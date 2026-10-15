@@ -37,6 +37,7 @@ import (
 // struct type lift to a SINGLE C# type, that a structurally DIFFERENT anonymous struct keeps its
 // own lift, and that a function-local identical struct stays in its own scope.
 func TestPackageLevelAnonStructDedup(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -167,6 +168,7 @@ func main() {
 // TEST-declared operand still records (the relocatable case recordsRequireProductionMutation's
 // rule text names).
 func TestWhiteboxProductionNumericConvNotRecorded(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}
@@ -277,6 +279,7 @@ func TestPointerBoxConversionRecordShape(t *testing.T) {
 // whitebox exclusion existed (os's syscall.Handle precedent) and stay declined, so the fix restores
 // exactly what e61758549 removed and adds nothing.
 func TestWhiteboxProductionPointerBoxConvStillRecorded(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}

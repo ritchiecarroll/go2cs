@@ -71,7 +71,7 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
-<!-- source: src/core/go/internal/gccgoimporter/parser.cs:518-521, 541 -->
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:522-525, 545 -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
     /*embed*/ public global::go.go.types_package.ΔType Type;

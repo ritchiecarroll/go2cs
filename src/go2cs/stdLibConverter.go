@@ -10,6 +10,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -99,22 +100,10 @@ func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 
 	// Apply filter if provided
 	if len(packageFilter) > 0 {
-		// Create a map for O(1) lookups
-		filterMap := make(map[string]bool)
-		for _, pkg := range packageFilter {
-			filterMap[pkg] = true
-		}
+		filteredQueue, err := filterStdLibQueue(c.graph.sortedQueue, packageFilter)
 
-		// Filter the queue
-		filteredQueue := make([]string, 0)
-		for _, pkg := range c.graph.sortedQueue {
-			if filterMap[pkg] {
-				filteredQueue = append(filteredQueue, pkg)
-			}
-		}
-
-		if len(filteredQueue) == 0 {
-			return fmt.Errorf("no matching packages found after filtering")
+		if err != nil {
+			return err
 		}
 
 		fmt.Printf("Filtered from %d to %d packages based on filter list\n",
@@ -151,6 +140,35 @@ func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 	}
 
 	return nil
+}
+
+// errNoMatchingPackages reports that a -stdlib package filter named nothing this conversion holds. It is
+// a sentinel so a multi-target run (platformCensus.go, platformEmit.go) can tell "this target has none of
+// the filtered packages" from a real failure: a package that exists on only some GOOS is empty on the
+// others.
+var errNoMatchingPackages = errors.New("no matching packages found after filtering")
+
+// filterStdLibQueue narrows a sorted convert queue to the packages named in packageFilter, keeping the
+// queue's dependency order. It returns errNoMatchingPackages when nothing is left.
+func filterStdLibQueue(sortedQueue, packageFilter []string) ([]string, error) {
+	// Create a map for O(1) lookups
+	filterMap := make(map[string]bool)
+	for _, pkg := range packageFilter {
+		filterMap[pkg] = true
+	}
+
+	filteredQueue := make([]string, 0)
+	for _, pkg := range sortedQueue {
+		if filterMap[pkg] {
+			filteredQueue = append(filteredQueue, pkg)
+		}
+	}
+
+	if len(filteredQueue) == 0 {
+		return nil, errNoMatchingPackages
+	}
+
+	return filteredQueue, nil
 }
 
 // rootAttributionFiles are the non-source files at the root of the Go source tree that the

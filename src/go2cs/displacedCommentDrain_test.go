@@ -110,6 +110,7 @@ func requireAbsent(t *testing.T, lines []string, text string) {
 // declaration sits between two converted ones, so its unclaimed comments surfaced under the
 // FOLLOWING declaration.
 func TestDisplacedFuncDoesNotStealTheNextDeclarationsComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -184,6 +185,7 @@ func main() {
 // declaration is the file's LAST, so there is no following declaration to misattribute to and the
 // end-of-file drain flushed the body's comments after the class's closing brace instead.
 func TestDisplacedFuncAtEndOfFileDoesNotLeakPastTheClass(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -229,6 +231,7 @@ func displacedTail(n int) int {
 // pinned by TestDisplacedFuncAtEndOfFileDoesNotLeakPastTheClass. What is distinct here is the
 // declaration KIND reaching the sink at all, which is what this exercises.
 func TestDisplacedTypeDoesNotStealTheNextDeclarationsComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}

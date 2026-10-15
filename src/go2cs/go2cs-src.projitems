@@ -97,6 +97,7 @@
     <None Include="$(MSBuildThisFileDirectory)conversionDriver.go" />
     <None Include="$(MSBuildThisFileDirectory)conversionDriver_test.go" />
     <None Include="$(MSBuildThisFileDirectory)conversionRecordFileAlias_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)converterGlobalsIsolation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)converterStaleness.go" />
     <None Include="$(MSBuildThisFileDirectory)converterStaleness_test.go" />
     <None Include="$(MSBuildThisFileDirectory)convertTimeout_test.go" />
@@ -131,6 +132,7 @@
     <None Include="$(MSBuildThisFileDirectory)declaredNotImplemented_test.go" />
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanion.go" />
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanionCall_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)deferFinallyDeadReceiverAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferFinallyLowering.go" />
     <None Include="$(MSBuildThisFileDirectory)deferValueReceiverSnapshot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deferLambdaReceiverCopy_test.go" />
@@ -149,6 +151,7 @@
     <None Include="$(MSBuildThisFileDirectory)displacedPromotedCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)displacedRefReceiverCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)docComments_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)dottedDigitSegment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)duplicatePartialMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicStructOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeGate_test.go" />
@@ -251,6 +254,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsTableCodePipe_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsRetiredAttributes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsProvenanceNotes_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSamplesHoldTheirLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\certContextReachGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\coreReferencesResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinLinknamePulls_test.go" />
@@ -258,6 +262,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fixturesCurrent_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fleetIdentifierCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibInode64Renames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeBoundaryBoxDeref_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateDarwin_test.go" />
@@ -370,6 +376,7 @@
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
     <None Include="$(MSBuildThisFileDirectory)perUnitAliasRenames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformEmit.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformFilterSkip_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCensus.go" />
@@ -405,6 +412,7 @@
     <None Include="$(MSBuildThisFileDirectory)projectFileWriter.go" />
     <None Include="$(MSBuildThisFileDirectory)projitemsIntegrity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publicizeSiblingTestSeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)rangeOverFuncAssignedVar_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeOverFuncBinding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readme.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeBadgeExclusion_test.go" />

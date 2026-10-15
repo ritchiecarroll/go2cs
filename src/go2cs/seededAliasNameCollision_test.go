@@ -144,6 +144,7 @@ func applyEcdhTestAlias() {
 // declarations of one name, and without getAliasedTypeName's qualified return the emitted sources
 // spell `ecdhꓸPublicKey` for a type that identifier does not name.
 func TestSeededAliasNameCollisionDeclaresOneName(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := seedAliasCollisionTestInfo(t, dir, fmt.Sprintf("global using %s = %s;", ecdhAliasName, ecdhProductionTarget))
 
@@ -223,6 +224,7 @@ func TestSeededAliasNameCollisionDeclaresOneName(t *testing.T) {
 // name as a const entry. Not reachable in today's corpus — its one genuine pair is a TYPE on both
 // sides — which is why this is an arm and not a row. From C1's structural read of this seat.
 func TestSeededAliasNameCollisionLeavesConstKeysUnmarked(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := seedAliasCollisionTestInfo(t, dir, fmt.Sprintf("global using %s = %s;", ecdhAliasName, ecdhProductionTarget))
 
@@ -310,6 +312,7 @@ func TestSeededAliasNameCollisionLeavesConstKeysUnmarked(t *testing.T) {
 // the alias identifier. A fix that suppressed declarations generally would pass the arm and fail
 // here.
 func TestUncollidedAliasStillDeclaresItsName(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := seedAliasCollisionTestInfo(t, dir, fmt.Sprintf("global using %s = %s;", ecdhAliasName, ecdhProductionTarget))
 

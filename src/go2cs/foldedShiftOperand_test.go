@@ -103,6 +103,8 @@ func funcBody(t *testing.T, cs, signature string) string {
 // typed to the shift (uintptr), with its Go text beside it, and to take the Go-semantics guard (`.Lsh(`,
 // the count `j` is unbounded) -- never the `int` arithmetic `1 << (int)(min(` that read CS0019.
 func TestMixedConstShiftOperandFoldsToItsValue(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	cs := convertFoldedShiftFixture(t)
 	set := funcBody(t, cs, "void set(")
 

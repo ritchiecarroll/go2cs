@@ -466,7 +466,8 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
     Expr x = default!;
     foreach (var clause in range<@string>(strings.FieldsSeq(text).Invoke)) {
         Expr y = default!;
-        foreach (var lit in range<@string>(strings.SplitSeq(clause, ","u8).Invoke)) {
+        foreach (var iᴛ1 in range<@string>(strings.SplitSeq(clause, ","u8).Invoke)) {
+            var lit = iᴛ1;
             Expr z = default!;
             bool neg = default!;
             if (strings.HasPrefix(lit, "!!"u8) || lit == "!"u8){

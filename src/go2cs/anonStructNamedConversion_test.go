@@ -28,6 +28,7 @@ import (
 // argument with the callee's FIRST parameter, so `use(nil, &s)` presents the lifted `struct{ X
 // string }` against `*structs.AssignB`, which recorded a pointer-box conversion of the lifted type.
 func TestAnonymousStructToNamedStructConversionIsRecorded(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

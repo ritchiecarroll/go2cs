@@ -71,6 +71,7 @@ func convertWarningFixture(t *testing.T, module, source string) string {
 // (Behavioral/AnyFromInterfacePointerCompare). AreEqual unwraps the adapter first, and the
 // non-empty-interface case already routes through it.
 func TestEmptyInterfacePointerCompareUsesAreEqual(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertWarningFixture(t, "eipc", `package main
 
 type node struct{ id int }
@@ -102,6 +103,7 @@ func main() {
 // blocks forever; it lowered to `switch (select()) {` with an empty block, which C# warns about and
 // which closed on a brace at column zero. The statement is the call itself.
 func TestEmptySelectEmitsBareCall(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertWarningFixture(t, "esel", `package main
 
 func serve(flag bool) {
@@ -143,6 +145,7 @@ func main() {
 // default, reads. When the only fallthrough target is a non-trailing default, that default reads the
 // precomputed any-match flag instead, and the running flag was declared and set but never read.
 func TestFallthroughMatchFlagIsRead(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertWarningFixture(t, "fmfr", `package main
 
 func kind(k int, nilOK bool) string {
@@ -187,6 +190,7 @@ func main() {
 // constant shift beside a literal (`16 | 1<<24`, internal/zstd) draws no warning, and a native-int
 // result already casts its computed operands in a block of its own.
 func TestConstantShiftBesideCastConstKeepsWidth(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertWarningFixture(t, "csbc", `package main
 
 const (

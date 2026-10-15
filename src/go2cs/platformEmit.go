@@ -121,29 +121,37 @@ func runPlatformEmission(options Options, stageDir string, packageFilter []strin
 	fmt.Printf("  seed holds %d files, %d of them hand-owned ([module: GoManualConversion])\n\n",
 		len(seed.hashes), len(seed.markedFiles))
 
-	emissions := make([]*platformEmission, 0, len(targets))
-
 	// STRICTLY SEQUENTIAL, one fresh root each — the r41 never-convert-twice-into-one-root rule.
-	for i, target := range targets {
-		fmt.Printf("=== [%d/%d] emission target %s\n", i+1, len(targets), target)
-
+	emissions, err := runTargetsSkippingUnmatched(targets, packageFilter, "emission", func(target string) (*platformEmission, error) {
 		emission, err := runCensusTarget(options, rootPath, stageDir, target, packageFilter, seed)
 
 		if err != nil {
-			return fmt.Errorf("emission target %s failed: %w", target, err)
+			return nil, fmt.Errorf("emission target %s failed: %w", target, err)
 		}
 
 		// A staging root whose seeding did not take measures a corpus that does not exist, and here
 		// it would be MERGED into the real one. Fatal, not a footnote.
 		if len(emission.markerGateViolations) > 0 {
-			return fmt.Errorf("target %s emitted %d hand-owned file(s) as plain .cs — the staging root was not seeded correctly; "+
+			return nil, fmt.Errorf("target %s emitted %d hand-owned file(s) as plain .cs — the staging root was not seeded correctly; "+
 				"first offender: %s", target, len(emission.markerGateViolations), emission.markerGateViolations[0])
 		}
 
-		emissions = append(emissions, emission)
+		return emission, nil
+	})
+
+	if err != nil {
+		return err
 	}
 
-	return mergePlatformEmissions(rootPath, targets, emissions)
+	// The merge classifies over the targets that EMITTED; a target skipped for an empty filter match has
+	// no emission to merge and must not stand in the target list.
+	emittedTargets := make([]string, 0, len(emissions))
+
+	for _, emission := range emissions {
+		emittedTargets = append(emittedTargets, emission.target)
+	}
+
+	return mergePlatformEmissions(rootPath, emittedTargets, emissions)
 }
 
 // resolveEmissionStageDir resolves the staging directory: the caller's -platform-stage when given

@@ -769,9 +769,18 @@ var linknamePushTargets = map[string]linknamePush{
 	// pushing definition there; the H6 os rewrite must declare net_newWindowsFile public by hand.
 	"net.newWindowsFile": {source: "os.net_newWindowsFile", bareDecl: true},
 	// runtime/trace's flight-recorder clock rate, pushed by runtime/tracetime.go into a one-arg HANDLE
-	// in runtime/trace/flightrecorder.go. Ordinary converted Go over osHasLowResClock, ticksPerSecond
-	// and traceTimeDiv, returning uint64 (no unexported type crosses). HONORABLE.
-	"runtime/trace.runtime_traceClockUnitsPerSecond": {source: "runtime.traceClockUnitsPerSecond"},
+	// in runtime/trace/flightrecorder.go. UNHONORABLE, by ruling (PREREAD 6.5, H6 audit row 45): the
+	// body itself is ordinary converted Go and would answer, but its ONLY consumer is
+	// FlightRecorder.Start, whose recorder then needs runtime.traceAdvance and runtime.traceClockNow,
+	// the converted tracer's generation and clock, which never run under the managed tracer. Answering
+	// here let Start subscribe and succeed, and the first batch then died on the reader goroutine.
+	// Refusing here makes Start itself refuse, by name, in the caller's goroutine. The two pulls are
+	// refused the same way in runtime/trace/flightrecorder_impl.cs, which also bodies runtime_readTrace,
+	// a bare //go:linkname declaration that go1.26.9 neither calls nor defines.
+	"runtime/trace.runtime_traceClockUnitsPerSecond": {
+		source: "runtime.traceClockUnitsPerSecond",
+		reason: "the flight recorder reads the converted execution tracer's generations, and the managed tracer (golib ExecutionTracer, behind runtime.StartTrace) has none to advance or clock; runtime/trace.Start is supported, trace.FlightRecorder is not",
+	},
 	// sync's external-test twin of unique's cleanup-queue drain, pushed by runtime/mcleanup.go into a
 	// one-arg HANDLE in sync/oncefunc_test.go (package sync_test, hence the key). Its body is the same
 	// hand-written wait as unique's, in runtime/mcleanup.cs. HONORABLE.
@@ -961,7 +970,19 @@ func typeIsPubliclyAccessible(t types.Type) bool {
 // such a pull kept a plain field of its own, which is never Go's value: at go1.26.9 runtime imports
 // math/bits, so math/bits's pulls of runtime.overflowError / runtime.divideError became null fields and
 // bits.Div64 panicked with nil where Go's own tests assert a runtime.Error.
+//
+// The STORAGE side of an inverted var alias (linknameVarAliasTargets) is never a pull, although it
+// carries the two-argument directive: the registry has already decided that this declaration HOLDS the
+// variable and the other package forwards to it, so it keeps its field (made public by
+// packageVarAccess). Read as a pull, runtime's canUseLongPaths and executablePath are refused as cycles
+// (each points up into a package that imports runtime) and, since late binding, came out as `internal`
+// LinknameVar properties naming their own forwarder: the forwarder could not see them (CS0117 at
+// internal/syscall/windows and os on darwin, H7 pass 5), and the two would have chased each other.
 func varLinknamePull(name string, options Options, docs ...*ast.CommentGroup) (ref string, pkgPath string, lateBound bool, ok bool) {
+	if linknameVarAliasStorage[currentPackagePath+"."+name] {
+		return "", "", false, false
+	}
+
 	for _, doc := range docs {
 		if doc == nil {
 			continue

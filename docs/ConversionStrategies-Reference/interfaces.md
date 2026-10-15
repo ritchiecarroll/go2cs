@@ -1143,7 +1143,7 @@ interface from a **directly imported** package (checked with `types.Implements`)
 emits real C# inheritance at the declaration and **skips re-declaring the covered members**
 (redeclaring would HIDE the base member — implementers would need both):
 
-<!-- source: src/core/io/fs/fs.cs:86-90 -->
+<!-- source: src/core/io/fs/fs.cs:98-102 -->
 ```csharp
 partial interface File :
     io.ReadCloser
@@ -1418,7 +1418,7 @@ it is present — the marker resolves as one unit to the already-simple lifted n
 well-defined even when several files lift the same shape. Emitted form:
 The declaring file, `batch.cs`:
 
-<!-- source: src/core/internal/trace/batch.cs:45-49 -->
+<!-- source: src/core/internal/trace/batch.cs:49-53 -->
 ```csharp
 internal partial interface readBatch_r /*dyn*/ :
     io.Reader,
@@ -1429,14 +1429,14 @@ internal partial interface readBatch_r /*dyn*/ :
 
 The cast site in another file, `generation.cs`:
 
-<!-- source: src/core/internal/trace/generation.cs:74 -->
+<!-- source: src/core/internal/trace/generation.cs:168 -->
 ```csharp
 (b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
 ```
 
 And the record in `package_info.cs`:
 
-<!-- source: src/core/internal/trace/package_info.cs:58 -->
+<!-- source: src/core/internal/trace/package_info.cs:59 -->
 ```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```

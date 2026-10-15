@@ -11,7 +11,7 @@
 //go:build !wasm
 namespace go.crypto.@internal.fips140;
 
-using entropy = go.crypto.@internal.entropy.v1.0.0.entropy_package;
+using entropy = go.crypto.@internal.entropy.v1_0_0.entropy_package;
 
 partial class drbg_package {
 

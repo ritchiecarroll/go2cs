@@ -485,4 +485,112 @@ public class GoAsyncIOTests
         Assert.AreEqual(11, ran);
     }
 
+    // ---- Pooled operations (Go 1.26) ---------------------------------------------------------
+    //
+    // Go 1.26's internal/poll takes every overlapped operation from a process-wide sync.Pool
+    // (fd_windows.go's operationPool) instead of one read and one write operation per FD, so ONE key
+    // reaches RearmOperation for several descriptors and for both modes. A record is bound to the
+    // descriptor and mode it was created for (its completion-port association and the mode its
+    // completion signals), so a key reused for another pair must get a NEW record, and the old one
+    // must be retired. Through Go 1.24 the key never changed binding, which is why the table was keyed
+    // by the operation alone.
+
+    private sealed class BoundOperation(nuint descriptor, nint mode) : IGoAsyncOperation, IDisposable
+    {
+        internal readonly nuint Descriptor = descriptor;
+        internal readonly nint Mode = mode;
+        internal int Disposals;
+
+        public nuint NativeAddress => 0x5000;
+
+        public nuint RearmForSubmit() => 0x6000;
+
+        public nuint StageBytes(int byteCount) => 0x7000;
+
+        public void Dispose() => Disposals++;
+    }
+
+    private static readonly Func<nuint, object, nint, object> s_boundFactory =
+        (descriptor, _, mode) => new BoundOperation(descriptor, mode);
+
+    private static BoundOperation boundStateOf(object key)
+    {
+        Assert.IsTrue(GoAsyncIO.TryGetOperationState(key, out object? state));
+        return (BoundOperation)state!;
+    }
+
+    [TestMethod]
+    public void RearmOperation_APooledKeyReusedForAnotherDescriptor_GetsANewRecord()
+    {
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        object key = new();
+
+        GoAsyncIO.RearmOperation(11, key, 'r');
+        BoundOperation first = boundStateOf(key);
+
+        GoAsyncIO.RearmOperation(12, key, 'r');
+        BoundOperation second = boundStateOf(key);
+
+        Assert.AreNotSame(first, second, "a pooled operation submitted on another descriptor must not reuse the first descriptor's record");
+        Assert.AreEqual((nuint)12, second.Descriptor);
+        Assert.AreEqual(1, first.Disposals, "the retired record is disposed");
+
+        GoAsyncIO.RemoveOperationState(key);
+    }
+
+    [TestMethod]
+    public void RearmOperation_APooledKeyReusedForTheOtherMode_GetsANewRecord()
+    {
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        object key = new();
+
+        GoAsyncIO.RearmOperation(13, key, 'r');
+        BoundOperation read = boundStateOf(key);
+
+        GoAsyncIO.RearmOperation(13, key, 'w');
+        BoundOperation write = boundStateOf(key);
+
+        Assert.AreNotSame(read, write, "a write must not signal through a record bound to 'r'");
+        Assert.AreEqual((nint)'w', write.Mode);
+        Assert.AreEqual(1, read.Disposals);
+
+        GoAsyncIO.RemoveOperationState(key);
+    }
+
+    [TestMethod]
+    public void RearmOperation_Rebinding_DropsTheRetiredRecordsPendingCompletion()
+    {
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        object key = new();
+
+        GoAsyncIO.RearmOperation(14, key, 'r');
+        GoAsyncIO.SetOperationCompletion(key, _ => Assert.Fail("a decode registered for the retired record ran"));
+
+        GoAsyncIO.RearmOperation(15, key, 'r');
+
+        Assert.IsFalse(GoAsyncIO.CompleteOperation(key, 0));
+        GoAsyncIO.RemoveOperationState(key);
+    }
+
+    [TestMethod]
+    public void RemoveOperationState_WithAState_RetiresOnlyThatState()
+    {
+        // A descriptor's teardown removes the records IT created. After a re-bind the key names
+        // another descriptor's live record, which a removal by key alone would retire.
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        object key = new();
+
+        GoAsyncIO.RearmOperation(16, key, 'r');
+        BoundOperation first = boundStateOf(key);
+
+        GoAsyncIO.RearmOperation(17, key, 'r');
+        BoundOperation second = boundStateOf(key);
+
+        Assert.IsFalse(GoAsyncIO.RemoveOperationState(key, first), "the retired record no longer owns the key");
+        Assert.AreSame(second, boundStateOf(key));
+
+        Assert.IsTrue(GoAsyncIO.RemoveOperationState(key, second));
+        Assert.IsFalse(GoAsyncIO.TryGetOperationState(key, out _));
+    }
+
 }

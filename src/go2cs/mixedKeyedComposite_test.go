@@ -36,6 +36,7 @@ import (
 // expression position: `new byte[]{0xfe, 0x80, <nil>[15] = 0x01}` — CS1525, invalid expression
 // term '<'.
 func TestMixedKeyedArrayCompositeLiteral(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

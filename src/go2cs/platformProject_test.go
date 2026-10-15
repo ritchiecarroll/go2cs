@@ -294,6 +294,63 @@ func withSharedLicenseGroup(t *testing.T, contents string) string {
 	return contents[:at] + sharedLicenseGroup + contents[at:]
 }
 
+// The conditioned block has ONE position whatever order the passes ran in, so a re-emit is a fixed
+// point. Licensing appends its group before </Project>, and the renderer used to put a new block at
+// </Project> too (or back where an earlier render had left it), so the file's order followed the
+// passes: the H7 consolidated re-emit moved three L3 projects' LICENSE group from before the block
+// to after it, lines identical. Three arms reach the one form references-then-licensing produces:
+// licensing first, a file an earlier emission left in licensing-first order, and a second render
+// of the result. RED at 94a0677c0b: arms 1 and 2 put the block after the license group.
+func TestPlatformBlockPositionIsIndependentOfPassOrder(t *testing.T) {
+	sets := map[string][]string{
+		"windows": {refErrors, refIO, refSysWin},
+		"linux":   {refErrors, refIO, refSysUnx},
+		"darwin":  {refErrors, refIO, refSysUnx, refRoute},
+	}
+
+	shared, deltas, varies := splitPlatformReferenceSets(sets)
+
+	if !varies {
+		t.Fatalf("splitPlatformReferenceSets reported no variance for sets that plainly differ")
+	}
+
+	render := func(arm string, contents string) string {
+		t.Helper()
+
+		rendered, err := renderPlatformReferences(contents, shared, deltas)
+
+		if err != nil {
+			t.Fatalf("%s: renderPlatformReferences: %v", arm, err)
+		}
+
+		return rendered
+	}
+
+	flat := flatProjectFile(sets["windows"])
+	want := withSharedLicenseGroup(t, render("references first", flat))
+
+	if !strings.Contains(want, platformReferenceGroupClose+"\r\n"+platformReferenceBlockHeader) ||
+		!strings.Contains(want, "\r\n"+sharedLicenseGroup+platformProjectClose) {
+		t.Fatalf("test setup: references-then-licensing is not block-then-license:\n%s", want)
+	}
+
+	licensed := withSharedLicenseGroup(t, flat)
+	closeAt := strings.LastIndex(licensed, platformProjectClose)
+	licenseFirstShape := licensed[:closeAt] + composePlatformReferenceGroups(deltas) + licensed[closeAt:]
+
+	arms := []struct{ name, got string }{
+		{"licensing first", render("licensing first", licensed)},
+		{"re-render of a licensing-first file", render("re-render", licenseFirstShape)},
+		{"second render", render("second render", want)},
+	}
+
+	for _, arm := range arms {
+		if arm.got != want {
+			t.Errorf("%s: the block's position depends on pass order\n--- want ---\n%s\n--- got ---\n%s", arm.name, want, arm.got)
+		}
+	}
+}
+
 // Re-rendering replaces the conditioned block and NOTHING after it. The renderer used to cut from the
 // block's header to </Project>, so a merged file lost the shared-LICENSE group licensing had
 // appended after the block -- log/syslog's `<None Include="../../LICENSE" …>` in the H10 close's

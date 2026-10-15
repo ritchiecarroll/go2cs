@@ -1244,9 +1244,29 @@ internal class StructTypeTemplate : TemplateBase
     // carries the `.Value` deref. The ONE statement of that test — EmbedHop renders the hop from it
     // and the promoted-method collection folds it down the embed path (MethodInfo.PathHasPointer) —
     // so the hop a forwarder spells and the method set it is placed in cannot disagree.
+    //
+    // Read off the box itself (UnboxedEmbedType), not off GetSimpleName's `.Value` suffix: for a GENERIC
+    // pointer embed that suffix follows the type arguments (`canonMap<T>.Value`), and stripping the
+    // arguments cut it away too, so Go 1.26 unique's `*canonMap[T]` read as a VALUE embed and every
+    // promotion through it skipped the deref (handle.cs:49,52 and uniqueMap<T>'s accessors).
     private static bool IsPointerHop(string embedTypeName) =>
-        StripGenericTypeArguments(GetSimpleName(embedTypeName, dropCollisionPrefix: true))
-            .EndsWith(".Value", StringComparison.Ordinal);
+        !ReferenceEquals(UnboxedEmbedType(embedTypeName), embedTypeName);
+
+    // The embed's type with its pointer box removed -- `global::go.ж<global::go.p.canonMap<T>>` (or the
+    // short `ж<canonMap<T>>`) to `global::go.p.canonMap<T>` -- and the SAME string instance for a value
+    // embed. Only a box at the top level counts: a value embed whose type ARGUMENT is a box
+    // (`nistCurve<ж<Point>>`) is a value embed.
+    private static string UnboxedEmbedType(string embedTypeName)
+    {
+        string bare = embedTypeName.StartsWith("global::", StringComparison.Ordinal) ? embedTypeName["global::".Length..] : embedTypeName;
+
+        if (bare.StartsWith("go.", StringComparison.Ordinal))
+            bare = bare["go.".Length..];
+
+        return bare.StartsWith($"{PointerPrefix}<", StringComparison.Ordinal) && bare.EndsWith(">", StringComparison.Ordinal)
+            ? bare[(PointerPrefix.Length + 1)..^1]
+            : embedTypeName;
+    }
 
     private string? m_enclosingGoPackage;
     private bool m_enclosingGoPackageResolved;
@@ -1903,8 +1923,15 @@ internal class StructTypeTemplate : TemplateBase
     // type PARAMETER names (`Point`); those must be rewritten to the instantiation's type ARGUMENTS
     // (`P256PointжnistPoint`) before promotion onto the enclosing struct — otherwise a promoted
     // accessor/forwarder references an out-of-scope `Point` (CS0246). Empty for a non-generic embed.
+    //
+    // A POINTER embed is mapped through its box: the instantiation is the box's ARGUMENT
+    // (`ж<canonMap<T>>` -> `canonMap<T>`), whose own arguments are the ones to substitute. Parsed off the
+    // box, the single argument was the whole inner type, and unique's `canonMap[T]` field
+    // `atomic.Pointer[indirect[T]]` promoted as `Pointer<Δindirect<canonMap<T>>>`.
     private Dictionary<string, string> GetEmbedTypeArgumentMap(string promotedStructType)
     {
+        promotedStructType = UnboxedEmbedType(promotedStructType);
+
         List<string> typeArguments = ParseTopLevelTypeArguments(promotedStructType);
 
         if (typeArguments.Count == 0)

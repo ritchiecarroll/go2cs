@@ -80,7 +80,7 @@ name of Go's `out`.
 With `-comments`, from the converted standard library, the blank line stays above the comment that opens
 the next group:
 
-<!-- source: GOROOT/src/strconv/ftoa.go:405-413 -->
+<!-- source: GOROOT/src/internal/strconv/ftoa.go:429-437 -->
 ```go
 		}
 	}
@@ -93,7 +93,7 @@ the next group:
 	}
 ```
 
-<!-- source: src/core/strconv/ftoa.cs:456-464 -->
+<!-- source: src/core/internal/strconv/ftoa.cs:473-481 -->
 ```csharp
         }
     }
@@ -198,7 +198,7 @@ No blank line where Go has none:
 
 A blank line where Go has one:
 
-<!-- source: GOROOT/src/strconv/ftoa.go:428-432 -->
+<!-- source: GOROOT/src/internal/strconv/ftoa.go:452-456 -->
 ```go
 	default:
 		dst = append(dst, byte(exp/100)+'0', byte(exp/10)%10+'0', byte(exp%10)+'0')
@@ -207,7 +207,7 @@ A blank line where Go has one:
 	return dst
 ```
 
-<!-- source: src/core/strconv/ftoa.cs:483-488 -->
+<!-- source: src/core/internal/strconv/ftoa.cs:500-505 -->
 ```csharp
     default: {
         dst = append(dst, (byte)((byte)(exp / 100) + (rune)'0'), (byte)((byte)(exp / 10) % 10 + (rune)'0'), (byte)((byte)(exp % 10) + (rune)'0'));
@@ -310,7 +310,7 @@ The same file shows the group rule above: the blank line Go has before `ErrTrail
 **Rule.** The doc comment of a named numeric, slice, map, channel, pointer or function type is written above
 its C# declaration, as a struct's is.
 
-<!-- source: GOROOT/src/sort/sort.go:118-121 -->
+<!-- source: GOROOT/src/sort/sort.go:120-123 -->
 ```go
 // Convenience types for common cases
 
@@ -318,7 +318,7 @@ its C# declaration, as a struct's is.
 type IntSlice []int
 ```
 
-<!-- source: src/core/sort/sort.cs:114-117 -->
+<!-- source: src/core/sort/sort.cs:116-119 -->
 ```csharp
 // Convenience types for common cases
 
@@ -391,14 +391,14 @@ its `global using` line then has none.
 **Rule.** A comment written on the same source line as a statement's end is written after one space on that
 statement's last emitted C# line.
 
-<!-- source: GOROOT/src/strings/strings.go:1142-1144 -->
+<!-- source: GOROOT/src/strings/strings.go:1139-1141 -->
 ```go
 	if old == new || n == 0 {
 		return s // avoid allocation
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1181-1183 -->
+<!-- source: src/core/strings/strings.cs:1177-1179 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -429,33 +429,30 @@ had none to lead and its comment was written after the block had closed, outside
 ### A comment after a block's `{` trails the `{`
 
 **Rule.** A one-line comment after the `{` of an `if`, `else`, `for` or `switch` header is written on the
-C# line that ends with that `{`.
+C# line that ends with that `{`. Here, from the `bidi` package of `golang.org/x/text`, which Go vendors into its own
+tree:
 
-<!-- source: GOROOT/src/strconv/ftoaryu.go:174-182 -->
+<!-- source: GOROOT/src/vendor/golang.org/x/text/unicode/bidi/core.go:676-682 -->
 ```go
-		if b > 5 {
-			roundUp = true
-		} else if b < 5 {
-			roundUp = false
-		} else { // b == 5
-			// round up if there are trailing digits,
-			// or if the new value of m is odd (round-to-even convention)
-			roundUp = trunc || m&1 == 1
-		}
+			if t == L {
+				// no change
+			} else if t == R {
+				s.resolvedLevels[i] += 1
+			} else { // t == AN || t == EN
+				s.resolvedLevels[i] += 2
+			}
 ```
 
-<!-- source: src/core/strconv/ftoaryu.cs:174-183 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:721-728 -->
 ```csharp
-        if (b > 5){
-            roundUp = true;
-        } else 
-        if (b < 5){
-            roundUp = false;
-        } else { // b == 5
-            // round up if there are trailing digits,
-            // or if the new value of m is odd (round-to-even convention)
-            roundUp = trunc || (uint64)(m & 1) == 1;
-        }
+            if (t == L){
+                // no change
+            } else 
+            if (t == R){
+                s.resolvedLevels[i] += 1;
+            } else { // t == AN || t == EN
+                s.resolvedLevels[i] += 2;
+            }
 ```
 
 The converter writes `else if` as `} else ` and then `if (…){` on the next line.
@@ -495,7 +492,7 @@ hold in every lowered form: a C# `switch`, the `if`/`else` chain a switch can be
 
 Above a label:
 
-<!-- source: GOROOT/src/strconv/atof.go:437-443 -->
+<!-- source: GOROOT/src/internal/strconv/atof.go:434-440 -->
 ```go
 	switch {
 	case exp == 0:
@@ -506,7 +503,7 @@ Above a label:
 	case exp > 0 && exp <= 15+22: // int * 10^k
 ```
 
-<!-- source: src/core/strconv/atof.cs:486-493 -->
+<!-- source: src/core/internal/strconv/atof.cs:487-494 -->
 ```csharp
     switch (ᐧ) {
     case {} when exp is 0: {
@@ -557,7 +554,7 @@ that block.
 
 An empty block:
 
-<!-- source: GOROOT/src/encoding/xml/xml.go:1123-1129 -->
+<!-- source: GOROOT/src/encoding/xml/xml.go:1130-1136 -->
 ```go
 		if b == '\r' {
 			d.buf.WriteByte('\n')
@@ -568,7 +565,7 @@ An empty block:
 		}
 ```
 
-<!-- source: src/core/encoding/xml/xml.cs:1234-1241 -->
+<!-- source: src/core/encoding/xml/xml.cs:1241-1248 -->
 ```csharp
         if (b == (rune)'\r'){
             d.buf.WriteByte((rune)'\n');
@@ -586,29 +583,30 @@ An empty block:
 block, keeping a blank line Go has above them. In a `case` body, comments after its last statement that are
 indented deeper than the label stay at the end of that body.
 
-<!-- source: GOROOT/src/strconv/itoa.go:126-132 -->
+<!-- source: GOROOT/src/internal/runtime/maps/table.go:1129-1135 -->
 ```go
-				i--
-				a[i] = smallsString[us*2+1]
-
-				u = q
-			}
-			// u < 1e9
+			it.key = key
+			it.elem = elem
+			return
 		}
+
+		// Continue to next table.
+	}
 ```
 
-<!-- source: src/core/strconv/itoa.cs:121-127 -->
+<!-- source: src/core/internal/runtime/maps/table.cs:1145-1151 -->
 ```csharp
-                i--;
-                a[i] = smallsString[usΔ1 * 2 + 1];
-
-                u = q;
-            }
-            // u < 1e9
+            it.key = key;
+            it.elem = elem;
+            return;
         }
+
+        // Continue to next table.
+    }
 ```
 
-`usΔ1` is a local renamed because it shadows another.
+The comment closes a `for` body in the map iterator of `internal/runtime/maps`, with the blank line Go leaves
+above it.
 
 **Limits.** Blocks the converter writes outside the ordinary block path, such as the outer block that holds
 an `if` statement's init clause, do not take this rule yet.
@@ -625,7 +623,7 @@ its own opening bracket.
 
 Trailing an element:
 
-<!-- source: GOROOT/src/time/format.go:1605-1609 -->
+<!-- source: GOROOT/src/time/format.go:1615-1619 -->
 ```go
 var unitMap = map[string]uint64{
 	"ns": uint64(Nanosecond),
@@ -634,7 +632,7 @@ var unitMap = map[string]uint64{
 	"μs": uint64(Microsecond), // U+03BC = Greek letter mu
 ```
 
-<!-- source: src/core/time/format.cs:1755-1759 -->
+<!-- source: src/core/time/format.cs:1765-1769 -->
 ```csharp
 internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"u8] = (uint64)(int64)ΔNanosecond,
@@ -645,27 +643,28 @@ internal static map<@string, uint64> unitMap = new map<@string, uint64>{
 
 After the last element, above the closing bracket:
 
-<!-- source: GOROOT/src/os/exec.go:126-131 -->
+<!-- source: GOROOT/src/database/sql/sql.go:2802-2806 -->
 ```go
-	p := &Process{
-		Pid:  pid,
-		mode: modeHandle,
-		// N.B Since we set statusDone, handle will never actually be
-		// used, so its value doesn't matter.
-	}
+			rows = &Rows{
+				dc:    dc,
+				rowsi: rowsi,
+				// releaseConn set below
+			}
 ```
 
-<!-- source: src/core/os/windows/exec.cs:119-124 -->
+<!-- source: src/core/database/sql/sql.cs:3189-3193 -->
 ```csharp
-    var p = Ꮡ(new Process(
-        Pid: pid,
-        mode: modeHandle
-        // N.B Since we set statusDone, handle will never actually be
-        // used, so its value doesn't matter.
-    ));
+                Ꮡrows.ValueSlot = Ꮡ(new Rows(
+                    dc: dc,
+                    rowsi: Ꮡrowsi.ValueSlot
+                    // releaseConn set below
+                ));
 ```
 
-`Ꮡ(…)` is golib's address-of, Go's `&`.
+`Ꮡ(…)` is golib's address-of, Go's `&`. The sample sits in a closure that `Stmt.QueryContext` passes to
+`retry`, and `rows` and `rowsi` are locals of `QueryContext` that the closure assigns. So each lives in a heap
+box, and the closure writes the box's `ValueSlot` (see
+[Function Values and Closures](../ConversionStrategies.md#function-values-and-closures)).
 
 **Limits.** A package-level `const` or `var` writes the comments before it above its doc, and the comments
 inside its value where the literal reaches them. Any the emission does not reach are still written above the
@@ -701,12 +700,12 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 
 `appendꓸꓸꓸ(x, y)` is Go's `append(x, y...)`. Inline between call arguments:
 
-<!-- source: GOROOT/src/crypto/tls/handshake_client.go:865-865 -->
+<!-- source: GOROOT/src/crypto/tls/handshake_client.go:864 -->
 ```go
 		clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */)
 ```
 
-<!-- source: src/core/crypto/tls/handshake_client.cs:987-987 -->
+<!-- source: src/core/crypto/tls/handshake_client.cs:983 -->
 ```csharp
         clientCipher = (~hs.suite).cipher(clientKey, clientIV, false /* not for reading */);
 ```

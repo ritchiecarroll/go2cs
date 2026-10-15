@@ -161,6 +161,7 @@ func requireCallForm(t *testing.T, lines []string, enclosing string, wantRecv st
 // whose own receiver is a `[GoRecv] ref` primary must keep the bare receiver, and the two callers
 // that DO hold a box must keep the box form.
 func TestDisplacedRefReceiverCallKeepsRefForm(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -190,6 +191,7 @@ func TestDisplacedRefReceiverCallKeepsRefForm(t *testing.T) {
 // this" precise: the emission a behavioral package can produce is already correct, so only a
 // converter-level test with the registry in reach can hold the invariant.
 func TestRefReceiverCallKeepsRefFormWithoutDisplacement(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}

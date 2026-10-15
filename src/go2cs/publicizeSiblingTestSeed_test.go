@@ -76,6 +76,7 @@ func (h alsoHidden) Carry() carried { return carried{} }
 // The SUBJECT: an unexported PRODUCTION type reached by the internal test half's exported field,
 // exported result and exported parameter — the CS0052/CS0050/CS0051 trio of the sizing's fixture.
 func TestSiblingTestExportedMembersPublicizeProductionType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := seedFixture(t, map[string]string{
 		"go.mod":    "module example/seed\n\ngo 1.23\n",
 		"seed.go":   seedProduction,
@@ -92,6 +93,7 @@ func TestSiblingTestExportedMembersPublicizeProductionType(t *testing.T) {
 // nothing public and must be left alone. Without this arm the subject passes for a change that
 // widens the production surface far past the defect.
 func TestSiblingTestUnexportedMembersPublicizeNothing(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := seedFixture(t, map[string]string{
 		"go.mod":    "module example/seed\n\ngo 1.23\n",
 		"seed.go":   seedProduction,
@@ -108,6 +110,7 @@ func TestSiblingTestUnexportedMembersPublicizeNothing(t *testing.T) {
 // through its exported surface, so they impose no accessibility requirement on it — and Go agrees,
 // since `seed_test` cannot name `hidden` at all.
 func TestExternalTestPackagePublicizesNothing(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := seedFixture(t, map[string]string{
 		"go.mod":    "module example/seed\n\ngo 1.23\n",
 		"seed.go":   seedProduction,
@@ -125,6 +128,7 @@ func TestExternalTestPackagePublicizesNothing(t *testing.T) {
 // a production object that happens to share the spelling — there is none here, and the pass must
 // not invent one or panic on the miss.
 func TestTestOnlyTypeNameResolvesToNothing(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := seedFixture(t, map[string]string{
 		"go.mod":    "module example/seed\n\ngo 1.23\n",
 		"seed.go":   seedProduction,
@@ -140,6 +144,7 @@ func TestTestOnlyTypeNameResolvesToNothing(t *testing.T) {
 // unexported result type is carried through by cascadePublicizedMethodTypes exactly as it would be
 // from a production consumer.
 func TestSeededTypeCascadesThroughItsExportedMethods(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := seedFixture(t, map[string]string{
 		"go.mod":    "module example/seed\n\ngo 1.23\n",
 		"seed.go":   seedProduction,

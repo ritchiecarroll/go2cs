@@ -66,7 +66,7 @@ internal static traceTime traceClockNow() {
 // second that elapse.
 //
 //go:linkname traceClockUnitsPerSecond runtime/trace.runtime_traceClockUnitsPerSecond
-public static uint64 traceClockUnitsPerSecond() {
+internal static uint64 traceClockUnitsPerSecond() {
     if (osHasLowResClock) {
         // We're using cputicks as our clock, so we need a real estimate.
         return (uint64)(ticksPerSecond() / (int64)traceTimeDiv);

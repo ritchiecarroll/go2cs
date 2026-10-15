@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package entropy implements a CPU jitter-based SP 800-90B entropy source.
-namespace go.crypto.@internal.entropy.v1.0.0;
+namespace go.crypto.@internal.entropy.v1_0_0;
 
 using time = go.crypto.@internal.fips140deps.time_package;
 using errors = errors_package;

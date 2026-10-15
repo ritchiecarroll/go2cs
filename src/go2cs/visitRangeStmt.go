@@ -638,6 +638,22 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 
 				bodyIndent := v.indent(v.indentLevel + 1)
 				context.innerPrefix = fmt.Sprintf("%s%s%s%s%s = %s;%s", v.newline, bodyIndent, keyHeapDecl, v.newline+bodyIndent, keyExpr, iterExpr, v.newline)
+			} else if keyNeedsCopy {
+				// A yielded variable the body WRITES (go/build/constraint's `lit = lit[len("!"):]`)
+				// takes the iterate-a-temp escape the slice/array/map arm applies: a foreach
+				// iteration variable is read-only (CS1656). No trailing newline: the copy is not in
+				// the Go source, so a blank line after it would be one the comment census counts as
+				// unexplained.
+				iterExpr = v.getTempVarName("i")
+				decl := "var "
+
+				if !v.options.preferVarDecl {
+					keyType = v.getCSharpTypeName(v.getExprType(rangeStmt.Key)) + " "
+					decl = ""
+				}
+
+				bodyIndent := v.indent(v.indentLevel + 1)
+				context.innerPrefix = fmt.Sprintf("%s%s%s%s = %s;", v.newline, bodyIndent, decl, keyExpr, iterExpr)
 			}
 
 			v.writeOutput("foreach (%s%s in range%s(%s%s%s))", keyType, iterExpr, rangeTypeArgs, rangeExpr, ptrDeref, invokeSuffix)
@@ -650,15 +666,40 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			if keyHeapDecl != "" {
 				kExpr = v.getTempVarName("i")
 				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s;", v.newline, bodyIndent, keyHeapDecl, v.newline+bodyIndent, keyExpr, kExpr)
+			} else if keyNeedsCopy {
+				// A written yielded variable iterates a temp, as in the single-value arm.
+				kExpr = v.getTempVarName("i")
+				decl := "var "
+
+				if !v.options.preferVarDecl {
+					keyType = v.getCSharpTypeName(v.getExprType(rangeStmt.Key)) + " "
+					decl = ""
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, bodyIndent, decl, keyExpr, kExpr)
 			}
 
 			if valHeapDecl != "" {
 				vExpr = v.getTempVarName("v")
 				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s;", v.newline, bodyIndent, valHeapDecl, v.newline+bodyIndent, valExpr, vExpr)
+			} else if valNeedsCopy {
+				vExpr = v.getTempVarName("v")
+				decl := "var "
+
+				if !v.options.preferVarDecl {
+					valType = v.getCSharpTypeName(v.getExprType(rangeStmt.Value)) + " "
+					decl = ""
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, bodyIndent, decl, valExpr, vExpr)
 			}
 
-			if innerPrefix != "" {
+			// The blank line after the prologue stays only where a box opened it; a bare copy
+			// takes none, as in the single-value arm.
+			if keyHeapDecl != "" || valHeapDecl != "" {
 				context.innerPrefix = innerPrefix + v.newline
+			} else if innerPrefix != "" {
+				context.innerPrefix = innerPrefix
 			}
 
 			v.writeOutput("foreach (%s(%s%s, %s%s) in range%s(%s%s%s))", varInit, keyType, kExpr, valType, vExpr, rangeTypeArgs, rangeExpr, ptrDeref, invokeSuffix)

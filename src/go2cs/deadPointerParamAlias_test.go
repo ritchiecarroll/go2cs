@@ -103,6 +103,7 @@ func TestBodyReferencesIdentAsValueIgnoresNamedArgumentLabels(t *testing.T) {
 // -comments a comment that names the parameter (runtime's casGToPreemptScan: "We never notify
 // gp.syncGroup …") added a dereferencing alias the conversion without -comments does not have.
 func TestPointerParamAliasIgnoresComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, `package main
 
 import "fmt"

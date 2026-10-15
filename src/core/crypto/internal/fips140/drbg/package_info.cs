@@ -79,7 +79,7 @@ public static partial class drbg_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸentropyꓸv1_0_0() => builtin.initPackage(typeof(go.crypto.@internal.entropy.v1.0.0.entropy_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸentropyꓸv1_0_0() => builtin.initPackage(typeof(go.crypto.@internal.entropy.v1_0_0.entropy_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸaes() => builtin.initPackage(typeof(go.crypto.@internal.fips140.aes_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸcheck() => builtin.initPackage(typeof(go.crypto.@internal.fips140.check_package));

@@ -73,6 +73,7 @@ func convertLiteralFloatConstFixture(t *testing.T) string {
 }
 
 func TestInexactLiteralFloatConstFoldsToGosValue(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertLiteralFloatConstFixture(t)
 
 	for _, want := range []string{
@@ -89,6 +90,7 @@ func TestInexactLiteralFloatConstFoldsToGosValue(t *testing.T) {
 }
 
 func TestExactLiteralFloatConstKeepsItsOperatorForm(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertLiteralFloatConstFixture(t)
 
 	for _, want := range []string{

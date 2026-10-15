@@ -403,6 +403,8 @@ func TestFuncResultProjectionNegativeControls(t *testing.T) {
 // Go checker already admitted) while the RECORDED and RENDERED name stays the projection — the same
 // two-instantiation split funcResultProjection itself carries.
 func TestProjectedGenericConstraintRecordsItsAdapter(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	visitor, calls := loadFuncResultFixture(t)
 	funIdent, typeArgs := funcResultInstance(t, visitor, calls, "pairCall")
 

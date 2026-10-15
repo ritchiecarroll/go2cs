@@ -36,6 +36,7 @@ func main() {
 `
 
 func TestPackedConstOperandCommentsTrailTheirBytes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, packedConstSource)
 
 	decl := lineContaining(t, lines, "@string packed =")
@@ -58,6 +59,7 @@ func TestPackedConstOperandCommentsTrailTheirBytes(t *testing.T) {
 }
 
 func TestPackedConstUnchangedWithoutComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithoutComments(t, packedConstSource)
 
 	at := lineContaining(t, lines, "@string packed =")
@@ -90,6 +92,7 @@ func main() {
 `
 
 func TestOperandCommentsAtTheirGoPosition(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, operandCommentsSource)
 
 	// inline, where Go has them
@@ -140,6 +143,7 @@ func main() {
 `
 
 func TestLiteralInCallKeepsItsComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, literalInCallSource)
 
 	loop := lineContaining(t, lines, "foreach (var (_, n) in")
@@ -181,6 +185,7 @@ func main() {
 `
 
 func TestOwnLineOperandCommentsKeepTheirLines(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, ownLineOperandCommentsSource)
 
 	first := lineContaining(t, lines, "// This is technically not allowed.")
