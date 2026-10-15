@@ -1055,7 +1055,7 @@ partial class runtime_package
     // arenas, spans and goroutine stacks; the managed model has none of them (the CLR owns the
     // heap), so the dump is truthful and empty rather than invented. The params record says what
     // this host can say: pointer byte order and size, no Go arena (0, 0), GOARCH, the Go release the
-    // corpus was converted from, ncpu. TestSchedPauseMetrics asserts the pause accounting, not the
+    // corpus was converted from, numCPUStartup (ncpu before Go 1.25). TestSchedPauseMetrics asserts the pause accounting, not the
     // contents. runtime/debug's own WriteHeapDump forwards here (WriteHeapDumpManaged).
     internal static void runtime_debug_WriteHeapDump(uintptr fd)
     {
@@ -1080,7 +1080,7 @@ partial class runtime_package
         uvarint(0);
         str(global::go.@internal.goarch_package.GOARCH);
         str(buildVersion);
-        uvarint((uint64)ncpu);
+        uvarint((uint64)numCPUStartup);
         uvarint((uint64)tagEOF);
 
         // THE WRITE IS MANAGED, on every target. It used to go through runtime.write, which is a
