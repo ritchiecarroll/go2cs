@@ -2,3 +2,6 @@
 # goos<TAB>project<TAB>namespace.class.member<TAB>owner and disposition; * in goos matches every flavour.
 windows	core/internal/runtime/syscall/windows	go.internal.runtime.syscall.windows_package.StdCall	G: unreached, as runtime.asmstdcall at 1.24 (pre-seat 2 withdrawn 2026-10-14)
 windows	core/internal/runtime/syscall/windows	go.internal.runtime.syscall.windows_package.asmstdcall	G: unreached, as runtime.asmstdcall at 1.24 (pre-seat 2 withdrawn 2026-10-14)
+*	core/testing/synctest	go.testing.synctest_package.testingSynctestTest	R: H4 testing linkname push, bodied by R's seat after H5 (predicted 2026-10-14)
+*	core/testing/cryptotest	go.testing.cryptotest_package.randSetTestingReader	R: H4 testing linkname pull, bodied by R's seat after H5 (predicted 2026-10-14)
+*	core/testing/cryptotest	go.testing.cryptotest_package.testingCheckParallel	R: H4 testing linkname pull, bodied by R's seat after H5 (predicted 2026-10-14)
