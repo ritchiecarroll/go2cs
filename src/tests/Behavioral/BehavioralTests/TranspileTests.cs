@@ -913,6 +913,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
 
     [TestMethod]
+    public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
+
+    [TestMethod]
     public void CheckIntFormFloatConst() => CheckTarget("IntFormFloatConst");
 
     [TestMethod]

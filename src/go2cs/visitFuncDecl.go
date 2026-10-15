@@ -358,6 +358,12 @@ func (v *Visitor) liftSignatureDynamicTypes(funcDecl *ast.FuncDecl) {
 	// across function scopes (see liftAtCallBoundary's doc comment) — set for both loops below.
 	v.liftAtCallBoundary = true
 
+	// An INLINE constraint carrying methods (`func Show[T interface{ Name() string }]`) lifts like
+	// an anonymous parameter interface, before anything in the signature can name it.
+	v.indentLevel++
+	v.liftTypeParamConstraints(funcDecl.Type.TypeParams, "")
+	v.indentLevel--
+
 	// Loop through function results to check if any are structs
 	if funcDecl.Type.Results != nil {
 		for index, field := range funcDecl.Type.Results.List {
@@ -407,6 +413,62 @@ func (v *Visitor) liftSignatureDynamicTypes(funcDecl *ast.FuncDecl) {
 	}
 
 	v.liftAtCallBoundary = false
+}
+
+// liftTypeParamConstraints lifts each ANONYMOUS inline constraint that carries methods in a type
+// parameter list — `[T interface{ Name() string }]`, `[T interface{ ~int; String() string }]` — to a
+// named interface, exactly as an anonymous parameter interface is lifted (visitInterfaceType), named
+// `<declaration>_<parameter>`. Before this, getGenericDefinition named such a constraint by its Go
+// text, and `where T : interface{Name() string}` is a C# syntax cascade that takes the whole package
+// down; a NAMED constraint takes the same arms with a name, so lifting is what gives the inline form
+// every arm the named form already has. A constraint naming the declaration's own parameters
+// (`[T interface{ Less(T) bool }]`) lifts generic over the ones it uses (localTypeUsedTypeParams).
+// Operator-only type sets (`interface{ ~int | ~string }`) carry no methods and are not lifted: their
+// arm lifts operator constraints instead and never names the interface.
+//
+// owner names a generic TYPE (`Box` for `type Box[T interface{…}]`), which lifts at package level,
+// outside any function; a function's lifts are prefixed with its name by visitInterfaceType.
+func (v *Visitor) liftTypeParamConstraints(typeParams *ast.FieldList, owner string) {
+	if typeParams == nil || len(typeParams.List) == 0 {
+		return
+	}
+
+	if len(owner) > 0 {
+		previous := v.liftTypeParamScope
+		scope := []string{}
+
+		for _, field := range typeParams.List {
+			for _, ident := range field.Names {
+				scope = append(scope, ident.Name)
+			}
+		}
+
+		v.liftTypeParamScope = scope
+		defer func() { v.liftTypeParamScope = previous }()
+	}
+
+	for _, field := range typeParams.List {
+		interfaceType, ok := ast.Unparen(field.Type).(*ast.InterfaceType)
+
+		if !ok || len(field.Names) == 0 || v.liftedTypeExists(interfaceType) {
+			continue
+		}
+
+		iface, ok := v.info.TypeOf(interfaceType).(*types.Interface)
+
+		if !ok || iface.NumMethods() == 0 {
+			continue
+		}
+
+		// `[A, B interface{…}]` shares one constraint expression, so it lifts once, under the first.
+		name := field.Names[0].Name
+
+		if len(owner) > 0 {
+			name = owner + "_" + name
+		}
+
+		v.visitInterfaceType(interfaceType, iface, name, nil, true, nil)
+	}
 }
 
 // manualSignatureLiftPrefix answers the lifted-type declarations a MANUAL declaration's signature

@@ -298,6 +298,10 @@ type Visitor struct {
 	// See liftExplicitAnonStructTypeArgs for the measured shape and the three-step resolution that
 	// makes the registry the only route from that position.
 	liftAtCallBoundary bool
+	// liftTypeParamScope names, in declaration order, the type parameters a lift may bind when it is
+	// made OUTSIDE a function: a generic type's inline constraint (liftTypeParamConstraints). Nil
+	// everywhere else, where localTypeUsedTypeParams reads the current function's own list.
+	liftTypeParamScope []string
 	// heapIntrinsicShadowed reports that a Go DECLARATION named `heap` is visible where the
 	// current function's heap-box emissions land, so each of them must spell golib's boxing
 	// intrinsic as `builtin.heap` rather than the bare `heap` (see heapIntrinsicName). Set per

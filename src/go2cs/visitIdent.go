@@ -138,17 +138,20 @@ func isNumericType(typ types.Type) bool {
 // *types.TypeParam objects owned by that function finds exactly the set the lifted declaration must
 // bind.
 func (v *Visitor) localTypeUsedTypeParams(t types.Type) []string {
-	if v.currentFuncDecl == nil || v.currentFuncDecl.Type == nil || v.currentFuncDecl.Type.TypeParams == nil {
-		return nil
-	}
+	// The enclosing declaration's parameters, in declaration order — the order the lifted type must
+	// bind them in, since a use site renders arguments positionally. A generic TYPE's inline
+	// constraint lifts outside any function, so liftTypeParamConstraints names that list itself.
+	enclosing := v.liftTypeParamScope
 
-	// The enclosing function's parameters, in declaration order — the order the lifted struct must
-	// bind them in, since a use site renders arguments positionally.
-	var enclosing []string
+	if enclosing == nil {
+		if v.currentFuncDecl == nil || v.currentFuncDecl.Type == nil || v.currentFuncDecl.Type.TypeParams == nil {
+			return nil
+		}
 
-	for _, field := range v.currentFuncDecl.Type.TypeParams.List {
-		for _, ident := range field.Names {
-			enclosing = append(enclosing, ident.Name)
+		for _, field := range v.currentFuncDecl.Type.TypeParams.List {
+			for _, ident := range field.Names {
+				enclosing = append(enclosing, ident.Name)
+			}
 		}
 	}
 
@@ -205,6 +208,16 @@ func (v *Visitor) localTypeUsedTypeParams(t types.Type) []string {
 			walk(shape.Underlying(), depth+1)
 		case *types.Alias:
 			walk(shape.Rhs(), depth+1)
+		case *types.Interface:
+			// The LIFTED interface itself only (an inline constraint, `interface{ Less(T) bool }`):
+			// its methods are what can name the enclosing parameters. Deeper, an interface is some
+			// named type's underlying, whose methods name THAT type's parameters, and matching them
+			// by name here would thread a parameter the lift never uses.
+			if depth == 0 {
+				for i := 0; i < shape.NumMethods(); i++ {
+					walk(shape.Method(i).Type(), depth+1)
+				}
+			}
 		}
 	}
 

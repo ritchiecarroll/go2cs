@@ -312,6 +312,30 @@ interface, and embedded-interface instantiations of a method-set-constrained gen
 constraint method on the parameter and widening walkList-style, values vs Go; clears go/ast's
 CS0308, the go/* toolchain gate.)
 
+An **anonymous inline** constraint carrying methods — `func Show[T interface{ Name() string }]`,
+`type Box[T interface{ Name() string }] struct` — is lifted to a named interface, exactly as an
+anonymous parameter interface is, and named `<declaration>_<parameter>` (`Show_T`, `Box_T`;
+`liftTypeParamConstraints`). Before the lift, `getGenericDefinition` named the constraint by its Go
+text, and `where T : interface{Name() string}` is a C# syntax cascade that takes the whole package
+down; lifted, it takes the same arms a named constraint takes. The lift is public when the declaration
+is exported (CS0703 otherwise), and a method of a generic type reaches its receiver's constraint by
+signature through the package registry. A constraint that names the declaration's own parameters
+(`[T interface{ Less(T) bool }]`) lifts generic over the ones it uses (`Min_T<T>`), and each use
+composes its own arguments, so a receiver that renames the parameter still binds. Operator-only type
+sets carry no methods and are not lifted.
+
+A **value** instantiation of a method-set constraint that names no type parameter — named or lifted,
+`slot[T nameI]` at `tagged` — is recorded at the instantiation (`recordValueConstraintImplementation`,
+on `constraintProxyFor`'s per-instantiation path), not only where a call converts an argument to the
+type parameter. A generic TYPE instantiated at a value type with no such call was CS0315.
+
+Two shapes remain. A constraint with type TERMS beside its methods
+(`interface{ ~int; String() string }`) emits as the CRTP `Str_T<ΔT>`, and no record can name its
+closed form `Str_T<myint>`: an interface with static abstract members cannot be a type argument, not
+even an attribute's (CS8920), so `myint` never implements it (CS0535, named or inline). And a VALUE
+instantiation of a constraint naming its own parameter (`Min[age]`) needs the constraint closed over
+the argument before it can be recorded. (Guarded by `InlineConstraintLift`, output-compared vs Go.)
+
 ## A SELF-REFERENTIAL generic method-set constraint uses a box-wrapping proxy as the type argument
 
 The widen-to-the-interface escape above works only when the constraint interface is **non-generic**
