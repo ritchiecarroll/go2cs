@@ -541,6 +541,29 @@ package IDs** get their NuGet prefix reservation filed now, not at H11.
 reservation was still an
 external wait after the release.)*
 
+> **Amendment 2026-10-15 — a relocation arc is checked for what its moved tests read (the Go 1.26 hop).** An arc in
+> `relocations-go<rel>.tsv` is derived by body, and a body score compares control flow: two unrelated tests that share
+> a range/compare/`Errorf` skeleton score high. A test that truly moves brings the tables and helpers it reads.
+> **Before the TSV lands, run** (from `src/go2cs`, with the incoming toolchain):
+>
+> `go run ./internal/relocscan -from <outgoing GOROOT> -to <incoming GOROOT> -arcs docs/phase4/data/relocations-go<rel>.tsv`
+>
+> A MOVED test is a Test/Benchmark/Fuzz/Example function that is in the source package at the outgoing release,
+> absent from it at the incoming one, and present by name in the target at the incoming one. Each package-level
+> declaration of the source that the test's body reads must be declared at package level in the target. One that is
+> not prints as `MISSING`, its arc prints `REFUSED`, and the run exits 1. A refused arc is dropped from the TSV or
+> re-derived; it is never kept with a note. Each arc's line states its moved tests and the reads it checked. An arc
+> with 0 reads checked passes without evidence, so say so wherever the arc is cited.
+<!-- C2, 2026-10-15, on the campaign tip f7d8f0b135, toolchain go1.26.9, -from go1.24.13. RED against the 5-arc TSV
+     at e7316d8a53: arc 5 `REFUSED runtime -> internal/strconv: 1 moved test(s), 3 package-level read(s) checked`,
+     `MISSING TestAtoi reads atoi32tests, atoi64tests, declared nowhere in internal/strconv at -to`, exit 1; the other
+     four arcs OK. GREEN against the 4-arc TSV at ab12a78f61 (arc 5 dropped by H3 route 2): wasitest 2 moved / 3
+     reads, oldtrace -> tracev1 3 / 8, go/ast/internal/tests -> go/ast 1 / 0 (passes without evidence), strconv ->
+     internal/strconv 37 / 76; exit 0. The first build also listed ok, out and test as MISSING: TestAtoi's locals,
+     which share names with runtime package-level declarations. Identifiers the parser resolves to a declaration
+     inside the test function are now excluded, and the red names only the two tables. COORD logged the arc-5
+     lesson (a moved test carries its tables) and ruled this guard as S3. -->
+
 ### H4 — Converter feature work **GATE**
 
 Whatever the release's language delta requires, plus whatever the census surfaced. Each item follows
