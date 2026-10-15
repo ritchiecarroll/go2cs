@@ -501,7 +501,7 @@ internal static bool validSIGPROF(ref m mp, ref sigctxt c) {
 }
 
 //go:linkname executablePath os.executablePath
-internal static @string executablePath { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, "go.os_package", "os")] get => global::go.LinknameVar<@string>.Get("go.os_package, os", "executablePath"); set => global::go.LinknameVar<@string>.Set("go.os_package, os", "executablePath", value); }
+public static @string executablePath;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string executablePathˢ = "executable_path="u8;
