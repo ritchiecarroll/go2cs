@@ -226,6 +226,7 @@ func emittedFuncBody(t *testing.T, mainCs, name string) string {
 
 // TestRangeOverFuncBoxesItsYieldedVariablePerIteration pins property 1 and its scope.
 func TestRangeOverFuncBoxesItsYieldedVariablePerIteration(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -307,6 +308,7 @@ func TestRangeOverFuncBoxesItsYieldedVariablePerIteration(t *testing.T) {
 
 // TestGenericNamedDelegateParamWrapsWithItsInstantiation pins property 2 and its scope.
 func TestGenericNamedDelegateParamWrapsWithItsInstantiation(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

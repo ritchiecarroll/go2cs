@@ -101,6 +101,7 @@ func main() {
 }
 
 func TestSiblingPackagesSharingANameAreDistinctTypes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	out := convertSiblingPackageFixture(t)
 
 	for _, check := range []struct{ file, want string }{
@@ -119,6 +120,7 @@ func TestSiblingPackagesSharingANameAreDistinctTypes(t *testing.T) {
 }
 
 func TestExemptPackageNameDifferencesKeepTheirNamespace(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	out := convertSiblingPackageFixture(t)
 
 	for _, check := range []struct{ file, want string }{

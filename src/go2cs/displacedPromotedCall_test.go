@@ -110,6 +110,7 @@ func promotedCallReceiver(t *testing.T, lines []string, enclosing string) string
 // hop through the embed), never the embedding type's own box; the direct-selection control keeps
 // the box form on both sides.
 func TestDisplacedPromotedCallKeepsTheHop(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}

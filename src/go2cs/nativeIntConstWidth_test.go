@@ -40,6 +40,7 @@ import (
 // TestBeyondInt32ConstEmission converts a fixture exercising each resolved-type route and pins the
 // emitted form for all of them at once. Transpile-only: the assertions are on emitted text.
 func TestBeyondInt32ConstEmission(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

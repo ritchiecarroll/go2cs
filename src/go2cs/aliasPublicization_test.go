@@ -56,6 +56,7 @@ type local = notExposed
 // ARM 1, THE SUBJECT. Each exported alias's unexported target is publicized, a composite target is
 // peeled to its element, and the cascade carries the target's exported method's result type.
 func TestAnExportedAliasPublicizesItsUnexportedTarget(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := collectFixturePublicized(t, aliasPublicizationFixture)
 
 	for _, name := range []string{"mutexWrap", "compareResult", "hiddenElem"} {
@@ -71,6 +72,7 @@ func TestAnExportedAliasPublicizesItsUnexportedTarget(t *testing.T) {
 
 // ARM 2, THE CONTROL. An unexported alias gives an importer nothing to name.
 func TestAnUnexportedAliasPublicizesNothing(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := collectFixturePublicized(t, aliasPublicizationFixture)
 
 	if publicized["notExposed"] {
@@ -81,6 +83,7 @@ func TestAnUnexportedAliasPublicizesNothing(t *testing.T) {
 // ARM 3, THE NEGATIVE ARM. The pass over the WHITE-BOX variant (production plus in-package test files,
 // what the -tests driver hands it) must not publicize a target that only a test-file alias exposes.
 func TestATestFileAliasPublicizesNothing(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{

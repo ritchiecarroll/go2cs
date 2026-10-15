@@ -24,6 +24,7 @@ import (
 // package's syntax alone), so a foreign target hopped through the number -- `((ΔLevel)(uint32)x)`,
 // whose second leg has no operator (CS0030). The answer must not depend on which package converts.
 func TestForeignTargetWrittenOverANamedNumberCastsDirectly(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

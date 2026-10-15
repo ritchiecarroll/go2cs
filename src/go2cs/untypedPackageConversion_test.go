@@ -48,6 +48,7 @@ import (
 // app package is mostly valid code around a couple of unresolved symbols, and the per-file recover
 // in processConversion would discard all of it.
 func TestUntypedPackageConvertsWithoutPanic(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}

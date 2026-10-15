@@ -178,6 +178,7 @@ func main() {
 //     path model exists to separate, and net/http's `return n.handler, n.pattern.String(), ...` is
 //     the corpus instance of the second.
 func TestMultiValueReturnSpillsCallsThatCanWriteAnEarlierOperand(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -236,6 +237,7 @@ func TestMultiValueReturnSpillsCallsThatCanWriteAnEarlierOperand(t *testing.T) {
 // Proven failing-first by routing the empty-interface element back through convertToInterfaceType:
 // the emission returns to `return (~ᴛ1, ᴛ2);`.
 func TestForwardedMultiValueReturnBoxesPointerIntoEmptyInterface(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

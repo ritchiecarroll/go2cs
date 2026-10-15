@@ -39,6 +39,7 @@ var wantUtf8Census = map[string]int{
 }
 
 func TestCommentParityUtf8(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	goRoot := build.Default.GOROOT
 	goFile := filepath.Join(goRoot, "src", "unicode", "utf8", "utf8.go")
 

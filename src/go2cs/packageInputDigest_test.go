@@ -161,6 +161,7 @@ func TestOnlyAModulePackageProjectRecordsAnInputDigest(t *testing.T) {
 // End to end: a -recurse conversion's module packages carry the digest; converting again with -comments into another
 // root records the same values.
 func TestRecurseModuleProjectsRecordTheirInputDigest(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}

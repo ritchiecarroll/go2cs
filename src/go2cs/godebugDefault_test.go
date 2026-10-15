@@ -111,6 +111,7 @@ func TestDefaultGODEBUGMatchesTheToolchain(t *testing.T) {
 // converted on its own (no -recurse) is unchanged -- the M6 scope ruling, so the behavioral corpus is
 // byte-identical.
 func TestRecurseMainProgramCarriesItsDefaultGODEBUG(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: converts a module")
 	}

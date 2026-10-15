@@ -90,6 +90,7 @@ func convertGenericTypeAliasFixtures(t *testing.T) (emitted, packageInfo, consum
 // option (a)). RED at master db1bd885a2, which emitted `global using Alias = go.ga_package.Box<go.T>;`,
 // published the alias as a GoTypeAlias record, and named it with type arguments at every use.
 func TestGenericTypeAliasRendersItsTarget(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	emitted, packageInfo, consumer, consumerInfo := convertGenericTypeAliasFixtures(t)
 
 	// the declaration keeps the Go text as a comment and nothing else
@@ -129,6 +130,7 @@ func TestGenericTypeAliasRendersItsTarget(t *testing.T) {
 // over an instantiated generic (`type Plain = Box[int]`), keeps its `global using`, its record and
 // its name at every use, byte for byte. It fails if genericAliasTarget widens to every alias.
 func TestPlainTypeAliasKeepsItsName(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	emitted, packageInfo, consumer, consumerInfo := convertGenericTypeAliasFixtures(t)
 
 	for _, want := range []string{"global using Plain = go.example.com.ga_package.Box<nint>;", "global using Word = go.@string;", "Word w) {"} {

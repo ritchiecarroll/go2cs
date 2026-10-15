@@ -150,6 +150,7 @@ func main() {
 // ARM 1, THE SUBJECT. A named non-`int` width is its OWN type argument and the operand is passed
 // through unchanged — no cast down to the underlying width, which is what erased the type.
 func TestRangeOverANamedIntWidthKeepsTheNamedType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	emitted := convertNamedIntRangeFixture(t)
 
 	// The operand's own rendering is a pre-existing convention and not this seat's axis: a Go
@@ -175,6 +176,7 @@ func TestRangeOverANamedIntWidthKeepsTheNamedType(t *testing.T) {
 // non-`int` width keeps the underlying-width argument; a plain `int` keeps the bare form. All
 // three were green before this change and must stay byte-identical.
 func TestRangeEmissionIsUnmovedOutsideTheNamedWidthCase(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	emitted := convertNamedIntRangeFixture(t)
 
 	if !strings.Contains(emitted, "range(((plainNamed)4))") {

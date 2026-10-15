@@ -31,6 +31,7 @@ import (
 // empty-interface position, and the CONTROL that a concrete func-typed return keeps its bare,
 // target-typed lambda.
 func TestEmptyInterfaceFuncLitPositions(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

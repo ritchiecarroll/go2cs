@@ -162,6 +162,7 @@ func (f *moduleProxyFixture) app(t *testing.T, name, version string) string {
 // same output root. RED at master: no lock was written, and the second conversion silently overwrote
 // pkg/example.test/dep with v1.1.0 under the first module's feet.
 func TestModuleCacheEndToEndLockAndClash(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: go mod download + go/packages over a file-proxy module cache")
 	}
@@ -263,6 +264,7 @@ func TestModuleCachePreflightNamesMissingDependency(t *testing.T) {
 // was taken for a LOCAL module: an in-place output inside the read-only cache and a relative
 // reference to it. It must reference $(go2csPath)pkg/<import-path>.
 func TestModuleCacheOutsideGopathResolvesAsCacheDependency(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: go mod download + go/packages over a file-proxy module cache")
 	}

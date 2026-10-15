@@ -119,6 +119,7 @@ func csLineContaining(t *testing.T, mainCs, fragment string) int {
 }
 
 func TestElseIfConditionAnswersItsOwnGoLine(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs, table := convertElseIfPositionFixture(t)
 
 	cases := []struct {
@@ -141,6 +142,7 @@ func TestElseIfConditionAnswersItsOwnGoLine(t *testing.T) {
 }
 
 func TestElseIfRecordLeavesTheEmittedTextUnchanged(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	// The fix is metadata only: the else-if keeps its two-line `} else ` / `if (cond) {` shape.
 	mainCs, _ := convertElseIfPositionFixture(t)
 

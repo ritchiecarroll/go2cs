@@ -72,6 +72,7 @@ func main() {
 `
 
 func TestPreludeSetApartByOneBlankLine(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, preludeSeparatorSource)
 
 	for _, c := range []struct {

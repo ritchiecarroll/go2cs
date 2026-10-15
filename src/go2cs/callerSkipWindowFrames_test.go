@@ -162,6 +162,7 @@ func main() {
 }
 
 func TestCallerSkipWindowFramesAreNotInlined(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertCallerSkipWindowFixture(t)
 
 	// The direct callers were marked before the window existed; the window adds register, Handle, logIt.
