@@ -26956,4 +26956,26 @@ that option, so nothing is red. COORD 2026-10-15: record only. Seat it if anythi
 
 — G (review note)
 
+## 2026-10-15 — G: at Go 1.26 every AES-GCM Open panics in Release, "unreachable; must be intrinsicified" — OPEN, seat queued (G)
+
+**Observed** (windows, GolibTests, Release): `ConvertedGcmOpenNeverPanicsWithOverlapUnderStress` fails 48 of 48. Debug
+reports it Inconclusive by design, because the alias tear it guards needs the JIT optimizer, so Debug never runs Open.
+
+**Cause.** Go 1.26's new `crypto/internal/constanttime` has `boolToUint8(b bool) uint8`, a compiler intrinsic whose
+written body is `panic("unreachable; must be intrinsicified")`. Every helper in the package calls it (`Select`,
+`ByteEq`, `Eq`, `LessOrEq`); `crypto/subtle` exposes them, and the GCM tag check reaches them. So every GCM Open in
+the converted corpus panics, which is the TLS read path of `net/http`, not just this test. The converter's intrinsic
+rule matches only Go's `panic("intrinsic")` convention, where a zero or no-op result is the meaning. `boolToUint8` has
+different text, and its result means something (1 for true, 0 for false), which no rule can infer from a panic
+message. A census of Go 1.26 non-test sources finds exactly 2 intrinsic-placeholder bodies, `abi.EscapeNonString` and
+`boolToUint8`.
+
+**Ruled (COORD 2026-10-15):**
+- A per-site hand-own of `boolToUint8`, branchless, red-first by this GolibTests case in Release.
+- A guard: any GOROOT function whose body is a lone intrinsic-placeholder panic is either matched by the intrinsic
+  rule or names a hand-own, and an unclassified one fails, naming the function.
+- Order (G): after H7 class A and row 57.
+
+— G (finding), COORD (ruling)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
