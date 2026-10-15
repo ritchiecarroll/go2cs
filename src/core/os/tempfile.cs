@@ -18,9 +18,7 @@ partial class os_package {
 // TempFile to a minimum.
 //
 //go:linkname runtime_rand runtime.rand
-/*linkname*/ internal static partial uint64 runtime_rand() {
-    return go.runtime_package.rand();
-}
+internal static partial uint64 runtime_rand();
 
 internal static @string nextRandom() {
     return strconv.FormatUint((uint64)(uint32)runtime_rand(), 10);

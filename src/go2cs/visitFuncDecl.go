@@ -2376,17 +2376,14 @@ var linknameForwardTargets = map[string]bool{
 	"syscall.fstatat":   true,
 	"syscall.ioctlPtr":  true,
 	"syscall.writev":    true,
-	// runtime's per-m ChaCha8 source, pulled by unique/canonmap.go (`//go:linkname runtime_rand
-	// runtime.rand`, Go 1.26) to seed its hash map without importing math/rand/v2, and authorized by the
-	// one-arg handle in rand.go ("Do not change signature: used via linkname from other packages").
-	// ORDINARY CONVERTED Go over getg().m.chacha8, and managed getg gives each goroutine its own m, so
-	// it returns real random bits. unique already references runtime. COMPILE AT H5, when unique's
-	// 1.26 canonmap.go first enters the corpus.
-	//
 	// NOT HERE: runtime.traceClockNow (runtime/trace/recorder.go). The handle exists, but the target
 	// returns runtime's unexported traceTime, so widening it public is CS0050 and runtime/trace's uint64
 	// would not take it (TestLinknameForwardTargetsExposeNoUnexportedTypes refuses the shape).
-	"runtime.rand": true,
+	//
+	// NOT HERE: runtime.rand, pulled as runtime_rand by net, os, math/rand, math/rand/v2 and (Go 1.26)
+	// unique. Each puller bodies it in a hand-owned companion over Random.Shared. A forward would collide
+	// with those bodies (CS0757), and runtime.rand reads getg().m.chacha8, whose m the managed getg mints
+	// per goroutine with an unseeded ChaCha8 state, so every goroutine would draw the same sequence.
 	// syscall's utimensat, pulled at Go 1.26 by internal/syscall/unix/utimes.go (`//go:linkname
 	// Utimensat syscall.utimensat`, built on every unix), whose one caller is os.Root's Chtimes
 	// (root_unix.go). ORDINARY CONVERTED Go on both unix targets: a generated libc wrapper on darwin

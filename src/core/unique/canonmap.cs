@@ -414,8 +414,6 @@ internal static ж<Δentry<T>> prune<T>(this ж<Δentry<T>> Ꮡe) {
 // on math/rand/v2.
 //
 //go:linkname runtime_rand runtime.rand
-/*linkname*/ internal static partial uint64 runtime_rand() {
-    return runtime.rand();
-}
+internal static partial uint64 runtime_rand();
 
 } // end unique_package
