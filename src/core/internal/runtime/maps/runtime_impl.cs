@@ -43,6 +43,7 @@
 // `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
 // beside converted code.
 using FatalReport = go.golib.FatalReport;
+using GoReflect = go.GoReflect;
 
 // rand, the second member of the same push block (runtime.cs:18; pushed by runtime/rand.go:182,
 // `maps_rand` -> `return rand()`), takes the companion for the same cycle reason. Go's runtime.rand is
@@ -95,4 +96,16 @@ partial class maps_package
     internal static partial void typedmemmove(ж<abi.Type> typ, @unsafe.Pointer dst, @unsafe.Pointer src) => throw refuseRawGroupMemory("typedmemmove");
 
     internal static partial void typedmemclr(ж<abi.Type> typ, @unsafe.Pointer ptr) => throw refuseRawGroupMemory("typedmemclr");
+
+    // typeString, pushed at Go 1.26 from runtime/type.go (`//go:linkname maps_typeString
+    // internal/runtime/maps.typeString`, body `toRType(typ).string()`), names the key type in
+    // unhashableTypeError's "hash of unhashable type: T". toRType resolves the descriptor's name offset,
+    // which the managed model never fills; the descriptor instead carries the System.Type it stands
+    // for (abi's type_impl.cs, sysType), and golib renders that exactly as %T and reflect's String do.
+    // A descriptor with no carried type has no name to give, and that refuses by name rather than
+    // printing a made-up one.
+    internal static partial @string typeString(ж<abi.Type> typ) =>
+        typ.Value.sysType is { } sysType ?
+            GoReflect.GoTypeName(sysType) :
+            throw panic("runtime-capability: typeString needs a type descriptor that carries its managed type");
 }

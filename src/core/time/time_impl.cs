@@ -65,6 +65,14 @@ partial class time_package
         return realNano();
     }
 
+    // runtimeIsBubbled reports whether the caller is in a synctest bubble. Go 1.26 pushes it from
+    // runtime/time.go (`//go:linkname time_runtimeIsBubbled time.runtimeIsBubbled`, body
+    // `getg().bubble != nil`), and Since and Until call it whenever t carries a monotonic reading, so
+    // the stub it replaces threw on the first time.Since(start). Bubble membership is golib's, the same object
+    // runtimeNano reads above. A companion, not a push forward: runtime's getg() is not where the
+    // managed bubble lives, and time already answers its other runtime pulls here.
+    internal static partial bool runtimeIsBubbled() => SyncTestBubble.Current is not null;
+
     // The REAL monotonic clock -- Go's nanotime(), which no bubble ever fakes. now() (Go's time_now),
     // the timer service thread and real-clock waits read this, never runtimeNano(): those are real in
     // Go even for a bubble member, and a member's runtimeNano() is its bubble's fake clock.
