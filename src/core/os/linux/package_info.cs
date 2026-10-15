@@ -117,7 +117,7 @@ using static go.os_package;
 [assembly: go.GoPositionMap("os/statat_unix.go", "statat_unix.cs", "ABAaooKAgqSC")]
 [assembly: go.GoPositionMap("os/sys.go", "sys.cs", "AAcQkg==")]
 [assembly: go.GoPositionMap("os/sys_linux.go", "sys_linux.cs", "AA4YxqKUgoKCgoLKgpSCgpSmgoKUpIKCpoKU")]
-[assembly: go.GoPositionMap("os/tempfile.go", "tempfile.cs", "AA4oAAkEggACGAAJAoKmgoKUlIKCgoKCgIKklLiY0oKCpoCClKQAAhYACAKCpoKClJSCgoKCgpSCgIKklIKAgra4goKU")]
+[assembly: go.GoPositionMap("os/tempfile.go", "tempfile.cs", "AA4o9IIAAhgACQKCpoKClJSCgoKCgoCCpJS4mNKCgqaAgpSkAAIWAAgCgqaCgpSUgoKCgoKUgoCCpJSCgIK2uIKClA==")]
 [assembly: go.GoPositionMap("os/types.go", "types.cs", "ABYakAAjXoCigAACEOKCgoKU")]
 [assembly: go.GoPositionMap("os/types_unix.go", "types_unix.cs", "ABQugKKAooCigKSC")]
 [assembly: go.GoPositionMap("os/zero_copy_linux.go", "zero_copy_linux.cs", "AAwcktbClIKmgoKmkoKmgqamAAoMgqaCgpTWwpiAgrYABxCCppSCpubCmICCtoKUtMSmpqaCgpT8soKClIKClIiClKaClKQ=", "30-33:1")]

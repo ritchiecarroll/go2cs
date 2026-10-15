@@ -29,7 +29,11 @@ internal static void setVMAName(@unsafe.Pointer start, uintptr length, @string n
     nint n = copy(sysName[..], " Go: "u8);
     copy(sysName.slice(n, 79), name); // leave final byte zero
 
-    var (_, _, err) = linux.Syscall6(linux.SYS_PRCTL, linux.PR_SET_VMA, linux.PR_SET_VMA_ANON_NAME, (uintptr)start, length, (uintptr)ᏑsysName.at<byte>(0), 0);
+    var ᴋ0 = start;
+    var ᴋ1 = ᏑsysName.at<byte>(0);
+        var (_, _, err) = linux.Syscall6(linux.SYS_PRCTL, linux.PR_SET_VMA, linux.PR_SET_VMA_ANON_NAME, (uintptr)ᴋ0, length, (uintptr)ᴋ1, 0);
+    System.GC.KeepAlive(ᴋ0);
+    System.GC.KeepAlive(ᴋ1);
     if (err == _EINVAL) {
         ᏑprSetVMAUnsupported.Store(true);
     }

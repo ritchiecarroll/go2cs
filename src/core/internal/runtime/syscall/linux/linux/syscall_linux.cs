@@ -31,12 +31,16 @@ public static (int32 n, uintptr errno) EpollWait(int32 epfd, slice<EpollEvent> e
     } else {
         ev = @unsafe.Pointer.FromBox(Ꮡ_zero);
     }
-    var (r1, _, e) = Syscall6(SYS_EPOLL_PWAIT, (uintptr)epfd, (uintptr)ev, (uintptr)maxev, (uintptr)waitms, 0, 0);
+    var ᴋ0 = ev;
+        var (r1, _, e) = Syscall6(SYS_EPOLL_PWAIT, (uintptr)epfd, (uintptr)ᴋ0, (uintptr)maxev, (uintptr)waitms, 0, 0);
+    System.GC.KeepAlive(ᴋ0);
     return ((int32)r1, e);
 }
 
 public static uintptr /*errno*/ EpollCtl(int32 epfd, int32 op, int32 fd, ж<EpollEvent> Ꮡevent) {
-    var (_, _, e) = Syscall6(SYS_EPOLL_CTL, (uintptr)epfd, (uintptr)op, (uintptr)fd, (uintptr)Ꮡevent, 0, 0);
+    var ᴋ1 = Ꮡevent;
+        var (_, _, e) = Syscall6(SYS_EPOLL_CTL, (uintptr)epfd, (uintptr)op, (uintptr)fd, (uintptr)ᴋ1, 0, 0);
+    System.GC.KeepAlive(ᴋ1);
     return e;
 }
 
@@ -48,7 +52,9 @@ public static (int32 fd, uintptr errno) Eventfd(int32 initval, int32 flags) {
 public static (nint fd, uintptr errno) Open(ж<byte> Ꮡpath, nint mode, uint32 perm) {
     // Use SYS_OPENAT to match the syscall package.
     nint dfd = AT_FDCWD;
-    var (r1, _, e) = Syscall6(SYS_OPENAT, (uintptr)dfd, (uintptr)Ꮡpath, (uintptr)((nint)(mode | (nint)O_LARGEFILE)), (uintptr)perm, 0, 0);
+    var ᴋ2 = Ꮡpath;
+        var (r1, _, e) = Syscall6(SYS_OPENAT, (uintptr)dfd, (uintptr)ᴋ2, (uintptr)((nint)(mode | (nint)O_LARGEFILE)), (uintptr)perm, 0, 0);
+    System.GC.KeepAlive(ᴋ2);
     return ((nint)r1, e);
 }
 
@@ -64,7 +70,9 @@ public static (nint n, uintptr errno) Read(nint fd, slice<byte> p) {
     } else {
         p0 = @unsafe.Pointer.FromBox(Ꮡ_zero);
     }
-    var (r1, _, e) = Syscall6(SYS_READ, (uintptr)fd, (uintptr)p0, (uintptr)len(p), 0, 0, 0);
+    var ᴋ3 = p0;
+        var (r1, _, e) = Syscall6(SYS_READ, (uintptr)fd, (uintptr)ᴋ3, (uintptr)len(p), 0, 0, 0);
+    System.GC.KeepAlive(ᴋ3);
     return ((nint)r1, e);
 }
 
@@ -79,16 +87,24 @@ public static (nint n, uintptr errno) Pread(nint fd, slice<byte> p, int64 offset
     uintptr e = default!;
     var exprᴛ1 = goarch.GOARCH;
     if (exprᴛ1 == "386"u8) {
-        (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)p0, (uintptr)len(p), (uintptr)offset, (uintptr)((offset >> (int)(32))), 0);
+        var ᴋ4 = p0;
+                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ4, (uintptr)len(p), (uintptr)offset, (uintptr)((offset >> (int)(32))), 0);
+        System.GC.KeepAlive(ᴋ4);
     }
     else if (exprᴛ1 == "arm"u8 || exprᴛ1 == "mipsle"u8) {
-        (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)p0, (uintptr)len(p), 0, (uintptr)offset, (uintptr)((offset >> (int)(32))));
+        var ᴋ5 = p0;
+                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ5, (uintptr)len(p), 0, (uintptr)offset, (uintptr)((offset >> (int)(32))));
+        System.GC.KeepAlive(ᴋ5);
     }
     else if (exprᴛ1 == "mips"u8) {
-        (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)p0, (uintptr)len(p), 0, (uintptr)((offset >> (int)(32))), (uintptr)offset);
+        var ᴋ6 = p0;
+                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ6, (uintptr)len(p), 0, (uintptr)((offset >> (int)(32))), (uintptr)offset);
+        System.GC.KeepAlive(ᴋ6);
     }
     else { /* default: */
-        (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)p0, (uintptr)len(p), (uintptr)offset, 0, 0);
+        var ᴋ7 = p0;
+                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ7, (uintptr)len(p), (uintptr)offset, 0, 0);
+        System.GC.KeepAlive(ᴋ7);
     }
     return ((nint)r1, e);
 }
@@ -103,7 +119,9 @@ partial struct Utsname {
 }
 
 public static uintptr /*errno*/ Uname(ж<Utsname> Ꮡbuf) {
-    var (_, _, e) = Syscall6(SYS_UNAME, (uintptr)Ꮡbuf, 0, 0, 0, 0, 0);
+    var ᴋ8 = Ꮡbuf;
+        var (_, _, e) = Syscall6(SYS_UNAME, (uintptr)ᴋ8, 0, 0, 0, 0, 0);
+    System.GC.KeepAlive(ᴋ8);
     return e;
 }
 

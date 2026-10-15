@@ -170,7 +170,7 @@ internal static uint32 rand32() {
 //
 //go:nosplit
 //go:linkname rand
-public static uint64 rand() {
+internal static uint64 rand() {
     // Note: We avoid acquirem here so that in the fast path
     // there is just a getg, an inlined c.Next, and a return.
     // The performance difference on a 16-core AMD is
