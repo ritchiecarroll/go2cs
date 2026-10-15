@@ -280,6 +280,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoScripts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoSuites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoTestdataEol_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\packageInitTestHook_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\psQuestionMarkVariable_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\publishedCounterReset_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\retiredHandOwns_test.go" />
@@ -373,6 +374,7 @@
     <None Include="$(MSBuildThisFileDirectory)packageInitFacts.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInputDigest.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInputDigest_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)packageInitTestHook_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageStateOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
     <None Include="$(MSBuildThisFileDirectory)perUnitAliasRenames_test.go" />
