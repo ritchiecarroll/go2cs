@@ -61,8 +61,9 @@ partial class synctest_package
     // a pointer to a field is a reference box minted where the address is taken, so two pointers
     // to one field are two boxes, and keying a table on the box would answer CurrentBubble to every Associate and false to IsAssociated, a
     // plausible wrong answer. Each refuses loudly instead. Their one caller in Go is sync.WaitGroup
-    // (waitgroup.go: Add, Wait), and sync/waitgroup.cs is still the hand-owned 1.24 body, which
-    // calls none of them; the sync rewrite that adopts 1.26's WaitGroup inherits this refusal.
+    // (waitgroup.go: Add, Wait), and the hand-owned sync/waitgroup.cs calls none of them: it keeps
+    // 1.26's association on the WaitGroup's own lazily made state, the one identity every pointer to
+    // the WaitGroup reaches, as Go's special does on the object.
     internal static partial nint associate(@unsafe.Pointer p) => throw panic(refusal("associate"));
 
     internal static partial void disassociate(@unsafe.Pointer b) => throw panic(refusal("disassociate"));
