@@ -86,6 +86,8 @@ func main() {
 // over the named constraint to read `/* Details = A | B */ new()`, never the bare `/* Details */ new()`,
 // and the inline union to keep `/* A | B */ new()`.
 func TestNamedUnionConstraintBreadcrumbCarriesItsUnion(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	cs := convertNamedUnionFixture(t)
 
 	if strings.Contains(cs, "/* Details */ new()") {

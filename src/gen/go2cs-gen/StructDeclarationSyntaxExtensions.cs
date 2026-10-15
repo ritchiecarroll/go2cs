@@ -542,7 +542,7 @@ public static class StructDeclarationSyntaxExtensions
         this StructDeclarationSyntax structDeclaration,
         Compilation compilation)
     {
-        string boxType = $"{PointerPrefix}<{structDeclaration.Identifier.Text}>";
+        string boxType = WithoutWhitespace($"{PointerPrefix}<{DeclaredTypeText(structDeclaration)}>");
 
         return compilation.SyntaxTrees
             .SelectMany(tree => tree.GetRoot()
@@ -557,10 +557,21 @@ public static class StructDeclarationSyntaxExtensions
 
                 return firstParam is not null &&
                        firstParam.Modifiers.Any(m => m.IsKind(SyntaxKind.ThisKeyword)) &&
-                       (firstParam.Type?.ToString() ?? "") == boxType;
+                       WithoutWhitespace(firstParam.Type?.ToString() ?? "") == boxType;
             })
             .Select(method => method.GetMethodInfo(compilation));
     }
+
+    // A struct's type as its own methods spell it in a receiver: the name with its type PARAMETERS
+    // (`canonMap<T>`). The box receivers above were matched against the bare name (`ж<canonMap>`),
+    // which no GENERIC struct's method ever spells, so Go 1.26 unique's `*canonMap[T]` promoted none of
+    // its box-receiver methods (Load, LoadOrStore) into uniqueMap[T] -- CS1929 at unique/handle.cs:49,52.
+    private static string DeclaredTypeText(StructDeclarationSyntax structDeclaration) =>
+        structDeclaration.Identifier.Text + (structDeclaration.TypeParameterList?.ToString() ?? "");
+
+    // Type text compared with its whitespace removed, so `Map<K,V>` and `Map<K, V>` are one spelling.
+    private static string WithoutWhitespace(string typeText) =>
+        string.Concat(typeText.Where(character => !char.IsWhiteSpace(character)));
 
     /// <summary>
     /// Gets the embedded-POINTER hop properties on the struct — the `public partial ref
@@ -644,7 +655,7 @@ public static class StructDeclarationSyntaxExtensions
         this StructDeclarationSyntax structDeclaration,
         Compilation compilation)
     {
-        return GetBoxReceiverMethodNames(structDeclaration.Identifier.Text, compilation);
+        return GetBoxReceiverMethodNames(DeclaredTypeText(structDeclaration), compilation);
     }
 
     /// <summary>
@@ -657,7 +668,7 @@ public static class StructDeclarationSyntaxExtensions
     /// </summary>
     public static HashSet<string> GetBoxReceiverMethodNames(string typeName, Compilation compilation)
     {
-        string boxType = $"ж<{typeName}>";
+        string boxType = WithoutWhitespace($"ж<{typeName}>");
 
         return new HashSet<string>(compilation.SyntaxTrees
             .SelectMany(tree => tree.GetRoot()
@@ -672,7 +683,7 @@ public static class StructDeclarationSyntaxExtensions
 
                 return firstParam is not null &&
                        firstParam.Modifiers.Any(m => m.IsKind(SyntaxKind.ThisKeyword)) &&
-                       (firstParam.Type?.ToString() ?? "") == boxType;
+                       WithoutWhitespace(firstParam.Type?.ToString() ?? "") == boxType;
             })
             .Select(method => method.Identifier.Text), StringComparer.Ordinal);
     }

@@ -217,7 +217,7 @@ func getProjectName(importPath string, options Options) (string, string) {
 	if len(parts) > 1 {
 
 		for i := 0; i < len(parts)-1; i++ {
-			namespace += "." + getCoreSanitizedIdentifier(parts[i])
+			namespace += "." + getCoreSanitizedIdentifier(joinDigitLeadingParts(parts[i]))
 		}
 	}
 

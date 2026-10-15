@@ -22,6 +22,7 @@ import (
 // package loaded last: a/foo's value typed as b/foo's type (CS0029). Each reference must name its
 // own package's target, and the shared alias name must not be declared at all.
 func TestSameNamedImportsKeepTheirOwnTypeAliases(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

@@ -95,6 +95,8 @@ const mathBitsOnlyApp = "package main\n\n" +
 	"func main() {\n\tq, _ := bits.Div64(0, 6, 3)\n\tprintln(q)\n}\n"
 
 func TestAppNotReachingRuntimeReferencesIt(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	lines := runtimeReferenceLines(convertAppModule(t, "bitsonly", mathBitsOnlyApp, false))
 
 	if len(lines) != 1 || !strings.Contains(lines[0], "<ProjectReference") {
@@ -104,6 +106,8 @@ func TestAppNotReachingRuntimeReferencesIt(t *testing.T) {
 }
 
 func TestAppNotReachingRuntimeReferencesTheRuntimePackageUnderNuGet(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	lines := runtimeReferenceLines(convertAppModule(t, "bitsonlynuget", mathBitsOnlyApp, true))
 
 	if len(lines) != 1 || !strings.Contains(lines[0], `<PackageReference Include="go.runtime"`) {
@@ -113,6 +117,8 @@ func TestAppNotReachingRuntimeReferencesTheRuntimePackageUnderNuGet(t *testing.T
 
 // The (B)-cannot-drift-into-(A) arm: an app that reaches runtime through fmt gains no reference line.
 func TestAppReachingRuntimeTransitivelyGainsNoReference(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	project := convertAppModule(t, "viafmt", "package main\n\nimport \"fmt\"\n\nfunc main() { fmt.Println(\"hi\") }\n", false)
 
 	if lines := runtimeReferenceLines(project); len(lines) != 0 {

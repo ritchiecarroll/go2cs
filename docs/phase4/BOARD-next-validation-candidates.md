@@ -26914,4 +26914,46 @@ least one method, split by whether it also has type terms (c-terms) or not (c-pu
 
 — G
 
+## 2026-10-15 — R: a package-level `sync.WaitGroup` is bubble-associated here, where Go leaves it Unbubbled — KNOWN DIFFERENCE for the Go 1.26 hop, POST-HOP SEAT OWED (G) — OPEN
+
+**The difference.** Go answers Unbubbled for a WaitGroup that is not in a heap span (a package-level variable,
+`runtime/synctest.go:383-386`). Converted code boxes a package-level variable exactly like a heap value (a
+`StandardBox<T>` behind the `Ꮡname` field), so golib cannot tell them apart. A global WaitGroup used inside a
+synctest bubble is therefore associated with that bubble here. This shows up in two places: Go's two fatals ("called
+from multiple synctest bubbles", "from inside and outside synctest bubble") fire for a global, and a global's `Wait`
+counts as durably blocking.
+
+**Ruled for the hop (COORD 2026-10-15, owner OK the same day):** option (a). The difference is stated, and an
+expected-difference test, `GoLeavesAPackageLevelWaitGroupUnbubbled_HereItIsAssociated`, rides R's G-W1 seat. Option
+(c), a converter special case for `sync.WaitGroup` globals only, is refused.
+
+**Owed after the hop (G, design-measure first):** option (b), a package-level box marker (for example a
+`StaticBox<T>` subtype, or a flag on `StandardBox`), so golib can answer Go's non-heap questions. First measure which
+golib or runtime questions besides synctest key on heap-ness, and the CNR footprint, since it moves every global's
+emission corpus-wide. When it lands it retires the expected-difference test above, and this row closes. Owner,
+2026-10-15: do the WaitGroup behavior sync after the 1.26 hop, "as long as we don't forget".
+
+— R (finding), COORD (ruling)
+
+## 2026-10-15 — G: a lowered defer evaluates a method's pointer receiver when the finally runs, not when the `defer` statement runs — RUNS-LIKE-GO GAP, post-H7 seat (G) — OPEN
+
+**The difference.** Go evaluates a deferred call's receiver and arguments when the `defer` statement executes
+(`defer p.m()` binds the `p` of that moment). The converter's lowered defer re-roots the call on the entry box
+(`if (ᒐd1) Ꮡp.DerefOrNull().m();`) and reads `Ꮡp` when the finally runs. The two differ only when the body reassigns
+the pointer after the defer. Found in G's review of P2's class-6 seat (`4c659c3486`, `os/linux/pidfd_linux.cs`), which
+does not reassign. The live-alias arm has carried the same property all along.
+
+**Owed (G, after H7):** red-first by a fixture that reassigns a pointer parameter after `defer p.m()`. Go calls `m` on
+the OLD `p`. Then capture the receiver at the defer statement.
+
+— G (review note), COORD (routing)
+
+## 2026-10-15 — G: under `-var=false` a range body that writes its variable copies into an undeclared name — RECORDED, no seat
+
+With `preferVarDecl` off, the copy-on-write arms of `visitRangeStmt` (slice/array/map, and since P2's `0555ce12b9` the
+yield-func arms) put the type on the foreach TEMP and emit `lit = iᴛ1;` with no declaration. The corpus never runs
+that option, so nothing is red. COORD 2026-10-15: record only. Seat it if anything starts using `-var=false`.
+
+— G (review note)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

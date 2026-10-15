@@ -214,6 +214,7 @@ func TestParseAsmTrampolineAddrs(t *testing.T) {
 // path: the pull emits a forwarder to syscall's public twin, the proven variable an initializer that
 // resolves its symbol, and the two unproven variables stay bare fields.
 func TestXSysDarwinLibcEmission(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

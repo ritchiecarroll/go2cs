@@ -325,6 +325,7 @@ func emittedFunction(t *testing.T, mainCs string, name string) string {
 // PartialStubGenerator body; golang.org/x/sys/unix's Syscall is shape 1, and go-isatty reaching it
 // inside fatih/color's type initializer is what killed the README walkthrough's app on Linux.
 func TestAsmTrampolinesForwardByShape(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the module's closure via go/packages")
 	}
@@ -508,6 +509,7 @@ GLOBL ·data(SB), RODATA, $8
 // loader runs is untouched), and the identical conversion with the real GOROOT is the control that
 // proves the fixture forwards when the exclusion does not apply.
 func TestAsmTrampolinesSkipGoRootPackages(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the package via go/packages")
 	}

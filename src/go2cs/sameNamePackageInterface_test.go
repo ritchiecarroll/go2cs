@@ -25,6 +25,7 @@ import (
 // identity (`slog.New(~h)`) with no GoImplement record (CS1503). The argument must render as its own
 // package's type and the conversion must be recorded and emitted like any other.
 func TestSameNamedPackageTypeConvertsToTheStdInterface(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

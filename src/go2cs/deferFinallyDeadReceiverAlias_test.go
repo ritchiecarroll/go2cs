@@ -109,6 +109,8 @@ func main() {
 
 // TestLoweredDeferReRootsADeadReceiverAlias pins the re-root for a dead alias and its control.
 func TestLoweredDeferReRootsADeadReceiverAlias(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

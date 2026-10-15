@@ -98,6 +98,8 @@ func convertLateBoundPullFixture(t *testing.T) (pullerCs string, pullerCsproj st
 }
 
 func TestUpwardLinknamePullIsReachedLateBound(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	source, project := convertLateBoundPullFixture(t)
 
 	var declaration string

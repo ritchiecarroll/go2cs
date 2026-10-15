@@ -249,6 +249,7 @@ func assertKeepAlivePair(t *testing.T, mainCs, marker string) {
 // four. Red before the widening — RawSyscall/RawSyscall6 fell through to the general call path,
 // which renders the argument as a bare `(uintptr)Ꮡ(buf, 0)` with nothing left referencing the box.
 func TestRawSyscallFunnelKeepsItsPointerArgumentAlive(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -265,6 +266,7 @@ func TestRawSyscallFunnelKeepsItsPointerArgumentAlive(t *testing.T) {
 // Without this, a widening of pointerDerivedArgSource would ride in unnoticed behind the set
 // change — the two are separate predicates and this guard measures only one of them.
 func TestRawSyscallFunnelLeavesIntegerArgumentsAlone(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -291,6 +293,7 @@ func TestRawSyscallFunnelLeavesIntegerArgumentsAlone(t *testing.T) {
 // was held. Nothing in the standing ladder could see it — the emission compiles, is byte-identical
 // in shape to a correct one, and only a collection landing INSIDE the kernel's window is wrong.
 func TestTwoStepPointerArgumentIsKeptAliveAcrossTheFunnel(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -305,6 +308,7 @@ func TestTwoStepPointerArgumentIsKeptAliveAcrossTheFunnel(t *testing.T) {
 // retaining door instead. Asserted on the emission rather than on golib so the two halves cannot
 // drift apart silently — a fixed golib with an unchanged emission is still the defect.
 func TestPointerMintFromABoxTakesTheRetainingDoor(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -482,6 +486,7 @@ func keepAliveCount(lines []string, box string) int {
 }
 
 func TestBridgedWrapperArgumentKeepsItsFrameMintedBoxAlive(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -533,6 +538,7 @@ func TestBridgedWrapperArgumentKeepsItsFrameMintedBoxAlive(t *testing.T) {
 // box is a static field alive for the process — neither may record a KeepAlive, or the arm has
 // widened past the class the census measured.
 func TestBridgedWrapperArgumentScopeControls(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -562,6 +568,7 @@ func TestBridgedWrapperArgumentScopeControls(t *testing.T) {
 // box named inside a literal's own body. Each is a frame question — the KeepAlive must sit in the
 // frame that minted the box, after the call, on a path the call reaches.
 func TestBridgedWrapperArgumentPlacement(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -657,6 +664,7 @@ func leadingSpace(line string) string {
 // splicing a KeepAlive into the header. debugMode lets the refusal through the per-file recovery;
 // the module driver reports it as the conversion error.
 func TestBridgedWrapperInForClauseIsRefused(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

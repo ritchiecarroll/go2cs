@@ -167,6 +167,7 @@ func emittedFunctionBody(t *testing.T, mainCs string, name string) string {
 }
 
 func TestNativeFieldArrayViewEmitsTheDoorAndElementRef(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

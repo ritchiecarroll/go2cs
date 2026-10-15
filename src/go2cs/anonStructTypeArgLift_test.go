@@ -101,6 +101,7 @@ func TestRawGoStructTextDetectorFires(t *testing.T) {
 // TestAnonymousStructTypeArgumentLiftsAtEverySite is the guard. It asserts the property the
 // defect violated at BOTH sites, not at the one the resolver happens to report.
 func TestAnonymousStructTypeArgumentLiftsAtEverySite(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	withDynamicTypeRegistry(t, func() {
 		mainCs := convertFunnelFixture(t, "example.com/anonta", "anonta", anonTypeArgFixture)
 
@@ -169,6 +170,7 @@ func TestAnonymousStructTypeArgumentLiftsAtEverySite(t *testing.T) {
 // failed: N unresolved dynamic type(s)` and exit 1. An emission that looked right while still
 // recording a site would leave the row unreadable for the same reason as before.
 func TestAnonymousStructTypeArgumentRecordsNoUnresolvedType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	withDynamicTypeRegistry(t, func() {
 		convertFunnelFixture(t, "example.com/anontarec", "anontarec", anonTypeArgFixture)
 

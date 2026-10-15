@@ -30,6 +30,7 @@ import (
 // a binding), both labels of a colliding pair whose bodies differ, the merge of a colliding pair
 // whose bodies match, and two distinct delegates sharing a first type argument kept apart.
 func TestTypeSwitchCollapsedFuncCase(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

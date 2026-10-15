@@ -38,6 +38,7 @@ func main() {
 `
 
 func TestAliasDocAboveItsGlobalUsing(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, aliasDocSource)
 
 	for _, c := range []struct {
@@ -89,6 +90,7 @@ func main() {
 // The using block sits directly under the file's leading comments; an alias's doc is set apart from them by the
 // blank line Go has above the declaration, so it does not read as the end of the file's header.
 func TestAliasDocSetApartFromTheFileHeader(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, aliasDocUnderHeaderSource)
 
 	if !blankAbove(t, lines, "// Celsius is an alias for a float.") {
@@ -115,6 +117,7 @@ func main() {
 // An alias of an anonymous struct lifts the struct, which takes the doc; the using line then has no doc of its own
 // to write and must not leave a bare blank line where it would have gone.
 func TestAliasOfStructLeavesNoBareBlankLine(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, aliasOfStructDocSource)
 
 	for i := 1; i < len(lines); i++ {
