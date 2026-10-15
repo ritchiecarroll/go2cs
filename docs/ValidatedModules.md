@@ -1,6 +1,6 @@
 # Validated Modules
 
-Third-party Go modules whose own `_test.go` suites go2cs converted with `go2cs -tests -recurse`,
+Go modules whose own `_test.go` suites go2cs converted with `go2cs -tests -recurse`,
 built against the converted standard library, ran under the Go-semantics test host, and compared
 verdict for verdict against a clean `go test -json` baseline of the same sources — the same bar the
 [standard-library roster](ValidatedTestPackages.md) holds every package to. A module appears here
