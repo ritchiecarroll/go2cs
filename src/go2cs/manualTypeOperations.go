@@ -426,6 +426,10 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// death, TestSchedLocalQueueEmpty). Go only asks whether that number is 0, so runtime2_impl.cs
 		// answers "runnext is nil" over Volatile.Read of the reference, beside the family's other members.
 		"runqempty": goosAny,
+		// The same view at a second site, Go 1.26's scheduler metrics: schedStatsAggregate.compute reads
+		// `atomic.Loaduintptr((*uintptr)(&p.runnext))` only for `next != 0`. runtime/metrics_impl.cs keeps
+		// the converted body and answers that one line over Volatile.Read of the reference.
+		"schedStatsAggregate.compute": goosAny,
 		// runtime's own semaphore (sema.go). The converted semacquire1 parks through acquireSudog, which
 		// reads the caller's P for its sudog cache; the managed model has no Ps, so the first semacquire
 		// that had to WAIT dereferenced a nil P on a goroutine and the runtime row's host died in
