@@ -1005,7 +1005,7 @@ partial class runtime_package
         bool writeLabels = labels != nil && len(labels) == len(Δp);
 
         if (len(Δp) == 0)
-            return ((nint)gcount(), false);
+            return ((nint)gcount(false), false);
 
         semacquire(ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡsema));
 
@@ -1211,8 +1211,10 @@ partial class runtime_package
     }
 
     // gcount is the body NumGoroutine above used to call, and the one THREE other consumers still
-    // reach directly: metrics.cs's /sched/goroutines compute closure, and mprof.cs's goroutine-profile
-    // size and count. Hand-owning NumGoroutine alone left all three on the auto body's clamped
+    // reach directly: metrics_impl.cs's /sched/goroutines compute, and mprof.cs's goroutine-profile
+    // size and count. Go 1.26 added includeSys (proc.go): the metrics total counts the runtime's own
+    // goroutines too (gcount(true)), the profiles do not (gcount(false)), so the registry answers
+    // Count or UserCount. Hand-owning NumGoroutine alone left all three on the auto body's clamped
     // constant 1, so a program could report a true count through the public API and a fabricated one
     // through its own metrics and profiles in the same breath.
     //
@@ -1224,9 +1226,9 @@ partial class runtime_package
     // cannot report fewer goroutines than the caller's own, so there is no nonsense to clamp and a
     // floor could only hide a real zero if one ever arose. The count's measured divergence — early by
     // one climbing, late to decay — is in this file's Honest-divergences ledger.
-    internal static int32 gcount()
+    internal static int32 gcount(bool includeSys)
     {
-        int n = Goroutine.UserCount;
+        int n = includeSys ? Goroutine.Count : Goroutine.UserCount;
 
         return n < 1 ? 1 : n;
     }
