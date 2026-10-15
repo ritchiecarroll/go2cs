@@ -281,8 +281,11 @@ func packageVarAccess(goIDName string, varType types.Type) string {
 // exactly the symbols that need to move. The handle is still required: it is Go's authorization for
 // the pull, and forwarding to a symbol its own package never opened would not be faithful.
 func packageFuncAccess(goIDName string, isFreeFunction bool) string {
-	if isFreeFunction && linknameHandles.Contains(goIDName) && linknameForwardTargets[currentPackagePath+"."+goIDName] {
-		return "public"
+	if isFreeFunction && linknameForwardTargets[currentPackagePath+"."+goIDName] {
+		// The handle can be in a file another target builds (linknameForwardHandleElsewhere).
+		if _, handledElsewhere := linknameForwardHandleElsewhere[currentPackagePath+"."+goIDName]; handledElsewhere || linknameHandles.Contains(goIDName) {
+			return "public"
+		}
 	}
 
 	// The PUSH direction's mirror image: the pushing DEFINITION (runtime's

@@ -25,6 +25,7 @@
 // Aliased rather than imported wholesale, as sync's companions do: this file needs exactly one golib
 // type.
 using SyncTestBubble = go.golib.SyncTestBubble;
+using @unsafe = go.unsafe_package;
 
 // Hand-owned (no synctest_impl.go exists, so a reconvert never regenerates it); marked for consistency
 // with the other hand-owned linkname companions.
@@ -49,4 +50,26 @@ partial class synctest_package
 
     // synctest_inBubble: gp.syncGroup = sg.(*synctestGroup) for the duration of f.
     internal static partial void inBubble(any _Δp0, Action _Δp1) => SyncTestBubble.InBubble((SyncTestBubble)_Δp0, _Δp1);
+
+    // Go 1.26 pushes four more from runtime/synctest.go. IsInBubble is `getg().bubble != nil`, which
+    // is golib's membership test; the other three are bodied below as stated refusals.
+    public static partial bool IsInBubble() => SyncTestBubble.Current is not null;
+
+    // synctest_associate, synctest_disassociate and synctest_isAssociated record a bubble id on the
+    // HEAP OBJECT p points to (a _KindSpecialBubble special on its span, keyed by p's offset), so Go
+    // answers the same for every pointer to the same address. The managed model has no such record:
+    // a pointer to a field is a reference box minted where the address is taken, so two pointers
+    // to one field are two boxes, and keying a table on the box would answer CurrentBubble to every Associate and false to IsAssociated, a
+    // plausible wrong answer. Each refuses loudly instead. Their one caller in Go is sync.WaitGroup
+    // (waitgroup.go: Add, Wait), and sync/waitgroup.cs is still the hand-owned 1.24 body, which
+    // calls none of them; the sync rewrite that adopts 1.26's WaitGroup inherits this refusal.
+    internal static partial nint associate(@unsafe.Pointer p) => throw panic(refusal("associate"));
+
+    internal static partial void disassociate(@unsafe.Pointer b) => throw panic(refusal("disassociate"));
+
+    internal static partial bool isAssociated(@unsafe.Pointer p) => throw panic(refusal("isAssociated"));
+
+    private static @string refusal(string name) =>
+        $"go2cs: //go:linkname push runtime.synctest_{name} -> internal/synctest.{name} is not honored: " +
+        "the managed heap has no per-object bubble record, so a pointer's bubble association cannot be kept";
 }

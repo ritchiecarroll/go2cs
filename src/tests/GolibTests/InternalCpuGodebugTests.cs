@@ -33,7 +33,8 @@ public class InternalCpuGodebugTests
         RequireX86();
         (string name, bool enabled)[] empty = cpu_package.GoCpuOptionsProbe("");
 
-        Assert.AreEqual(20, empty.Length, "doinit's table at GOAMD64 level 1");
+        // 23 since Go 1.26 (vpclmulqdq, avx512cd and avx512dq joined doinit's table; 20 through 1.25).
+        Assert.AreEqual(23, empty.Length, "doinit's table at GOAMD64 level 1");
         Assert.AreEqual(cpu_package.X86.HasAES, Flag(empty, "aes"));
         Assert.AreEqual(cpu_package.X86.HasSSE41, Flag(empty, "sse41"));
         Assert.AreEqual(cpu_package.X86.HasAVX2, Flag(empty, "avx2"));

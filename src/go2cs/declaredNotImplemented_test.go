@@ -79,12 +79,14 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 	// must be IN the population. Arm 3 below also requires every control to be a PUSHED member (its
 	// //go:linkname push exists in this corpus), so an assembly stub cannot serve here, however many
 	// hosts it has killed. Today the controls are two pushes that do not arrive and have callers in
-	// their own package: internal/runtime/maps.typeString (pushed from runtime/type.cs) and
-	// runtime/pprof.mach_vm_region (pushed from runtime/darwin/sys_darwin.cs), which the Phase 5
+	// their own package: os.ignoreSIGSYS (pushed from runtime's signal_unix.cs; pidfd_linux.cs calls
+	// it once) and runtime/pprof.mach_vm_region (pushed from runtime/darwin/sys_darwin.cs), which the Phase 5
 	// exported-reach census confirmed a user API reaches (pprof.StartCPUProfile on darwin, arm64 and
 	// x64; docs/phase4/CENSUS-phase5-exported-reach.md). It replaced
 	// internal/coverage/cfile.getCovCounterList in the commit that bodied that one (emit_impl.cs,
-	// 2026-10-10), which moved to the negative controls below.
+	// 2026-10-10), which moved to the negative controls below. os.ignoreSIGSYS replaced
+	// internal/runtime/maps.mapKeyError at the Go 1.26 hop (H5): 1.26 defines mapKeyError in maps
+	// itself (map.go), so runtime no longer pushes it and it left the population with its row.
 	//
 	// It named RED 7's three (fips140's getIndicator, setIndicator and fatal) until RED 7 (a) gave
 	// them bodies; they left the population and their rows left this list IN THAT SAME COMMIT, which
@@ -93,11 +95,9 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 	// same route on 2026-09-22 when internal/sync/runtime_impl.cs bodied them: they are NEGATIVE
 	// controls below now. The list is never left EMPTY: an empty list passes this arm while
 	// checking nothing, which is the vacuity the arm exists to refuse. So when a control gains a
-	// body, a member that is still stubbed replaces it in the same commit. typeString replaced
-	// internal/runtime/maps.mapKeyError at the Go 1.26 hop's H5 (2026-10-15): go1.26.9 gave
-	// mapKeyError a Go body in map.go and retired runtime_swiss.go, so it left the population upstream.
+	// body, a member that is still stubbed replaces it in the same commit.
 	controls := []string{
-		"internal/runtime/maps/map.cs:typeString",
+		"os/linux/pidfd_linux.cs:ignoreSIGSYS",
 		"runtime/pprof/darwin/vminfo_darwin.cs:mach_vm_region",
 	}
 
@@ -401,7 +401,6 @@ const (
 //
 // ⚠ EDIT THIS TABLE IN THE COMMIT THAT MOVES THE TREE, never afterwards. That is the whole mechanism.
 var declaredPushStubs = map[string]string{
-	"internal/runtime/maps.mapKeyError":                  dispositionLatent,
 	"internal/syscall/windows.QueryPerformanceCounter":   dispositionLatent,
 	"internal/syscall/windows.QueryPerformanceFrequency": dispositionLatent,
 	"os.ignoreSIGSYS":                   dispositionLatent,

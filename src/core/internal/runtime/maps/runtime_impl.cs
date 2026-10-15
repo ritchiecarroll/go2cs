@@ -95,4 +95,16 @@ partial class maps_package
     internal static partial void typedmemmove(ж<abi.Type> typ, @unsafe.Pointer dst, @unsafe.Pointer src) => throw refuseRawGroupMemory("typedmemmove");
 
     internal static partial void typedmemclr(ж<abi.Type> typ, @unsafe.Pointer ptr) => throw refuseRawGroupMemory("typedmemclr");
+
+    // typeString (Go 1.26, map.go:897-898; pushed by runtime/type.go:16, `maps_typeString` ->
+    // `toRType(typ).string()`) names a key type for unhashableTypeError's message, "hash of unhashable
+    // type: <T>". The same cycle rule as the rest of the push block puts it here, not in a linkname
+    // row. Runtime's own body reads the linker's name blob through nameOff, which a synthesized
+    // descriptor does not have; what it DOES carry is its managed type, and GoReflect.GoTypeName is the
+    // Go spelling golib already writes for the same panic (GoEqualityComparer's "hash of unhashable
+    // type"). Unfilled, the generator stubs this with a throwing body, so the first unhashable-key
+    // panic would have reported NotImplementedException instead of Go's message. A descriptor with no
+    // managed type names no Go type at all, and cannot be a map key's; it answers so, plainly.
+    internal static partial @string typeString(ж<abi.Type> typ) =>
+        typ != nil && typ.Value.sysType is { } st ? GoReflect.GoTypeName(st) : "<type with no managed descriptor>";
 }

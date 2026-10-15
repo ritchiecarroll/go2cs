@@ -5481,7 +5481,7 @@ partial class runtime_package
         if (v is IValueAdapter { Value: not null } valueAdapter)
             v = valueAdapter.Value;
 
-        abi.ΔKind kind = (abi.ΔKind)(Ꮡt.Value.Kind_ & abi.KindMask);
+        abi.ΔKind kind = abi.Kind(Ꮡt);
 
         if (kind >= abi.Bool && kind <= abi.Uintptr)
         {
