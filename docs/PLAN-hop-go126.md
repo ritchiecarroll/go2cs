@@ -376,8 +376,8 @@ COORD's to rule.
      H5c 702, H6 1291, H7 1511, H7a 1615, H8 1737, H9 2069, H10 2361, H11 3414, H12 3450, release day 3522, §3 3564,
      §5-§6 3927-3964, §7 lessons 2, 13, 19, 25, 30, 31, 42, 43, 48, 52, 54, 57, 60, 64); PLAN-corpus-upgrade.md §6, §8
      (OQ-1, OQ-10, OQ-18); RESUME-SESSIONS.md 1e and 1h on claude/coord-handover 1af8d80c09 (lanes and boxes).
-     Instrument states read at master 20279db5f6 on 2026-10-11: src/_roster.ps1:475 and :587, run-h10-recon.ps1:841-843,
-     check-h6-completeness.ps1:128 (at 20279db5f6 its audit default was a hard-coded go124 path on line 76; A8 derives it from src/version.props since), shardmap.py:94, check-roster-format.ps1:906; src/go2cs/go.mod; module-cache x/tools and
+     Instrument states read at master 20279db5f6 on 2026-10-11: src/_roster.ps1:475#4b5d9d and :587#4b5d9d, run-h10-recon.ps1:841-843#31620f,
+     check-h6-completeness.ps1:128#b71105 (at 20279db5f6 its audit default was a hard-coded go124 path on line 76; A8 derives it from src/version.props since), shardmap.py:94#a2b801, check-roster-format.ps1:906#dd8dfc; src/go2cs/go.mod; module-cache x/tools and
      x/mod .mod files. -->
 
 ---
