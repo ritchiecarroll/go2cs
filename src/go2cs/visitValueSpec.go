@@ -610,9 +610,19 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							// the lift arriving from the call-argument path under builtin new's UNNAMED
 							// parameter (an empty lift name — a whole-package syntax cascade). Mirrors
 							// the composite-literal lift above.
-							if funIdent, isIdent := callExpr.Fun.(*ast.Ident); isIdent && funIdent.Name == "new" {
+							// Go 1.26's `new(expr)` names a VALUE: for a composite literal (`var cfg =
+							// new(struct{ … }{ … })`) the struct to lift is the literal's TYPE, under the var's
+							// name as for `new(T)`. Unlifted here, it arrived from builtin new's parameter path
+							// named after that parameter (`Δtype`).
+							typeArg := callExpr.Args[0]
+
+							if compositeLit, isLit := typeArg.(*ast.CompositeLit); isLit && v.info.Types[typeArg].IsValue() {
+								typeArg = compositeLit.Type
+							}
+
+							if funIdent, isIdent := callExpr.Fun.(*ast.Ident); isIdent && funIdent.Name == "new" && typeArg != nil && v.info.Types[typeArg].IsType() {
 								if _, isBuiltin := v.info.ObjectOf(funIdent).(*types.Builtin); isBuiltin {
-									if subStructType, exprType := v.extractStructType(callExpr.Args[0]); subStructType != nil && !v.liftedTypeExists(subStructType) {
+									if subStructType, exprType := v.extractStructType(typeArg); subStructType != nil && !v.liftedTypeExists(subStructType) {
 										v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true, nil)
 									}
 								}
