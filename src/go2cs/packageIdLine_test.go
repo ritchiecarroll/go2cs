@@ -64,6 +64,7 @@ func TestPackageIdLineKeepsGoForTheStandardLibraryOnly(t *testing.T) {
 // The emitted projects of a real module conversion: its library carries no PackageId, its main keeps the template's
 // line, and no project carries the marker.
 func TestAConvertedModuleLibraryCarriesNoPrefixedPackageId(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

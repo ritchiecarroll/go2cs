@@ -25,6 +25,7 @@ import (
 // two num:uintptr results). Transpile-only: the emitted C# references syscall (which the fixture does
 // not import), so it is asserted as text, never compiled.
 func TestRecurseLinknameForwarder(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real -recurse converter over a module fixture")
 	}
@@ -110,6 +111,7 @@ func TestRecurseLinknameForwarder(t *testing.T) {
 // mutexevent shape: a push on a function that reads runtime.Caller), so only the `/*linkname*/` marker may tell them
 // apart. The forwarder carries it; the carrier is `partial` with no marker, which go2cs-gen reads as no-inline.
 func TestLinknameMarkerIsTheOnlyForwarderSignal(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real -recurse converter over a module fixture")
 	}
@@ -189,6 +191,7 @@ func TestLinknameMarkerIsTheOnlyForwarderSignal(t *testing.T) {
 // linknameForwardDefinitionSources arm from packageFuncAccess -- the first two or the third
 // assertion group goes red respectively.
 func TestRecurseLinknameForwardDefinition(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real -recurse converter over a module fixture")
 	}

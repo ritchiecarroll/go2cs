@@ -123,6 +123,7 @@ func liftPublished(packageInfo, name string) bool {
 }
 
 func TestManualDeclarationStillLiftsItsSignatureTypes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs, packageInfo := convertManualSignatureFixture(t)
 
 	for _, name := range []string{"hashIface", "plainHash"} {

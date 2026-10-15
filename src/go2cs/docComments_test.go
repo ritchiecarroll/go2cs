@@ -117,6 +117,7 @@ func docAbove(t *testing.T, lines []string, doc string) string {
 }
 
 func TestDocCommentsOfSpecsAndTypes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, docCommentsSource)
 
 	for _, c := range []struct{ doc, declares string }{
@@ -189,6 +190,7 @@ func main() {
 `
 
 func TestGroupBlankLines(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, groupBlankLinesSource)
 
 	for _, c := range []struct {
@@ -250,6 +252,7 @@ func main() {
 `
 
 func TestNoBlankLineRunsAroundLiftedVars(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, liftedVarSource)
 
 	for i := 1; i < len(lines); i++ {

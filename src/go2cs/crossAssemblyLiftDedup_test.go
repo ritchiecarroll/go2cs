@@ -184,6 +184,7 @@ func crossAssemblyLiftCandidates(t *testing.T) (internalCandidate, publicCandida
 // and the lift minted locally — while the same fixture, same seeded registry and same signature
 // adopt a PUBLIC candidate, which is the positive control that the key matches at all.
 func TestReferenceModelExternalSuiteRefusesInternalProductionLift(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}
@@ -249,6 +250,7 @@ func TestReferenceModelExternalSuiteRefusesInternalProductionLift(t *testing.T) 
 // package-level struct FIELD path (runtime's `IfaceKey.i`, the CS1503) as much as by the
 // function-local one.
 func TestWhiteboxModelExternalSuiteAdoptsInternalProductionLift(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}

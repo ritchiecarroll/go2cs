@@ -126,6 +126,7 @@ func (Clock) Kind() string { return "" }
 // emitted the alias. This pins the derivation, one case per published shape and one per deliberate
 // omission.
 func TestForeignReExportedAliasesAreDerivedFromTheDependency(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	resetPackageState(&packages.Package{})
 	foreignDerivedAliases = nil
 
@@ -210,6 +211,7 @@ func TestForeignReExportedAliasesAreDerivedFromTheDependency(t *testing.T) {
 // The INVARIANT, for this lane too: the derivation depends only on the dependency's own
 // declarations, never on what the current run has converted or accumulated.
 func TestForeignReExportedAliasesIgnoreRunAccumulatedState(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	resetPackageState(&packages.Package{})
 	foreignDerivedAliases = nil
 

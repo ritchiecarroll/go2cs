@@ -180,6 +180,7 @@ func deferStatementLine(t *testing.T, mainCs string) string {
 // `defer(syscall.Syscall(trap, (uintptr)fds[i], 0, 0), , , ,` form on every assertion below, and
 // leaves both controls passing — so the controls are measuring the scope, not carrying the verdict.
 func TestDeferredSyscallFunnelCallFillsItsEagerArgumentSlots(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -240,6 +241,7 @@ func TestDeferredSyscallFunnelCallFillsItsEagerArgumentSlots(t *testing.T) {
 // a pointer-derived one still gets the box temp and the GC.KeepAlive that reproduce Go's
 // uintptrkeepalive contract — the whole reason the interception exists.
 func TestOrdinarySyscallFunnelCallKeepsItsInterception(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

@@ -110,6 +110,7 @@ func emittedFunctionText(t *testing.T, cs, name string) string {
 }
 
 func TestManagedSliceViewRefusesWithoutAnAliasingPair(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertManagedSliceViewFixture(t)
 
 	refused := emittedFunctionText(t, mainCs, "wordsAsPointers")
