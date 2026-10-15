@@ -601,6 +601,10 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     internal atomic.Uint32 statsSeq;
     // Timer heap.
     internal timers timers;
+    // Cleanups. Go 1.25's per-P count of queued cleanups, which proc.go's destroy folds into
+    // gcCleanups.queued (mcleanup.cs). Go's p.cleanups, the per-P local block, is not declared: only
+    // mcleanup.go's own enqueue and flush reach it, and mcleanup.cs replaces that file whole.
+    internal uint64 cleanupsQueued; // monotonic count of cleanups queued by this P
     // maxStackScanDelta accumulates the amount of stack space held by
     // live goroutines (i.e. those eligible for stack scanning).
     // Flushed to gcController.maxStackScan once maxStackScanSlack
