@@ -961,7 +961,19 @@ func typeIsPubliclyAccessible(t types.Type) bool {
 // such a pull kept a plain field of its own, which is never Go's value: at go1.26.9 runtime imports
 // math/bits, so math/bits's pulls of runtime.overflowError / runtime.divideError became null fields and
 // bits.Div64 panicked with nil where Go's own tests assert a runtime.Error.
+//
+// The STORAGE side of an inverted var alias (linknameVarAliasTargets) is never a pull, although it
+// carries the two-argument directive: the registry has already decided that this declaration HOLDS the
+// variable and the other package forwards to it, so it keeps its field (made public by
+// packageVarAccess). Read as a pull, runtime's canUseLongPaths and executablePath are refused as cycles
+// (each points up into a package that imports runtime) and, since late binding, came out as `internal`
+// LinknameVar properties naming their own forwarder: the forwarder could not see them (CS0117 at
+// internal/syscall/windows and os on darwin, H7 pass 5), and the two would have chased each other.
 func varLinknamePull(name string, options Options, docs ...*ast.CommentGroup) (ref string, pkgPath string, lateBound bool, ok bool) {
+	if linknameVarAliasStorage[currentPackagePath+"."+name] {
+		return "", "", false, false
+	}
+
 	for _, doc := range docs {
 		if doc == nil {
 			continue
