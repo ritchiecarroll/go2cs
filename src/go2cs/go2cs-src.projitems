@@ -170,6 +170,7 @@
     <None Include="$(MSBuildThisFileDirectory)finalizerDoorGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fixedSkipCallerClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fixtureWritesTracked_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)foldedShiftOperand_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
