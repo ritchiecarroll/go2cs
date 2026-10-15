@@ -11379,30 +11379,28 @@ public static void registerLoadFromEmbeddedTZData(Func<@string, (@string, error)
 }
 ```
 
-**A `//go:linkname` push forwards too, or panics with a reason.** Package `unique` declares a bodyless
-function under the one-argument marker. Package `runtime` supplies the body with a push:
-`//go:linkname unique_runtime_registerUniqueMapCleanup unique.runtime_registerUniqueMapCleanup`.
+**A `//go:linkname` push forwards too, or panics with a reason.** Package `crypto/internal/sysrand`
+declares a bodyless function under the one-argument marker. Package `runtime` supplies the body with a push:
+`//go:linkname sysrand_fatal crypto/internal/sysrand.fatal`.
 
-<!-- source: GOROOT/src/unique/handle.go:176-179 -->
+<!-- source: GOROOT/src/crypto/internal/sysrand/rand.go:23-26 -->
 ```go
-// Implemented in runtime.
-
-//go:linkname runtime_registerUniqueMapCleanup
-func runtime_registerUniqueMapCleanup(cleanup func())
+// fatal is [runtime.fatal], pushed via linkname.
+//
+//go:linkname fatal
+func fatal(string)
 ```
 
-The bodyless declaration in `unique` becomes a forwarder to the converted body in `runtime`. `runtime` is
-a `using` alias for that package's class, and `Action` is the C# delegate for Go's `func()`:
+The bodyless declaration in `sysrand` becomes a forwarder to the converted body in `runtime`, whose
+package class it names in full. Go's unnamed `string` parameter is written `_`:
 
-<!-- source: src/core/unique/handle.cs:8-164 -->
+<!-- source: src/core/crypto/internal/sysrand/rand.cs:25-30 -->
 ```csharp
-using runtime = runtime_package;
-…
-// Implemented in runtime.
-
-//go:linkname runtime_registerUniqueMapCleanup
-/*linkname*/ internal static partial void runtime_registerUniqueMapCleanup(Action cleanup) {
-    runtime.unique_runtime_registerUniqueMapCleanup(cleanup);
+// fatal is [runtime.fatal], pushed via linkname.
+//
+//go:linkname fatal
+/*linkname*/ internal static partial void fatal(@string _) {
+    go.runtime_package.sysrand_fatal(_);
 }
 ```
 
@@ -11659,19 +11657,17 @@ condition, much like a C# `#if` around the whole file. The Go toolchain compiles
 condition holds. Passing `-tags purego` makes the name `purego` true, so files gated on `purego` join the
 build and files gated on `!purego` leave it.
 
-**The default build binds SHA-256 to assembly.** On amd64, Go compiles this file. Its three `block*`
-functions have no body, because their code lives in an assembly file. The `//go:noescape` lines are hints to
-Go's compiler and do not matter here:
+**The default build binds SHA-256 to assembly.** On amd64, Go compiles this file. `blockAVX2` and
+`blockSHANI` have no body, because their code lives in an assembly file; on a CPU with neither feature,
+`block` falls back to `blockGeneric`, SHA-256 written in plain Go. The `//go:noescape` lines are hints to Go's
+compiler and do not matter here:
 
 <!-- The `_amd64` filename suffix also limits this file to that architecture. Neither this file nor the
-     noasm file is vendored in this repo; both are read from the Go 1.24.13 GOROOT. -->
-<!-- source: GOROOT/src/crypto/internal/fips140/sha256/sha256block_amd64.go:5-39 -->
+     noasm file is vendored in this repo; both are read from the pinned toolchain's GOROOT. -->
+<!-- source: GOROOT/src/crypto/internal/fips140/sha256/sha256block_amd64.go:5-36 -->
 ```go
 //go:build !purego
 …
-//go:noescape
-func blockAMD64(dig *Digest, p []byte)
-
 //go:noescape
 func blockAVX2(dig *Digest, p []byte)
 
@@ -11684,14 +11680,14 @@ func block(dig *Digest, p []byte) {
 	} else if useAVX2 {
 		blockAVX2(dig, p)
 	} else {
-		blockAMD64(dig, p)
+		blockGeneric(dig, p)
 	}
 }
 ```
 
 **Under `purego`, a sibling file with a real body is chosen instead.** Its build line is long, but only the
-`|| purego` at the end matters: it selects the file on every architecture. Its `block` calls `blockGeneric`,
-SHA-256 written in plain Go:
+`|| purego` at the end matters: it selects the file on every architecture. Its `block` calls `blockGeneric`
+directly:
 
 <!-- source: GOROOT/src/crypto/internal/fips140/sha256/sha256block_noasm.go:5-11 -->
 ```go
@@ -11808,21 +11804,28 @@ public static (slice<byte>, error) P256OrdInverse(slice<byte> k) {
 **At Go 1.24, `crypto/elliptic` then panicked, just as Go did.** The P-256 curve's `Inverse` method in
 `crypto/elliptic` treated that error as impossible and panicked. Real Go built with `-tags purego` panicked
 there too, so the converted code did the same. `crypto/ecdsa` handles the same error with a fallback, so
-ECDSA was unaffected. Go 1.25 removed `Inverse` with `nistec_p256.go`, and the stub's only caller is now
-that ECDSA fallback, so the gap no longer reaches a panic:
+ECDSA was unaffected. Go 1.25 removed `Inverse` with `nistec_p256.go`. The stub's only caller is now
+ECDSA's `inverse`, where `c.ordInverse` is `P256OrdInverse` on P-256: it takes the stub's error as "not
+implemented here" and computes the inverse by Fermat's method, so the gap no longer reaches a panic:
 
-<!-- source: GOROOT/src/crypto/elliptic/nistec_p256.go:24-27 -->
+<!-- source: GOROOT/src/crypto/internal/fips140/ecdsa/ecdsa.go:383-399 -->
 ```go
-	inverse, err := nistec.P256OrdInverse(scalar)
-	if err != nil {
-		panic("crypto/elliptic: nistec rejected normalized scalar")
-	}
+func inverse[P Point[P]](c *Curve[P], kInv, k *bigmod.Nat) {
+	if c.ordInverse != nil {
+		kBytes, err := c.ordInverse(k.Bytes(c.N))
+		// Some platforms don't implement ordInverse, and always return an error.
+		if err == nil {
+…
+	// Calculate the inverse of s in GF(N) using Fermat's method
+	// (exponentiation modulo P - 2, per Euler's theorem)
+	kInv.Exp(k, c.nMinus2, c.N)
+}
 ```
 
 A Go `panic` becomes `throw panic(...)` ([Defer / Panic / Recover](#defer--panic--recover)). A literal passed
 straight to `panic` stays inline as a plain C# string instead of becoming a hoisted `ˢ` field. The tuple
-result is unpacked with `var (p, err) = …`. The same panic text survives in `crypto/elliptic`'s
-`ScalarBaseMult`, which shows both:
+result is unpacked with `var (p, err) = …`. The text the removed `Inverse` panicked with survives in
+`crypto/elliptic`'s `ScalarBaseMult`, which shows both:
 
 <!-- source: src/core/crypto/elliptic/nistec.cs:240-243 -->
 ```csharp
@@ -11953,7 +11956,7 @@ internal static @string joinPair(@string s, error err) {
 
 **With `-comments`, doc comments stay above their declarations.** They stay plain `//` lines rather than becoming C# XML documentation comments. That keeps Go's doc links, like `[RuneError]`, reading exactly as in Go. A comment on its own line inside a function also keeps its line, indented with its block:
 
-<!-- source: Go toolchain src/unicode/utf8/utf8.go:345-355 (Go 1.24.13; the Go source of src/core/unicode/utf8/utf8.cs, which the repository does not hold) -->
+<!-- source: GOROOT/src/unicode/utf8/utf8.go:365-375 -->
 ```go
 // EncodeRune writes into p (which must be large enough) the UTF-8 encoding of the rune.
 // If the rune is out of range, it writes the encoding of [RuneError].
@@ -11986,7 +11989,7 @@ Reading the C#: `nint` is Go's `int`, and `slice<byte>` is Go's `[]byte` ([Slice
 
 **A trailing comment stays on its line.** A struct field's trailing comment stays on the field's line:
 
-<!-- source: Go toolchain src/unicode/utf8/utf8.go:92-97 (Go 1.24.13; the Go source of src/core/unicode/utf8/utf8.cs, which the repository does not hold) -->
+<!-- source: GOROOT/src/unicode/utf8/utf8.go:92-97 -->
 ```go
 // acceptRange gives the range of valid values for the second byte in a UTF-8
 // sequence.
@@ -12007,28 +12010,24 @@ partial struct acceptRange {
 
 A [source generator](#source-generators) completes each converted Go type ([Struct Types](#struct-types)). `uint8` is an alias for C# `byte`, declared in each project file ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 
-A statement's trailing comment follows the statement's last C# line, after one space. It does not keep Go's column alignment, because the converted lines have different lengths. Here `first` is a lookup table and `xx` a constant of the same package:
+A statement's trailing comment follows the statement's last C# line, after one space. It does not keep Go's column alignment, because the converted lines have different lengths. Here `x` is a byte read from the package's `first` lookup table and `RuneError` is the package's constant for an invalid encoding. The C# spells out the casts that Go's typed shifts and conversions leave implicit:
 
-<!-- source: Go toolchain src/unicode/utf8/utf8.go:467-470 (Go 1.24.13; the Go source of src/core/unicode/utf8/utf8.cs, which the repository does not hold) -->
+<!-- source: GOROOT/src/unicode/utf8/utf8.go:182-183 -->
 ```go
-		x := first[pi]
-		if x == xx {
-			return false // Illegal starter byte.
-		}
+		mask := rune(x) << 31 >> 31 // Create 0x0000 or 0xFFFF.
+		return rune(p[0])&^mask | RuneError&mask, 1
 ```
-<!-- source: src/core/unicode/utf8/utf8.cs:507-510 -->
+<!-- source: src/core/unicode/utf8/utf8.cs:181-182 -->
 ```csharp
-        var x = first[pi];
-        if (x == xx) {
-            return false; // Illegal starter byte.
-        }
+        var mask = (((rune)x << (int)(31)) >> (int)(31)); // Create 0x0000 or 0xFFFF.
+        return ((rune)((rune)((rune)p[0] & ~mask) | (rune)((rune)RuneError & mask)), 1);
 ```
 
 **Blank lines follow Go, in every conversion.** Where Go leaves a blank line between two statements of a body, the C# has one; where Go has none, the C# adds none. After the converter's own lines at the top of a function, such as the locals for named results, there is exactly one blank line before the Go body. Without `-comments`, a converted `switch` is still followed by a blank line whether Go has one or not.
 
 **With `-comments`, a comment inside a function lands where Go put it.** Go's parser attaches a comment only to a declaration, a struct field or a spec, and never to a statement, so the converter places each of the others itself: after a statement, after the `{` of an `if`, `else` or `for`, on or above a `case` label, above a block's closing `}`, between the elements of a multi-line literal, and between operands where Go breaks the line. Here `d.nd` is the digit count of the number being formatted; the blank line, the comment that opens the group and the one after the `{` are all where Go has them:
 
-<!-- source: Go toolchain src/strconv/ftoa.go:405-413 (Go 1.24.13; the Go source of src/core/strconv/ftoa.cs, which the repository does not hold) -->
+<!-- source: GOROOT/src/internal/strconv/ftoa.go:429-437 -->
 ```go
 		}
 	}
