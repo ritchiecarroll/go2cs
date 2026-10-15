@@ -371,7 +371,7 @@ partial interface EventDetails<ΔT> {
 
 // EventConfig holds the data for constructing a trace event.
 partial struct EventConfig<T>
-    where T : /* EventDetails */ new()
+    where T : /* EventDetails = Metric | Label | Range | StateTransition | Sync | Task | Region | Log | StackSample */ new()
 {
     // Time is the timestamp of the event.
     public ΔTime Time;
@@ -391,7 +391,7 @@ partial struct EventConfig<T>
 
 // MakeEvent creates a new trace event from the given configuration.
 public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
-    where T : /* EventDetails */ new() {
+    where T : /* EventDetails = Metric | Label | Range | StateTransition | Sync | Task | Region | Log | StackSample */ new() {
     ΔEvent e = new();
     error err = default!;
     GoFrame ᒐ = default;
