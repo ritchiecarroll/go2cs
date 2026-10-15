@@ -30,6 +30,7 @@
     <None Include="$(MSBuildThisFileDirectory)archExclusive_test.go" />
     <None Include="$(MSBuildThisFileDirectory)argParse_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayCloneOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayCloneShadow_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsNilCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines_test.go" />
@@ -179,6 +180,7 @@
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)funcLitNamedNumericLiteralArm_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericDefinedMapChan_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericFuncInstantiationArg_test.go" />
@@ -414,6 +416,7 @@
     <None Include="$(MSBuildThisFileDirectory)publicizeSiblingTestSeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeOverFuncAssignedVar_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeOverFuncBinding_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)rangeScalarAssignedVar_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readme.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeBadgeExclusion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks.go" />

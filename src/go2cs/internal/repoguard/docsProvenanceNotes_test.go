@@ -9,6 +9,9 @@
 package repoguard
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"flag"
 	"fmt"
 	"os"
 	"path"
@@ -43,11 +46,16 @@ import (
 // .github/, .claude/) and is not tracked is MISSING and fails. Any other untracked path is outside the
 // repository (a toolchain file, a script on a lane's box) and is not read.
 //
-// WHAT IS CHECKED (provenanceNoteCheck): every cited line exists; if a backtick quote follows the token,
+// WHAT IS CHECKED (provenanceNoteCheck): every cited line exists, and at least one is not blank; if a
+// FINGERPRINT follows the token (`bufio.cs:17#1a2b3c`: the first six hex digits of the SHA-256 of the
+// cited lines, whitespace collapsed and blank lines dropped), the cited lines still hash to it, and when
+// they do not, the lines that now do are named if there is one such place; if a backtick quote follows,
 // the cited lines hold it (whitespace collapsed; a quote shortened with … must hold each piece in order of
-// appearance anywhere in the lines); if no quote follows, at least one cited line is not blank. A note that
-// quotes the code it cites is therefore checked for meaning, and a note that does not is checked only for
-// existence. Quote what a note cites.
+// appearance anywhere in the lines). A token with neither fails: it could only be checked for existence,
+// which is how a note's lines drifted silently. Quote what a note cites, or fingerprint it:
+// `go test ./internal/repoguard -run 'TestDocsProvenanceNotesResolve$' -args -note-fingerprints` adds the
+// missing fingerprints from the lines cited now. It never rewrites one, so first make sure each new or
+// unfingerprinted token cites the lines it describes.
 //
 // WHAT IS NOT READ: provenanceNoteRecordPages, pages whose notes are dated evidence of a moment rather
 // than descriptions of the tree; and the rows of provenanceNoteKnownStale, notes that describe emission
@@ -63,10 +71,21 @@ var provenanceNoteRecordPages = map[string]string{
 	"docs/GoCorpusMigration.md": "the Go hop runbook: its notes are dated lesson provenance, citing the tree, the ledger and lane scripts at the commit or date each lesson names",
 }
 
-// provenanceNoteKnownStale names, by page and resolved token, the notes that describe emission the
-// converter no longer writes. Each is excused while it fails; the visible prose beside it is the owed fix.
-// Empty: the three it was born with (the slice-bound examples) were fixed with their prose.
-var provenanceNoteKnownStale = map[string]string{}
+// provenanceNoteKnownStale names, by page and resolved token, the notes that no longer describe the tree.
+// Each is excused while it fails; the fix is owed where the reason says. The three it was born with (the
+// slice-bound examples) were fixed with their prose.
+//
+// The five PLAN-hop-go126.md rows are one dated note ("Instrument states read at master 20279db5f6 on
+// 2026-10-11"), fingerprinted from the lines it was written against (16e02568d5); the instruments have
+// changed since, so the lines at those numbers now say something else. The plan's owner re-cites them at
+// the lines that now hold each instrument state, or retires the note.
+var provenanceNoteKnownStale = map[string]string{
+	"docs/PLAN-hop-go126.md: src/_roster.ps1:475":                    "dated instrument note; the plan's owner re-cites it",
+	"docs/PLAN-hop-go126.md: src/_roster.ps1:587":                    "dated instrument note; the plan's owner re-cites it",
+	"docs/PLAN-hop-go126.md: src/run-h10-recon.ps1:841-843":          "dated instrument note; the plan's owner re-cites it",
+	"docs/PLAN-hop-go126.md: docs/phase4/hopA-inputs/shardmap.py:94": "dated instrument note; the plan's owner re-cites it",
+	"docs/PLAN-hop-go126.md: src/check-roster-format.ps1:906":        "dated instrument note; the plan's owner re-cites it",
+}
 
 var (
 	provenanceNoteToken = regexp.MustCompile(
@@ -77,7 +96,14 @@ var (
 	provenanceNoteUnder = regexp.MustCompile(`(?:under|in) ((?:src|docs)/[\w./\-ж]+)`)
 	provenanceNoteRoot  = regexp.MustCompile(`^(?:src|docs|\.github|\.claude)/`)
 	provenanceNoteElide = regexp.MustCompile(`…|\.\.\.`)
+	provenanceNoteFP    = regexp.MustCompile(`^#([0-9a-f]{6})\b`)
 )
+
+// noteFingerprints asks TestDocsProvenanceNotesResolve to add each missing fingerprint before it checks.
+var noteFingerprints = flag.Bool("note-fingerprints", false, "add a fingerprint to every unquoted, unfingerprinted provenance-note token, from the lines it cites now")
+
+// provenanceNoteHow is how a token that can only be checked for existence is fixed.
+const provenanceNoteHow = "quote what it cites, or fingerprint it (go test ./internal/repoguard -run 'TestDocsProvenanceNotesResolve$' -args -note-fingerprints, once it cites the right lines)"
 
 // noteTree is what a note is resolved against: the tracked paths and a way to read one.
 type noteTree struct {
@@ -100,6 +126,7 @@ type noteToken struct {
 	line   int
 	text   string
 	ranges [][2]int
+	fp     string
 	quote  string
 	kind   string
 	file   string
@@ -295,7 +322,13 @@ func provenanceNoteTokens(text string, tree noteTree) []noteToken {
 				prev = t.file
 			}
 
-			if q := provenanceNoteQuote.FindStringSubmatch(body[m[1]:]); q != nil {
+			rest := body[m[1]:]
+
+			if f := provenanceNoteFP.FindStringSubmatch(rest); f != nil {
+				t.fp, rest = f[1], rest[len(f[0]):]
+			}
+
+			if q := provenanceNoteQuote.FindStringSubmatch(rest); q != nil {
 				t.quote = q[1]
 			}
 
@@ -328,6 +361,23 @@ func provenanceNoteCheck(t noteToken, tree noteTree) string {
 		span = append(span, lines[r[0]-1:r[1]]...)
 	}
 
+	blank := true
+
+	for _, s := range span {
+		blank = blank && strings.TrimSpace(s) == ""
+	}
+
+	if blank {
+		return "every cited line is blank"
+	}
+
+	if t.fp != "" {
+		if got := provenanceNoteFingerprintOf(span); got != t.fp {
+			return fmt.Sprintf("the cited lines changed since the note was written (#%s, now #%s)%s; re-cite it at the lines that hold what it describes",
+				t.fp, got, provenanceNoteRelocated(lines, t))
+		}
+	}
+
 	if t.quote != "" {
 		joined := strings.Join(strings.Fields(strings.Join(span, " ")), " ")
 
@@ -336,17 +386,183 @@ func provenanceNoteCheck(t noteToken, tree noteTree) string {
 				return fmt.Sprintf("the cited lines do not hold the quoted `%s`", t.quote)
 			}
 		}
-
-		return ""
 	}
 
+	if t.fp == "" && t.quote == "" {
+		return "neither quotes nor fingerprints what it cites, so only its existence could be checked: " + provenanceNoteHow
+	}
+
+	return ""
+}
+
+// provenanceNoteFingerprintOf is the fingerprint of cited lines: the first six hex digits of the SHA-256
+// of the non-blank lines, each with its whitespace collapsed, one per line. A blank line added or dropped
+// inside the stretch leaves it unchanged; any other edit, or the stretch moving, changes it.
+func provenanceNoteFingerprintOf(span []string) string {
+	var b strings.Builder
+
 	for _, s := range span {
-		if strings.TrimSpace(s) != "" {
-			return ""
+		if f := strings.Fields(s); len(f) > 0 {
+			b.WriteString(strings.Join(f, " "))
+			b.WriteByte('\n')
 		}
 	}
 
-	return "every cited line is blank"
+	sum := sha256.Sum256([]byte(b.String()))
+
+	return hex.EncodeToString(sum[:])[:6]
+}
+
+// provenanceNoteRelocated names where a one-range token's fingerprinted lines now are, when they are in
+// exactly one place in the file, and is empty otherwise.
+func provenanceNoteRelocated(lines []string, t noteToken) string {
+	if len(t.ranges) != 1 {
+		return ""
+	}
+
+	n := t.ranges[0][1] - t.ranges[0][0] + 1
+	var at []int
+
+	for s := 0; s+n <= len(lines); s++ {
+		if strings.TrimSpace(lines[s]) != "" && provenanceNoteFingerprintOf(lines[s:s+n]) == t.fp {
+			at = append(at, s+1)
+		}
+	}
+
+	switch {
+	case len(at) != 1:
+		return ""
+	case n == 1:
+		return fmt.Sprintf("; those lines now read at :%d", at[0])
+	}
+
+	return fmt.Sprintf("; those lines now read at :%d-%d", at[0], at[0]+n-1)
+}
+
+// provenanceNoteRangesGoOn reports whether the text after a match continues its ranges (`-12`, `,7`,
+// `, 7`), so the match is a prefix of a longer token rather than the token itself.
+var provenanceNoteRangesGoOnRe = regexp.MustCompile(`^(?:\d|-\d|,\s?\d)`)
+
+func provenanceNoteRangesGoOn(after string) bool {
+	return provenanceNoteRangesGoOnRe.MatchString(after)
+}
+
+// provenanceNoteAddFingerprints writes a fingerprint after every unquoted, unfingerprinted token of the
+// living pages whose cited lines exist and are not all blank, and returns how many it wrote. It never
+// changes a fingerprint already written.
+func provenanceNoteAddFingerprints(t *testing.T, tree noteTree) int {
+	t.Helper()
+	root := repoRootFromPackageDir(t)
+	added := 0
+
+	for rel, text := range livingMarkdownPages(t) {
+		if _, record := provenanceNoteRecordPages[rel]; record {
+			continue
+		}
+
+		eol := "\n"
+
+		if strings.Contains(text, "\r\n") {
+			eol = "\r\n"
+		}
+
+		lines := strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
+		cursor := map[int]int{}
+		type insert struct{ line, col int }
+		var inserts []insert
+		fps := map[insert]string{}
+
+		for _, tk := range provenanceNoteTokens(text, tree) {
+			switch tk.kind {
+			case "rooted", "context", "stem", "under", "suffix", "continues":
+			default:
+				continue
+			}
+
+			// The token's own occurrence on its line: the next one, in token order, whose ranges end there.
+			l := tk.line - 1
+			col := -1
+
+			for from := cursor[l]; ; {
+				k := strings.Index(lines[l][from:], tk.text)
+
+				if k < 0 {
+					break
+				}
+
+				end := from + k + len(tk.text)
+
+				if !provenanceNoteRangesGoOn(lines[l][end:]) {
+					col = end
+					break
+				}
+
+				from = end
+			}
+
+			if col < 0 {
+				t.Errorf("%s:%d: cannot place a fingerprint after `%s`", rel, tk.line, tk.text)
+				continue
+			}
+
+			cursor[l] = col
+
+			if tk.fp != "" || tk.quote != "" {
+				continue
+			}
+
+			file, ok := tree.read(tk.file)
+
+			if !ok {
+				continue
+			}
+
+			var span []string
+			valid := true
+
+			for _, r := range tk.ranges {
+				if r[0] < 1 || r[1] < r[0] || r[1] > len(file) {
+					valid = false
+					break
+				}
+
+				span = append(span, file[r[0]-1:r[1]]...)
+			}
+
+			if !valid || provenanceNoteFingerprintOf(span) == provenanceNoteFingerprintOf(nil) {
+				continue // the check names it
+			}
+
+			at := insert{l, col}
+			inserts = append(inserts, at)
+			fps[at] = provenanceNoteFingerprintOf(span)
+		}
+
+		if len(inserts) == 0 {
+			continue
+		}
+
+		// Right to left, so each column is still where it was read.
+		sort.Slice(inserts, func(i, j int) bool {
+			if inserts[i].line != inserts[j].line {
+				return inserts[i].line > inserts[j].line
+			}
+
+			return inserts[i].col > inserts[j].col
+		})
+
+		for _, at := range inserts {
+			lines[at.line] = lines[at.line][:at.col] + "#" + fps[at] + lines[at.line][at.col:]
+		}
+
+		if err := os.WriteFile(filepath.Join(root, filepath.FromSlash(rel)), []byte(strings.Join(lines, eol)), 0o644); err != nil {
+			t.Fatalf("writing %s: %v", rel, err)
+		}
+
+		added += len(inserts)
+	}
+
+	return added
 }
 
 type noteProblem struct {
@@ -416,6 +632,9 @@ func TestProvenanceNoteRuleReadsEachShape(t *testing.T) {
 		"src/go2cs/main.go":                     "package main\n\n// one\n// two",
 	})
 
+	// fp is a token's fingerprint over the given cited lines.
+	fp := func(lines ...string) string { return "#" + provenanceNoteFingerprintOf(lines) }
+
 	cases := []struct {
 		name    string
 		page    string
@@ -427,15 +646,20 @@ func TestProvenanceNoteRuleReadsEachShape(t *testing.T) {
 		{"a quote shortened with an ellipsis", "<!-- src/tests/Behavioral/A/main.cs.target:5-6 `internal static … nint x` -->", 1, nil},
 		{"a line-only token on a blank line", "<!-- src/tests/Behavioral/A/main.cs.target:2 -->", 1, []string{"blank"}},
 		{"a token past the end of its file", "<!-- src/tests/Behavioral/A/main.go:9 -->", 1, []string{"5-line file"}},
-		{"a comma list and a continuation", "<!-- src/go2cs/main.go:1,3 and :4 -->", 2, nil},
-		{"a continuation past the end", "<!-- src/go2cs/main.go:1; :7 -->", 2, []string{"4-line file"}},
-		{"the previous token's directory", "<!-- src/tests/Behavioral/A/main.go:4 -> main.cs.target:6 `nint x = 1;` -->", 2, nil},
-		{"the previous token's stem", "<!-- src/tests/Behavioral/C/C.go:3 -> .cs.target:3 `x` -->", 2, nil},
-		{"a declared directory", "<!-- in src/tests/Behavioral/A: main.cs.target:6 -->", 1, nil},
-		{"a unique suffix", "<!-- C/C.cs.target:3 -->", 1, nil},
+		{"a comma list and a continuation", "<!-- src/go2cs/main.go:1,3" + fp("package main", "// one") + " and :4" + fp("// two") + " -->", 2, nil},
+		{"a continuation past the end", "<!-- src/go2cs/main.go:1" + fp("package main") + "; :7 -->", 2, []string{"4-line file"}},
+		{"the previous token's directory", "<!-- src/tests/Behavioral/A/main.go:4" + fp("\tx := 1") + " -> main.cs.target:6 `nint x = 1;` -->", 2, nil},
+		{"the previous token's stem", "<!-- src/tests/Behavioral/C/C.go:3" + fp("func main() {}") + " -> .cs.target:3 `x` -->", 2, nil},
+		{"a declared directory", "<!-- in src/tests/Behavioral/A: main.cs.target:6" + fp("    nint x = 1;") + " -->", 1, nil},
+		{"a unique suffix", "<!-- C/C.cs.target:3" + fp("x") + " -->", 1, nil},
+		{"an unquoted token with no fingerprint", "<!-- C/C.cs.target:3 -->", 1, []string{"neither quotes nor fingerprints"}},
+		{"a fingerprint ignores whitespace", "<!-- C/C.cs.target:3" + fp("  x  ") + " -->", 1, nil},
+		{"a fingerprint whose lines moved", "<!-- src/tests/Behavioral/A/main.cs.target:5" + fp("    nint x = 1;") + " -->", 1, []string{"changed since the note was written"}},
+		{"a fingerprint and a quote", "<!-- src/tests/Behavioral/A/main.cs.target:6" + fp("nint x = 1;") + " (`nint x = 1;`) -->", 1, nil},
+		{"a fingerprint that holds but a quote that does not", "<!-- src/tests/Behavioral/A/main.cs.target:6" + fp("nint x = 1;") + " `int y` -->", 1, []string{"do not hold"}},
 		{"an ambiguous name", "<!-- main.go:1 -->", 0, []string{"names 3 tracked files"}},
 		{"a moved rooted path", "<!-- src/tests/Behavioral/Gone/main.go:1 -->", 0, []string{"not a tracked file"}},
-		{"a docs-relative path", "<!-- ../src/go2cs/main.go:3 -->", 1, nil},
+		{"a docs-relative path", "<!-- ../src/go2cs/main.go:3" + fp("// one") + " -->", 1, nil},
 		{"a toolchain path is not read", "<!-- GOROOT/src/strconv/ftoa.go:9999 -->", 0, nil},
 		{"a file outside the repository is not read", "<!-- lane R's setup-convert.sh:26-28 -->", 0, nil},
 		{"a sample citation is not a note", "<!-- source: src/tests/Behavioral/A/main.go:99 -->", 0, nil},
@@ -461,6 +685,11 @@ func TestProvenanceNoteRuleReadsEachShape(t *testing.T) {
 	if _, p := provenanceNoteProblems("p.md", "x\n\n<!-- first\nsecond src/tests/Behavioral/A/main.go:99 -->", tree); len(p) != 1 || p[0].line != 4 {
 		t.Errorf("a problem on a note's second line: got %v, want one at line 4", p)
 	}
+
+	// A moved fingerprint names where its lines are now, when they are in one place.
+	if _, p := provenanceNoteProblems("p.md", "<!-- src/tests/Behavioral/A/main.cs.target:5"+fp("    nint x = 1;")+" -->", tree); len(p) != 1 || !strings.Contains(p[0].what, "now read at :6") {
+		t.Errorf("a moved fingerprint: got %v, want it relocated to :6", p)
+	}
 }
 
 // provenanceNoteRealTree is the repository, read from disk.
@@ -482,6 +711,11 @@ func provenanceNoteRealTree(t *testing.T) noteTree {
 // TestDocsProvenanceNotesResolve is the guard over the living pages.
 func TestDocsProvenanceNotesResolve(t *testing.T) {
 	tree := provenanceNoteRealTree(t)
+
+	if *noteFingerprints {
+		t.Logf("-note-fingerprints: added %d fingerprint(s) to the living pages", provenanceNoteAddFingerprints(t, tree))
+	}
+
 	var problems []string
 	excused := map[string]bool{}
 	checked := 0
@@ -536,9 +770,10 @@ func TestProvenanceNoteGuardFiresOnAPlantedStaleNote(t *testing.T) {
 	}
 
 	line := strings.Count(text[:strings.Index(text, real)], "\n") + 1
+	stale := provenanceNoteStaleOn(rel)
 
-	if _, p := provenanceNoteProblems(rel, text, tree); len(p) != len(provenanceNoteKnownStale) {
-		t.Fatalf("the unplanted page has %d problem(s), want only the %d known-stale rows: %v", len(p), len(provenanceNoteKnownStale), p)
+	if _, p := provenanceNoteProblems(rel, text, tree); len(p) != stale {
+		t.Fatalf("the unplanted page has %d problem(s), want only its %d known-stale row(s): %v", len(p), stale, p)
 	}
 
 	planted := strings.Replace(text, real, strings.Replace(real, ":91 ", ":92 ", 1), 1)
@@ -549,7 +784,58 @@ func TestProvenanceNoteGuardFiresOnAPlantedStaleNote(t *testing.T) {
 		named = named || x.line == line && strings.Contains(x.what, "do not hold")
 	}
 
-	if !named || len(p) != len(provenanceNoteKnownStale)+1 {
+	if !named || len(p) != stale+1 {
 		t.Errorf("the note moved to line 92 was not named at %s:%d: %v", rel, line, p)
 	}
+}
+
+// TestProvenanceNoteGuardFiresOnAMovedFingerprint is the same control for an unquoted note: a real
+// fingerprinted token moved two lines, the shape that passed the existence check before fingerprints.
+func TestProvenanceNoteGuardFiresOnAMovedFingerprint(t *testing.T) {
+	tree := provenanceNoteRealTree(t)
+	rel := "docs/ConversionStrategies.md"
+	text := livingMarkdownPages(t)[rel]
+	real := "src/core/bufio/bufio.cs:17#3ddbb0"
+
+	if strings.Count(text, real) != 1 {
+		t.Fatalf("the control's token is not on %s once; re-point the control at another fingerprinted token", rel)
+	}
+
+	line := strings.Count(text[:strings.Index(text, real)], "\n") + 1
+	planted := strings.Replace(text, real, "src/core/bufio/bufio.cs:19#3ddbb0", 1)
+	_, p := provenanceNoteProblems(rel, planted, tree)
+	named := false
+
+	for _, x := range p {
+		named = named || x.line == line && strings.Contains(x.what, "changed since the note was written") && strings.Contains(x.what, "now read at :17")
+	}
+
+	if !named || len(p) != provenanceNoteStaleOn(rel)+1 {
+		t.Errorf("the token moved to line 19 was not named, and relocated to :17, at %s:%d: %v", rel, line, p)
+	}
+
+	// And with its fingerprint removed, the token is named for carrying neither a quote nor a fingerprint.
+	_, p = provenanceNoteProblems(rel, strings.Replace(text, real, "src/core/bufio/bufio.cs:17", 1), tree)
+	named = false
+
+	for _, x := range p {
+		named = named || x.line == line && strings.Contains(x.what, "neither quotes nor fingerprints")
+	}
+
+	if !named {
+		t.Errorf("the token with its fingerprint removed was not named at %s:%d: %v", rel, line, p)
+	}
+}
+
+// provenanceNoteStaleOn counts the known-stale rows on one page.
+func provenanceNoteStaleOn(rel string) int {
+	n := 0
+
+	for key := range provenanceNoteKnownStale {
+		if strings.HasPrefix(key, rel+": ") {
+			n++
+		}
+	}
+
+	return n
 }
