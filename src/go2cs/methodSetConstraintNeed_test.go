@@ -76,6 +76,12 @@ func Wrap[E error](e E) error { return e }
 // CONTROL: the parameter instantiates a generic that needs it.
 func DescribeTwice[E error](e E) string { return Describe(e) + Describe(e) }
 
+// CONTROL: the SIGNATURE names a generic type constrained on the parameter (ecdsa's *Curve[P]); the body
+// never touches E, but C# checks Box<E>'s clause wherever Box<E> is named.
+type Box[E error] struct{ e E }
+
+func Peek[E error](b *Box[E]) bool { return b != nil }
+
 func main() {
 	var err error = &MyErr{7}
 	m, ok := AsType[*MyErr](err)
@@ -125,7 +131,7 @@ func main() {
 		}
 	}
 
-	for _, function := range []string{"Describe", "Wrap", "DescribeTwice"} {
+	for _, function := range []string{"Describe", "Wrap", "DescribeTwice", "Peek"} {
 		if got := clause(function); got != "where E : error" {
 			t.Errorf("CONTROL: %s<E> uses E as an error and must keep `where E : error`, got %q", function, got)
 		}

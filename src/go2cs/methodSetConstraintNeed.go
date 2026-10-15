@@ -116,6 +116,24 @@ func (v *Visitor) methodSetConstraintNeededSeen(fn *types.Func, index int, seen 
 
 	needed := false
 
+	// The SIGNATURE first: a parameter or result naming a generic TYPE instantiated at the parameter
+	// (crypto/internal/fips140/ecdsa's `c *Curve[P]`, gc/internal/gen's `Array[T]` result) puts that
+	// type's own clause on the signature itself -- C# checks `Curve<P>`'s `where P : Point<P>` wherever
+	// `Curve<P>` is named, so dropping the function's clause there is CS0314.
+	ast.Inspect(decl.Type, func(n ast.Node) bool {
+		if ident, ok := n.(*ast.Ident); ok && !needed {
+			if instance, ok := v.info.Instances[ident]; ok && v.instanceNeedsMethodSet(ident, instance, typeParam, seen) {
+				needed = true
+			}
+		}
+
+		return !needed
+	})
+
+	if needed {
+		return true
+	}
+
 	ast.Inspect(decl.Body, func(n ast.Node) bool {
 		if needed || n == nil {
 			return false
