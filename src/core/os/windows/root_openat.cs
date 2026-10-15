@@ -145,7 +145,7 @@ internal static error rootMkdirAll(ж<Root> Ꮡr, @string fullname, FileMode per
     // openDirFunc opens all but the last path component.
     // The usual default openDirFunc just opens directories with O_DIRECTORY.
     // We replace it here with one that creates missing directories along the way.
-    var openDirFunc = (syscallꓸHandle parent, @string name) => {
+    var openDirFunc = (syscallꓸHandle, error) (syscallꓸHandle parent, @string name) => {
         foreach (var @try in range(2)) {
             var (fd, errΔ1) = rootOpenDir(parent, name);
             switch (errΔ1.type()) {
