@@ -17,9 +17,7 @@ partial class net_package {
 // provided by runtime
 //
 //go:linkname runtime_rand runtime.rand
-/*linkname*/ internal static partial uint64 runtime_rand() {
-    return go.runtime_package.rand();
-}
+internal static partial uint64 runtime_rand();
 
 internal static nint randInt() {
     return (nint)(((nuint)runtime_rand() >> (int)(1))); // clear sign bit
