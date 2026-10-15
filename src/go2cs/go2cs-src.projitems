@@ -204,6 +204,7 @@
     <None Include="$(MSBuildThisFileDirectory)importInit_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)implicitConvValueType_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)implicitRuntimeReference_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importInitSection.go" />
     <None Include="$(MSBuildThisFileDirectory)importOperations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importSegmentShadow_test.go" />
