@@ -314,6 +314,8 @@
     <None Include="$(MSBuildThisFileDirectory)memberMarkGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)memberMarkers.go" />
     <None Include="$(MSBuildThisFileDirectory)methodExpressionWrapper_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)methodSetConstraintNeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)methodSetConstraintNeed.go" />
     <None Include="$(MSBuildThisFileDirectory)mixedKeyedComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleAncestryEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleCacheLock_integration_test.go" />
