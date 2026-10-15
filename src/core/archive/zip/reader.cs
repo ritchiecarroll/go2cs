@@ -1112,7 +1112,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
         if (err != default!){
             return (default!, err);
         } else 
-        if (s.Name() == "."u8 || !fs.ValidPath(s.Name())) {
+        if (((fs.FileInfo)(s)).Name() == "."u8 || !fs.ValidPath(((fs.FileInfo)(s)).Name())) {
             return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(
                 Op: "readdir"u8,
                 Path: (~d.e).name,
