@@ -1231,7 +1231,8 @@ public static uintptr UnsafeAddr(this ΔValue v) {
 // consumer that dereferences it.
 //
 // The classification comes from GoReflect.GoIsDirectIface, the SAME authority abi.synthType stamps
-// KindDirectIface from, so the descriptor bit and this word cannot disagree about one type.
+// TFlagDirectIface from (Go 1.26 moved the bit from Kind_ to TFlag and made the rule a size test,
+// Size_ == PtrBytes == PtrSize), so the descriptor bit and this word cannot disagree about one type.
 public static array<uintptr> InterfaceData(this ΔValue v) {
     v.mustBe(ΔInterface);
     var data = new array<uintptr>(2);
@@ -3772,10 +3773,10 @@ public static ΔType StructOf(slice<StructField> fields) {
                     throw panic("reflect: embedded type with methods not implemented if type is not first field");
                 }
                 // For a POINTER embed Go refuses any second field; for a non-pointer it refuses only
-                // when the type is pointer-shaped (`Kind_&KindDirectIface`), because an interface
-                // then holds a pointer to the struct rather than a copy of it. SettablePointer is
-                // exactly that case and its method set is EMPTY, which is why the outer gate cannot
-                // be a method-count test.
+                // when the type is pointer-shaped (`ft.IsDirectIface()`, a TFlag bit since Go 1.26),
+                // because an interface then holds a pointer to the struct rather than a copy of it.
+                // SettablePointer is exactly that case and its method set is EMPTY, which is why the
+                // outer gate cannot be a method-count test.
                 if (n > 1 && (field.Type.Kind() == ΔPointer || GoReflect.GoIsDirectIface(ft))) {
                     throw panic(field.Type.Kind() == ΔPointer
                         ? "reflect: embedded type with methods not implemented if there is more than one field"

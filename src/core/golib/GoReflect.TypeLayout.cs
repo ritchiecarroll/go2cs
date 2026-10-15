@@ -219,12 +219,14 @@ public static partial class GoReflect
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Go's rule is mechanical: a pointer, chan, map, func or unsafe.Pointer is pointer-shaped; an
-    /// array is pointer-shaped only when it has EXACTLY one element and that element is itself
-    /// pointer-shaped; a struct only when it has EXACTLY one field, likewise. Everything else is not.
-    /// The one-element condition is the whole distinction reflect's own TestArrayOfDirectIface and
-    /// TestStructOfDirectIface turn on: <c>[1]*byte</c> is pointer-shaped and <c>[0]*byte</c> is not,
-    /// however pointer-shaped the element type is.
+    /// Go 1.26's rule is a size test: a type is pointer-shaped when its size is one pointer word and
+    /// that word holds a pointer, <c>Size_ == PtrBytes == PtrSize</c> (cmd/compile types.IsDirectIface;
+    /// reflect's StructOf and ArrayOf stamp <c>TFlagDirectIface</c> by the same test). Through Go 1.25 the
+    /// rule was structural: a struct needed EXACTLY one field and an array EXACTLY one element. The two
+    /// agree except on a struct whose other fields are all zero-size, such as sync/atomic's
+    /// <c>Pointer[T]</c> (<c>_ [0]*T; _ noCopy; v unsafe.Pointer</c>), which 1.26 calls pointer-shaped.
+    /// <c>[1]*byte</c> is pointer-shaped and <c>[0]*byte</c> is not under both, which is the distinction
+    /// reflect's own TestArrayOfDirectIface and TestStructOfDirectIface turn on.
     /// </para>
     /// <para>
     /// This is a CLASSIFICATION, not a memory-layout claim. It answers what SHAPE a Go type has; it
@@ -257,36 +259,10 @@ public static partial class GoReflect
         if (depth > MaxLayoutDepth)
             return false;
 
-        switch (KindOf(t))
-        {
-            case Pointer or UnsafePointer or Map or Chan or Func:
-                return true;
-
-            case Array:
-            {
-                // Exactly one element, and that element pointer-shaped in turn. Unknown dims
-                // answer false — see the remarks: the conservative direction.
-                if (arrayDims is not { Length: > 0 } || arrayDims[0] != 1)
-                    return false;
-
-                Type? elem = ElementType(t);
-
-                if (elem is null)
-                    return false;
-
-                return goIsDirectIface(elem, arrayDims.Length > 1 ? arrayDims[1..] : null, depth + 1);
-            }
-
-            case Struct:
-            {
-                GoFieldInfo[] fields = GoFields(t);
-
-                return fields.Length == 1 && goIsDirectIface(fields[0].Type, fields[0].ArrayDims, depth + 1);
-            }
-
-            default:
-                return false;
-        }
+        // Size_ == PtrBytes == PtrSize. An underivable size or pointer prefix (unknown array dims)
+        // answers false — see the remarks: the conservative direction.
+        return tryGoSizeOf(t, arrayDims, depth, out nuint size) && size == (nuint)GoWordSize &&
+               goPtrBytesOf(t, arrayDims, depth) == GoWordSize;
     }
 
     /// <summary>
@@ -294,9 +270,9 @@ public static partial class GoReflect
     /// whether the single pointer the value reduces to is nil.
     /// </summary>
     /// <remarks>
-    /// A pointer-shaped type reduces, by the same one-element array / one-field struct rule
-    /// <see cref="GoIsDirectIface"/> walks, to exactly ONE pointer — which is why an interface can
-    /// hold it in the data word at all. This answers that pointer's nilness, so a caller
+    /// A pointer-shaped type reduces to exactly ONE pointer — which is why an interface can hold it in
+    /// the data word at all: an array of it has one element, and a struct has one field of nonzero size,
+    /// every other field being zero-size (the Go 1.26 rule <see cref="GoIsDirectIface"/> states). This answers that pointer's nilness, so a caller
     /// reconstructing an interface data word can distinguish the zero value (a nil pointer, word 0)
     /// from a live one. It lives beside the predicate because the two share the reduction; it
     /// answers a VALUE question where the predicate answers a TYPE one.
@@ -347,10 +323,22 @@ public static partial class GoReflect
 
             case Struct:
             {
-                GoFieldInfo[] fields = GoFields(t);
+                // The one field of nonzero size carries the word; zero-size fields beside it hold nothing.
+                GoFieldInfo? word = null;
 
-                return fields.Length != 1 ||
-                       goDirectIfaceWordIsNil(fields[0].Read(value), fields[0].Type, fields[0].ArrayDims, depth + 1);
+                foreach (GoFieldInfo field in GoFields(t))
+                {
+                    if (tryGoSizeOf(field.Type, field.ArrayDims, depth + 1, out nuint fieldSize) && fieldSize == 0)
+                        continue;
+
+                    if (word is not null)
+                        return true;
+
+                    word = field;
+                }
+
+                return word is not { } carrier ||
+                       goDirectIfaceWordIsNil(carrier.Read(value), carrier.Type, carrier.ArrayDims, depth + 1);
             }
 
             default:
