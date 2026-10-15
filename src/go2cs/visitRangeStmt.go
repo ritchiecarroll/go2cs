@@ -482,6 +482,28 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		scalarKeyExpr = v.getTempVarName("_")
 	}
 
+	// The scalar foreach positions (chan and int ranges) take the same iterate-a-temp escape for a
+	// variable the body WRITES (`for i := range n { i++ }`): a foreach iteration variable is
+	// read-only (CS1656). Returns the name the foreach declares. No trailing blank line follows the
+	// copy, which is not in the Go source.
+	scalarIterExpr := func() string {
+		if !keyNeedsCopy || keyHeapDecl != "" {
+			return scalarKeyExpr
+		}
+
+		iterExpr := v.getTempVarName("i")
+		decl := "var "
+
+		if !v.options.preferVarDecl {
+			keyType = v.getCSharpTypeName(v.getExprType(rangeStmt.Key)) + " "
+			decl = ""
+		}
+
+		context.innerPrefix = fmt.Sprintf("%s%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), decl, keyExpr, iterExpr)
+
+		return iterExpr
+	}
+
 	if isStr {
 		if untypedStr {
 			rangeExpr = fmt.Sprintf("(@string)%s", rangeExpr)
@@ -535,7 +557,8 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			keyType = "var "
 		}
 
-		v.writeOutput("foreach (%s%s in %s%s)", keyType, scalarKeyExpr, rangeExpr, ptrDeref)
+		iterExpr := scalarIterExpr()
+		v.writeOutput("foreach (%s%s in %s%s)", keyType, iterExpr, rangeExpr, ptrDeref)
 	} else if isInt {
 		// A non-`int` integer width binds golib's GENERIC range<T>, since Go gives the iteration
 		// variable the range operand's OWN type. T is named EXPLICITLY rather than inferred: Go's
@@ -585,7 +608,8 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			keyType = "var "
 		}
 
-		v.writeOutput("foreach (%s%s in range%s(%s%s))", keyType, scalarKeyExpr, rangeTypeArg, rangeExpr, ptrDeref)
+		iterExpr := scalarIterExpr()
+		v.writeOutput("foreach (%s%s in range%s(%s%s))", keyType, iterExpr, rangeTypeArg, rangeExpr, ptrDeref)
 	} else if yieldFunc > -1 {
 		// A NAMED func type renders as a C# DELEGATE; golib's range() overloads take
 		// Action<Func<…>>, and a distinct delegate type has no conversion — but its method
