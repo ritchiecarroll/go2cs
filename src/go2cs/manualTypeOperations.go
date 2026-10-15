@@ -416,16 +416,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"semacquire1": goosAny,
 		"semrelease1": goosAny,
 		"SemNwait":    goosAny,
-		// export_windows_test.go's two exports, hand-owned for windows alone in
+		// export_windows_test.go's export, hand-owned for windows alone in
 		// runtime/export_windows_impl_test.cs (a platform-named test companion, joined only to the
-		// windows test project). NewContextStub builds a machine CONTEXT from Go's own caller PC, SP
-		// and FP for the SEH tests (runtime-seh_windows_test.go) to hand to RtlLookupFunctionEntry
-		// and RtlVirtualUnwind; there is no Go machine code, so no such PC exists and the export
-		// REFUSES BY NAME where the auto body reached sys.GetCallerPC's throwing stub. That is the
-		// representational point, not GetCallerPC itself, whose other callers are ruled separately.
-		// NumberOfProcessors is GetSystemInfo's processor count, which the auto body read through
-		// stdcall1 -> asmcgocall's stub; the hand-own asks kernel32 directly.
-		"NewContextStub":     goosWindows,
+		// windows test project). NumberOfProcessors is GetSystemInfo's processor count, which the auto
+		// body read through stdcall1 -> asmcgocall's stub; the hand-own asks kernel32 directly.
+		// NewContextStub is retired -- 2026-10-15, the Go 1.26 hop's H5: go1.26.9 dropped it (and type
+		// ContextStub) from export_windows_test.go, so the key displaced nothing, and
+		// TestManualConversionRegistrationsDisplaceSomething named it after runtime's -tests regen.
 		"NumberOfProcessors": goosWindows,
 		// The mutex/note key-slot protocol. Go has TWO flavors of it and selects one per GOOS:
 		// lock_sema.go (windows, darwin, plan9, aix …) smuggles an *m address through the uintptr
