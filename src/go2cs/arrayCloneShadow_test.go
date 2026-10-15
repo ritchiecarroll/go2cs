@@ -27,6 +27,8 @@ import (
 // a Go Clone keeps `.Clone()`: the control.
 
 func TestNamedArrayWithGoCloneCopiesThroughValueCloneMethod(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 
