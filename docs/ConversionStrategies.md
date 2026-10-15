@@ -12179,7 +12179,7 @@ library always type-checks.
 `undefinedFunc` and `UndefinedType`. The full test package has a few more unresolved names, such as
 `fmt.NoSuchFunction`. The `healthy` function uses nothing missing.
 
-<!-- source: src/go2cs/untypedPackageConversion_test.go:74-107 -->
+<!-- source: src/go2cs/untypedPackageConversion_test.go:75-108 -->
 ```go
 func addressTaken() {
 	x := 1

@@ -55,6 +55,8 @@ func convertAdoptionModule(t *testing.T, appDir string, outRoot string) {
 }
 
 func TestPackageInfoIsNotAdoptedAcrossAPackageBoundary(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	// The conversions leave the per-package globals on this module's last package, and later tests read
 	// them (goPackageImportPathFor reads currentPackagePath): measured, TestInternalTestPackageInfoSeedAnchorsBridgeClass
 	// then stamped an ImportPath. Put back what this test changes.
@@ -119,6 +121,8 @@ func TestPackageInfoIsNotAdoptedAcrossAPackageBoundary(t *testing.T) {
 // crypto/x509/internal/macos's `package macOS` to `package macos`, and adopting the persisted file kept the
 // dead class macOS_package beside the macos_package the sources now declare.
 func TestPackageInfoIsNotAdoptedAcrossAPackageRename(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	savedPath, savedName, savedNamespace := currentPackagePath, packageName, packageNamespace
 	t.Cleanup(func() { currentPackagePath, packageName, packageNamespace = savedPath, savedName, savedNamespace })
 

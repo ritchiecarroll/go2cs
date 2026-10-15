@@ -26,6 +26,8 @@ import (
 // package is named for its parent, and a second package imports it.
 
 func TestDottedDigitPathSegmentIsOneNamespaceLevel(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 
