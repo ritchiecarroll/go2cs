@@ -49,7 +49,7 @@ using static go.@internal.runtime.syscall.linux_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/syscall/linux/syscall_linux.go", "syscall_linux.cs", "AA0gxIKC2oKCgpSUgqaCgqaCgqaUgoKmgoKmgoKClJSCpoKCgpSUkpSkpKSUAAsYgoI=")]
+[assembly: go.GoPositionMap("internal/runtime/syscall/linux/syscall_linux.go", "syscall_linux.cs", "AA0gxIKC2oKCgpSUoqaCoqaCgqaUgqKmgoKmgoKClJSipoKCgpSUkpTExMS0AAsYgqI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime.syscall;

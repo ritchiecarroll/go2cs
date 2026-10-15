@@ -738,7 +738,9 @@ internal static bool sigFromSeccomp(this ref sigctxt c) {
 
 //go:nosplit
 internal static (int32 ret, int32 errno) mprotect(@unsafe.Pointer addr, uintptr n, int32 prot) {
-    var (r, _, err) = linux.Syscall6(linux.SYS_MPROTECT, (uintptr)addr, n, (uintptr)prot, 0, 0, 0);
+    var ᴋ0 = addr;
+        var (r, _, err) = linux.Syscall6(linux.SYS_MPROTECT, (uintptr)ᴋ0, n, (uintptr)prot, 0, 0, 0);
+    System.GC.KeepAlive(ᴋ0);
     return ((int32)r, (int32)err);
 }
 

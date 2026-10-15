@@ -115,7 +115,7 @@ using static go.os_package;
 [assembly: go.GoPositionMap("os/statat_unix.go", "statat_unix.cs", "ABAaooKAgqSC")]
 [assembly: go.GoPositionMap("os/sys.go", "sys.cs", "AAcQkg==")]
 [assembly: go.GoPositionMap("os/sys_bsd.go", "sys_bsd.cs", "AA4WsoKClA==")]
-[assembly: go.GoPositionMap("os/tempfile.go", "tempfile.cs", "AA4oAAkEggACGAAJAoKmgoKUlIKCgoKCgIKklLiY0oKCpoCClKQAAhYACAKCpoKClJSCgoKCgpSCgIKklIKAgra4goKU")]
+[assembly: go.GoPositionMap("os/tempfile.go", "tempfile.cs", "AA4o9IIAAhgACQKCpoKClJSCgoKCgoCCpJS4mNKCgqaAgpSkAAIWAAgCgqaCgpSUgoKCgoKUgoCCpJSCgIK2uIKClA==")]
 [assembly: go.GoPositionMap("os/types.go", "types.cs", "ABYakAAjXoCigAACEOKCgoKU")]
 [assembly: go.GoPositionMap("os/types_unix.go", "types_unix.cs", "ABQugKKAooCigKSC")]
 [assembly: go.GoPositionMap("os/wait_unimp.go", "wait_unimp.cs", "AAom8g==")]
