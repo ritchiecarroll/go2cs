@@ -111,6 +111,7 @@ type pipelineRunner struct {
 	nugetSource    string
 	nugetVersion   string
 	toolTimeout    time.Duration
+	warm           *warmup
 }
 
 func newPipelineRunner(repoRoot string, supplied ...pipelineOptions) *pipelineRunner {
@@ -129,6 +130,7 @@ func newPipelineRunner(repoRoot string, supplied ...pipelineOptions) *pipelineRu
 		nugetSource:    options.nugetSource,
 		nugetVersion:   options.nugetVersion,
 		toolTimeout:    options.toolTimeout,
+		warm:           newWarmup(!options.noWarmup),
 	}
 }
 
@@ -276,6 +278,21 @@ func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult
 	if strings.TrimSpace(request.ConversionID) == "" {
 		return runResult{}, validationError("conversionId is required")
 	}
+	if err := p.waitForWarmup(ctx); err != nil {
+		return runResult{}, err
+	}
+	return p.runConversion(ctx, request)
+}
+
+// waitForWarmup holds a .NET build until a running warmup ends. The warmup is restoring the same
+// go.* packages into the same NuGet cache and starting the same build servers, so a build that
+// waits for it gets a warm toolchain instead of racing it for one. It waits before taking a pipeline
+// slot: the warmup needs a slot of its own to finish.
+func (p *pipelineRunner) waitForWarmup(ctx context.Context) error {
+	return p.warm.wait(ctx)
+}
+
+func (p *pipelineRunner) runConversion(ctx context.Context, request runRequest) (runResult, error) {
 	if err := p.acquire(ctx); err != nil {
 		return runResult{}, err
 	}
@@ -711,6 +728,17 @@ func (p *pipelineRunner) cleanupExpired() {
 	p.mu.Unlock()
 
 	for _, artifact := range remove {
+		_ = os.RemoveAll(artifact.workDir)
+	}
+}
+
+// discard forgets one saved conversion and removes its workspace.
+func (p *pipelineRunner) discard(id string) {
+	p.mu.Lock()
+	artifact := p.saved[id]
+	delete(p.saved, id)
+	p.mu.Unlock()
+	if artifact != nil {
 		_ = os.RemoveAll(artifact.workDir)
 	}
 }

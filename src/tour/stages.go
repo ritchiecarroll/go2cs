@@ -6,6 +6,12 @@ import (
 )
 
 func (p *pipelineRunner) build(ctx context.Context, request runRequest) (stageResult, error) {
+	if request.ConversionID == "" {
+		return stageResult{}, validationError("conversionId is required")
+	}
+	if err := p.waitForWarmup(ctx); err != nil {
+		return stageResult{}, err
+	}
 	artifact, err := p.savedArtifact(ctx, request.ConversionID)
 	if err != nil {
 		return stageResult{}, err
