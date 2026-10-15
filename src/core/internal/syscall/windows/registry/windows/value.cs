@@ -355,7 +355,11 @@ public static error SetBinaryValue(this Key k, @string name, slice<byte> value) 
 
 // DeleteValue removes a named value from the key k.
 public static error DeleteValue(this Key k, @string name) {
-    return regDeleteValue(((syscallꓸHandle)k), syscall.StringToUTF16Ptr(name));
+    var (namep, err) = syscall.UTF16PtrFromString(name);
+    if (err != default!) {
+        return err;
+    }
+    return regDeleteValue(((syscallꓸHandle)k), namep);
 }
 
 // ReadValueNames returns the value names of key k.

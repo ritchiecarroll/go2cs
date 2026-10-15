@@ -2011,8 +2011,9 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// (so it can never fabricate one), the call falls to the address route, and the kernel gets
 		// eight bytes that are two OBJECT REFERENCES -- WSAEINVAL, surfacing as
 		// `setsockopt: The requested address is not valid in its context` on IP_ADD_MEMBERSHIP.
-		// SetsockoptIPv6Mreq is NOT registered: Go returns EWINDOWS there, so there is nothing to
-		// preserve and a hand-own would invent behaviour.
+		// SetsockoptIPv6Mreq joined on windows at Go 1.25, when it stopped returning EWINDOWS and
+		// became a real Setsockopt over IPv6Mreq (Multiaddr [16]byte): the same defect, now reached
+		// by net's joinIPv6Group.
 		// LINUX joins the same registration 2026-09-03, and the scope is the whole of what changed:
 		// the defect above is the CONVERTED STRUCT's, not the platform's, so leaving this at
 		// goosWindows left the Linux flavour on the generated body with the identical fault.
@@ -2029,11 +2030,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// wrong-answer one. ICMPv6Filter is the fourth struct, surfaced by the census rather than by
 		// the ruling. Bodies for all eight in syscall/linux/structclass_linux_impl.cs.
 		//
-		// SetsockoptIPv6Mreq stays UNREGISTERED on windows for the reason given above (Go returns
-		// EWINDOWS there, so a hand-own would invent behaviour); on linux it is a real option.
+		// SetsockoptIPv6Mreq is registered on both since Go 1.25 (see above). Windows body in
+		// syscall/windows/syscall_windows_impl.cs.
 		"SetsockoptIPMreq":       goosWindowsLinux,
 		"SetsockoptIPMreqn":      goosLinux,
-		"SetsockoptIPv6Mreq":     goosLinux,
+		"SetsockoptIPv6Mreq":     goosWindowsLinux,
 		"SetsockoptICMPv6Filter": goosLinux,
 		"GetsockoptIPMreq":       goosLinux,
 		"GetsockoptIPMreqn":      goosLinux,

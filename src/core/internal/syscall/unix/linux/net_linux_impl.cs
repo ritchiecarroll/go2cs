@@ -281,6 +281,12 @@ partial class unix_package
     // is the whole defect this family carries.
     public static partial (nint n, error err) SendmsgNInet4(nint fd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet4> to, nint flags) {
         unsafe {
+            // Go 1.26: a nil `to` sends with no address (a connected socket), as syscall_unix.go's
+            // sendmsgNInet4 does; net's writeMsgAddrPort passes nil for an invalid AddrPort.
+            if (to == nil) {
+                return syscall.GoSendmsgNative(fd, p, oob, null, 0, flags);
+            }
+
             byte* buffer = stackalloc byte[syscall.GoNativeSockaddrLen];
             var (nameLen, err) = syscall.GoWriteNativeSockaddrInet4(to, buffer);
 
@@ -294,6 +300,12 @@ partial class unix_package
 
     public static partial (nint n, error err) SendmsgNInet6(nint fd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet6> to, nint flags) {
         unsafe {
+            // Go 1.26: a nil `to` sends with no address (a connected socket), as syscall_unix.go's
+            // sendmsgNInet6 does; net's writeMsgAddrPort passes nil for an invalid AddrPort.
+            if (to == nil) {
+                return syscall.GoSendmsgNative(fd, p, oob, null, 0, flags);
+            }
+
             byte* buffer = stackalloc byte[syscall.GoNativeSockaddrLen];
             var (nameLen, err) = syscall.GoWriteNativeSockaddrInet6(to, buffer);
 
