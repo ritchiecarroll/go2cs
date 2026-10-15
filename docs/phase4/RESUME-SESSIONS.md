@@ -77,6 +77,14 @@ i7's disk, not in the account, so treat them as a convenience. This section and 
 - The nugetgo security sentence reads "Security: the Go standard library this package is built on includes no Go
   security fixes released after Go <release>; review before any production use." The five conversion READMEs were
   updated directly, and hashset-cs dropped its "PROOF:" prefix.
+- 2026-10-15: the synctest WaitGroup sync is DEFERRED to after the hop. A package-level WaitGroup is associated with a
+  bubble here, where Go leaves it Unbubbled. The fix is a StaticBox marker (G), and the BOARD row of 2026-10-15
+  (master 9860e30658) tracks it. Owner: "as long as we don't forget". Put it on the post-hop board.
+- 2026-10-15, nugetgo READMEs for the post-hop rebuild wave:
+  - (1) the author part, below the generated fence: a short "About" paragraph on the ORIGINAL project's purpose, in
+    our own words, with an upstream link, for every module;
+  - (2) the generated fence: a TEXT link to the C# conversion repo beside the badge (New-NugetgoGeneratedBlock in
+    src/tools/nugetgo/NugetgoReadme.psm1).
 
 ### 1k.3 COORD's next steps, in order
 
