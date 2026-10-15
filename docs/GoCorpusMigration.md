@@ -1418,6 +1418,37 @@ first, and only by derivation; H5 meets them first.)*
 <!-- The first sentence of this paragraph is not in the draft: it was added at the apply (2026-10-02), because the code
      block above copies .cs, .csproj and README.md only, and close lesson 2 (H10's close amendment) widens the overlay
      "by every file an emitted csproj names in <EmbeddedResource Include>, derived from the emission". -->
+*(Noted 2026-10-15, the Go 1.26 hop's H5, ruled COORD: **the overlay also carries the icons of every package new at
+the target.** Each emitted csproj names `go2cs.ico` as its `ApplicationIcon` and packs `go2cs.png`. The `find` above
+copies neither, and a package that is not tracked yet has neither in `<tree>`. Derive them from the applied root:
+every stage file that is neither tracked nor in `overlay-set.txt`. At go1.26.9 that was 57 files: the png and ico of
+the 28 new packages, plus the ico of the relocated test-only `internal/runtime/wasitest`. All were byte-identical to
+the tracked template, and no other kind was left over. **The deletion set is wider than H5c's**, too: (1) the
+three-target merge's own layout moves, a flat file moved per-GOOS or three identical per-GOOS copies hoisted flat (10
+at go1.26.9, each `git rm`'d once all three targets carried its counterpart); (2) a removed package's `-tests`
+residue, which H5c never takes (`<Compile Remove>`d by design). That was 11 files at go1.26.9, under
+go/ast/internal/tests and runtime/internal/wasitest. Census: every tracked file absent from the applied root must be
+one of H5c's deletions or a named merge move.)*
+*(Noted 2026-10-15, the Go 1.26 hop's H5, the FIXTURE REFRESH, one commit after the overlay and before the ladder
+(PLAN-hop-go126 A5).
+**The instrument is the two guards' own lists:**
+- `TestTrackedFixturesMatchPinnedGoRoot` names each stale fixture as "differs" or "absent at the pinned GOROOT";
+- `TestEveryStagedFixtureIsTrackedOrIgnored` names each staged fixture that is neither tracked nor ignored.
+**The refresh:**
+- GOROOT's bytes over every "differs" row (76);
+- every "neither" row added from GOROOT by explicit path (43);
+- every "absent" row `git rm`'d (20) only when its removal is named: either H5c removed its package
+  (crypto/internal/hpke, 1; internal/trace/internal/oldtrace, 12, relocated to tracev1), or a successor exists at the
+  target (A5's STOP, ruled COORD 2026-10-15):
+  - archive/tar's four `.tar` fixtures and compress/bzip2's `fail-issue5747.bz2`, renamed by Go to `<name>.base64`;
+  - strconv's `testfp.txt`, which went with the strconv → internal/strconv arc;
+  - encoding/json's `code.json.gz`, which Go deleted (its bench now reads
+    `internal/jsontest/testdata/golang_source.json.zst`).
+**The gate:**
+- every refreshed or added file's INDEX blob equals `git hash-object --no-filters` of GOROOT's file (0 of 119
+  differed), and each working copy `cmp`-equals GOROOT's;
+- `git check-attr text` is `unset` on every binary fixture;
+- both guards go green.)*
 
 Then the marker census re-measured in `<tree>`, T0 phantoms restored per §4, and staging by explicit path —
 never `git add -A` (floor 8). `<tree>` is a worktree ON the version branch COORD names (checked out at `<H2>`, not

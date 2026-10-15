@@ -225,14 +225,14 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/core/reflect/all_test.cs:62 + src/core/reflect/go2cs_test_host.cs:1 ·
   src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:155 (ProjectReference; NuGet via -recurse=nuget) ·
   src/core/unicode/utf8/utf8.cs:23 + src/core/archive/zip/struct.cs:33 ·
-  src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17 + src/core/strconv/atoi.cs:148 ·
+  src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17 + src/core/internal/strconv/atoi.cs:130 ·
   src/core/golib/uintptr.cs:39 · src/core/bufio/bufio.csproj:136 (from src/go2cs/csproj-template.xml:121) ·
   src/core/encoding/gob/codec_test.cs:1197 ·
   src/core/golib/NilType.cs + src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:63 ·
   src/tests/Behavioral/SliceAliasing/main.cs.target:9 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:109 ·
   src/tests/Behavioral/NamedReturnDefer/main.cs.target:41 · src/tests/Behavioral/ShadowedCompoundAssign/main.cs.target:10 ·
-  src/core/strconv/atoi.cs:276 · src/tests/Behavioral/MapCommaOk/main.cs.target:13 ·
-  src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:20 · src/core/strconv/atoi.cs:273 ·
+  src/core/internal/strconv/atoi.cs:258 · src/tests/Behavioral/MapCommaOk/main.cs.target:13 ·
+  src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:20 · src/core/internal/strconv/atoi.cs:255 ·
   src/tests/Behavioral/MapCommaOk/main.cs.target:11 · src/tests/Behavioral/GenericFuncDecl/GenericFuncDecl.cs.target:7 +
   src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:53 + GenericInterfaceConstraint.cs.target:53 ·
   src/tests/Behavioral/TypeConversionReturnType/TypeConversionReturnType.cs.target:1 ·
@@ -314,13 +314,13 @@ code does not use, so they never clash with a Go name.
 Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer) come from golib, the
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
-<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:68; UnsafeOperations/UnsafeOperations.cs.target:26; GoCallVariations.cs.target:49 and UnsafeOperations.cs.target:26; GoCallVariations.cs.target:51; ReservedNameShadows/main.cs.target:39, src/core/time/time.cs:325, src/core/bufio/bufio_test.cs:11; ExprSwitch/ExprSwitch.cs.target:149, MultiFileInitOrder/a_first.cs.target:11; GoCallVariations.cs.target:27; src/core/errors/join.cs:19 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51); GoCallVariations.cs.target:22, ChannelRendezvous/main.cs.target:35, InitOrderTupleSpecs/main.cs.target:9; GoCallVariations.cs.target:10, src/core/strconv/atoi.cs:273; SStringTwinPilot/main.cs.target:43; src/core/encoding/json/package_info.cs:17;
-src/core/errors/join.cs:7, ExprSwitch.cs.target:27 (also src/core/flag/flag.cs:1187), ChannelRendezvous/main.cs.target:36; AnyStringLitChanSend/main.cs.target:66, GoCallVariations.cs.target:47, ChannelRendezvous/main.cs.target:37; GoCallVariations.cs.target:22; ChannelCapLen/main.cs.target:31, AnonymousStructs/AnonymousStructs.cs.target:41; src/core/strconv/atoi.cs:309, ExprSwitch.cs.target:133, src/core/strings/iter.cs:57; ExprSwitch.cs.target:295; AppendOfMake/AppendOfMake.cs.target:83; src/core/errors/join.cs:39, CaptureHoistThroughConversion/main.cs.target:42;
+<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:68; UnsafeOperations/UnsafeOperations.cs.target:26; GoCallVariations.cs.target:49 and UnsafeOperations.cs.target:26; GoCallVariations.cs.target:51; ReservedNameShadows/main.cs.target:39, src/core/time/time.cs:329, src/core/bufio/bufio_test.cs:11; ExprSwitch/ExprSwitch.cs.target:149, MultiFileInitOrder/a_first.cs.target:11; GoCallVariations.cs.target:27; src/core/errors/join.cs:20 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51); GoCallVariations.cs.target:22, ChannelRendezvous/main.cs.target:35, InitOrderTupleSpecs/main.cs.target:9; GoCallVariations.cs.target:10, src/core/internal/strconv/atoi.cs:255; SStringTwinPilot/main.cs.target:43; src/core/encoding/json/package_info.cs:17;
+src/core/errors/join.cs:7, ExprSwitch.cs.target:27 (also src/core/flag/flag.cs:1187), ChannelRendezvous/main.cs.target:36; AnyStringLitChanSend/main.cs.target:66, GoCallVariations.cs.target:47, ChannelRendezvous/main.cs.target:37; GoCallVariations.cs.target:22; ChannelCapLen/main.cs.target:31, AnonymousStructs/AnonymousStructs.cs.target:41; src/core/io/fs/sub.cs:86, ExprSwitch.cs.target:133, src/core/strings/iter.cs:50; ExprSwitch.cs.target:295; AppendOfMake/AppendOfMake.cs.target:83; src/core/errors/join.cs:40, CaptureHoistThroughConversion/main.cs.target:42;
 DefinedTypeOverInterface/package_info.cs:75; GenericTypeNameCompanion/main.cs.target:18; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45 and AnonymousInterfaces/AnonymousInterfaces.cs.target:51; AdapterNameInterfaceCollision/main.cs.target:25; GoCallVariations.cs.target:56; GoCallVariations.cs.target:57; UnsafeOperations.cs.target:4 and 23; src/core/strings/strings.cs:19; src/core/strings/export_test.cs:8 and strings_test.cs:24.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:41, ж.FieldRefBox.cs:69, ж.NativeBox.cs:41, ж.NativeArrayBox.cs:46, ж.SliceHeaderBox.cs:94, ж.HeaderSliceBox.cs:75 all derive from ж<T>.
 appendꓸꓸꓸ: InterfaceCasting/InterfaceCasting.cs.target:340 (Funcꓸꓸꓸ: BlankIdentifierCollision/main.cs.target:88).
 Buffer.Ꮡoff: PointerToPointer/PointerToPointer.cs.target:47 `PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));` for Go PointerToPointer.go:49 `PrintValPtr(&b.off)`; the static field-reference members are generated by src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2023 (FieldReferences). ᒐdone: NamedReturnDefer/main.cs.target:92; [GoRecv]: ReservedNameShadows/main.cs.target:61.
-/*<-*/: SelectStatement/SelectStatement.cs.target:71; _<T>(): TypeAssert/TypeAssert.cs.target:86 (comma-ok: src/core/strconv/atoi.cs:309); ᴋ: src/core/internal/syscall/unix/linux/getrandom.cs:39; break_/continue_: ForVariants/ForVariants.cs.target:71 (goto break_scan;) and :75 (continue_scan:;); main_point: LiftedLocalTypes/main.cs.target:17.
+/*<-*/: SelectStatement/SelectStatement.cs.target:71; _<T>(): TypeAssert/TypeAssert.cs.target:86 (comma-ok: src/core/io/fs/sub.cs:86); ᴋ: src/core/internal/syscall/unix/linux/getrandom.cs:39; break_/continue_: ForVariants/ForVariants.cs.target:71 (goto break_scan;) and :75 (continue_scan:;); main_point: LiftedLocalTypes/main.cs.target:17.
 Glyph constants: src/go2cs/symbols.go, generated from src/core/go2cs/symbols.json (DescriptorCarrierSuffix in src/go2cs/visitTypeSpec.go, DescriptorCompanionSuffix in src/go2cs/descriptorCompanion.go). Values of ᐧ, ᐧᐧ, ꟷ and ꓸꓸꓸ: src/core/golib/builtin.cs:163-199. The slice spread s.ꓸꓸꓸ: src/core/golib/slice.cs:641.
 Overload discriminators: the comma-ok overloads take a `bool _` whose value is unused: golib builtin.cs:678 (receive), map.cs:456 (map index), builtin.cs:3492-3497 (type assertion); the converter passes ꟷ (false) for receive/map and ᐧ (true) for type assertion. The select marker ꓸꓸꓸ is `public static readonly NilType ꓸꓸꓸ = nil;` (builtin.cs:188-199), whose doc comment says the channel operation then returns a SelectOp case descriptor that registers the pending operation with the select.
 ᐧᐧ: builtin.cs:165-177, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:14.
@@ -486,7 +486,7 @@ partial struct Outer {
 For example, `GoFrame` is the golib type of the local that runs a function's deferred calls
 ([Defer / Panic / Recover](#defer--panic--recover)), so a Go struct named `GoFrame` becomes `ΔGoFrame`:
 
-<!-- reserved-name list: src/go2cs/identifierNaming.go:170-180; type-vs-method rename: src/core/time/time.cs:325 `partial struct ΔMonth /*num:nint*/;` (Go type Month and method Time.Month); the same test's deferInShadowedPackage (ReservedNameShadows/main.cs.target:43-55) declares golib's `GoFrame ᒐ` beside the renamed `ΔGoFrame` local type -->
+<!-- reserved-name list: src/go2cs/identifierNaming.go:170-180; type-vs-method rename: src/core/time/time.cs:329 `partial struct ΔMonth /*num:nint*/;` (Go type Month and method Time.Month); the same test's deferInShadowedPackage (ReservedNameShadows/main.cs.target:43-55) declares golib's `GoFrame ᒐ` beside the renamed `ΔGoFrame` local type -->
 <!-- source: src/tests/Behavioral/ReservedNameShadows/main.go:45 -->
 ```go
 type GoFrame struct{ k int }
@@ -528,7 +528,7 @@ A method is `public` only when both its own name and its receiver type's name ar
 struct such as `accum` shows no modifier, because the [source generator](#source-generators) adds it on the
 generated half of the `partial` type.
 
-<!-- receiver clamp: src/go2cs/visitFuncDecl.go:775-783 (receiverAccess from :1800-1817; getAccess at src/go2cs/identifierNaming.go:345); example src/core/errors/join.cs:46 `internal static @string Error(this ref joinError e) {` -->
+<!-- receiver clamp: src/go2cs/visitFuncDecl.go:775-783 (receiverAccess from :1800-1817; getAccess at src/go2cs/identifierNaming.go:345); example src/core/errors/join.cs:47 `internal static @string Error(this ref joinError e) {` -->
 <!-- generator adds the modifier: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:113 (`{{Scope}} partial struct`), Templates/InterfaceType/InterfaceTypeTemplate.cs:50 (`{{Scope}} partial interface`). "usually": lifted local types carry `internal` (LiftedLocalTypes/main.cs.target:39) and an unexported type an exported field exposes carries `public` (PublicizedFieldType/main.cs.target:9); package-level declarations otherwise emit `partial` bare (src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5 `partial struct reg {`). A named function type becomes a delegate that carries its own modifier: src/tests/Behavioral/CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (Go main.go:23 `type Handler func(int)`); GenericTypeInstantiation.cs.target:45 `public delegate bool Seq2Like<K, V>(K _Δp0, V _Δp1);` -->
 <!-- new accum(nil): the generated NilType constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2079; "an empty named-type literal passes nil" is the Struct Types section's rule. Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
 
@@ -11805,9 +11805,11 @@ public static (slice<byte>, error) P256OrdInverse(slice<byte> k) {
 } // end nistec_package
 ```
 
-**`crypto/elliptic` then panics, just as Go does.** The P-256 curve's `Inverse` method in `crypto/elliptic`
-treats that error as impossible and panics. Real Go built with `-tags purego` panics here too, so the
-converted code does the same. `crypto/ecdsa` handles the same error with a fallback, so ECDSA is unaffected:
+**At Go 1.24, `crypto/elliptic` then panicked, just as Go did.** The P-256 curve's `Inverse` method in
+`crypto/elliptic` treated that error as impossible and panicked. Real Go built with `-tags purego` panicked
+there too, so the converted code did the same. `crypto/ecdsa` handles the same error with a fallback, so
+ECDSA was unaffected. Go 1.25 removed `Inverse` with `nistec_p256.go`, and the stub's only caller is now
+that ECDSA fallback, so the gap no longer reaches a panic:
 
 <!-- source: GOROOT/src/crypto/elliptic/nistec_p256.go:24-27 -->
 ```go
@@ -11819,11 +11821,12 @@ converted code does the same. `crypto/ecdsa` handles the same error with a fallb
 
 A Go `panic` becomes `throw panic(...)` ([Defer / Panic / Recover](#defer--panic--recover)). A literal passed
 straight to `panic` stays inline as a plain C# string instead of becoming a hoisted `ˢ` field. The tuple
-result is unpacked with `var (inverse, err) = …`:
+result is unpacked with `var (p, err) = …`. The same panic text survives in `crypto/elliptic`'s
+`ScalarBaseMult`, which shows both:
 
-<!-- source: src/core/crypto/elliptic/nistec_p256.cs:26-29 -->
+<!-- source: src/core/crypto/elliptic/nistec.cs:240-243 -->
 ```csharp
-    var (inverse, err) = nistec.P256OrdInverse(scalar);
+    var (p, err) = curve.newPoint().ScalarBaseMult(scalar);
     if (err != default!) {
         throw panic("crypto/elliptic: nistec rejected normalized scalar");
     }
@@ -11832,8 +11835,10 @@ result is unpacked with `var (inverse, err) = …`:
 <!-- Upstream gating: crypto/elliptic/nistec_p256.go is `amd64 || arm64` with no `!purego`, while
      crypto/internal/fips140/nistec/p256_ordinv.go is `(amd64 || arm64) && !purego`; under purego
      p256_ordinv_noasm.go returns errors.New("unimplemented") and Inverse panics with
-     `crypto/elliptic: nistec rejected normalized scalar`. Checked against the Go 1.24.13 tree; the
-     panic text is in ../src/core/crypto/elliptic/nistec_p256.cs:28. The default (-tags=) build binds the
+     `crypto/elliptic: nistec rejected normalized scalar`. Checked against the Go 1.24.13 tree; go1.25
+     removed nistec_p256.go, and at go1.26.9 P256OrdInverse's one caller is
+     crypto/internal/fips140/ecdsa/ecdsa.go:384-386, which falls back on the error. The same panic literal
+     stands at ../src/core/crypto/elliptic/nistec.cs:242. The default (-tags=) build binds the
      asm ordinv and returns a valid inverse; crypto/ecdsa handles the same error with a fallback, so
      ECDSA is unaffected. Inverse is reached via the deprecated `invertible` interface. The inline panic
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
