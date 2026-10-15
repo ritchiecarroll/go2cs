@@ -306,6 +306,12 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
     // sub-record behind the descriptor (there is none); TFlagExtraStar promises a name blob whose
     // first byte is a '*' to strip; TFlagRegularMemory/TFlagUnrolledBitmap describe a GC bitmap
     // layout the managed heap does not have. Each is a read this bridge cannot honor.
+    //
+    // That is also why the FIVE Uncommon() arms in type.cs (`Reinterpret<Type, structTypeUncommon>`
+    // and `Reinterpret<Type, Uncommon_u…>`, one per kind) are left converted and never hand-owned: each
+    // is a prefix downcast no synthesized descriptor can honor, and each sits behind Uncommon()'s
+    // `TFlag & TFlagUncommon == 0` early return, which this bit being zero makes unconditional. They are
+    // unreachable, not fixed; a census of prefix downcasts will list them (H7 row 57, 2026-10-15).
     if (GoReflect.HasGoName(st)) {
         t.TFlag |= (TFlag)TFlagNamed;
     }
@@ -445,6 +451,42 @@ public static ж<Type> TypeOf(any a) {
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔStructType>> s_structTypes = new();
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔArrayType>> s_arrayTypes = new();
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔMapType>> s_mapTypes = new();
+
+// TypeFor returns the abi.Type for a type parameter.
+//
+// Go 1.26 spells it `(*PtrType)(unsafe.Pointer(TypeOf((*T)(nil)))).Elem` (type.go:193): a prefix
+// downcast from the pointer descriptor's Type header to the PtrType record around it, then that
+// record's Elem field. A synthesized descriptor has no PtrType around it, so the converted
+// `Reinterpret<Type, PtrType>().Value.Elem` panicked on EVERY reflect.TypeFor[T]() ("dereference of a
+// managed pointer with no address"), H7 row 57. Elem() is this family's hand-owned answer for a
+// pointer descriptor, so the body is Go's own minus the cast. `(ж<T>)nil` is golib's canonical TYPED
+// nil (ж<T>.NilBox), not a C# null, so TypeOf sees a *T and answers its descriptor.
+public static ж<Type> TypeFor<T>() {
+    return TypeOf((ж<T>)nil).Elem();
+}
+
+private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔInterfaceType>> s_interfaceTypes = new();
+
+// InterfaceType returns t cast to a *InterfaceType, or nil if its tag does not match.
+//
+// The same prefix downcast as TypeFor's (`(*InterfaceType)(unsafe.Pointer(t))`), reached for EVERY
+// interface descriptor: internal/reflectlite's rtype.NumMethod reads `len(tt.Methods)` through it, and
+// the converted Reinterpret panicked at that read. Synthesized like StructType: the record's Type is
+// the descriptor itself, and Methods holds one entry per method of the interface, counted over the
+// SAME golib method-set machinery reflect's hand-owned rtype.NumMethod reads (GoReflect.GoMethodCount),
+// so the two layers cannot disagree about an interface's size. Each entry's Name and Typ stay zero:
+// they are offsets into a module's name and type sections, which a managed descriptor does not have,
+// exactly as StructType leaves each field's Name zero. No converted caller reads them.
+public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
+    if (Ꮡt == nil || Ꮡt.Value.Kind() != Interface || Ꮡt.Value.sysType is null) {
+        return default!;
+    }
+    return s_interfaceTypes.GetOrAdd(Ꮡt, static box => new StandardBox<ΔInterfaceType>(new ΔInterfaceType(
+        Type: box.Value,
+        PkgPath: default!,
+        Methods: new slice<Imethod>(new Imethod[(int)GoReflect.GoMethodCount(box.Value.sysType!)])
+    )));
+}
 
 // StructType returns t cast to a *StructType, or nil if its tag does not match.
 public static ж<ΔStructType> StructType(this ж<Type> Ꮡt) {
