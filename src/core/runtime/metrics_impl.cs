@@ -34,7 +34,7 @@ using @internal.runtime;
 partial class runtime_package
 {
     // compute populates the schedStatsAggregate with values from the runtime.
-    internal static void compute(this ref schedStatsAggregate a) {
+    [GoRecv] internal static void compute(this ref schedStatsAggregate a) {
         // Lock the scheduler so the global run queue can't change and
         // the number of Ps can't change. This doesn't prevent the
         // local run queues from changing, so the results are still
