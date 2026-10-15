@@ -127,7 +127,8 @@ internal static slice<@string> pathExt() {
     slice<@string> exts = default!;
     @string x = os.Getenv(pathextˢ);
     if (x != ""u8){
-        foreach (var e in range<@string>(strings.SplitSeq(strings.ToLower(x), @";"u8).Invoke)) {
+        foreach (var iᴛ1 in range<@string>(strings.SplitSeq(strings.ToLower(x), @";"u8).Invoke)) {
+            var e = iᴛ1;
             if (e == ""u8) {
                 continue;
             }

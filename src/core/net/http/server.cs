@@ -1665,7 +1665,8 @@ internal static void foreachHeaderElement(@string v, Action<@string> fn) {
         fn(v);
         return;
     }
-    foreach (var f in range<@string>(strings.SplitSeq(v, ","u8).Invoke)) {
+    foreach (var iᴛ1 in range<@string>(strings.SplitSeq(v, ","u8).Invoke)) {
+        var f = iᴛ1;
         {
             f = textproto.TrimString(f); if (f != ""u8) {
                 fn(f);

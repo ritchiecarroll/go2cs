@@ -54,7 +54,8 @@ public static ж<ΔFunc> Func(this ж<Asm> Ꮡa, @string decl) {
 
     // Assign implicit types to all arguments (x, y int -> x int, y int).
     @string typ = ""u8;
-    foreach (var (i, arg) in range<nint, @string>(slices.Backward<slice<@string>, @string>(args).Invoke)) {
+    foreach (var (i, vᴛ1) in range<nint, @string>(slices.Backward<slice<@string>, @string>(args).Invoke)) {
+        var arg = vᴛ1;
         arg = strings.TrimSpace(arg);
         if (!strings.Contains(arg, " "u8)){
             if (typ == ""u8) {
