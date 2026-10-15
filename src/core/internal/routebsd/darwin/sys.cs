@@ -14,19 +14,7 @@ internal static nint kernelAlign;
 internal static byte rtmVersion;
 internal static map<nint, ж<wireFormat>> wireFormats;
 
-[GoInit] internal static void init() {
-    ref var i = ref heap<uint32>(out var Ꮡi);
-    i = (uint32)1;
-    var b = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡi));
-    if (b.Value[0] == 1){
-        nativeEndian = littleEndian;
-    } else {
-        nativeEndian = bigEndian;
-    }
-    // might get overridden in probeRoutingStack
-    rtmVersion = syscall.RTM_VERSION;
-    (kernelAlign, wireFormats) = probeRoutingStack();
-}
+// go2cs generated this placeholder — func init is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static nint roundup(nint l) {
     if (l == 0) {

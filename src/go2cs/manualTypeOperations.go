@@ -248,6 +248,17 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 	// BitConverter.IsLittleEndian. go1.26.9 removed the vendored package (net/route moved to internal/routebsd), H5c
 	// deleted it with both of its hand-owned companions, and TestManualConversionRegistrationsDisplaceSomething then
 	// read the key as displacing nothing.
+	"internal/routebsd": {
+		// The retired route registration's successor (2026-10-15, the Go 1.26 hop's H6). go1.26.9's
+		// internal/routebsd/sys.go keeps route's byte-order probe verbatim, `(*[4]byte)(unsafe.Pointer(&i))` on a
+		// uint32 local, and net imports routebsd on BSDs, so the index panic route's companion cured would return in
+		// the module initializer of every darwin net importer. Measured offline at 7f9cdd51b4: the emitted
+		// expression panics `index out of range [0] with length 0` against golib, the 1.24 darwin census's text.
+		// internal/routebsd/darwin/sys_impl.cs answers it with BitConverter.IsLittleEndian and keeps the rest of
+		// init verbatim. Darwin-scoped for route's reason: sys.go is BSD-only. The companion carries the [GoInit]
+		// module initializer, because a displaced init emits only the placeholder.
+		"init": goosDarwin,
+	},
 	"slices": {
 		// overlaps has AnyOverlap's four-take shape and its race; its callers Insert/Replace take the
 		// hard-case rotation on TRUE, where startIdx panics `needle not found` for a source that does not
