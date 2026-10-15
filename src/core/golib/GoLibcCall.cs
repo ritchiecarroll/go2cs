@@ -15,7 +15,9 @@ namespace go;
 /// read off <c>sys_darwin_amd64.s</c> (2026-09-03): <c>syscall</c>/<c>syscall6</c>/<c>syscall9</c>
 /// compare the LOW 32 BITS of the result against -1 (<c>CMPL</c>), <c>syscallX</c>/<c>syscall6X</c>
 /// compare all 64 (<c>CMPQ</c>), and <c>syscallPtr</c> treats a NULL result as the error
-/// (<c>TESTQ</c>). Only on failure is <c>__error()</c> consulted.
+/// (<c>TESTQ</c>). Only on failure is <c>__error()</c> consulted. Go 1.26 replaced those entries with one,
+/// <c>runtime·syscall_rawsyscalln</c>, which reads errno after EVERY call and leaves the failure test
+/// to the caller (syscall's <c>errno</c>, <c>errnoX</c> and <c>errnoPtr</c>): that is <see cref="AlwaysRead"/>.
 /// </summary>
 public enum GoLibcErrnoRule
 {
@@ -27,6 +29,11 @@ public enum GoLibcErrnoRule
     Int64MinusOne,
     /// <summary><c>TESTQ AX, AX</c>: failure when the result is NULL.</summary>
     NullPointer,
+    /// <summary>
+    /// Go 1.26's <c>syscall.syscalln</c>/<c>rawsyscalln</c> (runtime/sys_darwin.go): errno is read after every
+    /// call, success or not, and the caller decides whether it means anything.
+    /// </summary>
+    AlwaysRead,
 }
 
 /// <summary>
@@ -70,9 +77,9 @@ public static unsafe class GoLibcCall
     /// </summary>
     /// <param name="fn">The resolved entry point — never a synthetic PC, never zero.</param>
     /// <param name="args">Up to <see cref="MaxArgs"/> integer arguments, each already widened to a register.</param>
-    /// <param name="rule">Which of Go's three failure tests applies.</param>
+    /// <param name="rule">Which of Go's three failure tests applies, or <see cref="GoLibcErrnoRule.AlwaysRead"/>.</param>
     /// <param name="errnoReader">The resolved <c>__error</c> (darwin) or <c>__errno_location</c> (glibc): a function returning <c>int*</c>.</param>
-    /// <param name="errno">The errno value on failure, 0 otherwise — sign-extended from the int the reader points at, as Go's <c>MOVLQSX</c> does.</param>
+    /// <param name="errno">The errno value on failure (after every call under <see cref="GoLibcErrnoRule.AlwaysRead"/>), 0 otherwise — sign-extended from the int the reader points at, as Go's <c>MOVLQSX</c> does.</param>
     /// <returns>The call's integer result register.</returns>
     /// <remarks>
     /// An argument carrying the managed-pointer-token tag (a pointer to a Go struct that holds managed
@@ -118,6 +125,7 @@ public static unsafe class GoLibcCall
             GoLibcErrnoRule.Int32MinusOne => unchecked((int)(uint)r) == -1,
             GoLibcErrnoRule.Int64MinusOne => unchecked((long)(ulong)r) == -1L,
             GoLibcErrnoRule.NullPointer => r == 0,
+            GoLibcErrnoRule.AlwaysRead => true,
             _ => false,
         };
 
@@ -182,10 +190,29 @@ public static unsafe class GoLibcCall
     /// fcntl_trampoline), and any other trampoline of a matching shape gets an extra stack argument a
     /// non-variadic callee never reads. Without this, a mode read from stack garbage made a file
     /// os.WriteFile created with 0o644 reopen as "permission denied" on osx-arm64 (run 36976772120).
+    /// <para>
+    /// Go 1.26's single entry, <c>runtime·syscallN_trampoline</c> (<see cref="GoLibcErrnoRule.AlwaysRead"/>), keys
+    /// on the arity alone, whatever failure test the caller applies afterwards: a3 when there are three
+    /// arguments, a4 when there are four or six. A ninth argument already travels at <c>[sp]</c> as itself, so a
+    /// nine-argument call stores nothing extra.
+    /// </para>
     /// </remarks>
     internal static int VariadicStackSlot(int arity, GoLibcErrnoRule rule, bool darwinArm64)
     {
-        if (!darwinArm64 || rule != GoLibcErrnoRule.Int32MinusOne)
+        if (!darwinArm64)
+            return -1;
+
+        if (rule == GoLibcErrnoRule.AlwaysRead)
+        {
+            return arity switch
+            {
+                3 => 2,       // syscallN_trampoline: n == 3 stores a3
+                4 or 6 => 3,  // syscallN_trampoline: n == 4 and n == 6 store a4
+                _ => -1,
+            };
+        }
+
+        if (rule != GoLibcErrnoRule.Int32MinusOne)
             return -1;
 
         return arity switch
