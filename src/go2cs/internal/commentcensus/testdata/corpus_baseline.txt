@@ -42,7 +42,7 @@ missed:trailing-spec	91
 partial:field-doc	1
 top:go-blank-cs-none	60
 top:go-none-cs-blank	1071
-top:unmapped:func	50
+top:unmapped:func	51
 top:unmapped:type-alias	42
 top:unmapped:type-other	70
 top:unmapped:type-struct	1
