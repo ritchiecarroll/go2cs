@@ -2600,15 +2600,16 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"Module32Next":  goosWindows,
 		// The OS-VERSION member, and the first of this class reached from OUTSIDE this package:
 		// net's Windows TCP dial consults version() behind a sync.Once on the way to setting
-		// keep-alive options. _OSVERSIONINFOW is 276 bytes native, ending in szCSDVersion INLINE as
-		// WCHAR[128]; the converted record holds that as one `array<uint16>` reference, so it
+		// keep-alive options. _OSVERSIONINFOEXW (Go 1.26; _OSVERSIONINFOW, 276 bytes, at 1.24) is 284
+		// bytes native, with szCSDVersion INLINE as WCHAR[128] after five DWORDs; the converted
+		// record holds that as one `array<uint16>` reference, so it
 		// carries a managed reference and the CLR auto-layouts it. Before the pointer-storage repair
 		// the generated wrapper handed ntdll a real address and RtlGetVersion wrote 276 bytes over a
 		// much smaller managed object; after it a reference-bearing pointee answers
 		// PointerStorage.None and ntdll is handed an order token instead -- 0xC0000005 inside
 		// ntdll!RtlGetVersion. Same ordinary mirror remedy as GetTimeZoneInformation,
 		// findFirstFile1, Process32First, adjustTokenPrivileges and Module32First: the wrapper
-		// receives the record as a TYPED `*_OSVERSIONINFOW`, so it applies directly. Body in
+		// receives the record as a TYPED `*_OSVERSIONINFOEXW`, so it applies directly. Body in
 		// zsyscall_windows_version_impl.cs.
 		"rtlGetVersion": goosWindows,
 	},
