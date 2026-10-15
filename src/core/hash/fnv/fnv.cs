@@ -448,13 +448,13 @@ internal static (hash.Cloner, error) Clone(this ref sum64a d) {
 
 internal static (hash.Cloner, error) Clone(this ref sum128 d) {
     ref var r = ref heap<sum128>(out var Ꮡr);
-    r = d.Clone();
+    r = d.ΔClone();
     return (new sum128жCloner(Ꮡr), default!);
 }
 
 internal static (hash.Cloner, error) Clone(this ref sum128a d) {
     ref var r = ref heap<sum128a>(out var Ꮡr);
-    r = d.Clone();
+    r = d.ΔClone();
     return (new sum128aжCloner(Ꮡr), default!);
 }
 
