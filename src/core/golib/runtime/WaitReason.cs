@@ -118,7 +118,14 @@ public enum WaitReason
     SynctestChanSend,
 
     /// <summary>"select (synctest)" — a bubble member selecting only on channels created in a bubble.</summary>
-    SynctestSelect
+    SynctestSelect,
+
+    /// <summary>
+    /// "sync.WaitGroup.Wait (durable)" — a bubble member waiting on a WaitGroup, new at Go 1.26
+    /// (runtime's waitReasonSynctestWaitGroupWait, passed by SemacquireWaitGroup). Declared with the runtime
+    /// map's arm (runtime stubs_impl.cs, mapWaitReason); the durable-wait behavior is a separate seat.
+    /// </summary>
+    SynctestWaitGroupWait
 }
 
 /// <summary>
@@ -159,6 +166,7 @@ public static class WaitReasons
         WaitReason.SynctestChanReceive => "chan receive (synctest)",
         WaitReason.SynctestChanSend => "chan send (synctest)",
         WaitReason.SynctestSelect => "select (synctest)",
+        WaitReason.SynctestWaitGroupWait => "sync.WaitGroup.Wait (durable)",
         _ => "unknown wait reason"
     };
 

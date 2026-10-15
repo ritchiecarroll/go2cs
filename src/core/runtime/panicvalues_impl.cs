@@ -70,6 +70,8 @@ public static partial class runtime_package
         // registering them here runs nothing ahead of the package's own initialization.
         RuntimeErrorPanic.PlainErrorValue = static message => (error)(plainError)(@string)message;
         RuntimeErrorPanic.BoundsErrorValue = static (x, y, signed, code) =>
-            (error)new boundsError(x: x, signed: signed, y: (nint)y, code: (boundsErrorCode)code);
+            // Go 1.26 moved the code to internal/abi (abi.BoundsErrorCode, bounds.go); the numbering is runtime's
+            // 1.24 boundsErrorCode verbatim, BoundsIndex .. BoundsConvert, so golib's code value carries over.
+            (error)new boundsError(x: x, signed: signed, y: (nint)y, code: (global::go.@internal.abi_package.BoundsErrorCode)code);
     }
 }

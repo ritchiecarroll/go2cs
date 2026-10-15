@@ -416,6 +416,7 @@ partial class runtime_package
         WaitReason.SynctestChanReceive => waitReasonSynctestChanReceive,
         WaitReason.SynctestChanSend => waitReasonSynctestChanSend,
         WaitReason.SynctestSelect => waitReasonSynctestSelect,
+        WaitReason.SynctestWaitGroupWait => waitReasonSynctestWaitGroupWait,
         _ => waitReasonZero,
     };
 
