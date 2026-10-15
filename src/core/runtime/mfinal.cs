@@ -66,19 +66,21 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-// finblock is an array of finalizers to be executed. finblocks are
-// arranged in a linked list for the finalizer queue.
+internal static UntypedInt finBlockSize => /* 4 * 1024 */ 4096;
+
+// finBlock is an block of finalizers to be executed. finBlocks
+// are arranged in a linked list for the finalizer queue.
 //
-// finblock is allocated from non-GC'd memory, so any heap pointers
+// finBlock is allocated from non-GC'd memory, so any heap pointers
 // must be specially handled. GC currently assumes that the finalizer
 // queue does not grow during marking (but it can shrink).
-[GoType] partial struct finblock {
+[GoType] partial struct finBlock {
     internal sys.NotInHeap _;
-    internal ж<finblock> alllink;
-    internal ж<finblock> next;
+    internal ж<finBlock> alllink;
+    internal ж<finBlock> next;
     internal uint32 cnt;
     internal int32 __;
-    internal array<finalizer> fin = new((uintptr)(_FinBlockSize - 2 * goarch.PtrSize - 2 * 4) / @unsafe.Sizeof(new finalizer(nil)));
+    internal array<finalizer> fin = new((uintptr)(finBlockSize - 2 * goarch.PtrSize - 2 * 4) / @unsafe.Sizeof(new finalizer(nil)));
 }
 
 internal static ж<atomic.Uint32> ᏑfingStatus = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
@@ -100,15 +102,18 @@ internal static ref mutex finlock => ref Ꮡfinlock.Value; // protects the follo
 
 internal static ж<g> fing; // goroutine that runs finalizers
 
-internal static ж<ж<finblock>> Ꮡfinq = new StandardBox<ж<finblock>>(default(ж<finblock>));
-internal static ref ж<finblock> finq => ref Ꮡfinq.ValueSlot;  // list of finalizers that are to be executed
+internal static ж<ж<finBlock>> Ꮡfinq = new StandardBox<ж<finBlock>>(default(ж<finBlock>));
+internal static ref ж<finBlock> finq => ref Ꮡfinq.ValueSlot;  // list of finalizers that are to be executed
 
-internal static ж<finblock> finc;  // cache of free blocks
+internal static ж<finBlock> finc;  // cache of free blocks
 
 internal static ж<array<byte>> Ꮡfinptrmask = new StandardBox<array<byte>>(new array<byte>(64));
 internal static ref array<byte> finptrmask => ref Ꮡfinptrmask.Value;
 
-internal static ж<finblock> allfin; // list of all blocks
+internal static uint64 finqueued; // monotonic count of queued finalizers
+internal static uint64 finexecuted; // monotonic count of executed finalizers
+
+internal static ж<finBlock> allfin; // list of all blocks
 
 // NOTE: Layout known to queuefinalizer.
 [GoType] partial struct finalizer {
@@ -170,7 +175,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
     @lock(Ꮡfinlock);
     if (finq == nil || (~finq).cnt == (uint32)len((~finq).fin)) {
         if (finc == nil) {
-            finc = (ж<finblock>)(uintptr)(persistentalloc(_FinBlockSize, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+            finc = (ж<finBlock>)(uintptr)(persistentalloc(finBlockSize, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
             finc.Value.alllink = allfin;
             allfin = finc;
             if (finptrmask[0] == 0) {
@@ -189,14 +194,15 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
         block.Value.next = finq;
         finq = block;
     }
-    var f = finq.at(finblock.Ꮡfin, (nint)((~finq).cnt));
-    atomic.Xadd(finq.of(finblock.Ꮡcnt), +1);
+    var f = finq.at(finBlock.Ꮡfin, (nint)((~finq).cnt));
+    atomic.Xadd(finq.of(finBlock.Ꮡcnt), +1);
     // Sync with markroots
     f.Value.fn = Ꮡfn;
     f.Value.nret = nret;
     f.Value.fint = Ꮡfint;
     f.Value.ot = Ꮡot;
     f.Value.arg = Δp;
+    finqueued++;
     unlock(Ꮡfinlock);
     ᏑfingStatus.Or(fingWake);
 }
@@ -205,7 +211,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
 internal static void iterate_finq(Action<ж<funcval>, @unsafe.Pointer, uintptr, ж<_type>, ж<ptrtype>> callback) {
     for (var fb = allfin; fb != nil; fb = fb.Value.alllink) {
         for (var i = (uint32)0; i < (~fb).cnt; i++) {
-            var f = fb.at(finblock.Ꮡfin, (nint)(i));
+            var f = fb.at(finBlock.Ꮡfin, (nint)(i));
             callback((~f).fn, (~f).arg, (~f).nret, (~f).fint, (~f).ot);
         }
     }
@@ -248,8 +254,25 @@ internal static bool finalizercommit(ж<g> Ꮡgp, @unsafe.Pointer @lock) {
     return true;
 }
 
+// go2cs: finqueued/finexecuted count only the converted queue above, which the managed
+// SetFinalizer never feeds (it enqueues on GoFinalizerQueue). The live counts are that queue's,
+// so they are added here under the same lock, which keeps Go's read shape: one consistent pair.
+internal static (uint64 queued, uint64 executed) finReadQueueStats() {
+    uint64 queued = default!;
+    uint64 executed = default!;
+
+    @lock(Ꮡfinlock);
+    queued = finqueued + (uint64)global::System.Threading.Interlocked.Read(ref GoFinalizerQueue.s_finalizersQueued);
+    executed = finexecuted + (uint64)global::System.Threading.Interlocked.Read(ref GoFinalizerQueue.s_finalizersExecuted);
+    unlock(Ꮡfinlock);
+    return (queued, executed);
+}
+
 // This is the goroutine that runs all of the finalizers.
-internal static void runfinq() {
+//
+// go2cs: Go 1.26 renamed runfinq to runFinalizers (traceback keys it as FuncID_runFinalizers).
+// The dated comments in this file that say runfinq name the same function under its Go 1.24 name.
+internal static void runFinalizers() {
     @unsafe.Pointer frame = default!;
     uintptr framecap = default!;
     nint argRegs = default!;
@@ -271,8 +294,9 @@ internal static void runfinq() {
             racefingo();
         }
         while (fb != nil) {
-            for (var i = fb.Value.cnt; i > 0; i--) {
-                var f = fb.at(finblock.Ꮡfin, (nint)(i - 1));
+            var n = fb.Value.cnt;
+            for (var i = n; i > 0; i--) {
+                var f = fb.at(finBlock.Ꮡfin, (nint)(i - 1));
                 ref var regs = ref heap(new abi.RegArgs(), out var Ꮡregs);
                 // The args may be passed in registers or on stack. Even for
                 // the register case, we still need the spill slots.
@@ -292,7 +316,7 @@ internal static void runfinq() {
                     framecap = framesz;
                 }
                 if ((~f).fint == nil) {
-                    @throw("missing type in runfinq"u8);
+                    @throw("missing type in finalizer"u8);
                 }
                 @unsafe.Pointer r = frame;
                 if (argRegs > 0){
@@ -321,7 +345,7 @@ internal static void runfinq() {
                     }
                 }
                 else { /* default: */
-                    @throw("bad kind in runfinq"u8);
+                    @throw("bad type kind in finalizer"u8);
                 }
 
                 ᏑfingStatus.Or(fingRunningFinalizer);
@@ -334,10 +358,11 @@ internal static void runfinq() {
                 f.Value.fn = default!;
                 f.Value.arg = default!;
                 f.Value.ot = default!;
-                atomic.Store(fb.of(finblock.Ꮡcnt), i - 1);
+                atomic.Store(fb.of(finBlock.Ꮡcnt), i - 1);
             }
             var next = fb.Value.next;
             @lock(Ꮡfinlock);
+            finexecuted += (uint64)n;
             fb.Value.next = finc;
             finc = fb;
             unlock(Ꮡfinlock);
@@ -769,13 +794,19 @@ private static class GoFinalizerQueue
     internal const int DrainBudgetMs = 10_000;
 
     // This goroutine's START FUNCTION, as an identity and never as something to call. Go's fing is
-    // `go runfinq()` (createfing), and `isSystemGoroutine` keys on exactly that start function
-    // (`f.funcID == abi.FuncID_runfinq`) to decide both that fing is a system goroutine and that it
-    // counts as a USER one while a finalizer body is running. Naming runfinq here reproduces that
-    // classification with the fact Go uses. The converted runfinq body would die in gopark if it
-    // were ever invoked; a method group is a compile-checked way to take its identity without
-    // reflection and without invoking it.
-    private static readonly global::System.Reflection.MethodBase s_runfinq = ((global::System.Action)runfinq).Method;
+    // `go runFinalizers()` (createfing), and `isSystemGoroutine` keys on exactly that start function
+    // (`f.funcID == abi.FuncID_runFinalizers`) to decide both that fing is a system goroutine and
+    // that it counts as a USER one while a finalizer body is running. Naming runFinalizers here
+    // reproduces that classification with the fact Go uses. The converted runFinalizers body would
+    // die in gopark if it were ever invoked; a method group is a compile-checked way to take its
+    // identity without reflection and without invoking it. (Go 1.24 named it runfinq.)
+    private static readonly global::System.Reflection.MethodBase s_runFinalizers = ((global::System.Action)runFinalizers).Method;
+
+    // Go 1.26's finqueued/finexecuted for the finalizers this queue carries (finReadQueueStats adds
+    // them). Cleanups are not counted: Go 1.26 queues those separately (mcleanup.go). Written from the
+    // CLR finalizer thread and from the runner, so they move by Interlocked.
+    internal static long s_finalizersQueued;
+    internal static long s_finalizersExecuted;
 
     // TWO ENTRY KINDS, ONE RUNNER (COORD c58b4c01d). A FINALIZER entry carries the Go value its body
     // must be invoked with, and dispatch re-derives the argument by Go's binding rule. A CLEANUP
@@ -855,6 +886,9 @@ private static class GoFinalizerQueue
         // This is our wakefing: Go sets fingWake before waking the parked finalizer goroutine.
         ᏑfingStatus.Or(fingWake);
 
+        if (!isCleanup)
+            global::System.Threading.Interlocked.Increment(ref s_finalizersQueued);
+
         s_queue.Enqueue((fn, target, isCleanup, gate));
         s_pending.Release();
     }
@@ -887,7 +921,7 @@ private static class GoFinalizerQueue
         // and is what keeps the first two unchanged (UserCount subtracts system goroutines and
         // tracebackothers skips them); the profile sees it only through the user-work window below,
         // which is Go's fingStatus&fingRunningFinalizer rule.
-        using global::go.golib.Goroutine.Scope goroutine = global::go.golib.Goroutine.EnterSystem(s_runfinq);
+        using global::go.golib.Goroutine.Scope goroutine = global::go.golib.Goroutine.EnterSystem(s_runFinalizers);
 
         while (true)
         {
@@ -1022,7 +1056,10 @@ private static class GoFinalizerQueue
             // cleanups re-attach to it now, BEFORE the queue can report idle, so a runtime.GC()
             // that waited for this finalizer also sees its cleanups registered again (A11).
             if (!item.IsCleanup)
+            {
                 item.Gate?.Finalized(item.Target!);
+                global::System.Threading.Interlocked.Increment(ref s_finalizersExecuted);
+            }
 
             global::System.Threading.Volatile.Write(ref s_runningSince, 0L);
 
