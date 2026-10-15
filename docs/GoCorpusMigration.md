@@ -1203,6 +1203,24 @@ done
   survivor proposal and the fifth rehearsal's re-derivation, agreeing).
 - **(f) Flat rows** (no `windows`/`linux`/`darwin` segment) that are not in the same class in all three
   flavour files are posted by name: an `-Apply` deletes a flat file on one flavour's selection alone.
+
+> **Amendment 2026-10-15 — FILE rows in the expected set (the Go 1.26 hop).** This hop's list is
+> **`docs/phase4/h5-removals-go126.txt`**, so read it in place of `h5-removals.txt` in step 1. It names
+> `internal/runtime/syscall` by its **9 files**, not as a directory. That directory survives as the parent of
+> the 1.26 packages `internal/runtime/syscall/linux` and `/windows`, and its 1.24 per-GOOS folder `linux/` is the
+> new package's own path, so a directory row would claim the new package's files. Step 3 as written reads only
+> directory rows: `[ -d "$D" ]` skips a file, and `under.awk` matches only a row's directory prefixes. The 9 files
+> would map to `-`, and (a) would STOP on linux. For a list that carries file rows, make two changes:
+> - **`under.awk`: an exact path wins first.** In the second rule, replace `hit = ""` with
+>   `hit = ($2 in d) ? $2 : ""`, ahead of the prefix loop.
+> - **Step 3's loop: `[ -e "$D" ]` in place of `[ -d "$D" ]`.** `find` given a file prints it when it passes the
+>   tests, so a seeded `.cs` named by file is counted in (b) as its own key. The non-`.cs` file rows (csproj,
+>   README, icons) join (c)'s residue.
+<!-- C2, 2026-10-15, at 83288cc484: under.awk run over h5-removals-go126.txt and four synthetic rows. As written,
+     internal/runtime/syscall/linux/defs_linux.cs (DELETE-ABSENT, package not in std at target) mapped to `-`. With the
+     exact-path arm it mapped to itself, a removed directory's row (internal/trace/event/go122/...) still mapped to its
+     directory, and a new 1.26 package's file under internal/runtime/syscall/linux/ stayed `-`, unclaimed. NOT MEASURED
+     against a real H5c dry run; the i9 runs that at H5. Derivation of the 20 rows: the file's own header. -->
 <!-- The list's own header, 826045a74:docs/phase4/h5-removals.txt:14-19 ("removed BY THE SEEDED RE-CONVERT ... never by hand"), applied
      through this step: C1 fa98268df §2, COORD db6d9462f §3.3, COORD 93c967d4d (boarded as the executable form), COORD 210d49537. Per-file
      amendment: COORD 0b5d72d0e §2 and c58b4c01d §3. Two-pin key: COORD 0b5d72d0e §2; C1 e8d90a664 §2 (produced = it or its .cs.auto
