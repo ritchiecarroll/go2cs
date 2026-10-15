@@ -450,7 +450,7 @@ internal static void initHighResTimer() {
 }
 
 //go:linkname canUseLongPaths internal/syscall/windows.CanUseLongPaths
-internal static bool canUseLongPaths { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, "go.@internal.syscall.windows_package", "internal.syscall.windows")] get => global::go.LinknameVar<bool>.Get("go.@internal.syscall.windows_package, internal.syscall.windows", "CanUseLongPaths"); set => global::go.LinknameVar<bool>.Set("go.@internal.syscall.windows_package, internal.syscall.windows", "CanUseLongPaths", value); }
+public static bool canUseLongPaths;
 
 // initLongPathSupport enables long path support.
 internal static void initLongPathSupport() {

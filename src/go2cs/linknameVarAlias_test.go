@@ -93,9 +93,14 @@ func TestRecurseLinknameVarAlias(t *testing.T) {
 			"func main() {\n\tprintln(Aliased, Unregistered, NoHandle, *addressOf())\n}\n")
 
 	// The STORAGE side — the shape runtime has. All three names are unexported in Go, so only the
-	// publicize arm can make them reachable from the forwarder's assembly.
+	// publicize arm can make them reachable from the forwarder's assembly. `aliased` carries Go's own
+	// TWO-argument directive pointing UP at the forwarder, as runtime's canUseLongPaths and
+	// executablePath do: read as a pull, it is refused as a cycle (main imports store) and was emitted
+	// LATE-BOUND, an `internal` property reaching the forwarder by name, which forwards straight back
+	// (H7 pass 5: CS0117 at internal/syscall/windows/syscall_windows.cs:17 and
+	// os/darwin/executable_darwin.cs:12). Registered storage is not a pull: it keeps its field.
 	writeModuleFile(t, filepath.Join(appDir, "store", "store.go"),
-		"package store\n\nvar aliased bool\n\nvar addressed bool\n\nvar noHandle bool\n\nvar untouched bool\n\n"+
+		"package store\n\nimport _ \"unsafe\"\n\n//go:linkname aliased "+forwarderPath+".Aliased\nvar aliased bool\n\nvar addressed bool\n\nvar noHandle bool\n\nvar untouched bool\n\n"+
 			"func Touch() bool { return aliased || addressed || noHandle || untouched }\n")
 
 	goRoot := build.Default.GOROOT
@@ -143,6 +148,10 @@ func TestRecurseLinknameVarAlias(t *testing.T) {
 	// name is unexported.
 	if !strings.Contains(storeCs, "public static bool aliased;") {
 		t.Errorf("alias storage not publicized for the cross-assembly forwarding property:\n%s", storeCs)
+	}
+
+	if strings.Contains(storeCs, "LinknameVar<") {
+		t.Errorf("alias storage was emitted as a late-bound pull of its own forwarder (a cycle, and internal):\n%s", storeCs)
 	}
 
 	// A handle with no registry row keeps its plain field — the registry is what decides, and Go's
