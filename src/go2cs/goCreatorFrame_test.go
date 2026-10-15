@@ -130,6 +130,7 @@ func main() {
 }
 
 func TestGoCreatorFramesAreNotInlined(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertGoCreatorFixture(t)
 
 	// A func literal cannot be partial, so a marked literal keeps the attribute itself.

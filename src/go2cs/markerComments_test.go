@@ -27,6 +27,7 @@ import (
 )
 
 func TestGoCommentsAreNeverMarkers(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

@@ -41,6 +41,7 @@ import (
 // TestFunctionLocalTypeLifts converts one production module carrying every local-declaration shape
 // reflect exercises and pins all three rules off the single emission.
 func TestFunctionLocalTypeLifts(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

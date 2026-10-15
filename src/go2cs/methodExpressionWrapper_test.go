@@ -93,6 +93,7 @@ func main() {
 }
 
 func TestMethodExpressionWrapperMark(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := strings.ReplaceAll(convertMethodExpressionWrapperFixture(t), "\r\n", "\n")
 
 	arms := []struct {

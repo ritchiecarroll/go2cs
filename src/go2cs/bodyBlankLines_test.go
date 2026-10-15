@@ -309,6 +309,7 @@ func blankAbove(t *testing.T, lines []string, text string) bool {
 }
 
 func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, bodyBlankLinesSource)
 
 	for _, c := range []struct {
@@ -447,6 +448,7 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 }
 
 func TestBodyBlankLinesKeptWithoutComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	pkgDir := filepath.Join(root, "app")
 
@@ -552,6 +554,7 @@ func main() {
 `
 
 func TestBodyBlankLinesNotDoubledWithoutComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithoutComments(t, doubledGapSource)
 
 	for i := 1; i < len(lines); i++ {
@@ -655,6 +658,7 @@ func main() {
 `
 
 func TestNoBlankLineBeforeDeclStatementDoc(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, declDocGapSource)
 
 	for _, c := range []struct {

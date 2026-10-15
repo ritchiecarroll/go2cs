@@ -80,6 +80,7 @@ func linknameCycleTestOptions() Options {
 // back at the top of linknamePullWouldCycle. This test then reports that the pull is allowed, which
 // is exactly the emission that produced the six project cycles.
 func TestLinknamePullCycleGuardAnswersWithoutTheConvertSetGraph(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	goRoot := testGoRoot(t)
 
 	// currentPackagePath and packageSourceDir are what resetPackageState sets from the loaded
@@ -174,6 +175,7 @@ func toolchainDepsContain(t *testing.T, goRoot string, target string, pkg string
 // `closure.Contains(targetPath)` instead of `closure.Contains(currentPackagePath)`, inverting the
 // direction — and the two answers stop matching on the upward case.
 func TestLinknamePullCycleGuardAgreesWithTheConvertSetGraph(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	goRoot := testGoRoot(t)
 	options := linknameCycleTestOptions()
 
@@ -256,6 +258,7 @@ func TestLinknamePullCycleGuardAgreesWithTheConvertSetGraph(t *testing.T) {
 //
 // RED PROOF: return false instead of true from the `!resolved` arm of linknamePullWouldCycle.
 func TestLinknamePullCycleGuardRefusesAnUnanswerableTarget(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	goRoot := testGoRoot(t)
 
 	linknameCycleTestState(t, nil, "runtime", filepath.Join(goRoot, "src", "runtime"), map[string]*packages.Package{})
@@ -281,6 +284,7 @@ func TestLinknamePullCycleGuardRefusesAnUnanswerableTarget(t *testing.T) {
 // RED PROOF: delete the importedPackages arm. This test still passes through the load path when a
 // loader is available, so it asserts the SHORTCUT specifically — a target that could never load.
 func TestLinknamePullCycleGuardTrustsTheCurrentPackageClosure(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	const target = "go2cs.invalid/provider"
 
 	linknameCycleTestState(t, nil, "go2cs.invalid/consumer", "", map[string]*packages.Package{

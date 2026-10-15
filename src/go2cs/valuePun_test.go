@@ -57,6 +57,7 @@ func platformWidth(i int) uint64 { return *(*uint64)(unsafe.Pointer(&i)) }
 //
 // RED at fa18863b94: every accepted body emitted `heap(…)` and `~Ꮡx.Reinterpret<T, U>()`.
 func TestValuePunReadRendersAsABitcastWithoutABox(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

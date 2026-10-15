@@ -87,6 +87,7 @@ func main() {
 `
 
 func TestCompositeLitCommentsKeepGoPlacement(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	lines := convertWithComments(t, compositeLitCommentsSource)
 
 	// Each row label ends its own row.

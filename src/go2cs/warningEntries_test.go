@@ -111,6 +111,7 @@ func main() {
 // folded local const (CS0219), exithook's never-written `running` and a blank package var (CS0649),
 // time's `uint64(nsec) |` (CS0675).
 func TestWarningEntryFactsFollowTheEmission(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 
 	dir := convertWarningEntriesFixture(t, root, "wef", map[string]string{
@@ -238,6 +239,7 @@ func main() {}
 // under which C# never reports CS0649 on an internal field (net/http, runtime and time all carry it).
 // The CS0219 fact in the same package still holds.
 func TestWarningEntriesNoUnassignedFieldUnderTheFriendGrant(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 
 	dir := convertWarningEntriesFixture(t, root, "wfg", map[string]string{
@@ -278,6 +280,7 @@ func TestRunning(t *testing.T) {
 // which folds, so the declaration `slice<_C_int> mib = default!;` is never read. A naked return
 // reads every named result, so a result that one reaches holds no fact.
 func TestWarningEntriesNamedResultReadOnlyThroughAFold(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 
 	dir := convertWarningEntriesFixture(t, root, "wnr", map[string]string{

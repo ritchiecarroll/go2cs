@@ -70,6 +70,7 @@ func TestGlobalQualifyForcingTarget(t *testing.T) {
 // the shadow lives in the test-variant class, so the `-stdlib` and `-tests` emissions of the
 // production files stay identical).
 func TestForcingTargetShadowedOnlyByOwnClassType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	previousName := packageName
 	t.Cleanup(func() { packageName = previousName })
 
@@ -135,6 +136,7 @@ func TestForcingTargetShadowedOnlyByOwnClassType(t *testing.T) {
 // reduced — and reads the emitted hook back. This is the end-to-end half: the unit test above pins
 // the decision, this pins that the decision reaches the emitted bytes.
 func TestTestLocalTypeShadowRootsForcingHook(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}

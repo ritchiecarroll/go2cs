@@ -74,6 +74,7 @@ func convertS11Fixture(t *testing.T) (mainCs string, packageInfo string) {
 // naming the field as reflection sees it, for a local carrier, an imported one, each name of a grouped field
 // and an embedded field.
 func TestDescriptorCarriersAreRecordedOnTheType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -127,6 +128,7 @@ func TestDescriptorCarriersAreRecordedOnTheType(t *testing.T) {
 // declared whole on the package's accessibility record, and a lifted function-local defined type of each wrapper
 // kind (slice, map, number, pointer) carries its Go name on its accessibility record.
 func TestLocalNamesAreRecordedOnTheType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

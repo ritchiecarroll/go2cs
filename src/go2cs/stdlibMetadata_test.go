@@ -200,6 +200,7 @@ func TestPublishedStdLibScope(t *testing.T) {
 // `go2cs -recurse=nuget` unusable without a deploy-core source deployment
 // (golang.org/x/sys/windows, in the README's fatih/color walkthrough).
 func TestRecurseNuGetResolvesForeignImplements(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}
@@ -484,6 +485,7 @@ func TestRecurseNuGetPinsTheCompileRidToTheTarget(t *testing.T) {
 // (CS0426) and non-generic `ΔSockaddr` (CS0305) on Linux. The windows conversion is the control: the
 // reference flavor's aliases are unchanged.
 func TestRecurseNuGetImportsTheTargetFlavorsAliases(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}

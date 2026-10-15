@@ -120,6 +120,7 @@ func rewrittenSources(t *testing.T, sources []string) []string {
 }
 
 func TestUnchangedReconversionLeavesEverySourceUntouched(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -145,6 +146,7 @@ func TestUnchangedReconversionLeavesEverySourceUntouched(t *testing.T) {
 // (platformCensus.go snapshotConvertedRoot; h8-comparand.sh reads its root the same way), so a census conversion must
 // still rewrite every source: the guard against incremental writes reaching it.
 func TestCensusConversionStillRewritesEverySource(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -172,6 +174,7 @@ func TestCensusConversionStillRewritesEverySource(t *testing.T) {
 // marker pass, so the byte compare alone cannot keep its timestamp; the resolved file is compared with what it held
 // before, and an unchanged one gets its time back.
 func TestUnchangedReconversionKeepsMarkerBearingSourcesUntouched(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -218,6 +221,7 @@ func Describe() string {
 // exactly these two, byte-identical. Their previous state is remembered before the re-seed and an unchanged one gets
 // its time back.
 func TestUnchangedTestsReconversionKeepsMetadataAnchorsUntouched(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -295,6 +299,7 @@ func TestUnchangedTestsReconversionKeepsMetadataAnchorsUntouched(t *testing.T) {
 // four packages in the tree with that anchor (crypto/ecdh, crypto/sha3, net/netip, text/tabwriter) moved 15 .cs on an
 // unchanged re-conversion, byte-identical.
 func TestUnchangedTestsReconversionThroughRecompileFallbackKeepsSourcesUntouched(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -385,6 +390,7 @@ func TestString(t *testing.T) {
 // to the same bytes. Measured on the -tests footprint: sync/rwmutex.cs.auto (RLocker's rlockerжLocker), byte-identical,
 // its time moved. The marker-bearing .cs sources take remember/restore for exactly this; the sibling did not.
 func TestUnchangedReconversionKeepsMarkerBearingAutoSiblingUntouched(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -454,6 +460,7 @@ func NewLocker() Locker { return &mutex{} }
 // process-wide and first-wins, so that path must restore its own siblings too, or the entry outlives the conversion and
 // shadows the next one's (a later run of the same package in one process would restore a stale time).
 func TestFullyHandOwnedPackageLeavesNoRememberedSibling(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}

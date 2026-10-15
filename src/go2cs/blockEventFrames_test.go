@@ -118,6 +118,7 @@ func main() {
 }
 
 func TestSkipCountedWalkerHopsAreNotInlined(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertBlockEventFixture(t)
 
 	for _, name := range []string{"save", "blockevent", "profEvent", "stackOf"} {
