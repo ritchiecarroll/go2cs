@@ -36,7 +36,7 @@ Before, `src/core/strings/builder.cs`:
 
 After, the same file:
 
-<!-- source: src/core/strings/builder.cs:48 -->
+<!-- source: src/core/strings/builder.cs:54 -->
 ```csharp
 public static nint Len(this ref Builder b) {
 ```
@@ -101,7 +101,7 @@ Before, `src/core/time/time.cs`:
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:910 -->
+<!-- source: src/core/time/time.cs:937 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -129,7 +129,7 @@ Before, `src/core/sort/sort.cs`:
 
 After, the same file:
 
-<!-- source: src/core/sort/sort.cs:113 -->
+<!-- source: src/core/sort/sort.cs:119 -->
 ```csharp
 partial struct IntSlice /*[]nint*/;
 ```
@@ -165,7 +165,7 @@ Before, `src/core/sort/sort.cs`:
 
 After, the same file:
 
-<!-- source: src/core/sort/sort.cs:83-87 -->
+<!-- source: src/core/sort/sort.cs:86-90 -->
 ```csharp
 partial struct reverse {
     // This embedded Interface permits Reverse to use the methods of
@@ -240,7 +240,7 @@ internal static nint format(this Duration d, [GoArrayDims(32)] ж<array<byte>> �
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:953 -->
+<!-- source: src/core/time/time.cs:975 -->
 ```csharp
 internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
 ```
@@ -268,7 +268,7 @@ Before, `src/core/unicode/utf8/utf8.cs`:
 
 After, the same file:
 
-<!-- source: src/core/unicode/utf8/utf8.cs:213 -->
+<!-- source: src/core/unicode/utf8/utf8.cs:218 -->
 ```csharp
 public static (rune r, nint size) DecodeRuneInString(sstring s) {
 ```
