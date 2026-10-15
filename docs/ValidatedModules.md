@@ -8,15 +8,14 @@ only when, in every package the run reached, each test either matched `go test` 
 failure, as something the converted code does not do.
 
 Each module's pages are written by the converter beside its conversion and copied here unedited:
-the module summary sums the per-package proof pages, and each proof page lists every verdict. For
-`golang.org/x/sync`, `github.com/ritchiecarroll/hashset` and `github.com/spf13/pflag` the summary is the
-`VALIDATION.md` their NuGet package carries, below the package's notice.
+the module summary sums the per-package proof pages, and each proof page lists every verdict. Every
+module's summary is the `VALIDATION.md` its NuGet package carries, below the package's notice.
 
 | Module | Version | Packages | Matched | Disclosed | Platform | Proof |
 |:--|:--|--:|--:|--:|:--|:--|
 | `golang.org/x/sync` | v0.19.0 | 4 | 27 | 1 | `linux/amd64` | [summary](validation/modules/golang.org/x/sync@v0.19.0/MODULE.md) |
-| `github.com/google/uuid` | v1.6.0 | 1 | 54 | 0 | `windows/amd64`, `linux/amd64` | [summary](validation/modules/github.com/google/uuid@v1.6.0/MODULE.md) |
-| `github.com/golang-jwt/jwt/v5` | v5.3.1 | 2 | 189 | 0 | `windows/amd64`, `linux/amd64` | [summary](validation/modules/github.com/golang-jwt/jwt/v5@v5.3.1/MODULE.md) |
+| `github.com/google/uuid` | v1.6.0 | 1 | 54 | 0 | `linux/amd64` | [summary](validation/modules/github.com/google/uuid@v1.6.0/MODULE.md) |
+| `github.com/golang-jwt/jwt/v5` | v5.3.1 | 2 | 189 | 0 | `linux/amd64` | [summary](validation/modules/github.com/golang-jwt/jwt/v5@v5.3.1/MODULE.md) |
 | `github.com/ritchiecarroll/hashset` | v1.0.0 | 1 | 37 | 0 | `linux/amd64` | [summary](validation/modules/github.com/ritchiecarroll/hashset@v1.0.0/MODULE.md) |
 | `github.com/spf13/pflag` | v1.0.9 | 1 | 177 | 0 | `linux/amd64` | [summary](validation/modules/github.com/spf13/pflag@v1.0.9/MODULE.md) |
 
@@ -31,9 +30,9 @@ their own each matched all 28 verdicts, and a third, made while the machine was 
 failed `TestWeightedAcquire` once; those proof pages are not reproduced here. That test depends on timing, so the
 result above is claimed only for a machine that is not busy with other work.
 
-**`github.com/google/uuid` and `github.com/golang-jwt/jwt/v5`:** each was read once on `windows/amd64` (the proof
-pages linked above) and once on `linux/amd64`, from the same module sources (their module sums match), and both
-platforms read the same counts with no test differing. `uuid`'s `TestClockSeqRace` skips on both sides. The
-`linux/amd64` run was made as root, which can hide a permission defect in how a module is staged, so it vouches for
-the counts, not for staging under an ordinary account; its proof pages are not reproduced here. `jwt/v5` also holds
-`cmd/jwt` and `test`, which have no tests of their own.
+**`github.com/google/uuid` and `github.com/golang-jwt/jwt/v5`:** the proof pages linked above are the `linux/amd64`
+readings their packages carry. Each module was also read on `windows/amd64` from the same module sources (their
+module sums match), with the same counts and no test differing; those proof pages are not reproduced here.
+`uuid`'s `TestClockSeqRace` skips on both sides. `uuid`'s `TestVersion6` has an upstream race that can fail it on
+either runtime; its proof page cites the race without disclosing it, and the proof is a run in which both sides
+passed. `jwt/v5` also holds `cmd/jwt` and `test`, which have no tests of their own.

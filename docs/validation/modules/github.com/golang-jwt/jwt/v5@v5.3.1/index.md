@@ -7,12 +7,15 @@ comparison, and written beside the conversion: it is not a row of go2cs's standa
 
 *Validated 2026-10-09*
 
-**186 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**186 matched · 0 disclosed** — Go 1.24.13, `linux/amd64`, converted package
 `src/github.com/golang-jwt/jwt/v5`.
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 linux/amd64`, with no controlling terminal.
 
 Both sides were built with `-tags purego,math_big_pure_go,safe`.
+
+Input digest `sha256-9647af3692e22d534f884f8a59f731746d35bc4c31966ad54c405af23b24eb78`: the package's Go sources, conversion options, target and converter, as its
+project records them (`GoInputDigest`).
 
 ## Verdicts
 
