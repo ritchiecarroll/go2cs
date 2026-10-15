@@ -45,6 +45,15 @@
 
   The net is −1, in `runtime`.
 
+  **2026-10-15, end to end now reads 79.** The census relocation fix (S1, `src/handown-upstream.ps1`, on
+  the tip at `d971812478`) also closed the go124 audit's OQ-6 hole. `internal/syscall/windows/exec_windows_test.cs`
+  sits in a package whose own last segment is `windows`, so the old fold mapped it to
+  `internal/syscall/exec_windows_test.go`, a file in no release, and it read no-upstream-counterpart. It
+  now maps to its real upstream: substantive on leg 1 (+3/−2), untouched on leg 2.
+  - The counts at `d971812478`, end to end, are substantive 79 and no-upstream 63.
+  - The row is in P2's share (`internal/syscall/windows`). The C1 + G share stays 31.
+  - The same fix reads `internal/runtime/syscall/linux/syscall_linux_impl.cs` as RELOCATED (§2.1).
+
 <!-- declchg, the declaration differ (Go, go/ast; built with the 1.24.13 toolchain, GOTOOLCHAIN=local):
   load(path): parse without comments; for each top-level decl record a key and a rendering:
     FuncDecl  -> "func " + Recv + "." + Name   (receiver type unwrapped through *, [T], [T,U])
