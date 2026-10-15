@@ -60,9 +60,17 @@
 // assembly both sides see, and GoAsyncIO is the descriptor-keyed rendezvous: the poller registers a
 // readiness sink for its descriptor at pollOpen, and the callback below signals it knowing only the
 // descriptor and the mode -- which is all a completion callback CAN know. MODE is known from the
-// WRAPPER, not from the operation: WSARecv/AcceptEx are always the read operation and
-// WSASend/ConnectEx always the write one, because each FD has exactly one rop and one wop for its
-// lifetime.
+// WRAPPER, not from the operation: WSARecv/AcceptEx are always a read and WSASend/ConnectEx always a
+// write.
+//
+// GO 1.26 POOLS THE OPERATIONS, which is why a record is BOUND as well as keyed. Through Go 1.24
+// each FD owned exactly one rop and one wop for its lifetime, so the key alone fixed the descriptor
+// and the mode. Go 1.26's internal/poll takes every operation from a process-wide sync.Pool
+// (fd_windows.go's operationPool), and the corpus's sync.Pool really reuses, so one key arrives for
+// several sockets and for both modes. operationFor therefore asks golib for the record bound to THIS
+// (descriptor, mode): GoAsyncIO.GetOrBindOperationState retires a record bound to another pair
+// (disposing it, which frees its control block and drops it from its socket's list) and builds a new
+// one. Retiring is safe because execIO puts an operation back in the pool only after harvesting it.
 //
 // WHERE THE CLR ASSOCIATION IS MADE, and why it is LAZY. Binding happens at the FIRST SUBMIT, not at
 // pollOpen (design §4.2 as amended at S2). Go's poller REJECTS completions it does not own --
@@ -173,6 +181,14 @@ partial class syscall_package
                 m_operations.Add(operation);
         }
 
+        // A record retired by a re-bind (see the file header) leaves the list it was tracked in, so
+        // this socket's teardown does not visit it again.
+        internal void Untrack(OverlappedOp operation)
+        {
+            lock (m_operations)
+                m_operations.Remove(operation);
+        }
+
         public void Dispose()
         {
             List<OverlappedOp> operations;
@@ -187,9 +203,11 @@ partial class syscall_package
                 m_operations.Clear();
             }
 
+            // Removal is conditional on the key still naming THIS record: a pooled key may have been
+            // re-bound to another socket's live record since it was tracked here.
             foreach (OverlappedOp operation in operations)
             {
-                GoAsyncIO.RemoveOperationState(operation.Key);
+                GoAsyncIO.RemoveOperationState(operation.Key, operation);
                 operation.Dispose();
             }
 
@@ -203,12 +221,12 @@ partial class syscall_package
 
     // ---- The per-operation record ----------------------------------------------------------------
 
-    // One record per (FD, mode) for the FD's lifetime, holding every piece of state the kernel is
-    // allowed to see: the NativeOverlapped the operation is identified by, the native WSABUF array or
-    // accept staging block, and -- crucially -- the ж<byte> BOXES whose pins hold the caller's own
-    // buffers still. Holding the address would not be enough: the pin is a GCHandle owned by that one
-    // box and released with it, so a later InitBuf dropping the last reference to a box the kernel is
-    // still writing through would unpin memory mid-flight.
+    // One record per binding of an operation to an (FD, mode) pair (see the file header), holding
+    // every piece of state the kernel is allowed to see: the NativeOverlapped the operation is
+    // identified by, the native WSABUF array or accept staging block, and -- crucially -- the ж<byte>
+    // BOXES whose pins hold the caller's own buffers still. Holding the address would not be enough:
+    // the pin is a GCHandle owned by that one box and released with it, so a later InitBuf dropping
+    // the last reference to a box the kernel is still writing through would unpin memory mid-flight.
     private sealed unsafe class OverlappedOp : IGoAsyncOperation, IDisposable
     {
         internal readonly SocketBinding Binding;
@@ -301,6 +319,7 @@ partial class syscall_package
 
             m_disposed = true;
 
+            Binding.Untrack(this);
             releaseOverlapped();
             m_preallocated.Dispose();
 
@@ -356,7 +375,7 @@ partial class syscall_package
     {
         nuint descriptor = (nuint)(uintptr)handle;
 
-        return (OverlappedOp)GoAsyncIO.GetOrCreateOperationState(Ꮡoverlapped,
+        return (OverlappedOp)GoAsyncIO.GetOrBindOperationState(Ꮡoverlapped, descriptor, mode,
             () => s_operationFactory(descriptor, Ꮡoverlapped, mode));
     }
 

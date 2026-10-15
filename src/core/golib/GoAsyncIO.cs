@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace go.golib;
@@ -52,7 +53,17 @@ public static class GoAsyncIO
     // golib must not know what a `*Overlapped` is. Equality is the key's own — for a go2cs pointer
     // that is (source box, field identity), which is exactly the property that makes three separate
     // mints of `&o.o` at three call sites resolve to ONE record.
-    private static readonly ConcurrentDictionary<object, Lazy<object>> s_operationState = new();
+    private static readonly ConcurrentDictionary<object, operationSlot> s_operationState = new();
+
+    // One operation's state, plus the (descriptor, mode) a submit bound it to. A slot made by
+    // GetOrCreateOperationState alone is UNBOUND and matches any binding; a slot made by
+    // GetOrBindOperationState matches only its own pair (see that method for why).
+    private sealed class operationSlot(Lazy<object> state, bool bound, nuint descriptor, nint mode)
+    {
+        internal readonly Lazy<object> State = state;
+
+        internal bool Matches(nuint other, nint otherMode) => !bound || (descriptor == other && mode == otherMode);
+    }
 
     // Completion work an operation owes, keyed the same way its state is (netpoll design SS4.8).
     // Separate from s_operationState because it is per-SUBMISSION and transient, while the state is
@@ -164,7 +175,56 @@ public static class GoAsyncIO
     /// <remarks>See <see cref="GetOrCreateDescriptorState"/> for why this is not a bare
     /// <c>GetOrAdd</c>.</remarks>
     public static object GetOrCreateOperationState(object key, Func<object> factory) =>
-        s_operationState.GetOrAdd(key, _ => new Lazy<object>(factory, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+        s_operationState.GetOrAdd(key, _ => new operationSlot(new Lazy<object>(factory, LazyThreadSafetyMode.ExecutionAndPublication), false, 0, 0)).State.Value;
+
+    /// <summary>
+    /// Gets the state for one operation BOUND to <paramref name="descriptor"/> and
+    /// <paramref name="mode"/>, creating it exactly once, and retiring a record the same key holds
+    /// for a different binding.
+    /// </summary>
+    /// <param name="key">Pointer the operation is named by.</param>
+    /// <param name="descriptor">Descriptor this submission is for.</param>
+    /// <param name="mode">Submitting package's own mode value.</param>
+    /// <param name="factory">Builds the state on the one thread that wins the race.</param>
+    /// <returns>The one state object for this operation and binding.</returns>
+    /// <remarks>
+    /// <para>
+    /// A record keeps what it was created for: its OS association belongs to one descriptor, and its
+    /// completion signals one mode. Through Go 1.24 that matched the key's life, because each FD
+    /// owned exactly one read and one write operation. Go 1.26's internal/poll takes every operation
+    /// from a process-wide <c>sync.Pool</c> (<c>fd_windows.go</c>'s <c>operationPool</c>), so one
+    /// key is reused across descriptors and across modes, and a record found by key alone would
+    /// submit on the wrong association and wake the wrong waiter.
+    /// </para>
+    /// <para>
+    /// So a key reused for a different pair gets a NEW record. The old one is removed with any
+    /// pending completion work and disposed when disposable. That is safe because a pooled
+    /// operation goes back to the pool only after <c>execIO</c> has harvested it: nothing is in
+    /// flight on the record being retired.
+    /// </para>
+    /// </remarks>
+    public static object GetOrBindOperationState(object key, nuint descriptor, nint mode, Func<object> factory)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(factory);
+
+        while (true)
+        {
+            operationSlot slot = s_operationState.GetOrAdd(key, _ =>
+                new operationSlot(new Lazy<object>(factory, LazyThreadSafetyMode.ExecutionAndPublication), true, descriptor, mode));
+
+            if (slot.Matches(descriptor, mode))
+                return slot.State.Value;
+
+            if (s_operationState.TryRemove(new KeyValuePair<object, operationSlot>(key, slot)))
+            {
+                s_operationCompletions.TryRemove(key, out _);
+
+                if (slot.State.IsValueCreated)
+                    (slot.State.Value as IDisposable)?.Dispose();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets the submitting package's state for one operation without creating it.
@@ -174,7 +234,7 @@ public static class GoAsyncIO
     /// <returns><c>true</c> when a state object exists for this operation.</returns>
     public static bool TryGetOperationState(object key, out object? state)
     {
-        state = s_operationState.TryGetValue(key, out Lazy<object>? lazy) ? lazy.Value : null;
+        state = s_operationState.TryGetValue(key, out operationSlot? slot) ? slot.State.Value : null;
 
         return state is not null;
     }
@@ -191,7 +251,34 @@ public static class GoAsyncIO
         // LATER operation that reuses this key inherit a decode meant for the dead one.
         s_operationCompletions.TryRemove(key, out _);
 
-        return s_operationState.TryRemove(key, out Lazy<object>? lazy) && lazy.IsValueCreated ? lazy.Value : null;
+        return s_operationState.TryRemove(key, out operationSlot? slot) && slot.State.IsValueCreated ? slot.State.Value : null;
+    }
+
+    /// <summary>
+    /// Removes one operation's state only while <paramref name="key"/> still names
+    /// <paramref name="state"/>.
+    /// </summary>
+    /// <param name="key">Pointer the operation is named by.</param>
+    /// <param name="state">The state the caller is retiring.</param>
+    /// <returns><c>true</c> when that state was removed.</returns>
+    /// <remarks>
+    /// For an owner retiring records it created, such as a descriptor's teardown: since
+    /// <see cref="GetOrBindOperationState"/> can re-bind a key to a NEW record for another
+    /// descriptor, removing by key alone could retire that other descriptor's live record.
+    /// </remarks>
+    public static bool RemoveOperationState(object key, object state)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        if (!s_operationState.TryGetValue(key, out operationSlot? slot) || !slot.State.IsValueCreated ||
+            !ReferenceEquals(slot.State.Value, state))
+            return false;
+
+        if (!s_operationState.TryRemove(new KeyValuePair<object, operationSlot>(key, slot)))
+            return false;
+
+        s_operationCompletions.TryRemove(key, out _);
+        return true;
     }
 
     /// <summary>
@@ -289,10 +376,11 @@ public static class GoAsyncIO
         Func<nuint, object, nint, object> factory = s_operationFactory
             ?? throw new InvalidOperationException("GoAsyncIO: no operation factory registered");
 
-        // GetOrCreateOperationState's Lazy(ExecutionAndPublication) is what holds this to ONE record
+        // GetOrBindOperationState's Lazy(ExecutionAndPublication) is what holds this to ONE record
         // per waiter: a bare GetOrAdd runs its factory more than once under contention, and each
-        // discarded record here owns native resources nothing would ever free (measured at S2b).
-        object state = GetOrCreateOperationState(key, () => factory(descriptor, key, mode));
+        // discarded record here owns native resources nothing would ever free (measured at S2b). The
+        // binding is what keeps a POOLED operation (Go 1.26) from reusing another descriptor's record.
+        object state = GetOrBindOperationState(key, descriptor, mode, () => factory(descriptor, key, mode));
 
         return state is IGoAsyncOperation operation
             ? operation.RearmForSubmit()
