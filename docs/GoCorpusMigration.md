@@ -1484,8 +1484,15 @@ So:
   test companion is unmarked and `_impl`-named, and the converter never emits it. i9's run took runtime's
   `export_impl_test.cs` and `export_windows_impl_test.cs` and restored them before committing.
 - Restore from HEAD what the run rewrites outside its scope: README Tests badges (it demotes them to "not yet
-  validated"; badges are the bank's) and `.cs.auto` review siblings (H6's).
-- Keep its `initᴛᴛtests()` hook in `package_init.cs`.)*
+  validated"; badges are the bank's), `.cs.auto` review siblings (H6's), and a production `package_init.cs` it
+  gives an `initᴛᴛtests()` hook. The hook item is *superseded 2026-10-15 (COORD, the H7 re-emit ruling)*:
+  - this note first said "keep" the hook;
+  - a file both modes write must come out identical from either, and `-stdlib` emits no hook (an unimplemented
+    partial is erased);
+  - so the `-stdlib` form is the record. Revert the hook and name it in the post, until G's seat makes `-tests` add
+    it only when the tests project supplies an implementer.
+  - The H7 consolidated re-emit (`2f669be61c`) removed the two that i9's follow-up 2 had committed
+    (internal/trace, runtime/windows).)*
 
 Then the marker census re-measured in `<tree>`, T0 phantoms restored per §4, and staging by explicit path —
 never `git add -A` (floor 8). `<tree>` is a worktree ON the version branch COORD names (checked out at `<H2>`, not
