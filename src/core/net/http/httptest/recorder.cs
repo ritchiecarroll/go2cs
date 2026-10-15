@@ -237,7 +237,8 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
         var (trailers, ok) = rw.snapHeader[trailerˢ, ꟷ]; if (ok) {
             res.Value.Trailer = new httpꓸHeader(len(trailers));
             foreach (var (_, k) in trailers) {
-                foreach (var kΔ1 in range<@string>(strings.SplitSeq(k, ","u8).Invoke)) {
+                foreach (var iᴛ1 in range<@string>(strings.SplitSeq(k, ","u8).Invoke)) {
+                    var kΔ1 = iᴛ1;
                     kΔ1 = http.CanonicalHeaderKey(textproto.TrimString(kΔ1));
                     if (!httpguts.ValidTrailerHeader(kΔ1)) {
                         // Ignore since forbidden by RFC 7230, section 4.1.2.

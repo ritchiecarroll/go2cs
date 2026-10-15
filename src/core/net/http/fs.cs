@@ -1199,7 +1199,8 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
     if (numRanges > maxRanges) {
         return (default!, default!); // ignore header with too many ranges
     }
-    foreach (var ra in range<@string>(strings.SplitSeq(s[(int)(builtin.len(b))..], ","u8).Invoke)) {
+    foreach (var iᴛ1 in range<@string>(strings.SplitSeq(s[(int)(builtin.len(b))..], ","u8).Invoke)) {
+        var ra = iᴛ1;
         ra = textproto.TrimString(ra);
         if (ra == ""u8) {
             continue;

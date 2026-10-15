@@ -1853,7 +1853,8 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
     ref var di = ref Ꮡdi.DerefOrNull();
 
     @string text = Ꮡcg.Text();
-    foreach (var line in range<@string>(strings.SplitSeq(text, "\n"u8).Invoke)) {
+    foreach (var iᴛ1 in range<@string>(strings.SplitSeq(text, "\n"u8).Invoke)) {
+        var line = iᴛ1;
         @string orig = line;
 
         // Line is

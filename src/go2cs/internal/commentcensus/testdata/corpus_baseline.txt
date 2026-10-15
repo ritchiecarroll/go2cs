@@ -21,7 +21,7 @@ misplaced:before-close-brace/anchor-differs	13
 misplaced:decl-doc/anchor-differs	72
 misplaced:field-doc/anchor-differs	10
 misplaced:free-in-type/anchor-differs	17
-misplaced:free-stmt/anchor-differs	211
+misplaced:free-stmt/anchor-differs	212
 misplaced:free-top-level/anchor-differs	4
 misplaced:in-composite-literal/anchor-differs	31
 misplaced:in-composite-literal/trailing-to-own-line	4

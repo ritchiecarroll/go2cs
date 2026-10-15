@@ -737,7 +737,8 @@ internal static bool shouldPanicOnCopyError(ж<http.Request> Ꮡreq) {
 internal static void removeHopByHopHeaders(httpꓸHeader h) {
     // RFC 7230, section 6.1: Remove headers listed in the "Connection" header.
     foreach (var (_, f) in h[connectionˢ]) {
-        foreach (var sf in range<@string>(strings.SplitSeq(f, ","u8).Invoke)) {
+        foreach (var iᴛ1 in range<@string>(strings.SplitSeq(f, ","u8).Invoke)) {
+            var sf = iᴛ1;
             {
                 sf = textproto.TrimString(sf); if (sf != ""u8) {
                     h.Del(sf);

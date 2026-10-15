@@ -126,7 +126,8 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
         };
 
         // Parse names.
-        foreach (var f in range<@string>(strings.SplitSeq(goexp, ","u8).Invoke)) {
+        foreach (var iᴛ1 in range<@string>(strings.SplitSeq(goexp, ","u8).Invoke)) {
+            var f = iᴛ1;
             if (f == ""u8) {
                 continue;
             }
