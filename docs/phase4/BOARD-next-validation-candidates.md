@@ -26813,4 +26813,105 @@ reads as the known boundary, not a new finding. COORD 2026-10-12: record, do not
 
 — G
 
+## 2026-10-14 — G: three generic-constraint shapes the converter does not carry, all older than Go 1.26 — POST-HOP BACKLOG (COORD), measured 0 in std
+
+Found while seating H4 item 2b (Go 1.26 self-referential generics, `claude/g-selfref-generics` `4e5a2b927d`).
+None is 1.26 drift: a Go-1.24-legal control fails identically on the hop-tip converter. COORD 2026-10-14 ruled
+all three **post-hop backlog** (G's), with the condition that any reach into a roster row's tests would move
+one to an H10 pre-item. They are real-module risks: a module the nugetgo waves convert can reach any of them.
+Each repro below is minimal, runs under `go run`, and was converted at hop tip `f7d8f0b135`'s converter with the
+errors quoted.
+
+**Reach, measured.** A go/types census (`golang.org/x/tools/go/packages`, `Tests: true`) over go1.26.9 `std`
+plus every `_test.go` file, for GOOS windows, linux and darwin (amd64): **0 sites for every shape on every
+target** (965 / 968 / 965 package variants, 0 load errors). So no roster row reaches them, and they stay backlog.
+The census's controls: a package holding each shape reads a-decl 1, a-inst 1, b1 2, b2 1, c-pure 1, c-terms 1,
+and the same shape moved into a `_test.go` file is counted there; SelfRefGenerics (which converts and runs) reads
+0 on all six. The b-predicate first counted `Owner() *Graph[N]` and read SelfRefGenerics as 6; that position
+converts correctly (every rendering of `Graph[*gnode]` names the proxy), so b now requires P under a slice,
+array, map, chan or pointer constructor. The census source is in G's scratch; it is about 200 lines and can be
+rebuilt from these definitions.
+
+### (a) A MULTI-PARAMETER self-referential constraint at a pointer argument — CS0305, then CS0246
+
+```go
+type Linker[T any, N any] interface {
+	Value() T
+	Next() N
+}
+
+type list struct {
+	v    int
+	rest *list
+}
+
+func (l *list) Value() int  { return l.v }
+func (l *list) Next() *list { return l.rest }
+
+func Walk[T any, N Linker[T, N]](n N, steps int) []T { … n.Value() … n = n.Next() … }
+
+// Walk[int](&list{1, &list{2, nil}}, 2)
+```
+
+`constraintProxyFor` accepts the constraint (one of its arguments is N) and renders the type argument as the
+proxy `listжLinker`. But `ImplementGenerator.EmitConstraintProxy` returns early for an interface whose arity is
+not 1, and the record closes the arity-2 interface over one argument: `GoImplement<list, Linker<list>>` is
+CS0305. Without that record the call is CS0246 (`listжLinker`) plus CS1503. The proxy would also have to be
+per `(element, T)`, since `Linker<nint, proxy>` depends on the other argument. Census predicate: a type parameter P whose
+constraint is a generic method-set interface instantiated with P and whose origin has more than one type
+parameter (a-decl), instantiated at a pointer to a named type (a-inst).
+
+### (b) A constraint proxy across a COMPOSITE boundary — CS0029 / CS1503
+
+```go
+type Edger[N any] interface{ Edges() []N }
+
+type gnode struct{ edges []*gnode }
+
+func (g *gnode) Edges() []*gnode { return g.edges }
+
+func Degree[N Edger[N]](n N) int { return len(n.Edges()) }   // (b1) the constraint's method
+
+type Bag[N Edger[N]] struct{ items []N }                     // (b2) the generic's own position
+
+// Degree(g); Bag[*gnode]{items: []*gnode{g}}
+```
+
+The proxy `gnodeжEdger` stands in for `*gnode`, and its implicit `ж<gnode>`↔proxy conversions marshal a BARE
+`N` (and each element of a `(N, error)` tuple). Nothing converts `slice<ж<gnode>>` to `slice<gnodeжEdger>`. The
+generated forwarder `slice<gnodeжEdger> Edger<gnodeжEdger>.Edges() => m_box.Edges()` is CS0029 (b1), and the
+caller's `[]*gnode{g}` at `items` is CS1503 (b2). A generic NAMED type's argument (`Owner() *Graph[N]`) is not
+this defect. Census predicate: a proxy instantiation where P sits under a slice, array, map, chan or pointer, in
+the constraint's methods (b1) or the generic's own signature or struct fields (b2). A nested func type is not
+counted, because it takes the lambda re-wrap. A fix is likely a `widen`-style projection at each such
+position, or a proxied element type in the generated forwarder.
+
+### (c) An ANONYMOUS inline constraint carrying methods — the Go text lands in the `where` clause
+
+```go
+type namer struct{ s string }
+
+func (n namer) Name() string { return n.s }
+
+func Show[T interface{ Name() string }](t T) string { return t.Name() }      // c-pure
+
+type myint int
+
+func (m myint) String() string { return "myint" }
+
+func Str[T interface {                                                      // c-terms
+	~int
+	String() string
+}](t T) string { return t.String() }
+```
+
+`getGenericDefinition` names an anonymous constraint by `constraint.String()`, and the method-set arms emit it
+verbatim: `where T : interface{Name() string}` and `where T : interface{String() string; ~int}<T>, new()`, a C#
+syntax-error cascade (CS1002/CS1031/CS1519…). A named constraint takes the same arms correctly. A fix is likely to
+LIFT the anonymous constraint to a named interface, the way an anonymous struct type argument is lifted, so
+every arm sees a name. Census predicate: a type parameter whose constraint is a bare `*types.Interface` with at
+least one method, split by whether it also has type terms (c-terms) or not (c-pure).
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
