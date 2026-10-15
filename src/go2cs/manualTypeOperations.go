@@ -384,6 +384,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// bookkeeping the managed host has no counterpart for and dispatches the call itself. Bodied,
 		// so displaced here. See docs/phase4/DESIGN-darwin-run-layer-2.md §2.2 and §7.
 		"libcCall": goosDarwin,
+		// runtime.libc_error_addr -- darwin's errno-address read, new at Go 1.26 (2026-10-15, the hop's H6). Its
+		// trampoline stores __error()'s int* THROUGH the args word: `MOVQ 0(DI), R14; CALL libc_error; MOVQ AX,
+		// (R14)`. Here that slot is a managed ж<int32> reference, which no dispatcher may write a native address
+		// into, and TestDarwinLibcCallSitesAreDeclared read the site as an unresolved pointee (ж<ж<int32>>). Its
+		// only managed callers are syscall_rawsyscalln (the body Go pushes into syscall.rawsyscalln, never called:
+		// syscall bodies its own syscalln and rawsyscalln in syscall/darwin/syscall_darwin_impl.cs) and minit (entered
+		// only from mstart1 and needm, neither of which the managed runtime enters). So runtime/darwin/libccall_impl.cs displaces it with a refusal BY NAME: a silent nil
+		// errno address would read as errno 0, a success.
+		"libc_error_addr": goosDarwin,
 		// getgcmask answers a TYPE's GC pointer bitmap, and Go answers it by reading the GC's own
 		// heap metadata: findObject, the span's typePointersOfUnchecked iterator, activeModules'
 		// data/bss bitmaps, the stack's locals map. None of those exist in a managed runtime, so the

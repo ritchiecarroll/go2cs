@@ -14,20 +14,7 @@ partial class runtime_package {
 
 internal static partial void libc_error_trampoline();
 
-internal partial struct libc_error_addr_args /*dyn*/ {
-    internal uintptr addr;
-}
-
-// libc_error_addr puts the libc error
-// address into addr.
-//
-//go:nosplit
-//go:cgo_unsafe_args
-internal static void libc_error_addr(ж<ж<int32>> Ꮡaddr) {
-    ref var args = ref heap(new libc_error_addr_args((uintptr)Ꮡaddr.OrTypedNil()), out var Ꮡargs);
-
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(libc_error_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-}
+// go2cs generated this placeholder — func libc_error_addr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // libcCallInfo is a structure used to pass parameters to the system call.
 partial struct libcCallInfo {
