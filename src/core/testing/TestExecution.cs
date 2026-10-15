@@ -478,7 +478,101 @@ public sealed class TestExecution
     private bool InOwnersBubble() =>
         m_ownerGoroutine is not null &&
         Environment.CurrentManagedThreadId != m_ownerThread &&
-        SyncTestBubble.Current?.Root == m_ownerGoroutine;
+        (SyncTestBubble.Current?.Root == m_ownerGoroutine ||
+         // A synctest.Test child (Go 1.25) runs on a bubble MEMBER, not the bubble's root, so its waiver
+         // is the same rule keyed on its own bubble: any other goroutine of that bubble may end it.
+         m_isSynctest && SyncTestBubble.Current is { } bubble && ReferenceEquals(bubble, m_bubble));
+
+    // Go 1.25's common.isSynctest (testing.go:649): this execution is the T that synctest.Test runs its
+    // function with, made by testingSynctestTest inside the bubble; m_bubble is that bubble.
+    private bool m_isSynctest;
+    private SyncTestBubble? m_bubble;
+
+    // Go's common.cleanupStarted (testing.go:1407's Store): set as the cleanup phase begins.
+    private bool m_cleanupStarted;
+
+    internal bool IsSynctest => m_isSynctest;
+
+    private const string ParallelInsideBubbleText = "testing: t.Parallel called inside synctest bubble";
+    private const string RunInsideBubbleText = "testing: t.Run called inside synctest bubble";
+    internal const string DeadlineInsideBubbleText = "testing: t.Deadline called inside synctest bubble";
+
+    /// <summary>
+    /// Go 1.25's <c>testingSynctestTest</c> (testing.go:2125), the body of testing/synctest's push
+    /// linkname: runs <paramref name="action"/> with a new T inside the caller's bubble and reports
+    /// whether it passed.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// synctest.Test calls this from the bubble's root goroutine. Go starts the child with
+    /// <c>go tRunner(t2, f)</c>, so the child is a bubble MEMBER: it shares the bubble's fake clock and
+    /// counts in its idle accounting. The host's own test threads are not goroutines a bubble can adopt,
+    /// so the child runs on golib's <see cref="Goroutine.Start(Action)"/>, which joins the creator's bubble
+    /// at the go statement as Go's newproc does.
+    /// </para>
+    /// <para>
+    /// Go's <c>&lt;-t2.signal</c> is a channel receive, and a bubble root blocked on one is durably
+    /// blocked, which is what lets the fake clock advance while the child sleeps. A .NET wait would leave
+    /// the root counted as running and the bubble could never go idle, so the signal is a golib channel
+    /// made here, inside the bubble.
+    /// </para>
+    /// </remarks>
+    internal bool RunSynctest(Action<ж<testing_package.T>> action)
+    {
+        lock (m_syncRoot)
+        {
+            if (m_cleanupStarted)
+                throw builtin.panic("testing: synctest.Run called during t.Cleanup");
+        }
+
+        TestExecution child = new(m_runner, Name, this, Source, Line)
+        {
+            m_isSynctest = true,
+            m_bubble = SyncTestBubble.Current
+        };
+
+        channel<bool> signal = new(1);
+        Goroutine.Start(() => child.ExecuteSynctest(action, signal));
+
+        if (!builtin.ᐸꟷ(signal))
+        {
+            // A parent test finished first (a subtest called FailNow on it): keep aborting up the chain,
+            // Go's runtime.Goexit here.
+            GoexitException.MarkGoroutineExiting();
+            throw new GoexitException();
+        }
+
+        return !child.Failed;
+    }
+
+    /// <summary>
+    /// The synctest child's tRunner: <see cref="Execute"/>, then Go's <c>t.signal &lt;- signal</c>,
+    /// false only when a parent finished before this child did (testing.go's errNilPanicOrGoexit walk).
+    /// </summary>
+    private void ExecuteSynctest(Action<ж<testing_package.T>> action, channel<bool> signal)
+    {
+        bool ok = true;
+
+        try
+        {
+            Execute(action);
+        }
+        catch (Exception ex)
+        {
+            // Execute contains its own handling; anything escaping it is a host defect (see Start).
+            ReportHostFailure(ex);
+        }
+        finally
+        {
+            for (TestExecution? ancestor = m_parent; ancestor is not null && ok; ancestor = ancestor.m_parent)
+            {
+                lock (ancestor.m_syncRoot)
+                    ok = !ancestor.m_finished;
+            }
+
+            signal.ᐸꟷ(ok);
+        }
+    }
 
     /// <summary>
     /// Go's <c>common.logDepth</c> (testing.go:1015-1032): append one record to this test's output,
@@ -530,6 +624,14 @@ public sealed class TestExecution
     /// </remarks>
     public void Log(string text)
     {
+        // Go's destination skips a synctest child (`!c.done && !c.isSynctest`, testing.go:1058): its
+        // records go to the test that called synctest.Test.
+        if (m_isSynctest && m_parent is not null)
+        {
+            m_parent.Log(text);
+            return;
+        }
+
         lock (m_syncRoot)
         {
             if (!m_finished)
@@ -780,6 +882,10 @@ public sealed class TestExecution
     /// </remarks>
     public bool Run(string name, Action<ж<testing_package.T>> action)
     {
+        // Go 1.25 (testing.go:2051), before the cleanup check.
+        if (m_isSynctest)
+            throw builtin.panic(RunInsideBubbleText);
+
         return m_runner.RunChild(this, name, action);
     }
 
@@ -863,6 +969,9 @@ public sealed class TestExecution
             // "multiple times" text.
             if (m_parallel)
                 throw builtin.panic(ParallelCalledMultipleTimesText);
+            // Go 1.25 (testing.go:1762): between the two, in Go's order.
+            if (m_isSynctest)
+                throw builtin.panic(ParallelInsideBubbleText);
             if (m_denyParallel)
                 throw builtin.panic(ParallelConflictText);
             m_parallel = true;
@@ -1456,7 +1565,10 @@ public sealed class TestExecution
         m_ownerThread = Environment.CurrentManagedThreadId;
         m_ownerGoroutine = Goroutine.Current;
         s_current.Value = this;
-        ReportEvent(new TestEvent(m_runner.Package, Name, "run", Source: Source, Line: Line));
+
+        // A synctest child is not a subtest: Go's t.Run prints === RUN, and testingSynctestTest does not.
+        if (!m_isSynctest)
+            ReportEvent(new TestEvent(m_runner.Package, Name, "run", Source: Source, Line: Line));
 
         testing_package.T t = new() { Execution = this };
         try
@@ -1547,11 +1659,14 @@ public sealed class TestExecution
                 (records, dropped) = LogRecords(terminal);
             }
 
-            ReportEvent(new TestEvent(m_runner.Package, Name, terminal, timer.Elapsed.TotalSeconds, output, Source, Line, records, dropped));
+            // Go's report: `if t.isSynctest { return // t.parent will handle reporting }`. The child's
+            // failure already reached the parent through Fail, and its log records through Log.
+            if (!m_isSynctest)
+                ReportEvent(new TestEvent(m_runner.Package, Name, terminal, timer.Elapsed.TotalSeconds, output, Source, Line, records, dropped));
 
             // Go's parallelStop.Add(1) (testing.go:1949): after the cleanups and the parallel subtests,
             // immediately before the test signals its parent, which here is the Completion that
-            // Start sets once Execute returns.
+            // Start sets once Execute returns. A synctest child is never parallel (Parallel refuses it).
             bool wasParallel;
 
             lock (m_syncRoot)
@@ -1560,12 +1675,17 @@ public sealed class TestExecution
             if (wasParallel)
                 Interlocked.Increment(ref s_parallelStop);
 
-            m_runner.Completed(this);
+            if (!m_isSynctest)
+                m_runner.Completed(this);
         }
     }
 
     private void RunCleanups()
     {
+        // Go's c.cleanupStarted.Store(true) as runCleanup begins: synctest.Test refuses to start from here on.
+        lock (m_syncRoot)
+            m_cleanupStarted = true;
+
         while (true)
         {
             Action cleanup;

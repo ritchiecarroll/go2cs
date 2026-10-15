@@ -366,8 +366,10 @@ public static partial class testing_package
     /// </remarks>
     [GoRecv] public static (time_package.Time deadline, bool ok) Deadline(this ref T t)
     {
-        // Touch the execution so an unattached T fails the same way every other member does.
-        _ = t.RequiredExecution;
+        // Touch the execution so an unattached T fails the same way every other member does. Inside a
+        // synctest bubble Go panics instead of answering a real-clock deadline (testing.go:2164).
+        if (t.RequiredExecution.IsSynctest)
+            throw builtin.panic(TestExecution.DeadlineInsideBubbleText);
 
         if (TestHost.PackageDeadlineUtc is not { } deadline)
             return (default!, false);
@@ -903,6 +905,18 @@ public static partial class testing_package
     public static void Skip(this ж<F> f, params ꓸꓸꓸany args) => Skip(ref f.Value, args);
 
     public static void Skipf(this ж<F> f, @string format, params ꓸꓸꓸany args) => Skipf(ref f.Value, format, args);
+
+    /// <summary>
+    /// Go 1.25's <c>testingSynctestTest</c> (testing.go:2125): runs <paramref name="f"/> with a new T
+    /// inside the caller's synctest bubble and reports whether it passed.
+    /// </summary>
+    /// <remarks>
+    /// Go reaches it through a push linkname, <c>//go:linkname testingSynctestTest
+    /// testing/synctest.testingSynctestTest</c>, so testing/synctest declares it without a body. That
+    /// package's companion forwards here; it is public because the companion is in another assembly.
+    /// synctest.Test calls it from inside a bubble it has just made.
+    /// </remarks>
+    public static bool testingSynctestTest(ж<T> t, Action<ж<T>> f) => t.Value.RequiredExecution.RunSynctest(f);
 
     /// <summary>
     /// Reports the average allocation cost per run of f — like Go's testing.AllocsPerRun, which
