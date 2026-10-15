@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 //go:build darwin
 
-// Package macOS provides cgo-less wrappers for Core Foundation and
+// Package macos provides cgo-less wrappers for Core Foundation and
 // Security.framework, similarly to how package syscall provides access to
 // libSystem.dylib.
 namespace go.crypto.x509.@internal;
@@ -16,7 +16,7 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 
-partial class macOS_package {
+partial class macos_package {
 
 // Core Foundation linker flags for the external linker. See Issue 42459.
 //
@@ -235,4 +235,4 @@ public static void ReleaseCFArray(CFRef Δarray) {
     CFRelease(Δarray);
 }
 
-} // end macOS_package
+} // end macos_package

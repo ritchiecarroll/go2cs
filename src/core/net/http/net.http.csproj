@@ -169,6 +169,7 @@
 
     <ProjectReference Include="$(go2csPath)core/bufio/bufio.csproj" />
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
+    <ProjectReference Include="$(go2csPath)core/compress/flate/compress.flate.csproj" />
     <ProjectReference Include="$(go2csPath)core/compress/gzip/compress.gzip.csproj" />
     <ProjectReference Include="$(go2csPath)core/container/list/container.list.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
@@ -190,6 +191,7 @@
     <ProjectReference Include="$(go2csPath)core/mime/multipart/mime.multipart.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/httptrace/net.http.httptrace.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/internal/ascii/net.http.internal.ascii.csproj" />
+    <ProjectReference Include="$(go2csPath)core/net/http/internal/httpcommon/net.http.internal.httpcommon.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/internal/net.http.internal.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/net.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/textproto/net.textproto.csproj" />

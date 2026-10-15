@@ -84,7 +84,7 @@ using static go.net.rpc_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("net/rpc/client.go", "client.cs", "ABcsgqYAKlrigqaCgoKCgpSCgoKmgoKCgoKCgoKCgsbUooKCgoKCgpSCgoKClO6CgvyCgoKUtIKClMiCgoKCgoKUpoKClIKCguiiAAgMggAFHAAJAoKCqqK4kgAJFKKAgqSAgqSmgqaCpoKqoqqigoKUuIKClIKUggAHEpKCgpSqwoKCgpSCgt7CgoKCgoLcgqaCgqiSgg==")]
 [assembly: global::go.GoPositionMap("net/rpc/debug.go", "debug.cs", "ACpQABQogKKAooCkgKKAooAACQ6UkoKCgoKUhoKUhoKC", "76-87:1;82-84:1.1;88-90:2")]
-[assembly: global::go.GoPositionMap("net/rpc/server.go", "server.cs", "AJcBrAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSmlIKmgoKUlIKmgIKkqqKCgpKClIKmgoKUpoKCgpSmgoKClKaCgpSmgoKUpoCCgpSklNzEopSCgoKUgoKCgpSCprKCgoKm0oKUgoKClJSCgoKUgqIAChSCpoLmooCCpoKUpICCpoKUpKaClJSCAAIS4oLc2qKCgoKigoKUgqaCgpSUgsiCqqKCgoKCpoKClJSCpqKCgoKUgpSCprKCgoKmooKCgpSClIKmsoKCgqYACAKCgoKmgriCgpSCpoCCpIKmlJSklKYACASCgoKCgpSCypSCgoKUgqaCgoKUgoKClN7CgoKCgpS6kKiiABI04qqiqqKssAALDLKCgoKClIKCgpSCrLKCrLI=", "", "", "480=NewDecoder/1/1/2,NewEncoder/1/1/3")]
+[assembly: global::go.GoPositionMap("net/rpc/server.go", "server.cs", "AJkBsAIALFySuJaSgrgAAhwACwKqou6CgoKCgoKUgoKClIKCgpSmlIKmgoKUlIKmgIKkqqKCgpKClIKmgoKUpoKCgpSmgoKClKaCgpSmgoKUpoCCgpSklNzEopSCgoKUgoKCgpSCprKCgoKm0oKUgoKClJSCgoKUgqIAChSCpoLmooCCpoKUpICCpoKUpKaClJSCAAIS4oLc2qKCgoKigoKUgqaCgpSUgsiCqqKCgoKCpoKClJSCpqKCgoKUgpSCprKCgoKmooKCgpSClIKmsoKCgqYACAKCgoKmgriCgpSCpoCCpIKmlJSklKYACASCgoKCgpSCypSCgoKUgqaCgoKUgoKClN7CgoKCgpS6kKiiABI04qqiqqKssAALDLKCgoKClIKCgpSCrLKCrLI=", "", "", "482=NewDecoder/1/1/2,NewEncoder/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

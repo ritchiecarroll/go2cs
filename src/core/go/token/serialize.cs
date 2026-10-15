@@ -3,7 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
+using slices = slices_package;
 using global::go.sync;
+using iter = iter_package;
 
 partial class token_package {
 
@@ -34,18 +36,15 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
 
     Ꮡs.of(FileSet.Ꮡmutex).Lock();
     s.@base = ss.Base;
-    var files = new slice<ж<ΔFile>>(len(ss.Files));
-    for (nint i = 0; i < len(ss.Files); i++) {
-        var f = Ꮡ(ss.Files, i);
-        files[i] = Ꮡ(new ΔFile(
-            name: (~f).Name,
-            @base: (~f).Base,
-            size: (~f).Size,
-            lines: (~f).Lines,
-            infos: (~f).Infos
-        ));
+    foreach (var (_, f) in ss.Files) {
+        Ꮡs.of(FileSet.Ꮡtree).add(Ꮡ(new ΔFile(
+            name: f.Name,
+            @base: f.Base,
+            size: f.Size,
+            lines: f.Lines,
+            infos: f.Infos
+        )));
     }
-    s.files = files;
     Ꮡs.of(FileSet.Ꮡlast).Store(nil);
     Ꮡs.of(FileSet.Ꮡmutex).Unlock();
 
@@ -60,16 +59,16 @@ public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
 
     Ꮡs.of(FileSet.Ꮡmutex).Lock();
     ss.Base = s.@base;
-    var files = new slice<serializedFile>(len(s.files));
-    foreach (var (i, f) in s.files) {
+    slice<serializedFile> files = default!;
+    foreach (var f in range<ж<ΔFile>>(Ꮡs.of(FileSet.Ꮡtree).all().Invoke)) {
         f.of(token_package.ΔFile.Ꮡmutex).Lock();
-        files[i] = new serializedFile(
+        files = append(files, new serializedFile(
             Name: (~f).name,
             Base: (~f).@base,
             Size: (~f).size,
-            Lines: appendꓸꓸꓸ(slice<nint>(default!), (~f).lines),
-            Infos: appendꓸꓸꓸ(slice<lineInfo>(default!), (~f).infos)
-        );
+            Lines: slices.Clone<slice<nint>, nint>((~f).lines),
+            Infos: slices.Clone<slice<lineInfo>, lineInfo>((~f).infos)
+        ));
         f.of(token_package.ΔFile.Ꮡmutex).Unlock();
     }
     ss.Files = files;

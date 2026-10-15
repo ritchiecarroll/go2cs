@@ -56,8 +56,8 @@ using static go.path.filepath_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("path/filepath/match.go", "match.cs", "ABQkAAE0ABgCgoKCgoKUpriCgpSClKaCgpSClIKUgri0qsKCgpSCgoKClJSC2LS0guisAAgIgoKClKaSgoKClJSCgoKmgoKCgoKUkoCCpIKCgIK2gpSUgriCgpSClKaCgoKmpoKClJSmgpSo0oKClIKCgoKmgoKUgoKUAAIWAAgCprSSgriAgqSCgIKkpoKCgpSmgriCpoKCgpSCgoKmqJKUtqS6koKUtqSkgpQAAxAACAKCgoKUgpSCgpSkgpSCgoKUgqbaooKClA==")]
-[assembly: go.GoPositionMap("path/filepath/path.go", "path.cs", "ABxuABsCAAIiAA4CAAIWAAgCrLIAAhLirsIAAhDSAAIUAAkCrsIAAhDSqJIAAhDSpoKClIKClAACFgAIAoKCgoKClIKCgpKkuIKCgqaCgrKCgpSClIKUgpSClIKUgpSUgoKClIKCgoKClIKClJTcygApVKaSgIKUlLaClIKCgpS4goKAgoKUtqiSgqaCuMqmgoKCgoCCtoKCgsoAAiQADwKCgpSUgpQAAiIADgKCgpSUgpSqooKClIKCgpSCrsIAAhLirsI=")]
+[assembly: go.GoPositionMap("path/filepath/match.go", "match.cs", "ABQkAAE4ABoCgoKCgoKUpriCgpSClKaCgpSClIKUgri0qsKCgpSCgqaCxrS0gsisAAgIgoKCppKCgoKUlIKCgqaCgoKCgpSSgIKkgoKAgraClKaCgoKUpoKCgqamgoKUpoKUqNKCgpSCgoKCpoKClIKClAACFgAIAqa0koK4gIKkgoCCpKaCgoKUpoK4gqaCgoKUgoKCpqiSlLakupKClLakpIKUAAMQAAgCgoKClIKUgoKUpIKUgoKClIKm2qKCgpQ=")]
+[assembly: go.GoPositionMap("path/filepath/path.go", "path.cs", "ABxuABsCAAIiAA4CAAIWAAgCrLIAAhLirsIAAhDSAAIUAAkCrsIAAhDSqJIAAhDSpoKClIKClAACGAAJAoKCgoKClIKCgpKkuIKCgqaCgrKCgpSClIKUgpSClIKUgpSUgoKClIKCgoKClIKClJTcygApVKaSgIKUlLaClIKCgpS4goKAgoKUtqiSgqaCuMqmgoKCgoCCtoKCgsoAAiQADwKCgpSUgpQAAiIADgKCgpSUgpSqooKClIKCgpSCrsIAAhLirsI=")]
 [assembly: go.GoPositionMap("path/filepath/path_unix.go", "path_unix.cs", "AAoiwqaCgpSmgqaUgoKmpoI=")]
 [assembly: go.GoPositionMap("path/filepath/symlink.go", "symlink.cs", "ABMggoKUgpSCgoKCgpSCgtymlJKUkqyigoKmyoKUppTKgqa4goKmgoKUyoKCpoKCpqamlIKUgpSCgpKUgoKCmKKCgqaClJSm")]
 [assembly: go.GoPositionMap("path/filepath/symlink_unix.go", "symlink_unix.cs", "AAgSgg==")]

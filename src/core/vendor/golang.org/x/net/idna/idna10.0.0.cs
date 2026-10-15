@@ -395,13 +395,17 @@ internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool 
             continue;
         }
         if (strings.HasPrefix(label, acePrefix)){
-            var (u, err2) = decode(label[(int)(len(acePrefix))..]);
+            @string enc = label[(int)(len(acePrefix))..];
+            var (u, err2) = decode(enc);
             if (err2 != default!) {
                 if (err == default!) {
                     err = err2;
                 }
                 // Spec says keep the old label.
                 continue;
+            }
+            if (err == default! && len(u) > 0 && isASCII(u)) {
+                err = punyError(enc);
             }
             isBidi = isBidi || bidirule.DirectionString(u) != bidi.LeftToRight;
             labels.set(u);
@@ -457,6 +461,15 @@ internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool 
         }
     }
     return (s, err);
+}
+
+internal static bool isASCII(@string s) {
+    foreach (var (_, c) in slice<byte>(s)) {
+        if (c >= 0x80) {
+            return false;
+        }
+    }
+    return true;
 }
 
 internal static (@string mapped, bool isBidi, error err) normalize(ж<Profile> Ꮡp, @string s) {

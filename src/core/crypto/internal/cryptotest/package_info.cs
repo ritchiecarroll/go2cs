@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using execꓸError = go.os.exec_package.ΔError;
 global using jsonꓸToken = object;
 global using jsonꓸΔToken = object;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
@@ -17,6 +18,11 @@ global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
+global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
+global using reflectꓸKind = go.reflect_package.ΔKind;
+global using reflectꓸMethod = go.reflect_package.ΔMethod;
+global using reflectꓸType = go.reflect_package.ΔType;
+global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
@@ -66,9 +72,11 @@ using static go.crypto.@internal.cryptotest_package;
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/allocations.go", "allocations.cs", "ABcmtIK4griCyoK4")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/block.go", "block.cs", "ABMitIKClIKCppSSppLckqaUlIKUgri0lIKUggAODIKCuIKClJSCgriClKaCuIKCuIKUgqaCkoKCpoKCuIKClILKgoKC7oKUgoKCpoKkgoKUgoKCyoKCuIKmgoKUpoKmlIKCuIKUgqaSkoC2goKAtoKCgOy4ppCSkLaQkpCSkMiilIKUlIKmog==", "30-32:1;34-36:2;41-67:3;72-87:1;89-104:2;106-141:3;146-174:4;176-197:5;199-219:6;208-208:6.1;213-213:6.2;218-218:6.3;224-238:7;228-228:7.1;231-231:7.2;232-232:7.3;235-235:7.4;236-236:7.5;237-237:7.6;244-252:1")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/blockmode.go", "blockmode.cs", "ABEmooKClKaCkqaSppKUgoCCtoKUgoKCAA0KgpSCgpC2kpSCgpSCgriSlJSCgpSCgsqSlJSUgriCgsqSlJKmgpKCgraCgriCgpSCyoKCgriClJKmgpSC3JKUgoKCpoKkgoKUgpSCuJKUgqaSkpC2goKQtoKCkMikgoKCsMiSlIKUkoKUlII=", "28-30:1;32-34:2;36-52:3;58-61:1;60-60:1.1;63-74:2;76-90:3;92-109:4;111-161:5;151-153:5.1;165-187:6;189-209:7;198-198:7.1;203-203:7.2;208-208:7.3;212-219:8;217-217:8.1;221-236:9")]
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/fetchmodule.go", "fetchmodule.cs", "AB4ksoK4goKUgoCCgILGgpSmlIKClIaAgrY=")]
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/hash.go", "hash.cs", "ABcotoKClIKCgqamgpSmgriAgsiAkuyCgpSCgoKmlIK4goKUpoKCgoKUgsqCgoKUgoKClKaCpIKClIKUgsqCgpSCgqaCgpSmgqaCzJKUgpSCgqaCupKUgpSCpoKmpoKCgg==", "23-56:1;59-74:2;76-92:3;95-121:4;124-147:5")]
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/implementations.go", "implementations.cs", "ABYkxIKCpoKCgqaApIKAgpSmgoKUgpSUAAcQgg==", "31-31:1;37-51:2")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/fetchmodule.go", "fetchmodule.cs", "AB4msriCgoKAgqSUgoCCgILGgpSmlIKClIaAgrY=")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/fips140.go", "fips140.cs", "AAsYgoKAgg==")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/hash.go", "hash.cs", "ABUsooKClKaCgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/implementations.go", "implementations.cs", "ABYoxIKCpoKCgqaApIKAgpSmgpT+gtaCgoKUlLa2", "33-33:1;39-47:2")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/methods.go", "methods.cs", "AA0sAAoCgoKClIKClLiCgoKmgpSCgqaCgoKClIK4")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/stream.go", "stream.cs", "ABEkAA4YpIKmuISCgpSClIKUgoKCAAcQhIKClIKmgpSmgoKC7oKUgoKUgoK4goKClISylIKC3IKUlJSCuIKCyoKUgoKUgpSioKSC3IKUgpSCgqakkpKAtoKCgLaCgoDagpSCgqaUgoKUlKaCgoKClJSCAAkUxIKUgoKCkLaCgoKUyIKUgpQ=", "32-87:1;40-59:1.1;43-57:1.1.1;63-86:1.2;66-84:1.2.1;89-100:2;102-118:3;109-116:3.1;120-137:4;139-157:5;149-155:5.1;150-150:5.1.1;159-187:6;170-185:6.1;174-174:6.1.1;179-179:6.1.2;184-184:6.1.3;189-220:7;229-236:1;235-235:1.1;238-244:2;243-243:2.1")]
 // </GoSourcePositionMaps>
 
@@ -97,6 +105,7 @@ public static partial class cryptotest_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸcipher() => builtin.initPackage(typeof(go.crypto.cipher_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸboring() => builtin.initPackage(typeof(go.crypto.@internal.boring_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸimpl() => builtin.initPackage(typeof(go.crypto.@internal.impl_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsubtle() => builtin.initPackage(typeof(go.crypto.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸjson() => builtin.initPackage(typeof(encoding.json_package));
@@ -104,10 +113,14 @@ public static partial class cryptotest_package
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(go.@internal.race_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtesthash() => builtin.initPackage(typeof(go.@internal.testhash_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(math.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));

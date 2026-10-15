@@ -3,47 +3,43 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using routebsd = @internal.routebsd_package;
 using syscall = syscall_package;
-using route = vendor.golang.org.x.net.route_package;
-using vendor.golang.org.x.net;
+using @internal;
+using net;
 
 partial class net_package {
 
-internal static (slice<route.Message>, error) interfaceMessages(nint ifindex) {
-    var (rib, err) = route.FetchRIB(syscall.AF_UNSPEC, syscall.NET_RT_IFLIST, ifindex);
-    if (err != default!) {
-        return (default!, err);
-    }
-    return route.ParseRIB(syscall.NET_RT_IFLIST, rib);
+internal static (slice<routebsd.Message>, error) interfaceMessages(nint ifindex) {
+    return routebsd.FetchRIBMessages(syscall.NET_RT_IFLIST, ifindex);
 }
 
 // interfaceMulticastAddrTable returns addresses for a specific
 // interface.
 internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ref Interface ifi) {
-    var (rib, err) = route.FetchRIB(syscall.AF_UNSPEC, syscall.NET_RT_IFLIST2, ifi.Index);
-    if (err != default!) {
-        return (default!, err);
-    }
-    (var msgs, err) = route.ParseRIB(syscall.NET_RT_IFLIST2, rib);
+    var (msgs, err) = routebsd.FetchRIBMessages(syscall.NET_RT_IFLIST2, ifi.Index);
     if (err != default!) {
         return (default!, err);
     }
     var ifmat = new slice<ΔAddr>(0, len(msgs));
     foreach (var (_, m) in msgs) {
         switch (m.type()) {
-        case ж<route.InterfaceMulticastAddrMessage> mΔ1: {
+        case ж<routebsd.InterfaceMulticastAddrMessage> mΔ1: {
             if (ifi.Index != (~mΔ1).Index) {
                 continue;
             }
             IP ip = default!;
             switch ((~mΔ1).Addrs[syscall.RTAX_IFA].type()) {
-            case ж<route.Inet4Addr> sa: {
-                ip = IPv4((~sa).IP[0], (~sa).IP[1], (~sa).IP[2], (~sa).IP[3]);
-                break;
-            }
-            case ж<route.Inet6Addr> sa: {
-                ip = new IP(IPv6len);
-                copy(ip, (~sa).IP[..]);
+            case ж<routebsd.InetAddr> sa: {
+                if ((~sa).IP.Is4()){
+                    var a = (~sa).IP.As4();
+                    ip = IPv4(a[0], a[1], a[2], a[3]);
+                } else 
+                if ((~sa).IP.Is6()) {
+                    var a = (~sa).IP.As16();
+                    ip = new IP(IPv6len);
+                    copy(ip, a[..]);
+                }
                 break;
             }}
             if (ip != default!) {

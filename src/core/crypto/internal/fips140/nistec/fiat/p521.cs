@@ -91,13 +91,8 @@ public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice
     // the encoding of -1 mod p, so p - 1, the highest canonical encoding.
     slice<byte> minusOneEncoding = @new<P521Element>().Sub(
         @new<P521Element>(), @new<P521Element>().One()).Bytes();
-    foreach (var (i, _) in v) {
-        if (v[i] < minusOneEncoding[i]) {
-            break;
-        }
-        if (v[i] > minusOneEncoding[i]) {
-            return (default!, errors.New(invalidP521Elementˢ));
-        }
+    if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
+        return (default!, errors.New(invalidP521Elementˢ));
     }
 
     ref var @in = ref heap(new array<byte>(66), out var Ꮡin);

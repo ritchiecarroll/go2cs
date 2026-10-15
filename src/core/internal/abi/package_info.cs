@@ -32,6 +32,7 @@ using static go.@internal.abi_package;
 [assembly: GoTypeAlias("FuncType", "ΔFuncType")]
 [assembly: GoTypeAlias("InterfaceType", "ΔInterfaceType")]
 [assembly: GoTypeAlias("Kind", "ΔKind")]
+[assembly: GoTypeAlias("MapType", "ΔMapType")]
 [assembly: GoTypeAlias("Name", "ΔName")]
 [assembly: GoTypeAlias("String", "const:ΔString")]
 [assembly: GoTypeAlias("StructType", "ΔStructType")]
@@ -57,14 +58,14 @@ using static go.@internal.abi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAIS4g==")]
+[assembly: go.GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAISAAkEgg==")]
+[assembly: go.GoPositionMap("internal/abi/bounds.go", "bounds.cs", "ABluABgCgoKCgpSClJSClJSCgoKUlIKUlKTygoKCgoKCgoKCgpSClIKClIKUgpQ=")]
 [assembly: go.GoPositionMap("internal/abi/compiletype.go", "compiletype.cs", "AAce8KaQqKCmkKaQ")]
-[assembly: go.GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgu6SgpQ=")]
+[assembly: go.GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgu6SgpQAAiAAEBwADgKC")]
 [assembly: go.GoPositionMap("internal/abi/funcpc.go", "funcpc.cs", "AAgsAA4S")]
-[assembly: go.GoPositionMap("internal/abi/map_noswiss.go", "map_noswiss.cs", "ACJQsqSSpJKkkqSS")]
-[assembly: go.GoPositionMap("internal/abi/map_swiss.go", "map_swiss.cs", "AC9qkqSSpJKkkg==")]
-[assembly: go.GoPositionMap("internal/abi/switch.go", "switch.cs", "AB9AgoK4lKQ=")]
-[assembly: go.GoPositionMap("internal/abi/type.go", "type.cs", "AIMBmAKSgpSmAB9UkoKAgqSmgKSCqJCmkqiSpoKClAAZLqKClNaigpQAAhTyABIyggA/RLKClJSkrKysrKysrAANfrKClKiQppCkgAAIEIKCgpSmooKClKiQABo+gqaCpoKmggAGMoIADRyCACVSotqiqJKokqiS2qKCgoKCgsySgpSCrLKCgoKCgpTqkoKUgqiSgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
+[assembly: go.GoPositionMap("internal/abi/map.go", "map.cs", "AC9qkqSSpJKkkg==")]
+[assembly: go.GoPositionMap("internal/abi/switch.go", "switch.cs", "ACBAppSk")]
+[assembly: go.GoPositionMap("internal/abi/type.go", "type.cs", "AIgBngKSgpSmAB9UkqaApIKokKaSpoKClAAZLqKClNaigpQAAhTyABIyggA/RLKClJSkrKysrKysrAANfrKClKiQppCkgAAIEIKCgpSmooKClKiQABo+gqaCpoKmggAGMoIADRyCACVSotqiqJKokqiS2qKCgoKCgsySgpSCrLKCgoKCgpTqkoKUgqiSgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -88,7 +89,9 @@ public static partial class abi_package
     [GoLocalName("u")] internal partial struct Uncommon_uᴛ6 {}
     [GoLocalName("u")] internal partial struct Uncommon_uᴛ7 {}
     internal partial struct structTypeUncommon {}
+    public partial struct BoundsErrorCode {}
     public partial struct ChanType {}
+    public partial struct CommonInterface {}
     public partial struct EmptyInterface {}
     public partial struct FuncFlag {}
     public partial struct FuncID {}
@@ -100,13 +103,13 @@ public static partial class abi_package
     public partial struct InterfaceSwitchCacheEntry {}
     public partial struct Method {}
     public partial struct NameOff {}
-    public partial struct OldMapType {}
+    public partial struct NonEmptyInterface {}
+    public partial struct PCLnTabMagic {}
     public partial struct PtrType {}
     public partial struct RF_State {}
     [GoValueClone("Ints", "Floats", "Ptrs", "ReturnIsPtr")] public partial struct RegArgs {}
     public partial struct SliceType {}
     public partial struct StructField {}
-    public partial struct SwissMapType {}
     public partial struct TFlag {}
     public partial struct TextOff {}
     public partial struct Type {}
@@ -120,6 +123,7 @@ public static partial class abi_package
     public partial struct ΔFuncType {}
     public partial struct ΔInterfaceType {}
     public partial struct ΔKind {}
+    public partial struct ΔMapType {}
     public partial struct ΔName {}
     public partial struct ΔStructType {}
     // </TypeAccessibility>

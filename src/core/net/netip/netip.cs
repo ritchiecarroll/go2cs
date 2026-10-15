@@ -15,7 +15,6 @@ using cmp = cmp_package;
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using byteorder = @internal.byteorder_package;
-using itoa = @internal.itoa_package;
 using math = math_package;
 using strconv = strconv_package;
 using unique = unique_package;
@@ -713,13 +712,13 @@ public static (ΔPrefix, error) Prefix(this ΔAddr ip, nint b) {
     }
     if (exprᴛ1 == z4) {
         if (b > 32) {
-            return (new ΔPrefix(nil), errors.New("prefix length "u8 + itoa.Itoa(b) + " too large for IPv4"u8));
+            return (new ΔPrefix(nil), errors.New("prefix length "u8 + strconv.Itoa(b) + " too large for IPv4"u8));
         }
         effectiveBits += 96;
     }
     else { /* default: */
         if (b > 128) {
-            return (new ΔPrefix(nil), errors.New("prefix length "u8 + itoa.Itoa(b) + " too large for IPv6"u8));
+            return (new ΔPrefix(nil), errors.New("prefix length "u8 + strconv.Itoa(b) + " too large for IPv6"u8));
         }
     }
     ip.addr = ip.addr.and(mask6(effectiveBits));
@@ -1428,25 +1427,27 @@ public static bool IsSingleIP(this ΔPrefix p) {
     return p.IsValid() && p.Bits() == p.ip.BitLen();
 }
 
-// compare returns an integer comparing two prefixes.
+// Compare returns an integer comparing two prefixes.
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.
 // Prefixes sort first by validity (invalid before valid), then
-// address family (IPv4 before IPv6), then prefix length, then
-// address.
-//
-// Unexported for Go 1.22 because we may want to compare by p.Addr first.
-// See post-acceptance discussion on go.dev/issue/61642.
-internal static nint compare(this ΔPrefix p, ΔPrefix p2) {
+// address family (IPv4 before IPv6), then masked prefix address, then
+// prefix length, then unmasked address.
+public static nint Compare(this ΔPrefix p, ΔPrefix p2) {
+    // Aside from sorting based on the masked address, this use of
+    // Addr.Compare also enforces the valid vs. invalid and address
+    // family ordering for the prefix.
     {
-        nint c = cmp.Compare(p.Addr().BitLen(), p2.Addr().BitLen()); if (c != 0) {
+        nint c = p.Masked().Addr().Compare(p2.Masked().Addr()); if (c != 0) {
             return c;
         }
     }
+
     {
         nint c = cmp.Compare(p.Bits(), p2.Bits()); if (c != 0) {
             return c;
         }
     }
+
     return p.Addr().Compare(p2.Addr());
 }
 
@@ -1708,7 +1709,7 @@ public static @string String(this ΔPrefix p) {
     if (!p.IsValid()) {
         return invalidPrefixˢ;
     }
-    return p.ip.String() + "/"u8 + itoa.Itoa(p.Bits());
+    return p.ip.String() + "/"u8 + strconv.Itoa(p.Bits());
 }
 
 } // end netip_package

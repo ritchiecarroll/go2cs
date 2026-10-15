@@ -18,7 +18,7 @@ internal static readonly @string osUnexpectedResultFromˢ = "os: unexpected resu
 internal static readonly @string getExitCodeProcessˢ = "GetExitCodeProcess"u8;
 internal static readonly @string getProcessTimesˢ = "GetProcessTimes"u8;
 
-// Note that Process.mode is always modeHandle because Windows always requires
+// Note that Process.handle is never nil because Windows always requires
 // a handle. A manually-created Process literal is not valid.
 internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
     ж<ProcessState> ps = default!;
@@ -60,7 +60,11 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
         if (e != default!) {
             (ps, err) = (default!, NewSyscallError(getProcessTimesˢ, e)); goto ᒐdone;
         }
-        defer(() => Ꮡp.Release(), ref ᒐ);
+
+        // For compatibility we use statusReleased here rather
+        // than statusDone.
+        Ꮡp.doRelease(statusReleased);
+
         (ps, err) = (Ꮡ(new ProcessState(p.Pid, new syscall.WaitStatus(ExitCode: ec), Ꮡu)), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -103,25 +107,8 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
     finally { ᒐ.Run(); }
 }
 
-internal static error release(this ж<Process> Ꮡp) {
-    // Drop the Process' reference and mark handle unusable for
-    // future calls.
-    //
-    // The API on Windows expects EINVAL if Release is called multiple
-    // times.
-    {
-        var old = Ꮡp.handlePersistentRelease(statusReleased); if (old == statusReleased) {
-            return syscall.EINVAL;
-        }
-    }
-
-    // no need for a finalizer anymore
-    runtime.SetFinalizer(Ꮡp.OrTypedNil(), default!);
-    return default!;
-}
-
-internal static void closeHandle(this ref Process p) {
-    syscall.CloseHandle(((syscallꓸHandle)p.handle));
+internal static void closeHandle(this ref processHandle ph) {
+    syscall.CloseHandle(((syscallꓸHandle)ph.handle));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

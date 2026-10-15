@@ -344,7 +344,7 @@ internal static readonly @string samplesˢ = "samples"u8;
 internal static readonly @string cpuˢ = "cpu"u8;
 
 // build completes and returns the constructed profile.
-internal static void build(this ж<profileBuilder> Ꮡb) {
+internal static error build(this ж<profileBuilder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.end = time.Now();
@@ -370,8 +370,8 @@ internal static void build(this ж<profileBuilder> Ꮡb) {
         if ((~e).tag != nil) {
             var eʗ1 = e;
             labels = () => {
-                foreach (var (_, lbl) in ((ж<labelMap>)(uintptr)((~eʗ1).tag)).Value.list) {
-                    Ꮡb.Value.pbLabel(tagSample_Label, lbl.key, lbl.value, 0);
+                foreach (var (_, lbl) in ((ж<labelMap>)(uintptr)((~eʗ1).tag)).Value.Set.List) {
+                    Ꮡb.Value.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };
         }
@@ -390,8 +390,11 @@ internal static void build(this ж<profileBuilder> Ꮡb) {
     // TODO: Anything for tagProfile_KeepFrames?
 
     b.pb.strings(tagProfile_StringTable, b.strings);
-    b.zw.Write(b.pb.data);
-    b.zw.Close();
+    var (_, err) = b.zw.Write(b.pb.data);
+    if (err != default!) {
+        return err;
+    }
+    return b.zw.Close();
 }
 
 // appendLocsForStack appends the location IDs for the given stack trace to the given

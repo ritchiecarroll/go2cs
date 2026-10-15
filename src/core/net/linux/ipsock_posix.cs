@@ -275,9 +275,6 @@ internal static (syscall.SockaddrInet6, error) addrPortToSockaddrInet6(netip.Add
     // to an IPv4-mapped IPv6 address.
     // The error message is kept consistent with ipToSockaddrInet6.
     var addr = ap.Addr();
-    if (!addr.IsValid()) {
-        return (new syscall.SockaddrInet6(nil), new AddrErrorжerror(Ꮡ(new AddrError(Err: "non-IPv6 address"u8, Addr: addr.String()))));
-    }
     var sa = new syscall.SockaddrInet6(
         Addr: addr.As16(),
         Port: (nint)ap.Port(),

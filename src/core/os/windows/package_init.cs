@@ -11,6 +11,5 @@ partial class os_package {
         initᴛStdin();
         initᴛStdout();
         initᴛStderr();
-        initᴛlstat();
     }
 } // end os_package

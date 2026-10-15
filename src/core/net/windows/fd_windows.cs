@@ -52,14 +52,41 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
     return (ret, default!);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string wsaioctlˢ = "wsaioctl"u8;
+
 internal static error init(this ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
-    var (errcall, err) = Ꮡfd.of(netFD.Ꮡpfd).Init(fd.net, true);
-    if (errcall != ""u8) {
-        err = wrapSyscallError(errcall, err);
+    {
+        var err = Ꮡfd.of(netFD.Ꮡpfd).Init(fd.net, true); if (err != default!) {
+            return err;
+        }
     }
-    return err;
+    var exprᴛ1 = fd.net;
+    if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
+        // Disable reporting of PORT_UNREACHABLE errors.
+        // See https://go.dev/issue/5834.
+        ref var ret = ref heap<uint32>(out var Ꮡret);
+        ret = (uint32)0;
+        ref var flag = ref heap<uint32>(out var Ꮡflag);
+        flag = (uint32)0;
+        var size = (uint32)/* unsafe.Sizeof(flag) */ (uintptr)4;
+        var err = syscall.WSAIoctl(fd.pfd.Sysfd, syscall.SIO_UDP_CONNRESET, Ꮡflag.Reinterpret<uint32, byte>(), size, nil, 0, Ꮡret, nil, 0);
+        if (err != default!) {
+            return wrapSyscallError(wsaioctlˢ, err);
+        }
+        // Disable reporting of NET_UNREACHABLE errors.
+        // See https://go.dev/issue/68614.
+        ret = 0;
+        flag = 0;
+        size = (uint32)/* unsafe.Sizeof(flag) */ (uintptr)4;
+        err = syscall.WSAIoctl(fd.pfd.Sysfd, windows.SIO_UDP_NETRESET, Ꮡflag.Reinterpret<uint32, byte>(), size, nil, 0, Ꮡret, nil, 0);
+        if (err != default!) {
+            return wrapSyscallError(wsaioctlˢ, err);
+        }
+    }
+    return default!;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -264,10 +291,37 @@ internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
     return (netfd, default!);
 }
 
-// Unimplemented functions.
-internal static (ж<os.File>, error) dup(this ref netFD fd) {
-    // TODO: Implement this, perhaps using internal/poll.DupCloseOnExec.
-    return (default!, syscall.EWINDOWS);
+// Defined in os package.
+/*linkname*/ internal static partial ж<os.File> newWindowsFile(syscallꓸHandle h, @string name) {
+    return os.net_newWindowsFile((uintptr)h, name);
+}
+
+internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.DerefOrNull();
+
+    // Disassociate the IOCP from the socket,
+    // it is not safe to share a duplicated handle
+    // that is associated with IOCP.
+    {
+        var errΔ1 = Ꮡfd.of(netFD.Ꮡpfd).DisassociateIOCP(); if (errΔ1 != default!) {
+            return (default!, errΔ1);
+        }
+    }
+    syscallꓸHandle h = default!;
+    ref var syserr = ref heap<error>(out var Ꮡsyserr);
+    var err = Ꮡfd.of(netFD.Ꮡpfd).RawControl((uintptr fdΔ1) => {
+        (h, Ꮡsyserr.ValueSlot) = dupSocket(((syscallꓸHandle)fdΔ1));
+    });
+    if (err == default!) {
+        err = syserr;
+    }
+    if (err != default!) {
+        return (default!, err);
+    }
+    // All WSASocket calls must be match with a syscall.Closesocket call,
+    // but os.NewFile calls syscall.CloseHandle instead. We need to use
+    // a hidden function so that the returned file is aware of this fact.
+    return (newWindowsFile(h, fd.name()), default!);
 }
 
 } // end net_package

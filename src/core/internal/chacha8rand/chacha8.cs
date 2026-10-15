@@ -8,9 +8,15 @@
 namespace go.@internal;
 
 using byteorder = go.@internal.byteorder_package;
+using cpu = go.@internal.cpu_package;
+using @unsafe = unsafe_package;
 using go.@internal;
 
 partial class chacha8rand_package {
+
+// Offsets into internal/cpu records for use in assembly.
+internal static uintptr offsetLOONG64HasLSX => /* unsafe.Offsetof(cpu.Loong64.HasLSX) */ 64;
+internal static uintptr offsetRISCV64HasV => /* unsafe.Offsetof(cpu.RISCV64.HasV) */ 65;
 
 internal static UntypedInt ctrInc => 4; // increment counter by 4 between block calls
 internal static UntypedInt ctrMax => 16; // reseed when counter reaches 16

@@ -32,6 +32,8 @@ using static go.@internal.syscall.windows_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b6f6e63652073796e632e4f6e63653b2073656e64416464722075696e747074723b2072656376416464722075696e747074723b20657272206572726f727d", "sendRecvMsgFuncᴛ1")]
+[assembly: GoTypeAlias("Context", "go.@internal.runtime.syscall.windows_package.Context")]
+[assembly: GoTypeAlias("MemoryBasicInformation", "go.@internal.runtime.syscall.windows_package.MemoryBasicInformation")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -55,14 +57,15 @@ using static go.@internal.syscall.windows_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/at_windows.go", "at_windows.cs", "ABUygoKmkqakgqSCyJSClIKmgqaCgpSCppSCgpSClICCtoIAAhDSlIK0tLaCgqaCAAsagqaCgoKCuKiSgpSUlAAKFIK2lKaCgoCCpIIACxqClIKmooKAgqSCAAYQgpSUAAUQAAselKQABxAABxKAgqQ=")]
+[assembly: go.GoPositionMap("internal/syscall/windows/at_windows.go", "at_windows.cs", "AB5EgoKmpIKClIKUgpSCgqaCgoKCgoKCgpSmpIKkgsiUgpSUlIKmgqaCgpSClIKmlIKClIKUgpSAggADENKUgrS0toKCpoKCgpQADByClIKmgoK4gIK2goK4AAYUAA8ShJSCgrqCyoKCgoKUgoKmgpTcgoKCuoKU2JKClJSUAAoUgraklKaCgoCCpIIACxqClIKmoqaUgoCCpIIABhCCgILsAAYQgqaUgqYACxgACx6UyKQAChaygoCmuoKUAAYQgoLIAAgUooKAgqSCAAYQgpSUyoKClIKUgpSY3oIABxDIgpTegIKk1qKCgIKkggAGEIKUlLaCgpSClIKUht6AgqQAFCjcAA8KooKClJSCgpSmgoCCpIIACxqClIYAABy8lIKCgoKCgoKCpoKUAAgShJIABxKm3NKClIKClJSCgpSCgoKUlIKClIKCgqaCgoKCpg==", "51-55:1;585-587:1", "", "218=IndexByte/1/3/1,IndexByte/2/3/1,IndexByte/3/3/1")]
+[assembly: go.GoPositionMap("internal/syscall/windows/nonblocking_windows.go", "nonblocking_windows.cs", "AAoesoKAgqQ=")]
 [assembly: go.GoPositionMap("internal/syscall/windows/reparse_windows.go", "reparse_windows.cs", "ADyEAZKCggATKpKCgg==")]
 [assembly: go.GoPositionMap("internal/syscall/windows/security_windows.go", "security_windows.cs", "ACZisoKUppSUAA0eggBBpgEACwjCkoKCgoKUgpSCABxuABEysoLYsoI=")]
 [assembly: go.GoPositionMap("internal/syscall/windows/string_windows.go", "string_windows.cs", "ABAowoKClKQ=")]
-[assembly: go.GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABIqooKUgoKCgpQAwAGeA/4AMtYBgoKClIKClAAnZJIAOIYBsoKCgoKUgpSUrMwADhCCpoCkgg==")]
-[assembly: go.GoPositionMap("internal/syscall/windows/types_windows.go", "types_windows.cs", "AGfgAZKClIKClIKClII=")]
-[assembly: go.GoPositionMap("internal/syscall/windows/version_windows.go", "version_windows.cs", "ABc60pKCggAHEqKClIKCgoKUgoKClIKCoqiigqqigqyyguyCgtyCpoKUgoKClIKCpg==")]
-[assembly: go.GoPositionMap("internal/syscall/windows/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiCgoKCgoKCgpSCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAMgosKClKaiooKmoqKCpqKigqaigoKUpqKCgpSmoqKCpqIACAKClKai4oKUprLCgoKUprKigoKUpqKCgpSigpSmoqKClKaigoKUpqKCgpSmooKClKKClKaiwoKUprLCgoKUpqKCgqaiwoKUpqKCgqaygoKClKaiooKUprKigoKUprKigoKUprKigoKUprKigoKUpqIACgKClKaiwoKUpqKigpQABiaiwoKUprLCgoKUpqLCgqai4oKmoqKClKaiooKUpqKigpQABBaiwoKUpqLigpSmosKClAAINqKigpQABBCigoKmoqKClKaigoKUooKUpqKigpSmosKClAAEHrKigoKU")]
+[assembly: go.GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABIqooKUgoKCgpQAxAGmA/4AM9gBgoKClIKClAAnZJIAPpIBsoKCgoKUgpSUrMwAHDSCpoCkgg==")]
+[assembly: go.GoPositionMap("internal/syscall/windows/types_windows.go", "types_windows.cs", "AG7mAZKClIKClIKClII=")]
+[assembly: go.GoPositionMap("internal/syscall/windows/version_windows.go", "version_windows.cs", "ABxE0pKCgqqiggALFoKCAAcSooKUgoKCgpSCgoKUgoKiqKKCqqKCrLKC7IKC3IKmgpSCgoKUgoKm")]
+[assembly: go.GoPositionMap("internal/syscall/windows/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiCgoKCgoKCgpSCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggADIKLCgpSmoqKCpqKigqaiooKmooKClKaigoKUpqKigqaiAAgCgpSmouKClKaywoKClKayooKClKaigoKUooKUpqKigpSmooKClKai4oKUpqKCgoKUpqIACgKClKaiooKUpqKCgpSigpSmouKClKaywoKClKaygoKClKaywoKClKaigoKmosKClKaigoKmsoKCgpSmoqKClKaiooKUprKigoKUprKigoKUprKigoKUpqKCgpTCgpSmsqKCgpSmogAKAoKUpqLCgpSmoqKClAAGJqLCgpSmssKCgpSmsoKCgpSmosKCpqIACgKCpqKigpSmoqKClKaiooKUAAQWosKClKai4oKUpqLCgpQACDaiwoKUpqLCgpQABBCiooKmooKCpqKigpSmooKClKKClKaiooKUpqLCgpSmoqKClAAEHrKigoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall;
@@ -77,16 +80,25 @@ public static partial class windows_package
     // via declarations below.
 
     // <TypeAccessibility>
-    [GoValueClone("csdVersion")] internal partial struct _OSVERSIONINFOW {}
+    [GoValueClone("csdVersion")] internal partial struct _OSVERSIONINFOEXW {}
     internal partial struct sendRecvMsgFuncᴛ1 {}
+    [GoLocalName("reparseDataBufferT")] internal partial struct symlinkat_reparseDataBufferT {}
     public partial struct ACCESS_MASK {}
     public partial struct ACL {}
+    public partial struct EXPLICIT_ACCESS {}
     public partial struct FILE_ATTRIBUTE_TAG_INFO {}
     public partial struct FILE_BASIC_INFO {}
+    public partial struct FILE_COMPLETION_INFORMATION {}
+    public partial struct FILE_DISPOSITION_INFO {}
     public partial struct FILE_DISPOSITION_INFORMATION {}
     public partial struct FILE_DISPOSITION_INFORMATION_EX {}
     [GoValueClone("FileName")] public partial struct FILE_FULL_DIR_INFO {}
     [GoValueClone("ShortName", "FileName")] public partial struct FILE_ID_BOTH_DIR_INFO {}
+    public partial struct FILE_IO_COMPLETION_NOTIFICATION_INFORMATION {}
+    [GoValueClone("FileName")] public partial struct FILE_LINK_INFORMATION {}
+    public partial struct FILE_MODE_INFORMATION {}
+    [GoValueClone("FileName")] public partial struct FILE_RENAME_INFORMATION {}
+    [GoValueClone("FileName")] public partial struct FILE_RENAME_INFORMATION_EX {}
     public partial struct IO_STATUS_BLOCK {}
     [GoValueClone("PhysicalAddress", "ZoneIndices")] public partial struct IpAdapterAddresses {}
     public partial struct IpAdapterAnycastAddress {}
@@ -99,7 +111,6 @@ public static partial class windows_package
     public partial struct LUID {}
     public partial struct LUID_AND_ATTRIBUTES {}
     public partial struct LocalGroupUserInfo0 {}
-    public partial struct MemoryBasicInformation {}
     [GoValueClone("Module", "ExePath")] public partial struct ModuleEntry32 {}
     [GoValueClone("PathBuffer")] public partial struct MountPointReparseBuffer {}
     public partial struct NTStatus {}
@@ -108,6 +119,7 @@ public static partial class windows_package
     public partial struct PROCESS_MEMORY_COUNTERS {}
     public partial struct REPARSE_DATA_BUFFER {}
     public partial struct REPARSE_DATA_BUFFER_HEADER {}
+    public partial struct RUNTIME_FUNCTION {}
     public partial struct SECURITY_DESCRIPTOR {}
     public partial struct SECURITY_DESCRIPTOR_CONTROL {}
     public partial struct SECURITY_QUALITY_OF_SERVICE {}
@@ -118,10 +130,12 @@ public static partial class windows_package
     public partial struct SecurityAttributes {}
     public partial struct SocketAddress {}
     [GoValueClone("PathBuffer")] public partial struct SymbolicLinkReparseBuffer {}
+    public partial struct SymlinkatFlags {}
     public partial struct TCP_INITIAL_RTO_PARAMETERS {}
     [GoValueClone("Groups")] public partial struct TOKEN_GROUPS {}
     public partial struct TOKEN_MANDATORY_LABEL {}
     [GoValueClone("Privileges")] public partial struct TOKEN_PRIVILEGES {}
+    public partial struct TRUSTEE {}
     public partial struct TokenType {}
     public partial struct UserInfo1 {}
     public partial struct UserInfo4 {}
@@ -136,6 +150,9 @@ public static partial class windows_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸoserror() => builtin.initPackage(typeof(go.@internal.oserror_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸruntimeꓸsyscallꓸwindows() => builtin.initPackage(typeof(go.@internal.runtime.syscall.windows_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstringslite() => builtin.initPackage(typeof(go.@internal.stringslite_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindowsꓸsysdll() => builtin.initPackage(typeof(go.@internal.syscall.windows.sysdll_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(go.sync_package));

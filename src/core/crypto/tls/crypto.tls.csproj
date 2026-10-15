@@ -178,16 +178,17 @@
     <ProjectReference Include="$(go2csPath)core/crypto/ecdsa/crypto.ecdsa.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/ed25519/crypto.ed25519.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/elliptic/crypto.elliptic.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/fips140/crypto.fips140.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/hkdf/crypto.hkdf.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/hmac/crypto.hmac.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/hpke/crypto.hpke.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/boring/crypto.internal.boring.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/aes/crypto.internal.fips140.aes.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/aes/gcm/crypto.internal.fips140.aes.gcm.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/hkdf/crypto.internal.fips140.hkdf.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/mlkem/crypto.internal.fips140.mlkem.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/tls12/crypto.internal.fips140.tls12.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/tls13/crypto.internal.fips140.tls13.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/hpke/crypto.internal.hpke.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/md5/crypto.md5.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/mlkem/crypto.mlkem.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rc4/crypto.rc4.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rsa/crypto.rsa.csproj" />
@@ -218,6 +219,7 @@
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
     <ProjectReference Include="$(go2csPath)core/vendor/golang.org/x/crypto/chacha20poly1305/vendor.golang.org.x.crypto.chacha20poly1305.csproj" />
     <ProjectReference Include="$(go2csPath)core/vendor/golang.org/x/crypto/cryptobyte/vendor.golang.org.x.crypto.cryptobyte.csproj" />
+    <ProjectReference Include="$(go2csPath)core/weak/weak.csproj" />
   </ItemGroup>
 
   <ItemGroup>

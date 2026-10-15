@@ -162,6 +162,12 @@ internal static UntypedInt prefixSize => 155; // Max length of the prefix field 
 // This matches the limit used by libarchive.
 internal static UntypedInt maxSpecialFileSize => /* 1 << 20 */ 1048576;
 
+// Maximum number of sparse file entries.
+// We should never actually hit this limit
+// (every sparse encoding will first be limited by maxSpecialFileSize),
+// but this adds an additional layer of defense.
+internal static UntypedInt maxSparseFileEntries => /* 1 << 20 */ 1048576;
+
 // blockPadding computes the number of bytes needed to pad offset up to the
 // nearest block edge where 0 <= n < blockSize.
 internal static int64 /*n*/ blockPadding(int64 offset) {

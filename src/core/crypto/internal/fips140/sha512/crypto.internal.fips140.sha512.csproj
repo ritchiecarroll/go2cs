@@ -164,6 +164,7 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/byteorder/crypto.internal.fips140deps.byteorder.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
+    <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/bits/math.bits.csproj" />
   </ItemGroup>
 

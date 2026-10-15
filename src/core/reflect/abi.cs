@@ -164,7 +164,7 @@ internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡr
     a.valueStart = builtin.append(a.valueStart, len(a.steps));
     bool ok = default!;
     bool ptr = default!;
-    if (rcvr.IfaceIndir() || rcvr.Pointers()){
+    if (!rcvr.IsDirectIface() || rcvr.Pointers()){
         ok = a.assignIntN(0, goarch.PtrSize, 1, 0b1);
         ptr = true;
     } else {
@@ -308,12 +308,12 @@ internal static void dump(this ref abiDesc a) {
     println();
 }
 
-internal static void dumpPtrBitMap(abi.IntArgRegBitmap b) {
-    b = b.Clone();
+internal static void dumpPtrBitMap(abi.IntArgRegBitmap bʗp) {
+    ref var b = ref heap(bʗp.Clone(), out var Ꮡb);
 
     for (nint i = 0; i < intArgRegs; i++) {
         nint x = 0;
-        if (b.Get(i)) {
+        if (Ꮡb.Get(i)) {
             x = 1;
         }
         print((@string)" "u8, x);

@@ -7,11 +7,10 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using buildcfg = @internal.buildcfg_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using slices = slices_package;
-using @internal;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
+using global::go.@internal;
 using global::go.go;
 
 partial class types_package {
@@ -53,141 +52,116 @@ internal static @string pathString(slice<Object> path) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkingSSObjPathSˢ = "-- checking %s (%s, objPath = %s)"u8;
-internal static readonly @string vSShouldHaveBeenDeclaredˢ = "%v: %s should have been declared"u8;
+internal static readonly @string checkingSObjPathSˢ = "-- checking %s (objPath = %s)"u8;
 
 // objDecl type-checks the declaration of obj in its respective (file) environment.
-// For the meaning of def, see Checker.definedType, in typexpr.go.
-internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj, ж<TypeName> Ꮡdef) {
+internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
+
+        if (tracePos) {
+            check.pushPos(((atPos)obj.Pos()));
+            defer(() => {
+                // If we're panicking, keep stack of source positions.
+                {
+                    var p = recover(); if (p != default!) {
+                        throw panic(p);
+                    }
+                }
+                Ꮡcheck.Value.popPos();
+            }, ref ᒐ);
+        }
 
         if ((~check.conf)._Trace && obj.Type() == default!) {
             if (check.indent == 0) {
                 fmt.Println(); // empty line between top-level objects for readability
             }
-            Ꮡcheck.trace(obj.Pos(), checkingSSObjPathSˢ, obj, obj.color(), pathString(check.objPath));
+            Ꮡcheck.trace(obj.Pos(), checkingSObjPathSˢ, obj, pathString(check.objPath));
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
-                Ꮡcheck.trace(obj.Pos(), "=> %s (%s)"u8, obj, obj.color());
+                Ꮡcheck.trace(obj.Pos(), "=> %s"u8, obj);
             }, ref ᒐ);
         }
 
-        // Checking the declaration of obj means inferring its type
-        // (and possibly its value, for constants).
-        // An object's type (and thus the object) may be in one of
-        // three states which are expressed by colors:
+        // Checking the declaration of an object means determining its type
+        // (and also its value for constants). An object (and thus its type)
+        // may be in 1 of 3 states:
         //
-        // - an object whose type is not yet known is painted white (initial color)
-        // - an object whose type is in the process of being inferred is painted grey
-        // - an object whose type is fully inferred is painted black
+        // - not in Checker.objPathIdx and type == nil : type is not yet known (white)
+        // -     in Checker.objPathIdx                 : type is pending       (grey)
+        // - not in Checker.objPathIdx and type != nil : type is known         (black)
         //
-        // During type inference, an object's color changes from white to grey
-        // to black (pre-declared objects are painted black from the start).
-        // A black object (i.e., its type) can only depend on (refer to) other black
-        // ones. White and grey objects may depend on white and black objects.
-        // A dependency on a grey object indicates a cycle which may or may not be
-        // valid.
+        // During type-checking, an object changes from white to grey to black.
+        // Predeclared objects start as black (their type is known without checking).
         //
-        // When objects turn grey, they are pushed on the object path (a stack);
-        // they are popped again when they turn black. Thus, if a grey object (a
-        // cycle) is encountered, it is on the object path, and all the objects
-        // it depends on are the remaining objects on that path. Color encoding
-        // is such that the color value of a grey object indicates the index of
-        // that object in the object path.
+        // A black object may only depend on (refer to) to other black objects. White
+        // and grey objects may depend on white or black objects. A dependency on a
+        // grey object indicates a (possibly invalid) cycle.
+        //
+        // When an object is marked grey, it is pushed onto the object path (a stack)
+        // and its index in the path is recorded in the path index map. It is popped
+        // and removed from the map when its type is determined (and marked black).
 
-        // During type-checking, white objects may be assigned a type without
-        // traversing through objDecl; e.g., when initializing constants and
-        // variables. Update the colors of those objects here (rather than
-        // everywhere where we set the type) to satisfy the color invariants.
-        if (obj.color() == white && obj.Type() != default!) {
-            obj.setColor(black);
+        // If this object is grey, we have a (possibly invalid) cycle. This is signaled
+        // by a non-nil type for the object, except for constants and variables whose
+        // type may be non-nil (known), or nil if it depends on a not-yet known
+        // initialization value.
+        //
+        // In the former case, set the type to Typ[Invalid] because we have an
+        // initialization cycle. The cycle error will be reported later, when
+        // determining initialization order.
+        //
+        // TODO(gri) Report cycle here and simplify initialization order code.
+        {
+            var (_, okΔ1) = check.objPathIdx[obj, ꟷ]; if (okΔ1) {
+                switch (obj.type()) {
+                case ж<Const> _:
+                case ж<Var> _: {
+                    var objΔ1 = obj;
+                    if (!Ꮡcheck.validCycle(objΔ1) || objΔ1.Type() == default!) {
+                        objΔ1.setType(new BasicжΔType(Typ[Invalid]));
+                    }
+                    break;
+                }
+                case ж<TypeName> objΔ1: {
+                    if (!Ꮡcheck.validCycle(new TypeNameжObject(objΔ1))) {
+                        objΔ1.of(TypeName.Ꮡobject).setType(new BasicжΔType(Typ[Invalid]));
+                    }
+                    break;
+                }
+                case ж<Func> objΔ1: {
+                    if (!Ꮡcheck.validCycle(new FuncжObject(objΔ1))) {
+                        // Don't set type to Typ[Invalid]; plenty of code asserts that
+                        // functions have a *Signature type. Instead, leave the type
+                        // as an empty signature, which makes it impossible to
+                        // initialize a variable with the function.
+                    }
+                    break;
+                }
+                default: {
+                    var objΔ1 = obj;
+                    throw panic("unreachable");
+                    break;
+                }}
+
+                assert(obj.Type() != default!);
+                return;
+            }
+        }
+
+        if (obj.Type() != default!) { // black, meaning it's already type-checked
             return;
         }
 
-        var exprᴛ1 = obj.color();
-        var matchᴛ1 = false;
-        var matchᴛ2 = exprᴛ1 == white || exprᴛ1 == black || exprᴛ1 == grey;
-        if (exprᴛ1 == white) { matchᴛ1 = true;
-            assert(obj.Type() == default!);
-            // All color values other than white and black are considered grey.
-            // Because black and white are < grey, all values >= grey are grey.
-            // Use those values to encode the object's index into the object path.
-            obj.setColor(grey + ((Δcolor)(uint32)check.push(obj)));
-            defer(() => {
-                Ꮡcheck.Value.pop().setColor(black);
-            }, ref ᒐ);
-        }
-        else if (exprᴛ1 == black) {
-            assert(obj.Type() != default!);
-            return;
-        }
-        else if (!matchᴛ2) { /* default: */
-            // Color values other than white or black are considered grey.
-            fallthrough = true;
-        }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 == grey) { matchᴛ1 = true;
-            // We have a (possibly invalid) cycle.
-            // In the existing code, this is marked by a non-nil type
-            // for the object except for constants and variables whose
-            // type may be non-nil (known), or nil if it depends on the
-            // not-yet known initialization value.
-            // In the former case, set the type to Typ[Invalid] because
-            // we have an initialization cycle. The cycle error will be
-            // reported later, when determining initialization order.
-            // TODO(gri) Report cycle here and simplify initialization
-            // order code.
-            switch (obj.type()) {
-            case ж<Const> objΔ2: {
-                if (!Ꮡcheck.validCycle(new ConstжObject(objΔ2)) || (~objΔ2).typ == default!) {
-                    objΔ2.Value.typ = new BasicжΔType(Typ[Invalid]);
-                }
-                break;
-            }
-            case ж<Var> objΔ2: {
-                if (!Ꮡcheck.validCycle(new VarжObject(objΔ2)) || (~objΔ2).typ == default!) {
-                    objΔ2.Value.typ = new BasicжΔType(Typ[Invalid]);
-                }
-                break;
-            }
-            case ж<TypeName> objΔ2: {
-                if (!Ꮡcheck.validCycle(new TypeNameжObject(objΔ2))) {
-                    // break cycle
-                    // (without this, calling underlying()
-                    // below may lead to an endless loop
-                    // if we have a cycle for a defined
-                    // (*Named) type)
-                    objΔ2.Value.typ = new BasicжΔType(Typ[Invalid]);
-                }
-                break;
-            }
-            case ж<Func> objΔ2: {
-                if (!Ꮡcheck.validCycle(new FuncжObject(objΔ2))) {
-                    // Don't set obj.typ to Typ[Invalid] here
-                    // because plenty of code type-asserts that
-                    // functions have a *Signature type. Grey
-                    // functions have their type set to an empty
-                    // signature which makes it impossible to
-                    // initialize a variable with the function.
-                }
-                break;
-            }
-            default: {
-                var objΔ2 = obj;
-                throw panic("unreachable");
-                break;
-            }}
-            assert(obj.Type() != default!);
-            return;
-        }
+        // white, meaning it must be type-checked
 
-        var d = check.objMap[obj];
-        if (d == nil) {
-            Ꮡcheck.dump(vSShouldHaveBeenDeclaredˢ, obj.Pos(), obj);
-            throw panic("unreachable");
-        }
+        check.push(obj); // mark as grey
+        defer(Ꮡcheck.pop, ref ᒐ);
+
+        var (d, ok) = check.objMap[obj, ꟷ];
+        assert(ok);
 
         // save/restore current environment and set up object environment
         defer((environment env) => {
@@ -201,29 +175,29 @@ internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj, ж<TypeName>
         // consts, vars, or functions, add dependencies to the current
         // check.decl.
         switch (obj.type()) {
-        case ж<Const> objΔ3: {
+        case ж<Const> objΔ2: {
             check.decl = d; // new package-level const decl
-            Ꮡcheck.constDecl(objΔ3, (~d).vtyp, (~d).init, (~d).inherited);
+            Ꮡcheck.constDecl(objΔ2, (~d).vtyp, (~d).init, (~d).inherited);
             break;
         }
-        case ж<Var> objΔ3: {
+        case ж<Var> objΔ2: {
             check.decl = d; // new package-level var decl
-            Ꮡcheck.varDecl(objΔ3, (~d).lhs, (~d).vtyp, (~d).init);
+            Ꮡcheck.varDecl(objΔ2, (~d).lhs, (~d).vtyp, (~d).init);
             break;
         }
-        case ж<TypeName> objΔ3: {
+        case ж<TypeName> objΔ2: {
             // invalid recursive types are detected via path
-            Ꮡcheck.typeDecl(objΔ3, (~d).tdecl, Ꮡdef);
-            Ꮡcheck.collectMethods(objΔ3); // methods can only be added to top-level types
+            Ꮡcheck.typeDecl(objΔ2, (~d).tdecl);
+            Ꮡcheck.collectMethods(objΔ2); // methods can only be added to top-level types
             break;
         }
-        case ж<Func> objΔ3: {
+        case ж<Func> objΔ2: {
             // functions may be recursive - no need to track dependencies
-            Ꮡcheck.funcDecl(objΔ3, d);
+            Ꮡcheck.funcDecl(objΔ2, d);
             break;
         }
         default: {
-            var objΔ3 = obj;
+            var objΔ2 = obj;
             throw panic("unreachable");
             break;
         }}
@@ -260,12 +234,12 @@ internal static bool /*valid*/ validCycle(this ж<Checker> Ꮡcheck, Object obj)
         }
 
         // Count cycle objects.
-        assert(obj.color() >= grey);
-        var start = obj.color() - grey; // index of obj in objPath
-        var cycle = check.objPath.slice((nint)(uint32)(start));
+        var (start, found) = check.objPathIdx[obj, ꟷ];
+        assert(found);
+        var cycle = check.objPath.slice(start);
         var tparCycle = false; // if set, the cycle is through a type parameter list
-        nint nval = 0; // number of (constant or variable) values in the cycle; valid if !generic
-        nint ndef = 0; // number of type definitions in the cycle; valid if !generic
+        nint nval = 0; // number of (constant or variable) values in the cycle
+        nint ndef = 0; // number of type definitions in the cycle
 loop:
         foreach (var (_, objΔ1) in cycle) {
             switch (objΔ1.type()) {
@@ -278,7 +252,7 @@ loop:
             case ж<TypeName> objΔ2: {
                 // If we reach a generic type that is part of a cycle
                 // and we are in a type parameter list, we have a cycle
-                // through a type parameter list, which is invalid.
+                // through a type parameter list.
                 if (check.inTParamList && isGeneric((~objΔ2).typ)) {
                     tparCycle = true;
                     goto break_loop;
@@ -339,20 +313,23 @@ break_loop:;
             }, ref ᒐ);
         }
 
-        if (!tparCycle) {
-            // A cycle involving only constants and variables is invalid but we
-            // ignore them here because they are reported via the initialization
-            // cycle check.
-            if (nval == len(cycle)) {
-                valid = true; goto ᒐdone;
-            }
+        // Cycles through type parameter lists are ok (go.dev/issue/68162).
+        if (tparCycle) {
+            valid = true; goto ᒐdone;
+        }
 
-            // A cycle involving only types (and possibly functions) must have at least
-            // one type definition to be permitted: If there is no type definition, we
-            // have a sequence of alias type names which will expand ad infinitum.
-            if (nval == 0 && ndef > 0) {
-                valid = true; goto ᒐdone;
-            }
+        // A cycle involving only constants and variables is invalid but we
+        // ignore them here because they are reported via the initialization
+        // cycle check.
+        if (nval == len(cycle)) {
+            valid = true; goto ᒐdone;
+        }
+
+        // A cycle involving only types (and possibly functions) must have at least
+        // one type definition to be permitted: If there is no type definition, we
+        // have a sequence of alias type names which will expand ad infinitum.
+        if (nval == 0 && ndef > 0) {
+            valid = true; goto ᒐdone;
         }
 
         Ꮡcheck.cycleError(cycle, firstInSrc(cycle));
@@ -376,11 +353,17 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
     // If obj is a type alias, mark it as valid (not broken) in order to avoid follow-on errors.
     var obj = cycle[start];
     var (tname, _) = obj._<ж<TypeName>>(ᐧ);
-    if (tname != nil && tname.IsAlias()) {
-        // If we use Alias nodes, it is initialized with Typ[Invalid].
-        // TODO(gri) Adjust this code if we initialize with nil.
-        if (!(~check.conf)._EnableAlias) {
-            check.validAlias(tname, new BasicжΔType(Typ[Invalid]));
+    if (tname != nil) {
+        if ((~check.conf)._EnableAlias){
+            {
+                var (a, ok) = tname.of(TypeName.Ꮡobject).Type()._<ж<Alias>>(ᐧ); if (ok) {
+                    a.Value.fromRHS = new BasicжΔType(Typ[Invalid]);
+                }
+            }
+        } else {
+            if (tname.IsAlias()) {
+                check.validAlias(tname, new BasicжΔType(Typ[Invalid]));
+            }
         }
     }
 
@@ -566,7 +549,7 @@ internal static void constDecl(this ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.
             if (!isConstType(t)) {
                 // don't report an error if the type is an invalid C (defined) type
                 // (go.dev/issue/22090)
-                if (isValid(under(t))) {
+                if (isValid(t.Underlying())) {
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(typ), InvalidConstType, "invalid constant type %s"u8, t);
                 }
                 obj.typ = new BasicжΔType(Typ[Invalid]);
@@ -659,20 +642,18 @@ internal static bool isImportedConstraint(this ref Checker check, ΔType typ) {
     if (named == nil || (~(~named).obj).pkg == check.pkg || (~(~named).obj).pkg == nil) {
         return false;
     }
-    var (u, _) = named.under()._<ж<Interface>>(ᐧ);
+    var (u, _) = named.Underlying()._<ж<Interface>>(ᐧ);
     return u != nil && !u.IsMethodSet();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string genericTypeAliasRequiresˢ = "generic type alias requires GOEXPERIMENT=aliastypeparams"u8;
 internal static readonly @string typeParametersˢ = "type parameters"u8;
-internal static readonly @string genericTypeAliasRequiresˢ2 = "generic type alias requires GODEBUG=gotypesalias=1 or unset"u8;
+internal static readonly @string cannotUseTypeParameterˢ = "cannot use type parameter declared in alias declaration as RHS"u8;
+internal static readonly @string genericTypeAliasRequiresˢ = "generic type alias requires GODEBUG=gotypesalias=1 or unset"u8;
 internal static readonly @string cannotUseATypeParameterˢ = "cannot use a type parameter as RHS in type declaration"u8;
 
-internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж<ast.TypeSpec> Ꮡtdecl, ж<TypeName> Ꮡdef) {
+internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж<ast.TypeSpec> Ꮡtdecl) {
     GoFrame ᒐ = default;
-    bool ᒐd1 = false;
-    bool ᒐd2 = false;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var obj = ref Ꮡobj.DerefOrNull();
@@ -712,32 +693,37 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
             }
 
             if ((~check.conf)._EnableAlias){
-                // TODO(gri) Should be able to use nil instead of Typ[Invalid] to mark
-                //           the alias as incomplete. Currently this causes problems
-                //           with certain cycles. Investigate.
-                //
-                // NOTE(adonovan): to avoid the Invalid being prematurely observed
-                // by (e.g.) a var whose type is an unfinished cycle,
-                // Unalias does not memoize if Invalid. Perhaps we should use a
-                // special sentinel distinct from Invalid.
-                var alias = Ꮡcheck.newAlias(Ꮡobj, new BasicжΔType(Typ[Invalid]));
-                setDefType(Ꮡdef, new AliasжΔType(alias));
+                var alias = Ꮡcheck.newAlias(Ꮡobj, default!);
+
+                // If we could not type the RHS, set it to invalid. This should
+                // only ever happen if we panic before setting.
+                var aliasʗ1 = alias;
+                defer(() => {
+                    if ((~aliasʗ1).fromRHS == default!) {
+                        aliasʗ1.Value.fromRHS = new BasicжΔType(Typ[Invalid]);
+                        unalias(aliasʗ1);
+                    }
+                }, ref ᒐ);
 
                 // handle type parameters even if not allowed (Alias type is supported)
                 if (tparam0 != nil) {
-                    if (!versionErr && !buildcfg.Experiment.AliasTypeParams) {
-                        Ꮡcheck.error(new ast_TypeSpecжpositioner(Ꮡtdecl), UnsupportedFeature, genericTypeAliasRequiresˢ);
-                        versionErr = true;
-                    }
                     check.openScope(new ast.TypeSpecжNode(Ꮡtdecl), typeParametersˢ);
-                    ᒐd1 = true;
+                    defer(Ꮡcheck.closeScope, ref ᒐ);
                     Ꮡcheck.collectTypeParams(alias.of(Alias.Ꮡtparams), tdecl.TypeParams);
                 }
 
-                rhs = Ꮡcheck.definedType(tdecl.Type, Ꮡobj);
+                rhs = Ꮡcheck.declaredType(tdecl.Type, Ꮡobj);
                 assert(rhs != default!);
                 alias.Value.fromRHS = rhs;
-                Unalias(new AliasжΔType(alias)); // resolve alias.actual
+
+                // spec: In an alias declaration the given type cannot be a type parameter declared in the same declaration."
+                // (see also go.dev/issue/75884, go.dev/issue/#75885)
+                {
+                    var (tpar, ok) = rhs._<ж<TypeParam>>(ᐧ); if (ok && (~alias).tparams != nil && slices.Index((~alias).tparams.list(), tpar) >= 0) {
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseTypeParameterˢ);
+                        alias.Value.fromRHS = new BasicжΔType(Typ[Invalid]);
+                    }
+                }
             } else {
                 // With Go1.23, the default behavior is to use Alias nodes,
                 // reflected by check.enableAlias. Signal non-default behavior.
@@ -747,7 +733,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
                 gotypesalias.IncNonDefault();
 
                 if (!versionErr && tparam0 != nil) {
-                    Ꮡcheck.error(new ast_TypeSpecжpositioner(Ꮡtdecl), UnsupportedFeature, genericTypeAliasRequiresˢ2);
+                    Ꮡcheck.error(new ast_TypeSpecжpositioner(Ꮡtdecl), UnsupportedFeature, genericTypeAliasRequiresˢ);
                     versionErr = true;
                 }
 
@@ -764,37 +750,41 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
         }
 
         var named = Ꮡcheck.newNamed(Ꮡobj, default!, default!);
-        setDefType(Ꮡdef, new NamedжΔType(named));
+
+        // The RHS of a named N can be nil if, for example, N is defined as a cycle of aliases with
+        // gotypesalias=0. Consider:
+        //
+        //   type D N    // N.unpack() will panic
+        //   type N A
+        //   type A = N  // N.fromRHS is not set before N.unpack(), since A does not call setDefType
+        //
+        // There is likely a better way to detect such cases, but it may not be worth the effort.
+        // Instead, we briefly permit a nil N.fromRHS while type-checking D.
+        named.Value.allowNilRHS = true;
+        var namedʗ1 = named;
+        defer(() => {
+            namedʗ1.Value.allowNilRHS = false;
+        }, ref ᒐ);
 
         if (tdecl.TypeParams != nil) {
             check.openScope(new ast.TypeSpecжNode(Ꮡtdecl), typeParametersˢ);
-            ᒐd2 = true;
+            defer(Ꮡcheck.closeScope, ref ᒐ);
             Ꮡcheck.collectTypeParams(named.of(Named.Ꮡtparams), tdecl.TypeParams);
         }
 
-        // determine underlying type of named
-        rhs = Ꮡcheck.definedType(tdecl.Type, Ꮡobj);
+        rhs = Ꮡcheck.declaredType(tdecl.Type, Ꮡobj);
         assert(rhs != default!);
         named.Value.fromRHS = rhs;
 
-        // If the underlying type was not set while type-checking the right-hand
-        // side, it is invalid and an error should have been reported elsewhere.
-        if ((~named).underlying == default!) {
-            named.Value.underlying = new BasicжΔType(Typ[Invalid]);
-        }
-
-        // Disallow a lone type parameter as the RHS of a type declaration (go.dev/issue/45639).
-        // We don't need this restriction anymore if we make the underlying type of a type
-        // parameter its constraint interface: if the RHS is a lone type parameter, we will
-        // use its underlying type (like we do for any RHS in a type declaration), and its
-        // underlying type is an interface and the type declaration is well defined.
+        // spec: "In a type definition the given type cannot be a type parameter."
+        // (See also go.dev/issue/45639.)
         if (isTypeParam(rhs)) {
             Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseATypeParameterˢ);
-            named.Value.underlying = new BasicжΔType(Typ[Invalid]);
+            named.Value.fromRHS = new BasicжΔType(Typ[Invalid]);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd2) Ꮡcheck.DerefOrNull().closeScope(); if (ᒐd1) Ꮡcheck.DerefOrNull().closeScope(); ᒐ.Run(); }
+    finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -973,7 +963,7 @@ internal static void collectMethods(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡo
 
 internal static void checkFieldUniqueness(this ж<Checker> Ꮡcheck, ж<Named> Ꮡbase) {
     {
-        var (t, _) = Ꮡbase.under()._<ж<Struct>>(ᐧ); if (t != nil) {
+        var (t, _) = Ꮡbase.Underlying()._<ж<Struct>>(ᐧ); if (t != nil) {
             objset mset = default!;
             for (nint i = 0; i < Ꮡbase.NumMethods(); i++) {
                 var m = Ꮡbase.Method(i);
@@ -1018,17 +1008,8 @@ internal static void funcDecl(this ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<dec
     var sig = @new<ΔSignature>();
     obj.typ = new ΔSignatureжΔType(sig); // guard against cycles
 
-    // Avoid cycle error when referring to method while type-checking the signature.
-    // This avoids a nuisance in the best case (non-parameterized receiver type) and
-    // since the method is not a type, we get an error. If we have a parameterized
-    // receiver type, instantiating the receiver type leads to the instantiation of
-    // its methods, and we don't want a cycle error in that case.
-    // TODO(gri) review if this is correct and/or whether we still need this?
-    var saved = obj.color_;
-    obj.color_ = black;
     var fdecl = decl.fdecl;
     Ꮡcheck.funcType(sig, (~fdecl).Recv, (~fdecl).Type);
-    obj.color_ = saved;
 
     // Set the scope's extent to the complete "func (...) { ... }"
     // so that Scope.Innermost works correctly.
@@ -1093,7 +1074,7 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
 
             var lhs0 = new slice<ж<Var>>(len((~dΔ2.spec).Names));
             foreach (var (i, name) in (~dΔ2.spec).Names) {
-                lhs0[i] = NewVar(name.Pos(), pkgʗ1, (~name).Name, default!);
+                lhs0[i] = newVar(LocalVar, name.Pos(), pkgʗ1, (~name).Name, default!);
             }
 
             // initialize all variables
@@ -1150,10 +1131,9 @@ internal static void declStmt(this ж<Checker> Ꮡcheck, ast.Decl d) {
             // the innermost containing block."
             tokenꓸPos scopePos = (~dΔ2.spec).Name.Pos();
             Ꮡcheck.declare(Ꮡcheck.Value.scope, (~dΔ2.spec).Name, new TypeNameжObject(obj), scopePos);
-            // mark and unmark type before calling typeDecl; its type is still nil (see Checker.objDecl)
-            obj.of(TypeName.Ꮡobject).setColor(grey + ((Δcolor)(uint32)Ꮡcheck.Value.push(new TypeNameжObject(obj))));
-            Ꮡcheck.typeDecl(obj, dΔ2.spec, nil);
-            Ꮡcheck.Value.pop().setColor(black);
+            Ꮡcheck.Value.push(new TypeNameжObject(obj)); // mark as grey
+            Ꮡcheck.typeDecl(obj, dΔ2.spec);
+            Ꮡcheck.Value.pop();
             break;
         }
         default: {

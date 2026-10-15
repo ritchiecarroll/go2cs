@@ -173,6 +173,8 @@ internal static slice<uintptr> runtime_expandFinalInlineFrame(slice<uintptr> stk
 // expandCgoFrames expands frame information for pc, known to be
 // a non-Go function, using the cgoSymbolizer hook. expandCgoFrames
 // returns nil if pc could not be expanded.
+//
+// Preconditions: cgoSymbolizerAvailable returns true.
 internal static slice<Frame> expandCgoFrames(uintptr pc) {
     ref var arg = ref heap<cgoSymbolizerArg>(out var Ꮡarg);
     arg = new cgoSymbolizerArg(pc: pc);
@@ -253,13 +255,17 @@ internal static ΔfuncInfo funcInfo(this ж<_func> Ꮡf) {
 
 // pcHeader holds data used by the pclntab lookups.
 partial struct pcHeader {
-    internal uint32 magic;  // 0xFFFFFFF1
-    internal uint8 pad1, pad2;   // 0,0
-    internal uint8 minLC;   // min instruction size
-    internal uint8 ptrSize;   // size of a ptr in bytes
-    internal nint nfunc;    // number of functions in the module
-    internal nuint nfiles;   // number of entries in the file tab
-    internal uintptr textStart; // base for function entry PC offsets in this module, equal to moduledata.text
+    internal abi.PCLnTabMagic magic; // abi.Go1NNPcLnTabMagic
+    internal uint8 pad1, pad2;            // 0,0
+    internal uint8 minLC;            // min instruction size
+    internal uint8 ptrSize;            // size of a ptr in bytes
+    internal nint nfunc;             // number of functions in the module
+    internal nuint nfiles;            // number of entries in the file tab
+    // The next field used to be textStart. This is no longer stored
+    // as it requires a relocation. Code should use the moduledata text
+    // field instead. This unused field can be removed in coordination
+    // with Delve.
+    internal uintptr _;
     internal uintptr funcnameOffset; // offset to the funcnametab variable from pcHeader
     internal uintptr cuOffset; // offset to the cutab variable from pcHeader
     internal uintptr filetabOffset; // offset to the filetab variable from pcHeader
@@ -293,6 +299,7 @@ partial struct moduledata {
     internal uintptr types, etypes;
     internal uintptr rodata;
     internal uintptr gofunc; // go.func.*
+    internal uintptr epclntab;
     internal slice<textsect> textsectmap;
     internal slice<int32> typelinks; // offsets from types
     internal slice<ж<itab>> itablinks;
@@ -495,10 +502,9 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
 
     // Check that the pclntab's format is valid.
     var hdr = datap.pcHeader;
-    if ((~hdr).magic != 0xfffffff1U || (~hdr).pad1 != 0 || (~hdr).pad2 != 0 || (~hdr).minLC != sys.PCQuantum || (~hdr).ptrSize != goarch.PtrSize || (~hdr).textStart != datap.text) {
-        println((@string)"runtime: pcHeader: magic="u8, ((Δhex)(uint64)(~hdr).magic), (@string)"pad1="u8, (~hdr).pad1, (@string)"pad2="u8, (~hdr).pad2,
-            (@string)"minLC="u8, (~hdr).minLC, (@string)"ptrSize="u8, (~hdr).ptrSize, (@string)"pcHeader.textStart="u8, ((Δhex)(uint64)(~hdr).textStart),
-            (@string)"text="u8, ((Δhex)(uint64)datap.text), (@string)"pluginpath="u8, datap.pluginpath);
+    if ((~hdr).magic != abi.CurrentPCLnTabMagic || (~hdr).pad1 != 0 || (~hdr).pad2 != 0 || (~hdr).minLC != sys.PCQuantum || (~hdr).ptrSize != goarch.PtrSize) {
+        println((@string)"runtime: pcHeader: magic="u8, ((Δhex)(uint64)(uint32)(~hdr).magic), (@string)"pad1="u8, (~hdr).pad1, (@string)"pad2="u8, (~hdr).pad2,
+            (@string)"minLC="u8, (~hdr).minLC, (@string)"ptrSize="u8, (~hdr).ptrSize, (@string)"pluginpath="u8, datap.pluginpath);
         @throw(invalidFunctionSymbolˢ);
     }
 
@@ -526,8 +532,15 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
 
     var min = datap.textAddr(datap.ftab[0].entryoff);
     var max = datap.textAddr(datap.ftab[nftab].entryoff);
-    if (datap.minpc != min || datap.maxpc != max) {
-        println((@string)"minpc="u8, ((Δhex)(uint64)datap.minpc), (@string)"min="u8, ((Δhex)(uint64)min), (@string)"maxpc="u8, ((Δhex)(uint64)datap.maxpc), (@string)"max="u8, ((Δhex)(uint64)max));
+    var minpc = datap.minpc;
+    var maxpc = datap.maxpc;
+    if (GOARCH == "wasm"u8) {
+        // On Wasm, the func table contains the function index, whereas
+        // the "PC" is function index << 16 + block index.
+        maxpc = alignUp(maxpc, ((uintptr)1 << (int)(16))); // round up for end PC
+    }
+    if (minpc != min || maxpc != max) {
+        println((@string)"minpc="u8, ((Δhex)(uint64)minpc), (@string)"min="u8, ((Δhex)(uint64)min), (@string)"maxpc="u8, ((Δhex)(uint64)maxpc), (@string)"max="u8, ((Δhex)(uint64)max));
         @throw(minpcOrMaxpcInvalidˢ);
     }
 
@@ -576,8 +589,16 @@ internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
             @throw(runtimeTextOffsetOutOfˢ);
         }
     }
+    if (GOARCH == "wasm"u8) {
+        // On Wasm, a text offset (e.g. in the method table) is function index, whereas
+        // the "PC" is function index << 16 + block index.
+        res <<= (int)(16);
+    }
     return res;
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string unexpectedMultipleTextˢ = "unexpected multiple text sections on Wasm"u8;
 
 // textOff is the opposite of textAddr. It converts a PC to a (virtual) offset
 // to md.text, and returns if the PC is in any Go text section.
@@ -586,8 +607,17 @@ internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
 //
 //go:nosplit
 internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) {
-    var res = (uint32)(pc - md.text);
+    var off = pc - md.text;
+    if (GOARCH == "wasm"u8) {
+        // On Wasm, the func table contains the function index, whereas
+        // the "PC" is function index << 16 + block index.
+        off >>= (int)(16);
+    }
+    var res = (uint32)off;
     if (len(md.textsectmap) > 1) {
+        if (GOARCH == "wasm"u8) {
+            fatal(unexpectedMultipleTextˢ);
+        }
         foreach (var (i, sect) in md.textsectmap) {
             if (sect.baseaddr > pc) {
                 // pc is not in any section.
@@ -722,6 +752,11 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
     }
 
     var x = (uintptr)pcOff + (~datap).text - (~datap).minpc; // TODO: are datap.text and datap.minpc always equal?
+    if (GOARCH == "wasm"u8) {
+        // On Wasm, pcOff is the function index, whereas
+        // the "PC" is function index << 16 + block index.
+        x = ((uintptr)pcOff << (int)(16)) + (~datap).text - (~datap).minpc;
+    }
     var b = x / (uintptr)abi.FuncTabBucketSize;
     var i = x % (uintptr)abi.FuncTabBucketSize / (uintptr)((uintptr)abi.FuncTabBucketSize / nsub);
 
@@ -803,6 +838,9 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
     // matches the cached contents.
     const bool debugCheckCache = false;
 
+    // If true, skip checking the cache entirely.
+    const bool skipCache = false;
+
     if (off == 0) {
         return (-1, 0);
     }
@@ -813,7 +851,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
     int32 checkVal = default!;
     uintptr checkPC = default!;
     var ck = pcvalueCacheKey(targetpc);
-    {
+    if (!skipCache) {
         var mp = acquirem();
         var cache = mp.of(m.ᏑpcvalueCache);
         // The cache can be used by the signal handler on this M. Avoid

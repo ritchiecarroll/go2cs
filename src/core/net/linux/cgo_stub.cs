@@ -30,7 +30,7 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupIP(context.Context ctx
     throw panic("cgo stub: cgo not available");
 }
 
-internal static (@string cname, error err, bool completed) cgoLookupCNAME(context.Context ctx, @string name) {
+internal static (@string cname, error err) cgoLookupCNAME(context.Context ctx, @string name) {
     throw panic("cgo stub: cgo not available");
 }
 

@@ -40,9 +40,7 @@ internal static void reset(this ref xxhash64 xh) {
     xh.v[3] = xxhPrime64c1;
     xh.v[3] = ((uint64)0 - xh.v[3]);
 
-    foreach (var (i, _) in xh.buf) {
-        xh.buf[i] = 0;
-    }
+    clear(xh.buf[..]);
     xh.cnt = 0;
 }
 

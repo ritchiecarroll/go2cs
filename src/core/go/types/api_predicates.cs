@@ -6,7 +6,7 @@
 // This file implements exported type predicates.
 namespace go.go;
 
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 
 partial class types_package {
 

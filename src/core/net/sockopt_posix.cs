@@ -4,7 +4,6 @@
 //go:build unix || windows
 namespace go;
 
-using bytealg = @internal.bytealg_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using @internal;
@@ -43,42 +42,6 @@ internal static (IP, error) interfaceToIPv4Addr(ж<Interface> Ꮡifi) {
         }}
     }
     return (default!, errNoSuchInterface);
-}
-
-internal static error setIPv4MreqToInterface(ref syscall.IPMreq mreq, ж<Interface> Ꮡifi) {
-    if (Ꮡifi == nil) {
-        return default!;
-    }
-    var (ifat, err) = Ꮡifi.Addrs();
-    if (err != default!) {
-        return err;
-    }
-    foreach (var (_, ifa) in ifat) {
-        switch (ifa.type()) {
-        case ж<IPAddr> v: {
-            {
-                var a = (~v).IP.To4(); if (a != default!) {
-                    copy(mreq.Interface[..], a);
-                    goto done;
-                }
-            }
-            break;
-        }
-        case ж<IPNet> v: {
-            {
-                var a = (~v).IP.To4(); if (a != default!) {
-                    copy(mreq.Interface[..], a);
-                    goto done;
-                }
-            }
-            break;
-        }}
-    }
-done:
-    if (bytealg.Equal(mreq.Multiaddr[..], IPv4zero.To4())) {
-        return errNoSuchMulticastInterface;
-    }
-    return default!;
 }
 
 internal static error setReadBuffer(ж<netFD> Ꮡfd, nint bytes) {

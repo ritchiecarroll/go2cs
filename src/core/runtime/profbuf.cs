@@ -38,6 +38,10 @@ partial class runtime_package {
 // be returned by read. By definition, r ≤ rNext ≤ w (before wraparound),
 // and rNext is only used by the reader, so it can be accessed without atomics.
 //
+// If the reader is blocked waiting for more data, the writer will wake it up if
+// either the buffer is more than half full, or when the writer sets the eof
+// marker or writes overflow entries (described below.)
+//
 // If the writer gets ahead of the reader, so that the buffer fills,
 // future writes are discarded and replaced in the output stream by an
 // overflow entry, which has size 2+hdrsize+1, time set to the time of
@@ -325,6 +329,11 @@ internal static void wakeupExtra(this ж<profBuf> Ꮡb) {
     while (ᐧ) {
         var old = Ꮡb.of(profBuf.Ꮡw).load();
         var @new = (profIndex)(old | profWriteExtra);
+        // Clear profReaderSleeping. We're going to wake up the reader
+        // if it was sleeping and we don't want double wakeups in case
+        // we, for example, attempt to write into a full buffer multiple
+        // times before the reader wakes up.
+        @new &= unchecked((profIndex)~(profIndex)(profReaderSleeping));
         if (!Ꮡb.of(profBuf.Ꮡw).cas(old, @new)) {
             continue;
         }

@@ -160,7 +160,7 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/fips140/crypto.fips140.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
   </ItemGroup>
 

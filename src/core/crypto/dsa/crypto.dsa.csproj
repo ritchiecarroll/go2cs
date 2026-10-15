@@ -168,7 +168,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140only/crypto.internal.fips140only.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/randutil/crypto.internal.randutil.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/rand/crypto.internal.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/big/math.big.csproj" />

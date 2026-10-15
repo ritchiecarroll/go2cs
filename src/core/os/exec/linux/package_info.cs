@@ -70,9 +70,10 @@ using static go.os.exec_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/exec/exec.go", "exec.cs", "AHvsAYKmgNoABxCCpoIA1gHSA5IABTAAGALKgIKmgoKCgoKUpoCCpKaCgoKClIKCgpTagoK4lIKkAAgSgIKUtgACGAALAoKUgoKWrsKUpoKCgoKUqsKClNaCgpSmooKCgpSCpoCCtoKCpoKCkoKClICCpJSmgqaCgpSuwoKCgpSCpoCCtoKCpoKCkoKClKaCggADIgANAoCCpAAMEgAMBoKmgoKClIKCuIKUgoKUlIKCuAABIAAOAoKCuIKUgqTqgoKClIKCgpSCgoKUgpSCgqbcgpSmgoKEioKCopSSgpSCgpS4AAgSgoKCpgAFFPK02IKCgLiSyuyCgqaC2NiCgMqSguyCyIIADRimgoLspgASKIIABigAEwKClIKmgoKUlIKCgriCuIC4pIKUAAIUAAwCgoKUpoKmgoKmtvymtKaCpgAKEvKClIKUgoKmgoKAgrbawoKUgpSCgoKCAAYS4oKUgpSCgpSCgoIABRYACAKClIKUgoKUgoKCAAUWAAgCgpSClIKClIKCggANKPKCpoCCgqSmgoKCgoKCpqrCgIKCgqTmgoKUgpSCgoKCgoKCgqyylIKCgoK4ggANGoCCkoLsgoKUqrSCAAIQ0ty2ooKCgriCgqaCuJSCuJSUgoKUgqaCuIKCptyygpSCgoKUlKYACRSYopSU", "424-437:1;484-486:1;512-514:1;546-555:1;595-599:1;643-651:1;748-761:2;960-965:1")]
+[assembly: go.GoPositionMap("os/exec/exec.go", "exec.cs", "AH3uAYKmgNoABxCCpoIA2gHcA5IABTAAGALKgIKmgoKCgoKUpoCCpKaCgoKClIKCgpTagoK4lIKkAAgSgIKUtgACGAALAoKUgoKWrsKUpoKCgoKUqsKClNaCgpSmooKCgpSCpoCCtoKCpoKCkoKClICCpJSmgqaCgpSuwoKCgpSCpoCCtoKCpoKCkoKClKaCggADIgANAoCCpAAMEgANCIKmgoKClIKCgriClIKClJSCgrgAASAADgKCgriClIKk6oKCgpSCgoKUgoKClIKUgoKm3IKUpoKChIqCgqKUkoKUgoKUuAAIEoKCgqYABRTytNiCgoC4ksrsgoKmgtjYgoDKkoLsgsiCAA0YpoKC7KYAEiiCAAYoABMCgpSCpoKClJSCgoK4griAuKSClAACFAAMAoKClKaCpoKCprb8prSmgqYAChLygpSClIKCpoKCgIK22sKClIKUgoKCggAGEuKClIKUgoKUgoKCAAUWAAgCgpSClIKClIKCggAFFgAIAoKUgpSCgpSCgoIADSjygqaAgoKkpoKCgoKCgqaqwoCCgoKk5oKClIKUgoKCgoKCgoKsspSCgoKCuIIADRqAgpKC7IKClKq0ggACENLctqKCgoK4goKmgriUgriUlIKClIKmgriCgqbcsoKUgoKClJSmAAkUmKKUlA==", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1")]
 [assembly: go.GoPositionMap("os/exec/exec_unix.go", "exec_unix.cs", "AAwg2II=")]
-[assembly: go.GoPositionMap("os/exec/lp_unix.go", "lp_unix.cs", "ABUolIKCgpSCgpS4gpSClAAFFgALCoCCtoKCgpSUgqKUlIKAgoKClJS2qqI=")]
+[assembly: go.GoPositionMap("os/exec/lookpath.go", "lookpath.cs", "AAc4ABUC")]
+[assembly: go.GoPositionMap("os/exec/lp_unix.go", "lp_unix.cs", "ABUolIKCgpSCgpS4gpSClNa6gIK2goKClJSCopSUgoCCgoKUlLaqog==")]
 // </GoSourcePositionMaps>
 
 namespace go.os;
@@ -117,6 +118,7 @@ public static partial class exec_package
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
+    [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(sync.atomic_package));
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>

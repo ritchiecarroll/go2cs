@@ -15,6 +15,7 @@ global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
 global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
 global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using runtimeꓸError = go.runtime_package.ΔError;
@@ -24,7 +25,7 @@ global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
-using static go.crypto.x509.@internal.macOS_package;
+using static go.crypto.x509.@internal.macos_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -62,7 +63,7 @@ using static go.crypto.x509.@internal.macOS_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/x509/internal/macos/corefoundation.go", "corefoundation.cs", "AB0+koKCgqqigoKUgoKokoKCAAgUkoKigqSasoK0gqSYsqSClKTskoKkgpSkmJKCpJiSgqSYkoKkmJKCpJiSgqSYkqSYkpKkmJKkmJKCpJiSgqSYkqTIkoKClKSWqrKCgpQ=")]
-[assembly: go.GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ADiIAYIACRaSkpKSlLyypIKSgpSkvLKkgpKClKSYkoKkgpSkmLKCgqaClNSYsoKCgpSSgpTUmJKCgpSkmJKCooKUpJiykuSClKSYkoKigoKCgoKClKSYkoKkmJKCgpSkyJKCgpSCgqQ=")]
+[assembly: go.GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ACBKgqqSgqSClKSYsoKCpoKU1JiygoKClJKClNSYkoKClKSYkoKigpSkmJKCooKCgoKCgpSkyJKCgpSCgqSYkoKClKQ=")]
 // </GoSourcePositionMaps>
 
 // Dynamically imported C entry points are recorded here, one `GoCgoImportDynamic` attribute
@@ -92,21 +93,17 @@ using static go.crypto.x509.@internal.macOS_package;
 [assembly: go.GoCgoImportDynamic("x509_SecCertificateCopyData_trampoline", "SecCertificateCopyData", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
 [assembly: go.GoCgoImportDynamic("x509_SecCertificateCreateWithData_trampoline", "SecCertificateCreateWithData", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
 [assembly: go.GoCgoImportDynamic("x509_SecPolicyCreateSSL_trampoline", "SecPolicyCreateSSL", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
+[assembly: go.GoCgoImportDynamic("x509_SecTrustCopyCertificateChain_trampoline", "SecTrustCopyCertificateChain", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
 [assembly: go.GoCgoImportDynamic("x509_SecTrustCreateWithCertificates_trampoline", "SecTrustCreateWithCertificates", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
 [assembly: go.GoCgoImportDynamic("x509_SecTrustEvaluateWithError_trampoline", "SecTrustEvaluateWithError", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
 [assembly: go.GoCgoImportDynamic("x509_SecTrustEvaluate_trampoline", "SecTrustEvaluate", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
-[assembly: go.GoCgoImportDynamic("x509_SecTrustGetCertificateAtIndex_trampoline", "SecTrustGetCertificateAtIndex", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
-[assembly: go.GoCgoImportDynamic("x509_SecTrustGetCertificateCount_trampoline", "SecTrustGetCertificateCount", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
-[assembly: go.GoCgoImportDynamic("x509_SecTrustGetResult_trampoline", "SecTrustGetResult", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
 [assembly: go.GoCgoImportDynamic("x509_SecTrustSetVerifyDate_trampoline", "SecTrustSetVerifyDate", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
-[assembly: go.GoCgoImportDynamic("x509_SecTrustSettingsCopyCertificates_trampoline", "SecTrustSettingsCopyCertificates", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
-[assembly: go.GoCgoImportDynamic("x509_SecTrustSettingsCopyTrustSettings_trampoline", "SecTrustSettingsCopyTrustSettings", "/System/Library/Frameworks/Security.framework/Versions/A/Security")]
 // </CgoDynamicImports>
 
 namespace go.crypto.x509.@internal;
 
-[GoPackage("macOS", ImportPath = "crypto/x509/internal/macos")]
-public static partial class macOS_package
+[GoPackage("macos")]
+public static partial class macos_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -118,9 +115,6 @@ public static partial class macOS_package
     public partial struct CFRef {}
     public partial struct CFString {}
     public partial struct OSStatus {}
-    public partial struct SecTrustResultType {}
-    public partial struct SecTrustSettingsDomain {}
-    public partial struct SecTrustSettingsResult {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

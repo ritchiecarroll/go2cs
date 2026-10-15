@@ -5,8 +5,10 @@
 namespace go;
 
 using sys = @internal.runtime.sys_package;
+using tracev2 = @internal.trace.tracev2_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using @internal.trace;
 using ꓸꓸꓸtraceArg = Span<runtime_package.traceArg>;
 
 partial class runtime_package {
@@ -24,11 +26,11 @@ internal static UntypedInt traceBytesPerNumber => 10;
 // we can change it if it's deemed too error-prone.
 partial struct traceWriter {
     internal partial ref traceLocker traceLocker { get; }
-    internal traceExperiment exp;
+    internal tracev2.Experiment exp;
     internal partial ref ж<traceBuf> traceBuf { get; }
 }
 
-// writer returns an a traceWriter that writes into the current M's stream.
+// writer returns a traceWriter that writes into the current M's stream.
 //
 // Once this is called, the caller must guard against stack growth until
 // end is called on it. Therefore, it's highly recommended to use this
@@ -48,7 +50,7 @@ internal static traceWriter writer(this traceLocker tl) {
             gp.Value.throwsplit = true;
         }
     }
-    return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][traceNoExperiment]);
+    return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][tracev2.NoExperiment]);
 }
 
 // unsafeTraceWriter produces a traceWriter that doesn't lock the trace.
@@ -70,7 +72,7 @@ internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> Ꮡbuf) 
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter @event(this traceWriter w, traceEv ev, params ꓸꓸꓸtraceArg argsʗp) {
+internal static traceWriter @event(this traceWriter w, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
     var args = argsʗp.sslice();
 
     // N.B. Everything in this call must be nosplit to maintain
@@ -153,6 +155,7 @@ internal static traceWriter flush(this traceWriter w) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string traceBufferˢ = "trace buffer"u8;
 internal static readonly @string traceOutOfMemoryˢ = "trace: out of memory"u8;
 
 // refill puts w.traceBuf on the queue of full buffers and refresh's w's buffer.
@@ -168,7 +171,7 @@ internal static traceWriter refill(this traceWriter w) {
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
         } else {
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-            w.traceBuf = (ж<traceBuf>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.of(mstats.Ꮡother_sys)));
+            w.traceBuf = (ж<traceBuf>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.of(mstats.Ꮡother_sys), traceBufferˢ));
             if (w.traceBuf == nil) {
                 @throw(traceOutOfMemoryˢ);
             }
@@ -186,21 +189,42 @@ internal static traceWriter refill(this traceWriter w) {
     // Tolerate a nil mp.
     var mID = ~(uint64)0;
     if (w.mp != nil) {
-        mID = (uint64)(~w.mp).procid;
+        mID = w.mp.Value.procid;
     }
 
     // Write the buffer's header.
-    if (w.exp == traceNoExperiment){
-        w.@byte((byte)traceEvEventBatch);
+    if (w.exp == tracev2.NoExperiment){
+        w.@byte((byte)tracev2.EvEventBatch);
     } else {
-        w.@byte((byte)traceEvExperimentalBatch);
-        w.@byte((byte)w.exp);
+        w.@byte((byte)tracev2.EvExperimentalBatch);
+        w.@byte((byte)(nuint)w.exp);
     }
     w.varint((uint64)w.gen);
-    w.varint((uint64)mID);
+    w.varint(mID);
     w.varint((uint64)ts);
     w.traceBuf.Value.lenPos = w.varintReserve();
     return w;
+}
+
+// expWriter returns a traceWriter that writes into the current M's stream for
+// the given experiment.
+internal static traceWriter expWriter(this traceLocker tl, tracev2.Experiment exp) {
+    return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][exp], exp: exp);
+}
+
+// unsafeTraceExpWriter produces a traceWriter for experimental trace batches
+// that doesn't lock the trace. Data written to experimental batches need not
+// conform to the standard trace format.
+//
+// It should only be used in contexts where either:
+// - Another traceLocker is held.
+// - trace.gen is prevented from advancing.
+//
+// This does not have the same stack growth restrictions as traceLocker.writer.
+//
+// buf may be nil.
+internal static traceWriter unsafeTraceExpWriter(uintptr gen, ж<traceBuf> Ꮡbuf, tracev2.Experiment exp) {
+    return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: Ꮡbuf, exp: exp);
 }
 
 // traceBufQueue is a FIFO of traceBufs.
@@ -253,7 +277,7 @@ partial struct traceBufHeader {
 partial struct traceBuf {
     internal sys.NotInHeap _;
     internal partial ref traceBufHeader traceBufHeader { get; }
-    internal array<byte> arr = new(((uintptr)64 << (int)(10)) - /* unsafe.Sizeof(traceBufHeader{}) */ (uintptr)32); // underlying buffer for traceBufHeader.buf
+    internal array<byte> arr = new((uintptr)tracev2.MaxBatchSize - /* unsafe.Sizeof(traceBufHeader{}) */ (uintptr)32); // underlying buffer for traceBufHeader.buf
 }
 
 // byte appends v to buf.

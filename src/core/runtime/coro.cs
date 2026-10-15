@@ -152,13 +152,13 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     var Δtrace = traceAcquire();
 
     var canCAS = true;
-    var sg = gp.syncGroup;
-    if (sg != nil) {
+    var bubble = gp.bubble;
+    if (bubble != nil) {
         // If we're in a synctest group, always use casgstatus (which tracks
         // group idleness) rather than directly CASing. Mark the group as active
         // while we're in the process of transferring control.
         canCAS = false;
-        sg.incActive();
+        bubble.incActive();
     }
 
     if (locked) {
@@ -265,8 +265,8 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
         traceRelease(Δtrace);
     }
 
-    if (sg != nil) {
-        sg.decActive();
+    if (bubble != nil) {
+        bubble.decActive();
     }
 
     // Switch to gnext. Does not return.

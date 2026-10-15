@@ -6,26 +6,23 @@ namespace go.crypto;
 using bytes = bytes_package;
 using context = context_package;
 using crypto = crypto_package;
+using hkdf = go.crypto.hkdf_package;
 using hmac = go.crypto.hmac_package;
-using hkdf = go.crypto.@internal.fips140.hkdf_package;
-using mlkem = go.crypto.@internal.fips140.mlkem_package;
+using hpke = go.crypto.hpke_package;
 using tls13 = go.crypto.@internal.fips140.tls13_package;
-using hpke = go.crypto.@internal.hpke_package;
 using rsa = go.crypto.rsa_package;
 using fips140tls = go.crypto.tls.@internal.fips140tls_package;
 using Δx509 = go.crypto.x509_package;
 using errors = errors_package;
+using fmt = fmt_package;
 using hash = hash_package;
 using byteorder = go.@internal.byteorder_package;
 using io = io_package;
 using slices = slices_package;
 using sort = sort_package;
 using time = time_package;
-using ecdh = go.crypto.ecdh_package;
-using fips140 = go.crypto.@internal.fips140_package;
 using go.@internal;
 using go.crypto;
-using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.tls.@internal;
 using go.sync;
@@ -39,11 +36,11 @@ partial class tls_package {
 internal static UntypedInt maxClientPSKIdentities => 5;
 
 partial struct echServerContext {
-    internal ж<hpke.Receipient> hpkeContext;
+    internal ж<hpke.Recipient> hpkeContext;
     internal uint8 configID;
     internal echCipher ciphersuite;
     internal hash.Hash transcript;
-    // inner indicates that the initial client_hello we recieved contained an
+    // inner indicates that the initial client_hello we received contained an
     // encrypted_client_hello extension that indicated it was an "inner" hello.
     // We don't do any additional processing of the hello in this case, so all
     // fields above are unset.
@@ -138,7 +135,6 @@ internal static readonly @string tlsTls13ClientSupportsˢ = "tls: TLS 1.3 client
 internal static readonly @string tlsEarlyDataWithoutPreˢ = "tls: early_data without pre_shared_key"u8;
 internal static readonly @string tlsClientSentUnexpectedˢ = "tls: client sent unexpected early data"u8;
 internal static readonly @string tlsNoKeyExchangesˢ = "tls: no key exchanges supported by both client and server"u8;
-internal static readonly @string tlsInvalidX25519mlkem768ˢ2 = "tls: invalid X25519MLKEM768 client key share"u8;
 internal static readonly @string tlsInvalidClientKeyShareˢ = "tls: invalid client key share"u8;
 internal static readonly @string tlsClientOfferedTlsˢ = "tls: client offered TLS version older than TLS 1.3"u8;
 internal static readonly @string tlsClientDidNotSendAQuicˢ = "tls: client did not send a quic_transport_parameters extension"u8;
@@ -221,11 +217,11 @@ internal static error processClientHello(this ж<serverHandshakeStateTLS13> Ꮡh
     hs.hello.Value.compressionMethod = compressionNone;
 
     var preferenceList = defaultCipherSuitesTLS13;
-    if (!hasAESGCMHardwareSupport || !aesgcmPreferred((~hs.clientHello).cipherSuites)) {
+    if (!hasAESGCMHardwareSupport || !isAESGCMPreferred((~hs.clientHello).cipherSuites)) {
         preferenceList = defaultCipherSuitesTLS13NoAES;
     }
     if (fips140tls.Required()) {
-        preferenceList = defaultCipherSuitesTLS13FIPS;
+        preferenceList = allowedCipherSuitesTLS13FIPS;
     }
     foreach (var (_, suiteID) in preferenceList) {
         hs.suite = mutualCipherSuiteTLS13((~hs.clientHello).cipherSuites, suiteID);
@@ -235,7 +231,8 @@ internal static error processClientHello(this ж<serverHandshakeStateTLS13> Ꮡh
     }
     if (hs.suite == nil) {
         c.sendAlert(alertHandshakeFailure);
-        return errors.New(tlsNoCipherSuiteˢ);
+        return fmt.Errorf("tls: no cipher suite supported by both client and server; client offered: %x"u8,
+            (~hs.clientHello).cipherSuites);
     }
     c.Value.cipherSuite = hs.suite.Value.id;
     hs.hello.Value.cipherSuite = hs.suite.Value.id;
@@ -289,56 +286,15 @@ internal static error processClientHello(this ж<serverHandshakeStateTLS13> Ꮡh
     }
     c.Value.curveID = selectedGroup;
 
-    var ecdhGroup = selectedGroup;
-    var ecdhData = clientKeyShare.Value.data;
-    if (selectedGroup == X25519MLKEM768) {
-        ecdhGroup = X25519;
-        if (len(ecdhData) != (nint)(mlkem.EncapsulationKeySize768 + x25519PublicKeySize)) {
-            c.sendAlert(alertIllegalParameter);
-            return errors.New(tlsInvalidX25519mlkem768ˢ2);
-        }
-        ecdhData = ecdhData[(int)(mlkem.EncapsulationKeySize768)..];
-    }
-    {
-        var (_, ok) = curveForCurveID(ecdhGroup); if (!ok) {
-            c.sendAlert(alertInternalError);
-            return errors.New(tlsCurvePreferencesˢ);
-        }
-    }
-    var (key, err) = generateECDHEKey((~c).config.rand(), ecdhGroup);
+    var (ke, err) = keyExchangeForCurveID(selectedGroup);
     if (err != default!) {
         c.sendAlert(alertInternalError);
-        return err;
+        return errors.New(tlsCurvePreferencesˢ);
     }
-    hs.hello.Value.serverShare = new keyShare(group: selectedGroup, data: key.PublicKey().Bytes());
-    (var peerKey, err) = key.Curve().NewPublicKey(ecdhData);
+    (hs.sharedKey, hs.hello.Value.serverShare, err) = ke.serverSharedSecret((~c).config.rand(), (~clientKeyShare).data);
     if (err != default!) {
         c.sendAlert(alertIllegalParameter);
         return errors.New(tlsInvalidClientKeyShareˢ);
-    }
-    (hs.sharedKey, err) = key.ECDH(peerKey);
-    if (err != default!) {
-        c.sendAlert(alertIllegalParameter);
-        return errors.New(tlsInvalidClientKeyShareˢ);
-    }
-    if (selectedGroup == X25519MLKEM768) {
-        var (k, errΔ3) = mlkem.NewEncapsulationKey768((~clientKeyShare).data[..(int)(mlkem.EncapsulationKeySize768)]);
-        if (errΔ3 != default!) {
-            c.sendAlert(alertIllegalParameter);
-            return errors.New(tlsInvalidX25519mlkem768ˢ2);
-        }
-        var (mlkemSharedSecret, ciphertext) = k.Encapsulate();
-        // draft-kwiatkowski-tls-ecdhe-mlkem-02, Section 3.1.3: "For
-        // X25519MLKEM768, the shared secret is the concatenation of the ML-KEM
-        // shared secret and the X25519 shared secret. The shared secret is 64
-        // bytes (32 bytes for each part)."
-        hs.sharedKey = appendꓸꓸꓸ(mlkemSharedSecret, hs.sharedKey);
-        // draft-kwiatkowski-tls-ecdhe-mlkem-02, Section 3.1.2: "When the
-        // X25519MLKEM768 group is negotiated, the server's key exchange value
-        // is the concatenation of an ML-KEM ciphertext returned from
-        // encapsulation to the client's encapsulation key, and the server's
-        // ephemeral X25519 share."
-        hs.hello.Value.serverShare.data = appendꓸꓸꓸ(ciphertext, (~hs.hello).serverShare.data);
     }
 
     (var selectedProto, err) = negotiateALPN((~(~c).config).NextProtos, (~hs.clientHello).alpnProtocols, (~c).quic != nil);
@@ -477,7 +433,7 @@ internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) 
         }
 
         var recvʗ1 = (~hs.suite).hash;
-        hs.earlySecret = tls13.NewEarlySecret<fips140.Hash>(widen<hash.Hash, fips140.Hash>(() => recvʗ1.New(), elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), (~sessionState).secret);
+        hs.earlySecret = tls13.NewEarlySecret<hash.Hash>(() => recvʗ1.New(), (~sessionState).secret);
         var binderKey = hs.earlySecret.ResumptionBinderKey();
         // Clone the transcript in case a HelloRetryRequest was recorded.
         var transcript = cloneHash(hs.transcript, (~hs.suite).hash);
@@ -506,7 +462,7 @@ internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) 
                     return errΔ1;
                 }
             }
-            var earlyTrafficSecret = hs.earlySecret.ClientEarlyTrafficSecret(new hash_HashᴠHash(transcriptΔ1));
+            var earlyTrafficSecret = hs.earlySecret.ClientEarlyTrafficSecret(transcriptΔ1);
             {
                 var errΔ2 = c.quicSetReadSecret(QUICEncryptionLevelEarly, (~hs.suite).id, earlyTrafficSecret); if (errΔ2 != default!) {
                     return errΔ2;
@@ -535,10 +491,21 @@ internal partial interface cloneHash_binaryMarshaler /*dyn*/ {
     error UnmarshalBinary(slice<byte> data);
 }
 
-// cloneHash uses the encoding.BinaryMarshaler and encoding.BinaryUnmarshaler
+// cloneHash uses [hash.Cloner] to clone in. If [hash.Cloner]
+// is not implemented or not supported, then it falls back to the
+// [encoding.BinaryMarshaler] and [encoding.BinaryUnmarshaler]
 // interfaces implemented by standard library hashes to clone the state of in
 // to a new instance of h. It returns nil if the operation fails.
 internal static hash.Hash cloneHash(hash.Hash @in, crypto.Hash h) {
+    {
+        var (cloner, okΔ1) = @in._<hash.Cloner>(ᐧ); if (okΔ1) {
+            {
+                var (outΔ1, errΔ1) = cloner.Clone(); if (errΔ1 == default!) {
+                    return outΔ1;
+                }
+            }
+        }
+    }
     var (marshaler, ok) = @in._<cloneHash_binaryMarshaler>(ᐧ);
     if (!ok) {
         return default!;
@@ -553,7 +520,7 @@ internal static hash.Hash cloneHash(hash.Hash @in, crypto.Hash h) {
         return default!;
     }
     {
-        var errΔ1 = unmarshaler.UnmarshalBinary(state); if (errΔ1 != default!) {
+        var errΔ2 = unmarshaler.UnmarshalBinary(state); if (errΔ2 != default!) {
             return default!;
         }
     }
@@ -582,7 +549,7 @@ internal static error pickCertificate(this ref serverHandshakeStateTLS13 hs) {
         }
         return err;
     }
-    (hs.sigAlg, err) = selectSignatureScheme((~c).vers, ref (certificate).DerefOrNull(), (~hs.clientHello).supportedSignatureAlgorithms);
+    (hs.sigAlg, err) = selectSignatureScheme((~c).vers, certificate, (~hs.clientHello).supportedSignatureAlgorithms);
     if (err != default!) {
         // getCertificate returned a certificate that is unsupported or
         // incompatible with the client's signature algorithms.
@@ -663,25 +630,25 @@ internal static (ж<keyShare>, error) doHelloRetryRequest(this ref serverHandsha
             }
         }
         var recvʗ1 = (~hs.suite).hash;
-
-            var recvʗ2 = (~hs.suite).hash;
-        var acceptConfirmation = tls13.ExpandLabel<fips140.Hash>(widen<hash.Hash, fips140.Hash>(() => recvʗ1.New(), elemᴛ0 => new hash_HashᴠHash(elemᴛ0)),
-            hkdf.Extract<fips140.Hash>(widen<hash.Hash, fips140.Hash>(() => recvʗ2.New(), elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), (~hs.clientHello).random, default!),
-            hrrEchAcceptConfirmationˢ,
-            confTranscript.Sum(default!),
-            8);
+        var h = () => recvʗ1.New();
+        var (prf, errΔ3) = hkdf.Extract(h, (~hs.clientHello).random, default!);
+        if (errΔ3 != default!) {
+            c.sendAlert(alertInternalError);
+            return (default!, errΔ3);
+        }
+        var acceptConfirmation = tls13.ExpandLabel(h, prf, hrrEchAcceptConfirmationˢ, confTranscript.Sum(default!), 8);
         helloRetryRequest.Value.encryptedClientHello = acceptConfirmation;
     }
 
     {
-        var (_, errΔ3) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(helloRetryRequest), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ3 != default!) {
-            return (default!, errΔ3);
+        var (_, errΔ4) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(helloRetryRequest), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ4 != default!) {
+            return (default!, errΔ4);
         }
     }
 
     {
-        var errΔ4 = hs.sendDummyChangeCipherSpec(); if (errΔ4 != default!) {
-            return (default!, errΔ4);
+        var errΔ5 = hs.sendDummyChangeCipherSpec(); if (errΔ5 != default!) {
+            return (default!, errΔ5);
         }
     }
 
@@ -703,8 +670,8 @@ internal static (ж<keyShare>, error) doHelloRetryRequest(this ref serverHandsha
             return (default!, errors.New(tlsSecondClientHelloˢ));
         }
 
-        var (echType, echCiphersuite, configID, encap, payload, errΔ5) = parseECHExt((~clientHello).encryptedClientHello);
-        if (errΔ5 != default!) {
+        var (echType, echCiphersuite, configID, encap, payload, errΔ6) = parseECHExt((~clientHello).encryptedClientHello);
+        if (errΔ6 != default!) {
             c.sendAlert(alertDecodeError);
             return (default!, errors.New(tlsClientSentInvalidˢ));
         }
@@ -720,14 +687,14 @@ internal static (ж<keyShare>, error) doHelloRetryRequest(this ref serverHandsha
                 return (default!, errors.New(tlsSecondClientHelloˢ2));
             }
 
-            var (encodedInner, errΔ6) = decryptECHPayload((~hs.echContext).hpkeContext, (~clientHello).original, payload);
-            if (errΔ6 != default!) {
+            var (encodedInner, errΔ7) = decryptECHPayload((~hs.echContext).hpkeContext, (~clientHello).original, payload);
+            if (errΔ7 != default!) {
                 c.sendAlert(alertDecryptError);
                 return (default!, errors.New(tlsFailedToDecryptSecondˢ));
             }
 
-            (var echInner, errΔ6) = decodeInnerClientHello(clientHello, encodedInner);
-            if (errΔ6 != default!) {
+            (var echInner, errΔ7) = decodeInnerClientHello(clientHello, encodedInner);
+            if (errΔ7 != default!) {
                 c.sendAlert(alertIllegalParameter);
                 return (default!, errors.New(tlsClientSentInvalidˢ));
             }
@@ -816,55 +783,55 @@ internal static error sendServerParameters(this ref serverHandshakeStateTLS13 hs
         }
         // compute the acceptance message
         var recvʗ1 = (~hs.suite).hash;
-
-            var recvʗ2 = (~hs.suite).hash;
-        var acceptConfirmation = tls13.ExpandLabel<fips140.Hash>(widen<hash.Hash, fips140.Hash>(() => recvʗ1.New(), elemᴛ0 => new hash_HashᴠHash(elemᴛ0)),
-            hkdf.Extract<fips140.Hash>(widen<hash.Hash, fips140.Hash>(() => recvʗ2.New(), elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), (~hs.clientHello).random, default!),
-            echAcceptConfirmationˢ,
-            echTranscript.Sum(default!),
-            8);
+        var h = () => recvʗ1.New();
+        var (prk, errΔ2) = hkdf.Extract(h, (~hs.clientHello).random, default!);
+        if (errΔ2 != default!) {
+            c.sendAlert(alertInternalError);
+            return errΔ2;
+        }
+        var acceptConfirmation = tls13.ExpandLabel(h, prk, echAcceptConfirmationˢ, echTranscript.Sum(default!), 8);
         copy((~hs.hello).random[(int)(32 - 8)..], acceptConfirmation);
     }
 
     {
-        var errΔ2 = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.clientHello), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ2 != default!) {
-            return errΔ2;
-        }
-    }
-
-    {
-        var (_, errΔ3) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(hs.hello), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ3 != default!) {
+        var errΔ3 = transcriptMsg(new clientHelloMsgжhandshakeMessage(hs.clientHello), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ3 != default!) {
             return errΔ3;
         }
     }
 
     {
-        var errΔ4 = hs.sendDummyChangeCipherSpec(); if (errΔ4 != default!) {
+        var (_, errΔ4) = hs.c.writeHandshakeRecord(new serverHelloMsgжhandshakeMessage(hs.hello), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ4 != default!) {
             return errΔ4;
+        }
+    }
+
+    {
+        var errΔ5 = hs.sendDummyChangeCipherSpec(); if (errΔ5 != default!) {
+            return errΔ5;
         }
     }
 
     var earlySecret = hs.earlySecret;
     if (earlySecret == nil) {
-        var recvʗ3 = (~hs.suite).hash;
-        earlySecret = tls13.NewEarlySecret<fips140.Hash>(widen<hash.Hash, fips140.Hash>(() => recvʗ3.New(), elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), default!);
+        var recvʗ2 = (~hs.suite).hash;
+        earlySecret = tls13.NewEarlySecret<hash.Hash>(() => recvʗ2.New(), default!);
     }
     hs.handshakeSecret = earlySecret.HandshakeSecret(hs.sharedKey);
 
-    var serverSecret = hs.handshakeSecret.ServerHandshakeTrafficSecret(new hash_HashᴠHash(hs.transcript));
+    var serverSecret = hs.handshakeSecret.ServerHandshakeTrafficSecret(hs.transcript);
     c.setWriteTrafficSecret(hs.suite, QUICEncryptionLevelHandshake, serverSecret);
-    var clientSecret = hs.handshakeSecret.ClientHandshakeTrafficSecret(new hash_HashᴠHash(hs.transcript));
+    var clientSecret = hs.handshakeSecret.ClientHandshakeTrafficSecret(hs.transcript);
     {
-        var errΔ5 = c.setReadTrafficSecret(hs.suite, QUICEncryptionLevelHandshake, clientSecret); if (errΔ5 != default!) {
-            return errΔ5;
+        var errΔ6 = c.setReadTrafficSecret(hs.suite, QUICEncryptionLevelHandshake, clientSecret, false); if (errΔ6 != default!) {
+            return errΔ6;
         }
     }
 
     if ((~c).quic != nil) {
         c.quicSetWriteSecret(QUICEncryptionLevelHandshake, (~hs.suite).id, serverSecret);
         {
-            var errΔ6 = c.quicSetReadSecret(QUICEncryptionLevelHandshake, (~hs.suite).id, clientSecret); if (errΔ6 != default!) {
-                return errΔ6;
+            var errΔ7 = c.quicSetReadSecret(QUICEncryptionLevelHandshake, (~hs.suite).id, clientSecret); if (errΔ7 != default!) {
+                return errΔ7;
             }
         }
     }
@@ -884,18 +851,30 @@ internal static error sendServerParameters(this ref serverHandshakeStateTLS13 hs
     encryptedExtensions.Value.alpnProtocol = c.Value.clientProtocol;
 
     if ((~c).quic != nil) {
-        var (p, errΔ7) = c.quicGetTransportParameters();
-        if (errΔ7 != default!) {
-            return errΔ7;
+        var (p, errΔ8) = c.quicGetTransportParameters();
+        if (errΔ8 != default!) {
+            return errΔ8;
         }
         encryptedExtensions.Value.quicTransportParameters = p;
         encryptedExtensions.Value.earlyData = hs.earlyData;
     }
 
+    if (!(~hs.c).didResume && (~hs.clientHello).serverName != ""u8) {
+        encryptedExtensions.Value.serverNameAck = true;
+    }
+
     // If client sent ECH extension, but we didn't accept it,
     // send retry configs, if available.
-    if (len((~(~hs.c).config).EncryptedClientHelloKeys) > 0 && len((~hs.clientHello).encryptedClientHello) > 0 && hs.echContext == nil) {
-        (encryptedExtensions.Value.echRetryConfigs, err) = buildRetryConfigList((~(~hs.c).config).EncryptedClientHelloKeys);
+    var echKeys = hs.c.Value.config.Value.EncryptedClientHelloKeys;
+    if ((~(~hs.c).config).GetEncryptedClientHelloKeys != default!) {
+        (echKeys, err) = (~(~hs.c).config).GetEncryptedClientHelloKeys(clientHelloInfo(hs.ctx, ref (c).DerefOrNull(), ref (hs.clientHello).DerefOrNull()));
+        if (err != default!) {
+            c.sendAlert(alertInternalError);
+            return err;
+        }
+    }
+    if (len(echKeys) > 0 && len((~hs.clientHello).encryptedClientHello) > 0 && hs.echContext == nil) {
+        (encryptedExtensions.Value.echRetryConfigs, err) = buildRetryConfigList(echKeys);
         if (err != default!) {
             c.sendAlert(alertInternalError);
             return err;
@@ -903,8 +882,8 @@ internal static error sendServerParameters(this ref serverHandshakeStateTLS13 hs
     }
 
     {
-        var (_, errΔ8) = hs.c.writeHandshakeRecord(new encryptedExtensionsMsgжhandshakeMessage(encryptedExtensions), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ8 != default!) {
-            return errΔ8;
+        var (_, errΔ9) = hs.c.writeHandshakeRecord(new encryptedExtensionsMsgжhandshakeMessage(encryptedExtensions), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ9 != default!) {
+            return errΔ9;
         }
     }
 
@@ -928,7 +907,8 @@ internal static error sendServerCertificate(this ref serverHandshakeStateTLS13 h
         var certReq = @new<certificateRequestMsgTLS13>();
         certReq.Value.ocspStapling = true;
         certReq.Value.scts = true;
-        certReq.Value.supportedSignatureAlgorithms = supportedSignatureAlgorithms();
+        certReq.Value.supportedSignatureAlgorithms = supportedSignatureAlgorithms((~c).vers);
+        certReq.Value.supportedSignatureAlgorithmsCert = supportedSignatureAlgorithmsCert();
         if ((~(~c).config).ClientCAs != nil) {
             certReq.Value.certificateAuthorities = (~(~c).config).ClientCAs.Subjects();
         }
@@ -962,12 +942,12 @@ internal static error sendServerCertificate(this ref serverHandshakeStateTLS13 h
         return c.sendAlert(alertInternalError);
     }
 
-    var signed = signedMessage(sigHash, serverSignatureContext, hs.transcript);
+    var signed = signedMessage(serverSignatureContext, hs.transcript);
     var signOpts = ((crypto.SignerOpts)sigHash);
     if (sigType == signatureRSAPSS) {
         signOpts = new rsa_PSSOptionsжSignerOpts(Ꮡ(new rsa.PSSOptions(SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: sigHash)));
     }
-    (var sig, err) = (~hs.cert).PrivateKey._<crypto.Signer>().Sign((~c).config.rand(), signed, signOpts);
+    (var sig, err) = crypto.SignMessage((~hs.cert).PrivateKey._<crypto.Signer>(), (~c).config.rand(), signed, signOpts);
     if (err != default!) {
         var @public = (~hs.cert).PrivateKey._<crypto.Signer>().Public();
         {
@@ -1007,8 +987,8 @@ internal static error sendServerFinished(this ref serverHandshakeStateTLS13 hs) 
 
     hs.masterSecret = hs.handshakeSecret.MasterSecret();
 
-    hs.trafficSecret = hs.masterSecret.ClientApplicationTrafficSecret(new hash_HashᴠHash(hs.transcript));
-    var serverSecret = hs.masterSecret.ServerApplicationTrafficSecret(new hash_HashᴠHash(hs.transcript));
+    hs.trafficSecret = hs.masterSecret.ClientApplicationTrafficSecret(hs.transcript);
+    var serverSecret = hs.masterSecret.ServerApplicationTrafficSecret(hs.transcript);
     c.setWriteTrafficSecret(hs.suite, QUICEncryptionLevelApplication, serverSecret);
 
     if ((~c).quic != nil) {
@@ -1053,12 +1033,7 @@ internal static bool shouldSendSessionTickets(this ref serverHandshakeStateTLS13
     }
 
     // Don't send tickets the client wouldn't use. See RFC 8446, Section 4.2.9.
-    foreach (var (_, pskMode) in (~hs.clientHello).pskModes) {
-        if (pskMode == pskModeDHE) {
-            return true;
-        }
-    }
-    return false;
+    return slices.Contains((~hs.clientHello).pskModes, pskModeDHE);
 }
 
 internal static error sendSessionTickets(this ref serverHandshakeStateTLS13 hs) {
@@ -1074,7 +1049,7 @@ internal static error sendSessionTickets(this ref serverHandshakeStateTLS13 hs) 
         }
     }
 
-    c.Value.resumptionSecret = hs.masterSecret.ResumptionMasterSecret(new hash_HashᴠHash(hs.transcript));
+    c.Value.resumptionSecret = hs.masterSecret.ResumptionMasterSecret(hs.transcript);
 
     if (!hs.shouldSendSessionTickets()) {
         return default!;
@@ -1094,7 +1069,7 @@ internal static error sendSessionTicket(this ж<Conn> Ꮡc, bool earlyData, slic
     }
     // ticket_nonce, which must be unique per connection, is always left at
     // zero because we only ever send one ticket per connection.
-    var psk = tls13.ExpandLabel<fips140.Hash>(widen<hash.Hash, fips140.Hash>(() => (~suite).hash.New(), elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), c.resumptionSecret, resumptionˢ,
+    var psk = tls13.ExpandLabel<hash.Hash>(() => (~suite).hash.New(), c.resumptionSecret, resumptionˢ,
         default!, (~suite).hash.Size());
 
     var m = @new<newSessionTicketMsgTLS13>();
@@ -1209,7 +1184,9 @@ internal static error readClientCertificate(this ref serverHandshakeStateTLS13 h
         }
 
         // See RFC 8446, Section 4.4.3.
-        if (!isSupportedSignatureAlgorithm((~certVerify).signatureAlgorithm, supportedSignatureAlgorithms())) {
+        // We don't use certReq.supportedSignatureAlgorithms because it would
+        // require keeping the certificateRequestMsgTLS13 around in the hs.
+        if (!isSupportedSignatureAlgorithm((~certVerify).signatureAlgorithm, supportedSignatureAlgorithms((~c).vers)) || !isSupportedSignatureAlgorithm((~certVerify).signatureAlgorithm, signatureSchemesForPublicKey((~c).vers, (~(~c).peerCertificates[0]).PublicKey))) {
             c.sendAlert(alertIllegalParameter);
             return errors.New(tlsClientCertificateUsedˢ);
         }
@@ -1218,10 +1195,9 @@ internal static error readClientCertificate(this ref serverHandshakeStateTLS13 h
             return c.sendAlert(alertInternalError);
         }
         if (sigType == signaturePKCS1v15 || sigHash == crypto.SHA1) {
-            c.sendAlert(alertIllegalParameter);
-            return errors.New(tlsClientCertificateUsedˢ);
+            return c.sendAlert(alertInternalError);
         }
-        var signed = signedMessage(sigHash, clientSignatureContext, hs.transcript);
+        var signed = signedMessage(clientSignatureContext, hs.transcript);
         {
             var errΔ5 = verifyHandshakeSignature(sigType, (~(~c).peerCertificates[0]).PublicKey,
                 sigHash, signed, (~certVerify).signature); if (errΔ5 != default!) {
@@ -1229,6 +1205,7 @@ internal static error readClientCertificate(this ref serverHandshakeStateTLS13 h
                 return errors.New("tls: invalid signature by the client certificate: "u8 + errΔ5.Error());
             }
         }
+        c.Value.peerSigAlg = certVerify.Value.signatureAlgorithm;
 
         {
             var errΔ6 = transcriptMsg(new certificateVerifyMsgжhandshakeMessage(certVerify), new hash_HashᴠtranscriptHash(hs.transcript)); if (errΔ6 != default!) {
@@ -1272,7 +1249,7 @@ internal static error readClientFinished(this ref serverHandshakeStateTLS13 hs) 
     }
 
     {
-        var errΔ1 = c.setReadTrafficSecret(hs.suite, QUICEncryptionLevelApplication, hs.trafficSecret); if (errΔ1 != default!) {
+        var errΔ1 = c.setReadTrafficSecret(hs.suite, QUICEncryptionLevelApplication, hs.trafficSecret, false); if (errΔ1 != default!) {
             return errΔ1;
         }
     }

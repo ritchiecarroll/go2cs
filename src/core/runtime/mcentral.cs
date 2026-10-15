@@ -11,6 +11,7 @@
 namespace go;
 
 using atomic = @internal.runtime.atomic_package;
+using gc = @internal.runtime.gc_package;
 using sys = @internal.runtime.sys_package;
 using @internal.runtime;
 
@@ -45,10 +46,10 @@ partial struct mcentral {
 // Initialize a single central free list.
 internal static void init(this ref mcentral c, spanClass spc) {
     c.spanclass = spc;
-    lockInit(Ꮡ(c.partial, 0).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡ(c.partial, 1).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡ(c.full, 0).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡ(c.full, 1).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
+    lockInit(ref nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
+    lockInit(ref nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
+    lockInit(ref nonnil(ref c).full[0].spineLock, lockRankSpanSetSpine);
+    lockInit(ref nonnil(ref c).full[1].spineLock, lockRankSpanSetSpine);
 }
 
 // partialUnswept returns the spanSet which holds partially-filled
@@ -81,7 +82,7 @@ internal static readonly @string spanHasNoFreeObjectsˢ = "span has no free obje
 // Allocate a span to use in an mcache.
 internal static ж<mspan> cacheSpan(this ref mcentral c) {
     // Deduct credit for this span allocation and sweep if necessary.
-    var spanBytes = (uintptr)class_to_allocnpages[c.spanclass.sizeclass()] * (uintptr)_PageSize;
+    var spanBytes = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()] * (uintptr)pageSize;
     deductSweepCredit(spanBytes, 0);
 
     var traceDone = false;
@@ -260,7 +261,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
 
 // grow allocates a new empty span from the heap and initializes it for c's size class.
 internal static ж<mspan> grow(this ref mcentral c) {
-    var npages = (uintptr)class_to_allocnpages[c.spanclass.sizeclass()];
+    var npages = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()];
     var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {
         return default!;

@@ -142,7 +142,7 @@ public static (ж<Writer>, error) Dial(@string network, @string raddr, Priority 
         if (err != default!) {
             return (default!, err);
         }
-        return (w, err);
+        return (w, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }

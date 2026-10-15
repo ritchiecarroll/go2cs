@@ -495,13 +495,16 @@ internal static void encodeGobEncoder(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡ
     // We know it's one of these.
     var exprᴛ1 = ut.externalEnc;
     if (exprᴛ1 == xGob) {
-        (data, err) = v.Interface()._<GobEncoder>().GobEncode();
+        var (gobEncoder, _) = reflect.TypeAssert<GobEncoder>(v);
+        (data, err) = gobEncoder.GobEncode();
     }
     else if (exprᴛ1 == xBinary) {
-        (data, err) = v.Interface()._<encoding.BinaryMarshaler>().MarshalBinary();
+        var (binaryMarshaler, _) = reflect.TypeAssert<encoding.BinaryMarshaler>(v);
+        (data, err) = binaryMarshaler.MarshalBinary();
     }
     else if (exprᴛ1 == xText) {
-        (data, err) = v.Interface()._<encoding.TextMarshaler>().MarshalText();
+        var (textMarshaler, _) = reflect.TypeAssert<encoding.TextMarshaler>(v);
+        (data, err) = textMarshaler.MarshalText();
     }
     if (err != default!) {
         error_(err);
@@ -752,7 +755,7 @@ internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect
         for (nint i = 0; i < indir; i++) {
             value = reflect.Indirect(value);
         }
-        if (ut.externalEnc == 0 && value.Type().Kind() == reflect.Struct){
+        if (ut.externalEnc == 0 && value.Kind() == reflect.Struct){
             Ꮡenc.encodeStruct(Ꮡb, engine, value);
         } else {
             Ꮡenc.encodeSingle(Ꮡb, engine, value);

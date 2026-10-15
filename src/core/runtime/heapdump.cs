@@ -10,8 +10,10 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
+using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 
 partial class runtime_package {
 
@@ -188,7 +190,7 @@ internal static void dumptype(ж<_type> Ꮡt) {
             dwrite(@unsafe.Pointer.FromPinnedBox(@unsafe.StringData(name)), (uintptr)len(name));
         }
     }
-    dumpbool((abiꓸKind)(t.Kind_ & abi.KindDirectIface) == 0 || t.Pointers());
+    dumpbool(!t.IsDirectIface() || t.Pointers());
 }
 
 // dump an object.
@@ -354,7 +356,7 @@ internal static void dumpgoroutine(ж<g> Ꮡgp) {
     dumpint(gp.goid);
     dumpint((uint64)gp.gopc);
     dumpint((uint64)readgstatus(Ꮡgp));
-    dumpbool(isSystemGoroutine(ref (Ꮡgp).DerefOrNull(), false));
+    dumpbool(isSystemGoroutine(Ꮡgp, false));
     dumpbool(false); // isbackground
     dumpint((uint64)gp.waitsince);
     dumpstr(gp.waitreason.String());
@@ -413,15 +415,25 @@ internal static void dumpgs() {
     forEachG((ж<g> gp) => {
         var status = readgstatus(gp); // The world is stopped so gp will not be in a scan state.
         var exprᴛ1 = status;
-        if (exprᴛ1 == _Gdead) {
+        var matchᴛ2 = exprᴛ1 == _Grunning || (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) || (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting);
+        if (exprᴛ1 == _Grunning) {
+            // Dump goroutine if it's _Grunning only during a syscall. This is safe
+            // because the goroutine will just park without mutating its stack, since
+            // the world is stopped.
+            if ((~gp).syscallsp != 0) {
+                dumpgoroutine(gp);
+            }
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ2) { /* default: */
+            print((@string)"runtime: unexpected G.status "u8, ((Δhex)(uint64)status), (@string)"\n"u8);
+            @throw(dumpgsInStwBadStatusˢ);
+        }
+        else if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
             // ok
         }
         else if (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting) {
             dumpgoroutine(gp);
-        }
-        else { /* default: */
-            print((@string)"runtime: unexpected G.status "u8, ((Δhex)(uint64)status), (@string)"\n"u8);
-            @throw(dumpgsInStwBadStatusˢ);
         }
     });
 }
@@ -463,7 +475,7 @@ internal static void dumproots() {
                     continue;
                 }
                 var spf = sp.Reinterpret<special, specialfinalizer>();
-                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + (uintptr)(~spf).special.offset);
+                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + (~spf).special.offset);
                 dumpfinalizer(Δp, (~spf).fn, (~spf).fint, (~spf).ot);
             }
         }
@@ -490,7 +502,7 @@ internal static void dumpobjs() {
         }
         var Δp = s.@base();
         var size = s.Value.elemsize;
-        var n = (((~s).npages << (int)(_PageShift))) / size;
+        var n = (((~s).npages << (int)(gc.PageShift))) / size;
         if (n > (uintptr)len(freemark)) {
             @throw(freemarkArrayDoesnTHaveˢ);
         }
@@ -544,7 +556,7 @@ internal static void dumpparams() {
     dumpint((uint64)arenaEnd);
     dumpstr(goarch.GOARCH);
     dumpstr(buildVersion);
-    dumpint((uint64)ncpu);
+    dumpint((uint64)numCPUStartup);
 }
 
 internal static void itab_callback(ж<itab> Ꮡtab) {
@@ -669,7 +681,7 @@ internal static void dumpmemprof() {
                 continue;
             }
             var spp = sp.Reinterpret<special, specialprofile>();
-            var Δp = s.@base() + (uintptr)(~spp).special.offset;
+            var Δp = s.@base() + (~spp).special.offset;
             dumpint(tagAllocSample);
             dumpint((uint64)Δp);
             dumpint((uint64)(uintptr)(~spp).b);
@@ -734,6 +746,7 @@ internal static void dumpfields(bitvector bvʗp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string heapdumpˢ = "heapdump"u8;
 internal static readonly @string heapdumpOutOfMemoryˢ = "heapdump: out of memory"u8;
 
 internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
@@ -744,7 +757,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
             sysFree(@unsafe.Pointer.FromPinnedBox(Ꮡ(tmpbuf, 0)), (uintptr)len(tmpbuf), Ꮡmemstats.of(mstats.Ꮡother_sys));
         }
         var n = nptr / 8 + 1;
-        @unsafe.Pointer pΔ1 = (uintptr)sysAlloc(n, Ꮡmemstats.of(mstats.Ꮡother_sys));
+        @unsafe.Pointer pΔ1 = (uintptr)sysAlloc(n, Ꮡmemstats.of(mstats.Ꮡother_sys), heapdumpˢ);
         if (pΔ1 == nil) {
             @throw(heapdumpOutOfMemoryˢ);
         }

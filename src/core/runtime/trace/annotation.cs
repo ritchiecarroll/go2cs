@@ -193,7 +193,7 @@ public static void End(this ж<Region> Ꮡr) {
 // The information is advisory only. The tracing status
 // may have changed by the time this function returns.
 public static bool IsEnabled() {
-    return Ꮡtracing.of(tracingᴛ1.Ꮡenabled).Load();
+    return Ꮡtracing.of(traceMultiplexer.Ꮡenabled).Load();
 }
 
 //

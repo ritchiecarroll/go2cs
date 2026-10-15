@@ -5,9 +5,9 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using slices = slices_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -138,12 +138,12 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
         ᏑfwdJumps.ValueSlot = appendꓸꓸꓸ(ᏑfwdJumps.ValueSlot, Ꮡcheck.blockBranches(Ꮡall, bʗ1, lstmtΔ1, listΔ1));
     }
 
-    ref var stmtBranches = ref heap<Action<ast.Stmt>>(out var ᏑstmtBranches);
+    ref var stmtBranches = ref heap<Action<ж<ast.LabeledStmt>, ast.Stmt>>(out var ᏑstmtBranches);
     var bʗ2 = b;
     var blockBranchesʗ1 = blockBranches;
     var jumpsOverVarDeclʗ1 = jumpsOverVarDecl;
     var recordVarDeclʗ1 = recordVarDecl;
-    stmtBranches = (ast.Stmt s) => {
+    stmtBranches = (ж<ast.LabeledStmt> lstmtΔ2, ast.Stmt s) => {
         switch (s.type()) {
         case ж<ast.DeclStmt> sΔ1: {
             {
@@ -194,10 +194,10 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
                         }
                     }
                     ᏑfwdJumps.ValueSlot = ᏑfwdJumps.ValueSlot.slice(0, i);
-                    Ꮡlstmt = sΔ1;
+                    lstmtΔ2 = sΔ1;
                 }
             }
-            ᏑstmtBranches.ValueSlot((~sΔ1).Stmt);
+            ᏑstmtBranches.ValueSlot(lstmtΔ2, (~sΔ1).Stmt);
             break;
         }
         case ж<ast.BranchStmt> sΔ1: {
@@ -275,13 +275,13 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
             break;
         }
         case ж<ast.BlockStmt> sΔ1: {
-            blockBranchesʗ1(Ꮡlstmt, (~sΔ1).List);
+            blockBranchesʗ1(lstmtΔ2, (~sΔ1).List);
             break;
         }
         case ж<ast.IfStmt> sΔ1: {
-            ᏑstmtBranches.ValueSlot(new ast.BlockStmtжStmt((~sΔ1).Body));
+            ᏑstmtBranches.ValueSlot(lstmtΔ2, new ast.BlockStmtжStmt((~sΔ1).Body));
             if ((~sΔ1).Else != default!) {
-                ᏑstmtBranches.ValueSlot((~sΔ1).Else);
+                ᏑstmtBranches.ValueSlot(lstmtΔ2, (~sΔ1).Else);
             }
             break;
         }
@@ -290,11 +290,11 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
             break;
         }
         case ж<ast.SwitchStmt> sΔ1: {
-            ᏑstmtBranches.ValueSlot(new ast.BlockStmtжStmt((~sΔ1).Body));
+            ᏑstmtBranches.ValueSlot(lstmtΔ2, new ast.BlockStmtжStmt((~sΔ1).Body));
             break;
         }
         case ж<ast.TypeSwitchStmt> sΔ1: {
-            ᏑstmtBranches.ValueSlot(new ast.BlockStmtжStmt((~sΔ1).Body));
+            ᏑstmtBranches.ValueSlot(lstmtΔ2, new ast.BlockStmtжStmt((~sΔ1).Body));
             break;
         }
         case ж<ast.CommClause> sΔ1: {
@@ -302,21 +302,21 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
             break;
         }
         case ж<ast.SelectStmt> sΔ1: {
-            ᏑstmtBranches.ValueSlot(new ast.BlockStmtжStmt((~sΔ1).Body));
+            ᏑstmtBranches.ValueSlot(lstmtΔ2, new ast.BlockStmtжStmt((~sΔ1).Body));
             break;
         }
         case ж<ast.ForStmt> sΔ1: {
-            ᏑstmtBranches.ValueSlot(new ast.BlockStmtжStmt((~sΔ1).Body));
+            ᏑstmtBranches.ValueSlot(lstmtΔ2, new ast.BlockStmtжStmt((~sΔ1).Body));
             break;
         }
         case ж<ast.RangeStmt> sΔ1: {
-            ᏑstmtBranches.ValueSlot(new ast.BlockStmtжStmt((~sΔ1).Body));
+            ᏑstmtBranches.ValueSlot(lstmtΔ2, new ast.BlockStmtжStmt((~sΔ1).Body));
             break;
         }}
     };
 
     foreach (var (_, s) in list) {
-        stmtBranches(s);
+        stmtBranches(nil, s);
     }
 
     return fwdJumps;

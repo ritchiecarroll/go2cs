@@ -168,6 +168,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/internal/byteorder/internal.byteorder.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/cpu/internal.cpu.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/goarch/internal.goarch.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>

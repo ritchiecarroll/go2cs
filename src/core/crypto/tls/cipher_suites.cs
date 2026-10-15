@@ -77,8 +77,8 @@ public static slice<ж<CipherSuite>> CipherSuites() {
 // Most applications should not use the cipher suites in this list, and should
 // only use those returned by [CipherSuites].
 public static slice<ж<CipherSuite>> InsecureCipherSuites() {
-    // This list includes RC4, CBC_SHA256, and 3DES cipher suites. See
-    // cipherSuitesPreferenceOrder for details.
+    // This list includes legacy RSA kex, RC4, CBC_SHA256, and 3DES cipher
+    // suites. See cipherSuitesPreferenceOrder for details.
     return new ж<CipherSuite>[]{
         Ꮡ(new CipherSuite(TLS_RSA_WITH_RC4_128_SHA, "TLS_RSA_WITH_RC4_128_SHA"u8, supportedUpToTLS12, true)),
         Ꮡ(new CipherSuite(TLS_RSA_WITH_3DES_EDE_CBC_SHA, "TLS_RSA_WITH_3DES_EDE_CBC_SHA"u8, supportedUpToTLS12, true)),
@@ -146,8 +146,8 @@ partial struct cipherSuite {
 }
 
 internal static slice<ж<cipherSuite>> ΔcipherSuites = new ж<cipherSuite>[]{ // TODO: replace with a map, since the order doesn't matter.
-    Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305, 32, 0, 12, ecdheRSAKA, (nint)((nint)suiteECDHE | (nint)suiteTLS12), default!, default!, aeadChaCha20Poly1305)),
-    Ꮡ(new cipherSuite(TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305, 32, 0, 12, ecdheECDSAKA, (nint)((nint)(UntypedInt)(suiteECDHE | suiteECSign) | (nint)suiteTLS12), default!, default!, aeadChaCha20Poly1305)),
+    Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, 32, 0, 12, ecdheRSAKA, (nint)((nint)suiteECDHE | (nint)suiteTLS12), default!, default!, aeadChaCha20Poly1305)),
+    Ꮡ(new cipherSuite(TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, 32, 0, 12, ecdheECDSAKA, (nint)((nint)(UntypedInt)(suiteECDHE | suiteECSign) | (nint)suiteTLS12), default!, default!, aeadChaCha20Poly1305)),
     Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, 16, 0, 4, ecdheRSAKA, (nint)((nint)suiteECDHE | (nint)suiteTLS12), default!, default!, aeadAESGCM)),
     Ꮡ(new cipherSuite(TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, 16, 0, 4, ecdheECDSAKA, (nint)((nint)(UntypedInt)(suiteECDHE | suiteECSign) | (nint)suiteTLS12), default!, default!, aeadAESGCM)),
     Ꮡ(new cipherSuite(TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, 32, 0, 4, ecdheRSAKA, (nint)((nint)(UntypedInt)(suiteECDHE | suiteTLS12) | (nint)suiteSHA384), default!, default!, aeadAESGCM)),
@@ -281,7 +281,7 @@ internal static slice<uint16> cipherSuitesPreferenceOrder = new uint16[]{
     // AEADs w/ ECDHE
     TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-    TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305, TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+    TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 
     // CBC w/ ECDHE
     TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
@@ -310,7 +310,7 @@ internal static slice<uint16> cipherSuitesPreferenceOrder = new uint16[]{
 
 internal static slice<uint16> cipherSuitesPreferenceOrderNoAES = new uint16[]{
     // ChaCha20Poly1305
-    TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305, TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+    TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 
     // AES-GCM w/ ECDHE
     TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
@@ -382,9 +382,13 @@ internal static map<uint16, bool> aesgcmCiphers = new map<uint16, bool>{
     [TLS_AES_256_GCM_SHA384] = true
 };
 
-// aesgcmPreferred returns whether the first known cipher in the preference list
-// is an AES-GCM cipher, implying the peer has hardware support for it.
-internal static bool aesgcmPreferred(slice<uint16> ciphers) {
+// isAESGCMPreferred returns whether we have hardware support for AES-GCM, and the
+// first known cipher in the peer's preference list is an AES-GCM cipher,
+// implying the peer also has hardware support for it.
+internal static bool isAESGCMPreferred(slice<uint16> ciphers) {
+    if (!hasAESGCMHardwareSupport) {
+        return false;
+    }
     foreach (var (_, cID) in ciphers) {
         {
             var c = cipherSuiteByID(cID); if (c != nil) {
@@ -537,7 +541,7 @@ internal static aead aeadAESGCM(slice<byte> key, slice<byte> noncePrefix) {
     } else {
         boring.Unreachable();
         var (ᴛ1, ᴛ2) = gcm.NewGCMForTLS12(aesΔ1._<ж<fipsaes.Block>>());
-        (aead, err) = (new gcm_GCMForTLS12жAEAD(ᴛ1), ᴛ2);
+        (aead, err) = (new gcm_GCMWithCounterNonceжAEAD(ᴛ1), ᴛ2);
     }
     if (err != default!) {
         throw panic(err);
@@ -572,7 +576,7 @@ internal static aead aeadAESGCMTLS13(slice<byte> key, slice<byte> nonceMask) {
     } else {
         boring.Unreachable();
         var (ᴛ1, ᴛ2) = gcm.NewGCMForTLS13(aesΔ1._<ж<fipsaes.Block>>());
-        (aead, err) = (new gcm_GCMForTLS13жAEAD(ᴛ1), ᴛ2);
+        (aead, err) = (new gcm_GCMWithXORCounterNonceжAEAD(ᴛ1), ᴛ2);
     }
     if (err != default!) {
         throw panic(err);

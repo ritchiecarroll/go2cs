@@ -2,20 +2,18 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-2_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/internal.pkgbits.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/internal/pkgbits@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/internal/pkgbits) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/internal/pkgbits)
+[![Tests](https://img.shields.io/badge/Tests-2_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/internal.pkgbits.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/internal/pkgbits@go1.26.9)\
+[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/internal/pkgbits) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/internal/pkgbits)
 
 From C#, call this package through the static class go.@internal.pkgbits_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
-Package pkgbits implements low-level coding abstractions for Unified IR's export data format.
+Package pkgbits implements low-level coding abstractions for Unified IR's (UIR) binary export data format.
 
-At a low-level, a package is a collection of bitstream elements. Each element has a "kind" and a dense, non-negative index. Elements can be randomly accessed given their kind and index.
+At a low-level, the exported objects of a package are encoded as a byte array. This array contains byte representations of primitive, potentially variable-length values, such as integers, booleans, strings, and constants.
 
-Individual elements are sequences of variable-length values (e.g., integers, booleans, strings, go/constant values, cross-references to other elements). Package pkgbits provides APIs for encoding and decoding these low-level values, but the details of mapping higher-level Go constructs into elements is left to higher-level abstractions.
+Additionally, the array may contain values which denote indices in the byte array itself. These are termed "relocations" and allow for references.
 
-Elements may cross-reference each other with "relocations." For example, an element representing a pointer type has a relocation referring to the element type.
-
-Go constructs may be composed as a constellation of multiple elements. For example, a declared function may have one element to describe the object (e.g., its name, type, position), and a separate element to describe its function body. This allows readers some flexibility in efficiently seeking or re-reading data (e.g., inlining requires re-reading the function body for each inlined call, without needing to re-read the object-level details).
+The details of mapping high-level Go constructs to primitives are left to other packages.
 
 ---
 

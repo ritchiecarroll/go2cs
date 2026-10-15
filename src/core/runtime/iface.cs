@@ -224,6 +224,11 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
 // If !firstTime, itabInit will not write anything to m.Fun (see issue 65962).
 // It is ok to call this multiple times on the same m, even concurrently
 // (although it will only be called once with firstTime==true).
+//
+// itabInit stores only code pointers, so it must not emit a write barrier;
+// //go:nowritebarrier enforces that (see the methods store below).
+//
+//go:nowritebarrier
 internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -239,7 +244,10 @@ internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     nint nt = (nint)(~x).Mcount;
     var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)(~x).Moff)), (int)(nt)));
     nint j = 0;
-    var methods = (false ? default(slice<@unsafe.Pointer>) : throw panic("go2cs: a slice view (*[N]unsafe.Pointer)(p)[...] over a managed element has no managed aliasing pair (iface.go:217)"));
+    // These are code pointers, not heap pointers. Use a uintptr slice so the
+    // store emits no write barrier: on wasm a code pointer can look like a
+    // heap pointer and make the GC crash (see issue 80472).
+    var methods = (~array<uintptr>.AliasPointer(Ꮡm.at(itab.ᏑFun, 0), 65536)).slice(0, ni, ni);
     @unsafe.Pointer fun0 = default!;
 imethods:
     for (nint k = 0; k < ni; k++) {
@@ -266,7 +274,7 @@ imethods:
                         fun0 = ifn; // we'll set m.Fun[0] at the end
                     } else 
                     if (firstTime) {
-                        methods[k] = ifn;
+                        methods[k] = (uintptr)ifn;
                     }
                     goto continue_imethods;
                 }
@@ -285,7 +293,7 @@ break_imethods:;
 }
 
 internal static void itabsinit() {
-    lockInit(ᏑitabLock, lockRankItab);
+    lockInit(ref itabLock, lockRankItab);
     @lock(ᏑitabLock);
     foreach (var (_, md) in activeModules()) {
         foreach (var (_, i) in (~md).itablinks) {
@@ -527,7 +535,7 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> Ꮡt) {
         tab = getitab(s.Inter, Ꮡt, s.CanFail);
     }
 
-    if (!abi.UseInterfaceSwitchCache(GOARCH)) {
+    if (!abi.UseInterfaceSwitchCache(goarch.ArchFamily)) {
         return tab;
     }
 
@@ -632,7 +640,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
         }
     }
 
-    if (!abi.UseInterfaceSwitchCache(GOARCH)) {
+    if (!abi.UseInterfaceSwitchCache(goarch.ArchFamily)) {
         return (case_, tab);
     }
 

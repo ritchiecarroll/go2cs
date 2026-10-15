@@ -110,8 +110,12 @@ internal static void sync_runtime_SemacquireRWMutex(ж<uint32> Ꮡaddr, bool lif
 }
 
 //go:linkname sync_runtime_SemacquireWaitGroup sync.runtime_SemacquireWaitGroup
-internal static void sync_runtime_SemacquireWaitGroup(ж<uint32> Ꮡaddr) {
-    semacquire1(Ꮡaddr, false, semaBlockProfile, 0, waitReasonSyncWaitGroupWait);
+internal static void sync_runtime_SemacquireWaitGroup(ж<uint32> Ꮡaddr, bool synctestDurable) {
+    var reason = waitReasonSyncWaitGroupWait;
+    if (synctestDurable) {
+        reason = waitReasonSynctestWaitGroupWait;
+    }
+    semacquire1(Ꮡaddr, false, semaBlockProfile, 0, reason);
 }
 
 //go:linkname poll_runtime_Semrelease internal/poll.runtime_Semrelease
@@ -167,7 +171,10 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.g = getg();
-    s.elem = @unsafe.Pointer.FromPinnedBox(Ꮡaddr);
+    s.elem.set(@unsafe.Pointer.FromPinnedBox(Ꮡaddr));
+    // Storing this pointer so that we can trace the semaphore address
+    // from the blocked goroutine when checking for goroutine leaks.
+    s.g.Value.waiting = Ꮡs;
     s.next = default!;
     s.prev = default!;
     s.waiters = 0;
@@ -175,7 +182,7 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
     ж<sudog> last = default!;
     var pt = Ꮡroot.of(semaRoot.Ꮡtreap);
     for (var t = pt.ValueSlot; t != nil; t = pt.ValueSlot) {
-        if ((~t).elem == @unsafe.Pointer.FromPinnedBox(Ꮡaddr)) {
+        if ((uintptr)Ꮡaddr == t.of(sudog.Ꮡelem).uintptr()) {
             // Already have addr in list.
             if (lifo){
                 // Substitute s in t's place in treap.
@@ -221,7 +228,7 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
             return;
         }
         last = t;
-        if ((uintptr)Ꮡaddr < (uintptr)(~t).elem){
+        if ((uintptr)Ꮡaddr < t.of(sudog.Ꮡelem).uintptr()){
             pt = t.of(sudog.Ꮡprev);
         } else {
             pt = t.of(sudog.Ꮡnext);
@@ -270,11 +277,13 @@ internal static (ж<sudog> found, int64 now, int64 tailtime) dequeue(this ж<sem
 
     var ps = Ꮡroot.of(semaRoot.Ꮡtreap);
     var s = ps.ValueSlot;
+
     for (; s != nil; s = ps.ValueSlot) {
-        if ((~s).elem == @unsafe.Pointer.FromPinnedBox(Ꮡaddr)) {
+        if ((uintptr)Ꮡaddr == s.of(sudog.Ꮡelem).uintptr()) {
             goto Found;
         }
-        if ((uintptr)Ꮡaddr < (uintptr)(~s).elem){
+
+        if ((uintptr)Ꮡaddr < s.of(sudog.Ꮡelem).uintptr()){
             ps = s.of(sudog.Ꮡprev);
         } else {
             ps = s.of(sudog.Ꮡnext);
@@ -340,8 +349,10 @@ Found:
             tailtime = s.Value.acquiretime;
         }
     }
+    // Goroutine is no longer blocked. Clear the waiting pointer.
+    s.Value.g.Value.waiting = default!;
     s.Value.parent = default!;
-    s.Value.elem = default!;
+    s.of(sudog.Ꮡelem).set(nil);
     s.Value.next = default!;
     s.Value.prev = default!;
     s.Value.ticket = 0;
@@ -472,6 +483,10 @@ internal static void notifyListWait(ж<notifyList> Ꮡl, uint32 t) {
     // Enqueue itself.
     var s = acquireSudog();
     s.Value.g = getg();
+    // Storing this pointer so that we can trace the condvar address
+    // from the blocked goroutine when checking for goroutine leaks.
+    s.of(sudog.Ꮡelem).set(@unsafe.Pointer.FromPinnedBox(Ꮡl));
+    s.Value.g.Value.waiting = s;
     s.Value.ticket = t;
     s.Value.releasetime = 0;
     var t0 = (int64)0;
@@ -489,8 +504,15 @@ internal static void notifyListWait(ж<notifyList> Ꮡl, uint32 t) {
     if (t0 != 0) {
         blockevent((~s).releasetime - t0, 2);
     }
+    // Goroutine is no longer blocked. Clear up its waiting pointer,
+    // and clean up the sudog before releasing it.
+    s.Value.g.Value.waiting = default!;
+    s.of(sudog.Ꮡelem).set(nil);
     releaseSudog(s);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string semaphoreWakeOfSynctestˢ = "semaphore wake of synctest goroutine from outside bubble"u8;
 
 // notifyListNotifyAll notifies all entries in the list.
 //
@@ -522,9 +544,9 @@ internal static void notifyListNotifyAll(ж<notifyList> Ꮡl) {
     while (s != nil) {
         var next = s.Value.next;
         s.Value.next = default!;
-        if ((~(~s).g).syncGroup != nil && (~getg()).syncGroup != (~(~s).g).syncGroup) {
+        if ((~(~s).g).bubble != nil && (~getg()).bubble != (~(~s).g).bubble) {
             println((@string)"semaphore wake of synctest goroutine"u8, (~(~s).g).goid, (@string)"from outside bubble"u8);
-            throw panic("semaphore wake of synctest goroutine from outside bubble");
+            fatal(semaphoreWakeOfSynctestˢ);
         }
         readyWithTime(ref (s).DerefOrNull(), 4);
         s = next;
@@ -581,9 +603,9 @@ internal static void notifyListNotifyOne(ж<notifyList> Ꮡl) {
             }
             unlock(Ꮡl.of(notifyList.Ꮡlock));
             s.Value.next = default!;
-            if ((~(~s).g).syncGroup != nil && (~getg()).syncGroup != (~(~s).g).syncGroup) {
+            if ((~(~s).g).bubble != nil && (~getg()).bubble != (~(~s).g).bubble) {
                 println((@string)"semaphore wake of synctest goroutine"u8, (~(~s).g).goid, (@string)"from outside bubble"u8);
-                throw panic("semaphore wake of synctest goroutine from outside bubble");
+                fatal(semaphoreWakeOfSynctestˢ);
             }
             readyWithTime(ref (s).DerefOrNull(), 4);
             return;

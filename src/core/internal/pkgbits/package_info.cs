@@ -39,7 +39,9 @@ using static go.@internal.pkgbits_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("AbsElemIdx", "uint")]
 [assembly: GoTypeAlias("Code", "ΔCode")]
+[assembly: GoTypeAlias("RelElemIdx", "go.@internal.pkgbits_package.Index")]
 [assembly: GoTypeAlias("Version", "ΔVersion")]
 // </ExportedTypeAliases>
 
@@ -75,10 +77,10 @@ using static go.@internal.pkgbits_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsgKKAAA4igKKAABQugKKA")]
 [assembly: global::go.GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADh+sKaQqrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKSgq7CkoKmooKs0uyCgoKCgqamouyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgoCqpKSkpIKCpAACHQAEJoKCgpSmgoKCAAIUAAgCgoKSgpSClKrCgoKCgpKCgoKCgqaClJSokA==")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACZMkAACEvIABhLSgpSSppSCgoKUqJKCgriCgoKCyoKCgsqCgpSqooCCgraCgoKssoKCruKClAASLrKWksqClIKCgoKCgqaCgpSmgoK4goKCgqaUgoKmpoKCgoCCtqaCgoKmgoKuwoKCgsqCgoIAAyIADQKCgoKUgoKokoKokoKokICmkKaQAAIQ4oKokoIAAhLiqqKCqqKCgryigoKClLiCtLSCtIK0grSCtIKCtILIooKCpoKCqJA=", "61-63:1")]
+[assembly: global::go.GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACZMkAACEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooCCgraCgoKssoKCruKSlAASLrKWksqClIKCgoKCgqaCgpSmgoK4goKCgqaUgoKmpoKCgoCCtqaCgoKmgoKuwoKCgsqCgoIAAyIADQKCgoKUgoKokoKokoKokICmkKaQAAIQ4oKokoIAAhLiqqKCqqKCgryigoKClLiCtLSCtIK0grSCtIKCtILIooKCpoKCqJA=", "61-63:1")]
 [assembly: global::go.GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
 [assembly: global::go.GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "AA8cspKUlJQABBCygqaCgoKCgg==", "16-21:1")]
-[assembly: global::go.GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoLKlIKCgpQ=")]
+[assembly: global::go.GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgsqUgoKClA==")]
 [assembly: global::go.GoPositionMap("internal/pkgbits/version.go", "version.cs", "AECIAQAHEN6S")]
 // </GoSourcePositionMaps>
 
@@ -104,8 +106,8 @@ public static partial class pkgbits_package
     public partial struct Index {}
     [GoValueClone("elemEndsEnds")] public partial struct PkgDecoder {}
     [GoValueClone("elems")] public partial struct PkgEncoder {}
-    public partial struct RelocEnt {}
-    public partial struct RelocKind {}
+    public partial struct RefTableEntry {}
+    public partial struct SectionKind {}
     public partial struct SyncMarker {}
     public partial struct ΔVersion {}
     // </TypeAccessibility>
@@ -128,7 +130,7 @@ public static partial class pkgbits_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbig() => builtin.initPackage(typeof(math.big_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(global::go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }

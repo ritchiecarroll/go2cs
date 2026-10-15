@@ -65,7 +65,11 @@ public static @string String(this ΔLevel l) {
         if (val == 0) {
             return @base;
         }
-        return fmt.Sprintf("%s%+d"u8, @base, val);
+        @string sval = strconv.Itoa((nint)val);
+        if (val > 0) {
+            sval = "+"u8 + sval;
+        }
+        return @base + sval;
     }
 
     switch (ᐧ) {

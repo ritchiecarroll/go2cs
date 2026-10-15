@@ -147,7 +147,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                 }
             }
 
-            switch (under(typΔ1).type()) {
+            switch (typΔ1.Underlying().type()) {
             case ж<Struct> t: {
                 foreach (var (i, f) in (~t).fields) {
                     if (fset == default!) {

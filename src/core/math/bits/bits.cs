@@ -333,7 +333,7 @@ public static nint /*n*/ Len16(uint16 x) {
         x >>= (int)(8);
         n = 8;
     }
-    return n + (nint)len8tab[x];
+    return n + (nint)len8tab[(uint8)x];
 }
 
 // Len32 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
@@ -348,7 +348,7 @@ public static nint /*n*/ Len32(uint32 x) {
         x >>= (int)(8);
         n += 8;
     }
-    return n + (nint)len8tab[x];
+    return n + (nint)len8tab[(uint8)x];
 }
 
 // Len64 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
@@ -367,7 +367,7 @@ public static nint /*n*/ Len64(uint64 x) {
         x >>= (int)(8);
         n += 8;
     }
-    return n + (nint)len8tab[x];
+    return n + (nint)len8tab[(uint8)x];
 }
 
 // --- Add with carry ---

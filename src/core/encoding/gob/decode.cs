@@ -884,13 +884,16 @@ internal static void decodeGobDecoder(this ref Decoder dec, ж<userTypeInfo> Ꮡ
     // We know it's one of these.
     var exprᴛ1 = ut.externalDec;
     if (exprᴛ1 == xGob) {
-        err = value.Interface()._<GobDecoder>().GobDecode(b);
+        var (gobDecoder, _) = reflect.TypeAssert<GobDecoder>(value);
+        err = gobDecoder.GobDecode(b);
     }
     else if (exprᴛ1 == xBinary) {
-        err = value.Interface()._<encoding.BinaryUnmarshaler>().UnmarshalBinary(b);
+        var (binaryUnmarshaler, _) = reflect.TypeAssert<encoding.BinaryUnmarshaler>(value);
+        err = binaryUnmarshaler.UnmarshalBinary(b);
     }
     else if (exprᴛ1 == xText) {
-        err = value.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(b);
+        var (textUnmarshaler, _) = reflect.TypeAssert<encoding.TextUnmarshaler>(value);
+        err = textUnmarshaler.UnmarshalText(b);
     }
     if (err != default!) {
         error_(err);

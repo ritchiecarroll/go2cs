@@ -25,7 +25,7 @@ partial class poll_package {
 // If handled is false, sendfile was unable to perform the copy,
 // has not modified the source or destination,
 // and the caller should perform the copy using a fallback implementation.
-public static (int64 n, error err, bool handled) SendFile(ж<FD> ᏑdstFD, nint src, int64 size) {
+public static (int64 n, error err, bool handled) SendFile(ж<FD> ᏑdstFD, uintptr src, int64 size) {
     int64 n = default!;
     error err = default!;
     bool handled = default!;
@@ -35,23 +35,23 @@ public static (int64 n, error err, bool handled) SendFile(ж<FD> ᏑdstFD, nint 
             // Linux's sendfile doesn't require any setup:
             // It sends from the current position of the source file and
             // updates the position of the source after sending.
-            return sendFile(ᏑdstFD, src, nil, size);
+            return sendFile(ᏑdstFD, (nint)src, nil, size);
         }
     }
 
     // Non-Linux sendfile implementations don't use the current position of the source file,
     // so we need to look up the position, pass it explicitly, and adjust it after
     // sendfile returns.
-    (var start, err) = ignoringEINTR2((int64, error) () => Δsyscall.Seek(src, 0, io.SeekCurrent));
+    (var start, err) = ignoringEINTR2((int64, error) () => Δsyscall.Seek((nint)src, 0, io.SeekCurrent));
     if (err != default!) {
         return (0, err, false);
     }
 
     ref var pos = ref heap<int64>(out var Ꮡpos);
     pos = start;
-    (n, err, handled) = sendFile(ᏑdstFD, src, Ꮡpos, size);
+    (n, err, handled) = sendFile(ᏑdstFD, (nint)src, Ꮡpos, size);
     if (n > 0) {
-        ignoringEINTR2((int64, error) () => Δsyscall.Seek(src, start + n, io.SeekStart));
+        ignoringEINTR2((int64, error) () => Δsyscall.Seek((nint)src, start + n, io.SeekStart));
     }
     return (n, err, handled);
 }
@@ -66,7 +66,7 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
         ref var dstFD = ref ᏑdstFD.DerefOrNull();
 
         defer(() => {
-            TestHookDidSendFile(ᏑdstFD, src, written, err, handled);
+            TestHookDidSendFile(ᏑdstFD, (uintptr)src, written, err, handled);
         }, ref ᒐ);
         {
             var errΔ1 = ᏑdstFD.writeLock(); if (errΔ1 != default!) {

@@ -20,13 +20,17 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
-using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
 partial class runtime_package {
+
+//go:linkname maps_typeString internal/runtime/maps.typeString
+internal static @string maps_typeString(ж<abi.Type> Ꮡtyp) {
+    return toRType(Ꮡtyp).@string();
+}
 
 // rtype is a wrapper that allows us to define additional methods.
 partial struct Δrtype {
@@ -77,7 +81,7 @@ internal static @string pkgpath(this Δrtype t) {
             return t.nameOff((~u).PkgPath).Name();
         }
     }
-    var exprᴛ1 = (abiꓸKind)(t.Kind_ & abi.KindMask);
+    var exprᴛ1 = t.Type.Value.Kind();
     if (exprᴛ1 == abi.Struct) {
         var st = t.Type.Reinterpret<abi.Type, structtype>();
         return (~st).PkgPath.Name();
@@ -556,8 +560,8 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
     if (Ꮡt == Ꮡv) {
         return true;
     }
-    var kind = (abiꓸKind)(t.Kind_ & abi.KindMask);
-    if (kind != (abiꓸKind)(v.Kind_ & abi.KindMask)) {
+    var kind = t.Kind();
+    if (kind != v.Kind()) {
         return false;
     }
     var (rt, rv) = (toRType(Ꮡt), toRType(Ꮡv));
@@ -644,13 +648,8 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         return true;
     }
     if (exprᴛ1 == abi.Map) {
-        if (goexperiment.SwissMap) {
-            var mtΔ1 = Ꮡt.Reinterpret<_type, abi.SwissMapType>();
-            var mvΔ1 = Ꮡv.Reinterpret<_type, abi.SwissMapType>();
-            return typesEqual((~mtΔ1).Key, (~mvΔ1).Key, seen) && typesEqual((~mtΔ1).Elem, (~mvΔ1).Elem, seen);
-        }
-        var mt = Ꮡt.Reinterpret<_type, abi.OldMapType>();
-        var mv = Ꮡv.Reinterpret<_type, abi.OldMapType>();
+        var mt = Ꮡt.Reinterpret<_type, abiꓸMapType>();
+        var mv = Ꮡv.Reinterpret<_type, abiꓸMapType>();
         return typesEqual((~mt).Key, (~mv).Key, seen) && typesEqual((~mt).Elem, (~mv).Elem, seen);
     }
     if (exprᴛ1 == abi.Pointer) {

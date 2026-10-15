@@ -54,6 +54,7 @@ using static go.@internal.runtime.atomic_package;
 [assembly: go.GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABIosqyyAAIQ0q7CAAIU8gANIrKssgACENKuwgACFPIAChyyrLIAAhTyAAIU8gAKHLKssoKClAAKHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gANIrKssgACENKuwgACFPIAChyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyAAwgsoKssgAQKLIAAhgACQKokqwABBwADAKssqYABhSyAAIYAAkCrLIAAh4ADAKuwgAKFrI=")]
 [assembly: go.GoPositionMap("internal/runtime/atomic/types_64bit.go", "types_64bit.cs", "AAgkAAkCAAIYAAkC")]
 [assembly: go.GoPositionMap("internal/runtime/atomic/unaligned.go", "unaligned.cs", "/oI=")]
+[assembly: go.GoPositionMap("internal/runtime/atomic/xchg8.go", "xchg8.cs", "AAsapIKCgpSCgpSClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

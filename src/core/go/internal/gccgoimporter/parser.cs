@@ -313,7 +313,7 @@ internal static readonly @string retˢ = "$ret"u8;
 internal static readonly @string escˢ = "esc"u8;
 
 // Param = Name ["..."] Type .
-internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
+internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> Ꮡpkg) {
     ж<types.Var> param = default!;
     bool isVariadic = default!;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -342,6 +342,7 @@ internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser
         typ = new types.SliceжΔType(types.NewSlice(typ));
     }
     param = types.NewParam(token.NoPos, Ꮡpkg, name, typ);
+    param.SetKind(kind);
     return (param, isVariadic);
 }
 
@@ -350,7 +351,7 @@ internal static ж<types.Var> parseVar(this ж<parser> Ꮡp, ж<types.Package> �
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string name = p.parseName();
-    var v = types.NewVar(token.NoPos, Ꮡpkg, name, Ꮡp.parseType(Ꮡpkg));
+    var v = types.NewVar(token.NoPos, Ꮡpkg, name, Ꮡp.parseType(Ꮡpkg)); // (types.PackageVar)
     if (name[0] == (rune)'.' || name[0] == (rune)'<') {
         // This is an unexported variable,
         // or a variable defined in a different package.
@@ -689,10 +690,10 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
                 p.expect((rune)'/');
             }
             p.expect((rune)'(');
-            var (receiver, _) = Ꮡp.parseParam(pkg);
+            var (receiver, _) = Ꮡp.parseParam(types.RecvVar, pkg);
             p.expect((rune)')');
             @string nameΔ1 = p.parseName();
-            var (@params, isVariadic) = Ꮡp.parseParamList(pkg);
+            var (@params, isVariadic) = Ꮡp.parseParamList(types.ParamVar, pkg);
             var results = Ꮡp.parseResultList(pkg);
             Ꮡp.skipInlineBody();
             p.expectEOL();
@@ -835,7 +836,7 @@ internal static typesꓸType parseStructType(this ж<parser> Ꮡp, ж<types.Pack
 internal static readonly object notOnFinalArgumentˢ = (@string)"... not on final argument"u8;
 
 // ParamList = "(" [ { Parameter "," } Parameter ] ")" .
-internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
+internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> Ꮡpkg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     slice<ж<types.Var>> list = default!;
@@ -846,7 +847,7 @@ internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, ж<
         if (len(list) > 0) {
             p.expect((rune)',');
         }
-        var (par, variadic) = Ꮡp.parseParam(Ꮡpkg);
+        var (par, variadic) = Ꮡp.parseParam(kind, Ꮡpkg);
         list = append(list, par);
         if (variadic) {
             if (isVariadic) {
@@ -871,10 +872,12 @@ internal static ж<types.Tuple> parseResultList(this ж<parser> Ꮡp, ж<types.P
             return default!;
         }
         var (taa, _) = Ꮡp.parseTypeAfterAngle(Ꮡpkg);
-        return types.NewTuple(types.NewParam(token.NoPos, Ꮡpkg, ""u8, taa));
+        var param = types.NewParam(token.NoPos, Ꮡpkg, ""u8, taa);
+        param.SetKind(types.ResultVar);
+        return types.NewTuple(param);
     }
     case (rune)'(': {
-        var (@params, _) = Ꮡp.parseParamList(Ꮡpkg);
+        var (@params, _) = Ꮡp.parseParamList(types.ResultVar, Ꮡpkg);
         return @params;
     }
     default: {
@@ -889,7 +892,7 @@ internal static ж<typesꓸSignature> parseFunctionType(this ж<parser> Ꮡp, ж
     var t = @new<typesꓸSignature>();
     p.update(new types.ΔSignatureжΔType(t), nlist);
 
-    var (@params, isVariadic) = Ꮡp.parseParamList(Ꮡpkg);
+    var (@params, isVariadic) = Ꮡp.parseParamList(types.ParamVar, Ꮡpkg);
     var results = Ꮡp.parseResultList(Ꮡpkg);
 
     t.Value = types.NewSignatureType(nil, default!, default!, @params, results, isVariadic).Value;

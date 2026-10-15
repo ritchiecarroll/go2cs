@@ -5,6 +5,7 @@ namespace go.regexp;
 
 using sort = sort_package;
 using strings = strings_package;
+using sync = sync_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
@@ -1805,24 +1806,125 @@ internal static ж<unicode.RangeTable> anyTable = Ꮡ(new unicode.RangeTable(
     R32: new unicode.Range32[]{new(Lo: ((uint32)1 << (int)(16)), Hi: unicode.MaxRune, Stride: 1)}.slice()
 ));
 
+internal static ж<unicode.RangeTable> asciiTable = Ꮡ(new unicode.RangeTable(
+    R16: new unicode.Range16[]{new(Lo: 0, Hi: 0x7F, Stride: 1)}.slice()
+));
+
+internal static ж<unicode.RangeTable> asciiFoldTable = Ꮡ(new unicode.RangeTable(
+    R16: new unicode.Range16[]{
+        new(Lo: 0, Hi: 0x7F, Stride: 1),
+        new(Lo: 0x017F, Hi: 0x017F, Stride: 1), // Old English long s (ſ), folds to S/s.
+        new(Lo: 0x212A, Hi: 0x212A, Stride: 1) // Kelvin K, folds to K/k.
+    }.slice()
+));
+
+// categoryAliases is a lazily constructed copy of unicode.CategoryAliases
+// but with the keys passed through canonicalName, to support inexact matches.
+partial struct categoryAliasesᴛ1 /*dyn*/ {
+    internal sync.Once once;
+    internal map<@string, @string> m;
+}
+internal static ж<categoryAliasesᴛ1> ᏑcategoryAliases = new StandardBox<categoryAliasesᴛ1>(default(categoryAliasesᴛ1));
+internal static ref categoryAliasesᴛ1 categoryAliases => ref ᏑcategoryAliases.Value;
+
+// initCategoryAliases initializes categoryAliases by canonicalizing unicode.CategoryAliases.
+internal static void initCategoryAliases() {
+    categoryAliases.m = new map<@string, @string>();
+    foreach (var (name, actual) in unicode.CategoryAliases) {
+        categoryAliases.m[canonicalName(name)] = actual;
+    }
+}
+
+// canonicalName returns the canonical lookup string for name.
+// The canonical name has a leading uppercase letter and then lowercase letters,
+// and it omits all underscores, spaces, and hyphens.
+// (We could have used all lowercase, but this way most package unicode
+// map keys are already canonical.)
+internal static @string canonicalName(@string name) {
+    slice<byte> b = default!;
+    var first = true;
+    foreach (var i in range(len(name))) {
+        var c = name[i];
+        switch (ᐧ) {
+        case {} when c == (rune)'_' || c == (rune)'-' || c == (rune)' ': {
+            c = (rune)' ';
+            break;
+        }
+        case {} when first: {
+            if ((rune)'a' <= c && c <= (rune)'z') {
+                c -= (byte)((rune)'a' - (rune)'A');
+            }
+            first = false;
+            break;
+        }
+        default: {
+            if ((rune)'A' <= c && c <= (rune)'Z') {
+                c += (byte)((rune)'a' - (rune)'A');
+            }
+            break;
+        }}
+        if (b == default!) {
+            if (c == name[i] && c != (rune)' ') {
+                // No changes so far, avoid allocating b.
+                continue;
+            }
+            b = new slice<byte>(i, len(name));
+            copy(b, name.slice(0, i));
+        }
+        if (c == (rune)' ') {
+            continue;
+        }
+        b = builtin.append(b, c);
+    }
+    if (b == default!) {
+        return name;
+    }
+    return ((@string)b);
+}
+
 // unicodeTable returns the unicode.RangeTable identified by name
 // and the table of additional fold-equivalent code points.
-internal static (ж<unicode.RangeTable>, ж<unicode.RangeTable>) unicodeTable(@string name) {
-    // Special case: "Any" means any.
-    if (name == "Any"u8) {
-        return (anyTable, anyTable);
+// If sign < 0, the result should be inverted.
+internal static (ж<unicode.RangeTable> tab, ж<unicode.RangeTable> fold, nint sign) unicodeTable(@string name) {
+    name = canonicalName(name);
+
+    // Special cases: Any, Assigned, and ASCII.
+    // Also LC is the only non-canonical Categories key, so handle it here.
+    var exprᴛ1 = name;
+    if (exprᴛ1 == "Any"u8) {
+        return (anyTable, anyTable, +1);
+    }
+    if (exprᴛ1 == "Assigned"u8) {
+        return (unicode.Cn, unicode.Cn, -1); // invert Cn (unassigned)
+    }
+    if (exprᴛ1 == "Ascii"u8) {
+        return (asciiTable, asciiFoldTable, +1);
+    }
+    if (exprᴛ1 == "Lc"u8) {
+        return (unicode.Categories["LC"u8], unicode.FoldCategory["LC"u8], +1);
     }
     {
         var t = unicode.Categories[name]; if (t != nil) {
-            return (t, unicode.FoldCategory[name]);
+            return (t, unicode.FoldCategory[name], +1);
         }
     }
     {
         var t = unicode.Scripts[name]; if (t != nil) {
-            return (t, unicode.FoldScript[name]);
+            return (t, unicode.FoldScript[name], +1);
         }
     }
-    return (default!, default!);
+
+    // unicode.CategoryAliases makes liberal use of underscores in its names
+    // (they are defined that way by Unicode), but we want to match ignoring
+    // the underscores, so make our own map with canonical names.
+    ᏑcategoryAliases.of(categoryAliasesᴛ1.Ꮡonce).Do(initCategoryAliases);
+    {
+        @string actual = categoryAliases.m[name]; if (actual != ""u8) {
+            var t = unicode.Categories[actual];
+            return (t, unicode.FoldCategory[actual], +1);
+        }
+    }
+    return (default!, default!, 0);
 }
 
 // parseUnicodeClass parses a leading Unicode character class like \p{Han}
@@ -1880,9 +1982,12 @@ internal static (slice<rune> @out, @string rest, error err) parseUnicodeClass(th
         name = name[1..];
     }
 
-    var (tab, fold) = unicodeTable(name);
+    var (tab, fold, tsign) = unicodeTable(name);
     if (tab == nil) {
         return (default!, "", new ΔErrorжerror(Ꮡ(new ΔError(ErrInvalidCharRange, seq))));
+    }
+    if (tsign < 0) {
+        sign = -sign;
     }
 
     if ((Flags)(p.flags & FoldCase) == 0 || fold == nil){

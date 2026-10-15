@@ -4,7 +4,7 @@
 //go:build unix || (js && wasm) || wasip1
 namespace go.@internal;
 
-using itoa = go.@internal.itoa_package;
+using strconv = go.@internal.strconv_package;
 using unix = go.@internal.syscall.unix_package;
 using io = io_package;
 using atomic = go.sync.atomic_package;
@@ -210,14 +210,8 @@ public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> p, int64 off) {
     if (fd.IsStream && len(p) > maxRW) {
         p = p[..(int)(maxRW)];
     }
-    nint n = default!;
-    error err = default!;
-    while (ᐧ) {
-        (n, err) = Δsyscall.Pread(fd.Sysfd, p, off);
-        if (!AreEqual(err, Δsyscall.EINTR)) {
-            break;
-        }
-    }
+    var pʗ1 = p;
+    var (n, err) = ignoringEINTR2((nint, error) () => Δsyscall.Pread(Ꮡfd.Value.Sysfd, pʗ1, off));
     if (err != default!) {
         n = 0;
     }
@@ -504,7 +498,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) {
                     // If we don't check this we will panic
                     // with slice bounds out of range.
                     // Use a more informative panic.
-                    throw panic("invalid return from write: got " + itoa.Itoa(n) + " from a write of " + itoa.Itoa(max - nn));
+                    throw panic("invalid return from write: got " + strconv.Itoa(n) + " from a write of " + strconv.Itoa(max - nn));
                 }
                 nn += n;
             }

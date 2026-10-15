@@ -4,7 +4,9 @@
 // CPU profile -> trace
 namespace go;
 
+using tracev2 = @internal.trace.tracev2_package;
 using @internal.runtime;
+using @internal.trace;
 using @unsafe = unsafe_package;
 using System.Runtime.CompilerServices;
 using atomic = @internal.runtime.atomic_package;
@@ -130,7 +132,7 @@ internal static void traceStopReadCPU() {
 // Must not run on the system stack because profBuf.read performs race
 // operations.
 internal static bool traceReadCPU(uintptr gen) {
-    array<uintptr> pcBuf = new(128); /* traceStackSize */
+    array<uintptr> pcBuf = new(128); /* tracev2.MaxFramesPerStack */
 
     var (data, tags, eof) = Δtrace.cpuLogRead[gen % 2].read(profBufNonBlocking);
     while (len(data) > 0) {
@@ -187,17 +189,17 @@ internal static bool traceReadCPU(uintptr gen) {
 
         // Ensure we have a place to write to.
         bool flushed = default!;
-        (w, flushed) = w.ensure(2 + 5 * traceBytesPerNumber /* traceEvCPUSamples + traceEvCPUSample + timestamp + g + m + p + stack ID */);
+        (w, flushed) = w.ensure(2 + 5 * traceBytesPerNumber /* tracev2.EvCPUSamples + tracev2.EvCPUSample + timestamp + g + m + p + stack ID */);
         if (flushed) {
             // Annotate the batch as containing strings.
-            w.@byte((byte)traceEvCPUSamples);
+            w.@byte((byte)tracev2.EvCPUSamples);
         }
 
         // Add the stack to the table.
         var stackID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf.slice(0, nstk));
 
         // Write out the CPU sample.
-        w.@byte((byte)traceEvCPUSample);
+        w.@byte((byte)tracev2.EvCPUSample);
         w.varint(timestamp);
         w.varint(mpid);
         w.varint(ppid);
@@ -247,20 +249,20 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
 
     // We're going to conditionally write to one of two buffers based on the
     // generation. To make sure we write to the correct one, we need to make
-    // sure this thread's trace seqlock is held. If it already is, then we're
+    // sure this thread's trace write flag is set. If it already is, then we're
     // in the tracer and we can just take advantage of that. If it isn't, then
     // we need to acquire it and read the generation.
     var locked = false;
-    if (Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Load() % 2 == 0) {
-        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
+    if (!Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Load()) {
+        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(true);
         locked = true;
     }
     var gen = ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Load();
     if (gen == 0) {
-        // Tracing is disabled, as it turns out. Release the seqlock if necessary
+        // Tracing is disabled, as it turns out. Clear the write flag if necessary
         // and exit.
         if (locked) {
-            Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
+            Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
         }
         return;
     }
@@ -281,7 +283,7 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
     if (Ꮡgp != nil) {
         hdr[1] = gp.goid;
     }
-    hdr[2] = (uint64)mp.procid;
+    hdr[2] = mp.procid;
 
     // Allow only one writer at a time
     while (!ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
@@ -300,9 +302,9 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
 
     ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑsignalLock).Store(0);
 
-    // Release the seqlock if we acquired it earlier.
+    // Clear the write flag if we set it earlier.
     if (locked) {
-        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
+        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
     }
 }
 

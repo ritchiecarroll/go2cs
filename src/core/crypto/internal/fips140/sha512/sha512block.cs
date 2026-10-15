@@ -98,22 +98,21 @@ internal static void blockGeneric(ref Digest dig, slice<byte> p) {
     array<uint64> w = new(80);
     var (h0, h1, h2, h3, h4, h5, h6, h7) = (dig.h[0], dig.h[1], dig.h[2], dig.h[3], dig.h[4], dig.h[5], dig.h[6], dig.h[7]);
     while (len(p) >= chunk) {
-        for (nint i = 0; i < 16; i++) {
-            nint j = i * 8;
-            w[i] = (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)p[j] << (int)(56)) | ((uint64)p[j + 1] << (int)(48))) | ((uint64)p[j + 2] << (int)(40))) | ((uint64)p[j + 3] << (int)(32))) | ((uint64)p[j + 4] << (int)(24))) | ((uint64)p[j + 5] << (int)(16))) | ((uint64)p[j + 6] << (int)(8))) | (uint64)p[j + 7]);
-        }
-        for (nint i = 16; i < 80; i++) {
-            var v1 = w[i - 2];
-            var t1 = (uint64)((uint64)(bits.RotateLeft64(v1, -19) ^ bits.RotateLeft64(v1, -61)) ^ ((v1 >> (int)(6))));
-            var v2 = w[i - 15];
-            var t2 = (uint64)((uint64)(bits.RotateLeft64(v2, -1) ^ bits.RotateLeft64(v2, -8)) ^ ((v2 >> (int)(7))));
-
-            w[i] = t1 + w[i - 7] + t2 + w[i - 16];
-        }
-
         var (a, b, c, d, e, f, g, h) = (h0, h1, h2, h3, h4, h5, h6, h7);
 
-        for (nint i = 0; i < 80; i++) {
+        foreach (var i in range(80)) {
+            if (i < 16){
+                nint j = i * 8;
+                w[i] = (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)p[j] << (int)(56)) | ((uint64)p[j + 1] << (int)(48))) | ((uint64)p[j + 2] << (int)(40))) | ((uint64)p[j + 3] << (int)(32))) | ((uint64)p[j + 4] << (int)(24))) | ((uint64)p[j + 5] << (int)(16))) | ((uint64)p[j + 6] << (int)(8))) | (uint64)p[j + 7]);
+            } else {
+                var v1 = w[i - 2];
+                var t1Δ1 = (uint64)((uint64)(bits.RotateLeft64(v1, -19) ^ bits.RotateLeft64(v1, -61)) ^ ((v1 >> (int)(6))));
+                var v2 = w[i - 15];
+                var t2Δ1 = (uint64)((uint64)(bits.RotateLeft64(v2, -1) ^ bits.RotateLeft64(v2, -8)) ^ ((v2 >> (int)(7))));
+
+                w[i] = t1Δ1 + w[i - 7] + t2Δ1 + w[i - 16];
+            }
+
             var t1 = h + ((uint64)((uint64)(bits.RotateLeft64(e, -14) ^ bits.RotateLeft64(e, -18)) ^ bits.RotateLeft64(e, -41))) + ((uint64)(((uint64)(e & f)) ^ ((uint64)(~e & g)))) + _K[i] + w[i];
 
             var t2 = ((uint64)((uint64)(bits.RotateLeft64(a, -28) ^ bits.RotateLeft64(a, -34)) ^ bits.RotateLeft64(a, -39))) + ((uint64)((uint64)(((uint64)(a & b)) ^ ((uint64)(a & c))) ^ ((uint64)(b & c))));

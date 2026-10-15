@@ -6,12 +6,13 @@ namespace go.go;
 using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using filepath = path.filepath_package;
 using strings = strings_package;
 using constant = global::go.go.constant_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using iter = iter_package;
 using path;
 
 partial class types_package {
@@ -32,8 +33,14 @@ partial struct ΔSignature {
     internal ж<Var> recv;        // nil if not a method
     internal ж<Tuple> @params;      // (incoming) parameters from left to right; or nil
     internal ж<Tuple> results;      // (outgoing) results from left to right; or nil
-    internal bool variadic;           // true if the last parameter's type is of the form ...T (or string, for append built-in only)
+    internal bool variadic;           // true if the last parameter's type is of the form ...T
 }
+
+// If variadic, the last element of params ordinarily has an
+// unnamed Slice type. As a special case, in a call to append,
+// it may be string, or a TypeParam T whose typeset ⊇ {string, []byte}.
+// It may even be a named []byte type if a client instantiates
+// T at such a type.
 
 // NewSignature returns a new function type for the given receiver, parameters,
 // and results, either of which may be nil. If variadic is set, the function
@@ -41,14 +48,25 @@ partial struct ΔSignature {
 // must be of unnamed slice type.
 //
 // Deprecated: Use [NewSignatureType] instead which allows for type parameters.
+//
+//go:fix inline
 public static ж<ΔSignature> NewSignature(ж<Var> Ꮡrecv, ж<Tuple> Ꮡparams, ж<Tuple> Ꮡresults, bool variadic) {
     return NewSignatureType(Ꮡrecv, default!, default!, Ꮡparams, Ꮡresults, variadic);
 }
 
 // NewSignatureType creates a new function type for the given receiver,
-// receiver type parameters, type parameters, parameters, and results. If
-// variadic is set, params must hold at least one parameter and the last
-// parameter's core type must be of unnamed slice or bytestring type.
+// receiver type parameters, type parameters, parameters, and results.
+//
+// If variadic is set, params must hold at least one parameter and the
+// last parameter must be an unnamed slice or a type parameter whose
+// type set has an unnamed slice as common underlying type.
+//
+// As a special case, to support append([]byte, str...), for variadic
+// signatures the last parameter may also be a string type, or a type
+// parameter containing a mix of byte slices and string types in its
+// type set. It may even be a named []byte slice type resulting from
+// instantiation of such a type parameter.
+//
 // If recv is non-nil, typeParams must be empty. If recvTypeParams is
 // non-empty, recv must be non-nil.
 public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypeParam>> recvTypeParams, slice<ж<TypeParam>> typeParams, ж<Tuple> Ꮡparams, ж<Tuple> Ꮡresults, bool variadic) {
@@ -59,11 +77,40 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
         if (n == 0) {
             throw panic("variadic function must have at least one parameter");
         }
-        var core = coreString((~@params.At(n - 1)).typ);
-        {
-            var (_, ok) = core._<ж<Slice>>(ᐧ); if (!ok && !isString(core)) {
-                throw panic(fmt.Sprintf("got %s, want variadic parameter with unnamed slice type or string as core type"u8, core.String()));
+        var last = @params.At(n - 1).Value.typ;
+        ж<Slice> S = default!;
+        foreach (var (t, _) in range<ΔType, ΔType>(typeset(last).Invoke)) {
+            if (t == default!) {
+                break;
             }
+            ж<Slice> s = default!;
+            if (isString(t)){
+                s = NewSlice(universeByte);
+            } else {
+                // Variadic Go functions have a last parameter of type []T,
+                // suggesting we should reject a named slice type B here.
+                //
+                // However, a call to built-in append(slice, x...)
+                // where x has a TypeParam type [T ~string | ~[]byte],
+                // has the type func([]byte, T). Since a client may
+                // instantiate this type at T=B, we must permit
+                // named slice types, even when this results in a
+                // signature func([]byte, B) where type B []byte.
+                //
+                // (The caller of NewSignatureType may have no way to
+                // know that it is dealing with the append special case.)
+                (s, _) = t.Underlying()._<ж<Slice>>(ᐧ);
+            }
+            if (S == nil){
+                S = s;
+            } else 
+            if (s == nil || !Identical(new SliceжΔType(S), new SliceжΔType(s))) {
+                S = default!;
+                break;
+            }
+        }
+        if (S == nil) {
+            throw panic(fmt.Sprintf("got %s, want variadic parameter of slice or string type"u8, last));
         }
     }
     var sig = Ꮡ(new ΔSignature(recv: Ꮡrecv, @params: Ꮡparams, results: Ꮡresults, variadic: variadic));
@@ -103,6 +150,7 @@ public static ж<TypeParamList> RecvTypeParams(this ref ΔSignature s) {
 }
 
 // Params returns the parameters of signature s, or nil.
+// See [NewSignatureType] for details of variadic functions.
 public static ж<Tuple> Params(this ref ΔSignature s) {
     return s.@params;
 }
@@ -175,8 +223,8 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
         }
 
         // collect ordinary and result parameters
-        var (pnames, @params, variadic) = Ꮡcheck.collectParams(ftyp.Params, true);
-        var (rnames, results, _) = Ꮡcheck.collectParams(ftyp.Results, false);
+        var (pnames, @params, variadic) = Ꮡcheck.collectParams(ParamVar, ftyp.Params);
+        var (rnames, results, _) = Ꮡcheck.collectParams(ResultVar, ftyp.Results);
 
         // declare named receiver, ordinary, and result parameters
         tokenꓸPos scopePos = ftyp.End(); // all parameter's scopes start after the signature
@@ -195,9 +243,6 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡcheck.DerefOrNull().closeScope(); ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string typeParameterˢ = "type parameter"u8;
 
 // collectRecv extracts the method receiver and its type parameters (if any) from rparam.
 // It declares the type parameters (but not the receiver) in the current scope, and
@@ -256,7 +301,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
                 case ж<Alias> tΔ1: {
                     // Methods on generic aliases are not permitted.
                     // Only report an error if the alias type is valid.
-                    if (isValid(unalias(tΔ1))) {
+                    if (isValid(new AliasжΔType(tΔ1))) {
                         Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "cannot define new methods on generic alias type %s"u8, tΔ1.OrTypedNil());
                     }
                     // Ok to continue but do not set basetype in this case so that
@@ -346,13 +391,13 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
     ж<Var> recv = default!;
     if (rname != nil && (~rname).Name != ""u8){
         // named receiver
-        recv = NewParam(rname.Pos(), check.pkg, (~rname).Name, recvType);
+        recv = newVar(RecvVar, rname.Pos(), check.pkg, (~rname).Name, recvType);
         // In this case, the receiver is declared by the caller
         // because it must be declared after any type parameters
         // (otherwise it might shadow one of them).
     } else {
         // anonymous receiver
-        recv = NewParam(rparam.Pos(), check.pkg, ""u8, recvType);
+        recv = newVar(RecvVar, rparam.Pos(), check.pkg, ""u8, recvType);
         check.recordImplicit(new ast.FieldжNode(Ꮡrparam), new VarжObject(recv));
     }
 
@@ -417,10 +462,11 @@ internal static void recordParenthesizedRecvTypes(this ref Checker check, ast.Ex
 internal static readonly @string anonymousParameterˢ = "anonymous parameter"u8;
 internal static readonly @string listContainsBothNamedAndˢ = "list contains both named and anonymous parameters"u8;
 
-// collectParams collects (but does not declare) all parameters of list and returns
-// the list of parameter names, corresponding parameter variables, and whether the
-// parameter list is variadic. Anonymous parameters are recorded with nil names.
-internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variadic) collectParams(this ж<Checker> Ꮡcheck, ж<ast.FieldList> Ꮡlist, bool variadicOk) {
+// collectParams collects (but does not declare) all parameter/result
+// variables of list and returns the list of names and corresponding
+// variables, and whether the (parameter) list is variadic.
+// Anonymous parameters are recorded with nil names.
+internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variadic) collectParams(this ж<Checker> Ꮡcheck, VarKind kind, ж<ast.FieldList> Ꮡlist) {
     slice<ж<ast.Ident>> names = default!;
     slice<ж<Var>> @params = default!;
     bool variadic = default!;
@@ -438,10 +484,10 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
         {
             var (t, _) = ftype._<ж<ast.Ellipsis>>(ᐧ); if (t != nil) {
                 ftype = t.Value.Elt;
-                if (variadicOk && i == len(list.List) - 1 && len((~field).Names) <= 1){
+                if (kind == ParamVar && i == len(list.List) - 1 && len((~field).Names) <= 1){
                     variadic = true;
                 } else {
-                    Ꮡcheck.softErrorf(new ast_Ellipsisжpositioner(t), MisplacedDotDotDot, "can only use ... with final parameter in list"u8);
+                    Ꮡcheck.softErrorf(new ast_Ellipsisжpositioner(t), InvalidSyntaxTree, "invalid use of ..."u8);
                     // ignore ... and continue
                 }
             }
@@ -456,7 +502,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
                     Ꮡcheck.error(new ast_Identжpositioner(name), InvalidSyntaxTree, anonymousParameterˢ);
                     // ok to continue
                 }
-                var par = NewParam(name.Pos(), check.pkg, (~name).Name, typ);
+                var par = newVar(kind, name.Pos(), check.pkg, (~name).Name, typ);
                 // named parameter is declared by caller
                 names = append(names, name);
                 @params = append(@params, par);
@@ -464,7 +510,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
             named = true;
         } else {
             // anonymous parameter
-            var par = NewParam(ftype.Pos(), check.pkg, ""u8, typ);
+            var par = newVar(kind, ftype.Pos(), check.pkg, ""u8, typ);
             check.recordImplicit(new ast.FieldжNode(field), new VarжObject(par));
             names = append(names, (ж<ast.Ident>)(nil));
             @params = append(@params, par);
@@ -526,8 +572,8 @@ internal static void validRecv(this ж<Checker> Ꮡcheck, positioner pos, ж<Var
             break;
         }
         @string cause = default!;
-        var switchᴛ13 = T.under();
-        switch (switchᴛ13.type()) {
+        var switchᴛ12 = T.Underlying();
+        switch (switchᴛ12.type()) {
         case ж<Basic> u: {
             // unsafe.Pointer is treated like a regular pointer
             if ((~u).kind == UnsafePointer) {
@@ -537,7 +583,7 @@ internal static void validRecv(this ж<Checker> Ꮡcheck, positioner pos, ж<Var
         }
         case ж<Pointer> _:
         case ж<Interface> _: {
-            var u = switchᴛ13;
+            var u = switchᴛ12;
             cause = pointerOrInterfaceTypeˢ;
             break;
         }

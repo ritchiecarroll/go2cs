@@ -74,7 +74,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     {
-        var (m, okΔ1) = reflect.Zero(t).Interface()._<Generator>(ᐧ); if (okΔ1) {
+        var (m, okΔ1) = reflect.TypeAssert<Generator>(reflect.Zero(t)); if (okΔ1) {
             return (m.Generate(Ꮡrand, size), true);
         }
     }

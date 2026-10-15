@@ -62,7 +62,7 @@ using static go.@internal.xcoff_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEeYAaKCgpSCgoKUgqyygoKClKiShpaSgIK2gpSkpKaCgIKkgIK2goKmlKaCgrjKgIK2goCCtoKUgoKUpoKClIKAgqSUgoKCgILKkoCCpIKmgpSClIKCuqyygoKm", "104-106:1")]
+[assembly: go.GoPositionMap("internal/xcoff/ar.go", "ar.cs", "AEiYAaKCgpSCgoKUgqyygoKClKiShpaSgIK2gpSkpKaCgIKkgIK2goKmlKaCgrjKgIK2goCCtoKUgoKUpoKClIKAgqSUgoKCgILKkoCCpIKmgpSClIKCuqyygoKm", "104-106:1")]
 [assembly: go.GoPositionMap("internal/xcoff/file.go", "file.cs", "AFmyAZKCgpSCgoKUgqyygoKClK7CgoKmqqKCgqaqooKUqJKClKiShJKAgqSCpoKmgIKkgoKCgoKUgoCCpIKCgoKkgoCCpIKCgoKmgriCgIKmkoCCpIKCgpS4gIKkgoKUgoKCgpSCgIKkgoKCgoKCpIKAgqSCgoKCgoKUgoKUgoKotoCCpIKCgpKClIKAgqSCgoKCgoKClIKCgsiCgIKkgoKCgoKCgqaCpoKmgpSClKbcgpSCgIKkpIKAgqTKgoCCtoKClIKAgqSCgqSCgIKkgoKUgoKCgILsgoKUgpSCgpSCgIKkgoKUgoCCpIKCgpSClIK4goCCpIKCgoKClIK4uAAICoKokoKCgpSokoKCgIKCgoKCgpS2pqaIsoKCgoKCgpS4gqrUgIKkgoKClIKAgqSCgqSCgIKkgoK4gIKkgoCCtpSCgoKCgoKCgoKCgoKClJSmrsKCgqaAgqSCgoKClIKAgqSCgoKkgoCCpIKCgriAgqSCgILIgoK4gIKkgoKCgoKUgoCCpIKUgoKUgoKCpqSCgIKkgpSCgpSUgoKClKassoKClII=")]
 // </GoSourcePositionMaps>
 
@@ -128,7 +128,7 @@ public static partial class xcoff_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsaferio() => builtin.initPackage(typeof(go.@internal.saferio_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
 }

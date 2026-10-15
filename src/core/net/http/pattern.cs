@@ -436,14 +436,6 @@ internal static relationship inverseRelationship(relationship r) {
     }
 }
 
-// isLitOrSingle reports whether the segment is a non-dollar literal or a single wildcard.
-internal static bool isLitOrSingle(segment seg) {
-    if (seg.wild) {
-        return !seg.multi;
-    }
-    return seg.s != "/"u8;
-}
-
 // describeConflict returns an explanation of why two patterns conflict.
 internal static @string describeConflict(ж<pattern> Ꮡp1, ж<pattern> Ꮡp2) {
     ref var p1 = ref Ꮡp1.DerefOrNull();

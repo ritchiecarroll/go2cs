@@ -15,6 +15,10 @@ partial struct mOS {
     internal pthreadmutex mutex;
     internal pthreadcond cond;
     internal nint count;
+    // address of errno variable for this thread.
+    // This is an optimization to avoid calling libc_error
+    // on every syscall_rawsyscalln.
+    internal ж<int32> errnoAddr;
 }
 
 internal static void unimplemented(@string name) {
@@ -168,7 +172,7 @@ internal static void sigNoteSleep(ж<note> _) {
 internal static void osinit() {
     // pthread_create delayed until end of goenvs so that we
     // can look at the environment first.
-    ncpu = getncpu();
+    numCPUStartup = getCPUCount();
     physPageSize = getPageSize();
 
     osinit_hack();
@@ -183,16 +187,28 @@ internal static (int32, int32) sysctlbynameInt32(slice<byte> name) {
     return (ret, @out);
 }
 
-//go:linkname internal_cpu_getsysctlbyname internal/cpu.getsysctlbyname
-internal static (int32, int32) internal_cpu_getsysctlbyname(slice<byte> name) {
+internal static int32 sysctlbynameBytes(slice<byte> name, slice<byte> @out) {
+    ref var nout = ref heap<uintptr>(out var Ꮡnout);
+    nout = (uintptr)len(@out);
+    var ret = sysctlbyname(Ꮡ(name, 0), Ꮡ(@out, 0), Ꮡnout, nil, 0);
+    return ret;
+}
+
+//go:linkname internal_cpu_sysctlbynameInt32 internal/cpu.sysctlbynameInt32
+internal static (int32, int32) internal_cpu_sysctlbynameInt32(slice<byte> name) {
     return sysctlbynameInt32(name);
+}
+
+//go:linkname internal_cpu_sysctlbynameBytes internal/cpu.sysctlbynameBytes
+internal static int32 internal_cpu_sysctlbynameBytes(slice<byte> name, slice<byte> @out) {
+    return sysctlbynameBytes(name, @out);
 }
 
 internal static UntypedInt _CTL_HW => 6;
 internal static UntypedInt _HW_NCPU => 3;
 internal static UntypedInt _HW_PAGESIZE => 7;
 
-internal static int32 getncpu() {
+internal static int32 getCPUCount() {
     // Use sysctl to fetch hw.ncpu.
     ref var mib = ref heap<array<uint32>>(out var Ꮡmib);
     mib = new uint32[]{_CTL_HW, _HW_NCPU}.array();
@@ -364,6 +380,7 @@ internal static void minit() {
     }
     minitSignalMask();
     getg().Value.m.Value.procid = (uint64)(uintptr)pthread_self();
+    libc_error_addr((~getg()).m.of(m.ᏑerrnoAddr));
 }
 
 // Called from dropm to undo the effect of an minit.
@@ -382,6 +399,7 @@ internal static void unminit() {
 // resources in minit, semacreate, or elsewhere. Do not take locks after calling this.
 //
 // This always runs without a P, so //go:nowritebarrierrec is required.
+//
 //go:nowritebarrierrec
 internal static void mdestroy(ref m mp) {
 }
@@ -483,7 +501,7 @@ internal static bool validSIGPROF(ref m mp, ref sigctxt c) {
 }
 
 //go:linkname executablePath os.executablePath
-public static @string executablePath;
+internal static @string executablePath { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, "go.os_package", "os")] get => global::go.LinknameVar<@string>.Get("go.os_package, os", "executablePath"); set => global::go.LinknameVar<@string>.Set("go.os_package, os", "executablePath", value); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string executablePathˢ = "executable_path="u8;

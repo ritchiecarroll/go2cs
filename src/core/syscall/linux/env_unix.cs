@@ -10,10 +10,6 @@ using Δsync = sync_package;
 
 partial class syscall_package {
 
-// envOnce guards initialization by copyenv, which populates env.
-internal static ж<Δsync.Once> ᏑenvOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once envOnce => ref ᏑenvOnce.Value;
-
 // envLock guards env and envs.
 internal static ж<Δsync.RWMutex> ᏑenvLock = new StandardBox<Δsync.RWMutex>(default(Δsync.RWMutex));
 internal static ref Δsync.RWMutex envLock => ref ᏑenvLock.Value;
@@ -31,7 +27,7 @@ internal static slice<@string> envs = runtime_envs();
 }
 
 // in package runtime
-internal static void copyenv() {
+internal static Action copyenv = Δsync.OnceFunc(() => {
     env = new map<@string, nint>();
     foreach (var (i, s) in envs) {
         for (nint j = 0; j < len(s); j++) {
@@ -52,12 +48,12 @@ internal static void copyenv() {
             }
         }
     }
-}
+});
 
 public static error Unsetenv(@string key) {
     GoFrame ᒐ = default;
     try {
-        ᏑenvOnce.Do(copyenv);
+        copyenv();
 
         ᏑenvLock.Lock();
         defer(ᏑenvLock.Unlock, ref ᒐ);
@@ -80,7 +76,7 @@ public static (@string value, bool found) Getenv(@string key) {
     bool found = default!;
     GoFrame ᒐ = default;
     try {
-        ᏑenvOnce.Do(copyenv);
+        copyenv();
         if (len(key) == 0) {
             (value, found) = ("", false); goto ᒐdone;
         }
@@ -108,7 +104,7 @@ public static (@string value, bool found) Getenv(@string key) {
 public static error Setenv(@string key, @string value) {
     GoFrame ᒐ = default;
     try {
-        ᏑenvOnce.Do(copyenv);
+        copyenv();
         if (len(key) == 0) {
             return EINVAL;
         }
@@ -148,14 +144,13 @@ public static error Setenv(@string key, @string value) {
 public static void Clearenv() {
     GoFrame ᒐ = default;
     try {
-        ᏑenvOnce.Do(copyenv);
+        copyenv();
 
         ᏑenvLock.Lock();
         defer(ᏑenvLock.Unlock, ref ᒐ);
 
-        foreach (var (k, _) in env) {
-            runtimeUnsetenv(k);
-        }
+        runtimeClearenv(env);
+
         env = new map<@string, nint>();
         envs = new @string[]{}.slice();
     }
@@ -166,7 +161,7 @@ public static void Clearenv() {
 public static slice<@string> Environ() {
     GoFrame ᒐ = default;
     try {
-        ᏑenvOnce.Do(copyenv);
+        copyenv();
         ᏑenvLock.RLock();
         defer(ᏑenvLock.RUnlock, ref ᒐ);
         var a = new slice<@string>(0, len(envs));

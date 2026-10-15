@@ -55,7 +55,7 @@ public static BlockMode NewCBCEncrypter(Block b, slice<byte> iv) {
             return new aes_CBCEncrypterжBlockMode(aes.NewCBCEncrypter(bΔ1, new array<byte>(iv, 16)));
         }
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CBC with non-AES ciphers is not allowed in FIPS 140-only mode");
     }
     {
@@ -142,7 +142,7 @@ public static BlockMode NewCBCDecrypter(Block b, slice<byte> iv) {
             return new aes_CBCDecrypterжBlockMode(aes.NewCBCDecrypter(bΔ1, new array<byte>(iv, 16)));
         }
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CBC with non-AES ciphers is not allowed in FIPS 140-only mode");
     }
     {

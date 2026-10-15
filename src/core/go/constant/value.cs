@@ -1415,7 +1415,15 @@ internal static (Value, Value) match0(Value x, Value y) {
         break;
     }
     case complexVal: {
-        return (vtoc(x), y);
+        switch (x.type()) {
+        case int64Val _:
+        case intVal _:
+        case ratVal _:
+        case floatVal _: {
+            var x1 = x;
+            return (vtoc(x1), y);
+        }}
+        break;
     }}
 
     // force unknown and invalid values into "x position" in callers of match

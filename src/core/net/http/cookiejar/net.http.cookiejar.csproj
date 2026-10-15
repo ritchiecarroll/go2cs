@@ -173,6 +173,7 @@
     <ProjectReference Include="$(go2csPath)core/net/http/internal/ascii/net.http.internal.ascii.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/net.http.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/net.csproj" />
+    <ProjectReference Include="$(go2csPath)core/net/netip/net.netip.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/url/net.url.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />

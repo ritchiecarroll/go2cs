@@ -56,7 +56,7 @@ using static go.@internal.zstd_package;
 [assembly: go.GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABQuAAsCgqaClIKClIKUgoKUlIKmgoKmgoKmgoLcgoKCgpSCgoKmgoKUlIKmgpSUgoKUgoKCpoKClJSCpoKmqIKClIKCgoLcgoKCgpSCgqaCpoKCpoLKgoKUgoKUgpSCgpSC3IKCgoKmgoKUgoKCgpSm")]
 [assembly: go.GoPositionMap("internal/zstd/literals.go", "literals.cs", "AAoc0oK4gpSClAAIDKKUgpS0gpSCtIKUguyCppSClIKmgpSCgoK46sKqlIKUgoKCgpTGgpSCgoK0gpSCgoLsgqaCgqaCqIKmgoKUlIKUgriC7oKClKaCptjWgoKmgoKUgoKmgoKCgqbq5oKUgtyCgqaCgoKUgoKUlIKClIKUgpSCypKCppKCppKCppKCpoKCgpSUlIKClIKUkoKUgqaCgqaCgqaCgqaCgoKUgoKmgoKUgoKUgoKm", "289-295:1")]
 [assembly: go.GoPositionMap("internal/zstd/window.go", "window.cs", "ABQqkoKClIKCqJKokoKUgqaCgoKCuIKCgoKUpoKUgs6igoKUgoKClIKCpoKClA==")]
-[assembly: go.GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "ABo8oqaClIKmgpSClKiSlIKCgqaCgoKCgoKCpoKCgoKCpoKCupKCgpSIgoKCppSCgoKCgoKCgpSCgoKClIKCgoKmgoKCgpSokoKCgqiSgoKC", "", "", "89=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
+[assembly: go.GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "ABo8oqaClIKmgpSCqJKUgoKCpoKCgoKCgoKmgoKCgoKmgoK6koKClIiCgoKmlIKCgoKCgoKClIKCgoKUgoKCgqaCgoKClKiSgoKCqJKCgoI=", "", "", "87=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
 [assembly: go.GoPositionMap("internal/zstd/zstd.go", "zstd.cs", "AEawAZKCgqqiuIKCgoKCgoIADyKygIKkgoKosoCCpIKCqLKCgIKklKiygoCCtgAICJKCpoCUgpS2gIKUgoCCpIKmtqaAgqSUlIKCpoKClKaCpoKCuIKAgraUlICCuqKUgoKCgoKCpoLKgpSCgtyCgoKUtLS0tLTsgqiSgqaUgoKmgoKCgoKCgpSokpSAgraUgoKCpoCCpoKClIKClIKCuIKClIK2goKClIIACAiypoCCtpSUgoLKgriUgoCCpIK0goCCpIKCgpS0goCCpLSmgoKUpoKmgpSCpoKAgraCgoKmlKaqooKClAAIEoKmgqaCpoKClKaCpoKClA==")]
 // </GoSourcePositionMaps>
 

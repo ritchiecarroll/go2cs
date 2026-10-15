@@ -1188,7 +1188,7 @@ public static void SetConnMaxLifetime(this ж<DB> Ꮡdb, time.Duration d) {
     }
     db.mu.Lock();
     // Wake cleaner up when lifetime is shortened.
-    if (d > 0 && d < db.maxLifetime && db.cleanerCh != default!) {
+    if (d > 0 && d < db.shortestIdleTimeLocked() && db.cleanerCh != default!) {
         var selᴛ7 = db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
         switch (trySelect(selᴛ7)) {
         case 0: {
@@ -1221,7 +1221,7 @@ public static void SetConnMaxIdleTime(this ж<DB> Ꮡdb, time.Duration d) {
         ᒐd1 = true;
 
         // Wake cleaner up when idle time is shortened.
-        if (d > 0 && d < db.maxIdleTime && db.cleanerCh != default!) {
+        if (d > 0 && d < db.shortestIdleTimeLocked() && db.cleanerCh != default!) {
             var selᴛ8 = db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
             switch (trySelect(selᴛ8)) {
             case 0: {

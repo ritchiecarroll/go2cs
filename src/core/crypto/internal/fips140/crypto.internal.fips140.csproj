@@ -162,7 +162,6 @@
 
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/godebug/crypto.internal.fips140deps.godebug.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />

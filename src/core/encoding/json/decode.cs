@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 // Represents JSON data structure using native Go types: booleans, floats,
 // strings, arrays, and maps.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using encoding = encoding_package;
@@ -41,11 +42,14 @@ partial class json_package {
 // and the input is a JSON quoted string, Unmarshal calls
 // [encoding.TextUnmarshaler.UnmarshalText] with the unquoted form of the string.
 //
-// To unmarshal JSON into a struct, Unmarshal matches incoming object
-// keys to the keys used by [Marshal] (either the struct field name or its tag),
-// preferring an exact match but also accepting a case-insensitive match. By
-// default, object keys which don't have a corresponding struct field are
-// ignored (see [Decoder.DisallowUnknownFields] for an alternative).
+// To unmarshal JSON into a struct, Unmarshal matches incoming object keys to
+// the keys used by [Marshal] (either the struct field name or its tag),
+// ignoring case. If multiple struct fields match an object key, an exact case
+// match is preferred over a case-insensitive one.
+//
+// Incoming object members are processed in the order observed. If an object
+// includes duplicate keys, later duplicates will replace or be merged into
+// prior values.
 //
 // To unmarshal JSON into an interface value,
 // Unmarshal stores one of these in the interface value:
@@ -528,13 +532,13 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflectꓸValue) indirec
         }
         if (v.Type().NumMethod() > 0 && v.CanInterface()) {
             {
-                var (u, ok) = v.Interface()._<Unmarshaler>(ᐧ); if (ok) {
+                var (u, ok) = reflect.TypeAssert<Unmarshaler>(v); if (ok) {
                     return (u, default!, new reflectꓸValue(nil));
                 }
             }
             if (!decodingNull) {
                 {
-                    var (u, ok) = v.Interface()._<encoding.TextUnmarshaler>(ᐧ); if (ok) {
+                    var (u, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(v); if (ok) {
                         return (default!, u, new reflectꓸValue(nil));
                     }
                 }
@@ -1337,15 +1341,6 @@ internal static (@string t, bool ok) unquote(slice<byte> s) {
     return (t, ok);
 }
 
-// unquoteBytes should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/bytedance/sonic
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname unquoteBytes
 internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
     slice<byte> t = default!;
     bool ok = default!;
@@ -1363,10 +1358,6 @@ internal static (slice<byte> t, bool ok) unquoteBytes(slice<byte> s) {
         var c = s[r];
         if (c == (rune)'\\' || c == (rune)'"' || c < (rune)' ') {
             break;
-        }
-        if (c < utf8.RuneSelf) {
-            r++;
-            continue;
         }
         var (rr, size) = utf8.DecodeRune(s.slice(r));
         if (rr == utf8.RuneError && size == 1) {

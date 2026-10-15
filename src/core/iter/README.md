@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-28_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/iter.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/iter@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/iter) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/iter)
+[![Tests](https://img.shields.io/badge/Tests-28_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/iter.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/iter@go1.26.9)\
+[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/iter) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/iter)
 
 From C#, call this package through the static class go.iter_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -22,7 +22,9 @@ Seq2 represents a sequence of paired values, conventionally key-value or index-v
 
 Yield returns true if the iterator should continue with the next element in the sequence, false if it should stop.
 
-For instance, [maps.Keys](https://pkg.go.dev/maps@go1.24.13#Keys) returns an iterator that produces the sequence of keys of the map m, implemented as follows:
+Yield panics if called after it returns false.
+
+For instance, [maps.Keys](https://pkg.go.dev/maps@go1.26.9#Keys) returns an iterator that produces the sequence of keys of the map m, implemented as follows:
 
 	func Keys[Map ~map[K]V, K comparable, V any](m Map) iter.Seq[K] {
 		return func(yield func(K) bool) {
@@ -128,7 +130,7 @@ If clients do not consume the sequence to completion, they must call stop, which
 
 ### Standard Library Usage
 
-A few packages in the standard library provide iterator-based APIs, most notably the [maps](https://pkg.go.dev/maps@go1.24.13) and [slices](https://pkg.go.dev/slices@go1.24.13) packages. For example, [maps.Keys](https://pkg.go.dev/maps@go1.24.13#Keys) returns an iterator over the keys of a map, while [slices.Sorted](https://pkg.go.dev/slices@go1.24.13#Sorted) collects the values of an iterator into a slice, sorts them, and returns the slice, so to iterate over the sorted keys of a map:
+A few packages in the standard library provide iterator-based APIs, most notably the [maps](https://pkg.go.dev/maps@go1.26.9) and [slices](https://pkg.go.dev/slices@go1.26.9) packages. For example, [maps.Keys](https://pkg.go.dev/maps@go1.26.9#Keys) returns an iterator over the keys of a map, while [slices.Sorted](https://pkg.go.dev/slices@go1.26.9#Sorted) collects the values of an iterator into a slice, sorts them, and returns the slice, so to iterate over the sorted keys of a map:
 
 	for _, key := range slices.Sorted(maps.Keys(m)) {
 		...
@@ -141,13 +143,13 @@ Iterators provide only the values of the sequence, not any direct way to modify 
 For example, a tree implementation might provide:
 
 	// Positions returns an iterator over positions in the sequence.
-	func (t *Tree[V]) Positions() iter.Seq[*Pos]
+	func (t *Tree[V]) Positions() iter.Seq[*Pos[V]]
 
 	// A Pos represents a position in the sequence.
 	// It is only valid during the yield call it is passed to.
 	type Pos[V any] struct { ... }
 
-	// Pos returns the value at the cursor.
+	// Value returns the value at the cursor.
 	func (p *Pos[V]) Value() V
 
 	// Delete deletes the value at this point in the iteration.

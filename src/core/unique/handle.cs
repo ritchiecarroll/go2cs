@@ -5,11 +5,9 @@ namespace go;
 
 using abi = @internal.abi_package;
 using isync = @internal.sync_package;
-using runtime = runtime_package;
-using Δsync = sync_package;
 using @unsafe = unsafe_package;
-using weak = weak_package;
 using @internal;
+using Δsync = @internal.sync_package;
 
 partial class unique_package {
 
@@ -42,49 +40,17 @@ public static Handle<T> Make<T>(T value) {
     }
     var (ma, ok) = ᏑuniqueMaps.Load(typ);
     if (!ok) {
-        // This is a good time to initialize cleanup, since we must go through
-        // this path on the first use of Make, and it's not on the hot path.
-        ᏑsetupMake.Do(registerCleanup);
-        ma = addUniqueMap<T>(typ).OrTypedNil();
+        var mΔ1 = Ꮡ(new uniqueMap<T>(canonMap: newCanonMap<T>(), cloneSeq: makeCloneSeq(typ)));
+        (ma, _) = ᏑuniqueMaps.LoadOrStore(typ, mΔ1.OrTypedNil());
     }
     var m = ma._<ж<uniqueMap<T>>>();
 
-    // Keep around any values we allocate for insertion. There
-    // are a few different ways we can race with other threads
-    // and create values that we might discard. By keeping
-    // the first one we make around, we can avoid generating
-    // more than one per racing thread.
-    ref var toInsert = ref heap<ж<T>>(out var ᏑtoInsert);  // Keep this around to keep it alive.
-    ref var toInsertWeak = ref heap(new weak.Pointer<T>(), out var ᏑtoInsertWeak);
-    var mʗ1 = m;
-    (T, weak.Pointer<T>) newValue() {
-        if (ᏑtoInsert.ValueSlot == nil) {
-            ᏑtoInsert.ValueSlot = @new<T>();
-            ᏑtoInsert.ValueSlot.ValueSlot = clone(value, mʗ1.of(uniqueMap<T>.ᏑcloneSeq));
-            ᏑtoInsertWeak.Value = weak.Make<T>(ᏑtoInsert.ValueSlot);
-        }
-        return (ᏑtoInsert.ValueSlot.ValueSlot, ᏑtoInsertWeak.Value);
+    // Find the value in the map.
+    var ptr = m.Load(value);
+    if (ptr == nil) {
+        // Insert a new value into the map.
+        ptr = m.LoadOrStore(clone(value, m.of(uniqueMap<T>.ᏑcloneSeq)));
     }
-    ж<T> ptr = default!;
-    while (ᐧ) {
-        // Check the map.
-        var (wp, okΔ1) = m.of(uniqueMap<T>.ᏑHashTrieMap).Load(value);
-        if (!okΔ1) {
-            // Try to insert a new value into the map.
-            var (k, v) = newValue();
-            (wp, _) = m.of(uniqueMap<T>.ᏑHashTrieMap).LoadOrStore(k, v);
-        }
-        // Now that we're sure there's a value in the map, let's
-        // try to get the pointer we need out of it.
-        ptr = wp.Value();
-        if (ptr != nil) {
-            break;
-        }
-        // The weak pointer is nil, so the old value is truly dead.
-        // Try to remove it and start over.
-        m.of(uniqueMap<T>.ᏑHashTrieMap).CompareAndDelete(value, wp);
-    }
-    runtime.KeepAlive(toInsert.OrTypedNil());
     return new Handle<T>(ptr);
 }
 
@@ -100,88 +66,9 @@ public static Handle<T> Make<T>(T value) {
 internal static ж<isync.HashTrieMap<ж<abi.Type>, any>> ᏑuniqueMaps = new StandardBox<isync.HashTrieMap<ж<abi.Type>, any>>(default(isync.HashTrieMap<ж<abi.Type>, any>));
 internal static ref isync.HashTrieMap<ж<abi.Type>, any> uniqueMaps => ref ᏑuniqueMaps.Value;                                            // any is always a *uniqueMap[T].
 
-// cleanupFuncs are functions that clean up dead weak pointers in type-specific
-// maps in uniqueMaps. We express cleanup this way because there's no way to iterate
-// over the sync.Map and call functions on the type-specific data structures otherwise.
-// These cleanup funcs each close over one of these type-specific maps.
-//
-// cleanupMu protects cleanupNotify and is held across the entire cleanup. Used for testing.
-// cleanupNotify is a test-only mechanism that allow tests to wait for the cleanup to run.
-internal static ж<Δsync.Mutex> ᏑcleanupMu = new StandardBox<Δsync.Mutex>(default(Δsync.Mutex));
-internal static ref Δsync.Mutex cleanupMu => ref ᏑcleanupMu.Value;
-internal static ж<Δsync.Mutex> ᏑcleanupFuncsMu = new StandardBox<Δsync.Mutex>(default(Δsync.Mutex));
-internal static ref Δsync.Mutex cleanupFuncsMu => ref ᏑcleanupFuncsMu.Value;
-internal static slice<Action> cleanupFuncs;
-internal static slice<Action> cleanupNotify; // One-time notifications when cleanups finish.
-
 partial struct uniqueMap<T> {
-    public partial ref @internal.sync_package.HashTrieMap<T, weak_package.Pointer<T>> HashTrieMap { get; }
+    internal partial ref ж<canonMap<T>> canonMap { get; }
     internal partial ref cloneSeq cloneSeq { get; }
-}
-
-internal static ж<uniqueMap<T>> addUniqueMap<T>(ж<abi.Type> Ꮡtyp) {
-    // Create a map for T and try to register it. We could
-    // race with someone else, but that's fine; it's one
-    // small, stray allocation. The number of allocations
-    // this can create is bounded by a small constant.
-    var m = Ꮡ(new uniqueMap<T>(cloneSeq: makeCloneSeq(Ꮡtyp)));
-    var (a, loaded) = ᏑuniqueMaps.LoadOrStore(Ꮡtyp, m.OrTypedNil());
-    if (!loaded) {
-        // Add a cleanup function for the new map.
-        ᏑcleanupFuncsMu.Lock();
-        var mʗ1 = m;
-        cleanupFuncs = append(cleanupFuncs, () => {
-            // Delete all the entries whose weak references are nil and clean up
-            // deleted entries.
-            var mʗ2 = mʗ1;
-            mʗ1.of(uniqueMap<T>.ᏑHashTrieMap).All()((T key, weak.Pointer<T> wp) => {
-                if (wp.Value() == nil) {
-                    mʗ2.of(uniqueMap<T>.ᏑHashTrieMap).CompareAndDelete(key, wp);
-                }
-                return true;
-            });
-        });
-        ᏑcleanupFuncsMu.Unlock();
-    }
-    return a._<ж<uniqueMap<T>>>();
-}
-
-// setupMake is used to perform initial setup for unique.Make.
-internal static ж<Δsync.Once> ᏑsetupMake = new StandardBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once setupMake => ref ᏑsetupMake.Value;
-
-// startBackgroundCleanup sets up a background goroutine to occasionally call cleanupFuncs.
-internal static void registerCleanup() {
-    runtime_registerUniqueMapCleanup(() => {
-        // Lock for cleanup.
-        ᏑcleanupMu.Lock();
-
-        // Grab funcs to run.
-        ᏑcleanupFuncsMu.Lock();
-        var cf = cleanupFuncs;
-        ᏑcleanupFuncsMu.Unlock();
-
-        // Run cleanup.
-        foreach (var (_, f) in cf) {
-            f();
-        }
-
-        // Run cleanup notifications.
-        foreach (var (_, f) in cleanupNotify) {
-            f();
-        }
-        cleanupNotify = default!;
-
-        // Finished.
-        ᏑcleanupMu.Unlock();
-    });
-}
-
-// Implemented in runtime.
-
-//go:linkname runtime_registerUniqueMapCleanup
-/*linkname*/ internal static partial void runtime_registerUniqueMapCleanup(Action cleanup) {
-    runtime.unique_runtime_registerUniqueMapCleanup(cleanup);
 }
 
 } // end unique_package

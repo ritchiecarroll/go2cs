@@ -10,6 +10,7 @@ using filepath = path.filepath_package;
 using strings = strings_package;
 using @internal;
 using go.io;
+using iter = iter_package;
 using path;
 
 partial class exec_package {
@@ -60,24 +61,14 @@ internal static (@string, error) findExecutable(@string @file, slice<@string> ex
     return ("", ErrNotFound);
 }
 
-// LookPath searches for an executable named file in the
-// directories named by the PATH environment variable.
-// LookPath also uses PATHEXT environment variable to match
-// a suitable candidate.
-// If file contains a slash, it is tried directly and the PATH is not consulted.
-// Otherwise, on success, the result is an absolute path.
-//
-// In older versions of Go, LookPath could return a path relative to the current directory.
-// As of Go 1.19, LookPath will instead return that path along with an error satisfying
-// [errors.Is](err, [ErrDot]). See the package documentation for more details.
-public static (@string, error) LookPath(@string @file) {
+internal static (@string, error) lookPath(@string @file) {
     {
         var err = validateLookPath(@file); if (err != default!) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
         }
     }
 
-    return lookPath(@file, pathExt());
+    return lookPathExts(@file, pathExt());
 }
 
 // lookExtensions finds windows executable by its dir and path.
@@ -111,17 +102,17 @@ internal static (@string, error) lookExtensions(@string path, @string dir) {
         }
     }
     if (dir == ""u8) {
-        return lookPath(path, exts);
+        return lookPathExts(path, exts);
     }
     if (filepath.VolumeName(path) != ""u8) {
-        return lookPath(path, exts);
+        return lookPathExts(path, exts);
     }
     if (len(path) > 1 && os.IsPathSeparator(path[0])) {
-        return lookPath(path, exts);
+        return lookPathExts(path, exts);
     }
     @string dirandpath = filepath.Join(dir, path);
     // We assume that LookPath will only add file extension.
-    var (lp, err) = lookPath(dirandpath, exts);
+    var (lp, err) = lookPathExts(dirandpath, exts);
     if (err != default!) {
         return ("", err);
     }
@@ -136,9 +127,7 @@ internal static slice<@string> pathExt() {
     slice<@string> exts = default!;
     @string x = os.Getenv(pathextˢ);
     if (x != ""u8){
-        foreach (var (_, vᴛ1) in strings.Split(strings.ToLower(x), @";"u8)) {
-            var e = vᴛ1;
-
+        foreach (var e in range<@string>(strings.SplitSeq(strings.ToLower(x), @";"u8).Invoke)) {
             if (e == ""u8) {
                 continue;
             }
@@ -156,8 +145,8 @@ internal static slice<@string> pathExt() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string pathˢ = "path"u8;
 
-// lookPath implements LookPath for the given PATHEXT list.
-internal static (@string, error) lookPath(@string @file, slice<@string> exts) {
+// lookPathExts implements LookPath for the given PATHEXT list.
+internal static (@string, error) lookPathExts(@string @file, slice<@string> exts) {
     if (strings.ContainsAny(@file, @":\/"u8)) {
         var (f, err) = findExecutable(@file, exts);
         if (err == default!) {

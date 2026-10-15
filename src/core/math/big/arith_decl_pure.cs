@@ -14,38 +14,20 @@ internal static Word /*c*/ subVV(slice<Word> z, slice<Word> x, slice<Word> y) {
     return subVV_g(z, x, y);
 }
 
-internal static Word /*c*/ addVW(slice<Word> z, slice<Word> x, Word y) {
-    // TODO: remove indirect function call when golang.org/issue/30548 is fixed
-    var fn = addVW_g;
-    if (len(z) > 32) {
-        fn = addVWlarge;
-    }
-    return fn(z, x, y);
+internal static Word /*c*/ lshVU(slice<Word> z, slice<Word> x, nuint s) {
+    return lshVU_g(z, x, s);
 }
 
-internal static Word /*c*/ subVW(slice<Word> z, slice<Word> x, Word y) {
-    // TODO: remove indirect function call when golang.org/issue/30548 is fixed
-    var fn = subVW_g;
-    if (len(z) > 32) {
-        fn = subVWlarge;
-    }
-    return fn(z, x, y);
-}
-
-internal static Word /*c*/ shlVU(slice<Word> z, slice<Word> x, nuint s) {
-    return shlVU_g(z, x, s);
-}
-
-internal static Word /*c*/ shrVU(slice<Word> z, slice<Word> x, nuint s) {
-    return shrVU_g(z, x, s);
+internal static Word /*c*/ rshVU(slice<Word> z, slice<Word> x, nuint s) {
+    return rshVU_g(z, x, s);
 }
 
 internal static Word /*c*/ mulAddVWW(slice<Word> z, slice<Word> x, Word y, Word r) {
     return mulAddVWW_g(z, x, y, r);
 }
 
-internal static Word /*c*/ addMulVVW(slice<Word> z, slice<Word> x, Word y) {
-    return addMulVVW_g(z, x, y);
+internal static Word /*c*/ addMulVVWW(slice<Word> z, slice<Word> x, slice<Word> y, Word m, Word a) {
+    return addMulVVWW_g(z, x, y, m, a);
 }
 
 } // end big_package

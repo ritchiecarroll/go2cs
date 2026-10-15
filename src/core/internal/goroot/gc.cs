@@ -21,12 +21,12 @@ partial class goroot_package {
 private static readonly @string srcˢ = "src"u8;
 
 // IsStandardPackage reports whether path is a standard package,
-// given goroot and compiler.
-public static bool IsStandardPackage(@string goroot, @string compiler, @string path) {
+// given goroot and compiler. readDir accepts OS filesystem paths.
+public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> readDir, @string goroot, @string compiler, @string path) {
     var exprᴛ1 = compiler;
     if (exprᴛ1 == "gc"u8) {
         @string dir = filepath.Join(goroot, srcˢ, path);
-        var (dirents, err) = os.ReadDir(dir);
+        var (dirents, err) = readDir(dir);
         if (err != default!) {
             return false;
         }
@@ -45,7 +45,7 @@ public static bool IsStandardPackage(@string goroot, @string compiler, @string p
     }
 }
 
-// gccgoSearch holds the gccgo search directories.
+// gccgoDirs holds the gccgo search directories.
 partial struct gccgoDirs {
     internal sync.Once once;
     internal slice<@string> dirs;
@@ -96,9 +96,11 @@ internal static void init(this ref gccgoDirs gd) {
     @string prefix = prefixᶜ;
     slice<@string> dirs = default!;
     foreach (var (_, dirEntry) in dirsEntries) {
-        if (strings.HasPrefix(dirEntry, prefix)) {
-            dirs = filepath.SplitList(strings.TrimPrefix(dirEntry, prefix));
-            break;
+        {
+            var (after, ok) = strings.CutPrefix(dirEntry, prefix); if (ok) {
+                dirs = filepath.SplitList(after);
+                break;
+            }
         }
     }
     if (len(dirs) == 0) {

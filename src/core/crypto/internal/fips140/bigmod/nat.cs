@@ -105,7 +105,8 @@ internal static ж<ΔNat> reset(this ж<ΔNat> Ꮡx, nint n) {
         x.limbs = new slice<nuint>(n);
         return Ꮡx;
     }
-    clear(x.limbs);
+    // Clear both the returned limbs and the previously used ones.
+    clear(x.limbs.slice(0, max(n, len(x.limbs))));
     x.limbs = x.limbs.slice(0, n);
     return Ꮡx;
 }
@@ -1194,7 +1195,7 @@ public static (ж<ΔNat>, error) GCDVarTime(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa,
 internal static readonly @string extendedGCDAOrMIsZeroˢ = "extendedGCD: a or m is zero"u8;
 internal static readonly @string extendedGCDBothAAndMAreˢ = "extendedGCD: both a and m are even"u8;
 
-// extendedGCD computes u and A such that a = GCD(a, m) and u = A*a - B*m.
+// extendedGCD computes u and A such that u = GCD(a, m) = A*a - B*m.
 //
 // u will have the size of the larger of a and m, and A will have the size of m.
 //

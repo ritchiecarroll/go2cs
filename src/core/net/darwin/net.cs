@@ -325,6 +325,9 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
 // The returned os.File's file descriptor is different from the connection's.
 // Attempting to change properties of the original using this duplicate
 // may or may not have the desired effect.
+//
+// On Windows, the returned os.File's file descriptor is not usable
+// on other processes.
 internal static (ж<os.File> f, error err) File(this ref conn c) {
     ж<os.File> f = default!;
     error err = default!;
@@ -905,13 +908,13 @@ internal static error acquireThread(context.Context ctx) {
     ᏑthreadOnce.Do(() => {
         threadLimit = new channel<EmptyStruct>(concurrentThreadsLimit());
     });
-    var selᴛ18 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-    var selᴛ19 = ctx.Done();
-    switch (select(selᴛ18, ᐸꟷ(selᴛ19, ꓸꓸꓸ))) {
+    var selᴛ16 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
+    var selᴛ17 = ctx.Done();
+    switch (select(selᴛ16, ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
     case 0: {
         return default!;
     }
-    case 1 when selᴛ19.ꟷᐳ(out _): {
+    case 1 when selᴛ17.ꟷᐳ(out _): {
         return ctx.Err();
     }}
     return default!;

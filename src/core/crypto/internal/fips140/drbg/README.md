@@ -2,10 +2,12 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/internal/fips140/drbg@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/internal/fips140/drbg) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/crypto/internal/fips140/drbg)
+[![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/crypto/internal/fips140/drbg@go1.26.9)\
+[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/crypto/internal/fips140/drbg) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/crypto/internal/fips140/drbg)
 
 From C#, call this package through the static class go.crypto.@internal.fips140.drbg_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
+Package drbg provides cryptographically secure random bytes usable by FIPS code. In FIPS mode it uses an SP 800-90A Rev. 1 Deterministic Random Bit Generator (DRBG). Otherwise, it uses the operating system's random number generator.
 
 ---
 

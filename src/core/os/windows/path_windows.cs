@@ -20,6 +20,57 @@ public static bool IsPathSeparator(uint8 c) {
     return c == (rune)'\\' || c == (rune)'/';
 }
 
+// splitPath returns the base name and parent directory.
+internal static (@string, @string) splitPath(@string path) {
+    if (path == ""u8) {
+        return (".", ".");
+    }
+
+    // The first prefixlen bytes are part of the parent directory.
+    // The prefix consists of the volume name (if any) and the first \ (if significant).
+    nint prefixlen = filepathlite.VolumeNameLen(path);
+    if (len(path) > prefixlen && IsPathSeparator(path[prefixlen])) {
+        if (prefixlen == 0){
+            // This is a path relative to the current volume, like \foo.
+            // Include the initial \ in the prefix.
+            prefixlen = 1;
+        } else 
+        if (path[prefixlen - 1] == (rune)':') {
+            // This is an absolute path on a named drive, like c:\foo.
+            // Include the initial \ in the prefix.
+            prefixlen++;
+        }
+    }
+
+    nint i = len(path) - 1;
+
+    // Remove trailing slashes.
+    while (i >= prefixlen && IsPathSeparator(path[i])) {
+        i--;
+    }
+    path = path.slice(0, i + 1);
+
+    // Find the last path separator. The basename is what follows.
+    while (i >= prefixlen && !IsPathSeparator(path[i])) {
+        i--;
+    }
+    @string basename = path.slice(i + 1);
+    if (basename == ""u8) {
+        basename = "."u8;
+    }
+
+    // Remove trailing slashes. The remainder is dirname.
+    while (i >= prefixlen && IsPathSeparator(path[i])) {
+        i--;
+    }
+    @string dirname = path.slice(0, i + 1);
+    if (dirname == ""u8) {
+        dirname = "."u8;
+    }
+
+    return (dirname, basename);
+}
+
 internal static @string dirname(@string path) {
     @string vol = filepathlite.VolumeName(path);
     nint i = len(path) - 1;

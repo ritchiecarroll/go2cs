@@ -5,8 +5,8 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -66,7 +66,7 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     foreach (var (_, m) in methods) {
         {
             var sig = (~m).typ._<ж<ΔSignature>>(); if ((~sig).recv == nil) {
-                sig.Value.recv = NewVar((~m).pos, (~m).pkg, ""u8, new InterfaceжΔType(typ));
+                sig.Value.recv = newVar(RecvVar, (~m).pos, (~m).pkg, ""u8, new InterfaceжΔType(typ));
             }
         }
     }
@@ -257,7 +257,7 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
                 }
             }
         }
-        sig.Value.recv = NewVar(name.Pos(), check.pkg, ""u8, recvTyp);
+        sig.Value.recv = newVar(RecvVar, name.Pos(), check.pkg, ""u8, recvTyp);
 
         var m = NewFunc(name.Pos(), check.pkg, (~name).Name, sig);
         check.recordDef(name, new FuncжObject(m));

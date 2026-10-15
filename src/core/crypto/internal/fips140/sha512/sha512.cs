@@ -9,6 +9,7 @@ namespace go.crypto.@internal.fips140;
 using fips140 = go.crypto.@internal.fips140_package;
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;
+using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;
 
@@ -208,6 +209,12 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
 
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
     return (b[8..], byteorder.BEUint64(b));
+}
+
+public static (hash.Cloner, error) Clone(this ref Digest d) {
+    ref var r = ref heap<Digest>(out var Ꮡr);
+    r = d.ΔClone();
+    return (new DigestжCloner(Ꮡr), default!);
 }
 
 // New returns a new Digest computing the SHA-512 hash.

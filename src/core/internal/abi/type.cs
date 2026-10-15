@@ -23,7 +23,7 @@ partial struct Type {
     public TFlag TFlag;   // extra type information flags
     public uint8 Align_;   // alignment of variable with this type
     public uint8 FieldAlign_;   // alignment of struct field with this type
-    public ΔKind Kind_;    // enumeration for C
+    public ΔKind Kind_;    // what kind of type this is (string, int, ...)
     // function for comparing objects of this type
     // (ptr to object A, ptr to object B) -> ==?
     public Func<@unsafe.Pointer, @unsafe.Pointer, bool> Equal;
@@ -75,10 +75,6 @@ public static ΔKind ΔString => 24;
 public static ΔKind Struct => 25;
 public static ΔKind UnsafePointer => 26;
 
-// TODO (khr, drchase) why aren't these in TFlag?  Investigate, fix if possible.
-public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
-public static ΔKind KindMask => /* (1 << 5) - 1 */ 31;
-
 // TFlag is used by a Type to signal what extra type information is
 // available in the memory directly following the Type value.
 partial struct TFlag /*num:uint8*/;
@@ -119,6 +115,15 @@ public static TFlag TFlagRegularMemory => /* 1 << 3 */ 8;
 // has type **byte instead of *byte. The runtime will store a
 // pointer to the GC pointer bitmask in *GCData.
 public static TFlag TFlagGCMaskOnDemand => /* 1 << 4 */ 16;
+
+// TFlagDirectIface means that a value of this type is stored directly
+// in the data field of an interface, instead of indirectly.
+// This flag is just a cached computation of Size_ == PtrBytes == goarch.PtrSize.
+public static TFlag TFlagDirectIface => /* 1 << 5 */ 32;
+
+// Leaving this breadcrumb behind for dlv. It should not be used, and no
+// Kind should be big enough to set this bit.
+public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
 
 // NameOff is the offset to a name from moduledata.types.  See resolveNameOff in runtime.
 partial struct NameOff /*num:int32*/;
@@ -171,17 +176,11 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 
 // TypeFor returns the abi.Type for a type parameter.
 public static ж<Type> TypeFor<T>() {
-    T v = GoZero<T>();
-    {
-        var t = TypeOf(v); if (t != nil) {
-            return t; // optimize for T being a non-interface kind
-        }
-    }
-    return TypeOf(((ж<T>)nil)).Elem(); // only for an interface kind
+    return (TypeOf(((ж<T>)nil)).Reinterpret<Type, PtrType>()).Value.Elem;
 }
 
 public static ΔKind Kind(this ref Type t) {
-    return (ΔKind)(t.Kind_ & KindMask);
+    return t.Kind_;
 }
 
 public static bool HasName(this ref Type t) {
@@ -193,14 +192,9 @@ public static bool Pointers(this ref Type t) {
     return t.PtrBytes != 0;
 }
 
-// IfaceIndir reports whether t is stored indirectly in an interface value.
-public static bool IfaceIndir(this ref Type t) {
-    return (ΔKind)(t.Kind_ & KindDirectIface) == 0;
-}
-
-// isDirectIface reports whether t is stored directly in an interface value.
+// IsDirectIface reports whether t is stored directly in an interface value.
 public static bool IsDirectIface(this ref Type t) {
-    return (ΔKind)(t.Kind_ & KindDirectIface) != 0;
+    return (TFlag)(t.TFlag & TFlagDirectIface) != 0;
 }
 
 public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
@@ -332,7 +326,7 @@ internal partial struct Uncommon_uᴛ4 /*dyn*/ {
 }
 
 internal partial struct Uncommon_uᴛ5 /*dyn*/ {
-    internal partial ref mapType mapType { get; }
+    public partial ref ΔMapType MapType { get; }
     internal UncommonType u;
 }
 
@@ -453,7 +447,7 @@ partial struct SliceType {
     public ж<Type> Elem; // slice element type
 }
 
-// funcType represents a function type.
+// FuncType represents a function type.
 //
 // A *Type for each in and out parameter is stored in an array that
 // directly follows the funcType (and possibly its uncommonType). So
@@ -617,7 +611,7 @@ internal static nint writeVarint(slice<byte> buf, nint n) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string nonEmptyStringˢ = "non-empty string"u8;
 
-// Name returns the tag string for n, or empty if there is none.
+// Name returns the name of n, or empty if it does not actually have a name.
 public static @string Name(this ΔName n) {
     if (n.Bytes == nil) {
         return ""u8;

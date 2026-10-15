@@ -14,11 +14,12 @@ internal static void _ᴛ3() {
     _ = x[elementStyle - 2];
     _ = x[elementTextarea - 3];
     _ = x[elementTitle - 4];
+    _ = x[elementMeta - 5];
 }
 
-internal static readonly @string _element_name = "elementNoneelementScriptelementStyleelementTextareaelementTitle"u8;
+internal static readonly @string _element_name = "elementNoneelementScriptelementStyleelementTextareaelementTitleelementMeta"u8;
 
-internal static array<uint8> _element_index = new uint8[]{0, 11, 24, 36, 51, 63}.array();
+internal static array<uint8> _element_index = new uint8[]{0, 11, 24, 36, 51, 63, 74}.array();
 
 internal static @string String(this element i) {
     if (i >= ((element)(uint8)(len(_element_index) - 1))) {

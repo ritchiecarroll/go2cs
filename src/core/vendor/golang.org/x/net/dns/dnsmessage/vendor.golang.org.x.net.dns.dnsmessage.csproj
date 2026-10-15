@@ -161,6 +161,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
+    <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -460,10 +460,6 @@ internal static void popPrefix(this ref printer p) {
     }
 }
 
-internal static reflectꓸType marshalerType = reflect.TypeFor<Marshaler>();
-internal static reflectꓸType marshalerAttrType = reflect.TypeFor<MarshalerAttr>();
-internal static reflectꓸType textMarshalerType = reflect.TypeFor<encoding.TextMarshaler>();
-
 // marshalValue writes one or more XML elements representing val.
 // If val was obtained from a struct field, finfo must have its details.
 internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
@@ -496,24 +492,40 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     var typ = val.Type();
 
     // Check for marshaler.
-    if (val.CanInterface() && typ.Implements(marshalerType)) {
-        return p.marshalInterface(val.Interface()._<Marshaler>(), defaultStart(typ, Ꮡfinfo, ᏑstartTemplate));
+    if (val.CanInterface()) {
+        {
+            var (marshaler, ok) = reflect.TypeAssert<Marshaler>(val); if (ok) {
+                return p.marshalInterface(marshaler, defaultStart(typ, Ꮡfinfo, ᏑstartTemplate));
+            }
+        }
     }
     if (val.CanAddr()) {
         var pv = val.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(marshalerType)) {
-            return p.marshalInterface(pv.Interface()._<Marshaler>(), defaultStart(pv.Type(), Ꮡfinfo, ᏑstartTemplate));
+        if (pv.CanInterface()) {
+            {
+                var (marshaler, ok) = reflect.TypeAssert<Marshaler>(pv); if (ok) {
+                    return p.marshalInterface(marshaler, defaultStart(pv.Type(), Ꮡfinfo, ᏑstartTemplate));
+                }
+            }
         }
     }
 
     // Check for text marshaler.
-    if (val.CanInterface() && typ.Implements(textMarshalerType)) {
-        return Ꮡp.marshalTextInterface(val.Interface()._<encoding.TextMarshaler>(), defaultStart(typ, Ꮡfinfo, ᏑstartTemplate));
+    if (val.CanInterface()) {
+        {
+            var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(val); if (ok) {
+                return Ꮡp.marshalTextInterface(textMarshaler, defaultStart(typ, Ꮡfinfo, ᏑstartTemplate));
+            }
+        }
     }
     if (val.CanAddr()) {
         var pv = val.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(textMarshalerType)) {
-            return Ꮡp.marshalTextInterface(pv.Interface()._<encoding.TextMarshaler>(), defaultStart(pv.Type(), Ꮡfinfo, ᏑstartTemplate));
+        if (pv.CanInterface()) {
+            {
+                var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(pv); if (ok) {
+                    return Ꮡp.marshalTextInterface(textMarshaler, defaultStart(pv.Type(), Ꮡfinfo, ᏑstartTemplate));
+                }
+            }
         }
     }
 
@@ -553,7 +565,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
         } else {
             var fv = xmlname.value(val, dontInitNilPointers);
             {
-                var (v, ok) = fv.Interface()._<Name>(ᐧ); if (ok && v.Local != ""u8) {
+                var (v, ok) = reflect.TypeAssert<Name>(fv); if (ok && v.Local != ""u8) {
                     start.Name = v;
                 }
             }
@@ -640,49 +652,65 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
 internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflectꓸValue val) {
     ref var start = ref Ꮡstart.DerefOrNull();
 
-    if (val.CanInterface() && val.Type().Implements(marshalerAttrType)) {
-        var (attr, errΔ1) = val.Interface()._<MarshalerAttr>().MarshalXMLAttr(name);
-        if (errΔ1 != default!) {
-            return errΔ1;
+    if (val.CanInterface()) {
+        {
+            var (marshaler, ok) = reflect.TypeAssert<MarshalerAttr>(val); if (ok) {
+                var (attr, errΔ1) = marshaler.MarshalXMLAttr(name);
+                if (errΔ1 != default!) {
+                    return errΔ1;
+                }
+                if (attr.Name.Local != ""u8) {
+                    start.Attr = append(start.Attr, attr);
+                }
+                return default!;
+            }
         }
-        if (attr.Name.Local != ""u8) {
-            start.Attr = append(start.Attr, attr);
-        }
-        return default!;
     }
 
     if (val.CanAddr()) {
         var pv = val.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(marshalerAttrType)) {
-            var (attr, errΔ2) = pv.Interface()._<MarshalerAttr>().MarshalXMLAttr(name);
-            if (errΔ2 != default!) {
-                return errΔ2;
+        if (pv.CanInterface()) {
+            {
+                var (marshaler, ok) = reflect.TypeAssert<MarshalerAttr>(pv); if (ok) {
+                    var (attr, errΔ2) = marshaler.MarshalXMLAttr(name);
+                    if (errΔ2 != default!) {
+                        return errΔ2;
+                    }
+                    if (attr.Name.Local != ""u8) {
+                        start.Attr = append(start.Attr, attr);
+                    }
+                    return default!;
+                }
             }
-            if (attr.Name.Local != ""u8) {
-                start.Attr = append(start.Attr, attr);
-            }
-            return default!;
         }
     }
 
-    if (val.CanInterface() && val.Type().Implements(textMarshalerType)) {
-        var (text, errΔ3) = val.Interface()._<encoding.TextMarshaler>().MarshalText();
-        if (errΔ3 != default!) {
-            return errΔ3;
+    if (val.CanInterface()) {
+        {
+            var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(val); if (ok) {
+                var (text, errΔ3) = textMarshaler.MarshalText();
+                if (errΔ3 != default!) {
+                    return errΔ3;
+                }
+                start.Attr = append(start.Attr, new Attr(name, ((@string)text)));
+                return default!;
+            }
         }
-        start.Attr = append(start.Attr, new Attr(name, ((@string)text)));
-        return default!;
     }
 
     if (val.CanAddr()) {
         var pv = val.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(textMarshalerType)) {
-            var (text, errΔ4) = pv.Interface()._<encoding.TextMarshaler>().MarshalText();
-            if (errΔ4 != default!) {
-                return errΔ4;
+        if (pv.CanInterface()) {
+            {
+                var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(pv); if (ok) {
+                    var (text, errΔ4) = textMarshaler.MarshalText();
+                    if (errΔ4 != default!) {
+                        return errΔ4;
+                    }
+                    start.Attr = append(start.Attr, new Attr(name, ((@string)text)));
+                    return default!;
+                }
             }
-            start.Attr = append(start.Attr, new Attr(name, ((@string)text)));
-            return default!;
         }
     }
 
@@ -709,7 +737,8 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
     }
 
     if (AreEqual(val.Type(), attrType)) {
-        start.Attr = append(start.Attr, val.Interface()._<Attr>());
+        var (attr, _) = reflect.TypeAssert<Attr>(val);
+        start.Attr = append(start.Attr, attr);
         return default!;
     }
 
@@ -949,31 +978,39 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
                     return err;
                 }
             }
-            if (vf.CanInterface() && vf.Type().Implements(textMarshalerType)) {
-                var (data, err) = vf.Interface()._<encoding.TextMarshaler>().MarshalText();
-                if (err != default!) {
-                    return err;
-                }
+            if (vf.CanInterface()) {
                 {
-                    var errΔ1 = emit(new printerжWriter(Ꮡp), data); if (errΔ1 != default!) {
-                        return errΔ1;
+                    var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(vf); if (ok) {
+                        var (data, err) = textMarshaler.MarshalText();
+                        if (err != default!) {
+                            return err;
+                        }
+                        {
+                            var errΔ1 = emit(new printerжWriter(Ꮡp), data); if (errΔ1 != default!) {
+                                return errΔ1;
+                            }
+                        }
+                        continue;
                     }
                 }
-                continue;
             }
             if (vf.CanAddr()) {
                 var pv = vf.Addr();
-                if (pv.CanInterface() && pv.Type().Implements(textMarshalerType)) {
-                    var (data, err) = pv.Interface()._<encoding.TextMarshaler>().MarshalText();
-                    if (err != default!) {
-                        return err;
-                    }
+                if (pv.CanInterface()) {
                     {
-                        var errΔ1 = emit(new printerжWriter(Ꮡp), data); if (errΔ1 != default!) {
-                            return errΔ1;
+                        var (textMarshaler, ok) = reflect.TypeAssert<encoding.TextMarshaler>(pv); if (ok) {
+                            var (data, err) = textMarshaler.MarshalText();
+                            if (err != default!) {
+                                return err;
+                            }
+                            {
+                                var errΔ1 = emit(new printerжWriter(Ꮡp), data); if (errΔ1 != default!) {
+                                    return errΔ1;
+                                }
+                            }
+                            continue;
                         }
                     }
-                    continue;
                 }
             }
 
@@ -1017,7 +1054,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
             }
             else if (exprᴛ2 == reflect.ΔSlice) {
                 {
-                    var (elem, ok) = vf.Interface()._<slice<byte>>(ᐧ); if (ok) {
+                    var (elem, ok) = reflect.TypeAssert<slice<byte>>(vf); if (ok) {
                         {
                             var err = emit(new printerжWriter(Ꮡp), elem); if (err != default!) {
                                 return err;

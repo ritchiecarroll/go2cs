@@ -10,6 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
+global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
+global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
+global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
+global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
+global using abiꓸName = go.@internal.abi_package.ΔName;
+global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +57,7 @@ using static go.@internal.synctest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/synctest/synctest.go", "synctest.cs", "AA0epqampgAJFqKAgqSqwoKUgqrCgpQ=")]
+[assembly: go.GoPositionMap("internal/synctest/synctest.go", "synctest.cs", "AA8gpqoACxq0gqimkqimkqimpqYACRaigIKkqsKClIKqwoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -64,6 +72,7 @@ public static partial class synctest_package
     // via declarations below.
 
     // <TypeAccessibility>
+    public partial struct Association {}
     public partial struct Bubble {}
     // </TypeAccessibility>
 
@@ -74,5 +83,6 @@ public static partial class synctest_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(go.@internal.abi_package));
     // </ImportInitializers>
 }

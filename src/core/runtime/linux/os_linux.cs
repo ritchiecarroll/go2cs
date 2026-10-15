@@ -6,10 +6,12 @@ namespace go;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
-using syscall = @internal.runtime.syscall_package;
+using linux = @internal.runtime.syscall.linux_package;
+using strconv = @internal.strconv_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using @internal.runtime.syscall;
 
 partial class runtime_package {
 
@@ -36,9 +38,6 @@ partial struct mOS {
     internal uintptr vgetrandomState;
     internal uint32 waitsema; // semaphore for parking on locks
 }
-
-//go:noescape
-internal static partial int32 futex(@unsafe.Pointer addr, int32 op, uint32 val, @unsafe.Pointer ts, @unsafe.Pointer addr2, uint32 val3);
 
 // Linux futex.
 //
@@ -73,7 +72,7 @@ internal static void futexsleep(ж<uint32> Ꮡaddr, uint32 val, int64 ns) {
 
     ref var ts = ref heap(new timespec(), out var Ꮡts);
     ts.setNsec(ns);
-    futex(@unsafe.Pointer.FromPinnedBox(Ꮡaddr), _FUTEX_WAIT_PRIVATE, val, @unsafe.Pointer.FromPinnedBox(Ꮡts), nil, 0);
+    futex(@unsafe.Pointer.FromPinnedBox(Ꮡaddr), _FUTEX_WAIT_PRIVATE, val, Ꮡts, nil, 0);
 }
 
 // If any procs are sleeping on addr, wake up at most cnt.
@@ -97,7 +96,7 @@ internal static void futexwakeup(ж<uint32> Ꮡaddr, uint32 cnt) {
     ((ж<int32>)(uintptr)((@unsafe.Pointer)(uintptr)0x1006)).Value = 0x1006;
 }
 
-internal static int32 getproccount() {
+internal static int32 getCPUCount() {
     // This buffer is huge (8 kB) but we are on the system stack
     // and there should be plenty of space (64 kB).
     // Also this is a leaf, so we're not holding up the memory for long.
@@ -208,11 +207,14 @@ internal static void newosproc(ж<m> Ꮡmp) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string osThreadStackˢ = "OS thread stack"u8;
+
 // Version of newosproc that doesn't require a valid G.
 //
 //go:nosplit
 internal static void newosproc0(uintptr stacksize, @unsafe.Pointer fn) {
-    @unsafe.Pointer Δstack = (uintptr)sysAlloc(stacksize, Ꮡmemstats.of(mstats.Ꮡstacks_sys));
+    @unsafe.Pointer Δstack = (uintptr)sysAlloc(stacksize, Ꮡmemstats.of(mstats.Ꮡstacks_sys), osThreadStackˢ);
     if (Δstack == nil) {
         writeErrStr(failallocatestack);
         exit(1);
@@ -351,8 +353,8 @@ internal static uintptr getHugePageSize() {
         return 0;
     }
     n--; // remove trailing newline
-    var (v, ok) = atoi(slicebytetostringtmp((ж<byte>)(uintptr)(ptr), (nint)n));
-    if (!ok || v < 0) {
+    var (v, err) = strconv.Atoi(slicebytetostringtmp((ж<byte>)(uintptr)(ptr), (nint)n));
+    if (err != default! || v < 0) {
         v = 0;
     }
     if ((nint)(v & (v - 1)) != 0) {
@@ -363,10 +365,10 @@ internal static uintptr getHugePageSize() {
 }
 
 internal static void osinit() {
-    ncpu = getproccount();
+    numCPUStartup = getCPUCount();
     physHugePageSize = getHugePageSize();
-    osArchInit();
     vgetrandomInit();
+    configure64bitsTimeOn32BitsArchitectures();
 }
 
 internal static ж<slice<byte>> Ꮡurandom_dev = new StandardBox<slice<byte>>(slice<byte>("/dev/urandom\x00"u8));
@@ -429,6 +431,7 @@ internal static void unminit() {
 // resources in minit, semacreate, or elsewhere. Do not take locks after calling this.
 //
 // This always runs without a P, so //go:nowritebarrierrec is required.
+//
 //go:nowritebarrierrec
 internal static void mdestroy(ref m mp) {
 }
@@ -451,9 +454,6 @@ internal static partial void setitimer(int32 mode, ж<itimerval> @new, ж<itimer
 
 //go:noescape
 internal static partial int32 timer_create(int32 clockid, ж<sigevent> sevp, ж<int32> timerid);
-
-//go:noescape
-internal static partial int32 timer_settime(int32 timerid, int32 flags, ж<itimerspec> @new, ж<itimerspec> old);
 
 //go:noescape
 internal static partial int32 timer_delete(int32 timerid);
@@ -485,7 +485,7 @@ internal static partial (int32 r, int32 w, int32 errno) pipe2(int32 flags);
 
 //go:nosplit
 public static (int32 ret, int32 errno) fcntl(int32 fd, int32 cmd, int32 arg) {
-    var (r, _, err) = syscall.Syscall6(syscall.SYS_FCNTL, (uintptr)fd, (uintptr)cmd, (uintptr)arg, 0, 0, 0);
+    var (r, _, err) = linux.Syscall6(linux.SYS_FCNTL, (uintptr)fd, (uintptr)cmd, (uintptr)arg, 0, 0, 0);
     return ((int32)r, (int32)err);
 }
 
@@ -500,7 +500,8 @@ internal static void setsig(uint32 i, uintptr fn) {
     sigfillset(ref sa.sa_mask);
     // Although Linux manpage says "sa_restorer element is obsolete and
     // should not be used". x86_64 kernel requires it. Only use it on
-    // x86.
+    // x86. Note that on 386 this is cleared when using the C sigaction
+    // function via cgo; see fixSigactionForCgo.
     if (GOARCH == "386"u8 || GOARCH == "amd64"u8) {
         sa.sa_restorer = abi.FuncPCABI0(sigreturn__sigaction);
     }
@@ -578,6 +579,23 @@ internal static void sysSigaction(uint32 sig, ж<sigactiont> Ꮡnew, ж<sigactio
 //
 //go:noescape
 internal static partial int32 rt_sigaction(uintptr sig, ж<sigactiont> @new, ж<sigactiont> old, uintptr size);
+
+// fixSigactionForCgo is called when we are using cgo to call the
+// C sigaction function. On 386 the C function does not expect the
+// SA_RESTORER flag to be set, and in some cases will fail if it is set:
+// it will pass the SA_RESTORER flag to the kernel without passing
+// the sa_restorer field. Since the C function will handle SA_RESTORER
+// for us, we need not pass it. See issue #75253.
+//
+//go:nosplit
+internal static void fixSigactionForCgo(ж<sigactiont> Ꮡnew) {
+    ref var @new = ref Ꮡnew.DerefOrNull();
+
+    if (GOARCH == "386"u8 && Ꮡnew != nil) {
+        @new.sa_flags &= unchecked((uint64)~(uint64)(_SA_RESTORER));
+        @new.sa_restorer = 0;
+    }
+}
 
 internal static partial nint getpid();
 
@@ -683,7 +701,7 @@ internal static void runPerThreadSyscall() {
     }
 
     var args = perThreadSyscall;
-    var (r1, r2, errno) = syscall.Syscall6(args.trap, args.a1, args.a2, args.a3, args.a4, args.a5, args.a6);
+    var (r1, r2, errno) = linux.Syscall6(args.trap, args.a1, args.a2, args.a3, args.a4, args.a5, args.a6);
     if (GOARCH == "ppc64"u8 || GOARCH == "ppc64le"u8) {
         // TODO(https://go.dev/issue/51192 ): ppc64 doesn't use r2.
         r2 = 0;
@@ -720,10 +738,96 @@ internal static bool sigFromSeccomp(this ref sigctxt c) {
 
 //go:nosplit
 internal static (int32 ret, int32 errno) mprotect(@unsafe.Pointer addr, uintptr n, int32 prot) {
-    var ᴋ0 = addr;
-        var (r, _, err) = syscall.Syscall6(syscall.SYS_MPROTECT, (uintptr)ᴋ0, n, (uintptr)prot, 0, 0, 0);
-    System.GC.KeepAlive(ᴋ0);
+    var (r, _, err) = linux.Syscall6(linux.SYS_MPROTECT, (uintptr)addr, n, (uintptr)prot, 0, 0, 0);
     return ((int32)r, (int32)err);
+}
+
+partial struct kernelVersion {
+    internal nint major;
+    internal nint minor;
+}
+
+// getKernelVersion returns major and minor kernel version numbers
+// parsed from the uname release field. ok reports whether parsing
+// succeeded; on failure callers must pick a default rather than
+// failing, because this is called during osinit before the runtime
+// is fully initialized and a throw here is unrecoverable.
+internal static (kernelVersion kv, bool ok) getKernelVersion() {
+    bool ok = default!;
+
+    ref var buf = ref heap(new linux.Utsname(), out var Ꮡbuf);
+    {
+        var e = linux.Uname(Ꮡbuf); if (e != 0) {
+            return (new kernelVersion(nil), false);
+        }
+    }
+    @string rel = gostringnocopy(Ꮡbuf.at(linux.Utsname.ᏑRelease, 0));
+    (var major, var minor, _, ok) = parseRelease(rel);
+    if (!ok) {
+        return (new kernelVersion(nil), false);
+    }
+    return (new kernelVersion(major: major, minor: minor), true);
+}
+
+// parseRelease parses a dot-separated version number from the prefix
+// of rel. It returns ok=true only if at least the major and minor
+// components were successfully parsed; the patch component is
+// best-effort. Trailing vendor or build suffixes such as
+// "-generic", "+", "_hi3535", or "-rc1" are ignored.
+internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@string rel) {
+    nint major = default!;
+    nint minor = default!;
+    nint patch = default!;
+    bool ok = default!;
+
+    // next consumes a run of decimal digits from the front of rel,
+    // returning the parsed value. If the digits are followed by a
+    // '.', it is consumed and more is set so the caller knows to
+    // parse another component; otherwise scanning terminates and
+    // the rest of rel is discarded.
+    (nint n, bool more, bool ok) next() {
+        nint n = default!;
+        nint i = 0;
+        while (i < len(rel) && rel[i] >= (rune)'0' && rel[i] <= (rune)'9') {
+            i++;
+        }
+        if (i == 0) {
+            return (0, false, false);
+        }
+        (n, var err) = strconv.Atoi(rel.slice(0, i));
+        if (err != default!) {
+            return (0, false, false);
+        }
+        if (i < len(rel) && rel[i] == (rune)'.') {
+            rel = rel.slice(i + 1);
+            return (n, true, true);
+        }
+        rel = ""u8;
+        return (n, false, true);
+    }
+
+    bool more = default!;
+    {
+        (major, more, ok) = next(); if (!ok || !more) {
+            return (0, 0, 0, false);
+        }
+    }
+    {
+        (minor, more, ok) = next(); if (!ok) {
+            return (0, 0, 0, false);
+        }
+    }
+    if (!more) {
+        return (major, minor, 0, true);
+    }
+    (patch, _, _) = next();
+    return (major, minor, patch, true);
+}
+
+// GE checks if the running kernel version
+// is greater than or equal to the provided version.
+internal static bool GE(this kernelVersion kv, nint x, nint y) {
+    return kv.major > x || (kv.major == x && kv.minor >= y);
 }
 
 } // end runtime_package

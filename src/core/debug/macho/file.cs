@@ -790,15 +790,27 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 public static (slice<@string>, error) ImportedSymbols(this ref File f) {
-    if (f.Dysymtab == nil || f.Symtab == nil) {
+    if (f.Symtab == nil) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "missing symbol table"u8, default!))));
     }
 
     var st = f.Symtab;
     var dt = f.Dysymtab;
     slice<@string> all = default!;
-    foreach (var (_, s) in (~st).Syms.slice((nint)((~dt).Iundefsym), (nint)((~dt).Iundefsym + (~dt).Nundefsym))) {
-        all = append(all, s.Name);
+    if (dt != nil){
+        foreach (var (_, s) in (~st).Syms.slice((nint)((~dt).Iundefsym), (nint)((~dt).Iundefsym + (~dt).Nundefsym))) {
+            all = append(all, s.Name);
+        }
+    } else {
+        // From Darwin's include/mach-o/nlist.h
+        const uint8 N_TYPE = 0x0e;
+        const uint8 N_UNDF = 0x0;
+        const uint8 N_EXT = 0x01;
+        foreach (var (_, s) in (~st).Syms) {
+            if ((uint8)(s.Type & N_TYPE) == N_UNDF && (uint8)(s.Type & N_EXT) != 0) {
+                all = append(all, s.Name);
+            }
+        }
     }
     return (all, default!);
 }

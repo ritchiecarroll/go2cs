@@ -43,7 +43,7 @@ public static Stream NewCTR(Block block, slice<byte> iv) {
             return new aesCtrWrapper(aes.NewCTR(blockΔ1, iv));
         }
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CTR with non-AES ciphers is not allowed in FIPS 140-only mode");
     }
     {

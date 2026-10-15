@@ -45,18 +45,23 @@
 // that a large amount of virtual address space may be reserved by the runtime.
 namespace go;
 
+using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
+using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
+using @internal;
 using @internal.runtime;
 
 partial class runtime_package {
 
 // The size of a bitmap chunk, i.e. the amount of bits (that is, pages) to consider
-// in the bitmap at once.
+// in the bitmap at once. It is 4MB on most platforms, except on Wasm it is 512KB.
+// We use a smaller chuck size on Wasm for the same reason as the smaller arena
+// size (see heapArenaBytes).
 internal static UntypedInt pallocChunkPages => /* 1 << logPallocChunkPages */ 512;
 internal static UntypedInt pallocChunkBytes => /* pallocChunkPages * pageSize */ 4194304;
-internal static UntypedInt logPallocChunkPages => 9;
-internal static UntypedInt logPallocChunkBytes => /* logPallocChunkPages + pageShift */ 22;
+internal static UntypedInt logPallocChunkPages => /* 9*(1-goarch.IsWasm) + 6*goarch.IsWasm */ 9;
+internal static UntypedInt logPallocChunkBytes => /* logPallocChunkPages + gc.PageShift */ 22;
 
 // The number of radix bits for each level.
 //
@@ -79,6 +84,8 @@ internal static UntypedInt summaryL0Bits => /* heapAddrBits - logPallocChunkByte
 // there should this change.
 internal static UntypedInt pallocChunksL2Bits => /* heapAddrBits - logPallocChunkBytes - pallocChunksL1Bits */ 13;
 internal static UntypedInt pallocChunksL1Shift => /* pallocChunksL2Bits */ 13;
+
+internal static readonly @string vmaNamePageAllocIndex = "page alloc index"u8;
 
 // maxSearchAddr returns the maximum searchAddr value, which indicates
 // that the heap has no free space.
@@ -230,6 +237,7 @@ partial struct pageAlloc {
     // heapAddrBits | L1 Bits | L2 Bits | L2 Entry Size
     // ------------------------------------------------
     // 32           | 0       | 10      | 128 KiB
+    // 32 (wasm)    | 0       | 13      | 128 KiB
     // 33 (iOS)     | 0       | 11      | 256 KiB
     // 48           | 13      | 13      | 1 MiB
     //
@@ -408,7 +416,7 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
         if (Δp.chunks[c.l1()] == nil) {
             // Create the necessary l2 entry.
             uintptr l2Size = /* unsafe.Sizeof(*p.chunks[0]) */ 1048576;
-            @unsafe.Pointer r = (uintptr)sysAlloc(l2Size, Δp.sysStat);
+            @unsafe.Pointer r = (uintptr)sysAlloc(l2Size, Δp.sysStat, vmaNamePageAllocIndex);
             if (r == nil) {
                 @throw(pageAllocOutOfMemoryˢ);
             }
@@ -1002,6 +1010,47 @@ internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages
         }
     }
     Δp.update(@base, npages, true, false);
+}
+
+// markRandomPaddingPages marks the range of memory [base, base+npages*pageSize]
+// as both allocated and scavenged. This is used for randomizing the base heap
+// address. Both the alloc and scav bits are set so that the pages are not used
+// and so the memory accounting stats are correctly calculated.
+//
+// Similar to allocRange, it also updates the summaries to reflect the
+// newly-updated bitmap.
+//
+// p.mheapLock must be held.
+internal static void markRandomPaddingPages(this ref pageAlloc Δp, uintptr @base, uintptr npages) {
+    assertLockHeld(Δp.mheapLock);
+
+    var limit = @base + npages * (uintptr)pageSize - 1;
+    chunkIdx sc = chunkIndex(@base);
+    chunkIdx ec = chunkIndex(limit);
+    nuint si = chunkPageIndex(@base);
+    nuint ei = chunkPageIndex(limit);
+    if (sc == ec){
+        var chunk = Δp.chunkOf(sc);
+        chunk.allocRange(si, ei + 1 - si);
+        Δp.scav.index.alloc(sc, ei + 1 - si);
+        chunk.of(pallocData.Ꮡscavenged).setRange(si, ei + 1 - si);
+    } else {
+        var chunk = Δp.chunkOf(sc);
+        chunk.allocRange(si, (nuint)pallocChunkPages - si);
+        Δp.scav.index.alloc(sc, (nuint)pallocChunkPages - si);
+        chunk.of(pallocData.Ꮡscavenged).setRange(si, (nuint)pallocChunkPages - si);
+        for (chunkIdx c = sc + 1; c < ec; c++) {
+            var chunkΔ1 = Δp.chunkOf(c);
+            chunkΔ1.allocAll();
+            Δp.scav.index.alloc(c, pallocChunkPages);
+            chunkΔ1.of(pallocData.Ꮡscavenged).setAll();
+        }
+        chunk = Δp.chunkOf(ec);
+        chunk.allocRange(0, ei + 1);
+        Δp.scav.index.alloc(ec, ei + 1);
+        chunk.of(pallocData.Ꮡscavenged).setRange(0, ei + 1);
+    }
+    Δp.update(@base, npages, true, true);
 }
 
 internal static uintptr pallocSumBytes => /* unsafe.Sizeof(pallocSum(0)) */ 8;

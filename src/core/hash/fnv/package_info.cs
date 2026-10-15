@@ -36,11 +36,17 @@ using static go.hash.fnv_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<sum128, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<sum128, hash_package.Hash>(Pointer = true)]
+[assembly: GoImplement<sum128a, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<sum128a, hash_package.Hash>(Pointer = true)]
+[assembly: GoImplement<sum32, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<sum32, hash_package.Hash32>(Pointer = true)]
+[assembly: GoImplement<sum32a, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<sum32a, hash_package.Hash32>(Pointer = true)]
+[assembly: GoImplement<sum64, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<sum64, hash_package.Hash64>(Pointer = true)]
+[assembly: GoImplement<sum64a, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<sum64a, hash_package.Hash64>(Pointer = true)]
 // </InterfaceImplementations>
 
@@ -55,7 +61,7 @@ using static go.hash.fnv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/fnv/fnv.go", "fnv.cs", "ACxYopKqopKqopKqopKqooKCgqqigoKCpoCigKKAooCigICigICkgKKAooCigKSCgoKClIKmgoKCgpSCpoKCgoKUgqaCgoKClIKmgpSClIKClKaCgpSClIKUpoCigKKAooCigKKApICigKKAooCigKKApIKCpoKCpoKCpoKCpoKCpoKCAAwegoKCpoKmgoKCpoKmgoKCpoKmgoKCpoKmgoKCgqaCpoKCgoKmguaCgpSClIKmgoKUgpSCpoKClIKUgqaCgpSClIKmgoKUgpSCgqaCgpSClIKC")]
+[assembly: go.GoPositionMap("hash/fnv/fnv.go", "fnv.cs", "ACxYopKqopKqopKqopKqooKCgqqigoKCpoCigKKAooCigICigICkgKKAooCigKSCgoKClIKmgoKCgpSCpoKCgoKUgqaCgoKClIKmgpSClIKClKaCgpSClIKUpoCigKKAooCigKKApICigKKAooCigKKApIKCpoKCpoKCpoKCpoKCpoKCAAwegoKCpoKmgoKCpoKmgoKCpoKmgoKCpoKmgoKCgqaCpoKCgoKmguaCgpSClIKmgoKUgpSCpoKClIKUgqaCgpSClIKmgoKUgpSCgqaCgpSClIKCpoKSpoKSpoKSpoKSpoKSpoKS")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

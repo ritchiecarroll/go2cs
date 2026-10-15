@@ -189,7 +189,6 @@
     <ProjectReference Include="$(go2csPath)core/crypto/ed25519/crypto.ed25519.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/elliptic/crypto.elliptic.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/md5/crypto.md5.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rsa/crypto.rsa.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha1/crypto.sha1.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha256/crypto.sha256.csproj" />
@@ -210,8 +209,8 @@
     <ProjectReference Include="$(go2csPath)core/net/net.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/netip/net.netip.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/url/net.url.csproj" />
-    <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
+    <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />

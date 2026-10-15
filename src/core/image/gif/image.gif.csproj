@@ -178,6 +178,7 @@
     <ProjectReference Include="$(go2csPath)core/image/image.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/byteorder/internal.byteorder.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
+    <ProjectReference Include="$(go2csPath)core/math/bits/math.bits.csproj" />
   </ItemGroup>
 
   <ItemGroup>

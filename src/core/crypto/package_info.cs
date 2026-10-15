@@ -54,7 +54,7 @@ using static go.crypto_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/crypto.go", "crypto.cs", "AC0mkgAXBoKUpKSkpKSkpKSkpKSkpKSkpKSkpAAYNgAVMrKClKaYooKCgqaokqyygpQ=")]
+[assembly: go.GoPositionMap("crypto/crypto.go", "crypto.cs", "AC0mkgAXBoKUpKSkpKSkpKSkpKSkpKSkpKSkpAAYNgAVMrKClKaYooKCgqaokqyygpQAP8ABsoCCpIKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,8 +69,11 @@ public static partial class crypto_package
     // via declarations below.
 
     // <TypeAccessibility>
+    public partial interface Decapsulator {}
     public partial interface Decrypter {}
     [GoLocalName("DecrypterOpts")] public partial interface DecrypterOptsᴅ {}
+    public partial interface Encapsulator {}
+    public partial interface MessageSigner {}
     [GoLocalName("PrivateKey")] public partial interface PrivateKeyᴅ {}
     [GoLocalName("PublicKey")] public partial interface PublicKeyᴅ {}
     public partial interface Signer {}

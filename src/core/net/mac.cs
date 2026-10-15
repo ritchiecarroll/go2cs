@@ -37,10 +37,11 @@ public static @string String(this HardwareAddr a) {
 //	0000.5e00.5301
 //	0200.5e10.0000.0001
 //	0000.0000.fe80.0000.0000.0000.0200.5e10.0000.0001
+//	00005e005301
 public static (HardwareAddr hw, error err) ParseMAC(@string s) {
     HardwareAddr hw = default!;
 
-    if (len(s) < 14) {
+    if (len(s) < 12) {
         goto error;
     }
 
@@ -87,7 +88,25 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
             x += 5;
         }
     } else {
-        goto error;
+        if (len(s) % 2 != 0) {
+            goto error;
+        }
+
+        nint n = len(s) / 2;
+        if (n != 6 && n != 8 && n != 20) {
+            goto error;
+        }
+
+        hw = new HardwareAddr(len(s) / 2);
+        for ((nint x, nint i) = (0, 0); i < n; i++) {
+            bool ok = default!;
+            {
+                (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
+                    goto error;
+                }
+            }
+            x += 2;
+        }
     }
     return (hw, default!);
 

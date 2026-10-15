@@ -293,7 +293,7 @@ internal static void vdsoauxv(uintptr tag, uintptr val) {
     }
 }
 
-// vdsoMarker reports whether PC is on the VDSO page.
+// inVDSOPage reports whether PC is on the VDSO page.
 //
 //go:nosplit
 internal static bool inVDSOPage(uintptr pc) {

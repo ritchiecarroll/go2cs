@@ -7,8 +7,8 @@ using syscall = syscall_package;
 
 partial class os_package {
 
-internal static void closeHandle(this ref Process p) {
-    syscall.Close((nint)p.handle);
+internal static void closeHandle(this ref processHandle ph) {
+    syscall.Close((nint)ph.handle);
 }
 
 } // end os_package

@@ -4,7 +4,9 @@
 namespace go;
 
 using context = context_package;
+using netip = net.netip_package;
 using syscall = syscall_package;
+using net;
 
 partial class net_package {
 
@@ -21,8 +23,17 @@ partial class net_package {
 // instead.
 // BUG(mikio): On JS and Plan 9, methods and functions related
 // to IPConn are not implemented.
-// BUG(mikio): On Windows, the File method of IPConn is not
-// implemented.
+// BUG: On Windows, raw IP sockets are restricted by the operating system.
+// Sending TCP data, sending UDP data with invalid source addresses,
+// and calling bind with TCP protocol don't work.
+//
+// See Winsock reference for details.
+internal static ж<IPAddr> ipAddrFromAddr(netipꓸAddr addr) {
+    return Ꮡ(new IPAddr(
+        IP: addr.AsSlice(),
+        Zone: addr.Zone()
+    ));
+}
 
 // IPAddr represents the address of an IP end point.
 partial struct IPAddr {
@@ -237,11 +248,20 @@ internal static ж<IPConn> newIPConn(ж<netFD> Ꮡfd) {
 // If the IP field of raddr is nil or an unspecified IP address, the
 // local system is assumed.
 public static (ж<IPConn>, error) DialIP(@string network, ж<IPAddr> Ꮡladdr, ж<IPAddr> Ꮡraddr) {
+    return dialIP(context.Background(), nil, network, Ꮡladdr, Ꮡraddr);
+}
+
+internal static (ж<IPConn>, error) dialIP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<IPAddr> Ꮡladdr, ж<IPAddr> Ꮡraddr) {
+    ref var dialer = ref Ꮡdialer.DerefOrNull();
+
     if (Ꮡraddr == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: default!, Err: errMissingAddress))));
     }
     var sd = Ꮡ(new sysDialer(network: network, address: Ꮡraddr.String()));
-    var (c, err) = sd.dialIP(context.Background(), Ꮡladdr, Ꮡraddr);
+    if (Ꮡdialer != nil) {
+        sd.Value.Dialer = dialer;
+    }
+    var (c, err) = sd.dialIP(ctx, Ꮡladdr, Ꮡraddr);
     if (err != default!) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: err))));
     }

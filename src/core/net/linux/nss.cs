@@ -92,8 +92,8 @@ internal static void acquireSema(this ref nsswitchConfig conf) {
 }
 
 internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
-    var selᴛ18 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-    switch (trySelect(selᴛ18)) {
+    var selᴛ16 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
+    switch (trySelect(selᴛ16)) {
     case 0: {
         return true;
     }

@@ -4,11 +4,12 @@
 namespace go.@internal.trace;
 
 using binary = encoding.binary_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
-using Δevent = go.@internal.trace.event_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using encoding;
+using go;
 using go.@internal.trace;
 
 partial class raw_package {
@@ -20,7 +21,7 @@ partial class raw_package {
 // trace format's framing. (But not interpreted.)
 partial struct Event {
     public version.Version Version;
-    public Δevent.Type Ev;
+    public tracev2.EventType Ev;
     public slice<uint64> Args;
     public slice<byte> Data;
 }

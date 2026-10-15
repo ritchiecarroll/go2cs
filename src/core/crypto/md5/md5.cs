@@ -29,6 +29,12 @@ public static UntypedInt ΔSize => 16;
 // The blocksize of MD5 in bytes.
 public static UntypedInt ΔBlockSize => 64;
 
+// The maximum number of bytes that can be passed to block(). The limit exists
+// because implementations that rely on assembly routines are not preemptible.
+internal static UntypedInt maxAsmIters => 1024;
+
+internal static UntypedInt maxAsmSize => /* BlockSize * maxAsmIters */ 65536; // 64KiB
+
 internal static UntypedInt init0 => 0x67452301;
 internal static UntypedInt init1 => 0xEFCDAB89;
 internal static UntypedInt init2 => 0x98BADCFE;
@@ -100,6 +106,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b[0..4]));
 }
 
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d.ΔClone();
+    return (new digestжCloner(Ꮡr), default!);
+}
+
 // New returns a new [hash.Hash] computing the MD5 checksum. The Hash
 // also implements [encoding.BinaryMarshaler], [encoding.BinaryAppender] and
 // [encoding.BinaryUnmarshaler] to marshal and unmarshal the internal
@@ -126,7 +138,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     error err = default!;
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (0, errors.New(cryptoMd5UseOfMd5IsNotˢ));
     }
     // Note that we currently call block or blockGeneric
@@ -150,6 +162,11 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     if (len(p) >= ΔBlockSize) {
         nint n = (nint)(len(p) & ~(nint)(ΔBlockSize - 1));
         if (haveAsm){
+            while (n > maxAsmSize) {
+                block(ref (Ꮡd).DerefOrNull(), p[..(int)(maxAsmSize)]);
+                p = p[(int)(maxAsmSize)..];
+                n -= maxAsmSize;
+            }
             block(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
         } else {
             blockGeneric(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
@@ -173,7 +190,7 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/md5: use of MD5 is not allowed in FIPS 140-only mode");
     }
 

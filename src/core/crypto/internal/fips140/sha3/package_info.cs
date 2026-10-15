@@ -50,11 +50,11 @@ using static go.crypto.@internal.fips140.sha3_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha3/cast.go", "cast.cs", "AAwagoK43IKCgIKk", "14-31:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/hashes.go", "hashes.cs", "AAcQkqiSqJKokgAVNqKqog==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/hashes.go", "hashes.cs", "AAcQkqiSqJKokgAPKKKqog==")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha3/keccakf.go", "keccakf.cs", "AA8e")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADNwkKaQpqSClIKmgpKosoKqAAgKuJSCqJCiwoKmlIKCgqaCuKjkgqamlIKmgoKmqqKCpoKCyoKCggAJGIKmgpSkpKSkpoKCgvaCgqaCggANDKaCgoKmgpSSgpSCgpSU")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/sha3.go", "sha3.cs", "ADNwkKaQpqSCgqaCkqiygqoACAq4lIKokKLCgqaUgoKCpoK4qOSCpqaUgqaCgqaqooKmgoLKgoKCAAkYgqaClKSkpKSmgoKC9oKCpoKCAA0MpoKCgqaClJKClIKClJQ=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha3/sha3_noasm.go", "sha3_noasm.cs", "AAgSgqaCpIKkgg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABo0goKCgoCCpKaUgoKmgoKCgqaCgoKCgoKCgqaAooCswKigpIKmqLKCgrqSkqaCpoKCgpSCpoKClICCpIKokqiSAAIQ0oKUAAIQ0oKU")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha3/shake.go", "shake.cs", "ABo0goKCgoCCgsiUgoKmgoKCgqaigoKCgoKCgqaAooCswKigpIKmqLKCgrqSkqaCpoKCgpSCpoKClICCpIKokqiSAAIQ5IKmooKClAACEOSCpqKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

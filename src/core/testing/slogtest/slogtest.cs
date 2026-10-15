@@ -175,6 +175,22 @@ internal static slice<testCase> cases = new testCase[]{
         }.slice()
     ),
     new(
+        name: "nested-empty-group-record"u8,
+        explanation: withSource("a Handler should not output nested groups if there are no attributes"u8),
+        f: (ж<slog.Logger> l) => {
+            l.With((@string)"a"u8, (@string)"b"u8).WithGroup("G"u8).With((@string)"c"u8, (@string)"d"u8).WithGroup("H"u8).WithGroup("I"u8).Info("msg"u8);
+        },
+        checks: new Func<map<@string, any>, @string>[]{
+            hasKey(slog.TimeKey),
+            hasKey(slog.LevelKey),
+            hasAttr(slog.MessageKey, (@string)"msg"u8),
+            hasAttr("a"u8, (@string)"b"u8),
+            inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
+            inGroup("G"u8, missingKey("H"u8)),
+            inGroup("G"u8, missingKey("I"u8))
+        }.slice()
+    ),
+    new(
         name: "resolve"u8,
         explanation: withSource("a Handler should call Resolve on attribute values"u8),
         f: (ж<slog.Logger> l) => {

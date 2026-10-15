@@ -313,6 +313,7 @@ public static @string Sprint(params ꓸꓸꓸany aʗp) {
 
 // Append formats using the default formats for its operands, appends the result to
 // the byte slice, and returns the updated slice.
+// Spaces are added between operands when neither is a string.
 public static slice<byte> Append(slice<byte> b, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
@@ -1414,11 +1415,7 @@ break_simpleFormat:;
             break;
         }
 
-        var verb = (rune)format[i];
-        nint size = 1;
-        if (verb >= utf8.RuneSelf) {
-            (verb, size) = utf8.DecodeRuneInString(format.slice(i));
-        }
+        var (verb, size) = utf8.DecodeRuneInString(format.slice(i));
         i += size;
 
         var matchᴛ2 = false;

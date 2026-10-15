@@ -13,6 +13,8 @@
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
+global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
+global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -53,7 +55,7 @@ using static go.@internal.filepathlite_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/filepathlite/path.go", "path.cs", "ABQkAA0cgoKUpoKCgoKUgpSCpqKCpoKClKiSgoKCgpSUlO6CkpKCgqaCpsbGgqaCgtiClIKC+oKmguyCpoKokqaCgpSCgoKCgoKmgpSClKiSgpSokoKUqJKClKaCgpSCgoKmqJKCgoKUqJKCgqaokoKmgqaUgoKUgqaClKiSgoKClIKUlKiSqqI=")]
-[assembly: go.GoPositionMap("internal/filepathlite/path_windows.go", "path_windows.cs", "AA8kgqaCgpSUlKaUgoKCgoKUgqaClIKUpoKClKaChJKCgoKUgoKUgqaUgoKCppQAAhDkgoKUyIKUgpSC3ICCpOaCgpSmgpSCppSUAAgSgpSClKaCgpSCgqamgoKUqJKCgqaClIKClAAFEuIACBK4AAcQAAgUgpSCgpS4lKyygpSCgoKkgqaClKyygoKCgoK4qJKCgqaokqrCgsqCgpSCgtyC")]
+[assembly: go.GoPositionMap("internal/filepathlite/path_windows.go", "path_windows.cs", "ABEmgqaCgpSUlKaUgoKCgoKUgqaClIKUpoKClKaChJKCgoKUgoKUgqaUgoKCppQAAhDkgoKUyIKUgpSC3IKClOaCgpSmgpSCppSUAAgSgpSClKaCgpSCgqamgoKUqJKCgqaClIKClAAFEuIACBK4AAcQAAgUgpSCgpS4lKyygpSCgoKkgqaClKyygoKCgoK4qJKCgqaqwoLKgoKUgoLcgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -81,6 +83,7 @@ public static partial class filepathlite_package
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸbytealg() => builtin.initPackage(typeof(go.@internal.bytealg_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸstringslite() => builtin.initPackage(typeof(go.@internal.stringslite_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindows() => builtin.initPackage(typeof(go.@internal.syscall.windows_package));
     [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(io.fs_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));

@@ -67,11 +67,18 @@ public static float64 Trunc(float64 x) {
 }
 
 internal static float64 trunc(float64 x) {
-    if (x == 0D || IsNaN(x) || IsInf(x, 0)) {
-        return x;
+    if (Abs(x) < 1D) {
+        return Copysign(0D, x);
     }
-    var (d, _) = Modf(x);
-    return d;
+
+    var b = Float64bits(x);
+    nuint e = (nuint)((nuint)((b >> (int)(shift))) & (nuint)mask) - (nuint)bias;
+
+    // Keep the top 12+e bits, the integer part; clear the rest.
+    if (e < 64 - 12) {
+        b &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((64 - 12 - e)) - 1));
+    }
+    return Float64frombits(b);
 }
 
 // Round returns the nearest integer, rounding half away from zero.

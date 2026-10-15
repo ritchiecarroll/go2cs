@@ -54,7 +54,7 @@ public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, 
     return (default!, ovf);
 }
 
-// Saturating add does a saturating addition of 'dst' and 'src',
+// SaturatingAdd does a saturating addition of 'dst' and 'src',
 // returning added value or math.MaxUint32 if there is an overflow.
 // Overflows are recorded in case the client needs to track them.
 public static uint32 SaturatingAdd(this ref Merger m, uint32 dst, uint32 src) {
@@ -65,7 +65,7 @@ public static uint32 SaturatingAdd(this ref Merger m, uint32 dst, uint32 src) {
     return result;
 }
 
-// Saturating add does a saturating addition of 'dst' and 'src',
+// SaturatingAdd does a saturating addition of 'dst' and 'src',
 // returning added value or math.MaxUint32 plus an overflow flag.
 public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
     var (d, s) = ((uint64)dst, (uint64)src);

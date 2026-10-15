@@ -25,13 +25,15 @@ partial interface Interface {
     // Sort may place equal elements in any order in the final result,
     // while Stable preserves the original input order of equal elements.
     //
-    // Less must describe a transitive ordering:
+    // Less must describe a [Strict Weak Ordering]. For example:
     //  - if both Less(i, j) and Less(j, k) are true, then Less(i, k) must be true as well.
     //  - if both Less(i, j) and Less(j, k) are false, then Less(i, k) must be false as well.
     //
     // Note that floating-point comparison (the < operator on float32 or float64 values)
-    // is not a transitive ordering when not-a-number (NaN) values are involved.
+    // is not a strict weak ordering when not-a-number (NaN) values are involved.
     // See Float64Slice.Less for a correct implementation for floating-point values.
+    //
+    // [Strict Weak Ordering]: https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings
     bool Less(nint i, nint j);
     // Swap swaps the elements with indexes i and j.
     void Swap(nint i, nint j);
@@ -232,7 +234,7 @@ public static bool StringsAreSorted(slice<@string> x) {
 }
 
 // Notes on stable sorting:
-// The used algorithms are simple and provable correct on all input and use
+// The used algorithms are simple and provably correct on all input and use
 // only logarithmic additional stack space. They perform well if compared
 // experimentally to other stable in-place sorting algorithms.
 //

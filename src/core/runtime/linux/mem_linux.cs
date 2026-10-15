@@ -16,7 +16,7 @@ internal static UntypedInt _EINVAL => 22;
 // prevents us from allocating more stack.
 //
 //go:nosplit
-internal static @unsafe.Pointer sysAllocOS(uintptr n) {
+internal static @unsafe.Pointer sysAllocOS(uintptr n, @string vmaName) {
     var (Δp, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
         if (err == _EACCES) {
@@ -29,6 +29,7 @@ internal static @unsafe.Pointer sysAllocOS(uintptr n) {
         }
         return default!;
     }
+    setVMAName(Δp, n, vmaName);
     return Δp;
 }
 
@@ -39,6 +40,7 @@ internal static UntypedInt madviseUnsupported => 0;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unalignedSysUnusedˢ = "unaligned sysUnused"u8;
+internal static readonly @string unusedˢ = "unused"u8;
 internal static readonly @string runtimeCannotDisableˢ = "runtime: cannot disable permissions in address space"u8;
 
 internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
@@ -80,7 +82,10 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
         // Fall back on mmap if it's not supported.
         // _MAP_ANON|_MAP_FIXED|_MAP_PRIVATE will unmap all the
         // pages in the old mapping, and remap the memory region.
-        mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
+        var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
+        if (err == 0 && Δp != nil) {
+            setVMAName(Δp, n, unusedˢ);
+        }
     }
 
     if (debug.harddecommit > 0) {
@@ -88,12 +93,14 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
         if (Δp != v || err != 0) {
             @throw(runtimeCannotDisableˢ);
         }
+        setVMAName(Δp, n, unusedˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string runtimeOutOfMemoryˢ = "runtime: out of memory"u8;
 internal static readonly @string runtimeCannotRemapPagesˢ = "runtime: cannot remap pages in address space"u8;
+internal static readonly @string usedˢ = "used"u8;
 
 internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
     if (debug.harddecommit > 0) {
@@ -104,6 +111,7 @@ internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
         if (Δp != v || err != 0) {
             @throw(runtimeCannotRemapPagesˢ);
         }
+        setVMAName(Δp, n, usedˢ);
         return;
     }
 }
@@ -174,18 +182,19 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
     madvise(v, n, _MADV_DONTNEED);
 }
 
-internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n) {
+internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string vmaName) {
     var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
         return default!;
     }
+    setVMAName(Δp, n, vmaName);
     return Δp;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string runtimeCannotMapPagesInˢ = "runtime: cannot map pages in arena address space"u8;
 
-internal static void sysMapOS(@unsafe.Pointer v, uintptr n) {
+internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string vmaName) {
     var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
     if (err == _ENOMEM) {
         @throw(runtimeOutOfMemoryˢ);
@@ -194,6 +203,7 @@ internal static void sysMapOS(@unsafe.Pointer v, uintptr n) {
         print((@string)"runtime: mmap("u8, @unsafe.Pointer.OrTypedNil(v), (@string)", "u8, n, (@string)") returned "u8, @unsafe.Pointer.OrTypedNil(Δp), (@string)", "u8, err, (@string)"\n"u8);
         @throw(runtimeCannotMapPagesInˢ);
     }
+    setVMAName(Δp, n, vmaName);
 
     // Disable huge pages if the GODEBUG for it is set.
     //
@@ -202,6 +212,10 @@ internal static void sysMapOS(@unsafe.Pointer v, uintptr n) {
     if (debug.disablethp != 0) {
         sysNoHugePageOS(v, n);
     }
+}
+
+internal static bool needZeroAfterSysUnusedOS() {
+    return debug.madvdontneed == 0;
 }
 
 } // end runtime_package

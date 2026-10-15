@@ -26,6 +26,7 @@ internal static ref sync.RWMutex systemRootsMu => ref ᏑsystemRootsMu.Value;
 public static ж<CertPool> systemRoots;
 internal static error systemRootsErr;
 internal static bool fallbacksSet;
+internal static bool useFallbackRoots;
 
 internal static ж<CertPool> systemRootsPool() {
     GoFrame ᒐ = default;
@@ -44,10 +45,28 @@ internal static void initSystemRoots() {
     try {
         ᏑsystemRootsMu.Lock();
         defer(ᏑsystemRootsMu.Unlock, ref ᒐ);
+
+        var fallbackRoots = systemRoots;
         (systemRoots, systemRootsErr) = loadSystemRoots();
         if (systemRootsErr != default!) {
             systemRoots = default!;
         }
+
+        if (fallbackRoots == nil) {
+            return; // no fallbacks to try
+        }
+
+        var systemCertsAvail = systemRoots != nil && (systemRoots.len() > 0 || (~systemRoots).systemPool);
+
+        if (!useFallbackRoots && systemCertsAvail) {
+            return;
+        }
+
+        if (useFallbackRoots && systemCertsAvail) {
+            x509usefallbackroots.IncNonDefault(); // overriding system certs with fallback certs.
+        }
+
+        (systemRoots, systemRootsErr) = (fallbackRoots, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -77,10 +96,6 @@ public static void SetFallbackRoots(ж<CertPool> Ꮡroots) {
             throw panic("roots must be non-nil");
         }
 
-        // trigger initSystemRoots if it hasn't already been called before we
-        // take the lock
-        _ = systemRootsPool();
-
         ᏑsystemRootsMu.Lock();
         defer(ᏑsystemRootsMu.Unlock, ref ᒐ);
 
@@ -89,12 +104,31 @@ public static void SetFallbackRoots(ж<CertPool> Ꮡroots) {
         }
         fallbacksSet = true;
 
-        if (systemRoots != nil && (systemRoots.len() > 0 || (~systemRoots).systemPool)) {
-            if (x509usefallbackroots.Value() != "1"u8) {
-                return;
-            }
-            x509usefallbackroots.IncNonDefault();
+        // Handle case when initSystemRoots was not yet executed.
+        // We handle that specially instead of calling loadSystemRoots, to avoid
+        // spending excessive amount of cpu here, since the SetFallbackRoots in most cases
+        // is going to be called at program startup.
+        if (systemRoots == nil && systemRootsErr == default!) {
+            systemRoots = Ꮡroots;
+            useFallbackRoots = x509usefallbackroots.Value() == "1"u8;
+            return;
         }
+
+        Ꮡonce.Do(() => {
+            throw panic("unreachable");
+        }); // asserts that system roots were indeed loaded before.
+
+        var forceFallbackRoots = x509usefallbackroots.Value() == "1"u8;
+        var systemCertsAvail = systemRoots != nil && (systemRoots.len() > 0 || (~systemRoots).systemPool);
+
+        if (!forceFallbackRoots && systemCertsAvail) {
+            return;
+        }
+
+        if (forceFallbackRoots && systemCertsAvail) {
+            x509usefallbackroots.IncNonDefault(); // overriding system certs with fallback certs.
+        }
+
         (systemRoots, systemRootsErr) = (Ꮡroots, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

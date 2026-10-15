@@ -14,6 +14,7 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.unicode;
+using iter = iter_package;
 
 partial class constraint_package {
 
@@ -463,11 +464,9 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
     nint size = 0;
 
     Expr x = default!;
-    foreach (var (_, clause) in strings.Fields(text)) {
+    foreach (var clause in range<@string>(strings.FieldsSeq(text).Invoke)) {
         Expr y = default!;
-        foreach (var (_, vᴛ1) in strings.Split(clause, ","u8)) {
-            var lit = vᴛ1;
-
+        foreach (var lit in range<@string>(strings.SplitSeq(clause, ","u8).Invoke)) {
             Expr z = default!;
             bool neg = default!;
             if (strings.HasPrefix(lit, "!!"u8) || lit == "!"u8){
@@ -584,18 +583,18 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
     // Prepare the +build lines.
     slice<@string> lines = default!;
     foreach (var (_, or) in split) {
-        @string line = buildˢ2;
+        ref var line = ref heap(new strings.Builder(), out var Ꮡline);
+        Ꮡline.WriteString(buildˢ2);
         foreach (var (_, and) in or) {
-            @string clause = ""u8;
+            Ꮡline.WriteString(" "u8);
             foreach (var (i, lit) in and) {
                 if (i > 0) {
-                    clause += ","u8;
+                    Ꮡline.WriteString(","u8);
                 }
-                clause += lit.String();
+                Ꮡline.WriteString(lit.String());
             }
-            line += " "u8 + clause;
         }
-        lines = append(lines, line);
+        lines = append(lines, line.String());
     }
 
     return (lines, default!);

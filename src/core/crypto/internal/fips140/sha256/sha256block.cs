@@ -82,23 +82,20 @@ internal static void blockGeneric(ref Digest dig, slice<byte> p) {
     array<uint32> w = new(64);
     var (h0, h1, h2, h3, h4, h5, h6, h7) = (dig.h[0], dig.h[1], dig.h[2], dig.h[3], dig.h[4], dig.h[5], dig.h[6], dig.h[7]);
     while (len(p) >= chunk) {
-        // Can interlace the computation of w with the
-        // rounds below if needed for speed.
-        for (nint i = 0; i < 16; i++) {
-            nint j = i * 4;
-            w[i] = (uint32)((uint32)((uint32)(((uint32)p[j] << (int)(24)) | ((uint32)p[j + 1] << (int)(16))) | ((uint32)p[j + 2] << (int)(8))) | (uint32)p[j + 3]);
-        }
-        for (nint i = 16; i < 64; i++) {
-            var v1 = w[i - 2];
-            var t1 = (uint32)((uint32)((bits.RotateLeft32(v1, -17)) ^ (bits.RotateLeft32(v1, -19))) ^ ((v1 >> (int)(10))));
-            var v2 = w[i - 15];
-            var t2 = (uint32)((uint32)((bits.RotateLeft32(v2, -7)) ^ (bits.RotateLeft32(v2, -18))) ^ ((v2 >> (int)(3))));
-            w[i] = t1 + w[i - 7] + t2 + w[i - 16];
-        }
-
         var (a, b, c, d, e, f, g, h) = (h0, h1, h2, h3, h4, h5, h6, h7);
 
-        for (nint i = 0; i < 64; i++) {
+        foreach (var i in range(64)) {
+            if (i < 16){
+                nint j = i * 4;
+                w[i] = (uint32)((uint32)((uint32)(((uint32)p[j] << (int)(24)) | ((uint32)p[j + 1] << (int)(16))) | ((uint32)p[j + 2] << (int)(8))) | (uint32)p[j + 3]);
+            } else {
+                var v1 = w[i - 2];
+                var t1Δ1 = (uint32)((uint32)((bits.RotateLeft32(v1, -17)) ^ (bits.RotateLeft32(v1, -19))) ^ ((v1 >> (int)(10))));
+                var v2 = w[i - 15];
+                var t2Δ1 = (uint32)((uint32)((bits.RotateLeft32(v2, -7)) ^ (bits.RotateLeft32(v2, -18))) ^ ((v2 >> (int)(3))));
+                w[i] = t1Δ1 + w[i - 7] + t2Δ1 + w[i - 16];
+            }
+
             var t1 = h + ((uint32)((uint32)((bits.RotateLeft32(e, -6)) ^ (bits.RotateLeft32(e, -11))) ^ (bits.RotateLeft32(e, -25)))) + ((uint32)(((uint32)(e & f)) ^ ((uint32)(~e & g)))) + _K[i] + w[i];
 
             var t2 = ((uint32)((uint32)((bits.RotateLeft32(a, -2)) ^ (bits.RotateLeft32(a, -13))) ^ (bits.RotateLeft32(a, -22)))) + ((uint32)((uint32)(((uint32)(a & b)) ^ ((uint32)(a & c))) ^ ((uint32)(b & c))));

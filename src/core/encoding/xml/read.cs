@@ -157,7 +157,7 @@ public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement>
     if (val.IsNil()) {
         return errors.New(nilPointerPassedToˢ);
     }
-    return Ꮡd.unmarshal(val.Elem(), Ꮡstart, 0);
+    return Ꮡd.unmarshal(val.Elem(), Ꮡstart);
 }
 
 // An UnmarshalError represents an error in the unmarshaling process.
@@ -210,25 +210,34 @@ internal static @string receiverType(any val) {
 // unmarshalInterface unmarshals a single XML element into val.
 // start is the opening tag of the element.
 internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) {
-    ref var d = ref Ꮡd.DerefOrNull();
-    ref var start = ref Ꮡstart.DerefOrNull();
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+        ref var start = ref Ꮡstart.DerefOrNull();
 
-    // Record that decoder must stop at end tag corresponding to start.
-    d.pushEOF();
+        // Record that decoder must stop at end tag corresponding to start.
+        d.pushEOF();
 
-    d.unmarshalDepth++;
-    var err = val.UnmarshalXML(Ꮡd, start);
-    d.unmarshalDepth--;
-    if (err != default!) {
-        d.popEOF();
-        return err;
+        var savedInUnmarshalXML = d.inUnmarshalXML;
+        d.inUnmarshalXML = true;
+        defer(() => {
+            Ꮡd.Value.inUnmarshalXML = savedInUnmarshalXML;
+        }, ref ᒐ);
+
+        var err = val.UnmarshalXML(Ꮡd, start);
+        if (err != default!) {
+            d.popEOF();
+            return err;
+        }
+
+        if (!d.popEOF()) {
+            return fmt.Errorf("xml: %s.UnmarshalXML did not consume entire <%s> element"u8, receiverType(val), start.Name.Local);
+        }
+
+        return default!;
     }
-
-    if (!d.popEOF()) {
-        return fmt.Errorf("xml: %s.UnmarshalXML did not consume entire <%s> element"u8, receiverType(val), start.Name.Local);
-    }
-
-    return default!;
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
 }
 
 // unmarshalTextInterface unmarshals a single XML element into val.
@@ -269,32 +278,48 @@ internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Att
         }
         val = val.Elem();
     }
-    if (val.CanInterface() && val.Type().Implements(unmarshalerAttrType)) {
+    if (val.CanInterface()) {
         // This is an unmarshaler with a non-pointer receiver,
         // so it's likely to be incorrect, but we do what we're told.
-        return val.Interface()._<UnmarshalerAttr>().UnmarshalXMLAttr(attr);
+        {
+            var (unmarshaler, ok) = reflect.TypeAssert<UnmarshalerAttr>(val); if (ok) {
+                return unmarshaler.UnmarshalXMLAttr(attr);
+            }
+        }
     }
     if (val.CanAddr()) {
         var pv = val.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(unmarshalerAttrType)) {
-            return pv.Interface()._<UnmarshalerAttr>().UnmarshalXMLAttr(attr);
+        if (pv.CanInterface()) {
+            {
+                var (unmarshaler, ok) = reflect.TypeAssert<UnmarshalerAttr>(pv); if (ok) {
+                    return unmarshaler.UnmarshalXMLAttr(attr);
+                }
+            }
         }
     }
 
     // Not an UnmarshalerAttr; try encoding.TextUnmarshaler.
-    if (val.CanInterface() && val.Type().Implements(textUnmarshalerType)) {
+    if (val.CanInterface()) {
         // This is an unmarshaler with a non-pointer receiver,
         // so it's likely to be incorrect, but we do what we're told.
-        return val.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(slice<byte>(attr.Value));
+        {
+            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(val); if (ok) {
+                return textUnmarshaler.UnmarshalText(slice<byte>(attr.Value));
+            }
+        }
     }
     if (val.CanAddr()) {
         var pv = val.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(textUnmarshalerType)) {
-            return pv.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(slice<byte>(attr.Value));
+        if (pv.CanInterface()) {
+            {
+                var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
+                    return textUnmarshaler.UnmarshalText(slice<byte>(attr.Value));
+                }
+            }
         }
     }
 
-    if (val.Type().Kind() == reflect.ΔSlice && val.Type().Elem().Kind() != reflect.Uint8) {
+    if (val.Kind() == reflect.ΔSlice && val.Type().Elem().Kind() != reflect.Uint8) {
         // Slice of element values.
         // Grow slice.
         nint n = val.Len();
@@ -320,9 +345,6 @@ internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Att
 }
 
 internal static reflectꓸType attrType = reflect.TypeFor<Attr>();
-internal static reflectꓸType unmarshalerType = reflect.TypeFor<Unmarshaler>();
-internal static reflectꓸType unmarshalerAttrType = reflect.TypeFor<UnmarshalerAttr>();
-internal static reflectꓸType textUnmarshalerType = reflect.TypeFor<encoding.TextUnmarshaler>();
 
 internal static UntypedInt maxUnmarshalDepth => 10000;
 internal static UntypedInt maxUnmarshalDepthWasm => 5000; // go.dev/issue/56498
@@ -330,11 +352,11 @@ internal static UntypedInt maxUnmarshalDepthWasm => 5000; // go.dev/issue/56498
 internal static error errUnmarshalDepth = errors.New("exceeded max depth"u8);
 
 // Unmarshal a single XML element into val.
-internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<StartElement> Ꮡstart, nint depth) {
+internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<StartElement> Ꮡstart) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var start = ref Ꮡstart.DerefOrNull();
 
-    if (depth >= maxUnmarshalDepth || runtime.GOARCH == "wasm"u8 && depth >= maxUnmarshalDepthWasm) {
+    if (d.stkDepth > maxUnmarshalDepth || runtime.GOARCH == "wasm"u8 && d.stkDepth > maxUnmarshalDepthWasm) {
         return errUnmarshalDepth;
     }
     // Find start element if we need it.
@@ -370,27 +392,43 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
         val = val.Elem();
     }
 
-    if (val.CanInterface() && val.Type().Implements(unmarshalerType)) {
+    if (val.CanInterface()) {
         // This is an unmarshaler with a non-pointer receiver,
         // so it's likely to be incorrect, but we do what we're told.
-        return Ꮡd.unmarshalInterface(val.Interface()._<Unmarshaler>(), Ꮡstart);
-    }
-
-    if (val.CanAddr()) {
-        var pv = val.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(unmarshalerType)) {
-            return Ꮡd.unmarshalInterface(pv.Interface()._<Unmarshaler>(), Ꮡstart);
+        {
+            var (unmarshaler, ok) = reflect.TypeAssert<Unmarshaler>(val); if (ok) {
+                return Ꮡd.unmarshalInterface(unmarshaler, Ꮡstart);
+            }
         }
     }
 
-    if (val.CanInterface() && val.Type().Implements(textUnmarshalerType)) {
-        return d.unmarshalTextInterface(val.Interface()._<encoding.TextUnmarshaler>());
+    if (val.CanAddr()) {
+        var pv = val.Addr();
+        if (pv.CanInterface()) {
+            {
+                var (unmarshaler, ok) = reflect.TypeAssert<Unmarshaler>(pv); if (ok) {
+                    return Ꮡd.unmarshalInterface(unmarshaler, Ꮡstart);
+                }
+            }
+        }
+    }
+
+    if (val.CanInterface()) {
+        {
+            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(val); if (ok) {
+                return d.unmarshalTextInterface(textUnmarshaler);
+            }
+        }
     }
 
     if (val.CanAddr()) {
         var pv = val.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(textUnmarshalerType)) {
-            return d.unmarshalTextInterface(pv.Interface()._<encoding.TextUnmarshaler>());
+        if (pv.CanInterface()) {
+            {
+                var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
+                    return d.unmarshalTextInterface(textUnmarshaler);
+                }
+            }
         }
     }
 
@@ -432,7 +470,7 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
 
                 // Recur to read element into slice.
                 {
-                    var errΔ6 = Ꮡd.unmarshal(v.Index(n), Ꮡstart, depth + 1); if (errΔ6 != default!) {
+                    var errΔ6 = Ꮡd.unmarshal(v.Index(n), Ꮡstart); if (errΔ6 != default!) {
                         v.SetLen(n);
                         return errΔ6;
                     }
@@ -474,7 +512,7 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
                     }
                     var fv = finfo.value(sv, initNilPointers);
                     {
-                        var (_, ok) = fv.Interface()._<Name>(ᐧ); if (ok) {
+                        var (_, ok) = reflect.TypeAssert<Name>(fv); if (ok) {
                             fv.Set(reflect.ValueOf(start.Name));
                         }
                     }
@@ -570,16 +608,14 @@ Loop:
             ref var t = ref heap(tᴛ1, out var Ꮡt);
             var consumed = false;
             if (sv.IsValid()) {
-                // unmarshalPath can call unmarshal, so we need to pass the depth through so that
-                // we can continue to enforce the maximum recursion limit.
-                (consumed, errΔ10) = Ꮡd.unmarshalPath(tinfo, sv, default!, Ꮡt, depth);
+                (consumed, errΔ10) = Ꮡd.unmarshalPath(tinfo, sv, default!, Ꮡt);
                 if (errΔ10 != default!) {
                     return errΔ10;
                 }
                 if (!consumed && saveAny.IsValid()) {
                     consumed = true;
                     {
-                        var errΔ11 = Ꮡd.unmarshal(saveAny, Ꮡt, depth + 1); if (errΔ11 != default!) {
+                        var errΔ11 = Ꮡd.unmarshal(saveAny, Ꮡt); if (errΔ11 != default!) {
                             return errΔ11;
                         }
                     }
@@ -620,24 +656,32 @@ continue_Loop:;
     }
 break_Loop:;
 
-    if (saveData.IsValid() && saveData.CanInterface() && saveData.Type().Implements(textUnmarshalerType)) {
+    if (saveData.IsValid() && saveData.CanInterface()) {
         {
-            var errΔ13 = saveData.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(data); if (errΔ13 != default!) {
-                return errΔ13;
+            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(saveData); if (ok) {
+                {
+                    var errΔ13 = textUnmarshaler.UnmarshalText(data); if (errΔ13 != default!) {
+                        return errΔ13;
+                    }
+                }
+                saveData = new reflectꓸValue(nil);
             }
         }
-        saveData = new reflectꓸValue(nil);
     }
 
     if (saveData.IsValid() && saveData.CanAddr()) {
         var pv = saveData.Addr();
-        if (pv.CanInterface() && pv.Type().Implements(textUnmarshalerType)) {
+        if (pv.CanInterface()) {
             {
-                var errΔ14 = pv.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(data); if (errΔ14 != default!) {
-                    return errΔ14;
+                var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
+                    {
+                        var errΔ14 = textUnmarshaler.UnmarshalText(data); if (errΔ14 != default!) {
+                            return errΔ14;
+                        }
+                    }
+                    saveData = new reflectꓸValue(nil);
                 }
             }
-            saveData = new reflectꓸValue(nil);
         }
     }
 
@@ -754,7 +798,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
 // The consumed result tells whether XML elements have been consumed
 // from the Decoder until start's matching end element, or if it's
 // still untouched because start is uninteresting for sv's fields.
-internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflectꓸValue sv, slice<@string> parents, ж<StartElement> Ꮡstart, nint depth) {
+internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflectꓸValue sv, slice<@string> parents, ж<StartElement> Ꮡstart) {
     error err = default!;
     ref var d = ref Ꮡd.DerefOrNull();
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
@@ -774,7 +818,7 @@ Loop:
         }
         if (len((~finfo).parents) == len(parents) && (~finfo).name == start.Name.Local) {
             // It's a perfect match, unmarshal the field.
-            return (true, Ꮡd.unmarshal(finfo.value(sv, initNilPointers), Ꮡstart, depth + 1));
+            return (true, Ꮡd.unmarshal(finfo.value(sv, initNilPointers), Ꮡstart));
         }
         if (len((~finfo).parents) > len(parents) && (~finfo).parents[len(parents)] == start.Name.Local) {
             // It's a prefix for the field. Break and recurse
@@ -806,9 +850,7 @@ break_Loop:;
         switch (tok.type()) {
         case StartElement tᴛ2: {
             ref var t = ref heap(tᴛ2, out var Ꮡt);
-            // the recursion depth of unmarshalPath is limited to the path length specified
-            // by the struct field tag, so we don't increment the depth here.
-            var (consumed2, errΔ1) = Ꮡd.unmarshalPath(Ꮡtinfo, sv, parents, Ꮡt, depth);
+            var (consumed2, errΔ1) = Ꮡd.unmarshalPath(Ꮡtinfo, sv, parents, Ꮡt);
             if (errΔ1 != default!) {
                 return (true, errΔ1);
             }

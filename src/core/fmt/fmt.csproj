@@ -169,6 +169,7 @@
 
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/fmtsort/internal.fmtsort.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/stringslite/internal.stringslite.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />

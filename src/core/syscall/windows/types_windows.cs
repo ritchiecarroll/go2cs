@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using @unsafe = unsafe_package;
+
 partial class syscall_package {
 
 // Windows errors.
@@ -31,6 +33,8 @@ public static Errno WSAENOPROTOOPT => 10042;
 public static Errno WSAECONNABORTED => 10053;
 public static Errno WSAECONNRESET => 10054;
 
+internal static Errno _ERROR_INVALID_PARAMETER => 87;
+
 // Invented values to support what package os expects.
 public static UntypedInt O_RDONLY => 0x00000;
 public static UntypedInt O_WRONLY => 0x00001;
@@ -43,10 +47,10 @@ public static UntypedInt O_NONBLOCK => 0x00800;
 public static UntypedInt O_APPEND => 0x00400;
 public static UntypedInt O_SYNC => 0x01000;
 public static UntypedInt O_ASYNC => 0x02000;
+internal static UntypedInt o_DIRECTORY => 0x04000;
 public static UntypedInt O_CLOEXEC => 0x80000;
-internal static UntypedInt o_DIRECTORY => 0x100000; // used by internal/syscall/windows
-internal static UntypedInt o_NOFOLLOW_ANY => 0x20000000; // used by internal/syscall/windows
-internal static UntypedInt o_OPEN_REPARSE => 0x40000000; // used by internal/syscall/windows
+internal static UntypedInt o_NOFOLLOW_ANY => 0x200000000; // used by internal/syscall/windows
+internal static UntypedInt o_WRITE_ATTRS => 0x800000000; // used by internal/syscall/windows
 
 // More invented values for signals
 public static ΔSignal SIGHUP => /* Signal(0x1) */ 1;
@@ -81,6 +85,20 @@ internal static array<@string> signals = new array<@string>(16){
     [15] = "terminated"u8
 };
 
+internal static UntypedInt fileFlagsMask => 0xFFF00000;
+
+internal static UntypedInt validFileFlagsMask => /* FILE_FLAG_OPEN_REPARSE_POINT |
+	FILE_FLAG_BACKUP_SEMANTICS |
+	FILE_FLAG_OVERLAPPED |
+	_FILE_FLAG_OPEN_NO_RECALL |
+	_FILE_FLAG_SESSION_AWARE |
+	_FILE_FLAG_POSIX_SEMANTICS |
+	_FILE_FLAG_DELETE_ON_CLOSE |
+	_FILE_FLAG_SEQUENTIAL_SCAN |
+	_FILE_FLAG_NO_BUFFERING |
+	_FILE_FLAG_RANDOM_ACCESS |
+	_FILE_FLAG_WRITE_THROUGH */ 4289724416;
+
 public static UntypedInt GENERIC_READ => 0x80000000;
 public static UntypedInt GENERIC_WRITE => 0x40000000;
 public static UntypedInt GENERIC_EXECUTE => 0x20000000;
@@ -110,9 +128,19 @@ public static UntypedInt OPEN_EXISTING => 3;
 public static UntypedInt OPEN_ALWAYS => 4;
 public static UntypedInt TRUNCATE_EXISTING => 5;
 
+// The following flags are supported by [Open]
+// and exported in [golang.org/x/sys/windows].
+internal static UntypedInt _FILE_FLAG_OPEN_NO_RECALL => 0x00100000;
 public static UntypedInt FILE_FLAG_OPEN_REPARSE_POINT => 0x00200000;
+internal static UntypedInt _FILE_FLAG_SESSION_AWARE => 0x00800000;
+internal static UntypedInt _FILE_FLAG_POSIX_SEMANTICS => 0x01000000;
 public static UntypedInt FILE_FLAG_BACKUP_SEMANTICS => 0x02000000;
+internal static UntypedInt _FILE_FLAG_DELETE_ON_CLOSE => 0x04000000;
+internal static UntypedInt _FILE_FLAG_SEQUENTIAL_SCAN => 0x08000000;
+internal static UntypedInt _FILE_FLAG_RANDOM_ACCESS => 0x10000000;
+internal static UntypedInt _FILE_FLAG_NO_BUFFERING => 0x20000000;
 public static UntypedInt FILE_FLAG_OVERLAPPED => 0x40000000;
+internal static UntypedInt _FILE_FLAG_WRITE_THROUGH => 0x80000000;
 
 public static UntypedInt HANDLE_FLAG_INHERIT => 0x00000001;
 public static UntypedInt STARTF_USESTDHANDLES => 0x00000100;
@@ -477,8 +505,16 @@ partial struct StartupInfo {
     public ΔHandle StdErr;
 }
 
+// _PROC_THREAD_ATTRIBUTE_LIST is a placeholder type to represent a the opaque PROC_THREAD_ATTRIBUTE_LIST.
+//
+// Manipulate this type only through [procThreadAttributeListContainer] to ensure proper handling of the
+// underlying memory. See https://g.dev/issue/73170.
 public partial struct _PROC_THREAD_ATTRIBUTE_LIST {
-    internal array<byte> _ = new(1);
+}
+
+partial struct procThreadAttributeListContainer {
+    internal ж<_PROC_THREAD_ATTRIBUTE_LIST> data;
+    internal slice<@unsafe.Pointer> pointers;
 }
 
 internal static UntypedInt _PROC_THREAD_ATTRIBUTE_PARENT_PROCESS => 0x00020000;

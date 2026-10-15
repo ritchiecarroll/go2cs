@@ -8,11 +8,11 @@ namespace go.go;
 using cmp = cmp_package;
 using heap = container.heap_package;
 using fmt = fmt_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using sort = sort_package;
 using container;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 
 partial class types_package {
 

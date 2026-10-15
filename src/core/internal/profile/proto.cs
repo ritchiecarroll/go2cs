@@ -21,6 +21,7 @@ namespace go.@internal;
 
 using errors = errors_package;
 using fmt = fmt_package;
+using slices = slices_package;
 
 partial class profile_package {
 
@@ -176,6 +177,20 @@ internal static uint32 le32(slice<byte> p) {
     return (uint32)((uint32)((uint32)((uint32)p[0] | ((uint32)p[1] << (int)(8))) | ((uint32)p[2] << (int)(16))) | ((uint32)p[3] << (int)(24)));
 }
 
+internal static nint /*numVarints*/ peekNumVarints(slice<byte> data) {
+    nint numVarints = default!;
+
+    for (; len(data) > 0; numVarints++) {
+        error err = default!;
+        {
+            (_, data, err) = decodeVarint(data); if (err != default!) {
+                break;
+            }
+        }
+    }
+    return numVarints;
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string badVarintˢ = "bad varint"u8;
 
@@ -306,6 +321,9 @@ internal static error decodeInt64s(ref buffer b, ж<slice<int64>> Ꮡx) {
 
     if (b.typ == 2) {
         // Packed encoding
+        nint dataLen = peekNumVarints(b.data);
+        x = slices.Grow<slice<int64>, int64>(x, dataLen);
+
         var data = b.data;
         while (len(data) > 0) {
             uint64 u = default!;
@@ -346,8 +364,11 @@ internal static error decodeUint64s(ref buffer b, ж<slice<uint64>> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (b.typ == 2) {
-        var data = b.data;
         // Packed encoding
+        nint dataLen = peekNumVarints(b.data);
+        x = slices.Grow<slice<uint64>, uint64>(x, dataLen);
+
+        var data = b.data;
         while (len(data) > 0) {
             uint64 uΔ1 = default!;
             error err = default!;

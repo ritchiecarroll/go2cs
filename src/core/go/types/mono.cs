@@ -7,8 +7,8 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -217,10 +217,10 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
     ref var @do = ref heap<Action<ΔType>>(out var Ꮡdo);
     var flowʗ1 = flow;
     @do = (ΔType typ) => {
-        var switchᴛ10 = Unalias(typ);
-        switch (switchᴛ10.type()) {
+        var switchᴛ9 = Unalias(typ);
+        switch (switchᴛ9.type()) {
         default: {
-            var typΔ1 = switchᴛ10;
+            var typΔ1 = switchᴛ9;
             throw panic("unexpected type");
             break;
         }

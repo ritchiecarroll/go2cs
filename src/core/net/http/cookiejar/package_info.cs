@@ -13,6 +13,8 @@
 global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
 global using httpꓸHeader = go.net.http_package.ΔHeader;
+global using netipꓸAddr = go.net.netip_package.ΔAddr;
+global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
 global using netꓸAddr = go.net_package.ΔAddr;
 global using netꓸError = go.net_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
@@ -58,7 +60,7 @@ using static go.net.http.cookiejar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AEieAcKmgpQAGjqSrLKssoKUqJKClIKCkoKmqJKssqjygpSCgpSUgpSCgqaCgoKmgoKigoKClIKUgoKClIKClNyCgIKkgIKklIKW3LKo8oKUgpSCgpSClIKUlIKCgoKUgoKCgIKCtpSCpoCCgpSCgqSCgqaCgpTGqKKCgoKCuIKCgqaCqqKCgpSClKiSgqaCgoKCpoKClIKm3IKoksqUqqKCpoKClAAHGAANApSClKaCgriCkoKClIKClIKUgriCgoKUlKSkpqiCzJaSpqYADyKCAAsY3JSmpoKUpu64goCCppTsgqY=", "214-222:1")]
+[assembly: go.GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AEmgAcKmgpQAGjqSrLKssoKUqJKClIKCkoKmrLKUppSmgpSCgpTWgoKAgqSokqyyqPKClIKClJSClIKCpoKCgqaCgqKCgoKUgpSCgoKUgoKU3IKAgqSAgqSUgpbcsqjygpSClIKClIKUgpSUgoKCgpSCgoKAgoK2lIKmgIKClIKCpIKCpoKClMaoooKCgoK4goKCpoKqooKClIKUqJKCpoKCgoKmgoKUgqbcgqiSypSqooKmgoKUAAcYAA0ClIKUpoKCuIKSgoKUgoKUgpSCuIKCgpSUpKSmqILMlpKmpgAPIoIACxjclKamgpSm7riCgIKmlOyCpg==", "247-255:1")]
 [assembly: go.GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ABtG0oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgpKClIKUgpSCgoKClIKUpoKUpJSokoKUlIKCgoKUAAgYsoKUgoKCgoKUpg==")]
 // </GoSourcePositionMaps>
 
@@ -92,6 +94,7 @@ public static partial class cookiejar_package
     [GoInit] internal static void initᴛᴛimportꓸnet() => builtin.initPackage(typeof(net_package));
     [GoInit] internal static void initᴛᴛimportꓸnetꓸhttp() => builtin.initPackage(typeof(go.net.http_package));
     [GoInit] internal static void initᴛᴛimportꓸnetꓸhttpꓸinternalꓸascii() => builtin.initPackage(typeof(go.net.http.@internal.ascii_package));
+    [GoInit] internal static void initᴛᴛimportꓸnetꓸnetip() => builtin.initPackage(typeof(go.net.netip_package));
     [GoInit] internal static void initᴛᴛimportꓸnetꓸurl() => builtin.initPackage(typeof(go.net.url_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));

@@ -111,15 +111,16 @@ public static Code DuplicateDecl => 10;
 //  	S
 //  }
 //
-public static Code InvalidDeclCycle => 11;
-
-// InvalidTypeCycle occurs when a cycle in type definitions results in a
-// type that is not well-defined.
-//
 // Example:
 //  import "unsafe"
 //
 //  type T [unsafe.Sizeof(T{})]int
+public static Code InvalidDeclCycle => 11;
+
+// TODO(markfreeman): Retire InvalidTypeCycle, as it's never emitted.
+
+// InvalidTypeCycle occurs when a cycle in type definitions results in a
+// type that is not well-defined.
 public static Code InvalidTypeCycle => 12;
 
 // InvalidConstInit occurs when a const declaration has a non-constant
@@ -716,12 +717,9 @@ public static Code NonVariadicDotDotDot => 78;
 
 // MisplacedDotDotDot occurs when a "..." is used somewhere other than the
 // final argument in a function declaration.
-//
-// Example:
-// 	func f(...int, int)
-public static Code MisplacedDotDotDot => 79;
+internal static Code _ᴛ4ʗ => 79; // not used anymore (error reported by parser)
 
-internal static Code _ᴛ4ʗ => 80; // InvalidDotDotDotOperand was removed.
+internal static Code _ᴛ5ʗ => 80; // InvalidDotDotDotOperand was removed.
 
 // InvalidDotDotDot occurs when a "..." is used in a non-variadic built-in
 // function.
@@ -881,7 +879,9 @@ public static Code InvalidConversion => 96;
 // context in which it is used.
 //
 // Example:
-//  var _ = 1 + []int{}
+//  func f[T ~int8 | ~int16 | ~int32 | ~int64](x T) T {
+//  	return x + 1024
+//  }
 public static Code InvalidUntypedConversion => 97;
 
 // BadOffsetofSyntax occurs when unsafe.Offsetof is called with an argument
@@ -988,7 +988,7 @@ public static Code InvalidCond => 105;
 //  }
 public static Code InvalidPostDecl => 106;
 
-internal static Code _ᴛ5ʗ => 107; // InvalidChanRange was removed.
+internal static Code _ᴛ6ʗ => 107; // InvalidChanRange was removed.
 
 // InvalidIterVar occurs when two iteration variables are used while ranging
 // over a channel.
@@ -1428,7 +1428,7 @@ public static Code InvalidUnsafeString => 146;
 
 // InvalidUnsafeStringData occurs if it is used in a package
 // compiled for a language version before go1.20.
-internal static Code _ᴛ6ʗ => 147; // not used anymore
+internal static Code _ᴛ7ʗ => 147; // not used anymore
 
 // InvalidClear occurs when clear is called with an argument
 // that is not of map or slice type.

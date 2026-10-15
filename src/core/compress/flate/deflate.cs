@@ -81,15 +81,6 @@ partial struct compressor {
     internal Func<ж<compressor>, slice<byte>, nint> fill; // copy data to window
     internal Action<ж<compressor>> step;        // process window
     internal ж<deflateFast> bestSpeed;               // Encoder for BestSpeed
-    // Input hash chains
-    // hashHead[hashValue] contains the largest inputIndex with the specified hash value
-    // If hashHead[hashValue] is within the current window, then
-    // hashPrev[hashHead[hashValue] & windowMask] contains the previous index
-    // with the same hash value.
-    internal nint chainHead;
-    internal array<uint32> hashHead = new(hashSize);
-    internal array<uint32> hashPrev = new(windowSize);
-    internal nint hashOffset;
     // input window: unprocessed data is window[index:windowEnd]
     internal nint index;
     internal slice<byte> window;
@@ -104,6 +95,17 @@ partial struct compressor {
     internal nint offset;
     internal nint maxInsertIndex;
     internal error err;
+    // Input hash chains
+    // hashHead[hashValue] contains the largest inputIndex with the specified hash value
+    // If hashHead[hashValue] is within the current window, then
+    // hashPrev[hashHead[hashValue] & windowMask] contains the previous index
+    // with the same hash value.
+    // These are large and do not contain pointers, so put them
+    // near the end of the struct so the GC has to scan less.
+    internal nint chainHead;
+    internal array<uint32> hashHead = new(hashSize);
+    internal array<uint32> hashPrev = new(windowSize);
+    internal nint hashOffset;
     // hashMatch must be able to contain hashes for the maximum match length.
     internal array<uint32> hashMatch = new(maxMatchLength - 1);
 }
@@ -692,8 +694,8 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, nint level) {
 // [Writer] with a preset dictionary. The returned [Writer] behaves
 // as if the dictionary had been written to it without producing
 // any compressed output. The compressed data written to w
-// can only be decompressed by a [Reader] initialized with the
-// same dictionary.
+// can only be decompressed by a reader initialized with the
+// same dictionary (see [NewReaderDict]).
 public static (ж<Writer>, error) NewWriterDict(io.Writer w, nint level, slice<byte> dict) {
     var dw = Ꮡ(new dictWriter(w));
     var (zw, err) = NewWriter(new dictWriterжWriter(dw), level);
@@ -702,7 +704,7 @@ public static (ж<Writer>, error) NewWriterDict(io.Writer w, nint level, slice<b
     }
     zw.of(Writer.Ꮡd).fillWindow(dict);
     zw.Value.dict = appendꓸꓸꓸ((~zw).dict, dict); // duplicate dictionary for Reset method.
-    return (zw, err);
+    return (zw, default!);
 }
 
 partial struct dictWriter {

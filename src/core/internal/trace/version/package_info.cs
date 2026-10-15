@@ -49,7 +49,7 @@ using static go.@internal.trace.version_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/version/version.go", "version.cs", "ABg2AAwekqaCggAFEKKCgoKUgpSokg==", "", "", "25=Specs/1/2/7,Specs/2/2/11")]
+[assembly: go.GoPositionMap("internal/trace/version/version.go", "version.cs", "ABg4AAsckuqigpSCgpSClKaCggAFEKKCgoKUgpSokg==", "", "", "25=Specs/1/4/7,Specs/2/4/8,Specs/3/4/9,Specs/4/4/10")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
@@ -75,8 +75,7 @@ public static partial class version_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸevent() => builtin.initPackage(typeof(go.@internal.trace.event_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸeventꓸgo122() => builtin.initPackage(typeof(go.@internal.trace.@event.go122_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸtracev2() => builtin.initPackage(typeof(go.@internal.trace.tracev2_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     // </ImportInitializers>
 }

@@ -5,7 +5,7 @@ namespace go;
 
 using cmp = cmp_package;
 using bytealg = @internal.bytealg_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using slices = slices_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
@@ -17,7 +17,9 @@ partial class net_package {
 // provided by runtime
 //
 //go:linkname runtime_rand runtime.rand
-internal static partial uint64 runtime_rand();
+/*linkname*/ internal static partial uint64 runtime_rand() {
+    return go.runtime_package.rand();
+}
 
 internal static nint randInt() {
     return (nint)(((nuint)runtime_rand() >> (int)(1))); // clear sign bit
@@ -36,7 +38,7 @@ internal static (@string arpa, error err) reverseaddr(@string addr) {
         return ("", new DNSErrorжerror(Ꮡ(new DNSError(Err: "unrecognized address"u8, Name: addr))));
     }
     if (ip.To4() != default!) {
-        return (itoa.Uitoa((nuint)ip[15]) + "." + itoa.Uitoa((nuint)ip[14]) + "." + itoa.Uitoa((nuint)ip[13]) + "." + itoa.Uitoa((nuint)ip[12]) + ".in-addr.arpa.", default!);
+        return (strconv.Itoa((nint)ip[15]) + "." + strconv.Itoa((nint)ip[14]) + "." + strconv.Itoa((nint)ip[13]) + "." + strconv.Itoa((nint)ip[12]) + ".in-addr.arpa.", default!);
     }
     // Must be IPv6
     var buf = new slice<byte>(0, len(ip) * 4 + len("ip6.arpa."));

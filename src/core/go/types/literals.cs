@@ -8,10 +8,10 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using strings = strings_package;
 using constant = global::go.go.constant_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -128,13 +128,12 @@ internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string missingTypeInCompositeˢ = "missing type in composite literal"u8;
-internal static readonly @string invalidRecursiveTypeˢ = "invalid recursive type"u8;
 internal static readonly @string mixtureOfFieldValueAndˢ = "mixture of field:value and value elements in struct literal"u8;
 internal static readonly @string structLiteralˢ = "struct literal"u8;
 internal static readonly @string missingKeyInMapLiteralˢ = "missing key in map literal"u8;
 internal static readonly @string mapLiteralˢ = "map literal"u8;
 internal static readonly @string elementˢ = " element"u8;
-internal static readonly @string noCoreTypeˢ = " (no core type)"u8;
+internal static readonly @string noCommonUnderlyingTypeˢ = " (no common underlying type)"u8;
 
 internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, ΔType hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -169,8 +168,9 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         typ = hint;
         @base = typ;
         // *T implies &T{}
+        var (u, _) = commonUnder(@base, default!);
         {
-            var (b, ok) = deref(coreType(@base)); if (ok) {
+            var (b, ok) = deref(u); if (ok) {
                 @base = b;
             }
         }
@@ -186,218 +186,191 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         break;
     }}
 
-    var switchᴛ9 = coreType(@base);
-    switch (switchᴛ9.type()) {
-    case ж<Struct> utyp: {
-        // Prevent crash if the struct referred to is not yet set up.
-        // See analogous comment for *Array.
-        if ((~utyp).fields == default!) {
-            Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), InvalidTypeCycle, invalidRecursiveTypeˢ);
-            x.mode = invalid;
-            return;
-        }
-        if (len(e.Elts) == 0) {
-            break;
-        }
-        // Convention for error messages on invalid struct literals:
-        // we mention the struct type only if it clarifies the error
-        // (e.g., a duplicate field error doesn't need the struct type).
-        var fields = utyp.Value.fields;
-        {
-            var (_, ok) = e.Elts[0]._<ж<ast.KeyValueExpr>>(ᐧ); if (ok){
-                // all elements must have keys
-                var visited = new slice<bool>(len(fields));
-                foreach (var (_, eΔ1) in e.Elts) {
-                    var (kv, _) = eΔ1._<ж<ast.KeyValueExpr>>(ᐧ);
-                    if (kv == nil) {
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ1), MixedStructLit, mixtureOfFieldValueAndˢ);
-                        continue;
-                    }
-                    var (key, _) = (~kv).Key._<ж<ast.Ident>>(ᐧ);
-                    // do all possible checks early (before exiting due to errors)
-                    // so we don't drop information on the floor
-                    Ꮡcheck.expr(nil, Ꮡx, (~kv).Value);
-                    if (key == nil) {
-                        Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), InvalidLitField, "invalid field name %s in struct literal"u8, (~kv).Key);
-                        continue;
-                    }
-                    nint i = fieldIndex(fields, check.pkg, (~key).Name, false);
-                    if (i < 0) {
-                        Object alt = default!;
-                        {
-                            nint j = fieldIndex(fields, check.pkg, (~key).Name, true); if (j >= 0) {
-                                alt = new VarжObject(fields[j]);
-                            }
-                        }
-                        @string msg = Ꮡcheck.lookupError(@base, (~key).Name, alt, true);
-                        Ꮡcheck.error(new ast_Exprᴠpositioner((~kv).Key), MissingLitField, msg);
-                        continue;
-                    }
-                    var fld = fields[i];
-                    check.recordUse(key, new VarжObject(fld));
-                    var etyp = fld.Value.typ;
-                    Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
-                    // 0 <= i < len(fields)
-                    if (visited[i]) {
-                        Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), DuplicateLitField, "duplicate field name %s in struct literal"u8, (~key).Name);
-                        continue;
-                    }
-                    visited[i] = true;
-                }
-            } else {
-                // no element must have a key
-                foreach (var (i, eΔ2) in e.Elts) {
-                    {
-                        var (kv, _) = eΔ2._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
-                            Ꮡcheck.error(new ast_KeyValueExprжpositioner(kv), MixedStructLit, mixtureOfFieldValueAndˢ);
+    {
+        var (u, _) = commonUnder(@base, default!);
+        switch (u.type()) {
+        case ж<Struct> utyp: {
+            if (len(e.Elts) == 0) {
+                break;
+            }
+            // Convention for error messages on invalid struct literals:
+            // we mention the struct type only if it clarifies the error
+            // (e.g., a duplicate field error doesn't need the struct type).
+            var fields = utyp.Value.fields;
+            {
+                var (_, ok) = e.Elts[0]._<ж<ast.KeyValueExpr>>(ᐧ); if (ok){
+                    // all elements must have keys
+                    var visited = new slice<bool>(len(fields));
+                    foreach (var (_, eΔ1) in e.Elts) {
+                        var (kv, _) = eΔ1._<ж<ast.KeyValueExpr>>(ᐧ);
+                        if (kv == nil) {
+                            Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ1), MixedStructLit, mixtureOfFieldValueAndˢ);
                             continue;
                         }
-                    }
-                    Ꮡcheck.expr(nil, Ꮡx, eΔ2);
-                    if (i >= len(fields)) {
-                        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidStructLit, "too many values in struct literal of type %s"u8, @base);
-                        break; // cannot continue
-                    }
-                    // i < len(fields)
-                    var fld = fields[i];
-                    if (!fld.of(Var.Ꮡobject).Exported() && (~fld).pkg != check.pkg) {
-                        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnexportedLitField, "implicit assignment to unexported field %s in struct literal of type %s"u8, (~fld).name, @base);
-                        continue;
-                    }
-                    var etyp = fld.Value.typ;
-                    Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
-                }
-                if (len(e.Elts) < len(fields)) {
-                    Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(Ꮡe), e.Rbrace), InvalidStructLit, "too few values in struct literal of type %s"u8, @base);
-                    // ok to continue
-                }
-            }
-        }
-        break;
-    }
-    case ж<Array> utyp: {
-        // Prevent crash if the array referred to is not yet set up. Was go.dev/issue/18643.
-        // This is a stop-gap solution. Should use Checker.objPath to report entire
-        // path starting with earliest declaration in the source. TODO(gri) fix this.
-        if ((~utyp).elem == default!) {
-            Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), InvalidTypeCycle, invalidRecursiveTypeˢ);
-            x.mode = invalid;
-            return;
-        }
-        var n = Ꮡcheck.indexedElts(e.Elts, (~utyp).elem, (~utyp).len);
-        // If we have an array of unknown length (usually [...]T arrays, but also
-        // arrays [n]T where n is invalid) set the length now that we know it and
-        // record the type for the array (usually done by check.typ which is not
-        // called for [...]T). We handle [...]T arrays and arrays with invalid
-        // length the same here because it makes sense to "guess" the length for
-        // the latter if we have a composite literal; e.g. for [n]int{1, 2, 3}
-        // where n is invalid for some reason, it seems fair to assume it should
-        // be 3 (see also Checked.arrayLength and go.dev/issue/27346).
-        if ((~utyp).len < 0) {
-            utyp.Value.len = n;
-            // e.Type is missing if we have a composite literal element
-            // that is itself a composite literal with omitted type. In
-            // that case there is nothing to record (there is no type in
-            // the source at that point).
-            if (e.Type != default!) {
-                check.recordTypeAndValue(e.Type, typexpr, new ArrayжΔType(utyp), default!);
-            }
-        }
-        break;
-    }
-    case ж<Slice> utyp: {
-        // Prevent crash if the slice referred to is not yet set up.
-        // See analogous comment for *Array.
-        if ((~utyp).elem == default!) {
-            Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), InvalidTypeCycle, invalidRecursiveTypeˢ);
-            x.mode = invalid;
-            return;
-        }
-        Ꮡcheck.indexedElts(e.Elts, (~utyp).elem, -1);
-        break;
-    }
-    case ж<Map> utyp: {
-        // Prevent crash if the map referred to is not yet set up.
-        // See analogous comment for *Array.
-        if ((~utyp).key == default! || (~utyp).elem == default!) {
-            Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), InvalidTypeCycle, invalidRecursiveTypeˢ);
-            x.mode = invalid;
-            return;
-        }
-        // If the map key type is an interface (but not a type parameter),
-        // the type of a constant key must be considered when checking for
-        // duplicates.
-        var keyIsInterface = isNonTypeParamInterface((~utyp).key);
-        var visited = new map<any, slice<ΔType>>(len(e.Elts));
-        foreach (var (_, eΔ3) in e.Elts) {
-            var (kv, _) = eΔ3._<ж<ast.KeyValueExpr>>(ᐧ);
-            if (kv == nil) {
-                Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ3), MissingLitKey, missingKeyInMapLiteralˢ);
-                continue;
-            }
-            Ꮡcheck.exprWithHint(Ꮡx, (~kv).Key, (~utyp).key);
-            Ꮡcheck.assignment(Ꮡx, (~utyp).key, mapLiteralˢ);
-            if (x.mode == invalid) {
-                continue;
-            }
-            if (x.mode == constant_) {
-                var duplicate = false;
-                var xkey = keyVal(x.val);
-                if (keyIsInterface){
-                    foreach (var (_, vtyp) in visited[xkey]) {
-                        if (Identical(vtyp, x.typ)) {
-                            duplicate = true;
-                            break;
+                        var (key, _) = (~kv).Key._<ж<ast.Ident>>(ᐧ);
+                        // do all possible checks early (before exiting due to errors)
+                        // so we don't drop information on the floor
+                        Ꮡcheck.expr(nil, Ꮡx, (~kv).Value);
+                        if (key == nil) {
+                            Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), InvalidLitField, "invalid field name %s in struct literal"u8, (~kv).Key);
+                            continue;
                         }
+                        nint i = fieldIndex(fields, check.pkg, (~key).Name, false);
+                        if (i < 0) {
+                            Object alt = default!;
+                            {
+                                nint j = fieldIndex(fields, check.pkg, (~key).Name, true); if (j >= 0) {
+                                    alt = new VarжObject(fields[j]);
+                                }
+                            }
+                            @string msg = Ꮡcheck.lookupError(@base, (~key).Name, alt, true);
+                            Ꮡcheck.error(new ast_Exprᴠpositioner((~kv).Key), MissingLitField, msg);
+                            continue;
+                        }
+                        var fld = fields[i];
+                        check.recordUse(key, new VarжObject(fld));
+                        var etyp = fld.Value.typ;
+                        Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
+                        // 0 <= i < len(fields)
+                        if (visited[i]) {
+                            Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), DuplicateLitField, "duplicate field name %s in struct literal"u8, (~key).Name);
+                            continue;
+                        }
+                        visited[i] = true;
                     }
-                    visited[xkey] = append(visited[xkey], x.typ);
                 } else {
-                    (_, duplicate) = visited[xkey, ꟷ];
-                    visited[xkey] = default!;
+                    // no element must have a key
+                    foreach (var (i, eΔ2) in e.Elts) {
+                        {
+                            var (kv, _) = eΔ2._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
+                                Ꮡcheck.error(new ast_KeyValueExprжpositioner(kv), MixedStructLit, mixtureOfFieldValueAndˢ);
+                                continue;
+                            }
+                        }
+                        Ꮡcheck.expr(nil, Ꮡx, eΔ2);
+                        if (i >= len(fields)) {
+                            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidStructLit, "too many values in struct literal of type %s"u8, @base);
+                            break; // cannot continue
+                        }
+                        // i < len(fields)
+                        var fld = fields[i];
+                        if (!fld.of(Var.Ꮡobject).Exported() && (~fld).pkg != check.pkg) {
+                            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnexportedLitField, "implicit assignment to unexported field %s in struct literal of type %s"u8, (~fld).name, @base);
+                            continue;
+                        }
+                        var etyp = fld.Value.typ;
+                        Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
+                    }
+                    if (len(e.Elts) < len(fields)) {
+                        Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(Ꮡe), e.Rbrace), InvalidStructLit, "too few values in struct literal of type %s"u8, @base);
+                        // ok to continue
+                    }
                 }
-                if (duplicate) {
-                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), DuplicateLitKey, "duplicate key %s in map literal"u8, x.val);
+            }
+            break;
+        }
+        case ж<Array> utyp: {
+            var n = Ꮡcheck.indexedElts(e.Elts, (~utyp).elem, (~utyp).len);
+            // If we have an array of unknown length (usually [...]T arrays, but also
+            // arrays [n]T where n is invalid) set the length now that we know it and
+            // record the type for the array (usually done by check.typ which is not
+            // called for [...]T). We handle [...]T arrays and arrays with invalid
+            // length the same here because it makes sense to "guess" the length for
+            // the latter if we have a composite literal; e.g. for [n]int{1, 2, 3}
+            // where n is invalid for some reason, it seems fair to assume it should
+            // be 3 (see also Checked.arrayLength and go.dev/issue/27346).
+            if ((~utyp).len < 0) {
+                utyp.Value.len = n;
+                // e.Type is missing if we have a composite literal element
+                // that is itself a composite literal with omitted type. In
+                // that case there is nothing to record (there is no type in
+                // the source at that point).
+                if (e.Type != default!) {
+                    check.recordTypeAndValue(e.Type, typexpr, new ArrayжΔType(utyp), default!);
+                }
+            }
+            break;
+        }
+        case ж<Slice> utyp: {
+            Ꮡcheck.indexedElts(e.Elts, (~utyp).elem, -1);
+            break;
+        }
+        case ж<Map> utyp: {
+            // If the map key type is an interface (but not a type parameter),
+            // the type of a constant key must be considered when checking for
+            // duplicates.
+            var keyIsInterface = isNonTypeParamInterface((~utyp).key);
+            var visited = new map<any, slice<ΔType>>(len(e.Elts));
+            foreach (var (_, eΔ3) in e.Elts) {
+                var (kv, _) = eΔ3._<ж<ast.KeyValueExpr>>(ᐧ);
+                if (kv == nil) {
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ3), MissingLitKey, missingKeyInMapLiteralˢ);
                     continue;
                 }
-            }
-            Ꮡcheck.exprWithHint(Ꮡx, (~kv).Value, (~utyp).elem);
-            Ꮡcheck.assignment(Ꮡx, (~utyp).elem, mapLiteralˢ);
-        }
-        break;
-    }
-    default: {
-        var utyp = switchᴛ9;
-        // when "using" all elements unpack KeyValueExpr
-        // explicitly because check.use doesn't accept them
-        foreach (var (_, vᴛ1) in e.Elts) {
-            var eΔ4 = vᴛ1;
-
-            {
-                var (kv, _) = eΔ4._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
-                    // Ideally, we should also "use" kv.Key but we can't know
-                    // if it's an externally defined struct key or not. Going
-                    // forward anyway can lead to other errors. Give up instead.
-                    eΔ4 = kv.Value.Value;
+                Ꮡcheck.exprWithHint(Ꮡx, (~kv).Key, (~utyp).key);
+                Ꮡcheck.assignment(Ꮡx, (~utyp).key, mapLiteralˢ);
+                if (x.mode == invalid) {
+                    continue;
                 }
+                if (x.mode == constant_) {
+                    var duplicate = false;
+                    var xkey = keyVal(x.val);
+                    if (keyIsInterface){
+                        foreach (var (_, vtyp) in visited[xkey]) {
+                            if (Identical(vtyp, x.typ)) {
+                                duplicate = true;
+                                break;
+                            }
+                        }
+                        visited[xkey] = append(visited[xkey], x.typ);
+                    } else {
+                        (_, duplicate) = visited[xkey, ꟷ];
+                        visited[xkey] = default!;
+                    }
+                    if (duplicate) {
+                        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), DuplicateLitKey, "duplicate key %s in map literal"u8, x.val);
+                        continue;
+                    }
+                }
+                Ꮡcheck.exprWithHint(Ꮡx, (~kv).Value, (~utyp).elem);
+                Ꮡcheck.assignment(Ꮡx, (~utyp).elem, mapLiteralˢ);
             }
-            Ꮡcheck.use(eΔ4);
+            break;
         }
-        // if utyp is invalid, an error was reported before
-        if (isValid(utyp)) {
-            @string qualifier = default!;
-            if (isElem) {
-                qualifier = elementˢ;
+        default: {
+            var utyp = u;
+            // when "using" all elements unpack KeyValueExpr
+            // explicitly because check.use doesn't accept them
+            foreach (var (_, vᴛ1) in e.Elts) {
+                var eΔ4 = vᴛ1;
+
+                {
+                    var (kv, _) = eΔ4._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
+                        // Ideally, we should also "use" kv.Key but we can't know
+                        // if it's an externally defined struct key or not. Going
+                        // forward anyway can lead to other errors. Give up instead.
+                        eΔ4 = kv.Value.Value;
+                    }
+                }
+                Ꮡcheck.use(eΔ4);
             }
-            @string cause = default!;
-            if (utyp == default!) {
-                cause = noCoreTypeˢ;
+            // if utyp is invalid, an error was reported before
+            if (isValid(utyp)) {
+                @string qualifier = default!;
+                if (isElem) {
+                    qualifier = elementˢ;
+                }
+                @string cause = default!;
+                if (utyp == default!) {
+                    cause = noCommonUnderlyingTypeˢ;
+                }
+                Ꮡcheck.errorf(new ast_CompositeLitжpositioner(Ꮡe), InvalidLit, "invalid composite literal%s type %s%s"u8, qualifier, typ, cause);
+                x.mode = invalid;
+                return;
             }
-            Ꮡcheck.errorf(new ast_CompositeLitжpositioner(Ꮡe), InvalidLit, "invalid composite literal%s type %s%s"u8, qualifier, typ, cause);
-            x.mode = invalid;
-            return;
-        }
-        break;
-    }}
+            break;
+        }}
+    }
 
     x.mode = value;
     x.typ = typ;

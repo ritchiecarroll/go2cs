@@ -7,6 +7,7 @@ namespace go.hash;
 using rand = crypto.rand_package;
 using errors = errors_package;
 using byteorder = @internal.byteorder_package;
+using math = math_package;
 using bits = go.math.bits_package;
 using reflect = reflect_package;
 using @internal;
@@ -191,6 +192,28 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         return;
     }
     throw panic(errors.New("maphash: hash of unhashable type "u8 + v.Type().String()));
+}
+
+internal static void float64(this ref Hash h, float64 f) {
+    if (f == 0D) {
+        h.WriteByte(0);
+        return;
+    }
+    array<byte> buf = new(8);
+    if (f != f) {
+        byteorder.LEPutUint64(buf[..], randUint64());
+        h.Write(buf[..]);
+        return;
+    }
+    byteorder.LEPutUint64(buf[..], math.Float64bits(f));
+    h.Write(buf[..]);
+}
+
+internal static byte btoi(bool b) {
+    if (b) {
+        return 1;
+    }
+    return 0;
 }
 
 } // end maphash_package

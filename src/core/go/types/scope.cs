@@ -94,6 +94,19 @@ public static Object Lookup(this ref ΔScope s, @string name) {
     return obj;
 }
 
+// lookupIgnoringCase returns the objects in scope s whose names match
+// the given name ignoring case. If exported is set, only exported names
+// are returned.
+internal static slice<Object> lookupIgnoringCase(this ref ΔScope s, @string name, bool exported) {
+    slice<Object> matches = default!;
+    foreach (var (_, n) in s.Names()) {
+        if ((!exported || isExported(n)) && strings.EqualFold(n, name)) {
+            matches = append(matches, s.Lookup(n));
+        }
+    }
+    return matches;
+}
+
 // Insert attempts to insert an object obj into scope s.
 // If s already contains an alternative object alt with
 // the same name, Insert leaves s unchanged and returns alt.
@@ -258,19 +271,11 @@ internal static uint32 order(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-internal static Δcolor color(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
 internal static void setType(this ref lazyObject _Δp0, ΔType _Δp1) {
     throw panic("unreachable");
 }
 
 internal static void setOrder(this ref lazyObject _Δp0, uint32 _Δp1) {
-    throw panic("unreachable");
-}
-
-internal static void setColor(this ref lazyObject _, Δcolor Δcolor) {
     throw panic("unreachable");
 }
 

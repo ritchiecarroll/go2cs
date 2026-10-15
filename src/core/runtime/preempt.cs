@@ -52,6 +52,7 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
+using goexperiment = @internal.goexperiment_package;
 using stringslite = @internal.stringslite_package;
 using @internal;
 using @internal.runtime;
@@ -131,7 +132,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
             var s = readgstatus(Ꮡgp);
             var exprᴛ1 = s;
             var matchᴛ1 = false;
-            if (exprᴛ1 == _Gdead) { matchᴛ1 = true;
+            if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) { matchᴛ1 = true;
                 // Nothing to suspend.
                 //
                 // preemptStop may need to be cleared, but
@@ -159,7 +160,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
                     fallthrough = true;
                 } while (false);
             }
-            if (fallthrough || !matchᴛ1 && (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting)) { matchᴛ1 = true;
+            if (fallthrough || !matchᴛ1 && (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gleaked)) { matchᴛ1 = true;
                 do {
                     // Claim goroutine by setting scan bit.
                     // This may race with execution or readying of gp.
@@ -287,7 +288,7 @@ internal static void resumeG(suspendGState state) {
     {
         var s = readgstatus(gp);
         var exprᴛ1 = s;
-        if (exprᴛ1 == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gsyscall | (uint32)_Gscan)) {
+        if (exprᴛ1 == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gleaked | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gsyscall | (uint32)_Gscan)) {
             casfrom_Gscanstatus(gp, s, (uint32)(s & ~(uint32)_Gscan));
         }
         else { /* default: */
@@ -308,28 +309,59 @@ internal static void resumeG(suspendGState state) {
 //
 //go:nosplit
 internal static bool canPreemptM(ref m mp) {
-    return mp.locks == 0 && mp.mallocing == 0 && mp.preemptoff == ""u8 && (~mp.p.ptr()).status == _Prunning;
+    return mp.locks == 0 && mp.mallocing == 0 && mp.preemptoff == ""u8 && (~mp.p.ptr()).status == _Prunning && mp.curg != nil && (uint32)(readgstatus(mp.curg) & ~(uint32)_Gscan) != _Gsyscall;
 }
 
 //go:generate go run mkpreempt.go
 
 // asyncPreempt saves all user registers and calls asyncPreempt2.
 //
-// When stack scanning encounters an asyncPreempt frame, it scans that
+// It saves GP registers (anything that might contain a pointer) to the G stack.
+// Hence, when stack scanning encounters an asyncPreempt frame, it scans that
 // frame and its parent frame conservatively.
+//
+// On some platforms, it saves large additional scalar-only register state such
+// as vector registers to an "extended register state" on the P.
 //
 // asyncPreempt is implemented in assembly.
 internal static partial void asyncPreempt();
 
+// asyncPreempt2 is the Go continuation of asyncPreempt.
+//
+// It must be deeply nosplit because there's untyped data on the stack from
+// asyncPreempt.
+//
+// It must not have any write barriers because we need to limit the amount of
+// stack it uses.
+//
 //go:nosplit
+//go:nowritebarrierrec
 internal static void asyncPreempt2() {
+    // We can't grow the stack with untyped data from asyncPreempt, so switch to
+    // the system stack right away.
+    mcall((ж<g> gpΔ1) => {
+        gpΔ1.Value.asyncSafePoint = true;
+
+        // Move the extended register state from the P to the G. We do this now that
+        // we're on the system stack to avoid stack splits.
+        xRegSave(ref (gpΔ1).DerefOrNull());
+
+        if ((~gpΔ1).preemptStop){
+            preemptPark(gpΔ1);
+        } else {
+            gopreempt_m(gpΔ1);
+        }
+        // The above functions never return.
+    });
+
+    // Do not grow the stack below here!
+
     var gp = getg();
-    gp.Value.asyncSafePoint = true;
-    if ((~gp).preemptStop){
-        mcall(preemptPark);
-    } else {
-        mcall(gopreempt_m);
-    }
+
+    // Put the extended register state back on the M so resumption can find it.
+    // We can't do this in asyncPreemptM because the park calls never return.
+    xRegRestore(gp);
+
     gp.Value.asyncSafePoint = false;
 }
 
@@ -342,19 +374,13 @@ internal static uintptr asyncPreemptStack = ~(uintptr)0;
     var total = funcMaxSPDelta(f);
     f = findfunc(abi.FuncPCABIInternal(asyncPreempt2));
     total += funcMaxSPDelta(f);
+    f = findfunc(abi.FuncPCABIInternal(xRegRestore));
+    total += funcMaxSPDelta(f);
     // Add some overhead for return PCs, etc.
     asyncPreemptStack = (uintptr)total + (uintptr)(8 * goarch.PtrSize);
     if (asyncPreemptStack > stackNosplit) {
-        // We need more than the nosplit limit. This isn't
-        // unsafe, but it may limit asynchronous preemption.
-        //
-        // This may be a problem if we start using more
-        // registers. In that case, we should store registers
-        // in a context object. If we pre-allocate one per P,
-        // asyncPreempt can spill just a few registers to the
-        // stack, then grab its context object and spill into
-        // it. When it enters the runtime, it would allocate a
-        // new context for the P.
+        // We need more than the nosplit limit. This isn't unsafe, but it may
+        // limit asynchronous preemption. Consider moving state into xRegState.
         print((@string)"runtime: asyncPreemptStack="u8, asyncPreemptStack, (@string)"\n"u8);
         @throw("async stack too large"u8);
     }
@@ -370,7 +396,6 @@ internal static bool wantAsyncPreempt(ж<g> Ꮡgp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeInternalˢ = "runtime/internal/"u8;
 internal static readonly @string internalRuntimeˢ = "internal/runtime/"u8;
 internal static readonly @string reflectˢ = "reflect."u8;
 internal static readonly @string badRestartPcˢ = "bad restart PC"u8;
@@ -413,6 +438,22 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
         return (false, 0);
     }
 
+    // If we're in the middle of a secret computation, we can't
+    // allow any conservative scanning of stacks, as that may lead
+    // to secrets leaking out from the stack into work buffers.
+    // Additionally, the preemption code will store the
+    // machine state (including registers which may contain confidential
+    // information) into the preemption buffers.
+    //
+    // TODO(dmo): there's technically nothing stopping us from doing the
+    // preemption, granted that don't conservatively scan and we clean up after
+    // ourselves. This is made slightly harder by the xRegs cached allocations
+    // that can move between Gs and Ps. In any case, for the intended users (cryptography code)
+    // they are unlikely get stuck in unterminating loops.
+    if (goexperiment.RuntimeSecret && gp.secret > 0) {
+        return (false, 0);
+    }
+
     // Check if PC is an unsafe-point.
     var f = findfunc(pc);
     if (!f.valid()) {
@@ -452,7 +493,7 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
     // Check the inner-most name
     var (u, uf) = newInlineUnwinder(f, pc);
     @string name = u.srcFunc(uf).name();
-    if (stringslite.HasPrefix(name, runtimeˢ) || stringslite.HasPrefix(name, runtimeInternalˢ) || stringslite.HasPrefix(name, internalRuntimeˢ) || stringslite.HasPrefix(name, reflectˢ)) {
+    if (stringslite.HasPrefix(name, runtimeˢ) || stringslite.HasPrefix(name, internalRuntimeˢ) || stringslite.HasPrefix(name, reflectˢ)) {
         // For now we never async preempt the runtime or
         // anything closely tied to the runtime. Known issues
         // include: various points in the scheduler ("don't

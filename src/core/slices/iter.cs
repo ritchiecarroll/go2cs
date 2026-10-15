@@ -51,6 +51,7 @@ public static iter.Seq<E> Values<Slice, E>(Slice s)
 
 // AppendSeq appends the values from seq to the slice and
 // returns the extended slice.
+// If seq is empty, the result preserves the nilness of s.
 public static Slice AppendSeq<Slice, E>(Slice s, iter.Seq<E> seq)
     where Slice : /* ~[]E */ ISlice<E>, ISupportMake<Slice>, ISliceWrap<Slice, E>, new()
 {
@@ -61,12 +62,14 @@ public static Slice AppendSeq<Slice, E>(Slice s, iter.Seq<E> seq)
 }
 
 // Collect collects values from seq into a new slice and returns it.
+// If seq is empty, the result is nil.
 public static slice<E> Collect<E>(iter.Seq<E> seq) {
     return AppendSeq(slice<E>(default!), seq);
 }
 
 // Sorted collects values from seq into a new slice, sorts the slice,
 // and returns it.
+// If seq is empty, the result is nil.
 public static slice<E> Sorted<E>(iter.Seq<E> seq)
     where E : /* cmp.Ordered */ IAdditionOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
@@ -77,6 +80,7 @@ public static slice<E> Sorted<E>(iter.Seq<E> seq)
 
 // SortedFunc collects values from seq into a new slice, sorts the slice
 // using the comparison function, and returns it.
+// If seq is empty, the result is nil.
 public static slice<E> SortedFunc<E>(iter.Seq<E> seq, Func<E, E, nint> cmp) {
     var s = Collect(seq);
     SortFunc(s, cmp);
@@ -87,6 +91,7 @@ public static slice<E> SortedFunc<E>(iter.Seq<E> seq, Func<E, E, nint> cmp) {
 // It then sorts the slice while keeping the original order of equal elements,
 // using the comparison function to compare elements.
 // It returns the new slice.
+// If seq is empty, the result is nil.
 public static slice<E> SortedStableFunc<E>(iter.Seq<E> seq, Func<E, E, nint> cmp) {
     var s = Collect(seq);
     SortStableFunc(s, cmp);

@@ -147,7 +147,7 @@ internal static (ж<Entry>, error) Next(this ж<typeUnitReader> Ꮡtur) {
     if (len((~tur.tu).data) == 0) {
         return (default!, default!);
     }
-    var e = Ꮡtur.of(typeUnitReader.Ꮡb).entry(nil, (~tur.tu).atable, (~tur.tu).@base, (~tur.tu).vers);
+    var e = Ꮡtur.of(typeUnitReader.Ꮡb).entry(nil, tur.tu.of(typeUnit.Ꮡunit));
     if (tur.b.err != default!) {
         tur.err = tur.b.err;
         return (default!, tur.err);

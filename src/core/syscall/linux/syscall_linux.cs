@@ -9,11 +9,13 @@
 // wrap it in our own nicer implementation.
 namespace go;
 
-using itoa = @internal.itoa_package;
-using runtimesyscall = @internal.runtime.syscall_package;
+using linux = @internal.runtime.syscall.linux_package;
+using strconv = @internal.strconv_package;
 using runtime = runtime_package;
+using slices = slices_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime.syscall;
 using go.sync;
 using ꓸꓸꓸuintptr = Span<uintptr>;
 
@@ -66,7 +68,7 @@ public static (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr trap, uint
     Errno err = default!;
 
     uintptr errno = default!;
-    (r1, r2, errno) = runtimesyscall.Syscall6(trap, a1, a2, a3, a4, a5, a6);
+    (r1, r2, errno) = linux.Syscall6(trap, a1, a2, a3, a4, a5, a6);
     err = ((Errno)errno);
     return (r1, r2, err);
 }
@@ -147,12 +149,7 @@ internal static bool isGroupMember(nint gid) {
         return false;
     }
 
-    foreach (var (_, g) in groups) {
-        if (g == gid) {
-            return true;
-        }
-    }
-    return false;
+    return slices.Contains(groups, gid);
 }
 
 internal static bool isCapDacOverrideSet() {
@@ -378,7 +375,7 @@ public static error /*err*/ Futimesat(nint dirfd, @string path, slice<Timeval> t
 public static error /*err*/ Futimes(nint fd, slice<Timeval> tv) {
     // Believe it or not, this is the best we can do on Linux
     // (and is what glibc does).
-    return Utimes("/proc/self/fd/"u8 + itoa.Itoa(fd), tv);
+    return Utimes("/proc/self/fd/"u8 + strconv.Itoa(fd), tv);
 }
 
 public const bool ImplementsGetwd = true;
@@ -533,23 +530,30 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     if (n > len(sa.raw.Path)) {
         return (default!, 0, EINVAL);
     }
-    if (n == len(sa.raw.Path) && name[0] != (rune)'@') {
+    // Abstract addresses start with NUL.
+    // '@' is also a valid way to specify abstract addresses.
+    var isAbstract = n > 0 && (name[0] == (rune)'@' || name[0] == (rune)'\x00');
+
+    // Non-abstract named addresses are NUL terminated.
+    // The length can't use the full capacity as we need to add NUL.
+    if (n == len(sa.raw.Path) && !isAbstract) {
         return (default!, 0, EINVAL);
     }
     sa.raw.Family = AF_UNIX;
     for (nint i = 0; i < n; i++) {
         sa.raw.Path[i] = (int8)name[i];
     }
-    // length is family (uint16), name, NUL.
-    var sl = ((_Socklen)2);
-    if (n > 0) {
-        sl += ((_Socklen)(uint32)n) + 1;
-    }
-    if (sa.raw.Path[0] == (rune)'@' || (sa.raw.Path[0] == 0 && sl > 3)) {
-        // Check sl > 3 so we don't change unnamed socket behavior.
+    // Length is family + name (+ NUL if non-abstract).
+    // Family is of type uint16 (2 bytes).
+    var sl = ((_Socklen)(uint32)(2 + n));
+    if (isAbstract){
+        // Abstract addresses are not NUL terminated.
+        // We rewrite '@' prefix to NUL here.
         sa.raw.Path[0] = 0;
-        // Don't count trailing NUL for abstract address.
-        sl--;
+    } else 
+    if (n > 0) {
+        // Add NUL for non-abstract named addresses.
+        sl++;
     }
 
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), sl, default!);

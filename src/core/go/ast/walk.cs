@@ -430,6 +430,11 @@ internal static Visitor Visit(this inspector f, Node node) {
 // f(node); node must not be nil. If f returns true, Inspect invokes f
 // recursively for each of the non-nil children of node, followed by a
 // call of f(nil).
+//
+// In many cases it may be more convenient to use [Preorder], which
+// returns an iterator over the sequence of nodes, or [PreorderStack],
+// which (like [Inspect]) provides control over descent into subtrees,
+// but additionally reports the stack of enclosing nodes.
 public static void Inspect(Node node, Func<Node, bool> f) {
     Walk(new inspectorᴠVisitor(NilSafeDelegateConversion<inspector, Func<Node, bool>>(f)), node);
 }
@@ -438,7 +443,8 @@ public static void Inspect(Node node, Func<Node, bool> f) {
 // beneath (and including) the specified root, in depth-first
 // preorder.
 //
-// For greater control over the traversal of each subtree, use [Inspect].
+// For greater control over the traversal of each subtree, use
+// [Inspect] or [PreorderStack].
 public static iter.Seq<Node> Preorder(Node root) {
     return (Func<Node, bool> yield) => {
         var ok = true;
@@ -450,6 +456,37 @@ public static iter.Seq<Node> Preorder(Node root) {
             return ok;
         });
     };
+}
+
+// PreorderStack traverses the tree rooted at root,
+// calling f before visiting each node.
+//
+// Each call to f provides the current node and traversal stack,
+// consisting of the original value of stack appended with all nodes
+// from root to n, excluding n itself. (This design allows calls
+// to PreorderStack to be nested without double counting.)
+//
+// If f returns false, the traversal skips over that subtree. Unlike
+// [Inspect], no second call to f is made after visiting node n.
+// (In practice, the second call is nearly always used only to pop the
+// stack, and it is surprisingly tricky to do this correctly.)
+public static void PreorderStack(Node root, slice<Node> stack, Func<Node, slice<Node>, bool> f) {
+    nint before = len(stack);
+    Inspect(root, (Node n) => {
+        if (n != default!){
+            if (!f(n, stack)) {
+                // Do not push, as there will be no corresponding pop.
+                return false;
+            }
+            stack = append(stack, n); // push
+        } else {
+            stack = stack.slice(0, len(stack) - 1); // pop
+        }
+        return true;
+    });
+    if (len(stack) != before) {
+        throw panic("push/pop mismatch");
+    }
 }
 
 } // end ast_package

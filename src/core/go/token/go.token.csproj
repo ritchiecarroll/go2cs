@@ -169,6 +169,7 @@
 
     <ProjectReference Include="$(go2csPath)core/cmp/cmp.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
