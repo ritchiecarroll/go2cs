@@ -737,7 +737,7 @@ public static void TestHandshakeClientHelloRetryRequest(ж<testing.T> Ꮡt) {
         args: new @string[]{"-cipher"u8, "ECDHE-RSA-AES128-GCM-SHA256"u8, "-curves"u8, "P-256"u8}.slice(),
         config: config,
         validate: error (global::go.crypto.tls_package.ΔConnectionState cs) => {
-            if (!cs.testingOnlyDidHRR) {
+            if (!cs.HelloRetryRequest) {
                 return errors.New(expectedˢ);
             }
             return default!;
@@ -749,7 +749,7 @@ public static void TestHandshakeClientHelloRetryRequest(ж<testing.T> Ꮡt) {
 
 public static void TestHandshakeClientECDHERSAChaCha20(ж<testing.T> Ꮡt) {
     var config = testConfig.Clone();
-    config.Value.CipherSuites = new uint16[]{TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305}.slice();
+    config.Value.CipherSuites = new uint16[]{TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256}.slice();
 
     var test = Ꮡ(new clientTest(
         name: "ECDHE-RSA-CHACHA20-POLY1305"u8,
@@ -762,7 +762,7 @@ public static void TestHandshakeClientECDHERSAChaCha20(ж<testing.T> Ꮡt) {
 
 public static void TestHandshakeClientECDHEECDSAChaCha20(ж<testing.T> Ꮡt) {
     var config = testConfig.Clone();
-    config.Value.CipherSuites = new uint16[]{TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305}.slice();
+    config.Value.CipherSuites = new uint16[]{TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256}.slice();
 
     var test = Ꮡ(new clientTest(
         name: "ECDHE-ECDSA-CHACHA20-POLY1305"u8,
@@ -3150,7 +3150,7 @@ internal static void testResumptionKeepsOCSPAndSCT(ж<testing.T> Ꮡt, uint16 ve
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object clientHandshakeDidNotˢ = (@string)"Client handshake did not error when the context was canceled"u8;
-internal static readonly object connCloseDoesNotErrorAsˢ = (@string)"conn.Close does not error as expected when called multiple times on WASM"u8;
+internal static readonly object connCloseDoesNotErrorAsˢ = (@string)"conn.Close does not error as expected when called multiple times on GOOS=js or GOOS=wasip1"u8;
 internal static readonly object clientConnectionWasNotˢ = (@string)"Client connection was not closed when the context was canceled"u8;
 
 // TestClientHandshakeContextCancellation tests that canceling
@@ -3181,7 +3181,7 @@ public static partial void TestClientHandshakeContextCancellation(ж<testing.T> 
         if (!AreEqual(err, context.Canceled)) {
             Ꮡt.Errorf("Unexpected client handshake error: %v"u8, err);
         }
-        if (runtime.GOARCH == "wasm"u8) {
+        if (runtime.GOOS == "js"u8 || runtime.GOOS == "wasip1"u8) {
             Ꮡt.Skip(connCloseDoesNotErrorAsˢ);
         }
         err = cli.Close();
@@ -3223,11 +3223,12 @@ public static void TestTLS13OnlyClientHelloCipherSuite(ж<testing.T> Ꮡt) {
             ciphers: new uint16[]{TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_AES_256_GCM_SHA384}.slice()
         )
     }.slice();
-    foreach (var (_, tt) in tls13Tests) {
-        ref var ttΔ1 = ref heap<TestTLS13OnlyClientHelloCipherSuite_tls13Tests>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(ttΔ1.name, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in tls13Tests) {
+        ref var tt = ref heap(new TestTLS13OnlyClientHelloCipherSuite_tls13Tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             testTLS13OnlyClientHelloCipherSuite(tΔ1, ttʗ1.ciphers);
         });
@@ -3240,7 +3241,7 @@ internal static void testTLS13OnlyClientHelloCipherSuite(ж<testing.T> Ꮡt, sli
         GetConfigForClient: (ж<global::go.crypto.tls_package.ClientHelloInfo> chi) => {
             var expectedCiphersuites = defaultCipherSuitesTLS13NoAES;
             if (fips140tls.Required()) {
-                expectedCiphersuites = defaultCipherSuitesTLS13FIPS;
+                expectedCiphersuites = allowedCipherSuitesTLS13FIPS;
             }
             if (len((~chi).CipherSuites) != len(expectedCiphersuites)){
                 Ꮡt.Errorf("only TLS 1.3 suites should be advertised, got=%x"u8, (~chi).CipherSuites);
