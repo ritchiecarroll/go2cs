@@ -991,6 +991,18 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// The param still needs the box rename (`Ꮡ<name>`) the body's uses reference —
 					// force the signature rebuild even if this leaves implicitPointers empty.
 					skippedDeadPointerAlias = true
+
+					// A defer→finally lowered call is not in the body text this scan reads, so it
+					// can still name the alias (`p.handleTransientRelease()`, a `ref Process`
+					// method, after a body that reached p only through the box — os's
+					// pidfd_linux.go). Record the box path as the live arm below does, so the
+					// finally re-roots the call on the box instead of naming an undeclared `p`
+					// (CS0103).
+					if v.entryAliasBoxPaths == nil {
+						v.entryAliasBoxPaths = map[string]string{}
+					}
+
+					v.entryAliasBoxPaths[getSanitizedIdentifier(analyzedName)] = fmt.Sprintf("%s%s.%s", AddressPrefix, param.Name(), NilDeferringDerefAccessor)
 					continue
 				}
 

@@ -127,7 +127,7 @@ internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) {
         )), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) p.handleTransientRelease(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡp.DerefOrNull().handleTransientRelease(); ᒐ.Run(); }
 }
 
 // pidfdSendSignal sends a signal to the process.
@@ -148,7 +148,7 @@ internal static error pidfdSendSignal(this ж<Process> Ꮡp, syscallꓸSignal s)
         return convertESRCH(unix.PidFDSendSignal(handle, s));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) p.handleTransientRelease(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡp.DerefOrNull().handleTransientRelease(); ᒐ.Run(); }
 }
 
 // pidfdWorks returns whether we can use pidfd on this system.
