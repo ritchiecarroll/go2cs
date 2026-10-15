@@ -89,6 +89,12 @@ The class is right (substantive), so 77 holds. The row's **delta** is wrong: it 
 the change since 1.24.13. Read row 63 against `internal/runtime/syscall/syscall_linux.go` at go1.24.13.
 The helper fix is C1's (S1 wrote it). It is proposed to COORD and is not in this skeleton.
 
+*(2026-10-15, C1: FIXED by `3c13b840cb`, ruled an instrument item by COORD. Each release now also tries the
+twice-folded path, after the once-folded one and only where that release has the file. The census at the tip
+then reads 182 marked and 77 / 6 / 36 / 63, unchanged. RELOCATED lists exactly this row,
+`internal/runtime/syscall/syscall_linux.go` => `internal/runtime/syscall/linux/syscall_linux.go`. The fix was red
+first: the selftest's new double-goos layout failed on the unchanged helper. Row 63 now compares the two real paths.)*
+
 ## 3. The lane assignment
 
 - **The runtime share** (`runtime`, `runtime/*`, `internal/runtime/*`, `internal/abi`, `internal/cpu`;
