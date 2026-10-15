@@ -5,10 +5,8 @@ namespace go.log;
 
 using context = context_package;
 using Δslog = go.log.slog_package;
-using slogtest = go.log.slog.@internal.slogtest_package;
 using os = os_package;
 using go.log;
-using go.log.slog.@internal;
 using io = io_package;
 using static go.log.slog_internal_test_package;
 
@@ -74,7 +72,13 @@ internal static readonly @string printedˢ = "printed"u8;
 // Another typical use would be to decrease the log level (to LevelDebug, say)
 // during a part of the program that was suspected of containing a bug.
 public static void ExampleHandler_levelHandler() {
-    var th = Δslog.NewTextHandler(new os.FileжWriter(os.Stdout), Ꮡ(new Δslog.HandlerOptions(ReplaceAttr: slogtest.RemoveTime)));
+    var removeTime = (slice<@string> groups, Δslog.Attr a) => {
+        if (a.Key == Δslog.TimeKey && len(groups) == 0) {
+            return new Δslog.Attr(nil);
+        }
+        return a;
+    };
+    var th = Δslog.NewTextHandler(new os.FileжWriter(os.Stdout), Ꮡ(new Δslog.HandlerOptions(ReplaceAttr: removeTime)));
     var logger = Δslog.New(new slog_test_package.LevelHandlerжΔHandler(NewLevelHandler(Δslog.LevelWarn, new Δslog.TextHandlerжΔHandler(th))));
     logger.Info(notPrintedˢ);
     logger.Warn(printedˢ);

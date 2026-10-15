@@ -1225,7 +1225,18 @@ internal static readonly @string fe8064ˢ = "fe80::/64"u8;
 internal static readonly @string fe9064ˢ = "fe90::/64"u8;
 internal static readonly @string fe8048ˢ = "fe80::/48"u8;
 internal static readonly @string fe808ˢ = "fe80::/8"u8;
-internal static readonly @string invalidPrefix1200161200ˢ = @"[invalid Prefix 1.2.0.0/16 1.2.0.0/24 1.2.3.0/24 fe80::/48 fe80::/64 fe90::/64]"u8;
+internal static readonly @string invalidPrefix1200161200ˢ = @"[invalid Prefix 1.2.0.0/16 1.2.0.0/24 1.2.3.0/24 1.2.3.4/24 1.2.3.0/28 fe80::/48 fe80::/64 fe90::/64]"u8;
+internal static readonly @string fec010ˢ = "fec0::/10"u8;
+internal static readonly @string fe009ˢ = "fe00::/9"u8;
+internal static readonly @string f8006ˢ = "f800::/6"u8;
+internal static readonly @string e0004ˢ = "e000::/4"u8;
+internal static readonly @string ff008ˢ = "ff00::/8"u8;
+internal static readonly @string a0003ˢ = "a000::/3"u8;
+internal static readonly @string fc007ˢ = "fc00::/7"u8;
+internal static readonly @string c0003ˢ = "c000::/3"u8;
+internal static readonly @string fe8010ˢ = "fe80::/10"u8;
+internal static readonly @string f0005ˢ = "f000::/5"u8;
+internal static readonly @string a0003C0003E0004F0005F800ˢ = @"[0.0.0.0/8 0.0.0.0/32 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.0.0.0/24 192.0.0.0/29 192.0.0.8/32 192.0.0.9/32 192.0.0.10/32 192.0.0.170/32 192.0.2.0/24 192.31.196.0/24 192.52.193.0/24 192.88.99.0/24 192.168.0.0/16 192.175.48.0/24 198.18.0.0/15 198.51.100.0/24 203.0.113.0/24 240.0.0.0/4 255.255.255.255/32 ::/8 100::/8 200::/7 400::/6 800::/5 1000::/4 2000::/3 4000::/3 6000::/3 8000::/3 a000::/3 c000::/3 e000::/4 f000::/5 f800::/6 fc00::/7 fe00::/9 fe80::/10 fec0::/10 ff00::/8]"u8;
 
 internal partial struct TestPrefixCompare_tests /*dyn*/ {
     internal netipꓸPrefix a, b;
@@ -1242,7 +1253,9 @@ public static void TestPrefixCompare(ж<testing.T> Ꮡt) {
         new(mustPrefix(fe8064ˢ), mustPrefix(fe9064ˢ), -1),
         new(mustPrefix("1.2.0.0/16"u8), mustPrefix("1.2.0.0/24"u8), -1),
         new(mustPrefix(fe8048ˢ), mustPrefix(fe8064ˢ), -1),
-        new(mustPrefix("1.2.3.0/24"u8), mustPrefix(fe808ˢ), -1)
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix(fe808ˢ), -1),
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix("1.2.3.4/24"u8), -1),
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix("1.2.3.0/28"u8), -1)
     }.slice();
     foreach (var (_, tt) in tests) {
         nint gotΔ1 = tt.a.Compare(tt.b);
@@ -1269,11 +1282,71 @@ public static void TestPrefixCompare(ж<testing.T> Ꮡt) {
         mustPrefix("1.2.0.0/16"u8),
         new netipꓸPrefix(nil),
         mustPrefix(fe8048ˢ),
-        mustPrefix("1.2.0.0/24"u8)
+        mustPrefix("1.2.0.0/24"u8),
+        mustPrefix("1.2.3.4/24"u8),
+        mustPrefix("1.2.3.0/28"u8)
     }.slice();
     slices.SortFunc<slice<netipꓸPrefix>, netipꓸPrefix>(values, ((Func<netipꓸPrefix, netipꓸPrefix, nint>)(netip.Compare)));
     @string got = fmt.Sprintf("%s"u8, values);
     @string want = invalidPrefix1200161200ˢ;
+    if (got != want) {
+        Ꮡt.Errorf("unexpected sort\n got: %s\nwant: %s\n"u8, got, want);
+    }
+
+    // Lists from
+    // https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml and
+    // https://www.iana.org/assignments/ipv6-address-space/ipv6-address-space.xhtml,
+    // to verify that the sort order matches IANA's conventional
+    // ordering.
+    values = new netipꓸPrefix[]{
+        mustPrefix("0.0.0.0/8"u8),
+        mustPrefix("127.0.0.0/8"u8),
+        mustPrefix("10.0.0.0/8"u8),
+        mustPrefix("203.0.113.0/24"u8),
+        mustPrefix("169.254.0.0/16"u8),
+        mustPrefix("192.0.0.0/24"u8),
+        mustPrefix("240.0.0.0/4"u8),
+        mustPrefix("192.0.2.0/24"u8),
+        mustPrefix("192.0.0.170/32"u8),
+        mustPrefix("198.18.0.0/15"u8),
+        mustPrefix("192.0.0.8/32"u8),
+        mustPrefix("0.0.0.0/32"u8),
+        mustPrefix("192.0.0.9/32"u8),
+        mustPrefix("198.51.100.0/24"u8),
+        mustPrefix("192.168.0.0/16"u8),
+        mustPrefix("192.0.0.10/32"u8),
+        mustPrefix("192.175.48.0/24"u8),
+        mustPrefix("192.52.193.0/24"u8),
+        mustPrefix("100.64.0.0/10"u8),
+        mustPrefix("255.255.255.255/32"u8),
+        mustPrefix("192.31.196.0/24"u8),
+        mustPrefix("172.16.0.0/12"u8),
+        mustPrefix("192.0.0.0/29"u8),
+        mustPrefix("192.88.99.0/24"u8),
+        mustPrefix(fec010ˢ),
+        mustPrefix("6000::/3"u8),
+        mustPrefix(fe009ˢ),
+        mustPrefix("8000::/3"u8),
+        mustPrefix("0000::/8"u8),
+        mustPrefix("0400::/6"u8),
+        mustPrefix(f8006ˢ),
+        mustPrefix(e0004ˢ),
+        mustPrefix(ff008ˢ),
+        mustPrefix(a0003ˢ),
+        mustPrefix(fc007ˢ),
+        mustPrefix("1000::/4"u8),
+        mustPrefix("0800::/5"u8),
+        mustPrefix("4000::/3"u8),
+        mustPrefix("0100::/8"u8),
+        mustPrefix(c0003ˢ),
+        mustPrefix(fe8010ˢ),
+        mustPrefix("0200::/7"u8),
+        mustPrefix(f0005ˢ),
+        mustPrefix("2000::/3"u8)
+    }.slice();
+    slices.SortFunc(values, (netipꓸPrefix a, netipꓸPrefix b) => a.Compare(b));
+    got = fmt.Sprintf("%s"u8, values);
+    want = a0003C0003E0004F0005F800ˢ;
     if (got != want) {
         Ꮡt.Errorf("unexpected sort\n got: %s\nwant: %s\n"u8, got, want);
     }

@@ -4,9 +4,12 @@
 namespace go;
 
 using flag = flag_package;
-using fmt = fmt_package;
+using asan = @internal.asan_package;
 using cpu = @internal.cpu_package;
+using msan = @internal.msan_package;
+using race = @internal.race_package;
 using atomic = @internal.runtime.atomic_package;
+using testenv = @internal.testenv_package;
 using Δio = io_package;
 using bits = global::go.math.bits_package;
 using static runtime_package;
@@ -378,7 +381,7 @@ public static void TestTrailingZero(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestAppendGrowth(ж<testing.T> Ꮡt) {
+public static void TestAppendGrowthHeap(ж<testing.T> Ꮡt) {
     ref var x = ref heap<slice<int64>>(out var Ꮡx);
     void check(nint wantΔ1) {
         if (cap(Ꮡx.ValueSlot) != wantΔ1) {
@@ -393,6 +396,35 @@ public static void TestAppendGrowth(ж<testing.T> Ꮡt) {
         check(want);
         if ((nint)(i & (i - 1)) == 0) {
             want = 2 * i;
+        }
+    }
+    runtime_internal_test_package.Escape(Ꮡ(x, 0)); // suppress stack-allocated backing store
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object instrumentationBreaksˢ = (@string)"instrumentation breaks this optimization"u8;
+
+public static void TestAppendGrowthStack(ж<testing.T> Ꮡt) {
+    if (race.Enabled || asan.Enabled || msan.Enabled) {
+        Ꮡt.Skip(instrumentationBreaksˢ);
+    }
+    ref var x = ref heap<slice<int64>>(out var Ꮡx);
+    void check(nint wantΔ1) {
+        if (cap(Ꮡx.ValueSlot) != wantΔ1) {
+            Ꮡt.Errorf("len=%d, cap=%d, want cap=%d"u8, len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
+        }
+    }
+
+    check(0);
+    nint want = 32 / 8; // 32 is the default for cmd/compile/internal/base.DebugFlags.VariableMakeThreshold
+    if (testenv.OptimizationOff()) {
+        want = 1;
+    }
+    for (nint i = 1; i <= 100; i++) {
+        x = append(x, (int64)(1));
+        check(want);
+        if ((nint)(i & (i - 1)) == 0) {
+            want = builtin.max(want, 2 * i);
         }
     }
 }
@@ -556,87 +588,6 @@ public static void TestVersion(ж<testing.T> Ꮡt) {
     @string vers = Version();
     if (strings.Contains(vers, "\r"u8) || strings.Contains(vers, "\n"u8)) {
         Ꮡt.Fatalf("cr/nl in version: %q"u8, vers);
-    }
-}
-
-internal partial struct TestTimediv_type /*dyn*/ {
-    internal int64 num;
-    internal int32 div;
-    internal int32 ret;
-    internal int32 rem;
-}
-
-public static void TestTimediv(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestTimediv_type[]{
-        new(
-            num: 8,
-            div: 2,
-            ret: 4,
-            rem: 0
-        ),
-        new(
-            num: 9,
-            div: 2,
-            ret: 4,
-            rem: 1
-        ),
-        new(
-            // Used by runtime.check.
-            num: 12345000054321L,
-            div: 1000000000,
-            ret: 12345,
-            rem: 54321
-        ),
-        new(
-            num: 4294967295L,
-            div: 2,
-            ret: (int32)(2147483648L - 1), // no overflow.
-            rem: 1
-        ),
-        new(
-            num: 4294967296L,
-            div: 2,
-            ret: (int32)(2147483648L - 1), // overflow.
-            rem: 0
-        ),
-        new(
-            num: 1099511627776L,
-            div: 2,
-            ret: (int32)(2147483648L - 1), // overflow.
-            rem: 0
-        ),
-        new(
-            num: 1099511627777L,
-            div: (int32)(1 << (int)(10)),
-            ret: (int32)(1 << (int)(30)),
-            rem: 1
-        )
-    }.slice()) {
-        ref var tc = ref heap(new TestTimediv_type(), out var Ꮡtc);
-        tc = vᴛ1;
-
-        @string name = fmt.Sprintf("%d div %d"u8, tc.num, tc.div);
-        var tcʗ1 = tc;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
-            // Double check that the inputs make sense using
-            // standard 64-bit division.
-            var ret64 = quo(tcʗ1.num, (int64)tcʗ1.div);
-            var rem64 = builtin.rem(tcʗ1.num, (int64)tcʗ1.div);
-            if (ret64 != (int64)(int32)ret64) {
-                // Simulate timediv overflow value.
-                ret64 = 2147483648L - 1;
-                rem64 = 0;
-            }
-            if (ret64 != (int64)tcʗ1.ret) {
-                tΔ1.Errorf("%d / %d got ret %d rem %d want ret %d rem %d"u8, tcʗ1.num, tcʗ1.div, ret64, rem64, tcʗ1.ret, tcʗ1.rem);
-            }
-
-            ref var rem = ref heap(new int32(), out var Ꮡrem);
-            var ret = runtime_internal_test_package.Timediv(tcʗ1.num, tcʗ1.div, Ꮡrem);
-            if (ret != tcʗ1.ret || rem != tcʗ1.rem) {
-                tΔ1.Errorf("timediv %d / %d got ret %d rem %d want ret %d rem %d"u8, tcʗ1.num, tcʗ1.div, ret, rem, tcʗ1.ret, tcʗ1.rem);
-            }
-        });
     }
 }
 

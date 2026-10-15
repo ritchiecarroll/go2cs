@@ -14,6 +14,7 @@ using slogtest = go.testing.slogtest_package;
 using encoding;
 using go.log;
 using go.testing;
+using iter = iter_package;
 using static go.log.slog_internal_test_package;
 
 partial class slog_test_package {
@@ -55,7 +56,7 @@ public static void TestSlogtest(ж<testing.T> Ꮡt) {
 
 internal static (slice<map<@string, any>>, error) parseLines(slice<byte> src, Func<slice<byte>, (map<@string, any>, error)> parse) {
     slice<map<@string, any>> records = default!;
-    foreach (var (_, line) in bytes.Split(src, new byte[]{(rune)'\n'}.slice())) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(src, new byte[]{(rune)'\n'}.slice()).Invoke)) {
         if (len(line) == 0) {
             continue;
         }

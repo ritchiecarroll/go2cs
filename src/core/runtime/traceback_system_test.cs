@@ -231,7 +231,7 @@ redacted.go:0: runtime.goexit
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string sentinelˢ = "sentinel "u8;
 internal static readonly @string runningˢ = " [running]:"u8;
-internal static readonly @string createdByˢ = "created by "u8;
+internal static readonly @string createdByˢ2 = "created by "u8;
 
 // parseStackPCs parses the parent process's program counters for the
 // first running goroutine out of a GOTRACEBACK=system traceback,
@@ -305,7 +305,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
 
         // Search for "goroutine GID [STATUS]"
         if (!on) {
-            if (strings.HasPrefix(line, goroutineˢ) && strings.Contains(line, runningˢ)) {
+            if (strings.HasPrefix(line, goroutineˢ2) && strings.Contains(line, runningˢ)) {
                 on = true;
 
                 if (parentSentinel == 0) {
@@ -321,7 +321,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
         }
 
         // Skip the final "created by SYMBOL in goroutine GID" part.
-        if (strings.HasPrefix(line, createdByˢ)) {
+        if (strings.HasPrefix(line, createdByˢ2)) {
             break;
         }
 

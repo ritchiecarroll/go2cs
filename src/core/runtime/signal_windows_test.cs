@@ -102,7 +102,6 @@ public static void TestVectoredHandlerExceptionInNonGoThread(ж<testing.T> Ꮡt)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object thisTestCanTRunOnWindowsˢ = (@string)"this test can't run on windows/arm"u8;
 internal static readonly @string testwinlibDllˢ = "testwinlib.dll"u8;
 internal static readonly @string buildmodeˢ = "-buildmode"u8;
 internal static readonly @string cSharedˢ = "c-shared"u8;
@@ -118,12 +117,7 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
         if (flagQuick.Value) {
             Ꮡt.Skip(quickˢ);
         }
-        if (Δruntime.GOARCH == "arm"u8) {
-            //TODO: remove this skip and update testwinlib/main.c
-            // once windows/arm supports c-shared buildmode.
-            // See go.dev/issues/43800.
-            Ꮡt.Skip(thisTestCanTRunOnWindowsˢ);
-        }
+
         testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
         testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
         testenv.MustHaveExecPath(new runtime_test_package.testing_TжTB(Ꮡt), gccˢ);
@@ -154,8 +148,8 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failure while running executable: %s\n%s"u8, err, @out);
         }
         @string expectedOutput = default!;
-        if (Δruntime.GOARCH == "arm64"u8 || Δruntime.GOARCH == "arm"u8){
-            // TODO: remove when windows/arm64 and windows/arm support SEH stack unwinding.
+        if (Δruntime.GOARCH == "arm64"u8){
+            // TODO: remove when windows/arm64 support SEH stack unwinding.
             expectedOutput = exceptionCount1ˢ;
         } else {
             expectedOutput = exceptionCount1ˢ2;

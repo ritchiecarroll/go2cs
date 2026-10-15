@@ -24,7 +24,14 @@ public static UntypedInt MaxAvgGroupLoad => /* maxAvgGroupLoad */ 7;
 // we can't properly test hint alloc overflows with this.
 internal static UntypedInt maxAllocTest => /* 1 << 30 */ 1073741824;
 
-public static (ж<global::go.@internal.runtime.maps_package.ΔMap>, ж<abi.SwissMapType>) NewTestMap<K, V>(uintptr hint) {
+internal static ж<abiꓸMapType> newTestMapType<K, V>() {
+    map<K, V> m = default!;
+    var mTyp = abi.TypeOf(m);
+    var mt = mTyp.Reinterpret<abi.Type, abiꓸMapType>();
+    return mt;
+}
+
+public static (ж<global::go.@internal.runtime.maps_package.ΔMap>, ж<abiꓸMapType>) NewTestMap<K, V>(uintptr hint) {
     var mt = newTestMapType<K, V>();
     return (NewMap(mt, hint, nil, maxAllocTest), mt);
 }
@@ -63,7 +70,7 @@ internal static uint64 GroupCount(this ref global::go.@internal.runtime.maps_pac
 // Returns nil if there are no full groups.
 // Returns nil if a group is full but contains entirely deleted slots.
 // Returns nil if the map is small.
-internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
+internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abiꓸMapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.dirLen <= 0) {
@@ -86,7 +93,7 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
             }
 
             // All full or deleted slots.
-            for (var j = (uintptr)0; j < abi.SwissMapGroupSlots; j++) {
+            for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
                 if (g.ctrls().get(j) == ctrlDeleted) {
                     continue;
                 }
@@ -103,7 +110,7 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
 }
 
 // Returns nil if the map is small.
-internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abiꓸMapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.dirLen <= 0) {

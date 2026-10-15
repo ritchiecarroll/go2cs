@@ -382,23 +382,23 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
             var c = new channel<nint>(chanCap);
-            for (nint p = 0; p < 2; p++) {
-                nint pΔ1 = p;
+            for (nint pᴛ1 = 0; pᴛ1 < 2; pᴛ1++) {
+                var p = pᴛ1;
                 var cʗ1 = c;
                 goǃ(() => {
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
                         for (nint i = 0; i < 1000; i++) {
-                            if (pΔ1 == 0 || i % 2 == 0){
-                                var selᴛ11 = cʗ1.ᐸꟷ(pΔ1, ꓸꓸꓸ);
+                            if (p == 0 || i % 2 == 0){
+                                var selᴛ11 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
                                 var selᴛ12 = cʗ1;
                                 switch (select(selᴛ11, ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
                                 case 0: {
                                     break;
                                 }
                                 case 1 when selᴛ12.ꟷᐳ(out var v): {
-                                    if (chanCap == 0 && v == pΔ1) {
+                                    if (chanCap == 0 && v == p) {
                                         Ꮡt.Errorf("self receive"u8);
                                         return;
                                     }
@@ -406,10 +406,10 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
                                 }}
                             } else {
                                 var selᴛ13 = cʗ1;
-                                var selᴛ14 = cʗ1.ᐸꟷ(pΔ1, ꓸꓸꓸ);
+                                var selᴛ14 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
                                 switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), selᴛ14)) {
                                 case 0 when selᴛ13.ꟷᐳ(out var v): {
-                                    if (chanCap == 0 && v == pΔ1) {
+                                    if (chanCap == 0 && v == p) {
                                         Ꮡt.Errorf("self receive"u8);
                                         return;
                                     }
@@ -453,19 +453,19 @@ public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
         // but we are careful that this whole construct does not deadlock.
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(10);
-        for (nint k = 0; k < 4; k++) {
-            nint kΔ1 = k;
+        for (nint kᴛ1 = 0; kᴛ1 < 4; kᴛ1++) {
+            var k = kᴛ1;
             var cʗ1 = c;
             goǃ(() => {
                 for (nint i = 0; i < N; i++) {
-                    cʗ1[kΔ1].ᐸꟷ(0);
+                    cʗ1[k].ᐸꟷ(0);
                 }
                 Ꮡwg.Done();
             });
             var cʗ2 = c;
             goǃ(() => {
                 for (nint i = 0; i < N; i++) {
-                    ᐸꟷ(cʗ2[kΔ1]);
+                    ᐸꟷ(cʗ2[k]);
                 }
                 Ꮡwg.Done();
             });
