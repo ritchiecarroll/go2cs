@@ -386,10 +386,7 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
 
 // go2cs generated this placeholder — func InterfaceType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// Size returns the size of data with type t.
-public static uintptr Size(this ref Type t) {
-    return t.Size_;
-}
+// go2cs generated this placeholder — func Size is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Align returns the alignment of data with type t.
 public static nint Align(this ref Type t) {
