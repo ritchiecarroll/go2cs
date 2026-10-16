@@ -4,6 +4,7 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -388,6 +389,21 @@ public class CrossPackagePromotedForwarderTests
         // Containment: the package class gains nothing, so same-package output stays what it was.
         foreach (string name in new[] { "Name(", "Set(", "Reset(", "Unix(", "Read(", "Close(", "lower(", "secret(", "Leak(" })
             Assert.IsFalse(package.Contains($" {name}"), $"'{name}' must be minted into the sibling class only, never into the package class");
+    }
+
+    [TestMethod]
+    public void TheFullTrimKeepNamesTheSiblingClassThatHoldsTheForwarder()
+    {
+        // golib's GoMethodText prints a struct through its run-time method set, so a method promoted from another
+        // package is printed through its forwarder in the SIBLING class. MethodSetKeep must keep it there: a
+        // dependency on the package class resolves no member under a full trim (ILC IL2037).
+        string generated = GeneratedFor(GenerateClean(Consumer), "Direct");
+        string[] keeps = [.. generated.Split('\n').Where(line => line.Contains("DynamicDependency(\"Name\"")).Select(line => line.Trim())];
+
+        Assert.AreEqual(1, keeps.Length, "one keep for the promoted Name: " + string.Join(" | ", keeps));
+        StringAssert.Contains(keeps[0], "ᴛDirectᴛxpkg)", "the keep names the sibling class");
+        Assert.IsTrue(generated.IndexOf(keeps[0], StringComparison.Ordinal) < generated.IndexOf("public override string ToString()", StringComparison.Ordinal),
+            "the keep sits on the struct's generated ToString");
     }
 
     [TestMethod]

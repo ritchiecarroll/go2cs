@@ -8,9 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
@@ -104,19 +104,42 @@ internal static class MethodSetKeep
         // embedded field, and their box twins (StructTypeTemplate.PromotedStructReceivers). No generator sees its own
         // output through the compilation, so package.GetMembers() above cannot list them, yet a struct whose Error or
         // String arrives ONLY by promotion is printed through exactly one of them (golib's GoMethodText binds it from
-        // the run-time method set). They sit in the package class, as extension methods over this type or its box.
-        foreach (Match forwarder in s_generatedReceiver.Matches(generatedSource))
-            dependencies.Add(Dependency(forwarder.Groups["name"].Value.TrimStart('@'), package));
+        // the run-time method set). A forwarder of a method promoted from ANOTHER package sits in its own top-level
+        // class (`<pkg>ᴛ<Type>ᴛxpkg`), not in the package class, so each is kept on the class that declares it: a
+        // dependency on the package class resolves nothing there (ILC IL2037), and the full-trim publish prints the
+        // structural text instead.
+        foreach ((string name, string declaringType) in GeneratedReceivers(generatedSource))
+            dependencies.Add(Dependency(name, declaringType));
 
         return dependencies.Distinct().ToList();
     }
 
     private static string Dependency(string metadataName, INamedTypeSymbol package) =>
-        $"[global::System.Diagnostics.CodeAnalysis.DynamicDependency({SymbolDisplay.FormatLiteral(metadataName, true)}, {GeneratedPartials.TypeOf(package)})]";
+        Dependency(metadataName, GeneratedPartials.TypeOf(package));
 
-    // A generated extension-method declaration on one line: `static <return type> <Name>[<type parameters>](this `. The
-    // return type may itself hold parentheses (a tuple), so the name is the identifier directly before `(this `.
-    private static readonly Regex s_generatedReceiver = new(@"\bstatic\s[^\r\n]*?(?<name>@?[\p{L}_][\p{L}\p{Mn}\p{Mc}\p{Nd}\p{Pc}]*)(?:<[^>\r\n]*>)?\(this\s", RegexOptions.CultureInvariant);
+    private static string Dependency(string metadataName, string typeOf) =>
+        $"[global::System.Diagnostics.CodeAnalysis.DynamicDependency({SymbolDisplay.FormatLiteral(metadataName, true)}, {typeOf})]";
+
+    // Every extension method declared in generatedSource, as (metadata name, `typeof(...)` of its declaring class).
+    private static IEnumerable<(string name, string declaringType)> GeneratedReceivers(string generatedSource)
+    {
+        if (generatedSource.IndexOf("(this ", StringComparison.Ordinal) < 0)
+            yield break;
+
+        CompilationUnitSyntax root = CSharpSyntaxTree.ParseText(generatedSource).GetCompilationUnitRoot();
+
+        foreach (MethodDeclarationSyntax method in root.DescendantNodes().OfType<MethodDeclarationSyntax>())
+        {
+            if (method.ParameterList.Parameters.FirstOrDefault() is not { } receiver || !receiver.Modifiers.Any(SyntaxKind.ThisKeyword) ||
+                method.Parent is not ClassDeclarationSyntax declaring)
+                continue;
+
+            string namespacePath = declaring.Ancestors().OfType<BaseNamespaceDeclarationSyntax>().FirstOrDefault()?.Name.ToString() ?? "";
+            string classPath = string.Join(".", declaring.AncestorsAndSelf().OfType<ClassDeclarationSyntax>().Reverse().Select(type => type.Identifier.ValueText));
+
+            yield return (method.Identifier.ValueText, $"typeof(global::{(namespacePath.Length > 0 ? namespacePath + "." : "")}{classPath})");
+        }
+    }
 
     private static bool IsReceiver(ITypeSymbol receiver, INamedTypeSymbol type) =>
         SymbolEqualityComparer.Default.Equals(receiver, type) ||
