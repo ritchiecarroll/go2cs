@@ -71,7 +71,9 @@ internal static class IArrayViewTypeTemplate
                 // IEnumerable<(nint, T)> is still satisfied on the boxing path.
                 public global::go.array<{{targetTypeName}}>.Enumerator GetEnumerator() => view.GetEnumerator();
 
-                global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> global::System.Collections.Generic.IEnumerable<(nint, {{targetTypeName}})>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<(nint, {{targetTypeName}})>)view).GetEnumerator();
+                global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> global::go.IArray<{{targetTypeName}}>.GetEnumerator() => ((global::go.IArray<{{targetTypeName}}>)view).GetEnumerator();
+
+                global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>)view).GetEnumerator();
 
                 global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)view).GetEnumerator();
 

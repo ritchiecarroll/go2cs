@@ -123,7 +123,7 @@ public class SliceRangeAllocationTests
 
         List<(nint, byte)> viaInterface = [];
 
-        foreach ((nint i, byte v) in (IEnumerable<(nint, byte)>)s)
+        foreach ((nint i, byte v) in (IArray<byte>)s)
             viaInterface.Add((i, v));
 
         CollectionAssert.AreEqual(

@@ -125,7 +125,7 @@ public class ArrayRangeAllocationTests
 
         for (int warm = 0; warm < 32; warm++)
         {
-            foreach ((nint i, byte v) in (IEnumerable<(nint, byte)>)a)
+            foreach ((nint i, byte v) in (IArray<byte>)a)
                 total += i + v;
         }
 
@@ -135,7 +135,7 @@ public class ArrayRangeAllocationTests
 
         for (int run = 0; run < LoopCount; run++)
         {
-            foreach ((nint i, byte v) in (IEnumerable<(nint, byte)>)a)
+            foreach ((nint i, byte v) in (IArray<byte>)a)
                 total += i + v;
         }
 
@@ -404,7 +404,7 @@ public class ArrayRangeAllocationTests
 
         List<(nint, byte)> viaInterface = [];
 
-        foreach ((nint i, byte v) in (IEnumerable<(nint, byte)>)a)
+        foreach ((nint i, byte v) in (IArray<byte>)a)
             viaInterface.Add((i, v));
 
         CollectionAssert.AreEqual(
