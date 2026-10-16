@@ -439,6 +439,7 @@
     <Project Path="tests/Behavioral/DeferValueFieldPtrReceiver/DeferValueFieldPtrReceiver.csproj" />
     <Project Path="tests/Behavioral/DeferValueReceiverSnapshot/DeferValueReceiverSnapshot.csproj" />
     <Project Path="tests/Behavioral/DeferVariadicCallee/DeferVariadicCallee.csproj" />
+    <Project Path="tests/Behavioral/DefinedArrayChainSlice/DefinedArrayChainSlice.csproj" />
     <Project Path="tests/Behavioral/DefinedComplexConst/DefinedComplexConst.csproj" />
     <Project Path="tests/Behavioral/DefinedElemStringConversion/DefinedElemStringConversion.csproj" />
     <Project Path="tests/Behavioral/DefinedForeignStructConvert/DefinedForeignStructConvert.csproj" />

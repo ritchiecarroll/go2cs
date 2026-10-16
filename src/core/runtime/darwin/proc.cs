@@ -5454,7 +5454,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
             while (cgoOff < 32 && mp.cgoCallers.Value[cgoOff] != 0) {
                 cgoOff++;
             }
-            n += copy(stk[..], (~mp.cgoCallers).Value.slice(0, cgoOff));
+            n += copy(stk[..], mp.cgoCallers.Value.slice(0, cgoOff));
             mp.cgoCallers.Value[0] = 0;
         }
 

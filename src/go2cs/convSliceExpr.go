@@ -177,12 +177,15 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 						ident += ".Value"
 					}
 				} else {
-					// A pointer-to-array BOX (a local, field, or call result) is dereferenced first.
-					// A NAMED array's deref yields the wrapper (no slice/range members) — reach its
-					// underlying array<T> via `.Value`, mirroring the deref-aliased branch above
-					// (runtime proc.go's `mp.cgoCallers[:cgoOff]`, cgoCallers a `*cgoCallers`).
+					// A pointer-to-array BOX (a local, field, or call result) is sliced through the box. A
+					// NAMED array's wrapper carries the slice members itself (both array templates, the view
+					// one included), and it is reached as the box's REF accessor, `p.Value`, never the
+					// dereference `(~p)`. `~` returns the wrapper BY VALUE, and the wrapper allocates its
+					// backing lazily, so `(~p).Value[..][i] = x` materialized the backing in a COPY and the
+					// write was lost (runtime's mpallocbits_test.go `want[:][2] = 0x3e` read back 0). An
+					// ANONYMOUS array (`*[N]T`) has no lazy backing, and its dereference shares the T[].
 					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
-						ident = "(" + PointerDerefOp + ident + ").Value"
+						ident += ".Value"
 					} else {
 						ident = "(" + PointerDerefOp + ident + ")"
 					}

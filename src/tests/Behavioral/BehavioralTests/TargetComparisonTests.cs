@@ -445,6 +445,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeferVariadicCallee() => CheckTarget("DeferVariadicCallee");
 
     [TestMethod]
+    public void CheckDefinedArrayChainSlice() => CheckTarget("DefinedArrayChainSlice");
+
+    [TestMethod]
     public void CheckDefinedComplexConst() => CheckTarget("DefinedComplexConst");
 
     [TestMethod]

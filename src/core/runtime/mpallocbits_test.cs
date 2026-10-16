@@ -75,25 +75,25 @@ public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
         var testʗ3 = test;
         Ꮡt.Run(innerˢ, (ж<testing.T> tΔ4) => {
             var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
-            (~want).Value[..][2] = 0x3e;
+            want.Value[..][2] = 0x3e;
             testʗ3(tΔ4, 129, 5, want);
         });
         var testʗ4 = test;
         Ꮡt.Run(alignedˢ, (ж<testing.T> tΔ5) => {
             var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
-            (~want).Value[..][2] = ~(uint64)0;
-            (~want).Value[..][3] = ~(uint64)0;
+            want.Value[..][2] = ~(uint64)0;
+            want.Value[..][3] = ~(uint64)0;
             testʗ4(tΔ5, 128, 128, want);
         });
         var testʗ5 = test;
         Ꮡt.Run(beginˢ, (ж<testing.T> tΔ6) => {
             var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
-            (~want).Value[..][0] = ~(uint64)0;
-            (~want).Value[..][1] = ~(uint64)0;
-            (~want).Value[..][2] = ~(uint64)0;
-            (~want).Value[..][3] = ~(uint64)0;
-            (~want).Value[..][4] = ~(uint64)0;
-            (~want).Value[..][5] = 0x1;
+            want.Value[..][0] = ~(uint64)0;
+            want.Value[..][1] = ~(uint64)0;
+            want.Value[..][2] = ~(uint64)0;
+            want.Value[..][3] = ~(uint64)0;
+            want.Value[..][4] = ~(uint64)0;
+            want.Value[..][5] = 0x1;
             testʗ5(tΔ6, 0, 321, want);
         });
         var testʗ6 = test;
