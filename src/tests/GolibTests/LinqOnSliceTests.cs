@@ -14,10 +14,10 @@ namespace GolibTests;
 /// <summary>
 /// LINQ binds a Go slice or array as its sequence of VALUES, and <c>foreach</c> still yields Go's
 /// <c>(index, value)</c> pairs. Before, <c>slice&lt;T&gt;</c> implemented both <c>IEnumerable&lt;T&gt;</c> (through
-/// <c>IList&lt;T&gt;</c>) and <c>IEnumerable&lt;(nint, T)&gt;</c> (through <c>IArray&lt;T&gt;</c>), so every LINQ call on
-/// a slice failed type inference (CS0411) and a consumer had to name the element type first. The pairs now come
-/// from <c>IArray&lt;T&gt;</c>'s own <c>GetEnumerator</c>, which <c>foreach</c> binds by pattern, and the only
-/// generic sequence interface left is <c>IEnumerable&lt;T&gt;</c>.
+/// <c>IList&lt;T&gt;</c>) and <c>IEnumerable&lt;(nint, T)&gt;</c> (through <c>IArray&lt;T&gt;</c>), so C# could
+/// infer neither element type and no LINQ method bound on a slice (CS1061); a consumer had to name the element
+/// type first. The pairs now come from <c>IArray&lt;T&gt;</c>'s own <c>GetEnumerator</c>, which <c>foreach</c>
+/// binds by pattern, and the only generic sequence interface left is <c>IEnumerable&lt;T&gt;</c>.
 /// </summary>
 [TestClass]
 public class LinqOnSliceTests
