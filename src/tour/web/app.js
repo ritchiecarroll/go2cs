@@ -33,6 +33,10 @@
   let running = false;
   let convertController = null;
   let runController = null;
+  // The page's request for the current conversion's build: { conversionId, controller, promise,
+  // settled, stage }. The server starts that build when it saves the conversion, so the page asks
+  // for it at once, shows it in the Build tab, and Run waits on (or reuses) this same request.
+  let buildRequest = null;
   let autoConvertTimer = null;
   let activeOutput = "transpile";
   let synchronizedRunPending = false;
@@ -178,6 +182,7 @@
     if (navigation) {
       convertController?.abort();
       runController?.abort();
+      forgetBuild();
       synchronizedRunPending = false;
       selectSourceView("code");
       resetNavigationState();
@@ -185,6 +190,7 @@
 
     if (!goSource) {
       conversionStatus.textContent = "This page has no editable Go source";
+      forgetBuild();
       conversionID = "";
       dirty = false;
       outputs.transpile = idleStage("transpile", "This Tour page has no code to convert.");
@@ -201,6 +207,7 @@
       conversionStatus.textContent = "Converting page...";
       scheduleAutoConvert();
     } else if (sourceChanged) {
+      forgetBuild();
       conversionID = "";
       dirty = true;
       conversionStatus.textContent = "Go source changed -- convert to refresh";
@@ -261,6 +268,7 @@
     let converted = false;
 
     converting = true;
+    forgetBuild();
     conversionID = "";
     outputs.transpile = { id: "transpile", status: "running", output: "Transpiling Go to C#...", durationMs: 0 };
     conversionStatus.textContent = automatic ? "Converting page..." : "Converting...";
@@ -286,6 +294,7 @@
       if (result.successful && !dirty) {
         conversionStatus.textContent = result.projectName ? `Converted  - ${result.projectName}` : "Converted";
         converted = true;
+        if (conversionID) showBuild(requestBuild(conversionID));
         if (automatic) selectOutput("build");
       } else if (dirty) {
         conversionID = "";
@@ -308,6 +317,64 @@
     return converted;
   }
 
+  function buildingStage() {
+    return { id: "build", status: "running", output: "Building generated .NET project...", durationMs: 0 };
+  }
+
+  // Asks for a conversion's build. The server started that build when it saved the conversion, so
+  // this request is the build's result, not a second build. The request becomes buildRequest, and
+  // its promise resolves to the build stage or rejects with the request's error.
+  function requestBuild(id) {
+    forgetBuild();
+    const controller = new AbortController();
+    const request = { conversionId: id, controller, settled: false, stage: null, promise: null };
+    request.promise = (async () => {
+      try {
+        const response = await fetch("/api/build", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversionId: id }),
+          signal: controller.signal
+        });
+        const stage = await response.json();
+        if (!response.ok) throw new Error(stage.error || `Build failed (${response.status})`);
+        request.stage = stage;
+        return stage;
+      } finally {
+        request.settled = true;
+      }
+    })();
+    buildRequest = request;
+    return request;
+  }
+
+  // Abandons the page's build request: its conversion is no longer the current one. The server's
+  // build is not stopped by this; only the page stops listening for it.
+  function forgetBuild() {
+    buildRequest?.controller.abort();
+    buildRequest = null;
+  }
+
+  // Shows a conversion's build in the Build tab while it runs and its result when it lands, as Run
+  // renders it. While Run is waiting on this same request, Run renders the result instead.
+  function showBuild(request) {
+    const pathAtStart = pagePath;
+    const current = () => !running && buildRequest === request &&
+      pagePath === pathAtStart && conversionID === request.conversionId;
+    outputs.build = buildingStage();
+    request.promise.then(stage => {
+      if (!current()) return;
+      outputs.build = stage;
+      if (stage.status !== "passed") conversionStatus.textContent = "Build failed";
+      renderOutputState();
+    }, error => {
+      if (error.name === "AbortError" || !current()) return;
+      outputs.build = taggedStage("build", "failed", outputStderr, error.message);
+      conversionStatus.textContent = "Build failed";
+      renderOutputState();
+    });
+  }
+
   async function runDotNet() {
     if (running) {
       killRun();
@@ -319,23 +386,26 @@
     runController = controller;
     const conversionAtStart = conversionID;
     const pathAtStart = pagePath;
+    // The conversion's own build request is reused while it is in flight or once it has passed; a
+    // failed or abandoned one is asked again, and the server answers with its finished build.
+    const reuse = buildRequest?.conversionId === conversionAtStart &&
+      (!buildRequest.settled || buildRequest.stage?.status === "passed");
+    const build = reuse ? buildRequest : requestBuild(conversionAtStart);
+    // Kill stops the page waiting for the build, as it always has; the server's build carries on.
+    controller.signal.addEventListener("abort", () => build.controller.abort(), { once: true });
+    const built = build.stage?.status === "passed";
     running = true;
-    outputs.build = { id: "build", status: "running", output: "Building generated .NET project...", durationMs: 0 };
-    outputs.run = idleStage("run", "Waiting for a successful build.");
-    conversionStatus.textContent = "Building...";
-    selectOutput("build");
+    if (!built) {
+      outputs.build = buildingStage();
+      outputs.run = idleStage("run", "Waiting for a successful build.");
+      conversionStatus.textContent = "Building...";
+      selectOutput("build");
+    }
     updateButtons();
 
     try {
       const requestBody = JSON.stringify({ conversionId: conversionAtStart });
-      const buildResponse = await fetch("/api/build", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: requestBody,
-        signal: controller.signal
-      });
-      const buildStage = await buildResponse.json();
-      if (!buildResponse.ok) throw new Error(buildStage.error || `Build failed (${buildResponse.status})`);
+      const buildStage = built ? build.stage : await build.promise;
       if (pagePath !== pathAtStart || conversionID !== conversionAtStart) return;
       outputs.build = buildStage;
       renderOutputState();
@@ -598,6 +668,7 @@
   });
   runtimeSelect.addEventListener("change", () => {
     runtimeMode = runtimeSelect.value;
+    forgetBuild();
     conversionID = "";
     dirty = Boolean(goSource);
     outputs.build = idleStage("build", "Run the converted project to see build output.");

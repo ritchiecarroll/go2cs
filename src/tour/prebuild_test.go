@@ -23,6 +23,11 @@ const stubToolchainEnv = "TOUR_STUB_TOOLCHAIN_DIR"
 // project, builds by printing a success line (holding first while the hold file exists), and runs
 // by printing one line. Every build records "build-start <dir>" and, if it is not killed first,
 // "build-end <dir>", so a test can count the builds that ran and where.
+//
+// A build also writes the program a real one would -- an assembly and its runtimeconfig.json under
+// the project's bin folder -- and names it the way MSBuild's minimal console logger does, after a
+// dependency's line, unless the nopath file exists. A run records how it was launched: "run-dll
+// <assembly>" for `dotnet <assembly>`, "run <dir> <args>" for `dotnet run`.
 func TestStubToolchainProcess(t *testing.T) {
 	dir := os.Getenv(stubToolchainEnv)
 	if dir == "" {
@@ -62,10 +67,25 @@ func TestStubToolchainProcess(t *testing.T) {
 			time.Sleep(10 * time.Millisecond)
 		}
 		recordStubCall(dir, "build-end "+workDir)
+		if _, err := os.Stat(filepath.Join(dir, "nopath")); err != nil && len(args) > 1 {
+			project := args[1]
+			name := strings.TrimSuffix(filepath.Base(project), filepath.Ext(project))
+			output := filepath.Join(filepath.Dir(project), "bin", "Debug", "net10.0")
+			assembly := filepath.Join(output, name+".dll")
+			_ = os.MkdirAll(output, 0o755)
+			_ = os.WriteFile(assembly, []byte("stub"), 0o600)
+			_ = os.WriteFile(filepath.Join(output, name+".runtimeconfig.json"), []byte("{}"), 0o600)
+			fmt.Printf("  go.lib -> %s\n", filepath.Join(dir, "go.lib.dll"))
+			fmt.Printf("  %s -> %s\n", name, assembly)
+		}
 		fmt.Println("Build succeeded.")
 		os.Exit(0)
 	case tool == "dotnet" && len(args) > 0 && args[0] == "run":
-		recordStubCall(dir, "run "+workDir)
+		recordStubCall(dir, "run "+workDir+" "+strings.Join(args, " "))
+		fmt.Println("hello from the stub")
+		os.Exit(0)
+	case tool == "dotnet" && len(args) == 1 && strings.HasSuffix(args[0], ".dll"):
+		recordStubCall(dir, "run-dll "+args[0])
 		fmt.Println("hello from the stub")
 		os.Exit(0)
 	}
@@ -123,16 +143,30 @@ func (s *toolchainStub) release(t *testing.T) {
 	}
 }
 
-// count reports how many recorded calls begin with prefix.
-func (s *toolchainStub) count(prefix string) int {
+// omitAssemblyPath makes every build from now on print no output-assembly line, as a build whose
+// logger does not name its output would.
+func (s *toolchainStub) omitAssemblyPath(t *testing.T) {
+	t.Helper()
+	if err := os.WriteFile(filepath.Join(s.dir, "nopath"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// calls reports the recorded calls that begin with prefix.
+func (s *toolchainStub) calls(prefix string) []string {
 	content, _ := os.ReadFile(filepath.Join(s.dir, "calls.log"))
-	found := 0
+	var found []string
 	for _, line := range strings.Split(string(content), "\n") {
 		if strings.HasPrefix(line, prefix) {
-			found++
+			found = append(found, line)
 		}
 	}
 	return found
+}
+
+// count reports how many recorded calls begin with prefix.
+func (s *toolchainStub) count(prefix string) int {
+	return len(s.calls(prefix))
 }
 
 // awaitCount waits until at least want calls beginning with prefix are recorded.

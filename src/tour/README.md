@@ -28,8 +28,9 @@ The interface is deliberately parallel:
 - Editing Go marks the C# stale until **Convert** is selected.
 - **Run with Go** converts, builds, and runs .NET whenever the Go program runs.
   It is on by default; turning it off is remembered by the browser.
-- A successful conversion starts its .NET build at once, in the background, so
-  **Run** usually finds the build already finished or under way.
+- A successful conversion starts its .NET build at once, in the background, and
+  the **Build** tab shows that build while it runs and its output when it ends,
+  so **Run** usually finds the build already finished or under way.
 - **Run** builds and executes the current conversion; it becomes **Kill** while
   the process is active.
 
@@ -199,8 +200,14 @@ limited to 256 KiB; normal tool stages have a 20-second timeout, dependency reso
 for an initial download, and the one-time converter build has ten.
 
 The `dotnet build` of a submission starts as soon as its conversion succeeds, in the background, and
-the Build stage reports that build: Run waits for it if it is still running, then executes the program,
-so a synchronized Go and .NET run pays only for whatever part of the build is left. Converting a newer
+the Build stage reports that build. The page asks for it straight after the conversion, so the Build tab
+fills in on its own; Run waits on that same request if the build is still running, or goes straight to
+the program if it has passed, so a synchronized Go and .NET run pays only for whatever part of the build
+is left. The program is launched directly, as `dotnet <assembly>`, at the path the build's own output
+names; `dotnet run --no-build` would evaluate the project again before every launch, which on
+Windows x64 more than doubled a hello-world run. The program sees the same working directory and environment either
+way (its `runtimeconfig.json` sits beside the assembly), and a build whose output names no assembly is
+run with `dotnet run --no-build --project` as before. Converting a newer
 submission (every Tour page converts itself on arrival) cancels an older one's unfinished build, as
 does the expiry of its workspace; should the older conversion still be run, it builds then. Aborting
 the Run request cancels the running program; a background build it was waiting for carries on, so the

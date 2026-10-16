@@ -99,6 +99,10 @@ type conversionArtifact struct {
 	// prebuild is the background build a conversion made for the page starts; nil for one saved by
 	// another path, such as the warmup's. Guarded by pipelineRunner.mu.
 	prebuild *prebuild
+	// assembly is the program the conversion's last build produced, as that build's output named it;
+	// empty until a build has passed and named one. programStage launches it. Guarded by
+	// pipelineRunner.mu.
+	assembly string
 }
 
 type pipelineRunner struct {
@@ -341,9 +345,7 @@ func (p *pipelineRunner) runConversion(ctx context.Context, request runRequest) 
 		return result, nil
 	}
 
-	runArgs := []string{"run", "--no-build", "--project", artifact.project}
-	runArgs = append(runArgs, runtimeMSBuildArgs(artifact.runtime)...)
-	run := p.runStage(ctx, "run", ".NET Run", artifact.outputDir, commandTimeout, "dotnet", runArgs...)
+	run := p.programStage(ctx, artifact)
 	result.Stages = append(result.Stages, run)
 	result.Successful = run.Status == "passed"
 	return result, nil
