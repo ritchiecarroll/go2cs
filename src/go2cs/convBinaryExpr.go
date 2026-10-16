@@ -153,6 +153,12 @@ func (v *Visitor) foldedNamedFloatConstLiteral(operand ast.Expr, targetCSType st
 // typed the way overflowingConstLiteral types its folds.
 // Pure-integer and pure-float expressions, and a float operand beside only integer LITERALS, keep
 // their emission: C# already evaluates those correctly.
+//
+// The SECOND trigger is pure-integer arithmetic around a named untyped-int constant whose UntypedInt
+// (int64) evaluation reaches a different value than Go's exact constant: an intermediate that leaves
+// int64 (`maxUint64 / 5`) or a shift count of 64 or more (`(div1e8m*5^8) % (1<<64) - 1`, internal/strconv's
+// compile-time assert). See untypedIntEvaluationDiffers. Arithmetic whose int64 evaluation agrees with
+// Go keeps its operators.
 func (v *Visitor) foldedMixedIntegerConstLiteral(expr ast.Expr) string {
 	tv, ok := v.info.Types[expr]
 
@@ -166,7 +172,7 @@ func (v *Visitor) foldedMixedIntegerConstLiteral(expr ast.Expr) string {
 		return ""
 	}
 
-	if !v.containsUntypedNamedIntegerConstRef(expr) || !v.containsFloatConstOperand(expr) {
+	if !v.containsUntypedNamedIntegerConstRef(expr) || !v.containsFloatConstOperand(expr) && !v.untypedIntEvaluationDiffers(expr) {
 		return ""
 	}
 
