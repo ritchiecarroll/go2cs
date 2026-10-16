@@ -156,17 +156,19 @@ public static ж<Type> synthType(System.Type? st, nint[]? arrayDims, nint[]?[]? 
         }
         arrayDims = stampedDims;
     }
-    // A DEFINED array type's own length (`type A [4]int`), read off its [GoType("[4]nint")] marker
-    // (GoReflect.DefinedArrayLength). It decides dims[0] as the stamp above decides the whole chain, and
-    // ONLY dims[0]: a deeper carried chain reaches into the element, which is then a NAMED array (an
-    // unnamed one is stamped above) and answers its own length from its own marker when Elem() builds
-    // it. So the tail is dropped rather than compared, and one Go type interns to one descriptor.
-    else if (GoReflect.DefinedArrayLength(st) is { } declaredLength) {
-        if (arrayDims is { Length: > 0 } && arrayDims[0] != declaredLength) {
+    // A DEFINED array type's declared chain (`type A [4]int`, `type M [2][3]int`), read off the leading
+    // [N][M]... of its [GoType] marker (GoReflect.DefinedArrayDims). It decides every position it declares,
+    // as the stamp above decides the whole chain, and ONLY those: a deeper carried chain reaches into a
+    // NAMED array element, which answers its own length from its own marker when Elem() builds it. So a
+    // carried tail past the declaration is dropped rather than compared, and one Go type interns to one
+    // descriptor.
+    else if (GoReflect.DefinedArrayDims(st) is { } declaredDims) {
+        int compared = arrayDims is null ? 0 : Math.Min(arrayDims.Length, declaredDims.Length);
+        if (!arrayDims.AsSpan(0, compared).SequenceEqual(declaredDims.AsSpan(0, compared))) {
             throw panic("reflect: descriptor cargo for " + GoReflect.GoTypeName(st) + " disagrees with its declared length: dims [" +
-                        string.Join(",", arrayDims) + "] vs declared [" + declaredLength + "]");
+                        string.Join(",", arrayDims) + "] vs declared [" + string.Join(",", declaredDims) + "]");
         }
-        arrayDims = new nint[] { declaredLength };
+        arrayDims = declaredDims;
     }
     if (GoReflect.TypeStampedChanDirChain(st) is { } stampedChain) {
         GoChanDir[]? carried = normalizeChanDirChain(chanDirChain);

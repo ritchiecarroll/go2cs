@@ -75,6 +75,48 @@ public class DefinedArrayDescriptorTests
     }
 
     [TestMethod]
+    public void AMultiDimensionalMarkerDeclaresItsWholeChain()
+    {
+        // type M [2][3]int -- the inner array is UNNAMED, so its 3 has no type of its own to answer from:
+        // the marker's whole leading [2][3] chain is M's declaration.
+        ж<abi.Type> descriptor = abi.TypeFor<DefinedIntMatrix2x3>();
+        ж<abi.ΔArrayType> array = abi.ArrayType(descriptor);
+
+        Assert.IsNotNull(array, "ArrayType() of type M [2][3]int answered nil");
+        Assert.AreEqual((uintptr)2, array.Value.Len, "M's own length");
+        Assert.AreEqual((uintptr)(2 * 3 * IntPtr.Size), descriptor.Value.Size_, "M's size is 2 x 3 x sizeof(int)");
+
+        ж<abi.ΔArrayType> element = abi.ArrayType(array.Value.Elem);
+
+        Assert.IsNotNull(element, "ArrayType() of M's unnamed element [3]int answered nil");
+        Assert.AreEqual((uintptr)3, element.Value.Len, "M's element length, read from M's marker");
+
+        reflect.ΔType t = reflect.TypeFor<DefinedIntMatrix2x3>();
+
+        Assert.AreEqual((nint)2, t.Len(), "reflect.TypeFor[M]().Len()");
+        Assert.AreEqual((uintptr)(2 * 3 * IntPtr.Size), t.Size(), "reflect.TypeFor[M]().Size()");
+        Assert.AreEqual((nint)3, t.Elem().Len(), "reflect.TypeFor[M]().Elem().Len()");
+
+        // The converter's own spelling of the same declaration -- a [GoArrayDims(2, 3)] stamp beside a
+        // marker that keeps only the outer [2] -- answers identically.
+        reflect.ΔType stamped = reflect.TypeFor<StampedIntMatrix2x3>();
+
+        Assert.AreEqual((nint)2, stamped.Len(), "the stamped spelling's Len()");
+        Assert.AreEqual((uintptr)(2 * 3 * IntPtr.Size), stamped.Size(), "the stamped spelling's Size()");
+        Assert.AreEqual((nint)3, stamped.Elem().Len(), "the stamped spelling's Elem().Len()");
+
+        // Carried cargo is compared on every position the marker declares: [2,3] agrees, and a carried
+        // inner length that contradicts the declared 3 is refused by name.
+        ж<abi.ΔArrayType> carried = abi.ArrayType(abi.synthType(typeof(DefinedIntMatrix2x3), new nint[] { 2, 3 }));
+
+        Assert.IsNotNull(carried, "a carried [2,3] chain for M was refused");
+        Assert.AreEqual((uintptr)2, carried.Value.Len, "M's length under a carried [2,3] chain");
+
+        PanicException refused = Assert.ThrowsException<PanicException>(() => abi.synthType(typeof(DefinedIntMatrix2x3), new nint[] { 2, 4 }));
+        StringAssert.Contains(refused.Message, "disagrees with its declared length");
+    }
+
+    [TestMethod]
     public void AStringElementArrayConvertsToAPointerWithoutPinning()
     {
         // unique's canonMap hashes a [3]string key through unsafe.Pointer(&key).
@@ -172,4 +214,36 @@ public readonly struct DefinedStringArray3(array<@string> value) : IArray<@strin
     public object Clone() => new DefinedStringArray3((array<@string>)Value.Clone());
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
     IEnumerator<(nint, @string)> IEnumerable<(nint, @string)>.GetEnumerator() => ((IEnumerable<(nint, @string)>)Value).GetEnumerator();
+}
+
+[GoType("[2][3]nint")]
+public readonly struct DefinedIntMatrix2x3(array<array<nint>> value) : IArray<array<nint>>
+{
+    private array<array<nint>> Value => DefinedArrayBacking.Of(value, 2);
+    public array<nint>[] Source => Value.Source;
+    Array? IArray.Source => Value.Source;
+    public nint Length => Value.Length;
+    public ref array<nint> this[nint index] => ref Value[index];
+    object? IArray.this[nint index] { get => Value[index]; set => Value[index] = (array<nint>)value!; }
+    public Span<array<nint>> ꓸꓸꓸ => Value.ꓸꓸꓸ;
+    public Span<array<nint>> ToSpan() => Value.ToSpan();
+    public object Clone() => new DefinedIntMatrix2x3((array<array<nint>>)Value.Clone());
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
+    IEnumerator<(nint, array<nint>)> IEnumerable<(nint, array<nint>)>.GetEnumerator() => ((IEnumerable<(nint, array<nint>)>)Value).GetEnumerator();
+}
+
+[GoType("[2]array<nint>"), GoArrayDims(2, 3)]
+public readonly struct StampedIntMatrix2x3(array<array<nint>> value) : IArray<array<nint>>
+{
+    private array<array<nint>> Value => DefinedArrayBacking.Of(value, 2);
+    public array<nint>[] Source => Value.Source;
+    Array? IArray.Source => Value.Source;
+    public nint Length => Value.Length;
+    public ref array<nint> this[nint index] => ref Value[index];
+    object? IArray.this[nint index] { get => Value[index]; set => Value[index] = (array<nint>)value!; }
+    public Span<array<nint>> ꓸꓸꓸ => Value.ꓸꓸꓸ;
+    public Span<array<nint>> ToSpan() => Value.ToSpan();
+    public object Clone() => new StampedIntMatrix2x3((array<array<nint>>)Value.Clone());
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
+    IEnumerator<(nint, array<nint>)> IEnumerable<(nint, array<nint>)>.GetEnumerator() => ((IEnumerable<(nint, array<nint>)>)Value).GetEnumerator();
 }

@@ -85,6 +85,7 @@ public class NoUncountedBackingAllocationsTests
         ("GoReflect.TypeLayout.cs|nint[] offsets = new nint[fields.Length];", "type-layout metadata: field offsets, array dims and signature types, computed per type"),
         ("GoReflect.TypeLayout.cs|nint[] result = new nint[dims.Length];", "type-layout metadata: field offsets, array dims and signature types, computed per type"),
         ("GoReflect.TypeLayout.cs|nint[] result = new nint[dims.Length];", "type-layout metadata: field offsets, array dims and signature types, computed per type"),
+        ("GoReflect.TypeLayout.cs|return dims.Count == 0 ? null : dims.ToArray();", "type-layout metadata: the dims a defined array type's marker declares, parsed once per type"),
         ("GoReflect.ValueMarshalling.cs|long[] dims = new long[arrayDims.Length];", "reflection metadata: the dims of a nested array type"),
         ("GoStructSynthesis.cs|Type[] signature = new Type[targetParameters.Length - skip + 1];", "runtime struct-type synthesis: signature and dims metadata of a synthesized type"),
         ("GoStructSynthesis.cs|int[] result = new int[dims.Length];", "runtime struct-type synthesis: signature and dims metadata of a synthesized type"),
