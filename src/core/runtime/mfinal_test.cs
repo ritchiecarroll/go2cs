@@ -226,7 +226,7 @@ public static void TestEmptySlice(ж<testing.T> Ꮡt) {
     var (x, y) = adjChunks();
 
     // the pointer inside xs points to y.
-    var xs = (~x).Value[(int)(objsize)..]; // change objsize to objsize-1 and the test passes
+    var xs = x.Value[(int)(objsize)..]; // change objsize to objsize-1 and the test passes
 
     var fin = new channel<bool>(1);
     var finʗ1 = fin;
