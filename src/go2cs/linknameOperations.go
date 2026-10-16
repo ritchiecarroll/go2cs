@@ -447,6 +447,16 @@ var linknamePushTargets = map[string]linknamePush{
 	// semantics, so the forward reaches a body that genuinely terminates as Go's does. Same package edge as
 	// the two indicator rows above.
 	"crypto/internal/fips140.fatal": {source: "runtime.fips_fatal", selfSymbolPull: true},
+	// testing/synctest's bubble runner, pushed by testing/testing.go (`//go:linkname testingSynctestTest
+	// testing/synctest.testingSynctestTest`) in the same SELF-SYMBOL shape: synctest.go names its own package.
+	// The pushed body is hand-owned and PUBLIC in testing.cs (testingSynctestTest over
+	// TestExecution.RunSynctest), with the signature the consumer declares. No new project reference and no
+	// cycle: testing/synctest already references testing.
+	//
+	// What the stub was costing (Go 1.26): synctest.Test threw "testingSynctestTest: no implementation reached
+	// this compilation" by name, and ended any test host that calls it. encoding/json's two synctest tests did,
+	// and net/http calls synctest.Test 17 times.
+	"testing/synctest.testingSynctestTest": {source: "testing.testingSynctestTest", selfSymbolPull: true},
 	// crypto/internal/sysrand's fatal, pushed by runtime/panic.go (`//go:linkname sysrand_fatal
 	// crypto/internal/sysrand.fatal`). HANDLE consumer shape: rand.go carries its own one-arg
 	// `//go:linkname fatal` above a bodyless `func fatal(string)`, so bareDecl and selfSymbolPull stay false.
