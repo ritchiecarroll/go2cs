@@ -174,10 +174,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 
 // go2cs generated this placeholder — func TypeOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// TypeFor returns the abi.Type for a type parameter.
-public static ж<Type> TypeFor<T>() {
-    return (TypeOf(((ж<T>)nil)).Reinterpret<Type, PtrType>()).Value.Elem;
-}
+// go2cs generated this placeholder — func TypeFor is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static ΔKind Kind(this ref Type t) {
     return t.Kind_;
@@ -387,15 +384,7 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
 
 // go2cs generated this placeholder — func FuncType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// InterfaceType returns t cast to a *InterfaceType, or nil if its tag does not match.
-public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    if (t.Kind() != Interface) {
-        return default!;
-    }
-    return Ꮡt.Reinterpret<Type, ΔInterfaceType>();
-}
+// go2cs generated this placeholder — func InterfaceType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Size returns the size of data with type t.
 public static uintptr Size(this ref Type t) {
