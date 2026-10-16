@@ -49,7 +49,7 @@ using static go.crypto.@internal.constanttime_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/constanttime/constant_time.go", "constant_time.cs", "AAcaAAoKgqiSqJKqoqqi")]
+[assembly: go.GoPositionMap("crypto/internal/constanttime/constant_time.go", "constant_time.cs", "AAcaAAoKgqiSqJKqog==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

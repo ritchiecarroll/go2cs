@@ -36,10 +36,6 @@ public static nint LessOrEq(nint x, nint y) {
     return (nint)boolToUint8(x <= y);
 }
 
-// boolToUint8 is a compiler intrinsic.
-// It returns 1 for true and 0 for false.
-internal static uint8 boolToUint8(bool b) {
-    throw panic("unreachable; must be intrinsicified");
-}
+// go2cs generated this placeholder — func boolToUint8 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end constanttime_package
