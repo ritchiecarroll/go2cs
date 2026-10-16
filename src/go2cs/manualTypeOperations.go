@@ -1309,6 +1309,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// ΔType wrapper by the underlying System.Type (canonType). See docs/phase4/DESIGN-reflection-bridge.md.
 		"Value.Type": goosAny,
 		"toType":     goosAny,
+		// TypeFor joins them. Go's body is `toRType(abi.TypeFor[T]())`, which the converter emits as a
+		// FRESH wrapper over a fresh box, the one public Type route that skipped canonType. `==` still
+		// held (it compares the boxes by storage identity), but reflect.DeepEqual's pointer
+		// short-circuit and sync.Map's key compare are reference identity, so TypeFor[T]() was not
+		// even DeepEqual to itself. Go 1.26's encoding/json and encoding/xml tests build their
+		// expected errors with TypeFor and compare them with DeepEqual (41 json rows, 1 xml row).
+		"TypeFor": goosAny,
 		// deepValueEqual keys its cycle-detection visited map on the values' internal data words
 		// (v.ptr / v.pointer()) — eface addresses the bridge never populates, so the auto form NREs
 		// converting the null unsafe.Pointer slot (strings/bytes TestSplit/TestSplitAfter, R5).

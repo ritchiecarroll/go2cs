@@ -2618,6 +2618,15 @@ internal static ΔType toType(ж<abi.Type> Ꮡt) {
     return canonType(Ꮡt);
 }
 
+// TypeFor returns the [Type] that represents the type argument T. Hand-owned for the reason toType is:
+// Go's body is `toRType(abi.TypeFor[T]())`, an *rtype converted to Type, and that conversion mints a
+// fresh wrapper over a fresh box per call. Go interns the descriptor, so TypeFor[T]() is the same Type
+// TypeOf answers; route it through toType so it is. abi.TypeFor never answers nil, so canonType's nil
+// arm is not reached.
+public static ΔType TypeFor<T>() {
+    return toType(abi.TypeFor<T>());
+}
+
 // ==== Type side: reflect.rtype's ΔType methods over the abi.Type's carried System.Type ====
 // rtype wraps an abi.Type by value, so `Ꮡt.Value.t.sysType` is the managed System.Type the Phase-1
 // synthType stamped on the descriptor. These bypass Go's name/offset resolution (resolveNameOff, a
