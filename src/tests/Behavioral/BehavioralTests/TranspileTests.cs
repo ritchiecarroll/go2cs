@@ -1878,6 +1878,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReflectTypeAssertMarshal() => CheckTarget("ReflectTypeAssertMarshal");
 
     [TestMethod]
+    public void CheckReflectTypeIdentity() => CheckTarget("ReflectTypeIdentity");
+
+    [TestMethod]
     public void CheckReflectTypedNilInterface() => CheckTarget("ReflectTypedNilInterface");
 
     [TestMethod]
