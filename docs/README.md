@@ -181,7 +181,7 @@ NuGet packages. Wondering which Go modules make good conversions? The
 
 [More questions](FAQ.md): versions, platforms, dependencies, C# to Go.
 
-![GopherDotNetBotFrisbee](images/GopherDotNetBotFrisbee.png)
+![GopherDotNetBotFrisbee](images/GopherDotNetBotFrisbee.jpg)
 
 ## Status
 
