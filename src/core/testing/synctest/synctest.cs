@@ -299,7 +299,9 @@ public static void Test(ж<testing.T> Ꮡt, Action<ж<testing.T>> f) {
 }
 
 //go:linkname testingSynctestTest testing/synctest.testingSynctestTest
-internal static partial bool testingSynctestTest(ж<testing.T> t, Action<ж<testing.T>> f);
+/*linkname*/ internal static partial bool testingSynctestTest(ж<testing.T> t, Action<ж<testing.T>> f) {
+    return testing.testingSynctestTest(t, f);
+}
 
 // Wait blocks until every goroutine within the current bubble,
 // other than the current goroutine, is durably blocked.
