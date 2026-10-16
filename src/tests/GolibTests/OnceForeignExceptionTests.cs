@@ -126,6 +126,93 @@ public class OnceForeignExceptionTests
             $"replay lost the Go panic value: '{second.Message}'");
     }
 
+    // --- the DROP half (Go 1.26 TestOnceXGC/*_panic, 2026-10-16) -------------------------------
+    //
+    // Go's OnceX bodies clear the wrapped function in the DEFER (`d.f = nil // Do not keep f alive
+    // after invoking it`), so f is released after the first call whether it returned or panicked.
+    // The hand-own cleared it only after f() RETURNED, so a panicking f stayed reachable for the
+    // life of the returned func. Each guard builds the once and calls it in NoInlining helpers, so
+    // no frame of this method can hold the captured object; only the WeakReference sees it.
+
+    [TestMethod]
+    public void OnceFuncDropsAPanickingFunctionAfterTheFirstCall() =>
+        AssertDroppedAfterFirstCall(BuildOnceFunc(panics: true), "OnceFunc, f panics");
+
+    [TestMethod]
+    public void OnceValueDropsAPanickingFunctionAfterTheFirstCall() =>
+        AssertDroppedAfterFirstCall(BuildOnceValue(panics: true), "OnceValue, f panics");
+
+    [TestMethod]
+    public void OnceValuesDropsAPanickingFunctionAfterTheFirstCall() =>
+        AssertDroppedAfterFirstCall(BuildOnceValues(panics: true), "OnceValues, f panics");
+
+    // The CONTROLS: the returning path already dropped f before the fix. Green on both sides; a
+    // control that goes red means the harness, not the hand-own, keeps the object alive.
+    [TestMethod]
+    public void OnceFuncDropsAReturningFunctionAfterTheFirstCall() =>
+        AssertDroppedAfterFirstCall(BuildOnceFunc(panics: false), "OnceFunc, f returns");
+
+    [TestMethod]
+    public void OnceValueDropsAReturningFunctionAfterTheFirstCall() =>
+        AssertDroppedAfterFirstCall(BuildOnceValue(panics: false), "OnceValue, f returns");
+
+    private sealed class Captured { }
+
+    // OnceFunc's own Action is returned as is: there is no adapter to share a closure with.
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static (Action call, WeakReference captured) BuildOnceFunc(bool panics)
+    {
+        var captured = new Captured();
+        var probe = sync.OnceFunc(() => { GC.KeepAlive(captured); if (panics) throw go.builtin.panic("once-drop"); });
+        return (probe, new WeakReference(captured));
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static (Action call, WeakReference captured) BuildOnceValue(bool panics)
+    {
+        var captured = new Captured();
+        var probe = sync.OnceValue<int>(() => { GC.KeepAlive(captured); if (panics) throw go.builtin.panic("once-drop"); return 1; });
+        return (Adapt(probe), new WeakReference(captured));
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static (Action call, WeakReference captured) BuildOnceValues(bool panics)
+    {
+        var captured = new Captured();
+        var probe = sync.OnceValues<int, int>(() => { GC.KeepAlive(captured); if (panics) throw go.builtin.panic("once-drop"); return (1, 2); });
+        return (Adapt(probe), new WeakReference(captured));
+    }
+
+    // The adapters are their OWN methods on purpose. A lambda written beside the one that captures
+    // `captured` would share its closure object, and would keep `captured` alive by itself.
+    private static Action Adapt<T>(Func<T> f) => () => f();
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static void CallOnce(Action call) => Capture(call);
+
+    private static void AssertDroppedAfterFirstCall((Action call, WeakReference captured) once, string what)
+    {
+        Collect();
+        Assert.IsTrue(once.captured.IsAlive, $"{what}: the captured object died BEFORE the first call (the once must still hold f)");
+
+        CallOnce(once.call);
+        Collect();
+        Assert.IsFalse(once.captured.IsAlive,
+            $"{what}: the wrapped function is still reachable after the first call. Go clears it in the defer, on " +
+            "both the returning and the panicking path (`d.f = nil // Do not keep f alive after invoking it`).");
+        GC.KeepAlive(once.call);
+    }
+
+    private static void Collect()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+    }
+
     private static Exception? Capture(Action action)
     {
         try

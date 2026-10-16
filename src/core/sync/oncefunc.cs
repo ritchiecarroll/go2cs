@@ -34,6 +34,12 @@ partial class sync_package {
 //
 // Guarded by GolibTests/OnceForeignExceptionTests (the replay guards fail against the converted
 // shape and pass against this one; the Go-panic control passes against both).
+//
+// f is cleared in a `finally`, the analogue of Go's defer, so it is released after the first call on
+// the panicking path too: Go's `d.f = nil` sits in the deferred func. The filter still runs first (it
+// runs in the first pass of the unwind, before any finally), so it still sees the panic. Clearing f
+// only after it returned kept a panicking f alive for the life of the returned func: Go 1.26's sync
+// TestOnceXGC/*_panic, and the DROP guards in the same test file.
 
 // OnceFunc returns a function that invokes f only once. The returned function
 // may be called concurrently.
@@ -59,10 +65,12 @@ public static Action OnceFunc(Action f) {
     var g = () => {
         try {
             f();
-            f = default!; // Do not keep f alive after invoking it.
             valid = true; // Set only if f does not panic.
         }
         catch (Exception ᒐex) when (recordUnwind(ᒐex)) { throw; } // unreachable: the filter declines
+        finally {
+            f = default!; // Do not keep f alive after invoking it. Go clears it in the defer, so on a panic too.
+        }
     };
     var gʗ1 = g;
     return () => {
@@ -100,10 +108,12 @@ public static Func<T> OnceValue<T>(Func<T> f) {
     var g = () => {
         try {
             result = f();
-            f = default!;
             valid = true;
         }
         catch (Exception ᒐex) when (recordUnwind(ᒐex)) { throw; } // unreachable: the filter declines
+        finally {
+            f = default!;
+        }
     };
     var gʗ1 = g;
     return () => {
@@ -143,10 +153,12 @@ public static Func<(T1, T2)> OnceValues<T1, T2>(Func<(T1, T2)> f) {
     var g = () => {
         try {
             (r1, r2) = f();
-            f = default!;
             valid = true;
         }
         catch (Exception ᒐex) when (recordUnwind(ᒐex)) { throw; } // unreachable: the filter declines
+        finally {
+            f = default!;
+        }
     };
     var gʗ1 = g;
     return () => {
