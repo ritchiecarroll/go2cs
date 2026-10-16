@@ -169,6 +169,12 @@ type Visitor struct {
 
 	liftedTypeNames hashset.HashSet[string]
 	liftedTypeMap   map[types.Type]string
+
+	// capturedLiftNames dedups lifts that close over type parameters (liftedTypeParams.go) WITHIN the
+	// declaration owning those parameters, where one signature is one Go type; liftBaseMarked records the
+	// lifts whose instantiation base parts are written (dynamicInterfaceBase.go).
+	capturedLiftNames map[string]string
+	liftBaseMarked    map[string]bool
 	subStructTypes  map[types.Type][]types.Type
 
 	// inUsingAliasTarget is set only while a type alias's `global using` RHS is being rendered.

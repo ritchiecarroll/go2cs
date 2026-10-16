@@ -1446,6 +1446,51 @@ not satisfying a lifted operator constraint — is a distinct, deeper root). Gua
 Namer })`, file B casts a concrete `*box` to it — the lifted name must flow into the attribute,
 the adapter, and the signature).
 
+## An anonymous interface lifted out of a GENERIC declaration binds its type parameters, and each instantiation's concrete lift derives it
+
+Go 1.26's crypto/x509 declares `type constraints[T, V any] struct { permitted, excluded interface{
+query(V) (T, bool) } }` and fills it from functions returning `interface{ query(string) (string, bool)
+}`. The field's anonymous interface mentions `T` and `V`, so its lift is a GENERIC declaration of its
+own, `constraints_permitted<T, V>`, and the struct names it constructed. Lifted non-generic, both names
+were unbound (CS0246), and crypto/x509 blocked every remaining project of the hop. As with a lift out of
+a generic function, only the parameters the shape uses are bound and no constraint clause is emitted:
+the enclosing declaration's clauses govern every use. Within that one declaration the same shape is
+one type, so `excluded` reuses `permitted`'s lift; across declarations a lift that closes over type
+parameters is never shared or registered by signature, since `T` means something else elsewhere.
+
+In Go, `interface{ query(string) (string, bool) }` is ONE type whether it is a function's result or
+`constraints[string, string].permitted`; in C# the function's result is a lifted dyn interface of its
+own. So each concrete instantiation of the generic struct writes one partial part making that shape's
+lift DERIVE the closed generic, an implicit reference conversion, and the derived lift's member is
+declared `new` because it redeclares the inherited one (CS0108 otherwise). Both are deferred markers
+resolved after the file-visit barrier, so the lift named may live in any file of the package; a shape
+no lift claimed resolves to an empty line, and the marker on every other dyn member resolves to nothing.
+Emitted form:
+
+<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:7-11, :16-17, :39-41 -->
+```csharp
+partial interface constraints_permitted<T, V> /*dyn*/ {
+    (T, bool) query(V _);
+}
+partial interface newCounter_R0 : constraints_permitted<ж<counter>, nint> {}
+partial interface newDNS_R0 : constraints_permitted<@string, @string> {}
+
+    internal constraints_permitted<T, V> permitted;
+    internal constraints_permitted<T, V> excluded;
+
+internal partial interface newDNS_R0 /*dyn*/ {
+    new (@string, bool) query(@string _);
+}
+```
+
+One direction is NOT covered: assigning the generic field back to the concrete lift (`var q
+interface{ query(string) (string, bool) } = c.permitted`) is a base-to-derived conversion C# does not
+make implicitly. crypto/x509 never does it. It closes when a Go type identity becomes ONE C# type (the
+generic lift as the dyn name for every structurally identical shape), which retires these partial parts.
+(Guarded by `GenericLiftedInterfaceField`: two instantiations, value and pointer receivers, a value
+called through both its concrete interface and the generic field, and Go's structural assertion on the
+field, output-compared to Go; and by `TestLiftedInterfaceFieldOfAGenericStructCarriesItsTypeParameters`.)
+
 ## An INITIALIZED var lifts its explicit anonymous declared type too — and a blank name lifts from the GO identifier
 
 `visitValueSpec` lifts a var whose DECLARED type is an anonymous struct/interface literal, but

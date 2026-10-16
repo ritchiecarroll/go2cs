@@ -3155,6 +3155,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	resolveDynamicTypeMarkers(resolveNames)
+	resolveDynamicInterfaceBases(resolveNames)
 
 	for relPath, codes := range resolveWarningFacts(warningFacts, collectPackageVarWrites(pkg.Syntax, pkg.TypesInfo), true) {
 		testWarningFacts[relPath] = codes
