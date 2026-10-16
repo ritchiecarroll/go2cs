@@ -65,7 +65,7 @@ using static go.@internal.abi_package;
 [assembly: go.GoPositionMap("internal/abi/funcpc.go", "funcpc.cs", "AAgsAA4S")]
 [assembly: go.GoPositionMap("internal/abi/map.go", "map.cs", "AC9qkqSSpJKkkg==")]
 [assembly: go.GoPositionMap("internal/abi/switch.go", "switch.cs", "ACBAppSk")]
-[assembly: go.GoPositionMap("internal/abi/type.go", "type.cs", "AIgBngKSgpSmACFcgKSCqJCmkqaCgpQAGS6igpTWooKUAAIU8gASMoIAP0SygpSUpKysrKysrKwAD44BkKaQpIAACBCCgoKUpqKCgpSokAAaPoKmgqaCpoIABjKCAA0cggAlUqLaoqiSqJKoktqigoKCgoLMkoKUgqyygoKCgoKU6pKClIKokoKUgoKmgoKUgpSCgoKUgoKClIKClIKmgoKCgoKCgqY=")]
+[assembly: go.GoPositionMap("internal/abi/type.go", "type.cs", "AIgBngKSgpSmACFcgKSCqJCmkqaCgpQAGS6igpTWooKUAAIU8gASMoIAP0SygpSUpKysrKysrKwAEZQBkKSAAAgQgoKClKaigoKUqJAAGj6CpoKmgqaCAAYyggANHIIAJVKi2qKokqiSqJLaooKCgoKCzJKClIKssoKCgoKClOqSgpSCqJKClIKCpoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

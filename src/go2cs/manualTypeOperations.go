@@ -1041,6 +1041,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// is what reflect's own rtype.Len reads), so hand-owning it turns a garbage read into the
 		// same truthful one, one layer down.
 		"Type.Len": goosAny,
+		// Type.Size is hand-owned for one arm. A descriptor whose Go size could not be derived, such as the
+		// unnamed array type argument of abi.TypeFor[[2]string]() (C# spells every [N]T as one array<T>), refuses
+		// by name. Its unstamped Size_ of 0 sent unique.Make down the zero-size arm, so two different pairs shared
+		// one handle and compared equal.
+		"Type.Size": goosAny,
 		// Type.ChanDir is the FOURTH member of that family and the only one with no synthesis
 		// waiting for it: the direction is not unpopulated, it is not in the managed type at all.
 		// `<-chan int`, `chan<- int` and `chan int` all emit as golib's `channel<T>`, so the

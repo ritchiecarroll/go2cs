@@ -27079,4 +27079,43 @@ to cast to.
 
 — G (measured 2026-10-16 with a go/types census of `print`/`println` arguments; COORD: record before the seat lands)
 
+## 2026-10-16 — G: a type-only descriptor for an UNNAMED array type argument carries no length — POST-HOP (deferred, not skipped), refuse-by-name until then
+
+C# spells every Go `[N]T` as the one `array<T>`, so a descriptor built from the TYPE alone carries no length. That
+covers `abi.TypeFor[[2]string]()`, `reflect.TypeFor[[2]string]()`, and the typed-nil route `TypeOf((*T)(nil)).Elem()`.
+Until the H8 seat `claude/g-h8-unknown-array-length`, such a descriptor answered `Size() == 0`, `Len() == 0` and
+`ArrayType() == nil`. `unique.Make([2]string{a, b})` then took Go's zero-size arm and returned the shared zerobase
+handle, so two DIFFERENT pairs compared equal: a wrong answer, P2's measured finding. A defined array
+(`type N [2]string`) and a stamped field already carry their lengths, and a live value reveals its own.
+
+**Now (the seat):** the descriptor is marked size-unknown. `Size()`, `Len()` and `ArrayType()` refuse by name: "runtime
+error: the size of [?]string is not known (the length of [?]string is not carried for an unnamed array type
+argument)". The raw `Size_` FIELD holds `^uintptr(0)`, never 0. The converted runtime and internal/runtime read that
+field directly (about 40 files), and no Go type has that size: it is past the address space, and Go's own
+`math.MulUintptr`/`maxAlloc` guards reject it loudly. A dimless descriptor stays usable for Kind, Name and identity.
+
+**Population** (go/types over std plus tests, windows/linux/darwin, identical counts): 16 instantiations take an
+unnamed array type argument, across 8 callees. ALL are in `_test.go` files, so there are 0 in production.
+- 5 reach a type-only sink (`reflect.TypeFor`, `abi.TypeFor` or `unique.Make`, walked transitively through generic
+  callees). These are `unique.Make` ×2 (handle_test.go, `[2]string`), which now refuse by name and become
+  disclosures, reflect_test `testTypeAssert` ×1 (`[2]int`) and `typeAssertAllocs` ×1 (`[128]int`), and
+  `runtime.AddCleanup` ×1 (malloc_test.go). The corpus body for `AddCleanup` is the managed hand-own, which does not
+  read `TypeFor`.
+- The other 11 (`hash/maphash` ×2, `unique.Handle` ×1, runtime_test `testFreegc` ×8) reach no type-only sink.
+
+**Where the length would ride, and why it is deferred.** The natural vehicle is `descriptorCompanion.go`. It already
+threads a per-instantiation carrier into a generic body that reads `reflect.TypeFor[T]`, as an extra C# type
+parameter that every call site supplies. Its header records why it stops short of `abi.TypeFor`, and that reason
+is this row's cost. `abi.TypeFor` is an IDENTITY surface: `unique.Make` keys `uniqueMaps` with it. Threading dims
+there (a) changes `unique.Make`'s PUBLIC C# signature, which moves every consumer assembly (`net/netip` among them),
+and (b) risks a false green, a store keyed on the carrier against a load keyed on the bare type. With 0
+production sites, the refusal is the honest answer for the hop. Reopen when a production instantiation appears or
+a post-hop identity redesign ("a Go type identity is ONE C# type") makes per-instantiation descriptors cheap.
+
+**Suspect, unmeasured:** `reflect.TypeAssert[[2]int]` compares a dimless `TypeFor` descriptor against a value-built
+one that carries `[2]`. If descriptor interning keys on dims, it answers false where Go answers true. That waits for
+the i9's reflect reading (owner G if it routes).
+
+— G (measured 2026-10-16; COORD ruled: accessor refusal now, this row post-hop)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

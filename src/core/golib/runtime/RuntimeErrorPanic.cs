@@ -123,6 +123,63 @@ public static class RuntimeErrorPanic
     /// and its remedy are written down.
     /// </para>
     /// </remarks>
+    private const string UnknownGoSizeMessage =
+        $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (the length of {{2}} is not carried for an unnamed array type argument)";
+    private const string UnknownGoSizeInnerMessage =
+        $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (an array in it carries no length, as for an unnamed array type argument)";
+    /// <summary>
+    /// The REFUSAL: a size-bearing read (<c>Size()</c>, <c>Len()</c>, <c>ArrayType()</c>) of a Go type descriptor
+    /// synthesized without an array length it needs.
+    /// </summary>
+    /// <remarks>
+    /// C# spells every Go <c>[N]T</c> as the one <c>array&lt;T&gt;</c>, so a descriptor built from the TYPE alone, such as
+    /// <c>abi.TypeFor[[2]string]()</c>, has no length to read. Answering 0 was a plausible number and a wrong one:
+    /// <c>unique.Make([2]string{a, b})</c> took Go's zero-size arm and handed every pair the shared zerobase handle,
+    /// so two different pairs compared equal. Refusing by name makes that wrong answer impossible. A live value
+    /// reveals its length and is answered as before.
+    /// </remarks>
+    /// <param name="read">The accessor refused, e.g. <c>"the size"</c>.</param>
+    /// <param name="type">The descriptor's managed type.</param>
+    /// <param name="arrayDims">The dims the descriptor did carry, if any.</param>
+    public static PanicException UnknownGoSize(string read, Type? type, nint[]? arrayDims)
+    {
+        string named = type is null ? "a synthesized type" : GoTextWithUnknownLengths(type, arrayDims);
+
+        return type is not null && FirstUnknownArrayText(type, arrayDims, 0) is { } array
+            ? new PanicException(string.Format(UnknownGoSizeMessage, read, named, array))
+            : new PanicException(string.Format(UnknownGoSizeInnerMessage, read, named));
+    }
+
+    // A Go type's text with each array length the descriptor does not carry written as `?`: `[?]string`,
+    // `[2][?]int`. A named type keeps its own name; GoReflect renders everything else.
+    private static string GoTextWithUnknownLengths(Type type, nint[]? arrayDims)
+    {
+        if (GoReflect.KindOf(type) != GoReflect.Array || GoReflect.HasGoName(type) || GoReflect.ElementType(type) is not { } element)
+            return GoReflect.GoTypeName(type, arrayDims);
+
+        string length = arrayDims is { Length: > 0 } ? arrayDims[0].ToString(System.Globalization.CultureInfo.InvariantCulture) : "?";
+
+        return $"[{length}]" + GoTextWithUnknownLengths(element, arrayDims is { Length: > 1 } ? arrayDims[1..] : null);
+    }
+
+    // The outermost array along the element chain whose length is missing, for the parenthesized reason. Null for
+    // a struct or any other kind (the caller then says an array in it carries no length).
+    private static string? FirstUnknownArrayText(Type type, nint[]? arrayDims, int depth)
+    {
+        if (depth > 16)
+            return null;
+
+        if (GoReflect.KindOf(type) == GoReflect.Array && GoReflect.ElementType(type) is { } element)
+        {
+            if (arrayDims is not { Length: > 0 } && GoReflect.DeclaredArrayDims(type) is null)
+                return GoTextWithUnknownLengths(type, null);
+
+            return FirstUnknownArrayText(element, arrayDims is { Length: > 1 } ? arrayDims[1..] : null, depth + 1);
+        }
+
+        return null;
+    }
+
     public static PanicException NativeArrayViewWithoutElementStorage(Type arrayType)
     {
         Type[] arguments = arrayType.IsGenericType ? arrayType.GetGenericArguments() : [];
