@@ -27118,4 +27118,25 @@ the i9's reflect reading (owner G if it routes).
 
 — G (measured 2026-10-16; COORD ruled: accessor refusal now, this row post-hop)
 
+## 2026-10-16 — G: testing/cryptotest's two linkname PULLS stay throwing stubs; no std test reaches them — RECORDED, no seat (owner G if a caller appears)
+
+`testing/cryptotest/rand.go` declares two bodyless functions under two-arg directives naming OTHER packages: PULLS,
+not the self-symbol PUSH shape `testing/synctest.testingSynctestTest` took (`claude/g-h8-synctest-push`, landed).
+
+- `randSetTestingReader` pulls `crypto/internal/rand.SetTestingReader`. The target is converted and PUBLIC
+  (`crypto/internal/rand/rand.cs`, forwarding to `fips140SetTestingReader`), so this one is a single
+  `linknameForwardTargets` row whenever it is needed.
+- `testingCheckParallel` pulls `testing.checkParallel`. `testing` is HAND-OWNED, and `testing.cs` has no
+  `checkParallel` body. Go's body walks the test's parent chain, panics with `parallelConflict` if any ancestor is
+  parallel, and then sets `denyParallel` so a later `t.Parallel()` panics too. That needs the hand-owned host's
+  parallel bookkeeping, so this is a hand-own plus a row, not a row alone.
+
+Both are reached only through `cryptotest.SetGlobalRandom`. Measured over GOROOT std plus tests at go1.26.9, it has
+**no caller**: its one mention is a TODO comment in `crypto/tls/handshake_test.go` ("to use
+cryptotest.SetGlobalRandom instead"). So both stay the generator's throwing stubs, which refuse by name if ever
+reached, and no verdict moves today. Reopen when a std test calls `SetGlobalRandom`. Take the `SetTestingReader` row
+and the `checkParallel` hand-own together, since the function calls `testingCheckParallel` first.
+
+— G (measured 2026-10-16; COORD: record the pair when the synctest seat lands)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
