@@ -235,9 +235,10 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // embed's storage is declared after the converter's fields, and an array or pointer field is a managed
     // reference. So the slot is not where Go, or a native callee, put the field: runtime's lfstack node
     // `&n.LFNode` read 8 bytes past the 512-aligned node and failed its tagged-pointer pack. A managed root pays
-    // one interface test; a root whose field offset cannot be known keeps its view.
+    // one type test; a root whose field offset cannot be known keeps its view. An array field is a native window
+    // with its declared Go length (FieldRefBox.NativeFieldBox), so its elements are reached at Go's bytes too.
     private static ж<TElem> nativeFieldView<TElem>(ж<TElem> view) =>
-        view is INativeRooted { NativeGoFieldAddress: var address and not 0 } ? new NativeBox<TElem>(address) : view;
+        view is FieldRefBox<TElem> fieldRef && fieldRef.NativeFieldBox() is { } native ? native : view;
 
     private static class FieldRefWrappers<TElem>
     {

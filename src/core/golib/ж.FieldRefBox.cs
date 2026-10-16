@@ -266,33 +266,45 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // "index out of range [0] with length 0"), a filled one as a fabricated reference. A managed root, a
     // field that is not an array, and a layout that cannot be known answer null, so arrayView keeps its
     // route; a reference-bearing element answers null from the shadow kind, which keeps it too.
-    internal override IArray? TryGetNativeArrayView(Type elementType)
+    internal override IArray? TryGetNativeArrayView(Type elementType) =>
+        NativeArrayWindow() is { } window ? window.TryGetNativeArrayView(elementType) : null;
+
+    // The box ж.of hands out for a field of a struct in NATIVE memory, null for any other root: the native window
+    // above for an array field whose Go length is known, else a NativeBox at the field's Go address. So every hop
+    // of a native chain is itself native and addresses Go's layout, never the CLR slot.
+    internal ж<T>? NativeFieldBox() =>
+        ((INativeRooted)this).NativeGoFieldAddress is var address and not 0
+            ? NativeArrayWindow() ?? new NativeBox<T>(address)
+            : null;
+
+    private ж<T>? NativeArrayWindow()
     {
         if (NativeArrayField.Open is not { } open || ((INativeRooted)this).NativeGoFieldAddress is not (var address and not 0))
             return null;
 
         nint length = GoArrayLengthOf(m_source, m_token);
 
-        return length >= 0 ? open(address, length, elementType) : null;
+        return length >= 0 ? open(address, length) : null;
     }
 
     // The window door per array field type, closed over the element type once: null when T is not array<E>.
     private static class NativeArrayField
     {
-        internal static readonly Func<nuint, nint, Type, IArray?>? Open = create();
+        internal static readonly Func<nuint, nint, ж<T>>? Open = create();
 
-        private static Func<nuint, nint, Type, IArray?>? create()
+        private static Func<nuint, nint, ж<T>>? create()
         {
             if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(array<>))
                 return null;
 
             return typeof(NativeArrayField).GetMethod(nameof(open), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
                 .MakeGenericMethod(typeof(T).GetGenericArguments()[0])
-                .CreateDelegate<Func<nuint, nint, Type, IArray?>>();
+                .CreateDelegate<Func<nuint, nint, ж<T>>>();
         }
 
-        private static IArray? open<TElem>(nuint address, nint length, Type elementType) =>
-            builtin.NativeArrayPointer<TElem>(address, length).TryGetNativeArrayView(elementType);
+        // T is array<TElem> whenever this is reached (create's guard), so the window IS a ж<T>.
+        private static ж<T> open<TElem>(nuint address, nint length) =>
+            (ж<T>)(object)builtin.NativeArrayPointer<TElem>(address, length);
     }
 
     // A directly declared array field's Go length (its [N]), read from the struct's Go fields: -1 when the
