@@ -175,7 +175,7 @@ partial struct ipConstraints {
 }
 
 internal partial interface newIPNetConstraints_R0 /*dyn*/ {
-    (ж<net.IPNet>, bool) query(net.IP _);
+    new (ж<net.IPNet>, bool) query(net.IP _);
 }
 
 internal static newIPNetConstraints_R0 newIPNetConstraints(slice<ж<net.IPNet>> l) {
@@ -344,7 +344,7 @@ partial struct dnsConstraints {
 }
 
 internal partial interface newDNSConstraints_R0 /*dyn*/ {
-    (@string, bool) query(@string _);
+    new (@string, bool) query(@string _);
 }
 
 internal static newDNSConstraints_R0 newDNSConstraints(slice<@string> l, bool permitted) {
@@ -422,7 +422,7 @@ partial struct emailConstraints {
 }
 
 internal partial interface newEmailConstraints_R0 /*dyn*/ {
-    (@string, bool) query(rfc2821Mailbox _);
+    new (@string, bool) query(rfc2821Mailbox _);
 }
 
 internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, bool permitted) {
@@ -471,15 +471,18 @@ internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailb
     return (constraint, found);
 }
 
-partial interface constraints_permitted /*dyn*/ {
+partial interface constraints_permitted<T, V> /*dyn*/ {
     (T, bool) query(V _Δp0);
 }
+partial interface newEmailConstraints_R0 : constraints_permitted<@string, rfc2821Mailbox> {}
+partial interface newIPNetConstraints_R0 : constraints_permitted<ж<net.IPNet>, net.IP> {}
+partial interface newDNSConstraints_R0 : constraints_permitted<@string, @string> {}
 
 
 partial struct constraints<T, V> {
     internal @string constraintType;
-    internal constraints_permitted permitted;
-    internal constraints_permitted excluded;
+    internal constraints_permitted<T, V> permitted;
+    internal constraints_permitted<T, V> excluded;
 }
 
 internal static error checkConstraints<T, V, P>(constraints<T, V> c, V s, P p)

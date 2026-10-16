@@ -604,6 +604,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Resolve any deferred cross-file dynamic (anonymous struct) type references
 		// now that every file's lifted names are registered in the shared registry.
 		resolveDynamicTypeMarkers(outputFileNames)
+		resolveDynamicInterfaceBases(outputFileNames)
 
 		// Write project file with correct output type and unsafe code settings
 		options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)

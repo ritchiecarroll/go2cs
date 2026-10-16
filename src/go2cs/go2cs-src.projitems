@@ -157,6 +157,7 @@
     <None Include="$(MSBuildThisFileDirectory)dottedDigitSegment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)duplicatePartialMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicStructOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)dynamicInterfaceBase.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeGate_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)embeddedAssets_test.go" />
@@ -186,6 +187,7 @@
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericDefinedMapChan_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericFuncInstantiationArg_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)genericLiftedInterfaceField_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericTypeAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)globalAddressOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go.mod" />
@@ -291,6 +293,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\publishedCounterReset_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\retiredHandOwns_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeNames.go" />
+    <None Include="$(MSBuildThisFileDirectory)liftedTypeParams.go" />
     <None Include="$(MSBuildThisFileDirectory)lineEndingSeams_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameCycleGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForward_test.go" />

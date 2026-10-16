@@ -725,6 +725,8 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
+    [TestMethod]
+    public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
 
     [TestMethod]
     public void CheckGenericNamedArrayType() => CheckTarget("GenericNamedArrayType");
