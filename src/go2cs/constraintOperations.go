@@ -92,10 +92,12 @@ const (
 	Array
 	Channel
 	Struct
-	// Map, Slice, Function, etc., types are not comparable, thus do not
-	// have common operator sets in a generic type constaint context.
-	// Technically, interfaces are comparable, but they represent the
-	// type constraint, so also will not have a common operator set.
+	// Slice is a member that supports NO operator: Go compares a slice only against nil, and it has no +
+	// or <. It must still be a member, because a type set gets an operator only when EVERY member supports
+	// it, and a member that contributed nothing let its partners decide alone: `net.IP | string` lifted
+	// string's +, == and < onto a slice (H7 class D, crypto/x509's nameConstraintsSet, CS0315). Map,
+	// Function and interface terms take Invalid for the same reason; it sits in no operator set either.
+	Slice
 )
 
 // OperatorSet represents the set of operators that can be applied to
@@ -491,22 +493,19 @@ func (v *Visitor) getConstraintTypeSetFromExpr(expr ast.Expr) hashset.HashSet[Co
 				typ := typeName.Type()
 				underlying := typ.Underlying()
 
-				// Check for composite types directly
-				switch underlying.(type) {
-				case *types.Pointer, *types.Array, *types.Chan, *types.Struct:
-					// These are valid constraint types, add them directly
-					results = append(results, typ)
-					return
-				case *types.Basic:
-					// It's a basic type, add it directly
-					results = append(results, typ)
+				if iface, isIface := underlying.(*types.Interface); isIface {
+					if !iface.Empty() {
+						// It's an interface type set, so recursively extract its embedded constraints
+						results = append(results, v.getConstraintsFromType(typ)...)
+					}
+
 					return
 				}
 
-				if iface, isIface := underlying.(*types.Interface); isIface && !iface.Empty() {
-					// It's an interface type set, so recursively extract its embedded constraints
-					results = append(results, v.getConstraintsFromType(typ)...)
-				}
+				// Every other named term is a MEMBER of the type set and is added as itself, whatever its
+				// underlying kind: getConstraintTypeSet classifies it by that kind. A named slice (an `IP`
+				// declared beside the interface) was skipped here, so it never reached the set at all.
+				results = append(results, typ)
 			}
 
 		case *ast.SelectorExpr:
@@ -671,17 +670,17 @@ func getConstraintTypeSet(constraintTypes []types.Type) hashset.HashSet[Constrai
 			// Arrays are comparable in Go when their element type is comparable.
 			constraintTypeSet.Add(Array)
 		case *types.Slice:
-			// Slices are not comparable in Go (only against nil), so they
-			// contribute no operator-bearing constraint type.
+			// Slices are not comparable in Go (only against nil): a member in no operator set.
+			constraintTypeSet.Add(Slice)
 		case *types.Chan:
 			constraintTypeSet.Add(Channel)
 		case *types.Struct:
 			constraintTypeSet.Add(Struct)
 		case *types.Named:
-			// For named types, check it they are structs
-			if _, ok := t.Underlying().(*types.Struct); ok {
-				constraintTypeSet.Add(Struct)
-			}
+			// A named member supports exactly the operators of its underlying type, as Go types it: a named
+			// struct is a Struct, a named int an Int, a named slice (net.IP) a Slice. Only the struct case
+			// was classified, so every other named member contributed nothing to the set.
+			constraintTypeSet.UnionWithSet(getConstraintTypeSet([]types.Type{t.Underlying()}))
 		default:
 			constraintTypeSet.Add(Invalid)
 		}

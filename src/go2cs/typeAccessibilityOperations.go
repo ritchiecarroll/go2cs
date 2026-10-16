@@ -800,6 +800,10 @@ func collectPublicizedTypes(pkg *types.Package, fset *token.FileSet) {
 				// below then carries them through any further exported-method chains.
 				if named, ok := obj.Type().(*types.Named); ok {
 					collectMethodSignatureUnexportedTypes(named, pkg)
+
+					// An EXPORTED generic type's constraints are named in its public declaration's
+					// where clauses, and in those of the extension methods its methods become.
+					collectTypeParamConstraintTypes(named.TypeParams(), pkg)
 				}
 
 				// An EXPORTED named FUNC type is emitted as a public C# delegate; an unexported
@@ -856,6 +860,11 @@ func collectPublicizedTypes(pkg *types.Package, fset *token.FileSet) {
 			}
 
 			if sig, ok := obj.Type().(*types.Signature); ok {
+				// Its type parameters' constraints face the rule too, as CS0703 on the public generic
+				// method: internal/runtime/gc/internal/gen's `func Arg[W wrap[T], T Word](fn *Func) T`
+				// emits `where W : Δwrap<T>` over the unexported `wrap`.
+				collectTypeParamConstraintTypes(sig.TypeParams(), pkg)
+
 				if params := sig.Params(); params != nil {
 					for i := range params.Len() {
 						collectSignatureTypes(params.At(i).Type(), pkg)
@@ -872,6 +881,32 @@ func collectPublicizedTypes(pkg *types.Package, fset *token.FileSet) {
 	}
 
 	collectSiblingTestPublicizedTypes(scope, pkg)
+}
+
+// collectTypeParamConstraintTypes publicizes the unexported named types a public generic member's where
+// clauses name (CS0703: a constraint type less accessible than the member). Only a constraint with
+// METHODS is named in C#: a type-set-only constraint renders as a breadcrumb comment beside the lifted
+// operator interfaces (see the constraint arms in constraintOperations.go), so it exposes nothing. The
+// constraint's own type arguments are spelled inside the clause too (`Δwrap<T>`), and walk the
+// signature rule.
+func collectTypeParamConstraintTypes(typeParams *types.TypeParamList, pkg *types.Package) {
+	for i := range typeParams.Len() {
+		named, ok := types.Unalias(typeParams.At(i).Constraint()).(*types.Named)
+
+		if !ok {
+			continue
+		}
+
+		if iface, ok := named.Underlying().(*types.Interface); !ok || iface.NumMethods() == 0 {
+			continue
+		}
+
+		collectSignatureTypes(named, pkg)
+
+		for j := range named.TypeArgs().Len() {
+			collectSignatureTypes(named.TypeArgs().At(j), pkg)
+		}
+	}
 }
 
 // isTestFileObject reports whether obj is declared in a `_test.go` file. Without a FileSet nothing
