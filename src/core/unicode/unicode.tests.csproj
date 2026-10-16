@@ -127,6 +127,7 @@
     <ProjectReference Include="$(go2csPath)core/flag/flag.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/sort/sort.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
