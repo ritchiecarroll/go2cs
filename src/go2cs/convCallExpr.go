@@ -1050,6 +1050,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// The FLOAT sibling: a conversion from a type parameter whose type set holds a FLOAT member TO a basic
+		// float, `float64(v)` with `T int | float64` (Go 1.26 math/big's calibrate_test csv[T], CS0030 as a cast).
+		// golib's ConvertToFloat64/ConvertToFloat32 decide per instantiation: a float is the identity or a
+		// rounding, an integer is C#'s round-to-nearest numeric conversion, as Go's is. float32 has its own
+		// helper so an integer rounds once, never through float64.
+		if targetBasic, ok := v.info.TypeOf(callExpr).(*types.Basic); ok && targetBasic.Info()&types.IsFloat != 0 {
+			if argTP, ok := types.Unalias(v.info.TypeOf(arg)).(*types.TypeParam); ok && typeParamIsNumericWithFloat(argTP) {
+				helper := "ConvertToFloat64"
+
+				if targetBasic.Kind() == types.Float32 {
+					helper = "ConvertToFloat32"
+				}
+
+				return fmt.Sprintf("%s<%s>(%s)", helper, v.getCSharpTypeName(argTP), expr)
+			}
+		}
+
 		// A conversion to a NAMED FUNC type — `metricReader(read)` where `type metricReader
 		// func() uint64` (runtime metrics.go) — targets a C# DELEGATE declaration
 		// (`internal delegate uint64 metricReader();`). Distinct delegate types have no cast

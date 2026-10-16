@@ -1077,6 +1077,7 @@
     <Project Path="tests/Behavioral/TypedNilPtrArrayDims/TypedNilPtrArrayDims.csproj" />
     <Project Path="tests/Behavioral/TypeConversionReturnType/TypeConversionReturnType.csproj" />
     <Project Path="tests/Behavioral/TypeInference/TypeInference.csproj" />
+    <Project Path="tests/Behavioral/TypeParamFloatConversion/TypeParamFloatConversion.csproj" />
     <Project Path="tests/Behavioral/TypeSwitch/TypeSwitch.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchBindingAddress/TypeSwitchBindingAddress.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchCollapsedFuncCase/TypeSwitchCollapsedFuncCase.csproj" />

@@ -2262,6 +2262,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckTypeInference() => CheckTarget("TypeInference");
 
     [TestMethod]
+    public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
+
+    [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]

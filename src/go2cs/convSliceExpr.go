@@ -616,6 +616,52 @@ func typeParamIsInteger(tp *types.TypeParam) bool {
 	return found
 }
 
+// typeParamIsNumericWithFloat reports whether every term of the type parameter's constraint type-set has a
+// NUMERIC basic underlying (integer or float) and at least one is a FLOAT (`int | float64`, math/big's
+// calibrate_test csv[T]). A conversion of such a value to a float basic routes through golib's
+// ConvertToFloat64/ConvertToFloat32, the float siblings of ConvertToUInt64; an integer-only set keeps its own
+// route (typeParamIsInteger). Mirrors typeParamIsInteger's walk.
+func typeParamIsNumericWithFloat(tp *types.TypeParam) bool {
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+
+	if !ok {
+		return false
+	}
+
+	hasFloat := false
+
+	numeric := func(t types.Type) bool {
+		basic, ok := t.Underlying().(*types.Basic)
+
+		if !ok || basic.Info()&(types.IsInteger|types.IsFloat) == 0 {
+			return false
+		}
+
+		if basic.Info()&types.IsFloat != 0 {
+			hasFloat = true
+		}
+
+		return true
+	}
+
+	for i := range iface.NumEmbeddeds() {
+		switch et := iface.EmbeddedType(i).(type) {
+		case *types.Union:
+			for j := range et.Len() {
+				if !numeric(et.Term(j).Type()) {
+					return false
+				}
+			}
+		default:
+			if !numeric(et) {
+				return false
+			}
+		}
+	}
+
+	return hasFloat
+}
+
 // typeParamIsStringByteUnion reports whether the type parameter's constraint is exactly Go's
 // `string | []byte` union (in either order) — the shape golib's IByteSeq<byte> models. Used to
 // widen a FUNC-LITERAL parameter of that type to the interface (a lambda has no where-clause).
