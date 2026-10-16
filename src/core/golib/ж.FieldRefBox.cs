@@ -258,6 +258,76 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
             ? root + (nuint)offset
             : 0;
 
+    // An ARRAY field of a struct that lives in NATIVE memory -- `&buf.PathBuffer[0]` over
+    // `buf := (*MountPointReparseBuffer)(unsafe.Pointer(&b[0]))`, whose box is a NativeBox over the pinned
+    // bytes -- is a native window at the field's GO offset, with the field's declared length. Without it the
+    // element door (arrayView) read Value, the struct at the CLR's layout, and took the bytes under the field
+    // as an array<E> HEADER: a zeroed buffer read as a null array of length 0 (os createMountPoint's
+    // "index out of range [0] with length 0"), a filled one as a fabricated reference. A managed root, a
+    // field that is not an array, and a layout that cannot be known answer null, so arrayView keeps its
+    // route; a reference-bearing element answers null from the shadow kind, which keeps it too.
+    internal override IArray? TryGetNativeArrayView(Type elementType) =>
+        NativeArrayWindow() is { } window ? window.TryGetNativeArrayView(elementType) : null;
+
+    // The box ж.of hands out for a field of a struct in NATIVE memory, null for any other root: the native window
+    // above for an array field whose Go length is known, else a NativeBox at the field's Go address. So every hop
+    // of a native chain is itself native and addresses Go's layout, never the CLR slot.
+    internal ж<T>? NativeFieldBox() =>
+        ((INativeRooted)this).NativeGoFieldAddress is var address and not 0
+            ? NativeArrayWindow() ?? new NativeBox<T>(address)
+            : null;
+
+    private ж<T>? NativeArrayWindow()
+    {
+        if (NativeArrayField.Open is not { } open || ((INativeRooted)this).NativeGoFieldAddress is not (var address and not 0))
+            return null;
+
+        nint length = GoArrayLengthOf(m_source, m_token);
+
+        return length >= 0 ? open(address, length) : null;
+    }
+
+    // The window door per array field type, closed over the element type once: null when T is not array<E>.
+    private static class NativeArrayField
+    {
+        internal static readonly Func<nuint, nint, ж<T>>? Open = create();
+
+        private static Func<nuint, nint, ж<T>>? create()
+        {
+            if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(array<>))
+                return null;
+
+            return typeof(NativeArrayField).GetMethod(nameof(open), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
+                .MakeGenericMethod(typeof(T).GetGenericArguments()[0])
+                .CreateDelegate<Func<nuint, nint, ж<T>>>();
+        }
+
+        // T is array<TElem> whenever this is reached (create's guard), so the window IS a ж<T>.
+        private static ж<T> open<TElem>(nuint address, nint length) =>
+            (ж<T>)(object)builtin.NativeArrayPointer<TElem>(address, length);
+    }
+
+    // A directly declared array field's Go length (its [N]), read from the struct's Go fields: -1 when the
+    // field is promoted, not an array, or not one-dimensional, so the caller keeps its route.
+    private static nint GoArrayLengthOf(object source, Delegate fieldId)
+    {
+        if (PointeeTypeOf(source) is not { } structType || FieldNameOf(fieldId) is not { } fieldName)
+            return -1;
+
+        return s_goArrayLengths.GetOrAdd((structType, fieldName), static key =>
+        {
+            foreach (GoReflect.GoFieldInfo field in GoReflect.GoFields(key.Item1))
+            {
+                if (field.Name == key.Item2)
+                    return field.Path.Length == 1 && field.ArrayDims is { Length: 1 } dims ? dims[0] : -1;
+            }
+
+            return -1;
+        });
+    }
+
+    private static readonly ConcurrentDictionary<(Type, string), nint> s_goArrayLengths = new();
+
     // A field's Go offset per accessor, memoized beside the displacement above and on the same terms: an
     // entry records the source type it was resolved for, so it is exact on a match and re-resolved on a
     // mismatch. Resolving reads the field's name off the delegate and slices it, which allocates; the door
