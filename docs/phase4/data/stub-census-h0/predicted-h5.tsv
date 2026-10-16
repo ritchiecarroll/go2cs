@@ -6,9 +6,9 @@ windows	core/internal/runtime/syscall/windows	go.internal.runtime.syscall.window
 *	core/testing/cryptotest	go.testing.cryptotest_package.randSetTestingReader	R: H4 testing linkname pull, bodied by R's seat after H5 (predicted 2026-10-14)
 *	core/testing/cryptotest	go.testing.cryptotest_package.testingCheckParallel	R: H4 testing linkname pull, bodied by R's seat after H5 (predicted 2026-10-14)
 # H7 pass 8 (go1.26.9 at 4972b87f8b, 2026-10-15): the appearances read there, each new at go1.26. Owners confirm their rows.
-*	core/runtime	go.runtime_package.panicBounds	G: asm-bodied (runtime/asm_*.s, every GOARCH); replaces the panicIndex/panicSlice* stubs (GONE); compiler-emitted calls only (H7 pass 8)
+*	core/runtime	go.runtime_package.panicBounds	G: asm-bodied (runtime/asm_*.s, every GOARCH but wasm: 10 of the 11); replaces the panicIndex/panicSlice* stubs (GONE); compiler-emitted calls only (H7 pass 8)
 *	core/runtime	go.runtime_package.panicExtend	G: asm-bodied (asm_386/arm/mipsx.s, 32-bit only); compiler-emitted calls only (H7 pass 8)
-*	core/runtime	go.runtime_package.secretEraseRegisters	G: asm-bodied (secret_amd64.s, secret_arm64.s); called only behind goexperiment.RuntimeSecret in stack copy and vgetrandom (H7 pass 8)
+*	core/runtime	go.runtime_package.secretEraseRegisters	G: asm-bodied (secret_amd64.s, secret_arm64.s); Go-side callers stack.go and vgetrandom_linux.go behind goexperiment.RuntimeSecret; asm callers asm_amd64.s, asm_arm64.s and the vDSO paths in sys_linux_amd64.s, sys_linux_arm64.s and time_linux_amd64.s behind g_secret != 0, none converted (H7 pass 8)
 *	core/internal/runtime/gc/scan	go.internal.runtime.gc.scan_package.ExpandAVX512	G: asm-bodied (amd64), Go's AVX-512 span scanner, behind CanAVX512 (H7 pass 8)
 *	core/internal/runtime/gc/scan	go.internal.runtime.gc.scan_package.FilterNilAVX512	G: asm-bodied (amd64), Go's AVX-512 span scanner, behind CanAVX512 (H7 pass 8)
 *	core/internal/runtime/gc/scan	go.internal.runtime.gc.scan_package.scanSpanPackedAVX512	G: asm-bodied (amd64), Go's AVX-512 span scanner, behind CanAVX512 (H7 pass 8)
