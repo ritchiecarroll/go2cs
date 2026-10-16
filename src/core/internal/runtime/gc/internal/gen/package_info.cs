@@ -93,7 +93,6 @@ public static partial class gen_package
 
     // <TypeAccessibility>
     internal partial interface loc {}
-    internal partial interface Δwrap<T> {}
     internal partial struct @void {}
     internal partial struct fileConst {}
     internal partial struct locMem {}
@@ -105,6 +104,7 @@ public static partial class gen_package
     internal partial struct valGP {}
     public partial interface Value {}
     public partial interface Word {}
+    public partial interface Δwrap<T> {}
     public partial struct Array<T> {}
     public partial struct File {}
     public partial struct Func {}

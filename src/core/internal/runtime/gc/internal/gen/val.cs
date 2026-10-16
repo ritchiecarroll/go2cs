@@ -24,7 +24,7 @@ partial interface Word :
 // new Value. Ideally we would just have a method on Value to initialize its op,
 // but that needs to have a non-pointer receiver to satisfy the interface and
 // then it can't mutate the Value.
-partial interface Δwrap<T> :
+public partial interface Δwrap<T> :
     Value
 
     where T : Value{
