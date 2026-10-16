@@ -191,9 +191,7 @@ internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)ni
 // or if the error has a method As(any) bool such that err.As(target)
 // returns true when target is a non-nil *E. In the latter case, the As
 // method is responsible for setting target.
-public static (E, bool) AsType<E>(error err)
-    where E : error
-{
+public static (E, bool) AsType<E>(error err) {
     if (err == default!) {
         E zero = GoZero<E>();
         return (zero, false);
@@ -202,9 +200,7 @@ public static (E, bool) AsType<E>(error err)
     return asType(err, ref pe);
 }
 
-internal static (E, bool) asType<E>(error err, ref ж<E> ppe)
-    where E : error
-{
+internal static (E, bool) asType<E>(error err, ref ж<E> ppe) {
     while (ᐧ) {
         {
             var (e, ok) = err._<E>(ᐧ); if (ok) {
