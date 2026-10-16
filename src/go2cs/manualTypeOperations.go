@@ -1856,6 +1856,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"fdMutex.increfAndClose": goosAny,
 		"fdMutex.rwlock":         goosAny,
 		"fdMutex.rwunlock":       goosAny,
+		// (*FD).DisassociateIOCP. Go associates every pollable socket with its port at open, so
+		// NtSetInformationFile(FileReplaceCompletionInformation) always has a port to drop. The managed
+		// poller binds a socket to the CLR's port only at its FIRST overlapped submit (the S2 amendment,
+		// syscall/windows/zsyscall_windows_wsa_impl.cs), and for a socket with no IO yet the kernel
+		// answers STATUS_INVALID_PARAMETER: net's dup() failed TestFileConn/udp and /unix with
+		// windows.NTStatus 0xC000000D. The hand-own reaches Go's post-condition without the call when
+		// nothing was bound, and marks the descriptor so the lazy bind never binds it again.
+		// internal/poll/windows/fd_windows_impl.cs holds the body.
+		"FD.DisassociateIOCP": goosWindows,
 	},
 	// debug/pe's COFF symbol reader pair. Go re-VIEWS one 18-byte symbol record as two struct
 	// shapes — `(*COFFSymbolAuxFormat5)(unsafe.Pointer(&sym))` — a free re-typing of the same
