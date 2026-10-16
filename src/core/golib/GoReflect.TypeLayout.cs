@@ -497,6 +497,11 @@ public static partial class GoReflect
 
         GoFieldInfo[] fields = GoFields(t);
 
+        // Marshal.OffsetOf answers the MARSHALED layout, which is the managed one only when no field at any depth is a
+        // bool or a char (marshaled as a 4-byte BOOL and a 1-byte char). Otherwise this struct's offsets are unproven,
+        // never refused; its reference fields and its fields' own layouts are still checked.
+        bool offsetsReadable = marshalLayoutIsManaged(t);
+
         for (int i = 0; i < fields.Length && i < goOffsets.Length; i++)
         {
             GoFieldInfo field = fields[i];
@@ -514,20 +519,23 @@ public static partial class GoReflect
             if (!fieldType.IsValueType || containsReferences(fieldType))
                 return $"field {field.Name} is a managed reference where Go stores the value inline";
 
-            nint clrOffset;
-
-            try
+            if (offsetsReadable)
             {
-                clrOffset = System.Runtime.InteropServices.Marshal.OffsetOf(t, member.Name);
-            }
-            catch (Exception ex) when (ex is ArgumentException or NotSupportedException)
-            {
-                // No CLR offset the runtime will report (a generic or non-blittable layout): unproven, not refused.
-                continue;
-            }
+                nint clrOffset;
 
-            if (clrOffset != goOffsets[i])
-                return $"field {field.Name} is at CLR offset {clrOffset} where Go lays it at {goOffsets[i]}";
+                try
+                {
+                    clrOffset = System.Runtime.InteropServices.Marshal.OffsetOf(t, member.Name);
+                }
+                catch (Exception ex) when (ex is ArgumentException or NotSupportedException)
+                {
+                    // No CLR offset the runtime will report (a generic or non-blittable layout): unproven, not refused.
+                    continue;
+                }
+
+                if (clrOffset != goOffsets[i])
+                    return $"field {field.Name} is at CLR offset {clrOffset} where Go lays it at {goOffsets[i]}";
+            }
 
             if (clrLayoutMismatch(fieldType, depth + 1) is { } inner)
                 return $"field {field.Name}: {inner}";
@@ -535,6 +543,28 @@ public static partial class GoReflect
 
         return null;
     }
+
+    private static readonly ConcurrentDictionary<Type, bool> s_marshalLayoutIsManaged = new();
+
+    // Whether a value type's marshaled layout is its managed layout: no bool or char in its instance fields, at any
+    // depth. A reference field never reaches the offset read (it is refused first), so only value fields are walked.
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    private static bool marshalLayoutIsManaged(Type valueType) =>
+        s_marshalLayoutIsManaged.GetOrAdd(valueType, static type =>
+        {
+            foreach (FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                Type fieldType = field.FieldType;
+
+                if (fieldType == typeof(bool) || fieldType == typeof(char))
+                    return false;
+
+                if (fieldType.IsValueType && !fieldType.IsPrimitive && !fieldType.IsEnum && fieldType != type && !marshalLayoutIsManaged(fieldType))
+                    return false;
+            }
+
+            return true;
+        });
 
     private static readonly ConcurrentDictionary<Type, bool> s_containsReferences = new();
 

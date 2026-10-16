@@ -62,6 +62,32 @@ public unsafe class NativeStructLayoutTests
         }
     }
 
+    // Marshal.OffsetOf answers the MARSHALED layout, where a bool is a 4-byte BOOL: 0, 4, 8 for this struct, whose
+    // managed layout is Go's (0, 1, 4). A bool-bearing struct must not be refused on that number.
+    [TestMethod]
+    public void ABoolBearingStructWhoseManagedLayoutIsGosIsNotRefused()
+    {
+        Assert.IsNull(GoReflect.ClrLayoutMismatch(typeof(LayoutTwoBoolsThenInt)), "a bool-bearing struct was refused on its marshaled layout");
+
+        byte* memory = (byte*)NativeMemory.AllocZeroed(8);
+
+        try
+        {
+            memory[1] = 1;
+            *(int*)(memory + 4) = 7;
+
+            ж<LayoutTwoBoolsThenInt> p = (ж<LayoutTwoBoolsThenInt>)(uintptr)(nuint)memory;
+
+            Assert.IsFalse(p.Value.a, "a does not read Go offset 0");
+            Assert.IsTrue(p.Value.b, "b does not read Go offset 1");
+            Assert.AreEqual(7, p.Value.c, "c does not read Go offset 4");
+        }
+        finally
+        {
+            NativeMemory.Free(memory);
+        }
+    }
+
     [TestMethod]
     public void ANativeStructWhoseLayoutMatchesStillReadsWhole()
     {
@@ -83,3 +109,6 @@ public unsafe class NativeStructLayoutTests
         }
     }
 }
+
+// Go: struct{ a, b bool; c int32 } at 0, 1, 4.
+[GoType] internal partial struct LayoutTwoBoolsThenInt { public bool a; public bool b; public int c; }
