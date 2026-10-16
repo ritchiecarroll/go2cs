@@ -459,6 +459,103 @@ public static partial class GoReflect
         return KindOf(t) == Struct && structLayoutOf(t, 0) is { Known: true } layout ? layout.Offsets : null;
     }
 
+    private static readonly ConcurrentDictionary<Type, string> s_clrLayoutMismatch = new();
+
+    /// <summary>
+    /// Why the CLR layout of the Go struct type <paramref name="t"/> is provably NOT its Go layout, naming the
+    /// first field that differs, or <c>null</c> when it matches or cannot be proven either way.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A NativeBox reads and writes its struct at CLR offsets, so native memory is the Go value only when the two
+    /// layouts agree. Two roots make them disagree:
+    /// </para>
+    /// <list type="bullet">
+    ///   <item><description>a field the CLR holds as a managed REFERENCE where Go has inline bytes: an array, a
+    ///   pointer, a string, a slice, an interface, an unsafe.Pointer (its retained box). Read out of native memory
+    ///   it is a garbage reference.</description></item>
+    ///   <item><description>a field at a different CLR offset. go2cs-gen declares a value embed's storage in the
+    ///   generated partial, after every converter-declared field, so `struct{ LFNode; data int }` lays out
+    ///   `data` first (runtime's lfstack nodes).</description></item>
+    /// </list>
+    /// <para>
+    /// The check recurses into struct fields. A layout it cannot prove (no Go layout, or a CLR offset the runtime
+    /// will not report) answers <c>null</c>, so an unproven struct keeps today's behavior.
+    /// </para>
+    /// </remarks>
+    public static string? ClrLayoutMismatch(Type t)
+    {
+        string reason = s_clrLayoutMismatch.GetOrAdd(t, static type => clrLayoutMismatch(type, 0) ?? "");
+
+        return reason.Length == 0 ? null : reason;
+    }
+
+    private static string? clrLayoutMismatch(Type t, int depth)
+    {
+        if (depth > MaxLayoutDepth || KindOf(t) != Struct || !t.IsValueType || GoFieldOffsets(t) is not { } goOffsets)
+            return null;
+
+        GoFieldInfo[] fields = GoFields(t);
+
+        for (int i = 0; i < fields.Length && i < goOffsets.Length; i++)
+        {
+            GoFieldInfo field = fields[i];
+
+            if (field.Path is not [var member])
+                continue;
+
+            // A zero-size field (an empty struct, `lockRankStruct` with ranking off) holds no bytes, so where the
+            // CLR puts it reads nothing.
+            if (TryGoSizeOf(field.Type, field.ArrayDims, out nuint size) && size == 0)
+                continue;
+
+            Type fieldType = member.FieldType;
+
+            if (!fieldType.IsValueType || containsReferences(fieldType))
+                return $"field {field.Name} is a managed reference where Go stores the value inline";
+
+            nint clrOffset;
+
+            try
+            {
+                clrOffset = System.Runtime.InteropServices.Marshal.OffsetOf(t, member.Name);
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException)
+            {
+                // No CLR offset the runtime will report (a generic or non-blittable layout): unproven, not refused.
+                continue;
+            }
+
+            if (clrOffset != goOffsets[i])
+                return $"field {field.Name} is at CLR offset {clrOffset} where Go lays it at {goOffsets[i]}";
+
+            if (clrLayoutMismatch(fieldType, depth + 1) is { } inner)
+                return $"field {field.Name}: {inner}";
+        }
+
+        return null;
+    }
+
+    private static readonly ConcurrentDictionary<Type, bool> s_containsReferences = new();
+
+    // Whether a value type holds a managed reference anywhere in its instance fields, walked by reflection rather
+    // than through RuntimeHelpers.IsReferenceOrContainsReferences<T>, which a Type in hand could reach only by
+    // MakeGenericMethod (not Native AOT safe for a value-type argument).
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    private static bool containsReferences(Type valueType) =>
+        s_containsReferences.GetOrAdd(valueType, static type =>
+        {
+            foreach (FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                Type fieldType = field.FieldType;
+
+                if (!fieldType.IsValueType || !fieldType.IsPrimitive && !fieldType.IsEnum && fieldType != type && containsReferences(fieldType))
+                    return true;
+            }
+
+            return false;
+        });
+
     /// <summary>The Go (amd64) alignment of a type (struct = max field alignment; array = element alignment).</summary>
     public static nint GoAlignOf(Type t)
     {

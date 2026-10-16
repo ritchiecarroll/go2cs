@@ -123,6 +123,14 @@ public static class RuntimeErrorPanic
     /// and its remedy are written down.
     /// </para>
     /// </remarks>
+    public static PanicException NativeArrayViewWithoutElementStorage(Type arrayType)
+    {
+        Type[] arguments = arrayType.IsGenericType ? arrayType.GetGenericArguments() : [];
+        string shape = arguments.Length == 1 ? $"array<{arguments[0].Name}>" : arrayType.Name;
+
+        return new PanicException(string.Format(NativeArrayViewMessage, shape));
+    }
+
     private const string UnknownGoSizeMessage =
         $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (the length of {{2}} is not carried for an unnamed array type argument)";
     private const string UnknownGoSizeInnerMessage =
@@ -180,12 +188,21 @@ public static class RuntimeErrorPanic
         return null;
     }
 
-    public static PanicException NativeArrayViewWithoutElementStorage(Type arrayType)
+    private const string NativeStructLayoutMessage =
+        $"{RuntimeErrorMessage}cannot read native memory as {{0}}: its CLR layout is not its Go layout ({{1}})";
+    /// <summary>
+    /// The REFUSAL: a native box of a Go struct whose CLR layout provably differs from its Go layout
+    /// (<see cref="GoReflect.ClrLayoutMismatch"/>), dereferenced as a whole.
+    /// </summary>
+    /// <remarks>
+    /// A native box reads its struct at CLR offsets, so the read would return Go's bytes at the wrong fields, or a
+    /// garbage managed reference where Go stores a value inline. Its fields are reached at their GO offsets instead
+    /// (a field view of a native box is itself a native box), so only a whole-struct read lands here. The message
+    /// names the type and the first field that differs, so the reader can find the declaration.
+    /// </remarks>
+    public static PanicException NativeStructLayoutMismatch(Type type, string reason)
     {
-        Type[] arguments = arrayType.IsGenericType ? arrayType.GetGenericArguments() : [];
-        string shape = arguments.Length == 1 ? $"array<{arguments[0].Name}>" : arrayType.Name;
-
-        return new PanicException(string.Format(NativeArrayViewMessage, shape));
+        return new PanicException(string.Format(NativeStructLayoutMessage, GoReflect.GoTypeName(type), reason));
     }
 
     private const string IndexOutOfRangeMessage = $"{RuntimeErrorMessage}index out of range [{{0}}] with length {{1}}";
