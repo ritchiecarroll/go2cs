@@ -1256,11 +1256,7 @@ public static ΔType TypeOf(any i) {
     return toType(abi.TypeOf(i));
 }
 
-// TypeFor returns the [Type] that represents the type argument T.
-public static ΔType TypeFor<T>() {
-    // toRType is safe to use here; type is never nil as T is statically known.
-    return new rtypeжΔType(toRType(abi.TypeFor<T>()));
-}
+// go2cs generated this placeholder — func TypeFor is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // rtypeOf directly extracts the *rtype of the provided value.
 internal static ж<abi.Type> rtypeOf(any i) {

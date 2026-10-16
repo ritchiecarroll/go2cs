@@ -1881,6 +1881,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckReflectTypeAssertMarshal() => CheckTarget("ReflectTypeAssertMarshal");
 
     [TestMethod]
+    public void CheckReflectTypeIdentity() => CheckTarget("ReflectTypeIdentity");
+
+    [TestMethod]
     public void CheckReflectTypedNilInterface() => CheckTarget("ReflectTypedNilInterface");
 
     [TestMethod]
