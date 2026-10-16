@@ -213,13 +213,13 @@ public static class PointerExtensions
         // the destination type, where the destination embeds the source as its first field, has no such object
         // behind it; the address route would read past the header, so it panics by name instead. A box that is
         // NOT a view keeps the routes below exactly as before (internal/abi's synthesized descriptors among them).
-        if (box is IFirstFieldView view)
+        // The arm is gated on the static PrefixChain pair, so the JIT folds it out of every other reinterpret.
+        if (PrefixChain<T, TDst>.Value && box is IFirstFieldView view)
         {
             if (FirstFieldParentOf<TDst>(view) is { } parent)
                 return parent;
 
-            if (PrefixEmbeds<T, TDst>.Value)
-                throw new PanicException($"go2cs: prefix downcast to *{GoName(typeof(TDst))} over a *{GoName(typeof(T))} that is not the first field of a {GoName(typeof(TDst))}: there is no {GoName(typeof(TDst))} behind this pointer");
+            throw RuntimeErrorPanic.InvalidPrefixDowncast(GoReflect.GoTypeName(typeof(TDst)), GoReflect.GoTypeName(typeof(T)));
         }
 
         // A Go slice HEADER read over a golib slice<X> — `(*slice)(unsafe.Pointer(&b))`, emitted as
@@ -357,24 +357,35 @@ public static class PointerExtensions
     }
 
     /// <summary>
-    /// Whether <typeparamref name="TDst"/> is a Go struct whose FIRST field (at Go offset 0) has type
-    /// <typeparamref name="T"/>: the prefix-embed shape, <c>type entry struct { node; ... }</c>, for which
-    /// a downcast over a view is checked rather than left to the address route.
+    /// Whether <typeparamref name="TDst"/> is a Go struct whose offset-0 FIRST-field chain reaches
+    /// <typeparamref name="T"/>: the prefix-embed shape, <c>type entry struct { node; ... }</c>, and its nesting
+    /// (<c>type pair struct { first entry; ... }</c> reaches <c>node</c> too). Only such a pair can be Go's prefix
+    /// downcast, so only it pays the view check; a static readonly bool lets the tier-1 JIT drop the arm for every
+    /// other pair.
     /// </summary>
-    internal static class PrefixEmbeds<T, TDst>
+    internal static class PrefixChain<T, TDst>
     {
-        internal static readonly bool Value =
-            typeof(TDst).IsValueType && typeof(TDst) != typeof(T) &&
-            GoReflect.GoFields(typeof(TDst)) is [var first, ..] && first.Type == typeof(T);
-    }
+        internal static readonly bool Value = Reaches(typeof(T), typeof(TDst));
 
-    // A converted type's name as a Go reader knows it: the CLR generic arity suffix (`entry`1`) dropped.
-    private static string GoName(Type type)
-    {
-        string name = type.Name;
-        int tick = name.IndexOf('`');
+        private static bool Reaches(Type source, Type destination)
+        {
+            // A struct's first Go field is inline at offset 0; a pointer embed (a ж<X> box) is not, so the chain stops there.
+            // A primitive reads back as its own single field (Int32's m_value), so a field of the type it sits in ends it too.
+            Type current = destination;
 
-        return tick < 0 ? name : name[..tick];
+            for (int depth = 0; depth < 16 && current != source && current.IsValueType; depth++)
+            {
+                if (GoReflect.GoFields(current) is not [var first, ..] || first.Type == current)
+                    return false;
+
+                if (first.Type == source)
+                    return true;
+
+                current = first.Type;
+            }
+
+            return false;
+        }
     }
 
     /// <summary>

@@ -5924,7 +5924,7 @@ The first line of `initSelf` binds `r` as a C# `ref` to the boxed value, so the 
 `Ꮡr` is the pointer itself. For a nil box, golib's `DerefOrNull()` returns a null `ref`. The first read or
 write through `r` then fails, and golib reports it as Go's nil-pointer panic
 ([Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)).
-<!-- DerefOrNull returns Unsafe.NullRef<T>() for a nil box; the NullReferenceException at first use maps to "invalid memory address or nil pointer dereference": src/core/golib/ж.PointerExtensions.cs:574#cf53a4 -->
+<!-- DerefOrNull returns Unsafe.NullRef<T>() for a nil box; the NullReferenceException at first use maps to "invalid memory address or nil pointer dereference": src/core/golib/ж.PointerExtensions.cs:585#cf53a4 -->
 
 **On a pointer, a call reads as it does in Go.** Besides its use as a name prefix, `Ꮡ` is also a golib
 function: `Ꮡ(value)` puts a value in a new box, like Go's `&`. So `&ring{…}` becomes `Ꮡ(new ring(…))`.
@@ -10148,7 +10148,7 @@ static field ([Strings](#strings-string-and-sstring)).
 
 For a nil box, `DerefOrNull()` returns an empty C# `ref` instead of failing. So `readName(nil)` still runs
 its first line, and panics with Go's nil-dereference message at `p.name`, just where Go does.
-[Implicit Pointer Dereferencing](#implicit-pointer-dereferencing) has more on the alias. <!-- DerefOrNull returns Unsafe.NullRef<T>() for a nil box: src/core/golib/ж.PointerExtensions.cs:574#cf53a4; the NullReferenceException at first use maps to "invalid memory address or nil pointer dereference". box-only parameter, no alias: src/tests/Behavioral/IncDecPointerField/main.cs.target:17-19#18cbb1 -->
+[Implicit Pointer Dereferencing](#implicit-pointer-dereferencing) has more on the alias. <!-- DerefOrNull returns Unsafe.NullRef<T>() for a nil box: src/core/golib/ж.PointerExtensions.cs:585#cf53a4; the NullReferenceException at first use maps to "invalid memory address or nil pointer dereference". box-only parameter, no alias: src/tests/Behavioral/IncDecPointerField/main.cs.target:17-19#18cbb1 -->
 
 **An unexported package-level function that only dereferences a pointer parameter takes `ref T`.** A C#
 `ref` parameter needs no box. Every caller of an unexported function is in the same package, so every call
@@ -10377,7 +10377,7 @@ internal static void populate(ж<row> Ꮡt, uint32 @base) {
 `t[i] = …` writes straight into the caller's array, because `t` is a `ref` to it. For a nil pointer,
 golib's `DerefOrNull()` returns a null `ref` instead of failing at once. The first read or write through
 `t` then raises Go's nil pointer dereference panic, at the same point Go would.
-<!-- DerefOrNull binds Unsafe.NullRef<T>() for a nil box; the first use throws NullReferenceException, which golib maps to Go's "invalid memory address or nil pointer dereference" runtime error: src/core/golib/ж.PointerExtensions.cs:574-580#190dcc and its remarks. -->
+<!-- DerefOrNull binds Unsafe.NullRef<T>() for a nil box; the first use throws NullReferenceException, which golib maps to Go's "invalid memory address or nil pointer dereference" runtime error: src/core/golib/ж.PointerExtensions.cs:585-591#190dcc and its remarks. -->
 
 `row` is Go's array type `[4]uint32`, completed by the [source generators](#source-generators).
 An array's length is fixed, so `len(t)` becomes the constant `4` ([Slices and Arrays](#slices-and-arrays)).
@@ -12420,7 +12420,7 @@ public static ж<ΔInt> And(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
     }
 …
 ```
-<!-- ΔInt: type at src/core/math/big/int.cs:32#0ecf04 inside partial class big_package (:13#ab4666); the colliding method is (*Float).Int, GOROOT/src/math/big/float.go:1080 -> src/core/math/big/float.cs:1133#ef1756. DerefOrNull on a nil box returns Unsafe.NullRef: src/core/golib/ж.PointerExtensions.cs:574#cf53a4. -->
+<!-- ΔInt: type at src/core/math/big/int.cs:32#0ecf04 inside partial class big_package (:13#ab4666); the colliding method is (*Float).Int, GOROOT/src/math/big/float.go:1080 -> src/core/math/big/float.cs:1133#ef1756. DerefOrNull on a nil box returns Unsafe.NullRef: src/core/golib/ж.PointerExtensions.cs:585#cf53a4. -->
 
 The swap exchanges the two boxes, so the aliases `x` and `y` must then be pointed at the new boxes. Either
 order of those two statements is correct C#. The converter collects them in a map and writes them in

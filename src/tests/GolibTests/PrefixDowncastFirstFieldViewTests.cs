@@ -62,6 +62,8 @@ public class PrefixDowncastFirstFieldViewTests
         internal Entry<long> first;
         internal Entry<long> second;
 
+        internal static ref Entry<long> Ꮡfirst(ref Pair instance) => ref instance.first;
+
         internal static ref Entry<long> Ꮡsecond(ref Pair instance) => ref instance.second;
     }
 
@@ -98,6 +100,20 @@ public class PrefixDowncastFirstFieldViewTests
     }
 
     [TestMethod]
+    public void AViewAtOffsetZeroOfAnOffsetZeroViewDowncastsToTheOutermostParent()
+    {
+        builtin.heap(new Pair { first = new Entry<long> { key = 4 } }, out ж<Pair> pair);
+        ж<Node<long>> node = pair.of(Pair.Ꮡfirst).of(Entry<long>.ᏑNode);
+
+        ж<Pair> back = node.Reinterpret<Node<long>, Pair>();
+
+        Assert.AreSame(pair, back, "&p.first.node is at offset 0 of p, so the downcast to *Pair answers p itself");
+
+        back.Value.first.key = 5;
+        Assert.AreEqual(5L, pair.Value.first.key, "a write through the downcast is the outer allocation's");
+    }
+
+    [TestMethod]
     public void AViewOfAnotherParentPanics_NamingBothTypes()
     {
         builtin.heap(new Indirect<long> { depth = 3 }, out ж<Indirect<long>> indirect);
@@ -106,9 +122,10 @@ public class PrefixDowncastFirstFieldViewTests
         PanicException panic = Assert.ThrowsException<PanicException>(() => node.Reinterpret<Node<long>, Entry<long>>(),
             "a view whose parent is not the destination type has nothing behind it to downcast to");
 
-        StringAssert.Contains(panic.Message, nameof(Node<long>));
-        StringAssert.Contains(panic.Message, nameof(Entry<long>));
+        StringAssert.StartsWith(panic.Message, "runtime error: invalid prefix downcast to *" + GoReflect.GoTypeName(typeof(Entry<long>)) + " ");
+        StringAssert.Contains(panic.Message, "*" + GoReflect.GoTypeName(typeof(Node<long>)) + " behind this pointer");
         Assert.IsFalse(panic.Message.Contains('`'), "Go names, without the CLR generic arity suffix");
+        Assert.IsFalse(panic.Message.Contains('Δ'), "Go names, without the converter's collision marker");
     }
 
     [TestMethod]
