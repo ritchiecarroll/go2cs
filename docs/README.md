@@ -5,7 +5,7 @@
 [![golib NuGet package](https://img.shields.io/nuget/dt/go.lib?label=go.lib%20NuGet%20package)
 ](https://www.nuget.org/packages/go.lib)
 
-Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll)
+Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) · [Converted Go module NuGet packages](https://www.nuget.org/packages?q=nugetgo)
 
 ---
 
