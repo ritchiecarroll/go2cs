@@ -378,7 +378,7 @@ internal static bool knownRoundTripperImpl(RoundTripper rt, ж<Request> Ꮡreq) 
 // The first way, used only for RoundTripper
 // implementations written before Go 1.5 or Go 1.6.
 internal partial interface setRequestCancel_canceler /*dyn*/ {
-    void CancelRequest(ж<Request> _);
+    void CancelRequest(ж<Request> _Δp0);
 }
 
 // setRequestCancel sets req.Cancel and adds a deadline context to req

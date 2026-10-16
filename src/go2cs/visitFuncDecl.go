@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 	"unicode"
@@ -52,11 +53,15 @@ func hasDuplicateBlankParams(parameters *types.Tuple) bool {
 	return false
 }
 
-// bodyUsesBlankDiscard reports whether the function's body contains a `_ = …` discard
-// (single or tuple position). A LONE blank param normally keeps the literal `_` name
-// (visually Go-like), but a parameter named `_` HIJACKS the body's C# discards —
+// bodyUsesBlankDiscard reports whether the function's body emits a bare C# `_` discard: a
+// `_ = …` assignment (single or tuple position), or a select case that receives and drops the
+// value (`case <-ch:`, emitted `selᴛN.ꟷᐳ(out _)`). A LONE blank param normally keeps the
+// literal `_` name (visually Go-like), but a parameter named `_` HIJACKS the body's C# discards —
 // encoding/binary's bounds-check hints (`_ = b[7]`) assigned a byte to the blank
-// littleEndian receiver (CS0029 ×12), so such functions synthesize blank names instead.
+// littleEndian receiver (CS0029 ×12), and net/http's transport_dial_test closure
+// `func(_ context.Context, …)` bound `out _` to that Context (CS1503) — so such functions
+// synthesize blank names instead. The walk includes nested function literals, which are
+// emitted inside the function and see its parameters.
 func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
 	if funcDecl == nil || funcDecl.Body == nil {
 		return false
@@ -65,9 +70,17 @@ func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
 	found := false
 
 	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
-		if assign, ok := node.(*ast.AssignStmt); ok {
-			for _, lhs := range assign.Lhs {
+		switch node := node.(type) {
+		case *ast.AssignStmt:
+			for _, lhs := range node.Lhs {
 				if ident, ok := lhs.(*ast.Ident); ok && ident.Name == "_" {
+					found = true
+					return false
+				}
+			}
+		case *ast.CommClause:
+			if exprStmt, ok := node.Comm.(*ast.ExprStmt); ok {
+				if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok && unaryExpr.Op == token.ARROW {
 					found = true
 					return false
 				}
