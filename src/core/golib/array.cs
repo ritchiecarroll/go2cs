@@ -26,6 +26,11 @@ public interface IArray : IEnumerable, ICloneable
 
     object? this[nint index] { get; set; }
 
+    // Whether an element holds a managed reference, which is what decides whether the data can be pinned
+    // (GCHandle refuses such an array). A fact of the element TYPE, answered by IArray<T> below; an
+    // implementer of the bare interface keeps the data-pin treatment it always had.
+    bool ElementHoldsReferences => false;
+
     public bool IndexIsValid(nint index)
     {
         return index > -1 && index < Length;
@@ -55,6 +60,8 @@ public interface IArray<T> : IArray, IEnumerable<T>, IGoReflectSequence
     // Reflect's object-form sequence operations (trim stage 3a; see IGoReflectSequence): the bodies the reflect bridge
     // closed over T with MakeGenericMethod, compiled here for every array, slice and named wrapper the program has.
     Type IGoReflectSequence.ReflectElementType => typeof(T);
+
+    bool IArray.ElementHoldsReferences => RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 
     object IGoReflectSequence.ReflectWindow(nint low, nint high) => this switch
     {

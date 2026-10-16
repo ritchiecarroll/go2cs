@@ -2409,6 +2409,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUntypedIntFloatLiteralFold() => CheckTarget("UntypedIntFloatLiteralFold");
 
     [TestMethod]
+    public void CheckUntypedIntExactConstArithmetic() => CheckTarget("UntypedIntExactConstArithmetic");
+
+    [TestMethod]
     public void CheckUntypedIntInterfaceBox() => CheckTarget("UntypedIntInterfaceBox");
 
     [TestMethod]

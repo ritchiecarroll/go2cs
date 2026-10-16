@@ -2409,6 +2409,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUntypedIntFloatLiteralFold() => CheckTarget("UntypedIntFloatLiteralFold");
 
     [TestMethod]
+    public void CheckUntypedIntExactConstArithmetic() => CheckTarget("UntypedIntExactConstArithmetic");
+
+    [TestMethod]
     public void CheckUntypedIntInterfaceBox() => CheckTarget("UntypedIntInterfaceBox");
 
     [TestMethod]

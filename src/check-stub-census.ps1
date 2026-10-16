@@ -16,6 +16,11 @@
 
         dotnet build src/go2cs-stdlib.slnx -c Release -p:GoTargetOS=<goos> --no-incremental -m:4 -p:UseSharedCompilation=false
 
+    The instrument is ruled PowerShell 7 (Core), run as `pwsh -File`. Under Windows PowerShell 5.1 the verdict
+    path cannot run ([System.IO.Path]::GetRelativePath is .NET Core only), so a Desktop edition is refused
+    up front with exit 3 rather than crashing after the build (H7 pass 8, 2026-10-15: that crash exited 1,
+    the FINDING code).
+
     Each list line is `project<TAB>file name` (project relative to src, ordinal sort, LC_ALL=C). Lists are
     compared on `project + namespace.class.member`, with the trailing `.<n>` index stripped: that index is
     a per-compilation counter, so one added member renumbers every stub after it in the same project.
@@ -36,7 +41,9 @@
     tell from a fresh one.
 .NOTES
     Exit codes: 0 every appearance predicted; 1 at least one UNPREDICTED appearance (a named finding);
-    2 refused (vacuous list, missing positive control, build error, or a tracked file under Generated/).
+    2 refused (vacuous list, missing positive control, build error, or a tracked file under Generated/);
+    3 INSTRUMENT ERROR (a Desktop edition, or any unhandled error in this script). Exit 1 is only ever a
+    named finding: an instrument that fails must not read as one.
 #>
 param(
     [string[]] $Flavors = @("windows", "linux", "darwin"),
@@ -46,7 +53,19 @@ param(
     [switch] $SkipBuild
 )
 
+if ($PSVersionTable.PSEdition -ne 'Core') {
+    Write-Host "STUB CENSUS INSTRUMENT ERROR: PowerShell 7 (Core) is required; this is $($PSVersionTable.PSEdition) $($PSVersionTable.PSVersion). Run it with pwsh -File." -ForegroundColor Red
+    exit 3
+}
+
 $ErrorActionPreference = "Stop"
+
+# Any error nothing handles ends the run as an INSTRUMENT ERROR, exit 3, never as a finding or a refusal.
+trap {
+    Write-Host "STUB CENSUS INSTRUMENT ERROR: $($_.Exception.Message) ($($_.InvocationInfo.ScriptName):$($_.InvocationInfo.ScriptLineNumber))" -ForegroundColor Red
+    exit 3
+}
+
 $src = $PSScriptRoot
 $repo = Split-Path $src -Parent
 
