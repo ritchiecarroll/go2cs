@@ -64,7 +64,7 @@ partial class x509_package {
 // email address map, and if we don't find anything, we check the domain portion
 // of the email address against the dnsConstraints.
 partial struct nameConstraintsSet<T, V>
-    where V : /* net.IP | string */ IAdditionOperators<V, V, V>, IEqualityOperators<V, V, bool>, IComparisonOperators<V, V, bool>, new()
+    where V : /* net.IP | string */ new()
 {
     internal slice<T> set;
 }
@@ -73,7 +73,7 @@ partial struct nameConstraintsSet<T, V>
 // prunes any constraints that are subsets of preceding constraints using the
 // provided subset function.
 internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Func<T, T, nint> cmp, Func<T, T, bool> subset)
-    where V : /* net.IP | string */ IAdditionOperators<V, V, V>, IEqualityOperators<V, V, bool>, IComparisonOperators<V, V, bool>, new()
+    where V : /* net.IP | string */ new()
 {
     if (builtin.len(nc.set) < 2) {
         return;
@@ -100,7 +100,7 @@ internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Fu
 // a matching constraint is found, it is returned along with true. If no
 // matching constraint is found, the zero value of T and false are returned.
 internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match)
-    where V : /* net.IP | string */ IAdditionOperators<V, V, V>, IEqualityOperators<V, V, bool>, IComparisonOperators<V, V, bool>, new()
+    where V : /* net.IP | string */ new()
 {
     T lowerBound = GoZero<T>();
 
