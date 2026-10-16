@@ -732,6 +732,8 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
     [TestMethod]
+    public void CheckGenericInterfaceCrossPackage() => CheckTarget("GenericInterfaceCrossPackage");
+    [TestMethod]
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
 
     [TestMethod]

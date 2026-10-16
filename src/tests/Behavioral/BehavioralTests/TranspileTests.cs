@@ -729,6 +729,8 @@ public class A1_TranspileTests : BehavioralTestBase
     [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
     [TestMethod]
+    public void CheckGenericInterfaceCrossPackage() => CheckTarget("GenericInterfaceCrossPackage");
+    [TestMethod]
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
 
     [TestMethod]
