@@ -66,7 +66,18 @@ internal interface IExactOrderToken
     bool OrderTokenIsExact { get; }
 }
 
-public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken
+/// <summary>
+/// A field view asked, as <c>object</c>, for the box it is the FIRST field of: its source when the field sits
+/// at Go offset 0 in it, else <c>null</c>. Go's prefix-downcast idiom reads exactly that relation —
+/// <c>(*entry[T])(unsafe.Pointer(&amp;e.node))</c> is <c>e</c> — and
+/// <see cref="PointerExtensions.Reinterpret{T,TDst}"/> walks it to hand the parent back.
+/// </summary>
+internal interface IFirstFieldView
+{
+    object? FirstFieldParent { get; }
+}
+
+public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView
 {
     private readonly object m_source;
     private readonly FieldRefFunc<T> m_accessor;
@@ -322,6 +333,10 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // Whether this view's order token is base plus Go offsets all the way down: its own field's offset resolved, and its
     // source's token exact in turn (a root box's base is; an element view's index times the Go stride is).
     bool IExactOrderToken.OrderTokenIsExact => OrderTokenIsExact;
+
+    // The source this view is the first field of: the field's Go offset in its source is 0. An offset the Go
+    // layout cannot resolve (-1) is not 0, so an unknown layout never claims a parent.
+    object? IFirstFieldView.FirstFieldParent => GoFieldOffsetOf(m_source, m_token) == 0 ? m_source : null;
 
     private bool OrderTokenIsExact =>
         GoFieldOffsetOf(m_source, m_token) >= 0 && (m_source is not IExactOrderToken source || source.OrderTokenIsExact);

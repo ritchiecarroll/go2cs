@@ -519,4 +519,18 @@ public static class RuntimeErrorPanic
                 return false;
         }
     }
+
+    private const string InvalidPrefixDowncastMessage =
+        $"{RuntimeErrorMessage}invalid prefix downcast to *{{0}} (the *{{1}} behind this pointer is not the first field of a {{0}})";
+    /// <summary>
+    /// The REFUSAL of Go's prefix-downcast idiom, <c>(*entry[T])(unsafe.Pointer(n))</c>, over a first-field view
+    /// whose offset-0 chain reaches no box of the destination type: in Go the larger object would be read past
+    /// the header, and here there is no such object to answer, so the conversion says so by name.
+    /// </summary>
+    /// <param name="destination">The destination type, as Go's <c>%T</c> prints it.</param>
+    /// <param name="source">The source pointer's element type, as Go's <c>%T</c> prints it.</param>
+    public static PanicException InvalidPrefixDowncast(string destination, string source)
+    {
+        return new PanicException((@string)string.Format(InvalidPrefixDowncastMessage, destination, source));
+    }
 }
