@@ -4508,6 +4508,14 @@ var testProjectFixedReferences = []string{
 	// that adds one. Test projects are graph leaves, so the added edge introduces no cycle (a
 	// `sync.tests -> context -> sync` path is three distinct projects, not a loop).
 	`$(go2csPath)core/context/context.csproj`,
+	// `io` joins for Go 1.25 on exactly the same grounds: TB gains Output() io.Writer, so every adapter
+	// body names `go.io_package.Writer`. testing.csproj reaches io only transitively (through fmt), and
+	// DisableTransitiveProjectReferences keeps that from reaching a test project, so a suite whose own
+	// imports never name io failed as context did: net/netip's T->TB and B->TB adapters gave CS0012 on
+	// the assembly, CS0234 on the namespace and CS9334 on Output()'s return type. 15 of the 224 test
+	// projects carried an adapter and no io reference when this was measured; it is fixed for all of
+	// them for the reason context is.
+	`$(go2csPath)core/io/io.csproj`,
 }
 
 func writeTestProject(projectFile, projectName, namespace, importPath string, model testProjectModel, productionFiles, testFiles, fixtures, dependencies []string, options Options) error {

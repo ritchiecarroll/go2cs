@@ -921,13 +921,16 @@ func TestConvertTestsRefusesHandOwnedAndToolchainPackages(t *testing.T) {
 // go.context_package.Context whether or not the suite mentions context. It cannot be import-derived
 // (Go's sources do not import context to call t.Context()) and it cannot arrive transitively
 // (DisableTransitiveProjectReferences is pinned by the sibling guard below), so fixed is the only
-// place it can live. This assertion is exact rather than a subset check on purpose: the set is the
+// place it can live. `io` joined for Go 1.25 on exactly the same grounds: TB gains Output() io.Writer,
+// so every adapter body names go.io_package.Writer (net/netip: CS0012, CS0234, CS9334). This
+// assertion is exact rather than a subset check on purpose: the set is the
 // reference every test project pays for, and growing it should require saying so here.
 func TestTestProjectFixedReferencesRootedInCore(t *testing.T) {
 	want := []string{
 		`$(go2csPath)core/golib/golib.csproj`,
 		`$(go2csPath)core/testing/testing.csproj`,
 		`$(go2csPath)core/context/context.csproj`,
+		`$(go2csPath)core/io/io.csproj`,
 	}
 
 	if !reflect.DeepEqual(testProjectFixedReferences, want) {
