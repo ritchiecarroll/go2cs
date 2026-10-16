@@ -109,18 +109,27 @@ public static class GoMethodText
 
     private delegate @string RefMethod<T>(ref T target);
 
-    // One binding per (T, value-or-pointer), kept with the candidate list it was resolved from. That list is
-    // GetGoMethodSetCandidates' own cache entry, which an assembly load clears (TypeExtensions.ClearTypeCaches),
-    // so a binding is re-resolved exactly when the method-set scan it came from is: a cache derived from the
-    // scan must never outlive it (the rule in TypeExtensions.ExtensionMethodRegistry.cs).
-    private sealed class Binding<TDelegate>(List<MethodInfo>? source, (TDelegate call, string name)? method) where TDelegate : Delegate
+    // One binding per (T, value-or-pointer), kept with the type-cache GENERATION it was resolved under. An assembly
+    // load bumps that generation (TypeExtensions.ClearTypeCaches) and clears the method-set candidates it was read
+    // from, so a binding is re-resolved exactly when the scan it came from is: a cache derived from the scan must
+    // never outlive it (the rule in TypeExtensions.ExtensionMethodRegistry.cs). The steady state is one int compare:
+    // no dictionary lookup, for a type with neither method as much as for one with both.
+    private sealed class Binding<TDelegate>(int generation, (TDelegate call, string name)? method) where TDelegate : Delegate
     {
-        public readonly List<MethodInfo>? Source = source;
+        public readonly int Generation = generation;
         public readonly (TDelegate call, string name)? Method = method;
     }
 
     private static (TDelegate call, string name)? Bound<T, TDelegate>(ref Binding<TDelegate>? cache, bool valueIsPointer, Func<MethodInfo, TDelegate?> bind) where TDelegate : Delegate
     {
+        int generation = GoTypeExtensions.TypeCacheGeneration;
+        Binding<TDelegate>? binding = System.Threading.Volatile.Read(ref cache);
+
+        if (binding is not null && binding.Generation == generation)
+            return binding.Method;
+
+        // Read BEFORE the scan: a load that lands while this resolves bumps the generation past the one recorded, so
+        // the next call resolves again rather than keeping an answer computed without that assembly.
         List<MethodInfo>? candidates;
 
         try
@@ -132,13 +141,8 @@ public static class GoMethodText
             candidates = null;
         }
 
-        Binding<TDelegate>? binding = System.Threading.Volatile.Read(ref cache);
-
-        if (binding is null || !ReferenceEquals(binding.Source, candidates))
-        {
-            binding = new Binding<TDelegate>(candidates, candidates is null ? null : Resolve<T, TDelegate>(candidates, bind));
-            System.Threading.Volatile.Write(ref cache, binding);
-        }
+        binding = new Binding<TDelegate>(generation, candidates is null ? null : Resolve<T, TDelegate>(candidates, bind));
+        System.Threading.Volatile.Write(ref cache, binding);
 
         return binding.Method;
     }
