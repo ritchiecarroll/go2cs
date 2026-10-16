@@ -201,7 +201,8 @@ for an initial download, and the one-time converter build has ten.
 
 The `dotnet build` of a submission starts as soon as its conversion succeeds, in the background, and
 the Build stage reports that build. The page asks for it straight after the conversion, so the Build tab
-fills in on its own; Run waits on that same request if the build is still running, or goes straight to
+fills in on its own, and once the build passes the page settles on **.NET Run**, ready, just as the Go
+side waits for Run (unless the reader has already picked another tab). Run waits on that same request if the build is still running, or goes straight to
 the program if it has passed, so a synchronized Go and .NET run pays only for whatever part of the build
 is left. The program is launched directly, as `dotnet <assembly>`, at the path the build's own output
 names; `dotnet run --no-build` would evaluate the project again before every launch, which on

@@ -365,7 +365,14 @@
     request.promise.then(stage => {
       if (!current()) return;
       outputs.build = stage;
-      if (stage.status !== "passed") conversionStatus.textContent = "Build failed";
+      if (stage.status !== "passed") {
+        conversionStatus.textContent = "Build failed";
+      } else {
+        // Built and waiting for Run, as the Go side waits: settle on the .NET Run tab, unless the
+        // reader has moved off the Build tab the page chose for them.
+        outputs.run = idleStage("run", "Built and ready: press Run to see the .NET output.");
+        if (activeOutput === "build") activeOutput = "run";
+      }
       renderOutputState();
     }, error => {
       if (error.name === "AbortError" || !current()) return;
