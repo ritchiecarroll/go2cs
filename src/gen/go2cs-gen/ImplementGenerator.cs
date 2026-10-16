@@ -1648,7 +1648,7 @@ public class ImplementGenerator : ISourceGenerator
     // Constraint ORDER follows C#'s required sequence: the class/struct/unmanaged/notnull primary
     // constraint first, then base + interface types, then new() last. Interface constraints (the
     // Go case) are global::-qualified like every other generated type reference.
-    private static string GetGenericConstraintClause(IEnumerable<ITypeParameterSymbol> typeParameters)
+    internal static string GetGenericConstraintClause(IEnumerable<ITypeParameterSymbol> typeParameters)
     {
         List<string> clauses = new();
 

@@ -726,6 +726,13 @@ internal class StructTypeTemplate : TemplateBase
 
         result.Append("\r\n\r\n    // Promoted Struct Receivers");
 
+        // A GENERIC enclosing struct's forwarders carry its type parameters (methodTypeParams below), so they
+        // repeat its where clauses too: gen's `Array[T Value]` embeds valAny, and `initOp<T>(this ref Array<T>
+        // target, …)` with no `where T : Value` names an Array<T> its T does not satisfy (CS0314).
+        string structConstraints = Context.Compilation.FindTypeSymbol(FullyQualifiedStructType) is { IsGenericType: true } structSymbol
+            ? ImplementGenerator.GetGenericConstraintClause(structSymbol.TypeParameters)
+            : "";
+
         // Get all extension methods for the struct, any directly defined receivers
         // take precedence over promoted struct methods that have the same name
         (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(FullyQualifiedStructType);
@@ -1201,7 +1208,7 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append(typedParams);
                 }
 
-                result.Append($") => {receiver}.{embedAccess}.{method.Name}(");
+                result.Append($"){structConstraints} => {receiver}.{embedAccess}.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                 result.Append(");");
 
@@ -1214,7 +1221,7 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append(typedParams);
                 }
 
-                result.AppendLine(")");
+                result.AppendLine($"){structConstraints}");
                 result.AppendLine("    {");
                 result.AppendLine($"        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;");
                 result.Append($"        {(method.ReturnType == "void" ? "" : "return ")}{receiver}.{method.Name}(");
