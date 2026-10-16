@@ -1875,6 +1875,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReflectStructTagCopy() => CheckTarget("ReflectStructTagCopy");
 
     [TestMethod]
+    public void CheckReflectTypeAssertMarshal() => CheckTarget("ReflectTypeAssertMarshal");
+
+    [TestMethod]
     public void CheckReflectTypedNilInterface() => CheckTarget("ReflectTypedNilInterface");
 
     [TestMethod]

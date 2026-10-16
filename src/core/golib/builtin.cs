@@ -4083,6 +4083,23 @@ public static partial class builtin
         };
     }
 
+    /// <summary>
+    /// Checks whether a value of the managed type <paramref name="valueType"/> implements the interface
+    /// <typeparamref name="TInterface"/>, decided on the TYPE alone, through the same cached method-set probe
+    /// <see cref="Implements{TInterface}(object?)"/> uses.
+    /// </summary>
+    /// <remarks>
+    /// For a caller that must answer before it has a value to hand over, and must not allocate one to ask:
+    /// reflect.TypeAssert[I] over a concrete Value, whose failing assertion Go answers without allocating.
+    /// </remarks>
+    /// <typeparam name="TInterface">Interface type to check.</typeparam>
+    /// <param name="valueType">Managed type of the value.</param>
+    /// <returns><c>true</c> if a value of <paramref name="valueType"/> implements <typeparamref name="TInterface"/>; otherwise, <c>false</c>.</returns>
+    public static bool TypeImplements<TInterface>(Type? valueType)
+    {
+        return valueType is not null && (typeof(TInterface).IsAssignableFrom(valueType) || Cache<TInterface>.Implements(valueType));
+    }
+
     // Per-interface structural-implementation cache, reached from the `_ =>` arm of Implements above.
     //
     // KEEP — a dead-code scan will flag this and be wrong. The only call site names the type through a
