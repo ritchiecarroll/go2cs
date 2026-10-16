@@ -93,6 +93,42 @@ func (v *Visitor) callFunIsUniversePrint(callExpr *ast.CallExpr) bool {
 	return ok && (ident.Name == "print" || ident.Name == "println") && v.identIsUniverseBuiltin(ident)
 }
 
+// printArgRawType returns the C# spelling of a print/println argument's UNDERLYING basic type when
+// the argument is of a named basic type whose value method set holds `Error() string` or
+// `String() string`, and "" otherwise. Only the value method set counts: a pointer prints its address
+// whatever its methods, which golib's printer handles, and a struct cannot be printed at all.
+func (v *Visitor) printArgRawType(arg ast.Expr) string {
+	named, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named)
+
+	if !ok {
+		return ""
+	}
+
+	basic, ok := named.Underlying().(*types.Basic)
+
+	if !ok || basic.Info()&types.IsUntyped != 0 {
+		return ""
+	}
+
+	methods := types.NewMethodSet(named)
+
+	for _, name := range []string{"Error", "String"} {
+		selection := methods.Lookup(nil, name)
+
+		if selection == nil {
+			continue
+		}
+
+		if signature, isFunc := selection.Type().(*types.Signature); isFunc && signature.Params().Len() == 0 && signature.Results().Len() == 1 {
+			if result, isBasic := signature.Results().At(0).Type().(*types.Basic); isBasic && result.Kind() == types.String {
+				return convertToCSTypeName(v.getCSharpTypeName(basic))
+			}
+		}
+	}
+
+	return ""
+}
+
 // convCallExpr converts any Go call expression to C#. Every function call, method call, built-in
 // call and type conversion in the corpus routes through here, which is why it is the largest
 // function in the converter.
@@ -1870,6 +1906,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			if v.callFunIsUniversePrint(callExpr) {
 				paramType = types.NewInterfaceType(nil, nil)
+
+				// Go's print/println write a named type's RAW value and never call its methods:
+				// println(time.Second) prints 1000000000. A converted value's C# ToString is its Go
+				// Error()/String() text (golib's GoMethodText), so a named basic argument whose value
+				// method set holds either is passed as its underlying value instead.
+				if paramHasArg {
+					if raw := v.printArgRawType(callExpr.Args[i]); raw != "" {
+						if callExprContext.castArgToType == nil {
+							callExprContext.castArgToType = make(map[int]string)
+						}
+
+						callExprContext.castArgToType[i] = raw
+					}
+				}
 			} else if paramType, ok = getParameterType(funcSignature, i); !ok {
 				continue
 			}
