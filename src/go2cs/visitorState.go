@@ -277,6 +277,11 @@ type Visitor struct {
 	// renders — no churn elsewhere. types.Type carries no source alias, so this map supplies it.
 	importPathAliases map[string]string
 
+	// dotImportTargets maps a Go import PATH this file DOT-imports to the class its `using static`
+	// names. A dot-imported package's type renders through its package NAME, which is correct only
+	// while no other import of the file binds that name. dotImportCollisionQualifier consults it.
+	dotImportTargets map[string]string
+
 	// FuncDecl variables
 	inFunction      bool
 	currentFuncDecl *ast.FuncDecl
