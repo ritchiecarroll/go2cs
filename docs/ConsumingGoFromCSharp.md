@@ -34,8 +34,9 @@ fmt.Println(shout, len(shout));     // HELLO, GOPHER 13
 
 `dotnet run` prints `HELLO, GOPHER 13`. That is the whole pattern: one `using` alias per Go package, and the calls
 read like Go. `@string` is Go's string type ([Strings](#strings)), and the packages bring `@string` and Go's
-built-ins such as `len` into scope for you ([Imports](#imports)). To quiet the compiler's warning about lowercase
-names, add `<NoWarn>$(NoWarn);CS8981</NoWarn>` to the project.
+built-ins such as `len` into scope for you ([Imports](#imports)). The packages also switch off the compiler's
+warning about lowercase alias names (CS8981); a project that references a conversion as projects adds
+`<NoWarn>$(NoWarn);CS8981</NoWarn>` itself ([Imports](#imports)).
 
 A published Go module works the same way. `github.com/google/uuid` is `nugetgo.github.com.google.uuid`:
 
@@ -119,7 +120,9 @@ to turn them off. A conversion you reference as projects does not add them, so w
 `Program.cs` does.
 
 **Lowercase aliases raise warning CS8981**, which notes that an all-lowercase name may become a C# keyword one day.
-The aliases are deliberate, so turn the warning off in the project:
+The aliases are deliberate. The same packages that add the usings above add CS8981 to your `NoWarn`, under the same
+switch, so `GoConsumerUsings=false` brings the warning back along with the usings. A conversion you reference as
+projects, or a project that sets `GoConsumerUsings` to `false`, turns the warning off in its own project file:
 
 ```xml
 <NoWarn>$(NoWarn);CS8981</NoWarn>
@@ -525,7 +528,8 @@ Each item is a first surprise, and what to write instead.
 - **A Go method does not compile.** Import the package's namespace as well as its alias: `using go;` for a
   standard-library package without a slash, `using go.encoding;` for `encoding/hex`, `using go.github.com.google;`
   for uuid ([Imports](#imports)).
-- **Warning CS8981 on each alias.** Add `<NoWarn>$(NoWarn);CS8981</NoWarn>` to the project.
+- **Warning CS8981 on each alias.** NuGet packages switch it off for you. A conversion you reference as projects, or
+  `GoConsumerUsings` set to `false`, needs `<NoWarn>$(NoWarn);CS8981</NoWarn>` in the project.
 - **`int n = len(s)` does not compile.** Go's `int` is `nint`: use `var`, `nint`, or a cast ([Numbers](#numbers)).
 - **`append(nums, 4, 5)` is ambiguous on a `slice<nint>`.** Cast the literals: `append(nums, (nint)4, (nint)5)`.
 - **`error e = nil;` does not compile.** Compare with `nil`, but produce a nil error with `null` or `default`.

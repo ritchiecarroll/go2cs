@@ -91,6 +91,18 @@
   </ItemGroup>
 
   <!--
+    THE ALIAS WARNING. The way to call converted Go from C# is one lowercase alias per package
+    (`using strings = go.strings_package;`, docs/ConsumingGoFromCSharp.md), and each such alias raises warning
+    CS8981: an all-lowercase type name may become a C# keyword one day. The aliases are deliberate, so the same
+    consumer who gets the usings above gets the warning off, under the same switch: GoConsumerUsings=false turns
+    both back on. A project that references a conversion as projects never imports this file and writes the
+    NoWarn itself.
+  -->
+  <PropertyGroup Condition="'$(GoConsumerUsings)' != 'false'">
+    <NoWarn>$(NoWarn);CS8981</NoWarn>
+  </PropertyGroup>
+
+  <!--
     THE TRIM MODE. golib derives a Go struct's size, layout and call arguments from its fields by reflection, so a full
     trim that removes field metadata breaks converted code at type initialization. A converted project's csproj template
     sets TrimMode=partial (trim the framework only); a hand-written consumer of the packages got the SDK's full trim
