@@ -1169,6 +1169,15 @@ func (v *Visitor) namedFuncTypeNameForSignature(sig *types.Signature) string {
 			continue
 		}
 
+		// A METHODLESS named func type is rendered inline as its base delegate and declares no C#
+		// type (methodlessNamedFuncSignature), so its name cannot type anything: the structural
+		// delegate a caller falls back to IS what that name renders to. Naming it here declared the
+		// local with a type that was never emitted: CS0246 at Go 1.26's internal/runtime/gc/scan
+		// tests (`expR := scan.ExpandReference` beside `type expandFunc func(...)`).
+		if _, collapses := methodlessNamedFuncSignature(named); collapses {
+			continue
+		}
+
 		if types.Identical(underlyingSig, sig) {
 			return getSanitizedIdentifier(named.Obj().Name())
 		}
