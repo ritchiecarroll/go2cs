@@ -261,12 +261,13 @@ public class ImplementGenerator : ISourceGenerator
             }
 
             string structName = structType.GetFullTypeName();
-            // The display string, never GetFullTypeName: its generic arm renders `Name<args>` without the
-            // containing class, which resolves only while the adapter's host class declares the
-            // interface. crypto/mlkem at Go 1.26 hosts *DecapsulationKey768's adapter in mlkem_package
-            // for mlkem_test's decapsulationKey[E] (CS0246 + CS0540 x3 per key). For a non-generic
-            // interface the two spellings are identical.
-            string interfaceName = GlobalQualify(interfaceType.ToDisplayString());
+            // The fully qualified display string, never GetFullTypeName: its generic arm renders
+            // `Name<args>` without the containing class, which resolves only while the adapter's host
+            // class declares the interface. crypto/mlkem at Go 1.26 hosts *DecapsulationKey768's adapter
+            // in mlkem_package for mlkem_test's decapsulationKey[E] (CS0246 + CS0540 x3 per key).
+            // FullyQualifiedFormat roots every name in global:: and escapes keyword identifiers by its own
+            // options (`probe_package.@base`), rather than by the default format's.
+            string interfaceName = interfaceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
             // Get the attribute's Promoted / Pointer / ConstraintProxy argument values, if defined
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
