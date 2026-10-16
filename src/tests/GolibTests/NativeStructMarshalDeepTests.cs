@@ -94,6 +94,19 @@ public unsafe class NativeStructMarshalDeepTests
         public ж<Trustee> B;
     }
 
+    // A struct whose fields are themselves reference-bearing, so a field view answers a token too.
+    public struct Holder
+    {
+        public Trustee First;
+        public Trustee Second;
+    }
+
+    // Field accessors named as the converter names them (Ꮡ + field), so each view's order token carries the
+    // field's Go offset: First at 0 (the same number as the struct's own pointer, as in Go), Second at 32.
+    private static ref Trustee ᏑFirst(object p) => ref ((ж<Holder>)p).Value.First;
+
+    private static ref Trustee ᏑSecond(object p) => ref ((ж<Holder>)p).Value.Second;
+
     // No native image: a string beside an array.
     public struct Named
     {
@@ -275,6 +288,76 @@ public unsafe class NativeStructMarshalDeepTests
 
         StringAssert.Contains(refused.Message, "argument 1");
         StringAssert.Contains(refused.Message, "element 0");
+        Assert.IsFalse(probe.Invoked, "the call must not run");
+    }
+
+    [TestMethod]
+    public void AFieldViewAfterItsStructsBoxIsRefusedByName()
+    {
+        heap(new Holder(), out ж<Holder> root);
+        ж<Trustee> second = root.of(ᏑSecond);
+        Probe probe = new() { Body = _ => 0 };
+
+        PanicException refused = Assert.ThrowsException<PanicException>(() => call(probe, token(root), token(second)));
+
+        StringAssert.Contains(refused.Message, "argument 1 aliases argument 0's storage");
+        Assert.IsFalse(probe.Invoked, "the call must not run");
+    }
+
+    [TestMethod]
+    public void AStructsBoxAfterOneOfItsFieldViewsIsRefusedByName()
+    {
+        heap(new Holder(), out ж<Holder> root);
+        ж<Trustee> second = root.of(ᏑSecond);
+        Probe probe = new() { Body = _ => 0 };
+
+        PanicException refused = Assert.ThrowsException<PanicException>(() => call(probe, 0, token(second), token(root)));
+
+        StringAssert.Contains(refused.Message, "argument 2 aliases argument 1's storage");
+        Assert.IsFalse(probe.Invoked, "the call must not run");
+    }
+
+    [TestMethod]
+    public void AFirstFieldAndItsStructAreOneAddressAndOneCopy()
+    {
+        // &h and &h.First are one Go address, so one order token; whichever converted last, the copy is the
+        // whole Holder, and both arguments name it.
+        ref Holder holder = ref heap(new Holder(), out ж<Holder> root);
+        holder.Second.Form = 2;
+        ж<Trustee> first = root.of(ᏑFirst);
+
+        nuint rootToken = token(root);
+        nuint firstToken = token(first);
+        Assert.AreEqual(rootToken, firstToken, "precondition: a first field shares its struct's number");
+
+        Probe probe = new()
+        {
+            Body = args =>
+            {
+                Assert.AreEqual(args[0], args[1], "one address, one copy");
+                Assert.AreEqual(2, *(int*)((byte*)args[0] + 32 + 12), "the copy is the whole Holder (Second.Form at 44)");
+
+                *(int*)((byte*)args[1] + 16) = 8;
+                *(int*)((byte*)args[0] + 32 + 16) = 9;
+                return 0;
+            }
+        };
+
+        call(probe, rootToken, firstToken);
+
+        Assert.AreEqual(8, root.Value.First.Type);
+        Assert.AreEqual(9, root.Value.Second.Type);
+    }
+
+    [TestMethod]
+    public void TwoFieldViewsOfOneStructAreRefusedByName()
+    {
+        heap(new Holder(), out ж<Holder> root);
+        Probe probe = new() { Body = _ => 0 };
+
+        PanicException refused = Assert.ThrowsException<PanicException>(() => call(probe, token(root.of(ᏑFirst)), token(root.of(ᏑSecond))));
+
+        StringAssert.Contains(refused.Message, "argument 1 aliases argument 0's storage");
         Assert.IsFalse(probe.Invoked, "the call must not run");
     }
 

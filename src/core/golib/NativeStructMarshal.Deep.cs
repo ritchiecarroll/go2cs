@@ -55,7 +55,8 @@ public static unsafe partial class NativeStructMarshal
     ///   </description></item>
     ///   <item><description>
     ///     WHAT HAS NO NATIVE IMAGE IS REFUSED BY NAME: a string, slice, map, channel, func, interface or
-    ///     non-nil unsafe.Pointer anywhere inside a copied pointee, and a layout this class cannot prove.
+    ///     non-nil unsafe.Pointer anywhere inside a copied pointee, a layout this class cannot prove, and a box
+    ///     that is another VIEW (a field view beside its struct's box, either order) of storage already copied.
     ///   </description></item>
     /// </list>
     /// <para>
@@ -174,6 +175,7 @@ public static unsafe partial class NativeStructMarshal
         public required Type Type { get; init; }
         public required nint Buffer { get; init; }
         public required nuint Stride { get; init; }
+        public required string Where { get; init; }
 
         // Exactly one of the two sources: a box (Count == 1), or a backing array and the run's first index.
         public object? Box { get; init; }
@@ -192,6 +194,11 @@ public static unsafe partial class NativeStructMarshal
     {
         private readonly Dictionary<object, DeepCopy> m_byBox = new(ReferenceEqualityComparer.Instance);
         private readonly Dictionary<Array, DeepCopy> m_byBacking = new(ReferenceEqualityComparer.Instance);
+
+        // The storage each copy was taken from (ManagedPointerTokens.AllocationIdOf, which every view of one
+        // allocation shares), so a second box that is a VIEW of storage already copied is caught: two
+        // independent copies of one storage would come back last-writer-wins.
+        private readonly Dictionary<ulong, DeepCopy> m_byAllocation = new();
         private readonly List<DeepCopy> m_copies = new();
 
         // A native word's address -> the value the encode wrote there, so the decode can tell a word the
@@ -209,6 +216,8 @@ public static unsafe partial class NativeStructMarshal
                 throw panic($"syscall: {where} is a managed pointer token that no longer resolves to a live " +
                             "value, so it has no native image to pass");
             }
+
+            box = widestAtSameAddress(box);
 
             if (m_byBox.TryGetValue(box, out DeepCopy? known))
                 return (nuint)known.Buffer;
@@ -229,9 +238,13 @@ public static unsafe partial class NativeStructMarshal
 
             refuseUnlessDeep(type, where);
 
+            ulong allocation = ManagedPointerTokens.AllocationIdOf(box);
+            refuseViewAlias(allocation, where);
+
             nuint stride = (nuint)GoSizeOf(type);
-            DeepCopy copy = allocate(new DeepCopy { Type = type, Buffer = 0, Stride = stride, Box = box }, stride);
+            DeepCopy copy = allocate(new DeepCopy { Type = type, Buffer = 0, Stride = stride, Where = where, Box = box }, stride);
             m_byBox[box] = copy;
+            m_byAllocation[allocation] = copy;
 
             object? value = ReadPointerSlot(box);
             encodeValue(value, type, (byte*)copy.Buffer);
@@ -254,17 +267,48 @@ public static unsafe partial class NativeStructMarshal
             Type type = backing.GetType().GetElementType()!;
             refuseUnlessDeep(type, where);
 
+            ulong allocation = ManagedPointerTokens.AllocationIdOf(box);
+            refuseViewAlias(allocation, where);
+
             nuint stride = (nuint)GoSizeOf(type);
             int count = backing.Length - index;
-            DeepCopy copy = allocate(new DeepCopy { Type = type, Buffer = 0, Stride = stride, Backing = backing, Start = index, Count = count }, stride * (nuint)count);
+            DeepCopy copy = allocate(new DeepCopy { Type = type, Buffer = 0, Stride = stride, Where = where, Backing = backing, Start = index, Count = count }, stride * (nuint)count);
 
             m_byBacking[backing] = copy;
             m_byBox[box] = copy;
+            m_byAllocation[allocation] = copy;
 
             for (int i = 0; i < count; i++)
                 encodeValue(backing.GetValue(index + i), type, (byte*)copy.Buffer + (nuint)i * stride);
 
             return (nuint)copy.Buffer;
+        }
+
+        // A FIRST field's view and its struct's box are one address in Go, so they share one order token, and
+        // the token resolves to whichever was converted last: &s and &s.f passed together could both resolve
+        // to the narrower f, and a callee reading s from the first would read past f's copy. The token names
+        // the outermost value at that address, so that is what is copied (f lies at offset 0 inside it); a
+        // parent with no native image keeps the narrower view, which is then all the caller can have meant.
+        private static object widestAtSameAddress(object box)
+        {
+            while (box is IFirstFieldView { FirstFieldParent: IGoReflectBox parent } &&
+                   PointeeTypeOfValue(parent) is { } parentType && DeepRefusal(parentType) is null)
+            {
+                box = parent;
+            }
+
+            return box;
+        }
+
+        // A box that is a different VIEW of storage already copied (a field view beside its struct's own box,
+        // either order, or two field views of one struct): refused by name rather than copied twice.
+        private void refuseViewAlias(ulong allocation, string where)
+        {
+            if (m_byAllocation.TryGetValue(allocation, out DeepCopy? earlier))
+            {
+                throw panic($"syscall: {where} aliases {earlier.Where}'s storage (a field or element view of " +
+                            "the same Go value), so the two cannot be copied to native memory independently");
+            }
         }
 
         private static void refuseUnlessDeep(Type type, string where)
@@ -285,7 +329,7 @@ public static unsafe partial class NativeStructMarshal
 
             DeepCopy copy = new()
             {
-                Type = shape.Type, Buffer = buffer, Stride = shape.Stride,
+                Type = shape.Type, Buffer = buffer, Stride = shape.Stride, Where = shape.Where,
                 Box = shape.Box, Backing = shape.Backing, Start = shape.Start, Count = shape.Count
             };
 
