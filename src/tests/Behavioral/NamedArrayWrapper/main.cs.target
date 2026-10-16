@@ -105,7 +105,7 @@ internal static void Main() {
     h.trace.Value[1] = h.trace.Value[0] + 2;
     fmt.Println(4, h.trace.Value[0], h.trace.Value[1], c[0]);
     var dst = new slice<uintptr>(2);
-    nint nc = copy(dst, (~h.trace).Value[..2]);
+    nint nc = copy(dst, h.trace.Value[..2]);
     fmt.Println(nc, dst[1]);
 
     ref var cs = ref heap(new counters(), out var Ꮡcs);
