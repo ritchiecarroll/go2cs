@@ -85,6 +85,14 @@ i7's disk, not in the account, so treat them as a convenience. This section and 
     our own words, with an upstream link, for every module;
   - (2) the generated fence: a TEXT link to the C# conversion repo beside the badge (New-NugetgoGeneratedBlock in
     src/tools/nugetgo/NugetgoReadme.psm1).
+- 2026-10-15, docs/ConsumingGoFromCSharp.md: rewritten and PUBLISHED on owner OK (master 61b0a4589f; CSharpConsumer 58
+  checks). Owner approved three consumer fixes:
+  - (1) a Go type's ToString() forwards to Error()/String() by fmt's rule (C1 design, G-reviewed; cut on the hop tip);
+  - (2) go.lib.targets suppresses CS8981 under GoConsumerUsings (P1, master);
+  - (3) LINQ on slice<T> by IArray<T> : IEnumerable<T> (C1 design, G-reviewed; cut on the hop tip).
+  Each updates the page in its seat.
+- 2026-10-15, go2cs.net had not deployed since 10-14: 4 stale fragment links into comments.md failed the Docs site
+  link check. Fixed at master 4898b619bd, and R's G3 TestDocsFragmentLinksResolve guards it now.
 
 ### 1k.3 COORD's next steps, in order
 
