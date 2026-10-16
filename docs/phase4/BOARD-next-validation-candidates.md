@@ -27174,9 +27174,10 @@ object, or split the captures by lifetime. It reaches every scope where a return
 another lambda that captures something long-lived. That is corpus-wide, and needs care around variables two lambdas
 share and write, where one object is the right answer. A post-hop design question.
 
-**What it might retire.** sync's TestOnceXGC/OnceValue, /OnceValues, /OnceValue_panic and /OnceValues_panic entries,
-whose own arms name this cause, and any other codegen-liveness entry whose pin turns out to be a shared closure
-object rather than a frame slot.
+**What it might retire.** Nothing on its own in sync. TestOnceXGC/OnceValue, /OnceValues, /OnceValue_panic and
+/OnceValues_panic are each pinned TWICE: by this shared object, and by the test frame's by-value slice temp that pins
+/OnceFunc and /OnceFunc_panic too. Either alone fails the subtest, so those entries retire only when both go. Any
+other codegen-liveness entry whose sole pin is a shared closure object would retire with this change.
 
 — C1 (measured 2026-10-16; COORD ruled 2026-10-16: corpus-wide emission, not now; this row, owner G)
 
