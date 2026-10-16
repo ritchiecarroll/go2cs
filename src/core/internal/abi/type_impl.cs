@@ -57,6 +57,10 @@ partial struct Type {
     [GoReflectCompanion] public nint[]?[]? funcParamDims;
     [GoReflectCompanion] public GoChanDir[]? chanDirChain;
     [GoReflectCompanion] public nint[]? keyDims;
+    // sizeUnknown: the Go size could not be derived, so Size_ is NOT a size. C# spells every [N]T as one array<T>,
+    // so a descriptor built from the type alone (abi.TypeFor[[2]string]()) has no length. Size(), Len() and
+    // ArrayType() refuse by name on it rather than answer the plausible zero (see UnknownGoSize).
+    [GoReflectCompanion] public bool sizeUnknown;
     // funcInChanDirs / funcOutChanDirs: a FUNC descriptor's per-parameter and per-result channel
     // DIRECTION, the direction twin of funcParamDims. `func(<-chan int)` and `func(chan int)` are
     // DISTINCT Go types over one managed delegate, so the direction joins the interning key and rides
@@ -343,6 +347,8 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
         nint align = GoReflect.GoAlignOf(st);
         t.Align_ = (uint8)align;
         t.FieldAlign_ = (uint8)align;
+    } else {
+        t.sizeUnknown = true;
     }
     // PtrBytes is the pointer-bearing PREFIX of the type, and it is what Pointers() reports. Leaving
     // it unstamped made every synthesized descriptor answer "I hold no pointers", which is a claim
@@ -558,11 +564,30 @@ private static ж<ΔStructType> synthesizeStructType(ж<Type> Ꮡt) {
 }
 
 // ArrayType returns t cast to a *ArrayType, or nil if its tag does not match.
+//
+// An array descriptor whose length is unknown refuses by name. Its nil would read as "not an array", Go's own
+// tag-mismatch answer, for a descriptor whose tag IS Array.
 public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Array || Ꮡt.Value.sysType is null) {
         return default!;
     }
-    return s_arrayTypes.GetOrAdd(Ꮡt, static box => synthesizeArrayType(box));
+    ж<ΔArrayType> arrayType = s_arrayTypes.GetOrAdd(Ꮡt, static box => synthesizeArrayType(box));
+    if (arrayType == nil) {
+        throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the length", Ꮡt.Value.sysType, Ꮡt.Value.arrayDims);
+    }
+    return arrayType;
+}
+
+// Size returns the size of data with type t.
+//
+// Hand-owned for one arm: a descriptor whose Go size could not be derived (sizeUnknown) refuses by name. Its
+// unstamped Size_ is 0, and 0 is a SIZE. unique.Make reads it as the zero-size type and returns the shared zerobase
+// handle for every value, so two different [2]string pairs compared equal. Every other descriptor answers Size_.
+public static uintptr Size(this ref Type t) {
+    if (t.sizeUnknown) {
+        throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the size", t.sysType, t.arrayDims);
+    }
+    return t.Size_;
 }
 
 // ==== the FUNC specialization — the same operation, and the same answer ==========================
@@ -913,11 +938,20 @@ public static ж<Type> Key(this ж<Type> Ꮡt) {
 // reported [3]byte and [3]byte as different types. A length the descriptor does not know is still
 // answered as Go's 0 — array dims are non-identity cargo (the recorded §5 limitation), so two
 // dimension-less array descriptors compare equal rather than randomly unequal.
+//
+// An array descriptor that carries no length REFUSES by name instead (UnknownGoSize). Its 0 read as a real empty
+// array, which is a plausible answer and a wrong one for every [N]T a type argument named.
 public static nint Len(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Array) {
         return 0;
     }
-    return Ꮡt.Value.arrayDims is { Length: > 0 } dims ? dims[0] : 0;
+    if (Ꮡt.Value.arrayDims is { Length: > 0 } dims) {
+        return dims[0];
+    }
+    if (Ꮡt.Value.sysType is { } st && GoReflect.DefinedArrayDims(st) is { Length: > 0 } declared) {
+        return declared[0];
+    }
+    throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the length", Ꮡt.Value.sysType, null);
 }
 
 private static ж<ΔArrayType> synthesizeArrayType(ж<Type> Ꮡt) {
