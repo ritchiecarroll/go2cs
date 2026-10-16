@@ -93,6 +93,19 @@ i7's disk, not in the account, so treat them as a convenience. This section and 
   Each updates the page in its seat.
 - 2026-10-15, go2cs.net had not deployed since 10-14: 4 stale fragment links into comments.md failed the Docs site
   link check. Fixed at master 4898b619bd, and R's G3 TestDocsFragmentLinksResolve guards it now.
+- 2026-10-16, version lines (owner OK):
+  - master carries the current Go line, with patch hops on master;
+  - the next minor hops on a hop branch;
+  - at each landing, cut release/go1.N for security fixes only, until Go drops that line;
+  - hop every Go release; there will NEVER be a Go 1.25 line.
+  Planned reboot of ALL machines around 10-23, at a stage boundary, with a session/account roll.
+- 2026-10-16, POST-HOP queue (do not start during H8):
+  - shift-count cast cleanup: `<< (int)(8)` -> `<< 8` for constant counts below the operand width (3597 sites in 448
+    files; validate identical IL; P1 + G review);
+  - the WaitGroup bubble sync (BOARD);
+  - the nugetgo rebuild wave;
+  - the version-line PLAN doc;
+  - the owed G BOARD rows.
 
 ### 1k.3 COORD's next steps, in order
 
