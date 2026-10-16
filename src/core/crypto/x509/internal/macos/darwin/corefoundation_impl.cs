@@ -7,7 +7,7 @@
 
 namespace go.crypto.x509.@internal;
 
-partial class macOS_package
+partial class macos_package
 {
     // syscall is Go's runtime·syscall_x509 (runtime/sys_darwin.go pushes it here by //go:linkname; the
     // body is runtime/sys_darwin_{amd64,arm64}.s): one call of a C function whose address `fn` is, taking
