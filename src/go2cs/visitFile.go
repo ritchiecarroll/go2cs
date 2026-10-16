@@ -80,6 +80,9 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// markEmptyInterfaceFuncLits)
 	v.markEmptyInterfaceFuncLits(file)
 
+	// Index the file's function declarations for methodSetConstraintNeeded
+	v.collectFileFuncDecls(file)
+
 	v.commentGroups = file.Comments
 
 	if v.options.includeComments {

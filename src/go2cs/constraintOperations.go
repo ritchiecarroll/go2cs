@@ -1461,6 +1461,15 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					// An embedded `comparable` is discounted for exactly the reason the bare-constraint
 					// arm above emits nothing for it: it is not expressible in C#, so it cannot be what
 					// makes an otherwise-method-set interface generic (see isMethodSetBeyondComparable).
+					//
+					// A FUNCTION's own type parameter keeps the clause only where its body uses the
+					// parameter as the interface (methodSetConstraintNeeded): a pointer type argument is
+					// golib's box, which cannot implement it, so an unneeded clause only refuses Go 1.26's
+					// errors.AsType[*DNSError] (CS0311).
+					if fn := v.currentGenericFunc(signature); fn != nil && !v.methodSetConstraintNeeded(fn, i) {
+						continue
+					}
+
 					constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s", v.newline, v.indent(v.indentLevel), typeParamNames[i], convertToCSTypeName(constraintName)))
 					continue
 				} else {

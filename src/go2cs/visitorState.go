@@ -549,6 +549,10 @@ type Visitor struct {
 	// any position (see markEmptyInterfaceFuncLits). convFuncLit then states the declared result type.
 	emptyInterfaceFuncLits map[*ast.FuncLit]bool
 
+	// fileFuncDecls is the current file's function declarations by object (collectFileFuncDecls), for
+	// the recursive callee question methodSetConstraintNeeded asks.
+	fileFuncDecls map[*types.Func]*ast.FuncDecl
+
 	// untypedConstContexts maps an UNTYPED constant subexpression to the resolved type of its
 	// enclosing typed constant expression — the context go/types drops when it leaves constant
 	// operands untyped (see markUntypedConstContexts). convBasicLit consults it for the F/D
