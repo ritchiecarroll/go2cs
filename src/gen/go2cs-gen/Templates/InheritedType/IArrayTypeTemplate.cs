@@ -76,8 +76,8 @@ internal static class IArrayTypeTemplate
                 // Forwards the CONCRETE struct enumerator, not IEnumerator<(nint, T)>: `foreach` binds
                 // GetEnumerator by pattern, so a named array type ranges with zero heap traffic exactly
                 // like the array<T> it wraps. Returning the interface here would box on every loop entry.
-                // IArray<T> -> IEnumerable<(nint, T)> still needs the interface member, so it becomes
-                // explicit — the boxing path, taken only when a consumer asks for the interface.
+                // IArray<T> declares its own GetEnumerator() over (nint, T), so that member becomes explicit
+                // — the boxing path, taken only when a consumer asks for the interface.
                 public global::go.array<{{targetTypeName}}>.Enumerator GetEnumerator() => Value.GetEnumerator();
 
                 global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> global::go.IArray<{{targetTypeName}}>.GetEnumerator() => ((global::go.IArray<{{targetTypeName}}>)Value).GetEnumerator();
