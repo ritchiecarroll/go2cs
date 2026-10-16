@@ -74,7 +74,7 @@ namespace go;
 /// each process was seen 109 times of 109. Only code outside the standard library reaches this path.
 /// </para>
 /// </remarks>
-public static unsafe class NativeStructMarshal
+public static unsafe partial class NativeStructMarshal
 {
     /// <summary>The raw call the keystone runs once the arguments are final.</summary>
     public delegate (uintptr r1, uintptr r2, uintptr errno) Syscall6Invoker(uintptr num, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
