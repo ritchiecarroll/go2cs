@@ -204,6 +204,24 @@ public static class PointerExtensions
         if (PrefixProjection<T, TDst>.Project is { } project && project(box) is { } projected)
             return projected;
 
+        // Go's PREFIX-DOWNCAST over a FIRST-FIELD VIEW — unique's canonMap stores every node as `&e.node` or
+        // `&i.node` and casts it back, `(*entry[T])(unsafe.Pointer(n))`. In Go the larger object is behind the
+        // pointer, and here it is too: the view's source is the parent box, at Go offset 0. Hand that box back
+        // (walking out through nested views that each sit at offset 0), so the downcast IS the parent pointer
+        // and a write through either is seen through the other. Nothing is allocated or pinned: the parent
+        // already exists and keeps its own storage and lifetime. A view whose offset-0 chain reaches no box of
+        // the destination type, where the destination embeds the source as its first field, has no such object
+        // behind it; the address route would read past the header, so it panics by name instead. A box that is
+        // NOT a view keeps the routes below exactly as before (internal/abi's synthesized descriptors among them).
+        // The arm is gated on the static PrefixChain pair, so the JIT folds it out of every other reinterpret.
+        if (PrefixChain<T, TDst>.Value && box is IFirstFieldView view)
+        {
+            if (FirstFieldParentOf<TDst>(view) is { } parent)
+                return parent;
+
+            throw RuntimeErrorPanic.InvalidPrefixDowncast(GoReflect.GoTypeName(typeof(TDst)), GoReflect.GoTypeName(typeof(T)));
+        }
+
         // A Go slice HEADER read over a golib slice<X> — `(*slice)(unsafe.Pointer(&b))`, emitted as
         // Reinterpret<slice<X>, Δsliceᴛ>(). Not an aliasing pair (five fields and a T[] against a pointer
         // and two integers) and not pinnable, so the address route below minted a NativeBox over the
@@ -323,6 +341,51 @@ public static class PointerExtensions
         internal static readonly bool Value =
             RuntimeHelpers.IsReferenceOrContainsReferences<T>() &&
             !RuntimeHelpers.IsReferenceOrContainsReferences<TDst>();
+    }
+
+    // The parent a first-field view's offset-0 chain reaches, when one of them is a box of the destination
+    // type: `&e.node` answers `e`; `&p.second.node` answers the `p.second` view, never `p`.
+    private static ж<TDst>? FirstFieldParentOf<TDst>(IFirstFieldView view)
+    {
+        for (object? parent = view.FirstFieldParent; parent is not null; parent = (parent as IFirstFieldView)?.FirstFieldParent)
+        {
+            if (parent is ж<TDst> found)
+                return found;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Whether <typeparamref name="TDst"/> is a Go struct whose offset-0 FIRST-field chain reaches
+    /// <typeparamref name="T"/>: the prefix-embed shape, <c>type entry struct { node; ... }</c>, and its nesting
+    /// (<c>type pair struct { first entry; ... }</c> reaches <c>node</c> too). Only such a pair can be Go's prefix
+    /// downcast, so only it pays the view check; a static readonly bool lets the tier-1 JIT drop the arm for every
+    /// other pair.
+    /// </summary>
+    internal static class PrefixChain<T, TDst>
+    {
+        internal static readonly bool Value = Reaches(typeof(T), typeof(TDst));
+
+        private static bool Reaches(Type source, Type destination)
+        {
+            // A struct's first Go field is inline at offset 0; a pointer embed (a ж<X> box) is not, so the chain stops there.
+            // A primitive reads back as its own single field (Int32's m_value), so a field of the type it sits in ends it too.
+            Type current = destination;
+
+            for (int depth = 0; depth < 16 && current != source && current.IsValueType; depth++)
+            {
+                if (GoReflect.GoFields(current) is not [var first, ..] || first.Type == current)
+                    return false;
+
+                if (first.Type == source)
+                    return true;
+
+                current = first.Type;
+            }
+
+            return false;
+        }
     }
 
     /// <summary>
