@@ -26992,4 +26992,91 @@ pointer method set implements it. Owner G; no seat until a C# consumer needs it.
 
 — G
 
+## 2026-10-15 — G: `runtime/pprof.pprof_goroutineLeakProfileWithLabels` stays a stub, because nothing can reach it and a forwarder would answer a fabricated 0 — BY DESIGN, no seat (COORD)
+
+Go 1.26 added a second goroutine-profile pull, `pprof_goroutineLeakProfileWithLabels`, beside
+`pprof_goroutineProfileWithLabels`. The older pull is a row in the curated `linknameForwardTargets` whitelist
+(`visitFuncDecl.go`, A9). That one row gives the consumer its forwarder and also makes runtime emit its one-arg handle
+public (the same map is read in `linknameOperations.go`). The new pull has no row, so runtime's push is `internal` and
+runtime/pprof keeps a bodiless partial stub. This is the curated pull rule, not class 5's var alias storage.
+
+No row is added, for these reasons (go1.26.9 source and the corpus):
+
+1. The only caller, `writeGoroutineLeak`, calls `runtime_goroutineLeakGC()` before the fetch, at every `debug` level.
+   That function is a push row with a recorded reason in `linknamePushTargets`: the pushed body spins on
+   `work.goroutineLeak.pending`, which only a leak-detecting GC cycle clears, and the managed collector never runs one.
+   It panics by name, so every leak-profile call stops one call before this symbol.
+2. `profiles.m` registers `"goroutineleak"` only under `goexperiment.GoroutineLeakProfile`. The corpus converts
+   `exp_goroutineleakprofile_off`, so `Lookup("goroutineleak")` is nil, and net/http/pprof checks the same flag.
+3. The only caller in the corpus is pprof's in-package `TestGoroutineLeakProfileConcurrency`, through the package var.
+   It expects 3 detected leaks, which the managed model cannot produce, so it refuses by name whatever this pull does.
+4. If the pull were reachable, the forwarded body would return `work.goroutineLeak.count`, which nothing in the managed
+   model ever sets. That is the fabricated 0 its sibling push row `runtime_goroutineleakcount` already refuses by name.
+
+A plausible answer is better than a refusal only when it is true. The pull, `runtime_goroutineLeakGC` and
+`runtime_goroutineleakcount` move together, and only if the managed model ever gains goroutine leak detection. The i9
+census row for this symbol is PREDICTED with this reason and is not a work item.
+
+— G (H8, measured 2026-10-15 at `f4cba85535`; COORD ruled no seat)
+
+## 2026-10-16 — G: the comment-parity census reads a blank line before a FOLDED statement as unmapped, because its matcher strips the `/* <Go text> */` the fold keeps — OPEN, owner open (post-hop census seat)
+
+`internal/commentcensus` maps a Go blank line inside a function body by finding the next C# line whose CODE holds
+every Go identifier of the next Go line. Comments are stripped before that match. When the converter folds a constant
+expression to Go's value with the Go text beside it, as `/* maxUint64 / 5 */ 3689348814741910323UL`, the identifiers
+it folded away live only in that comment. The blank line is still in the C#, but the census cannot anchor it. It
+counts the Go blank as `body:go-blank-unmapped` and the C# blank as `body:extra:unexplained`.
+
+Measured at the H8 constant-fold seat (`0c66151af3`, landed at `492a2d51d0`). It moved go/doc/comment's `isPunct`, where
+`mask` now appears only in `/* mask >> 64 */ 0UL`, by +1 in each class, and the seat's baseline took that +1 with its
+derivation. Four sibling functions in the same file (`maskᶜ` … `maskᶜ3`) were already in the class: their masks are
+folded with no comment at all.
+
+The fix is to read a line's TRAILING block comments as identifiers for this match. It was measured and NOT taken in
+that seat, because it reclassifies 257 blanks corpus-wide at go1.26.9:
+
+| class | change |
+|---|---|
+| `body:go-blank-unmapped` | −257 |
+| `body:extra:unexplained` | −123 |
+| `body:extra:after-named-result-locals` | −1 |
+| `body:go-blank-cs-none` | **+132** |
+
+The +132 is the reading this row owes. Each one is a Go blank line the census can now see with no C# blank before
+the statement it maps to. Each is either a real spacing defect that the unmapped class was hiding, or a false anchor
+from a trailing block comment that is not a fold annotation (`/* iota */`, `/*dyn*/`). Narrowing the read to the fold
+idiom (a comment directly before a numeric literal) and sampling the +132 decides which. The census change and its
+baseline rewrite then land together, with the per-class reading in the commit.
+
+— G (measured 2026-10-16; COORD: write the row, owner open)
+
+## 2026-10-16 — G: `print`/`println` of a TYPE-PARAMETER value would print its `String()` where Go prints the raw value, once the ToString seat lands — KNOWN GAP, 1 corpus site, 0 affected instantiations (owner open)
+
+C1's ToString seat (`claude/c1-tostring-forward`, not yet landed at `4cd99e2630`) makes a converted Go value's C#
+`ToString()` its Go `%v` text: `Error()`, else `String()`. Go's `print`/`println` never call those methods.
+`println(time.Second)` prints `1000000000`. The seat keeps that for the shapes the converter can see. A NAMED basic
+argument whose value method set holds `Error`/`String` is passed as its underlying value (`printArgRawType`,
+convCallExpr.go), and a pointer prints its address through golib's `IPrintPointer`.
+
+**The gap.** `printArgRawType` keys on `*types.Named`. An argument whose static type is a TYPE PARAMETER is not one,
+so it is passed as written. golib's printer then falls through to `arg.ToString()`, which the seat makes the Go
+method text. At an instantiation whose type argument is a named type with `String()` or `Error()`, the C# would
+print the method text where Go prints the raw value.
+
+**Measured** with go/types over std plus its tests, at go1.26.9, on windows, linux and darwin. Each target has
+roughly 760 to 790 universe `print`/`println` calls. Exactly ONE takes a type-parameter argument: runtime's
+`export_test.go` `DumpPrint[T any](v T)`, which calls `print(v)`. Its four callers in `print_test.go` (the
+`FuzzPrint{Float64,Float32,Complex128,Complex64}` targets) instantiate it with `float64`, `float32`, `complex128` and
+`complex64`. None is a named type with a method, so today no instantiation reaches the gap. The control shape, a
+named basic argument with a `String()`/`Error()` value method, counts 2 per target. That is the shape the seat folds
+to its raw value.
+
+**The fix, when an instantiation needs one,** is at run time and not in the converter. The static type is a
+parameter, so only the instantiation knows whether the value has a method. golib's printer would print a converted
+Go value by its RAW form, the underlying value of a named basic as Go's `print` writes it, rather than by
+`ToString()`. The converter-side alternative of casting a type-parameter argument to an underlying type has no type
+to cast to.
+
+— G (measured 2026-10-16 with a go/types census of `print`/`println` arguments; COORD: record before the seat lands)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

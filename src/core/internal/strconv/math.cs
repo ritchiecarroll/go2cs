@@ -111,28 +111,28 @@ internal static UntypedInt maxUint64 => /* 1<<64 - 1 */ 18446744073709551615;
 
 // div5Tab[p-1] is the multiplicative inverse of 5^p and maxUint64/5^p.
 internal static array<array<uint64>> div5Tab = new array<uint64>[]{
-    new uint64[]{0xcccccccccccccccdUL, maxUint64 / 5}.array(),
-    new uint64[]{0x8f5c28f5c28f5c29UL, (uint64)(3689348814741910323L / 5)}.array(),
-    new uint64[]{0x1cac083126e978d5UL, (uint64)(737869762948382064L / 5)}.array(),
-    new uint64[]{0xd288ce703afb7e91UL, (uint64)(147573952589676412L / 5)}.array(),
-    new uint64[]{0x5d4e8fb00bcbe61dUL, (uint64)(29514790517935282L / 5)}.array(),
-    new uint64[]{0x790fb65668c26139UL, (uint64)(5902958103587056L / 5)}.array(),
-    new uint64[]{0xe5032477ae8d46a5UL, (uint64)(1180591620717411L / 5)}.array(),
-    new uint64[]{0xc767074b22e90e21UL, (uint64)(236118324143482L / 5)}.array(),
-    new uint64[]{0x8e47ce423a2e9c6dUL, (uint64)(47223664828696L / 5)}.array(),
-    new uint64[]{0x4fa7f60d3ed61f49UL, (uint64)(9444732965739L / 5)}.array(),
-    new uint64[]{0x0fee64690c913975UL, (uint64)(1888946593147L / 5)}.array(),
-    new uint64[]{0x3662e0e1cf503eb1UL, (uint64)(377789318629L / 5)}.array(),
-    new uint64[]{0xa47a2cf9f6433fbdUL, (uint64)(75557863725L / 5)}.array(),
-    new uint64[]{0x54186f653140a659UL, (uint64)(15111572745L / 5)}.array(),
-    new uint64[]{0x7738164770402145UL, (uint64)(3022314549L / 5)}.array(),
-    new uint64[]{0xe4a4d1417cd9a041UL, (uint64)(3022314549L / 5 / 5)}.array(),
-    new uint64[]{0xc75429d9e5c5200dUL, (uint64)(3022314549L / 5 / 5 / 5)}.array(),
-    new uint64[]{0xc1773b91fac10669UL, (uint64)(3022314549L / 5 / 5 / 5 / 5)}.array(),
-    new uint64[]{0x26b172506559ce15UL, (uint64)(3022314549L / 5 / 5 / 5 / 5 / 5)}.array(),
-    new uint64[]{0xd489e3a9addec2d1UL, (uint64)(3022314549L / 5 / 5 / 5 / 5 / 5 / 5)}.array(),
-    new uint64[]{0x90e860bb892c8d5dUL, (uint64)(3022314549L / 5 / 5 / 5 / 5 / 5 / 5 / 5)}.array(),
-    new uint64[]{0x502e79bf1b6f4f79UL, (uint64)(3022314549L / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5)}.array()
+    new uint64[]{0xcccccccccccccccdUL, /* maxUint64 / 5 */ 3689348814741910323UL}.array(),
+    new uint64[]{0x8f5c28f5c28f5c29UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL}.array(),
+    new uint64[]{0x1cac083126e978d5UL, /* maxUint64 / 5 / 5 / 5 */ 147573952589676412UL}.array(),
+    new uint64[]{0xd288ce703afb7e91UL, /* maxUint64 / 5 / 5 / 5 / 5 */ 29514790517935282UL}.array(),
+    new uint64[]{0x5d4e8fb00bcbe61dUL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 */ 5902958103587056UL}.array(),
+    new uint64[]{0x790fb65668c26139UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 */ 1180591620717411UL}.array(),
+    new uint64[]{0xe5032477ae8d46a5UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 236118324143482UL}.array(),
+    new uint64[]{0xc767074b22e90e21UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 47223664828696UL}.array(),
+    new uint64[]{0x8e47ce423a2e9c6dUL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 9444732965739UL}.array(),
+    new uint64[]{0x4fa7f60d3ed61f49UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 1888946593147UL}.array(),
+    new uint64[]{0x0fee64690c913975UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 377789318629UL}.array(),
+    new uint64[]{0x3662e0e1cf503eb1UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 75557863725UL}.array(),
+    new uint64[]{0xa47a2cf9f6433fbdUL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 15111572745UL}.array(),
+    new uint64[]{0x54186f653140a659UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 3022314549UL}.array(),
+    new uint64[]{0x7738164770402145UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 604462909UL}.array(),
+    new uint64[]{0xe4a4d1417cd9a041UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 120892581UL}.array(),
+    new uint64[]{0xc75429d9e5c5200dUL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 24178516UL}.array(),
+    new uint64[]{0xc1773b91fac10669UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 4835703UL}.array(),
+    new uint64[]{0x26b172506559ce15UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 967140UL}.array(),
+    new uint64[]{0xd489e3a9addec2d1UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 193428UL}.array(),
+    new uint64[]{0x90e860bb892c8d5dUL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 38685UL}.array(),
+    new uint64[]{0x502e79bf1b6f4f79UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 7737UL}.array()
 }.array();
 
 // trimZeros trims trailing zeros from x.
@@ -160,10 +160,10 @@ internal static (uint64, nint) trimZeros(uint64 x) {
     // Assert that the multiplicative inverses are correct
     // by checking that (div1eNm * 5^N) % 1<<64 == 1.
     array<EmptyStruct> assert = new(1);
-    _ = assert[(div1e8m * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5) % ((1 << (int)(64))) - 1];
-    _ = assert[(div1e4m * 5 * 5 * 5 * 5) % ((1 << (int)(64))) - 1];
-    _ = assert[(div1e2m * 5 * 5) % ((1 << (int)(64))) - 1];
-    _ = assert[(div1e1m * 5) % ((1 << (int)(64))) - 1];
+    _ = assert[(nint)(/* (div1e8m*5*5*5*5*5*5*5*5)%(1<<64) - 1 */ 0L)];
+    _ = assert[(nint)(/* (div1e4m*5*5*5*5)%(1<<64) - 1 */ 0L)];
+    _ = assert[(nint)(/* (div1e2m*5*5)%(1<<64) - 1 */ 0L)];
+    _ = assert[(nint)(/* (div1e1m*5)%(1<<64) - 1 */ 0L)];
 
     // Cut 8 zeros, then 4, then 2, then 1.
     nint p = 0;

@@ -388,6 +388,7 @@
     <None Include="$(MSBuildThisFileDirectory)packageInitTestHook_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageStateOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)partialInstantiationAnonymousTypeArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)perUnitAliasRenames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformEmit.go" />
     <None Include="$(MSBuildThisFileDirectory)platformFilterSkip_test.go" />
@@ -520,6 +521,8 @@
     <None Include="$(MSBuildThisFileDirectory)untypedConstAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedConstOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedInterfaceFuncLit_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)untypedIntConstFold.go" />
+    <None Include="$(MSBuildThisFileDirectory)untypedIntConstFold_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedOperands.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedPackageConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedRegionShapes_test.go" />

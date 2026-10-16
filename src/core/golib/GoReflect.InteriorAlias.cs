@@ -154,6 +154,8 @@ public static partial class GoReflect
 
                 case Array:
                 {
+                    dims ??= DeclaredArrayDims(nodeType);
+
                     if (dims is not { Length: > 0 } || dims[0] < 0 || ElementType(nodeType) is not { } elemType)
                     {
                         shape += " refused: unknown-dims array";

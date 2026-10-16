@@ -845,6 +845,7 @@
     <Project Path="tests/Behavioral/ParenthesizedConcatContext/ParenthesizedConcatContext.csproj" />
     <Project Path="tests/Behavioral/ParenthesizedTypeAssertion/ParenthesizedTypeAssertion.csproj" />
     <Project Path="tests/Behavioral/ParenTypeConversionCall/ParenTypeConversionCall.csproj" />
+    <Project Path="tests/Behavioral/PartialInstantiationAnonymousTypeArg/PartialInstantiationAnonymousTypeArg.csproj" />
     <Project Path="tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
     <Project Path="tests/Behavioral/Phase5Breakpoint/Phase5Breakpoint.csproj" />
     <Project Path="tests/Behavioral/Phase5CoverageAPIs/Phase5CoverageAPIs.csproj" />
@@ -1099,6 +1100,7 @@
     <Project Path="tests/Behavioral/UnicodeConsoleOutput/UnicodeConsoleOutput.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerWordRead/UnsafePointerWordRead.csproj" />
     <Project Path="tests/Behavioral/UntypedFloatTypedCompare/UntypedFloatTypedCompare.csproj" />
+    <Project Path="tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/UntypedIntInterfaceBox/UntypedIntInterfaceBox.csproj" />
     <Project Path="tests/Behavioral/UntypedNestedSliceComposite/UntypedNestedSliceComposite.csproj" />
     <Project Path="tests/Behavioral/UnnamedMapNilConversion/UnnamedMapNilConversion.csproj" />
