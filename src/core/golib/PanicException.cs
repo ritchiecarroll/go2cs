@@ -72,9 +72,12 @@ public class PanicException(object? state, Exception? innerException = null) :
     /// .NET type name. Both are why the method set is probed, not merely the interface.
     /// </para>
     /// <para>
-    /// The <c>Stringer</c> arm is not redundant with <c>ToString()</c>. A Go named type's generated
-    /// <c>ToString()</c> forwards to its UNDERLYING value (go2cs-gen's InheritedTypeTemplate), so
-    /// <c>panic(2 * time.Second)</c> would print <c>2000000000</c> where Go prints <c>2s</c>. The
+    /// The <c>Stringer</c> arm is not redundant with <c>ToString()</c>, although a converted value's
+    /// <c>ToString()</c> now returns the same text (<see cref="GoMethodText"/>): <c>ToString()</c> turns a
+    /// panicking method into fmt's <c>%!v(PANIC=…)</c> text, where Go's runtime reports
+    /// <c>panic while printing panic value</c>, and only a direct call lets the catch below see the
+    /// panic. Before that forward, a named type's <c>ToString()</c> printed its underlying value, so
+    /// <c>panic(2 * time.Second)</c> printed <c>2000000000</c> where Go prints <c>2s</c>. The
     /// method is found the way golib's <c>error&lt;T&gt;</c> finds <c>Error</c> — through the
     /// extension-method registry, which is where a converted Go method lives.
     /// </para>

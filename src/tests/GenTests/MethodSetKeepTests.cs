@@ -152,4 +152,24 @@ public class MethodSetKeepTests
         CollectionAssert.AreEqual(new[] { "go.mtest_package.Kind", "go.mtest_package.P", "go.mtest_package.S", "go.ж<go.mtest_package.P>" }, stringReceivers,
             "the kept name covers every receiver form, the twin included: " + string.Join(", ", stringReceivers));
     }
+
+    [TestMethod]
+    public void EachGoTypesToStringForwardsToItsGoText()
+    {
+        // The ONE generated ToString is a Go value's %v text: golib's GoMethodText answers its Error(), else its String(),
+        // from the method set at run time (which includes the generator's own promoted forwarders), and the structural
+        // text is the fallback. The dependency lines MethodSetKeep anchors on that same line still precede it.
+        (Dictionary<string, string> generated, _, _) = Run();
+
+        foreach (string name in (string[])["Kind", "S", "P", "Plain"])
+        {
+            string source = generated.Single(pair => pair.Key.EndsWith($".{name}.g.cs", StringComparison.Ordinal)).Value;
+            string[] toStrings = source.Split('\n').Where(line => line.Contains("public override string ToString()")).ToArray();
+
+            Assert.AreEqual(1, toStrings.Length, $"{name} has exactly one generated ToString");
+            StringAssert.Contains(toStrings[0], "=> global::go.GoMethodText.Of(this) ?? ", $"{name}'s ToString forwards to its Go text: {toStrings[0].Trim()}");
+        }
+
+        CollectionAssert.AreEqual(new[] { "String", "size" }, KeptOnToString(generated, "S"), "the keep still sits on the forwarding ToString");
+    }
 }
