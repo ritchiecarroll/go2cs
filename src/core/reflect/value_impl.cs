@@ -164,10 +164,15 @@ internal static any /*i*/ valueInterface(ΔValue v, bool safe) {
 // marshal path, all of which call TypeAssert. The descriptor compare would also have read a dimless
 // TypeFor[[2]int]() against a value-built [2]int as different types.
 //
-// The value is the Value's live object (packInterfaceValue, the same one Interface() answers, with no allocation
-// for a concrete T), and the assertion is golib's ordinary Go type assertion. Go's own two preconditions come
-// first, with TypeAssert's texts: an invalid Value, and a read-only one (Go refuses those before Interface()
-// would, under its own name).
+// Go's own two preconditions come first, with TypeAssert's texts: an invalid Value, and a read-only one (Go refuses
+// those before Interface() would, under its own name). The general answer is the Value's interface value
+// (valueInterface, the one Interface() answers) asserted by golib's ordinary Go type assertion. Two arms keep Go's
+// ALLOCATION profile, which reflect's TestTypeAssertAllocs measures. An addressable Value's interface value is a
+// fresh box per read, which Go does not pay:
+//   - a CONCRETE T reads the slot itself, `ж<T>.Value`, or unboxes the stored value. Anything else takes the
+//     general answer, so a match is never decided on the C# type alone;
+//   - an INTERFACE T over a concrete Value decides on the TYPE first (builtin.TypeImplements, the cached method-set
+//     probe `_<T>` itself uses). That is Go's nil-data eface probe, so a failing assertion allocates nothing.
 public static (T, bool) TypeAssert<T>(ΔValue v) {
     if (v.flag == 0) {
         throw panic(Ꮡ(new ValueError("reflect.TypeAssert"u8, Invalid)));
@@ -177,6 +182,19 @@ public static (T, bool) TypeAssert<T>(ΔValue v) {
     }
     if ((flag)(v.flag & flagMethod) != 0) {
         v = makeMethodValue("TypeAssert"u8, v);
+    }
+    if (v.kind() != ΔInterface && typeof(T) != typeof(object)) {
+        if (!typeof(T).IsInterface) {
+            if (v.addrBox is ж<T> box) {
+                return (box.Value, true);
+            }
+            if (v.addrBox is null && v.boxed is T value) {
+                return (value, true);
+            }
+        }
+        else if (!global::go.builtin.TypeImplements<T>(v.typ_ == nil ? null : v.typ_.Value.sysType)) {
+            return (default!, false);
+        }
     }
     return valueInterface(v, false)._<T>(ᐧ);
 }
