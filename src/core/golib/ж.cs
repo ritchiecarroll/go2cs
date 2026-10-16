@@ -760,6 +760,9 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             return (nuint)slot;
     }
 
+    // The deep funnel's pointer-field word (NativeStructMarshal.CallDeep): the same conversion a syscall argument takes.
+    unsafe nuint IGoReflectBox.NativeArgumentAddress() => (nuint)(uintptr)this;
+
     void IGoReflectBox.WriteBoxSlot(object? value)
     {
         if (IsNilPointer)
