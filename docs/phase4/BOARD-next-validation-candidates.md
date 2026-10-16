@@ -26978,4 +26978,18 @@ message. A census of Go 1.26 non-test sources finds exactly 2 intrinsic-placehol
 
 — G (finding), COORD (ruling)
 
+## 2026-10-15 — G: a converted generic function emits `where T : I` only where it needs it, so a hand-written C# caller of `errors.AsType<T>` gets a run-time miss, not a compile error — RECORDED, no seat
+
+Since `b07edf813c` (H7 pass-6 class A), a converted generic function emits a method-set constraint clause
+(`where T : I`) only where its body or signature uses T as I. The consequence is for HAND-WRITTEN C# callers, such as
+of `errors.AsType<T>`: the compiler no longer refuses a T outside Go's constraint, so a wrong T fails at run time (an
+assertion that never matches) instead of at compile time. Converted Go callers are unaffected, because Go's checker
+validated every instantiation before conversion.
+
+This is the right trade at the hop: the clause it drops is the one a pointer type argument (golib's `ж<T>`) can never
+satisfy. The post-hop alternative that would restore the check is a C# shape in which `ж<T>` satisfies I whenever T's
+pointer method set implements it. Owner G; no seat until a C# consumer needs it.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
