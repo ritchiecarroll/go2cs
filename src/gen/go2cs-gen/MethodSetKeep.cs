@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -46,7 +47,7 @@ internal static class MethodSetKeep
     /// </summary>
     public static string OnToString(string generatedSource, INamedTypeSymbol? type)
     {
-        if (type is null || type.IsGenericType || Dependencies(type) is not { Count: > 0 } dependencies)
+        if (type is null || type.IsGenericType || Dependencies(type, generatedSource) is not { Count: > 0 } dependencies)
             return generatedSource;
 
         int site = generatedSource.IndexOf(ToStringDeclaration, StringComparison.Ordinal);
@@ -80,7 +81,7 @@ internal static class MethodSetKeep
     // a sealed interface's unexported marker method (go/ast's exprNode) is answered by this scan when no nominal adapter
     // exists. Keeping exported methods only measured +1.81 MB on the full-trim consumer against +5.13 MB for all; that is
     // a recorded future optimization in PLAN-golib-full-trim.md, gated on a census.
-    private static List<string> Dependencies(INamedTypeSymbol type)
+    private static List<string> Dependencies(INamedTypeSymbol type, string generatedSource)
     {
         List<string> dependencies = [];
         INamedTypeSymbol? package = type.ContainingType;
@@ -96,11 +97,26 @@ internal static class MethodSetKeep
             if (!method.IsExtensionMethod || method.IsGenericMethod || method.Parameters.Length == 0 || !IsReceiver(method.Parameters[0].Type, type))
                 continue;
 
-            dependencies.Add($"[global::System.Diagnostics.CodeAnalysis.DynamicDependency({SymbolDisplay.FormatLiteral(method.MetadataName, true)}, {GeneratedPartials.TypeOf(package)})]");
+            dependencies.Add(Dependency(method.MetadataName, package));
         }
+
+        // The methods this generator writes into the type's OWN part: the forwarders of methods promoted through an
+        // embedded field, and their box twins (StructTypeTemplate.PromotedStructReceivers). No generator sees its own
+        // output through the compilation, so package.GetMembers() above cannot list them, yet a struct whose Error or
+        // String arrives ONLY by promotion is printed through exactly one of them (golib's GoMethodText binds it from
+        // the run-time method set). They sit in the package class, as extension methods over this type or its box.
+        foreach (Match forwarder in s_generatedReceiver.Matches(generatedSource))
+            dependencies.Add(Dependency(forwarder.Groups["name"].Value.TrimStart('@'), package));
 
         return dependencies.Distinct().ToList();
     }
+
+    private static string Dependency(string metadataName, INamedTypeSymbol package) =>
+        $"[global::System.Diagnostics.CodeAnalysis.DynamicDependency({SymbolDisplay.FormatLiteral(metadataName, true)}, {GeneratedPartials.TypeOf(package)})]";
+
+    // A generated extension-method declaration on one line: `static <return type> <Name>[<type parameters>](this `. The
+    // return type may itself hold parentheses (a tuple), so the name is the identifier directly before `(this `.
+    private static readonly Regex s_generatedReceiver = new(@"\bstatic\s[^\r\n]*?(?<name>@?[\p{L}_][\p{L}\p{Mn}\p{Mc}\p{Nd}\p{Pc}]*)(?:<[^>\r\n]*>)?\(this\s", RegexOptions.CultureInvariant);
 
     private static bool IsReceiver(ITypeSymbol receiver, INamedTypeSymbol type) =>
         SymbolEqualityComparer.Default.Equals(receiver, type) ||

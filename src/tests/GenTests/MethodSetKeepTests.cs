@@ -44,6 +44,12 @@ public class MethodSetKeepTests
 
             public partial struct Plain { public nint n; }
 
+            public partial struct Inner { public nint n; }
+
+            public partial struct Outer { public partial ref Inner Inner { get; } }
+
+            public static @string Error(this Inner e) => "inner"u8;
+
             public static @string String(this Kind k) => "kind"u8;
 
             public static @string String(this S s) => "ess"u8;
@@ -151,6 +157,21 @@ public class MethodSetKeepTests
 
         CollectionAssert.AreEqual(new[] { "go.mtest_package.Kind", "go.mtest_package.P", "go.mtest_package.S", "go.ж<go.mtest_package.P>" }, stringReceivers,
             "the kept name covers every receiver form, the twin included: " + string.Join(", ", stringReceivers));
+    }
+
+    [TestMethod]
+    public void APromotionOnlyMethodIsKeptOnTheEmbeddingTypesToString()
+    {
+        // Outer's Error() exists ONLY as the forwarder the generator writes for the method promoted from its embedded
+        // Inner, which nothing in the package declares on Outer. golib's GoMethodText prints an Outer through that
+        // forwarder, so under a full trim its metadata must be kept exactly like a declared method's.
+        (Dictionary<string, string> generated, _, _) = Run();
+
+        string outer = generated.Single(pair => pair.Key.EndsWith(".Outer.g.cs", StringComparison.Ordinal)).Value;
+
+        StringAssert.Contains(outer, "Error(this Outer", "the fixture: the generator writes Outer's promoted Error forwarder");
+        CollectionAssert.Contains(KeptOnToString(generated, "Outer"), "Error", "the promoted forwarder is kept on Outer's ToString");
+        CollectionAssert.AreEqual(new[] { "Error" }, KeptOnToString(generated, "Inner"), "the declaring type keeps its own method");
     }
 
     [TestMethod]
