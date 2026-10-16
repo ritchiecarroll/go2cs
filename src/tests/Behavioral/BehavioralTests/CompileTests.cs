@@ -1125,6 +1125,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMathHugeArgReduction() => CheckTarget("MathHugeArgReduction");
 
     [TestMethod]
+    public void CheckMemProfileAllocFrames() => CheckTarget("MemProfileAllocFrames");
+
+    [TestMethod]
     public void CheckMethodExprDotImport() => CheckTarget("MethodExprDotImport");
 
     [TestMethod]

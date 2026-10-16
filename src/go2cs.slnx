@@ -686,6 +686,7 @@
     <Project Path="tests/Behavioral/MapStringBytesLookup/MapStringBytesLookup.csproj" />
     <Project Path="tests/Behavioral/MathFloatBits/MathFloatBits.csproj" />
     <Project Path="tests/Behavioral/MathHugeArgReduction/MathHugeArgReduction.csproj" />
+    <Project Path="tests/Behavioral/MemProfileAllocFrames/MemProfileAllocFrames.csproj" />
     <Project Path="tests/Behavioral/MethodGroupGenericArg/MethodGroupGenericArg.csproj" />
     <Project Path="tests/Behavioral/MethodOnBoxedGlobalIndex/MethodOnBoxedGlobalIndex.csproj" />
     <Project Path="tests/Behavioral/MapSamePackageTypes/MapSamePackageTypes.csproj" />
