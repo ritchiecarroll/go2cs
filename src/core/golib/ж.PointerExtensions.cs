@@ -204,6 +204,24 @@ public static class PointerExtensions
         if (PrefixProjection<T, TDst>.Project is { } project && project(box) is { } projected)
             return projected;
 
+        // Go's PREFIX-DOWNCAST over a FIRST-FIELD VIEW — unique's canonMap stores every node as `&e.node` or
+        // `&i.node` and casts it back, `(*entry[T])(unsafe.Pointer(n))`. In Go the larger object is behind the
+        // pointer, and here it is too: the view's source is the parent box, at Go offset 0. Hand that box back
+        // (walking out through nested views that each sit at offset 0), so the downcast IS the parent pointer
+        // and a write through either is seen through the other. Nothing is allocated or pinned: the parent
+        // already exists and keeps its own storage and lifetime. A view whose offset-0 chain reaches no box of
+        // the destination type, where the destination embeds the source as its first field, has no such object
+        // behind it; the address route would read past the header, so it panics by name instead. A box that is
+        // NOT a view keeps the routes below exactly as before (internal/abi's synthesized descriptors among them).
+        if (box is IFirstFieldView view)
+        {
+            if (FirstFieldParentOf<TDst>(view) is { } parent)
+                return parent;
+
+            if (PrefixEmbeds<T, TDst>.Value)
+                throw new PanicException($"go2cs: prefix downcast to *{GoName(typeof(TDst))} over a *{GoName(typeof(T))} that is not the first field of a {GoName(typeof(TDst))}: there is no {GoName(typeof(TDst))} behind this pointer");
+        }
+
         // A Go slice HEADER read over a golib slice<X> — `(*slice)(unsafe.Pointer(&b))`, emitted as
         // Reinterpret<slice<X>, Δsliceᴛ>(). Not an aliasing pair (five fields and a T[] against a pointer
         // and two integers) and not pinnable, so the address route below minted a NativeBox over the
@@ -323,6 +341,40 @@ public static class PointerExtensions
         internal static readonly bool Value =
             RuntimeHelpers.IsReferenceOrContainsReferences<T>() &&
             !RuntimeHelpers.IsReferenceOrContainsReferences<TDst>();
+    }
+
+    // The parent a first-field view's offset-0 chain reaches, when one of them is a box of the destination
+    // type: `&e.node` answers `e`; `&p.second.node` answers the `p.second` view, never `p`.
+    private static ж<TDst>? FirstFieldParentOf<TDst>(IFirstFieldView view)
+    {
+        for (object? parent = view.FirstFieldParent; parent is not null; parent = (parent as IFirstFieldView)?.FirstFieldParent)
+        {
+            if (parent is ж<TDst> found)
+                return found;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Whether <typeparamref name="TDst"/> is a Go struct whose FIRST field (at Go offset 0) has type
+    /// <typeparamref name="T"/>: the prefix-embed shape, <c>type entry struct { node; ... }</c>, for which
+    /// a downcast over a view is checked rather than left to the address route.
+    /// </summary>
+    internal static class PrefixEmbeds<T, TDst>
+    {
+        internal static readonly bool Value =
+            typeof(TDst).IsValueType && typeof(TDst) != typeof(T) &&
+            GoReflect.GoFields(typeof(TDst)) is [var first, ..] && first.Type == typeof(T);
+    }
+
+    // A converted type's name as a Go reader knows it: the CLR generic arity suffix (`entry`1`) dropped.
+    private static string GoName(Type type)
+    {
+        string name = type.Name;
+        int tick = name.IndexOf('`');
+
+        return tick < 0 ? name : name[..tick];
     }
 
     /// <summary>
