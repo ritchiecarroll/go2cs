@@ -768,22 +768,35 @@ partial class time_package
         }
 
         object? sendLock = syncSendLock(timer);
+        bool wasPending;
+        bool wasHeaped;
 
         if (sendLock is null)
         {
-            return modifyLocked(timer, when, period, bumpSeq: false);
+            wasHeaped = wasPending = modifyLocked(timer, when, period, bumpSeq: false);
+        }
+        else
+        {
+            // Synchronous timer channel (runtime.timer.modify's !async && isChan path) — the same one
+            // critical section as stop above, and here the lock is load-bearing in a second way: the
+            // re-arm can make the timer due IMMEDIATELY, so without holding sendLock across the drain a
+            // fresh, legitimate tick could be produced and then discarded by this very drain.
+            lock (sendLock)
+            {
+                bool pending = modifyLocked(timer, when, period, bumpSeq: true);
+                bool revoked = timer.c.DrainBuffer();
+                wasHeaped = pending;
+                wasPending = pending || revoked;
+            }
         }
 
-        // Synchronous timer channel (runtime.timer.modify's !async && isChan path) — the same one
-        // critical section as stop above, and here the lock is load-bearing in a second way: the
-        // re-arm can make the timer due IMMEDIATELY, so without holding sendLock across the drain a
-        // fresh, legitimate tick could be produced and then discarded by this very drain.
-        lock (sendLock)
-        {
-            bool pending = modifyLocked(timer, when, period, bumpSeq: true);
-            bool revoked = timer.c.DrainBuffer();
-            return pending || revoked;
-        }
+        // A bubbled timer due as it is ADDED runs now, in this goroutine, once the send lock is free. Go's
+        // condition is `add && t.isFake && t.state&timerHeaped == 0 && when <= bubble.now`: a Reset of a
+        // timer still on the heap is left for the bubble's next check, as Go leaves it.
+        if (timer.fake is { } bubble && !wasHeaped && when <= bubble.Now)
+            runFakeTimerNow(timer, bubble);
+
+        return wasPending;
     }
 
     // The heap-side half of a modify: set the period and re-arm. Caller holds sendLock when
@@ -998,51 +1011,83 @@ partial class time_package
             }
 
             heap.Dequeue();
-
-            // runtime.timer.unlockAndRun: capture the callback, advance or clear `when`, and
-            // run the callback only after the lock is released. `delay` is how LATE the
-            // firing is (Go's `delay := now - t.when`, always >= 0); sendTime subtracts it
-            // to send the time the tick was scheduled for rather than the time it ran.
-            // `seq` is captured HERE, with the firing decision, exactly as Go's
-            // unlockAndRun copies t.seq while still holding t.mu — it is what the send
-            // below re-checks to discover a Stop/Reset that landed in between.
-            int64 delay = now - when;
-            due.Add((entry.timer, entry.timer.f, entry.timer.arg, delay, entry.timer.seq));
-            entry.timer.gen++;
-
-            // From here until the send resolves, this timer has a tick that exists but is
-            // in NEITHER place a Stop can look — `when` is about to be cleared and the
-            // buffer is still empty. `offered` is that third state, and recording it is
-            // what lets Stop/Reset answer `pending` correctly for a firing they are about
-            // to revoke. See COMMITTED-BUT-UNSENT on runtimeTimer.offered.
-            entry.timer.offered = sync && entry.timer.IsChan;
-
-            if (entry.timer.period > 0)
-            {
-                // Advance by WHOLE periods past a late firing, so the tick phase stays
-                // aligned to the original schedule instead of drifting — Go's documented
-                // "adjust the time interval or drop ticks to make up for slow receivers"
-                // (unlockAndRun: next = when + period*(1 + delay/period)). Combined with
-                // sendTime's non-blocking send onto the cap-1 channel, a receiver too slow
-                // to keep up therefore LOSES ticks rather than seeing them queue up or the
-                // ticker fall behind.
-                int64 next = when + entry.timer.period * (1 + delay / entry.timer.period);
-
-                if (next < 0)
-                {
-                    next = int64.MaxValue;
-                }
-
-                entry.timer.when = next;
-                heap.Enqueue((entry.timer, entry.timer.gen), next);
-            }
-            else
-            {
-                entry.timer.when = 0;
-            }
+            takeDueLocked(entry.timer, when, now, sync, due, heap);
         }
 
         return deadline;
+    }
+
+    // One due timer's half of the drain: queue its firing into `due` and advance or clear its `when`,
+    // re-arming a periodic timer on `heap`. Shared by the drain above and by a bubbled timer that is
+    // already due when it is armed (runFakeTimerNow). Caller holds s_timerLock and has taken the timer's
+    // entry off `heap` (or, for the run-now path, holds no live entry for it).
+    private static void takeDueLocked(runtimeTimer timer, int64 when, int64 now, bool sync,
+        List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due,
+        PriorityQueue<(runtimeTimer timer, int64 gen), int64> heap)
+    {
+        // runtime.timer.unlockAndRun: capture the callback, advance or clear `when`, and
+        // run the callback only after the lock is released. `delay` is how LATE the
+        // firing is (Go's `delay := now - t.when`, always >= 0); sendTime subtracts it
+        // to send the time the tick was scheduled for rather than the time it ran.
+        // `seq` is captured HERE, with the firing decision, exactly as Go's
+        // unlockAndRun copies t.seq while still holding t.mu — it is what the send
+        // below re-checks to discover a Stop/Reset that landed in between.
+        int64 delay = now - when;
+        due.Add((timer, timer.f, timer.arg, delay, timer.seq));
+        timer.gen++;
+
+        // From here until the send resolves, this timer has a tick that exists but is
+        // in NEITHER place a Stop can look — `when` is about to be cleared and the
+        // buffer is still empty. `offered` is that third state, and recording it is
+        // what lets Stop/Reset answer `pending` correctly for a firing they are about
+        // to revoke. See COMMITTED-BUT-UNSENT on runtimeTimer.offered.
+        timer.offered = sync && timer.IsChan;
+
+        if (timer.period > 0)
+        {
+            // Advance by WHOLE periods past a late firing, so the tick phase stays
+            // aligned to the original schedule instead of drifting — Go's documented
+            // "adjust the time interval or drop ticks to make up for slow receivers"
+            // (unlockAndRun: next = when + period*(1 + delay/period)). Combined with
+            // sendTime's non-blocking send onto the cap-1 channel, a receiver too slow
+            // to keep up therefore LOSES ticks rather than seeing them queue up or the
+            // ticker fall behind.
+            int64 next = when + timer.period * (1 + delay / timer.period);
+
+            if (next < 0)
+            {
+                next = int64.MaxValue;
+            }
+
+            timer.when = next;
+            heap.Enqueue((timer, timer.gen), next);
+        }
+        else
+        {
+            timer.when = 0;
+        }
+    }
+
+    // Go's timer.modify for a bubbled timer that is due as it is armed (go1.26.9 runtime/time.go:622-645):
+    // "run it now rather than waiting for the bubble's timer scheduler", in the arming goroutine, so a
+    // 0-duration timer's channel is readable at once and an AfterFunc(0, f) starts f while its creator
+    // runs on. Waiting for Run to fire it deferred it until the bubble was durably blocked, which never
+    // comes for a creator that spins. Called with no lock held; the send lock is free, as Go unlocks it
+    // before unlockAndRun.
+    private static void runFakeTimerNow(runtimeTimer timer, SyncTestBubble bubble)
+    {
+        List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due = new();
+        bool sync = !asyncTimerChan();
+        int64 now = bubble.Now;
+
+        lock (s_timerLock)
+        {
+            // Still armed and still due: a racing Stop or Reset since the arm has moved `when`.
+            if (timer.when > 0 && timer.when <= now)
+                takeDueLocked(timer, timer.when, now, sync, due, fakeHeapOf(bubble));
+        }
+
+        fireDue(due, sync);
     }
 
     // The service loop's delivery of the drained firings, outside every lock -- shared the same way.
