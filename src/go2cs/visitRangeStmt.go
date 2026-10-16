@@ -346,40 +346,32 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		valExpr = "_"
 	}
 
-	// A heap-boxed range variable (its address is taken, `for i := range s { p := &i }`) in a
-	// slice/array/map range must be boxed PER ITERATION (Go 1.22 per-iteration variable semantics:
-	// a stored `&i` must point to a DISTINCT box each pass). Its heap decl is therefore deferred
-	// into the loop body and the foreach iterates a temp var that is copied into the fresh box —
-	// rather than declaring the box once before the loop (which would also clash with the foreach's
-	// own re-declaration of the same name → CS0136). Captured here, emitted in the DEFINE branch.
+	// A heap-boxed range variable (its address is taken, `for i := range s { p := &i }`) must be
+	// boxed PER ITERATION (Go 1.22 per-iteration variable semantics: a stored `&i` must point to a
+	// DISTINCT box each pass). Its heap decl is therefore deferred into the loop body and the foreach
+	// iterates a temp var that is copied into the fresh box, rather than declaring the box once
+	// before the loop (which would also clash with the foreach's own re-declaration of the same
+	// name: CS0136). Captured here, emitted by each arm.
 	//
-	// A range-over-FUNC loop is the same shape and was excluded by an arm test rather than by any
+	// Every arm defers. The range-over-FUNC arm was once excluded by an arm test rather than by any
 	// property of the range: its yielded variable is per-iteration in Go exactly as a slice index
 	// is, and its foreach declares the name itself, so the before-the-loop decl produced BOTH a
 	// `ref var now = ref heap(new time.Time(), out var Ꮡnow);` and a `foreach (var now in
 	// range(seq))` in one scope — CS0136, internal/synctest's `for now := range seq` inside a
-	// goroutine. The three remaining arms (string/chan/int) keep the before-the-loop decl.
+	// goroutine. The string, chan and int arms were the same shape again: os's `for o := range
+	// write` and `for linkKind := range testFileMax` met CS0136, and where the body iterated a temp
+	// instead (an address-taken variable), ONE box served every pass, so each stored `&i` aliased
+	// the final iteration's value.
 	var keyHeapDecl, valHeapDecl string
-	deferRangeVarBox := !isStr && !isChan && !isInt
 
 	// If defining new variables, perform escape analysis on the key and value expressions
 	if !assignVars {
-		var wroteHeapTypeDecl bool
-
 		if keyExpr != "_" {
 			// Get ident for key expression and check for heap allocation
 			if ident, ok := rangeStmt.Key.(*ast.Ident); ok {
-				heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
+				keyHeapDecl = v.convertToHeapTypeDecl(ident, true)
 
-				if len(heapTypeDecl) > 0 {
-					if deferRangeVarBox {
-						keyHeapDecl = heapTypeDecl
-					} else {
-						v.writeOutput("%s", heapTypeDecl)
-						v.outputBuilder.WriteString(v.newline)
-						wroteHeapTypeDecl = true
-					}
-				} else if !v.options.preferVarDecl {
+				if keyHeapDecl == "" && !v.options.preferVarDecl {
 					keyType = v.getCSharpTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
 			}
@@ -388,24 +380,12 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		if len(valExpr) > 0 && valExpr != "_" {
 			// Get ident for value expression and check for heap allocation
 			if ident, ok := rangeStmt.Value.(*ast.Ident); ok {
-				heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
+				valHeapDecl = v.convertToHeapTypeDecl(ident, true)
 
-				if len(heapTypeDecl) > 0 {
-					if deferRangeVarBox {
-						valHeapDecl = heapTypeDecl
-					} else {
-						v.writeOutput("%s", heapTypeDecl)
-						v.outputBuilder.WriteString(v.newline)
-						wroteHeapTypeDecl = true
-					}
-				} else if !v.options.preferVarDecl {
+				if valHeapDecl == "" && !v.options.preferVarDecl {
 					valType = v.getCSharpTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
 			}
-		}
-
-		if wroteHeapTypeDecl {
-			v.outputBuilder.WriteString(v.newline)
 		}
 	}
 
@@ -487,7 +467,22 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// read-only (CS1656). Returns the name the foreach declares. No trailing blank line follows the
 	// copy, which is not in the Go source.
 	scalarIterExpr := func() string {
-		if !keyNeedsCopy || keyHeapDecl != "" {
+		// A heap-boxed variable takes the per-iteration box the yield-func arm emits: iterate a
+		// temp, and open the body with a fresh box and the copy into it.
+		if keyHeapDecl != "" {
+			iterExpr := v.getTempVarName("i")
+
+			if !v.options.preferVarDecl {
+				keyType = v.getCSharpTypeName(v.getExprType(rangeStmt.Key)) + " "
+			}
+
+			bodyIndent := v.indent(v.indentLevel + 1)
+			context.innerPrefix = fmt.Sprintf("%s%s%s%s%s = %s;%s", v.newline, bodyIndent, keyHeapDecl, v.newline+bodyIndent, keyExpr, iterExpr, v.newline)
+
+			return iterExpr
+		}
+
+		if !keyNeedsCopy {
 			return scalarKeyExpr
 		}
 
@@ -509,13 +504,23 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			rangeExpr = fmt.Sprintf("(@string)%s", rangeExpr)
 		}
 
-		if assignVars || keyNeedsCopy || valNeedsCopy {
+		if assignVars || keyNeedsCopy || valNeedsCopy || keyHeapDecl != "" || valHeapDecl != "" {
 			// `assignVars` copies into pre-existing vars (`r = rᴛ1;`); a reassigned DEFINE var is
-			// declared from the temp (`var r = rᴛ1;`).
+			// declared from the temp (`var r = rᴛ1;`); a heap-boxed one is copied into its fresh
+			// per-iteration box.
 			var innerPrefix, tempKeyExpr, tempValExpr string
+			bodyIndent := v.indent(v.indentLevel + 1)
 
-			if keyExpr == "_" || (!assignVars && !keyNeedsCopy) {
+			if keyExpr == "_" || (!assignVars && !keyNeedsCopy && keyHeapDecl == "") {
 				tempKeyExpr = keyExpr
+			} else if keyHeapDecl != "" {
+				tempKeyExpr = v.getTempVarName("i")
+
+				if !v.options.preferVarDecl {
+					keyType = v.getCSharpTypeName(v.getExprType(rangeStmt.Key)) + " "
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s;", v.newline, bodyIndent, keyHeapDecl, v.newline+bodyIndent, keyExpr, tempKeyExpr)
 			} else {
 				tempKeyExpr = v.getTempVarName("i")
 				decl := ""
@@ -529,8 +534,16 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 				innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), decl, keyExpr, tempKeyExpr)
 			}
 
-			if valExpr == "_" || (!assignVars && !valNeedsCopy) {
+			if valExpr == "_" || (!assignVars && !valNeedsCopy && valHeapDecl == "") {
 				tempValExpr = valExpr
+			} else if valHeapDecl != "" {
+				tempValExpr = v.getTempVarName("r")
+
+				if !v.options.preferVarDecl {
+					valType = v.getCSharpTypeName(v.getExprType(rangeStmt.Value)) + " "
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s;", v.newline, bodyIndent, valHeapDecl, v.newline+bodyIndent, valExpr, tempValExpr)
 			} else {
 				tempValExpr = v.getTempVarName("r")
 				decl := ""

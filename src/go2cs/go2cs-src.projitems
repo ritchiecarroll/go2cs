@@ -415,6 +415,7 @@
     <None Include="$(MSBuildThisFileDirectory)publishBuildLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishRebundle_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishTimeout_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)rangeHeapBoxedVar_test.go" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm64.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-x64.pubxml" />
