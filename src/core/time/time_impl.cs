@@ -118,8 +118,15 @@ partial class time_package
     // THE BUBBLE BRANCH, now owed and taken (S3 of DESIGN-gopark-goready-synctest.md). This comment
     // used to say "RE-CHECK THE DAY A SYNCTEST BRIDGE IS WIRED: this body then owes the syncGroup
     // branch" -- golib's SyncTestBubble is that bridge. runtime.time_runtimeNow returns the enclosing
-    // bubble's fake clock (sec, nsec, and mono = the fake nanoseconds) when getg().syncGroup is set,
-    // and time_now() otherwise; so does this.
+    // bubble's fake clock when getg().bubble is set, and time_now() otherwise; so does this.
+    //
+    // Inside a bubble the monotonic reading is ZERO, as Go's (go1.26.9 runtime/time.go:17-30: "Don't
+    // return a monotonic time inside a synctest bubble"), so Now() carries no monotonic component and
+    // Since and Sub fall back to wall arithmetic. This body used to return mono = the fake nanoseconds,
+    // and a Time taken OUTSIDE the bubble then subtracted a real uptime reading from fake epoch
+    // nanoseconds: internal/synctest's TestMonotonicClock read time.Since(start) as about 56.8 years.
+    // runtimeNano still returns the fake clock in a bubble (Go's time_runtimeNano does), and timers read
+    // that.
     //
     // Delegating to now() rather than repeating its work keeps Now()'s wall clock and monotonic
     // component reading the same two sources as Since / Sub, which is the property startNano rebases.
@@ -128,7 +135,7 @@ partial class time_package
         if (SyncTestBubble.Current is { } bubble)
         {
             int64 fake = bubble.Now;
-            return (fake / 1_000_000_000L, (int32)(fake % 1_000_000_000L), fake);
+            return (fake / 1_000_000_000L, (int32)(fake % 1_000_000_000L), 0);
         }
 
         return now();
