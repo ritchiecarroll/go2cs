@@ -1050,6 +1050,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// A directional Go channel type remains undescribable here; that is a limit of the
 		// converter's channel emission one layer up, recorded in ConversionStrategies-Reference.md.
 		"Type.ChanDir": goosAny,
+		// TypeFor and Type.InterfaceType close the LIVE remainder of that prefix-downcast family (H7
+		// row 57): Go 1.26 rewrote TypeFor as `(*PtrType)(unsafe.Pointer(TypeOf((*T)(nil)))).Elem`, which
+		// panicked on every reflect.TypeFor[T](), and InterfaceType is reached for every interface
+		// descriptor. Both answered from the carried System.Type in type_impl.cs. The family's five
+		// Uncommon() arms stay converted: they are unreachable (type_impl.cs, beside TFlagUncommon).
+		"TypeFor":            goosAny,
+		"Type.InterfaceType": goosAny,
 	},
 	// internal/cpu.getGOAMD64level is declared in cpu_x86.s and its body is a COMPILE-TIME constant:
 	// the GOAMD64_vN define the toolchain sets from `go env GOAMD64`, with `#else MOVL $1` as the

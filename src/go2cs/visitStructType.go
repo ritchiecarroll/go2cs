@@ -524,7 +524,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				}
 			} else if interfaceType, interfaceIdentType := v.extractInterfaceType(field.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
 				v.indentLevel += indentOffset
-				v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+				liftedName := v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+
+				// A lift that closes over this generic struct's type parameters: each concrete
+				// instantiation's shape takes the closed generic as a base (dynamicInterfaceBase.go).
+				if len(liftCapturedTypeParams(interfaceIdentType)) > 0 {
+					v.writeLiftedInterfaceBaseMarkers(structPrefix, identType, field.Names[0].Name, liftedName)
+				}
+
 				v.indentLevel -= indentOffset
 
 				if structPrefix != nil {
