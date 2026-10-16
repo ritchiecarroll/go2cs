@@ -14,6 +14,25 @@ using System.Runtime.CompilerServices;
 namespace go;
 
 /// <summary>
+/// The runtime function Go's compiler calls to allocate, which a Go 1.26 heap-profile record names between
+/// <c>runtime.mallocgc</c> and the allocating function.
+/// </summary>
+public enum GoAllocEntry : byte
+{
+    /// <summary><c>runtime.newobject</c>: <c>new(T)</c>, <c>&amp;T{}</c>, an escaping local; a map's table.</summary>
+    NewObject,
+
+    /// <summary><c>runtime.newarray</c>: a map's groups.</summary>
+    NewArray,
+
+    /// <summary><c>runtime.makeslice</c>: <c>make([]T, n)</c>; a map's directory.</summary>
+    MakeSlice,
+
+    /// <summary><c>runtime.growslice</c>: an <c>append</c> that allocates.</summary>
+    GrowSlice,
+}
+
+/// <summary>
 /// The memory profiler's allocation hook: Go's <c>mallocgc</c> profiling branch, at the golib doors a
 /// converted program allocates through.
 /// </summary>
@@ -53,10 +72,11 @@ public static class GoMemProfile
     public static nint Rate = 512 * 1024;
 
     /// <summary>
-    /// Records one sampled allocation: the allocated object, its Go size in bytes, and whether its type
-    /// holds no pointers (Go's <c>noscan</c>, which <c>roundupsize</c> reads). Installed by runtime.
+    /// Records one sampled allocation: the allocated object, its Go size in bytes, whether its type holds
+    /// no pointers (Go's <c>noscan</c>, which <c>roundupsize</c> reads), and the entry point Go would have
+    /// allocated it through. Installed by runtime.
     /// </summary>
-    public static Action<object, nuint, bool>? Recorder;
+    public static Action<object, nuint, bool, GoAllocEntry>? Recorder;
 
     /// <summary>
     /// Whether the program can reach runtime/pprof: the inverse of Go's <c>disableMemoryProfiling</c>,
@@ -140,8 +160,9 @@ public static class GoMemProfile
     /// <summary>Charges one Go allocation of <paramref name="count"/> values of <typeparamref name="T"/>.</summary>
     /// <param name="allocation">The object that holds the allocation (the box, or the backing array).</param>
     /// <param name="count">How many values of <typeparamref name="T"/> it holds (1 for a box).</param>
+    /// <param name="entry">The runtime function Go's compiler would have called for this allocation.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Charge<T>(object allocation, nint count)
+    public static void Charge<T>(object allocation, nint count, GoAllocEntry entry)
     {
         nint rate = Rate;
 
@@ -157,7 +178,7 @@ public static class GoMemProfile
             return;
         }
 
-        Sample(allocation, size, GoSize<T>.NoScan, rate);
+        Sample(allocation, size, GoSize<T>.NoScan, rate, entry);
     }
 
     /// <summary>
@@ -170,7 +191,8 @@ public static class GoMemProfile
     /// An object whose lifetime is the modelled allocation's: its collection is the free. Made here, only when
     /// the charge reaches the sampler, when the caller passes none, so an unsampled charge allocates nothing.
     /// </param>
-    public static void ChargeBytes(ref object? allocation, long size, bool noscan)
+    /// <param name="entry">The runtime function Go allocates this part of the store through.</param>
+    public static void ChargeBytes(ref object? allocation, long size, bool noscan, GoAllocEntry entry)
     {
         nint rate = Rate;
 
@@ -184,11 +206,11 @@ public static class GoMemProfile
         }
 
         allocation ??= new object();
-        Sample(allocation, size, noscan, rate);
+        Sample(allocation, size, noscan, rate, entry);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void Sample(object allocation, long size, bool noscan, nint rate)
+    private static void Sample(object allocation, long size, bool noscan, nint rate, GoAllocEntry entry)
     {
         if (t_recording)
             return;
@@ -217,7 +239,7 @@ public static class GoMemProfile
 
         try
         {
-            recorder(allocation, (nuint)size, noscan);
+            recorder(allocation, (nuint)size, noscan, entry);
         }
         finally
         {
