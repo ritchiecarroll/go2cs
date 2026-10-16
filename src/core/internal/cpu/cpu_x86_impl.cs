@@ -33,8 +33,10 @@
 // Go fills `cpu.X86` in doinit(), which cpuinit() calls from schedinit(). schedinit is Go's
 // SCHEDULER BOOTSTRAP and go2cs never runs it — the same fact goenvs_impl.cs and goargs_impl.cs
 // are written around, each with the comment that a module initializer is "the faithful stand-in
-// for schedinit's slot". So doinit() is unreachable, `cpuid()` (x86 assembly, PartialStubGenerator
-// stub) never actually throws, and EVERY `X86.Has*` stayed at its `false` zero value process-wide.
+// for schedinit's slot". So doinit() is unreachable and EVERY `X86.Has*` stayed at its `false` zero
+// value process-wide. doinit's own cpuid calls therefore never run; the one live caller outside it is
+// Go 1.26's DataCacheSizes (datacache_x86.go), so cpuid() below has a managed body rather than the
+// PartialStubGenerator stub that throws.
 //
 // That is not cosmetic. `crypto/tls` picks its TLS 1.3 cipher-suite ORDER from
 // `hasAESGCMHardwareSupport`, which is `cpu.X86.HasAES && cpu.X86.HasPCLMULQDQ` — so with every
@@ -85,6 +87,26 @@ partial class cpu_package
     internal static int32 getGOAMD64level()
     {
         return 1;
+    }
+
+    /// <summary>
+    /// The managed body of Go's <c>cpuid</c> (cpu_x86.s): the four registers the CPUID instruction
+    /// returns for leaf <paramref name="eaxArg"/> and sub-leaf <paramref name="ecxArg"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="X86Base.CpuId(int, int)"/> executes the instruction itself, so the answers are the
+    /// host's own, as in Go. Go builds this file only for 386 and amd64; on a CLR host where
+    /// <see cref="X86Base.IsSupported"/> is false (Arm64, for instance) there is no instruction to
+    /// run, and every leaf reads as all zeros, the answer a CPU gives for an unsupported leaf.
+    /// </remarks>
+    internal static partial (uint32 eax, uint32 ebx, uint32 ecx, uint32 edx) cpuid(uint32 eaxArg, uint32 ecxArg)
+    {
+        if (!X86Base.IsSupported)
+            return (0, 0, 0, 0);
+
+        (int eax, int ebx, int ecx, int edx) = X86Base.CpuId(unchecked((int)eaxArg), unchecked((int)ecxArg));
+
+        return (unchecked((uint32)eax), unchecked((uint32)ebx), unchecked((uint32)ecx), unchecked((uint32)edx));
     }
 
     /// <summary>
