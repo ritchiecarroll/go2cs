@@ -227,9 +227,20 @@ fmt.Println(diskFull, wait);        // disk full 1.5s
 Console.WriteLine($"{diskFull.Error()} after {wait.String()}");    // disk full after 1.5s
 ```
 
-`Console.WriteLine(x)` and `$"{x}"` call .NET's `ToString()` instead. Strings, slices and maps print as Go prints
-them either way, but some values show what they are made of: a `Duration` prints its count of nanoseconds, and an
-error can print as an address. `fmt.Sprintf("%v", x)` gives the Go text as an `@string`.
+`Console.WriteLine(x)`, `$"{x}"` and a debugger call .NET's `ToString()`, and it gives the same text. A converted
+value's `ToString()` returns its `Error()`, else its `String()`, chosen the way `fmt`'s `%v` chooses: for a pointer,
+`Error()` wins over `String()` whichever of them has the pointer receiver. A value with neither method prints its
+fields or its underlying value, and a pointer with neither prints its address.
+
+```csharp
+Console.WriteLine($"{diskFull} after {wait}");                    // disk full after 1.5s
+```
+
+A method that panics prints Go's `%!v(PANIC=String method: …)` text instead of throwing. Two kinds of value keep
+their .NET text: a Go func value (a .NET delegate) and a value of a generic Go type. A `*big.Float` prints its
+`String()`, 10 significant digits, where `%v` calls its `Format` method and prints the shortest exact text.
+`fmt.Sprintf("%v", x)` gives the Go text of any value as an `@string`. Converted Go code's `print` and `println`
+still print a named value's raw number and a pointer's address, as in Go.
 
 `fmt` formats Go values, so give it a `slice<T>` rather than a C# array:
 
@@ -531,7 +542,7 @@ Each item is a first surprise, and what to write instead.
 - **`error e = nil;` does not compile.** Compare with `nil`, but produce a nil error with `null` or `default`.
 - **LINQ cannot infer a slice's element type.** Write `IEnumerable<T> e = s;` first, or use `new List<T>(s)` or
   `s.ToArray()` ([Slices](#slices)).
-- **`$"{d}"` prints a `Duration` in nanoseconds.** Print Go values through `fmt`, or call `.String()` or `.Error()`
+- **`$"{f}"` on a Go func value prints the delegate's .NET type name.** Print it through `fmt` instead
   ([Printing Go values](#printing-go-values)).
 - **A copy of a Go array value shares its bytes.** `var b = a;` on a `uuid.UUID` copies the C# struct, not the
   array inside it: write `a.Clone()`.

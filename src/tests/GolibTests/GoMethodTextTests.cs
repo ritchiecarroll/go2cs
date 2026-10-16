@@ -83,6 +83,16 @@ public class GoMethodTextTests
     }
 
     [TestMethod]
+    public void AnErrorHeldAsAnInterfacePrintsItsErrorText()
+    {
+        // errors.New returns a *errorString inside an `error`: the interface value's ToString is its dynamic value's.
+        error diskFull = errors_package.New("disk full");
+
+        Assert.AreEqual("disk full", diskFull.ToString());
+        Assert.AreEqual("disk full after 1.5s", $"{diskFull} after {new time_package.Duration(1_500_000_000)}");
+    }
+
+    [TestMethod]
     public void APointerChoosesByMethodKindAcrossItsWholeMethodSet()
     {
         Assert.AreEqual("mix-error", Ꮡ(new testMixValueError()).ToString(),
