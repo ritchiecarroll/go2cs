@@ -240,7 +240,12 @@ A method that panics prints Go's `%!v(PANIC=String method: …)` text instead of
 their .NET text: a Go func value (a .NET delegate) and a value of a generic Go type. A `*big.Float` prints its
 `String()`, 10 significant digits, where `%v` calls its `Format` method and prints the shortest exact text.
 `fmt.Sprintf("%v", x)` gives the Go text of any value as an `@string`. Converted Go code's `print` and `println`
-still print a named value's raw number and a pointer's address, as in Go.
+still print a named value's raw number and a pointer's address, as in Go. One gap: in converted generic code,
+`println` of a type-parameter value prints its `String()`, where Go prints the raw value, because the converter can
+pass the raw value only for a concrete named type. No converted standard-library code does this.
+
+A debugger display also calls `ToString()`, so it runs the type's `String()`. A `String()` that blocks or runs long
+hits the debugger's evaluation timeout.
 
 `fmt` formats Go values, so give it a `slice<T>` rather than a C# array:
 
