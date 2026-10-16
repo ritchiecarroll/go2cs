@@ -156,6 +156,20 @@ public static ж<Type> synthType(System.Type? st, nint[]? arrayDims, nint[]?[]? 
         }
         arrayDims = stampedDims;
     }
+    // A DEFINED array type's declared chain (`type A [4]int`, `type M [2][3]int`), read off the leading
+    // [N][M]... of its [GoType] marker (GoReflect.DefinedArrayDims). It decides every position it declares,
+    // as the stamp above decides the whole chain, and ONLY those: a deeper carried chain reaches into a
+    // NAMED array element, which answers its own length from its own marker when Elem() builds it. So a
+    // carried tail past the declaration is dropped rather than compared, and one Go type interns to one
+    // descriptor.
+    else if (GoReflect.DefinedArrayDims(st) is { } declaredDims) {
+        int compared = arrayDims is null ? 0 : Math.Min(arrayDims.Length, declaredDims.Length);
+        if (!arrayDims.AsSpan(0, compared).SequenceEqual(declaredDims.AsSpan(0, compared))) {
+            throw panic("reflect: descriptor cargo for " + GoReflect.GoTypeName(st) + " disagrees with its declared length: dims [" +
+                        string.Join(",", arrayDims) + "] vs declared [" + string.Join(",", declaredDims) + "]");
+        }
+        arrayDims = declaredDims;
+    }
     if (GoReflect.TypeStampedChanDirChain(st) is { } stampedChain) {
         GoChanDir[]? carried = normalizeChanDirChain(chanDirChain);
         if (carried is not null && !carried.AsSpan().SequenceEqual(normalizeChanDirChain(stampedChain)!)) {
