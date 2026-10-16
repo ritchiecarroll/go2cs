@@ -173,8 +173,7 @@ static class Program
         nint letters = 0;
         foreach (var (_, w) in words) letters += len(w);    // Go: for _, w := range words
         Check("8 (_, v) takes the values", letters == 16);
-        IEnumerable<@string> seq = words;   // name the element type, then LINQ works
-        Check("8 LINQ over IEnumerable<T>", seq.Count(w => len(w) == 5) == 2);
+        Check("8 LINQ sees a slice as its values", words.Count(w => len(w) == 5) == 2);
         List<@string> list = new(words);
         @string[] array = words.ToArray();
         Check("8 a slice copies into a List<T> or T[]", list.Count == 4 && array.Length == 4);

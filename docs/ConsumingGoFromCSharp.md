@@ -341,12 +341,11 @@ nint letters = 0;
 foreach (var (_, w) in words) letters += len(w);    // Go: for _, w := range words
 ```
 
-A slice is both a sequence of values and a sequence of `(index, value)` pairs, so LINQ cannot infer which one you
-mean. Name the element type first, or copy the slice into a list or an array:
+`foreach` gives a slice's `(index, value)` pairs, as Go's `range` does, and LINQ sees the slice as its values. The
+same holds for a Go array and for a named slice or array type:
 
 ```csharp
-IEnumerable<@string> seq = words;   // name the element type, then LINQ works
-// seq.Count(w => len(w) == 5) == 2
+// words.Count(w => len(w) == 5) == 2
 List<@string> list = new(words);
 @string[] array = words.ToArray();
 ```
@@ -529,8 +528,8 @@ Each item is a first surprise, and what to write instead.
 - **`int n = len(s)` does not compile.** Go's `int` is `nint`: use `var`, `nint`, or a cast ([Numbers](#numbers)).
 - **`append(nums, 4, 5)` is ambiguous on a `slice<nint>`.** Cast the literals: `append(nums, (nint)4, (nint)5)`.
 - **`error e = nil;` does not compile.** Compare with `nil`, but produce a nil error with `null` or `default`.
-- **LINQ cannot infer a slice's element type.** Write `IEnumerable<T> e = s;` first, or use `new List<T>(s)` or
-  `s.ToArray()` ([Slices](#slices)).
+- **`foreach (var v in s)` gives a tuple, not a value.** `foreach` over a slice gives `(index, value)` pairs: write
+  `foreach (var (_, v) in s)` for the values, or use LINQ ([Slices](#slices)).
 - **`$"{d}"` prints a `Duration` in nanoseconds.** Print Go values through `fmt`, or call `.String()` or `.Error()`
   ([Printing Go values](#printing-go-values)).
 - **A copy of a Go array value shares its bytes.** `var b = a;` on a `uuid.UUID` copies the C# struct, not the
