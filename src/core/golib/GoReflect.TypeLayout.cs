@@ -138,6 +138,8 @@ public static partial class GoReflect
             case Pointer or UnsafePointer or Map or Chan or Func: size = 8; return true;
             case Array:
             {
+                arrayDims ??= DeclaredArrayDims(t);
+
                 if (arrayDims is not { Length: > 0 } || arrayDims[0] < 0)
                     return false;
 
@@ -372,6 +374,8 @@ public static partial class GoReflect
 
             case Array:
             {
+                arrayDims ??= DeclaredArrayDims(t);
+
                 if (arrayDims is not { Length: > 0 })
                     return -1;
 
@@ -970,6 +974,8 @@ public static partial class GoReflect
 
             case Array:
             {
+                arrayDims ??= DeclaredArrayDims(t);
+
                 if (arrayDims is not { Length: > 0 })
                     return false;
 
@@ -1073,6 +1079,49 @@ public static partial class GoReflect
             type.GetCustomAttributes(typeof(GoArrayDimsAttribute), false) is [GoArrayDimsAttribute { Dims.Length: > 0 } stamped]
                 ? toNintDims(stamped.Dims)
                 : null);
+    }
+
+    private static readonly ConcurrentDictionary<Type, nint> s_definedArrayLengths = new();
+
+    /// <summary>
+    /// The length a DEFINED array type declares -- the leading <c>[N]</c> of its <c>[GoType("[N]E")]</c>
+    /// marker -- or null for every other type.
+    /// </summary>
+    /// <remarks>
+    /// <c>type A [4]int</c> emits as a go2cs-gen wrapper struct over an <c>array&lt;nint&gt;</c>, which
+    /// carries its length in the INSTANCE, so the marker is the one place the TYPE spells it. A descriptor
+    /// built from the type alone (<c>abi.TypeFor[A]()</c>, a pointer's <c>Elem()</c>) read no dims without
+    /// it: <c>Size_</c> 0 and a nil <c>ArrayType()</c>, which sent unique.Make down its zero-size arm and
+    /// makeCloneSeq into a nil dereference. Only the type's OWN length is read. An unnamed nested element
+    /// (<c>type nn [2][3]int</c>) reaches C# as a <c>[GoArrayDims]</c> stamp, which
+    /// <see cref="TypeStampedDims"/> answers first; a NAMED element answers its own length from its own
+    /// marker when its descriptor is built, as Go's element type carries its own.
+    /// </remarks>
+    public static nint? DefinedArrayLength(Type t)
+    {
+        nint length = s_definedArrayLengths.GetOrAdd(t, static type =>
+            goTypeMarkerOf(type) is { Definition: ['[', _, ..] definition } &&
+            definition.IndexOf(']') is var close and > 1 &&
+            long.TryParse(definition.AsSpan(1, close - 1), System.Globalization.NumberStyles.None,
+                System.Globalization.CultureInfo.InvariantCulture, out long declared)
+                ? (nint)declared
+                : -1);
+
+        return length < 0 ? null : length;
+    }
+
+    private static readonly ConcurrentDictionary<Type, nint[]?> s_declaredArrayDims = new();
+
+    /// <summary>
+    /// The dims an array TYPE declares on itself -- its <c>[GoArrayDims]</c> stamp, else a defined array's
+    /// own length (<see cref="DefinedArrayLength"/>) -- or null. A layout walk that reaches an array with
+    /// no dims carried down to it reads these: that is a NAMED array element (<c>type N [2]E</c> over
+    /// <c>type E [3]int</c>), whose length lives on its own type, as Go's element type carries its own.
+    /// </summary>
+    internal static nint[]? DeclaredArrayDims(Type t)
+    {
+        return s_declaredArrayDims.GetOrAdd(t, static type =>
+            TypeStampedDims(type) ?? (DefinedArrayLength(type) is { } length ? new[] { length } : null));
     }
 
     private static readonly ConcurrentDictionary<Type, GoChanDir[]?> s_typeStampedChanDirChains = new();

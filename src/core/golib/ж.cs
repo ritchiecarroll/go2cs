@@ -687,6 +687,14 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // Returns a stable native pointer to the first element of this box's Go fixed-array data,
     // pinning the array's backing for the box's lifetime (idempotent; a concurrent first touch
     // can at worst allocate one extra handle that the finalizer frees).
+    // Whether T is a Go fixed array (array<E>, or a defined `type A [N]E` wrapper) whose element E holds a
+    // managed reference. Per T and static, so the pointer conversion pays one static read for it, the
+    // PrefixChain gate's posture. A reference-type T keeps the data-pin arm it always had.
+    private static class FixedArrayElements
+    {
+        internal static readonly bool HoldReferences = typeof(T).IsValueType && default(T) is IArray { ElementHoldsReferences: true };
+    }
+
     private unsafe void* pinnedArrayData(IArray arr)
     {
         m_pin ??= new PinnedBuffer(arr.Source, arr.Length);
@@ -1115,7 +1123,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // heap — HeapVerify caught exactly that shape (a range-smashed victim under pipe-buffer
         // load) once the other corridors were closed. Recording the address is what makes the
         // tether's Resolve, and the provenance record itself, honest for case 1.
-        if (value.Value is IArray arr && arr is not ISlice)
+        //
+        // Only for an element that holds no managed reference: GCHandle refuses to pin any other array
+        // ("Object contains references"), which threw for unique's canonMap hashing a `[3]string` key
+        // through unsafe.Pointer(&key). Such an array has no data to pin, so it takes the reference-bearing
+        // token arm below, as any other reference-bearing pointee does.
+        if (value.Value is IArray arr && arr is not ISlice && !FixedArrayElements.HoldReferences)
         {
             uintptr dataAddr = (uintptr)value.pinnedArrayData(arr);
             ManagedPointerTokens.RegisterPinned((nuint)dataAddr.Value, value);
