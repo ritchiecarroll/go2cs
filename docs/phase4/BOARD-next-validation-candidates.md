@@ -27118,4 +27118,66 @@ the i9's reflect reading (owner G if it routes).
 
 — G (measured 2026-10-16; COORD ruled: accessor refusal now, this row post-hop)
 
+## 2026-10-16 — C1: a key-only `for i := range s` over a slice keeps the slice's backing array alive for the whole frame at TC=0 — POST-HOP (owner G), may retire a family of codegen-liveness disclosures
+
+The converter emits a key-only range over a slice as `foreach (var (i, _) in s)`. The enumerator is a hidden local
+holding its own copy of the slice header, and so a reference to the backing array. At TieredCompilation=0 the JIT
+reports that hidden local live until the method returns, so `s = nil` after the loop does not release the array.
+Go's liveness drops the range copy at the loop's end.
+
+**Measured** on weak's TestPointerEquality shape (a frame that fills a `[]*T`, makes weak pointers to each element,
+sets the slice to nil and calls `runtime.GC()`), Release, linux, hop tip 919c79a7d6. Go clears 10 of 10 in every arm.
+- A, the test's body verbatim in one frame: 10 of 10 still alive at TC=0, under default tiering and in Debug.
+- E, A with each `for i := range bt` written as `for i := 0; i < len(bt); i++`: CLEARED at TC=0, alive under default
+  tiering and in Debug (tier-0 and Debug code keep every frame temporary live).
+- B, the allocation and store moved into a noinline helper: cleared in all three. golib's weak.Pointer and
+  runtime.GC() are not involved.
+So at the configuration of record the pin is the `foreach` copy, and an index loop removes it.
+
+**Why it is not seated now.** It is a corpus-wide emission change. At 1ba15eb4d2, `git grep` finds 991
+`foreach (var (<name>, _) in` sites in 420 files under src/core, 465 of them in 189 `_test.cs` files. That pattern
+also matches key-only ranges over strings and maps, and the slice and array subset is not split out. A rewrite also
+has to keep Go's semantics: the range expression is evaluated once, so `len` is read once, not per iteration. That is
+a post-hop design question, not a hop fix.
+
+**What it might retire.** The codegen-liveness entries whose pin is a range copy rather than a by-value argument or a
+call's result temporary. weak's TestPointerEquality (the new entry) is one. Each entry's own arms say which kind of
+temporary pins it, so the candidates are found by re-reading those arms, not by name.
+
+— C1 (measured 2026-10-16; COORD ruled 2026-10-16: corpus-wide emission, not now; this row, owner G)
+
+## 2026-10-16 — C1: C# gives every closure in one scope ONE captured-variable object, so a closure that captures only `f` still roots `buf` — POST-HOP (owner G), may retire a family of codegen-liveness disclosures
+
+Go captures each variable a closure references, separately. C# hoists every variable captured by ANY lambda in a
+scope into one compiler-generated closure object, shared by all of that scope's lambdas. So in the converted form of
+
+    func(buf []byte) func() {
+        f := sync.OnceValue(func() any { buf[0] = 1; return nil })
+        return func() { f() }
+    }
+
+the returned `func() { f() }` holds the object that also holds `buf`, and `buf` stays reachable for as long as the
+returned func does. In Go the returned func reaches only `f`, and OnceValue drops its wrapped function after the
+first call.
+
+**Measured** on sync's TestOnceXGC shapes, Go 1.26.9, Release, linux. Every arm built and called in noinline
+helpers, so no test frame roots `buf`. Go collects `buf` after the first call in every arm. C# readings are the
+same at TC=0 and under tiering.
+- OnceValue and OnceValues, with the test's own literal (shared scope): RETAINED.
+- The same Once call with its adapter in a SEPARATE function, so no scope is shared: COLLECTED.
+- OnceFunc, whose constructor returns sync.OnceFunc's func with no adapter: COLLECTED.
+- The panic variants read the same way once sync's OnceX bodies clear `f` in a `finally`; before that fix they
+  were retained on the panic path alone.
+
+**Why it is not seated now.** The fix is an emission change: give a lambda that escapes its own scope its own closure
+object, or split the captures by lifetime. It reaches every scope where a returned or stored lambda sits beside
+another lambda that captures something long-lived. That is corpus-wide, and needs care around variables two lambdas
+share and write, where one object is the right answer. A post-hop design question.
+
+**What it might retire.** sync's TestOnceXGC/OnceValue, /OnceValues, /OnceValue_panic and /OnceValues_panic entries,
+whose own arms name this cause, and any other codegen-liveness entry whose pin turns out to be a shared closure
+object rather than a frame slot.
+
+— C1 (measured 2026-10-16; COORD ruled 2026-10-16: corpus-wide emission, not now; this row, owner G)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
