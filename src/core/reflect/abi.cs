@@ -120,7 +120,7 @@ internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
     // We'll always be adding a new value, so do that first.
     nint pStart = len(a.steps);
     a.valueStart = builtin.append(a.valueStart, pStart);
-    if (t.Size() == 0) {
+    if (Ꮡt.Size() == 0) {
         // If the size of the argument type is zero, then
         // in order to degrade gracefully into ABI0, we need
         // to stack-assign this type. The reason is that
@@ -145,7 +145,7 @@ internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
         // Register assignment failed. Roll back any changes
         // and stack-assign.
         a = aOld;
-        a.stackAssign(t.Size(), (uintptr)t.Align());
+        a.stackAssign(Ꮡt.Size(), (uintptr)t.Align());
         return Ꮡ(a.steps, len(a.steps) - 1);
     }
     return default!;
