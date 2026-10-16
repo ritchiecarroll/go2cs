@@ -4,9 +4,10 @@
     docs/ConsumingGoFromCSharp.md says.
 
 .DESCRIPTION
-    The page documents the C# surface of converted Go: @string, slice<T>, tuples and error values, the
-    pointer box, channel<T>, the goroutine launcher, PanicException. Those are emission and golib shapes,
-    and they move. This runner keeps the page honest:
+    The page documents the C# surface of converted Go: the package imports, standard-library calls,
+    @string, slice<T>, map<K,V>, tuples and error values, the pointer box, channel<T>, the goroutine
+    launcher, PanicException. Those are emission and golib shapes, and they move. This runner keeps the
+    page honest:
 
       1. builds the converter from this tree (skip with -SkipBuild);
       2. downloads github.com/ritchiecarroll/hashset and github.com/google/uuid at their pinned versions
@@ -34,7 +35,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $WorkRoot,
-    [int] $ExpectedChecks = 21,
+    [int] $ExpectedChecks = 58,
     [switch] $SkipBuild
 )
 
