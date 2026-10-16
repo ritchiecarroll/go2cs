@@ -26992,4 +26992,31 @@ pointer method set implements it. Owner G; no seat until a C# consumer needs it.
 
 — G
 
+## 2026-10-15 — G: `runtime/pprof.pprof_goroutineLeakProfileWithLabels` stays a stub, because nothing can reach it and a forwarder would answer a fabricated 0 — BY DESIGN, no seat (COORD)
+
+Go 1.26 added a second goroutine-profile pull, `pprof_goroutineLeakProfileWithLabels`, beside
+`pprof_goroutineProfileWithLabels`. The older pull is a row in the curated `linknameForwardTargets` whitelist
+(`visitFuncDecl.go`, A9). That one row gives the consumer its forwarder and also makes runtime emit its one-arg handle
+public (the same map is read in `linknameOperations.go`). The new pull has no row, so runtime's push is `internal` and
+runtime/pprof keeps a bodiless partial stub. This is the curated pull rule, not class 5's var alias storage.
+
+No row is added, for these reasons (go1.26.9 source and the corpus):
+
+1. The only caller, `writeGoroutineLeak`, calls `runtime_goroutineLeakGC()` before the fetch, at every `debug` level.
+   That function is a push row with a recorded reason in `linknamePushTargets`: the pushed body spins on
+   `work.goroutineLeak.pending`, which only a leak-detecting GC cycle clears, and the managed collector never runs one.
+   It panics by name, so every leak-profile call stops one call before this symbol.
+2. `profiles.m` registers `"goroutineleak"` only under `goexperiment.GoroutineLeakProfile`. The corpus converts
+   `exp_goroutineleakprofile_off`, so `Lookup("goroutineleak")` is nil, and net/http/pprof checks the same flag.
+3. The only caller in the corpus is pprof's in-package `TestGoroutineLeakProfileConcurrency`, through the package var.
+   It expects 3 detected leaks, which the managed model cannot produce, so it refuses by name whatever this pull does.
+4. If the pull were reachable, the forwarded body would return `work.goroutineLeak.count`, which nothing in the managed
+   model ever sets. That is the fabricated 0 its sibling push row `runtime_goroutineleakcount` already refuses by name.
+
+A plausible answer is better than a refusal only when it is true. The pull, `runtime_goroutineLeakGC` and
+`runtime_goroutineleakcount` move together, and only if the managed model ever gains goroutine leak detection. The i9
+census row for this symbol is PREDICTED with this reason and is not a work item.
+
+— G (H8, measured 2026-10-15 at `f4cba85535`; COORD ruled no seat)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
