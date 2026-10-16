@@ -697,6 +697,8 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
     [TestMethod]
+    public void CheckGenericInterfaceCrossPackage() => CheckTarget("GenericInterfaceCrossPackage");
+    [TestMethod]
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
 
     [TestMethod]

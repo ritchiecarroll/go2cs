@@ -27139,4 +27139,32 @@ and the `checkParallel` hand-own together, since the function calls `testingChec
 
 — G (measured 2026-10-16; COORD: record the pair when the synctest seat lands)
 
+## 2026-10-16 — C1: two generic-interface adapter shapes found beside the mlkem fix; none in std today — POST-HOP (owner G)
+
+Both surfaced while cutting `claude/c1-mlkem-generic-iface` (`ImplementGenerator` names a generic interface through
+its own class). Neither is reached by GOROOT std plus tests at go1.26.9. The census covered linux, windows and darwin,
+with identical output on each: 6 generic method-set interfaces, 0 used outside their declaring package.
+
+**1. The pointer-adapter collision key groups on the type-argument TAIL.** `ImplementGenerator` keys
+`adapterNameGroups` on `GetSimpleName(interfaceType.ToDisplayString())`, and `GetSimpleName` splits on the LAST dot,
+which falls inside the type-argument list. So one struct with records for two different generic interfaces whose
+arguments end in the same name builds one key (`encapKeyLike>`). The pair counts as a collision and the adapter
+takes a package prefix (`DecapKeyжprobe_decapKeyLike`). Measured in a GenTests fixture: a struct recording both
+`probe_package.decapKeyLike<encapKeyLike>` and `prod_package.hostDecapLike<encapKeyLike>`. The fixture was split so
+the shipped test does not lean on it. It compiles either way, since the prefix is only a rename. NOT measured:
+whether the converter's `adapterNameCollisions.go` composes the same prefixed name at a cast site. If it does not,
+the shape is a CS0246 at the site. The likely fix is to key on the name with type arguments stripped
+(`StripGenericTypeArguments` first), as the adapter class name already is.
+
+**2. A generic interface instantiated with a POINTER type argument does not satisfy its C# constraint.**
+`var x keylike.DecapKey[*encKey] = dk`, with `DecapKey[E EncapKey]` and `*encKey` implementing `EncapKey`, emits the
+record `DecapKey<ж<encKey>>`. C# rejects it with CS0311 x3: `ж<encKey>` has no reference conversion to `EncapKey`,
+because Go satisfies the constraint by duck typing and C# needs the interface on the type. Probe:
+`GenericInterfaceCrossPackage`'s first draft (`rfl-evidence/mlkem/gip-probe1-red-build.log` on the C1 box). The
+shipped behavioral test uses the constraint-call shape mlkem uses, whose record argument is the INTERFACE
+(`DecapKey<EncapKey>`). The remedy is a design question, a constraint proxy or an adapter-typed argument, and is not
+sized.
+
+— C1 (measured 2026-10-16; COORD ruled 2026-10-16: one BOARD row, owner G, census numbers stated)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

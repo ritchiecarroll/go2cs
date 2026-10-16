@@ -552,6 +552,8 @@
     <Project Path="tests/Behavioral/GenericNamedArrayType/GenericNamedArrayType.csproj" />
     <Project Path="tests/Behavioral/GenericNegation/GenericNegation.csproj" />
     <Project Path="tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.csproj" />
+    <Project Path="tests/Behavioral/GenericInterfaceCrossPackage/GenericInterfaceCrossPackage.csproj" />
+    <Project Path="tests/Behavioral/GenericInterfaceCrossPackage/keylike/GenericInterfaceCrossPackage.keylike.csproj" />
     <Project Path="tests/Behavioral/GenericPointerInterfaceImpl/GenericPointerInterfaceImpl.csproj" />
     <Project Path="tests/Behavioral/GenericReceiverFieldAddress/GenericReceiverFieldAddress.csproj" />
     <Project Path="tests/Behavioral/GenericResultLambdaInfer/GenericResultLambdaInfer.csproj" />
