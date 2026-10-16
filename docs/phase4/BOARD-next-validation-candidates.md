@@ -27050,4 +27050,33 @@ baseline rewrite then land together, with the per-class reading in the commit.
 
 — G (measured 2026-10-16; COORD: write the row, owner open)
 
+## 2026-10-16 — G: `print`/`println` of a TYPE-PARAMETER value would print its `String()` where Go prints the raw value, once the ToString seat lands — KNOWN GAP, 1 corpus site, 0 affected instantiations (owner open)
+
+C1's ToString seat (`claude/c1-tostring-forward`, not yet landed at `4cd99e2630`) makes a converted Go value's C#
+`ToString()` its Go `%v` text: `Error()`, else `String()`. Go's `print`/`println` never call those methods.
+`println(time.Second)` prints `1000000000`. The seat keeps that for the shapes the converter can see. A NAMED basic
+argument whose value method set holds `Error`/`String` is passed as its underlying value (`printArgRawType`,
+convCallExpr.go), and a pointer prints its address through golib's `IPrintPointer`.
+
+**The gap.** `printArgRawType` keys on `*types.Named`. An argument whose static type is a TYPE PARAMETER is not one,
+so it is passed as written. golib's printer then falls through to `arg.ToString()`, which the seat makes the Go
+method text. At an instantiation whose type argument is a named type with `String()` or `Error()`, the C# would
+print the method text where Go prints the raw value.
+
+**Measured** with go/types over std plus its tests, at go1.26.9, on windows, linux and darwin. Each target has
+roughly 760 to 790 universe `print`/`println` calls. Exactly ONE takes a type-parameter argument: runtime's
+`export_test.go` `DumpPrint[T any](v T)`, which calls `print(v)`. Its four callers in `print_test.go` (the
+`FuzzPrint{Float64,Float32,Complex128,Complex64}` targets) instantiate it with `float64`, `float32`, `complex128` and
+`complex64`. None is a named type with a method, so today no instantiation reaches the gap. The control shape, a
+named basic argument with a `String()`/`Error()` value method, counts 2 per target. That is the shape the seat folds
+to its raw value.
+
+**The fix, when an instantiation needs one,** is at run time and not in the converter. The static type is a
+parameter, so only the instantiation knows whether the value has a method. golib's printer would print a converted
+Go value by its RAW form, the underlying value of a named basic as Go's `print` writes it, rather than by
+`ToString()`. The converter-side alternative of casting a type-parameter argument to an underlying type has no type
+to cast to.
+
+— G (measured 2026-10-16 with a go/types census of `print`/`println` arguments; COORD: record before the seat lands)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
