@@ -1138,6 +1138,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"unpackEface":     goosAny,
 		"valueInterface":  goosAny, // a free function `valueInterface(v Value, safe bool)`, not a method
 		"Value.Interface": goosAny,
+		// TypeAssert[T] (Go 1.25) is `v.Interface().(T)` by its own doc, implemented by reinterpreting the data
+		// word through unsafe: a fabricated eface for an interface T, a `*(*T)(v.ptr)` read for a concrete one.
+		// Neither can be honored in managed storage, and the eface read panicked on every json/asn1/gob/xml
+		// marshal path at Go 1.26. The hand-own answers Go's definition from the managed value.
+		"TypeAssert":      goosAny,
 		"Value.Bool":      goosAny,
 		"Value.Int":       goosAny,
 		"Value.Uint":      goosAny,
