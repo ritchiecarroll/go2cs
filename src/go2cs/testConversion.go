@@ -3330,6 +3330,17 @@ func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName stri
 			return true
 		}
 
+		// A1, the one Q25 case that is sized and ruled (COORD 2026-10-16): a production pointer
+		// implementer of an interface declared in the external test package itself. The adapter is a
+		// class in the test compilation, so nothing mutates the production type and the reference model
+		// can host it. crypto/mlkem at Go 1.26: *DecapsulationKey768 against mlkem_test's
+		// decapsulationKey[E]. MEASURED before the cut, two-seeded on the five rows that took the
+		// recompile fallback: crypto/ecdh (lifted _ᴛ1/_ᴛ2) and crypto/mlkem move to the reference model,
+		// ecdh with an identical verdict set; crypto/sha3, net/netip and text/tabwriter emit identically.
+		if isTestLocalInterfaceName(ifaceName) {
+			return true
+		}
+
 		inner = strings.TrimPrefix(inner, "global::")
 
 		if strings.HasPrefix(inner, productionClassName+".") ||
@@ -3350,6 +3361,14 @@ func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName stri
 	}
 
 	return false
+}
+
+// isTestLocalInterfaceName reports whether a record's interface is declared in the external test
+// package: its outer name (before any type-argument list) is bare. The universe's error is bare too
+// and is not the test package's.
+func isTestLocalInterfaceName(ifaceName string) bool {
+	outer, _, _ := strings.Cut(strings.TrimPrefix(ifaceName, "global::"), "<")
+	return outer != "" && outer != "error" && !strings.Contains(outer, ".")
 }
 
 // isTestAnchoredConversionRecord decides the anchor for an EXTERNAL variant GoImplicitConv
