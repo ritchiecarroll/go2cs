@@ -516,7 +516,7 @@ partial class time_package
     // service thread waits on alongside its high-resolution timer so a newly-armed earlier deadline
     // interrupts an in-progress wait.
     private static readonly object s_timerLock = new();
-    private static readonly PriorityQueue<(runtimeTimer timer, int64 gen), int64> s_timerHeap = new();
+    private static readonly PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)> s_timerHeap = new();
 
     // golib's deadlock report asks whether a timer is still pending (Go: checkdead's timer scan), since
     // an AfterFunc can still start a goroutine. Registered with the heap itself, so it exists whenever a
@@ -831,11 +831,11 @@ partial class time_package
         // bubble's clock can make it due, and the clock moves only in the bubble's Run.
         if (timer.fake is { } bubble)
         {
-            fakeHeapOf(bubble).Enqueue((timer, timer.gen), when);
+            fakeHeapOf(bubble).Enqueue((timer, timer.gen), heapPrio(timer, when));
             return;
         }
 
-        s_timerHeap.Enqueue((timer, timer.gen), when);
+        s_timerHeap.Enqueue((timer, timer.gen), heapPrio(timer, when));
 
         if (s_timerThread is null)
         {
@@ -873,8 +873,15 @@ partial class time_package
     // bubble's lock, and CheckTimers reads the bubble's clock BEFORE taking s_timerLock.
 
     // The bubble's fake heap, created on first arm. Under s_timerLock.
-    private static PriorityQueue<(runtimeTimer timer, int64 gen), int64> fakeHeapOf(SyncTestBubble bubble) =>
-        (PriorityQueue<(runtimeTimer timer, int64 gen), int64>)(bubble.TimerState ??= new PriorityQueue<(runtimeTimer timer, int64 gen), int64>());
+    private static PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)> fakeHeapOf(SyncTestBubble bubble) =>
+        (PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)>)(bubble.TimerState ??= new PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)>());
+
+    // A heap entry's order: its deadline, then a tiebreak. Go re-randomizes a FAKE timer's rand at every
+    // insert (maybeAdd, go1.26.9 runtime/time.go:739-743) and orders the heap on (when, rand), so bubbled
+    // timers due at one fake instant fire in no fixed order, which internal/synctest's
+    // TestTimerNondeterminism checks across 1000 runs. A real timer's tiebreak stays 0, as before.
+    private static (int64 when, uint rand) heapPrio(runtimeTimer timer, int64 when) =>
+        (when, timer.fake is null ? 0u : (uint)System.Random.Shared.Next());
 
     // Go's sg.timers.check(sg.now): every fake timer due at the bubble's clock fires.
     private static void checkBubbleTimers(SyncTestBubble bubble)
@@ -901,12 +908,12 @@ partial class time_package
             if (bubble.TimerState is null)
                 return 0;
 
-            PriorityQueue<(runtimeTimer timer, int64 gen), int64> heap = fakeHeapOf(bubble);
+            PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)> heap = fakeHeapOf(bubble);
 
-            while (heap.TryPeek(out (runtimeTimer timer, int64 gen) entry, out int64 when))
+            while (heap.TryPeek(out (runtimeTimer timer, int64 gen) entry, out (int64 when, uint rand) prio))
             {
                 if (entry.timer.gen == entry.gen)
-                    return when;
+                    return prio.when;
 
                 heap.Dequeue();
             }
@@ -989,12 +996,12 @@ partial class time_package
     // under s_timerLock, it moves every timer due at `now` out of `heap` into `due` and returns the
     // next deadline (0 when nothing is armed). Extracted verbatim from serviceTimers for S3, so the
     // real clock and a bubble's fake one are ONE engine with two clocks.
-    private static int64 collectDueLocked(PriorityQueue<(runtimeTimer timer, int64 gen), int64> heap, int64 now, bool sync,
+    private static int64 collectDueLocked(PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)> heap, int64 now, bool sync,
         List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due)
     {
         int64 deadline = 0;
 
-        while (heap.TryPeek(out (runtimeTimer timer, int64 gen) entry, out int64 when))
+        while (heap.TryPeek(out (runtimeTimer timer, int64 gen) entry, out (int64 when, uint rand) prio))
         {
             if (entry.timer.gen != entry.gen)
             {
@@ -1004,14 +1011,14 @@ partial class time_package
                 continue;
             }
 
-            if (when > now)
+            if (prio.when > now)
             {
-                deadline = when;
+                deadline = prio.when;
                 break;
             }
 
             heap.Dequeue();
-            takeDueLocked(entry.timer, when, now, sync, due, heap);
+            takeDueLocked(entry.timer, prio.when, now, sync, due, heap);
         }
 
         return deadline;
@@ -1023,7 +1030,7 @@ partial class time_package
     // entry off `heap` (or, for the run-now path, holds no live entry for it).
     private static void takeDueLocked(runtimeTimer timer, int64 when, int64 now, bool sync,
         List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due,
-        PriorityQueue<(runtimeTimer timer, int64 gen), int64> heap)
+        PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)> heap)
     {
         // runtime.timer.unlockAndRun: capture the callback, advance or clear `when`, and
         // run the callback only after the lock is released. `delay` is how LATE the
@@ -1060,7 +1067,7 @@ partial class time_package
             }
 
             timer.when = next;
-            heap.Enqueue((timer, timer.gen), next);
+            heap.Enqueue((timer, timer.gen), heapPrio(timer, next));
         }
         else
         {
