@@ -89,6 +89,8 @@ public class CrossClassGenericInterfaceAdapterTests
         [assembly: GoImplement<global::go.prod_package.DecapKey, global::go.probe_package.decapKeyLike<global::go.probe_package.encapKeyLike>>(Pointer = true)]
         [assembly: GoImplement<global::go.prod_package.EncapKey, global::go.probe_package.encapKeyLike>(Pointer = true)]
         [assembly: GoImplement<global::go.prod_package.HostKey, global::go.prod_package.hostDecapLike<global::go.probe_package.encapKeyLike>>(Pointer = true)]
+        [assembly: GoImplement<global::go.prod_package.KwKey, global::go.probe_package.@base>(Pointer = true)]
+        [assembly: GoImplement<global::go.prod_package.KwDecap, global::go.probe_package.decapKeyLike<global::go.probe_package.@base>>(Pointer = true)]
 
         namespace go;
 
@@ -114,6 +116,21 @@ public class CrossClassGenericInterfaceAdapterTests
 
             public static object Bytes(this ж<HostKey> Ꮡh) => default!;
 
+            // A KEYWORD-named interface from the other class, alone and as a generic type argument.
+            public partial struct KwKey
+            {
+            }
+
+            public static object Bytes(this ж<KwKey> Ꮡk) => default!;
+
+            public partial struct KwDecap
+            {
+            }
+
+            public static ж<KwKey> EncapsulationKey(this ж<KwDecap> Ꮡd) => default!;
+
+            public static object Bytes(this ж<KwDecap> Ꮡd) => default!;
+
             internal partial interface hostDecapLike<E>
             {
                 object Bytes();
@@ -137,6 +154,11 @@ public class CrossClassGenericInterfaceAdapterTests
             {
                 object Bytes();
                 E EncapsulationKey();
+            }
+
+            internal partial interface @base
+            {
+                object Bytes();
             }
         }
         """;
@@ -250,6 +272,23 @@ public class CrossClassGenericInterfaceAdapterTests
 
         StringAssert.Contains(line, "class HostKeyжhostDecapLike : ", "the adapter name is composed from the simple interface name");
         StringAssert.Contains(line, "hostDecapLike<global::go.probe_package.encapKeyLike>,", "the type argument is unchanged");
+    }
+
+    /// <summary>
+    /// A KEYWORD-named interface from the other class keeps its <c>@</c> wherever it is a type reference: in
+    /// the base list, alone and as a generic type argument. Unescaped, <c>probe_package.base</c> is a parse
+    /// error after the dot.
+    /// </summary>
+    [TestMethod]
+    public void AKeywordNamedInterfaceIsEscapedInTheBaseList()
+    {
+        (Dictionary<string, string> adapters, Compilation _) = RunImplementGenerator();
+
+        string alone = ClassLine(Adapter(adapters, "KwKey-", "-ptr"));
+        string argument = ClassLine(Adapter(adapters, "KwDecap-", "-ptr"));
+
+        StringAssert.Contains(alone, ": global::go.probe_package.@base,", "the keyword interface itself");
+        StringAssert.Contains(argument, ": global::go.probe_package.decapKeyLike<global::go.probe_package.@base>,", "the keyword interface as a type argument");
     }
 
     /// <summary>
