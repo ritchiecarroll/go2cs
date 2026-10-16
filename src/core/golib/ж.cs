@@ -689,7 +689,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // can at worst allocate one extra handle that the finalizer frees).
     // Whether T is a Go fixed array (array<E>, or a defined `type A [N]E` wrapper) whose element E holds a
     // managed reference. Per T and static, so the pointer conversion pays one static read for it, the
-    // PrefixChain gate's posture. A reference-type T keeps the data-pin arm it always had.
+    // PrefixChain gate's posture. A reference-type T (any) asks the array it holds instead.
     private static class FixedArrayElements
     {
         internal static readonly bool HoldReferences = typeof(T).IsValueType && default(T) is IArray { ElementHoldsReferences: true };
@@ -1128,7 +1128,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // ("Object contains references"), which threw for unique's canonMap hashing a `[3]string` key
         // through unsafe.Pointer(&key). Such an array has no data to pin, so it takes the reference-bearing
         // token arm below, as any other reference-bearing pointee does.
-        if (value.Value is IArray arr && arr is not ISlice && !FixedArrayElements.HoldReferences)
+        if (value.Value is IArray arr && arr is not ISlice && !(typeof(T).IsValueType ? FixedArrayElements.HoldReferences : arr.ElementHoldsReferences))
         {
             uintptr dataAddr = (uintptr)value.pinnedArrayData(arr);
             ManagedPointerTokens.RegisterPinned((nuint)dataAddr.Value, value);

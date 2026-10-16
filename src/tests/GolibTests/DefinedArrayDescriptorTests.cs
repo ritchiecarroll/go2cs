@@ -144,6 +144,30 @@ public class DefinedArrayDescriptorTests
 
         Assert.AreEqual(42L, pinned.Value[0], "the fixed-array data arm no longer addresses element 0");
     }
+
+    [TestMethod]
+    public void AnInterfaceBoxHoldingAStringArrayConvertsWithoutPinning()
+    {
+        // unique.Make[any]([2]string{...}) hashes its key through unsafe.Pointer(&key) with T = any, so the
+        // box's static T says nothing about the array it holds: the gate reads the held array itself.
+        ж<object> held = new StandardBox<object>(new @string[] { "a", "b" }.array());
+        uintptr heldAddress = held;
+
+        Assert.AreNotEqual((uintptr)0, heldAddress, "an any box holding a [2]string converted to 0");
+        Assert.AreSame(held, (ж<object>)heldAddress, "an any box holding a [2]string does not resolve back to its box");
+
+        // An any box holding a reference-free array keeps the data-pin arm: the address is element 0's.
+        array<long> values = new long[] { 1, 2, 3 }.array();
+        ж<object> pinned = new StandardBox<object>(values);
+        uintptr dataAddress = pinned;
+
+        unsafe
+        {
+            *(long*)(nuint)dataAddress = 42;
+        }
+
+        Assert.AreEqual(42L, values[0], "an any box's fixed-array data arm no longer addresses element 0");
+    }
 }
 
 // The go2cs-gen shape of `type A [N]E`: an IArray<E> struct over a lazily allocated array<E>.
