@@ -103,6 +103,10 @@ public class SyncTestFakeTimeTests
                 Goroutine.Start(() => sleeper("c", 3));
                 Goroutine.Start(() => sleeper("a", 1));
                 Goroutine.Start(() => sleeper("b", 2));
+
+                // Main outlives the last deadline: a bubble's time stops when main returns (go1.26.9
+                // runtime/synctest.go:230-233).
+                time.Sleep(Seconds(4));
             })));
 
         Assert.AreEqual("abc", order, "fake time advances to each deadline in turn");
@@ -141,6 +145,10 @@ public class SyncTestFakeTimeTests
                     inBubble = SyncTestBubble.Current is not null;
                     ranAtNs = (long)time.Since(start);
                 });
+
+                // Main outlives the deadline, as time stops when main returns (go1.26.9
+                // runtime/synctest.go:230-233).
+                time.Sleep(Seconds(8));
             })));
 
         Assert.IsTrue(inBubble, "an AfterFunc's goroutine is started by the bubble and belongs to it");
@@ -161,6 +169,10 @@ public class SyncTestFakeTimeTests
                 beforeWaitNs = time.Now().UnixNano();
                 SyncTestBubble.Wait();
                 afterWaitNs = time.Now().UnixNano();
+
+                // Main outlives the sleeper: returning over a blocked member is a deadlock (go1.26.9
+                // runtime/synctest.go:246-247).
+                time.Sleep(Seconds(61));
             })));
 
         Assert.AreEqual(beforeWaitNs, afterWaitNs, "Wait returned over the sleeper without moving fake time");
@@ -179,13 +191,16 @@ public class SyncTestFakeTimeTests
     [TestMethod]
     public void ABubbleBlockedForeverWithTimersPendingStillReportsItsDeadlock()
     {
-        // Run keeps advancing fake time while timers remain; once none is pending and a member is
-        // still blocked, it reports Go's deadlock.
+        // Run keeps advancing fake time while timers remain; once none is pending and the bubble is
+        // still blocked, it reports Go's deadlock. Main is the one blocked: had it returned, time would
+        // have stopped there and the text would be the main-exited one (go1.26.9
+        // runtime/synctest.go:230-233, 246-249).
         Exception? escaped = OnGoroutine(() =>
             SyncTestBubble.Run(() =>
             {
                 channel<int> never = new(0);
-                Goroutine.Start(() => { time.Sleep(Seconds(10)); never.Receive(); });
+                time.Sleep(Seconds(10));
+                never.Receive();
             }));
 
         StringAssert.Contains(escaped?.Message, "deadlock: all goroutines in bubble are blocked");

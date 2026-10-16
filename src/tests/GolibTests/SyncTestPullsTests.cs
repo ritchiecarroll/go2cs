@@ -136,7 +136,8 @@ public class SyncTestPullsTests
             }
         });
 
-        StringAssert.Contains(escaped?.Message, "deadlock: all goroutines in bubble are blocked");
+        // f returned over the blocked member: Go's main-exited deadlock (go1.26.9 runtime/synctest.go:246-247).
+        StringAssert.Contains(escaped?.Message, "deadlock: main bubble goroutine has exited but blocked goroutines remain");
         Assert.IsNull(releaseEscaped, $"the release escaped: {releaseEscaped}");
         Assert.IsTrue(releasedAt >= 0, "the release ran");
         Assert.IsTrue(reportedAt > releasedAt, "the acquired bubble reported its deadlock only after Release");
