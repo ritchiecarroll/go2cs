@@ -2194,6 +2194,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTypeInference() => CheckTarget("TypeInference");
 
     [TestMethod]
+    public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
+
+    [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]

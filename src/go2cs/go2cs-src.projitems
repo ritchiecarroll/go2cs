@@ -583,6 +583,7 @@
     <None Include="$(MSBuildThisFileDirectory)rootGoTypeDescriptor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeParamNilArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeParamConstArg_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeParamFloatConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedConstMinMaxArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainGoRootFix_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warningClearEmission_test.go" />
