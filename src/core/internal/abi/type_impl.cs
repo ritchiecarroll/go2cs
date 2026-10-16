@@ -348,7 +348,14 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
         t.Align_ = (uint8)align;
         t.FieldAlign_ = (uint8)align;
     } else {
+        // The Size_ FIELD of an unknown-size descriptor holds ^uintptr(0), never 0. Size() refuses by name, but
+        // the converted runtime and internal/runtime read the field directly, and 0 is a SIZE a direct reader
+        // would act on, as unique's zero-size arm did. No Go type has this size: it is past the address space,
+        // where gc rejects a type, and Go's own overflow and allocation guards (math.MulUintptr, maxAlloc) reject
+        // it loudly. No production path builds one today: the census found 0 production instantiations
+        // with an unnamed array type argument.
         t.sizeUnknown = true;
+        t.Size_ = ~(uintptr)0;
     }
     // PtrBytes is the pointer-bearing PREFIX of the type, and it is what Pointers() reports. Leaving
     // it unstamped made every synthesized descriptor answer "I hold no pointers", which is a claim
@@ -583,7 +590,7 @@ public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
 // Hand-owned for one arm: a descriptor whose Go size could not be derived (sizeUnknown) refuses by name. Its
 // unstamped Size_ is 0, and 0 is a SIZE. unique.Make reads it as the zero-size type and returns the shared zerobase
 // handle for every value, so two different [2]string pairs compared equal. Every other descriptor answers Size_.
-public static uintptr Size(this ref Type t) {
+[GoRecv] public static uintptr Size(this ref Type t) {
     if (t.sizeUnknown) {
         throw global::go.golib.RuntimeErrorPanic.UnknownGoSize("the size", t.sysType, t.arrayDims);
     }

@@ -34,6 +34,7 @@ public class AbiUnknownArrayLengthTests
         Assert.AreEqual(
             "runtime error: the size of [?]string is not known (the length of [?]string is not carried for an unnamed array type argument)",
             Assert.ThrowsException<PanicException>(() => descriptor.Size()).Message, "the refusal's text");
+        Assert.AreEqual(~(uintptr)0, descriptor.Value.Size_, "a direct reader of the Size_ FIELD must not see a plausible 0");
         AssertRefusesByName(() => abi.Len(descriptor), "Len()");
         AssertRefusesByName(() => abi.ArrayType(descriptor), "ArrayType()");
     }
