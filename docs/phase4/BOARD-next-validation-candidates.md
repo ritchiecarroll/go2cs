@@ -27289,5 +27289,29 @@ only slice captures are crypto/tls/cache.go:33 and :38's `der []byte`, the calle
 allocation, so no slice-over-ptr case exists in the tree (census: a go/types walk of `std` with tests).
 
 — C1 (2026-10-17; COORD ruled the predicate and this row)
+## 2026-10-17 — P2: an untyped-constant call to a MULTI-parameter generic must spell every type argument, so one C# cannot name would break it — RECORDED, not reproduced, no seat
+
+The untyped-constant rule (claude/p2-untyped-const-typearg, d8740b96ce) gives a call explicit type
+arguments when only untyped constants fix one of its type parameters. C# has no partial explicit
+type arguments, so on a multi-parameter callee it spells ALL of them: `keyed(k, 4)` becomes
+`keyed<K', nint>(k, 4)`. If the other argument's type had no C# name, a call that compiled bare would
+stop compiling. G raised this in review.
+
+**Measured** with a probe through `keyed[K comparable, V any](k K, v V)`, base and cut converters,
+Release build, linux, go1.26.9. Six K shapes: an anonymous struct, a function-local type, an array
+of anonymous structs, an anonymous struct over a type parameter inside a generic function, an
+anonymous interface, and a bool. All six compile with the cut, because the converter lifts anonymous
+and local types to named C# types (`main_k`, `main_loc`, `inGeneric_k<T>`) before any call names
+them. The cut prints Go's output for all six (`int`); the base prints `int32`.
+
+The shape does occur in the rule's std population: 3 of its 20 calls are reflect's
+`setField[S, V any](in S, offset uintptr, value V)` with S an anonymous struct
+(`setField(struct{ _, a, _ uintptr }{}, …, 1)`, all_test.go TestIsZero). Copied into the probe, the
+cut emits `setField<main_in, nint>(new main_in(), …, 1)`, which compiles and prints Go's values.
+
+**Not seated.** No shape broke. If one the converter cannot name is found, the remedy is to decline
+the rule for that call and keep the bare form.
+
+— P2 (measured 2026-10-17; raised by G in review of d8740b96ce)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

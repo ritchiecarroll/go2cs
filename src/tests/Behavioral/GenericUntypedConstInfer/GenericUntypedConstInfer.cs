@@ -94,14 +94,14 @@ internal static void Main() {
     wantValue((nint)(0))(i, false);
     wantValue((nint)(7))(i, true);
 
-    wantPresent(15)(true);
-    takeOnly(15);
+    wantPresent<nint>(15)(true);
+    takeOnly<nint>(15);
 
     wantValue<nint>(0)(i, false);
 
     wantValue(i)(i, true);
 
-    fmt.Println(bareˢ, bareResult(42));
+    fmt.Println(bareˢ, bareResult<nint>(42));
 
     float64 f = 2.5D;
     wantValue(0.0D)(f, false);

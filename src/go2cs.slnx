@@ -1112,6 +1112,7 @@
     <Project Path="tests/Behavioral/UnexportedIfaceDynamicAssert/UnexportedIfaceDynamicAssert.csproj" />
     <Project Path="tests/Behavioral/UnicodeConsoleOutput/UnicodeConsoleOutput.csproj" />
     <Project Path="tests/Behavioral/UnsafePointerWordRead/UnsafePointerWordRead.csproj" />
+    <Project Path="tests/Behavioral/UntypedConstTypeArg/UntypedConstTypeArg.csproj" />
     <Project Path="tests/Behavioral/UntypedFloatTypedCompare/UntypedFloatTypedCompare.csproj" />
     <Project Path="tests/Behavioral/UntypedIntExactConstArithmetic/UntypedIntExactConstArithmetic.csproj" />
     <Project Path="tests/Behavioral/UntypedIntInterfaceBox/UntypedIntInterfaceBox.csproj" />

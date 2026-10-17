@@ -2423,6 +2423,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUntypedConstFloatContext() => CheckTarget("UntypedConstFloatContext");
 
     [TestMethod]
+    public void CheckUntypedConstTypeArg() => CheckTarget("UntypedConstTypeArg");
+
+    [TestMethod]
     public void CheckUntypedConstWideMask() => CheckTarget("UntypedConstWideMask");
 
     [TestMethod]

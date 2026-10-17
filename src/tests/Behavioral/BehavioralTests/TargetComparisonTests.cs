@@ -2426,6 +2426,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUntypedConstFloatContext() => CheckTarget("UntypedConstFloatContext");
 
     [TestMethod]
+    public void CheckUntypedConstTypeArg() => CheckTarget("UntypedConstTypeArg");
+
+    [TestMethod]
     public void CheckUntypedConstWideMask() => CheckTarget("UntypedConstWideMask");
 
     [TestMethod]
