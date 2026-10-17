@@ -100,6 +100,13 @@ func (v *Visitor) boxPointerIntoEmptyInterface(target types.Type, value ast.Expr
 		return rendered
 	}
 
+	// A TYPE-PARAMETER value takes its own arm, here where the target is known to be a real empty interface: a
+	// slot of type-parameter type (`eq(v1, v2)` with eq func(E, E) bool) is not one, and wrapping there would turn E
+	// into object (applyTypedNilTypeParamBox).
+	if typeParam, ok := v.getType(value, false).(*types.TypeParam); ok {
+		return applyTypedNilTypeParamBox(typeParam, rendered)
+	}
+
 	return v.applyTypedNilPointerBox(value, rendered)
 }
 
@@ -113,10 +120,6 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 	}
 
 	valueType := v.getType(value, false)
-
-	if typeParam, ok := valueType.(*types.TypeParam); ok {
-		return applyTypedNilTypeParamBox(typeParam, rendered)
-	}
 
 	if isExactUnsafePointer(valueType) {
 		return v.applyTypedNilUnsafePointerBox(valueType, v.unsafePointerExprNeverRendersNull(value), rendered)
@@ -142,7 +145,9 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 	return rendered + "." + TypedNilBoxAccessor
 }
 
-// applyTypedNilTypeParamBox is the boundary treatment for a value of TYPE-PARAMETER type: inside a generic body the
+// applyTypedNilTypeParamBox is the boundary treatment for a value of TYPE-PARAMETER type bound for a REAL empty
+// interface (the caller checks the target with isEmptyInterfaceTarget, which rejects a type-parameter slot): inside a
+// generic body the
 // converter cannot tell whether the type argument is a pointer, a func, an unsafe.Pointer or none of them, so the
 // value takes golib's OrTypedNilOf, which decides once per type argument (errors_test's testAsType[E compError]
 // boxed a nil *fs.PathError as Go's nil interface: `%T` read <nil> and `any(e) == nil` answered true). A type
@@ -216,10 +221,6 @@ func typeParamCanHoldNilReference(typeParam *types.TypeParam) bool {
 func (v *Visitor) applyTypedNilPointerBoxToType(valueType types.Type, rendered string) string {
 	if rendered == "" || valueType == nil {
 		return rendered
-	}
-
-	if typeParam, ok := valueType.(*types.TypeParam); ok {
-		return applyTypedNilTypeParamBox(typeParam, rendered)
 	}
 
 	if isExactUnsafePointer(valueType) {

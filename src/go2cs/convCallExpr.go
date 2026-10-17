@@ -2555,7 +2555,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							}
 
 							// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
-							if typeParam, isTypeParam := argType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) {
+							if typeParam, isTypeParam := argType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) && isEmptyInterfaceTarget(paramType) {
 								callExprContext.markAnyBoxedTypeParamArg(j)
 							}
 
