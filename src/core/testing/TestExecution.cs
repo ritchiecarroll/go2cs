@@ -1131,6 +1131,19 @@ public sealed class TestExecution
         // Go's parallelStart.Add(1): counted here, once the test is released and holds its slot
         // (testing.go:1805, right after t.tstate.waitParallel()), not when Parallel is called.
         Interlocked.Increment(ref s_parallelStart);
+
+        // ABANDONED WHILE QUEUED for the slot (G's review, BLOCKING): the watchdog abandoned this test while it
+        // waited above, and its Exchange found no slot to give back, so the slot just taken would be held by a
+        // body nobody waits for, and every parallel test queued behind it would wait forever. Give it back and
+        // leave without running the body, as FailNow leaves. Abandon sets the flag under m_syncRoot BEFORE its
+        // own Exchange, so in every order exactly one side releases. parallelStart was counted above and
+        // Execute's finally counts parallelStop, so the pair still balances (AllocsPerRun reads it).
+        if (Abandoned)
+        {
+            ReleaseParallelSlotOnce();
+            GoexitException.MarkGoroutineExiting();
+            throw new TestAbortException();
+        }
     }
 
     /// <summary>
