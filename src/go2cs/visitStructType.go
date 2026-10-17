@@ -655,6 +655,22 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		}
 
 		if field.Names == nil {
+			// An embed is a field the converter declares (owner ruling (A)), so under the zero-size layout arc's
+			// explicit layout it carries its Go offset like any other field, and a ZERO-SIZE embed is readonly for
+			// the same reason a zero-size named field is. One go/types field, so the flat index advances once,
+			// before any path below that skips the embed.
+			var embedOffsetAttr, embedReadOnly string
+
+			if hasZeroSizeLayout {
+				embedOffsetAttr = zeroSizeLayout.fieldOffsetAttribute(layoutFieldIndex)
+
+				if zeroSizeLayout.fieldIsZeroSize(layoutFieldIndex) {
+					embedReadOnly = "readonly "
+				}
+			}
+
+			layoutFieldIndex++
+
 			// Check for promoted fields
 			var ident *ast.Ident
 			var ok bool
@@ -928,7 +944,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				// promoted through another package's embed is unique in this struct's tree — an unmarked
 				// io_test `Buffer{bytes.Buffer; ReaderFrom; WriterTo}` would otherwise be given the
 				// embedded Buffer's ReadFrom and WriteTo, which Go drops as ambiguous.
-				v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+				v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
 			} else {
 				var handled bool
 
@@ -938,13 +954,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 							// An embedded pointer to a PREDECLARED type has nothing to promote and is a plain field;
 							// the `/*embed*/` comment is what lets the reflection projection report it Anonymous
 							// (a field named after its type is otherwise indistinguishable from an embed).
-							v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+							v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					} else if _, ok = identType.(*types.Struct); !ok {
 						if _, ok := identObj.Type().(*types.Named); !ok {
 							// An embedded PREDECLARED type (`struct{ int }`): the same plain-field emission, marked.
-							v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+							v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
 							handled = true
 						}
 					}
@@ -958,7 +974,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				// struct read at Go's layout (runtime's lfstack node, `struct{ LFNode; data int }`) found its
 				// fields at the wrong offsets (owner ruling (A), 2026-10-16, uniform over value and pointer embeds).
 				if !handled {
-					v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+					v.writeString(target, "%s%s %s %s%s %s;%s", embedOffsetAttr, embedMarker, getAccess(goTypeName), embedReadOnly, csEmitTypeName, embedName, tagComment)
 				}
 			}
 
