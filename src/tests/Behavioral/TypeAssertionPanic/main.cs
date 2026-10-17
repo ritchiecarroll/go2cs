@@ -1,11 +1,22 @@
 namespace go;
 
+using errors = errors_package;
 using fmt = fmt_package;
 using runtime = runtime_package;
 
 partial class main_package {
 
 partial struct celsius /*num:float64*/;
+
+partial struct myErr {
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string myErrˢ = "myErr"u8;
+
+internal static @string Error(this ref myErr _) {
+    return myErrˢ;
+}
 
 partial interface shape {
     float64 area();
@@ -66,7 +77,10 @@ private static readonly @string intToRuntimeErrorˢ = "int-to-runtime.Error"u8;
 private static readonly @string nilToRuntimeErrorˢ = "nil-to-runtime.Error"u8;
 private static readonly @string squareToShapeˢ = "square-to-shape"u8;
 private static readonly @string circleToShapeˢ = "circle-to-shape"u8;
+private static readonly @string boomˢ = "boom"u8;
+private static readonly @string errorToMyErrˢ = "error-to-*myErr"u8;
 private static readonly @string intToIntˢ = "int-to-int"u8;
+private static readonly @string errorToErrorˢ = "error-to-error"u8;
 private static readonly @string circleToShapeˢ2 = "*circle-to-shape"u8;
 private static readonly @string commaOkˢ = "comma-ok"u8;
 private static readonly object commaOkˢ2 = (@string)"comma-ok:"u8;
@@ -120,11 +134,21 @@ internal static void Main() {
         _ = circʗ1._<shape>();
     });
 
+    error err = errors.New(boomˢ);
+    var errʗ1 = err;
+    @catch(errorToMyErrˢ, () => {
+        _ = errʗ1._<ж<myErr>>();
+    });
+
     var boxedʗ5 = boxed;
     @catch(intToIntˢ, () => {
         _ = boxedʗ5._<nint>();
     });
     any ptr = Ꮡ(new circle(1D));
+    var errʗ2 = err;
+    @catch(errorToErrorˢ, () => {
+        _ = errʗ2._<error>();
+    });
     var ptrʗ1 = ptr;
     @catch(circleToShapeˢ2, () => {
         _ = ptrʗ1._<shape>();

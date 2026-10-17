@@ -81,6 +81,35 @@ public class RuntimeTypeAssertionTests
     // An assertion TO an interface reports the dynamic type, the interface and the first method of it the dynamic
     // type lacks (getitab's TypeAssertionError{nil, typ, inter, itabInit(m, false)}); the static source type is
     // not part of the sentence.
+    // The static source type is part of Go's sentence: an `error` operand prints "error", a named interface
+    // operand its own name. golib cannot see the static type of an `object` receiver, so the error carrier passes
+    // typeof(error) and the converter adds the source as the first type argument for any other named interface.
+    [TestMethod]
+    public void AnErrorSourceNamesErrorAsTheInterface()
+    {
+        error err = go.errors_package.New("boom");
+        AssertTypeAssertionError(PanicValue(() => err._<@string>()),
+            "interface conversion: error is *errors.errorString, not string", "error asserted to string (generic form)");
+    }
+
+    [TestMethod]
+    public void ANamedInterfaceSourceNamesItself()
+    {
+        IMissingShape source = new MissingShapeImpl();
+        string name = GoReflect.GoTypeName(typeof(IMissingShape));
+
+        AssertTypeAssertionError(PanicValue(() => source._<IMissingShape, @string>()),
+            $"interface conversion: {name} is {GoReflect.GoTypeName(typeof(MissingShapeImpl))}, not string", "named interface asserted to string");
+    }
+
+    [TestMethod]
+    public void AnObjectSourceStillNamesTheEmptyInterface()
+    {
+        object boxed = (nint)7;
+        AssertTypeAssertionError(PanicValue(() => boxed._<object, @string>()),
+            "interface conversion: interface {} is int, not string", "object asserted to string (two type arguments)");
+    }
+
     [TestMethod]
     public void AnAssertionToAnInterfaceNamesTheMissingMethod()
     {
@@ -130,6 +159,13 @@ public interface IMissingShape
     void Beta();
     void gamma();
     void Alpha();
+}
+
+public sealed class MissingShapeImpl : IMissingShape
+{
+    public void Alpha() { }
+    public void Beta() { }
+    public void gamma() { }
 }
 
 public struct HoldsBetaOnly;

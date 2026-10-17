@@ -152,6 +152,7 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
+    <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
   </ItemGroup>

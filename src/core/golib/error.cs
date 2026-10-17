@@ -243,7 +243,7 @@ public static class errorExtensions
         // recoverable Go panic, and killed os's dirFS.Open path-fixup (io/fs TestGlob,
         // TestReadDirPath, TestReadFilePath). Commit cb0f58078 closed the INTERFACE half of this
         // same defect; the dispatch above closes the CONCRETE-type half.
-        return ((object)target)._<T>();
+        return target._<error, T>();
     }
 
     public static bool _<[DynamicallyAccessedMembers(

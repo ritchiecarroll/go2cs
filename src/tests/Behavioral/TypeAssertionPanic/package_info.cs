@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "ABI6gOiAooDsooKAgoKClLaiABIEgpaQppCSkKaCkKaCkKiQkpCSgpCUgpCmkJKCkJKQgKQ=", "41-49:1;57-57:1;60-60:2;61-61:3;65-65:4;69-69:5;73-73:6;74-74:7;76-76:8;79-79:9;82-82:10;84-84:11;85-85:12")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "ABAygAALEoDogKKA7KKCgIKCgpS2ogAVBIKWkKaQkpCmgpCmgpCokJKQkoKQlIKQpoKQppCSgpCSkJKQgKQ=", "46-54:1;62-62:1;65-65:2;66-66:3;70-70:4;74-74:5;78-78:6;79-79:7;81-81:8;84-84:9;88-88:10;91-91:11;93-93:12;94-94:13;95-95:14")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,6 +69,7 @@ public static partial class main_package
     internal partial interface shape {}
     internal partial struct celsius {}
     internal partial struct circle {}
+    internal partial struct myErr {}
     internal partial struct point {}
     internal partial struct square {}
     // </TypeAccessibility>
@@ -80,6 +81,7 @@ public static partial class main_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>

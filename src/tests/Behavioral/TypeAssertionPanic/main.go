@@ -8,16 +8,21 @@
 // string, so `r.(runtime.Error)` and `r.(error)` missed on a recovered assertion failure. The
 // recovered value's type, its runtime.Error assertion and its text are all compared.
 //
-// Sources are empty interfaces. A named non-empty interface as the source (error, io.Reader) prints
-// its own name in Go, and the converted assertion does not yet carry the static interface type.
+// The source is an empty interface or error. A named non-empty interface as the source (io.Reader)
+// prints its own name in Go, and the converted assertion does not yet carry the static interface type.
 package main
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 )
 
 type celsius float64
+
+type myErr struct{}
+
+func (*myErr) Error() string { return "myErr" }
 
 type shape interface {
 	area() float64
@@ -78,9 +83,14 @@ func main() {
 	var circ any = circle{1}
 	catch("circle-to-shape", func() { _ = circ.(shape) })
 
+	// 6. An error source: Go names the static interface, error.
+	var err error = errors.New("boom")
+	catch("error-to-*myErr", func() { _ = err.(*myErr) })
+
 	// NEGATIVE CONTROLS - these must NOT panic.
 	catch("int-to-int", func() { _ = boxed.(int) })
 	var ptr any = &circle{1}
+	catch("error-to-error", func() { _ = err.(error) })
 	catch("*circle-to-shape", func() { _ = ptr.(shape) })
 	catch("comma-ok", func() { _, ok := boxed.(string); fmt.Println("comma-ok:", ok) })
 
