@@ -25,7 +25,7 @@ internal static @string apply(Func<any, @string> f, any v) {
 }
 
 internal static @string describe<T>(T v) {
-    return fmt.Sprintf("%v/%T"u8, v, v);
+    return fmt.Sprintf("%v/%T"u8, (v).OrTypedNilOf(), (v).OrTypedNilOf());
 }
 
 internal static any returned() {
