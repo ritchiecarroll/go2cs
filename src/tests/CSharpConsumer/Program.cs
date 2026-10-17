@@ -88,8 +88,11 @@ static class Program
         var (num, aerr) = strconv.Atoi("42");   // (nint, error)
         Check("3 strconv.Atoi returns (nint, error)", aerr == nil && num == 42);
         slice<nint> nums = new nint[] { 1, 2, 3 };
-        nums = append(nums, (nint)4, (nint)5);  // literals are C# int: cast them to Go's int
+        nums = append(nums, 4, 5);              // C# int literals append to a slice<nint>
         Check("3 append to a slice<nint>", len(nums) == 5 && nums[4] == 5);
+        slice<long> big = new long[] { 5 };
+        big = append(big, 6, 7);                // and to any Go integer slice
+        Check("3 append takes C# int literals for a slice<long>", len(big) == 3 && big[2] == 7);
 
         // 4. Strings.
         @string hello = "héllo, 世界";      // System.String converts to @string (UTF-16 to UTF-8)
