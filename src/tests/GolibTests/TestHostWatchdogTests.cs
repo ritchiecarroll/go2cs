@@ -172,4 +172,62 @@ public class TestHostWatchdogTests
         Assert.IsTrue(reporter.Events.Any(e => e.Test == "TestAParent" && e.Action == "fail" && e.Abandoned), "the parent was not abandoned");
         Assert.IsTrue(reporter.Events.Any(e => e.Test == "TestZParallel" && e.Action == "pass"), "the later parallel test did not run");
     }
+
+    // G's review, fix 2: the descriptor limit. A test may lower RLIMIT_NOFILE (syscall's TestPrlimitFileLimit), and
+    // the host puts the run's limit back between tests. An ABANDONED test's thread can still lower it later, while
+    // another test runs. The run's limit is the one restored, and drift found after an abandon names the abandoned
+    // test, since it may be the one that moved it. Linux and macOS only (HostDescriptorLimit.Applies).
+    [TestMethod]
+    public void AnAbandonedTestsLateDescriptorLimitChangeIsUndoneAndNamed()
+    {
+        if (!HostDescriptorLimit.Applies || HostDescriptorLimit.Snapshot() is not HostDescriptorLimit.RLimit original)
+        {
+            Assert.Inconclusive("RLIMIT_NOFILE is not readable on this host");
+            return;
+        }
+
+        HostDescriptorLimit.RLimit lowered = new() { Cur = original.Cur - 1, Max = original.Max };
+        using ManualResetEventSlim mayLower = new(false);
+        using ManualResetEventSlim hasLowered = new(false);
+        using ManualResetEventSlim release = new(false);
+
+        TestRegistry registry = new("watchdog", []);
+        registry.Add("TestAHangs", _ =>
+        {
+            // Blocks past the deadline; abandoned, its thread then lowers the limit while TestBPasses runs.
+            mayLower.Wait();
+            HostDescriptorLimit.Restore(lowered);
+            hasLowered.Set();
+            release.Wait();
+        }, "a_test.go", 1);
+        registry.Add("TestBPasses", _ => { mayLower.Set(); hasLowered.Wait(TimeSpan.FromSeconds(10)); }, "a_test.go", 2);
+
+        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        TestRunner runner = new(registry, OptionsWithDeadline("300ms"), reporter, ".", ".");
+
+        System.IO.TextWriter stderr = Console.Error;
+        System.IO.StringWriter captured = new();
+        bool returned;
+        HostDescriptorLimit.RLimit? after;
+
+        try
+        {
+            Console.SetError(captured);
+            Task<nint> run = Task.Run(runner.RunAll);
+            returned = run.Wait(TimeSpan.FromSeconds(30));
+            after = HostDescriptorLimit.Snapshot();
+        }
+        finally
+        {
+            Console.SetError(stderr);
+            release.Set();
+            HostDescriptorLimit.Restore(original);
+        }
+
+        Assert.IsTrue(returned, "RunAll did not return within 30 s");
+        Assert.IsTrue(hasLowered.IsSet, "the abandoned test's thread never lowered the limit: the arm did not run its case");
+        Assert.AreEqual(original.Cur, after?.Cur, "the run ended under the abandoned test's lowered limit, not the run's own");
+        StringAssert.Contains(captured.ToString(), "RLIMIT_NOFILE", "no drift report after the abandon");
+        StringAssert.Contains(captured.ToString(), "TestAHangs", "the drift report does not name the abandoned test");
+    }
 }
