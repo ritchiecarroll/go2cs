@@ -106,6 +106,41 @@ i7's disk, not in the account, so treat them as a convenience. This section and 
   - the nugetgo rebuild wave;
   - the version-line PLAN doc;
   - the owed G BOARD rows.
+- 2026-10-16/17, the VISUAL-PARITY CAMPAIGN is APPROVED at 1.26 ("do as many as practical"). It runs as a PARITY STAGE
+  on the hop branch, AFTER the H8 correctness seats and BEFORE the corpus re-bank, so validation runs once against the
+  final emission. The shift-count cleanup above joins it. The plan and ranking are in
+  docs/phase4/proposals/visual-parity-review.md (17 items). COORD defaults the owner did not override: interceptors for
+  @string slots NO; pointer params keep their Go name; `default!` -> `default`; collection expressions where the type
+  is explicit; switch shape case by case; `while (ᐧ)` -> `for (;;)`.
+- 2026-10-16/17, standing owner principles (apply to every seat):
+  - nothing is left out of a correctness rule for being unreached ("I would rather it work, even if it's not reachable");
+  - on emission shape, prefer readability and Go parity even at higher generator cost; behavior MUST match; if it
+    cannot be simplified, it is what it must be.
+- 2026-10-16/17, owner shape rulings:
+  - uniform embeds: every value and pointer embed is a converter-declared `/*embed*/` field in Go order (LANDED, hop
+    465bed007b; the hand-owned follow-up is G's seat 3858f2f5e5);
+  - raw-memory struct field writes read as Go through generated C# 14 ref extension properties
+    (`buf.SubstituteNameOffset = x`) (LANDED, hop 3bdac60827);
+  - the explicit type-assertion form `x._<I, T>()` is APPROVED where no simpler shape exists (unexported,
+    root-namespace and generic-instance sources; P1's stack);
+  - PLAIN string literals: about 0.7 ns per literal evaluation is an accepted trade for readability. The design is
+    plain literals at @string-typed sites via a cached conversion, keeping the hoist for any/generic slots, invalid
+    UTF-8 literals and multi-line raw strings. An EXPERIMENT is running (branch claude/coord-plain-literal-exp, local,
+    a COORD sub-agent). It also answers the owner's two questions: is the hoist worth keeping as an opt-in optimization
+    mode, and should any-slot literals use overloads, interceptors or pre-boxed cache entries.
+- 2026-10-17, owner ask: publish a STRINGS DESIGN doc ("design alternatives considered") once the plain-literal design is
+  decided, so everyone with a string idea can be pointed to it. Sources: docs/phase4/proposals/
+  string-literal-interceptors.md and u8-zero-copy-string.md, plus the plain-literal experiment's report. Present tense;
+  perf claims relative or platform-named.
+- 2026-10-16/17, the C# consumer API ("Good to know" page) items are APPROVED: `Must()` (Go parity, not OrThrow), the
+  `$(Product)=='go2cs'` pack hook, opt-in global package aliases, AsReadOnlySet, ReceiveAsync/SendAsync. Branch
+  claude/coord-gtk-consumer-api (G reviewed OK); it merges onto the hop. Doc text for release:
+  docs/phase4/proposals/gtk-doc-updates.md; review: good-to-know-review.md.
+- 2026-10-17: the i9 may NOT run net/http again (the owner's one-shot experiment was used); net/http regression reads
+  go to P2. crypto/tls stays banned on the i9.
+- 2026-10-17, ROLL ORDER: monitor weekly credits every turn. At about 90%, order the fleet STATE BLOCKs (the save-state
+  skill); by 95%, a FULL all-lanes roll from GitHub (not local memory), with new paste-ready prompts per lane naming
+  the machine, folders and worktrees to start from.
 
 ### 1k.3 COORD's next steps, in order
 
