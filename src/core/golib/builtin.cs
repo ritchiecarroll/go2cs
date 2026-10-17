@@ -2978,6 +2978,8 @@ public static partial class builtin
 
                 if (args[i] is @string text)
                     sink.Write(text.ToSpan());
+                else if (args[i] is IRuntimePrintable printable)
+                    printable.RuntimePrint(); // runtime.hex and runtime.quoted: printhex and printquoted
                 else
                     writePrintText(sink, printArg(args[i]).AsSpan(), buffer);
             }
