@@ -523,6 +523,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckEmbedDirectiveForms() => CheckTarget("EmbedDirectiveForms");
 
     [TestMethod]
+    public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceWitness() => CheckTarget("EmbeddedInterfaceWitness");
 
     [TestMethod]

@@ -198,7 +198,7 @@ internal static (slice<byte>, error) publicKeyBytes<P>(ж<ecdsa.Curve<P>> Ꮡc, 
 
 // PrivateKey represents an ECDSA private key.
 partial struct PrivateKey {
-    public partial ref PublicKey PublicKey { get; }
+    /*embed*/ public PublicKey PublicKey;
     // D is the private scalar value.
     //
     // Deprecated: modifying the raw value can produce invalid keys, and may

@@ -7,7 +7,7 @@ using strings = strings_package;
 partial class main_package {
 
 partial struct myType {
-    public partial ref bytes_package.Buffer Buffer { get; }
+    /*embed*/ public bytes_package.Buffer Buffer;
 }
 
 partial struct inner {
@@ -24,7 +24,7 @@ internal static nint Get(this inner i) {
 }
 
 partial struct outer {
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
 }
 
 partial struct own {

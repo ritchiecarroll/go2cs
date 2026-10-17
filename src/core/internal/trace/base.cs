@@ -41,7 +41,7 @@ internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
 // evTable contains the per-generation data necessary to
 // interpret an individual event.
 partial struct evTable {
-    internal partial ref sync sync { get; }
+    /*embed*/ internal sync sync;
     internal dataTable<stringID, @string> strings;
     internal dataTable<stackID, stack> stacks;
     internal map<uint64, frame> pcs;
@@ -246,7 +246,7 @@ partial struct stackID /*num:uint64*/;
 
 // cpuSample represents a CPU profiling sample captured by the trace.
 partial struct cpuSample {
-    internal partial ref schedCtx schedCtx { get; }
+    /*embed*/ internal schedCtx schedCtx;
     internal ΔTime time;
     internal stackID stack;
 }

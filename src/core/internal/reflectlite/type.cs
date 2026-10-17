@@ -104,7 +104,7 @@ public static abiꓸKind ΔString => /* abi.String */ 24;
 public static abiꓸKind Struct => /* abi.Struct */ 25;
 
 partial struct rtype {
-    public partial ref ж<@internal.abi_package.Type> Type { get; }
+    /*embed*/ public ж<@internal.abi_package.Type> Type;
 }
 
 // name is an encoded type name with optional extra data.

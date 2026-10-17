@@ -40,7 +40,7 @@ partial struct slots {
 
 partial struct Embedder {
     public @string Name;
-    internal partial ref slots slots { get; }
+    /*embed*/ internal slots slots;
 }
 
 public static nint Slots(this ref Embedder e) {

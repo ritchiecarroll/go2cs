@@ -18,7 +18,7 @@ partial class gcimporter_package {
 // A pkgReader holds the shared state for reading a unified IR package
 // description.
 partial struct pkgReader {
-    public partial ref global::go.@internal.pkgbits_package.PkgDecoder PkgDecoder { get; }
+    /*embed*/ public global::go.@internal.pkgbits_package.PkgDecoder PkgDecoder;
     internal fakeFileSet fake;
     internal ж<types.Context> ctxt;
     internal map<@string, ж<types.Package>> imports; // previously imported packages, indexed by path
@@ -109,7 +109,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
 // A reader holds the state for reading a single unified IR element
 // within a package.
 partial struct reader {
-    public partial ref global::go.@internal.pkgbits_package.Decoder Decoder { get; }
+    /*embed*/ public global::go.@internal.pkgbits_package.Decoder Decoder;
     internal ж<pkgReader> p;
     internal ж<readerDict> dict;
 }

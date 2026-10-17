@@ -302,7 +302,7 @@ internal static error Close(this ref chunkedWriter cw) {
 // trailers, but flush out chunks aggressively in the middle for
 // request bodies which may be generated slowly. See Issue 6574.
 partial struct FlushAfterChunkWriter {
-    public partial ref ж<bufio_package.Writer> Writer { get; }
+    /*embed*/ public ж<bufio_package.Writer> Writer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

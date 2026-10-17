@@ -21,7 +21,7 @@ partial struct holder {
 }
 
 partial struct wrapper {
-    internal partial ref ж<holder> holder { get; }
+    /*embed*/ internal ж<holder> holder;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

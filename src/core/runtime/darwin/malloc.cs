@@ -2448,8 +2448,8 @@ partial struct persistentAlloc {
 }
 
 partial struct globalAllocᴛ1 /*dyn*/ {
-    internal partial ref mutex mutex { get; }
-    internal partial ref persistentAlloc persistentAlloc { get; }
+    /*embed*/ internal mutex mutex;
+    /*embed*/ internal persistentAlloc persistentAlloc;
 }
 internal static ж<globalAllocᴛ1> ᏑglobalAlloc = new StandardBox<globalAllocᴛ1>(new globalAllocᴛ1(nil));
 internal static ref globalAllocᴛ1 globalAlloc => ref ᏑglobalAlloc.Value;

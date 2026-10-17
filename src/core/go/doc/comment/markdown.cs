@@ -12,7 +12,7 @@ partial class comment_package {
 
 // An mdPrinter holds the state needed for printing a Doc as Markdown.
 partial struct mdPrinter {
-    public partial ref ж<Printer> Printer { get; }
+    /*embed*/ public ж<Printer> Printer;
     internal @string headingPrefix;
     internal bytes.Buffer raw;
 }

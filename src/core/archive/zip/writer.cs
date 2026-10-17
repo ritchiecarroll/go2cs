@@ -37,7 +37,7 @@ partial struct Writer {
 }
 
 partial struct header {
-    public partial ref ж<FileHeader> FileHeader { get; }
+    /*embed*/ public ж<FileHeader> FileHeader;
     internal uint64 offset;
     internal bool raw;
 }
@@ -626,7 +626,7 @@ internal static (nint, error) Write(this dirWriter _, slice<byte> b) {
 }
 
 partial struct fileWriter {
-    internal partial ref ж<header> header { get; }
+    /*embed*/ internal ж<header> header;
     internal io.Writer zipw;
     internal ж<countWriter> rawCount;
     internal io.WriteCloser comp;

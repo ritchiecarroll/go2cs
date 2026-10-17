@@ -51,7 +51,7 @@ partial struct commentInfo {
 
 partial struct printer {
     // Configuration (does not change after initialization)
-    public partial ref Config Config { get; }
+    /*embed*/ public Config Config;
     internal ж<token.FileSet> fset;
     // Current state
     internal slice<byte> output;  // raw printer result
@@ -80,7 +80,7 @@ partial struct printer {
     internal slice<ж<ast.CommentGroup>> comments; // may be nil
     internal bool useNodeComments;                // if not set, ignore lead and line comments of nodes
     // Information about p.comments[p.cindex]; set up by nextComment.
-    internal partial ref commentInfo commentInfo { get; }
+    /*embed*/ internal commentInfo commentInfo;
     // Cache of already computed node sizes.
     internal map<ast.Node, nint> nodeSizes;
     // Cache of most recently computed line position.

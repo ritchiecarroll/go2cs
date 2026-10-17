@@ -226,8 +226,8 @@ partial struct Parser {
 
 // parseDoc is parsing state for a single doc comment.
 partial struct parseDoc {
-    public partial ref ж<Parser> Parser { get; }
-    public partial ref ж<Doc> Doc { get; }
+    /*embed*/ public ж<Parser> Parser;
+    /*embed*/ public ж<Doc> Doc;
     internal map<@string, ж<LinkDef>> links;
     internal slice<@string> lines;
     internal Func<@string, @string, bool> lookupSym;

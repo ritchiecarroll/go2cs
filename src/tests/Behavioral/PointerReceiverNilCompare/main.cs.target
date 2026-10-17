@@ -21,7 +21,7 @@ internal static bool same(this ж<box> Ꮡb, ж<box> Ꮡother) {
 }
 
 partial struct embedder {
-    internal partial ref box box { get; }
+    /*embed*/ internal box box;
     internal nint tag;
 }
 

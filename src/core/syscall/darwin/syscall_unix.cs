@@ -37,7 +37,7 @@ internal static nint clen(slice<byte> n) {
 
 // Mmap manager, for use by operating system-specific implementations.
 partial struct mmapper {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal map<ж<byte>, slice<byte>> active; // active mappings; key is last byte in mapping
     internal Func<uintptr, uintptr, nint, nint, nint, int64, (uintptr, error)> mmap;
     internal Func<uintptr, uintptr, error> munmap;

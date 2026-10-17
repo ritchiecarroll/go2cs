@@ -156,7 +156,7 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
 }
 
 partial struct ΔMapType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Key;
     public ж<Type> Elem;
     public ж<Type> Bucket;
@@ -177,7 +177,7 @@ public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
 }
 
 partial struct ΔArrayType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
     public ж<Type> Slice;
     public uintptr Len;

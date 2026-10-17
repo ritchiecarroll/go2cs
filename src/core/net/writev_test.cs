@@ -109,7 +109,7 @@ public static void TestBuffers_WriteTo(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct testBuffer_writeTo_writeLog /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal slice<nint> log;
 }
 

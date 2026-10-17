@@ -19,19 +19,19 @@ public static void Rename(this ref Base b, @string target) {
 }
 
 partial struct ByValue {
-    public partial ref Base Base { get; }
+    /*embed*/ public Base Base;
 }
 
 partial struct ByPointer {
-    public partial ref ж<Base> Base { get; }
+    /*embed*/ public ж<Base> Base;
 }
 
 partial struct ForeignByValue {
-    public partial ref PromotedTargetParam.targetlib_package.Finder Finder { get; }
+    /*embed*/ public PromotedTargetParam.targetlib_package.Finder Finder;
 }
 
 partial struct ForeignByPointer {
-    public partial ref ж<PromotedTargetParam.targetlib_package.Finder> Finder { get; }
+    /*embed*/ public ж<PromotedTargetParam.targetlib_package.Finder> Finder;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

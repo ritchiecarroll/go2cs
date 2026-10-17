@@ -14,7 +14,7 @@ partial struct sElemᴛ1 /*dyn*/ {
 partial struct sElem /*[]sElemᴛ1*/;
 
 partial struct embeds {
-    internal partial ref sElem sElem { get; }
+    /*embed*/ internal sElem sElem;
 }
 
 partial struct holds {
@@ -30,26 +30,26 @@ internal static nint M(this @base b) {
 }
 
 partial struct viaX {
-    internal partial ref @base @base { get; }
+    /*embed*/ internal @base @base;
 }
 
 partial struct viaY {
-    internal partial ref @base @base { get; }
+    /*embed*/ internal @base @base;
 }
 
 partial struct twice {
-    internal partial ref viaX viaX { get; }
-    internal partial ref ж<viaY> viaY { get; }
+    /*embed*/ internal viaX viaX;
+    /*embed*/ internal ж<viaY> viaY;
     public nint D;
 }
 
 partial struct once {
-    internal partial ref viaX viaX { get; }
+    /*embed*/ internal viaX viaX;
     public nint D;
 }
 
 partial struct deeper {
-    internal partial ref twice twice { get; }
+    /*embed*/ internal twice twice;
 }
 
 partial struct local /*global::go.ReflectFieldMetadata.fieldlib_package.Outer*/;
@@ -69,7 +69,7 @@ partial struct holdsNamed {
 }
 
 partial struct embedsNamed {
-    internal partial ref myInt myInt { get; }
+    /*embed*/ internal myInt myInt;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

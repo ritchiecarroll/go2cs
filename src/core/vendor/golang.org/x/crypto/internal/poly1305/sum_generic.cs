@@ -53,7 +53,7 @@ partial struct macState {
 }
 
 partial struct macGeneric {
-    internal partial ref macState macState { get; }
+    /*embed*/ internal macState macState;
     internal array<byte> buffer = new(TagSize);
     internal nint offset;
 }

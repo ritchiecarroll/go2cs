@@ -25,7 +25,7 @@ internal static T show<T>(this tag<T> t) {
 }
 
 partial struct wrapped<T> {
-    internal partial ref tag<T> tag { get; }
+    /*embed*/ internal tag<T> tag;
     internal nint count;
 }
 

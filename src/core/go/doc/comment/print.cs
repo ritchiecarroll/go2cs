@@ -150,7 +150,7 @@ public static @string DefaultID(this ref Heading h) {
 }
 
 partial struct commentPrinter {
-    public partial ref ж<Printer> Printer { get; }
+    /*embed*/ public ж<Printer> Printer;
 }
 
 // Comment returns the standard Go formatting of the [Doc],

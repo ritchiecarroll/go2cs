@@ -11,7 +11,7 @@ partial struct sym {
 }
 
 partial struct Node {
-    internal partial ref ж<sym> sym { get; }
+    /*embed*/ internal ж<sym> sym;
     public nint Weight;
 }
 

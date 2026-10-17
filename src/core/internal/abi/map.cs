@@ -27,7 +27,7 @@ internal static UntypedInt bitsetLSB => 0x0101010101010101;
 public const uint64 MapCtrlEmpty = /* bitsetLSB * uint64(ctrlEmpty) */ 9259542123273814144;
 
 partial struct ΔMapType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Key;
     public ж<Type> Elem;
     public ж<Type> Group; // internal type representing a slot group

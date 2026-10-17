@@ -30,7 +30,7 @@ partial struct onePassProg {
 // A onePassInst is a single instruction in a one-pass regular expression program.
 // It is the same as syntax.Inst except for the new 'Next' field.
 public partial struct onePassInst {
-    public partial ref regexp.syntax_package.Inst Inst { get; }
+    /*embed*/ public regexp.syntax_package.Inst Inst;
     public slice<uint32> Next;
 }
 

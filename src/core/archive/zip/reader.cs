@@ -52,14 +52,14 @@ partial struct Reader {
 // A ReadCloser is a [Reader] that must be closed when no longer needed.
 partial struct ReadCloser {
     internal ж<os.File> f;
-    public partial ref Reader Reader { get; }
+    /*embed*/ public Reader Reader;
 }
 
 // A File is a single file in a ZIP archive.
 // The file information is in the embedded [FileHeader].
 // The file content can be accessed by calling [File.Open].
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     internal ж<Reader> zip;
     internal io.ReaderAt zipr;
     internal int64 headerOffset; // includes overall ZIP archive baseOffset

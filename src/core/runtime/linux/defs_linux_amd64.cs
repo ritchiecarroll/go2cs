@@ -130,7 +130,7 @@ partial struct siginfoFields {
 }
 
 partial struct siginfo {
-    internal partial ref siginfoFields siginfoFields { get; }
+    /*embed*/ internal siginfoFields siginfoFields;
     // Pad struct to the max size in the kernel.
     internal array<byte> _ = new((uintptr)_si_max_size - /* unsafe.Sizeof(siginfoFields{}) */ (uintptr)24);
 }
@@ -154,7 +154,7 @@ partial struct sigeventFields {
 }
 
 partial struct sigevent {
-    internal partial ref sigeventFields sigeventFields { get; }
+    /*embed*/ internal sigeventFields sigeventFields;
     // Pad struct to the max size in the kernel.
     internal array<byte> _ = new((uintptr)_sigev_max_size - /* unsafe.Sizeof(sigeventFields{}) */ (uintptr)24);
 }

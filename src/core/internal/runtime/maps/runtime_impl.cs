@@ -107,4 +107,12 @@ partial class maps_package
     // managed type names no Go type at all, and cannot be a map key's; it answers so, plainly.
     internal static partial @string typeString(ж<abi.Type> typ) =>
         typ != nil && typ.Value.sysType is { } st ? GoReflect.GoTypeName(st) : "<type with no managed descriptor>";
+
+    // The panic value of mapKeyError (map.go:889-893): golib refuses an unhashable interface key on an
+    // empty or nil map with this, because golib's map<K,V> is a dictionary and never reaches the
+    // converted mapKeyError. golib sits below this package and cannot name unhashableTypeError, so the
+    // runtime package registers this as RuntimeErrorPanic.UnhashableKeyErrorValue (panicvalues_impl.cs).
+    // The descriptor is the managed-backed one typeString above reads, so Error() prints Go's spelling.
+    public static object unhashableKeyPanicValue(System.Type unhashable) =>
+        (error)new unhashableTypeError(abi.synthType(unhashable));
 }

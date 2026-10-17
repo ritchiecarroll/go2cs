@@ -278,7 +278,7 @@ public static @string Error(this ref CheckError s) {
 
 // A CheckEqualError is the result [CheckEqual] finding an error.
 partial struct CheckEqualError {
-    public partial ref CheckError CheckError { get; }
+    /*embed*/ public CheckError CheckError;
     public slice<any> Out1;
     public slice<any> Out2;
 }
