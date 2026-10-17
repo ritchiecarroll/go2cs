@@ -10,6 +10,15 @@ partial struct T {
     internal nint f;
 }
 
+partial struct pair {
+    internal ж<T> p;
+    internal nint n;
+}
+
+partial struct outer {
+    internal pair @in;
+}
+
 internal static void @try(@string name, Action register) {
     GoFrame ᒐ = default;
     try {
@@ -47,6 +56,11 @@ private static readonly object reassignedIsNilˢ = (@string)"reassigned is nil:"
 private static readonly @string funcVariableCapturesPtrˢ = "func variable captures ptr"u8;
 private static readonly @string funcVariableCapturesˢ = "func variable captures other object"u8;
 private static readonly @string funcVariableReassignedToˢ = "func variable reassigned to method value"u8;
+private static readonly @string structCaptureHoldsPtrˢ = "struct capture holds ptr"u8;
+private static readonly @string arrayCaptureHoldsPtrˢ = "array capture holds ptr"u8;
+private static readonly @string nestedStructCaptureHoldsˢ = "nested struct capture holds ptr"u8;
+private static readonly @string structCaptureHoldsOtherˢ = "struct capture holds other object"u8;
+private static readonly @string interfaceHoldingAStructˢ = "interface holding a struct that holds ptr"u8;
 private static readonly @string argIsPtrˢ = "arg is ptr"u8;
 
 internal static void Main() {
@@ -145,6 +159,57 @@ internal static void Main() {
         var vʗ4 = v;
                 cleanup = (nint p1) => vʗ4.release(p1);
         runtime.AddCleanup(v, cleanup, 0, new object?[] { v });
+    });
+
+    @try(structCaptureHoldsPtrˢ, () => {
+        var v = Ꮡ(new T(f: 16));
+        ref var p = ref heap<pair>(out var Ꮡp);
+        p = new pair(v, 1);
+        var pʗ1 = p;
+        runtime.AddCleanup(v, (nint _Δp0) => {
+            _ = pʗ1;
+        }, 0);
+    });
+
+    @try(arrayCaptureHoldsPtrˢ, () => {
+        var v = Ꮡ(new T(f: 17));
+        ref var a = ref heap<array<ж<T>>>(out var Ꮡa);
+        a = new ж<T>[]{default!, v}.array();
+        var aʗ1 = a;
+        runtime.AddCleanup(v, (nint _Δp0) => {
+            _ = aʗ1;
+        }, 0);
+    });
+
+    @try(nestedStructCaptureHoldsˢ, () => {
+        var v = Ꮡ(new T(f: 18));
+        ref var o = ref heap<outer>(out var Ꮡo);
+        o = new outer(new pair(v, 2));
+        var oʗ1 = o;
+        runtime.AddCleanup(v, (nint _Δp0) => {
+            _ = oʗ1;
+        }, 0);
+    });
+
+    @try(structCaptureHoldsOtherˢ, () => {
+        var v = Ꮡ(new T(f: 19));
+        var w = Ꮡ(new T(f: 20));
+        ref var p = ref heap<pair>(out var Ꮡp);
+        p = new pair(w, 3);
+        var pʗ2 = p;
+        runtime.AddCleanup(v, (nint _Δp0) => {
+            _ = pʗ2;
+        }, 0);
+        runtime.KeepAlive(w.OrTypedNil());
+    });
+
+    @try(interfaceHoldingAStructˢ, () => {
+        var v = Ꮡ(new T(f: 21));
+        any i = new pair(v, 4);
+        var iʗ1 = i;
+        runtime.AddCleanup(v, (nint _Δp0) => {
+            _ = iʗ1;
+        }, 0, new object?[] { i });
     });
 
     @try(argIsPtrˢ, () => {

@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAw2ooKAgraCoqSkABIEgoKCkLaCgoKQtoKCgpCSpoKCgoC2goKmgoKCkpCSgqaCgqaCkoCSgqaCgpCSpoKCgpCSgqaCgpKSpoKC", "28-32:1;42-45:1;44-44:1.1;47-51:2;50-50:2.1;53-58:3;56-56:3.1;60-64:4;63-63:4.1;66-69:5;71-78:6;74-74:6.1;75-75:6.2;80-83:7;85-90:8;87-87:8.1;92-96:9;94-94:9.1;98-104:10;101-101:10.1;106-111:11;108-108:11.1;113-116:12;115-115:12.1")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "ABVQooKAgraCoqSkABcEgoKCkLaCgoKQtoKCgpCSpoKCgoC2goKmgoKCkpCSgqaCgqaCkoCSgqaCgpCSpoKCgpCSgqaCgpKSpoKCkpC2goKSkLaCgpKQtoKCgpKQkqaCgoKQtoKC", "41-45:1;55-58:1;57-57:1.1;60-64:2;63-63:2.1;66-71:3;69-69:3.1;73-77:4;76-76:4.1;79-82:5;84-91:6;87-87:6.1;88-88:6.2;93-96:7;98-103:8;100-100:8.1;105-109:9;107-107:9.1;111-117:10;114-114:10.1;119-124:11;121-121:11.1;126-130:12;129-129:12.1;132-136:13;135-135:13.1;138-142:14;141-141:14.1;144-150:15;148-148:15.1;152-156:16;155-155:16.1;158-161:17;160-160:17.1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -66,6 +66,8 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct outer {}
+    internal partial struct pair {}
     public partial struct T {}
     // </TypeAccessibility>
 

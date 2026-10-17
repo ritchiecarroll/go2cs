@@ -13,7 +13,9 @@ import (
 // Refusing cases: the closure captures ptr, or a pointer to one of ptr's fields, or the cleanup is
 // a method value whose receiver is ptr.
 // The cleanup may also be a func-typed local whose every assignment is a func literal or a method
-// value; the converter passes the union of their captures.
+// value; the converter passes the union of their captures. A struct or array captured by value
+// refuses when a field or element is ptr. An interface holding such a struct does not: its data
+// word addresses a copy, not ptr.
 // Accepting cases: the closure captures another object, a plain value, or nothing, and the
 // case where a SIBLING closure in the same scope captures ptr while the cleanup closure
 // captures only another variable of that scope (a C# closure object can hold both), and the case
@@ -22,6 +24,17 @@ import (
 type T struct {
 	p *byte // a pointer field keeps T out of Go's tiny allocator
 	f int
+}
+
+// A struct and an array holding a *T, captured BY VALUE: Go's scan reads every pointer slot of
+// the cleanup's funcval, so a field or element that is ptr refuses the cleanup.
+type pair struct {
+	p *T
+	n int
+}
+
+type outer struct {
+	in pair
 }
 
 func try(name string, register func()) {
@@ -108,6 +121,38 @@ func main() {
 		cleanup := func(int) {}
 		cleanup = v.release
 		runtime.AddCleanup(v, cleanup, 0)
+	})
+
+	try("struct capture holds ptr", func() {
+		v := &T{f: 16}
+		p := pair{v, 1}
+		runtime.AddCleanup(v, func(int) { _ = p }, 0)
+	})
+
+	try("array capture holds ptr", func() {
+		v := &T{f: 17}
+		a := [2]*T{nil, v}
+		runtime.AddCleanup(v, func(int) { _ = a }, 0)
+	})
+
+	try("nested struct capture holds ptr", func() {
+		v := &T{f: 18}
+		o := outer{pair{v, 2}}
+		runtime.AddCleanup(v, func(int) { _ = o }, 0)
+	})
+
+	try("struct capture holds other object", func() {
+		v := &T{f: 19}
+		w := &T{f: 20}
+		p := pair{w, 3}
+		runtime.AddCleanup(v, func(int) { _ = p }, 0)
+		runtime.KeepAlive(w)
+	})
+
+	try("interface holding a struct that holds ptr", func() {
+		v := &T{f: 21}
+		var i any = pair{v, 4}
+		runtime.AddCleanup(v, func(int) { _ = i }, 0)
 	})
 
 	try("arg is ptr", func() {
