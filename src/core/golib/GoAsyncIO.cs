@@ -128,6 +128,20 @@ public static class GoAsyncIO
     }
 
     /// <summary>
+    /// Reports whether a readiness sink is registered for <paramref name="descriptor"/>, which is to
+    /// say whether the WAITER owns the descriptor's completions.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor to look up.</param>
+    /// <returns><c>true</c> when a sink is registered.</returns>
+    /// <remarks>
+    /// A submitting package whose OS routine also serves callers OUTSIDE the waiter reads this to
+    /// choose: an operation on a descriptor the waiter owns is issued through the completion
+    /// mechanism, and any other is issued exactly as the caller wrote it. Associating a descriptor
+    /// nobody waits on would route its completions to a port nobody reads.
+    /// </remarks>
+    public static bool HasReadiness(nuint descriptor) => s_sinks.ContainsKey(descriptor);
+
+    /// <summary>
     /// Gets the submitting package's state for <paramref name="descriptor"/>, creating it EXACTLY
     /// once.
     /// </summary>
