@@ -7,11 +7,11 @@ partial class main_package {
 internal static UntypedInt named => 7;
 
 internal static @string show<E>(E e) {
-    return fmt.Sprintf("%T %v"u8, e, e);
+    return fmt.Sprintf("%T %v"u8, (e).OrTypedNilOf(), (e).OrTypedNilOf());
 }
 
 internal static @string pair<E>(E a, E b) {
-    return fmt.Sprintf("%T"u8, b);
+    return fmt.Sprintf("%T"u8, (b).OrTypedNilOf());
 }
 
 internal static @string many<E>(params Span<E> esʗp) {
@@ -21,7 +21,7 @@ internal static @string many<E>(params Span<E> esʗp) {
 }
 
 internal static @string keyed<K, V>(K k, V v) {
-    return fmt.Sprintf("%T %T"u8, k, v);
+    return fmt.Sprintf("%T %T"u8, (k).OrTypedNilOf(), (v).OrTypedNilOf());
 }
 
 internal static void Main() {
