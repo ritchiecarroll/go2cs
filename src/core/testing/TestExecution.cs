@@ -232,6 +232,12 @@ public sealed class TestExecution
             children = m_children.ToArray();
         }
 
+        // The cascade tag first, before ANY verdict of this abandon is reported: an event another parallel test
+        // reports while the subtests below are being abandoned already ran beside an abandoned test, and must
+        // carry the tag (G's review). Only the root names itself; MarkAbandoned keeps the first test it is given.
+        if (abandonedWith is null)
+            m_runner.MarkAbandoned(Name);
+
         ReleaseParallelSlotOnce();
 
         long since = RunningSince;

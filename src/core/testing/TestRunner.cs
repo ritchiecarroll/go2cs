@@ -424,7 +424,9 @@ public sealed class TestRunner
 
         while (true)
         {
-            // Zero while the test has not started running: its thread has not reached the body yet.
+            // Zero while the test has not started running: its thread has not reached the body yet. Waiting a whole
+            // deadline then re-reading can overshoot by up to the thread's start latency, which only ever errs late
+            // (G's review: harmless, noted here rather than measured away).
             long since = execution.RunningSince;
             TimeSpan remaining = since == 0 ? deadline : deadline - Stopwatch.GetElapsedTime(since);
 
@@ -437,10 +439,7 @@ public sealed class TestRunner
             }
 
             if (execution.Abandon(deadline))
-            {
-                m_reporter.MarkAbandoned(execution.Name);
                 return false;
-            }
 
             task.GetAwaiter().GetResult();
             return true;
@@ -498,10 +497,7 @@ public sealed class TestRunner
                     // Abandon answers false when the test claimed its own verdict first; it stays pending
                     // until its thread completes, a moment later.
                     if (execution.Abandon(deadline))
-                    {
-                        m_reporter.MarkAbandoned(execution.Name);
                         pending.RemoveAt(i);
-                    }
 
                     continue;
                 }
@@ -635,6 +631,9 @@ public sealed class TestRunner
     internal void ReleaseParallelSlot(NestedRoot? root) => (root?.ParallelLimiter ?? m_parallelLimiter).Release();
 
     internal void Report(TestEvent testEvent) => m_reporter.Report(testEvent);
+
+    // TestExecution.Abandon's cascade tag (TestEvent.AfterAbandoned), set before its first verdict is reported.
+    internal void MarkAbandoned(string test) => m_reporter.MarkAbandoned(test);
 
     // Whether a registered test comes from the package's EXTERNAL (package x_test) files. Go's own definition is the
     // package clause: an external test file's clause is `<name>_test`. The converter stamps every test class with
