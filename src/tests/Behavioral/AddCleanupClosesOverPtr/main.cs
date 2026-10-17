@@ -19,6 +19,11 @@ partial struct outer {
     internal pair @in;
 }
 
+partial struct large {
+    internal ж<T> p;
+    internal array<int64> pad = new(16);
+}
+
 internal static void @try(@string name, Action register) {
     GoFrame ᒐ = default;
     try {
@@ -60,6 +65,7 @@ private static readonly @string structCaptureHoldsPtrˢ = "struct capture holds 
 private static readonly @string arrayCaptureHoldsPtrˢ = "array capture holds ptr"u8;
 private static readonly @string nestedStructCaptureHoldsˢ = "nested struct capture holds ptr"u8;
 private static readonly @string structCaptureHoldsOtherˢ = "struct capture holds other object"u8;
+private static readonly @string structOver128BytesHoldsˢ = "struct over 128 bytes holds ptr"u8;
 private static readonly @string interfaceHoldingAStructˢ = "interface holding a struct that holds ptr"u8;
 private static readonly @string argIsPtrˢ = "arg is ptr"u8;
 
@@ -168,7 +174,7 @@ internal static void Main() {
         var pʗ1 = p;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = pʗ1;
-        }, 0);
+        }, 0, null, new object?[] { p });
     });
 
     @try(arrayCaptureHoldsPtrˢ, () => {
@@ -178,7 +184,7 @@ internal static void Main() {
         var aʗ1 = a;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = aʗ1;
-        }, 0);
+        }, 0, null, new object?[] { a });
     });
 
     @try(nestedStructCaptureHoldsˢ, () => {
@@ -188,7 +194,7 @@ internal static void Main() {
         var oʗ1 = o;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = oʗ1;
-        }, 0);
+        }, 0, null, new object?[] { o });
     });
 
     @try(structCaptureHoldsOtherˢ, () => {
@@ -199,8 +205,18 @@ internal static void Main() {
         var pʗ2 = p;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = pʗ2;
-        }, 0);
+        }, 0, null, new object?[] { p });
         runtime.KeepAlive(w.OrTypedNil());
+    });
+
+    @try(structOver128BytesHoldsˢ, () => {
+        var v = Ꮡ(new T(f: 22));
+        ref var l = ref heap<large>(out var Ꮡl);
+        l = new large(p: v);
+        var lʗ1 = l;
+        runtime.AddCleanup(v, (nint _Δp0) => {
+            _ = lʗ1;
+        }, 0);
     });
 
     @try(interfaceHoldingAStructˢ, () => {

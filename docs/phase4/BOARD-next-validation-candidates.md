@@ -27252,6 +27252,17 @@ only `m`, a `HashTrieMap` STRUCT value, and the check never passes a struct capt
 **Trigger to revisit.** A tree whose census shows a residual site, or a dropped capture, inside a test Go FAILS with
 the closes-over-ptr panic.
 
+**Amended 2026-10-17 (struct and array captures, COORD follow-up after G's review).** A struct or array captured BY
+VALUE whose field or element is a pointer slot is now passed too (a fifth AddCleanup argument), and golib walks it
+through GoReflect.GoFields, bounded by depth 16. A capture over cmd/compile's 128-byte by-value limit is captured by
+reference in Go and is not passed. **One case Go refuses and we do not:** a SLICE whose backing array is ptr's own
+allocation (`s := ptr[:]` with ptr a `*[N]E`, then the cleanup reads `s`). Go's slot scan sees the slice's data
+pointer inside ptr's object; we do not follow slices, maps, channels or funcs, so that cleanup registers here.
+Population, go1.26.9 std: 44 AddCleanup calls, 3 composite captures, all `weak.Pointer` values (crypto/tls/cache.go:38,
+unique/canonmap.go:136, weak/pointer_test.go:167), each holding a weak handle, not ptr, so Go accepts all three. The
+only slice captures are crypto/tls/cache.go:33 and :38's `der []byte`, the caller's input bytes, not ptr's (`cert`'s)
+allocation, so no slice-over-ptr case exists in the tree (census: a go/types walk of `std` with tests).
+
 — C1 (2026-10-17; COORD ruled the predicate and this row)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

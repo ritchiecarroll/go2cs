@@ -37,6 +37,13 @@ type outer struct {
 	in pair
 }
 
+// Larger than cmd/compile's 128-byte by-value capture limit: captured by REFERENCE, so the funcval
+// holds a heap cell and Go accepts the cleanup.
+type large struct {
+	p   *T
+	pad [16]int64
+}
+
 func try(name string, register func()) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -147,6 +154,12 @@ func main() {
 		p := pair{w, 3}
 		runtime.AddCleanup(v, func(int) { _ = p }, 0)
 		runtime.KeepAlive(w)
+	})
+
+	try("struct over 128 bytes holds ptr", func() {
+		v := &T{f: 22}
+		l := large{p: v}
+		runtime.AddCleanup(v, func(int) { _ = l }, 0)
 	})
 
 	try("interface holding a struct that holds ptr", func() {

@@ -39,58 +39,84 @@ import (
 // Nothing else is passed: a method expression or package function has no captures, and any other
 // func value (a parameter, a package-level variable, a field, a call result) has no static fact and
 // stays unchecked. That residual is 0 call sites in the go1.26.9 tree.
-// Structs, slices, maps, channels, funcs and arrays are not passed: a struct value holding ptr in a
-// field, or a slice over ptr's own array, would be refused by Go and is not here (none in the
-// go1.26.9 tree's AddCleanup calls). When nothing qualifies, the call keeps its three-argument form.
+// A STRUCT or ARRAY captured by value is passed when some field or element, at any depth, is a pointer
+// slot. It goes in a fifth argument, and golib walks it through GoReflect.GoFields (captureKindOf).
+// Slices, maps, channels, funcs and strings are not passed: Go's slot scan sees their header
+// pointer, not ptr's object. The one exception Go refuses and this does not is a slice over ptr's
+// own array (BOARD row). When nothing qualifies, the call keeps its three-argument form.
 
-// addCleanupCaptureArgs returns the C# text of the fourth AddCleanup argument for callExpr, or ""
+// addCleanupCaptureArgs returns the C# text of the extra AddCleanup arguments for callExpr, or ""
 // when callExpr is not a call to runtime.AddCleanup or its cleanup carries no qualifying capture.
+// Pointer, unsafe.Pointer and interface captures go in the fourth argument. Struct and array
+// captures holding a pointer slot go in a fifth, which golib walks field by field: kept apart so an
+// interface capture whose dynamic value is a struct is never walked (Go's slot scan sees only the
+// interface's data word, which addresses a copy).
 func (v *Visitor) addCleanupCaptureArgs(callExpr *ast.CallExpr) string {
 	if len(callExpr.Args) != 3 || !v.isRuntimeAddCleanup(callExpr.Fun) {
 		return ""
 	}
 
-	var values []string
+	var captures []*ast.Ident
 
 	switch cleanup := ast.Unparen(callExpr.Args[1]).(type) {
 	case *ast.FuncLit:
-		for _, ident := range v.funcLitByValueCaptures(cleanup) {
-			if canAddressAllocation(v.info.TypeOf(ident)) {
-				if text := v.captureValueText(ident); text != "" {
-					values = append(values, text)
-				}
-			}
-		}
+		captures = v.funcLitByValueCaptures(cleanup)
 	case *ast.SelectorExpr:
 		if receiver := v.methodValueReceiver(cleanup); receiver != nil {
-			if text := v.captureValueText(receiver); text != "" {
-				values = append(values, text)
-			}
+			captures = []*ast.Ident{receiver}
 		}
 	case *ast.Ident:
-		for _, ident := range v.funcVariableCaptures(cleanup, callExpr.Pos()) {
-			if text := v.captureValueText(ident); text != "" {
-				values = append(values, text)
-			}
+		captures = v.funcVariableCaptures(cleanup, callExpr.Pos())
+	}
+
+	var pointers, composites []string
+
+	for _, ident := range captures {
+		kind := v.captureKindOf(v.info.TypeOf(ident))
+
+		if kind == captureNone {
+			continue
+		}
+
+		text := v.captureValueText(ident)
+
+		if text == "" {
+			continue
+		}
+
+		if kind == capturePointer {
+			pointers = append(pointers, text)
+		} else {
+			composites = append(composites, text)
 		}
 	}
 
-	if len(values) == 0 {
+	if len(composites) > 0 {
+		first := "null"
+
+		if len(pointers) > 0 {
+			first = "new object?[] { " + strings.Join(pointers, ", ") + " }"
+		}
+
+		return first + ", new object?[] { " + strings.Join(composites, ", ") + " }"
+	}
+
+	if len(pointers) == 0 {
 		return ""
 	}
 
-	return "new object?[] { " + strings.Join(values, ", ") + " }"
+	return "new object?[] { " + strings.Join(pointers, ", ") + " }"
 }
 
 // methodValueReceiver returns the receiver variable of a method value `x.m` whose receiver can
-// address an allocation, or nil for anything else (a method expression, a package function, a
+// address an allocation (a pointer, an interface, or a struct or array holding a pointer slot), or nil for anything else (a method expression, a package function, a
 // field, or a receiver that is not a plain variable).
 func (v *Visitor) methodValueReceiver(selector *ast.SelectorExpr) *ast.Ident {
 	if selection := v.info.Selections[selector]; selection == nil || selection.Kind() != types.MethodVal {
 		return nil
 	}
 
-	if receiver, ok := ast.Unparen(selector.X).(*ast.Ident); ok && canAddressAllocation(v.info.TypeOf(receiver)) {
+	if receiver, ok := ast.Unparen(selector.X).(*ast.Ident); ok && v.captureKindOf(v.info.TypeOf(receiver)) != captureNone {
 		return receiver
 	}
 
@@ -206,7 +232,7 @@ func (v *Visitor) funcVariableCaptures(ident *ast.Ident, callPos token.Pos) []*a
 		switch source := source.(type) {
 		case *ast.FuncLit:
 			for _, capture := range v.funcLitByValueCaptures(source) {
-				if canAddressAllocation(v.info.TypeOf(capture)) {
+				if v.captureKindOf(v.info.TypeOf(capture)) != captureNone {
 					add(capture)
 				}
 			}
@@ -279,8 +305,8 @@ func (v *Visitor) funcLitByValueCaptures(lit *ast.FuncLit) []*ast.Ident {
 
 // capturedByReference reports Go's capture mode for a local the way cmd/compile decides it: by
 // reference when the variable is assigned anywhere after its declaration or its address is taken.
-// (The compiler also captures a value larger than 128 bytes by reference; no pointer or interface
-// variable is that large, so the size rule cannot change what is passed here.)
+// (The compiler also captures a value larger than 128 bytes by reference; captureKindOf applies that
+// rule, which only a struct or array can reach.)
 func (v *Visitor) capturedByReference(local *types.Var) bool {
 	scope := local.Parent()
 	if scope == nil {
@@ -369,18 +395,80 @@ func (v *Visitor) captureValueText(ident *ast.Ident) string {
 	return v.convExpr(ident, nil)
 }
 
-// canAddressAllocation reports whether a value of typ is a pointer, unsafe.Pointer or interface:
-// the captured kinds this check passes (see the header).
-func canAddressAllocation(typ types.Type) bool {
+// The captured kinds this check passes (see the header).
+const (
+	captureNone      = iota // nothing in it can address ptr's allocation
+	capturePointer          // a pointer, unsafe.Pointer or interface: checked as itself
+	captureComposite        // a struct or array with a pointer slot: walked field by field in golib
+)
+
+// maxByValueCaptureSize is cmd/compile's limit for capturing a variable by VALUE: a larger one is
+// captured by reference, so its funcval slot addresses a heap cell, never ptr.
+const maxByValueCaptureSize = 128
+
+// captureKindOf classifies a by-value capture of type typ. A struct or array is a composite only if
+// some field or element, at any depth, is a pointer slot, and only within the by-value size limit
+// (sized for the target GOARCH); a slice, map, channel, func or string is never walked, since Go's
+// slot scan sees its header pointer, not ptr's object.
+func (v *Visitor) captureKindOf(typ types.Type) int {
 	if typ == nil {
-		return false
+		return captureNone
 	}
 
+	if isPointerSlot(typ) {
+		return capturePointer
+	}
+
+	if !holdsPointerSlot(typ, map[types.Type]bool{}) {
+		return captureNone
+	}
+
+	sizes := types.SizesFor("gc", platformArch(v.options.targetPlatform))
+
+	if sizes == nil {
+		sizes = types.SizesFor("gc", "amd64")
+	}
+
+	if sizes.Sizeof(typ) > maxByValueCaptureSize {
+		return captureNone
+	}
+
+	return captureComposite
+}
+
+// isPointerSlot reports whether a value of typ is one pointer slot: a pointer, unsafe.Pointer or
+// interface.
+func isPointerSlot(typ types.Type) bool {
 	switch under := typ.Underlying().(type) {
 	case *types.Pointer, *types.Interface:
 		return true
 	case *types.Basic:
 		return under.Kind() == types.UnsafePointer
+	}
+
+	return false
+}
+
+// holdsPointerSlot reports whether a struct or array of type typ has a pointer slot among its fields
+// or elements, at any depth. seen stops a recursive type.
+func holdsPointerSlot(typ types.Type, seen map[types.Type]bool) bool {
+	if seen[typ] {
+		return false
+	}
+
+	seen[typ] = true
+
+	switch under := typ.Underlying().(type) {
+	case *types.Struct:
+		for index := range under.NumFields() {
+			field := under.Field(index).Type()
+
+			if isPointerSlot(field) || holdsPointerSlot(field, seen) {
+				return true
+			}
+		}
+	case *types.Array:
+		return under.Len() > 0 && (isPointerSlot(under.Elem()) || holdsPointerSlot(under.Elem(), seen))
 	}
 
 	return false
