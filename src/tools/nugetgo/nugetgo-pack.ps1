@@ -516,6 +516,12 @@ Push-Location $converterDir
 try { & go @genArgs; if ($LASTEXITCODE -ne 0) { Refuse "gensourcemeta could not write the self-description ($LASTEXITCODE)" } }
 finally { Pop-Location }
 $projRefs = ($libraries | ForEach-Object { "    <ProjectReference Include=`"$(& $esc $_.FullName)`" PrivateAssets=`"all`" />" }) -join "`n"
+# Each packed package's own usings (build/<PackageId>.props): this tree's go.lib.pack.targets reads every packed package
+# directory's package_info.cs, so the one props names every package's namespace. Product=go2cs is what
+# the targets recognise a converted pack by.
+$packageDirs = ($libraries | ForEach-Object { "    <GoPackageDirectory Include=`"$(& $esc $_.DirectoryName)`" />" }) -join "`n"
+$packTargets = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'core/golib/buildTransitive/go.lib.pack.targets'
+if (-not (Test-Path -LiteralPath $packTargets -PathType Leaf)) { Refuse "no go.lib.pack.targets at $packTargets" }
 $pkgRefs = ((@($goRefs | ForEach-Object { "    <PackageReference Include=`"$_`" Version=`"`$(GoStdLibVersion)`" />" }) +
     @($requires | ForEach-Object { "    <PackageReference Include=`"$(& $esc $_.NuGetId)`" Version=`"$(& $esc $_.PackageVersion)`" />" })) -join "`n")
 $pageItems = ($pages | ForEach-Object {
@@ -544,9 +550,13 @@ $csproj = @"
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</PackageProjectUrl>
     <PackageTags>go2cs;golang;go</PackageTags>
+    <Product>go2cs</Product>
   </PropertyGroup>
   <ItemGroup>
 $projRefs
+  </ItemGroup>
+  <ItemGroup>
+$packageDirs
   </ItemGroup>
   <ItemGroup>
 $pkgRefs
@@ -559,6 +569,7 @@ $pkgRefs
     <None Include="go2cs/source-metadata.txt" Pack="true" PackagePath="go2cs" />
 $pageItems
   </ItemGroup>
+  <Import Project="$(& $esc $packTargets)" Condition="'`$(GoLibPackTargetsImported)' != 'true'" />
   <!-- Each package project's own assembly, as its project reference resolved it, under lib/<tfm>/. -->
   <Target Name="NugetgoModuleAssemblies" DependsOnTargets="ResolveProjectReferences">
     <ItemGroup>

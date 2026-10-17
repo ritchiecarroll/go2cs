@@ -119,4 +119,9 @@
 
   <!-- The symbol files beside a single-file host, on every publish (see the file). -->
   <Import Project="$(MSBuildThisFileDirectory)go.lib.symbols.targets" Condition="'$(GoLibSymbolsTargetsImported)' != 'true'" />
+
+  <!-- A converted package packed against the go.* packages (a `go2cs -recurse=nuget` conversion) writes its own
+       usings into build/<PackageId>.props at pack time (see the file). Inert unless the project's Product is go2cs
+       and it is being packed; the in-tree standard library imports the same file from src/Directory.Build.targets. -->
+  <Import Project="$(MSBuildThisFileDirectory)go.lib.pack.targets" Condition="'$(GoLibPackTargetsImported)' != 'true'" />
 </Project>

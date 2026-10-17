@@ -51,6 +51,26 @@ Against a go.lib published before the usings existed, `-TargetsFile src/core/gol
 imports the working-tree file explicitly. That is how the gate was read red-first, against the published
 1.24.13.3: without the file the first arm FAILS with CS0246 and CS0103; with it, both arms PASS.
 
+# `PackageUsings`: each package's own usings gate
+
+`PackageUsings` is the consumer fixture for the `build/<PackageId>.props` each converted package carries,
+written at pack time by golib's `buildTransitive/go.lib.pack.targets` from the package's `package_info.cs`. The
+props adds the package's own namespace as a global using, so a Go method of `encoding/hex` (namespace
+`go.encoding`) compiles without a hand-written `using go.encoding;`. `test-package-usings.ps1` packs
+`src/core/encoding/hex` from this tree (`--no-build`, so build the stdlib in Debug first), reads the props out
+of the nupkg, and builds the fixture against a published `go.encoding.hex` with that props imported explicitly:
+
+- PACK: the nupkg carries `build/go.encoding.hex.props`, and it names `go.encoding`;
+- a build and run of `Program.cs`, which declares no `using go.encoding;`;
+- a control that proves the arm can fail: without the props the build must fail with CS1929.
+
+```text
+pwsh src/tests/PackageTests/PackageUsings/test-package-usings.ps1 -Version <published go.encoding.hex version>
+```
+
+The gate was read red-first at the hop tip `5adb2dfb58`, before the targets existed: PACK FAILS (the packed
+nupkg carries no props).
+
 # `RidCompileAsset`: the RID-selected compile asset gate
 
 `RidCompileAsset` is the consumer fixture for go.lib's `buildTransitive/go.lib.targets`. A

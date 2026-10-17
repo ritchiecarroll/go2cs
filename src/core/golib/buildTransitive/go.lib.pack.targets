@@ -1,0 +1,96 @@
+<Project>
+  <!--
+    go.lib.pack.targets - Gbtc
+    Copyright © 2026 The go2cs Authors. All rights reserved.
+
+    Use of this source code is governed by an MIT-style license
+    that can be found in the LICENSE file.
+
+    THE PACKAGE'S OWN USINGS, written at PACK time into build/<PackageId>.props.
+
+    A converted Go package is a static class whose Go methods are extension methods, and C# brings an
+    extension method into scope only through a namespace import or `using static`; a `using x = y;`
+    alias never does. go.lib's consumer usings (go.lib.targets) import namespace `go`, which holds every
+    package whose import path has no slash. A package whose path has one (encoding/hex lives in
+    namespace `go.encoding`) needed a second, hand-written `using go.encoding;`, and without it a Go
+    method call failed with CS1929, naming some unrelated package's overload.
+
+    So each converted package ships build/<PackageId>.props, written here from the package's own
+    package_info.cs. It holds the package's namespace as a global using, under the same GoConsumerUsings
+    switch as go.lib's own usings. A package in namespace `go` needs none, so it gets no file.
+
+    The condition is evaluated in the consumer's ITEM pass, after every property, so a GoConsumerUsings
+    set in the consumer's csproj body is seen in the props although NuGet imports it ahead of that body.
+
+    NuGet imports build/<id>.props for a DIRECT package reference only, so a consumer gets the usings of
+    the packages it added and never those of the internal/* packages that arrive transitively.
+
+    WHO GETS ONE. A project whose Product is go2cs (the converter's csproj template sets it, so no
+    converted csproj changes) and that has a package_info.cs, at its root or, for a layout-L3 package,
+    in a per-GOOS folder. Every flavour's copy declares the same namespace and package class, and the
+    files are read from disk rather than from the compile items, so the props is the same whichever
+    $(GoTargetOS) the pack ran under. golib has no package_info.cs and gets none. A pack that bundles
+    SEVERAL converted packages into one nupkg (nugetgo-pack.ps1's module pack project) names their
+    directories as GoPackageDirectory items, and the one props covers all of them.
+
+    Set GoPackageUsingsProps=false to pack without the file.
+  -->
+  <PropertyGroup>
+    <GoLibPackTargetsImported>true</GoLibPackTargetsImported>
+  </PropertyGroup>
+
+  <!-- Before NuGet collects the package's files (_GetPackageFiles gathers every None with Pack=true). -->
+  <Target Name="GoWritePackageUsingsProps"
+          BeforeTargets="_GetPackageFiles"
+          Condition="'$(Product)' == 'go2cs' and '$(GoPackageUsingsProps)' != 'false' and '$(PackageId)' != ''">
+    <!-- One package_info.cs per package directory: the root copy, else the first per-GOOS copy. The
+         per-GOOS folders are read only when the root has none, so a real subpackage that happens to be
+         named for a GOOS (internal/syscall/windows) is never mistaken for a flavour folder of a package
+         that has its own root copy. -->
+    <ItemGroup>
+      <_GoPackageDirectory Include="@(GoPackageDirectory->'%(FullPath)')" />
+      <_GoPackageDirectory Include="$(MSBuildProjectDirectory)" Condition="'@(GoPackageDirectory)' == ''" />
+      <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/package_info.cs"
+                      Condition="Exists('%(_GoPackageDirectory.FullPath)/package_info.cs')" />
+      <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/windows/package_info.cs"
+                      Condition="!Exists('%(_GoPackageDirectory.FullPath)/package_info.cs') and Exists('%(_GoPackageDirectory.FullPath)/windows/package_info.cs')" />
+      <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/linux/package_info.cs"
+                      Condition="!Exists('%(_GoPackageDirectory.FullPath)/package_info.cs') and !Exists('%(_GoPackageDirectory.FullPath)/windows/package_info.cs') and Exists('%(_GoPackageDirectory.FullPath)/linux/package_info.cs')" />
+      <_GoPackageInfo Include="%(_GoPackageDirectory.FullPath)/darwin/package_info.cs"
+                      Condition="!Exists('%(_GoPackageDirectory.FullPath)/package_info.cs') and !Exists('%(_GoPackageDirectory.FullPath)/windows/package_info.cs') and !Exists('%(_GoPackageDirectory.FullPath)/linux/package_info.cs') and Exists('%(_GoPackageDirectory.FullPath)/darwin/package_info.cs')" />
+    </ItemGroup>
+
+    <!-- The converter's package_info.cs declares `namespace <ns>;` and then
+         `[GoPackage("<name>"...)] public static partial class <class>`. A namespace segment or class
+         that is a C# keyword is written escaped (`go.@internal`), and is used as written. -->
+    <ItemGroup>
+      <_GoPackageInfo>
+        <GoDeclared>$([System.Text.RegularExpressions.Regex]::IsMatch($([System.IO.File]::ReadAllText('%(FullPath)')), '(?m)^namespace\s+[\w.@]+\s*;[\s\S]*?\[GoPackage\("\w+"[^\]]*\)\]\s*public\s+static\s+(?:unsafe\s+)?partial\s+class\s+@?\w+'))</GoDeclared>
+      </_GoPackageInfo>
+    </ItemGroup>
+    <Error Condition="'@(_GoPackageInfo)' != '' and '%(_GoPackageInfo.GoDeclared)' != 'True'"
+           Text="go.lib: %(_GoPackageInfo.FullPath) declares no namespace followed by a [GoPackage] package class, so build/$(PackageId).props cannot name the package's usings. Set GoPackageUsingsProps=false to pack without it." />
+    <ItemGroup>
+      <_GoPackageInfo>
+        <GoNamespace>$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('%(FullPath)')), '(?s)\A.*?(?m:^)namespace\s+([\w.@]+)\s*;.*\z', '$1'))</GoNamespace>
+      </_GoPackageInfo>
+      <_GoNamespaceUsing Include="%(_GoPackageInfo.GoNamespace)" Condition="'%(_GoPackageInfo.GoNamespace)' != 'go'" />
+    </ItemGroup>
+
+    <!-- One string with escaped line breaks (%0A), so WriteLinesToFile keeps the indentation an item
+         list would trim. %24 is a literal $: the consumer's properties, evaluated where the file is imported. -->
+    <PropertyGroup>
+      <_GoPackageUsingsProps>$(IntermediateOutputPath)go2cs-pack/$(PackageId).props</_GoPackageUsingsProps>
+      <_GoNamespaceUsings>@(_GoNamespaceUsing->Distinct()->'    &lt;Using Include="%(Identity)" /&gt;', '%0A')</_GoNamespaceUsings>
+      <_GoPackageUsingsText>&lt;Project&gt;%0A  &lt;!-- Written by go.lib.pack.targets when $(PackageId) was packed: the package's usings (see that file in go.lib). --&gt;</_GoPackageUsingsText>
+      <_GoPackageUsingsText Condition="'$(_GoNamespaceUsings)' != ''">$(_GoPackageUsingsText)%0A  &lt;ItemGroup Condition="'%24(GoConsumerUsings)' != 'false'"&gt;%0A$(_GoNamespaceUsings)%0A  &lt;/ItemGroup&gt;</_GoPackageUsingsText>
+      <_GoPackageUsingsText>$(_GoPackageUsingsText)%0A&lt;/Project&gt;</_GoPackageUsingsText>
+    </PropertyGroup>
+
+    <WriteLinesToFile Condition="'$(_GoNamespaceUsings)' != ''" File="$(_GoPackageUsingsProps)" Lines="$(_GoPackageUsingsText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup Condition="'$(_GoNamespaceUsings)' != ''">
+      <None Include="$(_GoPackageUsingsProps)" Pack="true" PackagePath="build/" Visible="false" />
+      <FileWrites Include="$(_GoPackageUsingsProps)" />
+    </ItemGroup>
+  </Target>
+</Project>
