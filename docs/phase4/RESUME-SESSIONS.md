@@ -306,6 +306,40 @@ PASTE PROMPT
 You are P2, a go2cs fleet lane, in a cloud container (linux). Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/P2/) since your last post. Read every branch tip you hold with git ls-remote after fetch --prune, and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; then the os named-pipe completion-delivery fix (the i9's probe: all three steps hang, so completions never reach the poller), red-first by the probe, and the os named_overlapped_pipe subtest on the i9.
 ```
 
+### 1l.8 COORD's local folders (i7, drive H:)
+
+START-FOLDER: H:/Projects/go2cs (the main checkout, on master).
+- KEEP: H:/Projects/go2cs, the main checkout (master).
+- KEEP: H:/Projects/go2cs-mailbox, the claude/mailbox clone; the post tool runs from here.
+- KEEP: H:/go2cs-tmp-coord/hnd, the claude/coord-handover worktree; it holds this file and coord-live/ledger-append.sh.
+- KEEP: H:/go2cs-tmp-coord/hoptip, the hop gate worktree (claude/hop-go126). DELETE-SAFE once the hop lands and nothing is mid-merge.
+- KEEP: H:/go2cs-tmp-coord/coord-scratch, post files, gate scripts (gate-*.sh, board-union.py) and tP/watch-battery-inbox.sh. Old post .txt files inside are DELETE-SAFE.
+- KEEP: H:/go2cs-tmp-coord/gtk (claude/coord-gtk-consumer-api, pushed) until that branch merges, then DELETE-SAFE.
+- KEEP: H:/go2cs-tmp-coord/plit (claude/coord-plain-literal-exp, pushed), the post-roll implementation base; DELETE-SAFE after the plain-literal seat cuts from it.
+- KEEP: H:/Projects/go2cs-proposals, the source copies of docs/phase4/proposals; DELETE-SAFE (everything is on GitHub).
+- KEEP: H:/go2cs-tmp-coord/bundles, branch-bundles and backups (cited archives).
+- KEEP: H:/go2cs-tmp-coord/tools, H:/nuget/packages (the NuGet cache) and H:/go2cs-tmp-coord/repos.
+- DELETE-SAFE: H:/go2cs-tmp-coord/{interceptor-probe, u8-probe, parity-probe, plit-probe, consumer-probe, gtk-scratch, imgwork}: probe and scratch dirs; their reports are on GitHub.
+- DELETE-SAFE: H:/go2cs-tmp-coord/{tFLemitfull, tKemitfull, tLemitfull, tMemitfull, tNemitfull, tOemitfull, tPemitfull, tQemitfull, tT3emitfull, tT4emitfull, tF-untracked-run2, t48-seat12, rel6-rehearsal, stub-h0-out, h0-i7-census, h0-i7-logs, h5arm-logs, onefs, sandbox}: old train emission roots and logs from landed trains.
+
+### 1l.9 ROLL ORDER (owner: shutdown when safe; 95% weekly is the hard stop; machines rebooted and patched during the roll)
+
+A lane is SAFE TO SHUT DOWN when: (1) every commit is pushed, or bundled and named; (2) its STATE BLOCK and FOLDER INVENTORY are folded here; (3) nothing is mid-gate on its box. A run in flight is abandoned and re-run after the roll, never trusted half-done.
+
+SHUTDOWN order:
+1. P1, C1, P2 (cloud): nothing local survives, so confirm everything is pushed.
+2. R.
+3. The i9.
+4. G.
+5. COORD last: after folding the final inventories, pushing this file, and appending the ledger.
+
+START order (after the reboots):
+1. COORD on the i7. It verifies its folders, reads this file and the ledger tail, fetches, and posts the hop tip to every lane.
+2. G on G-LAPTOP. Reviews unblock merges.
+3. The i9. FIRST: read WHEA and the reset count, then `git fsck --full` (pack.threads=4), before any build. Then its NEXT.
+4. R on R-LAPTOP (the heavy behavioral legs).
+5. P2, C1, P1 (cloud; no reboot dependency). Start them once COORD has posted the tip.
+
 ---
 
 ## 1k. COORD STATE 2026-10-14 16:35 (START HERE for COORD; it supersedes 1j.3 and 1i for CURRENT STATE)
