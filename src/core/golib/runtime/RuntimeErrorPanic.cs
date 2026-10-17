@@ -607,4 +607,52 @@ public static class RuntimeErrorPanic
     {
         return new PanicException((@string)string.Format(InvalidPrefixDowncastMessage, destination, source));
     }
+
+    /// <summary>
+    /// Supplies Go 1.26's <c>maps.unhashableTypeError</c> (internal/runtime/maps, map.go) for an
+    /// unhashable key type: the value <c>mapKeyError</c> panics with.
+    /// </summary>
+    /// <remarks>
+    /// Registered by the internal/runtime/maps package through the runtime package's value bridge, as
+    /// <see cref="PlainErrorValue"/> is, because golib sits below both and cannot name the type. Go
+    /// 1.26 raises it where a map operation must refuse an unhashable dynamic key WITHOUT reaching the
+    /// hash: a lookup or delete on an EMPTY or NIL map (issue 23734) and reflect's equivalents. Its
+    /// <c>Error()</c> is <c>"hash of unhashable type: " + T</c> -- no <c>runtime error: </c> prefix and a
+    /// colon -- and it satisfies <c>runtime.Error</c> through its <c>RuntimeError()</c> method. Go 1.24
+    /// raised the prefixed <c>errorString</c> there instead; the hash path itself (a populated map, any
+    /// assignment) still does. Unregistered, the bare text stands.
+    /// </remarks>
+    public static Func<Type, object>? UnhashableKeyErrorValue { get; set; }
+
+    /// <summary>
+    /// Go 1.26's panic for an unhashable map key found by <c>mapKeyError</c>: an empty or nil map's
+    /// lookup or delete, or reflect's nil-map and empty-map arms.
+    /// </summary>
+    /// <param name="unhashable">The slice, map or func type Go names, found inside the key's dynamic type.</param>
+    public static PanicException UnhashableKey(Type unhashable)
+    {
+        return new PanicException(UnhashableKeyErrorValue?.Invoke(unhashable) ?? $"hash of unhashable type: {GoReflect.GoTypeName(unhashable)}");
+    }
+
+    /// <summary>
+    /// Supplies the Go runtime's <c>runtime.errorString</c> for a message: the value runtime's own
+    /// <c>panic(errorString("..."))</c> sites raise (alg.go's "hash of unhashable type", slice.go's
+    /// growslice and makeslice checks).
+    /// </summary>
+    /// <remarks>
+    /// Registered by the runtime package, as <see cref="PlainErrorValue"/> is. The message is the text
+    /// WITHOUT the prefix: <c>errorString.Error()</c> prepends <c>runtime error: </c>, and the value
+    /// satisfies <c>runtime.Error</c> through <c>RuntimeError()</c>. Unregistered, the prefixed text
+    /// stands as a plain string.
+    /// </remarks>
+    public static Func<string, object>? ErrorStringValue { get; set; }
+
+    /// <summary>
+    /// A Go runtime panic whose value is <c>runtime.errorString(message)</c>.
+    /// </summary>
+    /// <param name="message">The text after the <c>runtime error: </c> prefix.</param>
+    public static PanicException ErrorString(string message)
+    {
+        return new PanicException(ErrorStringValue?.Invoke(message) ?? RuntimeErrorMessage + message);
+    }
 }
