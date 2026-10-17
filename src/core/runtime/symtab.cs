@@ -279,7 +279,7 @@ partial struct pcHeader {
 // moduledata is stored in statically allocated non-pointer memory;
 // none of the pointers here are visible to the garbage collector.
 partial struct moduledata {
-    public partial ref @internal.runtime.sys_package.NotInHeap NotInHeap { get; } // Only in static data
+    /*embed*/ public @internal.runtime.sys_package.NotInHeap NotInHeap; // Only in static data
     internal ж<pcHeader> pcHeader;
     internal slice<byte> funcnametab;
     internal slice<uint32> cutab;
@@ -691,7 +691,7 @@ internal static ж<moduledata> findmoduledatap(uintptr pc) {
 }
 
 partial struct ΔfuncInfo {
-    internal partial ref ж<_func> _func { get; }
+    /*embed*/ internal ж<_func> _func;
     internal ж<moduledata> datap;
 }
 

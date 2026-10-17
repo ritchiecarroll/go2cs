@@ -14,7 +14,7 @@ public static void Add(this ж<Inner> Ꮡn, nint x) {
 }
 
 partial struct Outer {
-    public partial ref ж<Inner> Inner { get; }
+    /*embed*/ public ж<Inner> Inner;
     internal @string tag;
 }
 

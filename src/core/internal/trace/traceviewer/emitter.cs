@@ -456,7 +456,7 @@ public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
 }
 
 partial struct AsyncSliceEvent {
-    public partial ref SliceEvent SliceEvent { get; }
+    /*embed*/ public SliceEvent SliceEvent;
     public @string Category;
     public @string Scope;
     public uint64 TaskColorIndex; // Take on the same color as the task with this ID.

@@ -116,17 +116,13 @@ func (v *Visitor) structZeroSizeLayout(structType *types.Struct, named types.Typ
 		field := structType.Field(i)
 		fields[i] = field
 
-		// An EMBEDDED field is excluded, and the reason is that this predicate reads GO types while
-		// the constraint is about the C# STORAGE: go2cs may store a promoted embed as a ж<T> backing
-		// box under a marker-prefixed name, which is a managed reference that explicit layout may not
-		// place. A Go-type walk cannot see that choice, so the honest classification of an embed is
-		// "unknown", and unknown drops out of the arc. It costs real candidates — `runtime.mutex`
-		// embeds `lockRankStruct`, `sync.WaitGroup` embeds `noCopy` — and the alternative is emitting
-		// a layout whose legality depends on an emission decision made elsewhere.
-		if field.Embedded() {
-			return structZeroSizeLayout{}, false
-		}
-
+		// An EMBEDDED field takes part like any other. It used to be excluded because go2cs-gen stored a
+		// promoted embed in a generated backing field this arc could not place; since owner ruling (A)
+		// (2026-10-16) the converter declares every embed as a field itself (visitStructType), so its
+		// storage is the Go type's own, and the managed check below classifies it exactly as it does a
+		// named field: a pointer embed is managed and drops the struct out, a value embed of an unmanaged
+		// struct stays in. runtime's lfstack-list node `struct{ _ sys.NotInHeap; listedValManual }` is the
+		// shape this admits: Go lays both at offset 0, and sequential layout gave the blank a CLR byte.
 		if csManagedField(field.Type(), 0) {
 			return structZeroSizeLayout{}, false
 		}

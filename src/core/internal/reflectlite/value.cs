@@ -55,7 +55,7 @@ partial struct Value {
     //
     // The remaining 22+ bits give a method number for method values.
     // If flag.kind() != Func, code can assume that flagMethod is unset.
-    internal partial ref flag flag { get; }
+    /*embed*/ internal flag flag;
 }
 
 partial struct flag /*num:uintptr*/;

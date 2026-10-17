@@ -396,7 +396,7 @@ internal static bool resetForSleep(ж<g> Ꮡgp, @unsafe.Pointer _) {
 partial struct timeTimer {
     internal @unsafe.Pointer c; // <-chan time.Time
     internal bool init;
-    internal partial ref timer timer { get; }
+    /*embed*/ internal timer timer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

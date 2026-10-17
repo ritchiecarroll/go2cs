@@ -25,9 +25,9 @@ internal static UntypedInt traceBytesPerNumber => 10;
 // just regular arguments. However, this style is not load-bearing, and
 // we can change it if it's deemed too error-prone.
 partial struct traceWriter {
-    internal partial ref traceLocker traceLocker { get; }
+    /*embed*/ internal traceLocker traceLocker;
     internal tracev2.Experiment exp;
-    internal partial ref ж<traceBuf> traceBuf { get; }
+    /*embed*/ internal ж<traceBuf> traceBuf;
 }
 
 // writer returns a traceWriter that writes into the current M's stream.
@@ -276,7 +276,7 @@ partial struct traceBufHeader {
 // TODO(mknyszek): Rename traceBuf to traceBatch, since they map 1:1 with event batches.
 partial struct traceBuf {
     internal sys.NotInHeap _;
-    internal partial ref traceBufHeader traceBufHeader { get; }
+    /*embed*/ internal traceBufHeader traceBufHeader;
     internal array<byte> arr = new((uintptr)tracev2.MaxBatchSize - /* unsafe.Sizeof(traceBufHeader{}) */ (uintptr)32); // underlying buffer for traceBufHeader.buf
 }
 

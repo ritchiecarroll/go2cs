@@ -10,17 +10,17 @@ partial struct inner {
 }
 
 partial struct mid {
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
     internal nint extra;
 }
 
 partial struct deep {
-    internal partial ref mid mid { get; }
+    /*embed*/ internal mid mid;
     internal @string label;
 }
 
 partial struct ptrHolder {
-    internal partial ref ж<inner> inner { get; }
+    /*embed*/ internal ж<inner> inner;
     internal @string name;
 }
 

@@ -403,6 +403,7 @@
     <Project Path="tests/Behavioral/CrossPackagePromotedValueMethod/CrossPackagePromotedValueMethod.csproj" />
     <Project Path="tests/Behavioral/CrossPkgLiteralNestedField/CrossPkgLiteralNestedField.csproj" />
     <Project Path="tests/Behavioral/CrossPkgLiteralNestedField/addrlib/CrossPkgLiteralNestedField.addrlib.csproj" />
+    <Project Path="tests/Behavioral/EmbedLayoutMatchesGo/EmbedLayoutMatchesGo.csproj" />
     <Project Path="tests/Behavioral/NewExpr/NewExpr.csproj" />
     <Project Path="tests/Behavioral/RawStringLineEndings/RawStringLineEndings.csproj" />
     <Project Path="tests/Behavioral/SameNameImportAlias/SameNameImportAlias.csproj" />

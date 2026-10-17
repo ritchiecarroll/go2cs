@@ -29,13 +29,13 @@ partial struct GoroutineSummary {
     // List of regions in the goroutine, sorted based on the start time.
     public slice<ж<UserRegionSummary>> Regions;
     // Statistics of execution time during the goroutine execution.
-    public partial ref GoroutineExecStats GoroutineExecStats { get; }
+    /*embed*/ public GoroutineExecStats GoroutineExecStats;
     // goroutineSummary is state used just for computing this structure.
     // It's dropped before being returned to the caller.
     //
     // More specifically, if it's nil, it indicates that this summary has
     // already been finalized.
-    internal partial ref ж<goroutineSummary> goroutineSummary { get; }
+    /*embed*/ internal ж<goroutineSummary> goroutineSummary;
 }
 
 // UserTaskSummary represents a task in the trace.
@@ -88,7 +88,7 @@ partial struct UserRegionSummary {
     // but can be a state transition event to NotExist if the goroutine
     // terminated without explicitly ending the region.
     public ж<ΔEvent> End;
-    public partial ref GoroutineExecStats GoroutineExecStats { get; }
+    /*embed*/ public GoroutineExecStats GoroutineExecStats;
 }
 
 // GoroutineExecStats contains statistics about a goroutine's execution

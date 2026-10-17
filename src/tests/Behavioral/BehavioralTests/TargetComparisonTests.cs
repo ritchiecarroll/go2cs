@@ -526,6 +526,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckEmbedDirectiveForms() => CheckTarget("EmbedDirectiveForms");
 
     [TestMethod]
+    public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceWitness() => CheckTarget("EmbeddedInterfaceWitness");
 
     [TestMethod]

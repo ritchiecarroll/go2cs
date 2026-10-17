@@ -72,7 +72,7 @@ partial struct pstate {
 // extcu encapsulates a coverable unit within some function.
 partial struct extcu {
     internal uint32 fnfid; // index into p.funcs slice
-    public partial ref go.@internal.coverage_package.CoverableUnit CoverableUnit { get; }
+    /*embed*/ public go.@internal.coverage_package.CoverableUnit CoverableUnit;
 }
 
 // fnfile is a function-name/file-name tuple.

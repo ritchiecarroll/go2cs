@@ -55,7 +55,7 @@ internal static UntypedInt spanSetInitSpineCap => 256; // Enough for 1GB heap on
 
 partial struct spanSetBlockHeader {
     // Free spanSetBlocks are managed via a lock-free stack.
-    internal partial ref lfnode lfnode { get; }
+    /*embed*/ internal lfnode lfnode;
     // popped is the number of pop operations that have occurred on
     // this block. This number is used to help determine when a block
     // may be safely recycled.
@@ -63,12 +63,12 @@ partial struct spanSetBlockHeader {
 }
 
 partial struct spanSetBlockHeader2 {
-    internal partial ref spanSetBlockHeader spanSetBlockHeader { get; }
+    /*embed*/ internal spanSetBlockHeader spanSetBlockHeader;
     internal array<byte> pad = new((uintptr)tagAlign - /* unsafe.Sizeof(spanSetBlockHeader{}) */ (uintptr)24);
 }
 
 partial struct spanSetBlock {
-    internal partial ref spanSetBlockHeader2 spanSetBlockHeader2 { get; }
+    /*embed*/ internal spanSetBlockHeader2 spanSetBlockHeader2;
     // spans is the set of spans in this block.
     internal array<atomicMSpanPointer> spans = new(spanSetBlockEntries);
 }

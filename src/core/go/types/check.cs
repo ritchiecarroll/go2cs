@@ -169,7 +169,7 @@ partial struct Checker {
     internal ж<Context> ctxt; // context for de-duplicating instances
     internal ж<token.FileSet> fset;
     internal ж<Package> pkg;
-    public partial ref ж<ΔInfo> Info { get; }
+    /*embed*/ public ж<ΔInfo> Info;
     internal uint64 nextID;                 // unique Id for type parameters (first valid Id is 1)
     internal map<Object, ж<declInfo>> objMap; // maps package-level objects and (non-interface) methods to declaration info
     internal slice<Object> objList;          // source-ordered keys of objMap
@@ -207,7 +207,7 @@ partial struct Checker {
     internal slice<cleaner> cleaners;        // list of types that may need a final cleanup at the end of type-checking
     // environment within which the current object is type-checked (valid only
     // for the duration of type-checking a specific object)
-    internal partial ref environment environment { get; }
+    /*embed*/ internal environment environment;
     // debugging
     internal slice<positioner> posStack; // stack of source positions seen; used for panic tracing
     internal nint indent;         // indentation for tracing

@@ -7,7 +7,7 @@ using EmbeddedTypeNameCollision;
 partial class main_package {
 
 partial struct Buffer {
-    public partial ref EmbeddedTypeNameCollision.inner_package.Buffer ΔBuffer { get; }
+    /*embed*/ public EmbeddedTypeNameCollision.inner_package.Buffer ΔBuffer;
     public @string Tag;
 }
 

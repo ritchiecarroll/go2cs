@@ -33,7 +33,7 @@ partial class runtime_package {
 //
 // The zero value of Pinner is ready to use.
 partial struct Pinner {
-    internal partial ref ж<pinner> pinner { get; }
+    /*embed*/ internal ж<pinner> pinner;
 }
 
 // go2cs generated this placeholder — func Pin is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

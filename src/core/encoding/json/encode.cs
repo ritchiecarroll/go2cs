@@ -307,7 +307,7 @@ internal static readonly @string hex = "0123456789abcdef"u8;
 
 // An encodeState encodes JSON into a bytes.Buffer.
 partial struct encodeState {
-    public partial ref bytes_package.Buffer Buffer { get; } // accumulated output
+    /*embed*/ public bytes_package.Buffer Buffer; // accumulated output
     // Keep track of what pointers we've seen in the current recursive call
     // path, to avoid cycles that could lead to a stack overflow. Only do
     // the relatively expensive map operations if ptrLevel is larger than

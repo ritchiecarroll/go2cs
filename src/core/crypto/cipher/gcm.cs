@@ -114,7 +114,7 @@ public static (AEAD, error) NewGCMWithRandomNonce(Block cipher) {
 }
 
 partial struct gcmWithRandomNonce {
-    public partial ref ж<crypto.@internal.fips140.aes.gcm_package.GCM> GCM { get; }
+    /*embed*/ public ж<crypto.@internal.fips140.aes.gcm_package.GCM> GCM;
 }
 
 internal static nint NonceSize(this gcmWithRandomNonce g) {

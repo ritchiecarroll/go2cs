@@ -23,7 +23,7 @@ partial class slog_package {
 // JSONHandler is a [Handler] that writes Records to an [io.Writer] as
 // line-delimited JSON objects.
 partial struct JSONHandler {
-    internal partial ref ж<commonHandler> commonHandler { get; }
+    /*embed*/ internal ж<commonHandler> commonHandler;
 }
 
 // NewJSONHandler creates a [JSONHandler] that writes to w,

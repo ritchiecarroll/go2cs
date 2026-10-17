@@ -17,16 +17,16 @@ internal static nint get(this ref leaf l) {
 }
 
 partial struct holder {
-    internal partial ref ж<leaf> leaf { get; }
+    /*embed*/ internal ж<leaf> leaf;
     internal @string tag;
 }
 
 partial struct mid {
-    internal partial ref ж<leaf> leaf { get; }
+    /*embed*/ internal ж<leaf> leaf;
 }
 
 partial struct top {
-    internal partial ref mid mid { get; }
+    /*embed*/ internal mid mid;
     internal @string label;
 }
 

@@ -34,7 +34,7 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 partial struct DLL {
-    public partial ref ж<syscall_package.DLL> ΔDLL { get; }
+    /*embed*/ public ж<syscall_package.DLL> ΔDLL;
     internal ж<testing.T> t;
 }
 

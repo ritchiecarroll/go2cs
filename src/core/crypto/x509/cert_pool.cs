@@ -228,7 +228,7 @@ internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string 
 }
 
 internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
+    /*embed*/ public sync_package.Once Once;
     internal ж<Certificate> v;
 }
 

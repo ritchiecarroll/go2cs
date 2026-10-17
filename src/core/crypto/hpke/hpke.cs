@@ -30,14 +30,14 @@ partial struct context {
 // encapsulation key (i.e. the public key), and it is stateful, incrementing the
 // nonce counter for each [Sender.Seal] call.
 partial struct Sender {
-    internal partial ref ж<context> context { get; }
+    /*embed*/ internal ж<context> context;
 }
 
 // Recipient is a receiving HPKE context. It is instantiated with a specific KEM
 // decapsulation key (i.e. the secret key), and it is stateful, incrementing the
 // nonce counter for each successful [Recipient.Open] call.
 partial struct Recipient {
-    internal partial ref ж<context> context { get; }
+    /*embed*/ internal ж<context> context;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
