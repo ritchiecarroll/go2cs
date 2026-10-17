@@ -54,11 +54,12 @@ The scout and review reports are in `docs/phase4/proposals/` on this branch.
     re-cut, because C1's previous box disk failed and its 3 local commits were lost.
   - R: the testing-host OUTPUT FORMAT (Go decorate + Go text mode, one seat), AFTER C1's watchdog lands.
   - G: free; reviews, then its parked claude/g-inline-constraint-lift.
+- **OWNER RULED 2026-10-17, plain string literals (implement POST-ROLL, with fresh credits; record: docs/phase4/proposals/plain-literal-cache.md):**
+  - (1) plain literals ON BY DEFAULT at @string slots via golib's StringLiteralCache (branch claude/coord-plain-literal-exp holds the cache); the -stdlib conversion OPTS OUT (hoisted literals); users get a flag to opt into hoisting for a package or tool.
+  - (2) C# INTERCEPTORS for any-slot literals, ON BY DEFAULT, with a generator ERROR for every plain literal it cannot intercept (proposals/string-literal-interceptors.md); the stdlib opts out; users opt out by flag (COORD recommends ONE -hoist-literals switch for both).
+  - (3) after implementation, an ADVERSARIAL REVIEW of every performance-critical section, no stone unturned: the hot-loop lookup cost (about 2 ns), the 9-11 ns slower runtime-string conversion (try a faster miss check), interceptor build cost.
+  - Then the STRINGS DESIGN doc (design alternatives considered).
 - **OWNER DECISIONS OPEN:**
-  - plain string literals (docs/phase4/proposals/plain-literal-cache.md):
-    - (1) plain everywhere, or stdlib kept hoisted;
-    - (2) any slots: keep the pre-boxed hoist, or interceptors;
-    - (3) is the 9-11 ns slower runtime-string conversion acceptable, or try a faster miss check first.
   - P1's old-worktree cleanup needs the owner's by-name yes in P1's thread.
 - **THEN:** the PARITY STAGE (docs/phase4/proposals/visual-parity-review.md), the strings design doc, the H10
   re-bank, the 1.26 release.
