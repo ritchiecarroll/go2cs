@@ -171,6 +171,12 @@ public static class GoMemProfile
 
         long size = GoSize<T>.Bytes * count;
 
+        // Go's mallocgc returns &zerobase for a zero-size request before it reaches the sampler, or the
+        // countdown (go1.26.9 runtime/malloc.go:1074-1077): make([]T, 0) and a zero-size value are never
+        // profiled.
+        if (size == 0)
+            return;
+
         // Go: `if rate != 1 && size < c.nextSample { c.nextSample -= size } else { profilealloc(...) }`.
         if (rate != 1 && t_seeded && size < t_nextSample)
         {
@@ -197,6 +203,10 @@ public static class GoMemProfile
         nint rate = Rate;
 
         if (rate <= 0)
+            return;
+
+        // A zero-size request is zerobase, never profiled (as in Charge).
+        if (size == 0)
             return;
 
         if (rate != 1 && t_seeded && size < t_nextSample)
