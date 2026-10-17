@@ -6,8 +6,9 @@
 //     reflect.TestMapOfKeyUpdate assert it.
 //  2. HASH PANIC on an unhashable dynamic key. An interface-keyed map hashes the key before it
 //     looks anything up -- even when the map is EMPTY or NIL -- so a slice, map or func key panics
-//     "hash of unhashable type T" on every operation. runtime.TestEmptyMapWithInterfaceKey and
-//     reflect.TestMapOfKeyPanic assert it.
+//     "hash of unhashable type T" on every operation (Go 1.26 words the empty- and nil-map doors
+//     "hash of unhashable type: T", without the "runtime error: " prefix), and both are runtime.Errors.
+//     runtime.TestEmptyMapWithInterfaceKey and reflect.TestMapOfKeyPanic assert it.
 //  3. RANGE UNDER MUTATION. An entry overwritten during a range is produced with the bucket's
 //     CURRENT key and value when the range reaches it.
 package main
@@ -16,6 +17,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"runtime"
 )
 
 var negZero = math.Copysign(0, -1)
@@ -195,7 +197,10 @@ func rangeUnderOverwrite() {
 func try(label string, f func()) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println(label+": panic:", r)
+			// Both Go 1.26 values satisfy runtime.Error: maps.unhashableTypeError (the empty- and nil-map
+			// doors) and runtime.errorString (the hash). A recovered plain string would print false.
+			_, isRuntimeError := r.(runtime.Error)
+			fmt.Println(label+": panic:", r, "runtime.Error:", isRuntimeError)
 		}
 	}()
 	f()

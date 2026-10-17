@@ -3,6 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using Δmath = math_package;
 using reflect = reflect_package;
+using runtime = runtime_package;
 
 partial class main_package {
 
@@ -200,13 +201,17 @@ internal static void rangeUnderOverwrite() {
     fmt.Println(interfaceRangeUnderˢ, bad, bothOrdersSeenˢ, after > 0 && before > 0);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object runtimeErrorˢ = (@string)"runtime.Error:"u8;
+
 internal static void @try(@string label, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
-                    fmt.Println(label + ": panic:", r);
+                    var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
+                    fmt.Println(label + ": panic:", r, runtimeErrorˢ, isRuntimeError);
                 }
             }
         }, ref ᒐ);

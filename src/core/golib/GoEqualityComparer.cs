@@ -88,7 +88,7 @@ internal sealed class GoEqualityComparer<T> : IEqualityComparer<T>
         // (reflectPointerToken): the same null-Value shell reaching a path built only for the
         // non-null shape.
         if (root is IValueAdapter { Value: null } && GoReflect.ValueAdapterWrappedType(root.GetType()) is { } wrapped)
-            throw new PanicException($"runtime error: hash of unhashable type {builtin.GetGoTypeName(wrapped)}");
+            throw go.golib.RuntimeErrorPanic.ErrorString($"hash of unhashable type {builtin.GetGoTypeName(wrapped)}");
 
         // Go hashes an interface key's DYNAMIC value, and a slice, map or func there is unhashable:
         // every map operation panics rather than answering (runtime.TestEmptyMapWithInterfaceKey).
@@ -235,13 +235,14 @@ internal static class GoEqualityComparer
     /// <summary>
     /// Panics with Go's text when the HASH of an interface key's dynamic value is refused: runtime's
     /// <c>typehash</c>/<c>nilinterhash</c>, which a populated map's lookup, delete and every assignment
-    /// reach. The value is <c>runtime.errorString</c>, so the text keeps its <c>runtime error: </c> prefix
-    /// in Go 1.24 and 1.26 alike.
+    /// reach. The value is <c>runtime.errorString</c> (a <c>runtime.Error</c>; see
+    /// <see cref="go.golib.RuntimeErrorPanic.ErrorString"/>), so the text keeps its <c>runtime error: </c>
+    /// prefix in Go 1.24 and 1.26 alike.
     /// </summary>
     internal static void CheckHashableRoot(object? root)
     {
         if (UnhashableTypeOf(root) is { } unhashable)
-            throw new PanicException($"runtime error: hash of unhashable type {GoReflect.GoTypeName(unhashable)}");
+            throw go.golib.RuntimeErrorPanic.ErrorString($"hash of unhashable type {GoReflect.GoTypeName(unhashable)}");
     }
 
     private static Type? UnhashableTypeOf(object? root)

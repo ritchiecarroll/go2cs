@@ -563,9 +563,31 @@ public class RuntimeErrorPanicValueTests
         map<object, bool> full = new() { [(nint)1] = true };
         map<object, bool> empty = new();
 
-        Assert.AreEqual(want, TextOf(PanicValue(() => { _ = full[OneInt()]; })), "populated map lookup");
-        Assert.AreEqual(want, TextOf(PanicValue(() => { full[OneInt()] = true; })), "populated map assign");
-        Assert.AreEqual(want, TextOf(PanicValue(() => { empty[OneInt()] = true; })), "empty map assign");
+        // runtime.errorString IS a runtime.Error (`r.(runtime.Error)` is ok), and its Error() carries the prefix.
+        AssertRuntimeError(PanicValue(() => { _ = full[OneInt()]; }), want, "populated map lookup");
+        AssertRuntimeError(PanicValue(() => { full[OneInt()] = true; }), want, "populated map assign");
+        AssertRuntimeError(PanicValue(() => { empty[OneInt()] = true; }), want, "empty map assign");
+        AssertRuntimeError(PanicValue(() => reflect.ValueOf(empty).SetMapIndex(reflect.ValueOf(OneInt()), reflect.ValueOf(true))), want, "reflect SetMapIndex");
+    }
+
+    // A nil-wrapped named-func key reaches GetHashCode as its adapter shell, and Go's hash refuses it with
+    // the same errorString (GoEqualityComparer's second throw site).
+    [TestMethod]
+    public void UnregisteredFallbackTextIsGosForTheHashPath()
+    {
+        Func<string, object>? hook = RuntimeErrorPanic.ErrorStringValue;
+
+        try
+        {
+            RuntimeErrorPanic.ErrorStringValue = null;
+
+            map<object, bool> full = new() { [(nint)1] = true };
+            Assert.AreEqual("runtime error: hash of unhashable type []int", TextOf(PanicValue(() => { _ = full[OneInt()]; })));
+        }
+        finally
+        {
+            RuntimeErrorPanic.ErrorStringValue = hook;
+        }
     }
 
     [TestMethod]

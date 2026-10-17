@@ -633,4 +633,26 @@ public static class RuntimeErrorPanic
     {
         return new PanicException(UnhashableKeyErrorValue?.Invoke(unhashable) ?? $"hash of unhashable type: {GoReflect.GoTypeName(unhashable)}");
     }
+
+    /// <summary>
+    /// Supplies the Go runtime's <c>runtime.errorString</c> for a message: the value runtime's own
+    /// <c>panic(errorString("..."))</c> sites raise (alg.go's "hash of unhashable type", slice.go's
+    /// growslice and makeslice checks).
+    /// </summary>
+    /// <remarks>
+    /// Registered by the runtime package, as <see cref="PlainErrorValue"/> is. The message is the text
+    /// WITHOUT the prefix: <c>errorString.Error()</c> prepends <c>runtime error: </c>, and the value
+    /// satisfies <c>runtime.Error</c> through <c>RuntimeError()</c>. Unregistered, the prefixed text
+    /// stands as a plain string.
+    /// </remarks>
+    public static Func<string, object>? ErrorStringValue { get; set; }
+
+    /// <summary>
+    /// A Go runtime panic whose value is <c>runtime.errorString(message)</c>.
+    /// </summary>
+    /// <param name="message">The text after the <c>runtime error: </c> prefix.</param>
+    public static PanicException ErrorString(string message)
+    {
+        return new PanicException(ErrorStringValue?.Invoke(message) ?? RuntimeErrorMessage + message);
+    }
 }
