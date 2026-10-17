@@ -124,7 +124,7 @@ internal static void Main() {
         var cleanup = (nint _Δp0) => {
             _ = vʗ3.Value.f;
         };
-        runtime.AddCleanup(v, cleanup, 0);
+        runtime.AddCleanup(v, cleanup, 0, new object?[] { v });
     });
 
     @try(funcVariableCapturesˢ, () => {
@@ -134,7 +134,7 @@ internal static void Main() {
         var cleanup = (nint _Δp0) => {
             _ = wʗ3.Value.f;
         };
-        runtime.AddCleanup(v, cleanup, 0);
+        runtime.AddCleanup(v, cleanup, 0, new object?[] { w });
         runtime.KeepAlive(w.OrTypedNil());
     });
 
@@ -144,7 +144,7 @@ internal static void Main() {
         };
         var vʗ4 = v;
                 cleanup = (nint p1) => vʗ4.release(p1);
-        runtime.AddCleanup(v, cleanup, 0);
+        runtime.AddCleanup(v, cleanup, 0, new object?[] { v });
     });
 
     @try(argIsPtrˢ, () => {

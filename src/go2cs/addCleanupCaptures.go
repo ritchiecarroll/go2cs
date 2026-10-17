@@ -31,10 +31,14 @@ import (
 //     captures BY REFERENCE (one assigned after its declaration, or whose address is taken) puts its
 //     heap cell in the funcval, never ptr, so it is not passed: Go accepts that cleanup and so do we.
 //   - a METHOD VALUE `x.m` with x a variable: its receiver, which Go's funcval binds by value.
+//   - a func-typed LOCAL whose every assignment in its function is one of the two above: the union
+//     of their captures (funcVariableCaptures). All 20 func-variable call sites in the go1.26.9
+//     tree have this shape.
 // The current method's own pointer receiver is passed as its box, never its dereferenced name (see
 // captureValueText).
-// Nothing else is passed: a method expression or package function has no captures, and a func
-// VARIABLE has no static fact (20 such call sites in the go1.26.9 tree, all in tests Go passes).
+// Nothing else is passed: a method expression or package function has no captures, and any other
+// func value (a parameter, a package-level variable, a field, a call result) has no static fact and
+// stays unchecked. That residual is 0 call sites in the go1.26.9 tree.
 // Structs, slices, maps, channels, funcs and arrays are not passed: a struct value holding ptr in a
 // field, or a slice over ptr's own array, would be refused by Go and is not here (none in the
 // go1.26.9 tree's AddCleanup calls). When nothing qualifies, the call keeps its three-argument form.
@@ -58,11 +62,15 @@ func (v *Visitor) addCleanupCaptureArgs(callExpr *ast.CallExpr) string {
 			}
 		}
 	case *ast.SelectorExpr:
-		if selection := v.info.Selections[cleanup]; selection != nil && selection.Kind() == types.MethodVal {
-			if receiver, ok := ast.Unparen(cleanup.X).(*ast.Ident); ok && canAddressAllocation(v.info.TypeOf(receiver)) {
-				if text := v.captureValueText(receiver); text != "" {
-					values = append(values, text)
-				}
+		if receiver := v.methodValueReceiver(cleanup); receiver != nil {
+			if text := v.captureValueText(receiver); text != "" {
+				values = append(values, text)
+			}
+		}
+	case *ast.Ident:
+		for _, ident := range v.funcVariableCaptures(cleanup, callExpr.Pos()) {
+			if text := v.captureValueText(ident); text != "" {
+				values = append(values, text)
 			}
 		}
 	}
@@ -72,6 +80,144 @@ func (v *Visitor) addCleanupCaptureArgs(callExpr *ast.CallExpr) string {
 	}
 
 	return "new object?[] { " + strings.Join(values, ", ") + " }"
+}
+
+// methodValueReceiver returns the receiver variable of a method value `x.m` whose receiver can
+// address an allocation, or nil for anything else (a method expression, a package function, a
+// field, or a receiver that is not a plain variable).
+func (v *Visitor) methodValueReceiver(selector *ast.SelectorExpr) *ast.Ident {
+	if selection := v.info.Selections[selector]; selection == nil || selection.Kind() != types.MethodVal {
+		return nil
+	}
+
+	if receiver, ok := ast.Unparen(selector.X).(*ast.Ident); ok && canAddressAllocation(v.info.TypeOf(receiver)) {
+		return receiver
+	}
+
+	return nil
+}
+
+// funcVariableCaptures returns the captures to pass for a cleanup named by a func-typed VARIABLE,
+// or nil when the converter cannot prove what the variable holds. A LOCAL of the current function
+// whose every assignment there is a func literal or a method value can hold only those values, so
+// the UNION of their captures is passed. A superset is safe: a literal that could flow there and
+// closes over ptr is one Go would refuse. The residual stays unchecked: a parameter, a package-level
+// variable, a local assigned anything else (a call, a field, another variable, several values at
+// once) or whose address is taken. In the go1.26.9 tree all 20 func-variable call sites are covered
+// and the residual is 0 (a census by this predicate, mcleanup.cs divergence 5).
+//
+// A capture is passed only if its name resolves to the same variable at the call site (callPos).
+// One that is out of scope or shadowed there is dropped, so the call stays compilable.
+func (v *Visitor) funcVariableCaptures(ident *ast.Ident, callPos token.Pos) []*ast.Ident {
+	local, ok := v.info.Uses[ident].(*types.Var)
+	decl := v.currentFuncDecl
+
+	if !ok || local.Pkg() == nil || local.Parent() == local.Pkg().Scope() || decl == nil || local.Pos() < decl.Pos() || local.Pos() >= decl.End() {
+		return nil
+	}
+
+	var sources []ast.Expr
+	proven := true
+
+	assigned := func(value ast.Expr) {
+		switch value := ast.Unparen(value).(type) {
+		case *ast.FuncLit:
+			sources = append(sources, value)
+		case *ast.SelectorExpr:
+			if selection := v.info.Selections[value]; selection != nil && selection.Kind() == types.MethodVal {
+				sources = append(sources, value)
+			} else {
+				proven = false
+			}
+		default:
+			proven = false
+		}
+	}
+
+	ast.Inspect(decl, func(node ast.Node) bool {
+		switch n := node.(type) {
+		case *ast.Field:
+			for _, name := range n.Names {
+				if v.info.Defs[name] == local {
+					proven = false // a parameter or result
+				}
+			}
+		case *ast.AssignStmt:
+			for index, lhs := range n.Lhs {
+				if name, ok := lhs.(*ast.Ident); !ok || (v.info.Defs[name] != local && v.info.Uses[name] != local) {
+					continue
+				}
+
+				if len(n.Rhs) != len(n.Lhs) {
+					proven = false
+				} else {
+					assigned(n.Rhs[index])
+				}
+			}
+		case *ast.ValueSpec:
+			for index, name := range n.Names {
+				if v.info.Defs[name] != local || len(n.Values) == 0 {
+					continue // a declaration without a value holds nil, which captures nothing
+				}
+
+				if len(n.Values) != len(n.Names) {
+					proven = false
+				} else {
+					assigned(n.Values[index])
+				}
+			}
+		case *ast.UnaryExpr:
+			if n.Op == token.AND && v.namesVar(n.X, local) {
+				proven = false
+			}
+		case *ast.RangeStmt:
+			if v.namesVar(n.Key, local) || v.namesVar(n.Value, local) {
+				proven = false
+			}
+		}
+
+		return proven
+	})
+
+	if !proven {
+		return nil
+	}
+
+	var result []*ast.Ident
+	seen := map[types.Object]bool{}
+	scope := v.pkg.Scope().Innermost(callPos)
+
+	add := func(capture *ast.Ident) {
+		object := v.info.Uses[capture]
+
+		if object == nil || seen[object] || scope == nil {
+			return
+		}
+
+		if _, resolved := scope.LookupParent(capture.Name, callPos); resolved != object {
+			return
+		}
+
+		seen[object] = true
+		result = append(result, capture)
+	}
+
+	for _, source := range sources {
+		switch source := source.(type) {
+		case *ast.FuncLit:
+			for _, capture := range v.funcLitByValueCaptures(source) {
+				if canAddressAllocation(v.info.TypeOf(capture)) {
+					add(capture)
+				}
+			}
+		case *ast.SelectorExpr:
+			if receiver := v.methodValueReceiver(source); receiver != nil {
+				add(receiver)
+			}
+		}
+	}
+
+	return result
 }
 
 // isRuntimeAddCleanup reports whether fun names the runtime package's AddCleanup, instantiated or not.

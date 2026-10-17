@@ -55,12 +55,16 @@
 //     the converter, which knows which Go variables the cleanup closes over BY VALUE, passes their
 //     values to the four-argument AddCleanup below (src/go2cs/addCleanupCaptures.go), and the
 //     guard panics when one of them is a pointer whose referent is ptr's. The same answer under the
-//     JIT and native AOT, with no reflection. The converter passes pointer and interface captures,
-//     and a captured struct as its pointer and interface fields; a slice, map, channel, func or
-//     array capture is not passed (Go's slot scan would see a slice over ptr's own array). A
-//     cleanup that is a func VARIABLE carries no
-//     static fact and takes the three-argument form unchecked: censused 2026-10-17 over the
-//     go1.26.9 tree, 20 such call sites, all in tests Go passes, so none closes over ptr.
+//     JIT and native AOT, with no reflection. The converter passes pointer, unsafe.Pointer and
+//     interface captures; a struct, slice, map, channel, func or array capture is not passed (Go's
+//     slot scan would also see a struct field holding ptr, or a slice over ptr's own array). A
+//     cleanup held in a func-typed LOCAL whose every assignment is a func literal or a method value
+//     passes the UNION of those values' captures. That superset is safe: a literal that could flow
+//     there and closes over ptr is one Go refuses. Any other func value (a parameter, a
+//     package-level variable, a field, a call result, a local whose address is taken) carries no
+//     static fact and takes the three-argument form UNCHECKED. Censused 2026-10-17 over the
+//     go1.26.9 tree by that predicate (a go/types walk of runtime, internal/sync and
+//     runtime/race/testdata): 20 func-variable call sites, all 20 covered, residual 0.
 [module: go.GoManualConversion]
 
 namespace go;
