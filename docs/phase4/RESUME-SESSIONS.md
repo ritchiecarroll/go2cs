@@ -193,8 +193,9 @@ BRANCH: claude/p1-type-assertion-source 56411daf02145567921cd4f706f189f7310e26a3
 BRANCH: claude/p1-type-assertion-forms 3f20df17e1982b62b40d75f23b7acbb5d4673c1f on-origin-yes accepted -- R1 part 2, three call spellings; G OK incl. embedded-supertype fix; merge waits on the owner's OK for the explicit x._<I,T>() form
 BRANCH: claude/p1-docs-polish 6b496dd2d2448f384edf7c43844830d5a02d946d on-origin-yes landed -- already in master and in the hop tip
 BRANCH: claude/p1-tour-pin 3e918939fc71b1e40447aeeeb96224bce5c05790 on-origin-yes landed -- already in master and in the hop tip
-LOCAL-ONLY: claude/p1-union-measure a6d8e5a5c9398f848351c5d568444003f05ba074 measurement union tree of other lanes' commits, not for merge preserved-how: bundle p1-archive/claude_p1-union-measure.bundle (prerequisites on origin, verified) sha256-16 06e8a66e7e9133e7
-LOCAL-ONLY: proj/rt-measure 5661a81d083f5cbff42f59f932da29aa9647d513 measurement merge tree, not for merge preserved-how: bundle p1-archive/proj_rt-measure.bundle (prerequisites on origin, verified) sha256-16 baff9767049f4411
+BRANCH: claude/p1-union-measure a6d8e5a5c9398f848351c5d568444003f05ba074 on-origin-yes measurement -- union tree of other lanes' commits, NOT for merge (pushed at the roll)
+BRANCH: proj/rt-measure 5661a81d083f5cbff42f59f932da29aa9647d513 on-origin-yes measurement -- merge tree, NOT for merge (pushed at the roll)
+LOCAL-ONLY: none (2026-10-17 18:03Z). The container does not survive: START from a fresh clone (see FOLDERS).
 WORKTREE: p1flt claude/p1-type-assertion-source uncommitted-files-0 clean
 WORKTREE: p1gen claude/p1-type-assertion-forms uncommitted-files-0 clean
 WORKTREE: p1diag detached b095b8367f uncommitted-files-0 clean (H8 reading tree)
@@ -211,6 +212,31 @@ TOOLS: GOROOT go1.26.9 (corpus toolchain, version.props; CGO_ENABLED=0 for -stdl
 ```
 WAKE: Mailbox only: COORD posts to docs/phase4/inbox/P1/; P1 posts to docs/phase4/inbox/COORD/ with the fleet-msg tool.
 
+FOLDERS (posted by the lane 2026-10-17; its own words)
+```
+FOLDER INVENTORY P1
+from: P1 · to: COORD · 2026-10-17T18:03:03Z
+
+FOLDER INVENTORY P1 (cloud container, linux; Sonnet 5.5). The container does not survive, so what matters is what is on origin: all of it is. Purged this post: bin/obj in the p1flt tree (about 0.13 GB, 68 dirs); free disk 11 GB.
+START-FOLDER: a fresh clone of the repository at claude/p1-type-assertion-forms (3f20df17e1982b62b40d75f23b7acbb5d4673c1f, or its merged head once posted), plus a clone of claude/mailbox for the mailbox scripts
+PUSHED, confirmed by ls-remote just now: claude/p1-runtime-errors b3e6625be2efbf32a60198af72d74020dd1766e8; claude/p1-type-assertion-error aa2cf6f43dbc99e38af1f64e9a9e5817bf4e02df; -missing-method e8cdc282372b4f7ab2f4e37a8b1e69e956f14d8c; -source 56411daf02145567921cd4f706f189f7310e26a3; -forms 3f20df17e1982b62b40d75f23b7acbb5d4673c1f
+PUSHED NOW (were local-only in my last STATE BLOCK; safe-push, guard exit 0, remote == local): claude/p1-union-measure a6d8e5a5c9398f848351c5d568444003f05ba074 and proj/rt-measure 5661a81d083f5cbff42f59f932da29aa9647d513 (measurement trees, not for merge)
+FOLDER: p1gen | worktree, claude/p1-type-assertion-forms, 0 uncommitted | KEEP until the hop merge lands (the next step runs here) | 0.7 GB
+FOLDER: p1flt | worktree, claude/p1-type-assertion-source, 0 uncommitted | DELETE-SAFE (branch on origin) | 0.7 GB
+FOLDER: p1diag | worktree, detached b095b8367f, 0 uncommitted | DELETE-SAFE (H8 reading tree; hop commits are on origin) | 0.6 GB
+FOLDER: p1docs | worktree, claude/p1-docs-polish, 0 uncommitted | DELETE-SAFE (landed in master) | 0.6 GB
+FOLDER: p1tour | worktree, claude/p1-tour-pin, 0 uncommitted | DELETE-SAFE (landed in master) | 0.6 GB
+FOLDER: p1un | worktree, claude/p1-union-measure, 0 uncommitted | DELETE-SAFE (branch now on origin) | 0.6 GB
+FOLDER: rt | worktree, proj/rt-measure, 50 uncommitted | DELETE-SAFE (branch now on origin; the dirt is measurement scratch, patch and tgz kept in p1-archive) | 0.6 GB
+FOLDER: p1p, p1q | worktrees, detached 446d2c8ba0, 23 and 4 uncommitted | DELETE-SAFE (the dirt is regenerable validation pages from gate runs; patches and a tgz kept in p1-archive) | 0.6 GB each
+FOLDER: main checkout and mbx | the repository clone (detached on master) and the mailbox clone | KEEP while the session runs; both are clones of origin | 1.1 GB and 0.8 GB
+FOLDER: p1-archive | bundles and patches of the old trees, sha256-16 in my last STATE BLOCK | DELETE-SAFE now (all it protects is on origin) | 1 MB
+FOLDER: sdk | pinned Go 1.26.9 toolchain copy (GOROOT) | KEEP for this container only; re-download on a fresh one | 0.24 GB
+FOLDER: p1pq | logs and the recon scripts (run.sh, linux.sh, chk.py) of part 2 | DELETE-SAFE (the recipe is in team memory p1-type-assertion-state) | 2.5 GB
+FOLDER: h8read, hashset-cut, hs-pre, hs-r2-c, hs-r2-d, p1d-run, p1flt-gate, census, fw, fwP, dl124, nr-evidence, p1lo-gates | probe, gate and evidence dirs from earlier seats, all landed or posted | DELETE-SAFE; deletion of hs-pre, hs-r2-c, hs-r2-d and p1d-run is the cleanup the owner has not yet approved by name | 0.9 GB together
+No worktree was removed: the auto-mode classifier still blocks it and the container is reclaimed anyway.
+```
+
 PASTE PROMPT
 ```
 You are P1, the go2cs fleet's Sonnet pilot lane (mechanical work), in a cloud container. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/<you>/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe. FIRST ACTION: merge the hop tip into claude/p1-type-assertion-forms, REGENERATE src/core/runtime/{windows,linux,darwin}/package_info.cs with the merged converter (seeded -stdlib runtime emission, 3 targets), confirm builds, post the new head.
@@ -221,8 +247,8 @@ You are P1, the go2cs fleet's Sonnet pilot lane (mechanical work), in a cloud co
 STATE BLOCK
 ```
 LANE: C1   MODEL: opus-class/default effort   HOST: cloud (fresh box since ~15:06Z; the old box's disk failed)
-BRANCH: claude/c1-test-host-watchdog 87e0f1153544c46e269c4d01de7b4f69e99250a4 on-origin-yes announced -- WATCHDOG (A): red dc928f657f, fix 97eb14ccfe, floor column 3269239fd7, merge of tip 908642b2d4; posted 20261017T163719Z-C1; G reviews
-BRANCH: claude/c1-runtime-array-dims 3fa3251da4f40c166538bef0d972570eaca33d77 on-origin-yes announced -- (2) array-dims companion, G reviewed d33477bbdc OK; 3fa3251da4 is the -tests footprint (base reproduces malloc_test.cs), posted 20261017T151357Z-C1; awaits merge
+BRANCH: claude/c1-test-host-watchdog 63f0e316f7b0ecacc70b520276869c135b3b1d3f on-origin-yes announced -- WATCHDOG (A) with G's fixes (1)-(3) red-first (a349c67f53 .. 63f0e316f7); posted 20261017T174205Z-C1; awaits G's re-review
+NOTE: claude/c1-runtime-array-dims 3fa3251da4 LANDED at hop 8bb3b8b5be (pruned); its worktree scratchpad/arr is gone with the container
 NOTE: claude/c1-runtime-cleanup-closure 79e63d16b8 LANDED in the hop (merged in the 908642b2d4 batch, then pruned); reachable from claude/hop-go126, not yet from master
 BRANCH: claude/c1-tostring-forward e752628faf98f5a7792df8b5f22fadf04b22ee08 on-origin-yes announced -- ToString forwarding seat, round 2 posted for R's CNR; not in hop or master
 BRANCH: claude/c1-linq-slice 2d635fad3f7ad0b1632e84b559878fc20e2fecb1 on-origin-yes announced -- LINQ-on-slice seat; not in hop or master
@@ -237,15 +263,47 @@ BRANCH: claude/c1-retire-gcmasm 106e3fa91904343d55c8dd22c8a24951c870623b on-orig
 BRANCH: claude/c1-t4-census-fixup2 4d09229e69e013e9ad2c9f9e5224d32c290dd895 on-origin-yes stale -- T4 census rebaseline; not an ancestor of hop or master (landed content unverified from here)
 LOCAL-ONLY: none
 WORKTREE: scratchpad/wdg claude/c1-test-host-watchdog uncommitted-files-0 pushed
-WORKTREE: scratchpad/arr claude/c1-runtime-array-dims uncommitted-files-0 pushed
 WORKTREE: scratchpad/wdgbase detached-dc928f657f uncommitted-files-0 pushed-ancestor (GolibTests base arm only)
 WORKTREE: scratchpad/mbx claude/mailbox uncommitted-files-0 pushed
-NEXT: read COORD's/G's reply to 20261017T163719Z-C1 and act on it at claude/c1-test-host-watchdog 87e0f11535 (if it lands, R's output-format class starts there).
+NEXT: read G's re-review of 20261017T174205Z-C1 and act on it at claude/c1-test-host-watchdog 63f0e316f7; merge the hop tip in first if it has moved past 8bb3b8b5be. If the watchdog lands, R's output-format seat starts there.
 READ-FIRST: mailbox b41660a55 (20261017T163719Z-C1, the watchdog post), 56dac9381 (20261017T151357Z-C1, the array-dims answer); docs/GoCorpusMigration.md H10 step 61
-BLOCKED-ON: landing (watchdog and array-dims, both G review)
+BLOCKED-ON: review (G's re-review of the watchdog)
 TOOLS: GOTOOLCHAIN=local with GOROOT = go1.26.9 toolchain module; DOTNET_ROOT = private Microsoft 10.0.12 runtime root (docs/phase4/recipes/microsoft-dotnet/use-ms-dotnet.sh over the distro SDK 10.0.112); pwsh 7.6.6 as a dotnet tool; GolibTests with -p:GoTargetOS=linux
 ```
 WAKE: COORD sends direct session messages to the C1 cloud session (one-way); C1 answers through the mailbox (docs/phase4/inbox/COORD/). A cloud box's disk does NOT survive (C1's failed on 2026-10-17): push every commit as you make it.
+
+FOLDERS (posted by the lane 2026-10-17; its own words)
+```
+ROLL CHECK (C1): every C1 branch is pushed. Each SHA below is `git ls-remote origin` and equals the local tip
+where one exists. Read at 2026-10-17 ~17:50Z.
+
+claude/c1-test-host-watchdog 63f0e316f7b0ecacc70b520276869c135b3b1d3f = local tip. PUSHED. Includes G's fixes:
+  a349c67f53, e7cd29e000, 730331590f, f280d186cf, 2630ba4609, 63f0e316f7 (ancestry checked); posted 20261017T174205Z-C1
+claude/c1-runtime-array-dims 3fa3251da4f40c166538bef0d972570eaca33d77 = local tip. PUSHED. (array-dims, awaiting merge)
+claude/c1-tostring-forward e752628faf98f5a7792df8b5f22fadf04b22ee08: pushed, no local copy on this box
+claude/c1-linq-slice 2d635fad3f7ad0b1632e84b559878fc20e2fecb1: pushed, no local copy
+claude/c1-cgi-symlink f131a2cc6f8b16ee46e1844794dadeb4fca95167: pushed, no local copy
+claude/c1-comment-parity-j 1fa344ad2d632eab1ba32667f09c1c594c8f58e7: pushed, no local copy
+claude/c1-comment-parity-k 7af05606ad76d6d2aa5178eb23eff94f17ff1988: pushed, no local copy
+claude/c1-darwin-pprof-push-r2 9e8411fda7021aaed799b9de6afb967896b070ce: pushed, no local copy
+claude/c1-mprof-alloc-frames 582ac5bbda2fc36020e79b3f3542e9fd12d863a3: pushed, superseded (moved to R)
+claude/c1-scout-comment-parity 59a6c93b9e48c8909f359b358d83e9dd7b85147a: pushed, stale
+claude/c1-darwin-lookup-probe 1917d9bf3bd1d6f988d8331bde833c9c10db3998: pushed, stale
+claude/c1-retire-gcmasm 106e3fa91904343d55c8dd22c8a24951c870623b: pushed, superseded by -r2 (landed)
+claude/c1-t4-census-fixup2 4d09229e69e013e9ad2c9f9e5224d32c290dd895: pushed, stale
+claude/c1-runtime-cleanup-closure: landed in hop tip 908642b2d4 (pruned)
+mailbox: my last post ec67e7e3a6 is an ancestor of origin/claude/mailbox.
+
+LOCAL-ONLY: none. Every worktree has 0 uncommitted or untracked files. There are no stashes. The detached
+wdgbase worktree (730331590f) is an ancestor on origin. The session branch equals master (d0dfcbf2f8) and has
+no work on it. Scratch notes (the prediction log) are not repo work. Their scores are in my posts.
+
+START-FOLDER for a new C1 session: a fresh clone of the repo. Check out claude/c1-test-host-watchdog
+(63f0e316f7) first. NEXT there: read G's re-review of 20261017T174205Z-C1 and act on it. Hop tip was 908642b2d4
+at 17:47Z, so merge it in if it has moved. Second: claude/c1-runtime-array-dims (3fa3251da4), awaiting merge.
+Tools on a fresh linux box: GOTOOLCHAIN=local with go1.26.9; the Microsoft .NET 10 runtime via
+docs/phase4/recipes/microsoft-dotnet/use-ms-dotnet.sh; pwsh as a dotnet tool; GolibTests with -p:GoTargetOS=linux.
+```
 
 PASTE PROMPT
 ```
@@ -257,8 +315,7 @@ You are C1, a go2cs fleet lane, in a cloud container. Read CLAUDE.md, then secti
 STATE BLOCK
 ```
 LANE: R   MODEL: Opus 5.5 / default   HOST: R-LAPTOP
-BRANCH: claude/r-mprof-alloc-frames e408ba8b9fbd61b19fda62f4d28a4b692ae20093 on-origin-yes accepted -- mprof alloc frames + zero-size + lock-profile closure-name fix, G OK, in your merge queue
-BRANCH: claude/r-traceback-labels 8a53b6892835b93c2fedb3a0751ae774721e07e7 on-origin-yes announced -- tracebacklabels + G's one-byte UTF-8 fix (red cb06d40f80); GolibTests at this tip still running
+NOTE: claude/r-mprof-alloc-frames e408ba8b9f and claude/r-traceback-labels 8a53b68928 LANDED at hop 8bb3b8b5be (pruned); worktrees r-mprof and r-tblabels are DELETE-SAFE
 BRANCH: claude/r-testlogfile 4dea95c6848a6fe368abd0999d22fb39c5ecd746 on-origin-yes announced -- testlogfile + G's three divergences (red 3876caef3c); GolibTests R 1757/0/23 D 1749/0/31; TestFileChdirTestlog re-run queued
 NOTE: claude/r-test-output-format is a local design worktree with NO commits (it equals hop 7b6acfd10f); nothing to preserve
 BRANCH: claude/r-illink-issue 0ca2e05490bb7b5b38bb8f99185836c0f1b5c787 on-origin-yes stale -- older seat, untouched this session
@@ -270,15 +327,42 @@ WORKTREE: r-mprof claude/r-mprof-alloc-frames uncommitted-files-0 pushed
 WORKTREE: r-tblabels claude/r-traceback-labels uncommitted-files-0 pushed
 WORKTREE: r-testlog claude/r-testlogfile uncommitted-files-0 pushed
 WORKTREE: r-hostfmt claude/r-test-output-format uncommitted-files-0 (untracked testing/synctest -tests emission only, regenerable) not needed
-WORKTREE: r-linq detached 2d635fad3f7ad0b1632e84b559878fc20e2fecb1 uncommitted-files-0 on origin (LINQ seat head)
-WORKTREE: r-linqctl detached 8cf94bd579e9269433a3646b228c73ccd6beba2e uncommitted-files-0 on origin (LINQ control)
+WORKTREE: r-merged detached 908642b2d4 uncommitted-files-0 (for the merged ToString+LINQ run; recreatable on the current hop tip)
 WORKTREE: r-mbx-20261007 claude/mailbox uncommitted-files-0 mailbox clone, transport only
-NEXT: once the labels gate ends, run the merged ToString+LINQ full behavioral leg in a fresh worktree on hop 908642b2d4 and post the result.
+NEXT: the merged ToString+LINQ full behavioral leg (C1 e752628faf + 2d635fad3f) on the CURRENT hop tip (8bb3b8b5be or later), in r-merged re-pointed there; post the result. Then claude/r-testlogfile 4dea95c684 lands on G's OK; the output-format seat's code waits on C1's watchdog landing.
 READ-FIRST: inbox R 20261017T161811Z (merged run on 908642b2d4), 151132Z (G review), 150618Z (output-format ruling); my COORD posts 20261017T162027Z (announce), 135234Z (output-format scope), 104151Z (TestMkmalloc).
 BLOCKED-ON: landing (the output-format seat's code waits on C1's watchdog landing; design may proceed)
 TOOLS: GOROOT go1.26.9 (hop work, GOTOOLCHAIN=local), GOROOT go1.24.13 (mailbox scripts), DOTNET_ROOT .NET 10 (SDK 10.0.400), python 3.11
 ```
 WAKE: mailbox only: COORD posts to docs/phase4/inbox/R/; R posts to docs/phase4/inbox/COORD/ with the fleet-msg tool. R-LAPTOP has the large disk: heavy behavioral legs go there.
+
+FOLDERS (posted by the lane 2026-10-17; its own words)
+```
+PURGED before posting: ignored build output (bin/obj, published hosts, built go2cs.exe) with git clean -fdXq in all 7 R
+worktrees. No tracked file touched; 0 deleted tracked files in every tree.
+DELETED now (DELETE-SAFE, inside my own tree, children only):
+- r-linq (detached 2d635fad3f) and r-linqctl (detached 8cf94bd579): both on origin/claude/c1-linq-slice, 0 uncommitted,
+  LINQ CNR done and posted.
+START-FOLDER: R-LAPTOP: C:/Projects/go2cs (the main checkout, master; the session working directory)
+FOLDER: R-LAPTOP: C:/Projects/go2cs | main checkout, master, PARENT of every worktree below | KEEP (never removed: removing it takes the children) | -
+FOLDER: R-LAPTOP: C:/go2cs-tmp/r-mprof | worktree claude/r-mprof-alloc-frames e408ba8b9f, on origin, 0 uncommitted | KEEP until it lands (G OK, queued) | 588 MB
+FOLDER: R-LAPTOP: C:/go2cs-tmp/r-tblabels | worktree claude/r-traceback-labels 8a53b68928, on origin, 0 uncommitted | KEEP until it lands | 588 MB
+FOLDER: R-LAPTOP: C:/go2cs-tmp/r-testlog | worktree claude/r-testlogfile 4dea95c684, on origin, 0 uncommitted | KEEP until it lands | 588 MB
+FOLDER: R-LAPTOP: C:/go2cs-tmp/r-hostfmt | worktree claude/r-test-output-format at hop 7b6acfd10f, NO commits; only untracked, regenerable testing/synctest -tests emission | KEEP (output-format seat; code after C1's watchdog) | 588 MB
+FOLDER: R-LAPTOP: C:/go2cs-tmp/r-merged | detached 908642b2d4 (hop tip, on origin), 0 uncommitted | KEEP for the merged ToString+LINQ run (on HOLD for your tree ruling); recreatable | 589 MB
+FOLDER: R-LAPTOP: C:/go2cs-tmp/r-mbx-20261007 | mailbox clone, claude/mailbox, transport only | KEEP (fleet-read, msg and watch run from it) | 719 MB
+FOLDER: R-LAPTOP: C:/go2cs-tmp/bundles | R-local-only-20261017.bundle, 13 heads, sha256-16 644bc34e85b96f67 | KEEP (cited by my STATE BLOCK) | 0.3 MB
+FOLDER: R-LAPTOP: C:/go2cs-tmp/edits | the lane's gate and measure scripts (.sh, watchdog .ps1) and message drafts | KEEP (scripts reused on resume) | 40 MB
+FOLDER: R-LAPTOP: C:/go2cs-tmp (root loose files: 41 files, older R sessions' logs ds-*, repoguard-*, roster-*, pgate/qjit; docsamples.exe; py helpers) plus demo-evidence (empty) and __pycache__ | DELETE-SAFE (not cited by my state block). NOT deleted: not made this session; yours to purge | 5.2 MB
+FOLDER: R-LAPTOP: session scratch dir (the agent's temp dir) | per-run logs, TRX, measure outputs, design notes | DELETE-SAFE (results are in my COORD posts; output-format design summarised in 20261017T135234Z) | -
+FOLDER: R-LAPTOP: ~/AppData-temp go2cs-tests | test-host run sandboxes the -tests pipeline creates | DELETE-SAFE (per-run, regenerated) | -
+FOLDER: R-LAPTOP: ~/sdk/go1.26.9 | Go toolchain, GOROOT for hop work | KEEP | -
+FOLDER: R-LAPTOP: ~/sdk/go1.24.13 | Go toolchain, GOROOT for master and the mailbox scripts | KEEP | -
+FOLDER: R-LAPTOP: ~/sdk/go1.23.1 | the box's ambient GOROOT (unused by R; it made the Go-oracle tests skip until pinned) | KEEP (owner's) | -
+FOLDER: R-LAPTOP: ~/dotnet10 | DOTNET_ROOT, .NET 10 SDK 10.0.400 | KEEP | -
+FOLDER: R-LAPTOP: ~/.dotnet/tools | pwsh 7 dotnet-tool shim | KEEP | -
+Free disk after the purge: 334 GB.
+```
 
 PASTE PROMPT
 ```
@@ -291,7 +375,8 @@ STATE BLOCK
 ```
 LANE: P2   MODEL: opus-class/low   HOST: P2 (a cloud container, not a fleet box)
 BRANCH: claude/p2-reparse-blob a3fc33b20c7cded2d5150e92fc740de4676ea9eb on-origin-yes seat-posted -- os reparse blob (17:00Z post), with G + the i9
-BRANCH: claude/p2-pipe-deadline d501c4df7994998da4e257f1e3fd5d7c4a9edf2e on-origin-yes probe -- the named-pipe probe; the fix is local (LOCAL-ONLY below)
+BRANCH: claude/p2-pipe-deadline 64503699da5f150ce57049bcb2278b35ac130632 on-origin-yes seat-posted -- named-pipe completion delivery (17:46Z post): readFile/writeFile + GetOverlappedResult hand-owned under GoAsyncIO.HasReadiness; footprint 4 windows files; awaits the i9's probe + os row
+BRANCH: claude/p2-lookup-field-view 97b749ad469ab4ddc7a5ee405e81b7e20b7f5bdb on-origin-yes seat-posted -- net lookup_windows field views (18:04Z post); no converter change; awaits the i9's net windows row
 BRANCH: claude/p2-board-avx512 fc185fd40b7421283ac495d329a9350818161a9a on-origin-yes accepted -- held for the post-hop train
 BRANCH: claude/p2-iface-shell-cwt 814e043b8a26ac09e551f84de326205ed02e2b9d on-origin-yes accepted -- guards, held for the post-hop train
 BRANCH: claude/p2-select-park-fairness ed82d54f11cf1b17c447adee6818334ac9296ad1 on-origin-yes accepted -- held for the post-hop train
@@ -299,26 +384,53 @@ BRANCH: claude/p2-view-over-bytes b08c5124bc2a0ec591eaf4a9669e4ca25501d514 on-or
 BRANCH: claude/p2-rawstr-scout 0184e7b00b58b346a735037ce21bb222ba57d915 on-origin-yes record -- CENSUS-rawstring-crlf scout (10-12), in neither master nor the hop; status as the ledger has it
 BRANCH: claude/p2-runbook-s9-derivation 9a60e69949005719b5a65d81957330bdb745ba84 on-origin-yes landed -- contained in master and the hop; ref not pruned
 NOTE: claude/p2-untyped-const-typearg 7461f6ebb0, claude/p2-cpuinit-flags 404f3bc1f6, claude/p2-native-field-access 2c03fc060b: landed, remote refs pruned by COORD
-LOCAL-ONLY: claude/p2-pipe-deadline 46aed7ae5a (local tip, 2 commits over d501c4df79: merge of 908642b2d4 + the completion fix) preserved-how: bundle p2-pipe-deadline-local.bundle on P2 scratch, sha256-16 f4d67ab3c0c3bb15; pushes once its gates are green
-LOCAL-ONLY: claude/p2-func-measure a78614db28c422476ba4c504a3543b96217defe9 never-push-by-ruling preserved-how: bundle p2-func-measure.bundle on P2 scratch, sha256-16 917a29b8cbd14dd0
-WORKTREE: wt-pd claude/p2-pipe-deadline uncommitted-0 preserved-how: committed, bundled
+LOCAL-ONLY: claude/p2-func-measure a78614db28c422476ba4c504a3543b96217defe9 never-push-by-ruling, LOST with the container (nothing owed); also lost by design: three superseded pre-r2 refs and two MEASURE-ONLY refs (FOLDERS lists them)
+WORKTREE: wt-pd claude/p2-pipe-deadline uncommitted-0 preserved-how: pushed
+WORKTREE: wt-lw claude/p2-lookup-field-view uncommitted-0 preserved-how: pushed
 WORKTREE: wt-rpb claude/p2-reparse-blob uncommitted-0 preserved-how: pushed
 WORKTREE: wt-uq detached 6bcf729a64 uncommitted-3 preserved-how: superseded draft of the landed first-field-downcast seat; patch on P2 scratch, sha256-16 d684ef8ae950832e
 WORKTREE: wt-m claude/p2-measure-local uncommitted-17 preserved-how: none needed (generated -tests output of an old pprof run)
 WORKTREE: wt-utc wt-cpu wt-f3 wt-avx wt-cwt wt-sel wt-vob uncommitted-0 each preserved-how: pushed or landed
-NEXT: the named-pipe completion-delivery fix. Root, static (the i9's reading is the measurement): syscall's converted readFile/writeFile
- made no operation record, so a pipe handle was never bound to the CLR port; A and C then cancel with no record (ERROR_NOT_FOUND),
- and B waits for the packet a synchronous success still owes, since os.NewFile keeps the handle's completion modes (Go 1.26.9).
- Fix (local 46aed7ae5a): readFile/writeFile hand-owned, an overlapped call on a poller-owned descriptor (GoAsyncIO.HasReadiness, new)
- takes the socket seam's record (offset carried, buffer pinned for the flight), every other call keeps the generated body;
- GetOverlappedResult hand-owned beside WSAGetOverlappedResult under the same predicate. Now running: the two-seeded three-target
- footprint (prediction: 4 windows files, linux and darwin 0). Then the windows build, go test ./..., push, and a seat asking the
- i9 for the probe (A i/o timeout ~50 ms, B n=5, C file already closed ~100 ms) and os TestVariousDeadlines1Proc base vs seat.
-READ-FIRST: inbox/P2 20261017T163533Z (the i9's probe reading); inbox/COORD 20261017T170026Z-P2 (reparse seat)
+NEXT: three seats await windows readings by the i9: reparse a3fc33b20c (its full behavioral suite), pipe-deadline 64503699da (the probe A/B/C, os TestVariousDeadlines1Proc, the os row; net as control), lookup-field-view 97b749ad46 (net's windows row, lookup rows). Answer review and reading results; the held post-hop seats wait for the post-hop train.
+READ-FIRST: inbox/COORD 20261017T170026Z-P2 (reparse), 20261017T174605Z-P2 (pipe), 20261017T180435Z-P2 (lookup); the i9's replies in inbox/P2. This section is the record; team memory is a convenience copy.
 BLOCKED-ON: none for the fix; owner hand: removing merged wt-f3 and three scratch seeds still waits on the owner's word in the project thread
 TOOLS: GOROOT go1.26.9, DOTNET_ROOT .NET 10.0.12 / SDK 10.0.112, pwsh 7.6.6, python3
 ```
 WAKE: mailbox only: COORD posts to docs/phase4/inbox/P2/; P2 posts to docs/phase4/inbox/COORD/ with the fleet-msg tool. Windows runs are the i9's: P2 sends probes.
+
+FOLDERS (posted by the lane 2026-10-17; its own words)
+```
+START-FOLDER: the go2cs repository checkout the cloud session clones fresh at start (no local state carries over).
+The lane's resume state lives in the team memory file p2-profiling-lane-state, which survives the container.
+
+PUSHED, read by ls-remote 18:05Z (these are all P2 needs from this container):
+ claude/p2-reparse-blob        a3fc33b20c7cded2d5150e92fc740de4676ea9eb  seat, with G and the i9
+ claude/p2-pipe-deadline       64503699da5f150ce57049bcb2278b35ac130632  seat, with the i9
+ claude/p2-lookup-field-view   97b749ad469ab4ddc7a5ee405e81b7e20b7f5bdb  seat (18:04Z post)
+ claude/p2-board-avx512        fc185fd40b7421283ac495d329a9350818161a9a  held for the post-hop train
+ claude/p2-iface-shell-cwt     814e043b8a26ac09e551f84de326205ed02e2b9d  held for the post-hop train
+ claude/p2-select-park-fairness ed82d54f11cf1b17c447adee6818334ac9296ad1 held for the post-hop train
+ claude/p2-view-over-bytes     b08c5124bc2a0ec591eaf4a9669e4ca25501d514  held
+ claude/p2-rawstr-scout        0184e7b00b58b346a735037ce21bb222ba57d915  record (10-12)
+ claude/p2-runbook-s9-derivation 9a60e69949005719b5a65d81957330bdb745ba84 landed; ref not pruned
+FOLDER: wt-rpb wt-pd wt-lw | worktrees of the three seats above | DELETE-SAFE (pushed, uncommitted-0)
+FOLDER: wt-avx wt-cwt wt-sel wt-vob | worktrees of held branches | DELETE-SAFE (pushed, uncommitted-0)
+FOLDER: wt-cpu wt-utc wt-f3 | worktrees of landed branches | DELETE-SAFE (landed, uncommitted-0)
+FOLDER: wt-m | claude/p2-measure-local, 17 files of generated -tests output from an old pprof run | DELETE-SAFE
+FOLDER: wt-uq | detached draft of the landed first-field-downcast seat, 3 files | DELETE-SAFE (superseded)
+FOLDER: mbx | mailbox clone | DELETE-SAFE (transport; everything is on origin claude/mailbox)
+FOLDER: P2 scratch | probes, seeds, logs, bundles | DELETE-SAFE except as noted under LOST
+
+LOST WITH THE CONTAINER (local-only, none of it owed):
+ claude/p2-func-measure a78614db28 never-push by ruling; bundle on scratch, sha256-16 917a29b8cbd14dd0, goes with it
+ claude/p2-cli-version-diagnostics 338ef4a2af, claude/p2-n-cleanup 6235912709, claude/p2-untyped-region-nil-safety
+  b4d7ff1cf9: each superseded by its landed -r2
+ p2-measure-n-on-fixup2 ee4bb1f72b, p2-measure-n9-on-fixup2 712183fa1d: MEASURE ONLY, never pushed by design
+If any of these must survive, say which and I will push it under a name you give; otherwise nothing is owed.
+Not deleted now: removing worktrees in this container needs the owner's word (refused here earlier), and
+the container's end removes them anyway.
+cleanup: purged bin/obj in 12 worktrees (about 0.1 GB), free 9.5 GB; removed 0 trees.
+```
 
 PASTE PROMPT
 ```
