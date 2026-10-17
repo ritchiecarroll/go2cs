@@ -611,6 +611,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// header, which the managed model refuses).
 		"writeErrData": goosAny,
 		"bytes":        goosAny,
+		// hexdumpWords (Go 1.26 hexdump.go) symbolizes each aligned word through findfunc, funcname and
+		// funcInfo.entry, which walk a pclntab this host does not have: fn.valid() is always false, so the
+		// "<pkg.Func+0xOFF>" annotation line was never written and TestHexdumpWords read a dump without it.
+		// The hand-owned body (hexdump_impl.cs) is the converted one line for line, symbolizing through the
+		// caller records, as printDebugLogPC does.
+		"hexdumpWords": goosAny,
 		// syscall.AllThreadsSyscall's runtime half refuses by name BEFORE the world (Q6): there are
 		// no Ms to signal, so a stop that now succeeds would run the call on one thread and report
 		// success. linux-only: the function exists only in os_linux.go (linux/os_linux_impl.cs).
