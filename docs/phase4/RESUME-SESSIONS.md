@@ -189,13 +189,78 @@ PASTE PROMPT
 You are P1, the go2cs fleet's Sonnet pilot lane (mechanical work), in a cloud container. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/<you>/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe. FIRST ACTION: merge the hop tip into claude/p1-type-assertion-forms, REGENERATE src/core/runtime/{windows,linux,darwin}/package_info.cs with the merged converter (seeded -stdlib runtime emission, 3 targets), confirm builds, post the new head.
 ```
 
-### 1l.5 C1, P2, R: STATE BLOCKS pending at this revision
+### 1l.5 C1 (cloud)
 
-Their blocks are being folded in. Until then: C1 (cloud; COORD sends direct messages, C1 answers through the mailbox)
-holds claude/c1-runtime-array-dims (LANDED at the roll) and is re-cutting the WATCHDOG; P2 (mailbox) holds the os
-reparse-blob and named-pipe work plus claude/p2-pipe-deadline; R (mailbox, R-LAPTOP) holds claude/r-testlogfile
-(fixes pending push), claude/r-traceback-labels and claude/r-mprof-alloc-frames (merging), and the merged
-ToString+LINQ behavioral run. Each resumes with the shared prompt above plus its inbox.
+STATE BLOCK
+```
+LANE: C1   MODEL: opus-class/default effort   HOST: cloud (fresh box since ~15:06Z; the old box's disk failed)
+BRANCH: claude/c1-test-host-watchdog 87e0f1153544c46e269c4d01de7b4f69e99250a4 on-origin-yes announced -- WATCHDOG (A): red dc928f657f, fix 97eb14ccfe, floor column 3269239fd7, merge of tip 908642b2d4; posted 20261017T163719Z-C1; G reviews
+BRANCH: claude/c1-runtime-array-dims 3fa3251da4f40c166538bef0d972570eaca33d77 on-origin-yes announced -- (2) array-dims companion, G reviewed d33477bbdc OK; 3fa3251da4 is the -tests footprint (base reproduces malloc_test.cs), posted 20261017T151357Z-C1; awaits merge
+BRANCH: claude/c1-runtime-cleanup-closure 79e63d16b80f3caf19c8008e8029a1891e46bcbc on-origin-no landed -- (3) AddCleanup, in hop tip 908642b2d4 (pruned)
+BRANCH: claude/c1-tostring-forward e752628faf98f5a7792df8b5f22fadf04b22ee08 on-origin-yes announced -- ToString forwarding seat, round 2 posted for R's CNR; not in hop or master
+BRANCH: claude/c1-linq-slice 2d635fad3f7ad0b1632e84b559878fc20e2fecb1 on-origin-yes announced -- LINQ-on-slice seat; not in hop or master
+BRANCH: claude/c1-mprof-alloc-frames 582ac5bbda2fc36020e79b3f3542e9fd12d863a3 on-origin-yes superseded -- runtime/pprof mprof hand-off, MOVED to R
+BRANCH: claude/c1-cgi-symlink f131a2cc6f8b16ee46e1844794dadeb4fca95167 on-origin-yes announced -- cgi TestHost symlink containment; not in hop or master
+BRANCH: claude/c1-comment-parity-j 1fa344ad2d632eab1ba32667f09c1c594c8f58e7 on-origin-yes accepted -- parity seat J, held post-hop (its src/core footprint is owed against the 1.26 base)
+BRANCH: claude/c1-comment-parity-k 7af05606ad76d6d2aa5178eb23eff94f17ff1988 on-origin-yes accepted -- parity seat K, held post-hop (same footprint owed)
+BRANCH: claude/c1-darwin-pprof-push-r2 9e8411fda7021aaed799b9de6afb967896b070ce on-origin-yes accepted -- darwin pprof push r2, approved post-hop
+BRANCH: claude/c1-scout-comment-parity 59a6c93b9e48c8909f359b358d83e9dd7b85147a on-origin-yes stale -- comment-parity PLAN scout (seats B-K cut from it)
+BRANCH: claude/c1-darwin-lookup-probe 1917d9bf3bd1d6f988d8331bde833c9c10db3998 on-origin-yes stale -- resolver sizing probe, never a seat
+BRANCH: claude/c1-retire-gcmasm 106e3fa91904343d55c8dd22c8a24951c870623b on-origin-yes superseded -- by claude/c1-retire-gcmasm-r2 (landed)
+BRANCH: claude/c1-t4-census-fixup2 4d09229e69e013e9ad2c9f9e5224d32c290dd895 on-origin-yes stale -- T4 census rebaseline; not an ancestor of hop or master (landed content unverified from here)
+LOCAL-ONLY: none
+WORKTREE: scratchpad/wdg claude/c1-test-host-watchdog uncommitted-files-0 pushed
+WORKTREE: scratchpad/arr claude/c1-runtime-array-dims uncommitted-files-0 pushed
+WORKTREE: scratchpad/wdgbase detached-dc928f657f uncommitted-files-0 pushed-ancestor (GolibTests base arm only)
+WORKTREE: scratchpad/mbx claude/mailbox uncommitted-files-0 pushed
+NEXT: read COORD's/G's reply to 20261017T163719Z-C1 and act on it at claude/c1-test-host-watchdog 87e0f11535 (if it lands, R's output-format class starts there).
+READ-FIRST: mailbox b41660a55 (20261017T163719Z-C1, the watchdog post), 56dac9381 (20261017T151357Z-C1, the array-dims answer); docs/GoCorpusMigration.md H10 step 61
+BLOCKED-ON: landing (watchdog and array-dims, both G review)
+TOOLS: GOTOOLCHAIN=local with GOROOT = go1.26.9 toolchain module; DOTNET_ROOT = private Microsoft 10.0.12 runtime root (docs/phase4/recipes/microsoft-dotnet/use-ms-dotnet.sh over the distro SDK 10.0.112); pwsh 7.6.6 as a dotnet tool; GolibTests with -p:GoTargetOS=linux
+```
+WAKE: COORD sends direct session messages to the C1 cloud session (one-way); C1 answers through the mailbox (docs/phase4/inbox/COORD/). A cloud box's disk does NOT survive (C1's failed on 2026-10-17): push every commit as you make it.
+
+PASTE PROMPT
+```
+You are C1, a go2cs fleet lane, in a cloud container. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/YOU/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; your watchdog seat claude/c1-test-host-watchdog awaits G's review; then COORD's next order.
+```
+
+### 1l.6 R (R-LAPTOP)
+
+STATE BLOCK
+```
+LANE: R   MODEL: Opus 5.5 / default   HOST: R-LAPTOP
+BRANCH: claude/r-mprof-alloc-frames e408ba8b9fbd61b19fda62f4d28a4b692ae20093 on-origin-yes accepted -- mprof alloc frames + zero-size + lock-profile closure-name fix, G OK, in your merge queue
+BRANCH: claude/r-traceback-labels 8a53b6892835b93c2fedb3a0751ae774721e07e7 on-origin-yes announced -- tracebacklabels + G's one-byte UTF-8 fix (red cb06d40f80); GolibTests at this tip still running
+BRANCH: claude/r-testlogfile 4dea95c6848a6fe368abd0999d22fb39c5ecd746 on-origin-yes announced -- testlogfile + G's three divergences (red 3876caef3c); GolibTests R 1757/0/23 D 1749/0/31; TestFileChdirTestlog re-run queued
+BRANCH: claude/r-test-output-format 7b6acfd10f28e19680619dbc5cf53c7e7a933b43 on-origin-no cut -- output-format design worktree, NO commits (equals hop 7b6acfd10f), nothing to preserve
+BRANCH: claude/r-illink-issue 0ca2e05490bb7b5b38bb8f99185836c0f1b5c787 on-origin-yes stale -- older seat, untouched this session
+BRANCH: claude/r-news-1-24-13-7 768881662cc3814cd9e66a971f5a72a72328e577 on-origin-yes stale -- older seat, untouched this session
+NOTE: landed and pruned this session: claude/r-synctest-time (93fc325bc1, in 1feac60846) and claude/r-mkmalloc-disclosure (3004583392, in 908642b2d4); local branches and worktrees removed.
+NOTE: 82 more local claude/r-* branches are ancestors of origin/master or the hop (landed); not listed one by one.
+LOCAL-ONLY: 13 older branches (09-22..10-03) reachable from NO origin ref, not verified superseded, so bundled, not pushed: cb-panic-evidence, design-named-func-type-identity, jwt-promoted-iface-repros, m6-default-godebug, p2-sweep-evidence, panic-frames-design, ps51-selfdesc-count, recover-design, s3-fake-time, s4-synctest-pulls, test-host-init-order, tls-bogo-evidence, typeswitch-collapsed-func-case. preserved-how: one bundle, R-LAPTOP go2cs-tmp/bundles/R-local-only-20261017.bundle, 13 heads, prerequisites origin/master + origin/claude/hop-go126, git bundle verify OK, sha256-16 644bc34e85b96f67
+WORKTREE: r-mprof claude/r-mprof-alloc-frames uncommitted-files-0 pushed
+WORKTREE: r-tblabels claude/r-traceback-labels uncommitted-files-0 pushed
+WORKTREE: r-testlog claude/r-testlogfile uncommitted-files-0 pushed
+WORKTREE: r-hostfmt claude/r-test-output-format uncommitted-files-0 (untracked testing/synctest -tests emission only, regenerable) not needed
+WORKTREE: r-linq detached 2d635fad3f7ad0b1632e84b559878fc20e2fecb1 uncommitted-files-0 on origin (LINQ seat head)
+WORKTREE: r-linqctl detached 8cf94bd579e9269433a3646b228c73ccd6beba2e uncommitted-files-0 on origin (LINQ control)
+WORKTREE: r-mbx-20261007 claude/mailbox uncommitted-files-0 mailbox clone, transport only
+NEXT: once the labels gate ends, run the merged ToString+LINQ full behavioral leg in a fresh worktree on hop 908642b2d4 and post the result.
+READ-FIRST: inbox R 20261017T161811Z (merged run on 908642b2d4), 151132Z (G review), 150618Z (output-format ruling); my COORD posts 20261017T162027Z (announce), 135234Z (output-format scope), 104151Z (TestMkmalloc).
+BLOCKED-ON: landing (the output-format seat's code waits on C1's watchdog landing; design may proceed)
+TOOLS: GOROOT go1.26.9 (hop work, GOTOOLCHAIN=local), GOROOT go1.24.13 (mailbox scripts), DOTNET_ROOT .NET 10 (SDK 10.0.400), python 3.11
+```
+WAKE: mailbox only: COORD posts to docs/phase4/inbox/R/; R posts to docs/phase4/inbox/COORD/ with the fleet-msg tool. R-LAPTOP has the large disk: heavy behavioral legs go there.
+
+PASTE PROMPT
+```
+You are R, a go2cs fleet lane on R-LAPTOP. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/YOU/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; then the merged ToString+LINQ behavioral run on the hop tip COORD posts; then the testing-host OUTPUT FORMAT seat (Go decorate + Go text mode) AFTER C1's watchdog lands.
+```
+
+### 1l.7 P2 (cloud): STATE BLOCK pending at this revision
+
+P2 (mailbox only) holds the os reparse-blob widening (G design OK, 4 conditions), the named-pipe hang (the i9's probe: all three steps hang, so completions never reach the poller), claude/p2-pipe-deadline, and the lookup_windows.cs field views. It resumes with the shared prompt plus its inbox.
 
 ---
 
