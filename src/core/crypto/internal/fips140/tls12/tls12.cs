@@ -61,7 +61,7 @@ public static slice<byte> MasterSecret<H>(Func<H> hashΔ1, slice<byte> preMaster
     // "The TLS 1.2 KDF is an approved KDF when the following conditions are
     // satisfied: [...] (3) P_HASH uses either SHA-256, SHA-384 or SHA-512."
     var h = hashΔ1();
-    switch (((any)h).type()) {
+    switch (((any)(h).OrTypedNilOf()).type()) {
     case ж<sha256.Digest>: {
         if (h.Size() != 32) {
             fips140.RecordNonApproved();

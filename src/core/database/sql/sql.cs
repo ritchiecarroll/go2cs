@@ -486,7 +486,7 @@ public static (driverꓸValue, error) Value<T>(this Null<T> n) {
     if (!n.Valid) {
         return (default!, default!);
     }
-    var v = ((any)n.V);
+    var v = ((any)(n.V).OrTypedNilOf());
     // See issue 69728.
     {
         var (valuer, ok) = v._<driver.Valuer>(ᐧ); if (ok) {

@@ -29,7 +29,7 @@ internal static any escapeSink;
 // Escape forces any pointers in x to escape to the heap.
 public static T Escape<T>(T x) {
     if (alwaysFalse) {
-        escapeSink = x;
+        escapeSink = (x).OrTypedNilOf();
     }
     return x;
 }
