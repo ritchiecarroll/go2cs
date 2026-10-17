@@ -12,7 +12,7 @@ partial class comment_package {
 
 // An htmlPrinter holds the state needed for printing a [Doc] as HTML.
 partial struct htmlPrinter {
-    public partial ref ж<Printer> Printer { get; }
+    /*embed*/ public ж<Printer> Printer;
     internal bool tight;
 }
 

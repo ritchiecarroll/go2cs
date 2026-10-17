@@ -43,7 +43,7 @@ public static int64 Size(this ref CommonType c) {
 // See the documentation for [StructField] for more info on the interpretation of
 // the BitSize/BitOffset/DataBitOffset fields.
 partial struct BasicType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public int64 BitSize;
     public int64 BitOffset;
     public int64 DataBitOffset;
@@ -62,54 +62,54 @@ public static @string String(this ref BasicType t) {
 
 // A CharType represents a signed character type.
 partial struct CharType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // A UcharType represents an unsigned character type.
 partial struct UcharType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // An IntType represents a signed integer type.
 partial struct IntType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // A UintType represents an unsigned integer type.
 partial struct UintType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // A FloatType represents a floating point type.
 partial struct FloatType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // A ComplexType represents a complex floating point type.
 partial struct ComplexType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // A BoolType represents a boolean type.
 partial struct BoolType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // An AddrType represents a machine address type.
 partial struct AddrType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // An UnspecifiedType represents an implicit, unknown, ambiguous or nonexistent type.
 partial struct UnspecifiedType {
-    public partial ref BasicType BasicType { get; }
+    /*embed*/ public BasicType BasicType;
 }
 
 // qualifiers
 
 // A QualType represents a type that has the C/C++ "const", "restrict", or "volatile" qualifier.
 partial struct QualType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public @string Qual;
     public ΔType Type;
 }
@@ -124,7 +124,7 @@ public static int64 Size(this ref QualType t) {
 
 // An ArrayType represents a fixed size array type.
 partial struct ArrayType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public ΔType Type;
     public int64 StrideBitSize; // if > 0, number of bits to hold each element
     public int64 Count; // if == -1, an incomplete array, like char x[].
@@ -143,7 +143,7 @@ public static int64 Size(this ref ArrayType t) {
 
 // A VoidType represents the C void type.
 partial struct VoidType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -155,7 +155,7 @@ public static @string String(this ref VoidType t) {
 
 // A PtrType represents a pointer type.
 partial struct PtrType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public ΔType Type;
 }
 
@@ -165,7 +165,7 @@ public static @string String(this ref PtrType t) {
 
 // A StructType represents a struct, union, or C++ class type.
 partial struct StructType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public @string StructName;
     public @string Kind; // "struct", "union", or "class".
     public slice<ж<StructField>> Field;
@@ -298,7 +298,7 @@ public static @string Defn(this ref StructType t) {
 // The only indication of its native integer type is its ByteSize
 // (inside [CommonType]).
 partial struct EnumType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public @string EnumName;
     public slice<ж<EnumValue>> Val;
 }
@@ -330,7 +330,7 @@ public static @string String(this ref EnumType t) {
 
 // A FuncType represents a function type.
 partial struct FuncType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public ΔType ReturnType;
     public slice<ΔType> ParamType;
 }
@@ -355,7 +355,7 @@ public static @string String(this ref FuncType t) {
 
 // A DotDotDotType represents the variadic ... function parameter.
 partial struct DotDotDotType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
 }
 
 public static @string String(this ref DotDotDotType t) {
@@ -364,7 +364,7 @@ public static @string String(this ref DotDotDotType t) {
 
 // A TypedefType represents a named type.
 partial struct TypedefType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public ΔType Type;
 }
 
@@ -379,7 +379,7 @@ public static int64 Size(this ref TypedefType t) {
 // An UnsupportedType is a placeholder returned in situations where we
 // encounter a type that isn't supported.
 partial struct UnsupportedType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public Tag Tag;
 }
 

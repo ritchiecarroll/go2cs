@@ -14,7 +14,7 @@ partial class runtime_package {
 
 // gTraceState is per-G state for the tracer.
 partial struct gTraceState {
-    internal partial ref traceSchedResourceState traceSchedResourceState { get; }
+    /*embed*/ internal traceSchedResourceState traceSchedResourceState;
 }
 
 // reset resets the gTraceState for a new goroutine.
@@ -35,7 +35,7 @@ partial struct mTraceState {
 
 // pTraceState is per-P state for the tracer.
 partial struct pTraceState {
-    internal partial ref traceSchedResourceState traceSchedResourceState { get; }
+    /*embed*/ internal traceSchedResourceState traceSchedResourceState;
     // mSyscallID is the ID of the M this was bound to before entering a syscall.
     internal int64 mSyscallID;
     // maySweep indicates the sweep events should be traced.

@@ -32,7 +32,7 @@ partial class pe_package {
 
 // A File represents an open PE file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public any OptionalHeader; // of type *OptionalHeader32 or *OptionalHeader64
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Symbol>> Symbols; // COFF symbols with auxiliary symbol records removed

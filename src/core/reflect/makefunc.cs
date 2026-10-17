@@ -18,7 +18,7 @@ partial class reflect_package {
 // methodValue and runtime.reflectMethodValue.
 // Any changes should be reflected in all three.
 partial struct makeFuncImpl {
-    internal partial ref makeFuncCtxt makeFuncCtxt { get; }
+    /*embed*/ internal makeFuncCtxt makeFuncCtxt;
     internal ж<funcType> ftyp;
     internal Func<slice<ΔValue>, slice<ΔValue>> fn;
 }
@@ -36,7 +36,7 @@ internal static partial void makeFuncStub();
 // makeFuncImpl and runtime.reflectMethodValue.
 // Any changes should be reflected in all three.
 partial struct methodValue {
-    internal partial ref makeFuncCtxt makeFuncCtxt { get; }
+    /*embed*/ internal makeFuncCtxt makeFuncCtxt;
     internal nint method;
     internal ΔValue rcvr;
 }

@@ -15,7 +15,7 @@ partial class comment_package {
 
 // A textPrinter holds the state needed for printing a Doc as plain text.
 partial struct textPrinter {
-    public partial ref ж<Printer> Printer { get; }
+    /*embed*/ public ж<Printer> Printer;
     internal strings.Builder @long;
     internal @string prefix;
     internal @string codePrefix;

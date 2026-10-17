@@ -67,8 +67,8 @@ internal static ж<isync.HashTrieMap<ж<abi.Type>, any>> ᏑuniqueMaps = new Sta
 internal static ref isync.HashTrieMap<ж<abi.Type>, any> uniqueMaps => ref ᏑuniqueMaps.Value;                                            // any is always a *uniqueMap[T].
 
 partial struct uniqueMap<T> {
-    internal partial ref ж<canonMap<T>> canonMap { get; }
-    internal partial ref cloneSeq cloneSeq { get; }
+    /*embed*/ internal ж<canonMap<T>> canonMap;
+    /*embed*/ internal cloneSeq cloneSeq;
 }
 
 } // end unique_package

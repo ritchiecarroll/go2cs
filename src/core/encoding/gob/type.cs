@@ -351,7 +351,7 @@ internal static ж<userTypeInfo> wireTypeUserInfo; // userTypeInfo of wireType
 
 // Array type
 public partial struct arrayType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public typeId Elem;
     public nint Len;
 }
@@ -384,7 +384,7 @@ internal static @string @string(this ref arrayType a) {
 
 // GobEncoder type (something that implements the GobEncoder interface)
 public partial struct gobEncoderType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
 }
 
 internal static ж<gobEncoderType> newGobEncoderType(@string name) {
@@ -403,7 +403,7 @@ internal static @string @string(this ref gobEncoderType g) {
 
 // Map type
 public partial struct mapType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public typeId Key;
     public typeId Elem;
 }
@@ -438,7 +438,7 @@ internal static @string @string(this ref mapType m) {
 
 // Slice type
 public partial struct sliceType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public typeId Elem;
 }
 
@@ -479,7 +479,7 @@ public partial struct fieldType {
 }
 
 public partial struct structType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public slice<fieldType> Field;
 }
 

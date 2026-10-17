@@ -207,7 +207,7 @@ public partial struct options {
 
 // A Profile defines the configuration of an IDNA mapper.
 partial struct Profile {
-    internal partial ref options options { get; }
+    /*embed*/ internal options options;
 }
 
 internal static void apply(ж<options> Ꮡo, slice<Action<ж<options>>> opts) {

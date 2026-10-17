@@ -888,8 +888,8 @@ public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
 // ReadWriter stores pointers to a [Reader] and a [Writer].
 // It implements [io.ReadWriter].
 partial struct ReadWriter {
-    public partial ref ж<Reader> Reader { get; }
-    public partial ref ж<Writer> Writer { get; }
+    /*embed*/ public ж<Reader> Reader;
+    /*embed*/ public ж<Writer> Writer;
 }
 
 // NewReadWriter allocates a new [ReadWriter] that dispatches to r and w.

@@ -720,7 +720,7 @@ internal static void netpollAdjustWaiters(int32 delta) {
 }
 
 internal partial struct alloc_pollDescPadded /*dyn*/ {
-    internal partial ref pollDesc pollDesc { get; }
+    /*embed*/ internal pollDesc pollDesc;
     internal array<byte> pad = new(216);
 }
 

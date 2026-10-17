@@ -423,7 +423,7 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
 }
 
 partial struct linkedUtilWindow {
-    public partial ref go.@internal.trace_package.UtilWindow UtilWindow { get; }
+    /*embed*/ public go.@internal.trace_package.UtilWindow UtilWindow;
     public @string URL;
 }
 

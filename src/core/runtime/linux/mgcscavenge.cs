@@ -1265,7 +1265,7 @@ partial struct scavChunkData {
     // scavChunkFlags represents additional flags
     //
     // Note: only 6 bits are available.
-    internal partial ref scavChunkFlags scavChunkFlags { get; }
+    /*embed*/ internal scavChunkFlags scavChunkFlags;
 }
 
 // unpackScavChunkData unpacks a scavChunkData from a uint64.

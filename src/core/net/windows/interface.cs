@@ -180,7 +180,7 @@ public static (ж<Interface>, error) InterfaceByName(@string name) {
 // Multiple names sharing the index are managed by first-come
 // first-served basis for consistency.
 partial struct ipv6ZoneCache {
-    public partial ref sync_package.RWMutex RWMutex { get; }                // guard the following
+    /*embed*/ public sync_package.RWMutex RWMutex;                // guard the following
     internal time.Time lastFetched;      // last time routing information was fetched
     internal map<@string, nint> toIndex; // interface name to its index
     internal map<nint, @string> toName; // interface index to its name

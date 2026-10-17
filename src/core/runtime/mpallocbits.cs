@@ -436,7 +436,7 @@ internal static nuint findBitRange64(uint64 c, nuint n) {
 // Update the comment on (*pageAlloc).chunks should this
 // structure change.
 partial struct pallocData {
-    internal partial ref pallocBits pallocBits { get; }
+    /*embed*/ internal pallocBits pallocBits;
     internal pageBits scavenged;
 }
 

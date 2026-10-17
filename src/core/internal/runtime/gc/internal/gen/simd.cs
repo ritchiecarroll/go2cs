@@ -6,7 +6,7 @@ namespace go.@internal.runtime.gc.@internal;
 partial class gen_package {
 
 partial struct Uint8x64 {
-    internal partial ref valAny valAny { get; }
+    /*embed*/ internal valAny valAny;
 }
 
 internal static ж<Δkind> kindUint8x64 = Ꮡ(new Δkind(typ: "Uint8x64"u8, reg: regClassZ));
@@ -104,7 +104,7 @@ public static Uint8x64 /*z*/ Shuffle2Masked(this Uint8x64 x, Uint8x64 y, Uint8x6
 }
 
 partial struct Uint64x8 {
-    internal partial ref valAny valAny { get; }
+    /*embed*/ internal valAny valAny;
 }
 
 internal static ж<Δkind> kindUint64x8 = Ꮡ(new Δkind(typ: "Uint64x8"u8, reg: regClassZ));
@@ -188,7 +188,7 @@ public static Mask64 /*z*/ ShuffleBitsMasked(this Uint64x8 x, Uint8x64 y, Mask64
 }
 
 partial struct Mask8 {
-    internal partial ref valAny valAny { get; }
+    /*embed*/ internal valAny valAny;
 }
 
 internal static ж<Δkind> kindMask8 = Ꮡ(new Δkind(typ: "Mask8"u8, reg: regClassK));
@@ -238,7 +238,7 @@ public static Mask8 /*z*/ ShiftLeft(this Mask8 x, uint8 c) {
 }
 
 partial struct Mask64 {
-    internal partial ref valAny valAny { get; }
+    /*embed*/ internal valAny valAny;
 }
 
 internal static ж<Δkind> kindMask64 = Ꮡ(new Δkind(typ: "Mask64"u8, reg: regClassK));

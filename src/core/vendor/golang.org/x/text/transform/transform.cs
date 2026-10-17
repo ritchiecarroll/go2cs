@@ -325,7 +325,7 @@ public static error Close(this ref Writer w) {
 }
 
 partial struct nop {
-    public partial ref NopResetter NopResetter { get; }
+    /*embed*/ public NopResetter NopResetter;
 }
 
 internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
@@ -343,7 +343,7 @@ internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF
 }
 
 partial struct discard {
-    public partial ref NopResetter NopResetter { get; }
+    /*embed*/ public NopResetter NopResetter;
 }
 
 internal static (nint nDst, nint nSrc, error err) Transform(this discard _, slice<byte> dst, slice<byte> src, bool atEOF) {

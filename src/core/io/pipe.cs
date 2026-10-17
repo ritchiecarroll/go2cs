@@ -12,7 +12,7 @@ partial class io_package {
 
 // onceError is an object that will only store an error once.
 partial struct onceError {
-    public partial ref sync_package.Mutex Mutex { get; } // guards following
+    /*embed*/ public sync_package.Mutex Mutex; // guards following
     internal error err;
 }
 
@@ -172,7 +172,7 @@ internal static error writeCloseError(this ж<pipe> Ꮡp) {
 
 // A PipeReader is the read half of a pipe.
 partial struct PipeReader {
-    internal partial ref pipe pipe { get; }
+    /*embed*/ internal pipe pipe;
 }
 
 // Read implements the standard Read interface:

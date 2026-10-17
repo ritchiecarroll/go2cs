@@ -105,14 +105,14 @@ internal const bool stackTraceDebug = false;
 // Must be smaller than or equal to workbuf.
 partial struct stackWorkBuf {
     internal sys.NotInHeap _;
-    internal partial ref stackWorkBufHdr stackWorkBufHdr { get; }
+    /*embed*/ internal stackWorkBufHdr stackWorkBufHdr;
     internal array<uintptr> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(stackWorkBufHdr{}) */ (uintptr)32) / goarch.PtrSize);
 }
 
 // Header declaration must come after the buf declaration above, because of issue #14620.
 partial struct stackWorkBufHdr {
     internal sys.NotInHeap _;
-    internal partial ref workbufhdr workbufhdr { get; }
+    /*embed*/ internal workbufhdr workbufhdr;
     internal ж<stackWorkBuf> next; // linked list of workbufs
 }
 
@@ -124,13 +124,13 @@ partial struct stackWorkBufHdr {
 // Must be smaller than or equal to workbuf.
 partial struct stackObjectBuf {
     internal sys.NotInHeap _;
-    internal partial ref stackObjectBufHdr stackObjectBufHdr { get; }
+    /*embed*/ internal stackObjectBufHdr stackObjectBufHdr;
     internal array<stackObject> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(stackObjectBufHdr{}) */ (uintptr)32) / /* unsafe.Sizeof(stackObject{}) */ (uintptr)32);
 }
 
 partial struct stackObjectBufHdr {
     internal sys.NotInHeap _;
-    internal partial ref workbufhdr workbufhdr { get; }
+    /*embed*/ internal workbufhdr workbufhdr;
     internal ж<stackObjectBuf> next;
 }
 

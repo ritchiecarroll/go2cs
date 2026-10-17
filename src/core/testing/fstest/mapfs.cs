@@ -239,7 +239,7 @@ public static (slice<@string>, error) Glob(this MapFS fsys, @string pattern) {
 }
 
 partial struct noSub {
-    public partial ref MapFS MapFS { get; }
+    /*embed*/ public MapFS MapFS;
 }
 
 internal static void Sub(this noSub _) {
@@ -295,7 +295,7 @@ internal static @string String(this ж<mapFileInfo> Ꮡi) {
 // An openMapFile is a regular (non-directory) fs.File open for reading.
 partial struct openMapFile {
     internal @string path;
-    internal partial ref mapFileInfo mapFileInfo { get; }
+    /*embed*/ internal mapFileInfo mapFileInfo;
     internal int64 offset;
 }
 
@@ -354,7 +354,7 @@ internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int6
 // A mapDir is a directory fs.File (so also an fs.ReadDirFile) open for reading.
 partial struct mapDir {
     internal @string path;
-    internal partial ref mapFileInfo mapFileInfo { get; }
+    /*embed*/ internal mapFileInfo mapFileInfo;
     internal slice<mapFileInfo> entry;
     internal nint offset;
 }

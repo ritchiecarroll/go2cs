@@ -34,7 +34,7 @@ internal static labelMap labelValue(context.Context ctx) {
 // This is an initial implementation, but it will be replaced with something
 // that admits incremental immutable modification more efficiently.
 partial struct labelMap {
-    public partial ref @internal.runtime.pprof.label_package.Set Set { get; }
+    /*embed*/ public @internal.runtime.pprof.label_package.Set Set;
 }
 
 // String satisfies Stringer and returns key, value pairs in a consistent

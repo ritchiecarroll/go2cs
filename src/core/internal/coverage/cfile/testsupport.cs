@@ -150,7 +150,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
 }
 
 partial struct tstate {
-    public partial ref go.@internal.coverage.calloc_package.BatchCounterAlloc BatchCounterAlloc { get; }
+    /*embed*/ public go.@internal.coverage.calloc_package.BatchCounterAlloc BatchCounterAlloc;
     internal ж<cmerge.Merger> cm;
     internal ж<cformat.Formatter> cf;
     internal coverage.CounterMode cmode;

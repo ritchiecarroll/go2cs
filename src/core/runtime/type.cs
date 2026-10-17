@@ -34,7 +34,7 @@ internal static @string maps_typeString(ж<abi.Type> Ꮡtyp) {
 
 // rtype is a wrapper that allows us to define additional methods.
 partial struct Δrtype {
-    public partial ref ж<@internal.abi_package.Type> Type { get; } // embedding is okay here (unlike reflect) because none of this is public
+    /*embed*/ public ж<@internal.abi_package.Type> Type; // embedding is okay here (unlike reflect) because none of this is public
 }
 
 internal static @string @string(this Δrtype t) {

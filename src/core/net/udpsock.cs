@@ -119,7 +119,7 @@ public static ж<UDPAddr> UDPAddrFromAddrPort(netip.AddrPort addr) {
 
 // An addrPortUDPAddr is a netip.AddrPort-based UDP address that satisfies the Addr interface.
 partial struct addrPortUDPAddr {
-    public partial ref net.netip_package.AddrPort AddrPort { get; }
+    /*embed*/ public net.netip_package.AddrPort AddrPort;
 }
 
 internal static @string Network(this addrPortUDPAddr _) {
@@ -129,7 +129,7 @@ internal static @string Network(this addrPortUDPAddr _) {
 // UDPConn is the implementation of the [Conn] and [PacketConn] interfaces
 // for UDP network connections.
 partial struct UDPConn {
-    internal partial ref conn conn { get; }
+    /*embed*/ internal conn conn;
 }
 
 // SyscallConn returns a raw network connection.

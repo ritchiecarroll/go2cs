@@ -27,7 +27,7 @@ partial struct traceRegionAlloc {
 // not need write barriers.
 partial struct traceRegionAllocBlock {
     internal sys.NotInHeap _;
-    internal partial ref traceRegionAllocBlockHeader traceRegionAllocBlockHeader { get; }
+    /*embed*/ internal traceRegionAllocBlockHeader traceRegionAllocBlockHeader;
     internal array<byte> data = new(traceRegionAllocBlockData);
 }
 

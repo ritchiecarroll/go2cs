@@ -59,9 +59,9 @@ public static @string Error(this ProtocolError p) {
 // These embedded types carry methods with them;
 // see the documentation of those types for details.
 partial struct Conn {
-    public partial ref Reader Reader { get; }
-    public partial ref Writer Writer { get; }
-    public partial ref Pipeline Pipeline { get; }
+    /*embed*/ public Reader Reader;
+    /*embed*/ public Writer Writer;
+    /*embed*/ public Pipeline Pipeline;
     internal io.ReadWriteCloser conn;
 }
 

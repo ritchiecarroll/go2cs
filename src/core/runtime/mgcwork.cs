@@ -396,7 +396,7 @@ partial struct workbufhdr {
 
 partial struct workbuf {
     internal sys.NotInHeap _;
-    internal partial ref workbufhdr workbufhdr { get; }
+    /*embed*/ internal workbufhdr workbufhdr;
     // account for the above fields
     internal array<uintptr> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(workbufhdr{}) */ (uintptr)24) / goarch.PtrSize);
 }

@@ -182,7 +182,7 @@ partial struct ss {
     internal buffer buf;         // token accumulator
     internal nint count;           // runes consumed so far.
     internal bool atEOF;           // already read EOF
-    internal partial ref ssave ssave { get; }
+    /*embed*/ internal ssave ssave;
 }
 
 // ssave holds the parts of ss that need to be
