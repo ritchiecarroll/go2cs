@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(traceRegionAllocBlock))]
 partial class runtime_package {
 
 // traceRegionAlloc is a thread-safe region allocator.
@@ -59,7 +60,7 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
     block = (ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Load());
     if (block != nil) {
         var r = block.of(traceRegionAllocBlock.Ꮡoff).Add(n);
-        if (r <= (uintptr)len((~block).data)) {
+        if (r <= (uintptr)len(block.data)) {
             return block.at(traceRegionAllocBlock.Ꮡdata, (ulong)(r - n)).Reinterpret<byte, notInHeap>();
         }
     }
@@ -76,14 +77,14 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
         Ꮡblock.ValueSlot = (ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Load());
         if (Ꮡblock.ValueSlot != nil) {
             var r = Ꮡblock.ValueSlot.of(traceRegionAllocBlock.Ꮡoff).Add(n);
-            if (r <= (uintptr)len((~Ꮡblock.ValueSlot).data)) {
+            if (r <= (uintptr)len(Ꮡblock.ValueSlot.data)) {
                 unlock(Ꮡa.of(traceRegionAlloc.Ꮡlock));
                 Ꮡx.ValueSlot = Ꮡblock.ValueSlot.at(traceRegionAllocBlock.Ꮡdata, (ulong)(r - n)).Reinterpret<byte, notInHeap>();
                 return;
             }
 
             // Add the existing block to the full list.
-            Ꮡblock.ValueSlot.Value.next = Ꮡa.Value.full;
+            Ꮡblock.ValueSlot.traceRegionAllocBlockHeader.next = Ꮡa.Value.full;
             Ꮡa.Value.full = Ꮡblock.ValueSlot;
         }
 

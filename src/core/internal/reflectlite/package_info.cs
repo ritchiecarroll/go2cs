@@ -66,7 +66,7 @@ using static go.@internal.reflectlite_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIgBrAKCpoKmgqaC2qKCgoKCgvqCgpSCpoKClIKC5oKClIKCgoKUpoKCAAIaAAsO5IKmgqaCAAQWgKSCgoKUpoKCgpQABByCgpSCgoKClLSklKaCpoKCgpTOgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClAACFPKqogAEGoKClIKCpoIABL4BAAkEgsqCuKaygqaCpgAE2AHSgpQ=")]
-[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE2kAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACAq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
+[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE6kAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACAq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

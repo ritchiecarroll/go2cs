@@ -108,6 +108,7 @@ using @internal;
 using @internal.runtime;
 using abi = @internal.abi_package;
 
+[GoFieldAccess(typeof(arenaHint))]
 partial class runtime_package {
 
 internal static UntypedInt maxTinySize => /* _TinySize */ 16;
@@ -666,8 +667,8 @@ internal static void mallocinit() {
                 hintList = Ꮡmheap_.of(mheap.ᏑuserArena).of(mheap_userArena.ᏑarenaHints);
             }
             var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.of(mheap.ᏑarenaHintAlloc).alloc());
-            hint.Value.addr = Δp;
-            (hint.Value.next, hintList.ValueSlot) = (hintList.ValueSlot, hint);
+            hint.addr = Δp;
+            (hint.next, hintList.ValueSlot) = (hintList.ValueSlot, hint);
         }
     } else {
         // On a 32-bit machine, we're much more concerned
@@ -732,16 +733,16 @@ internal static void mallocinit() {
             }
         }
         var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.of(mheap.ᏑarenaHintAlloc).alloc());
-        hint.Value.addr = Δp;
-        (hint.Value.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
+        hint.addr = Δp;
+        (hint.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
 
         // Place the hint for user arenas just after the large reservation.
         //
         // While this potentially competes with the hint above, in practice we probably
         // aren't going to be getting this far anyway on 32-bit platforms.
         var userArenaHint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.of(mheap.ᏑarenaHintAlloc).alloc());
-        userArenaHint.Value.addr = Δp;
-        (userArenaHint.Value.next, mheap_.userArena.arenaHints) = (mheap_.userArena.arenaHints, userArenaHint);
+        userArenaHint.addr = Δp;
+        (userArenaHint.next, mheap_.userArena.arenaHints) = (mheap_.userArena.arenaHints, userArenaHint);
     }
     // Initialize the memory limit here because the allocator is going to look at it
     // but we haven't called gcinit yet and we're definitely going to allocate memory before then.
@@ -860,11 +861,11 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
 
         // Create new hints for extending this region.
         var hint = (ж<arenaHint>)(uintptr)(h.arenaHintAlloc.alloc());
-        (hint.Value.addr, hint.Value.down) = ((uintptr)v, true);
-        (hint.Value.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
+        (hint.addr, hint.down) = ((uintptr)v, true);
+        (hint.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
         hint = (ж<arenaHint>)(uintptr)(h.arenaHintAlloc.alloc());
-        hint.Value.addr = (uintptr)v + size;
-        (hint.Value.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
+        hint.addr = (uintptr)v + size;
+        (hint.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
     }
 
     // Check for bad pointers or pointers we can't use.

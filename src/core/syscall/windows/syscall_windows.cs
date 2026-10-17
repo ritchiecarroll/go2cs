@@ -15,6 +15,7 @@ using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
 
+[GoFieldAccess(typeof(symbolicLinkReparseBuffer), typeof(mountPointReparseBuffer))]
 partial class syscall_package {
 
 partial struct ΔHandle /*num:uintptr*/;
@@ -1445,8 +1446,8 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
         if (exprᴛ1 == IO_REPARSE_TAG_SYMLINK) {
             var data = rdb.of(reparseDataBuffer.ᏑreparseBuffer).Reinterpret<byte, symbolicLinkReparseBuffer>();
             var p = array<uint16>.AliasPointer(data.at(symbolicLinkReparseBuffer.ᏑPathBuffer, 0), 65535);
-            s = UTF16ToString((~p).slice((~data).SubstituteNameOffset / 2, (uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2));
-            if ((uint32)((~data).Flags & (uint32)_SYMLINK_FLAG_RELATIVE) == 0) {
+            s = UTF16ToString(p.slice(data.SubstituteNameOffset / 2, (uint16)(data.SubstituteNameOffset + data.SubstituteNameLength) / 2));
+            if ((uint32)(data.Flags & (uint32)_SYMLINK_FLAG_RELATIVE) == 0) {
                 if (len(s) >= 4 && s[..4] == @"\??\"){
                     s = s[4..];
                     switch (ᐧ) {
@@ -1470,7 +1471,7 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
         else if (exprᴛ1 == _IO_REPARSE_TAG_MOUNT_POINT) {
             var data = rdb.of(reparseDataBuffer.ᏑreparseBuffer).Reinterpret<byte, mountPointReparseBuffer>();
             var p = array<uint16>.AliasPointer(data.at(mountPointReparseBuffer.ᏑPathBuffer, 0), 65535);
-            s = UTF16ToString((~p).slice((~data).SubstituteNameOffset / 2, (uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2));
+            s = UTF16ToString(p.slice(data.SubstituteNameOffset / 2, (uint16)(data.SubstituteNameOffset + data.SubstituteNameLength) / 2));
             if (len(s) >= 4 && s[..4] == @"\??\"){ // \??\C:\foo\bar
                 s = s[4..];
             } else {

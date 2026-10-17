@@ -97,6 +97,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(stackObjectBuf))]
 partial class runtime_package {
 
 internal const bool stackTraceDebug = false;
@@ -290,7 +291,7 @@ internal static void addObject(this ref stackScanState s, uintptr addr, ж<stack
     if ((~x).nobj == len((~x).obj)) {
         // full buffer - allocate a new buffer, add to end of linked list
         var y = getempty().Reinterpret<workbuf, stackObjectBuf>();
-        y.Value.next = default!;
+        y.stackObjectBufHdr.next = default!;
         x.Value.next = y;
         s.tail = y;
         x = y;

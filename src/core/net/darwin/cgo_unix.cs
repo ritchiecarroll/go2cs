@@ -21,6 +21,7 @@ using System.Runtime.CompilerServices;
 using net;
 using vendor.golang.org.x.net.dns;
 
+[GoFieldAccess(typeof(syscall.RawSockaddrInet6))]
 partial class net_package {
 
 // cgoAvailable set to true to indicate that the cgo resolver
@@ -270,12 +271,12 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
             var exprᴛ2 = _C_ai_family(r).Value;
             if (exprᴛ2 == _C_AF_INET) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet4>();
-                var addr = new IPAddr(IP: copyIP((~sa).Addr[..]));
+                var addr = new IPAddr(IP: copyIP(sa.of(syscall.RawSockaddrInet4.ᏑAddr).slice()));
                 addrs = append(addrs, addr);
             }
             else if (exprᴛ2 == _C_AF_INET6) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet6>();
-                var addr = new IPAddr(IP: copyIP((~sa).Addr[..]), Zone: zoneCache.name((nint)(~sa).Scope_id));
+                var addr = new IPAddr(IP: copyIP(sa.of(syscall.RawSockaddrInet6.ᏑAddr).slice()), Zone: zoneCache.name((nint)sa.Scope_id));
                 addrs = append(addrs, addr);
             }
         }

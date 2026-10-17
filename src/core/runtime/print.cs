@@ -8,6 +8,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(Δsliceᴛ))]
 partial class runtime_package {
 
 // The compiler knows that a print of a value of this type
@@ -271,7 +272,7 @@ internal static void printslice(slice<byte> sʗp) {
 
     var sp = Ꮡs.Reinterpret<slice<byte>, Δsliceᴛ>();
     print((@string)"["u8, len(s), (@string)"/"u8, cap(s), (@string)"]"u8);
-    printpointer((~sp).Δarray);
+    printpointer(sp.Δarray);
 }
 
 internal static void printeface(eface e) {

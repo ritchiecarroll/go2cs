@@ -12,6 +12,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(workbuf))]
 partial class runtime_package {
 
 internal static UntypedInt _WorkbufSize => 2048; // in bytes; larger values result in less contention
@@ -467,7 +468,7 @@ internal static ж<workbuf> getempty() {
         // put the rest on the empty list.
         for (var i = (uintptr)0; i + (uintptr)_WorkbufSize <= workbufAlloc; i += _WorkbufSize) {
             var newb = (ж<workbuf>)(uintptr)((@unsafe.Pointer)(s.@base() + i));
-            newb.Value.nobj = 0;
+            newb.workbufhdr.nobj = 0;
             lfnodeValidate(newb.of(workbuf.Ꮡnode));
             if (i == 0){
                 b = newb;
