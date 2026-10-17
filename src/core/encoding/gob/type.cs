@@ -845,7 +845,7 @@ internal static (ж<typeInfo>, error) buildTypeInfo(ref userTypeInfo ut, reflect
             if (errΔ1 != default!) {
                 return (default!, errΔ1);
             }
-            var gtΔ1 = userType.id().gobType()._<ж<gobEncoderType>>();
+            var gtΔ1 = userType.id().gobType()._<ΔgobType, ж<gobEncoderType>>();
             var exprᴛ1 = ut.externalEnc;
             if (exprᴛ1 == xGob) {
                 info.Value.wire.GobEncoderT = gtΔ1;
@@ -863,19 +863,19 @@ internal static (ж<typeInfo>, error) buildTypeInfo(ref userTypeInfo ut, reflect
                 var typ = rt;
                 var exprᴛ2 = typ.Kind();
                 if (exprᴛ2 == reflect.Array) {
-                    info.Value.wire.ArrayT = t._<ж<arrayType>>();
+                    info.Value.wire.ArrayT = t._<ΔgobType, ж<arrayType>>();
                 }
                 else if (exprᴛ2 == reflect.Map) {
-                    info.Value.wire.MapT = t._<ж<mapType>>();
+                    info.Value.wire.MapT = t._<ΔgobType, ж<mapType>>();
                 }
                 else if (exprᴛ2 == reflect.ΔSlice) {
                     // []byte == []uint8 is a special case handled separately
                     if (typ.Elem().Kind() != reflect.Uint8) {
-                        info.Value.wire.SliceT = t._<ж<sliceType>>();
+                        info.Value.wire.SliceT = t._<ΔgobType, ж<sliceType>>();
                     }
                 }
                 else if (exprᴛ2 == reflect.Struct) {
-                    info.Value.wire.StructT = t._<ж<structType>>();
+                    info.Value.wire.StructT = t._<ΔgobType, ж<structType>>();
                 }
             }
         }

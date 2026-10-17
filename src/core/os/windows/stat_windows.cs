@@ -100,7 +100,7 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
 
         (var fi, err) = statHandle(name, h);
         syscall.CloseHandle(h);
-        if (err == default! && followSurrogates && fi._<ж<fileStat>>().isReparseTagNameSurrogate()) {
+        if (err == default! && followSurrogates && fi._<FileInfo, ж<fileStat>>().isReparseTagNameSurrogate()) {
             // To obtain information about the link target, we reopen the file without
             // FILE_FLAG_OPEN_REPARSE_POINT and examine the resulting handle.
             // (See https://devblogs.microsoft.com/oldnewthing/20100212-00/?p=14963.)
