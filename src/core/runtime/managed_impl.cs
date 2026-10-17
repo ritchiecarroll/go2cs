@@ -1639,19 +1639,17 @@ partial class runtime_package
 
     // Go's printquoted (go1.26.9 print.go:212-246), into a builder: printable ASCII as is; \n, \r, \t,
     // \\ and \" escaped; any other rune below 127 as \xHH, below 0x10000 as \uHHHH, else \UHHHHHHHH,
-    // lower-case hex. A range over a string decodes invalid UTF-8 as U+FFFD, one byte at a time, so it
-    // prints �.
+    // lower-case hex. Go's `for _, r := range s` yields U+FFFD for each invalid byte, ONE byte at a time,
+    // which golib's @string enumerator reproduces (.NET's Rune.DecodeFromUtf8 would consume a maximal
+    // invalid subpart instead: E2 82 41 is two U+FFFD and an A in Go, one U+FFFD and an A there). Each
+    // U+FFFD prints as the \ufffd escape.
     private static void appendQuoted(StringBuilder trace, @string s)
     {
         trace.Append('"');
 
-        ReadOnlySpan<byte> bytes = s.ToSpan();
-
-        while (!bytes.IsEmpty)
+        foreach ((nint _, rune runeValue) in s)
         {
-            System.Text.Rune.DecodeFromUtf8(bytes, out System.Text.Rune rune, out int consumed);
-            bytes = bytes[Math.Max(consumed, 1)..];
-            int r = rune.Value;
+            int r = runeValue;
 
             switch (r)
             {
