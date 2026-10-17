@@ -48,6 +48,26 @@
 //     ("ptr is arena-allocated", "ptr not in allocated block") are therefore unreachable and the
 //     lines are not kept as dead code. debug.sbrk IS kept -- it is a converted variable with a
 //     managed meaning and Go's noop-Cleanup answer is still the right one.
+//  5. THE CLOSES-OVER-PTR GUARD (Go 1.26) READS THE CAPTURES THE CONVERTER PASSES, NOT POINTER
+//     SLOTS. Go scans every pointer slot of the cleanup's funcval object for an address inside
+//     ptr's allocation. A C# delegate's closure object cannot answer that without reflection, and
+//     a C# closure object can also hold variables only a SIBLING lambda of its scope captured. So
+//     the converter, which knows which Go variables the cleanup closes over BY VALUE, passes their
+//     values to the four-argument AddCleanup below (src/go2cs/addCleanupCaptures.go), and the
+//     guard panics when one of them is a pointer whose referent is ptr's. The same answer under the
+//     JIT and native AOT. The converter passes pointer, unsafe.Pointer and interface captures as
+//     themselves, and a STRUCT or ARRAY captured by value that holds a pointer slot (and is within
+//     cmd/compile's 128-byte by-value limit) in a fifth argument, walked through GoReflect.GoFields
+//     (registered types only, depth-bounded; valueHoldsPointerInto). A slice, map, channel or func
+//     capture is not passed: Go's slot scan sees its header pointer, not ptr's object. The one case
+//     Go refuses that this does not is a SLICE over ptr's own array (a BOARD row names it). A
+//     cleanup held in a func-typed LOCAL whose every assignment is a func literal or a method value
+//     passes the UNION of those values' captures. That superset is safe: a literal that could flow
+//     there and closes over ptr is one Go refuses. Any other func value (a parameter, a
+//     package-level variable, a field, a call result, a local whose address is taken) carries no
+//     static fact and takes the three-argument form UNCHECKED. Censused 2026-10-17 over the
+//     go1.26.9 tree by that predicate (a go/types walk of runtime, internal/sync and
+//     runtime/race/testdata): 20 func-variable call sites, all 20 covered, residual 0.
 [module: go.GoManualConversion]
 
 namespace go;
@@ -116,7 +136,22 @@ partial class runtime_package {
 // mentions it. To ensure a cleanup does not get called prematurely,
 // pass the object to the [KeepAlive] function after the last point
 // where the object must remain reachable.
-public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp) {
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp) =>
+    addCleanup(Ꮡptr, cleanup, argʗp, captured: null, capturedValues: null);
+
+// The converter's form for a cleanup whose by-value captures it can see (a func literal or a method
+// value at the call site): `captured` holds their values, read by Go 1.26's closes-over-ptr check at
+// the point in the order Go runs it. See divergence 5.
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp, object?[] captured) =>
+    addCleanup(Ꮡptr, cleanup, argʗp, captured, capturedValues: null);
+
+// The same, when the cleanup also captures a STRUCT or ARRAY by value that holds a pointer slot:
+// `capturedValues` holds those values, walked field by field (valueHoldsPointerInto). `captured` is
+// null when there is no pointer or interface capture beside them.
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp, object?[]? captured, object?[] capturedValues) =>
+    addCleanup(Ꮡptr, cleanup, argʗp, captured, capturedValues);
+
+private static Cleanup addCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp, object?[]? captured, object?[]? capturedValues) {
     // The pointer to the object must be valid. `abi.Escape` above this line in Go forces ptr to the
     // heap; a go2cs pointer box IS the heap, so there is nothing to force.
     if (Ꮡptr == nil) {
@@ -156,6 +191,21 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
     if (GoZeroBase.Is(referent)) {
         return new Cleanup(nil);
     }
+    // Check that the cleanup function doesn't close over the pointer.
+    if (captured is not null) {
+        foreach (object? value in captured) {
+            if (holdsPointerInto(value, referent)) {
+                throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
+            }
+        }
+    }
+    if (capturedValues is not null) {
+        foreach (object? value in capturedValues) {
+            if (value is not null && valueHoldsPointerInto(value, value.GetType(), referent, depth: 0)) {
+                throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
+            }
+        }
+    }
     // Go: `fn := func() { cleanup(arg) }`, closed over arg at registration. The closure is the whole
     // reason a cleanup needs no argument binding at dispatch, unlike a finalizer.
     S arg = argʗp;
@@ -191,6 +241,60 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
         ptr: ((INilPointer)Ꮡptr).PointerOrderToken
     );
 }
+
+// Whether a captured pointer or interface value addresses ptr's allocation: a non-nil pointer whose
+// referent is ptr's, or the referent object itself. An interface whose dynamic value is a struct is
+// NOT taken apart: Go's slot scan sees the interface's data word, which addresses a copy.
+private static bool holdsPointerInto(object? value, object referent) => value switch {
+    null => false,
+    INilPointer pointer => !pointer.IsNilPointer && ReferenceEquals(pointer.ReferentObject, referent),
+    _ => ReferenceEquals(value, referent)
+};
+
+// Go's funcval holds a by-value struct or array capture inline, so its slot scan reaches every
+// pointer field and element. This walks the same slots: a struct through GoReflect.GoFields (the
+// registered-type projection, so no unregistered reflection and the same answer under native AOT),
+// an array element by element, each slot checked by holdsPointerInto. It reads a field only when
+// its static kind can hold a pointer slot, and stops at maxCaptureDepth. A slice, map, channel or
+// func field is never followed (Go's scan sees its header pointer, not ptr's object).
+private const int maxCaptureDepth = 16;
+
+private static bool valueHoldsPointerInto(object? value, Type type, object referent, int depth) {
+    if (value is null || depth > maxCaptureDepth) {
+        return false;
+    }
+    switch (GoReflect.KindOf(type)) {
+        case GoReflect.Pointer or GoReflect.UnsafePointer or GoReflect.Interface:
+            return holdsPointerInto(value, referent);
+        // A converted Go struct is a C# struct. A CLASS that classifies as Struct (weak.Pointer's
+        // handle<T>, which holds only a WeakReference) is one opaque slot, as Go's handle is.
+        case GoReflect.Struct when !type.IsValueType:
+            return holdsPointerInto(value, referent);
+        case GoReflect.Struct:
+            foreach (GoReflect.GoFieldInfo field in GoReflect.GoFields(type)) {
+                if (canHoldPointerSlot(field.Type) && valueHoldsPointerInto(field.Read(value), field.Type, referent, depth + 1)) {
+                    return true;
+                }
+            }
+            return false;
+        case GoReflect.Array:
+            Type? element = GoReflect.ElementType(type);
+            if (element is null || !canHoldPointerSlot(element) || value is not IArray array) {
+                return false;
+            }
+            for (nint index = 0; index < array.Length; index++) {
+                if (valueHoldsPointerInto(array[index], element, referent, depth + 1)) {
+                    return true;
+                }
+            }
+            return false;
+        default:
+            return false;
+    }
+}
+
+private static bool canHoldPointerSlot(Type type) =>
+    GoReflect.KindOf(type) is GoReflect.Pointer or GoReflect.UnsafePointer or GoReflect.Interface or GoReflect.Struct or GoReflect.Array;
 
 // Cleanup is a handle to a cleanup call for a specific object.
 [GoType] partial struct Cleanup {

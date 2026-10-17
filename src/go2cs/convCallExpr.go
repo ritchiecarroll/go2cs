@@ -3810,6 +3810,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	} else {
 		expr := v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext)
 
+		// runtime.AddCleanup's closes-over-ptr check reads the cleanup's by-value captures, which only
+		// the converter can see (addCleanupCaptures.go).
+		if captures := v.addCleanupCaptureArgs(callExpr); captures != "" {
+			expr += ", " + captures
+		}
+
 		if strings.HasSuffix(funcName, "(uintptr)") && strings.HasPrefix(expr, "(uintptr)") {
 			// Remove redundant cast to uintptr
 			expr = expr[9:]
