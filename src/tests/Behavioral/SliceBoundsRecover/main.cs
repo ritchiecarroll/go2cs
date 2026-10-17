@@ -175,7 +175,7 @@ internal static void Main() {
             sink = Ꮡa.Value.slice(lo4);
         }),
         new("ptrarray [:5]"u8, () => {
-            sink = (~pʗ1).slice(0, hi5);
+            sink = pʗ1.slice(0, hi5);
         }),
         new("namedarr [:5]"u8, () => {
             sink = naʗ1.slice(0, hi5);

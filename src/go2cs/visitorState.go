@@ -378,6 +378,12 @@ type Visitor struct {
 	// nativeFieldViewLocalCache memoizes isNativeFieldArrayViewLocal per local (nativeFieldArrayView.go);
 	// lazily initialized and never cleared, on the same per-object reasoning as the cache above.
 	nativeFieldViewLocalCache map[types.Object]bool
+	// fieldAccessLocalCache memoizes fieldAccessLocal per local (fieldAccess.go), on the same per-object
+	// reasoning: the pointee struct type of a local the provenance rule admits, or nil.
+	fieldAccessLocalCache map[types.Object]types.Type
+	// fieldAccessTypes lists, in first-use order, the rendered struct types whose fields this FILE reaches
+	// through a provenance-scoped local, for its `[GoFieldAccess(…)]` record (fieldAccess.go).
+	fieldAccessTypes []string
 	// captureAnalysisDecl is the declaration whose body performVariableAnalysis is currently
 	// walking — the real FuncDecl, or visitValueSpec's SYNTHETIC wrapper for a package-level
 	// func-literal initializer. The shared-capture routing's write scan (varShareFacts) reads

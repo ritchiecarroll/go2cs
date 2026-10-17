@@ -135,7 +135,7 @@ func main() {
 		{"s[i:]", "sink = s.slice(i);"},
 		{"a named slice", "sink = n.slice(i, j);"},
 		{"an array", "sink = a.slice(i, j);"},
-		{"a pointer-to-array dereferences first", "sink = (~p).slice(0, j);"},
+		{"a pointer-to-array is sliced through the box", "sink = p.slice(0, j);"},
 		{"a named array", "sink = na.slice(0, j);"},
 		{"a string", "sink = str.slice(i);"},
 		{"a named string", "sink = ns.slice(0, j);"},

@@ -104,4 +104,87 @@ public class ByteViewArrayFieldTests
 
         Assert.AreEqual((ushort)7, box.Value.PathBuffer[0]);
     }
+
+    // os's createMountPoint fills the reparse buffer through an array pointer over the field's first element:
+    // copy((*[0xffff]uint16)(unsafe.Pointer(&buf.PathBuffer[0]))[:n:n], target.pathBuf). The element is in native
+    // storage, so the array pointer is a native block at its address and the slice is a window onto the bytes.
+    [TestMethod]
+    public void AnArrayPointerOverTheFieldsElementSlicesItsBytes()
+    {
+        slice<byte> blob = new(16);
+        ж<MountPoint> buf = Ꮡ(blob, 0).Reinterpret<byte, MountPoint>();
+
+        slice<ushort> path = array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 0xffff).slice(0, 3, 3);
+
+        Assert.AreEqual((nint)3, len(path));
+        Assert.AreEqual((nint)3, cap(path));
+        Assert.AreEqual((nint)3, copy(path, new slice<ushort>(new ushort[] { 0x0102, 0x0304, 0x0506 })));
+
+        byte[] want = [0, 0, 0, 0, 0, 0, 0, 0, 0x02, 0x01, 0x04, 0x03, 0x06, 0x05, 0, 0];
+
+        for (int i = 0; i < want.Length; i++)
+            Assert.AreEqual(want[i], blob[i], $"byte {i}");
+    }
+
+    [TestMethod]
+    public void TheArrayPointersTwoIndexFormsSliceFromTheElement()
+    {
+        slice<byte> blob = new(16);
+        ж<MountPoint> buf = Ꮡ(blob, 0).Reinterpret<byte, MountPoint>();
+        ж<array<ushort>> p = array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 4);
+
+        p.slice(1, 3)[1] = 0x0a0b;
+        Assert.AreEqual((byte)0x0b, blob[12], "p[1:3][1] is element 2, Go offset 8 + 4");
+        Assert.AreEqual((byte)0x0a, blob[13]);
+
+        Assert.AreEqual((nint)1, len(p.slice(3)));
+        Assert.AreEqual((nint)4, len(p.slice()));
+        Assert.AreEqual((nint)3, cap(p.slice(1, 2)), "an array's slice keeps the rest of the array as capacity");
+    }
+
+    // An array has no capacity beyond its length, so Go's bound panics over one say "with length", where a slice's
+    // say "with capacity". The native window is a slice, so the texts are the array's by construction here.
+    [TestMethod]
+    public void TheArrayPointersBoundPanicsAreTheArrays()
+    {
+        slice<byte> blob = new(16);
+        ж<MountPoint> buf = Ꮡ(blob, 0).Reinterpret<byte, MountPoint>();
+        ж<array<ushort>> p = array<ushort>.AliasPointer(buf.at<ushort>(MountPoint.ᏑPathBuffer, 0), 4);
+
+        Assert.AreEqual("runtime error: slice bounds out of range [::5] with length 4", panicText(() => p.slice(0, 1, 5)));
+        Assert.AreEqual("runtime error: slice bounds out of range [:5] with length 4", panicText(() => p.slice(0, 5)));
+        Assert.AreEqual("runtime error: slice bounds out of range [5:4]", panicText(() => p.slice(5)));
+
+        // The same texts as a managed array's, through the dereference.
+        ж<array<ushort>> managed = Ꮡ(new array<ushort>(4));
+
+        Assert.AreEqual(panicText(() => managed.slice(0, 1, 5)), panicText(() => p.slice(0, 1, 5)));
+        Assert.AreEqual(panicText(() => managed.slice(0, 5)), panicText(() => p.slice(0, 5)));
+        Assert.AreEqual(panicText(() => managed.slice(5)), panicText(() => p.slice(5)));
+    }
+
+    [TestMethod]
+    public void AManagedArrayPointerSlicesThroughItsArray()
+    {
+        ж<array<ushort>> managed = Ꮡ(new array<ushort>(4));
+
+        managed.slice(1, 3)[0] = 9;
+
+        Assert.AreEqual((ushort)9, managed.Value[1]);
+        Assert.AreEqual((nint)3, cap(managed.slice(1, 2)));
+    }
+
+    private static string panicText(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (PanicException ex)
+        {
+            return ex.Message;
+        }
+
+        return "no panic";
+    }
 }
