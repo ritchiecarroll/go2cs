@@ -159,6 +159,13 @@ public sealed class TestRunner
 
         m_reporter.ReportPackage("run", output: m_options.ShuffleSeed is int reportedSeed ? $"shuffle seed: {reportedSeed}" : null);
 
+        // A test may lower the process's descriptor limit and leave it lowered, as Go's is free to (syscall's
+        // TestPrlimitFileLimit): the next test starts from the run's own limit, because the CLR cannot start a
+        // thread inside Go's 43 (HostDescriptorLimit.cs). Taken ONCE, before the first test, and restored at every
+        // serial boundary. A snapshot per test would capture whatever an ABANDONED test's still-running thread set
+        // since the last restore, and then restore to that (G's review of the watchdog).
+        HostDescriptorLimit.RLimit? runDescriptorLimit = HostDescriptorLimit.Snapshot();
+
         for (int count = 0; count < m_options.Count; count++)
         {
             // GO'S ORDER, not the names' (D4). cmd/go's loadTestFuncs (load/test.go) lists the package's
@@ -179,22 +186,18 @@ public sealed class TestRunner
 
             foreach (RegisteredTest test in tests)
             {
-                // A test may lower the process's descriptor limit and leave it lowered, as Go's is free
-                // to (syscall's TestPrlimitFileLimit): the next test starts from the run's own limit,
-                // because the CLR cannot start a thread inside Go's 43 (HostDescriptorLimit.cs).
-                HostDescriptorLimit.RLimit? descriptorLimit = HostDescriptorLimit.Snapshot();
-
                 TestExecution execution = Start(test.Name, test.Action, null, test.Source, test.Line);
                 WaitBoundedAtSerialBoundary(execution, parallel.Add);
-
-                if (HostDescriptorLimit.Restore(descriptorLimit) is int errno)
-                    Console.Error.WriteLine($"go2cs test host: restoring RLIMIT_NOFILE after {test.Name} was refused (errno {errno}); later tests run under the lowered limit");
+                RestoreRunDescriptorLimit(runDescriptorLimit, test.Name);
             }
 
             foreach (TestExecution execution in parallel)
                 execution.ReleaseParallel();
 
             WaitBounded(parallel);
+
+            if (parallel.Count > 0)
+                RestoreRunDescriptorLimit(runDescriptorLimit, "this iteration's parallel tests");
         }
 
         packageTimer.Stop();
@@ -345,6 +348,22 @@ public sealed class TestRunner
     // one thread, so a plain Add is correct there. RunChild can be entered CONCURRENTLY on one
     // parent (Go permits t.Run from any goroutine -- go.dev/issue/64402), so its sink must be the
     // parent's lock-guarded writer.
+    // Puts the run's descriptor limit back at a serial boundary. A move found once the watchdog has abandoned a test is
+    // reported naming that test: its thread is still running and may be what moved the limit, which a reader of a
+    // later failure needs to know. A move with no abandon is a test's own, as Go allows, and is restored quietly.
+    private void RestoreRunDescriptorLimit(HostDescriptorLimit.RLimit? runLimit, string after)
+    {
+        if (m_reporter.FirstAbandoned is string abandoned && runLimit is HostDescriptorLimit.RLimit wanted &&
+            HostDescriptorLimit.Moved(runLimit) is HostDescriptorLimit.RLimit moved)
+        {
+            Console.Error.WriteLine($"go2cs test host: RLIMIT_NOFILE read {moved.Cur}/{moved.Max} after {after}, not the run's {wanted.Cur}/{wanted.Max}; " +
+                $"{abandoned} was abandoned at the per-test deadline and its thread may still be running, so it may be what moved it; restoring the run's limit");
+        }
+
+        if (HostDescriptorLimit.Restore(runLimit) is int errno)
+            Console.Error.WriteLine($"go2cs test host: restoring RLIMIT_NOFILE after {after} was refused (errno {errno}); later tests run under the lowered limit");
+    }
+
     private static void WaitForSerialBoundary(TestExecution execution, Action<TestExecution> onParallel)
     {
         Task completed = Task.WhenAny(execution.Completion, execution.ParallelReached).GetAwaiter().GetResult();

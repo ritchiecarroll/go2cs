@@ -113,6 +113,16 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
             m_abandoned ??= test;
     }
 
+    /// <summary>The first test the watchdog abandoned in this run, or <c>null</c> when it has abandoned none.</summary>
+    public string? FirstAbandoned
+    {
+        get
+        {
+            lock (m_syncRoot)
+                return m_abandoned;
+        }
+    }
+
     // Callers hold m_syncRoot. An abandoned verdict is not "after" an abandoned test: it is one.
     private TestEvent StampAfterAbandoned(TestEvent testEvent) =>
         m_abandoned is null || testEvent.Abandoned ? testEvent : testEvent with { AfterAbandoned = m_abandoned };
