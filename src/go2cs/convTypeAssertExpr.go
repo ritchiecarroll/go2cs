@@ -183,6 +183,15 @@ func (v *Visitor) assertSourceFormFor(sourceType types.Type) assertSourceForm {
 			return assertSourceExplicit
 		}
 
+		// Lookup stops at the FIRST level with ANY applicable candidate, and an embedded interface's
+		// overload is applicable to the source. An embedded interface whose overload is found at an
+		// earlier level than the source's own would be bound instead, compile, and name the wrong
+		// interface. Every transitively embedded interface must therefore sit in the source's own
+		// namespace or the root one, whose overloads share a level with it or follow it.
+		if pkg != v.pkg && !embeddedInterfacesShareNamespace(named, make(map[*types.Named]bool)) {
+			return assertSourceExplicit
+		}
+
 		return assertSourceBare
 	}
 
@@ -215,18 +224,15 @@ func (v *Visitor) assertOverloadIsReachable(pkg *types.Package) bool {
 
 	// The class path reads "io_package" for a root package and "io.fs_package" for a nested one; the
 	// namespace is everything before the class segment, under the root namespace.
-	classPath := convertImportPathToNamespace(pkg.Path(), PackageSuffix)
-	lastDot := strings.LastIndex(classPath, ".")
+	namespace := packageClassNamespace(pkg)
 
-	if lastDot == -1 {
+	if namespace == RootNamespace {
 		return true
 	}
 
 	if packageNamespace == RootNamespace {
 		return false
 	}
-
-	namespace := RootNamespace + "." + classPath[:lastDot]
 
 	if packageNamespace == namespace || strings.HasPrefix(packageNamespace, namespace+".") {
 		return true
@@ -241,4 +247,55 @@ func (v *Visitor) assertOverloadIsReachable(pkg *types.Package) bool {
 	}
 
 	return false
+}
+
+// packageClassNamespace is the C# namespace of the class a package's declarations live in, which is where
+// its `<pkg>_package_asserts` class sits.
+func packageClassNamespace(pkg *types.Package) string {
+	classPath := convertImportPathToNamespace(pkg.Path(), PackageSuffix)
+	lastDot := strings.LastIndex(classPath, ".")
+
+	if lastDot == -1 {
+		return RootNamespace
+	}
+
+	return RootNamespace + "." + classPath[:lastDot]
+}
+
+// embeddedInterfacesShareNamespace reports whether every named interface that source embeds, directly or
+// through another, is declared in source's own namespace or in the root namespace.
+func embeddedInterfacesShareNamespace(source *types.Named, visited map[*types.Named]bool) bool {
+	iface, ok := source.Underlying().(*types.Interface)
+
+	if !ok || source.Obj().Pkg() == nil {
+		return true
+	}
+
+	own := packageClassNamespace(source.Obj().Pkg())
+
+	for i := 0; i < iface.NumEmbeddeds(); i++ {
+		embedded, ok := types.Unalias(iface.EmbeddedType(i)).(*types.Named)
+
+		if !ok || visited[embedded] {
+			continue
+		}
+
+		if _, isInterface := embedded.Underlying().(*types.Interface); !isInterface {
+			continue
+		}
+
+		visited[embedded] = true
+
+		if pkg := embedded.Obj().Pkg(); pkg != nil {
+			if namespace := packageClassNamespace(pkg); namespace != own && namespace != RootNamespace {
+				return false
+			}
+		}
+
+		if !embeddedInterfacesShareNamespace(embedded, visited) {
+			return false
+		}
+	}
+
+	return true
 }

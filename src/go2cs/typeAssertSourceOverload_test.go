@@ -177,7 +177,15 @@ func TestAssertSourceFormForCases(t *testing.T) {
 	t.Cleanup(func() { packageNamespace, packageChildNamespaces = savedNamespace, savedChildren })
 
 	fset := token.NewFileSet()
-	imp := importer.ForCompiler(fset, "source", nil)
+	sourceImporter := importer.ForCompiler(fset, "source", nil)
+	known := map[string]*types.Package{}
+	imp := importerFunc(func(path string) (*types.Package, error) {
+		if pkg, ok := known[path]; ok {
+			return pkg, nil
+		}
+
+		return sourceImporter.Import(path)
+	})
 
 	check := func(path, name, src string) *types.Package {
 		file, err := parser.ParseFile(fset, name+".go", src, 0)
@@ -191,6 +199,8 @@ func TestAssertSourceFormForCases(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+
+		known[path] = pkg
 
 		return pkg
 	}
@@ -239,6 +249,45 @@ type Inst = Gen[int]
 	packageChildNamespaces = map[string]bool{libNamespace: true}
 	importsLib := &Visitor{pkg: other, requiredUsings: hashset.NewHashSet([]string{"global::" + libNamespace})}
 
+	_ = check("example.com/deep/pkg", "deep", `package deep
+
+type Info interface {
+	Name() string
+}
+`)
+
+	outer := check("example.com/outer/pkg", "outer", `package outer
+
+import (
+	"io"
+
+	"example.com/deep/pkg"
+)
+
+// Embeds an interface of a DIFFERENT nested namespace.
+type Wide interface {
+	deep.Info
+	Close() error
+}
+
+// Embeds only a root-namespace interface.
+type Narrow interface {
+	io.Reader
+	Close() error
+}
+
+// Reaches the other namespace only through Wide.
+type Chain interface {
+	Wide
+	io.Reader
+}
+`)
+
+	outerClass := convertImportPathToNamespace(outer.Path(), PackageSuffix)
+	outerNamespace := RootNamespace + "." + outerClass[:strings.LastIndex(outerClass, ".")]
+	packageChildNamespaces[outerNamespace] = true
+	importsOuter := &Visitor{pkg: other, requiredUsings: hashset.NewHashSet([]string{"global::" + outerNamespace})}
+
 	root := check("rootpkg", "rootpkg", `package rootpkg
 
 import "io"
@@ -263,6 +312,9 @@ type Both interface {
 		{"exported of another package, caller in the root namespace", &Visitor{pkg: other}, RootNamespace, typeOf(lib, "Both"), assertSourceExplicit},
 		{"exported of another package, imported by a caller in a nested namespace", importsLib, "go.elsewhere", typeOf(lib, "Both"), assertSourceBare},
 		{"exported of another package, imported by a caller in the root namespace", importsLib, RootNamespace, typeOf(lib, "Both"), assertSourceExplicit},
+		{"embeds only a root-namespace interface", importsOuter, "go.elsewhere", typeOf(outer, "Narrow"), assertSourceBare},
+		{"embeds an interface of another nested namespace: lookup would bind its overload", importsOuter, "go.elsewhere", typeOf(outer, "Wide"), assertSourceExplicit},
+		{"reaches another nested namespace only transitively", importsOuter, "go.elsewhere", typeOf(outer, "Chain"), assertSourceExplicit},
 		{"exported of a root package, caller in the root namespace", &Visitor{pkg: other}, RootNamespace, typeOf(root, "Both"), assertSourceBare},
 		{"exported of a root package, caller in a nested namespace", &Visitor{pkg: other}, "go.elsewhere", typeOf(root, "Both"), assertSourceBare},
 		{"exported with one embedded interface, namespace not in scope", &Visitor{pkg: other}, "go.elsewhere", typeOf(lib, "One"), assertSourceExplicit},
@@ -277,3 +329,8 @@ type Both interface {
 		}
 	}
 }
+
+// importerFunc adapts a function to types.Importer.
+type importerFunc func(path string) (*types.Package, error)
+
+func (f importerFunc) Import(path string) (*types.Package, error) { return f(path) }
