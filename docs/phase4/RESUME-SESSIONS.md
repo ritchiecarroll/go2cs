@@ -41,7 +41,7 @@ The scout and review reports are in `docs/phase4/proposals/` on this branch.
     internal/synctest 59/59; internal/syscall/windows 7/7;
   - os still times out (two open P2 classes, below).
 - **MERGE QUEUE (COORD merges, in order; each is G-reviewed unless noted):**
-  1. R labels 8a53b68928, R mprof+lock e408ba8b9f, COORD consumer API 9f2265d210: gating at the roll.
+  1. LANDED at hop 8bb3b8b5be: C1 array-dims, R labels, R mprof+lock, the COORD consumer API (all pruned).
   2. P1's type-assertion stack, top = claude/p1-type-assertion-forms (owner approved the explicit form). It
      conflicted in runtime/{windows,linux,darwin}/package_info.cs. P1 is merging the tip in and REGENERATING those
      files; then merge P1's new head.
@@ -69,7 +69,7 @@ The scout and review reports are in `docs/phase4/proposals/` on this branch.
 STATE BLOCK
 ```
 LANE: COORD   MODEL: Opus 5.5 / high   HOST: i7
-BRANCH: claude/coord-gtk-consumer-api 9f2265d210660e633754e48ce71cc9f6e7a0880b on-origin-yes accepted -- owner-approved C# consumer API (Must, AsReadOnlySet, async channels, pack props, opt-in aliases); merging at the roll
+NOTE: claude/coord-gtk-consumer-api 9f2265d210 LANDED at hop 8bb3b8b5be (pruned); its worktree H:/go2cs-tmp-coord/gtk is DELETE-SAFE
 BRANCH: claude/coord-plain-literal-exp efc9a4b6dc5144595f02a057e06d7bbbbfdb594d on-origin-yes cut -- the plain-literal cache EXPERIMENT (golib StringLiteralCache + two hand-edited perf copies); never merge as is
 NEXT: read the hop tip; finish the merge queue in 1l.0; relay the owner's plain-literal decisions
 BLOCKED-ON: owner hand (the plain-literal decisions)
@@ -127,6 +127,25 @@ TOOLS: GOROOT go1.26.9 (GOTOOLCHAIN=local, CGO_ENABLED=0); DOTNET_ROOT .NET SDK 
 COMMS: COORD -> G by a direct session message to the session titled "g -- resume sesstion" (sic); G answers the same way.
 ```
 WAKE: COORD sends direct session messages to the session titled "g -- resume sesstion"; G answers the same way.
+
+FOLDERS
+```
+FOLDER INVENTORY (G-LAPTOP + its WSL arm; posted 2026-10-17; bin/obj purged, drift roots deleted)
+START-FOLDER: C:\Projects\go2cs (the shared main checkout; the app opens a session worktree under its .claude\worktrees). Never work in the main checkout itself: it is the PARENT of every worktree below.
+FOLDER: C:\Projects\go2cs | shared main checkout, parent of every app worktree and of gic | KEEP (parent)
+FOLDER: C:\Projects\go2cs\.claude\worktrees\wsl-su-auth-failure-43fec3 | this G session's worktree, claude/lane-g-mailbox-resume-8e0307 @ 7a1b2e3631 (landed), clean | DELETE-SAFE after the session ends (app worktree cleanup)
+FOLDER: C:\Projects\go2cs\.claude\worktrees\gifted-einstein-a338d2 and \row-harvest-2-1f7b91 | app worktrees, detached @ 1aebd6a885 (landed), clean | DELETE-SAFE (git worktree remove from the main checkout, never rm)
+FOLDER: C:\go2cs\wt\gic | claude/g-inline-constraint-lift @ 08d0cf4ecc (on origin), clean | KEEP (G's next item)
+FOLDER: C:\go2cs\archive | g-superseded-20261017.bundle (ea1d52f1cd9fd2d4), g-tools-20261017.tar (318634907bb94ccc), g-salvage-20261005.bundle, gbo-scripts.tgz, go2cs-archive, g2-state, h10, worktree-dirt-20261005 | KEEP (only copies of bundled local-only branches and tooling) | ~0.6 GB
+FOLDER: C:\go2cs\evidence | earlier cleanup deletion logs | KEEP | 366 MB
+FOLDER: C:\go2cs\scratch | battery/A-B scripts, logs, censuses | DELETE-SAFE after the roll (tooling is in the archive tar; state on GitHub) | ~1.9 GB
+FOLDER: C:\go2cs\tmp | battery TEMP/TMP | DELETE-SAFE when no G battery runs
+FOLDER: C:\go2cs\cache (go-build, gotmp, nuget) | GOCACHE/GOTMPDIR/NUGET_PACKAGES | DELETE-SAFE (regenerable)
+FOLDER: per-user sdk dir (go1.26.9, go1.24.13), per-user dotnet10 (SDK 10.0.400), the pwsh dotnet tool | toolchain pins | KEEP
+FOLDER: WSL home go2cs-lin | linux clone, detached @ 58f17868fe (landed), clean | KEEP (G's linux checkout) | 2.4 GB
+FOLDER: WSL home sdk (go1.24.13, go1.26.9) + go (GOPATH/modcache) | linux toolchain | KEEP
+FOLDER: WSL home g-preserved, h10 | small evidence | KEEP
+```
 
 PASTE PROMPT
 ```
