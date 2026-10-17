@@ -16,11 +16,20 @@
     method call failed with CS1929, naming some unrelated package's overload.
 
     So each converted package ships build/<PackageId>.props, written here from the package's own
-    package_info.cs. It holds the package's namespace as a global using, under the same GoConsumerUsings
-    switch as go.lib's own usings. A package in namespace `go` needs none, so it gets no file.
+    package_info.cs. It holds:
 
-    The condition is evaluated in the consumer's ITEM pass, after every property, so a GoConsumerUsings
-    set in the consumer's csproj body is seen in the props although NuGet imports it ahead of that body.
+      * the package's namespace as a global using (none when it is `go`, which go.lib already adds),
+        under the same GoConsumerUsings switch as go.lib's own usings;
+      * OPT-IN, under GoGlobalPackageAliases=true: the package class as a global alias named for the
+        Go package (`global using hex = go.encoding.hex_package;`), so a consumer writes no using at
+        all. It is off by default because a file that also declares the same alias, the form the
+        documentation recommends, fails with CS1537. Two directly referenced packages with one Go name
+        (math/rand and crypto/rand) give two `rand` aliases and CS1537 as well; the consumer drops one
+        with <Using Remove="go.crypto.rand_package" />.
+
+    The conditions are evaluated in the consumer's ITEM pass, after every property, so a
+    GoGlobalPackageAliases or GoConsumerUsings set in the consumer's csproj body is seen here although
+    NuGet imports this file ahead of that body.
 
     NuGet imports build/<id>.props for a DIRECT package reference only, so a consumer gets the usings of
     the packages it added and never those of the internal/* packages that arrive transitively.
@@ -73,6 +82,13 @@
     <ItemGroup>
       <_GoPackageInfo>
         <GoNamespace>$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('%(FullPath)')), '(?s)\A.*?(?m:^)namespace\s+([\w.@]+)\s*;.*\z', '$1'))</GoNamespace>
+        <GoPackageName>$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('%(FullPath)')), '(?s)\A.*?\[GoPackage\("(\w+)"[^\]]*\)\]\s*public\s+static\s+(?:unsafe\s+)?partial\s+class\s+@?\w+.*\z', '$1'))</GoPackageName>
+        <GoPackageClass>$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('%(FullPath)')), '(?s)\A.*?\[GoPackage\("\w+"[^\]]*\)\]\s*public\s+static\s+(?:unsafe\s+)?partial\s+class\s+(@?\w+).*\z', '$1'))</GoPackageClass>
+      </_GoPackageInfo>
+      <!-- The alias is the Go package name, escaped when it is a C# keyword (unsafe, internal). -->
+      <_GoPackageInfo>
+        <GoAlias>%(GoPackageName)</GoAlias>
+        <GoAlias Condition="$([System.String]::Copy(';abstract;as;base;bool;break;byte;case;catch;char;checked;class;const;continue;decimal;default;delegate;do;double;else;enum;event;explicit;extern;false;finally;fixed;float;for;foreach;goto;if;implicit;in;int;interface;internal;is;lock;long;namespace;new;null;object;operator;out;override;params;private;protected;public;readonly;ref;return;sbyte;sealed;short;sizeof;stackalloc;static;string;struct;switch;this;throw;true;try;typeof;uint;ulong;unchecked;unsafe;ushort;using;virtual;void;volatile;while;').Contains(';%(GoPackageName);'))">@%(GoPackageName)</GoAlias>
       </_GoPackageInfo>
       <_GoNamespaceUsing Include="%(_GoPackageInfo.GoNamespace)" Condition="'%(_GoPackageInfo.GoNamespace)' != 'go'" />
     </ItemGroup>
@@ -82,13 +98,14 @@
     <PropertyGroup>
       <_GoPackageUsingsProps>$(IntermediateOutputPath)go2cs-pack/$(PackageId).props</_GoPackageUsingsProps>
       <_GoNamespaceUsings>@(_GoNamespaceUsing->Distinct()->'    &lt;Using Include="%(Identity)" /&gt;', '%0A')</_GoNamespaceUsings>
+      <_GoAliasUsings>@(_GoPackageInfo->'    &lt;Using Include="%(GoNamespace).%(GoPackageClass)" Alias="%(GoAlias)" /&gt;', '%0A')</_GoAliasUsings>
       <_GoPackageUsingsText>&lt;Project&gt;%0A  &lt;!-- Written by go.lib.pack.targets when $(PackageId) was packed: the package's usings (see that file in go.lib). --&gt;</_GoPackageUsingsText>
       <_GoPackageUsingsText Condition="'$(_GoNamespaceUsings)' != ''">$(_GoPackageUsingsText)%0A  &lt;ItemGroup Condition="'%24(GoConsumerUsings)' != 'false'"&gt;%0A$(_GoNamespaceUsings)%0A  &lt;/ItemGroup&gt;</_GoPackageUsingsText>
-      <_GoPackageUsingsText>$(_GoPackageUsingsText)%0A&lt;/Project&gt;</_GoPackageUsingsText>
+      <_GoPackageUsingsText>$(_GoPackageUsingsText)%0A  &lt;ItemGroup Condition="'%24(GoGlobalPackageAliases)' == 'true'"&gt;%0A$(_GoAliasUsings)%0A  &lt;/ItemGroup&gt;%0A&lt;/Project&gt;</_GoPackageUsingsText>
     </PropertyGroup>
 
-    <WriteLinesToFile Condition="'$(_GoNamespaceUsings)' != ''" File="$(_GoPackageUsingsProps)" Lines="$(_GoPackageUsingsText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
-    <ItemGroup Condition="'$(_GoNamespaceUsings)' != ''">
+    <WriteLinesToFile Condition="'@(_GoPackageInfo)' != ''" File="$(_GoPackageUsingsProps)" Lines="$(_GoPackageUsingsText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup Condition="'@(_GoPackageInfo)' != ''">
       <None Include="$(_GoPackageUsingsProps)" Pack="true" PackagePath="build/" Visible="false" />
       <FileWrites Include="$(_GoPackageUsingsProps)" />
     </ItemGroup>

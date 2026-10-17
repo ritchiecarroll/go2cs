@@ -10,11 +10,17 @@
     into a FRESH package cache and builds it against that props file:
 
       PACK            the nupkg carries build/go.encoding.hex.props, and it names the package's namespace
-                      (go.encoding).
+                      (go.encoding) and, opt-in, its alias (hex = go.encoding.hex_package).
       NAMESPACE       Program.cs, which declares no `using go.encoding;`, builds and runs: a Go method
                       of encoding/hex resolves through the props' namespace using.
       CONTROL         the arm can fail: without the props the same build fails with CS1929 (the Go
                       method is not in scope), as every package before the props did.
+      ALIASES         with GoGlobalPackageAliases=true and no alias in the file, the `hex` alias comes
+                      from the props and the fixture builds and runs.
+      ALIAS CONTROL   the aliases are OFF by default: the same file without the property fails with
+                      CS0246 (`hex` is not defined).
+      ALIAS CLASH     why they are off by default: turned on for a file that declares the alias itself
+                      (the documented form), the build fails with CS1537.
 
     Exit 0 only when every arm reads as expected. Nothing outside a temporary work directory is written.
 
@@ -81,12 +87,12 @@ if ($nupkg.Count -eq 1) {
 if ($null -eq $propsText) {
     $verdicts += "FAIL (PACK): the packed go.encoding.hex carries no build/go.encoding.hex.props"
 }
-elseif (-not $propsText.Contains('<Using Include="go.encoding" />')) {
+elseif (-not $propsText.Contains('<Using Include="go.encoding" />') -or -not $propsText.Contains('<Using Include="go.encoding.hex_package" Alias="hex" />')) {
     $propsText -split "`n" | ForEach-Object { Write-Host "    $_" }
-    $verdicts += "FAIL (PACK): build/go.encoding.hex.props does not name go.encoding"
+    $verdicts += "FAIL (PACK): build/go.encoding.hex.props does not name go.encoding and the hex alias"
 }
 else {
-    $verdicts += "PASS (PACK): build/go.encoding.hex.props names go.encoding"
+    $verdicts += "PASS (PACK): build/go.encoding.hex.props names go.encoding and, opt-in, hex = go.encoding.hex_package"
 }
 
 # --- The consumer arms ------------------------------------------------------------------------------
@@ -131,6 +137,9 @@ Write-Host "Package usings gate: go.encoding.hex $Version from $Source, props pa
 if ($null -ne $propsText) {
     $verdicts += Invoke-Arm 'NAMESPACE' @($withProps) $true ''
     $verdicts += Invoke-Arm 'CONTROL no props' @() $false 'CS1929'
+    $verdicts += Invoke-Arm 'ALIASES GoGlobalPackageAliases=true' @($withProps, '-p:GoGlobalPackageAliases=true', '-p:DefineConstants=GLOBAL_ALIASES') $true ''
+    $verdicts += Invoke-Arm 'ALIAS CONTROL off by default' @($withProps, '-p:DefineConstants=GLOBAL_ALIASES') $false 'CS0246'
+    $verdicts += Invoke-Arm 'ALIAS CLASH with the file''s own alias' @($withProps, '-p:GoGlobalPackageAliases=true') $false 'CS1537'
 }
 
 $verdicts | ForEach-Object { Write-Host $_ }

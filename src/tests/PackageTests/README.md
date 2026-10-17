@@ -60,16 +60,23 @@ props adds the package's own namespace as a global using, so a Go method of `enc
 `src/core/encoding/hex` from this tree (`--no-build`, so build the stdlib in Debug first), reads the props out
 of the nupkg, and builds the fixture against a published `go.encoding.hex` with that props imported explicitly:
 
-- PACK: the nupkg carries `build/go.encoding.hex.props`, and it names `go.encoding`;
+- PACK: the nupkg carries `build/go.encoding.hex.props`, and it names `go.encoding` and, opt-in, the alias
+  `hex = go.encoding.hex_package`;
 - a build and run of `Program.cs`, which declares no `using go.encoding;`;
-- a control that proves the arm can fail: without the props the build must fail with CS1929.
+- a control that proves the arm can fail: without the props the build must fail with CS1929;
+- with `GoGlobalPackageAliases=true` and `GLOBAL_ALIASES` defined (the file then declares no alias either), a
+  build and run;
+- the aliases are off by default: the same file without the property must fail with CS0246;
+- why they are off by default: turned on for the file that declares `using hex = ...` itself, the build must
+  fail with CS1537.
 
 ```text
 pwsh src/tests/PackageTests/PackageUsings/test-package-usings.ps1 -Version <published go.encoding.hex version>
 ```
 
 The gate was read red-first at the hop tip `5adb2dfb58`, before the targets existed: PACK FAILS (the packed
-nupkg carries no props).
+nupkg carries no props). The alias arms were read red against the namespace-only targets: PACK, ALIASES and
+ALIAS CLASH FAIL.
 
 # `RidCompileAsset`: the RID-selected compile asset gate
 

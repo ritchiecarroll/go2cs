@@ -517,7 +517,7 @@ try { & go @genArgs; if ($LASTEXITCODE -ne 0) { Refuse "gensourcemeta could not 
 finally { Pop-Location }
 $projRefs = ($libraries | ForEach-Object { "    <ProjectReference Include=`"$(& $esc $_.FullName)`" PrivateAssets=`"all`" />" }) -join "`n"
 # Each packed package's own usings (build/<PackageId>.props): this tree's go.lib.pack.targets reads every packed package
-# directory's package_info.cs, so the one props names every package's namespace. Product=go2cs is what
+# directory's package_info.cs, so the one props names every package's namespace and, opt-in, alias. Product=go2cs is what
 # the targets recognise a converted pack by.
 $packageDirs = ($libraries | ForEach-Object { "    <GoPackageDirectory Include=`"$(& $esc $_.DirectoryName)`" />" }) -join "`n"
 $packTargets = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'core/golib/buildTransitive/go.lib.pack.targets'

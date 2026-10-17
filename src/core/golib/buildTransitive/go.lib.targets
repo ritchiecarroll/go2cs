@@ -84,6 +84,12 @@
     using per name (measured: identical Using items, Static casing included, emit once with no warning).
     A project reference to golib never imports buildTransitive, so the corpus is untouched.
     Set GoConsumerUsings=false to turn them off.
+
+    Each go.* or nugetgo.* package the consumer references directly adds two more from its own
+    build/<PackageId>.props (written when it was packed, by go.lib.pack.targets): its namespace, under the same
+    GoConsumerUsings switch, so its Go methods are in scope; and, OPT-IN, its package class as a global alias named
+    for the Go package (`hex` for go.encoding.hex_package). Set GoGlobalPackageAliases=true for the aliases. They
+    are off by default because a file that also declares the alias itself fails with CS1537.
   -->
   <ItemGroup Condition="'$(GoConsumerUsings)' != 'false'">
     <Using Include="go" />
