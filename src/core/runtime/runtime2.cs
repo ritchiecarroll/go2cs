@@ -26,6 +26,9 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using System.Runtime.CompilerServices;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 
 partial class runtime_package {
 
@@ -178,14 +181,19 @@ internal static UntypedInt _Pdead => 4;
 // but on the contention path they sleep in the kernel.
 // A zeroed Mutex is unlocked (no need to initialize each lock).
 // Initialization is helpful for static lock ranking, but not required.
-[GoType] partial struct mutex {
+[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct mutex {
     // Empty struct if lock ranking is disabled, otherwise includes the lock rank
-    internal partial ref lockRankStruct lockRankStruct { get; }
+    [FieldOffset(0)] /*embed*/ internal readonly lockRankStruct lockRankStruct;
     // Futex-based impl treats it as uint32 key,
     // while sema-based impl as M* waitm.
     // Used to be a union, but unions break precise GC.
-    internal uintptr key;
+    [FieldOffset(0)] internal uintptr key;
 }
+
+// TEST SEAM (GolibTests is outside runtime's InternalsVisibleTo grant): mutex's CLR size and layout. The zero-size layout
+// arc lays its zero-size lockRankStruct embed and its key both at offset 0 under explicit layout, so the CLR size is Go's
+// 8 (sequential layout put the generator's one-byte embed storage after key: 16).
+public static (int size, string? mismatch) GoMutexClrLayout => (Unsafe.SizeOf<mutex>(), GoReflect.ClrLayoutMismatch(typeof(mutex)));
 
 [GoType] partial struct funcval {
     internal uintptr fn;
@@ -343,7 +351,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
 //
 // Do not set fields manually. Use methods instead.
 [GoType] partial struct maybeTraceableChan {
-    internal partial ref maybeTraceablePtr maybeTraceablePtr { get; }
+    /*embed*/ internal maybeTraceablePtr maybeTraceablePtr;
 }
 
 //go:nosplit
@@ -658,8 +666,8 @@ internal static UntypedInt freeMWait => 2; // M still in use.
     internal atomic.Uint32 signalPending;
     // pcvalue lookup cache
     internal pcvalueCache pcvalueCache;
-    internal partial ref dlogPerM dlogPerM { get; }
-    internal partial ref mOS mOS { get; }
+    /*embed*/ internal dlogPerM dlogPerM;
+    /*embed*/ internal mOS mOS;
     internal chacha8rand.State chacha8;
     internal uint64 cheaprand;
     // Up to 10 locks held by this m, maintained by the lock ranking code.
@@ -672,7 +680,7 @@ internal static UntypedInt freeMWait => 2; // M still in use.
 internal static UntypedInt mRedZoneSize => /* (16 << 3) * asanenabledBit */ 0; // redZoneSize(2048)
 
 [GoType] partial struct mPadded {
-    internal partial ref m m { get; }
+    /*embed*/ internal m m;
     // Size the runtime.m structure so it fits in the 2048-byte size class, and
     // not in the next-smallest (1792-byte) size class. That leaves the 11 low
     // bits of muintptr values available for flags, as required by
@@ -968,7 +976,7 @@ internal static UntypedInt _SigIgn => 256; // _SIG_DFL action is to ignore the s
 // Keep in sync with linker (../cmd/link/internal/ld/pcln.go:/pclntab)
 // and with package debug/gosym and with symtab.go in package runtime.
 [GoType] partial struct _func {
-    public partial ref @internal.runtime.sys_package.NotInHeap NotInHeap { get; } // Only in static data
+    /*embed*/ public @internal.runtime.sys_package.NotInHeap NotInHeap; // Only in static data
     internal uint32 entryOff; // start pc, as offset from moduledata.text
     internal int32 nameOff;  // function name, as index into moduledata.funcnametab.
     internal int32 args;  // in/out args size

@@ -48,7 +48,7 @@ partial class runtime_package
     // printDebugLogImpl's two local types, lifted to package level as the converter lifts them.
     // Displacing the converted body displaces its lifted types with it, so they are declared here.
     [GoType("dyn")] [GoLocalName("readState")] internal partial struct printDebugLogImpl_readState {
-        internal partial ref debugLogReader debugLogReader { get; }
+        /*embed*/ internal debugLogReader debugLogReader;
         internal bool first;
         internal uint64 lost;
         internal uint64 nextTick;
