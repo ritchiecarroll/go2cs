@@ -796,6 +796,37 @@ ordinary import, a white-box and a plain reference-model test project). The beha
 `UsingStaticNamespaceAlias` compiles and runs both alias sets beside bare `Unsafe`, `Closure` and
 `Marshal`.
 
+## A dot-imported package's type is qualified by its class when another import has the package's name
+
+A Go file can dot-import one package and import a second package with the same NAME. crypto/mlkem's
+external test dot-imports `crypto/mlkem` and imports `crypto/internal/fips140/mlkem`. The dot-import emits
+`using static <class>;`, and the named import binds the name (`using mlkem = …fips140.mlkem_package;`, or
+its Δ rename). A TYPE reference to the dot-imported package was rendered through the package's name, so
+`*DecapsulationKey768` became `ж<Δmlkem.DecapsulationKey768>`. That is fips140's type, CS1503 at every
+use. When the name is bound to a different target, the type is now named through the dot-import's own
+class, rooted in `global::`:
+
+```csharp
+using static DotImportNameCollision.a.keys_package;
+using keys = DotImportNameCollision.b.keys_package;
+…
+ж<global::go.DotImportNameCollision.a.keys_package.Key> k = NewKey(dotˢ);
+var other = keys.NewKey(7);
+```
+
+Calls and other members of the dot-imported package keep the bare `using static` spelling. A package
+imported both dot and named (`path_test.go`'s `. "path"` beside `"path"`) binds the name to the same
+class and keeps the short form. The rule lives in `dotImportCollisionQualifier`
+(`typeNameResolution.go`), which both the generic and the non-generic arm of `getAliasQualifiedTypeName`
+consult.
+
+**Census (go1.26.9 GOROOT/src, imports only):** 6497 files, 292 with a dot-import, 12 with a dot-import whose
+name another import also binds. 10 of those import the same path both ways. The distinct pairs are
+crypto/mlkem's test, `go/types/instantiate.go` (which names only the dot-imported constants, so its emission
+does not move), and `cmd/compile/internal/types2`. Guarded by the behavioral project
+`DotImportNameCollision`, which covers fields, locals, a slice element, a map value, a generic type
+argument and a generic type.
+
 ## A function called with a value whose type has a same-named method is cast to its parameter type
 
 Go resolves `Sort(x)` to the package function `Sort(data Interface)` even when `x`'s type has a method

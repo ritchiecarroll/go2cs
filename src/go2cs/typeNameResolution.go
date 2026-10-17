@@ -483,6 +483,10 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 					aliasQualifier = fileAlias
 				}
 
+				if qualifier, ok := v.dotImportCollisionQualifier(pkg); ok {
+					aliasQualifier = qualifier
+				}
+
 				return fmt.Sprintf("%s.%s[%s]", aliasQualifier, obj.Name(), strings.Join(args, ", "))
 			}
 
@@ -519,6 +523,10 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 
 			if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
 				aliasQualifier = fileAlias
+			}
+
+			if qualifier, ok := v.dotImportCollisionQualifier(pkg); ok {
+				aliasQualifier = qualifier
 			}
 
 			// Two same-named imports both publish this type's key (see ambiguousImportedTypeAliases),
@@ -1041,6 +1049,30 @@ func (v *Visitor) getRefParameterTypeName(t types.Type) string {
 	}
 
 	return convertToCSTypeName(typeName)
+}
+
+// dotImportCollisionQualifier is the qualifier for a type of a package THIS FILE dot-imports when
+// another import of the file binds the same package name to a DIFFERENT target. A dot-imported
+// package has no alias of its own, so its types render through importQualifier(pkg.Name()), and that
+// name then resolves to the OTHER import: crypto/mlkem's external test dot-imports crypto/mlkem and
+// imports crypto/internal/fips140/mlkem, so `*DecapsulationKey768` rendered `ж<Δmlkem.…>`, fips140's
+// type (CS1503 ×12). The dot-import's own `using static` target names the right class; it is rooted
+// with global:: so no enclosing namespace can occlude it. A package imported both dot and named
+// (path's `. "path"` beside `"path"`) binds the name to the same target and keeps the short form.
+func (v *Visitor) dotImportCollisionQualifier(pkg *types.Package) (string, bool) {
+	target, dotImported := v.dotImportTargets[pkg.Path()]
+
+	if !dotImported {
+		return "", false
+	}
+
+	bound, taken := v.importAliasTargets[getSanitizedImport(importQualifier(pkg.Name()))]
+
+	if !taken || bound == target {
+		return "", false
+	}
+
+	return globalQualifyForcingTarget(target), true
 }
 
 // getCSharpTypeName renders t C#-shaped rather than Go-shaped: the alias-qualified Go name mapped

@@ -490,6 +490,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckDotImportNameCollision() => CheckTarget("DotImportNameCollision");
+
+    [TestMethod]
     public void CheckDotImportRenamedPackage() => CheckTarget("DotImportRenamedPackage");
 
     [TestMethod]
