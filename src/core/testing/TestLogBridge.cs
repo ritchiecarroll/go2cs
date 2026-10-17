@@ -7,8 +7,11 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Text;
+using System.Threading;
+using go.golib;
+using static go.builtin;
+using os = go.os_package;
+using testlog = go.@internal.testlog_package;
 
 // go2cs HAND-OWNED (whole file) — part of the Phase-4 test host, a structural replacement for Go's
 // testing package rather than a conversion of it (the rationale is in testing.cs). No converted source
@@ -32,23 +35,32 @@ namespace go.testing_runtime;
 /// back, and failed reading a file that did not exist.
 /// </para>
 /// <para>
-/// <b>Why <c>internal/testlog</c> is bound LATE.</b> For the reason TestFlagBridge states for
-/// <c>flag</c>: the converted test projects set <c>DisableTransitiveProjectReferences=true</c>, so a
-/// <c>testing</c> → <c>internal/testlog</c> project reference would not deploy the assembly beside a
-/// host whose package does not reach it. <c>internal/testlog</c> is present exactly when the package
-/// under test reaches <c>os</c>, which is the only package that logs to it. When it is absent there is
-/// nothing to observe the log, and the file still gets Go's header, as Go's would for such a package.
-/// The logger is <c>testlog.Interface</c>, a public interface this assembly cannot name, so it is
-/// implemented at run time by a <see cref="DispatchProxy"/> (the host runs JIT; golib already emits
-/// types the same way).
+/// <b>Go's own <c>os</c> and <c>internal/testlog</c>, referenced directly.</b> Both are in every host's
+/// closure already (testing → fmt → os → internal/testlog; measured in testing/synctest's host deps.json,
+/// a package that imports neither), so the edges cost no assembly. Going through Go's <c>os</c> is what
+/// makes the observable parts Go's: <c>os.Create</c>'s error is Go's <c>*PathError</c> text; the names
+/// <c>os</c> reports arrive as <c>@string</c> and are written as their raw bytes, invalid UTF-8 included;
+/// and a failure ends the process through <c>os.Exit(2)</c>, as Go's does, rather than returning a status
+/// a TestMain could carry on past (G's review of 6f50ffb840).
+/// </para>
+/// <para>
+/// The open and close DECISIONS (<see cref="Open"/>, <see cref="Close"/>) return Go's message, or null, and
+/// M.Run does the print and the exit: the decisions are what a test can read, since the exit ends the
+/// process.
 /// </para>
 /// </remarks>
 internal static class TestLogBridge
 {
+    // bufio.NewWriter's default size: testdeps writes through one, flushed when full and at StopTestLog.
+    private const int BufferSize = 4096;
+
     private static readonly object s_lock = new();
 
-    // testdeps' testLog: the writer while a log is open, and whether the logger and header are installed.
-    private static StreamWriter? s_writer;
+    // testdeps' testLog: the file and its buffer while a log is open, and whether the logger and header are
+    // installed (log.set).
+    private static ж<os.File>? s_file;
+    private static MemoryStream? s_buffer;
+    private static error? s_writeError;
     private static bool s_set;
 
     // Go's m.numRun as this log sees it: the host makes one M per process, so the count of opens is it.
@@ -56,38 +68,34 @@ internal static class TestLogBridge
 
     /// <summary>
     /// m.before's testlog block. The first run creates the file (Go's <c>m.numRun == 1</c>), a later one
-    /// appends to it. Returns null, or Go's exit status 2 after Go's message.
+    /// opens it write-only and seeks to its end. Returns null, or the message Go prints before os.Exit(2).
     /// </summary>
-    internal static int? Start(string path)
+    internal static string? Open(string path)
     {
-        bool firstRun = System.Threading.Interlocked.Increment(ref s_runs) == 1;
-        FileStream file;
+        bool firstRun = Interlocked.Increment(ref s_runs) == 1;
 
-        try
-        {
-            file = firstRun
-                ? new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)
-                : new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite);
+        (ж<os.File> file, error err) = firstRun
+            ? os.Create(path)
+            : os.OpenFile(path, os.O_WRONLY, default);
 
-            if (!firstRun)
-                file.Seek(0, SeekOrigin.End);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
-        {
-            Console.Error.Write($"testing: open {path}: {ex.Message}\n");
-            return 2;
-        }
+        if (err == nil && !firstRun)
+            file.Seek(0, 2); // io.SeekEnd
+
+        if (err != nil)
+            return $"testing: {err.Error()}\n";
 
         lock (s_lock)
         {
-            s_writer = new StreamWriter(file, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)) { NewLine = "\n" };
+            s_file = file;
+            s_buffer = new MemoryStream();
+            s_writeError = null;
 
             // StartTestLog: the logger and the header once per process, however many times m.Run runs.
             if (!s_set)
             {
                 s_set = true;
-                InstallLogger();
-                s_writer.Write("# test log\n"); // known to cmd/go/internal/test/test.go
+                testlog.SetLogger(new TestLogger());
+                WriteLocked("# test log\n"u8); // known to cmd/go/internal/test/test.go
             }
         }
 
@@ -95,99 +103,100 @@ internal static class TestLogBridge
     }
 
     /// <summary>
-    /// writeProfiles' testlog block: StopTestLog's flush, then the close. Returns null, or Go's exit
-    /// status 2 after Go's message.
+    /// writeProfiles' testlog block: StopTestLog's flush, then the close. Returns null, or the message Go
+    /// prints before os.Exit(2).
     /// </summary>
-    internal static int? Stop(string path)
+    internal static string? Close(string path)
     {
+        ж<os.File>? file;
+        error? flushError;
+
         lock (s_lock)
         {
-            StreamWriter? writer = s_writer;
-            s_writer = null;
+            file = s_file;
 
-            if (writer is null)
+            if (file is null)
                 return null;
 
-            try
-            {
-                writer.Dispose();
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                Console.Error.Write($"testing: can't write {path}: {ex.Message}\n");
-                return 2;
-            }
+            FlushLocked();
+            flushError = s_writeError;
+            s_file = null;
+            s_buffer = null;
         }
 
-        return null;
+        if (flushError is not null && flushError != nil)
+            return $"testing: can't write {path}: {flushError.Error()}\n";
+
+        error closeError = file.Close();
+
+        return closeError != nil ? $"testing: can't write {path}: {closeError.Error()}\n" : null;
     }
 
-    // testLog.add: one `op name` line; a name holding a newline, or empty, is not logged.
-    internal static void Add(string op, string name)
+    /// <summary>
+    /// Go's failure arm for both decisions: <c>fmt.Fprintf(os.Stderr, ...)</c> then <c>os.Exit(2)</c>,
+    /// through Go's own os, so the process ends as Go's does. A null message continues.
+    /// </summary>
+    internal static void ExitIfFailed(string? message)
     {
-        if (name.Length == 0 || name.Contains('\n'))
+        if (message is null)
+            return;
+
+        os.Stderr.WriteString(message);
+        os.Exit(2);
+    }
+
+    // testLog.add: one `op name` line, the name's own bytes; an empty name, or one holding a newline, is not
+    // logged.
+    private static void Add(ReadOnlySpan<byte> op, @string name)
+    {
+        ReadOnlySpan<byte> bytes = name.ToSpan();
+
+        if (bytes.IsEmpty || bytes.IndexOf((byte)'\n') >= 0)
             return;
 
         lock (s_lock)
         {
-            if (s_writer is null)
+            if (s_buffer is null)
                 return;
 
-            s_writer.Write(op);
-            s_writer.Write(' ');
-            s_writer.Write(name);
-            s_writer.Write('\n');
+            WriteLocked(op);
+            WriteLocked(" "u8);
+            WriteLocked(bytes);
+            WriteLocked("\n"u8);
         }
     }
 
-    // testlog.SetLogger(proxy), when the package under test carries internal/testlog at all.
-    private static void InstallLogger()
+    // bufio.Writer.Write: buffer, and write the buffer out when it fills. A write error sticks, as bufio's
+    // does, and Close reports it.
+    private static void WriteLocked(ReadOnlySpan<byte> bytes)
     {
-        Type? package = LoadTestlogPackage();
-        Type? contract = package?.GetNestedType("Interface", BindingFlags.Public);
-        MethodInfo? setLogger = package?.GetMethod("SetLogger", BindingFlags.Public | BindingFlags.Static, contract is null ? Type.EmptyTypes : [contract]);
+        s_buffer!.Write(bytes);
 
-        if (contract is null || setLogger is null)
+        if (s_buffer.Length >= BufferSize)
+            FlushLocked();
+    }
+
+    private static void FlushLocked()
+    {
+        if (s_buffer is null || s_file is null || s_buffer.Length == 0 || s_writeError is not null)
             return;
 
-        object logger = DispatchProxy.Create(contract, typeof(TestLogProxy));
-        setLogger.Invoke(null, BindingFlags.DoNotWrapExceptions, null, [logger], null);
+        (nint _, error err) = s_file.Write(new slice<byte>(s_buffer.ToArray()));
+        s_buffer.SetLength(0);
+
+        if (err != nil)
+            s_writeError = err;
     }
 
-    private static Type? LoadTestlogPackage()
+    // testdeps' testLog as internal/testlog.Interface: each method logs under testLog's op name.
+    private sealed class TestLogger : testlog.Interface
     {
-        const string AssemblyName = "internal.testlog";
-        const string PackageType = "go.internal.testlog_package";
+        public void Getenv(@string key) => Add("getenv"u8, key);
 
-        foreach (Assembly loaded in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            if (loaded.GetName().Name == AssemblyName)
-                return loaded.GetType(PackageType);
-        }
+        public void Stat(@string file) => Add("stat"u8, file);
 
-        try
-        {
-            return Assembly.Load(new AssemblyName(AssemblyName)).GetType(PackageType);
-        }
-        catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or BadImageFormatException)
-        {
-            return null;
-        }
-    }
-}
+        public void Open(@string file) => Add("open"u8, file);
 
-/// <summary>
-/// testdeps' testLog as <c>internal/testlog.Interface</c>: each of the interface's four methods is
-/// logged under its own lower-cased name (Getenv → <c>getenv</c>, Stat → <c>stat</c>, Open → <c>open</c>,
-/// Chdir → <c>chdir</c>), exactly testLog's ops. Public and unsealed because DispatchProxy derives from it.
-/// </summary>
-public class TestLogProxy : DispatchProxy
-{
-    protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
-    {
-        if (targetMethod is not null && args is [{ } name])
-            TestLogBridge.Add(targetMethod.Name.ToLowerInvariant(), name.ToString() ?? string.Empty);
-
-        return null;
+        public void Chdir(@string dir) => Add("chdir"u8, dir);
     }
 }

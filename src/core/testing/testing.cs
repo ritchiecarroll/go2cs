@@ -602,26 +602,21 @@ public static partial class testing_package
             return runner.ListTests();
 
         // m.before's testlog block, then the tests, then writeProfiles' (go1.26.9 testing.go:2339-2357,
-        // 2697-2706): the file is open for exactly the run, and an open or close failure is Go's exit 2.
+        // 2697-2706, run from m.after, which Go defers): the file is open for exactly the run, and an open
+        // or close failure prints Go's message and exits 2, as Go's does.
         if (runner.TestLogFile is not { } testLog)
             return runner.RunAll();
 
-        if (TestLogBridge.Start(testLog) is { } openFailed)
-            return openFailed;
-
-        nint code;
+        TestLogBridge.ExitIfFailed(TestLogBridge.Open(testLog));
 
         try
         {
-            code = runner.RunAll();
+            return runner.RunAll();
         }
         finally
         {
-            if (TestLogBridge.Stop(testLog) is { } closeFailed)
-                code = closeFailed;
+            TestLogBridge.ExitIfFailed(TestLogBridge.Close(testLog));
         }
-
-        return code;
     }
 
     // Compile-only B surface (see struct B above) — never executed, never throwing. The
