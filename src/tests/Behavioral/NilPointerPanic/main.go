@@ -13,7 +13,10 @@
 // different message would still "pass" a bare non-nil check.
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"runtime"
+)
 
 type node struct {
 	name string
@@ -34,7 +37,8 @@ type box struct {
 func catch(what string, f func()) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("%s recovered: %v\n", what, r)
+			_, isRuntimeError := r.(runtime.Error)
+			fmt.Printf("%s recovered: %v runtime.Error: %v\n", what, r, isRuntimeError)
 		} else {
 			fmt.Printf("%s NO PANIC\n", what)
 		}

@@ -16,7 +16,7 @@ public static class RuntimeErrorPanic
 {
     private const string RuntimeErrorMessage = "runtime error: ";
 
-    private const string NilPointerDereferenceMessage = $"{RuntimeErrorMessage}invalid memory address or nil pointer dereference";
+    private const string NilPointerDereferenceText = "invalid memory address or nil pointer dereference";
     /// <summary>
     /// A converter-emitted method-expression wrapper's OWN nil-receiver fault (an interface method
     /// expression `I.M(nil)`, or a promoted `(*Outer).M(nil)`): Go's wrapper faults there, and Go keeps
@@ -24,7 +24,7 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException WrapperNilReceiver()
     {
-        return new PanicException(NilPointerDereferenceMessage) { FaultKind = PanicFaultKind.Memory, RaisedByWrapper = true };
+        return new PanicException(ErrorStringState(NilPointerDereferenceText)) { FaultKind = PanicFaultKind.Memory, RaisedByWrapper = true };
     }
 
     /// <summary>
@@ -33,13 +33,13 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException Panicwrap(string message)
     {
-        return new PanicException((@string)message) { FaultKind = PanicFaultKind.Panicwrap, RaisedByWrapper = true };
+        return new PanicException(PlainErrorValue?.Invoke(message) ?? (@string)message) { FaultKind = PanicFaultKind.Panicwrap, RaisedByWrapper = true };
     }
 
     public static PanicException NilPointerDereference()
     {
         // A fault: Go reaches gopanic through sigpanic and panicmem (runtime's captureCallers splices both).
-        return new PanicException(NilPointerDereferenceMessage) { FaultKind = PanicFaultKind.Memory };
+        return new PanicException(ErrorStringState(NilPointerDereferenceText)) { FaultKind = PanicFaultKind.Memory };
     }
 
     private const string TokenArithmeticMessage =
@@ -409,7 +409,7 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException ArrayConversionLength(int64 sourceLength, int64 length)
     {
-        return new PanicException(string.Format(ArrayConversionLengthMessage, sourceLength, length))
+        return new PanicException(BoundsErrorValue?.Invoke(length, sourceLength, true, BoundsConvert) ?? string.Format(ArrayConversionLengthMessage, sourceLength, length))
         {
             RuntimeThrowText = "slice length too short to convert to array or pointer to array"
         };
@@ -467,7 +467,7 @@ public static class RuntimeErrorPanic
         return new PanicException(ShiftErrorValue?.Invoke() ?? NegativeShiftAmountMessage) { RuntimeThrowText = "negative shift amount" };
     }
 
-    private const string ComparingUncomparableTypeMessage = $"{RuntimeErrorMessage}comparing uncomparable type {{0}}";
+    private const string ComparingUncomparableTypeText = "comparing uncomparable type {0}";
 
     /// <summary>
     /// Go's panic for <c>==</c> between two interface values whose shared dynamic type has no equal
@@ -482,16 +482,16 @@ public static class RuntimeErrorPanic
     /// </remarks>
     public static PanicException ComparingUncomparableType(string goTypeName)
     {
-        return new PanicException(string.Format(ComparingUncomparableTypeMessage, goTypeName));
+        return new PanicException(ErrorStringState(string.Format(ComparingUncomparableTypeText, goTypeName)));
     }
 
-    private const string MakeSliceLenOutOfRangeMessage = $"{RuntimeErrorMessage}makeslice: len out of range";
+    private const string MakeSliceLenOutOfRangeText = "makeslice: len out of range";
     public static PanicException MakeSliceLenOutOfRange()
     {
-        return new PanicException(MakeSliceLenOutOfRangeMessage);
+        return new PanicException(ErrorStringState(MakeSliceLenOutOfRangeText));
     }
 
-    private const string RangeFunctionContinuedMessage = $"{RuntimeErrorMessage}range function continued iteration after function for loop body returned false";
+    private const string RangeFunctionContinuedText = "range function continued iteration after function for loop body returned false";
 
     /// <summary>
     /// Go's panic for a range-over-func sequence that calls <c>yield</c> again after the loop body
@@ -499,16 +499,16 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException RangeFunctionContinued()
     {
-        return new PanicException(RangeFunctionContinuedMessage);
+        return new PanicException(ErrorStringState(RangeFunctionContinuedText));
     }
 
-    private const string MakeSliceCapOutOfRangeMessage = $"{RuntimeErrorMessage}makeslice: cap out of range";
+    private const string MakeSliceCapOutOfRangeText = "makeslice: cap out of range";
     public static PanicException MakeSliceCapOutOfRange()
     {
-        return new PanicException(MakeSliceCapOutOfRangeMessage);
+        return new PanicException(ErrorStringState(MakeSliceCapOutOfRangeText));
     }
 
-    private const string GrowSliceLenOutOfRangeMessage = $"{RuntimeErrorMessage}growslice: len out of range";
+    private const string GrowSliceLenOutOfRangeText = "growslice: len out of range";
 
     /// <summary>
     /// Go's panic for an <c>append</c> whose grown length Go cannot allocate (runtime/slice.go's
@@ -518,7 +518,7 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException GrowSliceLenOutOfRange()
     {
-        return new PanicException(GrowSliceLenOutOfRangeMessage);
+        return new PanicException(ErrorStringState(GrowSliceLenOutOfRangeText));
     }
 
     /// <summary>
@@ -653,6 +653,15 @@ public static class RuntimeErrorPanic
     /// <param name="message">The text after the <c>runtime error: </c> prefix.</param>
     public static PanicException ErrorString(string message)
     {
-        return new PanicException(ErrorStringValue?.Invoke(message) ?? RuntimeErrorMessage + message);
+        return new PanicException(ErrorStringState(message));
+    }
+
+    // runtime's abi.BoundsConvert: a slice shorter than the array it converts to (x is the array length, y the slice's).
+    private const byte BoundsConvert = 8;
+
+    // The state of a runtime.errorString panic: the registered value, or the prefixed text when runtime never loaded.
+    private static object ErrorStringState(string message)
+    {
+        return ErrorStringValue?.Invoke(message) ?? RuntimeErrorMessage + message;
     }
 }
