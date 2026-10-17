@@ -386,7 +386,16 @@ public static partial class builtin
     /// slice = append(slice, elem1, elem2)
     /// slice = append(slice, anotherSlice...)
     /// </code>
+    /// <para>
+    /// Lowest priority: whenever a <see cref="slice{T}"/> overload also applies, this one is set aside.
+    /// Without that, <c>append(nums, 4, 5)</c> on a <c>slice&lt;nint&gt;</c> was CS0121: the C# int literals
+    /// inferred <c>T = int</c> here, an exact match for the elements, while every <see cref="slice{T}"/>
+    /// overload matched the slice exactly. The priority changes only calls that were that ambiguity: a call
+    /// this overload binds alone (a first argument typed <see cref="ISlice"/>) still binds it. Measured
+    /// 2026-10-16 by marking it obsolete: no call in go2cs-stdlib.slnx or go2cs.slnx bound it.
+    /// </para>
     /// </remarks>
+    [OverloadResolutionPriority(-1)]
     public static slice<T> append<T>(ISlice slice, params T[] elems)
     {
         return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
