@@ -3121,7 +3121,7 @@ public static partial class builtin
         while (target is IInterfaceAdapter interfaceAdapter)
             target = interfaceAdapter.Value!;
 
-        throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target)}, not {GetGoTypeName(typeof(T))}");
+        throw RuntimeErrorPanic.TypeAssertion(typeof(object), target, typeof(T));
     }
 
     /// <summary>

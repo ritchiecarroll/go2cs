@@ -664,4 +664,44 @@ public static class RuntimeErrorPanic
     {
         return ErrorStringValue?.Invoke(message) ?? RuntimeErrorMessage + message;
     }
+
+    /// <summary>
+    /// Supplies Go's <c>*runtime.TypeAssertionError</c> for a failed type assertion: the value
+    /// <c>panicdottypeE</c> and <c>panicnildottype</c> (iface.go) panic with.
+    /// </summary>
+    /// <remarks>
+    /// Registered by the runtime package, as <see cref="PlainErrorValue"/> is. The arguments are runtime's own
+    /// fields: the static interface type the assertion started from, the dynamic type (<c>null</c> for a nil
+    /// interface), the asserted type and the first method the asserted interface needs that the dynamic type
+    /// lacks (empty for a concrete mismatch). Unregistered, the same sentence stands as a plain string.
+    /// </remarks>
+    public static Func<Type, Type?, Type, string, object>? TypeAssertionErrorValue { get; set; }
+
+    /// <summary>
+    /// A failed type assertion of <paramref name="target"/>, held as <paramref name="source"/>, to <paramref name="asserted"/>.
+    /// </summary>
+    /// <param name="source">The static interface type the assertion started from: <c>object</c> for an empty interface.</param>
+    /// <param name="target">The interface value whose dynamic type did not match.</param>
+    /// <param name="asserted">The type asserted to.</param>
+    public static PanicException TypeAssertion(Type source, object? target, Type asserted)
+    {
+        // The dynamic type is what the adapters stand in for, as builtin.GetGoTypeName reads it.
+        while (true)
+        {
+            if (target is IжAdapter pointerAdapter)
+                target = pointerAdapter.Box;
+            else if (target is IValueAdapter valueAdapter)
+                target = valueAdapter.Value;
+            else if (target is IInterfaceAdapter interfaceAdapter)
+                target = interfaceAdapter.Value;
+            else
+                break;
+        }
+
+        string sourceName = source == typeof(object) ? "interface {}" : GoReflect.GoTypeName(source);
+
+        return new PanicException(
+            TypeAssertionErrorValue?.Invoke(source, target?.GetType(), asserted, "") ??
+            $"interface conversion: {sourceName} is {builtin.GetGoTypeName(target)}, not {GoReflect.GoTypeName(asserted)}");
+    }
 }

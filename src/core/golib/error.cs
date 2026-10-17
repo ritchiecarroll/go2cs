@@ -283,7 +283,7 @@ public static class errorExtensions
         if (TryTypeAssert(target, type, out object? value))
             return value;
 
-        throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target)}, not {GetGoTypeName(type)}");
+        throw RuntimeErrorPanic.TypeAssertion(typeof(error), target, type);
     }
 
     public static bool _(this error target, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, out object? result)

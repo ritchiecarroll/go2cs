@@ -39,6 +39,7 @@ namespace go;
 using System;
 using System.Runtime.CompilerServices;
 using go.golib;
+using abi = @internal.abi_package;
 using atomic = @internal.runtime.atomic_package;
 using @internal.runtime;
 
@@ -71,6 +72,9 @@ public static partial class runtime_package
         RuntimeErrorPanic.PlainErrorValue = static message => (error)(plainError)(@string)message;
         RuntimeErrorPanic.ErrorStringValue = static message => (error)(errorString)(@string)message;
         RuntimeErrorPanic.UnhashableKeyErrorValue = static unhashable => @internal.runtime.maps_package.unhashableKeyPanicValue(unhashable);
+        RuntimeErrorPanic.TypeAssertionErrorValue = static (source, concrete, asserted, missingMethod) =>
+            // Go's panicdottypeE verbatim: the static source type, the dynamic type (nil for a nil interface), the asserted type.
+            Ꮡ(new TypeAssertionError(abi.synthType(source), concrete is null ? nil : abi.synthType(concrete), abi.synthType(asserted), missingMethod));
         RuntimeErrorPanic.BoundsErrorValue = static (x, y, signed, code) =>
             // Go 1.26 moved the code to internal/abi (abi.BoundsErrorCode, bounds.go); the numbering is runtime's
             // 1.24 boundsErrorCode verbatim, BoundsIndex .. BoundsConvert, so golib's code value carries over.

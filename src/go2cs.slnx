@@ -1077,6 +1077,7 @@
     <Project Path="tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.csproj" />
     <Project Path="tests/Behavioral/TwoLevelDefinedStruct/TwoLevelDefinedStruct.csproj" />
     <Project Path="tests/Behavioral/TypeAssert/TypeAssert.csproj" />
+    <Project Path="tests/Behavioral/TypeAssertionPanic/TypeAssertionPanic.csproj" />
     <Project Path="tests/Behavioral/TypeConversion/TypeConversion.csproj" />
     <Project Path="tests/Behavioral/TypeConversionInterfaceParam/TypeConversionInterfaceParam.csproj" />
     <Project Path="tests/Behavioral/TypedNilFuncBoundaries/TypedNilFuncBoundaries.csproj" />
