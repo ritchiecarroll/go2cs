@@ -796,7 +796,7 @@ Guarded by `GenericTypeInference` (`seqOf[T ~int64, N ~int32 | ~int64](n N) Seq[
 ## A CONSTANT argument that fixes a type parameter is retyped to the instantiation
 Go infers a type parameter from an untyped constant's default type; go2cs then maps that Go type to C#. The two do not meet: an untyped int defaults to Go `int`, which is go2cs `nint`, but the constant emits as a bare C# literal whose own type is `int` (System.Int32). C# infers the type argument from the ARGUMENT, so `wantValue(0)` makes C# choose `T = int` where Go chose `nint`.
 
-Most such calls are fine and deliberately stay bare, because C# repairs the mismatch wherever an implicit conversion bridges it -- `int` -> `nint` is implicit, so a result that IS the bare type parameter converts at the use site. What cannot be repaired is an **invariant** position: C# generics have no variance for these, so `Action<int, bool>` is not `Action<nint, bool>` and `slice<int>` is not `slice<nint>`. Wherever the type parameter reaches a CONSTRUCTED type, the wrong instantiation is terminal (CS1503/CS0315/CS0411).
+Where the mismatch only reaches a VALUE, C# repairs it -- `int` -> `nint` is implicit, so a result that IS the bare type parameter converts at the use site. It does not repair what the callee observes of its own type argument (`%T`, a type switch, an interface box); the next section gives every such call explicit type arguments instead. What cannot be repaired is an **invariant** position: C# generics have no variance for these, so `Action<int, bool>` is not `Action<nint, bool>` and `slice<int>` is not `slice<nint>`. Wherever the type parameter reaches a CONSTRUCTED type, the wrong instantiation is terminal (CS1503/CS0315/CS0411).
 
 Two gates therefore retype the constant to the C# spelling of the type Go resolved (`untypedIntGenericArgCastType`, applied through the per-argument `castArgToType` plumbing):
 
@@ -805,8 +805,8 @@ Two gates therefore retype the constant to the C# spelling of the type Go resolv
 
 ```csharp
 wantValue((nint)(0))(i, false);      // V reaches func(V, bool) -- retyped
-wantPresent(15)(true);               // V absent from the result -- bare
-bareResult(42);                      // result IS V; implicit conversion repairs it -- bare
+wantPresent<nint>(15)(true);         // V absent from the result -- explicit type argument (next section)
+bareResult<nint>(42);                // result IS V -- explicit type argument (next section)
 wantValue<nint>(0)(i, false);        // Go wrote the type argument -- bare
 sliceOf((nint)(9));                  // []V is invariant -- retyped
 wantInt64((int64)(1234567890123L));  // the cast follows the RESOLVED width, not always nint
@@ -815,6 +815,29 @@ wantInt64((int64)(1234567890123L));  // the cast follows the RESOLVED width, not
 The cast type comes from the resolved type, so it is `nint`, `long`, `byte`, `nuint` and so on as the instantiation requires; a resolved `int32`/`rune` is skipped because a bare C# literal already IS System.Int32. A generic NAMED result is skipped too -- invariant likewise, but the explicit type-argument rule above already pins that instantiation, and retyping the argument as well would be redundant. Non-constant arguments never qualify: their emitted C# already carries the mapped Go type. Folded constant EXPRESSIONS do qualify (`3 + 4`, `1 << 10`), since they emit as bare C# arithmetic in exactly the same way.
 
 Guarded by `GenericUntypedIntArg` (the `~[]E` lock) and `GenericUntypedConstInfer` (the invariant-result gate, its control shapes, and the nint/long/byte widths), both output-compared vs `go run`.
+
+## A type parameter fixed only by untyped constants gets explicit type arguments
+The cast above repairs the invariant positions; it leaves the callee itself instantiated wrong. `show[E any](e E)` called `show(3)` is `show[int]` in Go, and `fmt.Sprintf("%T", e)` inside it prints `int`. Emitted bare, C# infers `E` from the literal and instantiates `show<int>`, so the same line prints `int32`. A named untyped constant is worse: it emits as its golib `UntypedInt` wrapper, so `show(named)` instantiates `show<UntypedInt>` and prints the wrapper's fields.
+
+When every argument that reaches a type parameter is an untyped constant at a position whose type IS that parameter (a variadic element included), and at least one of those constants would infer a different C# type, the call emits the instantiation go/types resolved (`calleeTypeParamFixedByUntypedConst`). The argument text does not change:
+
+<!-- source: src/tests/Behavioral/UntypedConstTypeArg/main.cs.target:28-37 -->
+```csharp
+fmt.Println(show<nint>(3));
+fmt.Println(show(2.5D));
+fmt.Println(show((rune)'a'));
+fmt.Println(show(1D + 2D.i()));
+fmt.Println(show<nint>(named));
+fmt.Println(show<nint>((1 << (int)(10))));
+fmt.Println(show((@string)"s"));
+fmt.Println(show(true));
+fmt.Println(many<nint>(1, 2, 3));
+fmt.Println(keyed<@string, nint>((@string)"k", 4));
+```
+
+Calls stay bare where C# already infers Go's type: a float (`2.5D`), rune, string, bool or complex constant, whose emission carries its type; an integer resolved to `int32`; an integer outside the `int32` range, which emits with a cast (`toFloat64(unchecked((nint)(9007199254740993L)))`); a parameter some typed argument also reaches, at any position (`pair(x, 3)` with `x int8`), since C# infers from that argument, including through an alias (`lib.Twice(f, 3)` with `f lib.Mapper[int]`) and through an erased pointer-core parameter's `ж<T>` (`setThrough(Ꮡn, 55)`, above); and a constant the two cast gates above already retype, so those calls keep their emission. Measured over std and its tests on windows, linux and darwin, the shape occurs only in `_test.go` files (20 calls), so the converted stdlib does not change.
+
+Guarded by `UntypedConstTypeArg` (`%T` of int, float, rune, complex, string, bool, named and shifted constants through generics, a variadic and a two-parameter callee, and typed-argument controls), output-compared vs `go run`.
 
 ## Increment/decrement on a type parameter
 `i++` / `i--` on a constrained type parameter binds `IIncrementOperators<T>` / `IDecrementOperators<T>`, which the lifted **Arithmetic** operator set now includes (reflect `rangeNum`'s loop, CS0023). They live in the numeric-only Arithmetic set -- never the string-including Sum set, since `@string` implements neither. The list is emitted in two places that must stay in sync: the converter's `getLiftedConstraints` (`constraintOperations.go`) and the go2cs-gen `InterfaceTypeTemplate`.

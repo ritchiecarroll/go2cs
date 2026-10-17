@@ -200,7 +200,7 @@ internal static void Main() {
     fmt.Println(concatenated());
     fmt.Println(classify(matchedˢ), classify(otherˢ));
     fmt.Println(bytesConst());
-    fmt.Println(genericLabel(7), genericLabel((@string)"x"));
+    fmt.Println(genericLabel<nint>(7), genericLabel((@string)"x"));
     var p = Ꮡ(new parser(nil));
     fmt.Println(p.name(), p.name());
     fmt.Println(loop());

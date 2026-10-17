@@ -1683,6 +1683,12 @@ The pushed body is one line (`unsafe.String(&sysDirectory[0], sysDirectoryLen)`)
 
 What the missing row cost is out of all proportion to one symbol, and worth recording as a shape to look for: the throw came out of a package-level VAR INITIALIZER, so it surfaced from `net_package`'s type initializer — **every `httptest` consumer died in `net`'s cctor**, whatever it was actually testing.
 
+## The runtime's CPU feature flags — cpuinit's copy half
+
+Go sets the runtime's own feature flags (`x86HasAVX`, `x86HasFMA`, `x86HasPOPCNT`, `x86HasSSE41`, and the arm, arm64, loong64 and riscv64 ones in `cpuflags.go`) in `cpuinit`, which `schedinit` calls before `alginit`. `cpuinit` calls `internal/cpu.Initialize` and then copies the flags the compiler's generated guards read out of `cpu.X86` (or `cpu.ARM`, ...). go2cs never runs `schedinit`, so every flag stayed false, though `internal/cpu` itself answered correctly: `cpu_x86_impl.cs` fills `cpu.X86` from its own module initializer. The runtime's `TestHasAVX` reads `x86HasAVX` through `export_test.go` and compares it with what a child process finds, so on an AVX host it failed with `x86HasAVX: false, CheckAVX got: OK`.
+
+`core/runtime/cpuflags_impl.cs` is the copy half of `cpuinit`, line for line, in a `[ModuleInitializer]`, the same stand-in for `schedinit`'s slot that `goenvs_impl.cs` and `goargs_impl.cs` use. It does not call `cpu.Initialize`, because `internal/cpu`'s initializer has already run it (with GODEBUG's `cpu.*` options off Windows) by the time `cpu.X86` can be read. `cpuinit` itself stays converted in `proc.go` and unreachable. (Guarded by `GolibTests.RuntimeCpuinitFlagsTests`: the four x86 flags equal `cpu.X86`'s, and `x86HasAVX` is true on an AVX host.)
+
 ## Long-path awareness is process SETUP, and golib does what Go's `osinit` does
 
 `runtime.osinit` is not only where `goenvs`/`goargs`/`initSysDirectory` run; it is also where every Go Windows binary opts its own process into long-path handling. `initLongPathSupport()` checks for Windows 10.0.15063 or later and then sets the undocumented `IsLongPathAwareProcess` bit in the PEB's bit field. ntdll's path canonicalizer consults that bit, so with it set a plain, un-prefixed path longer than `MAX_PATH` reaches the kernel intact.

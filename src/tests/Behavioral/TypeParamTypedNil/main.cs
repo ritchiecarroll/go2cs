@@ -72,7 +72,7 @@ internal static void Main() {
     fmt.Println(fmt.Sprintf("%T"u8, box((f).OrTypedNilFunc())), box((f).OrTypedNilFunc()) == default!, isNil((f).OrTypedNilFunc()));
     fmt.Println(nameOf<ж<myErr>>(nil));
     fmt.Println(box(e) == default!, isNil(e));
-    fmt.Println(show(Ꮡ(new P(1))), plain(3), plain((@string)"s"));
+    fmt.Println(show(Ꮡ(new P(1))), plain<nint>(3), plain((@string)"s"));
 }
 
 } // end main_package

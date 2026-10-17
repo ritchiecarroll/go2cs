@@ -25,6 +25,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAdapterNameInterfaceCollision() => CheckTarget("AdapterNameInterfaceCollision");
 
     [TestMethod]
+    public void CheckAddCleanupClosesOverPtr() => CheckTarget("AddCleanupClosesOverPtr");
+
+    [TestMethod]
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
@@ -2421,6 +2424,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUntypedConstFloatContext() => CheckTarget("UntypedConstFloatContext");
+
+    [TestMethod]
+    public void CheckUntypedConstTypeArg() => CheckTarget("UntypedConstTypeArg");
 
     [TestMethod]
     public void CheckUntypedConstWideMask() => CheckTarget("UntypedConstWideMask");
