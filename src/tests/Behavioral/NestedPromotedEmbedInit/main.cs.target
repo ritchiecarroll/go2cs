@@ -10,7 +10,7 @@ partial struct flags {
 }
 
 partial struct formatter {
-    internal partial ref flags flags { get; }
+    /*embed*/ internal flags flags;
     internal array<byte> pad = new(3);
 }
 

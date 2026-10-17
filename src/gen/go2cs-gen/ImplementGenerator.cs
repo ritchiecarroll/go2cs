@@ -453,7 +453,7 @@ public class ImplementGenerator : ISourceGenerator
             // unbound member unconditionally: that member's promotion is what type-checked the
             // cast, so there is nothing to decide. SEVERAL embeds is the case that must be
             // decided per member — see multiEmbedHopPaths below.
-            List<(string Name, string TypeName)> embedHops = structDecl?.GetEmbeddedPointerHopNames() ?? [];
+            List<(string Name, string TypeName)> embedHops = structDecl?.GetEmbeddedPointerHopNames(compilation!) ?? [];
             string? embedHop = embedHops.Count == 1 ? embedHops[0].Name : null;
 
             // With SEVERAL embedded pointers no single hop can take every member, so both forms of the
@@ -512,7 +512,7 @@ public class ImplementGenerator : ISourceGenerator
 
                     embedHopValueMethods.UnionWith(hopDecl.GetExtensionMethods(hopCompilation).Select(method => GetSimpleName(method.Name)));
 
-                    foreach ((string fieldName, string fieldTypeName) in hopDecl.GetEmbeddedValueHopNames())
+                    foreach ((string fieldName, string fieldTypeName) in hopDecl.GetEmbeddedValueHopNames(hopCompilation!))
                     {
                         foreach (string deepMethod in StructDeclarationSyntaxExtensions.GetBoxReceiverMethodNames(fieldTypeName, hopCompilation))
                         {
@@ -547,7 +547,7 @@ public class ImplementGenerator : ISourceGenerator
             HashSet<string>? embedHopMemberNames = null;
 
             if (embedHops.Count == 1 &&
-                ((structDecl?.GetEmbeddedValueHopNames().Count ?? 0) > 0 || GetEmbeddedInterfaceFieldMembers(structType).Count > 0))
+                ((structDecl?.GetEmbeddedValueHopNames(compilation!).Count ?? 0) > 0 || GetEmbeddedInterfaceFieldMembers(structType).Count > 0))
             {
                 embedHopMemberNames = new HashSet<string>(embedHopBoxMethods, StringComparer.Ordinal);
 
@@ -910,12 +910,14 @@ public class ImplementGenerator : ISourceGenerator
 
                         string receiver = "m_box";
                         StructDeclarationSyntax? currentDecl = structDecl;
+                        // The compilation that owns currentDecl's tree, followed down the hops with it.
+                        Compilation? currentCompilation = compilation;
                         string currentTypeName = structName;
                         INamedTypeSymbol? currentTypeSymbol = structType as INamedTypeSymbol;
 
                         for (int depth = 0; depth < maxDepth && currentDecl is not null; depth++)
                         {
-                            List<(string Name, string TypeName)> valueEmbedHops = currentDecl.GetEmbeddedValueHopNames();
+                            List<(string Name, string TypeName)> valueEmbedHops = currentDecl.GetEmbeddedValueHopNames(currentCompilation!);
 
                             if (valueEmbedHops.Count != 1)
                                 break;
@@ -942,6 +944,7 @@ public class ImplementGenerator : ISourceGenerator
                             // keyword-named type (`@fixed.Ꮡn`, not the parse-breaking `fixed.Ꮡn`).
                             receiver = $"{receiver}.of({EscapeCsKeyword(currentTypeName)}.{AddressPrefix}{GetUnsanitizedIdentifier(embedName)})";
                             (currentDecl, Compilation? embedCompilation) = context.GetStructDeclaration(embedTypeName);
+                            currentCompilation = embedCompilation;
                             currentTypeName = embedTypeName;
                             currentTypeSymbol = embedTypeSymbol;
 
@@ -1436,7 +1439,7 @@ public class ImplementGenerator : ISourceGenerator
                 // it) - net's `addrPortUDPAddr struct { netip.AddrPort }`: the bare
                 // `this.String()` bound an unrelated same-package extension by NAME (CS1929);
                 // `this.AddrPort.String()` binds the embed's value-receiver method.
-                ValueEmbedHop = embedHop is null && (structDecl?.GetEmbeddedValueHopNames() is [var singleValueHop]) ? singleValueHop.Name : null,
+                ValueEmbedHop = embedHop is null && (structDecl?.GetEmbeddedValueHopNames(compilation!) is [var singleValueHop]) ? singleValueHop.Name : null,
                 // A FOREIGN value embed's extensions live in another namespace segment
                 // (netip_package sits in go.net; the source file only ALIASES it, which does
                 // not import extensions) - call the package-class static directly:
@@ -1444,7 +1447,7 @@ public class ImplementGenerator : ISourceGenerator
                 // embed's SYMBOL: the spelled type name is already `global::go.…` in an internal test
                 // and `go.<module ns>.…` in an external one, and prefixing either again names nothing
                 // (`global::go.global::go.…` CS7000, `global::go.go.…` CS0234: golang-jwt's tests).
-                ValueEmbedHopStaticClass = embedHop is null && (structDecl?.GetEmbeddedValueHopNames() is [var svh]) && svh.TypeName.Contains('.')
+                ValueEmbedHopStaticClass = embedHop is null && (structDecl?.GetEmbeddedValueHopNames(compilation!) is [var svh]) && svh.TypeName.Contains('.')
                     ? ResolveValueEmbedPackageClass(structType, svh.Name) ?? "global::go." + svh.TypeName.Substring(0, svh.TypeName.LastIndexOf('.'))
                     : null,
                 UsingStatements = usingStatements

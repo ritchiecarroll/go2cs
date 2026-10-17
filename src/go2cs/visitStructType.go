@@ -950,9 +950,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					}
 				}
 
-				// Handle promoted struct implementations
+				// An embed that PROMOTES (a defined type, or a pointer to one) is a FIELD declared here, in Go
+				// declaration order, marked like every other embed: `/*embed*/ public T T;` or `/*embed*/ public
+				// ж<T> T;`. The field is the embed's storage and its accessor, so go2cs-gen declares neither and
+				// generates only the promoted members. Declaring it here is what puts it where Go lays it: storage
+				// the generator declared in a later partial part was laid AFTER every field written here, so a
+				// struct read at Go's layout (runtime's lfstack node, `struct{ LFNode; data int }`) found its
+				// fields at the wrong offsets (owner ruling (A), 2026-10-16, uniform over value and pointer embeds).
 				if !handled {
-					v.writeString(target, "%s partial ref %s %s { get; }%s", getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
+					v.writeString(target, "%s %s %s %s;%s", embedMarker, getAccess(goTypeName), csEmitTypeName, embedName, tagComment)
 				}
 			}
 

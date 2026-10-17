@@ -13,7 +13,7 @@ internal static void inc(this ref counter c) {
 }
 
 partial struct holder {
-    internal partial ref counter counter { get; }
+    /*embed*/ internal counter counter;
     internal @string name;
 }
 

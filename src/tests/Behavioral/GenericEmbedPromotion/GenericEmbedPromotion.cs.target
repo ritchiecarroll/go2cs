@@ -76,7 +76,7 @@ partial interface Named {
 }
 
 partial struct p224Curve {
-    internal partial ref curve<p224жpoint> curve { get; }
+    /*embed*/ internal curve<p224жpoint> curve;
 }
 
 internal static void Main() {

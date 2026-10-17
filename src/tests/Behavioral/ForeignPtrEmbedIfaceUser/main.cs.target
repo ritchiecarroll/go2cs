@@ -17,7 +17,7 @@ partial interface combo {
 }
 
 partial struct meterBox {
-    public partial ref ж<ForeignPtrEmbedIfaceLib_package.Meter> Meter { get; }
+    /*embed*/ public ж<ForeignPtrEmbedIfaceLib_package.Meter> Meter;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

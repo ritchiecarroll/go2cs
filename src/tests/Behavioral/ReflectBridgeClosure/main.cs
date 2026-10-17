@@ -28,14 +28,14 @@ partial struct clashB {
 }
 
 partial struct clash {
-    internal partial ref clashA clashA { get; }
-    internal partial ref clashB clashB { get; }
+    /*embed*/ internal clashA clashA;
+    /*embed*/ internal clashB clashB;
 }
 
 partial struct host {
     public nint Plain;
-    internal partial ref inner inner { get; }
-    internal partial ref tagged tagged { get; } /*`json:"t"`*/
+    /*embed*/ internal inner inner;
+    /*embed*/ internal tagged tagged; /*`json:"t"`*/
     public inner Named; /*`json:"n"`*/
 }
 

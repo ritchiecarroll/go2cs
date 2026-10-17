@@ -17,7 +17,7 @@ partial struct MyError {
 partial struct MyCustomError {
     public @string Message;
     /*embed*/ public Abser Abser;
-    public partial ref MyError MyError { get; }
+    /*embed*/ public MyError MyError;
     /*embed*/ internal error error;
 }
 

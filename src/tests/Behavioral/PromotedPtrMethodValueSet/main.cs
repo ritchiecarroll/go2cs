@@ -22,31 +22,31 @@ public static nint Get(this Inner i) {
 }
 
 partial struct SameP {
-    public partial ref ж<Inner> Inner { get; }
+    /*embed*/ public ж<Inner> Inner;
 }
 
 partial struct SameV {
-    public partial ref Inner Inner { get; }
+    /*embed*/ public Inner Inner;
 }
 
 partial struct MidP {
-    public partial ref ж<Inner> Inner { get; }
+    /*embed*/ public ж<Inner> Inner;
 }
 
 partial struct OuterVP {
-    public partial ref MidP MidP { get; }
+    /*embed*/ public MidP MidP;
 }
 
 partial struct MidV {
-    public partial ref Inner Inner { get; }
+    /*embed*/ public Inner Inner;
 }
 
 partial struct OuterPV {
-    public partial ref ж<MidV> MidV { get; }
+    /*embed*/ public ж<MidV> MidV;
 }
 
 partial struct OuterVV {
-    public partial ref MidV MidV { get; }
+    /*embed*/ public MidV MidV;
 }
 
 partial interface bumper {

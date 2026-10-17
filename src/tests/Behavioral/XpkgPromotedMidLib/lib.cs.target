@@ -5,7 +5,7 @@ using XpkgPromotedInnerLib = XpkgPromotedInnerLib_package;
 partial class XpkgPromotedMidLib_package {
 
 partial struct Mid {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct loc2 {
@@ -16,8 +16,8 @@ internal static XpkgPromotedInnerLib.Token Tok(this loc2 _) {
 }
 
 partial struct Mid2 {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
-    internal partial ref loc2 loc2 { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
+    /*embed*/ internal loc2 loc2;
 }
 
 partial struct r1 {
@@ -30,11 +30,11 @@ internal static nint Ping(this ref r1 r) {
 }
 
 partial struct SameP {
-    internal partial ref ж<r1> r1 { get; }
+    /*embed*/ internal ж<r1> r1;
 }
 
 partial struct SameV {
-    internal partial ref r1 r1 { get; }
+    /*embed*/ internal r1 r1;
 }
 
 public static SameP NewSameP() {
@@ -42,11 +42,11 @@ public static SameP NewSameP() {
 }
 
 partial struct wrap {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct Mid3 {
-    internal partial ref wrap wrap { get; }
+    /*embed*/ internal wrap wrap;
 }
 
 partial struct HasTok {
@@ -54,8 +54,8 @@ partial struct HasTok {
 }
 
 partial struct MidF {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
-    public partial ref HasTok HasTok { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
+    /*embed*/ public HasTok HasTok;
 }
 
 partial struct inner3 {
@@ -66,7 +66,7 @@ internal static XpkgPromotedInnerLib.Token Tok(this inner3 _) {
 }
 
 partial struct PS {
-    internal partial ref inner3 inner3 { get; }
+    /*embed*/ internal inner3 inner3;
     public nint Tok;
 }
 

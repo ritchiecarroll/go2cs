@@ -14,12 +14,12 @@ internal static @string describe(this inner i) {
 }
 
 partial struct mid {
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
     internal nint m;
 }
 
 partial struct top {
-    internal partial ref mid mid { get; }
+    /*embed*/ internal mid mid;
     internal nint t;
 }
 

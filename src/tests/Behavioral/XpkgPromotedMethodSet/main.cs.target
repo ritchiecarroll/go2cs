@@ -20,15 +20,15 @@ using ꓸꓸꓸany = Span<any>;
 partial class main_package {
 
 partial struct Direct {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct PtrDirect {
-    public partial ref ж<XpkgPromotedInnerLib_package.Inner> Inner { get; }
+    /*embed*/ public ж<XpkgPromotedInnerLib_package.Inner> Inner;
 }
 
 partial struct Outer {
-    public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
 }
 
 partial struct loc {
@@ -39,66 +39,66 @@ internal static inner.Token Tok(this loc _) {
 }
 
 partial struct Five {
-    public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
-    internal partial ref loc loc { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
+    /*embed*/ internal loc loc;
 }
 
 partial struct local {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct GCounter {
-    internal partial ref local local { get; }
-    public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
+    /*embed*/ internal local local;
+    /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
 }
 
 partial struct local2 {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct S6 {
-    internal partial ref loc loc { get; }
-    internal partial ref local2 local2 { get; }
+    /*embed*/ internal loc loc;
+    /*embed*/ internal local2 local2;
 }
 
 partial struct Within {
-    public partial ref XpkgPromotedMidLib_package.Mid2 Mid2 { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.Mid2 Mid2;
 }
 
 partial struct Shadow {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
     public nint Tok;
 }
 
 partial struct localMid {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct Mixed {
-    internal partial ref localMid localMid { get; }
+    /*embed*/ internal localMid localMid;
 }
 
 public static nint Name = 0;
 
 partial struct brokenState {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
 }
 
 partial struct Broken {
     /*embed*/ public io_package.Reader Reader;
-    internal partial ref ж<brokenState> brokenState { get; }
+    /*embed*/ internal ж<brokenState> brokenState;
 }
 
 partial struct Stamp {
-    public partial ref time_package.Time Time { get; }
+    /*embed*/ public time_package.Time Time;
 }
 
 partial struct PtrStamp {
-    public partial ref ж<time_package.Time> Time { get; }
+    /*embed*/ public ж<time_package.Time> Time;
 }
 
 partial struct BufP {
-    public partial ref ж<bytes_package.Buffer> Buffer { get; }
+    /*embed*/ public ж<bytes_package.Buffer> Buffer;
 }
 
 partial struct deepTok {
@@ -109,28 +109,28 @@ internal static inner.Token Tok(this deepTok _) {
 }
 
 partial struct localTok {
-    internal partial ref deepTok deepTok { get; }
+    /*embed*/ internal deepTok deepTok;
 }
 
 partial struct OuterS5 {
-    public partial ref XpkgPromotedMidLib_package.Mid3 Mid3 { get; }
-    internal partial ref localTok localTok { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.Mid3 Mid3;
+    /*embed*/ internal localTok localTok;
 }
 
 partial struct OuterFD {
-    public partial ref XpkgPromotedMidLib_package.MidF MidF { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.MidF MidF;
 }
 
 partial struct OuterFS {
-    public partial ref XpkgPromotedMidLib_package.PS PS { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.PS PS;
 }
 
 partial struct TT {
-    public partial ref ж<testing_package.T> T { get; }
+    /*embed*/ public ж<testing_package.T> T;
 }
 
 partial struct HideC {
-    public partial ref bytes_package.Buffer Buffer { get; }
+    /*embed*/ public bytes_package.Buffer Buffer;
     /*embed*/ public io_package.WriterTo WriterTo;
 }
 
