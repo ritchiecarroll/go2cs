@@ -1111,9 +1111,16 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         // A NIL pointer's address is 0, matching Go (`uintptr(unsafe.Pointer(nil)) == 0`) — and
         // the syscall wrappers legitimately pass nil pointers whose numeric address is simply 0.
-        // The value-peeking IsNull is KEPT deliberately: this is the address model, and a
-        // reference-typed pointee has no address to report.
-        if (value is null || value.IsNull)
+        //
+        // The STRUCTURAL nil question, never the value-peeking IsNull (2026-10-16). A standard heap
+        // box holding a null reference or a null Nullable<T> is `&p` with p nil: the address of the
+        // variable, which Go reports as non-zero and which does not change when p is assigned. The
+        // peek answered 0 there and the box's number afterward. It dated from 4eb4d14de0, when a
+        // reference-typed pointee had no address to report; the token arm below now reports one for
+        // every such box, and the deep funnel carries reference-bearing out words through this
+        // operator (IGoReflectBox.NativeArgumentAddress). For the same reason the reads below go
+        // through ValueSlot, not Value: StandardBox.Value panics on its own value peek.
+        if (value is null || value.IsNilPointer)
             return default;
 
         // Every zerobase pointer is ONE address, the zerobase's own (GoZeroBase): Go's
@@ -1141,7 +1148,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // ("Object contains references"), which threw for unique's canonMap hashing a `[3]string` key
         // through unsafe.Pointer(&key). Such an array has no data to pin, so it takes the reference-bearing
         // token arm below, as any other reference-bearing pointee does.
-        if (value.Value is IArray arr && arr is not ISlice && !(typeof(T).IsValueType ? FixedArrayElements.HoldReferences : arr.ElementHoldsReferences))
+        if (value.ValueSlot is IArray arr && arr is not ISlice && !(typeof(T).IsValueType ? FixedArrayElements.HoldReferences : arr.ElementHoldsReferences))
         {
             uintptr dataAddr = (uintptr)value.pinnedArrayData(arr);
             ManagedPointerTokens.RegisterPinned((nuint)dataAddr.Value, value);
@@ -1167,7 +1174,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // statement, and the address outlives that statement by definition.
         value.EnsureStableAddress();
 
-        fixed (void* ptr = &value.Value)
+        fixed (void* ptr = &value.ValueSlot)
         {
             // The PROVENANCE record (DESIGN-pointer-provenance.md, RATIFIED): the pin is the one
             // guarantee the resolve-side validate-on-read leans on.
@@ -1199,7 +1206,8 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (value is not null && value.NativeAddress != 0)
             return (void*)value.NativeAddress;
 
-        if (value is null || value.IsNull)
+        // Structural, as in the uintptr operator above.
+        if (value is null || value.IsNilPointer)
             return null;
 
         // The zerobase's one address, as in the uintptr operator above.
@@ -1209,7 +1217,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // A pointer to a Go fixed array resolves to the pinned address of the array data — see the
         // uintptr operator above for the full rationale, including why the address is REGISTERED
         // (the provenance record and the keystone tether must see buffer addresses too).
-        if (value.Value is IArray arr && arr is not ISlice)
+        if (value.ValueSlot is IArray arr && arr is not ISlice)
         {
             void* dataAddr = value.pinnedArrayData(arr);
             ManagedPointerTokens.RegisterPinned((nuint)dataAddr, value);
@@ -1227,7 +1235,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         value.EnsureStableAddress();
 
-        fixed (T* ptr = &value.Value)
+        fixed (T* ptr = &value.ValueSlot)
         {
             // Reached on the UNPINNABLE path too, for the reason spelled at the uintptr twin:
             // the entry is stale by construction there, Resolve validates on read and answers

@@ -27229,4 +27229,30 @@ other codegen-liveness entry whose sole pin is a shared closure object would ret
 
 — C1 (measured 2026-10-16; COORD ruled 2026-10-16: corpus-wide emission, not now; this row, owner G)
 
+## 2026-10-17 — C1: a frame or `created by` line inside a HAND-OWNED file prints the .cs path — POST-HOP (owner P1)
+
+Seen in a runtime.Stack(all) dump taken by the TestProfBufWakeup probe at hop tip 96c8d6d64f (linux): the reader
+goroutine's block ends `created by sync.(*WaitGroup).Go in goroutine 4`, with the position line
+`<tree>/src/core/sync/waitgroup.cs:230`. Go prints `<GOROOT>/src/sync/waitgroup.go:238`, the `go func()` line in
+`(*WaitGroup).Go`.
+
+**Mechanism.** `sync/waitgroup.cs` is a hand-own (`[module: go.GoManualConversion]`), and a hand-owned file has no
+`GoPositionMap` record in its package's `package_info.cs`. So the frame-line lookup (managed_impl.cs
+goCreatorPosition -> goSourcePosition) finds no Go position and falls back to the C# file and line. That fallback is
+correct for a file with no Go source. It is wrong for a hand-own that REPLACES a Go file: that file does have Go
+source, and Go reports it.
+
+**Population.** 189 files under src/core carry the marker (`^\s*\[module:\s*(go\.)?GoManualConversion\]`, counted 2026-10-17 at 87bb942c26). Every frame line and
+created-by line that falls inside one of them prints a .cs path. Which tests READ such a line is not measured.
+A test that parses a traceback for `.go:` (runtime's parseTraceback, pprof's location checks) is the exposed kind.
+
+**Not sized; options for P1.**
+- (a) Per hand-own, a file-level record naming the Go file it replaces, so at least the FILE matches. The line stays
+  approximate.
+- (b) Per-site line hints in the hand-own (an attribute or a marked comment at each `go` statement and each
+  frame-visible call), read into the same position map. Exact, but every hand-own author must keep it.
+- (c) Leave as is and disclose per test where a verdict reads it.
+
+— C1 (found 2026-10-17 in passing; COORD ruled: write the row, P1 later)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
