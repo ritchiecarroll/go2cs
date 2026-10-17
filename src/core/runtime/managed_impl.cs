@@ -133,6 +133,7 @@ using go.golib;
 using go.@internal.runtime;
 using abi = go.@internal.abi_package;
 using profilerecord = go.@internal.profilerecord_package;
+using label = go.@internal.runtime.pprof.label_package;
 using @unsafe = go.unsafe_package;
 
 [module: go.GoManualConversion]
@@ -1596,7 +1597,79 @@ partial class runtime_package
             ? WaitReasons.Text(goroutine.Reason)
             : "running";
 
-        trace.Append("goroutine ").Append(id).Append(" [").Append(status).Append("]:\n");
+        trace.Append("goroutine ").Append(id).Append(" [").Append(status);
+        appendGoroutineLabels(trace, goroutine);
+        trace.Append("]:\n");
+    }
+
+    // Go 1.26's goroutineheader tail (go1.26.9 traceback.go:1279-1290): with GODEBUG tracebacklabels=1
+    // (default 0), a goroutine carrying pprof labels prints ` labels:{"k": "v", ...}` before the `]:`, in
+    // label.Set's order (runtime/pprof sorts by key), each key and value through printquoted. The labels
+    // are the pointer runtime_setProfLabel stores: the CALLER's own from golib's AsyncLocal, which is
+    // authoritative for it, and another goroutine's from its slot.
+    private static void appendGoroutineLabels(StringBuilder trace, Goroutine? goroutine)
+    {
+        if (goroutine is null || Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels).Load() != 1)
+            return;
+
+        object? stored = ReferenceEquals(goroutine, Goroutine.Current) ? Goroutine.GetProfileLabels() : goroutine.ProfileLabels;
+
+        if (stored is not @unsafe.Pointer labelsPointer || labelsPointer == nil)
+            return;
+
+        slice<label.Label> labels = ((ж<label.Set>)(uintptr)labelsPointer).Value.List;
+
+        if (len(labels) == 0)
+            return;
+
+        trace.Append(" labels:{");
+
+        for (nint i = 0; i < len(labels); i++)
+        {
+            appendQuoted(trace, labels[i].Key);
+            trace.Append(": ");
+            appendQuoted(trace, labels[i].Value);
+
+            if (i < len(labels) - 1)
+                trace.Append(", ");
+        }
+
+        trace.Append('}');
+    }
+
+    // Go's printquoted (go1.26.9 print.go:212-246), into a builder: printable ASCII as is; \n, \r, \t,
+    // \\ and \" escaped; any other rune below 127 as \xHH, below 0x10000 as \uHHHH, else \UHHHHHHHH,
+    // lower-case hex. Go's `for _, r := range s` yields U+FFFD for each invalid byte, ONE byte at a time,
+    // which golib's @string enumerator reproduces (.NET's Rune.DecodeFromUtf8 would consume a maximal
+    // invalid subpart instead: E2 82 41 is two U+FFFD and an A in Go, one U+FFFD and an A there). Each
+    // U+FFFD prints as the \ufffd escape.
+    private static void appendQuoted(StringBuilder trace, @string s)
+    {
+        trace.Append('"');
+
+        foreach ((nint _, rune runeValue) in s)
+        {
+            int r = runeValue;
+
+            switch (r)
+            {
+                case '\n': trace.Append("\\n"); continue;
+                case '\r': trace.Append("\\r"); continue;
+                case '\t': trace.Append("\\t"); continue;
+                case '\\' or '"': trace.Append('\\').Append((char)r); continue;
+            }
+
+            if (r is >= ' ' and <= '~')
+                trace.Append((char)r);
+            else if (r < 127)
+                trace.Append("\\x").Append(r.ToString("x2"));
+            else if (r < 0x1_0000)
+                trace.Append("\\u").Append(r.ToString("x4"));
+            else
+                trace.Append("\\U").Append(r.ToString("x8"));
+        }
+
+        trace.Append('"');
     }
 
     // Renders frames the way Go's traceback does — `<pkg>.<Func>()` on one line, a tab-indented
