@@ -5400,6 +5400,11 @@ A named slice type such as `numbers` becomes a wrapper struct, its name followed
 behaves as a slice. A slice literal builds a C# array and turns it into a slice with `.slice()`
 ([Slices and Arrays](#slices-and-arrays)). Calls C# can infer, such as `totalArea(shapes)`, stay bare.
 
+A type argument Go takes from untyped constants alone is written out too, wherever C# would infer a
+different type. Go gives a constant its default type, so `show(3)` calls `show[int]`; C# infers from the
+bare literal, an `int`, which is Go's `int32`. The call becomes `show<nint>(3)`, and `%T` inside `show`
+prints `int` as in Go. Float, rune, string, bool and complex constants already carry their type and stay bare.
+
 Where Go writes the type arguments itself, C# keeps them. Here `T` appears in no parameter, so Go
 must name it. `stringerˢ` is the string literal `"stringer"`, hoisted to a field that the example shows
 ([Strings](#strings-string-and-sstring)):

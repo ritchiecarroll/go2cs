@@ -193,6 +193,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The `string | []byte` union](generic-constraints.md#the-string--byte-union)
   - [Explicit type arguments come from the callee's instantiation](generic-constraints.md#explicit-type-arguments-come-from-the-callees-instantiation)
   - [A CONSTANT argument that fixes a type parameter is retyped to the instantiation](generic-constraints.md#a-constant-argument-that-fixes-a-type-parameter-is-retyped-to-the-instantiation)
+  - [A type parameter fixed only by untyped constants gets explicit type arguments](generic-constraints.md#a-type-parameter-fixed-only-by-untyped-constants-gets-explicit-type-arguments)
   - [Increment/decrement on a type parameter](generic-constraints.md#incrementdecrement-on-a-type-parameter)
   - [Unary negation on a type parameter](generic-constraints.md#unary-negation-on-a-type-parameter)
   - [`uintptr` as a generic numeric type argument](generic-constraints.md#uintptr-as-a-generic-numeric-type-argument)

@@ -81,7 +81,7 @@ internal static partial void Main() {
     fmt.Println(plain());
     fmt.Println(variadic(1, 2));
     fmt.Println(name, n);
-    fmt.Println(generic(1));
+    fmt.Println(generic<nint>(1));
     fmt.Println(c.ptr());
     fmt.Println((~c).val());
     fmt.Println(b.get());
