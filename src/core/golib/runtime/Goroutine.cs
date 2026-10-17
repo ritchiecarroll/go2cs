@@ -1492,7 +1492,7 @@ public sealed class Goroutine
                 if (m_goroutine.m_bubble is { } bubble)
                 {
                     m_goroutine.m_bubble = null;
-                    bubble.Exited();
+                    bubble.Exited(m_goroutine);
                 }
 
                 // Go's goexit traces the destroy on the goroutine's own thread (ExecutionTracer, Q28).
