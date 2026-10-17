@@ -1,0 +1,407 @@
+H8 (Go 1.26 hop) readings posted by the i9 lane to COORD, 2026-10-16/17, in time order. One message per section; the first line names the source file.
+Each is the verbatim text that was posted, census-checked at the time. Hop tips are named by SHA in each message.
+
+===== h8-go126/msg-owner-hand.txt  (file mtime 2026-10-16 07:55)
+OWNER-HAND: i9 waits on the owner for ONE answer: may the i9 run net/http in this H8 reading set? His standing order (2026-09-28, held after the one 10-02 limits experiment) bans crypto/tls AND "the net suite containing TLS", which is net/http. A peer cannot lift that.
+Also held with it, since they exercise or import crypto/tls: net/http/httptest, net/smtp (tests import tls), crypto/x509 (tests import tls), and net/http/cgi and net/http/httptrace (the packages import tls).
+Not blocked meanwhile: archive/zip is piloting now on fba27f4c7e, then html/template, crypto/cipher and crypto/rsa, then the 22 non-TLS net-direct rows, then reflect. crypto/tls stays skipped regardless.
+
+===== h8-go126/msg-coord-h8-1.txt  (file mtime 2026-10-16 07:58)
+i9 -> COORD: H8 READING 1/26 on fba27f4c7e (it carries 492a2d51d0's constant fold and 4cd99e2630's reflect lift). Recon wrapper run-h10-recon.ps1, one attempt, no commit, pwsh 7.6.6, GOMAXPROCS=4 -p=4.
+  archive/zip: PASS, rc 0, 139 s, WHEA 0. go 101 / cs 101: matched 101, diverged 0, empty 0, disclosed 0, excluded 10 (examples/fuzz). Banked 1.24: 100 / 0 disclosed.
+    +1 is a NEW 1.26 test, TestFSWalkBadFile (reader_test.go, absent in 1.24.13). Not a regression.
+  The pilot also caught that the tree needed its converter built first (the wrapper refused in 2 s, by design).
+HELD, besides the 6 you named: os/exec. Its exec_test.go:720 starts an httptest TLS server (ts.StartTLS), so it touches TLS like the others. It waits on the same owner answer.
+  Scan method: the test files' crypto/tls / NewTLSServer / StartTLS / tls.* use over all 26 rows. The positive control (net/http: 8 of 37 test files) fires.
+RUNNING (one at a time): html/template, crypto/cipher, crypto/rsa, then bufio context debug/elf encoding/gob encoding/json expvar flag internal/poll net/http/cookiejar net/http/fcgi net/http/httputil net/mail net/netip net/rpc net/rpc/jsonrpc net/textproto net/url os runtime syscall net, then reflect.
+Per row: matched/diverged/empty/disclosed vs banked; each diverge classed against go1.24.13's test sources (a regression, or a NEW 1.26 test).
+
+===== h8-go126/msg-coord-h8-2.txt  (file mtime 2026-10-16 08:01)
+i9 -> COORD: H8 READINGS 2-4 on fba27f4c7e, plus ONE ROOT CLASS behind both diverges.
+  html/template: DIVERGED, 39 s, WHEA 0. go 265 / cs 265: matched 250, diverged 15, empty 0, disclosed 0. Banked 1.24: 243 / 0.
+    All 15 are HOP REGRESSIONS: TestEscape/{jsMarshaler,badMarshaler}, TestJSValEscaper, and TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped plus 9 subtests. All exist in 1.24.13 and the row banked with 0 disclosures.
+  crypto/cipher: PASS, 57 s, WHEA 0. go 27289 / cs 27289: matched 27289, diverged 0, empty 0, disclosed 0. Banked 1.24: 27272 / 0 (+17 at 1.26, all matched).
+  crypto/rsa: DIVERGED, 78 s, WHEA 0. go 591 / cs 591: matched 52, diverged 538, empty 0, disclosed 1. Banked 1.24: 568 / 1.
+    The diverges are HOP REGRESSIONS: TestEverything/* (most of them), TestEncryptPKCS1v15, TestEqual, TestNotPrecomputed/*, TestPSmallerThanQ, TestLargeSizeDifference.
+ROOT CLASS (one, both rows): reflect.TypeAssert[T], NEW in Go 1.25 (absent in 1.24.13; reflect/value.go:1518 at 1.26.9), panics in go.NativeBox.DereferenceableAddress:
+    "dereference of a managed pointer with no address (*Object over 0x8000...  -- the order token of a reference-bearing pointee at offset 0, Q44 s10.3 arm 2a ...)".
+  html/template reaches it via encoding/json.Marshal -> marshal -> marshalerEncoder -> reflect.TypeAssert[T].
+  crypto/rsa reaches it via x509.MarshalPKCS8PrivateKey -> MarshalPKCS1PrivateKey -> encoding/asn1.Marshal -> makeField/makeBody -> reflect.TypeAssert[T].
+  At 1.26 TypeAssert is called from encoding/asn1, gob, json and xml, so I expect encoding/gob and encoding/json (still to run) to read the same class. It is converter/golib work (G's reflect area, I propose).
+NOW: the owner's net/http EXPERIMENT is running ALONE (owner, in this session: "As an experiment, cautiously try running net/http -- if we fail or reboot, this will move to another lane"). I stopped the batch driver between rows; it resumes with bufio after net/http.
+
+===== h8-go126/msg-coord-nethttp.txt  (file mtime 2026-10-16 08:07)
+i9 -> COORD: THE OWNER'S net/http EXPERIMENT: NO INFRASTRUCTURE FAILURE. It ran ALONE, 136 s, WHEA 0 before and after, no reset (boot still 10-14 21:55), no crash. But the row read BUILD: its tests never ran.
+  net/http on fba27f4c7e: BUILD, verdicts NOMATCH (no comparison; banked 1.24: 1387 / 0). One C# error stops the -tests publish:
+    transport_dial_test.cs(450,35): CS1503 "cannot convert from 'out go.context_package.Context' to 'out go.EmptyStruct'".
+  The Go is a select receive-and-discard, `case <-t.Context().Done():`, at transport_dial_test.go:427. It is NEW 1.26 test code; 1.24.13's transport_dial_test.go has no such line.
+    Emitted: `var sel63 = t.Context().Done(); ... case 1 when sel63.<recv>(out _):`. The `out _` discard binds as Context, not the channel's element type EmptyStruct.
+  So: a converter class on new test code, not a regression of a banked test, but it blocks all 1387+ verdicts of the row. I propose it go to whoever owns select lowering.
+  The TLS workload this experiment was for was NOT exercised (no test ran). A re-read after the fix is a second net/http run on this box. I will NOT run it without the owner's word that his experiment covers it, so please put that to him with the re-read post.
+RESUMED: the batch is back on from bufio (22 rows, reflect last), one at a time.
+
+===== h8-go126/msg-coord-h8-3.txt  (file mtime 2026-10-16 08:11)
+i9 -> COORD: H8 READINGS 5-10 on fba27f4c7e (WHEA 0 on every row; matched/diverged/empty/disclosed vs banked 1.24 Tests/Disclosed):
+  bufio         PASS      20 s: 81 = 80 matched + 1 disclosed (banked 80/1).
+  context       PASS      19 s: 62 = 61 matched + 1 disclosed (banked 57/1; +4 at 1.26, all matched).
+  debug/elf     PASS      26 s: 32 matched (banked 31/0; +1 at 1.26).
+  encoding/gob  DIVERGED  65 s: SAME CLASS (reflect.TypeAssert). 69 matched / 37 diverged / 0 empty of 106 (banked 106/0); 34 of 38 fail events carry TypeAssert, and TestNilPointerPanics has the same no-address panic outside it.
+  encoding/json DIVERGED  41 s: SAME CLASS. 168 matched / 297 diverged / 85 empty of 550 (banked 532/0); 274 of 300 fail events carry TypeAssert.
+    Residue of 26, e.g. TestUnmarshal/ErrorInterface and TestInvalidUnmarshal: got/want error text. Re-read after G's fix before it is called a second class.
+  expvar        DIVERGED  26 s: SAME CLASS. 9 matched / 2 diverged (TestMapCounter, TestMapNil: JSON output) of 11 (banked 11/0).
+  Diverges by top-level test: gob 31 and expvar 2 all exist at 1.24 (hop regressions); json 58 of 61 exist at 1.24, and 3 are NEW 1.26 tests (TestDecoderInputOffset, TestSynctestMarshal, TestTokenTruncation). Re-read list after G's fix: html/template, crypto/rsa, encoding/gob, encoding/json, expvar.
+Running: flag, then the rest of the list.
+
+===== h8-go126/msg-coord-h8-4.txt  (file mtime 2026-10-16 08:15)
+i9 -> COORD: H8 READINGS 11-18 on fba27f4c7e, WHEA 0 on every row.
+  flag                PASS   24 matched (banked 24/0).
+  internal/poll       PASS   13 matched (banked 19/0). The denominator moved: 1.26 REMOVED TestFileFdsAreInitialised and TestSerialFdsAreInitialised (14 -> 12 Test funcs). Not a regression.
+  net/http/cookiejar  PASS   17 matched (banked 17/0).
+  net/http/fcgi       PASS   12 matched (banked 12/0).
+  net/http/httputil   PASS   62 matched (banked 53/0; +9 at 1.26, all matched).
+  net/mail            PASS   11 matched (banked 11/0).
+  net/netip           BUILD, NO verdicts (banked 211/57). A NEW CLASS: Go 1.25 added testing.TB.Output() io.Writer.
+    ImplementGenerator's TB implementations in the -tests build (netip_package.B/T-global__go.testing_package.TB-ptr.g.cs) need io.Writer, but net/netip's test project has NO reference to io:
+    CS0012 "io_package.Writer is defined in an assembly that is not referenced", CS0234, and CS9334 "Output() return type must be go.io_package.Writer".
+    It will hit any row whose test closure lacks io; this is the first one. It is the -tests csproj reference derivation (converter, I propose G or whoever owns -tests csproj minting).
+  net/rpc             DIVERGED, TypeAssert class. go 15 / cs 5: 3 matched, 2 diverged, 10 empty: the HOST CRASHED (exit 2) in flight on TestBuiltinTypes.
+    gob encode.go:339 -> enc_helpers.go:182 encIntSlice -> reflect.TypeAssert[[]int] on the RPC server goroutine, so an unrecovered panic takes the process down and the 10 later tests never report.
+  net/rpc/jsonrpc     DIVERGED, TypeAssert class (json). go 9 / cs 1: 0 matched, 1 diverged, 8 empty (banked 9/0): the host died early, as with net/rpc.
+Re-read list after G's TypeAssert fix grows: + net/rpc, net/rpc/jsonrpc. Remaining: net/textproto, net/url, os, runtime, syscall, net, reflect.
+
+===== h8-go126/msg-coord-h8-5.txt  (file mtime 2026-10-16 09:32)
+i9 -> COORD: H8 READINGS 19-23 on fba27f4c7e, WHEA 0. net and reflect are running.
+  net/textproto  PASS      27 matched (banked 26/0; +1 at 1.26).
+  net/url        DIVERGED  51 matched / 2 diverged (TestGob, TestJSON) of 53 (banked 49/0). TypeAssert class (2 of 3 fail events).
+  syscall        PASS      66 matched (banked 65/0).
+  os             BUILD, no verdicts (banked 1106/2). A NEW CLASS, CS0136 x2, both on NEW 1.26 test code:
+    A range variable that is also heap-hoisted is declared twice in one scope: `ref var o = ref heap(...)` and then `foreach (var o in write1)` (os_windows_test.cs:2085, in testPreadPwrite, absent at 1.24.13).
+    The same at root_test.cs:3063, `linkKind` in `for linkKind := range testFileMax` (root_test.go:2541; absent at 1.24.13).
+  runtime        BUILD, no verdicts (banked 10819/71). A NEW CLASS, CS1503 x9 "cannot convert from System.Range to nint" in mpallocbits_test.cs (78, 84, 85, 91, ...).
+    The Go is `want[:][2] = 0x3e` on `want := new(PallocBits)` (an array type), new 1.26 test code. 1.24.13 wrote `want[2]`.
+    It is emitted `(~want).Value[..][2]`, and the array's indexer takes no Range.
+  These two classes are new to the lists: os CS0136 (range variable + heap hoist) and runtime CS1503 (slice-of-array then index). Both sit in converted test code, both are NEW 1.26 tests, and each blocks a whole row. Routing is your call.
+Third batch saved: 63 rows, internal/sync .. weak (internal/syscall/windows* included). That is your list minus the rows already read here, the 6 TLS rows and os/exec held with P2, internal/trace/internal/oldtrace (gone at 1.26), and testing (the hand-own exclusion, never scheduled).
+  A TLS scan of the 63 hits nothing (the net/http control fires).
+
+===== h8-go126/msg-coord-h8-6.txt  (file mtime 2026-10-16 10:36)
+i9 -> COORD: H8 READINGS 24-25 on fba27f4c7e, WHEA 0. With them the first tree's list is DONE. The second tree (919c79a7d6) started the TypeAssert re-read at 10:35.
+  net      TIMEOUT at its 120 m floor (wall 7945 s): go 508 / cs 104: 101 matched, 3 diverged, 404 EMPTY (never reached). Banked 1.24: 476/3.
+    The host HUNG in TestFileConn/tcp: "in flight at the package deadline", so every later test reads empty. TestFileConn exists at 1.24 (file_test.go), so this is a hop regression unless that row was hand-stopped there.
+    TestFileError (exists at 1.24, error_test.go): "panic: syscall: argument 2 is a managed pointer token, not an address -- the pointee is reference-bearing ...". That is a syscall-funnel class, distinct from TypeAssert.
+  reflect  DIVERGED (run BEFORE G's TypeAssert fix): go 466 / cs 466: 321 matched, 124 diverged, 0 empty, 21 disclosed. Banked 1.24: 396/22.
+    146 fail events: 82 TypeAssert and 42 testing.AllocsPerRun BYTES-per-run (38 TestDeepEqualAllocs subtests; TestChanAlloc, TestMapIterReset/Set and TestSmallZero fail too but sit outside the diverged set).
+    Of the 7 diverging top-level tests, 3 are NEW 1.26 (TestTypeAssert, TestTypeAssertAllocs, TestTypeAssertMethod) and 4 exist at 1.24 (TestCallReturnsEmpty, TestDeepEqualAllocs, TestReflectCallABI, TestReflectMakeFuncCallABI).
+    PROPOSE: add reflect to the TypeAssert re-read on 919c79a7d6. The disclosure set (21 vs 22 banked) needs re-signing at H10 anyway.
+
+===== h8-go126/msg-coord-h8-7.txt  (file mtime 2026-10-16 10:46)
+i9 -> COORD: TypeAssert RE-READ on 919c79a7d6 (G's hand-own): 7 of 9 now PASS. WHEA 0 on every row.
+  html/template    PASS  265 matched (was 15 diverged; banked 243/0).
+  crypto/rsa       PASS  590 matched + 1 disclosed (was 538 diverged; banked 568/1).
+  encoding/gob     PASS  106 matched (was 37; banked 106/0).
+  expvar           PASS  11 matched (was 2; banked 11/0).
+  net/rpc          PASS  15 matched (was the host crash; banked 15/0).
+  net/rpc/jsonrpc  PASS  9 matched (was the host crash; banked 9/0).
+  net/url          PASS  53 matched (was 2; banked 49/0).
+  encoding/json    DIVERGED: go 550 / cs 465: 422 matched, 43 diverged, 85 empty (was 168/297/85; banked 532/0). Zero TypeAssert left. Three tags:
+    SYNCTEST: the host died on an unhandled NotImplementedException on a goroutine started by TestSynctestMarshal, so the 85 empty are this (the known class, G's row).
+    TYPE IDENTITY (the known post-hop canonical-identity class): TestInvalidUnmarshal x6 and some TestUnmarshal. got and want PRINT IDENTICAL, `&json.InvalidUnmarshalError{Type:(*reflect.rtype)(0x737472756374207b)}`, yet compare unequal. Two rtype instances, one token.
+    STRUCT FIELD PATH: TestInterfaceSet x8 and some TestUnmarshal. The error text reads "Go struct field .X of type int", with the struct name empty, so the message differs from Go's.
+  encoding/xml     DIVERGED: 392 matched, 1 diverged (TestUnmarshalBadPaths) of 393 (banked 387/0). TYPE IDENTITY again: TagPathError{Struct:(*reflect.rtype)(0x786d...)} have/want.
+Now running: batch 3 on the same tree (66 rows): reflect first, then go/internal/gcimporter, go/types, internal/sync ... weak.
+
+===== h8-go126/msg-coord-h8-8.txt  (file mtime 2026-10-16 10:59)
+i9 -> COORD: BATCH 3, rows 1-12 on 919c79a7d6, WHEA 0 on every row.
+  reflect (re-read after TypeAssert)  DIVERGED: 404 matched, 41 diverged, 21 disclosed of 466 (was 321/124; banked 396/22). Only 1 TypeAssert fail event left.
+    39 of the 41 are the ALLOC class (AllocsPerRun BYTES-per-run, TestDeepEqualAllocs/*), tagged deferred per G's ruling.
+    The other 2: TestCallReturnsEmpty "cleanup did not run" (exists at 1.24, a cleanup/finalizer reading), and TestDeepEqualAllocs's parent.
+  go/internal/gcimporter  PASS  638 matched (banked 621/0). Read in FULL here (GOROOT/test present).
+  go/types                PASS  597 matched (banked 574/0). In full.
+  internal/sync           PASS  106 matched (banked 106/0).
+  internal/synctest       BUILD  IO CS0012 (TB.Output; C1). Banked 28/0.
+  internal/syscall/windows DIVERGED: 5 matched, 2 diverged of 7 (banked 3/0). TestDeleteAt (+1 subtest) is NEW at 1.26 (at_windows_test.go).
+    "panic: syscall: argument 1 is a managed pointer token, not an address -- the pointee is reference-bearing ...": the SYSCALL-FUNNEL class, the same family as net's TestFileError (P2).
+  internal/syscall/windows/registry PASS  6 matched (banked 6/0).
+  internal/sysinfo        PASS  1 matched (banked 1/0).
+  internal/testenv        BUILD  IO CS0012 (C1). Banked 7/0.
+  internal/trace          PASS  187 matched (banked 92/0; +95 at 1.26, all matched).
+  internal/types/errors   BUILD  IO CS0012 (C1). Banked 155/0.
+  internal/xcoff          PASS  3 matched (banked 3/0).
+IO CS0012 re-read list grows: net/netip, internal/synctest, internal/testenv, internal/types/errors. Running: internal/zstd, io, io/fs ...
+
+===== b/msg-coord-b3-2.txt  (file mtime 2026-10-16 11:04)
+i9 -> COORD: BATCH 3, rows 13-26 on 919c79a7d6, WHEA 0 on every row. 11 PASS, 1 ALLOC-only, 2 BUILD.
+  PASS (matched / banked): internal/zstd 536/536, io 60+1 disclosed (60/1), io/fs 21 (18), io/ioutil 28 (28), iter 28 (28), log 23+1 disclosed (8/1; +16 at 1.26), log/slog/internal/benchmarks 3 (3), maps 14 (14), math 76 (76), math/bits 26 (26), math/cmplx 24 (24).
+  log/slog  DIVERGED: 228 matched, 5 diverged, 16 disclosed of 249 (banked 199/17). All 5 are TestAlloc/*: the ALLOC class (19 of 22 fail events are AllocsPerRun BYTES-per-run), tagged deferred per G's ruling.
+  log/slog/internal/buffer  BUILD  IO CS0012 (TB.Output; C1). Banked 1/1. The IO list: + this row.
+  math/big  BUILD (banked 231/0). A NEW CLASS, CS0030 x1: calibrate_test.cs(317,24) "Cannot convert type 'T' to 'double'".
+    The Go is `math.IsInf(float64(v), +1)` inside `func csv[T int | float64](name string, values []T)` (calibrate_test.go:257/260), NEW 1.26 test code (1.24.13 has no generic there).
+    It is emitted as a C# cast `(float64)v` on a type parameter constrained by operator interfaces, which C# forbids. A conversion of a type-parameter value to a concrete numeric type needs a generic conversion (for example double.CreateChecked).
+    It blocks all 231 verdicts. Converter class; routing is your call.
+Running: math/rand, math/rand/v2, mime ...
+
+===== b/msg-coord-b3-3.txt  (file mtime 2026-10-16 11:12)
+i9 -> COORD: BATCH 3, rows 27-42 on 919c79a7d6: ALL 16 PASS, 0 diverged, 0 empty, WHEA 0 on every row. Matched (+disclosed) / banked:
+  math/rand 47 (47); math/rand/v2 36 (36); mime 17+1 (17/1); mime/multipart 53 (52; +1); mime/quotedprintable 5 (5);
+  net/http/internal 14+1 (14/1); net/http/internal/ascii 13 (13); net/http/pprof 15 (15); os/exec/internal/fdtest 1 (1); os/signal 1 (1);
+  os/user 23 (17; +6); path 9 (9); path/filepath 61 (61); plugin 1 (1); regexp 45 (45); regexp/syntax 12 (12).
+Running: runtime/debug, runtime/metrics, runtime/pprof, runtime/trace, then slices .. weak (24 rows left).
+
+===== b/msg-coord-b3-4.txt  (file mtime 2026-10-16 11:22)
+i9 -> COORD: BATCH 3, rows 43-50 on 919c79a7d6, WHEA 0 on every row. The three Windows diagnostic reads are running now, alone; the batch resumes after them.
+  PASS: runtime/debug 8+1 disclosed (8/1); runtime/metrics 2 (2); slices 122+2 (121/2); sort 63 (63); strconv 39+11 disclosed (55/11: the denominator moved, 1.26 moved strconv's internals to internal/strconv).
+  strings  DIVERGED: 68 matched, 1 diverged (TestReplace), 4 disclosed of 73 (banked 69/4). TestReplace is the ALLOC class (AllocsPerRun count), deferred.
+  runtime/pprof  DIVERGED: 144 matched, 4 diverged, 4 empty, 12 disclosed of 158 (banked 145/7).
+    TestGoroutineLeakProfileConcurrency (NEW 1.26; its 4 subtests read empty): the named refusal "linkname push runtime.goroutineLeakGC -> runtime/pprof.runtime_goroutineLeakGC is not honored". It is G's unreachable-by-design leak profile, so a disclosure at re-bank.
+    TestGenericsHashKeyInPprofBuilder and TestMemoryProfiler/debug=1 exist at 1.24: profile-content diverges (the generics stack in the heap profile; the debug=1 memory entry pattern). REGRESSIONS to route.
+  runtime/trace  DIVERGED: 1 matched, 18 diverged of 19 (banked 2/0). All 18 are TestFlightRecorder* (NEW at 1.25/1.26): the named refusal "linkname push runtime.traceClockUnitsPerSecond -> runtime/trace.runtime_traceClockUnitsPerSecond is not honored: the flight re[corder] ...". A FLIGHT-RECORDER class (no managed tracer clock); disclosure or seat is your call.
+
+===== b/msg-coord-diag.txt  (file mtime 2026-10-16 11:31)
+i9 -> COORD: THE THREE WINDOWS DIAGNOSTIC READS on 919c79a7d6, each alone, -test-filter (diagnostic only, nothing banked). WHEA 0 on all three.
+(a) net ^TestFileError$ (32 s): "panic: syscall: argument 2 is a managed pointer token, not an address -- the pointee is reference-bearing ... Hand-own this wrapper against a blittable ...". Top frames:
+    syscall.refuseManagedPointerTokens <- syscall.syscalln <- internal/syscall/windows.WSADuplicateSocket(s, processID, info) <- net.dupSocket(h) <- net.dupFileSocket's closure (fd) <- internal/poll.RawControl <- GoFrame.Run <- net.TestFileError (error_test.cs:971).
+    Argument 2 is `info *WSAProtocolInfo`, a struct with fixed-array fields (ProtocolChain.ChainEntries [MAX_PROTOCOL_CHAIN]uint32, ProtocolName [WSAPROTOCOL_LEN+1]uint16).
+    This stack is from the full net row's results on fba27f4c7e: (b)'s rerun of net overwrote (a)'s results file. (a)'s own log on 919c shows the identical panic text.
+(c) internal/syscall/windows ^TestDeleteAt$ (11 s), subtest "DeleteAt removes file with no read permission": the same panic, "argument 1 is a managed pointer token ...". Top frames:
+    syscall.refuseManagedPointerTokens <- syscall.syscalln <- internal/syscall/windows.SetEntriesInAcl(countExplicitEntries, explicitEntries, oldACL, newACL) <- windows_test.makeFileNotReadable (at_windows_test.cs:192) <- TestDeleteAt's subtest (at_windows_test.cs:96).
+    Argument 1 is `explicitEntries *EXPLICIT_ACCESS`: a struct holding a TRUSTEE whose MultipleTrustee is a *TRUSTEE.
+    So P2's class is CONFIRMED on both samples: a reference-bearing struct pointee (fixed-array fields in (a), pointer fields in (c)) passed to a Windows API that syscalln refuses by design.
+(b) net ^TestFileConn$, -test-timeout 5m (317 s): the harness writes no goroutine dump at the deadline ("package timeout ... running tests: TestFileConn, TestFileConn/tcp"). So I ran the published host alone on the same filter and snapshotted all 10 threads with dotnet-stack at 45 s.
+    BLOCKING FRAME: the OVERLAPPED READ. internal/poll.pollBlock <- runtime_pollWait <- wait <- waitIO <- execIO <- poll.Read <- net.Read <- TCPConn.Read, in TestFileConn's server handler (`c.Read(b[:])` on the ACCEPTED conn, file_test.go handler).
+    The test goroutine waits in a TestFileConn closure on a channel<bool> Receive (by the source, the teardown waiting for that handler). NO thread is in WSADuplicateSocket or WSASocket.
+    So the accepted side never sees EOF, although the test closes c1 right after c1.File(). Reading, not proven: the c1.File() duplicate path (WSADuplicateSocket, refused in (a)) leaves the client socket open, so the peer never sees the close. That puts it in the same family, downstream.
+    Raw stacks: logs/h8-go126/b/diag-b-stacks.txt.
+Batch 3 resumed after these (15 rows left + internal/platform).
+
+===== b/msg-coord-b3-5.txt  (file mtime 2026-10-16 11:40)
+i9 -> COORD: BATCH 3 DONE, rows 51-66 + internal/platform on 919c79a7d6, WHEA 0 on every row. 14 PASS, 2 diverged, 1 BUILD.
+  PASS (matched+disclosed / banked): sync/atomic 108 (108); testing/fstest 8 (7); testing/iotest 18 (18); testing/quick 8 (8); testing/slogtest 18 (17); text/scanner 18 (18); text/tabwriter 3 (3);
+    text/template 53 (52); text/template/parse 52 (52); time 178 (178); unicode 28 (28); unicode/utf8 14+1 (14/1); unique 27+12 disclosed (21/1); internal/platform 1 (1), read in full here.
+  sync  DIVERGED: 48 matched, 4 diverged, 5 disclosed of 57 (banked 46/6). The 4 are TestOnceXGC/{OnceFunc,OnceValue,OnceValues}_panic (NEW 1.26 subtests) plus their parent.
+    They fail as their banked siblings TestOnceXGC/OnceFunc|OnceValue|OnceValues do ("wrapped function should be garbage collected, but still live"), which are already disclosed codegen-liveness.
+    So: extend that disclosure to the 3 new panic variants at re-bank. Not a seat.
+  weak  DIVERGED: 8 matched, 1 diverged (TestPointerEquality) of 9 (banked 6/0). A REAL GAP, newly visible: "expected weak pointer to be nil, got 0x8000000400000000" after runtime.GC().
+    At 1.24.13 the test's final check was VACUOUS: `bt = nil; runtime.GC(); for i := range bt {...}` ran zero times. Go 1.26 fixed it to `for i := range wt`, so the check now runs, and our weak pointers are not cleared after runtime.GC() with their referents dead.
+    It "passed" at 1.24 only because it checked nothing. Owner: weak/unique (C1's reflect/GC seat? your call).
+  unicode/utf16  BUILD: IO CS0012 (TB.Output). Banked 8/1. Joins the IO re-read list.
+IO RE-READ list for the synctest tip: internal/synctest, internal/testenv, internal/types/errors, log/slog/internal/buffer, unicode/utf16. Then the net/http rerun, alone.
+
+===== c/msg-coord-io.txt  (file mtime 2026-10-16 12:32)
+i9 -> COORD: IO RE-READ + net/http RERUN, both on 1ba15eb4d2 (started before c098a7c2fe was posted), WHEA 0 on every row, no reset.
+  THE OWNER'S net/http EXPERIMENT: PASS. go 1526 / cs 1526, all 1526 MATCHED, 0 diverged, 0 empty, 0 disclosed (banked 1.24: 1387/0; +139 at 1.26). Ran ALONE: 194 s, WHEA 0 before and after, boot still 10-14 21:55.
+    synctest.Test ran, and nothing reached the dupSocket funnel. That is the first full TLS-using net row on this box since the ban, and it is clean.
+  internal/testenv         PASS  7 matched (banked 7/0).
+  internal/types/errors    PASS  155 matched (banked 155/0).
+  log/slog/internal/buffer PASS  1 + 1 disclosed (banked 1/1).
+  unicode/utf16            PASS  8 + 1 disclosed (banked 8/1).
+  internal/synctest  TIMEOUT at 30 m: go 59 / cs 18: 13 matched, 5 diverged, 41 EMPTY (banked 28/0). It BUILDS now (IO fixed). All 5 diverges are NEW 1.26 tests about the bubble's FAKE CLOCK:
+    TestMonotonicClock: "time.Since(start) = 497786h55m14s, want 1s", so the bubble reads the real clock.
+    TestTimerRunsImmediately: "0-duration timer channel is not readable".
+    TestTimerAfterBubbleExit: "timer ran before bubble exit".
+    TestTimerNondeterminism: "seen timer1:true, timer2:false".
+    TestAfterFuncRunsImmediately HANGS, in flight at the deadline, so the 41 later tests read empty.
+    A SYNCTEST-TIME class: G's push row made synctest.Test run, but the bubble's virtual time and timers are not modelled. Owner: G (synctest).
+Running now: os on c098a7c2fe (P2's range seat; CS0136 should be gone), then the one-screen summary.
+
+===== d/msg-coord-os.txt  (file mtime 2026-10-16 13:38)
+i9 -> COORD: os RE-READ on c098a7c2fe (P2's range seat): it BUILDS now (CS0136 gone), but reads badly. TIMEOUT at 60 m (wall 3793 s, WHEA 0).
+  go 6776 / cs 6528: 4657 matched, 1869 diverged, 248 EMPTY, 2 disclosed. Banked 1.24: 1106/2; 1.26 adds the large TestRootMulti* families.
+  The host was in flight at the deadline in TestEnvironConsistency.
+  THE 1869 DIVERGES, classed one by one (Go verdict -> C# verdict, C# fail text):
+  1638  pass->fail  "index out of range [0] with length 0" at the golib element accessor, ALL in os_test.createMountPoint <- create <- newRootTest <- runRootMultiTestDescs, the NEW 1.26 TestRootMulti* families.
+        createMountPoint (os_windows_test.go:233, present at 1.24) does `byteblob := make([]byte, buflen); buf = (*windows.MountPointReparseBuffer)(unsafe.Pointer(&byteblob[0]))`, then `&buf.PathBuffer[0]`.
+        PathBuffer is the trailing `[1]uint16` (internal/syscall/windows/reparse_windows.go:62), and the C# view over the byte blob gives it length 0.
+        A VIEW-OVER-BYTES class: a struct reinterpreted from a []byte, whose trailing array must index into the blob. Converter/golib; routing is yours.
+   133  pass->fail (+4 skip->fail) with NO fail output: parallel tests (TestChmod, TestChtimes, ...; `=== PAUSE` in Go) that never resumed before the deadline. TIMEOUT COLLATERAL, not a class.
+    93  pass->fail  SYSCALL-FUNNEL ("argument N is a managed pointer token"), e.g. TestHardLink/InRoot: P2's seat, not yet landed.
+     1  pass->fail  TestFileChdirTestlog: an open of the test's own testlog path. Minor; I will re-read it after the others.
+  CORRECTION to my first look: about 2,500 "A required privilege is not held" symlink fails are NOT diverges. The Go oracle fails them too on this box (e.g. TestRootMultiLink/bSbA_to_bA go=fail cs=fail), so they MATCH.
+    That is the known no-symlink-privilege host gap (as at 1.24), not a C# defect.
+Next: internal/godebugs (running) and go/internal/srcimporter on the same tip, then the summary table.
+
+===== h8-go126/msg-coord-summary.txt  (file mtime 2026-10-16 13:40)
+i9 -> COORD: PROBE: os TestEnvironConsistency alone on c098a7c2fe passes both columns in 13 ms (rc 0, 14 s wall). NOT a hang: the 60 m clock just ran out there.
+H8 SUMMARY, i9's share: 96 rows, LATEST reading per row (tips fba27f4c7e -> 919c79a7d6 -> 1ba15eb4d2 -> c098a7c2fe). WHEA 0 on every row; no reset since 10-14 21:55.
+  80 PASS (34,048 matched + 36 disclosed, 0 diverged, 0 empty), including net/http 1526/1526 (owner's experiment), go/types and gcimporter in full, and godebugs and srcimporter with a full GOROOT.
+  NOT PASS (16)              verdict   go/cs/match/div/empty/disc   banked  class -> owner
+  encoding/json              DIVERGED  550/465/422/43/85/0           532/0   SYNCTEST host-crash (G, LANDED at 1ba15eb4d2; re-read owed) + rtype INTERNING + empty struct name in the field path (C1)
+  encoding/xml               DIVERGED  393/393/392/1/0/0             387/0   rtype INTERNING, TestUnmarshalBadPaths (C1)
+  internal/synctest          TIMEOUT   59/18/13/5/41/0               28/0    SYNCTEST-TIME: bubble fake clock and timers, 5 new tests; TestAfterFuncRunsImmediately hangs (G)
+  internal/syscall/windows   DIVERGED  7/7/5/2/0/0                   3/0     SYSCALL-FUNNEL, TestDeleteAt NEW (P2 seat e2668e2629, gating)
+  log/slog                   DIVERGED  249/249/228/5/0/16            199/17  ALLOC TestAlloc/* (deferred, G ruling)
+  math/big                   BUILD     -                             231/0   CS0030 float64(v) on a type parameter, new calibrate_test (G)
+  net                        TIMEOUT   508/104/101/3/404/0           476/3   SYSCALL-FUNNEL TestFileError + TestFileConn hang downstream (P2); 2 h floor wasted, re-read after P2
+  net/netip                  BUILD     - (fba27f4c7e)                211/57  IO CS0012: C1 validated it after the io seat; not re-read here
+  os                         TIMEOUT   6776/6528/4657/1869/248/2     1106/2  VIEW-OVER-BYTES 1638 (P2 first) + SYSCALL-FUNNEL 93 (P2) + 133 timeout collateral + TestFileChdirTestlog (R); 120 m re-read after P2
+  reflect                    DIVERGED  466/466/404/41/0/21           396/22  ALLOC 39 (deferred) + TestCallReturnsEmpty AddCleanup gap (C1)
+  runtime                    BUILD     - (fba27f4c7e)                10819/71 CS1503 want[:][2] (G, LANDED at b0da269b36; re-read owed)
+  runtime/pprof              DIVERGED  158/154/144/4/4/12            145/7   GoroutineLeak refuse-by-name (DISCLOSE) + 2 profile regressions (C1)
+  runtime/trace              DIVERGED  19/19/1/18/0/0                2/0     FlightRecorder refuse-by-name x18 (DISCLOSE)
+  strings                    DIVERGED  73/73/68/1/0/4                69/4    ALLOC TestReplace (deferred)
+  sync                       DIVERGED  57/57/48/4/0/5                46/6    3 new TestOnceXGC/*_panic: extend the codegen-liveness DISCLOSURE
+  weak                       DIVERGED  9/9/8/1/0/0                   6/0     TestPointerEquality: weak pointer not cleared; the 1.24 check was VACUOUS (C1)
+  SKIPPED on the i9: crypto/tls (owner ban); httptest, smtp, crypto/x509, http/cgi, httptrace, os/exec (TLS-touching, P2); 4 rows gone at 1.26; testing (hand-own exclusion).
+RE-READS OWED here: encoding/json (synctest landed), runtime (b0da269b36), net + os (after P2's two seats; os at 120 m), internal/syscall/windows (funnel), reflect/weak/pprof/xml/json (C1 seats).
+
+===== e/msg-coord-e1.txt  (file mtime 2026-10-16 13:52)
+i9 -> COORD: THREE ROWS on b0da269b36, WHEA 0 on each. Converter build rc 0. Now STOPPED for P2's funnel tip.
+  runtime  BUILD rc 0: the -tests build is GREEN now (G's want[:][2] holds). But the HOST DIED early: go 11147 / cs 312: 261 matched, 26 diverged, 10835 EMPTY, 29 disclosed (banked 10819/71). Wall 413 s.
+    KILLER: TestLFStack. "fatal error: taggedPointerPack" / "runtime: taggedPointerPack invalid packing: ptr=0x2a19e962608 tag=16777215 packed=... -> ptr=0x2a19e962c48 tag=16777215".
+      That is a runtime throw, so exit status 2, and "the process ended before the host completed": every test after it, and 25 in flight, read empty.
+    Go 1.26 changed lfstackPack to `taggedPointerPack(unsafe.Pointer(node), cnt&(1<<tagBits-1))` (lfstack.go:79; 1.24 passed cnt unmasked). With tag = 2^24-1, the round-trip check fails on a managed address.
+      A TAGGED-POINTER class. It blocks the whole row, so the 26 diverges are not worth classing until it is fixed. Owner: G (runtime), I propose.
+    (The "fatal error: index out of range" in the log is TestRuntimePanic's EXPECTED output; that test passes.)
+  encoding/json  DIVERGED: 509 matched, 41 diverged, 0 EMPTY (was 85: the SYNCTEST crash is FIXED), 0 disclosed of 550 (banked 532/0). NOTHING NEW:
+    27 RTYPE-INTERNING (C1): the TestUnmarshal/#N UnmarshalTypeError pairs print identically, Type:(*reflect.rtype)(0x7374...), and compare unequal; also TestInvalidUnmarshal.
+    11 EMPTY-FIELD-NAME (C1): "Go struct field .X". The other 3 are their parents.
+  net/netip  PASS: 211 matched + 57 disclosed of 268 (banked 211/57). The IO seat holds.
+
+===== f/msg-coord-f1a.txt  (file mtime 2026-10-16 14:09)
+i9 -> COORD: internal/syscall/windows on be402cb16c (P2's funnel), 119 s, WHEA 0: STILL 2 diverged (TestDeleteAt and its subtest "removes file with no read permission"); 5 matched of 7 (banked 3/0).
+  The FUNNEL PANIC IS GONE: no "managed pointer token" refusal any more. The deep path now fails at the Windows API itself: the subtest's only output is "The parameter is incorrect." (ERROR_INVALID_PARAMETER).
+  The likely why: makeFileNotReadable (at_windows_test.go:113) builds EXPLICIT_ACCESS{Trustee: TRUSTEE{TrusteeForm: TRUSTEE_IS_SID, Name: (uintptr)(unsafe.Pointer(sid))}}.
+    Name is a plain uintptr carrying a managed *SID's token, so the funnel (rightly) sees an integer, not a reference field, and passes it. Native code then gets a non-address for the SID.
+    The error comes from SetEntriesInAcl or SetNamedSecurityInfo, the next two calls; the host output does not say which.
+  So the seat cleared its class, and what remains is a NEW, narrower one: a uintptr(unsafe.Pointer(x)) stored INTO a struct field that is later handed to native code. Owner P2 (the funnel family).
+net (2 h floor) is running now; then the two filtered reads.
+
+===== f/msg-coord-f1b.txt  (file mtime 2026-10-16 14:37)
+i9 -> COORD: net + the filtered reads on be402cb16c, WHEA 0 throughout.
+  net  COMPLETED, no timeout: 1510 s (was the 2 h hang). go 508 / cs 508: 489 matched, 16 diverged, 0 EMPTY (was 404), 3 disclosed (banked 476/3).
+    TestFileConn/tcp now PASSES: the downstream hang CLEARED. TestFileError's funnel panic is GONE too.
+    The 16 are ONE class, the FILE-DUP path one step deeper. Every File* test now gets "unexpected type on 2nd nested level: windows.NTStatus" and "file <net> <addr>: The parameter is incorrect.":
+      TestFileError, TestFileConn{,/udp,/unix}, TestFileListener{,/tcp,/unix}, TestFilePacketConn{,/udp}.
+      So the dup call now reaches Windows and is rejected (by the path, WSADuplicateSocket; not traced frame by frame this time; an argument fault, as in TestDeleteAt), and the error surfaces as an NTStatus where Go's tests expect a different nested type.
+      TestUnixUnlink x7 is downstream: FileListener hits the same "parameter is incorrect", then the socket file is left behind, so the later subtests get "bind: Only one usage of each socket address".
+    (TestLookupNoSuchHost's DNS-server failures and TestIPAppendTextNoAllocs ALLOC are outside the diverged set.)
+  runtime ^(Test64BitReturnStdCall|TestRegisterClass)$: "Validated 2 tests against go test": BOTH PASS on the funnel tip.
+  registry: ^TestGetDynamicTimeZoneInformation$ matched NO test on either side (zero verdicts, the harness refuses it as a measurement). The DTZI call lives in TestGetMUIStringValue (registry_test.go:587/589).
+    I re-run with that filter right after the TestDeleteAt probe and ed25519.
+P2's TWO TestDeleteAt READS (diagnostic: the two makeFileNotReadable t.Fatal calls tagged I9PROBE in the throwaway tree, the test project re-published as the converter does, ^TestDeleteAt$):
+  1. It is SetEntriesInAcl: "I9PROBE SetEntriesInAcl: The parameter is incorrect." SetNamedSecurityInfo is never reached.
+  2. With DOTNET_GCgen0size=0x20000000 in the host env: the SAME failure, identical text. So it is an ARGUMENT FAULT, not a lifetime one (the TRUSTEE.Name uintptr carrying a managed SID token is the fitting reading).
+     I did not prove the knob took effect beyond setting it in the host process environment.
+  The other 2 subtests (readonly, normal) pass on both arms.
+Next: crypto/ed25519 (running), then registry TestGetMUIStringValue.
+
+===== g/msg-coord-g1.txt  (file mtime 2026-10-16 14:47)
+i9 -> COORD: P1's LAST 16 ROWS read on WINDOWS at b095b8367f: ALL 16 PASS, 0 diverged, 0 empty, WHEA 0 on every row (wall 7 min in all). Matched (+disclosed) / banked 1.24:
+  row                       matched(+disc)  banked   note
+  database/sql/driver       1               1/0      
+  debug/buildinfo           211             211/0    
+  debug/dwarf               41              40/0     +1 at 1.26, all matched
+  debug/gosym               10              10/0     
+  debug/macho               7               7/0      
+  debug/pe                  10              10/0     
+  debug/plan9obj            2               2/0      
+  embed/internal/embedtest  7               7/0      
+  encoding/ascii85          9               9/0      
+  encoding/asn1             55              40/0     +15 at 1.26, all matched
+  encoding/base32           26              26/0     
+  encoding/base64           17              17/0     
+  encoding/binary           142+4           142/4    
+  encoding/csv              71              71/0     
+  encoding/hex              12              12/0     
+  encoding/pem              18              18/0     
+  No diverge to class: no ALLOC, no rtype-interning, no regression. The 1.26 additions (debug/dwarf +1, encoding/asn1 +15) all match.
+
+===== g/msg-coord-g2.txt  (file mtime 2026-10-16 14:53)
+i9 -> COORD: P1's ROWS 21-31 read on WINDOWS at b095b8367f: 9 PASS, 1 ALLOC-only, 1 BUILD. WHEA 0 on every row. Matched (+disclosed) / banked 1.24:
+  crypto/internal/sysrand  PASS      6          6/0
+  crypto/md5               PASS      14+1       11/1   +3 at 1.26, all matched
+  crypto/mlkem             BUILD     -          8/0    REGRESSION (below)
+  crypto/pbkdf2            PASS      5          5/0
+  crypto/rand              PASS      314+1      314/1
+  crypto/rc4               PASS      75         75/0
+  crypto/sha1              PASS      13+1       12/1   +1
+  crypto/sha256            DIVERGED  29+1, 1 diverged   22/1   TestAllocatonsWithTypeAsserts: NEW 1.26, AllocsPerRun count = ALLOC (deferred); the +7 others match
+  crypto/sha3              PASS      54+5       18/5   +36 at 1.26, all matched
+  crypto/sha512            PASS      44+1       35/1   +9
+  crypto/subtle            PASS      10         9/0    +1
+crypto/mlkem BUILD, a REGRESSION (the generic test interface existed at 1.24.13, and the row banked 8/0): 20 errors, all in go2cs-gen's ImplementGenerator output for the test package's GENERIC interface
+    `type decapsulationKey[E encapsulationKey] interface` (mlkem_test.go:24), implemented by DecapsulationKey1024 (file ...DecapsulationKey1024-decapsulationKey_global__go.crypto.mlkem_test_package.encapsulationKey_-ptr.g.cs):
+    CS0246 "The type or namespace name 'decapsulationKey<>' could not be found" (an EMPTY type-argument list), then CS0540 x6 "containing type does not implement interface mlkem_test_package.decapsulationKey<encapsulationKey>", CS0576 x4, CS0234 x8.
+    A GENERIC-INTERFACE IMPLEMENT-RECORD class (the record names the interface with no type arguments). Owner: G (go2cs-gen), I propose.
+
+===== g/msg-coord-dup.txt  (file mtime 2026-10-16 15:08)
+i9 -> COORD: P2's DUP-PATH PROBE on b095b8367f, DIAGNOSTIC ONLY. Throwaway tree: I9PROBE stderr lines in internal/poll DisassociateIOCP and net dupSocket; net.tests re-published as the converter does; ^TestFileConn$. WHEA 0.
+  THE NTStatus COMES FROM poll.(*FD).DisassociateIOCP's NtSetInformationFile(FileReplaceCompletionInformation): STATUS_INVALID_PARAMETER, 0xC000000D ("The parameter is incorrect.", type internal/syscall/windows.NTStatus).
+  Does WSADuplicateSocket succeed? YES, every time it is reached (err nil), and WSASocket then returns a valid handle (e.g. 3384, err nil).
+  Per subtest:
+    udp:  NtSetInformationFile -> C000000D on the FIRST call, so dup() returns before dupSocket: "unexpected type on 2nd nested level: windows.NTStatus".
+    unix: the same, C000000D on the first call.
+    tcp:  call 1 NtSetInformationFile nil -> WSADuplicateSocket nil -> WSASocket ok (the c1.File() dup). Call 2 (the FileConn side) NtSetInformationFile -> C000000D, then WSADuplicateSocket nil -> WSASocket ok, and then the subtest FAILS on "getsockname: An invalid argument was supplied."
+      NOTE: tcp PASSED in the full net row on be402cb16c, and fails in this direct host run. Reported as seen; I did not chase the difference.
+  So the File* class is the IOCP disassociation, not the copy: NtSetInformationFile rejects FILE_COMPLETION_INFORMATION{} on these handles. The C# lowers the call as
+    NtSetInformationFile(fd.Sysfd, Ꮡ(new windows.IO_STATUS_BLOCK(nil)), unsafe.Pointer.FromPinnedBox(Ꮡinfo), 16, FileReplaceCompletionInformation).
+  The probe edits are REVERTED (git checkout of the 2 files; 0 I9PROBE lines left). The TestDeleteAt tags in the other tree are reverted too.
+
+===== g/msg-coord-iocp.txt  (file mtime 2026-10-16 15:49)
+i9 -> COORD: P2's DISCRIMINATOR CONFIRMS the reading. On b095b8367f, throwaway tree, TestFileConn/udp's client socket, ONE socket (sysfd 3004):
+  1. File() on the fresh socket before any IO: DisassociateIOCP's NtSetInformationFile(FileReplaceCompletionInformation) -> 0xC000000D.
+  2. One overlapped Write on the same socket: n=1, err nil.
+  3. File() again: NtSetInformationFile on sysfd 3004 -> 0 (success).
+  C000000D, then 0: the socket is bound to the CLR IO port only at its first overlapped submit, and disassociating a never-bound socket is what Windows rejects.
+  Side reading: with the socket bound by that one write, TestFileConn/udp PASSES end to end. The FileConn side's own disassociate (another handle) still read C000000D, but f.Fd() ignores that, as Go's does.
+  It also fits tcp's FIRST dup succeeding earlier (after ConnectEx, an overlapped op, so bound), while udp's Dial does no overlapped IO. tcp's later getsockname failure in the direct run is NOT explained by this.
+  The probe edits are REVERTED (git checkout of net/file_test.cs and internal/poll fd_windows.cs; 0 I9PROBE lines). WHEA 0.
+
+===== k/msg-coord-rt.txt  (file mtime 2026-10-16 20:22)
+i9 -> COORD: FULL runtime row on 967214ff01 (G's (B) + P2's F1), windows, ALONE. THE HOST SURVIVES: go 11147 / cs 10941 (was 312). 10831 matched, 67 diverged, 206 EMPTY, 47 disclosed (banked 1.24: 10819/71). WHEA 0.
+  But TIMEOUT at the 2 h floor (wall 7518 s). The clock ran out in a HANG: the LAST event before the deadline is "TestProfBufWakeup run", with nothing after it.
+    TestProfBufWakeup is NEW at 1.26 (profbuf_test.go:198: a blocking ProfBuf.Read waiting on a wakeup that never comes). 34 tests were open at the deadline (parallel ones paused, plus TestBigGOMAXPROCS, started just before), so the 206 empty are its collateral.
+    A NEW class: PROFBUF-WAKEUP hang. Owner: G (runtime), I propose. It is what keeps runtime from completing now.
+  THE 67 DIVERGES, classed:
+    50  no fail output: parents and tests in flight at the deadline, so HANG COLLATERAL.
+     8  TestFreegc/*/duplicate-check "found duplicate pointer": NEW 1.26 (freegc). How the managed allocator answers freegc is unread.
+     4  TestPrintQuoted/*: NEW 1.26, print(escaped(s)) prints the raw string ("got: baz\n\n want: baz\n"). The escaped-print builtin is not honoured.
+     1  TestCleanupUnreachableClosure: NEW 1.26, "AddCleanup failed to detect closure pointer" (the AddCleanup family, with C1's reflect TestCallReturnsEmpty).
+     1  TestHexdumpWords: NEW 1.26, the hexdump word layout differs.
+     1  TestMkmalloc: NEW 1.26, "no Go files in <the staged test dir>" (a test-host staging gap: it runs `go` on sources not staged).
+     2  TestRuntimeLockMetricsAndProfile (exists at 1.24): lock-contention metric deltas. Likely timing/metrics-model; I would re-read before calling it a regression.
+  Interim disclosures from your note (TestLFStack/Stress, TestListNIH*) are among the 47 disclosed.
+Next (queued, starting now): P2's pointer-peek RED/GREEN on TestDeleteAt, then the full internal/syscall/windows row on b369b3605a.
+
+===== h8-go126/msg-coord-fetchfault.txt  (file mtime 2026-10-17 03:07)
+i9 -> COORD: FAULT, STOPPED before the runtime row: `git fetch origin claude/hop-go126` (for 465bed007b) FAILED in the pack receive:
+  "error: inflate: data stream error (incorrect data check) / fatal: serious inflate inconsistency / fatal: fetch-pack: invalid index-pack output".
+  That is the i9's known signature (a zlib trailing-checksum failure, as in the earlier corruption instances), and on this SSD my record says a corruption here implicates the CPU (the Raptor Lake defect).
+  Nothing ran on bad data. The `&&` chain stopped at the fetch, so no worktree was created; the queued launcher found no tree and exited (I stopped it and its watcher).
+  State: NO WHEA in the last 12 h, no reset (boot still 10-14 21:55). Local refs are UNCHANGED (origin/claude/hop-go126 is still 967214ff01 here), and 465bed007b is absent.
+    The failed incoming pack is kept as evidence (tmp_pack, 5.0 MB, 03:06, copied to logs/h8-go126/retained-fetch-inflate-20261017). There was no full fsck yet.
+PROPOSE (your call, or the owner's, since it may be hardware): (1) ONE fetch retry, alone, WHEA read around it. (2) If it succeeds, `git fsck --full` on the repo (capped threads), since --connectivity-only cannot see this class. (3) Then the runtime row.
+  If the retry fails the same way, I stop fetching and it becomes OWNER-HAND (a repeat fault on this CPU).
+
+===== m/msg-coord-rt2.txt  (file mtime 2026-10-17 03:58)
+i9 -> COORD: FULL runtime on 465bed007b (G's uniform embed + C1's ProfBufWakeup entry), windows, ALONE: the row COMPLETES. 2709 s (was a 2 h timeout), 0 EMPTY (was 206), WHEA 0.
+  go 11146 / cs 11146: 11033 matched, 52 diverged, 66 disclosed (banked 1.24: 10819/71). TestLFStack/Stress and the 5 TestListNIH* now PASS outright (none in the diverged set).
+  THE 52 DIVERGES (counted by test; the sum closes at 52):
+   17  TestFreegc (parent, 8 size subtests, 8 duplicate-check): "found duplicate pointer" (NEW 1.26). C1's array-length seat, open.
+   10  TestPrintQuoted (+subtests, NEW): P1, open.             1  TestHexdumpWords (NEW): P1, open.
+    1  TestMkmalloc (NEW): R's staging gap, open.        3  TestRuntimeLockMetricsAndProfile (+2): R's mprof seat, open (deterministic, read earlier).
+    1  TestCleanupUnreachableClosure (NEW): C1's AddCleanup family, open.
+    6  RE-SIGN, not regressions: TestSehLookupFunctionEntry, TestSehUnwind{,DoublePanic,NilPointerPanic,Panic}, TestStartLineAsm.
+       At 1.24 these are DISCLOSED as `fail` (docs/validation/1.24.13.5/runtime.md). Now the host reports `infrastructure-error` (NotImplementedException from the GetCallerPC stub, ruled throwing; the AsmFunc asm stub, predicted at H7), so the pins no longer absorb them. Re-sign at H10.
+    3  ALLOC (NEW 1.26, deferred): TestAppendByteCapInLoop, TestAppendByteInLoop, TestAppendPtrInLoop.
+   NEW, not yet routed:
+    1  TestAppendGrowthStack (NEW 1.26): "len=1, cap=1, want cap=4 / len=2, cap=2, want cap=4". Go 1.26's append into a stack-allocated backing starts at cap 4; our growslice gives 1 and 2.
+    1  TestHasAVX (NEW): "x86HasAVX: false, CheckAVX got: OK". The C# internal/cpu reports NO AVX on this 13900K, which has AVX/AVX2; Go's testprog sees it. A cpuid feature-bit gap (P1's cpuid area?).
+    8  TestTracebackGoroutineLabels (parent + 7, NEW 1.26): "failed to find goroutine labels ... got: goroutine N [running]: ...". Our traceback prints no pprof labels on the goroutine header. Close to P1's print-quoting work (the labels print escaped).
+  Routing for the 3 new ones is yours.
+
+===== n/msg-owner-hand-nethttp.txt  (file mtime 2026-10-17 05:13)
+OWNER-HAND: i9 needs the owner's word for a THIRD net/http run (COORD's step 4, a regression check that R's synctest fatal-on-outside-bubble change doesn't bite). The owner's experiment covered one rerun after the select fix, and it was used: 1526/1526 PASS, alone, WHEA 0, at 1ba15eb4d2.
+  Outside that experiment, his ban on TLS-using net rows still stands on this box, and a peer cannot extend it. If he says yes, I run it alone with WHEA before and after, one attempt, same stop rule.
+Meanwhile, on 1feac60846, running now: internal/synctest, testing/synctest, errors (WHEA per row). net/http is NOT queued.
+
+===== o/msg-coord-os2.txt  (file mtime 2026-10-17 09:50)
+i9 -> COORD: on 3bdac60827 (P2's field property + F3, G's typed nil), windows, alone, WHEA 0 on both:
+  errors  PASS: 80/80 matched, 0 empty (banked 61/0). Typed nil closed the 4 TestAsType name mismatches.
+  os  STILL TIMEOUT at the 120 m deadline (wall 7296 s): go 6776 / cs 6528: 4751 matched, 1775 diverged, 248 EMPTY, 2 disclosed (banked 1106/2).
+    CLEARED: the 93 SYSCALL-FUNNEL fails (0 left).
+    MOVED ONE STEP DEEPER: the 1638 TestRootMulti* VIEW-OVER-BYTES. The index panic is gone; every one now fails with "The data present in the reparse point buffer is invalid." (ERROR_INVALID_REPARSE_DATA).
+      So createMountPoint's MountPointReparseBuffer now reaches FSCTL_SET_REPARSE_POINT, and Windows rejects its CONTENT: the header lengths/offsets or the PathBuffer bytes, as laid into the byte blob. Back to P2.
+    THE CLOCK-HOLDER, a NEW class: a HANG in TestVariousDeadlines1Proc/named_overlapped_pipe. The full row's LAST event is "named_overlapped_pipe/1ns-1 run", with nothing after it for the rest of the 2 h.
+      Confirmed alone: ^TestVariousDeadlines1Proc$ at 5 m runs to its deadline (324 s), and the named_overlapped_pipe subtests (1ns-1 ... 100ms-3) never report.
+      The "named overlapped pipe" case is NEW at 1.26 (os/timeout_windows_test.go; absent in 1.24.13). A deadline on an overlapped NAMED-PIPE read never fires. Likely the IOCP family (lazy bind / deadline cancel on a pipe handle); P2, I propose.
+    So the 132 + 4 no-output parents/in-flight and the 248 empty are this hang's collateral (135 tests open at the deadline). 1 TestFileChdirTestlog is R's, open.
