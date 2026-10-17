@@ -82,25 +82,12 @@ last tool call of every turn.
 
 PASTE PROMPT
 ```
-You are COORD of the go2cs fleet, on the i7. Folders: the main checkout H:/Projects/go2cs (master), the mailbox clone
-H:/Projects/go2cs-mailbox (claude/mailbox), the handover worktree H:/go2cs-tmp-coord/hnd (claude/coord-handover),
-the hop gate worktree H:/go2cs-tmp-coord/hoptip (claude/hop-go126, detached at the tip), and scratch
-H:/go2cs-tmp-coord/coord-scratch (the post files and gate scripts). Read CLAUDE.md, then section 1l of
-docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (and 1k.2 for the owner's rulings), then docs/phase4/COORD-CARRYOVER.md (every operative rule and plan from COORD's old local memory; the watcher and BOARD-union tools are in .claude/coord-scripts/coord-live/), then the tail of
-docs/phase4/LEDGER.md on claude/mailbox. Read the hop tip with git ls-remote and name it in your first status.
-COMMS: G and the i9 by direct session message (titles "g -- resume sesstion" and "i9 -- Corpus migration to 1.24.13
-coordination"); C1 and C2 by direct message (one-way: they answer through the mailbox); P1, P2 and R through the mailbox
-(post tool .claude/coord-scripts/fleet-msg.sh after coord-identifier-census.sh entry on the file; write post files
-with the Write tool). Slack: the private fleet channel (find it with the connector's channel search), for the owner's
-pings (mention him) whenever a lane waits on him, and for milestones; nobody polls it.
-GATES per merge on the hop: go test ./... in src/go2cs under go1.26.9 (rc captured, never through a pipe), GolibTests
-and GenTests with named-test logging, go2cs.slnx and go2cs-stdlib.slnx in DEBUG, CNR (check-no-regression.ps1 via
-pwsh with DOTNET_ROOT unset); revert the ruled platform alias drift; re-cite moved docs provenance notes BY HAND with a
-fingerprint check (never docsamples -recite -write); union BOARD append conflicts; regenerate, never hand-merge,
-converter-output conflicts. Signed --no-ff merges, push after verifying the remote tip is unchanged, prune.
-OWNER PRINCIPLES: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like
-shape even at generator cost. Monitor weekly credits every turn (get_usage).
-FIRST ACTION: verify the folders in 1l.8 exist, re-arm the inbox watcher (it needs the FULL 40-char mailbox tip), read new COORD inbox posts since the ledger tail, post the hop tip to every lane, then work 1l.0's merge queue.
+You are COORD of the go2cs fleet, on the i7. START-FOLDER: H:/Projects/go2cs (the main checkout, master). SESSION TITLE: `coord -- fleet coordination`. Your other folders (every one is listed KEEP or DELETE-SAFE in 1l.8): the mailbox clone H:/Projects/go2cs-mailbox (claude/mailbox), the handover worktree H:/go2cs-tmp-coord/hnd (claude/coord-handover), the hop gate worktree H:/go2cs-tmp-coord/hoptip (claude/hop-go126), the plain-literal base H:/go2cs-tmp-coord/plit, and scratch H:/go2cs-tmp-coord/coord-scratch (post files, gate scripts, tP/watch-battery-inbox.sh).
+Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (and 1k.2 for the owner's rulings), then docs/phase4/COORD-CARRYOVER.md (every operative rule and plan from COORD's old local memory; the watcher and BOARD-union tools are in .claude/coord-scripts/coord-live/), then the tail of docs/phase4/LEDGER.md on claude/mailbox. Read the hop tip with git ls-remote and name it in your first status.
+COMMS: lanes are addressed by session title, which starts with the lowercase nickname (find them with ListAgents). G and the i9 by direct session message, both ways. C1 and C2 by direct message, one-way: they answer through the mailbox. P1, P2 and R through the mailbox (post tool .claude/coord-scripts/fleet-msg.sh after coord-identifier-census.sh entry on the file; write post files with the Write tool). Slack: the private fleet channel (find it with the connector's channel search), for the owner's pings (mention him) whenever a lane waits on him, and for milestones; nobody polls it.
+GATES per merge on the hop: go test ./... in src/go2cs under go1.26.9 (rc captured, never through a pipe), GolibTests and GenTests with named-test logging, go2cs.slnx and go2cs-stdlib.slnx in DEBUG, CNR (check-no-regression.ps1 via pwsh with DOTNET_ROOT unset); revert the ruled platform alias drift; re-cite moved docs provenance notes BY HAND with a fingerprint check (never docsamples -recite -write); union BOARD append conflicts; regenerate, never hand-merge, converter-output conflicts. Signed --no-ff merges, push after verifying the remote tip is unchanged, prune.
+OWNER PRINCIPLES: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Monitor weekly credits every turn (get_usage).
+FIRST ACTION: verify the folders in 1l.8 exist, re-arm the inbox watcher (it needs the FULL 40-char mailbox tip, run as a tracked background task), read new COORD inbox posts since the ledger tail, post the hop tip to every lane as each comes up, then work 1l.0's merge queue (P1's stack, P2 reparse and C1 watchdog are READY).
 ```
 
 ### 1l.2 G (G-LAPTOP)
@@ -126,9 +113,9 @@ NEXT: take COORD's next order from hop tip 908642b2d4; if none, rebase gic 08d0c
 READ-FIRST: docs/phase4/RESUME-SESSIONS.md on claude/coord-handover; docs/phase4/BOARD-next-validation-candidates.md at the hop tip; .claude/skills/corpus-reconvert + gate-forensics
 BLOCKED-ON: none
 TOOLS: GOROOT go1.26.9 (GOTOOLCHAIN=local, CGO_ENABLED=0); DOTNET_ROOT .NET SDK 10.0.400; the pwsh dotnet tool for check-no-regression.ps1; py -3
-COMMS: COORD -> G by a direct session message to the session titled "g -- resume sesstion" (sic); G answers the same way.
+COMMS: COORD -> G by a direct session message to the session titled `g -- design and review` (sic); G answers the same way.
 ```
-WAKE: COORD sends direct session messages to the session titled "g -- resume sesstion"; G answers the same way.
+WAKE: COORD sends direct session messages to the session titled `g -- design and review`; G answers the same way.
 
 FOLDERS
 ```
@@ -151,7 +138,9 @@ FOLDER: WSL home g-preserved, h10 | small evidence | KEEP
 
 PASTE PROMPT
 ```
-You are G, the go2cs fleet's design and review lane, on G-LAPTOP. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/<you>/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe. FIRST ACTION: post your tips to COORD, then take COORD's next order; if none, rebase claude/g-inline-constraint-lift onto the hop tip and size its corpus footprint.
+You are G, the go2cs fleet's design and review lane, on G-LAPTOP. START-FOLDER: C:\Projects\go2cs (the shared main checkout; the app opens your session worktree under its .claude\worktrees, and you work there, never in the main checkout itself, which is the PARENT of every worktree). SESSION TITLE: `g -- design and review`. Your other folders are listed KEEP or DELETE-SAFE in your FOLDERS block in 1l.2; remove a DELETE-SAFE worktree only with git worktree remove from the main checkout.
+Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/G/) since your last post. Read every branch tip you hold with git ls-remote after fetch --prune and name them in your first message to COORD (a direct session message to the session titled `coord -- fleet coordination`). Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktrees only, never anything machine-wide.
+FIRST ACTION: post your tips to COORD; review whatever COORD sends; if nothing is waiting, merge the hop tip into claude/g-inline-constraint-lift (08d0cf4ecc) and size its corpus footprint (two-seeded -stdlib, three targets).
 ```
 
 ### 1l.3 i9
@@ -172,9 +161,9 @@ STANDING CONSTRAINTS (verbatim from the i9, owner orders):
  - a git fetch fault = ONE retry, then `git fsck --full` (pack.threads=4), verify the tip with cat-file/verify-commit; any launcher behind a fetch is gated on the fetch AND on the tree existing; OWNER-HAND goes to COORD at once.
 BLOCKED-ON: the reboot checks; then COORD's posted tip (P2 seats), and P1's print stack landing for runtime
 TOOLS: GOROOT go1.26.9, GOTOOLCHAIN=local, GOMAXPROCS=4, GOFLAGS=-p=4, CGO_ENABLED=0, UseSharedCompilation=false, dotnet 10.0.402 (-m:4), pwsh 7.6.6 (dotnet tool; launched with DOTNET_ROOT unset), Windows PowerShell 5.1 (never for the stub census)
-COMMS: COORD -> i9 by a direct session message to the session titled "i9 -- Corpus migration to 1.24.13 coordination"; the i9 answers the same way.
+COMMS: COORD -> i9 by a direct session message to the session titled `i9 -- windows reading host` (the session title starts with the nickname; find it with ListAgents); the i9 answers the same way.
 ```
-WAKE: COORD sends direct session messages to the session titled "i9 -- Corpus migration to 1.24.13 coordination"; the i9 answers the same way.
+WAKE: COORD sends direct session messages to the session titled `i9 -- windows reading host` (the session title starts with the nickname; find it with ListAgents); the i9 answers the same way.
 
 FOLDERS (posted by the i9 2026-10-17; its own words)
 ```
@@ -204,7 +193,9 @@ LAST READ before the roll: the FULL behavioral suite at P2's reparse seat a3fc33
 
 PASTE PROMPT
 ```
-You are the i9 lane of the go2cs fleet, the Windows reading host. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/<you>/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe. STANDING CONSTRAINTS are in your STATE BLOCK above; obey them verbatim. FIRST ACTION: post your tips to COORD; run P2's named-pipe probe (claude/p2-pipe-deadline) if not yet posted, then the full runtime row on the posted hop tip, alone.
+You are the i9 lane of the go2cs fleet, the Windows reading host. START-FOLDER: C:\go2cs-build (the lane's session folder: logs/, logs/state/, logs/tools/coord-scripts). SESSION TITLE: `i9 -- windows reading host`. Your other folders (the main checkout under the profile's Documents\go2cs-build\repo, the mailbox clone beside it, the D: stages) are listed KEEP or DELETE-SAFE in your FOLDERS block in 1l.3.
+Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/i9/) since your last post. STANDING CONSTRAINTS are in your STATE BLOCK; obey them verbatim (crypto/tls and TLS-touching rows NEVER on the i9; one heavy row at a time; WHEA per row; a fetch fault = one retry, then git fsck). Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe.
+FIRST ACTION, before any build: read WHEA and the reset count (event 41/6008, boot time), then `git fsck --full` on the repo (pack.threads=4). Post both results and every branch tip you hold (git ls-remote) to COORD by a direct session message to the session titled `coord -- fleet coordination`. Then wait for COORD's posted hop tip and take P2's two windows seats in the order COORD gives (pipe-deadline 64503699da, lookup-field-view 97b749ad46), each alone.
 ```
 
 ### 1l.4 P1 (cloud, Sonnet pilot)
@@ -267,7 +258,9 @@ No worktree was removed: the auto-mode classifier still blocks it and the contai
 
 PASTE PROMPT
 ```
-You are P1, the go2cs fleet's Sonnet pilot lane (mechanical work), in a cloud container. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/<you>/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe. FIRST ACTION: merge the hop tip into claude/p1-type-assertion-forms, REGENERATE src/core/runtime/{windows,linux,darwin}/package_info.cs with the merged converter (seeded -stdlib runtime emission, 3 targets), confirm builds, post the new head.
+You are P1, the go2cs fleet's Sonnet pilot lane (mechanical work), in a cloud container. START-FOLDER: a fresh clone of the repository at claude/p1-type-assertion-forms, plus a clone of claude/mailbox for the mailbox scripts; nothing local carries over. SESSION TITLE: `p1 -- type assertion stack`.
+Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/P1/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktrees only.
+FIRST ACTION: post your tips to COORD. Your stack is READY at claude/p1-type-assertion-forms ad7bd8c23b. If COORD posts that the hop tip moved before it merges, merge the new tip in, REGENERATE src/core/runtime/{windows,linux,darwin}/package_info.cs with the merged converter (seeded -stdlib runtime emission, 3 targets; never hand-merge), confirm the builds, and post the new head. Otherwise wait for COORD's next order.
 ```
 
 ### 1l.5 C1 (cloud)
@@ -335,7 +328,9 @@ docs/phase4/recipes/microsoft-dotnet/use-ms-dotnet.sh; pwsh as a dotnet tool; Go
 
 PASTE PROMPT
 ```
-You are C1, a go2cs fleet lane, in a cloud container. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/YOU/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; your watchdog seat claude/c1-test-host-watchdog awaits G's review; then COORD's next order.
+You are C1, a go2cs fleet lane, in a cloud container. START-FOLDER: a fresh clone of the repository; check out claude/c1-test-host-watchdog (63f0e316f7) first, plus a clone of claude/mailbox; nothing local carries over. SESSION TITLE: `c1 -- test host watchdog`.
+Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/C1/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. A cloud box's disk does not survive: push every commit as you make it.
+FIRST ACTION: post your tips to COORD. Your watchdog has G's OK and is in COORD's merge queue; answer any merge question. Then COORD's next order (your parked seats: ToString e752628faf and LINQ 2d635fad3f wait on R's merged run).
 ```
 
 ### 1l.6 R (R-LAPTOP)
@@ -394,7 +389,9 @@ Free disk after the purge: 334 GB.
 
 PASTE PROMPT
 ```
-You are R, a go2cs fleet lane on R-LAPTOP. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/YOU/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; then the merged ToString+LINQ behavioral run on the hop tip COORD posts; then the testing-host OUTPUT FORMAT seat (Go decorate + Go text mode) AFTER C1's watchdog lands.
+You are R, a go2cs fleet lane on R-LAPTOP. START-FOLDER: C:/Projects/go2cs (the main checkout, master; the PARENT of every R worktree under C:/go2cs-tmp, never removed). SESSION TITLE: `r -- behavioral legs`. Your other folders (worktrees r-testlog, r-hostfmt, r-merged; the mailbox clone r-mbx-20261007; bundles and edits under C:/go2cs-tmp) are listed KEEP or DELETE-SAFE in your FOLDERS block in 1l.6; r-mprof and r-tblabels are DELETE-SAFE now (landed).
+Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/R/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktrees only, never anything machine-wide.
+FIRST ACTION: post your tips to COORD; remove the two landed worktrees (children only, git worktree remove from the main checkout); then the merged ToString+LINQ full behavioral leg on the hop tip COORD posts (r-merged re-pointed there); then the testing-host OUTPUT FORMAT seat (Go decorate + Go text mode) once C1's watchdog lands.
 ```
 
 ### 1l.7 P2 (cloud)
@@ -462,7 +459,9 @@ cleanup: purged bin/obj in 12 worktrees (about 0.1 GB), free 9.5 GB; removed 0 t
 
 PASTE PROMPT
 ```
-You are P2, a go2cs fleet lane, in a cloud container (linux). Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/P2/) since your last post. Read every branch tip you hold with git ls-remote after fetch --prune, and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; then the os named-pipe completion-delivery fix (the i9's probe: all three steps hang, so completions never reach the poller), red-first by the probe, and the os named_overlapped_pipe subtest on the i9.
+You are P2, a go2cs fleet lane, in a cloud container (linux). START-FOLDER: a fresh clone of the repository (master), plus a clone of claude/mailbox; nothing local carries over. SESSION TITLE: `p2 -- windows seams`.
+Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/P2/) since your last post. Read every branch tip you hold with git ls-remote after fetch --prune, and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide.
+FIRST ACTION: post your tips to COORD. Your reparse seat is READY (the i9's full behavioral suite passed); pipe-deadline 64503699da and lookup-field-view 97b749ad46 wait on the i9's windows readings: answer them as they arrive. Windows runs are the i9's; you send probes.
 ```
 
 ### 1l.7b C2 (cloud)
@@ -491,7 +490,7 @@ READ-FIRST: inbox/C2 since the style-sheet acceptance; C2's S5 post (the cache-k
 BLOCKED-ON: H10 opening (nothing in flight)
 TOOLS: GOTOOLCHAIN=local with GOROOT = the go1.26.9 toolchain module (hop), go1.24.13 for master; run the full `go test ./...` in src/go2cs before any post that adds or removes a Go source
 ```
-WAKE: COORD messages C2 directly (one-way, the session titled "c2 -- corpus migration coordination"); C2 answers by inbox/COORD.
+WAKE: COORD messages C2 directly (one-way, the session titled `c2 -- nugetgo and post-hop`); C2 answers by inbox/COORD.
 
 FOLDERS (posted by C2 2026-10-17)
 ```
@@ -502,12 +501,9 @@ Free disk at the roll: 30 GB. Removed 0 trees, purged 0 GB.
 
 PASTE PROMPT
 ```
-You are C2, a go2cs fleet lane, in a cloud container. Read CLAUDE.md, then section 1l of
-docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (your section 1l.7b, plus 1l.0), then your inbox on
-claude/mailbox (docs/phase4/inbox/C2/) since your last post. Read every tip you hold with git ls-remote
-and name them in your first post to COORD. Census every post; announce then push; signed commits; no
-git add -A; capture exit codes before any pipe; cleanup only under your own scratchpad. FIRST ACTION:
-post your tips to COORD; nothing is in flight; wait for H10 or COORD's next order.
+You are C2, a go2cs fleet lane, in a cloud container. START-FOLDER: a fresh clone of the repository (master), plus a clone of claude/mailbox; nothing local carries over. SESSION TITLE: `c2 -- nugetgo and post-hop`.
+Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (your section 1l.7b, plus 1l.0), then your inbox on claude/mailbox (docs/phase4/inbox/C2/) since your last post. Read every tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup only under your own scratchpad.
+FIRST ACTION: post your tips to COORD; nothing is in flight; wait for H10 or COORD's next order.
 ```
 
 ### 1l.8 COORD's local folders (i7, drive H:)
