@@ -85,11 +85,15 @@ partial struct sliceKey {
     internal nint len;
 }
 
-internal static (bool, bool) zeroAgrees<T>() {
-    var p = @new<T>();
+internal static (bool, bool) zeroAgrees<T, Tᴀ>()
+    where Tᴀ : IGoArrayDims
+{
+    var p = GoArrayZero.New<T, Tᴀ>();
     var v = reflect.New(reflect.TypeOf(p.OrTypedNil()).Elem());
     return (reflect.DeepEqual(p.OrTypedNil(), v.Interface()), reflect.DeepEqual(p.ValueSlot, v.Elem().Interface()));
 }
+
+private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = [3]; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object fieldsˢ = (@string)"fields:"u8;
@@ -181,10 +185,10 @@ internal static void Main() {
     fmt.Println(mapNilInterfaceElementˢ, reflect.DeepEqual(anyNil, new map<@string, any>{["a"u8] = default!, ["b"u8] = (nint)(1)}),
         reflect.DeepEqual(anyNil, new map<@string, any>{["a"u8] = (nint)(0), ["b"u8] = (nint)(1)}));
 
-    var (sliceEq, sliceElemEq) = zeroAgrees<slice<any>>();
-    var (mapEq, mapElemEq) = zeroAgrees<map<@string, nint>>();
-    var (arrEq, arrElemEq) = zeroAgrees<array<nint>>();
-    var (strEq, strElemEq) = zeroAgrees<inner>();
+    var (sliceEq, sliceElemEq) = zeroAgrees<slice<any>, ᴀnone>();
+    var (mapEq, mapElemEq) = zeroAgrees<map<@string, nint>, ᴀnone>();
+    var (arrEq, arrElemEq) = zeroAgrees<array<nint>, ᴀ3>();
+    var (strEq, strElemEq) = zeroAgrees<inner, ᴀnone>();
     fmt.Println(newReflectNewˢ, sliceEq, sliceElemEq, mapEq, mapElemEq, arrEq, arrElemEq, strEq, strElemEq);
 
     var ps = @new<slice<nint>>();
