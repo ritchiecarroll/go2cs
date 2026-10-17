@@ -49,7 +49,7 @@ The scout and review reports are in `docs/phase4/proposals/` on this branch.
   4. C1's ToString e752628faf and LINQ 2d635fad3f, after R's merged behavioral run on the current tip.
   5. P2 reparse a3fc33b20c: READY (G design OK; the i9's two reads clean, the full behavioral suite 836/836 with 0 Output failures).
   6. P2 pipe-deadline 64503699da and lookup-field-view 97b749ad46: after the i9's windows readings (post-roll).
-  7. C1 watchdog 63f0e316f7: after G's re-review of fixes (1)-(3).
+  7. C1 watchdog 63f0e316f7: READY (G re-review OK 2026-10-17: fixes (1)-(3) each behind its red commit). Its landing unblocks R's output-format seat.
 - **IN FLIGHT:**
   - P2: three windows seats posted (queue 5-6); nothing running at the roll.
   - C1: the WATCHDOG (ruled (A): 15 m default plus per-row floors; crypto/dsa 120 m, go/parser 90 m). It is being
@@ -71,10 +71,10 @@ The scout and review reports are in `docs/phase4/proposals/` on this branch.
 STATE BLOCK
 ```
 LANE: COORD   MODEL: Opus 5.5 / high   HOST: i7
-NOTE: claude/coord-gtk-consumer-api 9f2265d210 LANDED at hop 8bb3b8b5be (pruned); its worktree H:/go2cs-tmp-coord/gtk is DELETE-SAFE
+NOTE: claude/coord-gtk-consumer-api 9f2265d210 LANDED at hop 8bb3b8b5be (pruned; worktree and local branch removed at the roll)
 BRANCH: claude/coord-plain-literal-exp efc9a4b6dc5144595f02a057e06d7bbbbfdb594d on-origin-yes cut -- the plain-literal cache EXPERIMENT (golib StringLiteralCache + two hand-edited perf copies); never merge as is
-NEXT: read the hop tip; finish the merge queue in 1l.0; relay the owner's plain-literal decisions
-BLOCKED-ON: owner hand (the plain-literal decisions)
+NEXT: read the hop tip (8bb3b8b5be at the roll); post it to every lane; then work the merge queue in 1l.0 (5 = P2 reparse and 7 = C1 watchdog are READY now; 2 = P1 after its regenerated head)
+BLOCKED-ON: none (the owner ruled the plain-literal decisions; they are 1l.0's post-roll implementation)
 TOOLS: GOROOT = the backslash spelling `go env GOROOT` prints, go1.26.9 for the hop and go1.24.13 for master; DOTNET_ROOT the dotnet10 folder; pwsh is a .NET 8 global tool (launch with DOTNET_ROOT unset, set env inside)
 ```
 WAKE: the inbox watcher `tP/watch-battery-inbox.sh <mailbox tip> inbox` from the coord-scratch folder, re-armed as the
@@ -100,7 +100,7 @@ fingerprint check (never docsamples -recite -write); union BOARD append conflict
 converter-output conflicts. Signed --no-ff merges, push after verifying the remote tip is unchanged, prune.
 OWNER PRINCIPLES: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like
 shape even at generator cost. Monitor weekly credits every turn (get_usage).
-FIRST ACTION: re-arm the inbox watcher, read new COORD inbox posts since the ledger tail, finish 1l.0's merge queue.
+FIRST ACTION: verify the folders in 1l.8 exist, re-arm the inbox watcher (it needs the FULL 40-char mailbox tip), read new COORD inbox posts since the ledger tail, post the hop tip to every lane, then work 1l.0's merge queue.
 ```
 
 ### 1l.2 G (G-LAPTOP)
@@ -275,7 +275,7 @@ You are P1, the go2cs fleet's Sonnet pilot lane (mechanical work), in a cloud co
 STATE BLOCK
 ```
 LANE: C1   MODEL: opus-class/default effort   HOST: cloud (fresh box since ~15:06Z; the old box's disk failed)
-BRANCH: claude/c1-test-host-watchdog 63f0e316f7b0ecacc70b520276869c135b3b1d3f on-origin-yes announced -- WATCHDOG (A) with G's fixes (1)-(3) red-first (a349c67f53 .. 63f0e316f7); posted 20261017T174205Z-C1; awaits G's re-review
+BRANCH: claude/c1-test-host-watchdog 63f0e316f7b0ecacc70b520276869c135b3b1d3f on-origin-yes announced -- WATCHDOG (A) with G's fixes (1)-(3) red-first (a349c67f53 .. 63f0e316f7); posted 20261017T174205Z-C1; G re-review OK
 NOTE: claude/c1-runtime-array-dims 3fa3251da4 LANDED at hop 8bb3b8b5be (pruned); its worktree scratchpad/arr is gone with the container
 NOTE: claude/c1-runtime-cleanup-closure 79e63d16b8 LANDED in the hop (merged in the 908642b2d4 batch, then pruned); reachable from claude/hop-go126, not yet from master
 BRANCH: claude/c1-tostring-forward e752628faf98f5a7792df8b5f22fadf04b22ee08 on-origin-yes announced -- ToString forwarding seat, round 2 posted for R's CNR; not in hop or master
@@ -293,9 +293,9 @@ LOCAL-ONLY: none
 WORKTREE: scratchpad/wdg claude/c1-test-host-watchdog uncommitted-files-0 pushed
 WORKTREE: scratchpad/wdgbase detached-dc928f657f uncommitted-files-0 pushed-ancestor (GolibTests base arm only)
 WORKTREE: scratchpad/mbx claude/mailbox uncommitted-files-0 pushed
-NEXT: read G's re-review of 20261017T174205Z-C1 and act on it at claude/c1-test-host-watchdog 63f0e316f7; merge the hop tip in first if it has moved past 8bb3b8b5be. If the watchdog lands, R's output-format seat starts there.
+NEXT: G's re-review is OK (2026-10-17), so the watchdog is in COORD's merge queue; answer any merge question at claude/c1-test-host-watchdog 63f0e316f7; merge the hop tip in first if it has moved past 8bb3b8b5be. If the watchdog lands, R's output-format seat starts there.
 READ-FIRST: mailbox b41660a55 (20261017T163719Z-C1, the watchdog post), 56dac9381 (20261017T151357Z-C1, the array-dims answer); docs/GoCorpusMigration.md H10 step 61
-BLOCKED-ON: review (G's re-review of the watchdog)
+BLOCKED-ON: landing (the watchdog, COORD's merge queue)
 TOOLS: GOTOOLCHAIN=local with GOROOT = go1.26.9 toolchain module; DOTNET_ROOT = private Microsoft 10.0.12 runtime root (docs/phase4/recipes/microsoft-dotnet/use-ms-dotnet.sh over the distro SDK 10.0.112); pwsh 7.6.6 as a dotnet tool; GolibTests with -p:GoTargetOS=linux
 ```
 WAKE: COORD sends direct session messages to the C1 cloud session (one-way); C1 answers through the mailbox (docs/phase4/inbox/COORD/). A cloud box's disk does NOT survive (C1's failed on 2026-10-17): push every commit as you make it.
@@ -473,12 +473,12 @@ START-FOLDER: H:/Projects/go2cs (the main checkout, on master).
 - KEEP: H:/go2cs-tmp-coord/hnd, the claude/coord-handover worktree; it holds this file and coord-live/ledger-append.sh.
 - KEEP: H:/go2cs-tmp-coord/hoptip, the hop gate worktree (claude/hop-go126). DELETE-SAFE once the hop lands and nothing is mid-merge.
 - KEEP: H:/go2cs-tmp-coord/coord-scratch, post files, gate scripts (gate-*.sh, board-union.py) and tP/watch-battery-inbox.sh. Old post .txt files inside are DELETE-SAFE.
-- KEEP: H:/go2cs-tmp-coord/gtk (claude/coord-gtk-consumer-api, pushed) until that branch merges, then DELETE-SAFE.
+- (removed at the roll: H:/go2cs-tmp-coord/gtk, landed.)
 - KEEP: H:/go2cs-tmp-coord/plit (claude/coord-plain-literal-exp, pushed), the post-roll implementation base; DELETE-SAFE after the plain-literal seat cuts from it.
 - KEEP: H:/Projects/go2cs-proposals, the source copies of docs/phase4/proposals; DELETE-SAFE (everything is on GitHub).
 - KEEP: H:/go2cs-tmp-coord/bundles, branch-bundles and backups (cited archives).
 - KEEP: H:/go2cs-tmp-coord/tools, H:/nuget/packages (the NuGet cache) and H:/go2cs-tmp-coord/repos.
-- DELETE-SAFE: H:/go2cs-tmp-coord/{interceptor-probe, u8-probe, parity-probe, plit-probe, consumer-probe, gtk-scratch, imgwork}: probe and scratch dirs; their reports are on GitHub.
+- (deleted at the roll: the interceptor, u8, parity, plit and consumer probe dirs, gtk-scratch and imgwork; their reports are on GitHub.)
 - DELETE-SAFE: H:/go2cs-tmp-coord/{tFLemitfull, tKemitfull, tLemitfull, tMemitfull, tNemitfull, tOemitfull, tPemitfull, tQemitfull, tT3emitfull, tT4emitfull, tF-untracked-run2, t48-seat12, rel6-rehearsal, stub-h0-out, h0-i7-census, h0-i7-logs, h5arm-logs, onefs, sandbox}: old train emission roots and logs from landed trains.
 
 ### 1l.9 ROLL ORDER (owner: shutdown when safe; 95% weekly is the hard stop; machines rebooted and patched during the roll)
