@@ -10785,7 +10785,7 @@ exactly two `int32`s apart, and the round trip returns the same number. In the C
 - `(uintptr)e0` is the collapsed `uintptr(unsafe.Pointer(e0))`, as in the `addrOf` example.
 - `strideˢ` and `roundTripˢ` are the string literals, stored once in static fields. `(@string)"…"u8` is a
   Go string built from UTF-8 bytes ([Strings](#strings-string-and-sstring)).
-<!-- FromPinnedBox versus FromBox: src/core/unsafe/unsafe.cs:484-558#e2f499 (FromBox carries a pointer value across without pinning; FromPinnedBox takes the address through the box's own uintptr conversion, which pins, and retains the box). The reference lists when each factory is emitted. The program prints the same booleans under go run and the converted C#: UintptrUnsafePointerIdiom/main.go:9-11#95b548. -->
+<!-- FromPinnedBox versus FromBox: src/core/unsafe/unsafe.cs:491-565#e2f499 (FromBox carries a pointer value across without pinning; FromPinnedBox takes the address through the box's own uintptr conversion, which pins, and retains the box). The reference lists when each factory is emitted. The program prints the same booleans under go run and the converted C#: UintptrUnsafePointerIdiom/main.go:9-11#95b548. -->
 
 **Reading a number's bits as another number is a `bitcast`.** A value pun between two number types,
 such as Go's `math.Float64bits`, becomes golib's [`bitcast<TSrc, TDst>`](../src/core/golib/builtin.cs).
@@ -10885,7 +10885,7 @@ In the C#:
 - `getrandomTrap` is the package's system-call number. The first omitted lines try a faster path, and
   the later ones turn a failure number into a Go error.
 - The tuple result is Go's multiple return ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)).
-<!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:1066#fa1cf5. The omitted lines: getrandom.cs:29-38#9c8951 (the vgetrandom fast path and the getrandomUnsupported check) and 41-46 (errno handling). The indent of line 39 is an emission layout artifact; lines 38-40 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
+<!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:1073#fa1cf5. The omitted lines: getrandom.cs:29-38#9c8951 (the vgetrandom fast path and the getrandomUnsupported check) and 41-46 (errno handling). The indent of line 39 is an emission layout artifact; lines 38-40 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
 
 **Full detail:** [Reference → Converting a Go pointer to `unsafe.Pointer`](ConversionStrategies-Reference/pointers.md#converting-a-go-pointer-to-unsafepointer) — every conversion form and when each factory is used, address arithmetic, pinning, order tokens, layout folding, value puns, the cases where `unsafe.Slice` or `unsafe.String` copies instead of aliasing, and the syscall keep-alive rule.
 
