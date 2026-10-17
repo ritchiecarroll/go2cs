@@ -40,6 +40,25 @@ public class AsyncChannelTests
         await task;
     }
 
+    // The cancellation CONTRACT, the .NET idiom (SemaphoreSlim.WaitAsync's): the task ends Canceled, and
+    // awaiting it throws an OperationCanceledException. The exact type is not part of it: a token canceled
+    // before the call gives Task.FromCanceled's TaskCanceledException, a subclass, and one canceled while the
+    // operation waited gives OperationCanceledException itself. So the base type is what is caught.
+    private static async Task AssertCanceled(Task task)
+    {
+        try
+        {
+            await Within(task);
+        }
+        catch (OperationCanceledException)
+        {
+            Assert.IsTrue(task.IsCanceled, $"the task threw OperationCanceledException but ended {task.Status}, not Canceled");
+            return;
+        }
+
+        Assert.Fail("the operation completed instead of being canceled");
+    }
+
     [TestMethod]
     public async Task ReceiveAsyncWaitsForASendOnAnUnbufferedChannel()
     {
@@ -179,7 +198,7 @@ public class AsyncChannelTests
         await Task.Delay(s_settle);
         cts.Cancel();
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(() => Within(received));
+        await AssertCanceled(received);
 
         // The canceled receiver left the queue: an unbuffered send now finds no one to hand to.
         Assert.IsFalse(ch.TrySend(9), "a canceled receive was still waiting on the channel");
@@ -195,7 +214,7 @@ public class AsyncChannelTests
         await Task.Delay(s_settle);
         cts.Cancel();
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(() => Within(sent));
+        await AssertCanceled(sent);
         Assert.IsFalse(ch.TryReceive(out _), "a canceled send's value reached the channel");
     }
 
@@ -207,10 +226,10 @@ public class AsyncChannelTests
         using CancellationTokenSource cts = new();
         cts.Cancel();
 
-        await Assert.ThrowsExceptionAsync<TaskCanceledException>(() => ch.ReceiveAsync(cts.Token));
+        await AssertCanceled(ch.ReceiveAsync(cts.Token));
         Assert.IsTrue(ch.TryReceive(out int value) && value == 3, "a receive canceled before it began took the value");
 
-        await Assert.ThrowsExceptionAsync<TaskCanceledException>(() => ch.SendAsync(4, cts.Token));
+        await AssertCanceled(ch.SendAsync(4, cts.Token));
         Assert.IsFalse(ch.TryReceive(out _), "a send canceled before it began delivered its value");
     }
 
@@ -255,6 +274,7 @@ public class AsyncChannelTests
             }
             catch (OperationCanceledException)
             {
+                Assert.IsTrue(sent.IsCanceled, $"a send threw OperationCanceledException but ended {sent.Status}");
                 canceled++;
             }
         }
@@ -278,8 +298,8 @@ public class AsyncChannelTests
         Assert.IsFalse(received.IsCompleted || sent.IsCompleted, "an operation on a nil channel completed");
 
         cts.Cancel();
-        await Assert.ThrowsExceptionAsync<TaskCanceledException>(() => Within(received));
-        await Assert.ThrowsExceptionAsync<TaskCanceledException>(() => Within(sent));
+        await AssertCanceled(received);
+        await AssertCanceled(sent);
     }
 
     // A pending operation is a queued waiter and a task, not a parked thread: a dedicated thread per
