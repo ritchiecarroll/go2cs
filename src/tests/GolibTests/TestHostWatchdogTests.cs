@@ -111,6 +111,9 @@ public class TestHostWatchdogTests
         TestExecution child = new(runner, "TestAbandonedFirst/inFlight", parent, "a_test.go", 2);
 
         Assert.IsTrue(parent.Abandon(TimeSpan.FromSeconds(1)), "the first Abandon must win");
+        // G's review, fix 3: the abandon marks the cascade source ITSELF, before it reports a verdict, so no event
+        // another test reports during the abandon misses the tag. Before, only the runner marked it, after the fact.
+        Assert.AreEqual("TestAbandonedFirst", reporter.FirstAbandoned, "Abandon must name the cascade source before it returns");
 
         child.RecordGoroutinePanic("late, after the abandon");
         parent.RecordGoroutinePanic("late, after the abandon");
