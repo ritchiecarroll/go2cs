@@ -84,7 +84,7 @@ You are COORD of the go2cs fleet, on the i7. Folders: the main checkout H:/Proje
 H:/Projects/go2cs-mailbox (claude/mailbox), the handover worktree H:/go2cs-tmp-coord/hnd (claude/coord-handover),
 the hop gate worktree H:/go2cs-tmp-coord/hoptip (claude/hop-go126, detached at the tip), and scratch
 H:/go2cs-tmp-coord/coord-scratch (the post files and gate scripts). Read CLAUDE.md, then section 1l of
-docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (and 1k.2 for the owner's rulings), then the tail of
+docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (and 1k.2 for the owner's rulings), then docs/phase4/COORD-CARRYOVER.md (every operative rule and plan from COORD's old local memory; the watcher and BOARD-union tools are in .claude/coord-scripts/coord-live/), then the tail of
 docs/phase4/LEDGER.md on claude/mailbox. Read the hop tip with git ls-remote and name it in your first status.
 COMMS: G and the i9 by direct session message (titles "g -- resume sesstion" and "i9 -- Corpus migration to 1.24.13
 coordination"); C1 by direct message (one-way: C1 answers through the mailbox); P1, P2 and R through the mailbox
