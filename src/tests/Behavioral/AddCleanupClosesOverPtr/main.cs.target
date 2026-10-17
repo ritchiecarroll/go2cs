@@ -44,6 +44,9 @@ private static readonly object siblingReadsˢ = (@string)"sibling reads"u8;
 private static readonly @string methodValueOnPtrˢ = "method value on ptr"u8;
 private static readonly @string reassignedAfterCaptureˢ = "reassigned after capture"u8;
 private static readonly object reassignedIsNilˢ = (@string)"reassigned is nil:"u8;
+private static readonly @string funcVariableCapturesPtrˢ = "func variable captures ptr"u8;
+private static readonly @string funcVariableCapturesˢ = "func variable captures other object"u8;
+private static readonly @string funcVariableReassignedToˢ = "func variable reassigned to method value"u8;
 private static readonly @string argIsPtrˢ = "arg is ptr"u8;
 
 internal static void Main() {
@@ -113,6 +116,35 @@ internal static void Main() {
         }, 0);
         Ꮡv.ValueSlot = default!;
         fmt.Println(reassignedIsNilˢ, Ꮡv.ValueSlot == nil);
+    });
+
+    @try(funcVariableCapturesPtrˢ, () => {
+        var v = Ꮡ(new T(f: 12));
+        var vʗ3 = v;
+        var cleanup = (nint _Δp0) => {
+            _ = vʗ3.Value.f;
+        };
+        runtime.AddCleanup(v, cleanup, 0);
+    });
+
+    @try(funcVariableCapturesˢ, () => {
+        var v = Ꮡ(new T(f: 13));
+        var w = Ꮡ(new T(f: 14));
+        var wʗ3 = w;
+        var cleanup = (nint _Δp0) => {
+            _ = wʗ3.Value.f;
+        };
+        runtime.AddCleanup(v, cleanup, 0);
+        runtime.KeepAlive(w.OrTypedNil());
+    });
+
+    @try(funcVariableReassignedToˢ, () => {
+        var v = Ꮡ(new T(f: 15));
+        var cleanup = (nint _Δp0) => {
+        };
+        var vʗ4 = v;
+                cleanup = (nint p1) => vʗ4.release(p1);
+        runtime.AddCleanup(v, cleanup, 0);
     });
 
     @try(argIsPtrˢ, () => {

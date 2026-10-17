@@ -12,6 +12,8 @@ import (
 //
 // Refusing cases: the closure captures ptr, or a pointer to one of ptr's fields, or the cleanup is
 // a method value whose receiver is ptr.
+// The cleanup may also be a func-typed local whose every assignment is a func literal or a method
+// value; the converter passes the union of their captures.
 // Accepting cases: the closure captures another object, a plain value, or nothing, and the
 // case where a SIBLING closure in the same scope captures ptr while the cleanup closure
 // captures only another variable of that scope (a C# closure object can hold both), and the case
@@ -85,6 +87,27 @@ func main() {
 		runtime.AddCleanup(v, func(int) { _ = v }, 0)
 		v = nil
 		fmt.Println("reassigned is nil:", v == nil)
+	})
+
+	try("func variable captures ptr", func() {
+		v := &T{f: 12}
+		cleanup := func(int) { _ = v.f }
+		runtime.AddCleanup(v, cleanup, 0)
+	})
+
+	try("func variable captures other object", func() {
+		v := &T{f: 13}
+		w := &T{f: 14}
+		cleanup := func(int) { _ = w.f }
+		runtime.AddCleanup(v, cleanup, 0)
+		runtime.KeepAlive(w)
+	})
+
+	try("func variable reassigned to method value", func() {
+		v := &T{f: 15}
+		cleanup := func(int) {}
+		cleanup = v.release
+		runtime.AddCleanup(v, cleanup, 0)
 	})
 
 	try("arg is ptr", func() {
