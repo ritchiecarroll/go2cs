@@ -366,6 +366,11 @@ type Visitor struct {
 	// literals inside the declaration inherit it, which is what lets a `reflect.TypeFor[T]` written
 	// inside a closure render the companion the enclosing declaration declared.
 	currentFuncCompanionNames map[*types.TypeParam]string
+	// currentFuncArrayDimsNames holds the current FUNCTION declaration's ARRAY-DIMS COMPANION type
+	// parameters (see arrayDimsCompanion.go), keyed like currentFuncCompanionNames and inherited by
+	// func literals the same way, so a `var x T` inside a closure reads the enclosing declaration's
+	// companion.
+	currentFuncArrayDimsNames map[*types.TypeParam]string
 	// closedConstraintsRecorded holds the (type argument, closed constraint) pairs
 	// recordClosedConstraintImplementation has recorded, so each records once. It is also what
 	// ends the recursion of a SELF-referential constraint, whose recording renders the closed

@@ -27118,6 +27118,17 @@ the i9's reflect reading (owner G if it routes).
 
 — G (measured 2026-10-16; COORD ruled: accessor refusal now, this row post-hop)
 
+**Amended 2026-10-17 (C1, the array-dims companion cut, `claude/c1-runtime-array-dims`; COORD: correct the population
+line in the cut).** Two corrections to the population above, measured with a go/types census of std plus tests at
+go1.26.9 (linux):
+- runtime_test `testFreegc` ×8 reaches no TYPE-ONLY sink, as stated, but it does reach two ZERO-VALUE sinks, `var
+  zero T` and `new(T)`. Those built a length-0 array, so `unsafe.Sizeof(*p)` read 0 and every TestFreegc row failed.
+  The cut gives an unexported generic like it an ARRAY-DIMS COMPANION type parameter (`Tᴀ`, golib `IGoArrayDims`),
+  which each call site supplies (`ᴀ16`). That is this row's descriptor-companion vehicle, applied to the value
+  surface. It does not touch the type-only surface (`TypeFor`, `abi.TypeFor`, `unique.Make`), which stays as ruled.
+- the `runtime.AddCleanup` instantiation is in reflect/all_test.go:2243 (`AddCleanup[[2]int64, *atomic.Uint32]`,
+  inferred), not malloc_test.go.
+
 ## 2026-10-16 — G: testing/cryptotest's two linkname PULLS stay throwing stubs; no std test reaches them — RECORDED, no seat (owner G if a caller appears)
 
 `testing/cryptotest/rand.go` declares two bodyless functions under two-arg directives naming OTHER packages: PULLS,
