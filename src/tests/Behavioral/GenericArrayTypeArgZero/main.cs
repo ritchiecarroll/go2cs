@@ -25,7 +25,7 @@ internal static nint zeroLen<T, Tᴀ>()
     where Tᴀ : IGoArrayDims
 {
     T x = GoArrayZero.Of<T, Tᴀ>();
-    return len(fmt.Sprint(x));
+    return len(fmt.Sprint((x).OrTypedNilOf()));
 }
 
 private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = [3]; }
