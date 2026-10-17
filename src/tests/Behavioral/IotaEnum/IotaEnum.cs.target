@@ -145,11 +145,11 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<Type, ΔArrayType>();
-        return (~tt).Elem;
+        return tt.of(main_package.ΔArrayType.ᏑElem).Value;
     }
     if (exprᴛ1 == Map) {
         var tt = Ꮡt.Reinterpret<Type, ΔMapType>();
-        return (~tt).Elem;
+        return tt.of(main_package.ΔMapType.ᏑElem).Value;
     }
 
     return default!;

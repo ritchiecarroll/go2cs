@@ -18,6 +18,7 @@ import (
 
 const TypeAliasMarker = ">>MARKER:TYPEALIASES<<"
 const UsingsMarker = ">>MARKER:USINGS<<"
+const FieldAccessMarker = ">>MARKER:FIELDACCESS<<"
 
 // ImportInitMarker used to reserve the top of the file's class body for the imported-package
 // module-initializer hooks. Those hooks now live in the emission unit's metadata file
@@ -153,6 +154,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	v.emittedClassName = packageClassName
 
 	v.writeOutput(UsingsMarker)
+	v.writeOutput(FieldAccessMarker)
 	v.writeOutputLn("partial class %s {", packageClassName)
 
 	v.collectMethodNamespaceUsings(file)
@@ -292,6 +294,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	}
 
 	fileText = strings.ReplaceAll(fileText, UsingsMarker, v.packageImports.String())
+	fileText = strings.ReplaceAll(fileText, FieldAccessMarker, v.fieldAccessRecord())
 
 	if v.typeAliasDeclarations.Len() > 0 {
 		v.typeAliasDeclarations.WriteString(v.newline)

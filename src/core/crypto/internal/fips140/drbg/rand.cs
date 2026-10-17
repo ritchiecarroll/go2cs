@@ -57,7 +57,7 @@ public static void Read(slice<byte> b) {
         // 8.7.2: "Note that a DRBG does not rely on additional input to provide
         // entropy, even though entropy could be provided in the additional input".
         var additionalInput = Ꮡ(new array<byte>(48));
-        sysrand.Read((~additionalInput)[..16]);
+        sysrand.Read(additionalInput.slice(0, 16));
 
         var drbg = ᏑdrbgInstance.Swap(nil);
         if (drbg == nil) {

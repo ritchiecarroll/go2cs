@@ -6,6 +6,7 @@ namespace go;
 
 using @unsafe = unsafe_package;
 
+[GoFieldAccess(typeof(ChanType))]
 partial class main_package {
 
 partial struct Type {
@@ -239,7 +240,7 @@ public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
 
     if (t.Kind() == Chan) {
         var ch = Ꮡt.Reinterpret<Type, ChanType>();
-        return (~ch).Dir;
+        return ch.Dir;
     }
     return InvalidDir;
 }
@@ -327,23 +328,23 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<Type, ΔArrayType>();
-        return (~tt).Elem;
+        return tt.of(main_package.ΔArrayType.ᏑElem).Value;
     }
     if (exprᴛ1 == Chan) {
         var tt = Ꮡt.Reinterpret<Type, ChanType>();
-        return (~tt).Elem;
+        return tt.of(ChanType.ᏑElem).Value;
     }
     if (exprᴛ1 == Map) {
         var tt = Ꮡt.Reinterpret<Type, ΔMapType>();
-        return (~tt).Elem;
+        return tt.of(main_package.ΔMapType.ᏑElem).Value;
     }
     if (exprᴛ1 == Pointer) {
         var tt = Ꮡt.Reinterpret<Type, PtrType>();
-        return (~tt).Elem;
+        return tt.of(PtrType.ᏑElem).Value;
     }
     if (exprᴛ1 == Slice) {
         var tt = Ꮡt.Reinterpret<Type, SliceType>();
-        return (~tt).Elem;
+        return tt.of(SliceType.ᏑElem).Value;
     }
 
     return default!;

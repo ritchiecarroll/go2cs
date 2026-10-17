@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(pollDesc))]
 partial class runtime_package {
 
 // Integrated network poller (platform-independent part).
@@ -742,7 +743,7 @@ internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
             lockInit(ref (pdΔ1.of(pollDesc.Ꮡlock)).DerefOrNull(), lockRankPollDesc);
             pdΔ1.of(pollDesc.Ꮡrt).init(default!, default!);
             pdΔ1.of(pollDesc.Ꮡwt).init(default!, default!);
-            pdΔ1.Value.link = c.first;
+            pdΔ1.link = c.first;
             c.first = pdΔ1;
         }
     }
@@ -761,8 +762,8 @@ internal static any /*i*/ makeArg(this ж<pollDesc> Ꮡpd) {
     ref var i = ref heap<any>(out var Ꮡi);
 
     var x = Ꮡi.Reinterpret<any, eface>();
-    x.Value._type = pdType;
-    x.Value.data = @unsafe.Pointer.FromBox(Ꮡpd.of(pollDesc.Ꮡself));
+    x.of(eface.Ꮡ_type).Value = pdType;
+    x.of(eface.Ꮡdata).Value = @unsafe.Pointer.FromBox(Ꮡpd.of(pollDesc.Ꮡself));
     return i;
 }
 

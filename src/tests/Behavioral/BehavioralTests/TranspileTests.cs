@@ -565,6 +565,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
+    public void CheckFieldAccessReinterpret() => CheckTarget("FieldAccessReinterpret");
+
+    [TestMethod]
     public void CheckFieldChainBoxReceiver() => CheckTarget("FieldChainBoxReceiver");
 
     [TestMethod]

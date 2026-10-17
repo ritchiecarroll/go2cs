@@ -388,6 +388,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A receiver or parameter RE-POINTED before first use — the normalization idiom](pointers.md#a-receiver-or-parameter-re-pointed-before-first-use--the-normalization-idiom)
   - [A reinterpreted raw address ALIASES native memory instead of boxing a copy](pointers.md#a-reinterpreted-raw-address-aliases-native-memory-instead-of-boxing-a-copy)
   - [An address of MANAGED storage that outlives its statement must carry a PIN](pointers.md#an-address-of-managed-storage-that-outlives-its-statement-must-carry-a-pin)
+  - [A field reached through a pointer REINTERPRETED from `unsafe.Pointer` reads at its Go offset — the field property](pointers.md#a-field-reached-through-a-pointer-reinterpreted-from-unsafepointer-reads-at-its-go-offset--the-field-property)
   - [`unsafe.Slice` over MANAGED element storage ALIASES it](pointers.md#unsafeslice-over-managed-element-storage-aliases-it)
   - [A reinterpret of a MANAGED pointer aliases the box — it never round-trips through the address](pointers.md#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address)
   - [A pointer-cast slice with a LOW bound offsets the span](pointers.md#a-pointer-cast-slice-with-a-low-bound-offsets-the-span)

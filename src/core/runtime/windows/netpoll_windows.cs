@@ -11,6 +11,7 @@ using @internal;
 using @internal.runtime;
 using @internal.runtime.syscall;
 
+[GoFieldAccess(typeof(pollOperation))]
 partial class runtime_package {
 
 // Sources are used to identify the event that created an overlapped entry.
@@ -74,9 +75,9 @@ internal static ж<pollOperation> pollOperationFromOverlappedEntry(ref overlappe
     // Check that the key matches the pollDesc pointer.
     bool keyMatch = default!;
     if (goarch.PtrSize == 4){
-        keyMatch = (uintptr)(e.key & ~(uintptr)(uintptr)sourceMasks) == ((uintptr)(~op).pd << (int)(sourceBits));
+        keyMatch = (uintptr)(e.key & ~(uintptr)(uintptr)sourceMasks) == ((uintptr)op.pd << (int)(sourceBits));
     } else {
-        keyMatch = (ж<pollDesc>)(uintptr)(((taggedPointer)(uint64)e.key).pointer()) == (~op).pd;
+        keyMatch = (ж<pollDesc>)(uintptr)(((taggedPointer)(uint64)e.key).pointer()) == op.pd;
     }
     if (!keyMatch) {
         return default!;

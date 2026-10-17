@@ -7,6 +7,7 @@ namespace go;
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
 
+[GoFieldAccess(typeof(RawSockaddrDatalink), typeof(RawSockaddr))]
 partial class syscall_package {
 
 internal static @string freebsdConfArch; // "machine $arch" line in kern.conftxt on freebsd
@@ -50,9 +51,9 @@ internal static (ж<SockaddrDatalink>, error) parseSockaddrLink(slice<byte> b) {
         return (default!, err);
     }
     var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddrDatalink>();
-    sa.Value.Len = rsa.Value.Len;
-    sa.Value.Family = rsa.Value.Family;
-    sa.Value.Index = rsa.Value.Index;
+    sa.Value.Len = rsa.Len;
+    sa.Value.Family = rsa.Family;
+    sa.Value.Index = rsa.Index;
     return (sa, default!);
 }
 
@@ -235,23 +236,23 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
             continue;
         }
         var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddr>();
-        var exprᴛ1 = (~rsa).Family;
+        var exprᴛ1 = rsa.Family;
         if (exprᴛ1 == AF_LINK) {
             var (sa, err) = parseSockaddrLink(b);
             if (err != default!) {
                 return (default!, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
-            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
+            b = b.slice(rsaAlignOf((nint)rsa.Len));
         }
         else if (exprᴛ1 == AF_INET || exprᴛ1 == AF_INET6) {
-            var (sa, err) = parseSockaddrInet(b, (~rsa).Family);
+            var (sa, err) = parseSockaddrInet(b, rsa.Family);
             if (err != default!) {
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
-            family = rsa.Value.Family;
+            b = b.slice(rsaAlignOf((nint)rsa.Len));
+            family = rsa.Family;
         }
         else { /* default: */
             var (sa, err) = parseNetworkLayerAddr(b, family);
@@ -305,23 +306,23 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage 
             continue;
         }
         var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddr>();
-        var exprᴛ1 = (~rsa).Family;
+        var exprᴛ1 = rsa.Family;
         if (exprᴛ1 == AF_LINK) {
             var (sa, err) = parseSockaddrLink(b);
             if (err != default!) {
                 return (default!, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
-            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
+            b = b.slice(rsaAlignOf((nint)rsa.Len));
         }
         else if (exprᴛ1 == AF_INET || exprᴛ1 == AF_INET6) {
-            var (sa, err) = parseSockaddrInet(b, (~rsa).Family);
+            var (sa, err) = parseSockaddrInet(b, rsa.Family);
             if (err != default!) {
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
-            family = rsa.Value.Family;
+            b = b.slice(rsaAlignOf((nint)rsa.Len));
+            family = rsa.Family;
         }
         else { /* default: */
             var (sa, err) = parseNetworkLayerAddr(b, family);

@@ -29,11 +29,11 @@ internal static void Main() {
     arr = new nint[]{10, 20, 30, 40, 50}.array();
     var p = Ꮡarr;
 
-    var full = (~p)[..];
-    var low = (~p)[2..];
-    var high = (~p)[..3];
-    var mid = (~p)[1..4];
-    var three = (~p).slice(1, 3, 4);
+    var full = p.slice();
+    var low = p.slice(2);
+    var high = p.slice(0, 3);
+    var mid = p.slice(1, 4);
+    var three = p.slice(1, 3, 4);
 
     fmt.Println(full);
     fmt.Println(low);

@@ -6,7 +6,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static nint readInto(ж<uint16> Ꮡbuf, nint toread, slice<uint16> src) {
-    return copy((~array<uint16>.AliasPointer(Ꮡbuf, 10000)).slice(0, toread, toread), src);
+    return copy(array<uint16>.AliasPointer(Ꮡbuf, 10000).slice(0, toread, toread), src);
 }
 
 internal static void bumpAll(ж<byte> Ꮡp) {
@@ -52,11 +52,11 @@ internal static void Main() {
     deref[1] = 0x00;
     fmt.Println(derefCopyˢ, deref, stillThroughPointerˢ, p.Value[1]);
 
-    var view = (~p)[..];
+    var view = p.slice();
     view[2] = 0x7f;
     fmt.Println(pAliasesˢ, dst[4], lenCapˢ, len(view), cap(view));
 
-    var inner = (~p)[1..3];
+    var inner = p.slice(1, 3);
     inner[0] = 0x21;
     fmt.Println(p13Aliasesˢ, dst[3], lenCapˢ, len(inner), cap(inner));
 

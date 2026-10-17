@@ -56,16 +56,16 @@ internal static void randinit() {
             seed.Value[i % 32] ^= (byte)(c);
         }
     } else {
-        if (readRandom((~seed)[..]) != 32 || allZero((~seed)[..])) {
+        if (readRandom(seed.slice()) != 32 || allZero(seed.slice())) {
             // readRandom should never fail, but if it does we'd rather
             // not make Go binaries completely unusable, so make up
             // some random data based on the current time.
             readRandomFailed = true;
-            readTimeRandom((~seed)[..]);
+            readTimeRandom(seed.slice());
         }
     }
     ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Init(seed.Value);
-    builtin.clear((~seed)[..]);
+    builtin.clear(seed.slice());
 
     if (startupRand != default!) {
         // Overwrite startupRand instead of clearing it, in case cgo programs

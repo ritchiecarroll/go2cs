@@ -872,7 +872,7 @@ internal static ж<sync.Pool> ᏑcopyBufPool = new StandardBox<sync.Pool>(new sy
 internal static ref sync.Pool copyBufPool => ref ᏑcopyBufPool.Value;
 
 internal static slice<byte> getCopyBuf() {
-    return (~ᏑcopyBufPool.Get()._<ж<array<byte>>>())[..];
+    return ᏑcopyBufPool.Get()._<ж<array<byte>>>().slice();
 }
 
 internal static void putCopyBuf(slice<byte> b) {

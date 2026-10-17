@@ -31,6 +31,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(Δsliceᴛ))]
 partial class runtime_package {
 
 // debugLogBytes is the size of each per-M ring buffer. This is
@@ -336,8 +337,8 @@ internal static ж<dloggerImpl> hexdump(this ж<dloggerImpl> Ꮡl, @unsafe.Point
 
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
     var bb = Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>();
-    bb.Value.Δarray = (@unsafe.Pointer)Δp;
-    (bb.Value.len, bb.Value.cap) = ((nint)bytes, (nint)bytes);
+    bb.Δarray = (@unsafe.Pointer)Δp;
+    (bb.len, bb.cap) = ((nint)bytes, (nint)bytes);
     if (len(b) > debugLogStringLimit) {
         b = b[..(int)(debugLogStringLimit)];
     }

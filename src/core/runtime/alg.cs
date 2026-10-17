@@ -12,6 +12,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(stringStruct), typeof(interfacetype), typeof(structtype), typeof(Δsliceᴛ))]
 partial class runtime_package {
 
 // We use 32-bit hash on Wasm, see hash32.go.
@@ -101,7 +102,7 @@ internal static partial uintptr strhash(@unsafe.Pointer Δp, uintptr h);
 
 internal static uintptr strhashFallback(@unsafe.Pointer a, uintptr h) {
     var x = (ж<stringStruct>)(uintptr)(a);
-    return memhashFallback((~x).str, h, (uintptr)(~x).len);
+    return memhashFallback(x.str, h, (uintptr)x.len);
 }
 
 // NOTE: Because NaN != NaN, a map can contain any
@@ -148,7 +149,7 @@ internal static uintptr c128hash(@unsafe.Pointer Δp, uintptr h) {
 
 internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
     var a = (ж<iface>)(uintptr)(Δp);
-    var tab = a.Value.tab;
+    var tab = a.of(iface.Ꮡtab).Value;
     if (tab == nil) {
         return h;
     }
@@ -163,7 +164,7 @@ internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
     if (t.IsDirectIface()){
         return trimHash(c1 * typehash(t, @unsafe.Pointer.FromBox(a.of(iface.Ꮡdata)), (uintptr)(h ^ c0)));
     } else {
-        return trimHash(c1 * typehash(t, (~a).data, (uintptr)(h ^ c0)));
+        return trimHash(c1 * typehash(t, a.of(iface.Ꮡdata).Value, (uintptr)(h ^ c0)));
     }
 }
 
@@ -179,7 +180,7 @@ internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
 //go:linkname nilinterhash
 internal static uintptr nilinterhash(@unsafe.Pointer Δp, uintptr h) {
     var a = (ж<eface>)(uintptr)(Δp);
-    var t = a.Value._type;
+    var t = a.of(eface.Ꮡ_type).Value;
     if (t == nil) {
         return h;
     }
@@ -190,7 +191,7 @@ internal static uintptr nilinterhash(@unsafe.Pointer Δp, uintptr h) {
     if (t.IsDirectIface()){
         return trimHash(c1 * typehash(t, @unsafe.Pointer.FromBox(a.of(eface.Ꮡdata)), (uintptr)(h ^ c0)));
     } else {
-        return trimHash(c1 * typehash(t, (~a).data, (uintptr)(h ^ c0)));
+        return trimHash(c1 * typehash(t, a.of(eface.Ꮡdata).Value, (uintptr)(h ^ c0)));
     }
 }
 
@@ -249,21 +250,21 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
     }
     if (exprᴛ2 == abi.Interface) {
         var i = Ꮡt.Reinterpret<_type, interfacetype>();
-        if (len((~i).Methods) == 0) {
+        if (len(i.Methods) == 0) {
             return nilinterhash(Δp, h);
         }
         return interhash(Δp, h);
     }
     if (exprᴛ2 == abi.Array) {
         var a = Ꮡt.Reinterpret<_type, arraytype>();
-        for (var i = (uintptr)0; i < (~a).Len; i++) {
-            h = typehash((~a).Elem, (uintptr)add(Δp, i * (~(~a).Elem).Size_), h);
+        for (var i = (uintptr)0; i < a.of(arraytype.ᏑLen).Value; i++) {
+            h = typehash(a.of(arraytype.ᏑElem).Value, (uintptr)add(Δp, i * (~a.of(arraytype.ᏑElem).Value).Size_), h);
         }
         return h;
     }
     if (exprᴛ2 == abi.Struct) {
         var s = Ꮡt.Reinterpret<_type, structtype>();
-        foreach (var (_, f) in (~s).Fields) {
+        foreach (var (_, f) in s.Fields) {
             if (f.Name.IsBlank()) {
                 continue;
             }
@@ -399,7 +400,7 @@ internal static uintptr bytesHash(slice<byte> bʗp, uintptr seed) {
     ref var b = ref heap(bʗp, out var Ꮡb);
 
     var s = Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>();
-    return memhash((~s).Δarray, seed, (uintptr)(~s).len);
+    return memhash(s.Δarray, seed, (uintptr)s.len);
 }
 
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
@@ -465,17 +466,17 @@ internal static void initAlgAES() {
 internal static uint32 readUnaligned32(@unsafe.Pointer Δp) {
     var q = (ж<array<byte>>)(uintptr)(Δp);
     if (goarch.BigEndian) {
-        return byteorder.BEUint32((~q)[..]);
+        return byteorder.BEUint32(q.slice());
     }
-    return byteorder.LEUint32((~q)[..]);
+    return byteorder.LEUint32(q.slice());
 }
 
 internal static uint64 readUnaligned64(@unsafe.Pointer Δp) {
     var q = (ж<array<byte>>)(uintptr)(Δp);
     if (goarch.BigEndian) {
-        return byteorder.BEUint64((~q)[..]);
+        return byteorder.BEUint64(q.slice());
     }
-    return byteorder.LEUint64((~q)[..]);
+    return byteorder.LEUint64(q.slice());
 }
 
 } // end runtime_package

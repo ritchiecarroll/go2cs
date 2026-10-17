@@ -16,6 +16,7 @@ using @internal;
 using System.Runtime.CompilerServices;
 using Δsync = sync_package;
 
+[GoFieldAccess(typeof(nonEmptyInterface), typeof(unsafeheader.Slice))]
 partial class reflect_package {
 
 // Value is the reflection interface to a Go value.
@@ -802,11 +803,11 @@ internal static (ж<abi.Type> rcvrtype, ж<funcType> t, @unsafe.Pointer fn) meth
             throw panic("reflect: " + op + " of unexported method");
         }
         var iface = (ж<nonEmptyInterface>)(uintptr)(v.ptr);
-        if ((~iface).itab == nil) {
+        if (iface.itab == nil) {
             throw panic("reflect: " + op + " of method on nil interface value");
         }
-        rcvrtype = iface.Value.itab.Value.Type;
-        fn = @unsafe.Pointer.FromBox(Ꮡ(@unsafe.Slice((~iface).itab.at(abi.ITab.ᏑFun, 0), i + 1), i));
+        rcvrtype = iface.itab.Value.Type;
+        fn = @unsafe.Pointer.FromBox(Ꮡ(@unsafe.Slice(iface.itab.at(abi.ITab.ᏑFun, 0), i + 1), i));
         t = tt.typeOff((~m).Typ).FuncType();
     } else {
         rcvrtype = v.typ();
@@ -835,7 +836,7 @@ internal static void storeRcvr(ΔValue v, @unsafe.Pointer p) {
     if (t.Kind() == abi.Interface){
         // the interface data word becomes the receiver word
         var iface = (ж<nonEmptyInterface>)(uintptr)(v.ptr);
-        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = iface.Value.word;
+        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = iface.word;
     } else 
     if ((flag)(v.flag & flagIndir) != 0 && t.IsDirectIface()){
         ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = ((ж<@unsafe.Pointer>)(uintptr)(v.ptr)).Value;
@@ -1350,7 +1351,7 @@ internal static nint lenNonSlice(this ΔValue v) {
         var exprᴛ1 = k;
         if (exprᴛ1 == Array) {
             var tt = v.typ().Reinterpret<abi.Type, arrayType>();
-            return (nint)(~tt).Len;
+            return (nint)tt.of(arrayType.ᏑLen).Value;
         }
         if (exprᴛ1 == Chan) {
             return chanlen((uintptr)v.pointer());
@@ -1758,11 +1759,11 @@ internal static void grow(this ΔValue v, nint n) {
         throw panic("reflect.Value.Grow: negative len");
         break;
     }
-    case {} when (~p).Len + n is < 0: {
+    case {} when p.Len + n is < 0: {
         throw panic("reflect.Value.Grow: slice overflow");
         break;
     }
-    case {} when (~p).Len + n > (~p).Cap: {
+    case {} when p.Len + n > p.Cap: {
         var t = v.typ().Elem();
         p.Value = growslice(t, p.Value, n);
         break;
@@ -2361,7 +2362,7 @@ internal static ΔValue cvtSliceArrayPtr(ΔValue v, ΔType t) {
         throw panic("reflect: cannot convert slice with length " + strconv.Itoa(v.Len()) + " to pointer to array with length " + strconv.Itoa(n));
     }
     var h = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
-    return new ΔValue(t.common(), (~h).Data, (flag)((flag)(v.flag & ~((flag)((flag)(flagIndir | flagAddr) | flagKindMask))) | ((flag)(uintptr)(nuint)ΔPointer)));
+    return new ΔValue(t.common(), h.Data, (flag)((flag)(v.flag & ~((flag)((flag)(flagIndir | flagAddr) | flagKindMask))) | ((flag)(uintptr)(nuint)ΔPointer)));
 }
 
 // convertOp: []T -> [N]T
@@ -2372,7 +2373,7 @@ internal static ΔValue cvtSliceArray(ΔValue v, ΔType t) {
     }
     var h = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
     var typ = t.common();
-    @unsafe.Pointer ptr = h.Value.Data;
+    @unsafe.Pointer ptr = h.Data;
     @unsafe.Pointer c = (uintptr)unsafe_New(typ);
     typedmemmove(typ, c, ptr);
     ptr = c;
