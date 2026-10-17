@@ -3726,6 +3726,41 @@ func TestMergedStaleGoImplementSpellingCollapses(t *testing.T) {
 	}
 }
 
+// A1 guard (COORD ruling 2026-10-16): a PRODUCTION pointer implementer of an interface declared in
+// the external test package itself anchors test-side. The pointer adapter is a class in the test
+// compilation, so it mutates no production type and the reference model can host it. crypto/mlkem at Go
+// 1.26 is the instance: *DecapsulationKey768 against mlkem_test's decapsulationKey[E encapsulationKey];
+// crypto/ecdh's lifted test-local _ᴛ1/_ᴛ2 are the same shape. Production-anchored before, these records
+// forced the recompile fallback. The controls keep the production anchor: the universe's error (bare, but
+// not the test package's), a qualified interface, a qualified generic interface, and the VALUE form,
+// whose generated partial struct must merge with the production declaration.
+func TestExternalVariantTestLocalInterfaceAnchorsTestSide(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	cases := []struct {
+		iface string
+		impl  string
+		want  bool
+	}{
+		{"decapsulationKey<encapsulationKey>", PointerPrefix + "<value_package.DecapKey>", true},            // test-local generic
+		{"decapsulationKey<encapsulationKey>", PointerPrefix + "<global::go.value_package.DecapKey>", true}, // rooted implementer
+		{"_ᴛ2", PointerPrefix + "<go.value_package.PrivateKey>", true},                                      // lifted test-local
+		{"encapsulationKey", PointerPrefix + "<value_package.EncapKey>", true},                              // test-local, non-generic
+		{"error", PointerPrefix + "<value_package.Builder>", false},                                         // universe error
+		{"io.Writer", PointerPrefix + "<value_package.Builder>", false},                                     // qualified interface
+		{"iter_package.Seq<int>", PointerPrefix + "<value_package.Builder>", false},                         // qualified generic
+		{"decapsulationKey<encapsulationKey>", "value_package.DecapKey", false},                             // value form
+	}
+
+	for _, testCase := range cases {
+		if got := isTestAnchoredImplementRecord(testCase.iface, testCase.impl, "value_package", false); got != testCase.want {
+			t.Errorf("isTestAnchoredImplementRecord(%q, %q) = %v, want %v", testCase.iface, testCase.impl, got, testCase.want)
+		}
+	}
+}
+
 // B4/B5 guard (partition predicate): an EXTERNAL variant GoImplement record anchors to the test
 // package unit when its generated code must live in the test package class — bare (test-local)
 // impls, every non-production ж pointer adapter, and adapter-class-marked (interface-sourced /
