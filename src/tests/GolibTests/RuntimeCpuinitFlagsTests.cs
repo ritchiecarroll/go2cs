@@ -40,6 +40,10 @@ public class RuntimeCpuinitFlagsTests
         if (!X86.Avx.IsSupported)
             Assert.Inconclusive("the host has no AVX, so x86HasAVX is rightly false and the arm cannot tell");
 
+        // GODEBUG=cpu.avx=off at start clears internal/cpu's flag off Windows, and the runtime copies that.
+        if (!cpu_package.X86.HasAVX)
+            Assert.Inconclusive("GODEBUG turned AVX off for this process, so x86HasAVX is rightly false");
+
         Assert.IsTrue(runtime_package.GoX86CpuFlags.avx, "x86HasAVX on an AVX host");
     }
 
