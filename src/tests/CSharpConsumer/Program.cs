@@ -134,6 +134,17 @@ static class Program
         {
             Check("6 an error becomes an exception where C# wants one", ex.Message.Contains("invalid syntax"));
         }
+        nint port = strconv.Atoi("8080").Must();    // the value, or a GoErrorException
+        Check("6 Must returns the value of a nil-error result", port == 8080);
+        try
+        {
+            strconv.Atoi("eighty").Must();
+            Check("6 Must throws on a non-nil error", false);
+        }
+        catch (GoErrorException ex) when (errors.Is(ex.Err, strconv.ErrSyntax))
+        {
+            Check("6 GoErrorException carries the original Go error", ex.Message.Contains("invalid syntax"));
+        }
 
         // 7. Panics and exceptions.
         try
