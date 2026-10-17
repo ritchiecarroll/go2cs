@@ -114,7 +114,7 @@ internal static uint64 comparableHash<T>(T v, ΔSeed seed) {
 }
 
 internal static void writeComparable<T>(ж<Hash> Ꮡh, T v) {
-    var vv = reflect.ValueOf(v);
+    var vv = reflect.ValueOf((v).OrTypedNilOf());
     appendT(Ꮡh, vv);
 }
 

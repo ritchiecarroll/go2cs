@@ -88,7 +88,7 @@ partial struct sliceKey {
 internal static (bool, bool) zeroAgrees<T>() {
     var p = @new<T>();
     var v = reflect.New(reflect.TypeOf(p.OrTypedNil()).Elem());
-    return (reflect.DeepEqual(p.OrTypedNil(), v.Interface()), reflect.DeepEqual(p.ValueSlot, v.Elem().Interface()));
+    return (reflect.DeepEqual(p.OrTypedNil(), v.Interface()), reflect.DeepEqual((p.ValueSlot).OrTypedNilOf(), v.Elem().Interface()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

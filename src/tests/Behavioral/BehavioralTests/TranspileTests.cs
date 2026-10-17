@@ -2279,6 +2279,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
 
     [TestMethod]
+    public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
+
+    [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]

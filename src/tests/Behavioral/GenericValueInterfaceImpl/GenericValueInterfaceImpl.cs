@@ -13,7 +13,7 @@ partial interface I {
 }
 
 public static @string M<T>(this G<T> g) {
-    return fmt.Sprint(g.v);
+    return fmt.Sprint((g.v).OrTypedNilOf());
 }
 
 partial struct T /*num:nint*/;

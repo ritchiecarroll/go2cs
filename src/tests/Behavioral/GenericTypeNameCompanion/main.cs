@@ -21,7 +21,7 @@ internal static void nameOf<T, Tᴺ>(@string label) {
 }
 
 internal static void sizeOf<T>(@string label, T v) {
-    fmt.Printf("%-11s dynamic=%T\n"u8, label, v);
+    fmt.Printf("%-11s dynamic=%T\n"u8, label, (v).OrTypedNilOf());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
