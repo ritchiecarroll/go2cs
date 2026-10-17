@@ -331,7 +331,7 @@ internal static Action<ж<testing.T>> testFreegc<T>(bool noscan) {
             var p = runtime_internal_test_package.Escape(@new<T>());
             T zero = GoZero<T>();
             if (!AreEqual(p.ValueSlot, zero)) {
-                t.Fatalf("allocator returned non-zero memory: %v"u8, p.ValueSlot);
+                t.Fatalf("allocator returned non-zero memory: %v"u8, (p.ValueSlot).OrTypedNilOf());
             }
             return p;
         }
@@ -340,7 +340,7 @@ internal static Action<ж<testing.T>> testFreegc<T>(bool noscan) {
             t.Helper();
             T zero = GoZero<T>();
             if (!AreEqual(p.ValueSlot, zero)) {
-                t.Fatalf("found non-zero memory before freegc (tests do not modify memory): %v"u8, p.ValueSlot);
+                t.Fatalf("found non-zero memory before freegc (tests do not modify memory): %v"u8, (p.ValueSlot).OrTypedNilOf());
             }
             runtime_internal_test_package.Freegc(@unsafe.Pointer.FromPinnedBox(p), @unsafe.Sizeof(p.ValueSlot), noscan);
         }

@@ -1675,7 +1675,7 @@ internal static any escapeSink;
 
 public static T Escape<T>(T x) {
     if (alwaysFalse) {
-        escapeSink = x;
+        escapeSink = (x).OrTypedNilOf();
     }
     return x;
 }
@@ -2028,7 +2028,7 @@ public static nint GlobalWaitingArenaChunks() {
 }
 
 public static T UserArenaClone<T>(T s) {
-    return arena_heapify(s)._<T>();
+    return arena_heapify((s).OrTypedNilOf())._<T>();
 }
 
 public static Func<uintptr, uintptr, uintptr> AlignUp = alignUp;
@@ -2284,7 +2284,7 @@ public static @string DumpPrintQuoted(@string s) {
 public static @string DumpPrint<T>(T v) {
     var gp = getg();
     gp.Value.writebuf = new slice<byte>(0, 2048);
-    print(v);
+    print((v).OrTypedNilOf());
     var buf = gp.Value.writebuf;
     gp.Value.writebuf = default!;
 
