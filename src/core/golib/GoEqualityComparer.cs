@@ -215,24 +215,42 @@ internal static class GoEqualityComparer
     private static readonly ConcurrentDictionary<Type, bool> s_signedZeroTypes = new();
 
     /// <summary>
-    /// Panics with Go's text when an interface key's dynamic value cannot be hashed.
+    /// Panics with Go's text when an interface key's dynamic value cannot be hashed, on the paths where
+    /// Go refuses the key WITHOUT hashing it: a lookup or delete on an EMPTY or NIL map, which is where a
+    /// Dictionary never hashes at all and so needs the explicit call (mapKeyError on the Used() == 0 path).
     /// </summary>
     /// <param name="key">The key, adapters and all.</param>
     /// <remarks>
-    /// Go's map hashes the key before it touches the table, so this fires on EVERY operation --
-    /// including a lookup or delete on an EMPTY or NIL map, which is where a Dictionary never hashes
-    /// at all and so needs the explicit call (runtime_swiss.go's mapKeyError on the Used() == 0 path).
+    /// Go 1.26 raises <c>maps.unhashableTypeError</c> here (<c>hash of unhashable type: T</c>, no
+    /// <c>runtime error: </c> prefix; see <see cref="go.golib.RuntimeErrorPanic.UnhashableKey"/>), where Go 1.24
+    /// raised the prefixed <c>errorString</c>. The hash path keeps <c>errorString</c> in both releases
+    /// and is <see cref="CheckHashableRoot"/>.
     /// </remarks>
-    public static void CheckHashable(object? key) => CheckHashableRoot(RootOf(key));
+    public static void CheckHashable(object? key)
+    {
+        if (UnhashableTypeOf(RootOf(key)) is { } unhashable)
+            throw go.golib.RuntimeErrorPanic.UnhashableKey(unhashable);
+    }
 
+    /// <summary>
+    /// Panics with Go's text when the HASH of an interface key's dynamic value is refused: runtime's
+    /// <c>typehash</c>/<c>nilinterhash</c>, which a populated map's lookup, delete and every assignment
+    /// reach. The value is <c>runtime.errorString</c>, so the text keeps its <c>runtime error: </c> prefix
+    /// in Go 1.24 and 1.26 alike.
+    /// </summary>
     internal static void CheckHashableRoot(object? root)
+    {
+        if (UnhashableTypeOf(root) is { } unhashable)
+            throw new PanicException($"runtime error: hash of unhashable type {GoReflect.GoTypeName(unhashable)}");
+    }
+
+    private static Type? UnhashableTypeOf(object? root)
     {
         // The dominant dynamic types are hashable and answer without the per-type cache.
         if (root is null or IConvertible or @string)
-            return;
+            return null;
 
-        if (s_unhashableTypes.GetOrAdd(root.GetType(), static t => unhashableWithin(t, 0)) is { } unhashable)
-            throw new PanicException($"runtime error: hash of unhashable type {GoReflect.GoTypeName(unhashable)}");
+        return s_unhashableTypes.GetOrAdd(root.GetType(), static t => unhashableWithin(t, 0));
     }
 
     // The type Go's mapKeyError names: the slice, map or func itself, found by recursing through

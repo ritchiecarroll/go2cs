@@ -513,4 +513,90 @@ public class RuntimeErrorPanicValueTests
             RuntimeErrorPanic.BoundsErrorValue = bounds;
         }
     }
+
+    // ---- unhashable map keys (Go 1.26: maps.unhashableTypeError vs runtime.errorString) -------------
+    //
+    // Go 1.26 splits one panic in two. mapKeyError (internal/runtime/maps/map.go) refuses an unhashable
+    // dynamic key on an EMPTY or NIL map without hashing it, and panics with unhashableTypeError, whose
+    // Error() is "hash of unhashable type: T": no "runtime error: " prefix, a colon. It is still a
+    // runtime.Error (RuntimeError()). The hash itself (runtime/alg.go's typehash and nilinterhash, reached
+    // by a populated map's lookup and delete and by EVERY assignment) still panics with errorString, so
+    // those keep "runtime error: hash of unhashable type T". Go 1.24 used errorString on both. Measured
+    // by running behavioral MapKeyUpdateAndHashPanic under go1.24.13 and go1.26.9: exactly the empty-map
+    // and nil-map lookup/delete lines and reflect's MapIndex/delete-on-nil lines moved.
+
+    private static string TextOf(object? recovered) =>
+        recovered is error e ? e.Error().ToString() : recovered?.ToString() ?? "<no panic>";
+
+    private static slice<nint> OneInt() => new(new nint[] { 1 });
+
+    [TestMethod]
+    public void EmptyAndNilMapLookupsAndDeletesRaiseGos126UnhashableTypeError()
+    {
+        const string want = "hash of unhashable type: []int";
+
+        map<object, bool> empty = new();
+        map<object, bool> nilMap = default!;
+
+        AssertRuntimeError(PanicValue(() => { _ = empty[OneInt()]; }), want, "empty map lookup");
+        AssertRuntimeError(PanicValue(() => { empty.TryGetValue(OneInt(), out _); }), want, "empty map comma-ok");
+        AssertRuntimeError(PanicValue(() => { empty.ContainsKey(OneInt()); }), want, "empty map ContainsKey");
+        AssertRuntimeError(PanicValue(() => { empty.Remove(OneInt()); }), want, "empty map delete");
+        AssertRuntimeError(PanicValue(() => { _ = nilMap[OneInt()]; }), want, "nil map lookup");
+        AssertRuntimeError(PanicValue(() => { nilMap.Remove(OneInt()); }), want, "nil map delete");
+    }
+
+    [TestMethod]
+    public void TheNamedTypeIsTheKeysSliceMapOrFuncType()
+    {
+        map<object, bool> empty = new();
+
+        AssertRuntimeError(PanicValue(() => { _ = empty[new map<@string, nint>()]; }), "hash of unhashable type: map[string]int", "map key");
+        AssertRuntimeError(PanicValue(() => { _ = empty[new Action(() => { })]; }), "hash of unhashable type: func()", "func key");
+    }
+
+    [TestMethod]
+    public void PopulatedMapLookupAndEveryAssignmentKeepTheErrorStringText()
+    {
+        const string want = "runtime error: hash of unhashable type []int";
+
+        map<object, bool> full = new() { [(nint)1] = true };
+        map<object, bool> empty = new();
+
+        Assert.AreEqual(want, TextOf(PanicValue(() => { _ = full[OneInt()]; })), "populated map lookup");
+        Assert.AreEqual(want, TextOf(PanicValue(() => { full[OneInt()] = true; })), "populated map assign");
+        Assert.AreEqual(want, TextOf(PanicValue(() => { empty[OneInt()] = true; })), "empty map assign");
+    }
+
+    [TestMethod]
+    public void ReflectNilAndEmptyMapArmsRaiseGos126UnhashableTypeError()
+    {
+        const string want = "hash of unhashable type: []int";
+
+        map<object, bool> empty = new();
+        map<object, bool> nilMap = default!;
+
+        AssertRuntimeError(PanicValue(() => reflect.ValueOf(empty).MapIndex(reflect.ValueOf(OneInt()))), want, "reflect MapIndex on empty map");
+        AssertRuntimeError(PanicValue(() => reflect.ValueOf(nilMap).MapIndex(reflect.ValueOf(OneInt()))), want, "reflect MapIndex on nil map");
+        AssertRuntimeError(PanicValue(() => reflect.ValueOf(nilMap).SetMapIndex(reflect.ValueOf(OneInt()), new reflect.ΔValue(nil))), want, "reflect delete on nil map");
+    }
+
+    // With nothing registered, the text is still Go 1.26's (a string value, as the other fallbacks are).
+    [TestMethod]
+    public void UnregisteredFallbackTextIsGos126ForAnUnhashableKey()
+    {
+        Func<Type, object>? hook = RuntimeErrorPanic.UnhashableKeyErrorValue;
+
+        try
+        {
+            RuntimeErrorPanic.UnhashableKeyErrorValue = null;
+
+            map<object, bool> empty = new();
+            Assert.AreEqual("hash of unhashable type: []int", TextOf(PanicValue(() => { _ = empty[OneInt()]; })));
+        }
+        finally
+        {
+            RuntimeErrorPanic.UnhashableKeyErrorValue = hook;
+        }
+    }
 }
