@@ -114,6 +114,10 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 
 	valueType := v.getType(value, false)
 
+	if typeParam, ok := valueType.(*types.TypeParam); ok {
+		return applyTypedNilTypeParamBox(typeParam, rendered)
+	}
+
 	if isExactUnsafePointer(valueType) {
 		return v.applyTypedNilUnsafePointerBox(valueType, v.unsafePointerExprNeverRendersNull(value), rendered)
 	}
@@ -138,6 +142,63 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 	return rendered + "." + TypedNilBoxAccessor
 }
 
+// applyTypedNilTypeParamBox is the boundary treatment for a value of TYPE-PARAMETER type: inside a generic body the
+// converter cannot tell whether the type argument is a pointer, a func, an unsafe.Pointer or none of them, so the
+// value takes golib's OrTypedNilOf, which decides once per type argument (errors_test's testAsType[E compError]
+// boxed a nil *fs.PathError as Go's nil interface: `%T` read <nil> and `any(e) == nil` answered true). A type
+// parameter whose type set holds none of them (`[T ~int | ~string]`) passes through unchanged.
+func applyTypedNilTypeParamBox(typeParam *types.TypeParam, rendered string) string {
+	if !typeParamCanHoldNilReference(typeParam) {
+		return rendered
+	}
+
+	return "(" + rendered + ")." + TypedNilTypeParamAccessor
+}
+
+// typeParamCanHoldNilReference reports whether a type parameter's type set can hold a value go2cs renders as a null
+// C# reference that Go treats as a typed nil: a pointer, a func or an unsafe.Pointer (slices, maps and channels are
+// golib structs and never null). Only a UNION restricts a type set -- `comparable` does not, it holds pointers -- so a
+// pure method set (`any`, `error`) or a constraint with no union (`interface{ comparable; error }`) qualifies, and a
+// union qualifies when one of its terms does.
+func typeParamCanHoldNilReference(typeParam *types.TypeParam) bool {
+	iface, ok := typeParam.Constraint().Underlying().(*types.Interface)
+
+	if !ok || iface.IsMethodSet() {
+		return true
+	}
+
+	hasUnion := false
+
+	for i := range iface.NumEmbeddeds() {
+		union, isUnion := iface.EmbeddedType(i).(*types.Union)
+
+		if !isUnion {
+			continue
+		}
+
+		hasUnion = true
+
+		for j := range union.Len() {
+			term := union.Term(j).Type()
+
+			if inner, isTypeParam := term.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(inner) {
+				return true
+			}
+
+			switch underlying := term.Underlying().(type) {
+			case *types.Pointer, *types.Signature:
+				return true
+			case *types.Basic:
+				if underlying.Kind() == types.UnsafePointer {
+					return true
+				}
+			}
+		}
+	}
+
+	return !hasUnion
+}
+
 // applyTypedNilPointerBoxToType is applyTypedNilPointerBox for a caller that holds the value's TYPE
 // but has no AST expression for it: a tuple element DECONSTRUCTED from a multi-value call, which is
 // a temporary the converter minted rather than a node the Go source wrote. Same boundary, same two
@@ -155,6 +216,10 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 func (v *Visitor) applyTypedNilPointerBoxToType(valueType types.Type, rendered string) string {
 	if rendered == "" || valueType == nil {
 		return rendered
+	}
+
+	if typeParam, ok := valueType.(*types.TypeParam); ok {
+		return applyTypedNilTypeParamBox(typeParam, rendered)
 	}
 
 	if isExactUnsafePointer(valueType) {
