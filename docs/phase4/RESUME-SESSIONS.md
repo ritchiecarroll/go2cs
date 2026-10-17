@@ -47,11 +47,13 @@ The scout and review reports are in `docs/phase4/proposals/` on this branch.
      files; then merge P1's new head.
   3. R testlogfile 4dea95c684 (G's three divergences fixed); its push was pending at the roll, so read the ref.
   4. C1's ToString e752628faf and LINQ 2d635fad3f, after R's merged behavioral run on the current tip.
+  5. P2 reparse a3fc33b20c: READY (G design OK; the i9's two reads clean, the full behavioral suite 836/836 with 0 Output failures).
+  6. P2 pipe-deadline 64503699da and lookup-field-view 97b749ad46: after the i9's windows readings (post-roll).
+  7. C1 watchdog 63f0e316f7: after G's re-review of fixes (1)-(3).
 - **IN FLIGHT:**
-  - P2: the os reparse-blob widening (G design OK under 4 conditions) and the named-pipe deadline hang (the i9 runs
-    P2's probe, claude/p2-pipe-deadline); then the lookup_windows.cs field views.
+  - P2: three windows seats posted (queue 5-6); nothing running at the roll.
   - C1: the WATCHDOG (ruled (A): 15 m default plus per-row floors; crypto/dsa 120 m, go/parser 90 m). It is being
-    re-cut, because C1's previous box disk failed and its 3 local commits were lost.
+    re-cut after C1's box disk failed; now at 63f0e316f7 with G's fixes, awaiting G's re-review.
   - R: the testing-host OUTPUT FORMAT (Go decorate + Go text mode, one seat), AFTER C1's watchdog lands.
   - G: free; reviews, then its parked claude/g-inline-constraint-lift.
 - **OWNER RULED 2026-10-17, plain string literals (implement POST-ROLL, with fresh credits; record: docs/phase4/proposals/plain-literal-cache.md):**
@@ -162,17 +164,43 @@ BRANCH: claude/i9-recon-go126 bd69190547fc9ae27410625d4294ccff93e32f37 on-origin
 BRANCH: claude/i9-go125-recon dc0e159ccfc26e1cf71194f7e5dacf66481889df on-origin-yes stale -- Go 1.25 recon data ref, not merged; history only
 NOTE: claude/i9-predicted-h7 50ee15fef4 and claude/i9-crosspkg-value-promotion 8213221317 are LANDED (in the hop); their refs were pruned after merge. The other 64 local claude/i9-* refs are ancestors of both the hop and master.
 LOCAL-ONLY: 15 superseded/scratch refs (archive/i9-combo-reading-1/2, archive/i9-nugetgo-rt-rehearsal, backup/i9-nugetgo-pack-pre-census, claude/i9-address-variant-pairing, claude/i9-aot-metadata-token, claude/i9-crosspkg-promoted-design, claude/i9-d4-on-a1f-local, claude/i9-docs-reference-step2, claude/i9-incremental-cs-writes, claude/i9-r1a-design, tmp-memo-orig, tmp-memo-orig2, tmp-packpaths-orig, tmp-sym-orig); preserved: one bundle on the i9, logs/state/i9-localonly-20261017.bundle (verify rc 0, 15 refs, 235 MB) sha256-16 d897f32b293be180
-WORKTREE: repo (main checkout) master, clean. i9-hop and i9-pred: clean, landed. i9-h8 .. -h8o: 15 throwaway H8 trees (detached, regenerated -tests files only); removal approved 2026-10-17.
-NEXT: on COORD's next posted hop tip (908642b2d4 now): the FULL runtime row alone (wrapper floor 120 m) once C1's array-dims and P1's print seats land; os is held for P2's reparse-content and named-pipe-hang seats. Start: a gated fetch, verify HEAD == tip, a fresh detached worktree, build the converter, then h8-drive.
+WORKTREE: only the main checkout remains (master, clean). Removed at the roll: i9-hop, i9-pred, i9-readings, i9-p-base, i9-p-seat and the 15 i9-h8* trees; 0 tracked deletions after.
+NEXT: AFTER THE REBOOT, FIRST: read WHEA and the reset count (event 41/6008, boot time), then `git fsck --full` (pack.threads=4) before any build. Then, on COORD's posted hop tip: P2's windows seats as COORD posts them (pipe-deadline 64503699da: the probe A/B/C, os TestVariousDeadlines1Proc, the os row, net as control; lookup-field-view 97b749ad46: net's windows row, the lookup rows). Then the FULL runtime row alone (wrapper floor 120 m) once P1's print seats land. The reparse seat a3fc33b20c is DONE (both reads clean).
 STANDING CONSTRAINTS (verbatim from the i9, owner orders):
  - crypto/tls NEVER on the i9; TLS-touching rows (net/http, httptest, smtp, crypto/x509, http/cgi, httptrace, os/exec) stay OFF the i9 (the owner's one-rerun net/http experiment is used; a peer cannot extend it).
  - ONE heavy row at a time, alone; WHEA read per row; on a fault STOP, retain, report, one retry only after a light task.
  - a git fetch fault = ONE retry, then `git fsck --full` (pack.threads=4), verify the tip with cat-file/verify-commit; any launcher behind a fetch is gated on the fetch AND on the tree existing; OWNER-HAND goes to COORD at once.
-BLOCKED-ON: landing (C1 array-dims, P1 print -> runtime; P2 reparse + pipe hang -> os)
+BLOCKED-ON: the reboot checks; then COORD's posted tip (P2 seats), and P1's print stack landing for runtime
 TOOLS: GOROOT go1.26.9, GOTOOLCHAIN=local, GOMAXPROCS=4, GOFLAGS=-p=4, CGO_ENABLED=0, UseSharedCompilation=false, dotnet 10.0.402 (-m:4), pwsh 7.6.6 (dotnet tool; launched with DOTNET_ROOT unset), Windows PowerShell 5.1 (never for the stub census)
 COMMS: COORD -> i9 by a direct session message to the session titled "i9 -- Corpus migration to 1.24.13 coordination"; the i9 answers the same way.
 ```
 WAKE: COORD sends direct session messages to the session titled "i9 -- Corpus migration to 1.24.13 coordination"; the i9 answers the same way.
+
+FOLDERS (posted by the i9 2026-10-17; its own words)
+```
+START-FOLDER: C:\go2cs-build (the lane's session folder; it holds logs/ and logs/state/)
+FOLDER: %USERPROFILE%\Documents\go2cs-build\repo | MAIN CHECKOUT (master @ 3ffd1d8a8d, clean) and the object store for every worktree | KEEP (the repo; never delete) | large
+FOLDER: %USERPROFILE%\Documents\go2cs-build\mbx-i9-20261005 | live mailbox clone that fleet-read.sh reads | KEEP (mailbox) | small
+FOLDER: %USERPROFILE%\Documents\go2cs-build\archive\{2026-09-27, 10-05/07/09/11-cleanup} | dated bundles and preserved trees from earlier reclaims | KEEP (archive record)
+FOLDER: C:\go2cs-build\logs | every lane script, run log and evidence dir (h5-go126, h8-go126 a..p, probe-pipe, retained-p8b-linux-csc, retained-fetch-inflate-20261017, ...) | KEEP (the resume record cites the retained-* evidence) | not measured
+FOLDER: C:\go2cs-build\logs\tools\coord-scripts | the identifier census + fleet-read/msg tools, extracted from the hop tip | KEEP (the census before every post) | small
+FOLDER: C:\go2cs-build\logs\state | the LOCAL-ONLY bundle i9-localonly-20261017.bundle (sha256-16 d897f32b293be180) + the state/inventory text | KEEP (cited bundle) | 225M
+FOLDER: C:\go2cs-build\census-2026-09-13 | older census data, kept by an earlier ruling | KEEP (earlier ruling) | 233M
+FOLDER: C:\go2cs-build\SAVE-STATE-i9.local.txt | an older local save-state file | KEEP (small; superseded by RESUME-SESSIONS)
+FOLDER: D:\go2cs-build\h7-reemit3 | seeded -stdlib root of the third H7 re-emit (4972b87f8b's converter) | KEEP (COORD's 10-16 ruling, the latest seeded root) | 1.4G
+FOLDER: D:\go2cs-build\h5-go126, h5-go126-r2 | H5 three-target emission stages | KEEP (keep while free >= 100 GB) | 3.5G + 4.7G
+FOLDER: D:\go2cs-build\h0-go126, h1-xtools | earlier hop stages (H0 baseline staging, H1 x/tools) | DELETE-SAFE after the hop lands (COORD ruling 2026-10-17) | 1.9G + 32M
+FOLDER: D:\go2cs-build\h7-go126 | H7 pass 1-8 build logs + red26 TSVs (passes 5-7 pushed as data refs) | DELETE-SAFE (pushed or reproducible) | 13M
+FOLDER: D:\go2cs-build\.tmp, .gocache, .nogomod | TMP/TEMP of the runs, a Go build cache, an empty-module helper | DELETE-SAFE (caches/temp, regenerable)
+FOLDER: %USERPROFILE%\sdk\go1.26.9 | the GOROOT pin | KEEP (the pin)
+FOLDER: %USERPROFILE%\sdk\go1.23.12, go1.24.13, go1.25.14 | prior-release GOROOTs (oracles, the 1.25.14 checkpoint legs) | KEEP
+FOLDER: %USERPROFILE%\.dotnet\tools (pwsh 7.6.6) | the pwsh 7 the stub census requires | KEEP (instrument)
+FOLDER: Go module cache, Go build cache, NuGet package cache (profile defaults) | package caches | DELETE-SAFE (regenerable; keeping them saves time)
+WORKTREES: only the main checkout remains (i9-hop, i9-pred, i9-readings, i9-p-base, i9-p-seat and the 15 i9-h8* trees removed 2026-10-17, children first; 0 tracked deletions).
+PURGED: 196 bin/obj/Generated dirs in i9-readings before its removal and 298 in the main checkout's src (0 tracked). D: 8.4 TB free, C: 419 GB free.
+LOCAL-ONLY: unchanged from the STATE BLOCK (15 refs, bundle i9-localonly-20261017.bundle, sha256-16 d897f32b293be180).
+LAST READ before the roll: the FULL behavioral suite at P2's reparse seat a3fc33b20c PASSES (836 projects; Output 807 compared, 0 failed, 29 platform-exclusive skips; 4020 s; WHEA 0). The 3 package_info.cs rewrites it saw (FieldAccessReinterpret, SystemCertVerify, X509SystemVerify: syscall alias lines) are the RULED platform-alias drift COORD reverts at every merge, not the seat's.
+```
 
 PASTE PROMPT
 ```
@@ -391,7 +419,7 @@ WORKTREE: wt-rpb claude/p2-reparse-blob uncommitted-0 preserved-how: pushed
 WORKTREE: wt-uq detached 6bcf729a64 uncommitted-3 preserved-how: superseded draft of the landed first-field-downcast seat; patch on P2 scratch, sha256-16 d684ef8ae950832e
 WORKTREE: wt-m claude/p2-measure-local uncommitted-17 preserved-how: none needed (generated -tests output of an old pprof run)
 WORKTREE: wt-utc wt-cpu wt-f3 wt-avx wt-cwt wt-sel wt-vob uncommitted-0 each preserved-how: pushed or landed
-NEXT: three seats await windows readings by the i9: reparse a3fc33b20c (its full behavioral suite), pipe-deadline 64503699da (the probe A/B/C, os TestVariousDeadlines1Proc, the os row; net as control), lookup-field-view 97b749ad46 (net's windows row, lookup rows). Answer review and reading results; the held post-hop seats wait for the post-hop train.
+NEXT: reparse a3fc33b20c is READY to merge (the i9's full behavioral suite PASSES, 2026-10-17); two seats await windows readings by the i9: pipe-deadline 64503699da (the probe A/B/C, os TestVariousDeadlines1Proc, the os row; net as control), lookup-field-view 97b749ad46 (net's windows row, lookup rows). Answer review and reading results; the held post-hop seats wait for the post-hop train.
 READ-FIRST: inbox/COORD 20261017T170026Z-P2 (reparse), 20261017T174605Z-P2 (pipe), 20261017T180435Z-P2 (lookup); the i9's replies in inbox/P2. This section is the record; team memory is a convenience copy.
 BLOCKED-ON: none for the fix; owner hand: removing merged wt-f3 and three scratch seeds still waits on the owner's word in the project thread
 TOOLS: GOROOT go1.26.9, DOTNET_ROOT .NET 10.0.12 / SDK 10.0.112, pwsh 7.6.6, python3
