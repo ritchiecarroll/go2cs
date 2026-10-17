@@ -468,7 +468,7 @@ private sealed class GoCleanupSentinel
 internal static UntypedInt cleanupBlockSize => 512;
 
 [GoType] internal partial struct cleanupBlock {
-    internal partial ref cleanupBlockHeader cleanupBlockHeader { get; }
+    /*embed*/ internal cleanupBlockHeader cleanupBlockHeader;
     internal array<cleanupFn> cleanups = new((uintptr)((uintptr)cleanupBlockSize - /* unsafe.Sizeof(cleanupBlockHeader{}) */ (uintptr)32) / /* unsafe.Sizeof(cleanupFn{}) */ (uintptr)24);
 }
 
@@ -486,7 +486,7 @@ internal static ref array<byte> cleanupBlockPtrMask => ref ᏑcleanupBlockPtrMas
 
 [GoType] internal partial struct cleanupBlockHeader {
     internal sys.NotInHeap _;
-    internal partial ref lfnode lfnode { get; }
+    /*embed*/ internal lfnode lfnode;
     internal ж<cleanupBlock> alllink;
     internal uint32 n;
 }
