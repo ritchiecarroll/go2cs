@@ -11,10 +11,191 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-10-06 22:50 section **1j** is START HERE for COORD (the session roll to the fleet's shared account, direct messaging back, the first task a comms test with the P threads' coordinator; TRAIN Q's union 13c0800c21 is in its battery, a fixup-2 follows for one finding; no release after Q by the owner's ruling). Earlier: 2026-10-06 15:50 section **1i** was START HERE for COORD (go.* 1.24.13.4 published, master 7098b8d3f9; TRAIN Q rehearsed green and not yet assembled; the face lift is the train after it; written at 76% of the week's usage, ahead of the 90% save-state). Earlier: 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-10-17 save-state at 90% weekly: section **1l** is START HERE for EVERY lane (a full fleet roll from GitHub). Earlier: 2026-10-06 22:50 section **1j** is START HERE for COORD (the session roll to the fleet's shared account, direct messaging back, the first task a comms test with the P threads' coordinator; TRAIN Q's union 13c0800c21 is in its battery, a fixup-2 follows for one finding; no release after Q by the owner's ruling). Earlier: 2026-10-06 15:50 section **1i** was START HERE for COORD (go.* 1.24.13.4 published, master 7098b8d3f9; TRAIN Q rehearsed green and not yet assembled; the face lift is the train after it; written at 76% of the week's usage, ahead of the 90% save-state). Earlier: 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
+
+---
+
+## 1l. FLEET ROLL 2026-10-17 (save-state at 90% weekly; START HERE for EVERY lane; it supersedes 1k for CURRENT STATE)
+
+Every lane's paste prompt below resumes from GitHub ALONE. No prompt depends on a memory file, a scratchpad or an
+untracked file, and none pins a tip: each lane reads its tips by `git ls-remote` and names them in its first post.
+The hop branch is `claude/hop-go126`, at Go 1.26.9. Rulings of 2026-10-16/17 are in 1k.2 (the last blocks).
+The scout and review reports are in `docs/phase4/proposals/` on this branch.
+
+### 1l.0 State in one screen
+
+- **Hop progress (H8, the per-row reading and fix phase):** today's landings, in order:
+  - P2 inline functype; G math/big; G (B) layout guard + P2 F1; C1 mlkem gen + disclosures; P2 DisassociateIOCP;
+    C1 A1+C; P2 ж.cs peek; C1 profbuf HANG entry; P1 unhashable wording; G (A) uniform embeds; G errors;
+    R synctest-time; G typed nil; P2 field property + F3; G hand-owned embed fields;
+  - a batch of four: C1 AddCleanup, P2 untyped-constant, P2 cpuinit flags, R TestMkmalloc exclusion;
+  - C1 array-dims.
+  Every gate green; CNR shows only platform alias drift (the ruled x509 pair plus FieldAccessReinterpret's syscall
+  aliases), which COORD reverts at each merge. G's corpus DRIFT check at 3bdac60827 was CLEAN.
+- **Rows at Go 1.26, on the i9 (windows):**
+  - runtime completes, 11033 matched;
+  - net 505+3/508; net/http 1526/1526 (also on linux, by P2); encoding/json 550/550; xml 393/393; errors 80/80;
+    internal/synctest 59/59; internal/syscall/windows 7/7;
+  - os still times out (two open P2 classes, below).
+- **MERGE QUEUE (COORD merges, in order; each is G-reviewed unless noted):**
+  1. R labels 8a53b68928, R mprof+lock e408ba8b9f, COORD consumer API 9f2265d210: gating at the roll.
+  2. P1's type-assertion stack, top = claude/p1-type-assertion-forms (owner approved the explicit form). It
+     conflicted in runtime/{windows,linux,darwin}/package_info.cs. P1 is merging the tip in and REGENERATING those
+     files; then merge P1's new head.
+  3. R testlogfile 4dea95c684 (G's three divergences fixed); its push was pending at the roll, so read the ref.
+  4. C1's ToString e752628faf and LINQ 2d635fad3f, after R's merged behavioral run on the current tip.
+- **IN FLIGHT:**
+  - P2: the os reparse-blob widening (G design OK under 4 conditions) and the named-pipe deadline hang (the i9 runs
+    P2's probe, claude/p2-pipe-deadline); then the lookup_windows.cs field views.
+  - C1: the WATCHDOG (ruled (A): 15 m default plus per-row floors; crypto/dsa 120 m, go/parser 90 m). It is being
+    re-cut, because C1's previous box disk failed and its 3 local commits were lost.
+  - R: the testing-host OUTPUT FORMAT (Go decorate + Go text mode, one seat), AFTER C1's watchdog lands.
+  - G: free; reviews, then its parked claude/g-inline-constraint-lift.
+- **OWNER DECISIONS OPEN:**
+  - plain string literals (docs/phase4/proposals/plain-literal-cache.md):
+    - (1) plain everywhere, or stdlib kept hoisted;
+    - (2) any slots: keep the pre-boxed hoist, or interceptors;
+    - (3) is the 9-11 ns slower runtime-string conversion acceptable, or try a faster miss check first.
+  - P1's old-worktree cleanup needs the owner's by-name yes in P1's thread.
+- **THEN:** the PARITY STAGE (docs/phase4/proposals/visual-parity-review.md), the strings design doc, the H10
+  re-bank, the 1.26 release.
+
+### 1l.1 COORD
+
+STATE BLOCK
+```
+LANE: COORD   MODEL: Opus 5.5 / high   HOST: i7
+BRANCH: claude/coord-gtk-consumer-api 9f2265d210660e633754e48ce71cc9f6e7a0880b on-origin-yes accepted -- owner-approved C# consumer API (Must, AsReadOnlySet, async channels, pack props, opt-in aliases); merging at the roll
+BRANCH: claude/coord-plain-literal-exp efc9a4b6dc5144595f02a057e06d7bbbbfdb594d on-origin-yes cut -- the plain-literal cache EXPERIMENT (golib StringLiteralCache + two hand-edited perf copies); never merge as is
+NEXT: read the hop tip; finish the merge queue in 1l.0; relay the owner's plain-literal decisions
+BLOCKED-ON: owner hand (the plain-literal decisions)
+TOOLS: GOROOT = the backslash spelling `go env GOROOT` prints, go1.26.9 for the hop and go1.24.13 for master; DOTNET_ROOT the dotnet10 folder; pwsh is a .NET 8 global tool (launch with DOTNET_ROOT unset, set env inside)
+```
+WAKE: the inbox watcher `tP/watch-battery-inbox.sh <mailbox tip> inbox` from the coord-scratch folder, re-armed as the
+last tool call of every turn.
+
+PASTE PROMPT
+```
+You are COORD of the go2cs fleet, on the i7. Folders: the main checkout H:/Projects/go2cs (master), the mailbox clone
+H:/Projects/go2cs-mailbox (claude/mailbox), the handover worktree H:/go2cs-tmp-coord/hnd (claude/coord-handover),
+the hop gate worktree H:/go2cs-tmp-coord/hoptip (claude/hop-go126, detached at the tip), and scratch
+H:/go2cs-tmp-coord/coord-scratch (the post files and gate scripts). Read CLAUDE.md, then section 1l of
+docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (and 1k.2 for the owner's rulings), then the tail of
+docs/phase4/LEDGER.md on claude/mailbox. Read the hop tip with git ls-remote and name it in your first status.
+COMMS: G and the i9 by direct session message (titles "g -- resume sesstion" and "i9 -- Corpus migration to 1.24.13
+coordination"); C1 by direct message (one-way: C1 answers through the mailbox); P1, P2 and R through the mailbox
+(post tool .claude/coord-scripts/fleet-msg.sh after coord-identifier-census.sh entry on the file; write post files
+with the Write tool). Slack: the private fleet channel (find it with the connector's channel search), for the owner's
+pings (mention him) whenever a lane waits on him, and for milestones; nobody polls it.
+GATES per merge on the hop: go test ./... in src/go2cs under go1.26.9 (rc captured, never through a pipe), GolibTests
+and GenTests with named-test logging, go2cs.slnx and go2cs-stdlib.slnx in DEBUG, CNR (check-no-regression.ps1 via
+pwsh with DOTNET_ROOT unset); revert the ruled platform alias drift; re-cite moved docs provenance notes BY HAND with a
+fingerprint check (never docsamples -recite -write); union BOARD append conflicts; regenerate, never hand-merge,
+converter-output conflicts. Signed --no-ff merges, push after verifying the remote tip is unchanged, prune.
+OWNER PRINCIPLES: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like
+shape even at generator cost. Monitor weekly credits every turn (get_usage).
+FIRST ACTION: re-arm the inbox watcher, read new COORD inbox posts since the ledger tail, finish 1l.0's merge queue.
+```
+
+### 1l.2 G (G-LAPTOP)
+
+STATE BLOCK
+```
+LANE: G   MODEL: Opus 5.5 / default   HOST: G-LAPTOP
+BRANCH: claude/g-inline-constraint-lift 08d0cf4ecc6c9a3bf6931a22fa6e7573e78e6dee on-origin-yes cut -- anonymous inline method-set constraints lift to named interfaces (backlog item c); parked, base f84fe9f4aa, needs a rebase onto the hop before any battery
+BRANCH: claude/g-runtime-settings 5d1bad82ed3fcea4356903fad140e06e609cbc36 on-origin-yes stale -- 229 test-host csproj background-GC-off; unlanded by patch-id, status UNVERIFIED (likely overtaken by the R2R/template seats)
+BRANCH: claude/g-sink-guard-followup 01315ac1f7f762b874b40a0d0f56d4ff504345c8 on-origin-yes stale -- retire TestSetPanicOnFault's host-fatal entry; unlanded, UNVERIFIED
+BRANCH: claude/g-sort-test-sources 8ff4cd27c78bd38ed0f2e16dc31213b18ce028ef on-origin-yes stale -- sort's committed test sources take the same-name capture cast; unlanded by patch-id, UNVERIFIED
+NOTE: RECORD refs (never seats, all on origin): g-filter-capture-design, g-plan-full-trim-9-13, g-gocmp-floor-reading, g-gocmp-perf-floor, g-runtime-divergence-census, g-illink-repro, g-probes-20261005, g-float-untyped-const-compare. Superseded refs (successors landed): the g-method-value-*, g-r2m-*, g-foreign-written-rhs, g-go-namespace-shadow, g-untyped-float-operators, g-using-static-alias, g-trim-* families. Diverged local tips pushed under -local- names: g-method-value-fm-record-r2-local-e17978ff23, g-untyped-float-operators-local-33e81281f1, g-r2m-caller-closure-local-1aa82bf320.
+LOCAL-ONLY: scratch tooling (drift check, assertion census, lookup/rune probes, gate/A-B scripts; host paths inside), tar g-tools-20261017 in G-LAPTOP's scratch root, sha256-16 318634907bb94ccc
+WORKTREE: gic on claude/g-inline-constraint-lift, clean, pushed (08d0cf4ecc)
+NEXT: take COORD's next order from hop tip 908642b2d4; if none, rebase gic 08d0cf4ecc onto the tip and size its corpus footprint. G is the design and review lane: every converter/gen/golib seat by another lane gets G's review before merge.
+READ-FIRST: docs/phase4/RESUME-SESSIONS.md on claude/coord-handover; docs/phase4/BOARD-next-validation-candidates.md at the hop tip; .claude/skills/corpus-reconvert + gate-forensics
+BLOCKED-ON: none
+TOOLS: GOROOT go1.26.9 (GOTOOLCHAIN=local, CGO_ENABLED=0); DOTNET_ROOT .NET SDK 10.0.400; the pwsh dotnet tool for check-no-regression.ps1; py -3
+COMMS: COORD -> G by a direct session message to the session titled "g -- resume sesstion" (sic); G answers the same way.
+```
+WAKE: COORD sends direct session messages to the session titled "g -- resume sesstion"; G answers the same way.
+
+PASTE PROMPT
+```
+You are G, the go2cs fleet's design and review lane, on G-LAPTOP. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/<you>/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe. FIRST ACTION: post your tips to COORD, then take COORD's next order; if none, rebase claude/g-inline-constraint-lift onto the hop tip and size its corpus footprint.
+```
+
+### 1l.3 i9
+
+STATE BLOCK
+```
+LANE: i9   MODEL: Opus 5.5 (claude-opus-5-5) / default effort   HOST: i9
+BRANCH: claude/i9-h8-readings 5d7b32d3daa5f9758db642b7384c2a02fcdf42f6 on-origin-yes cut -- the H8 readings record: docs/phase4/data/h8-go126/i9-readings/ (summary-rows.tsv, 127 rows with their latest reading; readings-log.txt, all 30 posts to COORD); data only, parent hop 908642b2d4
+BRANCH: claude/i9-recon-go126 bd69190547fc9ae27410625d4294ccff93e32f37 on-origin-yes stale -- Go 1.26 recon data ref, not merged; history only
+BRANCH: claude/i9-go125-recon dc0e159ccfc26e1cf71194f7e5dacf66481889df on-origin-yes stale -- Go 1.25 recon data ref, not merged; history only
+NOTE: claude/i9-predicted-h7 50ee15fef4 and claude/i9-crosspkg-value-promotion 8213221317 are LANDED (in the hop); their refs were pruned after merge. The other 64 local claude/i9-* refs are ancestors of both the hop and master.
+LOCAL-ONLY: 15 superseded/scratch refs (archive/i9-combo-reading-1/2, archive/i9-nugetgo-rt-rehearsal, backup/i9-nugetgo-pack-pre-census, claude/i9-address-variant-pairing, claude/i9-aot-metadata-token, claude/i9-crosspkg-promoted-design, claude/i9-d4-on-a1f-local, claude/i9-docs-reference-step2, claude/i9-incremental-cs-writes, claude/i9-r1a-design, tmp-memo-orig, tmp-memo-orig2, tmp-packpaths-orig, tmp-sym-orig); preserved: one bundle on the i9, logs/state/i9-localonly-20261017.bundle (verify rc 0, 15 refs, 235 MB) sha256-16 d897f32b293be180
+WORKTREE: repo (main checkout) master, clean. i9-hop and i9-pred: clean, landed. i9-h8 .. -h8o: 15 throwaway H8 trees (detached, regenerated -tests files only); removal approved 2026-10-17.
+NEXT: on COORD's next posted hop tip (908642b2d4 now): the FULL runtime row alone (wrapper floor 120 m) once C1's array-dims and P1's print seats land; os is held for P2's reparse-content and named-pipe-hang seats. Start: a gated fetch, verify HEAD == tip, a fresh detached worktree, build the converter, then h8-drive.
+STANDING CONSTRAINTS (verbatim from the i9, owner orders):
+ - crypto/tls NEVER on the i9; TLS-touching rows (net/http, httptest, smtp, crypto/x509, http/cgi, httptrace, os/exec) stay OFF the i9 (the owner's one-rerun net/http experiment is used; a peer cannot extend it).
+ - ONE heavy row at a time, alone; WHEA read per row; on a fault STOP, retain, report, one retry only after a light task.
+ - a git fetch fault = ONE retry, then `git fsck --full` (pack.threads=4), verify the tip with cat-file/verify-commit; any launcher behind a fetch is gated on the fetch AND on the tree existing; OWNER-HAND goes to COORD at once.
+BLOCKED-ON: landing (C1 array-dims, P1 print -> runtime; P2 reparse + pipe hang -> os)
+TOOLS: GOROOT go1.26.9, GOTOOLCHAIN=local, GOMAXPROCS=4, GOFLAGS=-p=4, CGO_ENABLED=0, UseSharedCompilation=false, dotnet 10.0.402 (-m:4), pwsh 7.6.6 (dotnet tool; launched with DOTNET_ROOT unset), Windows PowerShell 5.1 (never for the stub census)
+COMMS: COORD -> i9 by a direct session message to the session titled "i9 -- Corpus migration to 1.24.13 coordination"; the i9 answers the same way.
+```
+WAKE: COORD sends direct session messages to the session titled "i9 -- Corpus migration to 1.24.13 coordination"; the i9 answers the same way.
+
+PASTE PROMPT
+```
+You are the i9 lane of the go2cs fleet, the Windows reading host. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/<you>/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe. STANDING CONSTRAINTS are in your STATE BLOCK above; obey them verbatim. FIRST ACTION: post your tips to COORD; run P2's named-pipe probe (claude/p2-pipe-deadline) if not yet posted, then the full runtime row on the posted hop tip, alone.
+```
+
+### 1l.4 P1 (cloud, Sonnet pilot)
+
+STATE BLOCK
+```
+LANE: P1
+MODEL: Sonnet 5.5 / default effort
+HOST: cloud container (linux)
+BRANCH: claude/p1-runtime-errors b3e6625be2efbf32a60198af72d74020dd1766e8 on-origin-yes announced -- runtime error text seat A+B+C+D2, stacked on p1-unhashable-wording and the hop merge
+BRANCH: claude/p1-type-assertion-error aa2cf6f43dbc99e38af1f64e9a9e5817bf4e02df on-origin-yes announced -- D1, *runtime.TypeAssertionError and its text
+BRANCH: claude/p1-type-assertion-missing-method e8cdc282372b4f7ab2f4e37a8b1e69e956f14d8c on-origin-yes accepted -- R2, first missing method named (G OK)
+BRANCH: claude/p1-type-assertion-source 56411daf02145567921cd4f706f189f7310e26a3 on-origin-yes announced -- R1 part 1, golib _<TSource,T> and the CheckTypeAssertionPanic entry
+BRANCH: claude/p1-type-assertion-forms 3f20df17e1982b62b40d75f23b7acbb5d4673c1f on-origin-yes accepted -- R1 part 2, three call spellings; G OK incl. embedded-supertype fix; merge waits on the owner's OK for the explicit x._<I,T>() form
+BRANCH: claude/p1-docs-polish 6b496dd2d2448f384edf7c43844830d5a02d946d on-origin-yes landed -- already in master and in the hop tip
+BRANCH: claude/p1-tour-pin 3e918939fc71b1e40447aeeeb96224bce5c05790 on-origin-yes landed -- already in master and in the hop tip
+LOCAL-ONLY: claude/p1-union-measure a6d8e5a5c9398f848351c5d568444003f05ba074 measurement union tree of other lanes' commits, not for merge preserved-how: bundle p1-archive/claude_p1-union-measure.bundle (prerequisites on origin, verified) sha256-16 06e8a66e7e9133e7
+LOCAL-ONLY: proj/rt-measure 5661a81d083f5cbff42f59f932da29aa9647d513 measurement merge tree, not for merge preserved-how: bundle p1-archive/proj_rt-measure.bundle (prerequisites on origin, verified) sha256-16 baff9767049f4411
+WORKTREE: p1flt claude/p1-type-assertion-source uncommitted-files-0 clean
+WORKTREE: p1gen claude/p1-type-assertion-forms uncommitted-files-0 clean
+WORKTREE: p1diag detached b095b8367f uncommitted-files-0 clean (H8 reading tree)
+WORKTREE: p1docs claude/p1-docs-polish uncommitted-files-0 landed, awaiting the owner's by-name yes to remove
+WORKTREE: p1tour claude/p1-tour-pin uncommitted-files-0 landed, awaiting the same yes
+WORKTREE: p1un claude/p1-union-measure uncommitted-files-0 bundled above, awaiting the same yes
+WORKTREE: rt proj/rt-measure uncommitted-files-50 preserved-how: tracked patch 3bb7fcc580d750d7 and untracked tgz 678f838db1cba17c (p1-archive/rt-2026-10-17-*), sha256-16
+WORKTREE: p1p detached 446d2c8ba0 uncommitted-files-23 preserved-how: tracked patch 39c0db5f084cce57 and untracked tgz 15d7f2d51c40e504 (p1-archive/p1p-2026-10-17-*), sha256-16
+WORKTREE: p1q detached 446d2c8ba0 uncommitted-files-4 preserved-how: tracked patch 365e03a51095e5fa (p1-archive/p1q-2026-10-17-tracked.patch), sha256-16
+NEXT: on resume, read COORD's reply to the explicit-form question and, if the owner approved it, tell COORD the merge order is runtime-errors, type-assertion-error, -missing-method, -source, -forms starting from 3f20df17e1982b62b40d75f23b7acbb5d4673c1f; C1's frame-line row follows COORD's ruling on proposal 4a57c65f6.
+READ-FIRST: mailbox inbox/P1/20261017T161815Z-COORD.md and 20261017T123207Z-COORD.md; BOARD row "a failed single-value type assertion names its static source interface" on 3f20df17e1; src/go2cs/convTypeAssertExpr.go assertSourceFormFor; team memory p1-type-assertion-state
+BLOCKED-ON: owner hand (OK for the explicit x._<I,T>() form; by-name yes to remove 6 old worktrees, run git clean -X and delete merged local branches); lane (C1 frame-line ruling)
+TOOLS: GOROOT go1.26.9 (corpus toolchain, version.props; CGO_ENABLED=0 for -stdlib on linux), DOTNET_ROOT .NET 10 (10.0.112), python 3.11, no pwsh (behavioral runner run directly with GoTargetOS=linux)
+```
+WAKE: Mailbox only: COORD posts to docs/phase4/inbox/P1/; P1 posts to docs/phase4/inbox/COORD/ with the fleet-msg tool.
+
+PASTE PROMPT
+```
+You are P1, the go2cs fleet's Sonnet pilot lane (mechanical work), in a cloud container. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/<you>/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe. FIRST ACTION: merge the hop tip into claude/p1-type-assertion-forms, REGENERATE src/core/runtime/{windows,linux,darwin}/package_info.cs with the merged converter (seeded -stdlib runtime emission, 3 targets), confirm builds, post the new head.
+```
+
+### 1l.5 C1, P2, R: STATE BLOCKS pending at this revision
+
+Their blocks are being folded in. Until then: C1 (cloud; COORD sends direct messages, C1 answers through the mailbox)
+holds claude/c1-runtime-array-dims (LANDED at the roll) and is re-cutting the WATCHDOG; P2 (mailbox) holds the os
+reparse-blob and named-pipe work plus claude/p2-pipe-deadline; R (mailbox, R-LAPTOP) holds claude/r-testlogfile
+(fixes pending push), claude/r-traceback-labels and claude/r-mprof-alloc-frames (merging), and the merged
+ToString+LINQ behavioral run. Each resumes with the shared prompt above plus its inbox.
 
 ---
 
