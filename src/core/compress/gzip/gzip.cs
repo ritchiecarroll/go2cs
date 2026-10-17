@@ -26,7 +26,7 @@ public static UntypedInt HuffmanOnly => /* flate.HuffmanOnly */ -2;
 // A Writer is an [io.WriteCloser].
 // Writes to a Writer are compressed and written to w.
 partial struct Writer {
-    public partial ref Header Header { get; }      // written at first call to Write, Flush, or Close
+    /*embed*/ public Header Header;      // written at first call to Write, Flush, or Close
     internal io.Writer w;
     internal nint level;
     internal bool wroteHeader;

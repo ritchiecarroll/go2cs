@@ -82,7 +82,7 @@ internal static bool isGoFile(fs.FileInfo fi) {
 }
 
 internal partial struct bundle {
-    public partial ref ж<global::go.go.doc_package.Package> Package { get; }
+    /*embed*/ public ж<global::go.go.doc_package.Package> Package;
     public ж<token.FileSet> FSet;
 }
 

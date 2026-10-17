@@ -323,7 +323,7 @@ partial interface File :
 
 // helper types to turn a []byte into a File
 partial struct sectionReadCloser {
-    public partial ref ж<io_package.SectionReader> SectionReader { get; }
+    /*embed*/ public ж<io_package.SectionReader> SectionReader;
     /*embed*/ public io_package.Closer Closer;
 }
 

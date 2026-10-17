@@ -22,7 +22,7 @@ internal const nuint is64bit = /* ^uint(0) >> 63 */ 1; // 0 for 32-bit hosts, 1 
 // NOTE fields are exported to be used by TestSiginfoChildLayout.
 partial struct SiginfoChild {
     public int32 Signo;
-    internal partial ref siErrnoCode siErrnoCode { get; }                // Two int32 fields, swapped on MIPS.
+    /*embed*/ internal siErrnoCode siErrnoCode;                // Two int32 fields, swapped on MIPS.
     internal array<int32> _ = new(is64bit); // Extra padding for 64-bit hosts only.
 // End of common part. Beginning of signal-specific part.
     public int32 Pid;

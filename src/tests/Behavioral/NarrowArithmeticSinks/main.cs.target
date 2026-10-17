@@ -41,7 +41,7 @@ internal static @string variadic(params ꓸꓸꓸany xsʗp) {
 }
 
 internal static @string gen<T>(T x) {
-    return fmt.Sprintf("%v %T"u8, x, x);
+    return fmt.Sprintf("%v %T"u8, (x).OrTypedNilOf(), (x).OrTypedNilOf());
 }
 
 internal static void arm(@string @class, Func<@string> f) {

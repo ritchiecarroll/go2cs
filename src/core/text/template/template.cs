@@ -29,8 +29,8 @@ partial struct common {
 // as unexported by all other clients.
 partial struct Template {
     internal @string name;
-    public partial ref ж<text.template.parse_package.Tree> Tree { get; }
-    internal partial ref ж<common> common { get; }
+    /*embed*/ public ж<text.template.parse_package.Tree> Tree;
+    /*embed*/ internal ж<common> common;
     internal @string leftDelim;
     internal @string rightDelim;
 }

@@ -24,20 +24,20 @@ internal static void Store(this ref inner g, /*[4]*/ ж<array<byte>> Ꮡout) {
 }
 
 partial struct acc {
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
 }
 
 partial struct deep {
-    internal partial ref acc acc { get; }
+    /*embed*/ internal acc acc;
 }
 
 partial struct Hash {
-    internal partial ref acc acc { get; }
+    /*embed*/ internal acc acc;
     internal bool finalized;
 }
 
 partial struct DeepHash {
-    internal partial ref deep deep { get; }
+    /*embed*/ internal deep deep;
 }
 
 public static void Write(this ref Hash h, slice<byte> p) {

@@ -112,7 +112,7 @@ public static (ж<IPAddr>, error) ResolveIPAddr(@string network, @string address
 // IPConn is the implementation of the [Conn] and [PacketConn] interfaces
 // for IP network connections.
 partial struct IPConn {
-    internal partial ref conn conn { get; }
+    /*embed*/ internal conn conn;
 }
 
 // SyscallConn returns a raw network connection.

@@ -616,7 +616,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_capacity = capacity - low;
 
         // `make([]T, len, cap)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(m_array, capacity);
+        GoMemProfile.Charge<T>(m_array, capacity, GoAllocEntry.MakeSlice);
     }
 
     // A `make([]T, len[, cap])` whose ELEMENT zero value must itself be constructed, because
@@ -1529,7 +1529,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (slice == nil)
         {
             newArray = AllocationCounter.NewArray<T>(elems.Length);
-            GoMemProfile.Charge<T>(newArray, elems.Length);
+            GoMemProfile.Charge<T>(newArray, elems.Length, GoAllocEntry.GrowSlice);
             elems.CopyTo(newArray);
             return new slice<T>(newArray);
         }
@@ -1568,7 +1568,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // aliases it. The mapping plays the role of "the old array" in Go's own spec.
         nint newCapacity = GrowCapacity(slice, slice.Length + elems.Length);
         newArray = AllocationCounter.NewArray<T>(newCapacity);
-        GoMemProfile.Charge<T>(newArray, newCapacity);
+        GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
         slice.ToSpan().CopyTo(newArray);
         elems.CopyTo(newArray.AsSpan((int)slice.Length));
@@ -1673,7 +1673,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (slice == nil)
         {
             newArray = AllocationCounter.NewArray<T>(count);
-            GoMemProfile.Charge<T>(newArray, count);
+            GoMemProfile.Charge<T>(newArray, count, GoAllocEntry.GrowSlice);
             return new slice<T>(newArray);
         }
 
@@ -1699,7 +1699,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         nint newCapacity = GrowCapacity(slice, slice.Length + count);
         newArray = AllocationCounter.NewArray<T>(newCapacity);
-        GoMemProfile.Charge<T>(newArray, newCapacity);
+        GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
         slice.ToSpan().CopyTo(newArray);
 
@@ -1944,6 +1944,76 @@ public static class SliceExtensions
     public static slice<T> slice<T>(this array<T> array, nint low, nint high)
     {
         return array.Slice2(low, high);
+    }
+
+    // Go's slice of a POINTER-TO-ARRAY, `p[low:high:max]` with p a `*[N]T`, which Go dereferences for
+    // the expression: the converter emits these for an anonymous array's box (`p.slice(…)`), every
+    // form a call. A box over NATIVE memory answers its element window (TryGetNativeArrayView) and is
+    // sliced there, because it has no array<T> to dereference -- Go's *[N]T over native bytes points at
+    // bare elements with no header, and its Value refuses by name: os's createMountPoint,
+    // `(*[0xffff]uint16)(unsafe.Pointer(&buf.PathBuffer[0]))[:n:n]` over a reparse buffer viewed through
+    // unsafe.Pointer. The window's bounds are the array's LENGTH and its panics the array's texts
+    // ("with length"), exactly the checks of the array<T> overloads above. Every other box is
+    // dereferenced as `(~p)` was, so a managed array keeps its route, its checks and its nil panic.
+    public static slice<T> slice<T>(this ж<array<T>> pointer)
+    {
+        if (tryNativeArrayView(pointer, out slice<T> view))
+            return view;
+
+        return (~pointer)[..];
+    }
+
+    public static slice<T> slice<T>(this ж<array<T>> pointer, nint low)
+    {
+        if (tryNativeArrayView(pointer, out slice<T> view))
+            return nativeArraySlice2(view, low, view.Length);
+
+        return (~pointer).slice(low);
+    }
+
+    public static slice<T> slice<T>(this ж<array<T>> pointer, nint low, nint high)
+    {
+        if (tryNativeArrayView(pointer, out slice<T> view))
+            return nativeArraySlice2(view, low, high);
+
+        return (~pointer).slice(low, high);
+    }
+
+    public static slice<T> slice<T>(this ж<array<T>> pointer, nint low, nint high, nint max)
+    {
+        if (tryNativeArrayView(pointer, out slice<T> view))
+        {
+            if (low < 0 || high < low || max < high || max > view.Length)
+                throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(low, high, max, view.Length);
+
+            return view.slice(low, high, max);
+        }
+
+        return (~pointer).slice(low, high, max);
+    }
+
+    // The native window of a pointer-to-array; false for every box that is not over native memory (one virtual
+    // call answering null). A nil pointer answers false too, so it meets the dereference's nil panic.
+    private static bool tryNativeArrayView<T>(ж<array<T>> pointer, out slice<T> view)
+    {
+        if (pointer?.TryGetNativeArrayView(typeof(T)) is slice<T> native)
+        {
+            view = native;
+            return true;
+        }
+
+        view = default;
+        return false;
+    }
+
+    // array<T>.Slice2's checks over a native window: high against the array's length, then low against high,
+    // both unsigned, with the array's text.
+    private static slice<T> nativeArraySlice2<T>(slice<T> view, nint low, nint high)
+    {
+        if ((nuint)high > (nuint)view.Length || (nuint)low > (nuint)high)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(low, high, view.Length);
+
+        return view.slice(low, high);
     }
 
     // Go's 2-index slice of a string LITERAL, which converted code holds as a `"..."u8` span: s[low:] and

@@ -152,7 +152,7 @@ private static readonly @string prefixᶜ = "generic:"u8;
 
 internal static @string genericLabel<T>(T v) {
     @string prefix = prefixᶜ;
-    return fmt.Sprint(prefix, v);
+    return fmt.Sprint(prefix, (v).OrTypedNilOf());
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -200,7 +200,7 @@ internal static void Main() {
     fmt.Println(concatenated());
     fmt.Println(classify(matchedˢ), classify(otherˢ));
     fmt.Println(bytesConst());
-    fmt.Println(genericLabel(7), genericLabel((@string)"x"));
+    fmt.Println(genericLabel<nint>(7), genericLabel((@string)"x"));
     var p = Ꮡ(new parser(nil));
     fmt.Println(p.name(), p.name());
     fmt.Println(loop());

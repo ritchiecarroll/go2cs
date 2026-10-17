@@ -33,7 +33,7 @@ internal static T negateNamedSigned<T>(T x)
 }
 
 internal static void Main() {
-    fmt.Println(negate(5));
+    fmt.Println(negate<nint>(5));
     fmt.Println(negate((int32)(-7)));
     fmt.Println(negate((int64)(1099511627776L)));
 
@@ -42,7 +42,7 @@ internal static void Main() {
     fmt.Println(negate((uint64)1));
     fmt.Println(negate((nuint)3));
 
-    fmt.Println(negateSum(10, 32));
+    fmt.Println(negateSum<nint>(10, 32));
     fmt.Println(negateSum((uint32)2, (uint32)3));
 
     fmt.Println(negateNamed(((counter)0)));

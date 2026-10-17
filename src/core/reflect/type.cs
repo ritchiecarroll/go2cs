@@ -330,7 +330,7 @@ public static ΔKind Ptr => /* Pointer */ 22;
 
 // Embed this type to get common/uncommon
 partial struct Δcommon {
-    public partial ref @internal.abi_package.Type Type { get; }
+    /*embed*/ public @internal.abi_package.Type Type;
 }
 
 // rtype is the common implementation of most values.
@@ -356,7 +356,7 @@ public static ΔChanDir BothDir => /* RecvDir | SendDir */ 3; // chan
 
 // interfaceType represents an interface type.
 partial struct interfaceType {
-    public partial ref @internal.abi_package.ΔInterfaceType InterfaceType { get; } // can embed directly because not a public type.
+    /*embed*/ public @internal.abi_package.ΔInterfaceType InterfaceType; // can embed directly because not a public type.
 }
 
 internal static abiꓸName nameOff(this ж<interfaceType> Ꮡt, aNameOff off) {
@@ -385,17 +385,17 @@ internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) {
 
 // ptrType represents a pointer type.
 partial struct ptrType {
-    public partial ref @internal.abi_package.PtrType PtrType { get; }
+    /*embed*/ public @internal.abi_package.PtrType PtrType;
 }
 
 // sliceType represents a slice type.
 partial struct sliceType {
-    public partial ref @internal.abi_package.SliceType SliceType { get; }
+    /*embed*/ public @internal.abi_package.SliceType SliceType;
 }
 
 // structType represents a struct type.
 partial struct structType {
-    public partial ref @internal.abi_package.ΔStructType StructType { get; }
+    /*embed*/ public @internal.abi_package.ΔStructType StructType;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -415,7 +415,7 @@ internal static @string pkgPath(abiꓸName n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy((~(ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)))[..], (~array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4))[..]);
+    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
     var pkgPathName = new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.Name();
 }
@@ -1514,7 +1514,7 @@ partial struct cacheKey {
 // FuncOf does not share the common lookupCache since cacheKey is not
 // sufficient to represent functions unambiguously.
 partial struct funcLookupCacheᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; } // Guards stores (but not loads) on m.
+    /*embed*/ public sync_package.Mutex Mutex; // Guards stores (but not loads) on m.
     // m is a map[uint32][]*rtype keyed by the hash calculated in FuncOf.
     // Elements of m are append-only and thus safe for concurrent reading.
     internal Δsync.Map m;
@@ -1616,7 +1616,7 @@ internal static bool isReflexive(ж<abi.Type> Ꮡt) {
     }
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<abi.Type, arrayType>();
-        return isReflexive((~tt).Elem);
+        return isReflexive(tt.of(arrayType.ᏑElem).Value);
     }
     if (exprᴛ1 == Struct) {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
@@ -1649,7 +1649,7 @@ internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
     }
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<abi.Type, arrayType>();
-        return needKeyUpdate((~tt).Elem);
+        return needKeyUpdate(tt.of(arrayType.ᏑElem).Value);
     }
     if (exprᴛ1 == Struct) {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
@@ -1676,7 +1676,7 @@ internal static bool hashMightPanic(ж<abi.Type> Ꮡt) {
     }
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<abi.Type, arrayType>();
-        return hashMightPanic((~tt).Elem);
+        return hashMightPanic(tt.of(arrayType.ᏑElem).Value);
     }
     if (exprᴛ1 == Struct) {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
@@ -1719,7 +1719,7 @@ internal static ж<funcLookupCacheᴛ1> ᏑstructLookupCache = new StandardBox<f
 internal static ref funcLookupCacheᴛ1 structLookupCache => ref ᏑstructLookupCache.Value;
 
 partial struct structTypeUncommon {
-    internal partial ref structType structType { get; }
+    /*embed*/ internal structType structType;
     internal uncommonType u;
 }
 

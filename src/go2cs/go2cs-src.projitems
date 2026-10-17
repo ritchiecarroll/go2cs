@@ -13,6 +13,7 @@
     <None Include="$(MSBuildThisFileDirectory)adapterNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)adapterPassSeparation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)adapterStructLocality_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)addCleanupCaptures.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
@@ -33,6 +34,8 @@
     <None Include="$(MSBuildThisFileDirectory)arrayCloneOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayCloneShadow_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsNilCargo.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)assemblyScopedAlias_test.go" />
@@ -171,6 +174,9 @@
     <None Include="$(MSBuildThisFileDirectory)escapedArrayElementAddress_test.go" />
     <None Include="$(MSBuildThisFileDirectory)eventFraming_test.go" />
     <None Include="$(MSBuildThisFileDirectory)expressionComments_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccess.go" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccessCollisions.txt" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccessEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />
@@ -583,6 +589,7 @@
     <None Include="$(MSBuildThisFileDirectory)LICENSE-EXCEPTION" />
     <None Include="$(MSBuildThisFileDirectory)rootGoTypeDescriptor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeParamNilArg_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeParamTypedNil_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeParamConstArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeParamFloatConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedConstMinMaxArg_test.go" />

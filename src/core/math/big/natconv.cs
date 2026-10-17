@@ -519,7 +519,7 @@ partial struct divisor {
 }
 
 partial struct cacheBase10ᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal array<divisor> table = new(64); // cached divisors for base 10
 }
 internal static ж<cacheBase10ᴛ1> ᏑcacheBase10 = new StandardBox<cacheBase10ᴛ1>(new cacheBase10ᴛ1(nil));

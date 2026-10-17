@@ -238,7 +238,7 @@ internal static nint cmp(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
 // A PkgName represents an imported Go package.
 // PkgNames don't have a type.
 partial struct PkgName {
-    internal partial ref @object @object { get; }
+    /*embed*/ internal @object @object;
     internal ж<Package> imported;
 }
 
@@ -256,7 +256,7 @@ public static ж<Package> Imported(this ref PkgName obj) {
 
 // A Const represents a declared constant.
 partial struct Const {
-    internal partial ref @object @object { get; }
+    /*embed*/ internal @object @object;
     internal constant.Value val;
 }
 
@@ -282,7 +282,7 @@ internal static void isDependency(this ref Const _) {
 // a type parameter ([TypeParam]),
 // or a predeclared type such as int or error.
 partial struct TypeName {
-    internal partial ref @object @object { get; }
+    /*embed*/ internal @object @object;
 }
 
 // NewTypeName returns a new type name denoting the given typ.
@@ -342,7 +342,7 @@ public static bool IsAlias(this ж<TypeName> Ꮡobj) {
 
 // A Var represents a declared variable (including function parameters and results, and struct fields).
 partial struct Var {
-    internal partial ref @object @object { get; }
+    /*embed*/ internal @object @object;
     internal ж<Var> origin; // if non-nil, the Var from which this one was instantiated
     internal VarKind kind;
     internal bool embedded; // if set, the variable is an embedded struct field, and name is the type name
@@ -460,7 +460,7 @@ internal static void isDependency(this ref Var _) {
 // (interface) method. Its Type() is always a *Signature.
 // An abstract method may belong to many interfaces due to embedding.
 partial struct Func {
-    internal partial ref @object @object { get; }
+    /*embed*/ internal @object @object;
     internal bool hasPtrRecv_;  // only valid for methods that don't have a type yet; use hasPtrRecv() to read
     internal ж<Func> origin; // if non-nil, the Func from which this one was instantiated
 }
@@ -564,7 +564,7 @@ internal static void isDependency(this ref Func _) {
 // A Label represents a declared label.
 // Labels don't have a type.
 partial struct Label {
-    internal partial ref @object @object { get; }
+    /*embed*/ internal @object @object;
     internal bool used; // set if the label was used
 }
 
@@ -576,7 +576,7 @@ public static ж<Label> NewLabel(tokenꓸPos pos, ж<Package> Ꮡpkg, @string na
 // A Builtin represents a built-in function.
 // Builtins don't have a valid type.
 partial struct Builtin {
-    internal partial ref @object @object { get; }
+    /*embed*/ internal @object @object;
     internal builtinId id;
 }
 
@@ -586,7 +586,7 @@ internal static ж<Builtin> newBuiltin(builtinId id) {
 
 // Nil represents the predeclared value nil.
 partial struct Nil {
-    internal partial ref @object @object { get; }
+    /*embed*/ internal @object @object;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

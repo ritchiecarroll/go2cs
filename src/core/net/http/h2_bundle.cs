@@ -760,7 +760,7 @@ internal static slice<ж<http2ClientConn>> http2filterOutClientConn(slice<ж<htt
 // which never dials. We let the HTTP/1.1 client dial and use its TLS
 // connection instead.
 partial struct http2noDialClientConnPool {
-    internal partial ref ж<http2clientConnPool> http2clientConnPool { get; }
+    /*embed*/ internal ж<http2clientConnPool> http2clientConnPool;
 }
 
 internal static (ж<http2ClientConn>, error) GetClientConn(this http2noDialClientConnPool p, ж<Request> Ꮡreq, @string addr) {
@@ -983,19 +983,19 @@ internal static ref array<sync.Pool> http2dataChunkPools => ref Ꮡhttp2dataChun
 internal static slice<byte> http2getDataBufferChunk(int64 size) {
     switch (ᐧ) {
     case {} when size <= ((int64)1 << (int)(10)): {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(0).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(0).Get()._<ж<array<byte>>>().slice();
     }
     case {} when size <= ((int64)2 << (int)(10)): {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(1).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(1).Get()._<ж<array<byte>>>().slice();
     }
     case {} when size <= ((int64)4 << (int)(10)): {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(2).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(2).Get()._<ж<array<byte>>>().slice();
     }
     case {} when size <= ((int64)8 << (int)(10)): {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(3).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(3).Get()._<ж<array<byte>>>().slice();
     }
     default: {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(4).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(4).Get()._<ж<array<byte>>>().slice();
     }}
 }
 
@@ -2038,7 +2038,7 @@ internal static error checkFrameOrder(this ref http2Framer fr, http2FrameHeader 
 // associated with a stream.
 // See https://httpwg.org/specs/rfc7540.html#rfc.section.6.1
 partial struct http2DataFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     internal slice<byte> data;
 }
 
@@ -2177,7 +2177,7 @@ internal static error startWriteDataPadded(this ref http2Framer f, uint32 stream
 //
 // See https://httpwg.org/specs/rfc7540.html#SETTINGS
 partial struct http2SettingsFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     internal slice<byte> p;
 }
 
@@ -2335,7 +2335,7 @@ internal static error WriteSettingsAck(this ж<http2Framer> Ꮡf) {
 // is still functional.
 // See https://httpwg.org/specs/rfc7540.html#rfc.section.6.7
 partial struct http2PingFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     public array<byte> Data = new(8);
 }
 
@@ -2377,7 +2377,7 @@ internal static error WritePing(this ж<http2Framer> Ꮡf, bool ack, /*[8]*/ arr
 // A GoAwayFrame informs the remote peer to stop creating streams on this connection.
 // See https://httpwg.org/specs/rfc7540.html#rfc.section.6.8
 partial struct http2GoAwayFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     public uint32 LastStreamID;
     public http2ErrCode ErrCode;
     internal slice<byte> debugData;
@@ -2426,7 +2426,7 @@ internal static error WriteGoAway(this ж<http2Framer> Ꮡf, uint32 maxStreamID,
 // An UnknownFrame is the frame type returned when the frame type is unknown
 // or no specific frame type parser exists.
 partial struct http2UnknownFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     internal slice<byte> p;
 }
 
@@ -2447,7 +2447,7 @@ internal static (http2Frame, error) http2parseUnknownFrame(ж<http2frameCache> _
 // A WindowUpdateFrame is used to implement flow control.
 // See https://httpwg.org/specs/rfc7540.html#rfc.section.6.9
 partial struct http2WindowUpdateFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     public uint32 Increment; // never read with high bit set
 }
 
@@ -2505,7 +2505,7 @@ internal static error WriteWindowUpdate(this ж<http2Framer> Ꮡf, uint32 stream
 // A HeadersFrame is used to open a stream and additionally carries a
 // header block fragment.
 partial struct http2HeadersFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     // Priority is set if FlagHeadersPriority is set in the FrameHeader.
     public http2PriorityParam Priority;
     internal slice<byte> headerFragBuf; // not owned
@@ -2654,8 +2654,8 @@ internal static error WriteHeaders(this ж<http2Framer> Ꮡf, http2HeadersFrameP
 // A PriorityFrame specifies the sender-advised priority of a stream.
 // See https://httpwg.org/specs/rfc7540.html#rfc.section.6.3
 partial struct http2PriorityFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
-    internal partial ref http2PriorityParam http2PriorityParam { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
+    /*embed*/ internal http2PriorityParam http2PriorityParam;
 }
 
 internal static http2PriorityParam http2defaultRFC9218Priority = new http2PriorityParam(
@@ -2749,7 +2749,7 @@ internal static error WritePriority(this ж<http2Framer> Ꮡf, uint32 streamID, 
 // A RSTStreamFrame allows for abnormal termination of a stream.
 // See https://httpwg.org/specs/rfc7540.html#rfc.section.6.4
 partial struct http2RSTStreamFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     public http2ErrCode ErrCode;
 }
 
@@ -2787,7 +2787,7 @@ internal static error WriteRSTStream(this ж<http2Framer> Ꮡf, uint32 streamID,
 // A ContinuationFrame is used to continue a sequence of header block fragments.
 // See https://httpwg.org/specs/rfc7540.html#rfc.section.6.10
 partial struct http2ContinuationFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     internal slice<byte> headerFragBuf;
 }
 
@@ -2833,7 +2833,7 @@ internal static error WriteContinuation(this ж<http2Framer> Ꮡf, uint32 stream
 // A PushPromiseFrame is used to initiate a server stream.
 // See https://httpwg.org/specs/rfc7540.html#rfc.section.6.6
 partial struct http2PushPromiseFrame {
-    internal partial ref http2FrameHeader http2FrameHeader { get; }
+    /*embed*/ internal http2FrameHeader http2FrameHeader;
     public uint32 PromiseID;
     internal slice<byte> headerFragBuf; // not owned
 }
@@ -2993,7 +2993,7 @@ partial interface http2headersOrContinuation :
 // This type of frame does not appear on the wire and is only returned
 // by the Framer when Framer.ReadMetaHeaders is set.
 partial struct http2MetaHeadersFrame {
-    internal partial ref ж<http2HeadersFrame> http2HeadersFrame { get; }
+    /*embed*/ internal ж<http2HeadersFrame> http2HeadersFrame;
     // Fields are the fields contained in the HEADERS and
     // CONTINUATION frames. The underlying slice is owned by the
     // Framer and must not be retained after the next call to
@@ -8100,7 +8100,7 @@ partial struct http2Transport {
     internal ж<Transport> t1;
     internal sync.Once connPoolOnce;
     internal http2ClientConnPool connPoolOrDef; // non-nil version of ConnPool
-    internal partial ref ж<http2transportTestHooks> http2transportTestHooks { get; }
+    /*embed*/ internal ж<http2transportTestHooks> http2transportTestHooks;
 }
 
 // Hook points used for testing.
@@ -11906,7 +11906,7 @@ internal static error /*err*/ http2registerHTTPSProtocol(ж<Transport> Ꮡt, htt
 // and the http1.Transport can use type assertions to call non-RoundTrip methods on it.
 // This lets us expose, for example, NewClientConn to net/http.
 partial struct http2noDialH2RoundTripper {
-    internal partial ref ж<http2Transport> http2Transport { get; }
+    /*embed*/ internal ж<http2Transport> http2Transport;
 }
 
 internal static (ж<Response>, error) RoundTrip(this http2noDialH2RoundTripper rt, ж<Request> Ꮡreq) {

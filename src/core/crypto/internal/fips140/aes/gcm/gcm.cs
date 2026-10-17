@@ -18,7 +18,7 @@ partial struct GCM {
     internal aes.Block cipher;
     internal nint nonceSize;
     internal nint tagSize;
-    internal partial ref gcmPlatformData gcmPlatformData { get; }
+    /*embed*/ internal gcmPlatformData gcmPlatformData;
 }
 
 public static (ж<GCM>, error) New(ж<aes.Block> Ꮡcipher, nint nonceSize, nint tagSize) {

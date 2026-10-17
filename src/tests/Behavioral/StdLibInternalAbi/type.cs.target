@@ -6,6 +6,7 @@ namespace go;
 
 using @unsafe = unsafe_package;
 
+[GoFieldAccess(typeof(ChanType))]
 partial class main_package {
 
 partial struct Type {
@@ -117,7 +118,7 @@ public static ж<Type> TypeOf(any aʗp) {
 public static ж<Type> TypeFor<T>() {
     T v = GoZero<T>();
     {
-        var t = TypeOf(v); if (t != nil) {
+        var t = TypeOf((v).OrTypedNilOf()); if (t != nil) {
             return t;
         }
     }
@@ -197,7 +198,7 @@ partial struct Imethod {
 }
 
 partial struct ΔArrayType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
     public ж<Type> Slice;
     public uintptr Len;
@@ -224,13 +225,13 @@ public static ΔChanDir BothDir => /* RecvDir | SendDir */ 3;
 public static ΔChanDir InvalidDir => 0;
 
 partial struct ChanType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
     public ΔChanDir Dir;
 }
 
 partial struct structTypeUncommon {
-    public partial ref ΔStructType StructType { get; }
+    /*embed*/ public ΔStructType StructType;
     internal UncommonType u;
 }
 
@@ -239,48 +240,48 @@ public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
 
     if (t.Kind() == Chan) {
         var ch = Ꮡt.Reinterpret<Type, ChanType>();
-        return (~ch).Dir;
+        return ch.Dir;
     }
     return InvalidDir;
 }
 
 internal partial struct Uncommon_u /*dyn*/ {
-    public partial ref PtrType PtrType { get; }
+    /*embed*/ public PtrType PtrType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ1 /*dyn*/ {
-    public partial ref ΔFuncType FuncType { get; }
+    /*embed*/ public ΔFuncType FuncType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ2 /*dyn*/ {
-    public partial ref SliceType SliceType { get; }
+    /*embed*/ public SliceType SliceType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ3 /*dyn*/ {
-    public partial ref ΔArrayType ArrayType { get; }
+    /*embed*/ public ΔArrayType ArrayType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ4 /*dyn*/ {
-    public partial ref ChanType ChanType { get; }
+    /*embed*/ public ChanType ChanType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ5 /*dyn*/ {
-    public partial ref ΔMapType MapType { get; }
+    /*embed*/ public ΔMapType MapType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ6 /*dyn*/ {
-    public partial ref ΔInterfaceType InterfaceType { get; }
+    /*embed*/ public ΔInterfaceType InterfaceType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ7 /*dyn*/ {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     internal UncommonType u;
 }
 
@@ -327,23 +328,23 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<Type, ΔArrayType>();
-        return (~tt).Elem;
+        return tt.of(main_package.ΔArrayType.ᏑElem).Value;
     }
     if (exprᴛ1 == Chan) {
         var tt = Ꮡt.Reinterpret<Type, ChanType>();
-        return (~tt).Elem;
+        return tt.of(ChanType.ᏑElem).Value;
     }
     if (exprᴛ1 == Map) {
         var tt = Ꮡt.Reinterpret<Type, ΔMapType>();
-        return (~tt).Elem;
+        return tt.of(main_package.ΔMapType.ᏑElem).Value;
     }
     if (exprᴛ1 == Pointer) {
         var tt = Ꮡt.Reinterpret<Type, PtrType>();
-        return (~tt).Elem;
+        return tt.of(PtrType.ᏑElem).Value;
     }
     if (exprᴛ1 == Slice) {
         var tt = Ꮡt.Reinterpret<Type, SliceType>();
-        return (~tt).Elem;
+        return tt.of(SliceType.ᏑElem).Value;
     }
 
     return default!;
@@ -407,7 +408,7 @@ public static nint FieldAlign(this ref Type t) {
 }
 
 partial struct ΔInterfaceType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ΔName PkgPath;
     public slice<Imethod> Methods;
 }
@@ -435,7 +436,7 @@ public static nint NumMethod(this ref ΔInterfaceType t) {
 }
 
 partial struct ΔMapType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Key;
     public ж<Type> Elem;
     public ж<Type> Bucket;
@@ -476,12 +477,12 @@ public static ж<Type> Key(this ж<Type> Ꮡt) {
 }
 
 partial struct SliceType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
 }
 
 partial struct ΔFuncType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public uint16 InCount;
     public uint16 OutCount;
 }
@@ -540,7 +541,7 @@ public static bool IsVariadic(this ref ΔFuncType t) {
 }
 
 partial struct PtrType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
 }
 
@@ -555,7 +556,7 @@ public static bool Embedded(this ref StructField f) {
 }
 
 partial struct ΔStructType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ΔName PkgPath;
     public slice<StructField> Fields;
 }

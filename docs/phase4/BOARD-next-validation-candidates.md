@@ -27118,6 +27118,23 @@ the i9's reflect reading (owner G if it routes).
 
 — G (measured 2026-10-16; COORD ruled: accessor refusal now, this row post-hop)
 
+**Amended 2026-10-17 (C1, the array-dims companion cut, `claude/c1-runtime-array-dims`; COORD: correct the population
+line in the cut).** Two corrections to the population above, measured with a go/types census of std plus tests at
+go1.26.9 (linux):
+- runtime_test `testFreegc` ×8 reaches no TYPE-ONLY sink, as stated, but it does reach two ZERO-VALUE sinks, `var
+  zero T` and `new(T)`. Those built a length-0 array, so `unsafe.Sizeof(*p)` read 0 and every live `p` shared one
+  data address. Measured at the cut's red commit (`-test.run ^TestFreegc$`, linux): Go reports 89 rows (65 pass, 24
+  skip). In C#, the 8 `gc=yes/ptrs=false/size=*/duplicate-check` rows fail with "found duplicate pointer (0x…). i: 0
+  j: 1", one address for all 8 sizes, and their 8 parents and `TestFreegc` fail with them. The other 72 rows agree
+  with Go, but only because nothing else reads the length: `freegc` is a no-op while `runtimeFreegcEnabled` is false.
+  The cut gives an unexported generic like it an ARRAY-DIMS COMPANION type parameter (`Tᴀ`, golib `IGoArrayDims`),
+  which each call site supplies (`ᴀ16`). That is this row's descriptor-companion vehicle, applied to the value
+  surface. It does not touch the type-only surface (`TypeFor`, `abi.TypeFor`, `unique.Make`), which stays as ruled.
+  At the cut's fix commit all 89 rows equal Go. A probe line in the converted `free` closure (run only, never
+  committed) reads `unsafe.Sizeof(*p)` as 16, 17, 64, 500, 512, 4096, 20000 and 32760; at the red commit it read 0.
+- the `runtime.AddCleanup` instantiation is in reflect/all_test.go:2243 (`AddCleanup[[2]int64, *atomic.Uint32]`,
+  inferred), not malloc_test.go.
+
 ## 2026-10-16 — G: testing/cryptotest's two linkname PULLS stay throwing stubs; no std test reaches them — RECORDED, no seat (owner G if a caller appears)
 
 `testing/cryptotest/rand.go` declares two bodyless functions under two-arg directives naming OTHER packages: PULLS,
@@ -27254,6 +27271,65 @@ A test that parses a traceback for `.go:` (runtime's parseTraceback, pprof's loc
 - (c) Leave as is and disclose per test where a verdict reads it.
 
 — C1 (found 2026-10-17 in passing; COORD ruled: write the row, P1 later)
+## 2026-10-17 — C1: runtime.AddCleanup's closes-over-ptr check is UNCHECKED for a func value the converter cannot trace — residual 0 in go1.26.9
+
+Go 1.26's AddCleanup panics "cleanup function closes over ptr, cleanup will never run" when the cleanup's funcval holds
+a pointer into ptr's allocation. The managed AddCleanup (src/core/runtime/mcleanup.cs, divergence 5) checks the
+captures the converter passes at the call (src/go2cs/addCleanupCaptures.go). The converter can trace three shapes:
+a func literal at the call, a method value `x.m`, and a func-typed LOCAL whose every assignment in its function is
+one of those two (the union of their captures is passed; a superset is safe, since any literal that could flow there
+and closes over ptr is one Go refuses).
+
+**Residual (unchecked; the call keeps its three-argument form).** A parameter, a package-level variable, a field, a
+call result, a local assigned from any of those or from a multi-value assignment, and a local whose address is taken.
+Such a cleanup that DOES close over ptr registers here where Go panics.
+
+**Population, go1.26.9.** 55 AddCleanup calls: 33 func literals, 2 selectors, 20 func-variable idents. A go/types
+census of the 20 by the predicate above (runtime, internal/sync, runtime/race/testdata; a planted file of seven
+shapes classified as planted): 20 covered, **residual 0**. Covered does not mean a capture is passed. 18 of the 20
+are in converted test files (runtime/race/testdata is not converted), and 15 of those 18 pass one, `t`, all in
+runtime/mcleanup_test.go. Its :265 captures only a channel. internal/sync/hashtriemap_test.go:951 and :960 capture
+only `m`, a `HashTrieMap` STRUCT value, and the check never passes a struct capture.
+
+**Trigger to revisit.** A tree whose census shows a residual site, or a dropped capture, inside a test Go FAILS with
+the closes-over-ptr panic.
+
+**Amended 2026-10-17 (struct and array captures, COORD follow-up after G's review).** A struct or array captured BY
+VALUE whose field or element is a pointer slot is now passed too (a fifth AddCleanup argument), and golib walks it
+through GoReflect.GoFields, bounded by depth 16. A capture over cmd/compile's 128-byte by-value limit is captured by
+reference in Go and is not passed. **One case Go refuses and we do not:** a SLICE whose backing array is ptr's own
+allocation (`s := ptr[:]` with ptr a `*[N]E`, then the cleanup reads `s`). Go's slot scan sees the slice's data
+pointer inside ptr's object; we do not follow slices, maps, channels or funcs, so that cleanup registers here.
+Population, go1.26.9 std: 44 AddCleanup calls, 3 composite captures, all `weak.Pointer` values (crypto/tls/cache.go:38,
+unique/canonmap.go:136, weak/pointer_test.go:167), each holding a weak handle, not ptr, so Go accepts all three. The
+only slice captures are crypto/tls/cache.go:33 and :38's `der []byte`, the caller's input bytes, not ptr's (`cert`'s)
+allocation, so no slice-over-ptr case exists in the tree (census: a go/types walk of `std` with tests).
+
+— C1 (2026-10-17; COORD ruled the predicate and this row)
+## 2026-10-17 — P2: an untyped-constant call to a MULTI-parameter generic must spell every type argument, so one C# cannot name would break it — RECORDED, not reproduced, no seat
+
+The untyped-constant rule (claude/p2-untyped-const-typearg, d8740b96ce) gives a call explicit type
+arguments when only untyped constants fix one of its type parameters. C# has no partial explicit
+type arguments, so on a multi-parameter callee it spells ALL of them: `keyed(k, 4)` becomes
+`keyed<K', nint>(k, 4)`. If the other argument's type had no C# name, a call that compiled bare would
+stop compiling. G raised this in review.
+
+**Measured** with a probe through `keyed[K comparable, V any](k K, v V)`, base and cut converters,
+Release build, linux, go1.26.9. Six K shapes: an anonymous struct, a function-local type, an array
+of anonymous structs, an anonymous struct over a type parameter inside a generic function, an
+anonymous interface, and a bool. All six compile with the cut, because the converter lifts anonymous
+and local types to named C# types (`main_k`, `main_loc`, `inGeneric_k<T>`) before any call names
+them. The cut prints Go's output for all six (`int`); the base prints `int32`.
+
+The shape does occur in the rule's std population: 3 of its 20 calls are reflect's
+`setField[S, V any](in S, offset uintptr, value V)` with S an anonymous struct
+(`setField(struct{ _, a, _ uintptr }{}, …, 1)`, all_test.go TestIsZero). Copied into the probe, the
+cut emits `setField<main_in, nint>(new main_in(), …, 1)`, which compiles and prints Go's values.
+
+**Not seated.** No shape broke. If one the converter cannot name is found, the remedy is to decline
+the rule for that call and keep the bare form.
+
+— P2 (measured 2026-10-17; raised by G in review of d8740b96ce)
 
 ## 2026-10-17 — P1: a failed single-value type assertion names its static source interface; four residuals keep "interface {}" — SEATED (owner P1)
 

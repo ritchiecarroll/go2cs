@@ -332,7 +332,7 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // entry records the source type it was resolved for, so it is exact on a match and re-resolved on a
     // mismatch. Resolving reads the field's name off the delegate and slices it, which allocates; the door
     // asks on every call. -1 is "no Go layout", and it is cached too.
-    private static nint GoFieldOffsetOf(object source, Delegate fieldId)
+    internal static nint GoFieldOffsetOf(object source, Delegate fieldId)
     {
         Type sourceType = source.GetType();
 
@@ -521,7 +521,7 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // siblings, not a guess about arbitrary delegates.
     private const char PointerFieldAccessorPrefix = 'Ꮡ';
 
-    private static string? FieldNameOf(Delegate fieldId)
+    internal static string? FieldNameOf(Delegate fieldId)
     {
         string name = fieldId.Method.Name;
 

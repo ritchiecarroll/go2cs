@@ -33,7 +33,7 @@ partial struct Holder<T> {
 internal static ж<Holder<ж<CrossPkgLib.Sensor>>> sensorHolder = Ꮡ(new Holder<ж<CrossPkgLib.Sensor>>(nil));
 
 partial struct sensorBox {
-    public partial ref Holder<ж<CrossPkgLib_package.Sensor>> Holder { get; }
+    /*embed*/ public Holder<ж<CrossPkgLib_package.Sensor>> Holder;
     internal @string tag;
 }
 
@@ -140,7 +140,7 @@ internal static nint Serial(this cert c) {
 }
 
 partial struct holder<T> {
-    public partial ref ж<CrossPkgLib_package.Cache<T>> Cache { get; }
+    /*embed*/ public ж<CrossPkgLib_package.Cache<T>> Cache;
     internal @string name;
 }
 
@@ -411,12 +411,12 @@ internal static (ж<CrossPkgLib.Node>, error) simpleResolve(map<@string, ж<Cros
 }
 
 partial struct probe {
-    public partial ref ж<CrossPkgLib_package.Sensor> Sensor { get; }
+    /*embed*/ public ж<CrossPkgLib_package.Sensor> Sensor;
     internal nint id;
 }
 
 partial struct tagged {
-    public partial ref CrossPkgLib_package.Sensor Sensor { get; }
+    /*embed*/ public CrossPkgLib_package.Sensor Sensor;
     internal nint n;
 }
 
@@ -432,11 +432,11 @@ internal static @string Meter(this tagged t) {
 }
 
 partial struct counter {
-    public partial ref ж<CrossPkgLib_package.Meter> Meter { get; }
+    /*embed*/ public ж<CrossPkgLib_package.Meter> Meter;
 }
 
 partial struct rig {
-    public partial ref CrossPkgLib_package.Device Device { get; }
+    /*embed*/ public CrossPkgLib_package.Device Device;
     internal nint id;
 }
 

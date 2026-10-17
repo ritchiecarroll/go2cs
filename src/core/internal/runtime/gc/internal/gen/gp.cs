@@ -6,7 +6,7 @@ namespace go.@internal.runtime.gc.@internal;
 partial class gen_package {
 
 partial struct Uint64 {
-    internal partial ref valGP valGP { get; }
+    /*embed*/ internal valGP valGP;
 }
 
 internal static ж<Δkind> kindUint64 = Ꮡ(new Δkind(typ: "Uint64"u8, reg: regClassGP));

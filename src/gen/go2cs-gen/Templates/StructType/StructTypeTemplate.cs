@@ -43,9 +43,25 @@ internal class StructTypeTemplate : TemplateBase
     public HashSet<string> ReadOnlyZeroSizeMembers = [];
     public string[] ValueCloneFields = [];
 
+    // The embeds this struct's converter declaration carries as FIELDS (`/*embed*/ public T T;`), in Go order: the
+    // field is the embed's storage and its accessor, so the generator declares neither and stores through it.
+    private HashSet<string>? m_declaredEmbedFields;
+
+    private HashSet<string> DeclaredEmbedFields => m_declaredEmbedFields ??=
+        Context.GetStructDeclaration(FullyQualifiedStructType) is (StructDeclarationSyntax declaration, _)
+            ? new HashSet<string>(declaration.Members.OfType<FieldDeclarationSyntax>()
+                .Where(MemberMarkers.HasEmbed)
+                .SelectMany(declared => declared.Declaration.Variables.Select(variable => variable.Identifier.Text)), StringComparer.Ordinal)
+            : new HashSet<string>(StringComparer.Ordinal);
+
+    // The l-value of an embed's storage: the declared field itself, or the legacy generator-declared backing field.
+    // A keyword-named embed composes the backing name from the UNESCAPED member name ('@' only leads an identifier).
+    private string EmbedStorage(string memberName) =>
+        DeclaredEmbedFields.Contains(memberName) ? $"this.{memberName}" : $"{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)}";
+
     // The readonly zero-size members of a promoted (embedded) struct type, cached per type: from its
     // declaration when it is in this compilation, else from metadata, where a readonly INSTANCE field of a
-    // converted struct can only be one of the arc's (embeds are `partial ref` properties, not fields).
+    // converted struct can only be one of the arc's (a declared embed field is readonly only when the arc made it so).
     private readonly Dictionary<string, HashSet<string>> m_embedReadOnlyZeroSize = new(StringComparer.Ordinal);
 
     private bool IsReadOnlyZeroSizeMemberOf(string structTypeName, string memberName)
@@ -349,8 +365,13 @@ internal class StructTypeTemplate : TemplateBase
             // The composed field name must use the unescaped member name — a C#-keyword embed
             // (`type base struct{…}`) arrives escaped `@base`, but `ʗ@base` is invalid ('@' only
             // leads an identifier). The standalone member ACCESS sites keep `@base`.
+            // A converter-declared embed FIELD (`/*embed*/ public T T;`) is its own storage, declared in Go order by
+            // the converter, so the CLR lays it where Go does; only the legacy `partial ref` form is backed here.
             foreach ((string typeName, string memberName, _, _, _) in promotedStructs)
             {
+                if (DeclaredEmbedFields.Contains(memberName))
+                    continue;
+
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
@@ -385,6 +406,10 @@ internal class StructTypeTemplate : TemplateBase
             // member name; this one was the outlier.
             foreach ((string typeName, string memberName, _, _, _) in promotedStructs)
             {
+                // A declared embed field is already the accessor: `s.T` and `ref s.T` bind to it directly.
+                if (DeclaredEmbedFields.Contains(memberName))
+                    continue;
+
                 string memberScope = GetScope(GetSimpleName(memberName));
                 result.Append($"\r\n{TypeElemIndent}[global::System.Diagnostics.CodeAnalysis.UnscopedRef] {memberScope} partial ref {typeName} {memberName} => ref {CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)};");
             }
@@ -469,7 +494,11 @@ internal class StructTypeTemplate : TemplateBase
                     // A depth-1 member that is a readonly zero-size field of the embed answers the shared slot
                     // (a writable ref to it is CS8160); deeper ones resolve through the intermediate type's own
                     // promoted accessor, which applies this same rule.
-                    string promotedTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
+                    // So does EVERY member promoted through an embed that is itself one of THIS struct's readonly zero-size
+                    // fields (the zero-size layout arc stamps a zero-size embed readonly): a zero-size struct's members are
+                    // all zero-size, and a writable ref into a readonly field is CS8162 (XpkgPromotedMethodSet's OuterS5,
+                    // promoting deepTok through `struct{ deepTok }`).
+                    string promotedTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName)
                         ? ZeroSizeSlotRef(promotedType)
                         : $"ref {EmbedHop(promotedStructType, promotedMemberName)}.{memberName}";
 
@@ -529,7 +558,8 @@ internal class StructTypeTemplate : TemplateBase
                     string? pointerEmbedInnerType = PointerEmbedInnerType(promotedStructType, promotedMemberName);
 
                     // A depth-1 readonly zero-size member answers the shared slot, as the ref property above.
-                    string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
+                    // Through a readonly zero-size embed of this struct too, as the accessor above.
+                    string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName)
                         ? ZeroSizeSlotRef(promotedFieldType)
                         : $"ref instance.{EmbedHop(promotedStructType, promotedMemberName)}.{memberName}";
 
@@ -759,7 +789,7 @@ internal class StructTypeTemplate : TemplateBase
         // the same GetSimpleName call the forwarder emission uses, so both sides normalize to `Inner`.
         HashSet<string> pointerEmbedTypeNames = structDecl is null
             ? new(StringComparer.Ordinal)
-            : new(structDecl.GetEmbeddedPointerHopNames().Select(hop => GetSimpleName(hop.TypeName, dropCollisionPrefix: true)), StringComparer.Ordinal);
+            : new(structDecl.GetEmbeddedPointerHopNames(compilation!).Select(hop => GetSimpleName(hop.TypeName, dropCollisionPrefix: true)), StringComparer.Ordinal);
 
         // promotedStructType arrives as the qualified BOX form, so its GetSimpleName carries a trailing
         // `.Value` (the pointer deref) the embed keys above do not — strip it before the membership test.
@@ -1741,11 +1771,15 @@ internal class StructTypeTemplate : TemplateBase
 
                 if (member is IFieldSymbol field)
                 {
-                    // The INLINE embed field (`ʗ<Embed>`) is the one embed marker metadata always carries -- an
-                    // unexported embed (Mid2's `loc2`) has no accessor property at all -- so recurse through it.
-                    if (field.Name.StartsWith("ʗ", StringComparison.Ordinal))
+                    // An EMBED, in either stored form: the converter-declared embed field (`/*embed*/ internal loc2
+                    // loc2;`, known in metadata by its [GoMemberRecord]) or the legacy inline backing field (`ʗ<Embed>`).
+                    // Either is the one embed marker metadata always carries -- an unexported embed (Mid2's `loc2`) has
+                    // no accessor property at all -- so recurse through it.
+                    bool legacyInline = field.Name.StartsWith("ʗ", StringComparison.Ordinal);
+
+                    if (legacyInline || isGoEmbedded(field) && StructDeclarationSyntaxExtensions.IsPromotingEmbedType(field.Type))
                     {
-                        addTo(fieldsHere, GoName(field.Name[1..]), 1);
+                        addTo(fieldsHere, GoName(legacyInline ? field.Name[1..] : field.Name), 1);
 
                         ITypeSymbol inline = field.Type;
 
@@ -2181,7 +2215,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append($"{TypeElemIndent}    ");
                 // A keyword-named embed composes the box field from the UNESCAPED member name
                 // ('@' is only valid leading an identifier - 'Ꮡʗ@base' is CS1002).
-                result.AppendLine($"{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);");
+                result.AppendLine($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);");
                 continue;
             }
 
@@ -2356,6 +2390,10 @@ internal class StructTypeTemplate : TemplateBase
                 // the `default` it replaced.
                 case IPropertySymbol { ReturnsByRef: true, IsIndexer: false }:
                     return true;
+                // A converter-declared embed FIELD answers as the property form did: every embed keeps the
+                // constructor route (see the syntax walk's isProperty arm), whatever its own type needs.
+                case IFieldSymbol embedField when MemberMarkers.IsGoEmbedded(embedField) && StructDeclarationSyntaxExtensions.IsPromotingEmbedType(embedField.Type):
+                    return true;
                 case IFieldSymbol { Type: { IsReferenceType: false } fieldType }:
                 {
                     // A fixed-size array field (`[N]T` → golib `array<T>`) carries a `= new(N)`
@@ -2430,7 +2468,7 @@ internal class StructTypeTemplate : TemplateBase
             // initializer. See GetChanDirInitializerMembers for why this is scoped to direction
             // stamps alone and never a general field-initializer fallback.
             result.AppendLine(isPromotedStruct ?
-                $"{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = {memberValue};" :
+                $"{EmbedStorage(memberName)} = {memberValue};" :
                 IsFixedArrayMember(typeName, isReferenceType) ?
                     $"if ({memberName}.Source is not null) this.{memberName} = {memberName};" :
                     ChanDirInitializerMembers.Contains(memberName) ?

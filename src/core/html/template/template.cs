@@ -33,7 +33,7 @@ partial struct Template {
     internal ж<template.Template> text;
     // The underlying template's parse tree, updated to be HTML-safe.
     public ж<parse.Tree> Tree;
-    internal partial ref ж<nameSpace> nameSpace { get; } // common to all associated templates
+    /*embed*/ internal ж<nameSpace> nameSpace; // common to all associated templates
 }
 
 // escapeOK is a sentinel value used to indicate valid escaping.

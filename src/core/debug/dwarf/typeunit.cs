@@ -15,7 +15,7 @@ partial class dwarf_package {
 // The typeUnit format is a single type with a signature. It holds
 // the same data as a compilation unit.
 partial struct typeUnit {
-    internal partial ref unit unit { get; }
+    /*embed*/ internal unit unit;
     internal Offset toff; // Offset to signature type within data.
     internal @string name; // Name of .debug_type section.
     internal ΔType cache;   // Cache the type, nil to start.

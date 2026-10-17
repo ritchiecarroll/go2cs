@@ -521,7 +521,7 @@ public static Func<ж<Request>, (ж<url.URL>, error)> ProxyURL(ж<url.URL> Ꮡfi
 // optional extra headers to write and stores any error to return
 // from roundTrip.
 partial struct transportRequest {
-    public partial ref ж<Request> Request { get; }                     // original request, not to be mutated
+    /*embed*/ public ж<Request> Request;                     // original request, not to be mutated
     internal ΔHeader extra;                 // extra headers to write, or nil
     internal ж<httptrace.ClientTrace> trace; // optional
     internal context.Context ctx; // canceled when we are done with the request

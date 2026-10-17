@@ -37,7 +37,7 @@ public partial struct Δkind {
 }
 
 partial struct @void {
-    internal partial ref valAny valAny { get; }
+    /*embed*/ internal valAny valAny;
 }
 
 internal static ж<Δkind> voidKind = Ꮡ(new Δkind(typ: "void"u8, reg: regClassNone));
@@ -49,7 +49,7 @@ internal static ж<Δkind> kind(this @void _) {
 partial struct Ptr<T>
     where T : Value
 {
-    internal partial ref valGP valGP { get; }
+    /*embed*/ internal valGP valGP;
 }
 
 // Ptr is a Word
@@ -111,7 +111,7 @@ public static T Deref<W, T>(Ptr<W> ptr)
 partial struct Array<T>
     where T : Value
 {
-    internal partial ref valAny valAny { get; }
+    /*embed*/ internal valAny valAny;
 }
 
 public static Array<T> /*y*/ ConstArray<T>(slice<T> vals, @string name)
@@ -134,14 +134,14 @@ internal static ж<Δkind> kind<T>(this Array<T> _)
 }
 
 partial struct valGP {
-    internal partial ref valAny valAny { get; }
+    /*embed*/ internal valAny valAny;
 }
 
 internal static void isWord(this valGP _) {
 }
 
 partial struct valAny {
-    internal partial ref ж<op> op { get; }
+    /*embed*/ internal ж<op> op;
 }
 
 internal static void initOp(this ref valAny v, ж<op> Ꮡx) {

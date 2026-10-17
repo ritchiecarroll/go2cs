@@ -241,7 +241,7 @@ internal static Color yCbCrModel(Color c) {
 // NYCbCrA represents a non-alpha-premultiplied Y'CbCr-with-alpha color, having
 // 8 bits each for one luma, two chroma and one alpha component.
 partial struct NYCbCrA {
-    public partial ref YCbCr YCbCr { get; }
+    /*embed*/ public YCbCr YCbCr;
     public uint8 A;
 }
 

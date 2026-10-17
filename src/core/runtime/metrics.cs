@@ -641,7 +641,7 @@ internal static bool has(this ref statDepSet s, statDep d) {
 // current heap memory use. They're also sharded across Ps, so it
 // makes sense to grab them all at once.
 partial struct heapStatsAggregate {
-    internal partial ref heapStatsDelta heapStatsDelta { get; }
+    /*embed*/ internal heapStatsDelta heapStatsDelta;
 // Derived from values in heapStatsDelta.
 
     // inObjects is the bytes of memory occupied by objects,
@@ -731,7 +731,7 @@ internal static void compute(this ж<sysStatsAggregate> Ꮡa) {
 // cpuStatsAggregate represents CPU stats obtained from the runtime
 // acquired together to avoid skew and inconsistencies.
 partial struct cpuStatsAggregate {
-    internal partial ref cpuStats cpuStats { get; }
+    /*embed*/ internal cpuStats cpuStats;
 }
 
 // compute populates the cpuStatsAggregate with values from the runtime.

@@ -762,7 +762,7 @@ internal static any escapeSink;
 
 internal static T escape<T>(T x) {
     if (alwaysFalse) {
-        escapeSink = x;
+        escapeSink = (x).OrTypedNilOf();
     }
     return x;
 }

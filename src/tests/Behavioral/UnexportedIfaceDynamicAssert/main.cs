@@ -79,7 +79,7 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
 }
 
 partial struct TCPConn {
-    internal partial ref conn conn { get; }
+    /*embed*/ internal conn conn;
 }
 
 partial struct plainConn {
@@ -104,7 +104,7 @@ internal static (nint, error) Write(this ж<plainConn> Ꮡc, slice<byte> b) {
 }
 
 partial struct PlainConn {
-    internal partial ref plainConn plainConn { get; }
+    /*embed*/ internal plainConn plainConn;
 }
 
 partial struct valueSink {
@@ -130,7 +130,7 @@ internal static (int64, error) writeBuffers(this valueSink s, ж<Buffers> Ꮡv) 
 }
 
 partial struct ValueSink {
-    internal partial ref valueSink valueSink { get; }
+    /*embed*/ internal valueSink valueSink;
 }
 
 internal static void report(@string label, ref sink s, int64 n, error err) {

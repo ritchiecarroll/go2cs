@@ -9,6 +9,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(specialPinCounter))]
 partial class runtime_package {
 
 // A Pinner is a set of Go objects each pinned to a fixed location in memory. The
@@ -33,7 +34,7 @@ partial class runtime_package {
 //
 // The zero value of Pinner is ready to use.
 partial struct Pinner {
-    internal partial ref ж<pinner> pinner { get; }
+    /*embed*/ internal ж<pinner> pinner;
 }
 
 // go2cs generated this placeholder — func Pin is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -285,15 +286,15 @@ internal static void incPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
         rec = (ж<specialPinCounter>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialPinCounterAlloc).alloc());
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         // splice in record, fill in offset.
-        rec.Value.special.offset = offset;
-        rec.Value.special.kind = _KindSpecialPinCounter;
-        rec.Value.special.next = @ref.ValueSlot;
+        rec.special.offset = offset;
+        rec.special.kind = _KindSpecialPinCounter;
+        rec.special.next = @ref.ValueSlot;
         @ref.ValueSlot = rec.Reinterpret<specialPinCounter, special>();
         spanHasSpecials(Ꮡspan);
     } else {
         rec = @ref.ValueSlot.Reinterpret<special, specialPinCounter>();
     }
-    rec.Value.counter++;
+    rec.counter++;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -309,9 +310,9 @@ internal static bool decPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
         @throw(runtimePinnerDecreasedˢ);
     }
     var counter = @ref.ValueSlot.Reinterpret<special, specialPinCounter>();
-    counter.Value.counter--;
-    if ((~counter).counter == 0) {
-        @ref.ValueSlot = counter.Value.special.next;
+    counter.counter--;
+    if (counter.counter == 0) {
+        @ref.ValueSlot = counter.special.next;
         if (span.specials == nil) {
             spanHasNoSpecials(Ꮡspan);
         }

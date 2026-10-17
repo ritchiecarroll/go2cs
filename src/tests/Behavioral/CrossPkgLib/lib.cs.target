@@ -185,7 +185,7 @@ public static snapshot Peek() {
 partial struct Ticks /*num:uintptr*/;
 
 partial struct Device {
-    public partial ref Sensor Sensor { get; }
+    /*embed*/ public Sensor Sensor;
     public nint Serial;
 }
 
@@ -239,7 +239,7 @@ public static @string Emit(this ref EmitBase e) {
 }
 
 partial struct Branch {
-    public partial ref EmitBase EmitBase { get; }
+    /*embed*/ public EmitBase EmitBase;
     public nint Kind;
 }
 

@@ -136,7 +136,8 @@ public class SyncTestPullsTests
             }
         });
 
-        StringAssert.Contains(escaped?.Message, "deadlock: all goroutines in bubble are blocked");
+        // f returned over the blocked member: Go's main-exited deadlock (go1.26.9 runtime/synctest.go:246-247).
+        StringAssert.Contains(escaped?.Message, "deadlock: main bubble goroutine has exited but blocked goroutines remain");
         Assert.IsNull(releaseEscaped, $"the release escaped: {releaseEscaped}");
         Assert.IsTrue(releasedAt >= 0, "the release ran");
         Assert.IsTrue(reportedAt > releasedAt, "the acquired bubble reported its deadlock only after Release");
@@ -202,9 +203,11 @@ public class SyncTestPullsTests
         Assert.IsNull(after, "and the goroutine leaves it when f returns");
         Assert.AreEqual("goroutine is already bubbled", nested);
 
-        // A channel made inside Bubble.Run belongs to the bubble: sending on it from outside panics.
-        Exception? send = OnGoroutine(() => made.Send(1));
-        StringAssert.Contains(send?.Message, "send on synctest channel from outside bubble");
+        // A channel made inside Bubble.Run belongs to the bubble: sending on it from outside is fatal
+        // (Go 1.26), so the decision is read rather than the process ended.
+        string? send = null;
+        AssertNoFailure(OnGoroutine(() => send = BubbledChannelTests.ChannelFault(made, "send")));
+        Assert.AreEqual("send on synctest channel from outside bubble", send);
     }
 
     [TestMethod]

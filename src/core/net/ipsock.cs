@@ -19,7 +19,7 @@ partial class net_package {
 // both address families are to be supported.
 // See inet6(4) for details.
 partial struct ipStackCapabilities {
-    public partial ref sync_package.Once Once { get; }             // guards following
+    /*embed*/ public sync_package.Once Once;             // guards following
     internal bool ipv4Enabled;
     internal bool ipv6Enabled;
     internal bool ipv4MappedIPv6Enabled;

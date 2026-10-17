@@ -68,7 +68,7 @@ public static ж<MAC> New(/*[32]*/ ж<array<byte>> Ꮡkey) {
 // Therefore writing data to a running MAC after calling
 // Sum or Verify causes it to panic.
 partial struct MAC {
-    internal partial ref mac mac { get; } // platform-dependent implementation
+    /*embed*/ internal mac mac; // platform-dependent implementation
     internal bool finalized;
 }
 

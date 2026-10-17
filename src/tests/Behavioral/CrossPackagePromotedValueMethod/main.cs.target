@@ -6,19 +6,19 @@ using time = time_package;
 partial class main_package {
 
 partial struct Stamp {
-    public partial ref time_package.Time Time { get; }
+    /*embed*/ public time_package.Time Time;
 }
 
 partial struct PtrStamp {
-    public partial ref ж<time_package.Time> Time { get; }
+    /*embed*/ public ж<time_package.Time> Time;
 }
 
 partial struct inner {
-    public partial ref time_package.Time Time { get; }
+    /*embed*/ public time_package.Time Time;
 }
 
 partial struct Outer {
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
 }
 
 partial struct localBase {
@@ -30,7 +30,7 @@ internal static nint Twice(this localBase b) {
 }
 
 partial struct Wrap {
-    internal partial ref localBase localBase { get; }
+    /*embed*/ internal localBase localBase;
 }
 
 internal static time.Time @base = time.Date(2026, 9, 30, 12, 34, 56, 789000000, time.ΔUTC);

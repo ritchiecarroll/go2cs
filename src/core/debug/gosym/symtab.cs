@@ -140,7 +140,7 @@ public static @string BaseName(this ref Sym s) {
 // A Func collects information about a single function.
 partial struct Func {
     public uint64 Entry;
-    public partial ref ж<Sym> Sym { get; }
+    /*embed*/ public ж<Sym> Sym;
     public uint64 End;
     public slice<ж<Sym>> Params; // nil for Go 1.3 and later binaries
     public slice<ж<Sym>> Locals; // nil for Go 1.3 and later binaries

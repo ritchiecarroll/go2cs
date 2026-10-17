@@ -24,7 +24,7 @@ partial interface Node :
 }
 
 partial struct Base {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public int64 BitSize;
 }
 
@@ -33,15 +33,15 @@ public static ж<Base> Basic(this ж<Base> Ꮡb) {
 }
 
 partial struct Uint {
-    public partial ref Base Base { get; }
+    /*embed*/ public Base Base;
 }
 
 partial struct Int {
-    public partial ref Base Base { get; }
+    /*embed*/ public Base Base;
 }
 
 partial struct Ptr {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public Node Node;
 }
 

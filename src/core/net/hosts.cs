@@ -32,7 +32,7 @@ partial struct byName {
 
 // hosts contains known host entries.
 partial struct hostsᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     // Key for the list of literal IP addresses must be a host
     // name. It would be part of DNS labels, a FQDN or an absolute
     // FQDN.

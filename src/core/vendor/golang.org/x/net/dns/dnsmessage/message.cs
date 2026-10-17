@@ -380,7 +380,7 @@ public static @string GoString(this ref Header m) {
 
 // Message is a representation of a DNS message.
 partial struct Message {
-    public partial ref Header Header { get; }
+    /*embed*/ public Header Header;
     public slice<ΔQuestion> Questions;
     public slice<Resource> Answers;
     public slice<Resource> Authorities;

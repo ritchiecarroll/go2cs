@@ -497,7 +497,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                             d.Value[3] = 0;
                         } else 
                         if (s.Value[3] == 0xff){
-                            copy((~d)[..], (~s)[..]);
+                            copy(d.slice(), s.slice());
                         } else {
                             // This code does the same as color.NRGBAModel.Convert(
                             // rgba.At(x, y)).(color.NRGBA) but with no extra memory

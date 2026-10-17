@@ -85,7 +85,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 }
 
 partial struct testprogᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal @string dir;
     internal map<@string, ж<buildexe>> target;
 }

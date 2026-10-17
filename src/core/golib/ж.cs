@@ -263,6 +263,20 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     }
 
     /// <summary>
+    /// A reference to a field of the struct this pointer references -- Go's <c>p.f</c>, read, written or passed by
+    /// reference -- with no box in between. The field properties go2cs-gen emits for a struct reached through
+    /// <c>unsafe.Pointer</c> read here, so the site reads as Go does: <c>buf.SubstituteNameOffset = x</c>.
+    /// </summary>
+    /// <remarks>
+    /// A managed root answers the struct's own slot, <c>fieldRefFunc(ref Value)</c>, exactly what
+    /// <c>p.Value.f</c> reaches. A NATIVE root answers the field at its GO offset (see
+    /// <see cref="NativeBox{T}.FieldRef{TF}"/>): the CLR layout of a struct holding a managed reference is not
+    /// Go's, so the struct's own slot would read and write the wrong bytes, and its whole-value read refuses.
+    /// </remarks>
+    public ref TF field<TF>(FieldRefFunc<T, TF> fieldRefFunc) =>
+        ref this is NativeBox<T> native ? ref native.FieldRef(fieldRefFunc) : ref fieldRefFunc(ref Value);
+
+    /// <summary>
     /// Gets a pointer to a field that is itself accessed through a pointer-yielding accessor.
     /// </summary>
     public ж<TElem> of<TElem>(FieldPtrFunc<T, TElem> fieldPtrFunc)
