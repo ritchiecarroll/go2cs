@@ -48,6 +48,19 @@
 //     ("ptr is arena-allocated", "ptr not in allocated block") are therefore unreachable and the
 //     lines are not kept as dead code. debug.sbrk IS kept -- it is a converted variable with a
 //     managed meaning and Go's noop-Cleanup answer is still the right one.
+//  5. THE CLOSES-OVER-PTR GUARD (Go 1.26) READS THE CAPTURES THE CONVERTER PASSES, NOT POINTER
+//     SLOTS. Go scans every pointer slot of the cleanup's funcval object for an address inside
+//     ptr's allocation. A C# delegate's closure object cannot answer that without reflection, and
+//     a C# closure object can also hold variables only a SIBLING lambda of its scope captured. So
+//     the converter, which knows which Go variables the cleanup closes over BY VALUE, passes their
+//     values to the four-argument AddCleanup below (src/go2cs/addCleanupCaptures.go), and the
+//     guard panics when one of them is a pointer whose referent is ptr's. The same answer under the
+//     JIT and native AOT, with no reflection. The converter passes pointer and interface captures,
+//     and a captured struct as its pointer and interface fields; a slice, map, channel, func or
+//     array capture is not passed (Go's slot scan would see a slice over ptr's own array). A
+//     cleanup that is a func VARIABLE carries no
+//     static fact and takes the three-argument form unchecked: censused 2026-10-17 over the
+//     go1.26.9 tree, 20 such call sites, all in tests Go passes, so none closes over ptr.
 [module: go.GoManualConversion]
 
 namespace go;
@@ -116,7 +129,16 @@ partial class runtime_package {
 // mentions it. To ensure a cleanup does not get called prematurely,
 // pass the object to the [KeepAlive] function after the last point
 // where the object must remain reachable.
-public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp) {
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp) =>
+    addCleanup(Ꮡptr, cleanup, argʗp, captured: null);
+
+// The converter's form for a cleanup whose by-value captures it can see (a func literal or a method
+// value at the call site): `captured` holds their values, read by Go 1.26's closes-over-ptr check at
+// the point in the order Go runs it. See divergence 5.
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp, object?[] captured) =>
+    addCleanup(Ꮡptr, cleanup, argʗp, captured);
+
+private static Cleanup addCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp, object?[]? captured) {
     // The pointer to the object must be valid. `abi.Escape` above this line in Go forces ptr to the
     // heap; a go2cs pointer box IS the heap, so there is nothing to force.
     if (Ꮡptr == nil) {
@@ -156,6 +178,14 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
     if (GoZeroBase.Is(referent)) {
         return new Cleanup(nil);
     }
+    // Check that the cleanup function doesn't close over the pointer.
+    if (captured is not null) {
+        foreach (object? value in captured) {
+            if (holdsPointerInto(value, referent)) {
+                throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
+            }
+        }
+    }
     // Go: `fn := func() { cleanup(arg) }`, closed over arg at registration. The closure is the whole
     // reason a cleanup needs no argument binding at dispatch, unlike a finalizer.
     S arg = argʗp;
@@ -191,6 +221,15 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
         ptr: ((INilPointer)Ꮡptr).PointerOrderToken
     );
 }
+
+// Whether a captured value addresses ptr's allocation: a non-nil pointer whose referent is ptr's, or
+// the referent object itself. The converter passes a captured STRUCT as its pointer and interface
+// fields, so no value here needs to be taken apart, and nothing here reflects.
+private static bool holdsPointerInto(object? value, object referent) => value switch {
+    null => false,
+    INilPointer pointer => !pointer.IsNilPointer && ReferenceEquals(pointer.ReferentObject, referent),
+    _ => ReferenceEquals(value, referent)
+};
 
 // Cleanup is a handle to a cleanup call for a specific object.
 [GoType] partial struct Cleanup {

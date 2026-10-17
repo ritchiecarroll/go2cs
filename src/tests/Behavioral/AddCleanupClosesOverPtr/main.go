@@ -10,10 +10,12 @@ import (
 // closure object's pointer slots for an address inside ptr's object; the managed AddCleanup
 // (core/runtime/mcleanup.cs) scans the fields the cleanup body reads.
 //
-// Refusing cases: the closure captures ptr, or a pointer to one of ptr's fields.
+// Refusing cases: the closure captures ptr, or a pointer to one of ptr's fields, or the cleanup is
+// a method value whose receiver is ptr.
 // Accepting cases: the closure captures another object, a plain value, or nothing, and the
 // case where a SIBLING closure in the same scope captures ptr while the cleanup closure
-// captures only another variable of that scope (a C# closure object can hold both).
+// captures only another variable of that scope (a C# closure object can hold both), and the case
+// where the captured variable is reassigned afterwards, which Go captures by reference.
 
 type T struct {
 	p *byte // a pointer field keeps T out of Go's tiny allocator
@@ -31,6 +33,8 @@ func try(name string, register func()) {
 }
 
 func nothing(int) {}
+
+func (t *T) release(int) {}
 
 func main() {
 	try("captures ptr", func() {
@@ -69,6 +73,18 @@ func main() {
 		runtime.AddCleanup(v, func(int) { _ = w.f }, 0)
 		fmt.Println("sibling reads", sibling())
 		runtime.KeepAlive(w)
+	})
+
+	try("method value on ptr", func() {
+		v := &T{f: 10}
+		runtime.AddCleanup(v, v.release, 0)
+	})
+
+	try("reassigned after capture", func() {
+		v := &T{f: 11}
+		runtime.AddCleanup(v, func(int) { _ = v }, 0)
+		v = nil
+		fmt.Println("reassigned is nil:", v == nil)
 	})
 
 	try("arg is ptr", func() {

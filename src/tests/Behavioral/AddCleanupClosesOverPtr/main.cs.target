@@ -30,6 +30,9 @@ internal static void @try(@string name, Action register) {
 internal static void nothing(nint _) {
 }
 
+internal static void release(this ref T t, nint _) {
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string capturesPtrˢ = "captures ptr"u8;
 private static readonly @string capturesFieldPointerˢ = "captures field pointer"u8;
@@ -38,6 +41,9 @@ private static readonly @string capturesValueˢ = "captures value"u8;
 private static readonly @string capturesNothingˢ = "captures nothing"u8;
 private static readonly @string siblingCapturesPtrˢ = "sibling captures ptr"u8;
 private static readonly object siblingReadsˢ = (@string)"sibling reads"u8;
+private static readonly @string methodValueOnPtrˢ = "method value on ptr"u8;
+private static readonly @string reassignedAfterCaptureˢ = "reassigned after capture"u8;
+private static readonly object reassignedIsNilˢ = (@string)"reassigned is nil:"u8;
 private static readonly @string argIsPtrˢ = "arg is ptr"u8;
 
 internal static void Main() {
@@ -46,7 +52,7 @@ internal static void Main() {
         var vʗ1 = v;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = vʗ1.Value.f;
-        }, 0);
+        }, 0, new object?[] { v });
     });
 
     @try(capturesFieldPointerˢ, () => {
@@ -55,7 +61,7 @@ internal static void Main() {
         var fpʗ1 = fp;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = fpʗ1.Value;
-        }, 0);
+        }, 0, new object?[] { fp });
     });
 
     @try(capturesOtherObjectˢ, () => {
@@ -64,7 +70,7 @@ internal static void Main() {
         var wʗ1 = w;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = wʗ1.Value.f;
-        }, 0);
+        }, 0, new object?[] { w });
         runtime.KeepAlive(w.OrTypedNil());
     });
 
@@ -89,9 +95,24 @@ internal static void Main() {
         var wʗ2 = w;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = wʗ2.Value.f;
-        }, 0);
+        }, 0, new object?[] { w });
         fmt.Println(siblingReadsˢ, sibling());
         runtime.KeepAlive(w.OrTypedNil());
+    });
+
+    @try(methodValueOnPtrˢ, () => {
+        var v = Ꮡ(new T(f: 10));
+        runtime.AddCleanup<T, nint>(v, v.release, 0, new object?[] { v });
+    });
+
+    @try(reassignedAfterCaptureˢ, () => {
+        ref var v = ref heap<ж<T>>(out var Ꮡv);
+        Ꮡv.ValueSlot = Ꮡ(new T(f: 11));
+        runtime.AddCleanup(Ꮡv.ValueSlot, (nint _Δp0) => {
+            _ = Ꮡv.ValueSlot;
+        }, 0);
+        Ꮡv.ValueSlot = default!;
+        fmt.Println(reassignedIsNilˢ, Ꮡv.ValueSlot == nil);
     });
 
     @try(argIsPtrˢ, () => {
