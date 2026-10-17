@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 using go;                                   // golib, and the methods of every Go package whose import path has no slash
 using static go.builtin;                    // Go's built-ins: nil, len, append, delete, @new, goǃ, Ꮡ
@@ -265,6 +266,18 @@ static class Program
         }
         for (var g = 0; g < 4; g++) done.Receive();
         Check("11 an unbuffered channel waits for every goroutine", seen == 4);
+
+        var replies = new channel<nint>(0);
+        Task<nint> reply = replies.ReceiveAsync();      // awaitable: no thread waits for the sender
+        goǃ(() => replies.Send(99));
+        Check("11 ReceiveAsync completes when a goroutine sends", reply.Wait(10000) && reply.Result == 99);
+        using (var cts = new CancellationTokenSource())
+        {
+            Task<nint> abandoned = replies.ReceiveAsync(cts.Token);
+            cts.Cancel();
+            ((Task)abandoned).ContinueWith(_ => { }).Wait(10000);
+            Check("11 a canceled ReceiveAsync leaves the channel and takes nothing", abandoned.IsCanceled && !replies.TrySend(1));
+        }
 
         // 12. A real third-party module: github.com/google/uuid.
         uuid.UUID id = uuid.New();
