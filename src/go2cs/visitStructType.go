@@ -1099,10 +1099,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 // (the StructTypeTemplate "Promoted Struct References"). A `default`-valued instance of such a
 // struct has null boxes, so the first promoted-member access throws NullReferenceException —
 // an uninitialized declaration must render `new T(nil)` instead of `default!`. The decision
-// mirrors the embedded-field emission above: an embed renders as a `partial ref` promotion
-// (and thus a box) unless it is a same-package interface, a builtin non-named embed (`int`),
-// or a pointer to a non-named type; a CROSS-PACKAGE embed always takes the promotion path
-// (the selector-type branch above bypasses every plain-field case, interfaces included).
+// follows the embedded-field emission above: an embed is a PROMOTING declared field (go2cs-gen
+// keeps the constructor route for it) unless it is an interface, a builtin non-named embed
+// (`int`), or a pointer to a non-named type. A CROSS-PACKAGE named embed answers true here even
+// when it is an interface, which is conservative: it only selects the `new T(nil)` rendering.
 func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
 	if t == nil {
 		return false

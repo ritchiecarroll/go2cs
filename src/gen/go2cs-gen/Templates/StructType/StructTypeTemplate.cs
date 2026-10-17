@@ -61,7 +61,7 @@ internal class StructTypeTemplate : TemplateBase
 
     // The readonly zero-size members of a promoted (embedded) struct type, cached per type: from its
     // declaration when it is in this compilation, else from metadata, where a readonly INSTANCE field of a
-    // converted struct can only be one of the arc's (embeds are `partial ref` properties, not fields).
+    // converted struct can only be one of the arc's (a declared embed field is readonly only when the arc made it so).
     private readonly Dictionary<string, HashSet<string>> m_embedReadOnlyZeroSize = new(StringComparer.Ordinal);
 
     private bool IsReadOnlyZeroSizeMemberOf(string structTypeName, string memberName)
