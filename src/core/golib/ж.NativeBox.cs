@@ -116,11 +116,26 @@ public sealed class NativeBox<T> : ж<T>, INativeRooted
         return (void*)m_nativeAddr;
     }
 
-    /// <inheritdoc/>
-    public override unsafe ref T Value => ref Unsafe.AsRef<T>(DereferenceableAddress());
+    // The address of a WHOLE-struct read or write (Value, ValueSlot): DereferenceableAddress, refused first when T is a
+    // Go struct whose CLR layout is provably not its Go layout. Such a read would land Go's bytes in the wrong fields,
+    // or read a garbage managed reference where Go stores the value inline. Its fields stay reachable at their Go
+    // offsets (a field view of a native box is a native box, ж.of), and the native WORD operations (atomics on a
+    // pointer slot) read only the word, so they take DereferenceableAddress directly. Decided once per T.
+    private unsafe void* ValueAddress()
+    {
+        if (s_layoutMismatch is { } reason)
+            throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), reason);
+
+        return DereferenceableAddress();
+    }
+
+    private static readonly string? s_layoutMismatch = GoReflect.ClrLayoutMismatch(typeof(T));
 
     /// <inheritdoc/>
-    public override unsafe ref T ValueSlot => ref Unsafe.AsRef<T>(DereferenceableAddress());
+    public override unsafe ref T Value => ref Unsafe.AsRef<T>(ValueAddress());
+
+    /// <inheritdoc/>
+    public override unsafe ref T ValueSlot => ref Unsafe.AsRef<T>(ValueAddress());
 
     /// <summary>
     /// Whether this box aliases an ORDER TOKEN rather than an address — Q44 §10.3 arm 2a. Its

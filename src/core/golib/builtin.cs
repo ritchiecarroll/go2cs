@@ -2743,10 +2743,16 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>>? NativeFieldArrayPointer<T>(INilPointer? field, nint length)
     {
-        if (field is not INativeRooted { NativeGoFieldAddress: var address and not 0 })
-            return null;
+        // A field view of a native box IS a native box at the field's Go offset (ж.of), so its own root address is
+        // the field's; a one-hop field reference still answers through NativeGoFieldAddress.
+        nuint address = field switch
+        {
+            INativeRooted { NativeGoFieldAddress: var fieldAddress and not 0 } => fieldAddress,
+            INativeRooted { NativeRootAddress: var rootAddress and not 0 } => rootAddress,
+            _ => 0
+        };
 
-        return NativeArrayPointer<T>(address, length);
+        return address == 0 ? null : NativeArrayPointer<T>(address, length);
     }
 
     /// <summary>

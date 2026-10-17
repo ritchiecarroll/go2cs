@@ -217,7 +217,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     public ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
         // the cached view: one FieldRefBox per (box, accessor) for the box's life (ж.Views.cs)
-        return viewOf(fieldRefFunc);
+        return nativeFieldView(viewOf(fieldRefFunc));
     }
 
     /// <summary>
@@ -227,8 +227,18 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </summary>
     public ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
-        return viewOf(fieldRefFunc);
+        return nativeFieldView(viewOf(fieldRefFunc));
     }
+
+    // A field of a struct in NATIVE memory (Go's `&p.f` with p a native pointer) is a native box at the field's GO
+    // offset, not a managed view at its CLR slot. The CLR layout of a converted struct is not always Go's: a value
+    // embed's storage is declared after the converter's fields, and an array or pointer field is a managed
+    // reference. So the slot is not where Go, or a native callee, put the field: runtime's lfstack node
+    // `&n.LFNode` read 8 bytes past the 512-aligned node and failed its tagged-pointer pack. A managed root pays
+    // one type test; a root whose field offset cannot be known keeps its view. An array field is a native window
+    // with its declared Go length (FieldRefBox.NativeFieldBox), so its elements are reached at Go's bytes too.
+    private static ж<TElem> nativeFieldView<TElem>(ж<TElem> view) =>
+        view is FieldRefBox<TElem> fieldRef && fieldRef.NativeFieldBox() is { } native ? native : view;
 
     private static class FieldRefWrappers<TElem>
     {
