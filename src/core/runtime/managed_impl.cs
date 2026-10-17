@@ -2228,10 +2228,13 @@ partial class runtime_package
     // always did. Both facts consumed here — the Go line and the literal spans — come from the ONE
     // GoPositionMap record, the same indivisibility the position half rests on.
     //
-    // Known edge, stated rather than guarded: line granularity cannot split two literals sharing
-    // one Go line, nor a frame in an OUTER literal sitting on the very line a nested literal
-    // starts — the innermost span wins the tie, which favors the far more common frame (a body
-    // line of the nested literal) over the rarer one (the outer literal mid-call on that line).
+    // A frame in an OUTER literal stopped on the very line a nested literal starts on (Go's
+    // `marker(func() {`, the caller mid-call) sits in both spans by line. The method's FIRST statement
+    // decides: it lies inside the method's own literal and before the nested one, so the span must
+    // contain it too (FuncLiteralFor's entry line). Measured: runtime TestRuntimeLockMetricsAndProfile's
+    // `fn` frame at metrics_test.go:1192 read func4.1.1, its nested literal's name, where Go says func4.1.
+    // Known edge, stated rather than guarded: line granularity still cannot split two literals that
+    // share their FIRST line as well.
     //
     // The frame's C# line is read at its IL OFFSET through this file's own PDB reader (the one reader:
     // methodSourcePosition), never from a StackFrame's file info, so no capture has to ask the CLR to
@@ -2253,7 +2256,10 @@ partial class runtime_package
         if (goLine <= 0)
             return null;
 
-        return record.FuncLiteralFor(goLine);
+        (string? entryFile, int entryCsLine) = methodSourcePosition(method);
+        int entryGoLine = entryFile == csFile && entryCsLine > 0 ? record.GoLineFor(entryCsLine) : 0;
+
+        return record.FuncLiteralFor(goLine, entryGoLine);
     }
 
     // The same suffix for a method with NO live frame: a synthetic PC (a CPU profile's sampled method,
@@ -3114,9 +3120,10 @@ partial class runtime_package
         // literal answers the nested literal's name — or null when no recorded span contains it.
         // Innermost is the largest start line among the containing spans (spans nest lexically),
         // with the smaller end winning a shared start; a full tie keeps the first recorded entry.
-        public string? FuncLiteralFor(int goLine)
+        // entryGoLine (the frame's method's first statement, 0 for none) narrows the spans first.
+        public string? FuncLiteralFor(int goLine, int entryGoLine = 0)
         {
-            int best = innermostFuncLiteral(goLine);
+            int best = innermostFuncLiteral(goLine, entryGoLine);
 
             return best < 0 ? null : m_litSuffixes![best];
         }
@@ -3194,7 +3201,12 @@ partial class runtime_package
             return best < 0 ? 0 : m_litStarts![best];
         }
 
-        private int innermostFuncLiteral(int goLine)
+        // entryGoLine, when positive, is the Go line of the frame's METHOD's first statement: a span must
+        // contain it too. That splits the tie line granularity alone cannot: an outer literal stopped on
+        // the line a nested literal starts on. Both spans contain the frame's line, but only the outer
+        // one contains the outer method's first statement. When no span contains both, the frame line
+        // alone decides, as before.
+        private int innermostFuncLiteral(int goLine, int entryGoLine = 0)
         {
             decodeFuncLits();
 
@@ -3207,9 +3219,15 @@ partial class runtime_package
                 if (goLine < starts[i] || goLine > ends[i])
                     continue;
 
+                if (entryGoLine > 0 && (entryGoLine < starts[i] || entryGoLine > ends[i]))
+                    continue;
+
                 if (best < 0 || starts[i] > starts[best] || (starts[i] == starts[best] && ends[i] < ends[best]))
                     best = i;
             }
+
+            if (best < 0 && entryGoLine > 0)
+                return innermostFuncLiteral(goLine);
 
             return best;
         }
