@@ -4677,6 +4677,13 @@ partial class runtime_package
         "runtime.panicwrap" => 332,     // runtime/error.go
         "runtime.sigpanic" => GOOS == "windows"u8 ? 392 : 906, // runtime/signal_windows.go : signal_unix.go
         "testing.tRunner" => 1642,      // testing/testing.go
+        // The allocator frames a heap-profile record starts with (memProfileAlloc). Go 1.26 records them
+        // and Go 1.24 did not, so their lines are go1.26.9's.
+        "runtime.mallocgc" => 1067,     // runtime/malloc.go
+        "runtime.newobject" => 2156,    // runtime/malloc.go
+        "runtime.newarray" => 2199,     // runtime/malloc.go
+        "runtime.makeslice" => 102,     // runtime/slice.go
+        "runtime.growslice" => 178,     // runtime/slice.go
         _ => 0
     };
 

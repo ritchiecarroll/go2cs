@@ -616,7 +616,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_capacity = capacity - low;
 
         // `make([]T, len, cap)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(m_array, capacity);
+        GoMemProfile.Charge<T>(m_array, capacity, GoAllocEntry.MakeSlice);
     }
 
     // A `make([]T, len[, cap])` whose ELEMENT zero value must itself be constructed, because
@@ -1529,7 +1529,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (slice == nil)
         {
             newArray = AllocationCounter.NewArray<T>(elems.Length);
-            GoMemProfile.Charge<T>(newArray, elems.Length);
+            GoMemProfile.Charge<T>(newArray, elems.Length, GoAllocEntry.GrowSlice);
             elems.CopyTo(newArray);
             return new slice<T>(newArray);
         }
@@ -1568,7 +1568,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // aliases it. The mapping plays the role of "the old array" in Go's own spec.
         nint newCapacity = GrowCapacity(slice, slice.Length + elems.Length);
         newArray = AllocationCounter.NewArray<T>(newCapacity);
-        GoMemProfile.Charge<T>(newArray, newCapacity);
+        GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
         slice.ToSpan().CopyTo(newArray);
         elems.CopyTo(newArray.AsSpan((int)slice.Length));
@@ -1673,7 +1673,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (slice == nil)
         {
             newArray = AllocationCounter.NewArray<T>(count);
-            GoMemProfile.Charge<T>(newArray, count);
+            GoMemProfile.Charge<T>(newArray, count, GoAllocEntry.GrowSlice);
             return new slice<T>(newArray);
         }
 
@@ -1699,7 +1699,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         nint newCapacity = GrowCapacity(slice, slice.Length + count);
         newArray = AllocationCounter.NewArray<T>(newCapacity);
-        GoMemProfile.Charge<T>(newArray, newCapacity);
+        GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
         slice.ToSpan().CopyTo(newArray);
 

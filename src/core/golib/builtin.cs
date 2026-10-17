@@ -2389,7 +2389,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(target) : new StandardBox<T>(target);
 
         // `&T{}`, and through heap() an escaping local: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2855,7 +2855,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(value) : new StandardBox<T>(value);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2901,7 +2901,7 @@ public static partial class builtin
         ж<T> box = new StandardBox<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
