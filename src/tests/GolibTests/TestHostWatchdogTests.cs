@@ -125,4 +125,51 @@ public class TestHostWatchdogTests
         int parentIndex = reporter.Events.ToList().FindIndex(e => e.Test == "TestAbandonedFirst" && e.Action == "fail");
         Assert.IsTrue(childIndex < parentIndex, "a subtest's verdict precedes its parent's, Go's order");
     }
+
+    // G's review of the first cut (BLOCKING): an abandoned PARALLEL subtest still queued for a -parallel slot took one
+    // AFTER the abandon and kept it. With -parallel 1: TestAParent's two parallel subtests both block; /1 holds the one
+    // slot, /2 queues; the parent is abandoned, which gives /1's slot back; /2, abandoned while queued, then took it,
+    // ran, blocked and never gave it back, so TestZParallel (a later parallel top-level test) waited forever for a slot.
+    [TestMethod]
+    public void AnAbandonedQueuedParallelSubtestNeverTakesASlot()
+    {
+        using ManualResetEventSlim release = new(false);
+
+        TestRegistry registry = new("watchdog", []);
+        registry.Add("TestAParent", t =>
+        {
+            t.Value.Execution!.Run("1", c => { c.Value.Parallel(); release.Wait(); });
+            t.Value.Execution!.Run("2", c => { c.Value.Parallel(); release.Wait(); });
+        }, "a_test.go", 1);
+        registry.Add("TestZParallel", t => t.Value.Parallel(), "a_test.go", 2);
+
+        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "300ms");
+        TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
+
+        // /2 must reach the slot AFTER its abandon. On its own that is a race a body cannot force (its thread usually
+        // wakes first, and then its own abandon gives the slot back), so the seam holds it until it is abandoned.
+        TestExecution.BeforeParallelSlotForGuard = execution =>
+        {
+            if (execution.Name == "TestAParent/2")
+                SpinWait.SpinUntil(() => execution.Abandoned, TimeSpan.FromSeconds(10));
+        };
+
+        bool returned;
+
+        try
+        {
+            Task<nint> run = Task.Run(runner.RunAll);
+            returned = run.Wait(TimeSpan.FromSeconds(30));
+        }
+        finally
+        {
+            TestExecution.BeforeParallelSlotForGuard = null;
+            release.Set();
+        }
+
+        Assert.IsTrue(returned, "RunAll did not return within 30 s: an abandoned subtest kept the only -parallel slot");
+        Assert.IsTrue(reporter.Events.Any(e => e.Test == "TestAParent" && e.Action == "fail" && e.Abandoned), "the parent was not abandoned");
+        Assert.IsTrue(reporter.Events.Any(e => e.Test == "TestZParallel" && e.Action == "pass"), "the later parallel test did not run");
+    }
 }

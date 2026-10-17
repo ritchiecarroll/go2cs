@@ -1121,6 +1121,7 @@ public sealed class TestExecution
 
         // Released from the serial-phase gate; now compete for a -parallel slot so at most
         // Options.Parallel parallel tests RUN simultaneously (Go's -parallel semantics).
+        BeforeParallelSlotForGuard?.Invoke(this);
         m_runner.AcquireParallelSlot(NestedRoot);
         Volatile.Write(ref m_holdsParallelSlot, 1);
 
@@ -1131,6 +1132,14 @@ public sealed class TestExecution
         // (testing.go:1805, right after t.tstate.waitParallel()), not when Parallel is called.
         Interlocked.Increment(ref s_parallelStart);
     }
+
+    /// <summary>
+    /// GUARD SEAM (GolibTests' TestHostWatchdogTests): runs on the test's own thread after it leaves the
+    /// serial-phase gate and before it queues for a <c>-parallel</c> slot, so an arm can hold a test there
+    /// until the watchdog has abandoned it. That interleaving is a race no test body can force. Null in
+    /// every real run.
+    /// </summary>
+    internal static Action<TestExecution>? BeforeParallelSlotForGuard { get; set; }
 
     // Go's process-wide parallel accounting (testing.go:429-430). AllocsPerRun panics while they
     // differ (allocs.go:21), so each is incremented exactly where Go increments it: parallelStart in
