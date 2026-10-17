@@ -204,7 +204,7 @@ STATE BLOCK
 LANE: C1   MODEL: opus-class/default effort   HOST: cloud (fresh box since ~15:06Z; the old box's disk failed)
 BRANCH: claude/c1-test-host-watchdog 87e0f1153544c46e269c4d01de7b4f69e99250a4 on-origin-yes announced -- WATCHDOG (A): red dc928f657f, fix 97eb14ccfe, floor column 3269239fd7, merge of tip 908642b2d4; posted 20261017T163719Z-C1; G reviews
 BRANCH: claude/c1-runtime-array-dims 3fa3251da4f40c166538bef0d972570eaca33d77 on-origin-yes announced -- (2) array-dims companion, G reviewed d33477bbdc OK; 3fa3251da4 is the -tests footprint (base reproduces malloc_test.cs), posted 20261017T151357Z-C1; awaits merge
-BRANCH: claude/c1-runtime-cleanup-closure 79e63d16b80f3caf19c8008e8029a1891e46bcbc on-origin-no landed -- (3) AddCleanup, in hop tip 908642b2d4 (pruned)
+NOTE: claude/c1-runtime-cleanup-closure 79e63d16b8 LANDED in the hop (merged in the 908642b2d4 batch, then pruned); reachable from claude/hop-go126, not yet from master
 BRANCH: claude/c1-tostring-forward e752628faf98f5a7792df8b5f22fadf04b22ee08 on-origin-yes announced -- ToString forwarding seat, round 2 posted for R's CNR; not in hop or master
 BRANCH: claude/c1-linq-slice 2d635fad3f7ad0b1632e84b559878fc20e2fecb1 on-origin-yes announced -- LINQ-on-slice seat; not in hop or master
 BRANCH: claude/c1-mprof-alloc-frames 582ac5bbda2fc36020e79b3f3542e9fd12d863a3 on-origin-yes superseded -- runtime/pprof mprof hand-off, MOVED to R
@@ -241,7 +241,7 @@ LANE: R   MODEL: Opus 5.5 / default   HOST: R-LAPTOP
 BRANCH: claude/r-mprof-alloc-frames e408ba8b9fbd61b19fda62f4d28a4b692ae20093 on-origin-yes accepted -- mprof alloc frames + zero-size + lock-profile closure-name fix, G OK, in your merge queue
 BRANCH: claude/r-traceback-labels 8a53b6892835b93c2fedb3a0751ae774721e07e7 on-origin-yes announced -- tracebacklabels + G's one-byte UTF-8 fix (red cb06d40f80); GolibTests at this tip still running
 BRANCH: claude/r-testlogfile 4dea95c6848a6fe368abd0999d22fb39c5ecd746 on-origin-yes announced -- testlogfile + G's three divergences (red 3876caef3c); GolibTests R 1757/0/23 D 1749/0/31; TestFileChdirTestlog re-run queued
-BRANCH: claude/r-test-output-format 7b6acfd10f28e19680619dbc5cf53c7e7a933b43 on-origin-no cut -- output-format design worktree, NO commits (equals hop 7b6acfd10f), nothing to preserve
+NOTE: claude/r-test-output-format is a local design worktree with NO commits (it equals hop 7b6acfd10f); nothing to preserve
 BRANCH: claude/r-illink-issue 0ca2e05490bb7b5b38bb8f99185836c0f1b5c787 on-origin-yes stale -- older seat, untouched this session
 BRANCH: claude/r-news-1-24-13-7 768881662cc3814cd9e66a971f5a72a72328e577 on-origin-yes stale -- older seat, untouched this session
 NOTE: landed and pruned this session: claude/r-synctest-time (93fc325bc1, in 1feac60846) and claude/r-mkmalloc-disclosure (3004583392, in 908642b2d4); local branches and worktrees removed.
@@ -266,9 +266,45 @@ PASTE PROMPT
 You are R, a go2cs fleet lane on R-LAPTOP. Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/YOU/) since your last post. Read every branch tip you hold with git ls-remote and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; then the merged ToString+LINQ behavioral run on the hop tip COORD posts; then the testing-host OUTPUT FORMAT seat (Go decorate + Go text mode) AFTER C1's watchdog lands.
 ```
 
-### 1l.7 P2 (cloud): STATE BLOCK pending at this revision
+### 1l.7 P2 (cloud)
 
-P2 (mailbox only) holds the os reparse-blob widening (G design OK, 4 conditions), the named-pipe hang (the i9's probe: all three steps hang, so completions never reach the poller), claude/p2-pipe-deadline, and the lookup_windows.cs field views. It resumes with the shared prompt plus its inbox.
+STATE BLOCK
+```
+LANE: P2   MODEL: opus-class/low   HOST: P2 (a cloud container, not a fleet box)
+BRANCH: claude/p2-reparse-blob a3fc33b20c7cded2d5150e92fc740de4676ea9eb on-origin-yes seat-posted -- os reparse blob (17:00Z post), with G + the i9
+BRANCH: claude/p2-pipe-deadline d501c4df7994998da4e257f1e3fd5d7c4a9edf2e on-origin-yes probe -- the named-pipe probe; the fix is local (LOCAL-ONLY below)
+BRANCH: claude/p2-board-avx512 fc185fd40b7421283ac495d329a9350818161a9a on-origin-yes accepted -- held for the post-hop train
+BRANCH: claude/p2-iface-shell-cwt 814e043b8a26ac09e551f84de326205ed02e2b9d on-origin-yes accepted -- guards, held for the post-hop train
+BRANCH: claude/p2-select-park-fairness ed82d54f11cf1b17c447adee6818334ac9296ad1 on-origin-yes accepted -- held for the post-hop train
+BRANCH: claude/p2-view-over-bytes b08c5124bc2a0ec591eaf4a9669e4ca25501d514 on-origin-yes accepted -- held
+BRANCH: claude/p2-rawstr-scout 0184e7b00b58b346a735037ce21bb222ba57d915 on-origin-yes record -- CENSUS-rawstring-crlf scout (10-12), in neither master nor the hop; status as the ledger has it
+BRANCH: claude/p2-runbook-s9-derivation 9a60e69949005719b5a65d81957330bdb745ba84 on-origin-yes landed -- contained in master and the hop; ref not pruned
+NOTE: claude/p2-untyped-const-typearg 7461f6ebb0, claude/p2-cpuinit-flags 404f3bc1f6, claude/p2-native-field-access 2c03fc060b: landed, remote refs pruned by COORD
+LOCAL-ONLY: claude/p2-pipe-deadline 46aed7ae5a (local tip, 2 commits over d501c4df79: merge of 908642b2d4 + the completion fix) preserved-how: bundle p2-pipe-deadline-local.bundle on P2 scratch, sha256-16 f4d67ab3c0c3bb15; pushes once its gates are green
+LOCAL-ONLY: claude/p2-func-measure a78614db28c422476ba4c504a3543b96217defe9 never-push-by-ruling preserved-how: bundle p2-func-measure.bundle on P2 scratch, sha256-16 917a29b8cbd14dd0
+WORKTREE: wt-pd claude/p2-pipe-deadline uncommitted-0 preserved-how: committed, bundled
+WORKTREE: wt-rpb claude/p2-reparse-blob uncommitted-0 preserved-how: pushed
+WORKTREE: wt-uq detached 6bcf729a64 uncommitted-3 preserved-how: superseded draft of the landed first-field-downcast seat; patch on P2 scratch, sha256-16 d684ef8ae950832e
+WORKTREE: wt-m claude/p2-measure-local uncommitted-17 preserved-how: none needed (generated -tests output of an old pprof run)
+WORKTREE: wt-utc wt-cpu wt-f3 wt-avx wt-cwt wt-sel wt-vob uncommitted-0 each preserved-how: pushed or landed
+NEXT: the named-pipe completion-delivery fix. Root, static (the i9's reading is the measurement): syscall's converted readFile/writeFile
+ made no operation record, so a pipe handle was never bound to the CLR port; A and C then cancel with no record (ERROR_NOT_FOUND),
+ and B waits for the packet a synchronous success still owes, since os.NewFile keeps the handle's completion modes (Go 1.26.9).
+ Fix (local 46aed7ae5a): readFile/writeFile hand-owned, an overlapped call on a poller-owned descriptor (GoAsyncIO.HasReadiness, new)
+ takes the socket seam's record (offset carried, buffer pinned for the flight), every other call keeps the generated body;
+ GetOverlappedResult hand-owned beside WSAGetOverlappedResult under the same predicate. Now running: the two-seeded three-target
+ footprint (prediction: 4 windows files, linux and darwin 0). Then the windows build, go test ./..., push, and a seat asking the
+ i9 for the probe (A i/o timeout ~50 ms, B n=5, C file already closed ~100 ms) and os TestVariousDeadlines1Proc base vs seat.
+READ-FIRST: inbox/P2 20261017T163533Z (the i9's probe reading); inbox/COORD 20261017T170026Z-P2 (reparse seat)
+BLOCKED-ON: none for the fix; owner hand: removing merged wt-f3 and three scratch seeds still waits on the owner's word in the project thread
+TOOLS: GOROOT go1.26.9, DOTNET_ROOT .NET 10.0.12 / SDK 10.0.112, pwsh 7.6.6, python3
+```
+WAKE: mailbox only: COORD posts to docs/phase4/inbox/P2/; P2 posts to docs/phase4/inbox/COORD/ with the fleet-msg tool. Windows runs are the i9's: P2 sends probes.
+
+PASTE PROMPT
+```
+You are P2, a go2cs fleet lane, in a cloud container (linux). Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/P2/) since your last post. Read every branch tip you hold with git ls-remote after fetch --prune, and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; then the os named-pipe completion-delivery fix (the i9's probe: all three steps hang, so completions never reach the poller), red-first by the probe, and the os named_overlapped_pipe subtest on the i9.
+```
 
 ---
 
