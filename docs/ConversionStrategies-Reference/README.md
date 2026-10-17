@@ -441,6 +441,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The scheduler brackets are a faithful no-op, not an omission](manual-conversions.md#the-scheduler-brackets-are-a-faithful-no-op-not-an-omission)
   - [`runtime.argslice` — forwarding and populating are ONE change](manual-conversions.md#runtimeargslice--forwarding-and-populating-are-one-change)
   - [`runtime.sysDirectory` — the same pairing, one consumer shape further out](manual-conversions.md#runtimesysdirectory--the-same-pairing-one-consumer-shape-further-out)
+  - [The runtime's CPU feature flags — `cpuinit`'s copy half](manual-conversions.md#the-runtimes-cpu-feature-flags--cpuinits-copy-half)
   - [Long-path awareness is process SETUP, and golib does what Go's `osinit` does](manual-conversions.md#long-path-awareness-is-process-setup-and-golib-does-what-gos-osinit-does)
   - [Linux standard-descriptor hygiene is process SETUP too — Go's close-of-stdout must release the pipe](manual-conversions.md#linux-standard-descriptor-hygiene-is-process-setup-too--gos-close-of-stdout-must-release-the-pipe)
   - [`internal/weak.Pointer` — the CLR already has weak references, so the runtime handle becomes one](manual-conversions.md#internalweakpointer--the-clr-already-has-weak-references-so-the-runtime-handle-becomes-one)
