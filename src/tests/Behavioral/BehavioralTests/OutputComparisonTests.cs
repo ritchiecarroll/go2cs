@@ -683,6 +683,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericArrayConstraint() => CheckTarget("GenericArrayConstraint");
 
     [TestMethod]
+    public void CheckGenericArrayTypeArgZero() => CheckTarget("GenericArrayTypeArgZero");
+
+    [TestMethod]
     public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
 
     [TestMethod]

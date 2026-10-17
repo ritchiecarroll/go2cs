@@ -279,6 +279,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		return cgoUnsafeArgsBlockPointer(lift)
 	}
 
+	// An EXPORTED generic of this package called with an array type argument at a parameter whose
+	// zero value it builds: it cannot carry an array-dims companion, so the call is refused loudly
+	// rather than run with a length-0 array (arrayDimsCompanion.go).
+	if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
+		if instance, ok := v.info.Instances[funIdent]; ok {
+			if refusal := v.arrayDimsRefusal(funIdent, instance.TypeArgs); refusal != "" {
+				v.showWarning("%s: %s", refusal, v.getPrintedNode(callExpr))
+				return v.arrayDimsRefusalCall(callExpr, refusal)
+			}
+		}
+	}
+
 	// A call into the syscall funnel (Syscall/Syscall6/…/SyscallN) — see
 	// syscallKeepAliveAnalysis.go for why this reproduces Go's own uintptrkeepalive contract
 	// rather than every other call's ordinary argument rendering. Intercepted before anything
@@ -2931,6 +2943,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				return fmt.Sprintf("%s(%s)", AddressPrefix, nilChan)
 			}
 
+			// `new(T)` of a type parameter that carries an array-dims companion: the box holds an array
+			// sized from the dims the call site supplied (arrayDimsCompanion.go).
+			if companion := v.arrayDimsCompanionFor(newType); companion != "" {
+				return fmt.Sprintf("GoArrayZero.New<%s, %s>()", typeName, companion)
+			}
+
 			return fmt.Sprintf("@new<%s>()", typeName)
 		}
 
@@ -3283,6 +3301,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					(v.calleeHasConstraintOnlyTypeParam(funIdent) || v.callHasMethodGroupArg(callExpr) ||
 						v.calleeTypeParamUnsuppliedByCall(callExpr, funIdent) ||
 						v.calleeReadsDescriptorName(funIdent) ||
+						v.calleeCarriesArrayDims(funIdent) ||
 						v.callNeedsConstraintProxy(funIdent, instance.TypeArgs) ||
 						v.calleeTypeParamMixesUntypedAndTypedArgs(callExpr, funIdent) ||
 						v.calleeTypeParamFixedByUntypedConst(callExpr, funIdent) ||

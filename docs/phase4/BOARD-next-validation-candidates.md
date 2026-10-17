@@ -27118,6 +27118,23 @@ the i9's reflect reading (owner G if it routes).
 
 — G (measured 2026-10-16; COORD ruled: accessor refusal now, this row post-hop)
 
+**Amended 2026-10-17 (C1, the array-dims companion cut, `claude/c1-runtime-array-dims`; COORD: correct the population
+line in the cut).** Two corrections to the population above, measured with a go/types census of std plus tests at
+go1.26.9 (linux):
+- runtime_test `testFreegc` ×8 reaches no TYPE-ONLY sink, as stated, but it does reach two ZERO-VALUE sinks, `var
+  zero T` and `new(T)`. Those built a length-0 array, so `unsafe.Sizeof(*p)` read 0 and every live `p` shared one
+  data address. Measured at the cut's red commit (`-test.run ^TestFreegc$`, linux): Go reports 89 rows (65 pass, 24
+  skip). In C#, the 8 `gc=yes/ptrs=false/size=*/duplicate-check` rows fail with "found duplicate pointer (0x…). i: 0
+  j: 1", one address for all 8 sizes, and their 8 parents and `TestFreegc` fail with them. The other 72 rows agree
+  with Go, but only because nothing else reads the length: `freegc` is a no-op while `runtimeFreegcEnabled` is false.
+  The cut gives an unexported generic like it an ARRAY-DIMS COMPANION type parameter (`Tᴀ`, golib `IGoArrayDims`),
+  which each call site supplies (`ᴀ16`). That is this row's descriptor-companion vehicle, applied to the value
+  surface. It does not touch the type-only surface (`TypeFor`, `abi.TypeFor`, `unique.Make`), which stays as ruled.
+  At the cut's fix commit all 89 rows equal Go. A probe line in the converted `free` closure (run only, never
+  committed) reads `unsafe.Sizeof(*p)` as 16, 17, 64, 500, 512, 4096, 20000 and 32760; at the red commit it read 0.
+- the `runtime.AddCleanup` instantiation is in reflect/all_test.go:2243 (`AddCleanup[[2]int64, *atomic.Uint32]`,
+  inferred), not malloc_test.go.
+
 ## 2026-10-16 — G: testing/cryptotest's two linkname PULLS stay throwing stubs; no std test reaches them — RECORDED, no seat (owner G if a caller appears)
 
 `testing/cryptotest/rand.go` declares two bodyless functions under two-arg directives naming OTHER packages: PULLS,

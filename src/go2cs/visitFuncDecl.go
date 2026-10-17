@@ -573,6 +573,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// ONE source or the emitted arities disagree. See descriptorCompanion.go.
 	v.currentFuncCompanionNames = v.collectDescriptorCompanions(currentFuncType)
 
+	// A type parameter whose zero value this declaration builds, and that an own-package
+	// instantiation passes an ARRAY, gains an ARRAY-DIMS COMPANION carrying the length C# cannot
+	// keep in the type. One source for the declaration, the body and the call sites, as above. See
+	// arrayDimsCompanion.go.
+	v.currentFuncArrayDimsNames = v.collectArrayDimsCompanions(currentFuncType)
+
 	// A generic capture-mode method (e.g. atomic.Pointer[T]) is emitted with its heap box
 	// AS the receiver (`this ж<T> Ꮡx`) so the receiver's type parameter stays in scope for
 	// the field-ref form `Ꮡx.of(Type.ᏑField)`. See packageDirectBoxReceiverMethods.
@@ -1542,6 +1548,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			v.writeOutputLn(";")
 		}
 	} else {
+		v.outputBuilder.WriteString(v.newline)
+	}
+
+	// The phantom dims structs this declaration's call sites pass to its array-dims companions, each
+	// declared once per package, after the first function that needs it (arrayDimsCompanion.go).
+	if dimsTypes := v.arrayDimsTypeDeclarations(currentFuncType); dimsTypes != "" {
+		v.outputBuilder.WriteString(dimsTypes)
 		v.outputBuilder.WriteString(v.newline)
 	}
 
