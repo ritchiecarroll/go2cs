@@ -671,11 +671,11 @@ public static class RuntimeErrorPanic
     /// </summary>
     /// <remarks>
     /// Registered by the runtime package, as <see cref="PlainErrorValue"/> is. The arguments are runtime's own
-    /// fields: the static interface type the assertion started from, the dynamic type (<c>null</c> for a nil
-    /// interface), the asserted type and the first method the asserted interface needs that the dynamic type
-    /// lacks (empty for a concrete mismatch). Unregistered, the same sentence stands as a plain string.
+    /// fields: the static interface type the assertion started from (<c>null</c> when asserting to an
+    /// interface, as getitab's is), the dynamic type (<c>null</c> for a nil interface), the asserted type and the
+    /// first method the asserted interface needs that the dynamic type lacks (empty for a concrete mismatch). Unregistered, the same sentence stands as a plain string.
     /// </remarks>
-    public static Func<Type, Type?, Type, string, object>? TypeAssertionErrorValue { get; set; }
+    public static Func<Type?, Type?, Type, string, object>? TypeAssertionErrorValue { get; set; }
 
     /// <summary>
     /// A failed type assertion of <paramref name="target"/>, held as <paramref name="source"/>, to <paramref name="asserted"/>.
@@ -683,6 +683,10 @@ public static class RuntimeErrorPanic
     /// <param name="source">The static interface type the assertion started from: <c>object</c> for an empty interface.</param>
     /// <param name="target">The interface value whose dynamic type did not match.</param>
     /// <param name="asserted">The type asserted to.</param>
+    /// <remarks>
+    /// An assertion to an interface carries no source type, as getitab's does not: the text names the dynamic type and
+    /// the first method of the interface it lacks, and a nil source prints the bare word "interface".
+    /// </remarks>
     public static PanicException TypeAssertion(Type source, object? target, Type asserted)
     {
         // The dynamic type is what the adapters stand in for, as builtin.GetGoTypeName reads it.
@@ -698,10 +702,24 @@ public static class RuntimeErrorPanic
                 break;
         }
 
+        Type? concrete = target?.GetType();
+        string assertedName = GoReflect.GoTypeName(asserted);
+
+        if (asserted.IsInterface || asserted == typeof(object))
+        {
+            string missing = concrete is null || asserted == typeof(object) ? "" : concrete.FirstMissingMethod(asserted);
+
+            return new PanicException(
+                TypeAssertionErrorValue?.Invoke(null, concrete, asserted, missing) ??
+                (concrete is null ? $"interface conversion: interface is nil, not {assertedName}" :
+                    missing.Length > 0 ? $"interface conversion: {GoReflect.GoTypeName(concrete)} is not {assertedName}: missing method {missing}" :
+                    $"interface conversion: interface is {GoReflect.GoTypeName(concrete)}, not {assertedName}"));
+        }
+
         string sourceName = source == typeof(object) ? "interface {}" : GoReflect.GoTypeName(source);
 
         return new PanicException(
-            TypeAssertionErrorValue?.Invoke(source, target?.GetType(), asserted, "") ??
-            $"interface conversion: {sourceName} is {builtin.GetGoTypeName(target)}, not {GoReflect.GoTypeName(asserted)}");
+            TypeAssertionErrorValue?.Invoke(source, concrete, asserted, "") ??
+            $"interface conversion: {sourceName} is {builtin.GetGoTypeName(target)}, not {assertedName}");
     }
 }

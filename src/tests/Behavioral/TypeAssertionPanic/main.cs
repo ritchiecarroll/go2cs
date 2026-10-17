@@ -7,6 +7,31 @@ partial class main_package {
 
 partial struct celsius /*num:float64*/;
 
+partial interface shape {
+    float64 area();
+    float64 perimeter();
+}
+
+partial struct square {
+    internal float64 side;
+}
+
+internal static float64 perimeter(this square s) {
+    return 4D * s.side;
+}
+
+partial struct circle {
+    internal float64 r;
+}
+
+internal static float64 area(this ref circle c) {
+    return 3D * c.r * c.r;
+}
+
+internal static float64 perimeter(this ref circle c) {
+    return 6D * c.r;
+}
+
 partial struct point {
     internal nint x, y;
 }
@@ -37,7 +62,12 @@ private static readonly @string intToCelsiusˢ = "int-to-celsius"u8;
 private static readonly @string intToPointˢ = "int-to-*point"u8;
 private static readonly @string pointToPointˢ = "point-to-*point"u8;
 private static readonly @string nilToStringˢ = "nil-to-string"u8;
+private static readonly @string intToRuntimeErrorˢ = "int-to-runtime.Error"u8;
+private static readonly @string nilToRuntimeErrorˢ = "nil-to-runtime.Error"u8;
+private static readonly @string squareToShapeˢ = "square-to-shape"u8;
+private static readonly @string circleToShapeˢ = "circle-to-shape"u8;
 private static readonly @string intToIntˢ = "int-to-int"u8;
+private static readonly @string circleToShapeˢ2 = "*circle-to-shape"u8;
 private static readonly @string commaOkˢ = "comma-ok"u8;
 private static readonly object commaOkˢ2 = (@string)"comma-ok:"u8;
 private static readonly object stillRunningˢ = (@string)"still running"u8;
@@ -72,12 +102,36 @@ internal static void Main() {
     });
 
     var boxedʗ4 = boxed;
-    @catch(intToIntˢ, () => {
-        _ = boxedʗ4._<nint>();
+    @catch(intToRuntimeErrorˢ, () => {
+        _ = boxedʗ4._<runtimeꓸError>();
     });
+    var nothingʗ2 = nothing;
+    @catch(nilToRuntimeErrorˢ, () => {
+        _ = nothingʗ2._<runtimeꓸError>();
+    });
+    any sq = new square(2D);
+    var sqʗ1 = sq;
+    @catch(squareToShapeˢ, () => {
+        _ = sqʗ1._<shape>();
+    });
+    any circ = new circle(1D);
+    var circʗ1 = circ;
+    @catch(circleToShapeˢ, () => {
+        _ = circʗ1._<shape>();
+    });
+
     var boxedʗ5 = boxed;
+    @catch(intToIntˢ, () => {
+        _ = boxedʗ5._<nint>();
+    });
+    any ptr = Ꮡ(new circle(1D));
+    var ptrʗ1 = ptr;
+    @catch(circleToShapeˢ2, () => {
+        _ = ptrʗ1._<shape>();
+    });
+    var boxedʗ6 = boxed;
     @catch(commaOkˢ, () => {
-        var (_, ok) = boxedʗ5._<@string>(ᐧ);
+        var (_, ok) = boxedʗ6._<@string>(ᐧ);
         fmt.Println(commaOkˢ2, ok);
     });
 

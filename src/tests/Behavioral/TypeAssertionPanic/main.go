@@ -19,6 +19,20 @@ import (
 
 type celsius float64
 
+type shape interface {
+	area() float64
+	perimeter() float64
+}
+
+type square struct{ side float64 }
+
+func (s square) perimeter() float64 { return 4 * s.side }
+
+type circle struct{ r float64 }
+
+func (c *circle) area() float64      { return 3 * c.r * c.r }
+func (c *circle) perimeter() float64 { return 6 * c.r }
+
 type point struct{ x, y int }
 
 // catch runs f and reports what recover() saw: the value's dynamic type, whether it satisfies
@@ -54,8 +68,20 @@ func main() {
 	var nothing any
 	catch("nil-to-string", func() { _ = nothing.(string) })
 
+	// 5. An assertion to an interface names the dynamic type and the first method it lacks, in Go's
+	// order (area sorts before perimeter), and leaves the source type out; a nil source prints the bare word.
+	catch("int-to-runtime.Error", func() { _ = boxed.(runtime.Error) })
+	catch("nil-to-runtime.Error", func() { _ = nothing.(runtime.Error) })
+	var sq any = square{2}
+	catch("square-to-shape", func() { _ = sq.(shape) })
+	// A value circle does not carry the pointer-receiver methods; a *circle carries both.
+	var circ any = circle{1}
+	catch("circle-to-shape", func() { _ = circ.(shape) })
+
 	// NEGATIVE CONTROLS - these must NOT panic.
 	catch("int-to-int", func() { _ = boxed.(int) })
+	var ptr any = &circle{1}
+	catch("*circle-to-shape", func() { _ = ptr.(shape) })
 	catch("comma-ok", func() { _, ok := boxed.(string); fmt.Println("comma-ok:", ok) })
 
 	fmt.Println("still running")

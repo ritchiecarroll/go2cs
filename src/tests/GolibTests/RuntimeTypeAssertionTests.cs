@@ -78,11 +78,73 @@ public class RuntimeTypeAssertionTests
             "interface conversion: error is *errors.errorString, not string", "error asserted to string");
     }
 
+    // An assertion TO an interface reports the dynamic type, the interface and the first method of it the dynamic
+    // type lacks (getitab's TypeAssertionError{nil, typ, inter, itabInit(m, false)}); the static source type is
+    // not part of the sentence.
     [TestMethod]
-    public void AnAssertionToAnInterfaceIsATypeAssertionError()
+    public void AnAssertionToAnInterfaceNamesTheMissingMethod()
     {
         object boxed = (nint)7;
         AssertTypeAssertionError(PanicValue(() => boxed._<Δruntime.ΔError>()),
-            "interface conversion: interface {} is int, not runtime.Error", "int asserted to runtime.Error");
+            "interface conversion: int is not runtime.Error: missing method Error", "int asserted to runtime.Error");
     }
+
+    // A nil source to an interface: typeAssert's TypeAssertionError{nil, nil, inter, ""} prints the bare word.
+    [TestMethod]
+    public void ANilSourceToAnInterfaceHasNoSourceType()
+    {
+        object? nothing = null;
+        AssertTypeAssertionError(PanicValue(() => nothing!._<Δruntime.ΔError>()),
+            "interface conversion: interface is nil, not runtime.Error", "nil asserted to runtime.Error");
+    }
+
+    // itabInit walks the interface's methods in Go's order (exported first, then by name) and names the first
+    // one the type does not carry, so a type holding the later method still reports the earlier absent one.
+    [TestMethod]
+    public void TheFirstMissingMethodInGoOrderIsNamed()
+    {
+        AssertMissing(new HoldsBetaOnly(), "Alpha");
+        AssertMissing(new HoldsNoShapeMethod(), "Alpha");
+        AssertMissing(new HoldsAlphaAndBeta(), "gamma");
+    }
+
+    // A method of the right name and the wrong signature is missing: itabInit compares the type word too.
+    [TestMethod]
+    public void AMethodWithTheWrongSignatureIsMissing()
+    {
+        AssertMissing(new WrongAlphaSignature(), "Alpha");
+    }
+
+    private static void AssertMissing(object boxed, string method)
+    {
+        object? recovered = PanicValue(() => boxed._<IMissingShape>());
+        string source = GoReflect.GoTypeName(boxed.GetType());
+        string asserted = GoReflect.GoTypeName(typeof(IMissingShape));
+
+        AssertTypeAssertionError(recovered, $"interface conversion: {source} is not {asserted}: missing method {method}", source);
+    }
+}
+
+public interface IMissingShape
+{
+    void Beta();
+    void gamma();
+    void Alpha();
+}
+
+public struct HoldsBetaOnly;
+public struct HoldsNoShapeMethod;
+public struct HoldsAlphaAndBeta;
+public struct WrongAlphaSignature;
+
+public static class MissingShapeFixtures
+{
+    public static void Beta(this HoldsBetaOnly _) { }
+
+    public static void Alpha(this HoldsAlphaAndBeta _) { }
+    public static void Beta(this HoldsAlphaAndBeta _) { }
+
+    public static int Alpha(this WrongAlphaSignature _) => 0;
+    public static void Beta(this WrongAlphaSignature _) { }
+    public static void gamma(this WrongAlphaSignature _) { }
 }
