@@ -262,22 +262,36 @@ internal static void initMemProfileRecorder() {
 
 // mProf_Malloc for an allocation made through a golib constructor. Go's own mProf_Malloc stays converted
 // and unreached: profilealloc is called only from mallocgc, which this host does not run. The body is
-// Go's, with three differences. The stack buffer is allocated per sample rather than kept on the M. The
-// skip is 1, because the only Go-source frame between the allocating function and callers() is this one
-// (golib's frames are not Go frames, and Go's own skip of 5 counts mProf_Malloc, profilealloc, mallocgc
-// and its entry points). And setprofilebucket, which ties the object to its bucket for the free side,
-// becomes a weak reference kept beside the bucket (memProfileTrack, M2). An allocation no Go frame made
-// is not recorded.
+// Go's, with three differences. The stack buffer is allocated per sample rather than kept on the M.
+// Go's callers(3, ...) skips callers, mProf_Malloc and profilealloc, so its record STARTS at mallocgc and
+// the entry the compiler called (Go 1.26; Go 1.24 skipped those too). Neither frame runs here, so both are
+// interned root frames placed ahead of the walk, and the walk's skip is 1: the only Go-source frame
+// between the allocating function and callers() is this one (golib's frames are not Go frames). The
+// buffer is profstackdepth+2, Go's own. And setprofilebucket, which ties the object to its bucket for the
+// free side, becomes a weak reference kept beside the bucket (memProfileTrack, M2). An allocation no Go
+// frame made is not recorded.
+//
+// DEVIATION. A map's records carry mallocgc and newarray, newobject or makeslice above the Go function
+// that stored into the map; Go's also carry internal/runtime/maps' frames (newGroups, newTable, the
+// growth path) and the runtime.mapassign entry, which golib's store does not run.
 [MethodImpl(MethodImplOptions.NoInlining)]
-private static void memProfileAlloc(object allocation, nuint size, bool noscan) {
+private static void memProfileAlloc(object allocation, nuint size, bool noscan, GoAllocEntry entry) {
     uintptr fullSize = roundupsize((uintptr)size, noscan);
-    var stk = new slice<uintptr>((int)debug.profstackdepth);
-    nint nstk = callers(1, stk);
+    var stk = new slice<uintptr>((int)debug.profstackdepth + 2);
+    nint nstk = callers(1, stk[2..]);
     if (nstk == 0) {
         // No Go-source frame made this allocation: host code (a test host, golib's own bookkeeping) did,
         // and Go's profile has no such record.
         return;
     }
+    stk[0] = internRootFrame("runtime.mallocgc", "runtime/malloc.go", mallocgcLine(size, noscan));
+    stk[1] = entry switch {
+        GoAllocEntry.MakeSlice => internRootFrame("runtime.makeslice", "runtime/slice.go", 117),
+        GoAllocEntry.GrowSlice => internRootFrame("runtime.growslice", "runtime/slice.go", noscan ? 265 : 273),
+        GoAllocEntry.NewArray => internRootFrame("runtime.newarray", "runtime/malloc.go", 2207),
+        _ => internRootFrame("runtime.newobject", "runtime/malloc.go", 2157)
+    };
+    nstk += 2;
     var index = (ᏑmProfCycle.read() + 2) % (uint32)len(new memRecord(nil).future);
     var b = stkbucket(memProfile, fullSize, stk[..(int)(nstk)], true);
     var mr = b.mp();
@@ -287,6 +301,20 @@ private static void memProfileAlloc(object allocation, nuint size, bool noscan) 
     mpc.Value.alloc_bytes += fullSize;
     unlock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
     memProfileTrack(allocation, b, fullSize);
+}
+
+// The line of go1.26.9's mallocgc that dispatches an allocation of `size` bytes, by the allocator its size
+// class takes: mallocgcTiny (noscan, under maxTinySize 16), mallocgcSmallNoscan, mallocgcSmallScanNoHeader
+// (heap bits in the span, up to 512 bytes), mallocgcSmallScanHeader, and mallocgcLarge above maxSmallSize
+// less the 8-byte malloc header. Measured against Go's own records, MemProfileAllocFrames' oracle.
+private static int mallocgcLine(nuint size, bool noscan) {
+    if (size > 32768 - 8) {
+        return 1156;
+    }
+    if (noscan) {
+        return size < 16 ? 1141 : 1143;
+    }
+    return size <= 512 ? 1150 : 1152;
 }
 
 // ---- the memory profile's frees and cycles (class M, piece M2; COORD ruling 2026-09-26) ----

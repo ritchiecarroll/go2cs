@@ -20,16 +20,20 @@ public class MapGrowthProfileTests
     private const long Group = 136, Table = 32;
 
     // Runs the probe at MemProfileRate = 1 with the recorder replaced, and returns every charge it made.
-    private static List<(long size, bool noscan)> ChargesOf(Action probe, nint rate = 1)
+    private static List<(long size, bool noscan)> ChargesOf(Action probe, nint rate = 1) =>
+        EntriesOf(probe, rate).ConvertAll(static c => (c.size, c.noscan));
+
+    // The same, with the runtime entry point each charge names.
+    private static List<(long size, bool noscan, GoAllocEntry entry)> EntriesOf(Action probe, nint rate = 1)
     {
         // The model runs only where runtime/pprof is reachable (the startup toggle); this host's closure holds it.
         Assert.IsTrue(GoMemProfile.PprofReachable, "the map-growth model is the toggle-on arm");
 
-        List<(long, bool)> charges = [];
-        Action<object, nuint, bool> recorder = GoMemProfile.Recorder;
+        List<(long, bool, GoAllocEntry)> charges = [];
+        Action<object, nuint, bool, GoAllocEntry> recorder = GoMemProfile.Recorder;
         nint previous = GoMemProfile.Rate;
 
-        GoMemProfile.Recorder = (_, size, noscan) => charges.Add(((long)size, noscan));
+        GoMemProfile.Recorder = (_, size, noscan, entry) => charges.Add(((long)size, noscan, entry));
         GoMemProfile.Rate = rate;
 
         try
@@ -100,6 +104,24 @@ public class MapGrowthProfileTests
         List<(long, bool)> actual = ChargesOf(mapgrowthprobe_package.churnSmallMap);
 
         CollectionAssert.AreEqual(new List<(long, bool)> { (Group, true) }, actual, $"got [{Show(actual)}]");
+    }
+
+    // Each charge names the runtime function Go 1.26 allocates that part through, the frame its heap-profile
+    // record carries under mallocgc: newGroups' newarray for a group array, newTable's new(table), and the
+    // directory's make([]*table, n).
+    [TestMethod]
+    public void GrowMapChargesNameGosEntryPoints()
+    {
+        List<GoAllocEntry> expected =
+        [
+            GoAllocEntry.NewArray,
+            GoAllocEntry.NewObject, GoAllocEntry.NewArray, GoAllocEntry.MakeSlice,
+            GoAllocEntry.NewObject, GoAllocEntry.NewArray,
+        ];
+
+        List<GoAllocEntry> actual = EntriesOf(mapgrowthprobe_package.growMap).ConvertAll(static c => c.entry).GetRange(0, expected.Count);
+
+        CollectionAssert.AreEqual(expected, actual, $"want [{string.Join(", ", expected)}], got [{string.Join(", ", actual)}]");
     }
 
     // MemProfileRate = 0 turns the model off with the rest of the profile.
