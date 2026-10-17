@@ -16,7 +16,7 @@ partial struct record {
     public uint16 Length;
     public uint16 Off;
     public array<uint16> Path = new(4);
-    internal partial ref tail tail { get; }
+    /*embed*/ internal tail tail;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
