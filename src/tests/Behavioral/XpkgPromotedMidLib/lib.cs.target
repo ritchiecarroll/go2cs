@@ -1,6 +1,7 @@
 namespace go;
 
 using XpkgPromotedInnerLib = XpkgPromotedInnerLib_package;
+using System.Runtime.InteropServices;
 
 partial class XpkgPromotedMidLib_package {
 
@@ -15,9 +16,9 @@ internal static XpkgPromotedInnerLib.Token Tok(this loc2 _) {
     return new XpkgPromotedInnerLib.Token(N: 9);
 }
 
-partial struct Mid2 {
-    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
-    /*embed*/ internal loc2 loc2;
+[StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Mid2 {
+    [FieldOffset(0)] /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
+    [FieldOffset(8)] /*embed*/ internal readonly loc2 loc2;
 }
 
 partial struct r1 {
@@ -65,9 +66,9 @@ internal static XpkgPromotedInnerLib.Token Tok(this inner3 _) {
     return new XpkgPromotedInnerLib.Token(N: 3);
 }
 
-partial struct PS {
-    /*embed*/ internal inner3 inner3;
-    public nint Tok;
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct PS {
+    [FieldOffset(0)] /*embed*/ internal readonly inner3 inner3;
+    [FieldOffset(0)] public nint Tok;
 }
 
 } // end XpkgPromotedMidLib_package

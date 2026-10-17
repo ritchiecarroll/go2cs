@@ -12,6 +12,7 @@ using testing = testing_package;
 using time = time_package;
 using inner = XpkgPromotedInnerLib_package;
 using mid = XpkgPromotedMidLib_package;
+using System.Runtime.InteropServices;
 using XpkgPromotedInnerLib = XpkgPromotedInnerLib_package;
 using XpkgPromotedMidLib = XpkgPromotedMidLib_package;
 using encoding;
@@ -38,9 +39,9 @@ internal static inner.Token Tok(this loc _) {
     return new inner.Token(N: 7);
 }
 
-partial struct Five {
-    /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
-    /*embed*/ internal loc loc;
+[StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Five {
+    [FieldOffset(0)] /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
+    [FieldOffset(8)] /*embed*/ internal readonly loc loc;
 }
 
 partial struct local {
@@ -56,9 +57,9 @@ partial struct local2 {
     /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
-partial struct S6 {
-    /*embed*/ internal loc loc;
-    /*embed*/ internal local2 local2;
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct S6 {
+    [FieldOffset(0)] /*embed*/ internal readonly loc loc;
+    [FieldOffset(0)] /*embed*/ internal local2 local2;
 }
 
 partial struct Within {
@@ -112,9 +113,9 @@ partial struct localTok {
     /*embed*/ internal deepTok deepTok;
 }
 
-partial struct OuterS5 {
-    /*embed*/ public XpkgPromotedMidLib_package.Mid3 Mid3;
-    /*embed*/ internal localTok localTok;
+[StructLayout(LayoutKind.Explicit, Size = 16)] partial struct OuterS5 {
+    [FieldOffset(0)] /*embed*/ public XpkgPromotedMidLib_package.Mid3 Mid3;
+    [FieldOffset(8)] /*embed*/ internal readonly localTok localTok;
 }
 
 partial struct OuterFD {

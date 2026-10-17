@@ -494,7 +494,11 @@ internal class StructTypeTemplate : TemplateBase
                     // A depth-1 member that is a readonly zero-size field of the embed answers the shared slot
                     // (a writable ref to it is CS8160); deeper ones resolve through the intermediate type's own
                     // promoted accessor, which applies this same rule.
-                    string promotedTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
+                    // So does EVERY member promoted through an embed that is itself one of THIS struct's readonly zero-size
+                    // fields (the zero-size layout arc stamps a zero-size embed readonly): a zero-size struct's members are
+                    // all zero-size, and a writable ref into a readonly field is CS8162 (XpkgPromotedMethodSet's OuterS5,
+                    // promoting deepTok through `struct{ deepTok }`).
+                    string promotedTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName)
                         ? ZeroSizeSlotRef(promotedType)
                         : $"ref {EmbedHop(promotedStructType, promotedMemberName)}.{memberName}";
 
@@ -554,7 +558,8 @@ internal class StructTypeTemplate : TemplateBase
                     string? pointerEmbedInnerType = PointerEmbedInnerType(promotedStructType, promotedMemberName);
 
                     // A depth-1 readonly zero-size member answers the shared slot, as the ref property above.
-                    string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName)
+                    // Through a readonly zero-size embed of this struct too, as the accessor above.
+                    string promotedRefTarget = depth == 1 && IsReadOnlyZeroSizeMemberOf(promotedStructType, memberName) || ReadOnlyZeroSizeMembers.Contains(promotedMemberName)
                         ? ZeroSizeSlotRef(promotedFieldType)
                         : $"ref instance.{EmbedHop(promotedStructType, promotedMemberName)}.{memberName}";
 

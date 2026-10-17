@@ -106,6 +106,21 @@ public class DeclaredEmbedFieldTests
                 {
                     public global::go.inner_package.Mid m;
                 }
+
+                [GoType] internal partial struct deep { }
+
+                [GoType] internal partial struct ztok
+                {
+                    /*embed*/ internal deep deep;
+                }
+
+                // The zero-size layout arc's shape for a zero-size embed beside a field: Go lays both at offset 0.
+                [GoType] [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Size = 8)]
+                internal partial struct Leader
+                {
+                    [System.Runtime.InteropServices.FieldOffset(0)] /*embed*/ internal readonly ztok ztok;
+                    [System.Runtime.InteropServices.FieldOffset(0)] internal long v;
+                }
             }
         }
         """;
@@ -178,6 +193,17 @@ public class DeclaredEmbedFieldTests
         Assert.IsFalse(generated.Contains("ʗInner"), "the generator declared backing storage for a declared embed field");
         Assert.IsFalse(generated.Contains("partial ref global::go.main_package.Inner Inner =>") || generated.Contains("partial ref Inner Inner =>"),
             "the generator declared an accessor for a declared embed field");
+    }
+
+    [TestMethod]
+    public void AReadonlyZeroSizeEmbedPromotesThroughTheSharedSlot()
+    {
+        // The arc stamps a zero-size embed readonly, and a writable ref into a readonly field is CS8162, so every
+        // member promoted through it (all zero-size) answers golib's shared per-type slot instead.
+        string generated = GeneratedFor("Leader");
+
+        Assert.IsFalse(generated.Contains("ref ztok.deep"), "a member promoted through a readonly zero-size embed was a writable ref into it");
+        StringAssert.Contains(generated, "deep => ref global::go.GoZeroSizeSlot<", "the promoted zero-size member did not answer the shared slot");
     }
 
     [TestMethod]
