@@ -524,42 +524,7 @@ public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
     return default!;
 }
 
-// DisassociateIOCP disassociates the file handle from the IOCP.
-// The disassociate operation will not succeed if there is any
-// in-progress IO operation on the file handle.
-public static error DisassociateIOCP(this ж<FD> Ꮡfd) {
-    GoFrame ᒐ = default;
-    bool ᒐd1 = false;
-    try {
-        ref var fd = ref Ꮡfd.DerefOrNull();
-
-        {
-            var err = Ꮡfd.incref(); if (err != default!) {
-                return err;
-            }
-        }
-        ᒐd1 = true;
-
-        if (fd.isBlocking || !Ꮡfd.pollable()) {
-            // Nothing to disassociate.
-            return default!;
-        }
-
-        ref var info = ref heap<windows.FILE_COMPLETION_INFORMATION>(out var Ꮡinfo);
-        info = new windows.FILE_COMPLETION_INFORMATION(nil);
-        {
-            var err = windows.NtSetInformationFile(fd.Sysfd, Ꮡ(new windows.IO_STATUS_BLOCK(nil)), @unsafe.Pointer.FromPinnedBox(Ꮡinfo), (uint32)/* unsafe.Sizeof(info) */ (uintptr)16, windows.FileReplaceCompletionInformation); if (err != default!) {
-                return err;
-            }
-        }
-        Ꮡfd.of(FD.Ꮡdisassociated).Store(true);
-        // Don't call fd.pd.close(), it would be too racy.
-        // There is no harm on leaving fd.pd open until Close is called.
-        return default!;
-    }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
-}
+// go2cs generated this placeholder — func DisassociateIOCP is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static error destroy(this ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
