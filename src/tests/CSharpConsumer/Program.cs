@@ -294,6 +294,10 @@ static class Program
         Check("13 ranging over the set visits every element", keySum == 10);
         slice<int> keys = set.Keys();
         Check("13 Keys returns a slice of every element", len(keys) == 4);
+        IReadOnlySet<int> members = set.AsReadOnlySet();    // a live, read-only view of the keys
+        Check("13 AsReadOnlySet passes the set where an IReadOnlySet goes", members.Contains(4) && members.IsSubsetOf(new[] { 1, 2, 3, 4, 5 }));
+        map<@string, EmptyStruct> visited = nil;
+        Check("13 a nil Go map is the empty set", visited.AsReadOnlySet().Count == 0 && !visited.AsReadOnlySet().Contains("go"));
     }
 
     // 2. A C# class implementing a Go interface: io.Writer.
