@@ -63,6 +63,12 @@ internal sealed class TestOptions
     /// <summary>Go's <c>-test.outputdir</c>: where profiles and, with <see cref="Artifacts"/>, artifacts go.</summary>
     public string? OutputDir { get; private set; }
 
+    /// <summary>
+    /// Go's <c>-test.testlogfile</c>: the test action log for cmd/go, written by M.Run through
+    /// <see cref="TestLogBridge"/>. Not under <see cref="OutputDir"/>: Go's own note is "Not using toOutputDir".
+    /// </summary>
+    public string? TestLogFile { get; private set; }
+
     /// <summary>Environment variable the pipeline passes the result-file path in.</summary>
     public const string ResultFileEnvironmentVariable = "GO2CS_TEST_RESULT";
 
@@ -249,6 +255,9 @@ internal sealed class TestOptions
                 case "outputdir":
                 case "test.outputdir":
                     options.OutputDir = value ?? NextValue(args, ref index, name);
+                    break;
+                case "test.testlogfile":
+                    options.TestLogFile = value ?? NextValue(args, ref index, name);
                     break;
                 case "run":
                 case "test.run":
