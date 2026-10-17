@@ -33,7 +33,7 @@ public static void Swap(this Organs s, nint i, nint j) {
 // ByName implements sort.Interface by providing Less and using the Len and
 // Swap methods of the embedded Organs value.
 partial struct ByName {
-    public partial ref Organs Organs { get; }
+    /*embed*/ public Organs Organs;
 }
 
 public static bool Less(this ByName s, nint i, nint j) {
@@ -43,7 +43,7 @@ public static bool Less(this ByName s, nint i, nint j) {
 // ByWeight implements sort.Interface by providing Less and using the Len and
 // Swap methods of the embedded Organs value.
 partial struct ByWeight {
-    public partial ref Organs Organs { get; }
+    /*embed*/ public Organs Organs;
 }
 
 public static bool Less(this ByWeight s, nint i, nint j) {

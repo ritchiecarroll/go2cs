@@ -8,6 +8,9 @@ using Δruntime = runtime_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -229,9 +232,9 @@ public static void TestListManualRemoveAll(ж<testing.T> Ꮡt) {
 }
 
 // The tests below are identical, but used with a sys.NotInHeap type.
-partial struct listedValNIH {
-    internal sys.NotInHeap _;
-    internal partial ref listedValManual listedValManual { get; }
+[StructLayout(LayoutKind.Explicit, Size = 40)] partial struct listedValNIH {
+    [FieldOffset(0)] internal readonly sys.NotInHeap _;
+    [FieldOffset(0)] /*embed*/ internal listedValManual listedValManual;
 }
 
 internal static ж<listedValNIH> newListedValNIH(nint v) {

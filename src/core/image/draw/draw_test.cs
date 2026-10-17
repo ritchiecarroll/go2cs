@@ -767,7 +767,7 @@ public static void TestFloydSteinbergCheckerboard(ж<testing.T> Ꮡt) {
 // embeddedPaletted is an Image that behaves like an *image.Paletted but whose
 // type is not *image.Paletted.
 internal partial struct embeddedPaletted {
-    public partial ref ж<image_package.Paletted> Paletted { get; }
+    /*embed*/ public ж<image_package.Paletted> Paletted;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

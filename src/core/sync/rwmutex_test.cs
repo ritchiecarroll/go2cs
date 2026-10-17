@@ -216,7 +216,7 @@ public static partial void TestRLocker(ж<Δtesting.T> Ꮡt) {
 }
 
 internal partial struct BenchmarkRWMutexUncontended_PaddedRWMutex /*dyn*/ {
-    public partial ref sync_package.RWMutex RWMutex { get; }
+    /*embed*/ public sync_package.RWMutex RWMutex;
     internal array<uint32> pad = new(32);
 }
 

@@ -1028,7 +1028,7 @@ public static ж<ΔPallocData> PallocData(this ж<PageAlloc> Ꮡp, ChunkIdx i) {
 
 // AddrRange is a wrapper around addrRange for testing.
 public partial struct AddrRange {
-    internal partial ref global::go.runtime_package.addrRange addrRange { get; }
+    /*embed*/ internal global::go.runtime_package.addrRange addrRange;
 }
 
 // MakeAddrRange creates a new address range.
@@ -1065,7 +1065,7 @@ internal static void initᴛtestSysStat() { testSysStat = Ꮡmemstats.of(global:
 
 // AddrRanges is a wrapper around addrRanges for testing.
 public partial struct AddrRanges {
-    internal partial ref global::go.runtime_package.addrRanges addrRanges { get; }
+    /*embed*/ internal global::go.runtime_package.addrRanges addrRanges;
     internal bool mutable;
 }
 
@@ -1448,7 +1448,7 @@ public static UntypedInt SemTableSize => /* semTabSize */ 251;
 
 // SemTable is a wrapper around semTable exported for testing.
 public partial struct SemTable {
-    internal partial ref global::go.runtime_package.semTable semTable { get; }
+    /*embed*/ internal global::go.runtime_package.semTable semTable;
 }
 
 // Enqueue simulates enqueuing a waiter for a semaphore (or lock) at addr.
@@ -1581,7 +1581,7 @@ public static UntypedInt MemoryLimitHeapGoalHeadroomPercent => /* memoryLimitHea
 public static UntypedInt MemoryLimitMinHeapGoalHeadroom => /* memoryLimitMinHeapGoalHeadroom */ 1048576;
 
 public partial struct GCController {
-    internal partial ref global::go.runtime_package.gcControllerState gcControllerState { get; }
+    /*embed*/ internal global::go.runtime_package.gcControllerState gcControllerState;
 }
 
 public static ж<GCController> NewGCController(nint gcPercent, int64 memoryLimit) {
@@ -1699,7 +1699,7 @@ public static void GoschedIfBusy() {
 }
 
 public partial struct PIController {
-    internal partial ref global::go.runtime_package.piController piController { get; }
+    /*embed*/ internal global::go.runtime_package.piController piController;
 }
 
 public static partial ж<PIController> NewPIController(float64 kp, float64 ti, float64 tt, float64 min, float64 max) {
@@ -2106,7 +2106,7 @@ public static bool UnsafePoint(uintptr pc) {
 }
 
 public partial struct TraceMap {
-    internal partial ref global::go.runtime_package.traceMap traceMap { get; }
+    /*embed*/ internal global::go.runtime_package.traceMap traceMap;
 }
 
 public static (uint64, bool) PutString(this ж<TraceMap> Ꮡm, @string s) {
