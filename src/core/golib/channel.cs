@@ -364,23 +364,30 @@ internal abstract class ChanCore
     internal readonly SyncTestBubble? Bubble = SyncTestBubble.Current;
 
     /// <summary>
-    /// Go's check at the top of chansend / chanrecv: an operation on a bubbled channel from a goroutine
-    /// in no bubble panics with Go's text.
+    /// Go's decision at the top of chansend / chanrecv / closechan, and in send() / recv() before a
+    /// direct handoff: an operation on a bubbled channel from any goroutine not in THAT bubble -- no
+    /// bubble, or another one -- is a fault, and this is its text (null when the operation may run).
+    /// </summary>
+    /// <remarks>
+    /// Go 1.26 writes every one as <c>c.bubble != nil &amp;&amp; getg().bubble != c.bubble</c> and calls
+    /// <c>fatal</c> (go1.26.9 runtime/chan.go:193-195, 320-323, 418-420, 540-542, 704-707). Go 1.24
+    /// panicked instead, only for a caller in NO bubble, and a handoff compared the parked goroutine's
+    /// bubble. The fault ends the process, so the decision is its own member, which a test reads.
+    /// </remarks>
+    internal string? OutsideBubbleFault(string operation) =>
+        Bubble is not null && !ReferenceEquals(SyncTestBubble.Current, Bubble)
+            ? $"{operation} {(operation == "close" ? "of" : "on")} synctest channel from outside bubble"
+            : null;
+
+    /// <summary>
+    /// Go's check at the top of chansend / chanrecv / closechan: fatal, with Go's text, when
+    /// <see cref="OutsideBubbleFault"/> says so. Called before the channel lock is taken.
     /// </summary>
     internal void RefuseOutsideBubble(string operation)
     {
-        if (Bubble is not null && SyncTestBubble.Current is null)
-            throw new PanicException($"{operation} on synctest channel from outside bubble");
+        if (OutsideBubbleFault(operation) is { } fault)
+            FatalReport.Fatal(fault, userFault: true);
     }
-
-    /// <summary>
-    /// Go's check in send() / recv() before a direct handoff: the parked goroutine on the other side
-    /// must be in the same bubble as the caller (a goroutine of ANOTHER bubble can reach a bubbled
-    /// channel's queue, since it passes the no-bubble check). The waiter is already dequeued, as in
-    /// Go; the caller unlocks before this panic escapes.
-    /// </summary>
-    internal bool HandoffCrossesBubble(Waiter parked) =>
-        Bubble is not null && !ReferenceEquals(parked.Parker?.Bubble, SyncTestBubble.Current);
 
     /// <summary>Buffer capacity; 0 = unbuffered (rendezvous).</summary>
     internal readonly int Dataqsiz;
@@ -482,8 +489,8 @@ internal sealed class ChanCore<T> : ChanCore
             // unlockf), then publish value+ok and signal.
             Monitor.Exit(SyncRoot);
 
-            if (HandoffCrossesBubble(receiver))
-                throw new PanicException("send on synctest channel from outside bubble");
+            if (OutsideBubbleFault("send") is { } fault)
+                FatalReport.Fatal(fault, userFault: true);
 
             receiver.Elem = value;
             receiver.Ok = true;
@@ -558,11 +565,11 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (sender is not null)
         {
-            // Go's recv(): a handoff across bubbles panics, after its unlockf.
-            if (HandoffCrossesBubble(sender))
+            // Go's recv(): a handoff from outside the channel's bubble is fatal, after its unlockf.
+            if (OutsideBubbleFault("receive") is { } fault)
             {
                 Monitor.Exit(SyncRoot);
-                throw new PanicException("receive on synctest channel from outside bubble");
+                FatalReport.Fatal(fault, userFault: true);
             }
 
             if (Dataqsiz == 0)
@@ -642,6 +649,9 @@ internal sealed class ChanCore<T> : ChanCore
     /// </summary>
     internal void Close()
     {
+        // Go 1.26's closechan check, after the nil check and before the lock (chan.go:418-420).
+        RefuseOutsideBubble("close");
+
         Monitor.Enter(SyncRoot);
 
         if (Closed)
@@ -718,10 +728,10 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (receiver is not null)
         {
-            // Go's send(), reached from selectgo: a handoff across bubbles panics. Thrown with the
-            // select's locks held -- PollPassLocked releases them all before it escapes.
-            if (HandoffCrossesBubble(receiver))
-                throw new PanicException("send on synctest channel from outside bubble");
+            // Go's send(), reached from selectgo: a handoff from outside the channel's bubble is fatal.
+            // The select's locks are still held; the process ends here, so nothing waits on them.
+            if (OutsideBubbleFault("send") is { } fault)
+                FatalReport.Fatal(fault, userFault: true);
 
             receiver.Elem = value;
             receiver.Ok = true;
@@ -756,9 +766,9 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (sender is not null)
         {
-            // Go's recv(), reached from selectgo (locks released by PollPassLocked, as above).
-            if (HandoffCrossesBubble(sender))
-                throw new PanicException("receive on synctest channel from outside bubble");
+            // Go's recv(), reached from selectgo (fatal with the locks held, as above).
+            if (OutsideBubbleFault("receive") is { } fault)
+                FatalReport.Fatal(fault, userFault: true);
 
             if (Dataqsiz == 0)
             {
@@ -1109,10 +1119,11 @@ internal static class SelectRuntime
         return -1;
     }
 
-    // Go's selectgo, before any lock: a case on a bubbled channel from a goroutine in no bubble panics
-    // ("select on synctest channel from outside bubble"); returns whether EVERY non-nil case is on a
-    // bubbled channel. Nil cases are omitted from both questions, as Go omits them from its poll and
-    // lock orders (COORD's addition 3): Server.Shutdown's select over a bubbled channel and
+    // Go's selectgo, before any lock: a case on a bubbled channel from a goroutine not in its bubble
+    // is fatal ("select on synctest channel from outside bubble"; go1.26.9 runtime/select.go:179-183,
+    // a panic for a caller in no bubble at 1.24); returns whether EVERY non-nil case is on a bubbled
+    // channel. Nil cases are omitted from both questions, as Go omits them from its poll and lock
+    // orders (COORD's addition 3): Server.Shutdown's select over a bubbled channel and
     // context.Background().Done() -- a nil channel -- still parks as "select (durable)".
     private static bool AllCasesBubbled(SelectOp[] ops)
     {
@@ -1125,8 +1136,8 @@ internal static class SelectRuntime
 
             if (core.Bubble is not null)
             {
-                if (SyncTestBubble.Current is null)
-                    throw new PanicException("select on synctest channel from outside bubble");
+                if (core.OutsideBubbleFault("select") is { } fault)
+                    FatalReport.Fatal(fault, userFault: true);
             }
             else
             {

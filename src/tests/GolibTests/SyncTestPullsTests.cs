@@ -203,9 +203,11 @@ public class SyncTestPullsTests
         Assert.IsNull(after, "and the goroutine leaves it when f returns");
         Assert.AreEqual("goroutine is already bubbled", nested);
 
-        // A channel made inside Bubble.Run belongs to the bubble: sending on it from outside panics.
-        Exception? send = OnGoroutine(() => made.Send(1));
-        StringAssert.Contains(send?.Message, "send on synctest channel from outside bubble");
+        // A channel made inside Bubble.Run belongs to the bubble: sending on it from outside is fatal
+        // (Go 1.26), so the decision is read rather than the process ended.
+        string? send = null;
+        AssertNoFailure(OnGoroutine(() => send = BubbledChannelTests.ChannelFault(made, "send")));
+        Assert.AreEqual("send on synctest channel from outside bubble", send);
     }
 
     [TestMethod]

@@ -682,9 +682,9 @@ partial class time_package
     {
         runtimeTimer timer = runtimeTimerOf(box);
 
-        // Go's stopTimer: a fake timer touched from outside any bubble panics.
-        if (timer.fake is not null && SyncTestBubble.Current is null)
-            throw panic("stop of synctest timer from outside bubble");
+        // Go's stopTimer: a fake timer touched from outside any bubble is fatal.
+        if (outsideBubbleTimerFault(timer, "stop") is { } fault)
+            go.golib.FatalReport.Fatal(fault, userFault: true);
 
         object? sendLock = syncSendLock(timer);
 
@@ -745,12 +745,22 @@ partial class time_package
     {
         runtimeTimer timer = runtimeTimerOf(box);
 
-        // Go's resetTimer: a fake timer touched from outside any bubble panics.
-        if (timer.fake is not null && SyncTestBubble.Current is null)
-            throw panic("reset of synctest timer from outside bubble");
+        // Go's resetTimer: a fake timer touched from outside any bubble is fatal.
+        if (outsideBubbleTimerFault(timer, "reset") is { } fault)
+            go.golib.FatalReport.Fatal(fault, userFault: true);
 
         return modifyRuntimeTimer(timer, when, period);
     }
+
+    // Go's stopTimer / resetTimer decision: a fake timer touched from a goroutine in NO bubble is a
+    // fault, and this is its text (null when the call may run). Go 1.26 calls fatal (go1.26.9
+    // runtime/time.go:417-419, 432-434); Go 1.24 panicked. Unlike a channel's, the condition is
+    // still "no bubble", not "another bubble". The fault ends the process, so a test reads this
+    // (GolibTests, by reflection, with runtimeTimerOf).
+    private static string? outsideBubbleTimerFault(runtimeTimer timer, string operation) =>
+        timer.fake is not null && SyncTestBubble.Current is null
+            ? $"{operation} of synctest timer from outside bubble"
+            : null;
 
     // runtime.timer.modify: set the period and the new deadline, reporting whether the timer was
     // still pending. A Reset of an already-fired or stopped timer therefore returns false while
