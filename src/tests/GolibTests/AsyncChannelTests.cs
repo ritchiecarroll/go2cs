@@ -74,6 +74,25 @@ public class AsyncChannelTests
         await Within(sender);
     }
 
+    // `ReceiveAsync(default)` binds the TOKEN form, with no attribute needed: `default` converts to both
+    // the token and the comma-ok discriminator, and C# prefers the candidate that fills every parameter
+    // over the one that leaves its optional token to a default. The declared Task<int> is the proof: the
+    // comma-ok form returns Task<(int, bool)>. Measured against the commit that added the methods, it compiled
+    // and bound as here; the two-argument `ReceiveAsync(default, default)` is the comma-ok form.
+    [TestMethod]
+    public async Task ReceiveAsyncOfDefaultBindsTheTokenForm()
+    {
+        channel<int> ch = new(1);
+        ch.Send(5);
+
+        Task<int> received = ch.ReceiveAsync(default);
+        Assert.AreEqual(5, await Within(received));
+
+        ch.Send(6);
+        Task<(int val, bool ok)> commaOk = ch.ReceiveAsync(default, default);
+        Assert.AreEqual((6, true), await Within(commaOk));
+    }
+
     [TestMethod]
     public async Task SendAsyncIsARendezvousOnAnUnbufferedChannel()
     {
