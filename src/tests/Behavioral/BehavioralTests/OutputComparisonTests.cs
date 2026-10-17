@@ -2193,6 +2193,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTypeAssertionPanic() => CheckTarget("TypeAssertionPanic");
 
     [TestMethod]
+    public void CheckTypeAssertionSource() => CheckTarget("TypeAssertionSource");
+
+    [TestMethod]
     public void CheckTypeConversion() => CheckTarget("TypeConversion");
 
     [TestMethod]

@@ -1078,6 +1078,9 @@
     <Project Path="tests/Behavioral/TwoLevelDefinedStruct/TwoLevelDefinedStruct.csproj" />
     <Project Path="tests/Behavioral/TypeAssert/TypeAssert.csproj" />
     <Project Path="tests/Behavioral/TypeAssertionPanic/TypeAssertionPanic.csproj" />
+    <Project Path="tests/Behavioral/TypeAssertionSource/TypeAssertionSource.csproj" />
+    <Project Path="tests/Behavioral/TypeAssertionSource/lib/TypeAssertionSource.lib.csproj" />
+    <Project Path="tests/Behavioral/TypeAssertionSource/mid/TypeAssertionSource.mid.csproj" />
     <Project Path="tests/Behavioral/TypeConversion/TypeConversion.csproj" />
     <Project Path="tests/Behavioral/TypeConversionInterfaceParam/TypeConversionInterfaceParam.csproj" />
     <Project Path="tests/Behavioral/TypedNilFuncBoundaries/TypedNilFuncBoundaries.csproj" />
