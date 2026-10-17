@@ -42,14 +42,14 @@ The scout and review reports are in `docs/phase4/proposals/` on this branch.
   - os still times out (two open P2 classes, below).
 - **MERGE QUEUE (COORD merges, in order; each is G-reviewed unless noted):**
   1. LANDED at hop 8bb3b8b5be: C1 array-dims, R labels, R mprof+lock, the COORD consumer API (all pruned).
-  2. P1's type-assertion stack, top = claude/p1-type-assertion-forms (owner approved the explicit form). It
-     conflicted in runtime/{windows,linux,darwin}/package_info.cs. P1 is merging the tip in and REGENERATING those
-     files; then merge P1's new head.
+  2. P1's type-assertion stack: READY at claude/p1-type-assertion-forms ad7bd8c23b (owner approved the explicit form; the hop
+     tip 8bb3b8b5be merged in and the three runtime package_info.cs REGENERATED, not hand-merged; gates green on linux).
+     If the hop tip moves first, P1 re-merges and regenerates.
   3. R testlogfile 4dea95c684 (G's three divergences fixed); its push was pending at the roll, so read the ref.
   4. C1's ToString e752628faf and LINQ 2d635fad3f, after R's merged behavioral run on the current tip.
   5. P2 reparse a3fc33b20c: READY (G design OK; the i9's two reads clean, the full behavioral suite 836/836 with 0 Output failures).
   6. P2 pipe-deadline 64503699da and lookup-field-view 97b749ad46: after the i9's windows readings (post-roll).
-  7. C1 watchdog 63f0e316f7: READY (G re-review OK 2026-10-17: fixes (1)-(3) each behind its red commit). Its landing unblocks R's output-format seat.
+  7. C1 watchdog 63f0e316f7: READY (G re-review OK 2026-10-17: fixes (1)-(3) each behind its red commit; C1's merge-tree onto 8bb3b8b5be is clean, projitems keeps both). Its landing unblocks R's output-format seat.
 - **IN FLIGHT:**
   - P2: three windows seats posted (queue 5-6); nothing running at the roll.
   - C1: the WATCHDOG (ruled (A): 15 m default plus per-row floors; crypto/dsa 120 m, go/parser 90 m). It is being
@@ -89,7 +89,7 @@ H:/go2cs-tmp-coord/coord-scratch (the post files and gate scripts). Read CLAUDE.
 docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (and 1k.2 for the owner's rulings), then docs/phase4/COORD-CARRYOVER.md (every operative rule and plan from COORD's old local memory; the watcher and BOARD-union tools are in .claude/coord-scripts/coord-live/), then the tail of
 docs/phase4/LEDGER.md on claude/mailbox. Read the hop tip with git ls-remote and name it in your first status.
 COMMS: G and the i9 by direct session message (titles "g -- resume sesstion" and "i9 -- Corpus migration to 1.24.13
-coordination"); C1 by direct message (one-way: C1 answers through the mailbox); P1, P2 and R through the mailbox
+coordination"); C1 and C2 by direct message (one-way: they answer through the mailbox); P1, P2 and R through the mailbox
 (post tool .claude/coord-scripts/fleet-msg.sh after coord-identifier-census.sh entry on the file; write post files
 with the Write tool). Slack: the private fleet channel (find it with the connector's channel search), for the owner's
 pings (mention him) whenever a lane waits on him, and for milestones; nobody polls it.
@@ -218,7 +218,7 @@ BRANCH: claude/p1-runtime-errors b3e6625be2efbf32a60198af72d74020dd1766e8 on-ori
 BRANCH: claude/p1-type-assertion-error aa2cf6f43dbc99e38af1f64e9a9e5817bf4e02df on-origin-yes announced -- D1, *runtime.TypeAssertionError and its text
 BRANCH: claude/p1-type-assertion-missing-method e8cdc282372b4f7ab2f4e37a8b1e69e956f14d8c on-origin-yes accepted -- R2, first missing method named (G OK)
 BRANCH: claude/p1-type-assertion-source 56411daf02145567921cd4f706f189f7310e26a3 on-origin-yes announced -- R1 part 1, golib _<TSource,T> and the CheckTypeAssertionPanic entry
-BRANCH: claude/p1-type-assertion-forms 3f20df17e1982b62b40d75f23b7acbb5d4673c1f on-origin-yes accepted -- R1 part 2, three call spellings; G OK incl. embedded-supertype fix; merge waits on the owner's OK for the explicit x._<I,T>() form
+BRANCH: claude/p1-type-assertion-forms ad7bd8c23bb3e7ee096a7a8616eddb513afb89f3 on-origin-yes accepted -- R1 part 2, three call spellings (G OK; owner OK for the explicit form); hop 8bb3b8b5be merged in, runtime package_info.cs regenerated; READY, merge the stack in order
 BRANCH: claude/p1-docs-polish 6b496dd2d2448f384edf7c43844830d5a02d946d on-origin-yes landed -- already in master and in the hop tip
 BRANCH: claude/p1-tour-pin 3e918939fc71b1e40447aeeeb96224bce5c05790 on-origin-yes landed -- already in master and in the hop tip
 BRANCH: claude/p1-union-measure a6d8e5a5c9398f848351c5d568444003f05ba074 on-origin-yes measurement -- union tree of other lanes' commits, NOT for merge (pushed at the roll)
@@ -465,6 +465,51 @@ PASTE PROMPT
 You are P2, a go2cs fleet lane, in a cloud container (linux). Read CLAUDE.md, then section 1l of docs/phase4/RESUME-SESSIONS.md on branch claude/coord-handover (your section, plus 1l.0), then your mailbox inbox on claude/mailbox (docs/phase4/inbox/P2/) since your last post. Read every branch tip you hold with git ls-remote after fetch --prune, and name them in your first post to COORD. Owner principles: behavior must match Go; nothing is left out for being unreached; prefer the most readable, Go-like shape even at generator cost. Nicknames only on pushed surfaces; census every post (coord-identifier-census.sh entry) before sending; announce then push; signed commits; no git add -A; capture exit codes before any pipe; cleanup = bin/obj under your own worktree only, never anything machine-wide. FIRST ACTION: post your tips to COORD; then the os named-pipe completion-delivery fix (the i9's probe: all three steps hang, so completions never reach the poller), red-first by the probe, and the os named_overlapped_pipe subtest on the i9.
 ```
 
+### 1l.7b C2 (cloud)
+
+STATE BLOCK
+```
+LANE: C2   MODEL: opus-class/default effort   HOST: cloud container (linux; the scratchpad was wiped by a restart on 2026-10-17; nothing local survives)
+BRANCH: claude/c2-spread-defer-go a605f7b9b2d8274985e2efacb4a0fd42777072bc on-origin-yes announced -- defer/go of a spread call, red-first; HELD for the post-hop train
+BRANCH: claude/c2-escaping-pack-alias 1a7f5ef18d735b9525677d27c690d6d5ce205d14 on-origin-yes announced -- escaping variadic pack, route (a) golib; HELD for the post-hop train
+BRANCH: claude/c2-nugetgo-wave2-prep 85a6e913e96f9ebfaf55ea6525cd54388b6470be on-origin-yes accepted -- mousetrap + cobra prep, post-hop wave plan, S1 PIN-1 sheet, S2 wave driver
+BRANCH: claude/c2-nugetgo-hashset-1.0.0 4bf6b03a9696f578ce0d4bec516a80b9515f9898 on-origin-yes kit -- release kit/evidence, not a seat (prune is COORD's call, bundle first)
+BRANCH: claude/c2-nugetgo-hashset-rebuild-1 99900c69291e9be806b404636dcd2952224caa25 on-origin-yes kit -- same
+BRANCH: claude/c2-nugetgo-jwt-5.3.1 8bef58726f3f53152b3e113beb4157442b23e1d8 on-origin-yes kit -- same
+BRANCH: claude/c2-nugetgo-uuid-1.6.0 c25ae153b331bc517bc885857237e84801272982 on-origin-yes kit -- same
+BRANCH: claude/c2-nugetgo-tools 4493a553114e6d753c3ff452e8d7c32f22e40e79 on-origin-yes landed -- landed by restate; prunable
+BRANCH: claude/c2-nugetgo-tools-r6 39b58d0d8d4f88c940527fb7444e283252ffa1d4 on-origin-yes landed -- its GREEN is f59f0e05a1 on master; prunable
+BRANCH: claude/c2-nugetgo-hostpaths fdfb9d4791300b79d7f75f9525c70f9e69ae7683 on-origin-yes landed -- landed by restate; prunable
+BRANCH: claude/c2-nugetgo-pack-readme 7a37c9a2218238e360008549761afb258ad4c8d6 on-origin-yes landed -- landed by restate; prunable
+BRANCH: claude/c2-nugetgo-pack-readme-seat 59342e506cd842076044e32ef44f7e2b41274576 on-origin-yes landed -- landed by restate; prunable
+BRANCH: claude/c2-nugetgo-pack-readme-seat-t3 0d3eccc3f3b6a6bb15a664ca91edc14a54ddba2a on-origin-yes landed -- landed by restate; prunable
+BRANCH: claude/c2-nugetgo-suites-guard a031c61722b3f146de775fb870fb4b5b7429f4c1 on-origin-yes landed -- landed by restate; prunable
+NOTE: landed this week with no open ref: S3 relocscan (hop), S4 guard + projitems fix 40dfcd92bb (master), STYLE-disclosure-reasons ec7df2cdb5 (master db38d6c6d1)
+LOCAL-ONLY: none. No worktrees beyond a read-only mailbox clone; no stashes; the session branch equals master d0dfcbf2f8.
+NEXT (all post-hop or at H10, by COORD's order): (1) H10: extend the S4 fleet-word guard to the src/core manifests after the re-sign; the P1 rewording follows docs/phase4/STYLE-disclosure-reasons.md. (2) post-hop (a): -nuget-map-refresh reaches readNuGetPackage (nugetPackage.go:291; callers :139 and :180); prefer fixing the flag over changing docs/CommandLine.md:43; size it with red arms first. (3) post-hop (b): a folder feed keys its cache on a content hash, or bypasses our cache. (4) the nugetgo wave: uuid and jwt rebuilds gain the maintainers README; then the embed readability item.
+READ-FIRST: inbox/C2 since the style-sheet acceptance; C2's S5 post (the cache-key sizing); inbox/COORD 20261017T190233Z-C2 (this block); the ledger tail
+BLOCKED-ON: H10 opening (nothing in flight)
+TOOLS: GOTOOLCHAIN=local with GOROOT = the go1.26.9 toolchain module (hop), go1.24.13 for master; run the full `go test ./...` in src/go2cs before any post that adds or removes a Go source
+```
+WAKE: COORD messages C2 directly (one-way, the session titled "c2 -- corpus migration coordination"); C2 answers by inbox/COORD.
+
+FOLDERS (posted by C2 2026-10-17)
+```
+START-FOLDER: a fresh clone of the repository (master), plus a clone of claude/mailbox for the mailbox scripts. Nothing local carries over.
+FOLDER: scratchpad/mbxc | read-only mailbox clone | DELETE-SAFE (transport; everything is on origin)
+Free disk at the roll: 30 GB. Removed 0 trees, purged 0 GB.
+```
+
+PASTE PROMPT
+```
+You are C2, a go2cs fleet lane, in a cloud container. Read CLAUDE.md, then section 1l of
+docs/phase4/RESUME-SESSIONS.md on claude/coord-handover (your section 1l.7b, plus 1l.0), then your inbox on
+claude/mailbox (docs/phase4/inbox/C2/) since your last post. Read every tip you hold with git ls-remote
+and name them in your first post to COORD. Census every post; announce then push; signed commits; no
+git add -A; capture exit codes before any pipe; cleanup only under your own scratchpad. FIRST ACTION:
+post your tips to COORD; nothing is in flight; wait for H10 or COORD's next order.
+```
+
 ### 1l.8 COORD's local folders (i7, drive H:)
 
 START-FOLDER: H:/Projects/go2cs (the main checkout, on master).
@@ -486,7 +531,7 @@ START-FOLDER: H:/Projects/go2cs (the main checkout, on master).
 A lane is SAFE TO SHUT DOWN when: (1) every commit is pushed, or bundled and named; (2) its STATE BLOCK and FOLDER INVENTORY are folded here; (3) nothing is mid-gate on its box. A run in flight is abandoned and re-run after the roll, never trusted half-done.
 
 SHUTDOWN order:
-1. P1, C1, P2 (cloud): nothing local survives, so confirm everything is pushed.
+1. P1, C1, P2, C2 (cloud): nothing local survives, so confirm everything is pushed.
 2. R.
 3. The i9.
 4. G.
@@ -497,7 +542,7 @@ START order (after the reboots):
 2. G on G-LAPTOP. Reviews unblock merges.
 3. The i9. FIRST: read WHEA and the reset count, then `git fsck --full` (pack.threads=4), before any build. Then its NEXT.
 4. R on R-LAPTOP (the heavy behavioral legs).
-5. P2, C1, P1 (cloud; no reboot dependency). Start them once COORD has posted the tip.
+5. P2, C1, P1, C2 (cloud; no reboot dependency). Start them once COORD has posted the tip.
 
 ---
 

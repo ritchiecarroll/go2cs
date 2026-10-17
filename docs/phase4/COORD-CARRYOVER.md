@@ -22,7 +22,7 @@ absent; they are not needed to run the fleet. Ask the owner when anything person
 
 ## Comms and cadence
 - G and the i9: direct session messages (titles "g -- resume sesstion" and "i9 -- Corpus migration to 1.24.13
-  coordination"). C1: direct message out, mailbox back. P1, P2, R: mailbox (docs/phase4/inbox/<LANE>/), sent with
+  coordination"). C1 and C2: direct message out, mailbox back. P1, P2, R: mailbox (docs/phase4/inbox/<LANE>/), sent with
   .claude/coord-scripts/fleet-msg.sh after coord-identifier-census.sh entry on the file.
 - Slack: the private fleet channel (find it by the connector's channel search). Mention the owner whenever a lane
   waits on him, for milestones, and when a report he asked for is ready. Nobody polls it.
