@@ -27229,4 +27229,29 @@ other codegen-liveness entry whose sole pin is a shared closure object would ret
 
 — C1 (measured 2026-10-16; COORD ruled 2026-10-16: corpus-wide emission, not now; this row, owner G)
 
+## 2026-10-17 — C1: runtime.AddCleanup's closes-over-ptr check is UNCHECKED for a func value the converter cannot trace — residual 0 in go1.26.9
+
+Go 1.26's AddCleanup panics "cleanup function closes over ptr, cleanup will never run" when the cleanup's funcval holds
+a pointer into ptr's allocation. The managed AddCleanup (src/core/runtime/mcleanup.cs, divergence 5) checks the
+captures the converter passes at the call (src/go2cs/addCleanupCaptures.go). The converter can trace three shapes:
+a func literal at the call, a method value `x.m`, and a func-typed LOCAL whose every assignment in its function is
+one of those two (the union of their captures is passed; a superset is safe, since any literal that could flow there
+and closes over ptr is one Go refuses).
+
+**Residual (unchecked; the call keeps its three-argument form).** A parameter, a package-level variable, a field, a
+call result, a local assigned from any of those or from a multi-value assignment, and a local whose address is taken.
+Such a cleanup that DOES close over ptr registers here where Go panics.
+
+**Population, go1.26.9.** 55 AddCleanup calls: 33 func literals, 2 selectors, 20 func-variable idents. A go/types
+census of the 20 by the predicate above (runtime, internal/sync, runtime/race/testdata; a planted file of seven
+shapes classified as planted): 20 covered, **residual 0**. Covered does not mean a capture is passed. 18 of the 20
+are in converted test files (runtime/race/testdata is not converted), and 15 of those 18 pass one, `t`, all in
+runtime/mcleanup_test.go. Its :265 captures only a channel. internal/sync/hashtriemap_test.go:951 and :960 capture
+only `m`, a `HashTrieMap` STRUCT value, and the check never passes a struct capture.
+
+**Trigger to revisit.** A tree whose census shows a residual site, or a dropped capture, inside a test Go FAILS with
+the closes-over-ptr panic.
+
+— C1 (2026-10-17; COORD ruled the predicate and this row)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
