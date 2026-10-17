@@ -7204,10 +7204,30 @@ func testHostRunEnv(options Options) []string {
 	return nil
 }
 
-// testHostEnv is the converted host child's extra environment: the runtime settings (testHostRunEnv)
-// plus, for a package outside the standard library, its module's source root (testHostModuleEnv).
+// testHostEnv is the converted host child's extra environment: the runtime settings (testHostRunEnv), the
+// per-test deadline (testHostDeadlineEnv), and, for a package outside the standard library, its module's
+// source root (testHostModuleEnv).
 func testHostEnv(inputPath string, options Options) []string {
-	return append(testHostRunEnv(options), testHostModuleEnv(inputPath, options)...)
+	env := append(testHostRunEnv(options), testHostDeadlineEnv(options))
+	return append(env, testHostModuleEnv(inputPath, options)...)
+}
+
+// defaultTestDeadline is -test-deadline's default: below the longest row deadline the sweep passes and above
+// the longest single test a banked row runs at it. A row with a longer legitimate test takes a per-row floor
+// (run-validated-sweep.ps1 $testDeadlineFloors: crypto/dsa, go/parser), as COORD ruled option (A) on
+// 2026-10-17; runtime stays at the default, since its hangs are what the deadline is for.
+const defaultTestDeadline = 15 * time.Minute
+
+// testHostDeadlineEnv hands the converted host its per-test deadline (TestOptions.TestDeadline): a top-level
+// test still running at it is reported failed and abandoned, and the run goes on (TestRunner.WaitBounded,
+// DESIGN-object-lifetime-disclosure.md OQ-L3(b)). Through the environment, like the result file and never
+// on argv, because Go's test binary has no such flag and the Go side of the comparison stays unbounded. Always
+// passed, "0" for none, so the host never inherits a value from the shell that launched the converter.
+func testHostDeadlineEnv(options Options) string {
+	if options.testDeadline <= 0 {
+		return "GO2CS_TEST_DEADLINE=0"
+	}
+	return "GO2CS_TEST_DEADLINE=" + options.testDeadline.String()
 }
 
 // testHostModuleEnv hands a NON-standard-library package's host the root of the module it belongs to,
@@ -7498,6 +7518,10 @@ type normalizedTestEvent struct {
 	// the record boundaries a disclosure's count pin needs survive only here.
 	Records        []string `json:"records,omitempty"`
 	RecordsDropped int      `json:"recordsDropped,omitempty"`
+
+	// Abandoned marks a fail the converted host's per-test watchdog reported: the test did not finish within
+	// -test-deadline and its thread was left running (TestEvent.Abandoned). go test's stream never carries it.
+	Abandoned bool `json:"abandoned,omitempty"`
 }
 
 type testComparison struct {
@@ -9063,6 +9087,42 @@ func testRunOrder(output string) map[string]int {
 	return order
 }
 
+// terminalAbandonedTests names each test whose terminal event in the converted host's stream is a fail the
+// per-test watchdog reported (normalizedTestEvent.Abandoned).
+func terminalAbandonedTests(output string) map[string]bool {
+	abandoned := make(map[string]bool)
+	for _, line := range testStreamLines(output) {
+		var event normalizedTestEvent
+		if json.Unmarshal([]byte(line), &event) != nil || event.Test == "" {
+			continue
+		}
+		switch event.Action {
+		case "pass", "fail", "skip", "timeout", "infrastructure-error":
+			abandoned[event.Test] = event.Action == "fail" && event.Abandoned
+		}
+	}
+	return abandoned
+}
+
+// labelAbandonedTests marks each verdict mismatch whose C# side is the watchdog's: the row still FAILS, as
+// COORD ruled (an abandoned test counts as fail), but it reads as a test that did not finish within the
+// per-test deadline rather than as converted code that failed. A mismatch line starts with the test's name
+// and ": " (matchTerminalStatusesWithRecords). A test that hung inside a cascade is labelled by its own
+// event; the host's afterAbandoned tag on later events names the cascade's source.
+func labelAbandonedTests(mismatches []string, abandoned map[string]bool, deadline time.Duration) []string {
+	if len(abandoned) == 0 {
+		return mismatches
+	}
+	labelled := make([]string, len(mismatches))
+	for i, mismatch := range mismatches {
+		labelled[i] = mismatch
+		if name, _, found := strings.Cut(mismatch, ": "); found && abandoned[name] {
+			labelled[i] = fmt.Sprintf("%s (abandoned: did not finish within the per-test deadline %s; its goroutines were left running)", mismatch, deadline)
+		}
+	}
+	return labelled
+}
+
 // testRecords is one test's log-record list from the converted host's terminal event. Present is
 // false when the event carried no list, which a count-pinned disclosure refuses rather than
 // reading as zero records.
@@ -9862,6 +9922,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	}
 
 	mismatches, skipped, disclosed, withdrawn := matchTerminalStatusesWithRecords(names, goResults, csResults, disclosures, csOutputs, csRecords)
+	mismatches = labelAbandonedTests(mismatches, terminalAbandonedTests(csOutput), options.testDeadline)
 	if len(mismatches) > 0 {
 		result.Matched = false
 		result.Errors = append(result.Errors, mismatches...)
