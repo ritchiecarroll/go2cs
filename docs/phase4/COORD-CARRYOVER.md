@@ -27,7 +27,7 @@ absent; they are not needed to run the fleet. Ask the owner when anything person
 - Slack: the private fleet channel (find it by the connector's channel search). Mention the owner whenever a lane
   waits on him, for milestones, and when a report he asked for is ready. Nobody polls it.
 - Owner hands route through COORD. Lanes post OWNER-HAND to COORD at once, and COORD Slack-pings the owner.
-- Re-arm the inbox watcher (tP/watch-battery-inbox.sh <mailbox tip> inbox, from coord-scratch) as the last tool call
+- Re-arm the inbox watcher (tP/watch-battery-inbox.sh <FULL 40-char mailbox tip> inbox, from coord-scratch, as a tracked background task, never nohup) as the last tool call
   of every working turn. End every reply on text, never on a tool call.
 - Address the owner by his first name, the form he uses in chat (never a fleet title unless he does). Read the clock (`date`) in the same command as any dated line.
 - Status replies carry the branch, path and tip; integration turns end with Completed / Running / Queued.
@@ -71,7 +71,7 @@ absent; they are not needed to run the fleet. Ask the owner when anything person
   "About" text plus a C# repo link). The version-line PLAN doc. The owed G BOARD rows.
 - PARITY STAGE (approved): docs/phase4/proposals/visual-parity-review.md. Plain literals and interceptors per 1l.0,
   then the adversarial perf review, then the strings design doc.
-- C# consumer API: claude/coord-gtk-consumer-api merges onto the hop; the doc text for release is in
+- C# consumer API: LANDED on the hop (8bb3b8b5be); the doc text for release is in
   docs/phase4/proposals/gtk-doc-updates.md.
 - Planned: a reboot of ALL machines around 10-23 at a stage boundary (largely done at this roll).
 - RAINY-DAY: opt-in ASCII spellings for glyph names (a plan doc only). The IDE-mode experiment: PLAN-ide-mode.md.
