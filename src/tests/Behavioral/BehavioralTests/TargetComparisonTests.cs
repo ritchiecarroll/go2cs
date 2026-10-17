@@ -709,6 +709,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGenericArrayConstraint() => CheckTarget("GenericArrayConstraint");
 
     [TestMethod]
+    public void CheckGenericArrayTypeArgZero() => CheckTarget("GenericArrayTypeArgZero");
+
+    [TestMethod]
     public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
 
     [TestMethod]
