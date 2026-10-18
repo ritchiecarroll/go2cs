@@ -1014,7 +1014,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                     typeId elemId = default!;
                     {
                         var tt = builtinIdToType(wireId); if (tt != default!){
-                            elemId = tt._<ж<sliceType>>().Value.Elem;
+                            elemId = tt._<ΔgobType, ж<sliceType>>().Value.Elem;
                         } else {
                             elemId = dec.wireType[wireId].Value.SliceT.Value.Elem;
                         }

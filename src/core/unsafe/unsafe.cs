@@ -989,7 +989,7 @@ public static slice<T> Slice<T>(ж<T> ptr, uintptr len) {
 // five-element slice. It is refused by name instead (coordinator ruling 2026-09-29 11:33).
 //
 // The order matters. NEGATIVE first, on the full-width value: any negative length returns -1 for the
-// caller's own "len is negative" panic (Go's text), because narrowing a length below Int32.MinValue
+// caller's own "unsafe.Slice/String: len out of range" panic (runtime/unsafe.go's errorString), because narrowing a length below Int32.MinValue
 // wrapped it POSITIVE (-(2^32) + 5 came back as five elements; TRAIN J review, 2026-09-29). Then the
 // Int32 representation limit, which binds every element type, zero-size included. Then golib's ONE
 // maximum (GoSliceLimit), the same bound the native-backed slice window refuses at, with the same
@@ -1009,14 +1009,14 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
     int n = SpanLength<T, TLen>(len, "unsafe.Slice");
 
     if (n < 0)
-        throw go.golib.RuntimeErrorPanic.RuntimeRaised("len is negative");
+        throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.Slice: len out of range");
 
     if (ptr == nil)
     {
         if (n == 0)
             return [];
 
-        throw go.golib.RuntimeErrorPanic.RuntimeRaised("ptr is nil and len is not zero");
+        throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.Slice: ptr is nil and len is not zero");
     }
 
     // A zero-size element has no storage to span, so a length beyond any managed span is still a
@@ -1125,7 +1125,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
     int n = SpanLength<byte, TLen>(len, "unsafe.String");
 
     if (n < 0)
-        throw go.golib.RuntimeErrorPanic.RuntimeRaised("len is negative");
+        throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.String: len out of range");
 
     // A zero length reads no bytes, so the pointer is never dereferenced — in Go, and now here
     // either. SliceData over a non-nil slice of capacity 0 is documented to return a NON-nil
@@ -1140,7 +1140,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
 
     // Only a nil pointer with a NON-zero length is the panic Go specifies.
     if (ptr == nil)
-        throw go.golib.RuntimeErrorPanic.RuntimeRaised("ptr is nil and len is not zero");
+        throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.String: ptr is nil and len is not zero");
 
     // A pointer that ALIASES a native address reads its n bytes from that address (see Slice above).
     // @string has no native-backed representation — its header is (byte[], offset, length) — so this

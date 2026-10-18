@@ -38,13 +38,7 @@ partial struct Δrtype {
     /*embed*/ public ж<@internal.abi_package.Type> Type; // embedding is okay here (unlike reflect) because none of this is public
 }
 
-internal static @string @string(this Δrtype t) {
-    @string s = t.nameOff(t.Str).Name();
-    if ((abi.TFlag)(t.TFlag & abi.TFlagExtraStar) != 0) {
-        return s[1..];
-    }
-    return s;
-}
+// go2cs generated this placeholder — func string is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ж<uncommontype> uncommon(this Δrtype t) {
     return t.Type.Uncommon();

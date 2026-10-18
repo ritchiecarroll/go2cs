@@ -16,7 +16,7 @@ public static class RuntimeErrorPanic
 {
     private const string RuntimeErrorMessage = "runtime error: ";
 
-    private const string NilPointerDereferenceMessage = $"{RuntimeErrorMessage}invalid memory address or nil pointer dereference";
+    private const string NilPointerDereferenceText = "invalid memory address or nil pointer dereference";
     /// <summary>
     /// A converter-emitted method-expression wrapper's OWN nil-receiver fault (an interface method
     /// expression `I.M(nil)`, or a promoted `(*Outer).M(nil)`): Go's wrapper faults there, and Go keeps
@@ -24,7 +24,7 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException WrapperNilReceiver()
     {
-        return new PanicException(NilPointerDereferenceMessage) { FaultKind = PanicFaultKind.Memory, RaisedByWrapper = true };
+        return new PanicException(ErrorStringState(NilPointerDereferenceText)) { FaultKind = PanicFaultKind.Memory, RaisedByWrapper = true };
     }
 
     /// <summary>
@@ -33,13 +33,13 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException Panicwrap(string message)
     {
-        return new PanicException((@string)message) { FaultKind = PanicFaultKind.Panicwrap, RaisedByWrapper = true };
+        return new PanicException(PlainErrorValue?.Invoke(message) ?? (@string)message) { FaultKind = PanicFaultKind.Panicwrap, RaisedByWrapper = true };
     }
 
     public static PanicException NilPointerDereference()
     {
         // A fault: Go reaches gopanic through sigpanic and panicmem (runtime's captureCallers splices both).
-        return new PanicException(NilPointerDereferenceMessage) { FaultKind = PanicFaultKind.Memory };
+        return new PanicException(ErrorStringState(NilPointerDereferenceText)) { FaultKind = PanicFaultKind.Memory };
     }
 
     private const string TokenArithmeticMessage =
@@ -409,7 +409,7 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException ArrayConversionLength(int64 sourceLength, int64 length)
     {
-        return new PanicException(string.Format(ArrayConversionLengthMessage, sourceLength, length))
+        return new PanicException(BoundsErrorValue?.Invoke(length, sourceLength, true, BoundsConvert) ?? string.Format(ArrayConversionLengthMessage, sourceLength, length))
         {
             RuntimeThrowText = "slice length too short to convert to array or pointer to array"
         };
@@ -467,7 +467,7 @@ public static class RuntimeErrorPanic
         return new PanicException(ShiftErrorValue?.Invoke() ?? NegativeShiftAmountMessage) { RuntimeThrowText = "negative shift amount" };
     }
 
-    private const string ComparingUncomparableTypeMessage = $"{RuntimeErrorMessage}comparing uncomparable type {{0}}";
+    private const string ComparingUncomparableTypeText = "comparing uncomparable type {0}";
 
     /// <summary>
     /// Go's panic for <c>==</c> between two interface values whose shared dynamic type has no equal
@@ -482,16 +482,16 @@ public static class RuntimeErrorPanic
     /// </remarks>
     public static PanicException ComparingUncomparableType(string goTypeName)
     {
-        return new PanicException(string.Format(ComparingUncomparableTypeMessage, goTypeName));
+        return new PanicException(ErrorStringState(string.Format(ComparingUncomparableTypeText, goTypeName)));
     }
 
-    private const string MakeSliceLenOutOfRangeMessage = $"{RuntimeErrorMessage}makeslice: len out of range";
+    private const string MakeSliceLenOutOfRangeText = "makeslice: len out of range";
     public static PanicException MakeSliceLenOutOfRange()
     {
-        return new PanicException(MakeSliceLenOutOfRangeMessage);
+        return new PanicException(ErrorStringState(MakeSliceLenOutOfRangeText));
     }
 
-    private const string RangeFunctionContinuedMessage = $"{RuntimeErrorMessage}range function continued iteration after function for loop body returned false";
+    private const string RangeFunctionContinuedText = "range function continued iteration after function for loop body returned false";
 
     /// <summary>
     /// Go's panic for a range-over-func sequence that calls <c>yield</c> again after the loop body
@@ -499,16 +499,16 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException RangeFunctionContinued()
     {
-        return new PanicException(RangeFunctionContinuedMessage);
+        return new PanicException(ErrorStringState(RangeFunctionContinuedText));
     }
 
-    private const string MakeSliceCapOutOfRangeMessage = $"{RuntimeErrorMessage}makeslice: cap out of range";
+    private const string MakeSliceCapOutOfRangeText = "makeslice: cap out of range";
     public static PanicException MakeSliceCapOutOfRange()
     {
-        return new PanicException(MakeSliceCapOutOfRangeMessage);
+        return new PanicException(ErrorStringState(MakeSliceCapOutOfRangeText));
     }
 
-    private const string GrowSliceLenOutOfRangeMessage = $"{RuntimeErrorMessage}growslice: len out of range";
+    private const string GrowSliceLenOutOfRangeText = "growslice: len out of range";
 
     /// <summary>
     /// Go's panic for an <c>append</c> whose grown length Go cannot allocate (runtime/slice.go's
@@ -518,7 +518,7 @@ public static class RuntimeErrorPanic
     /// </summary>
     public static PanicException GrowSliceLenOutOfRange()
     {
-        return new PanicException(GrowSliceLenOutOfRangeMessage);
+        return new PanicException(ErrorStringState(GrowSliceLenOutOfRangeText));
     }
 
     /// <summary>
@@ -653,6 +653,73 @@ public static class RuntimeErrorPanic
     /// <param name="message">The text after the <c>runtime error: </c> prefix.</param>
     public static PanicException ErrorString(string message)
     {
-        return new PanicException(ErrorStringValue?.Invoke(message) ?? RuntimeErrorMessage + message);
+        return new PanicException(ErrorStringState(message));
+    }
+
+    // runtime's abi.BoundsConvert: a slice shorter than the array it converts to (x is the array length, y the slice's).
+    private const byte BoundsConvert = 8;
+
+    // The state of a runtime.errorString panic: the registered value, or the prefixed text when runtime never loaded.
+    private static object ErrorStringState(string message)
+    {
+        return ErrorStringValue?.Invoke(message) ?? RuntimeErrorMessage + message;
+    }
+
+    /// <summary>
+    /// Supplies Go's <c>*runtime.TypeAssertionError</c> for a failed type assertion: the value
+    /// <c>panicdottypeE</c> and <c>panicnildottype</c> (iface.go) panic with.
+    /// </summary>
+    /// <remarks>
+    /// Registered by the runtime package, as <see cref="PlainErrorValue"/> is. The arguments are runtime's own
+    /// fields: the static interface type the assertion started from (<c>null</c> when asserting to an
+    /// interface, as getitab's is), the dynamic type (<c>null</c> for a nil interface), the asserted type and the
+    /// first method the asserted interface needs that the dynamic type lacks (empty for a concrete mismatch). Unregistered, the same sentence stands as a plain string.
+    /// </remarks>
+    public static Func<Type?, Type?, Type, string, object>? TypeAssertionErrorValue { get; set; }
+
+    /// <summary>
+    /// A failed type assertion of <paramref name="target"/>, held as <paramref name="source"/>, to <paramref name="asserted"/>.
+    /// </summary>
+    /// <param name="source">The static interface type the assertion started from: <c>object</c> for an empty interface.</param>
+    /// <param name="target">The interface value whose dynamic type did not match.</param>
+    /// <param name="asserted">The type asserted to.</param>
+    /// <remarks>
+    /// An assertion to an interface carries no source type, as getitab's does not: the text names the dynamic type and
+    /// the first method of the interface it lacks, and a nil source prints the bare word "interface".
+    /// </remarks>
+    public static PanicException TypeAssertion(Type source, object? target, Type asserted)
+    {
+        // The dynamic type is what the adapters stand in for, as builtin.GetGoTypeName reads it.
+        while (true)
+        {
+            if (target is IжAdapter pointerAdapter)
+                target = pointerAdapter.Box;
+            else if (target is IValueAdapter valueAdapter)
+                target = valueAdapter.Value;
+            else if (target is IInterfaceAdapter interfaceAdapter)
+                target = interfaceAdapter.Value;
+            else
+                break;
+        }
+
+        Type? concrete = target?.GetType();
+        string assertedName = GoReflect.GoTypeName(asserted);
+
+        if (asserted.IsInterface || asserted == typeof(object))
+        {
+            string missing = concrete is null || asserted == typeof(object) ? "" : concrete.FirstMissingMethod(asserted);
+
+            return new PanicException(
+                TypeAssertionErrorValue?.Invoke(null, concrete, asserted, missing) ??
+                (concrete is null ? $"interface conversion: interface is nil, not {assertedName}" :
+                    missing.Length > 0 ? $"interface conversion: {GoReflect.GoTypeName(concrete)} is not {assertedName}: missing method {missing}" :
+                    $"interface conversion: interface is {GoReflect.GoTypeName(concrete)}, not {assertedName}"));
+        }
+
+        string sourceName = source == typeof(object) ? "interface {}" : GoReflect.GoTypeName(source);
+
+        return new PanicException(
+            TypeAssertionErrorValue?.Invoke(source, concrete, asserted, "") ??
+            $"interface conversion: {sourceName} is {builtin.GetGoTypeName(target)}, not {assertedName}");
     }
 }

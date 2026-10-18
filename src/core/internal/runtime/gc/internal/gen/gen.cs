@@ -511,7 +511,7 @@ internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs
     // Emit constants first
     foreach (var (_, o) in fn.ops) {
         if ((~o).Δop == "const"u8) {
-            @string name = locs[o]._<locMem>().name;
+            @string name = locs[o]._<loc, locMem>().name;
             f.emitConst(name, (~o).c);
         }
     }

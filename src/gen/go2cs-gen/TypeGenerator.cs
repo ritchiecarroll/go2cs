@@ -513,6 +513,7 @@ public class TypeGenerator : ISourceGenerator
                             // one gets no shell rather than one that fails to implement it (CS0535).
                             EmitShells = shellEligible && interfaceMethods.Length > 0 &&
                                 interfaceMethods.All(method => method.IsSignatureRenderable),
+                            EmitAssertOverload = shellEligible,
                             UsingStatements = usingStatements
                         }
                         .Generate();
