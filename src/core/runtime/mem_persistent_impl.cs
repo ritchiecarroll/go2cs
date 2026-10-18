@@ -67,6 +67,8 @@ partial class runtime_package
     private static readonly @string persistentallocSizeIsZeroˢ = "persistentalloc: size == 0"u8;
     private static readonly @string persistentallocAlignNotPow2ˢ = "persistentalloc: align is not a power of 2"u8;
     private static readonly @string persistentallocAlignTooLargeˢ = "persistentalloc: align is too large"u8;
+    // Go 1.26 names every sysAlloc mapping (mem.go's vmaName); persistentalloc1's is "immortal metadata".
+    private static readonly @string immortalMetadataˢ = "immortal metadata"u8;
     private static readonly @string persistentallocCannotAllocateˢ = "runtime: cannot allocate memory"u8;
 
     // Wrapper around sysAlloc that can allocate small chunks. There is no associated free
@@ -91,7 +93,7 @@ partial class runtime_package
             align = 8;
         }
         if (size >= maxBlock) {
-            return (ж<notInHeap>)(uintptr)(sysAlloc(size, ᏑsysStat));
+            return (ж<notInHeap>)(uintptr)(sysAlloc(size, ᏑsysStat, immortalMetadataˢ));
         }
         var mp = acquirem();
         ж<persistentAlloc> persistent = default!;
@@ -103,7 +105,7 @@ partial class runtime_package
         }
         persistent.Value.off = alignUp((~persistent).off, align);
         if ((~persistent).off + size > persistentChunkSize || (~persistent).@base == nil) {
-            persistent.Value.@base = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys)));
+            persistent.Value.@base = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys), immortalMetadataˢ));
             if ((~persistent).@base == nil) {
                 if (persistent == ᏑglobalAlloc.of(globalAllocᴛ1.ᏑpersistentAlloc)) {
                     unlock(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex));
@@ -179,7 +181,7 @@ partial class runtime_package
     /// <summary>Pushes one freshly mapped chunk (persistentChunkSize bytes) through the real push loop; returns the iterations it took.</summary>
     public static int GoPersistentChunkPushProbe()
     {
-        ж<notInHeap> chunk = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys)));
+        ж<notInHeap> chunk = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys), immortalMetadataˢ));
         return pushPersistentChunk(chunk);
     }
 
@@ -200,7 +202,7 @@ partial class runtime_package
         nuint address = (uintptr)observed;
         ж<notInHeap> reminted = (ж<notInHeap>)(uintptr)(@unsafe.Pointer)(uintptr)address;
         bool distinct = !ReferenceEquals(reminted, observed) && (uintptr)reminted == address;
-        ж<notInHeap> probe = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys)));
+        ж<notInHeap> probe = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys), immortalMetadataˢ));
         (probe.Reinterpret<notInHeap, uintptr>()).Value = (uintptr)address;
         bool remintedRefused = !ReferenceEquals(Interlocked.CompareExchange(ref ᏑpersistentChunks.ValueSlot, probe, reminted), reminted);
         bool observedAccepted = ReferenceEquals(Interlocked.CompareExchange(ref ᏑpersistentChunks.ValueSlot, probe, observed), observed);

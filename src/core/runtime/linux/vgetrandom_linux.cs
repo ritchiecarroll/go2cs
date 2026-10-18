@@ -5,6 +5,7 @@
 namespace go;
 
 using cpu = @internal.cpu_package;
+using goexperiment = @internal.goexperiment_package;
 using @unsafe = unsafe_package;
 using @internal;
 
@@ -43,13 +44,16 @@ internal static void vgetrandomInit() {
     vgetrandomAlloc.mmapProt = (int32)@params.MmapProt;
     vgetrandomAlloc.mmapFlags = (int32)@params.MmapFlags;
 
-    lockInit(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock), lockRankLeafRank);
+    lockInit(ref vgetrandomAlloc.statesLock, lockRankVgetrandom);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string getrandomStatesˢ = "getrandom states"u8;
 
 internal static uintptr vgetrandomGetState() {
     @lock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
     if (len(vgetrandomAlloc.states) == 0) {
-        var num = (uintptr)ncpu; // Just a reasonable size hint to start.
+        var num = (uintptr)numCPUStartup; // Just a reasonable size hint to start.
         var stateSizeCacheAligned = (uintptr)((vgetrandomAlloc.stateSize + cpu.CacheLineSize - 1) & ~(cpu.CacheLineSize - 1));
         var allocSize = (uintptr)((num * stateSizeCacheAligned + physPageSize - 1) & ~(physPageSize - 1));
         num = (physPageSize / stateSizeCacheAligned) * (allocSize / physPageSize);
@@ -58,6 +62,7 @@ internal static uintptr vgetrandomGetState() {
             unlock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
             return 0;
         }
+        setVMAName(Δp, allocSize, getrandomStatesˢ);
         var newBlock = (uintptr)Δp;
         if (vgetrandomAlloc.states == default!) {
             vgetrandomAlloc.states = new slice<uintptr>(0, (nint)(num));
@@ -95,6 +100,13 @@ internal static void vgetrandomDestroy(ref m mp) {
 public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flags) {
     if (vgetrandomAlloc.stateSize == 0) {
         return (-1, false);
+    }
+
+    // vDSO code may spill registers to the stack
+    // Make sure they're zeroed if we're running in secret mode
+    var gp = getg();
+    if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
+        secretEraseRegisters();
     }
 
     // We use getg().m instead of acquirem() here, because always taking

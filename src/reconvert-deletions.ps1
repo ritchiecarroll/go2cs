@@ -1390,7 +1390,26 @@ foreach ($dir in $stagedProjectDirs) {
     if (Test-OwnGoSource -Root $GoRoot -ImportPath $dir) { continue }
 
     $children = @($KnownGoos | Where-Object { Test-OwnGoSource -Root $GoRoot -ImportPath "$dir/$_" })
-    if ($children.Count -eq 0) { continue }
+
+    if ($children.Count -eq 0) {
+        # ⚠ THE SAME HOLE WITHOUT A CHILD (coordinator ruling 2026-10-15, the Go 1.26 hop's H5). A package
+        # removed WHOLE whose staged .cs all sit in per-GOOS folders: vendor/golang.org/x/net/route is
+        # darwin-only, so every .cs it has is under darwin\. Its rows key the removal on darwin\, which goes,
+        # and the parent's project, README, icons and .editorconfig were never enumerated -- the stale
+        # project stayed in the solution compiling an empty $(GoTargetOS)/*.cs. i9 measured it on the real
+        # post-H5c root (stage h5-go126-r2): exit 0 x3 with route's parent and its <Project> entry left.
+        # Decided from the GOROOTs and the staged LAYOUT, never from the rows, for the flavour reason above;
+        # a package with a flat .cs of its own is left to its rows, which already key it.
+        $onDisk  = Join-Path $CoreDir ($dir -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+        $flatCs  = @(Get-ChildItem -LiteralPath $onDisk -File -Filter '*.cs' -ErrorAction SilentlyContinue | Where-Object {
+            $_.Name -notlike '*_test.cs' -and $_.Name -ne 'package_test_info.cs' -and $_.Name -ne 'go2cs_test_host.cs' })
+        $goosCs  = @($KnownGoos | Where-Object {
+            @(Get-ChildItem -LiteralPath (Join-Path $onDisk $_) -File -Filter '*.cs' -ErrorAction SilentlyContinue).Count -gt 0 })
+
+        if ($flatCs.Count -eq 0 -and $goosCs.Count -gt 0) { $absentPackageDirs[$dir] = $true }
+
+        continue
+    }
 
     $absentPackageDirs[$dir] = $true
     $goosChildParents[$dir] = $children
@@ -1519,6 +1538,16 @@ foreach ($row in @($rows | Where-Object { $_.Class -eq 'PROTECTED' })) {
 # still PARSED so a stale invocation is answered with the pointer rather than a syntax complaint, and is
 # then refused by name (ruling `f0837eea1`). A human's ruling carried by the instrument, never inferred --
 # the UNRESOLVED shape (ruling `485d7387d` §2).
+#
+# ⚠ PASSING SEVERAL. -Orphan is [string[]]: give it ONCE, as an array. Under `powershell -File` a repeated
+# `-Orphan a -Orphan b` is refused before this script runs (ParameterAlreadyBound, exit 1, nothing read),
+# and `-Orphan a,b` arrives as ONE string, which the parse below refuses as a disposition of 'delete,b...'.
+# So a caller with more than one goes through -Command:
+#   powershell -Command "& '<script>' ... -Orphan @('<p1>=delete','<p2>=delete') -Apply; exit `$LASTEXITCODE"
+# The trailing `exit $LASTEXITCODE` is what carries this script's exit code out of -Command. i9 measured all
+# three shapes at the Go 1.26 hop's H5 (2026-10-15), and a stale path through -Command returned 2.
+# Only the paths still present are passed on a later flavour: the first -Apply deletes them, and a
+# disposition naming a path that is no longer an orphan is refused below (the stale arm).
 $orphanDisposition = @{}
 
 foreach ($entry in @($Orphan)) {
@@ -1806,6 +1835,7 @@ else {
     $dirsRemoved    = 0
     $dirsKept       = @()
     $slnxRemoved    = 0
+    $foldersRemoved = 0
 
     foreach ($r in ($residueRows | Sort-Object Path)) {
         $why = Test-ProtectedPath -RelativePath $r.Path
@@ -1987,6 +2017,57 @@ else {
             else { $keptLines += $line }
         }
 
+        # ⚠ A <Folder> THIS PASS EMPTIED GOES WITH ITS LAST <Project> (coordinator ruling 2026-10-15, the Go 1.26
+        # hop's H5). The loop above drops the <Project> line and nothing else, so every removed package left
+        # `<Folder Name="/<pkg>/" ...>` over its own `</Folder>`: i9 measured 8 on the real post-H5c root, where
+        # the committed solution, written by the generator, has none. A Folder is dropped ONLY when a
+        # <Project> was removed from it AND no line is left inside it -- one that was empty before this pass, or
+        # that still holds anything, is never touched. Read off the edited lines, never a fresh text filter.
+        $removedFrom = @{}
+
+        foreach ($line in $slnxLines) {
+            if ($keptLines -notcontains $line -and $line -match '<Project ') { $removedFrom[$line] = $true }
+        }
+
+        $folded     = @()
+        $open       = -1
+        $openHadRow = $false
+        $original   = @($slnxLines)
+        $cursor     = 0
+
+        foreach ($line in $keptLines) {
+            # Walk the ORIGINAL lines in step, so "a <Project> was removed inside this Folder" is a fact about
+            # the file as read, not a guess from what is left.
+            while ($cursor -lt $original.Count -and $original[$cursor] -ne $line) {
+                if ($open -ge 0 -and $removedFrom.ContainsKey($original[$cursor])) { $openHadRow = $true }
+                $cursor++
+            }
+            $cursor++
+
+            if ($line -match '^\s*<Folder\b[^>]*[^/]>\s*$') {
+                $folded    += $line
+                $open       = $folded.Count - 1
+                $openHadRow = $false
+                continue
+            }
+
+            if ($line -match '^\s*</Folder>\s*$' -and $open -ge 0) {
+                if ($openHadRow -and $open -eq $folded.Count - 1) {
+                    Write-Host ("    slnx     removed empty folder {0}" -f $folded[$open].Trim())
+                    $folded = @(if ($open -gt 0) { $folded[0..($open - 1)] })
+                    $foldersRemoved++
+                }
+                else { $folded += $line }
+
+                $open = -1
+                continue
+            }
+
+            $folded += $line
+        }
+
+        $keptLines = $folded
+
         $joiner = if ($slnxCrLf) { "`r`n" } else { "`n" }
         [System.IO.File]::WriteAllText($slnxPath, ($keptLines -join $joiner))
     }
@@ -2004,7 +2085,7 @@ else {
     # The after-block below subtracts this same variable, so the two can never disagree.
     Write-Host ("  residue .cs {0}   (the term the post-condition subtracts; the rest are .csproj, icons and test hosts)" -f $residueCs)
     Write-Host ("  package directories removed {0} of {1}; {2} kept with entries remaining" -f $dirsRemoved, $absentPackageDirs.Count, $dirsKept.Count)
-    Write-Host ("  slnx <Project> entries removed {0}  (packages with no project file {1}; directories removed {2})" -f $slnxRemoved, $slnxDirs.Count, $dirsRemoved)
+    Write-Host ("  slnx <Project> entries removed {0}  (packages with no project file {1}; directories removed {2}); emptied <Folder> elements removed {3}" -f $slnxRemoved, $slnxDirs.Count, $dirsRemoved, $foldersRemoved)
 
     # ⚠ THIS ROW IS A GUARD ON THE GENERATED SOLUTION, NOT A REPAIR OF IT -- ruling `d2ad84bdb` §3, which
     # supplies the mechanism my own report at `1f8da6540` did not have:
@@ -2093,14 +2174,23 @@ else {
     # residue .cs against the 37 the arithmetic implies, because the KEPT-directory block below prints
     # the names of entries that were NOT residue and a listing-parse cannot tell the two blocks apart.
     # A number the instrument derived beats a number a reader parsed out of its prose.
-    $expectedRemaining = $totalCs - $deleted - $residueCs
+    #
+    # ⚠ AND IT OWES AN ORPHAN TERM, for the same reason it owed the residue one. An orphaned hand-own
+    # ruled `-Orphan <path>=delete` is a production .cs that the walk above no longer finds, and it is in
+    # neither $deleted (classified rows) nor $residueCs. i9 measured it at the Go 1.26 hop's H5 (stage
+    # h5-go126-r2, 2026-10-15): the first real -Orphan delete removed 88 of 88 classified rows, 9 residue
+    # .cs and the 3 ruled orphans, and this check refused "expected 4405" against 4402 on disk -- exit 3,
+    # CORRECTLY, on bookkeeping. The disposition loop landed without this arithmetic, so the check was
+    # unsatisfiable on any run that deleted an orphan. $orphansDeleted counts only files it removed (a
+    # floor refusal exits above), so the term is exactly the deleted set.
+    $expectedRemaining = $totalCs - $deleted - $residueCs - $orphansDeleted
 
     Write-Host ''
     Write-Host '  after (re-walked from disk)' -ForegroundColor Cyan
-    Write-Host ("    production .cs under core        {0}   (was {1}, minus {2} classified, minus {3} residue .cs)" -f $remaining.Count, $totalCs, $deleted, $residueCs)
+    Write-Host ("    production .cs under core        {0}   (was {1}, minus {2} classified, minus {3} residue .cs, minus {4} orphaned hand-owns)" -f $remaining.Count, $totalCs, $deleted, $residueCs, $orphansDeleted)
 
     if ($remaining.Count -ne $expectedRemaining) {
-        Write-Host ("    ARITHMETIC MISMATCH -- expected {0} = {1} - {2} classified - {3} residue .cs" -f $expectedRemaining, $totalCs, $deleted, $residueCs) -ForegroundColor Red
+        Write-Host ("    ARITHMETIC MISMATCH -- expected {0} = {1} - {2} classified - {3} residue .cs - {4} orphaned hand-owns" -f $expectedRemaining, $totalCs, $deleted, $residueCs, $orphansDeleted) -ForegroundColor Red
         exit 3
     }
 }

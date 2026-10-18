@@ -12,6 +12,9 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <IsPackable>false</IsPackable>
+    <!-- One lowercase alias per Go package (using strings = go.strings_package;) keeps call sites Go-shaped;
+         CS8981 warns that an all-lowercase name may become a C# keyword one day. -->
+    <NoWarn>$(NoWarn);CS8981</NoWarn>
   </PropertyGroup>
 
   <Target Name="RequireConvertedRoot" BeforeTargets="ResolveProjectReferences;CollectPackageReferences">

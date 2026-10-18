@@ -4,15 +4,15 @@
 //go:build (!amd64 && !arm64 && !ppc64le && !s390x) || purego
 namespace go.crypto.@internal.fips140;
 
+using constanttime = go.crypto.@internal.constanttime_package;
 using fiat = go.crypto.@internal.fips140.nistec.fiat_package;
-using subtle = go.crypto.@internal.fips140.subtle_package;
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using cpu = go.crypto.@internal.fips140deps.cpu_package;
 using errors = errors_package;
 using bits = math.bits_package;
 using sync = sync_package;
 using @unsafe = unsafe_package;
-using go.crypto.@internal.fips140;
+using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
 using go.crypto.@internal.fips140deps;
 using math;
@@ -485,7 +485,7 @@ internal static void Select(this ref p256Table table, ж<P256Point> Ꮡp, uint8 
     }
     Ꮡp.Set(NewP256Point());
     for (var i = (uint8)1; i <= 16; i++) {
-        nint cond = subtle.ConstantTimeByteEq(i, n);
+        nint cond = constanttime.ByteEq(i, n);
         Ꮡp.Select(Ꮡ(table.Value, (uint8)(i - 1)), Ꮡp, cond);
     }
 }
@@ -582,7 +582,7 @@ internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> 
         throw panic("nistec: internal error: p256AffineTable.Select called with out-of-bounds value");
     }
     for (var i = (uint8)1; i <= 32; i++) {
-        nint cond = subtle.ConstantTimeByteEq(i, n);
+        nint cond = constanttime.ByteEq(i, n);
         Ꮡp.of(p256AffinePoint.Ꮡx).Select(Ꮡ(table.Value, (uint8)(i - 1)).of(p256AffinePoint.Ꮡx), Ꮡp.of(p256AffinePoint.Ꮡx), cond);
         Ꮡp.of(p256AffinePoint.Ꮡy).Select(Ꮡ(table.Value, (uint8)(i - 1)).of(p256AffinePoint.Ꮡy), Ꮡp.of(p256AffinePoint.Ꮡy), cond);
     }
@@ -637,7 +637,7 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
     // the point at infinity (because infinity can't be represented in affine
     // coordinates). Here we conditionally set p to the infinity if sel is zero.
     // In the loop, that's handled by AddAffine.
-    nint selIsZero = subtle.ConstantTimeByteEq(sel, 0);
+    nint selIsZero = constanttime.ByteEq(sel, 0);
     Ꮡp.Select(NewP256Point(), t.Projective(), selIsZero);
 
     while (index >= 5) {
@@ -655,7 +655,7 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
         var tableΔ1 = p256GeneratorTables.at<p256AffineTable>((index + 1) / 6);
         tableΔ1.Select(t, sel);
         t.Negate(sign);
-        nint selIsZeroΔ1 = subtle.ConstantTimeByteEq(sel, 0);
+        nint selIsZeroΔ1 = constanttime.ByteEq(sel, 0);
         Ꮡp.AddAffine(Ꮡp, t, selIsZeroΔ1);
     }
 

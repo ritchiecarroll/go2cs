@@ -2,14 +2,14 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-28_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/io.ioutil.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/io/ioutil@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/io/ioutil) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/io/ioutil)
+[![Tests](https://img.shields.io/badge/Tests-28_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/io.ioutil.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/io/ioutil@go1.26.9)\
+[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/io/ioutil) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/io/ioutil)
 
 From C#, call this package through the static class go.io.ioutil_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package ioutil implements some I/O utility functions.
 
-Deprecated: As of Go 1.16, the same functionality is now provided by package [io](https://pkg.go.dev/io@go1.24.13) or package [os](https://pkg.go.dev/os@go1.24.13), and those implementations should be preferred in new code. See the specific function documentation for details.
+Deprecated: As of Go 1.16, the same functionality is now provided by package [io](https://pkg.go.dev/io@go1.26.9) or package [os](https://pkg.go.dev/os@go1.26.9), and those implementations should be preferred in new code. See the specific function documentation for details.
 
 ---
 

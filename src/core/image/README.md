@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-8_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/image.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/image@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/image) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/image)
+[![Tests](https://img.shields.io/badge/Tests-8_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/image.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/image@go1.26.9)\
+[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/image) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/image)
 
 From C#, call this package through the static class go.image_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -11,7 +11,7 @@ Package image implements a basic 2-D image library.
 
 The fundamental interface is called \[Image]. An \[Image] contains colors, which are described in the image/color package.
 
-Values of the \[Image] interface are created either by calling functions such as \[NewRGBA] and \[NewPaletted], or by calling \[Decode] on an [io.Reader](https://pkg.go.dev/io@go1.24.13#Reader) containing image data in a format such as GIF, JPEG or PNG. Decoding any particular image format requires the prior registration of a decoder function. Registration is typically automatic as a side effect of initializing that format's package so that, to decode a PNG image, it suffices to have
+Values of the \[Image] interface are created either by calling functions such as \[NewRGBA] and \[NewPaletted], or by calling \[Decode] on an [io.Reader](https://pkg.go.dev/io@go1.26.9#Reader) containing image data in a format such as GIF, JPEG or PNG. Decoding any particular image format requires the prior registration of a decoder function. Registration is typically automatic as a side effect of initializing that format's package so that, to decode a PNG image, it suffices to have
 
 	import _ "image/png"
 
@@ -21,7 +21,7 @@ See "The Go image package" for more details: [https://golang.org/doc/articles/im
 
 ### Security Considerations
 
-The image package can be used to parse arbitrarily large images, which can cause resource exhaustion on machines which do not have enough memory to store them. When operating on arbitrary images, \[DecodeConfig] should be called before \[Decode], so that the program can decide whether the image, as defined in the returned header, can be safely decoded with the available resources. A call to \[Decode] which produces an extremely large image, as defined in the header returned by \[DecodeConfig], is not considered a security issue, regardless of whether the image is itself malformed or not. A call to \[DecodeConfig] which returns a header which does not match the image returned by \[Decode] may be considered a security issue, and should be reported per the \[Go Security Policy]([https://go.dev/security/policy](https://go.dev/security/policy)).
+The image package can be used to parse arbitrarily large images, which can cause resource exhaustion on machines which do not have enough memory to store them. When operating on arbitrary images, \[DecodeConfig] should be called before \[Decode], so that the program can decide whether the image, as defined in the returned header, can be safely decoded with the available resources. A call to \[Decode] which produces an extremely large image, as defined in the header returned by \[DecodeConfig], is not considered a security issue, regardless of whether the image is itself malformed or not. A call to \[DecodeConfig] which returns a header which does not match the image returned by \[Decode] may be considered a security issue, and should be reported per the [Go Security Policy](https://go.dev/security/policy).
 
 ---
 

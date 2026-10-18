@@ -208,6 +208,7 @@ partial struct Decoder {
     internal bytes.Buffer buf;
     internal ж<bytes.Buffer> saved;
     internal ж<stack> stk;
+    internal nint stkDepth;
     internal ж<stack> free;
     internal bool needClose;
     internal Name toClose;
@@ -218,7 +219,7 @@ partial struct Decoder {
     internal nint line;
     internal int64 linestart;
     internal int64 offset;
-    internal nint unmarshalDepth;
+    internal bool inUnmarshalXML;
 }
 
 // NewDecoder creates a new XML parser reading from r.
@@ -424,6 +425,9 @@ internal static ж<stack> push(this ref Decoder d, nint kind) {
     }
     s.Value.next = d.stk;
     s.Value.kind = kind;
+    if (kind == stkStart) {
+        d.stkDepth++;
+    }
     d.stk = s;
     return s;
 }
@@ -431,6 +435,9 @@ internal static ж<stack> push(this ref Decoder d, nint kind) {
 internal static ж<stack> pop(this ref Decoder d) {
     var s = d.stk;
     if (s != nil) {
+        if ((~s).kind == stkStart) {
+            d.stkDepth--;
+        }
         d.stk = s.Value.next;
         s.Value.next = d.free;
         d.free = s;
@@ -571,7 +578,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
 // start and end elements match and does not translate
 // name space prefixes to their corresponding URLs.
 public static (ΔToken, error) RawToken(this ref Decoder d) {
-    if (d.unmarshalDepth > 0) {
+    if (d.inUnmarshalXML) {
         return (default!, errRawToken);
     }
     return d.rawToken();

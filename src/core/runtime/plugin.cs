@@ -93,7 +93,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
         (valp.Value)[0] = @unsafe.Pointer.FromPinnedBox(t);
 
         @string name = symName.Name();
-        if ((abiꓸKind)((~t).Kind_ & abi.KindMask) == abi.Func) {
+        if (t.Kind() == abi.Func) {
             name = "."u8 + name;
         }
         syms[name] = val;

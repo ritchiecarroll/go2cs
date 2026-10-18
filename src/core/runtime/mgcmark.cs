@@ -6,6 +6,7 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
+using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
@@ -16,7 +17,8 @@ partial class runtime_package {
 
 internal static UntypedInt fixedRootFinalizers => iota;
 internal static UntypedInt fixedRootFreeGStacks => 1;
-internal static UntypedInt fixedRootCount => 2;
+internal static UntypedInt fixedRootCleanups => 2;
+internal static UntypedInt fixedRootCount => 3;
 
 // rootBlockBytes is the number of bytes to scan per data or
 // BSS root.
@@ -47,13 +49,65 @@ internal static UntypedInt drainCheckThreshold => 100000;
 //
 // Must be a multiple of the pageInUse bitmap element size and
 // must also evenly divide pagesPerArena.
-internal static UntypedInt pagesPerSpanRoot => 512;
+internal static UntypedInt pagesPerSpanRoot => /* min(512, pagesPerArena) */ 512;
 
-// gcMarkRootPrepare queues root scanning jobs (stacks, globals, and
+// internalBlocked returns true if the goroutine is blocked due to an
+// internal (non-leaking) waitReason, e.g. waiting for the netpoller or garbage collector.
+// Such goroutines are never leak detection candidates according to the GC.
+//
+//go:nosplit
+internal static bool internalBlocked(this ref g gp) {
+    var reason = gp.waitreason;
+    return reason < waitReasonChanReceiveNilChan || waitReasonSyncWaitGroupWait < reason;
+}
+
+// allGsSnapshotSortedForGC takes a snapshot of allgs and returns a sorted
+// array of Gs. The array is sorted by the G's status, with running Gs
+// first, followed by blocked Gs. The returned index indicates the cutoff
+// between runnable and blocked Gs.
+//
+// The world must be stopped or allglock must be held.
+internal static (slice<ж<g>>, nint) allGsSnapshotSortedForGC() {
+    assertWorldStoppedOrLockHeld(ref allglock);
+
+    // Reset the status of leaked goroutines in order to improve
+    // the precision of goroutine leak detection.
+    foreach (var (_, gp) in allgs) {
+        gp.of(g.Ꮡatomicstatus).CompareAndSwap(_Gleaked, _Gwaiting);
+    }
+
+    var allgsSorted = new slice<ж<g>>(len(allgs));
+
+    // Indices cutting off runnable and blocked Gs.
+    nint currIndex = 0;
+    nint blockedIndex = len(allgsSorted) - 1;
+    foreach (var (_, gp) in allgs) {
+        // not sure if we need atomic load because we are stopping the world,
+        // but do it just to be safe for now
+        {
+            var status = readgstatus(gp); if (status != _Gwaiting || gp.internalBlocked()){
+                allgsSorted[currIndex] = gp;
+                currIndex++;
+            } else {
+                allgsSorted[blockedIndex] = gp;
+                blockedIndex--;
+            }
+        }
+    }
+
+    // Because the world is stopped or allglock is held, allgadd
+    // cannot happen concurrently with this. allgs grows
+    // monotonically and existing entries never change, so we can
+    // simply return a copy of the slice header. For added safety,
+    // we trim everything past len because that can still change.
+    return (allgsSorted, blockedIndex + 1);
+}
+
+// gcPrepareMarkRoots queues root scanning jobs (stacks, globals, and
 // some miscellany) and initializes scanning-related state.
 //
 // The world must be stopped.
-internal static void gcMarkRootPrepare() {
+internal static void gcPrepareMarkRoots() {
     assertWorldStopped();
 
     // Compute how many data and BSS root blocks there are.
@@ -85,9 +139,9 @@ internal static void gcMarkRootPrepare() {
     //
     // Break up the work into arenas, and further into chunks.
     //
-    // Snapshot allArenas as markArenas. This snapshot is safe because allArenas
+    // Snapshot heapArenas as markArenas. This snapshot is safe because heapArenas
     // is append-only.
-    mheap_.markArenas = mheap_.allArenas.slice(0, len(mheap_.allArenas), len(mheap_.allArenas));
+    mheap_.markArenas = mheap_.heapArenas.slice(0, len(mheap_.heapArenas), len(mheap_.heapArenas));
     work.nSpanRoots = len(mheap_.markArenas) * (nint)(pagesPerArena / pagesPerSpanRoot);
 
     // Scan stacks.
@@ -96,11 +150,20 @@ internal static void gcMarkRootPrepare() {
     // ignore them because they begin life without any roots, so
     // there's nothing to scan, and any roots they create during
     // the concurrent phase will be caught by the write barrier.
-    work.stackRoots = allGsSnapshot();
+    if (work.goroutineLeak.enabled){
+        // goroutine leak finder GC --- only prepare runnable
+        // goroutines for marking.
+        (work.stackRoots, work.nMaybeRunnableStackRoots) = allGsSnapshotSortedForGC();
+    } else {
+        // regular GC --- scan every goroutine
+        work.stackRoots = allGsSnapshot();
+        work.nMaybeRunnableStackRoots = len(work.stackRoots);
+    }
+
     work.nStackRoots = len(work.stackRoots);
 
-    work.markrootNext = 0;
-    work.markrootJobs = (uint32)((nint)fixedRootCount + work.nDataRoots + work.nBSSRoots + work.nSpanRoots + work.nStackRoots);
+    Ꮡwork.of(workType.ᏑmarkrootNext).Store(0);
+    Ꮡwork.of(workType.ᏑmarkrootJobs).Store((uint32)((nint)fixedRootCount + work.nDataRoots + work.nBSSRoots + work.nSpanRoots + work.nMaybeRunnableStackRoots));
 
     // Calculate base indexes of each root type
     work.baseData = (uint32)fixedRootCount;
@@ -117,16 +180,18 @@ internal static readonly @string scanMissedAGˢ = "scan missed a g"u8;
 // gcMarkRootCheck checks that all roots have been scanned. It is
 // purely for debugging.
 internal static void gcMarkRootCheck() {
-    if (work.markrootNext < work.markrootJobs) {
-        print(work.markrootNext, (@string)" of "u8, work.markrootJobs, (@string)" markroot jobs done\n"u8);
-        @throw(leftOverMarkrootJobsˢ);
+    {
+        var (next, jobs) = (Ꮡwork.of(workType.ᏑmarkrootNext).Load(), Ꮡwork.of(workType.ᏑmarkrootJobs).Load()); if (next < jobs) {
+            print(next, (@string)" of "u8, jobs, (@string)" markroot jobs done\n"u8);
+            @throw(leftOverMarkrootJobsˢ);
+        }
     }
 
     // Check that stacks have been scanned.
     //
     // We only check the first nStackRoots Gs that we should have scanned.
     // Since we don't care about newer Gs (see comment in
-    // gcMarkRootPrepare), no locking is required.
+    // gcPrepareMarkRoots), no locking is required.
     nint i = 0;
     forEachGRace((ж<g> gp) => {
         if (i >= work.nStackRoots) {
@@ -144,7 +209,7 @@ internal static void gcMarkRootCheck() {
     });
 }
 
-// ptrmask for an allocation containing a single pointer.
+// oneptrmask for an allocation containing a single pointer.
 internal static ж<array<uint8>> Ꮡoneptrmask = new StandardBox<array<uint8>>(new uint8[]{1}.array());
 internal static ref array<uint8> oneptrmask => ref Ꮡoneptrmask.Value;
 
@@ -184,10 +249,8 @@ internal static int64 markroot(ж<gcWork> Ꮡgcw, uint32 i, bool flushBgCredit) 
     }
     case {} when i == fixedRootFinalizers: {
         for (var fb = allfin; fb != nil; fb = fb.Value.alllink) {
-            var cnt = (uintptr)atomic.Load(fb.of(finblock.Ꮡcnt));
-            // Finalizers that contain cleanups only have fn set. None of the other
-            // fields are necessary.
-            scanblock((uintptr)fb.at(finblock.Ꮡfin, 0), cnt * /* unsafe.Sizeof(fb.fin[0]) */ (uintptr)40, Ꮡfinptrmask.at<byte>(0), Ꮡgcw, nil);
+            var cnt = (uintptr)atomic.Load(fb.of(finBlock.Ꮡcnt));
+            scanblock((uintptr)fb.at(finBlock.Ꮡfin, 0), cnt * /* unsafe.Sizeof(fb.fin[0]) */ (uintptr)40, Ꮡfinptrmask.at<byte>(0), Ꮡgcw, nil);
         }
         break;
     }
@@ -195,6 +258,15 @@ internal static int64 markroot(ж<gcWork> Ꮡgcw, uint32 i, bool flushBgCredit) 
         // Switch to the system stack so we can call
         // stackfree.
         systemstack(markrootFreeGStacks);
+        break;
+    }
+    case {} when i == fixedRootCleanups: {
+        for (var cb = (ж<cleanupBlock>)(uintptr)(ᏑgcCleanups.of(cleanupQueue.Ꮡall).Load()); cb != nil; cb = cb.Value.alllink) {
+            // N.B. This only needs to synchronize with cleanup execution, which only resets these blocks.
+            // All cleanup queueing happens during sweep.
+            var n = (uintptr)atomic.Load(cb.of(cleanupBlock.Ꮡn));
+            scanblock((uintptr)cb.at(cleanupBlock.Ꮡcleanups, 0), n * /* unsafe.Sizeof(cleanupFn{}) */ (uintptr)24, ᏑcleanupBlockPtrMask.at<byte>(0), Ꮡgcw, nil);
+        }
         break;
     }
     case {} when work.baseSpans <= i && i < work.baseStacks: {
@@ -316,15 +388,19 @@ internal static void markrootFreeGStacks() {
     }
 
     // Free stacks.
-    var q = new gQueue(list.head, list.head);
+    ж<g> tail = default!;
     for (var gp = list.head.ptr(); gp != nil; gp = (~gp).schedlink.ptr()) {
+        tail = gp;
         stackfree((~gp).stack);
         gp.Value.stack.lo = 0;
         gp.Value.stack.hi = 0;
-        // Manipulate the queue directly since the Gs are
-        // already all linked the right way.
-        q.tail.set(gp);
+        if (valgrindenabled) {
+            valgrindDeregisterStack((~gp).valgrindStackID);
+            gp.Value.valgrindStackID = 0;
+        }
     }
+
+    var q = new gQueue(list.head, tail.guintptr(), list.size);
 
     // Put Gs back on the free list.
     @lock(Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡlock));
@@ -405,21 +481,7 @@ internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
             for (var sp = s.Value.specials; sp != nil; sp = sp.Value.next) {
                 var exprᴛ1 = (~sp).kind;
                 if (exprᴛ1 == _KindSpecialFinalizer) {
-                    // don't mark finalized object, but scan it so we
-                    // retain everything it points to.
-                    var spf = sp.Reinterpret<special, specialfinalizer>();
-                    // A finalizer can be set for an inner byte of an object, find object beginning.
-                    var Δp = s.@base() + (uintptr)(~spf).special.offset / (~s).elemsize * (~s).elemsize;
-
-                    // Mark everything that can be reached from
-                    // the object (but *not* the object itself or
-                    // we'll never collect it).
-                    if (!(~s).spanclass.noscan()) {
-                        scanobject(Δp, Ꮡgcw);
-                    }
-
-                    // The special itself is a root.
-                    scanblock((uintptr)@unsafe.Pointer.FromBox(spf.of(specialfinalizer.Ꮡfn)), goarch.PtrSize, Ꮡoneptrmask.at<uint8>(0), Ꮡgcw, nil);
+                    gcScanFinalizer(sp.Reinterpret<special, specialfinalizer>(), s, Ꮡgcw);
                 }
                 else if (exprᴛ1 == _KindSpecialWeakHandle) {
                     // The special itself is a root.
@@ -427,14 +489,38 @@ internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
                     scanblock((uintptr)@unsafe.Pointer.FromBox(spw.of(specialWeakHandle.Ꮡhandle)), goarch.PtrSize, Ꮡoneptrmask.at<uint8>(0), Ꮡgcw, nil);
                 }
                 else if (exprᴛ1 == _KindSpecialCleanup) {
-                    var spc = sp.Reinterpret<special, specialCleanup>();
-                    // The special itself is a root.
-                    scanblock((uintptr)@unsafe.Pointer.FromBox(spc.of(specialCleanup.Ꮡfn)), goarch.PtrSize, Ꮡoneptrmask.at<uint8>(0), Ꮡgcw, nil);
+                    gcScanCleanup(sp.Reinterpret<special, specialCleanup>(), Ꮡgcw);
                 }
             }
             unlock(s.of(mspan.Ꮡspeciallock));
         }
     }
+}
+
+// gcScanFinalizer scans the relevant parts of a finalizer special as a root.
+internal static void gcScanFinalizer(ж<specialfinalizer> Ꮡspf, ж<mspan> Ꮡs, ж<gcWork> Ꮡgcw) {
+    ref var spf = ref Ꮡspf.DerefOrNull();
+    ref var s = ref Ꮡs.DerefOrNull();
+
+    // Don't mark finalized object, but scan it so we retain everything it points to.
+    // A finalizer can be set for an inner byte of an object, find object beginning.
+    var Δp = s.@base() + spf.special.offset / s.elemsize * s.elemsize;
+
+    // Mark everything that can be reached from
+    // the object (but *not* the object itself or
+    // we'll never collect it).
+    if (!s.spanclass.noscan()) {
+        scanObject(Δp, Ꮡgcw);
+    }
+
+    // The special itself is also a root.
+    scanblock((uintptr)@unsafe.Pointer.FromBox(Ꮡspf.of(specialfinalizer.Ꮡfn)), goarch.PtrSize, Ꮡoneptrmask.at<uint8>(0), Ꮡgcw, nil);
+}
+
+// gcScanCleanup scans the relevant parts of a cleanup special as a root.
+internal static void gcScanCleanup(ж<specialCleanup> Ꮡspc, ж<gcWork> Ꮡgcw) {
+    // The special itself is a root.
+    scanblock((uintptr)Ꮡspc.of(specialCleanup.Ꮡcleanup), /* unsafe.Sizeof(cleanupFn{}) */ (uintptr)24, ᏑcleanupFnPtrMask.at<uint8>(0), Ꮡgcw, nil);
 }
 
 // gcAssistAlloc performs GC work to make gp's assist debt positive.
@@ -458,16 +544,16 @@ internal static void gcAssistAlloc(ж<g> Ꮡgp) {
         }
 
         {
-            var gpΔ1 = getg(); if ((~gpΔ1).syncGroup != nil) {
+            var gpΔ1 = getg(); if ((~gpΔ1).bubble != nil) {
                 // Disassociate the G from its synctest bubble while allocating.
                 // This is less elegant than incrementing the group's active count,
                 // but avoids any contamination between GC assist and synctest.
-                var sg = gpΔ1.Value.syncGroup;
-                gpΔ1.Value.syncGroup = default!;
+                var bubble = gpΔ1.Value.bubble;
+                gpΔ1.Value.bubble = default!;
+                var bubbleʗ1 = bubble;
                 var gpʗ1 = gpΔ1;
-                var sgʗ1 = sg;
                 defer(() => {
-                    gpʗ1.Value.syncGroup = sgʗ1;
+                    gpʗ1.Value.bubble = bubbleʗ1;
                 }, ref ᒐ);
             }
         }
@@ -656,9 +742,6 @@ retry:
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nwaitWorkNprocsˢ = "nwait > work.nprocs"u8;
-
 // gcAssistAlloc1 is the part of gcAssistAlloc that runs on the system
 // stack. This is a separate function to make it easier to see that
 // we're not capturing anything from the user stack, since the user
@@ -686,6 +769,7 @@ internal static void gcAssistAlloc1(ж<g> Ꮡgp, int64 scanWork) {
         gp.gcAssistBytes = 0;
         return;
     }
+
     // Track time spent in this assist. Since we're on the
     // system stack, this is non-preemptible, so we can
     // just measure start and end time.
@@ -695,11 +779,7 @@ internal static void gcAssistAlloc1(ж<g> Ꮡgp, int64 scanWork) {
     var startTime = nanotime();
     var trackLimiterEvent = (~gp.m).p.ptr().of(runtime_package.Δp.ᏑlimiterEvent).start(limiterEventMarkAssist, startTime);
 
-    var decnwait = atomic.Xadd(Ꮡwork.of(workType.Ꮡnwait), -1);
-    if (decnwait == work.nproc) {
-        println((@string)"runtime: work.nwait ="u8, decnwait, (@string)"work.nproc="u8, work.nproc);
-        @throw(nwaitWorkNprocsˢ);
-    }
+    gcBeginWork();
 
     // gcDrainN requires the caller to be preemptible.
     casGToWaitingForSuspendG(Ꮡgp, _Grunning, waitReasonGCAssistMarking);
@@ -722,14 +802,7 @@ internal static void gcAssistAlloc1(ж<g> Ꮡgp, int64 scanWork) {
 
     // If this is the last worker and we ran out of work,
     // signal a completion point.
-    var incnwait = atomic.Xadd(Ꮡwork.of(workType.Ꮡnwait), +1);
-    if (incnwait > work.nproc) {
-        println((@string)"runtime: work.nwait="u8, incnwait,
-            (@string)"work.nproc="u8, work.nproc);
-        @throw(workNwaitWorkNprocˢ);
-    }
-
-    if (incnwait == work.nproc && !gcMarkWorkAvailable(nil)) {
+    if (gcEndWork()) {
         // This has reached a background completion point. Set
         // gp.param to a non-nil value to indicate this. It
         // doesn't matter what we set it to (it just has to be
@@ -890,14 +963,14 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
     }
 
     var exprᴛ1 = (uint32)(readgstatus(Ꮡgp) & ~(uint32)_Gscan);
-    if (exprᴛ1 == _Gdead) {
+    if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
         return 0;
     }
     if (exprᴛ1 == _Grunning) {
         print((@string)"runtime: gp="u8, Ꮡgp.OrTypedNil(), (@string)", goid="u8, gp.goid, (@string)", gp->atomicstatus="u8, readgstatus(Ꮡgp), (@string)"\n"u8);
         @throw(scanstackGoroutineNotˢ);
     }
-    else if (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting) {
+    else if (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gleaked) {
         // ok
     }
     else { /* default: */
@@ -1080,6 +1153,15 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
         if (frame.varp != 0) {
             var size = frame.varp - frame.sp;
             if (size > 0) {
+                var isSigPanic = frame.fn.valid() && frame.fn.funcID == abi.FuncID_sigpanic;
+                if (usesLR && (isSigPanic || isAsyncPreempt || isDebugCall)) {
+                    // Also include the small frame injected by
+                    // (*sigctxt).pushCall. This is the same bump
+                    // as the SP bump used in (*unwinder).next.
+                    // We need this to ensure LR is scanned (for when
+                    // it contains a pointer-y non-PC). See issue 80188.
+                    size += alignUp(sys.MinFrameSize, sys.StackAlign);
+                }
                 scanConservative(frame.sp, size, nil, Ꮡgcw, Ꮡstate);
             }
         }
@@ -1175,6 +1257,28 @@ internal static void gcDrainMarkWorkerFractional(ж<gcWork> Ꮡgcw) {
     gcDrain(Ꮡgcw, (gcDrainFlags)((gcDrainFlags)(gcDrainFractional | gcDrainUntilPreempt) | gcDrainFlushBgCredit));
 }
 
+// gcNextMarkRoot safely increments work.markrootNext and returns the
+// index of the next root job. The returned boolean is true if the root job
+// is valid, and false if there are no more root jobs to be claimed,
+// i.e. work.markrootNext >= work.markrootJobs.
+internal static (uint32, bool) gcNextMarkRoot() {
+    if (!work.goroutineLeak.enabled) {
+        // If not running goroutine leak detection, assume regular GC behavior.
+        var job = Ꮡwork.of(workType.ᏑmarkrootNext).Add(1) - 1;
+        return (job, job < Ꮡwork.of(workType.ᏑmarkrootJobs).Load());
+    }
+
+    // Otherwise, use a CAS loop to increment markrootNext.
+    for (var (next, jobs) = (Ꮡwork.of(workType.ᏑmarkrootNext).Load(), Ꮡwork.of(workType.ᏑmarkrootJobs).Load()); next < jobs; next = Ꮡwork.of(workType.ᏑmarkrootNext).Load()) {
+        // There is still work available at the moment.
+        if (Ꮡwork.of(workType.ᏑmarkrootNext).CompareAndSwap(next, next + 1)) {
+            // We manage to snatch a root job. Return the root index.
+            return (next, true);
+        }
+    }
+    return (0, false);
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gcDrainPhaseIncorrectˢ = "gcDrain phase incorrect"u8;
 
@@ -1239,18 +1343,25 @@ internal static void gcDrain(ж<gcWork> Ꮡgcw, gcDrainFlags flags) {
         }
     }
 
-    // Drain root marking jobs.
-    if (work.markrootNext < work.markrootJobs) {
+    if (Ꮡwork.of(workType.ᏑmarkrootNext).Load() < Ꮡwork.of(workType.ᏑmarkrootJobs).Load()) {
         // Stop if we're preemptible, if someone wants to STW, or if
         // someone is calling forEachP.
         while (!((~gp).preempt && (preemptible || Ꮡsched.of(schedt.Ꮡgcwaiting).Load() || (~pp).runSafePointFn != 0))) {
-            var job = atomic.Xadd(Ꮡwork.of(workType.ᏑmarkrootNext), +1) - 1;
-            if (job >= work.markrootJobs) {
+            var (job, ok) = gcNextMarkRoot();
+            if (!ok) {
                 break;
             }
             markroot(Ꮡgcw, job, flushBgCredit);
             if (check != default! && check()) {
                 goto done;
+            }
+
+            // Spin up a new worker if requested.
+            if (goexperiment.GreenTeaGC && gcw.mayNeedWorker) {
+                gcw.mayNeedWorker = false;
+                if (gcphase == _GCmark) {
+                    ᏑgcController.enlistWorker();
+                }
             }
         }
     }
@@ -1275,22 +1386,55 @@ internal static void gcDrain(ж<gcWork> Ꮡgcw, gcDrainFlags flags) {
             gcw.balance();
         }
 
-        var b = gcw.tryGetFast();
-        if (b == 0) {
-            b = gcw.tryGet();
-            if (b == 0) {
-                // Flush the write barrier
-                // buffer; this may create
-                // more work.
-                wbBufFlush();
-                b = gcw.tryGet();
+        // See mgcwork.go for the rationale behind the order in which we check these queues.
+        uintptr b = default!;
+        objptr s = default!;
+        {
+            b = gcw.tryGetObjFast(); if (b == 0) {
+                {
+                    s = gcw.tryGetSpanFast(); if (s == 0) {
+                        {
+                            b = gcw.tryGetObj(); if (b == 0) {
+                                {
+                                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
+                                        // Flush the write barrier
+                                        // buffer; this may create
+                                        // more work.
+                                        wbBufFlush();
+                                        {
+                                            b = gcw.tryGetObj(); if (b == 0) {
+                                                {
+                                                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
+                                                        s = gcw.tryStealSpan();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-        if (b == 0) {
+        if (b != 0){
+            scanObject(b, Ꮡgcw);
+        } else 
+        if (s != 0){
+            scanSpan(s, Ꮡgcw);
+        } else {
             // Unable to get work.
             break;
         }
-        scanobject(b, Ꮡgcw);
+
+        // Spin up a new worker if requested.
+        if (goexperiment.GreenTeaGC && gcw.mayNeedWorker) {
+            gcw.mayNeedWorker = false;
+            if (gcphase == _GCmark) {
+                ᏑgcController.enlistWorker();
+            }
+        }
 
         // Flush background scan work credit to the global
         // account if we've accumulated enough locally so
@@ -1360,37 +1504,69 @@ internal static int64 gcDrainN(ж<gcWork> Ꮡgcw, int64 scanWork) {
             gcw.balance();
         }
 
-        var b = gcw.tryGetFast();
-        if (b == 0) {
-            b = gcw.tryGet();
-            if (b == 0) {
-                // Flush the write barrier buffer;
-                // this may create more work.
-                wbBufFlush();
-                b = gcw.tryGet();
-            }
-        }
-
-        if (b == 0) {
-            // Try to do a root job.
-            if (work.markrootNext < work.markrootJobs) {
-                var job = atomic.Xadd(Ꮡwork.of(workType.ᏑmarkrootNext), +1) - 1;
-                if (job < work.markrootJobs) {
-                    workFlushed += markroot(Ꮡgcw, job, false);
-                    continue;
+        // See mgcwork.go for the rationale behind the order in which we check these queues.
+        uintptr b = default!;
+        objptr s = default!;
+        {
+            b = gcw.tryGetObjFast(); if (b == 0) {
+                {
+                    s = gcw.tryGetSpanFast(); if (s == 0) {
+                        {
+                            b = gcw.tryGetObj(); if (b == 0) {
+                                {
+                                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
+                                        // Flush the write barrier
+                                        // buffer; this may create
+                                        // more work.
+                                        wbBufFlush();
+                                        {
+                                            b = gcw.tryGetObj(); if (b == 0) {
+                                                {
+                                                    s = Ꮡgcw.tryGetSpan(); if (s == 0) {
+                                                        // Try to do a root job.
+                                                        if (Ꮡwork.of(workType.ᏑmarkrootNext).Load() < Ꮡwork.of(workType.ᏑmarkrootJobs).Load()) {
+                                                            var (job, ok) = gcNextMarkRoot();
+                                                            if (ok) {
+                                                                workFlushed += markroot(Ꮡgcw, job, false);
+                                                                continue;
+                                                            }
+                                                        }
+                                                        s = gcw.tryStealSpan();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            // No heap or root jobs.
+        }
+        if (b != 0){
+            scanObject(b, Ꮡgcw);
+        } else 
+        if (s != 0){
+            scanSpan(s, Ꮡgcw);
+        } else {
+            // Unable to get work.
             break;
         }
-
-        scanobject(b, Ꮡgcw);
 
         // Flush background scan work credit.
         if (gcw.heapScanWork >= gcCreditSlack) {
             ᏑgcController.of(gcControllerState.ᏑheapScanWork).Add(gcw.heapScanWork);
             workFlushed += gcw.heapScanWork;
             gcw.heapScanWork = 0;
+        }
+
+        // Spin up a new worker if requested.
+        if (goexperiment.GreenTeaGC && gcw.mayNeedWorker) {
+            gcw.mayNeedWorker = false;
+            if (gcphase == _GCmark) {
+                ᏑgcController.enlistWorker();
+            }
         }
     }
 
@@ -1401,7 +1577,7 @@ internal static int64 gcDrainN(ж<gcWork> Ꮡgcw, int64 scanWork) {
     return workFlushed + gcw.heapScanWork;
 }
 
-// scanblock scans b as scanobject would, but using an explicit
+// scanblock scans b as scanObject would, but using an explicit
 // pointer bitmap instead of the heap bitmap.
 //
 // This is used to scan non-heap roots, so it does not update
@@ -1428,15 +1604,18 @@ internal static void scanblock(uintptr b0, uintptr n0, ж<uint8> Ꮡptrmask, ж<
         }
         for (nint j = 0; j < 8 && i < n; j++) {
             if ((uint32)(bits & 1) != 0) {
-                // Same work as in scanobject; see comments there.
+                // Same work as in scanObject; see comments there.
                 var Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(b + i));
                 if (Δp != 0) {
-                    {
-                        var (obj, span, objIndex) = findObject(Δp, b, i); if (obj != 0){
-                            greyobject(obj, b, i, span, Ꮡgcw, objIndex);
-                        } else 
-                        if (Ꮡstk != nil && Δp >= stk.stack.lo && Δp < stk.stack.hi) {
-                            Ꮡstk.putPtr(Δp, false);
+                    if (Ꮡstk != nil && Δp >= stk.stack.lo && Δp < stk.stack.hi){
+                        Ꮡstk.putPtr(Δp, false);
+                    } else {
+                        if (!tryDeferToSpanScan(Δp, Ꮡgcw)) {
+                            {
+                                var (obj, span, objIndex) = findObject(Δp, b, i); if (obj != 0) {
+                                    greyobject(obj, b, i, span, Ꮡgcw, objIndex);
+                                }
+                            }
                         }
                     }
                 }
@@ -1445,114 +1624,6 @@ internal static void scanblock(uintptr b0, uintptr n0, ж<uint8> Ꮡptrmask, ж<
             i += goarch.PtrSize;
         }
     }
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string scanobjectN0ˢ = "scanobject n == 0"u8;
-internal static readonly @string scanobjectOfANoscanˢ = "scanobject of a noscan object"u8;
-
-// scanobject scans the object starting at b, adding pointers to gcw.
-// b must point to the beginning of a heap object or an oblet.
-// scanobject consults the GC bitmap for the pointer mask and the
-// spans for the size of the object.
-//
-//go:nowritebarrier
-internal static void scanobject(uintptr b, ж<gcWork> Ꮡgcw) {
-    ref var gcw = ref Ꮡgcw.DerefOrNull();
-
-    // Prefetch object before we scan it.
-    //
-    // This will overlap fetching the beginning of the object with initial
-    // setup before we start scanning the object.
-    sys.Prefetch(b);
-
-    // Find the bits for b and the size of the object at b.
-    //
-    // b is either the beginning of an object, in which case this
-    // is the size of the object to scan, or it points to an
-    // oblet, in which case we compute the size to scan below.
-    var s = spanOfUnchecked(b);
-    var n = s.Value.elemsize;
-    if (n == 0) {
-        @throw(scanobjectN0ˢ);
-    }
-    if ((~s).spanclass.noscan()) {
-        // Correctness-wise this is ok, but it's inefficient
-        // if noscan objects reach here.
-        @throw(scanobjectOfANoscanˢ);
-    }
-
-    typePointers tp = default!;
-    if (n > maxObletBytes){
-        // Large object. Break into oblets for better
-        // parallelism and lower latency.
-        if (b == s.@base()) {
-            // Enqueue the other oblets to scan later.
-            // Some oblets may be in b's scalar tail, but
-            // these will be marked as "no more pointers",
-            // so we'll drop out immediately when we go to
-            // scan those.
-            for (var oblet = b + (uintptr)maxObletBytes; oblet < s.@base() + (~s).elemsize; oblet += maxObletBytes) {
-                if (!gcw.putFast(oblet)) {
-                    gcw.put(oblet);
-                }
-            }
-        }
-
-        // Compute the size of the oblet. Since this object
-        // must be a large object, s.base() is the beginning
-        // of the object.
-        n = s.@base() + (~s).elemsize - b;
-        n = min(n, (uintptr)(maxObletBytes));
-        tp = s.typePointersOfUnchecked(s.@base());
-        tp = tp.fastForward(b - tp.addr, b + n);
-    } else {
-        tp = s.typePointersOfUnchecked(b);
-    }
-
-    uintptr scanSize = default!;
-    while (ᐧ) {
-        uintptr addr = default!;
-        {
-            (tp, addr) = tp.nextFast(); if (addr == 0) {
-                {
-                    (tp, addr) = tp.next(b + n); if (addr == 0) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Keep track of farthest pointer we found, so we can
-        // update heapScanWork. TODO: is there a better metric,
-        // now that we can skip scalar portions pretty efficiently?
-        scanSize = addr - b + (uintptr)goarch.PtrSize;
-
-        // Work here is duplicated in scanblock and above.
-        // If you make changes here, make changes there too.
-        var obj = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
-
-        // At this point we have extracted the next potential pointer.
-        // Quickly filter out nil and pointers back to the current object.
-        if (obj != 0 && obj - b >= n) {
-            // Test if obj points into the Go heap and, if so,
-            // mark the object.
-            //
-            // Note that it's possible for findObject to
-            // fail if obj points to a just-allocated heap
-            // object because of a race with growing the
-            // heap. In this case, we know the object was
-            // just allocated and hence will be marked by
-            // allocation itself.
-            {
-                var (objΔ1, span, objIndex) = findObject(obj, b, addr - b); if (objΔ1 != 0) {
-                    greyobject(objΔ1, b, addr - b, span, Ꮡgcw, objIndex);
-                }
-            }
-        }
-    }
-    gcw.bytesMarked += (uint64)n;
-    gcw.heapScanWork += (int64)scanSize;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1572,29 +1643,32 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> Ꮡptrmask
     if (debugScanConservative) {
         printlock();
         print((@string)"conservatively scanning ["u8, ((Δhex)(uint64)b), (@string)","u8, ((Δhex)(uint64)(b + n)), (@string)")\n"u8);
-        hexdumpWords(b, b + n, (uintptr Δp) => {
+        hexdumpWords(b, n, (uintptr Δp, hexdumpMarker m) => {
             if (Ꮡptrmask != nil) {
                 var word = (Δp - b) / (uintptr)goarch.PtrSize;
                 var bits = addb(Ꮡptrmask, word / 8).Value;
                 if ((byte)(((bits >> (int)((word % 8)))) & 1) == 0) {
-                    return (rune)'$';
+                    return;
                 }
             }
 
             var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
             if (Ꮡstate != nil && Ꮡstate.Value.stack.lo <= val && val < Ꮡstate.Value.stack.hi) {
-                return (rune)'@';
+                m.start();
+                println((@string)"ptr to stack"u8);
+                return;
             }
 
             var span = spanOfHeap(val);
             if (span == nil) {
-                return (rune)' ';
+                return;
             }
             var idx = span.objIndex(val);
-            if (span.isFree(idx)) {
-                return (rune)' ';
+            if (span.isFreeOrNewlyAllocated(idx)) {
+                return;
             }
-            return (rune)'*';
+            m.start();
+            println((@string)"ptr to heap"u8);
         });
         printunlock();
     }
@@ -1644,14 +1718,19 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> Ꮡptrmask
         }
 
         // Check if val points to an allocated object.
+        //
+        // Ignore objects allocated during the mark phase, they've
+        // been allocated black.
         var idx = span.objIndex(val);
-        if (span.isFree(idx)) {
+        if (span.isFreeOrNewlyAllocated(idx)) {
             continue;
         }
 
         // val points to an allocated object. Mark it.
         var obj = span.@base() + idx * (~span).elemsize;
-        greyobject(obj, b, i, span, Ꮡgcw, idx);
+        if (!tryDeferToSpanScan(obj, Ꮡgcw)) {
+            greyobject(obj, b, i, span, Ꮡgcw, idx);
+        }
     }
 }
 
@@ -1661,10 +1740,12 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> Ꮡptrmask
 //
 //go:nowritebarrier
 internal static void shade(uintptr b) {
-    {
-        var (obj, span, objIndex) = findObject(b, 0, 0); if (obj != 0) {
-            var gcw = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡgcw);
-            greyobject(obj, 0, 0, span, gcw, objIndex);
+    var gcw = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡgcw);
+    if (!tryDeferToSpanScan(b, gcw)) {
+        {
+            var (obj, span, objIndex) = findObject(b, 0, 0); if (obj != 0) {
+                greyobject(obj, 0, 0, span, gcw, objIndex);
+            }
         }
     }
 }
@@ -1695,6 +1776,9 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
             // Already marked.
             return;
         }
+        if (debug.checkfinalizers > 1) {
+            print((@string)"  mark "u8, ((Δhex)(uint64)obj), (@string)" found at *("u8, ((Δhex)(uint64)@base), (@string)"+"u8, ((Δhex)(uint64)off), (@string)")\n"u8);
+        }
     } else {
         if (debug.gccheckmark > 0 && span.isFree(objIndex)) {
             print((@string)"runtime: marking free object "u8, ((Δhex)(uint64)obj), (@string)" found at *("u8, ((Δhex)(uint64)@base), (@string)"+"u8, ((Δhex)(uint64)off), (@string)")\n"u8);
@@ -1715,13 +1799,13 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
         if ((uint8)((~arena).pageMarks[pageIdx] & pageMask) == 0) {
             atomic.Or8(arena.at(heapArena.ᏑpageMarks, (ulong)(pageIdx)), pageMask);
         }
+    }
 
-        // If this is a noscan object, fast-track it to black
-        // instead of greying it.
-        if (span.spanclass.noscan()) {
-            gcw.bytesMarked += (uint64)span.elemsize;
-            return;
-        }
+    // If this is a noscan object, fast-track it to black
+    // instead of greying it.
+    if (span.spanclass.noscan()) {
+        gcw.bytesMarked += (uint64)span.elemsize;
+        return;
     }
 
     // We're adding obj to P's local workbuf, so it's likely
@@ -1730,8 +1814,8 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
     // some benefit on platforms with inclusive shared caches.
     sys.Prefetch(obj);
     // Queue the obj for scanning.
-    if (!gcw.putFast(obj)) {
-        gcw.put(obj);
+    if (!gcw.putObjFast(obj)) {
+        gcw.putObj(obj);
     }
 }
 
@@ -1808,6 +1892,10 @@ internal static void gcmarknewobject(ж<mspan> Ꮡspan, uintptr obj) {
     // Mark object.
     var objIndex = span.objIndex(obj);
     span.markBitsForIndex(objIndex).setMarked();
+    if (goexperiment.GreenTeaGC && gcUsesSpanInlineMarkBits(span.elemsize)) {
+        // No need to scan the new object.
+        span.scannedBitsForIndex(objIndex).setMarked();
+    }
 
     // Mark span.
     var (arena, pageIdx, pageMask) = pageIndexOf(span.@base());
@@ -1830,9 +1918,11 @@ internal static void gcMarkTinyAllocs() {
         if (c == nil || (~c).tiny == 0) {
             continue;
         }
-        var (_, span, objIndex) = findObject((~c).tiny, 0, 0);
         var gcw = Δp.of(runtime_package.Δp.Ꮡgcw);
-        greyobject((~c).tiny, 0, 0, span, gcw, objIndex);
+        if (!tryDeferToSpanScan((~c).tiny, gcw)) {
+            var (_, span, objIndex) = findObject((~c).tiny, 0, 0);
+            greyobject((~c).tiny, 0, 0, span, gcw, objIndex);
+        }
     }
 }
 

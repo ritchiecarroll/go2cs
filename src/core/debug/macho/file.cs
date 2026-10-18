@@ -34,7 +34,7 @@ partial class macho_package {
 
 // A File represents an open Mach-O file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public binary.ByteOrder ByteOrder;
     public slice<Load> Loads;
     public slice<ж<ΔSection>> Sections;
@@ -72,8 +72,8 @@ partial struct SegmentHeader {
 
 // A Segment represents a Mach-O 32-bit or 64-bit load segment command.
 partial struct ΔSegment {
-    public partial ref LoadBytes LoadBytes { get; }
-    public partial ref SegmentHeader SegmentHeader { get; }
+    /*embed*/ public LoadBytes LoadBytes;
+    /*embed*/ public SegmentHeader SegmentHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.
@@ -121,7 +121,7 @@ partial struct Reloc {
 }
 
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
@@ -145,7 +145,7 @@ public static io.ReadSeeker Open(this ref ΔSection s) {
 
 // A Dylib represents a Mach-O load dynamic library command.
 partial struct Dylib {
-    public partial ref LoadBytes LoadBytes { get; }
+    /*embed*/ public LoadBytes LoadBytes;
     public @string Name;
     public uint32 Time;
     public uint32 CurrentVersion;
@@ -154,21 +154,21 @@ partial struct Dylib {
 
 // A Symtab represents a Mach-O symbol table command.
 partial struct Symtab {
-    public partial ref LoadBytes LoadBytes { get; }
-    public partial ref SymtabCmd SymtabCmd { get; }
+    /*embed*/ public LoadBytes LoadBytes;
+    /*embed*/ public SymtabCmd SymtabCmd;
     public slice<Symbol> Syms;
 }
 
 // A Dysymtab represents a Mach-O dynamic symbol table command.
 partial struct Dysymtab {
-    public partial ref LoadBytes LoadBytes { get; }
-    public partial ref DysymtabCmd DysymtabCmd { get; }
+    /*embed*/ public LoadBytes LoadBytes;
+    /*embed*/ public DysymtabCmd DysymtabCmd;
     public slice<uint32> IndirectSyms; // indices into Symtab.Syms
 }
 
 // A Rpath represents a Mach-O rpath command.
 partial struct Rpath {
-    public partial ref LoadBytes LoadBytes { get; }
+    /*embed*/ public LoadBytes LoadBytes;
     public @string Path;
 }
 
@@ -790,15 +790,27 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 public static (slice<@string>, error) ImportedSymbols(this ref File f) {
-    if (f.Dysymtab == nil || f.Symtab == nil) {
+    if (f.Symtab == nil) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "missing symbol table"u8, default!))));
     }
 
     var st = f.Symtab;
     var dt = f.Dysymtab;
     slice<@string> all = default!;
-    foreach (var (_, s) in (~st).Syms.slice((nint)((~dt).Iundefsym), (nint)((~dt).Iundefsym + (~dt).Nundefsym))) {
-        all = append(all, s.Name);
+    if (dt != nil){
+        foreach (var (_, s) in (~st).Syms.slice((nint)((~dt).Iundefsym), (nint)((~dt).Iundefsym + (~dt).Nundefsym))) {
+            all = append(all, s.Name);
+        }
+    } else {
+        // From Darwin's include/mach-o/nlist.h
+        const uint8 N_TYPE = 0x0e;
+        const uint8 N_UNDF = 0x0;
+        const uint8 N_EXT = 0x01;
+        foreach (var (_, s) in (~st).Syms) {
+            if ((uint8)(s.Type & N_TYPE) == N_UNDF && (uint8)(s.Type & N_EXT) != 0) {
+                all = append(all, s.Name);
+            }
+        }
     }
     return (all, default!);
 }

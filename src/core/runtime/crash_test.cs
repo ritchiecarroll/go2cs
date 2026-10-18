@@ -8,6 +8,10 @@ using context = context_package;
 using errors = errors_package;
 using flag = flag_package;
 using fmt = fmt_package;
+using asan = @internal.asan_package;
+using msan = @internal.msan_package;
+using profile = @internal.profile_package;
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using traceparse = @internal.trace_package;
 using Δio = io_package;
@@ -81,7 +85,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 }
 
 partial struct testprogᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal @string dir;
     internal map<@string, ж<buildexe>> target;
 }
@@ -120,6 +124,15 @@ internal static @string runBuiltTestProg(ж<testing.T> Ꮡt, @string exe, @strin
 
     Ꮡt.Helper();
 
+    var (@out, _) = runBuiltTestProgErr(Ꮡt, exe, name, env.ꓸꓸꓸ);
+    return @out;
+}
+
+internal static (@string, error) runBuiltTestProgErr(ж<testing.T> Ꮡt, @string exe, @string name, params ꓸꓸꓸstring envʗp) {
+    var env = envʗp.sslice();
+
+    Ꮡt.Helper();
+
     if (flagQuick.Value) {
         Ꮡt.Skip(quickˢ);
     }
@@ -146,7 +159,7 @@ internal static @string runBuiltTestProg(ж<testing.T> Ꮡt, @string exe, @strin
             }
         }
     }
-    return ((@string)@out);
+    return (((@string)@out), err);
 }
 
 internal static channel<bool> serializeBuild = new channel<bool>(2);
@@ -193,7 +206,6 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
     // tests can look up executables that were already built.
     Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Unlock();
 
-    var flagsʗ1 = flags;
     var targetʗ1 = target;
     target.of(buildexe.Ꮡonce).Do(() => {
         GoFrame ᒐ = default;
@@ -208,33 +220,45 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
             // Don't get confused if testenv.GoToolPath calls t.Skip.
             targetʗ1.Value.err = errors.New(buildingTestCalledTSkipˢ);
 
+            if (asan.Enabled) {
+                flags = append(flags, "-asan"u8);
+            }
+            if (msan.Enabled) {
+                flags = append(flags, "-msan"u8);
+            }
+            if (race.Enabled) {
+                flags = append(flags, "-race"u8);
+            }
+
             @string exe = filepath.Join(dir, name + ".exe");
 
             var start = time.Now();
-            var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), appendꓸꓸꓸ(new @string[]{"build"u8, "-o"u8, exe}.slice(), flagsʗ1).ꓸꓸꓸ);
+            var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), appendꓸꓸꓸ(new @string[]{"build"u8, "-o"u8, exe}.slice(), flags).ꓸꓸꓸ);
             Ꮡt.Logf("running %v"u8, cmd.OrTypedNil());
             cmd.Value.Dir = "testdata/"u8 + binary;
             cmd = testenv.CleanCmdEnv(cmd);
 
-            // Add the rangefunc GOEXPERIMENT unconditionally since some tests depend on it.
-            // TODO(61405): Remove this once it's enabled by default.
+            // If tests need any experimental flags, add them here.
+            //
+            // TODO(vsaioc): Remove `goroutineleakprofile` once the feature is no longer experimental.
             var edited = false;
             foreach (var (i, _) in (~cmd).Env) {
                 @string e = (~cmd).Env[i];
                 {
                     var (_, vars, okΔ1) = strings.Cut(e, goexperimentˢ); if (okΔ1) {
-                        cmd.Value.Env[i] = "GOEXPERIMENT="u8 + vars + ",rangefunc"u8;
+                        cmd.Value.Env[i] = "GOEXPERIMENT="u8 + vars + ",goroutineleakprofile"u8;
                         edited = true;
+                        _ = vars;
                     }
                 }
             }
             if (!edited) {
-                cmd.Value.Env = append((~cmd).Env, "GOEXPERIMENT=rangefunc"u8);
+                cmd.Value.Env = append((~cmd).Env, "GOEXPERIMENT=goroutineleakprofile"u8);
             }
 
             var (@out, err) = cmd.CombinedOutput();
             if (err != default!){
-                targetʗ1.Value.err = fmt.Errorf("building %s %v: %v\n%s"u8, binary, flagsʗ1, err, @out);
+                targetʗ1.Value.err = fmt.Errorf("building %s %v: %v\n%s"u8, binary, flags, err, @out);
             } else {
                 Ꮡt.Logf("built %v in %v"u8, name, time.Since(start));
                 targetʗ1.Value.exe = exe;
@@ -272,6 +296,9 @@ internal partial struct testCrashHandler_crashTest /*dyn*/ {
 internal static void testCrashHandler(ж<testing.T> Ꮡt, bool cgo) {
     @string output = default!;
     if (cgo){
+        if (Δruntime.GOOS == "freebsd"u8 && race.Enabled) {
+            Ꮡt.Skipf("race + cgo freebsd not supported. See https://go.dev/issue/73788."u8);
+        }
         output = runTestProg(Ꮡt, testprogcgoˢ, crashˢ);
     } else {
         output = runTestProg(Ꮡt, testprogˢ, crashˢ);
@@ -286,12 +313,20 @@ public static void TestCrashHandler(ж<testing.T> Ꮡt) {
     testCrashHandler(Ꮡt, false);
 }
 
+internal static testenv.SpecialBuildTypes deadlockBuildTypes = new testenv.SpecialBuildTypes(
+    // External linking brings in cgo, causing deadlock detection not working.
+    Cgo: false,
+    Asan: asan.Enabled,
+    Msan: msan.Enabled,
+    Race: race.Enabled
+);
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fatalErrorAllGoroutinesˢ = "fatal error: all goroutines are asleep - deadlock!\n"u8;
 
 internal static void testDeadlock(ж<testing.T> Ꮡt, @string name) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
 
     @string output = runTestProg(Ꮡt, testprogˢ, name);
     @string want = fatalErrorAllGoroutinesˢ;
@@ -334,7 +369,7 @@ internal static readonly @string noGoroutinesMainCalledˢ = "no goroutines (main
 
 public static void TestGoexitDeadlock(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
 
     @string output = runTestProg(Ꮡt, testprogˢ, goexitDeadlockˢ);
     @string want = noGoroutinesMainCalledˢ;
@@ -465,11 +500,75 @@ public static void TestRecursivePanic5(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string repanickedPanicˢ = "RepanickedPanic"u8;
+internal static readonly @string panicMessageRecoveredˢ = """
+panic: message [recovered, repanicked]
+
+"""u8.Raw();
+
+public static void TestRepanickedPanic(ж<testing.T> Ꮡt) {
+    @string output = runTestProg(Ꮡt, testprogˢ, repanickedPanicˢ);
+    @string want = panicMessageRecoveredˢ;
+    if (!strings.HasPrefix(output, want)) {
+        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string repanickedMiddlePanicˢ = "RepanickedMiddlePanic"u8;
+internal static readonly @string panicInnerRecoveredPanicˢ = """
+panic: inner [recovered]
+	panic: middle [recovered, repanicked]
+	panic: outer
+
+"""u8.Raw();
+
+public static void TestRepanickedMiddlePanic(ж<testing.T> Ꮡt) {
+    @string output = runTestProg(Ꮡt, testprogˢ, repanickedMiddlePanicˢ);
+    @string want = panicInnerRecoveredPanicˢ;
+    if (!strings.HasPrefix(output, want)) {
+        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string repanickedPanicSandwichˢ = "RepanickedPanicSandwich"u8;
+internal static readonly @string panicOuterRecoveredPanicˢ = """
+panic: outer [recovered]
+	panic: inner [recovered]
+	panic: outer
+
+"""u8.Raw();
+
+public static void TestRepanickedPanicSandwich(ж<testing.T> Ꮡt) {
+    @string output = runTestProg(Ꮡt, testprogˢ, repanickedPanicSandwichˢ);
+    @string want = panicOuterRecoveredPanicˢ;
+    if (!strings.HasPrefix(output, want)) {
+        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string doublePanicWithSameValueˢ = "DoublePanicWithSameValue"u8;
+internal static readonly @string panicMessageˢ = """
+panic: message
+
+"""u8.Raw();
+
+public static void TestDoublePanicWithSameValue(ж<testing.T> Ꮡt) {
+    @string output = runTestProg(Ꮡt, testprogˢ, doublePanicWithSameValueˢ);
+    @string want = panicMessageˢ;
+    if (!strings.HasPrefix(output, want)) {
+        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string goexitExitˢ = "GoexitExit"u8;
 
 public static void TestGoexitCrash(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
 
     @string output = runTestProg(Ꮡt, testprogˢ, goexitExitˢ);
     @string want = noGoroutinesMainCalledˢ;
@@ -557,7 +656,7 @@ internal static readonly @string fatalErrorNoGoroutinesˢ = "fatal error: no gor
 
 public static void TestGoexitInPanic(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
 
     // see issue 8774: this code used to trigger an infinite recursion
     @string output = runTestProg(Ꮡt, testprogˢ, goexitInPanicˢ);
@@ -636,7 +735,7 @@ public static void TestPanicAfterGoexit(ж<testing.T> Ꮡt) {
 
 public static void TestRecoveredPanicAfterGoexit(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
 
     @string output = runTestProg(Ꮡt, testprogˢ, "RecoveredPanicAfterGoexit"u8);
     @string want = fatalErrorNoGoroutinesˢ;
@@ -647,7 +746,7 @@ public static void TestRecoveredPanicAfterGoexit(ж<testing.T> Ꮡt) {
 
 public static void TestRecoverBeforePanicAfterGoexit(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
 
     Ꮡt.Parallel();
     @string output = runTestProg(Ꮡt, testprogˢ, "RecoverBeforePanicAfterGoexit"u8);
@@ -659,7 +758,7 @@ public static void TestRecoverBeforePanicAfterGoexit(ж<testing.T> Ꮡt) {
 
 public static void TestRecoverBeforePanicAfterGoexit2(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
 
     Ꮡt.Parallel();
     @string output = runTestProg(Ꮡt, testprogˢ, "RecoverBeforePanicAfterGoexit2"u8);
@@ -808,6 +907,7 @@ internal static ж<bool> concurrentMapTest = flag.Bool("run_concurrent_map_tests
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingWithoutRunˢ = (@string)"skipping without -run_concurrent_map_tests"u8;
+internal static readonly object skippingTestRaceWillˢ = (@string)"skipping test: -race will catch the race, this test is for the built-in race detection"u8;
 internal static readonly @string concurrentMapWritesˢ = "concurrentMapWrites"u8;
 internal static readonly @string fatalErrorConcurrentMapˢ = "fatal error: concurrent map writes\n"u8;
 internal static readonly @string fatalErrorSmallMapWithNoˢ = "fatal error: small map with no empty slot (concurrent map writes?)\n"u8;
@@ -815,6 +915,9 @@ internal static readonly @string fatalErrorSmallMapWithNoˢ = "fatal error: smal
 public static void TestConcurrentMapWrites(ж<testing.T> Ꮡt) {
     if (!concurrentMapTest.Value) {
         Ꮡt.Skip(skippingWithoutRunˢ);
+    }
+    if (race.Enabled) {
+        Ꮡt.Skip(skippingTestRaceWillˢ);
     }
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
     @string output = runTestProg(Ꮡt, testprogˢ, concurrentMapWritesˢ);
@@ -835,6 +938,9 @@ public static void TestConcurrentMapReadWrite(ж<testing.T> Ꮡt) {
     if (!concurrentMapTest.Value) {
         Ꮡt.Skip(skippingWithoutRunˢ);
     }
+    if (race.Enabled) {
+        Ꮡt.Skip(skippingTestRaceWillˢ);
+    }
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
     @string output = runTestProg(Ꮡt, testprogˢ, concurrentMapReadWriteˢ);
     @string want = fatalErrorConcurrentMapˢ2;
@@ -853,6 +959,9 @@ public static void TestConcurrentMapIterateWrite(ж<testing.T> Ꮡt) {
     if (!concurrentMapTest.Value) {
         Ꮡt.Skip(skippingWithoutRunˢ);
     }
+    if (race.Enabled) {
+        Ꮡt.Skip(skippingTestRaceWillˢ);
+    }
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
     @string output = runTestProg(Ꮡt, testprogˢ, "concurrentMapIterateWrite"u8);
     @string want = fatalErrorConcurrentMapˢ3;
@@ -866,6 +975,9 @@ public static void TestConcurrentMapIterateWrite(ж<testing.T> Ꮡt) {
 
 public static void TestConcurrentMapWritesIssue69447(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+    if (race.Enabled) {
+        Ꮡt.Skip(skippingTestRaceWillˢ);
+    }
     var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -976,9 +1088,13 @@ break_retry:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippedTestCheckptrModeˢ = (@string)"skipped test: checkptr mode catches the corruption"u8;
 internal static readonly @string badTracebackˢ = "BadTraceback"u8;
 
 public static void TestBadTraceback(ж<testing.T> Ꮡt) {
+    if (asan.Enabled || msan.Enabled || race.Enabled) {
+        Ꮡt.Skip(skippedTestCheckptrModeˢ);
+    }
     @string output = runTestProg(Ꮡt, testprogˢ, badTracebackˢ);
     foreach (var (_, want) in new @string[]{
         "unexpected return pc"u8,
@@ -993,6 +1109,7 @@ public static void TestBadTraceback(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingOnSanitizersˢ = (@string)"skipping on sanitizers because the sanitizer runtime is external code"u8;
 internal static readonly @string timeProfˢ = "TimeProf"u8;
 internal static readonly @string gotracebackCrashˢ = "GOTRACEBACK=crash"u8;
 internal static readonly @string nodecount1ˢ = "-nodecount=1"u8;
@@ -1006,6 +1123,9 @@ public static void TestTimePprof(ж<testing.T> Ꮡt) {
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8) {
             Ꮡt.Skipf("skipping on %s because nanotime calls libc"u8, Δruntime.GOOS);
+        }
+        if (race.Enabled || asan.Enabled || msan.Enabled) {
+            Ꮡt.Skip(skippingOnSanitizersˢ);
         }
 
         // Pass GOTRACEBACK for issue #41120 to try to get more
@@ -1110,8 +1230,7 @@ internal static readonly object childProcessDidNotFailˢ = (@string)"child proce
 internal static readonly @string runtimeˢ2 = "runtime.unexportedPanicForTesting"u8;
 
 public static void TestRuntimePanic(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
-    var cmd = testenv.CleanCmdEnv(exec.Command(Δos.Args[0], testRunTestRuntimePanicˢ));
+    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunTestRuntimePanicˢ));
     cmd.Value.Env = append((~cmd).Env, "GO_TEST_RUNTIME_PANIC=1"u8);
     var (@out, err) = cmd.CombinedOutput();
     Ꮡt.Logf("%s"u8, @out);
@@ -1126,12 +1245,11 @@ public static void TestRuntimePanic(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testRunˢ2 = "-test.run=TestTracebackRuntimeFunction"u8;
+internal static readonly @string testRunˢ2 = "-test.run=^TestTracebackRuntimeFunction$"u8;
 internal static readonly @string runtimeReadMemStatsˢ = "runtime.ReadMemStats"u8;
 
 public static void TestTracebackRuntimeFunction(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
-    var cmd = testenv.CleanCmdEnv(exec.Command(Δos.Args[0], testRunˢ2));
+    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ2));
     cmd.Value.Env = append((~cmd).Env, "GO_TEST_RUNTIME_NPE_READMEMSTATS=1"u8);
     var (@out, err) = cmd.CombinedOutput();
     Ꮡt.Logf("%s"u8, @out);
@@ -1146,12 +1264,11 @@ public static void TestTracebackRuntimeFunction(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testRunˢ3 = "-test.run=TestTracebackRuntimeMethod"u8;
+internal static readonly @string testRunˢ3 = "-test.run=^TestTracebackRuntimeMethod$"u8;
 internal static readonly @string runtimeFuncEntryˢ = "runtime.(*Func).Entry"u8;
 
 public static void TestTracebackRuntimeMethod(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
-    var cmd = testenv.CleanCmdEnv(exec.Command(Δos.Args[0], testRunˢ3));
+    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ3));
     cmd.Value.Env = append((~cmd).Env, "GO_TEST_RUNTIME_NPE_FUNCMETHOD=1"u8);
     var (@out, err) = cmd.CombinedOutput();
     Ꮡt.Logf("%s"u8, @out);
@@ -1173,14 +1290,12 @@ internal static readonly @string runtimeStackOverflowˢ = "runtime.stackOverflow
 
 // Test that g0 stack overflows are handled gracefully.
 public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
-
     if (Δruntime.GOOS == "ios"u8) {
         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 62671);
     }
 
     if (Δos.Getenv(testG0StackOverflowˢ) != "1"u8) {
-        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunˢ4, testVˢ));
+        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ4, testVˢ));
         cmd.Value.Env = append((~cmd).Env, "TEST_G0_STACK_OVERFLOW=1"u8);
         var (@out, err) = cmd.CombinedOutput();
         Ꮡt.Logf("output:\n%s"u8, @out);
@@ -1231,7 +1346,7 @@ internal static readonly @string yzzyxˢ = "yzzyx\n"u8;
 public static void TestCrashWhileTracing(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
 
-    var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), Δos.Args[0]));
+    var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt))));
     cmd.Value.Env = append((~cmd).Env, "TEST_CRASH_WHILE_TRACING=1"u8);
     var (stdOut, err) = cmd.StdoutPipe();
     ref var errOut = ref heap(new bytes.Buffer(), out var ᏑerrOut);
@@ -1247,7 +1362,7 @@ public static void TestCrashWhileTracing(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("could not create trace.NewReader: %v"u8, err);
     }
     bool seen = default!;
-    bool seenSync = default!;
+    nint nSync = 0;
     nint i = 1;
 loop:
     for (; ᐧ ; i++) {
@@ -1262,7 +1377,7 @@ loop:
         }
         var exprᴛ1 = ev.Kind();
         if (exprᴛ1 == traceparse.EventSync) {
-            seenSync = true;
+            nSync = ev.Sync().N;
         }
         else if (exprᴛ1 == traceparse.EventLog) {
             var v = ev.Log();
@@ -1281,7 +1396,7 @@ break_loop:;
             Ꮡt.Error(theProcessShouldHaveˢ);
         }
     }
-    if (!seenSync) {
+    if (nSync <= 1) {
         Ꮡt.Errorf("expected at least one full generation to have been emitted before the trace was considered broken"u8);
     }
     if (!seen) {
@@ -1359,11 +1474,13 @@ public static void TestPanicWhilePanicking(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicRuntimeErrorUnsafeˢ = "panic: runtime error: unsafe.Slice: ptr is nil and len is not zero"u8;
+internal static readonly @string unsafeSlicePtrIsNilAndˢ = "unsafe.Slice: ptr is nil and len is not zero"u8;
 
 public static void TestPanicOnUnsafeSlice(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, "panicOnNilAndEleSizeIsZero"u8);
-    @string want = panicRuntimeErrorUnsafeˢ;
+    // Note: This is normally a panic, but is a throw when checkptr is
+    // enabled.
+    @string want = unsafeSlicePtrIsNilAndˢ;
     if (!strings.Contains(output, want)) {
         Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, output);
     }
@@ -1378,6 +1495,126 @@ public static void TestNetpollWaiters(ж<testing.T> Ꮡt) {
     @string want = "OK\n"u8;
     if (output != want) {
         Ꮡt.Fatalf("output is not %q\n%s"u8, want, output);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string runtimeRunFinalizersˢ = "runtime.runFinalizers"u8;
+internal static readonly @string cleanupˢ = "Cleanup"u8;
+internal static readonly @string runtimeRunCleanupsˢ = "runtime.runCleanups"u8;
+internal static readonly @string panicˢ = "Panic"u8;
+internal static readonly @string gotracebackAllˢ = "GOTRACEBACK=all"u8;
+internal static readonly @string goTestFinalizerDeadlockˢ = "GO_TEST_FINALIZER_DEADLOCK=panic"u8;
+internal static readonly @string stackˢ = "Stack"u8;
+internal static readonly @string goTestFinalizerDeadlockˢ2 = "GO_TEST_FINALIZER_DEADLOCK=stack"u8;
+internal static readonly @string pprofProtoˢ = "PprofProto"u8;
+internal static readonly @string goTestFinalizerDeadlockˢ3 = "GO_TEST_FINALIZER_DEADLOCK=pprof_proto"u8;
+internal static readonly @string pprofDebug1ˢ = "PprofDebug1"u8;
+internal static readonly @string goTestFinalizerDeadlockˢ4 = "GO_TEST_FINALIZER_DEADLOCK=pprof_debug1"u8;
+internal static readonly @string pprofDebug2ˢ = "PprofDebug2"u8;
+internal static readonly @string goTestFinalizerDeadlockˢ5 = "GO_TEST_FINALIZER_DEADLOCK=pprof_debug2"u8;
+
+public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> Ꮡt) {
+    Ꮡt.Parallel();
+
+    foreach (var (_, useCleanup) in new bool[]{false, true}.slice()) {
+        @string progName = finalizerˢ;
+        @string want = runtimeRunFinalizersˢ;
+        if (useCleanup) {
+            progName = cleanupˢ;
+            want = runtimeRunCleanupsˢ;
+        }
+        Ꮡt.Run(progName, (ж<testing.T> tΔ1) => {
+            // The runtime.runFinalizers/runtime.runCleanups frame should appear in panics, even if
+            // runtime frames are normally hidden (GOTRACEBACK=all).
+            tΔ1.Run(panicˢ, (ж<testing.T> tΔ2) => {
+                tΔ2.Parallel();
+                @string output = runTestProg(tΔ2, testprogˢ, progName + "Deadlock"u8, gotracebackAllˢ, goTestFinalizerDeadlockˢ);
+                @string wantΔ1 = want + "()"u8;
+                if (!strings.Contains(output, wantΔ1)) {
+                    tΔ2.Errorf("output does not contain %q:\n%s"u8, wantΔ1, output);
+                }
+            });
+
+            // The runtime.runFinalizers/runtime.Cleanups frame should appear in runtime.Stack,
+            // even though runtime frames are normally hidden.
+            tΔ1.Run(stackˢ, (ж<testing.T> tΔ3) => {
+                tΔ3.Parallel();
+                @string output = runTestProg(tΔ3, testprogˢ, progName + "Deadlock"u8, goTestFinalizerDeadlockˢ2);
+                @string wantΔ2 = want + "()"u8;
+                if (!strings.Contains(output, wantΔ2)) {
+                    tΔ3.Errorf("output does not contain %q:\n%s"u8, wantΔ2, output);
+                }
+            });
+
+            // The runtime.runFinalizers/runtime.Cleanups frame should appear in goroutine
+            // profiles.
+            tΔ1.Run(pprofProtoˢ, (ж<testing.T> tΔ4) => {
+                tΔ4.Parallel();
+                @string output = runTestProg(tΔ4, testprogˢ, progName + "Deadlock"u8, goTestFinalizerDeadlockˢ3);
+
+                var (p, err) = profile.Parse(new runtime_test_package.strings_ReaderжReader(strings.NewReader(output)));
+                if (err != default!) {
+                    // Logging the binary proto data is not very nice, but it might
+                    // be a text error message instead.
+                    tΔ4.Logf("Output: %s"u8, output);
+                    tΔ4.Fatalf("Error parsing proto output: %v"u8, err);
+                }
+                foreach (var (_, s) in (~p).Sample) {
+                    foreach (var (_, loc) in (~s).Location) {
+                        foreach (var (_, line) in (~loc).Line) {
+                            if ((~line.Function).Name == want) {
+                                // Done!
+                                return;
+                            }
+                        }
+                    }
+                }
+                tΔ4.Errorf("Profile does not contain %q:\n%s"u8, want, p.OrTypedNil());
+            });
+
+            // The runtime.runFinalizers/runtime.runCleanups frame should appear in goroutine
+            // profiles (debug=1).
+            tΔ1.Run(pprofDebug1ˢ, (ж<testing.T> tΔ5) => {
+                tΔ5.Parallel();
+                @string output = runTestProg(tΔ5, testprogˢ, progName + "Deadlock"u8, goTestFinalizerDeadlockˢ4);
+                @string wantΔ3 = want + "+"u8;
+                if (!strings.Contains(output, wantΔ3)) {
+                    tΔ5.Errorf("output does not contain %q:\n%s"u8, wantΔ3, output);
+                }
+            });
+
+            // The runtime.runFinalizers/runtime.runCleanups frame should appear in goroutine
+            // profiles (debug=2).
+            tΔ1.Run(pprofDebug2ˢ, (ж<testing.T> tΔ6) => {
+                tΔ6.Parallel();
+                @string output = runTestProg(tΔ6, testprogˢ, progName + "Deadlock"u8, goTestFinalizerDeadlockˢ5);
+                @string wantΔ4 = want + "()"u8;
+                if (!strings.Contains(output, wantΔ4)) {
+                    tΔ6.Errorf("output does not contain %q:\n%s"u8, wantΔ4, output);
+                }
+            });
+        });
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string fatalErrorSemaphoreWakeˢ = "fatal error: semaphore wake of synctest goroutine from outside bubble"u8;
+
+public static void TestSynctestCondSignalFromNoBubble(ж<testing.T> Ꮡt) {
+    foreach (var (_, test) in new @string[]{
+        "SynctestCond/signal/no_bubble"u8,
+        "SynctestCond/broadcast/no_bubble"u8,
+        "SynctestCond/signal/other_bubble"u8,
+        "SynctestCond/broadcast/other_bubble"u8
+    }.slice()) {
+        Ꮡt.Run(test, (ж<testing.T> tΔ1) => {
+            @string output = runTestProg(tΔ1, testprogˢ, test);
+            @string want = fatalErrorSemaphoreWakeˢ;
+            if (!strings.Contains(output, want)) {
+                tΔ1.Fatalf("output:\n%s\n\nwant output containing: %s"u8, output, want);
+            }
+        });
     }
 }
 

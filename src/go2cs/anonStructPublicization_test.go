@@ -94,6 +94,7 @@ var unexported = struct{ Elem hiddenLocalOnly }{}
 // ARM 1, THE SUBJECT. The walk must reach through the slice, into the anonymous struct, and through
 // the field's signature to the unexported interface.
 func TestAnAnonymousStructUnderAnExportedVarPublicizesItsFieldTypes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := collectFixturePublicized(t, anonPublicizationFixture)
 
 	if !publicized["testingT"] {
@@ -113,6 +114,7 @@ func TestAnAnonymousStructUnderAnExportedVarPublicizesItsFieldTypes(t *testing.T
 // internal type legally; an unexported var exposes nothing. Both must stay unpublicized, or the new
 // case is a blanket rather than a rule.
 func TestTheAnonymousStructWalkStaysBoundedByExportedness(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	publicized := collectFixturePublicized(t, anonPublicizationFixture)
 
 	if publicized["hiddenUnexportedField"] {

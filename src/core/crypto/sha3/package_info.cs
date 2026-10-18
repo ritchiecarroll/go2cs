@@ -39,6 +39,7 @@ using static go.crypto.sha3_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<SHA3, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<SHA3, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
@@ -53,7 +54,7 @@ using static go.crypto.sha3_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha3/sha3.go", "sha3.cs", "ABAggoKCgqiSgoKCgqiSgoKCgqiSgoKCgqiSgoKCgqq0gqaCgpSUgoKCqrSCpoKClJSCgoIABxKSqJKokqiSqJKokqiSqJKokqiSqJKokqiSAAcSkqiSAAIQ0gACENKssqyyqJKokqiSqJKokg==", "17-17:1;18-18:2;19-19:3;20-20:4")]
+[assembly: go.GoPositionMap("crypto/sha3/sha3.go", "sha3.cs", "ABAggoKCgqiSgoKCgqiSgoKCgqiSgoKCgqiSgoKCgqq0gqaCgpSUgoKCqrSCpoKClJSCgoIACBSSqJKokqiSqJKmgoK6soKokoKokoKokoKokoKokoKokoKokoKokpIACBKCgrqSqJIAAhDSAAIQ0qzSgqzSgqiygqiSgqiSgqiSgqiSgg==", "17-17:1;18-18:2;19-19:3;20-20:4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

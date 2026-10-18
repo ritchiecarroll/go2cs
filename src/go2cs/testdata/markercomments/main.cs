@@ -56,7 +56,7 @@ partial struct tagged {
     public nint Bare;   /* `json:"bare"`*/
     public nint Quote;   /* "json:\"q\""*/
     public nint Empty;
-    public partial ref Inner Inner { get; } /*`json:"inner"`*/
+    /*embed*/ public Inner Inner; /*`json:"inner"`*/
     /*embed*/ public fmt_package.Stringer Stringer; /*`json:"str"`*/
 }
 

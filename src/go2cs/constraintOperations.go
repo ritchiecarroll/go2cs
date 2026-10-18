@@ -92,10 +92,12 @@ const (
 	Array
 	Channel
 	Struct
-	// Map, Slice, Function, etc., types are not comparable, thus do not
-	// have common operator sets in a generic type constaint context.
-	// Technically, interfaces are comparable, but they represent the
-	// type constraint, so also will not have a common operator set.
+	// Slice is a member that supports NO operator: Go compares a slice only against nil, and it has no +
+	// or <. It must still be a member, because a type set gets an operator only when EVERY member supports
+	// it, and a member that contributed nothing let its partners decide alone: `net.IP | string` lifted
+	// string's +, == and < onto a slice (H7 class D, crypto/x509's nameConstraintsSet, CS0315). Map,
+	// Function and interface terms take Invalid for the same reason; it sits in no operator set either.
+	Slice
 )
 
 // OperatorSet represents the set of operators that can be applied to
@@ -491,22 +493,19 @@ func (v *Visitor) getConstraintTypeSetFromExpr(expr ast.Expr) hashset.HashSet[Co
 				typ := typeName.Type()
 				underlying := typ.Underlying()
 
-				// Check for composite types directly
-				switch underlying.(type) {
-				case *types.Pointer, *types.Array, *types.Chan, *types.Struct:
-					// These are valid constraint types, add them directly
-					results = append(results, typ)
-					return
-				case *types.Basic:
-					// It's a basic type, add it directly
-					results = append(results, typ)
+				if iface, isIface := underlying.(*types.Interface); isIface {
+					if !iface.Empty() {
+						// It's an interface type set, so recursively extract its embedded constraints
+						results = append(results, v.getConstraintsFromType(typ)...)
+					}
+
 					return
 				}
 
-				if iface, isIface := underlying.(*types.Interface); isIface && !iface.Empty() {
-					// It's an interface type set, so recursively extract its embedded constraints
-					results = append(results, v.getConstraintsFromType(typ)...)
-				}
+				// Every other named term is a MEMBER of the type set and is added as itself, whatever its
+				// underlying kind: getConstraintTypeSet classifies it by that kind. A named slice (an `IP`
+				// declared beside the interface) was skipped here, so it never reached the set at all.
+				results = append(results, typ)
 			}
 
 		case *ast.SelectorExpr:
@@ -671,17 +670,17 @@ func getConstraintTypeSet(constraintTypes []types.Type) hashset.HashSet[Constrai
 			// Arrays are comparable in Go when their element type is comparable.
 			constraintTypeSet.Add(Array)
 		case *types.Slice:
-			// Slices are not comparable in Go (only against nil), so they
-			// contribute no operator-bearing constraint type.
+			// Slices are not comparable in Go (only against nil): a member in no operator set.
+			constraintTypeSet.Add(Slice)
 		case *types.Chan:
 			constraintTypeSet.Add(Channel)
 		case *types.Struct:
 			constraintTypeSet.Add(Struct)
 		case *types.Named:
-			// For named types, check it they are structs
-			if _, ok := t.Underlying().(*types.Struct); ok {
-				constraintTypeSet.Add(Struct)
-			}
+			// A named member supports exactly the operators of its underlying type, as Go types it: a named
+			// struct is a Struct, a named int an Int, a named slice (net.IP) a Slice. Only the struct case
+			// was classified, so every other named member contributed nothing to the set.
+			constraintTypeSet.UnionWithSet(getConstraintTypeSet([]types.Type{t.Underlying()}))
 		default:
 			constraintTypeSet.Add(Invalid)
 		}
@@ -1046,6 +1045,14 @@ func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList
 
 			names = append(names, v.getCSharpTypeName(typeArg))
 		}
+
+		// THE ARRAY-DIMS COMPANION'S SUPPLY: one argument per carrying type parameter, after the
+		// descriptor companions, in declared order (arrayDimsCompanion.go).
+		for _, index := range v.arrayDimsCompanionParams(funcObj) {
+			if index < typeArgs.Len() {
+				names = append(names, v.arrayDimsCompanionArg(typeArgs.At(index)))
+			}
+		}
 	}
 
 	return names
@@ -1061,10 +1068,17 @@ func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList
 //
 // Returns nil — leaving the written list to render verbatim, byte for byte as before — whenever
 // the instantiation is COMPLETE (the overwhelmingly common case), the base is not a generic
-// function, or nothing was recorded. writtenCount is the count AFTER erasure filtering
+// function, or nothing was recorded. written is the list AFTER erasure filtering
 // (explicitTypeArgsAfterErasure), and the rendered list is filtered the same way, so an erased
 // pointer-core position cannot make a complete instantiation look partial.
-func (v *Visitor) completedInstantiationTypeArgs(x ast.Expr, writtenCount int) []string {
+//
+// The completed list renders every position from its go/types TYPE, the written ones included. A
+// written ANONYMOUS type (`TypeAssert[interface{ A() }]`, reflect's all_test.go) has no C# name until
+// a lift declares it, and only visiting its type expression lifts it. A complete list visits it on
+// the way to rendering it. This path never did, so the type rendered as raw Go text,
+// `interface{A()}`, an unresolved dynamic type that ends the conversion. The written arguments are
+// therefore visited first (liftWrittenTypeArgs), and the type rendering resolves to that lift.
+func (v *Visitor) completedInstantiationTypeArgs(x ast.Expr, written []ast.Expr) []string {
 	var funIdent *ast.Ident
 
 	switch e := x.(type) {
@@ -1088,13 +1102,39 @@ func (v *Visitor) completedInstantiationTypeArgs(x ast.Expr, writtenCount int) [
 		return nil
 	}
 
+	if inst.TypeArgs.Len() > len(written) {
+		v.liftWrittenTypeArgs(written)
+	}
+
 	rendered := v.renderedTypeArgs(funIdent, inst.TypeArgs)
 
-	if len(rendered) <= writtenCount {
+	if len(rendered) <= len(written) {
 		return nil
 	}
 
 	return rendered
+}
+
+// liftWrittenTypeArgs visits each written type argument that spells an anonymous interface or struct
+// type, for the lift that declares its C# name; the rendering itself is discarded. A named type has
+// nothing to lift and is not visited.
+func (v *Visitor) liftWrittenTypeArgs(written []ast.Expr) {
+	for _, arg := range written {
+		anonymous := false
+
+		ast.Inspect(arg, func(n ast.Node) bool {
+			switch n.(type) {
+			case *ast.InterfaceType, *ast.StructType:
+				anonymous = true
+			}
+
+			return !anonymous
+		})
+
+		if anonymous {
+			_ = v.convExpr(arg, nil)
+		}
+	}
 }
 
 func (v *Visitor) getConstraintType(typeConstraint *types.TypeParam) types.Type {
@@ -1398,6 +1438,24 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 						// has nothing left to enforce. `new()` is kept (unlike that arm) because a
 						// composite type set admits no pointer type argument — every term is a
 						// value type — and the generic tail would have appended it anyway.
+						//
+						// A NAMED constraint over such a union (internal/trace's `EventDetails`, nine struct
+						// types) carries its union in the breadcrumb beside its name, `/* EventDetails =
+						// Metric | Label | … */`. The bare name hid the one fact that makes `new()` the honest
+						// answer here, that the type set is a union of value types with no method to elide,
+						// and the elided-constraint ratchet (repoguard, RED 8 (d)), which reads the comment
+						// and cannot resolve a name, gated `/* EventDetails */ new()` as a lost constraint.
+						// An INLINE union is spelled the same way, terms by package NAME: Go's own spelling,
+						// and the ratchet's term grammar, which go/types' import-path form (`crypto/x509.
+						// parsedURI`, crypto/x509's checkConstraints) fails, gating a legitimate union.
+						if union, ok := constraintUnionText(constraint, v.pkg); ok {
+							if _, isNamed := types.Unalias(constraint).(*types.Named); isNamed {
+								originalConstraint = fmt.Sprintf("/* %s = %s */", constraintName, union)
+							} else {
+								originalConstraint = fmt.Sprintf("/* %s */", union)
+							}
+						}
+
 						constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s new()", v.newline, v.indent(v.indentLevel), typeParamNames[i], originalConstraint))
 						continue
 					}
@@ -1449,6 +1507,15 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					// An embedded `comparable` is discounted for exactly the reason the bare-constraint
 					// arm above emits nothing for it: it is not expressible in C#, so it cannot be what
 					// makes an otherwise-method-set interface generic (see isMethodSetBeyondComparable).
+					//
+					// A FUNCTION's own type parameter keeps the clause only where its body uses the
+					// parameter as the interface (methodSetConstraintNeeded): a pointer type argument is
+					// golib's box, which cannot implement it, so an unneeded clause only refuses Go 1.26's
+					// errors.AsType[*DNSError] (CS0311).
+					if fn := v.currentGenericFunc(signature); fn != nil && !v.methodSetConstraintNeeded(fn, i) {
+						continue
+					}
+
 					constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s", v.newline, v.indent(v.indentLevel), typeParamNames[i], convertToCSTypeName(constraintName)))
 					continue
 				} else {
@@ -1502,6 +1569,22 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		}
 	}
 
+	// ARRAY-DIMS COMPANIONS ride after the descriptor companions, in declared order, each bound to
+	// golib's IGoArrayDims (arrayDimsCompanion.go). Keyed by this declaration's own type parameters,
+	// so a generic named type's list finds nothing.
+	if len(v.currentFuncArrayDimsNames) > 0 {
+		for i := range typeParams.Len() {
+			if erasedParams[i] {
+				continue
+			}
+
+			if companion, hasCompanion := v.currentFuncArrayDimsNames[typeParams.At(i)]; hasCompanion {
+				emittedNames = append(emittedNames, companion)
+				constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : IGoArrayDims", v.newline, v.indent(v.indentLevel), companion))
+			}
+		}
+	}
+
 	if len(emittedNames) == 0 {
 		return "", strings.Join(constraintNames, "")
 	}
@@ -1516,8 +1599,9 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 // converted an argument to the type parameter (convertToInterfaceType). A generic TYPE instantiated
 // at a value type with no such call — `pair[tagged]{…}` — was CS0315, named or inline alike. Every
 // instantiation form reaches this hook (constraintProxyFor), so the record is minted here; it is a
-// set, so a pair a call already recorded is unchanged. A constraint naming a type parameter must be
-// closed over the instantiation first, and is not handled here.
+// set, so a pair a call already recorded is unchanged. An instantiated GENERIC constraint
+// (`Adder[A]`, `Adder[int]`) is recordClosedConstraintImplementation's, which closes it over the
+// argument; a lifted inline constraint naming a type parameter (`Min_T<T>`) is not closed by either.
 func (v *Visitor) recordValueConstraintImplementation(typeParam *types.TypeParam, typeArg types.Type) {
 	named, ok := types.Unalias(typeArg).(*types.Named)
 
@@ -1530,6 +1614,11 @@ func (v *Visitor) recordValueConstraintImplementation(typeParam *types.TypeParam
 	}
 
 	constraint := types.Unalias(typeParam.Constraint())
+
+	if generic, ok := constraint.(*types.Named); ok && generic.TypeArgs().Len() > 0 {
+		return
+	}
+
 	iface, ok := constraint.Underlying().(*types.Interface)
 
 	if !ok || iface.NumMethods() == 0 || !iface.IsMethodSet() || typeContainsTypeParams(constraint) {
@@ -1602,6 +1691,55 @@ func (v *Visitor) liftedConstraintName(iface *types.Interface, typeParams *types
 	}
 
 	return name + liftedTypeParamList(args)
+}
+
+// constraintUnionText renders a constraint's type set when it is exactly one union of type terms, NAMED
+// (`type EventDetails interface { Metric | Label | … }`) or inline (`[P string | net.IP | parsedURI]`), each
+// term spelled as Go writes it: with its package NAME (never its import path), bare in the package that
+// declares the constraint (`local` for an inline one), and a `~` kept. Anything else (a method, an embedded
+// interface beside the union, more than one embedded element) answers false, and the breadcrumb keeps the
+// text it had.
+func constraintUnionText(constraint types.Type, local *types.Package) (string, bool) {
+	var iface *types.Interface
+
+	switch c := types.Unalias(constraint).(type) {
+	case *types.Named:
+		iface, _ = c.Underlying().(*types.Interface)
+		local = c.Obj().Pkg()
+	case *types.Interface:
+		iface = c
+	}
+
+	if iface == nil || iface.NumMethods() != 0 || iface.NumEmbeddeds() != 1 {
+		return "", false
+	}
+
+	union, ok := iface.EmbeddedType(0).(*types.Union)
+
+	if !ok || union.Len() < 2 {
+		return "", false
+	}
+
+	qualifier := func(pkg *types.Package) string {
+		if pkg == local {
+			return ""
+		}
+
+		return pkg.Name()
+	}
+
+	terms := make([]string, union.Len())
+
+	for i := range union.Len() {
+		term := union.Term(i)
+		terms[i] = types.TypeString(term.Type(), qualifier)
+
+		if term.Tilde() {
+			terms[i] = "~" + terms[i]
+		}
+	}
+
+	return strings.Join(terms, " | "), true
 }
 
 // constraintProxyArg reports the C# constraint-proxy type name to render for type argument i of an
@@ -1693,6 +1831,73 @@ func (v *Visitor) recordNominalProductionConstraint(typeParam *types.TypeParam, 
 	packageLock.Unlock()
 }
 
+// recordClosedConstraintImplementation records the nominal implementation a VALUE type argument needs
+// to satisfy a GENERIC method-set constraint — `Sum[A Adder[A]]` at `vec` emits `where A : Adder<A>`,
+// which C# checks as `vec : Adder<vec>`, and only a GoImplement record makes go2cs-gen declare that
+// base. A non-generic constraint gets its record where the argument converts to the type parameter
+// (convertToInterfaceType), but that site sees the constraint over the callee's OWN type parameter,
+// `Adder[A]`, which no concrete type implements, so the generic form went unrecorded and every such
+// instantiation was CS0315. It is the shape Go 1.26's self-referential constraints are written in
+// (`type Adder[A Adder[A]] interface`), and it predates them: `Adder[A any]` failed identically.
+//
+// The constraint is closed over the argument where it names this type parameter. A constraint naming
+// any OTHER type parameter (`Linker[T, N]` at N) is left alone, since only the instantiation knows
+// what that one is.
+func (v *Visitor) recordClosedConstraintImplementation(typeParam *types.TypeParam, typeArg types.Type) {
+	if _, ok := types.Unalias(typeArg).(*types.Named); !ok || typeContainsTypeParams(typeArg) {
+		return
+	}
+
+	constraintNamed, ok := types.Unalias(typeParam.Constraint()).(*types.Named)
+
+	if !ok || constraintNamed.TypeArgs().Len() == 0 {
+		return
+	}
+
+	if iface, ok := constraintNamed.Underlying().(*types.Interface); !ok || iface.NumMethods() == 0 || !iface.IsMethodSet() {
+		return
+	}
+
+	closedArgs := make([]types.Type, constraintNamed.TypeArgs().Len())
+
+	for i := range closedArgs {
+		arg := constraintNamed.TypeArgs().At(i)
+
+		if tp, ok := arg.(*types.TypeParam); ok && tp == typeParam {
+			closedArgs[i] = typeArg
+		} else if typeContainsTypeParams(arg) {
+			return
+		} else {
+			closedArgs[i] = arg
+		}
+	}
+
+	closed, err := types.Instantiate(nil, constraintNamed.Origin(), closedArgs, true)
+
+	if err != nil {
+		return
+	}
+
+	if iface, ok := closed.Underlying().(*types.Interface); !ok || !types.Implements(typeArg, iface) {
+		return
+	}
+
+	// Once per pair, and marked BEFORE recording: rendering a self-referential constraint's closed
+	// form (`Adder[vec]`) instantiates Adder's own `A` at `vec` and reaches this pair again.
+	key := typeArg.String() + "|" + closed.String()
+
+	if v.closedConstraintsRecorded[key] {
+		return
+	}
+
+	if v.closedConstraintsRecorded == nil {
+		v.closedConstraintsRecorded = make(map[string]bool)
+	}
+
+	v.closedConstraintsRecorded[key] = true
+	v.convertToInterfaceType(closed, typeArg, "")
+}
+
 // constraintProxyFor is the (type parameter, type argument) core shared by every instantiation
 // form. A generic NAMED TYPE reaches it through constraintProxyArg; a generic FUNCTION reaches it
 // through constraintProxySigArg — Go's `benchmarkScalarMult[P nistPoint[P]]` called with
@@ -1716,6 +1921,7 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 
 	if !ok {
 		v.recordValueConstraintImplementation(typeParam, typeArg)
+		v.recordClosedConstraintImplementation(typeParam, typeArg)
 		return "", false
 	}
 
@@ -1834,11 +2040,36 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 		interfaceFullName = interfaceFullName[:idx]
 	}
 
+	// The record's interface argument is a placeholder, and the element serves — unless the interface
+	// constrains its OWN type parameter by itself (Go 1.26, `type GraphNode[N GraphNode[N]] interface`).
+	// Its C# declaration then carries `where N : GraphNode<N>`, which C# enforces on the attribute's
+	// type arguments too, and the element (a struct the proxy wraps) satisfies nothing: CS0315 on the
+	// record. The proxy implements the interface over itself, so it satisfies that bound by
+	// construction; the generator reads only the interface's open definition, so either serves it.
+	placeholder := elementFullName
+
+	if interfaceConstrainsItself(interfaceOrigin) {
+		placeholder = proxyName
+	}
+
 	packageLock.Lock()
-	constraintProxies[elementFullName+"|"+interfaceFullName] = [2]string{elementFullName, interfaceFullName}
+	constraintProxies[elementFullName+"|"+interfaceFullName] = [3]string{elementFullName, interfaceFullName, placeholder}
 	packageLock.Unlock()
 
 	return proxyName, true
+}
+
+// interfaceConstrainsItself reports whether a generic interface constrains one of its own type
+// parameters by an instantiation of ITSELF — `type Adder[A Adder[A]] interface`, legal from Go 1.26
+// (before it, "invalid recursive type").
+func interfaceConstrainsItself(origin *types.Named) bool {
+	for i := range origin.TypeParams().Len() {
+		if constraint, ok := types.Unalias(origin.TypeParams().At(i).Constraint()).(*types.Named); ok && constraint.Origin() == origin {
+			return true
+		}
+	}
+
+	return false
 }
 
 // namedHasConstraintProxy reports whether any type argument of the instantiated generic `named`

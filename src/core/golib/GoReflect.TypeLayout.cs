@@ -138,6 +138,8 @@ public static partial class GoReflect
             case Pointer or UnsafePointer or Map or Chan or Func: size = 8; return true;
             case Array:
             {
+                arrayDims ??= DeclaredArrayDims(t);
+
                 if (arrayDims is not { Length: > 0 } || arrayDims[0] < 0)
                     return false;
 
@@ -219,12 +221,14 @@ public static partial class GoReflect
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Go's rule is mechanical: a pointer, chan, map, func or unsafe.Pointer is pointer-shaped; an
-    /// array is pointer-shaped only when it has EXACTLY one element and that element is itself
-    /// pointer-shaped; a struct only when it has EXACTLY one field, likewise. Everything else is not.
-    /// The one-element condition is the whole distinction reflect's own TestArrayOfDirectIface and
-    /// TestStructOfDirectIface turn on: <c>[1]*byte</c> is pointer-shaped and <c>[0]*byte</c> is not,
-    /// however pointer-shaped the element type is.
+    /// Go 1.26's rule is a size test: a type is pointer-shaped when its size is one pointer word and
+    /// that word holds a pointer, <c>Size_ == PtrBytes == PtrSize</c> (cmd/compile types.IsDirectIface;
+    /// reflect's StructOf and ArrayOf stamp <c>TFlagDirectIface</c> by the same test). Through Go 1.25 the
+    /// rule was structural: a struct needed EXACTLY one field and an array EXACTLY one element. The two
+    /// agree except on a struct whose other fields are all zero-size, such as sync/atomic's
+    /// <c>Pointer[T]</c> (<c>_ [0]*T; _ noCopy; v unsafe.Pointer</c>), which 1.26 calls pointer-shaped.
+    /// <c>[1]*byte</c> is pointer-shaped and <c>[0]*byte</c> is not under both, which is the distinction
+    /// reflect's own TestArrayOfDirectIface and TestStructOfDirectIface turn on.
     /// </para>
     /// <para>
     /// This is a CLASSIFICATION, not a memory-layout claim. It answers what SHAPE a Go type has; it
@@ -257,36 +261,10 @@ public static partial class GoReflect
         if (depth > MaxLayoutDepth)
             return false;
 
-        switch (KindOf(t))
-        {
-            case Pointer or UnsafePointer or Map or Chan or Func:
-                return true;
-
-            case Array:
-            {
-                // Exactly one element, and that element pointer-shaped in turn. Unknown dims
-                // answer false — see the remarks: the conservative direction.
-                if (arrayDims is not { Length: > 0 } || arrayDims[0] != 1)
-                    return false;
-
-                Type? elem = ElementType(t);
-
-                if (elem is null)
-                    return false;
-
-                return goIsDirectIface(elem, arrayDims.Length > 1 ? arrayDims[1..] : null, depth + 1);
-            }
-
-            case Struct:
-            {
-                GoFieldInfo[] fields = GoFields(t);
-
-                return fields.Length == 1 && goIsDirectIface(fields[0].Type, fields[0].ArrayDims, depth + 1);
-            }
-
-            default:
-                return false;
-        }
+        // Size_ == PtrBytes == PtrSize. An underivable size or pointer prefix (unknown array dims)
+        // answers false — see the remarks: the conservative direction.
+        return tryGoSizeOf(t, arrayDims, depth, out nuint size) && size == (nuint)GoWordSize &&
+               goPtrBytesOf(t, arrayDims, depth) == GoWordSize;
     }
 
     /// <summary>
@@ -294,9 +272,9 @@ public static partial class GoReflect
     /// whether the single pointer the value reduces to is nil.
     /// </summary>
     /// <remarks>
-    /// A pointer-shaped type reduces, by the same one-element array / one-field struct rule
-    /// <see cref="GoIsDirectIface"/> walks, to exactly ONE pointer — which is why an interface can
-    /// hold it in the data word at all. This answers that pointer's nilness, so a caller
+    /// A pointer-shaped type reduces to exactly ONE pointer — which is why an interface can hold it in
+    /// the data word at all: an array of it has one element, and a struct has one field of nonzero size,
+    /// every other field being zero-size (the Go 1.26 rule <see cref="GoIsDirectIface"/> states). This answers that pointer's nilness, so a caller
     /// reconstructing an interface data word can distinguish the zero value (a nil pointer, word 0)
     /// from a live one. It lives beside the predicate because the two share the reduction; it
     /// answers a VALUE question where the predicate answers a TYPE one.
@@ -347,10 +325,22 @@ public static partial class GoReflect
 
             case Struct:
             {
-                GoFieldInfo[] fields = GoFields(t);
+                // The one field of nonzero size carries the word; zero-size fields beside it hold nothing.
+                GoFieldInfo? word = null;
 
-                return fields.Length != 1 ||
-                       goDirectIfaceWordIsNil(fields[0].Read(value), fields[0].Type, fields[0].ArrayDims, depth + 1);
+                foreach (GoFieldInfo field in GoFields(t))
+                {
+                    if (tryGoSizeOf(field.Type, field.ArrayDims, depth + 1, out nuint fieldSize) && fieldSize == 0)
+                        continue;
+
+                    if (word is not null)
+                        return true;
+
+                    word = field;
+                }
+
+                return word is not { } carrier ||
+                       goDirectIfaceWordIsNil(carrier.Read(value), carrier.Type, carrier.ArrayDims, depth + 1);
             }
 
             default:
@@ -384,6 +374,8 @@ public static partial class GoReflect
 
             case Array:
             {
+                arrayDims ??= DeclaredArrayDims(t);
+
                 if (arrayDims is not { Length: > 0 })
                     return -1;
 
@@ -466,6 +458,133 @@ public static partial class GoReflect
     {
         return KindOf(t) == Struct && structLayoutOf(t, 0) is { Known: true } layout ? layout.Offsets : null;
     }
+
+    private static readonly ConcurrentDictionary<Type, string> s_clrLayoutMismatch = new();
+
+    /// <summary>
+    /// Why the CLR layout of the Go struct type <paramref name="t"/> is provably NOT its Go layout, naming the
+    /// first field that differs, or <c>null</c> when it matches or cannot be proven either way.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A NativeBox reads and writes its struct at CLR offsets, so native memory is the Go value only when the two
+    /// layouts agree. Two roots make them disagree:
+    /// </para>
+    /// <list type="bullet">
+    ///   <item><description>a field the CLR holds as a managed REFERENCE where Go has inline bytes: an array, a
+    ///   pointer, a string, a slice, an interface, an unsafe.Pointer (its retained box). Read out of native memory
+    ///   it is a garbage reference.</description></item>
+    ///   <item><description>a field at a different CLR offset. go2cs-gen declares a value embed's storage in the
+    ///   generated partial, after every converter-declared field, so `struct{ LFNode; data int }` lays out
+    ///   `data` first (runtime's lfstack nodes).</description></item>
+    /// </list>
+    /// <para>
+    /// The check recurses into struct fields. A layout it cannot prove (no Go layout, or a CLR offset the runtime
+    /// will not report) answers <c>null</c>, so an unproven struct keeps today's behavior.
+    /// </para>
+    /// </remarks>
+    public static string? ClrLayoutMismatch(Type t)
+    {
+        string reason = s_clrLayoutMismatch.GetOrAdd(t, static type => clrLayoutMismatch(type, 0) ?? "");
+
+        return reason.Length == 0 ? null : reason;
+    }
+
+    private static string? clrLayoutMismatch(Type t, int depth)
+    {
+        if (depth > MaxLayoutDepth || KindOf(t) != Struct || !t.IsValueType || GoFieldOffsets(t) is not { } goOffsets)
+            return null;
+
+        GoFieldInfo[] fields = GoFields(t);
+
+        // Marshal.OffsetOf answers the MARSHALED layout, which is the managed one only when no field at any depth is a
+        // bool or a char (marshaled as a 4-byte BOOL and a 1-byte char). Otherwise this struct's offsets are unproven,
+        // never refused; its reference fields and its fields' own layouts are still checked.
+        bool offsetsReadable = marshalLayoutIsManaged(t);
+
+        for (int i = 0; i < fields.Length && i < goOffsets.Length; i++)
+        {
+            GoFieldInfo field = fields[i];
+
+            if (field.Path is not [var member])
+                continue;
+
+            // A zero-size field (an empty struct, `lockRankStruct` with ranking off) holds no bytes, so where the
+            // CLR puts it reads nothing.
+            if (TryGoSizeOf(field.Type, field.ArrayDims, out nuint size) && size == 0)
+                continue;
+
+            Type fieldType = member.FieldType;
+
+            if (!fieldType.IsValueType || containsReferences(fieldType))
+                return $"field {field.Name} is a managed reference where Go stores the value inline";
+
+            if (offsetsReadable)
+            {
+                nint clrOffset;
+
+                try
+                {
+                    clrOffset = System.Runtime.InteropServices.Marshal.OffsetOf(t, member.Name);
+                }
+                catch (Exception ex) when (ex is ArgumentException or NotSupportedException)
+                {
+                    // No CLR offset the runtime will report (a generic or non-blittable layout): unproven, not refused.
+                    continue;
+                }
+
+                if (clrOffset != goOffsets[i])
+                    return $"field {field.Name} is at CLR offset {clrOffset} where Go lays it at {goOffsets[i]}";
+            }
+
+            if (clrLayoutMismatch(fieldType, depth + 1) is { } inner)
+                return $"field {field.Name}: {inner}";
+        }
+
+        return null;
+    }
+
+    private static readonly ConcurrentDictionary<Type, bool> s_marshalLayoutIsManaged = new();
+
+    // Whether a value type's marshaled layout is its managed layout: no bool or char in its instance fields, at any
+    // depth. A reference field never reaches the offset read (it is refused first), so only value fields are walked.
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    private static bool marshalLayoutIsManaged(Type valueType) =>
+        s_marshalLayoutIsManaged.GetOrAdd(valueType, static type =>
+        {
+            foreach (FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                Type fieldType = field.FieldType;
+
+                if (fieldType == typeof(bool) || fieldType == typeof(char))
+                    return false;
+
+                if (fieldType.IsValueType && !fieldType.IsPrimitive && !fieldType.IsEnum && fieldType != type && !marshalLayoutIsManaged(fieldType))
+                    return false;
+            }
+
+            return true;
+        });
+
+    private static readonly ConcurrentDictionary<Type, bool> s_containsReferences = new();
+
+    // Whether a value type holds a managed reference anywhere in its instance fields, walked by reflection rather
+    // than through RuntimeHelpers.IsReferenceOrContainsReferences<T>, which a Type in hand could reach only by
+    // MakeGenericMethod (not Native AOT safe for a value-type argument).
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    private static bool containsReferences(Type valueType) =>
+        s_containsReferences.GetOrAdd(valueType, static type =>
+        {
+            foreach (FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                Type fieldType = field.FieldType;
+
+                if (!fieldType.IsValueType || !fieldType.IsPrimitive && !fieldType.IsEnum && fieldType != type && containsReferences(fieldType))
+                    return true;
+            }
+
+            return false;
+        });
 
     /// <summary>The Go (amd64) alignment of a type (struct = max field alignment; array = element alignment).</summary>
     public static nint GoAlignOf(Type t)
@@ -982,6 +1101,8 @@ public static partial class GoReflect
 
             case Array:
             {
+                arrayDims ??= DeclaredArrayDims(t);
+
                 if (arrayDims is not { Length: > 0 })
                     return false;
 
@@ -1085,6 +1206,61 @@ public static partial class GoReflect
             type.GetCustomAttributes(typeof(GoArrayDimsAttribute), false) is [GoArrayDimsAttribute { Dims.Length: > 0 } stamped]
                 ? toNintDims(stamped.Dims)
                 : null);
+    }
+
+    private static readonly ConcurrentDictionary<Type, nint[]?> s_definedArrayDims = new();
+
+    /// <summary>
+    /// The dims a DEFINED array type declares -- the whole leading <c>[N][M]...</c> chain of its
+    /// <c>[GoType("[N]E")]</c> marker, outermost first -- or null for every other type.
+    /// </summary>
+    /// <remarks>
+    /// <c>type A [4]int</c> emits as a go2cs-gen wrapper struct over an <c>array&lt;nint&gt;</c>, which
+    /// carries its length in the INSTANCE, so the marker is the one place the TYPE spells it. A descriptor
+    /// built from the type alone (<c>abi.TypeFor[A]()</c>, a pointer's <c>Elem()</c>) read no dims without
+    /// it: <c>Size_</c> 0 and a nil <c>ArrayType()</c>, which sent unique.Make down its zero-size arm and
+    /// makeCloneSeq into a nil dereference. The chain stops at the first segment that is not a constant
+    /// length, so <c>[2]E</c> declares [2] and leaves a NAMED element E to answer its own length from its
+    /// own marker when its descriptor is built, as Go's element type carries its own; <c>[2][3]nint</c>
+    /// declares [2,3], since an UNNAMED inner array has no type of its own to answer from. (The converter
+    /// spells that shape today as a <c>[GoArrayDims]</c> stamp, which <see cref="TypeStampedDims"/>
+    /// answers first; this reads the marker's chain whole so the two spellings agree.)
+    /// </remarks>
+    public static nint[]? DefinedArrayDims(Type t)
+    {
+        return s_definedArrayDims.GetOrAdd(t, static type =>
+            goTypeMarkerOf(type) is { Definition: ['[', _, ..] definition } ? parseLeadingDims(definition) : null);
+    }
+
+    // The leading constant-length [N][M]... segments of a Go type spelling, or null when the first is not one.
+    private static nint[]? parseLeadingDims(string definition)
+    {
+        System.Collections.Generic.List<nint> dims = [];
+        ReadOnlySpan<char> rest = definition;
+
+        while (rest is ['[', _, ..] && rest.IndexOf(']') is var close and > 1 &&
+               long.TryParse(rest[1..close], System.Globalization.NumberStyles.None,
+                   System.Globalization.CultureInfo.InvariantCulture, out long declared))
+        {
+            dims.Add((nint)declared);
+            rest = rest[(close + 1)..];
+        }
+
+        return dims.Count == 0 ? null : dims.ToArray();
+    }
+
+    private static readonly ConcurrentDictionary<Type, nint[]?> s_declaredArrayDims = new();
+
+    /// <summary>
+    /// The dims an array TYPE declares on itself -- its <c>[GoArrayDims]</c> stamp, else a defined array's
+    /// declared chain (<see cref="DefinedArrayDims"/>) -- or null. A layout walk that reaches an array with
+    /// no dims carried down to it reads these: that is a NAMED array element (<c>type N [2]E</c> over
+    /// <c>type E [3]int</c>), whose length lives on its own type, as Go's element type carries its own.
+    /// </summary>
+    internal static nint[]? DeclaredArrayDims(Type t)
+    {
+        return s_declaredArrayDims.GetOrAdd(t, static type =>
+            TypeStampedDims(type) ?? DefinedArrayDims(type));
     }
 
     private static readonly ConcurrentDictionary<Type, GoChanDir[]?> s_typeStampedChanDirChains = new();

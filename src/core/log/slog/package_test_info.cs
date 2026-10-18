@@ -8,6 +8,7 @@ global using static global::go.log.slog_package;
 global using static global::go.log.slog_internal_test_package;
 
 // <ImportedTypeAliases>
+global using execꓸError = go.os.exec_package.ΔError;
 global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
 global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
@@ -29,6 +30,7 @@ global using slogꓸHandler = go.log.slog_package.ΔHandler;
 global using slogꓸKind = go.log.slog_package.ΔKind;
 global using slogꓸLevel = go.log.slog_package.ΔLevel;
 global using slogꓸLogValuer = go.log.slog_package.ΔLogValuer;
+global using slogꓸSource = go.log.slog_package.ΔSource;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
@@ -42,6 +44,7 @@ using static global::go.log.slog_test_package;
 [assembly: GoTypeAlias("Kind", "ΔKind")]
 [assembly: GoTypeAlias("Level", "ΔLevel")]
 [assembly: GoTypeAlias("LogValuer", "ΔLogValuer")]
+[assembly: GoTypeAlias("Source", "ΔSource")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -67,9 +70,9 @@ using static global::go.log.slog_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/example_level_handler_test.go", "example_level_handler_test.cs", "ABcutICCpKqiqLKokqiSqJIABhYACAKCgoI=")]
+[assembly: go.GoPositionMap("log/slog/example_level_handler_test.go", "example_level_handler_test.cs", "ABUstICCpKqiqLKokqiSqJIABhYACAKCgpSUgoKC", "65-70:1")]
 [assembly: go.GoPositionMap("log/slog/example_wrap_test.go", "example_wrap_test.cs", "ABYm0oKUgoKC1oKUgqaCgpSUgg==", "30-41:1")]
-[assembly: go.GoPositionMap("log/slog/slogtest_test.go", "slogtest_test.cs", "ABokggAGEJKCgpKCgpSUgILsgoKCgpSCgpSUpoKCgIKkAAIS4oKCgoKCgpSUgoKCgoKClIKCqJSClA==", "24-24:1;25-25:2;27-40:3;30-36:3.1")]
+[assembly: go.GoPositionMap("log/slog/slogtest_test.go", "slogtest_test.cs", "ABskggAGEJKCgpKCgpSUgILsgoKCgpSCgpSUpoKCgIKkAAIS4oKCgoKCgpSUgoKCgoKClIKCqJSClA==", "24-24:1;25-25:2;27-40:3;30-36:3.1")]
 // </GoSourcePositionMaps>
 
 namespace go.log;
@@ -95,6 +98,7 @@ public static partial class slog_test_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸbufio() => builtin.initPackage(typeof(bufio_package));
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸcontext() => builtin.initPackage(typeof(context_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸjson() => builtin.initPackage(typeof(encoding.json_package));
@@ -107,9 +111,9 @@ public static partial class slog_test_package
     [GoInit] internal static void initᴛᴛimportꓸlog() => builtin.initPackage(typeof(log_package));
     [GoInit] internal static void initᴛᴛimportꓸlogꓸslog() => builtin.initPackage(typeof(go.log.slog_package));
     [GoInit] internal static void initᴛᴛimportꓸlogꓸslogꓸinternalꓸbuffer() => builtin.initPackage(typeof(go.log.slog.@internal.buffer_package));
-    [GoInit] internal static void initᴛᴛimportꓸlogꓸslogꓸinternalꓸslogtest() => builtin.initPackage(typeof(go.log.slog.@internal.slogtest_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));

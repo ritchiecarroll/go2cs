@@ -20,6 +20,8 @@ partial class ioutil_package {
 // to remove the file when no longer needed.
 //
 // Deprecated: As of Go 1.17, this function simply calls [os.CreateTemp].
+//
+//go:fix inline
 public static (ж<os.File> f, error err) TempFile(@string dir, @string pattern) {
     return os.CreateTemp(dir, pattern);
 }
@@ -35,6 +37,8 @@ public static (ж<os.File> f, error err) TempFile(@string dir, @string pattern) 
 // to remove the directory when no longer needed.
 //
 // Deprecated: As of Go 1.17, this function simply calls [os.MkdirTemp].
+//
+//go:fix inline
 public static (@string name, error err) TempDir(@string dir, @string pattern) {
     return os.MkdirTemp(dir, pattern);
 }

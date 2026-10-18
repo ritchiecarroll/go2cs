@@ -6,6 +6,7 @@ namespace go.crypto.@internal.fips140;
 // This file implements the RSASSA-PSS signature scheme and the RSAES-OAEP
 // encryption scheme according to RFC 8017, aka PKCS #1 v2.2.
 using bytes = bytes_package;
+using constanttime = go.crypto.@internal.constanttime_package;
 using fips140 = go.crypto.@internal.fips140_package;
 using drbg = go.crypto.@internal.fips140.drbg_package;
 using sha256 = go.crypto.@internal.fips140.sha256_package;
@@ -13,6 +14,7 @@ using sha3 = go.crypto.@internal.fips140.sha3_package;
 using sha512 = go.crypto.@internal.fips140.sha512_package;
 using subtle = go.crypto.@internal.fips140.subtle_package;
 using errors = errors_package;
+using hash = hash_package;
 using io = io_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
@@ -54,16 +56,16 @@ internal static void incCounter(ref array<byte> c) {
 
 // mgf1XOR XORs the bytes in out with a mask generated using the MGF1 function
 // specified in PKCS #1 v2.1.
-internal static void mgf1XOR(slice<byte> @out, fips140.Hash hash, slice<byte> seed) {
+internal static void mgf1XOR(slice<byte> @out, hash.Hash hashΔ1, slice<byte> seed) {
     ref var counter = ref heap(new array<byte>(4), out var Ꮡcounter);
     slice<byte> digest = default!;
 
     nint done = 0;
     while (done < len(@out)) {
-        hash.Reset();
-        hash.Write(seed);
-        hash.Write(counter[0..4]);
-        digest = hash.Sum(digest[..0]);
+        hashΔ1.Reset();
+        hashΔ1.Write(seed);
+        hashΔ1.Write(counter[0..4]);
+        digest = hashΔ1.Sum(digest[..0]);
 
         for (nint i = 0; i < len(digest) && done < len(@out); i++) {
             @out[done] ^= (byte)(digest[i]);
@@ -76,9 +78,9 @@ internal static void mgf1XOR(slice<byte> @out, fips140.Hash hash, slice<byte> se
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cryptoRsaInputMustBeˢ = "crypto/rsa: input must be hashed with given hash"u8;
 
-internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBits, slice<byte> salt, fips140.Hash hash) {
+internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBits, slice<byte> salt, hash.Hash hashΔ1) {
     // See RFC 8017, Section 9.1.1.
-    nint hLen = hash.Size();
+    nint hLen = hashΔ1.Size();
     nint sLen = len(salt);
     nint emLen = (emBits + 7) / 8;
 
@@ -116,12 +118,12 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
 
     array<byte> prefix = new(8);
 
-    hash.Reset();
-    hash.Write(prefix[..]);
-    hash.Write(mHash);
-    hash.Write(salt);
+    hashΔ1.Reset();
+    hashΔ1.Write(prefix[..]);
+    hashΔ1.Write(mHash);
+    hashΔ1.Write(salt);
 
-    h = hash.Sum(h[..0]);
+    h = hashΔ1.Sum(h[..0]);
 
     // 7.  Generate an octet string PS consisting of emLen - sLen - hLen - 2
     //     zero octets. The length of PS may be 0.
@@ -136,7 +138,7 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
     //
     // 10. Let maskedDB = DB \xor dbMask.
 
-    mgf1XOR(db, hash, h);
+    mgf1XOR(db, hashΔ1, h);
 
     // 11. Set the leftmost 8 * emLen - emBits bits of the leftmost octet in
     //     maskedDB to zero.
@@ -155,9 +157,9 @@ internal static UntypedInt pssSaltLengthAutodetect => -1;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rsaInternalErrorˢ = "rsa: internal error: inconsistent length"u8;
 
-internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBits, nint sLen, fips140.Hash hash) {
+internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBits, nint sLen, hash.Hash hashΔ1) {
     // See RFC 8017, Section 9.1.2.
-    nint hLen = hash.Size();
+    nint hLen = hashΔ1.Size();
     nint emLen = (emBits + 7) / 8;
     if (emLen != len(em)) {
         return errors.New(rsaInternalErrorˢ);
@@ -199,7 +201,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     // 7.  Let dbMask = MGF(H, emLen - hLen - 1).
     //
     // 8.  Let DB = maskedDB \xor dbMask.
-    mgf1XOR(db, hash, h);
+    mgf1XOR(db, hashΔ1, h);
 
     // 9.  Set the leftmost 8 * emLen - emBits bits of the leftmost octet in DB
     //     to zero.
@@ -243,16 +245,16 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     //     initial zero octets.
     //
     // 13. Let H' = Hash(M'), an octet string of length hLen.
-    hash.Reset();
+    hashΔ1.Reset();
     array<byte> prefix = new(8);
-    hash.Write(prefix[..]);
-    hash.Write(mHash);
-    hash.Write(salt);
+    hashΔ1.Write(prefix[..]);
+    hashΔ1.Write(mHash);
+    hashΔ1.Write(salt);
 
-    var h0 = hash.Sum(default!);
+    var h0 = hashΔ1.Sum(default!);
 
     // 14. If H = H', output "consistent." Otherwise, output "inconsistent."
-    if (!bytes.Equal(h0, h)) { // TODO: constant time?
+    if (!bytes.Equal(h0, h)) {
         return ErrVerification;
     }
     return default!;
@@ -260,17 +262,17 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
 
 // PSSMaxSaltLength returns the maximum salt length for a given public key and
 // hash function.
-public static (nint, error) PSSMaxSaltLength(ж<ΔPublicKey> Ꮡpub, fips140.Hash hash) {
+public static (nint, error) PSSMaxSaltLength(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
-    nint saltLength = (pub.N.BitLen() - 1 + 7) / 8 - 2 - hash.Size();
+    nint saltLength = (pub.N.BitLen() - 1 + 7) / 8 - 2 - hashΔ1.Size();
     if (saltLength < 0) {
         return (0, ErrMessageTooLong);
     }
     // FIPS 186-5, Section 5.4(g): "the length (in bytes) of the salt (sLen)
     // shall satisfy 0 ≤ sLen ≤ hLen".
-    if (fips140.Enabled && saltLength > hash.Size()) {
-        return (hash.Size(), default!);
+    if (fips140.Enabled && saltLength > hashΔ1.Size()) {
+        return (hashΔ1.Size(), default!);
     }
     return (saltLength, default!);
 }
@@ -279,16 +281,16 @@ public static (nint, error) PSSMaxSaltLength(ж<ΔPublicKey> Ꮡpub, fips140.Has
 internal static readonly @string cryptoRsaSaltLengthˢ = "crypto/rsa: salt length cannot be negative"u8;
 
 // SignPSS calculates the signature of hashed using RSASSA-PSS.
-public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpriv, fips140.Hash hash, slice<byte> hashed, nint saltLength) {
+public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpriv, hash.Hash hashΔ1, slice<byte> hashed, nint saltLength) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     fipsSelfTest();
     fips140.RecordApproved();
-    checkApprovedHash(hash);
+    checkApprovedHash(hashΔ1);
 
     // Note that while we don't commit to deterministic execution with respect
-    // to the rand stream, we also don't apply MaybeReadByte, so per Hyrum's Law
-    // it's probably relied upon by some. It's a tolerable promise because a
+    // to the rand stream, we also never applied MaybeReadByte, so per Hyrum's
+    // Law it's probably relied upon by some. It's a tolerable promise because a
     // well-specified number of random bytes is included in the signature, in a
     // well-specified way.
 
@@ -297,18 +299,18 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
     }
     // FIPS 186-5, Section 5.4(g): "the length (in bytes) of the salt (sLen)
     // shall satisfy 0 ≤ sLen ≤ hLen".
-    if (saltLength > hash.Size()) {
+    if (saltLength > hashΔ1.Size()) {
         fips140.RecordNonApproved();
     }
     var salt = new slice<byte>(saltLength);
     {
-        var errΔ1 = drbg.ReadWithReaderDeterministic(rand, salt); if (errΔ1 != default!) {
+        var errΔ1 = drbg.ReadWithReader(rand, salt); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
 
     nint emBits = priv.pub.N.BitLen() - 1;
-    var (em, err) = emsaPSSEncode(hashed, emBits, salt, hash);
+    var (em, err) = emsaPSSEncode(hashed, emBits, salt, hashΔ1);
     if (err != default!) {
         return (default!, err);
     }
@@ -333,24 +335,24 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
 }
 
 // VerifyPSS verifies sig with RSASSA-PSS automatically detecting the salt length.
-public static error VerifyPSS(ж<ΔPublicKey> Ꮡpub, fips140.Hash hash, slice<byte> digest, slice<byte> sig) {
-    return verifyPSS(Ꮡpub, hash, digest, sig, pssSaltLengthAutodetect);
+public static error VerifyPSS(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig) {
+    return verifyPSS(Ꮡpub, hashΔ1, digest, sig, pssSaltLengthAutodetect);
 }
 
-// VerifyPSS verifies sig with RSASSA-PSS and an expected salt length.
-public static error VerifyPSSWithSaltLength(ж<ΔPublicKey> Ꮡpub, fips140.Hash hash, slice<byte> digest, slice<byte> sig, nint saltLength) {
+// VerifyPSSWithSaltLength verifies sig with RSASSA-PSS and an expected salt length.
+public static error VerifyPSSWithSaltLength(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
     if (saltLength < 0) {
         return errors.New(cryptoRsaSaltLengthˢ);
     }
-    return verifyPSS(Ꮡpub, hash, digest, sig, saltLength);
+    return verifyPSS(Ꮡpub, hashΔ1, digest, sig, saltLength);
 }
 
-internal static error verifyPSS(ж<ΔPublicKey> Ꮡpub, fips140.Hash hash, slice<byte> digest, slice<byte> sig, nint saltLength) {
+internal static error verifyPSS(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice<byte> digest, slice<byte> sig, nint saltLength) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     fipsSelfTest();
     fips140.RecordApproved();
-    checkApprovedHash(hash);
+    checkApprovedHash(hashΔ1);
     {
         var (fipsApproved, errΔ1) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != default!){
             return errΔ1;
@@ -383,11 +385,11 @@ internal static error verifyPSS(ж<ΔPublicKey> Ꮡpub, fips140.Hash hash, slice
         em = em[1..];
     }
 
-    return emsaPSSVerify(digest, em, emBits, saltLength, hash);
+    return emsaPSSVerify(digest, em, emBits, saltLength, hashΔ1);
 }
 
-internal static void checkApprovedHash(fips140.Hash hash) {
-    switch (hash.type()) {
+internal static void checkApprovedHash(hash.Hash hashΔ1) {
+    switch (hashΔ1.type()) {
     case ж<sha256.Digest> _:
     case ж<sha512.Digest> _:
     case ж<sha3.Digest> _: {
@@ -400,17 +402,17 @@ internal static void checkApprovedHash(fips140.Hash hash) {
 }
 
 // EncryptOAEP encrypts the given message with RSAES-OAEP.
-public static (slice<byte>, error) EncryptOAEP(fips140.Hash hash, fips140.Hash mgfHash, io.Reader random, ж<ΔPublicKey> Ꮡpub, slice<byte> msg, slice<byte> label) {
+public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, hash.Hash mgfHash, io.Reader random, ж<ΔPublicKey> Ꮡpub, slice<byte> msg, slice<byte> label) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     // Note that while we don't commit to deterministic execution with respect
-    // to the random stream, we also don't apply MaybeReadByte, so per Hyrum's
+    // to the random stream, we also never applied MaybeReadByte, so per Hyrum's
     // Law it's probably relied upon by some. It's a tolerable promise because a
     // well-specified number of random bytes is included in the ciphertext, in a
     // well-specified way.
     fipsSelfTest();
     fips140.RecordApproved();
-    checkApprovedHash(hash);
+    checkApprovedHash(hashΔ1);
     {
         var (fipsApproved, err) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (err != default!){
             return (default!, err);
@@ -420,24 +422,24 @@ public static (slice<byte>, error) EncryptOAEP(fips140.Hash hash, fips140.Hash m
         }
     }
     nint k = pub.Size();
-    if (len(msg) > k - 2 * hash.Size() - 2) {
+    if (len(msg) > k - 2 * hashΔ1.Size() - 2) {
         return (default!, ErrMessageTooLong);
     }
 
-    hash.Reset();
-    hash.Write(label);
-    var lHash = hash.Sum(default!);
+    hashΔ1.Reset();
+    hashΔ1.Write(label);
+    var lHash = hashΔ1.Sum(default!);
 
     var em = new slice<byte>(k);
-    var seed = em.slice(1, 1 + hash.Size());
-    var db = em.slice(1 + hash.Size());
+    var seed = em.slice(1, 1 + hashΔ1.Size());
+    var db = em.slice(1 + hashΔ1.Size());
 
-    copy(db.slice(0, hash.Size()), lHash);
+    copy(db.slice(0, hashΔ1.Size()), lHash);
     db[len(db) - len(msg) - 1] = 1;
     copy(db.slice(len(db) - len(msg)), msg);
 
     {
-        var err = drbg.ReadWithReaderDeterministic(random, seed); if (err != default!) {
+        var err = drbg.ReadWithReader(random, seed); if (err != default!) {
             return (default!, err);
         }
     }
@@ -449,15 +451,15 @@ public static (slice<byte>, error) EncryptOAEP(fips140.Hash hash, fips140.Hash m
 }
 
 // DecryptOAEP decrypts ciphertext using RSAES-OAEP.
-public static (slice<byte>, error) DecryptOAEP(fips140.Hash hash, fips140.Hash mgfHash, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
+public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, hash.Hash mgfHash, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     fipsSelfTest();
     fips140.RecordApproved();
-    checkApprovedHash(hash);
+    checkApprovedHash(hashΔ1);
 
     nint k = priv.pub.Size();
-    if (len(ciphertext) > k || k < hash.Size() * 2 + 2) {
+    if (len(ciphertext) > k || k < hashΔ1.Size() * 2 + 2) {
         return (default!, ErrDecryption);
     }
 
@@ -466,19 +468,19 @@ public static (slice<byte>, error) DecryptOAEP(fips140.Hash hash, fips140.Hash m
         return (default!, err);
     }
 
-    hash.Reset();
-    hash.Write(label);
-    var lHash = hash.Sum(default!);
+    hashΔ1.Reset();
+    hashΔ1.Write(label);
+    var lHash = hashΔ1.Sum(default!);
 
-    nint firstByteIsZero = subtle.ConstantTimeByteEq(em[0], 0);
+    nint firstByteIsZero = constanttime.ByteEq(em[0], 0);
 
-    var seed = em.slice(1, hash.Size() + 1);
-    var db = em.slice(hash.Size() + 1);
+    var seed = em.slice(1, hashΔ1.Size() + 1);
+    var db = em.slice(hashΔ1.Size() + 1);
 
     mgf1XOR(seed, mgfHash, db);
     mgf1XOR(db, mgfHash, seed);
 
-    var lHash2 = db.slice(0, hash.Size());
+    var lHash2 = db.slice(0, hashΔ1.Size());
 
     // We have to validate the plaintext in constant time in order to avoid
     // attacks like: J. Manger. A Chosen Ciphertext Attack on RSA Optimal
@@ -495,14 +497,14 @@ public static (slice<byte>, error) DecryptOAEP(fips140.Hash hash, fips140.Hash m
     nint index = default!;
     nint invalid = default!;
     lookingForIndex = 1;
-    var rest = db.slice(hash.Size());
+    var rest = db.slice(hashΔ1.Size());
 
     for (nint i = 0; i < len(rest); i++) {
-        nint equals0 = subtle.ConstantTimeByteEq(rest[i], 0);
-        nint equals1 = subtle.ConstantTimeByteEq(rest[i], 1);
-        index = subtle.ConstantTimeSelect((nint)(lookingForIndex & equals1), i, index);
-        lookingForIndex = subtle.ConstantTimeSelect(equals1, 0, lookingForIndex);
-        invalid = subtle.ConstantTimeSelect((nint)(lookingForIndex & ~equals0), 1, invalid);
+        nint equals0 = constanttime.ByteEq(rest[i], 0);
+        nint equals1 = constanttime.ByteEq(rest[i], 1);
+        index = constanttime.Select((nint)(lookingForIndex & equals1), i, index);
+        lookingForIndex = constanttime.Select(equals1, 0, lookingForIndex);
+        invalid = constanttime.Select((nint)(lookingForIndex & ~equals0), 1, invalid);
     }
 
     if ((nint)((nint)((nint)(firstByteIsZero & lHash2Good) & ~invalid) & ~lookingForIndex) != 1) {

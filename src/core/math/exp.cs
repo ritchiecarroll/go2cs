@@ -107,16 +107,13 @@ internal static float64 exp(float64 x) {
 
     // special cases
     switch (ᐧ) {
-    case {} when IsNaN(x) || IsInf(x, 1): {
+    case {} when IsNaN(x): {
         return x;
     }
-    case {} when IsInf(x, -1): {
-        return 0D;
-    }
-    case {} when x > Overflow: {
+    case {} when x > Overflow: { // handles case where x is +∞
         return Inf(1);
     }
-    case {} when x < Underflow: {
+    case {} when x < Underflow: { // handles case where x is -∞
         return 0D;
     }
     case {} when /* -NearZero */ -3.725290298461914e-09D < x && x < NearZero: {
@@ -160,16 +157,13 @@ internal static float64 exp2(float64 x) {
 
     // special cases
     switch (ᐧ) {
-    case {} when IsNaN(x) || IsInf(x, 1): {
+    case {} when IsNaN(x): {
         return x;
     }
-    case {} when IsInf(x, -1): {
-        return 0D;
-    }
-    case {} when x > Overflow: {
+    case {} when x > Overflow: { // handles case where x is +∞
         return Inf(1);
     }
-    case {} when x < Underflow: {
+    case {} when x < Underflow: { // handles case where x is -∞
         return 0D;
     }}
 

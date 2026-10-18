@@ -1,0 +1,120 @@
+# TestDocsSamplesHoldTheirLines' known-list: source comments whose sample is verbatim in its file but
+# outside the lines the comment cites (docsamples -recite would re-cite them). Each row is excused while
+# docsamples still re-cites it; a row it no longer re-cites fails the guard, so the list only shrinks.
+# Re-cite a row with docsamples -recite -goroot <pinned GOROOT> -write <page>, then delete it here.
+# Seeded 2026-10-15 at the Go 1.26 hop: 108 golden (src/tests) citations and 5 GOROOT ones, every one
+# already off before the hop's H5 regeneration.
+# page<TAB>citation (the comment's text after "source:"), one row per comment
+docs/ConversionStrategies-Reference/generic-constraints.md	src/tests/Behavioral/MinMaxBuiltin/main.cs.target:92-93
+docs/ConversionStrategies-Reference/interfaces.md	src/tests/Behavioral/KeywordNamedTypes/main.cs.target:99, 103
+docs/ConversionStrategies-Reference/maps-and-channels.md	src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11 and :46-48
+docs/ConversionStrategies-Reference/native-and-narrow-integers.md	src/tests/Behavioral/MinIntDivide/main.cs.target:163
+docs/ConversionStrategies-Reference/native-and-narrow-integers.md	src/tests/Behavioral/MinIntDivide/main.cs.target:199
+docs/ConversionStrategies-Reference/native-and-narrow-integers.md	src/tests/Behavioral/MinIntDivideShadow/main.cs.target:19
+docs/ConversionStrategies-Reference/native-and-narrow-integers.md	src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:29-30
+docs/ConversionStrategies-Reference/native-and-narrow-integers.md	src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:113
+docs/ConversionStrategies-Reference/native-and-narrow-integers.md	src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:202
+docs/ConversionStrategies-Reference/struct-embedding.md	src/tests/Behavioral/LiftedLocalTypes/main.cs.target:45-47, 49
+docs/ConversionStrategies.md	GOROOT/src/cmp/cmp.go:28
+docs/ConversionStrategies.md	GOROOT/src/container/list/list_test.go:5
+docs/ConversionStrategies.md	GOROOT/src/path/path_test.go:5
+docs/ConversionStrategies.md	GOROOT/src/strings/export_test.go:5
+docs/ConversionStrategies.md	GOROOT/src/strings/search_test.go:5
+docs/ConversionStrategies.md	src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:84-93
+docs/ConversionStrategies.md	src/tests/Behavioral/ArrayWideIndexAddress/main.cs.target:10
+docs/ConversionStrategies.md	src/tests/Behavioral/ChannelCapLen/main.cs.target:1-37
+docs/ConversionStrategies.md	src/tests/Behavioral/ChannelCapLen/main.cs.target:24-33
+docs/ConversionStrategies.md	src/tests/Behavioral/ChannelCapLen/main.cs.target:24-33
+docs/ConversionStrategies.md	src/tests/Behavioral/CombinedStructFields/CombinedStructFields.cs.target:13-25
+docs/ConversionStrategies.md	src/tests/Behavioral/ConstrainedSliceParamInPlace/main.cs.target:39-49
+docs/ConversionStrategies.md	src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:1-48
+docs/ConversionStrategies.md	src/tests/Behavioral/DescriptorCarrierFieldName/main.cs.target:1-30
+docs/ConversionStrategies.md	src/tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.cs.target:62-69
+docs/ConversionStrategies.md	src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:40-108
+docs/ConversionStrategies.md	src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:46-126
+docs/ConversionStrategies.md	src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:49-137
+docs/ConversionStrategies.md	src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:51-170
+docs/ConversionStrategies.md	src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:71-279
+docs/ConversionStrategies.md	src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:74-290
+docs/ConversionStrategies.md	src/tests/Behavioral/ForVariants/ForVariants.cs.target:10-66
+docs/ConversionStrategies.md	src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.cs.target:18-107
+docs/ConversionStrategies.md	src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:50-77
+docs/ConversionStrategies.md	src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:65-69
+docs/ConversionStrategies.md	src/tests/Behavioral/GenericTypeNameCompanion/main.cs.target:27-46
+docs/ConversionStrategies.md	src/tests/Behavioral/GlobalShadowedByLocal/main.cs.target:6-125
+docs/ConversionStrategies.md	src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:18-43
+docs/ConversionStrategies.md	src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:47-62
+docs/ConversionStrategies.md	src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:64-68
+docs/ConversionStrategies.md	src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:9-45
+docs/ConversionStrategies.md	src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:97-105
+docs/ConversionStrategies.md	src/tests/Behavioral/GoShiftSemantics/main.cs.target:14-18
+docs/ConversionStrategies.md	src/tests/Behavioral/GoShiftSemantics/main.cs.target:26-27
+docs/ConversionStrategies.md	src/tests/Behavioral/GoroutinePanicExitCode/main.cs.target:8-18
+docs/ConversionStrategies.md	src/tests/Behavioral/IfStatements/IfStatements.cs.target:8-26
+docs/ConversionStrategies.md	src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:134-165
+docs/ConversionStrategies.md	src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:260-272
+docs/ConversionStrategies.md	src/tests/Behavioral/InterfaceImplementation/InterfaceImplementation.cs.target:54-98
+docs/ConversionStrategies.md	src/tests/Behavioral/InterfaceUntypedIntCompare/InterfaceUntypedIntCompare.cs.target:33-35
+docs/ConversionStrategies.md	src/tests/Behavioral/LiftedLocalTypes/main.cs.target:13-35
+docs/ConversionStrategies.md	src/tests/Behavioral/LocalValueIfaceCallConversion/main.cs.target:46-97
+docs/ConversionStrategies.md	src/tests/Behavioral/MapCommaOk/main.cs.target:1-29
+docs/ConversionStrategies.md	src/tests/Behavioral/MapCommaOk/main.cs.target:11-17
+docs/ConversionStrategies.md	src/tests/Behavioral/MapCommaOk/main.cs.target:7-27
+docs/ConversionStrategies.md	src/tests/Behavioral/MapStringBytesLookup/main.cs.target:7-37
+docs/ConversionStrategies.md	src/tests/Behavioral/MethodExpression/main.cs.target:61-65
+docs/ConversionStrategies.md	src/tests/Behavioral/MinMaxBuiltin/main.cs.target:40-43
+docs/ConversionStrategies.md	src/tests/Behavioral/NamedInterfacePointerMethodSet/main.cs.target:25-83
+docs/ConversionStrategies.md	src/tests/Behavioral/NamedNumericConversion/main.cs.target:7-29
+docs/ConversionStrategies.md	src/tests/Behavioral/NamedNumericPointerReinterpret/main.cs.target:54-93
+docs/ConversionStrategies.md	src/tests/Behavioral/NamedStringConsts/main.cs.target:44-61
+docs/ConversionStrategies.md	src/tests/Behavioral/NamedTypeBitwiseConst/main.cs.target:21-50
+docs/ConversionStrategies.md	src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:40-43
+docs/ConversionStrategies.md	src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:56
+docs/ConversionStrategies.md	src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:113
+docs/ConversionStrategies.md	src/tests/Behavioral/NestedVarShadow/main.cs.target:106-127
+docs/ConversionStrategies.md	src/tests/Behavioral/NilMapOperations/main.cs.target:26-50
+docs/ConversionStrategies.md	src/tests/Behavioral/PackageNameShadowing/main.cs.target:4-37
+docs/ConversionStrategies.md	src/tests/Behavioral/ParallelAssignmentHazard/main.cs.target:11-14
+docs/ConversionStrategies.md	src/tests/Behavioral/ParallelAssignmentHazard/main.cs.target:24-38
+docs/ConversionStrategies.md	src/tests/Behavioral/ParallelAssignmentHazard/main.cs.target:31-42
+docs/ConversionStrategies.md	src/tests/Behavioral/ParallelAssignmentHazard/main.cs.target:8-23
+docs/ConversionStrategies.md	src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:7-41
+docs/ConversionStrategies.md	src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-66
+docs/ConversionStrategies.md	src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:7-66
+docs/ConversionStrategies.md	src/tests/Behavioral/PointerValueToInterfaceArg/main.cs.target:7-59
+docs/ConversionStrategies.md	src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:20-31
+docs/ConversionStrategies.md	src/tests/Behavioral/ReceiverPointerValue/main.cs.target:45-52
+docs/ConversionStrategies.md	src/tests/Behavioral/ReceiverPointerValue/main.cs.target:7-62
+docs/ConversionStrategies.md	src/tests/Behavioral/RefLoweredParams/main.cs.target:12-138
+docs/ConversionStrategies.md	src/tests/Behavioral/ReflectChanNarrowing/main.cs.target:50-51
+docs/ConversionStrategies.md	src/tests/Behavioral/SStringElision/main.cs.target:178-182
+docs/ConversionStrategies.md	src/tests/Behavioral/SStringElision/main.cs.target:217-225
+docs/ConversionStrategies.md	src/tests/Behavioral/SStringTwinPilot/main.cs.target:42-43
+docs/ConversionStrategies.md	src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:110-114
+docs/ConversionStrategies.md	src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:195-196
+docs/ConversionStrategies.md	src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:215-226
+docs/ConversionStrategies.md	src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:229-242
+docs/ConversionStrategies.md	src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:20-21
+docs/ConversionStrategies.md	src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:36-37
+docs/ConversionStrategies.md	src/tests/Behavioral/SliceAliasing/main.cs.target:33-39
+docs/ConversionStrategies.md	src/tests/Behavioral/SlicePointerIdentity/main.cs.target:24-60
+docs/ConversionStrategies.md	src/tests/Behavioral/SortArrayType/SortArrayType.cs.target:199-201
+docs/ConversionStrategies.md	src/tests/Behavioral/StringLiteralHoisting/main.cs.target:33-39
+docs/ConversionStrategies.md	src/tests/Behavioral/StringLiteralHoisting/main.cs.target:55, :69, :82 and :102
+docs/ConversionStrategies.md	src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:8-81
+docs/ConversionStrategies.md	src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:36-59
+docs/ConversionStrategies.md	src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:36-59
+docs/ConversionStrategies.md	src/tests/Behavioral/TypeInference/TypeInference.cs.target:27
+docs/ConversionStrategies.md	src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:159-169
+docs/ConversionStrategies.md	src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:171-182
+docs/ConversionStrategies.md	src/tests/Behavioral/TypedNilInterface/TypedNilInterface.cs.target:38-39,101,107-108
+docs/ConversionStrategies.md	src/tests/Behavioral/UintptrUnsafePointerIdiom/main.cs.target:23-24, 38-44
+docs/ConversionStrategies.md	src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:59, 77-81
+docs/ConversionStrategies.md	src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:91-94
+docs/ConversionStrategies.md	src/tests/Behavioral/UntypedConstDefine/main.cs.target:17-29
+docs/ConversionStrategies.md	src/tests/Behavioral/UntypedConstDefine/main.cs.target:36-39
+docs/ConversionStrategies.md	src/tests/Behavioral/UntypedConstDefine/main.cs.target:7-24
+docs/ConversionStrategies.md	src/tests/Behavioral/UntypedConstDefine/main.cs.target:83-91
+docs/ConversionStrategies.md	src/tests/Behavioral/UntypedIntInterfaceBox/main.cs.target:40-41
+docs/ConversionStrategies.md	src/tests/Behavioral/VariadicFuncValues/main.cs.target:19-24
+docs/ConversionStrategies.md	src/tests/Behavioral/ZeroValueStructVar/main.cs.target:7-39

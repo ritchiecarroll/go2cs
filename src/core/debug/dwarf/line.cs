@@ -887,7 +887,7 @@ internal static (@string drive, @string rest) splitDrive(@string path) {
     }
     if (len(path) > 3 && (path[0] == (rune)'\\' || path[0] == (rune)'/') && (path[1] == (rune)'\\' || path[1] == (rune)'/')) {
         // Normalize the path so we can search for just \ below.
-        @string npath = strings.Replace(path, "/"u8, @"\"u8, -1);
+        @string npath = strings.ReplaceAll(path, "/"u8, @"\"u8);
         // Get the host part, which must be non-empty.
         nint slash1 = strings.IndexByte(npath[2..], (rune)'\\') + 2;
         if (slash1 > 2) {

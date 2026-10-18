@@ -196,7 +196,7 @@ public static @string ToSlash(@string path) {
     return replaceStringByte(path, Separator, (rune)'/');
 }
 
-// FromSlash is filepath.ToSlash.
+// FromSlash is filepath.FromSlash.
 public static @string FromSlash(@string path) {
     if (Separator == (rune)'/') {
         return path;

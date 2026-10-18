@@ -4,13 +4,40 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System.Collections.Generic;
 using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
 
 internal static class IArrayTypeTemplate
 {
-    public static string Generate(string structName, string typeName, string targetTypeName, string? targetTypeSize) =>
+    // The by-value copy members. A named array whose Go type declares its OWN `Clone` method (Go 1.26
+    // hash/fnv's sum128: `Clone() (hash.Cloner, error)`) gets no public Clone(): an instance member is
+    // bound before the extension method Go's Clone becomes, so it shadowed Go's method and RecvGenerator's
+    // forwarder `return d.Clone();` bound the array copy (CS0029). Such a type copies through
+    // ValueCloneMethod alone, the spelling the converter then uses at its copy sites (valueCloneSuffix).
+    // goMethods are the Go methods declared on the type (InheritedTypeTemplate.GoMethodNames), as the
+    // channel and map templates read them.
+    private static string CloneMembers(string structName, ICollection<string> goMethods) =>
+        goMethods.Contains("Clone") ?
+            $$"""
+            // Go by-value copy. `Clone` is the Go type's own method, so the copy is
+                    // {{ValueCloneMethod}} only (see GoValueCloneAttribute).
+                    public {{structName}} {{ValueCloneMethod}}() => new {{structName}}(Value.Clone());
+
+                    object global::System.ICloneable.Clone() => {{ValueCloneMethod}}();
+            """ :
+            $$"""
+            public {{structName}} Clone() => new {{structName}}(Value.Clone());
+
+                    // Uniform value-copy member name a generated struct clone calls on every
+                    // clone-needing field (see GoValueCloneAttribute); copy SITES use Clone().
+                    public {{structName}} {{ValueCloneMethod}}() => Clone();
+
+                    object global::System.ICloneable.Clone() => Clone();
+            """;
+
+    public static string Generate(string structName, string typeName, string targetTypeName, string? targetTypeSize, ICollection<string> goMethods) =>
         $$"""
                 
                 public {{targetTypeName}}[] Source => Value;
@@ -40,6 +67,10 @@ internal static class IArrayTypeTemplate
 
                 public slice<{{targetTypeName}}> slice(nint low, nint high) => Value.slice(low, high);
 
+                // Go's 3-index `x[lo:hi:max]`: golib's array<T> overload, reached on the wrapper itself the way
+                // the 2-index forms are (a pointer to this type is sliced as `p.Value.slice(…)`).
+                public slice<{{targetTypeName}}> slice(nint low, nint high, nint max) => Value.slice(low, high, max);
+
                 public slice<{{targetTypeName}}> Slice(nint start, nint length) => Value.Slice(start, length);
 
                 public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
@@ -64,13 +95,7 @@ internal static class IArrayTypeTemplate
 
                 public bool Equals(IArray<{{targetTypeName}}>? other) => Value.Equals(other);
 
-                public {{structName}} Clone() => new {{structName}}(Value.Clone());
-
-                // Uniform value-copy member name a generated struct clone calls on every
-                // clone-needing field (see GoValueCloneAttribute); copy SITES use Clone().
-                public {{structName}} {{ValueCloneMethod}}() => Clone();
-
-                object global::System.ICloneable.Clone() => Clone();
+                {{CloneMembers(structName, goMethods)}}
 
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}();
         """;

@@ -21,7 +21,7 @@ using os = os_package;
 using exec = go.os.exec_package;
 using filepath = path.filepath_package;
 using Δruntime = runtime_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using testing = testing_package;
@@ -30,6 +30,7 @@ using go;
 using go.@internal;
 using go.os;
 using io = io_package;
+using iter = iter_package;
 using path;
 using ꓸꓸꓸstring = Span<@string>;
 
@@ -44,8 +45,13 @@ internal static slice<@string> origEnv = os.Environ();
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string goBuilderNameˢ = "GO_BUILDER_NAME"u8;
 
-// Builder reports the name of the builder running this test
-// (for example, "linux-amd64" or "windows-386-gce").
+// Builder reports the name of the builder running this test. For example,
+// "gotip-linux-amd64_avx512-test_only" or "go1.24-windows-arm64" on LUCI,
+// or "linux-amd64" on our old infrastructure. Prefer using runtime.GOOS,
+// runtime.GOARCH, race.Enabled, reading the OS version, checking CPU
+// feature flags with internal/cpu, etc. over parsing builder names when
+// possible. When matching builder names, prefer a fuzzy match instead
+// of a strict comparison.
 // If the test is not running on the build infrastructure,
 // Builder returns the empty string.
 public static @string Builder() {
@@ -357,13 +363,27 @@ public static bool CanInternalLink(bool withCgo) {
     return !platform.MustLinkExternal(Δruntime.GOOS, Δruntime.GOARCH, withCgo);
 }
 
+// SpecialBuildTypes are interesting build types that may affect linking.
+partial struct SpecialBuildTypes {
+    public bool Cgo;
+    public bool Asan;
+    public bool Msan;
+    public bool Race;
+}
+
+// NoSpecialBuildTypes indicates a standard, no cgo go build.
+public static SpecialBuildTypes NoSpecialBuildTypes;
+
 // MustInternalLink checks that the current system can link programs with internal
 // linking.
 // If not, MustInternalLink calls t.Skip with an explanation.
-public static void MustInternalLink(testing.TB t, bool withCgo) {
-    if (!CanInternalLink(withCgo)) {
+public static void MustInternalLink(testing.TB t, SpecialBuildTypes with) {
+    if (with.Asan || with.Msan || with.Race) {
+        t.Skipf("skipping test: internal linking with sanitizers is not supported"u8);
+    }
+    if (!CanInternalLink(with.Cgo)) {
         t.Helper();
-        if (withCgo && CanInternalLink(false)) {
+        if (with.Cgo && CanInternalLink(false)) {
             t.Skipf("skipping test: internal linking on %s/%s is not supported with cgo"u8, Δruntime.GOOS, Δruntime.GOARCH);
         }
         t.Skipf("skipping test: internal linking on %s/%s is not supported"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -510,7 +530,7 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
             t.Fatalf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, (~cmd).Stderr);
         }
 
-        foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
+        foreach (var line in range<@string>(strings.SplitSeq(((@string)@out), "\n"u8).Invoke)) {
             if (line == ""u8) {
                 continue;
             }

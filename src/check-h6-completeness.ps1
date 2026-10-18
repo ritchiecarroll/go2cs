@@ -12,11 +12,11 @@
     passed straight through. Its own guards stay armed: a zero marker count throws and a classification
     that does not sum to the census fails its self-verify. Either one REFUSES this gate (exit 2).
 
-    ROWS -- the audit's row table is found by its HEADER: the one Markdown table whose header cells
+    ROWS -- the audit's row tables are found by their HEADER: every Markdown table whose header cells
     include '#', a cell starting 'path', a cell exactly 'class', a cell starting 'reason' and two cells
-    naming an '.auto' sha256. Every '|' line under its delimiter row, up to the first line that is not
-    one, is a row. Cells split on unescaped '|' (GFM). A path cell is read with its backticks removed,
-    relative to src/core. Prose elsewhere in the file (fill blocks, open questions) is never a row.
+    naming an '.auto' sha256. All of them are gated as ONE population, under one identical header. Every
+    '|' line under a delimiter row, up to the first that is not one, is a row. Cells split on unescaped
+    '|' (GFM). A path cell is read without its backticks, relative to src/core. Prose is never a row.
 
     ASSERTIONS -- each violation is printed on one line, prefixed by its kind:
       MISSING    a census path with no row
@@ -33,7 +33,7 @@
                  its path also reads MISSING)
 
     VACUITY -- refused (exit 2), never passed: a census that throws, a census of zero paths, a census
-    that exposed no population, an audit with no row table (or more than one), a table with zero rows.
+    that exposed no population, an audit with no row table, tables whose headers differ, a zero-row table.
     Both counts are printed on every run, before any verdict.
 
     NAMED BLIND SPOTS -- what a clean exit does NOT say:
@@ -184,42 +184,62 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
     }
 }
 if ($headers.Count -eq 0) { Stop-Refused "VACUOUS: no row table in the audit (no header with #, path, class, reason and two .auto sha256 cells)" }
-if ($headers.Count -gt 1) {
-    Stop-Refused ("the audit carries $($headers.Count) row tables, at lines " + (($headers | ForEach-Object { $_[0] + 1 }) -join ', ') + '; exactly one is gated')
-}
-$hdrLine = $headers[0][0]
+# Every table carrying the row header is gated, as ONE population (an audit with a section per lane carries
+# one table per lane). Each table's rows are read under its own header, and every header must match the
+# first cell for cell: a column that meant different things in different tables would be gated as one.
 $hdr = $headers[0][1]
+foreach ($h in $headers) {
+    if (($h[1] -join '|') -cne ($hdr -join '|')) {
+        Stop-Refused ("the row table at line $($h[0] + 1) has a different header from the one at line $($headers[0][0] + 1); every gated table must carry the same columns")
+    }
+}
 $colNum = [array]::IndexOf($hdr, '#')
 $colPath = @(0..($hdr.Count - 1) | Where-Object { $hdr[$_] -match '^path\b' })[0]
 $colClass = @(0..($hdr.Count - 1) | Where-Object { $hdr[$_] -ceq 'class' })[0]
 $colReason = @(0..($hdr.Count - 1) | Where-Object { $hdr[$_] -match '^reason\b' })[0]
 $colHash = @(0..($hdr.Count - 1) | Where-Object { $hdr[$_] -match '^\.auto\b.*\bsha256\b' })
 
-$delim = if ($hdrLine + 1 -lt $lines.Count) { $lines[$hdrLine + 1].Trim() } else { '' }
-if ($delim -notmatch '^\|(\s*:?-+:?\s*\|)+$') { Stop-Refused "the row table's header (line $($hdrLine + 1)) has no delimiter row under it" }
-
 $rows = New-Object System.Collections.Generic.List[object]
 $violations = New-Object System.Collections.Generic.List[string]
-for ($i = $hdrLine + 2; $i -lt $lines.Count; $i++) {
-    if (-not $lines[$i].TrimStart().StartsWith('|')) { break }
-    $cells = Split-Row $lines[$i]
-    $ln = $i + 1
-    if ($cells.Count -ne $hdr.Count) {
-        [void]$violations.Add("MALFORMED line ${ln}: $($cells.Count) cells, the header has $($hdr.Count): $(Show-Cell $lines[$i] 120)")
-        continue
+$auditRel = (Resolve-Path $AuditFile).Path.Replace($repo, '').TrimStart('\', '/')
+foreach ($h in $headers) {
+    $hdrLine = $h[0]
+    $delim = if ($hdrLine + 1 -lt $lines.Count) { $lines[$hdrLine + 1].Trim() } else { '' }
+    if ($delim -notmatch '^\|(\s*:?-+:?\s*\|)+$') { Stop-Refused "the row table's header (line $($hdrLine + 1)) has no delimiter row under it" }
+
+    $tableRows = 0
+    $lastLine = $hdrLine + 2
+    for ($i = $hdrLine + 2; $i -lt $lines.Count; $i++) {
+        if (-not $lines[$i].TrimStart().StartsWith('|')) { break }
+        $cells = Split-Row $lines[$i]
+        $ln = $i + 1
+        if ($cells.Count -ne $hdr.Count) {
+            [void]$violations.Add("MALFORMED line ${ln}: $($cells.Count) cells, the header has $($hdr.Count): $(Show-Cell $lines[$i] 120)")
+            continue
+        }
+        $rows.Add([pscustomobject]@{
+            Line   = $ln
+            Num    = Get-CellText $cells[$colNum]
+            Path   = Get-CellText $cells[$colPath]
+            Class  = Get-CellText $cells[$colClass]
+            Reason = $cells[$colReason]
+            Hashes = @($colHash | ForEach-Object { $cells[$_] })
+            Cells  = $cells
+        })
+        $tableRows++
+        $lastLine = $ln
     }
-    $rows.Add([pscustomobject]@{
-        Line   = $ln
-        Num    = Get-CellText $cells[$colNum]
-        Path   = Get-CellText $cells[$colPath]
-        Class  = Get-CellText $cells[$colClass]
-        Reason = $cells[$colReason]
-        Hashes = @($colHash | ForEach-Object { $cells[$_] })
-        Cells  = $cells
-    })
+    if ($headers.Count -gt 1) {
+        Write-Host "h6-completeness: table  = $tableRows rows (header line $($hdrLine + 1), rows through line $lastLine)"
+        if ($tableRows -eq 0) { Stop-Refused "VACUOUS: the row table at line $($hdrLine + 1) parsed 0 rows" }
+    }
 }
-$lastLine = if ($rows.Count -gt 0) { $rows[$rows.Count - 1].Line } else { $hdrLine + 2 }
-Write-Host "h6-completeness: audit  = $($rows.Count) rows parsed ($((Resolve-Path $AuditFile).Path.Replace($repo, '').TrimStart('\', '/')), header line $($hdrLine + 1), rows through line $lastLine)"
+if ($headers.Count -eq 1) {
+    Write-Host "h6-completeness: audit  = $($rows.Count) rows parsed ($auditRel, header line $($headers[0][0] + 1), rows through line $lastLine)"
+}
+else {
+    Write-Host "h6-completeness: audit  = $($rows.Count) rows parsed ($auditRel, $($headers.Count) tables gated as one population)"
+}
 if ($rows.Count -eq 0) { Stop-Refused 'VACUOUS: the audit row table parsed 0 rows' }
 
 # --- 3. Assertions ------------------------------------------------------------------------------------

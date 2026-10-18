@@ -286,6 +286,9 @@ public static partial void ErrorContext(this ref Logger l, context.Context ctx, 
 internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
+    if (ctx == default!) {
+        ctx = context.Background();
+    }
     if (!l.Enabled(ctx, level)) {
         return;
     }
@@ -298,9 +301,6 @@ internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel
     }
     var r = NewRecord(time_package.Now(), level, msg, pc);
     r.Add(args.ꓸꓸꓸ);
-    if (ctx == default!) {
-        ctx = context.Background();
-    }
     _ = l.Handler().Handle(ctx, r);
 }
 
@@ -308,6 +308,9 @@ internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel
 internal static partial void logAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
+    if (ctx == default!) {
+        ctx = context.Background();
+    }
     if (!l.Enabled(ctx, level)) {
         return;
     }
@@ -320,9 +323,6 @@ internal static partial void logAttrs(this ref Logger l, context.Context ctx, Δ
     }
     var r = NewRecord(time_package.Now(), level, msg, pc);
     r.AddAttrs(attrs.ꓸꓸꓸ);
-    if (ctx == default!) {
-        ctx = context.Background();
-    }
     _ = l.Handler().Handle(ctx, r);
 }
 

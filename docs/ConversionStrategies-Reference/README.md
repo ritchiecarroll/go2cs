@@ -193,6 +193,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The `string | []byte` union](generic-constraints.md#the-string--byte-union)
   - [Explicit type arguments come from the callee's instantiation](generic-constraints.md#explicit-type-arguments-come-from-the-callees-instantiation)
   - [A CONSTANT argument that fixes a type parameter is retyped to the instantiation](generic-constraints.md#a-constant-argument-that-fixes-a-type-parameter-is-retyped-to-the-instantiation)
+  - [A type parameter fixed only by untyped constants gets explicit type arguments](generic-constraints.md#a-type-parameter-fixed-only-by-untyped-constants-gets-explicit-type-arguments)
   - [Increment/decrement on a type parameter](generic-constraints.md#incrementdecrement-on-a-type-parameter)
   - [Unary negation on a type parameter](generic-constraints.md#unary-negation-on-a-type-parameter)
   - [`uintptr` as a generic numeric type argument](generic-constraints.md#uintptr-as-a-generic-numeric-type-argument)
@@ -388,6 +389,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A receiver or parameter RE-POINTED before first use — the normalization idiom](pointers.md#a-receiver-or-parameter-re-pointed-before-first-use--the-normalization-idiom)
   - [A reinterpreted raw address ALIASES native memory instead of boxing a copy](pointers.md#a-reinterpreted-raw-address-aliases-native-memory-instead-of-boxing-a-copy)
   - [An address of MANAGED storage that outlives its statement must carry a PIN](pointers.md#an-address-of-managed-storage-that-outlives-its-statement-must-carry-a-pin)
+  - [A field reached through a pointer REINTERPRETED from `unsafe.Pointer` reads at its Go offset — the field property](pointers.md#a-field-reached-through-a-pointer-reinterpreted-from-unsafepointer-reads-at-its-go-offset--the-field-property)
   - [`unsafe.Slice` over MANAGED element storage ALIASES it](pointers.md#unsafeslice-over-managed-element-storage-aliases-it)
   - [A reinterpret of a MANAGED pointer aliases the box — it never round-trips through the address](pointers.md#a-reinterpret-of-a-managed-pointer-aliases-the-box--it-never-round-trips-through-the-address)
   - [A pointer-cast slice with a LOW bound offsets the span](pointers.md#a-pointer-cast-slice-with-a-low-bound-offsets-the-span)
@@ -441,6 +443,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [The scheduler brackets are a faithful no-op, not an omission](manual-conversions.md#the-scheduler-brackets-are-a-faithful-no-op-not-an-omission)
   - [`runtime.argslice` — forwarding and populating are ONE change](manual-conversions.md#runtimeargslice--forwarding-and-populating-are-one-change)
   - [`runtime.sysDirectory` — the same pairing, one consumer shape further out](manual-conversions.md#runtimesysdirectory--the-same-pairing-one-consumer-shape-further-out)
+  - [The runtime's CPU feature flags — `cpuinit`'s copy half](manual-conversions.md#the-runtimes-cpu-feature-flags--cpuinits-copy-half)
   - [Long-path awareness is process SETUP, and golib does what Go's `osinit` does](manual-conversions.md#long-path-awareness-is-process-setup-and-golib-does-what-gos-osinit-does)
   - [Linux standard-descriptor hygiene is process SETUP too — Go's close-of-stdout must release the pipe](manual-conversions.md#linux-standard-descriptor-hygiene-is-process-setup-too--gos-close-of-stdout-must-release-the-pipe)
   - [`internal/weak.Pointer` — the CLR already has weak references, so the runtime handle becomes one](manual-conversions.md#internalweakpointer--the-clr-already-has-weak-references-so-the-runtime-handle-becomes-one)
@@ -483,7 +486,10 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`runtime.Pinner` — a pin BIT keyed by the referent allocation, and Go's two-level cgo walk over managed values](manual-conversions.md#runtimepinner--a-pin-bit-keyed-by-the-referent-allocation-and-gos-two-level-cgo-walk-over-managed-values)
 - **[Comments](comments.md)**
   - [Where a comment is attached, and where it is not](comments.md#where-a-comment-is-attached-and-where-it-is-not)
-  - [The rule](comments.md#the-rule)
-  - [What is still deferred](comments.md#what-is-still-deferred)
+  - [Blank lines](comments.md#blank-lines)
+  - [Doc comments](comments.md#doc-comments)
+  - [Comments inside a body](comments.md#comments-inside-a-body)
+  - [Comments inside expressions](comments.md#comments-inside-expressions)
+  - [Limits: where a comment still lands elsewhere](comments.md#limits-where-a-comment-still-lands-elsewhere)
 - **[Deterministic Output](deterministic-output.md)**
 - **[Packages That Do Not Type-Check](packages-that-do-not-type-check.md)**

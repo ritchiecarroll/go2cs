@@ -91,13 +91,8 @@ public static (ж<P256Element>, error) SetBytes(this ж<P256Element> Ꮡe, slice
     // the encoding of -1 mod p, so p - 1, the highest canonical encoding.
     slice<byte> minusOneEncoding = @new<P256Element>().Sub(
         @new<P256Element>(), @new<P256Element>().One()).Bytes();
-    foreach (var (i, _) in v) {
-        if (v[i] < minusOneEncoding[i]) {
-            break;
-        }
-        if (v[i] > minusOneEncoding[i]) {
-            return (default!, errors.New(invalidP256Elementˢ));
-        }
+    if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
+        return (default!, errors.New(invalidP256Elementˢ));
     }
 
     ref var @in = ref heap(new array<byte>(32), out var Ꮡin);

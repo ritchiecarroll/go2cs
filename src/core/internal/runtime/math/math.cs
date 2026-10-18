@@ -8,7 +8,12 @@ using go.@internal;
 
 partial class math_package {
 
+public const uint16 MaxUint16 = /* ^uint16(0) */ 65535;
+public const uint32 MaxUint32 = /* ^uint32(0) */ 4294967295;
+public const uint64 MaxUint64 = /* ^uint64(0) */ 18446744073709551615;
 public static uintptr MaxUintptr => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
+
+public const int64 MaxInt64 = /* int64(MaxUint64 >> 1) */ 9223372036854775807;
 
 // MulUintptr returns a * b and whether the multiplication overflowed.
 // On supported platforms this is an intrinsic lowered by the compiler.

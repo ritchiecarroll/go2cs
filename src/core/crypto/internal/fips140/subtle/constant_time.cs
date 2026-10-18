@@ -3,6 +3,13 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.fips140;
 
+using constanttime = go.crypto.@internal.constanttime_package;
+using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
+using bits = math.bits_package;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140deps;
+using math;
+
 partial class subtle_package {
 
 // ConstantTimeCompare returns 1 if the two slices, x and y, have equal contents
@@ -20,23 +27,38 @@ public static nint ConstantTimeCompare(slice<byte> x, slice<byte> y) {
         v |= (byte)((byte)(x[i] ^ y[i]));
     }
 
-    return ConstantTimeByteEq(v, 0);
+    return constanttime.ByteEq(v, 0);
 }
 
-// ConstantTimeSelect returns x if v == 1 and y if v == 0.
-// Its behavior is undefined if v takes any other value.
-public static nint ConstantTimeSelect(nint v, nint x, nint y) {
-    return (nint)((nint)(~(v - 1) & x) | (nint)((v - 1) & y));
-}
+// ConstantTimeLessOrEqBytes returns 1 if x <= y and 0 otherwise. The comparison
+// is lexigraphical, or big-endian. The time taken is a function of the length of
+// the slices and is independent of the contents. If the lengths of x and y do not
+// match it returns 0 immediately.
+public static nint ConstantTimeLessOrEqBytes(slice<byte> x, slice<byte> y) {
+    if (len(x) != len(y)) {
+        return 0;
+    }
 
-// ConstantTimeByteEq returns 1 if x == y and 0 otherwise.
-public static nint ConstantTimeByteEq(uint8 x, uint8 y) {
-    return (nint)((((uint32)((uint8)(x ^ y)) - 1) >> (int)(31)));
-}
-
-// ConstantTimeEq returns 1 if x == y and 0 otherwise.
-public static nint ConstantTimeEq(int32 x, int32 y) {
-    return (nint)((((uint64)(uint32)((int32)(x ^ y)) - 1) >> (int)(63)));
+    // Do a constant time subtraction chain y - x.
+    // If there is no borrow at the end, then x <= y.
+    uint64 b = default!;
+    while (len(x) > 8) {
+        var x0 = byteorder.BEUint64(x.slice(len(x) - 8));
+        var y0 = byteorder.BEUint64(y.slice(len(y) - 8));
+        (_, b) = bits.Sub64(y0, x0, b);
+        x = x.slice(0, len(x) - 8);
+        y = y.slice(0, len(y) - 8);
+    }
+    if (len(x) > 0) {
+        var xb = new slice<byte>(8);
+        var yb = new slice<byte>(8);
+        copy(xb.slice(8 - len(x)), x);
+        copy(yb.slice(8 - len(y)), y);
+        var x0 = byteorder.BEUint64(xb);
+        var y0 = byteorder.BEUint64(yb);
+        (_, b) = bits.Sub64(y0, x0, b);
+    }
+    return (nint)((uint64)(b ^ 1));
 }
 
 // ConstantTimeCopy copies the contents of y into x (a slice of equal length)
@@ -52,14 +74,6 @@ public static void ConstantTimeCopy(nint v, slice<byte> x, slice<byte> y) {
     for (nint i = 0; i < len(x); i++) {
         x[i] = (byte)((byte)(x[i] & xmask) | (byte)(y[i] & ymask));
     }
-}
-
-// ConstantTimeLessOrEq returns 1 if x <= y and 0 otherwise.
-// Its behavior is undefined if x or y are negative or > 2**31 - 1.
-public static nint ConstantTimeLessOrEq(nint x, nint y) {
-    var x32 = (int32)x;
-    var y32 = (int32)y;
-    return (nint)((int32)((((x32 - y32 - 1) >> (int)(31))) & 1));
 }
 
 } // end subtle_package

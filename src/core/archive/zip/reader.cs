@@ -6,6 +6,7 @@ namespace go.archive;
 using bufio = bufio_package;
 using binary = encoding.binary_package;
 using errors = errors_package;
+using fmt = fmt_package;
 using hash = hash_package;
 using crc32 = go.hash.crc32_package;
 using godebug = @internal.godebug_package;
@@ -51,14 +52,14 @@ partial struct Reader {
 // A ReadCloser is a [Reader] that must be closed when no longer needed.
 partial struct ReadCloser {
     internal ж<os.File> f;
-    public partial ref Reader Reader { get; }
+    /*embed*/ public Reader Reader;
 }
 
 // A File is a single file in a ZIP archive.
 // The file information is in the embedded [FileHeader].
 // The file content can be accessed by calling [File.Open].
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     internal ж<Reader> zip;
     internal io.ReaderAt zipr;
     internal int64 headerOffset; // includes overall ZIP archive baseOffset
@@ -897,6 +898,9 @@ internal static @string toValidName(@string name) {
 
 internal static void initFileList(this ж<Reader> Ꮡr) {
     Ꮡr.of(Reader.ᏑfileListOnce).Do(() => {
+        // Preallocate the minimum size of the index.
+        // We may also synthesize additional directory entries.
+        Ꮡr.Value.fileList = new slice<fileListEntry>(0, len(Ꮡr.Value.File));
         // files and knownDirs map from a file/directory name
         // to an index into the r.fileList entry that we are
         // building. They are used to mark duplicate entries.
@@ -1105,8 +1109,15 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
     var list = new slice<fs.DirEntry>(n);
     foreach (var (i, _) in list) {
         var (s, err) = Ꮡ(d.files, d.offset + i).stat();
-        if (err != default!) {
+        if (err != default!){
             return (default!, err);
+        } else 
+        if (((fs.FileInfo)(s)).Name() == "."u8 || !fs.ValidPath(((fs.FileInfo)(s)).Name())) {
+            return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(
+                Op: "readdir"u8,
+                Path: (~d.e).name,
+                Err: fmt.Errorf("invalid file name: %v"u8, d.files[d.offset + i].name)
+            ))));
         }
         list[i] = s;
     }

@@ -58,9 +58,9 @@ using static go.mime_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABo6nLKClKaCgoKmqJK4lIKClJSUAAkYlpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClIK6koKApLS0goLskoKCgoKokqiSgoLWggAPIraClKaCgpSCgqaCgqaCgIKkqrSCgqaUgpSCgoKClJSCgpSClIKUgpSClJSCgpSClIKCgoKCyoKmgIK2gqaCpqaClKSkAAgIgpS0gsaCgpTYgpSCgpSAgsaqooLqpqiSgoKCgKS0gpSCgpSCtLSkpqiSkoKAgqSAgqSmgpSktpQ=")]
-[assembly: go.GoPositionMap("mime/grammar.go", "grammar.cs", "AAkaoqrGqqKClA==")]
-[assembly: go.GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABIq0oKAgoKUlIKUgoK2goKCgoKUlIKUlJSClIKCpoiClIKCpoKmgoKmgoKCgoKCgqaClAAIBoKCgpSClIKUgoKUgpTcAAQYAA4CgpSCgqaaxIKCgoKUgoKmpqaCgIKClIKAgoLGgJSkgqqigoKAgoCCpLaCgoKCgIKCgqSCgoKUgoKAgraCpoK4poKCgsqCgpSUlIKClKaCrsKCgpSClAACEAAIAoKUgriCgoKCAAsYgoKClIKUpqbCgoKmgoKCgoKmgoKUgoKCgpSCppSCgoKClIKCgoKUlJSCpoKCgpSCgrSCgramgpSkpJSmgpSkpJQ=", "", "", "66=isTSpecial/1/1/2")]
-[assembly: go.GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgIKktKQAGC6CgIKUggAELgATAqaAgryygoKCgpSCgpSClKaCgq7CgoKmgoKClIKCrLKClILmooKClIKClJSClIKCgoCCpIKCpoI=")]
+[assembly: go.GoPositionMap("mime/grammar.go", "grammar.cs", "AAoSAAISABgg3AACEAAcKqyigpSCgqY=")]
+[assembly: go.GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABIq0oKAgoKUlIKUgoK2goKCgoKUlIKUlJSClIKCpoiClIKCpoKmgoKmgoKCgoKCgqaClKaCgoKUgpSCgIKkgoKUgpSogoKCzAABGAAOAoKUgoKmmsSCgoKClIKCpqamgoCCgpSAgoLGgJSkgqqigoKAgoCCpLaCgoKCgIKCgqSCgoKUgoKAgraCpoK4ppSCgoLKgoKUgsiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgIK2goKCgqaCgIKkgoKClIKmlIKCgoKUgoKUlIKmgoKClIKCtIKCtqaClKSklKaClKSklA==", "", "", "66=isTSpecial/1/1/2")]
+[assembly: go.GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgIKktAANGgBIjgGCgIKUggAEMAAUAqaAgryygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSC5qKCgpSCgpSUgpSCgoKAgqSCgqaC")]
 [assembly: go.GoPositionMap("mime/type_unix.go", "type_unix.cs", "AA0egsrc7qKCgpSkgpSCgpKCpoIACRSUgLi2lICCpNaigoKUpIKCgoKUgoKClKaAgsSkgoKAgtqCuIKCgg==")]
 // </GoSourcePositionMaps>
 

@@ -226,8 +226,8 @@ partial struct Parser {
 
 // parseDoc is parsing state for a single doc comment.
 partial struct parseDoc {
-    public partial ref ж<Parser> Parser { get; }
-    public partial ref ж<Doc> Doc { get; }
+    /*embed*/ public ж<Parser> Parser;
+    /*embed*/ public ж<Doc> Doc;
     internal map<@string, ж<LinkDef>> links;
     internal slice<@string> lines;
     internal Func<@string, @string, bool> lookupSym;
@@ -1190,7 +1190,7 @@ internal static bool isPunct(byte c) {
 	1<<'?' |
 	1<<'!' */ 10088151134830067712;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (10088151134830067712UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (((uint64)mask).Rsh((uint64)(64)))))) != 0;
+    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (10088151134830067712UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (/* mask >> 64 */ 0UL)))) != 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)

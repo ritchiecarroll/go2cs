@@ -24,6 +24,7 @@ import (
 //     positive control), the lock is written, and the lib stays UNMAPPED because a replace is never
 //     overridden by a mapping.
 func TestRecurseNuGetMapHook(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}

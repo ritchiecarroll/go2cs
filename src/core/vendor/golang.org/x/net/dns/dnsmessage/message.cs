@@ -17,8 +17,21 @@ using errors = errors_package;
 partial class dnsmessage_package {
 
 // Message formats
+//
+// To add a new Resource Record type:
+// 1. Create Resource Record types
+//   1.1. Add a Type constant named "Type<name>"
+//   1.2. Add the corresponding entry to the typeNames map
+//   1.3. Add a [ResourceBody] implementation named "<name>Resource"
+// 2. Implement packing
+//   2.1. Implement Builder.<name>Resource()
+// 3. Implement unpacking
+//   3.1. Add the unpacking code to unpackResourceBody()
+//   3.2. Implement Parser.<name>Resource()
 
-// A Type is a type of DNS request and response.
+// A Type is the type of a DNS Resource Record, as defined in the [IANA registry].
+//
+// [IANA registry]: https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-4
 partial struct Type /*num:uint16*/;
 
 // ResourceHeader.Type and Question.Type
@@ -32,6 +45,8 @@ public static Type TypeTXT => 16;
 public static Type TypeAAAA => 28;
 public static Type TypeSRV => 33;
 public static Type TypeOPT => 41;
+public static Type TypeSVCB => 64;
+public static Type TypeHTTPS => 65;
 
 // Question.Type
 public static Type TypeWKS => 11;
@@ -51,6 +66,8 @@ internal static map<Type, @string> typeNames = new map<Type, @string>{
     [TypeAAAA] = "TypeAAAA"u8,
     [TypeSRV] = "TypeSRV"u8,
     [TypeOPT] = "TypeOPT"u8,
+    [TypeSVCB] = "TypeSVCB"u8,
+    [TypeHTTPS] = "TypeHTTPS"u8,
     [TypeWKS] = "TypeWKS"u8,
     [TypeHINFO] = "TypeHINFO"u8,
     [TypeMINFO] = "TypeMINFO"u8,
@@ -278,6 +295,8 @@ internal static error errTooManyAuthorities = errors.New("too many Authorities t
 internal static error errTooManyAdditionals = errors.New("too many Additionals to pack (>65535)"u8);
 internal static error errNonCanonicalName = errors.New("name is not in canonical format (it must end with a .)"u8);
 internal static error errStringTooLong = errors.New("character string exceeds maximum length (255)"u8);
+internal static error errParamOutOfOrder = errors.New("parameter out of order"u8);
+internal static error errTooLongSVCBValue = errors.New("value too long (>65535 bytes)"u8);
 
 // Internal constants.
 // packStartingCap is the default initial buffer size allocated during
@@ -361,7 +380,7 @@ public static @string GoString(this ref Header m) {
 
 // Message is a representation of a DNS message.
 partial struct Message {
-    public partial ref Header Header { get; }
+    /*embed*/ public Header Header;
     public slice<ΔQuestion> Questions;
     public slice<Resource> Answers;
     public slice<Resource> Authorities;
@@ -2398,6 +2417,8 @@ private static readonly @string ptrˢ = "PTR"u8;
 private static readonly @string txtˢ = "TXT"u8;
 private static readonly @string aaaaˢ = "AAAA"u8;
 private static readonly @string srvˢ = "SRV"u8;
+private static readonly @string svcbˢ = "SVCB"u8;
+private static readonly @string httpsˢ = "HTTPS"u8;
 private static readonly @string optˢ = "OPT"u8;
 private static readonly @string unknownˢ = "Unknown"u8;
 
@@ -2461,6 +2482,18 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
         (rb, err) = unpackSRVResource(msg, off);
         r = new ΔSRVResourceжResourceBody(Ꮡrb);
         name = srvˢ;
+    }
+    else if (exprᴛ1 == TypeSVCB) {
+        ref var rb = ref heap(new ΔSVCBResource(), out var Ꮡrb);
+        (rb, err) = unpackSVCBResource(msg, off, hdr.Length);
+        r = new ΔSVCBResourceжResourceBody(Ꮡrb);
+        name = svcbˢ;
+    }
+    else if (exprᴛ1 == TypeHTTPS) {
+        ref var rb = ref heap(new ΔHTTPSResource(), out var Ꮡrb);
+        (rb.SVCBResource, err) = unpackSVCBResource(msg, off, hdr.Length);
+        r = new ΔHTTPSResourceжResourceBody(Ꮡrb);
+        name = httpsˢ;
     }
     else if (exprᴛ1 == TypeOPT) {
         ref var rb = ref heap(new ΔOPTResource(), out var Ꮡrb);

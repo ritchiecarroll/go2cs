@@ -315,6 +315,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 		alias := importSpec.Name.Name
 
 		if alias == "." {
+			v.dotImportTargets[v.currentImportPath] = importPath
 			v.packageImports.WriteString(fmt.Sprintf("using static %s;", importPath))
 		} else if alias == "_" {
 			// A BLANK import (`import _ "unsafe"`) is side-effects-only: Go forbids referencing
@@ -1093,5 +1094,5 @@ func namespaceWithDirectorySegment(namespace, importPath, name string) string {
 		return namespace
 	}
 
-	return namespace + "." + getCoreSanitizedIdentifier(tail)
+	return namespace + "." + getCoreSanitizedIdentifier(joinDigitLeadingParts(tail))
 }

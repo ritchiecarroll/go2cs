@@ -203,7 +203,7 @@ internal static bool fitsInOctal(nint n, int64 x) {
 // specification. Note that this implementation allows for negative timestamps,
 // which is allowed for by the PAX specification, but not always portable.
 internal static (time.Time, error) parsePAXTime(@string s) {
-    const nint maxNanoSecondDigits = 9;
+    UntypedInt maxNanoSecondDigits = 9;
 
     // Split string into seconds and sub-seconds parts.
     var (ss, sn, _) = strings.Cut(s, "."u8);
@@ -218,15 +218,22 @@ internal static (time.Time, error) parsePAXTime(@string s) {
     }
 
     // Parse the nanoseconds.
-    if (strings.Trim(sn, "0123456789"u8) != ""u8) {
-        return (new time.Time(nil), ErrHeader);
+    // Initialize an array with '0's to handle right padding automatically.
+    var nanoDigits = new byte[]{(rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0'}.array();
+    foreach (var i in range(len(sn))) {
+        {
+            var c = sn[i];
+            switch (ᐧ) {
+            case {} when c < (rune)'0' || c > (rune)'9': {
+                return (new time.Time(nil), ErrHeader);
+            }
+            case {} when i < len(nanoDigits): {
+                nanoDigits[i] = c;
+                break;
+            }}
+        }
     }
-    if (len(sn) < maxNanoSecondDigits){
-        sn += strings.Repeat("0"u8, maxNanoSecondDigits - len(sn)); // Right pad
-    } else {
-        sn = sn[..(int)(maxNanoSecondDigits)]; // Right truncate
-    }
-    var (nsecs, _) = strconv.ParseInt(sn, 10, 64); // Must succeed
+    var (nsecs, _) = strconv.ParseInt(((@string)(nanoDigits[..])), 10, 64); // Must succeed after validation
     if (len(ss) > 0 && ss[0] == (rune)'-') {
         return (time.Unix(secs, -1 * nsecs), default!); // Negative correction
     }
@@ -321,7 +328,7 @@ internal static (@string, error) formatPAXRecord(@string k, @string v) {
 //	"%d %s=%s\n" % (size, key, value)
 //
 // Keys and values should be UTF-8, but the number of bad writers out there
-// forces us to be a more liberal.
+// forces us to be more liberal.
 // Thus, we only reject all keys with NUL, and only reject NULs in values
 // for the PAX version of the USTAR string fields.
 // The key must not contain an '=' character.

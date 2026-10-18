@@ -152,9 +152,10 @@ public static bool ContainsFunc<S, E>(S s, Func<E, bool> f)
 // returning the modified slice.
 // The elements at s[i:] are shifted up to make room.
 // In the returned slice r, r[i] == v[0],
-// and, if i < len(s), r[i+len(v)] == value originally at r[i].
+// and, if i < len(s), r[i+len(v)] == value originally at s[i].
 // Insert panics if i > len(s).
 // This function is O(len(s) + len(v)).
+// If the result is empty, it has the same nilness as s.
 public static S Insert<S, E>(S s, nint i, params Span<E> vʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -244,6 +245,7 @@ public static S Insert<S, E>(S s, nint i, params Span<E> vʗp)
 // Delete is O(len(s)-i), so if many items must be deleted, it is better to
 // make a single call deleting them all together than to delete one at a time.
 // Delete zeroes the elements s[len(s)-(j-i):len(s)].
+// If the result is empty, it has the same nilness as s.
 public static S Delete<S, E>(S s, nint i, nint j)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -262,6 +264,7 @@ public static S Delete<S, E>(S s, nint i, nint j)
 // DeleteFunc removes any elements from s for which del returns true,
 // returning the modified slice.
 // DeleteFunc zeroes the elements between the new length and the original length.
+// If the result is empty, it has the same nilness as s.
 public static S DeleteFunc<S, E>(S s, Func<E, bool> del)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -286,6 +289,7 @@ public static S DeleteFunc<S, E>(S s, Func<E, bool> del)
 // modified slice.
 // Replace panics if j > len(s) or s[i:j] is not a valid slice of s.
 // When len(v) < (j-i), Replace zeroes the elements between the new length and the original length.
+// If the result is empty, it has the same nilness as s.
 public static S Replace<S, E>(S s, nint i, nint j, params Span<E> vʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -382,6 +386,7 @@ public static S Replace<S, E>(S s, nint i, nint j, params Span<E> vʗp)
 // Clone returns a copy of the slice.
 // The elements are copied using assignment, so this is a shallow clone.
 // The result may have additional unused capacity.
+// The result preserves the nilness of s.
 public static S Clone<S, E>(S s)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -399,6 +404,7 @@ public static S Clone<S, E>(S s)
 // Compact modifies the contents of the slice s and returns the modified slice,
 // which may have a smaller length.
 // Compact zeroes the elements between the new length and the original length.
+// The result preserves the nilness of s.
 public static S Compact<S, E>(S s)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -425,6 +431,7 @@ public static S Compact<S, E>(S s)
 // CompactFunc is like [Compact] but uses an equality function to compare elements.
 // For runs of elements that compare equal, CompactFunc keeps the first one.
 // CompactFunc zeroes the elements between the new length and the original length.
+// The result preserves the nilness of s.
 public static S CompactFunc<S, E>(S s, Func<E, E, bool> eq)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -452,6 +459,7 @@ public static S CompactFunc<S, E>(S s, Func<E, E, bool> eq)
 // another n elements. After Grow(n), at least n elements can be appended
 // to the slice without another allocation. If n is negative or too large to
 // allocate the memory, Grow panics.
+// The result preserves the nilness of s.
 public static S Grow<S, E>(S s, nint n)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -468,6 +476,7 @@ public static S Grow<S, E>(S s, nint n)
 }
 
 // Clip removes unused capacity from the slice, returning s[:len(s):len(s)].
+// The result preserves the nilness of s.
 public static S Clip<S, E>(S s)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
@@ -515,6 +524,7 @@ public static void Reverse<S, E>(S s)
 }
 
 // Concat returns a new slice concatenating the passed in slices.
+// If the concatenation is empty, the result is nil.
 public static S Concat<S, E>(params Span<S> slicesʗp)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {

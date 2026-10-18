@@ -94,6 +94,7 @@ func bareLineFeeds(content []byte) []int {
 }
 
 func TestEmittedSourceHasUniformLineEndings(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	content := convertLineEndingFixture(t)
 
 	// The fixture must reach both producers, or a clean reading proves nothing.

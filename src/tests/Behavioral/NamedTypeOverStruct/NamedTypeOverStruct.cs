@@ -44,7 +44,7 @@ internal static int64 twice(this @base b) {
 }
 
 partial struct derived {
-    internal partial ref @base @base { get; }
+    /*embed*/ internal @base @base;
     internal int64 tag;
 }
 
@@ -111,7 +111,7 @@ partial struct ctxt {
 }
 
 partial struct shadowed {
-    internal partial ref ctxt ctxt { get; }
+    /*embed*/ internal ctxt ctxt;
     internal nint fn;
 }
 

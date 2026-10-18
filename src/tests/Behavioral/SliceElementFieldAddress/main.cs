@@ -11,7 +11,7 @@ partial struct header {
 }
 
 public partial struct inst {
-    internal partial ref header header { get; }
+    /*embed*/ internal header header;
     public @string Name;
 }
 

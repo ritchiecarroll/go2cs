@@ -20,17 +20,22 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
-using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(structtype), typeof(interfacetype), typeof(chantype), typeof(functype))]
 partial class runtime_package {
+
+//go:linkname maps_typeString internal/runtime/maps.typeString
+internal static @string maps_typeString(ж<abi.Type> Ꮡtyp) {
+    return toRType(Ꮡtyp).@string();
+}
 
 // rtype is a wrapper that allows us to define additional methods.
 partial struct Δrtype {
-    public partial ref ж<@internal.abi_package.Type> Type { get; } // embedding is okay here (unlike reflect) because none of this is public
+    /*embed*/ public ж<@internal.abi_package.Type> Type; // embedding is okay here (unlike reflect) because none of this is public
 }
 
 internal static @string @string(this Δrtype t) {
@@ -77,14 +82,14 @@ internal static @string pkgpath(this Δrtype t) {
             return t.nameOff((~u).PkgPath).Name();
         }
     }
-    var exprᴛ1 = (abiꓸKind)(t.Kind_ & abi.KindMask);
+    var exprᴛ1 = t.Type.Value.Kind();
     if (exprᴛ1 == abi.Struct) {
         var st = t.Type.Reinterpret<abi.Type, structtype>();
-        return (~st).PkgPath.Name();
+        return st.PkgPath.Name();
     }
     if (exprᴛ1 == abi.Interface) {
         var it = t.Type.Reinterpret<abi.Type, interfacetype>();
-        return (~it).PkgPath.Name();
+        return it.PkgPath.Name();
     }
     return ""u8;
 }
@@ -452,7 +457,7 @@ internal static @string pkgPath(abiꓸName n) {
         off += i2 + l2;
     }
     ref var nameOff = ref heap(new nameOff(), out var ᏑnameOff);
-    copy((~(ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)))[..], (~array<byte>.AliasPointer(n.Data(off), 4))[..]);
+    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.Data(off), 4).slice());
     var pkgPathName = resolveNameOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff);
     return pkgPathName.Name();
 }
@@ -556,8 +561,8 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
     if (Ꮡt == Ꮡv) {
         return true;
     }
-    var kind = (abiꓸKind)(t.Kind_ & abi.KindMask);
-    if (kind != (abiꓸKind)(v.Kind_ & abi.KindMask)) {
+    var kind = t.Kind();
+    if (kind != v.Kind()) {
         return false;
     }
     var (rt, rv) = (toRType(Ꮡt), toRType(Ꮡv));
@@ -586,17 +591,17 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
     if (exprᴛ1 == abi.Array) {
         var at = Ꮡt.Reinterpret<_type, arraytype>();
         var av = Ꮡv.Reinterpret<_type, arraytype>();
-        return typesEqual((~at).Elem, (~av).Elem, seen) && (~at).Len == (~av).Len;
+        return typesEqual(at.of(arraytype.ᏑElem).Value, av.of(arraytype.ᏑElem).Value, seen) && at.of(arraytype.ᏑLen).Value == av.of(arraytype.ᏑLen).Value;
     }
     if (exprᴛ1 == abi.Chan) {
         var ct = Ꮡt.Reinterpret<_type, chantype>();
         var cv = Ꮡv.Reinterpret<_type, chantype>();
-        return (~ct).Dir == (~cv).Dir && typesEqual((~ct).Elem, (~cv).Elem, seen);
+        return ct.Dir == cv.Dir && typesEqual(ct.of(chantype.ᏑElem).Value, cv.of(chantype.ᏑElem).Value, seen);
     }
     if (exprᴛ1 == abi.Func) {
         var ft = Ꮡt.FuncType();
         var fv = Ꮡv.FuncType();
-        if ((~ft).OutCount != (~fv).OutCount || (~ft).InCount != (~fv).InCount) {
+        if (ft.OutCount != fv.OutCount || ft.InCount != fv.InCount) {
             return false;
         }
         var (tin, vin) = (ft.InSlice(), fv.InSlice());
@@ -616,15 +621,15 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
     if (exprᴛ1 == abi.Interface) {
         var it = Ꮡt.Reinterpret<_type, interfacetype>();
         var iv = Ꮡv.Reinterpret<_type, interfacetype>();
-        if ((~it).PkgPath.Name() != (~iv).PkgPath.Name()) {
+        if (it.PkgPath.Name() != iv.PkgPath.Name()) {
             return false;
         }
-        if (len((~it).Methods) != len((~iv).Methods)) {
+        if (len(it.Methods) != len(iv.Methods)) {
             return false;
         }
-        foreach (var (i, _) in (~it).Methods) {
-            var tm = Ꮡ((~it).Methods, i);
-            var vm = Ꮡ((~iv).Methods, i);
+        foreach (var (i, _) in it.Methods) {
+            var tm = Ꮡ(it.Methods, i);
+            var vm = Ꮡ(iv.Methods, i);
             // Note the mhdr array can be relocated from
             // another module. See #17724.
             var tname = resolveNameOff(@unsafe.Pointer.FromPinnedBox(tm), (~tm).Name);
@@ -644,37 +649,32 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         return true;
     }
     if (exprᴛ1 == abi.Map) {
-        if (goexperiment.SwissMap) {
-            var mtΔ1 = Ꮡt.Reinterpret<_type, abi.SwissMapType>();
-            var mvΔ1 = Ꮡv.Reinterpret<_type, abi.SwissMapType>();
-            return typesEqual((~mtΔ1).Key, (~mvΔ1).Key, seen) && typesEqual((~mtΔ1).Elem, (~mvΔ1).Elem, seen);
-        }
-        var mt = Ꮡt.Reinterpret<_type, abi.OldMapType>();
-        var mv = Ꮡv.Reinterpret<_type, abi.OldMapType>();
-        return typesEqual((~mt).Key, (~mv).Key, seen) && typesEqual((~mt).Elem, (~mv).Elem, seen);
+        var mt = Ꮡt.Reinterpret<_type, abiꓸMapType>();
+        var mv = Ꮡv.Reinterpret<_type, abiꓸMapType>();
+        return typesEqual(mt.of(abiꓸMapType.ᏑKey).Value, mv.of(abiꓸMapType.ᏑKey).Value, seen) && typesEqual(mt.of(abiꓸMapType.ᏑElem).Value, mv.of(abiꓸMapType.ᏑElem).Value, seen);
     }
     if (exprᴛ1 == abi.Pointer) {
         var pt = Ꮡt.Reinterpret<_type, ptrtype>();
         var pv = Ꮡv.Reinterpret<_type, ptrtype>();
-        return typesEqual((~pt).Elem, (~pv).Elem, seen);
+        return typesEqual(pt.of(ptrtype.ᏑElem).Value, pv.of(ptrtype.ᏑElem).Value, seen);
     }
     if (exprᴛ1 == abi.Slice) {
         var st = Ꮡt.Reinterpret<_type, slicetype>();
         var sv = Ꮡv.Reinterpret<_type, slicetype>();
-        return typesEqual((~st).Elem, (~sv).Elem, seen);
+        return typesEqual(st.of(slicetype.ᏑElem).Value, sv.of(slicetype.ᏑElem).Value, seen);
     }
     if (exprᴛ1 == abi.Struct) {
         var st = Ꮡt.Reinterpret<_type, structtype>();
         var sv = Ꮡv.Reinterpret<_type, structtype>();
-        if (len((~st).Fields) != len((~sv).Fields)) {
+        if (len(st.Fields) != len(sv.Fields)) {
             return false;
         }
-        if ((~st).PkgPath.Name() != (~sv).PkgPath.Name()) {
+        if (st.PkgPath.Name() != sv.PkgPath.Name()) {
             return false;
         }
-        foreach (var (i, _) in (~st).Fields) {
-            var tf = Ꮡ((~st).Fields, i);
-            var vf = Ꮡ((~sv).Fields, i);
+        foreach (var (i, _) in st.Fields) {
+            var tf = Ꮡ(st.Fields, i);
+            var vf = Ꮡ(sv.Fields, i);
             if ((~tf).Name.Name() != (~vf).Name.Name()) {
                 return false;
             }

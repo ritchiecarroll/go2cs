@@ -5,6 +5,8 @@ namespace go;
 
 using fmt = fmt_package;
 using asan = @internal.asan_package;
+using msan = @internal.msan_package;
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using bits = global::go.math.bits_package;
 using rand = global::go.math.rand_package;
@@ -119,7 +121,7 @@ internal partial struct TestGcRescan_X /*dyn*/ {
 }
 
 internal partial struct TestGcRescan_Y /*dyn*/ {
-    public partial ref TestGcRescan_X X { get; }
+    /*embed*/ public TestGcRescan_X X;
     internal ж<TestGcRescan_Y> nexty;
     internal ж<nint> p;
 }
@@ -233,11 +235,15 @@ public static void TestPeriodicGC(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippedTestCheckptrModeˢ2 = (@string)"skipped test: checkptr mode catches the issue before getting to zombie reporting"u8;
 internal static readonly @string gcZombieˢ = "GCZombie"u8;
 internal static readonly @string godebugInvalidptr0ˢ = "GODEBUG=invalidptr=0"u8;
 internal static readonly @string foundPointerToFreeObjectˢ = "found pointer to free object"u8;
 
 public static void TestGcZombieReporting(ж<testing.T> Ꮡt) {
+    if (asan.Enabled || msan.Enabled || race.Enabled) {
+        Ꮡt.Skip(skippedTestCheckptrModeˢ2);
+    }
     // This test is somewhat sensitive to how the allocator works.
     // Pointers in zombies slice may cross-span, thus we
     // add invalidptr=0 for avoiding the badPointer check.
@@ -353,7 +359,7 @@ internal static ref nint pointerClassData => ref ᏑpointerClassData.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object extraAllocationsCauseˢ = (@string)"extra allocations cause this test to fail; see #70079"u8;
-internal static readonly @string stackˢ = "stack"u8;
+internal static readonly @string stackˢ2 = "stack"u8;
 internal static readonly @string heapˢ = "heap"u8;
 internal static readonly @string bssˢ = "bss"u8;
 internal static readonly @string dataˢ = "data"u8;
@@ -375,7 +381,7 @@ public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
     }
     ref var onStack = ref heap(new nint(), out var ᏑonStack);
     ref var notOnStack = ref heap(new nint(), out var ᏑnotOnStack);
-    check(@unsafe.Pointer.FromPinnedBox(ᏑonStack), stackˢ);
+    check(@unsafe.Pointer.FromPinnedBox(ᏑonStack), stackˢ2);
     check(@unsafe.Pointer.FromPinnedBox(runtime_internal_test_package.Escape(ᏑnotOnStack)), heapˢ);
     check(@unsafe.Pointer.FromBox(ᏑpointerClassBSS), bssˢ);
     check(@unsafe.Pointer.FromPinnedBox(ᏑpointerClassData), dataˢ);
@@ -1051,6 +1057,35 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string godebugCheckfinalizers1ˢ = "GODEBUG=checkfinalizers=1"u8;
+internal static readonly @string detectedPossibleIssuesˢ = "detected possible issues with cleanups and/or finalizers"u8;
+internal static readonly @string isReachableFromˢ = "is reachable from"u8;
+internal static readonly @string isInATinyBlockˢ = "is in a tiny block"u8;
+internal static readonly @string mainˢ = "main.DetectFinalizerAndCleanupLeaks()"u8;
+
+public static void TestDetectFinalizerAndCleanupLeaks(ж<testing.T> Ꮡt) {
+    @string got = runTestProg(Ꮡt, testprogˢ, "DetectFinalizerAndCleanupLeaks"u8, godebugCheckfinalizers1ˢ);
+    var sp = strings.SplitN(got, detectedPossibleIssuesˢ, 2);
+    if (len(sp) != 2) {
+        Ꮡt.Fatalf("expected the runtime to throw, got:\n%s"u8, got);
+    }
+    if (strings.Count(sp[0], isReachableFromˢ) != 2) {
+        Ꮡt.Fatalf("expected exactly two leaked cleanups and/or finalizers, got:\n%s"u8, got);
+    }
+    // N.B. Disable in race mode and in asan mode. Both disable the tiny allocator.
+    nint wantSymbolizedLocations = 2;
+    if (!race.Enabled && !asan.Enabled) {
+        if (strings.Count(sp[0], isInATinyBlockˢ) != 1) {
+            Ꮡt.Fatalf("expected exactly one report for allocation in a tiny block, got:\n%s"u8, got);
+        }
+        wantSymbolizedLocations++;
+    }
+    if (strings.Count(sp[0], mainˢ) != wantSymbolizedLocations) {
+        Ꮡt.Fatalf("expected %d symbolized locations, got:\n%s"u8, wantSymbolizedLocations, got);
+    }
 }
 
 } // end runtime_test_package

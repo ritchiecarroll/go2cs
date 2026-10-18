@@ -10,7 +10,7 @@ partial struct header {
 }
 
 partial struct node {
-    internal partial ref header header { get; }
+    /*embed*/ internal header header;
     internal nint val;
 }
 

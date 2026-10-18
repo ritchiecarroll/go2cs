@@ -84,6 +84,12 @@ public sealed class SyncTestBubble
     // their stray members readied the next test's goroutine.
     private bool m_closed;
 
+    // Go's bubble.main and bubble.done (go1.26.9 runtime/synctest.go:200, :66-70): the goroutine Run started
+    // for f, and whether it has exited. Time stops once it has (Run's loop breaks before advancing the
+    // clock, :230-233), so a timer due after main returns never fires. Under m_mu.
+    private Goroutine? m_main;
+    private bool m_done;
+
     private SyncTestBubble(Goroutine root) => m_root = root;
 
     /// <summary>The calling goroutine's bubble, or <c>null</c>.</summary>
@@ -134,14 +140,16 @@ public sealed class SyncTestBubble
     public int Active { get { lock (m_mu) return m_active; } }
 
     // isIdleInSynctest (runtime2.go), whole: Sleep included since S3 put a bubbled sleep on the fake
-    // clock (see the class remarks).
+    // clock (see the class remarks). Go 1.25 replaced waitReasonSyncWaitGroupWait with
+    // waitReasonSynctestWaitGroupWait here (1.26.9 runtime2.go:1391): only a Wait on a WaitGroup associated
+    // with the waiter's own bubble is durable; a plain WaitGroup wait no longer counts idle.
     internal static bool IsIdle(WaitReason reason) => reason is
         WaitReason.ChanReceiveNilChan or
         WaitReason.ChanSendNilChan or
         WaitReason.SelectNoCases or
         WaitReason.Sleep or
         WaitReason.SyncCondWait or
-        WaitReason.SyncWaitGroupWait or
+        WaitReason.SynctestWaitGroupWait or
         WaitReason.Coroutine or
         WaitReason.SynctestRun or
         WaitReason.SynctestWait or
@@ -164,8 +172,18 @@ public sealed class SyncTestBubble
     // The creator could not start the thread it counted: undo, and let the bubble reconsider.
     internal void SpawnFailed() => Leave();
 
-    // A member's goroutine ended (it was running: a goroutine exits from its own thread).
-    internal void Exited() => Leave();
+    // A member's goroutine ended (it was running: a goroutine exits from its own thread). The bubble's
+    // main ending is Go's `gp == bubble.main` -> bubble.done (changegstatus, synctest.go:66-70).
+    internal void Exited(Goroutine gp)
+    {
+        lock (m_mu)
+        {
+            if (ReferenceEquals(gp, m_main))
+                m_done = true;
+        }
+
+        Leave();
+    }
 
     private void Leave()
     {
@@ -283,7 +301,16 @@ public sealed class SyncTestBubble
 
         try
         {
-            Goroutine.Start(f);
+            // Go: newproc, but also records the new g in bubble.main. The body records itself before it
+            // runs f, so main is known before it can exit; f stays the goroutine's start function (Entry,
+            // Go's startpc) for profiles.
+            Goroutine.Start(() =>
+            {
+                lock (sg.m_mu)
+                    sg.m_main = Goroutine.Current;
+
+                f();
+            }, f);
 
             Monitor.Enter(sg.m_mu);
             sg.m_active++;
@@ -348,15 +375,24 @@ public sealed class SyncTestBubble
                     throw new PanicException("synctest: time went backwards");
                 }
 
+                // Go: time stops once the bubble's main goroutine has exited (synctest.go:230-233).
+                if (sg.m_done)
+                    break;
+
                 sg.m_now = next;
             }
 
             int total = sg.m_total;
+            bool done = sg.m_done;
             sg.m_closed = true;
             Monitor.Exit(sg.m_mu);
 
             if (total != 1)
-                throw builtin.panic("deadlock: all goroutines in bubble are blocked");
+            {
+                throw builtin.panic(done
+                    ? "deadlock: main bubble goroutine has exited but blocked goroutines remain"
+                    : "deadlock: all goroutines in bubble are blocked");
+            }
         }
         finally
         {

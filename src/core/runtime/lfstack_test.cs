@@ -16,7 +16,7 @@ using Δruntime = runtime_package;
 partial class runtime_test_package {
 
 partial struct MyNode {
-    public partial ref global::go.runtime_internal_test_package.LFNode LFNode { get; }
+    /*embed*/ public global::go.runtime_internal_test_package.LFNode LFNode;
     internal nint data;
 }
 
@@ -25,7 +25,7 @@ partial struct MyNode {
 // We require lfstack objects to live outside the heap so that
 // checkptr passes on the unsafe shenanigans used.
 internal static ж<MyNode> allocMyNode(nint data) {
-    var n = (ж<MyNode>)(uintptr)(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(MyNode{}) */ (uintptr)24));
+    var n = (ж<MyNode>)(uintptr)(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(MyNode{}) */ (uintptr)24, runtime_internal_test_package.TagAlign));
     runtime_internal_test_package.LFNodeValidate(n.of(MyNode.ᏑLFNode));
     n.Value.data = data;
     return n;

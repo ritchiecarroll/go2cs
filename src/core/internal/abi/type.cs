@@ -23,7 +23,7 @@ partial struct Type {
     public TFlag TFlag;   // extra type information flags
     public uint8 Align_;   // alignment of variable with this type
     public uint8 FieldAlign_;   // alignment of struct field with this type
-    public ΔKind Kind_;    // enumeration for C
+    public ΔKind Kind_;    // what kind of type this is (string, int, ...)
     // function for comparing objects of this type
     // (ptr to object A, ptr to object B) -> ==?
     public Func<@unsafe.Pointer, @unsafe.Pointer, bool> Equal;
@@ -75,10 +75,6 @@ public static ΔKind ΔString => 24;
 public static ΔKind Struct => 25;
 public static ΔKind UnsafePointer => 26;
 
-// TODO (khr, drchase) why aren't these in TFlag?  Investigate, fix if possible.
-public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
-public static ΔKind KindMask => /* (1 << 5) - 1 */ 31;
-
 // TFlag is used by a Type to signal what extra type information is
 // available in the memory directly following the Type value.
 partial struct TFlag /*num:uint8*/;
@@ -119,6 +115,15 @@ public static TFlag TFlagRegularMemory => /* 1 << 3 */ 8;
 // has type **byte instead of *byte. The runtime will store a
 // pointer to the GC pointer bitmask in *GCData.
 public static TFlag TFlagGCMaskOnDemand => /* 1 << 4 */ 16;
+
+// TFlagDirectIface means that a value of this type is stored directly
+// in the data field of an interface, instead of indirectly.
+// This flag is just a cached computation of Size_ == PtrBytes == goarch.PtrSize.
+public static TFlag TFlagDirectIface => /* 1 << 5 */ 32;
+
+// Leaving this breadcrumb behind for dlv. It should not be used, and no
+// Kind should be big enough to set this bit.
+public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
 
 // NameOff is the offset to a name from moduledata.types.  See resolveNameOff in runtime.
 partial struct NameOff /*num:int32*/;
@@ -169,19 +174,10 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 
 // go2cs generated this placeholder — func TypeOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// TypeFor returns the abi.Type for a type parameter.
-public static ж<Type> TypeFor<T>() {
-    T v = GoZero<T>();
-    {
-        var t = TypeOf(v); if (t != nil) {
-            return t; // optimize for T being a non-interface kind
-        }
-    }
-    return TypeOf(((ж<T>)nil)).Elem(); // only for an interface kind
-}
+// go2cs generated this placeholder — func TypeFor is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static ΔKind Kind(this ref Type t) {
-    return (ΔKind)(t.Kind_ & KindMask);
+    return t.Kind_;
 }
 
 public static bool HasName(this ref Type t) {
@@ -193,14 +189,9 @@ public static bool Pointers(this ref Type t) {
     return t.PtrBytes != 0;
 }
 
-// IfaceIndir reports whether t is stored indirectly in an interface value.
-public static bool IfaceIndir(this ref Type t) {
-    return (ΔKind)(t.Kind_ & KindDirectIface) == 0;
-}
-
-// isDirectIface reports whether t is stored directly in an interface value.
+// IsDirectIface reports whether t is stored directly in an interface value.
 public static bool IsDirectIface(this ref Type t) {
-    return (ΔKind)(t.Kind_ & KindDirectIface) != 0;
+    return (TFlag)(t.TFlag & TFlagDirectIface) != 0;
 }
 
 public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
@@ -273,7 +264,7 @@ partial struct Imethod {
 
 // ArrayType represents a fixed array type.
 partial struct ΔArrayType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // array element type
     public ж<Type> Slice; // slice type
     public uintptr Len;
@@ -294,55 +285,55 @@ public static ΔChanDir InvalidDir => 0;
 
 // ChanType represents a channel type
 partial struct ChanType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
     public ΔChanDir Dir;
 }
 
 partial struct structTypeUncommon {
-    public partial ref ΔStructType StructType { get; }
+    /*embed*/ public ΔStructType StructType;
     internal UncommonType u;
 }
 
 // go2cs generated this placeholder — func ChanDir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal partial struct Uncommon_u /*dyn*/ {
-    public partial ref PtrType PtrType { get; }
+    /*embed*/ public PtrType PtrType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ1 /*dyn*/ {
-    public partial ref ΔFuncType FuncType { get; }
+    /*embed*/ public ΔFuncType FuncType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ2 /*dyn*/ {
-    public partial ref SliceType SliceType { get; }
+    /*embed*/ public SliceType SliceType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ3 /*dyn*/ {
-    public partial ref ΔArrayType ArrayType { get; }
+    /*embed*/ public ΔArrayType ArrayType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ4 /*dyn*/ {
-    public partial ref ChanType ChanType { get; }
+    /*embed*/ public ChanType ChanType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ5 /*dyn*/ {
-    internal partial ref mapType mapType { get; }
+    /*embed*/ public ΔMapType MapType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ6 /*dyn*/ {
-    public partial ref ΔInterfaceType InterfaceType { get; }
+    /*embed*/ public ΔInterfaceType InterfaceType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ7 /*dyn*/ {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     internal UncommonType u;
 }
 
@@ -393,20 +384,9 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
 
 // go2cs generated this placeholder — func FuncType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// InterfaceType returns t cast to a *InterfaceType, or nil if its tag does not match.
-public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+// go2cs generated this placeholder — func InterfaceType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    if (t.Kind() != Interface) {
-        return default!;
-    }
-    return Ꮡt.Reinterpret<Type, ΔInterfaceType>();
-}
-
-// Size returns the size of data with type t.
-public static uintptr Size(this ref Type t) {
-    return t.Size_;
-}
+// go2cs generated this placeholder — func Size is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Align returns the alignment of data with type t.
 public static nint Align(this ref Type t) {
@@ -418,7 +398,7 @@ public static nint FieldAlign(this ref Type t) {
 }
 
 partial struct ΔInterfaceType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ΔName PkgPath;      // import path
     public slice<Imethod> Methods; // sorted by hash
 }
@@ -449,11 +429,11 @@ public static nint NumMethod(this ref ΔInterfaceType t) {
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 partial struct SliceType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // slice element type
 }
 
-// funcType represents a function type.
+// FuncType represents a function type.
 //
 // A *Type for each in and out parameter is stored in an array that
 // directly follows the funcType (and possibly its uncommonType). So
@@ -465,7 +445,7 @@ partial struct SliceType {
 //		[2]*rtype    // [0] is in, [1] is out
 //	}
 partial struct ΔFuncType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public uint16 InCount;
     public uint16 OutCount; // top bit is set if last input parameter is ...
 }
@@ -495,7 +475,7 @@ public static bool IsVariadic(this ref ΔFuncType t) {
 }
 
 partial struct PtrType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // pointer element (pointed at) type
 }
 
@@ -510,7 +490,7 @@ public static bool Embedded(this ref StructField f) {
 }
 
 partial struct ΔStructType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ΔName PkgPath;
     public slice<StructField> Fields;
 }
@@ -617,7 +597,7 @@ internal static nint writeVarint(slice<byte> buf, nint n) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string nonEmptyStringˢ = "non-empty string"u8;
 
-// Name returns the tag string for n, or empty if there is none.
+// Name returns the name of n, or empty if it does not actually have a name.
 public static @string Name(this ΔName n) {
     if (n.Bytes == nil) {
         return ""u8;

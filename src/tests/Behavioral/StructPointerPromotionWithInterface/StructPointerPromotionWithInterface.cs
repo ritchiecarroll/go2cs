@@ -17,7 +17,7 @@ partial struct MyError {
 partial struct MyCustomError {
     public @string Message;
     /*embed*/ public Abser Abser;
-    public partial ref ж<MyError> MyError { get; }
+    /*embed*/ public ж<MyError> MyError;
 }
 
 public static float64 Time(this ref MyCustomError myErr) {
@@ -41,7 +41,7 @@ internal static @string Ping(this ref core c) {
 }
 
 partial struct Station {
-    internal partial ref core core { get; }
+    /*embed*/ internal core core;
     internal @string id;
 }
 
@@ -49,8 +49,8 @@ partial struct noop {
 }
 
 partial struct link {
-    internal partial ref noop noop { get; }
-    public partial ref ж<Station> Station { get; }
+    /*embed*/ internal noop noop;
+    /*embed*/ public ж<Station> Station;
 }
 
 partial interface Pinger {
@@ -85,11 +85,11 @@ internal static nint Hits(this ref meta m) {
 }
 
 partial struct kindBase {
-    internal partial ref meta meta { get; }
+    /*embed*/ internal meta meta;
 }
 
 partial struct counterKind {
-    internal partial ref kindBase kindBase { get; }
+    /*embed*/ internal kindBase kindBase;
 }
 
 partial interface stamper {
@@ -113,7 +113,7 @@ internal static nint probeRig(rig rʗp) {
 }
 
 partial struct deviceHandle {
-    public partial ref ж<Device> Device { get; }
+    /*embed*/ public ж<Device> Device;
 }
 
 partial struct leftSide {
@@ -133,8 +133,8 @@ internal static @string Ping(this rightSide r) {
 }
 
 partial struct pair {
-    internal partial ref leftSide leftSide { get; }
-    internal partial ref rightSide rightSide { get; }
+    /*embed*/ internal leftSide leftSide;
+    /*embed*/ internal rightSide rightSide;
 }
 
 partial struct Inner {
@@ -142,7 +142,7 @@ partial struct Inner {
 }
 
 partial struct Middle {
-    public partial ref ж<Inner> Inner { get; }
+    /*embed*/ public ж<Inner> Inner;
 }
 
 partial struct Outer {

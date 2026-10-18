@@ -46,6 +46,7 @@ using static go.os.signal_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
 [assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
+[assembly: GoImplement<signalError, error>]
 [assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
 // </InterfaceImplementations>
 
@@ -60,7 +61,7 @@ using static go.os.signal_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACIgASAoLKgoKCkrT6AAkWgoLugqaCgoKCgoKCgqaUgg==", "56-70:1;139-158:1;150-154:1.1;288-294:1")]
+[assembly: go.GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAkWgoLugqaCgoKCgoKCgqaUgsqCpoKClA==", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
 [assembly: go.GoPositionMap("os/signal/signal_unix.go", "signal_unix.cs", "AAsewrKysrSCgriCzoKUgoKUtLiCpoKmgqaC")]
 // </GoSourcePositionMaps>
 
@@ -80,6 +81,7 @@ public static partial class signal_package
     [GoValueClone("mask")] internal partial struct handler {}
     [GoValueClone("@ref")] internal partial struct handlersᴛ1 {}
     internal partial struct signalCtx {}
+    internal partial struct signalError {}
     internal partial struct stopping {}
     // </TypeAccessibility>
 

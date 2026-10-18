@@ -53,10 +53,11 @@ using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "AChQkoKUgoKmgqaCpoKCpoKmppSCgpSClIKmrvKAgpSCpII=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "AA8egoKAgoKCyIKCgqaCgoKCpoKCgoKUgoKCgoKUpoKClIKCgpSCgoKClIKClIKClKaC")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "AClQkoKUgpSCgqaCpoKmgoKmgqamlIKClIKUgqau8oCClIKkgg==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "AA8egoKAgoKCyIKCgqaCgoKClIKmgoKCgpSCgoKCgpSmgoKUgoKClIKCgoKUgoKUgpSCgpSmgg==")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_noasm.go", "chacha20poly1305_noasm.cs", "AAgSgqaC")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABEw4oKUgoKmgqaCpoKCAAcQgqaCgqaClKaCgpSClIKmgoKmgpQ=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/fips140only_go1.26.go", "fips140only_go1.26.cs", "AAsWgA==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABEw4oKUgpSCgqaCpoKmgoIABxCCpoKCpoKUpoKClIKUgqaCgqaClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto;
@@ -83,6 +84,7 @@ public static partial class chacha20poly1305_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸcipher() => builtin.initPackage(typeof(go.crypto.cipher_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸfips140() => builtin.initPackage(typeof(go.crypto.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(encoding.binary_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸcryptoꓸchacha20() => builtin.initPackage(typeof(go.vendor.golang.org.x.crypto.chacha20_package));

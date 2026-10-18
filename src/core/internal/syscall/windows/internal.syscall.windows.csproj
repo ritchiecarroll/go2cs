@@ -179,6 +179,22 @@
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>
 
+  <!-- Layout L3: this package's direct imports differ by GOOS, so the references that are not
+       common to every platform are selected by $(GoTargetOS)
+       (docs/phase4/DESIGN-multiplatform-corpus.md §8). A group with no items is not noise: it
+       records that the platform takes part in this package's axis and adds nothing beyond the
+       shared list above, which is what lets a single-target reconvert reproduce this file. -->
+  <ItemGroup Condition="'$(GoTargetOS)'=='darwin'" />
+
+  <ItemGroup Condition="'$(GoTargetOS)'=='linux'" />
+
+  <ItemGroup Condition="'$(GoTargetOS)'=='windows'">
+    <ProjectReference Include="$(go2csPath)core/internal/oserror/internal.oserror.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/stringslite/internal.stringslite.csproj" />
+    <ProjectReference Include="$(go2csPath)core/structs/structs.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="../../../LICENSE" Pack="true" PackagePath="" Condition="!Exists('$(MSBuildProjectDirectory)/LICENSE')" />
   </ItemGroup>

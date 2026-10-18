@@ -4,6 +4,7 @@
 namespace go;
 
 using abi = @internal.abi_package;
+using byteorder = @internal.byteorder_package;
 using cpu = @internal.cpu_package;
 using goarch = @internal.goarch_package;
 using sys = @internal.runtime.sys_package;
@@ -11,10 +12,24 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(stringStruct), typeof(interfacetype), typeof(structtype), typeof(Δsliceᴛ))]
 partial class runtime_package {
 
-internal static uintptr c0 => /* uintptr((8-goarch.PtrSize)/4*2860486313 + (goarch.PtrSize-4)/4*33054211828000289) */ unchecked((uintptr)33054211828000289);
-internal static uintptr c1 => /* uintptr((8-goarch.PtrSize)/4*3267000013 + (goarch.PtrSize-4)/4*23344194077549503) */ unchecked((uintptr)23344194077549503);
+// We use 32-bit hash on Wasm, see hash32.go.
+internal static UntypedInt hashSize => /* (1-goarch.IsWasm)*goarch.PtrSize + goarch.IsWasm*4 */ 8;
+internal static uintptr c0 => /* uintptr((8-hashSize)/4*2860486313 + (hashSize-4)/4*33054211828000289) */ unchecked((uintptr)33054211828000289);
+internal static uintptr c1 => /* uintptr((8-hashSize)/4*3267000013 + (hashSize-4)/4*23344194077549503) */ unchecked((uintptr)23344194077549503);
+
+internal static uintptr trimHash(uintptr h) {
+    if (goarch.IsWasm != 0) {
+        // On Wasm, we use 32-bit hash, despite that uintptr is 64-bit.
+        // memhash* always returns a uintptr with high 32-bit being 0
+        // (see hash32.go). We trim the hash in other places where we
+        // compute the hash manually, e.g. in interhash.
+        return (uintptr)(uint32)h;
+    }
+    return h;
+}
 
 internal static uintptr memhash0(@unsafe.Pointer Δp, uintptr h) {
     return h;
@@ -87,7 +102,7 @@ internal static partial uintptr strhash(@unsafe.Pointer Δp, uintptr h);
 
 internal static uintptr strhashFallback(@unsafe.Pointer a, uintptr h) {
     var x = (ж<stringStruct>)(uintptr)(a);
-    return memhashFallback((~x).str, h, (uintptr)(~x).len);
+    return memhashFallback(x.str, h, (uintptr)x.len);
 }
 
 // NOTE: Because NaN != NaN, a map can contain any
@@ -98,10 +113,10 @@ internal static uintptr f32hash(@unsafe.Pointer Δp, uintptr h) {
     var f = ~(ж<float32>)(uintptr)(Δp);
     switch (ᐧ) {
     case {} when f is 0F: {
-        return c1 * ((uintptr)(c0 ^ h)); // +0, -0
+        return trimHash(c1 * ((uintptr)(c0 ^ h))); // +0, -0
     }
     case {} when f != f: {
-        return c1 * ((uintptr)((uintptr)(c0 ^ h) ^ (uintptr)rand())); // any kind of NaN
+        return trimHash(c1 * ((uintptr)((uintptr)(c0 ^ h) ^ (uintptr)rand()))); // any kind of NaN
     }
     default: {
         return memhash(Δp, h, 4);
@@ -112,10 +127,10 @@ internal static uintptr f64hash(@unsafe.Pointer Δp, uintptr h) {
     var f = ~(ж<float64>)(uintptr)(Δp);
     switch (ᐧ) {
     case {} when f is 0D: {
-        return c1 * ((uintptr)(c0 ^ h)); // +0, -0
+        return trimHash(c1 * ((uintptr)(c0 ^ h))); // +0, -0
     }
     case {} when f != f: {
-        return c1 * ((uintptr)((uintptr)(c0 ^ h) ^ (uintptr)rand())); // any kind of NaN
+        return trimHash(c1 * ((uintptr)((uintptr)(c0 ^ h) ^ (uintptr)rand()))); // any kind of NaN
     }
     default: {
         return memhash(Δp, h, 8);
@@ -134,7 +149,7 @@ internal static uintptr c128hash(@unsafe.Pointer Δp, uintptr h) {
 
 internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
     var a = (ж<iface>)(uintptr)(Δp);
-    var tab = a.Value.tab;
+    var tab = a.of(iface.Ꮡtab).Value;
     if (tab == nil) {
         return h;
     }
@@ -146,10 +161,10 @@ internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
         // we want to report the struct, not the slice).
         throw panic(((errorString)("hash of unhashable type "u8 + toRType(t).@string())));
     }
-    if (isDirectIface(ref (t).DerefOrNull())){
-        return c1 * typehash(t, @unsafe.Pointer.FromBox(a.of(iface.Ꮡdata)), (uintptr)(h ^ c0));
+    if (t.IsDirectIface()){
+        return trimHash(c1 * typehash(t, @unsafe.Pointer.FromBox(a.of(iface.Ꮡdata)), (uintptr)(h ^ c0)));
     } else {
-        return c1 * typehash(t, (~a).data, (uintptr)(h ^ c0));
+        return trimHash(c1 * typehash(t, a.of(iface.Ꮡdata).Value, (uintptr)(h ^ c0)));
     }
 }
 
@@ -165,7 +180,7 @@ internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
 //go:linkname nilinterhash
 internal static uintptr nilinterhash(@unsafe.Pointer Δp, uintptr h) {
     var a = (ж<eface>)(uintptr)(Δp);
-    var t = a.Value._type;
+    var t = a.of(eface.Ꮡ_type).Value;
     if (t == nil) {
         return h;
     }
@@ -173,10 +188,10 @@ internal static uintptr nilinterhash(@unsafe.Pointer Δp, uintptr h) {
         // See comment in interhash above.
         throw panic(((errorString)("hash of unhashable type "u8 + toRType(t).@string())));
     }
-    if (isDirectIface(ref (t).DerefOrNull())){
-        return c1 * typehash(t, @unsafe.Pointer.FromBox(a.of(eface.Ꮡdata)), (uintptr)(h ^ c0));
+    if (t.IsDirectIface()){
+        return trimHash(c1 * typehash(t, @unsafe.Pointer.FromBox(a.of(eface.Ꮡdata)), (uintptr)(h ^ c0)));
     } else {
-        return c1 * typehash(t, (~a).data, (uintptr)(h ^ c0));
+        return trimHash(c1 * typehash(t, a.of(eface.Ꮡdata).Value, (uintptr)(h ^ c0)));
     }
 }
 
@@ -217,7 +232,7 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
             return memhash(Δp, h, t.Size_);
         }
     }
-    var exprᴛ2 = (abiꓸKind)(t.Kind_ & abi.KindMask);
+    var exprᴛ2 = t.Kind();
     if (exprᴛ2 == abi.Float32) {
         return f32hash(Δp, h);
     }
@@ -235,21 +250,21 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
     }
     if (exprᴛ2 == abi.Interface) {
         var i = Ꮡt.Reinterpret<_type, interfacetype>();
-        if (len((~i).Methods) == 0) {
+        if (len(i.Methods) == 0) {
             return nilinterhash(Δp, h);
         }
         return interhash(Δp, h);
     }
     if (exprᴛ2 == abi.Array) {
         var a = Ꮡt.Reinterpret<_type, arraytype>();
-        for (var i = (uintptr)0; i < (~a).Len; i++) {
-            h = typehash((~a).Elem, (uintptr)add(Δp, i * (~(~a).Elem).Size_), h);
+        for (var i = (uintptr)0; i < a.of(arraytype.ᏑLen).Value; i++) {
+            h = typehash(a.of(arraytype.ᏑElem).Value, (uintptr)add(Δp, i * (~a.of(arraytype.ᏑElem).Value).Size_), h);
         }
         return h;
     }
     if (exprᴛ2 == abi.Struct) {
         var s = Ꮡt.Reinterpret<_type, structtype>();
-        foreach (var (_, f) in (~s).Fields) {
+        foreach (var (_, f) in s.Fields) {
             if (f.Name.IsBlank()) {
                 continue;
             }
@@ -261,86 +276,6 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
         // Should never happen, as typehash should only be called
         // with comparable types.
         throw panic(((errorString)("hash of unhashable type "u8 + toRType(Ꮡt).@string())));
-    }
-}
-
-internal static error mapKeyError(ж<maptype> Ꮡt, @unsafe.Pointer Δp) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    if (!t.HashMightPanic()) {
-        return default!;
-    }
-    return mapKeyError2(t.Key, Δp);
-}
-
-internal static error mapKeyError2(ж<_type> Ꮡt, @unsafe.Pointer Δp) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    if ((abi.TFlag)(t.TFlag & abi.TFlagRegularMemory) != 0) {
-        return default!;
-    }
-    var exprᴛ1 = (abiꓸKind)(t.Kind_ & abi.KindMask);
-    if (exprᴛ1 == abi.Float32 || exprᴛ1 == abi.Float64 || exprᴛ1 == abi.Complex64 || exprᴛ1 == abi.Complex128 || exprᴛ1 == abi.ΔString) {
-        return default!;
-    }
-    if (exprᴛ1 == abi.Interface) {
-        var i = Ꮡt.Reinterpret<_type, interfacetype>();
-        ж<_type> tΔ2 = default!;
-        ж<@unsafe.Pointer> pdata = default!;
-        if (len((~i).Methods) == 0){
-            var a = (ж<eface>)(uintptr)(Δp);
-            tΔ2 = a.Value._type;
-            if (tΔ2 == nil) {
-                return default!;
-            }
-            pdata = a.of(eface.Ꮡdata);
-        } else {
-            var a = (ж<iface>)(uintptr)(Δp);
-            if ((~a).tab == nil) {
-                return default!;
-            }
-            tΔ2 = a.Value.tab.Value.Type;
-            pdata = a.of(iface.Ꮡdata);
-        }
-
-        if ((~tΔ2).Equal == default!) {
-            return ((errorString)("hash of unhashable type "u8 + toRType(tΔ2).@string()));
-        }
-
-        if (isDirectIface(ref (tΔ2).DerefOrNull())){
-            return mapKeyError2(tΔ2, @unsafe.Pointer.FromBox(pdata));
-        } else {
-            return mapKeyError2(tΔ2, pdata.Value);
-        }
-    }
-    if (exprᴛ1 == abi.Array) {
-        var a = Ꮡt.Reinterpret<_type, arraytype>();
-        for (var i = (uintptr)0; i < (~a).Len; i++) {
-            {
-                var err = mapKeyError2((~a).Elem, (uintptr)add(Δp, i * (~(~a).Elem).Size_)); if (err != default!) {
-                    return err;
-                }
-            }
-        }
-        return default!;
-    }
-    if (exprᴛ1 == abi.Struct) {
-        var s = Ꮡt.Reinterpret<_type, structtype>();
-        foreach (var (_, f) in (~s).Fields) {
-            if (f.Name.IsBlank()) {
-                continue;
-            }
-            {
-                var err = mapKeyError2(f.Typ, (uintptr)add(Δp, f.Offset)); if (err != default!) {
-                    return err;
-                }
-            }
-        }
-        return default!;
-    }
-    { /* default: */
-        // Should never happen, keep this case for robustness.
-        return ((errorString)("hash of unhashable type "u8 + toRType(Ꮡt).@string()));
     }
 }
 
@@ -415,7 +350,7 @@ internal static bool efaceeq(ж<_type> Ꮡt, @unsafe.Pointer x, @unsafe.Pointer 
     if (eq == default!) {
         throw panic(((errorString)("comparing uncomparable type "u8 + toRType(Ꮡt).@string())));
     }
-    if (isDirectIface(ref (Ꮡt).DerefOrNull())) {
+    if (t.IsDirectIface()) {
         // Direct interface types are ptr, chan, map, func, and single-element structs/arrays thereof.
         // Maps and funcs are not comparable, so they can't reach here.
         // Ptrs, chans, and single-element items can be compared directly using ==.
@@ -435,7 +370,7 @@ internal static bool ifaceeq(ж<itab> Ꮡtab, @unsafe.Pointer x, @unsafe.Pointer
     if (eq == default!) {
         throw panic(((errorString)("comparing uncomparable type "u8 + toRType(t).@string())));
     }
-    if (isDirectIface(ref (t).DerefOrNull())) {
+    if (t.IsDirectIface()) {
         // See comment in efaceeq.
         return x == y;
     }
@@ -465,7 +400,7 @@ internal static uintptr bytesHash(slice<byte> bʗp, uintptr seed) {
     ref var b = ref heap(bʗp, out var Ꮡb);
 
     var s = Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>();
-    return memhash((~s).Δarray, seed, (uintptr)(~s).len);
+    return memhash(s.Δarray, seed, (uintptr)s.len);
 }
 
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
@@ -531,17 +466,17 @@ internal static void initAlgAES() {
 internal static uint32 readUnaligned32(@unsafe.Pointer Δp) {
     var q = (ж<array<byte>>)(uintptr)(Δp);
     if (goarch.BigEndian) {
-        return (uint32)((uint32)((uint32)((uint32)q.Value[3] | ((uint32)q.Value[2] << (int)(8))) | ((uint32)q.Value[1] << (int)(16))) | ((uint32)q.Value[0] << (int)(24)));
+        return byteorder.BEUint32(q.slice());
     }
-    return (uint32)((uint32)((uint32)((uint32)q.Value[0] | ((uint32)q.Value[1] << (int)(8))) | ((uint32)q.Value[2] << (int)(16))) | ((uint32)q.Value[3] << (int)(24)));
+    return byteorder.LEUint32(q.slice());
 }
 
 internal static uint64 readUnaligned64(@unsafe.Pointer Δp) {
     var q = (ж<array<byte>>)(uintptr)(Δp);
     if (goarch.BigEndian) {
-        return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)q.Value[7] | ((uint64)q.Value[6] << (int)(8))) | ((uint64)q.Value[5] << (int)(16))) | ((uint64)q.Value[4] << (int)(24))) | ((uint64)q.Value[3] << (int)(32))) | ((uint64)q.Value[2] << (int)(40))) | ((uint64)q.Value[1] << (int)(48))) | ((uint64)q.Value[0] << (int)(56)));
+        return byteorder.BEUint64(q.slice());
     }
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)q.Value[0] | ((uint64)q.Value[1] << (int)(8))) | ((uint64)q.Value[2] << (int)(16))) | ((uint64)q.Value[3] << (int)(24))) | ((uint64)q.Value[4] << (int)(32))) | ((uint64)q.Value[5] << (int)(40))) | ((uint64)q.Value[6] << (int)(48))) | ((uint64)q.Value[7] << (int)(56)));
+    return byteorder.LEUint64(q.slice());
 }
 
 } // end runtime_package

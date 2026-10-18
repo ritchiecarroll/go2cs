@@ -119,8 +119,15 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
     var (bx, by, bz) = (Float64bits(x), Float64bits(y), Float64bits(z));
 
     // Inf or NaN or zero involved. At most one rounding will occur.
-    if (x == 0.0D || y == 0.0D || z == 0.0D || (uint64)(bx & (uint64)uvinf) == uvinf || (uint64)(by & (uint64)uvinf) == uvinf) {
+    if (x == 0.0D || y == 0.0D || (uint64)(bx & (uint64)uvinf) == uvinf || (uint64)(by & (uint64)uvinf) == uvinf) {
         return x * y + z;
+    }
+    // Handle z == 0.0 separately.
+    // Adding zero usually does not change the original value.
+    // However, there is an exception with negative zero. (e.g. (-0) + (+0) = (+0))
+    // This applies when x * y is negative and underflows.
+    if (z == 0.0D) {
+        return x * y;
     }
     // Handle non-finite z separately. Evaluating x*y+z where
     // x and y are finite, but z is infinite, should always result in z.

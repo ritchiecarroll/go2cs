@@ -30,6 +30,7 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 [assembly: GoTypeAlias("AAAAResource", "ΔAAAAResource")]
 [assembly: GoTypeAlias("AResource", "ΔAResource")]
 [assembly: GoTypeAlias("CNAMEResource", "ΔCNAMEResource")]
+[assembly: GoTypeAlias("HTTPSResource", "ΔHTTPSResource")]
 [assembly: GoTypeAlias("MXResource", "ΔMXResource")]
 [assembly: GoTypeAlias("NSResource", "ΔNSResource")]
 [assembly: GoTypeAlias("OPTResource", "ΔOPTResource")]
@@ -37,6 +38,7 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 [assembly: GoTypeAlias("Question", "ΔQuestion")]
 [assembly: GoTypeAlias("SOAResource", "ΔSOAResource")]
 [assembly: GoTypeAlias("SRVResource", "ΔSRVResource")]
+[assembly: GoTypeAlias("SVCBResource", "ΔSVCBResource")]
 [assembly: GoTypeAlias("TXTResource", "ΔTXTResource")]
 [assembly: GoTypeAlias("UnknownResource", "ΔUnknownResource")]
 // </ExportedTypeAliases>
@@ -52,12 +54,14 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 [assembly: GoImplement<ΔAAAAResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔAResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔCNAMEResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔHTTPSResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔMXResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔNSResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔOPTResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔPTRResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔSOAResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔSRVResource, ResourceBody>(Pointer = true)]
+[assembly: GoImplement<ΔSVCBResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔTXTResource, ResourceBody>(Pointer = true)]
 [assembly: GoImplement<ΔUnknownResource, ResourceBody>(Pointer = true)]
 // </InterfaceImplementations>
@@ -73,7 +77,8 @@ using static go.vendor.golang.org.x.net.dns.dnsmessage_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/message.go", "message.cs", "ACpaABEmkoCCpKiSgIKkAA4iAAcSkoCCpKiSgIKk3pIADSAACBSSgIKkqJKAgqSmgoLugoKClIKUpoKClIKCgoKUyoKCgoKIgqaCggAGEKaCppSCgoKClIKU5oKClN64lIKCgoKCgoKCgoKCgoKCgoKCABtCkgAQIrKCgoKUgpSClIKUgpSClIKUqJIAHVQAESSClKSkpJSokoKCgoKCpoKCgoCCpICCpICCpICCpICCpICCpKaCABMoggANKJKClIKCgoKUgoKClICCpAAcPpKClIKCgIKkgqaCgpSClIKCgoKUpoKCgoKClIKCgpSCpoKCpoCCpIKCgpSCgoKCgqaCgoKClIKCgpSAgqSCgoKUgqiSgIKkgoKClIKClIKClIKCqP6CgoKClIKUupKAgqSCgpSAgqSAgqSCgqiSgoCCkoLckqiSqOyCgpSCgoKClIKUAAMQwqiSgoCCkoLckqiSqOyCgpSCgoKClIKUAAMQwqiSgoCCkoLckqiSqOyCgpSCgoKClIKUAAMQwqiSgoCCkoIABRLCgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCqJKCgoCCpICCpICCpICCpICCpKiSqtiClIKUgpSCpoKUgoKClIIACRSUgoKAgraCgoCCtoKCgIK2goKAgsiokoSCgqKmgoKCoqaCgoKipoKCgqKmABxWAAoCgpSCgoKCggACHAALAqaCgpSClKiSgIKkgqiSgIKkgqiSgIKkgqiSgIKkgqaigoKUgqSCpIKkgpSClIKowoKUgpSCgpSAgqSCpoKClIKUqNKAgqSCgoKUgoCCpICCpICCpIKo0oCCpIKCgpSCgIKkgIKkgIKkgqjSgIKkgoKClIKAgqSAgqSAgqSCqNKAgqSCgoKUgoCCpICCpICCpIKo0oCCpIKCgpSCgIKkgIKkgIKkgqjCgIKkgoKClIKAgqSAgqSAgqSCqNKAgqSCgoKUgoCCpICCpICCpIKo0oCCpIKCgpSCgIKkgIKkgIKkgqjSgIKkgoKClIKAgqSAgqSAgqSCqMKAgqSCgoKUgoCCpICCpICCpIKowoCCpIKCgpSCgIKkgIKkgIKkgqiSgpSUggAYPJIAAhbygoCCpIKCgoKCpoKCgoCCpICCpICCpICCpICCpAACEuKCgriClAAJHrKCgoKCgpSokqyygpSmgoKClICCpICCpICCpIKClICCpKiSpoKClKaCgpSokqaCgqaCqJKmgoKmgqiSAAcSgoKUgqaCgpSokoKClIKUpoKClIKCgpSokqaCgoKUggALGpKCgpSCqJKCgpSs0qiSAAIU8pSCuIK4gqamlLiCuIKmlIKmgtyCgKbagoKmlLiopMqWtpSCgoKUgoKUlJSCgsqCgriCgrSClIKCgqaAgqTGxoKUgpSCgpSmuJSCgoKUgoKUlKaCguymxtgACRaSgoKUgqiSAAwMoqqUgoKCpIKCgqSCgoKkgoKCpIKCgqSCgoKkgoKCpIKCgqSCgoKkgoKCpIKCgpSClAAHEIKokqiSpoKCgIKkAAgSgqiSgoKCgpSokqqCgoKUgoCCpAAHEIKokqiSpoKCgIKkAAcQgqiSqJKmgoKAgqQAECSCqJKCgoKUgoKUgoKCgqiSAAIUgoKCgpSCgIKkgoKUgoKUgoKUgoKUgoKUAAcQgqiSgoKCgoKm2JKCgpSCgpSmgoKCgoKAgraClIKUAAoWgqiSgoKCgoKClKiSroKCgpSCgpSCgpSCgIKkAAcQgqiSqJKogoKAgqQABxCCqJKqkqaCgoCCpAATKpKqgqaCgoKCgpTYkoKClIKilKaCgoKCgoKClIKCgpSCgpSClAAIEoKokqiSqoK4gIKk", "", "", "359=printUint16/1/1/1,printBool/1/7/2,GoString/1/2/3,printBool/2/7/4,printBool/3/7/5,printBool/4/7/6,printBool/5/7/7,printBool/6/7/8,printBool/7/7/9,GoString/2/2/10;492=GoString/1/2/1,GoString/2/2/2;1866=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3,printUint32/1/1/4,printUint16/1/1/5;2391=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3;2535=printUint16/1/1/1,GoString/1/1/2;2648=GoString/1/2/1,GoString/2/2/2,printUint32/1/5/3,printUint32/2/5/4,printUint32/3/5/5,printUint32/4/5/6,printUint32/5/5/7;2771=printUint16/1/3/1,printUint16/2/3/2,printUint16/3/3/3,GoString/1/1/4;2812=printByteSlice/1/1/1;2836=printByteSlice/1/1/1;2873=printUint16/1/1/1,printByteSlice/1/1/2;2949=GoString/1/1/1,printByteSlice/1/1/2")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/message.go", "message.cs", "ADl4ABMqkoCCpKiSgIKkAA4iAAcSkoCCpKiSgIKk3pIADSAACBSSgIKkqJKAgqSmgoLugoKClIKUpoKClIKCgoKUyoKCgoKIgqaCggAGEKaCppSCgoKClIKU5oKClN64lIKCgoKCgoKCgoKCgoKCgoKCgoIAG0KSABAisoKCgpSClIKUgpSClIKUgpSokgAdVAARJIKUpKSklKiSgoKCgoKmgoKCgIKkgIKkgIKkgIKkgIKkgIKkpoIAEyiCAA0okoKUgoKCgpSCgoKUgIKkABw+koKUgoKAgqSCpoKClIKUgoKCgpSmgoKCgoKUgoKClIKmgoKmgIKkgoKClIKCgoKCpoKCgoKUgoKClICCpIKCgpSCqJKAgqSCgoKUgoKUgoKUgoKo/oKCgoKUgpS6koCCpIKClICCpICCpIKCqJKCgIKSgtySqJKo7IKClIKCgoKUgpQAAxDCqJKCgIKSgtySqJKo7IKClIKCgoKUgpQAAxDCqJKCgIKSgtySqJKo7IKClIKCgoKUgpQAAxDCqJKCgIKSggAFEsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKuwoKUgoKUgoKCrsKClIKClIKCgq7CgpSCgpSCgoKokoKCgIKkgIKkgIKkgIKkgIKkqJKq2IKUgpSClIKmgpSCgoKUggAJFJSCgoCCtoKCgIK2goKAgraCgoCCyKiShIKCoqaCgoKipoKCgqKmgoKCoqYAHFYACgKClIKCgoKCAAIcAAsCpoKClIKUqJKAgqSCqJKAgqSCqJKAgqSCqJKAgqSCpqKCgpSCpIKkgqSClIKUgqjCgpSClIKClICCpIKmgoKUgpSo0oCCpIKCgpSCgIKkgIKkgIKkgqjSgIKkgoKClIKAgqSAgqSAgqSCqNKAgqSCgoKUgoCCpICCpICCpIKo0oCCpIKCgpSCgIKkgIKkgIKkgqjSgIKkgoKClIKAgqSAgqSAgqSCqMKAgqSCgoKUgoCCpICCpICCpIKo0oCCpIKCgpSCgIKkgIKkgIKkgqjSgIKkgoKClIKAgqSAgqSAgqSCqNKAgqSCgoKUgoCCpICCpICCpIKowoCCpIKCgpSCgIKkgIKkgIKkgqjCgIKkgoKClIKAgqSAgqSAgqSCqJKClJSCABg8kgACFvKCgIKkgoKCgoKmgoKCgIKkgIKkgIKkgIKkgIKkAAIS4oKCuIKUAAkesoKCgoKClKiSrLKClKaCgoKUgIKkgIKkgIKkgoKUgIKkqJKmgoKUpoKClKiSpoKCpoKokqaCgqaCqJIABxKCgpSCpoKClKiSgoKUgpSmgoKUgoKClKiSpoKCgpSCAAsakoKClIKokoKClKzSqJIAAhTylIK4griCpqaUuIK4gqaUgqaC3IKAptqCgqaUuKikypa2lIKCgpSCgpSUlIKCyoKCuIKCtIKUgoKCpoCCpMbGgpSClIKClKa4lIKCgpSCgpSUpoKC7KbG2AAJFpKCgpSCqJIADgyiqpSCgoKkgoKCpIKCgqSCgoKkgoKCpIKCgqSCgoKkgoKCpIKCgqSCgoKkgoKCpIKCgqSCgoKUgpQABxCCqJKokqaCgoCCpAAIEoKokoKCgoKUqJKqgoKClIKAgqQABxCCqJKokqaCgoCCpAAHEIKokqiSpoKCgIKkABAkgqiSgoKClIKClIKCgoKokgACFIKCgoKUgoCCpIKClIKClIKClIKClIKClAAHEIKokoKCgoKCptiSgoKUgoKUpoKCgoKCgIK2gpSClAAKFoKokoKCgoKCgpSokq6CgoKUgoKUgoKUgoCCpAAHEIKokqiSqIKCgIKkAAcQgqiSqpKmgoKAgqQAEyqSqoKmgoKCgoKU2JKCgpSCopSmgoKCgoKCgpSCgoKUgoKUgpQACBKCqJKokqqCuICCpA==", "", "", "378=printUint16/1/1/1,printBool/1/7/2,GoString/1/2/3,printBool/2/7/4,printBool/3/7/5,printBool/4/7/6,printBool/5/7/7,printBool/6/7/8,printBool/7/7/9,GoString/2/2/10;511=GoString/1/2/1,GoString/2/2/2;1885=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3,printUint32/1/1/4,printUint16/1/1/5;2410=GoString/1/3/1,GoString/2/3/2,GoString/3/3/3;2568=printUint16/1/1/1,GoString/1/1/2;2681=GoString/1/2/1,GoString/2/2/2,printUint32/1/5/3,printUint32/2/5/4,printUint32/3/5/5,printUint32/4/5/6,printUint32/5/5/7;2804=printUint16/1/3/1,printUint16/2/3/2,printUint16/3/3/3,GoString/1/1/4;2845=printByteSlice/1/1/1;2869=printByteSlice/1/1/1;2906=printUint16/1/1/1,printByteSlice/1/1/2;2982=GoString/1/1/1,printByteSlice/1/1/2")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/dns/dnsmessage/svcb.go", "svcb.cs", "ABAkgqiSiIKCgqaCAAkUgqiSqJKCgpSCpqqigoKClKaCgqaqooKCgpSCpgAIFJIAESwADBySgIKkqJKAgqSmgoLKgoKUgoKClIKUgoKUppSCgpSCgIK2gILagoKCgoKSgIKkppSAgqSClIKClIK4poKCgoKSgIKkgoCCpIKUgpSCgqaokoKUgoKUgoKCrsKuwoKClKjSgIKkgoKUgoCCpICCpICCpIKowoKosoI=", "", "", "23=printUint16/1/1/1,GoString/1/1/2;105=GoString/1/1/1,printByteSlice/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.dns;
@@ -103,10 +108,13 @@ public static partial class dnsmessage_package
     public partial struct RCode {}
     [GoValueClone("Header")] public partial struct Resource {}
     [GoValueClone("Name")] public partial struct ResourceHeader {}
+    public partial struct SVCParam {}
+    public partial struct SVCParamKey {}
     public partial struct Type {}
     [GoValueClone("AAAA")] public partial struct ΔAAAAResource {}
     [GoValueClone("A")] public partial struct ΔAResource {}
     [GoValueClone("CNAME")] public partial struct ΔCNAMEResource {}
+    public partial struct ΔHTTPSResource {}
     [GoValueClone("MX")] public partial struct ΔMXResource {}
     [GoValueClone("NS")] public partial struct ΔNSResource {}
     public partial struct ΔOPTResource {}
@@ -114,6 +122,7 @@ public static partial class dnsmessage_package
     [GoValueClone("Name")] public partial struct ΔQuestion {}
     [GoValueClone("NS", "MBox")] public partial struct ΔSOAResource {}
     [GoValueClone("Target")] public partial struct ΔSRVResource {}
+    [GoValueClone("Target")] public partial struct ΔSVCBResource {}
     public partial struct ΔTXTResource {}
     public partial struct ΔUnknownResource {}
     // </TypeAccessibility>
@@ -126,5 +135,6 @@ public static partial class dnsmessage_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     // </ImportInitializers>
 }

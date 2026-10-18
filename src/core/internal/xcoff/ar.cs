@@ -7,9 +7,10 @@ using binary = encoding.binary_package;
 using fmt = fmt_package;
 using io = io_package;
 using os = os_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using encoding;
+using go;
 
 partial class xcoff_package {
 
@@ -47,7 +48,7 @@ partial struct bigarMemberHeader {
 
 // Archive represents an open AIX big archive.
 partial struct Archive {
-    public partial ref ArchiveHeader ArchiveHeader { get; }
+    /*embed*/ public ArchiveHeader ArchiveHeader;
     public slice<ж<Member>> Members;
     internal io.Closer closer;
 }
@@ -59,7 +60,7 @@ partial struct ArchiveHeader {
 
 // Member represents a member of an AIX big archive.
 partial struct Member {
-    public partial ref MemberHeader MemberHeader { get; }
+    /*embed*/ public MemberHeader MemberHeader;
     internal ж<io.SectionReader> sr;
 }
 

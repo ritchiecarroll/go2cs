@@ -249,12 +249,12 @@ partial struct ΔStateTransition {
     public ΔStack Stack;
     // The actual transition data. Stored in a neutral form so that
     // we don't need fields for every kind of resource.
-    internal int64 id;
     internal uint8 oldState;
     internal uint8 newState;
 }
 
-internal static ΔStateTransition goStateTransition(GoID id, GoState from, GoState to) {
+// MakeGoStateTransition creates a goroutine state transition.
+public static ΔStateTransition MakeGoStateTransition(GoID id, GoState from, GoState to) {
     return new ΔStateTransition(
         Resource: new ResourceID(Kind: ResourceGoroutine, id: (int64)id),
         oldState: (uint8)from,
@@ -262,7 +262,8 @@ internal static ΔStateTransition goStateTransition(GoID id, GoState from, GoSta
     );
 }
 
-internal static ΔStateTransition procStateTransition(ProcID id, ProcState from, ProcState to) {
+// MakeProcStateTransition creates a proc state transition.
+public static ΔStateTransition MakeProcStateTransition(ProcID id, ProcState from, ProcState to) {
     return new ΔStateTransition(
         Resource: new ResourceID(Kind: ResourceProc, id: (int64)id),
         oldState: (uint8)from,

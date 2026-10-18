@@ -74,7 +74,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     {
-        var (m, okΔ1) = reflect.Zero(t).Interface()._<Generator>(ᐧ); if (okΔ1) {
+        var (m, okΔ1) = reflect.TypeAssert<Generator>(reflect.Zero(t)); if (okΔ1) {
             return (m.Generate(Ꮡrand, size), true);
         }
     }
@@ -278,7 +278,7 @@ public static @string Error(this ref CheckError s) {
 
 // A CheckEqualError is the result [CheckEqual] finding an error.
 partial struct CheckEqualError {
-    public partial ref CheckError CheckError { get; }
+    /*embed*/ public CheckError CheckError;
     public slice<any> Out1;
     public slice<any> Out2;
 }

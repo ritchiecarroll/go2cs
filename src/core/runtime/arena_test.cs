@@ -49,6 +49,7 @@ partial struct largeScalar /*[4194305]byte*/;
 partial struct largePointer /*[524289]ж<smallPointer>*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object triggersSegvWithGodebugˢ = (@string)"triggers SEGV with GODEBUG=clobberfree=1"u8;
 internal static readonly @string allocˢ = "Alloc"u8;
 internal static readonly @string structˢ = "struct{}"u8;
 internal static readonly @string structˢ2 = "[]struct{}"u8;
@@ -57,6 +58,11 @@ internal static readonly @string intCap0ˢ = "[]int (cap 0)"u8;
 public static void TestUserArena(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        if (runtime_internal_test_package.Clobberfree()) {
+            // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
+            Ꮡt.Skip(triggersSegvWithGodebugˢ);
+        }
+
         // Set GOMAXPROCS to 2 so we don't run too many of these
         // tests in parallel.
         defer(GOMAXPROCS, GOMAXPROCS(2), ref ᒐ);
@@ -207,7 +213,7 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
         // Check integrity of allocated data.
         foreach (var (_, s) in arenaValues) {
             if (!AreEqual(s.ValueSlot, Ꮡvalue.ValueSlot)) {
-                tΔ1.Errorf("failed integrity check: got %#v, want %#v"u8, s.ValueSlot, Ꮡvalue.ValueSlot);
+                tΔ1.Errorf("failed integrity check: got %#v, want %#v"u8, (s.ValueSlot).OrTypedNilOf(), (Ꮡvalue.ValueSlot).OrTypedNilOf());
             }
         }
 
@@ -248,7 +254,7 @@ internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> va
                 var got = sl[i];
                 var want = valueʗ1[i];
                 if (!AreEqual(got, want)) {
-                    tΔ1.Errorf("failed integrity check: got %#v, want %#v at index %d"u8, got, want, i);
+                    tΔ1.Errorf("failed integrity check: got %#v, want %#v at index %d"u8, (got).OrTypedNilOf(), (want).OrTypedNilOf(), i);
                 }
             }
         }
@@ -263,6 +269,11 @@ internal static readonly @string freeˢ = "Free"u8;
 internal static readonly @string finalizerˢ = "Finalizer"u8;
 
 public static void TestUserArenaLiveness(ж<testing.T> Ꮡt) {
+    if (runtime_internal_test_package.Clobberfree()) {
+        // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
+        Ꮡt.Skip(triggersSegvWithGodebugˢ);
+    }
+
     Ꮡt.Run(freeˢ, (ж<testing.T> tΔ1) => {
         testUserArenaLiveness(tΔ1, false);
     });
@@ -368,9 +379,15 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
 internal static readonly object heapAllocationKeptAliveˢ = (@string)"heap allocation kept alive through non-pointer reference"u8;
 
 public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
+    if (runtime_internal_test_package.Clobberfree()) {
+        // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
+        Ꮡt.Skip(triggersSegvWithGodebugˢ);
+    }
+
     // This is a regression test for a serious issue wherein if pointer bits
     // aren't properly cleared, it's possible to allocate scalar data down
     // into a previously pointer-ful area, causing misinterpretation by the GC.
+
     // Create a large object, grab a pointer into it, and free it.
     var x = Ꮡ(new array<byte>(8388608));
     var xp = (uintptr)x.at<byte>(124);

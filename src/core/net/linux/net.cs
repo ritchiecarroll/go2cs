@@ -325,6 +325,9 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
 // The returned os.File's file descriptor is different from the connection's.
 // Attempting to change properties of the original using this duplicate
 // may or may not have the desired effect.
+//
+// On Windows, the returned os.File's file descriptor is not usable
+// on other processes.
 internal static (ж<os.File> f, error err) File(this ref conn c) {
     ж<os.File> f = default!;
     error err = default!;
@@ -394,7 +397,7 @@ partial interface PacketConn :
 }
 
 partial struct listenerBacklogCacheᴛ1 /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
+    /*embed*/ public sync_package.Once Once;
     internal nint val;
 }
 internal static ж<listenerBacklogCacheᴛ1> ᏑlistenerBacklogCache = new StandardBox<listenerBacklogCacheᴛ1>(new listenerBacklogCacheᴛ1(nil));
@@ -855,8 +858,8 @@ internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
 // without leading to a recursive call to ReadFrom.
 partial struct tcpConnWithoutReadFrom {
-    internal partial ref noReadFrom noReadFrom { get; }
-    public partial ref ж<TCPConn> TCPConn { get; }
+    /*embed*/ internal noReadFrom noReadFrom;
+    /*embed*/ public ж<TCPConn> TCPConn;
 }
 
 // Fallback implementation of io.ReaderFrom's ReadFrom, when sendfile isn't
@@ -881,8 +884,8 @@ internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) 
 // than WriteTo. This is used to permit WriteTo to call io.Copy
 // without leading to a recursive call to WriteTo.
 partial struct tcpConnWithoutWriteTo {
-    internal partial ref noWriteTo noWriteTo { get; }
-    public partial ref ж<TCPConn> TCPConn { get; }
+    /*embed*/ internal noWriteTo noWriteTo;
+    /*embed*/ public ж<TCPConn> TCPConn;
 }
 
 // Fallback implementation of io.WriterTo's WriteTo, when zero-copy isn't applicable.
@@ -905,13 +908,13 @@ internal static error acquireThread(context.Context ctx) {
     ᏑthreadOnce.Do(() => {
         threadLimit = new channel<EmptyStruct>(concurrentThreadsLimit());
     });
-    var selᴛ16 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-    var selᴛ17 = ctx.Done();
-    switch (select(selᴛ16, ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
+    var selᴛ14 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
+    var selᴛ15 = ctx.Done();
+    switch (select(selᴛ14, ᐸꟷ(selᴛ15, ꓸꓸꓸ))) {
     case 0: {
         return default!;
     }
-    case 1 when selᴛ17.ꟷᐳ(out _): {
+    case 1 when selᴛ15.ꟷᐳ(out _): {
         return ctx.Err();
     }}
     return default!;

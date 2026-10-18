@@ -5,11 +5,12 @@ namespace go.@internal;
 
 using bits = global::go.math.bits_package;
 using os = os_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using strings = strings_package;
 using atomic = global::go.sync.atomic_package;
 using time = time_package;
 using System.Runtime.InteropServices;
+using global::go;
 using global::go.math;
 using global::go.sync;
 

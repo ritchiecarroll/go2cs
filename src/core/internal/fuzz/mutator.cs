@@ -334,7 +334,7 @@ internal static slice<int32> interesting32 = new int32[]{-2147483648, -100663046
 internal const uint64 maxUint = /* uint64(^uint(0)) */ 18446744073709551615;
 internal const int64 maxInt = /* int64(maxUint >> 1) */ 9223372036854775807;
 
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     foreach (var (_, v) in interesting8) {
         interesting16 = append(interesting16, (int16)v);
     }

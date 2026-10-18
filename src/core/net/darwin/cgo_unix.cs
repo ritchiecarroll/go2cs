@@ -21,6 +21,7 @@ using System.Runtime.CompilerServices;
 using net;
 using vendor.golang.org.x.net.dns;
 
+[GoFieldAccess(typeof(syscall.RawSockaddrInet6))]
 partial class net_package {
 
 // cgoAvailable set to true to indicate that the cgo resolver
@@ -64,11 +65,7 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
         {
             var err = acquireThread(ctx); if (err != default!) {
                 T zero = GoZero<T>();
-                return (zero, new DNSErrorжerror(Ꮡ(new DNSError(
-                    Name: lookupName,
-                    Err: mapErr(err).Error(),
-                    IsTimeout: AreEqual(err, context.DeadlineExceeded)
-                ))));
+                return (zero, new DNSErrorжerror(newDNSError(mapErr(err), lookupName, ""u8)));
             }
         }
 
@@ -99,11 +96,7 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
             T zero = GoZero<T>();
-            return (zero, new DNSErrorжerror(Ꮡ(new DNSError(
-                Name: lookupName,
-                Err: mapErr(ctx.Err()).Error(),
-                IsTimeout: AreEqual(ctx.Err(), context.DeadlineExceeded)
-            ))));
+            return (zero, new DNSErrorжerror(newDNSError(mapErr(ctx.Err()), lookupName, ""u8)));
         }}
         return default!;
     }
@@ -278,12 +271,12 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
             var exprᴛ2 = _C_ai_family(r).Value;
             if (exprᴛ2 == _C_AF_INET) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet4>();
-                var addr = new IPAddr(IP: copyIP((~sa).Addr[..]));
+                var addr = new IPAddr(IP: copyIP(sa.of(syscall.RawSockaddrInet4.ᏑAddr).slice()));
                 addrs = append(addrs, addr);
             }
             else if (exprᴛ2 == _C_AF_INET6) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet6>();
-                var addr = new IPAddr(IP: copyIP((~sa).Addr[..]), Zone: zoneCache.name((nint)(~sa).Scope_id));
+                var addr = new IPAddr(IP: copyIP(sa.of(syscall.RawSockaddrInet6.ᏑAddr).slice()), Zone: zoneCache.name((nint)sa.Scope_id));
                 addrs = append(addrs, addr);
             }
         }
@@ -374,20 +367,19 @@ internal static (ж<_C_struct_sockaddr>, _C_socklen_t) cgoSockaddr(IP ip, @strin
     return (default!, 0);
 }
 
-internal static (@string cname, error err, bool completed) cgoLookupCNAME(context.Context ctx, @string name) {
+internal static (@string cname, error err) cgoLookupCNAME(context.Context ctx, @string name) {
     @string cname = default!;
     error err = default!;
-    bool completed = default!;
 
     (var resources, err) = resSearch(ctx, name, (nint)(uint16)dnsmessage.TypeCNAME, (nint)(uint16)dnsmessage.ClassINET);
     if (err != default!) {
-        return (cname, err, completed);
+        return ("", err);
     }
     (cname, err) = parseCNAMEFromResources(resources);
     if (err != default!) {
-        return ("", err, false);
+        return ("", err);
     }
-    return (cname, default!, true);
+    return (cname, default!);
 }
 
 // resSearch will make a call to the 'res_nsearch' routine in the C library
@@ -427,8 +419,12 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         // For now, we are willing to take res_search's word that there's nothing
         // useful in the response, even though there *is* a response.
         nint bufSize = maxDNSPacketSize;
-        var buf = (ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize));
-        defer(_C_free, @unsafe.Pointer.FromPinnedBox(buf), ref ᒐ);
+        ref var buf = ref heap<ж<_C_uchar>>(out var Ꮡbuf);
+        buf = (ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize));
+        defer(() => {
+            // Free in a closure which captures buf to pick up a reallocated buffer from below.
+            _C_free(@unsafe.Pointer.FromPinnedBox(Ꮡbuf.ValueSlot));
+        }, ref ᒐ);
 
         var (s, err) = syscall.BytePtrFromString(hostname);
         if (err != default!) {
@@ -437,17 +433,17 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
 
         nint size = default!;
         while (ᐧ) {
-            nint sizeΔ1 = _C_res_nsearch(state, s, @class, rtype, buf, bufSize);
-            if (sizeΔ1 <= 0 || sizeΔ1 > 0xffff) {
+            size = _C_res_nsearch(state, s, @class, rtype, buf, bufSize);
+            if (size <= 0 || size > 0xffff) {
                 return (default!, errors.New(resNsearchFailureˢ));
             }
-            if (sizeΔ1 <= bufSize) {
+            if (size <= bufSize) {
                 break;
             }
 
             // Allocate a bigger buffer to fit the entire msg.
             _C_free(@unsafe.Pointer.FromPinnedBox(buf));
-            bufSize = sizeΔ1;
+            bufSize = size;
             buf = (ж<_C_uchar>)(uintptr)(_C_malloc((uintptr)bufSize));
         }
 

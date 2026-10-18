@@ -28,6 +28,8 @@ The interface is deliberately parallel:
 - Editing Go marks the C# stale until **Convert** is selected.
 - **Run with Go** converts, builds, and runs .NET whenever the Go program runs.
   It is on by default; turning it off is remembered by the browser.
+- A successful conversion starts its .NET build at once, in the background, so
+  **Run** usually finds the build already finished or under way.
 - **Run** builds and executes the current conversion; it becomes **Kill** while
   the process is active.
 
@@ -115,13 +117,15 @@ go2cs, restores the `go.*` packages into the NuGet cache, and starts MSBuild and
 the C# compiler. The server makes that trip itself as soon as it starts, in the
 background, by converting, building, and running the Tour's own hello-world
 program in a scratch workspace of its own — the same stages, runtime, and
-environment a lesson uses. The page shows **Warming up .NET...** in the header
-while this runs and **.NET ready** briefly when it ends, so by the time a
-lesson is open its first run takes about as long as any later one.
+environment a lesson uses. The server prints that it is ready, and opens the
+browser, only when the warmup ends, so the first lesson a user sees already
+runs warm: its first run takes about as long as any later one.
 
-The server answers requests throughout. A conversion proceeds right away; a
-.NET build that arrives mid-warmup waits for the warmup to finish rather than
-racing it for the same packages, then builds warm. If the warmup fails, the
+The server answers requests throughout. A page opened during the warmup shows
+**Warming up .NET...** in the header while it runs and **.NET ready** briefly
+when it ends. A conversion proceeds right away; its
+.NET build, like any build that arrives mid-warmup, waits for the warmup to
+finish rather than racing it for the same packages, then builds warm. If the warmup fails, the
 server logs why and the page shows nothing: the first lesson simply pays the
 cold start. `-no-warmup` turns it off.
 
@@ -192,8 +196,15 @@ Go module; the server runs `go mod tidy`, recursively converts imported third-pa
 the generated app/dependency graph isolated from the selected runtime tree. The Code and Project tabs
 still show only the submitted app. Converted workspaces expire after 30 minutes. The request body is
 limited to 256 KiB; normal tool stages have a 20-second timeout, dependency resolution has two minutes
-for an initial download, and the one-time converter build has ten. Aborting the Run request cancels the
-active build or program.
+for an initial download, and the one-time converter build has ten.
+
+The `dotnet build` of a submission starts as soon as its conversion succeeds, in the background, and
+the Build stage reports that build: Run waits for it if it is still running, then executes the program,
+so a synchronized Go and .NET run pays only for whatever part of the build is left. Converting a newer
+submission (every Tour page converts itself on arrival) cancels an older one's unfinished build, as
+does the expiry of its workspace; should the older conversion still be run, it builds then. Aborting
+the Run request cancels the running program; a background build it was waiting for carries on, so the
+next Run finds it finished.
 
 ## Integration design
 
@@ -204,5 +215,6 @@ interface on port 4000.
 
 The websocket proxy translates the browser-facing origin to the private Tour
 origin so the upstream same-origin check remains effective. The server owns
-only the go2cs/.NET half. A successful conversion is retained briefly so Run
-can build and execute the exact project shown in the Project tab.
+only the go2cs/.NET half. A successful conversion is retained briefly, and
+built as soon as it is saved, so Run executes the exact project shown in the
+Project tab.

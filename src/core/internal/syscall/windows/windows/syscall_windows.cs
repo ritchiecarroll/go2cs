@@ -31,13 +31,16 @@ public static @string UTF16PtrToString(ж<uint16> Ꮡp) {
     return syscall.UTF16ToString(@unsafe.Slice(Ꮡp, n));
 }
 
+public static syscall.Errno ERROR_INVALID_HANDLE => 6;
 public static syscall.Errno ERROR_BAD_LENGTH => 24;
 public static syscall.Errno ERROR_SHARING_VIOLATION => 32;
 public static syscall.Errno ERROR_LOCK_VIOLATION => 33;
 public static syscall.Errno ERROR_NOT_SUPPORTED => 50;
 public static syscall.Errno ERROR_CALL_NOT_IMPLEMENTED => 120;
 public static syscall.Errno ERROR_INVALID_NAME => 123;
+public static syscall.Errno ERROR_NEGATIVE_SEEK => 131;
 public static syscall.Errno ERROR_LOCK_FAILED => 167;
+public static syscall.Errno ERROR_IO_INCOMPLETE => 996;
 public static syscall.Errno ERROR_NO_TOKEN => 1008;
 public static syscall.Errno ERROR_NO_UNICODE_TRANSLATION => 1113;
 public static syscall.Errno ERROR_CANT_ACCESS_FILE => 1920;
@@ -177,13 +180,14 @@ public static UntypedInt IfOperStatusDormant => 5;
 public static UntypedInt IfOperStatusNotPresent => 6;
 public static UntypedInt IfOperStatusLowerLayerDown => 7;
 
-//sys	GetAdaptersAddresses(family uint32, flags uint32, reserved uintptr, adapterAddresses *IpAdapterAddresses, sizePointer *uint32) (errcode error) = iphlpapi.GetAdaptersAddresses
+//sys	GetAdaptersAddresses(family uint32, flags uint32, reserved unsafe.Pointer, adapterAddresses *IpAdapterAddresses, sizePointer *uint32) (errcode error) = iphlpapi.GetAdaptersAddresses
 //sys	GetComputerNameEx(nameformat uint32, buf *uint16, n *uint32) (err error) = GetComputerNameExW
 //sys	MoveFileEx(from *uint16, to *uint16, flags uint32) (err error) = MoveFileExW
 //sys	GetModuleFileName(module syscall.Handle, fn *uint16, len uint32) (n uint32, err error) = kernel32.GetModuleFileNameW
 //sys	SetFileInformationByHandle(handle syscall.Handle, fileInformationClass uint32, buf unsafe.Pointer, bufsize uint32) (err error) = kernel32.SetFileInformationByHandle
 //sys	VirtualQuery(address uintptr, buffer *MemoryBasicInformation, length uintptr) (err error) = kernel32.VirtualQuery
 //sys	GetTempPath2(buflen uint32, buf *uint16) (n uint32, err error) = GetTempPath2W
+//sys	GetFileSizeEx(handle syscall.Handle, size *int64) (err error) = kernel32.GetFileSizeEx
 
 // flags for CreateToolhelp32Snapshot
 public static UntypedInt TH32CS_SNAPMODULE => 0x08;
@@ -247,7 +251,7 @@ internal static ж<sendRecvMsgFuncᴛ1> ᏑsendRecvMsgFunc = new StandardBox<sen
 internal static ref sendRecvMsgFuncᴛ1 sendRecvMsgFunc => ref ᏑsendRecvMsgFunc.Value;
 
 partial struct WSAMsg {
-    public syscall.Pointer Name;
+    public ж<syscall.RawSockaddrAny> Name;
     public int32 Namelen;
     public ж<syscall.WSABuf> Buffers;
     public uint32 BufferCount;
@@ -256,6 +260,7 @@ partial struct WSAMsg {
 }
 
 //sys	WSASocket(af int32, typ int32, protocol int32, protinfo *syscall.WSAProtocolInfo, group uint32, flags uint32) (handle syscall.Handle, err error) [failretval==syscall.InvalidHandle] = ws2_32.WSASocketW
+//sys	WSADuplicateSocket(s syscall.Handle, processID uint32, info *syscall.WSAProtocolInfo) (err error) [failretval!=0] = ws2_32.WSADuplicateSocketW
 //sys	WSAGetOverlappedResult(h syscall.Handle, o *syscall.Overlapped, bytes *uint32, wait bool, flags *uint32) (err error) = ws2_32.WSAGetOverlappedResult
 // go2cs generated this placeholder — func loadWSASendRecvMsg is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -373,8 +378,14 @@ partial struct FILE_FULL_DIR_INFO {
 
 //sys	GetVolumeInformationByHandle(file syscall.Handle, volumeNameBuffer *uint16, volumeNameSize uint32, volumeNameSerialNumber *uint32, maximumComponentLength *uint32, fileSystemFlags *uint32, fileSystemNameBuffer *uint16, fileSystemNameSize uint32) (err error) = GetVolumeInformationByHandleW
 //sys	GetVolumeNameForVolumeMountPoint(volumeMountPoint *uint16, volumeName *uint16, bufferlength uint32) (err error) = GetVolumeNameForVolumeMountPointW
-//sys	RtlLookupFunctionEntry(pc uintptr, baseAddress *uintptr, table *byte) (ret uintptr) = kernel32.RtlLookupFunctionEntry
-//sys	RtlVirtualUnwind(handlerType uint32, baseAddress uintptr, pc uintptr, entry uintptr, ctxt uintptr, data *uintptr, frame *uintptr, ctxptrs *byte) (ret uintptr) = kernel32.RtlVirtualUnwind
+partial struct RUNTIME_FUNCTION {
+    public uint32 BeginAddress;
+    public uint32 EndAddress;
+    public uint32 UnwindData;
+}
+
+//sys	RtlLookupFunctionEntry(pc uintptr, baseAddress *uintptr, table unsafe.Pointer) (ret *RUNTIME_FUNCTION) = kernel32.RtlLookupFunctionEntry
+//sys	RtlVirtualUnwind(handlerType uint32, baseAddress uintptr, pc uintptr, entry *RUNTIME_FUNCTION, ctxt unsafe.Pointer, data unsafe.Pointer, frame *uintptr, ctxptrs unsafe.Pointer) (ret uintptr) = kernel32.RtlVirtualUnwind
 partial struct SERVICE_STATUS {
     public uint32 ServiceType;
     public uint32 CurrentState;
@@ -421,6 +432,20 @@ public static partial int64 QueryPerformanceFrequency();
 
 // Implemented in runtime package.
 //sys   GetModuleHandle(modulename *uint16) (handle syscall.Handle, err error) = kernel32.GetModuleHandleW
+public static UntypedInt PIPE_ACCESS_INBOUND => 0x00000001;
+public static UntypedInt PIPE_ACCESS_OUTBOUND => 0x00000002;
+public static UntypedInt PIPE_ACCESS_DUPLEX => 0x00000003;
+
+public static UntypedInt PIPE_TYPE_BYTE => 0x00000000;
+public static UntypedInt PIPE_TYPE_MESSAGE => 0x00000004;
+
+public static UntypedInt PIPE_READMODE_BYTE => 0x00000000;
+public static UntypedInt PIPE_READMODE_MESSAGE => 0x00000002;
+
+//sys	CreateIoCompletionPort(filehandle syscall.Handle, cphandle syscall.Handle, key uintptr, threadcnt uint32) (handle syscall.Handle, err error)
+//sys	GetOverlappedResult(handle syscall.Handle, overlapped *syscall.Overlapped, done *uint32, wait bool) (err error)
+//sys	CreateNamedPipe(name *uint16, flags uint32, pipeMode uint32, maxInstances uint32, outSize uint32, inSize uint32, defaultTimeout uint32, sa *syscall.SecurityAttributes) (handle syscall.Handle, err error)  [failretval==syscall.InvalidHandle] = CreateNamedPipeW
+//sys	ReOpenFile(filehandle syscall.Handle, desiredAccess uint32, shareMode uint32, flagAndAttributes uint32) (handle syscall.Handle, err error) [failretval==syscall.InvalidHandle]
 
 // NTStatus corresponds with NTSTATUS, error values returned by ntdll.dll and
 // other native functions.
@@ -442,16 +467,32 @@ public static @string Error(this NTStatus s) {
 //
 // At the moment, we only need a couple, so just put them here manually.
 // If this list starts getting long, we should consider generating the full set.
+public static NTStatus STATUS_OBJECT_NAME_COLLISION => 0xC0000035;
 public static NTStatus STATUS_FILE_IS_A_DIRECTORY => 0xC00000BA;
 public static NTStatus STATUS_DIRECTORY_NOT_EMPTY => 0xC0000101;
 public static NTStatus STATUS_NOT_A_DIRECTORY => 0xC0000103;
 public static NTStatus STATUS_CANNOT_DELETE => 0xC0000121;
 public static NTStatus STATUS_REPARSE_POINT_ENCOUNTERED => 0xC000050B;
+public static NTStatus STATUS_NOT_SUPPORTED => 0xC00000BB;
+public static NTStatus STATUS_INVALID_PARAMETER => 0xC000000D;
+public static NTStatus STATUS_INVALID_INFO_CLASS => 0xC0000003;
+public static NTStatus STATUS_ACCESS_DENIED => 0xC0000022;
+
+public static UntypedInt FileModeInformation => 16;
+
+// https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_mode_information
+partial struct FILE_MODE_INFORMATION {
+    public uint32 Mode;
+}
 
 // NT Native APIs
-//sys   NtCreateFile(handle *syscall.Handle, access uint32, oa *OBJECT_ATTRIBUTES, iosb *IO_STATUS_BLOCK, allocationSize *int64, attributes uint32, share uint32, disposition uint32, options uint32, eabuffer uintptr, ealength uint32) (ntstatus error) = ntdll.NtCreateFile
+//sys   NtCreateFile(handle *syscall.Handle, access uint32, oa *OBJECT_ATTRIBUTES, iosb *IO_STATUS_BLOCK, allocationSize *int64, attributes uint32, share uint32, disposition uint32, options uint32, eabuffer unsafe.Pointer, ealength uint32) (ntstatus error) = ntdll.NtCreateFile
 //sys   NtOpenFile(handle *syscall.Handle, access uint32, oa *OBJECT_ATTRIBUTES, iosb *IO_STATUS_BLOCK, share uint32, options uint32) (ntstatus error) = ntdll.NtOpenFile
 //sys   rtlNtStatusToDosErrorNoTeb(ntstatus NTStatus) (ret syscall.Errno) = ntdll.RtlNtStatusToDosErrorNoTeb
-//sys   NtSetInformationFile(handle syscall.Handle, iosb *IO_STATUS_BLOCK, inBuffer uintptr, inBufferLen uint32, class uint32) (ntstatus error) = ntdll.NtSetInformationFile
+//sys   NtSetInformationFile(handle syscall.Handle, iosb *IO_STATUS_BLOCK, inBuffer unsafe.Pointer, inBufferLen uint32, class uint32) (ntstatus error) = ntdll.NtSetInformationFile
+//sys	RtlIsDosDeviceName_U(name *uint16) (ret uint32) = ntdll.RtlIsDosDeviceName_U
+//sys   NtQueryInformationFile(handle syscall.Handle, iosb *IO_STATUS_BLOCK, inBuffer unsafe.Pointer, inBufferLen uint32, class uint32) (ntstatus error) = ntdll.NtQueryInformationFile
+//sys	SetEntriesInAcl(countExplicitEntries uint32, explicitEntries *EXPLICIT_ACCESS, oldACL *ACL, newACL **ACL) (ret error) =  advapi32.SetEntriesInAclW
+//sys	SetNamedSecurityInfo(objectName string, objectType uint32, securityInformation uint32, owner *syscall.SID, group *syscall.SID, dacl *ACL, sacl *ACL) (ret error) = advapi32.SetNamedSecurityInfoW
 
 } // end windows_package

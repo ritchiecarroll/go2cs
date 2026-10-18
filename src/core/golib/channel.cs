@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using go.golib;
 
 namespace go;
@@ -220,9 +221,10 @@ internal sealed class SelectState
 /// <summary>
 /// A parked channel operation (Go's <c>sudog</c> analog): either a plain blocked send/receive, or
 /// one case of a blocked <c>select</c> (then <see cref="Sel"/> is non-null and all of the select's
-/// waiters share its park).
+/// waiters share its park). An AWAITED operation (<c>channel&lt;T&gt;.ReceiveAsync</c> / <c>SendAsync</c>) parks
+/// like a one-case select and is <c>detached</c>: no thread and no goroutine waits on it.
 /// </summary>
-internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex = -1)
+internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex = -1, bool detached = false)
 {
     /// <summary>Send: the (boxed) value to deliver. Receive: the delivered value (null = zero value).</summary>
     internal object? Elem;
@@ -243,8 +245,9 @@ internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex =
     // The goroutine parked on this waiter (Go's sudog.g). Every waiter is constructed by the goroutine
     // that is about to park on it -- chansend, chanrecv, and each case of a blocked select -- so the
     // constructing thread's identity IS the parker. Null on a thread with no goroutine identity,
-    // where Ready is a no-op.
-    internal readonly Goroutine? Parker = Goroutine.Current;
+    // where Ready is a no-op, and null for a DETACHED (awaited) waiter: the goroutine that created it
+    // did not park, and its continuation may run on any thread.
+    internal readonly Goroutine? Parker = detached ? null : Goroutine.Current;
 
     // Intrusive queue links — owned by the channel lock of the queue the waiter is on.
     internal Waiter? Next;
@@ -364,23 +367,30 @@ internal abstract class ChanCore
     internal readonly SyncTestBubble? Bubble = SyncTestBubble.Current;
 
     /// <summary>
-    /// Go's check at the top of chansend / chanrecv: an operation on a bubbled channel from a goroutine
-    /// in no bubble panics with Go's text.
+    /// Go's decision at the top of chansend / chanrecv / closechan, and in send() / recv() before a
+    /// direct handoff: an operation on a bubbled channel from any goroutine not in THAT bubble -- no
+    /// bubble, or another one -- is a fault, and this is its text (null when the operation may run).
+    /// </summary>
+    /// <remarks>
+    /// Go 1.26 writes every one as <c>c.bubble != nil &amp;&amp; getg().bubble != c.bubble</c> and calls
+    /// <c>fatal</c> (go1.26.9 runtime/chan.go:193-195, 320-323, 418-420, 540-542, 704-707). Go 1.24
+    /// panicked instead, only for a caller in NO bubble, and a handoff compared the parked goroutine's
+    /// bubble. The fault ends the process, so the decision is its own member, which a test reads.
+    /// </remarks>
+    internal string? OutsideBubbleFault(string operation) =>
+        Bubble is not null && !ReferenceEquals(SyncTestBubble.Current, Bubble)
+            ? $"{operation} {(operation == "close" ? "of" : "on")} synctest channel from outside bubble"
+            : null;
+
+    /// <summary>
+    /// Go's check at the top of chansend / chanrecv / closechan: fatal, with Go's text, when
+    /// <see cref="OutsideBubbleFault"/> says so. Called before the channel lock is taken.
     /// </summary>
     internal void RefuseOutsideBubble(string operation)
     {
-        if (Bubble is not null && SyncTestBubble.Current is null)
-            throw new PanicException($"{operation} on synctest channel from outside bubble");
+        if (OutsideBubbleFault(operation) is { } fault)
+            FatalReport.Fatal(fault, userFault: true);
     }
-
-    /// <summary>
-    /// Go's check in send() / recv() before a direct handoff: the parked goroutine on the other side
-    /// must be in the same bubble as the caller (a goroutine of ANOTHER bubble can reach a bubbled
-    /// channel's queue, since it passes the no-bubble check). The waiter is already dequeued, as in
-    /// Go; the caller unlocks before this panic escapes.
-    /// </summary>
-    internal bool HandoffCrossesBubble(Waiter parked) =>
-        Bubble is not null && !ReferenceEquals(parked.Parker?.Bubble, SyncTestBubble.Current);
 
     /// <summary>Buffer capacity; 0 = unbuffered (rendezvous).</summary>
     internal readonly int Dataqsiz;
@@ -438,6 +448,76 @@ internal abstract class ChanCore
     /// receive would block.
     /// </summary>
     internal abstract bool TryCommitRecvLocked(out object? value, out bool ok);
+
+    #region [ Awaited operations ]
+
+    // An awaited operation parks as a ONE-CASE select whose case is ordinal 0: every waker (a send, a
+    // receive, another select's commit, a close) already claims a select waiter by CAS before touching
+    // it, so the operation completes exactly once. Cancellation is a second claimant, ordinal 1. Whoever
+    // wins decides: the waker delivers and the operation happened, or the canceller unlinks the waiter
+    // and the operation did not, with no value taken or given either way.
+    private const int AsyncOperation = 0;
+    private const int AsyncCanceled = 1;
+
+    /// <summary>
+    /// Refuses an awaited operation on a synctest bubble's channel: its waiter has no goroutine, so a
+    /// bubble could neither count it idle nor check a handoff to it.
+    /// </summary>
+    internal Exception? RefuseAwaitedInBubble(string operation)
+    {
+        return Bubble is null ? null : new PanicException($"{operation} on synctest channel: an awaited channel operation has no goroutine to park");
+    }
+
+    /// <summary>
+    /// Creates the detached waiter an awaited operation parks with. The caller enqueues it under the
+    /// channel lock, as every park does.
+    /// </summary>
+    internal static Waiter NewAwaitedWaiter(bool isSend)
+    {
+        return new Waiter(isSend, new SelectState(), AsyncOperation, detached: true);
+    }
+
+    /// <summary>
+    /// Waits, without holding a thread, until a waker or <paramref name="token"/> claims
+    /// <paramref name="parked"/>; throws <see cref="OperationCanceledException"/> when the token won.
+    /// </summary>
+    internal async Task AwaitParked(Waiter parked, CancellationToken token)
+    {
+        SelectState sel = parked.Sel!;
+
+        // SemaphoreSlim completes an awaiting waiter's task with its continuation run asynchronously, so a
+        // waker's Release never runs the awaiting caller's code on the waker's own thread.
+        if (token.CanBeCanceled)
+        {
+            using (token.Register(() => cancelParked(parked)))
+                await sel.Park.WaitAsync().ConfigureAwait(false);
+        }
+        else
+        {
+            await sel.Park.WaitAsync().ConfigureAwait(false);
+        }
+
+        if (Volatile.Read(ref sel.Winner) == AsyncCanceled)
+            throw new OperationCanceledException(token);
+    }
+
+    // The token's claim. Losing it means a waker claimed first and is delivering (or has delivered): the
+    // operation completes. Winning it unlinks the waiter, which a waker that already popped it has done
+    // (Remove is then a no-op), and releases the park the waker would have.
+    private void cancelParked(Waiter parked)
+    {
+        SelectState sel = parked.Sel!;
+
+        if (!sel.TryClaim(AsyncCanceled))
+            return;
+
+        lock (SyncRoot)
+            parked.Queue?.Remove(parked);
+
+        sel.Park.Release();
+    }
+
+    #endregion
 }
 
 /// <summary>
@@ -482,8 +562,8 @@ internal sealed class ChanCore<T> : ChanCore
             // unlockf), then publish value+ok and signal.
             Monitor.Exit(SyncRoot);
 
-            if (HandoffCrossesBubble(receiver))
-                throw new PanicException("send on synctest channel from outside bubble");
+            if (OutsideBubbleFault("send") is { } fault)
+                FatalReport.Fatal(fault, userFault: true);
 
             receiver.Elem = value;
             receiver.Ok = true;
@@ -520,7 +600,7 @@ internal sealed class ChanCore<T> : ChanCore
         Waiter parked = new(isSend: true) { Elem = value };
         Sendq.Enqueue(parked);
 
-        // A bubbled channel parks as Go's "chan send (synctest)", which its bubble counts idle.
+        // A bubbled channel parks as Go's "chan send (durable)", which its bubble counts idle.
         using (Goroutine.Park(Bubble is null ? WaitReason.ChanSend : WaitReason.SynctestChanSend))
         {
             Monitor.Exit(SyncRoot);
@@ -558,11 +638,11 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (sender is not null)
         {
-            // Go's recv(): a handoff across bubbles panics, after its unlockf.
-            if (HandoffCrossesBubble(sender))
+            // Go's recv(): a handoff from outside the channel's bubble is fatal, after its unlockf.
+            if (OutsideBubbleFault("receive") is { } fault)
             {
                 Monitor.Exit(SyncRoot);
-                throw new PanicException("receive on synctest channel from outside bubble");
+                FatalReport.Fatal(fault, userFault: true);
             }
 
             if (Dataqsiz == 0)
@@ -619,7 +699,7 @@ internal sealed class ChanCore<T> : ChanCore
         Waiter parked = new(isSend: false);
         Recvq.Enqueue(parked);
 
-        // A bubbled channel parks as Go's "chan receive (synctest)", which its bubble counts idle.
+        // A bubbled channel parks as Go's "chan receive (durable)", which its bubble counts idle.
         using (Goroutine.Park(Bubble is null ? WaitReason.ChanReceive : WaitReason.SynctestChanReceive))
         {
             Monitor.Exit(SyncRoot);
@@ -642,6 +722,9 @@ internal sealed class ChanCore<T> : ChanCore
     /// </summary>
     internal void Close()
     {
+        // Go 1.26's closechan check, after the nil check and before the lock (chan.go:418-420).
+        RefuseOutsideBubble("close");
+
         Monitor.Enter(SyncRoot);
 
         if (Closed)
@@ -718,10 +801,10 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (receiver is not null)
         {
-            // Go's send(), reached from selectgo: a handoff across bubbles panics. Thrown with the
-            // select's locks held -- PollPassLocked releases them all before it escapes.
-            if (HandoffCrossesBubble(receiver))
-                throw new PanicException("send on synctest channel from outside bubble");
+            // Go's send(), reached from selectgo: a handoff from outside the channel's bubble is fatal.
+            // The select's locks are still held; the process ends here, so nothing waits on them.
+            if (OutsideBubbleFault("send") is { } fault)
+                FatalReport.Fatal(fault, userFault: true);
 
             receiver.Elem = value;
             receiver.Ok = true;
@@ -756,9 +839,9 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (sender is not null)
         {
-            // Go's recv(), reached from selectgo (locks released by PollPassLocked, as above).
-            if (HandoffCrossesBubble(sender))
-                throw new PanicException("receive on synctest channel from outside bubble");
+            // Go's recv(), reached from selectgo (fatal with the locks held, as above).
+            if (OutsideBubbleFault("receive") is { } fault)
+                FatalReport.Fatal(fault, userFault: true);
 
             if (Dataqsiz == 0)
             {
@@ -798,6 +881,101 @@ internal sealed class ChanCore<T> : ChanCore
         value = null;
         ok = false;
         return false;
+    }
+
+    /// <summary>
+    /// Go's chanrecv for an AWAITING caller: completes at once when the receive can commit, otherwise
+    /// parks a detached waiter in the same receive queue a blocked goroutine waits in, so delivery
+    /// order and the close rules are the channel's own. Every failure arrives through the task.
+    /// </summary>
+    internal Task<(T value, bool ok)> RecvAsync(CancellationToken token)
+    {
+        if (RefuseAwaitedInBubble("receive") is { } refused)
+            return Task.FromException<(T, bool)>(refused);
+
+        if (token.IsCancellationRequested)
+            return Task.FromCanceled<(T, bool)>(token);
+
+        // The typed non-blocking receive first: no boxing on the common ready path.
+        if (Recv(out T value, out bool ok, block: false))
+            return Task.FromResult((value, ok));
+
+        Waiter parked;
+
+        lock (SyncRoot)
+        {
+            // Again under the lock that publishes the waiter: a send or a close may have landed since.
+            if (TryCommitRecvLocked(out object? committed, out bool committedOk))
+            {
+                // As Recv: a closed, drained channel yields the element type's Go zero value.
+                T received = committedOk ? (committed is null ? default! : (T)committed) : builtin.GoZero<T>();
+                return Task.FromResult((received, committedOk));
+            }
+
+            parked = NewAwaitedWaiter(isSend: false);
+            Recvq.Enqueue(parked);
+        }
+
+        return awaitRecv(parked, token);
+    }
+
+    private async Task<(T value, bool ok)> awaitRecv(Waiter parked, CancellationToken token)
+    {
+        await AwaitParked(parked, token).ConfigureAwait(false);
+
+        // As Recv's parked arm: woken by close, Elem is null and the receive yields the Go zero value.
+        T value = parked.Elem is null ? builtin.GoZero<T>() : (T)parked.Elem;
+        return (value, parked.Ok);
+    }
+
+    /// <summary>
+    /// Go's chansend for an AWAITING caller: completes at once when the send can commit, otherwise
+    /// parks a detached waiter in the channel's send queue. A send on a closed channel panics, through
+    /// the task, whether the channel was closed before the call or while it waited.
+    /// </summary>
+    internal Task SendAsync(T value, CancellationToken token)
+    {
+        if (RefuseAwaitedInBubble("send") is { } refused)
+            return Task.FromException(refused);
+
+        if (token.IsCancellationRequested)
+            return Task.FromCanceled(token);
+
+        try
+        {
+            if (Send(value, block: false))
+                return Task.CompletedTask;
+        }
+        catch (PanicException ex)
+        {
+            return Task.FromException(ex);
+        }
+
+        Waiter parked;
+
+        lock (SyncRoot)
+        {
+            // Again under the lock that publishes the waiter: a receiver may have parked since.
+            if (Closed)
+                return Task.FromException(RuntimeErrorPanic.PlainError("send on closed channel"));
+
+            if (TryCommitSendLocked(value))
+                return Task.CompletedTask;
+
+            parked = NewAwaitedWaiter(isSend: true);
+            parked.Elem = value;
+            Sendq.Enqueue(parked);
+        }
+
+        return awaitSend(parked, token);
+    }
+
+    private async Task awaitSend(Waiter parked, CancellationToken token)
+    {
+        await AwaitParked(parked, token).ConfigureAwait(false);
+
+        if (!parked.Ok)
+            throw RuntimeErrorPanic.PlainError("send on closed channel");
     }
 }
 
@@ -973,7 +1151,7 @@ internal static class SelectRuntime
         // ready a parked goroutine. A waker that claimed us between the unlock and this wait has
         // already released the semaphore, so the wait returns immediately — no lost wakeup.
         // Go: a bubble member whose every (non-nil) case is a bubbled channel parks as "select
-        // (synctest)", which its bubble counts idle.
+        // (durable)", which its bubble counts idle.
         using (Goroutine.Park(allSynctest && SyncTestBubble.Current is not null ? WaitReason.SynctestSelect : WaitReason.Select))
         {
             UnlockAll(lockOrder);
@@ -1109,11 +1287,12 @@ internal static class SelectRuntime
         return -1;
     }
 
-    // Go's selectgo, before any lock: a case on a bubbled channel from a goroutine in no bubble panics
-    // ("select on synctest channel from outside bubble"); returns whether EVERY non-nil case is on a
-    // bubbled channel. Nil cases are omitted from both questions, as Go omits them from its poll and
-    // lock orders (COORD's addition 3): Server.Shutdown's select over a bubbled channel and
-    // context.Background().Done() -- a nil channel -- still parks as "select (synctest)".
+    // Go's selectgo, before any lock: a case on a bubbled channel from a goroutine not in its bubble
+    // is fatal ("select on synctest channel from outside bubble"; go1.26.9 runtime/select.go:179-183,
+    // a panic for a caller in no bubble at 1.24); returns whether EVERY non-nil case is on a bubbled
+    // channel. Nil cases are omitted from both questions, as Go omits them from its poll and lock
+    // orders (COORD's addition 3): Server.Shutdown's select over a bubbled channel and
+    // context.Background().Done() -- a nil channel -- still parks as "select (durable)".
     private static bool AllCasesBubbled(SelectOp[] ops)
     {
         bool all = true;
@@ -1125,8 +1304,8 @@ internal static class SelectRuntime
 
             if (core.Bubble is not null)
             {
-                if (SyncTestBubble.Current is null)
-                    throw new PanicException("select on synctest channel from outside bubble");
+                if (core.OutsideBubbleFault("select") is { } fault)
+                    FatalReport.Fatal(fault, userFault: true);
             }
             else
             {
@@ -1713,6 +1892,95 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
 
         m_core.Recv(out T value, out bool ok, block: true);
         return (value, ok);
+    }
+
+    /// <summary>
+    /// Receives a value without blocking the calling thread: the awaitable form of <see cref="Receive()"/>,
+    /// for a C# caller that must not block (a UI thread, a request handler).
+    /// </summary>
+    /// <param name="cancellationToken">Ends the wait; a canceled receive took no value.</param>
+    /// <returns>
+    /// A task for the value received; a receive on a closed, drained channel completes with the zero value.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// The same channel operation as <see cref="Receive()"/>, not a wrapper around it: a pending receive
+    /// waits in the channel's own receive queue, beside any blocked goroutine, so Go's rules hold
+    /// unchanged. An unbuffered channel is a rendezvous, waiters are served first in, first out, a closed
+    /// channel drains its buffer before it reads as the zero value, and a nil channel never becomes ready.
+    /// No thread waits: the task completes when a sender, a close or the token claims the waiter.
+    /// </para>
+    /// <para>
+    /// Cancellation is all or nothing. Whichever of a waker and the token claims the waiter first
+    /// decides, so a canceled receive took no value, and a receive that took one is never reported
+    /// canceled. A token canceled before the call performs no receive at all.
+    /// </para>
+    /// <para>
+    /// On a channel made inside a <c>testing/synctest</c> bubble the task faults with a
+    /// <see cref="PanicException"/>: a bubble tracks its goroutines' parks, and an awaited operation has none.
+    /// </para>
+    /// </remarks>
+    public Task<T> ReceiveAsync(CancellationToken cancellationToken = default)
+    {
+        Task<(T val, bool ok)> received = ReceiveAsync(true, cancellationToken);
+
+        return received.IsCompletedSuccessfully ? Task.FromResult(received.Result.val) : valueOf(received);
+
+        static async Task<T> valueOf(Task<(T val, bool ok)> task)
+        {
+            return (await task.ConfigureAwait(false)).val;
+        }
+    }
+
+    /// <summary>
+    /// Receives a value without blocking the calling thread, with Go's comma-ok result: the awaitable
+    /// form of <see cref="Receive(bool)"/>.
+    /// </summary>
+    /// <param name="_">Overload discriminator for the comma-ok result, <see cref="ꟷ"/>.</param>
+    /// <param name="cancellationToken">Ends the wait; a canceled receive took no value.</param>
+    /// <returns>
+    /// A task for the value received and whether a send delivered it: <c>(zero, false)</c> once the channel
+    /// is closed and drained.
+    /// </returns>
+    /// <remarks>See <see cref="ReceiveAsync(CancellationToken)"/>, which this is with the comma-ok result.</remarks>
+    public Task<(T val, bool ok)> ReceiveAsync(bool _, CancellationToken cancellationToken = default)
+    {
+        // Receiving from a nil channel blocks forever: only the token ends it.
+        if (m_core is null)
+            return nilChannelWait<(T val, bool ok)>(cancellationToken);
+
+        return m_core.RecvAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Sends a value without blocking the calling thread: the awaitable form of <see cref="Send(in T)"/>.
+    /// </summary>
+    /// <param name="value">Value to send.</param>
+    /// <param name="cancellationToken">Ends the wait; a canceled send delivered nothing.</param>
+    /// <returns>
+    /// A task that completes once the value is delivered: on an unbuffered channel when a receiver takes
+    /// it, on a buffered one when it is in the buffer.
+    /// </returns>
+    /// <remarks>
+    /// The same channel operation as <see cref="Send(in T)"/>, in the channel's own send queue (see
+    /// <see cref="ReceiveAsync(CancellationToken)"/> for the rules and for cancellation). A send on a closed
+    /// channel panics as in Go, through the task, whether the channel was closed before the call or while
+    /// the send waited.
+    /// </remarks>
+    public Task SendAsync(T value, CancellationToken cancellationToken = default)
+    {
+        // Sending to a nil channel blocks forever: only the token ends it.
+        if (m_core is null)
+            return nilChannelWait<bool>(cancellationToken);
+
+        return m_core.SendAsync(value, cancellationToken);
+    }
+
+    // A nil channel's operation never completes; a cancelable token ends it as canceled.
+    private static async Task<TResult> nilChannelWait<TResult>(CancellationToken token)
+    {
+        await Task.Delay(Timeout.Infinite, token).ConfigureAwait(false);
+        return default!;
     }
 
     /// <summary>

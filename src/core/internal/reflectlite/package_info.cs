@@ -15,6 +15,7 @@ global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
 global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
 global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using runtimeꓸError = go.runtime_package.ΔError;
@@ -65,7 +66,7 @@ using static go.@internal.reflectlite_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIgBrAKCpoKmgqaC2qKCgoKCgvqCgpSCpoKClIKC5oKClIKCgoKUpoKCAAIaAAsO5IKmgqaCAAQWgKSCgoKUpoKCgpQABByCgpSCgoKClLSklKaCpoKCgpTOgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClAACFPKqogAEGoKClIKCpoIABL4BAAkEgsqCuKaygqaCpgAE2AHSgpQ=")]
-[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AEugAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACAq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
+[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE6kAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACAq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

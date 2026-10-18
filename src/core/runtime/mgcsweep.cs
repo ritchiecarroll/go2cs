@@ -168,13 +168,16 @@ internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
             @throw(mismatchedBeginEndOfˢ);
         }
         if (Ꮡa.of(activeSweep.Ꮡstate).CompareAndSwap(state, state - 1)) {
-            if (state != sweepDrainedMask) {
+            if (state - 1 != sweepDrainedMask) {
                 return;
             }
+            // We're the last sweeper, and there's nothing left to sweep.
             if (debug.gcpacertrace > 0) {
                 var live = ᏑgcController.of(gcControllerState.ᏑheapLive).Load();
                 print((@string)"pacer: sweep done at heap size "u8, (live >> (int)(20)), (@string)"MB; allocated "u8, ((live - mheap_.sweepHeapLiveBasis) >> (int)(20)), (@string)"MB during sweep; swept "u8, Ꮡmheap_.of(mheap.ᏑpagesSwept).Load(), (@string)" pages at "u8, mheap_.sweepPagesPerByte, (@string)" pages/byte\n"u8);
             }
+            // Now that sweeping is completely done, flush remaining cleanups.
+            ᏑgcCleanups.flush();
             return;
         }
     }
@@ -271,7 +274,7 @@ internal static void finishsweep_m() {
 internal static void bgsweep(channel<nint> c) {
     Δsweep.g = getg();
 
-    lockInit(ᏑΔsweep.of(sweepdata.Ꮡlock), lockRankSweep);
+    lockInit(ref Δsweep.@lock, lockRankSweep);
     @lock(ᏑΔsweep.of(sweepdata.Ꮡlock));
     Δsweep.parked = true;
     c.ᐸꟷ(1);
@@ -306,12 +309,17 @@ internal static void bgsweep(channel<nint> c) {
             // N.B. freeSomeWbufs is already batched internally.
             goschedIfBusy();
         }
+        freeDeadSpanSPMCs();
         @lock(ᏑΔsweep.of(sweepdata.Ꮡlock));
         if (!isSweepDone()) {
             // This can happen if a GC runs between
             // gosweepone returning ^0 above
             // and the lock being acquired.
             unlock(ᏑΔsweep.of(sweepdata.Ꮡlock));
+            // This goroutine must preempt when we have no work to do
+            // but isSweepDone returns false because of another existing sweeper.
+            // See issue #73499.
+            goschedIfBusy();
             continue;
         }
         Δsweep.parked = true;
@@ -328,7 +336,7 @@ partial struct sweepLocker {
 
 // sweepLocked represents sweep ownership of a span.
 partial struct sweepLocked {
-    internal partial ref ж<mspan> mspan { get; }
+    /*embed*/ internal ж<mspan> mspan;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -544,7 +552,7 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
 
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
-        Δtrace.GCSweepSpan((~s).npages * (uintptr)_PageSize);
+        Δtrace.GCSweepSpan((~s).npages * (uintptr)pageSize);
         traceRelease(Δtrace);
     }
 
@@ -573,7 +581,7 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
     var siter = newSpecialsIter(s);
     while (siter.valid()) {
         // A finalizer can be set for an inner byte of an object, find object beginning.
-        var objIndex = (uintptr)(~siter.s).offset / size;
+        var objIndex = (~siter.s).offset / size;
         var Δp = s.@base() + objIndex * size;
         var mbits = s.markBitsForIndex(objIndex);
         if (!mbits.isMarked()){
@@ -581,7 +589,7 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
             // Pass 1: see if it has a finalizer.
             var hasFinAndRevived = false;
             var endOffset = Δp - s.@base() + size;
-            for (var tmp = siter.s; tmp != nil && (uintptr)(~tmp).offset < endOffset; tmp = tmp.Value.next) {
+            for (var tmp = siter.s; tmp != nil && (~tmp).offset < endOffset; tmp = tmp.Value.next) {
                 if ((~tmp).kind == _KindSpecialFinalizer) {
                     // Stop freeing of object if it has a finalizer.
                     mbits.setMarkedNonAtomic();
@@ -593,11 +601,11 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
                 // Pass 2: queue all finalizers and clear any weak handles. Weak handles are cleared
                 // before finalization as specified by the weak package. See the documentation
                 // for that package for more details.
-                while (siter.valid() && (uintptr)(~siter.s).offset < endOffset) {
+                while (siter.valid() && (~siter.s).offset < endOffset) {
                     // Find the exact byte for which the special was setup
                     // (as opposed to object beginning).
                     var special = siter.s;
-                    var pΔ1 = s.@base() + (uintptr)(~special).offset;
+                    var pΔ1 = s.@base() + (~special).offset;
                     if ((~special).kind == _KindSpecialFinalizer || (~special).kind == _KindSpecialWeakHandle){
                         siter.unlinkAndNext();
                         freeSpecial(special, (@unsafe.Pointer)pΔ1, size);
@@ -609,11 +617,11 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
                 }
             } else {
                 // Pass 2: the object is truly dead, free (and handle) all specials.
-                while (siter.valid() && (uintptr)(~siter.s).offset < endOffset) {
+                while (siter.valid() && (~siter.s).offset < endOffset) {
                     // Find the exact byte for which the special was setup
                     // (as opposed to object beginning).
                     var special = siter.s;
-                    var pΔ2 = s.@base() + (uintptr)(~special).offset;
+                    var pΔ2 = s.@base() + (~special).offset;
                     siter.unlinkAndNext();
                     freeSpecial(special, (@unsafe.Pointer)pΔ2, size);
                 }
@@ -661,10 +669,18 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
                 if (asanenabled && !(~s).isUserArenaChunk) {
                     asanpoison((@unsafe.Pointer)x, size);
                 }
+                if (valgrindenabled && !(~s).isUserArenaChunk) {
+                    valgrindFree((@unsafe.Pointer)x);
+                }
             }
             mbits.advance();
             abits.advance();
         }
+    }
+
+    // Copy over and clear the inline mark bits if necessary.
+    if (gcUsesSpanInlineMarkBits((~s).elemsize)) {
+        s.moveInlineMarks((~s).gcmarkBits);
     }
 
     // Check for zombie objects.
@@ -904,7 +920,7 @@ internal static void reportZombies(this ж<mspan> Ꮡs) {
             if (length > 1024) {
                 length = 1024;
             }
-            hexdumpWords(addr, addr + length, default!);
+            hexdumpWords(addr, length, default!);
         }
         mbits.advance();
         abits.advance();
@@ -1016,9 +1032,9 @@ internal static void gcPaceSweeper(uint64 trigger) {
         // concurrent sweep are less likely to leave pages
         // unswept when GC starts.
         heapDistance -= 1024 * 1024;
-        if (heapDistance < _PageSize) {
+        if (heapDistance < pageSize) {
             // Avoid setting the sweep ratio extremely high
-            heapDistance = _PageSize;
+            heapDistance = pageSize;
         }
         var pagesSwept = Ꮡmheap_.of(mheap.ᏑpagesSwept).Load();
         var pagesInUse = Ꮡmheap_.of(mheap.ᏑpagesInUse).Load();

@@ -177,13 +177,13 @@
     <ProjectReference Include="$(go2csPath)core/go/parser/go.parser.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/token/go.token.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/version/go.version.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/buildcfg/internal.buildcfg.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/goversion/internal.goversion.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/types/errors/internal.types.errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />
+    <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />

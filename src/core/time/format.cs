@@ -942,7 +942,7 @@ internal static @string quote(@string s) {
             if (c == (rune)'"' || c == (rune)'\\') {
                 buf = append(buf, (byte)((rune)'\\'));
             }
-            buf = append(buf, ((@string)c).ꓸꓸꓸ);
+            buf = append(buf, (byte)c);
         }
     }
     buf = append(buf, (byte)((rune)'"'));
@@ -1752,6 +1752,16 @@ internal static (uint64 x, float64 scale, @string rem) leadingFraction(@string s
     return (x, scale, s.slice(i));
 }
 
+// parseDurationError describes a problem parsing a duration string.
+partial struct parseDurationError {
+    internal @string message;
+    internal @string value;
+}
+
+internal static @string Error(this ref parseDurationError e) {
+    return "time: "u8 + e.message + " "u8 + quote(e.value);
+}
+
 internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"u8] = (uint64)(int64)ΔNanosecond,
     ["us"u8] = (uint64)(int64)Microsecond,
@@ -1770,7 +1780,8 @@ internal static map<@string, uint64> unitMap = new map<@string, uint64>{
 // Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 public static (Duration, error) ParseDuration(@string s) {
     // [-+]?([0-9]*(\.[0-9]*)?[a-z]+)+
-    @string orig = s;
+    ref var orig = ref heap<@string>(out var Ꮡorig);
+    orig = s;
     uint64 d = default!;
     var neg = false;
 
@@ -1787,7 +1798,7 @@ public static (Duration, error) ParseDuration(@string s) {
         return (0, default!);
     }
     if (s == ""u8) {
-        return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+        return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
     }
     while (s != ""u8) {
         uint64 v = default!;                      // integers before, after decimal point
@@ -1798,13 +1809,13 @@ public static (Duration, error) ParseDuration(@string s) {
 
         // The next character must be [0-9.]
         if (!(s[0] == (rune)'.' || (rune)'0' <= s[0] && s[0] <= (rune)'9')) {
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
         // Consume [0-9]*
         nint pl = len(s);
         (v, s, err) = leadingInt(s);
         if (err != default!) {
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
         var pre = pl != len(s); // whether we consumed anything before a period
 
@@ -1818,7 +1829,7 @@ public static (Duration, error) ParseDuration(@string s) {
         }
         if (!pre && !post) {
             // no digits (e.g. ".s" or "-.s")
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
 
         // Consume unit.
@@ -1830,17 +1841,17 @@ public static (Duration, error) ParseDuration(@string s) {
             }
         }
         if (i == 0) {
-            return (0, errors.New("time: missing unit in duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("missing unit in duration"u8, orig))));
         }
         @string u = s.slice(0, i);
         s = s.slice(i);
         var (unit, ok) = unitMap[u, ꟷ];
         if (!ok) {
-            return (0, errors.New("time: unknown unit "u8 + quote(u) + " in duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("unknown unit "u8 + quote(u) + " in duration"u8, orig))));
         }
         if (v > ((uint64)1 << (int)(63)) / unit) {
             // overflow
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
         v *= unit;
         if (f > 0) {
@@ -1849,19 +1860,19 @@ public static (Duration, error) ParseDuration(@string s) {
             v += (uint64)((float64)f * ((float64)unit / scale));
             if (v > ((uint64)1 << (int)(63))) {
                 // overflow
-                return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+                return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
             }
         }
         d += v;
         if (d > ((uint64)1 << (int)(63))) {
-            return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+            return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
         }
     }
     if (neg) {
         return (-((Duration)(int64)d), default!);
     }
     if (d > 9223372036854775807UL) {
-        return (0, errors.New("time: invalid duration "u8 + quote(orig)));
+        return (0, new parseDurationErrorжerror(Ꮡ(new parseDurationError("invalid duration"u8, orig))));
     }
     return (((Duration)(int64)d), default!);
 }

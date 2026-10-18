@@ -79,7 +79,7 @@ public static nint /*n*/ Len64(uint64 x) {
         x >>= (int)(8);
         n += 8;
     }
-    return n + (nint)len8tab[x];
+    return n + (nint)len8tab[(uint8)x];
 }
 
 // --- OnesCount ---

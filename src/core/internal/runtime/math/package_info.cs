@@ -49,7 +49,7 @@ using static go.@internal.runtime.math_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/math/math.go", "math.cs", "AAwaooKUggACEAAIAoKCgoKCgoKCgoKCggACEgAJAriC")]
+[assembly: go.GoPositionMap("internal/runtime/math/math.go", "math.cs", "ABEoooKUggACEAAIAoKCgoKCgoKCgoKCggACEgAJAriC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

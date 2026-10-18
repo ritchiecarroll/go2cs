@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 // Hashing algorithm inspired by
 // wyhash: https://github.com/wangyi-fudan/wyhash
-//go:build amd64 || arm64 || loong64 || mips64 || mips64le || ppc64 || ppc64le || riscv64 || s390x || wasm
+//go:build amd64 || arm64 || loong64 || mips64 || mips64le || ppc64 || ppc64le || riscv64 || s390x
 namespace go;
 
-using math = @internal.runtime.math_package;
+using Δmath = @internal.runtime.math_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
@@ -84,7 +84,7 @@ internal static uintptr memhash64Fallback(@unsafe.Pointer Δp, uintptr seed) {
 }
 
 internal static uintptr mix(uintptr a, uintptr b) {
-    var (hi, lo) = math.Mul64((uint64)a, (uint64)b);
+    var (hi, lo) = Δmath.Mul64((uint64)a, (uint64)b);
     return (uintptr)((uint64)(hi ^ lo));
 }
 

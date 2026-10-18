@@ -4,13 +4,16 @@
 namespace go;
 
 using abi = @internal.abi_package;
-using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
+using windows = @internal.runtime.syscall.windows_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using @internal.runtime.syscall;
+using ꓸꓸꓸuintptr = Span<uintptr>;
 
+[GoFieldAccess(typeof(windows.Context))]
 partial class runtime_package {
 
 // TODO(brainman): should not need those
@@ -42,7 +45,6 @@ partial struct stdFunction /*global::go.unsafe_package.Pointer*/;
 //go:cgo_import_dynamic runtime._GetThreadContext GetThreadContext%2 "kernel32.dll"
 //go:cgo_import_dynamic runtime._SetThreadContext SetThreadContext%2 "kernel32.dll"
 //go:cgo_import_dynamic runtime._LoadLibraryExW LoadLibraryExW%3 "kernel32.dll"
-//go:cgo_import_dynamic runtime._LoadLibraryW LoadLibraryW%1 "kernel32.dll"
 //go:cgo_import_dynamic runtime._PostQueuedCompletionStatus PostQueuedCompletionStatus%4 "kernel32.dll"
 //go:cgo_import_dynamic runtime._QueryPerformanceCounter QueryPerformanceCounter%1 "kernel32.dll"
 //go:cgo_import_dynamic runtime._QueryPerformanceFrequency QueryPerformanceFrequency%1 "kernel32.dll"
@@ -97,7 +99,6 @@ internal static stdFunction _GetSystemInfo;
 internal static stdFunction _GetThreadContext;
 internal static stdFunction _SetThreadContext;
 internal static stdFunction _LoadLibraryExW;
-internal static stdFunction _LoadLibraryW;
 internal static stdFunction _PostQueuedCompletionStatus;
 internal static stdFunction _QueryPerformanceCounter;
 internal static stdFunction _QueryPerformanceFrequency;
@@ -156,6 +157,8 @@ internal static partial void tstart_stdcall(ж<m> newm);
 internal static partial void wintls();
 
 partial struct mOS {
+    // This is here to avoid using the G stack so the stack can move during the call.
+    internal windows.StdCallInfo stdCallInfo;
     internal mutex threadLock;   // protects "thread" and prevents closing
     internal uintptr thread; // thread handle
     internal uintptr waitsema; // semaphore for parking on locks
@@ -182,8 +185,8 @@ partial struct mOS {
     // complete.
     //
     // TODO(austin): We may not need this if preemption were more
-    // tightly synchronized on the G/P status and preemption
-    // blocked transition into _Gsyscall/_Psyscall.
+    // tightly synchronized on the G status and preemption
+    // blocked transition into _Gsyscall.
     internal uint32 preemptExtLock;
 }
 
@@ -206,13 +209,9 @@ internal static int32 read(int32 fd, @unsafe.Pointer Δp, int32 n) {
 partial struct sigset {
 }
 
-// Call a Windows function with stdcall conventions,
-// and switch to os stack during the call.
-internal static partial void asmstdcall(@unsafe.Pointer fn);
-
 internal static @unsafe.Pointer asmstdcallAddr;
 
-partial struct winlibcall /*libcall*/;
+partial struct winlibcall /*global::go.@internal.runtime.syscall.windows_package.StdCallInfo*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string usageˢ = "usage"u8;
@@ -221,7 +220,7 @@ internal static stdFunction windowsFindfunc(uintptr lib, slice<byte> name) {
     if (name[len(name) - 1] != 0) {
         @throw(usageˢ);
     }
-    var f = stdcall2(_GetProcAddress, lib, (uintptr)Ꮡ(name, 0));
+    var f = stdcall(_GetProcAddress, lib, (uintptr)Ꮡ(name, 0));
     return ((stdFunction)(@unsafe.Pointer)f);
 }
 
@@ -236,7 +235,7 @@ internal static uintptr sysDirectoryLen;
 internal static readonly @string unableToDetermineSystemˢ = "Unable to determine system directory"u8;
 
 internal static void initSysDirectory() {
-    var l = stdcall2(_GetSystemDirectoryA, (uintptr)ᏑsysDirectory.at<byte>(0), (uintptr)(len(sysDirectory) - 1));
+    var l = stdcall(_GetSystemDirectoryA, (uintptr)ᏑsysDirectory.at<byte>(0), (uintptr)(len(sysDirectory) - 1));
     if (l == 0 || l > (uintptr)(len(sysDirectory) - 1)) {
         @throw(unableToDetermineSystemˢ);
     }
@@ -250,20 +249,21 @@ public static @string windows_GetSystemDirectory() {
 }
 
 internal static uintptr windowsLoadSystemLib(slice<uint16> name) {
-    return stdcall3(_LoadLibraryExW, (uintptr)Ꮡ(name, 0), 0, _LOAD_LIBRARY_SEARCH_SYSTEM32);
+    uintptr _LOAD_LIBRARY_SEARCH_SYSTEM32 = 0x00000800;
+    return stdcall(_LoadLibraryExW, (uintptr)Ꮡ(name, 0), 0, _LOAD_LIBRARY_SEARCH_SYSTEM32);
 }
 
 //go:linkname windows_QueryPerformanceCounter internal/syscall/windows.QueryPerformanceCounter
 internal static int64 windows_QueryPerformanceCounter() {
     ref var counter = ref heap(new int64(), out var Ꮡcounter);
-    stdcall1(_QueryPerformanceCounter, (uintptr)Ꮡcounter);
+    stdcall(_QueryPerformanceCounter, (uintptr)Ꮡcounter);
     return counter;
 }
 
 //go:linkname windows_QueryPerformanceFrequency internal/syscall/windows.QueryPerformanceFrequency
 internal static int64 windows_QueryPerformanceFrequency() {
     ref var frequency = ref heap(new int64(), out var Ꮡfrequency);
-    stdcall1(_QueryPerformanceFrequency, (uintptr)Ꮡfrequency);
+    stdcall(_QueryPerformanceFrequency, (uintptr)Ꮡfrequency);
     return frequency;
 }
 
@@ -319,7 +319,7 @@ internal static void monitorSuspendResume() {
     fn = uintptr (uintptr context, uint32 changeType, uintptr setting) => {
         for (var mp = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm))); mp != nil; mp = mp.Value.alllink) {
             if ((~mp).resumesema != 0) {
-                stdcall1(_SetEvent, (~mp).resumesema);
+                stdcall(_SetEvent, (~mp).resumesema);
             }
         }
         return (uintptr)(0);
@@ -330,14 +330,14 @@ internal static void monitorSuspendResume() {
     );
     ref var handle = ref heap<uintptr>(out var Ꮡhandle);
     handle = (uintptr)0;
-    stdcall3(powerRegisterSuspendResumeNotification, _DEVICE_NOTIFY_CALLBACK,
+    stdcall(powerRegisterSuspendResumeNotification, _DEVICE_NOTIFY_CALLBACK,
         (uintptr)Ꮡparams, (uintptr)@unsafe.Pointer.FromBox(Ꮡhandle));
 }
 
-internal static int32 getproccount() {
+internal static int32 getCPUCount() {
     ref var mask = ref heap(new uintptr(), out var Ꮡmask);
     ref var sysmask = ref heap(new uintptr(), out var Ꮡsysmask);
-    var ret = stdcall3(_GetProcessAffinityMask, currentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡmask), (uintptr)@unsafe.Pointer.FromBox(Ꮡsysmask));
+    var ret = stdcall(_GetProcessAffinityMask, windows.CurrentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡmask), (uintptr)@unsafe.Pointer.FromBox(Ꮡsysmask));
     if (ret != 0) {
         nint n = 0;
         nint maskbits = (nint)(/* unsafe.Sizeof(mask) */ (uintptr)8 * 8);
@@ -351,19 +351,16 @@ internal static int32 getproccount() {
         }
     }
     // use GetSystemInfo if GetProcessAffinityMask fails
-    ref var info = ref heap(new systeminfo(), out var Ꮡinfo);
-    stdcall1(_GetSystemInfo, (uintptr)Ꮡinfo);
-    return (int32)info.dwnumberofprocessors;
+    ref var info = ref heap(new windows.SystemInfo(), out var Ꮡinfo);
+    stdcall(_GetSystemInfo, (uintptr)Ꮡinfo);
+    return (int32)info.NumberOfProcessors;
 }
 
 internal static uintptr getPageSize() {
-    ref var info = ref heap(new systeminfo(), out var Ꮡinfo);
-    stdcall1(_GetSystemInfo, (uintptr)Ꮡinfo);
-    return (uintptr)info.dwpagesize;
+    ref var info = ref heap(new windows.SystemInfo(), out var Ꮡinfo);
+    stdcall(_GetSystemInfo, (uintptr)Ꮡinfo);
+    return (uintptr)info.PageSize;
 }
-
-internal static uintptr currentProcess => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615); // -1 = current process
-internal static uintptr currentThread => /* ^uintptr(1) */ unchecked((uintptr)18446744073709551614); // -2 = current thread
 
 // in sys_windows_386.s and sys_windows_amd64.s:
 internal static partial uint32 getlasterror();
@@ -396,9 +393,9 @@ internal static uint32 osRelax(bool relax) {
     }
 
     if (relax){
-        return (uint32)stdcall1(_timeEndPeriod, 1);
+        return (uint32)stdcall(_timeEndPeriod, 1);
     } else {
-        return (uint32)stdcall1(_timeBeginPeriod, 1);
+        return (uint32)stdcall(_timeBeginPeriod, 1);
     }
 }
 
@@ -420,14 +417,9 @@ public static bool haveHighResSleep = false;
 internal static uintptr createHighResTimer() {
     // As per @jstarks, see
     // https://github.com/golang/go/issues/8687#issuecomment-656259353
-    uintptr _CREATE_WAITABLE_TIMER_HIGH_RESOLUTION = 0x00000002;
-
-    UntypedInt _SYNCHRONIZE = 0x00100000;
-    UntypedInt _TIMER_QUERY_STATE = 0x0001;
-    UntypedInt _TIMER_MODIFY_STATE = 0x0002;
-    return stdcall4(_CreateWaitableTimerExW, 0, 0,
-        _CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
-        (uintptr)((uintptr)(UntypedInt)(_SYNCHRONIZE | _TIMER_QUERY_STATE) | (uintptr)_TIMER_MODIFY_STATE));
+    return stdcall(_CreateWaitableTimerExW, 0, 0,
+        windows.CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+        (uintptr)((uintptr)(UntypedInt)(windows.SYNCHRONIZE | windows.TIMER_QUERY_STATE) | (uintptr)windows.TIMER_MODIFY_STATE));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -439,7 +431,7 @@ internal static void initHighResTimer() {
     if (h != 0){
         haveHighResTimer = true;
         haveHighResSleep = _NtCreateWaitCompletionPacket != default!;
-        stdcall1(_CloseHandle, h);
+        stdcall(_CloseHandle, h);
     } else {
         // Only load winmm.dll if we need it.
         // This avoids a dependency on winmm.dll for Go programs
@@ -467,25 +459,25 @@ internal static void initLongPathSupport() {
     uintptr PebBitFieldOffset = 3;
 
     // Check that we're ≥ 10.0.15063.
-    ref var info = ref heap<_OSVERSIONINFOW>(out var Ꮡinfo);
-    info = new _OSVERSIONINFOW(nil);
-    info.osVersionInfoSize = (uint32)/* unsafe.Sizeof(info) */ (uintptr)276;
-    stdcall1(_RtlGetVersion, (uintptr)Ꮡinfo);
-    if (info.majorVersion < 10 || (info.majorVersion == 10 && info.minorVersion == 0 && info.buildNumber < 15063)) {
+    ref var info = ref heap<windows.OSVERSIONINFOW>(out var Ꮡinfo);
+    info = new windows.OSVERSIONINFOW(nil);
+    info.OSVersionInfoSize = (uint32)/* unsafe.Sizeof(info) */ (uintptr)276;
+    stdcall(_RtlGetVersion, (uintptr)Ꮡinfo);
+    if (info.MajorVersion < 10 || (info.MajorVersion == 10 && info.MinorVersion == 0 && info.BuildNumber < 15063)) {
         return;
     }
 
     // Set the IsLongPathAwareProcess flag of the PEB's bit field.
     // This flag is not documented, but it's known to be used
     // by Windows to enable long path support.
-    var bitField = (ж<byte>)(uintptr)((@unsafe.Pointer)(stdcall0(_RtlGetCurrentPeb) + PebBitFieldOffset));
+    var bitField = (ж<byte>)(uintptr)((@unsafe.Pointer)(stdcall(_RtlGetCurrentPeb) + PebBitFieldOffset));
     bitField.Value |= (byte)(IsLongPathAwareProcess);
 
     canUseLongPaths = true;
 }
 
 internal static void osinit() {
-    asmstdcallAddr = (@unsafe.Pointer)abi.FuncPCABI0(asmstdcall);
+    asmstdcallAddr = (@unsafe.Pointer)windows.AsmStdCallAddr();
 
     loadOptionalSyscalls();
 
@@ -499,7 +491,7 @@ internal static void osinit() {
     initSysDirectory();
     initLongPathSupport();
 
-    ncpu = getproccount();
+    numCPUStartup = getCPUCount();
 
     physPageSize = getPageSize();
 
@@ -507,13 +499,13 @@ internal static void osinit() {
     // of dedicated threads -- GUI, IO, computational, etc. Go processes use
     // equivalent threads that all do a mix of GUI, IO, computations, etc.
     // In such context dynamic priority boosting does nothing but harm, so we turn it off.
-    stdcall2(_SetProcessPriorityBoost, currentProcess, 1);
+    stdcall(_SetProcessPriorityBoost, windows.CurrentProcess, 1);
 }
 
 //go:nosplit
 internal static nint readRandom(slice<byte> r) {
     nint n = 0;
-    if ((uintptr)(stdcall2(_ProcessPrng, (uintptr)Ꮡ(r, 0), (uintptr)len(r)) & 0xff) != 0) {
+    if ((uintptr)(stdcall(_ProcessPrng, (uintptr)Ꮡ(r, 0), (uintptr)len(r)) & 0xff) != 0) {
         n = len(r);
     }
     return n;
@@ -523,8 +515,8 @@ internal static void goenvs() {
     // strings is a pointer to environment variable pairs in the form:
     //     "envA=valA\x00envB=valB\x00\x00" (in UTF-16)
     // Two consecutive zero bytes end the list.
-    @unsafe.Pointer strings = (@unsafe.Pointer)stdcall0(_GetEnvironmentStringsW);
-    var Δp = (~(ж<array<uint16>>)(uintptr)(strings))[..];
+    @unsafe.Pointer strings = (@unsafe.Pointer)stdcall(_GetEnvironmentStringsW);
+    var Δp = ((ж<array<uint16>>)(uintptr)(strings)).slice();
 
     nint n = 0;
     for ((nint from, nint i) = (0, 0); true; i++) {
@@ -547,7 +539,7 @@ internal static void goenvs() {
         Δp = Δp[1..]; // skip nil byte
     }
 
-    stdcall1(_FreeEnvironmentStringsW, (uintptr)strings);
+    stdcall(_FreeEnvironmentStringsW, (uintptr)strings);
 
     // We call these all the way here, late in init, so that malloc works
     // for the callback functions these generate.
@@ -555,7 +547,7 @@ internal static void goenvs() {
 
     fn = ctrlHandler;
     var ctrlHandlerPC = compileCallback(efaceOf(Ꮡfn).Value, true);
-    stdcall2(_SetConsoleCtrlHandler, ctrlHandlerPC, 1);
+    stdcall(_SetConsoleCtrlHandler, ctrlHandlerPC, 1);
 
     monitorSuspendResume();
 }
@@ -572,7 +564,7 @@ internal static void exit(int32 code) {
     // kills the suspending thread, and then this thread suspends.
     @lock(ᏑsuspendLock);
     atomic.Store(Ꮡexiting, 1);
-    stdcall1(_ExitProcess, (uintptr)code);
+    stdcall(_ExitProcess, (uintptr)code);
 }
 
 // write1 must be nosplit because it's used as a last resort in
@@ -586,10 +578,10 @@ internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
     uintptr handle = default!;
     var exprᴛ1 = fd;
     if (exprᴛ1 == 1) {
-        handle = stdcall1(_GetStdHandle, _STD_OUTPUT_HANDLE);
+        handle = stdcall(_GetStdHandle, _STD_OUTPUT_HANDLE);
     }
     else if (exprᴛ1 == 2) {
-        handle = stdcall1(_GetStdHandle, _STD_ERROR_HANDLE);
+        handle = stdcall(_GetStdHandle, _STD_ERROR_HANDLE);
     }
     else { /* default: */
         // assume fd is real windows handle.
@@ -606,7 +598,7 @@ internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
 
     if (!isASCII) {
         ref var m = ref heap(new uint32(), out var Ꮡm);
-        var isConsole = stdcall2(_GetConsoleMode, handle, (uintptr)Ꮡm) != 0;
+        var isConsole = stdcall(_GetConsoleMode, handle, (uintptr)Ꮡm) != 0;
         // If this is a console output, various non-unicode code pages can be in use.
         // Use the dedicated WriteConsole call to ensure unicode is printed correctly.
         if (isConsole) {
@@ -614,7 +606,7 @@ internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
         }
     }
     ref var written = ref heap(new uint32(), out var Ꮡwritten);
-    stdcall5(_WriteFile, handle, (uintptr)buf, (uintptr)n, (uintptr)Ꮡwritten, 0);
+    stdcall(_WriteFile, handle, (uintptr)buf, (uintptr)n, (uintptr)Ꮡwritten, 0);
     return (int32)written;
 }
 
@@ -669,7 +661,7 @@ internal static void writeConsoleUTF16(uintptr handle, slice<uint16> b) {
         return;
     }
     ref var written = ref heap(new uint32(), out var Ꮡwritten);
-    stdcall5(_WriteConsoleW,
+    stdcall(_WriteConsoleW,
         handle,
         (uintptr)Ꮡ(b, 0),
         (uintptr)l,
@@ -692,16 +684,16 @@ internal static int32 semasleep(int64 ns) {
 
     uintptr result = default!;
     if (ns < 0){
-        result = stdcall2(_WaitForSingleObject, (~(~getg()).m).waitsema, (uintptr)_INFINITE);
+        result = stdcall(_WaitForSingleObject, (~(~getg()).m).waitsema, (uintptr)windows.INFINITE);
     } else {
         var start = nanotime();
         var elapsed = (int64)0;
         while (ᐧ) {
-            var ms = (int64)timediv(ns - elapsed, 1000000, nil);
+            var ms = (ns - elapsed) / 1000000;
             if (ms == 0) {
                 ms = 1;
             }
-            result = stdcall4(_WaitForMultipleObjects, 2,
+            result = stdcall(_WaitForMultipleObjects, 2,
                 (uintptr)Ꮡ(new uintptr[]{(~(~getg()).m).waitsema, (~(~getg()).m).resumesema}.array()),
                 0, (uintptr)ms);
             if (result != (uintptr)(_WAIT_OBJECT_0 + 1)) {
@@ -749,7 +741,7 @@ internal static readonly @string runtimeSemawakeupˢ = "runtime.semawakeup"u8;
 internal static void semawakeup(ж<m> Ꮡmp) {
     ref var mp = ref Ꮡmp.DerefOrNull();
 
-    if (stdcall1(_SetEvent, mp.waitsema) == 0) {
+    if (stdcall(_SetEvent, mp.waitsema) == 0) {
         systemstack(() => {
             print((@string)"runtime: setevent failed; errno="u8, getlasterror(), (@string)"\n"u8);
             @throw(runtimeSemawakeupˢ);
@@ -765,20 +757,20 @@ internal static void semacreate(ref m mp) {
     if (mp.waitsema != 0) {
         return;
     }
-    mp.waitsema = stdcall4(_CreateEventA, 0, 0, 0, 0);
+    mp.waitsema = stdcall(_CreateEventA, 0, 0, 0, 0);
     if (mp.waitsema == 0) {
         systemstack(() => {
             print((@string)"runtime: createevent failed; errno="u8, getlasterror(), (@string)"\n"u8);
             @throw(runtimeSemacreateˢ);
         });
     }
-    mp.resumesema = stdcall4(_CreateEventA, 0, 0, 0, 0);
+    mp.resumesema = stdcall(_CreateEventA, 0, 0, 0, 0);
     if (mp.resumesema == 0) {
         systemstack(() => {
             print((@string)"runtime: createevent failed; errno="u8, getlasterror(), (@string)"\n"u8);
             @throw(runtimeSemacreateˢ);
         });
-        stdcall1(_CloseHandle, mp.waitsema);
+        stdcall(_CloseHandle, mp.waitsema);
         mp.waitsema = 0;
     }
 }
@@ -794,7 +786,7 @@ internal static readonly @string runtimeNewosprocˢ = "runtime.newosproc"u8;
 //go:nosplit
 internal static void newosproc(ж<m> Ꮡmp) {
     // We pass 0 for the stack size to use the default for this binary.
-    var thandle = stdcall6(_CreateThread, 0, 0,
+    var thandle = stdcall(_CreateThread, 0, 0,
         abi.FuncPCABI0(tstart_stdcall), (uintptr)Ꮡmp,
         0, 0);
 
@@ -812,7 +804,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
     }
 
     // Close thandle to avoid leaking the thread object if it exits.
-    stdcall1(_CloseHandle, thandle);
+    stdcall(_CloseHandle, thandle);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -824,11 +816,13 @@ internal static readonly @string badNewosproc0ˢ = "bad newosproc0"u8;
 //
 //go:nowritebarrierrec
 //go:nosplit
-internal static void newosproc0(ref m mp, @unsafe.Pointer stk) {
-    // TODO: this is completely broken. The args passed to newosproc0 (in asm_amd64.s)
-    // are stacksize and function, not *m and stack.
-    // Check os_linux.go for an implementation that might actually work.
+internal static void newosproc0(uintptr stacksize, uintptr fn) {
     @throw(badNewosproc0ˢ);
+}
+
+//go:nosplit
+//go:nowritebarrierrec
+internal static void libpreinit() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -872,7 +866,7 @@ internal static readonly @string badG0Stackˢ = "bad g0 stack"u8;
 // Called on the new thread, cannot allocate Go memory.
 internal static void minit() {
     ref var thandle = ref heap(new uintptr(), out var Ꮡthandle);
-    if (stdcall7(_DuplicateHandle, currentProcess, currentThread, currentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡthandle), 0, 0, _DUPLICATE_SAME_ACCESS) == 0) {
+    if (stdcall(_DuplicateHandle, windows.CurrentProcess, windows.CurrentThread, windows.CurrentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡthandle), 0, 0, windows.DUPLICATE_SAME_ACCESS) == 0) {
         print((@string)"runtime.minit: duplicatehandle failed; errno="u8, getlasterror(), (@string)"\n"u8);
         @throw(runtimeMinitˢ);
     }
@@ -880,7 +874,7 @@ internal static void minit() {
     var mp = getg().Value.m;
     @lock(mp.of(m.ᏑthreadLock));
     mp.Value.thread = thandle;
-    mp.Value.procid = (uint64)stdcall0(_GetCurrentThreadId);
+    mp.Value.procid = (uint64)stdcall(_GetCurrentThreadId);
 
     // Configure usleep timer, if possible.
     if ((~mp).highResTimer == 0 && haveHighResTimer) {
@@ -897,7 +891,7 @@ internal static void minit() {
             @throw(createWaitableTimerExˢ);
         }
         uintptr GENERIC_ALL = 0x10000000;
-        var errno = stdcall3(_NtCreateWaitCompletionPacket, (uintptr)@unsafe.Pointer.FromBox(mp.of(m.ᏑwaitIocpHandle)), GENERIC_ALL, 0);
+        var errno = stdcall(_NtCreateWaitCompletionPacket, (uintptr)@unsafe.Pointer.FromBox(mp.of(m.ᏑwaitIocpHandle)), GENERIC_ALL, 0);
         if ((~mp).waitIocpHandle == 0) {
             print((@string)"runtime: NtCreateWaitCompletionPacket failed; errno="u8, errno, (@string)"\n"u8);
             @throw("NtCreateWaitCompletionPacket failed"u8);
@@ -907,8 +901,8 @@ internal static void minit() {
 
     // Query the true stack base from the OS. Currently we're
     // running on a small assumed stack.
-    ref var mbi = ref heap(new memoryBasicInformation(), out var Ꮡmbi);
-    var res = stdcall3(_VirtualQuery, (uintptr)Ꮡmbi, (uintptr)Ꮡmbi, /* unsafe.Sizeof(mbi) */ (uintptr)48);
+    ref var mbi = ref heap(new windows.MemoryBasicInformation(), out var Ꮡmbi);
+    var res = stdcall(_VirtualQuery, (uintptr)Ꮡmbi, (uintptr)Ꮡmbi, /* unsafe.Sizeof(mbi) */ (uintptr)48);
     if (res == 0) {
         print((@string)"runtime: VirtualQuery failed; errno="u8, getlasterror(), (@string)"\n"u8);
         @throw(virtualQueryForStackBaseˢ);
@@ -919,7 +913,7 @@ internal static void minit() {
     // calling C functions that don't have stack checks and for
     // lastcontinuehandler. We shouldn't be anywhere near this
     // bound anyway.
-    var @base = mbi.allocationBase + ((uintptr)16 << (int)(10));
+    var @base = mbi.AllocationBase + ((uintptr)16 << (int)(10));
     // Sanity check the stack bounds.
     var g0 = getg();
     if (@base > (~g0).stack.hi || (~g0).stack.hi - @base > ((uintptr)64 << (int)(20))) {
@@ -940,7 +934,7 @@ internal static void unminit() {
     var mp = getg().Value.m;
     @lock(mp.of(m.ᏑthreadLock));
     if ((~mp).thread != 0) {
-        stdcall1(_CloseHandle, (~mp).thread);
+        stdcall(_CloseHandle, (~mp).thread);
         mp.Value.thread = 0;
     }
     unlock(mp.of(m.ᏑthreadLock));
@@ -952,58 +946,69 @@ internal static void unminit() {
 // resources in minit, semacreate, or elsewhere. Do not take locks after calling this.
 //
 // This always runs without a P, so //go:nowritebarrierrec is required.
+//
 //go:nowritebarrierrec
 //go:nosplit
 internal static void mdestroy(ref m mp) {
     if (mp.highResTimer != 0) {
-        stdcall1(_CloseHandle, mp.highResTimer);
+        stdcall(_CloseHandle, mp.highResTimer);
         mp.highResTimer = 0;
     }
     if (mp.waitIocpTimer != 0) {
-        stdcall1(_CloseHandle, mp.waitIocpTimer);
+        stdcall(_CloseHandle, mp.waitIocpTimer);
         mp.waitIocpTimer = 0;
     }
     if (mp.waitIocpHandle != 0) {
-        stdcall1(_CloseHandle, mp.waitIocpHandle);
+        stdcall(_CloseHandle, mp.waitIocpHandle);
         mp.waitIocpHandle = 0;
     }
     if (mp.waitsema != 0) {
-        stdcall1(_CloseHandle, mp.waitsema);
+        stdcall(_CloseHandle, mp.waitsema);
         mp.waitsema = 0;
     }
     if (mp.resumesema != 0) {
-        stdcall1(_CloseHandle, mp.resumesema);
+        stdcall(_CloseHandle, mp.resumesema);
         mp.resumesema = 0;
     }
 }
 
-// asmstdcall_trampoline calls asmstdcall converting from Go to C calling convention.
-internal static partial void asmstdcall_trampoline(@unsafe.Pointer args);
-
-// stdcall_no_g calls asmstdcall on os stack without using g.
+// stdcall_no_g is like [stdcall] but can be called without a G.
 //
+//go:nowritebarrier
 //go:nosplit
-internal static uintptr stdcall_no_g(stdFunction fn, nint n, uintptr args) {
-    ref var libcall = ref heap<libcall>(out var Ꮡlibcall);
-    libcall = new libcall(
-        fn: (uintptr)(@unsafe.Pointer)fn,
-        n: (uintptr)n,
-        args: args
+//go:uintptrkeepalive
+internal static uintptr stdcall_no_g(stdFunction fn, params ꓸꓸꓸuintptr argsʗp) {
+    var args = argsʗp.slice();
+
+    ref var call = ref heap<windows.StdCallInfo>(out var Ꮡcall);
+    call = new windows.StdCallInfo(
+        Fn: (uintptr)(@unsafe.Pointer)fn,
+        N: (uintptr)len(args)
     );
-    asmstdcall_trampoline((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡlibcall)));
-    System.GC.KeepAlive(Ꮡlibcall);
-    return libcall.r1;
+    if (len(args) > 0) {
+        call.Args = (uintptr)(uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+    }
+    windows.StdCall(Ꮡcall);
+    return call.R1;
 }
 
-// Calling stdcall on os stack.
+// stdcall calls fn with the given arguments using the stdcall calling convention.
+// Must be called from the system stack.
 // May run during STW, so write barriers are not allowed.
 //
 //go:nowritebarrier
 //go:nosplit
-internal static uintptr stdcall(stdFunction fn) {
+//go:uintptrkeepalive
+internal static uintptr stdcall(stdFunction fn, params ꓸꓸꓸuintptr argsʗp) {
+    var args = argsʗp.slice();
+
     var gp = getg();
     var mp = gp.Value.m;
-    mp.Value.libcall.fn = (uintptr)(@unsafe.Pointer)fn;
+    mp.Value.stdCallInfo.Fn = (uintptr)(@unsafe.Pointer)fn;
+    mp.Value.stdCallInfo.N = (uintptr)len(args);
+    if (len(args) > 0) {
+        mp.Value.stdCallInfo.Args = (uintptr)(uintptr)abi.NoEscape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+    }
     var resetLibcall = false;
     if ((~mp).profilehz != 0 && (~mp).libcallsp == 0) {
         // leave pc/sp for cpu profiler
@@ -1014,129 +1019,31 @@ internal static uintptr stdcall(stdFunction fn) {
         mp.Value.libcallsp = sys.GetCallerSP();
         resetLibcall = true; // See comment in sys_darwin.go:libcCall
     }
-    asmcgocall(asmstdcallAddr, @unsafe.Pointer.FromPinnedBox(mp.of(m.Ꮡlibcall)));
+    asmcgocall(asmstdcallAddr, @unsafe.Pointer.FromPinnedBox(mp.of(m.ᏑstdCallInfo)));
     if (resetLibcall) {
         mp.Value.libcallsp = 0;
     }
-    return (~mp).libcall.r1;
-}
-
-//go:nosplit
-internal static uintptr stdcall0(stdFunction fn) {
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 0;
-    mp.Value.libcall.args = 0;
-    return stdcall(fn);
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static uintptr stdcall1(stdFunction fn, uintptr a0ʗp) {
-    ref var a0 = ref heap(a0ʗp, out var Ꮡa0);
-
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 1;
-    mp.Value.libcall.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡa0));
-    return stdcall(fn);
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static uintptr stdcall2(stdFunction fn, uintptr a0ʗp, uintptr a1) {
-    ref var a0 = ref heap(a0ʗp, out var Ꮡa0);
-
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 2;
-    mp.Value.libcall.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡa0));
-    return stdcall(fn);
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static uintptr stdcall3(stdFunction fn, uintptr a0ʗp, uintptr a1, uintptr a2) {
-    ref var a0 = ref heap(a0ʗp, out var Ꮡa0);
-
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 3;
-    mp.Value.libcall.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡa0));
-    return stdcall(fn);
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static uintptr stdcall4(stdFunction fn, uintptr a0ʗp, uintptr a1, uintptr a2, uintptr a3) {
-    ref var a0 = ref heap(a0ʗp, out var Ꮡa0);
-
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 4;
-    mp.Value.libcall.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡa0));
-    return stdcall(fn);
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static uintptr stdcall5(stdFunction fn, uintptr a0ʗp, uintptr a1, uintptr a2, uintptr a3, uintptr a4) {
-    ref var a0 = ref heap(a0ʗp, out var Ꮡa0);
-
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 5;
-    mp.Value.libcall.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡa0));
-    return stdcall(fn);
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static uintptr stdcall6(stdFunction fn, uintptr a0ʗp, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5) {
-    ref var a0 = ref heap(a0ʗp, out var Ꮡa0);
-
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 6;
-    mp.Value.libcall.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡa0));
-    return stdcall(fn);
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static uintptr stdcall7(stdFunction fn, uintptr a0ʗp, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    ref var a0 = ref heap(a0ʗp, out var Ꮡa0);
-
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 7;
-    mp.Value.libcall.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡa0));
-    return stdcall(fn);
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static uintptr stdcall8(stdFunction fn, uintptr a0ʗp, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7) {
-    ref var a0 = ref heap(a0ʗp, out var Ꮡa0);
-
-    var mp = getg().Value.m;
-    mp.Value.libcall.n = 8;
-    mp.Value.libcall.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡa0));
-    return stdcall(fn);
+    return (~mp).stdCallInfo.R1;
 }
 
 // These must run on the system stack only.
 
 //go:nosplit
 internal static void osyield_no_g() {
-    stdcall_no_g(_SwitchToThread, 0, 0);
+    stdcall_no_g(_SwitchToThread);
 }
 
 //go:nosplit
 internal static void osyield() {
     systemstack(() => {
-        stdcall0(_SwitchToThread);
+        stdcall(_SwitchToThread);
     });
 }
 
 //go:nosplit
 internal static void usleep_no_g(uint32 us) {
     var timeout = (uintptr)us / 1000; // ms units
-    ref var args = ref heap<array<uintptr>>(out var Ꮡargs);
-    args = new uintptr[]{_INVALID_HANDLE_VALUE, timeout}.array();
-    stdcall_no_g(_WaitForSingleObject, len(args), (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡargs.at<uintptr>(0))));
+    stdcall_no_g(_WaitForSingleObject, windows.INVALID_HANDLE_VALUE, timeout);
 }
 
 // go2cs generated this placeholder — func usleep is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1145,18 +1052,18 @@ internal static uintptr ctrlHandler(uint32 _type) {
     uint32 s = default!;
 
     var exprᴛ1 = _type;
-    if (exprᴛ1 == _CTRL_C_EVENT || exprᴛ1 == _CTRL_BREAK_EVENT) {
-        s = _SIGINT;
+    if (exprᴛ1 == windows.CTRL_C_EVENT || exprᴛ1 == windows.CTRL_BREAK_EVENT) {
+        s = windows.SIGINT;
     }
-    else if (exprᴛ1 == _CTRL_CLOSE_EVENT || exprᴛ1 == _CTRL_LOGOFF_EVENT || exprᴛ1 == _CTRL_SHUTDOWN_EVENT) {
-        s = _SIGTERM;
+    else if (exprᴛ1 == windows.CTRL_CLOSE_EVENT || exprᴛ1 == windows.CTRL_LOGOFF_EVENT || exprᴛ1 == windows.CTRL_SHUTDOWN_EVENT) {
+        s = windows.SIGTERM;
     }
     else { /* default: */
         return 0;
     }
 
     if (sigsend(s)) {
-        if (s == _SIGTERM) {
+        if (s == windows.SIGTERM) {
             // Windows terminates the process after this handler returns.
             // Block indefinitely to give signal handlers a chance to clean up,
             // but make sure to be properly parked first, so the rest of the
@@ -1176,16 +1083,16 @@ internal static ref uintptr profiletimer => ref Ꮡprofiletimer.Value;
 
 internal static void profilem(ж<m> Ꮡmp, uintptr thread) {
     // Align Context to 16 bytes.
-    ж<context> c = default!;
+    ж<windows.Context> c = default!;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
-    c = (ж<context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
+    c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
 
-    c.Value.contextflags = _CONTEXT_CONTROL;
-    stdcall2(_GetThreadContext, thread, (uintptr)c);
+    c.ContextFlags = windows.CONTEXT_CONTROL;
+    stdcall(_GetThreadContext, thread, (uintptr)c);
 
-    var gp = gFromSP(ref (Ꮡmp).DerefOrNull(), c.sp());
+    var gp = gFromSP(ref (Ꮡmp).DerefOrNull(), c.SP());
 
-    sigprof(c.ip(), c.sp(), c.lr(), gp, Ꮡmp);
+    sigprof(c.PC(), c.SP(), c.LR(), gp, Ꮡmp);
 }
 
 internal static ж<g> gFromSP(ref m mp, uintptr sp) {
@@ -1211,10 +1118,10 @@ internal static ж<g> gFromSP(ref m mp, uintptr sp) {
 internal static readonly @string duplicatehandleFailedˢ = "duplicatehandle failed"u8;
 
 internal static void profileLoop() {
-    stdcall2(_SetThreadPriority, currentThread, _THREAD_PRIORITY_HIGHEST);
+    stdcall(_SetThreadPriority, windows.CurrentThread, windows.THREAD_PRIORITY_HIGHEST);
 
     while (ᐧ) {
-        stdcall2(_WaitForSingleObject, profiletimer, _INFINITE);
+        stdcall(_WaitForSingleObject, profiletimer, windows.INFINITE);
         var first = (ж<m>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡallm)));
         for (var mp = first; mp != nil; mp = mp.Value.alllink) {
             if (mp == (~getg()).m) {
@@ -1232,7 +1139,7 @@ internal static void profileLoop() {
             }
             // Acquire our own handle to the thread.
             ref var thread = ref heap(new uintptr(), out var Ꮡthread);
-            if (stdcall7(_DuplicateHandle, currentProcess, (~mp).thread, currentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡthread), 0, 0, _DUPLICATE_SAME_ACCESS) == 0) {
+            if (stdcall(_DuplicateHandle, windows.CurrentProcess, (~mp).thread, windows.CurrentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡthread), 0, 0, windows.DUPLICATE_SAME_ACCESS) == 0) {
                 print((@string)"runtime: duplicatehandle failed; errno="u8, getlasterror(), (@string)"\n"u8);
                 @throw(duplicatehandleFailedˢ);
             }
@@ -1242,9 +1149,9 @@ internal static void profileLoop() {
             // above and the SuspendThread. The handle
             // will remain valid, but SuspendThread may
             // fail.
-            if ((int32)stdcall1(_SuspendThread, thread) == -1) {
+            if ((int32)stdcall(_SuspendThread, thread) == -1) {
                 // The thread no longer exists.
-                stdcall1(_CloseHandle, thread);
+                stdcall(_CloseHandle, thread);
                 continue;
             }
             if ((~mp).profilehz != 0 && !(~mp).blocked) {
@@ -1252,8 +1159,8 @@ internal static void profileLoop() {
                 // was in the process of shutting down.
                 profilem(mp, thread);
             }
-            stdcall1(_ResumeThread, thread);
-            stdcall1(_CloseHandle, thread);
+            stdcall(_ResumeThread, thread);
+            stdcall(_CloseHandle, thread);
         }
     }
 }
@@ -1269,10 +1176,26 @@ internal const bool preemptMSupported = true;
 internal static ж<mutex> ᏑsuspendLock = new StandardBox<mutex>(new mutex(nil));
 internal static ref mutex suspendLock => ref ᏑsuspendLock.Value;
 
+// threadPausedLockRank warns the runtime against acquiring new locks on this
+// thread while it has another thread paused. The holder of this lock rank is
+// effectively a signal handler for a paused thread, which may be holding
+// arbitrary locks.
+//
+// The warning takes two concrete forms: First, unlock2 will see that this
+// thread is holding other locks, so won't try to flush the mutex contention
+// buffer (which can involve acquiring another lock). Second, builds with
+// GOEXPERIMENT=staticlockranking (currently broken, https://go.dev/issue/76058)
+// will report a rank violation.
+//
+// suspendLock serializes the transition into "suspended", but it's fine for
+// multiple threads to be in the suspended state concurrently, with each of
+// their sponsors independently using threadPausedLockRank to discourage
+// themselves from acquiring new locks.
+internal static lockRank threadPausedLockRank => /* lockRankLeafRank */ 1000;
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string selfPreemptˢ = "self-preempt"u8;
 internal static readonly @string runtimePreemptMˢ = "runtime.preemptM: duplicatehandle failed"u8;
-internal static readonly @string unsupportedArchitectureˢ = "unsupported architecture"u8;
 
 internal static void preemptM(ж<m> Ꮡmp) {
     ref var mp = ref Ꮡmp.DerefOrNull();
@@ -1299,17 +1222,17 @@ internal static void preemptM(ж<m> Ꮡmp) {
         return;
     }
     ref var thread = ref heap(new uintptr(), out var Ꮡthread);
-    if (stdcall7(_DuplicateHandle, currentProcess, mp.thread, currentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡthread), 0, 0, _DUPLICATE_SAME_ACCESS) == 0) {
+    if (stdcall(_DuplicateHandle, windows.CurrentProcess, mp.thread, windows.CurrentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡthread), 0, 0, windows.DUPLICATE_SAME_ACCESS) == 0) {
         print((@string)"runtime.preemptM: duplicatehandle failed; errno="u8, getlasterror(), (@string)"\n"u8);
         @throw(runtimePreemptMˢ);
     }
     unlock(Ꮡmp.of(m.ᏑthreadLock));
 
     // Prepare thread context buffer. This must be aligned to 16 bytes.
-    ж<context> c = default!;
+    ж<windows.Context> c = default!;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
-    c = (ж<context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
-    c.Value.contextflags = _CONTEXT_CONTROL;
+    c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
+    c.ContextFlags = windows.CONTEXT_CONTROL;
 
     // Serialize thread suspension. SuspendThread is asynchronous,
     // so it's otherwise possible for two threads to suspend each
@@ -1318,14 +1241,18 @@ internal static void preemptM(ж<m> Ꮡmp) {
     // actually suspended.
     @lock(ᏑsuspendLock);
 
+    // Signal handler rules are in effect; don't acquire new locks.
+    acquireLockRankAndM(threadPausedLockRank);
+
     // Suspend the thread.
-    if ((int32)stdcall1(_SuspendThread, thread) == -1) {
+    if ((int32)stdcall(_SuspendThread, thread) == -1) {
         unlock(ᏑsuspendLock);
-        stdcall1(_CloseHandle, thread);
+        stdcall(_CloseHandle, thread);
         atomic.Store(Ꮡmp.of(m.ᏑpreemptExtLock), 0);
         // The thread no longer exists. This shouldn't be
         // possible, but just acknowledge the request.
         Ꮡmp.of(m.ᏑpreemptGen).Add(1);
+        releaseLockRankAndM(threadPausedLockRank);
         return;
     }
 
@@ -1338,54 +1265,19 @@ internal static void preemptM(ж<m> Ꮡmp) {
     // We have to get the thread context before inspecting the M
     // because SuspendThread only requests a suspend.
     // GetThreadContext actually blocks until it's suspended.
-    stdcall2(_GetThreadContext, thread, (uintptr)c);
+    stdcall(_GetThreadContext, thread, (uintptr)c);
 
     unlock(ᏑsuspendLock);
 
     // Does it want a preemption and is it safe to preempt?
-    var gp = gFromSP(ref (Ꮡmp).DerefOrNull(), c.sp());
+    var gp = gFromSP(ref (Ꮡmp).DerefOrNull(), c.SP());
     if (gp != nil && wantAsyncPreempt(gp)) {
         {
-            var (ok, newpc) = isAsyncSafePoint(gp, c.ip(), c.sp(), c.lr()); if (ok) {
+            var (ok, resumePC) = isAsyncSafePoint(gp, c.PC(), c.SP(), c.LR()); if (ok) {
                 // Inject call to asyncPreempt
                 var targetPC = abi.FuncPCABI0(asyncPreempt);
-                var exprᴛ1 = GOARCH;
-                if (exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8) {
-                    // Make it look like the thread called targetPC.
-                    var sp = c.sp();
-                    sp -= goarch.PtrSize;
-                    ((ж<uintptr>)(uintptr)((@unsafe.Pointer)sp)).Value = newpc;
-                    c.set_sp(sp);
-                    c.set_ip(targetPC);
-                }
-                else if (exprᴛ1 == "arm"u8) {
-                    // Push LR. The injected call is responsible
-                    // for restoring LR. gentraceback is aware of
-                    // this extra slot. See sigctxt.pushCall in
-                    // signal_arm.go, which is similar except we
-                    // subtract 1 from IP here.
-                    var sp = c.sp();
-                    sp -= goarch.PtrSize;
-                    c.set_sp(sp);
-                    ((ж<uint32>)(uintptr)((@unsafe.Pointer)sp)).Value = (uint32)c.lr();
-                    c.set_lr(newpc - 1);
-                    c.set_ip(targetPC);
-                }
-                else if (exprᴛ1 == "arm64"u8) {
-                    // Push LR. The injected call is responsible
-                    // for restoring LR. gentraceback is aware of
-                    // this extra slot. See sigctxt.pushCall in
-                    // signal_arm64.go.
-                    var sp = c.sp() - 16; // SP needs 16-byte alignment
-                    c.set_sp(sp);
-                    ((ж<uint64>)(uintptr)((@unsafe.Pointer)sp)).Value = (uint64)c.lr();
-                    c.set_lr(newpc);
-                    c.set_ip(targetPC);
-                }
-                else { /* default: */
-                    @throw(unsupportedArchitectureˢ);
-                }
-                stdcall2(_SetThreadContext, thread, (uintptr)c);
+                c.PushCall(targetPC, resumePC);
+                stdcall(_SetThreadContext, thread, (uintptr)c);
             }
         }
     }
@@ -1395,8 +1287,10 @@ internal static void preemptM(ж<m> Ꮡmp) {
     // Acknowledge the preemption.
     Ꮡmp.of(m.ᏑpreemptGen).Add(1);
 
-    stdcall1(_ResumeThread, thread);
-    stdcall1(_CloseHandle, thread);
+    stdcall(_ResumeThread, thread);
+    stdcall(_CloseHandle, thread);
+
+    releaseLockRankAndM(threadPausedLockRank);
 }
 
 // osPreemptExtEnter is called before entering external code that may

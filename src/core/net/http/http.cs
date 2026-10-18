@@ -1,7 +1,7 @@
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:generate bundle -o=h2_bundle.go -prefix=http2 -tags=!nethttpomithttp2 golang.org/x/net/http2
+//go:generate bundle -o=h2_bundle.go -prefix=http2 -tags=!nethttpomithttp2 -import=golang.org/x/net/internal/httpcommon=net/http/internal/httpcommon golang.org/x/net/http2
 namespace go.net;
 
 using io = io_package;
@@ -132,8 +132,10 @@ internal static @string removeEmptyPort(@string host) {
     return host;
 }
 
-internal static bool isNotToken(rune r) {
-    return !httpguts.IsTokenRune(r);
+// isToken reports whether v is a valid token (https://www.rfc-editor.org/rfc/rfc2616#section-2.2).
+internal static bool isToken(@string v) {
+    // For historical reasons, this function is called ValidHeaderFieldName (see issue #67031).
+    return httpguts.ValidHeaderFieldName(v);
 }
 
 // stringContainsCTLByte reports whether s contains any ASCII control character.
@@ -248,9 +250,21 @@ partial interface Pusher {
 // both [Transport] and [Server].
 partial struct HTTP2Config {
     // MaxConcurrentStreams optionally specifies the number of
-    // concurrent streams that a peer may have open at a time.
+    // concurrent streams that a client may have open at a time.
     // If zero, MaxConcurrentStreams defaults to at least 100.
+    //
+    // This parameter only applies to Servers.
     public nint MaxConcurrentStreams;
+    // StrictMaxConcurrentRequests controls whether an HTTP/2 server's
+    // concurrency limit should be respected across all connections
+    // to that server.
+    // If true, new requests sent when a connection's concurrency limit
+    // has been exceeded will block until an existing request completes.
+    // If false, an additional connection will be opened if all
+    // existing connections are at their limit.
+    //
+    // This parameter only applies to Transports.
+    public bool StrictMaxConcurrentRequests;
     // MaxDecoderHeaderTableSize optionally specifies an upper limit for the
     // size of the header compression table used for decoding headers sent
     // by the peer.

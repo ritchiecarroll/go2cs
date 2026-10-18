@@ -19,8 +19,8 @@ partial struct DecapsulationKey1024 {
     internal array<byte> z = new(32); // implicit rejection sampling seed
     internal array<byte> ρ = new(32); // sampleNTT seed for A, stored for the encapsulation key
     internal array<byte> h = new(32); // H(ek), stored for ML-KEM.Decaps_internal
-    internal partial ref encryptionKey1024 encryptionKey1024 { get; }
-    internal partial ref decryptionKey1024 decryptionKey1024 { get; }
+    /*embed*/ internal encryptionKey1024 encryptionKey1024;
+    /*embed*/ internal decryptionKey1024 decryptionKey1024;
 }
 
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
@@ -76,7 +76,7 @@ public static ж<EncapsulationKey1024> EncapsulationKey(this ref DecapsulationKe
 partial struct EncapsulationKey1024 {
     internal array<byte> ρ = new(32); // sampleNTT seed for A
     internal array<byte> h = new(32); // H(ek)
-    internal partial ref encryptionKey1024 encryptionKey1024 { get; }
+    /*embed*/ internal encryptionKey1024 encryptionKey1024;
 }
 
 // Bytes returns the encapsulation key as a byte slice.
@@ -117,6 +117,7 @@ public static (ж<DecapsulationKey1024>, error) GenerateKey1024() {
 internal static readonly @string mlKemPctˢ = "ML-KEM PCT"u8;
 
 internal static (ж<DecapsulationKey1024>, error) generateKey1024(ж<DecapsulationKey1024> Ꮡdk) {
+    fipsSelfTest();
     ref var d = ref heap(new array<byte>(32), out var Ꮡd);
     drbg.Read(d[..]);
     ref var z = ref heap(new array<byte>(32), out var Ꮡz);
@@ -130,6 +131,7 @@ internal static (ж<DecapsulationKey1024>, error) generateKey1024(ж<Decapsulati
 // GenerateKeyInternal1024 is a derandomized version of GenerateKey1024,
 // exclusively for use in tests.
 public static ж<DecapsulationKey1024> GenerateKeyInternal1024(/*[32]*/ ж<array<byte>> Ꮡd, /*[32]*/ ж<array<byte>> Ꮡz) {
+    fipsSelfTest();
     var dk = Ꮡ(new DecapsulationKey1024(nil));
     kemKeyGen1024(dk, Ꮡd, ref (Ꮡz).DerefOrNull());
     return dk;
@@ -298,6 +300,7 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this �
 }
 
 internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey1024> Ꮡek, /*[1568]*/ ж<array<byte>> Ꮡcc) {
+    fipsSelfTest();
     ref var m = ref heap(new array<byte>(32), out var Ꮡm);
     drbg.Read(m[..]);
     // Note that the modulus check (step 2 of the encapsulation key check from
@@ -309,6 +312,7 @@ internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this
 // EncapsulateInternal is a derandomized version of Encapsulate, exclusively for
 // use in tests.
 public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey1024> Ꮡek, /*[32]*/ ж<array<byte>> Ꮡm) {
+    fipsSelfTest();
     var cc = Ꮡ(new byte[]{}.array(1568));
     return kemEncaps1024(cc, ref (Ꮡek).DerefOrNull(), Ꮡm);
 }
@@ -397,11 +401,12 @@ internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref
 
     var u = GoReflect.WithElemDims(new slice<ringElement>(k1024), 256); // NTT⁻¹(AT ◦ r) + e1
     foreach (var (i, _) in u) {
-        u[i] = e1[i].Clone();
+        nttElement uHat = default!;
         foreach (var (j, _) in r) {
             // Note that i and j are inverted, as we need the transposed of A.
-            u[i] = polyAdd<ringElement>(u[i], inverseNTT(nttMul(ex.a[j * (nint)k1024 + i], r[j])));
+            uHat = polyAdd<nttElement>(uHat, nttMul(ex.a[j * (nint)k1024 + i], r[j]));
         }
+        u[i] = polyAdd(e1[i], inverseNTT(uHat));
     }
 
     var μ = ringDecodeAndDecompress1(ref (Ꮡm).DerefOrNull());
@@ -431,6 +436,7 @@ internal static readonly @string mlkemInvalidCiphertextˢ = "mlkem: invalid ciph
 //
 // The shared key must be kept secret.
 public static (slice<byte> sharedKey, error err) Decapsulate(this ж<DecapsulationKey1024> Ꮡdk, slice<byte> ciphertext) {
+    fipsSelfTest();
     if (len(ciphertext) != CiphertextSize1024) {
         return (default!, errors.New(mlkemInvalidCiphertextˢ));
     }

@@ -4,6 +4,7 @@
 // Implementation of Server
 namespace go.net.http;
 
+using context = context_package;
 using tls = crypto.tls_package;
 using x509 = crypto.x509_package;
 using flag = flag_package;
@@ -125,6 +126,7 @@ public static ж<Server> NewUnstartedServer(httpꓸHandler handler) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string exampleCom80ˢ = ".example.com:80"u8;
 internal static readonly object httptestServingOnˢ = (@string)"httptest: serving on"u8;
 
 // Start starts a server from NewUnstartedServer.
@@ -134,8 +136,25 @@ public static void Start(this ж<Server> Ꮡs) {
     if (s.URL != ""u8) {
         throw panic("Server already started");
     }
+
     if (s.client == nil) {
-        s.client = Ꮡ(new http.Client(Transport: new http.TransportжRoundTripper(Ꮡ(new http.Transport(nil)))));
+        var tr = Ꮡ(new http.Transport(nil));
+        ref var dialer = ref heap<net.Dialer>(out var Ꮡdialer);
+        dialer = new net.Dialer(nil);
+        // User code may set either of Dial or DialContext, with DialContext taking precedence.
+        // We set DialContext here to preserve any context values that are passed in,
+        // but fall back to Dial if the user has set it.
+        var trʗ1 = tr;
+        tr.Value.DialContext = (context.Context ctx, @string network, @string addr) => {
+            if ((~trʗ1).Dial != default!) {
+                return (~trʗ1).Dial(network, addr);
+            }
+            if (addr == "example.com:80"u8 || strings.HasSuffix(addr, exampleCom80ˢ)) {
+                addr = Ꮡs.Value.Listener.Addr().String();
+            }
+            return Ꮡdialer.DialContext(ctx, network, addr);
+        };
+        s.client = Ꮡ(new http.Client(Transport: new http.TransportжRoundTripper(tr)));
     }
     s.URL = "http://"u8 + s.Listener.Addr().String();
     Ꮡs.wrap();
@@ -145,6 +164,9 @@ public static void Start(this ж<Server> Ꮡs) {
         select();
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string exampleCom443ˢ = ".example.com:443"u8;
 
 // StartTLS starts TLS on a server from NewUnstartedServer.
 public static void StartTLS(this ж<Server> Ꮡs) {
@@ -183,12 +205,25 @@ public static void StartTLS(this ж<Server> Ꮡs) {
     }
     var certpool = x509.NewCertPool();
     certpool.AddCert(s.certificate);
-    s.client.Value.Transport = new http.TransportжRoundTripper(Ꮡ(new http.Transport(
+    var tr = Ꮡ(new http.Transport(
         TLSClientConfig: Ꮡ(new tls.Config(
             RootCAs: certpool
         )),
         ForceAttemptHTTP2: s.EnableHTTP2
-    )));
+    ));
+    ref var dialer = ref heap<net.Dialer>(out var Ꮡdialer);
+    dialer = new net.Dialer(nil);
+    var trʗ1 = tr;
+    tr.Value.DialContext = (context.Context ctx, @string network, @string addr) => {
+        if ((~trʗ1).Dial != default!) {
+            return (~trʗ1).Dial(network, addr);
+        }
+        if (addr == "example.com:443"u8 || strings.HasSuffix(addr, exampleCom443ˢ)) {
+            addr = Ꮡs.Value.Listener.Addr().String();
+        }
+        return Ꮡdialer.DialContext(ctx, network, addr);
+    };
+    s.client.Value.Transport = new http.TransportжRoundTripper(tr);
     s.Listener = tls.NewListener(s.Listener, s.TLS);
     s.URL = "https://"u8 + s.Listener.Addr().String();
     Ꮡs.wrap();
@@ -345,6 +380,8 @@ public static ж<x509.Certificate> Certificate(this ref Server s) {
 // It is configured to trust the server's TLS test certificate and will
 // close its idle connections on [Server.Close].
 // Use Server.URL as the base URL to send requests to the server.
+// The returned client will also redirect any requests to "example.com"
+// or its subdomains to the server.
 public static ж<http.Client> Client(this ref Server s) {
     return s.client;
 }

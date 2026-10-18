@@ -9,11 +9,13 @@
 package main
 
 import (
+	"fmt"
 	"go/build"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 
@@ -53,24 +55,73 @@ func toolchainDefaultGODEBUG(t *testing.T, goRoot string, dir string) string {
 	return strings.TrimSpace(string(output))
 }
 
+// toolchainReleaseMinor is the N of the converting toolchain's go1.N release, read from GOROOT/VERSION.
+func toolchainReleaseMinor(t *testing.T, goRoot string) int {
+	t.Helper()
+
+	version, err := os.ReadFile(filepath.Join(goRoot, "VERSION"))
+
+	if err != nil {
+		t.Fatalf("reading the toolchain's VERSION: %v", err)
+	}
+
+	minor, ok := goMinorVersion(strings.TrimSpace(strings.SplitN(string(version), "\n", 2)[0]))
+
+	if !ok {
+		t.Fatalf("the toolchain's VERSION names no go1.N release: %q", version)
+	}
+
+	return minor
+}
+
+// godebugKeys is the sorted key list of a DefaultGODEBUG value.
+func godebugKeys(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	var keys []string
+
+	for _, setting := range strings.Split(value, ",") {
+		keys = append(keys, strings.SplitN(setting, "=", 2)[0])
+	}
+
+	sort.Strings(keys)
+
+	return strings.Join(keys, ",")
+}
+
 // TestDefaultGODEBUGMatchesTheToolchain is the oracle arm: for each fixture main package, the converter's
-// reproduction of cmd/go's algorithm must equal what the toolchain itself reports -- a go line older than
-// the release (old values for every later change), one at the release (nothing), a go.mod godebug block
-// with a `default=` override and an explicit setting, and a //go:debug directive in a source file.
+// reproduction of cmd/go's algorithm must equal what the toolchain itself reports -- go lines older than
+// the release (old values for every later change), one AT the running toolchain's release (nothing), a
+// go.mod godebug block with a `default=` override and an explicit setting, and a //go:debug directive in a
+// source file.
+//
+// The fixture PREMISE comes from the running toolchain, never a constant: a plain go line's settings are
+// exactly the table entries changed after it (internal/godebugs/table.go of the converting GOROOT, the table
+// cmd/go reads). "A go 1.24 module has an empty default" held only on a 1.24 toolchain; under go1.26.9 the
+// nine settings changed in 1.25 and 1.26 appear at their old values, and the hard-coded premise read red.
 func TestDefaultGODEBUGMatchesTheToolchain(t *testing.T) {
 	options := godebugTestOptions()
+	release := toolchainReleaseMinor(t, options.goRoot)
+	table, err := readGodebugsTable(options.goRoot)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	fixtures := []struct {
 		name   string
 		goMod  string
 		mainGo string
-		empty  bool
+		goLine int // a plain go line's minor, whose premise the table decides; 0 where overrides decide it
 	}{
-		{name: "go120", goMod: "module example.test/gd\n\ngo 1.20\n"},
-		{name: "go123", goMod: "module example.test/gd\n\ngo 1.23\n"},
-		{name: "go124", goMod: "module example.test/gd\n\ngo 1.24\n", empty: true},
+		{name: "go120", goMod: "module example.test/gd\n\ngo 1.20\n", goLine: 20},
+		{name: "go123", goMod: "module example.test/gd\n\ngo 1.23\n", goLine: 23},
+		{name: "go124", goMod: "module example.test/gd\n\ngo 1.24\n", goLine: 24},
+		{name: "atrelease", goMod: fmt.Sprintf("module example.test/gd\n\ngo 1.%d\n", release), goLine: release},
 		// No go line: cmd/go reads the module as go 1.16 (a module-cache release that predates modules).
-		{name: "nogoline", goMod: "module example.test/gd\n"},
+		{name: "nogoline", goMod: "module example.test/gd\n", goLine: 16},
 		{name: "block", goMod: "module example.test/gd\n\ngo 1.23\n\ngodebug (\n\tdefault=go1.21\n\tpanicnil=0\n)\n"},
 		{name: "directive", goMod: "module example.test/gd\n\ngo 1.24\n",
 			mainGo: "//go:debug panicnil=1\n//go:debug randseednop=0\n\npackage main\n\nfunc main() {}\n"},
@@ -99,8 +150,27 @@ func TestDefaultGODEBUGMatchesTheToolchain(t *testing.T) {
 				t.Errorf("DefaultGODEBUG\n got: %q\nwant: %q (go list -f {{.DefaultGODEBUG}})", got, want)
 			}
 
-			if fixture.empty != (want == "") {
-				t.Errorf("fixture premise broken: the toolchain's answer is %q (empty expected: %v)", want, fixture.empty)
+			if fixture.goLine == 0 {
+				return
+			}
+
+			var changedAfter []string
+
+			for _, entry := range table {
+				if fixture.goLine < entry.changed {
+					changedAfter = append(changedAfter, entry.name)
+				}
+			}
+
+			sort.Strings(changedAfter)
+
+			if premise := strings.Join(changedAfter, ","); godebugKeys(want) != premise {
+				t.Errorf("fixture premise broken: go 1.%d under the go1.%d toolchain should carry exactly the settings its "+
+					"table changed after 1.%d\n table: %q\n go list: %q", fixture.goLine, release, fixture.goLine, premise, godebugKeys(want))
+			}
+
+			if fixture.goLine == release && want != "" {
+				t.Errorf("a go line at the toolchain's own release must carry no default, the toolchain answers %q", want)
 			}
 		})
 	}
@@ -111,6 +181,7 @@ func TestDefaultGODEBUGMatchesTheToolchain(t *testing.T) {
 // converted on its own (no -recurse) is unchanged -- the M6 scope ruling, so the behavioral corpus is
 // byte-identical.
 func TestRecurseMainProgramCarriesItsDefaultGODEBUG(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: converts a module")
 	}

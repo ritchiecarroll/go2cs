@@ -196,6 +196,19 @@ A pointer-sourced cast to an interface implemented by a FOREIGN type references 
 
 An **EXPLICIT pointer-to-interface conversion** — Go's `image.Image(dst)` with `dst *image.RGBA` (image/draw) — is the same interface cast in conversion clothing and routes through the same machinery: `isTypeConversion` probes the ORIGINAL pointer type against an interface target (the value type alone does not implement it — the elem-only probe misread the conversion as a constructor call, `new image.Image(dst)`, CS0144), and the emission re-renders the argument in its BOX form and CASTS the adapter to the interface — `((image.Image)new image_ΔRGBAжImage(Ꮡdst))` — because the adapter implements its members explicitly, and a chained member access on the conversion result (`CrossPkgLib.Labeled(sp).Label()`) cannot bind on the adapter class itself (CS1929). (Guarded by `CrossPkgUser`'s `CrossPkgLib.Labeled(sp2).Label()` / `LabeledOf(sp2)` pair, output-compared vs Go.)
 
+## A pointer adapter names a GENERIC interface through the interface's own class
+`ImplementGenerator` takes the name of the interface an adapter implements from the interface symbol's display string. For a closed generic interface that is the fully qualified name, outer type and type arguments both. Until 2026-10-16 the name came from `GetFullTypeName`, whose generic arm writes `Name<args>` without the containing class. That bare name resolves only when the adapter's host class (the first class of the record's file) also declares the interface. Two arrangements host it elsewhere:
+- a record in one package for a generic interface declared in another;
+- an external test's record on a production pointer type, which anchors to the production class under the recompile model. crypto/mlkem at Go 1.26 is the measured instance: production `*DecapsulationKey768` against mlkem_test's `decapsulationKey[E encapsulationKey]`.
+
+Both built with CS0246 on the base list and one CS0540 per member. The adapter's class NAME does not change: it is composed from the simple interface name with the type arguments stripped. Only the generated file's hint name grows. For a non-generic interface the two spellings were already identical.
+
+<!-- generated: ImplementGenerator output for src/tests/Behavioral/GenericInterfaceCrossPackage, line 26; Generated/ is untracked, read 2026-10-16 -->
+```csharp
+internal sealed class decKeyжDecapKey : global::go.GenericInterfaceCrossPackage.keylike_package.DecapKey<global::go.GenericInterfaceCrossPackage.keylike_package.EncapKey>, IжAdapter
+```
+Guarded by the `GenericInterfaceCrossPackage` behavioral test (the interface and generic helper in sub-package `keylike`, the pointer implementers in `main`, output-compared against Go) and by GenTests `CrossClassGenericInterfaceAdapterTests`, which keeps two controls: a generic interface declared in the host class, and a non-generic interface from the other class.
+
 ## `%T` (and type-name rendering generally) unwraps generated adapters and pointer boxes
 
 Go's `%T` prints the interface value's **dynamic Go type** — `*strings.byteReplacer`, never an implementation artifact. The managed model interposes artifacts a name renderer must see through (strings' `TestPickAlgorithm`, which `%T`s each replacer algorithm, printed `strings.byteReplacerжreplacer`):
@@ -1143,7 +1156,7 @@ interface from a **directly imported** package (checked with `types.Implements`)
 emits real C# inheritance at the declaration and **skips re-declaring the covered members**
 (redeclaring would HIDE the base member — implementers would need both):
 
-<!-- source: src/core/io/fs/fs.cs:86-90 -->
+<!-- source: src/core/io/fs/fs.cs:98-102 -->
 ```csharp
 partial interface File :
     io.ReadCloser
@@ -1418,7 +1431,7 @@ it is present — the marker resolves as one unit to the already-simple lifted n
 well-defined even when several files lift the same shape. Emitted form:
 The declaring file, `batch.cs`:
 
-<!-- source: src/core/internal/trace/batch.cs:45-49 -->
+<!-- source: src/core/internal/trace/batch.cs:49-53 -->
 ```csharp
 internal partial interface readBatch_r /*dyn*/ :
     io.Reader,
@@ -1429,14 +1442,14 @@ internal partial interface readBatch_r /*dyn*/ :
 
 The cast site in another file, `generation.cs`:
 
-<!-- source: src/core/internal/trace/generation.cs:74 -->
+<!-- source: src/core/internal/trace/generation.cs:168 -->
 ```csharp
 (b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
 ```
 
 And the record in `package_info.cs`:
 
-<!-- source: src/core/internal/trace/package_info.cs:58 -->
+<!-- source: src/core/internal/trace/package_info.cs:59 -->
 ```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
@@ -1445,6 +1458,51 @@ not satisfying a lifted operator constraint — is a distinct, deeper root). Gua
 `AnonInterfaceCrossFile` (a two-file package: file A declares `describe(thing interface{ Sizer;
 Namer })`, file B casts a concrete `*box` to it — the lifted name must flow into the attribute,
 the adapter, and the signature).
+
+## An anonymous interface lifted out of a GENERIC declaration binds its type parameters, and each instantiation's concrete lift derives it
+
+Go 1.26's crypto/x509 declares `type constraints[T, V any] struct { permitted, excluded interface{
+query(V) (T, bool) } }` and fills it from functions returning `interface{ query(string) (string, bool)
+}`. The field's anonymous interface mentions `T` and `V`, so its lift is a GENERIC declaration of its
+own, `constraints_permitted<T, V>`, and the struct names it constructed. Lifted non-generic, both names
+were unbound (CS0246), and crypto/x509 blocked every remaining project of the hop. As with a lift out of
+a generic function, only the parameters the shape uses are bound and no constraint clause is emitted:
+the enclosing declaration's clauses govern every use. Within that one declaration the same shape is
+one type, so `excluded` reuses `permitted`'s lift; across declarations a lift that closes over type
+parameters is never shared or registered by signature, since `T` means something else elsewhere.
+
+In Go, `interface{ query(string) (string, bool) }` is ONE type whether it is a function's result or
+`constraints[string, string].permitted`; in C# the function's result is a lifted dyn interface of its
+own. So each concrete instantiation of the generic struct writes one partial part making that shape's
+lift DERIVE the closed generic, an implicit reference conversion, and the derived lift's member is
+declared `new` because it redeclares the inherited one (CS0108 otherwise). Both are deferred markers
+resolved after the file-visit barrier, so the lift named may live in any file of the package; a shape
+no lift claimed resolves to an empty line, and the marker on every other dyn member resolves to nothing.
+Emitted form:
+
+<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:7-11, :16-17, :39-41 -->
+```csharp
+partial interface constraints_permitted<T, V> /*dyn*/ {
+    (T, bool) query(V _);
+}
+partial interface newCounter_R0 : constraints_permitted<ж<counter>, nint> {}
+partial interface newDNS_R0 : constraints_permitted<@string, @string> {}
+
+    internal constraints_permitted<T, V> permitted;
+    internal constraints_permitted<T, V> excluded;
+
+internal partial interface newDNS_R0 /*dyn*/ {
+    new (@string, bool) query(@string _);
+}
+```
+
+One direction is NOT covered: assigning the generic field back to the concrete lift (`var q
+interface{ query(string) (string, bool) } = c.permitted`) is a base-to-derived conversion C# does not
+make implicitly. crypto/x509 never does it. It closes when a Go type identity becomes ONE C# type (the
+generic lift as the dyn name for every structurally identical shape), which retires these partial parts.
+(Guarded by `GenericLiftedInterfaceField`: two instantiations, value and pointer receivers, a value
+called through both its concrete interface and the generic field, and Go's structural assertion on the
+field, output-compared to Go; and by `TestLiftedInterfaceFieldOfAGenericStructCarriesItsTypeParameters`.)
 
 ## An INITIALIZED var lifts its explicit anonymous declared type too — and a blank name lifts from the GO identifier
 

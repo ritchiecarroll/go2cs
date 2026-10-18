@@ -37,6 +37,7 @@ using static go.hash.adler32_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<digest, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<digest, hash_package.Hash32>(Pointer = true)]
 // </InterfaceImplementations>
 
@@ -51,7 +52,7 @@ using static go.hash.adler32_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/adler32/adler32.go", "adler32.cs", "ACRMgK7SgoKmgKSA3oKCgqaC5oKClIKUgqiSgoKCgpSCgoKCgoKCgoKUgoKUgoKUpoKCpoCkgoKokA==")]
+[assembly: go.GoPositionMap("hash/adler32/adler32.go", "adler32.cs", "ACRMgK7SgoKmgKSA3oKCgqaC5oKClIKUgqaCkqiSgoKCgpSCgoKCgoKCgoKUgoKUgoKUpoKCpoCkgoKokA==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

@@ -18,11 +18,21 @@ internal static partial (uint32 eax, uint32 edx) xgetbv();
 
 // go2cs generated this placeholder — func getGOAMD64level is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// eax bits
+internal static UntypedInt cpuid_AVXVNNI => /* 1 << 4 */ 16;
+
 // ecx bits
 internal static UntypedInt cpuid_SSE3 => /* 1 << 0 */ 1;
 internal static UntypedInt cpuid_PCLMULQDQ => /* 1 << 1 */ 2;
+internal static UntypedInt cpuid_AVX512VBMI => /* 1 << 1 */ 2;
+internal static UntypedInt cpuid_AVX512VBMI2 => /* 1 << 6 */ 64;
 internal static UntypedInt cpuid_SSSE3 => /* 1 << 9 */ 512;
+internal static UntypedInt cpuid_AVX512GFNI => /* 1 << 8 */ 256;
+internal static UntypedInt cpuid_VAES => /* 1 << 9 */ 512;
+internal static UntypedInt cpuid_AVX512VNNI => /* 1 << 11 */ 2048;
+internal static UntypedInt cpuid_AVX512BITALG => /* 1 << 12 */ 4096;
 internal static UntypedInt cpuid_FMA => /* 1 << 12 */ 4096;
+internal static UntypedInt cpuid_AVX512VPOPCNTDQ => /* 1 << 14 */ 16384;
 internal static UntypedInt cpuid_SSE41 => /* 1 << 19 */ 524288;
 internal static UntypedInt cpuid_SSE42 => /* 1 << 20 */ 1048576;
 internal static UntypedInt cpuid_POPCNT => /* 1 << 23 */ 8388608;
@@ -30,16 +40,26 @@ internal static UntypedInt cpuid_AES => /* 1 << 25 */ 33554432;
 internal static UntypedInt cpuid_OSXSAVE => /* 1 << 27 */ 134217728;
 internal static UntypedInt cpuid_AVX => /* 1 << 28 */ 268435456;
 
-// ebx bits
+// "Extended Feature Flag" bits returned in EBX for CPUID EAX=0x7 ECX=0x0
 internal static UntypedInt cpuid_BMI1 => /* 1 << 3 */ 8;
 internal static UntypedInt cpuid_AVX2 => /* 1 << 5 */ 32;
 internal static UntypedInt cpuid_BMI2 => /* 1 << 8 */ 256;
 internal static UntypedInt cpuid_ERMS => /* 1 << 9 */ 512;
 internal static UntypedInt cpuid_AVX512F => /* 1 << 16 */ 65536;
+internal static UntypedInt cpuid_AVX512DQ => /* 1 << 17 */ 131072;
 internal static UntypedInt cpuid_ADX => /* 1 << 19 */ 524288;
+internal static UntypedInt cpuid_AVX512CD => /* 1 << 28 */ 268435456;
 internal static UntypedInt cpuid_SHA => /* 1 << 29 */ 536870912;
 internal static UntypedInt cpuid_AVX512BW => /* 1 << 30 */ 1073741824;
 internal static UntypedInt cpuid_AVX512VL => /* 1 << 31 */ 2147483648;
+
+// "Extended Feature Flag" bits returned in ECX for CPUID EAX=0x7 ECX=0x0
+internal static UntypedInt cpuid_AVX512_VBMI => /* 1 << 1 */ 2;
+internal static UntypedInt cpuid_AVX512_VBMI2 => /* 1 << 6 */ 64;
+internal static UntypedInt cpuid_GFNI => /* 1 << 8 */ 256;
+internal static UntypedInt cpuid_AVX512VPCLMULQDQ => /* 1 << 10 */ 1024;
+internal static UntypedInt cpuid_AVX512_BITALG => /* 1 << 12 */ 4096;
+
 // edx bits
 internal static UntypedInt cpuid_FSRM => /* 1 << 4 */ 16;
 // edx bits for CPUID 0x80000001
@@ -55,7 +75,8 @@ internal static void doinit() {
         new(Name: "fsrm"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasFSRM)),
         new(Name: "pclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasPCLMULQDQ)),
         new(Name: "rdtscp"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDTSCP)),
-        new(Name: "sha"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA))
+        new(Name: "sha"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA)),
+        new(Name: "vpclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPCLMULQDQ))
     }.slice();
     var level = getGOAMD64level();
     if (level < 2) {
@@ -83,13 +104,16 @@ internal static void doinit() {
         // they can be turned off.
         options = append(options,
             new option(Name: "avx512f"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512F)),
+            new option(Name: "avx512cd"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512CD)),
             new option(Name: "avx512bw"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BW)),
+            new option(Name: "avx512dq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512DQ)),
             new option(Name: "avx512vl"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VL)));
     }
 
     var (maxID, _, _, _) = cpuid(0, 0);
 
     if (maxID < 1) {
+        osInit();
         return;
     }
 
@@ -110,12 +134,6 @@ internal static void doinit() {
     // e.g. setting the xsavedisable boot option on Windows 10.
     X86.HasOSXSAVE = isSet(ecx1, cpuid_OSXSAVE);
 
-    // The FMA instruction set extension only has VEX prefixed instructions.
-    // VEX prefixed instructions require OSXSAVE to be enabled.
-    // See Intel 64 and IA-32 Architecture Software Developer’s Manual Volume 2
-    // Section 2.4 "AVX and SSE Instruction Exception Specification"
-    X86.HasFMA = isSet(ecx1, cpuid_FMA) && X86.HasOSXSAVE;
-
     var osSupportsAVX = false;
     var osSupportsAVX512 = false;
     // For XGETBV, OSXSAVE bit is required and sufficient.
@@ -133,22 +151,46 @@ internal static void doinit() {
 
     X86.HasAVX = isSet(ecx1, cpuid_AVX) && osSupportsAVX;
 
+    // The FMA instruction set extension requires both the FMA and AVX flags.
+    //
+    // Furthermore, the FMA instructions are all VEX prefixed instructions.
+    // VEX prefixed instructions require OSXSAVE to be enabled.
+    // See Intel 64 and IA-32 Architecture Software Developer’s Manual Volume 2
+    // Section 2.4 "AVX and SSE Instruction Exception Specification"
+    X86.HasFMA = isSet(ecx1, cpuid_FMA) && X86.HasAVX && X86.HasOSXSAVE;
+
     if (maxID < 7) {
+        osInit();
         return;
     }
 
-    var (_, ebx7, _, edx7) = cpuid(7, 0);
+    var (eax7, ebx7, ecx7, edx7) = cpuid(7, 0);
     X86.HasBMI1 = isSet(ebx7, cpuid_BMI1);
     X86.HasAVX2 = isSet(ebx7, cpuid_AVX2) && osSupportsAVX;
     X86.HasBMI2 = isSet(ebx7, cpuid_BMI2);
     X86.HasERMS = isSet(ebx7, cpuid_ERMS);
     X86.HasADX = isSet(ebx7, cpuid_ADX);
     X86.HasSHA = isSet(ebx7, cpuid_SHA);
+    X86.HasVAES = isSet(ecx7, cpuid_VAES) && X86.HasAVX;
 
     X86.HasAVX512F = isSet(ebx7, cpuid_AVX512F) && osSupportsAVX512;
     if (X86.HasAVX512F) {
+        X86.HasAVX512CD = isSet(ebx7, cpuid_AVX512CD);
         X86.HasAVX512BW = isSet(ebx7, cpuid_AVX512BW);
+        X86.HasAVX512DQ = isSet(ebx7, cpuid_AVX512DQ);
         X86.HasAVX512VL = isSet(ebx7, cpuid_AVX512VL);
+        X86.HasAVX512GFNI = isSet(ecx7, cpuid_AVX512GFNI);
+        X86.HasAVX512BITALG = isSet(ecx7, cpuid_AVX512BITALG);
+        X86.HasAVX512VPOPCNTDQ = isSet(ecx7, cpuid_AVX512VPOPCNTDQ);
+        X86.HasAVX512VBMI = isSet(ecx7, cpuid_AVX512VBMI);
+        X86.HasAVX512VBMI2 = isSet(ecx7, cpuid_AVX512VBMI2);
+        X86.HasAVX512VAES = isSet(ecx7, cpuid_VAES) && X86.HasAES && isSet(ebx7, cpuid_AVX512VL);
+        X86.HasAVX512VNNI = isSet(ecx7, cpuid_AVX512VNNI);
+        X86.HasAVX512VPCLMULQDQ = isSet(ecx7, cpuid_AVX512VPCLMULQDQ);
+        X86.HasAVX512VBMI = isSet(ecx7, cpuid_AVX512_VBMI);
+        X86.HasAVX512VBMI2 = isSet(ecx7, cpuid_AVX512_VBMI2);
+        X86.HasGFNI = isSet(ecx7, cpuid_GFNI);
+        X86.HasAVX512BITALG = isSet(ecx7, cpuid_AVX512_BITALG);
     }
 
     X86.HasFSRM = isSet(edx7, cpuid_FSRM);
@@ -157,11 +199,32 @@ internal static void doinit() {
     (maxExtendedInformation, _, _, _) = cpuid(0x80000000U, 0);
 
     if (maxExtendedInformation < 0x80000001U) {
+        osInit();
         return;
     }
 
     var (_, _, _, edxExt1) = cpuid(0x80000001U, 0);
     X86.HasRDTSCP = isSet(edxExt1, cpuid_RDTSCP);
+
+    doDerived = () => {
+        // Rather than carefully gating on fundamental AVX-512 features, we have
+        // a virtual "AVX512" feature that captures F+CD+BW+DQ+VL. BW, DQ, and
+        // VL have a huge effect on which AVX-512 instructions are available,
+        // and these have all been supported on everything except the earliest
+        // Phi chips with AVX-512. No CPU has had CD without F, so we include
+        // it. GOAMD64=v4 also implies exactly this set, and these are all
+        // included in AVX10.1.
+        X86.HasAVX512 = X86.HasAVX512F && X86.HasAVX512CD && X86.HasAVX512BW && X86.HasAVX512DQ && X86.HasAVX512VL;
+    };
+
+    if (eax7 >= 1) {
+        var (eax71, _, _, _) = cpuid(7, 1);
+        if (X86.HasAVX) {
+            X86.HasAVXVNNI = isSet(eax71, cpuid_AVXVNNI);
+        }
+    }
+
+    osInit();
 }
 
 internal static bool isSet(uint32 hwc, uint32 value) {

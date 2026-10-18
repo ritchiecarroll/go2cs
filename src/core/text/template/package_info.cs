@@ -40,7 +40,6 @@ using static go.text.template_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoDynamicTypeLift("7374727563747b73796e632e4f6e63653b2076206d61705b737472696e675d7265666c6563742e56616c75657d", "builtinFuncsOnceᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -67,10 +66,10 @@ using static go.text.template_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("text/template/exec.go", "exec.cs", "ABgslIKClAATKpKokqiSqqKCgoKmqJKokoKCpoL+lJSCqJKqogAOHoKmgqiygoKUgpQADRyCzsKCgpS0tMTWAAISAAkCgoKUAAIaAAoCpuKCgoKUyoKUggAIDgAJAoKUgoKCgoKUgpSUlOqCmsKCuIKCxua0tILGtLSAgtbEzOKCgoKClIKClKSCtKqyprKUlJSkpKSkpKSkpJSm0oKCgIK2gpSCooKmgpTKpoKCuKaClICCtqKStoKClIKClJSClMSClIKUxIKUgoKUxIKUgoKUgoKCgpSUgpTExIKCgpSCgqaUgpSUgoKCgoLKpoKUlLSUgrSkooKCgpSCpoKSgpSCAAIWAAsCgpSCgoKUgqaCgpSmpoKCuKKClKS2toKklIKClKSktKSUgt4ACQiClKqmgoKUpqSmgqaCpqKCpqKCgpSCpoKmtIKCgoKUrLKCgqamooKCgoKUrLKCgpSUgoKmgsqCgpSAgqSUlIKCgoKUgqaClMiCgoKUgoLIpKbGgoKApraCtoKogoKcsoKUgoKClIKCgoKkgpSAgraCgpS4goKCgoKmpu6UuJSCgqaCgoK4goKCprimyoKClJSUgqamgoKUqJKUpJSokoKUlJSUlIKUgoKCggAHEJSCgsa0tqaCgpSkgpS0pKSkpJSUpKSkpIK2graklIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoKAgoKCpIKmgoCCgoKkgqaCgpSkpKS2tKSkpJSCrLKCgqauwoKUgpSqooKCgpSCguyigpSCpoKClJS4", "354-358:1;363-396:2;389-394:2.1;794-799:1", "", "149=Name/1/1/1,Errorf/1/1/2")]
-[assembly: go.GoPositionMap("text/template/funcs.go", "funcs.cs", "ACVOwgAfQKKClKiSgoKokoKClIKClICCpLyigrqkgKSkpKTKkoKUgsakpqgACAKCgoKAgraAgqTqooKClJSClIKClKaClKSUqJKClKSkpJSClAACEPKCgpSigoKAgqSUgoKUpIKClICClNikpgACEgAIAoKClIKUgpSClKSkpoKCgoKUpoKUgqaClKyygoKUlJSqsqrCgoKUgoKmgIKkgoKCgpSUgqaCopSCgqaCgIK2quKCgIKAgpTYgoKU6pKCqsKqwqiSAAQQgoIACx6ClKSkpKSklKiSgpSUlKqigoKCpqiygoKUgqKCgoKUlLS0gsiUpKSkpKSkgpSClIKUuIKmqKSCqJKCgoKUgoKClIKUlLS0ppSkpKSkpKaopIKClKikgoKUqKSCgpS8goKCgoKYkoKCgpS0tLS0tLSkgoKUqKSClIKCqsK8gpSCgoKCgoKYkoKClJSUlKaUtLS0tLS0tIKCgsiCgpSUlJSopIKUgoKmgpSUqsKqwgACFPKClIKUgoKCgqaU", "73-75:1;366-374:1")]
+[assembly: go.GoPositionMap("text/template/funcs.go", "funcs.cs", "ACVOwgAaNIKCgoKokoKClIKClICCpLyigrqkgKSkpKTKkoKUgsakpqgACAKCgoKAgraAgqTqooKClJSClIKClKaClKSUqJKClKSkpJSClAACEPKCgpSigoKAgqSUgoKUpIKClICClNikpgACEgAIAoKClIKAgqSClIKUgpSkpKaCgoKClKaClIKmgpSssoKClJSUqrKqwoKClIKCpoCCpIKCgoKUlIKmgqKUgoKmgoCCtqrigoCCgIKU2IKClOqSgqrCqsKokgAEEIIACx6ClKSkpKSklKiSgpSUlKqigoKCpqiygoKUgqKCgoKUlLS0gsiUpKSkpKSkgpSClIKUuIKmqKSCqJKCgoKUgoKClIKUlLS0ppSkpKSkpKaopIKClKikgoKUqKSCgpS8goKCgoKYkoKCgpS0tLS0tLSkgoKUqKSClIKCqsK8gpSCgoKCgoKYkoKClJSUlKaUtLS0tLS0tIKCgsiCgpSUlJSopIKUgoKmgpSUqsKqwgACFPKClIKUgoKCgqaU", "357-365:1")]
 [assembly: go.GoPositionMap("text/template/helper.go", "helper.cs", "ABEw8oKUAAIYAAsCAAIcAA4CgqrSlJSCgoKUjuKClIKUlIKCpgACGAAJAgACFgAKAoKokoKClIKUruKu8oKmgoKCgoKUgpSUpsKCgqaCsoKC", "173-177:1")]
 [assembly: go.GoPositionMap("text/template/option.go", "option.cs", "ABZUABUCgoKUpoKCpoCClJSCpIKkgsg=")]
-[assembly: go.GoPositionMap("text/template/template.go", "template.cs", "ACVOkqaCqJIAAhTygtyokoKCgoKCAAMUAAwCgoKClIKCgoKCpoKUgoKCgtiSAAgaAAkCgoKCgoKmgpTY4oKmgoKCgpQABRDygoKCAAISAAsCgoKCgoLa8oKUgoIABRoADAKCgoKCgqaCgIK2rOKClICmpII=")]
+[assembly: go.GoPositionMap("text/template/template.go", "template.cs", "ACVOkqaCqJIAAhTygtyokoKCgoKCAAMUAAwCgoKClIKCgoKCgqaClIKCgoLYkgAIGgAJAoKCgoKCpoKU2OKCpoKCgoKUAAUQ8oKCggACEgALAoKCgoKC2vKClIKCAAUaAAwCgoKCgoKmgoCCtqzigpSApqSC")]
 // </GoSourcePositionMaps>
 
 namespace go.text;
@@ -85,7 +84,6 @@ public static partial class template_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct builtinFuncsOnceᴛ1 {}
     internal partial struct common {}
     internal partial struct kind {}
     internal partial struct missingKeyAction {}

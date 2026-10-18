@@ -9,6 +9,7 @@ partial class runtime_package {
 internal static UntypedInt _EINTR => 0x4;
 internal static UntypedInt _EAGAIN => 0xb;
 internal static UntypedInt _ENOMEM => 0xc;
+internal static UntypedInt _ENOSYS => 0x26;
 
 internal static UntypedInt _PROT_NONE => 0x0;
 internal static UntypedInt _PROT_READ => 0x1;
@@ -129,7 +130,7 @@ partial struct siginfoFields {
 }
 
 partial struct siginfo {
-    internal partial ref siginfoFields siginfoFields { get; }
+    /*embed*/ internal siginfoFields siginfoFields;
     // Pad struct to the max size in the kernel.
     internal array<byte> _ = new((uintptr)_si_max_size - /* unsafe.Sizeof(siginfoFields{}) */ (uintptr)24);
 }
@@ -153,7 +154,7 @@ partial struct sigeventFields {
 }
 
 partial struct sigevent {
-    internal partial ref sigeventFields sigeventFields { get; }
+    /*embed*/ internal sigeventFields sigeventFields;
     // Pad struct to the max size in the kernel.
     internal array<byte> _ = new((uintptr)_sigev_max_size - /* unsafe.Sizeof(sigeventFields{}) */ (uintptr)24);
 }

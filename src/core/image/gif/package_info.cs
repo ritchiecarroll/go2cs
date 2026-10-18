@@ -57,7 +57,7 @@ using static go.image.gif_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAIlaCgoKUpoKCgpQAKV6CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSSlKamgoKSgpKC3IKCkoKmqMSAgpS2lIKClIKmgoKClJSAgsiAgraCuIKUpsqCgoKUgoKUgoKAgpSAgtimgoKCgpSSgoKUpoKCgpSClKTYgoKmpJSCgILsgoKClIKUgqaCgoKUgsqCgIKkgpSCgoKCgpSClNbCgoKUgoKCgqaClJSClJSAgtyCgoKUtoKClIKmgoKSgIKClAANGoCCgpTagIKSgsiCgoLcgqaCgoLKgoIACAaCgIKkgoKCggARJIKU3IKCgpSAgqQACBIABhCygoKCgoKCgoKCgqaqooKAgqQAIEaigoCCpAALGKqigoCCpO6C")]
-[assembly: go.GoPositionMap("image/gif/writer.go", "writer.cs", "ABo0lIKCgqYAIkSCpoKmgoK4goKCuIKCqqKCgIK2pqaClIKClKaCgpSmgoKUpoKClOaCgpSCgriCgpSAgoKCgoKCgoKCgpS4goKCyIKCgoKCgoKClIKCgoL4goKUgoKUxoCClIKkgoKUgpSUpoKCgoKW9rKCpoKCpoKCgpSCgqaCgoKClICCgsiCgoKCgpSUpoKUlIKUgoKCgoLcgoCClIKCgpTKgqaCyIKClJSCgoKAgoKCgqaCgoKCyIIAFSjCgqaCpsiClIKCgpKCgILIgIKUtoKCgoKUlIKC2MSCgqaCgpSClIKmgoKAgoKCgtrKgoKU3IKSgqY=", "", "", "245=Equal/2/2/1;511=Dx/1/1/5,Dy/1/1/6")]
+[assembly: go.GoPositionMap("image/gif/writer.go", "writer.cs", "ABw2goKUACJEgqaCpoKCuIKCgriCgqqigoCCtqamgpSCgpSmgoKUpoKClKaCgpTmgoKUgoK4goKUgIKCgoKCgoKCgoKUuIKCgsiCgoKCgoKCgpSCgoKC+IKClIKClMaAgpSCpIKClIKUlKaCgoKClvaygqaCgqaCgoKUgoKmgoKCgpSAgoLIgoKCgoKUlKaClJSClIKCgoKC3IKAgpSCgoKUyoKmgsiCgpSUgoKCgIKCgoKmgoKCgsiCABUowoKmgqbIgpSCgoKSgoCCyICClLaCgoKClJSCgtjEgoKmgoKUgpSCpoKCgIKCgoLayoKClNyCkoKm", "", "", "243=Equal/2/2/1;509=Dx/1/1/5,Dy/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -100,5 +100,6 @@ public static partial class gif_package
     [GoInit] internal static void initᴛᴛimportꓸimageꓸcolorꓸpalette() => builtin.initPackage(typeof(go.image.color.palette_package));
     [GoInit] internal static void initᴛᴛimportꓸimageꓸdraw() => builtin.initPackage(typeof(go.image.draw_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }

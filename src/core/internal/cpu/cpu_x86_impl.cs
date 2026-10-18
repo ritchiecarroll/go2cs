@@ -33,8 +33,10 @@
 // Go fills `cpu.X86` in doinit(), which cpuinit() calls from schedinit(). schedinit is Go's
 // SCHEDULER BOOTSTRAP and go2cs never runs it — the same fact goenvs_impl.cs and goargs_impl.cs
 // are written around, each with the comment that a module initializer is "the faithful stand-in
-// for schedinit's slot". So doinit() is unreachable, `cpuid()` (x86 assembly, PartialStubGenerator
-// stub) never actually throws, and EVERY `X86.Has*` stayed at its `false` zero value process-wide.
+// for schedinit's slot". So doinit() is unreachable and EVERY `X86.Has*` stayed at its `false` zero
+// value process-wide. doinit's own cpuid calls therefore never run; the one live caller outside it is
+// Go 1.26's DataCacheSizes (datacache_x86.go), so cpuid() below has a managed body rather than the
+// PartialStubGenerator stub that throws.
 //
 // That is not cosmetic. `crypto/tls` picks its TLS 1.3 cipher-suite ORDER from
 // `hasAESGCMHardwareSupport`, which is `cpu.X86.HasAES && cpu.X86.HasPCLMULQDQ` — so with every
@@ -49,16 +51,22 @@
 // not use would be a lie in the direction that matters. Per-flag census against Go's own
 // cpu_x86.go, taken on this host before writing this:
 //
-//   MAPPED (15)   HasAES Aes · HasPCLMULQDQ Pclmulqdq · HasAVX Avx · HasAVX2 Avx2
+//   MAPPED (23)   HasAES Aes · HasPCLMULQDQ Pclmulqdq · HasAVX Avx · HasAVX2 Avx2
 //                 HasAVX512F Avx512F · HasAVX512BW Avx512BW · HasAVX512VL Avx512F.VL
 //                 HasBMI1 Bmi1 · HasBMI2 Bmi2 · HasFMA Fma · HasPOPCNT Popcnt
 //                 HasSSE3 Sse3 · HasSSE41 Sse41 · HasSSE42 Sse42 · HasSSSE3 Ssse3
-//   UNMAPPED (5)  HasADX, HasERMS, HasRDTSCP, HasSHA — no System.Runtime.Intrinsics.X86 surface in
-//                 .NET 10 (Sha does not exist; verified by compile error, not assumed) — and
-//                 HasOSXSAVE, which is an OS-support PRECONDITION for AVX rather than a feature:
-//                 the runtime has already applied it, since Avx.IsSupported is false without it.
-//                 These stay FALSE, which is the conservative direction: a consumer gated on them
-//                 takes the portable path, exactly as it does today.
+//                 and, from Go 1.26's wider set: HasAVX512CD Avx512CD · HasAVX512DQ Avx512DQ
+//                 HasAVX512VBMI Avx512Vbmi · HasAVX512VBMI2 Avx512Vbmi2 · HasAVX512GFNI Gfni.V512
+//                 HasAVX512VPCLMULQDQ Pclmulqdq.V512 · HasAVXVNNI AvxVnni · HasGFNI Gfni;
+//                 HasAVX512 is VIRTUAL (F+CD+BW+DQ+VL), derived after GODEBUG as Go's doDerived does.
+//   UNMAPPED (10) HasADX, HasERMS, HasRDTSCP, HasSHA, and Go 1.26's HasVAES, HasAVX512VAES,
+//                 HasAVX512VNNI, HasAVX512BITALG, HasAVX512VPOPCNTDQ — no System.Runtime.Intrinsics.X86
+//                 surface in .NET 10 (Sha, Aes.V256/V512, Avx512Vnni, Avx512Bitalg and Avx512Vpopcntdq
+//                 do not exist; verified by compile error, not assumed) — and HasOSXSAVE, which is
+//                 an OS-support PRECONDITION for AVX rather than a feature: the runtime has already
+//                 applied it, since Avx.IsSupported is false without it. These stay FALSE, which is
+//                 the conservative direction: a consumer gated on them takes the portable path.
+//   (HasFSRM is also unmapped and false, as before.)
 //
 // NOT getGOAMD64level. The header above is right and this does not disturb it: that answers the
 // BUILD's microarchitecture level (constant 1), this answers the HOST's capabilities. Go keeps them
@@ -82,6 +90,26 @@ partial class cpu_package
     }
 
     /// <summary>
+    /// The managed body of Go's <c>cpuid</c> (cpu_x86.s): the four registers the CPUID instruction
+    /// returns for leaf <paramref name="eaxArg"/> and sub-leaf <paramref name="ecxArg"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="X86Base.CpuId(int, int)"/> executes the instruction itself, so the answers are the
+    /// host's own, as in Go. Go builds this file only for 386 and amd64; on a CLR host where
+    /// <see cref="X86Base.IsSupported"/> is false (Arm64, for instance) there is no instruction to
+    /// run, and every leaf reads as all zeros, the answer a CPU gives for an unsupported leaf.
+    /// </remarks>
+    internal static partial (uint32 eax, uint32 ebx, uint32 ecx, uint32 edx) cpuid(uint32 eaxArg, uint32 ecxArg)
+    {
+        if (!X86Base.IsSupported)
+            return (0, 0, 0, 0);
+
+        (int eax, int ebx, int ecx, int edx) = X86Base.CpuId(unchecked((int)eaxArg), unchecked((int)ecxArg));
+
+        return (unchecked((uint32)eax), unchecked((uint32)ebx), unchecked((uint32)ecx), unchecked((uint32)edx));
+    }
+
+    /// <summary>
     /// Fills <see cref="X86"/> from the runtime's own instruction-set support, standing in for the
     /// <c>schedinit</c> slot where Go calls <c>cpuinit</c> → <c>Initialize</c> → <c>doinit</c>.
     /// </summary>
@@ -95,11 +123,6 @@ partial class cpu_package
     [ModuleInitializer]
     internal static void initX86FeatureDetection()
     {
-        // Go's cpuinit sets DebugOptions to true for the same GOOS list getGodebugEarly answers
-        // GODEBUG for, right before cpu.Initialize, so internal/cpu's own GODEBUG tests
-        // (TestDisableAllCapabilities, TestDisableSSE3) run exactly where the options are applied.
-        DebugOptions = GoCpuAppliesGodebug;
-
         if (!X86Base.IsSupported)
             return;
 
@@ -108,8 +131,16 @@ partial class cpu_package
         X86.HasAVX = Avx.IsSupported;
         X86.HasAVX2 = Avx2.IsSupported;
         X86.HasAVX512F = Avx512F.IsSupported;
+        X86.HasAVX512CD = Avx512CD.IsSupported;
         X86.HasAVX512BW = Avx512BW.IsSupported;
+        X86.HasAVX512DQ = Avx512DQ.IsSupported;
         X86.HasAVX512VL = Avx512F.VL.IsSupported;
+        X86.HasAVX512VBMI = Avx512Vbmi.IsSupported;
+        X86.HasAVX512VBMI2 = Avx512Vbmi2.IsSupported;
+        X86.HasAVX512GFNI = Gfni.V512.IsSupported;
+        X86.HasAVX512VPCLMULQDQ = Pclmulqdq.V512.IsSupported;
+        X86.HasAVXVNNI = AvxVnni.IsSupported;
+        X86.HasGFNI = Gfni.IsSupported;
         X86.HasBMI1 = Bmi1.IsSupported;
         X86.HasBMI2 = Bmi2.IsSupported;
         X86.HasFMA = Fma.IsSupported;
@@ -131,6 +162,18 @@ partial class cpu_package
 
         if (GoCpuAppliesGodebug)
             processOptions(Environment.GetEnvironmentVariable("GODEBUG") ?? "");
+
+        // Go 1.26's Initialize runs doDerived after processOptions, so a derived flag reflects the
+        // options GODEBUG turned off (cpu.avx512bw=off clears the virtual HasAVX512 too).
+        doDerived = deriveX86Features;
+        doDerived();
+    }
+
+    // cpu_x86.go doinit's doDerived (Go 1.26): the VIRTUAL "AVX512" feature, F+CD+BW+DQ+VL, the set
+    // GOAMD64=v4 implies and AVX10.1 includes.
+    private static void deriveX86Features()
+    {
+        X86.HasAVX512 = X86.HasAVX512F && X86.HasAVX512CD && X86.HasAVX512BW && X86.HasAVX512DQ && X86.HasAVX512VL;
     }
 
     /// <summary>
@@ -178,7 +221,8 @@ partial class cpu_package
             new(Name: "fsrm"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasFSRM)),
             new(Name: "pclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasPCLMULQDQ)),
             new(Name: "rdtscp"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDTSCP)),
-            new(Name: "sha"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA))
+            new(Name: "sha"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA)),
+            new(Name: "vpclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPCLMULQDQ))
         }.slice();
 
         var level = getGOAMD64level();
@@ -207,7 +251,9 @@ partial class cpu_package
         {
             options = append(options,
                 new option(Name: "avx512f"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512F)),
+                new option(Name: "avx512cd"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512CD)),
                 new option(Name: "avx512bw"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BW)),
+                new option(Name: "avx512dq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512DQ)),
                 new option(Name: "avx512vl"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VL)));
         }
     }

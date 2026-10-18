@@ -46,7 +46,7 @@ public static void Example_wrapping() {
         }
         // Remove the directory from the source's filename.
         if (a.Key == Δslog.SourceKey) {
-            var source = a.Value.Any()._<ж<Δslog.Source>>();
+            var source = a.Value.Any()._<ж<slogꓸSource>>();
             source.Value.File = filepath.Base((~source).File);
         }
         return a;

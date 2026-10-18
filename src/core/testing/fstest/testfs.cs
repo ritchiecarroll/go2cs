@@ -26,13 +26,16 @@ partial class fstest_package {
 // TestFS tests a file system implementation.
 // It walks the entire tree of files in fsys,
 // opening and checking that each file behaves correctly.
+// Symbolic links are not followed,
+// but their Lstat values are checked
+// if the file system implements [fs.ReadLinkFS].
 // It also checks that the file system contains at least the expected files.
 // As a special case, if no expected files are listed, fsys must be empty.
 // Otherwise, fsys must contain at least the listed files; it can also contain others.
 // The contents of fsys must not change concurrently with TestFS.
 //
 // If TestFS finds any misbehaviors, it returns either the first error or a
-// list of errors. Use [errors.Is] or [errors.As] to inspect.
+// list of errors. Use [errors.Is] or [errors.AsType] to inspect.
 //
 // Typical usage inside a test is:
 //
@@ -191,9 +194,16 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
             @string path = prefix + name;
             t.checkStat(path, info);
             Ꮡt.checkOpen(path);
-            if (info.IsDir()){
+            var exprᴛ1 = info.Type();
+            if (exprᴛ1 == fs.ModeDir) {
                 Ꮡt.checkDir(path);
-            } else {
+            }
+            else if (exprᴛ1 == fs.ModeSymlink) {
+                // No further processing.
+                // Avoid following symlinks to avoid potentially unbounded recursion.
+                t.files = append(t.files, path);
+            }
+            else { /* default: */
                 Ꮡt.checkFile(path);
             }
         }
@@ -505,6 +515,25 @@ internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry en
             @string finfo2Δ1 = formatInfo(info2Δ1);
             if (finfo2Δ1 != finfo) {
                 t.errorf("%s: fsys.Stat(...) = %s\n\twant %s"u8, path, finfo2Δ1, finfo);
+            }
+        }
+    }
+
+    {
+        var (fsys, ok) = t.fsys._<fs.ReadLinkFS>(ᐧ); if (ok) {
+            var (info2Δ2, errΔ2) = fsys.Lstat(path);
+            if (errΔ2 != default!) {
+                t.errorf("%s: fsys.Lstat: %v"u8, path, errΔ2);
+                return;
+            }
+            @string fientry2 = formatInfoEntry(info2Δ2);
+            if (fentry != fientry2) {
+                t.errorf("%s: mismatch:\n\tentry = %s\n\tfsys.Lstat(...) = %s"u8, path, fentry, fientry2);
+            }
+            @string feinfo = formatInfo(einfo);
+            @string finfo2Δ2 = formatInfo(info2Δ2);
+            if (feinfo != finfo2Δ2) {
+                t.errorf("%s: mismatch:\n\tentry.Info() = %s\n\tfsys.Lstat(...) = %s\n"u8, path, feinfo, finfo2Δ2);
             }
         }
     }

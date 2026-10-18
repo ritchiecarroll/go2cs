@@ -96,9 +96,9 @@ internal static partial bool testSemaHandoff() {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 while (ᐧ) {
-                    var selᴛ95 = doneʗ1;
-                    switch (trySelect(ᐸꟷ(selᴛ95, ꓸꓸꓸ))) {
-                    case 0 when selᴛ95.ꟷᐳ(out _): {
+                    var selᴛ96 = doneʗ1;
+                    switch (trySelect(ᐸꟷ(selᴛ96, ꓸꓸꓸ))) {
+                    case 0 when selᴛ96.ꟷᐳ(out _): {
                         return;
                     }
                     default: {

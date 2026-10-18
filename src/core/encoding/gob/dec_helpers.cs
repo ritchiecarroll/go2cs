@@ -61,7 +61,7 @@ internal static bool decBoolSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<bool>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<bool>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<bool>>(v);
     if (!ok) {
         // It is kind bool but not type bool. TODO: We can handle this unsafely.
         return false;
@@ -91,7 +91,7 @@ internal static bool decComplex64Slice(ж<decoderState> Ꮡstate, reflectꓸValu
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<complex64>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<complex64>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<complex64>>(v);
     if (!ok) {
         // It is kind complex64 but not type complex64. TODO: We can handle this unsafely.
         return false;
@@ -123,7 +123,7 @@ internal static bool decComplex128Slice(ж<decoderState> Ꮡstate, reflectꓸVal
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<complex128>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<complex128>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<complex128>>(v);
     if (!ok) {
         // It is kind complex128 but not type complex128. TODO: We can handle this unsafely.
         return false;
@@ -155,7 +155,7 @@ internal static bool decFloat32Slice(ж<decoderState> Ꮡstate, reflectꓸValue 
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<float32>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<float32>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<float32>>(v);
     if (!ok) {
         // It is kind float32 but not type float32. TODO: We can handle this unsafely.
         return false;
@@ -185,7 +185,7 @@ internal static bool decFloat64Slice(ж<decoderState> Ꮡstate, reflectꓸValue 
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<float64>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<float64>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<float64>>(v);
     if (!ok) {
         // It is kind float64 but not type float64. TODO: We can handle this unsafely.
         return false;
@@ -215,7 +215,7 @@ internal static bool decIntSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, n
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<nint>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<nint>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<nint>>(v);
     if (!ok) {
         // It is kind int but not type int. TODO: We can handle this unsafely.
         return false;
@@ -250,7 +250,7 @@ internal static bool decInt16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<int16>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<int16>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<int16>>(v);
     if (!ok) {
         // It is kind int16 but not type int16. TODO: We can handle this unsafely.
         return false;
@@ -284,7 +284,7 @@ internal static bool decInt32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<int32>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<int32>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<int32>>(v);
     if (!ok) {
         // It is kind int32 but not type int32. TODO: We can handle this unsafely.
         return false;
@@ -318,7 +318,7 @@ internal static bool decInt64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<int64>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<int64>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<int64>>(v);
     if (!ok) {
         // It is kind int64 but not type int64. TODO: We can handle this unsafely.
         return false;
@@ -348,7 +348,7 @@ internal static bool decInt8Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<int8>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<int8>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<int8>>(v);
     if (!ok) {
         // It is kind int8 but not type int8. TODO: We can handle this unsafely.
         return false;
@@ -382,7 +382,7 @@ internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<@string>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<@string>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<@string>>(v);
     if (!ok) {
         // It is kind string but not type string. TODO: We can handle this unsafely.
         return false;
@@ -426,7 +426,7 @@ internal static bool decUintSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<nuint>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<nuint>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<nuint>>(v);
     if (!ok) {
         // It is kind uint but not type uint. TODO: We can handle this unsafely.
         return false;
@@ -460,7 +460,7 @@ internal static bool decUint16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<uint16>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<uint16>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<uint16>>(v);
     if (!ok) {
         // It is kind uint16 but not type uint16. TODO: We can handle this unsafely.
         return false;
@@ -494,7 +494,7 @@ internal static bool decUint32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<uint32>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<uint32>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<uint32>>(v);
     if (!ok) {
         // It is kind uint32 but not type uint32. TODO: We can handle this unsafely.
         return false;
@@ -528,7 +528,7 @@ internal static bool decUint64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<uint64>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<uint64>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<uint64>>(v);
     if (!ok) {
         // It is kind uint64 but not type uint64. TODO: We can handle this unsafely.
         return false;
@@ -558,7 +558,7 @@ internal static bool decUintptrSlice(ж<decoderState> Ꮡstate, reflectꓸValue 
     ref var state = ref Ꮡstate.DerefOrNull();
 
     ref var Δslice = ref heap<slice<uintptr>>(out var Ꮡslice);
-    (Δslice, var ok) = v.Interface()._<slice<uintptr>>(ᐧ);
+    (Δslice, var ok) = reflect.TypeAssert<slice<uintptr>>(v);
     if (!ok) {
         // It is kind uintptr but not type uintptr. TODO: We can handle this unsafely.
         return false;

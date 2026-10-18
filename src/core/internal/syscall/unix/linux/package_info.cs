@@ -11,6 +11,7 @@
 
 // <ImportedTypeAliases>
 global using runtimeꓸError = go.runtime_package.ΔError;
+global using strconvꓸError = go.@internal.strconv_package.ΔError;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
@@ -51,18 +52,21 @@ using static go.@internal.syscall.unix_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/unix/at.go", "at.cs", "AAscgoKCpqKCpqaCgoKmooKmpoKCgpSCgpSUzIKmpoKCgqaqgpQ=")]
+[assembly: go.GoPositionMap("internal/syscall/unix/at.go", "at.cs", "AAscgoKCpqKCpqaCgoKmooKmpoKCgpSCgpSUzIKmpoKCgqaqgpSmgoKClK6ClKaCgoKUgoKUzoKUpoKCgpSCgpTOgpSmgoKClIKClMiClA==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/at_fstatat.go", "at_fstatat.cs", "AAscgoKCgqbCgqY=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/copy_file_range_unix.go", "copy_file_range_unix.cs", "AAscsgAEEIKClA==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/eaccess.go", "eaccess.cs", "AAscgtyU")]
 [assembly: go.GoPositionMap("internal/syscall/unix/faccessat_syscall.go", "faccessat_syscall.cs", "AAoW")]
+[assembly: go.GoPositionMap("internal/syscall/unix/fchmodat_linux.go", "fchmodat_linux.cs", "AAwc2ICCAAgQgoKUgpiigIKUlKSmpg==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/fcntl_unix.go", "fcntl_unix.cs", "AAsi9IKCgpQ=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/getrandom.go", "getrandom.cs", "AA0iAAwQkoKCgpSUgpSogoKUlA==")]
+[assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_ge.go", "kernel_version_ge.cs", "AAcSopQ=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_linux.go", "kernel_version_linux.cs", "AAkc4oKAgraogoK4goKClLg=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/net.go", "net.cs", "AAsguLi4uLi4uA==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/nonblocking_unix.go", "nonblocking_unix.cs", "AAoWgoKClKaC")]
 [assembly: go.GoPositionMap("internal/syscall/unix/pidfd_linux.go", "pidfd_linux.cs", "AAkSgoKClKaCgoKU")]
 [assembly: go.GoPositionMap("internal/syscall/unix/tcsetpgrp_linux.go", "tcsetpgrp_linux.cs", "AAoewqKClA==")]
+[assembly: go.GoPositionMap("internal/syscall/unix/utimes.go", "utimes.cs", "AAse")]
 [assembly: go.GoPositionMap("internal/syscall/unix/waitid_linux.go", "waitid_linux.cs", "AA0igsKClA==")]
 // </GoSourcePositionMaps>
 
@@ -89,6 +93,7 @@ public static partial class unix_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstrconv() => builtin.initPackage(typeof(go.@internal.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(sync.atomic_package));
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));

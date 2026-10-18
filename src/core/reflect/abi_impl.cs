@@ -163,7 +163,7 @@ internal static void addTypeBits(ж<bitVector> Ꮡbv, uintptr offset, ж<abi.Typ
     if (!t.Pointers()) {
         return;
     }
-    var exprᴛ1 = ((ΔKind)(nuint)((uint8)((abiꓸKind)(t.Kind_ & abi.KindMask))));
+    var exprᴛ1 = ((ΔKind)(nuint)((uint8)t.Kind()));
     if (exprᴛ1 == Chan || exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == ΔPointer || exprᴛ1 == ΔSlice || exprᴛ1 == ΔString || exprᴛ1 == ΔUnsafePointer) {
         while (bv.n < (uint32)(offset / (uintptr)goarch.PtrSize)) {
             // 1 pointer at start of representation

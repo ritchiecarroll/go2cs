@@ -42,8 +42,11 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"go/version"
 	"io"
 	"log"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -246,6 +249,7 @@ func assertKeepAlivePair(t *testing.T, mainCs, marker string) {
 // four. Red before the widening — RawSyscall/RawSyscall6 fell through to the general call path,
 // which renders the argument as a bare `(uintptr)Ꮡ(buf, 0)` with nothing left referencing the box.
 func TestRawSyscallFunnelKeepsItsPointerArgumentAlive(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -262,6 +266,7 @@ func TestRawSyscallFunnelKeepsItsPointerArgumentAlive(t *testing.T) {
 // Without this, a widening of pointerDerivedArgSource would ride in unnoticed behind the set
 // change — the two are separate predicates and this guard measures only one of them.
 func TestRawSyscallFunnelLeavesIntegerArgumentsAlone(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -288,6 +293,7 @@ func TestRawSyscallFunnelLeavesIntegerArgumentsAlone(t *testing.T) {
 // was held. Nothing in the standing ladder could see it — the emission compiles, is byte-identical
 // in shape to a correct one, and only a collection landing INSIDE the kernel's window is wrong.
 func TestTwoStepPointerArgumentIsKeptAliveAcrossTheFunnel(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -302,6 +308,7 @@ func TestTwoStepPointerArgumentIsKeptAliveAcrossTheFunnel(t *testing.T) {
 // retaining door instead. Asserted on the emission rather than on golib so the two halves cannot
 // drift apart silently — a fixed golib with an unchanged emission is still the defect.
 func TestPointerMintFromABoxTakesTheRetainingDoor(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -479,6 +486,7 @@ func keepAliveCount(lines []string, box string) int {
 }
 
 func TestBridgedWrapperArgumentKeepsItsFrameMintedBoxAlive(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -530,6 +538,7 @@ func TestBridgedWrapperArgumentKeepsItsFrameMintedBoxAlive(t *testing.T) {
 // box is a static field alive for the process — neither may record a KeepAlive, or the arm has
 // widened past the class the census measured.
 func TestBridgedWrapperArgumentScopeControls(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -559,6 +568,7 @@ func TestBridgedWrapperArgumentScopeControls(t *testing.T) {
 // box named inside a literal's own body. Each is a frame question — the KeepAlive must sit in the
 // frame that minted the box, after the call, on a path the call reaches.
 func TestBridgedWrapperArgumentPlacement(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -654,6 +664,7 @@ func leadingSpace(line string) string {
 // splicing a KeepAlive into the header. debugMode lets the refusal through the per-file recovery;
 // the module driver reports it as the conversion error.
 func TestBridgedWrapperInForClauseIsRefused(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -793,4 +804,59 @@ func funnelCallsOf(t *testing.T, pkgPath, src string) map[string]bool {
 	})
 
 	return calls
+}
+
+// TestSyscallFunnelPackagePathsAreRealPackages holds syscallFunnelPackagePaths to the GOROOT under
+// test, because a funnel PATH fails silently when Go moves the package: its callers stop being funnel
+// calls, their pointer arguments go unpinned, and everything still compiles. Go 1.26 moved Syscall6
+// from internal/runtime/syscall to internal/runtime/syscall/linux, and the 1.26 emission of
+// EpollWait/EpollCtl/Open/Read lost every KeepAlive the 1.24 emission had (the i9's H5 re-run,
+// 2026-10-15). A live entry must be a real std package for SOME GOOS, since every funnel package is
+// platform-specific and a host-only `go list std` omits it; a retired entry
+// (syscallFunnelRetiredPaths) must be GONE from any release at or past its retirement, so a stale
+// retirement fails too. The go command on PATH is the GOROOT under test.
+func TestSyscallFunnelPackagePathsAreRealPackages(t *testing.T) {
+	goVersion, err := exec.Command("go", "env", "GOVERSION").Output()
+
+	if err != nil {
+		t.Skipf("go command unavailable: %v", err)
+	}
+
+	release := strings.TrimSpace(string(goVersion))
+	std := map[string]bool{}
+
+	for _, goos := range []string{"linux", "darwin", "windows"} {
+		list := exec.Command("go", "list", "-e", "std")
+		list.Env = append(os.Environ(), "GOOS="+goos, "GOARCH=amd64", "CGO_ENABLED=0")
+		out, err := list.Output()
+
+		if err != nil {
+			t.Fatalf("go list std (GOOS=%s) failed: %v", goos, err)
+		}
+
+		for _, pkg := range strings.Fields(string(out)) {
+			std[pkg] = true
+		}
+	}
+
+	if !std["syscall"] {
+		t.Fatalf("go list std under %s does not list package syscall: the listing is not reading a GOROOT", release)
+	}
+
+	for path := range syscallFunnelRetiredPaths {
+		if !syscallFunnelPackagePaths[path] {
+			t.Errorf("syscallFunnelRetiredPaths names %q, which syscallFunnelPackagePaths does not", path)
+		}
+	}
+
+	for path := range syscallFunnelPackagePaths {
+		retiredAt, retired := syscallFunnelRetiredPaths[path]
+
+		switch {
+		case retired && version.Compare(release, retiredAt) >= 0 && std[path]:
+			t.Errorf("funnel path %q is marked retired at %s, but %s still lists it: the retirement is stale", path, retiredAt, release)
+		case (!retired || version.Compare(release, retiredAt) < 0) && !std[path]:
+			t.Errorf("funnel path %q is not a std package under %s for linux, darwin or windows: its callers are no longer funnel calls and their pointer arguments go unpinned; follow the move and retire the old path in syscallFunnelRetiredPaths", path, release)
+		}
+	}
 }

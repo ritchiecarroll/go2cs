@@ -5,6 +5,7 @@
 namespace go;
 
 using abi = @internal.abi_package;
+using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
@@ -427,6 +428,11 @@ internal static void sigtrampgo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
 
     c.fixsigcode(sig);
     sighandler(sig, Ꮡinfo, ctx, gp);
+
+    if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
+        atomic.Store((~gp).m.of(m.ᏑsignalSecret), 1);
+    }
+
     setg(gp);
     if (setStack) {
         restoreGsignalStack(ᏑgsignalStack);
@@ -1051,16 +1057,16 @@ internal static partial void ensureSigM() {
             }
             sigprocmask(_SIG_SETMASK, ᏑsigBlocked, nil);
             while (ᐧ) {
-                var selᴛ2 = enableSigChan;
-                var selᴛ3 = disableSigChan;
-                switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-                case 0 when selᴛ2.ꟷᐳ(out var sig): {
+                var selᴛ1 = enableSigChan;
+                var selᴛ2 = disableSigChan;
+                switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+                case 0 when selᴛ1.ꟷᐳ(out var sig): {
                     if (sig > 0) {
                         sigdelset(ref (ᏑsigBlocked).DerefOrNull(), (nint)sig);
                     }
                     break;
                 }
-                case 1 when selᴛ3.ꟷᐳ(out var sig): {
+                case 1 when selᴛ2.ꟷᐳ(out var sig): {
                     if (sig > 0 && blockableSig(sig)) {
                         sigaddset(ref (ᏑsigBlocked).DerefOrNull(), (nint)sig);
                     }

@@ -303,7 +303,7 @@ internal static ж<Interface> /*i*/ asInterface(ΔType x) {
 
     {
         var (_, ok) = Unalias(x)._<ж<TypeParam>>(ᐧ); if (!ok) {
-            (i, _) = under(x)._<ж<Interface>>(ᐧ);
+            (i, _) = x.Underlying()._<ж<Interface>>(ᐧ);
         }
     }
     return i;
@@ -382,7 +382,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 if (traceInference) {
                     u.tracef("%s ≡ under %s"u8, x, ny.OrTypedNil());
                 }
-                y = ny.under();
+                y = ny.Underlying();
                 // Per the spec, a defined type cannot have an underlying type
                 // that is a type parameter.
                 assert(!isTypeParam(y));
@@ -483,7 +483,7 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                                 default: {
                                     // Neither x nor y are defined types.
                                     {
-                                        var (yc, _) = under(y)._<ж<Chan>>(ᐧ); if (yc != nil && (~yc).dir != SendRecv) {
+                                        var (yc, _) = y.Underlying()._<ж<Chan>>(ᐧ); if (yc != nil && (~yc).dir != SendRecv) {
                                             // y is a directed channel type: select y.
                                             u.set(px, y);
                                         }
@@ -865,13 +865,13 @@ internal static bool /*result*/ nify(this ж<unifier> Ꮡu, ΔType xʗp, ΔType 
                 // up here again with x and y swapped, so we don't
                 // need to take care of that case separately.
                 {
-                    var cx = coreType(new TypeParamжΔType(xΔ3)); if (cx != default!) {
+                    var (cx, _) = commonUnder(new TypeParamжΔType(xΔ3), default!); if (cx != default!) {
                         if (traceInference) {
                             u.tracef("core %s ≡ %s"u8, xorig, yorig);
                         }
                         // If y is a defined type, it may not match against cx which
                         // is an underlying type (incl. int, string, etc.). Use assign
-                        // mode here so that the unifier automatically takes under(y)
+                        // mode here so that the unifier automatically uses y.Underlying()
                         // if necessary.
                         result = Ꮡu.nify(cx, yorig, Δassign, Ꮡp); goto ᒐdone;
                     }

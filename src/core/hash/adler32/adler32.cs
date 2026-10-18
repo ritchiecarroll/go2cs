@@ -85,6 +85,12 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default!;
 }
 
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d;
+    return (new digestжCloner(Ꮡr), default!);
+}
+
 // Add p to the running checksum d.
 internal static digest update(digest d, slice<byte> p) {
     var (s1, s2) = ((uint32)((digest)(d & 0xffff)), (uint32)((d >> (int)(16))));

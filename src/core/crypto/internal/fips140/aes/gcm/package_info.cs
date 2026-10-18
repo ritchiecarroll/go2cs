@@ -57,7 +57,7 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm.go", "gcm.cs", "ABcslP7ygpSClIKUgoKCggAHFIKmgqaCgqaigpSClIKmgoKUgqaCppSigriCpoKUgqaCgpSCpoKAyoKkrvKAgpSCpII=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_generic.go", "gcm_generic.cs", "AA0agqKCgpSUgoKmoqKCgpSClIKCgqaUrAALDoKClIKCvtKUgoKUgoKmgoKCvMKCqsKCgoKCgoI=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_noasm.go", "gcm_noasm.cs", "AAgS2KSCpoI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABEwAAgCgpSClIKUgpSClIKCAAIS4oKClAAKFoCkgKSigqaClIKClIKUpoKUgpSUgqaCggACENKCgpQABxCApICkooKmpoKUgpSUgqaCgqqigoKUAAkUgKSApKKCpoKUgpSmgpSClJSCpoKCrsKCgpQACRSApICkooKmgpSClKaClIKUlIKmgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABIyAAgCgpSClIKUgpSClIKCAAIWAAgCgoKUAAIQ0oKCpq7CgoKUAAsYgKSArOKCpoKUgpSCpoKUgpSmgpSClKaCpoKCAAIaAAoCgoKUrsKCgpSuwoKClAACHAALAoKClIKAgqQADigACQKClIKUgoKCpoCkgKzigqaCgriCgpSClKaClIKUpoKmgoI=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/ghash.go", "ghash.cs", "ABg20oKCgq4ACAYACA64lIKCpoKCpoKokoKCqKSosqaCggAIEoKmpsySlIKCgsqCgoKCgriUgoK4qqKCgoKCvKKClIKCgg==", "", "", "55=BEUint64/1/2/1,BEUint64/2/2/2")]
 // </GoSourcePositionMaps>
 
@@ -78,10 +78,8 @@ public static partial class gcm_package
     [GoValueClone("k1", "k2")] public partial struct CMAC {}
     [GoValueClone("mac")] public partial struct CounterKDF {}
     public partial struct GCM {}
-    public partial struct GCMForSSH {}
-    public partial struct GCMForTLS12 {}
-    public partial struct GCMForTLS13 {}
     public partial struct GCMWithCounterNonce {}
+    public partial struct GCMWithXORCounterNonce {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

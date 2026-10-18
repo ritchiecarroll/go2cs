@@ -6,7 +6,7 @@ namespace go.crypto;
 using boring = go.crypto.@internal.boring_package;
 using rsa = go.crypto.@internal.fips140.rsa_package;
 using fips140only = go.crypto.@internal.fips140only_package;
-using randutil = go.crypto.@internal.randutil_package;
+using rand = go.crypto.@internal.rand_package;
 using subtle = go.crypto.subtle_package;
 using errors = errors_package;
 using io = io_package;
@@ -20,6 +20,12 @@ partial class rsa_package {
 
 // PKCS1v15DecryptOptions is for passing options to PKCS #1 v1.5 decryption using
 // the [crypto.Decrypter] interface.
+//
+// Deprecated: PKCS #1 v1.5 encryption is dangerous and should not be used.
+// See [draft-irtf-cfrg-rsa-guidance-05] for more information. Use
+// [EncryptOAEP] and [DecryptOAEP] instead.
+//
+// [draft-irtf-cfrg-rsa-guidance-05]: https://www.ietf.org/archive/id/draft-irtf-cfrg-rsa-guidance-05.html#name-rationale
 partial struct PKCS1v15DecryptOptions {
     // SessionKeyLen is the length of the session key that is being
     // decrypted. If not zero, then a padding error during decryption will
@@ -35,19 +41,21 @@ internal static readonly @string cryptoRsaUseOfPkcs1V15ˢ = "crypto/rsa: use of 
 // scheme from PKCS #1 v1.5.  The message must be no longer than the
 // length of the public modulus minus 11 bytes.
 //
-// The random parameter is used as a source of entropy to ensure that
-// encrypting the same message twice doesn't result in the same
-// ciphertext. Most applications should use [crypto/rand.Reader]
-// as random. Note that the returned ciphertext does not depend
-// deterministically on the bytes read from random, and may change
-// between calls and/or between versions.
+// The random parameter is used as a source of entropy to ensure that encrypting
+// the same message twice doesn't result in the same ciphertext. Since Go 1.26,
+// a secure source of random bytes is always used, and the Reader is ignored
+// unless GODEBUG=cryptocustomrand=1 is set. This setting will be removed in a
+// future Go release. Instead, use [testing/cryptotest.SetGlobalRandom].
 //
-// WARNING: use of this function to encrypt plaintexts other than
-// session keys is dangerous. Use RSA OAEP in new protocols.
+// Deprecated: PKCS #1 v1.5 encryption is dangerous and should not be used.
+// See [draft-irtf-cfrg-rsa-guidance-05] for more information. Use
+// [EncryptOAEP] and [DecryptOAEP] instead.
+//
+// [draft-irtf-cfrg-rsa-guidance-05]: https://www.ietf.org/archive/id/draft-irtf-cfrg-rsa-guidance-05.html#name-rationale
 public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoRsaUseOfPkcs1V15ˢ));
     }
 
@@ -57,14 +65,12 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
         }
     }
 
-    randutil.MaybeReadByte(random);
-
     nint k = pub.Size();
     if (len(msg) > k - 11) {
         return (default!, ErrMessageTooLong);
     }
 
-    if (boring.Enabled && AreEqual(random, boring.RandReader)) {
+    if (boring.Enabled && rand.IsDefaultReader(random)) {
         var (bkey, errΔ2) = boringPublicKey(Ꮡpub);
         if (errΔ2 != default!) {
             return (default!, errΔ2);
@@ -72,6 +78,8 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
         return boring.EncryptRSAPKCS1(bkey, msg);
     }
     boring.UnreachableExceptTests();
+
+    random = rand.CustomReader(random);
 
     // EM = 0x00 || 0x02 || PS || 0x00 || M
     var em = new slice<byte>(k);
@@ -100,14 +108,17 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
     return rsa.Encrypt(fk, em);
 }
 
-// DecryptPKCS1v15 decrypts a plaintext using RSA and the padding scheme from PKCS #1 v1.5.
-// The random parameter is legacy and ignored, and it can be nil.
+// DecryptPKCS1v15 decrypts a plaintext using RSA and the padding scheme from
+// PKCS #1 v1.5. The random parameter is legacy and ignored, and it can be nil.
 //
-// Note that whether this function returns an error or not discloses secret
-// information. If an attacker can cause this function to run repeatedly and
-// learn whether each instance returned an error then they can decrypt and
-// forge signatures as if they had the private key. See
-// DecryptPKCS1v15SessionKey for a way of solving this problem.
+// Deprecated: PKCS #1 v1.5 encryption is dangerous and should not be used.
+// Whether this function returns an error or not discloses secret information.
+// If an attacker can cause this function to run repeatedly and learn whether
+// each instance returned an error then they can decrypt and forge signatures as
+// if they had the private key. See [draft-irtf-cfrg-rsa-guidance-05] for more
+// information. Use [EncryptOAEP] and [DecryptOAEP] instead.
+//
+// [draft-irtf-cfrg-rsa-guidance-05]: https://www.ietf.org/archive/id/draft-irtf-cfrg-rsa-guidance-05.html#name-rationale
 public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
@@ -173,6 +184,13 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateK
 //     Standard PKCS #1”, Daniel Bleichenbacher, Advances in Cryptology (Crypto '98)
 //   - [1] RFC 3218, Preventing the Million Message Attack on CMS,
 //     https://www.rfc-editor.org/rfc/rfc3218.html
+//
+// Deprecated: PKCS #1 v1.5 encryption is dangerous and should not be used. The
+// protections implemented by this function are limited and fragile, as
+// explained above. See [draft-irtf-cfrg-rsa-guidance-05] for more information.
+// Use [EncryptOAEP] and [DecryptOAEP] instead.
+//
+// [draft-irtf-cfrg-rsa-guidance-05]: https://www.ietf.org/archive/id/draft-irtf-cfrg-rsa-guidance-05.html#name-rationale
 public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> key) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
@@ -215,7 +233,7 @@ internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1
     nint index = default!;
     error err = default!;
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (0, default!, 0, errors.New(cryptoRsaUseOfPkcs1V15ˢ));
     }
 

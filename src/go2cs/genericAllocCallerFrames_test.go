@@ -118,6 +118,7 @@ func GenericCaller[T any](a bool) {
 }
 
 func TestGenericCallersOfASeededThinAllocatorAreNotInlined(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs, libCs := convertGenericAllocCallerFixture(t)
 
 	if line := declarationLine(t, mainCs, "storeAlloc"); !keepsOwnFrame(line) {

@@ -57,7 +57,7 @@ public static @string String(this Position pos) {
 // to configure a [Scanner] such that it only recognizes (Go) identifiers,
 // integers, and skips comments, set the Scanner's Mode field to:
 //
-//	ScanIdents | ScanInts | SkipComments
+//	ScanIdents | ScanInts | ScanComments | SkipComments
 //
 // With the exceptions of comments, which are skipped if SkipComments is
 // set, unrecognized tokens are not ignored. Instead, the scanner simply
@@ -167,7 +167,7 @@ partial struct Scanner {
     // the scanner is not inside a token. Call Pos to obtain an error
     // position in that case, or to obtain the position immediately
     // after the most recently scanned token.
-    public partial ref Position Position { get; }
+    /*embed*/ public Position Position;
 }
 
 // Init initializes a [Scanner] with a new source and returns s.

@@ -5,7 +5,7 @@ namespace go;
 
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using @internal;
 using fs = go.io.fs_package;
@@ -21,7 +21,7 @@ partial class os_package {
 internal static partial uint64 runtime_rand();
 
 internal static @string nextRandom() {
-    return itoa.Uitoa((nuint)(uint32)runtime_rand());
+    return strconv.FormatUint((uint64)(uint32)runtime_rand(), 10);
 }
 
 // CreateTemp creates a new temporary file in the directory dir,
@@ -115,7 +115,7 @@ public static (@string, error) MkdirTemp(@string dir, @string pattern) {
                     continue;
                 }
             }
-            return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirtemp"u8, Path: dir + ((@string)(rune)PathSeparator) + prefix + "*"u8 + suffix, Err: ErrExist))));
+            return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirtemp"u8, Path: prefix + "*"u8 + suffix, Err: ErrExist))));
         }
         if (IsNotExist(errΔ1)) {
             {

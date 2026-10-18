@@ -37,6 +37,7 @@ import (
 // duration of the test rather than parked in production. Transpile-only: the emitted C# is asserted
 // as text, never compiled.
 func TestRecurseLinknamePush(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real -recurse converter over a module fixture")
 	}

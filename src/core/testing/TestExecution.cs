@@ -120,6 +120,16 @@ public sealed class TestExecution
     // once — see TempDir. Go keeps the same state as `c.tempDir != ""` (testing.go:1230).
     private bool m_tempDirParentRegistered;
 
+    // Go 1.25's common.o (testing.go:1119-1121): the test's Output writer, made on first use here, and
+    // its buffered partial line (outputWriter.partial). Both under m_syncRoot.
+    private TestOutputWriter? m_outputWriter;
+    private readonly List<byte> m_outputPartial = [];
+
+    // Go 1.26's artifactDirOnce / artifactDir / artifactDirErr (testing.go:679-681), under m_syncRoot.
+    private bool m_artifactDirMade;
+    private string? m_artifactDir;
+    private string? m_artifactDirError;
+
     // Go 1.24's common.ctx / common.cancelCtx (testing.go:666-667), created there eagerly per test.
     // Here it is created on FIRST Context() call instead: the only way to observe the context is to
     // ask for it, and the overwhelming majority of tests never do — an eager context.WithCancel per
@@ -468,7 +478,101 @@ public sealed class TestExecution
     private bool InOwnersBubble() =>
         m_ownerGoroutine is not null &&
         Environment.CurrentManagedThreadId != m_ownerThread &&
-        SyncTestBubble.Current?.Root == m_ownerGoroutine;
+        (SyncTestBubble.Current?.Root == m_ownerGoroutine ||
+         // A synctest.Test child (Go 1.25) runs on a bubble MEMBER, not the bubble's root, so its waiver
+         // is the same rule keyed on its own bubble: any other goroutine of that bubble may end it.
+         m_isSynctest && SyncTestBubble.Current is { } bubble && ReferenceEquals(bubble, m_bubble));
+
+    // Go 1.25's common.isSynctest (testing.go:649): this execution is the T that synctest.Test runs its
+    // function with, made by testingSynctestTest inside the bubble; m_bubble is that bubble.
+    private bool m_isSynctest;
+    private SyncTestBubble? m_bubble;
+
+    // Go's common.cleanupStarted (testing.go:1407's Store): set as the cleanup phase begins.
+    private bool m_cleanupStarted;
+
+    internal bool IsSynctest => m_isSynctest;
+
+    private const string ParallelInsideBubbleText = "testing: t.Parallel called inside synctest bubble";
+    private const string RunInsideBubbleText = "testing: t.Run called inside synctest bubble";
+    internal const string DeadlineInsideBubbleText = "testing: t.Deadline called inside synctest bubble";
+
+    /// <summary>
+    /// Go 1.25's <c>testingSynctestTest</c> (testing.go:2125), the body of testing/synctest's push
+    /// linkname: runs <paramref name="action"/> with a new T inside the caller's bubble and reports
+    /// whether it passed.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// synctest.Test calls this from the bubble's root goroutine. Go starts the child with
+    /// <c>go tRunner(t2, f)</c>, so the child is a bubble MEMBER: it shares the bubble's fake clock and
+    /// counts in its idle accounting. The host's own test threads are not goroutines a bubble can adopt,
+    /// so the child runs on golib's <see cref="Goroutine.Start(Action)"/>, which joins the creator's bubble
+    /// at the go statement as Go's newproc does.
+    /// </para>
+    /// <para>
+    /// Go's <c>&lt;-t2.signal</c> is a channel receive, and a bubble root blocked on one is durably
+    /// blocked, which is what lets the fake clock advance while the child sleeps. A .NET wait would leave
+    /// the root counted as running and the bubble could never go idle, so the signal is a golib channel
+    /// made here, inside the bubble.
+    /// </para>
+    /// </remarks>
+    internal bool RunSynctest(Action<ж<testing_package.T>> action)
+    {
+        lock (m_syncRoot)
+        {
+            if (m_cleanupStarted)
+                throw builtin.panic("testing: synctest.Run called during t.Cleanup");
+        }
+
+        TestExecution child = new(m_runner, Name, this, Source, Line)
+        {
+            m_isSynctest = true,
+            m_bubble = SyncTestBubble.Current
+        };
+
+        channel<bool> signal = new(1);
+        Goroutine.Start(() => child.ExecuteSynctest(action, signal));
+
+        if (!builtin.ᐸꟷ(signal))
+        {
+            // A parent test finished first (a subtest called FailNow on it): keep aborting up the chain,
+            // Go's runtime.Goexit here.
+            GoexitException.MarkGoroutineExiting();
+            throw new GoexitException();
+        }
+
+        return !child.Failed;
+    }
+
+    /// <summary>
+    /// The synctest child's tRunner: <see cref="Execute"/>, then Go's <c>t.signal &lt;- signal</c>,
+    /// false only when a parent finished before this child did (testing.go's errNilPanicOrGoexit walk).
+    /// </summary>
+    private void ExecuteSynctest(Action<ж<testing_package.T>> action, channel<bool> signal)
+    {
+        bool ok = true;
+
+        try
+        {
+            Execute(action);
+        }
+        catch (Exception ex)
+        {
+            // Execute contains its own handling; anything escaping it is a host defect (see Start).
+            ReportHostFailure(ex);
+        }
+        finally
+        {
+            for (TestExecution? ancestor = m_parent; ancestor is not null && ok; ancestor = ancestor.m_parent)
+            {
+                lock (ancestor.m_syncRoot)
+                    ok = !ancestor.m_finished;
+            }
+
+            signal.ᐸꟷ(ok);
+        }
+    }
 
     /// <summary>
     /// Go's <c>common.logDepth</c> (testing.go:1015-1032): append one record to this test's output,
@@ -520,10 +624,20 @@ public sealed class TestExecution
     /// </remarks>
     public void Log(string text)
     {
+        // Go's destination skips a synctest child (`!c.done && !c.isSynctest`, testing.go:1058): its
+        // records go to the test that called synctest.Test.
+        if (m_isSynctest && m_parent is not null)
+        {
+            m_parent.Log(text);
+            return;
+        }
+
         lock (m_syncRoot)
         {
             if (!m_finished)
             {
+                // Go 1.25's log (testing.go:1047): the destination's buffered Output line goes first.
+                FlushPartialOutputLocked();
                 AppendLog(text.TrimEnd('\r', '\n'));
                 return;
             }
@@ -537,6 +651,7 @@ public sealed class TestExecution
                     if (ancestor.m_finished)
                         continue;
 
+                    ancestor.FlushPartialOutputLocked();
                     ancestor.AppendLog(text.TrimEnd('\r', '\n'));
                     return;
                 }
@@ -547,16 +662,149 @@ public sealed class TestExecution
     }
 
     /// <summary>
-    /// Go's panic text for a late log with no live ancestor, composed exactly as testing.go:1029
-    /// composes it: <c>"Log in goroutine after " + c.name + " has completed: " + s</c>.
+    /// Go's panic text for a late log with no live ancestor, composed exactly as Go 1.26's
+    /// <c>(*common).log</c> composes it (testing.go:1028-1039): the record loses one trailing newline,
+    /// its later lines are indented four spaces, and it ends in a newline, before
+    /// <c>"Log in goroutine after " + c.name + " has completed: " + s</c>.
     /// </summary>
     /// <remarks>
     /// Composed rather than a constant because Go's own text carries the test's name and the record,
     /// and quoted rather than paraphrased for the reason the Setenv/Parallel texts below are: a
-    /// recovered value is compared against the whole string.
+    /// recovered value is compared against the whole string. Go 1.24 used the record unchanged; 1.25
+    /// moved the reshaping ahead of the panic.
     /// </remarks>
-    internal static string LogAfterCompleteText(string name, string record) =>
-        $"Log in goroutine after {name} has completed: {record}";
+    internal static string LogAfterCompleteText(string name, string record)
+    {
+        string s = record.EndsWith('\n') ? record[..^1] : record;
+        s = s.Replace("\n", "\n    ") + "\n";
+        return $"Log in goroutine after {name} has completed: {s}";
+    }
+
+    /// <summary>
+    /// Go's <c>(*common).destination</c> (testing.go:1054): this test while it runs, else the nearest
+    /// ancestor still running, else null once the test and every parent are done.
+    /// </summary>
+    private TestExecution? Destination()
+    {
+        lock (m_syncRoot)
+        {
+            if (!m_finished)
+                return this;
+        }
+
+        for (TestExecution? ancestor = m_parent; ancestor is not null; ancestor = ancestor.m_parent)
+        {
+            lock (ancestor.m_syncRoot)
+            {
+                if (!ancestor.m_finished)
+                    return ancestor;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Go 1.25's <c>TB.Output</c> (testing.go:1114): one writer per test onto the same log as Log.
+    /// </summary>
+    internal go.io_package.Writer Output()
+    {
+        if (Destination() is null)
+            throw builtin.panic($"Output called after {Name} has completed");
+
+        lock (m_syncRoot)
+            return m_outputWriter ??= new TestOutputWriter(this);
+    }
+
+    /// <summary>
+    /// Go's <c>(*outputWriter).Write</c> (testing.go:1136): each complete line is a record, and a
+    /// trailing partial line waits for the next write, for Log, or for the end of the test.
+    /// </summary>
+    /// <remarks>
+    /// Go appends a line to the writer's OWN test even when that test is done and only an ancestor is
+    /// live (writeLine, :1167), where the late line is never printed; this host does the same, because
+    /// a finished execution's records are never reported again. The partial line is kept as BYTES so a
+    /// UTF-8 sequence split across two writes decodes whole.
+    /// </remarks>
+    internal void WriteOutput(ReadOnlySpan<byte> p)
+    {
+        if (Destination() is null)
+            throw builtin.panic($"Write called after {Name} has completed");
+
+        lock (m_syncRoot)
+        {
+            int newline;
+
+            while ((newline = p.IndexOf((byte)'\n')) >= 0)
+            {
+                m_outputPartial.AddRange(p[..newline]);
+                AppendLog(Encoding.UTF8.GetString(CollectionsMarshal.AsSpan(m_outputPartial)));
+                m_outputPartial.Clear();
+                p = p[(newline + 1)..];
+            }
+
+            m_outputPartial.AddRange(p);
+        }
+    }
+
+    /// <summary>Go's <c>flushPartial</c> (testing.go:1096): a buffered partial Output line becomes a record.</summary>
+    private void FlushPartialOutputLocked()
+    {
+        if (m_outputPartial.Count == 0)
+            return;
+
+        AppendLog(Encoding.UTF8.GetString(CollectionsMarshal.AsSpan(m_outputPartial)));
+        m_outputPartial.Clear();
+    }
+
+    /// <summary>
+    /// Go 1.25's <c>TB.Attr</c>, after its two refusals (which the caller applies with Errorf): an
+    /// <c>attr</c> event under chatty output only, as testing.go:1617-1620 prints its ATTR line.
+    /// </summary>
+    internal void ReportAttr(string key, string value)
+    {
+        if (m_runner.Verbose)
+            ReportEvent(new TestEvent(m_runner.Package, Name, "attr", Key: key, Value: value));
+    }
+
+    /// <summary>
+    /// Go 1.26's <c>TB.ArtifactDir</c> (testing.go:1333): made once per test. Returns the directory, or
+    /// the error the caller reports as <c>Fatalf("ArtifactDir: %v", err)</c> on every call, as Go does.
+    /// </summary>
+    /// <remarks>
+    /// Without <c>-test.artifacts</c> it is a TempDir child, removed with the test (makeTempDir is what
+    /// TempDir uses). With it, Go 1.26.9 builds <c>"/" + pkg + "/" + name</c> and hands it to
+    /// <c>filepath.Localize</c>, which refuses the leading slash, so the base is dropped and the directory
+    /// is a fresh one directly under <c>&lt;outputdir&gt;/_artifacts</c> (measured with go1.26.9's own
+    /// <c>go test -artifacts</c> on 2026-10-14). The host makes that same directory, and reports it as an
+    /// <c>artifacts</c> event under chatty output (Go's <c>=== ARTIFACTS</c> line, :1395).
+    /// </remarks>
+    internal (string? dir, string? error) ArtifactDir()
+    {
+        bool made = false;
+
+        lock (m_syncRoot)
+        {
+            if (!m_artifactDirMade)
+            {
+                m_artifactDirMade = made = true;
+
+                try
+                {
+                    m_artifactDir = m_runner.Artifacts ? m_runner.MakeArtifactDir() : TempDir().ToString();
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    m_artifactDirError = ex.Message;
+                }
+            }
+        }
+
+        if (made && m_runner.Artifacts && m_artifactDir is not null && m_runner.Verbose)
+            ReportEvent(new TestEvent(m_runner.Package, Name, "artifacts", Path: m_artifactDir));
+
+        return (m_artifactDir, m_artifactDirError);
+    }
 
     public void Helper()
     {
@@ -634,6 +882,10 @@ public sealed class TestExecution
     /// </remarks>
     public bool Run(string name, Action<ж<testing_package.T>> action)
     {
+        // Go 1.25 (testing.go:2051), before the cleanup check.
+        if (m_isSynctest)
+            throw builtin.panic(RunInsideBubbleText);
+
         return m_runner.RunChild(this, name, action);
     }
 
@@ -717,6 +969,9 @@ public sealed class TestExecution
             // "multiple times" text.
             if (m_parallel)
                 throw builtin.panic(ParallelCalledMultipleTimesText);
+            // Go 1.25 (testing.go:1762): between the two, in Go's order.
+            if (m_isSynctest)
+                throw builtin.panic(ParallelInsideBubbleText);
             if (m_denyParallel)
                 throw builtin.panic(ParallelConflictText);
             m_parallel = true;
@@ -728,7 +983,24 @@ public sealed class TestExecution
         // Options.Parallel parallel tests RUN simultaneously (Go's -parallel semantics).
         m_runner.AcquireParallelSlot(NestedRoot);
         m_holdsParallelSlot = true;
+
+        // Go's parallelStart.Add(1): counted here, once the test is released and holds its slot
+        // (testing.go:1805, right after t.tstate.waitParallel()), not when Parallel is called.
+        Interlocked.Increment(ref s_parallelStart);
     }
+
+    // Go's process-wide parallel accounting (testing.go:429-430). AllocsPerRun panics while they
+    // differ (allocs.go:21), so each is incremented exactly where Go increments it: parallelStart in
+    // Parallel above, parallelStop at the end of the test's run (see Execute). Go's binary exits when
+    // a test panics, so its deferred increment skips that case (didPanic); this host keeps running
+    // after a panicking test, so it counts every finished parallel test, or a later serial
+    // AllocsPerRun would panic where Go's would never have been reached.
+    private static long s_parallelStart;
+    private static long s_parallelStop;
+
+    /// <summary>Whether any parallel test is running: Go's <c>parallelStart != parallelStop</c>.</summary>
+    internal static bool ParallelTestsRunning =>
+        Interlocked.Read(ref s_parallelStart) != Interlocked.Read(ref s_parallelStop);
 
     /// <summary>
     /// Go's <c>t.TempDir()</c>: a per-test directory, removed when the test finishes.
@@ -1293,7 +1565,10 @@ public sealed class TestExecution
         m_ownerThread = Environment.CurrentManagedThreadId;
         m_ownerGoroutine = Goroutine.Current;
         s_current.Value = this;
-        ReportEvent(new TestEvent(m_runner.Package, Name, "run", Source: Source, Line: Line));
+
+        // A synctest child is not a subtest: Go's t.Run prints === RUN, and testingSynctestTest does not.
+        if (!m_isSynctest)
+            ReportEvent(new TestEvent(m_runner.Package, Name, "run", Source: Source, Line: Line));
 
         testing_package.T t = new() { Execution = this };
         try
@@ -1362,6 +1637,14 @@ public sealed class TestExecution
             RunCleanups();
             timer.Stop();
 
+            // Go's "Output buffered logs" (testing.go:2015-2018): after the subtests, before the report,
+            // this test's buffered partial Output line and each ancestor's become records.
+            for (TestExecution? node = this; node is not null; node = node.m_parent)
+            {
+                lock (node.m_syncRoot)
+                    node.FlushPartialOutputLocked();
+            }
+
             lock (m_syncRoot)
                 m_finished = true;
 
@@ -1376,13 +1659,33 @@ public sealed class TestExecution
                 (records, dropped) = LogRecords(terminal);
             }
 
-            ReportEvent(new TestEvent(m_runner.Package, Name, terminal, timer.Elapsed.TotalSeconds, output, Source, Line, records, dropped));
-            m_runner.Completed(this);
+            // Go's report: `if t.isSynctest { return // t.parent will handle reporting }`. The child's
+            // failure already reached the parent through Fail, and its log records through Log.
+            if (!m_isSynctest)
+                ReportEvent(new TestEvent(m_runner.Package, Name, terminal, timer.Elapsed.TotalSeconds, output, Source, Line, records, dropped));
+
+            // Go's parallelStop.Add(1) (testing.go:1949): after the cleanups and the parallel subtests,
+            // immediately before the test signals its parent, which here is the Completion that
+            // Start sets once Execute returns. A synctest child is never parallel (Parallel refuses it).
+            bool wasParallel;
+
+            lock (m_syncRoot)
+                wasParallel = m_parallel;
+
+            if (wasParallel)
+                Interlocked.Increment(ref s_parallelStop);
+
+            if (!m_isSynctest)
+                m_runner.Completed(this);
         }
     }
 
     private void RunCleanups()
     {
+        // Go's c.cleanupStarted.Store(true) as runCleanup begins: synctest.Test refuses to start from here on.
+        lock (m_syncRoot)
+            m_cleanupStarted = true;
+
         while (true)
         {
             Action cleanup;
@@ -1747,3 +2050,16 @@ public sealed class TestExecution
 /// failure REASON means it escaped the thread it belongs to.
 /// </remarks>
 internal sealed class TestAbortException : Exception;
+
+/// <summary>
+/// Go 1.25's <c>outputWriter</c> (testing.go:1124): the <see cref="go.io_package.Writer"/> that
+/// <c>TB.Output</c> returns. Every write goes to its test's log, line by line.
+/// </summary>
+internal sealed class TestOutputWriter(TestExecution owner) : go.io_package.Writer
+{
+    public (nint n, go.error err) Write(go.slice<byte> p)
+    {
+        owner.WriteOutput(p.ToSpan());
+        return (p.Length, default!);
+    }
+}

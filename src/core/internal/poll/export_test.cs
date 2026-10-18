@@ -13,7 +13,7 @@ partial class poll_internal_test_package {
 public static Action<ж<slice<slice<byte>>>, int64> Consume = (ж<slice<slice<byte>>> ᴛ0, int64 ᴛ1) => consume(ref ᴛ0.DerefOrNull(), ᴛ1);
 
 public partial struct XFDMutex {
-    internal partial ref global::go.@internal.poll_package.fdMutex fdMutex { get; }
+    /*embed*/ internal global::go.@internal.poll_package.fdMutex fdMutex;
 }
 
 public static bool Incref(this ж<XFDMutex> Ꮡmu) {

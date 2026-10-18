@@ -36,7 +36,9 @@ using static go.crypto.@internal.fips140.hmac_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<go.crypto.@internal.fips140.sha256_package.Digest, go.crypto.@internal.fips140_package.Hash>(Pointer = true)]
+[assembly: GoImplement<HMAC, hash_package.Cloner>(Pointer = true)]
+[assembly: GoImplement<errCloneUnsupported, error>]
+[assembly: GoImplement<go.crypto.@internal.fips140.sha256_package.Digest, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -50,8 +52,8 @@ using static go.crypto.@internal.fips140.hmac_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/hmac/cast.go", "cast.cs", "AA4cgoK43IKCgoCCpA==", "15-33:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "ACtYuIKU5raClIKAgraClIKmgqaAooCkgoKAgqSmggAOHoKClIKCpoKCpoKCgoK4goKosoKCgoKylJSCtJKClIKCgpSClIKCgpSClJSosg==", "136-144:1;137-140:1.1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/hmac/cast.go", "cast.cs", "AA8cgoK43IKCgoCCpA==", "15-33:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/hmac/hmac.go", "hmac.cs", "AC5euIKU5raClIKAgraClIKmgqaAooCkgoKAgqSmggAOHoKClIKCpoKCpoKCgoK4goIACAqCpoKqopKCgpSCgpSCgoKUgoKUqLKCgoKCspSUgrSSgpSCgoKUgpSCgoKUgpSUqLI=", "173-181:1;174-177:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -67,6 +69,7 @@ public static partial class hmac_package
 
     // <TypeAccessibility>
     internal partial interface marshalable {}
+    internal partial struct errCloneUnsupported {}
     public partial struct HMAC {}
     // </TypeAccessibility>
 
@@ -83,5 +86,6 @@ public static partial class hmac_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha3() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha3_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha512() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha512_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     // </ImportInitializers>
 }

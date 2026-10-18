@@ -323,10 +323,7 @@ public static (rune r, nint size, error err) ReadRune(this ref Reader b) {
     if (b.r == b.w) {
         return (0, 0, b.readErr());
     }
-    (r, size) = ((rune)b.buf[b.r], 1);
-    if (r >= utf8.RuneSelf) {
-        (r, size) = utf8.DecodeRune(b.buf.slice(b.r, b.w));
-    }
+    (r, size) = utf8.DecodeRune(b.buf.slice(b.r, b.w));
     b.r += size;
     b.lastByte = (nint)b.buf[b.r - 1];
     b.lastRuneSize = size;
@@ -551,9 +548,11 @@ public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
     b.lastByte = -1;
     b.lastRuneSize = -1;
 
-    (n, err) = b.writeBuf(w);
-    if (err != default!) {
-        return (n, err);
+    if (b.r < b.w) {
+        (n, err) = b.writeBuf(w);
+        if (err != default!) {
+            return (n, err);
+        }
     }
 
     {
@@ -889,8 +888,8 @@ public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
 // ReadWriter stores pointers to a [Reader] and a [Writer].
 // It implements [io.ReadWriter].
 partial struct ReadWriter {
-    public partial ref ж<Reader> Reader { get; }
-    public partial ref ж<Writer> Writer { get; }
+    /*embed*/ public ж<Reader> Reader;
+    /*embed*/ public ж<Writer> Writer;
 }
 
 // NewReadWriter allocates a new [ReadWriter] that dispatches to r and w.

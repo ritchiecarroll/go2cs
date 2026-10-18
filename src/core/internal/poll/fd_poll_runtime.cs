@@ -175,6 +175,7 @@ internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
             }
         }
         defer(() => Ꮡfd.decref(), ref ᒐ);
+
         if (fd.pd.runtimeCtx == 0) {
             return ErrNoDeadline;
         }

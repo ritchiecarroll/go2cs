@@ -5,7 +5,6 @@
 // license that can be found in the LICENSE file.
 namespace go.go;
 
-using fmt = fmt_package;
 using token = global::go.go.token_package;
 using global::go.go;
 
@@ -52,7 +51,7 @@ partial struct Alias {
 }
 
 // NewAlias creates a new Alias type with the given type name and rhs.
-// rhs must not be nil.
+// If rhs is nil, the alias is incomplete.
 public static ж<Alias> NewAlias(ж<TypeName> Ꮡobj, ΔType rhs) {
     var alias = (((ж<Checker>)nil)).newAlias(Ꮡobj, rhs);
     // Ensure that alias.actual is set (#65455).
@@ -114,6 +113,7 @@ public static ΔType Rhs(this ref Alias a) {
 // otherwise it follows t's alias chain until it
 // reaches a non-alias type which is then returned.
 // Consequently, the result is never an alias type.
+// Returns nil if the alias is incomplete.
 public static ΔType Unalias(ΔType t) {
     {
         var (a0, _) = t._<ж<Alias>>(ᐧ); if (a0 != nil) {
@@ -133,19 +133,9 @@ internal static ΔType unalias(ж<Alias> Ꮡa0) {
     for (var a = Ꮡa0; a != nil; (a, _) = t._<ж<Alias>>(ᐧ)) {
         t = a.Value.fromRHS;
     }
-    if (t == default!) {
-        throw panic(fmt.Sprintf("non-terminated alias %s"u8, (~a0.obj).name));
-    }
-
-    // Memoize the type only if valid.
-    // In the presence of unfinished cyclic declarations, Unalias
-    // would otherwise latch the invalid value (#66704).
-    // TODO(adonovan): rethink, along with checker.typeDecl's use
-    // of Invalid to mark unfinished aliases.
-    if (!AreEqual(t, Typ[Invalid])) {
-        a0.actual = t;
-    }
-
+    // It's fine to memoize nil types since it's the zero value for actual.
+    // It accomplishes nothing.
+    a0.actual = t;
     return t;
 }
 
@@ -157,12 +147,11 @@ internal static ж<Named> asNamed(ΔType t) {
 }
 
 // newAlias creates a new Alias type with the given type name and rhs.
-// rhs must not be nil.
+// If rhs is nil, the alias is incomplete.
 internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ΔType rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
-    assert(rhs != default!);
     var a = @new<Alias>();
     a.Value.obj = Ꮡobj;
     a.Value.orig = a;
@@ -196,17 +185,9 @@ internal static ж<Alias> newAliasInstance(this ж<Checker> Ꮡcheck, tokenꓸPo
 }
 
 internal static void cleanup(this ж<Alias> Ꮡa) {
-    ref var a = ref Ꮡa.DerefOrNull();
-
     // Ensure a.actual is set before types are published,
-    // so Unalias is a pure "getter", not a "setter".
-    var actual = Unalias(new AliasжΔType(Ꮡa));
-
-    if (AreEqual(actual, Typ[Invalid])) {
-        // We don't set a.actual to Typ[Invalid] during type checking,
-        // as it may indicate that the RHS is not fully set up.
-        a.actual = actual;
-    }
+    // so unalias is a pure "getter", not a "setter".
+    unalias(Ꮡa);
 }
 
 } // end types_package

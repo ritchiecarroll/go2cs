@@ -16,7 +16,8 @@
 // reference, so the first labelled CPU sample threw, and the sampler seam (cpusampler_impl.cs) dropped
 // that sample and every one after it. Here the slot takes the reference itself. There is no signal
 // handler and no barrier to avoid: the CLR's own store keeps the labels reachable from b.tags, which is
-// the property Go's comment argues for by hand. Every other line is Go's.
+// the property Go's comment argues for by hand. Every other line is Go's, at go1.26.9: the commit loop
+// carries Go 1.26's wakeup threshold (the reader is woken at half full, not on every write).
 //
 // Hand-owned (no profbuf_impl.go exists, so a reconvert never regenerates this file).
 [module: go.GoManualConversion]
@@ -97,11 +98,28 @@ internal static void write(this ж<profBuf> Ꮡb, ж<@unsafe.Pointer> ᏑtagPtr,
         // Racing with reader setting flag bits in b.w, to avoid lost wakeups.
         var old = Ꮡb.of(profBuf.Ꮡw).load();
         var @new = old.addCountsAndClearFlags(skip + 2 + len(stk) + (nint)b.hdrsize, 1);
+        // We re-load b.r here to reduce the likelihood of early wakeups
+        // if the reader already consumed some data between the last
+        // time we read b.r and now. This isn't strictly necessary.
+        nint unread = countSub(@new.dataCount(), Ꮡb.of(profBuf.Ꮡr).load().dataCount());
+        if (unread < 0) {
+            // The new count overflowed and wrapped around.
+            unread += len(b.data);
+        }
+        nint wakeupThreshold = len(b.data) / 2;
+        if (unread < wakeupThreshold) {
+            // Carry over the sleeping flag since we're not planning
+            // to wake the reader yet
+            @new |= (profIndex)(old & profReaderSleeping);
+        }
         if (!Ꮡb.of(profBuf.Ꮡw).cas(old, @new)) {
             continue;
         }
-        // If there was a reader, wake it up.
-        if ((profIndex)(old & profReaderSleeping) != 0) {
+        // If we've hit our high watermark for data in the buffer,
+        // and there is a reader, wake it up.
+        if (unread >= wakeupThreshold && (profIndex)(old & profReaderSleeping) != 0) {
+            // NB: if we reach this point, then the sleeping bit is
+            // cleared in the new b.w value
             notewakeup(Ꮡb.of(profBuf.Ꮡwait));
         }
         break;

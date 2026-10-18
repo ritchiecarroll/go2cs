@@ -6,11 +6,12 @@ namespace go.@internal.trace;
 using bufio = bufio_package;
 using fmt = fmt_package;
 using io = io_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using Δevent = go.@internal.trace.event_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
+using go;
 using go.@internal.trace;
 
 partial class raw_package {
@@ -19,8 +20,8 @@ partial class raw_package {
 // into an event stream.
 partial struct TextReader {
     internal version.Version v;
-    internal slice<Δevent.Spec> specs;
-    internal map<@string, Δevent.Type> names;
+    internal slice<tracev2.EventSpec> specs;
+    internal map<@string, tracev2.EventType> names;
     internal ж<bufio.Scanner> s;
 }
 
@@ -52,7 +53,7 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
     }
     tr.Value.v = v;
     tr.Value.specs = v.Specs();
-    tr.Value.names = Δevent.Names((~tr).specs);
+    tr.Value.names = tracev2.EventNames((~tr).specs);
     foreach (var (_, rΔ1) in line) {
         if (!unicode.IsSpace(rΔ1)) {
             return (default!, fmt.Errorf("encountered unexpected non-space at the end of the header: %q"u8, line));
@@ -174,14 +175,13 @@ internal static (@string arg, uint64 value, @string rest, error err) readArg(@st
     if (len(tok) == 0) {
         return ("", 0, s, fmt.Errorf("no argument"u8));
     }
-    var parts = strings.SplitN(tok, "="u8, 2);
-    if (len(parts) < 2) {
+    (arg, var val, var found) = strings.Cut(tok, "="u8);
+    if (!found) {
         return ("", 0, s, fmt.Errorf("malformed argument: %q"u8, tok));
     }
-    arg = parts[0];
-    (value, err) = strconv.ParseUint(parts[1], 10, 64);
+    (value, err) = strconv.ParseUint(val, 10, 64);
     if (err != default!) {
-        return (arg, value, s, fmt.Errorf("failed to parse argument value %q for arg %q"u8, parts[1], parts[0]));
+        return (arg, value, s, fmt.Errorf("failed to parse argument value %q for arg %q"u8, val, arg));
     }
     return (arg, value, rest, err);
 }
@@ -214,11 +214,11 @@ internal static (@string token, @string rest) readToken(@string s) {
 }
 
 internal static (slice<byte>, error) readData(@string line) {
-    var parts = strings.SplitN(line, "="u8, 2);
-    if (len(parts) < 2 || strings.TrimSpace(parts[0]) != "data"u8) {
+    var (dk, dv, found) = strings.Cut(line, "="u8);
+    if (!found || strings.TrimSpace(dk) != "data"u8) {
         return (default!, fmt.Errorf("malformed data: %q"u8, line));
     }
-    var (data, err) = strconv.Unquote(strings.TrimSpace(parts[1]));
+    var (data, err) = strconv.Unquote(strings.TrimSpace(dv));
     if (err != default!) {
         return (default!, fmt.Errorf("failed to parse data: %q: %v"u8, line, err));
     }

@@ -66,6 +66,12 @@
     <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
+  <!-- The field-property collision list: one file, read by the converter (go:embed), by FieldAccessGenerator and
+       by GenTests' guard. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\go2cs\fieldAccessCollisions.txt" LogicalName="go2cs.fieldAccessCollisions.txt" Visible="false" />
+  </ItemGroup>
+
   <Import Project="..\..\core\go2cs\go2cs.projitems" Label="Shared" />
   <ItemGroup>
     <None Include="LICENSE" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/LICENSE')" />

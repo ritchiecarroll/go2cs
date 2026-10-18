@@ -24,6 +24,7 @@ using fmt = fmt_package;
 using saferio = @internal.saferio_package;
 using zstd = @internal.zstd_package;
 using io = io_package;
+using math = math_package;
 using os = os_package;
 using strings = strings_package;
 using @unsafe = unsafe_package;
@@ -54,7 +55,7 @@ partial struct FileHeader {
 
 // A File represents an open ELF file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Prog>> Progs;
     internal io.Closer closer;
@@ -84,7 +85,7 @@ partial struct SectionHeader {
 
 // A Section represents a single section in an ELF file.
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.
@@ -199,7 +200,7 @@ partial struct ProgHeader {
 
 // A Prog represents a single ELF program header in an ELF binary.
 partial struct Prog {
-    public partial ref ProgHeader ProgHeader { get; }
+    /*embed*/ public ProgHeader ProgHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.
@@ -675,7 +676,6 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, 
 public static error ErrNoSymbols = errors.New("no symbol section"u8);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string symbolSectionIsEmptyˢ = "symbol section is empty"u8;
 internal static readonly @string lengthOfSymbolSectionIsˢ = "length of symbol section is not a multiple of SymSize"u8;
 
 internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f, SectionType typ) {
@@ -689,7 +689,7 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f
         return (default!, default!, fmt.Errorf("cannot load symbol section: %w"u8, err));
     }
     if (len(data) == 0) {
-        return (default!, default!, errors.New(symbolSectionIsEmptyˢ));
+        return (default!, default!, ErrNoSymbols);
     }
     if (len(data) % (nint)Sym32Size != 0) {
         return (default!, default!, errors.New(lengthOfSymbolSectionIsˢ));
@@ -740,6 +740,9 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f
     var (data, err) = symtabSection.Data();
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load symbol section: %w"u8, err));
+    }
+    if (len(data) == 0) {
+        return (default!, default!, ErrNoSymbols);
     }
     if (len(data) % (nint)Sym64Size != 0) {
         return (default!, default!, errors.New(lengthOfSymbolSectionIsˢ2));
@@ -897,18 +900,10 @@ internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, sl
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_X86_64_64) {
-            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
+            putUint(f.ByteOrder, dst, rela.Off, 8, (~sym).Value, rela.Addend, false);
         }
         else if (exprᴛ1 == R_X86_64_32) {
-            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, rela.Off, 4, (~sym).Value, rela.Addend, false);
         }
     }
 
@@ -943,12 +938,7 @@ internal static error applyRelocations386(this ref File f, slice<byte> dst, slic
         var sym = Ꮡ(symbols, symNo - 1);
 
         if (t == R_386_32) {
-            if (rel.Off + 4 >= (uint32)len(dst)) {
-                continue;
-            }
-            var val = f.ByteOrder.Uint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)));
-            val += (uint32)(~sym).Value;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
+            putUint(f.ByteOrder, dst, (uint64)rel.Off, 4, (~sym).Value, 0, true);
         }
     }
 
@@ -981,12 +971,7 @@ internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slic
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_ARM_ABS32) {
-            if (rel.Off + 4 >= (uint32)len(dst)) {
-                continue;
-            }
-            var val = f.ByteOrder.Uint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)));
-            val += (uint32)(~sym).Value;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
+            putUint(f.ByteOrder, dst, (uint64)rel.Off, 4, (~sym).Value, 0, true);
         }
     }
 
@@ -1026,18 +1011,10 @@ internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, sl
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_AARCH64_ABS64) {
-            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
+            putUint(f.ByteOrder, dst, rela.Off, 8, (~sym).Value, rela.Addend, false);
         }
         else if (exprᴛ1 == R_AARCH64_ABS32) {
-            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, rela.Off, 4, (~sym).Value, rela.Addend, false);
         }
     }
 
@@ -1076,11 +1053,7 @@ internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slic
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_PPC_ADDR32) {
-            if (rela.Off + 4 >= (uint32)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, (uint64)rela.Off, 4, (~sym).Value, (int64)rela.Addend, false);
         }
     }
 
@@ -1116,18 +1089,10 @@ internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, sl
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_PPC64_ADDR64) {
-            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
+            putUint(f.ByteOrder, dst, rela.Off, 8, (~sym).Value, rela.Addend, false);
         }
         else if (exprᴛ1 == R_PPC64_ADDR32) {
-            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, rela.Off, 4, (~sym).Value, rela.Addend, false);
         }
     }
 
@@ -1160,12 +1125,7 @@ internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, sli
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_MIPS_32) {
-            if (rel.Off + 4 >= (uint32)len(dst)) {
-                continue;
-            }
-            var val = f.ByteOrder.Uint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)));
-            val += (uint32)(~sym).Value;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
+            putUint(f.ByteOrder, dst, (uint64)rel.Off, 4, (~sym).Value, 0, true);
         }
     }
 
@@ -1208,18 +1168,10 @@ internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, s
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_MIPS_64) {
-            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
+            putUint(f.ByteOrder, dst, rela.Off, 8, (~sym).Value, rela.Addend, false);
         }
         else if (exprᴛ1 == R_MIPS_32) {
-            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, rela.Off, 4, (~sym).Value, rela.Addend, false);
         }
     }
 
@@ -1257,18 +1209,10 @@ internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, 
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_LARCH_64) {
-            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
+            putUint(f.ByteOrder, dst, rela.Off, 8, (~sym).Value, rela.Addend, false);
         }
         else if (exprᴛ1 == R_LARCH_32) {
-            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, rela.Off, 4, (~sym).Value, rela.Addend, false);
         }
     }
 
@@ -1304,18 +1248,10 @@ internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, 
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_RISCV_64) {
-            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
+            putUint(f.ByteOrder, dst, rela.Off, 8, (~sym).Value, rela.Addend, false);
         }
         else if (exprᴛ1 == R_RISCV_32) {
-            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, rela.Off, 4, (~sym).Value, rela.Addend, false);
         }
     }
 
@@ -1351,18 +1287,10 @@ internal static error applyRelocationss390x(this ref File f, slice<byte> dst, sl
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_390_64) {
-            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
+            putUint(f.ByteOrder, dst, rela.Off, 8, (~sym).Value, rela.Addend, false);
         }
         else if (exprᴛ1 == R_390_32) {
-            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, rela.Off, 4, (~sym).Value, rela.Addend, false);
         }
     }
 
@@ -1398,18 +1326,10 @@ internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, 
 
         var exprᴛ1 = t;
         if (exprᴛ1 == R_SPARC_64 || exprᴛ1 == R_SPARC_UA64) {
-            if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val64 = (~sym).Value + (uint64)rela.Addend;
-            f.ByteOrder.PutUint64(dst.slice((nint)(rela.Off), (nint)(rela.Off + 8)), val64);
+            putUint(f.ByteOrder, dst, rela.Off, 8, (~sym).Value, rela.Addend, false);
         }
         else if (exprᴛ1 == R_SPARC_32 || exprᴛ1 == R_SPARC_UA32) {
-            if (rela.Off + 4 >= (uint64)len(dst) || rela.Addend < 0) {
-                continue;
-            }
-            var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
-            f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
+            putUint(f.ByteOrder, dst, rela.Off, 4, (~sym).Value, rela.Addend, false);
         }
     }
 
@@ -1474,7 +1394,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
         return (b, default!);
     }
 
-    // There are many DWARf sections, but these are the ones
+    // There are many DWARF sections, but these are the ones
     // the debug/dwarf package started with.
     map<@string, slice<byte>> dat = new map<@string, slice<byte>>{["abbrev"u8] = default!, ["info"u8] = default!, ["str"u8] = default!, ["line"u8] = default!, ["ranges"u8] = default!};
     foreach (var (i, s) in f.Sections) {
@@ -2027,6 +1947,46 @@ internal static readonly @string unexpectedReadFromShtˢ = "unexpected read from
 
 internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromShtˢ));
+}
+
+// putUint writes a relocation to slice
+// at offset start of length length (4 or 8 bytes),
+// adding sym+addend to the existing value if readUint is true,
+// or just writing sym+addend if readUint is false.
+// If the write would extend beyond the end of slice, putUint does nothing.
+// If the addend is negative, putUint does nothing.
+// If the addition would overflow, putUint does nothing.
+internal static void putUint(binary.ByteOrder byteOrder, slice<byte> Δslice, uint64 start, uint64 length, uint64 sym, int64 addend, bool readUint) {
+    if (start + length > (uint64)len(Δslice) || (uint64)math.MaxUint64 - start < length) {
+        return;
+    }
+    if (addend < 0) {
+        return;
+    }
+
+    var s = Δslice.slice((nint)(start), (nint)(start + length));
+
+    switch (length) {
+    case 4: {
+        var ae = (uint32)addend;
+        if (readUint) {
+            ae += byteOrder.Uint32(s);
+        }
+        byteOrder.PutUint32(s, (uint32)sym + ae);
+        break;
+    }
+    case 8: {
+        var ae = (uint64)addend;
+        if (readUint) {
+            ae += byteOrder.Uint64(s);
+        }
+        byteOrder.PutUint64(s, sym + ae);
+        break;
+    }
+    default: {
+        throw panic("can't happen");
+        break;
+    }}
 }
 
 } // end elf_package

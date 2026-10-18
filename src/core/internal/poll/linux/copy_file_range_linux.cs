@@ -11,16 +11,11 @@ using go.@internal.syscall;
 
 partial class poll_package {
 
-internal static bool supportCopyFileRange() {
-    return isKernelVersionGE53();
-}
-
-internal static Func<bool> isKernelVersionGE53 = sync.OnceValue(bool () => {
-    var (major, minor) = unix.KernelVersion();
+internal static Func<bool> supportCopyFileRange = sync.OnceValue(bool () => {
     // copy_file_range(2) is broken in various ways on kernels older than 5.3,
     // see https://go.dev/issue/42400 and
     // https://man7.org/linux/man-pages/man2/copy_file_range.2.html#VERSIONS
-    return major > 5 || (major == 5 && minor >= 3);
+    return unix.KernelVersionGE(5, 3);
 });
 
 // For best performance, call copy_file_range() with the largest len value
@@ -70,10 +65,11 @@ internal static (bool, error) handleCopyFileRangeErr(error err, int64 copied, in
     }
     if (AreEqual(exprᴛ1, default!)) {
         if (copied == 0) {
-            // If we did not read any bytes at all,
-            // then this file may be in a file system
-            // where copy_file_range silently fails.
-            // https://lore.kernel.org/linux-fsdevel/20210126233840.GG4626@dread.disaster.area/T/#m05753578c7f7882f6e9ffe01f981bc223edef2b0
+            // Prior to Linux 5.19
+            // (https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=868f9f2f8e004bfe0d3935b1976f625b2924893b),
+            // copy_file_range can silently fail by reporting
+            // success and 0 bytes written. Assume such cases are
+            // failure and fallback to a different copy mechanism.
             if (written == 0) {
                 return (false, default!);
             }

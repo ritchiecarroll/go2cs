@@ -57,7 +57,7 @@ internal static error CheckNamedValue(this ccChecker c, –∂<driver.NamedValue> ·è
     // it isn't expecting. The final error will be thrown
     // in the argument converter loop.
     nint index = nv.Ordinal - 1;
-    if (c.want <= index) {
+    if (c.want >= 0 && c.want <= index) {
         return default!;
     }
 

@@ -217,20 +217,28 @@ internal static (nint n, nint oobn, error err) writeMsgAddrPort(this ref UDPConn
 
     var exprᴛ1 = (~c.fd).family;
     if (exprᴛ1 == syscall.AF_INET) {
-        ref var sa = ref heap<syscall.SockaddrInet4>(out var Ꮡsa);
-        (sa, var errΔ2) = addrPortToSockaddrInet4(addr);
-        if (errΔ2 != default!) {
-            return (0, 0, errΔ2);
+        ж<syscall.SockaddrInet4> sap = default!;
+        if (addr.IsValid()) {
+            ref var sa = ref heap<syscall.SockaddrInet4>(out var Ꮡsa);
+            (sa, var errΔ3) = addrPortToSockaddrInet4(addr);
+            if (errΔ3 != default!) {
+                return (0, 0, errΔ3);
+            }
+            sap = Ꮡsa;
         }
-        return c.fd.writeMsgInet4(b, oob, Ꮡsa);
+        return c.fd.writeMsgInet4(b, oob, sap);
     }
     if (exprᴛ1 == syscall.AF_INET6) {
-        ref var sa = ref heap<syscall.SockaddrInet6>(out var Ꮡsa);
-        (sa, var errΔ3) = addrPortToSockaddrInet6(addr);
-        if (errΔ3 != default!) {
-            return (0, 0, errΔ3);
+        ж<syscall.SockaddrInet6> sap = default!;
+        if (addr.IsValid()) {
+            ref var sa = ref heap<syscall.SockaddrInet6>(out var Ꮡsa);
+            (sa, var errΔ4) = addrPortToSockaddrInet6(addr);
+            if (errΔ4 != default!) {
+                return (0, 0, errΔ4);
+            }
+            sap = Ꮡsa;
         }
-        return c.fd.writeMsgInet6(b, oob, Ꮡsa);
+        return c.fd.writeMsgInet6(b, oob, sap);
     }
     { /* default: */
         return (0, 0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid address family"u8, Addr: addr.Addr().String()))));

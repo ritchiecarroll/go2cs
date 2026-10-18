@@ -226,18 +226,14 @@ internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) {
         foreach (var (_, pp) in allp) {
             var (typ, duration) = pp.of(runtime_package.Δp.ᏑlimiterEvent).consume(now);
             var exprᴛ1 = typ;
-            var matchᴛ1 = false;
-            if (exprᴛ1 == limiterEventIdleMarkWork) { matchᴛ1 = true;
-                fallthrough = true;
-            }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventIdle) { matchᴛ1 = true;
-                idleTime += duration;
+            if (exprᴛ1 == limiterEventIdle) {
                 Ꮡsched.of(schedt.ᏑidleTime).Add(duration);
+                idleTime += duration;
             }
-            else if (exprᴛ1 == limiterEventMarkAssist) { matchᴛ1 = true;
-                fallthrough = true;
+            else if (exprᴛ1 == limiterEventIdleMarkWork) {
+                idleTime += duration;
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventScavengeAssist) { matchᴛ1 = true;
+            else if (exprᴛ1 == limiterEventMarkAssist || exprᴛ1 == limiterEventScavengeAssist) {
                 assistTime += duration;
             }
             else if (exprᴛ1 == limiterEventNone) {
@@ -245,7 +241,7 @@ internal static void updateLocked(this ж<gcCPULimiterState> Ꮡl, int64 now) {
                     break;
                 } while (false);
             }
-            else if (!matchᴛ1) { /* default: */
+            else { /* default: */
                 @throw(invalidLimiterEventTypeˢ);
             }
         }
@@ -509,21 +505,17 @@ internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int6
     }
     // Account for the event.
     var exprᴛ1 = typ;
-    var matchᴛ1 = false;
-    if (exprᴛ1 == limiterEventIdleMarkWork) { matchᴛ1 = true;
-        ᏑgcCPULimiter.addIdleTime(duration);
-    }
-    else if (exprᴛ1 == limiterEventIdle) { matchᴛ1 = true;
-        ᏑgcCPULimiter.addIdleTime(duration);
+    if (exprᴛ1 == limiterEventIdle) {
         Ꮡsched.of(schedt.ᏑidleTime).Add(duration);
+        ᏑgcCPULimiter.addIdleTime(duration);
     }
-    else if (exprᴛ1 == limiterEventMarkAssist) { matchᴛ1 = true;
-        fallthrough = true;
+    else if (exprᴛ1 == limiterEventIdleMarkWork) {
+        ᏑgcCPULimiter.addIdleTime(duration);
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventScavengeAssist) {
+    else if (exprᴛ1 == limiterEventMarkAssist || exprᴛ1 == limiterEventScavengeAssist) {
         ᏑgcCPULimiter.addAssistTime(duration);
     }
-    else if (!matchᴛ1) { /* default: */
+    else { /* default: */
         @throw(limiterEventStopInvalidˢ);
     }
 }

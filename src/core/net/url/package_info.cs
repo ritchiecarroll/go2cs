@@ -57,7 +57,8 @@ using static go.net.url_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/url/url.go", "url.cs", "ACNCgKKA5IKG5oKGyoKUpKSUpoKUpKSUAA4igsqCAAIQ5IKmAAkUlLiUytzK7rjKyO6UygACENIAAhTyqrSCgoKUgoKCgpQABxCClAAHEIKCprSCtIKUyIKmgoKClIK0gpTGtqqiqqKmgpKCgoKClMqCpoKUgoKUpoKCgoKmpoKCgKSCtIKCgrSCxgAsXqIAAhYACAIADByygpSosoKUqsKClIKClNyygoLYgsaClMimAAIS9JKCgpSClICCpAACENKCgpQACA7CgpSCpoKUlIKCyoCCpJSCgpSmgpSClIIACBKAlMiCgoKAgqSCgqSm7oCCpNbCgoKUlIKUgpSCgpSCgIKklIKAgqSAgqSU6qKApoKCpoKClIKCpoLugoKCgpSCgpSUgoKC7oKClIKUkoCCgoLYgoCCpAACKgASAoKClIKAlJSkqAACFgAJAoKCgqaClKyy3AANEILIqJKCgpSCgJSUpAACFgAIAoKCgqaqooKUgpSCgqYAAjAAFQKUgoKUgoKClJSCgpSCgpSClIKmgpSAgoKkgILIgoKU7oCCtpSCgpSCgpTawoKmgoCCpAAIGsKCgpSqoqqiqJKokoIAAhoACgKCgqa4goKClIKClIKClNaigpSCgoKCgpSClIKCgoKUlIKCgpSUlKqigpSCgoKCgoKUgoKmqqKCgpKCgpSUgqaYgpSCgoKCgpSmlIKUgoKClKaClIK4griCgpSqoqyygoKUAAISAAgCkoKUuIKUgoKCgpSCgoKCpoKCgoKCpoKCgqyygqqigoKCgqaCpoKUrsKCrLKCrOKUgoKmgqasoqaCpoKCgpSCrNKCgqaClLiClJKCAAIYAAkCgoKUgpSClJa0pqiSgoKCpqrigoKUgg==")]
+[assembly: go.GoPositionMap("net/url/encoding_table.go", "encoding_table.cs", "ABg2")]
+[assembly: go.GoPositionMap("net/url/url.go", "url.cs", "AB48AAgSgKKA5IKG5oKGyoKoksqCyoKokgACENIAAhTyqrSCgoKUgoKCgpQABxCClAAHEIKCprSCtIKUyIKmgpSklIKCgriCtLS2qqKqoqaCkoKCgpTKgqaClIKClKaCgoKCpqaCgpSCtIKCgrSCtgA3fqIAAhYACAIADByygpSosoKUqsKClIKClNyygoLYgsaClMimAAIS9JKCgpSClICCpAACENKCgpQACA7CgpSCpoKUlIKCyoCCpJSCgpSmgpSClIIACBKAlMiCgoKAgqSCgqSm7oCCpNbCgoKUlIKUgpSCgpSCgIKklIKAgqSAgqSU6qKAgpKmgoKmgoKUgoKmgu6CgoKClIKClJSCgoLugoKUgpSSgIKCAAoWgoKCpqaCgtiCgIKkAAIqABICgoKUgoCUlKSoAAIWAAkCgoKCpoKUrLLcAA0QgsiokoKClIKAlJSkAAIWAAgCgoKCpqqigpSClIKCpgACMAAVApSCgpSCgoKUlIKClIKClIKUgqaClICCgqSAgsiCgpTugIK2lIKClIKClNrCgqaCgIKkAAgawoKClKqiqqKokqiSggACGgAKAoKCpsqCgoKUgoKUgoKU1qKClIKCgoKClIKUgoKCgpSUgoKClJSUqqKClKaCgoKClIKCgoKCgpSCgqaqooKCkoKClJSCpoKCgoKCgoKClIKkgIKUpKSClIK4griClKqirLKCgpQAAhIACAKSgpS4gpSCgoKClIKCgoKmgoKCgoKmgoKCrLKCqqKCgoKCpoKmgpSuwoKssoKs4pSCgqaCpqyipoKmgoKClIKu4oKmooKCpoKUuIKUkoIAAhgACQKCgpSClIKUlgAMFrSmqJKCgoKmrPKCgpSCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -90,10 +91,10 @@ public static partial class url_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(@internal.godebug_package));
-    [GoInit] internal static void initᴛᴛimportꓸmaps() => builtin.initPackage(typeof(maps_package));
     [GoInit] internal static void initᴛᴛimportꓸnetꓸnetip() => builtin.initPackage(typeof(go.net.netip_package));
     [GoInit] internal static void initᴛᴛimportꓸpath() => builtin.initPackage(typeof(path_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));

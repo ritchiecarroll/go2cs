@@ -153,6 +153,12 @@ func (v *Visitor) foldedNamedFloatConstLiteral(operand ast.Expr, targetCSType st
 // typed the way overflowingConstLiteral types its folds.
 // Pure-integer and pure-float expressions, and a float operand beside only integer LITERALS, keep
 // their emission: C# already evaluates those correctly.
+//
+// The SECOND trigger is pure-integer arithmetic around a named untyped-int constant whose UntypedInt
+// (int64) evaluation reaches a different value than Go's exact constant: an intermediate that leaves
+// int64 (`maxUint64 / 5`) or a shift count of 64 or more (`(div1e8m*5^8) % (1<<64) - 1`, internal/strconv's
+// compile-time assert). See untypedIntEvaluationDiffers. Arithmetic whose int64 evaluation agrees with
+// Go keeps its operators.
 func (v *Visitor) foldedMixedIntegerConstLiteral(expr ast.Expr) string {
 	tv, ok := v.info.Types[expr]
 
@@ -166,7 +172,7 @@ func (v *Visitor) foldedMixedIntegerConstLiteral(expr ast.Expr) string {
 		return ""
 	}
 
-	if !v.containsUntypedNamedIntegerConstRef(expr) || !v.containsFloatConstOperand(expr) {
+	if !v.containsUntypedNamedIntegerConstRef(expr) || !v.containsFloatConstOperand(expr) && !v.untypedIntEvaluationDiffers(expr) {
 		return ""
 	}
 
@@ -556,6 +562,74 @@ func shiftGuardWidthOfType(t types.Type) (*types.Basic, int, bool) {
 	}
 
 	return nil, 0, false
+}
+
+// foldedMixedConstShiftOperand renders a NON-constant shift's left operand as its constant VALUE, typed
+// to the shift, when that operand is a computed constant whose untyped arithmetic mixes in a TYPED
+// constant or a builtin min/max call: `(((1 << min(bits, ptrBits)) - 1) << j)` with `const bits
+// uintptr`, runtime's 1.26 malloc_generated.go (17 sites) and malloc_stubs.go (1).
+//
+// Go types the whole constant operand from context (uintptr), but its C# rendering cannot follow: a
+// typed local const emits as a local VARIABLE of its type (`uintptr bits = 5;`, C# has no const of a
+// struct type), and min/max emit as calls, so `(1 << (int)min(bits, …)) - 1` is ordinary `int`
+// arithmetic over non-constants. Because the operand also names an untyped constant (ptrBits),
+// shiftLeftRendersAsUntypedWrapper read it as golib UntypedInt arithmetic, so neither the untyped
+// retype nor the shift guard applied, and `dst & ~<int>` was CS0019. go/types holds the operand's exact
+// value, so it is emitted as that value with the Go text beside it, the converter's `/* expr */ value`
+// idiom for a constant C# cannot spell: `((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 31))`.
+//
+// Scoped to the mix that breaks: an operand of untyped literals and untyped named constants alone keeps
+// its existing UntypedInt rendering (UntypedIntWideShift), and a literal or bare constant is not computed.
+func (v *Visitor) foldedMixedConstShiftOperand(binaryExpr *ast.BinaryExpr) (string, bool) {
+	tv, ok := v.info.Types[binaryExpr.X]
+
+	if !ok || tv.Value == nil || tv.Value.Kind() != constant.Int || !v.isComputedConstOperand(binaryExpr.X) {
+		return "", false
+	}
+
+	shiftType, ok := v.info.Types[binaryExpr]
+
+	if !ok || shiftType.Value != nil {
+		return "", false
+	}
+
+	basic, _, inScope := shiftGuardWidthOfType(shiftType.Type)
+
+	if !inScope {
+		return "", false
+	}
+
+	mixed := false
+
+	ast.Inspect(binaryExpr.X, func(n ast.Node) bool {
+		if mixed {
+			return false
+		}
+
+		switch node := n.(type) {
+		case *ast.Ident:
+			if c, ok := v.info.Uses[node].(*types.Const); ok {
+				if b, ok := c.Type().Underlying().(*types.Basic); ok && b.Info()&types.IsUntyped == 0 {
+					mixed = true
+				}
+			}
+		case *ast.CallExpr:
+			if fun, ok := ast.Unparen(node.Fun).(*ast.Ident); ok && (fun.Name == "min" || fun.Name == "max") && v.identIsUniverseBuiltin(fun) {
+				mixed = true
+			}
+		}
+
+		return !mixed
+	})
+
+	if !mixed {
+		return "", false
+	}
+
+	goText := strings.Join(strings.Fields(v.getPrintedNode(binaryExpr.X)), " ")
+	goText = strings.ReplaceAll(goText, "*/", "* /")
+
+	return fmt.Sprintf("((%s)(/* %s */ %s))", v.getCSharpTypeName(basic), goText, tv.Value.ExactString()), true
 }
 
 // shiftLeftRendersAsUntypedWrapper reports whether the shift's left operand renders as a golib Untyped*
@@ -1811,7 +1885,16 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			// rather than the native operator. In scope only for a basic-integer left operand (a
 			// NAMED [GoType] wrapper keeps its existing generated-operator emission); a constant,
 			// masked, or modulo'd count that is provably bounded stays native (unchanged, ~zero churn).
-			if basic, width, inScope := v.shiftGuardWidth(binaryExpr); inScope && v.shiftCountGuarded(binaryExpr.Y, width) && !v.shiftLeftRendersAsUntypedWrapper(binaryExpr.X) {
+			// A computed-constant left operand that MIXES a typed constant or a min/max into its untyped
+			// arithmetic is folded to its value, typed to the shift (foldedMixedConstShiftOperand). It no
+			// longer renders as a golib Untyped* wrapper, so it takes the guard like any typed operand.
+			folded, isFolded := v.foldedMixedConstShiftOperand(binaryExpr)
+
+			if isFolded {
+				leftOperand = folded
+			}
+
+			if basic, width, inScope := v.shiftGuardWidth(binaryExpr); inScope && v.shiftCountGuarded(binaryExpr.Y, width) && (isFolded || !v.shiftLeftRendersAsUntypedWrapper(binaryExpr.X)) {
 				return v.emitGuardedShift(binaryExpr, leftOperand, rightOperand, binaryOp, basic)
 			}
 

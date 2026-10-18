@@ -37,6 +37,7 @@ using static go.hash.crc64_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<digest, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<digest, hash_package.Hash64>(Pointer = true)]
 // </InterfaceImplementations>
 
@@ -51,7 +52,7 @@ using static go.hash.crc64_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/crc64/crc64.go", "crc64.cs", "ACNKlIKCqqKClKSkuIKCgoKCgpSmlKaCgoKCgoKCpgAIHNCkgKSApIDegoKCgqaC9oKClIKUgpSCpoKClIKCgpKCpKaUpoKCAAAQuIKUqJKmgoKmgKSCgqqgprKCgoKCpg==")]
+[assembly: go.GoPositionMap("hash/crc64/crc64.go", "crc64.cs", "ACNKlIKCqqKClKSkuIKCgoKCgpSmlKaCgoKCgoKCpgAIHNCkgKSApIDegoKCgqaC9oKClIKUgpSCpoKSpoKClIKCgpKCpKaUpoKCAAAQuIKUqJKmgoKmgKSCgqqgprKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

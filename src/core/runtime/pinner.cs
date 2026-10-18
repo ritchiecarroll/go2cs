@@ -9,13 +9,32 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(specialPinCounter))]
 partial class runtime_package {
 
 // A Pinner is a set of Go objects each pinned to a fixed location in memory. The
 // [Pinner.Pin] method pins one object, while [Pinner.Unpin] unpins all pinned
-// objects. See their comments for more information.
+// objects.
+//
+// The purpose of a Pinner is two-fold.
+// First, it allows C code to safely use Go pointers that have not been passed
+// explicitly to the C code via a cgo call.
+// For example, for safely interacting with a pointer stored inside of a struct
+// whose pointer is passed to a C function.
+// Second, it allows C memory to safely retain that Go pointer even after the
+// cgo call returns, provided the object remains pinned.
+//
+// A Pinner arranges for its objects to be automatically unpinned some time after
+// it becomes unreachable, so its referents will not leak. However, this means the
+// Pinner itself must be kept alive across a cgo call, or as long as C retains a
+// reference to the pinned Go pointers.
+//
+// Reusing a Pinner is safe, and in fact encouraged, to avoid the cost of
+// initializing new Pinners on first use.
+//
+// The zero value of Pinner is ready to use.
 partial struct Pinner {
-    internal partial ref ж<pinner> pinner { get; }
+    /*embed*/ internal ж<pinner> pinner;
 }
 
 // go2cs generated this placeholder — func Pin is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -57,7 +76,7 @@ internal static @unsafe.Pointer pinnerGetPtr(ж<any> Ꮡi) {
         throw panic(((errorString)(@string)runtimePinnerArgumentIsˢ));
     }
     {
-        var kind = (abiꓸKind)((~etyp).Kind_ & abi.KindMask); if (kind != abi.Pointer && kind != abi.UnsafePointer) {
+        var kind = etyp.Kind(); if (kind != abi.Pointer && kind != abi.UnsafePointer) {
             throw panic(((errorString)("runtime.Pinner: argument is not a pointer: "u8 + toRType(etyp).@string())));
         }
     }
@@ -75,8 +94,8 @@ internal static readonly @string triedToUnpinNonGoPointerˢ = "tried to unpin no
 internal static readonly @string runtimePinnerObjectˢ = "runtime.Pinner: object already unpinned"u8;
 
 // setPinned marks or unmarks a Go pointer as pinned, when the ptr is a Go pointer.
-// It will be ignored while try to pin a non-Go pointer,
-// and it will be panic while try to unpin a non-Go pointer,
+// It will be ignored while trying to pin a non-Go pointer.
+// It will panic while trying to unpin a non-Go pointer,
 // which should not happen in normal usage.
 internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
     var span = spanOfHeap((uintptr)ptr);
@@ -267,15 +286,15 @@ internal static void incPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
         rec = (ж<specialPinCounter>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialPinCounterAlloc).alloc());
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         // splice in record, fill in offset.
-        rec.Value.special.offset = offset;
-        rec.Value.special.kind = _KindSpecialPinCounter;
-        rec.Value.special.next = @ref.ValueSlot;
+        rec.special.offset = offset;
+        rec.special.kind = _KindSpecialPinCounter;
+        rec.special.next = @ref.ValueSlot;
         @ref.ValueSlot = rec.Reinterpret<specialPinCounter, special>();
         spanHasSpecials(Ꮡspan);
     } else {
         rec = @ref.ValueSlot.Reinterpret<special, specialPinCounter>();
     }
-    rec.Value.counter++;
+    rec.counter++;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -291,9 +310,9 @@ internal static bool decPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
         @throw(runtimePinnerDecreasedˢ);
     }
     var counter = @ref.ValueSlot.Reinterpret<special, specialPinCounter>();
-    counter.Value.counter--;
-    if ((~counter).counter == 0) {
-        @ref.ValueSlot = counter.Value.special.next;
+    counter.counter--;
+    if (counter.counter == 0) {
+        @ref.ValueSlot = counter.special.next;
         if (span.specials == nil) {
             spanHasNoSpecials(Ꮡspan);
         }

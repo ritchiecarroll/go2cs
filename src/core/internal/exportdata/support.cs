@@ -6,8 +6,9 @@ namespace go.@internal;
 
 using bufio = bufio_package;
 using io = io_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using strings = strings_package;
+using global::go;
 
 partial class exportdata_package {
 

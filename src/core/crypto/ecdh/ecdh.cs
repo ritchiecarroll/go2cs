@@ -21,9 +21,9 @@ partial class ecdh_package {
 partial interface ΔCurve {
     // GenerateKey generates a random PrivateKey.
     //
-    // Most applications should use [crypto/rand.Reader] as rand. Note that the
-    // returned key does not depend deterministically on the bytes read from rand,
-    // and may change between calls and/or between versions.
+    // Since Go 1.26, a secure source of random bytes is always used, and rand
+    // is ignored unless GODEBUG=cryptocustomrand=1 is set. This setting will be
+    // removed in a future Go release. Instead, use [testing/cryptotest.SetGlobalRandom].
     (ж<PrivateKey>, error) GenerateKey(io.Reader rand);
     // NewPrivateKey checks that key is valid and returns a PrivateKey.
     //
@@ -90,6 +90,18 @@ public static bool Equal(this ref ΔPublicKey k, cryptoꓸPublicKey x) {
 public static ΔCurve Curve(this ref ΔPublicKey k) {
     return k.curve;
 }
+
+// KeyExchanger is an interface for an opaque private key that can be used for
+// key exchange operations. For example, an ECDH key kept in a hardware module.
+//
+// It is implemented by [PrivateKey].
+partial interface KeyExchanger {
+    ж<ΔPublicKey> PublicKey();
+    ΔCurve Curve();
+    (slice<byte>, error) ECDH(ж<ΔPublicKey> _);
+}
+
+internal static KeyExchanger _ᴛ1ʗ = new PrivateKeyжKeyExchanger(((ж<PrivateKey>)nil));
 
 // PrivateKey is an ECDH private key, usually kept secret.
 //

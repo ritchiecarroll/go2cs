@@ -24,6 +24,7 @@ using saferio = @internal.saferio_package;
 using math = math_package;
 using big = go.math.big_package;
 using reflect = reflect_package;
+using runtime = runtime_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
@@ -501,7 +502,21 @@ internal static (@string ret, error err) parseIA5String(slice<byte> bytes) {
 // parseT61String parses an ASN.1 T61String (8-bit clean string) from the given
 // byte slice and returns it.
 internal static (@string ret, error err) parseT61String(slice<byte> bytes) {
-    return (((@string)bytes), default!);
+    // T.61 is a defunct ITU 8-bit character encoding which preceded Unicode.
+    // T.61 uses a code page layout that _almost_ exactly maps to the code
+    // page layout of the ISO 8859-1 (Latin-1) character encoding, with the
+    // exception that a number of characters in Latin-1 are not present
+    // in T.61.
+    //
+    // Instead of mapping which characters are present in Latin-1 but not T.61,
+    // we just treat these strings as being encoded using Latin-1. This matches
+    // what most of the world does, including BoringSSL.
+    var buf = new slice<byte>(0, len(bytes));
+    foreach (var (_, v) in bytes) {
+        // All the 1-byte UTF-8 runes map 1-1 with Latin-1.
+        buf = utf8.AppendRune(buf, (rune)v);
+    }
+    return (((@string)buf), default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -519,15 +534,22 @@ internal static (@string ret, error err) parseUTF8String(slice<byte> bytes) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pkcs12OddLengthBmpStringˢ = "pkcs12: odd-length BMP string"u8;
+internal static readonly @string invalidBMPStringˢ = "invalid BMPString"u8;
 
 // BMPString
 
 // parseBMPString parses an ASN.1 BMPString (Basic Multilingual Plane of
 // ISO/IEC/ITU 10646-1) from the given byte slice and returns it.
 internal static (@string, error) parseBMPString(slice<byte> bmpString) {
+    // BMPString uses the defunct UCS-2 16-bit character encoding, which
+    // covers the Basic Multilingual Plane (BMP). UTF-16 was an extension of
+    // UCS-2, containing all of the same code points, but also including
+    // multi-code point characters (by using surrogate code points). We can
+    // treat a UCS-2 encoded string as a UTF-16 encoded string, as long as
+    // we reject out the UTF-16 specific code points. This matches the
+    // BoringSSL behavior.
     if (len(bmpString) % 2 != 0) {
-        return ("", errors.New(pkcs12OddLengthBmpStringˢ));
+        return ("", errors.New(invalidBMPStringˢ));
     }
 
     // Strip terminator if present.
@@ -539,7 +561,14 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
 
     var s = new slice<uint16>(0, len(bmpString) / 2);
     while (len(bmpString) > 0) {
-        s = append(s, (uint16)((uint16)((uint16)bmpString[0] << (int)(8)) + (uint16)bmpString[1]));
+        var point = (uint16)((uint16)((uint16)bmpString[0] << (int)(8)) + (uint16)bmpString[1]);
+        // Reject UTF-16 code points that are permanently reserved
+        // noncharacters (0xfffe, 0xffff, and 0xfdd0-0xfdef) and surrogates
+        // (0xd800-0xdfff).
+        if (point == 0xfffe || point == 0xffff || (point >= 0xfdd0 && point <= 0xfdef) || (point >= 0xd800 && point <= 0xdfff)) {
+            return ("", errors.New(invalidBMPStringˢ));
+        }
+        s = append(s, point);
         bmpString = bmpString[2..];
     }
 
@@ -650,7 +679,7 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
 // parseSequenceOf is used for SEQUENCE OF and SET OF values. It tries to parse
 // a number of ASN.1 values from the given byte slice and returns them as a
 // slice of Go values of the given type.
-internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> bytes, reflectꓸType sliceType, reflectꓸType elemType) {
+internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> bytes, reflectꓸType sliceType, reflectꓸType elemType, nint depth) {
     reflectꓸValue ret = new(nil);
     error err = default!;
 
@@ -703,7 +732,7 @@ internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> byt
     nint offset = 0;
     for (nint i = 0; i < numElements; i++) {
         ret = reflect.Append(ret, reflect.Zero(elemType));
-        (offset, err) = parseField(ret.Index(i), bytes, offset, @params);
+        (offset, err) = parseField(ret.Index(i), bytes, offset, @params, depth);
         if (err != default!) {
             return (ret, err);
         }
@@ -732,10 +761,16 @@ internal static readonly @string asn1ˢ = "asn1"u8;
 // parseField is the main parsing function. Given a byte slice and an offset
 // into the array, it will try to parse a suitable ASN.1 value out and store it
 // in the given Value.
-internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byte> bytes, nint initOffset, fieldParameters @params) {
+internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byte> bytes, nint initOffset, fieldParameters @params, nint depth) {
     nint offset = default!;
     error err = default!;
 
+    depth++;
+    const nint maxDecodeDepth = 10000;
+    const nint maxDecodeDepthWasm = 5000; // go.dev/issue/56498
+    if (depth > maxDecodeDepth || runtime.GOARCH == "wasm"u8 && depth > maxDecodeDepthWasm) {
+        return (initOffset, new StructuralError("nesting depth exceeded"u8));
+    }
     offset = initOffset;
     var fieldType = v.Type();
 
@@ -882,9 +917,19 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }
 
     // Special case for time: UTCTime and GeneralizedTime both map to the
-    // Go type time.Time.
-    if (universalTag == TagUTCTime && t.tag == TagGeneralizedTime && t.@class == ClassUniversal) {
-        universalTag = TagGeneralizedTime;
+    // Go type time.Time. getUniversalType returns the tag for UTCTime when
+    // it sees a time.Time, so if we see a different time type on the wire,
+    // or the field is tagged with a different type, we change the universal
+    // type to match.
+    if (universalTag == TagUTCTime) {
+        if (t.@class == ClassUniversal){
+            if (t.tag == TagGeneralizedTime) {
+                universalTag = t.tag;
+            }
+        } else 
+        if (@params.timeType != 0) {
+            universalTag = @params.timeType;
+        }
     }
 
     if (@params.set) {
@@ -1022,7 +1067,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
                 if (i == 0 && AreEqual(field.Type, rawContentsType)) {
                     continue;
                 }
-                (innerOffset, err) = parseField(val.Field(i), innerBytes, innerOffset, parseFieldParameters(field.Tag.Get(asn1ˢ)));
+                (innerOffset, err) = parseField(val.Field(i), innerBytes, innerOffset, parseFieldParameters(field.Tag.Get(asn1ˢ)), depth);
                 if (err != default!) {
                     return (offset, err);
                 }
@@ -1039,7 +1084,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
                 reflect.Copy(val, reflect.ValueOf(innerBytes));
                 return (offset, err);
             }
-            var (newSlice, err1) = parseSequenceOf(innerBytes, sliceType, sliceType.Elem());
+            var (newSlice, err1) = parseSequenceOf(innerBytes, sliceType, sliceType.Elem(), depth);
             if (err1 == default!) {
                 val.Set(newSlice);
             }
@@ -1176,6 +1221,13 @@ internal static bool /*ok*/ setDefaultValue(reflectꓸValue v, fieldParameters @
 //	numeric causes strings to be unmarshaled as ASN.1 NumericString values
 //	utf8    causes strings to be unmarshaled as ASN.1 UTF8String values
 //
+// When decoding an ASN.1 value with an IMPLICIT tag into a time.Time field,
+// Unmarshal will default to a UTCTime, which doesn't support time zones or
+// fractional seconds. To force usage of GeneralizedTime, use the following
+// tag:
+//
+//	generalized causes time.Times to be unmarshaled as ASN.1 GeneralizedTime values
+//
 // If the type of the first field of a structure is RawContent then the raw
 // ASN1 contents of the struct will be stored in it.
 //
@@ -1219,7 +1271,7 @@ public static (slice<byte> rest, error err) UnmarshalWithParams(slice<byte> b, a
     if (v.Kind() != reflect.ΔPointer || v.IsNil()) {
         return (default!, new invalidUnmarshalErrorжerror(Ꮡ(new invalidUnmarshalError(reflect.TypeOf(val)))));
     }
-    (var offset, err) = parseField(v.Elem(), b, 0, parseFieldParameters(@params));
+    (var offset, err) = parseField(v.Elem(), b, 0, parseFieldParameters(@params), 0);
     if (err != default!) {
         return (default!, err);
     }

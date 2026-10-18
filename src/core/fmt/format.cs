@@ -35,7 +35,7 @@ partial struct fmtFlags {
 // It prints into a buffer that must be set up separately.
 partial struct fmt {
     internal ж<buffer> buf;
-    internal partial ref fmtFlags fmtFlags { get; }
+    /*embed*/ internal fmtFlags fmtFlags;
     internal nint wid; // width
     internal nint prec; // precision
     // intbuf is large enough to store %b of an int64 with a sign and
@@ -361,10 +361,7 @@ internal static slice<byte> truncate(this ref fmt f, slice<byte> b) {
             if (n < 0) {
                 return b.slice(0, i);
             }
-            nint wid = 1;
-            if (b[i] >= utf8.RuneSelf) {
-                (_, wid) = utf8.DecodeRune(b.slice(i));
-            }
+            var (_, wid) = utf8.DecodeRune(b.slice(i));
             i += wid;
         }
     }

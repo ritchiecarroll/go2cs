@@ -194,6 +194,8 @@ internal static context escape(this ref escaper e, context c, parse.Node n) {
 
 internal static ж<godebug.Setting> debugAllowActionJSTmpl = godebug.New("jstmpllitinterp"u8);
 
+internal static ж<godebug.Setting> htmlmetacontenturlescape = godebug.New("htmlmetacontenturlescape"u8);
+
 // escapeAction escapes an action template node.
 internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -260,6 +262,20 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
         }
         else if (!matchᴛ1) { /* default: */
             throw panic(c.urlPart.String());
+        }
+    }
+    else if (exprᴛ1 == stateMetaContent) {
+        // Handled below in delim check.
+    }
+    else if (exprᴛ1 == stateMetaContentURL) {
+        if (htmlmetacontenturlescape.Value() != "0"u8){
+            s = append(s, "_html_template_urlfilter"u8);
+        } else {
+            // We don't have a great place to increment this, since it's hard to
+            // know if we actually escape any urls in _html_template_urlfilter,
+            // since it has no information about what context it is being
+            // executed in etc. This is probably the best we can do.
+            htmlmetacontenturlescape.IncNonDefault();
         }
     }
     else if (exprᴛ1 == stateJS) {
@@ -579,7 +595,7 @@ internal static context escapeBranch(this ref escaper e, context c, ж<parse.Bra
     if (nodeName == "range"u8) {
         e.rangeContext = Ꮡ(new rangeContext(outer: e.rangeContext));
     }
-    var c0 = e.escapeList(c, n.List);
+    var c0 = e.escapeList(c.clone(), n.List);
     if (nodeName == "range"u8) {
         if (c0.state != stateError) {
             c0 = joinRange(c0, ref (e.rangeContext).DerefOrNull());
@@ -610,7 +626,7 @@ internal static context escapeBranch(this ref escaper e, context c, ж<parse.Bra
             return c0;
         }
     }
-    var c1 = e.escapeList(c, n.ElseList);
+    var c1 = e.escapeList(c.clone(), n.ElseList);
     return join(c0, c1, new parse.BranchNodeжNode(Ꮡn), nodeName);
 }
 

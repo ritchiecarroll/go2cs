@@ -25,7 +25,7 @@ partial class template_package {
 // return value evaluates to non-nil during execution, execution terminates and
 // Execute returns that error.
 //
-// Errors returned by Execute wrap the underlying error; call [errors.As] to
+// Errors returned by Execute wrap the underlying error; call [errors.AsType] to
 // unwrap them.
 //
 // When template execution invokes a function with an argument list, that list
@@ -65,28 +65,14 @@ internal static FuncMap builtins() {
     });
 }
 
-partial struct builtinFuncsOnceᴛ1 /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
-    internal map<@string, reflectꓸValue> v;
-}
-internal static ж<builtinFuncsOnceᴛ1> ᏑbuiltinFuncsOnce = new StandardBox<builtinFuncsOnceᴛ1>(new builtinFuncsOnceᴛ1(nil));
-internal static ref builtinFuncsOnceᴛ1 builtinFuncsOnce => ref ᏑbuiltinFuncsOnce.Value;
-
-// builtinFuncsOnce lazily computes & caches the builtinFuncs map.
-// TODO: revert this back to a global map once golang.org/issue/2559 is fixed.
-internal static map<@string, reflectꓸValue> builtinFuncs() {
-    ᏑbuiltinFuncsOnce.of(builtinFuncsOnceᴛ1.ᏑOnce).Do(() => {
-        builtinFuncsOnce.v = createValueFuncs(builtins());
-    });
-    return builtinFuncsOnce.v;
-}
-
-// createValueFuncs turns a FuncMap into a map[string]reflect.Value
-internal static map<@string, reflectꓸValue> createValueFuncs(FuncMap funcMap) {
-    var m = new map<@string, reflectꓸValue>();
+// builtinFuncs lazily computes & caches the builtinFuncs map.
+internal static Func<map<@string, reflectꓸValue>> builtinFuncs;
+internal static void initᴛbuiltinFuncs() { builtinFuncs = sync.OnceValue(map<@string, reflectꓸValue> () => {
+    var funcMap = builtins();
+    var m = new map<@string, reflectꓸValue>(len(funcMap));
     addValueFuncs(m, funcMap);
     return m;
-}
+}); }
 
 // addValueFuncs adds to values the functions in funcs, converting them to reflect.Values.
 internal static void addValueFuncs(map<@string, reflectꓸValue> @out, FuncMap @in) {
@@ -305,6 +291,12 @@ internal static (reflectꓸValue, error) Δslice(reflectꓸValue item, params �
     if (!item.IsValid()) {
         return (new reflectꓸValue(nil), fmt.Errorf("slice of untyped nil"u8));
     }
+    bool isNil = default!;
+    {
+        (item, isNil) = indirect(item); if (isNil) {
+            return (new reflectꓸValue(nil), fmt.Errorf("slice of nil pointer"u8));
+        }
+    }
     if (len(indexes) > 3) {
         return (new reflectꓸValue(nil), fmt.Errorf("too many slice indexes: %d"u8, len(indexes)));
     }
@@ -480,7 +472,6 @@ internal static bool not(reflectꓸValue arg) {
 // Comparison.
 // TODO: Perhaps allow comparison between signed and unsigned integers.
 internal static error errBadComparisonType = errors.New("invalid type for comparison"u8);
-internal static error errBadComparison = errors.New("incompatible types for comparison"u8);
 internal static error errNoComparison = errors.New("missing argument for comparison"u8);
 
 partial struct kind /*num:nint*/;
@@ -568,7 +559,7 @@ internal static (bool, error) eq(reflectꓸValue arg1, params ꓸꓸꓸreflect�
             }
             default: {
                 if (arg1.IsValid() && arg.IsValid()) {
-                    return (false, errBadComparison);
+                    return (false, fmt.Errorf("incompatible types for comparison: %v and %v"u8, arg1.Type(), arg.Type()));
                 }
                 break;
             }}
@@ -645,7 +636,7 @@ internal static (bool, error) lt(reflectꓸValue arg1, reflectꓸValue arg2) {
             break;
         }
         default: {
-            return (false, errBadComparison);
+            return (false, fmt.Errorf("incompatible types for comparison: %v and %v"u8, arg1.Type(), arg2.Type()));
         }}
     } else {
         var exprᴛ1 = k1;

@@ -74,6 +74,12 @@ public static @string ImportPath(this TestDeps _) {
     return ΔImportPath;
 }
 
+public static @string ΔModulePath;
+
+public static @string ModulePath(this TestDeps _) {
+    return ΔModulePath;
+}
+
 // testLog implements testlog.Interface, logging actions by package os.
 partial struct testLog {
     internal sync.Mutex mu;

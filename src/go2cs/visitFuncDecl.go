@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 	"unicode"
@@ -52,11 +53,15 @@ func hasDuplicateBlankParams(parameters *types.Tuple) bool {
 	return false
 }
 
-// bodyUsesBlankDiscard reports whether the function's body contains a `_ = …` discard
-// (single or tuple position). A LONE blank param normally keeps the literal `_` name
-// (visually Go-like), but a parameter named `_` HIJACKS the body's C# discards —
+// bodyUsesBlankDiscard reports whether the function's body emits a bare C# `_` discard: a
+// `_ = …` assignment (single or tuple position), or a select case that receives and drops the
+// value (`case <-ch:`, emitted `selᴛN.ꟷᐳ(out _)`). A LONE blank param normally keeps the
+// literal `_` name (visually Go-like), but a parameter named `_` HIJACKS the body's C# discards —
 // encoding/binary's bounds-check hints (`_ = b[7]`) assigned a byte to the blank
-// littleEndian receiver (CS0029 ×12), so such functions synthesize blank names instead.
+// littleEndian receiver (CS0029 ×12), and net/http's transport_dial_test closure
+// `func(_ context.Context, …)` bound `out _` to that Context (CS1503) — so such functions
+// synthesize blank names instead. The walk includes nested function literals, which are
+// emitted inside the function and see its parameters.
 func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
 	if funcDecl == nil || funcDecl.Body == nil {
 		return false
@@ -65,9 +70,17 @@ func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
 	found := false
 
 	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
-		if assign, ok := node.(*ast.AssignStmt); ok {
-			for _, lhs := range assign.Lhs {
+		switch node := node.(type) {
+		case *ast.AssignStmt:
+			for _, lhs := range node.Lhs {
 				if ident, ok := lhs.(*ast.Ident); ok && ident.Name == "_" {
+					found = true
+					return false
+				}
+			}
+		case *ast.CommClause:
+			if exprStmt, ok := node.Comm.(*ast.ExprStmt); ok {
+				if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok && unaryExpr.Op == token.ARROW {
 					found = true
 					return false
 				}
@@ -622,6 +635,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// ONE source or the emitted arities disagree. See descriptorCompanion.go.
 	v.currentFuncCompanionNames = v.collectDescriptorCompanions(currentFuncType)
 
+	// A type parameter whose zero value this declaration builds, and that an own-package
+	// instantiation passes an ARRAY, gains an ARRAY-DIMS COMPANION carrying the length C# cannot
+	// keep in the type. One source for the declaration, the body and the call sites, as above. See
+	// arrayDimsCompanion.go.
+	v.currentFuncArrayDimsNames = v.collectArrayDimsCompanions(currentFuncType)
+
 	// A generic capture-mode method (e.g. atomic.Pointer[T]) is emitted with its heap box
 	// AS the receiver (`this ж<T> Ꮡx`) so the receiver's type parameter stays in scope for
 	// the field-ref form `Ꮡx.of(Type.ᏑField)`. See packageDirectBoxReceiverMethods.
@@ -1053,6 +1072,18 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// The param still needs the box rename (`Ꮡ<name>`) the body's uses reference —
 					// force the signature rebuild even if this leaves implicitPointers empty.
 					skippedDeadPointerAlias = true
+
+					// A defer→finally lowered call is not in the body text this scan reads, so it
+					// can still name the alias (`p.handleTransientRelease()`, a `ref Process`
+					// method, after a body that reached p only through the box — os's
+					// pidfd_linux.go). Record the box path as the live arm below does, so the
+					// finally re-roots the call on the box instead of naming an undeclared `p`
+					// (CS0103).
+					if v.entryAliasBoxPaths == nil {
+						v.entryAliasBoxPaths = map[string]string{}
+					}
+
+					v.entryAliasBoxPaths[getSanitizedIdentifier(analyzedName)] = fmt.Sprintf("%s%s.%s", AddressPrefix, param.Name(), NilDeferringDerefAccessor)
 					continue
 				}
 
@@ -1579,6 +1610,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			v.writeOutputLn(";")
 		}
 	} else {
+		v.outputBuilder.WriteString(v.newline)
+	}
+
+	// The phantom dims structs this declaration's call sites pass to its array-dims companions, each
+	// declared once per package, after the first function that needs it (arrayDimsCompanion.go).
+	if dimsTypes := v.arrayDimsTypeDeclarations(currentFuncType); dimsTypes != "" {
+		v.outputBuilder.WriteString(dimsTypes)
 		v.outputBuilder.WriteString(v.newline)
 	}
 
@@ -2438,6 +2476,32 @@ var linknameForwardTargets = map[string]bool{
 	"syscall.fstatat":   true,
 	"syscall.ioctlPtr":  true,
 	"syscall.writev":    true,
+	// NOT HERE: runtime.traceClockNow (runtime/trace/recorder.go). The handle exists, but the target
+	// returns runtime's unexported traceTime, so widening it public is CS0050 and runtime/trace's uint64
+	// would not take it (TestLinknameForwardTargetsExposeNoUnexportedTypes refuses the shape).
+	//
+	// NOT HERE: runtime.rand, pulled as runtime_rand by net, os, math/rand, math/rand/v2 and (Go 1.26)
+	// unique. Each puller bodies it in a hand-owned companion over Random.Shared. A forward would collide
+	// with those bodies (CS0757), and runtime.rand reads getg().m.chacha8, whose m the managed getg mints
+	// per goroutine with an unseeded ChaCha8 state, so every goroutine would draw the same sequence.
+	// syscall's utimensat, pulled at Go 1.26 by internal/syscall/unix/utimes.go (`//go:linkname
+	// Utimensat syscall.utimensat`, built on every unix), whose one caller is os.Root's Chtimes
+	// (root_unix.go). ORDINARY CONVERTED Go on both unix targets: a generated libc wrapper on darwin
+	// and a raw SYS_UTIMENSAT on linux. The one-arg handle is in syscall_darwin.go ONLY, so linux
+	// widens it through linknameForwardHandleElsewhere below. No new project reference.
+	"syscall.utimensat": true,
+}
+
+// linknameForwardHandleElsewhere names linknameForwardTargets rows that packageFuncAccess widens
+// WITHOUT the one-arg handle in the files being converted, because Go's handle for the symbol is in a
+// file that builds for another target. Go's linker requires that handle only for a pull from outside
+// the standard library, and these pullers are std packages, so the pull is authorized on every target
+// where it builds; the converter, reading one target's files, sees the handle on some targets and not
+// others. Keyed by the forward row; the value records where the handle is and where it is missing.
+// TestLinknameForwardHandlesCoverEveryPullingTarget requires every row whose puller builds where the
+// handle does not to be here, and every entry here to still need it.
+var linknameForwardHandleElsewhere = map[string]string{
+	"syscall.utimensat": "handle in syscall_darwin.go; linux builds internal/syscall/unix/utimes.go with none",
 }
 
 // linknameForwardDefinitions names the DEFINITION of a linknameForwardTargets row whose symbol is not

@@ -5,6 +5,8 @@ namespace go;
 
 // Metrics implementation exported to runtime/metrics.
 using godebugs = @internal.godebugs_package;
+using atomic = @internal.runtime.atomic_package;
+using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
@@ -48,12 +50,12 @@ internal static void initMetrics() {
         return;
     }
 
-    sizeClassBuckets = new slice<float64>(_NumSizeClasses, _NumSizeClasses + 1);
+    sizeClassBuckets = new slice<float64>(gc.NumSizeClasses, gc.NumSizeClasses + 1);
     // Skip size class 0 which is a stand-in for large objects, but large
     // objects are tracked separately (and they actually get placed in
     // the last bucket, not the first).
     sizeClassBuckets[0] = 1D; // The smallest allocation is 1 byte in size.
-    for (nint i = 1; i < _NumSizeClasses; i++) {
+    for (nint i = 1; i < gc.NumSizeClasses; i++) {
         // Size classes have an inclusive upper-bound
         // and exclusive lower bound (e.g. 48-byte size class is
         // (32, 48]) whereas we want and inclusive lower-bound
@@ -65,7 +67,7 @@ internal static void initMetrics() {
         // value up to 2^53 and size classes are relatively small
         // (nowhere near 2^48 even) so this will give us exact
         // boundaries.
-        sizeClassBuckets[i] = (float64)((uint16)(class_to_size[i] + 1));
+        sizeClassBuckets[i] = (float64)((uint16)(gc.SizeClassToSize[i] + 1));
     }
     sizeClassBuckets = append(sizeClassBuckets, float64Inf());
 
@@ -154,6 +156,20 @@ internal static void initMetrics() {
                 @out.Value.scalar = float64bits(nsToSec((~@in).cpuStats.UserTime));
             }
         ),
+        ["/gc/cleanups/executed:cleanups"u8] = new(
+            deps: makeStatDepSet(finalStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.finalStats.cleanupsExecuted;
+            }
+        ),
+        ["/gc/cleanups/queued:cleanups"u8] = new(
+            deps: makeStatDepSet(finalStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.finalStats.cleanupsQueued;
+            }
+        ),
         ["/gc/cycles/automatic:gc-cycles"u8] = new(
             deps: makeStatDepSet(sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
@@ -173,6 +189,20 @@ internal static void initMetrics() {
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
                 @out.Value.kind = metricKindUint64;
                 @out.Value.scalar = @in.Value.sysStats.gcCyclesDone;
+            }
+        ),
+        ["/gc/finalizers/executed:finalizers"u8] = new(
+            deps: makeStatDepSet(finalStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.finalStats.finalizersExecuted;
+            }
+        ),
+        ["/gc/finalizers/queued:finalizers"u8] = new(
+            deps: makeStatDepSet(finalStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.finalStats.finalizersQueued;
             }
         ),
         ["/gc/scan/globals:bytes"u8] = new(
@@ -317,7 +347,7 @@ internal static void initMetrics() {
             deps: makeStatDepSet(heapStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
                 @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)((~@in).heapStats.committed - (~@in).heapStats.inHeap - (~@in).heapStats.inStacks - (~@in).heapStats.inWorkBufs - (~@in).heapStats.inPtrScalarBits);
+                @out.Value.scalar = (uint64)((~@in).heapStats.committed - (~@in).heapStats.inHeap - (~@in).heapStats.inStacks - (~@in).heapStats.inWorkBufs);
             }
         ),
         ["/memory/classes/heap/objects:bytes"u8] = new(
@@ -380,7 +410,7 @@ internal static void initMetrics() {
             deps: makeStatDepSet(heapStatsDep, sysStatsDep),
             compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
                 @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)((~@in).heapStats.inWorkBufs + (~@in).heapStats.inPtrScalarBits) + (~@in).sysStats.gcMiscSys;
+                @out.Value.scalar = (uint64)(~@in).heapStats.inWorkBufs + (~@in).sysStats.gcMiscSys;
             }
         ),
         ["/memory/classes/os-stacks:bytes"u8] = new(
@@ -418,9 +448,45 @@ internal static void initMetrics() {
             }
         ),
         ["/sched/goroutines:goroutines"u8] = new(
-            compute: (ж<statAggregate> _, ж<metricValue> @out) => {
+            deps: makeStatDepSet(schedStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
                 @out.Value.kind = metricKindUint64;
-                @out.Value.scalar = (uint64)gcount();
+                @out.Value.scalar = @in.Value.schedStats.gTotal;
+            }
+        ),
+        ["/sched/goroutines/not-in-go:goroutines"u8] = new(
+            deps: makeStatDepSet(schedStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.schedStats.gNonGo;
+            }
+        ),
+        ["/sched/goroutines/running:goroutines"u8] = new(
+            deps: makeStatDepSet(schedStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.schedStats.gRunning;
+            }
+        ),
+        ["/sched/goroutines/runnable:goroutines"u8] = new(
+            deps: makeStatDepSet(schedStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.schedStats.gRunnable;
+            }
+        ),
+        ["/sched/goroutines/waiting:goroutines"u8] = new(
+            deps: makeStatDepSet(schedStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.schedStats.gWaiting;
+            }
+        ),
+        ["/sched/goroutines-created:goroutines"u8] = new(
+            deps: makeStatDepSet(schedStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.schedStats.gCreated;
             }
         ),
         ["/sched/latencies:seconds"u8] = new(
@@ -446,6 +512,13 @@ internal static void initMetrics() {
         ["/sched/pauses/total/other:seconds"u8] = new(
             compute: (ж<statAggregate> _, ж<metricValue> @out) => {
                 Ꮡsched.of(schedt.ᏑstwTotalTimeOther).write(@out);
+            }
+        ),
+        ["/sched/threads/total:threads"u8] = new(
+            deps: makeStatDepSet(schedStatsDep),
+            compute: (ж<statAggregate> @in, ж<metricValue> @out) => {
+                @out.Value.kind = metricKindUint64;
+                @out.Value.scalar = @in.Value.schedStats.threads;
             }
         ),
         ["/sync/mutex/wait/total:seconds"u8] = new(
@@ -500,10 +573,12 @@ internal static void godebug_registerMetric(@string name, Func<uint64> read) {
 partial struct statDep /*num:nuint*/;
 
 internal static statDep heapStatsDep => /* iota */ 0; // corresponds to heapStatsAggregate
-internal static statDep sysStatsDep => 1; // corresponds to sysStatsAggregate
-internal static statDep cpuStatsDep => 2; // corresponds to cpuStatsAggregate
-internal static statDep gcStatsDep => 3;  // corresponds to gcStatsAggregate
-internal static statDep numStatsDeps => 4;
+internal static statDep sysStatsDep => 1;  // corresponds to sysStatsAggregate
+internal static statDep cpuStatsDep => 2;  // corresponds to cpuStatsAggregate
+internal static statDep gcStatsDep => 3;   // corresponds to gcStatsAggregate
+internal static statDep finalStatsDep => 4; // corresponds to finalStatsAggregate
+internal static statDep schedStatsDep => 5; // corresponds to schedStatsAggregate
+internal static statDep numStatsDeps => 6;
 
 // statDepSet represents a set of statDeps.
 //
@@ -566,7 +641,7 @@ internal static bool has(this ref statDepSet s, statDep d) {
 // current heap memory use. They're also sharded across Ps, so it
 // makes sense to grab them all at once.
 partial struct heapStatsAggregate {
-    internal partial ref heapStatsDelta heapStatsDelta { get; }
+    /*embed*/ internal heapStatsDelta heapStatsDelta;
 // Derived from values in heapStatsDelta.
 
     // inObjects is the bytes of memory occupied by objects,
@@ -603,8 +678,8 @@ internal static void compute(this ж<heapStatsAggregate> Ꮡa) {
         var nf = a.smallFreeCount[i];
         a.totalAllocs += na;
         a.totalFrees += nf;
-        a.totalAllocated += na * (uint64)class_to_size[i];
-        a.totalFreed += nf * (uint64)class_to_size[i];
+        a.totalAllocated += na * (uint64)gc.SizeClassToSize[i];
+        a.totalFreed += nf * (uint64)gc.SizeClassToSize[i];
     }
     a.inObjects = a.totalAllocated - a.totalFreed;
     a.numObjects = a.totalAllocs - a.totalFrees;
@@ -656,7 +731,7 @@ internal static void compute(this ж<sysStatsAggregate> Ꮡa) {
 // cpuStatsAggregate represents CPU stats obtained from the runtime
 // acquired together to avoid skew and inconsistencies.
 partial struct cpuStatsAggregate {
-    internal partial ref cpuStats cpuStats { get; }
+    /*embed*/ internal cpuStats cpuStats;
 }
 
 // compute populates the cpuStatsAggregate with values from the runtime.
@@ -686,6 +761,35 @@ internal static void compute(this ref gcStatsAggregate a) {
     a.totalScan = a.heapScan + a.stackScan + a.globalsScan;
 }
 
+// finalStatsAggregate represents various finalizer/cleanup stats obtained
+// from the runtime acquired together to avoid skew and inconsistencies.
+partial struct finalStatsAggregate {
+    internal uint64 finalizersQueued;
+    internal uint64 finalizersExecuted;
+    internal uint64 cleanupsQueued;
+    internal uint64 cleanupsExecuted;
+}
+
+// compute populates the finalStatsAggregate with values from the runtime.
+internal static void compute(this ref finalStatsAggregate a) {
+    (a.finalizersQueued, a.finalizersExecuted) = finReadQueueStats();
+    (a.cleanupsQueued, a.cleanupsExecuted) = ᏑgcCleanups.readQueueStats();
+}
+
+// schedStatsAggregate contains stats about the scheduler, including
+// an approximate count of goroutines in each state.
+partial struct schedStatsAggregate {
+    internal uint64 gTotal;
+    internal uint64 gRunning;
+    internal uint64 gRunnable;
+    internal uint64 gNonGo;
+    internal uint64 gWaiting;
+    internal uint64 gCreated;
+    internal uint64 threads;
+}
+
+// go2cs generated this placeholder — func compute is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
 // nsToSec takes a duration in nanoseconds and converts it to seconds as
 // a float64.
 internal static float64 nsToSec(int64 ns) {
@@ -703,6 +807,8 @@ partial struct statAggregate {
     internal sysStatsAggregate sysStats;
     internal cpuStatsAggregate cpuStats;
     internal gcStatsAggregate gcStats;
+    internal finalStatsAggregate finalStats;
+    internal schedStatsAggregate schedStats;
 }
 
 // ensure populates statistics aggregates determined by deps if they
@@ -731,6 +837,12 @@ internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> Ꮡdeps)
         }
         else if (exprᴛ1 == gcStatsDep) {
             a.gcStats.compute();
+        }
+        else if (exprᴛ1 == finalStatsDep) {
+            a.finalStats.compute();
+        }
+        else if (exprᴛ1 == schedStatsDep) {
+            a.schedStats.compute();
         }
     }
     a.ensured = a.ensured.union(missing);

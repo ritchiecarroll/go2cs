@@ -28,7 +28,7 @@ using trace = go.@internal.trace_package;
 using log = log_package;
 using math = math_package;
 using http = net.http_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using time = time_package;
@@ -36,6 +36,7 @@ using encoding;
 using go;
 using go.@internal;
 using io = io_package;
+using iter = iter_package;
 using net;
 
 partial class traceviewer_package {
@@ -79,7 +80,7 @@ private static readonly @string flagsˢ = "flags"u8;
 
 internal static trace.UtilFlags requestUtilFlags(ж<http.Request> Ꮡr) {
     trace.UtilFlags flags = default!;
-    foreach (var (_, flagStr) in strings.Split(Ꮡr.FormValue(flagsˢ), "|"u8)) {
+    foreach (var flagStr in range<@string>(strings.SplitSeq(Ꮡr.FormValue(flagsˢ), "|"u8).Invoke)) {
         flags |= (trace.UtilFlags)(utilFlagNames[flagStr]);
     }
     return flags;
@@ -132,7 +133,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     }
 
     slice<float64> quantiles = default!;
-    foreach (var (_, flagStr) in strings.Split(Ꮡr.FormValue(flagsˢ), "|"u8)) {
+    foreach (var flagStr in range<@string>(strings.SplitSeq(Ꮡr.FormValue(flagsˢ), "|"u8).Invoke)) {
         if (flagStr == "mut"u8) {
             quantiles = new float64[]{0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D, /* 1 - .95 */ 0.05D}.slice();
             break;
@@ -422,7 +423,7 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
 }
 
 partial struct linkedUtilWindow {
-    public partial ref go.@internal.trace_package.UtilWindow UtilWindow { get; }
+    /*embed*/ public go.@internal.trace_package.UtilWindow UtilWindow;
     public @string URL;
 }
 

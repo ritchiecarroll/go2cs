@@ -104,11 +104,7 @@ public static ж<Element> Add(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Elemen
     v.l2 = a.l2 + b.l2;
     v.l3 = a.l3 + b.l3;
     v.l4 = a.l4 + b.l4;
-    // Using the generic implementation here is actually faster than the
-    // assembly. Probably because the body of this function is so simple that
-    // the compiler can figure out better optimizations by inlining the carry
-    // propagation.
-    return Ꮡv.carryPropagateGeneric();
+    return Ꮡv.carryPropagate();
 }
 
 // Subtract sets v = a - b, and returns v.
@@ -269,18 +265,22 @@ internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> �
     t = v;
     Ꮡt.reduce();
 
-    array<byte> buf = new(8);
-    foreach (var (i, l) in new uint64[]{t.l0, t.l1, t.l2, t.l3, t.l4}.array()) {
-        nint bitsOffset = i * 51;
-        byteorder.LEPutUint64(buf[..], l.Lsh((nuint)(bitsOffset % 8)));
-        foreach (var (iΔ1, bb) in buf.ΔRangeSnapshot()) {
-            nint off = bitsOffset / 8 + iΔ1;
-            if (off >= 32) {
-                break;
-            }
-            @out[off] |= (byte)(bb);
-        }
-    }
+    // Pack five 51-bit limbs into four 64-bit words:
+    //
+    //  255    204    153    102     51      0
+    //    ├──l4──┼──l3──┼──l2──┼──l1──┼──l0──┤
+    //   ├───u3───┼───u2───┼───u1───┼───u0───┤
+    // 256      192      128       64        0
+
+    var u0 = (uint64)((t.l1 << (int)(51)) | t.l0);
+    var u1 = (uint64)((t.l2 << (int)((102 - 64))) | (t.l1 >> (int)((64 - 51))));
+    var u2 = (uint64)((t.l3 << (int)((153 - 128))) | (t.l2 >> (int)((128 - 102))));
+    var u3 = (uint64)((t.l4 << (int)((204 - 192))) | (t.l3 >> (int)((192 - 153))));
+
+    byteorder.LEPutUint64(@out[(int)(0 * 8)..], u0);
+    byteorder.LEPutUint64(@out[(int)(1 * 8)..], u1);
+    byteorder.LEPutUint64(@out[(int)(2 * 8)..], u2);
+    byteorder.LEPutUint64(@out[(int)(3 * 8)..], u3);
 
     return @out[..];
 }
@@ -349,13 +349,13 @@ public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) {
 
 // Multiply sets v = x * y, and returns v.
 public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> Ꮡx, ж<Element> Ꮡy) {
-    feMul(Ꮡv, ref (Ꮡx).DerefOrNull(), ref (Ꮡy).DerefOrNull());
+    feMul(ref (Ꮡv).DerefOrNull(), ref (Ꮡx).DerefOrNull(), ref (Ꮡy).DerefOrNull());
     return Ꮡv;
 }
 
 // Square sets v = x * x, and returns v.
 public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> Ꮡx) {
-    feSquare(Ꮡv, ref (Ꮡx).DerefOrNull());
+    feSquare(ref (Ꮡv).DerefOrNull(), ref (Ꮡx).DerefOrNull());
     return Ꮡv;
 }
 

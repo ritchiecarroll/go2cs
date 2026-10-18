@@ -419,4 +419,52 @@ public static partial void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// TestKeyUpdateSpamPostHandshakeTLS13 tests that TLS 1.3 KeyUpdate messages do
+// not count as a state-advancing message after a handshake has been completed.
+public static partial void TestKeyUpdateSpamPostHandshakeTLS13(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        var (client, server) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
+        var serverʗ1 = server;
+        defer(() => serverʗ1.Close(), ref ᒐ);
+        var clientʗ1 = client;
+        defer(() => clientʗ1.Close(), ref ᒐ);
+
+        var clientʗ2 = client;
+        goǃ(() => {
+            var c = Client(clientʗ2, testConfig.Clone());
+            {
+                var errΔ1 = c.Handshake(); if (errΔ1 != default!) {
+                    Ꮡt.Error(errΔ1);
+                    return;
+                }
+            }
+            var (ku, err) = (Ꮡ(new keyUpdateMsg(nil))).marshal();
+            if (err != default!) {
+                Ꮡt.Error(err);
+                return;
+            }
+            var cs = cipherSuiteTLS13ByID((~c).cipherSuite);
+            for (nint i = 0; i <= maxUselessRecords; i++) {
+                c.writeRecordLocked(recordTypeHandshake, ku);
+                c.setWriteTrafficSecret(cs, QUICEncryptionLevelInitial, cs.nextTrafficSecret((~c).@out.trafficSecret));
+            }
+        });
+        var s = Server(server, testConfig.Clone());
+        {
+            var err = s.Handshake(); if (err != default!) {
+                Ꮡt.Fatal(err);
+            }
+        }
+        @string expectedErr = tlsTooManyNonAdvancingˢ;
+        {
+            var (_, err) = s.Read(new slice<byte>(1)); if (err == default! || err.Error() != expectedErr) {
+                Ꮡt.Fatalf("unexpected error: got %v, want %q"u8, err, expectedErr);
+            }
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
 } // end tls_internal_test_package

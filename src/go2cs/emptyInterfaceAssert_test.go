@@ -23,6 +23,7 @@ import (
 // which no value implements, so every non-nil assert failed (objx TestInter, TestIsInter). Both forms
 // must emit `_<any>`, exactly as the identifier `any` already does, and nothing may be lifted for it.
 func TestEmptyInterfaceAssertIsAny(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

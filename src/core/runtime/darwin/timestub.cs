@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 // Declarations for operating systems implementing time.now
 // indirectly, in terms of walltime and nanotime assembly.
-//go:build !faketime && !windows && !(linux && amd64)
+//go:build !faketime && !windows && !(linux && amd64) && !plan9
 namespace go;
 
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname

@@ -49,7 +49,7 @@ using static go.crypto.@internal.entropy_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/entropy/entropy.go", "entropy.cs", "ABgwooKC")]
+[assembly: go.GoPositionMap("crypto/internal/entropy/entropy.go", "entropy.cs", "ABw4ooKC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

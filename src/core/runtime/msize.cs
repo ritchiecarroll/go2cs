@@ -7,6 +7,9 @@
 // See also mksizeclasses.go for how we decide what size classes to use.
 namespace go;
 
+using gc = @internal.runtime.gc_package;
+using @internal.runtime;
+
 partial class runtime_package {
 
 // Returns size of the memory block that mallocgc will allocate if you ask for the size,
@@ -15,17 +18,17 @@ internal static uintptr /*reqSize*/ roundupsize(uintptr size, bool noscan) {
     uintptr reqSize = default!;
 
     reqSize = size;
-    if (reqSize <= (uintptr)(maxSmallSize - mallocHeaderSize)) {
+    if (reqSize <= (uintptr)(maxSmallSize - gc.MallocHeaderSize)) {
         // Small object.
-        if (!noscan && reqSize > minSizeForMallocHeader) { // !noscan && !heapBitsInSpan(reqSize)
-            reqSize += mallocHeaderSize;
+        if (!noscan && reqSize > gc.MinSizeForMallocHeader) { // !noscan && !heapBitsInSpan(reqSize)
+            reqSize += gc.MallocHeaderSize;
         }
         // (reqSize - size) is either mallocHeaderSize or 0. We need to subtract mallocHeaderSize
         // from the result if we have one, since mallocgc will add it back in.
-        if (reqSize <= (uintptr)(smallSizeMax - 8)) {
-            return (uintptr)class_to_size[size_to_class8[divRoundUp(reqSize, smallSizeDiv)]] - (reqSize - size);
+        if (reqSize <= (uintptr)(gc.SmallSizeMax - 8)) {
+            return (uintptr)gc.SizeClassToSize[gc.SizeToSizeClass8[divRoundUp(reqSize, gc.SmallSizeDiv)]] - (reqSize - size);
         }
-        return (uintptr)class_to_size[size_to_class128[divRoundUp(reqSize - (uintptr)smallSizeMax, largeSizeDiv)]] - (reqSize - size);
+        return (uintptr)gc.SizeClassToSize[gc.SizeToSizeClass128[divRoundUp(reqSize - (uintptr)gc.SmallSizeMax, gc.LargeSizeDiv)]] - (reqSize - size);
     }
     // Large object. Align reqSize up to the next page. Check for overflow.
     reqSize += pageSize - 1;

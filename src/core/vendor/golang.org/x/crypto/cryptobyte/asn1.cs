@@ -245,7 +245,7 @@ public static void AddASN1(this ж<Builder> Ꮡb, asn1.Tag tag, Action<ж<Builde
     // Identifiers with the low five bits set indicate high-tag-number format
     // (two or more octets), which we don't support.
     if ((asn1.Tag)(tag & 0x1f) == 0x1f) {
-        b.err = fmt.Errorf("cryptobyte: high-tag number identifier octects not supported: 0x%x"u8, tag);
+        b.err = fmt.Errorf("cryptobyte: high-tag number identifier octets not supported: 0x%x"u8, tag);
         return;
     }
     b.AddUint8((uint8)tag);

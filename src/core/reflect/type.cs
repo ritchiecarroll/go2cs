@@ -16,7 +16,10 @@
 
 // uncommonType is present only for defined types or types with methods
 // (if T is a defined type, the uncommonTypes for T and *T have methods).
-// Using a pointer to this struct reduces the overall size required
+// When present, the uncommonType struct immediately follows the
+// abi.Type struct in memory.
+// The abi.TFlagUncommon indicates the presence of uncommonType.
+// Using an optional struct reduces the overall size required
 // to describe a non-defined type with no methods.
 global using uncommonType = go.@internal.abi_package.UncommonType;
 global using aNameOff = go.@internal.abi_package.NameOff;
@@ -49,6 +52,7 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
+using iter = iter_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using Δsync = sync_package;
@@ -92,7 +96,13 @@ partial interface ΔType {
     // method signature, without a receiver, and the Func field is nil.
     //
     // Methods are sorted in lexicographic order.
+    //
+    // Calling this method will force the linker to retain all exported methods in all packages.
+    // This may make the executable binary larger but will not affect execution time.
     ΔMethod Method(nint _);
+    // Methods returns an iterator over each method in the type's method set. The sequence is
+    // equivalent to calling Method successively for each index i in the range [0, NumMethod()).
+    iter.Seq<ΔMethod> Methods();
     // MethodByName returns the method with that name in the type's
     // method set and a boolean indicating if the method was found.
     //
@@ -101,6 +111,10 @@ partial interface ΔType {
     //
     // For an interface type, the returned Method's Type field gives the
     // method signature, without a receiver, and the Func field is nil.
+    //
+    // Calling this method will cause the linker to retain all methods with this name in all packages.
+    // If the linker can't determine the name, it will retain all exported methods.
+    // This may make the executable binary larger but will not affect execution time.
     (ΔMethod, bool) MethodByName(@string _);
     // NumMethod returns the number of methods accessible using Method.
     //
@@ -181,6 +195,10 @@ partial interface ΔType {
     // It panics if the type's Kind is not Struct.
     // It panics if i is not in the range [0, NumField()).
     StructField Field(nint i);
+    // Fields returns an iterator over each struct field for struct type t. The sequence is
+    // equivalent to calling Field successively for each index i in the range [0, NumField()).
+    // It panics if the type's Kind is not Struct.
+    iter.Seq<StructField> Fields();
     // FieldByIndex returns the nested field corresponding
     // to the index sequence. It is equivalent to calling Field
     // successively for each index i.
@@ -213,6 +231,10 @@ partial interface ΔType {
     // It panics if the type's Kind is not Func.
     // It panics if i is not in the range [0, NumIn()).
     ΔType In(nint i);
+    // Ins returns an iterator over each input parameter of function type t. The sequence
+    // is equivalent to calling In successively for each index i in the range [0, NumIn()).
+    // It panics if the type's Kind is not Func.
+    iter.Seq<ΔType> Ins();
     // Key returns a map type's key type.
     // It panics if the type's Kind is not Map.
     ΔType Key();
@@ -232,6 +254,10 @@ partial interface ΔType {
     // It panics if the type's Kind is not Func.
     // It panics if i is not in the range [0, NumOut()).
     ΔType Out(nint i);
+    // Outs returns an iterator over each output parameter of function type t. The sequence
+    // is equivalent to calling Out successively for each index i in the range [0, NumOut()).
+    // It panics if the type's Kind is not Func.
+    iter.Seq<ΔType> Outs();
     // OverflowComplex reports whether the complex128 x cannot be represented by type t.
     // It panics if t's Kind is not Complex64 or Complex128.
     bool OverflowComplex(complex128 x);
@@ -298,11 +324,13 @@ public static ΔKind Struct => 25;
 public static ΔKind ΔUnsafePointer => 26;
 
 // Ptr is the old name for the [Pointer] kind.
+//
+//go:fix inline
 public static ΔKind Ptr => /* Pointer */ 22;
 
 // Embed this type to get common/uncommon
 partial struct Δcommon {
-    public partial ref @internal.abi_package.Type Type { get; }
+    /*embed*/ public @internal.abi_package.Type Type;
 }
 
 // rtype is the common implementation of most values.
@@ -328,7 +356,7 @@ public static ΔChanDir BothDir => /* RecvDir | SendDir */ 3; // chan
 
 // interfaceType represents an interface type.
 partial struct interfaceType {
-    public partial ref @internal.abi_package.ΔInterfaceType InterfaceType { get; } // can embed directly because not a public type.
+    /*embed*/ public @internal.abi_package.ΔInterfaceType InterfaceType; // can embed directly because not a public type.
 }
 
 internal static abiꓸName nameOff(this ж<interfaceType> Ꮡt, aNameOff off) {
@@ -357,17 +385,17 @@ internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) {
 
 // ptrType represents a pointer type.
 partial struct ptrType {
-    public partial ref @internal.abi_package.PtrType PtrType { get; }
+    /*embed*/ public @internal.abi_package.PtrType PtrType;
 }
 
 // sliceType represents a slice type.
 partial struct sliceType {
-    public partial ref @internal.abi_package.SliceType SliceType { get; }
+    /*embed*/ public @internal.abi_package.SliceType SliceType;
 }
 
 // structType represents a struct type.
 partial struct structType {
-    public partial ref @internal.abi_package.ΔStructType StructType { get; }
+    /*embed*/ public @internal.abi_package.ΔStructType StructType;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -387,7 +415,7 @@ internal static @string pkgPath(abiꓸName n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy((~(ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)))[..], (~array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4))[..]);
+    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
     var pkgPathName = new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.Name();
 }
@@ -768,6 +796,61 @@ internal static bool canRangeFunc2(ж<abi.Type> Ꮡt) {
     }
     var yield = y.FuncType();
     return (~yield).InCount == 2 && (~yield).OutCount == 1 && yield.Out(0).Kind() == abi.Bool;
+}
+
+internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (t.Kind() != Struct) {
+        throw panic("reflect: Fields of non-struct type " + Ꮡt.String());
+    }
+    return (Func<StructField, bool> yield) => {
+        foreach (var i in range(Ꮡt.NumField())) {
+            if (!yield(Ꮡt.Field(i))) {
+                return;
+            }
+        }
+    };
+}
+
+internal static iter.Seq<ΔMethod> Methods(this ж<rtype> Ꮡt) {
+    return (Func<ΔMethod, bool> yield) => {
+        foreach (var i in range(Ꮡt.NumMethod())) {
+            if (!yield(Ꮡt.Method(i))) {
+                return;
+            }
+        }
+    };
+}
+
+internal static iter.Seq<ΔType> Ins(this ж<rtype> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (t.Kind() != Func) {
+        throw panic("reflect: Ins of non-func type " + Ꮡt.String());
+    }
+    return (Func<ΔType, bool> yield) => {
+        foreach (var i in range(Ꮡt.NumIn())) {
+            if (!yield(Ꮡt.In(i))) {
+                return;
+            }
+        }
+    };
+}
+
+internal static iter.Seq<ΔType> Outs(this ж<rtype> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (t.Kind() != Func) {
+        throw panic("reflect: Outs of non-func type " + Ꮡt.String());
+    }
+    return (Func<ΔType, bool> yield) => {
+        foreach (var i in range(Ꮡt.NumOut())) {
+            if (!yield(Ꮡt.Out(i))) {
+                return;
+            }
+        }
+    };
 }
 
 // add returns p+x.
@@ -1173,6 +1256,8 @@ public static ΔType TypeOf(any i) {
     return toType(abi.TypeOf(i));
 }
 
+// go2cs generated this placeholder — func TypeFor is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
 // rtypeOf directly extracts the *rtype of the provided value.
 internal static ж<abi.Type> rtypeOf(any i) {
     return abi.TypeOf(i);
@@ -1189,6 +1274,8 @@ internal static ref Δsync.Map ptrMap => ref ᏑptrMap.Value; // map[*rtype]*ptr
 // The two functions behave identically.
 //
 // Deprecated: Superseded by [PointerTo].
+//
+//go:fix inline
 public static ΔType PtrTo(ΔType t) {
     return PointerTo(t);
 }
@@ -1427,7 +1514,7 @@ partial struct cacheKey {
 // FuncOf does not share the common lookupCache since cacheKey is not
 // sufficient to represent functions unambiguously.
 partial struct funcLookupCacheᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; } // Guards stores (but not loads) on m.
+    /*embed*/ public sync_package.Mutex Mutex; // Guards stores (but not loads) on m.
     // m is a map[uint32][]*rtype keyed by the hash calculated in FuncOf.
     // Elements of m are append-only and thus safe for concurrent reading.
     internal Δsync.Map m;
@@ -1529,7 +1616,7 @@ internal static bool isReflexive(ж<abi.Type> Ꮡt) {
     }
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<abi.Type, arrayType>();
-        return isReflexive((~tt).Elem);
+        return isReflexive(tt.of(arrayType.ᏑElem).Value);
     }
     if (exprᴛ1 == Struct) {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
@@ -1562,7 +1649,7 @@ internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
     }
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<abi.Type, arrayType>();
-        return needKeyUpdate((~tt).Elem);
+        return needKeyUpdate(tt.of(arrayType.ᏑElem).Value);
     }
     if (exprᴛ1 == Struct) {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
@@ -1589,7 +1676,7 @@ internal static bool hashMightPanic(ж<abi.Type> Ꮡt) {
     }
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<abi.Type, arrayType>();
-        return hashMightPanic((~tt).Elem);
+        return hashMightPanic(tt.of(arrayType.ᏑElem).Value);
     }
     if (exprᴛ1 == Struct) {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
@@ -1632,7 +1719,7 @@ internal static ж<funcLookupCacheᴛ1> ᏑstructLookupCache = new StandardBox<f
 internal static ref funcLookupCacheᴛ1 structLookupCache => ref ᏑstructLookupCache.Value;
 
 partial struct structTypeUncommon {
-    internal partial ref structType structType { get; }
+    /*embed*/ internal structType structType;
     internal uncommonType u;
 }
 
@@ -1882,16 +1969,5 @@ internal static void append(this ref bitVector bv, uint8 bit) {
 }
 
 // go2cs generated this placeholder — func addTypeBits is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-// TypeFor returns the [Type] that represents the type argument T.
-public static ΔType TypeFor<T>() {
-    T v = GoZero<T>();
-    {
-        var t = TypeOf(v); if (t != default!) {
-            return t; // optimize for T being a non-interface kind
-        }
-    }
-    return TypeOf(((ж<T>)nil)).Elem(); // only for an interface kind
-}
 
 } // end reflect_package

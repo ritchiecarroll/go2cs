@@ -60,7 +60,7 @@ using static go.runtime.debug_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("runtime/debug/garbage.go", "garbage.cs", "ABU+AAoM0oIACBKCgoKCgoKUgpSCgqaCgriCgoKCgpQABCAACwKuwgACHgAMAgACIgAOAgACJgAQAgACGAAKFgAKbgA1Ag==")]
-[assembly: go.GoPositionMap("runtime/debug/mod.go", "mod.cs", "AA0eqrKCgpSCgoLulAA2eJKokuiSgoKUgpSCkoKCgoKCgoKUgpSUgpSClIKCgpSCgpSmABcSAAoCgoKCuAAHFIKClIKCgpTugryCgoKUlIK0goKCgsaCgoKCgsaCgpSClMq0goKmkpSmgoKUgpSAgqSCtoKCgpSCyIKClIKCgsiCgtqklA==", "116-130:1;160-164:1;176-190:2")]
+[assembly: go.GoPositionMap("runtime/debug/mod.go", "mod.cs", "AA0eqrKCgpSCgoLulAA3epKokuiSgoKUgpSCkoKCgoKCgoKUgpSUgpSClIKCgpSCgpSmABcSAAoCgoKCuAAHFIKClIKCgpTugryCgoKUlIK0goKCgsaCgoKCgsaCgpSClMq0goKmkpSmgoKUgpSAgqSCtoKCgpSCyIKClIKCgsiCgtqklA==", "117-131:1;161-165:1;177-191:2")]
 [assembly: go.GoPositionMap("runtime/debug/stack.go", "stack.cs", "ABEikqqigoKCgpQACCYACwKCABk0goKUgpSApqSo")]
 [assembly: go.GoPositionMap("runtime/debug/stubs.go", "stubs.cs", "AAkYopKSkpKS")]
 // </GoSourcePositionMaps>

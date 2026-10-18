@@ -15,7 +15,7 @@ partial class sync_package {
 internal static partial void runtime_Semacquire(ж<uint32> s);
 
 // SemacquireWaitGroup is like Semacquire, but for WaitGroup.Wait.
-internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s);
+internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s, bool synctestDurable);
 
 // Semacquire(RW)Mutex(R) is like Semacquire, but for profiling contended
 // Mutexes and RWMutexes.

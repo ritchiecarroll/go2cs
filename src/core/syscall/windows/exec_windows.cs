@@ -14,8 +14,9 @@
 //   references: they are neither the right bytes at the right offsets for the Win32 layout, nor
 //   marshalable at all — `unsafe.Sizeof(*si)` (golib's Marshal.SizeOf) throws outright with
 //   "cannot be marshaled as an unmanaged structure; no meaningful size or offset can be computed."
-//   The same applies to _PROC_THREAD_ATTRIBUTE_LIST, whose converted form wraps an `array<byte>`
-//   class reference. This is the memory-layout / raw-metal case documented in
+//   The attribute list is native memory too: Go 1.25 keeps it in LocalAlloc'd memory behind
+//   procThreadAttributeListContainer (_PROC_THREAD_ATTRIBUTE_LIST is now an empty struct), and this
+//   file allocates it off the GC heap itself. This is the memory-layout / raw-metal case documented in
 //   src/archived/Baseline-vs-FullConversion.md: a faithful conversion is impossible, so the declaration is
 //   hand-owned.
 //
@@ -49,6 +50,7 @@ using System.Runtime.InteropServices;
 namespace go;
 
 using bytealg = @internal.bytealg_package;
+using slices = slices_package;
 using Δsync = sync_package;
 using utf16 = unicode.utf16_package;
 using @unsafe = unsafe_package;
@@ -162,6 +164,49 @@ internal static @string makeCmdLine(slice<@string> args) {
     return ((@string)b);
 }
 
+internal static slice<@string> envSorted(slice<@string> envv) {
+    if (len(envv) < 2) {
+        return envv;
+    }
+
+    var lowerKeyCache = new map<@string, slice<byte>>{}; // lowercased keys to avoid recomputing them in sort
+    var lowerKeyCacheʗ1 = lowerKeyCache;
+    slice<byte> lowerKey(@string kv) {
+        nint eq = bytealg.IndexByteString(kv, (rune)'=');
+        if (eq < 0) {
+            return default!;
+        }
+        @string k = kv.slice(0, eq);
+        var (v, ok) = lowerKeyCacheʗ1[k, ꟷ];
+        if (!ok) {
+            v = slice<byte>(k);
+            foreach (var (i, b) in v) {
+                // We only normalize ASCII for now.
+                // In practice, all environment variables are ASCII, and the
+                // syscall package can't import "unicode" anyway.
+                // Also, per https://nullprogram.com/blog/2023/08/23/ the
+                // sorting of environment variables doesn't really matter.
+                // TODO(bradfitz): use RtlCompareUnicodeString instead,
+                // per that blog post? For now, ASCII is good enough.
+                if ((rune)'a' <= b && b <= (rune)'z') {
+                    v[i] -= (byte)((rune)'a' - (rune)'A');
+                }
+            }
+            lowerKeyCacheʗ1[k] = v;
+        }
+        return v;
+    }
+
+    var lowerKeyʗ1 = lowerKey;
+    var cmpEnv = (@string a, @string b) => bytealg.Compare(lowerKeyʗ1(a), lowerKeyʗ1(b));
+
+    if (!slices.IsSortedFunc(envv, cmpEnv)) {
+        envv = slices.Clone<slice<@string>, @string>(envv);
+        slices.SortFunc(envv, cmpEnv);
+    }
+    return envv;
+}
+
 // createEnvBlock converts an array of environment strings into
 // the representation required by CreateProcess: a sequence of NUL
 // terminated strings followed by a nil.
@@ -171,6 +216,12 @@ internal static (slice<uint16>, error) createEnvBlock(slice<@string> envv) {
     if (len(envv) == 0) {
         return (utf16.Encode(slice<rune>((@string)"\x00\x00")), default!);
     }
+
+    // https://learn.microsoft.com/en-us/windows/win32/procthread/changing-environment-variables
+    // says that: "All strings in the environment block must be sorted
+    // alphabetically by name."
+    envv = envSorted(envv);
+
     nint length = default!;
     foreach (var (_, s) in envv) {
         if (bytealg.IndexByteString(s, 0) != -1) {

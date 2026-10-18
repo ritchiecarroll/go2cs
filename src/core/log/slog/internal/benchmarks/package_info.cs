@@ -14,6 +14,7 @@ global using slogꓸHandler = go.log.slog_package.ΔHandler;
 global using slogꓸKind = go.log.slog_package.ΔKind;
 global using slogꓸLevel = go.log.slog_package.ΔLevel;
 global using slogꓸLogValuer = go.log.slog_package.ΔLogValuer;
+global using slogꓸSource = go.log.slog_package.ΔSource;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
@@ -58,7 +59,7 @@ using static go.log.slog.@internal.benchmarks_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "ACJGuJY=", "", "", "41=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
+[assembly: go.GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "AChSuIKW", "", "", "48=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
 [assembly: go.GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqaA9NKCpIKCgpSCgoKCgpKCgoKClIKC1qKUpKSkpKSkpIKUxMa4oqaCpoIADyCCpoCkooKCpoKmguyAooCkgqaC", "50-56:1")]
 // </GoSourcePositionMaps>
 
@@ -74,6 +75,7 @@ public static partial class benchmarks_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct @event {}
     [GoValueClone("ringBuffer")] internal partial struct asyncHandler {}
     internal partial struct disabledHandler {}
     internal partial struct fastTextHandler {}

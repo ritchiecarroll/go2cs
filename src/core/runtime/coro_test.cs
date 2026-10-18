@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
@@ -39,6 +40,9 @@ public static void TestCoroCgoCallback(ж<testing.T> Ꮡt) {
     testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
     if (Δruntime.GOOS == "windows"u8) {
         Ꮡt.Skip(coroCgoCallbackTestsNotˢ);
+    }
+    if (Δruntime.GOOS == "freebsd"u8 && race.Enabled) {
+        Ꮡt.Skipf("race + cgo freebsd not supported. See https://go.dev/issue/73788."u8);
     }
     foreach (var (_, test) in new @string[]{
         "CoroCgoIterCallback"u8,

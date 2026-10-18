@@ -133,6 +133,7 @@ func requireOwnLine(t *testing.T, lines []string, comment string) int {
 // TestTrailingCommentStaysOnItsStatementLine is the Tour of go2cs pointers example: every statement
 // carries an end-of-line comment, and the last one used to escape `Main` entirely.
 func TestTrailingCommentStaysOnItsStatementLine(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -187,6 +188,7 @@ func main() {
 // to the only statement of a loop body, so the block boundary is what used to strand it — the
 // statement emitted, the `}` closed the loop, and the comment followed on its own line OUTSIDE.
 func TestTrailingCommentOnLastStatementOfBlock(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -228,6 +230,7 @@ func main() {
 // block — and the two forms that must NOT change, a whole-line comment and a multi-line block
 // comment that merely opens on a statement's line.
 func TestTrailingCommentAcrossStatementKinds(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}

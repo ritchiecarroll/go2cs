@@ -90,7 +90,7 @@ public static void TestCmpIfaceConcreteAlloc(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingOnNonGcCompilerˢ);
     }
 
-    var n = testing.AllocsPerRun(1, () => {
+    var n = testing.AllocsPerRun(100, () => {
         _ = AreEqual(e, ts);
         _ = AreEqual(i1, ts);
         _ = AreEqual(e, (nint)(1));

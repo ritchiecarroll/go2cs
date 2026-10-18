@@ -14,41 +14,64 @@ partial class tls_package {
 // them to apply local policies.
 internal static ж<godebug.Setting> tlsmlkem = godebug.New("tlsmlkem"u8);
 
+internal static ж<godebug.Setting> tlssecpmlkem = godebug.New("tlssecpmlkem"u8);
+
 // defaultCurvePreferences is the default set of supported key exchanges, as
 // well as the preference order.
 internal static slice<CurveID> defaultCurvePreferences() {
-    if (tlsmlkem.Value() == "0"u8) {
+    switch (ᐧ) {
+    // tlsmlkem=0 restores the pre-Go 1.24 default.
+    case {} when tlsmlkem.Value() == "0"u8: {
         return new CurveID[]{X25519, CurveP256, CurveP384, CurveP521}.slice();
     }
-    return new CurveID[]{X25519MLKEM768, X25519, CurveP256, CurveP384, CurveP521}.slice();
+    // tlssecpmlkem=0 restores the pre-Go 1.26 default.
+    case {} when tlssecpmlkem.Value() == "0"u8: {
+        return new CurveID[]{X25519MLKEM768, X25519, CurveP256, CurveP384, CurveP521}.slice();
+    }
+    default: {
+        return new CurveID[]{
+            X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024,
+            X25519, CurveP256, CurveP384, CurveP521
+        }.slice();
+    }}
 }
 
-// defaultSupportedSignatureAlgorithms contains the signature and hash algorithms that
-// the code advertises as supported in a TLS 1.2+ ClientHello and in a TLS 1.2+
+// defaultSupportedSignatureAlgorithms returns the signature and hash algorithms that
+// the code advertises and supports in a TLS 1.2+ ClientHello and in a TLS 1.2+
 // CertificateRequest. The two fields are merged to match with TLS 1.3.
 // Note that in TLS 1.2, the ECDSA algorithms are not constrained to P-256, etc.
-internal static slice<SignatureScheme> defaultSupportedSignatureAlgorithms = new SignatureScheme[]{
-    PSSWithSHA256,
-    ECDSAWithP256AndSHA256,
-    Ed25519,
-    PSSWithSHA384,
-    PSSWithSHA512,
-    PKCS1WithSHA256,
-    PKCS1WithSHA384,
-    PKCS1WithSHA512,
-    ECDSAWithP384AndSHA384,
-    ECDSAWithP521AndSHA512,
-    PKCS1WithSHA1,
-    ECDSAWithSHA1
-}.slice();
+internal static slice<SignatureScheme> defaultSupportedSignatureAlgorithms() {
+    return new SignatureScheme[]{
+        PSSWithSHA256,
+        ECDSAWithP256AndSHA256,
+        Ed25519,
+        PSSWithSHA384,
+        PSSWithSHA512,
+        PKCS1WithSHA256,
+        PKCS1WithSHA384,
+        PKCS1WithSHA512,
+        ECDSAWithP384AndSHA384,
+        ECDSAWithP521AndSHA512,
+        PKCS1WithSHA1,
+        ECDSAWithSHA1
+    }.slice();
+}
 
 internal static ж<godebug.Setting> tlsrsakex = godebug.New("tlsrsakex"u8);
 
 internal static ж<godebug.Setting> tls3des = godebug.New("tls3des"u8);
 
-internal static slice<uint16> defaultCipherSuites() {
-    var suites = slices.Clone<slice<uint16>, uint16>(cipherSuitesPreferenceOrder);
-    return slices.DeleteFunc(suites, (uint16 c) => disabledCipherSuites[c] || tlsrsakex.Value() != "1"u8 && rsaKexCiphers[c] || tls3des.Value() != "1"u8 && tdesCiphers[c]);
+internal static slice<uint16> supportedCipherSuites(bool aesGCMPreferred) {
+    if (aesGCMPreferred){
+        return slices.Clone<slice<uint16>, uint16>(cipherSuitesPreferenceOrder);
+    } else {
+        return slices.Clone<slice<uint16>, uint16>(cipherSuitesPreferenceOrderNoAES);
+    }
+}
+
+internal static slice<uint16> defaultCipherSuites(bool aesGCMPreferred) {
+    var ΔcipherSuites = supportedCipherSuites(aesGCMPreferred);
+    return slices.DeleteFunc(ΔcipherSuites, (uint16 c) => disabledCipherSuites[c] || tlsrsakex.Value() != "1"u8 && rsaKexCiphers[c] || tls3des.Value() != "1"u8 && tdesCiphers[c]);
 }
 
 // defaultCipherSuitesTLS13 is also the preference order, since there are no
@@ -83,47 +106,6 @@ public static slice<uint16> defaultCipherSuitesTLS13 = new uint16[]{
 //go:linkname defaultCipherSuitesTLS13NoAES
 public static slice<uint16> defaultCipherSuitesTLS13NoAES = new uint16[]{
     TLS_CHACHA20_POLY1305_SHA256,
-    TLS_AES_128_GCM_SHA256,
-    TLS_AES_256_GCM_SHA384
-}.slice();
-
-// The FIPS-only policies below match BoringSSL's
-// ssl_compliance_policy_fips_202205, which is based on NIST SP 800-52r2, with
-// minor changes per https://go.dev/issue/71757.
-// https://cs.opensource.google/boringssl/boringssl/+/master:ssl/ssl_lib.cc;l=3289;drc=ea7a88fa
-internal static slice<uint16> defaultSupportedVersionsFIPS = new uint16[]{
-    VersionTLS12,
-    VersionTLS13
-}.slice();
-
-// defaultCurvePreferencesFIPS are the FIPS-allowed curves,
-// in preference order (most preferable first).
-internal static slice<CurveID> defaultCurvePreferencesFIPS = new CurveID[]{CurveP256, CurveP384, CurveP521}.slice();
-
-// defaultSupportedSignatureAlgorithmsFIPS currently are a subset of
-// defaultSupportedSignatureAlgorithms without Ed25519 and SHA-1.
-internal static slice<SignatureScheme> defaultSupportedSignatureAlgorithmsFIPS = new SignatureScheme[]{
-    PSSWithSHA256,
-    PSSWithSHA384,
-    PSSWithSHA512,
-    PKCS1WithSHA256,
-    ECDSAWithP256AndSHA256,
-    PKCS1WithSHA384,
-    ECDSAWithP384AndSHA384,
-    PKCS1WithSHA512,
-    ECDSAWithP521AndSHA512
-}.slice();
-
-// defaultCipherSuitesFIPS are the FIPS-allowed cipher suites.
-internal static slice<uint16> defaultCipherSuitesFIPS = new uint16[]{
-    TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-    TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-    TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-    TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
-}.slice();
-
-// defaultCipherSuitesTLS13FIPS are the FIPS-allowed cipher suites for TLS 1.3.
-internal static slice<uint16> defaultCipherSuitesTLS13FIPS = new uint16[]{
     TLS_AES_128_GCM_SHA256,
     TLS_AES_256_GCM_SHA384
 }.slice();

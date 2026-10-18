@@ -109,11 +109,12 @@ internal static slice<byte> trim(slice<byte> s) {
     while (i < len(s) && (s[i] == (rune)' ' || s[i] == (rune)'\t')) {
         i++;
     }
-    nint n = len(s);
-    while (n > i && (s[n - 1] == (rune)' ' || s[n - 1] == (rune)'\t')) {
+    s = s.slice(i);
+    nint n = len(s) - 1;
+    while (n >= 0 && (s[n] == (rune)' ' || s[n] == (rune)'\t')) {
         n--;
     }
-    return s.slice(i, n);
+    return s.slice(0, n + 1);
 }
 
 // ReadContinuedLineBytes is like [Reader.ReadContinuedLine] but
@@ -179,7 +180,7 @@ internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, i
         }
         var (lineΔ1, errΔ2) = r.readLineSlice(lim - (int64)len(r.buf));
         if (errΔ2 != default!) {
-            break;
+            return (default!, errΔ2);
         }
         r.buf = appendꓸꓸꓸ(r.buf, trim(lineΔ1));
     }
@@ -224,13 +225,13 @@ internal static (nint code, bool continued, @string message, error err) parseCod
     error err = default!;
 
     if (len(line) < 4 || line[3] != (rune)' ' && line[3] != (rune)'-') {
-        err = ((ProtocolError)("short response: "u8 + line));
+        err = ((ProtocolError)fmt.Sprintf("short response: %q"u8, line));
         return (code, continued, message, err);
     }
     continued = line[3] == (rune)'-';
     (code, err) = strconv.Atoi(line[0..3]);
     if (err != default! || code < 100) {
-        err = ((ProtocolError)("invalid response code: "u8 + line));
+        err = ((ProtocolError)fmt.Sprintf("invalid response code: %q"u8, line));
         return (code, continued, message, err);
     }
     message = line[4..];
@@ -264,7 +265,7 @@ public static (nint code, @string message, error err) ReadCodeLine(this ref Read
 
     (code, var continued, message, err) = r.readCodeLine(expectCode);
     if (err == default! && continued) {
-        err = ((ProtocolError)("unexpected multi-line response: "u8 + message));
+        err = ((ProtocolError)fmt.Sprintf("unexpected multi-line response: %q"u8, message));
     }
     return (code, message, err);
 }
@@ -537,6 +538,10 @@ public static (MIMEHeader, error) ReadMIMEHeader(this ж<Reader> Ꮡr) {
 public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemory, int64 maxHeaders) {
     ref var r = ref Ꮡr.DerefOrNull();
 
+    if (maxMemory < 0) {
+        return (default!, errMessageTooLarge);
+    }
+
     // Avoid lots of small slice allocations later by allocating one
     // large one ahead of time which we'll cut up into smaller
     // slices. If this isn't big enough later, we allocate small ones.
@@ -551,12 +556,6 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
 
     var m = new MIMEHeader(hint);
 
-    // Account for 400 bytes of overhead for the MIMEHeader, plus 200 bytes per entry.
-    // Benchmarking map creation as of go1.20, a one-entry MIMEHeader is 416 bytes and large
-    // MIMEHeaders average about 200 bytes per entry.
-    maxMemory -= 400;
-    const int64 mapEntryOverhead = 200;
-
     // The first line cannot start with a leading space.
     {
         var (buf, err) = r.R.Peek(1); if (err == default! && (buf[0] == (rune)' ' || buf[0] == (rune)'\t')) {
@@ -565,7 +564,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
             if (errΔ1 != default!) {
                 return (m, errΔ1);
             }
-            return (m, ((ProtocolError)("malformed MIME header initial line: "u8 + ((sstring)line))));
+            return (m, ((ProtocolError)fmt.Sprintf("malformed MIME header initial line: %q"u8, line)));
         }
     }
 
@@ -578,15 +577,15 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
         // Key ends at first colon.
         var (k, v, ok) = bytes.Cut(kv, colon);
         if (!ok) {
-            return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((sstring)kv))));
+            return (m, ((ProtocolError)fmt.Sprintf("malformed MIME header line: %q"u8, kv)));
         }
         (var key, ok) = canonicalMIMEHeaderKey(k);
         if (!ok) {
-            return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((sstring)kv))));
+            return (m, ((ProtocolError)fmt.Sprintf("malformed MIME header line: %q"u8, kv)));
         }
         foreach (var (_, c) in v) {
             if (!validHeaderValueByte(c)) {
-                return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((sstring)kv))));
+                return (m, ((ProtocolError)fmt.Sprintf("malformed MIME header line: %q"u8, kv)));
             }
         }
 
@@ -600,6 +599,10 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
 
         var vv = m[key];
         if (vv == default!) {
+            // Account for per-entry overhead.
+            // 200 bytes is based on benchmarks circa Go 1.20.
+            const int64 mapEntryOverhead = 200;
+
             maxMemory -= (int64)len(key);
             maxMemory -= mapEntryOverhead;
         }
@@ -677,8 +680,8 @@ internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) {
 // the rest are converted to lowercase. For example, the
 // canonical key for "accept-encoding" is "Accept-Encoding".
 // MIME header keys are assumed to be ASCII only.
-// If s contains a space or invalid header field bytes, it is
-// returned without modifications.
+// If s contains a space or invalid header field bytes as
+// defined by RFC 9112, it is returned without modifications.
 public static @string CanonicalMIMEHeaderKey(@string s) {
     // Quick check for canonical encoding.
     var upper = true;

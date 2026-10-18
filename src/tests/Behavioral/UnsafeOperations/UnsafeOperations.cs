@@ -37,7 +37,7 @@ partial struct Padded {
 
 partial struct Embedded {
     internal byte lead;
-    public partial ref Padded Padded { get; }
+    /*embed*/ public Padded Padded;
     internal int16 trail;
 }
 

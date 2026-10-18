@@ -5,7 +5,7 @@ namespace go.@internal;
 
 partial class poll_package {
 
-public static Action<ж<FD>, nint, int64, error, bool> TestHookDidSendFile = (ж<FD> dstFD, nint src, int64 written, error err, bool handled) => {
+public static Action<ж<FD>, uintptr, int64, error, bool> TestHookDidSendFile = (ж<FD> dstFD, uintptr src, int64 written, error err, bool handled) => {
 };
 
 } // end poll_package

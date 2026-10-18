@@ -94,7 +94,7 @@ func plantForeignAlias(t *testing.T, plainKey string, target string) {
 // qualifier that kept the wrong number of bytes, which is precisely the failure the width half guards.
 func TestForeignConstraintProxySplitsOnAliasDot(t *testing.T) {
 	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
 	consumer.importQueue.Add("example/proxycross/curves")
 
 	plantForeignAlias(t, "curves.Point", "go.example.proxycross.curves_package.Point")
@@ -119,7 +119,7 @@ func TestForeignConstraintProxySplitsOnAliasDot(t *testing.T) {
 // from being "split on anything" and proves the cut ADDS a case rather than changing one.
 func TestForeignConstraintProxyAsciiDotUnchanged(t *testing.T) {
 	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
 	consumer.importQueue.Add("example/proxycross/curves")
 
 	funIdent, typeArgs := crossPackageInstance(t, consumer, consumerCalls, "consumerCall")

@@ -21,6 +21,7 @@ import (
 // the underlying, as the numeric twin already does. Emitted as a plain cast it is CS0030 (go-cmp's
 // example_test `myString(in)`, with `type myString otherString` and `type otherString string`).
 func TestNamedStringAndBoolConversionsHopThroughTheUnderlying(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

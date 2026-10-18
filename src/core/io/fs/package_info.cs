@@ -43,6 +43,10 @@ using static go.io.fs_package;
 [assembly: GoImplement<PathError, error>(Pointer = true)]
 [assembly: GoImplement<dirInfo, DirEntry>]
 [assembly: GoImplement<subFS, FS>(Pointer = true)]
+[assembly: GoImplement<subFS, GlobFS>(Pointer = true)]
+[assembly: GoImplement<subFS, ReadDirFS>(Pointer = true)]
+[assembly: GoImplement<subFS, ReadFileFS>(Pointer = true)]
+[assembly: GoImplement<subFS, ReadLinkFS>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -57,12 +61,13 @@ using static go.io.fs_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAki4oKCgpSCgoKUgpSCgoKCgoKUgoKUgpSCgqYAAhLigriClIKCgoKU")]
-[assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ACtsAA0CgqaUuIKCgpSCgpSClAA+hgGCgoKCloCigKKAooCigAAzXoKCgoKCgoKmgoKUgoKClJSUqqKqoqiSqJIACRSApIDmkoI=")]
+[assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaAooCigKKAooAAM16CgoKCgoKCpoKClIKCgpSUlKqiqqKokqiSAAkUgKSA5pKC")]
 [assembly: go.GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgsiAgqSCgIKkpoKUgriCpoKCgpSCgoKmqJKUpAADEPKCgoKmgoKCgpSCpqqigpSm")]
 [assembly: go.GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABk6AAgCgIK2goKUpIKCpoKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1")]
 [assembly: go.GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgIK2goKUpIKAgoKCyIKCgoKUgoKCgpQ=")]
+[assembly: go.GoPositionMap("io/fs/readlink.go", "readlink.cs", "ABY0soKClAACENKCgpQ=")]
 [assembly: go.GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oCCtoKClJI=")]
-[assembly: go.GoPositionMap("io/fs/sub.go", "sub.cs", "ABJEAA4CgpSClICCpAAHEpKClKiSgpSClKiSgIKAgsbWgoKClILWgoKClIKmgoKClIKmlICCpIKmgoKCgoKUlNaigpSSgpQ=")]
+[assembly: go.GoPositionMap("io/fs/sub.go", "sub.cs", "ABJGAA8CgpSClICCpKaSkpKSAAYQkoKUqJKClIKUqJKAgoCCxtaCgoKUgtaCgoKUgqaCgoKUgtaCgoKUgoKU1oKCgpSCgpSmlICCpIKmgoKCgoKUlNaigpSSgpQ=")]
 [assembly: go.GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygAyaJKAgpSUtoKUgoKClLiCgoCCgpS2AAIeAAwCgoKUlIKU")]
 // </GoSourcePositionMaps>
 
@@ -89,6 +94,7 @@ public static partial class fs_package
     public partial interface ReadDirFS {}
     public partial interface ReadDirFile {}
     public partial interface ReadFileFS {}
+    public partial interface ReadLinkFS {}
     public partial interface StatFS {}
     public partial interface SubFS {}
     public partial struct FileMode {}

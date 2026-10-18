@@ -215,7 +215,7 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
     // pointers we greyed. We use the buffer itself to temporarily
     // record greyed pointers.
     //
-    // TODO: Should scanobject/scanblock just stuff pointers into
+    // TODO: Should scanObject/scanblock just stuff pointers into
     // the wbBuf? Then this would become the sole greying path.
     //
     // TODO: We could avoid shading any of the "new" pointers in
@@ -235,6 +235,9 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
             //
             // TODO: Should we filter out nils in the fast
             // path to reduce the rate of flushes?
+            continue;
+        }
+        if (tryDeferToSpanScan(ptr, gcw)) {
             continue;
         }
         var (obj, span, objIndex) = findObject(ptr, 0, 0);
@@ -264,7 +267,7 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
     }
 
     // Enqueue the greyed objects.
-    gcw.putBatch(ptrs.slice(0, pos));
+    gcw.putObjBatch(ptrs.slice(0, pos));
 
     pp.wbBuf.reset();
 }

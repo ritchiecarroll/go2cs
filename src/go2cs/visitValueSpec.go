@@ -288,13 +288,27 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					// address, so `&zeroVal[0]` (reflect, pulling runtime.zeroVal) would reference a
 					// nonexistent `ᏑzeroVal` box (CS0103). Such a pull falls through to the addressed-
 					// global emission — the pre-feature behavior, which compiles.
-					if ref, pkgPath, ok := varLinknamePull(goIDName, v.options, declDoc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
+					if ref, pkgPath, lateBound, ok := varLinknamePull(goIDName, v.options, declDoc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
 						if i > 0 {
 							v.outputBuilder.WriteString(v.newline)
 						}
 
-						v.importQueue.Add(pkgPath)
 						csTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(def.Type(), false))
+
+						// A pull whose direct reference would close a project cycle (math/bits pulling
+						// runtime.overflowError at go1.26.9, where runtime imports math/bits) reaches the
+						// remote by name instead: the same storage, no ProjectReference. The one
+						// DynamicDependency keeps the remote's field under a trimmed or Native AOT publish.
+						if lateBound {
+							dot := strings.LastIndex(ref, ".")
+							class, remote := ref[:dot], ref[dot+1:]
+							typeName := fmt.Sprintf("%s, %s", class, strings.ReplaceAll(pkgPath, "/", "."))
+							v.writeOutput("%s static %s %s { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, \"%s\", \"%s\")] get => global::go.LinknameVar<%s>.Get(\"%s\", \"%s\"); set => global::go.LinknameVar<%s>.Set(\"%s\", \"%s\", value); }",
+								getAccess(goIDName), csTypeName, csIDName, class, strings.ReplaceAll(pkgPath, "/", "."), csTypeName, typeName, remote, csTypeName, typeName, remote)
+							continue
+						}
+
+						v.importQueue.Add(pkgPath)
 						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getAccess(goIDName), csTypeName, csIDName, ref, ref)
 						continue
 					}
@@ -596,9 +610,19 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							// the lift arriving from the call-argument path under builtin new's UNNAMED
 							// parameter (an empty lift name — a whole-package syntax cascade). Mirrors
 							// the composite-literal lift above.
-							if funIdent, isIdent := callExpr.Fun.(*ast.Ident); isIdent && funIdent.Name == "new" {
+							// Go 1.26's `new(expr)` names a VALUE: for a composite literal (`var cfg =
+							// new(struct{ … }{ … })`) the struct to lift is the literal's TYPE, under the var's
+							// name as for `new(T)`. Unlifted here, it arrived from builtin new's parameter path
+							// named after that parameter (`Δtype`).
+							typeArg := callExpr.Args[0]
+
+							if compositeLit, isLit := typeArg.(*ast.CompositeLit); isLit && v.info.Types[typeArg].IsValue() {
+								typeArg = compositeLit.Type
+							}
+
+							if funIdent, isIdent := callExpr.Fun.(*ast.Ident); isIdent && funIdent.Name == "new" && typeArg != nil && v.info.Types[typeArg].IsType() {
 								if _, isBuiltin := v.info.ObjectOf(funIdent).(*types.Builtin); isBuiltin {
-									if subStructType, exprType := v.extractStructType(callExpr.Args[0]); subStructType != nil && !v.liftedTypeExists(subStructType) {
+									if subStructType, exprType := v.extractStructType(typeArg); subStructType != nil && !v.liftedTypeExists(subStructType) {
 										v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true, nil)
 									}
 								}

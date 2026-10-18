@@ -178,7 +178,7 @@ public static void SetTTL(this ResponseWriter w, uint32 seconds) {
 }
 
 public partial struct AWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 public static void AddIP(this AWriter w, /*[4]*/ array<byte> v4) {
@@ -192,7 +192,7 @@ public static void AddIP(this AWriter w, /*[4]*/ array<byte> v4) {
 }
 
 public partial struct AAAAWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 public static void AddIP(this AAAAWriter w, /*[16]*/ array<byte> v6) {
@@ -206,7 +206,7 @@ public static void AddIP(this AAAAWriter w, /*[16]*/ array<byte> v6) {
 }
 
 public partial struct SRVWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 // AddSRV adds a SRV record. The target name must end in a period and

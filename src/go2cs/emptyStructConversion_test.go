@@ -139,6 +139,7 @@ func emittedLineFor(t *testing.T, mainCs string, local string) string {
 }
 
 func TestEmptyStructConversionEmitsAConstruction(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

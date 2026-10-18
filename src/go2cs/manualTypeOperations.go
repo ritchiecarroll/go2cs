@@ -158,6 +158,15 @@ func isManualVarInPackage(pkgPath string, goos string, goName string) bool {
 // Free functions ("funcName") and methods on other types ("recvTypeName.funcName") owned by the
 // same manual files — declarations whose bodies are inseparable from the manual types' semantics.
 var manualConversionFuncs = map[string]map[string]goosScope{
+	"crypto/internal/constanttime": {
+		// boolToUint8 is a Go compiler INTRINSIC whose written body is `panic("unreachable; must be
+		// intrinsicified")`, and every helper of the package (Select, ByteEq, Eq, LessOrEq) calls it, so
+		// converted it made every GCM Open panic (Go 1.26, H7). Its result MEANS something (1 / 0), which
+		// compilerIntrinsic.go's no-op rule for `panic("intrinsic")` cannot supply. The branchless body is
+		// in crypto/internal/constanttime/constant_time_impl.cs; TestIntrinsicPlaceholdersAreClassified
+		// requires every such placeholder to be either the rule's or a registered hand-own.
+		"boolToUint8": goosAny,
+	},
 	"crypto/internal/fips140/alias": {
 		// AnyOverlap orders element ADDRESSES — four `(uintptr)Ꮡ(…)` takes, each pinning its backing only
 		// until the box that took it is finalized, so a collection landing between two takes relocates one
@@ -243,15 +252,20 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// vendor/golang.org/x/crypto/internal/alias/alias_purego_impl.cs holds the body.
 		"AnyOverlap": goosAny,
 	},
-	"vendor/golang.org/x/net/route": {
-		// route.init probes the byte order through `(*[4]byte)(unsafe.Pointer(&i))` on a uint32 local —
-		// the raw-metal fork golib names at array<T>.AliasPointer (an array<T> cannot be fabricated from a
-		// scalar's bytes), measured by the first darwin behavioral census as an index panic inside the
-		// module initializer of every net importer (net imports x/net/route on BSDs only). The companion
-		// vendor/golang.org/x/net/route/darwin/sys_impl.cs answers the question with
-		// BitConverter.IsLittleEndian and keeps the rest of init verbatim. Darwin-scoped: sys.go is BSD-only,
-		// so the converted init never existed in the linux or windows emission. A displaced init emits only
-		// the placeholder, so the companion carries the [GoInit] module initializer itself.
+	// vendor/golang.org/x/net/route's "init" (darwin) is retired — 2026-10-15, the Go 1.26 hop's H5. The registration
+	// displaced route.init's `(*[4]byte)(unsafe.Pointer(&i))` byte-order probe for darwin/sys_impl.cs's
+	// BitConverter.IsLittleEndian. go1.26.9 removed the vendored package (net/route moved to internal/routebsd), H5c
+	// deleted it with both of its hand-owned companions, and TestManualConversionRegistrationsDisplaceSomething then
+	// read the key as displacing nothing.
+	"internal/routebsd": {
+		// The retired route registration's successor (2026-10-15, the Go 1.26 hop's H6). go1.26.9's
+		// internal/routebsd/sys.go keeps route's byte-order probe verbatim, `(*[4]byte)(unsafe.Pointer(&i))` on a
+		// uint32 local, and net imports routebsd on BSDs, so the index panic route's companion cured would return in
+		// the module initializer of every darwin net importer. Measured offline at 7f9cdd51b4: the emitted
+		// expression panics `index out of range [0] with length 0` against golib, the 1.24 darwin census's text.
+		// internal/routebsd/darwin/sys_impl.cs answers it with BitConverter.IsLittleEndian and keeps the rest of
+		// init verbatim. Darwin-scoped for route's reason: sys.go is BSD-only. The companion carries the [GoInit]
+		// module initializer, because a displaced init emits only the placeholder.
 		"init": goosDarwin,
 	},
 	"slices": {
@@ -390,6 +404,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// bookkeeping the managed host has no counterpart for and dispatches the call itself. Bodied,
 		// so displaced here. See docs/phase4/DESIGN-darwin-run-layer-2.md §2.2 and §7.
 		"libcCall": goosDarwin,
+		// runtime.libc_error_addr -- darwin's errno-address read, new at Go 1.26 (2026-10-15, the hop's H6). Its
+		// trampoline stores __error()'s int* THROUGH the args word: `MOVQ 0(DI), R14; CALL libc_error; MOVQ AX,
+		// (R14)`. Here that slot is a managed ж<int32> reference, which no dispatcher may write a native address
+		// into, and TestDarwinLibcCallSitesAreDeclared read the site as an unresolved pointee (ж<ж<int32>>). Its
+		// only managed callers are syscall_rawsyscalln (the body Go pushes into syscall.rawsyscalln, never called:
+		// syscall bodies its own syscalln and rawsyscalln in syscall/darwin/syscall_darwin_impl.cs) and minit (entered
+		// only from mstart1 and needm, neither of which the managed runtime enters). So runtime/darwin/libccall_impl.cs displaces it with a refusal BY NAME: a silent nil
+		// errno address would read as errno 0, a success.
+		"libc_error_addr": goosDarwin,
 		// getgcmask answers a TYPE's GC pointer bitmap, and Go answers it by reading the GC's own
 		// heap metadata: findObject, the span's typePointersOfUnchecked iterator, activeModules'
 		// data/bss bitmaps, the stack's locals map. None of those exist in a managed runtime, so the
@@ -412,6 +435,10 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// death, TestSchedLocalQueueEmpty). Go only asks whether that number is 0, so runtime2_impl.cs
 		// answers "runnext is nil" over Volatile.Read of the reference, beside the family's other members.
 		"runqempty": goosAny,
+		// The same view at a second site, Go 1.26's scheduler metrics: schedStatsAggregate.compute reads
+		// `atomic.Loaduintptr((*uintptr)(&p.runnext))` only for `next != 0`. runtime/metrics_impl.cs keeps
+		// the converted body and answers that one line over Volatile.Read of the reference.
+		"schedStatsAggregate.compute": goosAny,
 		// runtime's own semaphore (sema.go). The converted semacquire1 parks through acquireSudog, which
 		// reads the caller's P for its sudog cache; the managed model has no Ps, so the first semacquire
 		// that had to WAIT dereferenced a nil P on a goroutine and the runtime row's host died in
@@ -422,16 +449,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"semacquire1": goosAny,
 		"semrelease1": goosAny,
 		"SemNwait":    goosAny,
-		// export_windows_test.go's two exports, hand-owned for windows alone in
+		// export_windows_test.go's export, hand-owned for windows alone in
 		// runtime/export_windows_impl_test.cs (a platform-named test companion, joined only to the
-		// windows test project). NewContextStub builds a machine CONTEXT from Go's own caller PC, SP
-		// and FP for the SEH tests (runtime-seh_windows_test.go) to hand to RtlLookupFunctionEntry
-		// and RtlVirtualUnwind; there is no Go machine code, so no such PC exists and the export
-		// REFUSES BY NAME where the auto body reached sys.GetCallerPC's throwing stub. That is the
-		// representational point, not GetCallerPC itself, whose other callers are ruled separately.
-		// NumberOfProcessors is GetSystemInfo's processor count, which the auto body read through
-		// stdcall1 -> asmcgocall's stub; the hand-own asks kernel32 directly.
-		"NewContextStub":     goosWindows,
+		// windows test project). NumberOfProcessors is GetSystemInfo's processor count, which the auto
+		// body read through stdcall1 -> asmcgocall's stub; the hand-own asks kernel32 directly.
+		// NewContextStub is retired -- 2026-10-15, the Go 1.26 hop's H5: go1.26.9 dropped it (and type
+		// ContextStub) from export_windows_test.go, so the key displaced nothing, and
+		// TestManualConversionRegistrationsDisplaceSomething named it after runtime's -tests regen.
 		"NumberOfProcessors": goosWindows,
 		// The mutex/note key-slot protocol. Go has TWO flavors of it and selects one per GOOS:
 		// lock_sema.go (windows, darwin, plan9, aix …) smuggles an *m address through the uintptr
@@ -1017,6 +1041,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// is what reflect's own rtype.Len reads), so hand-owning it turns a garbage read into the
 		// same truthful one, one layer down.
 		"Type.Len": goosAny,
+		// Type.Size is hand-owned for one arm. A descriptor whose Go size could not be derived, such as the
+		// unnamed array type argument of abi.TypeFor[[2]string]() (C# spells every [N]T as one array<T>), refuses
+		// by name. Its unstamped Size_ of 0 sent unique.Make down the zero-size arm, so two different pairs shared
+		// one handle and compared equal.
+		"Type.Size": goosAny,
 		// Type.ChanDir is the FOURTH member of that family and the only one with no synthesis
 		// waiting for it: the direction is not unpopulated, it is not in the managed type at all.
 		// `<-chan int`, `chan<- int` and `chan int` all emit as golib's `channel<T>`, so the
@@ -1026,6 +1055,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// A directional Go channel type remains undescribable here; that is a limit of the
 		// converter's channel emission one layer up, recorded in ConversionStrategies-Reference.md.
 		"Type.ChanDir": goosAny,
+		// TypeFor and Type.InterfaceType close the LIVE remainder of that prefix-downcast family (H7
+		// row 57): Go 1.26 rewrote TypeFor as `(*PtrType)(unsafe.Pointer(TypeOf((*T)(nil)))).Elem`, which
+		// panicked on every reflect.TypeFor[T](), and InterfaceType is reached for every interface
+		// descriptor. Both answered from the carried System.Type in type_impl.cs. The family's five
+		// Uncommon() arms stay converted: they are unreachable (type_impl.cs, beside TFlagUncommon).
+		"TypeFor":            goosAny,
+		"Type.InterfaceType": goosAny,
 	},
 	// internal/cpu.getGOAMD64level is declared in cpu_x86.s and its body is a COMPILE-TIME constant:
 	// the GOAMD64_vN define the toolchain sets from `go env GOAMD64`, with `#else MOVL $1` as the
@@ -1102,6 +1138,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"unpackEface":     goosAny,
 		"valueInterface":  goosAny, // a free function `valueInterface(v Value, safe bool)`, not a method
 		"Value.Interface": goosAny,
+		// TypeAssert[T] (Go 1.25) is `v.Interface().(T)` by its own doc, implemented by reinterpreting the data
+		// word through unsafe: a fabricated eface for an interface T, a `*(*T)(v.ptr)` read for a concrete one.
+		// Neither can be honored in managed storage, and the eface read panicked on every json/asn1/gob/xml
+		// marshal path at Go 1.26. The hand-own answers Go's definition from the managed value.
+		"TypeAssert":      goosAny,
 		"Value.Bool":      goosAny,
 		"Value.Int":       goosAny,
 		"Value.Uint":      goosAny,
@@ -1268,6 +1309,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// ΔType wrapper by the underlying System.Type (canonType). See docs/phase4/DESIGN-reflection-bridge.md.
 		"Value.Type": goosAny,
 		"toType":     goosAny,
+		// TypeFor joins them. Go's body is `toRType(abi.TypeFor[T]())`, which the converter emits as a
+		// FRESH wrapper over a fresh box, the one public Type route that skipped canonType. `==` still
+		// held (it compares the boxes by storage identity), but reflect.DeepEqual's pointer
+		// short-circuit and sync.Map's key compare are reference identity, so TypeFor[T]() was not
+		// even DeepEqual to itself. Go 1.26's encoding/json and encoding/xml tests build their
+		// expected errors with TypeFor and compare them with DeepEqual (41 json rows, 1 xml row).
+		"TypeFor": goosAny,
 		// deepValueEqual keys its cycle-detection visited map on the values' internal data words
 		// (v.ptr / v.pointer()) — eface addresses the bridge never populates, so the auto form NREs
 		// converting the null unsafe.Pointer slot (strings/bytes TestSplit/TestSplitAfter, R5).
@@ -1808,6 +1856,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"fdMutex.increfAndClose": goosAny,
 		"fdMutex.rwlock":         goosAny,
 		"fdMutex.rwunlock":       goosAny,
+		// (*FD).DisassociateIOCP. Go associates every pollable socket with its port at open, so
+		// NtSetInformationFile(FileReplaceCompletionInformation) always has a port to drop. The managed
+		// poller binds a socket to the CLR's port only at its FIRST overlapped submit (the S2 amendment,
+		// syscall/windows/zsyscall_windows_wsa_impl.cs), and for a socket with no IO yet the kernel
+		// answers STATUS_INVALID_PARAMETER: net's dup() failed TestFileConn/udp and /unix with
+		// windows.NTStatus 0xC000000D. The hand-own reaches Go's post-condition without the call when
+		// nothing was bound, and marks the descriptor so the lazy bind never binds it again.
+		// internal/poll/windows/fd_windows_impl.cs holds the body.
+		"FD.DisassociateIOCP": goosWindows,
 	},
 	// debug/pe's COFF symbol reader pair. Go re-VIEWS one 18-byte symbol record as two struct
 	// shapes — `(*COFFSymbolAuxFormat5)(unsafe.Pointer(&sym))` — a free re-typing of the same
@@ -2020,8 +2077,9 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// (so it can never fabricate one), the call falls to the address route, and the kernel gets
 		// eight bytes that are two OBJECT REFERENCES -- WSAEINVAL, surfacing as
 		// `setsockopt: The requested address is not valid in its context` on IP_ADD_MEMBERSHIP.
-		// SetsockoptIPv6Mreq is NOT registered: Go returns EWINDOWS there, so there is nothing to
-		// preserve and a hand-own would invent behaviour.
+		// SetsockoptIPv6Mreq joined on windows at Go 1.25, when it stopped returning EWINDOWS and
+		// became a real Setsockopt over IPv6Mreq (Multiaddr [16]byte): the same defect, now reached
+		// by net's joinIPv6Group.
 		// LINUX joins the same registration 2026-09-03, and the scope is the whole of what changed:
 		// the defect above is the CONVERTED STRUCT's, not the platform's, so leaving this at
 		// goosWindows left the Linux flavour on the generated body with the identical fault.
@@ -2038,11 +2096,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// wrong-answer one. ICMPv6Filter is the fourth struct, surfaced by the census rather than by
 		// the ruling. Bodies for all eight in syscall/linux/structclass_linux_impl.cs.
 		//
-		// SetsockoptIPv6Mreq stays UNREGISTERED on windows for the reason given above (Go returns
-		// EWINDOWS there, so a hand-own would invent behaviour); on linux it is a real option.
+		// SetsockoptIPv6Mreq is registered on both since Go 1.25 (see above). Windows body in
+		// syscall/windows/syscall_windows_impl.cs.
 		"SetsockoptIPMreq":       goosWindowsLinux,
 		"SetsockoptIPMreqn":      goosLinux,
-		"SetsockoptIPv6Mreq":     goosLinux,
+		"SetsockoptIPv6Mreq":     goosWindowsLinux,
 		"SetsockoptICMPv6Filter": goosLinux,
 		"GetsockoptIPMreq":       goosLinux,
 		"GetsockoptIPMreqn":      goosLinux,
@@ -2609,15 +2667,16 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"Module32Next":  goosWindows,
 		// The OS-VERSION member, and the first of this class reached from OUTSIDE this package:
 		// net's Windows TCP dial consults version() behind a sync.Once on the way to setting
-		// keep-alive options. _OSVERSIONINFOW is 276 bytes native, ending in szCSDVersion INLINE as
-		// WCHAR[128]; the converted record holds that as one `array<uint16>` reference, so it
+		// keep-alive options. _OSVERSIONINFOEXW (Go 1.26; _OSVERSIONINFOW, 276 bytes, at 1.24) is 284
+		// bytes native, with szCSDVersion INLINE as WCHAR[128] after five DWORDs; the converted
+		// record holds that as one `array<uint16>` reference, so it
 		// carries a managed reference and the CLR auto-layouts it. Before the pointer-storage repair
 		// the generated wrapper handed ntdll a real address and RtlGetVersion wrote 276 bytes over a
 		// much smaller managed object; after it a reference-bearing pointee answers
 		// PointerStorage.None and ntdll is handed an order token instead -- 0xC0000005 inside
 		// ntdll!RtlGetVersion. Same ordinary mirror remedy as GetTimeZoneInformation,
 		// findFirstFile1, Process32First, adjustTokenPrivileges and Module32First: the wrapper
-		// receives the record as a TYPED `*_OSVERSIONINFOW`, so it applies directly. Body in
+		// receives the record as a TYPED `*_OSVERSIONINFOEXW`, so it applies directly. Body in
 		// zsyscall_windows_version_impl.cs.
 		"rtlGetVersion": goosWindows,
 	},

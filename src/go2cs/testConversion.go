@@ -1669,8 +1669,9 @@ func referenceModelTestPackageInfoSeed(projectNamespace, testClassName, goPackag
 
 // packageProductionInitHookMethod names the production-init forcing hook productionInitForcingHook
 // emits. Deliberately NOT in the shared symbol table beside PackageTestInitHookMethod: that table
-// carries the names BOTH sides need, and `initᴛᴛtests` is there because go2cs-gen's
-// PartialStubGenerator must recognize it and never stub it. This hook is emitted whole, with a
+// carries the names BOTH sides need, and `initᴛᴛtests` went there when it was a partial go2cs-gen's
+// PartialStubGenerator had to recognize and never stub (since H7 ruling F it is emitted whole, as a
+// module initializer, like this one). This hook is emitted whole, with a
 // body, so no generator ever sees an unimplemented partial to stub and no C# projection of the
 // name is owed. The doubled temp marker keeps it clear of the relocated-package-var method space
 // ("init" + marker + <var name>, initOrderOperations.go), and the `production` word keeps it clear
@@ -3011,6 +3012,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// an empty result. Runs BEFORE escape analysis, which consults the reversion verdicts; the
 	// signature/call-site emission reads the lowered sets during the visits.
 	performRefLoweringAnalysis(prodEntries, pkg.Types, pkg.TypesInfo, options)
+	collectHandOwnedTypes(prodEntries, pkg.TypesInfo)
 
 	performEscapeAnalysis(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo)
 	collectAddressedGlobals(allEntries, pkg.Types, pkg.TypesInfo)
@@ -3116,8 +3118,9 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 
 	// Emit the variant's ordered relocated-initializer file (no-op unless the convert loop
 	// recorded any relocation). The internal variant shares the production `<pkg>_package`
-	// class: when the production package_init.cs exists it owns the single static-ctor slot,
-	// so the test side implements its erasable partial hook instead of a second ctor. The
+	// class on the recompile model: when the production package_init.cs exists it owns the single
+	// static-ctor slot, so the test side runs its relocations from a module initializer that forces
+	// that ctor first, instead of declaring a second ctor. The
 	// `_test.cs` suffix keeps the file out of the production csproj's compile set (the IP-4
 	// test-artifact exclusion) — it compiles only into the test assembly.
 	if len(packageMovedInitMethods) > 0 {
@@ -3130,7 +3133,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 
 		initFileName := fmt.Sprintf("package_init_%s_test.cs", variantKind)
 		variantClassName := getSanitizedImport(pkg.Name + PackageSuffix)
-		implementHook := false
+		productionOwnsCtor := false
 
 		if options.testClassNameOverride != "" {
 			variantClassName = options.testClassNameOverride
@@ -3142,10 +3145,10 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 			// CS0111 on the constructor itself, once crypto/x509's platform folder started
 			// compiling into its test assembly at all.
 			_, statErr := os.Stat(platformLayoutPath(outputPath, goosOfTarget(options.targetPlatform), PackageInitFileName))
-			implementHook = statErr == nil
+			productionOwnsCtor = statErr == nil
 		}
 
-		if err := writeTestVariantInitFile(outputPath, initFileName, packageNamespace, variantClassName, implementHook); err != nil {
+		if err := writeTestVariantInitFile(outputPath, initFileName, packageNamespace, variantClassName, productionOwnsCtor); err != nil {
 			return nil, nil, err
 		}
 
@@ -3153,6 +3156,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	resolveDynamicTypeMarkers(resolveNames)
+	resolveDynamicInterfaceBases(resolveNames)
 
 	for relPath, codes := range resolveWarningFacts(warningFacts, collectPackageVarWrites(pkg.Syntax, pkg.TypesInfo), true) {
 		testWarningFacts[relPath] = codes
@@ -3229,7 +3233,7 @@ func appendExternalTestPackageClass(testInfoPath, packageNamespace, productionPa
 type conversionRecordSet struct {
 	interfaceImplements map[string]hashset.HashSet[string]
 	promotedImplements  map[string]hashset.HashSet[string]
-	proxies             map[string][2]string
+	proxies             map[string][3]string
 	implicitConvs       map[string]hashset.HashSet[string]
 	invertedConvs       map[string]hashset.HashSet[string]
 	indirectConvs       map[string]hashset.HashSet[string]
@@ -3241,7 +3245,7 @@ func newConversionRecordSet() conversionRecordSet {
 	return conversionRecordSet{
 		interfaceImplements: make(map[string]hashset.HashSet[string]),
 		promotedImplements:  make(map[string]hashset.HashSet[string]),
-		proxies:             make(map[string][2]string),
+		proxies:             make(map[string][3]string),
 		implicitConvs:       make(map[string]hashset.HashSet[string]),
 		invertedConvs:       make(map[string]hashset.HashSet[string]),
 		indirectConvs:       make(map[string]hashset.HashSet[string]),
@@ -3327,6 +3331,17 @@ func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName stri
 			return true
 		}
 
+		// A1, the one Q25 case that is sized and ruled (COORD 2026-10-16): a production pointer
+		// implementer of an interface declared in the external test package itself. The adapter is a
+		// class in the test compilation, so nothing mutates the production type and the reference model
+		// can host it. crypto/mlkem at Go 1.26: *DecapsulationKey768 against mlkem_test's
+		// decapsulationKey[E]. MEASURED before the cut, two-seeded on the five rows that took the
+		// recompile fallback: crypto/ecdh (lifted _ᴛ1/_ᴛ2) and crypto/mlkem move to the reference model,
+		// ecdh with an identical verdict set; crypto/sha3, net/netip and text/tabwriter emit identically.
+		if isTestLocalInterfaceName(ifaceName) {
+			return true
+		}
+
 		inner = strings.TrimPrefix(inner, "global::")
 
 		if strings.HasPrefix(inner, productionClassName+".") ||
@@ -3347,6 +3362,14 @@ func isTestAnchoredImplementRecord(ifaceName, implName, productionClassName stri
 	}
 
 	return false
+}
+
+// isTestLocalInterfaceName reports whether a record's interface is declared in the external test
+// package: its outer name (before any type-argument list) is bare. The universe's error is bare too
+// and is not the test package's.
+func isTestLocalInterfaceName(ifaceName string) bool {
+	outer, _, _ := strings.Cut(strings.TrimPrefix(ifaceName, "global::"), "<")
+	return outer != "" && outer != "error" && !strings.Contains(outer, ".")
 }
 
 // isTestAnchoredConversionRecord decides the anchor for an EXTERNAL variant GoImplicitConv
@@ -4505,6 +4528,14 @@ var testProjectFixedReferences = []string{
 	// that adds one. Test projects are graph leaves, so the added edge introduces no cycle (a
 	// `sync.tests -> context -> sync` path is three distinct projects, not a loop).
 	`$(go2csPath)core/context/context.csproj`,
+	// `io` joins for Go 1.25 on exactly the same grounds: TB gains Output() io.Writer, so every adapter
+	// body names `go.io_package.Writer`. testing.csproj reaches io only transitively (through fmt), and
+	// DisableTransitiveProjectReferences keeps that from reaching a test project, so a suite whose own
+	// imports never name io failed as context did: net/netip's T->TB and B->TB adapters gave CS0012 on
+	// the assembly, CS0234 on the namespace and CS9334 on Output()'s return type. 15 of the 224 test
+	// projects carried an adapter and no io reference when this was measured; it is fixed for all of
+	// them for the reason context is.
+	`$(go2csPath)core/io/io.csproj`,
 }
 
 func writeTestProject(projectFile, projectName, namespace, importPath string, model testProjectModel, productionFiles, testFiles, fixtures, dependencies []string, options Options) error {
@@ -5938,10 +5969,10 @@ func isSelfProjectReference(reference, projectName string) bool {
 // `Verify`, `VerifyOptions`' fields, `loadSystemRoots`, `domainToReverseLabels` and every error
 // type's `Error()` method — 187 errors that name the TEST files, not the missing folder.
 //
-// The per-GOOS `package_init.cs` belongs in the set for the same reason: a `-tests` run rewrites it
-// to declare the `initᴛᴛtests()` partial hook the internal variant's package_init_internal_test.cs
-// implements, and a declaration in one compilation with its implementation in another is no hook at
-// all. Only the TARGET platform's folder is taken; the others are a different build.
+// The per-GOOS `package_init.cs` belongs in the set for the same reason: it holds the production
+// class's static ctor, which the internal variant's package_init_internal_test.cs forces before its
+// own relocations run, and a ctor missing from the test compilation leaves production's relocated
+// vars unset. Only the TARGET platform's folder is taken; the others are a different build.
 func productionCSFiles(outputPath string, goos string) ([]string, error) {
 	result, err := productionCSFilesIn(outputPath, "")
 

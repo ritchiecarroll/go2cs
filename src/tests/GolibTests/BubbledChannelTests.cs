@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
@@ -9,10 +10,10 @@ namespace GolibTests;
 
 /// <summary>
 /// Bubbled channels (S2 of DESIGN-gopark-goready-synctest.md): a channel made inside a synctest bubble
-/// is tagged (Go's hchan.synctest); a send / receive / select on it from a goroutine in no bubble
-/// panics with Go's text; a direct handoff across bubbles panics; and a member blocked on bubbled
-/// channels -- including a select whose other cases are nil -- counts idle, while one blocked on a
-/// channel made outside does not.
+/// is tagged (Go's hchan.bubble); a send / receive / select / close on it from a goroutine not in that
+/// bubble -- no bubble or another one -- is fatal with Go's text (Go 1.26; 1.24 panicked, and only for
+/// no bubble); and a member blocked on bubbled channels -- including a select whose other cases are
+/// nil -- counts idle, while one blocked on a channel made outside does not.
 /// </summary>
 [TestClass]
 public class BubbledChannelTests
@@ -55,17 +56,80 @@ public class BubbledChannelTests
         return made;
     }
 
+    // Go 1.26's outside-bubble faults end the process (FatalReport.Fatal exits), so they are read at
+    // the decision every call site consults (ChanCore.OutsideBubbleFault); the -tests rows
+    // TestChannelMovedOutOfBubble and TestTimerFromInsideBubble cover the fatal itself.
+    internal static string? ChannelFault(channel<int> ch, string operation) =>
+        ((ChanCore)typeof(channel<int>).GetField("m_core", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(ch)!).OutsideBubbleFault(operation);
+
+    private static readonly string[] s_operations = ["send", "receive", "select", "close"];
+
+    // Go's own words, spelled out rather than built from the operation (closechan says "of").
+    private static readonly string[] s_goFaults =
+    [
+        "send on synctest channel from outside bubble",
+        "receive on synctest channel from outside bubble",
+        "select on synctest channel from outside bubble",
+        "close of synctest channel from outside bubble",
+    ];
+
     [TestMethod]
-    public void TheOutsidePanicsSayGosWords()
+    public void TheOutsideFatalsSayGosWords()
     {
         channel<int> ch = MadeInABubble(1);
+        string?[] faults = new string?[s_operations.Length];
 
-        StringAssert.Contains(OnGoroutine(() => ch.Send(1))?.Message, "send on synctest channel from outside bubble");
-        StringAssert.Contains(OnGoroutine(() => ch.Receive())?.Message, "receive on synctest channel from outside bubble");
-        StringAssert.Contains(OnGoroutine(() => select(ch.Receiving))?.Message, "select on synctest channel from outside bubble");
+        AssertNoFailure(OnGoroutine(() =>
+        {
+            for (int i = 0; i < s_operations.Length; i++)
+                faults[i] = ChannelFault(ch, s_operations[i]);
+        }));
 
-        // Non-blocking forms check too (Go checks before the fast path).
-        StringAssert.Contains(OnGoroutine(() => ch.Received(out _))?.Message, "receive on synctest channel from outside bubble");
+        // close is new at Go 1.26 (closechan had no bubble check at 1.24).
+        for (int i = 0; i < s_operations.Length; i++)
+            Assert.AreEqual(s_goFaults[i], faults[i]);
+    }
+
+    [TestMethod]
+    public void AnotherBubblesMemberIsOutsideTheChannelsBubble()
+    {
+        // Go 1.26 compares the caller's bubble with the CHANNEL's: a member of another bubble faults
+        // like a goroutine in none (1.24 let it through, and caught only a handoff across bubbles).
+        channel<int> ch = MadeInABubble(0);
+        string?[] faults = new string?[s_operations.Length];
+
+        AssertNoFailure(OnGoroutine(() => SyncTestBubble.Run(() =>
+        {
+            for (int i = 0; i < s_operations.Length; i++)
+                faults[i] = ChannelFault(ch, s_operations[i]);
+        })));
+
+        for (int i = 0; i < s_operations.Length; i++)
+            Assert.AreEqual(s_goFaults[i], faults[i]);
+    }
+
+    [TestMethod]
+    public void InItsOwnBubbleNothingIsRefused()
+    {
+        string?[] faults = ["unset", "unset", "unset", "unset"];
+
+        AssertNoFailure(OnGoroutine(() => SyncTestBubble.Run(() =>
+        {
+            channel<int> ch = new(1);
+            Goroutine.Start(() => faults[0] = ChannelFault(ch, "send"));   // a member, not only main
+            SyncTestBubble.Wait();
+
+            for (int i = 1; i < s_operations.Length; i++)
+                faults[i] = ChannelFault(ch, s_operations[i]);
+
+            ch.Send(1);
+            ch.Receive();
+            close(ch);
+        })));
+
+        foreach (string? fault in faults)
+            Assert.IsNull(fault);
     }
 
     [TestMethod]
@@ -73,14 +137,16 @@ public class BubbledChannelTests
     {
         channel<int> ch = new(1);
         AssertNoFailure(OnGoroutine(() => { ch.Send(1); ch.Receive(); }));
-    }
 
-    [TestMethod]
-    public void CloseFromOutsideIsNotRefused()
-    {
-        // Go's closechan carries no bubble check.
-        channel<int> ch = MadeInABubble(0);
-        AssertNoFailure(OnGoroutine(() => close(ch)));
+        string?[] faults = new string?[s_operations.Length];
+        AssertNoFailure(OnGoroutine(() => SyncTestBubble.Run(() =>
+        {
+            for (int i = 0; i < s_operations.Length; i++)
+                faults[i] = ChannelFault(ch, s_operations[i]);
+        })));
+
+        foreach (string? fault in faults)
+            Assert.IsNull(fault, "an untagged channel is open to every bubble");
     }
 
     [TestMethod]
@@ -175,82 +241,5 @@ public class BubbledChannelTests
         outside.Send(1);
         Assert.IsTrue(done.Wait(TimeoutMs), "the bubble never finished");
         AssertNoFailure(escaped);
-    }
-
-    [TestMethod]
-    public void AHandoffAcrossBubblesPanics()
-    {
-        // Bubble A makes an unbuffered channel; a member of bubble B (which passes the no-bubble check)
-        // parks receiving on it; A's send then finds B's goroutine and panics, as Go's send() does. B's
-        // receiver is left stranded (dequeued, never woken -- Go's own outcome), so B reports its
-        // deadlock.
-        channel<int> shared = default;
-        using ManualResetEventSlim published = new(false);
-        int bParked = 0;
-        Exception? sendPanic = null;
-
-        Exception? a = null, b = null;
-        using ManualResetEventSlim aDone = new(false);
-        using ManualResetEventSlim bDone = new(false);
-
-        Goroutine.Start(() =>
-        {
-            try
-            {
-                SyncTestBubble.Run(() =>
-                {
-                    shared = new channel<int>(0);
-                    published.Set();
-
-                    SpinWait.SpinUntil(() => Volatile.Read(ref bParked) == 1, TimeoutMs);
-                    Thread.Sleep(200);   // B's member is now parked on the channel
-
-                    try
-                    {
-                        shared.Send(1);
-                    }
-                    catch (PanicException ex)
-                    {
-                        sendPanic = ex;
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                a = ex;
-            }
-            finally
-            {
-                aDone.Set();
-            }
-        });
-
-        Goroutine.Start(() =>
-        {
-            try
-            {
-                SyncTestBubble.Run(() =>
-                {
-                    published.Wait();
-                    Volatile.Write(ref bParked, 1);
-                    shared.Receive();
-                });
-            }
-            catch (Exception ex)
-            {
-                b = ex;
-            }
-            finally
-            {
-                bDone.Set();
-            }
-        });
-
-        Assert.IsTrue(aDone.Wait(TimeoutMs), "bubble A never finished");
-        AssertNoFailure(a);
-        StringAssert.Contains(sendPanic?.Message, "send on synctest channel from outside bubble");
-
-        Assert.IsTrue(bDone.Wait(TimeoutMs), "bubble B never reported its stranded receiver");
-        StringAssert.Contains(b?.Message, "deadlock: all goroutines in bubble are blocked");
     }
 }

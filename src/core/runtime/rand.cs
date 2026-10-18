@@ -7,7 +7,7 @@ namespace go;
 using byteorder = @internal.byteorder_package;
 using chacha8rand = @internal.chacha8rand_package;
 using goarch = @internal.goarch_package;
-using math = @internal.runtime.math_package;
+using Δmath = @internal.runtime.math_package;
 using @unsafe = unsafe_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using @internal;
@@ -56,16 +56,16 @@ internal static void randinit() {
             seed.Value[i % 32] ^= (byte)(c);
         }
     } else {
-        if (readRandom((~seed)[..]) != 32 || allZero((~seed)[..])) {
+        if (readRandom(seed.slice()) != 32 || allZero(seed.slice())) {
             // readRandom should never fail, but if it does we'd rather
             // not make Go binaries completely unusable, so make up
             // some random data based on the current time.
             readRandomFailed = true;
-            readTimeRandom((~seed)[..]);
+            readTimeRandom(seed.slice());
         }
     }
     ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Init(seed.Value);
-    builtin.clear((~seed)[..]);
+    builtin.clear(seed.slice());
 
     if (startupRand != default!) {
         // Overwrite startupRand instead of clearing it, in case cgo programs
@@ -246,7 +246,7 @@ internal static uint32 cheaprand() {
     // by the compiler should be in this list.
     if ((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(goarch.IsAmd64 | goarch.IsArm64) | goarch.IsPpc64) | goarch.IsPpc64le) | goarch.IsMips64) | goarch.IsMips64le) | goarch.IsS390x) | goarch.IsRiscv64) | goarch.IsLoong64) == 1) {
         mp.Value.cheaprand += 0xa0761d6478bd642fUL;
-        var (hi, lo) = math.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ 0xe7037ed1a0b428dbUL));
+        var (hi, lo) = Δmath.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ 0xe7037ed1a0b428dbUL));
         return (uint32)((uint64)(hi ^ lo));
     }
 

@@ -225,7 +225,19 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// has a committed package_info.cs (F3 in docs/PLAN-linux-operation.md). The WRITE path is
 		// unchanged — each line is still emitted with "\r\n" — so output stays byte-identical.
 		packageInfoLines = splitLines(string(packageInfoBytes))
-	} else {
+
+		// A directory can change hands between releases: go1.26 split internal/runtime/syscall, and the
+		// 1.24 package's per-GOOS folder linux/ became the package internal/runtime/syscall/linux. The
+		// file found there is then ANOTHER package's, and adopting it copied that package's
+		// `using static <its class>;` into the new one (CS0234). Only a file whose [GoPackage] stamp names
+		// this package is adopted; anything else is replaced by the template, as if absent.
+		if owner, adopted := packageInfoBelongsHere(packageInfoLines); !adopted {
+			showWarning("\"%s\" is package %s's package_info.cs, not %s's; writing a fresh one from the template", packageInfoFileName, owner, packageName)
+			packageInfoLines = nil
+		}
+	}
+
+	if packageInfoLines == nil {
 		// Generate new package info file from template. The template is pinned CRLF at CHECKOUT
 		// (.gitattributes) and embedded at COMPILE time, so its endings are a property of the tree
 		// the converter was built from — an attribute added after a clone was materialized does not
@@ -606,7 +618,8 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// Add self-referential constraint proxies (nistCurve[*P224Point]'s Point). Each is a
 		// `GoImplement<element, iface<element>>(ConstraintProxy = true)` — the interface's own
 		// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),
-		// so the element doubles as the dummy. See constraintProxyArg / EmitConstraintProxy.
+		// so the element doubles as the dummy — except where the interface constrains itself (see
+		// constraintProxyFor). See constraintProxyArg / EmitConstraintProxy.
 		for _, proxy := range constraintProxies {
 			elementRef := qualifyLocalTypeRef(proxy[0])
 			interfaceRef := qualifyLocalTypeRef(proxy[1])
@@ -626,7 +639,15 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 				continue
 			}
 
-			lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, elementRef))
+			// The placeholder is the element, or — for an interface that constrains itself — the proxy,
+			// which is generated into the class carrying this record and so is named bare.
+			placeholderRef := elementRef
+
+			if proxy[2] != proxy[0] {
+				placeholderRef = proxy[2]
+			}
+
+			lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, placeholderRef))
 		}
 
 		// Sort lines
@@ -1019,6 +1040,69 @@ func goPackageImportPathStamp(namespace, name, importPath string) string {
 	}
 
 	return importPath
+}
+
+// packageInfoBelongsHere reports whether a persisted package_info.cs is the CURRENT package's, read from its
+// [GoPackage] stamps. One stamp naming this package -- its name, or its external test variant's -- is enough,
+// unless that stamp carries an explicit ImportPath naming another path. The NAME, not the namespace, is the
+// identity: a namespace can move under the same package (convergePackageNamespace exists for exactly that),
+// while a directory that changes hands brings another package's name with it. A file with no stamp at all
+// predates stamps and is adopted, as before. When it is not adopted, owner is the name its first stamp gives.
+func packageInfoBelongsHere(lines []string) (owner string, adopted bool) {
+	// No current package name is no identity to compare against (a metadata writer driven outside a
+	// package conversion, as the -tests whitebox unit tests do): adopt, as before.
+	if packageName == "" {
+		return "", true
+	}
+
+	productionName := strings.TrimSuffix(packageName, "_test")
+	productionPath := goReflectPackagePath(currentPackagePath)
+
+	if productionName != packageName {
+		productionPath = strings.TrimSuffix(productionPath, "_test")
+	}
+
+	stamps := 0
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		if !strings.HasPrefix(trimmed, goPackageStampPrefix) {
+			continue
+		}
+
+		rest := trimmed[len(goPackageStampPrefix):]
+		end := strings.Index(rest, `"`)
+
+		if end < 0 {
+			continue
+		}
+
+		name := rest[:end]
+		stamps++
+
+		if stamps == 1 {
+			owner = name
+		}
+
+		if name != productionName && name != productionName+"_test" {
+			continue
+		}
+
+		const importPathKey = `ImportPath = "`
+
+		if i := strings.Index(rest, importPathKey); i >= 0 && productionPath != "" {
+			stamped := rest[i+len(importPathKey):]
+
+			if j := strings.Index(stamped, `"`); j >= 0 && strings.TrimSuffix(stamped[:j], "_test") != productionPath {
+				continue
+			}
+		}
+
+		return name, true
+	}
+
+	return owner, stamps == 0
 }
 
 // goPackageImportPathFor returns Go's import path for a package class that the CURRENT conversion

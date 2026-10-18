@@ -9,6 +9,7 @@ using fmt = fmt_package;
 using godebug = go.@internal.godebug_package;
 using io = io_package;
 using fs = go.io.fs_package;
+using math = math_package;
 using mime = mime_package;
 using multipart = go.mime.multipart_package;
 using textproto = go.net.textproto_package;
@@ -26,6 +27,7 @@ using go.io;
 using go.mime;
 using go.net;
 using go.path;
+using iter = iter_package;
 
 partial class http_package {
 
@@ -71,8 +73,10 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
     return originalErr;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string httpInvalidOrUnsafeFileˢ = "http: invalid or unsafe file path"u8;
+// errInvalidUnsafePath is returned by Dir.Open when the call to
+// filepath.Localize fails. filepath.Localize returns an error if the path
+// cannot be represented by the operating system.
+internal static error errInvalidUnsafePath = errors.New("http: invalid or unsafe file path"u8);
 
 // Open implements [FileSystem] using [os.Open], opening files for reading rooted
 // and relative to the directory d.
@@ -83,7 +87,7 @@ public static (File, error) Open(this Dir d, @string name) {
     }
     (pathΔ1, var err) = filepath.Localize(pathΔ1);
     if (err != default!) {
-        return (default!, errors.New(httpInvalidOrUnsafeFileˢ));
+        return (default!, errInvalidUnsafePath);
     }
     @string dir = ((@string)d);
     if (dir == ""u8) {
@@ -888,6 +892,9 @@ internal static (@string msg, nint httpStatus) toHTTPError(error err) {
     if (errors.Is(err, fs.ErrPermission)) {
         return (forbiddenˢ, StatusForbidden);
     }
+    if (errors.Is(err, errInvalidUnsafePath)) {
+        return (pageNotFoundˢ, StatusNotFound);
+    }
     // Default:
     return (internalServerErrorˢ, StatusInternalServerError);
 }
@@ -983,7 +990,7 @@ internal static bool containsDotDot(@string v) {
     if (!strings.Contains(v, ".."u8)) {
         return false;
     }
-    foreach (var (_, ent) in strings.FieldsFunc(v, isSlashRune)) {
+    foreach (var ent in range<@string>(strings.FieldsFuncSeq(v, isSlashRune).Invoke)) {
         if (ent == ".."u8) {
             return true;
         }
@@ -1143,6 +1150,29 @@ internal static textproto.MIMEHeader mimeHeader(this httpRange r, @string conten
     });
 }
 
+// GODEBUG=httpservecontentmaxranges=<limit> controls the maximum number of ranges that will
+// be processed in a Range header. Setting httpservecontentmaxranges=0 disables the limit.
+internal static ж<godebug.Setting> httpservecontentmaxranges = godebug.New("httpservecontentmaxranges"u8);
+
+internal static UntypedInt defaultMaxContentRanges => 200;
+
+internal static nint maxContentRanges() {
+    nint maxRanges = defaultMaxContentRanges;
+    {
+        @string v = httpservecontentmaxranges.Value(); if (v != ""u8) {
+            {
+                var (n, err) = strconv.Atoi(v); if (err == default! && n >= 0) {
+                    maxRanges = n;
+                    if (maxRanges == 0) {
+                        maxRanges = math.MaxInt;
+                    }
+                }
+            }
+        }
+    }
+    return maxRanges;
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string invalidRangeˢ = "invalid range"u8;
 
@@ -1161,9 +1191,16 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
     }
     slice<httpRange> ranges = default!;
     var noOverlap = false;
-    foreach (var (_, vᴛ1) in strings.Split(s[(int)(builtin.len(b))..], ","u8)) {
-        var ra = vᴛ1;
-
+    nint numRanges = strings.Count(s[(int)(builtin.len(b))..], ","u8) + 1;
+    nint maxRanges = maxContentRanges();
+    if ((numRanges > maxRanges) != (numRanges > defaultMaxContentRanges)) {
+        httpservecontentmaxranges.IncNonDefault();
+    }
+    if (numRanges > maxRanges) {
+        return (default!, default!); // ignore header with too many ranges
+    }
+    foreach (var iᴛ1 in range<@string>(strings.SplitSeq(s[(int)(builtin.len(b))..], ","u8).Invoke)) {
+        var ra = iᴛ1;
         ra = textproto.TrimString(ra);
         if (ra == ""u8) {
             continue;

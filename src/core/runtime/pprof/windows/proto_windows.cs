@@ -18,11 +18,12 @@ partial class pprof_package {
 internal static (syscallꓸHandle, error) createModuleSnapshot() {
     while (ᐧ) {
         var (snap, err) = syscall.CreateToolhelp32Snapshot((uint32)((uint32)windows.TH32CS_SNAPMODULE | (uint32)windows.TH32CS_SNAPMODULE32), (uint32)syscall.Getpid());
-        ref var errno = ref heap(new syscall.Errno(), out var Ꮡerrno);
-        if (err != default! && errors.As(err, Ꮡerrno) && errno == windows.ERROR_BAD_LENGTH) {
-            // When CreateToolhelp32Snapshot(SNAPMODULE|SNAPMODULE32, ...) fails
-            // with ERROR_BAD_LENGTH then it should be retried until it succeeds.
-            continue;
+        {
+            var (errno, ok) = errors.AsType<syscall.Errno>(err); if (ok && errno == windows.ERROR_BAD_LENGTH) {
+                // When CreateToolhelp32Snapshot(SNAPMODULE|SNAPMODULE32, ...) fails
+                // with ERROR_BAD_LENGTH then it should be retried until it succeeds.
+                continue;
+            }
         }
         return (snap, err);
     }

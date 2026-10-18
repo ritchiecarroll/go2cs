@@ -11,28 +11,54 @@ using go;
 
 partial class windows_package {
 
-// https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_osversioninfow
-partial struct _OSVERSIONINFOW {
+// https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_osversioninfoexw
+partial struct _OSVERSIONINFOEXW {
     internal uint32 osVersionInfoSize;
     internal uint32 majorVersion;
     internal uint32 minorVersion;
     internal uint32 buildNumber;
     internal uint32 platformId;
     internal array<uint16> csdVersion = new(128);
+    internal uint16 servicePackMajor;
+    internal uint16 servicePackMinor;
+    internal uint16 suiteMask;
+    internal byte productType;
+    internal byte reserved;
 }
 
 // According to documentation, RtlGetVersion function always succeeds.
-//sys	rtlGetVersion(info *_OSVERSIONINFOW) = ntdll.RtlGetVersion
+//sys	rtlGetVersion(info *_OSVERSIONINFOEXW) = ntdll.RtlGetVersion
+
+// Retrieves version information of the current Windows OS
+// from the RtlGetVersion API.
+internal static ж<_OSVERSIONINFOEXW> getVersionInfo() {
+    ref var info = ref heap<_OSVERSIONINFOEXW>(out var Ꮡinfo);
+    info = new _OSVERSIONINFOEXW(nil);
+    info.osVersionInfoSize = (uint32)/* unsafe.Sizeof(info) */ (uintptr)284;
+    rtlGetVersion(Ꮡinfo);
+    return Ꮡinfo;
+}
 
 // Version retrieves the major, minor, and build version numbers
 // of the current Windows OS from the RtlGetVersion API.
 public static (uint32 major, uint32 minor, uint32 build) Version() {
-    ref var info = ref heap<_OSVERSIONINFOW>(out var Ꮡinfo);
-    info = new _OSVERSIONINFOW(nil);
-    info.osVersionInfoSize = (uint32)/* unsafe.Sizeof(info) */ (uintptr)276;
-    rtlGetVersion(Ꮡinfo);
-    return (info.majorVersion, info.minorVersion, info.buildNumber);
+    var info = getVersionInfo();
+    return ((~info).majorVersion, (~info).minorVersion, (~info).buildNumber);
 }
+
+// SupportUnlimitedTransmitFile indicates whether the current
+// Windows version's TransmitFile function imposes any
+// concurrent operation limits.
+// Workstation and client versions of Windows limit the number
+// of concurrent TransmitFile operations allowed on the system
+// to a maximum of two. Please see:
+// https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nf-mswsock-transmitfile
+// https://golang.org/issue/73746
+public static Func<bool> SupportUnlimitedTransmitFile;
+internal static void initᴛSupportUnlimitedTransmitFile() { SupportUnlimitedTransmitFile = sync.OnceValue(bool () => {
+    var info = getVersionInfo();
+    return (~info).productType != VER_NT_WORKSTATION;
+}); }
 
 internal static bool supportTCPKeepAliveIdle;
 internal static bool supportTCPKeepAliveInterval;

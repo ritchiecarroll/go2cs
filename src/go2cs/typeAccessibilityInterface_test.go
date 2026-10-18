@@ -44,6 +44,7 @@ func publicizedTypeNames() map[string]bool {
 // dropping it only where the emitted member is unconditionally public — would publicize `hidden`
 // too, and that assertion fails.
 func TestInterfaceMemberSignatureTypesArePublicized(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
@@ -109,6 +110,7 @@ func (c Conn) poke(h alsoHidden) {}
 // seed loop, so an unexported, never-publicized interface must leave its signature types alone —
 // this pins that the fix widened the rule for PUBLIC surfaces only.
 func TestUnexportedInterfaceDoesNotPublicizeSignatureTypes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
@@ -144,6 +146,7 @@ var _ sealed = nil
 // seeds the interface, `cascadePublicizedMethodTypes` re-walks it, and only then does the widened
 // interface gate see it.
 func TestPublicizedInterfaceCascadesToItsMemberSignatureTypes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
@@ -187,6 +190,7 @@ func (h Holder) Addr() sealed { return nil }
 // *types.Interface, and the method set there includes EMBEDDED members. An embedded unexported
 // method is exactly as public in the emitted C# as a directly declared one.
 func TestEmbeddedInterfaceMemberSignatureTypesArePublicized(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
@@ -318,6 +322,7 @@ var (
 // every negative assertion above vacuously true. Assert the instrument works by requiring the
 // classic exported-method case to still register.
 func TestPublicizeInstrumentIsNotVacuous(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{

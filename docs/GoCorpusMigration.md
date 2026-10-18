@@ -380,6 +380,14 @@ paragraph read "Default order (a COORD proposal, NOTES §5 Q13, unruled at 172d4
 *(Edited in place 2026-09-26, §7 lessons 7-9: steps 6-8 added.)*
 
 **Gate:** converter unit tests green **and** `go2cs.exe` demonstrably built by the new toolchain.
+*(Edited in place 2026-10-14, the Go 1.26 hop's H1, ruled by COORD: **under a pin window** (the converter's `go`
+directive has moved while H2 has not moved the corpus pin, or H5 has not regenerated the corpus), "green" admits
+ONLY tests that read GOROOT's new-release sources against something still at the corpus release: the corpus pin, the
+committed corpus, or a registry of the old release's facts. Each such test is NAMED with an owner and the stage
+that clears it. Every other test must be green. A test outside the named set is red, and so is a member still failing
+past its clearing stage. Prove the set by running the BASE (no H1 commit) under the same pin, and compare by name.
+The pairing does not rescue the converter suite, because `auto` switches `go` itself inside `src/go2cs`. Worked
+instance: [`phase4/H1-go126-toolchain.md`](phase4/H1-go126-toolchain.md) §5, eight named, three of them owed as work.)*
 
 ### H2 — The pin bump **GATE**
 
@@ -532,6 +540,29 @@ package IDs** get their NuGet prefix reservation filed now, not at H11.
 *(Edited in place 2026-09-26, §7 lessons 11-12: two rulings were withdrawn over counts with unstated axes, and the
 reservation was still an
 external wait after the release.)*
+
+> **Amendment 2026-10-15 — a relocation arc is checked for what its moved tests read (the Go 1.26 hop).** An arc in
+> `relocations-go<rel>.tsv` is derived by body, and a body score compares control flow: two unrelated tests that share
+> a range/compare/`Errorf` skeleton score high. A test that truly moves brings the tables and helpers it reads.
+> **Before the TSV lands, run** (from `src/go2cs`, with the incoming toolchain):
+>
+> `go run ./internal/relocscan -from <outgoing GOROOT> -to <incoming GOROOT> -arcs docs/phase4/data/relocations-go<rel>.tsv`
+>
+> A MOVED test is a Test/Benchmark/Fuzz/Example function that is in the source package at the outgoing release,
+> absent from it at the incoming one, and present by name in the target at the incoming one. Each package-level
+> declaration of the source that the test's body reads must be declared at package level in the target. One that is
+> not prints as `MISSING`, its arc prints `REFUSED`, and the run exits 1. A refused arc is dropped from the TSV or
+> re-derived; it is never kept with a note. Each arc's line states its moved tests and the reads it checked. An arc
+> with 0 reads checked passes without evidence, so say so wherever the arc is cited.
+<!-- C2, 2026-10-15, on the campaign tip f7d8f0b135, toolchain go1.26.9, -from go1.24.13. RED against the 5-arc TSV
+     at e7316d8a53: arc 5 `REFUSED runtime -> internal/strconv: 1 moved test(s), 3 package-level read(s) checked`,
+     `MISSING TestAtoi reads atoi32tests, atoi64tests, declared nowhere in internal/strconv at -to`, exit 1; the other
+     four arcs OK. GREEN against the 4-arc TSV at ab12a78f61 (arc 5 dropped by H3 route 2): wasitest 2 moved / 3
+     reads, oldtrace -> tracev1 3 / 8, go/ast/internal/tests -> go/ast 1 / 0 (passes without evidence), strconv ->
+     internal/strconv 37 / 76; exit 0. The first build also listed ok, out and test as MISSING: TestAtoi's locals,
+     which share names with runtime package-level declarations. Identifiers the parser resolves to a declaration
+     inside the test function are now excluded, and the red names only the two tables. COORD logged the arc-5
+     lesson (a moved test carries its tables) and ruled this guard as S3. -->
 
 ### H4 — Converter feature work **GATE**
 
@@ -1195,12 +1226,43 @@ done
   survivor proposal and the fifth rehearsal's re-derivation, agreeing).
 - **(f) Flat rows** (no `windows`/`linux`/`darwin` segment) that are not in the same class in all three
   flavour files are posted by name: an `-Apply` deletes a flat file on one flavour's selection alone.
+
+> **Amendment 2026-10-15 — FILE rows in the expected set (the Go 1.26 hop).** This hop's list is
+> **`docs/phase4/h5-removals-go126.txt`**, so read it in place of `h5-removals.txt` in step 1. It names
+> `internal/runtime/syscall` by its **9 files**, not as a directory. That directory survives as the parent of
+> the 1.26 packages `internal/runtime/syscall/linux` and `/windows`, and its 1.24 per-GOOS folder `linux/` is the
+> new package's own path, so a directory row would claim the new package's files. Step 3 as written reads only
+> directory rows: `[ -d "$D" ]` skips a file, and `under.awk` matches only a row's directory prefixes. The 9 files
+> would map to `-`, and (a) would STOP on linux. For a list that carries file rows, make two changes:
+> - **`under.awk`: an exact path wins first.** In the second rule, replace `hit = ""` with
+>   `hit = ($2 in d) ? $2 : ""`, ahead of the prefix loop.
+> - **Step 3's loop: `[ -e "$D" ]` in place of `[ -d "$D" ]`.** `find` given a file prints it when it passes the
+>   tests, so a seeded `.cs` named by file is counted in (b) as its own key. The non-`.cs` file rows (csproj,
+>   README, icons) join (c)'s residue.
+<!-- C2, 2026-10-15, at 83288cc484: under.awk run over h5-removals-go126.txt and four synthetic rows. As written,
+     internal/runtime/syscall/linux/defs_linux.cs (DELETE-ABSENT, package not in std at target) mapped to `-`. With the
+     exact-path arm it mapped to itself, a removed directory's row (internal/trace/event/go122/...) still mapped to its
+     directory, and a new 1.26 package's file under internal/runtime/syscall/linux/ stayed `-`, unclaimed. NOT MEASURED
+     against a real H5c dry run; the i9 runs that at H5. Derivation of the 20 rows: the file's own header. -->
 <!-- The list's own header, 826045a74:docs/phase4/h5-removals.txt:14-19 ("removed BY THE SEEDED RE-CONVERT ... never by hand"), applied
      through this step: C1 fa98268df §2, COORD db6d9462f §3.3, COORD 93c967d4d (boarded as the executable form), COORD 210d49537. Per-file
      amendment: COORD 0b5d72d0e §2 and c58b4c01d §3. Two-pin key: COORD 0b5d72d0e §2; C1 e8d90a664 §2 (produced = it or its .cs.auto
      sibling newer than the seed). Order of tests: src/reconvert-deletions.ps1:746-756 (Resolve-Principal, Test-ConversionTarget with
      Get-SourceStdSet -ForGoos, :679) before the name and marker test :758-771; std membership is flavour-dependent :498-500.
      (f) is a posting rule only: src/reconvert-deletions.ps1:153-156 asks flat files under -Goos. -->
+*(Noted 2026-10-15, the Go 1.26 hop's H5, i9's first real `-Apply` with `-Orphan`: three instrument changes, each red
+on the real post-H5c root first. **(1)** The after-count owes `- $orphansDeleted`: the run deleted 88 rows, 9 residue
+`.cs` and the 3 ruled orphans, then refused 4405 against 4402 on disk, exit 3. **(2) Arm 1 without a child:** a
+package removed whole whose staged `.cs` all sit in per-GOOS folders, with no GOOS child at the target, now has its
+parent's project, README, icons and `.editorconfig` swept as residue. `vendor/golang.org/x/net/route` (darwin-only)
+kept all five, and its solution entry, under exit 0 ×3. **(3) An emptied `<Folder>` goes with its last `<Project>`**,
+through the instrument's own solution editor: 8 empty Folders were left (9 with route's), against 0 in the generated
+file. A Folder that was empty before the pass, or still holds a line, is never touched. Re-applied from the backup:
+exit 0 ×3, 363 `<Project>` entries, 0 empty Folders; `check-h5c-goos-child.ps1` still passes all 18 arms. **Usage:**
+`-Orphan` is `[string[]]`, so give it ONCE as an array through `-Command`
+(`-Orphan @('<p1>=delete','<p2>=delete') -Apply; exit $LASTEXITCODE`). Under `-File`, a repeated `-Orphan` is
+ParameterAlreadyBound before the script runs, and `a,b` arrives as one string. On a later flavour, pass only the
+orphans still present: the stale arm refuses a disposition that names a deleted path.)*
 *(Noted 2026-10-14, PLAN-hop-go126 §9: in step 2, `-ExpectGo go1.24.13` is the incoming release and
 `-ExpectSourceGo go1.23.12` the outgoing one, as the H4a and H5 note above defines them. `reconvert-deletions.ps1`
 requires `-ExpectGo`, and derives `-ExpectSourceGo` from the `version.props` beside the script only when it is
@@ -1379,6 +1441,58 @@ first, and only by derivation; H5 meets them first.)*
 <!-- The first sentence of this paragraph is not in the draft: it was added at the apply (2026-10-02), because the code
      block above copies .cs, .csproj and README.md only, and close lesson 2 (H10's close amendment) widens the overlay
      "by every file an emitted csproj names in <EmbeddedResource Include>, derived from the emission". -->
+*(Noted 2026-10-15, the Go 1.26 hop's H5, ruled COORD: **the overlay also carries the icons of every package new at
+the target.** Each emitted csproj names `go2cs.ico` as its `ApplicationIcon` and packs `go2cs.png`. The `find` above
+copies neither, and a package that is not tracked yet has neither in `<tree>`. Derive them from the applied root:
+every stage file that is neither tracked nor in `overlay-set.txt`. At go1.26.9 that was 57 files: the png and ico of
+the 28 new packages, plus the ico of the relocated test-only `internal/runtime/wasitest`. All were byte-identical to
+the tracked template, and no other kind was left over. **The deletion set is wider than H5c's**, too: (1) the
+three-target merge's own layout moves, a flat file moved per-GOOS or three identical per-GOOS copies hoisted flat (10
+at go1.26.9, each `git rm`'d once all three targets carried its counterpart); (2) a removed package's `-tests`
+residue, which H5c never takes (`<Compile Remove>`d by design). That was 11 files at go1.26.9, under
+go/ast/internal/tests and runtime/internal/wasitest. Census: every tracked file absent from the applied root must be
+one of H5c's deletions or a named merge move.)*
+*(Noted 2026-10-15, the Go 1.26 hop's H5, the FIXTURE REFRESH, one commit after the overlay and before the ladder
+(PLAN-hop-go126 A5).
+**The instrument is the two guards' own lists:**
+- `TestTrackedFixturesMatchPinnedGoRoot` names each stale fixture as "differs" or "absent at the pinned GOROOT";
+- `TestEveryStagedFixtureIsTrackedOrIgnored` names each staged fixture that is neither tracked nor ignored.
+**The refresh:**
+- GOROOT's bytes over every "differs" row (76);
+- every "neither" row added from GOROOT by explicit path (43);
+- every "absent" row `git rm`'d (20) only when its removal is named: either H5c removed its package
+  (crypto/internal/hpke, 1; internal/trace/internal/oldtrace, 12, relocated to tracev1), or a successor exists at the
+  target (A5's STOP, ruled COORD 2026-10-15):
+  - archive/tar's four `.tar` fixtures and compress/bzip2's `fail-issue5747.bz2`, renamed by Go to `<name>.base64`;
+  - strconv's `testfp.txt`, which went with the strconv → internal/strconv arc;
+  - encoding/json's `code.json.gz`, which Go deleted (its bench now reads
+    `internal/jsontest/testdata/golang_source.json.zst`).
+**The gate:**
+- every refreshed or added file's INDEX blob equals `git hash-object --no-filters` of GOROOT's file (0 of 119
+  differed), and each working copy `cmp`-equals GOROOT's;
+- `git check-attr text` is `unset` on every binary fixture;
+- both guards go green.)*
+*(Noted 2026-10-15, the Go 1.26 hop's H5, the TARGETED `-tests` REGEN (COORD's ruling on
+`TestCommittedCoreReferencesResolve`: a `.tests.csproj` naming an H5-removed package is regenerated, never
+hand-edited). A `-tests` convert into a seeded package writes what it emits, but never removes a test file Go deleted.
+So:
+- Remove the package's FLAT test-side files first (`*_test.cs`, `package_test_info.cs`, `go2cs_test_host.cs`,
+  `*.tests.csproj`), in the git-backed worktree.
+- Convert. Then `git status` reads M = re-emitted, A = new, D = not emitted at the target.
+- A D whose `<name>.go` still exists at the target is restored as unselected, never deleted.
+- **First, list every `*_impl_test.cs` and every marked test file, and keep them out of the removal.** A hand-written
+  test companion is unmarked and `_impl`-named, and the converter never emits it. i9's run took runtime's
+  `export_impl_test.cs` and `export_windows_impl_test.cs` and restored them before committing.
+- Restore from HEAD what the run rewrites outside its scope: README Tests badges (it demotes them to "not yet
+  validated"; badges are the bank's), `.cs.auto` review siblings (H6's), and a production `package_init.cs` it
+  gives an `initᴛᴛtests()` hook. The hook item is *superseded 2026-10-15 (COORD, the H7 re-emit ruling)*:
+  - this note first said "keep" the hook;
+  - a file both modes write must come out identical from either, and `-stdlib` emits no hook (an unimplemented
+    partial is erased);
+  - so the `-stdlib` form is the record. Revert the hook and name it in the post, until G's seat makes `-tests` add
+    it only when the tests project supplies an implementer.
+  - The H7 consolidated re-emit (`2f669be61c`) removed the two that i9's follow-up 2 had committed
+    (internal/trace, runtime/windows).)*
 
 Then the marker census re-measured in `<tree>`, T0 phantoms restored per §4, and staging by explicit path —
 never `git add -A` (floor 8). `<tree>` is a worktree ON the version branch COORD names (checked out at `<H2>`, not
@@ -1791,6 +1905,31 @@ go1.24.13 … || exit 3`, run from a no-module directory.
      its command's rc" comment owned as unimplemented at the time it was written, then implemented. i9's linux prediction
      2c6aa2259: the golib arm, 338 predicted against 343 measured. The i7's windows second read at COORD fe23ab855 is the
      second of the two windows boxes. COORD's rung-7 close: a065b1bd9. -->
+
+*(Noted 2026-10-15, the Go 1.26 hop's H7, ruled COORD: **the ladder of record is the stub census's own Release build,
+plus one Debug build per flavour at H7's close.**
+- `pwsh -File src/check-stub-census.ps1 -Flavors <fl> -Predicted docs/phase4/data/stub-census-h0/predicted-h5.tsv` purges
+  `Generated/` and builds `go2cs-stdlib.slnx -c Release -p:GoTargetOS=<fl> --no-incremental -m:4
+  -p:UseSharedCompilation=false`. That one build per flavour per pass is scored in this section's units.
+- The census REFUSES (exit 2) on any build error. During the ladder, exit 2 is expected and only the build reading
+  is reported. The census VERDICT (exit 0 every appearance predicted, 1 FINDING) is read when that flavour first
+  reaches 0 errors. Never weaken the refusal.
+- Exit 3 is an INSTRUMENT ERROR, never a verdict: a Desktop edition (Windows PowerShell 5.1 is refused up front;
+  the instrument is ruled pwsh 7) or any unhandled error in the script. At H7 pass 8, 5.1 crashed after a green
+  build and exited 1, the FINDING code.
+- At H7's close, one Debug build per flavour confirms the record (an `#if DEBUG` divergence surfaces only there).
+**Scoring that log:**
+- Under Windows PowerShell 5.1, `*>` wrote it UTF-16LE; under pwsh 7 it is UTF-8. Decode by what the bytes are
+  (NULs in the first 200 bytes) and prove the decode: 0 NULs, and a known line present. Scored raw, i9's first
+  pass read 0 errors against 26.
+- Turn backslashes into `/` with `tr '\134' '/'`, not a sed escape; the shell layer collapses `\\`.
+- Key a site on any non-space run ending `.cs(l,c): error CSnnnn`, after cutting the trailing `[project.csproj]`.
+  Generated file names carry non-ASCII (`Δ`), and an ASCII-only key mis-split ROOTS/CASCADE 10/3 against 4/9.
+  A greedy `.*/core/` reaches into that bracket.
+- **A `Generated/` site whose cause is its own** (a duplicate member, as at pass 2's
+  `NoInliningPartialGenerator/stubs_impl.noinline.g.cs` CS0111) is reported as a ROOT beside the CASCADE unit,
+  which keeps its definition.
+- ASM reads `bin/Release`.)*
 
 
 ### H7a — The master fold **GATE**

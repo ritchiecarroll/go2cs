@@ -167,9 +167,11 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/constanttime/crypto.internal.constanttime.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/subtle/crypto.internal.fips140.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/sys/internal.runtime.sys.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
+    <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>
 
   <ItemGroup>

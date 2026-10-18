@@ -389,6 +389,11 @@ func directivePhrase(hasDirective bool) string {
 // (runtime/metrics_test.runtime_readMetricNames), so the guard resolves the suffix to the base
 // directory and inverts the file selection — test files only, and only those in the external test
 // package (in-package `_test.go` files belong to `<base>` itself, a different consumer path).
+//
+// So a plain `<base>` reads its in-package `_test.go` files as well as its production files. The
+// -tests conversion converts them under `<base>`'s own path, so a consumer declared there is keyed
+// `<base>.<symbol>` like any other: Go 1.26's unique keeps its only push consumer,
+// `runtime_blockUntilEmptyCleanupQueue`, in handle_test.go.
 func parseGoPackageDir(t *testing.T, goRoot string, pkgPath string) []*ast.File {
 	t.Helper()
 
@@ -411,7 +416,9 @@ func parseGoPackageDir(t *testing.T, goRoot string, pkgPath string) []*ast.File 
 	files := make([]*ast.File, 0, len(matches))
 
 	for _, match := range matches {
-		if strings.HasSuffix(match, "_test.go") != isExternalTest {
+		isTestFile := strings.HasSuffix(match, "_test.go")
+
+		if isExternalTest && !isTestFile {
 			continue
 		}
 
@@ -424,8 +431,9 @@ func parseGoPackageDir(t *testing.T, goRoot string, pkgPath string) []*ast.File 
 		}
 
 		// A `_test.go` whose package clause has no `_test` suffix is an IN-PACKAGE test file —
-		// part of `<base>`, not of the external test package this pkgPath names.
-		if isExternalTest && (file.Name == nil || !strings.HasSuffix(file.Name.Name, "_test")) {
+		// part of `<base>`, not of the external test package this pkgPath names, and the other way
+		// round for one whose clause has the suffix.
+		if isTestFile && (file.Name == nil || strings.HasSuffix(file.Name.Name, "_test") != isExternalTest) {
 			continue
 		}
 

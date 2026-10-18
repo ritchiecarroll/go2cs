@@ -16,6 +16,7 @@ partial struct Info {
     public nint Changed;   // minor version when default changed, if any; 21 means Go 1.21
     public @string Old; // value that restores behavior prior to Changed
     public bool Opaque;   // setting does not export information to runtime/metrics using [internal/godebug.Setting.IncNonDefault]
+    public bool Immutable;   // setting cannot be changed after program start
 }
 
 // All is the table of known settings, sorted by Name.
@@ -29,14 +30,20 @@ partial struct Info {
 public static ж<slice<Info>> ᏑAll = new StandardBox<slice<Info>>(new Info[]{
     new(Name: "allowmultiplevcs"u8, Package: "cmd/go"u8),
     new(Name: "asynctimerchan"u8, Package: "time"u8, Changed: 23, Old: "1"u8),
+    new(Name: "containermaxprocs"u8, Package: "runtime"u8, Changed: 25, Old: "0"u8),
+    new(Name: "cryptocustomrand"u8, Package: "crypto"u8, Changed: 26, Old: "1"u8),
     new(Name: "dataindependenttiming"u8, Package: "crypto/subtle"u8, Opaque: true),
+    new(Name: "decoratemappings"u8, Package: "runtime"u8, Opaque: true, Changed: 25, Old: "0"u8),
+    new(Name: "embedfollowsymlinks"u8, Package: "cmd/go"u8),
     new(Name: "execerrdot"u8, Package: "os/exec"u8),
-    new(Name: "fips140"u8, Package: "crypto/fips140"u8, Opaque: true),
+    new(Name: "fips140"u8, Package: "crypto/fips140"u8, Opaque: true, Immutable: true),
+    new(Name: "fips140ems"u8, Package: "crypto/tls"u8),
     new(Name: "gocachehash"u8, Package: "cmd/go"u8),
     new(Name: "gocachetest"u8, Package: "cmd/go"u8),
     new(Name: "gocacheverify"u8, Package: "cmd/go"u8),
     new(Name: "gotestjsonbuildtext"u8, Package: "cmd/go"u8, Changed: 24, Old: "1"u8),
     new(Name: "gotypesalias"u8, Package: "go/types"u8, Changed: 23, Old: "0"u8),
+    new(Name: "htmlmetacontenturlescape"u8, Package: "html/template"u8),
     new(Name: "http2client"u8, Package: "net/http"u8),
     new(Name: "http2debug"u8, Package: "net/http"u8, Opaque: true),
     new(Name: "http2server"u8, Package: "net/http"u8),
@@ -44,6 +51,7 @@ public static ж<slice<Info>> ᏑAll = new StandardBox<slice<Info>>(new Info[]{
     new(Name: "httplaxcontentlength"u8, Package: "net/http"u8, Changed: 22, Old: "1"u8),
     new(Name: "httpmuxgo121"u8, Package: "net/http"u8, Changed: 22, Old: "1"u8),
     new(Name: "httpservecontentkeepheaders"u8, Package: "net/http"u8, Changed: 23, Old: "1"u8),
+    new(Name: "httpservecontentmaxranges"u8, Package: "net/http"u8, Changed: 26, Old: "1"u8),
     new(Name: "installgoroot"u8, Package: "go/build"u8),
     new(Name: "jstmpllitinterp"u8, Package: "html/template"u8, Opaque: true), // bug #66217: remove Opaque
     //{Name: "multipartfiles", Package: "mime/multipart"},
@@ -62,18 +70,33 @@ public static ж<slice<Info>> ᏑAll = new StandardBox<slice<Info>>(new Info[]{
     new(Name: "tlsmaxrsasize"u8, Package: "crypto/tls"u8),
     new(Name: "tlsmlkem"u8, Package: "crypto/tls"u8, Changed: 24, Old: "0"u8, Opaque: true),
     new(Name: "tlsrsakex"u8, Package: "crypto/tls"u8, Changed: 22, Old: "1"u8),
+    new(Name: "tlssecpmlkem"u8, Package: "crypto/tls"u8, Changed: 26, Old: "0"u8, Opaque: true),
+    new(Name: "tlssha1"u8, Package: "crypto/tls"u8, Changed: 25, Old: "1"u8),
     new(Name: "tlsunsafeekm"u8, Package: "crypto/tls"u8, Changed: 22, Old: "1"u8),
+    new(Name: "updatemaxprocs"u8, Package: "runtime"u8, Changed: 25, Old: "0"u8),
     new(Name: "urlmaxqueryparams"u8, Package: "net/url"u8, Changed: 24, Old: "0"u8),
+    new(Name: "urlstrictcolons"u8, Package: "net/url"u8, Changed: 26, Old: "0"u8),
     new(Name: "winreadlinkvolume"u8, Package: "os"u8, Changed: 23, Old: "0"u8),
     new(Name: "winsymlink"u8, Package: "os"u8, Changed: 23, Old: "0"u8),
     new(Name: "x509keypairleaf"u8, Package: "crypto/tls"u8, Changed: 23, Old: "0"u8),
     new(Name: "x509negativeserial"u8, Package: "crypto/x509"u8, Changed: 23, Old: "1"u8),
     new(Name: "x509rsacrt"u8, Package: "crypto/x509"u8, Changed: 24, Old: "0"u8),
+    new(Name: "x509sha256skid"u8, Package: "crypto/x509"u8, Changed: 25, Old: "0"u8),
     new(Name: "x509usefallbackroots"u8, Package: "crypto/x509"u8),
     new(Name: "x509usepolicies"u8, Package: "crypto/x509"u8, Changed: 24, Old: "0"u8),
     new(Name: "zipinsecurepath"u8, Package: "archive/zip"u8)
 }.slice());
 public static ref slice<Info> All => ref ᏑAll.ValueSlot;
+
+partial struct RemovedInfo {
+    public @string Name; // name of the removed GODEBUG setting.
+    public nint Removed;   // minor version of Go, when the removal happened
+}
+
+// Removed contains all GODEBUGs that we have removed.
+public static slice<RemovedInfo> Removed = new RemovedInfo[]{
+    new(Name: "x509sha1"u8, Removed: 24)
+}.slice();
 
 // Lookup returns the Info with the given name.
 public static ж<Info> Lookup(@string name) {

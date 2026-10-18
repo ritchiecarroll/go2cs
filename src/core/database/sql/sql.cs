@@ -486,7 +486,7 @@ public static (driverꓸValue, error) Value<T>(this Null<T> n) {
     if (!n.Valid) {
         return (default!, default!);
     }
-    var v = ((any)n.V);
+    var v = ((any)(n.V).OrTypedNilOf());
     // See issue 69728.
     {
         var (valuer, ok) = v._<driver.Valuer>(ᐧ); if (ok) {
@@ -610,7 +610,7 @@ internal static connReuseStrategy cachedOrNewConn => 1;
 partial struct driverConn {
     internal ж<DB> db;
     internal time.Time createdAt;
-    public partial ref sync_package.Mutex Mutex { get; }  // guards following
+    /*embed*/ public sync_package.Mutex Mutex;  // guards following
     internal driver.Conn ci;
     internal bool needReset; // The connection session should be reset before use if true.
     internal bool closed;
@@ -1188,7 +1188,7 @@ public static void SetConnMaxLifetime(this ж<DB> Ꮡdb, time.Duration d) {
     }
     db.mu.Lock();
     // Wake cleaner up when lifetime is shortened.
-    if (d > 0 && d < db.maxLifetime && db.cleanerCh != default!) {
+    if (d > 0 && d < db.shortestIdleTimeLocked() && db.cleanerCh != default!) {
         var selᴛ7 = db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
         switch (trySelect(selᴛ7)) {
         case 0: {
@@ -1221,7 +1221,7 @@ public static void SetConnMaxIdleTime(this ж<DB> Ꮡdb, time.Duration d) {
         ᒐd1 = true;
 
         // Wake cleaner up when idle time is shortened.
-        if (d > 0 && d < db.maxIdleTime && db.cleanerCh != default!) {
+        if (d > 0 && d < db.shortestIdleTimeLocked() && db.cleanerCh != default!) {
             var selᴛ8 = db.cleanerCh.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
             switch (trySelect(selᴛ8)) {
             case 0: {
@@ -2463,7 +2463,7 @@ public static error Close(this ж<ΔConn> Ꮡc) {
 }
 
 partial struct Tx_stmts /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal slice<ж<ΔStmt>> v;
 }
 

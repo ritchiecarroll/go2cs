@@ -4,10 +4,12 @@
 namespace go;
 
 using atomic = @internal.runtime.atomic_package;
+using gc = @internal.runtime.gc_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(mcache))]
 partial class runtime_package {
 
 // Per-thread (in Go, per-P) cache for small objects.
@@ -39,11 +41,21 @@ partial struct mcache {
     internal uintptr tinyoffset;
     internal uintptr tinyAllocs;
 // The rest is not accessed on every malloc.
-    internal array<ж<mspan>> alloc = new(numSpanClasses); // spans to allocate from, indexed by spanClass
+
+    // alloc contains spans to allocate from, indexed by spanClass.
+    internal array<ж<mspan>> alloc = new(numSpanClasses);
+// TODO(thepudds): better to interleave alloc and reusableScan/reusableNoscan so that
+// a single malloc call can often access both in the same cache line for a given spanClass.
+// It's not interleaved right now in part to have slightly smaller diff, and might be
+// negligible effect on current microbenchmarks.
+
+    // reusableNoscan contains linked lists of reusable noscan heap objects, indexed by spanClass.
+    // The next pointers are stored in the first word of the heap objects.
+    internal array<gclinkptr> reusableNoscan = new(numSpanClasses);
     internal array<stackfreelist> stackcache = new(_NumStackOrders);
     // flushGen indicates the sweepgen during which this mcache
     // was last flushed. If flushGen != mheap_.sweepgen, the spans
-    // in this mcache are stale and need to the flushed so they
+    // in this mcache are stale and need to be flushed so they
     // can be swept. This is done in acquirep.
     internal atomic.Uint32 flushGen;
 }
@@ -86,10 +98,11 @@ internal static ж<mcache> allocmcache() {
         Ꮡc.ValueSlot.of(mcache.ᏑflushGen).Store(mheap_.sweepgen);
         unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     });
-    foreach (var (i, _) in (~c).alloc) {
-        c.Value.alloc[i] = Ꮡemptymspan;
+    foreach (var (i, _) in c.alloc) {
+        c.of(mcache.Ꮡalloc).ElementRef(i) = Ꮡemptymspan;
     }
-    c.Value.nextSample = nextSample();
+    c.nextSample = nextSample();
+
     return c;
 }
 
@@ -137,6 +150,7 @@ internal static ж<mcache> getMCache(ref m mp) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string refillOfSpanWithFreeˢ = "refill of span with free space remaining"u8;
+internal static readonly @string refillOfSpanWithReusableˢ = "refill of span with reusable pointers remaining on pointer free list"u8;
 internal static readonly @string badSweepgenInRefillˢ = "bad sweepgen in refill"u8;
 internal static readonly @string spanHasNoFreeSpaceˢ = "span has no free space"u8;
 
@@ -152,6 +166,16 @@ internal static void refill(this ref mcache c, spanClass spc) {
     if ((~s).allocCount != (~s).nelems) {
         @throw(refillOfSpanWithFreeˢ);
     }
+
+    // TODO(thepudds): we might be able to allow mallocgcTiny to reuse 16 byte objects from spc==5,
+    // but for now, just clear our reusable objects for tinySpanClass.
+    if (spc == tinySpanClass) {
+        c.reusableNoscan[spc] = 0;
+    }
+    if (c.reusableNoscan[spc] != 0) {
+        @throw(refillOfSpanWithReusableˢ);
+    }
+
     if (s != Ꮡemptymspan) {
         // Mark this span as no longer cached.
         if ((~s).sweepgen != mheap_.sweepgen + 3) {
@@ -218,18 +242,18 @@ internal static void refill(this ref mcache c, spanClass spc) {
 
 // allocLarge allocates a span for a large object.
 internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool noscan) {
-    if (size + (uintptr)_PageSize < size) {
+    if (size + (uintptr)pageSize < size) {
         @throw(outOfMemoryˢ);
     }
-    var npages = (size >> (int)(_PageShift));
-    if ((uintptr)(size & (uintptr)_PageMask) != 0) {
+    var npages = (size >> (int)(gc.PageShift));
+    if ((uintptr)(size & (uintptr)pageMask) != 0) {
         npages++;
     }
 
     // Deduct credit for this span allocation and sweep if
     // necessary. mHeap_Alloc will also sweep npages, so this only
     // pays the debt down to npage pages.
-    deductSweepCredit(npages * (uintptr)_PageSize, npages);
+    deductSweepCredit(npages * (uintptr)pageSize, npages);
 
     var spc = makeSpanClass(0, noscan);
     var s = Ꮡmheap_.alloc(npages, spc);
@@ -311,6 +335,13 @@ internal static void releaseAll(this ref mcache c) {
     c.tinyAllocs = 0;
     Ꮡmemstats.of(mstats.ᏑheapStats).release();
 
+    // Clear the reusable linked lists.
+    // For noscan objects, the nodes of the linked lists are the reusable heap objects themselves,
+    // so we can simply clear the linked list head pointers.
+    // TODO(thepudds): consider having debug logging of a non-empty reusable lists getting cleared,
+    // maybe based on the existing debugReusableLog.
+    builtin.clear(c.reusableNoscan[..]);
+
     // Update heapLive and heapScan.
     ᏑgcController.update(dHeapLive, scanAlloc);
 }
@@ -343,6 +374,28 @@ internal static void prepareForSweep(this ж<mcache> Ꮡc) {
     c.releaseAll();
     stackcache_clear(ref (Ꮡc).DerefOrNull());
     Ꮡc.of(mcache.ᏑflushGen).Store(mheap_.sweepgen); // Synchronizes with gcStart
+}
+
+// addReusableNoscan adds a noscan object pointer to the reusable pointer free list
+// for a span class.
+internal static void addReusableNoscan(this ref mcache c, spanClass spc, uintptr ptr) {
+    if (!runtimeFreegcEnabled) {
+        return;
+    }
+
+    // Add to the reusable pointers free list.
+    var v = ((gclinkptr)ptr);
+    v.ptr().Value.next = c.reusableNoscan[spc];
+    c.reusableNoscan[spc] = v;
+}
+
+// hasReusableNoscan reports whether there is a reusable object available for
+// a noscan spc.
+internal static bool hasReusableNoscan(this ref mcache c, spanClass spc) {
+    if (!runtimeFreegcEnabled) {
+        return false;
+    }
+    return c.reusableNoscan[spc] != 0;
 }
 
 } // end runtime_package

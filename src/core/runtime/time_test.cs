@@ -31,7 +31,7 @@ public static void TestFakeTime(ж<testing.T> Ꮡt) {
 
     // Faketime is advanced in checkdead. External linking brings in cgo,
     // causing checkdead not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
 
     Ꮡt.Parallel();
 

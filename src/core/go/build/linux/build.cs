@@ -10,12 +10,12 @@ using ast = global::go.go.ast_package;
 using constraint = global::go.go.build.constraint_package;
 using Δdoc = global::go.go.doc_package;
 using token = global::go.go.token_package;
-using buildcfg = @internal.buildcfg_package;
-using godebug = @internal.godebug_package;
-using goroot = @internal.goroot_package;
-using goversion = @internal.goversion_package;
-using platform = @internal.platform_package;
-using syslist = @internal.syslist_package;
+using buildcfg = global::go.@internal.buildcfg_package;
+using godebug = global::go.@internal.godebug_package;
+using goroot = global::go.@internal.goroot_package;
+using goversion = global::go.@internal.goversion_package;
+using platform = global::go.@internal.platform_package;
+using syslist = global::go.@internal.syslist_package;
 using io = io_package;
 using fs = global::go.io.fs_package;
 using os = os_package;
@@ -29,13 +29,14 @@ using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
-using @internal;
+using global::go.@internal;
 using global::go.go;
 using global::go.go.build;
 using global::go.io;
 using global::go.os;
 using global::go.path;
 using global::go.unicode;
+using iter = iter_package;
 using ꓸꓸꓸstring = Span<@string>;
 
 partial class build_package {
@@ -402,7 +403,7 @@ internal static Context defaultContext() {
 
     @string env = os.Getenv(cgoEnabledˢ);
     if (env == ""u8) {
-        env = defaultCGO_ENABLED;
+        env = buildcfg.DefaultCGO_ENABLED;
     }
     var exprᴛ1 = env;
     if (exprᴛ1 == "1"u8) {
@@ -819,7 +820,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
                 }
                 tried.goroot = dir;
             }
-            if (ctxt.Compiler == "gccgo"u8 && goroot.IsStandardPackage(ctxt.GOROOT, ctxt.Compiler, path)) {
+            if (ctxt.Compiler == "gccgo"u8 && goroot.IsStandardPackage(os.ReadDir, ctxt.GOROOT, ctxt.Compiler, path)) {
                 // TODO(bcmills): Setting p.Dir here is misleading, because gccgo
                 // doesn't actually load its standard-library packages from this
                 // directory. See if we can leave it unset.
@@ -1250,7 +1251,7 @@ internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string 
     // To invoke the go command,
     // we must not being doing special things like AllowBinary or IgnoreVendor,
     // and all the file system callbacks must be nil (we're meant to use the local file system).
-    if ((ImportMode)(mode & AllowBinary) != 0 || (ImportMode)(mode & IgnoreVendor) != 0 || ctxt.JoinPath != default! || ctxt.SplitPathList != default! || ctxt.IsAbsPath != default! || ctxt.IsDir != default! || ctxt.HasSubdir != default! || ctxt.ReadDir != default! || ctxt.OpenFile != default! || !equal(ctxt.ToolTags, defaultToolTags) || !equal(ctxt.ReleaseTags, defaultReleaseTags)) {
+    if ((ImportMode)(mode & AllowBinary) != 0 || (ImportMode)(mode & IgnoreVendor) != 0 || ctxt.JoinPath != default! || ctxt.SplitPathList != default! || ctxt.IsAbsPath != default! || ctxt.IsDir != default! || ctxt.HasSubdir != default! || ctxt.ReadDir != default! || ctxt.OpenFile != default! || !slices.Equal<slice<@string>, @string>(ctxt.ToolTags, defaultToolTags) || !slices.Equal<slice<@string>, @string>(ctxt.ReleaseTags, defaultReleaseTags)) {
         return errNoModules;
     }
 
@@ -1396,18 +1397,6 @@ internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string 
     p.Root = f[2];
     p.Goroot = f[3] == "true";
     return default!;
-}
-
-internal static bool equal(slice<@string> x, slice<@string> y) {
-    if (len(x) != len(y)) {
-        return false;
-    }
-    foreach (var (i, xi) in x) {
-        if (xi != y[i]) {
-            return false;
-        }
-    }
-    return true;
 }
 
 // hasGoFiles reports whether dir contains any files with names ending in .go.
@@ -1864,9 +1853,8 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
     ref var di = ref Ꮡdi.DerefOrNull();
 
     @string text = Ꮡcg.Text();
-    foreach (var (_, vᴛ1) in strings.Split(text, "\n"u8)) {
-        var line = vᴛ1;
-
+    foreach (var iᴛ1 in range<@string>(strings.SplitSeq(text, "\n"u8).Invoke)) {
+        var line = iᴛ1;
         @string orig = line;
 
         // Line is
@@ -1915,8 +1903,8 @@ internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Pac
         if (err != default!) {
             return fmt.Errorf("%s: invalid #cgo line: %s"u8, filename, orig);
         }
-        foreach (var (i, vᴛ2) in args) {
-            var arg = vᴛ2;
+        foreach (var (i, vᴛ1) in args) {
+            var arg = vᴛ1;
 
             {
                 (arg, ok) = expandSrcDir(arg, di.Dir); if (!ok) {
@@ -2182,23 +2170,7 @@ internal static bool matchTag(this ref Context ctxt, @string name, map<@string, 
     }
 
     // other tags
-    foreach (var (_, tag) in ctxt.BuildTags) {
-        if (tag == name) {
-            return true;
-        }
-    }
-    foreach (var (_, tag) in ctxt.ToolTags) {
-        if (tag == name) {
-            return true;
-        }
-    }
-    foreach (var (_, tag) in ctxt.ReleaseTags) {
-        if (tag == name) {
-            return true;
-        }
-    }
-
-    return false;
+    return slices.Contains(ctxt.BuildTags, name) || slices.Contains(ctxt.ToolTags, name) || slices.Contains(ctxt.ReleaseTags, name);
 }
 
 // goodOSArchFile returns false if the name contains a $GOOS or $GOARCH

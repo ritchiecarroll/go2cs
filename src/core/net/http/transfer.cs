@@ -231,10 +231,10 @@ internal static partial void probeRequestBody(this ж<transferWriter> Ꮡt) {
         builtin.close(Ꮡt.Value.ByteReadCh);
     }, Ꮡt.Value.Body);
     var timer = time.NewTimer(200 * time.Millisecond);
-    var selᴛ91 = t.ByteReadCh;
-    var selᴛ92 = (~timer).C;
-    switch (select(ᐸꟷ(selᴛ91, ꓸꓸꓸ), ᐸꟷ(selᴛ92, ꓸꓸꓸ))) {
-    case 0 when selᴛ91.ꟷᐳ(out var rres): {
+    var selᴛ96 = t.ByteReadCh;
+    var selᴛ97 = (~timer).C;
+    switch (select(ᐸꟷ(selᴛ96, ꓸꓸꓸ), ᐸꟷ(selᴛ97, ꓸꓸꓸ))) {
+    case 0 when selᴛ96.ꟷᐳ(out var rres): {
         timer.Stop();
         if (rres.n == 0 && AreEqual(rres.err, io.EOF)){
             // It was empty.
@@ -253,7 +253,7 @@ internal static partial void probeRequestBody(this ж<transferWriter> Ꮡt) {
         }
         break;
     }
-    case 1 when selᴛ92.ꟷᐳ(out _): {
+    case 1 when selᴛ97.ꟷᐳ(out _): {
         // Too slow. Don't wait. Read it later, and keep
         // assuming that this is ContentLength == -1
         // (unknown), which means we'll send a

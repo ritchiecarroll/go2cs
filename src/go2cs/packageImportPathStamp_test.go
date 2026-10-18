@@ -51,6 +51,7 @@ func withPackage(t *testing.T, name, path string) {
 }
 
 func TestConvergeGoPackageStampsReplacesAStalePathAndAddsAMissingOne(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	withPackage(t, "dotted", "example.com/dotted/v2")
 
 	for _, stale := range []string{
@@ -68,6 +69,7 @@ func TestConvergeGoPackageStampsReplacesAStalePathAndAddsAMissingOne(t *testing.
 }
 
 func TestConvergeGoPackageStampsDropsAStampTheDerivationNoLongerNeeds(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	withPackage(t, "gob", "encoding/gob")
 
 	lines := []string{`[GoPackage("gob", ImportPath = "stale/path")]`, "public static partial class gob_package"}
@@ -78,6 +80,7 @@ func TestConvergeGoPackageStampsDropsAStampTheDerivationNoLongerNeeds(t *testing
 }
 
 func TestConvergeGoPackageStampsGivesEachTestVariantItsGoPath(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	// The EXTERNAL variant writes package_test_info.cs, which also carries the production class and
 	// the internal-test bridge: each class keeps its own Go path.
 	withPackage(t, "dotted_test", "example.com/dotted/v2_test")
@@ -105,6 +108,7 @@ func TestConvergeGoPackageStampsGivesEachTestVariantItsGoPath(t *testing.T) {
 }
 
 func TestConvergeGoPackageStampsNamesPackageMainByGosRule(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	withPackage(t, "main", "go2cs/DottedModulePath")
 
 	lines := []string{`[GoPackage("main")]`, "public static partial class main_package"}
@@ -123,6 +127,7 @@ func withGorootVendored(t *testing.T, vendored bool) {
 }
 
 func TestConvergeGoPackageStampsGivesAGorootVendoredPackageGosVendorPath(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	// The loader reports $GOROOT/src/vendor/golang.org/x/net/idna as golang.org/x/net/idna. Go's
 	// reflect path for it is vendor/golang.org/x/net/idna; the stamp must carry that path, and a
 	// stamp written from the loader's path must converge to it.
@@ -144,6 +149,7 @@ func TestConvergeGoPackageStampsGivesAGorootVendoredPackageGosVendorPath(t *test
 }
 
 func TestConvergeGoPackageStampsKeepsANonGorootModulesOwnPath(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	// The control: the same path from a module OUTSIDE GOROOT (converting x/net itself) is not
 	// vendored, and keeps the path the loader reports.
 	withPackage(t, "idna", "golang.org/x/net/idna")
@@ -158,6 +164,7 @@ func TestConvergeGoPackageStampsKeepsANonGorootModulesOwnPath(t *testing.T) {
 }
 
 func TestGoReflectPackagePathPrefixesOnlyAnUnprefixedVendoredPath(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	withGorootVendored(t, true)
 
 	for loader, want := range map[string]string{

@@ -16,11 +16,12 @@
 // its address makes the kernel write the native record's full length over a much smaller managed
 // object.
 //
-// THIS ONE, in numbers. OSVERSIONINFOW is 276 bytes: five DWORDs and then szCSDVersion INLINE as
-// WCHAR[128] (20 + 256). That number is not read off documentation alone -- the conversion computes
-// it for itself, and version_windows.cs:37 assigns the folded `unsafe.Sizeof(info)` literal 276 to
-// osVersionInfoSize before the call, which is also the value RtlGetVersion validates. The converted
-// _OSVERSIONINFOW (version_windows.cs:20) cannot have that layout: its csdVersion is
+// THIS ONE, in numbers. OSVERSIONINFOEXW is 284 bytes: five DWORDs, then szCSDVersion INLINE as
+// WCHAR[128] (20 + 256 = 276), then three WORDs and two BYTEs (+8). That number is not read off
+// documentation alone -- the conversion computes it for itself, and version_windows.cs:37 assigns
+// the folded `unsafe.Sizeof(info)` literal 284 to osVersionInfoSize before the call, which is also
+// the value RtlGetVersion validates. The converted _OSVERSIONINFOEXW (version_windows.cs:15) cannot
+// have that layout: its csdVersion is
 // `array<uint16>`, a readonly struct over a `uint16[]`, so the record CONTAINS A MANAGED REFERENCE
 // and is roughly two dozen bytes with CLR auto-layout free to place its fields anywhere. The
 // per-field offsets are not restated here because the remedy does not depend on them: it replaces
@@ -38,10 +39,18 @@
 // corruption loud; this file is what removes it, and landing one without the other is what the
 // re-seat's condition exists to prevent.
 //
-// WHO REACHES IT. version() has two callers, both behind a sync.Once in this same file's Go
-// original: initTCPKeepAlive (version_windows.cs:48, on the error path of its probe socket) and
-// SupportTCPInitialRTONoSYNRetransmissions (version_windows.cs:98). net's Windows TCP dial consults
-// those on the way to setting keep-alive options, so the first dial in a process runs this.
+// WHO REACHES IT. getVersionInfo() has two callers in this same file's Go original. Version() serves
+// initTCPKeepAlive (version_windows.cs:74, on the error path of its probe socket) and
+// SupportTCPInitialRTONoSYNRetransmissions (version_windows.cs:120), both behind a sync.Once; net's
+// Windows TCP dial consults those on the way to setting keep-alive options, so the first dial in a
+// process runs this. SupportUnlimitedTransmitFile (version_windows.cs:59) reads productType, which
+// net's sendfile consults (net/windows/sendfile_windows.cs:20).
+//
+// GO 1.26 widened the record. Go 1.24 passed OSVERSIONINFOW (276 bytes) as `_OSVERSIONINFOW`; Go
+// 1.26 passes OSVERSIONINFOEXW as `_OSVERSIONINFOEXW`, adding servicePackMajor/Minor, suiteMask,
+// productType and reserved after szCSDVersion. productType became load-bearing with
+// SupportUnlimitedTransmitFile (golang.org/issue/73746), so the mirror carries all five fields
+// and copies them back.
 //
 // THE CENSUS ROW THAT WAS MISSING. This package's zsyscall_windows_impl.cs header enumerates the
 // same-shape wrappers left for the suite that would reach them -- and rtlGetVersion is not among
@@ -79,28 +88,29 @@ using syscall = go.syscall_package;
 
 partial class windows_package
 {
-    // szCSDVersion's element count, as both OSVERSIONINFOW and the converted _OSVERSIONINFOW
+    // szCSDVersion's element count, as both OSVERSIONINFOEXW and the converted _OSVERSIONINFOEXW
     // declare it. A `fixed` buffer needs a compile-time constant, and the converted struct's own
     // `new(128)` is a run-time field initializer.
     private const int csdVersionLength = 128;
 
-    // The documented native size, and the same 276 version() writes into osVersionInfoSize. Stated
-    // so the mirror's own layout is checked at the boundary rather than assumed -- the failure this
-    // file exists to prevent is a silent offset.
-    private const int NativeOsVersionInfoWSize = 276;
+    // The documented native size, and the same 284 getVersionInfo() writes into osVersionInfoSize.
+    // Stated so the mirror's own layout is checked at the boundary rather than assumed -- the
+    // failure this file exists to prevent is a silent offset.
+    private const int NativeOsVersionInfoExWSize = 284;
 
     /// <summary>
-    /// <c>OSVERSIONINFOW</c> exactly as ntdll lays it out: 276 bytes, the CSD string inline as
+    /// <c>OSVERSIONINFOEXW</c> exactly as ntdll lays it out: 284 bytes, the CSD string inline as
     /// <c>WCHAR[128]</c>.
     /// </summary>
     /// <remarks>
     /// <c>fixed</c> is what keeps that buffer inline -- a C# array field would be another managed
     /// reference, which is the whole bug -- so the struct is blittable and needs no marshalling
-    /// layer. Every field is 4-byte aligned and the buffer is 2-byte aligned, so sequential layout
-    /// reproduces the native offsets (0, 4, 8, 12, 16, 20) with no padding anywhere.
+    /// layer. Every field is naturally aligned at its native offset (0, 4, 8, 12, 16, 20, then 276,
+    /// 278, 280, 282, 283), and 284 is a multiple of the struct's 4-byte alignment, so sequential
+    /// layout adds no padding anywhere.
     /// </remarks>
     [StructLayout(LayoutKind.Sequential)]
-    private unsafe struct NativeOsVersionInfoW
+    private unsafe struct NativeOsVersionInfoExW
     {
         public uint32 OSVersionInfoSize;
         public uint32 MajorVersion;
@@ -108,34 +118,39 @@ partial class windows_package
         public uint32 BuildNumber;
         public uint32 PlatformId;
         public fixed uint16 CSDVersion[csdVersionLength];
+        public uint16 ServicePackMajor;
+        public uint16 ServicePackMinor;
+        public uint16 SuiteMask;
+        public byte ProductType;
+        public byte Reserved;
     }
 
     /// <summary>
-    /// Fills the caller's <c>_OSVERSIONINFOW</c> from ntdll through a blittable mirror.
+    /// Fills the caller's <c>_OSVERSIONINFOEXW</c> from ntdll through a blittable mirror.
     /// </summary>
     /// <remarks>
     /// Go's signature is preserved exactly. RtlGetVersion always succeeds -- Go's own comment above
     /// the //sys line says so, and the generated wrapper discards the status accordingly -- so this
     /// returns void and reports nothing the caller did not already have.
     /// </remarks>
-    internal static unsafe void rtlGetVersion(ж<_OSVERSIONINFOW> Ꮡinfo)
+    internal static unsafe void rtlGetVersion(ж<_OSVERSIONINFOEXW> Ꮡinfo)
     {
-        if (sizeof(NativeOsVersionInfoW) != NativeOsVersionInfoWSize)
+        if (sizeof(NativeOsVersionInfoExW) != NativeOsVersionInfoExWSize)
         {
             throw new InvalidOperationException(
-                $"internal/syscall/windows: the NativeOsVersionInfoW mirror is " +
-                $"{sizeof(NativeOsVersionInfoW)} bytes where ntdll writes " +
-                $"{NativeOsVersionInfoWSize} -- every field past the first would come from the " +
+                $"internal/syscall/windows: the NativeOsVersionInfoExW mirror is " +
+                $"{sizeof(NativeOsVersionInfoExW)} bytes where ntdll writes " +
+                $"{NativeOsVersionInfoExWSize} -- every field past the first would come from the " +
                 "wrong offset.");
         }
 
-        ref _OSVERSIONINFOW managed = ref Ꮡinfo.Value;
+        ref _OSVERSIONINFOEXW managed = ref Ꮡinfo.Value;
 
-        NativeOsVersionInfoW native = default;
+        NativeOsVersionInfoExW native = default;
 
         // The CALLER's value, not the mirror's size: Go sets this to unsafe.Sizeof(info) before the
         // call and RtlGetVersion validates it, so substituting anything else would change what the
-        // kernel is asked. The two agree at 276, and the assertion above is what keeps them
+        // kernel is asked. The two agree at 284, and the assertion above is what keeps them
         // agreeing.
         native.OSVersionInfoSize = managed.osVersionInfoSize;
 
@@ -150,6 +165,11 @@ partial class windows_package
         managed.minorVersion = native.MinorVersion;
         managed.buildNumber = native.BuildNumber;
         managed.platformId = native.PlatformId;
+        managed.servicePackMajor = native.ServicePackMajor;
+        managed.servicePackMinor = native.ServicePackMinor;
+        managed.suiteMask = native.SuiteMask;
+        managed.productType = native.ProductType;
+        managed.reserved = native.Reserved;
 
         // Copied whole, NULs included, for the reason the GetTimeZoneInformation twin spells out: a
         // caller reads such a field as UTF16ToString(csdVersion[:]), which stops at the first NUL,

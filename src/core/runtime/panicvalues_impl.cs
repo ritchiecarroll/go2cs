@@ -69,7 +69,11 @@ public static partial class runtime_package
         // Constructed per panic, as Go constructs them: neither touches a static of this package, so
         // registering them here runs nothing ahead of the package's own initialization.
         RuntimeErrorPanic.PlainErrorValue = static message => (error)(plainError)(@string)message;
+        RuntimeErrorPanic.ErrorStringValue = static message => (error)(errorString)(@string)message;
+        RuntimeErrorPanic.UnhashableKeyErrorValue = static unhashable => @internal.runtime.maps_package.unhashableKeyPanicValue(unhashable);
         RuntimeErrorPanic.BoundsErrorValue = static (x, y, signed, code) =>
-            (error)new boundsError(x: x, signed: signed, y: (nint)y, code: (boundsErrorCode)code);
+            // Go 1.26 moved the code to internal/abi (abi.BoundsErrorCode, bounds.go); the numbering is runtime's
+            // 1.24 boundsErrorCode verbatim, BoundsIndex .. BoundsConvert, so golib's code value carries over.
+            (error)new boundsError(x: x, signed: signed, y: (nint)y, code: (global::go.@internal.abi_package.BoundsErrorCode)code);
     }
 }

@@ -173,7 +173,7 @@ internal static error checkChainSSLServerPolicy(ж<Certificate> Ꮡc, ж<syscall
 internal static map<ExtKeyUsage, slice<byte>> windowsExtKeyUsageOIDs;
 internal static void initᴛwindowsExtKeyUsageOIDs() { windowsExtKeyUsageOIDs = new map<ExtKeyUsage, slice<byte>>(builtin.len(extKeyUsageOIDs)); }
 
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     foreach (var (_, eku) in extKeyUsageOIDs) {
         windowsExtKeyUsageOIDs[eku.extKeyUsage] = slice<byte>(eku.oid.String() + "\x00");
     }

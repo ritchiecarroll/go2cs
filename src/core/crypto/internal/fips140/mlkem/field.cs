@@ -231,9 +231,7 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
     f = f.Clone();
 
     (s, var b) = sliceForAppend(s, encodingSize1);
-    foreach (var (i, _) in b) {
-        b[i] = 0;
-    }
+    clear(b);
     foreach (var (i, _) in f) {
         b[i / 8] |= (uint8)((uint8)(compress(f[i], 1).Lsh((int64)((i % 8)))));
     }

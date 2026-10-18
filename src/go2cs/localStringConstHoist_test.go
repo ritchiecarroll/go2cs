@@ -67,6 +67,7 @@ func use() string { return pkgConst + greeting + fromInit }
 //
 // RED at master 4c53b02a0a: every local string const emitted `@string fnAtoi = "Atoi"u8;` in the body.
 func TestLocalStringConstHoistsUnderItsOwnName(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

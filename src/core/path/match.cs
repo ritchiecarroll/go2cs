@@ -102,9 +102,7 @@ internal static (bool star, @string chunk, @string rest) scanChunk(@string patte
         star = true;
     }
     var inrange = false;
-    nint i = default!;
-Scan:
-    for (i = 0; i < len(pattern); i++) {
+    for (nint i = 0; i < len(pattern); i++) {
         switch (pattern[i]) {
         case (rune)'\\': {
             // error check handled in matchChunk: bad pattern.
@@ -123,14 +121,12 @@ Scan:
         }
         case (rune)'*': {
             if (!inrange) {
-                goto break_Scan;
+                return (star, pattern.slice(0, i), pattern.slice(i));
             }
             break;
         }}
-continue_Scan:;
     }
-break_Scan:;
-    return (star, pattern.slice(0, i), pattern.slice(i));
+    return (star, pattern, "");
 }
 
 // matchChunk checks whether chunk matches the beginning of s.
@@ -144,9 +140,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
     // checking that the pattern is well-formed but no longer reading s.
     var failed = false;
     while (len(chunk) > 0) {
-        if (!failed && len(s) == 0) {
-            failed = true;
-        }
+        failed = failed || len(s) == 0;
         var exprᴛ1 = chunk[0];
         var matchᴛ1 = false;
         if (exprᴛ1 is (rune)'[') { matchᴛ1 = true;
@@ -187,20 +181,14 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                         }
                     }
                 }
-                if (loΔ1 <= r && r <= hiΔ1) {
-                    match = true;
-                }
+                match = match || loΔ1 <= r && r <= hiΔ1;
                 nrange++;
             }
-            if (match == negated) {
-                failed = true;
-            }
+            failed = failed || match == negated;
         }
         else if (exprᴛ1 is (rune)'?') { matchᴛ1 = true;
             if (!failed) {
-                if (s[0] == (rune)'/') {
-                    failed = true;
-                }
+                failed = s[0] == (rune)'/';
                 var (_, n) = utf8.DecodeRuneInString(s);
                 s = s.slice(n);
             }
@@ -215,9 +203,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
         }
         if (fallthrough || !matchᴛ1) { /* default: */
             if (!failed) {
-                if (chunk[0] != s[0]) {
-                    failed = true;
-                }
+                failed = chunk[0] != s[0];
                 s = s[1..];
             }
             chunk = chunk[1..];

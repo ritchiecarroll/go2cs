@@ -40,6 +40,7 @@ import (
 // any slot of a keyed composite — single-result and multi-result alike — and pins the CONTROL
 // that a concrete func-typed slot, which does have a delegate target, is left exactly as it was.
 func TestUntypedInterfaceFuncLitResultType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

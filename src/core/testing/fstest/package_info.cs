@@ -39,7 +39,7 @@ using static go.testing.fstest_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<MapFS, go.io.fs_package.FS>]
+[assembly: GoImplement<MapFS, go.io.fs_package.ReadLinkFS>]
 [assembly: GoImplement<fsOnly, go.io.fs_package.FS>(Promoted = true)]
 [assembly: GoImplement<fsOnly, go.io.fs_package.FS>]
 [assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
@@ -61,8 +61,8 @@ using static go.testing.fstest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ACpWkpaSgpSClK7CgoKCgoKCgoKmuIKCgoKCgoKU7oKmgpSClJiClAAMFoKmgqaCpoLupJIACBKAooCigKKAooCigKKAooCkggAJFICkgKSCgpSClIKCpoLYtKSClIKmgoKUgoKUAAoWgKKAooKmgoKClIKUgoKUgg==", "103-105:1")]
-[assembly: go.GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlIABICgIKkgoCCkoKCgqaCgpSAgqS2pqKSgoKCgpSClIKCgoKUlIKCpoKUAAoYsqaCgoKClIKCgoKUAAgK9IKCgpSCgoKCqJKClJSCgpSCtIK0gqSCgoKClMqCgoKCuIKCgoK4gILapoCCpJKCgoKUpoCCpJKCgoKClIKCgpSCgpSCgpSCgqamgIKCgoKUlIKC7IKCgpSUgoK4oqaSqJKokqiSgIK4koKCgoKCgoKUlLS0tLS2lMqAgsiCgoKCgpSmgqaClJSCgoK4goKClIKmgoKmgoKUtIK0graqooKCgpSCgoKClIKUgqaCgoKUgqaCgqaCgsqCgoKUgoKmgIKCgoKUgoLewoKCgoKUyoKCpoKCgoKCgpSClJSCpoKmgoKUpgAICNKmgoKCpoKCgoKmgILapoCCgoKClLiClIKCgpSUooDYgoKClKaCgoKUkoCCxKSCgoLqsoKCgpS6kriClICC7oCCAAcQgoCC", "449-457:1;485-490:2;543-543:1;575-581:1")]
+[assembly: go.GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ACpWkpKWkoKUgoKmgpSuwoKCgoKCgqa4goKCgoKClO6CpoKUgpSYgpSCgpSUppSAgoKClMiCgoKCgpSClICCgoKUpJSokoKClIKUrLKCgpSmgoKUgoKUkpSCgqaCpoKCgtwADBaCpoKmgqaC7qSSAAgSgKKAooCigKKAooCigKKApIIACRSApICkgoKUgpSCgqaC2LSkgpSCpoKClIKClAAKFoCigKKCpoKCgpSClIKClII=", "106-108:1")]
+[assembly: go.GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlOABUCgIKkgoCCkoKCgqaCgpSAgqS2pqKSgoKCgpSClIKCgoKUlIKCpoKUAAoYsqaCgoKClIKCgoKUAAgK9IKCgpSCgoKCqJKClJSCgpSCtIK0gqSCgoKUyKTKgoKCgriCgoKCuICC2qaAgqSSgoKClKaAgqSSgoKCgpSCgoKUgoKUgoKUgoKmpoCCgoKClJSCguyCgoKUlIKCuKKmkqiSqJKokoCCuJKCgoKCgoKClJS0tLS0tpTKgILIgoKCgoKUpoKmgpSUgoKCuIKCgpSCpoKCpoKClLSCtIK2qqKCgoKUgoKCgpSClIKmgoKClIKmgoKmgoLKgoKClIKCpoCCgoKClIKCyICCgoKClIKClIKCgt7CgoKCgpTKgoKmgoKCgoKClIKUlIKmgqaCgpSmAAgI0qaCgoKmgoKCgqaAgtqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgILEpIKCguqygoKClLqSuIKUgILugIIABxCCgII=", "474-482:1;510-515:2;568-568:1;600-606:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

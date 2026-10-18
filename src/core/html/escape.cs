@@ -192,16 +192,16 @@ internal static ж<strings.Replacer> htmlEscaper = strings.NewReplacer(
 
 // EscapeString escapes special characters like "<" to become "&lt;". It
 // escapes only five such characters: <, >, &, ' and ".
-// UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
+// [UnescapeString](EscapeString(s)) == s always holds, but the converse isn't
 // always true.
 public static @string EscapeString(@string s) {
     return htmlEscaper.Replace(s);
 }
 
 // UnescapeString unescapes entities like "&lt;" to become "<". It unescapes a
-// larger range of entities than EscapeString escapes. For example, "&aacute;"
+// larger range of entities than [EscapeString] escapes. For example, "&aacute;"
 // unescapes to "á", as does "&#225;" and "&#xE1;".
-// UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
+// UnescapeString([EscapeString](s)) == s always holds, but the converse isn't
 // always true.
 public static @string UnescapeString(@string s) {
     nint i = strings.IndexByte(s, (rune)'&');

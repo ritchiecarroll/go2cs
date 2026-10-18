@@ -263,7 +263,7 @@ internal static nint encodeSize(slice<byte> b, uint32 size) {
 // Closed.
 partial struct bufWriter {
     internal io.Closer closer;
-    public partial ref ж<bufio_package.Writer> Writer { get; }
+    /*embed*/ public ж<bufio_package.Writer> Writer;
 }
 
 internal static error Close(this ref bufWriter w) {

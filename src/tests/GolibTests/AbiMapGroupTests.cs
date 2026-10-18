@@ -15,7 +15,7 @@ public class AbiMapGroupTests
 {
     private struct Big { internal long a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q; }
 
-    private static ж<abi.SwissMapType> MapTypeOf<K, V>()
+    private static ж<abi.ΔMapType> MapTypeOf<K, V>()
         where K : notnull
     {
         map<K, V> m = default!;
@@ -25,7 +25,7 @@ public class AbiMapGroupTests
     private static uintptr GroupSizeOf<K, V>()
         where K : notnull
     {
-        ж<abi.SwissMapType> mt = MapTypeOf<K, V>();
+        ж<abi.ΔMapType> mt = MapTypeOf<K, V>();
 
         Assert.IsTrue(mt != nil, "premise: the map descriptor projects");
         Assert.IsTrue(mt.Value.Group != nil, "the descriptor carries a group type");

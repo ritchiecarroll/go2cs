@@ -69,7 +69,7 @@ public static (ж<UnixAddr>, error) ResolveUnixAddr(@string network, @string add
 // UnixConn is an implementation of the [Conn] interface for connections
 // to Unix domain sockets.
 partial struct UnixConn {
-    internal partial ref conn conn { get; }
+    /*embed*/ internal conn conn;
 }
 
 // SyscallConn returns a raw network connection.
@@ -84,7 +84,7 @@ public static (syscall.RawConn, error) SyscallConn(this ж<UnixConn> Ꮡc) {
 }
 
 // CloseRead shuts down the reading side of the Unix domain connection.
-// Most callers should just use Close.
+// Most callers should just use [UnixConn.Close].
 public static error CloseRead(this ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -100,7 +100,7 @@ public static error CloseRead(this ж<UnixConn> Ꮡc) {
 }
 
 // CloseWrite shuts down the writing side of the Unix domain connection.
-// Most callers should just use Close.
+// Most callers should just use [UnixConn.Close].
 public static error CloseWrite(this ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -129,7 +129,7 @@ public static (nint, ж<UnixAddr>, error) ReadFromUnix(this ж<UnixConn> Ꮡc, s
     return (n, addr, err);
 }
 
-// ReadFrom implements the [PacketConn] ReadFrom method.
+// ReadFrom implements the [PacketConn].ReadFrom method.
 public static (nint, ΔAddr, error) ReadFrom(this ж<UnixConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -185,7 +185,7 @@ public static (nint, error) WriteToUnix(this ж<UnixConn> Ꮡc, slice<byte> b, �
     return (n, err);
 }
 
-// WriteTo implements the [PacketConn] WriteTo method.
+// WriteTo implements the [PacketConn].WriteTo method.
 public static (nint, error) WriteTo(this ж<UnixConn> Ꮡc, slice<byte> b, ΔAddr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -231,11 +231,17 @@ internal static ж<UnixConn> newUnixConn(ж<netFD> Ꮡfd) {
 
 // DialUnix acts like [Dial] for Unix networks.
 //
-// The network must be a Unix network name; see func Dial for details.
+// The network must be a Unix network name; see func [Dial] for details.
 //
 // If laddr is non-nil, it is used as the local address for the
 // connection.
 public static (ж<UnixConn>, error) DialUnix(@string network, ж<UnixAddr> Ꮡladdr, ж<UnixAddr> Ꮡraddr) {
+    return dialUnix(context.Background(), nil, network, Ꮡladdr, Ꮡraddr);
+}
+
+internal static (ж<UnixConn>, error) dialUnix(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<UnixAddr> Ꮡladdr, ж<UnixAddr> Ꮡraddr) {
+    ref var dialer = ref Ꮡdialer.DerefOrNull();
+
     var exprᴛ1 = network;
     if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
     }
@@ -243,7 +249,10 @@ public static (ж<UnixConn>, error) DialUnix(@string network, ж<UnixAddr> Ꮡla
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
     var sd = Ꮡ(new sysDialer(network: network, address: Ꮡraddr.String()));
-    var (c, err) = sd.dialUnix(context.Background(), Ꮡladdr, Ꮡraddr);
+    if (Ꮡdialer != nil) {
+        sd.Value.Dialer = dialer;
+    }
+    var (c, err) = sd.dialUnix(ctx, Ꮡladdr, Ꮡraddr);
     if (err != default!) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: err))));
     }
@@ -269,7 +278,7 @@ internal static bool ok(this ж<UnixListener> Ꮡln) {
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
 //
-// The returned RawConn only supports calling Control. Read and
+// The returned [syscall.RawConn] only supports calling Control. Read and
 // Write return an error.
 public static (syscall.RawConn, error) SyscallConn(this ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
@@ -327,7 +336,7 @@ public static error Close(this ж<UnixListener> Ꮡl) {
 }
 
 // Addr returns the listener's network address.
-// The Addr returned is shared by all invocations of Addr, so
+// The [Addr] returned is shared by all invocations of Addr, so
 // do not modify it.
 public static ΔAddr Addr(this ref UnixListener l) {
     return (~l.fd).laddr;
@@ -348,9 +357,12 @@ public static error SetDeadline(this ж<UnixListener> Ꮡl, time.Time t) {
 // It is the caller's responsibility to close f when finished.
 // Closing l does not affect f, and closing f does not affect l.
 //
-// The returned os.File's file descriptor is different from the
+// The returned [os.File]'s file descriptor is different from the
 // connection's. Attempting to change properties of the original
 // using this duplicate may or may not have the desired effect.
+//
+// On Windows, the returned os.File's file descriptor is not
+// usable on other processes.
 public static (ж<os.File> f, error err) File(this ж<UnixListener> Ꮡl) {
     ж<os.File> f = default!;
     error err = default!;

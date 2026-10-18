@@ -32,7 +32,7 @@ partial struct fileStat {
     // what syscall.GetFileType returns
     internal uint32 filetype;
     // used to implement SameFile
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal @string path;
     internal uint32 vol;
     internal uint32 idxhi;

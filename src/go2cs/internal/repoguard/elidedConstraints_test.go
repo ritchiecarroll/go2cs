@@ -84,7 +84,11 @@ var erasedConstraintPattern = regexp.MustCompile(`/\*\s*where\s+[A-Za-z_][A-Za-z
 // The term grammar admits no braces, parentheses, semicolons or pointer stars. An inline interface
 // that carries methods, and a pointer term (whose methodless union emits no constraint at all, so it
 // can never reach `new()` legitimately), therefore stay in the gated column.
-var methodlessUnionPattern = regexp.MustCompile(`where\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*/\*\s*` + unionTerm + `(?:\s*\|\s*` + unionTerm + `)+\s*\*/\s*new\(\)`)
+// A NAMED constraint over such a union is spelled with its name first, `/* EventDetails = Metric | Label |
+// … */` (H7, 2026-10-15: internal/trace's EventDetails, nine struct types, was gated as a lost constraint
+// while its breadcrumb carried only the name). The name is optional in the pattern and the union after it
+// is held to the same grammar, so a bare name, or a name over a single term, stays gated.
+var methodlessUnionPattern = regexp.MustCompile(`where\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*/\*\s*(?:[A-Za-z_][A-Za-z0-9_.]*\s*=\s*)?` + unionTerm + `(?:\s*\|\s*` + unionTerm + `)+\s*\*/\s*new\(\)`)
 
 const unionTerm = `~?[A-Za-z_][A-Za-z0-9_.]*(?:\[[A-Za-z0-9_., \[\]]*\])?`
 
@@ -236,6 +240,11 @@ func TestElidedConstraintScannerFiresOnBothForms(t *testing.T) {
 	// pointer term. Without them the union arm would pass for a change that admits every `|`.
 	write("src/core/planted/unionmethods.cs", "    where T : /* interface{ ~int | ~string; String() string } */ new()\n")
 	write("src/core/planted/unionptr.cs", "    where T : /* *Node | Leaf */ new()\n")
+	// A NAMED constraint over a methodless union, with its union beside the name: REPORTED. Its near-misses,
+	// the bare name and a name over one term, stay GATED.
+	write("src/core/planted/namedunion.cs", "    where T : /* EventDetails = Metric | Label | Range */ new()\n")
+	write("src/core/planted/namedbare.cs", "    where T : /* EventDetails */ new()\n")
+	write("src/core/planted/namedone.cs", "    where T : /* EventDetails = Metric */ new()\n")
 
 	tracked := []string{
 		"src/core/planted/elided.cs",
@@ -248,11 +257,14 @@ func TestElidedConstraintScannerFiresOnBothForms(t *testing.T) {
 		"src/core/planted/tilde.cs",
 		"src/core/planted/unionmethods.cs",
 		"src/core/planted/unionptr.cs",
+		"src/core/planted/namedunion.cs",
+		"src/core/planted/namedbare.cs",
+		"src/core/planted/namedone.cs",
 	}
 
 	scan := scanElidedConstraints(t, root, tracked)
 
-	wantElided := []string{"planted/elided.cs:2", "planted/qualified.cs:1", "planted/unionmethods.cs:1", "planted/unionptr.cs:1"}
+	wantElided := []string{"planted/elided.cs:2", "planted/namedbare.cs:1", "planted/namedone.cs:1", "planted/qualified.cs:1", "planted/unionmethods.cs:1", "planted/unionptr.cs:1"}
 
 	if strings.Join(scan.elided, ",") != strings.Join(wantElided, ",") {
 		t.Errorf("gated form: want %v, got %v", wantElided, scan.elided)
@@ -265,13 +277,13 @@ func TestElidedConstraintScannerFiresOnBothForms(t *testing.T) {
 			"which is why this plant exists", wantErased, scan.erased)
 	}
 
-	wantUnion := []string{"planted/tilde.cs:1", "planted/union.cs:1"}
+	wantUnion := []string{"planted/namedunion.cs:1", "planted/tilde.cs:1", "planted/union.cs:1"}
 
 	if strings.Join(scan.union, ",") != strings.Join(wantUnion, ",") {
 		t.Errorf("methodless-union form: want %v, got %v", wantUnion, scan.union)
 	}
 
-	if scan.files != 9 {
-		t.Errorf("scanned %d files, want 9 (the src/core plants only; src/notcore is out of scope)", scan.files)
+	if scan.files != 12 {
+		t.Errorf("scanned %d files, want 12 (the src/core plants only; src/notcore is out of scope)", scan.files)
 	}
 }

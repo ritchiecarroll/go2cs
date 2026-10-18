@@ -35,7 +35,7 @@ internal static uint64 readIntBE(slice<byte> b, uintptr size) {
         return (uint64)byteorder.BEUint32(b);
     }
     if (exprᴛ1 == 8) {
-        return (uint64)byteorder.BEUint64(b);
+        return byteorder.BEUint64(b);
     }
     { /* default: */
         throw panic("syscall: readInt with unsupported size");
@@ -54,7 +54,7 @@ internal static uint64 readIntLE(slice<byte> b, uintptr size) {
         return (uint64)byteorder.LEUint32(b);
     }
     if (exprᴛ1 == 8) {
-        return (uint64)byteorder.LEUint64(b);
+        return byteorder.LEUint64(b);
     }
     { /* default: */
         throw panic("syscall: readInt with unsupported size");

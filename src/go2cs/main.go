@@ -913,7 +913,7 @@ Examples:
 				switch {
 				case options.testHandOwnHost:
 					// TESTS ONLY. processConversion is what emits the production .cs, the
-					// package_init.cs hook and the production csproj; for a hand-owned host all
+					// package_init.cs and the production csproj; for a hand-owned host all
 					// three would overwrite hand-written files, so the whole call is skipped and
 					// the test conversion — which processConversion would otherwise have ended by
 					// calling — is entered directly. This is the ONE structural difference between

@@ -11,6 +11,7 @@ using fmt = fmt_package;
 using net = net_package;
 using http = go.net.http_package;
 using ascii = go.net.http.@internal.ascii_package;
+using netip = go.net.netip_package;
 using url = go.net.url_package;
 using slices = slices_package;
 using strings = strings_package;
@@ -117,7 +118,7 @@ internal static @string id(this ref entry e) {
 // request to host/path. It is the caller's responsibility to check if the
 // cookie is expired.
 internal static bool shouldSend(this ref entry e, bool https, @string host, @string path) {
-    return e.domainMatch(host) && e.pathMatch(path) && (https || !e.Secure);
+    return e.domainMatch(host) && e.pathMatch(path) && e.secureMatch(https);
 }
 
 // domainMatch checks whether e's Domain allows sending e back to host.
@@ -144,6 +145,43 @@ internal static bool pathMatch(this ref entry e, @string requestPath) {
         }
     }
     return false;
+}
+
+// secureMatch checks whether a cookie should be sent based on the protocol
+// and the Secure flag. Localhost is considered a secure origin regardless
+// of protocol, matching browser behavior.
+internal static bool secureMatch(this ref entry e, bool https) {
+    if (!e.Secure) {
+        // Cookies not marked secure are always sent.
+        return true;
+    }
+    // Everything below is about cookies marked secure.
+    if (https) {
+        // HTTPS request matches secure cookies.
+        return true;
+    }
+    // Consider localhost to be secure like browsers.
+    if (isLocalhost(e.Domain)) {
+        return true;
+    }
+    var (ip, err) = netip.ParseAddr(e.Domain);
+    if (err == default! && ip.IsLoopback()) {
+        return true;
+    }
+    return false;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string localhostˢ = "localhost"u8;
+
+internal static bool isLocalhost(@string host) {
+    host = strings.TrimSuffix(host, "."u8);
+    {
+        nint idx = strings.LastIndex(host, "."u8); if (idx >= 0) {
+            host = host.slice(idx + 1);
+        }
+    }
+    return ascii.EqualFold(host, localhostˢ);
 }
 
 // hasDotSuffix reports whether s ends in "."+suffix.

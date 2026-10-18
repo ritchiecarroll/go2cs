@@ -95,6 +95,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b));
 }
 
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d.ΔClone();
+    return (new digestжCloner(Ꮡr), default!);
+}
+
 internal static void Reset(this ref digest d) {
     d.h[0] = init0;
     d.h[1] = init1;
@@ -134,7 +140,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     error err = default!;
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (0, errors.New(cryptoSha1UseOfSha1IsNotˢ));
     }
     boring.Unreachable();
@@ -172,7 +178,7 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode");
     }
 
@@ -219,7 +225,7 @@ internal static slice<byte> ConstantTimeSum(this ref digest d, slice<byte> @in) 
 internal static array<byte> constSum(this ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode");
     }
 
@@ -288,7 +294,7 @@ public static array<byte> Sum(slice<byte> data) {
     if (boring.Enabled) {
         return boring.SHA1(data);
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode");
     }
     ref var d = ref heap(new digest(), out var Ꮡd);

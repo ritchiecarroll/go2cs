@@ -136,7 +136,8 @@ ASCII character classes:
 	[[:word:]]     word characters (== [0-9A-Za-z_])
 	[[:xdigit:]]   hex digit (== [0-9A-Fa-f])
 
-Unicode character classes are those in [unicode.Categories] and [unicode.Scripts].
+Unicode character classes are those in [unicode.Categories],
+[unicode.CategoryAliases], and [unicode.Scripts].
 */
 namespace go.regexp;
 

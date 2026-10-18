@@ -100,7 +100,6 @@ internal static void defPredeclaredTypes() {
     // interface.
     {
         universeAnyNoAlias = NewTypeName(nopos, nil, anyˢ, new InterfaceжΔType(Ꮡ(new Interface(complete: true, tset: ᏑtopTypeSet))));
-        universeAnyNoAlias.of(TypeName.Ꮡobject).setColor(black);
         // ensure that the any TypeName reports a consistent Parent, after
         // hijacking Universe.Lookup with gotypesalias=0.
         universeAnyNoAlias.of(TypeName.Ꮡobject).setParent(Universe);
@@ -109,7 +108,6 @@ internal static void defPredeclaredTypes() {
         // into the Universe, but we lean toward the future and insert the Alias
         // representation.
         universeAnyAlias = NewTypeName(nopos, nil, anyˢ, default!);
-        universeAnyAlias.of(TypeName.Ꮡobject).setColor(black);
         _ = NewAlias(universeAnyAlias, universeAnyNoAlias.of(TypeName.Ꮡobject).Type().Underlying()); // Link TypeName and Alias
         def(new TypeNameжObject(universeAnyAlias));
     }
@@ -117,12 +115,11 @@ internal static void defPredeclaredTypes() {
     // type error interface{ Error() string }
     {
         var obj = NewTypeName(nopos, nil, errorˢ, default!);
-        obj.of(TypeName.Ꮡobject).setColor(black);
-        var typ = NewNamed(obj, default!, default!);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
 
         // error.Error() string
-        var recv = NewVar(nopos, nil, ""u8, new NamedжΔType(typ));
-        var res = NewVar(nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
+        var recv = newVar(RecvVar, nopos, nil, ""u8, new NamedжΔType(typ));
+        var res = newVar(ResultVar, nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
         var sig = NewSignatureType(recv, default!, default!, nil, NewTuple(res), false);
         var err = NewFunc(nopos, nil, errorˢ2, sig);
 
@@ -130,20 +127,21 @@ internal static void defPredeclaredTypes() {
         var ityp = Ꮡ(new Interface(methods: new ж<Func>[]{err}.slice(), complete: true));
         computeInterfaceTypeSet(nil, nopos, ityp); // prevent races due to lazy computation of tset
 
-        typ.SetUnderlying(new InterfaceжΔType(ityp));
+        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.Underlying();
         def(new TypeNameжObject(obj));
     }
 
     // type comparable interface{} // marked as comparable
     {
         var obj = NewTypeName(nopos, nil, comparableˢ, default!);
-        obj.of(TypeName.Ꮡobject).setColor(black);
-        var typ = NewNamed(obj, default!, default!);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
 
         // interface{} // marked as comparable
         var ityp = Ꮡ(new Interface(complete: true, tset: Ꮡ(new _TypeSet(default!, allTermlist, true))));
 
-        typ.SetUnderlying(new InterfaceжΔType(ityp));
+        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.Underlying();
         def(new TypeNameжObject(obj));
     }
 }
@@ -166,7 +164,7 @@ internal static void defPredeclaredConsts() {
 }
 
 internal static void defPredeclaredNil() {
-    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil"u8, typ: new BasicжΔType(Typ[UntypedNil]), color_: black)))));
+    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil"u8, typ: new BasicжΔType(Typ[UntypedNil]))))));
 }
 
 // A builtinId is the id of a builtin function.
@@ -290,7 +288,7 @@ public static void DefPredeclaredTestFuncs() {
 // a scope. Objects with exported names are inserted in the unsafe package
 // scope; other objects are inserted in the universe scope.
 internal static void def(Object obj) {
-    assert(obj.color() == black);
+    assert(obj.Type() != default!);
     @string name = obj.Name();
     if (strings.Contains(name, " "u8)) {
         return; // nothing to do

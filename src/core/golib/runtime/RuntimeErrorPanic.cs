@@ -131,6 +131,80 @@ public static class RuntimeErrorPanic
         return new PanicException(string.Format(NativeArrayViewMessage, shape));
     }
 
+    private const string UnknownGoSizeMessage =
+        $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (the length of {{2}} is not carried for an unnamed array type argument)";
+    private const string UnknownGoSizeInnerMessage =
+        $"{RuntimeErrorMessage}{{0}} of {{1}} is not known (an array in it carries no length, as for an unnamed array type argument)";
+    /// <summary>
+    /// The REFUSAL: a size-bearing read (<c>Size()</c>, <c>Len()</c>, <c>ArrayType()</c>) of a Go type descriptor
+    /// synthesized without an array length it needs.
+    /// </summary>
+    /// <remarks>
+    /// C# spells every Go <c>[N]T</c> as the one <c>array&lt;T&gt;</c>, so a descriptor built from the TYPE alone, such as
+    /// <c>abi.TypeFor[[2]string]()</c>, has no length to read. Answering 0 was a plausible number and a wrong one:
+    /// <c>unique.Make([2]string{a, b})</c> took Go's zero-size arm and handed every pair the shared zerobase handle,
+    /// so two different pairs compared equal. Refusing by name makes that wrong answer impossible. A live value
+    /// reveals its length and is answered as before.
+    /// </remarks>
+    /// <param name="read">The accessor refused, e.g. <c>"the size"</c>.</param>
+    /// <param name="type">The descriptor's managed type.</param>
+    /// <param name="arrayDims">The dims the descriptor did carry, if any.</param>
+    public static PanicException UnknownGoSize(string read, Type? type, nint[]? arrayDims)
+    {
+        string named = type is null ? "a synthesized type" : GoTextWithUnknownLengths(type, arrayDims);
+
+        return type is not null && FirstUnknownArrayText(type, arrayDims, 0) is { } array
+            ? new PanicException(string.Format(UnknownGoSizeMessage, read, named, array))
+            : new PanicException(string.Format(UnknownGoSizeInnerMessage, read, named));
+    }
+
+    // A Go type's text with each array length the descriptor does not carry written as `?`: `[?]string`,
+    // `[2][?]int`. A named type keeps its own name; GoReflect renders everything else.
+    private static string GoTextWithUnknownLengths(Type type, nint[]? arrayDims)
+    {
+        if (GoReflect.KindOf(type) != GoReflect.Array || GoReflect.HasGoName(type) || GoReflect.ElementType(type) is not { } element)
+            return GoReflect.GoTypeName(type, arrayDims);
+
+        string length = arrayDims is { Length: > 0 } ? arrayDims[0].ToString(System.Globalization.CultureInfo.InvariantCulture) : "?";
+
+        return $"[{length}]" + GoTextWithUnknownLengths(element, arrayDims is { Length: > 1 } ? arrayDims[1..] : null);
+    }
+
+    // The outermost array along the element chain whose length is missing, for the parenthesized reason. Null for
+    // a struct or any other kind (the caller then says an array in it carries no length).
+    private static string? FirstUnknownArrayText(Type type, nint[]? arrayDims, int depth)
+    {
+        if (depth > 16)
+            return null;
+
+        if (GoReflect.KindOf(type) == GoReflect.Array && GoReflect.ElementType(type) is { } element)
+        {
+            if (arrayDims is not { Length: > 0 } && GoReflect.DeclaredArrayDims(type) is null)
+                return GoTextWithUnknownLengths(type, null);
+
+            return FirstUnknownArrayText(element, arrayDims is { Length: > 1 } ? arrayDims[1..] : null, depth + 1);
+        }
+
+        return null;
+    }
+
+    private const string NativeStructLayoutMessage =
+        $"{RuntimeErrorMessage}cannot read native memory as {{0}}: its CLR layout is not its Go layout ({{1}})";
+    /// <summary>
+    /// The REFUSAL: a native box of a Go struct whose CLR layout provably differs from its Go layout
+    /// (<see cref="GoReflect.ClrLayoutMismatch"/>), dereferenced as a whole.
+    /// </summary>
+    /// <remarks>
+    /// A native box reads its struct at CLR offsets, so the read would return Go's bytes at the wrong fields, or a
+    /// garbage managed reference where Go stores a value inline. Its fields are reached at their GO offsets instead
+    /// (a field view of a native box is itself a native box), so only a whole-struct read lands here. The message
+    /// names the type and the first field that differs, so the reader can find the declaration.
+    /// </remarks>
+    public static PanicException NativeStructLayoutMismatch(Type type, string reason)
+    {
+        return new PanicException(string.Format(NativeStructLayoutMessage, GoReflect.GoTypeName(type), reason));
+    }
+
     private const string IndexOutOfRangeMessage = $"{RuntimeErrorMessage}index out of range [{{0}}] with length {{1}}";
 
     // Go's boundsNegErrorFmt for boundsIndex: a NEGATIVE signed index prints without the length.
@@ -518,5 +592,67 @@ public static class RuntimeErrorPanic
                 panic = null;
                 return false;
         }
+    }
+
+    private const string InvalidPrefixDowncastMessage =
+        $"{RuntimeErrorMessage}invalid prefix downcast to *{{0}} (the *{{1}} behind this pointer is not the first field of a {{0}})";
+    /// <summary>
+    /// The REFUSAL of Go's prefix-downcast idiom, <c>(*entry[T])(unsafe.Pointer(n))</c>, over a first-field view
+    /// whose offset-0 chain reaches no box of the destination type: in Go the larger object would be read past
+    /// the header, and here there is no such object to answer, so the conversion says so by name.
+    /// </summary>
+    /// <param name="destination">The destination type, as Go's <c>%T</c> prints it.</param>
+    /// <param name="source">The source pointer's element type, as Go's <c>%T</c> prints it.</param>
+    public static PanicException InvalidPrefixDowncast(string destination, string source)
+    {
+        return new PanicException((@string)string.Format(InvalidPrefixDowncastMessage, destination, source));
+    }
+
+    /// <summary>
+    /// Supplies Go 1.26's <c>maps.unhashableTypeError</c> (internal/runtime/maps, map.go) for an
+    /// unhashable key type: the value <c>mapKeyError</c> panics with.
+    /// </summary>
+    /// <remarks>
+    /// Registered by the internal/runtime/maps package through the runtime package's value bridge, as
+    /// <see cref="PlainErrorValue"/> is, because golib sits below both and cannot name the type. Go
+    /// 1.26 raises it where a map operation must refuse an unhashable dynamic key WITHOUT reaching the
+    /// hash: a lookup or delete on an EMPTY or NIL map (issue 23734) and reflect's equivalents. Its
+    /// <c>Error()</c> is <c>"hash of unhashable type: " + T</c> -- no <c>runtime error: </c> prefix and a
+    /// colon -- and it satisfies <c>runtime.Error</c> through its <c>RuntimeError()</c> method. Go 1.24
+    /// raised the prefixed <c>errorString</c> there instead; the hash path itself (a populated map, any
+    /// assignment) still does. Unregistered, the bare text stands.
+    /// </remarks>
+    public static Func<Type, object>? UnhashableKeyErrorValue { get; set; }
+
+    /// <summary>
+    /// Go 1.26's panic for an unhashable map key found by <c>mapKeyError</c>: an empty or nil map's
+    /// lookup or delete, or reflect's nil-map and empty-map arms.
+    /// </summary>
+    /// <param name="unhashable">The slice, map or func type Go names, found inside the key's dynamic type.</param>
+    public static PanicException UnhashableKey(Type unhashable)
+    {
+        return new PanicException(UnhashableKeyErrorValue?.Invoke(unhashable) ?? $"hash of unhashable type: {GoReflect.GoTypeName(unhashable)}");
+    }
+
+    /// <summary>
+    /// Supplies the Go runtime's <c>runtime.errorString</c> for a message: the value runtime's own
+    /// <c>panic(errorString("..."))</c> sites raise (alg.go's "hash of unhashable type", slice.go's
+    /// growslice and makeslice checks).
+    /// </summary>
+    /// <remarks>
+    /// Registered by the runtime package, as <see cref="PlainErrorValue"/> is. The message is the text
+    /// WITHOUT the prefix: <c>errorString.Error()</c> prepends <c>runtime error: </c>, and the value
+    /// satisfies <c>runtime.Error</c> through <c>RuntimeError()</c>. Unregistered, the prefixed text
+    /// stands as a plain string.
+    /// </remarks>
+    public static Func<string, object>? ErrorStringValue { get; set; }
+
+    /// <summary>
+    /// A Go runtime panic whose value is <c>runtime.errorString(message)</c>.
+    /// </summary>
+    /// <param name="message">The text after the <c>runtime error: </c> prefix.</param>
+    public static PanicException ErrorString(string message)
+    {
+        return new PanicException(ErrorStringValue?.Invoke(message) ?? RuntimeErrorMessage + message);
     }
 }

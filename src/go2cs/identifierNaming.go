@@ -217,6 +217,8 @@ func getSanitizedImport(identifier string) string {
 		return identifier // Already sanitized
 	}
 
+	identifier = joinDigitLeadingParts(identifier)
+
 	if strings.Contains(identifier, ".") {
 		parts := strings.Split(identifier, ".")
 
@@ -234,6 +236,39 @@ func getSanitizedImport(identifier string) string {
 	}
 
 	return identifier
+}
+
+// joinDigitLeadingParts keeps a dotted path element whose dot-separated parts would not all be C#
+// identifiers from becoming namespace levels: a part that starts with a DIGIT is joined to the part
+// before it with an underscore. Go 1.26 added the first such element to the standard library,
+// crypto/internal/entropy/v1.0.0, and split on its dots it emitted `namespace
+// go.crypto.@internal.entropy.v1.0.0;` -- `0` is not an identifier (13 syntax errors, linux and
+// darwin, plus every importer's `using`). It now reads `….entropy.v1_0_0`, the spelling importInitName
+// already gives the same path's forcing hook. A part with a letter first (`gopkg.in`, `yaml.v3`) stays
+// its own namespace level, as before.
+//
+// The answer is the same whether the caller passes one path element or a whole dotted namespace, so
+// the DECLARATION side (getProjectName, namespaceWithDirectorySegment) and the IMPORT side
+// (getSanitizedImport, per element) agree without sharing a split. A FIRST part that starts with a
+// digit has no part to join and is left alone: no path in the standard library has one.
+func joinDigitLeadingParts(identifier string) string {
+	if !strings.Contains(identifier, ".") {
+		return identifier
+	}
+
+	parts := strings.Split(identifier, ".")
+	joined := make([]string, 0, len(parts))
+
+	for _, part := range parts {
+		if len(joined) > 0 && part != "" && part[0] >= '0' && part[0] <= '9' {
+			joined[len(joined)-1] += "_" + part
+			continue
+		}
+
+		joined = append(joined, part)
+	}
+
+	return strings.Join(joined, ".")
 }
 
 func getSanitizedIdentifier(identifier string) string {

@@ -8,12 +8,12 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -294,7 +294,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
         tokenꓸPos end = @file.End();
         {
             var f = check.fset.File(@file.Pos()); if (f != nil) {
-                (pos, end) = (((tokenꓸPos)f.Base()), ((tokenꓸPos)(f.Base() + f.Size())));
+                (pos, end) = (((tokenꓸPos)f.Base()), f.End());
             }
         }
         var fileScope = NewScope((~pkg).scope, pos, end, check.filename(fileNo));
@@ -434,7 +434,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
 
                 // declare all variables
                 foreach (var (i, name) in (~dΔ1.spec).Names) {
-                    var obj = NewVar(name.Pos(), pkgʗ1, (~name).Name, default!);
+                    var obj = newVar(PackageVar, name.Pos(), pkgʗ1, (~name).Name, default!);
                     lhs[i] = obj;
 
                     var di = d1;
@@ -486,10 +486,8 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                         // don't declare init functions in the package scope - they are invisible
                         obj.Value.parent = pkgʗ1.Value.scope;
                         Ꮡcheck.Value.recordDef((~dΔ1.decl).Name, new FuncжObject(obj));
-                        // init functions must have a body
                         if ((~dΔ1.decl).Body == nil) {
-                            // TODO(gri) make this error message consistent with the others above
-                            Ꮡcheck.softErrorf(new Funcжpositioner(obj), MissingInitBody, "missing function body"u8);
+                            Ꮡcheck.softErrorf(new Funcжpositioner(obj), MissingInitBody, "func init must have a body"u8);
                         }
                     } else {
                         Ꮡcheck.declare((~pkgʗ1).scope, (~dΔ1.decl).Name, new FuncжObject(obj), nopos);
@@ -567,6 +565,17 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
             check.methods[@base] = append(check.methods[@base], (~m).obj);
         }
     }
+}
+
+// sortObjects sorts package-level objects by source-order for reproducible processing
+internal static void sortObjects(this ref Checker check) {
+    check.objList = new slice<Object>(len(check.objMap));
+    nint i = 0;
+    foreach (var (obj, _) in check.objMap) {
+        check.objList[i] = obj;
+        i++;
+    }
+    slices.SortFunc(check.objList, (Object a, Object b) => cmp_package.Compare(a.order(), b.order()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -716,17 +725,8 @@ internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Che
 internal static void packageObjects(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    // process package objects in source order for reproducible results
-    var objList = new slice<Object>(len(check.objMap));
-    nint i = 0;
-    foreach (var (obj, _) in check.objMap) {
-        objList[i] = obj;
-        i++;
-    }
-    slices.SortFunc(objList, (Object a, Object b) => cmp_package.Compare(a.order(), b.order()));
-
     // add new methods to already type-checked types (from a prior Checker.Files call)
-    foreach (var (_, obj) in objList) {
+    foreach (var (_, obj) in check.objList) {
         {
             var (objΔ1, _) = obj._<ж<TypeName>>(ᐧ); if (objΔ1 != nil && (~objΔ1).typ != default!) {
                 Ꮡcheck.collectMethods(objΔ1);
@@ -751,8 +751,8 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         // its Type is Invalid.
         //
         // Investigate and reenable this branch.
-        foreach (var (_, obj) in objList) {
-            Ꮡcheck.objDecl(obj, nil);
+        foreach (var (_, obj) in check.objList) {
+            Ꮡcheck.objDecl(obj);
         }
     } else {
         // Without Alias nodes, we process non-alias type declarations first, followed by
@@ -763,13 +763,13 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         slice<ж<TypeName>> aliasList = default!;
         slice<Object> othersList = default!;        // everything that's not a type
         // phase 1: non-alias type declarations
-        foreach (var (_, obj) in objList) {
+        foreach (var (_, obj) in check.objList) {
             {
                 var (tname, _) = obj._<ж<TypeName>>(ᐧ); if (tname != nil){
                     if ((~(~check.objMap[new TypeNameжObject(tname)]).tdecl).Assign.IsValid()){
                         aliasList = append(aliasList, tname);
                     } else {
-                        Ꮡcheck.objDecl(obj, nil);
+                        Ꮡcheck.objDecl(obj);
                     }
                 } else {
                     othersList = append(othersList, obj);
@@ -778,11 +778,11 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         }
         // phase 2: alias type declarations
         foreach (var (_, obj) in aliasList) {
-            Ꮡcheck.objDecl(new TypeNameжObject(obj), nil);
+            Ꮡcheck.objDecl(new TypeNameжObject(obj));
         }
         // phase 3: all other declarations
         foreach (var (_, obj) in othersList) {
-            Ꮡcheck.objDecl(obj, nil);
+            Ꮡcheck.objDecl(obj);
         }
     }
 

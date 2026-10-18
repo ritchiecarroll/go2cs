@@ -7,15 +7,15 @@ namespace go;
 using errorspkg = errors_package;
 using asan = @internal.asan_package;
 using bytealg = @internal.bytealg_package;
-using itoa = @internal.itoa_package;
 using msan = @internal.msan_package;
 using oserror = @internal.oserror_package;
 using race = @internal.race_package;
-using runtime = runtime_package;
+using strconv = @internal.strconv_package;
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
 
+[GoFieldAccess(typeof(symbolicLinkReparseBuffer), typeof(mountPointReparseBuffer))]
 partial class syscall_package {
 
 partial struct ΔHandle /*num:uintptr*/;
@@ -146,12 +146,35 @@ public static (uint32 n, error err) FormatMessage(uint32 flags, uint32 msgsrc, u
     return formatMessage(flags, (uintptr)msgsrc, msgid, langid, buf, Ꮡargs);
 }
 
+internal static ж<Δsync.Map> ᏑerrnoErrorCache = new StandardBox<Δsync.Map>(default(Δsync.Map));
+internal static ref Δsync.Map errnoErrorCache => ref ᏑerrnoErrorCache.Value;
+
 public static @string Error(this Errno e) {
     // deal with special go errors
     nint idx = (nint)(uintptr)(e - (Errno)APPLICATION_ERROR);
     if (0 <= idx && idx < len(errors)) {
         return errors[idx];
     }
+
+    var cache = false;
+    var exprᴛ1 = e;
+    if (exprᴛ1 == ERROR_FILE_NOT_FOUND || exprᴛ1 == ERROR_PATH_NOT_FOUND) {
+        {
+            var (cached, ok) = ᏑerrnoErrorCache.Load(e); if (ok) {
+                return cached._<@string>();
+            }
+        }
+        cache = true;
+    }
+
+    @string result = e.error();
+    if (cache) {
+        ᏑerrnoErrorCache.Store(e, result);
+    }
+    return result;
+}
+
+internal static @string error(this Errno e) {
     // ask windows for the remaining errors
     uint32 flags = (uint32)((UntypedInt)(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY) | (uint32)FORMAT_MESSAGE_IGNORE_INSERTS);
     var b = new slice<uint16>(300);
@@ -159,7 +182,7 @@ public static @string Error(this Errno e) {
     if (err != default!) {
         (n, err) = formatMessage(flags, 0, (uint32)(uintptr)e, 0, b, nil);
         if (err != default!) {
-            return "winapi error #"u8 + itoa.Itoa((nint)(uintptr)e);
+            return "winapi error #"u8 + strconv.Itoa((nint)(uintptr)e);
         }
     }
     // trim terminating \r and \n
@@ -281,6 +304,7 @@ public static uintptr NewCallbackCDecl(any fn) {
 //sys	GetCommandLine() (cmd *uint16) = kernel32.GetCommandLineW
 //sys	CommandLineToArgv(cmd *uint16, argc *int32) (argv *[8192]*[8192]uint16, err error) [failretval==nil] = shell32.CommandLineToArgvW
 //sys	LocalFree(hmem Handle) (handle Handle, err error) [failretval!=0]
+//sys	localAlloc(flags uint32, length uint32) (ptr uintptr, err error) = kernel32.LocalAlloc
 //sys	SetHandleInformation(handle Handle, mask uint32, flags uint32) (err error)
 //sys	FlushFileBuffers(handle Handle) (err error)
 //sys	GetFullPathName(path *uint16, buflen uint32, buf *uint16, fname **uint16) (n uint32, err error) = kernel32.GetFullPathNameW
@@ -343,8 +367,9 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     if (err != default!) {
         return (InvalidHandle, err);
     }
+    nint accessFlags = (nint)(flag & (nint)((nint)((nint)(UntypedInt)(O_RDONLY | O_WRONLY) | (nint)O_RDWR)));
     uint32 access = default!;
-    var exprᴛ1 = (nint)(flag & (nint)((nint)((nint)(UntypedInt)(O_RDONLY | O_WRONLY) | (nint)O_RDWR)));
+    var exprᴛ1 = accessFlags;
     if (exprᴛ1 == O_RDONLY) {
         access = GENERIC_READ;
     }
@@ -376,14 +401,32 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     if ((uint32)(perm & (uint32)S_IWRITE) == 0) {
         attrs = FILE_ATTRIBUTE_READONLY;
     }
-    if ((nint)(flag & (nint)O_WRONLY) == 0 && (nint)(flag & (nint)O_RDWR) == 0) {
-        // We might be opening or creating a directory.
-        // CreateFile requires FILE_FLAG_BACKUP_SEMANTICS
+    // fileFlags contains the high 12 bits of flag.
+    // This bit range can be used by the caller to specify the file flags
+    // passed to CreateFile. It is an error to use if the bits can't be
+    // mapped to the supported FILE_FLAG_* constants.
+    {
+        var fileFlags = (uint32)((uint32)flag & (uint32)fileFlagsMask); if ((uint32)(fileFlags & ~(uint32)validFileFlagsMask) == 0){
+            attrs |= (uint32)(fileFlags);
+        } else {
+            return (InvalidHandle, oserror.ErrInvalid);
+        }
+    }
+
+    var exprᴛ2 = accessFlags;
+    if (exprᴛ2 == O_WRONLY || exprᴛ2 == O_RDWR) {
+        // Unix doesn't allow opening a directory with O_WRONLY
+        // or O_RDWR, so we don't set the flag in that case,
+        // which will make CreateFile fail with ERROR_ACCESS_DENIED.
+        // We will map that to EISDIR if the file is a directory.
+    }
+    else { /* default: */
+        // We might be opening a directory for reading,
+        // and CreateFile requires FILE_FLAG_BACKUP_SEMANTICS
         // to work with directories.
         attrs |= (uint32)(FILE_FLAG_BACKUP_SEMANTICS);
     }
     if ((nint)(flag & (nint)O_SYNC) != 0) {
-        const uint32 _FILE_FLAG_WRITE_THROUGH = 0x80000000;
         attrs |= (uint32)(_FILE_FLAG_WRITE_THROUGH);
     }
     // We don't use CREATE_ALWAYS, because when opening a file with
@@ -408,7 +451,7 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     }}
     (var h, err) = createFile(namep, access, sharemode, sa, createmode, attrs, 0);
     if (h == InvalidHandle) {
-        if (AreEqual(err, ERROR_ACCESS_DENIED) && ((nint)(flag & (nint)O_WRONLY) != 0 || (nint)(flag & (nint)O_RDWR) != 0)) {
+        if (AreEqual(err, ERROR_ACCESS_DENIED) && ((uint32)(attrs & (uint32)FILE_FLAG_BACKUP_SEMANTICS) == 0)) {
             // We should return EISDIR when we are trying to open a directory with write access.
             var (fa, e1) = GetFileAttributes(namep);
             if (e1 == default! && (uint32)(fa & (uint32)FILE_ATTRIBUTE_DIRECTORY) != 0) {
@@ -417,9 +460,33 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
         }
         return (h, err);
     }
+    if ((nint)(flag & (nint)o_DIRECTORY) != 0) {
+        // Check if the file is a directory, else return ENOTDIR.
+        ref var fi = ref heap(new ByHandleFileInformation(), out var Ꮡfi);
+        {
+            var errΔ1 = GetFileInformationByHandle(h, Ꮡfi); if (errΔ1 != default!) {
+                CloseHandle(h);
+                return (InvalidHandle, errΔ1);
+            }
+        }
+        if ((uint32)(fi.FileAttributes & (uint32)FILE_ATTRIBUTE_DIRECTORY) == 0) {
+            CloseHandle(h);
+            return (InvalidHandle, ENOTDIR);
+        }
+    }
     // Ignore O_TRUNC if the file has just been created.
     if ((nint)(flag & (nint)O_TRUNC) == O_TRUNC && (createmode == OPEN_EXISTING || (createmode == OPEN_ALWAYS && AreEqual(err, ERROR_ALREADY_EXISTS)))) {
         err = Ftruncate(h, 0);
+        if (AreEqual(err, _ERROR_INVALID_PARAMETER)) {
+            // ERROR_INVALID_PARAMETER means truncation is not supported on this file handle.
+            // Unix's O_TRUNC specification says to ignore O_TRUNC on named pipes and terminal devices.
+            // We do the same here.
+            {
+                var (t, err1) = GetFileType(h); if (err1 == default! && (t == FILE_TYPE_PIPE || t == FILE_TYPE_CHAR)) {
+                    err = default!;
+                }
+            }
+        }
         if (err != default!) {
             CloseHandle(h);
             return (InvalidHandle, err);
@@ -505,24 +572,10 @@ internal static error setFilePointerEx(ΔHandle handle, int64 distToMove, ж<int
                 (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 4, (uintptr)handle, (uintptr)distToMove, (uintptr)ᴋ0, (uintptr)whence, 0, 0);
         System.GC.KeepAlive(ᴋ0);
     } else {
-        // Different 32-bit systems disgaree about whether distToMove starts 8-byte aligned.
-        var exprᴛ1 = runtime.GOARCH;
-        if (exprᴛ1 == "386"u8) {
-            // distToMove is a LARGE_INTEGER, which is 64 bits.
-            var ᴋ1 = ᏑnewFilePointer;
-                        (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 5, (uintptr)handle, (uintptr)distToMove, (uintptr)((distToMove >> (int)(32))), (uintptr)ᴋ1, (uintptr)whence, 0);
-            System.GC.KeepAlive(ᴋ1);
-        }
-        else if (exprᴛ1 == "arm"u8) {
-            // distToMove must be 8-byte aligned per ARM calling convention
-            // https://docs.microsoft.com/en-us/cpp/build/overview-of-arm-abi-conventions#stage-c-assignment-of-arguments-to-registers-and-stack
-            var ᴋ2 = ᏑnewFilePointer;
-                        (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 6, (uintptr)handle, 0, (uintptr)distToMove, (uintptr)((distToMove >> (int)(32))), (uintptr)ᴋ2, (uintptr)whence);
-            System.GC.KeepAlive(ᴋ2);
-        }
-        else { /* default: */
-            throw panic("unsupported 32-bit architecture");
-        }
+        // distToMove is a LARGE_INTEGER, which is 64 bits.
+        var ᴋ1 = ᏑnewFilePointer;
+                (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 5, (uintptr)handle, (uintptr)distToMove, (uintptr)((distToMove >> (int)(32))), (uintptr)ᴋ1, (uintptr)whence, 0);
+        System.GC.KeepAlive(ᴋ1);
     }
     if (e1 != 0) {
         return errnoErr(e1);
@@ -895,23 +948,30 @@ internal static (@unsafe.Pointer, int32, error) sockaddr(this ж<SockaddrUnix> �
     if (n > len(sa.raw.Path)) {
         return (default!, 0, EINVAL);
     }
-    if (n == len(sa.raw.Path) && name[0] != (rune)'@') {
+    // Abstract addresses start with NUL.
+    // '@' is also a valid way to specify abstract addresses.
+    var isAbstract = n > 0 && (name[0] == (rune)'@' || name[0] == (rune)'\x00');
+
+    // Non-abstract named addresses are NUL terminated.
+    // The length can't use the full capacity as we need to add NUL.
+    if (n == len(sa.raw.Path) && !isAbstract) {
         return (default!, 0, EINVAL);
     }
     sa.raw.Family = AF_UNIX;
     for (nint i = 0; i < n; i++) {
         sa.raw.Path[i] = (int8)name[i];
     }
-    // length is family (uint16), name, NUL.
-    var sl = (int32)2;
-    if (n > 0) {
-        sl += (int32)n + 1;
-    }
-    if (sa.raw.Path[0] == (rune)'@' || (sa.raw.Path[0] == 0 && sl > 3)) {
-        // Check sl > 3 so we don't change unnamed socket behavior.
+    // Length is family + name (+ NUL if non-abstract).
+    // Family is of type uint16 (2 bytes).
+    var sl = (int32)(2 + n);
+    if (isAbstract){
+        // Abstract addresses are not NUL terminated.
+        // We rewrite '@' prefix to NUL here.
         sa.raw.Path[0] = 0;
-        // Don't count trailing NUL for abstract address.
-        sl--;
+    } else 
+    if (n > 0) {
+        // Add NUL for non-abstract named addresses.
+        sl++;
     }
 
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), sl, default!);
@@ -957,17 +1017,17 @@ internal static error /*err*/ wsaSendtoInet4(ΔHandle s, ж<WSABuf> Ꮡbufs, uin
     if (err != default!) {
         return err;
     }
-    var ᴋ3 = Ꮡbufs;
-    var ᴋ4 = Ꮡsent;
-    var ᴋ5 = (@unsafe.Pointer)rsa;
-    var ᴋ6 = Ꮡoverlapped;
-    var ᴋ7 = Ꮡcroutine;
-        var (r1, _, e1) = Syscall9(procWSASendTo.Addr(), 9, (uintptr)s, (uintptr)ᴋ3, (uintptr)bufcnt, (uintptr)ᴋ4, (uintptr)flags, (uintptr)ᴋ5, (uintptr)len, (uintptr)ᴋ6, (uintptr)ᴋ7);
+    var ᴋ2 = Ꮡbufs;
+    var ᴋ3 = Ꮡsent;
+    var ᴋ4 = (@unsafe.Pointer)rsa;
+    var ᴋ5 = Ꮡoverlapped;
+    var ᴋ6 = Ꮡcroutine;
+        var (r1, _, e1) = Syscall9(procWSASendTo.Addr(), 9, (uintptr)s, (uintptr)ᴋ2, (uintptr)bufcnt, (uintptr)ᴋ3, (uintptr)flags, (uintptr)ᴋ4, (uintptr)len, (uintptr)ᴋ5, (uintptr)ᴋ6);
+    System.GC.KeepAlive(ᴋ2);
     System.GC.KeepAlive(ᴋ3);
     System.GC.KeepAlive(ᴋ4);
     System.GC.KeepAlive(ᴋ5);
     System.GC.KeepAlive(ᴋ6);
-    System.GC.KeepAlive(ᴋ7);
     if (r1 == socket_error) {
         if (e1 != 0){
             err = errnoErr(e1);
@@ -985,17 +1045,17 @@ internal static error /*err*/ wsaSendtoInet6(ΔHandle s, ж<WSABuf> Ꮡbufs, uin
     if (err != default!) {
         return err;
     }
-    var ᴋ8 = Ꮡbufs;
-    var ᴋ9 = Ꮡsent;
-    var ᴋ10 = (@unsafe.Pointer)rsa;
-    var ᴋ11 = Ꮡoverlapped;
-    var ᴋ12 = Ꮡcroutine;
-        var (r1, _, e1) = Syscall9(procWSASendTo.Addr(), 9, (uintptr)s, (uintptr)ᴋ8, (uintptr)bufcnt, (uintptr)ᴋ9, (uintptr)flags, (uintptr)ᴋ10, (uintptr)len, (uintptr)ᴋ11, (uintptr)ᴋ12);
+    var ᴋ7 = Ꮡbufs;
+    var ᴋ8 = Ꮡsent;
+    var ᴋ9 = (@unsafe.Pointer)rsa;
+    var ᴋ10 = Ꮡoverlapped;
+    var ᴋ11 = Ꮡcroutine;
+        var (r1, _, e1) = Syscall9(procWSASendTo.Addr(), 9, (uintptr)s, (uintptr)ᴋ7, (uintptr)bufcnt, (uintptr)ᴋ8, (uintptr)flags, (uintptr)ᴋ9, (uintptr)len, (uintptr)ᴋ10, (uintptr)ᴋ11);
+    System.GC.KeepAlive(ᴋ7);
     System.GC.KeepAlive(ᴋ8);
     System.GC.KeepAlive(ᴋ9);
     System.GC.KeepAlive(ᴋ10);
     System.GC.KeepAlive(ᴋ11);
-    System.GC.KeepAlive(ᴋ12);
     if (r1 == socket_error) {
         if (e1 != 0){
             err = errnoErr(e1);
@@ -1023,15 +1083,15 @@ internal static ref connectExFuncᴛ1 connectExFunc => ref ᏑconnectExFunc.Valu
 internal static error /*err*/ connectEx(ΔHandle s, @unsafe.Pointer name, int32 namelen, ж<byte> ᏑsendBuf, uint32 sendDataLen, ж<uint32> ᏑbytesSent, ж<Overlapped> Ꮡoverlapped) {
     error err = default!;
 
-    var ᴋ13 = name;
-    var ᴋ14 = ᏑsendBuf;
-    var ᴋ15 = ᏑbytesSent;
-    var ᴋ16 = Ꮡoverlapped;
-        var (r1, _, e1) = Syscall9(connectExFunc.addr, 7, (uintptr)s, (uintptr)ᴋ13, (uintptr)namelen, (uintptr)ᴋ14, (uintptr)sendDataLen, (uintptr)ᴋ15, (uintptr)ᴋ16, 0, 0);
+    var ᴋ12 = name;
+    var ᴋ13 = ᏑsendBuf;
+    var ᴋ14 = ᏑbytesSent;
+    var ᴋ15 = Ꮡoverlapped;
+        var (r1, _, e1) = Syscall9(connectExFunc.addr, 7, (uintptr)s, (uintptr)ᴋ12, (uintptr)namelen, (uintptr)ᴋ13, (uintptr)sendDataLen, (uintptr)ᴋ14, (uintptr)ᴋ15, 0, 0);
+    System.GC.KeepAlive(ᴋ12);
     System.GC.KeepAlive(ᴋ13);
     System.GC.KeepAlive(ᴋ14);
     System.GC.KeepAlive(ᴋ15);
-    System.GC.KeepAlive(ᴋ16);
     if (r1 == 0) {
         if (e1 != 0){
             err = ((error)e1);
@@ -1178,9 +1238,7 @@ public static error /*err*/ SetsockoptInet4Addr(ΔHandle fd, nint level, nint op
 
 // go2cs generated this placeholder — func SetsockoptIPMreq is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static error /*err*/ SetsockoptIPv6Mreq(ΔHandle fd, nint level, nint opt, ж<IPv6Mreq> Ꮡmreq) {
-    return EWINDOWS;
-}
+// go2cs generated this placeholder — func SetsockoptIPv6Mreq is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static nint /*pid*/ Getpid() {
     return (nint)getCurrentProcessId();
@@ -1351,7 +1409,7 @@ public static @string String(this ΔSignal s) {
             return str;
         }
     }
-    return "signal "u8 + itoa.Itoa((nint)s);
+    return "signal "u8 + strconv.Itoa((nint)s);
 }
 
 public static error LoadCreateSymbolicLink() {
@@ -1364,7 +1422,11 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
     error err = default!;
     GoFrame ᒐ = default;
     try {
-        (var fd, err) = CreateFile(StringToUTF16Ptr(path), GENERIC_READ, 0, nil, OPEN_EXISTING,
+        (var pathp, err) = UTF16PtrFromString(path);
+        if (err != default!) {
+            (n, err) = (-1, err); goto ᒐdone;
+        }
+        (var fd, err) = CreateFile(pathp, GENERIC_READ, 0, nil, OPEN_EXISTING,
             (uint32)((uint32)FILE_FLAG_OPEN_REPARSE_POINT | (uint32)FILE_FLAG_BACKUP_SEMANTICS), 0);
         if (err != default!) {
             (n, err) = (-1, err); goto ᒐdone;
@@ -1384,8 +1446,8 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
         if (exprᴛ1 == IO_REPARSE_TAG_SYMLINK) {
             var data = rdb.of(reparseDataBuffer.ᏑreparseBuffer).Reinterpret<byte, symbolicLinkReparseBuffer>();
             var p = array<uint16>.AliasPointer(data.at(symbolicLinkReparseBuffer.ᏑPathBuffer, 0), 65535);
-            s = UTF16ToString((~p).slice((~data).SubstituteNameOffset / 2, (uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2));
-            if ((uint32)((~data).Flags & (uint32)_SYMLINK_FLAG_RELATIVE) == 0) {
+            s = UTF16ToString(p.slice(data.SubstituteNameOffset / 2, (uint16)(data.SubstituteNameOffset + data.SubstituteNameLength) / 2));
+            if ((uint32)(data.Flags & (uint32)_SYMLINK_FLAG_RELATIVE) == 0) {
                 if (len(s) >= 4 && s[..4] == @"\??\"){
                     s = s[4..];
                     switch (ᐧ) {
@@ -1409,7 +1471,7 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
         else if (exprᴛ1 == _IO_REPARSE_TAG_MOUNT_POINT) {
             var data = rdb.of(reparseDataBuffer.ᏑreparseBuffer).Reinterpret<byte, mountPointReparseBuffer>();
             var p = array<uint16>.AliasPointer(data.at(mountPointReparseBuffer.ᏑPathBuffer, 0), 65535);
-            s = UTF16ToString((~p).slice((~data).SubstituteNameOffset / 2, (uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2));
+            s = UTF16ToString(p.slice(data.SubstituteNameOffset / 2, (uint16)(data.SubstituteNameOffset + data.SubstituteNameLength) / 2));
             if (len(s) >= 4 && s[..4] == @"\??\"){ // \??\C:\foo\bar
                 s = s[4..];
             } else {
@@ -1463,10 +1525,8 @@ public static error PostQueuedCompletionStatus(ΔHandle cphandle, uint32 qty, ui
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unableToQueryBufferSizeˢ = "unable to query buffer size from InitializeProcThreadAttributeList"u8;
 
-// newProcThreadAttributeList allocates new PROC_THREAD_ATTRIBUTE_LIST, with
-// the requested maximum number of attributes, which must be cleaned up by
-// deleteProcThreadAttributeList.
-internal static (ж<_PROC_THREAD_ATTRIBUTE_LIST>, error) newProcThreadAttributeList(uint32 maxAttrCount) {
+// newProcThreadAttributeList allocates a new [procThreadAttributeListContainer], with the requested maximum number of attributes.
+internal static (ж<procThreadAttributeListContainer>, error) newProcThreadAttributeList(uint32 maxAttrCount) {
     ref var size = ref heap(new uintptr(), out var Ꮡsize);
     var err = initializeProcThreadAttributeList(nil, maxAttrCount, 0, Ꮡsize);
     if (!AreEqual(err, ERROR_INSUFFICIENT_BUFFER)) {
@@ -1475,13 +1535,38 @@ internal static (ж<_PROC_THREAD_ATTRIBUTE_LIST>, error) newProcThreadAttributeL
         }
         return (default!, err);
     }
-    // size is guaranteed to be ≥1 by initializeProcThreadAttributeList.
-    var al = Ꮡ(new slice<byte>((nint)(size)), 0).Reinterpret<byte, _PROC_THREAD_ATTRIBUTE_LIST>();
-    err = initializeProcThreadAttributeList(al, maxAttrCount, 0, Ꮡsize);
+    const uint32 LMEM_FIXED = 0;
+    (var alloc, err) = localAlloc(LMEM_FIXED, (uint32)size);
     if (err != default!) {
         return (default!, err);
     }
-    return (al, default!);
+    // size is guaranteed to be ≥1 by InitializeProcThreadAttributeList.
+    var al = Ꮡ(new procThreadAttributeListContainer(data: (ж<_PROC_THREAD_ATTRIBUTE_LIST>)(uintptr)((@unsafe.Pointer)alloc)));
+    err = initializeProcThreadAttributeList((~al).data, maxAttrCount, 0, Ꮡsize);
+    if (err != default!) {
+        return (default!, err);
+    }
+    al.Value.pointers = new slice<@unsafe.Pointer>(0, (nint)(maxAttrCount));
+    return (al, err);
+}
+
+// Update modifies the ProcThreadAttributeList using UpdateProcThreadAttribute.
+internal static error update(this ref procThreadAttributeListContainer al, uintptr attribute, @unsafe.Pointer value, uintptr size) {
+    al.pointers = append(al.pointers, value);
+    return updateProcThreadAttribute(al.data, 0, attribute, value, size, nil, nil);
+}
+
+// Delete frees ProcThreadAttributeList's resources.
+internal static void delete(this ref procThreadAttributeListContainer al) {
+    deleteProcThreadAttributeList(al.data);
+    LocalFree(((ΔHandle)(uintptr)al.data));
+    al.data = default!;
+    al.pointers = default!;
+}
+
+// List returns the actual ProcThreadAttributeList to be passed to StartupInfoEx.
+internal static ж<_PROC_THREAD_ATTRIBUTE_LIST> list(this ref procThreadAttributeListContainer al) {
+    return al.data;
 }
 
 // RegEnumKeyEx enumerates the subkeys of an open registry key.

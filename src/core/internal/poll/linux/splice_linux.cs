@@ -7,7 +7,6 @@ using unix = go.@internal.syscall.unix_package;
 using Δruntime = runtime_package;
 using sync = go.sync_package;
 using Δsyscall = syscall_package;
-using @unsafe = unsafe_package;
 using go;
 using go.@internal.syscall;
 
@@ -213,10 +212,8 @@ partial struct splicePipeFields {
 }
 
 partial struct splicePipe {
-    internal partial ref splicePipeFields splicePipeFields { get; }
-    // We want to use a finalizer, so ensure that the size is
-    // large enough to not use the tiny allocator.
-    internal array<byte> _ = new(24 - /* unsafe.Sizeof(splicePipeFields{}) */ (uintptr)24 % 24);
+    /*embed*/ internal splicePipeFields splicePipeFields;
+    internal Δruntime.Cleanup cleanup;
 }
 
 // splicePipePool caches pipes to avoid high-frequency construction and destruction of pipe buffers.
@@ -233,7 +230,11 @@ internal static any newPoolPipe() {
     if (p == nil) {
         return default!;
     }
-    Δruntime.SetFinalizer(p.OrTypedNil(), destroyPipe);
+
+    p.Value.cleanup = Δruntime.AddCleanup(p, (splicePipeFields spf) => {
+        var ᴛ1 = new splicePipe(splicePipeFields: spf);
+        destroyPipe(ref ᴛ1);
+    }, (~p).splicePipeFields);
     return p.OrTypedNil();
 }
 
@@ -252,8 +253,8 @@ internal static void putPipe(ж<splicePipe> Ꮡp) {
     // If there is still data left in the pipe,
     // then close and discard it instead of putting it back into the pool.
     if (p.data != 0) {
-        Δruntime.SetFinalizer(Ꮡp.OrTypedNil(), default!);
-        destroyPipe(Ꮡp);
+        p.cleanup.Stop();
+        destroyPipe(ref (Ꮡp).DerefOrNull());
         return;
     }
     ᏑsplicePipePool.Put(Ꮡp.OrTypedNil());
@@ -279,9 +280,7 @@ internal static ж<splicePipe> newPipe() {
 }
 
 // destroyPipe destroys a pipe.
-internal static void destroyPipe(ж<splicePipe> Ꮡp) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
+internal static void destroyPipe(ref splicePipe p) {
     CloseFunc(p.rfd);
     CloseFunc(p.wfd);
 }

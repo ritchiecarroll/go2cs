@@ -18,7 +18,6 @@ partial class net_package {
 // Notable members of the hall of shame include:
 //   - github.com/pojntfx/hydrapp/hydrapp
 //   - github.com/mtibben/androiddnsfix
-//   - github.com/metacubex/mihomo
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.

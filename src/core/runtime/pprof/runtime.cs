@@ -28,6 +28,16 @@ internal static partial void runtime_setProfLabel(@unsafe.Pointer labels);
 // runtime_getProfLabel is defined in runtime/proflabel.go.
 internal static partial @unsafe.Pointer runtime_getProfLabel();
 
+// runtime_goroutineleakcount is defined in runtime/proc.go.
+internal static nint runtime_goroutineleakcount() {
+    throw panic("go2cs: //go:linkname push runtime.goroutineleakcount -> runtime/pprof.runtime_goroutineleakcount is not honored: goroutine leak detection needs a GC that marks blocked goroutines unreachable, which the managed model does not do, so any count would be a fabricated 0");
+}
+
+// runtime_goroutineLeakGC is defined in runtime/mgc.go.
+internal static void runtime_goroutineLeakGC() {
+    throw panic("go2cs: //go:linkname push runtime.goroutineLeakGC -> runtime/pprof.runtime_goroutineLeakGC is not honored: the pushed body waits for a goroutine-leak GC cycle the managed collector never runs, so it would spin forever");
+}
+
 // SetGoroutineLabels sets the current goroutine's labels to match ctx.
 // A new goroutine inherits the labels of the goroutine that created it.
 // This is a lower-level API than [Do], which should be used instead when possible.

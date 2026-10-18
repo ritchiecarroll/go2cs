@@ -272,6 +272,7 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeSize = arraySize,
                             TypeClass = "Array",
                             ElementZeroFactory = ArrayElementZeroFactory(context, targetSyntax, semanticModel, typeName, needsConstructionCache),
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         }
                         .Generate();

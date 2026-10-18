@@ -41,25 +41,25 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
 partial struct BuildInfo {
     // GoVersion is the version of the Go toolchain that built the binary
     // (for example, "go1.19.2").
-    public @string GoVersion;
+    public @string GoVersion; /*`json:",omitempty"`*/
     // Path is the package path of the main package for the binary
     // (for example, "golang.org/x/tools/cmd/stringer").
-    public @string Path;
+    public @string Path; /*`json:",omitempty"`*/
     // Main describes the module that contains the main package for the binary.
-    public Module Main;
+    public Module Main; /*`json:""`*/
     // Deps describes all the dependency modules, both direct and indirect,
     // that contributed packages to the build of this binary.
-    public slice<ж<Module>> Deps;
+    public slice<ж<Module>> Deps; /*`json:",omitempty"`*/
     // Settings describes the build settings used to build the binary.
-    public slice<BuildSetting> Settings;
+    public slice<BuildSetting> Settings; /*`json:",omitempty"`*/
 }
 
 // A Module describes a single module included in a build.
 partial struct Module {
-    public @string Path; // module path
-    public @string Version; // module version
-    public @string Sum; // checksum
-    public ж<Module> Replace; // replaced by this module
+    public @string Path; /*`json:",omitempty"`*/ // module path
+    public @string Version; /*`json:",omitempty"`*/ // module version
+    public @string Sum; /*`json:",omitempty"`*/ // checksum
+    public ж<Module> Replace; /*`json:",omitempty"`*/ // replaced by this module
 }
 
 // A BuildSetting is a key-value pair describing one setting that influenced a build.
@@ -85,8 +85,9 @@ partial struct Module {
 partial struct BuildSetting {
     // Key and Value describe the build setting.
     // Key must not contain an equals sign, space, tab, or newline.
+    public @string Key; /*`json:",omitempty"`*/
     // Value must not contain newlines ('\n').
-    public @string Key, Value;
+    public @string Value; /*`json:",omitempty"`*/
 }
 
 // quoteKey reports whether key is required to be quoted.

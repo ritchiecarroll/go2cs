@@ -22,7 +22,7 @@ partial class io_test_package {
 
 // A version of bytes.Buffer without ReadFrom and WriteTo
 partial struct Buffer {
-    public partial ref bytes_package.Buffer ΔBuffer { get; }
+    /*embed*/ public bytes_package.Buffer ΔBuffer;
     /*embed*/ public io_package.ReaderFrom ReaderFrom; // conflicts with and hides bytes.Buffer's ReaderFrom.
     /*embed*/ public io_package.WriterTo WriterTo;   // conflicts with and hides bytes.Buffer's WriterTo.
 }
@@ -101,7 +101,7 @@ public static void TestCopyWriteTo(ж<testing.T> Ꮡt) {
 
 // Version of bytes.Buffer that checks whether WriteTo was called or not
 partial struct writeToChecker {
-    public partial ref bytes_package.Buffer Buffer { get; }
+    /*embed*/ public bytes_package.Buffer Buffer;
     internal bool writeToCalled;
 }
 
@@ -282,7 +282,7 @@ public static void TestReadAtLeast(ж<testing.T> Ꮡt) {
 // when the input is exhausted.
 partial struct dataAndErrorBuffer {
     internal error err;
-    public partial ref bytes_package.Buffer Buffer { get; }
+    /*embed*/ public bytes_package.Buffer Buffer;
 }
 
 internal static (nint n, error err) Read(this ref dataAndErrorBuffer r, slice<byte> p) {

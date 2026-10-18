@@ -30,6 +30,7 @@ import (
 )
 
 func TestPackageTupleVarSpecInitOrderRelocation(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}

@@ -473,6 +473,7 @@ func embedNamesEqual(left, right []string) bool {
 // `go.embed_package` needs no import and cannot be shadowed. Both import forms are armed below, so
 // the rule is ONE rule and a later reader cannot re-introduce the alias for the named-import case.
 func TestTheInitializerIsQualifiedUnderEitherImportForm(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	for _, form := range []struct {
 		name    string
 		imports string
@@ -529,6 +530,7 @@ func TestTheInitializerIsQualifiedUnderEitherImportForm(t *testing.T) {
 // grouped variable's `//go:embed` was read twice, two patterns for a []byte variable, and refused.
 // The directive reads take the declaration's doc; the writer takes the spec's (visitValueSpec).
 func TestAGroupedSpecReadsItsEmbedDirectiveOnce(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	for _, form := range []struct {
 		name string
 		decl string

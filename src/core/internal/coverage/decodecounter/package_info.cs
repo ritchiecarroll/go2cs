@@ -54,7 +54,7 @@ using static go.@internal.coverage.decodecounter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/decodecounter/decodecounterfile.go", "decodecounterfile.cs", "ACdOgtyAgqSClIKUgriAgraCgIK2gIKkpqKCpqKCgIKkgIKkgpSClKrUgIKkgoLKgIKkgIK2gIKUgoKCgILYpoKCgoKUgpSCgoL2ooKCgpSClIKSgoKUlIKCgoKClIKClICCpJSAgoKClIKCgraAgqSAgqQAAhLirsKuwgAKGJKu4oKUgpSCgIK2gIKkqqIABBQACAKClIKCgoKCgoKCgpSCgoKUlKSCgoKCgpSClKaCgoKUgpS4AAIQ0oKCgoKCkoKUgriUgriCgpSCgpSClIKCgoKUlA==", "157-163:1;281-297:1;300-309:2;311-320:3")]
+[assembly: go.GoPositionMap("internal/coverage/decodecounter/decodecounterfile.go", "decodecounterfile.cs", "AChOgtyAgqSClIKUgriAgraCgIK2gIKkpqKCpqKCgIKkgIKkgpSClKrUgIKkgoLKgIKkgIK2gIKUgoKCgILYpoKCgoKUgpSCgoL2ooKCgpSClIKSgoKUlIKCgoKClIKClICCpJSAgoKClIKCgraAgqSAgqQAAhLirsKuwgAKGJKu4oKUgpSCgIK2gIKkqqIABBQACAKClIKCgoKCgoKCgpSCgoKUlKSCgoKCgpSClKaCgoKUgpS4AAIQ0oKCgoKCkoKUgriUgriCgpSCgpSClIKCgoKUlA==", "157-163:1;281-297:1;300-309:2;311-320:3")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -87,6 +87,6 @@ public static partial class decodecounter_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸcoverageꓸstringtab() => builtin.initPackage(typeof(go.@internal.coverage.stringtab_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     // </ImportInitializers>
 }

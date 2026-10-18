@@ -5,17 +5,32 @@
 namespace go;
 
 using atomic = @internal.runtime.atomic_package;
-using syscall = @internal.runtime.syscall_package;
+using linux = @internal.runtime.syscall.linux_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
+using @internal.runtime.syscall;
 
 partial class runtime_package {
 
 internal static int32 epfd = -1;           // epoll descriptor
-internal static ж<uintptr> ᏑnetpollEventFd = new StandardBox<uintptr>(default(uintptr));
-internal static ref uintptr netpollEventFd => ref ᏑnetpollEventFd.Value; // eventfd for netpollBreak
+internal static uintptr netpollEventFd; // eventfd for netpollBreak
 internal static ж<atomic.Uint32> ᏑnetpollWakeSig = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
 internal static ref atomic.Uint32 netpollWakeSig => ref ᏑnetpollWakeSig.Value;     // used to avoid duplicate calls of netpollBreak
+
+// netpollPackData stores pd and its fdseq in the epoll data field of ev as
+// a taggedPointer. A nil pd marks the netpollBreak eventfd: netpollopen always
+// registers a non-nil *pollDesc, so netpollUnpackData can tell the two apart
+// by the pointer alone, on any word size or endianness.
+internal static void netpollPackData(ж<linux.EpollEvent> Ꮡev, ж<pollDesc> Ꮡpd, uintptr fdseq) {
+    (Ꮡev.of(linux.EpollEvent.ᏑData).Reinterpret<array<byte>, taggedPointer>()).Value = taggedPointerPack(@unsafe.Pointer.FromPinnedBox(Ꮡpd), fdseq);
+}
+
+// netpollUnpackData returns the pollDesc and fdseq stored by netpollPackData.
+// pd is nil for the netpollBreak eventfd.
+internal static (ж<pollDesc> pd, uintptr fdseq) netpollUnpackData(ж<linux.EpollEvent> Ꮡev) {
+    var tp = ~Ꮡev.of(linux.EpollEvent.ᏑData).Reinterpret<array<byte>, taggedPointer>();
+    return ((ж<pollDesc>)(uintptr)(tp.pointer()), tp.tag());
+}
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string runtimeNetpollinitFailedˢ = "runtime: netpollinit failed"u8;
@@ -24,22 +39,22 @@ internal static readonly @string runtimeEpollctlFailedˢ = "runtime: epollctl fa
 
 internal static void netpollinit() {
     uintptr errno = default!;
-    (epfd, errno) = syscall.EpollCreate1(syscall.EPOLL_CLOEXEC);
+    (epfd, errno) = linux.EpollCreate1(linux.EPOLL_CLOEXEC);
     if (errno != 0) {
         println((@string)"runtime: epollcreate failed with"u8, errno);
         @throw(runtimeNetpollinitFailedˢ);
     }
-    (var efd, errno) = syscall.Eventfd(0, (int32)((int32)syscall.EFD_CLOEXEC | (int32)syscall.EFD_NONBLOCK));
+    (var efd, errno) = linux.Eventfd(0, (int32)((int32)linux.EFD_CLOEXEC | (int32)linux.EFD_NONBLOCK));
     if (errno != 0) {
-        println((@string)"runtime: eventfd failed with"u8, ((uintptr)0 - errno));
+        println((@string)"runtime: eventfd failed with"u8, errno);
         @throw(runtimeEventfdFailedˢ);
     }
-    ref var ev = ref heap<syscall.EpollEvent>(out var Ꮡev);
-    ev = new syscall.EpollEvent(
-        Events: syscall.EPOLLIN
+    ref var ev = ref heap<linux.EpollEvent>(out var Ꮡev);
+    ev = new linux.EpollEvent(
+        Events: linux.EPOLLIN
     );
-    (Ꮡev.of(syscall.EpollEvent.ᏑData).Reinterpret<array<byte>, ж<uintptr>>()).ValueSlot = ᏑnetpollEventFd;
-    errno = syscall.EpollCtl(epfd, syscall.EPOLL_CTL_ADD, efd, Ꮡev);
+    netpollPackData(Ꮡev, nil, 0);
+    errno = linux.EpollCtl(epfd, linux.EPOLL_CTL_ADD, efd, Ꮡev);
     if (errno != 0) {
         println((@string)"runtime: epollctl failed with"u8, errno);
         @throw(runtimeEpollctlFailedˢ);
@@ -52,16 +67,15 @@ internal static bool netpollIsPollDescriptor(uintptr fd) {
 }
 
 internal static uintptr netpollopen(uintptr fd, ж<pollDesc> Ꮡpd) {
-    ref var ev = ref heap(new syscall.EpollEvent(), out var Ꮡev);
-    ev.Events = (uint32)((UntypedInt)((UntypedInt)(syscall.EPOLLIN | syscall.EPOLLOUT) | syscall.EPOLLRDHUP) | (uint32)syscall.EPOLLET);
-    var tp = taggedPointerPack(@unsafe.Pointer.FromPinnedBox(Ꮡpd), Ꮡpd.of(pollDesc.Ꮡfdseq).Load());
-    (Ꮡev.of(syscall.EpollEvent.ᏑData).Reinterpret<array<byte>, taggedPointer>()).Value = tp;
-    return syscall.EpollCtl(epfd, syscall.EPOLL_CTL_ADD, (int32)fd, Ꮡev);
+    ref var ev = ref heap(new linux.EpollEvent(), out var Ꮡev);
+    ev.Events = (uint32)((UntypedInt)((UntypedInt)(linux.EPOLLIN | linux.EPOLLOUT) | linux.EPOLLRDHUP) | (uint32)linux.EPOLLET);
+    netpollPackData(Ꮡev, Ꮡpd, Ꮡpd.of(pollDesc.Ꮡfdseq).Load());
+    return linux.EpollCtl(epfd, linux.EPOLL_CTL_ADD, (int32)fd, Ꮡev);
 }
 
 internal static uintptr netpollclose(uintptr fd) {
-    ref var ev = ref heap(new syscall.EpollEvent(), out var Ꮡev);
-    return syscall.EpollCtl(epfd, syscall.EPOLL_CTL_DEL, (int32)fd, Ꮡev);
+    ref var ev = ref heap(new linux.EpollEvent(), out var Ꮡev);
+    return linux.EpollCtl(epfd, linux.EPOLL_CTL_DEL, (int32)fd, Ꮡev);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -106,9 +120,9 @@ internal static (gList, int32) netpoll(int64 delay) {
         // 1e9 ms == ~11.5 days.
         waitms = 1000000000;
     }
-    array<syscall.EpollEvent> events = new(128, () => new());
+    array<linux.EpollEvent> events = new(128, () => new());
 retry:
-    var (n, errno) = syscall.EpollWait(epfd, events[..], (int32)len(events), waitms);
+    var (n, errno) = linux.EpollWait(epfd, events[..], (int32)len(events), waitms);
     if (errno != 0) {
         if (errno != _EINTR) {
             println((@string)"runtime: epollwait on fd"u8, epfd, (@string)"failed with"u8, errno);
@@ -124,14 +138,16 @@ retry:
     ref var toRun = ref heap(new gList(), out var ᏑtoRun);
     var delta = (int32)0;
     for (var i = (int32)0; i < n; i++) {
-        ref var ev = ref heap<syscall.EpollEvent>(out var Ꮡev);
+        ref var ev = ref heap<linux.EpollEvent>(out var Ꮡev);
         ev = events[i].ΔClone();
         if (ev.Events == 0) {
             continue;
         }
 
-        if (~Ꮡev.of(syscall.EpollEvent.ᏑData).Reinterpret<array<byte>, ж<uintptr>>() == ᏑnetpollEventFd) {
-            if (ev.Events != syscall.EPOLLIN) {
+        var (pd, tag) = netpollUnpackData(Ꮡev);
+        // pd == nil denotes a netpollBreak eventfd.
+        if (pd == nil) {
+            if (ev.Events != linux.EPOLLIN) {
                 println((@string)"runtime: netpoll: eventfd ready for"u8, ev.Events);
                 @throw(runtimeNetpollEventfdˢ);
             }
@@ -150,18 +166,15 @@ retry:
         }
 
         int32 mode = default!;
-        if ((uint32)(ev.Events & ((uint32)((UntypedInt)((UntypedInt)(syscall.EPOLLIN | syscall.EPOLLRDHUP) | syscall.EPOLLHUP) | (uint32)syscall.EPOLLERR))) != 0) {
+        if ((uint32)(ev.Events & ((uint32)((UntypedInt)((UntypedInt)(linux.EPOLLIN | linux.EPOLLRDHUP) | linux.EPOLLHUP) | (uint32)linux.EPOLLERR))) != 0) {
             mode += (rune)'r';
         }
-        if ((uint32)(ev.Events & ((uint32)((UntypedInt)(syscall.EPOLLOUT | syscall.EPOLLHUP) | (uint32)syscall.EPOLLERR))) != 0) {
+        if ((uint32)(ev.Events & ((uint32)((UntypedInt)(linux.EPOLLOUT | linux.EPOLLHUP) | (uint32)linux.EPOLLERR))) != 0) {
             mode += (rune)'w';
         }
         if (mode != 0) {
-            var tp = ~Ꮡev.of(syscall.EpollEvent.ᏑData).Reinterpret<array<byte>, taggedPointer>();
-            var pd = (ж<pollDesc>)(uintptr)(tp.pointer());
-            var tag = tp.tag();
             if (pd.of(pollDesc.Ꮡfdseq).Load() == tag) {
-                pd.setEventErr(ev.Events == syscall.EPOLLERR, tag);
+                pd.setEventErr(ev.Events == linux.EPOLLERR, tag);
                 delta += netpollready(ᏑtoRun, pd, mode);
             }
         }

@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-574_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/go.types.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/go/types@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/go/types) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/go/types)
+[![Tests](https://img.shields.io/badge/Tests-574_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/go.types.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/go/types@go1.26.9)\
+[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/go/types) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/go/types)
 
 From C#, call this package through the static class go.go.types_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -16,6 +16,8 @@ Name resolution maps each identifier (\[ast.Ident]) in the program to the symbol
 Constant folding computes the exact constant value (\[constant.Value]) of every expression (\[ast.Expr]) that is a compile-time constant. Use the Types field of \[Info] to find the results of constant folding for an expression.
 
 Type deduction computes the type (\[Type]) of every expression (\[ast.Expr]) and checks for compliance with the language specification. Use the Types field of \[Info] for the results of type deduction.
+
+Applications that need to type-check one or more complete packages of Go source code may find it more convenient not to invoke the type checker directly but instead to use the Load function in package [golang.org/x/tools/go/packages](https://pkg.go.dev/golang.org/x/tools/go/packages).
 
 For a tutorial, see [https://go.dev/s/types-tutorial](https://go.dev/s/types-tutorial).
 

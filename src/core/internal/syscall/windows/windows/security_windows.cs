@@ -54,7 +54,7 @@ public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPr
 }
 
 //sys DuplicateTokenEx(hExistingToken syscall.Token, dwDesiredAccess uint32, lpTokenAttributes *syscall.SecurityAttributes, impersonationLevel uint32, tokenType TokenType, phNewToken *syscall.Token) (err error) = advapi32.DuplicateTokenEx
-//sys SetTokenInformation(tokenHandle syscall.Token, tokenInformationClass uint32, tokenInformation uintptr, tokenInformationLength uint32) (err error) = advapi32.SetTokenInformation
+//sys SetTokenInformation(tokenHandle syscall.Token, tokenInformationClass uint32, tokenInformation unsafe.Pointer, tokenInformationLength uint32) (err error) = advapi32.SetTokenInformation
 partial struct SID_AND_ATTRIBUTES {
     public ж<syscall.SID> Sid;
     public uint32 Attributes;

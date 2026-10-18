@@ -320,16 +320,26 @@ func renderPlatformReferences(contents string, shared []string, deltas map[strin
 
 	rebuilt := contents[:start] + region.String() + contents[start+closeAt:]
 
-	// Drop any block this file already carried before appending the new one, so the rewrite is a
-	// replacement rather than an accumulation -- and drop THE BLOCK ONLY. It used to be cut from its
-	// header to </Project>, which also took everything written after it: the licensing pass appends
-	// the shared-LICENSE <None> group before </Project>, so in every committed L3 project file it
-	// FOLLOWS the block. A single-target reconvert never noticed (it renders a fresh template before
-	// licensing runs), but the multi-target merge renders a STAGED file, and the H10 close's regen
-	// lost log/syslog's `<None Include="../../LICENSE" …>` that way (licensing_test.go guards it).
-	// The replacement goes back where the old block stood, so the file's order is kept too.
-	insertAt := -1
+	// The block's ONE position: directly after the shared reference group and the blank line that
+	// follows it. The other groups after it are written by passes that append before </Project>
+	// (licensing's shared-LICENSE <None> group, the merge's kept remainder). A block placed at
+	// </Project>, or put back where an earlier render had left it, therefore landed before or after
+	// them depending on which pass ran first, and re-emit was not a fixed point: the H7 consolidated
+	// re-emit moved the LICENSE group of three L3 projects (internal/runtime/cgroup,
+	// internal/syscall/windows, crypto/internal/fips140deps/time) from before the block to after it,
+	// lines identical, once the stage inputs stopped differing. Anchored here, the file is a function
+	// of its other contents and the reference sets alone.
+	insertAt := start + region.Len() + len(platformReferenceGroupClose)
 
+	if strings.HasPrefix(rebuilt[insertAt:], "\r\n") {
+		insertAt += len("\r\n")
+	}
+
+	// Drop any block this file already carried before inserting the new one, so the rewrite is a
+	// replacement rather than an accumulation -- and drop THE BLOCK ONLY. It used to be cut from its
+	// header to </Project>, which also took everything written after it, and the H10 close's regen
+	// lost log/syslog's `<None Include="../../LICENSE" …>` that way (licensing_test.go guards it).
+	// A block always follows the shared reference group, so removing one never moves insertAt.
 	for {
 		blockAt := strings.Index(rebuilt, platformReferenceBlockHeader)
 
@@ -343,25 +353,17 @@ func renderPlatformReferences(contents string, shared []string, deltas map[strin
 			return rebuilt, err
 		}
 
-		rebuilt = rebuilt[:blockAt] + rebuilt[endAt:]
-
-		if insertAt < 0 {
-			insertAt = blockAt
+		if blockAt < insertAt {
+			return rebuilt, fmt.Errorf("project file's conditioned reference block precedes its shared reference group")
 		}
+
+		rebuilt = rebuilt[:blockAt] + rebuilt[endAt:]
 	}
 
 	block := composePlatformReferenceGroups(deltas)
 
 	if len(block) == 0 {
 		return rebuilt, nil
-	}
-
-	if insertAt < 0 {
-		insertAt = strings.LastIndex(rebuilt, platformProjectClose)
-	}
-
-	if insertAt < 0 {
-		return rebuilt, fmt.Errorf("project file has no %s to insert the conditioned reference block before", platformProjectClose)
 	}
 
 	return rebuilt[:insertAt] + block + rebuilt[insertAt:], nil

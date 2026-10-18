@@ -142,6 +142,7 @@ func TestForeignCollisionAliasesAreDerivedFromTheDependency(t *testing.T) {
 // The INVARIANT: the derivation depends only on the dependency's own declarations, never on what
 // the current run has converted or accumulated. Same dependency, hostile run state, same answer.
 func TestForeignCollisionAliasesIgnoreRunAccumulatedState(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dependency := loadCollisionFixtureDependency(t)
 
 	resetPackageState(&packages.Package{})
@@ -170,6 +171,7 @@ func TestForeignCollisionAliasesIgnoreRunAccumulatedState(t *testing.T) {
 // still spell the foreign member the renamed way, identically to a run in which the dependency was
 // converted first.
 func TestUnconvertedDependencySpellsCollisionRenamedMember(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dependency := loadCollisionFixtureDependency(t)
 
 	resetPackageState(&packages.Package{})

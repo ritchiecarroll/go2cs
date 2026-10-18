@@ -8,28 +8,22 @@ namespace go.@internal;
 using fmt = fmt_package;
 using math = math_package;
 using strings = strings_package;
-using @event = go.@internal.trace.event_package;
-using go122 = go.@internal.trace.@event.go122_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using go.@internal.trace;
-using go.@internal.trace.@event;
 using io = io_package;
 
 partial class trace_package {
 
-// maxArgs is the maximum number of arguments for "plain" events,
-// i.e. anything that could reasonably be represented as a baseEvent.
-internal static UntypedInt maxArgs => 5;
-
 // timedEventArgs is an array that is able to hold the arguments for any
 // timed event.
-/* [maxArgs - 1]uint64 */
+/* [tracev2.MaxTimedEventArgs - 1]uint64 */
 partial struct timedEventArgs /*[4]uint64*/;
 
 // baseEvent is the basic unprocessed event. This serves as a common
 // fundamental data structure across.
 partial struct baseEvent {
-    internal @event.Type typ;
+    internal tracev2.EventType typ;
     internal ΔTime time;
     internal timedEventArgs args;
 }
@@ -39,7 +33,7 @@ partial struct baseEvent {
 internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
     var exprᴛ1 = v;
     if (exprᴛ1 == version.Go122) {
-        return e.args.slice(len(go122.Specs()[e.typ].Args) - 1);
+        return e.args.slice(len(tracev2.Specs()[e.typ].Args) - 1);
     }
     throw panic(fmt.Sprintf("unsupported version: go 1.%d"u8, v));
 }
@@ -47,7 +41,7 @@ internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
 // evTable contains the per-generation data necessary to
 // interpret an individual event.
 partial struct evTable {
-    internal frequency freq;
+    /*embed*/ internal sync sync;
     internal dataTable<stringID, @string> strings;
     internal dataTable<stackID, stack> stacks;
     internal map<uint64, frame> pcs;
@@ -57,9 +51,8 @@ partial struct evTable {
     internal slice<@string> extraStrings;
     internal map<@string, extraStringID> extraStringIDs;
     internal extraStringID nextExtra;
-    // expData contains extra unparsed data that is accessible
-    // only to ExperimentEvent via an EventExperimental event.
-    internal map<@event.Experiment, ж<ExperimentalData>> expData;
+    // expBatches contains extra unparsed data relevant to a specific experiment.
+    internal map<tracev2.Experiment, slice<ExperimentalBatch>> expBatches;
 }
 
 // addExtraString adds an extra string to the evTable and returns
@@ -78,7 +71,7 @@ internal static extraStringID addExtraString(this ref evTable t, @string s) {
     }
     t.nextExtra++;
     var id = t.nextExtra;
-    t.extraStrings = append(t.extraStrings, s);
+    t.extraStrings = builtin.append(t.extraStrings, s);
     t.extraStringIDs[s] = id;
     return id;
 }
@@ -114,11 +107,23 @@ internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
     }
     {
         var (existing, ok) = d.get(id); if (ok) {
-            return fmt.Errorf("multiple %Ts with the same ID: id=%d, new=%v, existing=%v"u8, data, id, data, existing);
+            return fmt.Errorf("multiple %Ts with the same ID: id=%d, new=%v, existing=%v"u8, (data).OrTypedNilOf(), id, (data).OrTypedNilOf(), (existing).OrTypedNilOf());
         }
     }
     d.sparse[id] = data;
     return default!;
+}
+
+// append adds a new element to the data table and returns its ID.
+internal static EI append<EI, E>(this ref dataTable<EI, E> d, E data)
+    where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
+{
+    if (d.sparse == default!) {
+        d.sparse = new map<EI, E>();
+    }
+    var id = ConvertToType<EI>(len(d.sparse)) + ConvertToType<EI>(1);
+    d.sparse[id] = data;
+    return id;
 }
 
 // compactify attempts to compact sparse into dense.
@@ -217,7 +222,7 @@ internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
 {
     var (data, ok) = d.get(id);
     if (!ok) {
-        throw panic(fmt.Sprintf("expected id %d in %T table"u8, id, data));
+        throw panic(fmt.Sprintf("expected id %d in %T table"u8, id, (data).OrTypedNilOf()));
     }
     return data;
 }
@@ -241,7 +246,7 @@ partial struct stackID /*num:uint64*/;
 
 // cpuSample represents a CPU profiling sample captured by the trace.
 partial struct cpuSample {
-    internal partial ref schedCtx schedCtx { get; }
+    /*embed*/ internal schedCtx schedCtx;
     internal ΔTime time;
     internal stackID stack;
 }
@@ -258,7 +263,7 @@ internal static ΔEvent asEvent(this cpuSample s, ж<evTable> Ꮡtable) {
         table: Ꮡtable,
         ctx: s.schedCtx,
         @base: new baseEvent(
-            typ: go122.EvCPUSample,
+            typ: tracev2.EvCPUSample,
             time: s.time
         )
     );

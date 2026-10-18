@@ -11,6 +11,8 @@ using fips140 = go.crypto.@internal.fips140_package;
 using sha256 = go.crypto.@internal.fips140.sha256_package;
 using sha3 = go.crypto.@internal.fips140.sha3_package;
 using sha512 = go.crypto.@internal.fips140.sha512_package;
+using errors = errors_package;
+using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 
@@ -30,8 +32,9 @@ partial interface marshalable {
 }
 
 partial struct HMAC {
+    // opad and ipad may share underlying storage with HMAC clones.
     internal slice<byte> opad, ipad;
-    internal fips140.Hash outer, inner;
+    internal hash.Hash outer, inner;
     // If marshaled is true, then opad and ipad do not contain a padded
     // copy of the key, but rather the marshaled state of outer/inner after
     // opad/ipad has been fed into it.
@@ -141,9 +144,48 @@ public static void Reset(this ref HMAC h) {
     h.marshaled = true;
 }
 
-// New returns a new HMAC hash using the given [fips140.Hash] type and key.
+partial struct errCloneUnsupported {
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string cryptoHmacHashDoesNotˢ = "crypto/hmac: hash does not support hash.Cloner"u8;
+
+internal static @string Error(this errCloneUnsupported e) {
+    return cryptoHmacHashDoesNotˢ;
+}
+
+internal static error Unwrap(this errCloneUnsupported e) {
+    return errors.ErrUnsupported;
+}
+
+// Clone implements [hash.Cloner] if the underlying hash does.
+// Otherwise, it returns an error wrapping [errors.ErrUnsupported].
+public static (hash.Cloner, error) Clone(this ref HMAC h) {
+    ref var r = ref heap<HMAC>(out var Ꮡr);
+    r = h;
+    var (ic, ok) = h.inner._<hash.Cloner>(ᐧ);
+    if (!ok) {
+        return (default!, new errCloneUnsupported(nil));
+    }
+    (var oc, ok) = h.outer._<hash.Cloner>(ᐧ);
+    if (!ok) {
+        return (default!, new errCloneUnsupported(nil));
+    }
+    error err = default!;
+    (r.inner, err) = ic.Clone();
+    if (err != default!) {
+        return (default!, new errCloneUnsupported(nil));
+    }
+    (r.outer, err) = oc.Clone();
+    if (err != default!) {
+        return (default!, new errCloneUnsupported(nil));
+    }
+    return (new HMACжCloner(Ꮡr), default!);
+}
+
+// New returns a new HMAC hash using the given [hash.Hash] type and key.
 public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)
-    where H : fips140.Hash
+    where H : hash.Hash
 {
     var hm = Ꮡ(new HMAC(keyLen: len(key)));
     hm.Value.outer = h();

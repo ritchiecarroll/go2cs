@@ -10,6 +10,10 @@
 // which between them are the whole managed-representation obstacle on the Windows datagram path
 // (docs/phase4/DESIGN-netpoll-managed-poller.md §4.8, RATIFIED).
 //
+// It also holds (*FD).DisassociateIOCP (2026-10-16), which is not a sockaddr converter: the lazy port
+// bind left Go's body nothing to disassociate on a socket with no IO yet. Its own comment, at the foot
+// of this file, says why.
+//
 // The decoders came first, with this file; the encoders followed on 2026-08-26 once a measurement
 // reached them. The two halves fail through the SAME two mechanisms, described below in the reading
 // direction, and the encoders' section at the end of this header says what changes when those
@@ -100,7 +104,7 @@
 using System;
 using golib = go.golib;
 
-// Hand-owned (no fd_windows_impl.go exists, so a reconvert never regenerates this file); the two
+// Hand-owned (no fd_windows_impl.go exists, so a reconvert never regenerates this file); the
 // declarations it replaces are registered in the converter's manualConversionFuncs, which is what
 // turns their generated bodies into placeholders.
 [module: go.GoManualConversion]
@@ -111,6 +115,8 @@ namespace go.@internal;
 // (internal/syscall), and a plain alias collides with it (CS0576). The generated fd_windows.cs
 // spells it the same way for the same reason.
 using Δsyscall = go.syscall_package;
+using windows = go.@internal.syscall.windows_package;
+using atomic = go.sync.atomic_package;
 
 partial class poll_package
 {
@@ -150,5 +156,58 @@ partial class poll_package
 
     internal static int32 sockaddrInet6ToRaw(ж<Δsyscall.RawSockaddrAny> Ꮡrsa, ref Δsyscall.SockaddrInet6 sa) {
         return Δsyscall.GoRawSockaddrFromInet6(Ꮡrsa, sa.Port, sa.ZoneId, sa.Addr);
+    }
+
+    // (*FD).DisassociateIOCP. Go's body asks the kernel to drop the handle's completion port, which
+    // in Go always exists: netpollopen associates every pollable handle at open. The managed poller
+    // binds a socket to the CLR's port only at its FIRST overlapped submit (the S2 amendment; see
+    // syscall/windows/zsyscall_windows_wsa_impl.cs), so a socket with no IO yet has no port, and
+    // NtSetInformationFile(FileReplaceCompletionInformation) answers STATUS_INVALID_PARAMETER for it.
+    // net's dup() returned that as windows.NTStatus 0xC000000D, and TestFileConn/udp and /unix failed.
+    //
+    // So the call is made only when the submit seam has bound the socket, and the post-condition is
+    // the same either way: the handle has no port, and the FD is no longer pollable. The descriptor
+    // is also MARKED, because the bind is lazy: without the mark the next overlapped submit on this
+    // FD would bind it again, and its completion would go to a port while waitIO's non-pollable arm
+    // waits on the operation's own event. With the mark the seam submits event-signalled operations
+    // and never binds. Everything else is Go's body, in Go's order.
+    public static error DisassociateIOCP(this ж<FD> Ꮡfd) {
+        GoFrame ᒐ = default;
+        bool ᒐd1 = false;
+        try {
+            ref var fd = ref Ꮡfd.DerefOrNull();
+
+            {
+                var err = Ꮡfd.incref(); if (err != default!) {
+                    return err;
+                }
+            }
+            ᒐd1 = true;
+
+            if (fd.isBlocking || !Ꮡfd.pollable()) {
+                // Nothing to disassociate.
+                return default!;
+            }
+
+            nuint descriptor = (nuint)(uintptr)fd.Sysfd;
+
+            if (golib.GoAsyncIO.TryGetDescriptorState(descriptor, out _)) {
+                ref var info = ref heap<windows.FILE_COMPLETION_INFORMATION>(out var Ꮡinfo);
+                info = new windows.FILE_COMPLETION_INFORMATION(nil);
+                var err = windows.NtSetInformationFile(fd.Sysfd, Ꮡ(new windows.IO_STATUS_BLOCK(nil)), unsafe_package.Pointer.FromPinnedBox(Ꮡinfo), (uint32)(uintptr)16, windows.FileReplaceCompletionInformation); if (err != default!) {
+                    return err;
+                }
+            }
+
+            golib.GoAsyncIO.MarkUnassociated(descriptor);
+            // Through the alias: in namespace go.@internal the extension lookup reaches go.sync_package's
+            // generic Store first (CS7036), where the generated file's `using go.sync;` finds atomic's.
+            atomic.Store(Ꮡfd.of(FD.Ꮡdisassociated), true);
+            // Don't call fd.pd.close(), it would be too racy.
+            // There is no harm on leaving fd.pd open until Close is called.
+            return default!;
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+        finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
     }
 }

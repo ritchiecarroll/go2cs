@@ -11,6 +11,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(itab), typeof(itabTableType), typeof(abi.TypeAssertCache), typeof(abi.InterfaceSwitchCache))]
 partial class runtime_package {
 
 internal static UntypedInt itabInitSize => 512;
@@ -134,7 +135,7 @@ internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> Ꮡ
         if (m == nil) {
             return default!;
         }
-        if ((~m).Inter == Ꮡinter && (~m).Type == Ꮡtyp) {
+        if (m.Inter == Ꮡinter && m.Type == Ꮡtyp) {
             return m;
         }
         h += i;
@@ -165,14 +166,14 @@ internal static void itabAdd(ж<itab> Ꮡm) {
         // We lie and tell malloc we want pointer-free memory because
         // all the pointed-to values are not in the heap.
         var t2 = (ж<itabTableType>)(uintptr)(mallocgc((2 + 2 * (~t).size) * (uintptr)goarch.PtrSize, nil, true));
-        t2.Value.size = (~t).size * 2;
+        t2.size = (~t).size * 2;
 
         // Copy over entries.
         // Note: while copying, other threads may look for an itab and
         // fail to find it. That's ok, they will then try to get the itab lock
         // and as a consequence wait until this copying is complete.
         iterate_itabs(t2.add);
-        if ((~t2).count != (~t).count) {
+        if (t2.count != (~t).count) {
             @throw(mismatchedCountDuringˢ);
         }
         // Publish new hash table. Use an atomic write: see comment in getitab.
@@ -224,6 +225,11 @@ internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
 // If !firstTime, itabInit will not write anything to m.Fun (see issue 65962).
 // It is ok to call this multiple times on the same m, even concurrently
 // (although it will only be called once with firstTime==true).
+//
+// itabInit stores only code pointers, so it must not emit a write barrier;
+// //go:nowritebarrier enforces that (see the methods store below).
+//
+//go:nowritebarrier
 internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -239,7 +245,10 @@ internal static unsafe @string itabInit(ж<itab> Ꮡm, bool firstTime) {
     nint nt = (nint)(~x).Mcount;
     var xmhdr = new slice<abi.Method>(new ReadOnlySpan<abi.Method>((abi.Method*)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(x), (uintptr)(~x).Moff)), (int)(nt)));
     nint j = 0;
-    var methods = (false ? default(slice<@unsafe.Pointer>) : throw panic("go2cs: a slice view (*[N]unsafe.Pointer)(p)[...] over a managed element has no managed aliasing pair (iface.go:217)"));
+    // These are code pointers, not heap pointers. Use a uintptr slice so the
+    // store emits no write barrier: on wasm a code pointer can look like a
+    // heap pointer and make the GC crash (see issue 80472).
+    var methods = array<uintptr>.AliasPointer(Ꮡm.at(itab.ᏑFun, 0), 65536).slice(0, ni, ni);
     @unsafe.Pointer fun0 = default!;
 imethods:
     for (nint k = 0; k < ni; k++) {
@@ -266,7 +275,7 @@ imethods:
                         fun0 = ifn; // we'll set m.Fun[0] at the end
                     } else 
                     if (firstTime) {
-                        methods[k] = ifn;
+                        methods[k] = (uintptr)ifn;
                     }
                     goto continue_imethods;
                 }
@@ -285,7 +294,7 @@ break_imethods:;
 }
 
 internal static void itabsinit() {
-    lockInit(ᏑitabLock, lockRankItab);
+    lockInit(ref itabLock, lockRankItab);
     @lock(ᏑitabLock);
     foreach (var (_, md) in activeModules()) {
         foreach (var (_, i) in (~md).itablinks) {
@@ -527,7 +536,7 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> Ꮡt) {
         tab = getitab(s.Inter, Ꮡt, s.CanFail);
     }
 
-    if (!abi.UseInterfaceSwitchCache(GOARCH)) {
+    if (!abi.UseInterfaceSwitchCache(goarch.ArchFamily)) {
         return tab;
     }
 
@@ -540,7 +549,7 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> Ꮡt) {
     // Load the current cache.
     var oldC = (ж<abi.TypeAssertCache>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.of(abi.TypeAssert.ᏑCache))));
 
-    if ((uint32)(cheaprand() & (uint32)(~oldC).Mask) != 0) {
+    if ((uint32)(cheaprand() & (uint32)oldC.Mask) != 0) {
         // As cache gets larger, choose to update it less often
         // so we can amortize the cost of building a new cache.
         return tab;
@@ -579,7 +588,7 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
     // Allocate the new table.
     var newSize = /* unsafe.Sizeof(abi.TypeAssertCache{}) */ (uintptr)24 + (uintptr)(newN - 1) * /* unsafe.Sizeof(abi.TypeAssertCacheEntry{}) */ (uintptr)16;
     var newC = (ж<abi.TypeAssertCache>)(uintptr)(mallocgc(newSize, nil, true));
-    newC.Value.Mask = (uintptr)(newN - 1);
+    newC.Mask = (uintptr)(newN - 1);
     var newEntries = @unsafe.Slice(newC.at(abi.TypeAssertCache.ᏑEntries, 0), newN);
 
     // Fill the new table.
@@ -632,7 +641,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
         }
     }
 
-    if (!abi.UseInterfaceSwitchCache(GOARCH)) {
+    if (!abi.UseInterfaceSwitchCache(goarch.ArchFamily)) {
         return (case_, tab);
     }
 
@@ -647,7 +656,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
     // Load the current cache.
     var oldC = (ж<abi.InterfaceSwitchCache>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.of(abi.InterfaceSwitch.ᏑCache))));
 
-    if ((uint32)(cheaprand() & (uint32)(~oldC).Mask) != 0) {
+    if ((uint32)(cheaprand() & (uint32)oldC.Mask) != 0) {
         // As cache gets larger, choose to update it less often
         // so we can amortize the cost of building a new cache
         // (that cost is linear in oldc.Mask).
@@ -690,7 +699,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
     // Allocate the new table.
     var newSize = /* unsafe.Sizeof(abi.InterfaceSwitchCache{}) */ (uintptr)32 + (uintptr)(newN - 1) * /* unsafe.Sizeof(abi.InterfaceSwitchCacheEntry{}) */ (uintptr)24;
     var newC = (ж<abi.InterfaceSwitchCache>)(uintptr)(mallocgc(newSize, nil, true));
-    newC.Value.Mask = (uintptr)(newN - 1);
+    newC.Mask = (uintptr)(newN - 1);
     var newEntries = @unsafe.Slice(newC.at(abi.InterfaceSwitchCache.ᏑEntries, 0), newN);
 
     // Fill the new table.

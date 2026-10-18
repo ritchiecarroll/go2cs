@@ -604,9 +604,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         // However, it is still possible to trigger this case if something exceptional
         // happens between calls to revise; the framework just doesn't support this yet.
     }.slice()) {
-        var eΔ1 = e;
-        var eʗ1 = eΔ1;
-        Ꮡt.Run((~eΔ1).name, (ж<testing.T> tΔ20) => {
+        var eʗ1 = e;
+        Ꮡt.Run((~e).name, (ж<testing.T> tΔ20) => {
             tΔ20.Parallel();
 
             var c = runtime_internal_test_package.NewGCController((~eʗ1).gcPercent, (~eʗ1).memoryLimit);

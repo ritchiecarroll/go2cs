@@ -1,0 +1,3 @@
+# testfp: a fixture read through a string
+float64 %b 4503599627370496p-52 1
+float64 %b 4503599627370497p-52 1.0000000000000002

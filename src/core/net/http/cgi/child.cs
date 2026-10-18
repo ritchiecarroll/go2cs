@@ -73,9 +73,15 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
 
     r.Value.Proto = @params[serverProtocolˢ];
     bool ok = default!;
-    (r.Value.ProtoMajor, r.Value.ProtoMinor, ok) = http.ParseHTTPVersion((~r).Proto);
-    if (!ok) {
-        return (default!, errors.New(cgiInvalidServerProtocolˢ));
+    if ((~r).Proto == "INCLUDED"u8){
+        // SSI (Server Side Include) use case
+        // CGI Specification RFC 3875 - section 4.1.16
+        (r.Value.ProtoMajor, r.Value.ProtoMinor) = (1, 0);
+    } else 
+    {
+        (r.Value.ProtoMajor, r.Value.ProtoMinor, ok) = http.ParseHTTPVersion((~r).Proto); if (!ok) {
+            return (default!, errors.New(cgiInvalidServerProtocolˢ));
+        }
     }
 
     r.Value.Close = true;

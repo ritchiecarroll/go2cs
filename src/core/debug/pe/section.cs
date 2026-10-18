@@ -86,7 +86,7 @@ partial struct SectionHeader {
 
 // Section provides access to PE COFF section.
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly

@@ -32,7 +32,7 @@ partial class pe_package {
 
 // A File represents an open PE file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public any OptionalHeader; // of type *OptionalHeader32 or *OptionalHeader64
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Symbol>> Symbols; // COFF symbols with auxiliary symbol records removed
@@ -341,6 +341,12 @@ partial struct ImportDirectory {
     internal @string dll;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string optionalHeaderDataˢ = "optional header data directory virtual size doesn't fit within data seek"u8;
+internal static readonly @string importDirectoryOriginalˢ = "import directory original first thunk doesn't fit within data seek"u8;
+internal static readonly @string thunkParsingNeedsAtLeastˢ = "thunk parsing needs at least 8-bytes"u8;
+internal static readonly @string thunkParsingNeedsAtLeastˢ2 = "thunk parsing needs at least 5-bytes"u8;
+
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
@@ -401,7 +407,11 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     }
 
     // seek to the virtual address specified in the import data directory
-    d = d.slice((nint)(idd.VirtualAddress - (~ds).VirtualAddress));
+    var seek = idd.VirtualAddress - (~ds).VirtualAddress;
+    if (seek >= (uint32)len(d)) {
+        return (default!, errors.New(optionalHeaderDataˢ));
+    }
+    d = d.slice((nint)(seek));
 
     // start decoding the import directory
     slice<ImportDirectory> ida = default!;
@@ -432,9 +442,16 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
         (dt.dll, _) = getString(names, (nint)(dt.Name - (~ds).VirtualAddress));
         (d, _) = ds.Data();
         // seek to OriginalFirstThunk
-        d = d.slice((nint)(dt.OriginalFirstThunk - (~ds).VirtualAddress));
+        var seekΔ1 = dt.OriginalFirstThunk - (~ds).VirtualAddress;
+        if (seekΔ1 >= (uint32)len(d)) {
+            return (default!, errors.New(importDirectoryOriginalˢ));
+        }
+        d = d.slice((nint)(seekΔ1));
         while (len(d) > 0) {
             if (pe64){ // 64bit
+                if (len(d) < 8) {
+                    return (default!, errors.New(thunkParsingNeedsAtLeastˢ));
+                }
                 var va = binary.LittleEndian.Uint64(d[0..8]);
                 d = d[8..];
                 if (va == 0) {
@@ -447,6 +464,9 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
                     all = append(all, fn + ":"u8 + dt.dll);
                 }
             } else { // 32bit
+                if (len(d) <= 4) {
+                    return (default!, errors.New(thunkParsingNeedsAtLeastˢ2));
+                }
                 var va = binary.LittleEndian.Uint32(d[0..4]);
                 d = d[4..];
                 if (va == 0) {

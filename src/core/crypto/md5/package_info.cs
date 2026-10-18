@@ -41,6 +41,7 @@ using static go.crypto.md5_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<digest, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<digest, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
@@ -55,7 +56,7 @@ using static go.crypto.md5_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/md5/md5.go", "md5.cs", "ABUqggAVMIKCgoKCggAFEIKmgoKCgoKCgoKC5oKClIKUgoKCgoKCgoKmgqaCrsKCgqaApIDUwoLKgoKCgoKCgpSUlJSCgoKUlJSClKaUkoKmooIABxCCgoK4gqaCgoKCgqiSgoKC")]
+[assembly: go.GoPositionMap("crypto/md5/md5.go", "md5.cs", "ABUqggAbOoKCgoKCggAFEIKmgoKCgoKCgoKC5oKClIKUgoKCgoKCgoKmgqaCpoKSrsKCgqaApIDUwoLKgoKCgoKCgpSUlJSCgoKCgoKUlJSUgpSmlJKCpqKCAAcQgoKCuIKmgoKCgoKokoKCgg==")]
 [assembly: go.GoPositionMap("crypto/md5/md5block.go", "md5block.cs", "AA0clJSUgqamgoKCgoKCgoKCgoKCgoKCpoKCgoKCgoKCgoKCgoKCgqaCgoKCgoKCgoKCgoKCgoKmgoKCgoKCgoKCgoKCgoKCpoKCgoKCgoKCgoKCgoKCgqaCgoK4")]
 [assembly: go.GoPositionMap("crypto/md5/md5block_generic.go", "md5block_generic.cs", "AAoWgg==")]
 // </GoSourcePositionMaps>

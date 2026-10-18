@@ -145,4 +145,27 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
     return unchecked((int32)(uint32)r);
 }
 
+// runtime.libc_error_addr, displaced (2026-10-15, the Go 1.26 hop's H6; manualTypeOperations.go names the reason).
+//
+// Go 1.26 reads errno through an ADDRESS: libc_error_addr(&p) runs libc_error_trampoline, which calls
+// __error() and stores the returned int* through the args word into p, and syscall_rawsyscalln then reads
+// *p. Here p is a ж<int32>, a managed reference, so the store has no faithful managed form: a native int*
+// cannot become a box, and the errno it points at is thread-local storage the next managed call may
+// overwrite. The managed runtime reads errno inside the call instead (GoLibcCall's errnoReader above,
+// s_libcCallErrnoReader).
+//
+// No managed path reaches this function at 5f78cf7691's emission:
+//   syscall_rawsyscalln  sys_darwin.cs; the body Go pushes into syscall.rawsyscalln by //go:linkname. syscall
+//                        bodies its own syscalln and rawsyscalln (syscall/darwin/syscall_darwin_impl.cs, on
+//                        GoLibcCall with errno read inside the call), so the pushed body is never called
+//   minit                os_darwin.cs; called from mstart1 (whose caller mstart0 is entered from assembly
+//                        only) and from needm (cgo callbacks, and signal paths behind sigtramp, which
+//                        sigaction_impl.cs never installs)
+// So it refuses BY NAME. A body that left p nil would make the caller read errno 0, a success, silently.
+// The displacement takes the function's lifted libc_error_addr_args with it (the two-seeded footprint
+// reads it gone from sys_darwin.cs and package_info.cs); libc_error_trampoline and its import record stay.
+internal static void libc_error_addr(ж<ж<int32>> Ꮡaddr) {
+    @throw("runtime: libc_error_addr reached: the managed runtime has no address for errno; GoLibcCall reads it inside the call (runtime/darwin/libccall_impl.cs)"u8);
+}
+
 } // end runtime_package

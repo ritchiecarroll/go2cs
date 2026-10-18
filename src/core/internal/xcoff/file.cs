@@ -30,7 +30,7 @@ partial struct SectionHeader {
 }
 
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
@@ -79,7 +79,7 @@ partial struct FileHeader {
 
 // A File represents an open XCOFF file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Symbol>> Symbols;
     public slice<byte> StringTable;

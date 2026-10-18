@@ -12,6 +12,7 @@ using time = time_package;
 using go.@internal;
 using go.@internal.trace;
 using static go.@internal.trace_internal_test_package;
+using version = go.@internal.trace.version_package;
 
 partial class trace_test_package {
 
@@ -136,7 +137,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
     var checkʗ1 = check;
     Ꮡt.Run("V2"u8, (ж<testing.T> tΔ2) => {
         @string testPath = testdataTestsGo122Gcˢ;
-        var (r, _, err) = testtrace.ParseFile(testPath);
+        var (r, _, _, err) = testtrace.ParseFile(testPath);
         if (err != default!) {
             tΔ2.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, err);
         }

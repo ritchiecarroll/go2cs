@@ -140,7 +140,7 @@ public static @string BaseName(this ref Sym s) {
 // A Func collects information about a single function.
 partial struct Func {
     public uint64 Entry;
-    public partial ref ж<Sym> Sym { get; }
+    /*embed*/ public ж<Sym> Sym;
     public uint64 End;
     public slice<ж<Sym>> Params; // nil for Go 1.3 and later binaries
     public slice<ж<Sym>> Locals; // nil for Go 1.3 and later binaries
@@ -344,7 +344,8 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
 
 // NewTable decodes the Go symbol table (the ".gosymtab" section in ELF),
 // returning an in-memory representation.
-// Starting with Go 1.3, the Go symbol table no longer includes symbol data.
+// Starting with Go 1.3, the Go symbol table no longer includes symbol data;
+// callers should pass nil for the symtab parameter.
 public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡpcln) {
     ref var pcln = ref Ꮡpcln.DerefOrNull();
 

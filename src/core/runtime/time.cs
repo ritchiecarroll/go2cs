@@ -19,10 +19,16 @@ internal static (int64 sec, int32 nsec, int64 mono) time_runtimeNow() {
     int32 nsec = default!;
 
     {
-        var sg = getg().Value.syncGroup; if (sg != nil) {
-            sec = (~sg).now / (1000 * 1000 * 1000);
-            nsec = (int32)((~sg).now % (1000 * 1000 * 1000));
-            return (sec, nsec, (~sg).now);
+        var bubble = getg().Value.bubble; if (bubble != nil) {
+            sec = (~bubble).now / (1000 * 1000 * 1000);
+            nsec = (int32)((~bubble).now % (1000 * 1000 * 1000));
+            // Don't return a monotonic time inside a synctest bubble.
+            // If we return a monotonic time based on the fake clock,
+            // arithmetic on times created inside/outside bubbles is confusing.
+            // If we return a monotonic time based on the real monotonic clock,
+            // arithmetic on times created in the same bubble is confusing.
+            // Simplest is to omit the monotonic time within a bubble.
+            return (sec, nsec, 0);
         }
     }
     return time_now();
@@ -31,10 +37,15 @@ internal static (int64 sec, int32 nsec, int64 mono) time_runtimeNow() {
 //go:linkname time_runtimeNano time.runtimeNano
 internal static int64 time_runtimeNano() {
     var gp = getg();
-    if ((~gp).syncGroup != nil) {
-        return (~(~gp).syncGroup).now;
+    if ((~gp).bubble != nil) {
+        return (~(~gp).bubble).now;
     }
     return nanotime();
+}
+
+//go:linkname time_runtimeIsBubbled time.runtimeIsBubbled
+internal static bool time_runtimeIsBubbled() {
+    return (~getg()).bubble != nil;
 }
 
 // A timer is a potentially repeating trigger for calling t.f(t.arg, t.seq).
@@ -54,6 +65,7 @@ partial struct timer {
     internal bool isChan;         // timer has a channel; immutable; can be read without lock
     internal bool isFake;         // timer is using fake time; immutable; can be read without lock
     internal uint32 blocked; // number of goroutines blocked on timer's channel
+    internal uint32 rand; // randomizes order of timers at same instant; only set when isFake
     // Timer wakes up at when, and then at when+period, ... (period > 0 only)
     // each time calling f(arg, seq, delay) in the timer goroutine, so f must be
     // a well-behaved function and not block.
@@ -111,7 +123,7 @@ partial struct timer {
 internal static void init(this ж<timer> Ꮡt, Action<any, uintptr, int64> f, any arg) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    lockInit(Ꮡt.of(timer.Ꮡmu), lockRankTimer);
+    lockInit(ref nonnil(ref t).mu, lockRankTimer);
     t.f = f;
     t.arg = arg;
 }
@@ -140,12 +152,28 @@ partial struct timers {
     // heap[i].when over timers with the timerModified bit set.
     // If minWhenModified = 0, it means there are no timerModified timers in the heap.
     internal atomic.Int64 minWhenModified;
-    internal ж<synctestGroup> syncGroup;
 }
 
 partial struct timerWhen {
     internal ж<timer> timer;
     internal int64 when;
+}
+
+// less reports whether tw is less than other.
+internal static bool less(this timerWhen tw, timerWhen other) {
+    switch (ᐧ) {
+    case {} when tw.when < other.when: {
+        return true;
+    }
+    case {} when tw.when > other.when: {
+        return false;
+    }
+    default: {
+        // When timers wake at the same time, use a per-timer random value to order them.
+        // We only set the random value for timers using fake time, since there's
+        // no practical way to schedule real-time timers for the same instant.
+        return (~tw.timer).rand < (~other.timer).rand;
+    }}
 }
 
 internal static void @lock(this ж<timers> Ꮡts) {
@@ -322,15 +350,15 @@ internal static void timeSleep(int64 ns) {
     if (t == nil) {
         t = @new<timer>();
         t.init(goroutineReady, gp.OrTypedNil());
-        if ((~gp).syncGroup != nil) {
+        if ((~gp).bubble != nil) {
             t.Value.isFake = true;
         }
         gp.Value.timer = t;
     }
     int64 now = default!;
     {
-        var sg = gp.Value.syncGroup; if (sg != nil){
-            now = sg.Value.now;
+        var bubble = gp.Value.bubble; if (bubble != nil){
+            now = bubble.Value.now;
         } else {
             now = nanotime();
         }
@@ -341,7 +369,7 @@ internal static void timeSleep(int64 ns) {
     }
     gp.Value.sleepWhen = when;
     if ((~t).isFake){
-        // Call timer.reset in this goroutine, since it's the one in a syncGroup.
+        // Call timer.reset in this goroutine, since it's the one in a bubble.
         // We don't need to worry about the timer function running before the goroutine
         // is parked, because time won't advance until we park.
         resetForSleep(gp, nil);
@@ -368,7 +396,7 @@ internal static bool resetForSleep(ж<g> Ꮡgp, @unsafe.Pointer _) {
 partial struct timeTimer {
     internal @unsafe.Pointer c; // <-chan time.Time
     internal bool init;
-    internal partial ref timer timer { get; }
+    /*embed*/ internal timer timer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -389,7 +417,7 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
         racerelease(@unsafe.Pointer.FromPinnedBox(t.of(timeTimer.Ꮡtimer)));
     }
     if (Ꮡc != nil) {
-        lockInit(t.of(timeTimer.ᏑsendLock), lockRankTimerSend);
+        lockInit(ref (t.of(timeTimer.ᏑsendLock)).DerefOrNull(), lockRankTimerSend);
         t.Value.isChan = true;
         c.timer = t.of(timeTimer.Ꮡtimer);
         if (c.dataqsiz == 0) {
@@ -397,7 +425,7 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
         }
     }
     {
-        var gr = getg().Value.syncGroup; if (gr != nil) {
+        var bubble = getg().Value.bubble; if (bubble != nil) {
             t.Value.isFake = true;
         }
     }
@@ -406,6 +434,9 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
     return t;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string stopOfSynctestTimerFromˢ = "stop of synctest timer from outside bubble"u8;
+
 // stopTimer stops a timer.
 // It reports whether t was stopped before being run.
 //
@@ -413,11 +444,14 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
 internal static bool stopTimer(ж<timeTimer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    if (t.isFake && (~getg()).syncGroup == nil) {
-        throw panic("stop of synctest timer from outside bubble");
+    if (t.isFake && (~getg()).bubble == nil) {
+        fatal(stopOfSynctestTimerFromˢ);
     }
     return Ꮡt.of(timeTimer.Ꮡtimer).stop();
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string resetOfSynctestTimerFromˢ = "reset of synctest timer from outside bubble"u8;
 
 // resetTimer resets an inactive timer, adding it to the timer heap.
 //
@@ -430,8 +464,8 @@ internal static bool resetTimer(ж<timeTimer> Ꮡt, int64 when, int64 period) {
     if (raceenabled) {
         racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡt.of(timeTimer.Ꮡtimer)));
     }
-    if (t.isFake && (~getg()).syncGroup == nil) {
-        throw panic("reset of synctest timer from outside bubble");
+    if (t.isFake && (~getg()).bubble == nil) {
+        fatal(resetOfSynctestTimerFromˢ);
     }
     return Ꮡt.of(timeTimer.Ꮡtimer).reset(when, period);
 }
@@ -493,7 +527,7 @@ internal static void maybeRunAsync(this ж<timer> Ꮡt) {
         {
             var now = nanotime(); if (t.when <= now) {
                 systemstack(() => {
-                    Ꮡt.unlockAndRun(now); // resets t.when
+                    Ꮡt.unlockAndRun(now, nil); // resets t.when
                 });
                 Ꮡt.@lock();
             }
@@ -590,6 +624,7 @@ internal static void deleteMin(this ж<timers> Ꮡts) {
 internal static readonly @string timerWhenMustBePositiveˢ = "timer when must be positive"u8;
 internal static readonly @string timerPeriodMustBeNonˢ = "timer period must be non-negative"u8;
 internal static readonly @string modifyˢ = "modify"u8;
+internal static readonly @string fakeTimerExecutingWithNoˢ = "fake timer executing with no bubble"u8;
 
 // modify modifies an existing timer.
 // This is called by the netpoll code or time.Ticker.Reset or time.Timer.Reset.
@@ -649,6 +684,33 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
 
     var add = Ꮡt.needsAdd();
 
+    if (add && t.isFake) {
+        // If this is a bubbled timer scheduled to fire immediately,
+        // run it now rather than waiting for the bubble's timer scheduler.
+        // This avoids deferring timer execution until after the bubble
+        // becomes durably blocked.
+        //
+        // Don't do this for non-bubbled timers: It isn't necessary,
+        // and there may be cases where the runtime executes timers with
+        // the expectation the timer func will not run in the current goroutine.
+        // Bubbled timers are always created by the time package, and are
+        // safe to run in the current goroutine.
+        var bubble = getg().Value.bubble;
+        if (bubble == nil) {
+            @throw(fakeTimerExecutingWithNoˢ);
+        }
+        if ((uint8)(t.state & timerHeaped) == 0 && when <= (~bubble).now) {
+            var bubbleʗ1 = bubble;
+            systemstack(() => {
+                if (!async && Ꮡt.Value.isChan) {
+                    unlock(Ꮡt.of(timer.ᏑsendLock));
+                }
+                Ꮡt.unlockAndRun((~bubbleʗ1).now, bubbleʗ1);
+            });
+            return pending;
+        }
+    }
+
     if (!async && t.isChan) {
         // Stop any future sends with stale values.
         // See timer.unlockAndRun.
@@ -691,7 +753,7 @@ internal static bool needsAdd(this ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assertLockHeld(Ꮡt.of(timer.Ꮡmu));
-    var need = (uint8)(t.state & timerHeaped) == 0 && t.when > 0 && (!t.isChan || t.isFake || t.blocked > 0);
+    var need = (uint8)(t.state & timerHeaped) == 0 && t.when > 0 && (!t.isChan || t.blocked > 0);
     if (need){
         Ꮡt.trace(needsAddˢ);
     } else {
@@ -737,11 +799,11 @@ internal static void maybeAdd(this ж<timer> Ꮡt) {
     var mp = acquirem();
     ж<timers> ts = default!;
     if (t.isFake){
-        var sg = getg().Value.syncGroup;
-        if (sg == nil) {
+        var bubble = getg().Value.bubble;
+        if (bubble == nil) {
             @throw(invalidTimerFakeTimeButˢ);
         }
-        ts = sg.of(synctestGroup.Ꮡtimers);
+        ts = bubble.of(synctestBubble.Ꮡtimers);
     } else {
         ts = (~mp).p.ptr().of(runtime_package.Δp.Ꮡtimers);
     }
@@ -752,6 +814,12 @@ internal static void maybeAdd(this ж<timer> Ꮡt) {
     var when = (int64)0;
     var wake = false;
     if (Ꮡt.needsAdd()) {
+        if (t.isFake) {
+            // Re-randomize timer order.
+            // We could do this for all timers, but unbubbled timers are highly
+            // unlikely to have the same when.
+            t.rand = cheaprand();
+        }
         t.state |= (uint8)(timerHeaped);
         when = t.when;
         var wakeTime = ts.wakeTime();
@@ -1041,7 +1109,7 @@ internal static readonly @string checkˢ = "check"u8;
 // We pass now in and out to avoid extra calls of nanotime.
 //
 //go:yeswritebarrierrec
-internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> Ꮡts, int64 now) {
+internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> Ꮡbubble) {
     int64 pollUntil = default!;
     bool ran = default!;
     ref var ts = ref Ꮡts.DerefOrNull();
@@ -1079,7 +1147,7 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
         while (len(ts.heap) > 0) {
             // Note that runtimer may temporarily unlock ts.
             {
-                var tw = Ꮡts.run(now); if (tw != 0) {
+                var tw = Ꮡts.run(now, Ꮡbubble); if (tw != 0) {
                     if (tw > 0) {
                         pollUntil = tw;
                     }
@@ -1115,7 +1183,7 @@ internal static readonly @string runˢ = "run"u8;
 // If a timer is run, this will temporarily unlock ts.
 //
 //go:systemstack
-internal static int64 run(this ж<timers> Ꮡts, int64 now) {
+internal static int64 run(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> Ꮡbubble) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(runˢ);
@@ -1151,7 +1219,7 @@ Redo:
         return (~t).when;
     }
 
-    t.unlockAndRun(now);
+    t.unlockAndRun(now, Ꮡbubble);
     assertLockHeld(Ꮡts.of(timers.Ꮡmu)); // t is unlocked now, but not ts
     return 0;
 }
@@ -1169,8 +1237,9 @@ internal static readonly @string mismatchedIsSendingˢ = "mismatched isSending u
 // unlockAndRun returns with t unlocked and t.ts (re-)locked.
 //
 //go:systemstack
-internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
+internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBubble> Ꮡbubble) {
     ref var t = ref Ꮡt.DerefOrNull();
+    ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     Ꮡt.trace(unlockAndRunˢ);
     assertLockHeld(Ꮡt.of(timer.Ꮡmu));
@@ -1181,9 +1250,15 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         // Note that we are running on a system stack,
         // so there is no chance of getg().m being reassigned
         // out from under us while this function executes.
-        var tsLocal = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡtimers);
+        var gp = getg();
+        ж<timers> tsLocal = default!;
+        if (Ꮡbubble == nil){
+            tsLocal = (~(~gp).m).p.ptr().of(runtime_package.Δp.Ꮡtimers);
+        } else {
+            tsLocal = Ꮡbubble.of(synctestBubble.Ꮡtimers);
+        }
         if ((~tsLocal).raceCtx == 0) {
-            tsLocal.Value.raceCtx = racegostart(abi.FuncPCABIInternal(((Func<ж<timers>, int64, int64>)(run))) + (uintptr)sys.PCQuantum);
+            tsLocal.Value.raceCtx = racegostart(abi.FuncPCABIInternal(((Func<ж<timers>, int64, ж<synctestBubble>, int64>)(run))) + (uintptr)sys.PCQuantum);
         }
         raceacquirectx((~tsLocal).raceCtx, (uintptr)@unsafe.Pointer.FromRef(ref t));
     }
@@ -1233,21 +1308,25 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         if ((~gp).racectx != 0) {
             @throw(unexpectedRacectxˢ);
         }
-        gp.Value.racectx = (~(~gp).m).p.ptr().Value.timers.raceCtx;
+        if (Ꮡbubble == nil){
+            gp.Value.racectx = (~(~gp).m).p.ptr().Value.timers.raceCtx;
+        } else {
+            gp.Value.racectx = bubble.timers.raceCtx;
+        }
     }
 
     if (ts != nil) {
         ts.unlock();
     }
 
-    if (ts != nil && (~ts).syncGroup != nil) {
+    if (Ꮡbubble != nil) {
         // Temporarily use the timer's synctest group for the G running this timer.
         var gp = getg();
-        if ((~gp).syncGroup != nil) {
+        if ((~gp).bubble != nil) {
             @throw(unexpectedSyncgroupSetˢ);
         }
-        gp.Value.syncGroup = ts.Value.syncGroup;
-        (~ts).syncGroup.changegstatus(gp, _Gdead, _Grunning);
+        gp.Value.bubble = Ꮡbubble;
+        Ꮡbubble.changegstatus(gp, _Gdead, _Grunning);
     }
 
     if (!async && t.isChan) {
@@ -1292,10 +1371,15 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         unlock(Ꮡt.of(timer.ᏑsendLock));
     }
 
-    if (ts != nil && (~ts).syncGroup != nil) {
+    if (Ꮡbubble != nil) {
         var gp = getg();
-        (~ts).syncGroup.changegstatus(gp, _Grunning, _Gdead);
-        gp.Value.syncGroup = default!;
+        Ꮡbubble.changegstatus(gp, _Grunning, _Gdead);
+        if (raceenabled) {
+            // Establish a happens-before between this timer event and
+            // the next synctest.Wait call.
+            racereleasemergeg(ref (gp).DerefOrNull(), (uintptr)Ꮡbubble.raceaddr());
+        }
+        gp.Value.bubble = default!;
     }
 
     if (ts != nil) {
@@ -1327,7 +1411,7 @@ internal static void verify(this ж<timers> Ꮡts) {
 
         // The heap is timerHeapN-ary. See siftupTimer and siftdownTimer.
         nint Δp = (nint)((nuint)(i - 1) / (nuint)timerHeapN);
-        if (tw.when < ts.heap[Δp].when) {
+        if (tw.less(ts.heap[Δp])) {
             print((@string)"bad timer heap at "u8, i, (@string)": "u8, Δp, (@string)": "u8, ts.heap[Δp].when, (@string)", "u8, i, (@string)": "u8, tw.when, (@string)"\n"u8);
             @throw(badTimerHeapˢ);
         }
@@ -1411,13 +1495,12 @@ internal static void siftUp(this ref timers ts, nint i) {
         badTimer();
     }
     var tw = heap[i];
-    var when = tw.when;
-    if (when <= 0) {
+    if (tw.when <= 0) {
         badTimer();
     }
     while (i > 0) {
         nint Δp = (nint)((nuint)(i - 1) / (nuint)timerHeapN); // parent
-        if (when >= heap[Δp].when) {
+        if (!tw.less(heap[Δp])) {
             break;
         }
         heap[i] = heap[Δp];
@@ -1440,8 +1523,7 @@ internal static void siftDown(this ref timers ts, nint i) {
         return;
     }
     var tw = heap[i];
-    var when = tw.when;
-    if (when <= 0) {
+    if (tw.when <= 0) {
         badTimer();
     }
     while (ᐧ) {
@@ -1449,11 +1531,11 @@ internal static void siftDown(this ref timers ts, nint i) {
         if (leftChild >= n) {
             break;
         }
-        var w = when;
+        var w = tw;
         nint c = -1;
         foreach (var (j, twΔ1) in heap.slice(leftChild, min(leftChild + (nint)timerHeapN, n))) {
-            if (twΔ1.when < w) {
-                w = twΔ1.when;
+            if (twΔ1.less(w)) {
+                w = twΔ1;
                 c = leftChild + j;
             }
         }
@@ -1494,7 +1576,6 @@ internal static void badTimer() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string synctestTimerAccessedˢ = "synctest timer accessed from outside bubble"u8;
-internal static readonly @string timerMovedBetweenˢ = "timer moved between synctest bubbles"u8;
 internal static readonly @string maybeRunChanˢ = "maybeRunChan-"u8;
 internal static readonly @string maybeRunChanˢ2 = "maybeRunChan+"u8;
 
@@ -1503,26 +1584,13 @@ internal static readonly @string maybeRunChanˢ2 = "maybeRunChan+"u8;
 // maybeRunChan checks whether the timer needs to run
 // to send a value to its associated channel. If so, it does.
 // The timer must not be locked.
-internal static void maybeRunChan(this ж<timer> Ꮡt) {
+internal static void maybeRunChan(this ж<timer> Ꮡt, ж<Δhchan> Ꮡc) {
     ref var t = ref Ꮡt.DerefOrNull();
+    ref var c = ref Ꮡc.DerefOrNull();
 
-    if (t.isFake) {
-        Ꮡt.@lock();
-        ж<synctestGroup> timerGroup = default!;
-        if (t.ts != nil) {
-            timerGroup = t.ts.Value.syncGroup;
-        }
-        Ꮡt.unlock();
-        var sg = getg().Value.syncGroup;
-        if (sg == nil) {
-            throw panic(((plainError)(@string)synctestTimerAccessedˢ));
-        }
-        if (timerGroup != nil && sg != timerGroup) {
-            throw panic(((plainError)(@string)timerMovedBetweenˢ));
-        }
-        // No need to do anything here.
-        // synctest.Run will run the timer when it advances its fake clock.
-        return;
+    if (t.isFake && (~getg()).bubble != c.bubble) {
+        // This should have been checked by the caller, but check just in case.
+        fatal(synctestTimerAccessedˢ);
     }
     if ((uint8)(Ꮡt.of(timer.Ꮡastate).Load() & timerHeaped) != 0) {
         // If the timer is in the heap, the ordinary timer code
@@ -1532,6 +1600,9 @@ internal static void maybeRunChan(this ж<timer> Ꮡt) {
 
     Ꮡt.@lock();
     var now = nanotime();
+    if (t.isFake) {
+        now = getg().Value.bubble.Value.now;
+    }
     if ((uint8)(t.state & timerHeaped) != 0 || t.when == 0 || t.when > now) {
         Ꮡt.trace(maybeRunChanˢ);
         // Timer in the heap, or not running at all, or not triggered.
@@ -1540,7 +1611,7 @@ internal static void maybeRunChan(this ж<timer> Ꮡt) {
     }
     Ꮡt.trace(maybeRunChanˢ2);
     systemstack(() => {
-        Ꮡt.unlockAndRun(now);
+        Ꮡt.unlockAndRun(now, Ꮡc.Value.bubble);
     });
 }
 
@@ -1553,9 +1624,11 @@ internal static readonly @string blockTimerChanˢ = "blockTimerChan"u8;
 // adding it if needed.
 internal static void blockTimerChan(ref Δhchan c) {
     var t = c.timer;
-    if ((~t).isFake) {
-        return;
+    if ((~t).isFake && c.bubble != (~getg()).bubble) {
+        // This should have been checked by the caller, but check just in case.
+        fatal(synctestTimerAccessedˢ);
     }
+
     t.@lock();
     t.trace(blockTimerChanˢ);
     if (!(~t).isChan) {
@@ -1596,9 +1669,6 @@ internal static readonly @string unblockTimerChanˢ = "unblockTimerChan"u8;
 // blocked on it anymore.
 internal static void unblockTimerChan(ref Δhchan c) {
     var t = c.timer;
-    if ((~t).isFake) {
-        return;
-    }
     t.@lock();
     t.trace(unblockTimerChanˢ);
     if (!(~t).isChan || (~t).blocked == 0) {

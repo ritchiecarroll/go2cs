@@ -11,6 +11,7 @@ using @unsafe = unsafe_package;
 using System.Runtime.CompilerServices;
 using go.@internal;
 
+[GoFieldAccess(typeof(abi.EmptyInterface))]
 partial class reflectlite_package {
 
 // Value is the reflection interface to a Go value.
@@ -42,18 +43,20 @@ partial struct Value {
     // Valid when either flagIndir is set or typ.pointers() is true.
     internal @unsafe.Pointer ptr;
     // flag holds metadata about the value.
-    // The lowest bits are flag bits:
+    //
+    // The lowest five bits give the Kind of the value, mirroring typ.Kind().
+    //
+    // The next set of bits are flag bits:
     //	- flagStickyRO: obtained via unexported not embedded field, so read-only
     //	- flagEmbedRO: obtained via unexported embedded field, so read-only
     //	- flagIndir: val holds a pointer to the data
-    //	- flagAddr: v.CanAddr is true (implies flagIndir)
-    // Value cannot represent method values.
-    // The next five bits give the Kind of the value.
-    // This repeats typ.Kind() except for method values.
-    // The remaining 23+ bits give a method number for method values.
+    //	- flagAddr: v.CanAddr is true (implies flagIndir and ptr is non-nil)
+    //	- flagMethod: v is a method value.
+    // If !typ.IsDirectIface(), code can assume that flagIndir is set.
+    //
+    // The remaining 22+ bits give a method number for method values.
     // If flag.kind() != Func, code can assume that flagMethod is unset.
-    // If ifaceIndir(typ), code can assume that flagIndir is set.
-    internal partial ref flag flag { get; }
+    /*embed*/ internal flag flag;
 }
 
 partial struct flag /*num:uintptr*/;
@@ -112,7 +115,7 @@ internal static any packEface(Value v) {
     var e = Ꮡi.Reinterpret<any, abi.EmptyInterface>();
     // First, fill in the data portion of the interface.
     switch (ᐧ) {
-    case {} when t.IfaceIndir(): {
+    case {} when !t.IsDirectIface(): {
         if ((flag)(v.flag & flagIndir) == 0) {
             throw panic("bad indir");
         }
@@ -123,25 +126,25 @@ internal static any packEface(Value v) {
             typedmemmove(t, c, ptr);
             ptr = c;
         }
-        e.Value.Data = ptr;
+        e.Data = ptr;
         break;
     }
     case {} when (flag)(v.flag & flagIndir) != 0: {
         // Value is indirect, but interface is direct. We need
         // to load the data at v.ptr into the interface data word.
-        e.Value.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        e.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
         break;
     }
     default: {
         // Value is direct, and so is the interface.
-        e.Value.Data = v.ptr;
+        e.Data = v.ptr;
         break;
     }}
     // Now, fill in the type portion. We're very careful here not
     // to have any operation between the e.word and e.typ assignments
     // that would let the garbage collector observe the partially-built
     // interface value.
-    e.Value.Type = t;
+    e.Type = t;
     return i;
 }
 

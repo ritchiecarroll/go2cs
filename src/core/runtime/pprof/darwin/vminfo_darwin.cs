@@ -3,8 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.runtime;
 
+using byteorder = @internal.byteorder_package;
 using os = os_package;
 using @unsafe = unsafe_package;
+using @internal;
 
 partial class pprof_package {
 
@@ -39,18 +41,13 @@ internal static bool machVMInfo(Action<uint64, uint64, uint64, @string, @string>
             // offset is usually 0.
             addMapping(addr,
                 addr + memRegionSize,
-                read64(ref info.Offset),
+                byteorder.LEUint64(info.Offset[..]),
                 regionFilename(addr),
                 ""u8);
             added = true;
         }
         addr += memRegionSize;
     }
-}
-
-internal static uint64 read64(ref array<byte> p) {
-    // all supported darwin platforms are little endian
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)p[0] | ((uint64)p[1] << (int)(8))) | ((uint64)p[2] << (int)(16))) | ((uint64)p[3] << (int)(24))) | ((uint64)p[4] << (int)(32))) | ((uint64)p[5] << (int)(40))) | ((uint64)p[6] << (int)(48))) | ((uint64)p[7] << (int)(56)));
 }
 
 internal static @string regionFilename(uint64 address) {

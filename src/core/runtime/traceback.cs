@@ -6,11 +6,13 @@ namespace go;
 using abi = @internal.abi_package;
 using bytealg = @internal.bytealg_package;
 using goarch = @internal.goarch_package;
+using label = @internal.runtime.pprof.label_package;
 using sys = @internal.runtime.sys_package;
 using stringslite = @internal.stringslite_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using @internal.runtime.pprof;
 
 partial class runtime_package {
 
@@ -439,12 +441,16 @@ internal static void resolveInternal(this ж<unwinder> Ꮡu, bool innermost, boo
             // gp._defer for a defer corresponding to this function, but that
             // is hard to do with defer records on the stack during a stack copy.)
             // Note: the +1 is to offset the -1 that
-            // stack.go:getStackMap does to back up a return
+            // (*stkframe).getStackMap does to back up a return
             // address make sure the pc is in the CALL instruction.
         } else {
             frame.Value.continpc = 0;
         }
     }
+}
+
+internal static bool isInjectedCall(abi.FuncID id) {
+    return id == abi.FuncID_sigpanic || id == abi.FuncID_asyncPreempt || id == abi.FuncID_debugCallV2;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -497,7 +503,7 @@ internal static void next(this ж<unwinder> Ꮡu) {
         @throw(tracebackStuckˢ);
     }
 
-    var injectedCall = f.funcID == abi.FuncID_sigpanic || f.funcID == abi.FuncID_asyncPreempt || f.funcID == abi.FuncID_debugCallV2;
+    var injectedCall = isInjectedCall(f.funcID);
     if (injectedCall){
         u.flags |= (unwindFlags)(unwindTrap);
     } else {
@@ -516,6 +522,7 @@ internal static void next(this ж<unwinder> Ꮡu) {
     // before faking a call.
     if (usesLR && injectedCall) {
         var x = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(~frame).sp);
+        // same as the size bump used in scanframeworker.
         frame.Value.sp += alignUp(sys.MinFrameSize, sys.StackAlign);
         f = findfunc((~frame).pc);
         frame.Value.fn = f;
@@ -611,7 +618,7 @@ internal static uintptr symPC(this ref unwinder u) {
 // If the current frame is not a cgo frame or if there's no registered cgo
 // unwinder, it returns 0.
 internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) {
-    if (cgoTraceback == nil || u.frame.fn.funcID != abi.FuncID_cgocallback || u.cgoCtxt < 0) {
+    if (!cgoTracebackAvailable() || u.frame.fn.funcID != abi.FuncID_cgocallback || u.cgoCtxt < 0) {
         // We don't have a cgo unwinder (typical case), or we do but we're not
         // in a cgo frame or we're out of cgo context.
         return 0;
@@ -1061,7 +1068,7 @@ internal static (nint n, nint lastN) traceback2(ж<unwinder> Ꮡu, bool showRunt
                 var anySymbolized = false;
                 var stop = false;
                 foreach (var (_, pc) in cgoBuf.slice(0, cgoN)) {
-                    if (cgoSymbolizer == nil){
+                    if (!cgoSymbolizerAvailable()){
                         {
                             var (pr, stopΔ1) = commitFrame(); if (stopΔ1){
                                 break;
@@ -1161,6 +1168,22 @@ internal static bool showfuncinfo(ΔsrcFunc sf, bool firstFrame, abi.FuncID call
         return false;
     }
 
+    // Always show runtime.runFinalizers and runtime.runCleanups as
+    // context that this goroutine is running finalizers or cleanups,
+    // otherwise there is no obvious indicator.
+    //
+    // TODO(prattmic): A more general approach would be to always show the
+    // outermost frame (besides runtime.goexit), even if it is a runtime.
+    // Hiding the outermost frame allows the apparent outermost frame to
+    // change across different traces, which seems impossible.
+    //
+    // Unfortunately, implementing this requires looking ahead at the next
+    // frame, which goes against traceback's incremental approach (see big
+    // comment in traceback1).
+    if (sf.funcID == abi.FuncID_runFinalizers || sf.funcID == abi.FuncID_runCleanups) {
+        return true;
+    }
+
     @string name = sf.name();
 
     // Special case: always show runtime.gopanic frame
@@ -1220,8 +1243,13 @@ internal static array<@string> gStatusStrings = new golib.SparseArray<@string>{
     [_Gwaiting] = "waiting"u8,
     [_Gdead] = "dead"u8,
     [_Gcopystack] = "copystack"u8,
-    [_Gpreempted] = "preempted"u8
-}.array(10);
+    [_Gleaked] = "leaked"u8,
+    [_Gpreempted] = "preempted"u8,
+    [_Gdeadextra] = "waiting for cgo callback"u8
+}.array(12);
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string durableˢ = "(durable)"u8;
 
 internal static void goroutineheader(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
@@ -1242,7 +1270,7 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
     }
 
     // Override.
-    if (gpstatus == _Gwaiting && gp.waitreason != waitReasonZero) {
+    if ((gpstatus == _Gwaiting || gpstatus == _Gleaked) && gp.waitreason != waitReasonZero) {
         status = gp.waitreason.String();
     }
 
@@ -1261,8 +1289,18 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
         }
     }
     print((@string)" ["u8, status);
+    if (gpstatus == _Gleaked) {
+        print((@string)" (leaked)"u8);
+    }
     if (isScan) {
         print((@string)" (scan)"u8);
+    }
+    {
+        var bubble = gp.bubble; if (bubble != nil && gpstatus == _Gwaiting && gp.waitreason.isIdleInSynctest() && !stringslite.HasSuffix(status, durableˢ)) {
+            // If this isn't a status where the name includes a (durable)
+            // suffix to distinguish it from the non-durable form, add it here.
+            print((@string)" (durable)"u8);
+        }
     }
     if (waitfor >= 1) {
         print((@string)", "u8, waitfor, (@string)" minutes"u8);
@@ -1271,14 +1309,31 @@ internal static void goroutineheader(ж<g> Ꮡgp) {
         print((@string)", locked to thread"u8);
     }
     {
-        var sg = gp.syncGroup; if (sg != nil) {
-            print((@string)", synctest group "u8, (~(~sg).root).goid);
+        var bubble = gp.bubble; if (bubble != nil) {
+            print((@string)", synctest bubble "u8, (~bubble).id);
+        }
+    }
+    if (gp.labels != nil && Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels).Load() == 1) {
+        var labels = ((ж<label.Set>)(uintptr)(gp.labels)).Value.List;
+        if (len(labels) > 0) {
+            print((@string)" labels:{"u8);
+            foreach (var (i, kv) in labels) {
+                print(((quoted)kv.Key), (@string)": "u8, ((quoted)kv.Value));
+                if (i < len(labels) - 1) {
+                    print((@string)", "u8);
+                }
+            }
+            print((@string)"}"u8);
         }
     }
     print((@string)"]:\n"u8);
 }
 
 internal static void tracebackothers(ж<g> Ꮡme) {
+    tracebacksomeothers(Ꮡme, (ж<g> _) => true);
+}
+
+internal static void tracebacksomeothers(ж<g> Ꮡme, Func<ж<g>, bool> showf) {
     var (level, _, _) = gotraceback();
 
     // Show the current goroutine first, if we haven't already.
@@ -1298,7 +1353,18 @@ internal static void tracebackothers(ж<g> Ꮡme) {
     // miss Gs created after this loop.
     var curgpʗ1 = curgp;
     forEachGRace((ж<g> gp) => {
-        if (gp == Ꮡme || gp == curgpʗ1 || readgstatus(gp) == _Gdead || isSystemGoroutine(ref (gp).DerefOrNull(), false) && level < 2) {
+        if (gp == Ꮡme || gp == curgpʗ1) {
+            return;
+        }
+        {
+            var status = readgstatus(gp); if (status == _Gdead || status == _Gdeadextra) {
+                return;
+            }
+        }
+        if (!showf(gp)) {
+            return;
+        }
+        if (isSystemGoroutine(gp, false) && level < 2) {
             return;
         }
         print((@string)"\n"u8);
@@ -1307,7 +1373,16 @@ internal static void tracebackothers(ж<g> Ꮡme) {
         // from a signal handler initiated during a systemstack call.
         // The original G is still in the running state, and we want to
         // print its stack.
-        if ((~gp).m != (~getg()).m && (uint32)(readgstatus(gp) & ~(uint32)_Gscan) == _Grunning){
+        //
+        // There's a small window of time in exitsyscall where a goroutine could be
+        // in _Grunning as it's exiting a syscall. This could be the case even if the
+        // world is stopped or frozen.
+        //
+        // This is OK because the goroutine will not exit the syscall while the world
+        // is stopped or frozen. This is also why it's safe to check syscallsp here,
+        // and safe to take the goroutine's stack trace. The syscall path mutates
+        // syscallsp only just before exiting the syscall.
+        if ((~gp).m != (~getg()).m && (uint32)(readgstatus(gp) & ~(uint32)_Gscan) == _Grunning && (~gp).syscallsp == 0){
             print((@string)"\tgoroutine running on other thread; stack unavailable\n"u8);
             printcreatedby(gp);
         } else {
@@ -1352,30 +1427,34 @@ internal static void tracebackHexdump(Δstack stk, ж<stkframe> Ꮡframe, uintpt
 
     // Print the hex dump.
     print((@string)"stack: frame={sp:"u8, ((Δhex)(uint64)frame.sp), (@string)", fp:"u8, ((Δhex)(uint64)frame.fp), (@string)"} stack=["u8, ((Δhex)(uint64)stk.lo), (@string)","u8, ((Δhex)(uint64)stk.hi), (@string)")\n"u8);
-    hexdumpWords(lo, hi, (uintptr Δp) => {
-        var exprᴛ1 = Δp;
-        if (exprᴛ1 == Ꮡframe.Value.fp) {
-            return (rune)'>';
+    hexdumpWords(lo, hi - lo, (uintptr Δp, hexdumpMarker m) => {
+        if (Δp == Ꮡframe.Value.fp) {
+            m.start();
+            println((@string)"FP"u8);
         }
-        if (exprᴛ1 == Ꮡframe.Value.sp) {
-            return (rune)'<';
+        if (Δp == Ꮡframe.Value.sp) {
+            m.start();
+            println((@string)"SP"u8);
         }
-        if (exprᴛ1 == bad) {
-            return (rune)'!';
+        if (Δp == bad) {
+            m.start();
+            println((@string)"bad"u8);
         }
-        return 0;
     });
 }
 
 // isSystemGoroutine reports whether the goroutine g must be omitted
 // in stack dumps and deadlock detector. This is any goroutine that
 // starts at a runtime.* entry point, except for runtime.main,
-// runtime.handleAsyncEvent (wasm only) and sometimes runtime.runfinq.
+// runtime.handleAsyncEvent (wasm only) and sometimes
+// runtime.runFinalizers/runtime.runCleanups.
 //
 // If fixed is true, any goroutine that can vary between user and
 // system (that is, the finalizer goroutine) is considered a user
 // goroutine.
-internal static bool isSystemGoroutine(ref g gp, bool @fixed) {
+internal static bool isSystemGoroutine(ж<g> Ꮡgp, bool @fixed) {
+    ref var gp = ref Ꮡgp.DerefOrNull();
+
     // Keep this in sync with internal/trace.IsSystemGoroutine.
     var f = findfunc(gp.startpc);
     if (!f.valid()) {
@@ -1384,7 +1463,7 @@ internal static bool isSystemGoroutine(ref g gp, bool @fixed) {
     if (f.funcID == abi.FuncID_runtime_main || f.funcID == abi.FuncID_corostart || f.funcID == abi.FuncID_handleAsyncEvent) {
         return false;
     }
-    if (f.funcID == abi.FuncID_runfinq) {
+    if (f.funcID == abi.FuncID_runFinalizers) {
         // We include the finalizer goroutine if it's calling
         // back into user code.
         if (@fixed) {
@@ -1394,7 +1473,23 @@ internal static bool isSystemGoroutine(ref g gp, bool @fixed) {
         }
         return (uint32)(ᏑfingStatus.Load() & fingRunningFinalizer) == 0;
     }
+    if (f.funcID == abi.FuncID_runCleanups) {
+        // We include the cleanup goroutines if they're calling
+        // back into user code.
+        if (@fixed) {
+            // This goroutine can vary. In fixed mode,
+            // always consider it a user goroutine.
+            return false;
+        }
+        return !Ꮡgp.of(g.ᏑrunningCleanups).Load();
+    }
     return stringslite.HasPrefix(funcname(f), runtimeˢ);
+}
+
+internal partial struct SetCgoTraceback_cgoSetTracebackFunctionsArg /*dyn*/ {
+    internal @unsafe.Pointer traceback;
+    internal @unsafe.Pointer context;
+    internal @unsafe.Pointer symbolizer;
 }
 
 // SetCgoTraceback records three C functions to use to gather
@@ -1571,10 +1666,15 @@ public static void SetCgoTraceback(nint version, @unsafe.Pointer traceback, @uns
     cgoContext = context;
     cgoSymbolizer = symbolizer;
 
-    // The context function is called when a C function calls a Go
-    // function. As such it is only called by C code in runtime/cgo.
-    if (_cgo_set_context_function != nil) {
-        cgocall(_cgo_set_context_function, context);
+    if (_cgo_set_traceback_functions != nil) {
+        ref var arg = ref heap<SetCgoTraceback_cgoSetTracebackFunctionsArg>(out var Ꮡarg);
+        arg = new SetCgoTraceback_cgoSetTracebackFunctionsArg(
+            traceback: traceback,
+            context: context,
+            symbolizer: symbolizer
+        );
+        cgocall(_cgo_set_traceback_functions, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+        System.GC.KeepAlive(Ꮡarg);
     }
 }
 
@@ -1583,6 +1683,18 @@ internal static @unsafe.Pointer cgoTraceback;
 internal static @unsafe.Pointer cgoContext;
 
 internal static @unsafe.Pointer cgoSymbolizer;
+
+internal static bool cgoTracebackAvailable() {
+    // - The traceback function must be registered via SetCgoTraceback.
+    // - This must be a cgo binary (providing _cgo_call_traceback_function).
+    return cgoTraceback != nil && _cgo_call_traceback_function != nil;
+}
+
+internal static bool cgoSymbolizerAvailable() {
+    // - The symbolizer function must be registered via SetCgoTraceback.
+    // - This must be a cgo binary (providing _cgo_call_symbolizer_function).
+    return cgoSymbolizer != nil && _cgo_call_symbolizer_function != nil;
+}
 
 // cgoTracebackArg is the type passed to cgoTraceback.
 partial struct cgoTracebackArg {
@@ -1610,7 +1722,7 @@ partial struct cgoSymbolizerArg {
 
 // printCgoTraceback prints a traceback of callers.
 internal static void printCgoTraceback(ref ΔcgoCallers callers) {
-    if (cgoSymbolizer == nil) {
+    if (!cgoSymbolizerAvailable()) {
         foreach (var (_, c) in callers) {
             if (c == 0) {
                 break;
@@ -1637,6 +1749,8 @@ internal static void printCgoTraceback(ref ΔcgoCallers callers) {
 // printOneCgoTraceback prints the traceback of a single cgo caller.
 // This can print more than one line because of inlining.
 // It returns the "stop" result of commitFrame.
+//
+// Preconditions: cgoSymbolizerAvailable returns true.
 internal static bool printOneCgoTraceback(uintptr pc, Func<(bool, bool)> commitFrame, ж<cgoSymbolizerArg> Ꮡarg) {
     ref var arg = ref Ꮡarg.DerefOrNull();
 
@@ -1672,6 +1786,8 @@ internal static bool printOneCgoTraceback(uintptr pc, Func<(bool, bool)> commitF
 }
 
 // callCgoSymbolizer calls the cgoSymbolizer function.
+//
+// Preconditions: cgoSymbolizerAvailable returns true.
 internal static void callCgoSymbolizer(ж<cgoSymbolizerArg> Ꮡarg) {
     var call = cgocall;
     if (Ꮡpanicking.Load() > 0 || (~(~getg()).m).curg != getg()) {
@@ -1685,14 +1801,13 @@ internal static void callCgoSymbolizer(ж<cgoSymbolizerArg> Ꮡarg) {
     if (asanenabled) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(Ꮡarg), /* unsafe.Sizeof(cgoSymbolizerArg{}) */ (uintptr)56);
     }
-    call(cgoSymbolizer, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+    call(_cgo_call_symbolizer_function, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
 }
 
 // cgoContextPCs gets the PC values from a cgo traceback.
+//
+// Preconditions: cgoTracebackAvailable returns true.
 internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
-    if (cgoTraceback == nil) {
-        return;
-    }
     var call = cgocall;
     if (Ꮡpanicking.Load() > 0 || (~(~getg()).m).curg != getg()) {
         // We do not want to call into the scheduler when panicking
@@ -1711,7 +1826,7 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
     if (asanenabled) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(Ꮡarg), /* unsafe.Sizeof(arg) */ (uintptr)32);
     }
-    call(cgoTraceback, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+    call(_cgo_call_traceback_function, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
     System.GC.KeepAlive(Ꮡarg);
 }
 

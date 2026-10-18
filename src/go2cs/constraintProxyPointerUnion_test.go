@@ -138,7 +138,7 @@ func loadPointerUnionFixture(t *testing.T) (*Visitor, *types.Scope) {
 	// panic on a nil map nor leak into a sibling test.
 	previousProxies := constraintProxies
 	t.Cleanup(func() { constraintProxies = previousProxies })
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
 
 	production := loadProductionForDir(t, dir)
 
@@ -225,8 +225,9 @@ func TestPointerUnionDeclarationAgreesWithProxy(t *testing.T) {
 		"ptrElemCurve": "",
 
 		// THE CONTROL for both: the same methodless shape with no pointer anywhere KEEPS `new()`.
-		// Without it the two arms above pass for a change that drops the clause everywhere.
-		"valueKeyCurve": "where K : /* valueKeySet */ new()",
+		// Without it the two arms above pass for a change that drops the clause everywhere. (Since H7 the
+		// breadcrumb carries the named set's union beside its name, constraintUnionText; the clause is the same.)
+		"valueKeyCurve": "where K : /* valueKeySet = int32 | int64 | string | V1 */ new()",
 	} {
 		_, constraints := visitor.getGenericDefinition(pointerUnionNamed(t, scope, curve))
 		got := strings.TrimSpace(constraints)
@@ -428,7 +429,7 @@ func crossPackageInstance(t *testing.T, visitor *Visitor, calls map[string]*ast.
 
 func TestConstraintProxyOwnerRecordsItsOwnProxy(t *testing.T) {
 	owner, _, ownerCalls, _ := loadCrossPackageProxyFixture(t)
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
 
 	funIdent, typeArgs := crossPackageInstance(t, owner, ownerCalls, "ownerCall")
 	proxyName, ok := owner.constraintProxySigArg(funIdent, typeArgs, 0)
@@ -450,7 +451,7 @@ func TestConstraintProxyOwnerRecordsItsOwnProxy(t *testing.T) {
 
 func TestConstraintProxyConsumerNamesTheOwnersProxy(t *testing.T) {
 	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
 	consumer.importQueue.Add("example/proxycross/curves") // proxycross.go imports curves: its alias is in scope
 
 	funIdent, typeArgs := crossPackageInstance(t, consumer, consumerCalls, "consumerCall")
@@ -476,7 +477,7 @@ func TestConstraintProxyConsumerNamesTheOwnersProxy(t *testing.T) {
 // must be the fully-qualified C# name -- and never the Go import path, which is what an unconverted fully-qualified name would be.
 func TestConstraintProxyConsumerWithoutTheInterfaceImportQualifiesFully(t *testing.T) {
 	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
 	consumer.importQueue.Add("example/proxycross/mid") // indirect.go imports mid only
 
 	funIdent, typeArgs := crossPackageInstance(t, consumer, consumerCalls, "indirectCall")

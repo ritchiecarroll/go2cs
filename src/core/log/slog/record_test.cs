@@ -48,24 +48,35 @@ internal partial struct TestRecordSource_type /*dyn*/ {
     internal @string wantFunction;
     internal @string wantFile;
     internal bool wantLinePositive;
+    internal bool wantNil;
 }
 
 public static void TestRecordSource(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    // Zero call depth => empty *Source.
+    // Zero call depth => nil *Source.
     foreach (var (_, test) in new TestRecordSource_type[]{
-        new(0, ""u8, ""u8, false),
-        new(-16, ""u8, ""u8, false),
-        new(1, "log/slog.TestRecordSource"u8, "record_test.go"u8, true), // 1: caller of NewRecord
-        new(2, "testing.tRunner"u8, "testing.go"u8, true)
+        new(0, ""u8, ""u8, false, true),
+        new(-16, ""u8, ""u8, false, true),
+        new(1, "log/slog.TestRecordSource"u8, "record_test.go"u8, true, false), // 1: caller of NewRecord
+        new(2, "testing.tRunner"u8, "testing.go"u8, true, false)
     }.slice()) {
         uintptr pc = default!;
         if (test.depth > 0) {
             pc = callerPC(test.depth + 1);
         }
         var r = NewRecord(new time_package.Time(nil), 0, ""u8, pc);
-        var got = r.source();
+        var got = r.Source();
+        if (test.wantNil) {
+            if (got != nil) {
+                Ꮡt.Errorf("depth %d: got non-nil Source, want nil"u8, test.depth);
+            }
+            continue;
+        }
+        if (got == nil) {
+            Ꮡt.Errorf("depth %d: got nil Source, want non-nil"u8, test.depth);
+            continue;
+        }
         {
             nint i = strings.LastIndexByte((~got).File, (rune)'/'); if (i >= 0) {
                 got.Value.File = (~got).File.slice(i + 1);

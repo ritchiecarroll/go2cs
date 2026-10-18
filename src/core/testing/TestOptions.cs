@@ -57,6 +57,12 @@ internal sealed class TestOptions
     public string? ResultFile { get; private set; }
     public string? JUnitFile { get; private set; }
 
+    /// <summary>Go 1.26's <c>-test.artifacts</c>: keep each test's ArtifactDir under the output directory.</summary>
+    public bool Artifacts { get; private set; }
+
+    /// <summary>Go's <c>-test.outputdir</c>: where profiles and, with <see cref="Artifacts"/>, artifacts go.</summary>
+    public string? OutputDir { get; private set; }
+
     /// <summary>Environment variable the pipeline passes the result-file path in.</summary>
     public const string ResultFileEnvironmentVariable = "GO2CS_TEST_RESULT";
 
@@ -234,6 +240,15 @@ internal sealed class TestOptions
                 case "test.short":
                     // Backs testing.Short() in the shim; go test's default (flag absent) is false.
                     options.Short = value is null || bool.Parse(value);
+                    break;
+                case "artifacts":
+                case "test.artifacts":
+                    // Go 1.26 (testing.go:458): ArtifactDir keeps its directory under the output directory.
+                    options.Artifacts = value is null || bool.Parse(value);
+                    break;
+                case "outputdir":
+                case "test.outputdir":
+                    options.OutputDir = value ?? NextValue(args, ref index, name);
                     break;
                 case "run":
                 case "test.run":

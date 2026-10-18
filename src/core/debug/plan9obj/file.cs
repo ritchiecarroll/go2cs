@@ -38,7 +38,7 @@ partial struct FileHeader {
 
 // A File represents an open Plan 9 a.out file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public slice<ж<ΔSection>> Sections;
     internal io.Closer closer;
 }
@@ -54,7 +54,7 @@ partial struct SectionHeader {
 
 // A Section represents a single section in a Plan 9 a.out file.
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.

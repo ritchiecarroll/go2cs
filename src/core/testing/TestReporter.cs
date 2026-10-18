@@ -48,6 +48,9 @@ namespace go.testing_runtime;
 /// record COUNT, so a failure printing an extra assert beside the pinned one cannot be absorbed.
 /// </param>
 /// <param name="RecordsDropped">Records the log cap dropped, when it dropped any: a count pin cannot hold then.</param>
+/// <param name="Key">An <c>attr</c> event's key (Go 1.25's <c>TB.Attr</c>; test2json's <c>Key</c>).</param>
+/// <param name="Value">An <c>attr</c> event's value (test2json's <c>Value</c>).</param>
+/// <param name="Path">An <c>artifacts</c> event's directory (Go 1.26's <c>TB.ArtifactDir</c>; test2json's <c>Path</c>).</param>
 /// <remarks>
 /// The shape is deliberate: the Phase-4 pipeline runs the same suite twice — once here and once
 /// under real <c>go test -json</c> — and diffs the two verdict streams. Matching Go's event
@@ -62,7 +65,10 @@ public sealed record TestEvent(
     string? Source = null,
     int? Line = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<string>? Records = null,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? RecordsDropped = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? RecordsDropped = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Key = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Value = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Path = null);
 
 /// <summary>
 /// Collects every <see cref="TestEvent"/> of a run and writes it out, either as <c>go test
@@ -106,6 +112,19 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
 
             if (testEvent.Action == "run" && !verbose)
                 return;
+
+            // Go's chatty lines for these two, as testing.go prints them (:1621 and :1395).
+            if (testEvent.Action == "attr")
+            {
+                WriteEventLine($"=== ATTR  {testEvent.Test} {testEvent.Key} {testEvent.Value}");
+                return;
+            }
+
+            if (testEvent.Action == "artifacts")
+            {
+                WriteEventLine($"=== ARTIFACTS {testEvent.Test} {testEvent.Path}");
+                return;
+            }
 
             string output = string.IsNullOrWhiteSpace(testEvent.Output) ? "" : $" — {testEvent.Output}";
 

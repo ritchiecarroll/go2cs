@@ -191,7 +191,7 @@ private static int readdir_r_native(nint dir, nint entry, nint result) {
                 names = append(names, name);
             }
             else if (mode == readdirDirEntry) {
-                (var de, var err) = newUnixDirent(file.name, name, dtToType(Marshal.ReadByte(entry + direntTypeOff)));
+                (var de, var err) = newUnixDirent(Ꮡfile, name, dtToType(Marshal.ReadByte(entry + direntTypeOff)));
                 if (IsNotExist(err)) {
                     // File disappeared between readdir and stat. Treat as if it didn't exist.
                     continue;
@@ -202,7 +202,7 @@ private static int readdir_r_native(nint dir, nint entry, nint result) {
                 dirents = append(dirents, de);
             }
             else {
-                (var info, var err) = lstat(file.name + "/"u8 + name);
+                (var info, var err) = Ꮡfile.lstatat(name);
                 if (IsNotExist(err)) {
                     // File disappeared between readdir + stat. Treat as if it didn't exist.
                     continue;

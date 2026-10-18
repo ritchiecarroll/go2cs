@@ -173,9 +173,11 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/boring/bbig/crypto.internal.boring.bbig.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/boring/crypto.internal.boring.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/ecdsa/crypto.internal.fips140.ecdsa.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/nistec/crypto.internal.fips140.nistec.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140cache/crypto.internal.fips140cache.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140hash/crypto.internal.fips140hash.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140only/crypto.internal.fips140only.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/randutil/crypto.internal.randutil.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/rand/crypto.internal.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha512/crypto.sha512.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/subtle/crypto.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />

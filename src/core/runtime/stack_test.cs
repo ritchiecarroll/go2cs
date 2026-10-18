@@ -4,6 +4,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using asan = @internal.asan_package;
 using testenv = @internal.testenv_package;
 using reflect = reflect_package;
 using Δregexp = regexp_package;
@@ -372,7 +373,7 @@ internal static void setBig(ж<nint> Ꮡp, nint x, bigBuf b) {
 public static partial void TestDeferPtrsPanic(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 100; i++) {
         var c = new channel<nint>(1);
-        goǃ(testDeferPtrsGoexit, c, i);
+        goǃ(testDeferPtrsPanic, c, i);
         {
             nint n = ᐸꟷ(c); if (n != 42) {
                 Ꮡt.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)"u8, i, n);
@@ -587,7 +588,7 @@ public static partial void TestStackCache(ж<testing.T> Ꮡt) {
 public static partial void TestStackOutput(ж<testing.T> Ꮡt) {
     var b = new slice<byte>(1024);
     @string stk = ((@string)(b.slice(0, Stack(b, false))));
-    if (!strings.HasPrefix(stk, goroutineˢ)) {
+    if (!strings.HasPrefix(stk, goroutineˢ2)) {
         Ꮡt.Errorf("Stack (len %d):\n%s"u8, len(stk), stk);
         Ꮡt.Errorf("Stack output should begin with \"goroutine \""u8);
     }
@@ -596,7 +597,7 @@ public static partial void TestStackOutput(ж<testing.T> Ꮡt) {
 public static partial void TestStackAllOutput(ж<testing.T> Ꮡt) {
     var b = new slice<byte>(1024);
     @string stk = ((@string)(b.slice(0, Stack(b, true))));
-    if (!strings.HasPrefix(stk, goroutineˢ)) {
+    if (!strings.HasPrefix(stk, goroutineˢ2)) {
         Ꮡt.Errorf("Stack (len %d):\n%s"u8, len(stk), stk);
         Ꮡt.Errorf("Stack output should begin with \"goroutine \""u8);
     }
@@ -966,7 +967,7 @@ partial interface I {
 internal static readonly @string sigpanicˢ = "sigpanic"u8;
 internal static readonly @string runtimeTestIMˢ = "runtime_test.I.M"u8;
 internal static readonly @string panicwrapˢ = "panicwrap"u8;
-internal static readonly @string runtimeTestˢ = "runtime_test.(*structWithMethod).nop"u8;
+internal static readonly @string runtimeTestˢ3 = "runtime_test.(*structWithMethod).nop"u8;
 
 public static void TestStackWrapperStackPanic(ж<testing.T> Ꮡt) {
     Ꮡt.Run(sigpanicˢ, (ж<testing.T> tΔ1) => {
@@ -981,13 +982,12 @@ public static void TestStackWrapperStackPanic(ж<testing.T> Ꮡt) {
         var wrapperʗ1 = wrapper;
         testStackWrapperPanic(tΔ2, () => {
             wrapperʗ1(nil);
-        }, runtimeTestˢ);
+        }, runtimeTestˢ3);
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string callersFramesˢ = "CallersFrames"u8;
-internal static readonly @string stackˢ2 = "Stack"u8;
 
 internal static void testStackWrapperPanic(ж<testing.T> Ꮡt, Action cb, @string expect) {
     // Test that the stack trace from a panicking wrapper includes
@@ -1021,7 +1021,7 @@ internal static void testStackWrapperPanic(ж<testing.T> Ꮡt, Action cb, @strin
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    Ꮡt.Run(stackˢ2, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(stackˢ, (ж<testing.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
             defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
@@ -1225,6 +1225,7 @@ internal static Action<any> escapeMe = (any x) => {
 };
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestAsanForcesˢ = (@string)"skipping test: ASAN forces heap allocation"u8;
 internal static readonly @string framePointerAdjustˢ = "FramePointerAdjust"u8;
 
 public static void TestFramePointerAdjust(ж<testing.T> Ꮡt) {
@@ -1233,6 +1234,9 @@ public static void TestFramePointerAdjust(ж<testing.T> Ꮡt) {
     }
     else { /* default: */
         Ꮡt.Skipf("frame pointer is not supported on %s"u8, GOARCH);
+    }
+    if (asan.Enabled) {
+        Ꮡt.Skip(skippingTestAsanForcesˢ);
     }
     @string output = runTestProg(Ꮡt, testprogˢ, framePointerAdjustˢ);
     if (output != ""u8) {

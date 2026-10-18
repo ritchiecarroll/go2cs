@@ -16,6 +16,8 @@ using filepath = path.filepath_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.encoding;
 using go.log.slog.@internal;
 using path;
@@ -83,7 +85,7 @@ internal static (slice<byte>, error) MarshalJSON(this jsonMarshaler j) {
 }
 
 internal partial struct jsonMarshalerError {
-    internal partial ref jsonMarshaler jsonMarshaler { get; }
+    /*embed*/ internal jsonMarshaler jsonMarshaler;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -168,6 +170,62 @@ internal static @string jsonValueString(global::go.log.slog_package.Value v) {
         }
     }
     return ((@string)buf);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string anErrorOccurredˢ = "an error occurred"u8;
+internal static readonly @string helloWorldˢ = "hello world"u8;
+internal static readonly @string attrsˢ = "attrs"u8;
+internal static readonly @string componentˢ = "component"u8;
+internal static readonly @string subtestˢ = "subtest"u8;
+internal static readonly @string flagˢ = "flag"u8;
+internal static readonly @string errorˢ2 = "error"u8;
+internal static readonly @string eventˢ = "event"u8;
+
+internal partial struct TestJSONAllocs_testEvent /*dyn*/ {
+    public nint ID;
+    public @string Scope;
+    public bool Enabled;
+}
+
+public static void TestJSONAllocs(ж<testing.T> Ꮡt) {
+    var ctx = Ꮡt.Context();
+    var l = New(new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(io.Discard, Ꮡ(new HandlerOptions(nil)))));
+    var testErr = errors.New(anErrorOccurredˢ);
+    ref var testEvent = ref heap<TestJSONAllocs_testEvent>(out var ᏑtestEvent);
+    testEvent = new TestJSONAllocs_testEvent(
+        123456, "abcdefgh"u8, true
+    );
+
+    var ctxʗ1 = ctx;
+    var lʗ1 = l;
+    Ꮡt.Run(messageˢ, (ж<testing.T> tΔ1) => {
+        var ctxʗ2 = ctxʗ1;
+        var lʗ2 = lʗ1;
+        wantAllocs(tΔ1, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            lʗ2.LogAttrs(ctxʗ2, LevelInfo,
+                helloWorldˢ);
+        });
+    });
+    var ctxʗ3 = ctx;
+    var lʗ3 = l;
+    var testErrʗ1 = testErr;
+    var testEventʗ1 = testEvent;
+    Ꮡt.Run(attrsˢ, (ж<testing.T> tΔ2) => {
+        var ctxʗ4 = ctxʗ3;
+        var lʗ4 = lʗ3;
+        var testErrʗ2 = testErrʗ1;
+        var testEventʗ2 = testEventʗ1;
+        wantAllocs(tΔ2, 1, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            lʗ4.LogAttrs(ctxʗ4, LevelInfo,
+                helloWorldˢ,
+                go.log.slog_package.String(componentˢ, subtestˢ),
+                Int("id"u8, 67890),
+                go.log.slog_package.Bool(flagˢ, true),
+                go.log.slog_package.Any(errorˢ2, testErrʗ2),
+                go.log.slog_package.Any(eventˢ, testEventʗ2));
+        });
+    });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

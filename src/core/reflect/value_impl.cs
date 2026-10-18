@@ -153,6 +153,52 @@ internal static any /*i*/ valueInterface(ΔValue v, bool safe) {
     return packInterfaceValue(v);
 }
 
+// TypeAssert is semantically equivalent to:
+//
+//	v2, ok := v.Interface().(T)
+//
+// Hand-owned to that DEFINITION. Go 1.25 implements it by reinterpreting the Value's data word through unsafe:
+// for an interface T it fabricates an eface `abi.EmptyInterface{Type: v.typ(), Data: nil}` and asserts that, and
+// for a concrete T it compares descriptors and reads `*(*T)(v.ptr)`. Managed storage has no data word. The
+// fabricated eface was a dereference of an order token, and it panicked on every Go 1.26 json, asn1, gob and xml
+// marshal path, all of which call TypeAssert. The descriptor compare would also have read a dimless
+// TypeFor[[2]int]() against a value-built [2]int as different types.
+//
+// Go's own two preconditions come first, with TypeAssert's texts: an invalid Value, and a read-only one (Go refuses
+// those before Interface() would, under its own name). The general answer is the Value's interface value
+// (valueInterface, the one Interface() answers) asserted by golib's ordinary Go type assertion. Two arms keep Go's
+// ALLOCATION profile, which reflect's TestTypeAssertAllocs measures. An addressable Value's interface value is a
+// fresh box per read, which Go does not pay:
+//   - a CONCRETE T reads the slot itself, `ж<T>.Value`, or unboxes the stored value. Anything else takes the
+//     general answer, so a match is never decided on the C# type alone;
+//   - an INTERFACE T over a concrete Value decides on the TYPE first (builtin.TypeImplements, the cached method-set
+//     probe `_<T>` itself uses). That is Go's nil-data eface probe, so a failing assertion allocates nothing.
+public static (T, bool) TypeAssert<T>(ΔValue v) {
+    if (v.flag == 0) {
+        throw panic(Ꮡ(new ValueError("reflect.TypeAssert"u8, Invalid)));
+    }
+    if ((flag)(v.flag & flagRO) != 0) {
+        throw panic("reflect.TypeAssert: cannot return value obtained from unexported field or method");
+    }
+    if ((flag)(v.flag & flagMethod) != 0) {
+        v = makeMethodValue("TypeAssert"u8, v);
+    }
+    if (v.kind() != ΔInterface && typeof(T) != typeof(object)) {
+        if (!typeof(T).IsInterface) {
+            if (v.addrBox is ж<T> box) {
+                return (box.Value, true);
+            }
+            if (v.addrBox is null && v.boxed is T value) {
+                return (value, true);
+            }
+        }
+        else if (!global::go.builtin.TypeImplements<T>(v.typ_ == nil ? null : v.typ_.Value.sysType)) {
+            return (default!, false);
+        }
+    }
+    return valueInterface(v, false)._<T>(ᐧ);
+}
+
 // packInterfaceValue is the bridge's packEface: it builds the interface value for v, and Go's
 // rule for that is entirely about the TYPE half. An eface carries (type, data word), so a
 // POINTER-kinded Value whose data word is nil packs as a NON-nil interface holding
@@ -1231,7 +1277,8 @@ public static uintptr UnsafeAddr(this ΔValue v) {
 // consumer that dereferences it.
 //
 // The classification comes from GoReflect.GoIsDirectIface, the SAME authority abi.synthType stamps
-// KindDirectIface from, so the descriptor bit and this word cannot disagree about one type.
+// TFlagDirectIface from (Go 1.26 moved the bit from Kind_ to TFlag and made the rule a size test,
+// Size_ == PtrBytes == PtrSize), so the descriptor bit and this word cannot disagree about one type.
 public static array<uintptr> InterfaceData(this ΔValue v) {
     v.mustBe(ΔInterface);
     var data = new array<uintptr>(2);
@@ -2571,6 +2618,15 @@ internal static ΔType toType(ж<abi.Type> Ꮡt) {
     return canonType(Ꮡt);
 }
 
+// TypeFor returns the [Type] that represents the type argument T. Hand-owned for the reason toType is:
+// Go's body is `toRType(abi.TypeFor[T]())`, an *rtype converted to Type, and that conversion mints a
+// fresh wrapper over a fresh box per call. Go interns the descriptor, so TypeFor[T]() is the same Type
+// TypeOf answers; route it through toType so it is. abi.TypeFor never answers nil, so canonType's nil
+// arm is not reached.
+public static ΔType TypeFor<T>() {
+    return toType(abi.TypeFor<T>());
+}
+
 // ==== Type side: reflect.rtype's ΔType methods over the abi.Type's carried System.Type ====
 // rtype wraps an abi.Type by value, so `Ꮡt.Value.t.sysType` is the managed System.Type the Phase-1
 // synthType stamped on the descriptor. These bypass Go's name/offset resolution (resolveNameOff, a
@@ -3772,10 +3828,10 @@ public static ΔType StructOf(slice<StructField> fields) {
                     throw panic("reflect: embedded type with methods not implemented if type is not first field");
                 }
                 // For a POINTER embed Go refuses any second field; for a non-pointer it refuses only
-                // when the type is pointer-shaped (`Kind_&KindDirectIface`), because an interface
-                // then holds a pointer to the struct rather than a copy of it. SettablePointer is
-                // exactly that case and its method set is EMPTY, which is why the outer gate cannot
-                // be a method-count test.
+                // when the type is pointer-shaped (`ft.IsDirectIface()`, a TFlag bit since Go 1.26),
+                // because an interface then holds a pointer to the struct rather than a copy of it.
+                // SettablePointer is exactly that case and its method set is EMPTY, which is why the
+                // outer gate cannot be a method-count test.
                 if (n > 1 && (field.Type.Kind() == ΔPointer || GoReflect.GoIsDirectIface(ft))) {
                     throw panic(field.Type.Kind() == ΔPointer
                         ? "reflect: embedded type with methods not implemented if there is more than one field"

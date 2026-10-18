@@ -921,13 +921,16 @@ func TestConvertTestsRefusesHandOwnedAndToolchainPackages(t *testing.T) {
 // go.context_package.Context whether or not the suite mentions context. It cannot be import-derived
 // (Go's sources do not import context to call t.Context()) and it cannot arrive transitively
 // (DisableTransitiveProjectReferences is pinned by the sibling guard below), so fixed is the only
-// place it can live. This assertion is exact rather than a subset check on purpose: the set is the
+// place it can live. `io` joined for Go 1.25 on exactly the same grounds: TB gains Output() io.Writer,
+// so every adapter body names go.io_package.Writer (net/netip: CS0012, CS0234, CS9334). This
+// assertion is exact rather than a subset check on purpose: the set is the
 // reference every test project pays for, and growing it should require saying so here.
 func TestTestProjectFixedReferencesRootedInCore(t *testing.T) {
 	want := []string{
 		`$(go2csPath)core/golib/golib.csproj`,
 		`$(go2csPath)core/testing/testing.csproj`,
 		`$(go2csPath)core/context/context.csproj`,
+		`$(go2csPath)core/io/io.csproj`,
 	}
 
 	if !reflect.DeepEqual(testProjectFixedReferences, want) {
@@ -1197,6 +1200,7 @@ func TestSelectCompileExcludedTestFilesKeepsTestMainAndFuzzOnly(t *testing.T) {
 // that anchor to the test class (bare test-local impls, adapter-class pairs) must NOT trigger
 // the fallback, or every black-box package with any interface cast loses the model.
 func TestRecordsRequireProductionAnchorGatesReferenceModel(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
 
@@ -1257,6 +1261,7 @@ func TestRecordsRequireProductionAnchorGatesReferenceModel(t *testing.T) {
 // White-box reference fallback: pointer/value adapters can live in the test metadata anchor, but
 // conversion operators that would have to extend a referenced production type cannot.
 func TestRecordsRequireProductionMutationGatesWhiteboxModel(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
 
@@ -1718,6 +1723,7 @@ func TestBareCastPrefersAnchorLocalRecordOverForeignSimpleNameMatch(t *testing.T
 // internal _test.go file anchors to the bridge (its generated partial must merge with the
 // bridge-declared type); production-qualified and undeclared bare names anchor to the test class.
 func TestSplitWhiteboxVariantRecordsPartitionsByBridgeDeclaredNames(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
 
@@ -1751,6 +1757,7 @@ func TestSplitWhiteboxVariantRecordsPartitionsByBridgeDeclaredNames(t *testing.T
 // read empty. The fixture reproduces the collision through the real go/types scan, so the guard
 // fails if either the split's variant gate or the collision itself regresses.
 func TestSplitWhiteboxVariantRecordsResolvesBareNamesInTheRecordingVariant(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
@@ -1820,6 +1827,8 @@ func TestSplitWhiteboxVariantRecordsResolvesBareNamesInTheRecordingVariant(t *te
 // carrier; its first — and only — class is the bridge, so go2cs-gen hosts bridge-anchored
 // generated code inside the class the real declarations merge into.
 func TestInternalTestPackageInfoSeedAnchorsBridgeClass(t *testing.T) {
+	requirePristineConverterPathGlobals(t)
+
 	seed := internalTestPackageInfoSeed("go", "value_package", "value_internal_test_package", "value")
 
 	if !strings.Contains(seed, "[GoPackage(\"value\")]\r\npublic static partial class value_internal_test_package\r\n{\r\n}\r\n") {
@@ -3579,6 +3588,7 @@ func TestExampleDeclarationsAreDiscoveredAndDisclosed(t *testing.T) {
 // identical emission semantics for production package_info.cs and the test path's
 // package_test_info.cs (which is why the test path has no private metadata writer to drift).
 func TestWritePackageInfoFileMergesExistingSections(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := filepath.Join(dir, "package_test_info.cs")
 
@@ -3650,6 +3660,7 @@ func TestWritePackageInfoFileMergesExistingSections(t *testing.T) {
 // GoImplement line through the same qualifyLocalTypeRef canonicalization the fresh render applies,
 // so the two collapse to ONE. Guards the container/heap -tests re-validation from a fresh converter.
 func TestMergedStaleGoImplementSpellingCollapses(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := filepath.Join(dir, externalTestPackageInfoFileName)
 
@@ -3715,12 +3726,48 @@ func TestMergedStaleGoImplementSpellingCollapses(t *testing.T) {
 	}
 }
 
+// A1 guard (COORD ruling 2026-10-16): a PRODUCTION pointer implementer of an interface declared in
+// the external test package itself anchors test-side. The pointer adapter is a class in the test
+// compilation, so it mutates no production type and the reference model can host it. crypto/mlkem at Go
+// 1.26 is the instance: *DecapsulationKey768 against mlkem_test's decapsulationKey[E encapsulationKey];
+// crypto/ecdh's lifted test-local _ᴛ1/_ᴛ2 are the same shape. Production-anchored before, these records
+// forced the recompile fallback. The controls keep the production anchor: the universe's error (bare, but
+// not the test package's), a qualified interface, a qualified generic interface, and the VALUE form,
+// whose generated partial struct must merge with the production declaration.
+func TestExternalVariantTestLocalInterfaceAnchorsTestSide(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	cases := []struct {
+		iface string
+		impl  string
+		want  bool
+	}{
+		{"decapsulationKey<encapsulationKey>", PointerPrefix + "<value_package.DecapKey>", true},            // test-local generic
+		{"decapsulationKey<encapsulationKey>", PointerPrefix + "<global::go.value_package.DecapKey>", true}, // rooted implementer
+		{"_ᴛ2", PointerPrefix + "<go.value_package.PrivateKey>", true},                                      // lifted test-local
+		{"encapsulationKey", PointerPrefix + "<value_package.EncapKey>", true},                              // test-local, non-generic
+		{"error", PointerPrefix + "<value_package.Builder>", false},                                         // universe error
+		{"io.Writer", PointerPrefix + "<value_package.Builder>", false},                                     // qualified interface
+		{"iter_package.Seq<int>", PointerPrefix + "<value_package.Builder>", false},                         // qualified generic
+		{"decapsulationKey<encapsulationKey>", "value_package.DecapKey", false},                             // value form
+	}
+
+	for _, testCase := range cases {
+		if got := isTestAnchoredImplementRecord(testCase.iface, testCase.impl, "value_package", false); got != testCase.want {
+			t.Errorf("isTestAnchoredImplementRecord(%q, %q) = %v, want %v", testCase.iface, testCase.impl, got, testCase.want)
+		}
+	}
+}
+
 // B4/B5 guard (partition predicate): an EXTERNAL variant GoImplement record anchors to the test
 // package unit when its generated code must live in the test package class — bare (test-local)
 // impls, every non-production ж pointer adapter, and adapter-class-marked (interface-sourced /
 // foreign-value ᴠ) pairs; production-qualified records keep the production anchor, where the
 // partial-struct/adapter they generate merges with the production declaration.
 func TestExternalVariantRecordPartitionAnchors(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	resetPackageState(&packages.Package{})
 	packageNamespace = "go"
 	adapterClassImplementations.Add("io.Writer|value_package.WriterTo")
@@ -3760,6 +3807,7 @@ func TestExternalVariantRecordPartitionAnchors(t *testing.T) {
 // into package_test_info.cs. A variant with NO test-anchored records writes no unit at all
 // (utf8-class packages keep their single-file shape).
 func TestWriteExternalVariantMetadataSplitsAnchors(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	testInfoPath := filepath.Join(dir, testPackageInfoFileName)
 
@@ -3877,6 +3925,7 @@ func TestWriteExternalVariantMetadataSplitsAnchors(t *testing.T) {
 // same namespace rendering the alias emission uses; direct dependencies, the production package,
 // `using static` lines, and comment lines contribute nothing.
 func TestAliasReferenceImportsAddsTransitiveAliasTargets(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	infoPath := filepath.Join(dir, testPackageInfoFileName)
 
@@ -3980,6 +4029,7 @@ func readConvertedAssembly(t *testing.T, dir string) string {
 // EXTERNAL-variant call sites (the export_test pattern — both variants share one load, so the
 // session-scoped object-keyed registry carries the internal pass's rename into the external one).
 func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	files := map[string]string{
 		"go.mod":   "module example/pinned\n\ngo 1.23\n",
@@ -4044,6 +4094,7 @@ func TestTestVariantPinsProductionTypeAgainstTestMethodCollision(t *testing.T) {
 // emission. Discrimination both ways: a same-named method whose production function is never
 // referenced (Stable), or referenced only QUALIFIED (Reverse), keeps its plain name.
 func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	files := map[string]string{
 		"go.mod":   "module example/value\n\ngo 1.23\n",
@@ -4110,6 +4161,7 @@ func TestTestVariantRenamesTestMethodShadowingDotImportedFunction(t *testing.T) 
 // Discrimination: a same-named free function whose parameters do NOT line up with the receiver
 // (different type, or an extra parameter) emits distinctly and must keep its plain name.
 func TestTestVariantRenamesTestFuncCollidingWithProductionMethodReceiver(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	files := map[string]string{
 		"go.mod": "module example/limbs\n\ngo 1.23\n",
@@ -4176,6 +4228,7 @@ func TestTestVariantRenamesTestFuncCollidingWithProductionMethodReceiver(t *test
 // the duplicate definition (32 errors). Both directions are pinned here — UNSEEDED the test lift
 // legitimately takes the base name (its own class is the only scope), SEEDED it must not.
 func TestTestVariantPinsProductionLiftedTypeNames(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	files := map[string]string{
 		"go.mod": "module example/lifted\n\ngo 1.23\n",
@@ -4248,6 +4301,7 @@ func TestTestVariantPinsProductionLiftedTypeNames(t *testing.T) {
 // suite, where production is a separate ASSEMBLY whose hook cannot be reached); SEEDED it must
 // stay silent, because the production file already forces the import.
 func TestTestVariantPinsProductionBlankImportForces(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
@@ -4309,6 +4363,7 @@ func TestTestVariantPinsProductionBlankImportForces(t *testing.T) {
 // The scope that matters is the COMPILATION, not one emission pass. Pinned in both directions, as
 // X1: unseeded the test half takes the first ordinal; seeded it continues from the production one.
 func TestTestVariantContinuesProductionBlankIdentifierCounter(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
@@ -4429,9 +4484,10 @@ func TestAliasScanCoversRecompiledProductionSources(t *testing.T) {
 // the TEST files rather than the missing folder.
 //
 // Three things are pinned: the target folder is taken, a NON-target folder is not (it is a
-// different build), and the per-GOOS `package_init.cs` is included — a `-tests` run rewrites it to
-// declare the `initᴛᴛtests()` partial the internal variant implements, and a declaration whose
-// implementation is in another compilation is no hook at all.
+// different build), and the per-GOOS `package_init.cs` is included — it holds the production static
+// ctor the internal variant's module initializer forces before its own relocations
+// (TestPackageInitIsIdenticalFromEitherMode), and a ctor left out of the compilation leaves
+// production's relocated vars unset.
 func TestProductionCSFilesTakeTheTargetPlatformFolder(t *testing.T) {
 	dir := t.TempDir()
 
@@ -4494,6 +4550,7 @@ func TestProductionCSFilesTakeTheTargetPlatformFolder(t *testing.T) {
 //
 // Same shape as X2's blank-identifier counter, and pinned the same way in both directions.
 func TestTestVariantContinuesProductionInitOrdinals(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 
 	writeModuleFiles(t, dir, map[string]string{
@@ -4538,9 +4595,9 @@ func TestTestVariantContinuesProductionInitOrdinals(t *testing.T) {
 
 // X6 guard (the production static-ctor probe follows LAYOUT L3): the internal variant shares the
 // production `<pkg>_package` class, which has exactly one static-constructor slot. When the
-// production package_init.cs exists it owns that slot and the test side implements its erasable
-// `initᴛᴛtests()` partial hook instead of declaring a second ctor — and the probe deciding which
-// shape to emit is a file-exists check that looked FLAT only.
+// production package_init.cs exists it owns that slot and the test side emits an `initᴛᴛtests()`
+// module initializer that forces it, instead of declaring a second ctor — and the probe deciding
+// which shape to emit is a file-exists check that looked FLAT only.
 //
 // L3 keeps package_init.cs in the package's per-GOOS folder (Go's InitOrder differs when the file
 // set does), so an L3 package answered "no production ctor" and got a SECOND
@@ -4574,8 +4631,8 @@ func TestProductionInitProbeFollowsPlatformLayout(t *testing.T) {
 	}
 
 	// A package with no production static ctor at all must still answer "absent" — the test side
-	// owns the slot there, and a probe answering "present" would emit a hook implementation with no
-	// declaration to implement.
+	// owns the slot there, and a probe answering "present" would trade the variant's own static ctor
+	// for a module initializer that runs its relocations eagerly where nothing requires it.
 	empty := t.TempDir()
 	if _, err := os.Stat(platformLayoutPath(empty, "windows", PackageInitFileName)); err == nil {
 		t.Fatal("a package with no package_init.cs must probe as absent")
@@ -4700,6 +4757,7 @@ func TestIsSelfProjectReference(t *testing.T) {
 // section up without a migration step; the merge path is what carries a seeded production
 // package_info.cs's entries through each test variant's additions.
 func TestWritePackageInfoFileInsertsTypeAccessibilitySection(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := filepath.Join(dir, PackageInfoFileName)
 
@@ -4810,6 +4868,7 @@ func TestWritePackageInfoFileInsertsTypeAccessibilitySection(t *testing.T) {
 // declaration that survives to carry either, so a stamp left behind when the record is skipped
 // would be lost, and one relocated onto a record that is never written would be lost too.
 func TestRecordTypeAccessibilityRelocatesMovableAttributes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	const attrs = "[GoLocalName(\"span\")] [GoValueClone(\"buf\")] "
 
 	// The recording path: the stamps land on the record, the declaration is left bare.
@@ -4862,6 +4921,7 @@ func TestRecordTypeAccessibilityRelocatesMovableAttributes(t *testing.T) {
 // leading '[' pull every stamped entry into a block of its own ahead of the unstamped ones —
 // legal, but it scrambles a section whose whole value is being readable at a glance.
 func TestTypeAccessibilitySortIgnoresAttributePrefix(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	for _, c := range []struct {
 		line string
 		want string
@@ -5069,6 +5129,7 @@ func TestWhiteboxBridgeDeclaredNamesCoverMethodsAndPackageDecls(t *testing.T) {
 //
 // Both directions are asserted: the bridge class appears, and the production class does not.
 func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	files := map[string]string{
 		"go.mod":   "module example/boxacc\n\ngo 1.23\n",
@@ -5128,6 +5189,7 @@ func TestTestVariantBoxAccessorNamesBridgeDeclaringClass(t *testing.T) {
 // All three shapes are pinned here: the uppercase local, the lowercase local, and the anonymous lift
 // (whose fields reach a package-level unexported production type — the CS0052 member of the family).
 func TestFunctionLocalTypesShareOneAccessibility(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	files := map[string]string{
 		"go.mod": "module example/localaccess\n\ngo 1.23\n",
@@ -5223,6 +5285,7 @@ func importInitClaims() []string {
 // record, and the bridge spelling that reads it — plus the discrimination that a var no method
 // collides with keeps its plain name on both sides.
 func TestTestVariantBridgeFollowsRenamedPackageVar(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads a module fixture through go/packages")
 	}

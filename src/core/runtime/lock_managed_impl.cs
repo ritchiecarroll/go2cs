@@ -183,15 +183,10 @@ public static void GoRuntimeLockProbeReset(int which) => Interlocked.Exchange(re
 public static int GoRuntimeLocksHeldByCurrentThread() => t_heldCount;
 
 // The probes through Go's own entry points, runtime.lock and runtime.unlock (-> unlockWithRank -> unlock2),
-// the frames a runtime-lock contention stack starts at; and runtime's GODEBUG runtimecontentionstacks,
-// set and restored (the previous value is returned).
+// the frames a runtime-lock contention stack starts at. (Go 1.25 deleted GODEBUG runtimecontentionstacks,
+// and its set-and-restore seam went with it: the stack is always the unlocker's.)
 public static void GoRuntimeLockProbeLockGo(int which) => @lock(s_lockProbes[which]);
 public static void GoRuntimeLockProbeUnlockGo(int which) => unlock(s_lockProbes[which]);
-public static int GoSetRuntimeContentionStacks(int value) {
-    int previous = Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Load();
-    Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Store(value);
-    return previous;
-}
 
 // ---- contention: WHO IS WAITING, without a waiter chain (COORD ruling 2026-09-22) ----
 //
@@ -214,24 +209,77 @@ public static int GoSetRuntimeContentionStacks(int value) {
 // LAZY, not a static-readonly initializer: runtime_package is partial across many files, a field
 // initializer's order against another file's static init is unspecified, and lock2 is reached from
 // static initialization -- a contended lock2 there must not meet a null table.
-private static System.Collections.Concurrent.ConcurrentDictionary<ж<mutex>, int>? s_lockWaitersField;
+//
+// Go 1.25 (lock_spinbit.go): each sleeping M stamps m.mWaitList.startTicks, and the UNLOCKER charges the
+// contention from them (unlock2Wake). So the table's value is the lock's waiters, not just their count:
+// one start-tick slot per spinning lock2, oldest first. The record is guarded by its own monitor; count
+// mirrors the slot list so mutexContended reads it without the lock. A record whose last waiter left is
+// RETIRED and removed, and an adder that raced the removal retries on a fresh record.
+private sealed class LockWaiters {
+    internal readonly List<StrongBox<int64>> starts = new();
+    internal int count;
+    internal bool retired;
+}
 
-private static System.Collections.Concurrent.ConcurrentDictionary<ж<mutex>, int> s_lockWaiters =>
+private static System.Collections.Concurrent.ConcurrentDictionary<ж<mutex>, LockWaiters>? s_lockWaitersField;
+
+private static System.Collections.Concurrent.ConcurrentDictionary<ж<mutex>, LockWaiters> s_lockWaiters =>
     s_lockWaitersField ?? Interlocked.CompareExchange(ref s_lockWaitersField, new(), null) ?? s_lockWaitersField!;
 
-private static void addLockWaiter(ж<mutex> Ꮡl) => s_lockWaiters.AddOrUpdate(Ꮡl, 1, static (_, n) => n + 1);
+// lock2's slow path: this waiter's slot, stamped now (Go's `gp.m.mWaitList.startTicks = cputicks()`).
+private static StrongBox<int64> addLockWaiter(ж<mutex> Ꮡl) {
+    var slot = new StrongBox<int64>(cputicks());
+    while (true) {
+        LockWaiters waiters = s_lockWaiters.GetOrAdd(Ꮡl, static _ => new LockWaiters());
+        lock (waiters) {
+            if (waiters.retired) {
+                continue;
+            }
+            waiters.starts.Add(slot);
+            Volatile.Write(ref waiters.count, waiters.starts.Count);
+            return slot;
+        }
+    }
+}
 
-private static void removeLockWaiter(ж<mutex> Ꮡl) {
-    System.Collections.Concurrent.ConcurrentDictionary<ж<mutex>, int> waiters = s_lockWaiters;
-    while (waiters.TryGetValue(Ꮡl, out int n)) {
-        if (n <= 1 ? waiters.TryRemove(new KeyValuePair<ж<mutex>, int>(Ꮡl, n)) : waiters.TryUpdate(Ꮡl, n - 1, n)) {
-            return;
+private static void removeLockWaiter(ж<mutex> Ꮡl, StrongBox<int64> slot) {
+    // The record cannot have been retired while this slot is in it, so the lookup finds the same one.
+    if (!s_lockWaiters.TryGetValue(Ꮡl, out LockWaiters? waiters)) {
+        return;
+    }
+    lock (waiters) {
+        waiters.starts.Remove(slot);
+        Volatile.Write(ref waiters.count, waiters.starts.Count);
+        if (waiters.starts.Count == 0) {
+            waiters.retired = true;
+            s_lockWaiters.TryRemove(new KeyValuePair<ж<mutex>, LockWaiters>(Ꮡl, waiters));
         }
     }
 }
 
 internal static bool mutexContended(ж<mutex> Ꮡl) {
-    return s_lockWaitersField is { } waiters && waiters.TryGetValue(Ꮡl, out int n) && n > 0;
+    return s_lockWaitersField is { } table && table.TryGetValue(Ꮡl, out LockWaiters? waiters) && Volatile.Read(ref waiters.count) > 0;
+}
+
+// unlock2Wake's charge, made while the lock is still held (so no waiter can leave): the average of the
+// newest and the oldest waiter's wait, times the number of waiters, and both of those slots reset to
+// endTicks, so the next unlock charges only the time since. Returns -1 when no waiter is left to charge.
+private static int64 chargeLockWaiters(ж<mutex> Ꮡl, int64 endTicks) {
+    if (s_lockWaitersField is not { } table || !table.TryGetValue(Ꮡl, out LockWaiters? waiters)) {
+        return -1;
+    }
+    lock (waiters) {
+        int n = waiters.starts.Count;
+        if (n == 0) {
+            return -1;
+        }
+        StrongBox<int64> head = waiters.starts[n - 1];
+        StrongBox<int64> tail = waiters.starts[0];
+        int64 cycles = ((endTicks - head.Value) + (endTicks - tail.Value)) / 2;
+        head.Value = endTicks;
+        tail.Value = endTicks;
+        return cycles * n;
+    }
 }
 
 public static bool GoRuntimeLockProbeContended(int which) => mutexContended(s_lockProbes[which]);
@@ -251,9 +299,8 @@ internal static void lock2(ж<mutex> Ꮡl) {
 
     SpinWait spinner = default;
     int64 waitStart = nanotime();
-    int64 tickStart = beginRuntimeLockProfile();
 
-    addLockWaiter(Ꮡl);
+    StrongBox<int64> waiterSlot = addLockWaiter(Ꮡl);
     try {
         while (true) {
             nuint k = Volatile.Read(ref l.key.Value);
@@ -267,15 +314,12 @@ internal static void lock2(ж<mutex> Ꮡl) {
         }
     }
     finally {
-        removeLockWaiter(Ꮡl);
+        removeLockWaiter(Ꮡl, waiterSlot);
     }
 
     int64 waited = nanotime() - waitStart;
     if (waited > 0 && Ꮡsched is not null && !Ꮡsched.IsNilPointer) {
         Ꮡsched.of(schedt.ᏑtotalRuntimeLockWaitTime).Add(waited);
-    }
-    if (tickStart != 0) {
-        endRuntimeLockProfile(Ꮡl, tickStart);
     }
     pushHeld(Ꮡl);
 }
@@ -295,96 +339,122 @@ internal static void unlock2(ж<mutex> Ꮡl) {
     // managed held count stands in for m.locks.
     int depth = t_heldCount;
 
+    // Go's unlock2: sample first (mutexSampleContention, 1 in mutexprofilerate, one atomic read with
+    // the profile off), and only then look for waiters, charging them while the lock is still held.
+    int64 cycles = -1;
+    if (mutexSampleContention() && mutexContended(Ꮡl)) {
+        cycles = chargeLockWaiters(Ꮡl, cputicks());
+    }
+
     // No waiter chain to dequeue and nobody parked to wake — release the slot; a spinning lock2
     // observes it. The futex flavor's mutex_sleeping state has no managed counterpart for the same
     // reason: nothing ever sleeps on the slot.
     popHeld(Ꮡl);
     Interlocked.Exchange(ref l.key.Value, 0);
 
-    // Go's unlock2 calls recordUnlock after the release. The early-out is one thread-static read:
-    // an uncontended unlock, or any unlock while the mutex profile is off, goes no further.
-    if (t_runtimeLockProfilePending) {
-        recordRuntimeLockUnlock(Ꮡl, depth);
+    // The stack is taken outside the critical section, as Go's traceback is (mLockProfile's comment).
+    if (cycles >= 0) {
+        recordRuntimeLockUnlock(cycles);
+    }
+    if (depth == 1 && t_runtimeLockProfilePending) {
+        storeRuntimeLockProfile();
     }
 }
 
-// ---- runtime-internal lock contention in the MUTEX PROFILE (census A3; G's design, i9's cut) ----
+// ---- runtime-internal lock contention in the MUTEX PROFILE (census A3; G's design, i9's cut; Go 1.25's split) ----
 //
-// Go's split (lock_spinbit.go lock2/unlock2, mprof.go lockTimer and mLockProfile): the WAITER charges
-// its contended acquire to its M's mLockProfile (lockTimer.end -> recordLock), and that SAME M's later
-// unlock of the lock captures the stack there, starting at runtime.unlock (recordUnlock ->
-// captureStack), and its outermost unlock stores it in the mutex bucket (store). One event per sampled
-// contended acquire; runtime's TestRuntimeLockMetricsAndProfile/runtime.lock/sample-1 counts exactly 200
-// at [runtime.unlock, its closure, (*contentionWorker).run].
+// Go 1.25 moved the blame (lock_spinbit.go unlock2/unlock2Wake, mprof.go mLockProfile): the UNLOCKER of a
+// contended lock charges the waiters' time (chargeLockWaiters above), captures ITS OWN stack, starting at
+// runtime.unlock (recordUnlock -> captureStack), and its outermost unlock stores the sample in the mutex
+// bucket (store). Go 1.24 had the waiter charge itself (lockTimer -> recordLock) and its own later unlock
+// capture the stack, which blames the wrong critical section: runtime's
+// TestRuntimeLockMetricsAndProfile/runtime.lock "compare timers" checks that each marker frame is blamed
+// for the delay IT inflicts.
 //
 // What is managed, and why:
-// - The lockTimer's TICK half only (the mutex profile's sample, 1 in mutexprofilerate): its TIME half
-//   feeds m.mLockProfile.waitTime, which the metric never reads here (totalMutexWaitTimeNanos drops
-//   the allm walk) -- the metric is charged above, every contended wait at its measured length.
+// - The metric half is unchanged: every contended wait is charged to sched.totalRuntimeLockWaitTime at its
+//   measured length (lock2 above). mLockProfile.start/end, the sampled waitTime, are not used.
 // - The held depth is t_heldCount, NOT m.locks: the managed lock2 does not return the m.locks
 //   bookkeeping (this file's header), and m.locks also rises on acquirem, so "m.locks == 1" would not
-//   mean "the outermost runtime lock". recordUnlock's store condition keys on the held depth instead.
+//   mean "the outermost runtime lock". store's condition keys on the held depth instead.
 // - The stack is taken by the managed walk (callers), not Go's unwinder, into mLockProfile.stack,
 //   which the managed getg's per-goroutine M never initializes (no mProfStackInit): it is allocated
 //   LAZILY on the first capture, never on every M at mint.
-// - The early-out: t_runtimeLockProfilePending is set only when recordLock has something to carry to
-//   an unlock, so with the mutex profile off (rate 0) no lock2 samples and no unlock2 looks further.
-// The converted recordLock and store run as Go wrote them; recordUnlock and captureStack are the two
-// halves that read m.locks and the native unwinder, so their managed forms are below.
+// - t_runtimeLockProfilePending is set when this thread has a stack buffered for its outermost unlock,
+//   so an unlock with nothing buffered pays one thread-static read for the store check.
+// The converted recordUnlock and captureStack read the native unwinder (captureStack) and m.locks (store),
+// so recordUnlock with captureStack inlined, and store, have their managed forms below. storeSlow is
+// the converted body.
 
 [ThreadStatic] private static bool t_runtimeLockProfilePending;
 
-// lockTimer.begin's tick half: sample this contended acquire for the mutex profile, 1 in
-// mutexprofilerate. Returns the start tick, or 0 when not sampled (always 0 with the profile off).
-private static int64 beginRuntimeLockProfile() {
-    var rate = (int64)@internal.runtime.atomic_package.Load64(Ꮡmutexprofilerate);
-    if (rate > 0 && rem((int64)cheaprand(), rate) == 0) {
-        return cputicks();
-    }
-    return 0;
-}
-
-// lockTimer.end's tick half: charge the sampled wait to this M's mLockProfile (recordLock).
-private static void endRuntimeLockProfile(ж<mutex> Ꮡl, int64 tickStart) {
-    var gp = getg();
-    (~gp).m.of(m.ᏑmLockProfile).recordLock(cputicks() - tickStart, Ꮡl);
-    t_runtimeLockProfilePending = true;
-}
-
-// recordUnlock, with captureStack inlined into it so the walk's frame count is Go's: callers' skip 0 is
-// this frame (Go's recordUnlock), 1 unlock2, 2 unlockWithRank, and 3 runtime.unlock -- Go's `skip := 3`.
-// NoInlining keeps this frame counted; unlock2 is a skip-counted walker to the converter
-// (computeNoInliningClosure), so unlockWithRank and unlock are emitted NoInlining too.
+// recordUnlock as Go 1.26 wrote it (mprof.go), with captureStack inlined into it so the walk's frame count
+// is Go's: callers' skip 0 is this frame (Go's recordUnlock), 1 unlock2, 2 unlockWithRank, and 3
+// runtime.unlock. Go's own skip is 4 because its recordUnlock is reached through unlock2Wake, a frame the
+// managed unlock2 does not have. NoInlining keeps this frame counted; unlock2 is a skip-counted walker to
+// the converter (computeNoInliningClosure), so unlockWithRank and unlock are emitted NoInlining too.
 [MethodImpl(MethodImplOptions.NoInlining)]
-private static void recordRuntimeLockUnlock(ж<mutex> Ꮡl, int depth) {
+private static void recordRuntimeLockUnlock(int64 cycles) {
     var gp = getg();
     ж<mLockProfile> Ꮡprof = (~gp).m.of(m.ᏑmLockProfile);
     ref var prof = ref Ꮡprof.Value;
 
-    if ((uintptr)Ꮡl == prof.pending && debug.profstackdepth != 0) {
-        // captureStack (debug.profstackdepth == 0 records no stack, as Go returns early)
-        if (len(prof.stack) == 0) {
-            prof.stack = new slice<uintptr>(1 + (int)maxSkip + (int)debug.profstackdepth);
-        }
-        prof.pending = 0;
-        prof.haveStack = true;
-        prof.stack[0] = logicalStackSentinel;
-        if (Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Load() == 0) {
-            prof.stack[1] = @internal.abi_package.FuncPCABIInternal(_LostContendedRuntimeLock) + (uintptr)@internal.runtime.sys_package.PCQuantum;
-            prof.stack[2] = 0;
-        }
-        else {
-            nint nstk = 1 + callers(3, prof.stack[1..]);
-            if (nstk < len(prof.stack)) {
-                prof.stack[nstk] = 0;
+    if (cycles < 0) {
+        cycles = 0;
+    }
+
+    if (prof.disabled) {
+        // We're experiencing contention while attempting to report contention.
+        // Make a note of its magnitude, but don't allow it to be the sole cause
+        // of another contention report.
+        prof.cyclesLost += cycles;
+        return;
+    }
+
+    {
+        var prev = prof.cycles; if (prev > 0) {
+            // We can only store one call stack for runtime-internal lock contention
+            // on this M, and we've already got one. Decide which should stay, and
+            // add the other to the report for runtime._LostContendedRuntimeLock.
+            if (cycles == 0) {
+                return;
+            }
+            var prevScore = (uint64)cheaprand64() % (uint64)prev;
+            var thisScore = (uint64)cheaprand64() % (uint64)cycles;
+            if (prevScore > thisScore) {
+                prof.cyclesLost += cycles;
+                return;
+            } else {
+                prof.cyclesLost += prev;
             }
         }
     }
-    if (depth == 1 && prof.haveStack) {
-        prof.store();
+
+    // captureStack (debug.profstackdepth == 0 records no stack, as Go returns early)
+    if (debug.profstackdepth != 0) {
+        if (len(prof.stack) == 0) {
+            prof.stack = new slice<uintptr>(1 + (int)maxSkip + (int)debug.profstackdepth);
+        }
+        prof.haveStack = true;
+        prof.stack[0] = logicalStackSentinel;
+        nint nstk = 1 + callers(3, prof.stack[1..]);
+        if (nstk < len(prof.stack)) {
+            prof.stack[nstk] = 0;
+        }
+        t_runtimeLockProfilePending = true;
     }
-    if (prof.pending == 0 && !prof.haveStack && prof.cycles == 0 && prof.cyclesLost == 0) {
-        t_runtimeLockProfilePending = false;
+    prof.cycles = cycles;
+}
+
+// store, at the outermost unlock (depth 1 stands in for m.locks == 1, above). The flag is cleared FIRST:
+// storeSlow takes profBlockLock, and that lock's own unlock is again at depth 1, so it must find nothing
+// pending. storeSlow sets prof.disabled for its span, as Go's does, so contention met there is "lost".
+private static void storeRuntimeLockProfile() {
+    t_runtimeLockProfilePending = false;
+    var gp = getg();
+    ref var prof = ref (~gp).m.of(m.ᏑmLockProfile).Value;
+    if (prof.haveStack) {
+        prof.storeSlow();
     }
 }
 

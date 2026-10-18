@@ -9,12 +9,14 @@ namespace go.go;
 
 using bytes = bytes_package;
 using fmt = fmt_package;
+using scannerhooks = global::go.go.@internal.scannerhooks_package;
 using token = global::go.go.token_package;
 using filepath = path.filepath_package;
 using strconv = strconv_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
 using global::go.go;
+using global::go.go.@internal;
 using global::go.unicode;
 using path;
 using ꓸꓸꓸany = Span<any>;
@@ -44,8 +46,14 @@ partial struct Scanner {
     internal nint lineOffset;      // current line offset
     internal bool insertSemi;      // insert a semicolon before next newline
     internal tokenꓸPos nlPos; // position of newline in preceding comment
+    internal tokenꓸPos stringEnd; // end position; defined only for STRING tokens
     // public state - ok to modify
     public nint ErrorCount; // number of errors encountered
+}
+
+// Provide go/parser with backdoor access to the StringEnd information.
+[GoInit] internal static void init() {
+    scannerhooks.StringEnd = (any scanner) => (~scanner._<ж<Scanner>>()).stringEnd;
 }
 
 internal static UntypedInt bom => 0xFEFF; // byte order mark, only permitted as very first character
@@ -53,6 +61,7 @@ internal static UntypedInt eof => -1; // end of file
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string illegalCharacterNulˢ = "illegal character NUL"u8;
+internal static readonly @string illegalUtf8EncodingGotˢ = "illegal UTF-8 encoding (got UTF-16)"u8;
 internal static readonly @string illegalUtf8Encodingˢ = "illegal UTF-8 encoding"u8;
 internal static readonly @string illegalByteOrderMarkˢ = "illegal byte order mark"u8;
 
@@ -79,7 +88,15 @@ internal static void next(this ref Scanner s) {
             // not ASCII
             (r, w) = utf8.DecodeRune(s.src.slice(s.rdOffset));
             if (r == utf8.RuneError && w == 1){
-                s.error(s.offset, illegalUtf8Encodingˢ);
+                var @in = s.src.slice(s.rdOffset);
+                if (s.offset == 0 && len(@in) >= 2 && (@in[0] == 0xFF && @in[1] == 0xFE || @in[0] == 0xFE && @in[1] == 0xFF)){
+                    // U+FEFF BOM at start of file, encoded as big- or little-endian
+                    // UCS-2 (i.e. 2-byte UTF-16). Give specific error (go.dev/issue/71950).
+                    s.error(s.offset, illegalUtf8EncodingGotˢ);
+                    s.rdOffset += len(@in); // consume all input to avoid error cascade
+                } else {
+                    s.error(s.offset, illegalUtf8Encodingˢ);
+                }
             } else 
             if (r == bom && s.offset > 0) {
                 s.error(s.offset, illegalByteOrderMarkˢ);
@@ -107,7 +124,7 @@ internal static byte peek(this ref Scanner s) {
     return 0;
 }
 
-// A mode value is a set of flags (or 0).
+// A Mode value is a set of flags (or 0).
 // They control scanner behavior.
 partial struct Mode /*num:nuint*/;
 
@@ -767,7 +784,7 @@ internal static slice<byte> stripCR(slice<byte> b, bool comment) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rawStringLiteralNotˢ = "raw string literal not terminated"u8;
 
-internal static @string scanRawString(this ref Scanner s) {
+internal static (@string, nint) scanRawString(this ref Scanner s) {
     // '`' opening already consumed
     nint offs = s.offset - 1;
 
@@ -788,11 +805,12 @@ internal static @string scanRawString(this ref Scanner s) {
     }
 
     var lit = s.src.slice(offs, s.offset);
+    nint rawLen = len(lit);
     if (hasCR) {
         lit = stripCR(lit, false);
     }
 
-    return ((@string)lit);
+    return (((@string)lit), rawLen);
 }
 
 internal static void skipWhitespace(this ref Scanner s) {
@@ -937,6 +955,7 @@ scanAgain:
                 insertSemi = true;
                 tok = token.STRING;
                 lit = s.scanString();
+                s.stringEnd = pos + ((tokenꓸPos)len(lit));
             }
             else if (exprᴛ2 is (rune)'\'') {
                 insertSemi = true;
@@ -946,7 +965,9 @@ scanAgain:
             else if (exprᴛ2 is (rune)'`') {
                 insertSemi = true;
                 tok = token.STRING;
-                lit = s.scanRawString();
+                nint rawLen = default!;
+                (lit, rawLen) = s.scanRawString();
+                s.stringEnd = pos + ((tokenꓸPos)rawLen);
             }
             else if (exprᴛ2 is (rune)':') {
                 tok = s.switch2(token.COLON, token.DEFINE);

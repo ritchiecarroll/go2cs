@@ -16,9 +16,4 @@ internal static @string boring_runtime_arg0() {
     return argslice[0];
 }
 
-//go:linkname fipstls_runtime_arg0 crypto/internal/boring/fipstls.runtime_arg0
-internal static @string fipstls_runtime_arg0() {
-    return boring_runtime_arg0();
-}
-
 } // end runtime_package

@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(pollDesc))]
 partial class runtime_package {
 
 // Integrated network poller (platform-independent part).
@@ -308,7 +309,7 @@ internal static void free(this ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
     // Increment the fdseq field, so that any currently
     // running netpoll calls will not mark pd as ready.
     var fdseq = Ꮡpd.of(pollDesc.Ꮡfdseq).Load();
-    fdseq = (uintptr)((fdseq + 1) & (uintptr)((1 << (int)(taggedPointerBits)) - 1));
+    fdseq = (uintptr)((fdseq + 1) & (uintptr)((1 << (int)(tagBits)) - 1));
     Ꮡpd.of(pollDesc.Ꮡfdseq).Store(fdseq);
 
     Ꮡpd.publishInfo();
@@ -719,25 +720,30 @@ internal static void netpollAdjustWaiters(int32 delta) {
     }
 }
 
+internal partial struct alloc_pollDescPadded /*dyn*/ {
+    /*embed*/ internal pollDesc pollDesc;
+    internal array<byte> pad = new(216);
+}
+
 internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     @lock(Ꮡc.of(pollCache.Ꮡlock));
     if (c.first == nil) {
-        uintptr pdSize = /* unsafe.Sizeof(pollDesc{}) */ 280;
+        uintptr pdSize = /* unsafe.Sizeof(pollDescPadded{}) */ 512;
         var n = (uintptr)pollBlockSize / pdSize;
         if (n == 0) {
             n = 1;
         }
         // Must be in non-GC memory because can be referenced
         // only from epoll/kqueue internals.
-        @unsafe.Pointer mem = (uintptr)persistentalloc(n * pdSize, 0, Ꮡmemstats.of(mstats.Ꮡother_sys));
+        @unsafe.Pointer mem = (uintptr)persistentalloc(n * pdSize, tagAlign, Ꮡmemstats.of(mstats.Ꮡother_sys));
         for (var i = (uintptr)0; i < n; i++) {
             var pdΔ1 = (ж<pollDesc>)(uintptr)(add(mem, i * pdSize));
-            lockInit(pdΔ1.of(pollDesc.Ꮡlock), lockRankPollDesc);
+            lockInit(ref (pdΔ1.of(pollDesc.Ꮡlock)).DerefOrNull(), lockRankPollDesc);
             pdΔ1.of(pollDesc.Ꮡrt).init(default!, default!);
             pdΔ1.of(pollDesc.Ꮡwt).init(default!, default!);
-            pdΔ1.Value.link = c.first;
+            pdΔ1.link = c.first;
             c.first = pdΔ1;
         }
     }
@@ -756,8 +762,8 @@ internal static any /*i*/ makeArg(this ж<pollDesc> Ꮡpd) {
     ref var i = ref heap<any>(out var Ꮡi);
 
     var x = Ꮡi.Reinterpret<any, eface>();
-    x.Value._type = pdType;
-    x.Value.data = @unsafe.Pointer.FromBox(Ꮡpd.of(pollDesc.Ꮡself));
+    x.of(eface.Ꮡ_type).Value = pdType;
+    x.of(eface.Ꮡdata).Value = @unsafe.Pointer.FromBox(Ꮡpd.of(pollDesc.Ꮡself));
     return i;
 }
 

@@ -36,6 +36,7 @@ using static go.crypto.@internal.fips140.sha512_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Digest, hash_package.Cloner>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -50,8 +51,8 @@ using static go.crypto.@internal.fips140.sha512_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha512/cast.go", "cast.cs", "AAwagoK4AAkUgoKAgqQ=", "14-35:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AEyeAYKUgoKCgoKCgqSCgoKCgoKCpIKCgoKCgoKkgoKCgoKCgqSUggAIFoKmgpSkpKSklIKCgoKCgoKCgoKC5oKClAANDJSClIKCgoKCgoKCgoKCgqaCqJKCgqiSgoKokoKCqJKCgqaCpoCkwoKCgoKCgoKUlIKCgpSClKaClIKCgqa0goKCgoKUuIK4gpSCpoKCgoKCgoKCgqY=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512block.go", "sha512block.cs", "AA0aAFKmAYKCgoKCgpaCgoKClKaUgpSUgoKCgoKCgqaCgoKCgoKClKY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AE2gAYKUgoKCgoKCgqSCgoKCgoKCpIKCgoKCgoKkgoKCgoKCgqSUggAIFoKmgpSkpKSklIKCgoKCgoKCgoKC5oKClAANDJSClIKCgoKCgoKCgoKCgqaCpoKSqJKCgqiSgoKokoKCqJKCgqaCpoCkwoKCgoKCgoKUlIKCgpSClKaClIKCgqa0goKCgoKUuIK4gpSCpoKCgoKCgoKCgqY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512block.go", "sha512block.cs", "AA0aAFKmAYKCgoKUgoKCloKCgpSmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512block_noasm.go", "sha512block_noasm.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 
@@ -80,6 +81,7 @@ public static partial class sha512_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     // </ImportInitializers>
 }

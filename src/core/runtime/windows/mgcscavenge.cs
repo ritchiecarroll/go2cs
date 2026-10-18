@@ -345,7 +345,7 @@ internal static void init(this ж<scavengerState> Ꮡs) {
     if (s.g != nil) {
         @throw(scavengerStateIsAlreadyˢ);
     }
-    lockInit(Ꮡs.of(scavengerState.Ꮡlock), lockRankScavenge);
+    lockInit(ref nonnil(ref s).@lock, lockRankScavenge);
     s.g = getg();
 
     s.timer = @new<timer>();
@@ -1265,7 +1265,7 @@ partial struct scavChunkData {
     // scavChunkFlags represents additional flags
     //
     // Note: only 6 bits are available.
-    internal partial ref scavChunkFlags scavChunkFlags { get; }
+    /*embed*/ internal scavChunkFlags scavChunkFlags;
 }
 
 // unpackScavChunkData unpacks a scavChunkData from a uint64.

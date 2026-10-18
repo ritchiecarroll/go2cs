@@ -11,9 +11,9 @@ private static readonly object nomatchˢ = (@string)"nomatch"u8;
 internal static Action<T, bool> wantValue<T>(T want) {
     return (T got, bool ok) => {
         if (ok && AreEqual(got, want)){
-            fmt.Println(matchˢ, got);
+            fmt.Println(matchˢ, (got).OrTypedNilOf());
         } else {
-            fmt.Println(nomatchˢ, got, want, ok);
+            fmt.Println(nomatchˢ, (got).OrTypedNilOf(), (want).OrTypedNilOf(), ok);
         }
     };
 }
@@ -23,7 +23,7 @@ private static readonly object presentˢ = (@string)"present"u8;
 
 internal static Action<bool> wantPresent<T>(T want) {
     return (bool ok) => {
-        fmt.Println(presentˢ, want, ok);
+        fmt.Println(presentˢ, (want).OrTypedNilOf(), ok);
     };
 }
 
@@ -31,7 +31,7 @@ internal static Action<bool> wantPresent<T>(T want) {
 private static readonly object tookˢ = (@string)"took"u8;
 
 internal static void takeOnly<T>(T want) {
-    fmt.Println(tookˢ, want);
+    fmt.Println(tookˢ, (want).OrTypedNilOf());
 }
 
 internal static T bareResult<T>(T v) {
@@ -57,7 +57,7 @@ private static readonly object pairˢ = (@string)"pair"u8;
 
 internal static Action<V, bool> pairValue<K, V>(K k, V v) {
     return (V got, bool ok) => {
-        fmt.Println(pairˢ, k, got, ok);
+        fmt.Println(pairˢ, (k).OrTypedNilOf(), (got).OrTypedNilOf(), ok);
     };
 }
 
@@ -66,7 +66,7 @@ private static readonly object likeˢ = (@string)"like"u8;
 
 internal static Action<T, bool> wantLike<T>(T proto, T want) {
     return (T got, bool ok) => {
-        fmt.Println(likeˢ, got, want, ok);
+        fmt.Println(likeˢ, (got).OrTypedNilOf(), (want).OrTypedNilOf(), ok);
     };
 }
 
@@ -77,7 +77,7 @@ internal static Action<T, bool> wantInt64<T>(T want)
     where T : /* int64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     return (T got, bool ok) => {
-        fmt.Println(i64ˢ, got, want, ok);
+        fmt.Println(i64ˢ, (got).OrTypedNilOf(), (want).OrTypedNilOf(), ok);
     };
 }
 
@@ -94,14 +94,14 @@ internal static void Main() {
     wantValue((nint)(0))(i, false);
     wantValue((nint)(7))(i, true);
 
-    wantPresent(15)(true);
-    takeOnly(15);
+    wantPresent<nint>(15)(true);
+    takeOnly<nint>(15);
 
     wantValue<nint>(0)(i, false);
 
     wantValue(i)(i, true);
 
-    fmt.Println(bareˢ, bareResult(42));
+    fmt.Println(bareˢ, bareResult<nint>(42));
 
     float64 f = 2.5D;
     wantValue(0.0D)(f, false);

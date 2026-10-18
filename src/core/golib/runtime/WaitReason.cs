@@ -111,14 +111,22 @@ public enum WaitReason
     /// <summary>"synctest.Wait" — parked until every other member of its bubble is durably blocked.</summary>
     SynctestWait,
 
-    /// <summary>"chan receive (synctest)" — receiving on a channel created in a synctest bubble.</summary>
+    /// <summary>"chan receive (durable)" — receiving on a channel created in a synctest bubble.</summary>
     SynctestChanReceive,
 
-    /// <summary>"chan send (synctest)" — sending on a channel created in a synctest bubble.</summary>
+    /// <summary>"chan send (durable)" — sending on a channel created in a synctest bubble.</summary>
     SynctestChanSend,
 
-    /// <summary>"select (synctest)" — a bubble member selecting only on channels created in a bubble.</summary>
-    SynctestSelect
+    /// <summary>"select (durable)" — a bubble member selecting only on channels created in a bubble.</summary>
+    SynctestSelect,
+
+    /// <summary>
+    /// "sync.WaitGroup.Wait (durable)" — a bubble member waiting on a WaitGroup its own bubble added to,
+    /// new at Go 1.25 (runtime's waitReasonSynctestWaitGroupWait, passed by SemacquireWaitGroup). Declared
+    /// with the runtime map's arm (runtime stubs_impl.cs, mapWaitReason); sync's hand-owned waitgroup.cs
+    /// parks with it.
+    /// </summary>
+    SynctestWaitGroupWait
 }
 
 /// <summary>
@@ -156,9 +164,10 @@ public static class WaitReasons
         WaitReason.GCScavengeWait => "GC scavenge wait",
         WaitReason.SynctestRun => "synctest.Run",
         WaitReason.SynctestWait => "synctest.Wait",
-        WaitReason.SynctestChanReceive => "chan receive (synctest)",
-        WaitReason.SynctestChanSend => "chan send (synctest)",
-        WaitReason.SynctestSelect => "select (synctest)",
+        WaitReason.SynctestChanReceive => "chan receive (durable)",
+        WaitReason.SynctestChanSend => "chan send (durable)",
+        WaitReason.SynctestSelect => "select (durable)",
+        WaitReason.SynctestWaitGroupWait => "sync.WaitGroup.Wait (durable)",
         _ => "unknown wait reason"
     };
 

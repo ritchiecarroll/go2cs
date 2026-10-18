@@ -1,6 +1,7 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 // JSON value parser state machine.
@@ -178,7 +179,7 @@ internal static nint eof(this ж<scanner> Ꮡs) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string exceededMaxDepthˢ = "exceeded max depth"u8;
 
-// pushParseState pushes a new parse state p onto the parse stack.
+// pushParseState pushes a new parse state newParseState onto the parse stack.
 // an error state is returned if maxNestingDepth was exceeded, otherwise successState is returned.
 internal static nint pushParseState(this ref scanner s, byte c, nint newParseState, nint successState) {
     s.parseState = append(s.parseState, newParseState);

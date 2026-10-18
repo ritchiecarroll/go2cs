@@ -67,7 +67,7 @@ partial struct Float {
     internal Accuracy acc;
     internal form form;
     internal bool neg;
-    internal nat mant;
+    internal Δnat mant;
     internal int32 exp;
 }
 
@@ -511,7 +511,7 @@ internal static void round(this ж<Float> Ꮡz, nuint sbit) {
                 }
                 z.exp++;
                 // adjust mantissa: divide by 2 to compensate for exponent adjustment
-                shrVU(z.mant, z.mant, 1);
+                rshVU(z.mant, z.mant, 1);
                 // set msb == carry == 1 from the mantissa overflow above
                 UntypedInt msb = /* 1 << (_W - 1) */ 9223372036854775808;
                 z.mant[n - 1] |= (Word)(msb);
@@ -606,15 +606,15 @@ public static ж<Float> SetFloat64(this ж<Float> Ꮡz, float64 x) {
 // fnorm normalizes mantissa m by shifting it to the left
 // such that the msb of the most-significant word (msw) is 1.
 // It returns the shift amount. It assumes that len(m) != 0.
-internal static int64 fnorm(nat m) {
+internal static int64 fnorm(Δnat m) {
     if (debugFloat && (len(m) == 0 || m[len(m) - 1] == 0)) {
         throw panic("msw of mantissa is 0");
     }
     nuint s = nlz(m[len(m) - 1]);
     if (s > 0) {
-        Word c = shlVU(m, m, s);
+        Word c = lshVU(m, m, s);
         if (debugFloat && c != 0) {
-            throw panic("nlz or shlVU incorrect");
+            throw panic("nlz or lshVU incorrect");
         }
     }
     return (int64)s;
@@ -632,7 +632,7 @@ public static ж<Float> SetInt(this ж<Float> Ꮡz, ж<ΔInt> Ꮡx) {
     // are many trailing 0's.
     var bits = (uint32)x.BitLen();
     if (z.prec == 0) {
-        z.prec = umax32(bits, 64);
+        z.prec = max(bits, (uint32)(64));
     }
     z.acc = Exact;
     z.neg = x.neg;
@@ -662,7 +662,7 @@ public static ж<Float> SetRat(this ж<Float> Ꮡz, ж<ΔRat> Ꮡx) {
     Ꮡa.SetInt(Ꮡx.Num());
     Ꮡb.SetInt(Ꮡx.Denom());
     if (z.prec == 0) {
-        z.prec = umax32(a.prec, b.prec);
+        z.prec = max(a.prec, b.prec);
     }
     return Ꮡz.Quo(Ꮡa, Ꮡb);
 }
@@ -735,7 +735,7 @@ public static ж<Float> Copy(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
 }
 
 // msb32 returns the 32 most significant bits of x.
-internal static uint32 msb32(nat x) {
+internal static uint32 msb32(Δnat x) {
     nint i = len(x) - 1;
     if (i < 0) {
         return 0;
@@ -754,7 +754,7 @@ internal static uint32 msb32(nat x) {
 }
 
 // msb64 returns the 64 most significant bits of x.
-internal static uint64 msb64(nat x) {
+internal static uint64 msb64(Δnat x) {
     nint i = len(x) - 1;
     if (i < 0) {
         return 0;
@@ -1166,7 +1166,7 @@ public static (ж<ΔInt>, Accuracy) Int(this ж<Float> Ꮡx, ж<ΔInt> Ꮡz) {
         z.neg = x.neg;
         switch (ᐧ) {
         case {} when exp > allBits: {
-            z.abs = z.abs.shl(x.mant, exp - allBits);
+            z.abs = z.abs.lsh(x.mant, exp - allBits);
             break;
         }
         default: {
@@ -1174,7 +1174,7 @@ public static (ж<ΔInt>, Accuracy) Int(this ж<Float> Ꮡx, ж<ΔInt> Ꮡz) {
             break;
         }
         case {} when exp < allBits: {
-            z.abs = z.abs.shr(x.mant, allBits - exp);
+            z.abs = z.abs.rsh(x.mant, allBits - exp);
             break;
         }}
         return (Ꮡz, acc);
@@ -1214,7 +1214,7 @@ public static (ж<ΔRat>, Accuracy) Rat(this ж<Float> Ꮡx, ж<ΔRat> Ꮡz) {
         z.a.neg = x.neg;
         switch (ᐧ) {
         case {} when x.exp > allBits: {
-            z.a.abs = z.a.abs.shl(x.mant, (nuint)(x.exp - allBits));
+            z.a.abs = z.a.abs.lsh(x.mant, (nuint)(x.exp - allBits));
             z.b.abs = z.b.abs[..0]; // == 1 (see Rat)
             // z already in normal form
             break;
@@ -1228,7 +1228,7 @@ public static (ж<ΔRat>, Accuracy) Rat(this ж<Float> Ꮡx, ж<ΔRat> Ꮡz) {
         case {} when x.exp < allBits: {
             z.a.abs = z.a.abs.set(x.mant);
             var t = z.b.abs.setUint64(1);
-            z.b.abs = t.shl(t, (nuint)(allBits - x.exp));
+            z.b.abs = t.lsh(t, (nuint)(allBits - x.exp));
             Ꮡz.norm();
             break;
         }}
@@ -1310,10 +1310,10 @@ internal static void uadd(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     switch (ᐧ) {
     case {} when ex < ey: {
         if (al){
-            var t = ((nat)default!).shl(y.mant, (nuint)(ey - ex));
+            var t = ((Δnat)default!).lsh(y.mant, (nuint)(ey - ex));
             z.mant = z.mant.add(x.mant, t);
         } else {
-            z.mant = z.mant.shl(y.mant, (nuint)(ey - ex));
+            z.mant = z.mant.lsh(y.mant, (nuint)(ey - ex));
             z.mant = z.mant.add(x.mant, z.mant);
         }
         break;
@@ -1325,10 +1325,10 @@ internal static void uadd(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     }
     case {} when ex > ey: {
         if (al){
-            var t = ((nat)default!).shl(x.mant, (nuint)(ex - ey));
+            var t = ((Δnat)default!).lsh(x.mant, (nuint)(ex - ey));
             z.mant = z.mant.add(t, y.mant);
         } else {
-            z.mant = z.mant.shl(x.mant, (nuint)(ex - ey));
+            z.mant = z.mant.lsh(x.mant, (nuint)(ex - ey));
             z.mant = z.mant.add(z.mant, y.mant);
         }
         ex = ey;
@@ -1363,10 +1363,10 @@ internal static void usub(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     switch (ᐧ) {
     case {} when ex < ey: {
         if (al){
-            var t = ((nat)default!).shl(y.mant, (nuint)(ey - ex));
+            var t = ((Δnat)default!).lsh(y.mant, (nuint)(ey - ex));
             z.mant = t.sub(x.mant, t);
         } else {
-            z.mant = z.mant.shl(y.mant, (nuint)(ey - ex));
+            z.mant = z.mant.lsh(y.mant, (nuint)(ey - ex));
             z.mant = z.mant.sub(x.mant, z.mant);
         }
         break;
@@ -1378,10 +1378,10 @@ internal static void usub(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     }
     case {} when ex > ey: {
         if (al){
-            var t = ((nat)default!).shl(x.mant, (nuint)(ex - ey));
+            var t = ((Δnat)default!).lsh(x.mant, (nuint)(ex - ey));
             z.mant = t.sub(t, y.mant);
         } else {
-            z.mant = z.mant.shl(x.mant, (nuint)(ex - ey));
+            z.mant = z.mant.lsh(x.mant, (nuint)(ex - ey));
             z.mant = z.mant.sub(z.mant, y.mant);
         }
         ex = ey;
@@ -1420,9 +1420,9 @@ internal static void umul(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
 
     var e = (int64)x.exp + (int64)y.exp;
     if (Ꮡx == Ꮡy){
-        z.mant = z.mant.sqr(x.mant);
+        z.mant = z.mant.sqr(nil, x.mant);
     } else {
-        z.mant = z.mant.mul(x.mant, y.mant);
+        z.mant = z.mant.mul(nil, x.mant, y.mant);
     }
     Ꮡz.setExpAndRound(e - fnorm(z.mant), 0);
 }
@@ -1431,51 +1431,59 @@ internal static void umul(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
 // but using the sign of z for rounding the result.
 // x and y must have a non-empty mantissa and valid exponent.
 internal static void uquo(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
-    ref var z = ref Ꮡz.DerefOrNull();
-    ref var x = ref Ꮡx.DerefOrNull();
-    ref var y = ref Ꮡy.DerefOrNull();
+    GoFrame ᒐ = default;
+    try {
+        ref var z = ref Ꮡz.DerefOrNull();
+        ref var x = ref Ꮡx.DerefOrNull();
+        ref var y = ref Ꮡy.DerefOrNull();
 
-    if (debugFloat) {
-        validateBinaryOperands(ref (Ꮡx).DerefOrNull(), ref (Ꮡy).DerefOrNull());
-    }
-
-    // mantissa length in words for desired result precision + 1
-    // (at least one extra bit so we get the rounding bit after
-    // the division)
-    nint n = (nint)(z.prec / (uint32)_W) + 1;
-
-    // compute adjusted x.mant such that we get enough result precision
-    var xadj = x.mant;
-    {
-        nint dΔ1 = n - len(x.mant) + len(y.mant); if (dΔ1 > 0) {
-            // d extra words needed => add d "0 digits" to x
-            xadj = new nat(len(x.mant) + dΔ1);
-            copy(xadj.slice(dΔ1), x.mant);
+        if (debugFloat) {
+            validateBinaryOperands(ref (Ꮡx).DerefOrNull(), ref (Ꮡy).DerefOrNull());
         }
+
+        // mantissa length in words for desired result precision + 1
+        // (at least one extra bit so we get the rounding bit after
+        // the division)
+        nint n = (nint)(z.prec / (uint32)_W) + 1;
+
+        // compute adjusted x.mant such that we get enough result precision
+        var xadj = x.mant;
+        {
+            nint dΔ1 = n - len(x.mant) + len(y.mant); if (dΔ1 > 0) {
+                // d extra words needed => add d "0 digits" to x
+                xadj = new Δnat(len(x.mant) + dΔ1);
+                copy(xadj.slice(dΔ1), x.mant);
+            }
+        }
+        // TODO(gri): If we have too many digits (d < 0), we should be able
+        // to shorten x for faster division. But we must be extra careful
+        // with rounding in that case.
+
+        // Compute d before division since there may be aliasing of x.mant
+        // (via xadj) or y.mant with z.mant.
+        nint d = len(xadj) - len(y.mant);
+
+        // divide
+        var stk = getStack();
+        var stkʗ1 = stk;
+        defer(stkʗ1.free, ref ᒐ);
+        Δnat r = default!;
+        (z.mant, r) = z.mant.div(stk, default!, xadj, y.mant);
+        var e = (int64)x.exp - (int64)y.exp - (int64)(d - len(z.mant)) * (int64)_W;
+
+        // The result is long enough to include (at least) the rounding bit.
+        // If there's a non-zero remainder, the corresponding fractional part
+        // (if it were computed), would have a non-zero sticky bit (if it were
+        // zero, it couldn't have a non-zero remainder).
+        nuint sbit = default!;
+        if (len(r) > 0) {
+            sbit = 1;
+        }
+
+        Ꮡz.setExpAndRound(e - fnorm(z.mant), sbit);
     }
-    // TODO(gri): If we have too many digits (d < 0), we should be able
-    // to shorten x for faster division. But we must be extra careful
-    // with rounding in that case.
-
-    // Compute d before division since there may be aliasing of x.mant
-    // (via xadj) or y.mant with z.mant.
-    nint d = len(xadj) - len(y.mant);
-
-    // divide
-    nat r = default!;
-    (z.mant, r) = z.mant.div(default!, xadj, y.mant);
-    var e = (int64)x.exp - (int64)y.exp - (int64)(d - len(z.mant)) * (int64)_W;
-
-    // The result is long enough to include (at least) the rounding bit.
-    // If there's a non-zero remainder, the corresponding fractional part
-    // (if it were computed), would have a non-zero sticky bit (if it were
-    // zero, it couldn't have a non-zero remainder).
-    nuint sbit = default!;
-    if (len(r) > 0) {
-        sbit = 1;
-    }
-
-    Ꮡz.setExpAndRound(e - fnorm(z.mant), sbit);
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 // ucmp returns -1, 0, or +1, depending on whether
@@ -1560,7 +1568,7 @@ public static ж<Float> Add(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy)
     }
 
     if (z.prec == 0) {
-        z.prec = umax32(x.prec, y.prec);
+        z.prec = max(x.prec, y.prec);
     }
 
     if (x.form == finite && y.form == finite) {
@@ -1637,7 +1645,7 @@ public static ж<Float> Sub(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy)
     }
 
     if (z.prec == 0) {
-        z.prec = umax32(x.prec, y.prec);
+        z.prec = max(x.prec, y.prec);
     }
 
     if (x.form == finite && y.form == finite) {
@@ -1708,7 +1716,7 @@ public static ж<Float> Mul(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy)
     }
 
     if (z.prec == 0) {
-        z.prec = umax32(x.prec, y.prec);
+        z.prec = max(x.prec, y.prec);
     }
 
     z.neg = x.neg != y.neg;
@@ -1757,7 +1765,7 @@ public static ж<Float> Quo(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy)
     }
 
     if (z.prec == 0) {
-        z.prec = umax32(x.prec, y.prec);
+        z.prec = max(x.prec, y.prec);
     }
 
     z.neg = x.neg != y.neg;
@@ -1850,13 +1858,6 @@ internal static nint ord(this ref Float x) {
         m = -m;
     }
     return m;
-}
-
-internal static uint32 umax32(uint32 x, uint32 y) {
-    if (x > y) {
-        return x;
-    }
-    return y;
 }
 
 } // end big_package

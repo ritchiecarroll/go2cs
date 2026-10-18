@@ -81,7 +81,7 @@ internal static partial void runtime_exitsyscall() {
 // getuid, … — syscalls that cannot fail), so the dropped errno is not a swallowed error; it is the
 // contract. No enter/exitsyscall bracket, exactly as Go's raw path has none.
 internal static partial (uintptr r1, uintptr r2) rawSyscallNoError(uintptr trap, uintptr a1, uintptr a2, uintptr a3) {
-    var (r1, r2, _) = @internal.runtime.syscall_package.Syscall6(trap, a1, a2, a3, 0, 0, 0);
+    var (r1, r2, _) = @internal.runtime.syscall.linux_package.Syscall6(trap, a1, a2, a3, 0, 0, 0);
     return (r1, r2);
 }
 

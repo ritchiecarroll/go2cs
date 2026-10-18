@@ -9,6 +9,7 @@ using strings = strings_package;
 using testing = testing_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using atomic = global::go.sync.atomic_package;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -647,6 +648,35 @@ public static void TestFPUnwindAfterRecovery(ж<testing.T> Ꮡt) {
             }
         }, ref ᒐ);
         throw panic((nint)(1));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+//go:noinline
+internal static partial nint deref() {
+    ref var i = ref heap<ж<nint>>(out var Ꮡi);
+    Δruntime.KeepAlive(Ꮡi);
+    return i.Value;
+}
+
+public static void TestFPUnwindStackGrowthAfterRecovery(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        if (!runtime_internal_test_package.FramePointerEnabled) {
+            Ꮡt.Skip(framePointersNotˢ);
+        }
+        global::go.runtime_internal_test_package.StackPoisonCopyRestore state = runtime_internal_test_package.StackPoisonCopy();
+        defer(ᴛ0 => ᴛ0.Restore(), state, ref ᒐ);
+        defer(() => {
+            if (recover() == default!) {
+                Ꮡt.Fatal(didNotRecoverFromPanicˢ);
+            }
+            growStack(nil);
+            ref var pcs = ref heap(new array<uintptr>(32), out var Ꮡpcs);
+            runtime_internal_test_package.FPCallers(pcs[..]);
+        }, ref ᒐ);
+        deref();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

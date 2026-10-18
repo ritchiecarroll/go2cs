@@ -639,36 +639,37 @@ public static @string GoString(this SectionIndex i) {
 // Section type.
 partial struct SectionType /*num:uint32*/;
 
-public static SectionType SHT_NULL => 0;                  /* inactive */
-public static SectionType SHT_PROGBITS => 1;              /* program defined information */
-public static SectionType SHT_SYMTAB => 2;                /* symbol table section */
-public static SectionType SHT_STRTAB => 3;                /* string table section */
-public static SectionType SHT_RELA => 4;                  /* relocation section with addends */
-public static SectionType SHT_HASH => 5;                  /* symbol hash table section */
-public static SectionType SHT_DYNAMIC => 6;               /* dynamic section */
-public static SectionType SHT_NOTE => 7;                  /* note section */
-public static SectionType SHT_NOBITS => 8;                /* no space section */
-public static SectionType SHT_REL => 9;                   /* relocation section - no addends */
-public static SectionType SHT_SHLIB => 10;                 /* reserved - purpose unknown */
-public static SectionType SHT_DYNSYM => 11;                /* dynamic symbol table section */
-public static SectionType SHT_INIT_ARRAY => 14;            /* Initialization function pointers. */
-public static SectionType SHT_FINI_ARRAY => 15;            /* Termination function pointers. */
-public static SectionType SHT_PREINIT_ARRAY => 16;         /* Pre-initialization function ptrs. */
-public static SectionType SHT_GROUP => 17;                 /* Section group. */
-public static SectionType SHT_SYMTAB_SHNDX => 18;          /* Section indexes (see SHN_XINDEX). */
-public static SectionType SHT_LOOS => 0x60000000;                  /* First of OS specific semantics */
-public static SectionType SHT_GNU_ATTRIBUTES => 0x6ffffff5;        /* GNU object attributes */
-public static SectionType SHT_GNU_HASH => 0x6ffffff6;              /* GNU hash table */
-public static SectionType SHT_GNU_LIBLIST => 0x6ffffff7;           /* GNU prelink library list */
-public static SectionType SHT_GNU_VERDEF => 0x6ffffffd;            /* GNU version definition section */
-public static SectionType SHT_GNU_VERNEED => 0x6ffffffe;           /* GNU version needs section */
-public static SectionType SHT_GNU_VERSYM => 0x6fffffff;            /* GNU version symbol table */
-public static SectionType SHT_HIOS => 0x6fffffff;                  /* Last of OS specific semantics */
-public static SectionType SHT_LOPROC => 0x70000000;                /* reserved range for processor */
-public static SectionType SHT_MIPS_ABIFLAGS => 0x7000002a;         /* .MIPS.abiflags */
-public static SectionType SHT_HIPROC => 0x7fffffff;                /* specific section header types */
-public static SectionType SHT_LOUSER => 0x80000000;                /* reserved range for application */
-public static SectionType SHT_HIUSER => 0xffffffff;                /* specific indexes */
+public static SectionType SHT_NULL => 0;                    /* inactive */
+public static SectionType SHT_PROGBITS => 1;                /* program defined information */
+public static SectionType SHT_SYMTAB => 2;                  /* symbol table section */
+public static SectionType SHT_STRTAB => 3;                  /* string table section */
+public static SectionType SHT_RELA => 4;                    /* relocation section with addends */
+public static SectionType SHT_HASH => 5;                    /* symbol hash table section */
+public static SectionType SHT_DYNAMIC => 6;                 /* dynamic section */
+public static SectionType SHT_NOTE => 7;                    /* note section */
+public static SectionType SHT_NOBITS => 8;                  /* no space section */
+public static SectionType SHT_REL => 9;                     /* relocation section - no addends */
+public static SectionType SHT_SHLIB => 10;                   /* reserved - purpose unknown */
+public static SectionType SHT_DYNSYM => 11;                  /* dynamic symbol table section */
+public static SectionType SHT_INIT_ARRAY => 14;              /* Initialization function pointers. */
+public static SectionType SHT_FINI_ARRAY => 15;              /* Termination function pointers. */
+public static SectionType SHT_PREINIT_ARRAY => 16;           /* Pre-initialization function ptrs. */
+public static SectionType SHT_GROUP => 17;                   /* Section group. */
+public static SectionType SHT_SYMTAB_SHNDX => 18;            /* Section indexes (see SHN_XINDEX). */
+public static SectionType SHT_LOOS => 0x60000000;                    /* First of OS specific semantics */
+public static SectionType SHT_GNU_ATTRIBUTES => 0x6ffffff5;          /* GNU object attributes */
+public static SectionType SHT_GNU_HASH => 0x6ffffff6;                /* GNU hash table */
+public static SectionType SHT_GNU_LIBLIST => 0x6ffffff7;             /* GNU prelink library list */
+public static SectionType SHT_GNU_VERDEF => 0x6ffffffd;              /* GNU version definition section */
+public static SectionType SHT_GNU_VERNEED => 0x6ffffffe;             /* GNU version needs section */
+public static SectionType SHT_GNU_VERSYM => 0x6fffffff;              /* GNU version symbol table */
+public static SectionType SHT_HIOS => 0x6fffffff;                    /* Last of OS specific semantics */
+public static SectionType SHT_LOPROC => 0x70000000;                  /* reserved range for processor */
+public static SectionType SHT_RISCV_ATTRIBUTES => 0x70000003;        /* RISCV object attributes */
+public static SectionType SHT_MIPS_ABIFLAGS => 0x7000002a;           /* .MIPS.abiflags */
+public static SectionType SHT_HIPROC => 0x7fffffff;                  /* specific section header types */
+public static SectionType SHT_LOUSER => 0x80000000;                  /* reserved range for application */
+public static SectionType SHT_HIUSER => 0xffffffff;                  /* specific indexes */
 
 internal static slice<intName> shtStrings = new intName[]{
     new(0, "SHT_NULL"u8),
@@ -696,6 +697,8 @@ internal static slice<intName> shtStrings = new intName[]{
     new(0x6ffffffe, "SHT_GNU_VERNEED"u8),
     new(0x6fffffff, "SHT_GNU_VERSYM"u8),
     new(0x70000000, "SHT_LOPROC"u8),
+    // We don't list the processor-dependent SectionType,
+    // as the values overlap.
     new(0x7000002a, "SHT_MIPS_ABIFLAGS"u8),
     new(0x7fffffff, "SHT_HIPROC"u8),
     new(0x80000000U, "SHT_LOUSER"u8),
@@ -821,6 +824,8 @@ public static ProgType PT_MIPS_REGINFO => 0x70000000;         /* Register usage 
 public static ProgType PT_MIPS_RTPROC => 0x70000001;          /* Runtime procedures */
 public static ProgType PT_MIPS_OPTIONS => 0x70000002;         /* Options */
 public static ProgType PT_MIPS_ABIFLAGS => 0x70000003;        /* ABI flags */
+
+public static ProgType PT_RISCV_ATTRIBUTES => 0x70000003;        /* RISC-V ELF attribute section. */
 
 public static ProgType PT_S390_PGSTE => 0x70000000;        /* 4k page table size */
 
@@ -2373,6 +2378,8 @@ public static R_LARCH R_LARCH_TLS_DTPREL64 => 9;
 public static R_LARCH R_LARCH_TLS_TPREL32 => 10;
 public static R_LARCH R_LARCH_TLS_TPREL64 => 11;
 public static R_LARCH R_LARCH_IRELATIVE => 12;
+public static R_LARCH R_LARCH_TLS_DESC32 => 13;
+public static R_LARCH R_LARCH_TLS_DESC64 => 14;
 public static R_LARCH R_LARCH_MARK_LA => 20;
 public static R_LARCH R_LARCH_MARK_PCREL => 21;
 public static R_LARCH R_LARCH_SOP_PUSH_PCREL => 22;
@@ -2458,6 +2465,23 @@ public static R_LARCH R_LARCH_SUB6 => 106;
 public static R_LARCH R_LARCH_ADD_ULEB128 => 107;
 public static R_LARCH R_LARCH_SUB_ULEB128 => 108;
 public static R_LARCH R_LARCH_64_PCREL => 109;
+public static R_LARCH R_LARCH_CALL36 => 110;
+public static R_LARCH R_LARCH_TLS_DESC_PC_HI20 => 111;
+public static R_LARCH R_LARCH_TLS_DESC_PC_LO12 => 112;
+public static R_LARCH R_LARCH_TLS_DESC64_PC_LO20 => 113;
+public static R_LARCH R_LARCH_TLS_DESC64_PC_HI12 => 114;
+public static R_LARCH R_LARCH_TLS_DESC_HI20 => 115;
+public static R_LARCH R_LARCH_TLS_DESC_LO12 => 116;
+public static R_LARCH R_LARCH_TLS_DESC64_LO20 => 117;
+public static R_LARCH R_LARCH_TLS_DESC64_HI12 => 118;
+public static R_LARCH R_LARCH_TLS_DESC_LD => 119;
+public static R_LARCH R_LARCH_TLS_DESC_CALL => 120;
+public static R_LARCH R_LARCH_TLS_LE_HI20_R => 121;
+public static R_LARCH R_LARCH_TLS_LE_ADD_R => 122;
+public static R_LARCH R_LARCH_TLS_LE_LO12_R => 123;
+public static R_LARCH R_LARCH_TLS_LD_PCREL20_S2 => 124;
+public static R_LARCH R_LARCH_TLS_GD_PCREL20_S2 => 125;
+public static R_LARCH R_LARCH_TLS_DESC_PCREL20_S2 => 126;
 
 internal static slice<intName> rlarchStrings = new intName[]{
     new(0, "R_LARCH_NONE"u8),
@@ -2473,6 +2497,8 @@ internal static slice<intName> rlarchStrings = new intName[]{
     new(10, "R_LARCH_TLS_TPREL32"u8),
     new(11, "R_LARCH_TLS_TPREL64"u8),
     new(12, "R_LARCH_IRELATIVE"u8),
+    new(13, "R_LARCH_TLS_DESC32"u8),
+    new(14, "R_LARCH_TLS_DESC64"u8),
     new(20, "R_LARCH_MARK_LA"u8),
     new(21, "R_LARCH_MARK_PCREL"u8),
     new(22, "R_LARCH_SOP_PUSH_PCREL"u8),
@@ -2557,7 +2583,24 @@ internal static slice<intName> rlarchStrings = new intName[]{
     new(106, "R_LARCH_SUB6"u8),
     new(107, "R_LARCH_ADD_ULEB128"u8),
     new(108, "R_LARCH_SUB_ULEB128"u8),
-    new(109, "R_LARCH_64_PCREL"u8)
+    new(109, "R_LARCH_64_PCREL"u8),
+    new(110, "R_LARCH_CALL36"u8),
+    new(111, "R_LARCH_TLS_DESC_PC_HI20"u8),
+    new(112, "R_LARCH_TLS_DESC_PC_LO12"u8),
+    new(113, "R_LARCH_TLS_DESC64_PC_LO20"u8),
+    new(114, "R_LARCH_TLS_DESC64_PC_HI12"u8),
+    new(115, "R_LARCH_TLS_DESC_HI20"u8),
+    new(116, "R_LARCH_TLS_DESC_LO12"u8),
+    new(117, "R_LARCH_TLS_DESC64_LO20"u8),
+    new(118, "R_LARCH_TLS_DESC64_HI12"u8),
+    new(119, "R_LARCH_TLS_DESC_LD"u8),
+    new(120, "R_LARCH_TLS_DESC_CALL"u8),
+    new(121, "R_LARCH_TLS_LE_HI20_R"u8),
+    new(122, "R_LARCH_TLS_LE_ADD_R"u8),
+    new(123, "R_LARCH_TLS_LE_LO12_R"u8),
+    new(124, "R_LARCH_TLS_LD_PCREL20_S2"u8),
+    new(125, "R_LARCH_TLS_GD_PCREL20_S2"u8),
+    new(126, "R_LARCH_TLS_DESC_PCREL20_S2"u8)
 }.slice();
 
 public static @string String(this R_LARCH i) {

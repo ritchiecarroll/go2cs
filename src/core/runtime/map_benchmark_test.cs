@@ -595,10 +595,11 @@ public static void BenchmarkMapInterfacePtr(ж<testing.B> Ꮡb) {
 
     var m = new map<any, bool>{};
 
-    for (nint i = 0; i < 100; i++) {
-        ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1);
-        iΔ1 = i;
-        m[ᏑiΔ1] = true;
+    for (nint iᴛ1 = 0; iᴛ1 < 100; iᴛ1++) {
+        ref var i = ref heap<nint>(out var Ꮡi);
+        i = iᴛ1;
+        m[Ꮡi] = true;
+        iᴛ1 = i;
     }
 
     var key = @new<nint>();
@@ -1387,12 +1388,61 @@ public static void BenchmarkMapSmallAccessHit(ж<testing.B> Ꮡb) {
     Ꮡb.Run(keyInt32ElemInt32ˢ, smallBenchSizes(benchmarkMapAccessHit<int32, int32>));
     Ꮡb.Run(keyInt64ElemInt64ˢ, smallBenchSizes(benchmarkMapAccessHit<int64, int64>));
     Ꮡb.Run(keyStringElemStringˢ, smallBenchSizes(benchmarkMapAccessHit<@string, @string>));
+    Ꮡb.Run(keySmallTypeElemInt32ˢ, smallBenchSizes(benchmarkMapAccessHit<smallType, int32>));
 }
 
 public static void BenchmarkMapSmallAccessMiss(ж<testing.B> Ꮡb) {
     Ꮡb.Run(keyInt32ElemInt32ˢ, smallBenchSizes(benchmarkMapAccessMiss<int32, int32>));
     Ꮡb.Run(keyInt64ElemInt64ˢ, smallBenchSizes(benchmarkMapAccessMiss<int64, int64>));
     Ꮡb.Run(keyStringElemStringˢ, smallBenchSizes(benchmarkMapAccessMiss<@string, @string>));
+    Ꮡb.Run(keySmallTypeElemInt32ˢ, smallBenchSizes(benchmarkMapAccessMiss<smallType, int32>));
+}
+
+internal static void mapAccessZeroBenchmark<K>(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    map<K, uint64> m = default!;
+    K key = GoZero<K>();
+    for (nint i = 0; i < b.N; i++) {
+        sink = m[key];
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string keyInt64ˢ = "Key=int64"u8;
+internal static readonly @string keyInt32ˢ = "Key=int32"u8;
+internal static readonly @string keyStringˢ = "Key=string"u8;
+internal static readonly @string keyMediumTypeˢ = "Key=mediumType"u8;
+internal static readonly @string keyBigTypeˢ = "Key=bigType"u8;
+
+public static void BenchmarkMapAccessZero(ж<testing.B> Ꮡb) {
+    Ꮡb.Run(keyInt64ˢ, mapAccessZeroBenchmark<int64>);
+    Ꮡb.Run(keyInt32ˢ, mapAccessZeroBenchmark<int32>);
+    Ꮡb.Run(keyStringˢ, mapAccessZeroBenchmark<@string>);
+    Ꮡb.Run(keyMediumTypeˢ, mapAccessZeroBenchmark<mediumType>);
+    Ꮡb.Run(keyBigTypeˢ, mapAccessZeroBenchmark<bigType>);
+}
+
+internal static void mapAccessEmptyBenchmark<K>(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var m = new map<K, uint64>();
+    foreach (var (i, v) in genValues<K>(0, 1000)) {
+        m[v] = (uint64)i;
+    }
+    builtin.clear(m);
+    K key = GoZero<K>();
+    for (nint i = 0; i < b.N; i++) {
+        sink = m[key];
+    }
+}
+
+public static void BenchmarkMapAccessEmpty(ж<testing.B> Ꮡb) {
+    Ꮡb.Run(keyInt64ˢ, mapAccessEmptyBenchmark<int64>);
+    Ꮡb.Run(keyInt32ˢ, mapAccessEmptyBenchmark<int32>);
+    Ꮡb.Run(keyStringˢ, mapAccessEmptyBenchmark<@string>);
+    Ꮡb.Run(keyMediumTypeˢ, mapAccessEmptyBenchmark<mediumType>);
+    Ꮡb.Run(keyBigTypeˢ, mapAccessEmptyBenchmark<bigType>);
 }
 
 } // end runtime_test_package

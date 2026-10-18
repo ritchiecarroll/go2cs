@@ -386,7 +386,16 @@ public static partial class builtin
     /// slice = append(slice, elem1, elem2)
     /// slice = append(slice, anotherSlice...)
     /// </code>
+    /// <para>
+    /// Lowest priority: whenever a <see cref="slice{T}"/> overload also applies, this one is set aside.
+    /// Without that, <c>append(nums, 4, 5)</c> on a <c>slice&lt;nint&gt;</c> was CS0121: the C# int literals
+    /// inferred <c>T = int</c> here, an exact match for the elements, while every <see cref="slice{T}"/>
+    /// overload matched the slice exactly. The priority changes only calls that were that ambiguity: a call
+    /// this overload binds alone (a first argument typed <see cref="ISlice"/>) still binds it. Measured
+    /// 2026-10-16 by marking it obsolete: no call in go2cs-stdlib.slnx or go2cs.slnx bound it.
+    /// </para>
     /// </remarks>
+    [OverloadResolutionPriority(-1)]
     public static slice<T> append<T>(ISlice slice, params T[] elems)
     {
         return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
@@ -2389,7 +2398,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(target) : new StandardBox<T>(target);
 
         // `&T{}`, and through heap() an escaping local: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2743,10 +2752,16 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>>? NativeFieldArrayPointer<T>(INilPointer? field, nint length)
     {
-        if (field is not INativeRooted { NativeGoFieldAddress: var address and not 0 })
-            return null;
+        // A field view of a native box IS a native box at the field's Go offset (ж.of), so its own root address is
+        // the field's; a one-hop field reference still answers through NativeGoFieldAddress.
+        nuint address = field switch
+        {
+            INativeRooted { NativeGoFieldAddress: var fieldAddress and not 0 } => fieldAddress,
+            INativeRooted { NativeRootAddress: var rootAddress and not 0 } => rootAddress,
+            _ => 0
+        };
 
-        return NativeArrayPointer<T>(address, length);
+        return address == 0 ? null : NativeArrayPointer<T>(address, length);
     }
 
     /// <summary>
@@ -2849,7 +2864,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(value) : new StandardBox<T>(value);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2895,7 +2910,7 @@ public static partial class builtin
         ж<T> box = new StandardBox<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -4081,6 +4096,23 @@ public static partial class builtin
             null => false,
             _ => Cache<TInterface>.Implements(value.GetType())
         };
+    }
+
+    /// <summary>
+    /// Checks whether a value of the managed type <paramref name="valueType"/> implements the interface
+    /// <typeparamref name="TInterface"/>, decided on the TYPE alone, through the same cached method-set probe
+    /// <see cref="Implements{TInterface}(object?)"/> uses.
+    /// </summary>
+    /// <remarks>
+    /// For a caller that must answer before it has a value to hand over, and must not allocate one to ask:
+    /// reflect.TypeAssert[I] over a concrete Value, whose failing assertion Go answers without allocating.
+    /// </remarks>
+    /// <typeparam name="TInterface">Interface type to check.</typeparam>
+    /// <param name="valueType">Managed type of the value.</param>
+    /// <returns><c>true</c> if a value of <paramref name="valueType"/> implements <typeparamref name="TInterface"/>; otherwise, <c>false</c>.</returns>
+    public static bool TypeImplements<TInterface>(Type? valueType)
+    {
+        return valueType is not null && (typeof(TInterface).IsAssignableFrom(valueType) || Cache<TInterface>.Implements(valueType));
     }
 
     // Per-interface structural-implementation cache, reached from the `_ =>` arm of Implements above.
