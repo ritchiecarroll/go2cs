@@ -1597,12 +1597,18 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 // `pair[T interface{ Name() string }]`, at `tagged`. C# checks `where T : nameI` as `tagged : nameI`,
 // which only a GoImplement record makes go2cs-gen declare, and a record was minted only where a CALL
 // converted an argument to the type parameter (convertToInterfaceType). A generic TYPE instantiated
-// at a value type with no such call — `pair[tagged]{…}` — was CS0315, named or inline alike. Every
-// instantiation form reaches this hook (constraintProxyFor), so the record is minted here; it is a
-// set, so a pair a call already recorded is unchanged. An instantiated GENERIC constraint
+// at a value type with no such call — `pair[tagged]{…}` — was CS0315, named or inline alike. Both
+// instantiation forms call it, a generic TYPE from constraintProxyArg and a FUNCTION from
+// constraintProxySigArg, so the record is minted there; it is a set, so a pair a call already
+// recorded is unchanged. An instantiated GENERIC constraint
 // (`Adder[A]`, `Adder[int]`) is recordClosedConstraintImplementation's, which closes it over the
 // argument; a lifted inline constraint naming a type parameter (`Min_T<T>`) is not closed by either.
-func (v *Visitor) recordValueConstraintImplementation(typeParam *types.TypeParam, typeArg types.Type) {
+//
+// fn is the generic FUNCTION whose index'th parameter this is, nil for a generic TYPE. A function's
+// method-set clause is emitted only where its body needs it (methodSetConstraintNeeded), and no
+// clause asks for no record: Go 1.26's errors.AsType[E error] at a value error type drops its clause,
+// and recording `GoImplement<alert, error>` there declared an implementation nothing checks.
+func (v *Visitor) recordValueConstraintImplementation(typeParam *types.TypeParam, typeArg types.Type, fn *types.Func, index int) {
 	named, ok := types.Unalias(typeArg).(*types.Named)
 
 	if !ok || typeContainsTypeParams(typeArg) {
@@ -1638,6 +1644,10 @@ func (v *Visitor) recordValueConstraintImplementation(typeParam *types.TypeParam
 	}
 
 	if !types.Implements(typeArg, iface) {
+		return
+	}
+
+	if fn != nil && !v.methodSetConstraintNeeded(fn, index) {
 		return
 	}
 
@@ -1764,6 +1774,8 @@ func (v *Visitor) constraintProxyArg(named *types.Named, i int) (string, bool) {
 	if typeParams == nil || i >= typeParams.Len() || named.TypeArgs() == nil || i >= named.TypeArgs().Len() {
 		return "", false
 	}
+
+	v.recordValueConstraintImplementation(typeParams.At(i), named.TypeArgs().At(i), nil, i)
 
 	return v.constraintProxyFor(typeParams.At(i), named.TypeArgs().At(i))
 }
@@ -1920,7 +1932,6 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 	ptr, ok := types.Unalias(typeArg).(*types.Pointer)
 
 	if !ok {
-		v.recordValueConstraintImplementation(typeParam, typeArg)
 		v.recordClosedConstraintImplementation(typeParam, typeArg)
 		return "", false
 	}
@@ -2120,6 +2131,10 @@ func (v *Visitor) constraintProxySigArg(funIdent *ast.Ident, typeArgs *types.Typ
 
 	if typeParams == nil || i >= typeParams.Len() || typeArgs == nil || i >= typeArgs.Len() {
 		return "", false
+	}
+
+	if fn, ok := v.info.ObjectOf(funIdent).(*types.Func); ok {
+		v.recordValueConstraintImplementation(typeParams.At(i), typeArgs.At(i), fn, i)
 	}
 
 	return v.constraintProxyFor(typeParams.At(i), typeArgs.At(i))

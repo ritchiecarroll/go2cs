@@ -540,6 +540,7 @@
     <None Include="$(MSBuildThisFileDirectory)validationProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneFieldSpelling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneStampMembers_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueConstraintRecordNeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePunOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variableAnalysisOperations.go" />

@@ -342,7 +342,9 @@ sets carry no methods and are not lifted.
 A **value** instantiation of a method-set constraint that names no type parameter — named or lifted,
 `slot[T nameI]` at `tagged` — is recorded at the instantiation (`recordValueConstraintImplementation`,
 on `constraintProxyFor`'s per-instantiation path), not only where a call converts an argument to the
-type parameter. A generic TYPE instantiated at a value type with no such call was CS0315. An
+type parameter. A generic TYPE instantiated at a value type with no such call was CS0315. A
+FUNCTION's clause is emitted only where its body needs it (`methodSetConstraintNeeded`), and the
+record follows the clause: `errors.AsType[E error]` drops it, so `AsType[alert]` records nothing. An
 instantiated GENERIC constraint is left to `recordClosedConstraintImplementation`, below.
 
 A **value** instantiation of a **generic** method-set constraint — `Sum[A Adder[A]]` at `vec` —
