@@ -333,10 +333,13 @@ anonymous parameter interface is, and named `<declaration>_<parameter>` (`Show_T
 `liftTypeParamConstraints`). Before the lift, `getGenericDefinition` named the constraint by its Go
 text, and `where T : interface{Name() string}` is a C# syntax cascade that takes the whole package
 down; lifted, it takes the same arms a named constraint takes. The lift is public when the declaration
-is exported (CS0703 otherwise), and a method of a generic type reaches its receiver's constraint by
-signature through the package registry. A constraint that names the declaration's own parameters
-(`[T interface{ Less(T) bool }]`) lifts generic over the ones it uses (`Min_T<T>`), and each use
-composes its own arguments, so a receiver that renames the parameter still binds. Operator-only type
+is exported (CS0703 otherwise). A constraint that names the declaration's own parameters
+(`[T interface{ Less(T) bool }]`) lifts generic over the ones it captures (`Min_T<T>`,
+`liftCapturedTypeParams`), and each use composes its own arguments, so a receiver that renames the
+parameter still binds. A method of a generic type reaches the constraint as its receiver's own copy, a
+different object and possibly in another file: a lift capturing no parameter is found by its signature
+in the package registry, and one capturing a parameter, which is never registered by signature, by its
+DECLARATION (`constraintLiftKey`: the type and the parameter's index). Operator-only type
 sets carry no methods and are not lifted.
 
 A **value** instantiation of a method-set constraint that names no type parameter — named or lifted,

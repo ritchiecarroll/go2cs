@@ -27,7 +27,6 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoDynamicTypeLift("696e746572666163657b4c65737328542920626f6f6c7d", "Min_T")]
 [assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e673b20546167282920696e747d", "Label_T")]
 [assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e677d", "Box_T")]
 [assembly: GoDynamicTypeLift("696e746572666163657b546167282920696e747d", "Both_C")]

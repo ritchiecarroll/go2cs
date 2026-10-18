@@ -340,14 +340,6 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		genericTypeParams = liftedTypeParamList(capturedTypeParamNames(capturedTypeParams))
 	}
 
-	// A LIFTED interface binds the enclosing declaration's type parameters it uses, as a lifted
-	// struct does: an inline constraint `[T interface{ Less(T) bool }]` lifts to `Min_T<T>`. A lift
-	// naming none renders exactly as before, so no existing lift moves (one that named a parameter
-	// could not have compiled). Its uses compose their own arguments (getGenericDefinition).
-	if lifted && genericTypeParams == "" {
-		genericTypeParams = liftedTypeParamList(v.localTypeUsedTypeParams(v.getType(interfaceType, false)))
-	}
-
 	result.WriteString(outerIndent)
 	result.WriteString(fmt.Sprintf("%s%spartial interface %s%s%s%s%s{", InterfaceTypeAttributeMarker, InterfacePostAtributeMarker, getSanitizedIdentifier(interfaceTypeName), genericTypeParams, InterfaceDefinitionCommentMarker, InterfaceInheritanceMarker, InterfaceConstraintMarker))
 	result.WriteString(v.newline)

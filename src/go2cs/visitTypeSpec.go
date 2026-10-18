@@ -276,7 +276,8 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 
 	// A generic type's INLINE constraints lift ahead of it (liftTypeParamConstraints), and before the
 	// access modifier below is set: the interface emitter consumes v.pendingTypeAccess on entry.
-	v.liftTypeParamConstraints(typeSpec.TypeParams, name)
+	ownerType, _ := v.info.Defs[typeSpec.Name].Type().(*types.Named)
+	v.liftTypeParamConstraints(typeSpec.TypeParams, name, ownerType)
 
 	// An unexported type used as an exported struct field, or in an exported callable's signature,
 	// must be emitted as public (CS0050/CS0051/CS0052). Set the access modifier for the type-kind

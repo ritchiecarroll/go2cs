@@ -1286,7 +1286,7 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 			constraintName = constraint.String()
 
 			if iface.NumMethods() > 0 {
-				constraintName = v.liftedConstraintName(iface, typeParams)
+				constraintName = v.liftedConstraintName(iface, genericOwner(named, signature, typeParams), i)
 			}
 		} else {
 			constraintName = v.getAliasQualifiedTypeName(constraint, false)
@@ -1655,16 +1655,29 @@ func (v *Visitor) recordValueConstraintImplementation(typeParam *types.TypeParam
 }
 
 // liftedConstraintName names an anonymous inline constraint by the interface liftTypeParamConstraints
-// lifted it to. The lift is found by this visitor's own map, then by its signature in the package
-// registry — a method of a generic type reaches its receiver's constraint as a different object with
-// the same signature, possibly from another file — and otherwise by a deferred marker the file-visit
-// barrier resolves, as every other cross-file lift reference is.
+// lifted it to. The lift is found by this visitor's own map (the declaration itself, or a function's
+// own constraint). A METHOD of a generic type reaches the constraint as its receiver's copy, a
+// different object, possibly in another file: a lift that captures no parameter is found by its
+// signature in the package registry, and one that captures any (`Ord_T<T>`) by its DECLARATION
+// (constraintLiftKey on owner and index), since such a lift is never registered by signature. Either
+// way a lift not yet visited is a deferred marker the file-visit barrier resolves.
 //
-// The lift is declared over the declaration's parameters it USES, in declaration order (`Min_T<T>`),
-// so its arguments are composed HERE, from this list's own parameters by index: a receiver may
-// rename them (`func (b *Box[U]) …`), and its constraint then names U where the declaration named T.
-func (v *Visitor) liftedConstraintName(iface *types.Interface, typeParams *types.TypeParamList) string {
+// The lift is declared over the parameters it captures, in declared order (liftCapturedTypeParams), so
+// its arguments are composed HERE from the same walk over this copy: a receiver may rename them
+// (`func (b *Box[U]) …`), and its constraint then names U where the declaration named T.
+func (v *Visitor) liftedConstraintName(iface *types.Interface, owner *types.Named, index int) string {
+	captured := liftCapturedTypeParams(iface)
 	name, ok := v.liftedNameFor(iface)
+
+	if !ok && len(captured) > 0 && owner != nil {
+		key := constraintLiftKey(owner, index)
+
+		if name = lookupConstraintLift(key); name == "" {
+			name = dynamicTypeMarker(key)
+		}
+
+		ok = true
+	}
 
 	if !ok {
 		if name = lookupDynamicTypeName(iface.String()); name == "" {
@@ -1678,29 +1691,31 @@ func (v *Visitor) liftedConstraintName(iface *types.Interface, typeParams *types
 		name = name[:idx]
 	}
 
-	used := map[int]bool{}
+	return name + liftedTypeParamList(capturedTypeParamNames(captured))
+}
 
-	for i := 0; i < typeParams.Len(); i++ {
-		for m := 0; m < iface.NumMethods() && !used[i]; m++ {
-			used[i] = typeMentionsTypeParam(iface.Method(m).Type(), typeParams.At(i), map[types.Type]bool{})
-		}
+// genericOwner is the generic TYPE whose parameter list typeParams is: the named type itself, or a
+// method's receiver type (its origin); nil for a function's own list.
+func genericOwner(named *types.Named, signature *types.Signature, typeParams *types.TypeParamList) *types.Named {
+	if named != nil {
+		return named.Origin()
 	}
 
-	var args []string
-
-	for i := 0; i < typeParams.Len(); i++ {
-		if used[i] {
-			argName := typeParams.At(i).Obj().Name()
-
-			if csReservedTypeNames.Contains(argName) {
-				argName = getSanitizedIdentifier(argName)
-			}
-
-			args = append(args, argName)
-		}
+	if signature == nil || signature.Recv() == nil || signature.RecvTypeParams() != typeParams {
+		return nil
 	}
 
-	return name + liftedTypeParamList(args)
+	recv := signature.Recv().Type()
+
+	if pointer, ok := recv.(*types.Pointer); ok {
+		recv = pointer.Elem()
+	}
+
+	if recvNamed, ok := types.Unalias(recv).(*types.Named); ok {
+		return recvNamed.Origin()
+	}
+
+	return nil
 }
 
 // constraintUnionText renders a constraint's type set when it is exactly one union of type terms, NAMED
