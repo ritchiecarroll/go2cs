@@ -28,6 +28,13 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **cgo.** A package whose build selects a file with `import "C"` stops the whole run:
   `error GO2CS2001: ... cgo has no C# conversion yet`. With no pure-Go path it is out of reach today
   ([plan](PLAN-cgo-interop.md), [Roadmap](Roadmap.md#cgo)).
+* **A self-referential constraint over a pointer, when a method shares the element's storage.**
+  `Walk[*Node]` under `Walk[N Tree[N]]` with `Children() []N` stops the run with `error GO2CS2002`,
+  naming the site and the method. A pointer element reaches the generic code through a proxy object, and
+  a `[]N`, `map[K]N`, `chan N` or `*N` the proxy passed along would be a copy, not Go's shared value.
+  The same function over a value element converts, and so does a constraint whose methods pass only
+  `N`, funcs and arrays ([how](ConversionStrategies-Reference/generic-constraints.md#what-a-proxy-forwards-and-the-instantiations-go2cs-refuses)).
+  No Go 1.24 standard-library package reaches it.
 * **Go newer than the library tracks.** A newer `go` line in your `go.mod`, or any dependency's, gets
   `package requires newer Go version` or a refusal naming both releases. Set `GOTOOLCHAIN=local` and pin
   older versions until `go build ./...` passes, as the

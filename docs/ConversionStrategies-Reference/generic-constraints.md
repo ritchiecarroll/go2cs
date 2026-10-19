@@ -552,6 +552,40 @@ assigned, boxed, asserted, `%T` and `reflect.TypeOf` compared, and a reflect-cre
 through `reflect`, output-compared vs Go. Also GenTests `ForeignConstraintProxyTests`, which executes
 separately built assemblies.)
 
+### What a proxy forwards, and the instantiations go2cs refuses
+
+A proxy is a separate C# object per pointer, wrapping the element's box. So each forwarder marshals every
+position of a constraint method that mentions the self parameter `N`, in both proxy kinds
+(`MarshalAcrossProxy` in go2cs-gen):
+
+* **The whole `N`, or a tuple of such values**: the proxy's implicit conversions, as above.
+* **A func, at any depth, named or not** (`Next() func() N`, `Each(func(func(N) bool) bool)`, `Path() iter.Seq[N]`): re-wrapped in a lambda over
+  the target's own parameter types, and a nil func stays nil
+  (`ᴛNext(m_box) is { } ᴛf0 ? new Func<жFlow<E>>(() => ᴛf0()) : null`).
+* **A Go array** (`Triple() [3]N`): copied element by element, which is exact, because Go copies arrays too.
+* **A type that names `N` only as a type argument whose parameter is itself self-constrained**
+  (`Owner() *Graph[N]` with `Graph[N GraphNode[N]]`) is the same C# type on both sides and passes as written.
+
+Every other position SHARES the element's storage in Go: a `[]N`, `map[K]N`, `chan N` or `*N`, or a generic
+type carrying `N` through a parameter that is not self-constrained (`List[N]`). A slice of proxies is a
+different array from the slice of boxes the element holds, so a forwarded copy would compile and silently
+break Go's aliasing. The converter therefore refuses, before any file is written, every instantiation that
+would name such a proxy (`refuseUnforwardableConstraintProxies`, `error GO2CS2002`, naming the site, the
+interface and each method). An instantiation over a VALUE element needs no proxy and converts, and its
+`Children()` slice aliases the element's backing array exactly as in Go. Because go2cs-gen publishes the
+generic proxy for every self-referential constraint, it also gives such a method no slot and makes its
+forwarder throw the same refusal. The interface's own package still compiles: before this rule, a single
+`Children() []N` broke that package's build (CS0029), even when only value elements used it. No Go 1.24
+standard-library package and no behavioral fixture reaches a refused shape (census of 2026-10-19: 6
+interfaces in std, 12 in the behavioral tree, 0 sharing shapes).
+
+Two exact designs remain open, and nothing in the corpus needs them: a per-element copy of the generic function
+in which `N` is the box itself (monomorphization), or static-abstract witness types in place of the proxy.
+Both are larger and read less like the Go source. (Guarded by the converter's `constraintProxyForwarding_test.go`,
+GenTests `ProxyContainerForwardingTests`, which executes both proxy kinds, and behavioral
+`ProxyContainerForwarding`, where a value element's shared `Children()` slice and a pointer element's func
+and array results are output-compared with Go.)
+
 ### A func LITERAL at a proxied delegate position declares its parameters AT the proxy
 
 Item 4 above moves a METHOD GROUP's T-boundary into a lambda body, because a method-group conversion
