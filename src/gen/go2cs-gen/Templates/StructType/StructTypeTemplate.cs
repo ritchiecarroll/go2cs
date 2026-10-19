@@ -1595,22 +1595,6 @@ internal class StructTypeTemplate : TemplateBase
         return $"{pkg}{TempVarMarker}{structName.TrimStart('@')}{TempVarMarker}xpkg";
     }
 
-    // The premise XpkgClassName's uniqueness rests on, checked where it could fail: a package stem
-    // holding `ᴛ` makes the stem boundary ambiguous (stem `aᴛb` + struct `c` and stem `a` + struct
-    // `bᴛc` name one class), and the collision would otherwise surface as a bare CS0101 on a
-    // generated class with nothing pointing here. No Go package in the corpus has such a stem.
-    // RS2008 asks for analyzer release-tracking files; go2cs-gen is a source generator that ships
-    // with the converter and keeps none, and this is its one diagnostic.
-#pragma warning disable RS2008
-    private static readonly DiagnosticDescriptor s_xpkgStemMarker = new(
-        id: "GO2CS0001",
-        title: "Package class stem contains the lifted-name marker",
-        messageFormat: "Package class stem '{0}' contains '" + TempVarMarker + "': the cross-package forwarder class '{1}' may collide with another struct's (CS0101)",
-        category: "go2cs-gen",
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true);
-#pragma warning restore RS2008
-
     private readonly StringBuilder m_xpkg = new();
 
     private Dictionary<string, int>? m_treeNameCounts;
@@ -1859,9 +1843,10 @@ internal class StructTypeTemplate : TemplateBase
         if (!method.ReturnTypeIsPublic || !method.ParametersArePublic)
             return;
 
-        // The first forwarder this struct mints is where its sibling class comes into being.
+        // The first forwarder this struct mints is where its sibling class comes into being. GO2CS0001 checks
+        // XpkgClassName's uniqueness premise (see GeneratorDiagnostics.XpkgStemMarker).
         if (m_xpkg.Length == 0 && PackageName.Contains(TempVarMarker))
-            Context.ReportDiagnostic(Diagnostic.Create(s_xpkgStemMarker, Location.None, PackageName, XpkgClassName($"{PackageName}_package", NonGenericStructName)));
+            Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.XpkgStemMarker,Location.None, PackageName, XpkgClassName($"{PackageName}_package", NonGenericStructName)));
 
         string scope = Scope ?? "public";
         string qualified = $"global::{PackageNamespace}.{PackageName}_package.{StructName}";

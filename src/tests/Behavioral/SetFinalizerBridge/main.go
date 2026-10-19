@@ -18,9 +18,16 @@ import (
 //
 // Both loops are BOUNDED so this reports a verdict either way instead of hanging; Go makes no
 // promptness guarantee, but with explicit runtime.GC() both outcomes are stable (measured 8/8
-// per side before this was written).
+// per side before this was written, at an earlier Go release; see payload for 1.26.9).
 
-type payload struct{ n int }
+// payload is 16 bytes on purpose. A pointer-free object under 16 bytes goes to Go's tiny
+// allocator, which packs several into one 16-byte block, and runtime.SetFinalizer's doc says
+// the finalizer for an unreferenced object in such a block "may never run if it always exists
+// in the same batch as a referenced object". With the earlier 8-byte payload{n int}, Go 1.26.9
+// on linux printed "registered finalizer: DID NOT RUN" in 20 of 20 runs here and in 3 of 5 on
+// another box, so Go's own output was not a stable oracle. At 16 bytes it RAN 20 of 20, as did a
+// pointer-bearing payload, and "cleared" stayed DID NOT RUN 20 of 20 (2026-10-19).
+type payload struct{ n, pad int }
 
 // registered drops the only reference to a finalized object and reports whether it ran.
 func registered() string {

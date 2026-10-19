@@ -601,8 +601,9 @@ on a `[]byte` prints `4 8` in Go and panicked here. It is now an ordinary manage
 into a named slice wrapper's slot through the single convertibility relation. Two details are
 load-bearing: growth **within** the existing capacity writes nothing at all, because Go reaches
 `growslice` only past the capacity and a spurious write would detach any other view still sharing the
-backing store; and the capacity landed on is unspecified in Go (its `growslice` rounds to a size
-class), so only `len+n` is guaranteed and the guard test asserts `cap >= n`, never an exact figure.
+backing store; and the capacity landed on is Go's `growslice` answer, the same function `append` grows
+through ([slices-and-arrays.md](slices-and-arrays.md#append-grows-a-slice-exactly-as-gos-growslice-does)),
+which GolibTests' `GoGrowSliceTests` pins for `reflect.Value.Grow` too. This guard test asserts `cap >= n`.
 
 Guard: `tests/Behavioral/ReflectZeroAndGrow` pins all four against `go run` — raw and named strings,
 raw and named arrays (zero and non-zero, including an array OF named strings), the nil-vs-empty

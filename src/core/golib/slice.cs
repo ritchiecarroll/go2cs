@@ -86,12 +86,16 @@ public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
         if (length + extra <= s.Capacity)
             return this;
 
-        nint capacity = s.Capacity == 0 ? length + extra : s.Capacity;
+        // Go's Value.Grow reaches growslice here (reflect_growslice asks for the old length plus extra), so the
+        // capacity is append's own, and the malloc is charged as growslice's is.
+        // An unnamed array element is sized by value: an element of the slice, else the length the slice
+        // recorded at its creation (a slice that has neither grows unrounded, and is recorded as such).
+        nint[]? elemDims = null;
 
-        while (capacity < length + extra)
-            capacity *= 2;
+        if (GoGrowthFacts<T>.SizedByValue)
+            elemDims = length > 0 ? GoGrowthFacts<T>.ValueDims(s[0]) : GoReflect.SliceElemArrayDims(s);
 
-        // Go's Value.Grow reaches growslice here, which mallocs the new backing; so is this one charged.
+        nint capacity = slice<T>.GrowCapacity(s, length + extra, elemDims);
         T[] backing = AllocationCounter.NewArray<T>(capacity);
 
         // Block copy, not an element loop: encoding/gob's decUint8Slice grows buffers past internal/saferio's 10 MiB
@@ -1509,8 +1513,8 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // `et.Size_ == 0` to bump the length and return the same (zerobase) data pointer — so the
         // whole operation is the length/capacity arithmetic. Doing it here rather than falling
         // through keeps a `make([]struct{}, n)` slice from ever needing storage it has no reason to
-        // own, and keeps the growth rule identical to the backed path so `cap` still agrees with Go
-        // wherever Go's own answer is observable.
+        // own. Go's zero-size growslice returns cap = len, so a grown zero-size slice has exactly
+        // its new length as capacity.
         if (GoZeroSizeFacts<T>.IsZeroSize)
         {
             nint zeroSizeLength = slice.m_length + elems.Length;
@@ -1521,17 +1525,18 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
             // Nil source or beyond capacity: Go reallocates and DETACHES, so the result starts at
             // offset 0 exactly as the backed path's fresh array does.
-            nint zeroSizeCapacity = slice == nil ? elems.Length : CalculateNewCapacity(slice, zeroSizeLength);
-
-            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroSizeLength, zeroSizeCapacity);
+            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroSizeLength, zeroSizeLength);
         }
 
+        // A nil slice grows through growslice like any other: the first backing is the size class of
+        // what was appended (append([]byte(nil), 1) has cap 8), not the exact length.
         if (slice == nil)
         {
-            newArray = AllocationCounter.NewArray<T>(elems.Length);
-            GoMemProfile.Charge<T>(newArray, elems.Length, GoAllocEntry.GrowSlice);
+            nint firstCapacity = GrowCapacity(slice, elems.Length, AppendedElemDims(elems));
+            newArray = AllocationCounter.NewArray<T>(firstCapacity);
+            GoMemProfile.Charge<T>(newArray, firstCapacity, GoAllocEntry.GrowSlice);
             elems.CopyTo(newArray);
-            return new slice<T>(newArray);
+            return new slice<T>(newArray, 0, elems.Length);
         }
 
         if (elems.Length <= slice.Available)
@@ -1566,7 +1571,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // native backing this is the design's §2.3 answer verbatim: the new backing is MANAGED,
         // writes through the grown slice stop reaching the mapping, and the original slice still
         // aliases it. The mapping plays the role of "the old array" in Go's own spec.
-        nint newCapacity = GrowCapacity(slice, slice.Length + elems.Length);
+        nint newCapacity = GrowCapacity(slice, slice.Length + elems.Length, AppendedElemDims(elems));
         newArray = AllocationCounter.NewArray<T>(newCapacity);
         GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
@@ -1609,14 +1614,9 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
                 if (slice != nil && zeroAdded <= slice.Available)
                     return new slice<T>(GoZeroSizeFacts<T>.Storage, slice.m_low, slice.m_low + zeroLength, slice.m_low + slice.m_capacity);
 
-                nint zeroCapacity = slice == nil ? zeroAdded : CalculateNewCapacity(slice, zeroLength);
-
-                // The growth rule's even-rounding wraps past MaxInt for the giant lengths only
-                // zero-size elements can reach — exact need is the honest capacity there.
-                if (zeroCapacity < zeroLength)
-                    zeroCapacity = zeroLength;
-
-                return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroCapacity);
+                // Go's zero-size growslice: cap = len, which also holds for the giant lengths only
+                // zero-size elements can reach.
+                return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroLength);
             }
 
             if (window.m_nativeBase == 0 || window.m_length <= int.MaxValue)
@@ -1641,13 +1641,12 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // "this expression allocates only once". The converter emits `appendꓸꓸꓸ(x, makeꓸꓸꓸ<T>(n))`
     // for it, landing here.
     //
-    // Every arm mirrors what `Append(x, <n zeroes>)` does today, so the rewrite moves no cap() and no
-    // aliasing: the zero-size arm is Append(ISlice)'s (including its exact-need guard for the giant
-    // lengths only zero-size elements reach), a nil x gets an exact-length backing as the span core
-    // gives it, the in-place arm writes the n elements of the SHARED backing -- to zero, as Go clears
-    // them (the region beyond len may hold stale values from an earlier, longer window) -- and the
-    // growing arm takes CalculateNewCapacity and detaches, as the span core does. The one thing that
-    // differs is the make's own backing, which no longer exists.
+    // Every arm mirrors what `Append(x, <n zeroes>)` does, so the rewrite moves no cap() and no
+    // aliasing: the zero-size arm is Append(ISlice)'s (cap = len, Go's zero-size growslice), a nil x
+    // grows through GrowCapacity as the span core's does, the in-place arm writes the n elements of the
+    // SHARED backing -- to zero, as Go clears them (the region beyond len may hold stale values from an
+    // earlier, longer window) -- and the growing arm takes GrowCapacity and detaches, as the span core
+    // does. The one thing that differs is the make's own backing, which no longer exists.
     internal static slice<T> AppendZeroed(in slice<T> slice, nint count)
     {
         if (count == 0)
@@ -1660,21 +1659,17 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             if (slice != nil && count <= slice.Available)
                 return new slice<T>(GoZeroSizeFacts<T>.Storage, slice.m_low, slice.m_low + zeroLength, slice.m_low + slice.m_capacity);
 
-            nint zeroCapacity = slice == nil ? count : CalculateNewCapacity(slice, zeroLength);
-
-            if (zeroCapacity < zeroLength)
-                zeroCapacity = zeroLength;
-
-            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroCapacity);
+            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroLength);
         }
 
         T[] newArray;
 
         if (slice == nil)
         {
-            newArray = AllocationCounter.NewArray<T>(count);
-            GoMemProfile.Charge<T>(newArray, count, GoAllocEntry.GrowSlice);
-            return new slice<T>(newArray);
+            nint firstCapacity = GrowCapacity(slice, count);
+            newArray = AllocationCounter.NewArray<T>(firstCapacity);
+            GoMemProfile.Charge<T>(newArray, firstCapacity, GoAllocEntry.GrowSlice);
+            return new slice<T>(newArray, 0, count);
         }
 
         if (count <= slice.Available)
@@ -1711,49 +1706,61 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return Append(slice, elems.AsSpan());
     }
 
-    // Go's growslice for an element type with storage (CENSUS-golib-int32-narrowings E1): a grown
-    // length no managed T[] can hold is Go's own recoverable "growslice: len out of range", and one
-    // that fits clamps the growth rule's capacity to that ceiling (Go would over-allocate past it;
-    // here that capacity does not exist), so an append that fits never escapes as the CLR's
-    // OutOfMemoryException.
-    internal static nint GrowCapacity(in slice<T> slice, nint neededLength)
+    // Go's growslice for an element type with storage: nextslicecap, then the allocator's size class for
+    // the element's Go size (GoGrowthFacts<T>.RoundUpCapacity), so cap() reads exactly what Go's would after
+    // any growth. A grown length no managed T[] can hold is Go's own recoverable "growslice: len out of
+    // range" (CENSUS-golib-int32-narrowings E1), and one that fits clamps the capacity to that ceiling (Go
+    // would over-allocate past it; here that capacity does not exist), so an append that fits never escapes
+    // as the CLR's OutOfMemoryException.
+    //
+    // elemDims is the array dims of an appended element when T is an unnamed array (GoGrowthFacts<T>.SizedByValue):
+    // array<E> is one C# type for every [N]E, so the Go size comes from the value, never from T. Growth appends
+    // at least one element, and every array<E> value carries its length. AppendZeroed passes none: the converter
+    // never emits `append(x, make(...)...)` for an element whose zero value must be constructed.
+    internal static nint GrowCapacity(in slice<T> slice, nint neededLength, nint[]? elemDims)
     {
         if (neededLength > Array.MaxLength)
             throw RuntimeErrorPanic.GrowSliceLenOutOfRange();
 
-        return Math.Min(CalculateNewCapacity(slice, neededLength), Array.MaxLength);
+        nint newCap = GoGrowthFacts<T>.RoundUpCapacity(neededLength, NextSliceCap(neededLength, slice.Capacity), elemDims);
+
+        return Math.Min(newCap, Array.MaxLength);
     }
 
-    private static nint CalculateNewCapacity(in slice<T> slice, nint neededCapacity)
+    // The growth capacity for a caller with no element to read (an unnamed array element then grows unrounded,
+    // and is recorded as such).
+    internal static nint GrowCapacity(in slice<T> slice, nint neededLength) => GrowCapacity(slice, neededLength, null);
+
+    // The dims GrowCapacity reads for an unnamed array element: those of the first appended element.
+    private static nint[]? AppendedElemDims(ReadOnlySpan<T> elems) =>
+        GoGrowthFacts<T>.SizedByValue ? GoGrowthFacts<T>.ValueDims(elems[0]) : null;
+
+    // Go's nextslicecap (runtime/slice.go): double below 256 elements of capacity, then step by
+    // (newcap + 3*256) / 4, a smooth transition toward x1.25; a need past double the old capacity takes
+    // the need itself.
+    private static nint NextSliceCap(nint newLen, nint oldCap)
     {
-        nint capacity = slice.Capacity;
+        nint newcap = oldCap;
+        nint doublecap = newcap + newcap;
 
-        if (capacity > 1 && capacity % 2 != 0)
-            capacity++;
+        if (newLen > doublecap)
+            return newLen;
 
-        nint doubleCapacity = capacity + capacity;
+        const nint threshold = 256;
 
-        if (neededCapacity > doubleCapacity)
+        if (oldCap < threshold)
+            return doublecap;
+
+        while (true)
         {
-            if (neededCapacity % 2 != 0)
-                neededCapacity++;
+            newcap += (newcap + 3 * threshold) >> 2;
 
-            capacity = neededCapacity;
-        }
-        else
-        {
-            if (slice.Length < 1024)
-            {
-                capacity = doubleCapacity;
-            }
-            else
-            {
-                while (capacity < neededCapacity)
-                    capacity += capacity / 4;
-            }
+            // Also true when newcap overflowed, since newLen is positive.
+            if ((nuint)newcap >= (nuint)newLen)
+                break;
         }
 
-        return capacity;
+        return newcap <= 0 ? newLen : newcap;
     }
 }
 

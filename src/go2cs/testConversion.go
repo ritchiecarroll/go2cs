@@ -7165,25 +7165,33 @@ func testPublishTimeout(options Options) time.Duration {
 // captured output (on stderr), and the exit code is the build's. Measured 2026-10-07 (SDK 10, a project whose
 // BaseOutputPath is redirected as a -recurse props does): the redirected path printed on success, and on a compile
 // error the CS line with exit 1.
+//
+// With -test-build-maxcpu N the publish carries -m:N, capping its MSBuild nodes; unset, it carries no -m and MSBuild
+// uses one node per logical processor. This publish is the only dotnet command a -tests run starts, so the flag caps
+// every build the pipeline does.
 func publishTestHostArgs(outputPath, testProject string, options Options) []string {
 	publishDir := filepath.Join(outputPath, "bin", "tests", "publish")
 
-	var targetOS []string
+	var buildArgs []string
 
 	if goos := goosOfTarget(options.targetPlatform); goos != "" {
-		targetOS = []string{"-p:GoTargetOS=" + goos}
+		buildArgs = []string{"-p:GoTargetOS=" + goos}
+	}
+
+	if options.testBuildMaxCPU > 0 {
+		buildArgs = append(buildArgs, "-m:"+strconv.Itoa(options.testBuildMaxCPU))
 	}
 
 	if options.testConfig == "Release" {
 		go2csPathArg := strings.TrimRight(filepath.ToSlash(options.go2csPath), "/") + "/"
 		args := []string{"publish", testProject, "-c", "Release", "-p:go2csPath=" + go2csPathArg}
 
-		return append(append(args, targetOS...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
+		return append(append(args, buildArgs...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
 	}
 
 	args := []string{"publish", testProject, "-c", "Debug"}
 
-	return append(append(args, targetOS...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
+	return append(append(args, buildArgs...), "-o", publishDir, "-getProperty:"+publishTargetPathProperty)
 }
 
 // withPublishBinlog appends `-bl:<binlog>` to a publish argument list when a binlog path is given, and
