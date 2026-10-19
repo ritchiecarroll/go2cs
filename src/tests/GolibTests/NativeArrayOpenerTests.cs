@@ -101,6 +101,7 @@ public unsafe class NativeArrayOpenerTests
             reflect.ΔType type = reflect.ArrayOf(2, reflect.PointerTo(reflect.TypeFor<double>()));
             PanicException refusal = Assert.ThrowsException<PanicException>(() => reflect.NewAt(type, (uintptr)(nuint)block));
 
+            StringAssert.StartsWith(refusal.Message, "go2cs: native pointer array: ", "a refusal Go never raises carries go2cs:");
             StringAssert.Contains(refusal.Message, "*[2]*float64", "the refusal names the array and its element");
             StringAssert.Contains(refusal.Message, "no reader for it was compiled");
         }
@@ -141,7 +142,7 @@ public unsafe class NativeArrayOpenerTests
         {
             PanicException refusal = Assert.ThrowsException<PanicException>(() => NativeArrayPointer<ж<Unregistered>>((nuint)block, 2));
 
-            StringAssert.Contains(refusal.Message, "native pointer array: *[2]*");
+            StringAssert.StartsWith(refusal.Message, "go2cs: native pointer array: *[2]*");
             StringAssert.Contains(refusal.Message, "no reader for it was compiled");
         }
         finally
@@ -159,7 +160,7 @@ public unsafe class NativeArrayOpenerTests
 
         PanicException refusal = Assert.ThrowsException<PanicException>(() => record.at<Unregistered>(Record.ᏑCells, 0));
 
-        StringAssert.Contains(refusal.Message, "native array field: a [2]");
+        StringAssert.StartsWith(refusal.Message, "go2cs: native array field: a [2]");
         StringAssert.Contains(refusal.Message, "no window for it was compiled");
     }
 }

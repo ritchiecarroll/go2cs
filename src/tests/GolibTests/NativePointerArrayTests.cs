@@ -126,15 +126,15 @@ public unsafe class NativePointerArrayTests
 
             // A native pointer is refused as a managed one is: the producer owns the memory.
             words.ElementRef(1) = (ж<int>)(uintptr)(nuint)(block + 32);
-            StringAssert.Contains(Assert.ThrowsException<PanicException>(() => words.ElementRef(1)).Message, "stored into through an element");
+            StringAssert.Contains(goRefusal(() => words.ElementRef(1)).Message, "stored into through an element");
             Assert.AreEqual((nint)0, *(nint*)(block + 8), "the refused store reached the word");
 
             words.ElementRef(0) = builtin.Ꮡ(7);
-            StringAssert.Contains(Assert.ThrowsException<PanicException>(() => words.ElementRef(0)).Message, "Go forbids a Go pointer there");
+            StringAssert.Contains(goRefusal(() => words.ElementRef(0)).Message, "Go forbids a Go pointer there");
             Assert.AreEqual((nint)0, *(nint*)block, "the refused store reached the word");
 
             // The whole array cannot be served without reading every word.
-            StringAssert.Contains(Assert.ThrowsException<PanicException>(() => words.Value).Message, "did not allocate");
+            StringAssert.Contains(goRefusal(() => words.Value).Message, "did not allocate");
         }
         finally
         {
@@ -156,7 +156,7 @@ public unsafe class NativePointerArrayTests
 
             view[1] = builtin.Ꮡ(9);
 
-            StringAssert.Contains(Assert.ThrowsException<PanicException>(() => words.ElementRef(2)).Message, "through a slice of the array");
+            StringAssert.Contains(goRefusal(() => words.ElementRef(2)).Message, "through a slice of the array");
             Assert.AreEqual((nint)0, *(nint*)(block + 16), "the refused store reached the word");
 
             // A word the slice does not cover still reads.
@@ -179,6 +179,7 @@ public unsafe class NativePointerArrayTests
             view[0] = builtin.Ꮡ(3);
 
             PanicException refused = Assert.ThrowsException<PanicException>(() => GoForeignMemory.Release((nuint)block, 64));
+            StringAssert.StartsWith(refused.Message, "go2cs: ");
             StringAssert.Contains(refused.Message, "through a slice of the array");
             Assert.AreEqual((nint)0, *(nint*)block, "the refused store reached the word");
 
@@ -203,7 +204,7 @@ public unsafe class NativePointerArrayTests
             ж<array<@string>> strings = builtin.NativeArrayPointer<@string>((nuint)block, 2);
 
             Assert.AreEqual((nuint)block, strings.NativeAddress, "the address stays the block's");
-            StringAssert.Contains(Assert.ThrowsException<PanicException>(() => strings.Value).Message, "did not allocate");
+            StringAssert.Contains(goRefusal(() => strings.Value).Message, "did not allocate");
         }
         finally
         {
@@ -234,6 +235,14 @@ public unsafe class NativePointerArrayTests
         }
 
         Assert.IsFalse(GoOsMemory.Owns(@base + 2 * page));
+    }
+
+    // A refusal Go never raises is go2cs's, and says so (the C1 ruling: every go2cs refusal carries go2cs:).
+    private static PanicException goRefusal(Func<object?> action)
+    {
+        PanicException refusal = Assert.ThrowsException<PanicException>(action);
+        StringAssert.StartsWith(refusal.Message, "go2cs: ");
+        return refusal;
     }
 
     // The tests' own producer release: what a seam does before it frees.
@@ -273,6 +282,7 @@ public unsafe class NativePointerArrayTests
 
             ж<array<ж<int>>> released = builtin.NativeArrayPointer<ж<int>>(block, 4);
             PanicException foreign = Assert.ThrowsException<PanicException>(() => released.Value);
+            StringAssert.StartsWith(foreign.Message, "go2cs: ");
             StringAssert.Contains(foreign.Message, "did not allocate");
         }
         finally

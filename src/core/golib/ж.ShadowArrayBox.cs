@@ -95,7 +95,7 @@ internal sealed class ShadowArrayBox<T> : ж<array<T>>
     internal static ж<array<T>> Over(nuint nativeAddress, nint length)
     {
         if (length < 0)
-            throw new PanicException($"native-shadowed array: negative length {length}");
+            throw new PanicException($"go2cs: native-shadowed array: negative length {length}");
 
         return nativeAddress == 0 ? ж<array<T>>.NilBox : new ShadowArrayBox<T>(nativeAddress, length);
     }
@@ -125,7 +125,7 @@ internal sealed class ShadowArrayBox<T> : ж<array<T>>
     }
 
     private PanicException foreignRefused() =>
-        new($"native-shadowed array at 0x{m_nativeAddr:x}: a *[N]{typeof(T).Name} over memory the Go runtime did not " +
+        new($"go2cs: native-shadowed array at 0x{m_nativeAddr:x}: a *[N]{typeof(T).Name} over memory the Go runtime did not " +
             "allocate holds data whose element type carries managed references, which no managed store can read " +
             "from native bytes; if this memory is the runtime's own, its mapping missed registration in GoOsMemory");
 

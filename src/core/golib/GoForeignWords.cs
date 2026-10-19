@@ -178,7 +178,7 @@ internal static class GoForeignWords
 
     /// <summary>The refusal of a store made through <paramref name="through"/> into the word at <paramref name="word"/>.</summary>
     internal static PanicException StoreRefused(nuint word, string through) =>
-        new($"native pointer array: the word at 0x{word:x} was stored into through {through}; it is memory the Go " +
+        new($"go2cs: native pointer array: the word at 0x{word:x} was stored into through {through}; it is memory the Go " +
             "runtime did not allocate, read as its producer's and immutable until the producer releases it, so " +
             "the store is refused rather than lost (Go forbids a Go pointer there, and the C memory is its producer's)");
 }

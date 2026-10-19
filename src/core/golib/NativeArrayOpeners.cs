@@ -54,13 +54,13 @@ public static class NativeArrayOpeners
     internal static object OpenPointerArray(Type element, nuint address, nint length) =>
         s_pointerArrays.TryGetValue(element, out Func<nuint, nint, object>? open)
             ? open(address, length)
-            : throw new PanicException($"native pointer array: *[{length}]*{GoTypeName(element)} over memory the Go runtime did not allocate: this build never spells *[N]*{GoTypeName(element)}, so no reader for it was compiled");
+            : throw new PanicException($"go2cs: native pointer array: *[{length}]*{GoTypeName(element)} over memory the Go runtime did not allocate: this build never spells *[N]*{GoTypeName(element)}, so no reader for it was compiled");
 
     /// <summary>A <c>*[length]X</c> over the native memory at <paramref name="address"/>.</summary>
     internal static object OpenArray(Type element, nuint address, nint length) =>
         s_arrays.TryGetValue(element, out Func<nuint, nint, object>? open)
             ? open(address, length)
-            : throw new PanicException($"native array field: a [{length}]{GoTypeName(element)} field of a struct in native memory: this build declares no [N]{GoTypeName(element)} field, so no window for it was compiled");
+            : throw new PanicException($"go2cs: native array field: a [{length}]{GoTypeName(element)} field of a struct in native memory: this build declares no [N]{GoTypeName(element)} field, so no window for it was compiled");
 
     // The element as Go spells it (`main.E`, `*uint16`): reflect's own type string.
     private static string GoTypeName(Type type) => GoReflect.GoTypeName(type);

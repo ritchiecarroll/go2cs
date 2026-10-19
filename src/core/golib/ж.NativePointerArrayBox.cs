@@ -77,7 +77,7 @@ internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordAr
     internal static ж<array<ж<E>>> Over(nuint nativeAddress, nint length)
     {
         if (length < 0)
-            throw new PanicException($"native pointer array: negative length {length}");
+            throw new PanicException($"go2cs: native pointer array: negative length {length}");
 
         return nativeAddress == 0 ? NilBox : new NativePointerArrayBox<E>(nativeAddress, length);
     }
@@ -99,7 +99,7 @@ internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordAr
     object? IGoReflectBox.ReadBoxSlot() => m_words.Clone();
 
     private PanicException noMaterializableArray() =>
-        new($"native pointer array at 0x{m_nativeAddr:x}: a *[{m_words.Length}]*{typeof(E).Name} over memory the Go runtime " +
+        new($"go2cs: native pointer array at 0x{m_nativeAddr:x}: a *[{m_words.Length}]*{typeof(E).Name} over memory the Go runtime " +
             "did not allocate has no array<T> to dereference (serving one would read every word); read its elements " +
             "through p[i]'s element door or a slice of it, and if this memory is the runtime's own, its allocation " +
             "missed registration in GoOsMemory");
