@@ -11,13 +11,9 @@ using path;
 partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string statlayouttruthˢ = "statlayouttruth"u8;
 private static readonly object mkdirTempErrorˢ = (@string)"MkdirTemp error:"u8;
-private static readonly @string subˢ = "sub"u8;
 private static readonly object mkdirErrorˢ = (@string)"Mkdir error:"u8;
-private static readonly @string aTxtˢ = "a.txt"u8;
 private static readonly object writeFileErrorˢ = (@string)"WriteFile error:"u8;
-private static readonly @string bTxtˢ = "b.txt"u8;
 private static readonly object statDirErrorˢ = (@string)"Stat dir error:"u8;
 private static readonly object statDirIsDirˢ = (@string)"stat dir: IsDir ="u8;
 private static readonly object isRegularˢ = (@string)"IsRegular ="u8;
@@ -32,7 +28,6 @@ private static readonly object lstatFileSizeˢ = (@string)"lstat file: Size ="u8
 private static readonly object openErrorˢ = (@string)"Open error:"u8;
 private static readonly object fileStatErrorˢ = (@string)"File.Stat error:"u8;
 private static readonly object fstatSizeˢ = (@string)"fstat: Size ="u8;
-private static readonly @string txtˢ = "*.txt"u8;
 private static readonly object globTxtˢ = (@string)"glob *.txt:"u8;
 private static readonly object readdirˢ = (@string)"readdir:"u8;
 private static readonly object entryˢ = (@string)"  entry:"u8;
@@ -49,14 +44,14 @@ private static readonly object gidCallableˢ = (@string)"gid callable:"u8;
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
-        var (dir, err) = os.MkdirTemp(""u8, statlayouttruthˢ);
+        var (dir, err) = os.MkdirTemp("", "statlayouttruth");
         if (err != default!) {
             fmt.Println(mkdirTempErrorˢ, err);
             return;
         }
         defer(os.RemoveAll, dir, ref ᒐ);
 
-        @string sub = filepath.Join(dir, subˢ);
+        @string sub = filepath.Join(dir, "sub");
         {
             var errΔ1 = os.Mkdir(sub, 493); if (errΔ1 != default!) {
                 fmt.Println(mkdirErrorˢ, errΔ1);
@@ -64,7 +59,7 @@ internal static void Main() {
             }
         }
         var payload = slice<byte>("0123456789abcdef"u8);
-        @string @file = filepath.Join(dir, aTxtˢ);
+        @string @file = filepath.Join(dir, "a.txt");
         {
             var errΔ2 = os.WriteFile(@file, payload, 420); if (errΔ2 != default!) {
                 fmt.Println(writeFileErrorˢ, errΔ2);
@@ -72,7 +67,7 @@ internal static void Main() {
             }
         }
         {
-            var errΔ3 = os.WriteFile(filepath.Join(sub, bTxtˢ), payload[..5], 420); if (errΔ3 != default!) {
+            var errΔ3 = os.WriteFile(filepath.Join(sub, "b.txt"), payload[..5], 420); if (errΔ3 != default!) {
                 fmt.Println(writeFileErrorˢ, errΔ3);
                 return;
             }
@@ -113,7 +108,7 @@ internal static void Main() {
         }
         fmt.Println(fstatSizeˢ, fi.Size(), isRegularˢ, fi.Mode().IsRegular());
 
-        (var matches, err) = filepath.Glob(filepath.Join(dir, txtˢ));
+        (var matches, err) = filepath.Glob(filepath.Join(dir, "*.txt"));
         fmt.Println(globTxtˢ, len(matches), err);
 
         (var entries, err) = os.ReadDir(dir);

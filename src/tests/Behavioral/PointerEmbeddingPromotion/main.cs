@@ -31,12 +31,12 @@ partial struct top {
 }
 
 internal static void Main() {
-    var h = new holder(leaf: Ꮡ(new leaf(n: 0)), tag: "h"u8);
+    var h = new holder(leaf: Ꮡ(new leaf(n: 0)), tag: "h");
     h.bump();
     h.bump();
     fmt.Println(h.get(), h.n, h.tag);
 
-    var t = new top(mid: new mid(leaf: Ꮡ(new leaf(n: 10))), label: "t"u8);
+    var t = new top(mid: new mid(leaf: Ꮡ(new leaf(n: 10))), label: "t");
     t.bump();
     fmt.Println(t.get(), t.n, t.label);
 }

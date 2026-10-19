@@ -21,8 +21,8 @@ public static @string Show(describer d) {
 }
 
 internal static void Main() {
-    fmt.Println(Show(new Label(text: "A"u8)));
-    fmt.Println(Show(new Label(text: "B"u8)));
+    fmt.Println(Show(new Label(text: "A")));
+    fmt.Println(Show(new Label(text: "B")));
 }
 
 } // end main_package

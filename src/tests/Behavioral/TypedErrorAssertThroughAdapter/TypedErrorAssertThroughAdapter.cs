@@ -25,7 +25,7 @@ internal static error pointerSourced() {
 }
 
 internal static error valueSourced() {
-    return new valErr(tag: "v"u8);
+    return new valErr(tag: "v");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -59,11 +59,8 @@ partial struct fieldsTagged {
 partial struct speaker {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string speakerˢ = "speaker"u8;
-
 internal static @string String(this speaker _) {
-    return speakerˢ;
+    return "speaker";
 }
 
 partial struct mute {

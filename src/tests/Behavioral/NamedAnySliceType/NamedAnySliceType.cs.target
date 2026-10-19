@@ -19,9 +19,9 @@ internal static @string describe(this SE s) {
 
 internal static void Main() {
     var rows = new row[]{
-        new("%d"u8, new SE(new any[]{(nint)(1)}.slice())),
-        new("%d %s"u8, new SE(new any[]{(nint)(2), (@string)"two"u8}.slice())),
-        new("%6.2f"u8, new SE(new any[]{12.0D}.slice()))
+        new("%d", new SE(new any[]{(nint)(1)}.slice())),
+        new("%d %s", new SE(new any[]{(nint)(2), (@string)"two"u8}.slice())),
+        new("%6.2f", new SE(new any[]{12.0D}.slice()))
     }.slice();
     foreach (var (_, r) in rows) {
         fmt.Printf(r.format + "\n"u8, r.val.ꓸꓸꓸ);

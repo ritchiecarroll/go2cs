@@ -23,7 +23,6 @@ internal static Action makeGreeter(@string name) {
 private static readonly object deferredˢ = (@string)"deferred"u8;
 private static readonly object bodyˢ = (@string)"body"u8;
 private static readonly object closureRecoveredˢ = (@string)"closure recovered:"u8;
-private static readonly @string go2csˢ = "go2cs"u8;
 private static readonly object argClosureDeferredˢ = (@string)"arg-closure deferred"u8;
 private static readonly object argClosureBodyˢ = (@string)"arg-closure body"u8;
 private static readonly object outerRecoveredˢ = (@string)"outer recovered:"u8;
@@ -98,7 +97,7 @@ internal static void Main() {
     }
     fmt.Println(counted());
 
-    var greet = makeGreeter(go2csˢ);
+    var greet = makeGreeter("go2cs");
     greet();
 
     void run(Action fn) {
@@ -153,7 +152,7 @@ partial struct task {
 
 internal static ж<task> makeTask(nint @base) {
     nint bonus = @base * 2;
-    return Ꮡ(new task(fn: () => bonus + 1, name: "t"u8));
+    return Ꮡ(new task(fn: () => bonus + 1, name: "t"));
 }
 
 } // end main_package

@@ -28,26 +28,14 @@ internal static nint valInt(nint v, @string tag) {
     return v;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sendChanˢ = "1:send-chan"u8;
-private static readonly @string sendValˢ = "2:send-val"u8;
-private static readonly @string recvChanˢ = "3:recv-chan"u8;
-private static readonly @string byteChanˢ = "1:byte-chan"u8;
-private static readonly @string recvChanˢ2 = "2:recv-chan"u8;
-private static readonly @string anyChanˢ = "3:any-chan"u8;
-private static readonly @string anyValˢ = "4:any-val"u8;
-private static readonly @string recvChanˢ3 = "1:recv-chan"u8;
-private static readonly @string sendChanˢ2 = "2:send-chan"u8;
-private static readonly @string sendValˢ2 = "3:send-val"u8;
-
 internal static void Main() {
     var full = new channel<nint>(1);
     full.ᐸꟷ(1);
     var ready = new channel<nint>(1);
     ready.ᐸꟷ(42);
     nint got = 0;
-    var selᴛ1 = chanInt(full, sendChanˢ).ᐸꟷ(valInt(9, sendValˢ), ꓸꓸꓸ);
-    var selᴛ2 = chanInt(ready, recvChanˢ);
+    var selᴛ1 = chanInt(full, "1:send-chan").ᐸꟷ(valInt(9, "2:send-val"), ꓸꓸꓸ);
+    var selᴛ2 = chanInt(ready, "3:recv-chan");
     switch (select(selᴛ1, ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0: {
         got = -1;
@@ -64,9 +52,9 @@ internal static void Main() {
     var fullAny = new channel<any>(1);
     fullAny.ᐸꟷ((@string)"x"u8);
     nint hit = 0;
-    var selᴛ3 = chanByte(fullBytes, byteChanˢ).ᐸꟷ(200, ꓸꓸꓸ);
-    var selᴛ4 = chanInt(noPeer, recvChanˢ2);
-    var selᴛ5 = chanAny(fullAny, anyChanˢ).ᐸꟷ(valInt(3, anyValˢ), ꓸꓸꓸ);
+    var selᴛ3 = chanByte(fullBytes, "1:byte-chan").ᐸꟷ(200, ꓸꓸꓸ);
+    var selᴛ4 = chanInt(noPeer, "2:recv-chan");
+    var selᴛ5 = chanAny(fullAny, "3:any-chan").ᐸꟷ(valInt(3, "4:any-val"), ꓸꓸꓸ);
     switch (trySelect(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ), selᴛ5)) {
     case 0: {
         hit = 1;
@@ -89,8 +77,8 @@ internal static void Main() {
     var room = new channel<nint>(1);
     var blocked = new channel<nint>(0);
     nint which = 0;
-    var selᴛ6 = chanInt(room, sendChanˢ).ᐸꟷ(valInt(7, sendValˢ), ꓸꓸꓸ);
-    var selᴛ7 = chanInt(blocked, recvChanˢ);
+    var selᴛ6 = chanInt(room, "1:send-chan").ᐸꟷ(valInt(7, "2:send-val"), ꓸꓸꓸ);
+    var selᴛ7 = chanInt(blocked, "3:recv-chan");
     switch (select(selᴛ6, ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
     case 0: {
         which = 1;
@@ -108,8 +96,8 @@ internal static void Main() {
     var sink = new channel<nint>(1);
     sink.ᐸꟷ(1);
     nint v = 0;
-    var selᴛ8 = chanInt(src, recvChanˢ3);
-    var selᴛ9 = chanInt(sink, sendChanˢ2).ᐸꟷ(valInt(8, sendValˢ2), ꓸꓸꓸ);
+    var selᴛ8 = chanInt(src, "1:recv-chan");
+    var selᴛ9 = chanInt(sink, "2:send-chan").ᐸꟷ(valInt(8, "3:send-val"), ꓸꓸꓸ);
     switch (select(ᐸꟷ(selᴛ8, ꓸꓸꓸ), selᴛ9)) {
     case 0 when selᴛ8.ꟷᐳ(out v): {
         break;

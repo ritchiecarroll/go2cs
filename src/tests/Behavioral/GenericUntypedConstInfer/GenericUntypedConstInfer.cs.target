@@ -111,7 +111,7 @@ internal static void Main() {
     wantValue((rune)'a')(r, false);
     wantValue((rune)'q')(r, true);
 
-    @string s = "hi"u8;
+    @string s = "hi";
     wantValue((@string)"")(s, false);
     wantValue((@string)"hi")(s, true);
 
@@ -124,7 +124,7 @@ internal static void Main() {
     wantValue((nint)((1 << (int)(10))))((1 << (int)(10)), true);
 
     fmt.Println(sliceˢ, sliceOf((nint)(9)));
-    fmt.Println(mapˢ, mapTo(oneˢ, (nint)(1))[oneˢ]);
+    fmt.Println(mapˢ, mapTo(oneˢ, (nint)(1))["one"]);
     fmt.Println(chanˢ, ᐸꟷ(chanOf((nint)(11))));
 
     wantLike((byte)0, (byte)(3))(3, true);

@@ -12,12 +12,12 @@ internal partial struct main_type /*dyn*/ {
 }
 
 internal static void Main() {
-    var ta = Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8));
+    var ta = Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix"));
 
     array<main_type> connAddrs = new main_type[]{
         new(new addrlib.UnixAddrжAddr(ta), new addrlib.UnixAddrжAddr(ta)),
-        new(new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8))), new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8)))),
-        new(new addrlib.UnixAddrжAddr(ta), new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8))))
+        new(new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix"))), new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix")))),
+        new(new addrlib.UnixAddrжAddr(ta), new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix"))))
     }.array();
 
     foreach (var (i, ca) in connAddrs.ΔRangeSnapshot()) {
