@@ -32,9 +32,7 @@ internal static void show(@string label, slice<item> items) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string roundTripˢ = "round trip"u8;
 private static readonly object lenˢ = (@string)"len:"u8;
-private static readonly @string afterWriteThroughˢ = "after write through"u8;
 private static readonly object identityˢ = (@string)"identity:"u8;
 private static readonly object tailIdentityˢ = (@string)"tail identity:"u8;
 private static readonly object tailHeadˢ = (@string)"tail head:"u8;
@@ -45,14 +43,14 @@ private static readonly object bytesˢ = (@string)"bytes:"u8;
 private static readonly object bytesTailˢ = (@string)"bytes tail:"u8;
 
 internal static void Main() {
-    var items = new item[]{new("a"u8, 1), new("b"u8, 2), new("c"u8, 3)}.slice();
+    var items = new item[]{new("a", 1), new("b", 2), new("c", 3)}.slice();
 
     var g = newGroup(items);
-    show(roundTripˢ, g.items());
+    show("round trip", g.items());
     fmt.Println(lenˢ, len(g.items()));
 
     g.items()[1].val = 20;
-    show(afterWriteThroughˢ, items);
+    show("after write through", items);
 
     fmt.Println(identityˢ, @unsafe.SliceData(items) == Ꮡ(items, 0));
     var tail = items[1..];

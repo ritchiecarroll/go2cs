@@ -8,16 +8,13 @@ partial struct holder {
     internal any value;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noneˢ = "none"u8;
-
 internal static @string sprint(any x) {
     switch (x.type()) {
     case @string v: {
         return "str:"u8 + v;
     }
     case null: {
-        return noneˢ;
+        return "none";
     }
     default: {
         var v = x;

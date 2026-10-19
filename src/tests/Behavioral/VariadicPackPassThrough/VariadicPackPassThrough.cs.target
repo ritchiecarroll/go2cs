@@ -93,7 +93,6 @@ private static readonly object sumˢ = (@string)"sum:"u8;
 private static readonly object gatherˢ = (@string)"gather:"u8;
 private static readonly object fillˢ = (@string)"fill:"u8;
 private static readonly object describeˢ = (@string)"describe:"u8;
-private static readonly @string dSVˢ = "%d-%s-%v"u8;
 private static readonly object twoˢ = (@string)"two"u8;
 private static readonly object intoˢ = (@string)"into:"u8;
 private static readonly object copyIntoˢ = (@string)"copyInto:"u8;
@@ -113,7 +112,7 @@ internal static void Main() {
     nint n = fill(d, 8, 9, 10);
     fmt.Println(fillˢ, n, d);
 
-    fmt.Println(describeˢ, describe(dSVˢ, (nint)(1), twoˢ, 3.5D));
+    fmt.Println(describeˢ, describe("%d-%s-%v", (nint)(1), twoˢ, 3.5D));
 
     fmt.Println(intoˢ, into(1, 2));
     fmt.Println(copyIntoˢ, copyInto(1, 2, 3));

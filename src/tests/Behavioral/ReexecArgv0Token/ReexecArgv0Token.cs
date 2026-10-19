@@ -12,11 +12,10 @@ partial class main_package {
 internal static readonly @string token = "argv0-token-7f3a"u8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string argv0Depthˢ = "ARGV0_DEPTH"u8;
 private static readonly object osExecutableˢ = (@string)"os.Executable:"u8;
 
 internal static void Main() {
-    var (depth, _) = strconv.Atoi(Δos.Getenv(argv0Depthˢ));
+    var (depth, _) = strconv.Atoi(Δos.Getenv("ARGV0_DEPTH"));
     if (depth > 3) {
         fmt.Printf("depth %d: REFUSED (cap)\n"u8, depth);
         Δos.Exit(3);
@@ -35,7 +34,7 @@ internal static void Main() {
     }
     var cmd = exec.Command(exe);
     cmd.Value.Path = exe;
-    cmd.Value.Args = new @string[]{token, "-marker"u8, "x"u8}.slice();
+    cmd.Value.Args = new @string[]{token, "-marker", "x"}.slice();
     cmd.Value.Env = append(Δos.Environ(), "ARGV0_DEPTH="u8 + strconv.Itoa(depth + 1));
     (var @out, err) = cmd.CombinedOutput();
     fmt.Print(((@string)@out));
@@ -46,7 +45,7 @@ internal static void Main() {
 
 internal static @string tail(@string s) {
     {
-        nint i = strings.LastIndex(s, "/"u8); if (i >= 0) {
+        nint i = strings.LastIndex(s, "/"); if (i >= 0) {
             return s.slice(i + 1);
         }
     }

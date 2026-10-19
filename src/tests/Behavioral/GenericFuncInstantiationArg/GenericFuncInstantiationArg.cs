@@ -37,7 +37,7 @@ private static readonly object controlˢ = (@string)"control:"u8;
 
 internal static void Main() {
     var pf = pick<@string>;
-    fmt.Println(controlˢ, reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(new @string[]{"a"u8, "b"u8, "c"u8}.slice()));
+    fmt.Println(controlˢ, reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(new @string[]{"a", "b", "c"}.slice()));
 
     fmt.Println(reflect.TypeOf(pick<@string>).String());
     fmt.Println(reflect.TypeOf(pair<@string, nint>).String());

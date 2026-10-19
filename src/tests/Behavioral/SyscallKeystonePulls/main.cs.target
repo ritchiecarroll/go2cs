@@ -14,9 +14,7 @@ partial class main_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object lookPathGoErrorˢ = (@string)"LookPath(go): error:"u8;
 private static readonly object lookPathGoˢ = (@string)"LookPath(go):"u8;
-private static readonly @string exeˢ = ".exe"u8;
 private static readonly object absoluteˢ = (@string)"absolute:"u8;
-private static readonly @string noSuchExecutableGo2csˢ = "no-such-executable-go2cs-keystone"u8;
 private static readonly object lookPathMissingErrorˢ = (@string)"LookPath(missing): error:"u8;
 private static readonly object doneˢ = (@string)"done"u8;
 private static readonly object userCurrentErrorˢ = (@string)"user.Current: error:"u8;
@@ -31,14 +29,14 @@ private static readonly object userLookupGroupNameErrorˢ = (@string)"user.Looku
 private static readonly object gidRoundTripsˢ = (@string)"gid round-trips:"u8;
 
 internal static void Main() {
-    var (p, err) = exec.LookPath("go"u8);
+    var (p, err) = exec.LookPath("go");
     if (err != default!){
         fmt.Println(lookPathGoErrorˢ, err);
     } else {
-        fmt.Println(lookPathGoˢ, strings.TrimSuffix(filepath.Base(p), exeˢ), absoluteˢ, filepath.IsAbs(p));
+        fmt.Println(lookPathGoˢ, strings.TrimSuffix(filepath.Base(p), ".exe"), absoluteˢ, filepath.IsAbs(p));
     }
 
-    (_, err) = exec.LookPath(noSuchExecutableGo2csˢ);
+    (_, err) = exec.LookPath("no-such-executable-go2cs-keystone");
     fmt.Println(lookPathMissingErrorˢ, err != default!);
 
     if (runtime.GOOS != "darwin"u8) {

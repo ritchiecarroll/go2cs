@@ -40,7 +40,7 @@ internal static @string useReadCloser(ReadCloser rc) {
 }
 
 internal static void Main() {
-    var f = new myFile(data: "x"u8);
+    var f = new myFile(data: "x");
     fmt.Println(useCloser(f));
     fmt.Println(useReadCloser(f));
 }

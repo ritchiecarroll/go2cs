@@ -9,7 +9,7 @@ partial struct loc {
     internal nint offset;
 }
 
-internal static ж<loc> ᏑutcLoc = new StandardBox<loc>(new loc(name: "UTC"u8, offset: 0));
+internal static ж<loc> ᏑutcLoc = new StandardBox<loc>(new loc(name: "UTC", offset: 0));
 internal static ref loc utcLoc => ref ᏑutcLoc.Value;
 
 internal static ж<loc> get(this ж<loc> Ꮡl) {
@@ -58,7 +58,7 @@ private static readonly object recoveredˢ = (@string)"recovered"u8;
 
 internal static void Main() {
     ж<loc> nilLoc = default!;
-    var real = Ꮡ(new loc(name: "MST"u8, offset: -7));
+    var real = Ꮡ(new loc(name: "MST", offset: -7));
 
     var (ᴛ1, ᴛ2) = nilLoc.lookup(3);
     fmt.Println(ᴛ1, ᴛ2);
@@ -68,9 +68,9 @@ internal static void Main() {
     fmt.Println(span(nilLoc, 10));
     fmt.Println(span(real, 10));
 
-    fmt.Println(nilLoc.rename("!"u8));
+    fmt.Println(nilLoc.rename("!"));
     fmt.Println(utcLoc.name);
-    fmt.Println(real.rename("?"u8));
+    fmt.Println(real.rename("?"));
     fmt.Println((~real).name);
 
     fmt.Println(real.firstUseReads());

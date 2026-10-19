@@ -71,7 +71,7 @@ public static void Add<T>(this ref Box<T> b, T t)
 public static @string Names<T>(this ref Box<T> b)
     where T : Box_T
 {
-    @string @out = ""u8;
+    @string @out = "";
     foreach (var (_, it) in b.items) {
         @out += it.Name() + ";"u8;
     }
@@ -136,18 +136,18 @@ public static T Min<T>(T a, T b)
 }
 
 internal static void Main() {
-    fmt.Println(Show(new namer("x"u8)));
-    fmt.Println(show(new namer("y"u8)));
-    fmt.Println(Label(new tagged("t"u8, 7)));
+    fmt.Println(Show(new namer("x")));
+    fmt.Println(show(new namer("y")));
+    fmt.Println(Label(new tagged("t", 7)));
 
     var b = Ꮡ(new Box<namer>(nil));
-    b.Add(new namer("a"u8));
-    b.Add(new namer("b"u8));
+    b.Add(new namer("a"));
+    b.Add(new namer("b"));
     fmt.Println(b.Names());
 
-    fmt.Println(new pair<tagged>(new tagged("p"u8, 1), new tagged("q"u8, 2)).joined());
-    fmt.Println(new slot<tagged>(new tagged("s"u8, 9)).get());
-    fmt.Println(Both(new namer("n"u8), new tagged("m"u8, 0), new tagged("k"u8, 3)));
+    fmt.Println(new pair<tagged>(new tagged("p", 1), new tagged("q", 2)).joined());
+    fmt.Println(new slot<tagged>(new tagged("s", 9)).get());
+    fmt.Println(Both(new namer("n"), new tagged("m", 0), new tagged("k", 3)));
 
     fmt.Println(Min(((age)5), ((age)3)));
     fmt.Println(new Ord<age>(v: 3).Below(5), new Ord<age>(v: 3).Below(2));

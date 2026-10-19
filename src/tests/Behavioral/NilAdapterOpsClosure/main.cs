@@ -39,29 +39,25 @@ internal static void @try(@string label, Action f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string equalityˢ = "equality"u8;
-private static readonly @string mapHashˢ = "map-hash"u8;
 private static readonly object storedOkˢ = (@string)"stored ok"u8;
-private static readonly @string reflectSetˢ = "reflect-set"u8;
 private static readonly object setOkDestNilˢ = (@string)"set ok, dest == nil:"u8;
-private static readonly @string methodValueCallˢ = "method-value-call"u8;
 private static readonly object gotMethodValueKindˢ = (@string)"got method value, kind:"u8;
 private static readonly object worldˢ = (@string)"world"u8;
 private static readonly object calledOkˢ = (@string)"called ok"u8;
 
 internal static void Main() {
-    @try(equalityˢ, () => {
+    @try("equality", () => {
         var (a, b) = (wrap(default!), wrap(default!));
         fmt.Println((@string)"a == b:"u8, AreEqual(a, b));
     });
 
-    @try(mapHashˢ, () => {
+    @try("map-hash", () => {
         var m = new map<Greetable, nint>{};
         m[wrap(default!)] = 1;
         fmt.Println(storedOkˢ);
     });
 
-    @try(reflectSetˢ, () => {
+    @try("reflect-set", () => {
         ref var dest = ref heap<Greetable>(out var Ꮡdest);
         var rv = reflect.ValueOf(Ꮡdest).Elem();
         ref var src = ref heap<Greetable>(out var Ꮡsrc);
@@ -70,7 +66,7 @@ internal static void Main() {
         fmt.Println(setOkDestNilˢ, Ꮡdest.ValueSlot == default!);
     });
 
-    @try(methodValueCallˢ, () => {
+    @try("method-value-call", () => {
         var g = wrap(default!);
         var v = reflect.ValueOf(g);
         var mv = v.Method(0);

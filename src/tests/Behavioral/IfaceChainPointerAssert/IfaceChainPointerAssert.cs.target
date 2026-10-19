@@ -38,7 +38,6 @@ internal static @string Close(this valConn v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string mutatedˢ = "mutated"u8;
 private static readonly object chainAssertOkˢ = (@string)"chain assert ok:"u8;
 private static readonly object chainAssertMissedˢ = (@string)"chain assert MISSED"u8;
 private static readonly object throughChainˢ = (@string)"through chain:"u8;
@@ -56,13 +55,13 @@ private static readonly object nilInterfaceWronglyˢ = (@string)"nil interface W
 private static readonly object nilInterfaceMissesˢ = (@string)"nil interface misses"u8;
 
 internal static void Main() {
-    readCloser rc = new connжreadCloser(Ꮡ(new conn(data: "init"u8)));
+    readCloser rc = new connжreadCloser(Ꮡ(new conn(data: "init")));
 
     reader r = new readCloserᴠreader(rc);
 
     {
         var (p, ok) = r._<ж<conn>>(ᐧ); if (ok){
-            p.Value.data = mutatedˢ;
+            p.Value.data = "mutated";
             fmt.Println(chainAssertOkˢ, p.Read());
         } else {
             fmt.Println(chainAssertMissedˢ);
@@ -83,7 +82,7 @@ internal static void Main() {
         break;
     }}
 
-    readCloser vrc = new valConn(tag: "v1"u8);
+    readCloser vrc = new valConn(tag: "v1");
     reader vr = new readCloserᴠreader(vrc);
 
     {

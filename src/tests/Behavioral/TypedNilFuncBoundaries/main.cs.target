@@ -47,14 +47,14 @@ internal static void Main() {
 
     var fieldSlot = new row[]{new((zero).OrTypedNilFunc(), true)}.slice();
 
-    var keyedSlot = new map<@string, any>{["k"u8] = (zero).OrTypedNilFunc()};
+    var keyedSlot = new map<@string, any>{["k"] = (zero).OrTypedNilFunc()};
 
     var appendSlot = append(new any[]{}.slice(), (any)((zero).OrTypedNilFunc()));
 
     fmt.Println(argˢ, argSlot == default!);
     fmt.Println(elemˢ, elemSlot[0] == default!);
     fmt.Println(fieldˢ, fieldSlot[0].v == default!);
-    fmt.Println(keyedˢ, keyedSlot["k"u8] == default!);
+    fmt.Println(keyedˢ, keyedSlot["k"] == default!);
     fmt.Println(appendˢ, appendSlot[0] == default!);
 
     fmt.Println(convˢ, take(((Action)(default!)).OrTypedNilFunc()) == default!);
