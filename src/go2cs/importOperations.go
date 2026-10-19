@@ -486,6 +486,9 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 			// into go.<pkg> PackageReferences, EXCEPT during the stdlib self-conversion, whose
 			// packages must reference each other as source to build the assemblies being published.
 			PublishedStdLib:  isStdLib && options.nugetRefs && !options.convertStdLib,
+			// The on-disk path names the package's class, which withoutForeignStructRecords needs to tell
+			// the package's own records from the local adapters it records for foreign structs.
+			ImportPath:       canonicalImportPath,
 			PackageName:      packageName,
 			RootPackageName:  rootPackageNameFromPathParts(importPathParts),
 			SourceDir:        sourceDir,
@@ -556,6 +559,7 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 
 		return PackageInfo{
 			IsStdLib:         true,
+			ImportPath:       canonicalImportPath,
 			PackageName:      packageName,
 			RootPackageName:  rootPackageNameFromPathParts(importPathParts),
 			SourceDir:        meta.Dir,

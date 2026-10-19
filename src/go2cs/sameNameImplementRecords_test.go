@@ -139,6 +139,37 @@ func main() {
 	}
 }
 
+// The STANDARD-LIBRARY route, where the defect lives: a stdlib import resolves through go/build, not the -recurse
+// metadata the module test above takes, and that branch left PackageInfo.ImportPath empty, which the filter reads as
+// "keep every record". The first cut of the fix passed the module test and changed nothing in fips140test (51
+// `sha256.DigestжHash` sites at go1.26.9, measured). Driven through getImportPackageInfo for crypto/sha256 itself,
+// with its real record and an own-qualified control.
+func TestStdlibImportInfoNamesItsPackageForTheRecordFilter(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{goRoot: goRoot, goPath: build.Default.GOPATH, go2csPath: t.TempDir(), targetPlatform: runtime.GOOS + "/" + runtime.GOARCH}
+	info, ok := getImportPackageInfo([]string{"crypto/sha256"}, options)["crypto/sha256"]
+
+	if !ok || info.Err != nil {
+		t.Fatalf("crypto/sha256 did not resolve: %+v", info)
+	}
+
+	const foreign = "[assembly: GoImplement<go.crypto.@internal.fips140.sha256_package.Digest, hash_package.Hash>(Pointer = true)]"
+	const own = "[assembly: GoImplement<global::go.crypto.sha256_package.digestOwn, hash_package.Hash>(Pointer = true)]"
+
+	kept := withoutForeignStructRecords([]string{foreign, own}, info.ImportPath)
+
+	if len(kept) != 1 || kept[0] != own {
+		t.Fatalf("crypto/sha256's loader (ImportPath %q) must drop its record for fips140/sha256's Digest and keep its own: kept %q", info.ImportPath, kept)
+	}
+}
+
 // implementRecordLines is the GoImplement records of a package_info.cs, for a failure message.
 func implementRecordLines(text string) string {
 	var records []string
