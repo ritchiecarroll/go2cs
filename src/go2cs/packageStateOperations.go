@@ -72,6 +72,7 @@ func resetPackageState(pkg *packages.Package) {
 	interfaceImplementations = make(map[string]hashset.HashSet[string])
 	promotedInterfaceImplementations = make(map[string]hashset.HashSet[string])
 	constraintProxies = make(map[string][3]string)
+	importedConstraintProxies = make(map[string]map[string][]string)
 	nominalProductionConstraints = hashset.HashSet[string]{}
 	interfaceInheritances = make(map[string]hashset.HashSet[string])
 	adapterClassImplementations = hashset.HashSet[string]{}
