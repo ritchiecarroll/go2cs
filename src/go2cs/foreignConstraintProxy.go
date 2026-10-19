@@ -54,6 +54,12 @@ func (v *Visitor) publishedConstraintProxyElements(pkg *types.Package, proxyName
 		}
 
 		packageLock.Lock()
+
+		// Made per package by resetPackageState; a visitor driven outside a conversion run finds it nil.
+		if importedConstraintProxies == nil {
+			importedConstraintProxies = make(map[string]map[string][]string)
+		}
+
 		importedConstraintProxies[pkg.Path()] = proxies
 		packageLock.Unlock()
 	}

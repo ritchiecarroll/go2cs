@@ -184,6 +184,8 @@
     <None Include="$(MSBuildThisFileDirectory)fixedSkipCallerClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fixtureWritesTracked_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foldedShiftOperand_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy.go" />
+    <None Include="$(MSBuildThisFileDirectory)foreignConstraintProxy_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
@@ -230,6 +232,7 @@
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintNamed.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineConstraintPublished_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintReceiverLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestLocalInterfaceStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)intrinsicPlaceholders_test.go" />
