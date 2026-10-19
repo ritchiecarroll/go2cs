@@ -327,7 +327,7 @@ Overload discriminators: the comma-ok overloads take a `bool _` whose value is u
 Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; ᐧ U+1427 CANADIAN SYLLABICS FINAL MIDDLE DOT; ꟷ U+A7F7 LATIN EPIGRAPHIC LETTER SIDEWAYS I; ᴛ U+1D1B LATIN LETTER SMALL CAPITAL T. All are letter categories (Lm/Lo/Ll), so C# reads them as identifier characters.
 ᶠ is FuncValueMarker (symbols.json:172-183#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:26#ee6601).
 _ΔpN: src/go2cs/visitFuncDecl.go:1350-1364#03b3c7 and :2802-2810#701c82; :56-64#c625cd and :1902#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); interface methods and function types name every unnamed parameter: AnonymousInterfaces.cs.target:51 `(nint, error) Read(slice<byte> _Δp0);` (Go AnonymousInterfaces.go:28 `interface{ Read([]byte) (int, error) }`), BlankIdentifierCollision/main.cs.target:39 `internal delegate stateFn stateFn(nint _Δp0);`; a lone `_` that stays: CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (a named `_`); several: GenericTypeInstantiation.cs.target:45#f1c413.
-Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:483#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
+Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:484#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:367-375#853c51).
 The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:72-76#b0ed6c and :121#941a6a. -->
 
@@ -7577,7 +7577,7 @@ the NoInlining pin on runtime.Caller callers. src/core/golib/GoFrame.cs: m_d0..m
 fifth registration allocates the List<Action> overflow. PanicException: src/core/golib/PanicException.cs:20#6fd451.
 Run() re-throws a panic no deferred call recovered: GoFrame.cs:120-149#1286a5. Capture parks it for recover():
 GoFrame.cs:595-618#b2f6a2; builtin.recover reads and clears that slot: builtin.cs:330#9159ef. defer/panic/recover live on
-the partial class builtin (builtin.DeferRegistrations.cs:48#ffe49b, builtin.cs:282#02f33c, :330#9159ef); the project-wide
+the partial class builtin (builtin.DeferRegistrations.cs:48#ffe49b, builtin.cs:282#09e845, :330#9159ef); the project-wide
 `using static go.builtin` is described at builtin.cs:35#bbc027. A non-panic exception fails IsPanic and propagates
 unchanged while the finally still runs the defers: GoFrame.cs:528-590#3ad245. -->
 **A function that defers wraps its body in `try`/`catch`/`finally`.** This is the smallest `defer`:
@@ -7732,7 +7732,7 @@ spells Go's `nil` and zero values as `default!`, so `r != default!` is Go's `r !
 
 <!-- Hoisting table: docs/ConversionStrategies-Reference/strings.md:146-164#54a76c (a slug of 3 characters or
 fewer stays inline; builtin arguments such as panic's take their own path). The C# string to Go string
-normalization: src/core/golib/builtin.cs:282#02f33c. -->
+normalization: src/core/golib/builtin.cs:282#09e845. -->
 `"recovered"` becomes the field `recoveredˢ`, but `"ok"` stays inline as `"ok"u8`: a field name would say
 no more than a value that short. The literal passed to `panic` stays a plain C# string. golib's `panic`
 turns it into a Go `string`, so `recover()` sees Go's type.
@@ -11780,8 +11780,8 @@ else.
      functions whose bodies are arith_$GOARCH.s; arith_decl_pure.go (`math_big_pure_go`) forwards each
      to the `_g` pure-Go implementation in arith.go. With purego alone, every big.Int/Float/Rat
      arithmetic path compiled and threw on first use (surfaced as time.TestTruncateRound -> big.Int.Mul
-     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:266#3fe3c3 (defaultStdLibBuildTags);
-     resolveBuildTags (commandLineOptions.go:290#0885a6) keys the default on the -stdlib and -tests flags, not on
+     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:267#3fe3c3 (defaultStdLibBuildTags);
+     resolveBuildTags (commandLineOptions.go:291#0885a6) keys the default on the -stdlib and -tests flags, not on
      the package being standard library, so a -tests run on any package gets it. `-tags=` clears the
      default. A -stdlib run prints the tags it applies, e.g.
      `Applying build tags: purego,math_big_pure_go (default; pass -tags to override)`
@@ -11886,7 +11886,7 @@ result is unpacked with `var (p, err) = …`. The text the removed `Inverse` pan
      asm ordinv and returns a valid inverse; crypto/ecdsa handles the same error with a fallback, so
      ECDSA is unaffected. Inverse is reached via the deprecated `invertible` interface. The inline panic
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
-     (src/go2cs/hoistedLiteralOperations.go:612-614#0b8d4e), since it costs nothing until a panic fires. -->
+     (src/go2cs/hoistedLiteralOperations.go:815-817#0b8d4e), since it costs nothing until a panic fires. -->
 
 **A module converts with `-tags safe`, for a different reason.** Some libraries reach into Go's runtime with
 unsafe pointer arithmetic, adding a byte offset to a value to read one of its private fields. Converted code
