@@ -23,7 +23,7 @@ namespace go2cs.Tests;
 /// AliasPointer, an inferred unsafe.Slice over a <c>**E</c>, ArrayPointer, NativeArrayPointer and
 /// NativeFieldArrayPointer over <c>ж&lt;E&gt;</c>, and struct fields <c>[N]X</c> and <c>[N]*E</c>; and its
 /// non-doors: a local <c>[N]*E</c>, a raw uintptr conversion, an unsafe.Slice over a value element, and an open
-/// generic site.
+/// generic site. A generic struct's fields register when the FIELD's element is closed, and only then.
 /// </summary>
 [TestClass]
 public class NativeArrayOpenerGeneratorTests
@@ -46,6 +46,7 @@ public class NativeArrayOpenerGeneratorTests
             internal partial struct Local { internal nint x; }
             internal partial struct Raw { internal nint x; }
             private partial struct Secret { internal nint x; }
+            internal partial struct Boxed { internal nint x; }
 
             internal partial struct Record
             {
@@ -58,6 +59,8 @@ public class NativeArrayOpenerGeneratorTests
             internal partial struct Generic<T>
             {
                 internal array<T> items;
+                internal array<uint32> counts;
+                internal array<ж<Boxed>> boxes;
             }
 
             internal static void Use(ж<ж<Alias>> alias, ж<ж<Sliced>> sliced, ж<nint> values, uintptr raw)
@@ -134,6 +137,7 @@ public class NativeArrayOpenerGeneratorTests
         string[] expectedPointerArrays =
         [
             "global::go.ntest_package.Alias",    // array<ж<E>>.AliasPointer
+            "global::go.ntest_package.Boxed",    // a [N]*E field of a GENERIC struct: the field's element is closed
             "global::go.ntest_package.Opened",   // NativeArrayPointer<ж<E>>
             "global::go.ntest_package.Pointed",  // a [N]*E field: its window opens the pointer array
             "global::go.ntest_package.Sliced",   // unsafe.Slice over a **E, inferred
@@ -143,6 +147,8 @@ public class NativeArrayOpenerGeneratorTests
         string[] expectedArrays =
         [
             "global::go.ntest_package.Secret",                   // a private element: registered inside the package class
+            "global::go.ж<global::go.ntest_package.Boxed>",      // the generic struct's closed [N]*E field's own window
+            "uint",                                              // a generic struct's closed [N]uint32 field
             "global::go.ж<global::go.ntest_package.Pointed>",    // the [N]*E field's own window
             "ushort",                                            // a [N]uint16 field
         ];
