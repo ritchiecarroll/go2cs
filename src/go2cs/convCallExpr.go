@@ -337,6 +337,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		v.pendingSyscallKeepAlive = append(v.pendingSyscallKeepAlive, boxes...)
 	}
 
+	// A conversion whose type writes an anonymous struct lifts it before any arm renders the type. An assignment
+	// has already lifted it under the variable's name; every other position takes "type", as a composite literal does.
+	v.liftConversionTargetAnonStruct(callExpr, "type")
+
 	// ---- Phase 1a: shapes intercepted before the general call path ----
 	//
 	// Each of these is a Go idiom whose faithful rendering the general path below gets wrong, so
