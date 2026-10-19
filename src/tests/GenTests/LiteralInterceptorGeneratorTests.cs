@@ -329,6 +329,36 @@ public class LiteralInterceptorGeneratorTests
         Assert.AreEqual("System.String", Execute(run.Updated));
     }
 
+    // The syntax provider's predicate admits only a converted file holding a call with a bare string-literal argument,
+    // so a file with none pays no semantic query, on the first run or after an edit to it (cost P6: a package with no
+    // site, as every standard-library package is, transforms nothing). RED with the predicate admitting every
+    // compilation unit: the four refused shapes read true.
+    [TestMethod]
+    [DataRow("main.cs", """public static string Body() => Show("one");""", true, DisplayName = "a call with a bare literal argument")]
+    [DataRow("main.cs", """public static string Body() => Println(1, "two");""", true, DisplayName = "a bare literal in a params position")]
+    [DataRow("other.cs", """public static string Other() => Seen(1);""", false, DisplayName = "calls with no literal argument")]
+    [DataRow("quiet.cs", """public static string Quiet() { string s = "not an argument"; return Seen(s.Length); }""", false, DisplayName = "a literal that is not an argument")]
+    [DataRow("quiet.cs", """public static string Quiet() => Seen("x"u8.Length);""", false, DisplayName = "a u8 literal")]
+    [DataRow("main_impl.cs", """public static string Body() => Show("one");""", false, DisplayName = "a hand-written companion file")]
+    public void OnlyAConvertedFileWithABareLiteralArgumentReachesTheTransform(string path, string body, bool expected)
+    {
+        string source =
+            $$"""
+            namespace go
+            {
+                public static partial class main_package
+                {
+                    {{body}}
+                }
+            }
+            """;
+
+        SyntaxNode root = CSharpSyntaxTree.ParseText(source, s_parseOptions, path: path).GetRoot();
+
+        Assert.AreEqual(expected, LiteralInterceptorGenerator.IsTransformInput(root));
+        Assert.IsFalse(LiteralInterceptorGenerator.IsTransformInput(root.DescendantNodes().OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>().First()), "only a compilation unit is an input");
+    }
+
     // GO2CS0004 is the net: with the generator absent a bare literal in an object slot is an error, and with it present
     // the intercepted literal is not.
     [TestMethod]

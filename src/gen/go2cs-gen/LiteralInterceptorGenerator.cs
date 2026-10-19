@@ -54,8 +54,13 @@ namespace go2cs;
 /// rebind.
 /// </para>
 /// <para>
-/// One generated file per source file, so an edit re-runs one file's transform: the cache class and the
-/// interceptor class are <c>file</c>-local in namespace <c>go2cs.Interceptors</c>, which go.lib.targets admits
+/// Only a converted file that holds a call with a bare string-literal argument reaches the transform: the syntax
+/// provider's predicate reads that from the syntax alone, and a predicate re-runs only for a changed tree, so a file
+/// with no candidate pays no semantic query on any edit. A file that has one re-binds its calls on every compilation
+/// change, as any semantic transform does (a probe with ForAttributeWithMetadataName measured the same re-run), and
+/// that is what lets GO2CS0006 see an overload added in another file. Each file still gets its own generated file,
+/// and only a file whose output changed is re-emitted. The cache class and the interceptor class are
+/// <c>file</c>-local in namespace <c>go2cs.Interceptors</c>, which go.lib.targets admits
 /// (<c>InterceptorsNamespaces</c>). Interceptors that write the same literals into the same slots of the same
 /// method share one body. An interceptor is a real frame: it carries <c>[GeneratedCode("go2cs-gen")]</c> and
 /// <c>[StackTraceHidden]</c>, which the Go traceback (runtime managed_impl.cs, <c>classifyGoSourceFrame</c>) and
@@ -67,10 +72,11 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
 {
     private const string GoTakesCSharpStringAttributeName = "go.GoTakesCSharpStringAttribute";
 
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         IncrementalValuesProvider<FileOutput> files = context.SyntaxProvider.CreateSyntaxProvider(
-                static (node, _) => node is CompilationUnitSyntax,
+                static (node, _) => IsTransformInput(node),
                 static (syntaxContext, cancellationToken) => Transform(syntaxContext.SemanticModel, (CompilationUnitSyntax)syntaxContext.Node, cancellationToken))
             .Where(static output => output is not null)!;
 
@@ -84,11 +90,23 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
         });
     }
 
+    // A call with a bare C# string literal among its arguments: the only shape the transform reads, decided from syntax.
+    private static bool IsCandidate(InvocationExpressionSyntax invocation) =>
+        invocation.ArgumentList.Arguments.Any(argument => argument.Expression.IsKind(SyntaxKind.StringLiteralExpression));
+
+    /// <summary>
+    /// The syntax provider's predicate: a converted file holding at least one call with a bare string-literal argument.
+    /// It reads syntax only, so it re-runs only for a changed tree, and a file it refuses pays no semantic query.
+    /// </summary>
+    public static bool IsTransformInput(SyntaxNode node) =>
+        node is CompilationUnitSyntax root && IsConvertedSourceFile(root.SyntaxTree) &&
+        root.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(IsCandidate);
+
     private static FileOutput? Transform(SemanticModel semanticModel, CompilationUnitSyntax root, CancellationToken cancellationToken)
     {
         SyntaxTree tree = root.SyntaxTree;
 
-        if (!IsConvertedSourceFile(tree) || IsHandOwnedAssembly(semanticModel.Compilation) || semanticModel.Compilation.GetTypeByMetadataName("go.string") is null)
+        if (IsHandOwnedAssembly(semanticModel.Compilation) || semanticModel.Compilation.GetTypeByMetadataName("go.string") is null)
             return null;
 
         INamedTypeSymbol? marker = semanticModel.Compilation.GetTypeByMetadataName(GoTakesCSharpStringAttributeName);
@@ -99,7 +117,7 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (!invocation.ArgumentList.Arguments.Any(argument => argument.Expression.IsKind(SyntaxKind.StringLiteralExpression)))
+            if (!IsCandidate(invocation))
                 continue;
 
             IMethodSymbol method;
