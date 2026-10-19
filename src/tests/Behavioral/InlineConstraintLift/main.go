@@ -63,8 +63,8 @@ func Both[A, B interface{ Name() string }, C interface{ Tag() int }](a A, b B, c
 	return a.Name() + "/" + b.Name() + "/" + fmt.Sprint(c.Tag())
 }
 
-// A constraint naming the type parameter it constrains lifts GENERIC (`Min_T<T>`). Declared only: a
-// value instantiation needs the closed-constraint record a later change supplies.
+// A constraint naming the type parameter it constrains lifts GENERIC (`Min_T<T>`), and each value
+// instantiation records the constraint closed over its argument (`GoImplement<age, Min_T<age>>`).
 func Min[T interface{ Less(T) bool }](a, b T) T {
 	if b.Less(a) {
 		return b
@@ -85,4 +85,15 @@ func main() {
 	fmt.Println(pair[tagged]{tagged{"p", 1}, tagged{"q", 2}}.joined())
 	fmt.Println(slot[tagged]{tagged{"s", 9}}.get())
 	fmt.Println(Both(namer{"n"}, tagged{"m", 0}, tagged{"k", 3}))
+
+	// The generic TYPE Ord (ord.go) at a value, a pointer and a nested generic argument; the
+	// instantiations are in this file and the declaration in another.
+	fmt.Println(Min(age(5), age(3)))
+	fmt.Println(Ord[age]{v: 3}.Below(5), Ord[age]{v: 3}.Below(2))
+	fmt.Println(Ord[*node]{v: &node{1}}.Below(&node{0}), Ord[*node]{v: &node{1}}.Below(&node{4}))
+	fmt.Println(Ord[wrap[string]]{v: wrap[string]{2}}.Below(wrap[string]{5}), Ord[wrap[int]]{v: wrap[int]{7}}.Below(wrap[int]{3}))
+
+	// A generic value type implementing a generic interface at its own instantiation, no constraint.
+	var l Lesser[wrap[string]] = wrap[string]{1}
+	fmt.Println(l.Less(wrap[string]{2}), l.Less(wrap[string]{0}))
 }

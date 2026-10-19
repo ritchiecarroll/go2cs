@@ -39,13 +39,19 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<age, Min_T<age>>]
+[assembly: GoImplement<age, Ord_T<age>>]
 [assembly: GoImplement<namer, Box_T>]
 [assembly: GoImplement<namer, Show_T>]
+[assembly: GoImplement<node, Ord_T<node>>(ConstraintProxy = true)]
 [assembly: GoImplement<tagged, Both_C>]
 [assembly: GoImplement<tagged, Box_T>]
 [assembly: GoImplement<tagged, Label_T>]
 [assembly: GoImplement<tagged, nameI>]
 [assembly: GoImplement<tagged, pair_T>]
+[assembly: GoImplement<wrap<@string>, Lesser<wrap<@string>>>]
+[assembly: GoImplement<wrap<@string>, Ord_T<wrap<@string>>>]
+[assembly: GoImplement<wrap<nint>, Ord_T<wrap<nint>>>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -59,7 +65,8 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAoWgP6AooDmoKag9qgADAygpKKCgpQADAygAAwQoObC6qKClKaCgoKUgoKClIKC")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAoWgP6AooDmoKag9qgADAygpKKCgpQADAygAAwQoObC6qKClKaCgoKUgoKClIKCmIKCgpaC")]
+[assembly: go.GoPositionMap("ord.go", "ord.cs", "AA4SoAAIDIDooOiA")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -77,16 +84,22 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial interface nameI {}
     internal partial interface pair_T {}
+    internal partial struct age {}
     internal partial struct namer {}
+    internal partial struct node {}
     internal partial struct pair<T> {}
     internal partial struct slot<T> {}
     internal partial struct tagged {}
+    internal partial struct wrap<E> {}
     public partial interface Both_C {}
     public partial interface Box_T {}
     public partial interface Label_T {}
+    public partial interface Lesser<T> {}
     public partial interface Min_T<T> {}
+    public partial interface Ord_T<T> {}
     public partial interface Show_T {}
     public partial struct Box<T> {}
+    public partial struct Ord<T> {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

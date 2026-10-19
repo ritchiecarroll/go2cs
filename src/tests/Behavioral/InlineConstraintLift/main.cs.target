@@ -148,6 +148,14 @@ internal static void Main() {
     fmt.Println(new pair<tagged>(new tagged("p"u8, 1), new tagged("q"u8, 2)).joined());
     fmt.Println(new slot<tagged>(new tagged("s"u8, 9)).get());
     fmt.Println(Both(new namer("n"u8), new tagged("m"u8, 0), new tagged("k"u8, 3)));
+
+    fmt.Println(Min(((age)5), ((age)3)));
+    fmt.Println(new Ord<age>(v: 3).Below(5), new Ord<age>(v: 3).Below(2));
+    fmt.Println(new Ord<nodeжOrd_T>(v: Ꮡ(new node(1))).Below(Ꮡ(new node(0))), new Ord<nodeжOrd_T>(v: Ꮡ(new node(1))).Below(Ꮡ(new node(4))));
+    fmt.Println(new Ord<wrap<@string>>(v: new wrap<@string>(2)).Below(new wrap<@string>(5)), new Ord<wrap<nint>>(v: new wrap<nint>(7)).Below(new wrap<nint>(3)));
+
+    Lesser<wrap<@string>> l = new wrap<@string>(1);
+    fmt.Println(l.Less(new wrap<@string>(2)), l.Less(new wrap<@string>(0)));
 }
 
 } // end main_package
