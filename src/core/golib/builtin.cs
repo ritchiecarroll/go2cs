@@ -2709,36 +2709,45 @@ public static partial class builtin
         if (ShadowArrayBox<T>.Needed)
         {
             // A POINTER element over memory the Go runtime did not allocate is a foreign address, read from its
-            // word (G's ruling, 2026-10-19; see NativePointerArrayBox and GoOsMemory).
-            if (NativePointerArray<T>.Open is { } open && address != 0 && !GoOsMemory.Owns(address))
-                return open(address, length);
+            // word (G's ruling, 2026-10-19; see NativePointerArrayBox and GoOsMemory). Ownership is asked FIRST, so
+            // the runtime's own arena never reaches the door.
+            if (address != 0 && !GoOsMemory.Owns(address) && ForeignPointerElement<T>.Type is { } element)
+                return foreignPointerArray<T>(element, address, length);
 
             // Any other reference-bearing element cannot alias native bytes: its elements live in a managed store
-            // that SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox).
+            // that SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox). Over foreign
+            // memory that store refuses every read by name.
             return ShadowArrayBox<T>.Over(address, length);
         }
 
         return NativeArrayBox<T>.Over(address, length);
     }
 
-    // The foreign pointer-array door per element type, closed over E once: null unless T is a pointer, ж<E>.
-    private static class NativePointerArray<T>
+    // E for a pointer element T = ж<E>, else null: a pure type query, decided once per T.
+    private static class ForeignPointerElement<T>
     {
-        internal static readonly Func<nuint, nint, ж<array<T>>>? Open = create();
+        internal static readonly Type? Type =
+            typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ж<>) ? typeof(T).GetGenericArguments()[0] : null;
+    }
 
-        private static Func<nuint, nint, ж<array<T>>>? create()
+    // The foreign pointer array is built by E's own operations (GoTypeOps, trim stage 3c-2b), compiled wherever
+    // compiled code names them: a builtin's here in golib, a struct's by go2cs-gen once its pointer is spelled. A
+    // reflection-built instantiation over a VALUE-type E has no code under Native AOT (see ж<T>'s
+    // s_publishArrayBacking), so none is made here. An E with no compiled operations is refused by name.
+    private static ж<array<T>> foreignPointerArray<T>(Type element, nuint address, nint length)
+    {
+        IGoTypeOps ops;
+
+        try
         {
-            if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(ж<>))
-                return null;
-
-            return typeof(NativePointerArray<T>).GetMethod(nameof(open), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
-                .MakeGenericMethod(typeof(T).GetGenericArguments()[0])
-                .CreateDelegate<Func<nuint, nint, ж<array<T>>>>();
+            ops = GoTypeOps.Of(element);
+        }
+        catch (NotSupportedException)
+        {
+            throw new PanicException($"native pointer array: *[N]*{element.FullName} over memory the Go runtime did not allocate needs {element.FullName}'s compiled type operations, which this build does not carry");
         }
 
-        // T is ж<E> whenever this is reached (create's guard), so the box IS a ж<array<T>>.
-        private static ж<array<T>> open<E>(nuint address, nint length) =>
-            (ж<array<T>>)(object)NativePointerArrayBox<E>.Over(address, length);
+        return (ж<array<T>>)ops.ForeignPointerArray(address, length);
     }
 
     /// <summary>

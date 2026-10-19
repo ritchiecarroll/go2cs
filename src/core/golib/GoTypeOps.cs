@@ -61,6 +61,12 @@ public interface IGoTypeOps
 
     /// <summary>The canonical typed nil pointer to this ARRAY type carrying its dims (<c>ж&lt;T&gt;.NilBoxOfDims</c>).</summary>
     object NilBoxOfDims(long[] dims);
+
+    /// <summary>
+    /// A <c>*[length]*T</c> over <paramref name="address"/>, memory the Go runtime did not allocate, whose words are read
+    /// as the foreign addresses they are (<c>NativePointerArrayBox</c>): a <c>ж&lt;array&lt;ж&lt;T&gt;&gt;&gt;</c>.
+    /// </summary>
+    object ForeignPointerArray(nuint address, nint length);
 }
 
 /// <summary>The operations of <typeparamref name="T"/>: each names its own instantiation, so a compiled reference compiles them.</summary>
@@ -89,6 +95,9 @@ public sealed class GoTypeOps<T> : IGoTypeOps
 
     /// <inheritdoc/>
     public object NilBoxOfDims(long[] dims) => ж<T>.NilBoxOfDims(dims);
+
+    /// <inheritdoc/>
+    public object ForeignPointerArray(nuint address, nint length) => NativePointerArrayBox<T>.Over(address, length);
 }
 
 /// <summary>
