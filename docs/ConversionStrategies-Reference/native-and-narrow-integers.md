@@ -96,9 +96,9 @@ any x = (int8)(a + a);
 mk := map[uint8]string{144: "wrapped"}
 fmt.Println("map key:", mk[u+u])
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:29-30 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:30-31 -->
 ```csharp
-var mk = new map<uint8, @string>{[144] = "wrapped"u8};
+var mk = new map<uint8, @string>{[144] = "wrapped"};
 fmt.Println(mapKeyˢ, mk[(uint8)(u + u)]);
 ```
 
@@ -187,13 +187,13 @@ that never goes through a pointer). Otherwise it is `a * 0`, so `f() % -1` still
 ```go
 arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)) })
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:163 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:136 -->
 ```csharp
-arm(int64ˢ, () => fmt.Sprint(quo(i64, (int64)m1), (@string)" "u8, rem(i64, (int64)m1)));
+arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), (@string)" "u8, rem(i64, (int64)m1)));
 ```
 
 Here `i64` holds `math.MinInt64`, `m1` is an `int` holding -1, `arm` runs the function under `recover` and
-prints its result under the label, and `int64ˢ` is the hoisted `"int64"` literal.
+prints its result under the label.
 
 **Compound assignment never reaches C#'s `/=` or `%=`.** Its target is evaluated once:
 
