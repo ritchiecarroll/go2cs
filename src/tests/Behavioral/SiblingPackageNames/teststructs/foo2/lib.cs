@@ -2,11 +2,8 @@ namespace go.SiblingPackageNames.teststructs.foo2;
 
 partial class foo_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string foo2ˢ = "foo2"u8;
-
 public static @string Name() {
-    return foo2ˢ;
+    return "foo2";
 }
 
 partial struct Triple {

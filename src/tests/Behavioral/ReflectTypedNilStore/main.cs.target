@@ -41,7 +41,7 @@ internal static void Main() {
         reflect.ValueOf(ch).Send(f);
         var got = ᐸꟷ(ch);
 
-        fmt.Printf("%s: set=%T map=%T append=%T call=%v send=%T\n"u8, name, dst, m["k"u8], s[0], @out, got);
+        fmt.Printf("%s: set=%T map=%T append=%T call=%v send=%T\n"u8, name, dst, m["k"], s[0], @out, got);
     }
 }
 

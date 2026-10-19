@@ -33,12 +33,12 @@ internal partial struct main_named /*dyn*/ {
 }
 
 internal static void Main() {
-    var ta = Ꮡ(new UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8));
+    var ta = Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"));
 
     array<main_type> connAddrs = new main_type[]{
         new(new UnixAddrжAddr(ta), new UnixAddrжAddr(ta)),
-        new(new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8))), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8)))),
-        new(new UnixAddrжAddr(ta), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8))))
+        new(new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix")))),
+        new(new UnixAddrжAddr(ta), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))))
     }.array();
 
     foreach (var (i, ca) in connAddrs.ΔRangeSnapshot()) {

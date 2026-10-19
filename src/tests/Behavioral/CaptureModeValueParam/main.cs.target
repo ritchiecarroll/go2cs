@@ -42,7 +42,7 @@ private static readonly object bumpedˢ = (@string)"bumped:"u8;
 private static readonly object callerCopyUntouchedˢ = (@string)"caller copy untouched:"u8;
 
 internal static void Main() {
-    var t = new Tally(total: 5, log: "start"u8);
+    var t = new Tally(total: 5, log: "start");
     var (total, log) = bump(t, 3);
     fmt.Println(bumpedˢ, total, log);
     fmt.Println(callerCopyUntouchedˢ, t.total, t.log);

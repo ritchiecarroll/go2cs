@@ -13,11 +13,11 @@ partial struct E {
 }
 
 public static @string Error(this E _) {
-    return "e"u8;
+    return "e";
 }
 
 public static @string GoString(this E _) {
-    return "E!"u8;
+    return "E!";
 }
 
 partial struct S {
@@ -25,7 +25,7 @@ partial struct S {
 }
 
 public static @string String(this S _) {
-    return "s"u8;
+    return "s";
 }
 
 partial struct w {
@@ -69,8 +69,6 @@ internal static void visible(@string label, reflectꓸType t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pubˢ = "Pub"u8;
-private static readonly @string namedˢ = "Named"u8;
 private static readonly object wErrorCanInterfaceˢ = (@string)"w.error CanInterface:"u8;
 private static readonly object wErrorElemCanInterfaceˢ = (@string)"w.error.Elem CanInterface:"u8;
 private static readonly object wErrorElemCodeˢ = (@string)"w.error.Elem.Code CanInterface:"u8;
@@ -84,13 +82,13 @@ private static readonly object namedNamedTwinˢ = (@string)"Named -> named twin:
 private static readonly object pubNamedˢ = (@string)"Pub -> Named:"u8;
 
 internal static void Main() {
-    describe("w"u8, reflect.TypeOf(new w(nil)));
-    describe(pubˢ, reflect.TypeOf(new Pub(nil)));
-    describe(namedˢ, reflect.TypeOf(new Named(nil)));
-    describe("X"u8, reflect.TypeOf(new X(nil)));
+    describe("w", reflect.TypeOf(new w(nil)));
+    describe("Pub", reflect.TypeOf(new Pub(nil)));
+    describe("Named", reflect.TypeOf(new Named(nil)));
+    describe("X", reflect.TypeOf(new X(nil)));
 
-    visible(pubˢ, reflect.TypeOf(new Pub(nil)));
-    visible("X"u8, reflect.TypeOf(new X(nil)));
+    visible("Pub", reflect.TypeOf(new Pub(nil)));
+    visible("X", reflect.TypeOf(new X(nil)));
 
     var v = reflect.ValueOf(new w(new E(7)));
     fmt.Println(wErrorCanInterfaceˢ, v.Field(0).CanInterface());
@@ -108,8 +106,8 @@ internal static void Main() {
     fmt.Printf("%#v\n"u8, new Pub(new S(3)));
     fmt.Printf("%#v\n"u8, new Named(new S(3)));
 
-    var twin = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer"u8, Type: reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem(), Anonymous: true)}.slice());
-    var plain = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer"u8, Type: reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem())}.slice());
+    var twin = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem(), Anonymous: true)}.slice());
+    var plain = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem())}.slice());
     fmt.Println(pubAnonymousTwinˢ, reflect.TypeOf(new Pub(nil)).ConvertibleTo(twin));
     fmt.Println(pubNamedTwinˢ, reflect.TypeOf(new Pub(nil)).ConvertibleTo(plain));
     fmt.Println(namedAnonymousTwinˢ, reflect.TypeOf(new Named(nil)).ConvertibleTo(twin));

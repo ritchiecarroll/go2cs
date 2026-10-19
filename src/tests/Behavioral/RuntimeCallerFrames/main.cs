@@ -76,7 +76,6 @@ private static readonly object callerFileRootedˢ = (@string)"caller file rooted
 private static readonly object callerLineˢ = (@string)"caller line:"u8;
 private static readonly object callerLineTwoFramesUpˢ = (@string)"caller line two frames up:"u8;
 private static readonly object tracebackNamesAGoFileˢ = (@string)"traceback names a go file:"u8;
-private static readonly @string mainGoˢ = "/main.go:"u8;
 private static readonly object okAt0ˢ = (@string)"ok at 0:"u8;
 private static readonly object okAt1ˢ = (@string)"ok at 1:"u8;
 private static readonly object okTwoLevelsUpˢ = (@string)"ok two levels up:"u8;
@@ -88,17 +87,11 @@ private static readonly object framesFilesUseForwardˢ = (@string)"frames files 
 private static readonly object framesFilesUseHostˢ = (@string)"frames files use host separator:"u8;
 private static readonly object tracebackUsesHostˢ = (@string)"traceback uses host separator:"u8;
 private static readonly object tracebackNamesPointerˢ = (@string)"traceback names pointer receiver:"u8;
-private static readonly @string mainRecvTPtrFrameˢ = "main.(*recvT).ptrFrame"u8;
 private static readonly object tracebackNamesValueˢ = (@string)"traceback names value receiver:"u8;
-private static readonly @string mainRecvTValueFrameˢ = "main.recvT.valueFrame"u8;
 private static readonly object tracebackDropsPointerˢ = (@string)"traceback drops pointer receiver:"u8;
-private static readonly @string mainPtrFrameˢ = "main.ptrFrame"u8;
 private static readonly object tracebackDropsValueˢ = (@string)"traceback drops value receiver:"u8;
-private static readonly @string mainValueFrameˢ = "main.valueFrame"u8;
 private static readonly object tracebackNamesGenericˢ = (@string)"traceback names generic receiver:"u8;
-private static readonly @string mainGenRecvGenFrameˢ = "main.genRecv[...].genFrame"u8;
 private static readonly object tracebackNamesPlainFuncˢ = (@string)"traceback names plain func:"u8;
-private static readonly @string mainPlainFrameˢ = "main.plainFrame"u8;
 private static readonly object tracebackParenthesizesˢ = (@string)"traceback parenthesizes plain func:"u8;
 
 internal static partial void Main() {
@@ -118,7 +111,7 @@ internal static partial void Main() {
     fmt.Println(callerFileRootedˢ, callerFileRooted());
     fmt.Println(callerLineˢ, selfLine());
     fmt.Println(callerLineTwoFramesUpˢ, wrapGrand());
-    fmt.Println(tracebackNamesAGoFileˢ, hasSub(stackText(), mainGoˢ));
+    fmt.Println(tracebackNamesAGoFileˢ, hasSub(stackText(), "/main.go:"));
 
     fmt.Println(okAt0ˢ, okAt(0));
     fmt.Println(okAt1ˢ, okAt(1));
@@ -138,17 +131,17 @@ internal static partial void Main() {
     fmt.Println(tracebackUsesHostˢ, stackHasBackslash());
 
     @string methodTrace = ((recvT)0).valueFrame();
-    fmt.Println(tracebackNamesPointerˢ, hasSub(methodTrace, mainRecvTPtrFrameˢ));
-    fmt.Println(tracebackNamesValueˢ, hasSub(methodTrace, mainRecvTValueFrameˢ));
-    fmt.Println(tracebackDropsPointerˢ, hasSub(methodTrace, mainPtrFrameˢ));
-    fmt.Println(tracebackDropsValueˢ, hasSub(methodTrace, mainValueFrameˢ));
+    fmt.Println(tracebackNamesPointerˢ, hasSub(methodTrace, "main.(*recvT).ptrFrame"));
+    fmt.Println(tracebackNamesValueˢ, hasSub(methodTrace, "main.recvT.valueFrame"));
+    fmt.Println(tracebackDropsPointerˢ, hasSub(methodTrace, "main.ptrFrame"));
+    fmt.Println(tracebackDropsValueˢ, hasSub(methodTrace, "main.valueFrame"));
 
     @string genTrace = new genRecv<nint>(nil).genFrame();
-    fmt.Println(tracebackNamesGenericˢ, hasSub(genTrace, mainGenRecvGenFrameˢ));
+    fmt.Println(tracebackNamesGenericˢ, hasSub(genTrace, "main.genRecv[...].genFrame"));
 
     @string plainTrace = plainFrame();
-    fmt.Println(tracebackNamesPlainFuncˢ, hasSub(plainTrace, mainPlainFrameˢ));
-    fmt.Println(tracebackParenthesizesˢ, hasSub(plainTrace, "(*"u8));
+    fmt.Println(tracebackNamesPlainFuncˢ, hasSub(plainTrace, "main.plainFrame"));
+    fmt.Println(tracebackParenthesizesˢ, hasSub(plainTrace, "(*"));
 }
 
 internal static bool hasByte(@string s, byte b) {

@@ -128,7 +128,7 @@ internal static Seq<nint> countdown(nint n) {
 
 internal static KVSeq<@string, nint> letters() {
     return (Func<@string, nint, bool> yield) => {
-        _ = yield("a"u8, 1) && yield("b"u8, 2);
+        _ = yield("a", 1) && yield("b", 2);
     };
 }
 
@@ -167,9 +167,9 @@ internal static void Main() {
     var pt = new Point(new int32[]{1, 2}.slice());
     PassSlice(pt, (int32)(42));
     fmt.Println(pt.String());
-    var g1 = new Grades(new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2});
-    var g2 = new Grades(new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2});
-    var g3 = new Grades(new map<@string, nint>{["a"u8] = 9});
+    var g1 = new Grades(new map<@string, nint>{["a"] = 1, ["b"] = 2});
+    var g2 = new Grades(new map<@string, nint>{["a"] = 1, ["b"] = 2});
+    var g3 = new Grades(new map<@string, nint>{["a"] = 9});
     fmt.Println(EqualMaps<Grades, @string, nint>(g1, g2), EqualMaps<Grades, @string, nint>(g1, g3));
     nint sum = 0;
     foreach (var v in range<nint>(countdown(5).Invoke)) {
@@ -185,7 +185,7 @@ internal static void Main() {
     Grades nilG = default!;
     fmt.Println(CloneOrNil<Grades, @string, nint>(nilG) == default!);
     var cl = CloneOrNil<Grades, @string, nint>(g1);
-    fmt.Println(len(cl), cl["a"u8]);
+    fmt.Println(len(cl), cl["a"]);
     DropKey<Grades, @string, nint>(g1, (@string)"a");
     fmt.Println(len(g1));
     var (i16, ok16) = bsearchLike(new uint16[]{2, 4, 8}.slice(), (uint16)4);

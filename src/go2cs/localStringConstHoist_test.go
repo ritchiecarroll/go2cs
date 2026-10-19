@@ -89,6 +89,7 @@ func TestLocalStringConstHoistsUnderItsOwnName(t *testing.T) {
 		indentSpaces:        4,
 		preferVarDecl:       true,
 		useChannelOperators: true,
+		hoistLiterals:       true, // arm C is the HOISTED mode's: a user package opts in (the standard library always does)
 	}
 
 	build.Default.GOROOT = options.goRoot

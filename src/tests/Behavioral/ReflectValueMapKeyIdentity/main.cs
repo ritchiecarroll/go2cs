@@ -24,7 +24,7 @@ private static readonly object differentMapsEqualˢ = (@string)"different maps e
 private static readonly object zeroEqualˢ = (@string)"zero equal:"u8;
 
 internal static void Main() {
-    var m = new map<@string, any>{["vstring"u8] = (@string)"foo"u8, ["Vint"u8] = (nint)(42), ["vbool"u8] = true};
+    var m = new map<@string, any>{["vstring"] = (@string)"foo"u8, ["Vint"] = (nint)(42), ["vbool"] = true};
     var dataVal = reflect.ValueOf(m);
     var keys = new map<reflectꓸValue, EmptyStruct>();
     foreach (var (_, k) in dataVal.MapKeys()) {
@@ -34,7 +34,7 @@ internal static void Main() {
 
     nint matched = 0;
     foreach (var (k, _) in keys) {
-        foreach (var (_, field) in new @string[]{"Vstring"u8, "Vint"u8, "Vbool"u8}.slice()) {
+        foreach (var (_, field) in new @string[]{"Vstring", "Vint", "Vbool"}.slice()) {
             if (strings.EqualFold(k.Interface()._<@string>(), field)) {
                 matched++;
             }
@@ -42,8 +42,8 @@ internal static void Main() {
     }
     fmt.Println(matchedFieldsˢ, matched);
 
-    @string a = strings.Repeat("a"u8, 2);
-    @string b = strings.Repeat("b"u8, 2);
+    @string a = strings.Repeat("a", 2);
+    @string b = strings.Repeat("b", 2);
     fmt.Println(differentStringsEqualˢ, reflect.ValueOf(a) == reflect.ValueOf(b));
     ref var s1 = ref heap<pair>(out var Ꮡs1);
     s1 = new pair(a, 1);

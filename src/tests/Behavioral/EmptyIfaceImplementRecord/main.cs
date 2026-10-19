@@ -26,7 +26,7 @@ internal partial struct main_xs /*dyn*/ {
 }
 
 internal static void Main() {
-    fmt.Stringer s = new name("ok"u8);
+    fmt.Stringer s = new name("ok");
     fmt.Println(args(new main_xs()), s.String());
 }
 

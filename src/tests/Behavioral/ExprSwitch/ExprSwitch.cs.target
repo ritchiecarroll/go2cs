@@ -33,10 +33,8 @@ public static nint Foo(nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testˢ = "test"u8;
 private static readonly object helloˢ = (@string)"hello, "u8;
-private static readonly @string worldˢ = "world"u8;
-private static readonly @string helloSˢ = "hello, %s"u8;
+private static readonly object worldˢ = (@string)"world"u8;
 private static readonly object writeˢ = (@string)"Write "u8;
 private static readonly object oneˢ = (@string)"one"u8;
 private static readonly object twoˢ = (@string)"two"u8;
@@ -78,9 +76,9 @@ private static readonly object steadyˢ = (@string)"steady"u8;
 private static readonly object slowˢ = (@string)"slow"u8;
 
 internal static void Main() {
-    fmt.Println(getStr(testˢ));
-    fmt.Println(getStr2(helloˢ, worldˢ));
-    fmt.Println(getStr3(helloSˢ, worldˢ));
+    fmt.Println(getStr("test"));
+    fmt.Println(getStr2(helloˢ, "world"));
+    fmt.Println(getStr3("hello, %s", worldˢ));
 
     nint i = 2;
     fmt.Print(writeˢ, i, (@string)" as "u8);

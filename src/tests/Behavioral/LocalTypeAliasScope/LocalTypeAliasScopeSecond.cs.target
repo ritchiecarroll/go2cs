@@ -42,9 +42,9 @@ internal static void secondWriteOps() {
 private static readonly object secondAliasesˢ = (@string)"secondAliases:"u8;
 
 internal static void secondAliases() {
-    var h = new secondAliases_hdr(Name: "link.txt"u8, Size: 0);
+    var h = new secondAliases_hdr(Name: "link.txt", Size: 0);
 
-    fmt.Println(secondAliasesˢ, h, new Header(Name: "raw"u8, Size: 7));
+    fmt.Println(secondAliasesˢ, h, new Header(Name: "raw", Size: 7));
 }
 
 } // end main_package

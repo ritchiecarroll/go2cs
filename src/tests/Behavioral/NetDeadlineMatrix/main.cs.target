@@ -9,14 +9,11 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tcpˢ = "tcp"u8;
-
 internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, bool ok) pair() {
     Δnet.Conn client = default!;
     Δnet.Conn server = default!;
 
-    var (listener, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
+    var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
     if (err != default!) {
         return (default!, default!, () => {
         }, false);
@@ -34,7 +31,7 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
         acceptsʗ1.ᐸꟷ(conn);
     });
 
-    (client, err) = Δnet.Dial(tcpˢ, listener.Addr().String());
+    (client, err) = Δnet.Dial("tcp", listener.Addr().String());
     if (err != default!) {
         listener.Close();
         return (default!, default!, () => {

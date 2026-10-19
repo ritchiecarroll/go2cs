@@ -30,7 +30,6 @@ private static readonly object notPointToPointˢ = (@string)"not point-to-point:
 private static readonly object lookupRoundTripsˢ = (@string)"-- lookup round trips --"u8;
 private static readonly object interfaceByIndexAgreesˢ = (@string)"InterfaceByIndex agrees:"u8;
 private static readonly object interfaceByNameAgreesˢ = (@string)"InterfaceByName agrees:"u8;
-private static readonly @string go2csNoSuchAdapterˢ = "go2cs-no-such-adapter"u8;
 private static readonly object unknownNameIsAnErrorˢ = (@string)"unknown name is an error:"u8;
 private static readonly object netInterfaceAddrsˢ = (@string)"-- net.InterfaceAddrs --"u8;
 private static readonly object addressesReportedˢ = (@string)"addresses reported:"u8;
@@ -154,7 +153,7 @@ internal static void Main() {
     fmt.Println(interfaceByIndexAgreesˢ, byIndexAgrees);
     fmt.Println(interfaceByNameAgreesˢ, byNameAgrees);
 
-    (_, err) = Δnet.InterfaceByName(go2csNoSuchAdapterˢ);
+    (_, err) = Δnet.InterfaceByName("go2cs-no-such-adapter");
     fmt.Println(unknownNameIsAnErrorˢ, err != default!);
 
     fmt.Println(netInterfaceAddrsˢ);

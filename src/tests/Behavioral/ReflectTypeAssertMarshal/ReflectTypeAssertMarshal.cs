@@ -44,10 +44,10 @@ private static readonly object nilInterfaceValueˢ = (@string)"nil interface val
 private static readonly object arrayˢ = (@string)"array:"u8;
 
 internal static void Main() {
-    var (b, err) = json.Marshal(new reading("lab"u8, 21.5D));
+    var (b, err) = json.Marshal(new reading("lab", 21.5D));
     fmt.Println(((@string)b), err);
 
-    (var der, err) = asn1.Marshal(new record(7, "seven"u8));
+    (var der, err) = asn1.Marshal(new record(7, "seven"));
     fmt.Printf("%x %v\n"u8, der, err);
 
     ref var back = ref heap(new record(), out var Ꮡback);
@@ -57,12 +57,12 @@ internal static void Main() {
     var (i, ok) = reflect.TypeAssert<nint>(reflect.ValueOf((nint)(42)));
     fmt.Println(concreteˢ, i, ok);
 
-    (var n, ok) = reflect.TypeAssert<namer>(reflect.ValueOf(new thing("t"u8)));
+    (var n, ok) = reflect.TypeAssert<namer>(reflect.ValueOf(new thing("t")));
     fmt.Println(interfaceOverConcreteˢ, n.Name(), ok);
 
     ref var held = ref heap<any>(out var Ꮡheld);
 
-    held = new thing("held"u8);
+    held = new thing("held");
     (var h, ok) = reflect.TypeAssert<thing>(reflect.ValueOf(Ꮡheld).Elem());
     fmt.Println(interfaceValueˢ, h.s, ok);
 
