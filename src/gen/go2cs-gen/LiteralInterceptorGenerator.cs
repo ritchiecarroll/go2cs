@@ -102,17 +102,30 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
             if (!invocation.ArgumentList.Arguments.Any(argument => argument.Expression.IsKind(SyntaxKind.StringLiteralExpression)))
                 continue;
 
-            if (semanticModel.GetOperation(invocation, cancellationToken) is not IInvocationOperation operation)
+            IMethodSymbol method;
+            List<Slot> slots;
+
+            if (semanticModel.GetOperation(invocation, cancellationToken) is IInvocationOperation operation)
+            {
+                CheckOverloadDrift(semanticModel, invocation, operation, marker, diagnostics, cancellationToken);
+                method = operation.TargetMethod;
+                slots = BoxedLiteralSlots(operation, marker);
+            }
+            else if (SoleCandidate(semanticModel, invocation, cancellationToken) is { } candidate)
+            {
+                // The call does not bind in THIS compilation: an argument names a member another generator adds (a
+                // TypeGenerator property of a defined type, `a.Value[1]`), and generators all read the same input. With
+                // one candidate in the method group, the final binding can only be that member.
+                method = candidate.method;
+                slots = PositionalSlots(invocation, candidate.method, candidate.receiverShift, marker);
+            }
+            else
+            {
                 continue;
-
-            CheckOverloadDrift(semanticModel, invocation, operation, marker, diagnostics, cancellationToken);
-
-            List<Slot> slots = BoxedLiteralSlots(operation, marker);
+            }
 
             if (slots.Count == 0)
                 continue;
-
-            IMethodSymbol method = operation.TargetMethod;
             string? refusal = Refusal(semanticModel, method, slots);
             InterceptableLocation? location = null;
 
@@ -178,6 +191,54 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
                     slots.Add(new Slot(parameter.Ordinal, index, elementLiteral.value, elementLiteral.syntax, elementLiteral.syntax.ToString()));
 
                 index++;
+            }
+        }
+
+        return slots;
+    }
+
+    // The one method a call that does not bind can resolve to, read from its method group: exactly one member, and not
+    // generic (a generic one is inferred from the arguments, which this compilation cannot see). receiverShift is 1
+    // for an extension method called through its receiver (the group reports it reduced; the interceptor takes the
+    // unreduced definition, whose parameter 0 is the receiver).
+    private static (IMethodSymbol method, int receiverShift)? SoleCandidate(SemanticModel semanticModel, InvocationExpressionSyntax invocation, CancellationToken cancellationToken)
+    {
+        IMethodSymbol[] group = [.. semanticModel.GetMemberGroup(invocation.Expression, cancellationToken).OfType<IMethodSymbol>()];
+
+        if (group is not [{ } only] || only.IsGenericMethod)
+            return null;
+
+        return only.ReducedFrom is { } definition ? (definition, 1) : (only, 0);
+    }
+
+    // The boxed-literal slots of a call that does not bind, by argument position: a C# string literal (positional, no
+    // ref kind) whose parameter is object, or which falls in a trailing params span or array of object.
+    private static List<Slot> PositionalSlots(InvocationExpressionSyntax invocation, IMethodSymbol method, int receiverShift, INamedTypeSymbol? marker)
+    {
+        List<Slot> slots = [];
+        ImmutableArray<IParameterSymbol> parameters = method.Parameters;
+        SeparatedSyntaxList<ArgumentSyntax> arguments = invocation.ArgumentList.Arguments;
+
+        if (arguments.Any(argument => argument.NameColon is not null))
+            return slots;
+
+        for (int position = 0; position < arguments.Count; position++)
+        {
+            ArgumentSyntax argument = arguments[position];
+
+            if (argument.Expression is not LiteralExpressionSyntax { RawKind: (int)SyntaxKind.StringLiteralExpression } literal || !argument.RefKindKeyword.IsKind(SyntaxKind.None))
+                continue;
+
+            int index = position + receiverShift;
+
+            if (parameters.Length > 0 && parameters[parameters.Length - 1] is { IsParams: true } tail && index >= parameters.Length - 1)
+            {
+                if (IsObjectSequence(tail.Type) && !IsMarked(tail, marker))
+                    slots.Add(new Slot(tail.Ordinal, index - (parameters.Length - 1), literal.Token.ValueText, literal, literal.ToString()));
+            }
+            else if (index < parameters.Length && parameters[index].Type.SpecialType == SpecialType.System_Object && !IsMarked(parameters[index], marker))
+            {
+                slots.Add(new Slot(index, -1, literal.Token.ValueText, literal, literal.ToString()));
             }
         }
 

@@ -132,7 +132,7 @@ public class LiteralInterceptorGeneratorTests
 
     private sealed record Run(Compilation Updated, ImmutableArray<Diagnostic> GeneratorDiagnostics, ImmutableArray<GeneratedSourceResult> Sources);
 
-    private static Run Generate(string body, string path = "main.cs", string? assemblyAttributes = null, bool runGenerator = true)
+    private static Run Generate(string body, string path = "main.cs", string? assemblyAttributes = null, bool runGenerator = true, IIncrementalGenerator? sibling = null)
     {
         string source =
             $$"""
@@ -162,7 +162,11 @@ public class LiteralInterceptorGeneratorTests
         if (!runGenerator)
             return new Run(compilation, [], []);
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create([new LiteralInterceptorGenerator().AsSourceGenerator()], parseOptions: s_parseOptions);
+        ISourceGenerator[] generators = sibling is null
+            ? [new LiteralInterceptorGenerator().AsSourceGenerator()]
+            : [new LiteralInterceptorGenerator().AsSourceGenerator(), sibling.AsSourceGenerator()];
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generators, parseOptions: s_parseOptions);
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation updated, out ImmutableArray<Diagnostic> diagnostics);
 
         return new Run(updated, diagnostics, [.. driver.GetRunResult().Results.SelectMany(result => result.GeneratedSources)]);
@@ -213,6 +217,50 @@ public class LiteralInterceptorGeneratorTests
         Run run = Generate("""return Show("one");""", runGenerator: false);
 
         Assert.AreEqual("System.String", Execute(run.Updated));
+    }
+
+    // A sibling generator's output, like TypeGenerator's members of a defined type: every generator reads the same input
+    // compilation, so to LiteralInterceptorGenerator a call whose other argument names such a member does not bind.
+    private sealed class AddsAMember : IIncrementalGenerator
+    {
+        public void Initialize(IncrementalGeneratorInitializationContext context) =>
+            context.RegisterSourceOutput(context.CompilationProvider, static (production, _) =>
+                production.AddSource("added.g.cs", "namespace go { public static partial class main_package { public static int Added => 7; public static Counter AddedBox => default; public static @string AddedText => default; } }"));
+    }
+
+    // The call does not bind in the generator's compilation, so its one-member method group decides: the final binding
+    // can only be that member. RED before the fallback: the literal went un-intercepted, and the analyzer's GO2CS0004
+    // failed the build (measured on DefinedArrayChainSlice, whose fmt.Println names a defined array's generated Value).
+    [TestMethod]
+    [DataRow("""return Println("x", Added);""", "go.string,System.Int32", DisplayName = "a params span call naming a sibling generator's member")]
+    [DataRow("""return Pair("k", AddedText);""", "go.string", DisplayName = "a fixed object slot beside an argument the sibling supplies")]
+    public void ACallThatBindsOnlyAfterASiblingGeneratorIsStillIntercepted(string body, string expected)
+    {
+        Run run = Generate(body, sibling: new AddsAMember());
+
+        Assert.AreEqual(0, run.GeneratorDiagnostics.Length, string.Join("; ", run.GeneratorDiagnostics));
+        Assert.AreEqual(expected, Execute(run.Updated));
+
+        ImmutableArray<Diagnostic> analyzed = run.Updated.WithAnalyzers([new StringLiteralBindingAnalyzer()]).GetAnalyzerDiagnosticsAsync().Result;
+
+        Assert.AreEqual(0, analyzed.Length, string.Join("; ", analyzed));
+    }
+
+    // The limit: a call whose RECEIVER a sibling generator supplies has no method group in this compilation, so nothing
+    // resolves it, and GO2CS0004 fails the build rather than let the callee see System.String. The converter never
+    // emits that shape bare: a method of a type this package declares (RecvGenerator's ж<T> forwarders), a promoted
+    // method and a non-identifier receiver all keep the pre-boxed field (hoistedLiteralOperations.go
+    // interceptableAnyArg).
+    [TestMethod]
+    public void ACallWhoseReceiverASiblingGeneratorSuppliesFailsClosed()
+    {
+        Run run = Generate("""return AddedBox.Add("v");""", sibling: new AddsAMember());
+
+        Assert.AreEqual(0, run.GeneratorDiagnostics.Count(diagnostic => diagnostic.Id is "GO2CS0005" or "GO2CS0006"), string.Join("; ", run.GeneratorDiagnostics));
+
+        ImmutableArray<Diagnostic> analyzed = run.Updated.WithAnalyzers([new StringLiteralBindingAnalyzer()]).GetAnalyzerDiagnosticsAsync().Result;
+
+        Assert.AreEqual(1, analyzed.Count(diagnostic => diagnostic.Id == "GO2CS0004"), string.Join("; ", analyzed));
     }
 
     [TestMethod]

@@ -21,6 +21,8 @@ import (
 // hoistedLiteralOperations.go). Every literal is distinct, so each arm's assertion names exactly one
 // site.
 const plainLiteralFixture = "package plit\n\n" +
+	"import \"sync\"\n\n" +
+	"type holder struct{ m sync.Map }\n\n" +
 	"type Token string\n\n" +
 	"type Box[T any] struct{ v T }\n\n" +
 	"func (b *Box[T]) Set(v T) { b.v = v }\n\n" +
@@ -51,6 +53,10 @@ const plainLiteralFixture = "package plit\n\n" +
 	"\tshow(\"mixed any and value use\")\n" +
 	"\tvar l logger\n" +
 	"\tl.Log(\"method variadic any\", 1)\n" +
+	"\tvar mp sync.Map\n" +
+	"\tmp.Store(\"cross package method\", 1)\n" +
+	"\tvar h holder\n" +
+	"\th.m.Store(\"field receiver method\", 2)\n" +
 	"\tvar sink Sink\n" +
 	"\tif sink != nil {\n" +
 	"\t\tsink.Put(\"interface method any\")\n" +
@@ -203,7 +209,7 @@ func TestPlainLiteralsAtInterceptableAnySlots(t *testing.T) {
 	for _, want := range []string{
 		`show("passed to an any slot");`,
 		`show("mixed any and value use");`,
-		`l.Log("method variadic any", (nint)(1));`,
+		`mp.Store("cross package method", (nint)(1));`,
 		`sink.Put("interface method any");`,
 		`show("");`,
 	} {
@@ -212,7 +218,7 @@ func TestPlainLiteralsAtInterceptableAnySlots(t *testing.T) {
 		}
 	}
 
-	for _, unwanted := range []string{"passedToAnAnySlotˢ", "mixedAnyAndValueUseˢ", "methodVariadicAnyˢ", "interfaceMethodAnyˢ"} {
+	for _, unwanted := range []string{"passedToAnAnySlotˢ", "mixedAnyAndValueUseˢ", "crossPackageMethodˢ", "interfaceMethodAnyˢ"} {
 		if strings.Contains(emitted, unwanted) {
 			t.Errorf("an intercepted literal claimed a field (%q):\n%s", unwanted, emitted)
 		}
@@ -232,6 +238,8 @@ func TestAnySlotsGoInterceptorsCannotReachKeepTheHoist(t *testing.T) {
 		`f(funcValueAnyˢ);`,
 		`Tag<nint>(1, genericFunctionAnySlotˢ);`,
 		`b.Note(genericTypeAnySlotˢ);`,
+		`l.Log(methodVariadicAnyˢ, (nint)(1));`,
+		`.Store(fieldReceiverMethodˢ, (nint)(2));`,
 		`(@string)"composite any element"u8`,
 	} {
 		if !strings.Contains(emitted, want) {
@@ -245,6 +253,8 @@ func TestAnySlotsGoInterceptorsCannotReachKeepTheHoist(t *testing.T) {
 		`f("func value any")`,
 		`Tag<nint>(1, "generic function any slot")`,
 		`b.Note("generic type any slot")`,
+		`l.Log("method variadic any"`,
+		`Store("field receiver method"`,
 	} {
 		if strings.Contains(emitted, unwanted) {
 			t.Errorf("a bare literal reached an any slot no interceptor can reach (%q):\n%s", unwanted, emitted)

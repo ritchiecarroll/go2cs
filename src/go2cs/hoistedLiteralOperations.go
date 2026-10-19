@@ -945,13 +945,21 @@ func hasBareCSharpForm(lit *ast.BasicLit) bool {
 
 // interceptableAnyArg reports whether the call an `any`-slot literal is an argument of is one
 // go2cs-gen's LiteralInterceptorGenerator intercepts: an ordinary invocation of a non-generic function or
-// method. Three shapes are not:
+// method, which the generator can resolve. These shapes are not:
 //   - a go/defer argument, which reaches the callee through the capture list's inferred type arguments;
 //   - a func value, whose C# call is a delegate Invoke, which no interceptor can replace;
 //   - a generic function or method, or a method of a generic type: its interceptor would itself have to be
-//     generic, which is deferred (no behavioral fixture calls one with a literal in an any slot).
+//     generic, which is deferred (no behavioral fixture calls one with a literal in an any slot);
+//   - a method the generator cannot resolve because what the call binds is GENERATED in the same compilation,
+//     and every generator reads the same input compilation, so none sees another's output: a method of a
+//     non-interface type declared in this package (go2cs-gen's RecvGenerator writes its pointer-receiver
+//     forwarders here, so `p.Info("x")` binds to a ж<T> overload the interceptor generator cannot see), a
+//     promoted method (the forwarder is generated on the embedding type), and a method whose receiver is not a
+//     plain identifier (a field reached through a pointer is a generated ref property).
 //
-// Each keeps the pre-boxed field. A method expression (`T.M(x, "s")`) is excluded with them.
+// Each keeps the pre-boxed field. A method expression (`T.M(x, "s")`) is excluded with them. A function call
+// whose OTHER arguments use generated members still binds once all generators have run, and the generator
+// resolves it from its one-member method group.
 func (c *hoistCollector) interceptableAnyArg(lit *ast.BasicLit, stack []ast.Node) bool {
 	call, ok := stack[len(stack)-1].(*ast.CallExpr)
 
@@ -978,15 +986,39 @@ func (c *hoistCollector) interceptableAnyArg(lit *ast.BasicLit, stack []ast.Node
 		return false
 	}
 
-	if sel, isSel := ast.Unparen(call.Fun).(*ast.SelectorExpr); isSel {
-		if selection := c.info.Selections[sel]; selection != nil && selection.Kind() == types.MethodExpr {
-			return false
-		}
-	}
-
 	sig, ok := fn.Origin().Type().(*types.Signature)
 
-	return ok && sig.TypeParams().Len() == 0 && sig.RecvTypeParams().Len() == 0
+	if !ok || sig.TypeParams().Len() > 0 || sig.RecvTypeParams().Len() > 0 {
+		return false
+	}
+
+	recv := sig.Recv()
+
+	if recv == nil {
+		return true
+	}
+
+	sel, isSel := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+	if !isSel {
+		return false
+	}
+
+	selection := c.info.Selections[sel]
+
+	if selection == nil || selection.Kind() != types.MethodVal || len(selection.Index()) > 1 {
+		return false
+	}
+
+	if _, isIdent := ast.Unparen(sel.X).(*ast.Ident); !isIdent {
+		return false
+	}
+
+	if isIface, _ := isInterface(recv.Type()); isIface {
+		return true
+	}
+
+	return fn.Pkg() != nil && fn.Pkg().Path() != c.pkgPath
 }
 
 // plainLiteralForm reports whether a literal has a plain C# form at all. A multi-line raw literal does
