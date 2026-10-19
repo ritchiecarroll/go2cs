@@ -30,6 +30,8 @@ using static go.main_package;
 [assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e673b20546167282920696e747d", "Label_T")]
 [assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e677d", "Box_T")]
 [assembly: GoDynamicTypeLift("696e746572666163657b546167282920696e747d", "Both_C")]
+[assembly: GoInlineConstraintLift("Min", 0, "Min_T")]
+[assembly: GoInlineConstraintLift("Ord", 0, "Ord_T")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
