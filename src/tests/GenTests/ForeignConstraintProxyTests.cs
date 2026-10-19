@@ -45,6 +45,8 @@ public class ForeignConstraintProxyTests
         {
             public class ж<T> { public ж(T value) { Value = value; } public T Value; }
 
+            public struct slice<T> { }
+
             public interface IжAdapter { object? Box { get; } }
 
             public class PanicException(object? state) : System.Exception(state?.ToString()) { }
@@ -313,5 +315,79 @@ public class ForeignConstraintProxyTests
     public void AnUnboundSlotPanicsByName()
     {
         Assert.AreEqual("go2cs: constraint proxy жLesser<go.example.elem_package+Other>: no package instantiating Lesser[*Other] bound method Less", Invoke(BuildAll(), "Unbound"));
+    }
+
+    // Go 1.26's GraphNode <-> Graph cycle (behavioral SelfRefGenerics): an interface constraining ITSELF whose method names
+    // a generic CONSTRAINED by it, `Owner() *Graph[N]` with `Graph[N GraphNode[N]]`.
+    private const string CycleLibSource =
+        """
+        using go;
+
+        namespace go.example;
+
+        public static partial class graph_package
+        {
+            public partial interface GraphNode<N> where N : GraphNode<N>
+            {
+                N Next();
+
+                ж<Graph<N>> Owner();
+            }
+
+            public partial struct Graph<N> where N : GraphNode<N> { public N head; }
+        }
+        """;
+
+    private const string CycleElemSource =
+        """
+        using go;
+
+        namespace go.example;
+
+        public static partial class gnode_package
+        {
+            public partial struct GNode { public int K; }
+
+            public static ж<GNode> Next(this ж<GNode> n) => n;
+
+            public static ж<graph_package.Graph<graph_package.жGraphNode<GNode>>> Owner(this ж<GNode> n) => null!;
+        }
+        """;
+
+    private const string CycleConsumerSource =
+        """
+        using go;
+
+        [assembly: GoImplement<global::go.example.gnode_package.GNode, global::go.example.graph_package.GraphNode<global::go.example.graph_package.жGraphNode<global::go.example.gnode_package.GNode>>>(ConstraintProxy = true)]
+
+        namespace go.example;
+
+        public static partial class gmain_package
+        {
+            public static global::go.example.graph_package.Graph<global::go.example.graph_package.жGraphNode<gnode_package.GNode>> Make() => default;
+        }
+        """;
+
+    /// <summary>
+    /// A slot names the self parameter as the PROXY wherever it is a type argument whose parameter carries the
+    /// self-referential constraint, as the converter renders `*Graph[*GNode]` in the element's own method; everywhere
+    /// else (a bare result, a slice element) it is the BOX. A box there was CS0311 in the interface's own assembly
+    /// (`Graph<ж<E>>` does not satisfy `where N : GraphNode<N>`), which broke SelfRefGenerics; the consumer's binder
+    /// lambdas then bind the element's methods exactly as their signatures read.
+    /// </summary>
+    [TestMethod]
+    public void ASlotNamesTheProxyWhereTheConstraintRequiresIt()
+    {
+        Built built = new([], []);
+
+        Build(built, "shims", ShimSource);
+        Build(built, "graph", CycleLibSource);
+        Build(built, "gnode", CycleElemSource);
+        Build(built, "gmain", CycleConsumerSource);
+
+        string proxy = Source(built, "graph", "жGraphNode-generic-proxy");
+
+        StringAssert.Contains(proxy, "global::System.Func<ж<E>, global::go.ж<global::go.example.graph_package.Graph<жGraphNode<E>>>> ᴛOwner");
+        StringAssert.Contains(proxy, "global::System.Func<ж<E>, ж<E>> ᴛNext");
     }
 }

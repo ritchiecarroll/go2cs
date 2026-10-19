@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using go2cs.Templates.InterfaceImpl;
@@ -1828,6 +1829,46 @@ public class ImplementGenerator : ISourceGenerator
     // qualified, so a package type of the same name cannot be confused with it.
     private const string GenericProxyElement = "E";
 
+    // A generic-proxy SLOT's type is the element's own Go-method shape: the self parameter is the BOX, `ж<E>`, except where
+    // it is a type argument whose type parameter is constrained by an interface closed over that parameter. Go 1.26's
+    // `GraphNode[N GraphNode[N]] interface { Owner() *Graph[N] }` with `Graph[N GraphNode[N]]` is the shape: the converter
+    // names the constraint proxy there in the element's method as well (`*Graph[*GNode]` is `ж<Graph<…жGraphNode<GNode>>>`),
+    // and the box would not satisfy the constraint at all: `Graph<ж<E>>` was CS0311 in the interface's own assembly
+    // (behavioral SelfRefGenerics).
+    private static string RenderSlotType(ITypeSymbol type, ITypeParameterSymbol selfParameter, string boxRef, string proxyRef)
+    {
+        if (SymbolEqualityComparer.Default.Equals(type, selfParameter))
+            return boxRef;
+
+        if (!ContainsTypeParameter(type, selfParameter))
+            return GlobalQualify(type.ToDisplayString());
+
+        switch (type)
+        {
+            case IArrayTypeSymbol array:
+                return $"{RenderSlotType(array.ElementType, selfParameter, boxRef, proxyRef)}[]";
+            case INamedTypeSymbol { IsTupleType: true } tuple:
+                return $"({string.Join(", ", tuple.TupleElements.Select(element => RenderSlotType(element.Type, selfParameter, boxRef, proxyRef)))})";
+            case INamedTypeSymbol named:
+                ImmutableArray<ITypeParameterSymbol> parameters = named.ConstructedFrom.TypeParameters;
+
+                IEnumerable<string> arguments = named.TypeArguments.Select((argument, index) =>
+                    SymbolEqualityComparer.Default.Equals(argument, selfParameter) && index < parameters.Length && IsSelfConstrained(parameters[index])
+                        ? proxyRef
+                        : RenderSlotType(argument, selfParameter, boxRef, proxyRef));
+
+                return $"{StripGenericTypeArguments(GlobalQualify(named.ConstructedFrom.ToDisplayString()))}<{string.Join(", ", arguments)}>";
+            default:
+                return GlobalQualify(type.ToDisplayString());
+        }
+    }
+
+    // Reports whether a type parameter is constrained by a generic interface closed over the parameter itself
+    // (`where N : GraphNode<N>`), the constraint only a constraint proxy satisfies for a pointer argument.
+    private static bool IsSelfConstrained(ITypeParameterSymbol parameter) =>
+        parameter.ConstraintTypes.Any(constraint => constraint is INamedTypeSymbol { IsGenericType: true } named &&
+            named.TypeArguments.Any(argument => SymbolEqualityComparer.Default.Equals(argument, parameter)));
+
     // The method set a constraint proxy forwards, each method paired with the interface that DECLARES it closed over
     // the proxy: the constraint's own members first, in declaration order, then every embedded interface's, ordered
     // by its rendered reference (see EmitConstraintProxy, whose order this repeats).
@@ -1889,11 +1930,11 @@ public class ImplementGenerator : ISourceGenerator
             // both declarations through one slot.
             if (slotNames.Add(slotName))
             {
-                IEnumerable<string> slotTypes = method.Parameters.Select(parameter => RenderWithProxy(parameter.Type, selfParameter, boxRef)).Prepend(boxRef);
+                IEnumerable<string> slotTypes = method.Parameters.Select(parameter => RenderSlotType(parameter.Type, selfParameter, boxRef, proxyRef)).Prepend(boxRef);
 
                 string slotType = method.ReturnsVoid
                     ? $"global::System.Action<{string.Join(", ", slotTypes)}>"
-                    : $"global::System.Func<{string.Join(", ", slotTypes.Append(RenderWithProxy(method.ReturnType, selfParameter, boxRef)))}>";
+                    : $"global::System.Func<{string.Join(", ", slotTypes.Append(RenderSlotType(method.ReturnType, selfParameter, boxRef, proxyRef)))}>";
 
                 string discards = method.Parameters.Length == 0 ? "_" : $"({string.Join(", ", Enumerable.Repeat("_", method.Parameters.Length + 1))})";
 
