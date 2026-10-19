@@ -16,8 +16,8 @@ partial struct Node {
 }
 
 internal static void Main() {
-    var a = Ꮡ(new Node(sym: Ꮡ(new sym(Value: 1, Name: "a"u8)), Weight: 10));
-    var b = Ꮡ(new Node(sym: Ꮡ(new sym(Value: 2, Name: "b"u8)), Weight: 20));
+    var a = Ꮡ(new Node(sym: Ꮡ(new sym(Value: 1, Name: "a")), Weight: 10));
+    var b = Ꮡ(new Node(sym: Ꮡ(new sym(Value: 2, Name: "b")), Weight: 20));
     a.Value.sym.Value.Node = b;
     b.Value.sym.Value.Node = a;
 

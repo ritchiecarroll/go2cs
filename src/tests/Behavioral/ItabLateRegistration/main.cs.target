@@ -40,17 +40,15 @@ internal static (@string, nint) primeLate() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string beforeˢ = "before"u8;
 private static readonly object primedˢ = (@string)"primed"u8;
-private static readonly @string afterˢ = "after "u8;
 
 internal static void Main() {
-    round(beforeˢ);
+    round("before");
 
     var (pn, ps) = primeLate();
     fmt.Println(primedˢ, pn, ps);
 
-    round(afterˢ);
+    round("after ");
 }
 
 } // end main_package

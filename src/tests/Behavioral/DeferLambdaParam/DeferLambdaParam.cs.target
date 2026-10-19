@@ -8,11 +8,7 @@ partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object deferredCountClosureˢ = (@string)"Deferred count (closure):"u8;
-private static readonly @string oneˢ = "one"u8;
-private static readonly @string twoˢ = "two"u8;
 private static readonly object deferredVariadicˢ = (@string)"Deferred variadic:"u8;
-private static readonly @string changedˢ = "CHANGED"u8;
-private static readonly @string alsoChangedˢ = "ALSO-CHANGED"u8;
 private static readonly object deferredVariadic1Argˢ = (@string)"Deferred variadic (1 arg):"u8;
 private static readonly object deferredVariadicFixedˢ = (@string)"Deferred variadic (fixed + tail):"u8;
 private static readonly object deferredVariadicNoArgsˢ = (@string)"Deferred variadic (no args):"u8;
@@ -28,13 +24,13 @@ internal static void Main() {
             fmt.Println(deferredCountClosureˢ, cnt);
         }, count, ref ᒐ);
 
-        @string a = oneˢ;
-        @string b = twoˢ;
+        @string a = "one";
+        @string b = "two";
         defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring partsʗp) => {
             var parts = partsʗp.slice();
             fmt.Println(deferredVariadicˢ, len(parts), parts);
         }))(ᴛ1, ᴛ2), a, b, ref ᒐ);
-        (a, b) = (changedˢ, alsoChangedˢ);
+        (a, b) = ("CHANGED", "ALSO-CHANGED");
 
         defer(ᴛ1 => ((Actionꓸꓸꓸ<nint>)((params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.slice();
@@ -53,7 +49,7 @@ internal static void Main() {
             var parts = partsʗp.slice();
             fmt.Println(deferredVariadicWithˢ, parts);
             return len(parts);
-        }))(ᴛ1, ᴛ2), (@string)"r1", "r2", ref ᒐ);
+        }))(ᴛ1, ᴛ2), (@string)"r1", (@string)"r2", ref ᒐ);
 
         fmt.Println(iifeVariadicˢ, ((Funcꓸꓸꓸ<nint, nint>)((params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.sslice();

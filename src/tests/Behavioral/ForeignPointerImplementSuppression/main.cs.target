@@ -16,8 +16,6 @@ private static readonly object switchˢ = (@string)"switch:"u8;
 private static readonly object plainˢ = (@string)"plain"u8;
 private static readonly object toneˢ2 = (@string)"tone"u8;
 private static readonly object defaultˢ = (@string)"default"u8;
-private static readonly @string firstˢ = "first"u8;
-private static readonly @string secondˢ = "second"u8;
 private static readonly object mapˢ = (@string)"map:"u8;
 private static readonly object plainˢ2 = (@string)"plain:"u8;
 private static readonly object libˢ = (@string)"lib:"u8;
@@ -59,8 +57,8 @@ internal static void Main() {
     }}
 
     var seen = new map<tone.Level, @string>{};
-    seen[l] = firstˢ;
-    seen[l2] = secondˢ;
+    seen[l] = "first";
+    seen[l2] = "second";
     fmt.Println(mapˢ, seen[l], len(seen));
 
     var p = Ꮡ(new tone.Plain(D: 4));

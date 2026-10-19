@@ -49,6 +49,8 @@ func resetPackageState(pkg *packages.Package) {
 	cgoDynamicImportPragmas = nil
 	currentPackagePath = pkg.PkgPath
 	currentPackageGorootVendored = false
+	packageHoistsLiterals = false
+	packagePlainLits = nil
 	exportedTypeAliases = make(map[string]string)
 	importedTypeAliases = make(map[string]string)
 	importedTypeAliasSourceDirs = make(map[string]string)

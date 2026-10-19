@@ -38,6 +38,38 @@ import (
 //
 // Emission is then a pure substitution: convExpr's BasicLit arm renders the field name for any
 // node this pass registered, and visitFuncDecl emits the declarations the function owns.
+//
+// PLAIN LITERALS (owner ruling 2026-10-17). Hoisting is now the STANDARD LIBRARY's mode and an
+// opt-in for everything else (-hoist-literals). By default a literal in a value slot typed exactly Go
+// `string` renders as the bare C# literal, `F("hello")`, the way Go reads: golib's
+// `implicit operator @string(string)` converts each C# literal once and shares the result
+// (StringLiteralCache.cs), so the slot still costs 0 B per evaluation. Such a literal claims no field,
+// so it has no init order and no name, which is why the init, init-reachable and degenerate-slug
+// exclusions below do not apply to it. Every slot where a bare C# string would bind the wrong C#
+// type keeps the hoisted (or inline) form: an `any` slot (System.String is the wrong dynamic type),
+// a named string type (no single conversion reaches the wrapper, CS0029), an argument of a generic
+// callee (C# would infer T = string), a go/defer argument (the capture list infers its own type
+// arguments), an sstring twin (a bare C# string binds the twin's sstring overload through a conversion
+// that transcodes on every call, where today's form is a zero-copy view), and a multi-line raw
+// literal (`.Raw()` must strip the checkout's CRs).
+
+// packageHoistsLiterals is the literal mode of the package being converted: true hoists exactly as
+// before plain literals existed, false emits plain literals. It is a property of the PACKAGE, never of
+// the invocation (see literalsHoistedFor), and each driver sets it beside currentPackageGorootVendored.
+var packageHoistsLiterals bool
+
+// literalsHoistedFor decides a package's literal mode. The standard library keeps hoisted literals: a
+// package is the standard library's when its source is under GOROOT/src (vendored packages included),
+// which is the same answer under -stdlib, under -tests (which runs with convertStdLib false and
+// re-emits the package's production .cs into the corpus) and in the -tests seed recomputation, so a
+// package's production and test passes can never disagree. -hoist-literals opts any other package in.
+func literalsHoistedFor(packageDir string, options Options) bool {
+	return options.hoistLiterals || stdLibImportPathOf(packageDir, options.goRoot) != ""
+}
+
+// packagePlainLits holds every string-literal NODE that renders as a plain C# literal (see the file
+// comment). convExpr's BasicLit arm consults it through isPlainStringLiteral.
+var packagePlainLits map[*ast.BasicLit]bool
 
 // packageHoistedLits maps every string-literal NODE this pass resolved to the package-scoped
 // static field that stands in for it. convExpr's BasicLit arm consults it; a node absent here
@@ -138,6 +170,7 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 	packageHoistLitReaders = make(map[*types.Func]bool)
 	packageHoistNames = make(map[string]hoistSeed)
 	packageHoistedLocalConsts = make(map[*types.Const]bool)
+	packagePlainLits = make(map[*ast.BasicLit]bool)
 
 	pkgPath := ""
 
@@ -184,13 +217,6 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 				continue
 			}
 
-			// `func init()` runs exactly once by construction — hoisting buys nothing and would
-			// move real work into the type initializer. A deterministic AST filter, not a
-			// hotness heuristic (§4.2).
-			if funcDecl.Recv == nil && funcDecl.Name.Name == "init" {
-				continue
-			}
-
 			// A declaration owned by a manual conversion emits only a placeholder comment (see
 			// visitFuncDecl's isManualFuncDecl early return) — it renders no FunctionPrefixMarker,
 			// so it can neither declare a field nor reference one from a body that is discarded.
@@ -198,14 +224,29 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 				continue
 			}
 
-			// Reachable from a package-level var initializer with no relocation available (see
-			// the initOrderRelocated parameter): a field declared above this function could be
-			// read before its own initializer runs, so nothing here hoists.
-			if c.initReachable[funcDecl] {
+			// `func init()` runs exactly once by construction — hoisting buys nothing and would
+			// move real work into the type initializer. A deterministic AST filter, not a
+			// hotness heuristic (§4.2). Reachable from a package-level var initializer with no
+			// relocation available (see the initOrderRelocated parameter): a field declared above
+			// this function could be read before its own initializer runs, so nothing here hoists.
+			// Neither reason touches a PLAIN literal, which declares no field, so those still go plain.
+			if (funcDecl.Recv == nil && funcDecl.Name.Name == "init") || c.initReachable[funcDecl] {
+				if !packageHoistsLiterals {
+					c.plainOnly = true
+					c.collectFunc(funcDecl)
+					c.collectPlainLocalConsts(funcDecl)
+					c.plainOnly = false
+				}
+
 				continue
 			}
 
 			c.collectFunc(funcDecl)
+
+			if !packageHoistsLiterals {
+				c.collectPlainLocalConsts(funcDecl)
+				continue
+			}
 
 			// Arm C: this function's string consts. Only an EMITTED file may declare the field (a
 			// seeded `-tests` pass does not rewrite a production file, whose `.cs` already has them).
@@ -214,6 +255,10 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 					packageHoistLitReaders[obj] = true
 				}
 			}
+		}
+
+		if !packageHoistsLiterals {
+			c.collectPlainPackageVars(fileEntry.file)
 		}
 	}
 
@@ -277,6 +322,10 @@ type hoistCollector struct {
 	// per-file walk state: whether this file's literals may CLAIM a field declaration.
 	emitted bool
 
+	// plainOnly marks a function whose literals may go plain but may claim no field (see the
+	// init and init-reachable arm of collectHoistedLiterals).
+	plainOnly bool
+
 	// per-function walk state
 	funcDecl *ast.FuncDecl
 }
@@ -320,6 +369,141 @@ func (c *hoistCollector) collectLocalConsts(funcDecl *ast.FuncDecl) bool {
 	})
 
 	return found
+}
+
+// collectPlainLocalConsts is arm C's plain-mode counterpart: a function-local const of type `string`
+// whose value is a single literal renders as a C# local with a plain initializer,
+// `@string fnAtoi = "Atoi";`, and claims no field. A const of a NAMED string type keeps its u8
+// initializer (a C# string has no single conversion to the wrapper), and so do a multi-line raw
+// literal and a raw-byte literal, for the reasons the file comment gives.
+func (c *hoistCollector) collectPlainLocalConsts(funcDecl *ast.FuncDecl) {
+	ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+		genDecl, ok := n.(*ast.GenDecl)
+
+		if !ok || genDecl.Tok != token.CONST {
+			return true
+		}
+
+		for _, spec := range genDecl.Specs {
+			valueSpec, ok := spec.(*ast.ValueSpec)
+
+			if !ok || len(valueSpec.Values) != len(valueSpec.Names) {
+				continue
+			}
+
+			for i, name := range valueSpec.Names {
+				obj, ok := c.info.Defs[name].(*types.Const)
+				lit, isLit := valueSpec.Values[i].(*ast.BasicLit)
+
+				if !ok || obj == nil || !isLit || lit.Kind != token.STRING || !isPlainStringSlot(obj.Type()) || !plainLiteralForm(lit) {
+					continue
+				}
+
+				packagePlainLits[lit] = true
+			}
+		}
+
+		return true
+	})
+}
+
+// collectPlainPackageVars is plain mode's walk of a file's package-level `var` initializers, which the
+// hoist never visits (a package-level initializer runs once): `var greeting = "hello"` and
+// `var names = []string{"a", "b"}` read as Go does. A literal there claims no field, so it is
+// plain-only; an argument of an inferred generic call keeps today's form by the same plainContext rule
+// as in a function body.
+func (c *hoistCollector) collectPlainPackageVars(file *ast.File) {
+	c.funcDecl = nil
+	c.plainOnly = true
+	defer func() { c.plainOnly = false }()
+
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+
+		if !ok || genDecl.Tok != token.VAR {
+			continue
+		}
+
+		var stack []ast.Node
+
+		ast.Inspect(genDecl, func(n ast.Node) bool {
+			if n == nil {
+				stack = stack[:len(stack)-1]
+				return true
+			}
+
+			if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == token.STRING && len(stack) > 0 {
+				c.consider(lit, stack)
+			}
+
+			stack = append(stack, n)
+			return true
+		})
+	}
+}
+
+// compositeElemSlot returns the slot type of a literal that is a composite literal's element, map key,
+// map value or struct field value, or nil when it is none of those.
+func (c *hoistCollector) compositeElemSlot(lit *ast.BasicLit, stack []ast.Node) types.Type {
+	if len(stack) == 0 {
+		return nil
+	}
+
+	var composite *ast.CompositeLit
+	isKey := false
+
+	switch parent := stack[len(stack)-1].(type) {
+	case *ast.CompositeLit:
+		composite = parent
+	case *ast.KeyValueExpr:
+		if len(stack) < 2 {
+			return nil
+		}
+
+		composite, _ = stack[len(stack)-2].(*ast.CompositeLit)
+		isKey = parent.Key == lit
+
+		if composite != nil {
+			if fields, ok := c.typeUnder(c.info.TypeOf(composite)).(*types.Struct); ok {
+				name, ok := parent.Key.(*ast.Ident)
+
+				if !ok || isKey {
+					return nil
+				}
+
+				for i := range fields.NumFields() {
+					if fields.Field(i).Name() == name.Name {
+						return fields.Field(i).Type()
+					}
+				}
+
+				return nil
+			}
+		}
+	}
+
+	if composite == nil {
+		return nil
+	}
+
+	switch under := c.typeUnder(c.info.TypeOf(composite)).(type) {
+	case *types.Slice:
+		return under.Elem()
+	case *types.Array:
+		return under.Elem()
+	case *types.Map:
+		if isKey {
+			return under.Key()
+		}
+
+		return under.Elem()
+	case *types.Struct:
+		if idx := exprIndexOf(composite.Elts, lit); idx >= 0 && idx < under.NumFields() {
+			return under.Field(idx).Type()
+		}
+	}
+
+	return nil
 }
 
 // initializerReachableFuncs returns every package function a package-level `var` initializer can
@@ -448,15 +632,34 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 		return // unparsable token — leave it exactly as it renders today
 	}
 
-	// The empty literal already costs 0 B (ToArray() of an empty span returns Array.Empty), and a
-	// raw-byte-escape literal takes the byte-array-backed @string path, not the u8 span (§4.2).
-	if value == "" || (!strings.HasPrefix(lit.Value, "`") && stringLiteralNeedsByteArray(lit.Value)) {
+	// A raw-byte-escape literal takes the byte-array-backed @string path, not the u8 span (§4.2), and
+	// has no plain form either: a C# literal cannot hold its bytes.
+	if !strings.HasPrefix(lit.Value, "`") && stringLiteralNeedsByteArray(lit.Value) {
 		return
 	}
 
-	kind, ok := c.hoistTarget(lit, stack)
+	kind, slot, ok := c.hoistTarget(lit, stack)
 
 	if !ok {
+		// Plain mode also reaches a composite ELEMENT (or key, or field value), which the hoist
+		// excludes as Tier B: the composite's own type fixes the slot's C# type.
+		if !packageHoistsLiterals && isPlainStringSlot(c.compositeElemSlot(lit, stack)) && plainLiteralForm(lit) {
+			packagePlainLits[lit] = true
+		}
+
+		return
+	}
+
+	// Plain mode: a value slot typed exactly `string` takes the bare C# literal and no field. The
+	// empty literal goes plain too; it reads as Go does and converts to the zero @string.
+	if !packageHoistsLiterals && kind == hoistUseValue && isPlainStringSlot(slot) && plainLiteralForm(lit) && c.plainContext(lit, stack) {
+		packagePlainLits[lit] = true
+		return
+	}
+
+	// The empty literal already costs 0 B (ToArray() of an empty span returns Array.Empty). A
+	// plain-only function claims no field (see collectHoistedLiterals).
+	if value == "" || c.plainOnly {
 		return
 	}
 
@@ -501,9 +704,9 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 // Everything not listed here — comparison and concat operands, switch-case values, composite
 // elements and keys, struct tags, index expressions over a non-map — is excluded by falling
 // through.
-func (c *hoistCollector) hoistTarget(lit *ast.BasicLit, stack []ast.Node) (hoistUseKind, bool) {
+func (c *hoistCollector) hoistTarget(lit *ast.BasicLit, stack []ast.Node) (hoistUseKind, types.Type, bool) {
 	if len(stack) == 0 {
-		return 0, false
+		return 0, nil, false
 	}
 
 	parent := stack[len(stack)-1]
@@ -514,26 +717,26 @@ func (c *hoistCollector) hoistTarget(lit *ast.BasicLit, stack []ast.Node) (hoist
 		sig := c.enclosingSignature(stack)
 
 		if idx < 0 || sig == nil || sig.Results() == nil || len(p.Results) != sig.Results().Len() {
-			return 0, false
+			return 0, nil, false
 		}
 
-		return c.classifyTarget(sig.Results().At(idx).Type())
+		return c.targetOf(sig.Results().At(idx).Type())
 
 	case *ast.AssignStmt:
 		// `s += "…"` is a CONCAT in assignment clothing and is excluded with the other concat
 		// operands (§4.2): golib's `operator +(@string, ReadOnlySpan<byte>)` already consumes the
 		// span without materializing it.
 		if p.Tok != token.ASSIGN && p.Tok != token.DEFINE {
-			return 0, false
+			return 0, nil, false
 		}
 
 		idx := exprIndexOf(p.Rhs, lit)
 
 		if idx < 0 || len(p.Lhs) != len(p.Rhs) {
-			return 0, false
+			return 0, nil, false
 		}
 
-		return c.classifyTarget(c.info.TypeOf(p.Lhs[idx]))
+		return c.targetOf(c.info.TypeOf(p.Lhs[idx]))
 
 	case *ast.ValueSpec:
 		// A CONST spec's value is emitted as the constant's own `static readonly` field — there is
@@ -541,7 +744,7 @@ func (c *hoistCollector) hoistTarget(lit *ast.BasicLit, stack []ast.Node) (hoist
 		for i := len(stack) - 1; i >= 0; i-- {
 			if genDecl, ok := stack[i].(*ast.GenDecl); ok {
 				if genDecl.Tok == token.CONST {
-					return 0, false
+					return 0, nil, false
 				}
 
 				break
@@ -551,61 +754,61 @@ func (c *hoistCollector) hoistTarget(lit *ast.BasicLit, stack []ast.Node) (hoist
 		idx := exprIndexOf(p.Values, lit)
 
 		if idx < 0 || len(p.Names) != len(p.Values) {
-			return 0, false
+			return 0, nil, false
 		}
 
 		if p.Type != nil {
-			return c.classifyTarget(c.info.TypeOf(p.Type))
+			return c.targetOf(c.info.TypeOf(p.Type))
 		}
 
 		if obj := c.info.Defs[p.Names[idx]]; obj != nil {
-			return c.classifyTarget(obj.Type())
+			return c.targetOf(obj.Type())
 		}
 
-		return 0, false
+		return 0, nil, false
 
 	case *ast.SendStmt:
 		if p.Value != lit {
-			return 0, false
+			return 0, nil, false
 		}
 
 		chanType, ok := c.typeUnder(c.info.TypeOf(p.Chan)).(*types.Chan)
 
 		if !ok {
-			return 0, false
+			return 0, nil, false
 		}
 
-		return c.classifyTarget(chanType.Elem())
+		return c.targetOf(chanType.Elem())
 
 	case *ast.IndexExpr:
 		// A standalone map-index key (`counts["build"]++`, `m["k"] = v`, `x := m["k"]`) rebuilds
 		// the key @string on every evaluation.
 		if p.Index != lit {
-			return 0, false
+			return 0, nil, false
 		}
 
 		mapType, ok := c.typeUnder(c.info.TypeOf(p.X)).(*types.Map)
 
 		if !ok {
-			return 0, false
+			return 0, nil, false
 		}
 
-		return c.classifyTarget(mapType.Key())
+		return c.targetOf(mapType.Key())
 
 	case *ast.CallExpr:
 		return c.callArgTarget(p, lit)
 	}
 
-	return 0, false
+	return 0, nil, false
 }
 
-func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (hoistUseKind, bool) {
+func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (hoistUseKind, types.Type, bool) {
 	idx := exprIndexOf(call.Args, lit)
 
 	// A SPREAD call (`append(b, "x"...)`) renders its arguments through the ellipsis machinery,
 	// which wraps a literal in its own `((@string)…)ꓸꓸꓸ` form — leave the whole call alone.
 	if idx < 0 || call.Ellipsis.IsValid() {
-		return 0, false
+		return 0, nil, false
 	}
 
 	// A UNIVERSE BUILTIN is not an ordinary call: go/types records a call-site-specific signature
@@ -614,7 +817,7 @@ func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (h
 	// cost until a panic actually fires), `print`/`println` take a golib overload set, and
 	// `[]byte("…")`/`copy` must materialize fresh storage. None of them hoist.
 	if callIsUniverseBuiltin(c.info, call.Fun) {
-		return 0, false
+		return 0, nil, false
 	}
 
 	// A CONVERSION, not a call. `[]byte("x")` / `[]rune("x")` must materialize FRESH mutable
@@ -624,26 +827,26 @@ func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (h
 		named, isNamed := types.Unalias(c.info.TypeOf(call)).(*types.Named)
 
 		if !isNamed {
-			return 0, false
+			return 0, nil, false
 		}
 
 		if basic, isBasic := named.Underlying().(*types.Basic); !isBasic || basic.Kind() != types.String {
-			return 0, false
+			return 0, nil, false
 		}
 
-		return hoistUseValue, true
+		return hoistUseValue, c.info.TypeOf(call), true
 	}
 
 	sig, ok := c.typeUnder(c.info.TypeOf(call.Fun)).(*types.Signature)
 
 	if !ok {
-		return 0, false
+		return 0, nil, false
 	}
 
 	params := sig.Params()
 
 	if params == nil {
-		return 0, false
+		return 0, nil, false
 	}
 
 	// FORMAT-POSITION literals stay inline (§4.2): a format string slugs badly (`"%v"` -> `vˢ`,
@@ -653,7 +856,7 @@ func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (h
 	// whole *f family and any user wrapper shaped like one.
 	if sig.Variadic() && params.Len() >= 2 && idx == params.Len()-2 && callFuncNameEndsWithF(call.Fun) {
 		if basic, isBasic := params.At(idx).Type().Underlying().(*types.Basic); isBasic && basic.Kind() == types.String {
-			return 0, false
+			return 0, nil, false
 		}
 	}
 
@@ -663,17 +866,17 @@ func (c *hoistCollector) callArgTarget(call *ast.CallExpr, lit *ast.BasicLit) (h
 		slice, isSlice := params.At(params.Len() - 1).Type().(*types.Slice)
 
 		if !isSlice {
-			return 0, false
+			return 0, nil, false
 		}
 
 		target = slice.Elem()
 	} else if idx < params.Len() {
 		target = params.At(idx).Type()
 	} else {
-		return 0, false
+		return 0, nil, false
 	}
 
-	return c.classifyTarget(target)
+	return c.targetOf(target)
 }
 
 // classifyTarget maps a target slot's type to the hoist kind. Only two slots qualify: a Go
@@ -704,6 +907,129 @@ func (c *hoistCollector) classifyTarget(t types.Type) (hoistUseKind, bool) {
 	return 0, false
 }
 
+// targetOf classifies a slot (classifyTarget) and also reports its type, which plain mode reads.
+func (c *hoistCollector) targetOf(t types.Type) (hoistUseKind, types.Type, bool) {
+	kind, ok := c.classifyTarget(t)
+	return kind, t, ok
+}
+
+// isPlainStringSlot reports whether a slot is typed exactly Go `string`, the one slot a bare C#
+// string literal reaches in a single conversion. A named string type is not: its wrapper converts
+// from @string and from a u8 span, never from a C# string (CS0029).
+func isPlainStringSlot(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	basic, ok := types.Unalias(t).(*types.Basic)
+
+	return ok && (basic.Kind() == types.String || basic.Kind() == types.UntypedString)
+}
+
+// plainLiteralForm reports whether a literal has a plain C# form at all. A multi-line raw literal does
+// not: its value is Go's only after `.Raw()` strips the CRs every checkout gives a .cs file
+// (.gitattributes pins *.cs eol=crlf), and a cached plain literal would keep them. A raw-byte literal
+// does not either (consider filters it before this is asked).
+func plainLiteralForm(lit *ast.BasicLit) bool {
+	return !(strings.HasPrefix(lit.Value, "`") && strings.Contains(lit.Value, "\n"))
+}
+
+// plainContext reports whether a call argument's C# binding is fixed by the callee's declared
+// parameter, which is what a bare C# string needs. Three shapes are not:
+//   - a go/defer argument, which the lowering passes through the capture list's own inferred type
+//     arguments (`defer((ᴛ1) => f(ᴛ1), helloˢ, ref ᒐ)`);
+//   - an argument whose callee's ORIGIN parameter mentions a type parameter: the converter emits an
+//     inferred call without type arguments, so C# infers T from the argument, and a plain "key" makes
+//     `Pair("key", 1)` a map<string, nint> that compiles and diverges;
+//   - an argument of an sstring twin, where @string and sstring both convert from a C# string. The
+//     twin registry (sstringTwins) is one process-wide table keyed by package path, so it answers for
+//     a twin of any package, the importing ones included.
+//
+// Every other parent is already a fixed-type slot.
+func (c *hoistCollector) plainContext(lit *ast.BasicLit, stack []ast.Node) bool {
+	call, ok := stack[len(stack)-1].(*ast.CallExpr)
+
+	if !ok {
+		return true
+	}
+
+	if len(stack) >= 2 {
+		switch owner := stack[len(stack)-2].(type) {
+		case *ast.GoStmt:
+			if owner.Call == call {
+				return false
+			}
+		case *ast.DeferStmt:
+			if owner.Call == call {
+				return false
+			}
+		}
+	}
+
+	fn := calleeFunc(c.info, call)
+
+	if fn == nil {
+		return true // a func value or a conversion: the slot type is the value's own
+	}
+
+	if len(sstringTwinIndices(fn)) > 0 {
+		return false
+	}
+
+	sig, ok := fn.Origin().Type().(*types.Signature)
+
+	if !ok || sig.Params() == nil {
+		return true
+	}
+
+	params := sig.Params()
+	idx := exprIndexOf(call.Args, lit)
+
+	switch {
+	case idx < 0 || params.Len() == 0:
+		return true
+	case sig.Variadic() && idx >= params.Len()-1:
+		return !typeContainsTypeParams(params.At(params.Len() - 1).Type())
+	case idx < params.Len():
+		return !typeContainsTypeParams(params.At(idx).Type())
+	}
+
+	return true
+}
+
+// calleeFunc returns the function or method a call names, or nil for a func value, a conversion or a
+// builtin. An explicit instantiation (`F[string](…)`) names the same function.
+func calleeFunc(info *types.Info, call *ast.CallExpr) *types.Func {
+	fun := ast.Unparen(call.Fun)
+
+	switch f := fun.(type) {
+	case *ast.IndexExpr:
+		fun = f.X
+	case *ast.IndexListExpr:
+		fun = f.X
+	}
+
+	var ident *ast.Ident
+
+	switch f := fun.(type) {
+	case *ast.Ident:
+		ident = f
+	case *ast.SelectorExpr:
+		ident = f.Sel
+	default:
+		return nil
+	}
+
+	fn, _ := info.Uses[ident].(*types.Func)
+
+	return fn
+}
+
+// isPlainStringLiteral reports whether basicLit renders as a plain C# literal (packagePlainLits).
+func isPlainStringLiteral(basicLit *ast.BasicLit) bool {
+	return packagePlainLits != nil && packagePlainLits[basicLit]
+}
+
 func (c *hoistCollector) typeUnder(t types.Type) types.Type {
 	if t == nil {
 		return nil
@@ -720,6 +1046,10 @@ func (c *hoistCollector) enclosingSignature(stack []ast.Node) *types.Signature {
 			sig, _ := c.info.TypeOf(funcLit).(*types.Signature)
 			return sig
 		}
+	}
+
+	if c.funcDecl == nil {
+		return nil // a package-level initializer: a `return` there belongs to a func literal
 	}
 
 	if obj, ok := c.info.Defs[c.funcDecl.Name].(*types.Func); ok && obj != nil {

@@ -5,7 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abCˢ = "AB\U0001F600\U0001F601C"u8;
 private static readonly object lenˢ = (@string)"len"u8;
 private static readonly object totalˢ = (@string)"total"u8;
 private static readonly object origˢ = (@string)"orig"u8;
@@ -17,7 +16,7 @@ private static readonly object addrˢ = (@string)"addr"u8;
 private static readonly object throughPointerˢ = (@string)"through pointer"u8;
 
 internal static void Main() {
-    @string s = abCˢ;
+    @string s = "AB\U0001F600\U0001F601C";
     slice<uint16> @out = default!;
     foreach (var (_, rᴛ1) in s) {
         var r = rᴛ1;

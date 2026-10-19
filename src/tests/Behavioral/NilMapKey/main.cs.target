@@ -13,20 +13,15 @@ internal static @string Error(this ref myErr e) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilKeyˢ = "nil-key"u8;
-private static readonly @string alphaˢ = "alpha"u8;
-private static readonly @string sevenˢ = "seven"u8;
 private static readonly object lenˢ = (@string)"len:"u8;
 private static readonly object indexˢ = (@string)"index:"u8;
 private static readonly object commaOkˢ = (@string)"comma-ok:"u8;
 private static readonly object rangeNilEntryˢ = (@string)"range nil entry:"u8;
 private static readonly object rangeˢ = (@string)"range:"u8;
-private static readonly @string againˢ = "again"u8;
 private static readonly object overwriteˢ = (@string)"overwrite:"u8;
 private static readonly object neighborsˢ = (@string)"neighbors:"u8;
 private static readonly object afterDeleteˢ = (@string)"after delete:"u8;
 private static readonly object deleteAgainˢ = (@string)"delete again:"u8;
-private static readonly @string backˢ = "back"u8;
 private static readonly object reAddˢ = (@string)"re-add:"u8;
 private static readonly object afterClearˢ = (@string)"after clear:"u8;
 private static readonly object literalˢ = (@string)"literal:"u8;
@@ -43,9 +38,9 @@ private static readonly object printPtrMapˢ = (@string)"print ptr map:"u8;
 internal static void Main() {
     var m = new map<any, @string>();
 
-    m[default!] = nilKeyˢ;
-    m[(@string)"a"u8] = alphaˢ;
-    m[(nint)(7)] = sevenˢ;
+    m[default!] = "nil-key";
+    m[(@string)"a"u8] = "alpha";
+    m[(nint)(7)] = "seven";
 
     fmt.Println(lenˢ, len(m));
     fmt.Println(indexˢ, m[default!]);
@@ -64,7 +59,7 @@ internal static void Main() {
     }
     fmt.Println(rangeˢ, seen, sawNil);
 
-    m[default!] = againˢ;
+    m[default!] = "again";
     fmt.Println(overwriteˢ, len(m), m[default!]);
 
     fmt.Println(neighborsˢ, m[(@string)"a"u8], m[(nint)(7)]);
@@ -76,7 +71,7 @@ internal static void Main() {
     delete(m, default!);
     fmt.Println(deleteAgainˢ, len(m));
 
-    m[default!] = backˢ;
+    m[default!] = "back";
     fmt.Println(reAddˢ, len(m), m[default!]);
     clear(m);
     (_, ok) = m[default!, ꟷ];
@@ -87,7 +82,7 @@ internal static void Main() {
 
     var em = new map<error, nint>();
     em[default!] = 10;
-    em[new myErrжerror(Ꮡ(new myErr("boom"u8)))] = 20;
+    em[new myErrжerror(Ꮡ(new myErr("boom")))] = 20;
     fmt.Println(errorMapˢ, len(em), em[default!]);
 
     var (ev, eok) = em[default!, ꟷ];

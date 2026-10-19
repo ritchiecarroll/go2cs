@@ -10,22 +10,17 @@ internal static bucketType memProfile => /* iota */ 0;
 internal static bucketType blockProfile => 1;
 internal static bucketType mutexProfile => 2;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string invalidˢ = "invalid"u8;
-private static readonly @string memˢ = "mem"u8;
-private static readonly @string blockOrMutexˢ = "block-or-mutex"u8;
-
 internal static @string size(bucketType typ) {
     @string s = default!;
     var exprᴛ1 = typ;
     if (exprᴛ1 == memProfile) {
-        s = memˢ;
+        s = "mem";
     }
     else if (exprᴛ1 == blockProfile || exprᴛ1 == mutexProfile) {
-        s = blockOrMutexˢ;
+        s = "block-or-mutex";
     }
     else { /* default: */
-        s = invalidˢ;
+        s = "invalid";
     }
 
     return s;

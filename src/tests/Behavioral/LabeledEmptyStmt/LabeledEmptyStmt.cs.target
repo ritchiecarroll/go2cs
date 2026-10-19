@@ -18,18 +18,14 @@ keep:;
     return best;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string smallˢ = "small"u8;
-private static readonly @string bigˢ = "big"u8;
-
 internal static @string gotoEndOfFunc(nint v) {
-    @string msg = smallˢ;
+    @string msg = "small";
     if (v > 10) {
         goto big;
     }
     return msg;
 big:
-    msg = bigˢ;
+    msg = "big";
     return msg;
 }
 

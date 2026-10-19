@@ -36,7 +36,7 @@ internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
 
 internal static void Main() {
     var s = Ꮡ(new state(nil));
-    var c = Ꮡ(new conn(name: "c1"u8, state: s));
+    var c = Ꮡ(new conn(name: "c1", state: s));
 
     var (n, err) = c.Write(slice<byte>("hello"u8));
     fmt.Println(n, err == default!);

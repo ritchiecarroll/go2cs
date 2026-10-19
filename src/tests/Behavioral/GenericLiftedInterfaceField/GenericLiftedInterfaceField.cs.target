@@ -79,7 +79,7 @@ internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
 private static readonly object assertˢ = (@string)"assert:"u8;
 
 internal static void Main() {
-    var d = new constraints<@string, @string>("dns"u8, newDNS("a"u8), newDNS("x"u8));
+    var d = new constraints<@string, @string>("dns", newDNS("a"), newDNS("x"));
     var (ᴛ1, ᴛ2) = check(d, (@string)"a");
     fmt.Println(ᴛ1, ᴛ2);
     var (ᴛ3, ᴛ4) = check(d, (@string)"b");
@@ -87,9 +87,9 @@ internal static void Main() {
     var (ᴛ5, ᴛ6) = check(d, (@string)"x");
     fmt.Println(ᴛ5, ᴛ6);
 
-    var q = newDNS("z"u8);
+    var q = newDNS("z");
     d.permitted = q;
-    var (t1, ok1) = q.query("z"u8);
+    var (t1, ok1) = q.query("z");
     var (t2, ok2) = d.permitted.query("z"u8);
     fmt.Println(t1, ok1, t2, ok2);
 
@@ -98,7 +98,7 @@ internal static void Main() {
     fmt.Println(assertˢ, isShape);
 
     var c = newCounter();
-    var k = new constraints<ж<counter>, nint>("count"u8, c, default!);
+    var k = new constraints<ж<counter>, nint>("count", c, default!);
     var (r, ok) = check(k, 1);
     fmt.Println((~r).n, ok);
     (_, _) = c.query(0);

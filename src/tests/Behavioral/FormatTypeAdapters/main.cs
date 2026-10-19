@@ -14,22 +14,16 @@ partial struct loud {
     internal nint n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string loudˢ = "LOUD"u8;
-
 internal static @string greet(this ref loud l) {
-    return loudˢ;
+    return "LOUD";
 }
 
 partial struct soft {
     internal nint n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string softˢ = "soft"u8;
-
 internal static @string greet(this soft s) {
-    return softˢ;
+    return "soft";
 }
 
 partial interface stamper {
@@ -48,7 +42,7 @@ internal static void Main() {
 
     fmt.Printf("%T\n"u8, new soft(n: 4));
 
-    stamper m = new typelib_Markᴠstamper(typelib.NewMark("x"u8));
+    stamper m = new typelib_Markᴠstamper(typelib.NewMark("x"));
     fmt.Printf("%T\n"u8, m);
 
     fmt.Println(g.greet(), h.greet(), m.Stamp());

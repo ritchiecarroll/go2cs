@@ -96,7 +96,7 @@ public static @string Labels<N>(this ж<Graph<N>> Ꮡg)
 {
     ref var g = ref Ꮡg.DerefOrNull();
 
-    @string @out = ""u8;
+    @string @out = "";
     var x = g.head;
     foreach (var _ᴛ1 in range(g.size)) {
         if (x.Owner() != Ꮡg) {
@@ -138,9 +138,9 @@ internal static void Main() {
     fmt.Println(ms.Least());
 
     var g = Ꮡ(new Graph<gnodeжGraphNode>(size: 4));
-    var a = Ꮡ(new gnode(g: g, name: "a"u8));
-    var b = Ꮡ(new gnode(g: g, name: "b"u8));
-    var c = Ꮡ(new gnode(name: "c"u8));
+    var a = Ꮡ(new gnode(g: g, name: "a"));
+    var b = Ꮡ(new gnode(g: g, name: "b"));
+    var c = Ꮡ(new gnode(name: "c"));
     (a.Value.next, b.Value.next, c.Value.next) = (b, c, a);
     g.Value.head = a;
     fmt.Println(g.Labels());

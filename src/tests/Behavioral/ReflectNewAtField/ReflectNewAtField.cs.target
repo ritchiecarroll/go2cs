@@ -32,7 +32,7 @@ internal static void Main() {
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 7;
     ref var x = ref heap<P>(out var Ꮡx);
-    x = new P(1, 2, new inner("x"u8), Ꮡn);
+    x = new P(1, 2, new inner("x"), Ꮡn);
     var v = reflect.ValueOf(Ꮡx).Elem();
 
     for (nint i = 0; i < v.NumField(); i++) {
@@ -43,11 +43,11 @@ internal static void Main() {
     fmt.Println(field(v, 0).Interface(), field(v, 1).Interface(), field(v, 2).Interface(), field(v, 3).Interface()._<ж<nint>>().Value);
 
     field(v, 1).SetInt(20);
-    field(v, 2).Set(reflect.ValueOf(new inner("z"u8)));
+    field(v, 2).Set(reflect.ValueOf(new inner("z")));
     fmt.Println(x.@private, x.s.a);
 
     ref var y = ref heap<P>(out var Ꮡy);
-    y = new P(1, 3, new inner("y"u8), Ꮡn);
+    y = new P(1, 3, new inner("y"), Ꮡn);
     var w = reflect.ValueOf(Ꮡy).Elem();
     fmt.Println(AreEqual(field(v, 1).Interface(), field(w, 1).Interface()));
     fmt.Println(reflect.DeepEqual(field(v, 2).Interface(), field(w, 2).Interface()));

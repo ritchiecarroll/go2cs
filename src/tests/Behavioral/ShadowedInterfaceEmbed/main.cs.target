@@ -43,26 +43,23 @@ internal static @string Handle(this wrapper w, @string msg) {
     return w.prefix + w.Handler.Handle(msg);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string msgˢ = "msg"u8;
-
 internal static void Main() {
-    var l = new Logger(name: "test"u8);
+    var l = new Logger(name: "test");
     fmt.Println(l.Handler());
 
     ref var @base = ref heap<baseHandler>(out var Ꮡbase);
     @base = new baseHandler(level: 2);
 
-    ΔHandler hv = new wrapper(Handler: @base, prefix: "wrap:"u8);
+    ΔHandler hv = new wrapper(Handler: @base, prefix: "wrap:");
     fmt.Println(hv.Enabled(1), hv.Enabled(3));
-    fmt.Println(hv.Handle(msgˢ));
-    fmt.Println(hv.WithName("n"u8));
+    fmt.Println(hv.Handle("msg"));
+    fmt.Println(hv.WithName("n"));
 
-    var hp = Ꮡ(new wrapper(Handler: @base, prefix: "ptr:"u8));
+    var hp = Ꮡ(new wrapper(Handler: @base, prefix: "ptr:"));
     ΔHandler hpi = new wrapperжΔHandler(hp);
     fmt.Println(hpi.Enabled(2));
-    fmt.Println(hpi.Handle(msgˢ));
-    fmt.Println(hpi.WithName("p"u8));
+    fmt.Println(hpi.Handle("msg"));
+    fmt.Println(hpi.WithName("p"));
 }
 
 } // end main_package

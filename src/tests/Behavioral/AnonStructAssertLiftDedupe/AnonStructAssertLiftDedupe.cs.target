@@ -64,14 +64,14 @@ internal static void Main() {
     fmt.Println(b1PointerAssertionˢ, (~pq).X, (~pq).Y);
 
     main_s s = default!;
-    s.A = "hi"u8;
+    s.A = "hi";
 
     any k = s;
     var t = k._<main_s>();
     s = t;
     fmt.Println(b2DifferentShapeˢ, s.A);
 
-    any w = new main_type(X: "a"u8, Y: "b"u8);
+    any w = new main_type(X: "a", Y: "b");
     var x = w._<main_type>();
     fmt.Println(b3SameNamesDifferentˢ, x.X, x.Y);
 

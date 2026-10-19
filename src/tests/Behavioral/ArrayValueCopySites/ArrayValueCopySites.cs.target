@@ -149,7 +149,7 @@ internal static void rangeAssignExisting() {
 private static readonly object mapKeyRangeˢ = (@string)"mapKeyRange:"u8;
 
 internal static void mapKeyRange() {
-    var mk = new map<array<nint>, @string>{[new nint[]{1, 2}.array()] = "v"u8};
+    var mk = new map<array<nint>, @string>{[new nint[]{1, 2}.array()] = "v"};
 
     foreach (var (kᴛ1, _) in mk) {
         var k = kᴛ1.Clone();
@@ -199,12 +199,12 @@ private static readonly object mapKeyLiteralˢ = (@string)"mapKeyLiteral:"u8;
 
 internal static void compositeMapValueAndKey() {
     var a = new nint[]{1, 2, 3}.array();
-    var mv = new map<@string, array<nint>>{["x"u8] = a.Clone()};
+    var mv = new map<@string, array<nint>>{["x"] = a.Clone()};
     a[0] = 99;
-    fmt.Println(mapValueˢ, mv["x"u8, () => new array<nint>(3)]);
+    fmt.Println(mapValueˢ, mv["x", () => new array<nint>(3)]);
 
     var k = new nint[]{1, 2}.array();
-    var mk = new map<array<nint>, @string>{[k.Clone()] = "kv"u8};
+    var mk = new map<array<nint>, @string>{[k.Clone()] = "kv"};
     k[0] = 99;
     fmt.Println(mapKeyLiteralˢ, mk[new nint[]{1, 2}.array()]);
 }

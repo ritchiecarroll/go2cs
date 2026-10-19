@@ -29,7 +29,6 @@ private static readonly object verifyErrorˢ = (@string)"verify error:"u8;
 private static readonly object unknownAuthorityˢ = (@string)"unknown authority:"u8;
 private static readonly object verifyWithDnsnameErrorˢ = (@string)"verify with dnsname error:"u8;
 private static readonly object hostnameMismatchˢ = (@string)"hostname mismatch:"u8;
-private static readonly @string otherExampleˢ = "other.example"u8;
 
 internal static void Main() {
     var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
@@ -41,12 +40,12 @@ internal static void Main() {
     var now = time.Now();
     var template = Ꮡ(new x509.Certificate(
         SerialNumber: big.NewInt(20260818),
-        Subject: new pkix.Name(CommonName: "go2cs.example"u8),
+        Subject: new pkix.Name(CommonName: "go2cs.example"),
         NotBefore: now.Add(-time.ΔHour),
         NotAfter: now.Add(time.ΔHour),
         KeyUsage: (x509.KeyUsage)(x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign),
         ExtKeyUsage: new x509.ExtKeyUsage[]{x509.ExtKeyUsageServerAuth}.slice(),
-        DNSNames: new @string[]{"go2cs.example"u8}.slice(),
+        DNSNames: new @string[]{"go2cs.example"}.slice(),
         IsCA: true,
         BasicConstraintsValid: true
     ));
@@ -70,10 +69,10 @@ internal static void Main() {
     fmt.Println(verifyErrorˢ, err);
     fmt.Println(unknownAuthorityˢ, isUnknownAuthority(err));
 
-    (_, err) = cert.Verify(new x509.VerifyOptions(DNSName: "go2cs.example"u8));
+    (_, err) = cert.Verify(new x509.VerifyOptions(DNSName: "go2cs.example"));
     fmt.Println(verifyWithDnsnameErrorˢ, err);
 
-    fmt.Println(hostnameMismatchˢ, cert.VerifyHostname(otherExampleˢ) != default!);
+    fmt.Println(hostnameMismatchˢ, cert.VerifyHostname("other.example") != default!);
 
     walkChain(der);
 }
@@ -159,27 +158,21 @@ internal static void walkChain(slice<byte> der) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object policyMatchˢ = (@string)"policy match:"u8;
-private static readonly @string go2csExampleˢ = "go2cs.example"u8;
 private static readonly object policyMismatchˢ = (@string)"policy mismatch:"u8;
 private static readonly object policyUntrustedˢ = (@string)"policy untrusted:"u8;
 
 internal static void checkSSLPolicy(ж<syscall.CertChainContext> ᏑchainCtx) {
     const uint32 allowUnknownCA = 0x00000010;
 
-    fmt.Println(policyMatchˢ, sslPolicyError(ᏑchainCtx, go2csExampleˢ, allowUnknownCA));
-    fmt.Println(policyMismatchˢ, sslPolicyError(ᏑchainCtx, otherExampleˢ, allowUnknownCA));
-    fmt.Println(policyUntrustedˢ, sslPolicyError(ᏑchainCtx, go2csExampleˢ, 0));
+    fmt.Println(policyMatchˢ, sslPolicyError(ᏑchainCtx, "go2cs.example", allowUnknownCA));
+    fmt.Println(policyMismatchˢ, sslPolicyError(ᏑchainCtx, "other.example", allowUnknownCA));
+    fmt.Println(policyUntrustedˢ, sslPolicyError(ᏑchainCtx, "go2cs.example", 0));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string utf16Errorˢ = "utf16 error"u8;
-private static readonly @string cnMismatchˢ = "cn mismatch"u8;
-private static readonly @string untrustedRootˢ = "untrusted root"u8;
 
 internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx, @string serverName, uint32 flags) {
     var (servernamep, err) = syscall.UTF16PtrFromString(serverName);
     if (err != default!) {
-        return utf16Errorˢ;
+        return "utf16 error";
     }
 
     var sslPara = Ꮡ(new syscall.SSLExtraCertChainPolicyPara(
@@ -204,13 +197,13 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx,
 
     var exprᴛ1 = status.Error;
     if (exprᴛ1 is 0) {
-        return "ok"u8;
+        return "ok";
     }
     if (exprᴛ1 == syscall.CERT_E_CN_NO_MATCH) {
-        return cnMismatchˢ;
+        return "cn mismatch";
     }
     if (exprᴛ1 == syscall.CERT_E_UNTRUSTEDROOT) {
-        return untrustedRootˢ;
+        return "untrusted root";
     }
     { /* default: */
         return fmt.Sprintf("0x%08x"u8, status.Error);

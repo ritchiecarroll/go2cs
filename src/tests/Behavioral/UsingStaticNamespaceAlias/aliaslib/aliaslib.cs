@@ -2,7 +2,7 @@ namespace go.UsingStaticNamespaceAlias;
 
 partial class aliaslib_package {
 
-public static @string Unsafe = "unsafe-var"u8;
+public static @string Unsafe = "unsafe-var";
 
 public static nint Closure(nint n) {
     return n * 3;
