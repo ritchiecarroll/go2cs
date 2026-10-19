@@ -82,6 +82,25 @@ partial class runtime_package
 
     // ---- the guard's view (GolibTests RuntimeMemoryFamilyTests) ----
 
+    // The sys*OS seams, named as the windows flavour's (mem_windows_impl.cs), so one GolibTests arm drives each:
+    // Go's converted bodies (mem_linux.cs), which map and unmap through sysMmap / sysMunmap above.
+    // Block bodies: a declaration line that names sysAllocOS would read to TestManualConversionRegistrationsHaveBodies
+    // as this file declaring it, and on this flavour Go's converted body is the one.
+    public static nuint GoSysAllocOS(nuint n)
+    {
+        return ((uintptr)sysAllocOS(n, ""u8)).Value;
+    }
+
+    public static void GoSysFreeOS(nuint v, nuint n)
+    {
+        sysFreeOS(new @unsafe.Pointer(v), n);
+    }
+
+    public static nuint GoSysReserveOS(nuint v, nuint n)
+    {
+        return ((uintptr)sysReserveOS(new @unsafe.Pointer(v), n, ""u8)).Value;
+    }
+
     /// <summary>Maps n bytes anonymous read/write, writes a byte pattern, reads it back, advises DONTNEED, unmaps; returns the address and whether the round trip held.</summary>
     public static unsafe (nuint address, bool roundTrip, nint firstErr, int madviseRc) GoSysMmapProbe(nuint n)
     {
