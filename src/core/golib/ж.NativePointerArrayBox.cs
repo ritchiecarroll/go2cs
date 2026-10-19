@@ -56,7 +56,7 @@ namespace go;
 /// never reaches the word.
 /// </para>
 /// </remarks>
-internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordArray<ж<E>>
+internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordArray<ж<E>>, IGoReflectBox
 {
     private readonly nuint m_nativeAddr;
     private readonly NativePointerWords<E> m_words;
@@ -91,6 +91,12 @@ internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordAr
 
     /// <inheritdoc/>
     public override ref array<ж<E>> ValueSlot => throw noMaterializableArray();
+
+    // reflect's read of the pointee, `*p` (Value.Elem, then Index, Len or Interface on the array): Go's by-value copy
+    // of the array, which reads every word (m_words.Clone). The slot itself still refuses: no array<T> aliases these
+    // words, and a store goes through an element door. Every other reflect face is ж<T>'s: an interface
+    // re-implementation maps the rest to the base's members.
+    object? IGoReflectBox.ReadBoxSlot() => m_words.Clone();
 
     private PanicException noMaterializableArray() =>
         new($"native pointer array at 0x{m_nativeAddr:x}: a *[{m_words.Length}]*{typeof(E).Name} over memory the Go runtime " +
