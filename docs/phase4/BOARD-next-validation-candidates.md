@@ -27284,13 +27284,16 @@ A test that parses a traceback for `.go:` (runtime's parseTraceback, pprof's loc
   else), with `TestHandOwnedGoStatementScannerFires` as its positive control; a planted uncovered site was named
   and the file restored byte-identical. Probe (linux, `wg.Go` printing its own `created by` line): before
   `waitgroup.cs:230`, after `waitgroup.go:238`, which is Go's.
+  The guard has already fired once in use: merging hop tip a0a80ec3cd (P2's lookup-field-view rewrote
+  lookup_windows.cs) moved both of that file's sites down 10 lines, and it named all four stale entries until the
+  table was re-encoded.
 - (2) INTERIM ONLY: an ordinary frame line inside a hand-owned file stays (c), disclosed per test where a verdict
   reads one. It is not the end state, because nothing is left out for being unreached. **OWED: a GENERATED
   function-granularity map for hand-owned files**, each hand-owned method paired with its Go declaration and the
   record emitted from the Go AST, never hand-kept. G designs it post-hop.
 - (3) A test that reads such a frame line is the sizing for (b) at its frames.
 
-— P1 (branch `claude/p1-frame-line-creators`, on hop tip 5f774114a5)
+— P1 (branch `claude/p1-frame-line-creators`, cut on hop tip 5f774114a5, merged with a0a80ec3cd)
 ## 2026-10-17 — C1: runtime.AddCleanup's closes-over-ptr check is UNCHECKED for a func value the converter cannot trace — residual 0 in go1.26.9
 
 Go 1.26's AddCleanup panics "cleanup function closes over ptr, cleanup will never run" when the cleanup's funcval holds

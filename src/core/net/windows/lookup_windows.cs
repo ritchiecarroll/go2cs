@@ -52,7 +52,7 @@
 // hand-owned file. One table entry per statement, each followed by a zero entry, so every other
 // line of the file still reports its own C# position. repoguard's TestHandOwnedGoStatementsMapToGo
 // checks it.
-[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs", "AGhwAABvAIoByAIAAMcC")]
+[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs", "AHJwAABvAIoByAIAAMcC")]
 
 namespace go;
 
