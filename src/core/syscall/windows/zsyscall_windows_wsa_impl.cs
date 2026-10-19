@@ -264,6 +264,13 @@ partial class syscall_package
         // Boxes whose GCHandles pin the caller's buffers for the flight; replaced at each submit.
         private readonly List<object> m_pins = new();
 
+        // Two threads can retire one record at once: a submit whose pooled key now names another
+        // (descriptor, mode) retires it (GoAsyncIO.GetOrBindOperationState), while its own socket's
+        // pollClose retires every record the socket still tracks (SocketBinding.Dispose). Unguarded,
+        // both freed the one control block, and the second free threw "Handle is not initialized" out
+        // of net's Close. The gate makes the later caller wait for the earlier and then return, and
+        // Rearm takes it too, so a submit can never interleave with a retirement.
+        private readonly object m_gate = new();
         private bool m_disposed;
 
         internal OverlappedOp(SocketBinding? binding, nint mode, object key)
@@ -281,24 +288,35 @@ partial class syscall_package
         // Frees the previous control block (see the file header on why not in the callback) and
         // allocates the one this submit will use. A PreAllocatedOverlapped may have only one
         // allocation outstanding, so free-then-allocate is required, not merely tidy.
+        //
+        // A retired record is never submitted on: Go's close ordering (pollClose only after every
+        // read and write has returned) and the pool (an operation returns to it only after its
+        // harvest) keep it so. A path that breaks either panics here, by name, rather than allocating
+        // a block on a record whose free has already happened.
         internal NativeOverlapped* Rearm()
         {
-            releaseOverlapped();
-
-            if (Binding is null)
+            lock (m_gate)
             {
-                // execIO sets the event on every submit, so it is read here rather than at creation.
-                m_native = (NativeOverlapped*)NativeMemory.AllocZeroed((nuint)sizeof(NativeOverlapped));
-                m_native->EventHandle = (nint)(nuint)(uintptr)((ж<Overlapped>)Key).Value.HEvent;
-            }
-            else
-            {
-                m_native = Binding.Bound.AllocateNativeOverlapped(m_preallocated!);
-            }
+                if (m_disposed)
+                    throw panic($"syscall: overlapped submit on a retired operation record (descriptor {Binding?.Descriptor.ToString() ?? "disassociated"}, mode '{(char)Mode}'): its socket was closed or its pooled operation re-bound before the submit");
 
-            m_pins.Clear();
+                releaseOverlapped();
 
-            return m_native;
+                if (Binding is null)
+                {
+                    // execIO sets the event on every submit, so it is read here rather than at creation.
+                    m_native = (NativeOverlapped*)NativeMemory.AllocZeroed((nuint)sizeof(NativeOverlapped));
+                    m_native->EventHandle = (nint)(nuint)(uintptr)((ж<Overlapped>)Key).Value.HEvent;
+                }
+                else
+                {
+                    m_native = Binding.Bound.AllocateNativeOverlapped(m_preallocated!);
+                }
+
+                m_pins.Clear();
+
+                return m_native;
+            }
         }
 
         internal void Pin(object box) => m_pins.Add(box);
@@ -344,23 +362,30 @@ partial class syscall_package
 
         public void Dispose()
         {
-            if (m_disposed)
-                return;
-
-            m_disposed = true;
-
-            Binding?.Untrack(this);
-            releaseOverlapped();
-            m_preallocated?.Dispose();
-
-            if (m_staging is not null)
+            lock (m_gate)
             {
-                NativeMemory.Free(m_staging);
-                m_staging = null;
-                m_stagingLength = 0;
-            }
+                if (m_disposed)
+                    return;
 
-            m_pins.Clear();
+                m_disposed = true;
+
+                releaseOverlapped();
+                m_preallocated?.Dispose();
+
+                if (m_staging is not null)
+                {
+                    NativeMemory.Free(m_staging);
+                    m_staging = null;
+                    m_stagingLength = 0;
+                }
+
+                m_pins.Clear();
+
+                // Untracked LAST. The socket disposes its bound handle after every record it still
+                // tracks is disposed, and the control block is freed THROUGH that handle, so a record
+                // leaves the list only once its block is freed.
+                Binding?.Untrack(this);
+            }
         }
     }
 
