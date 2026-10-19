@@ -162,14 +162,14 @@ func TestInputDigestMovesWhenALinkStagedFixtureIsEdited(t *testing.T) {
 	root := syntheticFixtureTree(t)
 	options := Options{targetPlatform: "windows/amd64"}
 
-	before, err := testInputDigest(root, root, options, "rev")
+	before, err := testInputDigest(root, root, options, "rev", nil)
 	if err != nil {
 		t.Fatalf("testInputDigest: %v", err)
 	}
 
 	writeFile(t, filepath.Join(root, "testdata", "testprog", "b.go"), "package main\n\nfunc helper() { println(\"edited\") }\n")
 
-	after, err := testInputDigest(root, root, options, "rev")
+	after, err := testInputDigest(root, root, options, "rev", nil)
 	if err != nil {
 		t.Fatalf("testInputDigest: %v", err)
 	}

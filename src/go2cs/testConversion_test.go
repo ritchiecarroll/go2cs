@@ -1632,12 +1632,12 @@ func TestNestedSiblingTestdataIsStaged(t *testing.T) {
 	// F7: a nested fixture is a conversion INPUT, so adding one invalidates a prior comparison
 	// exactly as a top-level testdata file does.
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, out, options, "converter")
+	first, err := testInputDigest(dir, out, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	write("internal/oldtrace/testdata/http_1_19_good", "trace\n")
-	second, err := testInputDigest(dir, out, options, "converter")
+	second, err := testInputDigest(dir, out, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2906,14 +2906,14 @@ func TestInputDigestDetectsSourceChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, dir, options, "converter")
+	first, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(source, []byte("package value\nvar changed = true\n"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	second, err := testInputDigest(dir, dir, options, "converter")
+	second, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2930,7 +2930,7 @@ func TestInputDigestDetectsNewTestdataFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, dir, options, "converter")
+	first, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2942,7 +2942,7 @@ func TestInputDigestDetectsNewTestdataFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	second, err := testInputDigest(dir, dir, options, "converter")
+	second, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2958,11 +2958,11 @@ func TestInputDigestDetectsConversionOptionChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	first, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: true}, "converter")
+	first, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: true}, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: false}, "converter")
+	second, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: false}, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -453,6 +453,7 @@ func TestConstraintProxyConsumerNamesTheOwnersProxy(t *testing.T) {
 	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
 	constraintProxies = make(map[string][3]string)
 	consumer.importQueue.Add("example/proxycross/curves") // proxycross.go imports curves: its alias is in scope
+	plantPublishedConstraintProxy(t, "example/proxycross/curves", "P1жPoint", "P1")
 
 	funIdent, typeArgs := crossPackageInstance(t, consumer, consumerCalls, "consumerCall")
 	proxyName, ok := consumer.constraintProxySigArg(funIdent, typeArgs, 0)
@@ -472,6 +473,33 @@ func TestConstraintProxyConsumerNamesTheOwnersProxy(t *testing.T) {
 	}
 }
 
+// TestConstraintProxyConsumerWithNothingPublishedBindsTheGenericProxy: the same consumer when the owner published NO concrete
+// proxy for the element (it never closes its constraint over *P1 itself). Naming `curves.P1жPoint` then named a class nothing
+// declares (CS0426); the consumer takes the owner's GENERIC proxy and records a bind, never a concrete proxy of its own.
+func TestConstraintProxyConsumerWithNothingPublishedBindsTheGenericProxy(t *testing.T) {
+	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
+	constraintProxies = make(map[string][3]string)
+	consumer.importQueue.Add("example/proxycross/curves")
+	plantPublishedConstraintProxy(t, "example/proxycross/curves", "someOtherжPoint", "someOther")
+
+	funIdent, typeArgs := crossPackageInstance(t, consumer, consumerCalls, "consumerCall")
+	proxyName, ok := consumer.constraintProxySigArg(funIdent, typeArgs, 0)
+
+	if !ok || proxyName != "curves.жPoint<curves.P1>" {
+		t.Fatalf("with no published proxy for *P1 the consumer must name the owner's generic proxy: got %q, %v; want %q, true", proxyName, ok, "curves.жPoint<curves.P1>")
+	}
+
+	if len(constraintProxies) != 1 {
+		t.Fatalf("the consumer must record exactly the one bind, recorded %d: %v", len(constraintProxies), constraintProxies)
+	}
+
+	for key := range constraintProxies {
+		if !strings.HasPrefix(key, constraintProxyBindKey) || strings.Contains(key, "/") {
+			t.Errorf("the record must be a bind keyed apart from concrete records, in C# spelling: %q", key)
+		}
+	}
+}
+
 // TestConstraintProxyConsumerWithoutTheInterfaceImportQualifiesFully: a consumer FILE can instantiate a foreign constraint through a
 // third package without importing the interface's own package. The file-local alias names nothing there (CS0246), so the qualifier
 // must be the fully-qualified C# name -- and never the Go import path, which is what an unconverted fully-qualified name would be.
@@ -479,6 +507,7 @@ func TestConstraintProxyConsumerWithoutTheInterfaceImportQualifiesFully(t *testi
 	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
 	constraintProxies = make(map[string][3]string)
 	consumer.importQueue.Add("example/proxycross/mid") // indirect.go imports mid only
+	plantPublishedConstraintProxy(t, "example/proxycross/curves", "P1жPoint", "P1")
 
 	funIdent, typeArgs := crossPackageInstance(t, consumer, consumerCalls, "indirectCall")
 	proxyName, ok := consumer.constraintProxySigArg(funIdent, typeArgs, 0)

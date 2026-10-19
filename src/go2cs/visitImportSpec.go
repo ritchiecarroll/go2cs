@@ -853,8 +853,8 @@ func (v *Visitor) qualifyPackageReference(ns string) string {
 
 // resolveUsingNamespace answers the namespace a file-level `using <namespace>;` entry imports, or
 // false for an entry that is not one (`static …`, `alias = …`) or names no namespace of this
-// compilation's go.* closure (System.*). A relative name binds innermost-first from the file's
-// namespace, exactly as the using directive itself does.
+// compilation's go.* closure (System.*). A name binds innermost-first from the file's namespace and
+// then as written from the root, exactly as the using directive itself does.
 func resolveUsingNamespace(using string) (string, bool) {
 	if strings.ContainsAny(using, " =") {
 		return "", false
@@ -876,6 +876,13 @@ func resolveUsingNamespace(using string) (string, bool) {
 		}
 
 		prefix = prefix[:dot]
+	}
+
+	// Past every enclosing namespace, the name binds AS WRITTEN from the root. A rooted using spelled without
+	// global:: (`using go.@internal;`, crypto/tls's conn.cs) is that case, and the walk above never tried it, so
+	// the file's capture of a bare `sync_package.Mutex` by internal/sync went unseen.
+	if packageChildNamespaces[using] {
+		return using, true
 	}
 
 	return "", false
