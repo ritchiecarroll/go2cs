@@ -475,6 +475,9 @@ func (v *Visitor) liftTypeParamConstraints(typeParams *ast.FieldList, owner stri
 
 		liftName := v.visitInterfaceType(interfaceType, iface, name, nil, true, nil)
 
+		// Every instantiation reads this declared constraint object (inlineConstraintNamed).
+		registerConstraintLift(inlineConstraintKey(iface), liftName)
+
 		if ownerType != nil {
 			for i := first; i < index; i++ {
 				registerConstraintLift(constraintLiftKey(ownerType, i), liftName)

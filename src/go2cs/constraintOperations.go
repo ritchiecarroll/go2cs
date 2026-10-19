@@ -1875,7 +1875,16 @@ func (v *Visitor) recordClosedConstraintImplementation(typeParam *types.TypePara
 		return
 	}
 
-	constraintNamed, ok := types.Unalias(typeParam.Constraint()).(*types.Named)
+	// An inline constraint naming its own parameter is read through its lift's named view
+	// (inlineConstraintNamed); one whose lift is not named yet replays after the barrier.
+	constraint, resolved := v.effectiveConstraint(typeParam)
+
+	if !resolved {
+		v.deferConstraintRecord(typeParam, func() { v.recordClosedConstraintImplementation(typeParam, typeArg) })
+		return
+	}
+
+	constraintNamed, ok := types.Unalias(constraint).(*types.Named)
 
 	if !ok || constraintNamed.TypeArgs().Len() == 0 {
 		return
@@ -1958,8 +1967,10 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 	}
 
 	// The constraint must be an INSTANTIATED generic method-set interface (nistPoint[Point]);
-	// a plain non-generic method-set interface (go/ast's Node) widens to itself instead.
-	constraintNamed, ok := typeParam.Constraint().(*types.Named)
+	// a plain non-generic method-set interface (go/ast's Node) widens to itself instead. An inline
+	// constraint naming its own parameter is read through its lift's named view (inlineConstraintNamed).
+	constraint, resolved := v.effectiveConstraint(typeParam)
+	constraintNamed, ok := constraint.(*types.Named)
 
 	if !ok || constraintNamed.TypeArgs() == nil || constraintNamed.TypeArgs().Len() == 0 {
 		return "", false
@@ -2076,6 +2087,13 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 
 	if interfaceConstrainsItself(interfaceOrigin) {
 		placeholder = proxyName
+	}
+
+	// A lift not named yet: the proxy name above carries the deferred marker, which the barrier
+	// resolves in the emitted source, and the record replays after it under the real name.
+	if !resolved {
+		v.deferConstraintRecord(typeParam, func() { v.constraintProxyFor(typeParam, typeArg) })
+		return proxyName, true
 	}
 
 	packageLock.Lock()

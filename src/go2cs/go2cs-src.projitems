@@ -228,6 +228,8 @@
     <None Include="$(MSBuildThisFileDirectory)incrementalWrites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineConstraintNamed.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineConstraintReceiverLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestLocalInterfaceStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)intrinsicPlaceholders_test.go" />
