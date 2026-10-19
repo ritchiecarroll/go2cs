@@ -20,19 +20,15 @@ partial struct receiver {
 internal static void method(this receiver _) {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilFuncˢ = "<nil Func>"u8;
-private static readonly @string emptyNameˢ = "<empty name>"u8;
-
 internal static @string nameOf(any fn) {
     var p = reflect.ValueOf(fn).Pointer();
     var f = runtime.FuncForPC(p);
     if (f == nil) {
-        return nilFuncˢ;
+        return "<nil Func>";
     }
     @string name = f.Name();
     if (name == ""u8) {
-        return emptyNameˢ;
+        return "<empty name>";
     }
     return name;
 }

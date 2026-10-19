@@ -87,12 +87,11 @@ private static readonly object writeˢ = (@string)"write:"u8;
 private static readonly object aliasedˢ = (@string)"aliased:"u8;
 private static readonly object closeˢ = (@string)"close:"u8;
 private static readonly object valueFormˢ = (@string)"value form:"u8;
-private static readonly @string abcˢ = "abc"u8;
 private static readonly object foreignˢ = (@string)"foreign:"u8;
 private static readonly object foreignValueFormˢ = (@string)"foreign value form:"u8;
 
 internal static void Main() {
-    var r = Ꮡ(new reader(src: "hello world"u8));
+    var r = Ꮡ(new reader(src: "hello world"));
     var w = Ꮡ(new writer(nil));
     var d = Ꮡ(new duplex(r, w));
 
@@ -113,7 +112,7 @@ internal static void Main() {
     (n, _) = rw.Write(slice<byte>("!"u8));
     fmt.Println(valueFormˢ, n, w.String());
 
-    var f = Ꮡ(new foreign(strings.NewReader(abcˢ), Ꮡ(new strings.Builder(nil))));
+    var f = Ꮡ(new foreign(strings.NewReader("abc"), Ꮡ(new strings.Builder(nil))));
     readStringWriter rsw = new foreignжreadStringWriter(f);
 
     var fbuf = new slice<byte>(3);
@@ -122,7 +121,7 @@ internal static void Main() {
     fmt.Println(foreignˢ, n, n2, (~f).Builder.String());
 
     readStringWriter frsw = f.Value;
-    var (n3, _) = frsw.WriteString("gh"u8);
+    var (n3, _) = frsw.WriteString("gh");
     fmt.Println(foreignValueFormˢ, n3, (~f).Builder.String());
 }
 

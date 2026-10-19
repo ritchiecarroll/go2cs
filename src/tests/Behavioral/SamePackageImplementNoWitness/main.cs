@@ -25,7 +25,6 @@ private static readonly object switchˢ = (@string)"switch:"u8;
 private static readonly object counterˢ = (@string)"Counter"u8;
 private static readonly object gaugeˢ = (@string)"Gauge"u8;
 private static readonly object defaultˢ = (@string)"default"u8;
-private static readonly @string fromIfaceˢ = "from-iface"u8;
 private static readonly object mapˢ = (@string)"map:"u8;
 private static readonly object callˢ = (@string)"call:"u8;
 private static readonly object explicitˢ = (@string)"explicit:"u8;
@@ -71,7 +70,7 @@ internal static void Main() {
     }}
 
     var seen = new map<ledger.Metric, @string>{};
-    seen[m] = fromIfaceˢ;
+    seen[m] = "from-iface";
     fmt.Println(mapˢ, seen[want], len(seen));
 
     fmt.Println(callˢ, m.Value());
@@ -97,7 +96,7 @@ internal static void Main() {
     var b = new ledger.Box<nint>(V: 9);
     fmt.Println(genericˢ, b.Value(), b.V);
 
-    fmt.Println(localˢ, new Stamp(S: "s"u8).Mark());
+    fmt.Println(localˢ, new Stamp(S: "s").Mark());
 }
 
 } // end main_package

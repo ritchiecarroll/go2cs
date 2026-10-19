@@ -9,7 +9,7 @@ partial struct AErr {
 }
 
 public static @string Error(this ref AErr e) {
-    return "a"u8;
+    return "a";
 }
 
 partial struct BErr {
@@ -17,7 +17,7 @@ partial struct BErr {
 }
 
 public static @string Error(this ref BErr e) {
-    return "b"u8;
+    return "b";
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -33,7 +33,6 @@ private static readonly object spMpˢ = (@string)"sp==mp"u8;
 private static readonly object stpNilˢ = (@string)"stp==nil"u8;
 private static readonly object switchAErrˢ = (@string)"switch-AErr"u8;
 private static readonly object switchOtherˢ = (@string)"switch-other"u8;
-private static readonly @string missingˢ = "missing"u8;
 private static readonly object printfVˢ = (@string)"printf-v"u8;
 private static readonly object dpiNilˢ = (@string)"dpi==nil"u8;
 private static readonly object dpiXˢ = (@string)"dpi==x"u8;
@@ -110,7 +109,7 @@ internal static void Main() {
     var sl = new slice<ж<BErr>>(1);
     var mm = new map<@string, ж<AErr>>{};
 
-    fmt.Printf("%T %T %T %T\n"u8, dp.OrTypedNil(), st.P.OrTypedNil(), sl[0].OrTypedNil(), mm[missingˢ].OrTypedNil());
+    fmt.Printf("%T %T %T %T\n"u8, dp.OrTypedNil(), st.P.OrTypedNil(), sl[0].OrTypedNil(), mm["missing"].OrTypedNil());
     fmt.Println(printfVˢ, fmt.Sprintf("%v|%v"u8, dp.OrTypedNil(), st.P.OrTypedNil()));
 
     any dpi = dp.OrTypedNil();
@@ -122,10 +121,10 @@ internal static void Main() {
 
     var anys = new any[]{dp.OrTypedNil(), st.P.OrTypedNil()}.slice();
     var holder = new main_holder(V: dp.OrTypedNil());
-    var byName = new map<@string, any>{["p"u8] = dp.OrTypedNil()};
+    var byName = new map<@string, any>{["p"] = dp.OrTypedNil()};
     var byKey = new map<any, nint>{[dp.OrTypedNil()] = 7};
     fmt.Println(elemNilˢ, anys[0] == default!, fieldNilˢ, holder.V == default!);
-    fmt.Println(mapvalNilˢ, byName["p"u8] == default!, mapkeyˢ, byKey[dp.OrTypedNil()], byKey[((ж<nint>)nil)]);
+    fmt.Println(mapvalNilˢ, byName["p"] == default!, mapkeyˢ, byKey[dp.OrTypedNil()], byKey[((ж<nint>)nil)]);
 
     var ch = new channel<any>(1);
     ch.ᐸꟷ(dp.OrTypedNil());

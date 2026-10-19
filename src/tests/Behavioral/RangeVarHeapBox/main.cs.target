@@ -84,7 +84,7 @@ internal static void Main() {
     }
     fmt.Println();
 
-    foreach (var (_, f) in stringClosures("aé!"u8)) {
+    foreach (var (_, f) in stringClosures("aé!")) {
         fmt.Print(f(), (@string)" "u8);
     }
     fmt.Println();

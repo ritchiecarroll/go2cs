@@ -13,7 +13,6 @@ partial struct mySlice /*[]byte*/;
 private static readonly object lenˢ = (@string)"len:"u8;
 private static readonly object isNilˢ = (@string)"isNil:"u8;
 private static readonly object readˢ = (@string)"read:"u8;
-private static readonly @string absentˢ = "absent"u8;
 private static readonly object copyLenˢ = (@string)"copy len:"u8;
 
 internal static void Main() {
@@ -24,7 +23,7 @@ internal static void Main() {
 
     var nilMap = ((map<@string, nint>)default!);
     fmt.Println(lenˢ, len(nilMap), isNilˢ, nilMap == default!);
-    fmt.Println(readˢ, nilMap[absentˢ]);
+    fmt.Println(readˢ, nilMap["absent"]);
 
     fmt.Println(reflect.TypeOf(((myMap)default!)));
     fmt.Println(reflect.TypeOf(((mySlice)default!)));
@@ -32,7 +31,7 @@ internal static void Main() {
     fmt.Println(reflect.TypeOf((channel<nint>)(default!)));
     fmt.Println(reflect.TypeOf(((ж<nint>)nil)));
 
-    var populated = new map<@string, nint>{["a"u8] = 1};
+    var populated = new map<@string, nint>{["a"] = 1};
     fmt.Println(copyLenˢ, len(((map<@string, nint>)populated)));
 }
 

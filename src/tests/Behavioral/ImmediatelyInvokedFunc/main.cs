@@ -7,7 +7,6 @@ partial class main_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object recoveredˢ = (@string)"recovered:"u8;
 private static readonly object afterRecoverˢ = (@string)"after recover"u8;
-private static readonly @string scopeˢ = "scope"u8;
 private static readonly object afterArgRecoverˢ = (@string)"after arg recover"u8;
 private static readonly object ignoredArgCallsˢ = (@string)"ignored arg; calls ="u8;
 
@@ -84,7 +83,7 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))(scopeˢ);
+    }))("scope");
     fmt.Println(afterArgRecoverˢ);
 
     nint calls = 0;

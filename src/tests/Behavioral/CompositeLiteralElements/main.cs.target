@@ -110,8 +110,8 @@ internal static void Main() {
     var pnnExplicit = new ж<nn>[]{Ꮡ(new nn(new array<array<nint>>(2, () => new(3))))}.slice();
     fmt.Println(pnnExplicitˢ, len(pnnExplicit[0].Value), len((pnnExplicit[0].Value)[0]), pnnExplicit[0].Value);
 
-    var mpn = new map<@string, ж<nb>>{["a"u8] = Ꮡ(new nb(new byte[4].array()))};
-    fmt.Println(mpnˢ, len(mpn), len(mpn["a"u8].Value), mpn["a"u8].Value);
+    var mpn = new map<@string, ж<nb>>{["a"] = Ꮡ(new nb(new byte[4].array()))};
+    fmt.Println(mpnˢ, len(mpn), len(mpn["a"].Value), mpn["a"].Value);
     var apn = new ж<nb>[]{Ꮡ(new nb(new byte[4].array())), Ꮡ(new nb(new byte[4].array()))}.array();
     fmt.Println(apnˢ, len(apn), len(apn[0].Value), apn[0].Value, apn[1].Value);
 
@@ -129,8 +129,8 @@ internal static void Main() {
     var pm = new ж<map<@string, nint>>[]{Ꮡ(new map<@string, nint>{})}.slice();
     fmt.Println((@string)"pm:"u8, len(pm), len(pm[0].ValueSlot), pm[0].ValueSlot == default!, pm[0].ValueSlot);
 
-    var mp = new map<@string, ж<array<nint>>>{["a"u8] = Ꮡ(new nint[]{}.array(2))};
-    fmt.Println((@string)"mp:"u8, len(mp), len(mp["a"u8].Value), mp["a"u8].Value);
+    var mp = new map<@string, ж<array<nint>>>{["a"] = Ꮡ(new nint[]{}.array(2))};
+    fmt.Println((@string)"mp:"u8, len(mp), len(mp["a"].Value), mp["a"].Value);
 
     var ap = new ж<array<nint>>[]{Ꮡ(new nint[]{}.array(3)), Ꮡ(new nint[]{}.array(3))}.array();
     fmt.Println((@string)"ap:"u8, len(ap), len(ap[0].Value), ap[0].Value, ap[1].Value);
@@ -155,8 +155,8 @@ internal static void Main() {
     var arrNested = new array<array<nint>>[]{new array<nint>[]{}.array(2, () => new(3))}.array(2, () => new(2, () => new(3)));
     fmt.Println(arrNestedˢ, len(arrNested), len(arrNested[0]), len(arrNested[0][0]), len(arrNested[1][0]), arrNested);
 
-    var mapNested = new map<@string, array<array<nint>>>{["k"u8] = new array<nint>[]{}.array(2, () => new(3))};
-    fmt.Println(mapNestedˢ, len(mapNested["k"u8, () => new array<array<nint>>(2, () => new(3))]), len(mapNested["k"u8, () => new array<array<nint>>(2, () => new(3))][0]), mapNested["k"u8, () => new array<array<nint>>(2, () => new(3))]);
+    var mapNested = new map<@string, array<array<nint>>>{["k"] = new array<nint>[]{}.array(2, () => new(3))};
+    fmt.Println(mapNestedˢ, len(mapNested["k", () => new array<array<nint>>(2, () => new(3))]), len(mapNested["k", () => new array<array<nint>>(2, () => new(3))][0]), mapNested["k", () => new array<array<nint>>(2, () => new(3))]);
 
     var sa = new main_sa[]{new()}.slice();
     fmt.Println((@string)"sa:"u8, len(sa), len(sa[0].A), len(sa[0].A[0]), sa[0]);

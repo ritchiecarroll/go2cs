@@ -53,20 +53,16 @@ internal static Writer asWriter(Conn c) {
     return new ConnᴠWriter(c);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "hello"u8;
-private static readonly @string viaWriterˢ = "via-writer"u8;
-
 internal static void Main() {
-    Conn c = new connжConn(Ꮡ(new conn(data: "init"u8)));
+    Conn c = new connжConn(Ꮡ(new conn(data: "init")));
 
     ReadWriteCloser rwc = new ConnᴠReadWriteCloser(c);
 
-    writeTo(new ConnᴠWriter(c), helloˢ);
+    writeTo(new ConnᴠWriter(c), "hello");
     fmt.Println(readFrom(new ConnᴠReader(c)));
 
     var w = asWriter(c);
-    w.Write(viaWriterˢ);
+    w.Write("via-writer");
 
     fmt.Println(c.Read());
     fmt.Println(rwc.Close());

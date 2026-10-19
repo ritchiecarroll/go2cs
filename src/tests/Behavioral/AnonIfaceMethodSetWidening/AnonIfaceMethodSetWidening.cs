@@ -12,11 +12,8 @@ internal static @string Foo(this gadget g) {
     return fmt.Sprintf("foo %d"u8, g.n);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string barˢ = "bar"u8;
-
 internal static @string Bar(this ref gadget g) {
-    return barˢ;
+    return "bar";
 }
 
 partial interface fooer {

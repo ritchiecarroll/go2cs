@@ -34,8 +34,8 @@ internal static @string report(report_r r) {
 }
 
 internal static void Main() {
-    fmt.Println(Report(new named("a"u8)));
-    fmt.Println(report(new named("b"u8)));
+    fmt.Println(Report(new named("a")));
+    fmt.Println(report(new named("b")));
 }
 
 } // end main_package

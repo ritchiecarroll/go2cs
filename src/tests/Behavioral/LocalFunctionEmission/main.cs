@@ -28,9 +28,9 @@ internal static void p1() {
         }
         return x;
     }
-    nint a = parseUint("42"u8, 0, 99);
-    nint b = parseUint("7x"u8, 1, 99);
-    nint c = parseUint("98"u8, 0, 50);
+    nint a = parseUint("42", 0, 99);
+    nint b = parseUint("7x", 1, 99);
+    nint c = parseUint("98", 0, 50);
     fmt.Println((@string)"P1:"u8, a, b, c, ok, calls);
 }
 
@@ -43,7 +43,7 @@ internal static void p2() {
 
 internal static void p3() {
     ref var t = ref heap<tally>(out var Ꮡt);
-    t = new tally(1, "a"u8);
+    t = new tally(1, "a");
     ref var arr = ref heap<array<nint>>(out var Ꮡarr);
     arr = new nint[]{1, 2, 3}.array();
     void bump(nint k) {

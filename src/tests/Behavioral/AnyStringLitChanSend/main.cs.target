@@ -52,10 +52,7 @@ internal static void describe(@string prefix, any v) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object textˢ = (@string)"text"u8;
-private static readonly @string sendˢ = "send"u8;
 private static readonly object selˢ = (@string)"sel"u8;
-private static readonly @string selectˢ = "select"u8;
-private static readonly @string plainˢ = "plain"u8;
 private static readonly object stringChanˢ = (@string)"string chan:"u8;
 private static readonly object assertˢ = (@string)"assert"u8;
 private static readonly object assertStringˢ = (@string)"assert string:"u8;
@@ -65,27 +62,27 @@ internal static void Main() {
     var ch = new channel<any>(2);
     ch.ᐸꟷ(textˢ);
     ch.ᐸꟷ((nint)(42));
-    describe(sendˢ, ᐸꟷ(ch));
-    describe(sendˢ, ᐸꟷ(ch));
+    describe("send", ᐸꟷ(ch));
+    describe("send", ᐸꟷ(ch));
 
     var sel = new channel<any>(1);
     var selᴛ1 = sel.ᐸꟷ(selˢ, ꓸꓸꓸ);
     switch (select(selᴛ1)) {
     case 0: {
-        describe(selectˢ, ᐸꟷ(sel));
+        describe("select", ᐸꟷ(sel));
         break;
     }}
 
     var sc = new channel<@string>(1);
-    sc.ᐸꟷ(plainˢ);
+    sc.ᐸꟷ("plain");
     fmt.Println(stringChanˢ, ᐸꟷ(sc));
 
     var vs = new channel<speaker>(1);
-    vs.ᐸꟷ(new dog(name: "rex"u8));
+    vs.ᐸꟷ(new dog(name: "rex"));
     fmt.Println((ᐸꟷ(vs)).speak());
 
     var ps = new channel<speaker>(1);
-    var c = Ꮡ(new cat(name: "tom"u8));
+    var c = Ꮡ(new cat(name: "tom"));
     ps.ᐸꟷ(new catжspeaker(c));
     fmt.Println((ᐸꟷ(ps)).speak());
 

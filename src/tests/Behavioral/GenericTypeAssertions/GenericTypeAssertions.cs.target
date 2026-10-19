@@ -11,7 +11,7 @@ partial struct Box<T> {
 public static any GetValue(nint index) {
     var values = new any[]{
         new Box<nint>(Value: 42),
-        new Box<@string>(Value: "hello"u8),
+        new Box<@string>(Value: "hello"),
         new Box<float64>(Value: 3.14D)
     }.slice();
 

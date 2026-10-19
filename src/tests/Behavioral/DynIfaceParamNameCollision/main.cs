@@ -34,7 +34,6 @@ internal static void Set(this ref setter s, @string value) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object errˢ = (@string)"err:"u8;
-private static readonly @string styleCssˢ = "/style.css"u8;
 private static readonly object notAPusherˢ = (@string)"not a pusher"u8;
 
 internal partial interface serve_type /*dyn*/ {
@@ -45,7 +44,7 @@ internal partial interface serve_type /*dyn*/ {
 internal static void serve(any v) {
     {
         var (p, ok) = v._<serve_type>(ᐧ); if (ok){
-            fmt.Println(errˢ, p.Push(styleCssˢ, 7), p.Label());
+            fmt.Println(errˢ, p.Push("/style.css", 7), p.Label());
         } else {
             fmt.Println(notAPusherˢ);
         }
@@ -53,7 +52,6 @@ internal static void serve(any v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string blueˢ = "blue"u8;
 private static readonly object notASetterˢ = (@string)"not a setter"u8;
 
 internal partial interface apply_type /*dyn*/ {
@@ -63,7 +61,7 @@ internal partial interface apply_type /*dyn*/ {
 internal static void apply(any v) {
     {
         var (s, ok) = v._<apply_type>(ᐧ); if (ok){
-            s.Set(blueˢ);
+            s.Set("blue");
         } else {
             fmt.Println(notASetterˢ);
         }
@@ -71,13 +69,13 @@ internal static void apply(any v) {
 }
 
 internal static void Main() {
-    serve(new pusher(id: "v"u8));
+    serve(new pusher(id: "v"));
 
-    serve(Ꮡ(new pusher(id: "p"u8)));
+    serve(Ꮡ(new pusher(id: "p")));
 
-    apply(Ꮡ(new setter(id: "s"u8)));
+    apply(Ꮡ(new setter(id: "s")));
 
-    apply(new pusher(id: "x"u8));
+    apply(new pusher(id: "x"));
 }
 
 } // end main_package

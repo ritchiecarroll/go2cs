@@ -19,7 +19,7 @@ partial struct src {
 
 internal static @string Pull(this ref src s) {
     if (s.pos >= len(s.items)) {
-        return ""u8;
+        return "";
     }
     @string item = s.items[s.pos];
     s.pos++;
@@ -40,7 +40,7 @@ partial struct duplex {
 }
 
 internal static @string Status(this ref duplex d) {
-    return "ok"u8;
+    return "ok";
 }
 
 partial interface conn {
@@ -51,7 +51,7 @@ partial interface conn {
 
 internal static void Main() {
     var @out = Ꮡ(new dst(nil));
-    var d = Ꮡ(new duplex(source: new srcжsource(Ꮡ(new src(items: new @string[]{"alpha"u8, "beta"u8}.slice()))), sink: new dstжsink(@out)));
+    var d = Ꮡ(new duplex(source: new srcжsource(Ꮡ(new src(items: new @string[]{"alpha", "beta"}.slice()))), sink: new dstжsink(@out)));
     conn c = new duplexжconn(d);
     c.Push(c.Pull());
     c.Push(c.Pull());

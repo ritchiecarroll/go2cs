@@ -125,11 +125,8 @@ internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
 partial struct fakeError {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fakeErrorˢ = "fake error"u8;
-
 internal static @string Error(this fakeError _) {
-    return fakeErrorˢ;
+    return "fake error";
 }
 
 internal static error Unwrap(this fakeError _) {

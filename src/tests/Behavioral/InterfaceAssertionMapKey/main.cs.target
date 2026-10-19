@@ -55,11 +55,11 @@ private static readonly object doneˢ = (@string)"done"u8;
 
 internal static void Main() {
     var objMap = new map<Object, nint>();
-    objMap[new myVarжObject(Ꮡ(new myVar("var-a"u8)))] = 1;
-    objMap[new myVarжObject(Ꮡ(new myVar("var-b"u8)))] = 2;
-    objMap[new myConst("const-c"u8)] = 4;
-    objMap[new myConst("const-d"u8)] = 8;
-    objMap[new myFuncжObject(Ꮡ(new myFunc("func-e"u8)))] = 16;
+    objMap[new myVarжObject(Ꮡ(new myVar("var-a")))] = 1;
+    objMap[new myVarжObject(Ꮡ(new myVar("var-b")))] = 2;
+    objMap[new myConst("const-c")] = 4;
+    objMap[new myConst("const-d")] = 8;
+    objMap[new myFuncжObject(Ꮡ(new myFunc("func-e")))] = 16;
 
     var M = new map<dependency, bool>();
     foreach (var (obj, _) in objMap) {

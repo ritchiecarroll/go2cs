@@ -26,7 +26,7 @@ partial struct embedWithUnexpMeth {
 }
 
 internal static @string f(this embedWithUnexpMeth _) {
-    return "f"u8;
+    return "f";
 }
 
 internal static unexpIface pinUnexpMethI = ((unexpIface)new embedWithUnexpMeth(nil));
@@ -73,7 +73,6 @@ private static readonly object switchˢ = (@string)"switch:"u8;
 private static readonly object meterˢ = (@string)"meter"u8;
 private static readonly object gaugeˢ = (@string)"gauge"u8;
 private static readonly object defaultˢ = (@string)"default"u8;
-private static readonly @string callSyntaxˢ = "call-syntax"u8;
 private static readonly object mapˢ = (@string)"map:"u8;
 
 internal static void Main() {
@@ -83,11 +82,11 @@ internal static void Main() {
 
     fmt.Printf("foreign-slice-type: %T\n"u8, s);
 
-    var ls = ((fmt.Stringer)new Label(Text: "x"u8));
+    var ls = ((fmt.Stringer)new Label(Text: "x"));
     fmt.Println(foreignStructˢ, ls.String());
     fmt.Printf("foreign-struct-type: %T %v\n"u8, ls, ls);
     var (lv, lok) = ls._<Label>(ᐧ);
-    fmt.Println(foreignStructAssertˢ, lok, lv.Text, AreEqual(ls, ((fmt.Stringer)new Label(Text: "x"u8))));
+    fmt.Println(foreignStructAssertˢ, lok, lv.Text, AreEqual(ls, ((fmt.Stringer)new Label(Text: "x"))));
 
     fmt.Println(unexportedIfaceˢ, pinUnexpMethI.f());
     var (_, uok) = pinUnexpMethI._<embedWithUnexpMeth>(ᐧ);
@@ -117,7 +116,7 @@ internal static void Main() {
     }}
 
     var seen = new map<valued, @string>{};
-    seen[gv] = callSyntaxˢ;
+    seen[gv] = "call-syntax";
     valued byAssign = ((gauge)4);
     fmt.Println(mapˢ, seen[byAssign], len(seen));
 }

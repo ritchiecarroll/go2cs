@@ -12,38 +12,25 @@ partial struct circle {
     internal nint r;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string circleˢ = "circle"u8;
-
 internal static @string name(this ref circle c) {
-    return circleˢ;
+    return "circle";
 }
 
 partial struct square {
     internal nint s;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string squareˢ = "square"u8;
-
 internal static @string name(this ref square q) {
-    return squareˢ;
+    return "square";
 }
 
 partial struct dot {
     internal nint tag;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string dotˢ = "dot"u8;
-
 internal static @string name(this dot d) {
-    return dotˢ;
+    return "dot";
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilShapeˢ = "nil shape"u8;
-private static readonly @string unknownˢ = "unknown"u8;
 
 internal static @string classify(shape v) {
     switch (v.type()) {
@@ -57,16 +44,13 @@ internal static @string classify(shape v) {
         return "val "u8 + t.name();
     }
     case null: {
-        return nilShapeˢ;
+        return "nil shape";
     }
     default: {
         var t = v;
-        return unknownˢ;
+        return "unknown";
     }}
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string multiOtherˢ = "multi other"u8;
 
 internal static @string classifyMulti(shape v) {
     switch (v.type()) {
@@ -80,7 +64,7 @@ internal static @string classifyMulti(shape v) {
     }
     default: {
         var t = v;
-        return multiOtherˢ;
+        return "multi other";
     }}
 }
 

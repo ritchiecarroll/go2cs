@@ -43,16 +43,12 @@ internal static void Main() {
     fmt.Println(lookupOtherˢ, lookup(err, q));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string foundˢ = "found"u8;
-private static readonly @string missingˢ = "missing"u8;
-
 internal static @string lookup(any key, ж<node> Ꮡwant) {
     if (AreEqual(key, Ꮡwant)) {
-        return foundˢ;
+        return "found";
     }
 
-    return missingˢ;
+    return "missing";
 }
 
 } // end main_package

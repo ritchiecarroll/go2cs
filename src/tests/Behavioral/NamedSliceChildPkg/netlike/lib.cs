@@ -12,14 +12,10 @@ public static @string Describe() {
     return IoLike.Version();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string alphaˢ = "alpha"u8;
-private static readonly @string betaˢ = "beta"u8;
-
 public static InfoList Build() {
     return new InfoList(new FsLike.Info[]{
-        FsLike.NewInfo(alphaˢ, 3),
-        FsLike.NewInfo(betaˢ, 5)
+        FsLike.NewInfo("alpha", 3),
+        FsLike.NewInfo("beta", 5)
     }.slice());
 }
 
