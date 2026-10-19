@@ -19,7 +19,7 @@ partial struct Outer {
 }
 
 internal static void Main() {
-    var o = Ꮡ(new Outer(Inner: Ꮡ(new Inner(nil)), tag: "t"u8));
+    var o = Ꮡ(new Outer(Inner: Ꮡ(new Inner(nil)), tag: "t"));
     o.Add(5);
     o.Add(3);
     fmt.Println((~o).total, (~o).tag);

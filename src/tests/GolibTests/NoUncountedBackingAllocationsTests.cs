@@ -70,6 +70,7 @@ public class NoUncountedBackingAllocationsTests
         ("map.cs|m_items = items.ToArray();", "debugger view: at most 1,000 of a map's pairs, built only when a debugger expands one"),
         ("slice.cs|public T[] Items => value.ToSpan().ToArray();", "debugger view: the len window's elements, built only when a debugger expands a slice"),
         ("string.cs|public byte[] Bytes => value.ToSpan().ToArray();", "debugger view: a string's bytes, built only when a debugger expands one"),
+        ("StringLiteralCache.cs|public readonly Slot[] Slots = new Slot[1 << log2];", "the literal cache's slot table: process-wide, grown by doubling at half load, so O(log n) tables for n literals; not a Go-visible backing (the UTF-8 backing each slot holds is charged through Utf8ToBytes)"),
         ("AdapterBinder.cs|MethodInvoker[] invokers = new MethodInvoker[methodNames.Length];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),
         ("AdapterBinder.cs|bool[] dereference = new bool[methodNames.Length];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),
         ("AdapterBinder.cs|object?[] arguments = new object?[args.Length + 1];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),

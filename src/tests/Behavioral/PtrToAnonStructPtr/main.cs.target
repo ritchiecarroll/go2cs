@@ -8,9 +8,6 @@ internal static @string decode(any output) {
     return fmt.Sprintf("%T"u8, output);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string bazˢ = "baz"u8;
-
 internal partial struct main_data /*dyn*/ {
     public @string Foo;
 }
@@ -19,7 +16,7 @@ internal static void Main() {
     ref var data = ref heap<ж<main_data>>(out var Ꮡdata);
     data = Ꮡ(new main_data());
     fmt.Println(decode(Ꮡdata));
-    data.Value.Foo = bazˢ;
+    data.Value.Foo = "baz";
     fmt.Println((~data).Foo);
 }
 

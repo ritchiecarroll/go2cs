@@ -3,7 +3,7 @@ namespace go;
 partial class main_package {
 
 internal static @string entryName;
-internal static void initᴛentryName() { entryName = registry.add("alpha"u8); }
+internal static void initᴛentryName() { entryName = registry.add("alpha"); }
 
 internal static @string entryUpper;
 internal static void initᴛentryUpper() { entryUpper = entryName + "!"u8; }
@@ -21,9 +21,9 @@ internal static ж<table> sizedTable = newTable(tableSize);
 internal static holder chunkHolder = new();
 
 internal static slice<@string> kindNames = new golib.SparseArray<@string>{
-    [kindNone] = "none"u8,
-    [kindFile] = "file"u8,
-    [kindPipe] = "pipe"u8
+    [kindNone] = "none",
+    [kindFile] = "file",
+    [kindPipe] = "pipe"
 }.slice();
 
 internal static @string pipeLabel;

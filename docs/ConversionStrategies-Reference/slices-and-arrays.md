@@ -482,8 +482,8 @@ for _, row := range m { row[0] = 99 }  // → foreach (var (_, vᴛ1) in m) { va
 for i, row = range m { … }             // pre-existing vars → row = vᴛ1.Clone(); inside the body
 m := [2][3]int{a, b}                   // → new array<nint>[]{a.Clone(), b.Clone()}.array()
 s1 := holder{arr: a}                   // keyed struct field  → new holder(arr: a.Clone())
-mv := map[string][3]int{"x": a}        // map value           → ["x"u8] = a.Clone()
-mk := map[[2]int]string{k: "kv"}       // map KEY             → [k.Clone()] = "kv"u8
+mv := map[string][3]int{"x": a}        // map value           → ["x"] = a.Clone()
+mk := map[[2]int]string{k: "kv"}       // map KEY             → [k.Clone()] = "kv"
 lst := []any{b}                        // interface boxing    → new any[]{b.Clone()}.slice()
 return h.arr                           // return              → return h.arr.Clone();
 ch <- a                                // channel send        → ch.ᐸꟷ(a.Clone())
@@ -1520,9 +1520,9 @@ z, ok := entity2["alsomissing"]       // comma-ok form
 v := nilMap[7]                        // quadMap is map[int][4]byte, nil — len 4
 ```
 ```csharp
-var x = entity2[notthereˢ, () => new array<rune>(2)].Clone();
-var n = nested[zzzˢ, () => new array<array<nint>>(2, () => new(3))].Clone();
-var (z, ok) = entity2[alsomissingˢ, () => new array<rune>(2), ꟷ];
+var x = entity2["notthere", () => new array<rune>(2)].Clone();
+var n = nested["zzz", () => new array<array<nint>>(2, () => new(3))].Clone();
+var (z, ok) = entity2["alsomissing", () => new array<rune>(2), ꟷ];
 var v = nilMap[7, () => new array<byte>(4)].Clone();
 ```
 

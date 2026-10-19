@@ -32,7 +32,7 @@ internal static void Main() {
     fmt.Println(mapOfArrayOf2IntIntˢ, AreEqual(reflect.MapOf(reflect.ArrayOf(2, reflect.TypeOf((nint)(0))), reflect.TypeOf((nint)(0))), reflect.TypeOf(m)));
     fmt.Println(typeOfMap2IntIntKeyLen2ˢ, reflect.TypeOf(m).Key().Len() == 2);
 
-    var me = new map<@string, array<nint>>{[""u8] = new nint[]{}.array(3)};
+    var me = new map<@string, array<nint>>{[""] = new nint[]{}.array(3)};
     fmt.Println(mapOfStringArrayOf3Intˢ, AreEqual(reflect.MapOf(reflect.TypeOf((@string)""u8), reflect.ArrayOf(3, reflect.TypeOf((nint)(0)))), reflect.TypeOf(me)));
 
     var nested = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()}.slice(), 2, 3);
@@ -42,14 +42,14 @@ internal static void Main() {
     fmt.Println(typeOf4ByteElemElemLen4ˢ, reflect.TypeOf(ptrs).Elem().Elem().Len() == 4);
 
     fmt.Println(deepEqual6Uint88Uint8ˢ, !reflect.DeepEqual(sixes, eights));
-    var m1 = new map<@string, slice<@string>>{["a"u8] = new @string[]{"x"u8}.slice()};
-    var m2 = new map<@string, slice<@string>>{["b"u8] = new @string[]{"x"u8, "y"u8}.slice()};
+    var m1 = new map<@string, slice<@string>>{["a"] = new @string[]{"x"}.slice()};
+    var m2 = new map<@string, slice<@string>>{["b"] = new @string[]{"x", "y"}.slice()};
     fmt.Println(typeOfMapStringStringˢ, AreEqual(reflect.TypeOf(m1), reflect.TypeOf(m2)));
     var s1 = new slice<nint>[]{new nint[]{1}.slice()}.slice();
     var s2 = new slice<nint>[]{new nint[]{1, 2}.slice()}.slice();
     fmt.Println(typeOfIntLen1TypeOfIntˢ, AreEqual(reflect.TypeOf(s1), reflect.TypeOf(s2)));
-    var h1 = new map<@string, slice<@string>>{["k"u8] = new @string[]{"x"u8, "y"u8}.slice(), ["j"u8] = new @string[]{"z"u8}.slice()};
-    var h2 = new map<@string, slice<@string>>{["j"u8] = new @string[]{"z"u8}.slice(), ["k"u8] = new @string[]{"x"u8, "y"u8}.slice()};
+    var h1 = new map<@string, slice<@string>>{["k"] = new @string[]{"x", "y"}.slice(), ["j"] = new @string[]{"z"}.slice()};
+    var h2 = new map<@string, slice<@string>>{["j"] = new @string[]{"z"}.slice(), ["k"] = new @string[]{"x", "y"}.slice()};
     fmt.Println(deepEqualSameMapˢ, reflect.DeepEqual(h1, h2));
 }
 

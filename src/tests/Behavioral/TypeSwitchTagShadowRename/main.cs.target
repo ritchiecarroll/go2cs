@@ -8,27 +8,21 @@ partial struct node {
     internal any inner;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nodeIntˢ = "node:int"u8;
-private static readonly @string nodeStringˢ = "node:string"u8;
-private static readonly @string nodeOtherˢ = "node:other"u8;
-private static readonly @string plainˢ = "plain"u8;
-
 internal static @string inspect(any n) {
     switch (n.type()) {
     case ж<node> nΔ1: {
         switch ((~nΔ1).inner.type()) {
         case nint: {
-            return nodeIntˢ;
+            return "node:int";
         }
         case int32: {
-            return nodeIntˢ;
+            return "node:int";
         }
         case @string: {
-            return nodeStringˢ;
+            return "node:string";
         }
         default: {
-            return nodeOtherˢ;
+            return "node:other";
         }}
 
         break;
@@ -36,12 +30,9 @@ internal static @string inspect(any n) {
     default: {
         var nΔ1 = n;
         _ = nΔ1;
-        return plainˢ;
+        return "plain";
     }}
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string shadowˢ = "shadow"u8;
 
 internal static (@string, @string) classifyVia(any v) {
     any unwrap(any vΔ1) {
@@ -72,7 +63,7 @@ internal static (@string, @string) classifyVia(any v) {
         }}
     }
 
-    @string label = shadowˢ;
+    @string label = "shadow";
     var other = Ꮡ(new node(nil));
     other.Value.inner = label;
 
@@ -83,7 +74,7 @@ internal static (@string, @string) classifyVia(any v) {
 private static readonly object directˢ = (@string)"direct"u8;
 
 internal static void Main() {
-    @string hi = "hi"u8;
+    @string hi = "hi";
     var sn = Ꮡ(new node(nil));
     sn.Value.inner = hi;
 

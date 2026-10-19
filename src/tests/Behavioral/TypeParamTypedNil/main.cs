@@ -48,11 +48,8 @@ internal static @string nameOf<E>(E want) {
 partial struct myErr {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string myErrˢ = "myErr"u8;
-
 internal static @string Error(this ref myErr _) {
-    return myErrˢ;
+    return "myErr";
 }
 
 internal static any plain<T>(T t)

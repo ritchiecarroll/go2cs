@@ -12,20 +12,18 @@ internal static channel<bool> done = new channel<bool>(0);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object twoEvaluatedˢ = (@string)"  two() evaluated"u8;
-private static readonly @string sevenˢ = "seven"u8;
 
 internal static (nint, @string) two() {
     fmt.Println(twoEvaluatedˢ);
-    return (7, sevenˢ);
+    return (7, "seven");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object threeEvaluatedˢ = (@string)"  three() evaluated"u8;
-private static readonly @string threeˢ = "three"u8;
 
 internal static (nint, @string, bool) three() {
     fmt.Println(threeEvaluatedˢ);
-    return (3, threeˢ, true);
+    return (3, "three", true);
 }
 
 internal static (nint, nint) next() {
@@ -161,10 +159,10 @@ internal static void deferMethodSpread() {
     GoFrame ᒐ = default;
     try {
         fmt.Println(deferMethodSpreadEnterˢ);
-        var s = Ꮡ(new sink(tag: "A"u8));
+        var s = Ꮡ(new sink(tag: "A"));
         var sʗ1 = s;
         defer(ᴛ1 => sʗ1.take(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
-        s.Value.tag = "B"u8;
+        s.Value.tag = "B";
         fmt.Println(deferMethodSpreadBodyˢ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -237,12 +235,9 @@ internal static partial void goCaptureSpread() {
     fmt.Println(goCaptureSpreadDoneˢ);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string capturedˢ = "captured"u8;
-
 internal static (nint, @string) pair() {
     counter++;
-    return (counter, capturedˢ);
+    return (counter, "captured");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

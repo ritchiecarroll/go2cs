@@ -68,7 +68,7 @@ internal static void Main() {
         fmt.Println(i, v.Four(1, 2, 3, 4));
         fmt.Println(i, v.Five(1, 2, 3, 4, 5));
         fmt.Println(i, v.Sum(1, 2, 3, 4, 5));
-        fmt.Println(i, v.Mixed("go"u8, true, 9));
+        fmt.Println(i, v.Mixed("go", true, 9));
     }
 }
 

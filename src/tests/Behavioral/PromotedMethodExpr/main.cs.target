@@ -38,14 +38,12 @@ internal static @string Say(this own o, @string p) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object myTypeWriteˢ = (@string)"(*myType).Write:"u8;
 private static readonly object myTypeWriteˢ2 = (@string)"(&myType{}).Write:"u8;
-private static readonly @string abcˢ = "abc"u8;
 private static readonly object m3Lenˢ = (@string)"m3.Len:"u8;
 private static readonly object outerAddˢ = (@string)"(*outer).Add:"u8;
 private static readonly object outerGetˢ = (@string)"outer.Get:"u8;
 private static readonly object oGetˢ = (@string)"o.Get:"u8;
 private static readonly object ownSayˢ = (@string)"own.Say:"u8;
 private static readonly object ownSayˢ2 = (@string)"own{}.Say:"u8;
-private static readonly @string whyˢ = "why"u8;
 private static readonly object asValueˢ = (@string)"as value:"u8;
 
 internal static void Main() {
@@ -62,7 +60,7 @@ internal static void Main() {
     fmt.Println(myTypeWriteˢ2, n, err, m2.of(myType.ᏑBuffer).String());
 
     ref var m3 = ref heap(new myType(), out var Ꮡm3);
-    Ꮡm3.of(myType.ᏑBuffer).WriteString(abcˢ);
+    Ꮡm3.of(myType.ᏑBuffer).WriteString("abc");
     var lv = Ꮡm3.Len;
     fmt.Println(m3Lenˢ, lv());
     
@@ -78,11 +76,11 @@ internal static void Main() {
     fmt.Println(oGetˢ, gv());
     
     var say = ((Func<own, @string, @string>)(Say));
-    fmt.Println(ownSayˢ, say(new own("!"u8), "hi"u8));
-    var recvʗ1 = new own("?"u8);
+    fmt.Println(ownSayˢ, say(new own("!"), "hi"));
+    var recvʗ1 = new own("?");
     
     var sv = (@string p1) => recvʗ1.Say(p1);
-    fmt.Println(ownSayˢ2, sv(whyˢ));
+    fmt.Println(ownSayˢ2, sv("why"));
 
     fmt.Println(asValueˢ, strings.ToUpper(fmt.Sprint(((Func<Func<ж<myType>, slice<byte>, (nint, error)>, nint>)(f => {
         ref var t = ref heap(new myType(), out var Ꮡt);

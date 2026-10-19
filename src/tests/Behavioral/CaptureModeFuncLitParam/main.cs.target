@@ -55,7 +55,7 @@ internal static void Main() {
         Ꮡt.Add(m);
         return (t.total, t.log);
     }
-    var seed = new Tally(total: 5, log: "s"u8);
+    var seed = new Tally(total: 5, log: "s");
     var (total, log) = f(seed, 3);
     fmt.Println(assignedˢ, total, log);
     fmt.Println(callerCopyUntouchedˢ, seed.total, seed.log);
@@ -64,10 +64,10 @@ internal static void Main() {
         ref var t = ref heap(tʗp, out var Ꮡt);
         Ꮡt.Add(7);
         return (t.total, t.log);
-    }))(new Tally(total: 1, log: "i"u8));
+    }))(new Tally(total: 1, log: "i"));
     fmt.Println(iifeˢ, total2, log2);
 
-    var @base = new Tally(total: 2, log: "d"u8);
+    var @base = new Tally(total: 2, log: "d");
     runDeferred(@base);
     fmt.Println(deferredSourceUntouchedˢ, @base.total, @base.log);
 
@@ -80,7 +80,7 @@ internal static void Main() {
         t.total++;
         return (t.total, t.log);
     }
-    var (total4, log4) = g(new Tally(total: 3, log: "n"u8));
+    var (total4, log4) = g(new Tally(total: 3, log: "n"));
     fmt.Println(nestedˢ, total4, log4);
 
     (nint, @string) h(Tally tʗp, params ꓸꓸꓸnint nsʗp) {
@@ -91,7 +91,7 @@ internal static void Main() {
         }
         return (t.total, t.log);
     }
-    var (total5, log5) = h(new Tally(total: 10, log: "v"u8), 1, 2);
+    var (total5, log5) = h(new Tally(total: 10, log: "v"), 1, 2);
     fmt.Println(variadicˢ, total5, log5);
 }
 

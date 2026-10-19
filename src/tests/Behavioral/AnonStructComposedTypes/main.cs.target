@@ -20,8 +20,8 @@ partial struct mapPtrValuesᴛ1 /*dyn*/ {
     internal nint n;
 }
 internal static map<@string, ж<mapPtrValuesᴛ1>> mapPtrValues = new map<@string, ж<mapPtrValuesᴛ1>>{
-    ["a"u8] = Ꮡ(new mapPtrValuesᴛ1(10)),
-    ["b"u8] = Ꮡ(new mapPtrValuesᴛ1(20))
+    ["a"] = Ꮡ(new mapPtrValuesᴛ1(10)),
+    ["b"] = Ꮡ(new mapPtrValuesᴛ1(20))
 };
 
 
@@ -29,7 +29,7 @@ partial struct nestedᴛ1 /*dyn*/ {
     internal @string tag;
 }
 internal static slice<slice<nestedᴛ1>> nested = new slice<nestedᴛ1>[]{
-    new nestedᴛ1[]{new("x"u8), new("y"u8)}.slice()
+    new nestedᴛ1[]{new("x"), new("y")}.slice()
 }.slice();
 
 internal static void Main() {
@@ -37,7 +37,7 @@ internal static void Main() {
         fmt.Println((~e).@in, (~e).str, (~e).error == default!);
     }
 
-    fmt.Println((~mapPtrValues["a"u8]).n + (~mapPtrValues["b"u8]).n);
+    fmt.Println((~mapPtrValues["a"]).n + (~mapPtrValues["b"]).n);
     fmt.Println(nested[0][0].tag, nested[0][1].tag);
 
     ptrElems[0].Value.@in = 42;

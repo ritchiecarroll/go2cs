@@ -5,7 +5,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static error errSeek = errors.New("cannot seek"u8);
+internal static error errSeek = errors.New("cannot seek");
 
 internal static @string take64(Func<(int64, error)> f) {
     var (n, err) = f();

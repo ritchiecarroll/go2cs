@@ -62,7 +62,7 @@ internal static void Main() {
 
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 9;
-    var ptrKeys = new map<ж<nint>, @string>{[default!] = "nil"u8, [Ꮡn] = "n"u8};
+    var ptrKeys = new map<ж<nint>, @string>{[default!] = "nil", [Ꮡn] = "n"};
     nint ptrs = 0;
     nint pnils = 0;
     nint pinvalid = 0;
@@ -97,7 +97,7 @@ internal static void Main() {
     }
     fmt.Println(errˢ, eiface, enils, reflect.ValueOf(errKeys).Len());
 
-    var plain = new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2};
+    var plain = new map<@string, nint>{["a"] = 1, ["b"] = 2};
     nint strs = 0;
     nint snils = 0;
     nint psum = 0;
@@ -114,14 +114,14 @@ internal static void Main() {
     }
     fmt.Println(plainˢ, strs, snils, psum, reflect.ValueOf(plain).Len());
 
-    var slices = new map<@string, slice<nint>>{["k"u8] = new nint[]{1, 2, 3}.slice()};
+    var slices = new map<@string, slice<nint>>{["k"] = new nint[]{1, 2, 3}.slice()};
     iter = reflect.ValueOf(slices).MapRange();
     while (iter.Next()) {
         var v = iter.Value();
         fmt.Println(sliceValueˢ, v.Kind() == reflect.ΔSlice, v.Len(), v.IsNil());
     }
 
-    var anyVals = new map<@string, any>{["k"u8] = default!};
+    var anyVals = new map<@string, any>{["k"] = default!};
     iter = reflect.ValueOf(anyVals).MapRange();
     while (iter.Next()) {
         var v = iter.Value();

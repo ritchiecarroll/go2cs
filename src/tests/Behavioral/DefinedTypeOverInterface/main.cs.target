@@ -33,14 +33,14 @@ internal static @string describe(Token t) {
     case point v: {
         return "pt:"u8 + v.String();
     }}
-    return "?"u8;
+    return "?";
 }
 
 internal static void Main() {
     any t = (nint)(42);
     fmt.Println(describe(t));
 
-    @string msg = "hi"u8;
+    @string msg = "hi";
     Token ts = msg;
     fmt.Println(describe(ts));
 

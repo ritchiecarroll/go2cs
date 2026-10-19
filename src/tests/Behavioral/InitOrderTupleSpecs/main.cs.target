@@ -25,9 +25,9 @@ internal static ref @string boxed => ref Ꮡboxed.Value;
 internal static error _ᴛ3ʗ;
 internal static void initᴛboxed() { boxed = makeGreeting().Item1; }
 
-internal static @string prefix = "go"u8;
+internal static @string prefix = "go";
 
-internal static @string suffix = "2cs"u8;
+internal static @string suffix = "2cs";
 
 internal static (nint, nint) tupleᴛ3ʗ = constantPair();
 internal static nint safeA = tupleᴛ3ʗ.Item1;

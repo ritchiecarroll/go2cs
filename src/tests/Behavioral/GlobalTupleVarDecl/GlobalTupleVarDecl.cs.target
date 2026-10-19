@@ -14,20 +14,17 @@ internal static (ж<box>, error) makeBox(nint v) {
     return (Ꮡ(new box(v: v)), default!);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "hello"u8;
-
 internal static (nint, @string) pair() {
     calls++;
-    return (42, helloˢ);
+    return (42, "hello");
 }
 
 internal static ж<box> defaultBox = makeBox(7).Item1;
 internal static error _ᴛ1ʗ;
 
-internal static nint n;
-internal static @string s;
-internal static void initᴛn() { var tupleᴛ1ʗ = pair(); n = tupleᴛ1ʗ.Item1; s = tupleᴛ1ʗ.Item2; }
+internal static (nint, @string) tupleᴛ1ʗ = pair();
+internal static nint n = tupleᴛ1ʗ.Item1;
+internal static @string s = tupleᴛ1ʗ.Item2;
 
 internal static void Main() {
     fmt.Println((~defaultBox).v);
@@ -54,7 +51,7 @@ internal static @string String(this sval v) {
 }
 
 internal static (stringer, Func<nint>) ifaceAndFunc() {
-    return (new sval(s: "iface"u8), () => 9);
+    return (new sval(s: "iface"), () => 9);
 }
 
 } // end main_package

@@ -19,11 +19,8 @@ partial struct allExported {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string secretˢ = "secret"u8;
 private static readonly object bynameSecretˢ = (@string)"byname secret:"u8;
-private static readonly @string exportedˢ = "Exported"u8;
 private static readonly object bynameExportedˢ = (@string)"byname Exported:"u8;
-private static readonly @string absentˢ = "absent"u8;
 private static readonly object bynameAbsentˢ = (@string)"byname absent:"u8;
 private static readonly object decodeMixedˢ = (@string)"decode mixed:      "u8;
 private static readonly object decodeAllExportedˢ = (@string)"decode allExported:"u8;
@@ -36,11 +33,11 @@ internal static void Main() {
         fmt.Printf("%d %-10s exported=%-5v pkgpath=%q tag=%q\n"u8, i, fΔ1.Name, fΔ1.IsExported(), fΔ1.PkgPath, ((@string)fΔ1.Tag));
     }
 
-    var (f, ok) = t.FieldByName(secretˢ);
+    var (f, ok) = t.FieldByName("secret");
     fmt.Println(bynameSecretˢ, ok, f.IsExported(), f.PkgPath);
-    (f, ok) = t.FieldByName(exportedˢ);
+    (f, ok) = t.FieldByName("Exported");
     fmt.Println(bynameExportedˢ, ok, f.IsExported(), f.PkgPath);
-    (_, ok) = t.FieldByName(absentˢ);
+    (_, ok) = t.FieldByName("absent");
     fmt.Println(bynameAbsentˢ, ok);
 
     ref var m = ref heap(new mixed(), out var Ꮡm);
@@ -56,17 +53,13 @@ internal static void Main() {
     fmt.Println(decodeAllExportedˢ, decode(Ꮡa), a);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string structureErrorStructˢ = "structure error: struct contains unexported fields"u8;
-private static readonly @string nilˢ = "<nil>"u8;
-
 internal static @string decode(any p) {
     var v = reflect.ValueOf(p).Elem();
     var t = v.Type();
 
     for (nint i = 0; i < t.NumField(); i++) {
         if (!t.Field(i).IsExported()) {
-            return structureErrorStructˢ;
+            return "structure error: struct contains unexported fields";
         }
     }
 
@@ -74,7 +67,7 @@ internal static @string decode(any p) {
         v.Field(i).SetInt((int64)(i + 1));
     }
 
-    return nilˢ;
+    return "<nil>";
 }
 
 } // end main_package

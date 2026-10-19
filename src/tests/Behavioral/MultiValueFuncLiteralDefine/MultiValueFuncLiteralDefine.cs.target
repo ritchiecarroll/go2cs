@@ -69,7 +69,7 @@ internal static void Main() {
 
     var id = identity<@string>;
     var sq = square<float64>;
-    fmt.Println(genericInstantiationsˢ, id("go"u8), sq(1.5D));
+    fmt.Println(genericInstantiationsˢ, id("go"), sq(1.5D));
 }
 
 } // end main_package

@@ -13,24 +13,19 @@ public static (Greeter, bool) TryGreet(any v) {
     return (g, ok);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string otherˢ = "other"u8;
-private static readonly @string stringˢ = "string"u8;
-private static readonly @string greeterˢ = "greeter"u8;
-
 public static @string Describe(Greeter g, any original) {
     any v = g;
 
     var (_, again) = v._<Greeter>(ᐧ);
 
-    @string kind = otherˢ;
+    @string kind = "other";
     switch (v.type()) {
     case @string: {
-        kind = stringˢ;
+        kind = "string";
         break;
     }
     case {} ᴛ0 when ᴛ0._<Greeter>(out var _): {
-        kind = greeterˢ;
+        kind = "greeter";
         break;
     }}
 

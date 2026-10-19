@@ -52,16 +52,12 @@ internal static void bump(ref cursor c) {
     c.pos++;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string oneˢ = "one"u8;
-private static readonly @string twoˢ = "two"u8;
-
 internal static (nint, nint) streams() {
-    var (rbr1, err) = makeCursor(10, oneˢ);
+    var (rbr1, err) = makeCursor(10, "one");
     if (err != default!) {
         return (0, 0);
     }
-    (var rbr2, err) = makeCursor(20, twoˢ);
+    (var rbr2, err) = makeCursor(20, "two");
     if (err != default!) {
         return (0, 0);
     }

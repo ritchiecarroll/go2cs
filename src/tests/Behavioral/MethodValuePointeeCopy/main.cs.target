@@ -16,11 +16,8 @@ internal static @string tag(this frame f, @string suffix) {
     return f.Name + suffix;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string touchedˢ = "touched"u8;
-
 internal static @string touch(this frame f) {
-    f.Name = touchedˢ;
+    f.Name = "touched";
     return f.Name;
 }
 
@@ -32,7 +29,7 @@ internal static nint ptrCalls;
 
 internal static ж<frame> makePtr() {
     ptrCalls++;
-    return Ꮡ(new frame(Name: "made"u8));
+    return Ꮡ(new frame(Name: "made"));
 }
 
 internal static Func<@string> viaParam(ж<frame> Ꮡp) {
@@ -54,38 +51,38 @@ private static readonly object paramˢ = (@string)"param   "u8;
 private static readonly object elemˢ = (@string)"elem    "u8;
 
 internal static void Main() {
-    var h1 = new holder(p: Ꮡ(new frame(Name: "a"u8)));
+    var h1 = new holder(p: Ꮡ(new frame(Name: "a")));
     var recvʗ1 = ~h1.p;
     
     var h1ʗ1 = h1;
     var fieldV = () => recvʗ1.label();
-    h1.p.Value.Name = "A"u8;
+    h1.p.Value.Name = "A";
 
     fmt.Println(fieldˢ, fieldV(), (~h1.p).label());
 
-    var h2 = new holder(p: Ꮡ(new frame(Name: "b"u8)));
+    var h2 = new holder(p: Ꮡ(new frame(Name: "b")));
     var recvʗ2 = ~h2.p;
     
     var h2ʗ1 = h2;
     var repoint = () => recvʗ2.label();
-    h2.p = Ꮡ(new frame(Name: "B"u8));
+    h2.p = Ꮡ(new frame(Name: "B"));
 
     fmt.Println(repointˢ, repoint(), (~h2.p).label());
 
-    var p3 = Ꮡ(new frame(Name: "c"u8));
+    var p3 = Ꮡ(new frame(Name: "c"));
     var recvʗ3 = ~p3;
     
     var p3ʗ1 = p3;
     var identV = () => recvʗ3.label();
-    p3.Value.Name = "C"u8;
+    p3.Value.Name = "C";
 
     fmt.Println(identˢ, identV());
 
-    var h4 = new holder(p: Ꮡ(new frame(Name: "d"u8)));
+    var h4 = new holder(p: Ꮡ(new frame(Name: "d")));
     @string call(Func<@string> f) => f();
     var recvʗ4 = ~h4.p;
     @string got = call(() => recvʗ4.label());
-    h4.p.Value.Name = "D"u8;
+    h4.p.Value.Name = "D";
 
     var recvʗ5 = ~h4.p;
     fmt.Println(argumentˢ, got, call(() => recvʗ5.label()));
@@ -99,16 +96,16 @@ internal static void Main() {
 
     fmt.Println(callOnceˢ, ptrCalls, callV());
 
-    var h6 = new holder(p: Ꮡ(new frame(Name: "e"u8)));
+    var h6 = new holder(p: Ꮡ(new frame(Name: "e")));
     var recvʗ7 = ~h6.p;
     
     var h6ʗ1 = h6;
     var tag = (@string p1) => recvʗ7.tag(p1);
-    h6.p.Value.Name = "E"u8;
+    h6.p.Value.Name = "E";
 
-    fmt.Println(paramsˢ, tag("!"u8));
+    fmt.Println(paramsˢ, tag("!"));
 
-    var h7 = new holder(p: Ꮡ(new frame(Name: "f"u8)));
+    var h7 = new holder(p: Ꮡ(new frame(Name: "f")));
     var recvʗ8 = ~h7.p;
     
     var h7ʗ1 = h7;
@@ -116,9 +113,9 @@ internal static void Main() {
 
     fmt.Println(copyˢ, touch(), (~h7.p).Name);
 
-    var p8 = Ꮡ(new frame(Name: "g"u8));
+    var p8 = Ꮡ(new frame(Name: "g"));
     var paramV = viaParam(p8);
-    p8.Value.Name = "G"u8;
+    p8.Value.Name = "G";
 
     fmt.Println(paramˢ, paramV());
 
@@ -127,7 +124,7 @@ internal static void Main() {
     
     var s9ʗ1 = s9;
     var elemV = () => recvʗ9.label();
-    s9[0].Value.Name = "H"u8;
+    s9[0].Value.Name = "H";
 
     fmt.Println(elemˢ, elemV());
 }

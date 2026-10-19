@@ -55,6 +55,7 @@ go2cs -tests -recurse -test-action all module_dir out_root      # validate a who
 | `-tags <list>` | Build tags applied when loading packages. `-stdlib` and `-tests` apply `purego` and `math_big_pure_go` by default, and `-recurse` adds `safe`. An explicit `-tags` replaces every default. |
 | `-indent <n>` | Spaces per indent level (default 4). |
 | `-var` | Prefer `var` declarations where the type is obvious (default on). |
+| `-hoist-literals` | Hoist each string literal in a value slot to one `static readonly` field (`F(helloˢ)`), the standard library's form, instead of the default plain C# literal (`F("hello")`, converted once and shared by golib). The standard library always hoists; this opts any other package in. It is the recommended opt-out for performance-critical code: a hoisted field is a plain static read, where a plain literal makes a cache lookup on every evaluation. See [plain literals](ConversionStrategies-Reference/strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal). |
 | `-uco` | Emit channel operators instead of method calls (default on). |
 | `-comments` | Carry source comments into the output (best effort, see [go/ast comment status](https://github.com/golang/go/issues/20744)). |
 | `-csproj <file>` | Generate project files from a custom `.csproj` template instead of the embedded one. |

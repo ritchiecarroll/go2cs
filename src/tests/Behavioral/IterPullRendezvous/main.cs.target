@@ -118,11 +118,8 @@ private static readonly object stopAfterExhaustionIsANoˢ = (@string)"stop after
 private static readonly object pull2ˢ = (@string)"pull2:"u8;
 private static readonly object earlyPullˢ = (@string)"early pull:"u8;
 private static readonly object pullAfterEarlyStopˢ = (@string)"pull after early stop:"u8;
-private static readonly @string firstNextˢ = "first next"u8;
 private static readonly object pullAfterPanicˢ = (@string)"pull after panic:"u8;
-private static readonly @string stopAfterPanicˢ = "stop after panic"u8;
 private static readonly object cleanupPullˢ = (@string)"cleanup pull:"u8;
-private static readonly @string stopIntoCleanupˢ = "stop into cleanup"u8;
 private static readonly object goexitCrossedˢ = (@string)"goexit crossed:"u8;
 private static readonly object pullAfterGoexitˢ = (@string)"pull after goexit:"u8;
 private static readonly object pullAfterImmediateStopˢ = (@string)"pull after immediate stop:"u8;
@@ -171,7 +168,7 @@ internal static void Main() {
 
     var (nextP, stopP) = iter.Pull(panicSeq());
     var nextPʗ1 = nextP;
-    @catch(firstNextˢ, () => {
+    @catch("first next", () => {
         nextPʗ1();
     });
 
@@ -179,7 +176,7 @@ internal static void Main() {
     fmt.Println(pullAfterPanicˢ, pv, pok);
 
     var stopPʗ1 = stopP;
-    @catch(stopAfterPanicˢ, () => {
+    @catch("stop after panic", () => {
         stopPʗ1();
     });
 
@@ -188,7 +185,7 @@ internal static void Main() {
     fmt.Println(cleanupPullˢ, cv, cvok);
 
     var stopCʗ1 = stopC;
-    @catch(stopIntoCleanupˢ, () => {
+    @catch("stop into cleanup", () => {
         stopCʗ1();
     });
 

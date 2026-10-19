@@ -12,9 +12,7 @@ private static readonly object numˢ = (@string)"num:"u8;
 private static readonly object totalˢ2 = (@string)"Total:"u8;
 private static readonly object keyˢ = (@string)"key:"u8;
 private static readonly object valueˢ = (@string)"value:"u8;
-private static readonly @string subTestˢ = "sub-test"u8;
 private static readonly object valˢ = (@string)"val:"u8;
-private static readonly @string testˢ = "test"u8;
 
 internal static void Main() {
     var nums = new nint[]{2, 3, 4}.slice();
@@ -53,7 +51,7 @@ internal static void Main() {
     }
     fmt.Println(totalˢ2, total);
 
-    var kvs = new map<@string, @string>{["a"u8] = "apple"u8, ["b"u8] = "banana"u8};
+    var kvs = new map<@string, @string>{["a"] = "apple", ["b"] = "banana"};
     foreach (var (kΔ1, vΔ1) in kvs) {
         fmt.Printf("%s -> %s\n"u8, kΔ1, vΔ1);
     }
@@ -79,7 +77,7 @@ internal static void Main() {
             fmt.Printf("%s -> %s\n"u8, kΔ3, vΔ3);
         }
 
-        @string strΔ1 = subTestˢ;
+        @string strΔ1 = "sub-test";
 
         nint i1Δ1 = default!;
         rune c1Δ1 = default!;
@@ -115,7 +113,7 @@ internal static void Main() {
         fmt.Println(iΔ3, c);
     }
 
-    @string str = testˢ;
+    @string str = "test";
 
     nint i1 = default!;
     rune c1 = default!;

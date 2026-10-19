@@ -27,11 +27,8 @@ internal static @string Marshal(this ref widget w) {
 partial struct other {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string otherˢ = "other"u8;
-
 internal static @string Str(this ref other o) {
-    return otherˢ;
+    return "other";
 }
 
 internal static Stringish newStringish(nint n) {

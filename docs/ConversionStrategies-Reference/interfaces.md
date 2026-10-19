@@ -83,7 +83,7 @@ Cast sites emit the adapter around the box (`Incrementer inc = new CounterжIncr
 **Non-empty interface-to-interface conversions use a forwarding adapter.** A Go interface value may be assigned or passed to another non-empty interface when the source interface method set satisfies the target (`var local localLabel = foreign`, where `foreign` is `CrossPkgLib.Labeled`). C# has no structural conversion between unrelated interfaces, so the converter records the interface pair as `[assembly: GoImplement<CrossPkgLib_package.Labeled, localLabel>]` and emits the cast site as a generated adapter:
 
 ```csharp
-CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter"u8, Temp: 21);
+CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter", Temp: 21);
 localLabel local = new CrossPkgLib_LabeledᴠlocalLabel(foreign);
 fmt.Println(labelOf(new CrossPkgLib_LabeledᴠlocalLabel(foreign)));
 ```

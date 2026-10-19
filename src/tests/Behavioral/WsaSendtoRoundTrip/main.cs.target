@@ -17,7 +17,6 @@ internal static void Main() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string udp4ˢ = "udp4"u8;
 private static readonly object roundtripListenFailedˢ = (@string)"roundtrip: listen failed"u8;
 private static readonly object roundtripServerAddressIsˢ = (@string)"roundtrip: server address is not IPv4"u8;
 private static readonly object roundtripSenderSetupˢ = (@string)"roundtrip: sender setup failed"u8;
@@ -35,7 +34,7 @@ private static readonly object roundtripPeerPortMatchesˢ = (@string)"roundtrip:
 internal static void roundTrip() {
     GoFrame ᒐ = default;
     try {
-        var (server, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(roundtripListenFailedˢ);
             return;
@@ -111,7 +110,7 @@ private static readonly object zerolenItCarriedNoBytesˢ = (@string)"zerolen: it
 internal static void zeroLengthDatagram() {
     GoFrame ᒐ = default;
     try {
-        var (server, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(zerolenListenFailedˢ);
             return;

@@ -38,9 +38,6 @@ internal static partial void allocLiteral() {
     sinkLit = Ꮡ(new T(a: 1));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string mainAllocˢ = "main.alloc"u8;
-
 internal static partial void Main() {
     runtime.MemProfileRate = 1;
     allocMake();
@@ -67,8 +64,8 @@ internal static partial void Main() {
             }
             @string name = f.Name();
             names = append(names, name);
-            if (strings.HasPrefix(name, mainAllocˢ)) {
-                @string line = strings.Join(names, " < "u8);
+            if (strings.HasPrefix(name, "main.alloc")) {
+                @string line = strings.Join(names, " < ");
                 if (!seen[line]) {
                     seen[line] = true;
                     lines = append(lines, line);

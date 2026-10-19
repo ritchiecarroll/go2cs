@@ -30,8 +30,8 @@ internal static ж<item> passthrough(ж<item> Ꮡit) {
 
 internal static void Main() {
     slice<entry> table = default!;
-    var a = Ꮡ(new item(name: "alpha"u8));
-    var b = Ꮡ(new item(name: "beta"u8));
+    var a = Ꮡ(new item(name: "alpha"));
+    var b = Ꮡ(new item(name: "beta"));
     table = addItem(table, a);
     table = addItem(table, b);
 
