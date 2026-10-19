@@ -17,7 +17,7 @@ internal partial interface main_Printer /*dyn*/ {
 }
 
 internal static void Main() {
-    main_Printer p = new Message("Hello, from a function-scoped interface!"u8);
+    main_Printer p = new Message("Hello, from a function-scoped interface!");
     p.Print();
 }
 

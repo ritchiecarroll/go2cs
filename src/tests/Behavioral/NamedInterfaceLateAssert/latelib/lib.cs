@@ -25,7 +25,7 @@ partial interface quiet {
 public static (@string, bool) TryTop(any v) {
     {
         var (t, ok) = v._<Top>(ᐧ); if (ok) {
-            return (t.Name() + "/" + t.Kind() + "/" + t.Detail("d"u8), true);
+            return (t.Name() + "/" + t.Kind() + "/" + t.Detail("d"), true);
         }
     }
     return ("", false);

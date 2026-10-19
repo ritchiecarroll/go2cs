@@ -93,10 +93,6 @@ private static readonly object localField1Exportedˢ = (@string)"local.Field(1) 
 private static readonly object localField1PkgPathOuterˢ = (@string)"local.Field(1) PkgPath == Outer.Field(1) PkgPath:"u8;
 private static readonly object localField1PkgPathIsˢ = (@string)"local.Field(1) PkgPath is foreign (not this package, not empty):"u8;
 private static readonly object anonUnexportedPkgPathIsˢ = (@string)"anon unexported PkgPath is this package:"u8;
-private static readonly @string structIntˢ = "struct{ int }"u8;
-private static readonly @string structIntˢ2 = "struct{ *int }"u8;
-private static readonly @string structNTˢ = "struct{ n T }"u8;
-private static readonly @string structMyIntˢ = "struct{ myInt }"u8;
 
 internal partial struct main_i /*dyn*/ {
     internal nint u;
@@ -107,21 +103,21 @@ internal static void Main() {
     fmt.Println(canSetViaUnexportedˢ, reflect.ValueOf(new holds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Index(0).Field(0).CanSet());
     fmt.Println(canSetViaSliceˢ, reflect.ValueOf(new embeds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Slice(0, 1).Index(0).Field(0).CanSet());
 
-    var (_, foundTwice) = reflect.TypeOf(new twice(nil)).FieldByName("B"u8);
-    var (fOnce, foundOnce) = reflect.TypeOf(new once(nil)).FieldByName("B"u8);
-    var (fD, foundD) = reflect.TypeOf(new twice(nil)).FieldByName("D"u8);
+    var (_, foundTwice) = reflect.TypeOf(new twice(nil)).FieldByName("B");
+    var (fOnce, foundOnce) = reflect.TypeOf(new once(nil)).FieldByName("B");
+    var (fD, foundD) = reflect.TypeOf(new twice(nil)).FieldByName("D");
     fmt.Println(twiceBFoundˢ, foundTwice);
     fmt.Println(onceBFoundˢ, foundOnce, indexˢ, fOnce.Index);
     fmt.Println(twiceDFoundˢ, foundD, indexˢ, fD.Index);
-    fmt.Println(twiceBValueValidˢ, reflect.ValueOf(new twice(nil)).FieldByName("B"u8).IsValid());
-    var (_, foundDeeperB) = reflect.TypeOf(new deeper(nil)).FieldByName("B"u8);
-    var (fDeeperD, foundDeeperD) = reflect.TypeOf(new deeper(nil)).FieldByName("D"u8);
-    fmt.Println(deeperBFoundˢ, foundDeeperB, valueValidˢ, reflect.ValueOf(new deeper(nil)).FieldByName("B"u8).IsValid());
-    fmt.Println(deeperDFoundˢ, foundDeeperD, indexˢ, fDeeperD.Index, valueˢ, reflect.ValueOf(new deeper(nil)).FieldByName("D"u8).IsValid());
+    fmt.Println(twiceBValueValidˢ, reflect.ValueOf(new twice(nil)).FieldByName("B").IsValid());
+    var (_, foundDeeperB) = reflect.TypeOf(new deeper(nil)).FieldByName("B");
+    var (fDeeperD, foundDeeperD) = reflect.TypeOf(new deeper(nil)).FieldByName("D");
+    fmt.Println(deeperBFoundˢ, foundDeeperB, valueValidˢ, reflect.ValueOf(new deeper(nil)).FieldByName("B").IsValid());
+    fmt.Println(deeperDFoundˢ, foundDeeperD, indexˢ, fDeeperD.Index, valueˢ, reflect.ValueOf(new deeper(nil)).FieldByName("D").IsValid());
 
-    var (_, mTwice) = reflect.TypeOf(new twice(nil)).MethodByName("M"u8);
-    var (_, mDeeper) = reflect.TypeOf(new deeper(nil)).MethodByName("M"u8);
-    var (_, mOnce) = reflect.TypeOf(new once(nil)).MethodByName("M"u8);
+    var (_, mTwice) = reflect.TypeOf(new twice(nil)).MethodByName("M");
+    var (_, mDeeper) = reflect.TypeOf(new deeper(nil)).MethodByName("M");
+    var (_, mOnce) = reflect.TypeOf(new once(nil)).MethodByName("M");
     fmt.Println(mPromotedTwiceˢ, mTwice, deeperˢ, mDeeper, onceˢ, mOnce);
 
     var lt = reflect.TypeOf(new local(new fieldlib.Outer(nil)));
@@ -137,10 +133,10 @@ internal static void Main() {
         var f = t.Field(0);
         fmt.Printf("%-14s name=%-5s anonymous=%-5v type=%-6v pkgPath=%q\n"u8, label, f.Name, f.Anonymous, f.Type, f.PkgPath);
     }
-    anon(structIntˢ, reflect.TypeOf(new embedsInt(nil)));
-    anon(structIntˢ2, reflect.TypeOf(new embedsIntPtr(nil)));
-    anon(structNTˢ, reflect.TypeOf(new holdsNamed(nil)));
-    anon(structMyIntˢ, reflect.TypeOf(new embedsNamed(nil)));
+    anon("struct{ int }", reflect.TypeOf(new embedsInt(nil)));
+    anon("struct{ *int }", reflect.TypeOf(new embedsIntPtr(nil)));
+    anon("struct{ n T }", reflect.TypeOf(new holdsNamed(nil)));
+    anon("struct{ myInt }", reflect.TypeOf(new embedsNamed(nil)));
 }
 
 } // end main_package

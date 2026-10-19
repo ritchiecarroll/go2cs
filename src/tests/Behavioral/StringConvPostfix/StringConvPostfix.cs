@@ -4,9 +4,6 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string frakˢ = "frak"u8;
-
 internal static void Main() {
     slice<byte> b = default!;
     for (var ch = (rune)(rune)'A'; ch <= (rune)'E'; ch++) {
@@ -37,10 +34,10 @@ internal static void Main() {
     fmt.Println(((@string)(slice<byte>)w), len(w));
 
     var glyphs = new map<@string, rune>{
-        ["frak"u8] = (rune)0x1D504,
-        ["ae"u8] = (rune)'\U000000C6'
+        ["frak"] = (rune)0x1D504,
+        ["ae"] = (rune)'\U000000C6'
     };
-    fmt.Println(glyphs[frakˢ], glyphs["ae"u8], ((@string)glyphs[frakˢ]));
+    fmt.Println(glyphs["frak"], glyphs["ae"], ((@string)glyphs["frak"]));
 }
 
 partial struct sink /*[]byte*/;

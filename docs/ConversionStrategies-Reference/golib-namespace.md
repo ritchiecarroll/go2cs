@@ -222,10 +222,10 @@ now routes through `foreignAliasedTypeName` — the *same* recorded-alias lookup
 any type with no registered alias, so nothing else moves (whole-corpus CNR byte-identical).
 
 ```csharp
-var m = new renamedlibꓸMarker(Name: "alpha"u8, Size: 3);          // composite literal  (was: new Marker(…))
-var (got, ok) = Describe(deltaˢ, 9)._<renamedlibꓸMarker>(ᐧ);      // type assertion     (was: _<Marker>(ᐧ))
-var pl = new Plain(Note: "eta"u8);                                 // NOT renamed — bare, unchanged
-var l = new ΔLocal(Tag: "iota"u8);                                 // same-package rename — local, no alias
+var m = new renamedlibꓸMarker(Name: "alpha", Size: 3);            // composite literal  (was: new Marker(…))
+var (got, ok) = Describe("delta", 9)._<renamedlibꓸMarker>(ᐧ);    // type assertion     (was: _<Marker>(ᐧ))
+var pl = new Plain(Note: "eta");                                   // NOT renamed — bare, unchanged
+var l = new ΔLocal(Tag: "iota");                                   // same-package rename — local, no alias
 ```
 
 The rename rule itself is `performNameCollisionAnalysis`'s and is worth stating exactly, because the second

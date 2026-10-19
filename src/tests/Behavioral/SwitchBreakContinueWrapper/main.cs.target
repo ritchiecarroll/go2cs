@@ -29,7 +29,7 @@ private static readonly object gAfterSwitchˢ = (@string)"g: after switch"u8;
 private static readonly object gGotˢ = (@string)"g: got"u8;
 
 internal static void Main() {
-    var words = new @string[]{"skip"u8, "stop"u8, "keep"u8, "skip"u8, "keep"u8}.slice();
+    var words = new @string[]{"skip", "stop", "keep", "skip", "keep"}.slice();
 
     for (nint i = 0; i < len(words); i++) {
         var exprᴛ1 = words[i];
@@ -118,7 +118,7 @@ continue_outer:;
     }
 break_outer:;
 
-    foreach (var (idx, w) in new @string[]{"go"u8, "brk"u8, "go"u8, "end"u8}.slice()) {
+    foreach (var (idx, w) in new @string[]{"go", "brk", "go", "end"}.slice()) {
         var exprᴛ6 = w;
         if (exprᴛ6 == "go"u8 || exprᴛ6 == "brk"u8) {
             do {

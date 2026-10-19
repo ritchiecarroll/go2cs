@@ -17,16 +17,16 @@ private static readonly object mismatchˢ = (@string)"mismatch:"u8;
 private static readonly object pointerˢ = (@string)"pointer:"u8;
 
 internal static void Main() {
-    any data = new Map(new map<@string, any>{["a"u8] = (nint)(1)});
+    any data = new Map(new map<@string, any>{["a"] = (nint)(1)});
 
     {
         var (mΔ1, okΔ1) = data._<Map>(ᐧ); if (okΔ1) {
-            fmt.Println(commaOkˢ, len(mΔ1), mΔ1["a"u8]);
+            fmt.Println(commaOkˢ, len(mΔ1), mΔ1["a"]);
         }
     }
 
     var m = data._<Map>();
-    fmt.Println(singleˢ, m["a"u8]);
+    fmt.Println(singleˢ, m["a"]);
 
     any other = (nint)(5);
     var (_, ok) = other._<Map>(ᐧ);

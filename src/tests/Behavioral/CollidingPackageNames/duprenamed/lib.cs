@@ -5,22 +5,16 @@ partial class dup_package {
 partial struct Widget {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string widgetMarkerˢ = "widget-marker"u8;
-
 public static @string Marker(this Widget _) {
-    return widgetMarkerˢ;
+    return "widget-marker";
 }
 
 partial struct ΔMarker {
     public @string Value;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloFromDuprenamedˢ = "hello-from-duprenamed"u8;
-
 public static @string Greeting() {
-    return helloFromDuprenamedˢ;
+    return "hello-from-duprenamed";
 }
 
 partial struct Box<T> {

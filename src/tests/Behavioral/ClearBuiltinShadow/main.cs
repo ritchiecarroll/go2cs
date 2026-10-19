@@ -57,7 +57,7 @@ internal static void Main() {
     b.clear();
     fmt.Println(len((~b).data));
 
-    var m = new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2};
+    var m = new map<@string, nint>{["a"] = 1, ["b"] = 2};
     builtin.clear(m);
     fmt.Println(len(m));
 
@@ -65,7 +65,7 @@ internal static void Main() {
     g.run();
     fmt.Println((~g).err);
 
-    var h = new header(new map<@string, slice<@string>>{["a"u8] = new @string[]{"1"u8}.slice(), ["b"u8] = new @string[]{"2"u8}.slice()});
+    var h = new header(new map<@string, slice<@string>>{["a"] = new @string[]{"1"}.slice(), ["b"] = new @string[]{"2"}.slice()});
     var alias = h;
     builtin.clear(h);
     fmt.Println(len(h), len(alias));
@@ -83,7 +83,7 @@ internal static void Main() {
 
     var c = new slice<cell>(2, () => new());
     c[0].v[1] = 3;
-    c[0].m = new map<@string, nint>{["x"u8] = 1};
+    c[0].m = new map<@string, nint>{["x"] = 1};
     builtin.clear(c);
     fmt.Println(len(c[0].v), c[0].v[1], c[0].m == default!);
     c[0].v[1] += 4;

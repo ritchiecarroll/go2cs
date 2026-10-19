@@ -16,21 +16,16 @@ partial struct holder {
     internal any v;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string intˢ = "int"u8;
-private static readonly @string int32ˢ = "int32"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static @string classify(any v) {
     switch (v.type()) {
     case nint: {
-        return intˢ;
+        return "int";
     }
     case int32: {
-        return int32ˢ;
+        return "int32";
     }
     default: {
-        return otherˢ;
+        return "other";
     }}
 
 }
@@ -50,8 +45,8 @@ internal static void Main() {
     var s = new any[]{(nint)(5)}.slice();
     fmt.Println(s[0]._<nint>());
 
-    var m = new map<@string, any>{["k"u8] = (nint)(9)};
-    fmt.Println(m["k"u8]._<nint>());
+    var m = new map<@string, any>{["k"] = (nint)(9)};
+    fmt.Println(m["k"]._<nint>());
 
     var h = new holder(v: (nint)(3));
     fmt.Println(h.v._<nint>());

@@ -16,7 +16,7 @@ internal static void Main() {
 
     fmt.Println(earthˢ);
 
-    @string world = "世界"u8;
+    @string world = "世界";
     fmt.Println(len(world), ((@string)(slice<rune>(world))[0]));
 }
 

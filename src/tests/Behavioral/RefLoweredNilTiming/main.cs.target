@@ -17,11 +17,10 @@ internal static void consume(ref uint64 p, uint64 marker) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sideEffectRanˢ = "side effect ran"u8;
 private static readonly object eagerFromCompletedˢ = (@string)"eagerFrom completed"u8;
 
 internal static void eagerFrom(ref elem e) {
-    var m = side(sideEffectRanˢ);
+    var m = side("side effect ran");
     consume(ref nonnil(ref e).x, m);
     fmt.Println(eagerFromCompletedˢ);
 }
@@ -40,15 +39,11 @@ internal static void passThrough(ref uint64 p) {
     fmt.Println(valueˢ, p);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilOkˢ = "nil ok"u8;
-private static readonly @string nonNilˢ = "non-nil"u8;
-
 internal static @string nilGuard(ж<elem> Ꮡp) {
     if (Ꮡp == nil) {
-        return nilOkˢ;
+        return "nil ok";
     }
-    return nonNilˢ;
+    return "non-nil";
 }
 
 internal static ж<elem> nilElem() {
@@ -91,26 +86,22 @@ internal static void deferredFault() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string zerovarˢ = "zerovar"u8;
-private static readonly @string literalˢ = "literal"u8;
-private static readonly @string boxedˢ = "boxed"u8;
-private static readonly @string liveˢ = "live"u8;
 private static readonly object goodXˢ = (@string)"good.x:"u8;
 private static readonly object guardˢ = (@string)"guard:"u8;
 
 internal static void Main() {
     ж<elem> e1 = default!;
-    tryEager(zerovarˢ, ref (e1).DerefOrNull());
+    tryEager("zerovar", ref (e1).DerefOrNull());
 
-    tryEager(literalˢ, ref ((ж<elem>)default!).DerefOrNull());
+    tryEager("literal", ref ((ж<elem>)default!).DerefOrNull());
 
     any i = nilElem().OrTypedNil();
     var e3 = i._<ж<elem>>();
-    tryEager(boxedˢ, ref (e3).DerefOrNull());
+    tryEager("boxed", ref (e3).DerefOrNull());
 
     ref var good = ref heap<elem>(out var Ꮡgood);
     good = new elem(x: 40);
-    tryEager(liveˢ, ref good);
+    tryEager("live", ref good);
     fmt.Println(goodXˢ, good.x);
 
     deferredFault();

@@ -28,10 +28,6 @@ internal static void @try(@string label, Action set) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sStringMustPanicˢ = "S->string (must PANIC)"u8;
-private static readonly @string byteBMustBeOkˢ = "[]byte->B (must be ok)"u8;
-private static readonly @string bByteMustBeOkˢ = "B->[]byte (must be ok)"u8;
-private static readonly @string stringSMustPanicˢ = "string->S (must PANIC)"u8;
 private static readonly object sStringˢ = (@string)"S->string:"u8;
 private static readonly object stringSˢ = (@string)"| string->S:"u8;
 private static readonly object byteBˢ = (@string)"[]byte->B:"u8;
@@ -39,22 +35,22 @@ private static readonly object bByteˢ = (@string)"| B->[]byte:"u8;
 
 internal static void Main() {
     ref var dstString = ref heap(new @string(), out var ᏑdstString);
-    @try(sStringMustPanicˢ, () => {
+    @try("S->string (must PANIC)", () => {
         reflect.ValueOf(ᏑdstString).Elem().Set(reflect.ValueOf(((S)(@string)"x"u8)));
     });
 
     ref var dstB = ref heap<B>(out var ᏑdstB);
-    @try(byteBMustBeOkˢ, () => {
+    @try("[]byte->B (must be ok)", () => {
         reflect.ValueOf(ᏑdstB).Elem().Set(reflect.ValueOf(slice<byte>("y"u8)));
     });
 
     ref var dstBytes = ref heap<slice<byte>>(out var ᏑdstBytes);
-    @try(bByteMustBeOkˢ, () => {
+    @try("B->[]byte (must be ok)", () => {
         reflect.ValueOf(ᏑdstBytes).Elem().Set(reflect.ValueOf(((B)slice<byte>((@string)"z"u8))));
     });
 
     ref var dstS = ref heap(new S(), out var ᏑdstS);
-    @try(stringSMustPanicˢ, () => {
+    @try("string->S (must PANIC)", () => {
         reflect.ValueOf(ᏑdstS).Elem().Set(reflect.ValueOf((@string)"w"u8));
     });
 

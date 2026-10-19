@@ -6,11 +6,8 @@ partial class main_package {
 
 public delegate nint Fn();
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string stringFnˢ = "String(fn)"u8;
-
 public static @string String(this Fn fn) {
-    return stringFnˢ;
+    return "String(fn)";
 }
 
 partial interface Getter {

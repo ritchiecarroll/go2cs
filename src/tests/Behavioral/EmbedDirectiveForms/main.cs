@@ -21,8 +21,8 @@ private static readonly object unrelatedˢ = (@string)"unrelated:"u8;
 private static readonly object byteSumˢ = (@string)"byte sum:"u8;
 
 internal static void Main() {
-    fmt.Printf("testfp: %d bytes, %d lines\n"u8, len(testfp), strings.Count(testfp, "\n"u8));
-    foreach (var (i, line) in strings.Split(strings.TrimSuffix(testfp, "\n"u8), "\n"u8)) {
+    fmt.Printf("testfp: %d bytes, %d lines\n"u8, len(testfp), strings.Count(testfp, "\n"));
+    foreach (var (i, line) in strings.Split(strings.TrimSuffix(testfp, "\n"), "\n")) {
         fmt.Printf("  %d: %q\n"u8, i, line);
     }
     fmt.Println(testfpTestfpAgainˢ, testfp == testfpAgain);

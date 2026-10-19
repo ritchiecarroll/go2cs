@@ -9,11 +9,8 @@ internal static void bump(ж<PromotedEmbedLib.Counter> Ꮡc, nint n) {
     Ꮡc.Add(n);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string widgetˢ = "widget"u8;
-
 internal static void Main() {
-    var c = PromotedEmbedLib.New(widgetˢ);
+    var c = PromotedEmbedLib.New("widget");
     c.Add(3);
     bump(c, 4);
     fmt.Println((~c).Label, c.Report().Sum);

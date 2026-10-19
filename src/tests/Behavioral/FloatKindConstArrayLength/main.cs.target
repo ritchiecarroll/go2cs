@@ -125,8 +125,8 @@ internal static void Main() {
     ж<array<byte>> ptr = Ꮡlit;
     fmt.Println(pointerˢ, 10, ptr.Value[1]);
 
-    var m = new map<@string, array<byte>>{["k"u8] = lit.Clone()};
-    fmt.Println(mapValueˢ, len(m["k"u8, () => new array<byte>(10)]), m["k"u8, () => new array<byte>(10)][1]);
+    var m = new map<@string, array<byte>>{["k"] = lit.Clone()};
+    fmt.Println(mapValueˢ, len(m["k", () => new array<byte>(10)]), m["k", () => new array<byte>(10)][1]);
 
     var sl = GoReflect.WithElemDims(new array<byte>[]{lit.Clone()}.slice(), 10);
     fmt.Println(sliceElemˢ, len(sl), len(sl[0]), sl[0][1]);

@@ -132,6 +132,7 @@ anchor and links to the same heading in its new page.
   - <a id="a-nil-element-appended-to-a-slice-casts-to-the-element-type"></a>[A nil element appended to a slice casts to the element type](ConversionStrategies-Reference/slices-and-arrays.md#a-nil-element-appended-to-a-slice-casts-to-the-element-type)
 - <a id="strings-string-and-sstring"></a>[Strings (@string and sstring)](ConversionStrategies-Reference/strings.md#strings-string-and-sstring)
   - <a id="string-is-a-byte-string-and-slicing-it-is-a-window"></a>[@string is a byte string, and slicing it is a window](ConversionStrategies-Reference/strings.md#string-is-a-byte-string-and-slicing-it-is-a-window)
+  - <a id="a-literal-in-a-string-slot-is-a-plain-c-literal"></a>[A literal in a string slot is a plain C# literal](ConversionStrategies-Reference/strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
   - <a id="string-literals-render-as-u8-spans"></a>[String literals render as u8 spans](ConversionStrategies-Reference/strings.md#string-literals-render-as-u8-spans)
   - <a id="a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string"></a>[A string literal with raw-byte escapes emits a byte-array @string](ConversionStrategies-Reference/strings.md#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string)
   - <a id="converting-between-strings-and-slices"></a>[Converting between strings and slices](ConversionStrategies-Reference/strings.md#converting-between-strings-and-slices)

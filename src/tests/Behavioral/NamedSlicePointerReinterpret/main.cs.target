@@ -25,11 +25,6 @@ internal static void preformat(this ж<handler> Ꮡh, @string s) {
     h.groups++;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string alpha1ˢ = "alpha=1"u8;
-private static readonly @string beta2ˢ = " beta=2"u8;
-private static readonly @string gamma3ˢ = " gamma=3"u8;
-
 internal static void Main() {
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
     b = new slice<byte>(0, 8);
@@ -57,9 +52,9 @@ internal static void Main() {
     fmt.Println(len(src));
 
     var h = Ꮡ(new handler(nil));
-    h.preformat(alpha1ˢ);
-    h.preformat(beta2ˢ);
-    h.preformat(gamma3ˢ);
+    h.preformat("alpha=1");
+    h.preformat(" beta=2");
+    h.preformat(" gamma=3");
     fmt.Println(((@string)(~h).preformatted), len((~h).preformatted), (~h).groups);
 
     var t = h.of(handler.Ꮡpreformatted).Reinterpret<slice<byte>, Buf>();

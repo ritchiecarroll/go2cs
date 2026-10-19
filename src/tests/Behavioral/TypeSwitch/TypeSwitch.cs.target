@@ -126,16 +126,11 @@ internal static void Main() {
     fmt.Println(mk.tag(new byte[]{7, 8}.slice()));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string boolˢ = "bool"u8;
-private static readonly @string oneˢ = "one"u8;
-private static readonly @string manyˢ = "many"u8;
-
 internal static @string probe(any x) {
     switch (x.type()) {
     case bool v: {
         _ = v;
-        return boolˢ;
+        return "bool";
     }
     default: {
         var v = x;
@@ -143,10 +138,10 @@ internal static @string probe(any x) {
             nint vΔ1 = len(fmt.Sprint(v));
             switch (vΔ1) {
             case 1: {
-                return oneˢ;
+                return "one";
             }
             default: {
-                return manyˢ;
+                return "many";
             }}
         }
 

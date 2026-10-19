@@ -42,7 +42,7 @@ internal static ж<counter> run() {
     try {
         var c = Ꮡ(new counter(nil));
         defer(() => note(), ref ᒐ);
-        defer((ᴛ1, ᴛ2) => note(ᴛ1, ᴛ2), (@string)"a", "b", ref ᒐ);
+        defer((ᴛ1, ᴛ2) => note(ᴛ1, ᴛ2), (@string)"a", (@string)"b", ref ᒐ);
         var cʗ1 = c;
         defer(() => cʗ1.bump(), ref ᒐ);
         var cʗ2 = c;

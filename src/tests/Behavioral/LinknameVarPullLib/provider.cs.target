@@ -4,6 +4,6 @@ namespace go;
 
 partial class LinknameVarPullLib_package {
 
-public static @string secret = "pulled across the linkname"u8;
+public static @string secret = "pulled across the linkname";
 
 } // end LinknameVarPullLib_package

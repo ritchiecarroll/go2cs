@@ -58,7 +58,7 @@ internal static @string names(reflectꓸType t) {
 
     for (nint i = 0; i < t.NumMethod(); i++) {
         if (i > 0) {
-            Ꮡsb.WriteString(","u8);
+            Ꮡsb.WriteString(",");
         }
 
         Ꮡsb.WriteString(t.Method(i).Name);
@@ -67,15 +67,12 @@ internal static @string names(reflectꓸType t) {
     return sb.String();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string bumpˢ = "Bump"u8;
-
 internal static void describe(@string label, any v) {
     var t = reflect.TypeOf(v);
     fmt.Printf("%s: NumMethod=%d [%s]\n"u8, label, t.NumMethod(), names(t));
 
     var rv = reflect.ValueOf(v);
-    var m = rv.MethodByName(bumpˢ);
+    var m = rv.MethodByName("Bump");
     fmt.Printf("%s: MethodByName(Bump) valid=%v\n"u8, label, m.IsValid());
 
     if (m.IsValid()) {
@@ -99,63 +96,51 @@ internal static void describe(@string label, any v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string samePˢ = "SameP"u8;
-private static readonly @string samePˢ2 = "*SameP"u8;
 private static readonly object samePInnerAfterˢ = (@string)"SameP inner after:"u8;
-private static readonly @string sameVˢ = "SameV"u8;
-private static readonly @string sameVˢ2 = "*SameV"u8;
 private static readonly object sameVInnerAfterˢ = (@string)"SameV inner after:"u8;
-private static readonly @string outerVPˢ = "OuterVP"u8;
-private static readonly @string outerVPˢ2 = "*OuterVP"u8;
 private static readonly object outerVPInnerAfterˢ = (@string)"OuterVP inner after:"u8;
-private static readonly @string outerPVˢ = "OuterPV"u8;
-private static readonly @string outerPVˢ2 = "*OuterPV"u8;
 private static readonly object outerPVInnerAfterˢ = (@string)"OuterPV inner after:"u8;
-private static readonly @string outerVVˢ = "OuterVV"u8;
-private static readonly @string outerVVˢ2 = "*OuterVV"u8;
 private static readonly object outerVVInnerAfterˢ = (@string)"OuterVV inner after:"u8;
-private static readonly @string firstSecondˢ = "first\nsecond\n"u8;
-private static readonly @string readStringˢ = "ReadString"u8;
 private static readonly object bufioReadWriterValueHasˢ = (@string)"bufio.ReadWriter value has ReadString:"u8;
 private static readonly object bufioReadWriterValueˢ = (@string)"bufio.ReadWriter value asserts io.Reader:"u8;
 
 internal static void Main() {
     ref var p = ref heap<SameP>(out var Ꮡp);
     p = new SameP(Ꮡ(new Inner(10)));
-    describe(samePˢ, p);
-    describe(samePˢ2, Ꮡp);
+    describe("SameP", p);
+    describe("*SameP", Ꮡp);
     fmt.Println(samePInnerAfterˢ, p.n);
 
     ref var v = ref heap<SameV>(out var Ꮡv);
     v = new SameV(new Inner(20));
-    describe(sameVˢ, v);
-    describe(sameVˢ2, Ꮡv);
+    describe("SameV", v);
+    describe("*SameV", Ꮡv);
     fmt.Println(sameVInnerAfterˢ, v.n);
 
     ref var vp = ref heap<OuterVP>(out var Ꮡvp);
     vp = new OuterVP(new MidP(Ꮡ(new Inner(30))));
-    describe(outerVPˢ, vp);
-    describe(outerVPˢ2, Ꮡvp);
+    describe("OuterVP", vp);
+    describe("*OuterVP", Ꮡvp);
     fmt.Println(outerVPInnerAfterˢ, vp.n);
 
     ref var pv = ref heap<OuterPV>(out var Ꮡpv);
     pv = new OuterPV(Ꮡ(new MidV(new Inner(40))));
-    describe(outerPVˢ, pv);
-    describe(outerPVˢ2, Ꮡpv);
+    describe("OuterPV", pv);
+    describe("*OuterPV", Ꮡpv);
     fmt.Println(outerPVInnerAfterˢ, pv.n);
 
     ref var vv = ref heap<OuterVV>(out var Ꮡvv);
     vv = new OuterVV(new MidV(new Inner(50)));
-    describe(outerVVˢ, vv);
-    describe(outerVVˢ2, Ꮡvv);
+    describe("OuterVV", vv);
+    describe("*OuterVV", Ꮡvv);
     fmt.Println(outerVVInnerAfterˢ, vv.n);
 
-    var rw = new bufio.ReadWriter(Reader: bufio.NewReader(new strings_ReaderжReader(strings.NewReader(firstSecondˢ))));
+    var rw = new bufio.ReadWriter(Reader: bufio.NewReader(new strings_ReaderжReader(strings.NewReader("first\nsecond\n"))));
     var rt = reflect.TypeOf(rw);
-    var (_, hasReadString) = rt.MethodByName(readStringˢ);
+    var (_, hasReadString) = rt.MethodByName("ReadString");
     fmt.Println(bufioReadWriterValueHasˢ, hasReadString);
 
-    var @out = reflect.ValueOf(rw).MethodByName(readStringˢ).Call(new reflectꓸValue[]{reflect.ValueOf((byte)(rune)'\n')}.slice());
+    var @out = reflect.ValueOf(rw).MethodByName("ReadString").Call(new reflectꓸValue[]{reflect.ValueOf((byte)(rune)'\n')}.slice());
     fmt.Printf("ReadString via reflect = %q\n"u8, @out[0].String());
 
     any x = rw;

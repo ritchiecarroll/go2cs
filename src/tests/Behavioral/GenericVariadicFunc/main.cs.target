@@ -47,8 +47,8 @@ internal static void Main() {
     fmt.Println(Count<nint>(1, 2, 3, 4));
     fmt.Println(DeferredCount((@string)"x", (@string)"y"));
 
-    @string s1 = "go"u8;
-    @string s2 = "2cs"u8;
+    @string s1 = "go";
+    @string s2 = "2cs";
     fmt.Println(First(s1, s2));
 
     fmt.Println(First((@string)"A", (@string)"B", (@string)"C"));

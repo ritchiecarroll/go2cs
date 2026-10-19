@@ -37,7 +37,6 @@ private static readonly object localArrayˢ = (@string)"local array:"u8;
 private static readonly object promotedˢ = (@string)"promoted:"u8;
 private static readonly object swappedˢ = (@string)"swapped:"u8;
 private static readonly object patchedˢ = (@string)"patched:"u8;
-private static readonly @string patchedˢ2 = "patched"u8;
 private static readonly object nameˢ = (@string)"name:"u8;
 
 internal static void Main() {
@@ -78,7 +77,7 @@ internal static void Main() {
     fmt.Println(patchedˢ, (~pr).Inst[1].Arg, (~pr).Inst[3].Out);
 
     var n = Ꮡ((~pr).Inst, 3).of(inst.ᏑName);
-    n.Value = patchedˢ2;
+    n.Value = "patched";
     fmt.Println(nameˢ, (~pr).Inst[3].Name);
 }
 

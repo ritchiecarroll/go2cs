@@ -26,7 +26,7 @@ public static Option<T> NewEmptyOption<T>() {
 
 internal static void Main() {
     var optionPtr = Ꮡ(new Option<@string>(
-        value: "hello"u8,
+        value: "hello",
         valid: true
     ));
     fmt.Printf("Option value: %s, valid: %t\n"u8, (~optionPtr).value, (~optionPtr).valid);
@@ -39,9 +39,9 @@ internal static void Main() {
     fmt.Printf("Options count: %d\n"u8, len(options));
 
     var cache = new map<@string, Option<float64>>{
-        ["pi"u8] = NewOption<float64>(3.14159D),
-        ["e"u8] = NewOption<float64>(2.71828D),
-        ["phi"u8] = NewEmptyOption<float64>()
+        ["pi"] = NewOption<float64>(3.14159D),
+        ["e"] = NewOption<float64>(2.71828D),
+        ["phi"] = NewEmptyOption<float64>()
     };
     fmt.Printf("Cache size: %d\n"u8, len(cache));
 

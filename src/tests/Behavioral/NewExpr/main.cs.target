@@ -19,7 +19,7 @@ partial struct cfgᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
 }
-internal static ж<cfgᴛ1> cfg = Ꮡ(new cfgᴛ1("cfg"u8, 3));
+internal static ж<cfgᴛ1> cfg = Ꮡ(new cfgᴛ1("cfg", 3));
 
 internal static ж<int64> limit = Ꮡ((int64)(1099511627776L));
 

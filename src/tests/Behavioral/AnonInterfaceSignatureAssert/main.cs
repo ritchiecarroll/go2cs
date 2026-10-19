@@ -50,7 +50,7 @@ private static readonly object multiUnwrapCountˢ = (@string)"multi unwrap count
 private static readonly object singleUnwrapˢ = (@string)"single unwrap:"u8;
 
 internal static void Main() {
-    var e1 = new simpleErr("boom"u8);
+    var e1 = new simpleErr("boom");
     var m = new multiWrap(errs: new error[]{e1}.slice());
     var s = new singleWrap(err: e1);
 
