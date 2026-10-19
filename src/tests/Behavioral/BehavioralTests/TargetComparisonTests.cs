@@ -1777,6 +1777,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPromotedValueEmbedUser() => CheckTarget("PromotedValueEmbedUser");
 
     [TestMethod]
+    public void CheckProxyContainerForwarding() => CheckTarget("ProxyContainerForwarding");
+
+    [TestMethod]
     public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
 
     [TestMethod]

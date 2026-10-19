@@ -39,13 +39,32 @@ namespace go2cs.Tests;
 [TestClass]
 public class ForeignConstraintProxyTests
 {
-    private const string ShimSource =
+    internal const string ShimSource =
         """
         namespace go
         {
             public class ж<T> { public ж(T value) { Value = value; } public T Value; }
 
             public struct slice<T> { }
+
+            public struct map<K, V> { }
+
+            public class channel<T> { }
+
+            public readonly struct array<T> : System.Collections.Generic.IEnumerable<T>
+            {
+                private readonly T[] items;
+
+                public array(T[] items) { this.items = items; }
+
+                public int Length => items.Length;
+
+                public T this[int index] => items[index];
+
+                public System.Collections.Generic.IEnumerator<T> GetEnumerator() => ((System.Collections.Generic.IEnumerable<T>)items).GetEnumerator();
+
+                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+            }
 
             public interface IжAdapter { object? Box { get; } }
 
@@ -209,18 +228,19 @@ public class ForeignConstraintProxyTests
 
     private static readonly CSharpParseOptions s_parseOptions = new(LanguageVersion.Latest);
 
-    private static IEnumerable<MetadataReference> CoreReferences()
+    internal static IEnumerable<MetadataReference> CoreReferences()
     {
         string coreDir = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
 
         yield return MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         yield return MetadataReference.CreateFromFile(Path.Combine(coreDir, "System.Runtime.dll"));
+        yield return MetadataReference.CreateFromFile(Path.Combine(coreDir, "System.Linq.dll"));
     }
 
-    private sealed record Built(Dictionary<string, byte[]> Images, Dictionary<string, List<GeneratedSourceResult>> Generated);
+    internal sealed record Built(Dictionary<string, byte[]> Images, Dictionary<string, List<GeneratedSourceResult>> Generated);
 
     // Compiles one assembly over the images before it, through both generators, and keeps its image and generated sources.
-    private static void Build(Built built, string name, string source)
+    internal static void Build(Built built, string name, string source)
     {
         CSharpCompilation compilation = CSharpCompilation.Create(
             name,
@@ -259,7 +279,7 @@ public class ForeignConstraintProxyTests
             name.Name is { } simple && images.TryGetValue(simple, out byte[]? image) ? LoadFromStream(new MemoryStream(image)) : null;
     }
 
-    private static string Invoke(Built built, string method)
+    internal static string Invoke(Built built, string method)
     {
         ImageContext context = new(built.Images);
 
@@ -274,7 +294,7 @@ public class ForeignConstraintProxyTests
         }
     }
 
-    private static string Source(Built built, string assembly, string hintFragment) =>
+    internal static string Source(Built built, string assembly, string hintFragment) =>
         built.Generated[assembly].FirstOrDefault(source => source.HintName.Contains(hintFragment)).SourceText?.ToString() ?? "";
 
     /// <summary>THE SUBJECT: b1's value and main's own dispatch through the bound slots, and are one type.</summary>

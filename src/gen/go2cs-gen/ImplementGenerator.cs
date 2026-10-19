@@ -1747,6 +1747,7 @@ public class ImplementGenerator : ISourceGenerator
         string interfaceRef = $"{StripGenericTypeArguments(GlobalQualify(interfaceDef.ToDisplayString()))}<{proxyName}>";
 
         ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+        ProxyForms forms = new(selfParameter, $"{PointerPrefix}<{elementName}>", proxyName);
         StringBuilder methods = new();
 
         // A Go constraint interface may EMBED other interfaces, and Go embedding emits as C#
@@ -1782,12 +1783,21 @@ public class ImplementGenerator : ISourceGenerator
                 string methodName = EscapeCsKeyword(method.Name);
                 string returnType = RenderWithProxy(method.ReturnType, selfParameter, proxyName);
                 string parameters = string.Join(", ", method.Parameters.Select((parameter, index) => $"{RenderWithProxy(parameter.Type, selfParameter, proxyName)} {SafeParameterName(parameter.Name, index)}"));
-                string arguments = string.Join(", ", method.Parameters.Select((parameter, index) => RenderForwardedArgument(parameter.Type, SafeParameterName(parameter.Name, index), selfParameter, elementName)));
+                List<string> refused = UnforwardablePositions(method, forms);
 
                 if (methods.Length > 0)
                     methods.Append("\r\n\r\n        ");
 
-                methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => m_box.{methodName}({arguments});");
+                if (refused.Count > 0)
+                {
+                    methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {RefusedForwarderBody(proxyName, interfaceDef, method, refused)};");
+                    continue;
+                }
+
+                string arguments = string.Join(", ", method.Parameters.Select((parameter, index) => MarshalAcrossProxy(SafeParameterName(parameter.Name, index), parameter.Type, forms, false, true, 0)));
+                string call = $"m_box.{methodName}({arguments})";
+
+                methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {(method.ReturnsVoid ? call : MarshalAcrossProxy(call, method.ReturnType, forms, true, true, 0))};");
             }
         }
 
@@ -1895,9 +1905,9 @@ public class ImplementGenerator : ISourceGenerator
     /// <remarks>
     /// Each forwarder calls a static slot typed with the self parameter rendered as the BOX, <c>ж&lt;E&gt;</c>,
     /// so a binder's lambda calls the element's Go method on exactly the types that method declares. Arguments
-    /// and results cross the proxy/box boundary through the proxy's implicit conversions, and a delegate
-    /// argument through RenderForwardedArgument's re-wrap, as in a concrete proxy. One delegate call per
-    /// forwarded method is the cost of a proxy that does not know its element.
+    /// and results cross the proxy/box boundary through MarshalAcrossProxy, as in a concrete proxy; a method
+    /// whose values share the element's storage has no slot, and its forwarder throws the converter's refusal.
+    /// One delegate call per forwarded method is the cost of a proxy that does not know its element.
     /// </remarks>
     internal static void EmitGenericConstraintProxy(GeneratorExecutionContext context, INamedTypeSymbol interfaceDef, HashSet<string> emittedHintNames)
     {
@@ -1909,6 +1919,7 @@ public class ImplementGenerator : ISourceGenerator
         string boxRef = $"{PointerPrefix}<{GenericProxyElement}>";
         string interfaceRef = $"{StripGenericTypeArguments(GlobalQualify(interfaceDef.ToDisplayString()))}<{proxyRef}>";
         ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+        ProxyForms forms = new(selfParameter, boxRef, proxyRef);
 
         StringBuilder slots = new();
         StringBuilder methods = new();
@@ -1924,6 +1935,21 @@ public class ImplementGenerator : ISourceGenerator
             {
                 context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, method.Locations.FirstOrDefault(), $"the generic constraint proxy {proxyRef}", $"'{method.Name}' takes more parameters than a slot delegate can hold"));
                 return;
+            }
+
+            string returnType = method.ReturnsVoid ? "void" : RenderWithProxy(method.ReturnType, selfParameter, proxyRef);
+            string parameters = string.Join(", ", method.Parameters.Select((parameter, index) => $"{RenderWithProxy(parameter.Type, selfParameter, proxyRef)} {SafeParameterName(parameter.Name, index)}"));
+            List<string> refused = UnforwardablePositions(method, forms);
+
+            if (methods.Length > 0)
+                methods.Append("\r\n\r\n        ");
+
+            // A method the proxy cannot forward has no slot to bind, and its forwarder throws the converter's refusal: the
+            // interface's own package compiles, and every value-element instantiation (which needs no proxy) works.
+            if (refused.Count > 0)
+            {
+                methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {RefusedForwarderBody(proxyRef, interfaceDef, method, refused)};");
+                continue;
             }
 
             // An interface embedding another that declares the same method (Go permits identical duplicates) forwards
@@ -1944,14 +1970,10 @@ public class ImplementGenerator : ISourceGenerator
                 slots.Append($"public static {slotType} {slotName} = static {discards} => throw {TempVarMarker}Unbound(\"{method.Name}\");");
             }
 
-            string returnType = method.ReturnsVoid ? "void" : RenderWithProxy(method.ReturnType, selfParameter, proxyRef);
-            string parameters = string.Join(", ", method.Parameters.Select((parameter, index) => $"{RenderWithProxy(parameter.Type, selfParameter, proxyRef)} {SafeParameterName(parameter.Name, index)}"));
-            string arguments = string.Join("", method.Parameters.Select((parameter, index) => $", {RenderForwardedArgument(parameter.Type, SafeParameterName(parameter.Name, index), selfParameter, GenericProxyElement)}"));
+            string arguments = string.Join("", method.Parameters.Select((parameter, index) => $", {MarshalAcrossProxy(SafeParameterName(parameter.Name, index), parameter.Type, forms, false, true, 0)}"));
+            string call = $"{slotName}(m_box{arguments})";
 
-            if (methods.Length > 0)
-                methods.Append("\r\n\r\n        ");
-
-            methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {slotName}(m_box{arguments});");
+            methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {(method.ReturnsVoid ? call : MarshalAcrossProxy(call, method.ReturnType, forms, true, true, 0))};");
         }
 
         string packageNamespace = packageClass.ContainingNamespace.ToDisplayString(s_namespaceUsingFormat);
@@ -2151,47 +2173,121 @@ public class ImplementGenerator : ISourceGenerator
 
     private static string SafeParameterName(string name, int index) => string.IsNullOrEmpty(name) ? $"arg{index}" : EscapeCsKeyword(name);
 
-    // Renders ONE forwarded argument in a constraint-proxy forwarder body.
-    //
-    // A parameter whose type mentions the interface's self parameter is DECLARED on the proxy
-    // closed over the PROXY (`Action<TжTBRun>`), while the box extension the body forwards to is
-    // declared closed over the BOX (`Action<ж<testing.T>>`). At the TOP level the two implicit
-    // conversions the proxy emits marshal that boundary for free — a bare `T` argument converts
-    // proxy→box, a `T` result converts box→proxy. NESTED inside a delegate they cannot: C#
-    // delegate variance requires a REFERENCE conversion and does not lift a user-defined one
-    // through `Action<>`/`Func<>`. The forwarder then binds nothing (CS1929, reported against the
-    // ref-receiver overload because no ж-twin is applicable). net/http's own constraint is the
-    // shape — `type TBRun[T any] interface { testing.TB; Run(string, func(T)) bool }`.
-    //
-    // Re-wrap in a lambda whose parameters are typed with the self parameter substituted by the
-    // BOX, so every crossing takes an implicit conversion in whichever direction that position
-    // needs: box→proxy for an argument going IN, proxy→box for a self-typed RESULT coming OUT
-    // (the lambda's return type is inferred from the target delegate, where the conversion
-    // applies). The lambda parameters are named positionally with the temp marker, which no Go
-    // identifier can spell, so they cannot shadow the forwarder's own parameters.
-    //
-    // Anything that is NOT a delegate is returned untouched — the top-level implicit conversions
-    // already cover it — and so is a delegate with a by-ref parameter, which Go cannot express:
-    // a guess there would trade a clear diagnostic for a wrong marshalling.
-    private static string RenderForwardedArgument(ITypeSymbol parameterType, string parameterName, ITypeParameterSymbol selfParameter, string elementName)
+    // The two spellings of the self parameter across a constraint proxy's boundary: the element's Go methods (and a
+    // generic proxy's slots) take and return the BOX, the proxy's own signatures the PROXY.
+    private sealed record ProxyForms(ITypeParameterSymbol Self, string BoxRef, string ProxyRef)
     {
-        if (SymbolEqualityComparer.Default.Equals(parameterType, selfParameter) ||
-            !ContainsTypeParameter(parameterType, selfParameter) ||
-            parameterType is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } delegateType ||
-            delegateType.DelegateInvokeMethod is not { } invoke ||
-            invoke.Parameters.Any(parameter => parameter.RefKind != RefKind.None))
+        public string Render(ITypeSymbol type, bool asProxy) => asProxy ? RenderWithProxy(type, Self, ProxyRef) : RenderSlotType(type, Self, BoxRef, ProxyRef);
+
+        // A type both spellings name identically, or that C# converts implicitly: the self parameter itself (the
+        // proxy declares both conversions), or a tuple of such types (C# converts a tuple element-wise).
+        public bool ConvertsImplicitly(ITypeSymbol type) =>
+            !ContainsTypeParameter(type, Self) ||
+            SymbolEqualityComparer.Default.Equals(type, Self) ||
+            Render(type, true) == Render(type, false) ||
+            type is INamedTypeSymbol { IsTupleType: true } tuple && tuple.TupleElements.All(element => ConvertsImplicitly(element.Type));
+    }
+
+    // Marshals ONE value across a constraint proxy's boundary: `expression`, spelled with the self parameter as the
+    // box (toProxy) or as the proxy (!toProxy), becomes the other spelling. Returns null when the value cannot cross.
+    //
+    // - A type that converts implicitly (ProxyForms.ConvertsImplicitly) passes as written where C# has a target type
+    //   (an argument, a result, a lambda's return), and is cast elsewhere.
+    // - A DELEGATE is re-wrapped in a lambda over the target's own parameter types, marshalling each argument the
+    //   other way and the result this way, to any depth; a nil func stays nil. C# delegate variance needs a reference
+    //   conversion and never lifts the proxy's user-defined one through `Action<>`/`Func<>` (net/http's
+    //   `TBRun[T any] interface { testing.TB; Run(string, func(T)) bool }` is the shape).
+    // - A Go ARRAY (golib's array<T>) is copied element by element, which is exact: Go copies arrays.
+    // - A tuple marshals element by element.
+    // - Every other shape SHARES the element's storage in Go (a slice, map, channel or pointer of the self parameter,
+    //   or a generic type carrying it through a parameter that is not self-constrained): a proxy is a separate object
+    //   per box, so a copy would compile and break Go's aliasing. The converter refuses an instantiation that would
+    //   reach such a proxy (constraintProxyForwarding.go), and its forwarder throws the same refusal.
+    //
+    // Lambda parameters and pattern variables carry the temp marker and the nesting depth, which no Go identifier can
+    // spell, so they shadow neither the forwarder's parameters nor each other.
+    private static string? MarshalAcrossProxy(string expression, ITypeSymbol type, ProxyForms forms, bool toProxy, bool targetTyped, int depth)
+    {
+        if (forms.ConvertsImplicitly(type))
+            return targetTyped || !ContainsTypeParameter(type, forms.Self) || forms.Render(type, true) == forms.Render(type, false)
+                ? expression
+                : $"(({forms.Render(type, toProxy)})({expression}))";
+
+        switch (type)
         {
-            return parameterName;
+            case INamedTypeSymbol { TypeKind: TypeKind.Delegate, DelegateInvokeMethod: { } invoke } when invoke.Parameters.All(parameter => parameter.RefKind == RefKind.None):
+            {
+                string function = $"{TempVarMarker}f{depth}";
+                List<string> lambdaParameters = [];
+                List<string> arguments = [];
+
+                for (int index = 0; index < invoke.Parameters.Length; index++)
+                {
+                    IParameterSymbol parameter = invoke.Parameters[index];
+                    string name = $"{TempVarMarker}a{depth}_{index}";
+
+                    if (MarshalAcrossProxy(name, parameter.Type, forms, !toProxy, true, depth + 1) is not { } argument)
+                        return null;
+
+                    lambdaParameters.Add($"{forms.Render(parameter.Type, toProxy)} {name}");
+                    arguments.Add(argument);
+                }
+
+                string call = $"{function}({string.Join(", ", arguments)})";
+                string? body = invoke.ReturnsVoid ? call : MarshalAcrossProxy(call, invoke.ReturnType, forms, toProxy, true, depth + 1);
+
+                return body is null ? null : $"({expression} is {{ }} {function} ? new {forms.Render(type, toProxy)}(({string.Join(", ", lambdaParameters)}) => {body}) : null)";
+            }
+            case INamedTypeSymbol { Name: "array", Arity: 1, ContainingType: null } array when array.ContainingNamespace?.ToDisplayString() == "go":
+            {
+                ITypeSymbol elementType = array.TypeArguments[0];
+                string element = $"{TempVarMarker}e{depth}";
+
+                if (MarshalAcrossProxy(element, elementType, forms, toProxy, true, depth + 1) is not { } converted)
+                    return null;
+
+                return $"new {forms.Render(type, toProxy)}(global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select<{forms.Render(elementType, !toProxy)}, {forms.Render(elementType, toProxy)}>({expression}, {element} => {converted})))";
+            }
+            case INamedTypeSymbol { IsTupleType: true } tuple:
+            {
+                string value = $"{TempVarMarker}t{depth}";
+                List<string> elements = [];
+
+                for (int index = 0; index < tuple.TupleElements.Length; index++)
+                {
+                    if (MarshalAcrossProxy($"{value}.Item{index + 1}", tuple.TupleElements[index].Type, forms, toProxy, false, depth + 1) is not { } element)
+                        return null;
+
+                    elements.Add(element);
+                }
+
+                return $"({expression} switch {{ var {value} => ({string.Join(", ", elements)}) }})";
+            }
+            default:
+                return null;
+        }
+    }
+
+    // A forwarder body for a constraint method the proxy cannot forward: the refusal the converter gives every
+    // instantiation that would reach it, thrown as a Go panic. `phrases` names each position ("returns slice<N>"), parenthesized after the qualified method.
+    private static string RefusedForwarderBody(string proxyName, INamedTypeSymbol interfaceDef, IMethodSymbol method, IEnumerable<string> phrases) =>
+        $"throw global::go.builtin.panic(\"go2cs: constraint proxy {proxyName}: {interfaceDef.Name}.{method.Name} ({string.Join(", ", phrases)}), which in Go shares the element's own storage; a proxy is a separate object per pointer and cannot forward it, so go2cs refuses every instantiation of {interfaceDef.Name} over a pointer element\")";
+
+    // The positions of a constraint method that cannot cross the proxy boundary, as "returns T" / "takes T" phrases.
+    private static List<string> UnforwardablePositions(IMethodSymbol method, ProxyForms forms)
+    {
+        List<string> phrases = [];
+
+        foreach (IParameterSymbol parameter in method.Parameters)
+        {
+            if (MarshalAcrossProxy(parameter.Name, parameter.Type, forms, false, true, 0) is null)
+                phrases.Add($"takes {parameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}");
         }
 
-        string boxRef = $"{PointerPrefix}<{elementName}>";
+        if (!method.ReturnsVoid && MarshalAcrossProxy("result", method.ReturnType, forms, true, true, 0) is null)
+            phrases.Add($"returns {method.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}");
 
-        string lambdaParameters = string.Join(", ", invoke.Parameters.Select((parameter, index) =>
-            $"{RenderWithProxy(parameter.Type, selfParameter, boxRef)} {TempVarMarker}{index}"));
-
-        string lambdaArguments = string.Join(", ", invoke.Parameters.Select((_, index) => $"{TempVarMarker}{index}"));
-
-        return $"({lambdaParameters}) => {parameterName}({lambdaArguments})";
+        return phrases;
     }
 
     // Reports whether a type mentions the interface's self-type parameter anywhere in its shape.
