@@ -264,6 +264,12 @@ partial class syscall_package
         // Boxes whose GCHandles pin the caller's buffers for the flight; replaced at each submit.
         private readonly List<object> m_pins = new();
 
+        // Two threads can retire one record at once: a submit whose pooled key now names another
+        // (descriptor, mode) retires it (GoAsyncIO.GetOrBindOperationState), while its own socket's
+        // pollClose retires every record the socket still tracks (SocketBinding.Dispose). Unguarded,
+        // both freed the one control block, and the second free threw "Handle is not initialized" out
+        // of net's Close. The gate makes the later caller wait for the earlier and then return.
+        private readonly object m_gate = new();
         private bool m_disposed;
 
         internal OverlappedOp(SocketBinding? binding, nint mode, object key)
@@ -344,23 +350,30 @@ partial class syscall_package
 
         public void Dispose()
         {
-            if (m_disposed)
-                return;
-
-            m_disposed = true;
-
-            Binding?.Untrack(this);
-            releaseOverlapped();
-            m_preallocated?.Dispose();
-
-            if (m_staging is not null)
+            lock (m_gate)
             {
-                NativeMemory.Free(m_staging);
-                m_staging = null;
-                m_stagingLength = 0;
-            }
+                if (m_disposed)
+                    return;
 
-            m_pins.Clear();
+                m_disposed = true;
+
+                releaseOverlapped();
+                m_preallocated?.Dispose();
+
+                if (m_staging is not null)
+                {
+                    NativeMemory.Free(m_staging);
+                    m_staging = null;
+                    m_stagingLength = 0;
+                }
+
+                m_pins.Clear();
+
+                // Untracked LAST. The socket disposes its bound handle after every record it still
+                // tracks is disposed, and the control block is freed THROUGH that handle, so a record
+                // leaves the list only once its block is freed.
+                Binding?.Untrack(this);
+            }
         }
     }
 
