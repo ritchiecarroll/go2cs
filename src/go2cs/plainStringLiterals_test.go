@@ -10,6 +10,7 @@ package main
 
 import (
 	"go/build"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -305,5 +306,89 @@ func TestPlainLiteralsInPackageVarsAndComposites(t *testing.T) {
 
 	if strings.Contains(emitted, `Echo("package generic argument")`) {
 		t.Errorf("a bare literal reached an inferred generic call:\n%s", emitted)
+	}
+}
+
+// relocationFixture: a package-level initializer that reaches a function with a local string const
+// (LocalStringConstHoist's shape). Hoisted, the const is a field the initializer reads, so the var is
+// relocated into package_init.cs; plain, it reads no field and stays a field initializer.
+const relocationFixture = "package plit\n\n" +
+	"var greeting = makeGreeting(\"world\")\n\n" +
+	"func makeGreeting(name string) string {\n\tconst hello = \"hello there \"\n\treturn hello + name\n}\n\n" +
+	"func use() string { return greeting }\n"
+
+// TestAStalePackageInitIsRetiredWhenNothingRelocates: a conversion that relocates nothing removes the
+// package_init.cs an EARLIER conversion generated at the same path, whose static constructor would call
+// an init method this conversion no longer declares (CS0103; measured on LocalStringConstHoist,
+// GlobalTupleVarDecl and StringLiteralHoisting when plain literals landed). A hand-written
+// package_init.cs is never touched.
+func TestAStalePackageInitIsRetiredWhenNothingRelocates(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/plit\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "plit.go"), relocationFixture)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	convert := func(hoist bool) string {
+		t.Helper()
+
+		options := Options{
+			goRoot:              goRoot,
+			goPath:              build.Default.GOPATH,
+			go2csPath:           filepath.Join(root, "out"),
+			recurse:             true,
+			targetPlatform:      "linux/amd64",
+			indentSpaces:        4,
+			preferVarDecl:       true,
+			useChannelOperators: true,
+			hoistLiterals:       hoist,
+		}
+
+		build.Default.GOROOT = options.goRoot
+		build.Default.GOPATH = options.goPath
+
+		if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+			t.Fatalf("ConvertModule(hoist=%v): %v", hoist, err)
+		}
+
+		return filepath.Join(options.go2csPath, "src", "example.com", "plit")
+	}
+
+	pkgDir := convert(true)
+	initPath := filepath.Join(pkgDir, PackageInitFileName)
+
+	if !strings.Contains(readGenerated(t, initPath), "initᴛgreeting();") {
+		t.Fatalf("the hoisted conversion must relocate greeting into %s", initPath)
+	}
+
+	convert(false)
+
+	if _, err := os.Stat(initPath); !os.IsNotExist(err) {
+		t.Errorf("the plain conversion relocates nothing, so %s must be retired (stat err %v)", initPath, err)
+	}
+
+	if emitted := readGenerated(t, filepath.Join(pkgDir, "plit.cs")); strings.Contains(emitted, "initᴛgreeting") {
+		t.Errorf("the plain conversion must not relocate greeting:\n%s", emitted)
+	}
+
+	// CONTROL: a hand-written package_init.cs (no generated header) survives a conversion that
+	// relocates nothing.
+	handWritten := "// hand-owned\r\nnamespace go.example.com;\r\n"
+
+	if err := os.WriteFile(initPath, []byte(handWritten), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	convert(false)
+
+	if got, err := os.ReadFile(initPath); err != nil || string(got) != handWritten {
+		t.Errorf("a hand-written package_init.cs must be left untouched (err %v)", err)
 	}
 }
