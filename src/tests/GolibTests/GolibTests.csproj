@@ -139,6 +139,10 @@
          project already carries needs no change, so only the gate FILE is conditional. -->
     <Compile Remove="WindowsNetDbTranscriptionTests.cs" />
 
+    <!-- The TXT payload pin drives syscall's DnsQuery transcription seam (transcribeDnsRecords) and its
+         DNSTXTData, both declared only in syscall's windows/ folder. Same reason and same form as above. -->
+    <Compile Remove="WindowsDnsTxtPayloadTests.cs" />
+
     <!-- TempDirCleanupOrderTests: ONE of its two arms is windows-only and the file follows that arm.
          EveryCleanupSucceedsWhenAChdirSitsBetweenTempDirCalls guards an ORDER that is
          platform-independent (one parent removal registered on the FIRST TempDir call, so a Chdir
