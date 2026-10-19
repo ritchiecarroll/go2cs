@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file.
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using winint = go.@internal.syscall.windows_package;
@@ -31,6 +32,17 @@ public class WindowsQueryPerformanceCounterTests
 {
     private static bool OnWindows => System.OperatingSystem.IsWindows();
 
+    // The two calls sit in their own NoInlining methods so that internal/syscall/windows is touched only
+    // behind each arm's host gate. A method that names the package directly loads it when the arm runs, and
+    // off windows that assembly's module initializer throws before the gate's first line (measured: a
+    // linux host building the windows flavour read all three arms as TypeInitializationException in
+    // '<Module>' rather than Inconclusive).
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static long QueryPerformanceCounter() => winint.QueryPerformanceCounter();
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static long QueryPerformanceFrequency() => winint.QueryPerformanceFrequency();
+
     [TestMethod]
     public void TheFrequencyIsTheKernelsPerformanceFrequency()
     {
@@ -40,7 +52,7 @@ public class WindowsQueryPerformanceCounterTests
             return;
         }
 
-        long frequency = winint.QueryPerformanceFrequency();
+        long frequency = QueryPerformanceFrequency();
 
         Assert.IsTrue(frequency > 0, $"QueryPerformanceFrequency() = {frequency}, want > 0");
         Assert.AreEqual(Stopwatch.Frequency, frequency, "the frequency is not QueryPerformanceFrequency's (Stopwatch.Frequency reads that call)");
@@ -56,7 +68,7 @@ public class WindowsQueryPerformanceCounterTests
         }
 
         long before = Stopwatch.GetTimestamp();
-        long counter = winint.QueryPerformanceCounter();
+        long counter = QueryPerformanceCounter();
         long after = Stopwatch.GetTimestamp();
 
         Assert.IsTrue(before <= counter && counter <= after,
@@ -72,9 +84,9 @@ public class WindowsQueryPerformanceCounterTests
             return;
         }
 
-        long first = winint.QueryPerformanceCounter();
+        long first = QueryPerformanceCounter();
         Thread.Sleep(1);
-        long second = winint.QueryPerformanceCounter();
+        long second = QueryPerformanceCounter();
 
         Assert.IsTrue(second > first, $"QueryPerformanceCounter() read {first}, then {second} a millisecond later");
     }
