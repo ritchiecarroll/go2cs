@@ -83,7 +83,7 @@ public class PointerReinterpretUnaliasedTests
         ж<Person> p = d.ReinterpretUnaliased<Data, Person>();
 
         PanicException panic = Assert.ThrowsException<PanicException>(() => _ = p.Value.Name, "a read through the conversion answered");
-        AssertNamesTheConversion(panic.Message);
+        AssertNamesTheConversion(panic);
     }
 
     [TestMethod]
@@ -93,14 +93,20 @@ public class PointerReinterpretUnaliasedTests
         ж<Person> p = d.ReinterpretUnaliased<Data, Person>();
 
         PanicException panic = Assert.ThrowsException<PanicException>(() => p.Value.Name = "pat", "a write through the conversion answered");
-        AssertNamesTheConversion(panic.Message);
+        AssertNamesTheConversion(panic);
         Assert.AreEqual("ora", d.Value.Name.ToString(), "a refused write changed the source");
     }
 
-    private static void AssertNamesTheConversion(string message)
+    // Go never panics here, so the refusal is a go2cs limitation: a plain panic carrying a Go string, never a
+    // runtime.Error, or a recovering handler (net/http, fmt's catchPanic) would print it as Go's own behaviour.
+    private static void AssertNamesTheConversion(PanicException panic)
     {
-        StringAssert.Contains(message, "pointer conversion", "the refusal does not name the conversion");
+        string message = panic.Message;
+
+        StringAssert.StartsWith(message, "go2cs: pointer conversion (*", "the refusal does not name itself a go2cs limitation and the conversion");
         StringAssert.Contains(message, "two C# classes, which cannot alias", "the refusal does not say why");
+        Assert.IsInstanceOfType(panic.State, typeof(@string), "the panic value is not a plain Go string");
+        Assert.IsFalse(message.Contains("runtime error"), $"the refusal reads as a Go runtime error: {message}");
         Assert.IsFalse(message.Contains("native memory"), $"the refusal speaks of native memory for a managed box: {message}");
     }
 }

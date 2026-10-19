@@ -312,7 +312,7 @@ public static class PointerExtensions
     /// The conversion is valid Go and most of what follows it is exact here: a nil source gives the derived type's
     /// nil, the result compares and hashes as a reinterpret view of <paramref name="box"/>, and converting it back
     /// gives <paramref name="box"/> itself. Only a read or a write through it needs Go's aliased memory, and that
-    /// refuses by name (<see cref="RuntimeErrorPanic.UnaliasablePointerConversion"/>) rather than copying, which is
+    /// refuses by name (a plain "go2cs: pointer conversion" panic, never a runtime.Error) rather than copying, which is
     /// what the converter emitted before. The converter prints a warning naming the site and the two classes.
     /// </remarks>
     public static ж<TDst> ReinterpretUnaliased<T, TDst>(this ж<T>? box)
