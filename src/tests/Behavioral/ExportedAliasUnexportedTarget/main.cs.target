@@ -27,15 +27,13 @@ public static void Log(this ж<Logger> Ꮡl, @string line) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string firstˢ = "first"u8;
-private static readonly @string secondˢ = "second"u8;
 private static readonly object lockRoundTripOkˢ = (@string)"lock round trip ok"u8;
 
 internal static void Main() {
     ref var l = ref heap(new Logger(), out var Ꮡl);
-    Ꮡl.Log(firstˢ);
+    Ꮡl.Log("first");
     l.mu.Disable();
-    Ꮡl.Log(secondˢ);
+    Ꮡl.Log("second");
     fmt.Println(len(l.lines), l.lines[0], l.lines[1]);
 
     ref var w = ref heap(new aliaslibꓸMutexWrap(), out var Ꮡw);

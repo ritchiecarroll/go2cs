@@ -47,11 +47,8 @@ partial struct sliceErr {
     public slice<nint> S;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sliceErrˢ = "sliceErr"u8;
-
 internal static @string Error(this sliceErr _) {
-    return sliceErrˢ;
+    return "sliceErr";
 }
 
 internal static void check(@string name, Action f) {
@@ -92,39 +89,12 @@ internal static void checkPanicOnly(@string name, Action f) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object uncomparableDynamicTypesˢ = (@string)"== uncomparable dynamic types: Go panics =="u8;
-private static readonly @string mapˢ = "map"u8;
-private static readonly @string sliceˢ = "slice"u8;
-private static readonly @string funcˢ = "func"u8;
-private static readonly @string namedMapˢ = "named map"u8;
-private static readonly @string namedSliceˢ = "named slice"u8;
-private static readonly @string namedFuncˢ = "named func"u8;
-private static readonly @string structWSliceˢ = "struct w/ slice"u8;
-private static readonly @string structWMapˢ = "struct w/ map"u8;
-private static readonly @string structWFuncˢ = "struct w/ func"u8;
-private static readonly @string structWStructˢ = "struct w/ struct"u8;
 private static readonly object arrayLengthIsPartOfTheˢ = (@string)"== array length is part of the reported type =="u8;
-private static readonly @string arrayOfSliceˢ = "array of slice"u8;
-private static readonly @string arrayOfMapˢ = "array of map"u8;
-private static readonly @string dArrayOfSliceˢ = "2-D array of slice"u8;
-private static readonly @string arrayOfStructˢ = "array of struct"u8;
 private static readonly object interfaceFieldPanicsˢ = (@string)"== interface FIELD panics naming the inner type, recoverably =="u8;
-private static readonly @string structWAnyMapˢ = "struct w/ any=map"u8;
-private static readonly @string structWAnySliceˢ = "struct w/ any=slice"u8;
 private static readonly object structWAnyIntˢ = (@string)"struct w/ any=int:"u8;
 private static readonly object nonEmptyInterfaceˢ = (@string)"== non-empty interface =="u8;
-private static readonly @string errorWSliceˢ = "error w/ slice"u8;
 private static readonly object nilComparesNeverPanicˢ = (@string)"== nil compares never panic =="u8;
-private static readonly @string mapNilˢ = "map == nil"u8;
-private static readonly @string sliceNilˢ = "slice == nil"u8;
-private static readonly @string funcNilˢ = "func == nil"u8;
-private static readonly @string structWSliceNilˢ = "struct w/ slice == nil"u8;
-private static readonly @string arrayOfSliceNilˢ = "array of slice == nil"u8;
-private static readonly @string nilIfaceMapˢ = "nil iface == map"u8;
-private static readonly @string nilIfaceNilIfaceˢ = "nil iface == nil iface"u8;
 private static readonly object differingDynamicTypesˢ = (@string)"== differing dynamic types never panic =="u8;
-private static readonly @string mapIntˢ = "map == int"u8;
-private static readonly @string sliceMapˢ = "slice == map"u8;
-private static readonly @string intSliceˢ = "int == slice"u8;
 private static readonly object comparableValuesStillˢ = (@string)"== comparable values still compare =="u8;
 private static readonly object intˢ = (@string)"int:      "u8;
 private static readonly object stringˢ = (@string)"string:   "u8;
@@ -138,8 +108,6 @@ private static readonly object chanˢ = (@string)"chan:     "u8;
 private static readonly object ifaceˢ = (@string)"iface:    "u8;
 private static readonly object nestedˢ = (@string)"nested:   "u8;
 private static readonly object theVerdictIsStableAcrossˢ = (@string)"== the verdict is stable across repeated comparisons =="u8;
-private static readonly @string repeatMapˢ = "repeat map"u8;
-private static readonly @string repeatComparableˢ = "repeat comparable"u8;
 
 internal partial struct main_nestedComparable /*dyn*/ {
     public point P;
@@ -149,65 +117,65 @@ internal partial struct main_nestedComparable /*dyn*/ {
 internal static void Main() {
     fmt.Println(uncomparableDynamicTypesˢ);
 
-    any m = new map<@string, nint>{["a"u8] = 1};
+    any m = new map<@string, nint>{["a"] = 1};
     var mʗ1 = m;
-    check(mapˢ, () => {
+    check("map", () => {
         _ = AreEqual(mʗ1, mʗ1);
     });
 
     any s = new nint[]{1, 2}.slice();
     var sʗ1 = s;
-    check(sliceˢ, () => {
+    check("slice", () => {
         _ = AreEqual(sʗ1, sʗ1);
     });
 
     any fn = () => {
     };
     var fnʗ1 = fn;
-    check(funcˢ, () => {
+    check("func", () => {
         _ = AreEqual(fnʗ1, fnʗ1);
     });
 
-    any nm = new myMap(new map<@string, nint>{["a"u8] = 1});
+    any nm = new myMap(new map<@string, nint>{["a"] = 1});
     var nmʗ1 = nm;
-    check(namedMapˢ, () => {
+    check("named map", () => {
         _ = AreEqual(nmʗ1, nmʗ1);
     });
 
     any nsl = new mySlice(new nint[]{1}.slice());
     var nslʗ1 = nsl;
-    check(namedSliceˢ, () => {
+    check("named slice", () => {
         _ = AreEqual(nslʗ1, nslʗ1);
     });
 
-    any nf = new Func<nint, @string>((nint _Δp0) => ""u8);
+    any nf = new Func<nint, @string>((nint _Δp0) => "");
     var nfʗ1 = nf;
-    checkPanicOnly(namedFuncˢ, () => {
+    checkPanicOnly("named func", () => {
         _ = AreEqual(nfʗ1, nfʗ1);
     });
 
     any ws = new withSlice(1, new nint[]{2}.slice());
     var wsʗ1 = ws;
-    check(structWSliceˢ, () => {
+    check("struct w/ slice", () => {
         _ = AreEqual(wsʗ1, wsʗ1);
     });
 
     any wm = new withMap(1, new map<@string, nint>{});
     var wmʗ1 = wm;
-    check(structWMapˢ, () => {
+    check("struct w/ map", () => {
         _ = AreEqual(wmʗ1, wmʗ1);
     });
 
     any wf = new withFunc(() => {
     });
     var wfʗ1 = wf;
-    check(structWFuncˢ, () => {
+    check("struct w/ func", () => {
         _ = AreEqual(wfʗ1, wfʗ1);
     });
 
     any nested = new outer(new inner(slice<byte>("x"u8)), 1);
     var nestedʗ1 = nested;
-    check(structWStructˢ, () => {
+    check("struct w/ struct", () => {
         _ = AreEqual(nestedʗ1, nestedʗ1);
     });
 
@@ -216,25 +184,25 @@ internal static void Main() {
 
     any aos = new slice<nint>[]{new nint[]{1}.slice()}.array();
     var aosʗ1 = aos;
-    check(arrayOfSliceˢ, () => {
+    check("array of slice", () => {
         _ = AreEqual(aosʗ1, aosʗ1);
     });
 
     any aom = new map<@string, nint>[]{}.array(2);
     var aomʗ1 = aom;
-    check(arrayOfMapˢ, () => {
+    check("array of map", () => {
         _ = AreEqual(aomʗ1, aomʗ1);
     });
 
     any a2d = new array<slice<nint>>[]{}.array(2, () => new(3));
     var a2dʗ1 = a2d;
-    check(dArrayOfSliceˢ, () => {
+    check("2-D array of slice", () => {
         _ = AreEqual(a2dʗ1, a2dʗ1);
     });
 
     any aostruct = new withSlice[]{}.array(3);
     var aostructʗ1 = aostruct;
-    check(arrayOfStructˢ, () => {
+    check("array of struct", () => {
         _ = AreEqual(aostructʗ1, aostructʗ1);
     });
 
@@ -243,13 +211,13 @@ internal static void Main() {
 
     any wa = new withAny(1, new map<@string, nint>{});
     var waʗ1 = wa;
-    check(structWAnyMapˢ, () => {
+    check("struct w/ any=map", () => {
         _ = AreEqual(waʗ1, waʗ1);
     });
 
     any wa2 = new withAny(1, new nint[]{1}.slice());
     var wa2ʗ1 = wa2;
-    check(structWAnySliceˢ, () => {
+    check("struct w/ any=slice", () => {
         _ = AreEqual(wa2ʗ1, wa2ʗ1);
     });
 
@@ -263,7 +231,7 @@ internal static void Main() {
 
     error e = new sliceErr(new nint[]{1}.slice());
     var eʗ1 = e;
-    check(errorWSliceˢ, () => {
+    check("error w/ slice", () => {
         _ = AreEqual(eʗ1, eʗ1);
     });
 
@@ -271,34 +239,34 @@ internal static void Main() {
     fmt.Println(nilComparesNeverPanicˢ);
 
     var mʗ2 = m;
-    check(mapNilˢ, () => {
+    check("map == nil", () => {
         _ = mʗ2 == default!;
     });
     var sʗ2 = s;
-    check(sliceNilˢ, () => {
+    check("slice == nil", () => {
         _ = sʗ2 == default!;
     });
     var fnʗ2 = fn;
-    check(funcNilˢ, () => {
+    check("func == nil", () => {
         _ = fnʗ2 == default!;
     });
     var wsʗ2 = ws;
-    check(structWSliceNilˢ, () => {
+    check("struct w/ slice == nil", () => {
         _ = wsʗ2 == default!;
     });
     var aosʗ2 = aos;
-    check(arrayOfSliceNilˢ, () => {
+    check("array of slice == nil", () => {
         _ = aosʗ2 == default!;
     });
 
     any nilIface = default!;
     var mʗ3 = m;
     var nilIfaceʗ1 = nilIface;
-    check(nilIfaceMapˢ, () => {
+    check("nil iface == map", () => {
         _ = AreEqual(nilIfaceʗ1, mʗ3);
     });
     var nilIfaceʗ2 = nilIface;
-    check(nilIfaceNilIfaceˢ, () => {
+    check("nil iface == nil iface", () => {
         _ = AreEqual(nilIfaceʗ2, nilIfaceʗ2);
     });
 
@@ -308,17 +276,17 @@ internal static void Main() {
     any i = (nint)(5);
     var iʗ1 = i;
     var mʗ4 = m;
-    check(mapIntˢ, () => {
+    check("map == int", () => {
         _ = AreEqual(mʗ4, iʗ1);
     });
     var mʗ5 = m;
     var sʗ3 = s;
-    check(sliceMapˢ, () => {
+    check("slice == map", () => {
         _ = AreEqual(sʗ3, mʗ5);
     });
     var iʗ2 = i;
     var sʗ4 = s;
-    check(intSliceˢ, () => {
+    check("int == slice", () => {
         _ = AreEqual(iʗ2, sʗ4);
     });
 
@@ -386,12 +354,12 @@ internal static void Main() {
 
     for (nint iΔ1 = 0; iΔ1 < 2; iΔ1++) {
         var mʗ6 = m;
-        check(repeatMapˢ, () => {
+        check("repeat map", () => {
             _ = AreEqual(mʗ6, mʗ6);
         });
         var i1ʗ1 = i1;
         var i2ʗ1 = i2;
-        check(repeatComparableˢ, () => {
+        check("repeat comparable", () => {
             _ = AreEqual(i1ʗ1, i2ʗ1);
         });
     }

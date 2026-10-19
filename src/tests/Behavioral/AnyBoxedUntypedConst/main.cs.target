@@ -47,33 +47,26 @@ internal static any retFloatL() {
     return 2.5D;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string intˢ = "int"u8;
-private static readonly @string int32ˢ = "int32"u8;
-private static readonly @string float64ˢ = "float64"u8;
-private static readonly @string stringˢ = "string"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static @string kindOf(any v) {
     switch (v.type()) {
     case nint: {
-        return intˢ;
+        return "int";
     }
     case int32: {
-        return int32ˢ;
+        return "int32";
     }
     case float64: {
-        return float64ˢ;
+        return "float64";
     }
     case @string: {
-        return stringˢ;
+        return "string";
     }}
 
-    return otherˢ;
+    return "other";
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string seedˢ = "seed"u8;
+private static readonly object seedˢ = (@string)"seed"u8;
 
 internal static any retStrL() {
     return seedˢ;
@@ -173,14 +166,14 @@ internal static void Main() {
     fmt.Println(slcFloatLitˢ, AreEqual(sl[2], ((any)f)));
     fmt.Println(slcNamedˢ, AreEqual(sl[3], ((any)i)));
 
-    var mk = new map<any, @string>{[(nint)(7)] = "seven"u8, [(rune)'A'] = "letter"u8, [2.5D] = "half"u8};
+    var mk = new map<any, @string>{[(nint)(7)] = "seven", [(rune)'A'] = "letter", [2.5D] = "half"};
     fmt.Println(mapkeyLitˢ, mk[((any)i)], mk[((any)r)], mk[((any)f)]);
     fmt.Println(mapkeyLookupˢ, mk[(nint)(7)], mk[(rune)'A'], mk[2.5D], mk[(nint)(namedInt)]);
     var (_, mkMiss) = mk[(int32)7, ꟷ];
     fmt.Println(mapkeyMissˢ, mkMiss);
 
-    var mv = new map<@string, any>{["i"u8] = (nint)(7), ["r"u8] = (rune)'A', ["f"u8] = 2.5D};
-    fmt.Println(mapvalLitˢ, AreEqual(mv["i"u8], ((any)i)), AreEqual(mv["r"u8], ((any)r)), AreEqual(mv["f"u8], ((any)f)));
+    var mv = new map<@string, any>{["i"] = (nint)(7), ["r"] = (rune)'A', ["f"] = 2.5D};
+    fmt.Println(mapvalLitˢ, AreEqual(mv["i"], ((any)i)), AreEqual(mv["r"], ((any)r)), AreEqual(mv["f"], ((any)f)));
 
     var hk = new holder(v: (nint)(7));
     var hp = new holder((nint)(7));
@@ -210,7 +203,7 @@ internal static void Main() {
     var (fv, fok) = ((any)2.5D)._<float64>(ᐧ);
     fmt.Println(assertLitˢ, iv, iok, rv, rok, fv, fok);
 
-    @string s = seedˢ;
+    @string s = "seed";
     fmt.Println(strVarLitˢ, variadicEq(s, seedˢ));
     fmt.Println(strVarCatˢ, variadicEq(s, (@string)("se" + "ed")));
     fmt.Println(strVarNamedˢ, variadicEq(s, namedStr), variadicEq(s, typedStr));
@@ -223,11 +216,11 @@ internal static void Main() {
     var ssl = new any[]{(@string)"seed"u8, (@string)("se" + "ed")}.slice();
     fmt.Println(strSlcˢ, AreEqual(ssl[0], ((any)s)), AreEqual(ssl[1], ((any)s)));
 
-    var smk = new map<any, @string>{[(@string)"seed"u8] = "hit"u8};
+    var smk = new map<any, @string>{[(@string)"seed"u8] = "hit"};
     fmt.Println(strMapkeyˢ, smk[seedˢ], smk[((any)s)]);
 
-    var smv = new map<@string, any>{["k"u8] = (@string)"seed"u8, ["c"u8] = (@string)("se"u8 + "ed"u8)};
-    fmt.Println(strMapvalˢ, AreEqual(smv["k"u8], ((any)s)), AreEqual(smv["c"u8], ((any)s)));
+    var smv = new map<@string, any>{["k"] = (@string)"seed"u8, ["c"] = (@string)("se"u8 + "ed"u8)};
+    fmt.Println(strMapvalˢ, AreEqual(smv["k"], ((any)s)), AreEqual(smv["c"], ((any)s)));
 
     var shk = new holder(v: (@string)"seed"u8);
     var shp = new holder((@string)"seed"u8);

@@ -30,10 +30,10 @@ private static readonly object unnamedMapˢ = (@string)"unnamed map:"u8;
 
 internal static void unnamedMap() {
     ref var m = ref heap<map<@string, nint>>(out var Ꮡm);
-    m = new map<@string, nint>{["a"u8] = 1};
+    m = new map<@string, nint>{["a"] = 1};
     var p = new PM(Ꮡm);
-    (p.ValueSlot)["b"u8] = 2;
-    fmt.Println(unnamedMapˢ, len(p.ValueSlot), (p.ValueSlot)["b"u8], len(m));
+    (p.ValueSlot)["b"] = 2;
+    fmt.Println(unnamedMapˢ, len(p.ValueSlot), (p.ValueSlot)["b"], len(m));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -12,9 +12,6 @@ partial struct tracker {
     internal map<ж<conn>, @string> m;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string unknownˢ = "unknown"u8;
-
 internal static @string status(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -23,7 +20,7 @@ internal static @string status(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
             return s;
         }
     }
-    return unknownˢ;
+    return "unknown";
 }
 
 internal static void rename(this ж<conn> Ꮡc, ж<tracker> Ꮡt, @string s) {
@@ -58,21 +55,17 @@ internal static void close(this ж<conn> Ꮡc, ж<tracker> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string busyˢ = "busy"u8;
-private static readonly @string newˢ = "new"u8;
-
 internal static void Main() {
     var a = Ꮡ(new conn(id: 1));
     var b = Ꮡ(new conn(id: 2));
-    var t = Ꮡ(new tracker(m: new map<ж<conn>, @string>{[a] = "idle"u8}));
+    var t = Ꮡ(new tracker(m: new map<ж<conn>, @string>{[a] = "idle"}));
 
     fmt.Println(a.status(t), b.status(t));
 
-    a.rename(t, busyˢ);
+    a.rename(t, "busy");
     fmt.Println(a.label(t), len((~t).m));
 
-    b.rename(t, newˢ);
+    b.rename(t, "new");
     fmt.Println(b.label(t), a.label(t), len((~t).m));
 
     a.close(t);

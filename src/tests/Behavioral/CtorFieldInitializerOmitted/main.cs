@@ -11,9 +11,9 @@ partial struct Holder {
 }
 
 internal static void Main() {
-    var a = new Holder(Name: "a"u8);
+    var a = new Holder(Name: "a");
     var b = @new<Holder>();
-    b.Value.Name = "a"u8;
+    b.Value.Name = "a";
 
     fmt.Println(reflect.DeepEqual(a, b.Value));
     fmt.Printf("%T\n"u8, a.Done);

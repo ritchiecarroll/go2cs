@@ -15,21 +15,17 @@ internal static nint valueMethod(this T t) {
     return t.n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilFuncˢ = "<nil Func>"u8;
-private static readonly @string emptyNameˢ = "<empty name>"u8;
-
 internal static @string nameOf(any fn) {
     var f = runtime.FuncForPC(reflect.ValueOf(fn).Pointer());
     if (f == nil) {
-        return nilFuncˢ;
+        return "<nil Func>";
     }
     {
         @string name = f.Name(); if (name != ""u8) {
             return name;
         }
     }
-    return emptyNameˢ;
+    return "<empty name>";
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -37,10 +37,10 @@ internal partial struct main_typeᴛ3 /*dyn*/ {
 }
 
 internal static void Main() {
-    var (_, okA) = assertAs<main_type, withM>(new withM("x"u8));
-    var (_, okAPtr) = assertAs<main_type, ж<withM>>(Ꮡ(new withM("y"u8)));
-    var (m, okM) = assertAs<main_typeᴛ1, withM>(new withM("z"u8));
-    var (s, okS) = assertAs<main_typeᴛ2, withM>(new withM("w"u8));
+    var (_, okA) = assertAs<main_type, withM>(new withM("x"));
+    var (_, okAPtr) = assertAs<main_type, ж<withM>>(Ꮡ(new withM("y")));
+    var (m, okM) = assertAs<main_typeᴛ1, withM>(new withM("z"));
+    var (s, okS) = assertAs<main_typeᴛ2, withM>(new withM("w"));
     var (p, okP) = assertAs<main_typeᴛ3, main_typeᴛ3>(new main_typeᴛ3(1, 2));
 
     fmt.Println(okA, okAPtr, okM, m != default!, okS, s.String(), okP, p.X + p.Y);

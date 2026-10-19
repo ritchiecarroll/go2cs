@@ -115,7 +115,6 @@ internal static partial void roundTrip(@string label, @string network, @string a
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tcpˢ = "tcp"u8;
 private static readonly object closeReadListenFailedˢ = (@string)"closeRead: listen failed"u8;
 private static readonly object closeReadDialFailedˢ = (@string)"closeRead: dial failed"u8;
 private static readonly object closeReadAcceptFailedˢ = (@string)"closeRead: accept failed"u8;
@@ -124,7 +123,7 @@ private static readonly object closeReadˢ = (@string)"closeRead: brokeBlockedRe
 internal static partial void closeBreaksBlockedRead() {
     GoFrame ᒐ = default;
     try {
-        var (listener, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
+        var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(closeReadListenFailedˢ);
             return;
@@ -144,7 +143,7 @@ internal static partial void closeBreaksBlockedRead() {
             acceptsʗ1.ᐸꟷ(conn);
         });
 
-        (var client, err) = Δnet.Dial(tcpˢ, listener.Addr().String());
+        (var client, err) = Δnet.Dial("tcp", listener.Addr().String());
         if (err != default!) {
             fmt.Println(closeReadDialFailedˢ);
             return;
@@ -194,7 +193,7 @@ private static readonly object closeWriteˢ = (@string)"closeWrite: brokeBlocked
 internal static partial void closeBreaksBlockedWrite() {
     GoFrame ᒐ = default;
     try {
-        var (listener, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
+        var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(closeWriteListenFailedˢ);
             return;
@@ -214,7 +213,7 @@ internal static partial void closeBreaksBlockedWrite() {
             acceptsʗ1.ᐸꟷ(conn);
         });
 
-        (var client, err) = Δnet.Dial(tcpˢ, listener.Addr().String());
+        (var client, err) = Δnet.Dial("tcp", listener.Addr().String());
         if (err != default!) {
             fmt.Println(closeWriteDialFailedˢ);
             return;
@@ -262,20 +261,18 @@ internal static partial void closeBreaksBlockedWrite() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string ipv4ˢ = "ipv4"u8;
 private static readonly object ipv6AvailableTrueˢ = (@string)"ipv6: available=true"u8;
-private static readonly @string ipv6ˢ = "ipv6"u8;
 private static readonly object ipv6AvailableFalseˢ = (@string)"ipv6: available=false"u8;
 private static readonly object doneˢ = (@string)"done"u8;
 
 internal static void Main() {
-    roundTrip(ipv4ˢ, tcpˢ, "127.0.0.1:0"u8);
+    roundTrip("ipv4", "tcp", "127.0.0.1:0");
 
     {
-        var (probe, err) = Δnet.Listen(tcpˢ, "[::1]:0"u8); if (err == default!){
+        var (probe, err) = Δnet.Listen("tcp", "[::1]:0"); if (err == default!){
             probe.Close();
             fmt.Println(ipv6AvailableTrueˢ);
-            roundTrip(ipv6ˢ, tcpˢ, "[::1]:0"u8);
+            roundTrip("ipv6", "tcp", "[::1]:0");
         } else {
             fmt.Println(ipv6AvailableFalseˢ);
         }

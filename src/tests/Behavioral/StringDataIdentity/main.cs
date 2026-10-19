@@ -5,11 +5,8 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string identityProbeStringˢ = "identity probe string"u8;
-
 internal static void Main() {
-    @string s = identityProbeStringˢ;
+    @string s = "identity probe string";
     @string t = s;
 
     fmt.Println(@unsafe.StringData(s) == @unsafe.StringData(t));

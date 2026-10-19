@@ -52,9 +52,9 @@ internal static void Main() {
     var h = (Funcꓸꓸꓸ<nint, nint>)(sum);
     fmt.Println(b5ConversionOfARealFuncˢ, h(1, 2, 3));
 
-    fmt.Println(c1OneNilArgˢ, countArgs("x"u8, (any)(default!)));
-    fmt.Println(c2NilAmongOthersˢ, countArgs("x"u8, (nint)(1), (any)(default!), (@string)"y"u8));
-    fmt.Println(c3NoVariadicArgsˢ, countArgs("x"u8));
+    fmt.Println(c1OneNilArgˢ, countArgs("x", (any)(default!)));
+    fmt.Println(c2NilAmongOthersˢ, countArgs("x", (nint)(1), (any)(default!), (@string)"y"u8));
+    fmt.Println(c3NoVariadicArgsˢ, countArgs("x"));
     fmt.Println(c4Spreadˢ, countArgs("x"u8, new any[]{(nint)(1), default!, (nint)(3)}.slice().ꓸꓸꓸ));
     fmt.Println(c5TypedNilSliceArgˢ, countPtrs((ж<Point>)(nil), (ж<Point>)(nil)));
     fmt.Println(c6Sumˢ, sum(4, 5, 6));

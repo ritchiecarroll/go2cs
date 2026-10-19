@@ -41,7 +41,7 @@ internal static bool remove(nint v) {
 }
 
 internal static @string list() {
-    @string s = ""u8;
+    @string s = "";
     for (var p = head; p != nil; p = p.Value.next) {
         s += fmt.Sprintf("%d "u8, (~p).val);
     }

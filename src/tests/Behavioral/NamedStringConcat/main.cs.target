@@ -36,11 +36,11 @@ internal static void Main() {
     var typed = new version[]{@base + "-t1"u8, @base + "-t2"u8}.slice();
     var elided = new slice<version>[]{new version[]{@base + "-e1"u8}.slice()}.slice();
 
-    var inMap = new map<@string, version>{["k"u8] = @base + "-m"u8};
+    var inMap = new map<@string, version>{["k"] = @base + "-m"u8};
     var inStruct = new main_rec(@base + "-s"u8);
 
     fmt.Println(@short, @explicit, viaCall, acc, joined);
-    fmt.Println(typed, elided, inMap["k"u8], inStruct.v);
+    fmt.Println(typed, elided, inMap["k"], inStruct.v);
 
     fmt.Println(@short.tag(), joined.tag());
 }

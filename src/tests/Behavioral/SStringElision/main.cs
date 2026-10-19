@@ -13,7 +13,6 @@ private static readonly object classifyˢ = (@string)"classify:"u8;
 private static readonly object pickˢ = (@string)"pick:"u8;
 private static readonly object prefixˢ = (@string)"prefix:"u8;
 private static readonly object matchVarˢ = (@string)"matchVar:"u8;
-private static readonly @string go2csˢ = "go2cs"u8;
 private static readonly object matchFieldˢ = (@string)"matchField:"u8;
 private static readonly object twoConvˢ = (@string)"twoConv:"u8;
 private static readonly object callOperandˢ = (@string)"callOperand:"u8;
@@ -57,7 +56,7 @@ internal static void Main() {
         fmt.Println(taggedˢ);
     }
 
-    @string want = "v2"u8;
+    @string want = "v2";
     if (tagᴛ1 == want) {
         fmt.Println(wantedˢ);
     }
@@ -68,13 +67,13 @@ internal static void Main() {
 
     fmt.Println(prefixˢ, prefix(slice<byte>("GET /x"u8)));
 
-    fmt.Println(matchVarˢ, matchVar(slice<byte>("go2cs"u8), go2csˢ));
+    fmt.Println(matchVarˢ, matchVar(slice<byte>("go2cs"u8), "go2cs"));
 
-    fmt.Println(matchFieldˢ, matchField(slice<byte>("prod"u8), new config(name: "prod"u8)));
+    fmt.Println(matchFieldˢ, matchField(slice<byte>("prod"u8), new config(name: "prod")));
 
     fmt.Println(twoConvˢ, matchTwoConversions(slice<byte>("abc"u8), slice<byte>("abc"u8)));
 
-    fmt.Println(callOperandˢ, staysHeapCallOperand(slice<byte>("y"u8), () => "y"u8));
+    fmt.Println(callOperandˢ, staysHeapCallOperand(slice<byte>("y"u8), () => "y"));
 
     fmt.Println(switchTagˢ, switchTag(slice<byte>("put"u8)));
 
@@ -84,15 +83,15 @@ internal static void Main() {
 
     fmt.Println(switchCallˢ, switchCall(slice<byte>("q"u8)));
 
-    fmt.Println(concatLocalˢ, concatLocal(slice<byte>("go"u8), "2cs"u8));
+    fmt.Println(concatLocalˢ, concatLocal(slice<byte>("go"u8), "2cs"));
 
     fmt.Println(concatLitˢ, concatLit(slice<byte>("v"u8)));
 
-    fmt.Println(concatVarˢ, concatVar(slice<byte>("k"u8), "v"u8));
+    fmt.Println(concatVarˢ, concatVar(slice<byte>("k"u8), "v"));
 
     fmt.Println(concatTwoˢ, concatTwo(slice<byte>("x"u8), slice<byte>("y"u8)));
 
-    fmt.Println(concatCallˢ, concatCall(slice<byte>("q"u8), () => "z"u8));
+    fmt.Println(concatCallˢ, concatCall(slice<byte>("q"u8), () => "z"));
 
     fmt.Println(concatObjˢ, concatObj(slice<byte>("x"u8)));
 }
@@ -173,7 +172,7 @@ internal static nint switchCall(slice<byte> b) {
 }
 
 internal static @string labelValue() {
-    return "q"u8;
+    return "q";
 }
 
 partial struct config {
@@ -221,20 +220,15 @@ internal static nint classify(slice<byte> word) {
     return total;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string alphaˢ = "alpha"u8;
-private static readonly @string bravoˢ = "bravo"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static @string pick(slice<byte> tag) {
     sstring tagᴛ1 = ((sstring)tag);
     if (tagᴛ1 == "a"u8) {
-        return alphaˢ;
+        return "alpha";
     }
     if (tagᴛ1 == "b"u8) {
-        return bravoˢ;
+        return "bravo";
     }
-    return otherˢ;
+    return "other";
 }
 
 internal static bool prefix(slice<byte> buf) {

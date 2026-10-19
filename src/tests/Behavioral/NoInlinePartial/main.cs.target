@@ -7,13 +7,10 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noCallerˢ = "<no caller>"u8;
-
 internal static partial @string here() {
     var (pc, _, _, ok) = runtime.Caller(1);
     if (!ok) {
-        return noCallerˢ;
+        return "<no caller>";
     }
     return runtime.FuncForPC(pc).Name();
 }

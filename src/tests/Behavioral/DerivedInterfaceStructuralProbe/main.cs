@@ -24,9 +24,6 @@ internal static @string Error(this ref plainErr e) {
     return e.msg;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string notTemporaryˢ = "not temporary"u8;
-
 internal partial interface classify_type /*dyn*/ :
     error
 {
@@ -40,7 +37,7 @@ internal static @string classify(error err) {
         }
     }
 
-    return notTemporaryˢ;
+    return "not temporary";
 }
 
 partial interface stringish {
@@ -81,9 +78,6 @@ internal static @string Name(this ref shallow s) {
     return s.id;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string notDeepˢ = "not deep"u8;
-
 internal partial interface describe_type /*dyn*/ :
     named
 {
@@ -97,14 +91,14 @@ internal static @string describe(any v) {
         }
     }
 
-    return notDeepˢ;
+    return "not deep";
 }
 
 internal static void Main() {
-    fmt.Println(classify(new tempErrжerror(Ꮡ(new tempErr(msg: "boom"u8)))));
-    fmt.Println(classify(new plainErrжerror(Ꮡ(new plainErr(msg: "plain"u8)))));
-    fmt.Println(describe(Ꮡ(new node(id: "n1"u8))));
-    fmt.Println(describe(Ꮡ(new shallow(id: "s1"u8))));
+    fmt.Println(classify(new tempErrжerror(Ꮡ(new tempErr(msg: "boom")))));
+    fmt.Println(classify(new plainErrжerror(Ꮡ(new plainErr(msg: "plain")))));
+    fmt.Println(describe(Ꮡ(new node(id: "n1"))));
+    fmt.Println(describe(Ꮡ(new shallow(id: "s1"))));
 }
 
 } // end main_package

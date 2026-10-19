@@ -39,9 +39,9 @@ private static readonly object firstˢ = (@string)"first:"u8;
 private static readonly object emptyˢ = (@string)"empty:"u8;
 
 internal static void Main() {
-    var root = Ꮡ(new node(name: "root"u8));
-    var a = Ꮡ(new node(name: "a"u8));
-    var b = Ꮡ(new node(name: "b"u8));
+    var root = Ꮡ(new node(name: "root"));
+    var a = Ꮡ(new node(name: "a"));
+    var b = Ꮡ(new node(name: "b"));
 
     foreach (var (_, n) in root.collect(new ж<node>[]{a, b}.slice())) {
         fmt.Println(gotˢ, (~n).name);

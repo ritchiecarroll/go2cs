@@ -993,7 +993,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 			if c.Val().Kind() == constant.String && len(valueSpec.Values) >= i+1 {
 				if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok && lit.Kind == token.STRING {
-					constVal = v.convBasicLit(lit, DefaultBasicLitContext())
+					if isPlainStringLiteral(lit) {
+						// A function-local const in plain mode (collectPlainLocalConsts).
+						constVal = v.convBasicLit(lit, plainBasicLitContext())
+					} else {
+						constVal = v.convBasicLit(lit, DefaultBasicLitContext())
+					}
 				} else if s := constant.StringVal(c.Val()); !utf8.ValidString(s) || stringLiteralNeedsByteArray(c.Val().ExactString()) {
 					// A CONCATENATED string const folds to one value here; unlike a single *ast.BasicLit
 					// (handled by convBasicLit's byte-array machinery above) it bypassed that path, so a

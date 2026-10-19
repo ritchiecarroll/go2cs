@@ -58,9 +58,6 @@ internal static @string describe<T>(@string label) {
 private static readonly @string helloˢ = "hello"u8;
 private static readonly @string worldˢ = "world"u8;
 private static readonly @string fourˢ = "four"u8;
-private static readonly @string nopeˢ = "nope"u8;
-private static readonly @string stringerˢ = "stringer"u8;
-private static readonly @string ptrIntˢ = "ptr-int"u8;
 
 internal static void Main() {
     var intStack = new Stack<nint>(nil);
@@ -76,11 +73,11 @@ internal static void Main() {
     fmt.Printf("Popped from string stack: %s\n"u8, text);
 
     var pair = new Seq2Like<@string, nint>((@string k, nint v) => len(k) == v);
-    fmt.Println(consume(pair, fourˢ, 4), pair(nopeˢ, 3));
+    fmt.Println(consume(pair, fourˢ, 4), pair("nope", 3));
 
-    fmt.Println(describe<fmt.Stringer>(stringerˢ));
+    fmt.Println(describe<fmt.Stringer>("stringer"));
 
-    fmt.Println(describe<ж<nint>>(ptrIntˢ));
+    fmt.Println(describe<ж<nint>>("ptr-int"));
 }
 
 } // end main_package

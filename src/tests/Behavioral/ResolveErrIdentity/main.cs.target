@@ -19,9 +19,9 @@ internal partial struct main_rows /*dyn*/ {
 
 internal static void Main() {
     var rows = new main_rows[]{
-        new("l2tp"u8, "127.0.0.1"u8, new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)l2tpˢ))),
-        new("l2tp:gre"u8, "127.0.0.1"u8, new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)l2tpGreˢ))),
-        new("tcp"u8, "1.2.3.4:123"u8, new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)tcpˢ)))
+        new("l2tp", "127.0.0.1", new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)l2tpˢ))),
+        new("l2tp:gre", "127.0.0.1", new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)l2tpGreˢ))),
+        new("tcp", "1.2.3.4:123", new net_UnknownNetworkErrorᴠerror(((Δnet.UnknownNetworkError)(@string)tcpˢ)))
     }.slice();
     foreach (var (_, r) in rows) {
         var (addr, err) = Δnet.ResolveIPAddr(r.network, r.addr);
