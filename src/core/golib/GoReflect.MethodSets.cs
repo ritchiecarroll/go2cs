@@ -244,6 +244,21 @@ public static partial class GoReflect
     /// <returns>The unbound delegate, or <c>null</c> for an interface method.</returns>
     public static Delegate? GoMethodFunc(Type? t, int index)
     {
+        // A method that cannot be bound is a GO panic naming the type and the method, which reflect's callers can
+        // recover, never a CLR exception that ends the process: CreateDelegate over the OPEN method of a generic type
+        // threw ArgumentException here, uncatchable by recover, until the candidate source closed it.
+        try
+        {
+            return BindMethodFunc(t, index);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or NotImplementedException or InvalidOperationException or MemberAccessException)
+        {
+            throw builtin.panic($"reflect: cannot bind method {MethodAt(t, index).GoName} of {GoTypeName(t)}: {ex.Message}");
+        }
+    }
+
+    private static Delegate? BindMethodFunc(Type? t, int index)
+    {
         GoMethodSetEntry entry = MethodAt(t, index);
 
         if (entry.Method.DeclaringType is { IsInterface: true })
@@ -333,6 +348,7 @@ public static partial class GoReflect
     {
         object? bindTarget = GoDynamicValueOf(receiver);
         GoMethodSetEntry entry;
+        Type? methodOwner = staticType;
 
         if (IsGoInterfaceType(staticType))
         {
@@ -381,6 +397,7 @@ public static partial class GoReflect
                 throw new MissingMethodException(GoTypeName(dynamicType), name);
 
             entry = MethodAt(dynamicType, dynamicIndex);
+            methodOwner = dynamicType;
         }
         else
         {
@@ -397,7 +414,16 @@ public static partial class GoReflect
             TryBoxPointee(bindTarget.GetType(), out _))
             bindTarget = ReadPointerSlot(bindTarget);
 
-        return s_boundFactories.GetOrAdd(entry.Method, static m => CompileBoundFactory(m))(bindTarget);
+        // A bind failure is a Go panic naming the type and the method, as in GoMethodFunc: under Native AOT the
+        // compiled binder can lack code for the method's delegate type, and its NotSupportedException ended the process.
+        try
+        {
+            return s_boundFactories.GetOrAdd(entry.Method, static m => CompileBoundFactory(m))(bindTarget);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or NotImplementedException or InvalidOperationException or MemberAccessException)
+        {
+            throw builtin.panic($"reflect: cannot bind method {entry.GoName} of {GoTypeName(methodOwner)}: {ex.Message}");
+        }
     }
 
     private static readonly ConcurrentDictionary<Type, Func<Func<object?[], object?>, Delegate>> s_goFuncDelegateFactories = [];

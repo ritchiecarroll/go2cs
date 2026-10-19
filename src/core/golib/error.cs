@@ -169,18 +169,30 @@ public class error<T> : error, IErrorTarget, IInterfaceAdapter
         Type targetType = typeof(T);
         Type targetTypeByPtr = typeof(ж<T>);
 
-        MethodInfo? extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
+        MethodInfo? extensionMethod = closed(targetTypeByPtr.GetExtensionMethod("Error"), pointer: true);
 
         if (extensionMethod is not null)
             s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
 
-        extensionMethod = targetType.GetExtensionMethod("Error");
+        extensionMethod = closed(targetType.GetExtensionMethod("Error"), pointer: false);
 
         if (extensionMethod is not null)
             s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
 
         if (s_ErrorByPtr is null && s_ErrorByVal is null)
             throw new NotImplementedException($"{targetType.FullName} does not implement error.Error method", new Exception("Error"));
+
+        // A generic type's Error is found OPEN (`Error<T>(this Box<T>)`), which has no delegate: take it closed over T's
+        // type arguments from the method-set candidate source instead, the form every shell binds.
+        static MethodInfo? closed(MethodInfo? method, bool pointer)
+        {
+            if (method is not { ContainsGenericParameters: true })
+                return method;
+
+            AdapterBinder.ResolveReceiverMethods(typeof(T), "Error", out MethodInfo? byPtr, out MethodInfo? byVal);
+
+            return pointer ? byPtr : byVal;
+        }
     }
 
     public static explicit operator error<T>(in ж<T> target_ptr)
