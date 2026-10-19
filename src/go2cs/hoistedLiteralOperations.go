@@ -256,6 +256,10 @@ func collectHoistedLiterals(files []FileEntry, pkg *types.Package, info *types.I
 				}
 			}
 		}
+
+		if !packageHoistsLiterals {
+			c.collectPlainPackageVars(fileEntry.file)
+		}
 	}
 
 	c.assignNames(pkg)
@@ -403,6 +407,105 @@ func (c *hoistCollector) collectPlainLocalConsts(funcDecl *ast.FuncDecl) {
 	})
 }
 
+// collectPlainPackageVars is plain mode's walk of a file's package-level `var` initializers, which the
+// hoist never visits (a package-level initializer runs once): `var greeting = "hello"` and
+// `var names = []string{"a", "b"}` read as Go does. A literal there claims no field, so it is
+// plain-only; an argument of an inferred generic call keeps today's form by the same plainContext rule
+// as in a function body.
+func (c *hoistCollector) collectPlainPackageVars(file *ast.File) {
+	c.funcDecl = nil
+	c.plainOnly = true
+	defer func() { c.plainOnly = false }()
+
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+
+		if !ok || genDecl.Tok != token.VAR {
+			continue
+		}
+
+		var stack []ast.Node
+
+		ast.Inspect(genDecl, func(n ast.Node) bool {
+			if n == nil {
+				stack = stack[:len(stack)-1]
+				return true
+			}
+
+			if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == token.STRING && len(stack) > 0 {
+				c.consider(lit, stack)
+			}
+
+			stack = append(stack, n)
+			return true
+		})
+	}
+}
+
+// compositeElemSlot returns the slot type of a literal that is a composite literal's element, map key,
+// map value or struct field value, or nil when it is none of those.
+func (c *hoistCollector) compositeElemSlot(lit *ast.BasicLit, stack []ast.Node) types.Type {
+	if len(stack) == 0 {
+		return nil
+	}
+
+	var composite *ast.CompositeLit
+	isKey := false
+
+	switch parent := stack[len(stack)-1].(type) {
+	case *ast.CompositeLit:
+		composite = parent
+	case *ast.KeyValueExpr:
+		if len(stack) < 2 {
+			return nil
+		}
+
+		composite, _ = stack[len(stack)-2].(*ast.CompositeLit)
+		isKey = parent.Key == lit
+
+		if composite != nil {
+			if fields, ok := c.typeUnder(c.info.TypeOf(composite)).(*types.Struct); ok {
+				name, ok := parent.Key.(*ast.Ident)
+
+				if !ok || isKey {
+					return nil
+				}
+
+				for i := range fields.NumFields() {
+					if fields.Field(i).Name() == name.Name {
+						return fields.Field(i).Type()
+					}
+				}
+
+				return nil
+			}
+		}
+	}
+
+	if composite == nil {
+		return nil
+	}
+
+	switch under := c.typeUnder(c.info.TypeOf(composite)).(type) {
+	case *types.Slice:
+		return under.Elem()
+	case *types.Array:
+		return under.Elem()
+	case *types.Map:
+		if isKey {
+			return under.Key()
+		}
+
+		return under.Elem()
+	case *types.Struct:
+		if idx := exprIndexOf(composite.Elts, lit); idx >= 0 && idx < under.NumFields() {
+			return under.Field(idx).Type()
+		}
+	}
+
+	return nil
+}
+
 // initializerReachableFuncs returns every package function a package-level `var` initializer can
 // reach — directly in its RHS (function literals included, exactly as Go's own initialization-order
 // analysis counts them) or transitively through another package function. Built over the FULL file
@@ -538,6 +641,12 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 	kind, slot, ok := c.hoistTarget(lit, stack)
 
 	if !ok {
+		// Plain mode also reaches a composite ELEMENT (or key, or field value), which the hoist
+		// excludes as Tier B: the composite's own type fixes the slot's C# type.
+		if !packageHoistsLiterals && isPlainStringSlot(c.compositeElemSlot(lit, stack)) && plainLiteralForm(lit) {
+			packagePlainLits[lit] = true
+		}
+
 		return
 	}
 
@@ -937,6 +1046,10 @@ func (c *hoistCollector) enclosingSignature(stack []ast.Node) *types.Signature {
 			sig, _ := c.info.TypeOf(funcLit).(*types.Signature)
 			return sig
 		}
+	}
+
+	if c.funcDecl == nil {
+		return nil // a package-level initializer: a `return` there belongs to a func literal
 	}
 
 	if obj, ok := c.info.Defs[c.funcDecl.Name].(*types.Func); ok && obj != nil {

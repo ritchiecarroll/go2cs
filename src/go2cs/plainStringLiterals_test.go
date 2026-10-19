@@ -231,3 +231,79 @@ func TestStandardLibraryKeepsHoistedLiterals(t *testing.T) {
 		}
 	}
 }
+
+// plainCompositeFixture holds B2's sites: package-level var initializers and composite elements, which
+// the hoist never reached (Tier B) and which now read as Go does.
+const plainCompositeFixture = "package plit\n\n" +
+	"type pair struct {\n\tname string\n\tn    int\n}\n\n" +
+	"func Echo[T any](v T) T { return v }\n\n" +
+	"var packageGreeting = \"package level value\"\n\n" +
+	"var names = []string{\"first slice element\", \"second slice element\"}\n\n" +
+	"var counts = map[string]int{\"map literal key\": 1}\n\n" +
+	"var labels = map[int]string{1: \"map literal value\"}\n\n" +
+	"var keyed = pair{name: \"keyed struct field\", n: 2}\n\n" +
+	"var positional = pair{\"positional struct field\", 3}\n\n" +
+	"var boxed = []any{\"boxed composite element\"}\n\n" +
+	"var echoed = Echo(\"package generic argument\")\n\n" +
+	"func local() []string { return []string{\"function composite element\"} }\n\n" +
+	"func use() int { return len(packageGreeting) + len(names) + counts[\"\"] + len(labels) + keyed.n + positional.n + len(boxed) + len(echoed) + len(local()) }\n"
+
+// TestPlainLiteralsInPackageVarsAndComposites (B2): a package-level var initializer and a composite's
+// element, map key, map value and struct field value typed exactly `string` take the plain literal; an
+// `any` element keeps its boxed inline form, and an inferred generic call in an initializer keeps
+// today's form by G's rule.
+func TestPlainLiteralsInPackageVarsAndComposites(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/plit\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "plit.go"), plainCompositeFixture)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      "linux/amd64",
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "plit", "plit.cs")), "\r\n", "\n")
+
+	for _, plain := range []string{
+		"package level value", "first slice element", "second slice element", "map literal key",
+		"map literal value", "keyed struct field", "positional struct field", "function composite element",
+	} {
+		if want := `"` + plain + `"`; !strings.Contains(emitted, want) || strings.Contains(emitted, want+"u8") {
+			t.Errorf("want the plain literal %s:\n%s", want, emitted)
+		}
+	}
+
+	// The generic initializer keeps the untyped-constant cast, which fixes T = @string; a bare literal
+	// there would infer T = System.String.
+	for _, kept := range []string{`(@string)"boxed composite element"u8`, `Echo((@string)"package generic argument")`} {
+		if !strings.Contains(emitted, kept) {
+			t.Errorf("want today's form %s:\n%s", kept, emitted)
+		}
+	}
+
+	if strings.Contains(emitted, `Echo("package generic argument")`) {
+		t.Errorf("a bare literal reached an inferred generic call:\n%s", emitted)
+	}
+}
