@@ -637,6 +637,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
+
+    [TestMethod]
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
 
     [TestMethod]
@@ -1967,6 +1970,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
+
+    [TestMethod]
+    public void CheckRootedUsingCapture() => CheckTarget("RootedUsingCapture");
 
     [TestMethod]
     public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");

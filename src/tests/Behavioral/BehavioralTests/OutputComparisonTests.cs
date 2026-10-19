@@ -608,6 +608,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
 
     [TestMethod]
+    public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
+
+    [TestMethod]
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
 
     [TestMethod]
@@ -1905,6 +1908,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
+
+    [TestMethod]
+    public void CheckRootedUsingCapture() => CheckTarget("RootedUsingCapture");
 
     [TestMethod]
     public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
