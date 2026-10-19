@@ -293,12 +293,56 @@ func TestTestsConversionConsultsTheDynamicTypeGate(t *testing.T) {
 		t.Errorf("the dynamic-type gate in %s does not run AFTER processTestConversion; the test variants' own unresolved markers would not be covered", driverSource)
 	}
 
-	// Scoped to -tests: the -stdlib and plain single-package paths keep warn-and-continue (see
-	// unresolvedDynamicTypeError's own comment for why). The nearest `if options.convertTests`
-	// before the call is what expresses that.
+	// This early return is scoped to -tests, where it fails the run before the build step. Every other driver
+	// is failed by main's exit-time check (TestMainChecksTheDynamicTypeGateAfterEveryDriver). The nearest
+	// `if options.convertTests` before the call is what expresses that scope.
 	convertTests := strings.LastIndex(text[:gate], "if options.convertTests")
 
 	if convertTests == -1 {
 		t.Errorf("the dynamic-type gate in %s is not inside an `if options.convertTests` block; it must not fail a -stdlib or single-package conversion", driverSource)
+	}
+}
+
+// TestMainChecksTheDynamicTypeGateAfterEveryDriver pins the exit-time half of the gate: no driver -- a single
+// package, -stdlib, -recurse, -platforms -- may exit 0 after writing raw Go text, so main must consult the gate
+// after the last driver dispatch, where every one of them has returned. The record is process-global and never
+// reset per package, so that one call covers them all (COORD's ruling on C1's pointer-conversion seat, D4).
+func TestMainChecksTheDynamicTypeGateAfterEveryDriver(t *testing.T) {
+	const mainSource = "main.go"
+
+	contents, err := os.ReadFile(mainSource)
+
+	if err != nil {
+		t.Fatalf("reading %s: %v", mainSource, err)
+	}
+
+	text := string(contents)
+	start := strings.Index(text, "\nfunc main() {")
+
+	if start == -1 {
+		t.Fatalf("%s has no func main", mainSource)
+	}
+
+	end := strings.Index(text[start:], "\n}\n")
+
+	if end == -1 {
+		t.Fatalf("cannot find the end of func main in %s", mainSource)
+	}
+
+	body := text[start : start+end]
+	gate := strings.LastIndex(body, "unresolvedDynamicTypeError()")
+
+	if gate == -1 {
+		t.Fatalf("func main in %s never calls unresolvedDynamicTypeError; a -stdlib or single-package conversion that "+
+			"wrote raw Go text exits 0", mainSource)
+	}
+
+	for _, driver := range []string{"ScanAndConvertFiltered(", "processConversion(", "executeTestAction(", "ConvertModule("} {
+		if at := strings.LastIndex(body, driver); at == -1 {
+			t.Errorf("func main in %s no longer dispatches %s; update this guard's driver list", mainSource, driver)
+		} else if at > gate {
+			t.Errorf("func main in %s calls the dynamic-type gate BEFORE its last %s dispatch, so that driver can still exit 0 "+
+				"after writing raw Go text", mainSource, driver)
+		}
 	}
 }
