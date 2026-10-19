@@ -260,6 +260,7 @@ func main() {
 	testFilterCmd := commandLine.String("test-filter", "", "Regex handed VERBATIM to BOTH sides of a -test-action compare (go test -run and the converted host --run), so the two runs filter identically. Intended for the block-gated census: exclude a test that BLOCKS the suite by passing an anchored alternation of the parents to keep. A gated census is DIAGNOSTIC ONLY and must never bank a row -- the row banks from an ungated run, after the block is rooted or the divergence disclosed")
 	testConfigCmd := commandLine.String("test-config", "Release", "Publish/run configuration for the converted test host: Release (default since 2026-09-02 -- the validation configuration of RECORD, with an explicit -p:go2csPath replacing the Debug-conditional csproj-template default, and the CLR's tiered JIT disabled by default, see -test-tiered) or Debug (the pre-2026-09-02 default, still fully supported by flag). Recorded on every proof page and in the comparison record so a verdict carries the level it was measured at. The default moved on the deployment owner's ruling, gated on the Release census (docs/phase4/CENSUS-release-tc0-delta.md), not on this flag's own authority")
 	testTieredCmd := commandLine.Bool("test-tiered", false, "With -test-config Release, opt back IN to the CLR's default tiered JIT (Release's own default is DOTNET_TieredCompilation=0, since a verdict that depends on JIT promotion timing is not reproducible run to run). Meaningless with -test-config Debug. It changes what the C# host's JIT does, not what the converter emits")
+	testBuildMaxCPUCmd := commandLine.Int("test-build-maxcpu", 0, "Cap the MSBuild nodes of the converted test host's dotnet publish, the only dotnet command a -tests run starts, by passing it -m:N. 0 (the default) passes no -m, and MSBuild uses one node per logical processor. Only an explicit -m on the command line caps it: a Directory.Build.rsp or MSBUILDNODECOUNT in the tree did not (measured on the i9, 2026-10-18)")
 	testPublishBinlogCmd := commandLine.Bool("test-publish-binlog", false, "Have the converted test host's dotnet publish write an MSBuild binary log to <output>/bin/tests/publish.binlog, from the first attempt, KEPT only when the publish fails and deleted when it succeeds. For census and battery sweeps chasing a build failure that passes on a re-run; costs ~35% of a warm publish")
 	testModuleDisclosuresCmd := commandLine.String("module-disclosures", "", "With -tests on a third-party module: the committed tree of module rows' disclosure manifests (<root>/<module>@<version>/<package dir>/go2cs_test_disclosures.json, e.g. src/tests/ModuleDisclosures). Read only when the package's output directory holds no manifest, and only for the module version this run resolved")
 	testAllowHandOwnCmd := commandLine.Bool("test-allow-handown", false, "Convert a package the -stdlib queue deliberately skips (testing, unsafe, builtin, cmd/...) as a -tests target anyway. Refused by default: `testing` IS the hand-owned Phase-4 test host, and the pipeline's natural output path is the very directory the host lives in, so a mistyped command overwrites it (measured 2026-09-03 -- the run replaced src/core/testing/testing.cs with Go's converted testing.go). Pass this ONLY with a BARE scratch output root, for a deliberate measurement whose emission is thrown away; it is not a route to banking such a package, which would still hit the F15b 'ONE testing package, period' collision. Consulted AFTER the hand-own host path since 2026-09-20, so what this flag does depends on what is AT the output root: on a BARE root it keeps the full production census measured 2026-09-03 (no csproj there, so the host path cannot open), while at a hand-owned counterpart's own directory -- or at a root SEEDED from src/core, which carries that counterpart's csproj and markers and so is NOT bare -- the host path wins instead, the run converts TESTS ONLY, and no production file is emitted over a hand-own")
@@ -561,6 +562,7 @@ Examples:
 		testConfig:          canonicalTestConfig(*testConfigCmd),
 		testTiered:          *testTieredCmd,
 		testPublishBinlog:   *testPublishBinlogCmd,
+		testBuildMaxCPU:     *testBuildMaxCPUCmd,
 		testAllowHandOwn:    *testAllowHandOwnCmd,
 		recurse:             recurseVal.enabled,
 		moduleOnly:          recurseVal.moduleOnly,
@@ -584,6 +586,10 @@ Examples:
 		debugMode:           *debugModeCmd,
 		dualRecv:            *dualRecvCmd,
 		dualRecvParams:      *dualRecvParamsCmd,
+	}
+
+	if options.testBuildMaxCPU < 0 {
+		log.Fatalf("-test-build-maxcpu is %d; it takes a node count of 1 or more, or 0 for MSBuild's own default\n", options.testBuildMaxCPU)
 	}
 
 	options.testModuleDisclosures = absPathOrEmpty(strings.TrimSpace(*testModuleDisclosuresCmd))
