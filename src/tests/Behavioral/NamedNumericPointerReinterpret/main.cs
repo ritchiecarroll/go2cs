@@ -68,10 +68,6 @@ internal static partial void setStr(ref namedString s, @string v) {
     s = ((namedString)v);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string beforeˢ = "before"u8;
-private static readonly @string afterˢ = "after"u8;
-
 internal static void Main() {
     ref var a = ref heap(new lfstack(), out var Ꮡa);
     a = 0xDEADBEEF01UL;
@@ -97,8 +93,8 @@ internal static void Main() {
     fmt.Println(xy.X, xy.Y);
 
     ref var s = ref heap<@string>(out var Ꮡs);
-    s = beforeˢ;
-    setStr(ref (Ꮡs.Reinterpret<@string, namedString>()).DerefOrNull(), afterˢ);
+    s = "before";
+    setStr(ref (Ꮡs.Reinterpret<@string, namedString>()).DerefOrNull(), "after");
     fmt.Println(s);
 
     ref var d = ref heap(new lfstack(), out var Ꮡd);

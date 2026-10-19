@@ -36,11 +36,11 @@ internal static error Close(this ref pipe _) {
 }
 
 internal static @string name(this ref a _) {
-    return "a"u8;
+    return "a";
 }
 
 internal static @string name(this ref b _) {
-    return "b"u8;
+    return "b";
 }
 
 internal static void @catch(@string what, Action f) {
@@ -61,16 +61,6 @@ internal static void @catch(@string what, Action f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string namerToBˢ = "namer-to-*b"u8;
-private static readonly @string ioReaderToBytesBufferˢ = "io.Reader-to-*bytes.Buffer"u8;
-private static readonly @string ioReadWriterToPipeˢ = "io.ReadWriter-to-*pipe"u8;
-private static readonly @string ioReadCloserToPipeˢ = "io.ReadCloser-to-*pipe"u8;
-private static readonly @string anonymousToBˢ = "anonymous-to-*b"u8;
-private static readonly @string namerToAˢ = "namer-to-*a"u8;
-private static readonly @string ioReaderToStringsReaderˢ = "io.Reader-to-*strings.Reader"u8;
-private static readonly @string libRwToMidOtherˢ = "lib.RW-to-*mid.Other"u8;
-
 internal partial interface main_anon /*dyn*/ {
     @string name();
 }
@@ -78,46 +68,46 @@ internal partial interface main_anon /*dyn*/ {
 internal static void Main() {
     namer n = new aжnamer(Ꮡ(new a(nil)));
     var nʗ1 = n;
-    @catch(namerToBˢ, () => {
+    @catch("namer-to-*b", () => {
         _ = nʗ1._<namer, ж<b>>();
     });
 
-    Δio.Reader r = new strings_ReaderжReader(strings.NewReader("x"u8));
+    Δio.Reader r = new strings_ReaderжReader(strings.NewReader("x"));
     var rʗ1 = r;
-    @catch(ioReaderToBytesBufferˢ, () => {
+    @catch("io.Reader-to-*bytes.Buffer", () => {
         _ = rʗ1._<ж<bytes.Buffer>>();
     });
 
     Δio.ReadWriter rw = new bytes_BufferжReadWriter(Ꮡ(new bytes.Buffer(nil)));
     var rwʗ1 = rw;
-    @catch(ioReadWriterToPipeˢ, () => {
+    @catch("io.ReadWriter-to-*pipe", () => {
         _ = rwʗ1._<ж<pipe>>();
     });
 
-    Δio.ReadCloser rc = Δio.NopCloser(new strings_ReaderжReader(strings.NewReader("x"u8)));
+    Δio.ReadCloser rc = Δio.NopCloser(new strings_ReaderжReader(strings.NewReader("x")));
     var rcʗ1 = rc;
-    @catch(ioReadCloserToPipeˢ, () => {
+    @catch("io.ReadCloser-to-*pipe", () => {
         _ = rcʗ1._<ж<pipe>>();
     });
 
     main_anon anon = new aжmain_anon(Ꮡ(new a(nil)));
     var anonʗ1 = anon;
-    @catch(anonymousToBˢ, () => {
+    @catch("anonymous-to-*b", () => {
         _ = anonʗ1._<ж<b>>();
     });
 
     var nʗ2 = n;
-    @catch(namerToAˢ, () => {
+    @catch("namer-to-*a", () => {
         _ = nʗ2._<namer, ж<a>>();
     });
     var rʗ2 = r;
-    @catch(ioReaderToStringsReaderˢ, () => {
+    @catch("io.Reader-to-*strings.Reader", () => {
         _ = rʗ2._<ж<strings.Reader>>();
     });
 
     var x = mid.Get();
     var xʗ1 = x;
-    @catch(libRwToMidOtherˢ, () => {
+    @catch("lib.RW-to-*mid.Other", () => {
         _ = xʗ1._<lib.RW, ж<mid.Other>>();
     });
 }

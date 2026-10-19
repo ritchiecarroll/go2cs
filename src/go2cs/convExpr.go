@@ -255,6 +255,14 @@ func DefaultBasicLitContext() BasicLitContext {
 	}
 }
 
+// plainBasicLitContext renders a string literal as the bare C# literal: no `u8`, no `(@string)` cast.
+func plainBasicLitContext() BasicLitContext {
+	context := DefaultBasicLitContext()
+	context.u8StringOK = false
+
+	return context
+}
+
 func (c BasicLitContext) getDefault() StmtContext {
 	return DefaultBasicLitContext()
 }
@@ -549,6 +557,14 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		}
 
 		context := getExprContext[BasicLitContext](contexts)
+
+		// A PLAIN literal (the pre-pass proved its slot is typed exactly `string`) renders as the
+		// bare C# literal, `"hello"`; golib's implicit @string(string) shares one conversion per
+		// literal. See hoistedLiteralOperations.go.
+		if isPlainStringLiteral(exprType) {
+			context = plainBasicLitContext()
+		}
+
 		return v.convBasicLit(exprType, context)
 	case *ast.BinaryExpr:
 		context := getExprContext[PatternMatchExprContext](contexts)

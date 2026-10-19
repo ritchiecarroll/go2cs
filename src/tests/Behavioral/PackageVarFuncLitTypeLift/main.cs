@@ -26,16 +26,13 @@ internal partial struct makers_type /*dyn*/ {
     /*embed*/ public Greeter Greeter;
 }
 internal static slice<makersᴛ1> makers = new makersᴛ1[]{
-    new("direct"u8, (@string s) => new namedGreeter(s)),
-    new("embedded"u8, (@string s) => new makers_type(new namedGreeter(s)))
+    new("direct", (@string s) => new namedGreeter(s)),
+    new("embedded", (@string s) => new makers_type(new namedGreeter(s)))
 }.slice();
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string worldˢ = "world"u8;
 
 internal static void Main() {
     foreach (var (_, m) in makers) {
-        fmt.Println(m.label, m.build(worldˢ).Greet());
+        fmt.Println(m.label, m.build("world").Greet());
     }
 
     fmt.Println(varFirstLabel, varFirst.Greet());

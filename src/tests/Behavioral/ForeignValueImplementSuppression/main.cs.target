@@ -22,7 +22,6 @@ private static readonly object switchˢ = (@string)"switch:"u8;
 private static readonly object grayˢ = (@string)"Gray"u8;
 private static readonly object shadeˢ = (@string)"Shade"u8;
 private static readonly object defaultˢ = (@string)"default"u8;
-private static readonly @string fromIfaceˢ = "from-iface"u8;
 private static readonly object mapˢ = (@string)"map:"u8;
 private static readonly object callˢ = (@string)"call:"u8;
 private static readonly object describeˢ = (@string)"describe:"u8;
@@ -63,7 +62,7 @@ internal static void Main() {
     }}
 
     var seen = new map<hue.Tint, @string>{};
-    seen[got] = fromIfaceˢ;
+    seen[got] = "from-iface";
     fmt.Println(mapˢ, seen[want], len(seen));
 
     var (l, a) = got.Shade();

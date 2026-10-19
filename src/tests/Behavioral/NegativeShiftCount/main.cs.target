@@ -43,39 +43,26 @@ internal static void arm(@string @class, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string leftIntˢ = "left int"u8;
-private static readonly @string rightInt64ByInt8ˢ = "right int64 by int8"u8;
-private static readonly @string leftUint32ByInt64ˢ = "left uint32 by int64"u8;
-private static readonly @string rightInt8ˢ = "right int8"u8;
-private static readonly @string namedCountˢ = "named count"u8;
-private static readonly @string compoundLeftˢ = "compound left"u8;
-private static readonly @string compoundRightˢ = "compound right"u8;
-private static readonly @string moduloCountˢ = "modulo count"u8;
-private static readonly @string nonNegativeSignedˢ = "non-negative signed"u8;
-private static readonly @string unsignedHugeˢ = "unsigned huge"u8;
-private static readonly @string maskedSignedˢ = "masked signed"u8;
-
 internal static void Main() {
-    arm(leftIntˢ, () => fmt.Sprint(one.Lsh((int64)(neg))));
-    arm(rightInt64ByInt8ˢ, () => fmt.Sprint(big.Rsh((int64)(neg8))));
-    arm(leftUint32ByInt64ˢ, () => fmt.Sprint(u32.Lsh((int64)(neg64))));
-    arm(rightInt8ˢ, () => fmt.Sprint(i8.Rsh((int64)(neg))));
-    arm(namedCountˢ, () => fmt.Sprint(big.Lsh((int64)(int8)(c))));
-    arm(compoundLeftˢ, () => {
+    arm("left int", () => fmt.Sprint(one.Lsh((int64)(neg))));
+    arm("right int64 by int8", () => fmt.Sprint(big.Rsh((int64)(neg8))));
+    arm("left uint32 by int64", () => fmt.Sprint(u32.Lsh((int64)(neg64))));
+    arm("right int8", () => fmt.Sprint(i8.Rsh((int64)(neg))));
+    arm("named count", () => fmt.Sprint(big.Lsh((int64)(int8)(c))));
+    arm("compound left", () => {
         var x = big;
         x.LshAssign((int64)(neg));
         return fmt.Sprint(x);
     });
-    arm(compoundRightˢ, () => {
+    arm("compound right", () => {
         var x = u32;
         x.RshAssign((int64)(neg8));
         return fmt.Sprint(x);
     });
-    arm(moduloCountˢ, () => fmt.Sprint(big.Lsh((int64)((y % 8)))));
-    arm(nonNegativeSignedˢ, () => fmt.Sprint(one.Lsh((int64)(three)), (@string)" "u8, big.Rsh((int64)(three)), (@string)" "u8, u32.Lsh((int64)(wide)), (@string)" "u8, i8.Rsh((int64)(wide))));
-    arm(unsignedHugeˢ, () => fmt.Sprint(big.Lsh(huge), (@string)" "u8, i8.Rsh(huge)));
-    arm(maskedSignedˢ, () => fmt.Sprint((big << (int)(((nint)(y & 7))))));
+    arm("modulo count", () => fmt.Sprint(big.Lsh((int64)((y % 8)))));
+    arm("non-negative signed", () => fmt.Sprint(one.Lsh((int64)(three)), (@string)" "u8, big.Rsh((int64)(three)), (@string)" "u8, u32.Lsh((int64)(wide)), (@string)" "u8, i8.Rsh((int64)(wide))));
+    arm("unsigned huge", () => fmt.Sprint(big.Lsh(huge), (@string)" "u8, i8.Rsh(huge)));
+    arm("masked signed", () => fmt.Sprint((big << (int)(((nint)(y & 7))))));
 }
 
 } // end main_package

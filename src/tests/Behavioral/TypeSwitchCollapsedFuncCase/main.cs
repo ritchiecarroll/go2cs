@@ -12,9 +12,6 @@ partial class main_package {
 
 // type HookValue is a methodless func type — rendered inline as its base delegate
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string invalidDecodeHookˢ = "invalid decode hook signature"u8;
-
 internal static (any, error) exec(any raw, reflectꓸValue from, reflectꓸValue to) {
     switch (raw.type()) {
     case Func<reflectꓸType, reflectꓸType, any, (any, error)> f: {
@@ -31,26 +28,21 @@ internal static (any, error) exec(any raw, reflectꓸValue from, reflectꓸValue
     }
     default: {
         var f = raw;
-        return (default!, errors.New(invalidDecodeHookˢ));
+        return (default!, errors.New("invalid decode hook signature"));
     }}
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string typeˢ = "type"u8;
-private static readonly @string kindOrValueˢ = "kind or value"u8;
-private static readonly @string otherˢ = "other"u8;
 
 internal static @string kind(any raw) {
     switch (raw.type()) {
     case Func<reflectꓸType, reflectꓸType, any, (any, error)>: {
-        return typeˢ;
+        return "type";
     }
     case Func<reflectꓸKind, reflectꓸKind, any, (any, error)> _:
     case Func<reflectꓸValue, reflectꓸValue, (any, error)> _: {
-        return kindOrValueˢ;
+        return "kind or value";
     }}
 
-    return otherˢ;
+    return "other";
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

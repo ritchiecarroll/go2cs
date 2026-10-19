@@ -22,7 +22,7 @@ internal static void Main() {
         fmt.Printf("%v %T\n"u8, v, v);
     }
 
-    @string s = "v"u8;
+    @string s = "v";
     fmt.Printf("%v %T\n"u8, (any)(s), (any)(s));
 }
 

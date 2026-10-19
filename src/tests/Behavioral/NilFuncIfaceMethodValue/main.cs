@@ -7,12 +7,9 @@ partial class main_package {
 
 public delegate @string Greeter();
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilGreeterˢ = "nil greeter"u8;
-
 public static @string Greet(this Greeter g) {
     if (g == default!) {
-        return nilGreeterˢ;
+        return "nil greeter";
     }
     return g();
 }
@@ -53,12 +50,6 @@ private static readonly object elemNilˢ = (@string)"elem nil:"u8;
 private static readonly object numMethodˢ = (@string)"NumMethod:"u8;
 private static readonly object methodKindˢ = (@string)"method kind:"u8;
 private static readonly object typeˢ = (@string)"type:"u8;
-private static readonly @string method0Callˢ = "Method(0).Call"u8;
-private static readonly @string methodByNameShoutCallˢ = "MethodByName(Shout).Call"u8;
-private static readonly @string shoutˢ = "Shout"u8;
-private static readonly @string helloˢ = "hello"u8;
-private static readonly @string nonNilMethod0Callˢ = "non-nil Method(0).Call"u8;
-private static readonly @string nonNilMethod1Callˢ = "non-nil Method(1).Call"u8;
 
 internal static void Main() {
     Greeter g = default!;
@@ -76,14 +67,14 @@ internal static void Main() {
     m = v.Method(0);
     fmt.Println(methodKindˢ, m.Kind(), typeˢ, m.Type());
     var mʗ1 = m;
-    call(method0Callˢ, () => mʗ1.Call(default!)[0].String());
-    call(methodByNameShoutCallˢ, () => Ꮡv.Value.MethodByName(shoutˢ).Call(default!)[0].String());
+    call("Method(0).Call", () => mʗ1.Call(default!)[0].String());
+    call("MethodByName(Shout).Call", () => Ꮡv.Value.MethodByName("Shout").Call(default!)[0].String());
 
-    var h = new Greeter(() => helloˢ);
+    var h = new Greeter(() => "hello");
     i = new GreeterᴠGreetable(h);
     v = reflect.ValueOf(Ꮡi).Elem();
-    call(nonNilMethod0Callˢ, () => Ꮡv.Value.Method(0).Call(default!)[0].String());
-    call(nonNilMethod1Callˢ, () => Ꮡv.Value.Method(1).Call(default!)[0].String());
+    call("non-nil Method(0).Call", () => Ꮡv.Value.Method(0).Call(default!)[0].String());
+    call("non-nil Method(1).Call", () => Ꮡv.Value.Method(1).Call(default!)[0].String());
 }
 
 } // end main_package

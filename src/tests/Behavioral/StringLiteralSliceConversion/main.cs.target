@@ -10,12 +10,9 @@ partial struct vector {
 }
 
 internal static slice<vector> vectors = new vector[]{
-    new("split"u8, slice<byte>((@string)("this is a longer than block-size key "u8 + "written as several pieces so it fits the "u8 + "source width, exactly as crypto/hmac writes it"u8))),
-    new("plain"u8, slice<byte>("single"u8))
+    new("split", slice<byte>((@string)("this is a longer than block-size key "u8 + "written as several pieces so it fits the "u8 + "source width, exactly as crypto/hmac writes it"u8))),
+    new("plain", slice<byte>("single"u8))
 }.slice();
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "hello"u8;
 
 internal static void Main() {
     var bs = slice<byte>("hello"u8);
@@ -42,7 +39,7 @@ internal static void Main() {
         fmt.Println(v.name, len(v.key), v.key[0], v.key[len(v.key) - 1]);
     }
 
-    @string s = helloˢ;
+    @string s = "hello";
     fmt.Println(((sstring)slice<byte>(s)) == ((sstring)bs));
 }
 

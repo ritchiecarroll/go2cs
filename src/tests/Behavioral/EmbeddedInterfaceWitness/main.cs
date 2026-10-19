@@ -47,7 +47,7 @@ private static readonly object numMethodˢ = (@string)"NumMethod:"u8;
 internal static void check(@string label, any value) {
     {
         var (rw, ok) = value._<iolike.ReadWriter>(ᐧ); if (ok){
-            fmt.Println(label, readWriterYesˢ, rw.Read(), rw.Write("x"u8));
+            fmt.Println(label, readWriterYesˢ, rw.Read(), rw.Write("x"));
         } else {
             fmt.Println(label, readWriterNoˢ);
         }
@@ -64,15 +64,10 @@ internal static void check(@string label, any value) {
     fmt.Println(label, numMethodˢ, reflect.TypeOf(value).NumMethod());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string wrapperˢ = "wrapper"u8;
-private static readonly @string plainˢ = "plain"u8;
-private static readonly @string holderˢ = "holder"u8;
-
 internal static void Main() {
-    check(wrapperˢ, new wrapper(Reader: new iolike.Base(Tag: "base"u8), prefix: "w:"u8));
-    check(plainˢ, new plain(tag: "p"u8));
-    check(holderˢ, new holder(Reader: new iolike.Base(Tag: "held"u8), prefix: "h:"u8));
+    check("wrapper", new wrapper(Reader: new iolike.Base(Tag: "base"), prefix: "w:"));
+    check("plain", new plain(tag: "p"));
+    check("holder", new holder(Reader: new iolike.Base(Tag: "held"), prefix: "h:"));
     LocalPromotion();
     checkConflicted();
     checkPointerOnly();
@@ -88,7 +83,7 @@ internal partial struct LocalPromotion_inner /*dyn*/ {
 }
 
 public static void LocalPromotion() {
-    var w = new LocalPromotion_inner(Reader: new iolike.Base(Tag: "local"u8));
+    var w = new LocalPromotion_inner(Reader: new iolike.Base(Tag: "local"));
     fmt.Println(localDirectˢ, w.Reader.Read());
 
     any v = w;
@@ -113,7 +108,7 @@ private static readonly object conflictedReaderNoˢ = (@string)"conflicted Reade
 private static readonly object conflictedNumMethodˢ = (@string)"conflicted NumMethod:"u8;
 
 internal static void checkConflicted() {
-    any v = new conflicted(Base: new iolike.Base(Tag: "conf"u8));
+    any v = new conflicted(Base: new iolike.Base(Tag: "conf"));
 
     {
         var (_, ok) = v._<iolike.Reader>(ᐧ); if (ok){
@@ -160,7 +155,7 @@ internal static void checkPointerOnly() {
 
     {
         var (rw, ok) = ptr._<iolike.ReadWriter>(ᐧ); if (ok){
-            fmt.Println(pointerOnlyPtrYesˢ, rw.Write("x"u8));
+            fmt.Println(pointerOnlyPtrYesˢ, rw.Write("x"));
         } else {
             fmt.Println(pointerOnlyPtrNoˢ);
         }

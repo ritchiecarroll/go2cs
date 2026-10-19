@@ -11,9 +11,9 @@ internal static float64 negZero = Δmath.Copysign(0D, -1D);
 
 internal static @string sign(float64 f) {
     if (Δmath.Signbit(f)) {
-        return "-0"u8;
+        return "-0";
     }
-    return "+0"u8;
+    return "+0";
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -143,9 +143,9 @@ internal static void rangeUnderOverwrite() {
         var overwritten = false;
         foreach (var (k, v) in m) {
             if (k == 0D) {
-                @string want = "+0"u8;
+                @string want = "+0";
                 if (overwritten){
-                    want = "-0"u8;
+                    want = "-0";
                     after++;
                     if (v != 3) {
                         bad++;
@@ -177,9 +177,9 @@ internal static void rangeUnderOverwrite() {
         foreach (var (k, v) in m) {
             {
                 var (f, ok) = k._<float64>(ᐧ); if (ok) {
-                    @string want = "+0"u8;
+                    @string want = "+0";
                     if (overwritten){
-                        want = "-0"u8;
+                        want = "-0";
                         after++;
                         if (v != 3) {
                             bad++;
@@ -223,15 +223,6 @@ internal static void @try(@string label, Action f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string emptyMapLookupIntˢ = "empty map lookup []int"u8;
-private static readonly @string emptyMapCommaOkMapKeyˢ = "empty map comma-ok map key"u8;
-private static readonly @string emptyMapDeleteFuncKeyˢ = "empty map delete func key"u8;
-private static readonly @string emptyMapAssignIntˢ = "empty map assign []int"u8;
-private static readonly @string fullMapLookupIntˢ = "full map lookup []int"u8;
-private static readonly @string fullMapAssignIntˢ = "full map assign []int"u8;
-private static readonly @string nilMapLookupIntˢ = "nil map lookup []int"u8;
-private static readonly @string nilMapDeleteIntˢ = "nil map delete []int"u8;
-private static readonly @string hashableKeyOnEmptyMapˢ = "hashable key on empty map"u8;
 private static readonly object fullMapLenAfterˢ = (@string)"full map len after:"u8;
 private static readonly object emptyMapLenAfterˢ = (@string)"empty map len after:"u8;
 
@@ -243,54 +234,50 @@ internal static void hashPanic() {
 
     var emptyʗ1 = empty;
     var sliceʗ1 = Δslice;
-    @try(emptyMapLookupIntˢ, () => {
+    @try("empty map lookup []int", () => {
         _ = emptyʗ1[sliceʗ1];
     });
     var emptyʗ2 = empty;
-    @try(emptyMapCommaOkMapKeyˢ, () => {
+    @try("empty map comma-ok map key", () => {
         (_, _) = emptyʗ2[new map<@string, nint>{}, ꟷ];
     });
     var emptyʗ3 = empty;
-    @try(emptyMapDeleteFuncKeyˢ, () => {
+    @try("empty map delete func key", () => {
         delete(emptyʗ3, () => {
         });
     });
     var emptyʗ4 = empty;
     var sliceʗ2 = Δslice;
-    @try(emptyMapAssignIntˢ, () => {
+    @try("empty map assign []int", () => {
         emptyʗ4[sliceʗ2] = true;
     });
     var fullʗ1 = full;
     var sliceʗ3 = Δslice;
-    @try(fullMapLookupIntˢ, () => {
+    @try("full map lookup []int", () => {
         _ = fullʗ1[sliceʗ3];
     });
     var fullʗ2 = full;
-    @try(fullMapAssignIntˢ, () => {
-        fullʗ2[new @string[]{"x"u8}.slice()] = true;
+    @try("full map assign []int", () => {
+        fullʗ2[new @string[]{"x"}.slice()] = true;
     });
     var nilMapʗ1 = nilMap;
     var sliceʗ4 = Δslice;
-    @try(nilMapLookupIntˢ, () => {
+    @try("nil map lookup []int", () => {
         _ = nilMapʗ1[sliceʗ4];
     });
     var nilMapʗ2 = nilMap;
     var sliceʗ5 = Δslice;
-    @try(nilMapDeleteIntˢ, () => {
+    @try("nil map delete []int", () => {
         delete(nilMapʗ2, sliceʗ5);
     });
     var emptyʗ5 = empty;
-    @try(hashableKeyOnEmptyMapˢ, () => {
+    @try("hashable key on empty map", () => {
         _ = emptyʗ5[new nint[]{1, 2}.array()];
     });
     fmt.Println(fullMapLenAfterˢ, len(full), emptyMapLenAfterˢ, len(empty));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string reflectMapIndexIntOnˢ = "reflect MapIndex []int on empty MapOf(any)"u8;
-private static readonly @string reflectSetMapIndexIntˢ = "reflect SetMapIndex []int"u8;
-private static readonly @string reflectMapIndexIntOnNilˢ = "reflect MapIndex []int on nil map"u8;
-private static readonly @string reflectDeleteIntOnNilMapˢ = "reflect delete []int on nil map"u8;
 private static readonly object reflectFloat64KeyAfter0ˢ = (@string)"reflect float64 key after +0 then -0:"u8;
 
 internal static void reflectSide() {
@@ -299,24 +286,24 @@ internal static void reflectSide() {
     slice<nint> Δslice = default!;
     var mʗ1 = m;
     var sliceʗ1 = Δslice;
-    @try(reflectMapIndexIntOnˢ, () => {
+    @try("reflect MapIndex []int on empty MapOf(any)", () => {
         mʗ1.MapIndex(reflect.ValueOf(sliceʗ1));
     });
     var mʗ2 = m;
     var sliceʗ2 = Δslice;
-    @try(reflectSetMapIndexIntˢ, () => {
+    @try("reflect SetMapIndex []int", () => {
         mʗ2.SetMapIndex(reflect.ValueOf(sliceʗ2), reflect.ValueOf(true));
     });
     ref var nilm = ref heap<reflectꓸValue>(out var Ꮡnilm);
     nilm = reflect.Zero(reflect.TypeFor<map<any, bool>>());
     var nilmʗ1 = nilm;
     var sliceʗ3 = Δslice;
-    @try(reflectMapIndexIntOnNilˢ, () => {
+    @try("reflect MapIndex []int on nil map", () => {
         nilmʗ1.MapIndex(reflect.ValueOf(sliceʗ3));
     });
     var nilmʗ2 = nilm;
     var sliceʗ4 = Δslice;
-    @try(reflectDeleteIntOnNilMapˢ, () => {
+    @try("reflect delete []int on nil map", () => {
         nilmʗ2.SetMapIndex(reflect.ValueOf(sliceʗ4), new reflectꓸValue(nil));
     });
 

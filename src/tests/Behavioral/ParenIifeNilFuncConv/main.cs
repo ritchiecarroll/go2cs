@@ -17,7 +17,6 @@ internal static nint call(this handlerFunc h, @string s) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object parenIifeˢ = (@string)"paren iife"u8;
 private static readonly object bareIifeˢ = (@string)"bare iife"u8;
-private static readonly @string abcdˢ = "abcd"u8;
 
 internal static void Main() {
     ((Action)(() => {
@@ -39,14 +38,14 @@ internal static void Main() {
     fmt.Println(product);
 
     var h = default(handlerFunc)!;
-    fmt.Println(h == default!, h.call("x"u8));
+    fmt.Println(h == default!, h.call("x"));
 
     h = new handlerFunc((@string s) => len(s));
-    fmt.Println(h == default!, h.call(abcdˢ));
+    fmt.Println(h == default!, h.call("abcd"));
 
     var table = new handlerFunc[]{default(handlerFunc)!, h}.slice();
     foreach (var (_, entry) in table) {
-        fmt.Println(entry.call("zz"u8));
+        fmt.Println(entry.call("zz"));
     }
 }
 

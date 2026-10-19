@@ -2,10 +2,9 @@ namespace go;
 
 partial class main_package {
 
-internal static @string pkgLevelLiteral = "package level literal stays inline"u8;
+internal static @string pkgLevelLiteral = "package level literal stays inline";
 
-internal static @string derivedAtInit;
-internal static void initᴛderivedAtInit() { derivedAtInit = describe(); }
+internal static @string derivedAtInit = describe();
 
 partial struct box {
     internal @string name;

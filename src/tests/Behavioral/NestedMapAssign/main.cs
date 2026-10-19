@@ -13,11 +13,11 @@ internal static void addEdge(map<@string, map<@string, bool>> g, @string from, @
 
 internal static void Main() {
     var g = new map<@string, map<@string, bool>>{};
-    addEdge(g, "a"u8, "b"u8);
-    addEdge(g, "a"u8, "c"u8);
-    addEdge(g, "b"u8, "c"u8);
-    fmt.Println(g["a"u8]["b"u8], g["a"u8]["c"u8], g["b"u8]["c"u8], g["a"u8]["z"u8]);
-    fmt.Println(len(g["a"u8]));
+    addEdge(g, "a", "b");
+    addEdge(g, "a", "c");
+    addEdge(g, "b", "c");
+    fmt.Println(g["a"]["b"], g["a"]["c"], g["b"]["c"], g["a"]["z"]);
+    fmt.Println(len(g["a"]));
 }
 
 } // end main_package

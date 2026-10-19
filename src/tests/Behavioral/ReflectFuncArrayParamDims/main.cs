@@ -36,11 +36,6 @@ internal static nint declared(/*[16]*/ array<byte> @in) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string f32ˢ = "f32"u8;
-private static readonly @string f64ˢ = "f64"u8;
-private static readonly @string nestedˢ = "nested"u8;
-private static readonly @string plainˢ = "plain"u8;
-private static readonly @string declaredˢ = "declared"u8;
 private static readonly object distinctIn0Typesˢ = (@string)"distinct in0 types:"u8;
 private static readonly object sameAsItselfˢ = (@string)"same as itself:    "u8;
 private static readonly object nestedElemˢ = (@string)"nested elem:"u8;
@@ -63,11 +58,11 @@ internal static void Main() {
     };
     var plain = (nint a, slice<byte> s) => a + len(s);
 
-    report(f32ˢ, reflect.TypeOf((f32).OrTypedNilFunc()));
-    report(f64ˢ, reflect.TypeOf((f64).OrTypedNilFunc()));
-    report(nestedˢ, reflect.TypeOf((nested).OrTypedNilFunc()));
-    report(plainˢ, reflect.TypeOf((plain).OrTypedNilFunc()));
-    report(declaredˢ, reflect.TypeOf(declared));
+    report("f32", reflect.TypeOf((f32).OrTypedNilFunc()));
+    report("f64", reflect.TypeOf((f64).OrTypedNilFunc()));
+    report("nested", reflect.TypeOf((nested).OrTypedNilFunc()));
+    report("plain", reflect.TypeOf((plain).OrTypedNilFunc()));
+    report("declared", reflect.TypeOf(declared));
 
     fmt.Println(distinctIn0Typesˢ, !AreEqual(reflect.TypeOf((f32).OrTypedNilFunc()).In(0), reflect.TypeOf((f64).OrTypedNilFunc()).In(0)));
     fmt.Println(sameAsItselfˢ, AreEqual(reflect.TypeOf((f32).OrTypedNilFunc()).In(0), reflect.TypeOf((f32).OrTypedNilFunc()).In(0)));
@@ -85,19 +80,17 @@ internal static void Main() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fillPtrˢ = "FillPtr"u8;
 private static readonly object methodPtrParamKindˢ = (@string)"method ptr param: kind ="u8;
 private static readonly object elemˢ = (@string)"elem ="u8;
 private static readonly object lenˢ = (@string)"len ="u8;
 private static readonly object filledThroughThePointerˢ = (@string)"filled through the pointer:"u8;
-private static readonly @string sumArrayˢ = "SumArray"u8;
 private static readonly object methodValueParamˢ = (@string)"method value param:"u8;
 private static readonly object methodSumˢ = (@string)"method sum:"u8;
 
 internal static void reportMethod() {
     var t = reflect.TypeOf(new filler(nil));
 
-    var (m, ok) = t.MethodByName(fillPtrˢ);
+    var (m, ok) = t.MethodByName("FillPtr");
     if (!ok) {
         throw panic("FillPtr not found");
     }
@@ -110,7 +103,7 @@ internal static void reportMethod() {
     m.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler(nil)), reflect.ValueOf((nint)(7)), reply}.slice());
     fmt.Println(filledThroughThePointerˢ, reply.Elem().Interface());
 
-    (var s, ok) = t.MethodByName(sumArrayˢ);
+    (var s, ok) = t.MethodByName("SumArray");
     if (!ok) {
         throw panic("SumArray not found");
     }

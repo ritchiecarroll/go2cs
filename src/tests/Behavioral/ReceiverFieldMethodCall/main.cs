@@ -80,7 +80,6 @@ public static int32 ReadViaValue(this ж<Flag> Ꮡf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string hitsˢ = "hits"u8;
 private static readonly object startˢ = (@string)"start:"u8;
 private static readonly object incrˢ = (@string)"Incr:"u8;
 private static readonly object addN5ˢ = (@string)"AddN 5:"u8;
@@ -93,7 +92,7 @@ private static readonly object caseTwinˢ = (@string)"case twin:"u8;
 
 internal static void Main() {
     ref var fl = ref heap(new Flag(), out var Ꮡfl);
-    fl.label = hitsˢ;
+    fl.label = "hits";
 
     Ꮡfl.Reset(10);
     fmt.Println(fl.Label(), startˢ, fl.Value());

@@ -70,9 +70,6 @@ internal static nint /*total*/ closures(nint n) {
     return total;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string negˢ = "neg"u8;
-
 internal static (nint @out, @string label) compute(nint x) {
     nint @out = default!;
     @string label = default!;
@@ -82,7 +79,7 @@ internal static (nint @out, @string label) compute(nint x) {
             @out += 1000;
         }, ref ᒐ);
         if (x < 0) {
-            (@out, label) = (-1, negˢ);
+            (@out, label) = (-1, "neg");
             goto ᒐdone;
         }
         (@out, label) = (@double(x), fmt.Sprintf("v=%d"u8, x));
@@ -91,9 +88,6 @@ internal static (nint @out, @string label) compute(nint x) {
     finally { ᒐ.Run(); }
     ᒐdone: return (@out, label);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string recoveredˢ = "recovered"u8;
 
 internal static (nint code, @string msg) guarded(bool boom) {
     nint code = default!;
@@ -104,7 +98,7 @@ internal static (nint code, @string msg) guarded(bool boom) {
             {
                 var r = recover(); if (r != default!) {
                     code = -1;
-                    msg = recoveredˢ;
+                    msg = "recovered";
                 }
             }
         }, ref ᒐ);
@@ -112,7 +106,7 @@ internal static (nint code, @string msg) guarded(bool boom) {
             throw panic("kaboom");
         }
         code = 0;
-        msg = "ok"u8;
+        msg = "ok";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

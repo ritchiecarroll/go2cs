@@ -21,23 +21,23 @@ private static readonly object cloneDˢ = (@string)"clone d:"u8;
 private static readonly object cloneHasBˢ = (@string)"clone has b:"u8;
 
 internal static void Main() {
-    var m = new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2, ["c"u8] = 3};
+    var m = new map<@string, nint>{["a"] = 1, ["b"] = 2, ["c"] = 3};
 
     var mc = clone(m)._<map<@string, nint>>();
 
-    mc["a"u8] = 99;
-    mc["d"u8] = 4;
+    mc["a"] = 99;
+    mc["d"] = 4;
     delete(mc, "b"u8);
 
     fmt.Println(origLenˢ, len(m), cloneLenˢ, len(mc));
-    fmt.Println(origAˢ, m["a"u8], cloneAˢ, mc["a"u8]);
+    fmt.Println(origAˢ, m["a"], cloneAˢ, mc["a"]);
 
-    var (_, origHasD) = m["d"u8, ꟷ];
-    var (_, origHasB) = m["b"u8, ꟷ];
+    var (_, origHasD) = m["d", ꟷ];
+    var (_, origHasB) = m["b", ꟷ];
     fmt.Println(origHasDˢ, origHasD, origHasBˢ, origHasB);
 
-    var (_, cloneHasB) = mc["b"u8, ꟷ];
-    fmt.Println(cloneCˢ, mc["c"u8], cloneDˢ, mc["d"u8], cloneHasBˢ, cloneHasB);
+    var (_, cloneHasB) = mc["b", ꟷ];
+    fmt.Println(cloneCˢ, mc["c"], cloneDˢ, mc["d"], cloneHasBˢ, cloneHasB);
 }
 
 } // end main_package

@@ -46,20 +46,14 @@ partial struct Ptr {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string uintˢ = "uint"u8;
 private static readonly object uintAssertsToAnonBasicˢ = (@string)"uint asserts to anon Basic:"u8;
-private static readonly @string uint64ˢ = "uint64"u8;
 private static readonly object uintAfterWriteThroughˢ = (@string)"uint after write through promoted pointer:"u8;
-private static readonly @string intˢ = "int"u8;
 private static readonly object intAfterWriteThroughˢ = (@string)"int after write through promoted pointer:"u8;
 private static readonly object typeSwitchMatchedAnonˢ = (@string)"type switch matched anon Basic, bit size:"u8;
 private static readonly object typeSwitchMatchedDefaultˢ = (@string)"type switch matched default"u8;
 private static readonly object uintValueAssertsToAnonˢ = (@string)"uint VALUE asserts to anon Basic:"u8;
-private static readonly @string innerˢ = "inner"u8;
-private static readonly @string ptrˢ = "ptr"u8;
 private static readonly object ptrCommonThroughEmbedˢ = (@string)"ptr Common through embed:"u8;
 private static readonly object ptrStringThroughEmbedˢ = (@string)"ptr String through embed:"u8;
-private static readonly @string emptyˢ = "empty"u8;
 private static readonly object ptrCommonWithNilFieldˢ = (@string)"ptr Common with nil field:"u8;
 private static readonly object ptrAfterWriteThroughˢ = (@string)"ptr after write through Common:"u8;
 private static readonly object ptrFieldNodeˢ = (@string)"ptr field node:"u8;
@@ -70,7 +64,7 @@ internal partial interface main_type /*dyn*/ {
 
 internal static void Main() {
     var u = Ꮡ(new Uint(nil));
-    u.Value.Label = uintˢ;
+    u.Value.Label = "uint";
     Node n = new UintжNode(u);
 
     var (basic, ok) = n._<main_type>(ᐧ);
@@ -79,13 +73,13 @@ internal static void Main() {
     if (ok) {
         var b = basic.Basic();
         b.Value.BitSize = 64;
-        b.Value.Label = uint64ˢ;
+        b.Value.Label = "uint64";
     }
 
     fmt.Println(uintAfterWriteThroughˢ, (~u).BitSize, (~u).Label, n.String());
 
     var i = Ꮡ(new Int(nil));
-    i.Value.Label = intˢ;
+    i.Value.Label = "int";
     Node ni = new IntжNode(i);
     {
         var (bi, okI) = ni._<main_type>(ᐧ); if (okI) {
@@ -110,11 +104,11 @@ internal static void Main() {
     fmt.Println(uintValueAssertsToAnonˢ, valueOK);
 
     var inner = Ꮡ(new Uint(nil));
-    inner.Value.Label = innerˢ;
+    inner.Value.Label = "inner";
     inner.Value.ByteSize = 8;
 
     var p = Ꮡ(new Ptr(Node: new UintжNode(inner)));
-    p.Value.Label = ptrˢ;
+    p.Value.Label = "ptr";
     p.Value.ByteSize = 4;
 
     Node np = new PtrжNode(p);
@@ -122,7 +116,7 @@ internal static void Main() {
     fmt.Println(ptrStringThroughEmbedˢ, np.String());
 
     var empty = Ꮡ(new Ptr(nil));
-    empty.Value.Label = emptyˢ;
+    empty.Value.Label = "empty";
     empty.Value.ByteSize = 2;
     Node ne = new PtrжNode(empty);
     fmt.Println(ptrCommonWithNilFieldˢ, (~ne.Common()).Label, (~ne.Common()).ByteSize);

@@ -804,6 +804,7 @@ func collectPublicizedTypes(pkg *types.Package, fset *token.FileSet) {
 					// An EXPORTED generic type's constraints are named in its public declaration's
 					// where clauses, and in those of the extension methods its methods become.
 					collectTypeParamConstraintTypes(named.TypeParams(), pkg)
+					collectInlineConstraintLifts(named.TypeParams())
 				}
 
 				// An EXPORTED named FUNC type is emitted as a public C# delegate; an unexported
@@ -876,11 +877,26 @@ func collectPublicizedTypes(pkg *types.Package, fset *token.FileSet) {
 						collectSignatureTypes(results.At(i).Type(), pkg)
 					}
 				}
+
+				collectInlineConstraintLifts(sig.TypeParams())
 			}
 		}
 	}
 
 	collectSiblingTestPublicizedTypes(scope, pkg)
+}
+
+// collectInlineConstraintLifts publicizes the lift of every anonymous inline constraint carrying
+// methods in an EXPORTED declaration's type-parameter list (liftTypeParamConstraints). The public
+// generic's `where T : Show_T` names the lift, and C# requires a constraint type to be at least as
+// accessible as the declaration it constrains (CS0703), while a lift defaults to internal. Keyed by
+// the constraint type itself, as every lifted anonymous type is (collectPublicizedLiftedType).
+func collectInlineConstraintLifts(typeParams *types.TypeParamList) {
+	for i := 0; i < typeParams.Len(); i++ {
+		if iface, ok := typeParams.At(i).Constraint().(*types.Interface); ok && iface.NumMethods() > 0 {
+			packagePublicizedLiftedTypes[iface] = true
+		}
+	}
 }
 
 // collectTypeParamConstraintTypes publicizes the unexported named types a public generic member's where

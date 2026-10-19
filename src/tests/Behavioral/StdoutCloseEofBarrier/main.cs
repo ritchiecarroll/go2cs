@@ -8,11 +8,8 @@ using go.os;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string eofBarrierChildˢ = "EOF_BARRIER_CHILD"u8;
-
 internal static void Main() {
-    if (Δos.Getenv(eofBarrierChildˢ) == "1"u8) {
+    if (Δos.Getenv("EOF_BARRIER_CHILD") == "1"u8) {
         child();
         return;
     }

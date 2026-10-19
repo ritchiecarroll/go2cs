@@ -34,7 +34,7 @@ internal static void Main() {
     fmt.Printf("Int queue size: %d\n"u8, intQueue.Size());
 
     var stringQueue = new Queue<@string>(
-        items: new @string[]{"hello"u8, "world"u8}.slice()
+        items: new @string[]{"hello", "world"}.slice()
     );
     fmt.Printf("String queue size: %d\n"u8, stringQueue.Size());
 
