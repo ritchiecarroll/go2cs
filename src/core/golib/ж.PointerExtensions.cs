@@ -181,6 +181,14 @@ public static class PointerExtensions
             return new StandardBox<TDst>(fn);
         }
 
+        // A reinterpret OF a reinterpret view re-views the view's ROOT, so `(*T)((*U)(p))` is p itself and a chain of
+        // conversions is one view over one box. A view over the view aliased the right storage but compared unequal to
+        // the box it came from wherever that box is not itself a field view -- a standard box or an element reference --
+        // so `(*Employee)((*Person)(e)) == e` read false. The root answers null when it cannot alias as TDst, and then
+        // the view-over-view below still aliases through the intermediate view.
+        if (box is FieldRefBox<T> { ReinterpretRoot: IReinterpretRoot root } && root.AliasAs<TDst>() is { } collapsed)
+            return collapsed;
+
         if (ReinterpretAliasesStorage<T, TDst>.Value)
         {
             // Alias the SAME managed storage. Routing through ValueSlot (rather than a cached ref)
@@ -683,4 +691,28 @@ public static class PointerExtensions
 public static class PrefixProjection<T, TDst>
 {
     public static Func<ж<T>, ж<TDst>?>? Project;
+}
+
+/// <summary>
+/// The box a reinterpret view stands over, asked to alias as another pointee type. See the round-trip collapse in
+/// <see cref="PointerExtensions.Reinterpret{T, TDst}"/>.
+/// </summary>
+internal interface IReinterpretRoot
+{
+    /// <summary>
+    /// This box itself when it already is a <c>ж&lt;TDst&gt;</c>; a reinterpret view over this box when the two pointee
+    /// types can alias; otherwise <c>null</c>.
+    /// </summary>
+    ж<TDst>? AliasAs<TDst>();
+}
+
+public abstract partial class ж<T> : IReinterpretRoot
+{
+    ж<TDst>? IReinterpretRoot.AliasAs<TDst>()
+    {
+        if (this is ж<TDst> same)
+            return same;
+
+        return PointerExtensions.ReinterpretAliasesStorage<T, TDst>.Value ? new FieldRefBox<TDst>(this, ReinterpretRef<TDst>) : null;
+    }
 }

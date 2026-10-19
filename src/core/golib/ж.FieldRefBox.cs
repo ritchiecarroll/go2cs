@@ -561,6 +561,10 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // own storage read as another type: `(*U)(unsafe.Pointer(p))` is p's address, so the hop is Go offset 0 whatever the
     // two types are. Counting it so gives the view its source's order token (one Go address, one number) and lets a
     // reinterpret of a first field widen to its struct (IFirstFieldView). Every other view resolves its field by name.
+    // The box this view re-reads as T when it is a REINTERPRET view, else null. Reinterpret re-views it rather than this
+    // view, so a chain of pointer conversions stays one view over one box (PointerExtensions.Reinterpret).
+    internal object? ReinterpretRoot => IsReinterpretAccessor(m_token) ? m_source : null;
+
     private static bool IsReinterpretAccessor(Delegate fieldId) =>
         fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef), DeclaringType: { IsGenericType: true } owner } &&
         owner.GetGenericTypeDefinition() == typeof(ж<>);
