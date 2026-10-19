@@ -3957,7 +3957,7 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 // call's target type, returning expr wrapped as the target requires.
 //
 // Every DECISION here is type-driven — funcType, argType, targetTypeName and packageTypeSpecRHS —
-// and expr is pure text that flows only to the return value (the two pointer cases wrap it). That
+// and expr is pure text that flows only to the return value (the numeric pointer case wraps it). That
 // is what lets the recording run without a conversion at all: a caller that discards the result
 // passes "" and pays no traversal. Keep it that way; reading anything out of expr would put a whole
 // second walk of the argument subtree back on every call (see the loop's note in convCallExpr).
@@ -3996,13 +3996,12 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 
 		if !types.Identical(funcType, argType) {
 			if _, ok := argType.Underlying().(*types.Struct); ok {
-				if targetTypeIsPointer {
-					// Dereference target type when casting to pointer types,
-					// in C# implicit casting operator requires the target type
-					// to be a direct type, not a pointer type
-					expr = fmt.Sprintf("(%s?.Value ?? default!)", expr)
-				}
-
+				// A struct POINTER conversion `(*U)(p)` never renders here: convCallExpr routes every such
+				// pair to an aliasing Reinterpret before this point (structPair, namedToNamed), so a pointer
+				// target reaches this arm only from the argument loop, which records and discards expr. The
+				// `(expr?.Value ?? default!)` copy it used to render lost every write through the result
+				// (PointerConversionAliasing); measured unreachable on the behavioral corpus and the
+				// three-target stdlib before it was removed.
 				argTypeName := v.getCSharpTypeName(argType)
 
 				// SKIP a conversion the [GoType] wrapper already provides: `type bitStringEncoder
