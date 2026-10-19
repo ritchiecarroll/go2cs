@@ -86,7 +86,7 @@ operand. In these examples `a` is an `int8` holding 100 and `u` is a `uint8` hol
 ```go
 var x any = a + a
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:113 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:72 -->
 ```csharp
 any x = (int8)(a + a);
 ```
@@ -96,13 +96,14 @@ any x = (int8)(a + a);
 mk := map[uint8]string{144: "wrapped"}
 fmt.Println("map key:", mk[u+u])
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:30-31 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticCompileSinks/main.cs.target:20-21 -->
 ```csharp
 var mk = new map<uint8, @string>{[144] = "wrapped"};
-fmt.Println(mapKeyˢ, mk[(uint8)(u + u)]);
+fmt.Println("map key:", mk[(uint8)(u + u)]);
 ```
 
-`mapKeyˢ` is the hoisted `"map key:"` literal (`private static readonly object mapKeyˢ = (@string)"map key:"u8;`).
+`"map key:"` is a plain C# literal that go2cs-gen boxes as a Go string for `fmt.Println`
+([strings](strings.md#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string)).
 
 **Why.** C# evaluates `a + a` as the `int` 200 where Go wraps to -56. Deferring the wrap is exact only while
 the consumer reads the low bits and something above it narrows the final result. Anywhere else the
@@ -139,7 +140,7 @@ and width, so a guarded shift needs no cast of its own.
 ```go
 var x int8 = (a + a) >> n
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:202 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticSinks/main.cs.target:171 -->
 ```csharp
 int8 x = (int8)(((int8)(a + a)).Rsh(n));
 ```
@@ -187,9 +188,9 @@ that never goes through a pointer). Otherwise it is `a * 0`, so `f() % -1` still
 ```go
 arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)) })
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:136 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:133 -->
 ```csharp
-arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), (@string)" "u8, rem(i64, (int64)m1)));
+arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
 ```
 
 Here `i64` holds `math.MinInt64`, `m1` is an `int` holding -1, `arm` runs the function under `recover` and
@@ -210,7 +211,7 @@ prints its result under the label.
 ```go
 sl[counted(1)] /= m1
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:199 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:169 -->
 ```csharp
 sl[counted(1)].QuoAssign(m1);
 ```
@@ -242,7 +243,7 @@ function, method, variable or constant of that name (`go/constant` declares its 
 enclosing function declares anything of that name anywhere: a variable (`if rem := n % size; rem != 0` in
 `crypto/internal/fips140/ecdsa`), a constant, a type, or a type-switch binding:
 
-<!-- source: src/tests/Behavioral/MinIntDivideShadow/main.cs.target:19 -->
+<!-- source: src/tests/Behavioral/MinIntDivideShadow/main.cs.target:20 -->
 ```csharp
 fmt.Println(builtin.quo(i32, (int32)m1), builtin.rem(i32, (int32)m1));
 ```

@@ -47,10 +47,6 @@ internal static void nothing(nint _) {
 internal static void release(this ref T t, nint _) {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object siblingReadsˢ = (@string)"sibling reads"u8;
-private static readonly object reassignedIsNilˢ = (@string)"reassigned is nil:"u8;
-
 internal static void Main() {
     @try("captures ptr", () => {
         var v = Ꮡ(new T(f: 1));
@@ -101,7 +97,7 @@ internal static void Main() {
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = wʗ2.Value.f;
         }, 0, new object?[] { w });
-        fmt.Println(siblingReadsˢ, sibling());
+        fmt.Println("sibling reads", sibling());
         runtime.KeepAlive(w.OrTypedNil());
     });
 
@@ -117,7 +113,7 @@ internal static void Main() {
             _ = Ꮡv.ValueSlot;
         }, 0);
         Ꮡv.ValueSlot = default!;
-        fmt.Println(reassignedIsNilˢ, Ꮡv.ValueSlot == nil);
+        fmt.Println("reassigned is nil:", Ꮡv.ValueSlot == nil);
     });
 
     @try("func variable captures ptr", () => {

@@ -58,7 +58,7 @@ internal static void Main() {
 
     {
         var (n, ok) = store((nint)(11))._<nint>(ᐧ); if (ok) {
-            fmt.Println((@string)"ok"u8, n);
+            fmt.Println("ok", n);
         }
     }
 }

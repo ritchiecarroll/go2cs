@@ -53,9 +53,6 @@ internal static @string firstUseReads(this ж<loc> Ꮡl) {
     return n + "/"u8 + l.name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered"u8;
-
 internal static void Main() {
     ж<loc> nilLoc = default!;
     var real = Ꮡ(new loc(name: "MST", offset: -7));
@@ -82,7 +79,7 @@ internal static void Main() {
             defer(() => {
                 {
                     var r = recover(); if (r != default!) {
-                        fmt.Println(recoveredˢ);
+                        fmt.Println("recovered");
                     }
                 }
             }, ref ᒐ);

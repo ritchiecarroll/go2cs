@@ -478,7 +478,7 @@ type (
     holder struct{ myInt; MyInt }
 )
 ```
-<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:45-47, 49 -->
+<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:47-51 -->
 ```csharp
 internal partial struct embeddedLocalTypes_holder /*dyn*/ {
     /*embed*/ internal embeddedLocalTypes_myInt myInt;

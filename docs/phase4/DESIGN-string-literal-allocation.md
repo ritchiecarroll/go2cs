@@ -538,3 +538,28 @@ generated package_init.cs files that only hoisted fields had needed (initOrderOp
 `retireStalePackageInitFile`). The two linux misses, EnvironBlockWalk and LocalTimeZone, are windows-only
 fixtures, measured by the windows regeneration. Interceptors, which would remove the cache lookup, are
 later work and not part of this amendment.
+
+## 10. Dated amendment, 2026-10-19 (C2, owner ruling 2026-10-17, part 2) -- `any` slots go plain, boxed by interceptors
+
+Outside the standard library, a literal in an `any` slot of a call go2cs-gen can intercept now renders bare too
+(`fmt.Println("hello")`). go2cs-gen's `LiteralInterceptorGenerator` emits, per source file, interceptors that write a
+cached, pre-boxed `@string` into the slot and forward, so the call allocates nothing and the callee never sees a
+`System.String`. A call the generator cannot intercept is `GO2CS0005`, and an overload that captured the literal is
+`GO2CS0006`. `GO2CS0004` accepts a boxed literal only when its call is intercepted. Every build route admits
+`go2cs.Interceptors` and raises a go2cs-gen load failure (`CS8032`, `CS8034`, `CS8784`, `CS8785`, `CS9057`) to an
+error, and `go.lib.targets` refuses a compiler below Roslyn 4.14 (`GO2CS3001`). The user-facing rules are in
+strings.md, *A literal in an `any` slot is a plain C# literal too*.
+
+**The boundary is generator visibility.** Every source generator reads the same input compilation, so the interceptor
+generator cannot see what go2cs-gen's other generators add. The first full go2cs.slnx build at the seat measured both
+consequences:
+- A call whose OTHER argument uses a generated member does not bind for it. DefinedArrayChainSlice's
+  `fmt.Println(..., a.Value[1])` names TypeGenerator's `Value`. The generator resolves that call from its one-member
+  method group.
+- A call whose RECEIVER or bound overload is generated (RecvGenerator's `ж<T>` forwarders) cannot be resolved at all.
+  That was 5 GO2CS0004 sites, all fail-closed. The converter keeps the pre-boxed field there.
+
+**Measured at the merge c2b3bd0bc0 (linux, base = hop tip 66d41328b5).** The CNR moved 404 `.cs`, 906 `.csproj` (the
+template block) and 372 `package_info.cs` (position maps only), against a revised prediction of 402 / 904 / 372. The +2
+are the two PointerConversion fixtures new at the tip. The base showed 15 files of pre-existing linux drift,
+subtracted by name. The go2cs.slnx Debug build had 0 errors and 0 GO2CS0004/0005/0006 sites.

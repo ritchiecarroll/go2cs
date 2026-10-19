@@ -62,9 +62,6 @@ internal static void swapEmitter(ж<logger> Ꮡl, bool swap) {
     emit("spread %d %d"u8, rest.ꓸꓸꓸ);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nilFuncValueˢ = (@string)"nil func value"u8;
-
 internal static void Main() {
     apply(gather);
 
@@ -76,7 +73,7 @@ internal static void Main() {
     Funcꓸꓸꓸ<@string, nint, @string> f = default!;
 
     if (f == default!) {
-        fmt.Println(nilFuncValueˢ);
+        fmt.Println("nil func value");
     }
 
     f = gather;

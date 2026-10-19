@@ -8,9 +8,6 @@ partial struct node {
     internal @string name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object describeˢ = (@string)"describe:"u8;
-
 internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chain) {
     @string describe() => Ꮡc.Value.name;
 
@@ -21,7 +18,7 @@ internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chai
         toCheck = append(toCheck, cΔ1);
     }
 
-    fmt.Println(describeˢ, describe());
+    fmt.Println("describe:", describe());
     return toCheck;
 }
 
@@ -33,22 +30,17 @@ internal static ж<node> firstOr(this ж<node> Ꮡc, slice<ж<node>> chain) {
     return Ꮡc;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object gotˢ = (@string)"got:"u8;
-private static readonly object firstˢ = (@string)"first:"u8;
-private static readonly object emptyˢ = (@string)"empty:"u8;
-
 internal static void Main() {
     var root = Ꮡ(new node(name: "root"));
     var a = Ꮡ(new node(name: "a"));
     var b = Ꮡ(new node(name: "b"));
 
     foreach (var (_, n) in root.collect(new ж<node>[]{a, b}.slice())) {
-        fmt.Println(gotˢ, (~n).name);
+        fmt.Println("got:", (~n).name);
     }
 
-    fmt.Println(firstˢ, (~root.firstOr(new ж<node>[]{a, b}.slice())).name);
-    fmt.Println(emptyˢ, (~root.firstOr(default!)).name);
+    fmt.Println("first:", (~root.firstOr(new ж<node>[]{a, b}.slice())).name);
+    fmt.Println("empty:", (~root.firstOr(default!)).name);
 }
 
 } // end main_package

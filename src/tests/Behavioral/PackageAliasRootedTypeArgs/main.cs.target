@@ -37,7 +37,7 @@ partial struct Header {
 }
 
 public static @string String(this Header h) {
-    return fmt.Sprint(h.Name, (@string)"/"u8, h.Size);
+    return fmt.Sprint(h.Name, "/", h.Size);
 }
 
 partial interface Stringish {
@@ -60,32 +60,6 @@ internal static nint Zed(this zed z) {
     return z.v;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object fn0Ranˢ = (@string)"fn0 ran"u8;
-private static readonly object namesˢ = (@string)"names:"u8;
-private static readonly object sizesˢ = (@string)"sizes:"u8;
-private static readonly object gridˢ = (@string)"grid:"u8;
-private static readonly object errsˢ = (@string)"errs:"u8;
-private static readonly object cplxˢ = (@string)"cplx:"u8;
-private static readonly object cplx2ˢ = (@string)"cplx2:"u8;
-private static readonly object chansˢ = (@string)"chans:"u8;
-private static readonly object arrˢ = (@string)"arr:"u8;
-private static readonly object hdrsˢ = (@string)"hdrs:"u8;
-private static readonly object rdrsˢ = (@string)"rdrs:"u8;
-private static readonly object ptrsˢ = (@string)"ptrs:"u8;
-private static readonly object fn2ˢ = (@string)"fn2:"u8;
-private static readonly object nestedˢ = (@string)"nested:"u8;
-private static readonly object hmapˢ = (@string)"hmap:"u8;
-private static readonly object u8sˢ = (@string)"u8s:"u8;
-private static readonly object ifsˢ = (@string)"ifs:"u8;
-private static readonly object directˢ = (@string)"direct:"u8;
-private static readonly object aliasOfAliasˢ = (@string)"aliasOfAlias:"u8;
-private static readonly object anonˢ = (@string)"anon:"u8;
-private static readonly object ifaceˢ = (@string)"iface:"u8;
-private static readonly object anonIˢ = (@string)"anonI:"u8;
-private static readonly object sendsˢ = (@string)"sends:"u8;
-private static readonly object recvsˢ = (@string)"recvs:"u8;
-
 internal static void Main() {
     names a = new @string[]{"x", "y"}.slice();
     sizes b = new sizes{["k"] = 7};
@@ -101,7 +75,7 @@ internal static void Main() {
     fn k = (@string sΔ1) => len(sΔ1);
     fn2 k2 = (Header x) => (x.Name, default!);
     fn0 k0 = () => {
-        fmt.Println(fn0Ranˢ);
+        fmt.Println("fn0 ran");
     };
     nested l = new nested{["z"] = new Header[]{new(Name: "q", Size: 2)}.slice()};
     hmap m = new hmap{["z"] = new(Name: "hm", Size: 3)};
@@ -125,13 +99,13 @@ internal static void Main() {
     k0();
     var (name, err) = k2(new Header(Name: "k2", Size: 14));
 
-    fmt.Println(namesˢ, a, sizesˢ, b, gridˢ, c, errsˢ, d);
-    fmt.Println(cplxˢ, e, cplx2ˢ, e2, chansˢ, ᐸꟷ(f), arrˢ, g);
-    fmt.Println(hdrsˢ, h, rdrsˢ, i, ptrsˢ, j, (@string)"fn:"u8, k("abcd"));
-    fmt.Println(fn2ˢ, name, err, nestedˢ, l, hmapˢ, m);
-    fmt.Println(u8sˢ, n, ifsˢ, o, directˢ, p, aliasOfAliasˢ, q);
-    fmt.Println(anonˢ, r, ifaceˢ, s, anonIˢ, t.Zed());
-    fmt.Println(sendsˢ, ᐸꟷ(sendCh), recvsˢ, ᐸꟷ(recv));
+    fmt.Println("names:", a, "sizes:", b, "grid:", c, "errs:", d);
+    fmt.Println("cplx:", e, "cplx2:", e2, "chans:", ᐸꟷ(f), "arr:", g);
+    fmt.Println("hdrs:", h, "rdrs:", i, "ptrs:", j, "fn:", k("abcd"));
+    fmt.Println("fn2:", name, err, "nested:", l, "hmap:", m);
+    fmt.Println("u8s:", n, "ifs:", o, "direct:", p, "aliasOfAlias:", q);
+    fmt.Println("anon:", r, "iface:", s, "anonI:", t.Zed());
+    fmt.Println("sends:", ᐸꟷ(sendCh), "recvs:", ᐸꟷ(recv));
 }
 
 } // end main_package

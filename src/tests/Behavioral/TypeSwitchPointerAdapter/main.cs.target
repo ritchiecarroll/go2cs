@@ -80,12 +80,6 @@ internal static void grow(shape v) {
     }}
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object anyHoldsCircleˢ = (@string)"any holds *circle"u8;
-private static readonly object anyMissˢ = (@string)"any miss"u8;
-private static readonly object shapeHoldsSquareˢ = (@string)"shape holds *square"u8;
-private static readonly object shapeMissˢ = (@string)"shape miss"u8;
-
 internal static void Main() {
     var c = Ꮡ(new circle(r: 1));
     var q = Ꮡ(new square(s: 2));
@@ -107,22 +101,22 @@ internal static void Main() {
     any x = c.OrTypedNil();
     switch (x.type()) {
     case ж<circle>: {
-        fmt.Println(anyHoldsCircleˢ);
+        fmt.Println("any holds *circle");
         break;
     }
     default: {
-        fmt.Println(anyMissˢ);
+        fmt.Println("any miss");
         break;
     }}
 
     shape v = new squareжshape(q);
     switch (v.type()) {
     case ж<square>: {
-        fmt.Println(shapeHoldsSquareˢ);
+        fmt.Println("shape holds *square");
         break;
     }
     default: {
-        fmt.Println(shapeMissˢ);
+        fmt.Println("shape miss");
         break;
     }}
 

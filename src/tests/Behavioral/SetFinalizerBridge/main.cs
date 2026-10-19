@@ -67,13 +67,9 @@ internal static @string cleared() {
     return "DID NOT RUN";
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object registeredFinalizerˢ = (@string)"registered finalizer:"u8;
-private static readonly object clearedFinalizerˢ = (@string)"cleared finalizer:"u8;
-
 internal static void Main() {
-    fmt.Println(registeredFinalizerˢ, registered());
-    fmt.Println(clearedFinalizerˢ, cleared());
+    fmt.Println("registered finalizer:", registered());
+    fmt.Println("cleared finalizer:", cleared());
 }
 
 } // end main_package

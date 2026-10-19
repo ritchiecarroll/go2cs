@@ -41,9 +41,6 @@ internal static void @catch(@string what, Action f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object stillRunningˢ = (@string)"still running:"u8;
-
 internal static void Main() {
     ж<node> p = default!;
     var pʗ1 = p;
@@ -105,7 +102,7 @@ internal static void Main() {
         fmt.Println(pʗ6 == nil, bʗ2.p == nil, nodesʗ2[0] == nil);
     });
 
-    fmt.Println(stillRunningˢ, real.label());
+    fmt.Println("still running:", real.label());
 }
 
 } // end main_package

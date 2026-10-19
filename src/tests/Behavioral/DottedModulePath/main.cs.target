@@ -12,10 +12,6 @@ using Δio = io_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object encodeˢ = (@string)"encode:"u8;
-private static readonly object decodeˢ = (@string)"decode:"u8;
-
 internal static void Main() {
     fmt.Println(reflect.TypeOf(new dotted.T(nil)).PkgPath());
     fmt.Println(reflect.TypeOf(Ꮡ(new dotted.T(nil))).Elem().String());
@@ -32,7 +28,7 @@ internal static void Main() {
 
     {
         var err = gob.NewEncoder(new bytes_BufferжWriter(Ꮡbuf)).Encode(Ꮡin); if (err != default!) {
-            fmt.Println(encodeˢ, err);
+            fmt.Println("encode:", err);
             return;
         }
     }
@@ -42,7 +38,7 @@ internal static void Main() {
     ref var @out = ref heap<any>(out var Ꮡout);
     {
         var err = gob.NewDecoder(new bytes_BufferжReader(Ꮡbuf)).Decode(Ꮡout); if (err != default!) {
-            fmt.Println(decodeˢ, err);
+            fmt.Println("decode:", err);
             return;
         }
     }

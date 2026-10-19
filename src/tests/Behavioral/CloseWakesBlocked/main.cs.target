@@ -9,17 +9,13 @@ internal static void expectPanic(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(name, (@string)"->"u8, recover());
+            fmt.Println(name, "->", recover());
         }, ref ᒐ);
         f();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sentWrongˢ = (@string)"sent (wrong)"u8;
-private static readonly object defaultWrongˢ = (@string)"default (wrong)"u8;
 
 internal static partial void Main() {
     var ch = new channel<nint>(0);
@@ -138,11 +134,11 @@ internal static partial void Main() {
         var selᴛ5 = sd.ᐸꟷ(1, ꓸꓸꓸ);
         switch (trySelect(selᴛ5)) {
         case 0: {
-            fmt.Println(sentWrongˢ);
+            fmt.Println("sent (wrong)");
             break;
         }
         default: {
-            fmt.Println(defaultWrongˢ);
+            fmt.Println("default (wrong)");
             break;
         }}
     });

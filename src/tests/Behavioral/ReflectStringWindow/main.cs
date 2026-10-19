@@ -16,14 +16,9 @@ internal static void show(@string label, reflectꓸValue v) {
     fmt.Printf("%s: kind=%v type=%v len=%d val=%v\n"u8, label, v.Kind(), v.Type(), v.Len(), v.Interface());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object hLloˢ = (@string)"héllo"u8;
-private static readonly object abcdefˢ = (@string)"abcdef"u8;
-private static readonly object panicsˢ = (@string)"panics:"u8;
-
 internal static void Main() {
     ref var s = ref heap<reflectꓸValue>(out var Ꮡs);
-    s = reflect.ValueOf(hLloˢ);
+    s = reflect.ValueOf("héllo");
     for (nint i = 0; i < s.Len(); i++) {
         var e = s.Index(i);
         fmt.Printf("index %d: kind=%v type=%v val=%v canAddr=%v canSet=%v\n"u8,
@@ -39,7 +34,7 @@ internal static void Main() {
     show("named [6:6]", sv.Slice(6, 6));
 
     ref var plain = ref heap<reflectꓸValue>(out var Ꮡplain);
-    plain = reflect.ValueOf(abcdefˢ);
+    plain = reflect.ValueOf("abcdef");
     show("plain [1:4]", plain.Slice(1, 4));
 
     var full = new nint[]{0, 1, 2, 3, 4, 5, 6, 7}.slice();
@@ -68,7 +63,7 @@ internal static void Main() {
     var plainʗ2 = plain;
 
         var rfʗ1 = rf;
-    fmt.Println(panicsˢ, probe(() => {
+    fmt.Println("panics:", probe(() => {
         sʗ1.Index(99);
     }), probe(() => {
         plainʗ1.Slice(4, 2);

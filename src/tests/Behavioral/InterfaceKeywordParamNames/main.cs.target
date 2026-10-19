@@ -40,9 +40,9 @@ internal static @string Guard(this frozen f, @string @lock, @string @base, nint 
 }
 
 internal static void exercise(swapper s) {
-    fmt.Println(s.CompareAndSwap((@string)"k"u8, (nint)(2), (nint)(3)));
-    fmt.Println(s.CompareAndSwap((@string)"k"u8, (nint)(1), (nint)(3)));
-    fmt.Println(s.CompareAndSwap((@string)"k"u8, (nint)(3), (nint)(3)));
+    fmt.Println(s.CompareAndSwap("k", (nint)(2), (nint)(3)));
+    fmt.Println(s.CompareAndSwap("k", (nint)(1), (nint)(3)));
+    fmt.Println(s.CompareAndSwap("k", (nint)(3), (nint)(3)));
     fmt.Println(s.Guard("L", "B", 7));
 }
 

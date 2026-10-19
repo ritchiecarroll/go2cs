@@ -37,15 +37,11 @@ internal static (nint, @string) bump(Tally tʗp, nint n) {
     return (t.total, t.log);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bumpedˢ = (@string)"bumped:"u8;
-private static readonly object callerCopyUntouchedˢ = (@string)"caller copy untouched:"u8;
-
 internal static void Main() {
     var t = new Tally(total: 5, log: "start");
     var (total, log) = bump(t, 3);
-    fmt.Println(bumpedˢ, total, log);
-    fmt.Println(callerCopyUntouchedˢ, t.total, t.log);
+    fmt.Println("bumped:", total, log);
+    fmt.Println("caller copy untouched:", t.total, t.log);
 }
 
 } // end main_package

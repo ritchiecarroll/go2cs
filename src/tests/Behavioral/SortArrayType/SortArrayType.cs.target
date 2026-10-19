@@ -149,9 +149,6 @@ public static (nint E2, @string p) Testing() {
     return (E2, p);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object consumedˢ = (@string)"consumed:"u8;
-
 internal static void Main() {
     var agesDemo = new PeopleByAge(new Person[]{new("Zed", 30, 11.5F), new("Amy", 25, 7.0F)}.slice());
     agesDemo.sort();
@@ -218,7 +215,7 @@ internal static void Main() {
     ref var crew = ref heap<Roster>(out var Ꮡcrew);
     crew = new Roster(new Person[]{new(Name: "Ann", Age: 30), new(Name: "Bob", Age: 40)}.slice());
     consumeOne(ref (Ꮡcrew.of(Roster.Ꮡm_value)).DerefOrNull());
-    fmt.Println(consumedˢ, len(crew), crew[0].Name);
+    fmt.Println("consumed:", len(crew), crew[0].Name);
 
     x = """
 

@@ -11,11 +11,6 @@ internal static void show(@string label, any v) {
     fmt.Printf("%-16s %%T=%-18T String()=%s\n"u8, label, v, reflect.TypeOf(v).String());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object ifaceUnexportedˢ = (@string)"iface unexported:"u8;
-private static readonly object ifaceMixedˢ = (@string)"iface mixed     :"u8;
-private static readonly object ifaceEmptyˢ = (@string)"iface empty     :"u8;
-
 internal partial interface main_unexportedOnly /*dyn*/ {
     @string a(nint _);
 }
@@ -37,9 +32,9 @@ internal static void Main() {
 
     ref var unexportedOnly = ref heap<main_unexportedOnly>(out var ᏑunexportedOnly);
     ref var mixedExportedness = ref heap<main_mixedExportedness>(out var ᏑmixedExportedness);
-    fmt.Println(ifaceUnexportedˢ, reflect.TypeOf(ᏑunexportedOnly).Elem().String());
-    fmt.Println(ifaceMixedˢ, reflect.TypeOf(ᏑmixedExportedness).Elem().String());
-    fmt.Println(ifaceEmptyˢ, reflect.TypeOf(@new<any>()).Elem().String());
+    fmt.Println("iface unexported:", reflect.TypeOf(ᏑunexportedOnly).Elem().String());
+    fmt.Println("iface mixed     :", reflect.TypeOf(ᏑmixedExportedness).Elem().String());
+    fmt.Println("iface empty     :", reflect.TypeOf(@new<any>()).Elem().String());
 
     fmt.Printf("slice-of-array Elem().String()=%s Len()=%d\n"u8,
         reflect.TypeOf(GoReflect.WithElemDims(new array<uint8>[]{new uint8[]{}.array(6)}.slice(), 6)).Elem().String(),

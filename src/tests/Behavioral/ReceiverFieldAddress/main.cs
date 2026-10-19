@@ -27,19 +27,13 @@ public static int32 Get(this ref Counter c) {
     return c.n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object afterSetˢ = (@string)"after Set:"u8;
-private static readonly object add10ˢ = (@string)"Add 10:"u8;
-private static readonly object add5ˢ = (@string)"Add 5:"u8;
-private static readonly object finalˢ = (@string)"final:"u8;
-
 internal static void Main() {
     ref var c = ref heap(new Counter(), out var Ꮡc);
     Ꮡc.Set(100);
-    fmt.Println(afterSetˢ, c.Get());
-    fmt.Println(add10ˢ, Ꮡc.Add(10));
-    fmt.Println(add5ˢ, Ꮡc.Add(5));
-    fmt.Println(finalˢ, c.Get());
+    fmt.Println("after Set:", c.Get());
+    fmt.Println("Add 10:", Ꮡc.Add(10));
+    fmt.Println("Add 5:", Ꮡc.Add(5));
+    fmt.Println("final:", c.Get());
 }
 
 } // end main_package

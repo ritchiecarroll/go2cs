@@ -122,7 +122,9 @@ public class FieldAccessGeneratorTests
         return MetadataReference.CreateFromImage(image.ToArray());
     }
 
-    private const string Record = "global::go.main_package.record";
+    // Roslyn 4.14 (go2cs-gen's floor) displays a type named `record`, a contextual keyword, escaped; 4.10 printed it
+    // bare. Both spellings compile.
+    private const string Record = "global::go.main_package.@record";
 
     [TestMethod]
     public void ARecordedStructGetsARefPropertyPerField()

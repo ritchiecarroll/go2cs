@@ -31,7 +31,7 @@ internal static void Main() {
         reflect.ValueOf(Ꮡdst).Elem().Set(f);
 
         var m = new map<@string, any>{};
-        reflect.ValueOf(m).SetMapIndex(reflect.ValueOf((@string)"k"u8), f);
+        reflect.ValueOf(m).SetMapIndex(reflect.ValueOf("k"), f);
 
         var s = reflect.Append(reflect.ValueOf(new any[]{}.slice()), f).Interface()._<slice<any>>();
 

@@ -23,24 +23,16 @@ internal static partial runtime.Frame other() {
     return capture();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object functionˢ = (@string)"function:"u8;
-private static readonly object funcNonNilˢ = (@string)"func non-nil:"u8;
-private static readonly object funcNameMatchesˢ = (@string)"func name matches:"u8;
-private static readonly object sameFunctionTwoCallSitesˢ = (@string)"same function, two call sites, same *Func:"u8;
-private static readonly object differentFunctionˢ = (@string)"different function, different *Func:"u8;
-private static readonly object otherSNameˢ = (@string)"other's name:"u8;
-
 internal static void Main() {
     var (first, second) = twoSites();
     var third = other();
 
-    fmt.Println(functionˢ, first.Function);
-    fmt.Println(funcNonNilˢ, first.Func != nil);
-    fmt.Println(funcNameMatchesˢ, first.Func != nil && first.Func.Name() == first.Function);
-    fmt.Println(sameFunctionTwoCallSitesˢ, first.Func != nil && first.Func == second.Func);
-    fmt.Println(differentFunctionˢ, third.Func != nil && third.Func != first.Func);
-    fmt.Println(otherSNameˢ, third.Func != nil && third.Func.Name() == "main.other"u8);
+    fmt.Println("function:", first.Function);
+    fmt.Println("func non-nil:", first.Func != nil);
+    fmt.Println("func name matches:", first.Func != nil && first.Func.Name() == first.Function);
+    fmt.Println("same function, two call sites, same *Func:", first.Func != nil && first.Func == second.Func);
+    fmt.Println("different function, different *Func:", third.Func != nil && third.Func != first.Func);
+    fmt.Println("other's name:", third.Func != nil && third.Func.Name() == "main.other"u8);
 }
 
 } // end main_package

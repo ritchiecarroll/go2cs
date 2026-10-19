@@ -131,10 +131,6 @@ internal static void report(@string label, ref sink s, int64 n, error err) {
     fmt.Println(label, n, err, s.mode, ((@string)s.bytes));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object directˢ = (@string)"direct"u8;
-private static readonly object missˢ = (@string)"miss"u8;
-
 internal static void Main() {
     ref var bufs = ref heap<Buffers>(out var Ꮡbufs);
     bufs = new Buffers(new slice<byte>[]{slice<byte>("go"u8), slice<byte>("2"u8), slice<byte>("cs"u8)}.slice());
@@ -165,9 +161,9 @@ internal static void Main() {
             ref var more = ref heap<Buffers>(out var Ꮡmore);
             more = new Buffers(new slice<byte>[]{slice<byte>("!"u8)}.slice());
             (n, _) = wv.writeBuffers(Ꮡmore);
-            fmt.Println(directˢ, n, ((@string)(~tcpSink).bytes));
+            fmt.Println("direct", n, ((@string)(~tcpSink).bytes));
         } else {
-            fmt.Println(directˢ, missˢ);
+            fmt.Println("direct", "miss");
         }
     }
 }

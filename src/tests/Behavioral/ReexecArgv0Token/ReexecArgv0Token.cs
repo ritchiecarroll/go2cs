@@ -11,9 +11,6 @@ partial class main_package {
 
 internal static readonly @string token = "argv0-token-7f3a"u8;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object osExecutableˢ = (@string)"os.Executable:"u8;
-
 internal static void Main() {
     var (depth, _) = strconv.Atoi(Δos.Getenv("ARGV0_DEPTH"));
     if (depth > 3) {
@@ -29,7 +26,7 @@ internal static void Main() {
     }
     var (exe, err) = Δos.Executable();
     if (err != default!) {
-        fmt.Println(osExecutableˢ, err);
+        fmt.Println("os.Executable:", err);
         Δos.Exit(1);
     }
     var cmd = exec.Command(exe);

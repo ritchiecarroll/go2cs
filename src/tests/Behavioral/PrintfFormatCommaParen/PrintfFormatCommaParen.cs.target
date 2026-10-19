@@ -12,9 +12,6 @@ internal static @string String(this stringer b) {
     return b.s;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object plChanOfBothDirArrayOf3ˢ = (@string)"pl ChanOf(BothDir, ArrayOf(3,int)) String() Elem().Len()"u8;
-
 internal static void Main() {
     @string name = "x";
     nint n = 3;
@@ -62,7 +59,7 @@ internal static void Main() {
     fmt.Println(fmt.Sprintf("sp2 f(a,b) s=%s d=%d"u8,
         name, n));
 
-    fmt.Println(plChanOfBothDirArrayOf3ˢ);
+    fmt.Println("pl ChanOf(BothDir, ArrayOf(3,int)) String() Elem().Len()");
 }
 
 } // end main_package

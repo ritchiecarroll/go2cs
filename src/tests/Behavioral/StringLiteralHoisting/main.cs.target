@@ -46,9 +46,6 @@ internal static nint mutableBytes() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string namedStringConversionˢ = "named string conversion"u8;
-private static readonly object preBoxedAnyTargetˢ = (@string)"pre boxed any target"u8;
-private static readonly object mixedUseLiteralˢ = (@string)"mixed use literal"u8;
-private static readonly object formatTrailingArgumentˢ = (@string)"format trailing argument"u8;
 
 internal static void Main() {
     fmt.Println(kind(0), kind(1));
@@ -69,15 +66,15 @@ internal static void Main() {
     counts["standalone map key"] += 2;
     fmt.Println(counts["standalone map key"]);
 
-    fmt.Println(preBoxedAnyTargetˢ);
+    fmt.Println("pre boxed any target");
 
-    fmt.Println(echo("mixed use literal"), mixedUseLiteralˢ);
+    fmt.Println(echo("mixed use literal"), "mixed use literal");
 
     fmt.Println(isSentinel("comparison operand literal"), isSentinel("nope"));
     fmt.Println(withSuffix("tail"));
     fmt.Println(mutableBytes());
 
-    fmt.Printf("format position literal %s\n"u8, formatTrailingArgumentˢ);
+    fmt.Printf("format position literal %s\n"u8, "format trailing argument");
 
     fmt.Println(echo("OK"), echo("yes"), echo("true"));
 

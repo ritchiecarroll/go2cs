@@ -12,17 +12,13 @@ internal static ж<Element> push(any v) {
     return Ꮡ(new Element(Value: v));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bugEValue1ˢ = (@string)"BUG: e.Value != 1"u8;
-private static readonly object okEValue1ˢ = (@string)"ok: e.Value == 1"u8;
-
 internal static void Main() {
     var e = push((nint)(1));
 
     if (!AreEqual((~e).Value, (nint)(1))){
-        fmt.Println(bugEValue1ˢ);
+        fmt.Println("BUG: e.Value != 1");
     } else {
-        fmt.Println(okEValue1ˢ);
+        fmt.Println("ok: e.Value == 1");
     }
 
     fmt.Println(AreEqual((~e).Value, (nint)(1)));

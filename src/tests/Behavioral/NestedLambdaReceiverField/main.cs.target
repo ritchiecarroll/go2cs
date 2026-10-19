@@ -20,11 +20,8 @@ partial struct dep {
     internal @string label;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object noteˢ = (@string)"note:"u8;
-
 internal static void note(this ref dep d, any x) {
-    fmt.Println(noteˢ, d.label, x != default!);
+    fmt.Println("note:", d.label, x != default!);
 }
 
 partial struct stmt {
@@ -46,18 +43,15 @@ internal static void exec(this ж<stmt> Ꮡs) {
             Ꮡs.Value.d.note(Ꮡs.OrTypedNil());
         });
         if (Ꮡs.Value.cg != default!) {
-            fmt.Println((@string)"cg:"u8, Ꮡs.Value.cg.tag(), Ꮡs.Value.id);
+            fmt.Println("cg:", Ꮡs.Value.cg.tag(), Ꮡs.Value.id);
         }
     });
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void Main() {
     var s = Ꮡ(new stmt(d: Ꮡ(new dep(label: "d1")), cg: new connGrabжgrabber(Ꮡ(new connGrab(name: "g1"))), id: 7));
     s.exec();
-    fmt.Println(doneˢ);
+    fmt.Println("done");
 }
 
 } // end main_package

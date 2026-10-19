@@ -42,13 +42,10 @@ internal static @string readName(ж<node> Ꮡp) {
     return p.name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sideEffectRanParamShapeˢ = (@string)"  side effect ran (param shape)"u8;
-
 internal static @string announce(ж<node> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    fmt.Println(sideEffectRanParamShapeˢ);
+    fmt.Println("  side effect ran (param shape)");
     _ = checkArg(Ꮡp, "announce");
     return p.name;
 }
@@ -108,20 +105,10 @@ internal static void @try(@string label, Action fn) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nilArgumentDelegatedˢ = (@string)"== 1. nil argument, DELEGATED guard: must not panic =="u8;
-private static readonly object nilArgumentUnconditionalˢ = (@string)"== 2. nil argument, UNCONDITIONAL deref: must panic =="u8;
-private static readonly object nilArgumentSideEffectˢ = (@string)"== 3. nil argument, side effect BEFORE the deref: effect then panic =="u8;
-private static readonly object nilTerminatedWalkˢ = (@string)"== 4. nil-terminated walk: repointing to the terminator must not panic =="u8;
-private static readonly object errorParameterHoldingNilˢ = (@string)"== 5. *error parameter: holding nil is not a dereference =="u8;
-private static readonly object normalizationRepointedˢ = (@string)"== 6. normalization: repointed before any read =="u8;
-private static readonly object nonNilArgumentsˢ = (@string)"== 7. non-nil arguments: everything unchanged =="u8;
-private static readonly object aWriteThroughAPointerˢ = (@string)"== 8. a write through a pointer parameter still lands =="u8;
-
 internal static void Main() {
     ж<node> nilNode = default!;
 
-    fmt.Println(nilArgumentDelegatedˢ);
+    fmt.Println("== 1. nil argument, DELEGATED guard: must not panic ==");
     var nilNodeʗ1 = nilNode;
     @try("checkArg(nil)", () => {
         var err = checkArg(nilNodeʗ1, "x");
@@ -138,21 +125,21 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(nilArgumentUnconditionalˢ);
+    fmt.Println("== 2. nil argument, UNCONDITIONAL deref: must panic ==");
     var nilNodeʗ4 = nilNode;
     @try("readName(nil)", () => {
         _ = readName(nilNodeʗ4);
     });
 
     fmt.Println();
-    fmt.Println(nilArgumentSideEffectˢ);
+    fmt.Println("== 3. nil argument, side effect BEFORE the deref: effect then panic ==");
     var nilNodeʗ5 = nilNode;
     @try("announce(nil)", () => {
         _ = announce(nilNodeʗ5);
     });
 
     fmt.Println();
-    fmt.Println(nilTerminatedWalkˢ);
+    fmt.Println("== 4. nil-terminated walk: repointing to the terminator must not panic ==");
     var chain = Ꮡ(new node(name: "a", n: 1, next: Ꮡ(new node(name: "b", n: 2, next: Ꮡ(new node(name: "c", n: 3))))));
     var chainʗ1 = chain;
     @try("walkLen(chain)", () => {
@@ -164,7 +151,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(errorParameterHoldingNilˢ);
+    fmt.Println("== 5. *error parameter: holding nil is not a dereference ==");
     ref var held = ref heap<error>(out var Ꮡheld);
     @try("setErr(&held)", () => {
         fmt.Printf("  %s\n"u8, setErr(Ꮡheld, errNilArg));
@@ -174,7 +161,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(normalizationRepointedˢ);
+    fmt.Println("== 6. normalization: repointed before any read ==");
     var nilNodeʗ7 = nilNode;
     @try("normalize(nil)", () => {
         fmt.Printf("  normalize -> %s\n"u8, normalize(nilNodeʗ7));
@@ -185,7 +172,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(nonNilArgumentsˢ);
+    fmt.Println("== 7. non-nil arguments: everything unchanged ==");
     var chainʗ3 = chain;
     @try("checkArg(chain)", () => {
         fmt.Printf("  checkArg -> %v\n"u8, checkArg(chainʗ3, "x"));
@@ -209,7 +196,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(aWriteThroughAPointerˢ);
+    fmt.Println("== 8. a write through a pointer parameter still lands ==");
     rename(ref (chain).DerefOrNull(), "renamed");
     fmt.Printf("  chain.name -> %s\n"u8, (~chain).name);
 }

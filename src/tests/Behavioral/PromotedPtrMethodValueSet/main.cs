@@ -95,57 +95,48 @@ internal static void describe(@string label, any v) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object samePInnerAfterˢ = (@string)"SameP inner after:"u8;
-private static readonly object sameVInnerAfterˢ = (@string)"SameV inner after:"u8;
-private static readonly object outerVPInnerAfterˢ = (@string)"OuterVP inner after:"u8;
-private static readonly object outerPVInnerAfterˢ = (@string)"OuterPV inner after:"u8;
-private static readonly object outerVVInnerAfterˢ = (@string)"OuterVV inner after:"u8;
-private static readonly object bufioReadWriterValueHasˢ = (@string)"bufio.ReadWriter value has ReadString:"u8;
-private static readonly object bufioReadWriterValueˢ = (@string)"bufio.ReadWriter value asserts io.Reader:"u8;
-
 internal static void Main() {
     ref var p = ref heap<SameP>(out var Ꮡp);
     p = new SameP(Ꮡ(new Inner(10)));
     describe("SameP", p);
     describe("*SameP", Ꮡp);
-    fmt.Println(samePInnerAfterˢ, p.n);
+    fmt.Println("SameP inner after:", p.n);
 
     ref var v = ref heap<SameV>(out var Ꮡv);
     v = new SameV(new Inner(20));
     describe("SameV", v);
     describe("*SameV", Ꮡv);
-    fmt.Println(sameVInnerAfterˢ, v.n);
+    fmt.Println("SameV inner after:", v.n);
 
     ref var vp = ref heap<OuterVP>(out var Ꮡvp);
     vp = new OuterVP(new MidP(Ꮡ(new Inner(30))));
     describe("OuterVP", vp);
     describe("*OuterVP", Ꮡvp);
-    fmt.Println(outerVPInnerAfterˢ, vp.n);
+    fmt.Println("OuterVP inner after:", vp.n);
 
     ref var pv = ref heap<OuterPV>(out var Ꮡpv);
     pv = new OuterPV(Ꮡ(new MidV(new Inner(40))));
     describe("OuterPV", pv);
     describe("*OuterPV", Ꮡpv);
-    fmt.Println(outerPVInnerAfterˢ, pv.n);
+    fmt.Println("OuterPV inner after:", pv.n);
 
     ref var vv = ref heap<OuterVV>(out var Ꮡvv);
     vv = new OuterVV(new MidV(new Inner(50)));
     describe("OuterVV", vv);
     describe("*OuterVV", Ꮡvv);
-    fmt.Println(outerVVInnerAfterˢ, vv.n);
+    fmt.Println("OuterVV inner after:", vv.n);
 
     var rw = new bufio.ReadWriter(Reader: bufio.NewReader(new strings_ReaderжReader(strings.NewReader("first\nsecond\n"))));
     var rt = reflect.TypeOf(rw);
     var (_, hasReadString) = rt.MethodByName("ReadString");
-    fmt.Println(bufioReadWriterValueHasˢ, hasReadString);
+    fmt.Println("bufio.ReadWriter value has ReadString:", hasReadString);
 
     var @out = reflect.ValueOf(rw).MethodByName("ReadString").Call(new reflectꓸValue[]{reflect.ValueOf((byte)(rune)'\n')}.slice());
     fmt.Printf("ReadString via reflect = %q\n"u8, @out[0].String());
 
     any x = rw;
     var (r, ok) = x._<Δio.Reader>(ᐧ);
-    fmt.Println(bufioReadWriterValueˢ, ok);
+    fmt.Println("bufio.ReadWriter value asserts io.Reader:", ok);
 
     if (ok) {
         var buf = new slice<byte>(6);

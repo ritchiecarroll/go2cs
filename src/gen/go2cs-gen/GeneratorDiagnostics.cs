@@ -74,5 +74,27 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    // LiteralInterceptorGenerator's refusal: a bare C# string literal reaches an object slot of a call the generator
+    // cannot intercept, so the callee would see System.String. The converter emits a bare literal in an any slot only
+    // where the call is interceptable; this names any other, with the reason.
+    public static readonly DiagnosticDescriptor LiteralNotIntercepted = new(
+        id: "GO2CS0005",
+        title: "A C# string literal in an any slot cannot be intercepted",
+        messageFormat: "The C# string literal {0} reaches the any slot of '{1}', and the call cannot be intercepted: {2}",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    // LiteralInterceptorGenerator's binding guard: Go has one callee per call, but a C# method group can hold another
+    // member whose parameter captures a bare literal (it prefers go.@string to object), so the call would no longer
+    // reach the Go function's any slot.
+    public static readonly DiagnosticDescriptor LiteralOverloadDrift = new(
+        id: "GO2CS0006",
+        title: "An overload captures a C# string literal meant for an any slot",
+        messageFormat: "The C# string literal {0} binds '{1}', while '{2}' takes it in an any slot; an overload beside the converted callee has captured the call",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }

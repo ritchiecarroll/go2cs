@@ -27,7 +27,10 @@ namespace go2cs;
 /// normalizes one to @string; len(string) counts its UTF-8 bytes).
 /// <list type="bullet">
 /// <item>A1, an object or interface target: the dynamic type would be System.String, which no Go type
-/// switch, assertion or comparison matches.</item>
+/// switch, assertion or comparison matches. The one exception is an invocation LiteralInterceptorGenerator
+/// intercepted (its interceptor, in namespace go2cs.Interceptors, writes a cached Go string into the object
+/// slot): the converter renders an interceptable any-slot argument bare (owner ruling 2026-10-17, part 2). So
+/// when the generator does not run, every such literal is still an error here, never a silent System.String.</item>
 /// <item>A2, a type parameter inferred from the literal: `Echo("x")` makes T = System.String (and
 /// `Pair("k", 1)` a map&lt;string, nint&gt;), which compiles and diverges.</item>
 /// <item>A3, an unmarked System.String parameter where the method group also takes @string at that
@@ -86,6 +89,9 @@ public sealed class StringLiteralBindingAnalyzer : DiagnosticAnalyzer
             if (conversion.Parent is IArgumentOperation { Parameter: { } boxedParameter } && IsMarked(boxedParameter, marker))
                 return;
 
+            if (target.SpecialType == SpecialType.System_Object && IsIntercepted(context, conversion))
+                return;
+
             Report(context, literal, $"'{target.ToDisplayString()}' (its dynamic type would be System.String)");
             return;
         }
@@ -115,6 +121,25 @@ public sealed class StringLiteralBindingAnalyzer : DiagnosticAnalyzer
 
         if (goOverloadExists)
             Report(context, literal, $"the System.String parameter '{parameter.Name}' of '{method.OriginalDefinition.ToDisplayString()}' where an @string overload exists");
+    }
+
+    // Whether the invocation a boxed literal is an argument of (directly, or as an element of a params collection) is
+    // intercepted by a go2cs-gen interceptor.
+    private static bool IsIntercepted(OperationAnalysisContext context, IOperation boxed)
+    {
+        IOperation? current = boxed.Parent;
+
+        while (current is not null and not IInvocationOperation)
+        {
+            if (current is not (IArgumentOperation or ICollectionExpressionOperation or IArrayCreationOperation or IArrayInitializerOperation))
+                return false;
+
+            current = current.Parent;
+        }
+
+        return current is IInvocationOperation { Syntax: InvocationExpressionSyntax invocation } &&
+               context.Operation.SemanticModel?.GetInterceptorMethod(invocation, context.CancellationToken) is { } interceptor &&
+               interceptor.ContainingNamespace?.ToDisplayString() == "go2cs.Interceptors";
     }
 
     private static bool IsNotAValueSlot(SyntaxNode node) =>

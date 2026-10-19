@@ -37,31 +37,24 @@ internal static @string Write(this holder h, @string s) {
     return h.prefix + s;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object readWriterYesˢ = (@string)"ReadWriter: yes"u8;
-private static readonly object readWriterNoˢ = (@string)"ReadWriter: no"u8;
-private static readonly object readerYesˢ = (@string)"Reader: yes"u8;
-private static readonly object readerNoˢ = (@string)"Reader: no"u8;
-private static readonly object numMethodˢ = (@string)"NumMethod:"u8;
-
 internal static void check(@string label, any value) {
     {
         var (rw, ok) = value._<iolike.ReadWriter>(ᐧ); if (ok){
-            fmt.Println(label, readWriterYesˢ, rw.Read(), rw.Write("x"));
+            fmt.Println(label, "ReadWriter: yes", rw.Read(), rw.Write("x"));
         } else {
-            fmt.Println(label, readWriterNoˢ);
+            fmt.Println(label, "ReadWriter: no");
         }
     }
 
     {
         var (r, ok) = value._<iolike.Reader>(ᐧ); if (ok){
-            fmt.Println(label, readerYesˢ, r.Read());
+            fmt.Println(label, "Reader: yes", r.Read());
         } else {
-            fmt.Println(label, readerNoˢ);
+            fmt.Println(label, "Reader: no");
         }
     }
 
-    fmt.Println(label, numMethodˢ, reflect.TypeOf(value).NumMethod());
+    fmt.Println(label, "NumMethod:", reflect.TypeOf(value).NumMethod());
 }
 
 internal static void Main() {
@@ -73,26 +66,21 @@ internal static void Main() {
     checkPointerOnly();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object localDirectˢ = (@string)"local direct:"u8;
-private static readonly object localAssertˢ = (@string)"local assert:"u8;
-private static readonly object localAssertNoˢ = (@string)"local assert: no"u8;
-
 internal partial struct LocalPromotion_inner /*dyn*/ {
     /*embed*/ public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
 }
 
 public static void LocalPromotion() {
     var w = new LocalPromotion_inner(Reader: new iolike.Base(Tag: "local"));
-    fmt.Println(localDirectˢ, w.Reader.Read());
+    fmt.Println("local direct:", w.Reader.Read());
 
     any v = w;
 
     {
         var (r, ok) = v._<iolike.Reader>(ᐧ); if (ok){
-            fmt.Println(localAssertˢ, r.Read());
+            fmt.Println("local assert:", r.Read());
         } else {
-            fmt.Println(localAssertNoˢ);
+            fmt.Println("local assert: no");
         }
     }
 }
@@ -102,23 +90,18 @@ partial struct conflicted {
     /*embed*/ public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object conflictedReaderYesˢ = (@string)"conflicted Reader: yes"u8;
-private static readonly object conflictedReaderNoˢ = (@string)"conflicted Reader: no"u8;
-private static readonly object conflictedNumMethodˢ = (@string)"conflicted NumMethod:"u8;
-
 internal static void checkConflicted() {
     any v = new conflicted(Base: new iolike.Base(Tag: "conf"));
 
     {
         var (_, ok) = v._<iolike.Reader>(ᐧ); if (ok){
-            fmt.Println(conflictedReaderYesˢ);
+            fmt.Println("conflicted Reader: yes");
         } else {
-            fmt.Println(conflictedReaderNoˢ);
+            fmt.Println("conflicted Reader: no");
         }
     }
 
-    fmt.Println(conflictedNumMethodˢ, reflect.TypeOf(v).NumMethod());
+    fmt.Println("conflicted NumMethod:", reflect.TypeOf(v).NumMethod());
 }
 
 partial struct pointerBase {
@@ -142,22 +125,14 @@ internal static @string Write(this ref pointerOnly p, @string s) {
     return "po:"u8 + s;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object pointerOnlyPtrYesˢ = (@string)"pointerOnly ptr: yes"u8;
-private static readonly object pointerOnlyPtrNoˢ = (@string)"pointerOnly ptr: no"u8;
-private static readonly object pointerOnlyValYesˢ = (@string)"pointerOnly val: yes"u8;
-private static readonly object pointerOnlyValNoˢ = (@string)"pointerOnly val: no"u8;
-private static readonly object pointerOnlyNumMethodPtrˢ = (@string)"pointerOnly NumMethod ptr:"u8;
-private static readonly object valˢ = (@string)"val:"u8;
-
 internal static void checkPointerOnly() {
     any ptr = Ꮡ(new pointerOnly(nil));
 
     {
         var (rw, ok) = ptr._<iolike.ReadWriter>(ᐧ); if (ok){
-            fmt.Println(pointerOnlyPtrYesˢ, rw.Write("x"));
+            fmt.Println("pointerOnly ptr: yes", rw.Write("x"));
         } else {
-            fmt.Println(pointerOnlyPtrNoˢ);
+            fmt.Println("pointerOnly ptr: no");
         }
     }
 
@@ -165,13 +140,13 @@ internal static void checkPointerOnly() {
 
     {
         var (_, ok) = val._<iolike.ReadWriter>(ᐧ); if (ok){
-            fmt.Println(pointerOnlyValYesˢ);
+            fmt.Println("pointerOnly val: yes");
         } else {
-            fmt.Println(pointerOnlyValNoˢ);
+            fmt.Println("pointerOnly val: no");
         }
     }
 
-    fmt.Println(pointerOnlyNumMethodPtrˢ, reflect.TypeOf(ptr).NumMethod(), valˢ, reflect.TypeOf(val).NumMethod());
+    fmt.Println("pointerOnly NumMethod ptr:", reflect.TypeOf(ptr).NumMethod(), "val:", reflect.TypeOf(val).NumMethod());
 }
 
 } // end main_package
