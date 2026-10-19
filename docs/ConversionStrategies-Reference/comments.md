@@ -61,11 +61,11 @@ the two groups is dropped and leaves no extra blank behind:
 	fmt.Println(r.h(21)) // 42
 ```
 
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:116-126 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:112-122 -->
 ```csharp
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
-    fmt.Println(convertedFuncTypeCallˢ, result.player, result.opponent, result.thisTurn, turnIsOver);
+    fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
 
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
     var (n, @out, serr) = m.split("hi");
@@ -76,8 +76,9 @@ the two groups is dropped and leaves no extra blank behind:
     fmt.Println(r.h(21));
 ```
 
-`convertedFuncTypeCallˢ` is a hoisted literal, declared at the end of the file; `@out` is the keyword-escaped
-name of Go's `out`.
+`"converted func type call:"` is a plain C# literal that go2cs-gen boxes as a Go string for `fmt.Println`
+([strings](strings.md#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string));
+`@out` is the keyword-escaped name of Go's `out`.
 
 With `-comments`, from the converted standard library, the blank line stays above the comment that opens
 the next group:
