@@ -1643,8 +1643,10 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerCastSliceReinterpret() => CheckTarget("PointerCastSliceReinterpret");
+
     [TestMethod]
     public void CheckPointerConversionAliasing() => CheckTarget("PointerConversionAliasing");
+
     [TestMethod]
     public void CheckPointerConversionAnonymousTarget() => CheckTarget("PointerConversionAnonymousTarget");
 

@@ -18,7 +18,7 @@ internal partial struct toAnonymous_q /*dyn*/ {
 }
 
 internal static void toAnonymous() {
-    var e = Ꮡ(new Employee(Name: "ada"u8, Age: 13));
+    var e = Ꮡ(new Employee(Name: "ada", Age: 13));
     var q = e.Reinterpret<Employee, toAnonymous_q>();
 
     q.Value.Age = 14;
@@ -34,7 +34,7 @@ internal partial struct tagsOnly_t /*dyn*/ {
 }
 
 internal static void tagsOnly() {
-    var t = Ꮡ(new tagsOnly_t("bea"u8, 15));
+    var t = Ꮡ(new tagsOnly_t("bea", 15));
     var u = t.Reinterpret<tagsOnly_t, toAnonymous_q>();
 
     u.Value.Age = 16;

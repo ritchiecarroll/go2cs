@@ -30,17 +30,16 @@ internal static void rename(ж<Person> Ꮡp, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string bobˢ = "bob"u8;
 private static readonly object namedWriteThroughˢ = (@string)"named, write through converted:"u8;
 private static readonly object namedWriteThroughˢ2 = (@string)"named, write through original:"u8;
 private static readonly object namedSameAddressˢ = (@string)"named, same address:"u8;
 private static readonly object namedRoundTripIdentityˢ = (@string)"named, round trip identity:"u8;
 
 internal static void named() {
-    var e = Ꮡ(new Employee(Name: "ann"u8, Age: 30));
+    var e = Ꮡ(new Employee(Name: "ann", Age: 30));
     var p = e.Reinterpret<Employee, Person>();
 
-    p.Value.Name = bobˢ;
+    p.Value.Name = "bob";
     fmt.Println(namedWriteThroughˢ, (~e).Name);
 
     e.Value.Age = 31;
@@ -64,7 +63,7 @@ private static readonly object unsafeWriteThroughˢ = (@string)"unsafe, write th
 private static readonly object unsafeRoundTripIdentityˢ = (@string)"unsafe, round trip identity:"u8;
 
 internal static void viaUnsafe() {
-    var e = Ꮡ(new Employee(Name: "cat"u8, Age: 5));
+    var e = Ꮡ(new Employee(Name: "cat", Age: 5));
     var p = e.Reinterpret<Employee, Person>();
 
     p.Age = 6;
@@ -74,7 +73,6 @@ internal static void viaUnsafe() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object anonymousWriteThroughˢ = (@string)"anonymous, write through converted:"u8;
-private static readonly @string dovˢ = "dov"u8;
 private static readonly object anonymousWriteThroughˢ2 = (@string)"anonymous, write through original:"u8;
 private static readonly object anonymousSameAddressˢ = (@string)"anonymous, same address:"u8;
 
@@ -84,13 +82,13 @@ internal partial struct anonymous_a /*dyn*/ {
 }
 
 internal static void anonymous() {
-    var a = Ꮡ(new anonymous_a("dot"u8, 7));
+    var a = Ꮡ(new anonymous_a("dot", 7));
     var p = a.Reinterpret<anonymous_a, Person>();
 
     p.Value.Age = 8;
     fmt.Println(anonymousWriteThroughˢ, (~a).Age);
 
-    a.Value.Name = dovˢ;
+    a.Value.Name = "dov";
     fmt.Println(anonymousWriteThroughˢ2, (~p).Name);
     fmt.Println(anonymousSameAddressˢ, @unsafe.Pointer.FromPinnedBox(p) == @unsafe.Pointer.FromPinnedBox(a));
 }
@@ -114,7 +112,7 @@ private static readonly object tagsOnlyNamedWriteˢ = (@string)"tags only named,
 private static readonly object tagsOnlyNamedRoundTripˢ = (@string)"tags only named, round trip identity:"u8;
 
 internal static void tagsOnlyNamed() {
-    var t = Ꮡ(new Tagged(Name: "kim"u8, Age: 18));
+    var t = Ꮡ(new Tagged(Name: "kim", Age: 18));
     var p = t.Reinterpret<Tagged, Person>();
 
     p.Value.Age = 19;
@@ -127,31 +125,29 @@ private static readonly object equalityTwoConversionsˢ = (@string)"equality, tw
 private static readonly object equalityConversionAndˢ = (@string)"equality, conversion and variable:"u8;
 
 internal static void equality() {
-    var e = Ꮡ(new Employee(Name: "cy"u8, Age: 17));
+    var e = Ꮡ(new Employee(Name: "cy", Age: 17));
     var p = e.Reinterpret<Employee, Person>();
     fmt.Println(equalityTwoConversionsˢ, e.Reinterpret<Employee, Person>() == e.Reinterpret<Employee, Person>());
     fmt.Println(equalityConversionAndˢ, p == e.Reinterpret<Employee, Person>());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fayˢ = "fay"u8;
 private static readonly object definedWriteThroughˢ = (@string)"defined, write through converted:"u8;
 
 internal static void definedType() {
-    var e = Ꮡ(new Employee(Name: "eve"u8, Age: 9));
+    var e = Ꮡ(new Employee(Name: "eve", Age: 9));
     var s = e.Reinterpret<Employee, Staff>();
 
-    s.Value.Name = fayˢ;
+    s.Value.Name = "fay";
     fmt.Println(definedWriteThroughˢ, (~e).Name);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string halˢ = "hal"u8;
 private static readonly object argumentWriteThroughˢ = (@string)"argument, write through converted:"u8;
 
 internal static void callArgument() {
-    var e = Ꮡ(new Employee(Name: "gus"u8, Age: 10));
-    rename(e.Reinterpret<Employee, Person>(), halˢ);
+    var e = Ꮡ(new Employee(Name: "gus", Age: 10));
+    rename(e.Reinterpret<Employee, Person>(), "hal");
     fmt.Println(argumentWriteThroughˢ, (~e).Name);
 }
 
@@ -167,7 +163,6 @@ internal static void sliceElement() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string janˢ = "jan"u8;
 private static readonly object fieldAddressWriteThroughˢ = (@string)"field address, write through converted:"u8;
 
 internal partial struct fieldAddress_pair /*dyn*/ {
@@ -179,7 +174,7 @@ internal static void fieldAddress() {
     ref var pr = ref heap(new fieldAddress_pair(), out var Ꮡpr);
     var p = Ꮡpr.of(fieldAddress_pair.ᏑSecond).Reinterpret<Employee, Person>();
 
-    p.Value.Name = janˢ;
+    p.Value.Name = "jan";
     fmt.Println(fieldAddressWriteThroughˢ, pr.Second.Name);
 }
 

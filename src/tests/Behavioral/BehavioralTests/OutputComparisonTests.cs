@@ -1593,8 +1593,10 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerCastSliceReinterpret() => CheckTarget("PointerCastSliceReinterpret");
+
     [TestMethod]
     public void CheckPointerConversionAliasing() => CheckTarget("PointerConversionAliasing");
+
     [TestMethod]
     public void CheckPointerConversionAnonymousTarget() => CheckTarget("PointerConversionAnonymousTarget");
 
