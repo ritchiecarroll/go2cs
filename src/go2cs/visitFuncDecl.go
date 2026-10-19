@@ -374,7 +374,7 @@ func (v *Visitor) liftSignatureDynamicTypes(funcDecl *ast.FuncDecl) {
 	// An INLINE constraint carrying methods (`func Show[T interface{ Name() string }]`) lifts like
 	// an anonymous parameter interface, before anything in the signature can name it.
 	v.indentLevel++
-	v.liftTypeParamConstraints(funcDecl.Type.TypeParams, "", nil)
+	v.liftTypeParamConstraints(funcDecl.Type.TypeParams, "", nil, funcDecl.Name.Name)
 	v.indentLevel--
 
 	// Loop through function results to check if any are structs
@@ -443,8 +443,10 @@ func (v *Visitor) liftSignatureDynamicTypes(funcDecl *ast.FuncDecl) {
 // outside any function; a function's lifts are prefixed with its name by visitInterfaceType. A type's
 // lift is also registered by DECLARATION (registerConstraintLift): each of its methods reaches the
 // constraint as the receiver's own copy, a different object, and a lift that captures a parameter is
-// never registered by signature (its `T` means something else in every declaration).
-func (v *Visitor) liftTypeParamConstraints(typeParams *ast.FieldList, owner string, ownerType *types.Named) {
+// never registered by signature (its `T` means something else in every declaration). A lift that
+// captures a parameter is PUBLISHED by declaration instead, under goOwner, the declaration's Go name
+// (publishInlineConstraintLift), so another package instantiating it can name the lift too.
+func (v *Visitor) liftTypeParamConstraints(typeParams *ast.FieldList, owner string, ownerType *types.Named, goOwner string) {
 	if typeParams == nil || len(typeParams.List) == 0 {
 		return
 	}
@@ -481,6 +483,12 @@ func (v *Visitor) liftTypeParamConstraints(typeParams *ast.FieldList, owner stri
 		if ownerType != nil {
 			for i := first; i < index; i++ {
 				registerConstraintLift(constraintLiftKey(ownerType, i), liftName)
+			}
+		}
+
+		if len(liftCapturedTypeParams(iface)) > 0 {
+			for i := first; i < index; i++ {
+				publishInlineConstraintLift(goOwner, i, liftName)
 			}
 		}
 	}
