@@ -419,8 +419,6 @@ const (
 //
 // ⚠ EDIT THIS TABLE IN THE COMMIT THAT MOVES THE TREE, never afterwards. That is the whole mechanism.
 var declaredPushStubs = map[string]string{
-	"internal/syscall/windows.QueryPerformanceCounter":   dispositionLatent,
-	"internal/syscall/windows.QueryPerformanceFrequency": dispositionLatent,
 	"os.ignoreSIGSYS":                   dispositionLatent,
 	"os.restoreSIGSYS":                  dispositionLatent,
 	"reflect.chancap":                   dispositionLatent,
