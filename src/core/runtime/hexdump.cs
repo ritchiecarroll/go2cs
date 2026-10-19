@@ -9,32 +9,7 @@ using @internal;
 
 partial class runtime_package {
 
-// hexdumpWords prints a word-oriented hex dump of [p, p+len).
-//
-// If mark != nil, it will be passed to hexdumper.mark.
-internal static void hexdumpWords(uintptr Δp, uintptr len, Action<uintptr, hexdumpMarker> mark) {
-    printlock();
-
-    // Provide a default annotation
-    var symMark = (uintptr u, hexdumpMarker hm) => {
-        if (mark != default!) {
-            mark(u, hm);
-        }
-
-        // Can we symbolize this value?
-        var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)u);
-        var fn = findfunc(val);
-        if (fn.valid()) {
-            hm.start();
-            print((@string)"<"u8, funcname(fn), (@string)"+"u8, ((Δhex)(uint64)(val - fn.entry())), (@string)">\n"u8);
-        }
-    };
-
-    var h = new hexdumper(addr: Δp, mark: symMark);
-    h.write(@unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)Δp), len));
-    h.close();
-    printunlock();
-}
+// go2cs generated this placeholder — func hexdumpWords is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // hexdumper is a Swiss-army knife hex dumper.
 //

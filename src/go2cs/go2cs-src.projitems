@@ -228,6 +228,9 @@
     <None Include="$(MSBuildThisFileDirectory)incrementalWrites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineConstraintClosedRecord_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineConstraintNamed.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineConstraintReceiverLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestLocalInterfaceStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)intrinsicPlaceholders_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
@@ -277,6 +280,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fixturesCurrent_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fleetIdentifierCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibInode64Renames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnedGoStatementPositions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />
@@ -543,6 +547,7 @@
     <None Include="$(MSBuildThisFileDirectory)validationProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneFieldSpelling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneStampMembers_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueConstraintRecordNeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePunOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)valuePun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variableAnalysisOperations.go" />

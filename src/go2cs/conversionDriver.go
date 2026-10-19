@@ -609,6 +609,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		resolveDynamicTypeMarkers(outputFileNames)
 		resolveDynamicInterfaceBases(outputFileNames)
 
+		// Inline-constraint records an instantiation deferred until its lift was named (the
+		// names are all registered now), ahead of the metadata file below.
+		replayDeferredConstraintRecords()
+
 		// Write project file with correct output type and unsafe code settings
 		options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)
 		err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options)

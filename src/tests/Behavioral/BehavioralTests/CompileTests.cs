@@ -938,6 +938,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
 
     [TestMethod]
+    public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
+
+    [TestMethod]
     public void CheckIntFormFloatConst() => CheckTarget("IntFormFloatConst");
 
     [TestMethod]

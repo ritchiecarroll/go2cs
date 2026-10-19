@@ -941,6 +941,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
 
     [TestMethod]
+    public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
+
+    [TestMethod]
     public void CheckIntFormFloatConst() => CheckTarget("IntFormFloatConst");
 
     [TestMethod]
