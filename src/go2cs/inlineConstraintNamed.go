@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -195,13 +197,14 @@ var (
 
 // inlineConstraintNamed is typeParam's inline constraint as the instantiated generic interface its lift
 // declares (`Ord_T[T]`), when the constraint is an anonymous interface carrying methods that captures a
-// type parameter of a declaration in THIS package. resolved is false when the lift's name is not known yet:
-// the constraint then carries the deferred marker as its name, and a caller that RECORDS must defer
-// (deferConstraintRecord) rather than record it.
+// type parameter of a declaration. resolved is false when the lift's name is not known yet: the constraint
+// then carries the deferred marker as its name, and a caller that RECORDS must defer (deferConstraintRecord)
+// rather than record it. A declaration in ANOTHER package is named by the lift its package published
+// (importedInlineConstraintLift), and keeps its anonymous form when it published none.
 func (v *Visitor) inlineConstraintNamed(typeParam *types.TypeParam) (constraint *types.Named, resolved bool, ok bool) {
 	iface, isInterface := typeParam.Constraint().(*types.Interface)
 
-	if !isInterface || iface.NumMethods() == 0 || typeParam.Obj().Pkg() != v.pkg {
+	if !isInterface || iface.NumMethods() == 0 {
 		return nil, false, false
 	}
 
@@ -211,7 +214,15 @@ func (v *Visitor) inlineConstraintNamed(typeParam *types.TypeParam) (constraint 
 		return nil, false, false
 	}
 
-	origin, resolved := v.inlineConstraintOrigin(iface, captured)
+	foreignName := ""
+
+	if typeParam.Obj().Pkg() != v.pkg {
+		if foreignName = v.importedInlineConstraintLift(typeParam); foreignName == "" {
+			return nil, false, false
+		}
+	}
+
+	origin, resolved := v.inlineConstraintOrigin(iface, captured, foreignName)
 	args := make([]types.Type, len(captured))
 
 	for i, param := range captured {
@@ -230,8 +241,9 @@ func (v *Visitor) inlineConstraintNamed(typeParam *types.TypeParam) (constraint 
 }
 
 // inlineConstraintOrigin builds (or reuses) the synthetic generic interface: the lift's name, one fresh
-// parameter per captured one, and the constraint's method set rewritten over them.
-func (v *Visitor) inlineConstraintOrigin(iface *types.Interface, captured []*types.TypeParam) (*types.Named, bool) {
+// parameter per captured one, and the constraint's method set rewritten over them. foreignName is the name
+// a foreign declaration's package published, empty for a declaration in this package.
+func (v *Visitor) inlineConstraintOrigin(iface *types.Interface, captured []*types.TypeParam, foreignName string) (*types.Named, bool) {
 	inlineConstraintOriginsLock.Lock()
 	origin, cached := inlineConstraintOrigins[iface]
 	inlineConstraintOriginsLock.Unlock()
@@ -240,7 +252,11 @@ func (v *Visitor) inlineConstraintOrigin(iface *types.Interface, captured []*typ
 		return origin, true
 	}
 
-	name, known := v.liftedNameFor(iface)
+	name, known := foreignName, foreignName != ""
+
+	if !known {
+		name, known = v.liftedNameFor(iface)
+	}
 
 	if !known {
 		name = lookupConstraintLift(inlineConstraintKey(iface))
@@ -335,11 +351,130 @@ func replayDeferredConstraintRecords() {
 	deferredConstraintRecordsLock.Unlock()
 }
 
+// The capturing inline-constraint lifts this package publishes, by declaration (owner, index) → lift name,
+// and those read from imported packages, by package path. Written into the package's metadata as
+// `[assembly: GoInlineConstraintLift("Ord", 0, "Ord_T")]` (packageInfoWriter).
+var (
+	publishedInlineConstraintLifts = map[inlineConstraintDecl]string{}
+	importedInlineConstraintLifts  = map[string]map[inlineConstraintDecl]string{}
+	inlineConstraintLiftsLock      sync.Mutex
+)
+
+// inlineConstraintDecl names a type parameter by its declaration: the Go name of the generic type or
+// function declaring it, and its position in that declaration's type parameter list.
+type inlineConstraintDecl struct {
+	owner string
+	index int
+}
+
+// publishInlineConstraintLift records the lift of goOwner's index'th type parameter's capturing inline
+// constraint for this package's metadata (liftTypeParamConstraints).
+func publishInlineConstraintLift(goOwner string, index int, liftName string) {
+	if idx := strings.IndexByte(liftName, '<'); idx >= 0 {
+		liftName = liftName[:idx]
+	}
+
+	inlineConstraintLiftsLock.Lock()
+	publishedInlineConstraintLifts[inlineConstraintDecl{goOwner, index}] = liftName
+	inlineConstraintLiftsLock.Unlock()
+}
+
+// publishedInlineConstraintLiftRecords renders this package's published lifts as metadata records.
+func publishedInlineConstraintLiftRecords() []string {
+	inlineConstraintLiftsLock.Lock()
+	defer inlineConstraintLiftsLock.Unlock()
+
+	records := make([]string, 0, len(publishedInlineConstraintLifts))
+
+	for decl, liftName := range publishedInlineConstraintLifts {
+		records = append(records, fmt.Sprintf("[assembly: GoInlineConstraintLift(\"%s\", %d, \"%s\")]", decl.owner, decl.index, liftName))
+	}
+
+	return records
+}
+
+var inlineConstraintLiftPattern = regexp.MustCompile(`^\[assembly: GoInlineConstraintLift\("([^"]+)", ([0-9]+), "([^"]+)"\)\]$`)
+
+// importedInlineConstraintLift returns the lift name the package declaring typeParam published for its inline
+// constraint, or "" when it published none (an older conversion, or no metadata to read). The declaration is
+// found by the type parameter itself in its package's scope: an instantiation reads the declaration's own.
+func (v *Visitor) importedInlineConstraintLift(typeParam *types.TypeParam) string {
+	pkg := typeParam.Obj().Pkg()
+	decl, found := typeParamDecl(pkg, typeParam)
+
+	if !found {
+		return ""
+	}
+
+	inlineConstraintLiftsLock.Lock()
+	lifts, loaded := importedInlineConstraintLifts[pkg.Path()]
+	inlineConstraintLiftsLock.Unlock()
+
+	if !loaded {
+		lifts = make(map[inlineConstraintDecl]string)
+
+		if info, ok := getImportPackageInfo([]string{pkg.Path()}, v.options)[pkg.Path()]; ok && info.Err == nil {
+			if lines, ok := importPackageInfoLines(info, v.options); ok {
+				for _, line := range lines {
+					if matches := inlineConstraintLiftPattern.FindStringSubmatch(strings.TrimSpace(line)); matches != nil {
+						if index, err := strconv.Atoi(matches[2]); err == nil {
+							lifts[inlineConstraintDecl{matches[1], index}] = matches[3]
+						}
+					}
+				}
+			}
+		}
+
+		inlineConstraintLiftsLock.Lock()
+		importedInlineConstraintLifts[pkg.Path()] = lifts
+		inlineConstraintLiftsLock.Unlock()
+	}
+
+	return lifts[decl]
+}
+
+// typeParamDecl finds the package-level generic type or function declaring typeParam.
+func typeParamDecl(pkg *types.Package, typeParam *types.TypeParam) (inlineConstraintDecl, bool) {
+	if pkg == nil {
+		return inlineConstraintDecl{}, false
+	}
+
+	scope := pkg.Scope()
+
+	for _, name := range scope.Names() {
+		var params *types.TypeParamList
+
+		switch obj := scope.Lookup(name).(type) {
+		case *types.TypeName:
+			if named, ok := obj.Type().(*types.Named); ok {
+				params = named.TypeParams()
+			}
+		case *types.Func:
+			if signature, ok := obj.Type().(*types.Signature); ok {
+				params = signature.TypeParams()
+			}
+		}
+
+		for i := range params.Len() {
+			if params.At(i) == typeParam {
+				return inlineConstraintDecl{name, i}, true
+			}
+		}
+	}
+
+	return inlineConstraintDecl{}, false
+}
+
 // resetInlineConstraintState clears the per-package state above (resetPackageState).
 func resetInlineConstraintState() {
 	inlineConstraintOriginsLock.Lock()
 	inlineConstraintOrigins = map[*types.Interface]*types.Named{}
 	inlineConstraintOriginsLock.Unlock()
+
+	inlineConstraintLiftsLock.Lock()
+	publishedInlineConstraintLifts = map[inlineConstraintDecl]string{}
+	importedInlineConstraintLifts = map[string]map[inlineConstraintDecl]string{}
+	inlineConstraintLiftsLock.Unlock()
 
 	deferredConstraintRecordsLock.Lock()
 	deferredConstraintRecords = nil

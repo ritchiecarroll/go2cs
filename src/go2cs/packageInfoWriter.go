@@ -395,6 +395,12 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			lines.Add(fmt.Sprintf("[assembly: GoDynamicTypeLift(\"%s\", \"%s\")]", hex.EncodeToString([]byte(signature)), typeName))
 		}
 
+		// Publish every inline constraint lift that captures its own parameter, by DECLARATION (see
+		// GoInlineConstraintLiftAttribute), so another package instantiating the declaration names it too.
+		for _, record := range publishedInlineConstraintLiftRecords() {
+			lines.Add(record)
+		}
+
 		// Sort lines
 		sortedLines := lines.Keys()
 		sort.Strings(sortedLines)
@@ -620,7 +626,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),
 		// so the element doubles as the dummy — except where the interface constrains itself (see
 		// constraintProxyFor). See constraintProxyArg / EmitConstraintProxy.
-		for _, proxy := range constraintProxies {
+		for key, proxy := range constraintProxies {
 			elementRef := qualifyLocalTypeRef(proxy[0])
 			interfaceRef := qualifyLocalTypeRef(proxy[1])
 
@@ -634,8 +640,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			// name becomes ambiguous — CS0104 ×8 in crypto/ecdsa's test half, the same
 			// duplicate-type shadow the reference model exists to eliminate. The production proxy
 			// is the single identity; defer to it. A test-DECLARED constraint interface still
-			// renders bare (crypto/internal/nistec's own nistPoint) and is emitted here as before.
-			if metadataAnchorLocalTypes && strings.Contains(interfaceRef, PackageSuffix+".") {
+			// renders bare (crypto/internal/nistec's own nistPoint) and is emitted here as before. A BIND record
+			// (foreignConstraintProxy) declares no class, only this assembly's binding, so it is always written.
+			if metadataAnchorLocalTypes && strings.Contains(interfaceRef, PackageSuffix+".") && !strings.HasPrefix(key, constraintProxyBindKey) {
 				continue
 			}
 

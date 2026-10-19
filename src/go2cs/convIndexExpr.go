@@ -173,6 +173,11 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	}
 
 	if v.isGenericTypeArgument(indexExpr) {
+		// A type argument taking a constraint proxy renders through the resolved type (see proxiedTypeInstantiation).
+		if render, ok := v.proxiedTypeInstantiation(indexExpr); ok {
+			return render
+		}
+
 		context := DefaultIdentContext()
 		context.isType = true
 

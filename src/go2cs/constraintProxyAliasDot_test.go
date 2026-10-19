@@ -35,6 +35,34 @@ import (
 // importQueue and referencedForeignPackages that getScopeCheckedTypeName consults), and its own test
 // pins the unplanted answer at `curves.P1жPoint`. Three fixtures for one shape would be two too many.
 
+// plantPublishedConstraintProxy seeds the record the interface's package PUBLISHES when it closes its
+// constraint over an element itself (`GoImplement<P1, Point<P1>>(ConstraintProxy = true)` in curves'
+// package_info.cs), which these fixtures have no file for. A consumer names that concrete proxy only when
+// its owner published it (foreignConstraintProxy's rule 1; with nothing published it takes the generic
+// proxy), and these tests are about how rule 1 spells the owner's qualifier. Copy-on-write, as
+// plantForeignAlias below explains: the cache is package-global and must come back exactly as it was.
+func plantPublishedConstraintProxy(t *testing.T, ownerPath, proxyName, element string) {
+	t.Helper()
+
+	packageLock.Lock()
+	previous := importedConstraintProxies
+	planted := make(map[string]map[string][]string, len(previous)+1)
+
+	for key, value := range previous {
+		planted[key] = value
+	}
+
+	planted[ownerPath] = map[string][]string{proxyName: {element}}
+	importedConstraintProxies = planted
+	packageLock.Unlock()
+
+	t.Cleanup(func() {
+		packageLock.Lock()
+		importedConstraintProxies = previous
+		packageLock.Unlock()
+	})
+}
+
 // plantForeignAlias seeds the imported-type alias for a foreign type — the entry the corpus never
 // carries for a CONSTRAINT interface — so getScopeCheckedTypeName's alias branch answers with the glyph
 // form. importedTypeAliases is package-GLOBAL and a real run re-makes it per package, so the plant
@@ -96,6 +124,7 @@ func TestForeignConstraintProxySplitsOnAliasDot(t *testing.T) {
 	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
 	constraintProxies = make(map[string][3]string)
 	consumer.importQueue.Add("example/proxycross/curves")
+	plantPublishedConstraintProxy(t, "example/proxycross/curves", "P1"+PointerPrefix+"Point", "P1")
 
 	plantForeignAlias(t, "curves.Point", "go.example.proxycross.curves_package.Point")
 
@@ -121,6 +150,7 @@ func TestForeignConstraintProxyAsciiDotUnchanged(t *testing.T) {
 	_, consumer, _, consumerCalls := loadCrossPackageProxyFixture(t)
 	constraintProxies = make(map[string][3]string)
 	consumer.importQueue.Add("example/proxycross/curves")
+	plantPublishedConstraintProxy(t, "example/proxycross/curves", "P1"+PointerPrefix+"Point", "P1")
 
 	funIdent, typeArgs := crossPackageInstance(t, consumer, consumerCalls, "consumerCall")
 	got, ok := consumer.constraintProxySigArg(funIdent, typeArgs, 0)
