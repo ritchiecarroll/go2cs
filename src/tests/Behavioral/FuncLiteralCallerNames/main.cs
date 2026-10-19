@@ -10,7 +10,7 @@ internal static partial @string who() {
     var pc = new slice<uintptr>(1);
 
     if (runtime.Callers(2, pc) == 0) {
-        return ""u8;
+        return "";
     }
 
     var frames = runtime.CallersFrames(pc);

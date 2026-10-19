@@ -34,33 +34,26 @@ partial struct ForeignByPointer {
     /*embed*/ public ж<PromotedTargetParam.targetlib_package.Finder> Finder;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string paramˢ = "param"u8;
-private static readonly @string valueRenamedˢ = "value-renamed"u8;
-private static readonly @string pointerRenamedˢ = "pointer-renamed"u8;
-private static readonly @string foreignValueRenamedˢ = "foreign-value-renamed"u8;
-private static readonly @string foreignPointerRenamedˢ = "foreign-pointer-renamed"u8;
-
 internal static void Main() {
-    var v = new ByValue(new Base("value-recv"u8));
-    fmt.Println(v.Pair(paramˢ));
-    v.Base.Rename(valueRenamedˢ);
-    fmt.Println(v.Pair(paramˢ));
+    var v = new ByValue(new Base("value-recv"));
+    fmt.Println(v.Pair("param"));
+    v.Base.Rename("value-renamed");
+    fmt.Println(v.Pair("param"));
 
-    var p = new ByPointer(Ꮡ(new Base("pointer-recv"u8)));
-    fmt.Println(p.Pair(paramˢ));
-    p.Rename(pointerRenamedˢ);
-    fmt.Println(p.Pair(paramˢ));
+    var p = new ByPointer(Ꮡ(new Base("pointer-recv")));
+    fmt.Println(p.Pair("param"));
+    p.Rename("pointer-renamed");
+    fmt.Println(p.Pair("param"));
 
-    var fv = new ForeignByValue(new targetlib.Finder(Name: "foreign-value"u8));
-    fmt.Println(fv.Finder.Match(paramˢ));
-    fv.Finder.Retarget(foreignValueRenamedˢ);
-    fmt.Println(fv.Finder.Match(paramˢ));
+    var fv = new ForeignByValue(new targetlib.Finder(Name: "foreign-value"));
+    fmt.Println(fv.Finder.Match("param"));
+    fv.Finder.Retarget("foreign-value-renamed");
+    fmt.Println(fv.Finder.Match("param"));
 
-    var fp = new ForeignByPointer(Ꮡ(new targetlib.Finder(Name: "foreign-pointer"u8)));
-    fmt.Println(fp.Finder.Value.Match(paramˢ));
-    fp.Finder.Value.Retarget(foreignPointerRenamedˢ);
-    fmt.Println(fp.Finder.Value.Match(paramˢ));
+    var fp = new ForeignByPointer(Ꮡ(new targetlib.Finder(Name: "foreign-pointer")));
+    fmt.Println(fp.Finder.Value.Match("param"));
+    fp.Finder.Value.Retarget("foreign-pointer-renamed");
+    fmt.Println(fp.Finder.Value.Match("param"));
 }
 
 } // end main_package

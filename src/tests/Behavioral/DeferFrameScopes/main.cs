@@ -36,13 +36,6 @@ internal static void loopDefers(nint n) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fromLoopˢ = "from-loop"u8;
-private static readonly @string fromSwitchˢ = "from-switch"u8;
-private static readonly @string fromSwitchExprˢ = "from-switch-expr"u8;
-private static readonly @string bigˢ = "big"u8;
-private static readonly @string fallthroughˢ = "fallthrough"u8;
-
 internal static (@string label, nint score) classify(nint n) {
     @string label = default!;
     nint score = default!;
@@ -55,27 +48,27 @@ internal static (@string label, nint score) classify(nint n) {
 
         for (nint i = 0; i < 3; i++) {
             if (i == 2 && n == 2) {
-                (label, score) = (fromLoopˢ, i);
+                (label, score) = ("from-loop", i);
                 goto ᒐdone;
             }
         }
 
         switch (n) {
         case 3: {
-            (label, score) = (fromSwitchˢ, 3);
+            (label, score) = ("from-switch", 3);
             goto ᒐdone;
         }
         case 4: {
-            (label, score) = (fromSwitchExprˢ, 4); goto ᒐdone;
+            (label, score) = ("from-switch-expr", 4); goto ᒐdone;
         }}
 
         if (n > 10) {
-            label = bigˢ;
+            label = "big";
             score = n;
             goto ᒐdone;
         }
 
-        (label, score) = (fallthroughˢ, n);
+        (label, score) = ("fallthrough", n);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -151,7 +144,6 @@ internal static nint mixedScopes() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object guardedCleanupˢ = (@string)"guarded cleanup"u8;
 private static readonly object recoveredˢ = (@string)"recovered "u8;
-private static readonly @string noPanicˢ = "no panic"u8;
 
 internal static @string /*msg*/ guarded(bool boom) {
     @string msg = default!;
@@ -170,7 +162,7 @@ internal static @string /*msg*/ guarded(bool boom) {
             throw panic("frame boom");
         }
 
-        msg = noPanicˢ;
+        msg = "no panic";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

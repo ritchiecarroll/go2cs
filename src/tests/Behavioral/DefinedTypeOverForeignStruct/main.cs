@@ -12,17 +12,13 @@ internal static @string describe(this ref alias a) {
     return fmt.Sprintf("%s/%d"u8, a.Name, a.In.Len());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string firstˢ = "first"u8;
-private static readonly @string secondˢ = "second"u8;
-
 internal static void Main() {
-    var a = ((alias)ptlike.New(firstˢ, 1, 2, 3));
+    var a = ((alias)ptlike.New("first", 1, 2, 3));
 
     fmt.Println(a.Name, a.In.Len());
     fmt.Println(a.describe());
 
-    a.Name = secondˢ;
+    a.Name = "second";
     fmt.Println(a.Name);
 
     a.In.Push(4);

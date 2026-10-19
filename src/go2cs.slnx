@@ -406,6 +406,7 @@
     <Project Path="tests/Behavioral/CrossPkgLiteralNestedField/addrlib/CrossPkgLiteralNestedField.addrlib.csproj" />
     <Project Path="tests/Behavioral/EmbedLayoutMatchesGo/EmbedLayoutMatchesGo.csproj" />
     <Project Path="tests/Behavioral/GenericArrayTypeArgZero/GenericArrayTypeArgZero.csproj" />
+    <Project Path="tests/Behavioral/InlineConstraintLift/InlineConstraintLift.csproj" />
     <Project Path="tests/Behavioral/NewExpr/NewExpr.csproj" />
     <Project Path="tests/Behavioral/RawStringLineEndings/RawStringLineEndings.csproj" />
     <Project Path="tests/Behavioral/SameNameImportAlias/SameNameImportAlias.csproj" />

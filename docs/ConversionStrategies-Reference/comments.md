@@ -61,14 +61,14 @@ the two groups is dropped and leaves no extra blank behind:
 	fmt.Println(r.h(21)) // 42
 ```
 
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:119-129 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:116-126 -->
 ```csharp
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
     fmt.Println(convertedFuncTypeCallˢ, result.player, result.opponent, result.thisTurn, turnIsOver);
 
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
-    var (n, @out, serr) = m.split("hi"u8);
+    var (n, @out, serr) = m.split("hi");
     fmt.Println(n, @out, serr == default!);
 
     var p = new provider(produce: (nint x) => x * 2);
@@ -230,13 +230,13 @@ follows every switch whether Go has one or not. A behavioral golden shows it:
 	return "other"
 ```
 
-<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:68-72 -->
+<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:61-65 -->
 ```csharp
     case @string: {
-        return stringˢ;
+        return "string";
     }}
 
-    return otherˢ;
+    return "other";
 ```
 
 ### Between the specs of a `const` or `var` group

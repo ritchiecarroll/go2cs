@@ -83,7 +83,7 @@ internal static void Main() {
 
     int32 negAssign = (int32)(-(2147483648L - 1));
     var negConv = (int32)(-(2147483648L - 1));
-    var rows = new row[]{new("-2147483647"u8, (int32)(-(2147483648L - 1)))}.slice();
+    var rows = new row[]{new("-2147483647", (int32)(-(2147483648L - 1)))}.slice();
 
     foreach (var (_, v) in negs) {
         fmt.Println(v);

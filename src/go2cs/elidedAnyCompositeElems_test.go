@@ -92,7 +92,7 @@ func main() {
 	// CONTROLS: an elided literal of a concrete element type, and a typed `[]any` literal, keep their emission.
 	for _, want := range []string{
 		`new nint[]{1, 2}.slice()`,
-		`new @string[]{"x"u8}.slice()`,
+		`new @string[]{"x"}.slice()`, // a `string` element takes the plain literal (hoistedLiteralOperations.go)
 		`new any[]{(@string)"flat"u8, (nint)(3)}.slice()`,
 	} {
 		if !strings.Contains(mainCs, want) {

@@ -33,8 +33,8 @@ internal static void Main() {
         fmt.Println(p.X, p.Y);
     }
 
-    var tally = new main_Tally(new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2});
-    fmt.Println(tally["a"u8] + tally["b"u8]);
+    var tally = new main_Tally(new map<@string, nint>{["a"] = 1, ["b"] = 2});
+    fmt.Println(tally["a"] + tally["b"]);
 
     var stream = new main_Stream(1);
     stream.ᐸꟷ(7);
@@ -52,8 +52,8 @@ internal static void Main() {
     var rs = new main_recursiveSlice(new main_recursiveSlice[]{new main_recursiveSlice(new main_recursiveSlice[]{default!}.slice()), default!}.slice());
     fmt.Println(len(rs), len(rs[0]));
 
-    var rm = new main_recursiveMap(new map<@string, main_recursiveMap>{["a"u8] = new main_recursiveMap(new map<@string, main_recursiveMap>{["b"u8] = default!})});
-    fmt.Println(len(rm), len(rm["a"u8]));
+    var rm = new main_recursiveMap(new map<@string, main_recursiveMap>{["a"] = new main_recursiveMap(new map<@string, main_recursiveMap>{["b"] = default!})});
+    fmt.Println(len(rm), len(rm["a"]));
     fmt.Println(sum);
 }
 

@@ -40,10 +40,10 @@ internal static void receiverReassignedNoLoop() {
     GoFrame ᒐ = default;
     try {
         fmt.Println(controlReceiverBoundAtˢ);
-        var x = Ꮡ(new conn(name: "first"u8));
+        var x = Ꮡ(new conn(name: "first"));
         var xʗ1 = x;
         defer(() => xʗ1.Close(), ref ᒐ);
-        x = Ꮡ(new conn(name: "second"u8));
+        x = Ꮡ(new conn(name: "second"));
         _ = x;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -131,7 +131,7 @@ internal static void closureCaptureRange() {
     GoFrame ᒐ = default;
     try {
         fmt.Println(controlClosureCaptureˢ);
-        foreach (var (_, v) in new @string[]{"x"u8, "y"u8, "z"u8}.slice()) {
+        foreach (var (_, v) in new @string[]{"x", "y", "z"}.slice()) {
             defer(() => {
                 fmt.Println(rangeˢ, v);
             }, ref ᒐ);

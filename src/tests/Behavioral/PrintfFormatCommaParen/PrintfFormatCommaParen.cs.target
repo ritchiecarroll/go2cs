@@ -16,9 +16,9 @@ internal static @string String(this stringer b) {
 private static readonly object plChanOfBothDirArrayOf3ˢ = (@string)"pl ChanOf(BothDir, ArrayOf(3,int)) String() Elem().Len()"u8;
 
 internal static void Main() {
-    @string name = "x"u8;
+    @string name = "x";
     nint n = 3;
-    var b = new stringer("bx"u8);
+    var b = new stringer("bx");
 
     fmt.Printf("constructed row: ChanOf(BothDir, ArrayOf(3,int)) String()=%s Elem().Len()=%d\n"u8, name, n);
 

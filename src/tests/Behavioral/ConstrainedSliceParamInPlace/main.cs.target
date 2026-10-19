@@ -49,7 +49,7 @@ internal static void Main() {
     reverseSeq<numbers, nint>(b);
     fmt.Println(b);
 
-    var s = new @string[]{"go"u8, "2"u8, "cs"u8}.slice();
+    var s = new @string[]{"go", "2", "cs"}.slice();
     reverseSeq<slice<@string>, @string>(s);
     fmt.Println(s);
 

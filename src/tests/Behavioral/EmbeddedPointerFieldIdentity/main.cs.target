@@ -27,8 +27,6 @@ partial struct wrapper {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object depth1ˢ = (@string)"depth1:"u8;
 private static readonly object depth2ˢ = (@string)"depth2:"u8;
-private static readonly @string firstˢ = "first"u8;
-private static readonly @string secondˢ = "second"u8;
 private static readonly object mapEntriesˢ = (@string)"map entries:"u8;
 private static readonly object promotedStructˢ = (@string)"promoted struct:"u8;
 private static readonly object promotedFieldˢ = (@string)"promoted field:"u8;
@@ -41,8 +39,8 @@ internal static void Main() {
     fmt.Println(depth2ˢ, o.of(outer.Ꮡin).of(inner.Ꮡv) == o.of(outer.Ꮡin).of(inner.Ꮡv));
 
     var m = new map<ж<uint32>, @string>{};
-    m[o.of(outer.Ꮡin).of(inner.Ꮡv)] = firstˢ;
-    m[o.of(outer.Ꮡin).of(inner.Ꮡv)] = secondˢ;
+    m[o.of(outer.Ꮡin).of(inner.Ꮡv)] = "first";
+    m[o.of(outer.Ꮡin).of(inner.Ꮡv)] = "second";
     fmt.Println(mapEntriesˢ, len(m), m[o.of(outer.Ꮡin).of(inner.Ꮡv)]);
 
     var h = Ꮡ(new holder(nil));

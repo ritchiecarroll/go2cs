@@ -11,21 +11,15 @@ partial interface shape {
 partial struct circle {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string circleˢ = "circle"u8;
-
 internal static @string name(this circle _) {
-    return circleˢ;
+    return "circle";
 }
 
 partial struct square {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string squareˢ = "square"u8;
-
 internal static @string name(this square _) {
-    return squareˢ;
+    return "square";
 }
 
 internal static UntypedInt kCircle => /* iota + 2 */ 2;

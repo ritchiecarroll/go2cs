@@ -7,14 +7,11 @@ partial class main_package {
 
 partial struct Sum /*[4]byte*/;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string bWasReadBeforeItWasˢ = "B was read before it was initialized"u8;
-
 internal static (Sum, error) build(/*[4]*/ array<byte> src) {
     src = src.Clone();
 
     if (src[0] == 0) {
-        return (new Sum(new byte[4].array()), errors.New(bWasReadBeforeItWasˢ));
+        return (new Sum(new byte[4].array()), errors.New("B was read before it was initialized"));
     }
 
     return (((Sum)src), default!);

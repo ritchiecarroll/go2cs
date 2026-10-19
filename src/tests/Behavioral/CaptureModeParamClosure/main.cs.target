@@ -91,7 +91,7 @@ private static readonly object deferMethodValueˢ = (@string)"deferMethodValue:"
 private static readonly object callerCopyUntouchedˢ = (@string)"caller copy untouched:"u8;
 
 internal static void Main() {
-    var t = new Tally(total: 5, log: "start"u8);
+    var t = new Tally(total: 5, log: "start");
 
     var (before, after, log) = closureRead(t, 3);
     fmt.Println(closureReadˢ, before, after, log);

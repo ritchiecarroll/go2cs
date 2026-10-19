@@ -49,6 +49,8 @@ func resetPackageState(pkg *packages.Package) {
 	cgoDynamicImportPragmas = nil
 	currentPackagePath = pkg.PkgPath
 	currentPackageGorootVendored = false
+	packageHoistsLiterals = false
+	packagePlainLits = nil
 	exportedTypeAliases = make(map[string]string)
 	importedTypeAliases = make(map[string]string)
 	importedTypeAliasSourceDirs = make(map[string]string)
@@ -84,6 +86,8 @@ func resetPackageState(pkg *packages.Package) {
 	nameCollisions = make(map[string]bool)
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
+	packageConstraintLiftNames = make(map[string]string)
+	resetInlineConstraintState()
 	packageLiftedTypeNames = hashset.HashSet[string]{}
 	productionLiftedTypeNames = nil
 	productionAliasLiftedTypes = nil

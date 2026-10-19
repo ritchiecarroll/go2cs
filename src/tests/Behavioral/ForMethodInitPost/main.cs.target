@@ -21,9 +21,6 @@ internal static void next(this ref iter it) {
     it.i++;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abcˢ = "abc"u8;
-
 internal static void Main() {
     iter u = default!;
     nint sum = 0;
@@ -39,8 +36,8 @@ internal static void Main() {
     }
     fmt.Println(count);
 
-    @string @out = ""u8;
-    for (@string p = abcˢ; p != ""u8; ) {
+    @string @out = "";
+    for (@string p = "abc"; p != ""u8; ) {
         @out += p[..1];
         p = p[1..];
     }

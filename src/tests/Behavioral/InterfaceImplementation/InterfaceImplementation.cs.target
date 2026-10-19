@@ -62,11 +62,8 @@ internal static void Main() {
 
 partial struct errno /*num:uintptr*/;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string errnoˢ = "errno"u8;
-
 internal static @string Error(this errno e) {
-    return errnoˢ;
+    return "errno";
 }
 
 internal static errno errAgain => 11;
@@ -139,32 +136,20 @@ public static void ShowZoo(/*[2]*/ ж<array<Animal>> Ꮡzoo) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string frogˢ = "Frog"u8;
-
 public static @string Type(this ref Frog f) {
-    return frogˢ;
+    return "Frog";
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string kickˢ = "Kick"u8;
 
 public static @string Swim(this ref Frog f) {
-    return kickˢ;
+    return "Kick";
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string paddleˢ = "Paddle"u8;
 
 public static @string Swim(this ref Dog d) {
-    return paddleˢ;
+    return "Paddle";
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string doggieˢ = "Doggie"u8;
-
 public static @string Type(this ref Dog d) {
-    return doggieˢ;
+    return "Doggie";
 }
 
 } // end main_package

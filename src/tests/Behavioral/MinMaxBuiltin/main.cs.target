@@ -82,7 +82,7 @@ internal static void untypedConstTypes() {
     nuint un = 11;
     float32 f32 = 0.5F;
     float64 f64 = 0.25D;
-    @string s = "m"u8;
+    @string s = "m";
     var (fe, rt, dl) = (((fieldElement)10), ((ratio)2.5D), ((delta)(-5)));
 
     fmt.Printf("%T %v | %T %v\n"u8, max(i8, (int8)(1)), max(i8, (int8)(1)), min(i8, (int8)(1)), min(i8, (int8)(1)));

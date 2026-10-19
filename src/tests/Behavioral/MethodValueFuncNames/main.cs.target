@@ -19,21 +19,17 @@ internal static nint pointerMethod(this ref T t) {
     return t.n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilFuncˢ = "<nil Func>"u8;
-private static readonly @string emptyNameˢ = "<empty name>"u8;
-
 internal static @string nameOf(any fn) {
     var f = runtime.FuncForPC(reflect.ValueOf(fn).Pointer());
     if (f == nil) {
-        return nilFuncˢ;
+        return "<nil Func>";
     }
     {
         @string name = f.Name(); if (name != ""u8) {
             return name;
         }
     }
-    return emptyNameˢ;
+    return "<empty name>";
 }
 
 internal static partial Func<nint> makeLiteral() {
@@ -101,11 +97,8 @@ internal static partial void Main() {
 
 partial struct named /*num:nint*/;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string namedˢ = "named"u8;
-
 internal static @string String(this named n) {
-    return namedˢ;
+    return "named";
 }
 
 } // end main_package

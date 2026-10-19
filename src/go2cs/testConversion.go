@@ -2830,6 +2830,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	resetPackageState(pkg)
 	packageNamespace = projectNamespace
 	currentPackageGorootVendored = isGorootVendoredDir(pkg.Dir, options.goRoot)
+	packageHoistsLiterals = literalsHoistedFor(pkg.Dir, options)
 
 	// The lifted type names the production conversion already claimed (see
 	// productionLiftedTypeNames). Non-nil for the INTERNAL variant only — its test files emit into
@@ -3157,6 +3158,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 
 	resolveDynamicTypeMarkers(resolveNames)
 	resolveDynamicInterfaceBases(resolveNames)
+	replayDeferredConstraintRecords()
 
 	for relPath, codes := range resolveWarningFacts(warningFacts, collectPackageVarWrites(pkg.Syntax, pkg.TypesInfo), true) {
 		testWarningFacts[relPath] = codes

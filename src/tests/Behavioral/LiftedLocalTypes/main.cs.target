@@ -79,9 +79,6 @@ internal static void embeddedLocalTypes() {
     fmt.Printf("%T\n"u8, h.embed);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sevenˢ = "seven"u8;
-
 internal partial struct foreignUnderlyingLocalTypes_myTime /*global::go.time_package.Time*/;
 
 internal partial struct foreignUnderlyingLocalTypes_myDur /*global::go.time_package.Duration*/;
@@ -91,7 +88,7 @@ internal partial struct foreignUnderlyingLocalTypes_inner /*global::go.time_pack
 internal static void foreignUnderlyingLocalTypes() {
     var m = new map<ж<foreignUnderlyingLocalTypes_myTime>, @string>();
     var t = @new<foreignUnderlyingLocalTypes_myTime>();
-    m[t] = sevenˢ;
+    m[t] = "seven";
     var (v, ok) = m[t, ꟷ];
     fmt.Println(v, ok, len(m));
     foreignUnderlyingLocalTypes_myDur d = default!;
