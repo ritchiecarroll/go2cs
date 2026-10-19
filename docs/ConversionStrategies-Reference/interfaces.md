@@ -196,6 +196,19 @@ A pointer-sourced cast to an interface implemented by a FOREIGN type references 
 
 An **EXPLICIT pointer-to-interface conversion** — Go's `image.Image(dst)` with `dst *image.RGBA` (image/draw) — is the same interface cast in conversion clothing and routes through the same machinery: `isTypeConversion` probes the ORIGINAL pointer type against an interface target (the value type alone does not implement it — the elem-only probe misread the conversion as a constructor call, `new image.Image(dst)`, CS0144), and the emission re-renders the argument in its BOX form and CASTS the adapter to the interface — `((image.Image)new image_ΔRGBAжImage(Ꮡdst))` — because the adapter implements its members explicitly, and a chained member access on the conversion result (`CrossPkgLib.Labeled(sp).Label()`) cannot bind on the adapter class itself (CS1929). (Guarded by `CrossPkgUser`'s `CrossPkgLib.Labeled(sp2).Label()` / `LabeledOf(sp2)` pair, output-compared vs Go.)
 
+## A pointer adapter names a GENERIC interface through the interface's own class
+`ImplementGenerator` takes the name of the interface an adapter implements from the interface symbol's display string. For a closed generic interface that is the fully qualified name, outer type and type arguments both. Until 2026-10-16 the name came from `GetFullTypeName`, whose generic arm writes `Name<args>` without the containing class. That bare name resolves only when the adapter's host class (the first class of the record's file) also declares the interface. Two arrangements host it elsewhere:
+- a record in one package for a generic interface declared in another;
+- an external test's record on a production pointer type, which anchors to the production class under the recompile model. crypto/mlkem at Go 1.26 is the measured instance: production `*DecapsulationKey768` against mlkem_test's `decapsulationKey[E encapsulationKey]`.
+
+Both built with CS0246 on the base list and one CS0540 per member. The adapter's class NAME does not change: it is composed from the simple interface name with the type arguments stripped. Only the generated file's hint name grows. For a non-generic interface the two spellings were already identical.
+
+<!-- generated: ImplementGenerator output for src/tests/Behavioral/GenericInterfaceCrossPackage, line 26; Generated/ is untracked, read 2026-10-16 -->
+```csharp
+internal sealed class decKeyжDecapKey : global::go.GenericInterfaceCrossPackage.keylike_package.DecapKey<global::go.GenericInterfaceCrossPackage.keylike_package.EncapKey>, IжAdapter
+```
+Guarded by the `GenericInterfaceCrossPackage` behavioral test (the interface and generic helper in sub-package `keylike`, the pointer implementers in `main`, output-compared against Go) and by GenTests `CrossClassGenericInterfaceAdapterTests`, which keeps two controls: a generic interface declared in the host class, and a non-generic interface from the other class.
+
 ## `%T` (and type-name rendering generally) unwraps generated adapters and pointer boxes
 
 Go's `%T` prints the interface value's **dynamic Go type** — `*strings.byteReplacer`, never an implementation artifact. The managed model interposes artifacts a name renderer must see through (strings' `TestPickAlgorithm`, which `%T`s each replacer algorithm, printed `strings.byteReplacerжreplacer`):

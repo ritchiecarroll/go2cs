@@ -305,8 +305,18 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
             return new StandardBox<array<T>>(new array<T>(backing, (int)index, (int)(length < available ? length : available)));
         }
 
+        // An element in NATIVE memory -- a native box, or an element of a native window such as an array field of a
+        // struct viewed over pinned bytes (`&buf.PathBuffer[0]`) -- is the base of a native block: the array is
+        // the native kind over its address, with Go's N, since nothing here knows how far the block extends. The
+        // raw route would build an array view no native memory can back, which the reverse conversion refuses.
+        if (length >= 0 && element is not null && nativeElementAddress(element) is var address and not 0)
+            return builtin.NativeArrayPointer<T>(address, length);
+
         return (ж<array<T>>)(uintptr)element!;
     }
+
+    private static nuint nativeElementAddress(ж<T> element) =>
+        element.NativeAddress is var address and not 0 ? address : element is ElemRefBox<T> run ? run.NativeElementAddress : 0;
 
     private static void checkArrayConversionLength(nint sourceLength, nint length)
     {

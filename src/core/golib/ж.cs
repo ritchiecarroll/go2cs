@@ -217,7 +217,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     public ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
         // the cached view: one FieldRefBox per (box, accessor) for the box's life (ж.Views.cs)
-        return viewOf(fieldRefFunc);
+        return nativeFieldView(viewOf(fieldRefFunc));
     }
 
     /// <summary>
@@ -227,8 +227,18 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </summary>
     public ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
-        return viewOf(fieldRefFunc);
+        return nativeFieldView(viewOf(fieldRefFunc));
     }
+
+    // A field of a struct in NATIVE memory (Go's `&p.f` with p a native pointer) is a native box at the field's GO
+    // offset, not a managed view at its CLR slot. The CLR layout of a converted struct is not always Go's: a value
+    // embed's storage is declared after the converter's fields, and an array or pointer field is a managed
+    // reference. So the slot is not where Go, or a native callee, put the field: runtime's lfstack node
+    // `&n.LFNode` read 8 bytes past the 512-aligned node and failed its tagged-pointer pack. A managed root pays
+    // one type test; a root whose field offset cannot be known keeps its view. An array field is a native window
+    // with its declared Go length (FieldRefBox.NativeFieldBox), so its elements are reached at Go's bytes too.
+    private static ж<TElem> nativeFieldView<TElem>(ж<TElem> view) =>
+        view is FieldRefBox<TElem> fieldRef && fieldRef.NativeFieldBox() is { } native ? native : view;
 
     private static class FieldRefWrappers<TElem>
     {
@@ -251,6 +261,20 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             }
         }
     }
+
+    /// <summary>
+    /// A reference to a field of the struct this pointer references -- Go's <c>p.f</c>, read, written or passed by
+    /// reference -- with no box in between. The field properties go2cs-gen emits for a struct reached through
+    /// <c>unsafe.Pointer</c> read here, so the site reads as Go does: <c>buf.SubstituteNameOffset = x</c>.
+    /// </summary>
+    /// <remarks>
+    /// A managed root answers the struct's own slot, <c>fieldRefFunc(ref Value)</c>, exactly what
+    /// <c>p.Value.f</c> reaches. A NATIVE root answers the field at its GO offset (see
+    /// <see cref="NativeBox{T}.FieldRef{TF}"/>): the CLR layout of a struct holding a managed reference is not
+    /// Go's, so the struct's own slot would read and write the wrong bytes, and its whole-value read refuses.
+    /// </remarks>
+    public ref TF field<TF>(FieldRefFunc<T, TF> fieldRefFunc) =>
+        ref this is NativeBox<T> native ? ref native.FieldRef(fieldRefFunc) : ref fieldRefFunc(ref Value);
 
     /// <summary>
     /// Gets a pointer to a field that is itself accessed through a pointer-yielding accessor.
@@ -689,7 +713,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // can at worst allocate one extra handle that the finalizer frees).
     // Whether T is a Go fixed array (array<E>, or a defined `type A [N]E` wrapper) whose element E holds a
     // managed reference. Per T and static, so the pointer conversion pays one static read for it, the
-    // PrefixChain gate's posture. A reference-type T keeps the data-pin arm it always had.
+    // PrefixChain gate's posture. A reference-type T (any) asks the array it holds instead.
     private static class FixedArrayElements
     {
         internal static readonly bool HoldReferences = typeof(T).IsValueType && default(T) is IArray { ElementHoldsReferences: true };
@@ -759,6 +783,9 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         fixed (T* slot = &ValueSlot)
             return (nuint)slot;
     }
+
+    // The deep funnel's pointer-field word (NativeStructMarshal.CallDeep): the same conversion a syscall argument takes.
+    unsafe nuint IGoReflectBox.NativeArgumentAddress() => (nuint)(uintptr)this;
 
     void IGoReflectBox.WriteBoxSlot(object? value)
     {
@@ -1098,9 +1125,16 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         // A NIL pointer's address is 0, matching Go (`uintptr(unsafe.Pointer(nil)) == 0`) — and
         // the syscall wrappers legitimately pass nil pointers whose numeric address is simply 0.
-        // The value-peeking IsNull is KEPT deliberately: this is the address model, and a
-        // reference-typed pointee has no address to report.
-        if (value is null || value.IsNull)
+        //
+        // The STRUCTURAL nil question, never the value-peeking IsNull (2026-10-16). A standard heap
+        // box holding a null reference or a null Nullable<T> is `&p` with p nil: the address of the
+        // variable, which Go reports as non-zero and which does not change when p is assigned. The
+        // peek answered 0 there and the box's number afterward. It dated from 4eb4d14de0, when a
+        // reference-typed pointee had no address to report; the token arm below now reports one for
+        // every such box, and the deep funnel carries reference-bearing out words through this
+        // operator (IGoReflectBox.NativeArgumentAddress). For the same reason the reads below go
+        // through ValueSlot, not Value: StandardBox.Value panics on its own value peek.
+        if (value is null || value.IsNilPointer)
             return default;
 
         // Every zerobase pointer is ONE address, the zerobase's own (GoZeroBase): Go's
@@ -1128,7 +1162,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // ("Object contains references"), which threw for unique's canonMap hashing a `[3]string` key
         // through unsafe.Pointer(&key). Such an array has no data to pin, so it takes the reference-bearing
         // token arm below, as any other reference-bearing pointee does.
-        if (value.Value is IArray arr && arr is not ISlice && !FixedArrayElements.HoldReferences)
+        if (value.ValueSlot is IArray arr && arr is not ISlice && !(typeof(T).IsValueType ? FixedArrayElements.HoldReferences : arr.ElementHoldsReferences))
         {
             uintptr dataAddr = (uintptr)value.pinnedArrayData(arr);
             ManagedPointerTokens.RegisterPinned((nuint)dataAddr.Value, value);
@@ -1154,7 +1188,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // statement, and the address outlives that statement by definition.
         value.EnsureStableAddress();
 
-        fixed (void* ptr = &value.Value)
+        fixed (void* ptr = &value.ValueSlot)
         {
             // The PROVENANCE record (DESIGN-pointer-provenance.md, RATIFIED): the pin is the one
             // guarantee the resolve-side validate-on-read leans on.
@@ -1186,7 +1220,8 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (value is not null && value.NativeAddress != 0)
             return (void*)value.NativeAddress;
 
-        if (value is null || value.IsNull)
+        // Structural, as in the uintptr operator above.
+        if (value is null || value.IsNilPointer)
             return null;
 
         // The zerobase's one address, as in the uintptr operator above.
@@ -1196,7 +1231,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // A pointer to a Go fixed array resolves to the pinned address of the array data — see the
         // uintptr operator above for the full rationale, including why the address is REGISTERED
         // (the provenance record and the keystone tether must see buffer addresses too).
-        if (value.Value is IArray arr && arr is not ISlice)
+        if (value.ValueSlot is IArray arr && arr is not ISlice)
         {
             void* dataAddr = value.pinnedArrayData(arr);
             ManagedPointerTokens.RegisterPinned((nuint)dataAddr, value);
@@ -1214,7 +1249,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         value.EnsureStableAddress();
 
-        fixed (T* ptr = &value.Value)
+        fixed (T* ptr = &value.ValueSlot)
         {
             // Reached on the UNPINNABLE path too, for the reason spelled at the uintptr twin:
             // the entry is stale by construction there, Resolve validates on read and answers

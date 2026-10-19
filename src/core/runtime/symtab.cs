@@ -11,6 +11,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(findfuncbucket))]
 partial class runtime_package {
 
 // Frames may be used to get function/file/line information for a
@@ -279,7 +280,7 @@ partial struct pcHeader {
 // moduledata is stored in statically allocated non-pointer memory;
 // none of the pointers here are visible to the garbage collector.
 partial struct moduledata {
-    public partial ref @internal.runtime.sys_package.NotInHeap NotInHeap { get; } // Only in static data
+    /*embed*/ public @internal.runtime.sys_package.NotInHeap NotInHeap; // Only in static data
     internal ж<pcHeader> pcHeader;
     internal slice<byte> funcnametab;
     internal slice<uint32> cutab;
@@ -670,7 +671,7 @@ internal static int32 startLine(this ж<Func> Ꮡf) {
     var fn = Ꮡf.raw();
     if (fn.isInlined()) { // inlined version
         var fi = fn.Reinterpret<_func, funcinl>();
-        return (~fi).startLine;
+        return fi.of(funcinl.ᏑstartLine).Value;
     }
     return fn.funcInfo().startLine;
 }
@@ -691,7 +692,7 @@ internal static ж<moduledata> findmoduledatap(uintptr pc) {
 }
 
 partial struct ΔfuncInfo {
-    internal partial ref ж<_func> _func { get; }
+    /*embed*/ internal ж<_func> _func;
     internal ж<moduledata> datap;
 }
 
@@ -761,7 +762,7 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
     var i = x % (uintptr)abi.FuncTabBucketSize / (uintptr)((uintptr)abi.FuncTabBucketSize / nsub);
 
     var ffb = (ж<findfuncbucket>)(uintptr)(add((@unsafe.Pointer)(~datap).findfunctab, b * /* unsafe.Sizeof(findfuncbucket{}) */ (uintptr)20));
-    var idx = (~ffb).idx + (uint32)(~ffb).subbuckets[i];
+    var idx = ffb.idx + (uint32)ffb.of(findfuncbucket.Ꮡsubbuckets).ElementRef(i);
 
     // Find the ftab entry.
     while ((~datap).ftab[idx + 1].entryoff <= pcOff) {

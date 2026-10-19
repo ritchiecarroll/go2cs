@@ -415,8 +415,8 @@ internal static (ж<pipe>, ж<pipe>) myPipe() {
 }
 
 internal partial struct pipe {
-    public partial ref ж<io_package.PipeReader> PipeReader { get; }
-    public partial ref ж<io_package.PipeWriter> PipeWriter { get; }
+    /*embed*/ public ж<io_package.PipeReader> PipeReader;
+    /*embed*/ public ж<io_package.PipeWriter> PipeWriter;
 }
 
 internal partial struct pipeAddr /*num:nint*/;

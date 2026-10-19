@@ -656,6 +656,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"userArena.free":  goosAny,
 		"arena_heapify":   goosAny,
 		"UserArena.New":   goosAny,
+		// rtype.string reads the type's name through nameOff into the linker's name blob. A descriptor
+		// synthesized from a managed type (abi.synthType) has no blob and a zero Str, so the converted body
+		// answered "" for it: a *TypeAssertionError built from two golib descriptors printed "interface
+		// conversion:  is , not ". typestring_impl.cs answers a managed-backed descriptor with its Go
+		// spelling (GoReflect.GoTypeName, the renderer maps' typeString uses) and keeps Go's body for the rest.
+		"rtype.string": goosAny,
 		// traceMap's node lives in Go-layout memory: newTraceMapNode reinterprets traceRegionAlloc
 		// bytes as a reference-bearing traceMapNode. It is allocated managed instead (tracemap_impl.cs).
 		"traceMap.newTraceMapNode": goosAny,
@@ -1041,6 +1047,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// is what reflect's own rtype.Len reads), so hand-owning it turns a garbage read into the
 		// same truthful one, one layer down.
 		"Type.Len": goosAny,
+		// Type.Size is hand-owned for one arm. A descriptor whose Go size could not be derived, such as the
+		// unnamed array type argument of abi.TypeFor[[2]string]() (C# spells every [N]T as one array<T>), refuses
+		// by name. Its unstamped Size_ of 0 sent unique.Make down the zero-size arm, so two different pairs shared
+		// one handle and compared equal.
+		"Type.Size": goosAny,
 		// Type.ChanDir is the FOURTH member of that family and the only one with no synthesis
 		// waiting for it: the direction is not unpopulated, it is not in the managed type at all.
 		// `<-chan int`, `chan<- int` and `chan int` all emit as golib's `channel<T>`, so the
@@ -1133,6 +1144,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"unpackEface":     goosAny,
 		"valueInterface":  goosAny, // a free function `valueInterface(v Value, safe bool)`, not a method
 		"Value.Interface": goosAny,
+		// TypeAssert[T] (Go 1.25) is `v.Interface().(T)` by its own doc, implemented by reinterpreting the data
+		// word through unsafe: a fabricated eface for an interface T, a `*(*T)(v.ptr)` read for a concrete one.
+		// Neither can be honored in managed storage, and the eface read panicked on every json/asn1/gob/xml
+		// marshal path at Go 1.26. The hand-own answers Go's definition from the managed value.
+		"TypeAssert":      goosAny,
 		"Value.Bool":      goosAny,
 		"Value.Int":       goosAny,
 		"Value.Uint":      goosAny,
@@ -1299,6 +1315,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// ΔType wrapper by the underlying System.Type (canonType). See docs/phase4/DESIGN-reflection-bridge.md.
 		"Value.Type": goosAny,
 		"toType":     goosAny,
+		// TypeFor joins them. Go's body is `toRType(abi.TypeFor[T]())`, which the converter emits as a
+		// FRESH wrapper over a fresh box, the one public Type route that skipped canonType. `==` still
+		// held (it compares the boxes by storage identity), but reflect.DeepEqual's pointer
+		// short-circuit and sync.Map's key compare are reference identity, so TypeFor[T]() was not
+		// even DeepEqual to itself. Go 1.26's encoding/json and encoding/xml tests build their
+		// expected errors with TypeFor and compare them with DeepEqual (41 json rows, 1 xml row).
+		"TypeFor": goosAny,
 		// deepValueEqual keys its cycle-detection visited map on the values' internal data words
 		// (v.ptr / v.pointer()) — eface addresses the bridge never populates, so the auto form NREs
 		// converting the null unsafe.Pointer slot (strings/bytes TestSplit/TestSplitAfter, R5).
@@ -1839,6 +1862,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"fdMutex.increfAndClose": goosAny,
 		"fdMutex.rwlock":         goosAny,
 		"fdMutex.rwunlock":       goosAny,
+		// (*FD).DisassociateIOCP. Go associates every pollable socket with its port at open, so
+		// NtSetInformationFile(FileReplaceCompletionInformation) always has a port to drop. The managed
+		// poller binds a socket to the CLR's port only at its FIRST overlapped submit (the S2 amendment,
+		// syscall/windows/zsyscall_windows_wsa_impl.cs), and for a socket with no IO yet the kernel
+		// answers STATUS_INVALID_PARAMETER: net's dup() failed TestFileConn/udp and /unix with
+		// windows.NTStatus 0xC000000D. The hand-own reaches Go's post-condition without the call when
+		// nothing was bound, and marks the descriptor so the lazy bind never binds it again.
+		// internal/poll/windows/fd_windows_impl.cs holds the body.
+		"FD.DisassociateIOCP": goosWindows,
 	},
 	// debug/pe's COFF symbol reader pair. Go re-VIEWS one 18-byte symbol record as two struct
 	// shapes — `(*COFFSymbolAuxFormat5)(unsafe.Pointer(&sym))` — a free re-typing of the same
@@ -2236,6 +2268,19 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// cost a registration, a placeholder and a body apiece to change the behaviour of code with
 		// no caller. wsaSendtoNoCallers_test.go is the guard for the day that stops being true.
 		"WSASendto": goosWindows,
+		// readFile and writeFile joined on 2026-10-17: the KERNEL32 members of the same seam, and the
+		// TransmitFile defect over a file handle. internal/poll's execIO submits every read and write
+		// on an overlapped file or pipe FD through them with `&o.o`, and the generated bodies created
+		// no record, so the handle was never bound to the CLR's completion port. The i9 measured all
+		// three steps of docs/phase4/probes/p2-named-pipe-deadline hanging (a deadline read, a plain
+		// write+read, a Close under a pending read), which is os
+		// TestVariousDeadlines1Proc/named_overlapped_pipe. Unlike the Winsock members these also
+		// serve SYNCHRONOUS callers (a nil overlapped, or Pread on a blocking handle), so the hand-own
+		// takes the seam only for a descriptor the poller owns and keeps the generated body for every
+		// other call. Body in zsyscall_windows_file_impl.cs; its harvest twin is
+		// internal/syscall/windows' GetOverlappedResult.
+		"readFile":  goosWindows,
+		"writeFile": goosWindows,
 		//
 		// LoadConnectEx is NOT overlapped at all, and is here because the netpoll design recorded the
 		// extension-pointer lookup as "synchronous and already working" and the crypto/tls census
@@ -2574,6 +2619,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// [module: go.GoRequiresUnsafe] and the csproj flipping to true is part of the intended
 		// footprint — unlike `syscall`, which already emits true.
 		"WSAGetOverlappedResult": goosWindows,
+		// GetOverlappedResult is its FILE twin (2026-10-17): execIO harvests a file or pipe FD's
+		// operation with it, and once syscall's readFile/writeFile submit through the seam the
+		// control block the kernel wrote is the record's, not the managed `o.o`. Same predicate as
+		// the submit, so a caller's own overlapped keeps the generated body.
+		"GetOverlappedResult": goosWindows,
 		// The SUBMIT half of the WriteMsg path, and the second defect on it. Its generated body hands
 		// the kernel `uintptr(unsafe.Pointer(msg))` -- the address of the MANAGED WSAMsg, whose
 		// syscall.Pointer class reference, ж<WSABuf> and inline reference-bearing Control land nowhere

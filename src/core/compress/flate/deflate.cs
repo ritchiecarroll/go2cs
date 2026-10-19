@@ -74,7 +74,7 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
 }.slice();
 
 partial struct compressor {
-    internal partial ref compressionLevel compressionLevel { get; }
+    /*embed*/ internal compressionLevel compressionLevel;
     internal ж<huffmanBitWriter> w;
     internal Action<slice<byte>, slice<uint32>> bulkHasher;
     // compression algorithm

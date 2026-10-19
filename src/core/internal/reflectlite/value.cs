@@ -11,6 +11,7 @@ using @unsafe = unsafe_package;
 using System.Runtime.CompilerServices;
 using go.@internal;
 
+[GoFieldAccess(typeof(abi.EmptyInterface))]
 partial class reflectlite_package {
 
 // Value is the reflection interface to a Go value.
@@ -55,7 +56,7 @@ partial struct Value {
     //
     // The remaining 22+ bits give a method number for method values.
     // If flag.kind() != Func, code can assume that flagMethod is unset.
-    internal partial ref flag flag { get; }
+    /*embed*/ internal flag flag;
 }
 
 partial struct flag /*num:uintptr*/;
@@ -125,25 +126,25 @@ internal static any packEface(Value v) {
             typedmemmove(t, c, ptr);
             ptr = c;
         }
-        e.Value.Data = ptr;
+        e.Data = ptr;
         break;
     }
     case {} when (flag)(v.flag & flagIndir) != 0: {
         // Value is indirect, but interface is direct. We need
         // to load the data at v.ptr into the interface data word.
-        e.Value.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        e.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
         break;
     }
     default: {
         // Value is direct, and so is the interface.
-        e.Value.Data = v.ptr;
+        e.Data = v.ptr;
         break;
     }}
     // Now, fill in the type portion. We're very careful here not
     // to have any operation between the e.word and e.typ assignments
     // that would let the garbage collector observe the partially-built
     // interface value.
-    e.Value.Type = t;
+    e.Type = t;
     return i;
 }
 

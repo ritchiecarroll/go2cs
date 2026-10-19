@@ -248,7 +248,7 @@ internal static (FileInfo, error) rootStat(ref Root r, @string name, bool lstat)
             if (errΔ1 != default!) {
                 return (default!, errΔ1);
             }
-            if (!lstat && fiΔ1._<ж<fileStat>>().isReparseTagNameSurrogate()) {
+            if (!lstat && fiΔ1._<FileInfo, ж<fileStat>>().isReparseTagNameSurrogate()) {
                 var (link, errΔ2) = readReparseLinkHandle(fd);
                 if (errΔ2 != default!) {
                     return (default!, errΔ2);

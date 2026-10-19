@@ -299,8 +299,10 @@ public class SyncTestBubbleTests
         Exception? escaped = OnGoroutine(() =>
             SyncTestBubble.Run(() => Goroutine.Start(() => select())));
 
+        // Main returned over the blocked member, so this is Go's main-exited deadlock (go1.26.9
+        // runtime/synctest.go:246-247).
         Assert.IsInstanceOfType(escaped, typeof(PanicException));
-        StringAssert.Contains(escaped!.Message, "deadlock: all goroutines in bubble are blocked");
+        StringAssert.Contains(escaped!.Message, "deadlock: main bubble goroutine has exited but blocked goroutines remain");
     }
 
     [TestMethod]

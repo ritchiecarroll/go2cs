@@ -183,10 +183,10 @@ public class MemberRecordGeneratorTests
     public void GoCommentsShapedLikeTheMarkerAreNeverRecorded()
     {
         // Go comments spelled exactly like the marker, in every place the converter carries one: the converter
-        // writes each with a space after its `/*`, so only the real embeds (two in `marked`, one in `tagged`)
-        // are recorded, as for the same source without them.
+        // writes each with a space after its `/*`, so only the real embeds (two in `marked`, two in `tagged`, the
+        // struct embed Inner a marked field since owner ruling (A)) are recorded, as for the same source without them.
         string converted = MarkerCommentsFixture();
-        string[] realEmbeds = ["Reader", "Stringer", "int"];
+        string[] realEmbeds = ["Inner", "Reader", "Stringer", "int"];
 
         CollectionAssert.AreEqual(realEmbeds, RecordedMembers(Run(converted), "Embedded"), "the converter's output");
 

@@ -8,6 +8,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(specialBubble))]
 partial class runtime_package {
 
 // A synctestBubble is a set of goroutines started by synctest.Run.
@@ -457,7 +458,7 @@ internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64
         // p is already associated with a bubble.
         // Return true iff it's the same bubble.
         var s = iter.ValueSlot.Reinterpret<special, specialBubble>();
-        if ((~s).bubbleid == bubbleid){
+        if (s.bubbleid == bubbleid){
             assoc = bubbleAssocCurrentBubble;
         } else {
             assoc = bubbleAssocOtherBubble;
@@ -469,10 +470,10 @@ internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         var s = (ж<specialBubble>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialBubbleAlloc).alloc());
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        s.Value.bubbleid = bubbleid;
-        s.Value.special.kind = _KindSpecialBubble;
-        s.Value.special.offset = offset;
-        s.Value.special.next = iter.ValueSlot;
+        s.bubbleid = bubbleid;
+        s.special.kind = _KindSpecialBubble;
+        s.special.offset = offset;
+        s.special.next = iter.ValueSlot;
         iter.ValueSlot = s.Reinterpret<specialBubble, special>();
         spanHasSpecials(span);
         assoc = bubbleAssocCurrentBubble;

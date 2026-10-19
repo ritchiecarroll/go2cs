@@ -67,6 +67,10 @@ internal static class IArrayTypeTemplate
 
                 public slice<{{targetTypeName}}> slice(nint low, nint high) => Value.slice(low, high);
 
+                // Go's 3-index `x[lo:hi:max]`: golib's array<T> overload, reached on the wrapper itself the way
+                // the 2-index forms are (a pointer to this type is sliced as `p.Value.slice(…)`).
+                public slice<{{targetTypeName}}> slice(nint low, nint high, nint max) => Value.slice(low, high, max);
+
                 public slice<{{targetTypeName}}> Slice(nint start, nint length) => Value.Slice(start, length);
 
                 public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();

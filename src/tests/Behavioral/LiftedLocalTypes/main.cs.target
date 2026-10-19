@@ -45,14 +45,14 @@ internal partial struct embeddedLocalTypes_embed /*dyn*/ {
 }
 
 internal partial struct embeddedLocalTypes_holder /*dyn*/ {
-    internal partial ref embeddedLocalTypes_myInt myInt { get; }
-    public partial ref embeddedLocalTypes_MyInt MyInt { get; }
-    internal partial ref embeddedLocalTypes_embed embed { get; }
+    /*embed*/ internal embeddedLocalTypes_myInt myInt;
+    /*embed*/ public embeddedLocalTypes_MyInt MyInt;
+    /*embed*/ internal embeddedLocalTypes_embed embed;
 }
 
 internal partial struct embeddedLocalTypes_ptrHolder /*dyn*/ {
-    internal partial ref ж<embeddedLocalTypes_myInt> myInt { get; }
-    internal partial ref ж<embeddedLocalTypes_embed> embed { get; }
+    /*embed*/ internal ж<embeddedLocalTypes_myInt> myInt;
+    /*embed*/ internal ж<embeddedLocalTypes_embed> embed;
 }
 
 internal static void embeddedLocalTypes() {

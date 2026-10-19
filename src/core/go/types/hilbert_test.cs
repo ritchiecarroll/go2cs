@@ -72,7 +72,7 @@ func main() {
 }
 
 partial struct gen {
-    public partial ref bytes_package.Buffer Buffer { get; }
+    /*embed*/ public bytes_package.Buffer Buffer;
 }
 
 internal static void p(this ж<gen> Ꮡg, @string format, params ꓸꓸꓸany argsʗp) {

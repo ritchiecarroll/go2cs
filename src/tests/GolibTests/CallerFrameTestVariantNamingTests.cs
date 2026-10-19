@@ -143,6 +143,20 @@ namespace GolibTests
                 "a nested literal frame must answer the recorded DOTTED counter, innermost span first");
         }
 
+        // (5b) The OUTER literal stopped on the line its nested literal starts on (Go's `marker(func() {`,
+        //      the caller mid-call): the frame's line, 110, lies in both spans, but the outer literal's
+        //      first statement, line 100, lies only in its own. Innermost-by-line alone answered the nested
+        //      literal's name here (func2.1): runtime TestRuntimeLockMetricsAndProfile's fn frame read
+        //      func4.1.1 where Go says func4.1.
+        [TestMethod]
+        public void RecordedOuterLiteralMidCallOnTheNestedLineNamesTheOuter()
+        {
+            Assert.AreEqual(
+                "litguard/probe.recordedOuterLiteralMidCallFrame.func2",
+                go.litguard.probe_package.recordedOuterLiteralMidCallFrame(),
+                "an outer literal frame on a nested literal's first line must answer the OUTER counter");
+        }
+
         // (6) The ruled fallback: a literal frame NO conversion recorded — an older artifact, a
         //     hand-written lambda — keeps the Roslyn-derived ordinal it always had. Only the shape
         //     is pinned; the exact ordinal is Roslyn's own closure-group numbering, which is the
@@ -341,7 +355,9 @@ namespace go.slcguard
 // The recorded-literal shapes. `#line` remaps each method — its lambda's sequence points included —
 // into the fictional file the assembly record at the top of this file describes, so the lambda
 // frames' PDB positions land inside the recorded spans: the first method's lines start at 100 (the
-// outer literal's span alone), the second's at 110 (inside BOTH spans, where innermost must win).
+// outer literal's span alone), the second's at 110 (inside BOTH spans, where innermost must win). The
+// mid-call method between them opens its literal at 104-109 (the outer span alone) and makes its call
+// from line 110, so its frame sits in both spans while its first statement sits in the outer one.
 // Everything else about the shapes matches the classes above: namespace `go.<dir>`, a
 // `<pkg>_package` class, which is all isConvertedGoFrame asks.
 //
@@ -370,6 +386,19 @@ namespace go.litguard
         public static string recordedOuterLiteralFrame()
         {
             Func<string> literal = [MethodImpl(MethodImplOptions.NoInlining)] () => GolibTests.CallerFrameTestVariantNamingTests.CallerFunctionName();
+
+            return literal();
+        }
+#line 104 "litguard_probe_recorded.cs"
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static string recordedOuterLiteralMidCallFrame()
+        {
+            Func<string> literal = [MethodImpl(MethodImplOptions.NoInlining)] () =>
+            {
+                string? none = null;
+#line 110 "litguard_probe_recorded.cs"
+                return none ?? GolibTests.CallerFrameTestVariantNamingTests.CallerFunctionName();
+            };
 
             return literal();
         }

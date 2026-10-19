@@ -55,14 +55,21 @@ public static class GoAsyncIO
     // mints of `&o.o` at three call sites resolve to ONE record.
     private static readonly ConcurrentDictionary<object, operationSlot> s_operationState = new();
 
-    // One operation's state, plus the (descriptor, mode) a submit bound it to. A slot made by
-    // GetOrCreateOperationState alone is UNBOUND and matches any binding; a slot made by
-    // GetOrBindOperationState matches only its own pair (see that method for why).
-    private sealed class operationSlot(Lazy<object> state, bool bound, nuint descriptor, nint mode)
+    // Descriptors the WAITER has taken off the completion mechanism (see MarkUnassociated). A
+    // submitting package reads this to decide how to issue an operation, and a record keeps the
+    // answer it was built under, so a mark retires every record built before it.
+    private static readonly ConcurrentDictionary<nuint, bool> s_unassociated = new();
+
+    // One operation's state, plus the (descriptor, mode) a submit bound it to and whether that
+    // descriptor was unassociated when it did. A slot made by GetOrCreateOperationState alone is
+    // UNBOUND and matches any binding; a slot made by GetOrBindOperationState matches only its own
+    // pair and association state (see that method for why).
+    private sealed class operationSlot(Lazy<object> state, bool bound, nuint descriptor, nint mode, bool unassociated = false)
     {
         internal readonly Lazy<object> State = state;
 
-        internal bool Matches(nuint other, nint otherMode) => !bound || (descriptor == other && mode == otherMode);
+        internal bool Matches(nuint other, nint otherMode) =>
+            !bound || (descriptor == other && mode == otherMode && unassociated == IsUnassociated(other));
     }
 
     // Completion work an operation owes, keyed the same way its state is (netpoll design SS4.8).
@@ -85,9 +92,16 @@ public static class GoAsyncIO
     public static void SetReadiness(nuint descriptor, Action<nint>? sink)
     {
         if (sink is null)
+        {
             s_sinks.TryRemove(descriptor, out _);
+        }
         else
+        {
+            // A new registration is a new descriptor that reuses a retired number, so it starts
+            // associable whatever the old one was marked.
+            s_unassociated.TryRemove(descriptor, out _);
             s_sinks[descriptor] = sink;
+        }
     }
 
     /// <summary>
@@ -112,6 +126,20 @@ public static class GoAsyncIO
 
         return true;
     }
+
+    /// <summary>
+    /// Reports whether a readiness sink is registered for <paramref name="descriptor"/>, which is to
+    /// say whether the WAITER owns the descriptor's completions.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor to look up.</param>
+    /// <returns><c>true</c> when a sink is registered.</returns>
+    /// <remarks>
+    /// A submitting package whose OS routine also serves callers OUTSIDE the waiter reads this to
+    /// choose: an operation on a descriptor the waiter owns is issued through the completion
+    /// mechanism, and any other is issued exactly as the caller wrote it. Associating a descriptor
+    /// nobody waits on would route its completions to a port nobody reads.
+    /// </remarks>
+    public static bool HasReadiness(nuint descriptor) => s_sinks.ContainsKey(descriptor);
 
     /// <summary>
     /// Gets the submitting package's state for <paramref name="descriptor"/>, creating it EXACTLY
@@ -161,10 +189,40 @@ public static class GoAsyncIO
     public static void RemoveDescriptor(nuint descriptor)
     {
         s_sinks.TryRemove(descriptor, out _);
+        s_unassociated.TryRemove(descriptor, out _);
 
         if (s_descriptorState.TryRemove(descriptor, out Lazy<object>? lazy) && lazy.IsValueCreated)
             (lazy.Value as IDisposable)?.Dispose();
     }
+
+    /// <summary>
+    /// Records that the WAITER has taken <paramref name="descriptor"/> off the completion mechanism,
+    /// so no submitting package may associate it with one again.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor the waiter disassociated.</param>
+    /// <remarks>
+    /// <para>
+    /// This is Go's <c>(*FD).DisassociateIOCP</c> post-condition: the handle belongs to no completion
+    /// port, and its later IO waits on the operation's own event (<c>waitIO</c>'s non-pollable arm).
+    /// A submitting package that associates descriptors LAZILY, at the first operation, would
+    /// otherwise associate a disassociated handle again on its next submit, and route that
+    /// operation's completion to a port nobody is waiting on.
+    /// </para>
+    /// <para>
+    /// The mark lives until <see cref="RemoveDescriptor"/> retires the descriptor or a new
+    /// <see cref="SetReadiness"/> registers its number again. Every operation record built before
+    /// the mark stops matching (see <see cref="GetOrBindOperationState"/>), so the next submit on
+    /// that descriptor builds a record under the new state.
+    /// </para>
+    /// </remarks>
+    public static void MarkUnassociated(nuint descriptor) => s_unassociated[descriptor] = true;
+
+    /// <summary>
+    /// Reports whether <paramref name="descriptor"/> was marked by <see cref="MarkUnassociated"/>.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor to look up.</param>
+    /// <returns><c>true</c> when the descriptor may not be associated.</returns>
+    public static bool IsUnassociated(nuint descriptor) => s_unassociated.ContainsKey(descriptor);
 
     /// <summary>
     /// Gets the submitting package's state for one operation, creating it EXACTLY once.
@@ -197,7 +255,8 @@ public static class GoAsyncIO
     /// submit on the wrong association and wake the wrong waiter.
     /// </para>
     /// <para>
-    /// So a key reused for a different pair gets a NEW record. The old one is removed with any
+    /// So a key reused for a different pair gets a NEW record, and so does a key whose descriptor was
+    /// marked by <see cref="MarkUnassociated"/> after its record was built. The old one is removed with any
     /// pending completion work and disposed when disposable. That is safe because a pooled
     /// operation goes back to the pool only after <c>execIO</c> has harvested it: nothing is in
     /// flight on the record being retired.
@@ -211,7 +270,8 @@ public static class GoAsyncIO
         while (true)
         {
             operationSlot slot = s_operationState.GetOrAdd(key, _ =>
-                new operationSlot(new Lazy<object>(factory, LazyThreadSafetyMode.ExecutionAndPublication), true, descriptor, mode));
+                new operationSlot(new Lazy<object>(factory, LazyThreadSafetyMode.ExecutionAndPublication), true, descriptor, mode,
+                    IsUnassociated(descriptor)));
 
             if (slot.Matches(descriptor, mode))
                 return slot.State.Value;

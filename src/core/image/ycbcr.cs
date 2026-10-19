@@ -229,7 +229,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
 // colors. A and AStride are analogous to the Y and YStride fields of the
 // embedded YCbCr.
 partial struct NYCbCrA {
-    public partial ref YCbCr YCbCr { get; }
+    /*embed*/ public YCbCr YCbCr;
     public slice<uint8> A;
     public nint AStride;
 }

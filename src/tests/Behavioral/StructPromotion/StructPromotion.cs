@@ -27,8 +27,8 @@ public static bool IsManager(this Employee e) {
 }
 
 partial struct Record {
-    public partial ref Person Person { get; }
-    public partial ref Employee Employee { get; }
+    /*embed*/ public Person Person;
+    /*embed*/ public Employee Employee;
 }
 
 public static bool IsDr(this Record p) {
@@ -44,7 +44,7 @@ internal static @string describe(this ref commonBase c) {
 }
 
 partial struct ledger {
-    internal partial ref commonBase commonBase { get; }
+    /*embed*/ internal commonBase commonBase;
     internal nint seq;
 }
 

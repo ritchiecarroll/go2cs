@@ -157,7 +157,7 @@ public static net.Conn NetConn(this ref Conn c) {
 // A halfConn represents one direction of the record layer
 // connection, either sending or receiving.
 partial struct halfConn {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal error err;  // first permanent error
     internal uint16 version; // protocol version
     internal any cipher;    // cipher algorithm

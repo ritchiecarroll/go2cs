@@ -31,13 +31,13 @@ partial struct Parameters {
 
 // PublicKey represents a DSA public key.
 partial struct PublicKey {
-    public partial ref Parameters Parameters { get; }
+    /*embed*/ public Parameters Parameters;
     public ж<bigꓸInt> Y;
 }
 
 // PrivateKey represents a DSA private key.
 partial struct PrivateKey {
-    public partial ref PublicKey PublicKey { get; }
+    /*embed*/ public PublicKey PublicKey;
     public ж<bigꓸInt> X;
 }
 

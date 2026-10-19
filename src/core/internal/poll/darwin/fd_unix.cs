@@ -23,7 +23,7 @@ partial struct FD {
     // System file descriptor. Immutable until Close.
     public nint Sysfd;
     // Platform dependent state of the file descriptor.
-    public partial ref SysFile SysFile { get; }
+    /*embed*/ public SysFile SysFile;
     // I/O poller.
     internal pollDesc pd;
     // Semaphore signaled when file is closed.

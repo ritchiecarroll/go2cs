@@ -30,7 +30,7 @@ partial struct generation {
     internal slice<ThreadID> batchMs;
     internal slice<cpuSample> cpuSamples;
     internal timestamp minTs;
-    internal partial ref ж<evTable> evTable { get; }
+    /*embed*/ internal ж<evTable> evTable;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -123,7 +123,7 @@ internal static (ж<generation>, error) readGeneration(ж<bufio.Reader> Ꮡr, ve
 // Used only for trace versions < Go126.
 partial struct spilledBatch {
     internal uint64 gen;
-    internal partial ref ж<batch> batch { get; }
+    /*embed*/ internal ж<batch> batch;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

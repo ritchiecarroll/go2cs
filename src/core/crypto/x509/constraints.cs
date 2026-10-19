@@ -498,7 +498,7 @@ internal static error checkConstraints<T, V, P>(constraints<T, V> c, V s, P p)
     if (c.excluded != default!) {
         {
             var (constraint, found) = c.excluded.query(s); if (found) {
-                return fmt.Errorf("%s %q is excluded by constraint %q"u8, c.constraintType, p, constraint);
+                return fmt.Errorf("%s %q is excluded by constraint %q"u8, c.constraintType, p, (constraint).OrTypedNilOf());
             }
         }
     }

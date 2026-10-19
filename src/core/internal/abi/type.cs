@@ -264,7 +264,7 @@ partial struct Imethod {
 
 // ArrayType represents a fixed array type.
 partial struct ΔArrayType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // array element type
     public ж<Type> Slice; // slice type
     public uintptr Len;
@@ -285,55 +285,55 @@ public static ΔChanDir InvalidDir => 0;
 
 // ChanType represents a channel type
 partial struct ChanType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
     public ΔChanDir Dir;
 }
 
 partial struct structTypeUncommon {
-    public partial ref ΔStructType StructType { get; }
+    /*embed*/ public ΔStructType StructType;
     internal UncommonType u;
 }
 
 // go2cs generated this placeholder — func ChanDir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal partial struct Uncommon_u /*dyn*/ {
-    public partial ref PtrType PtrType { get; }
+    /*embed*/ public PtrType PtrType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ1 /*dyn*/ {
-    public partial ref ΔFuncType FuncType { get; }
+    /*embed*/ public ΔFuncType FuncType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ2 /*dyn*/ {
-    public partial ref SliceType SliceType { get; }
+    /*embed*/ public SliceType SliceType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ3 /*dyn*/ {
-    public partial ref ΔArrayType ArrayType { get; }
+    /*embed*/ public ΔArrayType ArrayType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ4 /*dyn*/ {
-    public partial ref ChanType ChanType { get; }
+    /*embed*/ public ChanType ChanType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ5 /*dyn*/ {
-    public partial ref ΔMapType MapType { get; }
+    /*embed*/ public ΔMapType MapType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ6 /*dyn*/ {
-    public partial ref ΔInterfaceType InterfaceType { get; }
+    /*embed*/ public ΔInterfaceType InterfaceType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ7 /*dyn*/ {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     internal UncommonType u;
 }
 
@@ -386,10 +386,7 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
 
 // go2cs generated this placeholder — func InterfaceType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// Size returns the size of data with type t.
-public static uintptr Size(this ref Type t) {
-    return t.Size_;
-}
+// go2cs generated this placeholder — func Size is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Align returns the alignment of data with type t.
 public static nint Align(this ref Type t) {
@@ -401,7 +398,7 @@ public static nint FieldAlign(this ref Type t) {
 }
 
 partial struct ΔInterfaceType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ΔName PkgPath;      // import path
     public slice<Imethod> Methods; // sorted by hash
 }
@@ -432,7 +429,7 @@ public static nint NumMethod(this ref ΔInterfaceType t) {
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 partial struct SliceType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // slice element type
 }
 
@@ -448,7 +445,7 @@ partial struct SliceType {
 //		[2]*rtype    // [0] is in, [1] is out
 //	}
 partial struct ΔFuncType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public uint16 InCount;
     public uint16 OutCount; // top bit is set if last input parameter is ...
 }
@@ -478,7 +475,7 @@ public static bool IsVariadic(this ref ΔFuncType t) {
 }
 
 partial struct PtrType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // pointer element (pointed at) type
 }
 
@@ -493,7 +490,7 @@ public static bool Embedded(this ref StructField f) {
 }
 
 partial struct ΔStructType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ΔName PkgPath;
     public slice<StructField> Fields;
 }

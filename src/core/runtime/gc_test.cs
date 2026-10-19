@@ -121,7 +121,7 @@ internal partial struct TestGcRescan_X /*dyn*/ {
 }
 
 internal partial struct TestGcRescan_Y /*dyn*/ {
-    public partial ref TestGcRescan_X X { get; }
+    /*embed*/ public TestGcRescan_X X;
     internal ж<TestGcRescan_Y> nexty;
     internal ж<nint> p;
 }

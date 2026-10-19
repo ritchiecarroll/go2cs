@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
@@ -13,8 +14,8 @@ namespace GolibTests;
 /// Fake time in a synctest bubble (S3 of DESIGN-gopark-goready-synctest.md): a member reads its
 /// bubble's clock, which starts at 2000-01-01 00:00:00 UTC and moves only when the bubble is idle --
 /// straight to the next fake timer -- so a Sleep, a Timer or an AfterFunc of any length completes at
-/// its exact fake deadline in (almost) no real time. A fake timer touched from outside the bubble
-/// panics with Go's text.
+/// its exact fake deadline in (almost) no real time. A fake timer stopped or reset from outside any
+/// bubble is fatal with Go's text (a panic at Go 1.24).
 /// </summary>
 [TestClass]
 public class SyncTestFakeTimeTests
@@ -103,6 +104,10 @@ public class SyncTestFakeTimeTests
                 Goroutine.Start(() => sleeper("c", 3));
                 Goroutine.Start(() => sleeper("a", 1));
                 Goroutine.Start(() => sleeper("b", 2));
+
+                // Main outlives the last deadline: a bubble's time stops when main returns (go1.26.9
+                // runtime/synctest.go:230-233).
+                time.Sleep(Seconds(4));
             })));
 
         Assert.AreEqual("abc", order, "fake time advances to each deadline in turn");
@@ -141,6 +146,10 @@ public class SyncTestFakeTimeTests
                     inBubble = SyncTestBubble.Current is not null;
                     ranAtNs = (long)time.Since(start);
                 });
+
+                // Main outlives the deadline, as time stops when main returns (go1.26.9
+                // runtime/synctest.go:230-233).
+                time.Sleep(Seconds(8));
             })));
 
         Assert.IsTrue(inBubble, "an AfterFunc's goroutine is started by the bubble and belongs to it");
@@ -161,31 +170,70 @@ public class SyncTestFakeTimeTests
                 beforeWaitNs = time.Now().UnixNano();
                 SyncTestBubble.Wait();
                 afterWaitNs = time.Now().UnixNano();
+
+                // Main outlives the sleeper: returning over a blocked member is a deadlock (go1.26.9
+                // runtime/synctest.go:246-247).
+                time.Sleep(Seconds(61));
             })));
 
         Assert.AreEqual(beforeWaitNs, afterWaitNs, "Wait returned over the sleeper without moving fake time");
     }
 
+    // Go 1.26's stop/reset faults end the process (FatalReport.Fatal exits), so they are read at the
+    // decision both call sites consult; the -tests row TestTimerFromInsideBubble covers the fatal.
+    private static string? TimerFault(ж<time.Timer> box, string operation)
+    {
+        const BindingFlags Private = BindingFlags.Static | BindingFlags.NonPublic;
+        object timer = typeof(time).GetMethod("runtimeTimerOf", Private)!.Invoke(null, [box])!;
+        return (string?)typeof(time).GetMethod("outsideBubbleTimerFault", Private)!.Invoke(null, [timer, operation]);
+    }
+
     [TestMethod]
-    public void AFakeTimerFromOutsideTheBubblePanics()
+    public void AFakeTimerFromOutsideTheBubbleIsFatal()
     {
         ж<time.Timer>? leaked = null;
-        AssertNoFailure(OnGoroutine(() => SyncTestBubble.Run(() => { leaked = time.NewTimer(Seconds(1)); leaked.Stop(); })));
+        string? insideStop = "unset", insideReset = "unset";
 
-        StringAssert.Contains(OnGoroutine(() => leaked!.Stop())?.Message, "stop of synctest timer from outside bubble");
-        StringAssert.Contains(OnGoroutine(() => leaked!.Reset(Seconds(1)))?.Message, "reset of synctest timer from outside bubble");
+        AssertNoFailure(OnGoroutine(() => SyncTestBubble.Run(() =>
+        {
+            leaked = time.NewTimer(Seconds(1));
+            insideStop = TimerFault(leaked, "stop");
+            insideReset = TimerFault(leaked, "reset");
+            leaked.Stop();
+        })));
+
+        Assert.IsNull(insideStop, "a member may stop its bubble's timer");
+        Assert.IsNull(insideReset, "a member may reset its bubble's timer");
+
+        string? stop = null, reset = null, plain = "unset";
+        AssertNoFailure(OnGoroutine(() =>
+        {
+            stop = TimerFault(leaked!, "stop");
+            reset = TimerFault(leaked!, "reset");
+
+            ж<time.Timer> real = time.NewTimer(Seconds(1));
+            plain = TimerFault(real, "stop");
+            real.Stop();
+        }));
+
+        Assert.AreEqual("stop of synctest timer from outside bubble", stop);
+        Assert.AreEqual("reset of synctest timer from outside bubble", reset);
+        Assert.IsNull(plain, "a timer made outside any bubble is not fake");
     }
 
     [TestMethod]
     public void ABubbleBlockedForeverWithTimersPendingStillReportsItsDeadlock()
     {
-        // Run keeps advancing fake time while timers remain; once none is pending and a member is
-        // still blocked, it reports Go's deadlock.
+        // Run keeps advancing fake time while timers remain; once none is pending and the bubble is
+        // still blocked, it reports Go's deadlock. Main is the one blocked: had it returned, time would
+        // have stopped there and the text would be the main-exited one (go1.26.9
+        // runtime/synctest.go:230-233, 246-249).
         Exception? escaped = OnGoroutine(() =>
             SyncTestBubble.Run(() =>
             {
                 channel<int> never = new(0);
-                Goroutine.Start(() => { time.Sleep(Seconds(10)); never.Receive(); });
+                time.Sleep(Seconds(10));
+                never.Receive();
             }));
 
         StringAssert.Contains(escaped?.Message, "deadlock: all goroutines in bubble are blocked");

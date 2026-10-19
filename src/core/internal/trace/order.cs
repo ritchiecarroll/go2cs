@@ -1364,7 +1364,7 @@ partial struct gState {
     // regions are the active user regions for this goroutine.
     internal slice<userRegion> regions;
     // rangeState is the state of special time ranges bound to this goroutine.
-    internal partial ref rangeState rangeState { get; }
+    /*embed*/ internal rangeState rangeState;
 }
 
 // beginRegion starts a user region on the goroutine.
@@ -1394,7 +1394,7 @@ partial struct pState {
     internal tracev2.ProcStatus status;
     internal seqCounter seq;
     // rangeState is the state of special time ranges bound to this proc.
-    internal partial ref rangeState rangeState { get; }
+    /*embed*/ internal rangeState rangeState;
 }
 
 // mState is the state of a thread at a point in the trace.

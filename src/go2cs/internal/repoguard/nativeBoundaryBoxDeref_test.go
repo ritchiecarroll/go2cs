@@ -31,8 +31,10 @@ import (
 // blittable mirror with its size ASSERTED, transcribed into the managed record on arrival.
 //
 // Fork (iii) -- handing the kernel a managed pointer TOKEN as an argument -- is a different defect and
-// is already answered at run time by refuseManagedPointerTokens (syscall/windows/dll_windows.cs), which
-// throws. Fork (ii) has no such door: nothing at run time can tell a native address from a wrong one.
+// is already answered at run time by the windows funnel (syscall/windows/dll_windows.cs), which copies
+// the pointee at Go's layout through NativeStructMarshal.CallDeep or refuses it by name (2026-10-16;
+// before that it refused every token). Fork (ii) has no such door: nothing at run time can tell a native
+// address from a wrong one.
 // That is why it needs a census.
 //
 // PROVENANCE. C1's family sizing (coord-queue q86; the sizing at 3480c8ddb6 §3) declared 7 members. C1

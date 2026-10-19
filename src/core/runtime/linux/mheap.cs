@@ -18,6 +18,7 @@ using @internal;
 using @internal.runtime;
 using System.Runtime.InteropServices;
 
+[GoFieldAccess(typeof(mheap), typeof(Δsliceᴛ), typeof(specialfinalizer), typeof(specialCleanup), typeof(specialCheckFinalizer), typeof(specialTinyBlock), typeof(specialWeakHandle), typeof(immortalWeakHandle), typeof(specialprofile), typeof(specialReachable), typeof(specialSecret))]
 partial class runtime_package {
 
 // minPhysPageSize is a lower-bound on the physical page size. The
@@ -517,30 +518,30 @@ internal static void recordspan(@unsafe.Pointer vh, @unsafe.Pointer Δp) {
 
     assertLockHeld(h.of(mheap.Ꮡlock));
 
-    if (len((~h).allspans) >= cap((~h).allspans)) {
+    if (len(h.allspans) >= cap(h.allspans)) {
         nint n = 64 * 1024 / goarch.PtrSize;
-        if (n < cap((~h).allspans) * 3 / 2) {
-            n = cap((~h).allspans) * 3 / 2;
+        if (n < cap(h.allspans) * 3 / 2) {
+            n = cap(h.allspans) * 3 / 2;
         }
         ref var @new = ref heap<slice<ж<mspan>>>(out var Ꮡnew);
         var sp = Ꮡnew.Reinterpret<slice<ж<mspan>>, Δsliceᴛ>();
-        sp.Value.Δarray = (uintptr)sysAlloc((uintptr)n * (uintptr)goarch.PtrSize, Ꮡmemstats.of(mstats.Ꮡother_sys), allspansArrayˢ);
-        if ((~sp).Δarray == nil) {
+        sp.Δarray = (uintptr)sysAlloc((uintptr)n * (uintptr)goarch.PtrSize, Ꮡmemstats.of(mstats.Ꮡother_sys), allspansArrayˢ);
+        if (sp.Δarray == nil) {
             @throw(runtimeCannotAllocateˢ);
         }
-        sp.Value.len = len((~h).allspans);
-        sp.Value.cap = n;
-        if (len((~h).allspans) > 0) {
-            copy(@new, (~h).allspans);
+        sp.len = len(h.allspans);
+        sp.cap = n;
+        if (len(h.allspans) > 0) {
+            copy(@new, h.allspans);
         }
-        var oldAllspans = h.Value.allspans;
+        var oldAllspans = h.allspans;
         (h.of(mheap.Ꮡallspans).Reinterpret<slice<ж<mspan>>, notInHeapSlice>()).Value = (Ꮡnew.Reinterpret<slice<ж<mspan>>, notInHeapSlice>()).Value;
         if (len(oldAllspans) != 0) {
             sysFree(@unsafe.Pointer.FromBox(Ꮡ(oldAllspans, 0)), (uintptr)cap(oldAllspans) * /* unsafe.Sizeof(oldAllspans[0]) */ (uintptr)8, Ꮡmemstats.of(mstats.Ꮡother_sys));
         }
     }
-    h.Value.allspans = (~h).allspans.slice(0, len((~h).allspans) + 1);
-    h.Value.allspans[len((~h).allspans) - 1] = s;
+    h.allspans = h.allspans.slice(0, len(h.allspans) + 1);
+    h.allspans[len(h.allspans) - 1] = s;
 }
 
 // A spanClass represents the size class and noscan-ness of a span.
@@ -2141,11 +2142,11 @@ internal static bool addfinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡf, uintptr
     @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     var s = (ж<specialfinalizer>)(uintptr)(Ꮡmheap_.of(mheap.Ꮡspecialfinalizeralloc).alloc());
     unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-    s.Value.special.kind = _KindSpecialFinalizer;
-    s.Value.fn = Ꮡf;
-    s.Value.nret = nret;
-    s.Value.fint = Ꮡfint;
-    s.Value.ot = Ꮡot;
+    s.special.kind = _KindSpecialFinalizer;
+    s.fn = Ꮡf;
+    s.nret = nret;
+    s.fint = Ꮡfint;
+    s.ot = Ꮡot;
     if (addspecial(Δp, s.of(specialfinalizer.Ꮡspecial), false)) {
         // This is responsible for maintaining the same
         // GC-related invariants as markrootSpans in any
@@ -2209,9 +2210,9 @@ internal static uint64 addCleanup(@unsafe.Pointer Δp, cleanupFn c) {
     mheap_.cleanupID++; // Increment first. ID 0 is reserved.
     var id = mheap_.cleanupID;
     unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-    s.Value.special.kind = _KindSpecialCleanup;
-    s.Value.cleanup = c;
-    s.Value.id = id;
+    s.special.kind = _KindSpecialCleanup;
+    s.cleanup = c;
+    s.id = id;
 
     var mp = acquirem();
     addspecial(Δp, s.of(specialCleanup.Ꮡspecial), true);
@@ -2258,11 +2259,11 @@ internal static void setCleanupContext(@unsafe.Pointer ptr, ж<_type> ᏑptrType
     @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     var s = (ж<specialCheckFinalizer>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialCheckFinalizerAlloc).alloc());
     unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-    s.Value.special.kind = _KindSpecialCheckFinalizer;
-    s.Value.cleanupID = cleanupID;
-    s.Value.createPC = createPC;
-    s.Value.funcPC = funcPC;
-    s.Value.ptrType = ᏑptrType;
+    s.special.kind = _KindSpecialCheckFinalizer;
+    s.cleanupID = cleanupID;
+    s.createPC = createPC;
+    s.funcPC = funcPC;
+    s.ptrType = ᏑptrType;
 
     var mp = acquirem();
     addspecial(ptr, s.of(specialCheckFinalizer.Ꮡspecial), true);
@@ -2381,7 +2382,7 @@ internal static void setTinyBlockContext(@unsafe.Pointer ptr) {
     @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     var s = (ж<specialTinyBlock>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialTinyBlockAlloc).alloc());
     unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-    s.Value.special.kind = _KindSpecialTinyBlock;
+    s.special.kind = _KindSpecialTinyBlock;
 
     var mp = acquirem();
     addspecial(ptr, s.of(specialTinyBlock.Ꮡspecial), false);
@@ -2581,8 +2582,8 @@ internal static ж<atomic.Uintptr> getOrAddWeakHandle(@unsafe.Pointer Δp) {
     var s = (ж<specialWeakHandle>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialWeakHandleAlloc).alloc());
     unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     var handle = Ꮡ(((~@new<getOrAddWeakHandle_weakHandleBox>()).h));
-    s.Value.special.kind = _KindSpecialWeakHandle;
-    s.Value.handle = handle;
+    s.special.kind = _KindSpecialWeakHandle;
+    s.handle = handle;
     handle.Store((uintptr)Δp);
     if (addspecial(Δp, s.of(specialWeakHandle.Ꮡspecial), false)) {
         // This is responsible for maintaining the same
@@ -2729,7 +2730,7 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
             // the same node are much less likely.
             if (newNode == nil) {
                 newNode = (ж<immortalWeakHandle>)(uintptr)(persistentalloc(/* unsafe.Sizeof(immortalWeakHandle{}) */ (uintptr)24, goarch.PtrSize, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
-                newNode.Value.ptr = Δp;
+                newNode.ptr = Δp;
             }
             if (m.CompareAndSwapNoWB(nil, @unsafe.Pointer.FromPinnedBox(newNode))) {
                 return newNode.handle();
@@ -2739,7 +2740,7 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
             // anymore.
             n = (ж<immortalWeakHandle>)(uintptr)(m.Load());
         }
-        if ((~n).ptr == Δp) {
+        if (n.ptr == Δp) {
             return n.handle();
         }
         m = n.at(immortalWeakHandle.Ꮡchildren, (ulong)((hashIter >> (int)((8 * goarch.PtrSize - 1)))));
@@ -2764,8 +2765,8 @@ internal static void setprofilebucket(@unsafe.Pointer Δp, ж<bucket> Ꮡb) {
     @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     var s = (ж<specialprofile>)(uintptr)(Ꮡmheap_.of(mheap.Ꮡspecialprofilealloc).alloc());
     unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-    s.Value.special.kind = _KindSpecialProfile;
-    s.Value.b = Ꮡb;
+    s.special.kind = _KindSpecialProfile;
+    s.b = Ꮡb;
     if (!addspecial(Δp, s.of(specialprofile.Ꮡspecial), false)) {
         @throw(setprofilebucketProfileˢ);
     }
@@ -2840,28 +2841,28 @@ internal static void freeSpecial(ж<special> Ꮡs, @unsafe.Pointer Δp, uintptr 
     var exprᴛ1 = s.kind;
     if (exprᴛ1 == _KindSpecialFinalizer) {
         var sf = Ꮡs.Reinterpret<special, specialfinalizer>();
-        queuefinalizer(Δp, (~sf).fn, (~sf).nret, (~sf).fint, (~sf).ot);
+        queuefinalizer(Δp, sf.fn, sf.nret, sf.fint, sf.ot);
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         Ꮡmheap_.of(mheap.Ꮡspecialfinalizeralloc).free(@unsafe.Pointer.FromPinnedBox(sf));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     }
     else if (exprᴛ1 == _KindSpecialWeakHandle) {
         var sw = Ꮡs.Reinterpret<special, specialWeakHandle>();
-        (~sw).handle.Store(0);
+        sw.handle.Store(0);
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         Ꮡmheap_.of(mheap.ᏑspecialWeakHandleAlloc).free(@unsafe.Pointer.FromPinnedBox(Ꮡs));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     }
     else if (exprᴛ1 == _KindSpecialProfile) {
         var sp = Ꮡs.Reinterpret<special, specialprofile>();
-        mProf_Free((~sp).b, size);
+        mProf_Free(sp.b, size);
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         Ꮡmheap_.of(mheap.Ꮡspecialprofilealloc).free(@unsafe.Pointer.FromPinnedBox(sp));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     }
     else if (exprᴛ1 == _KindSpecialReachable) {
         var sp = Ꮡs.Reinterpret<special, specialReachable>();
-        sp.Value.done = true;
+        sp.done = true;
         // The creator frees these.
     }
     else if (exprᴛ1 == _KindSpecialPinCounter) {
@@ -2874,7 +2875,7 @@ internal static void freeSpecial(ж<special> Ꮡs, @unsafe.Pointer Δp, uintptr 
         // Cleanups, unlike finalizers, do not resurrect the objects
         // they're attached to, so we only need to pass the cleanup
         // function, not the object.
-        ᏑgcCleanups.enqueue((~sc).cleanup);
+        ᏑgcCleanups.enqueue(sc.cleanup);
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         Ꮡmheap_.of(mheap.ᏑspecialCleanupAlloc).free(@unsafe.Pointer.FromPinnedBox(sc));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
@@ -2910,7 +2911,7 @@ internal static void freeSpecial(ж<special> Ꮡs, @unsafe.Pointer Δp, uintptr 
         // allocation since the only way to attach a secret special
         // is via the allocation path. This isn't universal for
         // tiny allocs, but we avoid them in mallocgc anyway.
-        memclrNoHeapPointers(Δp, (~ss).size);
+        memclrNoHeapPointers(Δp, ss.size);
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         Ꮡmheap_.of(mheap.ᏑspecialSecretAlloc).free(@unsafe.Pointer.FromPinnedBox(Ꮡs));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));

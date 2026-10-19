@@ -43,7 +43,7 @@ internal static @string Zeta(this embedded _) {
 }
 
 partial struct outer {
-    internal partial ref embedded embedded { get; }
+    /*embed*/ internal embedded embedded;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

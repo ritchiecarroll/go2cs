@@ -443,7 +443,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
     case ж<bool> d: {
         var (bv, err) = driver.Bool.ConvertValue(src);
         if (err == default!) {
-            d.Value = bv._<bool>();
+            d.Value = bv._<driverꓸValue, bool>();
         }
         return err;
     }

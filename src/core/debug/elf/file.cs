@@ -55,7 +55,7 @@ partial struct FileHeader {
 
 // A File represents an open ELF file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Prog>> Progs;
     internal io.Closer closer;
@@ -85,7 +85,7 @@ partial struct SectionHeader {
 
 // A Section represents a single section in an ELF file.
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.
@@ -200,7 +200,7 @@ partial struct ProgHeader {
 
 // A Prog represents a single ELF program header in an ELF binary.
 partial struct Prog {
-    public partial ref ProgHeader ProgHeader { get; }
+    /*embed*/ public ProgHeader ProgHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.

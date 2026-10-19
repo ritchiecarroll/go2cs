@@ -41,7 +41,7 @@ internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
 // evTable contains the per-generation data necessary to
 // interpret an individual event.
 partial struct evTable {
-    internal partial ref sync sync { get; }
+    /*embed*/ internal sync sync;
     internal dataTable<stringID, @string> strings;
     internal dataTable<stackID, stack> stacks;
     internal map<uint64, frame> pcs;
@@ -107,7 +107,7 @@ internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
     }
     {
         var (existing, ok) = d.get(id); if (ok) {
-            return fmt.Errorf("multiple %Ts with the same ID: id=%d, new=%v, existing=%v"u8, data, id, data, existing);
+            return fmt.Errorf("multiple %Ts with the same ID: id=%d, new=%v, existing=%v"u8, (data).OrTypedNilOf(), id, (data).OrTypedNilOf(), (existing).OrTypedNilOf());
         }
     }
     d.sparse[id] = data;
@@ -222,7 +222,7 @@ internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
 {
     var (data, ok) = d.get(id);
     if (!ok) {
-        throw panic(fmt.Sprintf("expected id %d in %T table"u8, id, data));
+        throw panic(fmt.Sprintf("expected id %d in %T table"u8, id, (data).OrTypedNilOf()));
     }
     return data;
 }
@@ -246,7 +246,7 @@ partial struct stackID /*num:uint64*/;
 
 // cpuSample represents a CPU profiling sample captured by the trace.
 partial struct cpuSample {
-    internal partial ref schedCtx schedCtx { get; }
+    /*embed*/ internal schedCtx schedCtx;
     internal ΔTime time;
     internal stackID stack;
 }

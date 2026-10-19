@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using runtime = runtime_package;
 
 partial class main_package {
 
@@ -27,7 +28,8 @@ internal static void @catch(@string what, Action f) {
         defer(() => {
             {
                 var r = recover(); if (r != default!){
-                    fmt.Printf("%s recovered: %v\n"u8, what, r);
+                    var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
+                    fmt.Printf("%s recovered: %v runtime.Error: %v\n"u8, what, r, isRuntimeError);
                 } else {
                     fmt.Printf("%s NO PANIC\n"u8, what);
                 }

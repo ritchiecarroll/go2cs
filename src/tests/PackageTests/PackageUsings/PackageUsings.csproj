@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Consumer fixture for each converted package's own usings (build/<PackageId>.props, written at pack
+       time by src/core/golib/buildTransitive/go.lib.pack.targets). Driven by test-package-usings.ps1,
+       which restores it from a chosen feed into a fresh package cache; it is not a solution member and
+       is never built by the corpus. Program.cs declares NO `using go.encoding;`: a Go method of
+       encoding/hex compiles only if the package's props supplies it. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <NoWarn>$(NoWarn);CS8981</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="go.encoding.hex" Version="$(GoPackageVersion)" />
+  </ItemGroup>
+
+  <!-- Pre-publish only: GoPackageProps names a build/<PackageId>.props taken out of a freshly packed
+       nupkg, to test it against an already-published package that does not carry one yet. A package
+       that ships the file brings it through NuGet's build/ import instead. -->
+  <Import Project="$(GoPackageProps)" Condition="'$(GoPackageProps)' != ''" />
+</Project>

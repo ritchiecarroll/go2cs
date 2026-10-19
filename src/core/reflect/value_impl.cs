@@ -153,6 +153,52 @@ internal static any /*i*/ valueInterface(ΔValue v, bool safe) {
     return packInterfaceValue(v);
 }
 
+// TypeAssert is semantically equivalent to:
+//
+//	v2, ok := v.Interface().(T)
+//
+// Hand-owned to that DEFINITION. Go 1.25 implements it by reinterpreting the Value's data word through unsafe:
+// for an interface T it fabricates an eface `abi.EmptyInterface{Type: v.typ(), Data: nil}` and asserts that, and
+// for a concrete T it compares descriptors and reads `*(*T)(v.ptr)`. Managed storage has no data word. The
+// fabricated eface was a dereference of an order token, and it panicked on every Go 1.26 json, asn1, gob and xml
+// marshal path, all of which call TypeAssert. The descriptor compare would also have read a dimless
+// TypeFor[[2]int]() against a value-built [2]int as different types.
+//
+// Go's own two preconditions come first, with TypeAssert's texts: an invalid Value, and a read-only one (Go refuses
+// those before Interface() would, under its own name). The general answer is the Value's interface value
+// (valueInterface, the one Interface() answers) asserted by golib's ordinary Go type assertion. Two arms keep Go's
+// ALLOCATION profile, which reflect's TestTypeAssertAllocs measures. An addressable Value's interface value is a
+// fresh box per read, which Go does not pay:
+//   - a CONCRETE T reads the slot itself, `ж<T>.Value`, or unboxes the stored value. Anything else takes the
+//     general answer, so a match is never decided on the C# type alone;
+//   - an INTERFACE T over a concrete Value decides on the TYPE first (builtin.TypeImplements, the cached method-set
+//     probe `_<T>` itself uses). That is Go's nil-data eface probe, so a failing assertion allocates nothing.
+public static (T, bool) TypeAssert<T>(ΔValue v) {
+    if (v.flag == 0) {
+        throw panic(Ꮡ(new ValueError("reflect.TypeAssert"u8, Invalid)));
+    }
+    if ((flag)(v.flag & flagRO) != 0) {
+        throw panic("reflect.TypeAssert: cannot return value obtained from unexported field or method");
+    }
+    if ((flag)(v.flag & flagMethod) != 0) {
+        v = makeMethodValue("TypeAssert"u8, v);
+    }
+    if (v.kind() != ΔInterface && typeof(T) != typeof(object)) {
+        if (!typeof(T).IsInterface) {
+            if (v.addrBox is ж<T> box) {
+                return (box.Value, true);
+            }
+            if (v.addrBox is null && v.boxed is T value) {
+                return (value, true);
+            }
+        }
+        else if (!global::go.builtin.TypeImplements<T>(v.typ_ == nil ? null : v.typ_.Value.sysType)) {
+            return (default!, false);
+        }
+    }
+    return valueInterface(v, false)._<T>(ᐧ);
+}
+
 // packInterfaceValue is the bridge's packEface: it builds the interface value for v, and Go's
 // rule for that is entirely about the TYPE half. An eface carries (type, data word), so a
 // POINTER-kinded Value whose data word is nil packs as a NON-nil interface holding
@@ -2570,6 +2616,15 @@ public static ΔType Type(this ΔValue v) {
 // unimplemented bridge gap, NOT canonical (tracked separately); do not rely on their identity.
 internal static ΔType toType(ж<abi.Type> Ꮡt) {
     return canonType(Ꮡt);
+}
+
+// TypeFor returns the [Type] that represents the type argument T. Hand-owned for the reason toType is:
+// Go's body is `toRType(abi.TypeFor[T]())`, an *rtype converted to Type, and that conversion mints a
+// fresh wrapper over a fresh box per call. Go interns the descriptor, so TypeFor[T]() is the same Type
+// TypeOf answers; route it through toType so it is. abi.TypeFor never answers nil, so canonType's nil
+// arm is not reached.
+public static ΔType TypeFor<T>() {
+    return toType(abi.TypeFor<T>());
 }
 
 // ==== Type side: reflect.rtype's ΔType methods over the abi.Type's carried System.Type ====

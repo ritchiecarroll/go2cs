@@ -71,7 +71,7 @@ partial struct Header {
 // returned by [Reader.Read] as tentative until they receive the [io.EOF]
 // marking the end of the data.
 partial struct Reader {
-    public partial ref Header Header { get; }       // valid after NewReader or Reader.Reset
+    /*embed*/ public Header Header;       // valid after NewReader or Reader.Reset
     internal flate.Reader r;
     internal io.ReadCloser decompressor;
     internal uint32 digest; // CRC-32, IEEE polynomial (section 8)

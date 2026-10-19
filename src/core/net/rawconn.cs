@@ -101,7 +101,7 @@ internal static poll.String Network(this ref rawConn c) {
 }
 
 partial struct rawListener {
-    internal partial ref rawConn rawConn { get; }
+    /*embed*/ internal rawConn rawConn;
 }
 
 internal static error Read(this ref rawListener l, Func<uintptr, bool> _) {

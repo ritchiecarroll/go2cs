@@ -148,6 +148,12 @@ const TypedNilFuncAccessor = "OrTypedNilFunc()"
 // argument list.
 const TypedNilUnsafePointerAccessor = "OrTypedNil"
 
+// TypedNilTypeParamAccessor is the golib extension method a value of TYPE-PARAMETER type takes on its way into an
+// EMPTY interface (`any`) when its type set can hold a pointer, a func or an unsafe.Pointer: the generic sibling of
+// TypedNilBoxAccessor and TypedNilFuncAccessor, decided per type argument at run time (golib TypedNilOf.cs), since
+// inside the generic body the converter cannot see which of them the argument is.
+const TypedNilTypeParamAccessor = "OrTypedNilOf()"
+
 // The -tests package-init hook: the erasable classic-partial method a production
 // package_init.cs static ctor ends with when converting under -tests, IMPLEMENTED by the
 // internal test variant's relocated-initializer file (go2cs initOrderOperations.go /

@@ -15,7 +15,7 @@ partial class tls_package {
 // connections to reuse parsed certificates, instead of re-parsing the
 // certificate for every connection, which is an expensive operation.
 partial struct weakCertCache {
-    public partial ref sync_package.Map Map { get; }
+    /*embed*/ public sync_package.Map Map;
 }
 
 internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> Ꮡwcc, slice<byte> der) {

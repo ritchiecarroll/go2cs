@@ -13,6 +13,7 @@
     <None Include="$(MSBuildThisFileDirectory)adapterNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)adapterPassSeparation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)adapterStructLocality_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)addCleanupCaptures.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
@@ -33,6 +34,8 @@
     <None Include="$(MSBuildThisFileDirectory)arrayCloneOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayCloneShadow_test.go" />
     <None Include="$(MSBuildThisFileDirectory)arrayDimsNilCargo.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion.go" />
+    <None Include="$(MSBuildThisFileDirectory)arrayDimsCompanion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines.go" />
     <None Include="$(MSBuildThisFileDirectory)asmTrampolines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)assemblyScopedAlias_test.go" />
@@ -171,6 +174,9 @@
     <None Include="$(MSBuildThisFileDirectory)escapedArrayElementAddress_test.go" />
     <None Include="$(MSBuildThisFileDirectory)eventFraming_test.go" />
     <None Include="$(MSBuildThisFileDirectory)expressionComments_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccess.go" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccessCollisions.txt" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccessEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />
@@ -324,6 +330,7 @@
     <None Include="$(MSBuildThisFileDirectory)memberMarkers.go" />
     <None Include="$(MSBuildThisFileDirectory)methodExpressionWrapper_test.go" />
     <None Include="$(MSBuildThisFileDirectory)methodSetConstraintNeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)methodlessFuncTypeLocal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)methodSetConstraintNeed.go" />
     <None Include="$(MSBuildThisFileDirectory)mixedKeyedComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleAncestryEmission_test.go" />
@@ -388,6 +395,7 @@
     <None Include="$(MSBuildThisFileDirectory)packageInitTestHook_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageStateOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)partialInstantiationAnonymousTypeArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)perUnitAliasRenames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformEmit.go" />
     <None Include="$(MSBuildThisFileDirectory)platformFilterSkip_test.go" />
@@ -402,6 +410,7 @@
     <None Include="$(MSBuildThisFileDirectory)platformProject.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformScopedDisclosures_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)pointerNamedArraySlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerReceiverMark_test.go" />
     <None Include="$(MSBuildThisFileDirectory)positionCalls_test.go" />
     <None Include="$(MSBuildThisFileDirectory)positionMapOperations.go" />
@@ -414,6 +423,7 @@
     <None Include="$(MSBuildThisFileDirectory)publishBuildLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishRebundle_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publishTimeout_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)rangeHeapBoxedVar_test.go" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-arm64.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)profiles\linux-x64.pubxml" />
@@ -456,6 +466,7 @@
     <None Include="$(MSBuildThisFileDirectory)runtimeDigestHandOwned_test.go" />
     <None Include="$(MSBuildThisFileDirectory)safePushGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)seededAliasNameCollision_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)selectDiscardBlankParam_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sameNameImportAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sameNamePackageInterface_test.go" />
     <None Include="$(MSBuildThisFileDirectory)s11Records_test.go" />
@@ -490,6 +501,7 @@
     <None Include="$(MSBuildThisFileDirectory)testAliasShadowOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testDeadline_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\hostlaunch\fixture\keys\k" />
@@ -506,6 +518,7 @@
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityInterface_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityProse_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeAssertSourceOverload_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilInterfaceBoxing.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilUnsafePointer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution.go" />
@@ -577,7 +590,9 @@
     <None Include="$(MSBuildThisFileDirectory)LICENSE-EXCEPTION" />
     <None Include="$(MSBuildThisFileDirectory)rootGoTypeDescriptor_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeParamNilArg_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeParamTypedNil_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeParamConstArg_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeParamFloatConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedConstMinMaxArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)toolchainGoRootFix_test.go" />
     <None Include="$(MSBuildThisFileDirectory)warningClearEmission_test.go" />

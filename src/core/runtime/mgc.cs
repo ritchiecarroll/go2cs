@@ -501,7 +501,7 @@ partial struct workType {
     // debug.gctrace heap sizes for this cycle.
     internal uint64 heap0, heap1, heap2;
     // Cumulative estimated CPU usage.
-    internal partial ref cpuStats cpuStats { get; }
+    /*embed*/ internal cpuStats cpuStats;
 }
 
 // go2cs generated this placeholder — func GC is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1690,7 +1690,7 @@ partial struct gcBgMarkWorkerNode {
 }
 
 partial struct gcBgMarkWorkerNodePadded {
-    internal partial ref gcBgMarkWorkerNode gcBgMarkWorkerNode { get; }
+    /*embed*/ internal gcBgMarkWorkerNode gcBgMarkWorkerNode;
     internal array<byte> pad = new((uintptr)((uintptr)tagAlign - /* unsafe.Sizeof(gcBgMarkWorkerNode{}) */ (uintptr)32) - gcBgMarkWorkerNodeRedZoneSize);
 }
 

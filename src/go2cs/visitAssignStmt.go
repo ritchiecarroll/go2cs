@@ -1611,6 +1611,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// across even when nil (see typedNilInterfaceBoxing.go). appendRhsPtrContext has
 				// already rendered it as the BOX rather than a deref alias.
 				rhsExpr = v.applyTypedNilPointerBox(rhs, rhsExpr)
+
+				// The TYPE-PARAMETER twin, only for a REAL empty-interface LHS (lhsIsEmptyInterface also answers for
+				// an LHS of type-parameter type, where wrapping would turn E into object).
+				if typeParam, ok := v.getType(rhs, false).(*types.TypeParam); ok && isEmptyInterfaceTarget(v.getType(lhs, false)) {
+					rhsExpr = applyTypedNilTypeParamBox(typeParam, rhsExpr)
+				}
 			}
 
 			// A `:=` DECLARATION whose RHS is a constant-folded NAMED-NUMERIC conversion

@@ -419,7 +419,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
     for (nint i = nclen; i < len(codeOrder); i++) {
         f.codebits.Value[codeOrder[i]] = 0;
     }
-    if (!f.h1.init((~f.codebits)[0..])) {
+    if (!f.h1.init(f.codebits.slice(0))) {
         return ((CorruptInputError)f.roffset);
     }
 
@@ -484,7 +484,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
         }
     }
 
-    if (!f.h1.init((~f.bits).slice(0, nlit)) || !f.h2.init((~f.bits).slice(nlit, nlit + ndist))) {
+    if (!f.h1.init(f.bits.slice(0, nlit)) || !f.h2.init(f.bits.slice(nlit, nlit + ndist))) {
         return ((CorruptInputError)f.roffset);
     }
 

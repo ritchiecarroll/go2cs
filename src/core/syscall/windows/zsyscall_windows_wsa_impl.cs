@@ -82,6 +82,14 @@
 // and really does reach the kernel). Binding lazily removes the hazard structurally: a socket that
 // only ever sees foreign overlapped IO is never associated at all.
 //
+// A DISASSOCIATED SOCKET IS NEVER BOUND AGAIN. net's dup() and os's File.Fd() call internal/poll's
+// DisassociateIOCP, whose hand-own (internal/poll/windows/fd_windows_impl.cs) marks the descriptor
+// with GoAsyncIO.MarkUnassociated. A socket that was never bound has no port to replace, and
+// NtSetInformationFile(FileReplaceCompletionInformation) answers STATUS_INVALID_PARAMETER for it, so
+// the hand-own skips the call there. From the mark on, the factory builds records with no binding, and
+// they submit with the caller's own event (see OverlappedOp), which is what Go's waitIO waits on once
+// the FD is no longer pollable.
+//
 // THE OVERLAPPED IS FREED AT THE NEXT SUBMIT, NOT IN THE CALLBACK, and that is deliberate. execIO
 // harvests with WSAGetOverlappedResult AFTER its wait returns, and that call reads Internal /
 // InternalHigh out of the very control block the kernel wrote -- so the block must outlive the
@@ -227,9 +235,17 @@ partial class syscall_package
     // BOXES whose pins hold the caller's own buffers still. Holding the address would not be enough:
     // the pin is a GCHandle owned by that one box and released with it, so a later InitBuf dropping
     // the last reference to a box the kernel is still writing through would unpin memory mid-flight.
+    //
+    // A record built for a descriptor the poller has DISASSOCIATED (GoAsyncIO.MarkUnassociated, set by
+    // internal/poll's hand-owned DisassociateIOCP) has no binding at all. Go's execIO gives such an
+    // operation its own event, `o.o.HEvent = h | 1` (the low bit keeps the kernel from queueing a
+    // completion packet), and waitIO's non-pollable arm blocks on that event. So the record submits a
+    // plain native OVERLAPPED that carries the caller's event, and never touches the CLR's port: a
+    // bound overlapped carries no event, and its completion would wake nobody.
     private sealed unsafe class OverlappedOp : IGoAsyncOperation, IDisposable
     {
-        internal readonly SocketBinding Binding;
+        // Null for a record on a disassociated descriptor (see above).
+        internal readonly SocketBinding? Binding;
         internal readonly nint Mode;
 
         // The key this record is filed under in golib's operation table. Kept so that retiring the
@@ -238,7 +254,7 @@ partial class syscall_package
         // of every socket the program ever opened.
         internal readonly object Key;
 
-        private readonly PreAllocatedOverlapped m_preallocated;
+        private readonly PreAllocatedOverlapped? m_preallocated;
         private NativeOverlapped* m_native;
 
         // Native staging: the WSABUF array for send/recv, the AcceptEx output block for accept.
@@ -250,12 +266,12 @@ partial class syscall_package
 
         private bool m_disposed;
 
-        internal OverlappedOp(SocketBinding binding, nint mode, object key)
+        internal OverlappedOp(SocketBinding? binding, nint mode, object key)
         {
             Binding = binding;
             Mode = mode;
             Key = key;
-            m_preallocated = new PreAllocatedOverlapped(completed, this, null);
+            m_preallocated = binding is null ? null : new PreAllocatedOverlapped(completed, this, null);
         }
 
         // The address the kernel knows this operation by -- and the ENTIRE contract
@@ -268,7 +284,17 @@ partial class syscall_package
         internal NativeOverlapped* Rearm()
         {
             releaseOverlapped();
-            m_native = Binding.Bound.AllocateNativeOverlapped(m_preallocated);
+
+            if (Binding is null)
+            {
+                // execIO sets the event on every submit, so it is read here rather than at creation.
+                m_native = (NativeOverlapped*)NativeMemory.AllocZeroed((nuint)sizeof(NativeOverlapped));
+                m_native->EventHandle = (nint)(nuint)(uintptr)((ж<Overlapped>)Key).Value.HEvent;
+            }
+            else
+            {
+                m_native = Binding.Bound.AllocateNativeOverlapped(m_preallocated!);
+            }
 
             m_pins.Clear();
 
@@ -308,7 +334,11 @@ partial class syscall_package
             if (m_native is null)
                 return;
 
-            Binding.Bound.FreeNativeOverlapped(m_native);
+            if (Binding is null)
+                NativeMemory.Free(m_native);
+            else
+                Binding.Bound.FreeNativeOverlapped(m_native);
+
             m_native = null;
         }
 
@@ -319,9 +349,9 @@ partial class syscall_package
 
             m_disposed = true;
 
-            Binding.Untrack(this);
+            Binding?.Untrack(this);
             releaseOverlapped();
-            m_preallocated.Dispose();
+            m_preallocated?.Dispose();
 
             if (m_staging is not null)
             {
@@ -341,8 +371,9 @@ partial class syscall_package
     // instead. It deliberately does NOT free the overlapped either (see the file header).
     private static unsafe void completed(uint32 errorCode, uint32 numBytes, NativeOverlapped* native)
     {
-        if (ThreadPoolBoundHandle.GetNativeOverlappedState(native) is OverlappedOp operation)
-            GoAsyncIO.Signal(operation.Binding.Descriptor, operation.Mode);
+        // Only a bound record's overlapped can complete here, so Binding is set.
+        if (ThreadPoolBoundHandle.GetNativeOverlappedState(native) is OverlappedOp { Binding: { } binding } operation)
+            GoAsyncIO.Signal(binding.Descriptor, operation.Mode);
     }
 
     // Resolves (creating exactly once) the record for one operation. `Ꮡoverlapped` is the key: see
@@ -354,10 +385,11 @@ partial class syscall_package
     // SAME delegate, deliberately: two code paths that must agree about record identity are two code
     // paths that eventually will not.
     private static readonly Func<nuint, object, nint, object> s_operationFactory = (descriptor, key, mode) => {
-        SocketBinding binding = bindingFor(descriptor);
+        // A disassociated descriptor is never bound again (see OverlappedOp).
+        SocketBinding? binding = GoAsyncIO.IsUnassociated(descriptor) ? null : bindingFor(descriptor);
         OverlappedOp created = new(binding, mode, (ж<Overlapped>)key);
 
-        binding.Track(created);
+        binding?.Track(created);
 
         return created;
     };

@@ -66,6 +66,18 @@ internal static class HostDescriptorLimit
     }
 
     /// <summary>
+    /// The current RLIMIT_NOFILE when it differs from <paramref name="snapshot"/>, or <c>null</c> when it does not, cannot
+    /// be read, or there is no snapshot. Read before <see cref="Restore"/> by a caller that reports the move.
+    /// </summary>
+    internal static RLimit? Moved(RLimit? snapshot)
+    {
+        if (snapshot is not RLimit wanted || getrlimit(ResourceId, out RLimit current) != 0)
+            return null;
+
+        return current.Cur == wanted.Cur && current.Max == wanted.Max ? null : current;
+    }
+
+    /// <summary>
     /// Puts <paramref name="snapshot"/> back if the limit moved. Returns <c>null</c> when nothing needed
     /// restoring or the restore succeeded, else the errno the kernel refused it with.
     /// </summary>

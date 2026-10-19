@@ -87,8 +87,9 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 		}
 	}
 
-	if got := strings.Count(mainCs, embedMarker); got != 3 {
-		t.Errorf("got %d %s, want 3 (the three real embeds; every Go comment re-spelled):\n%s", got, embedMarker, mainCs)
+	// Four: since owner ruling (A) the struct embed `Inner` is a marked field too.
+	if got := strings.Count(mainCs, embedMarker); got != 4 {
+		t.Errorf("got %d %s, want 4 (the four real embeds; every Go comment re-spelled):\n%s", got, embedMarker, mainCs)
 	}
 
 	// Each struct tag at the end of its field's line, never as [GoTag]: backquoted where a comment can hold
@@ -106,7 +107,7 @@ func TestGoCommentsAreNeverMarkers(t *testing.T) {
 		"public @string Wide; /*`json:\"ü\"`*/",
 		"public @string Spaced; /*`json:\"s\"`*/ /* `json:\"other\"`*/",
 		"public nint Empty;\n",
-		"public partial ref Inner Inner { get; } /*`json:\"inner\"`*/",
+		embedMarker + " public Inner Inner; /*`json:\"inner\"`*/",
 		embedMarker + " public fmt_package.Stringer Stringer; /*`json:\"str\"`*/",
 	} {
 		if !strings.Contains(mainCs, want) {

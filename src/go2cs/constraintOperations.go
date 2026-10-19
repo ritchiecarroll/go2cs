@@ -1045,6 +1045,14 @@ func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList
 
 			names = append(names, v.getCSharpTypeName(typeArg))
 		}
+
+		// THE ARRAY-DIMS COMPANION'S SUPPLY: one argument per carrying type parameter, after the
+		// descriptor companions, in declared order (arrayDimsCompanion.go).
+		for _, index := range v.arrayDimsCompanionParams(funcObj) {
+			if index < typeArgs.Len() {
+				names = append(names, v.arrayDimsCompanionArg(typeArgs.At(index)))
+			}
+		}
 	}
 
 	return names
@@ -1060,10 +1068,17 @@ func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList
 //
 // Returns nil — leaving the written list to render verbatim, byte for byte as before — whenever
 // the instantiation is COMPLETE (the overwhelmingly common case), the base is not a generic
-// function, or nothing was recorded. writtenCount is the count AFTER erasure filtering
+// function, or nothing was recorded. written is the list AFTER erasure filtering
 // (explicitTypeArgsAfterErasure), and the rendered list is filtered the same way, so an erased
 // pointer-core position cannot make a complete instantiation look partial.
-func (v *Visitor) completedInstantiationTypeArgs(x ast.Expr, writtenCount int) []string {
+//
+// The completed list renders every position from its go/types TYPE, the written ones included. A
+// written ANONYMOUS type (`TypeAssert[interface{ A() }]`, reflect's all_test.go) has no C# name until
+// a lift declares it, and only visiting its type expression lifts it. A complete list visits it on
+// the way to rendering it. This path never did, so the type rendered as raw Go text,
+// `interface{A()}`, an unresolved dynamic type that ends the conversion. The written arguments are
+// therefore visited first (liftWrittenTypeArgs), and the type rendering resolves to that lift.
+func (v *Visitor) completedInstantiationTypeArgs(x ast.Expr, written []ast.Expr) []string {
 	var funIdent *ast.Ident
 
 	switch e := x.(type) {
@@ -1087,13 +1102,39 @@ func (v *Visitor) completedInstantiationTypeArgs(x ast.Expr, writtenCount int) [
 		return nil
 	}
 
+	if inst.TypeArgs.Len() > len(written) {
+		v.liftWrittenTypeArgs(written)
+	}
+
 	rendered := v.renderedTypeArgs(funIdent, inst.TypeArgs)
 
-	if len(rendered) <= writtenCount {
+	if len(rendered) <= len(written) {
 		return nil
 	}
 
 	return rendered
+}
+
+// liftWrittenTypeArgs visits each written type argument that spells an anonymous interface or struct
+// type, for the lift that declares its C# name; the rendering itself is discarded. A named type has
+// nothing to lift and is not visited.
+func (v *Visitor) liftWrittenTypeArgs(written []ast.Expr) {
+	for _, arg := range written {
+		anonymous := false
+
+		ast.Inspect(arg, func(n ast.Node) bool {
+			switch n.(type) {
+			case *ast.InterfaceType, *ast.StructType:
+				anonymous = true
+			}
+
+			return !anonymous
+		})
+
+		if anonymous {
+			_ = v.convExpr(arg, nil)
+		}
+	}
 }
 
 func (v *Visitor) getConstraintType(typeConstraint *types.TypeParam) types.Type {
@@ -1518,6 +1559,22 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 
 			if companion, hasCompanion := v.currentFuncCompanionNames[typeParams.At(i)]; hasCompanion {
 				emittedNames = append(emittedNames, companion)
+			}
+		}
+	}
+
+	// ARRAY-DIMS COMPANIONS ride after the descriptor companions, in declared order, each bound to
+	// golib's IGoArrayDims (arrayDimsCompanion.go). Keyed by this declaration's own type parameters,
+	// so a generic named type's list finds nothing.
+	if len(v.currentFuncArrayDimsNames) > 0 {
+		for i := range typeParams.Len() {
+			if erasedParams[i] {
+				continue
+			}
+
+			if companion, hasCompanion := v.currentFuncArrayDimsNames[typeParams.At(i)]; hasCompanion {
+				emittedNames = append(emittedNames, companion)
+				constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : IGoArrayDims", v.newline, v.indent(v.indentLevel), companion))
 			}
 		}
 	}

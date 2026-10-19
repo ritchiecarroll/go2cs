@@ -49,7 +49,7 @@ internal static void Main() {
     fmt.Println(assertˢ, ok, v.R, v.A);
     var (_, badOK) = got._<colorlike.Gray>(ᐧ);
     fmt.Println(assertMissˢ, badOK);
-    fmt.Println(assert1ˢ, got._<colorlike.NRGBA>().G);
+    fmt.Println(assert1ˢ, got._<colorlike.Color, colorlike.NRGBA>().G);
 
     switch (got.type()) {
     case colorlike.Gray t: {

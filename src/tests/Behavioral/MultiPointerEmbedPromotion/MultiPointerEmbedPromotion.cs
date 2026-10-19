@@ -47,8 +47,8 @@ internal static @string String(this ref writer w) {
 }
 
 partial struct duplex {
-    internal partial ref ж<reader> reader { get; }
-    internal partial ref ж<writer> writer { get; }
+    /*embed*/ internal ж<reader> reader;
+    /*embed*/ internal ж<writer> writer;
 }
 
 internal static error Close(this ref duplex d) {
@@ -72,8 +72,8 @@ partial interface readWriter {
 }
 
 partial struct foreign {
-    public partial ref ж<strings_package.Reader> Reader { get; }
-    public partial ref ж<strings_package.Builder> Builder { get; }
+    /*embed*/ public ж<strings_package.Reader> Reader;
+    /*embed*/ public ж<strings_package.Builder> Builder;
 }
 
 partial interface readStringWriter {

@@ -74,7 +74,7 @@ public static void TestHostingOurselves(ж<testing.T> Ꮡt) {
 
 internal partial struct customWriterRecorder {
     internal io.Writer w;
-    public partial ref ж<net.http.httptest_package.ResponseRecorder> ResponseRecorder { get; }
+    /*embed*/ public ж<net.http.httptest_package.ResponseRecorder> ResponseRecorder;
 }
 
 internal static (nint n, error err) Write(this ref customWriterRecorder r, slice<byte> p) {

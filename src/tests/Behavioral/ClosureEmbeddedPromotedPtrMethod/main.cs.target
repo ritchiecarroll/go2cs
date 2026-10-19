@@ -24,7 +24,7 @@ private static readonly @string appliedˢ = "applied"u8;
 private static readonly object appliedˢ2 = (@string)"applied:"u8;
 
 internal partial struct run_rep /*dyn*/ {
-    internal partial ref counter counter { get; }
+    /*embed*/ internal counter counter;
     internal @string label;
 }
 

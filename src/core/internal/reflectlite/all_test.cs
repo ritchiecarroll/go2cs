@@ -398,25 +398,25 @@ internal partial struct TestCanSetField_Embed /*dyn*/ {
 }
 
 internal partial struct TestCanSetField_S1 /*dyn*/ {
-    internal partial ref TestCanSetField_embed embed { get; }
+    /*embed*/ internal TestCanSetField_embed embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S2 /*dyn*/ {
-    internal partial ref ж<TestCanSetField_embed> embed { get; }
+    /*embed*/ internal ж<TestCanSetField_embed> embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S3 /*dyn*/ {
-    public partial ref TestCanSetField_Embed Embed { get; }
+    /*embed*/ public TestCanSetField_Embed Embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S4 /*dyn*/ {
-    public partial ref ж<TestCanSetField_Embed> Embed { get; }
+    /*embed*/ public ж<TestCanSetField_Embed> Embed;
     internal nint x;
     public nint X;
 }
@@ -1039,7 +1039,7 @@ internal partial struct TestSetPanic_t0 /*dyn*/ {
 
 internal partial struct TestSetPanic_t1 /*dyn*/ {
     public nint Y;
-    internal partial ref TestSetPanic_t0 t0 { get; }
+    /*embed*/ internal TestSetPanic_t0 t0;
 }
 
 internal partial struct TestSetPanic_T2 /*dyn*/ {
@@ -1049,8 +1049,8 @@ internal partial struct TestSetPanic_T2 /*dyn*/ {
 
 internal partial struct TestSetPanic_T /*dyn*/ {
     public nint X;
-    internal partial ref TestSetPanic_t1 t1 { get; }
-    public partial ref TestSetPanic_T2 T2 { get; }
+    /*embed*/ internal TestSetPanic_t1 t1;
+    /*embed*/ public TestSetPanic_T2 T2;
     public TestSetPanic_t1 NamedT1;
     public TestSetPanic_T2 NamedT2;
     internal TestSetPanic_t1 namedT1;
@@ -1397,7 +1397,7 @@ partial struct Talias1 {
 }
 
 partial struct Talias2 {
-    public partial ref Tint Tint { get; }
+    /*embed*/ public Tint Tint;
     /*embed*/ public Tint2 Tint2;
 }
 

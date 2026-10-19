@@ -371,6 +371,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			resultExpr = v.applyTypedNilUnsafePointerBox(v.getType(expr, false), v.unsafePointerExprNeverRendersNull(expr), resultExpr)
 		}
 
+		// The TYPE-PARAMETER sibling: `fmt.Sprintf("%T", e)` and `[]any{e}` inside a generic body, where E may be a nil
+		// pointer or func at run time (errors_test's testAsType named its subtests by `%T` of a nil *fs.PathError).
+		if callContext != nil && callContext.anyBoxedTypeParamArgs[i] && !spreadArg && !totalReplacement {
+			if typeParam, isTypeParam := v.getType(expr, false).(*types.TypeParam); isTypeParam {
+				resultExpr = applyTypedNilTypeParamBox(typeParam, resultExpr)
+			}
+		}
+
 		if !totalReplacement && replacementArgs != nil && i < len(replacementArgs) && len(replacementArgs[i]) > 0 {
 			resultExpr = strings.ReplaceAll(replacementArgs[i], DynamicCastArgMarker, resultExpr)
 		}

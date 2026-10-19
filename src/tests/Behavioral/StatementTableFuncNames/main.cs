@@ -25,7 +25,7 @@ internal static nint pointerMethod(this ref T t) {
 }
 
 partial struct W {
-    public partial ref bytes_package.Buffer Buffer { get; }
+    /*embed*/ public bytes_package.Buffer Buffer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

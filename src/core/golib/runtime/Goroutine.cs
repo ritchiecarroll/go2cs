@@ -725,6 +725,13 @@ public sealed class Goroutine
     public static object? GetProfileLabels() => s_profileLabels.Value;
 
     /// <summary>
+    /// THIS goroutine's profile labels as another thread sees them, Go's <c>gp.labels</c> read by a
+    /// traceback of <c>gp</c> (runtime.Stack's goroutine header). The calling goroutine reads its own
+    /// through <see cref="GetProfileLabels"/>, which is authoritative for it; see m_profileLabels.
+    /// </summary>
+    internal object? ProfileLabels => Volatile.Read(ref m_profileLabels);
+
+    /// <summary>
     /// Accounts for a SYSTEM goroutine doing user work for the lifetime of the returned scope, so a
     /// profile of user goroutines includes it.
     /// </summary>
@@ -1492,7 +1499,7 @@ public sealed class Goroutine
                 if (m_goroutine.m_bubble is { } bubble)
                 {
                     m_goroutine.m_bubble = null;
-                    bubble.Exited();
+                    bubble.Exited(m_goroutine);
                 }
 
                 // Go's goexit traces the destroy on the goroutine's own thread (ExecutionTracer, Q28).

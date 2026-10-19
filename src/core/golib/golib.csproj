@@ -72,6 +72,8 @@
     <None Include="buildTransitive/go.lib.targets" Pack="true" PackagePath="buildTransitive/" />
     <!-- Imported by go.lib.targets: the symbol files beside a single-file host, on every publish. -->
     <None Include="buildTransitive/go.lib.symbols.targets" Pack="true" PackagePath="buildTransitive/" />
+    <!-- Imported by go.lib.targets: a packed converted package's own usings, build/<PackageId>.props. -->
+    <None Include="buildTransitive/go.lib.pack.targets" Pack="true" PackagePath="buildTransitive/" />
   </ItemGroup>
 
   <ItemGroup>

@@ -38,7 +38,7 @@ namespace go;
 /// canonicalization that halved the token/hash workloads in the design's §2.2 measurement.
 /// </para>
 /// </remarks>
-public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
+public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
 {
     // The FAST arm: canonical backing + ABSOLUTE index, deref-equivalent by the indexer
     // definitions of the three arms that populate it. Null when the foreign arm is in effect.
@@ -49,6 +49,12 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
     private readonly IArray? m_foreign;
 
     private readonly nint m_index;
+
+    // The deep funnel's run source (NativeStructMarshal.CallDeep): the fast arm's backing and absolute index.
+    // The foreign arm has no contiguous backing to copy a run from, so it answers none.
+    Array? IElementRun.RunBacking => m_backing;
+
+    nint IElementRun.RunIndex => m_index;
 
     // Create a new indexed reference into existing heap allocated collection storage. The fast
     // arm is taken ONLY for the three arms whose indexers ARE the canonical access (the ratified
@@ -185,6 +191,9 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
             return m_foreign is slice<T> ns && ns.IsNativeBacked ? ns.NativeElementAddress(m_index) : 0;
         }
     }
+
+    // The element's native address, 0 for a managed element: array<T>.AliasPointer views native memory from it.
+    internal nuint NativeElementAddress => nativeElementIdentity();
 
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute
