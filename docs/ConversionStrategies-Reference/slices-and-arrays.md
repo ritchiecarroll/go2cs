@@ -752,9 +752,10 @@ fmt.Println(cap(b)) // 8: the allocator's smallest size class
    `(newcap + 3*256) / 4`, a smooth move toward ×1.25. A need past double the old capacity takes the need
    itself.
 2. **`roundupsize`.** Multiply by the element's Go size and round up to the allocator's size class
-   (`GoSizeClasses.RoundUpSize`), then divide back. A pointer-bearing object larger than 512 bytes carries
-   an 8-byte malloc header inside its class, so a `[]string` steps 32, 71, 143. A request past 32 KiB
-   rounds up to whole 8 KiB pages.
+   (`GoSizeClasses.RoundUpSize`), then divide back. A pointer-bearing object larger than
+   `goarch.PtrSize * goarch.PtrBits` bytes (512 on amd64, the target the standard library is converted
+   for) carries an 8-byte malloc header inside its class, so a `[]string` steps 32, 71, 143. A request
+   past 32 KiB rounds up to whole 8 KiB pages.
 
 The element's Go size and whether it holds pointers come from golib's type layout (`GoReflect.TryGoSizeOf`,
 `GoPtrBytesOf`), read once per element type (`GoGrowthFacts<T>`). An element whose Go size is not derivable

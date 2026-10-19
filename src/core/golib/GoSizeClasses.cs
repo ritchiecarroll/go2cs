@@ -20,8 +20,9 @@ namespace go;
 /// The numbers are Go's own (GOROOT/src/internal/runtime/gc: <c>SizeClassToSize</c>, <c>MaxSmallSize</c>,
 /// <c>PageShift</c>, <c>MallocHeaderSize</c>, <c>MinSizeForMallocHeader</c>), the same on every 64-bit
 /// target. repoguard's TestGolibSizeClassesMatchTheToolchain fails when this table drifts from the pinned
-/// toolchain's, and proves that taking the smallest class at least as large as the request is exactly Go's
-/// <c>SizeToSizeClass8</c>/<c>SizeToSizeClass128</c> lookup for every small size.
+/// toolchain's, holds <see cref="PtrSize"/> to the converted internal/goarch's, and proves that taking the
+/// smallest class at least as large as the request is exactly Go's <c>SizeToSizeClass8</c>/
+/// <c>SizeToSizeClass128</c> lookup for every small size.
 /// </para>
 /// <para>
 /// A pointer-bearing object larger than <see cref="MinSizeForMallocHeader"/> carries an 8-byte malloc header
@@ -48,8 +49,18 @@ public static class GoSizeClasses
     /// <summary>The header a pointer-bearing object past <see cref="MinSizeForMallocHeader"/> carries.</summary>
     public const nuint MallocHeaderSize = 8;
 
-    /// <summary>Go's <c>MinSizeForMallocHeader</c>: <c>goarch.PtrSize * goarch.PtrBits</c>, 8 * 64 on 64-bit.</summary>
-    public const nuint MinSizeForMallocHeader = 512;
+    /// <summary>
+    /// Go's <c>goarch.PtrSize</c> on the target the standard library is converted for. That target is amd64
+    /// (internal/goarch's converted PtrSize is 8, and GoReflect's Go sizes are amd64 sizes), so the malloc
+    /// header threshold below is the 64-bit one; Go's 32-bit targets (386, arm) would give 128.
+    /// </summary>
+    public const nuint PtrSize = 8;
+
+    /// <summary>Go's <c>goarch.PtrBits</c>.</summary>
+    public const nuint PtrBits = PtrSize * 8;
+
+    /// <summary>Go's <c>MinSizeForMallocHeader</c>, the same expression over the same pointer size.</summary>
+    public const nuint MinSizeForMallocHeader = PtrSize * PtrBits;
 
     /// <summary>
     /// Go's <c>roundupsize(size, noscan)</c>: the bytes an allocation of <paramref name="size"/> bytes really

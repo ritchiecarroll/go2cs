@@ -27,7 +27,10 @@ import (
 //
 //   - TestGolibSizeClassesMatchTheToolchain reads GOROOT/src/internal/runtime/gc and fails when golib's
 //     class table or any constant roundupsize reads (MaxSmallSize, PageShift, MallocHeaderSize,
-//     MinSizeForMallocHeader) differs. It also proves the one liberty golib takes, a binary search for the
+//     MinSizeForMallocHeader) differs. MinSizeForMallocHeader is pointer-size dependent in Go
+//     (goarch.PtrSize * goarch.PtrBits), so golib states the same expression, and its PtrSize must be the
+//     converted internal/goarch's: the pointer size of the target the standard library is converted for. It
+//     also proves the one liberty golib takes, a binary search for the
 //     smallest class at least as large as the request, equal to Go's SizeToSizeClass8 / SizeToSizeClass128
 //     lookup at every small size.
 //   - TestGoGrowSliceExpectationsMatchTheToolchain re-runs the probe behind GolibTests' GoGrowSliceTests
@@ -41,6 +44,8 @@ var (
 	goArrayLiteral = regexp.MustCompile(`(?m)^var (\w+) = \[[^\]]*\]uint(?:8|16)\{([^}]*)\}`)
 	goConstLine    = regexp.MustCompile(`(?m)^\s*(\w+)\s*=\s*(.+?)\s*(?://.*)?$`)
 	csConstLine    = regexp.MustCompile(`public const \w+ (\w+) = ([^;]+);`)
+	goarchConst    = regexp.MustCompile(`(?m)^const (\w+) = (.+?)\s*$`)
+	csGoarchConst  = regexp.MustCompile(`public static UntypedInt (\w+) => /\*[^*]*\*/ (\d+);`)
 	csClassTable   = regexp.MustCompile(`(?s)ReadOnlySpan<ushort> SizeClassToSize =>\s*\[(.*?)\];`)
 )
 
@@ -121,16 +126,10 @@ func TestGolibSizeClassesMatchTheToolchain(t *testing.T) {
 		return n
 	}
 
-	// MinSizeForMallocHeader is an expression in the toolchain; golib states its 64-bit value.
-	if got := goConsts["MinSizeForMallocHeader"]; got != "goarch.PtrSize * goarch.PtrBits" {
-		t.Fatalf("the toolchain's MinSizeForMallocHeader is now %q; restate golib's MinSizeForMallocHeader from it", got)
-	}
-
 	want := map[string]int{
-		"MaxSmallSize":           goInt("MaxSmallSize"),
-		"PageShift":              goInt("PageShift"),
-		"MallocHeaderSize":       goInt("MallocHeaderSize"),
-		"MinSizeForMallocHeader": 8 * 64,
+		"MaxSmallSize":     goInt("MaxSmallSize"),
+		"PageShift":        goInt("PageShift"),
+		"MallocHeaderSize": goInt("MallocHeaderSize"),
 	}
 
 	csConsts := map[string]string{}
@@ -143,6 +142,53 @@ func TestGolibSizeClassesMatchTheToolchain(t *testing.T) {
 		if got := csConsts[name]; got != strconv.Itoa(value) {
 			t.Errorf("golib's GoSizeClasses.%s is %q, the toolchain's is %d", name, got, value)
 		}
+	}
+
+	// The pointer-size-dependent constants: golib states Go's own expressions (MinSizeForMallocHeader from
+	// malloc.go, PtrBits from internal/goarch), over a PtrSize that must be the converted goarch's.
+	goarchSrc, err := os.ReadFile(filepath.Join(gorootForGuards(), "src", "internal", "goarch", "goarch.go"))
+
+	if err != nil {
+		t.Fatalf("reading the toolchain's goarch constants: %v", err)
+	}
+
+	for _, m := range goarchConst.FindAllStringSubmatch(string(goarchSrc), -1) {
+		goConsts["goarch."+m[1]] = m[2]
+	}
+
+	for name, goExpr := range map[string]string{
+		"MinSizeForMallocHeader": goConsts["MinSizeForMallocHeader"],
+		"PtrBits":                goConsts["goarch.PtrBits"],
+	} {
+		if goExpr == "" {
+			t.Fatalf("the toolchain no longer declares %s in the form this guard reads", name)
+		}
+
+		if got, want := csConsts[name], strings.ReplaceAll(goExpr, "goarch.", ""); got != want {
+			t.Errorf("golib's GoSizeClasses.%s is %q, the toolchain's is %q", name, got, goExpr)
+		}
+	}
+
+	convertedGoarch, err := os.ReadFile(filepath.Join(root, "src", "core", "internal", "goarch", "goarch.cs"))
+
+	if err != nil {
+		t.Fatalf("reading the converted goarch: %v", err)
+	}
+
+	convertedPtrSize := ""
+
+	for _, m := range csGoarchConst.FindAllStringSubmatch(string(convertedGoarch), -1) {
+		if m[1] == "PtrSize" {
+			convertedPtrSize = m[2]
+		}
+	}
+
+	if convertedPtrSize == "" {
+		t.Fatalf("the converted internal/goarch no longer declares PtrSize in the form this guard reads")
+	}
+
+	if got := csConsts["PtrSize"]; got != convertedPtrSize {
+		t.Errorf("golib's GoSizeClasses.PtrSize is %q, the converted internal/goarch's PtrSize is %s", got, convertedPtrSize)
 	}
 
 	table := csClassTable.FindStringSubmatch(string(golib))
