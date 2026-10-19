@@ -120,6 +120,7 @@ public class GenericMethodSourceTests
     {
         PanicException panic = Assert.ThrowsException<PanicException>(() => GoReflect.GoMethodFunc(typeof(genmeth_package.Odd), 0));
 
+        StringAssert.Contains(panic.Message, "go2cs: reflect: cannot bind method", "Go never raises it, so it says it is go2cs's");
         StringAssert.Contains(panic.Message, "Out");
     }
 
@@ -129,6 +130,7 @@ public class GenericMethodSourceTests
     {
         PanicException panic = Assert.ThrowsException<PanicException>(() => GoReflect.GoMethodValue(typeof(genmeth_package.Odd), 0, default(genmeth_package.Odd)));
 
+        StringAssert.Contains(panic.Message, "go2cs: reflect: cannot bind method");
         StringAssert.Contains(panic.Message, "Out");
         StringAssert.Contains(panic.Message, "Odd");
     }

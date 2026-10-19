@@ -253,7 +253,7 @@ public static partial class GoReflect
         }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or NotImplementedException or InvalidOperationException or MemberAccessException)
         {
-            throw builtin.panic($"reflect: cannot bind method {MethodAt(t, index).GoName} of {GoTypeName(t)}: {ex.Message}");
+            throw builtin.panic($"go2cs: reflect: cannot bind method {MethodAt(t, index).GoName} of {GoTypeName(t)}: {ex.Message}");
         }
     }
 
@@ -473,7 +473,7 @@ public static partial class GoReflect
         }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or NotImplementedException or InvalidOperationException or MemberAccessException)
         {
-            throw builtin.panic($"reflect: cannot bind method {entry.GoName} of {GoTypeName(methodOwner)}: {ex.Message}");
+            throw builtin.panic($"go2cs: reflect: cannot bind method {entry.GoName} of {GoTypeName(methodOwner)}: {ex.Message}");
         }
     }
 
