@@ -1737,8 +1737,12 @@ public static ΔValue NewAt(ΔType typ, @unsafe.Pointer p) {
     // with the zero box every such field read as zero (cmpopts IgnoreUnexported and IgnoreFields
     // compared differing structs equal). EXACT ONLY (ruled 2026-10-04): a live token, or a live
     // token plus an offset landing exactly on a node of this type -- see
-    // GoReflect.ResolveNewAtPointee. Every miss keeps the zero box, so gcbits' path is unchanged.
+    // GoReflect.ResolveNewAtPointee. A pointer to a POINTER array over memory the Go runtime did not
+    // allocate reads the foreign words it holds, through E's registered opener, and refuses by name an
+    // E no compilation spells (G's ruling, 2026-10-19; GoReflect.OpenNewAtPointerArray). Every other
+    // miss keeps the zero box, so gcbits' path is unchanged: its p is a tagged storage token.
     object box = GoReflect.ResolveNewAtPointee((nuint)(uintptr)p, st) ??
+                 GoReflect.OpenNewAtPointerArray((nuint)(uintptr)p, st, dims) ??
                  GoReflect.NewPointerBox(st, GoReflect.ZeroValueOf(st, dims, chanDir));
     return makeTypedValue(box, typeof(ж<>).MakeGenericType(st), null, default, chanDir);
 }

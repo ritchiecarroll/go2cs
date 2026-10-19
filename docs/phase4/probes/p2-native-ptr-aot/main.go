@@ -5,10 +5,18 @@
 // views that array through a window far larger than the memory, re-sliced to the count. A second
 // record does the same over a converted struct element, so a builtin element and a struct element
 // both reach the native reader.
+//
+// Four arms follow (G's narrowing and COORD's ruling, 2026-10-19). A chain-context record carries a
+// **point, and unsafe.Slice reads the words it names, as crypto/x509's windows chain reads do. reflect builds *[2]*point over the second record's
+// words: point's reader is compiled, since the program spells *[N]*point. reflect builds *[2]*other
+// over the same words: the program never spells *[N]*other, so no reader for it was compiled, and the
+// converted program refuses by name where Go reads the words (the disclosed divergence). And a third
+// record holds a [4]uint16 VALUE field, read through the window over a native struct's array field.
 package main
 
 import (
 	"fmt"
+	"reflect"
 	"syscall"
 	"unicode/utf16"
 	"unsafe"
@@ -27,6 +35,33 @@ type point struct {
 type pointData struct {
 	Count  uint32
 	Points [1]*point
+}
+
+// point's layout, but the program never spells a pointer array of it: only reflection builds one.
+type other struct {
+	X, Y int32
+}
+
+// crypto/x509's CertChainContext shape: a count, then a pointer to an array of pointers.
+type chainContext struct {
+	Count  uint32
+	Chains **point
+}
+
+// A record whose array field holds values.
+type nameRec struct {
+	Len  uint32
+	Name [4]uint16
+}
+
+// arm runs f, printing a panic's value rather than dying of it.
+func arm(name string, f func()) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("%s: panic: %v\n", name, r)
+		}
+	}()
+	f()
 }
 
 func main() {
@@ -75,6 +110,46 @@ func main() {
 	for i, p := range (*[1 << 10]*point)(unsafe.Pointer(&pd.Points[0]))[:pd.Count:pd.Count] {
 		fmt.Printf("point %d %d %d\n", i, p.X, p.Y)
 	}
+
+	// chainContext at 2048: count 2, Chains naming the second record's words.
+	*(*uint32)(unsafe.Pointer(&b[2048])) = 2
+	word(2056, base+72)
+
+	cc := (*chainContext)(unsafe.Pointer(base + 2048))
+
+	arm("slice", func() {
+		for i, p := range unsafe.Slice(cc.Chains, cc.Count) {
+			fmt.Printf("slice point %d %d %d\n", i, p.X, p.Y)
+		}
+	})
+
+	// reflect over the second record's words, as *[2]*point and as *[2]*other.
+	for _, e := range []reflect.Type{reflect.TypeOf(point{}), reflect.TypeOf(other{})} {
+		arm("reflect "+e.String(), func() {
+			v := reflect.NewAt(reflect.ArrayOf(2, reflect.PointerTo(e)), unsafe.Pointer(base+72)).Elem()
+			for i := 0; i < v.Len(); i++ {
+				p := v.Index(i).Elem()
+				fmt.Printf("reflect %s %d %d %d\n", e, i, p.Field(0).Int(), p.Field(1).Int())
+			}
+		})
+	}
+
+	// nameRec at 1536: length 3, then four UTF-16 units at 1540.
+	*(*uint32)(unsafe.Pointer(&b[1536])) = 3
+	for i, u := range []uint16{'g', 'o', 'p', 0} {
+		*(*uint16)(unsafe.Pointer(&b[1540+2*i])) = u
+	}
+
+	nr := (*nameRec)(unsafe.Pointer(base + 1536))
+
+	arm("name", func() {
+		fmt.Printf("name %d", nr.Len)
+		for i := range nr.Name {
+			q := &nr.Name[i]
+			fmt.Printf(" %d", *q)
+		}
+		fmt.Println()
+	})
 
 	if err := syscall.Munmap(b); err != nil {
 		panic(err)
