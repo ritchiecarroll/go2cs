@@ -98,6 +98,26 @@ public class GoAsyncIOTests
     }
 
     [TestMethod]
+    public void HasReadinessFollowsTheSinkFromOpenToClose()
+    {
+        // syscall's readFile/writeFile take the completion seam only for a descriptor the poller owns,
+        // and this is how they ask. It must follow the SINK, not the descriptor's other state: a
+        // disassociated descriptor is still the poller's until pollClose retires it.
+        nuint descriptor = nextDescriptor();
+
+        Assert.IsFalse(GoAsyncIO.HasReadiness(descriptor), "a descriptor nobody registered");
+
+        GoAsyncIO.SetReadiness(descriptor, _ => { });
+        Assert.IsTrue(GoAsyncIO.HasReadiness(descriptor), "registered by pollOpen");
+
+        GoAsyncIO.MarkUnassociated(descriptor);
+        Assert.IsTrue(GoAsyncIO.HasReadiness(descriptor), "disassociated, still the poller's");
+
+        GoAsyncIO.RemoveDescriptor(descriptor);
+        Assert.IsFalse(GoAsyncIO.HasReadiness(descriptor), "retired by pollClose");
+    }
+
+    [TestMethod]
     public void DescriptorStateIsCreatedExactlyOnceUnderContention()
     {
         // THE MEASURED REQUIREMENT. A bare GetOrAdd builds one object per racing thread and keeps
