@@ -276,6 +276,28 @@ public class ImplementGenerator : ISourceGenerator
             bool constraintProxy = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("ConstraintProxy")).value?.Trim() ?? "false");
             bool production = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Production")).value?.Trim() ?? "false");
 
+            // A VALUE record for a CONSTRUCTED generic target (`wrap<@string>` implementing
+            // `Lesser<wrap<@string>>`) extends the OPEN definition, since a partial declaration can only
+            // extend that (see emittedGenericValueImpls), and left the interface CLOSED:
+            // `partial struct wrap<E> : Lesser<wrap<@string>>` forwards `this.Less(_)` with a wrap<@string>
+            // where Less<E> takes wrap<E> (CS1929), for every generic value type implementing a generic
+            // interface at its own instantiation. Re-open the interface over the target's own parameters,
+            // `wrap<E> : Lesser<wrap<E>>`, which is what Go means: a method on wrap[E] is declared for every
+            // E and cannot specialize. Every closed record of the target then collapses into that one
+            // partial by the open key below. The record itself stays closed (an attribute's type arguments
+            // cannot be open). Validated member by member against the target's own Go methods, so a closed
+            // argument that only COINCIDES with a target argument (`namer[E]` whose Get returns string,
+            // implementing Getter[string]) keeps today's closed form.
+            if (!pointer && !constraintProxy &&
+                structType is INamedTypeSymbol { IsGenericType: true } constructedTarget &&
+                interfaceType is INamedTypeSymbol { IsGenericType: true } closedInterface &&
+                SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, context.Compilation.Assembly) &&
+                ReopenInterfaceOverTarget(constructedTarget, closedInterface, context.Compilation) is { } openInterface)
+            {
+                interfaceType = openInterface;
+                interfaceName = interfaceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            }
+
             if (structType.TypeKind == TypeKind.Interface)
             {
                 List<MethodInfo> interfaceAdapterMethods = ((INamedTypeSymbol)interfaceType).GetAllBaseInterfaces(context.Compilation)
@@ -1979,5 +2001,99 @@ public class ImplementGenerator : ISourceGenerator
     private static string? GetFirstClassName(CompilationUnitSyntax compilationUnit)
     {
         return compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault()?.Identifier.Text;
+    }
+
+    /// <summary>
+    /// Re-opens <paramref name="closedInterface"/> over the OPEN definition of
+    /// <paramref name="constructedTarget"/>: every occurrence of the target itself and of each of its type
+    /// arguments becomes the open target and its type parameters. Returns null when nothing re-opens, or
+    /// when any member of the candidate is not satisfied by a Go method the open target declares (a
+    /// package-class extension method over its receiver), in which case the closed form is kept.
+    /// </summary>
+    private static INamedTypeSymbol? ReopenInterfaceOverTarget(INamedTypeSymbol constructedTarget, INamedTypeSymbol closedInterface, Compilation compilation)
+    {
+        INamedTypeSymbol openTarget = constructedTarget.OriginalDefinition;
+
+        if (SymbolEqualityComparer.Default.Equals(constructedTarget, openTarget) || openTarget.ContainingType is not { } packageClass)
+            return null;
+
+        var closedArguments = constructedTarget.TypeArguments;
+        var openParameters = openTarget.TypeParameters;
+
+        ITypeSymbol Reopen(ITypeSymbol type)
+        {
+            if (SymbolEqualityComparer.Default.Equals(type, constructedTarget))
+                return openTarget;
+
+            for (int i = 0; i < closedArguments.Length; i++)
+            {
+                if (SymbolEqualityComparer.Default.Equals(type, closedArguments[i]))
+                    return openParameters[i];
+            }
+
+            return type is INamedTypeSymbol { IsGenericType: true } named
+                ? named.OriginalDefinition.Construct(named.TypeArguments.Select(Reopen).ToArray())
+                : type;
+        }
+
+        INamedTypeSymbol candidate = closedInterface.OriginalDefinition.Construct(closedInterface.TypeArguments.Select(Reopen).ToArray());
+
+        if (SymbolEqualityComparer.Default.Equals(candidate, closedInterface))
+            return null;
+
+        IEnumerable<IMethodSymbol> members = candidate.GetAllBaseInterfaces(compilation)
+            .Concat([candidate])
+            .SelectMany(iface => iface.GetMembers().OfType<IMethodSymbol>())
+            .Where(method => method.MethodKind == MethodKind.Ordinary && !method.IsStatic);
+
+        foreach (IMethodSymbol member in members)
+        {
+            if (!DeclaresGoMethod(packageClass, openTarget, member))
+                return null;
+        }
+
+        return candidate;
+    }
+
+    /// <summary>
+    /// Reports whether the open target declares a Go VALUE method satisfying <paramref name="member"/>: an
+    /// extension method of its package class named alike, over the target by value, generic over the
+    /// target's own parameters in order, whose remaining signature equals the member's once those
+    /// parameters are the target's.
+    /// </summary>
+    private static bool DeclaresGoMethod(INamedTypeSymbol packageClass, INamedTypeSymbol openTarget, IMethodSymbol member)
+    {
+        foreach (IMethodSymbol method in packageClass.GetMembers(member.Name).OfType<IMethodSymbol>())
+        {
+            if (!method.IsExtensionMethod || method.Parameters.Length != member.Parameters.Length + 1 ||
+                method.TypeParameters.Length != openTarget.TypeParameters.Length ||
+                method.Parameters[0].RefKind != RefKind.None ||
+                method.Parameters[0].Type is not INamedTypeSymbol receiver ||
+                !SymbolEqualityComparer.Default.Equals(receiver.OriginalDefinition, openTarget))
+            {
+                continue;
+            }
+
+            IMethodSymbol bound = method.Construct(openTarget.TypeParameters.Cast<ITypeSymbol>().ToArray());
+
+            if (!SymbolEqualityComparer.Default.Equals(bound.Parameters[0].Type, openTarget) ||
+                !SymbolEqualityComparer.Default.Equals(bound.ReturnType, member.ReturnType))
+            {
+                continue;
+            }
+
+            bool matches = true;
+
+            for (int i = 0; i < member.Parameters.Length && matches; i++)
+            {
+                matches = SymbolEqualityComparer.Default.Equals(bound.Parameters[i + 1].Type, member.Parameters[i].Type) &&
+                          bound.Parameters[i + 1].RefKind == member.Parameters[i].RefKind;
+            }
+
+            if (matches)
+                return true;
+        }
+
+        return false;
     }
 }
