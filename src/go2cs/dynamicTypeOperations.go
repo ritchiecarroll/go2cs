@@ -151,7 +151,7 @@ func takeUnresolvedDynamicTypes() []unresolvedDynamicType {
 // unresolvedDynamicTypeError is the W2b GATE: it turns any recorded unresolvable dynamic-type
 // marker into a hard error naming every site, and clears the record either way.
 //
-// Why this is fatal rather than advisory, and why only on the -tests path. The fallback emission
+// Why this is fatal rather than advisory. The fallback emission
 // is the raw Go type signature, which CANNOT compile — so the warning is a free, already-correct
 // prediction of a broken artifact. A `-tests` conversion is one link in a pipeline whose very next
 // step builds that artifact, and the build's own diagnostics point AWAY from the cause: three
@@ -160,12 +160,12 @@ func takeUnresolvedDynamicTypes() []unresolvedDynamicType {
 // CENSUS-runtime-first-contact.md, W2). Exiting 0 there is the same false green CNR's NOT MEASURED
 // rule closes: an emission the converter could not fully regenerate must never read as success.
 //
-// The -stdlib and plain single-package paths keep warn-and-continue deliberately. -stdlib converts
-// 300+ packages, records per-package failures and continues, and has a real downstream gate that
-// names an uncompilable emission by file and error code (the full go2cs-stdlib.slnx build) — there
-// is no silent success to close. A single-package conversion of arbitrary Go is legitimately
-// best-effort, the same judgment the -go2cspath self-location warning records ("deliberately NOT
-// fatal").
+// Every driver fails on it since 2026-10-19 (COORD's ruling on C1's pointer-conversion seat, D4): the -tests path
+// returns it early from conversionDriver.go, before its build step, and main checks it once more at exit after
+// whichever driver ran. Before that the -stdlib and plain single-package paths warned and continued by design:
+// -stdlib has a downstream gate that names an uncompilable emission (the go2cs-stdlib.slnx build), and a
+// single-package conversion of arbitrary Go is best-effort. The ruling is that no run exits 0 after writing text
+// that cannot compile, whatever gate follows it; the files are still written.
 func unresolvedDynamicTypeError() error {
 	unresolved := takeUnresolvedDynamicTypes()
 
@@ -181,7 +181,7 @@ func unresolvedDynamicTypeError() error {
 		summary.WriteString(fmt.Sprintf("\n  %s(%d): %s", entry.fileName, entry.line, entry.signature))
 	}
 
-	summary.WriteString("\n  The converted test project will not build, and its compiler errors will name the parse")
+	summary.WriteString("\n  The emitted C# will not build, and its compiler errors will name the parse")
 	summary.WriteString("\n  cascade rather than these types. Failing here so the cause is what gets reported.")
 
 	return fmt.Errorf("%s", summary.String())
