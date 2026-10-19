@@ -327,6 +327,29 @@ interface, and embedded-interface instantiations of a method-set-constrained gen
 constraint method on the parameter and widening walkList-style, values vs Go; clears go/ast's
 CS0308, the go/* toolchain gate.)
 
+An **anonymous inline** constraint carrying methods — `func Show[T interface{ Name() string }]`,
+`type Box[T interface{ Name() string }] struct` — is lifted to a named interface, exactly as an
+anonymous parameter interface is, and named `<declaration>_<parameter>` (`Show_T`, `Box_T`;
+`liftTypeParamConstraints`). Before the lift, `getGenericDefinition` named the constraint by its Go
+text, and `where T : interface{Name() string}` is a C# syntax cascade that takes the whole package
+down; lifted, it takes the same arms a named constraint takes. The lift is public when the declaration
+is exported (CS0703 otherwise). A constraint that names the declaration's own parameters
+(`[T interface{ Less(T) bool }]`) lifts generic over the ones it captures (`Min_T<T>`,
+`liftCapturedTypeParams`), and each use composes its own arguments, so a receiver that renames the
+parameter still binds. A method of a generic type reaches the constraint as its receiver's own copy, a
+different object and possibly in another file: a lift capturing no parameter is found by its signature
+in the package registry, and one capturing a parameter, which is never registered by signature, by its
+DECLARATION (`constraintLiftKey`: the type and the parameter's index). Operator-only type
+sets carry no methods and are not lifted.
+
+A **value** instantiation of a method-set constraint that names no type parameter — named or lifted,
+`slot[T nameI]` at `tagged` — is recorded at the instantiation (`recordValueConstraintImplementation`,
+on `constraintProxyFor`'s per-instantiation path), not only where a call converts an argument to the
+type parameter. A generic TYPE instantiated at a value type with no such call was CS0315. A
+FUNCTION's clause is emitted only where its body needs it (`methodSetConstraintNeeded`), and the
+record follows the clause: `errors.AsType[E error]` drops it, so `AsType[alert]` records nothing. An
+instantiated GENERIC constraint is left to `recordClosedConstraintImplementation`, below.
+
 A **value** instantiation of a **generic** method-set constraint — `Sum[A Adder[A]]` at `vec` —
 satisfies `where A : Adder<A>` only as `vec : Adder<vec>`, a base go2cs-gen declares from a
 `[assembly: GoImplement<vec, Adder<vec>>]` record. A non-generic constraint (`where T : Namer`) gets
@@ -339,6 +362,35 @@ path, so the once-guard is also what ends that recursion. A constraint naming a 
 (`Linker[T, N]` at `N`) is left alone, since only the instantiation knows the other argument. The gap
 dates from Go generics' arrival (`Adder[A any]` failed identically), and it is the shape Go 1.26's
 self-referential constraints are written in. (Guarded by `SelfRefGenerics`, output-compared vs Go.)
+
+An INLINE constraint naming its own parameter (`type Ord[T interface{ Less(T) bool }]`, lifted to
+`Ord_T<T>`) is closed over each instantiation exactly as the named `Lesser[T]` is: `inlineConstraintNamed`
+presents the lift as a synthetic generic interface (`Ord_T[T]`, its method set rewritten over fresh
+parameters by `substituteTypeParams`, since go/types offers no substitution for an anonymous interface
+over a parameter bound elsewhere), and `recordClosedConstraintImplementation` and `constraintProxyFor`
+read it through `effectiveConstraint`. `Ord[age]` records `GoImplement<age, Ord_T<age>>`, `Ord[*node]`
+takes the proxy `nodeжOrd_T`, and `Ord[wrap[string]]` records the closed pair the generator re-opens
+over `wrap<E>` (below). The lift's name is assigned by the declaration's own visit, so an instantiation
+in a file visited first DEFERS: its record replays after the file-visit barrier
+(`replayDeferredConstraintRecords`, before any metadata file is written), and a proxy name carries the
+deferred marker the barrier resolves. A constraint declared in ANOTHER package keeps its anonymous
+form, since its lift name is not published.
+
+A GENERIC value type implementing a generic interface at its own instantiation
+(`var l Lesser[wrap[string]] = wrap[string]{1}`, or the constraint above at `wrap[string]`) is recorded
+CLOSED (an attribute's type arguments cannot be open), and a partial can extend only the open
+definition, so go2cs-gen emitted `partial struct wrap<E> : Lesser<wrap<@string>>`, whose forwarding
+call cannot bind. The generator now RE-OPENS the interface over the target's own parameters
+(`wrap<E> : Lesser<wrap<E>>`), validated member by member against the target's Go methods, so every
+closed record of `wrap` shares one partial and an argument that only coincides with the target's (a
+`namer[E]` whose `Get` returns `string`) keeps the closed form. (GenTests
+`GenericValueInterfaceReopenTests`.)
+
+One shape remains. A constraint with type TERMS beside its methods
+(`interface{ ~int; String() string }`) emits as the CRTP `Str_T<ΔT>`, and no record can name its
+closed form `Str_T<myint>`: an interface with static abstract members cannot be a type argument, not
+even an attribute's (CS8920), so `myint` never implements it (CS0535, named or inline). (Guarded by
+`InlineConstraintLift`, output-compared vs Go.)
 
 ## A SELF-REFERENTIAL generic method-set constraint uses a box-wrapping proxy as the type argument
 

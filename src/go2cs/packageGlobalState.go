@@ -477,6 +477,10 @@ var packageLock = sync.Mutex{}
 // concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
 var packageDynamicTypeNames map[string]string
 
+// packageConstraintLiftNames maps a generic type's inline-constraint DECLARATION (constraintLiftKey)
+// to its lift, for the methods whose receiver copy of the constraint no signature key may name.
+var packageConstraintLiftNames = map[string]string{}
+
 // packageLiftedTypeNames holds every lifted type name (an anonymous struct/interface, or a
 // function-local declaration hoisted out of its body) CLAIMED so far by this package's conversion.
 // Every lifted type is emitted as a NESTED type of the single `<pkg>_package` partial class, so the

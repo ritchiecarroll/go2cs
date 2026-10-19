@@ -84,6 +84,8 @@ func resetPackageState(pkg *packages.Package) {
 	nameCollisions = make(map[string]bool)
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
+	packageConstraintLiftNames = make(map[string]string)
+	resetInlineConstraintState()
 	packageLiftedTypeNames = hashset.HashSet[string]{}
 	productionLiftedTypeNames = nil
 	productionAliasLiftedTypes = nil
