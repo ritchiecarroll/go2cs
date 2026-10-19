@@ -67,3 +67,29 @@ The `GenericMethodReflect` behavioral program, published with Native AOT at this
 to `go run` at the same tree: 91 of 91 lines, against 62 with the lazy `Method(i).Func` alone. The 29 lines that
 moved are 22 uses of the unbound `Method(i).Func`, 5 bound method values (`Box[[]int]` and `Pair`, through `T` and
 `*T`), and 2 lines after the pointer calls that depended on them.
+
+## Increment 2: promoted methods, variadic tails, the 17..24 parameter ladder
+
+COORD's ruling (2026-10-19 19:36Z) accepted increment 1's cost and asked for the three gaps to be covered. The
+generator now writes arms for a method with a variadic tail (golib's `Funcꓸꓸꓸ`/`Actionꓸꓸꓸ` family), for one with more
+than 16 parameters (golib's `Func`/`Action` ladder through 24), and for the promoted methods it forwards into a type's
+generated part. A third program, `promoted/`, reaches promoted methods through a value embed (`Outer`) and a pointer
+embed (`Wrap`), and a variadic method, through `MethodByName`, `Method(i)`, `Type.Method(i).Func` and `Call`.
+
+Census before the change, type-checked over the converted standard library: 1,213 exported promoted (type, method)
+pairs in 203 types (276 through a pointer embed); 105 variadic methods on linux and darwin and 107 on windows, none
+with more than 8 fixed parameters; no method with 16 or more parameters.
+
+### Prediction (written before any measurement)
+
+- `promoted`, Native AOT, arms ON: output equals Go, all 6 lines.
+- `promoted`, Native AOT, arms OFF: line 1 equals Go (names only, no bind), and the program fails at line 2, where
+  `Twice` is bound through `*Outer`, a value method of a struct reached through a pointer, which needs code Native AOT
+  does not have. FALSIFIER: OFF printing line 2 equal to Go means increment 1's run-time binder already covered the
+  promoted value method, and the promoted arms are not what fixes it.
+- `nocall`, Native AOT, arms ON at this increment minus arms ON at increment 1 (86,547,360 B): between +250 KB and
+  +900 KB, central +500 KB. The promoted pairs are about a fifth of all std pairs and the variadic ones under 2%, and
+  only the types `fmt`'s closure constructs pay. FALSIFIER: outside that range.
+- The standard library's assemblies (`go2cs-stdlib.slnx`, Release, every core package), arms ON minus OFF, summed
+  over the DLLs: between +2.5 MB and +6 MB. Increment 1's JIT measure was about 430 B of IL per arm, and the std has
+  about 8,000 (type, method, T or *T) cases.

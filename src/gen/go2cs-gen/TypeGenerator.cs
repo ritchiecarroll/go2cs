@@ -570,7 +570,7 @@ public class TypeGenerator : ISourceGenerator
                         context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSource.g.cs")), methodSource);
 
                     // A value type's exported Go methods as compiled delegates, reached only through reflect's method paths (MethodSet).
-                    if (MethodSet.Source(packageNamespace, generatedType as INamedTypeSymbol) is { } methodSet)
+                    if (MethodSet.Source(packageNamespace, generatedType as INamedTypeSymbol, context.Compilation, generatedSource) is { } methodSet)
                         context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSet.g.cs")), methodSet);
                 }
             }
