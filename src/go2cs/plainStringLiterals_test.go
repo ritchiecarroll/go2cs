@@ -392,3 +392,69 @@ func TestAStalePackageInitIsRetiredWhenNothingRelocates(t *testing.T) {
 		t.Errorf("a hand-written package_init.cs must be left untouched (err %v)", err)
 	}
 }
+
+// deferCaptureFixture: string literals in deferred and spawned calls, whose arguments the lowering
+// passes through the registration's generic type parameters. Two-letter literals, because a go/defer
+// argument keeps the hoist, and only a literal whose slug is too short for a field renders inline.
+const deferCaptureFixture = "package plit\n\n" +
+	"func note(first string, rest ...string) {}\n\n" +
+	"func any1(v any) {}\n\n" +
+	"func sites() {\n" +
+	"\tdefer note(\"aa\", \"bb\", \"hh\")\n" +
+	"\tdefer any1(\"cc\")\n" +
+	"\tgo note(\"dd\", \"ee\", \"ii\")\n" +
+	"\tdefer func() { _ = recover() }()\n" +
+	"\tdefer panic(\"ff\")\n" +
+	"}\n\n" +
+	"func direct() { panic(\"gg\") }\n"
+
+// TestADeferredCaptureListCastsEveryStringLiteral: every string literal in a deferred or spawned
+// call's capture list takes `(@string)`, so the registration's type parameter is Go's string and not
+// System.String (GO2CS0004 A2; measured on DeferVariadicCallee, DeferPanicArg and DeferLambdaParam).
+// The fixed slot, the first variadic element and an `any` slot already did; a variadic element PAST
+// the parameter array (`hh`, `ii`) and a deferred panic's value (`ff`) did not. CONTROL: a direct panic keeps its bare literal, which golib's panic normalizes.
+func TestADeferredCaptureListCastsEveryStringLiteral(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/plit\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "plit.go"), deferCaptureFixture)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      "linux/amd64",
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "plit", "plit.cs")), "\r\n", "\n")
+
+	for _, literal := range []string{"aa", "bb", "hh", "cc", "dd", "ee", "ii", "ff"} {
+		bare := `, "` + literal + `"`
+		if strings.Contains(emitted, bare) || !strings.Contains(emitted, `(@string)"`+literal+`"`) {
+			t.Errorf("want `(@string)\"%s\"` in the capture list, never a bare C# string:\n%s", literal, emitted)
+		}
+	}
+
+	if !strings.Contains(emitted, `throw panic("gg")`) {
+		t.Errorf("control: a direct panic keeps its bare literal:\n%s", emitted)
+	}
+}

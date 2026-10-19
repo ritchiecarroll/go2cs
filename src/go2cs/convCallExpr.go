@@ -3205,6 +3205,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// the reassignment case above.) Both visitDeferStmt and visitGoStmt force the temp-param
 			// form for a built-in callee, so renderParams is set whenever callArgs is.
 			if deferCallArgs != nil && len(deferCallArgs) == 1 && deferRenderParams {
+				// The eager argument feeds the registration's generic type parameter, so here (and
+				// only here) a string literal takes Go's type explicitly: bare, T inferred as
+				// System.String (GO2CS0004 A2, DeferPanicArg). panic's own normalization still
+				// covers every non-deferred site, which keeps its bare literal.
+				if lit, isLit := ast.Unparen(callExpr.Args[0]).(*ast.BasicLit); isLit && lit.Kind == token.STRING {
+					panicValue = "(@string)" + panicValue
+				} else if constExprIsStringLiteralConcat(callExpr.Args[0]) {
+					panicValue = v.applyUntypedConstBoxCast(callExpr.Args[0], panicValue)
+				}
+
 				deferCallArgs[0] = panicValue
 
 				return fmt.Sprintf("throw panic(%s1)", TempVarMarker)
