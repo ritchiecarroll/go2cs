@@ -105,18 +105,50 @@ public static class PointerExtensions
     /// design -- so this indexes it in place, bounded by the length it was minted with. Every other box
     /// reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does, with the same overloads and so the
     /// same bounds checks and panics. One type test per read; no element box (runtime's cheaprand is on
-    /// the emitted population).
+    /// the emitted population). A pointer array over FOREIGN memory reads its element's word in place
+    /// (<see cref="NativePointerArrayBox{E}"/>); that second test exists only for a reference-bearing
+    /// <typeparamref name="T"/>, a JIT-time constant, so an unmanaged element's read is unchanged.
     /// </remarks>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+            return ref words.ElementRef(index);
+
+        return ref pointer.Value[index];
+    }
 
     /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+            return ref words.ElementRef(index);
+
+        return ref pointer.Value[index];
+    }
 
     /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+        {
+            // An UNSIGNED index is checked at its full value before any narrowing, as array<T>'s ulong indexer does.
+            if (index >= (ulong)words.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, words.Length);
+
+            return ref words.ElementRef((nint)index);
+        }
+
+        return ref pointer.Value[index];
+    }
 
     /// <summary>
     /// Reinterprets a pointer as a pointer to <typeparamref name="TDst"/> — Go's

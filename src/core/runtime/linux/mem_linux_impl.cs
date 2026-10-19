@@ -20,6 +20,13 @@
 // its own affair -- a struct that carries managed references reinterpreted over it is the E3
 // class (Q58's design), not this file's. Errors return as Go's err (errno), never as exceptions.
 //
+// REGISTRATION (G's ruling, 2026-10-19): every mapping sysMmap makes is recorded in golib's GoOsMemory and
+// every sysMunmap releases its range, since every linux sys*OS path funnels through these two. The runtime
+// OWNS that memory, so a pointer word in it is a Go pointer, while a word in any other native memory is a
+// foreign address that builtin.NativeArrayPointer reads as one. Registering a raw mapping too (the page-size
+// probe, vgetrandom's states) is safe: no pointer array is built over one, and marking it Go-owned only selects
+// the managed shadow for an array nobody builds.
+//
 // Hand-owned: there is no mem_linux_impl.go, so a -stdlib reconvert never regenerates this file.
 
 using System.Runtime.InteropServices;
@@ -49,12 +56,15 @@ partial class runtime_package
         if (r == -1) {
             return (nil, (nint)Marshal.GetLastPInvokeError());
         }
+        GoOsMemory.Register((nuint)r, (nuint)n);
         return (new @unsafe.Pointer((nuint)r), 0);
     }
 
-    // sysMunmap calls the munmap system call.
+    // sysMunmap calls the munmap system call. The range is released from GoOsMemory first, so an address the
+    // kernel hands to another thread's mmap the moment it is unmapped is never unregistered after it.
     internal static partial void sysMunmap(@unsafe.Pointer addr, uintptr n)
     {
+        GoOsMemory.Unregister((nuint)(uintptr)addr, (nuint)n);
         libc_munmap((nint)(nuint)(uintptr)addr, (nuint)n);
     }
 

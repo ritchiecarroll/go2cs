@@ -276,7 +276,7 @@ using static go.runtime_package;
 [assembly: go.GoPositionMap("runtime/symtab.go", "symtab.cs", "AEagAbKCggAEhgIACwIAAiAADQKClIKCAAIgAA8GgpSClIKUpoKU3KaUgoKmlKYAAhDSkpSUpoKCAAkUgpTugpQADRyCpoKm2IKCgoKUgoKCpgB8pAIACgKCgpQAAioAEgKCgoKUgoKCgoKCAAwagoKCgrgAGzqCggAMIAANBIKElLiClIKCgoKClIKClIKUuIKCgoKmlIKCpoKCggAHLgASAoKCgpSCgqaCgqamlAAFEuKCppSCgoKUgpSUlIKUgoK4qJKClAAVsAGigoKClAACEuKCgqYABxCCpoKokgACGAAJAqgAAiIADwKCgpSUgoKmgqaUgpSCpoKmggAMGoKClAACFPKClKgADyjC+Ja2pIKssoKCgoLKgoLcgoKCgoKUgoLIppSCpoKCgpSUgoKCgoKCgoKClO6CgoKmgoKCgoKCgu6CppTKgqaUgoKCgoKCgpSmgqaCgpSmgoKCgoKmgoKmpoKCgqaAgrYAAhgADAKCgpSCgpSUgqaC1oKCgoKUqJKCgoKCgoKCgoKUuIKmgoKUgqaCgpSCqJKClKqigpSCgoaigpSCgqi2goKUgoKUgpSCgoKUgoKokqKCgoKCgpSUAAsU6IKU", "", "", "191=gostring/1/2/3,gostring/2/2/4")]
 [assembly: go.GoPositionMap("runtime/symtabinl.go", "symtabinl.cs", "ADKGAQAQAoKClIKCtoIABxCCqJKCgpSCqJIAAhwACwKClIIABxIAAhAACAKC", "", "", "79=pcdatavalue1/1/1/4")]
 [assembly: go.GoPositionMap("runtime/synctest.go", "synctest.cs", "ACxWAA0SgoKUgqSCpoKUgoKCtoLKgqaCgoKClIKmuIKUgpSCgoK8woKC2LKCgoKUgoKCurKCAAoWgoKUlICUyKbqAAsM0oKmgoKU3IKCgpSCkriCooKCgoKmgoKCgsaCgoKUgoKClIKClIKUlJSmgoKmlIKCgpSUlKa0/oKmooKClJSUgqiSgoKUuIKClIKClIKCgpSCgriC6KKClJSCgqiSqJKAgoKkqJKosoKClIKSlKIADjAACgKCptyClJSmgqaCgpSkpoKCgoKCgoKCgqamgpSuwqyyrLI=", "192-194:1;198-204:2;210-217:3;353-355:1", "", "213=Add/1/1/1")]
-[assembly: go.GoPositionMap("runtime/sys_darwin.go", "sys_darwin.cs", "AA4aAAswAAoCgoKCAAIWAAsCuIKUgoCClIKCpKb84pqCgoKk3vKCgqTowoKCgqTowoKCpPjCgoKCpNjCpJjCgqTowoKkAAFGACECgpSkAAoO0gABEIKk6MKCpPjCgqTowoKkAAMSvtjCpN7ypNjCpJjCAAQU+NKCgqQAAywAARoACwKCgqQAAxIAAxLo0sqUgoKk2MKk+MKCgqQACgjCgoKCgoKkAAkIwoKCgoKCpOiimIKkmKKCpAAKCMKCgoKCpOjCgoKCpNjCgoKk2MKCgqTowoKCgqTowoKCgqT4woKCgoKk2MKCgqTo1IKkxpKokoKCuIKkAAoOAAUSAAkCggAIHqQACAaSAAYWpA==")]
+[assembly: go.GoPositionMap("runtime/sys_darwin.go", "sys_darwin.cs", "AA4aAAswAAoCgoKCAAIWAAsCuIKUgoCClIKCpKb84pqCgoKk3vKCgqTowoKCgqTowoKCpPjCgoKCpNjCpJjCgqTowoKkAAFGACECgpSkAAMmAAMQ+MKCpOjCgqQAAxK+2MKk3vKk2MKkmMIABBT40oKCpAADLAABGgALAoKCpAADEgADEujSypSCgqTYwqT4woKCpAAKCMKCgoKCgqQACQjCgoKCgoKk6KKYgqSYooKkAAoIwoKCgoKk6MKCgoKk2MKCgqTYwoKCpOjCgoKCpOjCgoKCpPjCgoKCgqTYwoKCpOjUgqTGkqiSgoK4gqQACg4ABRIACQKCAAgepAAIBpIABhak")]
 [assembly: go.GoPositionMap("runtime/sys_nonppc64x.go", "sys_nonppc64x.cs", "AAgS")]
 [assembly: go.GoPositionMap("runtime/sys_x86.go", "sys_x86.cs", "AAwgooKCgoKC")]
 [assembly: go.GoPositionMap("runtime/tagptr_64bit.go", "tagptr_64bit.cs", "ADx+ooKCgpSokqaUgpSokg==")]
@@ -534,12 +534,10 @@ public static partial class runtime_package
     internal partial struct mheap_userArena {}
     internal partial struct mlink {}
     internal partial struct mlock_args {}
-    internal partial struct mmap_args {}
     internal partial struct moduledata {}
     internal partial struct modulehash {}
     internal partial struct mspan {}
     [GoValueClone("heapStats", "pause_ns", "pause_end", "lastScanStats")] internal partial struct mstats {}
-    internal partial struct munmap_args {}
     internal partial struct neverCallThisFunction {}
     internal partial struct newmHandoffᴛ1 {}
     internal partial struct notInHeap {}

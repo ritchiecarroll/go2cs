@@ -68,13 +68,22 @@ internal sealed class ShadowArrayBox<T> : ж<array<T>>
     private readonly nuint m_nativeAddr;
     private array<T> m_store;
 
+    // Null over memory the Go runtime does not own: its elements are data a zeroed store would misread.
+    private readonly bool m_foreign;
+
     private ShadowArrayBox(nuint nativeAddress, nint length)
         : base(isNull: false)
     {
         m_nativeAddr = nativeAddress;
 
-        // Zeroed, as sysAlloc'd memory is: Go reads a fresh L2 block as all-zero pallocData.
-        m_store = new array<T>(length);
+        // Zeroed, as sysAlloc'd memory is: Go reads a fresh L2 block as all-zero pallocData. Over memory the
+        // runtime owns, the store is the block's one shadow (GoOsMemory), so a second pointer minted over the same
+        // block reads what the first one stored, as a second Go pointer to the same memory does.
+        // Over FOREIGN memory there is no shadow (G's ruling, 2026-10-19): a zeroed store would answer zero for memory
+        // that holds data, a silent wrong read, so every read refuses by name instead.
+        array<T>? shadow = GoOsMemory.Shadow<T>(nativeAddress, length);
+        m_foreign = shadow is null;
+        m_store = shadow ?? default;
 
         AllocationCounter.Count();
     }
@@ -92,10 +101,33 @@ internal sealed class ShadowArrayBox<T> : ж<array<T>>
     }
 
     /// <inheritdoc/>
-    public override ref array<T> Value => ref m_store;
+    public override ref array<T> Value
+    {
+        get
+        {
+            if (m_foreign)
+                throw foreignRefused();
+
+            return ref m_store;
+        }
+    }
 
     /// <inheritdoc/>
-    public override ref array<T> ValueSlot => ref m_store;
+    public override ref array<T> ValueSlot
+    {
+        get
+        {
+            if (m_foreign)
+                throw foreignRefused();
+
+            return ref m_store;
+        }
+    }
+
+    private PanicException foreignRefused() =>
+        new($"native-shadowed array at 0x{m_nativeAddr:x}: a *[N]{typeof(T).Name} over memory the Go runtime did not " +
+            "allocate holds data whose element type carries managed references, which no managed store can read " +
+            "from native bytes; if this memory is the runtime's own, its mapping missed registration in GoOsMemory");
 
     /// <inheritdoc/>
     // The block's address: the one Go allocated, frees and advises (see the class remarks).

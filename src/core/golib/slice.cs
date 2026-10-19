@@ -1955,34 +1955,40 @@ public static class SliceExtensions
     // unsafe.Pointer. The window's bounds are the array's LENGTH and its panics the array's texts
     // ("with length"), exactly the checks of the array<T> overloads above. Every other box is
     // dereferenced as `(~p)` was, so a managed array keeps its route, its checks and its nil panic.
+    // A box whose elements are native WORDS (a foreign pointer array, NativePointerArrayBox) is sliced by
+    // reading the words the slice spans, and no more: [low, max), or [low, high) for the 2-index and 1-index
+    // forms, whose capacity is then high - low (see that class's remarks).
     public static slice<T> slice<T>(this ж<array<T>> pointer)
     {
-        if (tryNativeArrayView(pointer, out slice<T> view))
-            return view;
+        if (tryNativeArrayView(pointer, out slice<T> view, out INativeWordArray<T>? words))
+            return words?.Window(0, words.Length, words.Length) ?? view;
 
         return (~pointer)[..];
     }
 
     public static slice<T> slice<T>(this ж<array<T>> pointer, nint low)
     {
-        if (tryNativeArrayView(pointer, out slice<T> view))
-            return nativeArraySlice2(view, low, view.Length);
+        if (tryNativeArrayView(pointer, out slice<T> view, out INativeWordArray<T>? words))
+            return words is null ? nativeArraySlice2(view, low, view.Length) : nativeWordSlice2(words, low, words.Length);
 
         return (~pointer).slice(low);
     }
 
     public static slice<T> slice<T>(this ж<array<T>> pointer, nint low, nint high)
     {
-        if (tryNativeArrayView(pointer, out slice<T> view))
-            return nativeArraySlice2(view, low, high);
+        if (tryNativeArrayView(pointer, out slice<T> view, out INativeWordArray<T>? words))
+            return words is null ? nativeArraySlice2(view, low, high) : nativeWordSlice2(words, low, high);
 
         return (~pointer).slice(low, high);
     }
 
     public static slice<T> slice<T>(this ж<array<T>> pointer, nint low, nint high, nint max)
     {
-        if (tryNativeArrayView(pointer, out slice<T> view))
+        if (tryNativeArrayView(pointer, out slice<T> view, out INativeWordArray<T>? words))
         {
+            if (words is not null)
+                return words.Window(low, high, max);
+
             if (low < 0 || high < low || max < high || max > view.Length)
                 throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(low, high, max, view.Length);
 
@@ -1993,17 +1999,36 @@ public static class SliceExtensions
     }
 
     // The native window of a pointer-to-array; false for every box that is not over native memory (one virtual
-    // call answering null). A nil pointer answers false too, so it meets the dereference's nil panic.
-    private static bool tryNativeArrayView<T>(ж<array<T>> pointer, out slice<T> view)
+    // call answering null). A nil pointer answers false too, so it meets the dereference's nil panic. A view of
+    // native WORDS answers through `words`, with `view` unset.
+    private static bool tryNativeArrayView<T>(ж<array<T>> pointer, out slice<T> view, out INativeWordArray<T>? words)
     {
-        if (pointer?.TryGetNativeArrayView(typeof(T)) is slice<T> native)
+        switch (pointer?.TryGetNativeArrayView(typeof(T)))
         {
-            view = native;
-            return true;
-        }
+            case slice<T> native:
+                view = native;
+                words = null;
+                return true;
 
-        view = default;
-        return false;
+            case INativeWordArray<T> nativeWords:
+                view = default;
+                words = nativeWords;
+                return true;
+
+            default:
+                view = default;
+                words = null;
+                return false;
+        }
+    }
+
+    // nativeArraySlice2's checks, over a view of native words.
+    private static slice<T> nativeWordSlice2<T>(INativeWordArray<T> words, nint low, nint high)
+    {
+        if ((nuint)high > (nuint)words.Length || (nuint)low > (nuint)high)
+            throw RuntimeErrorPanic.LengthSliceBoundsOutOfRange(low, high, words.Length);
+
+        return words.Window(low, high, high);
     }
 
     // array<T>.Slice2's checks over a native window: high against the array's length, then low against high,

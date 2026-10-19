@@ -2706,12 +2706,39 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length)
     {
-        // A reference-bearing element cannot alias native bytes: its elements live in a managed store that
-        // SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox).
         if (ShadowArrayBox<T>.Needed)
+        {
+            // A POINTER element over memory the Go runtime did not allocate is a foreign address, read from its
+            // word (G's ruling, 2026-10-19; see NativePointerArrayBox and GoOsMemory).
+            if (NativePointerArray<T>.Open is { } open && address != 0 && !GoOsMemory.Owns(address))
+                return open(address, length);
+
+            // Any other reference-bearing element cannot alias native bytes: its elements live in a managed store
+            // that SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox).
             return ShadowArrayBox<T>.Over(address, length);
+        }
 
         return NativeArrayBox<T>.Over(address, length);
+    }
+
+    // The foreign pointer-array door per element type, closed over E once: null unless T is a pointer, ж<E>.
+    private static class NativePointerArray<T>
+    {
+        internal static readonly Func<nuint, nint, ж<array<T>>>? Open = create();
+
+        private static Func<nuint, nint, ж<array<T>>>? create()
+        {
+            if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(ж<>))
+                return null;
+
+            return typeof(NativePointerArray<T>).GetMethod(nameof(open), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
+                .MakeGenericMethod(typeof(T).GetGenericArguments()[0])
+                .CreateDelegate<Func<nuint, nint, ж<array<T>>>>();
+        }
+
+        // T is ж<E> whenever this is reached (create's guard), so the box IS a ж<array<T>>.
+        private static ж<array<T>> open<E>(nuint address, nint length) =>
+            (ж<array<T>>)(object)NativePointerArrayBox<E>.Over(address, length);
     }
 
     /// <summary>

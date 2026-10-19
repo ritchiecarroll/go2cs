@@ -413,6 +413,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// only from mstart1 and needm, neither of which the managed runtime enters). So runtime/darwin/libccall_impl.cs displaces it with a refusal BY NAME: a silent nil
 		// errno address would read as errno 0, a success.
 		"libc_error_addr": goosDarwin,
+		// runtime.mmap / runtime.munmap on DARWIN (G's ruling, 2026-10-19): the OS mapping primitives, which record
+		// every range they map in golib's GoOsMemory and release it at munmap, so builtin.NativeArrayPointer can tell
+		// the runtime's own OS memory (Go pointers, kept in a managed shadow) from foreign memory (pointer words read
+		// as foreign addresses). linux registers at its hand-owned sysMmap / sysMunmap and windows at
+		// sysAllocOS / sysReserveOS / sysFreeOS. The converted bodies reach libc through libcCall with mmap_args,
+		// whose unsafe.Pointer fields give it no pinnable storage, so libcCall refuses them by name;
+		// runtime/darwin/sys_darwin_mmap_impl.cs calls libc directly with Go's trampoline contract.
+		"mmap":   goosDarwin,
+		"munmap": goosDarwin,
 		// getgcmask answers a TYPE's GC pointer bitmap, and Go answers it by reading the GC's own
 		// heap metadata: findObject, the span's typePointersOfUnchecked iterator, activeModules'
 		// data/bss bitmaps, the stack's locals map. None of those exist in a managed runtime, so the
