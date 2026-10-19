@@ -336,7 +336,7 @@ partial struct sweepLocker {
 
 // sweepLocked represents sweep ownership of a span.
 partial struct sweepLocked {
-    internal partial ref ж<mspan> mspan { get; }
+    /*embed*/ internal ж<mspan> mspan;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

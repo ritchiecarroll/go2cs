@@ -29,7 +29,7 @@ partial struct cell {
 }
 
 partial struct holder {
-    internal partial ref ж<cell> cell { get; }
+    /*embed*/ internal ж<cell> cell;
 }
 
 internal static @string String(this holder h) {

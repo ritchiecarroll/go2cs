@@ -536,7 +536,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
             // errors.
             Ꮡcheck.Value.recordInstance(Ꮡix.Value.orig, targsʗ1, instʗ1);
 
-            @string name = instʗ1._<instantiatedType_type>().Obj().Value.name;
+            @string name = instʗ1._<ΔgenericType, instantiatedType_type>().Obj().Value.name;
             var tparams = instʗ1.TypeParams().list();
             if (Ꮡcheck.validateTArgLen(Ꮡix.Value.Pos(), name, len(tparams), len(targsʗ1))) {
                 // check type constraints

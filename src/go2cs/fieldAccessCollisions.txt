@@ -1,0 +1,37 @@
+# Names a generated field property must never take: every public instance member of golib's ж<T> and every
+# golib extension member whose receiver is a ж<…>. C# binds an INSTANCE member before an extension one, so a
+# Go field named like one of these would silently bind the box's member; go2cs-gen emits no property for it
+# and the converter emits the explicit `p.of(T.Ꮡf).Value` form instead.
+#
+# ONE list, read by the converter (fieldAccess.go, go:embed), by go2cs-gen (an embedded resource) and by
+# GenTests' FieldAccessCollisionGuardTests, which FAILS when ж<T> gains a public member this list lacks.
+# One name per line; '#' starts a comment.
+at
+CompareExchangePointerWord
+DerefOrNil
+DerefOrNull
+ElementRef
+Equals
+ExchangePointerWord
+field
+GetHashCode
+GetType
+IsNative
+IsNilPointer
+IsNull
+IsOrderTokenAt
+IsPinnedAt
+NativeAddress
+of
+OrTypedNil
+PinnableStorage
+PointerOrderToken
+PrintPointer
+ReadPointerWord
+ReferentObject
+Reinterpret
+slice
+StorageKind
+ToString
+Value
+ValueSlot

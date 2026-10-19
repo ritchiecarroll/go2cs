@@ -118,7 +118,7 @@ internal static error checkOpenSSLVersion() {
 // ParseTestData.
 internal partial struct recordingConn {
     /*embed*/ public net_package.Conn Conn;
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal slice<slice<byte>> flows;
     internal bool reading;
 }
@@ -300,7 +300,7 @@ internal static (slice<slice<byte>> flows, error err) parseTestData(io.Reader r)
 // replayingConn is a net.Conn that replays flows recorded by recordingConn.
 internal partial struct replayingConn {
     internal testing.TB t;
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal slice<slice<byte>> flows;
     internal bool reading;
 }

@@ -15,6 +15,7 @@ global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
+global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAgqlIKClAATBoKCgoKCpoKCgoKmgoKCgqaCgoKCloSCgoKogoKWgoKCgpSCgoKClIKCgoIADhaCgoKCgoKClIKCgpSCgoIACA6CooaCgpSUgoKCgoKCgoKmlIKmgoK4loKCgoKUlIKCgIKCgoKCgqaUgraCgrimooKAgraCogAPBIKCgoKUoJKQkpCioJKgkpCSoJKgkpCSAAkGgpKCoJKgkpKgkqCkgoKCgoK4goKCgoI=", "196-200:1;211-211:1;212-212:2;213-213:3;213-213:3.1;214-214:4;215-215:5;216-216:6;217-217:7;218-218:8;219-219:9;226-226:1;227-227:2;229-229:3;230-230:4")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAkulIKClAATBoKCgoKCpoKCgoKmgoKCgqaCgoKCloSCgoKogoKWgoKCgpSCgoKClIKCgoIADhaCgoKCgoKClIKCgpSCgoIACA6CooaCgpSUgoKCgoKCgoKmlIKmgoK4loKCgoKUlIKCgIKCgoKCgqaUgraCgrjWooKAhoK2gqIADwSCgoKClKCSkJKQoqCSoJKQkqCSoJKQkgAJBoKSgqCSoJKSoJKgpIKCgoKCuIKCgoKC", "198-205:1;216-216:1;217-217:2;218-218:3;218-218:3.1;219-219:4;220-220:5;221-221:6;222-222:7;223-223:8;224-224:9;231-231:1;232-232:2;234-234:3;235-235:4")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -86,5 +87,6 @@ public static partial class main_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }

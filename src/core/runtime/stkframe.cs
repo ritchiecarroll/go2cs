@@ -10,6 +10,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(stackmap))]
 partial class runtime_package {
 
 // A stkframe holds information about a single physical stack frame.
@@ -203,20 +204,20 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
     if (size > minsize) {
         var stackid = pcdata;
         var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
-        if (stkmap == nil || (~stkmap).n <= 0) {
+        if (stkmap == nil || stkmap.n <= 0) {
             print((@string)"runtime: frame "u8, funcname(f), (@string)" untyped locals "u8, ((Δhex)(uint64)(frame.varp - size)), (@string)"+"u8, ((Δhex)(uint64)size), (@string)"\n"u8);
             @throw(missingStackmapˢ);
         }
         // If nbit == 0, there's no work to do.
-        if ((~stkmap).nbit > 0){
-            if (stackid < 0 || stackid >= (~stkmap).n) {
+        if (stkmap.nbit > 0){
+            if (stackid < 0 || stackid >= stkmap.n) {
                 // don't know where we are
-                print((@string)"runtime: pcdata is "u8, stackid, (@string)" and "u8, (~stkmap).n, (@string)" locals stack map entries for "u8, funcname(f), (@string)" (targetpc="u8, ((Δhex)(uint64)targetpc), (@string)")\n"u8);
+                print((@string)"runtime: pcdata is "u8, stackid, (@string)" and "u8, stkmap.n, (@string)" locals stack map entries for "u8, funcname(f), (@string)" (targetpc="u8, ((Δhex)(uint64)targetpc), (@string)")\n"u8);
                 @throw(badSymbolTableˢ);
             }
             locals = stackmapdata(stkmap, stackid);
             if (stackDebug >= 3 && debug) {
-                print((@string)"      locals "u8, stackid, (@string)"/"u8, (~stkmap).n, (@string)" "u8, locals.n, (@string)" words "u8, locals.bytedata.OrTypedNil(), (@string)"\n"u8);
+                print((@string)"      locals "u8, stackid, (@string)"/"u8, stkmap.n, (@string)" "u8, locals.n, (@string)" words "u8, locals.bytedata.OrTypedNil(), (@string)"\n"u8);
             }
         } else 
         if (stackDebug >= 3 && debug) {
@@ -231,16 +232,16 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // Non-empty argument frame, but not a special map.
         // Fetch the argument map at pcdata.
         var stackmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
-        if (stackmap == nil || (~stackmap).n <= 0) {
+        if (stackmap == nil || stackmap.n <= 0) {
             print((@string)"runtime: frame "u8, funcname(f), (@string)" untyped args "u8, ((Δhex)(uint64)frame.argp), (@string)"+"u8, ((Δhex)(uint64)(args.n * (int32)goarch.PtrSize)), (@string)"\n"u8);
             @throw(missingStackmapˢ);
         }
-        if (pcdata < 0 || pcdata >= (~stackmap).n) {
+        if (pcdata < 0 || pcdata >= stackmap.n) {
             // don't know where we are
-            print((@string)"runtime: pcdata is "u8, pcdata, (@string)" and "u8, (~stackmap).n, (@string)" args stack map entries for "u8, funcname(f), (@string)" (targetpc="u8, ((Δhex)(uint64)targetpc), (@string)")\n"u8);
+            print((@string)"runtime: pcdata is "u8, pcdata, (@string)" and "u8, stackmap.n, (@string)" args stack map entries for "u8, funcname(f), (@string)" (targetpc="u8, ((Δhex)(uint64)targetpc), (@string)")\n"u8);
             @throw(badSymbolTableˢ);
         }
-        if ((~stackmap).nbit == 0){
+        if (stackmap.nbit == 0){
             args.n = 0;
         } else {
             args = stackmapdata(stackmap, pcdata);

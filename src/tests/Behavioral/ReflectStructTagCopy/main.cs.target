@@ -42,7 +42,7 @@ partial struct inner {
 
 partial struct outer {
     public uint16 Head;
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

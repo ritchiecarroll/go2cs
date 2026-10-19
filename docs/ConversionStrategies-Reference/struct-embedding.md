@@ -2,6 +2,19 @@
 <!-- {% raw %} — Jekyll/Liquid guard: this page contains Go composite-literal and template syntax ({{ … }}) that Liquid would otherwise parse; the HTML comment hides the tag on GitHub. -->
 
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#struct-type-embedding)
+
+> **AMENDED 2026-10-16, owner ruling (A): every embed is a field the CONVERTER declares, in Go's order.** A
+> value embed is `/*embed*/ public T T;` and a pointer embed `/*embed*/ public ж<T> T;`, written where Go
+> declares the embed; go2cs-gen reads the marked field as the embed, stores through it, and declares neither
+> the `ʗT` backing field nor the `partial ref` accessor the sections below describe. The reason is LAYOUT: the
+> generator declared the backing field in a later partial part, which the CLR laid after every converter field,
+> so an embed declared first sat at the wrong offset for any struct read at Go's layout (runtime's lfstack node,
+> `struct{ LFNode; data int }`); a zero-size blank before an embed (`struct{ _ sys.NotInHeap; listedValManual }`)
+> now takes the zero-size layout arc, which could not place generator-owned storage. Converted code reads the
+> same at every use site (`s.T`, `ref s.T`, `Ꮡ(s).of(S.ᏑT)`). The sections below are kept as the record of the
+> property form and of why each generator rule exists; where one says "the `partial ref` property", read "the
+> declared embed field" (the legacy property form is still READ, for hand-owned files that spell it).
+> Shown by: src/tests/Behavioral/EmbedLayoutMatchesGo, GenTests DeclaredEmbedFieldTests and EmbeddedValueHopTests.
 Go structs use "[type embedding](https://go101.org/article/type-embedding.html)" instead of inheritance. Since converted structs are C# `struct`s (no inheritance), the `TypeGenerator` manages the equivalent: it adds a field for the embedded type and promotes the embedded type's fields and methods (selection shorthand). Both field and method promotion are **transitive through every embedding level**: when `top` embeds `mid` which embeds `inner`, `top` gets an accessor for `inner`'s field `n` (`top.n => ref mid.n`) and a forwarding receiver for `inner`'s method `describe` (`top.describe() => target.mid.describe()`), each resolving through `mid`'s own one-level promotion. The generator collects an embedded struct's members and methods recursively (following each field whose name equals its type's simple name — Go's embedding marker), with the closest declaration of a name winning, matching Go's promotion rules. **Pointer embeds promote too.** Go also embeds by pointer (`*traceBuf`), whose C# field type is `ж<traceBuf>`; its methods and fields are promoted exactly like a value embed (the field's ref-property is dereferenced — `target.traceBuf.Value.method()` — which binds the pointer-receiver method via the `this ref` `ж<T>` overload). The embedding-marker comparison dereferences the field type first, because a pointer field's simple name carries a `.Value` suffix (`traceBuf.Value`) that would never match the bare embed field name. This matters most *transitively*: `traceExpWriter` embeds `traceWriter` (value) which embeds `*traceBuf` (pointer), and `traceBuf`'s `varint`/`byte` must promote all the way up — without the deref-aware marker the nested pointer embed is skipped and the upper struct silently loses the method (CS1929). (Guarded by the `NestedEmbeddingPromotion` behavioral test for value embeds and the `PointerEmbeddingPromotion` test for one-level and two-level-transitive pointer embeds; runtime relies on the field case for `stackWorkBuf` → `stackWorkBufHdr` → `workbufhdr.nobj` and the pointer case for the trace writers.) Because the promotion is performed at conversion time by the generator, methods added later in hand-written C# are not automatically promoted; keeping the source in Go and re-converting (or using explicit interfaces) is the maintainable path.
 
 **Zero values of promoted-embed structs construct through a generated constructor — never `default`.** An embed is an inline field, so its own `default` is a usable Go zero value; what still is not is an embedded type that itself needs construction (a fixed-size array field, or a nested embed of one), whose `default` leaves a null backing. The generator therefore keeps allocating every embed in the type's constructors, and the converter keeps rendering an uninitialized declaration of such a struct through them. Both halves close this: the **converter** renders every *uninitialized* declaration of such a struct through the NilType constructor instead of `default!` — `var s shadowed` emits `shadowed s = new(nil);`, an uninitialized package-level `var g shadowed` emits `internal static shadowed g = new(nil);` (the addressed-global box wraps the same, `new(new shadowed(nil))`), and a named result `(r shadowed)` declares `shadowed r = new(nil);` — while the **generator** allocates the boxes in the *parameterless* constructor too, so the `new S()` zero values materialized by `heap(new S(), out var Ꮡs)` (an address-taken local) and golib's `@new<T>()` (`p := new(shadowed)`, which constructs via `Activator.CreateInstance<T>()`) are equally usable. The detection (`structHasPromotedEmbeds`, `visitStructType.go`) mirrors the embedded-field emission: an embed takes the promoted-box path unless it is a same-package interface, a builtin non-named embed (`int`), or a pointer to a non-named type; a cross-package embed (selector type) always promotes. Residual gap: an instance materialized as `default(T)` *outside* a declaration — a missing-key map read, a freshly `make`d slice's elements — still has null boxes; golib cannot run a constructor generically there. (Guarded by the `NamedTypeOverStruct` behavioral test — `var s shadowed` with explicit `s.ctxt.fn` and promoted `s.fn` access, plus `new(shadowed)`, vs Go.)
@@ -468,8 +481,8 @@ type (
 <!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:45-47, 49 -->
 ```csharp
 internal partial struct embeddedLocalTypes_holder /*dyn*/ {
-    internal partial ref embeddedLocalTypes_myInt myInt { get; }
-    public partial ref embeddedLocalTypes_MyInt MyInt { get; }
+    /*embed*/ internal embeddedLocalTypes_myInt myInt;
+    /*embed*/ public embeddedLocalTypes_MyInt MyInt;
 …
 }
 ```
@@ -552,7 +565,7 @@ and the struct itself was CS0542:
 <!-- illustration: not converter output -->
 ```csharp
 partial struct Buffer {
-    public partial ref bytes_package.Buffer ΔBuffer { get; }   // was: `Buffer { get; }`, CS0542
+    /*embed*/ public bytes_package.Buffer ΔBuffer;   // was: `Buffer { get; }`, CS0542
     public io_package.ReaderFrom ReaderFrom;
     public io_package.WriterTo WriterTo;
 }

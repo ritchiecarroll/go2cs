@@ -66,7 +66,7 @@ public static void SetGlobalRandom(ж<testing.T> Ꮡt, uint64 seed) {
 }
 
 partial struct lockedReader {
-    public partial ref go.sync_package.Mutex Mutex { get; }
+    /*embed*/ public go.sync_package.Mutex Mutex;
     internal ж<mathrand.ChaCha8> r;
 }
 

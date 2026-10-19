@@ -972,7 +972,7 @@ internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) {
 }
 
 partial struct cpuᴛ1 /*dyn*/ {
-    public partial ref go.sync_package.Mutex Mutex { get; }
+    /*embed*/ public go.sync_package.Mutex Mutex;
     internal bool profiling;
     internal channel<bool> done;
 }

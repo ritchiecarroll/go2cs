@@ -16,7 +16,7 @@ internal static nint bump(this ref setting s) {
 
 partial struct Setting {
     internal @string tag;
-    internal partial ref ж<setting> setting { get; }
+    /*embed*/ internal ж<setting> setting;
 }
 
 internal static ж<setting> lookup(@string name) {

@@ -124,7 +124,7 @@ public static ж<Type> TypeOf(any aʗp) {
 public static ж<Type> TypeFor<T>() {
     T v = GoZero<T>();
     {
-        var t = TypeOf(v); if (t != nil) {
+        var t = TypeOf((v).OrTypedNilOf()); if (t != nil) {
             return t;
         }
     }
@@ -145,18 +145,18 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
         var tt = Ꮡt.Reinterpret<Type, ΔArrayType>();
-        return (~tt).Elem;
+        return tt.of(main_package.ΔArrayType.ᏑElem).Value;
     }
     if (exprᴛ1 == Map) {
         var tt = Ꮡt.Reinterpret<Type, ΔMapType>();
-        return (~tt).Elem;
+        return tt.of(main_package.ΔMapType.ᏑElem).Value;
     }
 
     return default!;
 }
 
 partial struct ΔMapType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Key;
     public ж<Type> Elem;
     public ж<Type> Bucket;
@@ -177,7 +177,7 @@ public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
 }
 
 partial struct ΔArrayType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
     public ж<Type> Slice;
     public uintptr Len;

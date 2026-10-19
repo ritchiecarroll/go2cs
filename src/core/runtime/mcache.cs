@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(mcache))]
 partial class runtime_package {
 
 // Per-thread (in Go, per-P) cache for small objects.
@@ -97,10 +98,10 @@ internal static ж<mcache> allocmcache() {
         Ꮡc.ValueSlot.of(mcache.ᏑflushGen).Store(mheap_.sweepgen);
         unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     });
-    foreach (var (i, _) in (~c).alloc) {
-        c.Value.alloc[i] = Ꮡemptymspan;
+    foreach (var (i, _) in c.alloc) {
+        c.of(mcache.Ꮡalloc).ElementRef(i) = Ꮡemptymspan;
     }
-    c.Value.nextSample = nextSample();
+    c.nextSample = nextSample();
 
     return c;
 }

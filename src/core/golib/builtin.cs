@@ -386,7 +386,16 @@ public static partial class builtin
     /// slice = append(slice, elem1, elem2)
     /// slice = append(slice, anotherSlice...)
     /// </code>
+    /// <para>
+    /// Lowest priority: whenever a <see cref="slice{T}"/> overload also applies, this one is set aside.
+    /// Without that, <c>append(nums, 4, 5)</c> on a <c>slice&lt;nint&gt;</c> was CS0121: the C# int literals
+    /// inferred <c>T = int</c> here, an exact match for the elements, while every <see cref="slice{T}"/>
+    /// overload matched the slice exactly. The priority changes only calls that were that ambiguity: a call
+    /// this overload binds alone (a first argument typed <see cref="ISlice"/>) still binds it. Measured
+    /// 2026-10-16 by marking it obsolete: no call in go2cs-stdlib.slnx or go2cs.slnx bound it.
+    /// </para>
     /// </remarks>
+    [OverloadResolutionPriority(-1)]
     public static slice<T> append<T>(ISlice slice, params T[] elems)
     {
         return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
@@ -2389,7 +2398,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(target) : new StandardBox<T>(target);
 
         // `&T{}`, and through heap() an escaping local: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2855,7 +2864,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(value) : new StandardBox<T>(value);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2901,7 +2910,7 @@ public static partial class builtin
         ж<T> box = new StandardBox<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -3123,7 +3132,7 @@ public static partial class builtin
         while (target is IInterfaceAdapter interfaceAdapter)
             target = interfaceAdapter.Value!;
 
-        throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target)}, not {GetGoTypeName(typeof(T))}");
+        throw RuntimeErrorPanic.TypeAssertion(typeof(object), target, typeof(T));
     }
 
     /// <summary>
@@ -4243,4 +4252,30 @@ public static partial class builtin
     /// <param name="value">UTF-8 bytes.</param>
     /// <returns>Heap allocated string.</returns>
     public static @string str(ReadOnlySpan<byte> value) => (@string)value;
+
+    /// <summary>
+    /// Type asserts <paramref name="target"/>, whose Go static type is the interface <typeparamref name="TSource"/>, as
+    /// type <typeparamref name="T"/>; a failure panics with that source type in the text, as Go's does.
+    /// </summary>
+    /// <typeparam name="TSource">Static interface type of <paramref name="target"/>.</typeparam>
+    /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
+    /// <param name="target">Source value to type assert.</param>
+    /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
+    /// <remarks>
+    /// The plain <c>_&lt;T&gt;(this object)</c> form cannot see the static type, so it names the source "interface {}";
+    /// Go prints "io.Reader is *os.File, not *bytes.Buffer". A generated overload on each interface, and golib's own for
+    /// <c>error</c>, supply the source here, leaving the call site as <c>x._&lt;T&gt;()</c>.
+    /// </remarks>
+    public static T _<TSource, [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods |
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
+    )] T>(this TSource target)
+    {
+        if (TryTypeAssert((object?)target, out T value))
+            return value;
+
+        throw RuntimeErrorPanic.TypeAssertion(typeof(TSource), target, typeof(T));
+    }
 }

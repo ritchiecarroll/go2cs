@@ -16,6 +16,7 @@ using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
 
+[GoFieldAccess(typeof(RawSockaddrInet4), typeof(RawSockaddrInet6))]
 partial class syscall_package {
 
 public static nint Stdin = 0;
@@ -37,7 +38,7 @@ internal static nint clen(slice<byte> n) {
 
 // Mmap manager, for use by operating system-specific implementations.
 partial struct mmapper {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal map<ж<byte>, slice<byte>> active; // active mappings; key is last byte in mapping
     internal Func<uintptr, uintptr, nint, nint, nint, int64, (uintptr, error)> mmap;
     internal Func<uintptr, uintptr, error> munmap;
@@ -351,7 +352,7 @@ internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint f
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet4.ᏑPort), 2);
     from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
-    from.Addr = pp.Value.Addr.Clone();
+    from.Addr = pp.Addr.Clone();
     return (n, err);
 }
 
@@ -370,8 +371,8 @@ internal static (nint n, error err) recvfromInet6(nint fd, slice<byte> p, nint f
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet6.ᏑPort), 2);
     from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
-    from.ZoneId = pp.Value.Scope_id;
-    from.Addr = pp.Value.Addr.Clone();
+    from.ZoneId = pp.Scope_id;
+    from.Addr = pp.Addr.Clone();
     return (n, err);
 }
 
@@ -389,7 +390,7 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet4(nint
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet4.ᏑPort), 2);
     from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
-    from.Addr = pp.Value.Addr.Clone();
+    from.Addr = pp.Addr.Clone();
     return (n, oobn, recvflags, err);
 }
 
@@ -407,8 +408,8 @@ internal static (nint n, nint oobn, nint recvflags, error err) recvmsgInet6(nint
     var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
     var port = @unsafe.ArrayPointer<byte>.Of(pp.of(RawSockaddrInet6.ᏑPort), 2);
     from.Port = ((nint)port.ElementRef(0) << (int)(8)) + (nint)port.ElementRef(1);
-    from.ZoneId = pp.Value.Scope_id;
-    from.Addr = pp.Value.Addr.Clone();
+    from.ZoneId = pp.Scope_id;
+    from.Addr = pp.Addr.Clone();
     return (n, oobn, recvflags, err);
 }
 

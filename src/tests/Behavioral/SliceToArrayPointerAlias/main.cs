@@ -26,7 +26,7 @@ internal static void premultiplyLike(slice<byte> dst, slice<byte> src) {
             (d.Value[0], d.Value[1], d.Value[2], d.Value[3]) = (0, 0, 0, 0);
         } else 
         if (s.Value[3] == 0xff){
-            copy((~d)[..], (~s)[..]);
+            copy(d.slice(), s.slice());
         } else {
             d.Value[0] = (byte)(s.Value[0] / 2);
             d.Value[1] = (byte)(s.Value[1] / 2);
@@ -67,7 +67,7 @@ internal static void Main() {
     deref[1] = 0x00;
     fmt.Println(derefCopyˢ, deref, stillThroughPointerˢ, p.Value[1]);
 
-    var view = (~p)[..];
+    var view = p.slice();
     view[3] = 0x7f;
     fmt.Println(sliceOfArrayPointerˢ, buf[4], lenCapˢ, len(view), cap(view));
 

@@ -13,7 +13,7 @@ using ꓸꓸꓸosꓸSignal = Span<osꓸSignal>;
 partial class signal_package {
 
 partial struct handlersᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     // Map a channel to the signals that should be sent to it.
     internal map<channel/*<-*/<osꓸSignal>, ж<handler>> m;
     // Map a signal to the number of channels receiving it.

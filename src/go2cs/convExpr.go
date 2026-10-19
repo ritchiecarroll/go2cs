@@ -77,6 +77,10 @@ type CallExprContext struct {
 	// as nothing (typedNilInterfaceBoxing.go's third arm). Marked only for an EXACT unsafe.Pointer —
 	// a named type over it renders as its wrapper struct.
 	anyBoxedUnsafePointerArgs map[int]bool
+	// anyBoxedTypeParamArgs is the TYPE-PARAMETER sibling of the three maps above, at the same slots: inside a generic
+	// body a value of type E may be a nil pointer, func or unsafe.Pointer at run time, so it takes golib's
+	// OrTypedNilOf, which decides per type argument (typedNilInterfaceBoxing.go, applyTypedNilTypeParamBox).
+	anyBoxedTypeParamArgs map[int]bool
 	// genericResultInferredFuncArgs marks func-LITERAL arguments whose DECLARED parameter type
 	// is a signature with a type parameter in its RESULT list (`OnceValue[T any](f func() T)`).
 	// C# must infer that type argument FROM THE LAMBDA'S RETURN TYPE, so the arms' natural C#
@@ -192,6 +196,16 @@ func (c *CallExprContext) markAnyBoxedUnsafePointerArg(i int) {
 	}
 
 	c.anyBoxedUnsafePointerArgs[i] = true
+}
+
+// markAnyBoxedTypeParamArg marks slot i for the typed-nil boundary's type-parameter arm (see anyBoxedTypeParamArgs),
+// created on first use as the unsafe.Pointer marker is.
+func (c *CallExprContext) markAnyBoxedTypeParamArg(i int) {
+	if c.anyBoxedTypeParamArgs == nil {
+		c.anyBoxedTypeParamArgs = make(map[int]bool)
+	}
+
+	c.anyBoxedTypeParamArgs[i] = true
 }
 
 // getDefault is what makes *CallExprContext satisfy ExprContext, and that conformance is

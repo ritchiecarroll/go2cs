@@ -30,8 +30,8 @@ public static nint Get(this ref Gauge g) {
 }
 
 partial struct Pair {
-    public partial ref ж<Meter> Meter { get; }
-    public partial ref ж<Gauge> Gauge { get; }
+    /*embed*/ public ж<Meter> Meter;
+    /*embed*/ public ж<Gauge> Gauge;
 }
 
 public static ж<Meter> NewMeter() {

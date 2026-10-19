@@ -15,6 +15,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(stackmap), typeof(specialfinalizer), typeof(specialprofile))]
 partial class runtime_package {
 
 // go2cs generated this placeholder — func runtime_debug_WriteHeapDump is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -265,7 +266,7 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
     var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
 
     ref var bv = ref heap(new bitvector(), out var Ꮡbv);
-    if (stkmap != nil && (~stkmap).n > 0){
+    if (stkmap != nil && stkmap.n > 0){
         bv = stackmapdata(stkmap, pcdata);
     } else {
         bv.n = -1;
@@ -305,15 +306,15 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
             dumpint((uint64)off);
         }
     } else 
-    if ((~stkmap).n < 0){
+    if (stkmap.n < 0){
         // Locals size information, dump just the locals.
-        var size = (uintptr)(-(~stkmap).n);
+        var size = (uintptr)(-stkmap.n);
         for (var off = s.varp - size - s.sp; off < s.varp - s.sp; off += goarch.PtrSize) {
             dumpint(fieldKindPtr);
             dumpint((uint64)off);
         }
     } else 
-    if ((~stkmap).n > 0) {
+    if (stkmap.n > 0) {
         // Locals bitmap information, scan just the pointers in
         // locals.
         dumpbv(Ꮡbv, s.varp - (uintptr)bv.n * (uintptr)goarch.PtrSize - s.sp);
@@ -475,8 +476,8 @@ internal static void dumproots() {
                     continue;
                 }
                 var spf = sp.Reinterpret<special, specialfinalizer>();
-                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + (~spf).special.offset);
-                dumpfinalizer(Δp, (~spf).fn, (~spf).fint, (~spf).ot);
+                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + spf.special.offset);
+                dumpfinalizer(Δp, spf.fn, spf.fint, spf.ot);
             }
         }
     }
@@ -681,10 +682,10 @@ internal static void dumpmemprof() {
                 continue;
             }
             var spp = sp.Reinterpret<special, specialprofile>();
-            var Δp = s.@base() + (~spp).special.offset;
+            var Δp = s.@base() + spp.special.offset;
             dumpint(tagAllocSample);
             dumpint((uint64)Δp);
-            dumpint((uint64)(uintptr)(~spp).b);
+            dumpint((uint64)(uintptr)spp.b);
         }
     }
 }

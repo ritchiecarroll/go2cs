@@ -103,7 +103,7 @@ public static void LocalPromotion() {
 }
 
 partial struct conflicted {
-    public partial ref EmbeddedInterfaceWitness.iolike_package.Base Base { get; }
+    /*embed*/ public EmbeddedInterfaceWitness.iolike_package.Base Base;
     /*embed*/ public EmbeddedInterfaceWitness.iolike_package.Reader Reader;
 }
 
@@ -136,7 +136,7 @@ internal static @string Write(this ref pointerBase b, @string s) {
 
 partial struct pointerOnly {
     /*embed*/ public EmbeddedInterfaceWitness.iolike_package.ReadWriter ReadWriter;
-    internal partial ref pointerBase pointerBase { get; }
+    /*embed*/ internal pointerBase pointerBase;
 }
 
 // Go method set entry for the promoted 'ReadWriter.Read()' - provided ONLY by the embedded

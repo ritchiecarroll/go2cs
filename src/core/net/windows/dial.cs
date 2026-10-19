@@ -498,7 +498,7 @@ public static (Conn, error) DialTimeout(@string network, @string address, time.D
 
 // sysDialer contains a Dial's parameters and configuration.
 partial struct sysDialer {
-    public partial ref Dialer Dialer { get; }
+    /*embed*/ public Dialer Dialer;
     internal @string network, address;
     internal Func<context.Context, @string, ж<TCPAddr>, ж<TCPAddr>, (ж<TCPConn>, error)> testHookDialTCP;
 }
@@ -1091,7 +1091,7 @@ public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context
 
 // sysListener contains a Listen's parameters and configuration.
 partial struct sysListener {
-    public partial ref ListenConfig ListenConfig { get; }
+    /*embed*/ public ListenConfig ListenConfig;
     internal @string network, address;
 }
 

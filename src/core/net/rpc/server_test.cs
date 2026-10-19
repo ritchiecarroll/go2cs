@@ -113,7 +113,7 @@ internal static error Exported(this ref hidden t, Args args, ж<Reply> Ꮡreply)
 }
 
 public partial struct Embed {
-    internal partial ref hidden hidden { get; }
+    /*embed*/ internal hidden hidden;
 }
 
 public partial struct BuiltinTypes {

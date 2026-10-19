@@ -1045,6 +1045,14 @@ func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList
 
 			names = append(names, v.getCSharpTypeName(typeArg))
 		}
+
+		// THE ARRAY-DIMS COMPANION'S SUPPLY: one argument per carrying type parameter, after the
+		// descriptor companions, in declared order (arrayDimsCompanion.go).
+		for _, index := range v.arrayDimsCompanionParams(funcObj) {
+			if index < typeArgs.Len() {
+				names = append(names, v.arrayDimsCompanionArg(typeArgs.At(index)))
+			}
+		}
 	}
 
 	return names
@@ -1551,6 +1559,22 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 
 			if companion, hasCompanion := v.currentFuncCompanionNames[typeParams.At(i)]; hasCompanion {
 				emittedNames = append(emittedNames, companion)
+			}
+		}
+	}
+
+	// ARRAY-DIMS COMPANIONS ride after the descriptor companions, in declared order, each bound to
+	// golib's IGoArrayDims (arrayDimsCompanion.go). Keyed by this declaration's own type parameters,
+	// so a generic named type's list finds nothing.
+	if len(v.currentFuncArrayDimsNames) > 0 {
+		for i := range typeParams.Len() {
+			if erasedParams[i] {
+				continue
+			}
+
+			if companion, hasCompanion := v.currentFuncArrayDimsNames[typeParams.At(i)]; hasCompanion {
+				emittedNames = append(emittedNames, companion)
+				constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : IGoArrayDims", v.newline, v.indent(v.indentLevel), companion))
 			}
 		}
 	}

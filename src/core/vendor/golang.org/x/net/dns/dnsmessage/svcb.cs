@@ -35,7 +35,7 @@ public static @string GoString(this ref ΔSVCBResource r) {
 // It has the same format as the SVCB record.
 partial struct ΔHTTPSResource {
     // Alias for SVCB resource record.
-    public partial ref ΔSVCBResource SVCBResource { get; }
+    /*embed*/ public ΔSVCBResource SVCBResource;
 }
 
 internal static Type realType(this ref ΔHTTPSResource r) {

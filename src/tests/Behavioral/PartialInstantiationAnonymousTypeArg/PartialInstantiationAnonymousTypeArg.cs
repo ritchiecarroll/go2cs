@@ -16,7 +16,7 @@ internal static @string String(this withM w) {
 }
 
 internal static (T, bool) assertAs<T, V>(V v) {
-    var (t, ok) = ((any)v)._<T>(ᐧ);
+    var (t, ok) = ((any)(v).OrTypedNilOf())._<T>(ᐧ);
     return (t, ok);
 }
 

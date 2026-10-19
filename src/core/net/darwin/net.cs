@@ -397,7 +397,7 @@ partial interface PacketConn :
 }
 
 partial struct listenerBacklogCacheᴛ1 /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
+    /*embed*/ public sync_package.Once Once;
     internal nint val;
 }
 internal static ж<listenerBacklogCacheᴛ1> ᏑlistenerBacklogCache = new StandardBox<listenerBacklogCacheᴛ1>(new listenerBacklogCacheᴛ1(nil));
@@ -858,8 +858,8 @@ internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
 // without leading to a recursive call to ReadFrom.
 partial struct tcpConnWithoutReadFrom {
-    internal partial ref noReadFrom noReadFrom { get; }
-    public partial ref ж<TCPConn> TCPConn { get; }
+    /*embed*/ internal noReadFrom noReadFrom;
+    /*embed*/ public ж<TCPConn> TCPConn;
 }
 
 // Fallback implementation of io.ReaderFrom's ReadFrom, when sendfile isn't
@@ -884,8 +884,8 @@ internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) 
 // than WriteTo. This is used to permit WriteTo to call io.Copy
 // without leading to a recursive call to WriteTo.
 partial struct tcpConnWithoutWriteTo {
-    internal partial ref noWriteTo noWriteTo { get; }
-    public partial ref ж<TCPConn> TCPConn { get; }
+    /*embed*/ internal noWriteTo noWriteTo;
+    /*embed*/ public ж<TCPConn> TCPConn;
 }
 
 // Fallback implementation of io.WriterTo's WriteTo, when zero-copy isn't applicable.

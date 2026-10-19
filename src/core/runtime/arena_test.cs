@@ -213,7 +213,7 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
         // Check integrity of allocated data.
         foreach (var (_, s) in arenaValues) {
             if (!AreEqual(s.ValueSlot, Ꮡvalue.ValueSlot)) {
-                tΔ1.Errorf("failed integrity check: got %#v, want %#v"u8, s.ValueSlot, Ꮡvalue.ValueSlot);
+                tΔ1.Errorf("failed integrity check: got %#v, want %#v"u8, (s.ValueSlot).OrTypedNilOf(), (Ꮡvalue.ValueSlot).OrTypedNilOf());
             }
         }
 
@@ -254,7 +254,7 @@ internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> va
                 var got = sl[i];
                 var want = valueʗ1[i];
                 if (!AreEqual(got, want)) {
-                    tΔ1.Errorf("failed integrity check: got %#v, want %#v at index %d"u8, got, want, i);
+                    tΔ1.Errorf("failed integrity check: got %#v, want %#v at index %d"u8, (got).OrTypedNilOf(), (want).OrTypedNilOf(), i);
                 }
             }
         }

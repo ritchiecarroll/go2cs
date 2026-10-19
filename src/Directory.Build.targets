@@ -16,4 +16,14 @@
   -->
   <Import Project="$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.symbols.targets"
           Condition="'$(GoLibSymbolsTargetsImported)' != 'true' and Exists('$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.symbols.targets')" />
+
+  <!--
+    Every packed standard-library package (push-nuget.ps1's `dotnet pack` of go2cs-stdlib.slnx) ships its own
+    usings in build/<PackageId>.props, written at pack time by golib's go.lib.pack.targets from the package's
+    package_info.cs. It recognises a converted project by $(Product) == go2cs, which the converter's csproj
+    template sets, and does nothing outside a pack. go.lib.targets imports the same file for a conversion
+    packed against the go.* packages; the tree imports it here for the same reason as the symbols targets.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.pack.targets"
+          Condition="'$(GoLibPackTargetsImported)' != 'true' and Exists('$(MSBuildThisFileDirectory)core/golib/buildTransitive/go.lib.pack.targets')" />
 </Project>

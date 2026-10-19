@@ -25,6 +25,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAdapterNameInterfaceCollision() => CheckTarget("AdapterNameInterfaceCollision");
 
     [TestMethod]
+    public void CheckAddCleanupClosesOverPtr() => CheckTarget("AddCleanupClosesOverPtr");
+
+    [TestMethod]
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
@@ -490,6 +493,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckDotImportNameCollision() => CheckTarget("DotImportNameCollision");
+
+    [TestMethod]
     public void CheckDotImportRenamedPackage() => CheckTarget("DotImportRenamedPackage");
 
     [TestMethod]
@@ -521,6 +527,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckEmbedDirectiveForms() => CheckTarget("EmbedDirectiveForms");
+
+    [TestMethod]
+    public void CheckEmbedLayoutMatchesGo() => CheckTarget("EmbedLayoutMatchesGo");
 
     [TestMethod]
     public void CheckEmbeddedInterfaceWitness() => CheckTarget("EmbeddedInterfaceWitness");
@@ -560,6 +569,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
+
+    [TestMethod]
+    public void CheckFieldAccessReinterpret() => CheckTarget("FieldAccessReinterpret");
 
     [TestMethod]
     public void CheckFieldChainBoxReceiver() => CheckTarget("FieldChainBoxReceiver");
@@ -704,6 +716,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericArrayConstraint() => CheckTarget("GenericArrayConstraint");
+
+    [TestMethod]
+    public void CheckGenericArrayTypeArgZero() => CheckTarget("GenericArrayTypeArgZero");
 
     [TestMethod]
     public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
@@ -1128,6 +1143,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckMathHugeArgReduction() => CheckTarget("MathHugeArgReduction");
+
+    [TestMethod]
+    public void CheckMemProfileAllocFrames() => CheckTarget("MemProfileAllocFrames");
 
     [TestMethod]
     public void CheckMethodExprDotImport() => CheckTarget("MethodExprDotImport");
@@ -2276,6 +2294,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTypeParamFloatConversion() => CheckTarget("TypeParamFloatConversion");
 
     [TestMethod]
+    public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
+
+    [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]
@@ -2409,6 +2430,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUntypedConstFloatContext() => CheckTarget("UntypedConstFloatContext");
+
+    [TestMethod]
+    public void CheckUntypedConstTypeArg() => CheckTarget("UntypedConstTypeArg");
 
     [TestMethod]
     public void CheckUntypedConstWideMask() => CheckTarget("UntypedConstWideMask");

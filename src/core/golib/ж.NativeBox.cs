@@ -138,6 +138,41 @@ public sealed class NativeBox<T> : ж<T>, INativeRooted
     public override unsafe ref T ValueSlot => ref Unsafe.AsRef<T>(ValueAddress());
 
     /// <summary>
+    /// The field <paramref name="fieldRefFunc"/> names, at its GO offset in the native memory this box aliases --
+    /// the managed reference behind <see cref="ж{T}.field{TF}"/> for a native root.
+    /// </summary>
+    /// <remarks>
+    /// The struct's CLR layout is not always Go's (an array, pointer or string field is a managed reference, and a
+    /// value embed is declared after the converter's fields), so the CLR slot <c>fieldRefFunc(ref Value)</c> is not
+    /// where Go, or a native callee, put the field. The offset is the struct's Go layout, memoized per accessor (the
+    /// lookup the field view takes, FieldRefBox.GoFieldOffsetOf). A struct whose Go layout cannot be known keeps the
+    /// CLR slot, which is the whole-value read and refuses a provably mismatched layout by name. A field that is
+    /// itself a managed reference, or a struct whose own layout is not Go's, cannot be read out of native bytes and
+    /// is refused by name with the same text.
+    /// </remarks>
+    internal unsafe ref TF FieldRef<TF>(FieldRefFunc<T, TF> fieldRefFunc)
+    {
+        nint offset = FieldRefBox<TF>.GoFieldOffsetOf(this, fieldRefFunc);
+
+        if (offset < 0)
+            return ref fieldRefFunc(ref Value);
+
+        if (NativeFieldLayout<TF>.Mismatch is { } reason)
+            throw reason.Length == 0
+                ? RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), $"field {FieldRefBox<TF>.FieldNameOf(fieldRefFunc)} is a managed reference where Go stores the value inline")
+                : RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(TF), reason);
+
+        return ref Unsafe.AsRef<TF>((byte*)DereferenceableAddress() + offset);
+    }
+
+    // Whether a field of type TF can be read in place out of native bytes: null when it can, "" when TF holds a
+    // managed reference, else the reason TF's own CLR layout is not its Go layout. Decided once per TF.
+    private static class NativeFieldLayout<TF>
+    {
+        internal static readonly string? Mismatch = RuntimeHelpers.IsReferenceOrContainsReferences<TF>() ? "" : GoReflect.ClrLayoutMismatch(typeof(TF));
+    }
+
+    /// <summary>
     /// Whether this box aliases an ORDER TOKEN rather than an address — Q44 §10.3 arm 2a. Its
     /// numeric value and identity are unchanged; only a DEREFERENCE is refused.
     /// </summary>

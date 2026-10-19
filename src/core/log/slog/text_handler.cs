@@ -22,7 +22,7 @@ partial class slog_package {
 // TextHandler is a [Handler] that writes Records to an [io.Writer] as a
 // sequence of key=value pairs separated by spaces and followed by a newline.
 partial struct TextHandler {
-    internal partial ref ж<commonHandler> commonHandler { get; }
+    /*embed*/ internal ж<commonHandler> commonHandler;
 }
 
 // NewTextHandler creates a [TextHandler] that writes to w,

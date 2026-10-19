@@ -36,7 +36,7 @@ private static readonly @string intsˢ = "ints"u8;
 private static readonly @string floatsˢ = "floats"u8;
 
 internal static void Main() {
-    fmt.Println(toFloat64(7), toFloat64(2.5D), toFloat64(unchecked((nint)(9007199254740993L))) == 9007199254740992D, toFloat64(-3));
+    fmt.Println(toFloat64<nint>(7), toFloat64(2.5D), toFloat64(unchecked((nint)(9007199254740993L))) == 9007199254740992D, toFloat64<nint>(-3));
     fmt.Println(toFloat32<int64>((1 << (int)(24)) + 1) == (1 << (int)(24)), toFloat32((float32)1.5F), toFloat32(16777217.0D) == (1 << (int)(24)));
     fmt.Println(csv(intsˢ, new nint[]{1, 2, 3}.slice()));
     fmt.Println(csv(floatsˢ, new float64[]{0.5D, Δmath.Inf(1), -2D}.slice()));

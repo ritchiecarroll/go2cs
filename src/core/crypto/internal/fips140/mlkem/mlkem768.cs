@@ -72,8 +72,8 @@ partial struct DecapsulationKey768 {
     internal array<byte> z = new(32); // implicit rejection sampling seed
     internal array<byte> ρ = new(32); // sampleNTT seed for A, stored for the encapsulation key
     internal array<byte> h = new(32); // H(ek), stored for ML-KEM.Decaps_internal
-    internal partial ref encryptionKey encryptionKey { get; }
-    internal partial ref decryptionKey decryptionKey { get; }
+    /*embed*/ internal encryptionKey encryptionKey;
+    /*embed*/ internal decryptionKey decryptionKey;
 }
 
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
@@ -129,7 +129,7 @@ public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey
 partial struct EncapsulationKey768 {
     internal array<byte> ρ = new(32); // sampleNTT seed for A
     internal array<byte> h = new(32); // H(ek)
-    internal partial ref encryptionKey encryptionKey { get; }
+    /*embed*/ internal encryptionKey encryptionKey;
 }
 
 // Bytes returns the encapsulation key as a byte slice.

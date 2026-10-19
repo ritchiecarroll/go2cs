@@ -113,7 +113,7 @@ partial struct OAEPOptions {
 // Its fields must not be modified after calling [PrivateKey.Precompute], and
 // should not be used directly as big.Int values for cryptographic purposes.
 partial struct PrivateKey {
-    public partial ref PublicKey PublicKey { get; }            // public part.
+    /*embed*/ public PublicKey PublicKey;            // public part.
     public ж<bigꓸInt> D; // private exponent
     public slice<ж<bigꓸInt>> Primes; // prime factors of N, has >= 2 elements.
     // Precomputed contains precomputed values that speed up RSA operations,

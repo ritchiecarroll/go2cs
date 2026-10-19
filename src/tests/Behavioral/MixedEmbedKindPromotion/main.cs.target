@@ -26,7 +26,7 @@ internal static @string Greet(this hello h) {
 }
 
 partial struct mixed {
-    internal partial ref ж<counter> counter { get; }
+    /*embed*/ internal ж<counter> counter;
     /*embed*/ internal greeter greeter;
 }
 
@@ -41,7 +41,7 @@ partial struct holder {
 }
 
 partial struct outer {
-    internal partial ref holder holder { get; }
+    /*embed*/ internal holder holder;
     internal nint extra;
 }
 

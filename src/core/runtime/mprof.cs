@@ -929,7 +929,7 @@ internal static void iterate_memprof(Action<ж<bucket>, uintptr, ж<uintptr>, ui
 partial struct BlockProfileRecord {
     public int64 Count;
     public int64 Cycles;
-    public partial ref StackRecord StackRecord { get; }
+    /*embed*/ public StackRecord StackRecord;
 }
 
 // BlockProfile returns n, the number of records in the current blocking profile.

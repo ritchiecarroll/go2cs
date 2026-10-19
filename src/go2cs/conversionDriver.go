@@ -379,6 +379,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// too (the three-driver rule, DESIGN-zh-box-reduction §3.5) — analysis only, no
 				// emission reads it; -debug surfaces the census.
 				performRefLoweringAnalysis(files, packageTypes, info, options)
+				collectHandOwnedTypes(files, info)
 
 				emitAutoConversionSiblings(files, fset, packageTypes, info, map[*ast.Ident]string{}, map[string]*types.Var{}, packageOutputPath, options)
 
@@ -458,6 +459,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// ("address-taken only into lowered positions → stack") is consulted by the escape
 		// analysis, and the signature/call-site emission reads the verdicts during the visits.
 		performRefLoweringAnalysis(files, packageTypes, info, options)
+		collectHandOwnedTypes(files, info)
 
 		performEscapeAnalysis(files, fset, packageTypes, info)
 

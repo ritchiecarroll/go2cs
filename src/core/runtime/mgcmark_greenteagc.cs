@@ -43,6 +43,7 @@ using @internal;
 using @internal.runtime;
 using @internal.runtime.gc;
 
+[GoFieldAccess(typeof(spanSPMC))]
 partial class runtime_package {
 
 internal const bool doubleCheckGreenTea = false;
@@ -773,7 +774,7 @@ internal static ж<spanSPMC> newSpanSPMC(uint32 cap) {
         @throw(spmcCapacityMustBeAPowerˢ);
     }
 
-    r.Value.cap = cap;
+    r.cap = cap;
     @unsafe.Pointer ring = (uintptr)sysAlloc((uintptr)cap * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8, Ꮡmemstats.of(mstats.ᏑgcMiscSys), gcSpanQueueˢ);
     atomic.StorepNoWB(@unsafe.Pointer.FromBox(r.of(spanSPMC.Ꮡring)), ring);
     return r;
@@ -983,7 +984,7 @@ internal static void scanSpan(objptr Δp, ж<gcWork> Ꮡgcw) {
     }
 
     // Process all the pointers we just got.
-    foreach (var (_, pΔ1) in (~gcw.ptrBuf).slice(0, nptrs)) {
+    foreach (var (_, pΔ1) in gcw.ptrBuf.slice(0, nptrs)) {
         if (!tryDeferToSpanScan(pΔ1, Ꮡgcw)) {
             {
                 var (obj, span, objIndex) = findObject(pΔ1, 0, 0); if (obj != 0) {
@@ -1069,7 +1070,7 @@ internal static void scanObjectSmall(uintptr spanBase, uintptr b, uintptr objSiz
     }
 
     // Process all the pointers we just got.
-    foreach (var (_, vᴛ1) in (~gcw.ptrBuf).slice(0, nptrs)) {
+    foreach (var (_, vᴛ1) in gcw.ptrBuf.slice(0, nptrs)) {
         var Δp = vᴛ1;
 
         Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);
@@ -1125,7 +1126,7 @@ internal static void scanObjectsSmall(uintptr @base, uintptr objSize, uint16 ele
     }
 
     // Process all the pointers we just got.
-    foreach (var (_, vᴛ2) in (~gcw.ptrBuf).slice(0, nptrs)) {
+    foreach (var (_, vᴛ2) in gcw.ptrBuf.slice(0, nptrs)) {
         var Δp = vᴛ2;
 
         Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)Δp);

@@ -13,6 +13,7 @@ using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
 
+[GoFieldAccess(typeof(abiꓸInterfaceType), typeof(abi.EmptyInterface), typeof(abi.NonEmptyInterface), typeof(abiꓸStructType))]
 partial class maps_package {
 
 // This package contains the implementation of Go's builtin map type.
@@ -885,19 +886,19 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
         var i = Ꮡt.Reinterpret<abi.Type, abiꓸInterfaceType>();
         ж<abi.Type> tΔ2 = default!;
         ж<@unsafe.Pointer> pdata = default!;
-        if (len((~i).Methods) == 0){
+        if (len(i.Methods) == 0){
             var a = (ж<abi.EmptyInterface>)(uintptr)(p);
-            tΔ2 = a.Value.Type;
+            tΔ2 = a.Type;
             if (tΔ2 == nil) {
                 return default!;
             }
             pdata = a.of(abi.EmptyInterface.ᏑData);
         } else {
             var a = (ж<abi.NonEmptyInterface>)(uintptr)(p);
-            if ((~a).ITab == nil) {
+            if (a.ITab == nil) {
                 return default!;
             }
-            tΔ2 = a.Value.ITab.Value.Type;
+            tΔ2 = a.ITab.Value.Type;
             pdata = a.of(abi.NonEmptyInterface.ᏑData);
         }
 
@@ -913,9 +914,9 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
     }
     if (exprᴛ1 == abi.Array) {
         var a = Ꮡt.Reinterpret<abi.Type, abiꓸArrayType>();
-        for (var i = (uintptr)0; i < (~a).Len; i++) {
+        for (var i = (uintptr)0; i < a.of(abiꓸArrayType.ᏑLen).Value; i++) {
             {
-                var err = mapKeyError2((~a).Elem, (@unsafe.Pointer)((uintptr)p + i * (~(~a).Elem).Size_)); if (err != default!) {
+                var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, (@unsafe.Pointer)((uintptr)p + i * (~a.of(abiꓸArrayType.ᏑElem).Value).Size_)); if (err != default!) {
                     return err;
                 }
             }
@@ -924,7 +925,7 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
     }
     if (exprᴛ1 == abi.Struct) {
         var s = Ꮡt.Reinterpret<abi.Type, abiꓸStructType>();
-        foreach (var (_, f) in (~s).Fields) {
+        foreach (var (_, f) in s.Fields) {
             if (f.Name.IsBlank()) {
                 continue;
             }

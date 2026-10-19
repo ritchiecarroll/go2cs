@@ -10,7 +10,7 @@ using syscall = syscall_package;
 partial class os_package {
 
 partial struct getwdCacheᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal @string dir;
 }
 internal static ж<getwdCacheᴛ1> ᏑgetwdCache = new StandardBox<getwdCacheᴛ1>(new getwdCacheᴛ1(nil));

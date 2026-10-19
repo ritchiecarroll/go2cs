@@ -137,31 +137,35 @@ public class NativeArrayViewFloorTests
     }
 
     /// <summary>
-    /// <c>array&lt;T&gt;.AliasPointer</c>'s documented raw-metal fallback funnels through the same
-    /// operator, so the floor covers it with NO second change. This arm names that site.
+    /// <c>array&lt;T&gt;.AliasPointer</c> over a NATIVE element does not reach the floor: it answers the native
+    /// array door at the element's address, a window onto the bytes, as Go's <c>(*[N]T)(unsafe.Pointer(p))</c> is.
     /// </summary>
     /// <remarks>
-    /// <c>array.cs</c>'s fallback is <c>return (ж&lt;array&lt;T&gt;&gt;)(uintptr)element!</c>, taken
-    /// when the element pointer has no managed element storage to window. A native scalar box is
-    /// exactly such a pointer, so calling AliasPointer with one reaches the refusal — and if a later
-    /// change routes that fallback somewhere else, this arm is what notices.
+    /// This arm used to require the refusal: <c>AliasPointer</c>'s raw-metal fallback,
+    /// <c>(ж&lt;array&lt;T&gt;&gt;)(uintptr)element</c>, was the only route for an element with no managed storage,
+    /// and it funneled through the floor. An element in native memory now takes the native arm ahead of that
+    /// fallback (os's createMountPoint, an array pointer over a reparse buffer's PathBuffer), so its address is
+    /// viewed, never materialized as a managed array. The floor itself is unchanged and the arms above still
+    /// drive it through the operator.
     /// </remarks>
     [TestMethod]
-    public void AliasPointersRawMetalFallbackReachesTheSameRefusal()
+    public void AliasPointerOverANativeElementWindowsItsBytesInsteadOfReachingTheFloor()
     {
         nint block = Marshal.AllocHGlobal(NativeBytes);
 
         try
         {
-            // A pointer with no managed element storage behind it: the fallback's own stated case.
+            for (int i = 0; i < NativeBytes; i++)
+                Marshal.WriteByte(block, i, 0);
+
             ж<byte> element = (ж<byte>)(uintptr)(nuint)block;
+            ж<array<byte>> view = array<byte>.AliasPointer(element, 4);
 
-            PanicException panic = Assert.ThrowsException<PanicException>(
-                () => _ = array<byte>.AliasPointer(element, 4),
-                "AliasPointer's raw-metal fallback must reach the floor rather than fabricate a view");
+            view.ElementRef(2) = 0x5a;
 
-            StringAssert.Contains(panic.Message ?? "", "no managed element storage",
-                "the fallback must fail with the FLOOR's refusal, not with some other panic on the way");
+            Assert.AreEqual((byte)0x5a, Marshal.ReadByte(block, 2), "the view writes the native byte in place");
+            Assert.AreEqual((byte)0, Marshal.ReadByte(block, 4), "the view is the four bytes at the element, no more");
+            Assert.ThrowsException<PanicException>(() => view.ElementRef(4), "the window is bounded by the length asked for");
         }
         finally
         {

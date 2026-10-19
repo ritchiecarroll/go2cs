@@ -284,7 +284,7 @@ internal static ж<mspan> refill(this ref userArena a) {
 }
 
 partial struct liveUserArenaChunk {
-    internal partial ref ж<mspan> mspan { get; } // Must represent a user arena chunk.
+    /*embed*/ internal ж<mspan> mspan; // Must represent a user arena chunk.
     // Reference to mspan.base() to keep the chunk alive.
     internal @unsafe.Pointer x;
 }

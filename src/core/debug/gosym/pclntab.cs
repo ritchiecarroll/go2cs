@@ -452,7 +452,7 @@ internal static ΔfuncTab funcTab(this ж<LineTable> Ꮡt) {
 // funcTab is memory corresponding to a slice of functab structs, followed by an invalid PC.
 // A functab struct is a PC and a func offset.
 partial struct ΔfuncTab {
-    public partial ref ж<LineTable> LineTable { get; }
+    /*embed*/ public ж<LineTable> LineTable;
     internal nint sz; // cached result of t.functabFieldSize
 }
 

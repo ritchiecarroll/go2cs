@@ -521,7 +521,7 @@ internal static UntypedInt _PROC_THREAD_ATTRIBUTE_PARENT_PROCESS => 0x00020000;
 internal static UntypedInt _PROC_THREAD_ATTRIBUTE_HANDLE_LIST => 0x00020002;
 
 partial struct _STARTUPINFOEXW {
-    public partial ref StartupInfo StartupInfo { get; }
+    /*embed*/ public StartupInfo StartupInfo;
     public ж<_PROC_THREAD_ATTRIBUTE_LIST> ProcThreadAttributeList;
 }
 

@@ -210,7 +210,7 @@ internal static void Main() {
     
     var h16ʗ1 = h16;
     var chainIfacePtr = h16ʗ1.i.label;
-    n16._<ж<frame>>().Value.Name = n16ˢ;
+    n16._<namer, ж<frame>>().Value.Name = n16ˢ;
 
     fmt.Println(chainIfPˢ, chainIfacePtr());
 

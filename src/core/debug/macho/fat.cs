@@ -33,8 +33,8 @@ internal static UntypedInt fatArchHeaderSize => /* 5 * 4 */ 20;
 
 // A FatArch is a Mach-O File inside a FatFile.
 partial struct FatArch {
-    public partial ref FatArchHeader FatArchHeader { get; }
-    public partial ref ж<File> File { get; }
+    /*embed*/ public FatArchHeader FatArchHeader;
+    /*embed*/ public ж<File> File;
 }
 
 // ErrNotFat is returned from [NewFatFile] or [OpenFat] when the file is not a
