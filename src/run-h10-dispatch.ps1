@@ -95,7 +95,16 @@ param(
 
     # ⚠ THE RESUME LEDGER, append-only and idempotent (ruling (10)). A worker that dies mid-shard
     # re-runs this script; rows already recorded for THIS tree state are skipped rather than re-banked.
-    [string] $Ledger
+    [string] $Ledger,
+
+    # Passed through to every row's sweep (`sweep`) or recon wrapper (`rebank`), and ONLY when given:
+    # unset, the row script's own default applies and each invocation is what it was before these
+    # existed. -TestDeadline is the converted host's per-test deadline (each row still takes the longer
+    # of it and its $testDeadlineFloors floor); -TestBuildMaxCpu caps each row's test-host publish at N
+    # MSBuild nodes (the converter's -test-build-maxcpu).
+    [string] $TestDeadline,
+    [ValidateRange(0, [int]::MaxValue)]
+    [int] $TestBuildMaxCpu
 )
 
 Set-StrictMode -Version Latest
@@ -113,6 +122,13 @@ if (-not $SweepScript) {
 }
 
 if (-not (Test-Path -LiteralPath $Plan)) { Deny "no plan at '$Plan'" }
+
+# The row scripts' pass-through arguments, splatted into BOTH calls below and printed in the header,
+# so the dry run shows exactly what every row would be handed.
+$rowForward = [ordered]@{}
+foreach ($name in @('TestDeadline', 'TestBuildMaxCpu')) {
+    if ($PSBoundParameters.ContainsKey($name)) { $rowForward[$name] = $PSBoundParameters[$name] }
+}
 
 # ⚠⚠ THE EXECUTOR IS RESOLVED WHERE IT IS USED, NOT AT THE TOP. Measured 2026-09-20: a
 # `-DryRun` on a box with no tree checked out REFUSED for want of a sweep script it never invokes --
@@ -336,6 +352,11 @@ Write-Host "  worker          : $Worker   at W = $FleetSize"
 Write-Host "  slice cap       : $sliceCapSeconds s ($([math]::Round($sliceCapSeconds / 60.0, 1)) min), from the plan"
 Write-Host "  cooldown        : $cooldownSeconds s ($([math]::Round($cooldownSeconds / 60.0, 1)) min) BETWEEN slices, from $cooldownSource"
 Write-Host "  sweep           : $SweepScript"
+if ($rowForward.Count -gt 0) {
+    Write-Host "  row arguments   : $(@($rowForward.Keys | ForEach-Object { "-$_ $($rowForward[$_])" }) -join ' ')"
+} else {
+    Write-Host '  row arguments   : none forwarded -- each row script uses its own defaults'
+}
 Write-Host "  timings         : $TimingOut"
 
 $plannedCost = ($mine | Where-Object { $sliceNumbers -contains $_.Slice } | Measure-Object -Property Cost -Sum).Sum
@@ -508,7 +529,7 @@ foreach ($sliceNumber in $sliceNumbers) {
             # -AllowBranch: the driver's tree is a BANKING tree and the wrapper refuses a branch by
             # default. Both ends assert that fact rather than trusting the other to have checked.
             & $RebankWrapper -NameList $rowList -Tree $Tree -GoRoot $GoRoot -Out $rowOut `
-                             -ExpectTip $ExpectTip -Scratch $Scratch -AllowBranch
+                             -ExpectTip $ExpectTip -Scratch $Scratch -AllowBranch @rowForward
             # CAPTURED IMMEDIATELY, before anything touches $? or a pipe. Floor 7.
             $rowExit = $LASTEXITCODE
             $wall = [int] ((Get-Date) - $started).TotalSeconds
@@ -570,7 +591,7 @@ foreach ($sliceNumber in $sliceNumbers) {
             # -Filter <pkg> -Exact is the sweep's own documented per-package campaign interface: exact path
             # match, because substring 'io' sweeps bufio and io/fs alongside io and a per-row driver would
             # re-sweep large rows repeatedly.
-            & $SweepScript -Filter $row.Package -Exact -SkipBuild:($rowsRun -gt 0)
+            & $SweepScript -Filter $row.Package -Exact -SkipBuild:($rowsRun -gt 0) @rowForward
             # CAPTURED IMMEDIATELY, before anything touches $? or a pipe. Floor 7, and the reason
             # safe-push.sh exists.
             $rowExit = $LASTEXITCODE
