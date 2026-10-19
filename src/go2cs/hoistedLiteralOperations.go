@@ -395,7 +395,7 @@ func (c *hoistCollector) collectPlainLocalConsts(funcDecl *ast.FuncDecl) {
 				obj, ok := c.info.Defs[name].(*types.Const)
 				lit, isLit := valueSpec.Values[i].(*ast.BasicLit)
 
-				if !ok || obj == nil || !isLit || lit.Kind != token.STRING || !isPlainStringSlot(obj.Type()) || !plainLiteralForm(lit) {
+				if !ok || obj == nil || !isLit || lit.Kind != token.STRING || !isPlainStringSlot(obj.Type()) || !hasBareCSharpForm(lit) {
 					continue
 				}
 
@@ -643,7 +643,7 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 	if !ok {
 		// Plain mode also reaches a composite ELEMENT (or key, or field value), which the hoist
 		// excludes as Tier B: the composite's own type fixes the slot's C# type.
-		if !packageHoistsLiterals && isPlainStringSlot(c.compositeElemSlot(lit, stack)) && plainLiteralForm(lit) {
+		if !packageHoistsLiterals && isPlainStringSlot(c.compositeElemSlot(lit, stack)) && hasBareCSharpForm(lit) {
 			packagePlainLits[lit] = true
 		}
 
@@ -652,7 +652,16 @@ func (c *hoistCollector) consider(lit *ast.BasicLit, stack []ast.Node) {
 
 	// Plain mode: a value slot typed exactly `string` takes the bare C# literal and no field. The
 	// empty literal goes plain too; it reads as Go does and converts to the zero @string.
-	if !packageHoistsLiterals && kind == hoistUseValue && isPlainStringSlot(slot) && plainLiteralForm(lit) && c.plainContext(lit, stack) {
+	if !packageHoistsLiterals && kind == hoistUseValue && isPlainStringSlot(slot) && hasBareCSharpForm(lit) && c.plainContext(lit, stack) {
+		packagePlainLits[lit] = true
+		return
+	}
+
+	// Plain mode, an `any` slot: the argument of a call go2cs-gen's LiteralInterceptorGenerator can
+	// intercept takes the bare C# literal too, and the generated interceptor writes a cached, pre-boxed Go
+	// string into the slot. The same bare-form predicate as the string slot, so the any slot admits no
+	// literal the string slot refuses. Every other any slot keeps the pre-boxed field.
+	if !packageHoistsLiterals && kind == hoistUseAny && hasBareCSharpForm(lit) && c.interceptableAnyArg(lit, stack) {
 		packagePlainLits[lit] = true
 		return
 	}
@@ -924,6 +933,60 @@ func isPlainStringSlot(t types.Type) bool {
 	basic, ok := types.Unalias(t).(*types.Basic)
 
 	return ok && (basic.Kind() == types.String || basic.Kind() == types.UntypedString)
+}
+
+// hasBareCSharpForm reports whether a literal can render as a bare C# literal: the one predicate every plain
+// arm shares (a `string` slot, a composite element, a function-local constant and an interceptable `any`
+// slot). A raw-byte literal (stringLiteralNeedsByteArray) has none, since a C# literal cannot hold bytes that
+// are not valid UTF-8, and neither does a multi-line raw literal (plainLiteralForm).
+func hasBareCSharpForm(lit *ast.BasicLit) bool {
+	return (strings.HasPrefix(lit.Value, "`") || !stringLiteralNeedsByteArray(lit.Value)) && plainLiteralForm(lit)
+}
+
+// interceptableAnyArg reports whether the call an `any`-slot literal is an argument of is one
+// go2cs-gen's LiteralInterceptorGenerator intercepts: an ordinary invocation of a non-generic function or
+// method. Three shapes are not:
+//   - a go/defer argument, which reaches the callee through the capture list's inferred type arguments;
+//   - a func value, whose C# call is a delegate Invoke, which no interceptor can replace;
+//   - a generic function or method, or a method of a generic type: its interceptor would itself have to be
+//     generic, which is deferred (no behavioral fixture calls one with a literal in an any slot).
+//
+// Each keeps the pre-boxed field. A method expression (`T.M(x, "s")`) is excluded with them.
+func (c *hoistCollector) interceptableAnyArg(lit *ast.BasicLit, stack []ast.Node) bool {
+	call, ok := stack[len(stack)-1].(*ast.CallExpr)
+
+	if !ok {
+		return false
+	}
+
+	if len(stack) >= 2 {
+		switch owner := stack[len(stack)-2].(type) {
+		case *ast.GoStmt:
+			if owner.Call == call {
+				return false
+			}
+		case *ast.DeferStmt:
+			if owner.Call == call {
+				return false
+			}
+		}
+	}
+
+	fn := calleeFunc(c.info, call)
+
+	if fn == nil {
+		return false
+	}
+
+	if sel, isSel := ast.Unparen(call.Fun).(*ast.SelectorExpr); isSel {
+		if selection := c.info.Selections[sel]; selection != nil && selection.Kind() == types.MethodExpr {
+			return false
+		}
+	}
+
+	sig, ok := fn.Origin().Type().(*types.Signature)
+
+	return ok && sig.TypeParams().Len() == 0 && sig.RecvTypeParams().Len() == 0
 }
 
 // plainLiteralForm reports whether a literal has a plain C# form at all. A multi-line raw literal does
