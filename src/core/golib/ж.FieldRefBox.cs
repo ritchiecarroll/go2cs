@@ -565,7 +565,8 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // view, so a chain of pointer conversions stays one view over one box (PointerExtensions.Reinterpret).
     internal object? ReinterpretRoot => IsReinterpretAccessor(m_token) ? m_source : null;
 
+    // ReinterpretUnaliased's refusing accessor is a reinterpret view too: same address, same root.
     private static bool IsReinterpretAccessor(Delegate fieldId) =>
-        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef), DeclaringType: { IsGenericType: true } owner } &&
+        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef) or nameof(ж<byte>.UnaliasedRef), DeclaringType: { IsGenericType: true } owner } &&
         owner.GetGenericTypeDefinition() == typeof(ж<>);
 }

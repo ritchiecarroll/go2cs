@@ -881,6 +881,13 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         return ref Unsafe.As<T, TDst>(ref ((ж<T>)source).ValueSlot);
     }
 
+    // The accessor of PointerExtensions.ReinterpretUnaliased: a reinterpret view that refuses every read and
+    // write by name. Static for the reason ReinterpretRef is, so two such views of one box compare equal.
+    internal static ref TDst UnaliasedRef<TDst>(object source)
+    {
+        throw RuntimeErrorPanic.UnaliasablePointerConversion(GoReflect.GoTypeName(typeof(TDst)), GoReflect.GoTypeName(typeof(T)));
+    }
+
     // Per-INSTANTIATION constant: is T golib's own `array<E>`? A pure TYPE query, exactly like
     // s_publishArrayBacking above and subject to the same rule stated there — it builds no code, so
     // ILC answers it from the type system and nothing reflection-BUILT is reintroduced.

@@ -304,6 +304,28 @@ public static class PointerExtensions
     /// together are the boundary idiom this exists for, and they exclude the prefix-downcast
     /// idiom — see the call site.
     /// </remarks>
+    /// <summary>
+    /// Go's <c>(*TDst)(p)</c> for two struct types the converter knows cannot ALIAS in C#: identical ignoring tags,
+    /// but differing in the tags of a nested unnamed type held through a reference, which C# lifts to two classes.
+    /// </summary>
+    /// <remarks>
+    /// The conversion is valid Go and most of what follows it is exact here: a nil source gives the derived type's
+    /// nil, the result compares and hashes as a reinterpret view of <paramref name="box"/>, and converting it back
+    /// gives <paramref name="box"/> itself. Only a read or a write through it needs Go's aliased memory, and that
+    /// refuses by name (<see cref="RuntimeErrorPanic.UnaliasablePointerConversion"/>) rather than copying, which is
+    /// what the converter emitted before. The converter prints a warning naming the site and the two classes.
+    /// </remarks>
+    public static ж<TDst> ReinterpretUnaliased<T, TDst>(this ж<T>? box)
+    {
+        if (box is null || box.IsNilPointer)
+            return ж<TDst>.NilBox;
+
+        if (box is FieldRefBox<T> { ReinterpretRoot: IReinterpretRoot root } && root is ж<TDst> same)
+            return same;
+
+        return new FieldRefBox<TDst>(box, ж<T>.UnaliasedRef<TDst>);
+    }
+
     internal static class FuncCookieReinterpret<T, TDst>
     {
         /// <summary>

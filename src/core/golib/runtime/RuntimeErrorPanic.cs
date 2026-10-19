@@ -594,6 +594,21 @@ public static class RuntimeErrorPanic
         }
     }
 
+    private const string UnaliasablePointerConversionMessage =
+        $"{RuntimeErrorMessage}pointer conversion (*{{0}})(*{{1}}): their nested unnamed struct is two C# classes, which cannot alias";
+    /// <summary>
+    /// The REFUSAL of a read or write through Go's <c>(*U)(p)</c> where <c>U</c> and <c>p</c>'s element type are
+    /// identical ignoring tags but differ in the tags of a nested unnamed type held through a reference: C# lifts
+    /// that type twice, as two classes, and no managed view can read a reference to one as the other. The
+    /// conversion itself stands (nil stays nil, comparison is exact); only the dereference refuses.
+    /// </summary>
+    /// <param name="destination">The destination element type, as Go's <c>%T</c> prints it.</param>
+    /// <param name="source">The source pointer's element type, as Go's <c>%T</c> prints it.</param>
+    public static PanicException UnaliasablePointerConversion(string destination, string source)
+    {
+        return new PanicException((@string)string.Format(UnaliasablePointerConversionMessage, destination, source));
+    }
+
     private const string InvalidPrefixDowncastMessage =
         $"{RuntimeErrorMessage}invalid prefix downcast to *{{0}} (the *{{1}} behind this pointer is not the first field of a {{0}})";
     /// <summary>
