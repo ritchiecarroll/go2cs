@@ -7577,7 +7577,7 @@ the NoInlining pin on runtime.Caller callers. src/core/golib/GoFrame.cs: m_d0..m
 fifth registration allocates the List<Action> overflow. PanicException: src/core/golib/PanicException.cs:20#6fd451.
 Run() re-throws a panic no deferred call recovered: GoFrame.cs:120-149#1286a5. Capture parks it for recover():
 GoFrame.cs:595-618#b2f6a2; builtin.recover reads and clears that slot: builtin.cs:330#9159ef. defer/panic/recover live on
-the partial class builtin (builtin.DeferRegistrations.cs:48#ffe49b, builtin.cs:282#02f33c, :330#9159ef); the project-wide
+the partial class builtin (builtin.DeferRegistrations.cs:48#ffe49b, builtin.cs:282#09e845, :330#9159ef); the project-wide
 `using static go.builtin` is described at builtin.cs:35#bbc027. A non-panic exception fails IsPanic and propagates
 unchanged while the finally still runs the defers: GoFrame.cs:528-590#3ad245. -->
 **A function that defers wraps its body in `try`/`catch`/`finally`.** This is the smallest `defer`:
@@ -7732,7 +7732,7 @@ spells Go's `nil` and zero values as `default!`, so `r != default!` is Go's `r !
 
 <!-- Hoisting table: docs/ConversionStrategies-Reference/strings.md:146-164#54a76c (a slug of 3 characters or
 fewer stays inline; builtin arguments such as panic's take their own path). The C# string to Go string
-normalization: src/core/golib/builtin.cs:282#02f33c. -->
+normalization: src/core/golib/builtin.cs:282#09e845. -->
 `"recovered"` becomes the field `recoveredˢ`, but `"ok"` stays inline as `"ok"u8`: a field name would say
 no more than a value that short. The literal passed to `panic` stays a plain C# string. golib's `panic`
 turns it into a Go `string`, so `recover()` sees Go's type.
