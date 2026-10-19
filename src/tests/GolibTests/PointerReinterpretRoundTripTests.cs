@@ -124,6 +124,20 @@ public class PointerReinterpretRoundTripTests
             "unsafe.Pointer of the round trip == unsafe.Pointer(e)");
     }
 
+    // The converter's OTHER mint for unsafe.Pointer(p): FromPinnedBox for a plain pointer operand, FromBox on the
+    // unsafePointerBoxEmission branch (a pointer parameter's box). Both spellings must agree with Go.
+    [TestMethod]
+    public void UnsafePointerFromBoxOfAReinterpretIsTheSourceAddress()
+    {
+        ж<Employee> e = Ꮡ(new Employee { Name = "jan", Age = 11 });
+        ж<Person> p = e.Reinterpret<Employee, Person>();
+
+        Assert.IsTrue(@unsafe.Pointer.FromBox(p) == @unsafe.Pointer.FromBox(e), "unsafe.Pointer((*Person)(e)) == unsafe.Pointer(e), FromBox");
+        Assert.IsTrue(@unsafe.Pointer.FromBox(p.Reinterpret<Person, Employee>()) == @unsafe.Pointer.FromBox(e),
+            "unsafe.Pointer of the round trip == unsafe.Pointer(e), FromBox");
+        Assert.IsTrue(@unsafe.Pointer.FromBox(p) == @unsafe.Pointer.FromPinnedBox(e), "the two mints agree for one address");
+    }
+
     [TestMethod]
     public void ANilSourceReinterpretsToNil()
     {
