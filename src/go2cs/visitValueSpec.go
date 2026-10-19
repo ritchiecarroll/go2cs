@@ -518,7 +518,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							// alias conversions go2cs-gen already emits for named types. Identical
 							// spellings take no cast, so the common case stays byte-clean.
 							if base := embedBaseCSTypeName(kind, elementType); base != "" && base != csTypeName {
-								initializer = fmt.Sprintf("(%s)(%s)", csTypeName, initializer)
+								initializer = castOf(csTypeName, initializer)
 							}
 
 							if v.isAddressedGlobal(ident) {
@@ -685,7 +685,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						// same cast back to the declared type as the assignment forms — Go wraps the
 						// arithmetic at the operand width, C# promotes it to int (CS0266 / lost wrap).
 						if narrowCast := v.narrowArithmeticCastTypeFor(def.Type(), valueSpec.Values[i], valExpr); len(narrowCast) > 0 {
-							valExpr = fmt.Sprintf("(%s)(%s)", narrowCast, valExpr)
+							valExpr = castOf(narrowCast, valExpr)
 						}
 
 						// A directional channel var taking a BIDIRECTIONAL value narrows the Go
