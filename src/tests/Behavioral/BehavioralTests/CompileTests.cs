@@ -754,6 +754,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
 
     [TestMethod]
+    public void CheckGenericMethodReflect() => CheckTarget("GenericMethodReflect");
+
+    [TestMethod]
     public void CheckGenericNamedArrayType() => CheckTarget("GenericNamedArrayType");
 
     [TestMethod]
@@ -1769,6 +1772,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPromotedValueEmbedUser() => CheckTarget("PromotedValueEmbedUser");
+
+    [TestMethod]
+    public void CheckProxyContainerForwarding() => CheckTarget("ProxyContainerForwarding");
 
     [TestMethod]
     public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");

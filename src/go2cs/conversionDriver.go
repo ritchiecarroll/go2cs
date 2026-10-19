@@ -301,6 +301,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			log.Fatalf("Refusing to convert: %s\n", err)
 		}
 
+		// Refuse, before any file is written as well, an instantiation whose constraint proxy could not
+		// forward its constraint without breaking Go's aliasing (constraintProxyForwarding.go).
+		if refusal := refuseUnforwardableConstraintProxies(pkg); refusal != nil {
+			refusal.report()
+			log.Fatalf("Refusing to convert: %s\n", refusal)
+		}
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)

@@ -87,6 +87,8 @@
     <None Include="$(MSBuildThisFileDirectory)commentParityUtf8_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyAliasDot_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding.go" />
+    <None Include="$(MSBuildThisFileDirectory)constraintProxyForwarding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch.go" />
     <None Include="$(MSBuildThisFileDirectory)testsCorpusArch_test.go" />
