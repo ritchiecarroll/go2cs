@@ -15,6 +15,11 @@ import (
 )
 
 func (v *Visitor) convIndexListExpr(indexListExpr *ast.IndexListExpr) string {
+	// A type argument taking a constraint proxy renders through the resolved type (see proxiedTypeInstantiation).
+	if render, ok := v.proxiedTypeInstantiation(indexListExpr); ok {
+		return render
+	}
+
 	callExprContext := DefaultCallExprContext()
 	callExprContext.sourceIsTypeParams = true
 

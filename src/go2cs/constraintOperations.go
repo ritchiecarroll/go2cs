@@ -2002,9 +2002,11 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 	// ImplementGenerator's `elementType.Name + PointerPrefix + interfaceDef.Name`.
 	proxyName := elemNamed.Obj().Name() + PointerPrefix + interfaceOrigin.Obj().Name()
 
-	// A FOREIGN constraint interface: the package that declares it OWNS the proxy. It records the pair wherever it closes
-	// the constraint over the element, and ImplementGenerator makes that proxy public when both sides are, so a consumer
-	// names THE OWNER'S proxy through the interface package's C# qualifier and records none of its own. A second record
+	// A FOREIGN constraint interface: the package that declares it OWNS the proxy (foreignConstraintProxy: its concrete
+	// proxy when it published one for this element, else its generic proxy, which this package binds). A concrete one is
+	// recorded wherever the owner closes the constraint over the element, and ImplementGenerator makes that proxy public
+	// when both sides are, so a consumer names THE OWNER'S proxy through the interface package's C# qualifier and records
+	// no concrete proxy of its own. A second record
 	// here would mint a second class of the same simple name in this assembly, which the owner's signatures do not accept:
 	// crypto/ecdsa passing crypto/internal/fips140/ecdsa's `P224()` result to its own generics was CS1503 x16, and the
 	// record itself spelled the interface by its Go import path, a parse error (RED 8, COORD a4eb648a6 g2a/g2b). The
@@ -2051,7 +2053,7 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 			return "", false
 		}
 
-		return qualified[:dot+len(sep)] + proxyName, true
+		return v.foreignConstraintProxy(interfaceOrigin, elemNamed, proxyName, qualified[:dot+len(sep)], sep == TypeAliasDot)
 	}
 
 	// Register the (element, interface) pair so package_info emits the ConstraintProxy record.
@@ -2132,6 +2134,21 @@ func (v *Visitor) namedHasConstraintProxy(named *types.Named) bool {
 	}
 
 	return false
+}
+
+// proxiedTypeInstantiation renders a WRITTEN generic type instantiation (`lib.Ord2[*elem.Node]`, an IndexExpr or
+// IndexListExpr in a type position) through the resolved type when a type argument takes a constraint proxy, so it
+// names exactly the type a declaration of the same Go type names: `lib.Ord2<lib.жLesser<elem.Node>>`. The AST walk
+// rendered the box (`lib.Ord2<ж<elem.Node>>`), which satisfies no constraint and is another type (CS0311 at a type
+// assertion or a conversion). Gated to the proxy case, as the composite-literal re-render is, so nothing else changes.
+func (v *Visitor) proxiedTypeInstantiation(instantiation ast.Expr) (string, bool) {
+	if tv, ok := v.info.Types[instantiation]; ok && tv.IsType() {
+		if named, ok := types.Unalias(tv.Type).(*types.Named); ok && v.namedHasConstraintProxy(named) {
+			return convertToCSTypeName(v.getAliasQualifiedTypeName(named, false)), true
+		}
+	}
+
+	return "", false
 }
 
 // signatureTypeParams resolves the declared type-parameter list of the generic FUNCTION `funIdent`

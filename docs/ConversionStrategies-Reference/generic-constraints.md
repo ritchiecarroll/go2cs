@@ -373,8 +373,14 @@ takes the proxy `nodeжOrd_T`, and `Ord[wrap[string]]` records the closed pair t
 over `wrap<E>` (below). The lift's name is assigned by the declaration's own visit, so an instantiation
 in a file visited first DEFERS: its record replays after the file-visit barrier
 (`replayDeferredConstraintRecords`, before any metadata file is written), and a proxy name carries the
-deferred marker the barrier resolves. A constraint declared in ANOTHER package keeps its anonymous
-form, since its lift name is not published.
+deferred marker the barrier resolves. A constraint declared in ANOTHER package takes the lift name
+its package PUBLISHED: the lift is generic over the parameter it captures, so it is published by
+DECLARATION, never by signature, as `[assembly: GoInlineConstraintLift("Ord", 0, "Ord_T")]` (the
+owning type or function's Go name, the type parameter's index, the lift). An importer finds the
+declaration by the type parameter itself in its package's scope and reads the record
+(`importedInlineConstraintLift`), so `lib.Ord[age]` records `GoImplement<age, lib.Ord_T<age>>` and
+`lib.Ord[*node]` takes the lift's generic proxy (below). A package that published none (an older
+conversion) leaves the anonymous form.
 
 A GENERIC value type implementing a generic interface at its own instantiation
 (`var l Lesser[wrap[string]] = wrap[string]{1}`, or the constraint above at `wrap[string]`) is recorded
@@ -502,6 +508,49 @@ next subsection.)
    reads only the interface's open definition. Every other record keeps the element. The proxy is
    generated into the class that carries the record, so the placeholder is named bare. (Guarded by
    `SelfRefGenerics`: the cycle at a pointer instantiation, values vs Go.)
+
+### A FOREIGN interface's proxy is the interface package's: concrete when it published one, else its generic proxy
+
+The proxy is the type argument, so it is part of the instantiated type's identity: `lib.Ord2[*elem.Node]`
+is ONE C# type only if every package that names it names ONE proxy. So no package ever declares a
+proxy for an interface another package declares; a second importer would declare a second one. The
+choice is made in `foreignConstraintProxy`, by two rules:
+
+1. **A concrete proxy the interface's package PUBLISHED for the element wins.** That package records the
+   pair wherever it closes the constraint over the element, which it can do only for an element it
+   imports, and every instantiator imports it, so every importer reads the same record
+   (`publishedConstraintProxyElements`, from whichever source `loadImportedTypeAliases` reads, applying
+   nothing). std's crypto/ecdh and crypto/ecdsa name `fips140/ecdh`'s and `fips140/ecdsa`'s
+   `P256PointжPoint` this way. The element's package cannot publish one for a foreign interface: that
+   would be the consumer-local proxy this rule forbids. Two published proxies of one name (two elements
+   called `Node`) are refused by name, leaving the box.
+2. **Otherwise the interface package's GENERIC proxy, closed over the element**:
+   `lib.Ord2<lib.жLesser<elem.Node>>`. go2cs-gen publishes `жLesser<E> : Lesser<жLesser<E>>` beside every
+   interface a package declares and closes over the parameter it constrains (`where T : Lesser<T>`, named
+   or an inline lift; `ConstraintProxyGenerator`, driven by the constraint clauses, so the converter
+   writes no record for it). It cannot forward by itself, because the element's Go methods are extension
+   methods over `ж<Node>` and an extension method does not bind through a type parameter. So each
+   forwarder calls a static slot typed over the box, and every package that instantiates the constraint
+   records the pair, `GoImplement<elem.Node, lib.Lesser<elem.Node>>(ConstraintProxy = true)`, which
+   for a FOREIGN interface the generator turns into a `[ModuleInitializer]` binding the slots
+   (`lib.жLesser<elem.Node>.ᴛLess = static (recv, ᴛ0) => recv.Less(ᴛ0);`). A module initializer runs
+   before any code of its assembly, so no value of the type exists unbound, including one made by
+   reflection. Every binder binds the same methods, so a second changes nothing. A slot nobody bound
+   panics naming the proxy, the element, the interface and the method.
+
+**Cost:** a generic-proxy forwarder makes one delegate call per forwarded method, where a concrete
+proxy calls the extension directly. The forwarders are listed for the adversarial performance review;
+std pays nothing, since all of its foreign-interface sites take rule 1.
+
+A WRITTEN instantiation in a type position, such as a type assertion or a conversion, renders through
+the resolved type whenever an argument takes a proxy (`proxiedTypeInstantiation`, gated to that case).
+The AST walk rendered the box, `lib.Ord2<ж<elem.Node>>`, which is another type. To reflection, a proxy
+is the pointer it stands for (R10): `%T` prints `lib.Ord2[*ForeignConstraintProxy/elem.Node]`, and
+`reflect.Set` of a `*elem.Node` into the proxy-typed field stores it wrapped. (Guarded by
+`ForeignConstraintProxy`: two, three and four packages, named and inline, b1's value received,
+assigned, boxed, asserted, `%T` and `reflect.TypeOf` compared, and a reflect-created value filled
+through `reflect`, output-compared vs Go. Also GenTests `ForeignConstraintProxyTests`, which executes
+separately built assemblies.)
 
 ### A func LITERAL at a proxied delegate position declares its parameters AT the proxy
 

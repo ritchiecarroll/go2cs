@@ -1667,7 +1667,7 @@ partial interface handshakeMessageWithOriginalBytes :
 // lruSessionCache is a ClientSessionCache implementation that uses an LRU
 // caching strategy.
 partial struct lruSessionCache {
-    /*embed*/ public sync_package.Mutex Mutex;
+    /*embed*/ public go.sync_package.Mutex Mutex;
     internal map<@string, ж<list.Element>> m;
     internal ж<list.List> q;
     internal nint capacity;
