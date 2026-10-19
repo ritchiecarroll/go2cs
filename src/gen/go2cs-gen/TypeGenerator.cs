@@ -564,6 +564,10 @@ public class TypeGenerator : ISourceGenerator
                         registrations[(packageNamespace, packageName)] = entries = [];
 
                     entries.Add((OpenGenericName(identifier), RegistryMembersFor(targetSyntax, typeDefinition)));
+
+                    // A generic value type's Go methods, closed over its own type parameters for golib (MethodSource).
+                    if (MethodSource.Source(packageNamespace, generatedType as INamedTypeSymbol) is { } methodSource)
+                        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSource.g.cs")), methodSource);
                 }
             }
         }
