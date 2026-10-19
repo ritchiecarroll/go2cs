@@ -7,7 +7,7 @@ using time = time_package;
 partial class main_package {
 
 partial struct payload {
-    internal nint n;
+    internal nint n, pad;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
