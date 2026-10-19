@@ -2706,12 +2706,28 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length)
     {
-        // A reference-bearing element cannot alias native bytes: its elements live in a managed store that
-        // SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox).
         if (ShadowArrayBox<T>.Needed)
+        {
+            // A POINTER element over memory the Go runtime did not allocate is a foreign address, read from its
+            // word (G's ruling, 2026-10-19; see NativePointerArrayBox and GoOsMemory). Ownership is asked FIRST, so
+            // the runtime's own arena never reaches the door, which is E's registered opener (NativeArrayOpeners).
+            if (address != 0 && !GoOsMemory.Owns(address) && ForeignPointerElement<T>.Type is { } element)
+                return (ж<array<T>>)NativeArrayOpeners.OpenPointerArray(element, address, length);
+
+            // Any other reference-bearing element cannot alias native bytes: its elements live in a managed store
+            // that SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox). Over foreign
+            // memory that store refuses every read by name.
             return ShadowArrayBox<T>.Over(address, length);
+        }
 
         return NativeArrayBox<T>.Over(address, length);
+    }
+
+    // E for a pointer element T = ж<E>, else null: a pure type query, decided once per T.
+    private static class ForeignPointerElement<T>
+    {
+        internal static readonly Type? Type =
+            typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ж<>) ? typeof(T).GetGenericArguments()[0] : null;
     }
 
     /// <summary>

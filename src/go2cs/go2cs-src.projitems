@@ -305,6 +305,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoScripts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoSuites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoTestdataEol_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\osMemoryRegistrationCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\packageInitTestHook_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\psQuestionMarkVariable_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\publishedCounterReset_test.go" />

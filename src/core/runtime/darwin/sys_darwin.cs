@@ -254,42 +254,11 @@ internal static void osinit_hack() {
 
 internal static partial void osinit_hack_trampoline();
 
-internal partial struct mmap_args /*dyn*/ {
-    internal @unsafe.Pointer addr;
-    internal uintptr n;
-    internal int32 prot, flags, fd;
-    internal uint32 off;
-    internal @unsafe.Pointer ret1;
-    internal nint ret2;
-}
-
-// mmap is used to do low-level memory allocation via mmap. Don't allow stack
-// splits, since this function (used by sysAlloc) is called in a lot of low-level
-// parts of the runtime and callers often assume it won't acquire any locks.
-//
-//go:nosplit
-internal static (@unsafe.Pointer, nint) mmap(@unsafe.Pointer addr, uintptr n, int32 prot, int32 flags, int32 fd, uint32 off) {
-    ref var args = ref heap<mmap_args>(out var Ꮡargs);
-    args = new mmap_args(addr.Value, n, prot, flags, fd, off, nil, 0);
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(mmap_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    return (args.ret1, args.ret2);
-}
+// go2cs generated this placeholder — func mmap is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static partial void mmap_trampoline();
 
-internal partial struct munmap_args /*dyn*/ {
-    internal uintptr addr;
-    internal uintptr n;
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static void munmap(@unsafe.Pointer addr, uintptr n) {
-    ref var args = ref heap(new munmap_args((uintptr)addr, n), out var Ꮡargs);
-
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(munmap_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(@unsafe.Pointer.OrTypedNil(addr)); // Just for consistency. Hopefully addr is not a Go address.
-}
+// go2cs generated this placeholder — func munmap is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static partial void munmap_trampoline();
 

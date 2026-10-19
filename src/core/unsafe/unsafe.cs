@@ -1046,7 +1046,16 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
     // surface at first read, named, rather than as corruption), and the mapping arm proceeds
     // exactly as before for the audit's 13 native sites, mmap first among them.
     if (ptr.IsNative && ManagedPointerTokens.Resolve(ptr.NativeAddress) is null)
+    {
+        // A POINTER element cannot alias native memory: its words are read through the pointer-array kinds, which
+        // read memory the Go runtime did not allocate as the foreign addresses its words are (G's ruling,
+        // 2026-10-19: crypto/x509's windows chain reads, unsafe.Slice(chainCtx.Chains, n)) and keep the runtime's
+        // own words in a shadow. The slice reads the n words (see builtin.NativeArrayPointer).
+        if (NativePointerElement<T>.Is)
+            return builtin.NativeArrayPointer<T>(ptr.NativeAddress, n).slice(0, n, n);
+
         return slice<T>.OverNativeMemory(ptr.NativeAddress, n);
+    }
 
     // A pointer INTO managed array/slice storage (`unsafe.Slice(&s[i], n)`) yields a window that
     // ALIASES that storage, exactly as Go's unsafe.Slice does: writes through the rebuilt slice must
@@ -1062,6 +1071,11 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
     // result do not reach the source.
     fixed (T* pointer = &ptr.Value)
         return new slice<T>(new ReadOnlySpan<T>(pointer, n));
+}
+
+// Whether T is a Go pointer, ж<E>: a pure type query, decided once per T.
+private static class NativePointerElement<T> {
+    internal static readonly bool Is = typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ж<>);
 }
 
 // SliceData returns a pointer to the underlying array of the argument
