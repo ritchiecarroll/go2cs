@@ -737,6 +737,43 @@ the `Reslice` fix, `appendNilNothing` the `Append` fix, and `packZeroArgs`/`spre
 re-spread a callee typically performs before observing it. `NilSliceConversion` continues to guard
 the `[]T(nil)` conversion row.)
 
+## `append` grows a slice exactly as Go's `growslice` does
+
+`cap()` after an append is observable, so golib computes the capacity a grown slice gets the way Go's
+`runtime.growslice` does, for every element type:
+
+```go
+var b []byte
+b = append(b, 1)
+fmt.Println(cap(b)) // 8: the allocator's smallest size class
+```
+
+1. **`nextslicecap`.** Double the old capacity below 256 elements. From 256 on, step by
+   `(newcap + 3*256) / 4`, a smooth move toward ×1.25. A need past double the old capacity takes the need
+   itself.
+2. **`roundupsize`.** Multiply by the element's Go size and round up to the allocator's size class
+   (`GoSizeClasses.RoundUpSize`), then divide back. A pointer-bearing object larger than 512 bytes carries
+   an 8-byte malloc header inside its class, so a `[]string` steps 32, 71, 143. A request past 32 KiB
+   rounds up to whole 8 KiB pages.
+
+The element's Go size and whether it holds pointers come from golib's type layout (`GoReflect.TryGoSizeOf`,
+`GoPtrBytesOf`), read once per element type (`GoGrowthFacts<T>`). An element whose Go size is not derivable
+keeps step 1 alone. A nil slice grows through the same rule, so its first backing is a size class
+(`append([]byte(nil), 1)` has cap 8, not 1). `reflect.Value.Grow` reaches the same function, as Go's
+`reflect_growslice` does. `internal/bytealg.MakeNoZero` (strings.Builder's buffer) reads the same table.
+
+The table and constants are Go's (GOROOT/src/internal/runtime/gc). The repoguard test
+`TestGolibSizeClassesMatchTheToolchain` fails when they drift from the pinned toolchain, and proves that
+golib's smallest-class-at-least-as-large search equals Go's two lookup tables at every small size.
+GolibTests' `GoGrowSliceTests` replays twenty growth sequences recorded from Go itself
+(`testdata/growslice`, under `-gcflags='-N -l'`), and `TestGoGrowSliceExpectationsMatchTheToolchain`
+re-runs that probe.
+
+**What is not modeled.** Since Go 1.25 the compiler can give a non-escaping append a 32-byte stack
+backing store, so `var s []int64; s = append(s, 1)` reports cap 4. Since Go 1.26 a slice that escapes
+only when it is returned can walk the size-class ladder inside that buffer and move to the heap at the
+end. Both are the compiler's decisions after inlining, and golib reproduces only the heap path.
+
 ## A slice of a ZERO-SIZE element type carries no storage — `make([]struct{}, math.MaxInt)` allocates nothing
 
 Go's `struct{}` has size 0, so `mallocgc(0, …)` returns the address of the runtime's global
@@ -765,7 +802,8 @@ golib's `zerobase` — so `s == nil` keeps the representation-nilness rule above
 nil, the zero header still is), while every window bound is checked against `m_length`/`m_capacity`
 alone. Each operation Go answers from length arithmetic does the same here: `make` skips the allocation
 and the `Array.MaxLength` ceiling (Go's `len < 0` rule stays), `Reslice` rebuilds the header directly,
-`append` bumps the length and applies the identical growth rule, `copy` returns `min(len(dst), len(src))`
+`append` bumps the length and grows the capacity to exactly the new length, as Go's zero-size
+`growslice` does, `copy` returns `min(len(dst), len(src))`
 and moves nothing (Go's `memmove` of `n * 0` bytes), `clear` is complete before it starts, indexing
 answers the ONE shared element (Go computes `&s[i]` as `data + i*0`, so every index names the same
 address), and `range` is a counted loop.
@@ -791,7 +829,7 @@ Inside golib the window's own span still serves every copy a span can express (m
 int-bounded by `T[]`, so allocation counts and in-place/grow behavior are byte-identical to the span
 core), zero-size windows route by pure length arithmetic BEFORE any span form (which is what lets
 `TestConcat_too_large`'s `make([]struct{}, math.MaxInt)` fakes flow through `Concat`'s Grow chain
-allocation-free, with the growth rule's even-rounding guarded against wrapping past `MaxInt`), and a
+allocation-free, a grown capacity being exactly the new length), and a
 named-slice wrapper arriving through the boxed interface lends its own `ꓸꓸꓸ` projection — one
 interface call, inside the core. Two shapes are deliberate: the constrained form takes BOTH type
 arguments explicitly (`appendꓸꓸꓸ<S, E>`), because a constraint surface does not participate in C#
@@ -815,7 +853,7 @@ s = subslice<S, E>(appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, cap(s)), makeꓸ�
 golib's `makeꓸꓸꓸ<T>` validates the length as `make` does (same panic), and `appendꓸꓸꓸ` over it calls
 `slice<T>.AppendZeroed`. That mirrors `Append`'s arms: the zero-size arm, so `TestConcat_too_large`'s
 `MaxInt` fakes still allocate nothing; nil; in place, zeroing the shared backing's new elements, which a
-stale write beyond `len` would otherwise leak; and growth through `CalculateNewCapacity`. So no `cap()`
+stale write beyond `len` would otherwise leak; and growth through `GrowCapacity`, Go's `growslice`. So no `cap()`
 moves. Refused, each keeping the make-then-append emission:
 - a capacity argument (Go does not recognise it either);
 - an element whose zero value must be constructed (`arrayElemFactory`);
