@@ -364,9 +364,17 @@ public class ImplementGenerator : ISourceGenerator
             // nistPoint[Point] structurally so nistCurve[*P224Point] can instantiate): emit the
             // proxy class that wraps ж<element> and implements the interface over ITSELF, then move
             // on — none of the normal adapter method-binding below applies.
+            //
+            // A FOREIGN interface is never proxied here: a second importer would declare a second
+            // proxy, and the proxy is part of the instantiated type's identity. The record then binds
+            // the interface package's GENERIC proxy to the element's methods instead.
             if (constraintProxy)
             {
-                EmitConstraintProxy(context, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, packageClassName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
+                if (SymbolEqualityComparer.Default.Equals(interfaceType.ContainingAssembly, context.Compilation.Assembly))
+                    EmitConstraintProxy(context, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, packageClassName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
+                else
+                    EmitConstraintProxyBind(context, attributeSyntax, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
+
                 continue;
             }
 
@@ -1810,6 +1818,195 @@ public class ImplementGenerator : ISourceGenerator
         .Generate();
 
         context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{proxyName}-proxy.g.cs")), proxySource);
+    }
+
+    // The generic constraint proxy's name: the interface's simple name behind the pointer marker, `жLesser<E>`. The
+    // converter names it so at every instantiation that reaches it, and the binder finds it so.
+    internal static string GenericConstraintProxyName(INamedTypeSymbol interfaceDef) => $"{PointerPrefix}{interfaceDef.Name}";
+
+    // The element parameter of a generic constraint proxy. The proxy's signatures render every other type fully
+    // qualified, so a package type of the same name cannot be confused with it.
+    private const string GenericProxyElement = "E";
+
+    // The method set a constraint proxy forwards, each method paired with the interface that DECLARES it closed over
+    // the proxy: the constraint's own members first, in declaration order, then every embedded interface's, ordered
+    // by its rendered reference (see EmitConstraintProxy, whose order this repeats).
+    private static List<(string DeclaringRef, IMethodSymbol Method)> ConstraintMethodSet(INamedTypeSymbol interfaceDef, string interfaceRef, string proxyRef)
+    {
+        ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+        List<(string DeclaringRef, INamedTypeSymbol Interface)> methodSets = [(interfaceRef, interfaceDef)];
+
+        methodSets.AddRange(interfaceDef.AllInterfaces
+            .Select(embedded => (DeclaringRef: RenderWithProxy(embedded, selfParameter, proxyRef), Interface: embedded))
+            .OrderBy(entry => entry.DeclaringRef, StringComparer.Ordinal));
+
+        return methodSets
+            .SelectMany(entry => entry.Interface.GetMembers().OfType<IMethodSymbol>()
+                .Where(member => member.MethodKind == MethodKind.Ordinary && !member.IsStatic)
+                .Select(method => (entry.DeclaringRef, method)))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Emits the GENERIC constraint proxy <c>жLesser&lt;E&gt; : Lesser&lt;жLesser&lt;E&gt;&gt;</c> for a
+    /// self-referential constraint interface this package declares (ConstraintProxyGenerator finds them).
+    /// </summary>
+    /// <remarks>
+    /// Each forwarder calls a static slot typed with the self parameter rendered as the BOX, <c>ж&lt;E&gt;</c>,
+    /// so a binder's lambda calls the element's Go method on exactly the types that method declares. Arguments
+    /// and results cross the proxy/box boundary through the proxy's implicit conversions, and a delegate
+    /// argument through RenderForwardedArgument's re-wrap, as in a concrete proxy. One delegate call per
+    /// forwarded method is the cost of a proxy that does not know its element.
+    /// </remarks>
+    internal static void EmitGenericConstraintProxy(GeneratorExecutionContext context, INamedTypeSymbol interfaceDef, HashSet<string> emittedHintNames)
+    {
+        if (interfaceDef.TypeParameters.Length != 1 || interfaceDef.ContainingType is not { } packageClass || !packageClass.Name.EndsWith(PackageSuffix))
+            return;
+
+        string proxyName = GenericConstraintProxyName(interfaceDef);
+        string proxyRef = $"{proxyName}<{GenericProxyElement}>";
+        string boxRef = $"{PointerPrefix}<{GenericProxyElement}>";
+        string interfaceRef = $"{StripGenericTypeArguments(GlobalQualify(interfaceDef.ToDisplayString()))}<{proxyRef}>";
+        ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+
+        StringBuilder slots = new();
+        StringBuilder methods = new();
+        HashSet<string> slotNames = new(StringComparer.Ordinal);
+
+        foreach ((string declaringRef, IMethodSymbol method) in ConstraintMethodSet(interfaceDef, interfaceRef, proxyRef))
+        {
+            string methodName = EscapeCsKeyword(method.Name);
+            string slotName = $"{TempVarMarker}{method.Name}";
+
+            // The receiver, then the method's own parameters: a BCL delegate holds at most sixteen.
+            if (method.Parameters.Length + 1 > 16)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, method.Locations.FirstOrDefault(), $"the generic constraint proxy {proxyRef}", $"'{method.Name}' takes more parameters than a slot delegate can hold"));
+                return;
+            }
+
+            // An interface embedding another that declares the same method (Go permits identical duplicates) forwards
+            // both declarations through one slot.
+            if (slotNames.Add(slotName))
+            {
+                IEnumerable<string> slotTypes = method.Parameters.Select(parameter => RenderWithProxy(parameter.Type, selfParameter, boxRef)).Prepend(boxRef);
+
+                string slotType = method.ReturnsVoid
+                    ? $"global::System.Action<{string.Join(", ", slotTypes)}>"
+                    : $"global::System.Func<{string.Join(", ", slotTypes.Append(RenderWithProxy(method.ReturnType, selfParameter, boxRef)))}>";
+
+                string discards = method.Parameters.Length == 0 ? "_" : $"({string.Join(", ", Enumerable.Repeat("_", method.Parameters.Length + 1))})";
+
+                if (slots.Length > 0)
+                    slots.Append("\r\n\r\n        ");
+
+                slots.Append($"public static {slotType} {slotName} = static {discards} => throw {TempVarMarker}Unbound(\"{method.Name}\");");
+            }
+
+            string returnType = method.ReturnsVoid ? "void" : RenderWithProxy(method.ReturnType, selfParameter, proxyRef);
+            string parameters = string.Join(", ", method.Parameters.Select((parameter, index) => $"{RenderWithProxy(parameter.Type, selfParameter, proxyRef)} {SafeParameterName(parameter.Name, index)}"));
+            string arguments = string.Join("", method.Parameters.Select((parameter, index) => $", {RenderForwardedArgument(parameter.Type, SafeParameterName(parameter.Name, index), selfParameter, GenericProxyElement)}"));
+
+            if (methods.Length > 0)
+                methods.Append("\r\n\r\n        ");
+
+            methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {slotName}(m_box{arguments});");
+        }
+
+        string packageNamespace = packageClass.ContainingNamespace.ToDisplayString(s_namespaceUsingFormat);
+
+        string proxySource = new GenericConstraintProxyImplTemplate
+        {
+            PackageNamespace = packageNamespace,
+            PackageName = packageClass.Name[..^PackageSuffix.Length],
+            ProxyName = proxyName,
+            InterfaceRef = interfaceRef,
+            InterfaceName = interfaceDef.Name,
+            // Public with its interface: the proxy is a type argument of whatever exported signature closes the constraint.
+            AdapterScope = AdapterSidePublic(interfaceDef, interfaceDef.Name) ? "public" : "internal",
+            SlotDeclarations = slots.ToString(),
+            MethodsImplementation = methods.ToString()
+        }
+        .Generate();
+
+        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClass.Name}.{proxyName}-generic-proxy.g.cs")), proxySource);
+    }
+
+    /// <summary>
+    /// Binds a FOREIGN interface's generic constraint proxy to one element's Go methods: a module initializer
+    /// assigning each slot of <c>lib.жLesser&lt;elem.Node&gt;</c> a lambda that calls the like-named method on the box.
+    /// </summary>
+    /// <remarks>
+    /// The slots are read from the proxy the interface's package published, not re-derived from the interface, so
+    /// a binder can only bind what that proxy forwards. A package that published none is refused by name: the
+    /// converter names the proxy at the instantiation, which could not compile.
+    /// </remarks>
+    private static void EmitConstraintProxyBind(GeneratorExecutionContext context, AttributeSyntax attributeSyntax, ITypeSymbol elementType, INamedTypeSymbol interfaceType, string packageNamespace, string packageName, string[] usingStatements, HashSet<string> emittedHintNames, HashSet<string> emittedProxies)
+    {
+        INamedTypeSymbol interfaceDef = interfaceType.OriginalDefinition;
+
+        if (interfaceDef.TypeParameters.Length != 1)
+            return;
+
+        // One binding per (element, interface) pair, however many instantiation sites recorded it. Keyed by the CLOSED
+        // element: each instantiation of a generic element (`Box<int>`, `Box<string>`) closes its own proxy, whose
+        // slots are its own statics.
+        if (!emittedProxies.Add($"bind|{elementType.ToDisplayString()}|{interfaceDef.ToDisplayString()}"))
+            return;
+
+        string proxyName = GenericConstraintProxyName(interfaceDef);
+
+        if (interfaceDef.ContainingType?.GetTypeMembers(proxyName, 1).FirstOrDefault() is not { } proxy)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), $"'{interfaceDef.ToDisplayString()}' has no generic constraint proxy {proxyName}<E> in its package to bind '{elementType.ToDisplayString()}' to"));
+            return;
+        }
+
+        // Fully qualified by the symbol's own format: GetFullTypeName's generic arm drops the containing package class
+        // (`Box<int>`, CS0246 from the consumer's namespace).
+        string elementName = elementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        string proxyRef = $"{StripGenericTypeArguments(GlobalQualify(proxy.ToDisplayString()))}<{elementName}>";
+        StringBuilder bindings = new();
+
+        foreach (IFieldSymbol slot in proxy.GetMembers().OfType<IFieldSymbol>().Where(field => field.IsStatic && field.Name.StartsWith(TempVarMarker, StringComparison.Ordinal)))
+        {
+            if (slot.Type is not INamedTypeSymbol { DelegateInvokeMethod: { } invoke })
+                continue;
+
+            string arguments = string.Join(", ", invoke.Parameters.Skip(1).Select((_, index) => $"{TempVarMarker}{index}"));
+            string parameters = string.Join(", ", new[] { "recv" }.Concat(invoke.Parameters.Skip(1).Select((_, index) => $"{TempVarMarker}{index}")));
+
+            if (bindings.Length > 0)
+                bindings.Append("\r\n        ");
+
+            bindings.Append($"{proxyRef}.{slot.Name} = static ({parameters}) => recv.{EscapeCsKeyword(slot.Name[TempVarMarker.Length..])}({arguments});");
+        }
+
+        // Each lambda calls the element's box extension methods, declared in the element's package class: bring that
+        // class's namespace into scope, as a concrete proxy does.
+        string[] bindUsings = usingStatements;
+
+        if (elementType.ContainingNamespace is { IsGlobalNamespace: false } elementNamespace)
+            bindUsings = [.. usingStatements, $"using {elementNamespace.ToDisplayString(s_namespaceUsingFormat)};"];
+
+        // Unique within the package class: two elements of one simple name, from two packages, bind separately.
+        string methodName = $"{TempVarMarker}Bind{elementType.Name}{PointerPrefix}{interfaceDef.Name}";
+
+        for (int suffix = 2; !emittedProxies.Add($"bindname|{packageNamespace}.{packageName}|{methodName}"); suffix++)
+            methodName = $"{TempVarMarker}Bind{elementType.Name}{PointerPrefix}{interfaceDef.Name}{suffix}";
+
+        string bindSource = new ConstraintProxyBindTemplate
+        {
+            PackageNamespace = packageNamespace,
+            PackageName = packageName,
+            MethodName = methodName,
+            ProxyRef = proxyRef,
+            Bindings = bindings.ToString(),
+            UsingStatements = bindUsings
+        }
+        .Generate();
+
+        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.{elementType.Name}{PointerPrefix}{interfaceDef.Name}-bind.g.cs")), bindSource);
     }
 
     /// <summary>
