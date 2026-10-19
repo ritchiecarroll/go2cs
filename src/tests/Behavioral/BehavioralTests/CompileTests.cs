@@ -1964,6 +1964,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]
+    public void CheckRootedUsingCapture() => CheckTarget("RootedUsingCapture");
+
+    [TestMethod]
     public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
 
     [TestMethod]

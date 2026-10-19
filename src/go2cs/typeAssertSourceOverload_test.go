@@ -151,7 +151,9 @@ func main() {
 		{"unexp._<loc, ж<impl>>()", "an unexported interface names itself, whatever it embeds"},
 		{"one._<single, ж<impl>>()", "an unexported interface with one embedded interface names itself"},
 		{"generic._<gen<nint>, ж<impl>>()", "a generic interface takes no overload, so it names itself"},
-		{"fsys._<fs.FS, ж<impl>>()", "main is in the root namespace, which cannot see an overload in go.io.fs"},
+		// main's namespace here is go.example.com, and its rooted `using go.io;` imports io/fs's overload class. This
+		// arm read the explicit form until resolveUsingNamespace tried a rooted using as written (2026-10-19).
+		{"fsys._<ж<impl>>()", "a rooted using of go.io makes io/fs's overload reachable"},
 		{"anyValue._<ж<impl>>()", "the empty interface stays bare"},
 		{"((object)hid)._<ж<impl>>()", "another package's unexported interface embedding two others is widened"},
 		{"okValue._<ж<impl>>(ᐧ)", "the comma-ok form is never touched"},
