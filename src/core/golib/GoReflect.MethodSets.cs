@@ -308,6 +308,26 @@ public static partial class GoReflect
         public override int GetHashCode() => System.HashCode.Combine(m_type, m_index);
     }
 
+    private static readonly ConcurrentDictionary<Type, IGoMethodSet?> s_generatedMethodSets = [];
+
+    // The method's delegate from the generated method set of the type it is reached through (go2cs-gen's IGoMethodSet),
+    // or null when the type has none or no arm for it. The set is the element type's zero value, read only here: a
+    // table that registration filled would root every arm in every program, and this way only a program that reaches
+    // reflect's method paths compiles one.
+    private static Delegate? GeneratedMethod(Type? t, MethodInfo method, bool bound, object? receiver)
+    {
+        if (t is null)
+            return null;
+
+        bool pointer = KindOf(t) == Pointer;
+
+        if ((pointer ? ElementType(t) : t) is not { IsValueType: true } element)
+            return null;
+
+        return s_generatedMethodSets.GetOrAdd(element, static type => GoTypeOps.Uninitialized(type) as IGoMethodSet)?
+            .ᴛMethod(method.Name, pointer, bound, receiver);
+    }
+
     private static Delegate? BindMethodFunc(Type? t, int index)
     {
         GoMethodSetEntry entry = MethodAt(t, index);
@@ -316,6 +336,12 @@ public static partial class GoReflect
             return null;
 
         Type funcType = GoMethodFuncType(t, index);
+
+        // The type's generated method set (IGoMethodSet) answers with a delegate compiled code created, which Native AOT
+        // can always hand out; the binders below remain the route for a method it has no arm for.
+        if (GeneratedMethod(t, entry.Method, false, null) is { } generated && generated.GetType() == funcType)
+            return generated;
+
         ParameterInfo[] parameters = entry.Method.GetParameters();
 
         // When GoMethodFuncType retyped the receiver to the POINTER it was looked up through (see
@@ -457,6 +483,11 @@ public static partial class GoReflect
 
         // The receiver GO sees: a copy-bound `this ref X` method is a value-receiver method of X.
         golib.TypeExtensions.IsCopyBoundReceiver(entry.Method, out Type receiverType);
+
+        // The type's generated method set binds the receiver in compiled code (IGoMethodSet), as it is: a value method
+        // reached through *X copies the pointee there, at the bind.
+        if (GeneratedMethod(methodOwner, entry.Method, true, bindTarget) is { } generatedValue)
+            return generatedValue;
 
         // A value-receiver method reached through *X receives a COPY of the pointee (Go's rule).
         // Fix W: the box test walks the base chain, so a per-kind subclass instance still takes
