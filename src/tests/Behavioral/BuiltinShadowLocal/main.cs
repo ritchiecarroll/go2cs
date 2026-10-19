@@ -21,26 +21,19 @@ internal static nint capPlusOne(slice<nint> s) {
     return capΔ1 + 1;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sigkillˢ = "SIGKILL"u8;
-private static readonly @string sigˢ = "SIG?"u8;
-
 internal static @string signame(nint sig) {
     if (sig == 9) {
-        return sigkillˢ;
+        return "SIGKILL";
     }
-    return sigˢ;
+    return "SIG?";
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noneˢ = "none"u8;
 
 internal static @string describeSignal(nint sig) {
     @string signameΔ1 = signame(sig);
     if (signameΔ1 != ""u8) {
         return "["u8 + signameΔ1 + "]"u8;
     }
-    return noneˢ;
+    return "none";
 }
 
 partial struct arr /*[3]nint*/;

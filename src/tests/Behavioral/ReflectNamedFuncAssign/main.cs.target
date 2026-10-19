@@ -9,11 +9,8 @@ public delegate nint AssignA();
 
 public delegate nint Other();
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string otherˢ = "other"u8;
-
 public static @string Name(this Other o) {
-    return otherˢ;
+    return "other";
 }
 
 public static bool Equal(this AssignA x, Func<nint> y) {
@@ -25,7 +22,6 @@ internal static nint apply(Func<nint> f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string equalˢ = "Equal"u8;
 private static readonly object assignableˢ = (@string)"assignable:"u8;
 private static readonly object equalViaCallˢ = (@string)"Equal via Call:"u8;
 private static readonly object applyViaCallˢ = (@string)"apply via Call:"u8;
@@ -36,7 +32,7 @@ private static readonly object namedIntoOtherNamedˢ = (@string)"named into othe
 internal static void Main() {
     var a = new AssignA(() => 7);
 
-    var (m, _) = reflect.TypeOf((a).OrTypedNilFunc()).MethodByName(equalˢ);
+    var (m, _) = reflect.TypeOf((a).OrTypedNilFunc()).MethodByName("Equal");
     fmt.Println(assignableˢ, m.Type.In(0).AssignableTo(m.Type.In(1)));
     fmt.Println(equalViaCallˢ, m.Func.Call(new reflectꓸValue[]{reflect.ValueOf((a).OrTypedNilFunc()), reflect.ValueOf((a).OrTypedNilFunc())}.slice())[0].Bool());
 

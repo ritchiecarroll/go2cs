@@ -72,7 +72,7 @@ private static readonly object readBackˢ = (@string)"read back:"u8;
 private static readonly object nameIntactˢ = (@string)"name intact:"u8;
 
 internal static void Main() {
-    var o = Ꮡ(new outer(name: "x"u8, ptr: Ꮡ(new inner(nil))));
+    var o = Ꮡ(new outer(name: "x", ptr: Ꮡ(new inner(nil))));
 
     o.bumpA();
     o.bumpA();

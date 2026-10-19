@@ -18,10 +18,10 @@ internal static @string Name(this ref box b) {
 }
 
 internal static void Main() {
-    var b = Ꮡ(new box(label: "widget"u8, n: 42));
+    var b = Ꮡ(new box(label: "widget", n: 42));
     fmt.Println(describe(new boxжdescribe_thing(b)));
 
-    var c = Ꮡ(new box(label: "gadget"u8, n: 7));
+    var c = Ꮡ(new box(label: "gadget", n: 7));
     fmt.Println(describe(new boxжdescribe_thing(c)));
 }
 

@@ -13,7 +13,6 @@ private static readonly object unexpectedˢ = (@string)"unexpected"u8;
 private static readonly object drainedˢ = (@string)"drained"u8;
 private static readonly object sentˢ = (@string)"sent"u8;
 private static readonly object unexpectedRecvˢ = (@string)"unexpected recv"u8;
-private static readonly @string tailˢ = "tail"u8;
 
 internal static void Main() {
     for (nint loop = 0; loop < 2; loop++) {
@@ -72,7 +71,7 @@ internal static void Main() {
 
     channel<@string> c = default!;
     c = new channel<@string>(1);
-    c.ᐸꟷ(tailˢ);
+    c.ᐸꟷ("tail");
     fmt.Println(ᐸꟷ(c));
 }
 

@@ -8,7 +8,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
-internal static bool all = os.Getenv("GO2CS_CALLER_LINE_ALL_SHAPES"u8) == "1"u8;
+internal static bool all = os.Getenv("GO2CS_CALLER_LINE_ALL_SHAPES") == "1"u8;
 
 internal static void show(bool exactInRelease, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
@@ -95,7 +95,7 @@ internal static void Main() {
     show(false, pkgSumˢ, pkgSum);
     show(false, pkgStructsˢ, pkgStructs);
 
-    (Ꮡ(new chain(nil))).Add(1).Add(2).Add(3).Done("S1"u8);
+    (Ꮡ(new chain(nil))).Add(1).Add(2).Add(3).Done("S1");
 
     show(false, (@string)"S2"u8, three(line(),
         line(),

@@ -34,10 +34,10 @@ internal static void Main() {
     var now = time.Now();
     var template = Ꮡ(new x509.Certificate(
         SerialNumber: big.NewInt(20261011),
-        Subject: new pkix.Name(CommonName: "go2cs.example"u8),
+        Subject: new pkix.Name(CommonName: "go2cs.example"),
         NotBefore: now.Add(-time.ΔHour),
         NotAfter: now.Add(time.ΔHour),
-        DNSNames: new @string[]{"go2cs.example"u8}.slice()
+        DNSNames: new @string[]{"go2cs.example"}.slice()
     ));
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.of(ecdsa.PrivateKey.ᏑPublicKey), key.OrTypedNil());
     if (err != default!) {
@@ -69,7 +69,7 @@ internal static void Main() {
     intermediates.AddCert(inter);
     (var chains, err) = leaf.Verify(new x509.VerifyOptions(
         Intermediates: intermediates,
-        DNSName: "www.google.com"u8,
+        DNSName: "www.google.com",
         CurrentTime: time.Unix(1677615892, 0)
     ));
     if (err != default!) {
@@ -81,7 +81,7 @@ internal static void Main() {
         foreach (var (_, c) in chain) {
             names = append(names, (~c).Subject.CommonName);
         }
-        fmt.Println(publicChainˢ, strings.Join(names, " -> "u8));
+        fmt.Println(publicChainˢ, strings.Join(names, " -> "));
     }
 }
 

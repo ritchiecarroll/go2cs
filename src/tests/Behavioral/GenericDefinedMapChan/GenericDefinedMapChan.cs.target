@@ -164,7 +164,7 @@ internal static void Main() {
     bag.Drop(7);
     fmt.Println(bagIntˢ, len(bag), sortedInts(bag.Keys()));
 
-    Bag<@string> names = new Bag<@string>(new map<@string, EmptyStruct>{["a"u8] = new()});
+    Bag<@string> names = new Bag<@string>(new map<@string, EmptyStruct>{["a"] = new()});
     names.Put("b"u8);
     fmt.Println(bagStringˢ, sortedStrings(names.Keys()));
 
@@ -175,7 +175,7 @@ internal static void Main() {
     var (_, missing) = ages.Get("z"u8);
     fmt.Println(indexStringIntˢ, age, ok, missing, sortedStrings(ages.Keys()));
 
-    var labels = new Index<nint, @string>(new map<nint, @string>{[1] = "one"u8});
+    var labels = new Index<nint, @string>(new map<nint, @string>{[1] = "one"});
     labels.Put(2, twoˢ);
     var (label, _) = labels.Get(2);
     fmt.Println(indexIntStringˢ, label, sortedInts(labels.Keys()));

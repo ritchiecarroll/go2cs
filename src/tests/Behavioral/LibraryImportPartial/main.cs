@@ -11,11 +11,8 @@ internal static void Main() {
     fmt.Println(libraryImportPartialˢ, describe());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string compiledInitializedAndˢ = "compiled, initialized and ran"u8;
-
 internal static @string describe() {
-    return compiledInitializedAndˢ;
+    return "compiled, initialized and ran";
 }
 
 } // end main_package

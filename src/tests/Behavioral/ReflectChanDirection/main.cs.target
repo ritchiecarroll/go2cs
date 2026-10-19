@@ -21,17 +21,13 @@ internal static void describe(@string label, reflectꓸType t) {
     fmt.Printf("%s: %v | dir=%v | kind=%v\n"u8, label, t, t.ChanDir(), t.Kind());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string notAChannelˢ = "not a channel"u8;
-private static readonly @string rangeOverSendOnlyChannelˢ = "range over send-only channel"u8;
-
 internal static @string walkRangeShape(reflectꓸValue v) {
     if (v.Kind() != reflect.Chan) {
-        return notAChannelˢ;
+        return "not a channel";
     }
 
     if (v.Type().ChanDir() == reflect.SendDir) {
-        return rangeOverSendOnlyChannelˢ;
+        return "range over send-only channel";
     }
 
     slice<@string> @out = default!;
@@ -44,7 +40,7 @@ internal static @string walkRangeShape(reflectꓸValue v) {
         @out = append(@out, fmt.Sprint(elem));
     }
 
-    return "["u8 + strings.Join(@out, " "u8) + "]"u8;
+    return "["u8 + strings.Join(@out, " ") + "]"u8;
 }
 
 internal static partial channel<@string> count(nint n) {
@@ -59,9 +55,6 @@ internal static partial channel<@string> count(nint n) {
     return ch;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noPanicˢ = "no panic"u8;
-
 internal static @string /*msg*/ recovered(Action fn) {
     @string msg = default!;
     GoFrame ᒐ = default;
@@ -74,7 +67,7 @@ internal static @string /*msg*/ recovered(Action fn) {
             }
         }, ref ᒐ);
         fn();
-        msg = noPanicˢ;
+        msg = "no panic";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -82,16 +75,12 @@ internal static @string /*msg*/ recovered(Action fn) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string makeChanˢ = "make chan<-"u8;
-private static readonly @string makeChanˢ2 = "make <-chan"u8;
-private static readonly @string makeChanˢ3 = "make chan"u8;
 private static readonly object chanRecvˢ = (@string)"chan->recv:"u8;
 private static readonly object recvChanˢ = (@string)"recv->chan:"u8;
 private static readonly object chanSendˢ = (@string)"chan->send:"u8;
 private static readonly object sendRecvˢ = (@string)"send->recv:"u8;
 private static readonly object identicalˢ = (@string)"identical:"u8;
 private static readonly object distinctˢ = (@string)"distinct:"u8;
-private static readonly @string definedChanˢ = "defined chan"u8;
 private static readonly object rangeCount5ˢ = (@string)"range count(5):"u8;
 private static readonly object rangeSendOnlyˢ = (@string)"range send-only:"u8;
 private static readonly object rangeSendOnlyHungTheˢ = (@string)"range send-only: HUNG -- the direction guard did not fire before Recv"u8;
@@ -101,7 +90,6 @@ private static readonly object capˢ = (@string)"cap:"u8;
 private static readonly object tryrecvˢ = (@string)"tryrecv:"u8;
 private static readonly object emptyValidˢ = (@string)"| empty valid:"u8;
 private static readonly object trysendˢ = (@string)"trysend:"u8;
-private static readonly @string lastˢ = "last"u8;
 private static readonly object recvOnSendOnlyˢ = (@string)"recv on send-only:"u8;
 private static readonly object sendOnRecvOnlyˢ = (@string)"send on recv-only:"u8;
 
@@ -110,9 +98,9 @@ internal static partial void Main() {
     var recv = new /*<-*/channel<nint>(2, GoChanDir.Recv);
     var both = new channel<nint>(0);
 
-    describe(makeChanˢ, reflect.TypeOf(send));
-    describe(makeChanˢ2, reflect.TypeOf(recv));
-    describe(makeChanˢ3, reflect.TypeOf(both));
+    describe("make chan<-", reflect.TypeOf(send));
+    describe("make <-chan", reflect.TypeOf(recv));
+    describe("make chan", reflect.TypeOf(both));
 
     var ps = Ꮡ(channel/*<-*/<@string>.SendOnly);
     var pr = Ꮡ(/*<-*/channel<nint>.RecvOnly);
@@ -139,7 +127,7 @@ internal static partial void Main() {
     fmt.Println(identicalˢ, AreEqual(ci, reflect.TypeOf(both)), distinctˢ, !AreEqual(ci, ri), !AreEqual(ri, si));
 
     sink sk = new sink(0);
-    describe(definedChanˢ, reflect.TypeOf(sk));
+    describe("defined chan", reflect.TypeOf(sk));
 
     fmt.Println(rangeCount5ˢ, walkRangeShape(reflect.ValueOf(count(5))));
 
@@ -173,7 +161,7 @@ internal static partial void Main() {
     fmt.Println(trysendˢ, bv.TrySend(reflect.ValueOf((nint)(7))));
 
     var closing = new channel<@string>(1);
-    closing.ᐸꟷ(lastˢ);
+    closing.ᐸꟷ("last");
     close(closing);
     var cv = reflect.ValueOf(closing);
     var (drainedVal, okDrain) = cv.Recv();

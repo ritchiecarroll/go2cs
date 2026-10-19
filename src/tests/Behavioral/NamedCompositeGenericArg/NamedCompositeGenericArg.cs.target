@@ -68,7 +68,7 @@ private static readonly object namedArrayˢ = (@string)"named array:"u8;
 private static readonly object controlsˢ = (@string)"controls:"u8;
 
 internal static void Main() {
-    var names = new Names(new map<nint, @string>{[2] = "b"u8, [1] = "a"u8});
+    var names = new Names(new map<nint, @string>{[2] = "b", [1] = "a"});
     fmt.Println(namedMapˢ, keys<@string>(names));
 
     var scores = new Scores(new float64[]{1.5D, 2.5D}.slice());
@@ -84,7 +84,7 @@ internal static void Main() {
     var grid = new Grid(new nint[]{4, 5}.array());
     fmt.Println(namedArrayˢ, first<nint>(grid));
 
-    fmt.Println(controlsˢ, keys(new map<nint, @string>{[3] = "c"u8}), keys<@string>(names));
+    fmt.Println(controlsˢ, keys(new map<nint, @string>{[3] = "c"}), keys<@string>(names));
 }
 
 } // end main_package

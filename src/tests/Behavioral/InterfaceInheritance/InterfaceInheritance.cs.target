@@ -15,11 +15,11 @@ public static void N(this T1 t) {
 }
 
 public static @string String(this T1 t) {
-    return ""u8;
+    return "";
 }
 
 public static @string Error(this T1 t) {
-    return ""u8;
+    return "";
 }
 
 partial struct T2 {
@@ -33,11 +33,11 @@ public static void N(this T2 t) {
 }
 
 public static @string String(this T2 t) {
-    return ""u8;
+    return "";
 }
 
 public static @string Error(this T2 t) {
-    return ""u8;
+    return "";
 }
 
 partial interface I {
@@ -54,15 +54,15 @@ partial interface V :
 
 internal static void Main() {
     var m = new map<I, nint>();
-    I i1 = new T1("foo"u8);
-    I i2 = new T2("bar"u8);
+    I i1 = new T1("foo");
+    I i2 = new T2("bar");
     m[i1] = 1;
     m[i2] = 2;
     fmt.Println(m);
 
     var n = new map<V, nint>();
-    V v1 = new T1("foo"u8);
-    V v2 = new T2("bar"u8);
+    V v1 = new T1("foo");
+    V v2 = new T2("bar");
     v1.N();
     v2.M();
     fmt.Print(v1.String());

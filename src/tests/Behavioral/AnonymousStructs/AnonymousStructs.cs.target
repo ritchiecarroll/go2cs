@@ -60,8 +60,8 @@ internal partial struct main_type /*dyn*/ {
 }
 
 internal static void Main() {
-    var namedPerson = new Person(Name: "Alice"u8, Age: 30);
-    var anonPerson = new processAnonymousStruct_data(Name: "Bob"u8, Age: 25);
+    var namedPerson = new Person(Name: "Alice", Age: 30);
+    var anonPerson = new processAnonymousStruct_data(Name: "Bob", Age: 25);
 
     any someInterface = anonPerson;
 
@@ -77,7 +77,7 @@ internal static void Main() {
 
     fmt.Println(functionParameterTestsˢ);
 
-    processAnonymousStruct(new processAnonymousStruct_data(Name: "Charlie"u8, Age: 40));
+    processAnonymousStruct(new processAnonymousStruct_data(Name: "Charlie", Age: 40));
 
     processAnonymousStruct(anonPerson);
 
@@ -93,9 +93,9 @@ internal static void Main() {
     fmt.Println(inFunctionVarSliceOfˢ);
 
     slice<main_type> sects = new main_type[]{
-        new("text"u8, 100),
-        new("data"u8, 200),
-        new("syms"u8, 300)
+        new("text", 100),
+        new("data", 200),
+        new("syms", 300)
     }.slice();
 
     var total = (uint32)0;

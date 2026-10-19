@@ -11,11 +11,8 @@ partial interface badge {
 partial struct gold {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goldˢ = "gold"u8;
-
 internal static @string label(this gold _) {
-    return goldˢ;
+    return "gold";
 }
 
 

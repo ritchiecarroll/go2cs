@@ -17,23 +17,19 @@ internal static @string apply(Funcꓸꓸꓸ<@string, any, @string> f, @string fo
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string dynDˢ = "dyn %d"u8;
-private static readonly @string printfˢ = "printf"u8;
-private static readonly @string viaTableDˢ = "via table %d"u8;
-private static readonly @string viaArgumentSˢ = "via argument %s"u8;
 private static readonly object samePointerˢ = (@string)"same pointer:"u8;
 private static readonly object nameˢ = (@string)"name:"u8;
-private static readonly @string innerˢ = "inner"u8;
 private static readonly @string hLloˢ = "héllo, 世界"u8;
 private static readonly object leftˢ = (@string)"left"u8;
 private static readonly object rightˢ = (@string)"right"u8;
+private static readonly object printfˢ = (@string)"printf"u8;
 private static readonly object doneˢ = (@string)"done"u8;
 
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
         fmt.Println(fmt.Sprintf("xxx"u8));
-        @string dynamic = dynDˢ;
+        @string dynamic = "dyn %d";
         fmt.Println(fmt.Sprintf(dynamic, (nint)(1)));
         var b = slice<byte>("from bytes %d"u8);
         fmt.Println(fmt.Sprintf(((@string)b), (nint)(2)));
@@ -42,9 +38,9 @@ internal static void Main() {
 
         Funcꓸꓸꓸ<@string, any, @string> f = fmt.Sprintfᶠ;
         fmt.Println(f("via local %s"u8, (@string)"ok"u8));
-        var table = new map<@string, any>{["printf"u8] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ))};
-        fmt.Println(table[printfˢ]._<Funcꓸꓸꓸ<@string, any, @string>>()(viaTableDˢ, (nint)(4)));
-        fmt.Println(apply(fmt.Sprintfᶠ, viaArgumentSˢ));
+        var table = new map<@string, any>{["printf"] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ))};
+        fmt.Println(table["printf"]._<Funcꓸꓸꓸ<@string, any, @string>>()("via table %d", (nint)(4)));
+        fmt.Println(apply(fmt.Sprintfᶠ, "via argument %s"));
 
         var p1 = reflect.ValueOf(fmt.Sprintfᶠ).Pointer();
         var p2 = reflect.ValueOf((f).OrTypedNilFunc()).Pointer();
@@ -54,7 +50,7 @@ internal static void Main() {
         ref var n = ref heap(new nint(), out var Ꮡn);
         var (count, err) = fmt.Sscanf("42"u8, "%d"u8, Ꮡn);
         fmt.Println(count, err, n);
-        fmt.Println(fmt.Errorf("wrapped: %w"u8, errors.New(innerˢ)));
+        fmt.Println(fmt.Errorf("wrapped: %w"u8, errors.New("inner")));
         fmt.Println(((@string)fmt.Appendf(default!, "appended %d"u8, (nint)(6))));
         fmt.Println(utf8.RuneCountInString(hLloˢ));
         var (r, size) = utf8.DecodeRuneInString("é!"u8);

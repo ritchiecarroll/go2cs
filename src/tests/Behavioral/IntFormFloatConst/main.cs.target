@@ -30,9 +30,9 @@ internal static float64 decimalControl = 339.7784D;
 
 internal static void Main() {
     var samples = new sample[]{
-        new("big"u8, 123456789123456789123456789D, 5F),
-        new("decimal"u8, 339.7784D, 3.5F),
-        new("small"u8, 33909D, 8F)
+        new("big", 123456789123456789123456789D, 5F),
+        new("decimal", 339.7784D, 3.5F),
+        new("small", 33909D, 8F)
     }.slice();
     foreach (var (_, s) in samples) {
         fmt.Println(s.name, s.value, s.small);

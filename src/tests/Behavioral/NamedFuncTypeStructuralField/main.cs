@@ -44,7 +44,7 @@ partial struct comparer {
 }
 
 internal static void Main() {
-    var items = new item[]{new("delta"u8, 4), new("alpha"u8, 1), new("charlie"u8, 3), new("bravo"u8, 2)}.slice();
+    var items = new item[]{new("delta", 4), new("alpha", 1), new("charlie", 3), new("bravo", 2)}.slice();
 
     new By((ж<item> a, ж<item> b) => (~a).rank < (~b).rank).Sort(items);
 

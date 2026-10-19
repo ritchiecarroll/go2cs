@@ -13,7 +13,7 @@ internal static void Main() {
     fmt.Println(foo1.Name(), foo2.Name());
 
     foo1.Pair a = new foo1.Pair(Left: 1, Right: 2);
-    var b = new foo2.Triple(A: "x"u8, B: "y"u8, C: "z"u8);
+    var b = new foo2.Triple(A: "x", B: "y", C: "z");
     fmt.Println(a.Sum(), b.Join());
 }
 

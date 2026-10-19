@@ -20,7 +20,6 @@ internal static Greetable wrap(Action<@string> handler) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object helloˢ = (@string)"hello"u8;
-private static readonly @string worldˢ = "world"u8;
 
 internal static void Main() {
     var nilGreetable = wrap(default!);
@@ -32,7 +31,7 @@ internal static void Main() {
     });
     var (realGreeter, realOk) = realGreetable._<Greeter>(ᐧ);
     fmt.Println(realOk, realGreeter == default!);
-    realGreeter.Greet(worldˢ);
+    realGreeter.Greet("world");
 }
 
 } // end main_package

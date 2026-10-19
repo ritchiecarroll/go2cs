@@ -86,12 +86,11 @@ internal static nint add(nint x, nint y) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pairˢ = "pair"u8;
 private static readonly object handledˢ = (@string)"handled:"u8;
 private static readonly object innerFnRanˢ = (@string)"inner fn ran"u8;
 
 internal static partial void runPair(channel<EmptyStruct> done) {
-    @string tag = pairˢ;
+    @string tag = "pair";
     void handler(channel<EmptyStruct> ch, Action fn) {
         fn();
         fmt.Println(handledˢ, tag);

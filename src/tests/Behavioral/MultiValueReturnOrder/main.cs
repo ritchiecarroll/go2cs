@@ -34,12 +34,9 @@ internal static (nint, nint) readThenBump() {
     return (c.n, ᴛ2);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string middleˢ = "middle"u8;
-
 internal static (nint, @string, nint) orderedCalls(ref slice<@string> log) {
     counter c = default!;
-    var ᴛ3 = note(ref log, middleˢ);
+    var ᴛ3 = note(ref log, "middle");
     var ᴛ4 = c.bump();
     return (c.n, ᴛ3, ᴛ4);
 }
@@ -104,9 +101,6 @@ internal static (any, error) forwardPointer(@string name) {
     return (ᴛ1.OrTypedNil(), ᴛ2);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string otherˢ = "other"u8;
-
 internal static @string describe(any v) {
     switch (v.type()) {
     case ж<thing> t: {
@@ -117,12 +111,11 @@ internal static @string describe(any v) {
     }
     default: {
         var t = v;
-        return otherˢ;
+        return "other";
     }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abcˢ = "abc"u8;
 private static readonly object parseOIDˢ = (@string)"parseOID:"u8;
 private static readonly object readThenBumpˢ = (@string)"readThenBump:"u8;
 private static readonly object orderedCallsˢ = (@string)"orderedCalls:"u8;
@@ -133,13 +126,12 @@ private static readonly object unrelatedOperandˢ = (@string)"unrelatedOperand:"
 private static readonly object valueReceiverCallˢ = (@string)"valueReceiverCall:"u8;
 private static readonly object pointerFieldUnrelatedˢ = (@string)"pointerFieldUnrelated:"u8;
 private static readonly object pointerFieldSameˢ = (@string)"pointerFieldSame:"u8;
-private static readonly @string oneˢ = "one"u8;
 private static readonly object forwardPointerˢ = (@string)"forwardPointer:"u8;
 private static readonly object assertThingˢ = (@string)"assert *thing:"u8;
 private static readonly object assertThingˢ2 = (@string)"assert thing:"u8;
 
 internal static void Main() {
-    var (o, err) = parseOID(abcˢ);
+    var (o, err) = parseOID("abc");
     fmt.Println(parseOIDˢ, ((@string)o.der), err);
 
     var (a, b) = readThenBump();
@@ -172,7 +164,7 @@ internal static void Main() {
     var (ga, gb) = pointerFieldSame(ref (nd2).DerefOrNull());
     fmt.Println(pointerFieldSameˢ, ga, gb);
 
-    var (v, ferr) = forwardPointer(oneˢ);
+    var (v, ferr) = forwardPointer("one");
     fmt.Println(forwardPointerˢ, describe(v), ferr);
 
     var (tp, ok) = v._<ж<thing>>(ᐧ);

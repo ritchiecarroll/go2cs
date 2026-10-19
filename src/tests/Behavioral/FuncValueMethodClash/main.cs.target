@@ -9,18 +9,12 @@ partial class main_package {
 partial struct T {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string methodˢ = "method"u8;
-
 public static @string Run(this T _) {
-    return methodˢ;
+    return "method";
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string funcˢ = "func"u8;
-
 public static @string Run() {
-    return funcˢ;
+    return "func";
 }
 
 internal static @string use(Func<@string> f) {

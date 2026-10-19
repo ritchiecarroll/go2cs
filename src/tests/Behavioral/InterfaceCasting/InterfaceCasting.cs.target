@@ -13,7 +13,7 @@ public static @string Error(this MyError err) {
 }
 
 internal static error f() {
-    return new MyError("foo"u8);
+    return new MyError("foo");
 }
 
 partial interface Animal {
@@ -23,38 +23,29 @@ partial interface Animal {
 partial struct Dog {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string woofˢ = "Woof!"u8;
-
 public static @string Speak(this Dog d) {
-    return woofˢ;
+    return "Woof!";
 }
 
 partial struct Cat {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string meowˢ = "Meow!"u8;
-
 public static @string Speak(this ref Cat c) {
-    return meowˢ;
+    return "Meow!";
 }
 
 partial struct Llama {
 }
 
 public static @string Speak(this Llama l) {
-    return "?????"u8;
+    return "?????";
 }
 
 partial struct JavaProgrammer {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string designPatternsˢ = "Design patterns!"u8;
-
 public static @string Speak(this JavaProgrammer j) {
-    return designPatternsˢ;
+    return "Design patterns!";
 }
 
 partial struct Counter {
@@ -65,14 +56,11 @@ internal static void addTo(ref nint p, nint delta) {
     p += delta;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string incˢ = "inc"u8;
-
 public static @string Inc(this ж<Counter> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     addTo(ref nonnil(ref c).n, 1);
-    return incˢ;
+    return "inc";
 }
 
 public static nint Total(this ref Counter c) {
@@ -96,11 +84,6 @@ public static Animal Reversed(Animal a) {
     return new reversedжAnimal(Ꮡ(new reversed(a)));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string dogˢ = "dog"u8;
-private static readonly @string catˢ = "cat"u8;
-private static readonly @string llamaˢ = "llama"u8;
-
 internal static (Animal, @string) pick(nint kind) {
     Animal a = default!;
     @string name = default!;
@@ -108,19 +91,19 @@ internal static (Animal, @string) pick(nint kind) {
     case 0: {
         ref var d = ref heap(new Dog(), out var Ꮡd);
         a = new DogжAnimal(Ꮡd);
-        name = dogˢ;
+        name = "dog";
         break;
     }
     case 1: {
         ref var c = ref heap(new Cat(), out var Ꮡc);
         a = new CatжAnimal(Ꮡc);
-        name = catˢ;
+        name = "cat";
         break;
     }
     default: {
         ref var l = ref heap(new Llama(), out var Ꮡl);
         a = new LlamaжAnimal(Ꮡl);
-        name = llamaˢ;
+        name = "llama";
         break;
     }}
 
@@ -137,7 +120,6 @@ private static readonly object viaInterfaceˢ = (@string)"via interface:"u8;
 private static readonly object assertBackˢ = (@string)"assert-back:"u8;
 private static readonly object promotedViaPointerˢ = (@string)"promoted via pointer adapter:"u8;
 private static readonly object pickedˢ = (@string)"picked:"u8;
-private static readonly @string dataˢ = "data"u8;
 private static readonly object replacedˢ = (@string)"replaced:"u8;
 private static readonly object deconstructedIntoIfaceˢ = (@string)"deconstructed into iface:"u8;
 private static readonly object madeˢ = (@string)"made:"u8;
@@ -148,7 +130,7 @@ private static readonly object anyStringˢ = (@string)"any-string:"u8;
 internal static void Main() {
     error err = default!;
 
-    err = new MyError("bar"u8);
+    err = new MyError("bar");
 
     fmt.Printf("%v %v\n"u8, f(), err);
 
@@ -180,10 +162,10 @@ internal static void Main() {
 
     rdr rd = new strRdr(nil);
     fmt.Println(rd.read());
-    var rc = open(dataˢ);
+    var rc = open("data");
     fmt.Println(rc.read(), rc.close());
     var readers = new rdr[]{new strRdr(nil)}.slice();
-    readers[0] = new fileRdr(name: "x"u8);
+    readers[0] = new fileRdr(name: "x");
     fmt.Println(readers[0].read());
 
     slice<Animal> pack = default!;
@@ -218,7 +200,7 @@ internal static void Main() {
     speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog(nil))));
     fmt.Println(ss.Speak(), ss.Shut());
 
-    labeler lb = new badgeжlabeler(Ꮡ(new badge(text: "id"u8, num: 9)));
+    labeler lb = new badgeжlabeler(Ꮡ(new badge(text: "id", num: 9)));
     fmt.Println(keywordMethodˢ, lb.@string(), lb.@int());
 
     var av = describe(true);
@@ -267,11 +249,8 @@ partial struct wrapSink {
     /*embed*/ public Animal Animal;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string shutˢ = "shut"u8;
-
 internal static @string Shut(this wrapSink w) {
-    return shutˢ;
+    return "shut";
 }
 
 partial interface rdr {
@@ -291,11 +270,8 @@ partial interface rdCloser :
 partial struct strRdr {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string strRdrˢ = "strRdr"u8;
-
 internal static @string read(this strRdr _) {
-    return strRdrˢ;
+    return "strRdr";
 }
 
 partial struct fileRdr {
@@ -334,8 +310,8 @@ partial struct plumbing {
 partial struct sinks /*[]sink*/;
 
 internal static @string runPlumbing() {
-    var p = new plumbing(name: "n1"u8);
-    var batch = new sinks(new sink[]{new basin(tag: "x"u8), new basin(tag: "y"u8)}.slice());
+    var p = new plumbing(name: "n1");
+    var batch = new sinks(new sink[]{new basin(tag: "x"), new basin(tag: "y")}.slice());
     slice<sink> all = default!;
     all = appendꓸꓸꓸ(all, batch);
     return p.name + ":"u8 + all[0].drain() + ","u8 + all[1].drain();

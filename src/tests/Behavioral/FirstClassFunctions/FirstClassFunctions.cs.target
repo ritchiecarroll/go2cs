@@ -83,7 +83,7 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     foreach (var (_, val) in vals) {
         total += val;
     }
-    @string s = ""u8;
+    @string s = "";
     foreach (var (_, val) in vals) {
         if (s != ""u8) {
             s += ", "u8;
@@ -96,9 +96,6 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object convertedFuncTypeCallˢ = (@string)"converted func type call:"u8;
-private static readonly @string pkgFmtˢ = "pkg/fmt"u8;
-private static readonly @string fmtˢ = "fmt"u8;
-private static readonly @string printfˢ = "Printf"u8;
 private static readonly object collapseHoistˢ = (@string)"collapse hoist:"u8;
 
 internal static void Main() {
@@ -121,7 +118,7 @@ internal static void Main() {
     fmt.Println(convertedFuncTypeCallˢ, result.player, result.opponent, result.thisTurn, turnIsOver);
 
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
-    var (n, @out, serr) = m.split("hi"u8);
+    var (n, @out, serr) = m.split("hi");
     fmt.Println(n, @out, serr == default!);
 
     var p = new provider(produce: (nint x) => x * 2);
@@ -141,7 +138,7 @@ internal static void Main() {
     var res = new resolver(
         lookupPackage: (@string name) => {
             if (name == "fmt"u8) {
-                return (pkgFmtˢ, true);
+                return ("pkg/fmt", true);
             }
             return ("", false);
         },
@@ -149,8 +146,8 @@ internal static void Main() {
             return recv == ""u8 && name == "Printf"u8;
         }
     );
-    var (ip, found) = res.lookupPackage(fmtˢ);
-    fmt.Println(ip, found, res.lookupSym(""u8, printfˢ), res.lookupSym("T"u8, "M"u8));
+    var (ip, found) = res.lookupPackage("fmt");
+    fmt.Println(ip, found, res.lookupSym("", "Printf"), res.lookupSym("T", "M"));
 
     (any, error) fetch() {
         var (ᴛ1, ᴛ2) = fetchPair();
@@ -167,19 +164,13 @@ internal static @string passThrough() {
     return joinPair(ᴛ1, ᴛ2);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pairˢ = "pair"u8;
-
 internal static (@string, error) fetchPair() {
-    return (pairˢ, default!);
+    return ("pair", default!);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string errˢ = "err"u8;
 
 internal static @string joinPair(@string s, error err) {
     if (err != default!) {
-        return errˢ;
+        return "err";
     }
     return "got:"u8 + s;
 }
@@ -237,11 +228,8 @@ internal static nint run(this ж<worker> Ꮡw, slice<byte> b) {
 
 internal delegate nint handler(nint _);
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string handlerˢ = "handler"u8;
-
 internal static @string tag(this handler h) {
-    return handlerˢ;
+    return "handler";
 }
 
 partial interface tagged {

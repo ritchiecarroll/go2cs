@@ -17,9 +17,6 @@ internal static void describe(@string label, reflectꓸType t) {
         label, t, t.Kind(), t.Len(), t.Elem(), t.Size(), t.Align(), t.Name());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noPanicˢ = "no panic"u8;
-
 internal static @string /*msg*/ recovered(Action fn) {
     @string msg = default!;
     GoFrame ᒐ = default;
@@ -32,7 +29,7 @@ internal static @string /*msg*/ recovered(Action fn) {
             }
         }, ref ᒐ);
         fn();
-        msg = noPanicˢ;
+        msg = "no panic";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -47,8 +44,6 @@ internal static reflectꓸType nest(nint depth, reflectꓸType elem) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string arrayOf3Uint8ˢ = "ArrayOf(3, uint8)"u8;
-private static readonly @string declared3Uint8ˢ = "declared [3]uint8"u8;
 private static readonly object identicalˢ = (@string)"identical:"u8;
 private static readonly object elemIdenticalˢ = (@string)"| elem identical:"u8;
 private static readonly object assignableˢ = (@string)"| assignable:"u8;
@@ -59,14 +54,12 @@ private static readonly object lenˢ = (@string)"| len:"u8;
 private static readonly object elemˢ = (@string)"| elem:"u8;
 private static readonly object elemLenˢ = (@string)"| elem len:"u8;
 private static readonly object sizeˢ = (@string)"| size:"u8;
-private static readonly @string arrayOf2Celsiusˢ = "ArrayOf(2, Celsius)"u8;
 private static readonly object celsiusIdenticalˢ = (@string)"celsius identical:"u8;
 private static readonly object pointerElemˢ = (@string)"pointer elem:"u8;
 private static readonly object structElemˢ = (@string)"struct elem:"u8;
 private static readonly object zeroLengthˢ = (@string)"zero length:"u8;
 private static readonly object deepequalˢ = (@string)"deepequal:"u8;
 private static readonly object nest5ˢ = (@string)"nest(5):"u8;
-private static readonly @string sliceOfUint8ˢ = "SliceOf(uint8)"u8;
 private static readonly object sliceIdenticalˢ = (@string)"slice identical:"u8;
 private static readonly object sliceOfArrayIdenticalToˢ = (@string)"slice of array identical to declared:"u8;
 private static readonly object arrayOfSliceˢ = (@string)"array of slice:"u8;
@@ -82,8 +75,8 @@ internal static void Main() {
 
     var made = reflect.ArrayOf(3, byteT);
     var declared = reflect.TypeOf(new uint8[]{}.array(3));
-    describe(arrayOf3Uint8ˢ, made);
-    describe(declared3Uint8ˢ, declared);
+    describe("ArrayOf(3, uint8)", made);
+    describe("declared [3]uint8", declared);
     fmt.Println(identicalˢ, AreEqual(made, declared), elemIdenticalˢ, AreEqual(made.Elem(), byteT),
         assignableˢ, made.AssignableTo(declared), comparableˢ, made.Comparable());
 
@@ -92,7 +85,7 @@ internal static void Main() {
         lenˢ, outer.Len(), elemˢ, outer.Elem(), elemLenˢ, outer.Elem().Len(), sizeˢ, outer.Size());
 
     var celsius = reflect.ArrayOf(2, reflect.TypeOf(((Celsius)0D)));
-    describe(arrayOf2Celsiusˢ, celsius);
+    describe("ArrayOf(2, Celsius)", celsius);
     fmt.Println(celsiusIdenticalˢ, AreEqual(celsius, reflect.TypeOf(new Celsius[]{}.array(2))));
 
     var ptr = reflect.ArrayOf(2, reflect.PointerTo(byteT));
@@ -119,7 +112,7 @@ internal static void Main() {
         identicalˢ2, AreEqual(deep, reflect.TypeOf(deepDecl)));
 
     var sl = reflect.SliceOf(byteT);
-    describeSlice(sliceOfUint8ˢ, sl);
+    describeSlice("SliceOf(uint8)", sl);
     fmt.Println(sliceIdenticalˢ, AreEqual(sl, reflect.TypeOf(new uint8[]{}.slice())), elemIdenticalˢ, AreEqual(sl.Elem(), byteT));
 
     var slArr = reflect.SliceOf(reflect.ArrayOf(3, byteT));
