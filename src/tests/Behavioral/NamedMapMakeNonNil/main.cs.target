@@ -10,8 +10,8 @@ internal static void Main() {
     var m = new StrIntMap(0);
     fmt.Println(m == default!);
     fmt.Println(len(m));
-    m["a"u8] = 1;
-    fmt.Println(m["a"u8]);
+    m["a"] = 1;
+    fmt.Println(m["a"]);
 
     var m2 = new StrIntMap(0);
     fmt.Println(m2 == default!);

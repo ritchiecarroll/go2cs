@@ -147,6 +147,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A `nil` element appended to a slice casts to the element type](slices-and-arrays.md#a-nil-element-appended-to-a-slice-casts-to-the-element-type)
 - **[Strings (`@string` and `sstring`)](strings.md)**
   - [`@string` is a byte string, and slicing it is a window](strings.md#string-is-a-byte-string-and-slicing-it-is-a-window)
+  - [A literal in a `string` slot is a plain C# literal](strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
   - [String literals render as `u8` spans](strings.md#string-literals-render-as-u8-spans)
   - [A string literal with raw-byte escapes emits a byte-array `@string`](strings.md#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string)
   - [Converting between strings and slices](strings.md#converting-between-strings-and-slices)

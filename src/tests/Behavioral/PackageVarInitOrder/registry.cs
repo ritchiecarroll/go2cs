@@ -19,7 +19,7 @@ internal static @string add(this ref reg r, @string name) {
 
 internal static ж<reg> registry = newReg();
 
-internal static slice<@string> names = new @string[]{"stdin"u8, "stdout"u8}.slice();
+internal static slice<@string> names = new @string[]{"stdin", "stdout"}.slice();
 
 internal static UntypedInt chunkBits => 4;
 

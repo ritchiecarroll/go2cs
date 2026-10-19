@@ -36,9 +36,6 @@ internal static @string describe(@string tag, params ꓸꓸꓸany valsʗp) {
     return fmt.Sprintf("%s%v"u8, tag, vals);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string allZeroˢ = "all zero"u8;
-
 internal static (nint, error) firstNonZero(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
@@ -47,7 +44,7 @@ internal static (nint, error) firstNonZero(params ꓸꓸꓸnint valsʗp) {
             return (v, default!);
         }
     }
-    return (0, errors.New(allZeroˢ));
+    return (0, errors.New("all zero"));
 }
 
 internal static slice<@string> recorded;
@@ -116,14 +113,10 @@ private static readonly object firstBˢ = (@string)"firstB   :"u8;
 private static readonly object recordNˢ = (@string)"recordN  :"u8;
 private static readonly object recordedˢ = (@string)"recorded :"u8;
 private static readonly object betweenˢ = (@string)"between  :"u8;
-private static readonly @string totalˢ = "Total"u8;
 private static readonly object methodˢ = (@string)"method   :"u8;
 private static readonly object catˢ = (@string)"cat      :"u8;
-private static readonly @string catˢ2 = "cat"u8;
 private static readonly object countˢ = (@string)"count    :"u8;
-private static readonly @string countˢ2 = "count"u8;
 private static readonly object pairˢ = (@string)"pair     :"u8;
-private static readonly @string pairˢ2 = "pair"u8;
 private static readonly object toofewˢ = (@string)"toofew   :"u8;
 private static readonly object okEmptyˢ = (@string)"ok-empty :"u8;
 
@@ -146,13 +139,13 @@ internal static void Main() {
 
     fmt.Println(betweenˢ, callString(between, (nint)(2), (nint)(4), (nint)(1), (nint)(2), (nint)(3), (nint)(4), (nint)(5)));
 
-    var m = reflect.ValueOf(new counter(@base: 100)).MethodByName(totalˢ);
+    var m = reflect.ValueOf(new counter(@base: 100)).MethodByName("Total");
     fmt.Println(methodˢ, callString(m.Interface(), (nint)(1), (nint)(2)));
 
     var funcs = new map<@string, any>{
-        ["cat"u8] = ((Funcꓸꓸꓸ<@string, @string, @string>)(@string (@string sep, params ꓸꓸꓸstring partsʗp) => {
+        ["cat"] = ((Funcꓸꓸꓸ<@string, @string, @string>)(@string (@string sep, params ꓸꓸꓸstring partsʗp) => {
             var parts = partsʗp.sslice();
-            @string @out = ""u8;
+            @string @out = "";
             foreach (var (i, p) in parts) {
                 if (i > 0) {
                     @out += sep;
@@ -161,11 +154,11 @@ internal static void Main() {
             }
             return @out;
         })),
-        ["count"u8] = ((Funcꓸꓸꓸ<any, nint>)(nint (params ꓸꓸꓸany valsʗp) => {
+        ["count"] = ((Funcꓸꓸꓸ<any, nint>)(nint (params ꓸꓸꓸany valsʗp) => {
             var vals = valsʗp.sslice();
             return len(vals);
         })),
-        ["pair"u8] = ((Funcꓸꓸꓸ<nint, nint, (nint, nint)>)((nint, nint) (nint a, params ꓸꓸꓸnint restʗp) => {
+        ["pair"] = ((Funcꓸꓸꓸ<nint, nint, (nint, nint)>)((nint, nint) (nint a, params ꓸꓸꓸnint restʗp) => {
             var rest = restʗp.sslice();
             nint t = 0;
             foreach (var (_, r) in rest) {
@@ -184,9 +177,9 @@ internal static void Main() {
         fmt.Printf("funcmap %-6s: variadic=%v numIn=%d in-last=%v\n"u8,
             name, fn.Type().IsVariadic(), fn.Type().NumIn(), fn.Type().In(fn.Type().NumIn() - 1));
     }
-    fmt.Println(catˢ, callString(funcs[catˢ2], (@string)"-"u8, (@string)"a"u8, (@string)"b"u8, (@string)"c"u8));
-    fmt.Println(countˢ, callString(funcs[countˢ2], (nint)(1), (nint)(2), (nint)(3), (nint)(4)));
-    fmt.Println(pairˢ, callString(funcs[pairˢ2], (nint)(7), (nint)(1), (nint)(2)));
+    fmt.Println(catˢ, callString(funcs["cat"], (@string)"-"u8, (@string)"a"u8, (@string)"b"u8, (@string)"c"u8));
+    fmt.Println(countˢ, callString(funcs["count"], (nint)(1), (nint)(2), (nint)(3), (nint)(4)));
+    fmt.Println(pairˢ, callString(funcs["pair"], (nint)(7), (nint)(1), (nint)(2)));
 
     fmt.Println(toofewˢ, recoverText(() => {
         reflect.ValueOf(join).Call(default!);
@@ -195,9 +188,6 @@ internal static void Main() {
         reflect.ValueOf(sum).Call(default!);
     }));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noPanicˢ = "<no panic>"u8;
 
 internal static @string /*msg*/ recoverText(Action f) {
     @string msg = default!;
@@ -211,7 +201,7 @@ internal static @string /*msg*/ recoverText(Action f) {
             }
         }, ref ᒐ);
         f();
-        msg = noPanicˢ;
+        msg = "<no panic>";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

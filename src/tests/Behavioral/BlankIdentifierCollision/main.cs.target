@@ -76,9 +76,6 @@ internal static nint bump(this ref counter c, nint d) {
     return c.n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pairˢ = "pair"u8;
-
 internal static void blankFuncValues() {
     _ = (Func<@string, nint, (@string, error)>)(pair);
     _ = (Action<nint>)(sink);
@@ -101,7 +98,7 @@ internal static void blankFuncValues() {
     state = lexNumber;
     _ = state;
 
-    var (s, _) = f(pairˢ, 1);
+    var (s, _) = f("pair", 1);
     fmt.Println(s, count(), total(1, 2, 3), c.bump(5));
 }
 

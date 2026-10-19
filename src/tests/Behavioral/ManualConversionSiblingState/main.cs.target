@@ -22,7 +22,7 @@ internal static void Main() {
     var np = Ꮡsched.of(schedlike.Ꮡdisable).of(schedlike_disable.Ꮡn);
     np.Value = 7;
 
-    sched.label = "ok"u8;
+    sched.label = "ok";
 
     reportProcs();
     fmt.Println(disableˢ, sched.disable.user, sched.disable.n);

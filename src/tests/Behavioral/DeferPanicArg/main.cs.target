@@ -80,9 +80,9 @@ internal static void pointerValue() {
                 }
             }
         }, ref ᒐ);
-        var p = Ꮡ(new myErr(msg: "boxed"u8));
+        var p = Ꮡ(new myErr(msg: "boxed"));
         defer(ᴛ1 => throw panic(ᴛ1), p.OrTypedNil(), ref ᒐ);
-        p = Ꮡ(new myErr(msg: "replaced"u8));
+        p = Ꮡ(new myErr(msg: "replaced"));
         _ = p;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -101,7 +101,7 @@ internal static void replacesInFlight() {
         ((Action)(() => {
             GoFrame ᒐ = default;
             try {
-                defer(ᴛ1 => throw panic(ᴛ1), "from defer", ref ᒐ);
+                defer(ᴛ1 => throw panic(ᴛ1), (@string)"from defer", ref ᒐ);
                 throw panic("original");
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -114,8 +114,6 @@ internal static void replacesInFlight() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object multipleRecoveredˢ = (@string)"multiple recovered:"u8;
-private static readonly @string aChangedˢ = "A-changed"u8;
-private static readonly @string bChangedˢ = "B-changed"u8;
 
 internal static void multiple() {
     GoFrame ᒐ = default;
@@ -123,12 +121,12 @@ internal static void multiple() {
         defer(() => {
             fmt.Println(multipleRecoveredˢ, recover());
         }, ref ᒐ);
-        @string a = "A"u8;
-        @string b = "B"u8;
+        @string a = "A";
+        @string b = "B";
         defer(ᴛ1 => throw panic(ᴛ1), a, ref ᒐ);
         defer(ᴛ1 => throw panic(ᴛ1), b, ref ᒐ);
-        a = aChangedˢ;
-        b = bChangedˢ;
+        a = "A-changed";
+        b = "B-changed";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

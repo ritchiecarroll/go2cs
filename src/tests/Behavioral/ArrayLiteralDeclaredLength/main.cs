@@ -83,7 +83,7 @@ internal static void Main() {
     var ints = new nint[]{7}.array(4);
     fmt.Println(intsˢ, len(ints), ints[0], ints[3]);
 
-    var strs = new @string[]{"a"u8}.array(3);
+    var strs = new @string[]{"a"}.array(3);
     fmt.Println(strsˢ, len(strs), strs[0], strs[2] == "");
 
     fmt.Println(sliceCtlˢ, len(new byte[]{}.slice()), len(new byte[]{1, 2}.slice()));

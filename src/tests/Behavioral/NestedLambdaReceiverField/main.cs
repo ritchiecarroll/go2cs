@@ -55,7 +55,7 @@ internal static void exec(this ж<stmt> Ꮡs) {
 private static readonly object doneˢ = (@string)"done"u8;
 
 internal static void Main() {
-    var s = Ꮡ(new stmt(d: Ꮡ(new dep(label: "d1"u8)), cg: new connGrabжgrabber(Ꮡ(new connGrab(name: "g1"u8))), id: 7));
+    var s = Ꮡ(new stmt(d: Ꮡ(new dep(label: "d1")), cg: new connGrabжgrabber(Ꮡ(new connGrab(name: "g1"))), id: 7));
     s.exec();
     fmt.Println(doneˢ);
 }

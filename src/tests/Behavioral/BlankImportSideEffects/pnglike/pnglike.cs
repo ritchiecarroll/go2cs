@@ -6,7 +6,7 @@ using go.BlankImportSideEffects;
 partial class pnglike_package {
 
 [GoInit] internal static void init() {
-    registry.Register("pnglike"u8, "pnglike decoder"u8);
+    registry.Register("pnglike", "pnglike decoder");
 }
 
 } // end pnglike_package

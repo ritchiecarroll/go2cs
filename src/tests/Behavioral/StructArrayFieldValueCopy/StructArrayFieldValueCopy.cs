@@ -155,10 +155,10 @@ internal static void rangeCopy() {
 private static readonly object mapˢ = (@string)"map:        "u8;
 
 internal static void mapValueCopy() {
-    var m = new map<@string, digest>{["k"u8] = newDigest()};
-    var mv = m["k"u8].ΔClone();
+    var m = new map<@string, digest>{["k"] = newDigest()};
+    var mv = m["k"].ΔClone();
     mv.bump();
-    var stored = m["k"u8].ΔClone();
+    var stored = m["k"].ΔClone();
     fmt.Println(mapˢ, stored.show(), (@string)"|"u8, mv.show());
 }
 

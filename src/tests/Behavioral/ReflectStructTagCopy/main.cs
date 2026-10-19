@@ -46,10 +46,7 @@ partial struct outer {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string jsonˢ = "json"u8;
-private static readonly @string asn1ˢ = "asn1"u8;
 private static readonly object lookupJsonˢ = (@string)"lookup json:"u8;
-private static readonly @string missingˢ = "missing"u8;
 private static readonly object lookupMissingˢ = (@string)"lookup missing:"u8;
 private static readonly object copySliceˢ = (@string)"copy slice:"u8;
 private static readonly object copyShortSrcˢ = (@string)"copy short src:"u8;
@@ -65,13 +62,13 @@ internal static void Main() {
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
-        fmt.Printf("%s raw=%q json=%q asn1=%q\n"u8, fΔ1.Name, ((@string)fΔ1.Tag), fΔ1.Tag.Get(jsonˢ), fΔ1.Tag.Get(asn1ˢ));
+        fmt.Printf("%s raw=%q json=%q asn1=%q\n"u8, fΔ1.Name, ((@string)fΔ1.Tag), fΔ1.Tag.Get("json"), fΔ1.Tag.Get("asn1"));
     }
 
     var f = t.Field(1);
-    var (v, ok) = f.Tag.Lookup(jsonˢ);
+    var (v, ok) = f.Tag.Lookup("json");
     fmt.Println(lookupJsonˢ, v, ok);
-    (v, ok) = f.Tag.Lookup(missingˢ);
+    (v, ok) = f.Tag.Lookup("missing");
     fmt.Println(lookupMissingˢ, v, ok);
 
     var dst = new slice<byte>(4);
@@ -118,7 +115,7 @@ internal static void Main() {
         fmt.Printf("offset %-6s %d\n"u8, fΔ2.Name, fΔ2.Offset);
     }
 
-    var (of, _) = reflect.TypeOf(new outer(nil)).FieldByName("Y"u8);
+    var (of, _) = reflect.TypeOf(new outer(nil)).FieldByName("Y");
     fmt.Printf("promoted Y offset=%d index=%v\n"u8, of.Offset, of.Index);
 }
 

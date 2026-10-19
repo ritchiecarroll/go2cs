@@ -55,12 +55,12 @@ internal static void Main() {
     d = Ꮡv;
     fmt.Println((@string)"c==d"u8, c == d, (@string)"&c==&d"u8, Ꮡc == Ꮡd);
 
-    var keys = new map<ж<ж<nint>>, @string>{[Ꮡc] = "c"u8, [Ꮡd] = "d"u8};
+    var keys = new map<ж<ж<nint>>, @string>{[Ꮡc] = "c", [Ꮡd] = "d"};
     fmt.Println(keysˢ, len(keys), keys[Ꮡc], keys[Ꮡd]);
 
     ref var late = ref heap<ж<nint>>(out var Ꮡlate);
     var lp = Ꮡlate;
-    var stable = new map<ж<ж<nint>>, @string>{[lp] = "stable"u8};
+    var stable = new map<ж<ж<nint>>, @string>{[lp] = "stable"};
     fmt.Println(beforeˢ, stable[lp]);
     late = Ꮡv;
     fmt.Println(afterˢ, stable[lp], len(stable), (lp.ValueSlot).Value);
@@ -69,7 +69,7 @@ internal static void Main() {
     var fp = Ꮡh.of(holder.Ꮡp);
     var fs = Ꮡh.of(holder.Ꮡs);
     fmt.Println(fieldNilˢ, fp.ValueSlot == nil, fs.ValueSlot == default!, len(fs.ValueSlot));
-    var fields = new map<ж<ж<nint>>, @string>{[fp] = "h.p"u8};
+    var fields = new map<ж<ж<nint>>, @string>{[fp] = "h.p"};
     fmt.Println(fieldKeyˢ, fields[fp]);
     h.p = Ꮡv;
     fmt.Println(fieldSetˢ, fields[fp], (fp.ValueSlot).Value, fp.ValueSlot == c);

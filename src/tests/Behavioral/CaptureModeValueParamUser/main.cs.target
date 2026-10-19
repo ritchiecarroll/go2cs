@@ -21,7 +21,7 @@ private static readonly object callerIndentUnchangedˢ = (@string)"caller Indent
 
 internal static void Main() {
     var cfg = new CaptureModeValueParamLib.Config(Indent: 3);
-    var (@out, trace) = render(cfg, "go"u8);
+    var (@out, trace) = render(cfg, "go");
     fmt.Println(renderedˢ, @out);
     fmt.Println(traceˢ, trace);
     fmt.Println(callerIndentUnchangedˢ, cfg.Indent);

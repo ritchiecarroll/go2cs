@@ -22,11 +22,8 @@ private static readonly object arrVsSlcˢ = (@string)"arr vs slc :"u8;
 private static readonly object arrVsSlc2ˢ = (@string)"arr vs slc2:"u8;
 private static readonly object structElemˢ = (@string)"struct elem:"u8;
 private static readonly object writeThruˢ = (@string)"write thru :"u8;
-private static readonly @string twoˢ = "two"u8;
-private static readonly @string threeˢ = "three"u8;
 private static readonly object mapLookupˢ = (@string)"map lookup :"u8;
 private static readonly object mapLenˢ = (@string)"map len    :"u8;
-private static readonly @string twoˢ2 = "TWO"u8;
 private static readonly object mapLen2ˢ = (@string)"map len 2  :"u8;
 private static readonly object mapResliceˢ = (@string)"map reslice:"u8;
 private static readonly object mapMissˢ = (@string)"map miss   :"u8;
@@ -67,11 +64,11 @@ internal static void Main() {
     fmt.Println(writeThruˢ, s[1], t[0]);
 
     var m = new map<ж<nint>, @string>{};
-    m[Ꮡ(s, 2)] = twoˢ;
-    m[Ꮡ(s, 3)] = threeˢ;
+    m[Ꮡ(s, 2)] = "two";
+    m[Ꮡ(s, 3)] = "three";
     fmt.Println(mapLookupˢ, m[Ꮡ(s, 2)], m[Ꮡ(s, 3)]);
     fmt.Println(mapLenˢ, len(m));
-    m[Ꮡ(s, 2)] = twoˢ2;
+    m[Ꮡ(s, 2)] = "TWO";
     fmt.Println(mapLen2ˢ, len(m));
     fmt.Println(mapResliceˢ, m[Ꮡ(t, 1)], m[Ꮡ(t, 2)]);
     var (_, miss) = m[Ꮡ(s, 0), ꟷ];

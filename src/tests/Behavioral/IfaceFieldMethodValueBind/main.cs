@@ -33,19 +33,15 @@ internal static Func<@string, nint> pickSizer(this ref config c) {
     return f;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abcˢ = "abc"u8;
-private static readonly @string abcdˢ = "abcd"u8;
-
 internal static void Main() {
     var c = Ꮡ(new config(s: new flat(n: 10)));
     var f = c.pickSizer();
-    fmt.Println(f(abcˢ));
-    fmt.Println((~c).s.size(abcˢ));
+    fmt.Println(f("abc"));
+    fmt.Println((~c).s.size("abc"));
 
     var c2 = Ꮡ(new config(nil));
     var g = c2.pickSizer();
-    fmt.Println(g(abcdˢ));
+    fmt.Println(g("abcd"));
 }
 
 } // end main_package

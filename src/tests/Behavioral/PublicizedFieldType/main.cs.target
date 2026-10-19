@@ -53,7 +53,7 @@ internal static void Main() {
     fmt.Println(cr.Item.v);
     fmt.Println(cr.Lvl);
 
-    var b = new EncBuffer(new coder(tag: "png"u8, seq: 7));
+    var b = new EncBuffer(new coder(tag: "png", seq: 7));
     fmt.Println(b.tag, b.seq);
 
     fmt.Println(cr.Tally(), cr.Weigh(3));

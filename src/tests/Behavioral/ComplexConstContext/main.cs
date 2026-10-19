@@ -21,13 +21,7 @@ internal static void showComplex(@string name, complex128 c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cRationalˢ = "cRational"u8;
-private static readonly @string cNegImagˢ = "cNegImag"u8;
-private static readonly @string cPureImagˢ = "cPureImag"u8;
-private static readonly @string cWideEnoughˢ = "cWideEnough"u8;
-private static readonly @string cFoldedˢ = "cFolded"u8;
 private static readonly object c64ˢ = (@string)"c64"u8;
-private static readonly @string localˢ = "local"u8;
 private static readonly object overFitsFloat32ˢ = (@string)"over-fits-float32"u8;
 
 internal static void Main() {
@@ -49,15 +43,15 @@ internal static void Main() {
     var r = complex(rf, 0D);
     fmt.Println(real(r), imag(r));
 
-    showComplex(cRationalˢ, cRational);
-    showComplex(cNegImagˢ, cNegImag);
-    showComplex(cPureImagˢ, cPureImag);
-    showComplex(cWideEnoughˢ, cWideEnough);
-    showComplex(cFoldedˢ, cFolded);
+    showComplex("cRational", cRational);
+    showComplex("cNegImag", cNegImag);
+    showComplex("cPureImag", cPureImag);
+    showComplex("cWideEnough", cWideEnough);
+    showComplex("cFolded", cFolded);
     fmt.Println(c64ˢ, real(c64), imag(c64));
 
     complex128 local = /* 0.5 - 0.25i */ 0.5D + -0.25D.i();
-    showComplex(localˢ, local);
+    showComplex("local", local);
 
     var over = complex((float64)(maxFloat32 * 2D), (float64)(maxFloat32 * 2D));
     fmt.Printf("over %T %v %v\n"u8, over, real(over), imag(over));

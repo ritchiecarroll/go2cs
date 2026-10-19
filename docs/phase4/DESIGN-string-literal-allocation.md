@@ -515,3 +515,26 @@ a literal whose `u8` span is consumed as a span (no `@string` is minted); a lite
 
 **Gate:** each arm's two-seeded corpus reconvert hunk count, then its members' rows before and after at
 Release with tiering off.
+
+## 9. Dated amendment, 2026-10-19 (C2, owner ruling 2026-10-17) -- plain literals are the default; the standard library keeps Tier C
+
+Tier C is now the standard library's mode and an opt-in for everything else. Outside the standard
+library, a literal whose slot is exactly Go `string` renders as a bare C# literal (`F("hello")`), and
+golib's `implicit operator @string(string)` converts each C# literal once through `StringLiteralCache`
+(golib StringLiteralCache.cs; a hit costs about 0.5 ns over a hoisted field, measured there). A package
+whose source is under GOROOT/src keeps the hoist under `-stdlib` and `-tests` alike (`literalsHoistedFor`);
+`-hoist-literals` opts any other package in, and is the recommended opt-out for performance-critical code.
+Every slot where a bare C# string would bind the wrong C# type keeps today's form: `any` slots (still
+hoisted pre-boxed), named string types, arguments whose callee parameter mentions a type parameter, go and
+defer arguments, sstring twins, multi-line raw strings and raw-byte literals. The fail-closed guard is the
+analyzer `GO2CS0004` (go2cs-gen StringLiteralBindingAnalyzer.cs; one marker, `[GoTakesCSharpString]`).
+
+**As landed:** seat claude/c2-plain-literals d4bee28445, merged on hop 9c2a551adf as e1f98819c4; windows
+goldens 904fc6aed1 (COORD). **Measured at the merge 130fbd495b (linux):** three-target `-stdlib` corpus
+0 of 7530 files differ, and the negative control (GOROOT key forced off) moves 1219 files and removes 4502
+hoisted fields, so the comparison can see a change and the zero is a real reading. The behavioral CNR moved 474 of the
+476 predicted goldens, plus DeferVariadicCallee and the new InlineConstraintLift, and retired three
+generated package_init.cs files that only hoisted fields had needed (initOrderOperations.go
+`retireStalePackageInitFile`). The two linux misses, EnvironBlockWalk and LocalTimeZone, are windows-only
+fixtures, measured by the windows regeneration. Interceptors, which would remove the cache lookup, are
+later work and not part of this amendment.

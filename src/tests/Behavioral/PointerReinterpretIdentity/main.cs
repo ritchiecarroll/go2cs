@@ -38,18 +38,14 @@ internal static @string String(this ref builder b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "hello"u8;
-private static readonly @string worldˢ = "world"u8;
 private static readonly object caughtˢ = (@string)"caught:"u8;
-private static readonly @string seedˢ = "seed"u8;
-private static readonly @string moreˢ = "more"u8;
 private static readonly object unreachableˢ = (@string)"unreachable"u8;
 
 internal static void Main() {
     ref var b = ref heap(new builder(), out var Ꮡb);
-    Ꮡb.write(helloˢ);
-    Ꮡb.write(", "u8);
-    Ꮡb.write(worldˢ);
+    Ꮡb.write("hello");
+    Ꮡb.write(", ");
+    Ꮡb.write("world");
     fmt.Println(b.String());
 
     ((Action)(() => {
@@ -63,10 +59,10 @@ internal static void Main() {
                 }
             }, ref ᒐ);
             ref var src = ref heap(new builder(), out var Ꮡsrc);
-            Ꮡsrc.write(seedˢ);
+            Ꮡsrc.write("seed");
             ref var cp = ref heap<builder>(out var Ꮡcp);
             cp = src;
-            Ꮡcp.write(moreˢ);
+            Ꮡcp.write("more");
             fmt.Println(unreachableˢ);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

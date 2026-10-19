@@ -26,9 +26,9 @@ partial struct dirsᴛ1 /*dyn*/ {
     internal time.Time stamp;
 }
 internal static slice<dirsᴛ1> dirs = new dirsᴛ1[]{
-    new(""u8, time.Date(2021, time.February, 3, 4, 5, 6, 0, time.ΔUTC)),
-    new("LongDirectoryNameWellBeyondEightDotThree"u8, time.Date(2021, time.February, 3, 5, 6, 7, 0, time.ΔUTC)),
-    new("ÜnicödeDir"u8, time.Date(2021, time.February, 3, 6, 7, 8, 0, time.ΔUTC))
+    new("", time.Date(2021, time.February, 3, 4, 5, 6, 0, time.ΔUTC)),
+    new("LongDirectoryNameWellBeyondEightDotThree", time.Date(2021, time.February, 3, 5, 6, 7, 0, time.ΔUTC)),
+    new("ÜnicödeDir", time.Date(2021, time.February, 3, 6, 7, 8, 0, time.ΔUTC))
 }.slice();
 
 partial struct filesᴛ1 /*dyn*/ {
@@ -37,20 +37,15 @@ partial struct filesᴛ1 /*dyn*/ {
     internal time.Time stamp;
 }
 internal static slice<filesᴛ1> files = new filesᴛ1[]{
-    new("ReadMe.txt"u8, 7, time.Date(2022, time.March, 4, 5, 6, 7, 0, time.ΔUTC)),
-    new("LongDirectoryNameWellBeyondEightDotThree\\Payload.bin"u8, 300, time.Date(2023, time.April, 5, 6, 7, 8, 0, time.ΔUTC)),
-    new("ÜnicödeDir\\Inner.dat"u8, 65, time.Date(2024, time.May, 6, 7, 8, 9, 0, time.ΔUTC))
+    new("ReadMe.txt", 7, time.Date(2022, time.March, 4, 5, 6, 7, 0, time.ΔUTC)),
+    new("LongDirectoryNameWellBeyondEightDotThree\\Payload.bin", 300, time.Date(2023, time.April, 5, 6, 7, 8, 0, time.ΔUTC)),
+    new("ÜnicödeDir\\Inner.dat", 65, time.Date(2024, time.May, 6, 7, 8, 9, 0, time.ΔUTC))
 }.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object singleLookupˢ = (@string)"-- single lookup --"u8;
-private static readonly @string readMeTxtˢ = "ReadMe.txt"u8;
 private static readonly object missingˢ = (@string)"-- missing --"u8;
-private static readonly @string noSuchFileTxtˢ = "NoSuchFile.txt"u8;
 private static readonly object canonicalCaseˢ = (@string)"-- canonical case --"u8;
-private static readonly @string evalSymlinksRootˢ = "EvalSymlinks(root)"u8;
-private static readonly @string evalSymlinksˢ = "EvalSymlinks"u8;
-private static readonly @string relˢ = "Rel"u8;
 
 internal static void Main() {
     @string root = filepath.Join(os.TempDir(), fmt.Sprintf("go2cs_findfirstfile_%d"u8, os.Getpid()));
@@ -66,26 +61,26 @@ internal static void Main() {
     }
 
     fmt.Println(singleLookupˢ);
-    var one = lookup(filepath.Join(root, readMeTxtˢ));
+    var one = lookup(filepath.Join(root, "ReadMe.txt"));
     fmt.Printf("%s alt=%s dir=%v size=%d mtime=%d\n"u8, ascii(one.name), ascii(one.alt), one.isDir, one.size, one.mtime);
 
     fmt.Println(missingˢ);
-    var (_, err) = find(filepath.Join(root, noSuchFileTxtˢ));
+    var (_, err) = find(filepath.Join(root, "NoSuchFile.txt"));
     fmt.Println(AreEqual(err, syscall.ERROR_FILE_NOT_FOUND));
 
     fmt.Println(canonicalCaseˢ);
     (var rootEval, err) = filepath.EvalSymlinks(root);
     if (err != default!) {
-        fatal(evalSymlinksRootˢ, err);
+        fatal("EvalSymlinks(root)", err);
     }
     foreach (var (_, f) in files) {
         var (got, errΔ1) = filepath.EvalSymlinks(strings.ToLower(filepath.Join(root, f.rel)));
         if (errΔ1 != default!) {
-            fatal(evalSymlinksˢ, errΔ1);
+            fatal("EvalSymlinks", errΔ1);
         }
         (var rel, errΔ1) = filepath.Rel(rootEval, got);
         if (errΔ1 != default!) {
-            fatal(relˢ, errΔ1);
+            fatal("Rel", errΔ1);
         }
         fmt.Println(ascii(rel));
     }
@@ -93,16 +88,11 @@ internal static void Main() {
     os.RemoveAll(root);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string mkdirAllˢ = "MkdirAll"u8;
-private static readonly @string writeFileˢ = "WriteFile"u8;
-private static readonly @string chtimesˢ = "Chtimes"u8;
-
 internal static void build(@string root) {
     foreach (var (_, d) in dirs) {
         {
             var err = os.MkdirAll(filepath.Join(root, d.rel), 493); if (err != default!) {
-                fatal(mkdirAllˢ, err);
+                fatal("MkdirAll", err);
             }
         }
     }
@@ -114,7 +104,7 @@ internal static void build(@string root) {
         }
         {
             var err = os.WriteFile(filepath.Join(root, f.rel), body, 420); if (err != default!) {
-                fatal(writeFileˢ, err);
+                fatal("WriteFile", err);
             }
         }
     }
@@ -122,37 +112,32 @@ internal static void build(@string root) {
     foreach (var (_, f) in files) {
         {
             var err = os.Chtimes(filepath.Join(root, f.rel), f.stamp, f.stamp); if (err != default!) {
-                fatal(chtimesˢ, err);
+                fatal("Chtimes", err);
             }
         }
     }
     for (nint i = len(dirs) - 1; i >= 0; i--) {
         {
             var err = os.Chtimes(filepath.Join(root, dirs[i].rel), dirs[i].stamp, dirs[i].stamp); if (err != default!) {
-                fatal(chtimesˢ, err);
+                fatal("Chtimes", err);
             }
         }
     }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string utf16PtrFromStringˢ = "UTF16PtrFromString"u8;
-private static readonly @string findFirstFileˢ = "FindFirstFile"u8;
-private static readonly @string findNextFileˢ = "FindNextFile"u8;
 
 internal static slice<entry> enumerate(@string dir) {
     GoFrame ᒐ = default;
     try {
         var (pattern, err) = syscall.UTF16PtrFromString(dir + @"\*"u8);
         if (err != default!) {
-            fatal(utf16PtrFromStringˢ, err);
+            fatal("UTF16PtrFromString", err);
         }
 
         ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
 
         (var h, err) = syscall.FindFirstFile(pattern, Ꮡdata);
         if (err != default!) {
-            fatal(findFirstFileˢ, err);
+            fatal("FindFirstFile", err);
         }
         defer(syscall.FindClose, h, ref ᒐ);
 
@@ -168,7 +153,7 @@ internal static slice<entry> enumerate(@string dir) {
                     if (AreEqual(errΔ1, syscall.ERROR_NO_MORE_FILES)) {
                         break;
                     }
-                    fatal(findNextFileˢ, errΔ1);
+                    fatal("FindNextFile", errΔ1);
                 }
             }
         }
@@ -184,7 +169,7 @@ internal static slice<entry> enumerate(@string dir) {
 internal static entry lookup(@string path) {
     var (e, err) = find(path);
     if (err != default!) {
-        fatal(findFirstFileˢ, err);
+        fatal("FindFirstFile", err);
     }
     return e;
 }
@@ -225,26 +210,20 @@ internal static (entry, bool) toEntry(ж<syscall.Win32finddata> Ꮡdata) {
 
 internal static @string altName(ref syscall.Win32finddata data) {
     if (data.AlternateFileName[0] == 0) {
-        return ""u8;
+        return "";
     }
     return syscall.UTF16ToString(data.AlternateFileName[..]);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string rootˢ = "<root>"u8;
-
 internal static @string shown(@string rel) {
     if (rel == ""u8) {
-        return rootˢ;
+        return "<root>";
     }
     return rel;
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string hexDigitsᶜ = "0123456789abcdef"u8;
-
 internal static @string ascii(@string s) {
-    @string hexDigits = hexDigitsᶜ;
+    @string hexDigits = "0123456789abcdef";
 
     var @out = new slice<byte>(0, len(s));
     foreach (var (_, r) in s) {
