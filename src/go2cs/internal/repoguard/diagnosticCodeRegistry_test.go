@@ -224,7 +224,7 @@ func converterRegistry(t *testing.T, root string) []registeredCode {
 
 				text, err := strconv.Unquote(lit.Value)
 
-				if err != nil || !diagnosticCodeUse.MatchString(text) || len(text) != len("GO2CS0000") {
+				if err != nil || !diagnosticCodeUse.MatchString(text) || len(text) != len(diagnosticCode(0)) {
 					continue
 				}
 
