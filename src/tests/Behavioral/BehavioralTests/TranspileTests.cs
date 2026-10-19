@@ -637,6 +637,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
+
+    [TestMethod]
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
 
     [TestMethod]
