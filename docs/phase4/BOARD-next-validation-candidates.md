@@ -27271,6 +27271,26 @@ A test that parses a traceback for `.go:` (runtime's parseTraceback, pprof's loc
 - (c) Leave as is and disclose per test where a verdict reads it.
 
 — C1 (found 2026-10-17 in passing; COORD ruled: write the row, P1 later)
+
+**2026-10-19, P1: creator sites CLOSED; ordinary frames INTERIM (c); the durable fix is OWED (COORD ruling of
+2026-10-19 on P1's proposal).**
+- (1) The `go` statements of hand-owned files take option (b) in its smallest form: a hand-kept `GoPositionMap`
+  record in the hand-owned file itself, one table entry per `goǃ(` line mapping it to the Go `go` statement it
+  replaces, each followed by a zero entry so no other line of the file claims a Go position. Correction to P1's
+  sizing: the sites are **3 in 2 files**, not 5 in 3 (the two `goǃ(runfinq)` in runtime/mfinal.cs are in comments):
+  sync/waitgroup.cs (Go waitgroup.go:238) and net/windows/lookup_windows.cs (Go lookup_windows.go:56 and :164).
+  Guard: repoguard `TestHandOwnedGoStatementsMapToGo` (a `goǃ(` on a code line of a hand-owned file needs a record
+  for that file that maps it to a `go` statement of the recorded Go file at the pinned GOROOT, and maps nothing
+  else), with `TestHandOwnedGoStatementScannerFires` as its positive control; a planted uncovered site was named
+  and the file restored byte-identical. Probe (linux, `wg.Go` printing its own `created by` line): before
+  `waitgroup.cs:230`, after `waitgroup.go:238`, which is Go's.
+- (2) INTERIM ONLY: an ordinary frame line inside a hand-owned file stays (c), disclosed per test where a verdict
+  reads one. It is not the end state, because nothing is left out for being unreached. **OWED: a GENERATED
+  function-granularity map for hand-owned files**, each hand-owned method paired with its Go declaration and the
+  record emitted from the Go AST, never hand-kept. G designs it post-hop.
+- (3) A test that reads such a frame line is the sizing for (b) at its frames.
+
+— P1 (branch `claude/p1-frame-line-creators`, on hop tip 5f774114a5)
 ## 2026-10-17 — C1: runtime.AddCleanup's closes-over-ptr check is UNCHECKED for a func value the converter cannot trace — residual 0 in go1.26.9
 
 Go 1.26's AddCleanup panics "cleanup function closes over ptr, cleanup will never run" when the cleanup's funcval holds

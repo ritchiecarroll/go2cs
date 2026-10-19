@@ -38,6 +38,13 @@
 
 [module: go.GoManualConversion]
 
+// The Go lines of this file's `go` statements, so a goroutine it starts names its creator's Go
+// position in a traceback's "created by" line. Hand-kept: the converter emits no record for a
+// hand-owned file. One table entry per statement, each followed by a zero entry, so every other
+// line of the file still reports its own C# position. repoguard's TestHandOwnedGoStatementsMapToGo
+// checks it.
+[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs", "AGhwAABvAIoByAIAAMcC")]
+
 namespace go;
 
 using context = context_package;
