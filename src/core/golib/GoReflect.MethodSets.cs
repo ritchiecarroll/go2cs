@@ -257,6 +257,57 @@ public static partial class GoReflect
         }
     }
 
+    /// <summary>
+    /// Whether the <paramref name="index"/>'th method has an unbound func value at all, answered from the method
+    /// table without binding one: a concrete type's method does, and an interface method does not (Go leaves its
+    /// <c>Method.Func</c> the zero Value).
+    /// </summary>
+    /// <param name="t">Managed type standing for the Go type.</param>
+    /// <param name="index">Method index.</param>
+    /// <returns><c>true</c> when <see cref="GoMethodFunc"/> has a func to bind.</returns>
+    public static bool GoMethodHasFunc(Type? t, int index) =>
+        MethodAt(t, index).Method.DeclaringType is not { IsInterface: true };
+
+    /// <summary>
+    /// <c>reflect.Type.Method(i).Func</c>, bound on its first use. Go reads a method's name, type and index without
+    /// building its func, so <c>NumMethod</c>, <c>Method(i).Name</c> and <c>MethodByName</c>'s lookup must not bind
+    /// one either: binding is where a method with no delegate form fails (under Native AOT, every method whose
+    /// <c>Func</c>/<c>Expression</c> instantiation has no native code), and that failure belongs to the use of the
+    /// func, as the Go panic <see cref="GoMethodFunc"/> raises.
+    /// </summary>
+    public sealed class LazyMethodFunc : IEquatable<LazyMethodFunc>
+    {
+        private readonly Type? m_type;
+        private readonly int m_index;
+        private Delegate? m_func;
+
+        /// <summary>
+        /// Names the <paramref name="index"/>'th method of <paramref name="t"/> without binding it.
+        /// </summary>
+        /// <param name="t">Managed type standing for the Go type.</param>
+        /// <param name="index">Method index.</param>
+        public LazyMethodFunc(Type? t, int index)
+        {
+            m_type = t;
+            m_index = index;
+        }
+
+        /// <summary>
+        /// The unbound func, bound by <see cref="GoMethodFunc"/> on first read.
+        /// </summary>
+        public Delegate Func => m_func ??= GoMethodFunc(m_type, m_index)!;
+
+        /// <inheritdoc />
+        public bool Equals(LazyMethodFunc? other) =>
+            other is not null && other.m_type == m_type && other.m_index == m_index;
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => Equals(obj as LazyMethodFunc);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => System.HashCode.Combine(m_type, m_index);
+    }
+
     private static Delegate? BindMethodFunc(Type? t, int index)
     {
         GoMethodSetEntry entry = MethodAt(t, index);

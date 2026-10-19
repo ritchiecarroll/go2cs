@@ -132,6 +132,27 @@ public class GenericMethodSourceTests
         StringAssert.Contains(panic.Message, "Out");
         StringAssert.Contains(panic.Message, "Odd");
     }
+
+    // reflect's Type.Method(i) builds Func LAZILY, as Go reads a method's name without binding its func: Method(i),
+    // its Name and Type, and MethodByName's lookup leave Func unbound, and its first use binds it. (Under Native AOT,
+    // where binding fails for every method func, Method(i).Name panicked while Func was built eagerly.)
+    [TestMethod]
+    public void TypeMethodLeavesFuncUnboundUntilItsUse()
+    {
+        reflect_package.ΔType t = reflect_package.TypeOf(new genmeth_package.Pair<@string, nint>("z", 26));
+        reflect_package.ΔMethod m = t.Method(1);
+
+        Assert.AreEqual((@string)"String", m.Name);
+        Assert.IsTrue(t.MethodByName("String").Item2);
+        Assert.AreEqual(m.Type, m.Func.Type(), "Go's m.Func.Type() == m.Type");
+        Assert.IsInstanceOfType(Boxed(m.Func), typeof(GoReflect.LazyMethodFunc), "Method(i) binds nothing");
+
+        Delegate func = (Delegate)m.Func.Interface()!;
+        Assert.AreEqual((@string)"z=26", func.DynamicInvoke(new genmeth_package.Pair<@string, nint>("z", 26)));
+    }
+
+    private static object? Boxed(reflect_package.ΔValue v) =>
+        typeof(reflect_package.ΔValue).GetField("boxed", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(v);
 }
 
 public static class genmeth_package

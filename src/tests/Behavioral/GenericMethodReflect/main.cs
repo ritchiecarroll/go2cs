@@ -109,7 +109,7 @@ internal static void @try(@string label, Func<@string> f) {
 }
 
 internal static @string show(slice<reflectꓸValue> results) {
-    @string s = "["u8;
+    @string s = "[";
     foreach (var (i, r) in results) {
         if (i > 0) {
             s += " "u8;
@@ -180,74 +180,57 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
 }
 
 internal static map<@string, array<slice<@string>>> goSets = new map<@string, array<slice<@string>>>{
-    ["Plain"u8] = new slice<@string>[]{new @string[]{"Describe"u8, "Get"u8}.slice(), new @string[]{"Describe"u8, "Get"u8, "Set"u8}.slice()}.array(),
-    ["Box[int]"u8] = new slice<@string>[]{new @string[]{"Describe"u8, "Get"u8}.slice(), new @string[]{"Describe"u8, "Get"u8, "Set"u8}.slice()}.array(),
-    ["Box[string]"u8] = new slice<@string>[]{new @string[]{"Describe"u8, "Get"u8}.slice(), new @string[]{"Describe"u8, "Get"u8, "Set"u8}.slice()}.array(),
-    ["Box[[]int]"u8] = new slice<@string>[]{new @string[]{"Describe"u8, "Get"u8}.slice(), new @string[]{"Describe"u8, "Get"u8, "Set"u8}.slice()}.array(),
-    ["Pair[string,int]"u8] = new slice<@string>[]{new @string[]{"Key"u8, "String"u8}.slice(), new @string[]{"Key"u8, "String"u8, "Swap"u8}.slice()}.array(),
-    ["Ord2[age]"u8] = new slice<@string>[]{new @string[]{"Less"u8}.slice(), new @string[]{"Less"u8}.slice()}.array()
+    ["Plain"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
+    ["Box[int]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
+    ["Box[string]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
+    ["Box[[]int]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
+    ["Pair[string,int]"] = new slice<@string>[]{new @string[]{"Key", "String"}.slice(), new @string[]{"Key", "String", "Swap"}.slice()}.array(),
+    ["Ord2[age]"] = new slice<@string>[]{new @string[]{"Less"}.slice(), new @string[]{"Less"}.slice()}.array()
 };
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string plainˢ = "Plain"u8;
-private static readonly @string boxIntˢ = "Box[int]"u8;
-private static readonly @string boxStringˢ = "Box[string]"u8;
-private static readonly @string boxIntˢ2 = "Box[[]int]"u8;
-private static readonly @string pairStringIntˢ = "Pair[string,int]"u8;
-private static readonly @string ord2Ageˢ = "Ord2[age]"u8;
-private static readonly @string fmtGenericStringerˢ = "fmt generic Stringer"u8;
-private static readonly @string fmtGenericStringerˢ2 = "fmt *generic Stringer"u8;
-private static readonly @string fmtNonGenericStringerˢ = "fmt non-generic Stringer"u8;
-private static readonly @string assertGenericToStringerˢ = "assert generic to Stringer"u8;
-private static readonly @string falseˢ = "false"u8;
-private static readonly @string assertGenericToStringerˢ2 = "assert *generic to Stringer"u8;
-private static readonly @string assertGenericToSwapperˢ = "assert generic to swapper"u8;
-private static readonly @string assertGenericToSwapperˢ2 = "assert *generic to swapper"u8;
-private static readonly @string assertGenericCellToˢ = "assert generic Cell to valuer"u8;
-
 internal static void Main() {
-    probe(plainˢ, new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"u8] = new any[]{(@string)"p="u8}.slice(), ["Set"u8] = new any[]{(nint)(9)}.slice()});
-    probe(boxIntˢ, new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"u8] = new any[]{(@string)"b="u8}.slice(), ["Set"u8] = new any[]{(nint)(9)}.slice()});
-    probe(boxStringˢ, new Box<@string>(v: "s"u8), Ꮡ(new Box<@string>(v: "t"u8)), new map<@string, slice<any>>{["Describe"u8] = new any[]{(@string)"b="u8}.slice(), ["Set"u8] = new any[]{(@string)"u"u8}.slice()});
-    probe(boxIntˢ2, new Box<slice<nint>>(v: new nint[]{1}.slice()), Ꮡ(new Box<slice<nint>>(v: new nint[]{2}.slice())), new map<@string, slice<any>>{["Describe"u8] = new any[]{(@string)"b="u8}.slice(), ["Set"u8] = new any[]{new nint[]{3, 4}.slice()}.slice()});
-    probe(pairStringIntˢ, new Pair<@string, nint>(k: "a"u8, v: 1), Ꮡ(new Pair<@string, nint>(k: "b"u8, v: 2)), new map<@string, slice<any>>{["Swap"u8] = new any[]{(nint)(5)}.slice()});
-    probe(ord2Ageˢ, new Ord2<age>(a: 1, b: 2), Ꮡ(new Ord2<age>(a: 3, b: 2)), default!);
+    probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"p="u8}.slice(), ["Set"] = new any[]{(nint)(9)}.slice()});
+    probe("Box[int]", new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{(nint)(9)}.slice()});
+    probe("Box[string]", new Box<@string>(v: "s"), Ꮡ(new Box<@string>(v: "t")), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{(@string)"u"u8}.slice()});
+    probe("Box[[]int]", new Box<slice<nint>>(v: new nint[]{1}.slice()), Ꮡ(new Box<slice<nint>>(v: new nint[]{2}.slice())), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{new nint[]{3, 4}.slice()}.slice()});
+    probe("Pair[string,int]", new Pair<@string, nint>(k: "a", v: 1), Ꮡ(new Pair<@string, nint>(k: "b", v: 2)), new map<@string, slice<any>>{["Swap"] = new any[]{(nint)(5)}.slice()});
+    probe("Ord2[age]", new Ord2<age>(a: 1, b: 2), Ꮡ(new Ord2<age>(a: 3, b: 2)), default!);
 
-    @try(fmtGenericStringerˢ, () => fmt.Sprint(new Pair<@string, nint>(k: "z"u8, v: 26)));
-    @try(fmtGenericStringerˢ2, () => fmt.Sprint(Ꮡ(new Pair<@string, nint>(k: "y"u8, v: 25))));
-    @try(fmtNonGenericStringerˢ, () => fmt.Sprint(new Pair<@string, nint>(k: "x"u8, v: 24).String()));
+    @try("fmt generic Stringer", () => fmt.Sprint(new Pair<@string, nint>(k: "z", v: 26)));
+    @try("fmt *generic Stringer", () => fmt.Sprint(Ꮡ(new Pair<@string, nint>(k: "y", v: 25))));
+    @try("fmt non-generic Stringer", () => fmt.Sprint(new Pair<@string, nint>(k: "x", v: 24).String()));
 
-    @try(assertGenericToStringerˢ, () => {
-        var (s, ok) = ((any)new Pair<@string, nint>(k: "z"u8, v: 26))._<fmt.Stringer>(ᐧ);
+    @try("assert generic to Stringer", () => {
+        var (s, ok) = ((any)new Pair<@string, nint>(k: "z", v: 26))._<fmt.Stringer>(ᐧ);
         if (!ok) {
-            return falseˢ;
+            return "false";
         }
         return "true "u8 + s.String();
     });
-    @try(assertGenericToStringerˢ2, () => {
-        var (s, ok) = ((any)(Ꮡ(new Pair<@string, nint>(k: "z"u8, v: 26))))._<fmt.Stringer>(ᐧ);
+    @try("assert *generic to Stringer", () => {
+        var (s, ok) = ((any)(Ꮡ(new Pair<@string, nint>(k: "z", v: 26))))._<fmt.Stringer>(ᐧ);
         if (!ok) {
-            return falseˢ;
+            return "false";
         }
         return "true "u8 + s.String();
     });
-    @try(assertGenericToSwapperˢ, () => {
-        var (_, ok) = ((any)new Pair<@string, nint>(k: "z"u8, v: 26))._<swapper>(ᐧ);
+    @try("assert generic to swapper", () => {
+        var (_, ok) = ((any)new Pair<@string, nint>(k: "z", v: 26))._<swapper>(ᐧ);
         return fmt.Sprint(ok);
     });
-    @try(assertGenericToSwapperˢ2, () => {
-        var p = Ꮡ(new Pair<@string, nint>(k: "w"u8, v: 1));
+    @try("assert *generic to swapper", () => {
+        var p = Ꮡ(new Pair<@string, nint>(k: "w", v: 1));
         var (s, ok) = ((any)p.OrTypedNil())._<swapper>(ᐧ);
         if (!ok) {
-            return falseˢ;
+            return "false";
         }
         nint old = s.Swap(2);
         return fmt.Sprint(ok, (@string)" "u8, old, (@string)" "u8, (~p).v);
     });
-    @try(assertGenericCellToˢ, () => {
+    @try("assert generic Cell to valuer", () => {
         var (c, ok) = ((any)new Cell<nuint>(V: 1, Valid: true))._<valuer>(ᐧ);
         if (!ok) {
-            return falseˢ;
+            return "false";
         }
         var (v, err) = c.Value();
         return fmt.Sprint(ok, (@string)" "u8, v, (@string)" "u8, err);
