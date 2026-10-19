@@ -226,7 +226,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:155#df9083 (ProjectReference; NuGet via -recurse=nuget) ·
   src/core/unicode/utf8/utf8.cs:20#83c559 + src/core/archive/zip/struct.cs:33#d3abd8 ·
   src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17#ee46fb + src/core/internal/strconv/atoi.cs:130#4606f0 ·
-  src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:136#07f377 (from src/go2cs/csproj-template.xml:121#07f377) ·
+  src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:136#07f377 (from src/go2cs/csproj-template.xml:128#07f377) ·
   src/core/encoding/gob/codec_test.cs:1197#1265b9 ·
   src/core/golib/NilType.cs + src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:55#e494b0 ·
   src/tests/Behavioral/SliceAliasing/main.cs.target:9#ee5567 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:109#9a82dc ·
@@ -2051,7 +2051,7 @@ case has its own paragraph in this section.
 Each converted project declares them. So `uint8` is C#'s `byte`, `int64` is `long`, and `rune` is `int`.
 Go's `byte` stays C#'s own `byte`, the same type as `uint8`.
 <!-- each project file carries lines such as `<Using Include="System.Int32" Alias="rune" />`:
-     src/core/bufio/bufio.csproj:136#07f377, from src/go2cs/csproj-template.xml:110-121#9dcfa6 -->
+     src/core/bufio/bufio.csproj:136#07f377, from src/go2cs/csproj-template.xml:117-128#9dcfa6 -->
 
 **`uintptr` is its own type.** It becomes golib's [`uintptr`](../src/core/golib/uintptr.cs), a small struct
 that holds one `nuint`. It is not an alias, because Go treats `uint` and `uintptr` as different types, and
@@ -11823,7 +11823,7 @@ result is unpacked with `var (p, err) = …`. The text the removed `Inverse` pan
      asm ordinv and returns a valid inverse; crypto/ecdsa handles the same error with a fallback, so
      ECDSA is unaffected. Inverse is reached via the deprecated `invertible` interface. The inline panic
      literal is deliberate: the converter exempts `panic`'s argument from literal hoisting
-     (src/go2cs/hoistedLiteralOperations.go:815-817#0b8d4e), since it costs nothing until a panic fires. -->
+     (src/go2cs/hoistedLiteralOperations.go:824-826#0b8d4e), since it costs nothing until a panic fires. -->
 
 **A module converts with `-tags safe`, for a different reason.** Some libraries reach into Go's runtime with
 unsafe pointer arithmetic, adding a byte offset to a value to read one of its private fields. Converted code
