@@ -40,8 +40,6 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<main_data, ж<Person>>(Indirect = true)]
-[assembly: GoImplicitConv<main_data_Address, ж<Person_Address>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
