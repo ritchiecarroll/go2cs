@@ -395,6 +395,12 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			lines.Add(fmt.Sprintf("[assembly: GoDynamicTypeLift(\"%s\", \"%s\")]", hex.EncodeToString([]byte(signature)), typeName))
 		}
 
+		// Publish every inline constraint lift that captures its own parameter, by DECLARATION (see
+		// GoInlineConstraintLiftAttribute), so another package instantiating the declaration names it too.
+		for _, record := range publishedInlineConstraintLiftRecords() {
+			lines.Add(record)
+		}
+
 		// Sort lines
 		sortedLines := lines.Keys()
 		sort.Strings(sortedLines)
