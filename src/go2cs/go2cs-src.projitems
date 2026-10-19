@@ -267,6 +267,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\diagnosticCodeRegistry_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsJekyllLiquid_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsKramdownRawHTML_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSiteLinksTitles_test.go" />

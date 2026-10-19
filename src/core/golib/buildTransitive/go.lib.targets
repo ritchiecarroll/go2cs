@@ -126,6 +126,19 @@
   <!-- The symbol files beside a single-file host, on every publish (see the file). -->
   <Import Project="$(MSBuildThisFileDirectory)go.lib.symbols.targets" Condition="'$(GoLibSymbolsTargetsImported)' != 'true'" />
 
+  <!--
+    THE BUILD-SIDE GO2CS DIAGNOSTIC REGISTRY. A GO2CS code in the range 3000-3999 is raised in the C# build by
+    go2cs's MSBuild targets, and this file is the only targets file that raises one. Each code is ONE property in
+    the block below, named Go2csDiagnostic<Name> and holding the code, and the task that raises it names the
+    property: <Error Code="$(Go2csDiagnostic<Name>)" ... /> or <Warning Code="$(Go2csDiagnostic<Name>)" ... />.
+    The other two sides keep their own registries: go2cs-gen's 0001-0999 in GeneratorDiagnostics.cs, the
+    converter's 1000-2999 in src/go2cs/diagnosticOutput.go. Every code has one row in docs/DiagnosticCodes.md,
+    and the repoguard test TestGo2csDiagnosticCodeRegistry fails by name on a code that is not registered, is
+    registered twice or outside its range, is never raised, or has no row. No build-side code is defined yet.
+  -->
+  <PropertyGroup Label="Go2csDiagnosticCodes">
+  </PropertyGroup>
+
   <!-- A converted package packed against the go.* packages (a `go2cs -recurse=nuget` conversion) writes its own
        usings into build/<PackageId>.props at pack time (see the file). Inert unless the project's Product is go2cs
        and it is being packed; the in-tree standard library imports the same file from src/Directory.Build.targets. -->
