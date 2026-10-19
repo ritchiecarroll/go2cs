@@ -486,6 +486,9 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 			// into go.<pkg> PackageReferences, EXCEPT during the stdlib self-conversion, whose
 			// packages must reference each other as source to build the assemblies being published.
 			PublishedStdLib:  isStdLib && options.nugetRefs && !options.convertStdLib,
+			// The on-disk path names the package's class, which withoutForeignStructRecords needs to tell
+			// the package's own records from the local adapters it records for foreign structs.
+			ImportPath:       canonicalImportPath,
 			PackageName:      packageName,
 			RootPackageName:  rootPackageNameFromPathParts(importPathParts),
 			SourceDir:        sourceDir,
@@ -556,6 +559,7 @@ func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo,
 
 		return PackageInfo{
 			IsStdLib:         true,
+			ImportPath:       canonicalImportPath,
 			PackageName:      packageName,
 			RootPackageName:  rootPackageNameFromPathParts(importPathParts),
 			SourceDir:        meta.Dir,
@@ -903,7 +907,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 		if lines, ok := info.NuGetSubstitution.metadataLines(info.ImportPath, goosOfTarget(options.targetPlatform)); ok {
 			if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
 				applyExportedTypeAliases(results, info, false)
-				loadPackageImplementLines(lines, info.RootPackageName)
+				loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
 				return
 			}
 		}
@@ -946,7 +950,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 			if lines, ok := stdLibExportedMetadata(info.PackageName, goosOfTarget(options.targetPlatform)); ok {
 				if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
 					applyExportedTypeAliases(results, info, false)
-					loadPackageImplementLines(lines, info.RootPackageName)
+					loadPackageImplementLines(lines, info.RootPackageName, info.ImportPath)
 					return
 				}
 			}
@@ -969,7 +973,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 
 	if err == nil {
 		applyExportedTypeAliases(results, info, false)
-		loadPackageImplements(packageInfoFile, info.RootPackageName)
+		loadPackageImplements(packageInfoFile, info.RootPackageName, info.ImportPath)
 	} else {
 		showWarning("Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
 	}
@@ -1184,26 +1188,73 @@ func parseSeededGlobalTypeAliasLines(lines []string) map[string]string {
 	return aliases
 }
 
+// foreignStructRecordPattern captures the STRUCT side of a GoImplement record when it is package-qualified.
+var foreignStructRecordPattern = regexp.MustCompile(`^\[assembly: GoImplement<(?:global::)?([^,<>]*_package)\.[^,<>]+(?:<[^,]*>)?, `)
+
+// withoutForeignStructRecords drops every GoImplement record whose STRUCT side is qualified to a package class other
+// than the declaring package's own (importPath's), and returns the rest.
+//
+// Such a record is a LOCAL adapter or partial of the declaring assembly for a FOREIGN struct: crypto/sha256 converts
+// crypto/internal/fips140/sha256's *Digest to hash.Hash and records `GoImplement<go.crypto.@internal.fips140.
+// sha256_package.Digest, hash_package.Hash>(Pointer = true)`, which go2cs-gen realizes as crypto/sha256's own
+// `sha256_DigestжHash`. It proves nothing about the struct's package. The reader keys records by the declaring
+// package's NAME and the struct's SIMPLE name (implementRecordKey), and that key assumed a foreign-struct record could
+// never match a cast because the names differ; same-named packages (Go 1.24's fips140 split: aes, hmac, sha256,
+// sha512) defeat it. Read back, the record claimed fips140/sha256 published `DigestжHash`, and a consumer loading
+// both named it there, where nothing declares it (crypto/internal/fips140test at go1.26.9, CS0426 x206).
+//
+// A record naming the declaring package's OWN type qualified (`global::`-rooted, or rooted to avoid a System
+// collision) is kept. An empty importPath keeps every record, as before.
+func withoutForeignStructRecords(lines []string, importPath string) []string {
+	if importPath == "" {
+		return lines
+	}
+
+	// Compared without the `go.` root, which a record may or may not carry (`global::go.image_package`,
+	// `go.go.ast_package`). The renderer names a multi-segment path's class (`math/rand/v2` -> `go.math.rand.
+	// rand_package`) but reads a single-segment one as a type, so that class is spelled directly.
+	unrooted := func(class string) string { return strings.TrimPrefix(class, RootNamespace+".") }
+	ownClass := importPath + PackageSuffix
+
+	if strings.Contains(importPath, "/") {
+		ownClass = unrooted(strings.TrimSuffix(convertToCSFullTypeName(importPath+".T"), ".T"))
+	}
+	kept := make([]string, 0, len(lines))
+
+	for _, line := range lines {
+		if matches := foreignStructRecordPattern.FindStringSubmatch(strings.TrimSpace(line)); matches != nil && unrooted(matches[1]) != ownClass {
+			continue
+		}
+
+		kept = append(kept, line)
+	}
+
+	return kept
+}
+
 // loadPackageImplements records a converted package's exported GoImplement pairs from its
 // package_info.cs into the imported-implements sets. Split out of loadImportedTypeAliases so
 // the -tests path can load the PRODUCTION package's pairs without its alias load
 // (visitImportSpec deliberately skips that for the package under test — its types bind
 // locally): an EXTERNAL test file's cast of a production type must reference the seeded
 // adapter through the aliased qualifier instead of re-recording the pair (B4/B5).
-func loadPackageImplements(packageInfoFile string, rootPackageName string) {
+func loadPackageImplements(packageInfoFile string, rootPackageName string, importPath string) {
 	lines, err := readPackageInfoLines(packageInfoFile)
 
 	if err != nil {
 		return
 	}
 
-	loadPackageImplementLines(lines, rootPackageName)
+	loadPackageImplementLines(lines, rootPackageName, importPath)
 }
 
 // loadPackageImplementLines is loadPackageImplements over an already-read line set, so the
 // embedded standard-library metadata record can seed the same sets as a package_info.cs read
-// from disk (see stdlibMetadata.go).
-func loadPackageImplementLines(lines []string, rootPackageName string) {
+// from disk (see stdlibMetadata.go). importPath is the declaring package's, whose own records
+// are the only ones that prove anything about it (withoutForeignStructRecords).
+func loadPackageImplementLines(lines []string, rootPackageName string, importPath string) {
+	lines = withoutForeignStructRecords(lines, importPath)
+
 	// Record the package's POINTER-sourced GoImplement pairs: their generated adapter
 	// classes (TжIface) are public members of the foreign package class, so a cross-package
 	// pointer-to-interface conversion here can reference them by qualified name (io/fs's
