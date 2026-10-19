@@ -2890,7 +2890,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 
 	if productionName != "" {
 		productionInfoPath := platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform))
-		loadPackageImplements(productionInfoPath, productionName)
+		loadPackageImplements(productionInfoPath, productionName, strings.TrimSuffix(pkg.PkgPath, "_test"))
 		seedProductionAliasLifts(pkg, productionInfoPath)
 		seedProductionInterfaceAliases(pkg, productionInfoPath, options)
 		seedProductionDynamicTypeLifts(productionInfoPath)
