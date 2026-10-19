@@ -77,13 +77,8 @@ and editor problem matchers (for example VS Code's `$msCompile`) pick it up:
 /src/app/main.go(3,16): error GO2CS1003: cannot use 1 (untyped int constant) as string value in variable declaration
 ```
 
-| Code | Meaning |
-|:--|:--|
-| `GO2CS1000` | The package did not load cleanly (an error `go/packages` does not classify). The package still converts best-effort. |
-| `GO2CS1001` | The package did not load cleanly: a `go list` error, such as a missing module or no Go files for this build. |
-| `GO2CS1002` | The package did not load cleanly: a Go parse error. The package still converts best-effort. |
-| `GO2CS1003` | The package did not fully type-check. It still converts best-effort, but code that depends on the failing expression is emitted untyped and will not compile. |
-| `GO2CS2001` | Refused: a cgo source (`import "C"`) is selected for this build, and cgo has no C# conversion yet. The run exits non-zero. Convert with `CGO_ENABLED=0` or exclude the file. |
+Every code the converter can print, with what to do about it, is in the one table of
+[diagnostic codes](DiagnosticCodes.md), beside the `GO2CS0xxx` codes `go2cs-gen` reports in the C# build.
 
 A diagnostic with no source position names `go2cs` as its origin. The `WARNING:` / `Refusing to convert:` summary line
 printed before these lines is unchanged.

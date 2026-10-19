@@ -235,7 +235,8 @@ in a stack trace: in Go the two names are one function.
 - **A record that names a member the type does not have is refused by name.** The runtime checks each
   generated record against the type the first time it is read, and stops with the member's name instead of
   applying a fact to the wrong thing.
-- **A comment no record can carry is a build error** (`GO2CS0003`), never a silent loss. So is a record whose
+- **A comment no record can carry is a build error** (`GO2CS0003`; every `go2cs-gen` code is listed in
+  [diagnostic codes](../DiagnosticCodes.md)), never a silent loss. So is a record whose
   key would match two methods of one type; the error names both.
 - **The generators' tests are built from the converter's own output**, so a change in how the converter spells
   a marker fails a test instead of passing against a hand-written copy of the old spelling.
