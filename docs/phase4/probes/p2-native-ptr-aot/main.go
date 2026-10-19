@@ -6,8 +6,8 @@
 // record does the same over a converted struct element, so a builtin element and a struct element
 // both reach the native reader.
 //
-// Four arms follow (G's narrowing and COORD's ruling, 2026-10-19). A chain-context record carries a
-// **point, and unsafe.Slice reads the words it names, as crypto/x509's windows chain reads do. reflect builds *[2]*point over the second record's
+// Four arms follow (G's narrowing and COORD's ruling, 2026-10-19). unsafe.Slice reads the second
+// record's words through a **point, as crypto/x509's windows chain reads do. reflect builds *[2]*point over the second record's
 // words: point's reader is compiled, since the program spells *[N]*point. reflect builds *[2]*other
 // over the same words: the program never spells *[N]*other, so no reader for it was compiled, and the
 // converted program refuses by name where Go reads the words (the disclosed divergence). And a third
@@ -40,12 +40,6 @@ type pointData struct {
 // point's layout, but the program never spells a pointer array of it: only reflection builds one.
 type other struct {
 	X, Y int32
-}
-
-// crypto/x509's CertChainContext shape: a count, then a pointer to an array of pointers.
-type chainContext struct {
-	Count  uint32
-	Chains **point
 }
 
 // A record whose array field holds values.
@@ -111,14 +105,12 @@ func main() {
 		fmt.Printf("point %d %d %d\n", i, p.X, p.Y)
 	}
 
-	// chainContext at 2048: count 2, Chains naming the second record's words.
-	*(*uint32)(unsafe.Pointer(&b[2048])) = 2
-	word(2056, base+72)
-
-	cc := (*chainContext)(unsafe.Pointer(base + 2048))
+	// The **point arrives as a number, as CertChainContext.Chains does from CertGetCertificateChain. (Reading
+	// it out of a pointer FIELD of a struct in native memory is a separate shape this probe does not test.)
+	chains := (**point)(unsafe.Pointer(base + 72))
 
 	arm("slice", func() {
-		for i, p := range unsafe.Slice(cc.Chains, cc.Count) {
+		for i, p := range unsafe.Slice(chains, 2) {
 			fmt.Printf("slice point %d %d %d\n", i, p.X, p.Y)
 		}
 	})
@@ -144,7 +136,8 @@ func main() {
 
 	arm("name", func() {
 		fmt.Printf("name %d", nr.Len)
-		for i := range nr.Name {
+		// The field's length is a constant: ranging over nr.Name would read the whole array value.
+		for i := 0; i < len(nameRec{}.Name); i++ {
 			q := &nr.Name[i]
 			fmt.Printf(" %d", *q)
 		}
