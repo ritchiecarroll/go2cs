@@ -591,6 +591,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				_, argIsBasic := argElem.(*types.Basic)
 				basicToNamed := okBaseNamed && argIsBasic && types.Identical(argElem, baseNamed.Underlying())
 
+				// Go converts between struct types whose underlying types are identical IGNORING TAGS (the
+				// spec's Conversions), so a pointer conversion with an UNNAMED struct on either side --
+				// TypeConversion's `(*Person)(data)` -- or between named structs whose fields differ only in tags
+				// is the same pointer REINTERPRET as namedToNamed, which compares tags. Without this arm the pair
+				// reached applyImplicitConversion, which dereferences, value-converts and re-boxes: a write through
+				// the result was lost, its address differed from the source's, and a nil source became a non-nil
+				// zero box (the PointerConversionAliasing guard).
+				_, resultIsStruct := resultElem.Underlying().(*types.Struct)
+				_, argIsStruct := argElem.Underlying().(*types.Struct)
+				structPair := !namedToNamed && resultIsStruct && argIsStruct && !types.Identical(resultElem, argElem) &&
+					types.IdenticalIgnoreTags(resultElem.Underlying(), argElem.Underlying())
+
 				// `(*[4]uint64)(&s.s)` / `(*fiatScalarNonMontgomeryDomainFieldElement)(&s.s)` — pointer
 				// reinterprets of an array-backed DEFINED type (crypto/internal/edwards25519 scalar.go):
 				// to its unnamed underlying array, or to a SIBLING defined type written over the SAME
@@ -643,6 +655,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					baseName := convertToCSTypeName(v.getAliasQualifiedTypeName(resultElem, false))
 
 					return fmt.Sprintf("%s((%s)(%s.Value))", AddressPrefix, baseName, argExpr)
+				}
+
+				if structPair {
+					if emission, ok := v.structPointerConversionEmission(callExpr, arg, argElem, resultElem); ok {
+						return emission
+					}
 				}
 
 				if namedToNamed || namedToBasic || basicToNamed {
@@ -7501,4 +7519,77 @@ func (v *Visitor) sameNameMethodCapture(callExpr *ast.CallExpr, paramType types.
 	}
 
 	return ""
+}
+
+// structPointerConversionEmission renders `(*U)(p)` for two struct types identical ignoring tags (convCallExpr's
+// structPair) as golib's aliasing Reinterpret, reporting false when the source is not a Go pointer.
+//
+// One class of such pairs cannot alias in C#: a field whose two types differ only in the tags of a NESTED
+// unnamed type held through a reference -- `Address *struct{ Street string }` against the same field with
+// `json` tags -- because C# lifts the two unnamed types to two classes (ж<A> and ж<B>), and reading a
+// reference to one as the other is a CLR type-safety break. golib's own alias gate refuses that pair. The
+// conversion itself is still valid Go this host can run exactly: nil stays nil, and a converted pointer that is
+// reassigned or compared is exact; only a read or a write through it needs the aliased memory. So the emission
+// is ReinterpretUnaliased, whose view panics by name at the first read or write, and this warning names the
+// site and the two classes at conversion time (G's ruling: refuse at the dereference, diagnose at the cause).
+func (v *Visitor) structPointerConversionEmission(callExpr *ast.CallExpr, arg ast.Expr, srcElem, targetElem types.Type) (string, bool) {
+	src, srcName, targetName := v.pointerReinterpretManagedSource(callExpr, arg)
+
+	if src == nil {
+		return "", false
+	}
+
+	identContext := DefaultIdentContext()
+	identContext.isPointer = true
+
+	method := "Reinterpret"
+
+	srcStruct, _ := srcElem.Underlying().(*types.Struct)
+	targetStruct, _ := targetElem.Underlying().(*types.Struct)
+
+	if field, srcField, targetField, refused := unaliasableStructField(srcStruct, targetStruct); refused {
+		method = "ReinterpretUnaliased"
+
+		v.showWarning("pointer conversion %s at line %d: field %s is %s on one side and %s on the other, two C# classes "+
+			"that cannot alias, so a read or write through the converted pointer panics",
+			v.getPrintedNode(callExpr), v.fset.Position(callExpr.Pos()).Line, field,
+			v.getCSharpTypeName(srcField), v.getCSharpTypeName(targetField))
+	}
+
+	return fmt.Sprintf("%s.%s<%s, %s>()", v.convExpr(src, []ExprContext{identContext}), method, srcName, targetName), true
+}
+
+// unaliasableStructField reports the first field of two struct types, identical ignoring tags, whose C# forms
+// cannot alias: a field whose two types differ (so they differ in the tags of a nested unnamed type) and are not
+// themselves structs. A differing nested struct held INLINE lifts to two C# structs with the same field types,
+// which golib's LayoutCompatible compares recursively and aliases, so this recurses into it exactly as golib does.
+// Every other differing type -- a pointer, slice, array, map, channel or func over the nested type -- is a
+// reference-bearing generic over two distinct classes, which golib refuses.
+func unaliasableStructField(src, target *types.Struct) (string, types.Type, types.Type, bool) {
+	if src == nil || target == nil || src.NumFields() != target.NumFields() {
+		return "", nil, nil, false
+	}
+
+	for i := 0; i < src.NumFields(); i++ {
+		srcField, targetField := src.Field(i), target.Field(i)
+
+		if types.Identical(srcField.Type(), targetField.Type()) {
+			continue
+		}
+
+		srcInner, srcIsStruct := srcField.Type().Underlying().(*types.Struct)
+		targetInner, targetIsStruct := targetField.Type().Underlying().(*types.Struct)
+
+		if srcIsStruct && targetIsStruct {
+			if name, a, b, refused := unaliasableStructField(srcInner, targetInner); refused {
+				return srcField.Name() + "." + name, a, b, true
+			}
+
+			continue
+		}
+
+		return srcField.Name(), srcField.Type(), targetField.Type(), true
+	}
+
+	return "", nil, nil, false
 }
