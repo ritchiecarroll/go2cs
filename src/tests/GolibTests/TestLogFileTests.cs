@@ -62,7 +62,7 @@ public class TestLogFileTests
             ?? throw new AssertFailedException("TestLogBridge.Open, the open decision M.Run exits on, does not exist");
 
         string path = Path.Combine(Path.GetTempPath(), "go2cs-no-such-dir-" + Guid.NewGuid().ToString("N"), "testlog.txt");
-        string? message = (string?)open.Invoke(null, BindingFlags.DoNotWrapExceptions, null, [path], null);
+        string? message = (string?)open.Invoke(null, BindingFlags.DoNotWrapExceptions, null, [path, true], null);
 
         // Go on windows: fmt.Fprintf(os.Stderr, "testing: %s\n", err) with err os.Create's *PathError.
         Assert.AreEqual($"testing: open {path}: The system cannot find the path specified.\n", message);

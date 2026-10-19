@@ -6,8 +6,6 @@
 // that can be found in the LICENSE file.
 
 using System;
-using System.IO;
-using System.Threading;
 using go.golib;
 using static go.builtin;
 using os = go.os_package;
@@ -56,24 +54,25 @@ internal static class TestLogBridge
 
     private static readonly object s_lock = new();
 
-    // testdeps' testLog: the file and its buffer while a log is open, and whether the logger and header are
-    // installed (log.set).
+    // testdeps' testLog, a process-wide package variable in Go as here: the file and its bufio.Writer (buffer,
+    // bytes buffered, sticky error) while a log is open, and whether the logger and header are installed (log.set).
+    // The run count and the once-only close are the M's (M.NumRun, M.AfterDone), as Go's m.numRun and m.afterOnce.
     private static ж<os.File>? s_file;
-    private static MemoryStream? s_buffer;
+    private static byte[]? s_buffer;
+    private static int s_buffered;
     private static error? s_writeError;
     private static bool s_set;
-
-    // Go's m.numRun as this log sees it: the host makes one M per process, so the count of opens is it.
-    private static int s_runs;
 
     /// <summary>
     /// m.before's testlog block. The first run creates the file (Go's <c>m.numRun == 1</c>), a later one
     /// opens it write-only and seeks to its end. Returns null, or the message Go prints before os.Exit(2).
     /// </summary>
-    internal static string? Open(string path)
+    /// <remarks>
+    /// A later run's StartTestLog installs a FRESH writer over the re-opened file, and Go never flushes or closes
+    /// it (only the first m.after does, <see cref="Close"/>): its records reach the file only when its buffer fills.
+    /// </remarks>
+    internal static string? Open(string path, bool firstRun)
     {
-        bool firstRun = Interlocked.Increment(ref s_runs) == 1;
-
         (ж<os.File> file, error err) = firstRun
             ? os.Create(path)
             : os.OpenFile(path, os.O_WRONLY, default);
@@ -87,7 +86,8 @@ internal static class TestLogBridge
         lock (s_lock)
         {
             s_file = file;
-            s_buffer = new MemoryStream();
+            s_buffer = new byte[BufferSize];
+            s_buffered = 0;
             s_writeError = null;
 
             // StartTestLog: the logger and the header once per process, however many times m.Run runs.
@@ -104,7 +104,7 @@ internal static class TestLogBridge
 
     /// <summary>
     /// writeProfiles' testlog block: StopTestLog's flush, then the close. Returns null, or the message Go
-    /// prints before os.Exit(2).
+    /// prints before os.Exit(2). M.Run calls it after its FIRST run only (Go's m.afterOnce).
     /// </summary>
     internal static string? Close(string path)
     {
@@ -122,6 +122,7 @@ internal static class TestLogBridge
             flushError = s_writeError;
             s_file = null;
             s_buffer = null;
+            s_buffered = 0;
         }
 
         if (flushError is not null && flushError != nil)
@@ -166,26 +167,66 @@ internal static class TestLogBridge
         }
     }
 
-    // bufio.Writer.Write: buffer, and write the buffer out when it fills. A write error sticks, as bufio's
-    // does, and Close reports it.
+    // bufio.Writer.WriteString and WriteByte, the only writes testLog makes: fill the buffer, and write it out
+    // only when a write NEEDS the room, a full buffer at a time. A large write into an empty buffer goes straight
+    // to the file (*os.File is an io.StringWriter). The first write error sticks, and Close reports it. Exact,
+    // because what reaches the file is observable: a later run's writer is never flushed (Open).
     private static void WriteLocked(ReadOnlySpan<byte> bytes)
     {
-        s_buffer!.Write(bytes);
+        while (bytes.Length > BufferSize - s_buffered && s_writeError is null)
+        {
+            int n;
 
-        if (s_buffer.Length >= BufferSize)
-            FlushLocked();
-    }
+            if (s_buffered == 0)
+            {
+                (nint written, error err) = s_file!.Write(new slice<byte>(bytes.ToArray()));
+                n = (int)written;
 
-    private static void FlushLocked()
-    {
-        if (s_buffer is null || s_file is null || s_buffer.Length == 0 || s_writeError is not null)
+                if (err != nil)
+                    s_writeError = err;
+            }
+            else
+            {
+                n = BufferSize - s_buffered;
+                bytes[..n].CopyTo(s_buffer.AsSpan(s_buffered));
+                s_buffered += n;
+                FlushLocked();
+            }
+
+            bytes = bytes[n..];
+        }
+
+        if (s_writeError is not null)
             return;
 
-        (nint _, error err) = s_file.Write(new slice<byte>(s_buffer.ToArray()));
-        s_buffer.SetLength(0);
+        bytes.CopyTo(s_buffer.AsSpan(s_buffered));
+        s_buffered += bytes.Length;
+    }
+
+    // bufio.Writer.Flush: one write of everything buffered; a short write is io.ErrShortWrite, and on an error the
+    // unwritten tail stays buffered and the error sticks.
+    private static void FlushLocked()
+    {
+        if (s_buffer is null || s_file is null || s_buffered == 0 || s_writeError is not null)
+            return;
+
+        (nint written, error err) = s_file.Write(new slice<byte>(s_buffer, 0, s_buffered));
+        int n = (int)written;
+
+        if (n < s_buffered && err == nil)
+            err = go.io_package.ErrShortWrite;
 
         if (err != nil)
+        {
+            if (n > 0 && n < s_buffered)
+                s_buffer.AsSpan(n, s_buffered - n).CopyTo(s_buffer);
+
+            s_buffered -= n;
             s_writeError = err;
+            return;
+        }
+
+        s_buffered = 0;
     }
 
     // testdeps' testLog as internal/testlog.Interface: each method logs under testLog's op name.
