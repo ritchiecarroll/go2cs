@@ -1765,6 +1765,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPromotedValueEmbedUser() => CheckTarget("PromotedValueEmbedUser");
 
     [TestMethod]
+    public void CheckProxyContainerForwarding() => CheckTarget("ProxyContainerForwarding");
+
+    [TestMethod]
     public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
 
     [TestMethod]

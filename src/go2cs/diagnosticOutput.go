@@ -118,6 +118,10 @@ const (
 	diagnosticParseError = "GO2CS1002"
 	diagnosticTypeError  = "GO2CS1003"
 	diagnosticCgoRefused = "GO2CS2001"
+
+	// diagnosticProxyRefused: an instantiation needing a constraint proxy that cannot forward its constraint
+	// without breaking Go's aliasing (constraintProxyForwarding.go).
+	diagnosticProxyRefused = "GO2CS2002"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST

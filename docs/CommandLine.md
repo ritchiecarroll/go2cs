@@ -84,6 +84,7 @@ and editor problem matchers (for example VS Code's `$msCompile`) pick it up:
 | `GO2CS1002` | The package did not load cleanly: a Go parse error. The package still converts best-effort. |
 | `GO2CS1003` | The package did not fully type-check. It still converts best-effort, but code that depends on the failing expression is emitted untyped and will not compile. |
 | `GO2CS2001` | Refused: a cgo source (`import "C"`) is selected for this build, and cgo has no C# conversion yet. The run exits non-zero. Convert with `CGO_ENABLED=0` or exclude the file. |
+| `GO2CS2002` | Refused: a generic instantiation over a pointer element (`Walk[*Node]` under `N Tree[N]`) needs a constraint proxy, and a method of the constraint passes a value that shares the element's storage (`Children() []N`, a map, channel or pointer of `N`), which a proxy cannot forward without breaking Go's aliasing. Each site and method is named, and the run exits non-zero. A value element converts. See [generic constraints](ConversionStrategies-Reference/generic-constraints.md#what-a-proxy-forwards-and-the-instantiations-go2cs-refuses). |
 
 A diagnostic with no source position names `go2cs` as its origin. The `WARNING:` / `Refusing to convert:` summary line
 printed before these lines is unchanged.
