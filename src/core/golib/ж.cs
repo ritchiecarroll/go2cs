@@ -881,6 +881,16 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         return ref Unsafe.As<T, TDst>(ref ((ж<T>)source).ValueSlot);
     }
 
+    // The accessor of PointerExtensions.ReinterpretUnaliased: a reinterpret view that refuses every read and
+    // write by name. Static for the reason ReinterpretRef is, so two such views of one box compare equal.
+    // Go never panics here -- the refusal is a go2cs limitation -- so it is a plain panic carrying a Go string,
+    // not a runtime.Error: a recovering handler must not print it as Go's own behaviour.
+    internal static ref TDst UnaliasedRef<TDst>(object source)
+    {
+        throw new PanicException((@string)$"go2cs: pointer conversion (*{GoReflect.GoTypeName(typeof(TDst))})(*{GoReflect.GoTypeName(typeof(T))}): " +
+            "their nested unnamed struct is two C# classes, which cannot alias");
+    }
+
     // Per-INSTANTIATION constant: is T golib's own `array<E>`? A pure TYPE query, exactly like
     // s_publishArrayBacking above and subject to the same rule stated there — it builds no code, so
     // ILC answers it from the type system and nothing reflection-BUILT is reintroduced.

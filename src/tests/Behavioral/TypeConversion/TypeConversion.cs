@@ -29,7 +29,7 @@ internal static void Main() {
 
     ref var mine = ref heap(new Person(), out var Ꮡmine);
 
-    ж<Person> person = ((ж<Person>)(data?.Value ?? default!));
+    ж<Person> person = data.ReinterpretUnaliased<main_data, Person>();
 
     person = Ꮡmine;
 

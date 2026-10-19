@@ -40,17 +40,8 @@ namespace go2cs;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class StringLiteralBindingAnalyzer : DiagnosticAnalyzer
 {
-#pragma warning disable RS2008
-    public static readonly DiagnosticDescriptor StringLiteralBindsWrongType = new(
-        id: "GO2CS0004",
-        title: "A C# string literal binds a type Go's string is not",
-        messageFormat: "The C# string literal {0} binds {1}; converted code must pass a Go string (go.@string) here",
-        category: "go2cs-gen",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true);
-#pragma warning restore RS2008
-
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [StringLiteralBindsWrongType];
+    // GO2CS0004, declared with every other go2cs-gen code in GeneratorDiagnostics.
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [GeneratorDiagnostics.StringLiteralBindsWrongType];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -135,5 +126,5 @@ public sealed class StringLiteralBindingAnalyzer : DiagnosticAnalyzer
         parameter.OriginalDefinition.GetAttributes().Any(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, marker));
 
     private static void Report(OperationAnalysisContext context, ILiteralOperation literal, string binding) =>
-        context.ReportDiagnostic(Diagnostic.Create(StringLiteralBindsWrongType, literal.Syntax.GetLocation(), literal.Syntax.ToString(), binding));
+        context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.StringLiteralBindsWrongType, literal.Syntax.GetLocation(), literal.Syntax.ToString(), binding));
 }

@@ -267,6 +267,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\relocscan\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\diagnosticCodeRegistry_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsJekyllLiquid_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsKramdownRawHTML_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\docsSiteLinksTitles_test.go" />
@@ -282,6 +283,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\elidedConstraints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fixturesCurrent_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fleetIdentifierCensus_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibGrowSlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\golibInode64Renames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnedGoStatementPositions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
@@ -512,6 +514,7 @@
     <None Include="$(MSBuildThisFileDirectory)testConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testDeadline_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testBuildMaxCPU_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\hostlaunch\fixture\keys\k" />
