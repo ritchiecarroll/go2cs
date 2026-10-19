@@ -513,6 +513,7 @@
     <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\s11records\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\validationproof\expected.md" />
+    <None Include="$(MSBuildThisFileDirectory)testManifestEmbedDigest_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testOnlyPackageEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)ToDo.md" />
     <None Include="$(MSBuildThisFileDirectory)toolchainResolution.go" />
