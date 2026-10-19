@@ -50,6 +50,8 @@ public class StringLiteralBindingAnalyzerTests
                 public static long len(in @string s) => 0;
                 public static long len([GoTakesCSharpString] string s) => 0;
                 public static System.Exception panic([GoTakesCSharpString] object? state) => new();
+                public static void goǃ<T>(System.Action<T> action, T arg) { }
+                public static void goǃ<T1, T2, T3>(System.Action<T1, T2, T3> action, T1 arg1, T2 arg2, T3 arg3) { }
             }
 
             public sealed class Box<T>
@@ -73,6 +75,7 @@ public class StringLiteralBindingAnalyzerTests
                 public static void Overloaded(@string s) { }
                 public static void Overloaded(string s) { }
                 public static void CSharpOnly(string s) { }
+                public static void Fv(@string first, params @string[] rest) { }
             }
         }
         """;
@@ -152,6 +155,22 @@ public class StringLiteralBindingAnalyzerTests
     // A3: overload resolution chose the C# string overload over the @string one.
     [TestMethod]
     public void AnUnmarkedStringOverloadBesideAnAtStringOneIsAnError() => AssertOne("""Overloaded("x");""", "where an @string overload exists");
+
+    // A2 through a go statement's registration: goǃ<T…> (golib builtin.GoroutineLaunchers.cs) infers
+    // each T from its argument exactly as defer<T…> does, so a bare literal there makes T = System.String.
+    // These are the shapes the converter emitted before it cast every capture-list literal: a variadic
+    // element past the parameter array (`go fv("aa", "bb", "cc")`) and a spawned panic's value
+    // (`go panic("pp")`). A bare literal beside a method group (`goǃ(Take, "xx")`) does not compile at
+    // all (Take is not an Action<string>), so it needs no arm.
+    [TestMethod]
+    public void AGoStatementCaptureListTakingABareLiteralIsAnError()
+    {
+        AssertOne("""builtin.goǃ((ᴛ1, ᴛ2, ᴛ3) => Fv(ᴛ1, ᴛ2, ᴛ3), (@string)"aa", (@string)"bb", "cc");""", "type parameter 'T3'");
+        AssertOne("""builtin.goǃ(ᴛ1 => throw builtin.panic(ᴛ1), "pp");""", "type parameter 'T'");
+        AssertNone("""builtin.goǃ((ᴛ1, ᴛ2, ᴛ3) => Fv(ᴛ1, ᴛ2, ᴛ3), (@string)"aa", (@string)"bb", (@string)"cc");""");
+        AssertNone("""builtin.goǃ(ᴛ1 => throw builtin.panic(ᴛ1), (@string)"pp");""");
+        AssertNone("""builtin.goǃ(Take, (@string)"xx");""");
+    }
 
     // The intended binding, and every exemption.
     [TestMethod]

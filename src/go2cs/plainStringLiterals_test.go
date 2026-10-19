@@ -458,3 +458,73 @@ func TestADeferredCaptureListCastsEveryStringLiteral(t *testing.T) {
 		t.Errorf("control: a direct panic keeps its bare literal:\n%s", emitted)
 	}
 }
+
+// goCaptureFixture: string literals in spawned calls only. `go` lowers through golib's
+// goǃ<T…>(Action<T…>, T… args) (builtin.GoroutineLaunchers.cs), the same generic argument list as
+// defer, so a bare literal there infers T = System.String. Two-letter literals, for the reason
+// deferCaptureFixture gives.
+const goCaptureFixture = "package plit\n\n" +
+	"func f(s string) {}\n\n" +
+	"func g(v any) {}\n\n" +
+	"func fv(first string, rest ...string) {}\n\n" +
+	"func two(s string, n int) {}\n\n" +
+	"func spawn() {\n" +
+	"\tgo f(\"xx\")\n" +
+	"\tgo g(\"yy\")\n" +
+	"\tgo fv(\"aa\", \"bb\", \"cc\")\n" +
+	"\tgo two(\"tt\", 1)\n" +
+	"\tgo func(s string) {}(\"ll\")\n" +
+	"\tgo panic(\"pp\")\n" +
+	"}\n"
+
+// TestAGoStatementCaptureListCastsEveryStringLiteral: the capture-list cast keys on the argument
+// site both lowerings share (convExprList's callArgs, set by visitGoStmt and visitDeferStmt alike),
+// so a go statement takes `(@string)` exactly as a defer does: a fixed `string` slot, an `any` slot,
+// variadic elements inside and past the parameter array, a two-argument arity, a function literal
+// and a spawned panic, whose value is the thunk's eager argument (convCallExpr.go's panic arm reads
+// the same callArgs).
+func TestAGoStatementCaptureListCastsEveryStringLiteral(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/plit\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "plit.go"), goCaptureFixture)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      "linux/amd64",
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "plit", "plit.cs")), "\r\n", "\n")
+
+	if strings.Count(emitted, "goǃ(") != 6 {
+		t.Fatalf("want six goǃ launches:\n%s", emitted)
+	}
+
+	for _, literal := range []string{"xx", "yy", "aa", "bb", "cc", "tt", "ll", "pp"} {
+		bare := `"` + literal + `"`
+		if strings.Count(emitted, bare) != strings.Count(emitted, `(@string)`+bare) || !strings.Contains(emitted, `(@string)`+bare) {
+			t.Errorf("want `(@string)\"%s\"` in the go statement's capture list, never a bare C# string:\n%s", literal, emitted)
+		}
+	}
+}

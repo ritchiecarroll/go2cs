@@ -3207,8 +3207,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if deferCallArgs != nil && len(deferCallArgs) == 1 && deferRenderParams {
 				// The eager argument feeds the registration's generic type parameter, so here (and
 				// only here) a string literal takes Go's type explicitly: bare, T inferred as
-				// System.String (GO2CS0004 A2, DeferPanicArg). panic's own normalization still
-				// covers every non-deferred site, which keeps its bare literal.
+				// System.String (GO2CS0004 A2, DeferPanicArg). This is the deferred AND the spawned
+				// panic: deferCallArgs is the callArgs both visitDeferStmt and visitGoStmt set, and
+				// goǃ<T> infers exactly as defer<T> does (`go panic("x")`). panic's own normalization
+				// still covers every direct site, which keeps its bare literal.
 				if lit, isLit := ast.Unparen(callExpr.Args[0]).(*ast.BasicLit); isLit && lit.Kind == token.STRING {
 					panicValue = "(@string)" + panicValue
 				} else if constExprIsStringLiteralConcat(callExpr.Args[0]) {
