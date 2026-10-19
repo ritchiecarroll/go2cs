@@ -30,7 +30,7 @@ public class GoMethodSetTests
 
     // A plain struct with a value method, a pointer method emitted `this ref` (answered through RecvGenerator's ж twin),
     // an unexported method and a variadic one; a generic struct with a value and a pointer method over type parameters
-    // named apart from the type's.
+    // named apart from the type's; and a struct named `file`, a contextual keyword the partial must escape (CS9056).
     private const string Package =
         """
         namespace go;
@@ -40,6 +40,7 @@ public class GoMethodSetTests
         {
             public partial struct Plain { public nint n; }
             public partial struct Pair<K, V> { public K k; public V v; }
+            public partial struct @file { public nint size; }
 
             public static nint Get(this Plain p) => p.n;
 
@@ -50,6 +51,8 @@ public class GoMethodSetTests
             public static nint Sum(this Plain p, params Span<nint> more) => p.n + more.Length;
 
             public static @string String<K, V>(this Pair<K, V> p) => (@string)$"{p.k}={p.v}";
+
+            public static nint Size(this ж<@file> f) => f.Value.size;
 
             public static B Swap<A, B>(this ref Pair<A, B> p, B v)
             {
@@ -138,7 +141,7 @@ public class GoMethodSetTests
         (Dictionary<string, string> sources, Diagnostic[] errors, Compilation output) = Run();
 
         Assert.AreEqual(0, errors.Length, "the package, its method sets and the ж twins compile: " + string.Join("; ", errors.Take(3)));
-        Assert.AreEqual(2, sources.Count, "Plain and Pair each carry a method set");
+        Assert.AreEqual(3, sources.Count, "Plain, Pair and file each carry a method set");
         StringAssert.Contains(sources.Single(source => source.Key.Contains("Plain")).Value, "partial struct Plain : global::go.IGoMethodSet");
 
         using MemoryStream image = new();
