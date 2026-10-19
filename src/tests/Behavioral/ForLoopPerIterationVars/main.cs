@@ -22,11 +22,8 @@ internal static void g1() {
         var i = iᴛ1;
         fs = append(fs, () => i);
     }
-    fmt.Println((@string)"g1:"u8, fs[0](), fs[1](), fs[2]());
+    fmt.Println("g1:", fs[0](), fs[1](), fs[2]());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object g2vˢ = (@string)"g2v:"u8;
 
 internal static void g2() {
     slice<Func<nint>> fs = default!;
@@ -40,9 +37,9 @@ internal static void g2() {
         fs = append(fs, () => i);
         iᴛ1 = i;
     }
-    fmt.Println((@string)"g2:"u8, len(fs));
+    fmt.Println("g2:", len(fs));
     foreach (var (_, f) in fs) {
-        fmt.Println(g2vˢ, f());
+        fmt.Println("g2v:", f());
     }
 }
 
@@ -54,7 +51,7 @@ internal static void g3() {
         ps = append(ps, Ꮡi);
         iᴛ1 = i;
     }
-    fmt.Println((@string)"g3:"u8, ps[0].Value, ps[1].Value, ps[2].Value);
+    fmt.Println("g3:", ps[0].Value, ps[1].Value, ps[2].Value);
 }
 
 internal static void g4() {
@@ -66,7 +63,7 @@ internal static void g4() {
         var iʗ1 = i;
         var pʗ1 = p;
         fs = append(fs, () => {
-            fmt.Println((@string)"g4:"u8, pʗ1.Value, iʗ1);
+            fmt.Println("g4:", pʗ1.Value, iʗ1);
         });
         iᴛ1 = i;
     }
@@ -93,7 +90,7 @@ continue_outer:;
     }
 break_outer:;
     foreach (var (_, f) in fs) {
-        fmt.Println((@string)"g5:"u8, f());
+        fmt.Println("g5:", f());
     }
 }
 
@@ -108,7 +105,7 @@ internal static void g6() {
         fs = append(fs, () => i);
     }
     foreach (var (_, f) in fs) {
-        fmt.Println((@string)"g6:"u8, f());
+        fmt.Println("g6:", f());
     }
 }
 
@@ -119,7 +116,7 @@ internal static void g7() {
         _ = j;
         fs = append(fs, () => i);
     }
-    fmt.Println((@string)"g7:"u8, fs[0](), fs[1](), fs[2]());
+    fmt.Println("g7:", fs[0](), fs[1](), fs[2]());
 }
 
 partial struct pt {
@@ -135,7 +132,7 @@ internal static void g8() {
         fs = append(fs, () => sʗ1.x);
         sᴛ1 = s;
     }
-    fmt.Println((@string)"g8:"u8, fs[0](), fs[1](), fs[2]());
+    fmt.Println("g8:", fs[0](), fs[1](), fs[2]());
 }
 
 internal static void g9() {
@@ -148,7 +145,7 @@ internal static void g9() {
         sum += i;
         iᴛ1 = i;
     }
-    fmt.Println((@string)"g9:"u8, sum);
+    fmt.Println("g9:", sum);
 }
 
 } // end main_package

@@ -29,9 +29,6 @@ internal static uint32 headAt(this ref hasher h, nint i) {
     return h.head[i];
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object headSumˢ = (@string)"head sum:"u8;
-
 internal static void Main() {
     var h = Ꮡ(new hasher(pairs: new array<nint>[]{new nint[]{0, 0, 0}.array(), new nint[]{0, 0, 0}.array()}.array()));
 
@@ -53,7 +50,7 @@ internal static void Main() {
     for (nint i = 0; i < len((~h).head); i++) {
         total += (~h).head[i];
     }
-    fmt.Println(headSumˢ, total);
+    fmt.Println("head sum:", total);
 }
 
 } // end main_package

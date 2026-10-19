@@ -24,20 +24,6 @@ internal static nint declared(nint x) {
     return x;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object argˢ = (@string)"arg    "u8;
-private static readonly object elemˢ = (@string)"elem   "u8;
-private static readonly object fieldˢ = (@string)"field  "u8;
-private static readonly object keyedˢ = (@string)"keyed  "u8;
-private static readonly object appendˢ = (@string)"append "u8;
-private static readonly object convˢ = (@string)"conv   "u8;
-private static readonly object declaredˢ = (@string)"declared"u8;
-private static readonly object qualifiedˢ = (@string)"qualified"u8;
-private static readonly object methodvalˢ = (@string)"methodval"u8;
-private static readonly object literalˢ = (@string)"literal "u8;
-private static readonly object fieldfnˢ = (@string)"fieldfn "u8;
-private static readonly object fieldsetˢ = (@string)"fieldset"u8;
-
 internal static void Main() {
     Func<nint, nint> zero = default!;
 
@@ -51,27 +37,27 @@ internal static void Main() {
 
     var appendSlot = append(new any[]{}.slice(), (any)((zero).OrTypedNilFunc()));
 
-    fmt.Println(argˢ, argSlot == default!);
-    fmt.Println(elemˢ, elemSlot[0] == default!);
-    fmt.Println(fieldˢ, fieldSlot[0].v == default!);
-    fmt.Println(keyedˢ, keyedSlot["k"] == default!);
-    fmt.Println(appendˢ, appendSlot[0] == default!);
+    fmt.Println("arg    ", argSlot == default!);
+    fmt.Println("elem   ", elemSlot[0] == default!);
+    fmt.Println("field  ", fieldSlot[0].v == default!);
+    fmt.Println("keyed  ", keyedSlot["k"] == default!);
+    fmt.Println("append ", appendSlot[0] == default!);
 
-    fmt.Println(convˢ, take(((Action)(default!)).OrTypedNilFunc()) == default!);
+    fmt.Println("conv   ", take(((Action)(default!)).OrTypedNilFunc()) == default!);
 
     holder h = default!;
 
-    fmt.Println(declaredˢ, take(declared) != default!);
-    fmt.Println(qualifiedˢ, take(fmt.Sprint) != default!);
+    fmt.Println("declared", take(declared) != default!);
+    fmt.Println("qualified", take(fmt.Sprint) != default!);
     var hʗ1 = h;
-    fmt.Println(methodvalˢ, take(() => hʗ1.method()) != default!);
-    fmt.Println(literalˢ, take(() => {
+    fmt.Println("methodval", take(() => hʗ1.method()) != default!);
+    fmt.Println("literal ", take(() => {
     }) != default!);
 
-    fmt.Println(fieldfnˢ, take((h.fn).OrTypedNilFunc()) == default!);
+    fmt.Println("fieldfn ", take((h.fn).OrTypedNilFunc()) == default!);
 
     h.fn = declared;
-    fmt.Println(fieldsetˢ, take((h.fn).OrTypedNilFunc()) == default!);
+    fmt.Println("fieldset", take((h.fn).OrTypedNilFunc()) == default!);
 }
 
 } // end main_package

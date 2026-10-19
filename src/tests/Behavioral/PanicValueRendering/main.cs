@@ -18,25 +18,22 @@ internal static error mustOpen(@string path) {
     return new openErrжerror(Ꮡ(new openErr(path: path, code: 13)));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered:"u8;
-
 internal static void Main() {
-    fmt.Println(recoveredˢ, recoverText(() => {
+    fmt.Println("recovered:", recoverText(() => {
         throw panic(mustOpen("a.txt"));
     }));
 
     var wrapped = fmt.Errorf("load config: %w"u8, mustOpen("cfg.yaml"));
     var wrappedʗ1 = wrapped;
-    fmt.Println(recoveredˢ, recoverText(() => {
+    fmt.Println("recovered:", recoverText(() => {
         throw panic(wrappedʗ1);
     }));
 
-    fmt.Println(recoveredˢ, recoverText(() => {
+    fmt.Println("recovered:", recoverText(() => {
         throw panic("plain string");
     }));
 
-    fmt.Println(recoveredˢ, recoverText(() => {
+    fmt.Println("recovered:", recoverText(() => {
         throw panic(errors.New("simple"));
     }));
 

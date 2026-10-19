@@ -37,11 +37,6 @@ internal static I pick(nint which) {
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object intˢ = (@string)"int"u8;
-private static readonly object pointˢ = (@string)"point"u8;
-private static readonly object otherˢ = (@string)"other"u8;
-
 internal static void Main() {
     any a = (int8)(-5);
     any b = (nint)(42);
@@ -52,12 +47,12 @@ internal static void Main() {
 
     show((int8)7);
     show((nint)(9));
-    show((@string)"s"u8);
+    show("s");
     show(new point(5, 6));
     show(default!);
     anon((int8)7);
     anon((nint)(9));
-    anon((@string)"s"u8);
+    anon("s");
     anon(new point(5, 6));
     anon(default!);
 
@@ -70,17 +65,17 @@ internal static void Main() {
     fmt.Println(AreEqual(e, a), AreEqual(e, b), e == default!);
     {
         var (n, ok) = b._<nint>(ᐧ); if (ok) {
-            fmt.Println(intˢ, n + 1);
+            fmt.Println("int", n + 1);
         }
     }
     switch (d.type()) {
     case point v: {
-        fmt.Println(pointˢ, v.X + v.Y);
+        fmt.Println("point", v.X + v.Y);
         break;
     }
     default: {
         var v = d;
-        fmt.Println(otherˢ);
+        fmt.Println("other");
         break;
     }}
 

@@ -19,12 +19,6 @@ partial struct record {
     /*embed*/ internal tail tail;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bytesˢ = (@string)"bytes:"u8;
-private static readonly object fieldsˢ = (@string)"fields:"u8;
-private static readonly object portBytesˢ = (@string)"port bytes:"u8;
-private static readonly object portˢ = (@string)"port:"u8;
-
 internal static void Main() {
     var blob = new slice<byte>(24);
     var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
@@ -40,13 +34,13 @@ internal static void Main() {
     var p = rec.of(record.ᏑLength);
     p.Value += 1;
 
-    fmt.Println(bytesˢ, blob[..20]);
-    fmt.Println(fieldsˢ, rec.Kind == 0x01020304, rec.Length, rec.Off, rec.of(record.ᏑPath).ElementRef(1), rec.of(record.ᏑPath).ElementRef(2), rec.tail.B, n);
+    fmt.Println("bytes:", blob[..20]);
+    fmt.Println("fields:", rec.Kind == 0x01020304, rec.Length, rec.Off, rec.of(record.ᏑPath).ElementRef(1), rec.of(record.ᏑPath).ElementRef(2), rec.tail.B, n);
 
     var raw = new slice<byte>(16);
     var sa = Ꮡ(raw, 0).Reinterpret<byte, syscall.RawSockaddrInet4>();
     sa.Port = 0x901f;
-    fmt.Println(portBytesˢ, raw[2], raw[3], portˢ, sa.Port);
+    fmt.Println("port bytes:", raw[2], raw[3], "port:", sa.Port);
 }
 
 } // end main_package

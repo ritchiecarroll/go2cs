@@ -11,53 +11,37 @@ partial struct Point {
     public nint X, Y;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object a1Variadic1ParamActionˢ = (@string)"A1 variadic-1-param Action nil:"u8;
-private static readonly object a2Variadic1ParamFuncNilˢ = (@string)"A2 variadic-1-param Func nil:"u8;
-private static readonly object a3Variadic1ParamMultiˢ = (@string)"A3 variadic-1-param multi-result nil:"u8;
-private static readonly object b1Variadic2ParamNilˢ = (@string)"B1 variadic-2-param nil:"u8;
-private static readonly object b2NonVariadicNilˢ = (@string)"B2 non-variadic nil:"u8;
-private static readonly object b3NonVariadicBoolNilˢ = (@string)"B3 non-variadic bool nil:"u8;
-private static readonly object b4NoParamNilˢ = (@string)"B4 no-param nil:"u8;
-private static readonly object b5ConversionOfARealFuncˢ = (@string)"B5 conversion of a real func:"u8;
-private static readonly object c1OneNilArgˢ = (@string)"C1 one nil arg:"u8;
-private static readonly object c2NilAmongOthersˢ = (@string)"C2 nil among others:"u8;
-private static readonly object c3NoVariadicArgsˢ = (@string)"C3 no variadic args:"u8;
-private static readonly object c4Spreadˢ = (@string)"C4 spread:"u8;
-private static readonly object c5TypedNilSliceArgˢ = (@string)"C5 typed nil slice arg:"u8;
-private static readonly object c6Sumˢ = (@string)"C6 sum:"u8;
-
 internal static void Main() {
     var a = (Actionꓸꓸꓸ<nint>)(default!);
-    fmt.Println(a1Variadic1ParamActionˢ, a == default!);
+    fmt.Println("A1 variadic-1-param Action nil:", a == default!);
 
     var b = (Funcꓸꓸꓸ<Point, nint>)(default!);
-    fmt.Println(a2Variadic1ParamFuncNilˢ, b == default!);
+    fmt.Println("A2 variadic-1-param Func nil:", b == default!);
 
     var c = (Funcꓸꓸꓸ<@string, (nint, bool)>)(default!);
-    fmt.Println(a3Variadic1ParamMultiˢ, c == default!);
+    fmt.Println("A3 variadic-1-param multi-result nil:", c == default!);
 
     var d = (Funcꓸꓸꓸ<Point, Point, nint>)(default!);
-    fmt.Println(b1Variadic2ParamNilˢ, d == default!);
+    fmt.Println("B1 variadic-2-param nil:", d == default!);
 
     var e = (Func<Point, nint>)(default!);
-    fmt.Println(b2NonVariadicNilˢ, e == default!);
+    fmt.Println("B2 non-variadic nil:", e == default!);
 
     var f = (Func<nint, bool>)(default!);
-    fmt.Println(b3NonVariadicBoolNilˢ, f == default!);
+    fmt.Println("B3 non-variadic bool nil:", f == default!);
 
     var g = (Action)(default!);
-    fmt.Println(b4NoParamNilˢ, g == default!);
+    fmt.Println("B4 no-param nil:", g == default!);
 
     var h = (Funcꓸꓸꓸ<nint, nint>)(sum);
-    fmt.Println(b5ConversionOfARealFuncˢ, h(1, 2, 3));
+    fmt.Println("B5 conversion of a real func:", h(1, 2, 3));
 
-    fmt.Println(c1OneNilArgˢ, countArgs("x", (any)(default!)));
-    fmt.Println(c2NilAmongOthersˢ, countArgs("x", (nint)(1), (any)(default!), (@string)"y"u8));
-    fmt.Println(c3NoVariadicArgsˢ, countArgs("x"));
-    fmt.Println(c4Spreadˢ, countArgs("x"u8, new any[]{(nint)(1), default!, (nint)(3)}.slice().ꓸꓸꓸ));
-    fmt.Println(c5TypedNilSliceArgˢ, countPtrs((ж<Point>)(nil), (ж<Point>)(nil)));
-    fmt.Println(c6Sumˢ, sum(4, 5, 6));
+    fmt.Println("C1 one nil arg:", countArgs("x", (any)(default!)));
+    fmt.Println("C2 nil among others:", countArgs("x", (nint)(1), (any)(default!), "y"));
+    fmt.Println("C3 no variadic args:", countArgs("x"));
+    fmt.Println("C4 spread:", countArgs("x"u8, new any[]{(nint)(1), default!, (nint)(3)}.slice().ꓸꓸꓸ));
+    fmt.Println("C5 typed nil slice arg:", countPtrs((ж<Point>)(nil), (ж<Point>)(nil)));
+    fmt.Println("C6 sum:", sum(4, 5, 6));
 }
 
 internal static nint sum(params ꓸꓸꓸnint xsʗp) {

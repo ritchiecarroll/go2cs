@@ -10,7 +10,7 @@ partial struct request {
     internal nint depth;
 }
 
-internal static Func<ж<request>, @string, @string> describe = (ж<request> r, @string tag) => fmt.Sprint(tag, (@string)":"u8, (~r).path, (@string)"/"u8, (~r).closed, (@string)"/"u8, (~r).depth, r.label());
+internal static Func<ж<request>, @string, @string> describe = (ж<request> r, @string tag) => fmt.Sprint(tag, ":", (~r).path, "/", (~r).closed, "/", (~r).depth, r.label());
 
 internal static Action<ж<request>> deepen = (ж<request> r) => {
     r.Value.depth = (~r).depth + 2;

@@ -77,18 +77,14 @@ internal static @string fromChan(channel<any> ch) {
     }}
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object callsˢ = (@string)"calls:"u8;
-private static readonly object boomˢ = (@string)"boom"u8;
-
 internal static void Main() {
     fmt.Println(classify((nint)(7)));
-    fmt.Println(classify((@string)"hi"u8));
+    fmt.Println(classify("hi"));
     fmt.Println(classify(true));
     fmt.Println(classify(2.5D));
-    fmt.Println(callsˢ, calls);
+    fmt.Println("calls:", calls);
 
-    fmt.Println(recovered(boomˢ));
+    fmt.Println(recovered("boom"));
     fmt.Println(recovered((nint)(9)));
     fmt.Println(recovered(1.25D));
 

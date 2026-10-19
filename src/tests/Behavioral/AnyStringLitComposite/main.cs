@@ -13,28 +13,18 @@ partial struct pair {
     internal any value;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object stringˢ = (@string)"string:"u8;
-private static readonly object otherˢ = (@string)"other:"u8;
-
 internal static void describe(@string prefix, any v) {
     switch (v.type()) {
     case @string s: {
-        fmt.Println(prefix, stringˢ, s);
+        fmt.Println(prefix, "string:", s);
         break;
     }
     default: {
         var s = v;
-        fmt.Println(prefix, otherˢ, s);
+        fmt.Println(prefix, "other:", s);
         break;
     }}
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object labelˢ = (@string)"label:"u8;
-private static readonly object mapkeyvalˢ = (@string)"mapkeyval:"u8;
-private static readonly object elidedposLabelˢ = (@string)"elidedpos label:"u8;
-private static readonly object ptrelidedposLabelˢ = (@string)"ptrelidedpos label:"u8;
 
 internal static void Main() {
     var n = Ꮡ(new node(inner: (@string)"hi"u8));
@@ -50,13 +40,13 @@ internal static void Main() {
     var sp = new array<any>(3){[1] = (@string)"sp"u8};
 
     describe("keyed", (~n).inner);
-    fmt.Println(labelˢ, p.label);
+    fmt.Println("label:", p.label);
     describe("positional", p.value);
     describe("mapval", m["k"]);
 
     foreach (var (k, v) in mk) {
         describe("mapkey", k);
-        fmt.Println(mapkeyvalˢ, v);
+        fmt.Println("mapkeyval:", v);
     }
 
     describe("slice0", s[0]);
@@ -64,10 +54,10 @@ internal static void Main() {
     describe("array0", arr[0]);
     describe("array1", arr[1]);
     describe("elided", el[0].inner);
-    fmt.Println(elidedposLabelˢ, ep[0].label);
+    fmt.Println("elidedpos label:", ep[0].label);
     describe("elidedpos", ep[0].value);
     describe("ptrelided", (~pp[0]).inner);
-    fmt.Println(ptrelidedposLabelˢ, (~pq[0]).label);
+    fmt.Println("ptrelidedpos label:", (~pq[0]).label);
     describe("ptrelidedpos", (~pq[0]).value);
     describe("sparse0", sp[0]);
     describe("sparse1", sp[1]);

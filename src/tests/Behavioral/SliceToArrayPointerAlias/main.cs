@@ -36,42 +36,28 @@ internal static void premultiplyLike(slice<byte> dst, slice<byte> src) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object aliasedWriteˢ = (@string)"aliased write:"u8;
-private static readonly object readBackThroughPointerˢ = (@string)"read back through pointer:"u8;
-private static readonly object valueConversionˢ = (@string)"value conversion:"u8;
-private static readonly object sliceUnchangedˢ = (@string)"slice unchanged:"u8;
-private static readonly object derefCopyˢ = (@string)"deref copy:"u8;
-private static readonly object stillThroughPointerˢ = (@string)"still through pointer:"u8;
-private static readonly object sliceOfArrayPointerˢ = (@string)"slice of array pointer:"u8;
-private static readonly object lenCapˢ = (@string)"len/cap:"u8;
-private static readonly object elementIdentityˢ = (@string)"element identity:"u8;
-private static readonly object windowedIdentityˢ = (@string)"windowed identity:"u8;
-private static readonly object windowedLoopˢ = (@string)"windowed loop:"u8;
-private static readonly object arrayLengthˢ = (@string)"array length:"u8;
-
 internal static void Main() {
     var buf = new slice<byte>(9);
     buf[0] = 0x99;
     writeThrough(buf[1..]);
-    fmt.Println(aliasedWriteˢ, buf);
+    fmt.Println("aliased write:", buf);
 
     var p = Ꮡ(array<byte>.Alias(buf[1..], 4));
     buf[2] = 0xab;
-    fmt.Println(readBackThroughPointerˢ, p.Value[0], p.Value[1], p.Value[2], p.Value[3]);
+    fmt.Println("read back through pointer:", p.Value[0], p.Value[1], p.Value[2], p.Value[3]);
 
     var got = valueCopy(buf[1..]);
-    fmt.Println(valueConversionˢ, got, sliceUnchangedˢ, buf[1..5]);
+    fmt.Println("value conversion:", got, "slice unchanged:", buf[1..5]);
 
     var deref = p.Value.Clone();
     deref[1] = 0x00;
-    fmt.Println(derefCopyˢ, deref, stillThroughPointerˢ, p.Value[1]);
+    fmt.Println("deref copy:", deref, "still through pointer:", p.Value[1]);
 
     var view = p.slice();
     view[3] = 0x7f;
-    fmt.Println(sliceOfArrayPointerˢ, buf[4], lenCapˢ, len(view), cap(view));
+    fmt.Println("slice of array pointer:", buf[4], "len/cap:", len(view), cap(view));
 
-    fmt.Println(elementIdentityˢ, p.at<byte>(0) == Ꮡ(buf, 1), windowedIdentityˢ, p.at<byte>(2) == Ꮡ(buf, 3));
+    fmt.Println("element identity:", p.at<byte>(0) == Ꮡ(buf, 1), "windowed identity:", p.at<byte>(2) == Ꮡ(buf, 3));
 
     var src = new byte[]{
         0x10, 0x20, 0x30, 0x00,
@@ -80,9 +66,9 @@ internal static void Main() {
     }.slice();
     var dst = new slice<byte>(len(src));
     premultiplyLike(dst, src);
-    fmt.Println(windowedLoopˢ, dst);
+    fmt.Println("windowed loop:", dst);
 
-    fmt.Println(arrayLengthˢ, 4, len(p.Value));
+    fmt.Println("array length:", 4, len(p.Value));
 }
 
 } // end main_package

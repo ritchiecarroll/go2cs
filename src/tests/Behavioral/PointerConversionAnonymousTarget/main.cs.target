@@ -9,9 +9,6 @@ partial struct Employee {
     public nint Age;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object toAnonymousWriteThroughˢ = (@string)"to anonymous, write through converted:"u8;
-
 internal partial struct toAnonymous_q /*dyn*/ {
     public @string Name;
     public nint Age;
@@ -22,11 +19,8 @@ internal static void toAnonymous() {
     var q = e.Reinterpret<Employee, toAnonymous_q>();
 
     q.Value.Age = 14;
-    fmt.Println(toAnonymousWriteThroughˢ, (~e).Age);
+    fmt.Println("to anonymous, write through converted:", (~e).Age);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object tagsOnlyWriteThroughˢ = (@string)"tags only, write through converted:"u8;
 
 internal partial struct tagsOnly_t /*dyn*/ {
     public @string Name; /*`json:"name"`*/
@@ -38,7 +32,7 @@ internal static void tagsOnly() {
     var u = t.Reinterpret<tagsOnly_t, toAnonymous_q>();
 
     u.Value.Age = 16;
-    fmt.Println(tagsOnlyWriteThroughˢ, (~t).Age);
+    fmt.Println("tags only, write through converted:", (~t).Age);
 }
 
 internal static void Main() {

@@ -146,11 +146,6 @@ partial struct Outer {
     internal ж<ж<Inner>> ptr;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object myErrorWhatˢ = (@string)"MyError What ="u8;
-private static readonly object myCustomErrorWhatˢ = (@string)"MyCustomError What ="u8;
-private static readonly object myCustomErrorMethodˢ = (@string)"MyCustomError method ="u8;
-
 internal static void Main() {
     ref var e = ref heap<MyError>(out var Ꮡe);
     e = new MyError(time.Now(), "Hello");
@@ -159,9 +154,9 @@ internal static void Main() {
     a.Message = "New";
     a.What = "World";
 
-    fmt.Println(myErrorWhatˢ, e.What);
-    fmt.Println(myCustomErrorWhatˢ, a.What);
-    fmt.Println(myCustomErrorMethodˢ, a.Time());
+    fmt.Println("MyError What =", e.What);
+    fmt.Println("MyCustomError What =", a.What);
+    fmt.Println("MyCustomError method =", a.Time());
 
     ref var inner = ref heap<ж<Inner>>(out var Ꮡinner);
     inner = Ꮡ(new Inner(Value: "hello"));

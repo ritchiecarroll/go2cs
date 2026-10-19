@@ -28,11 +28,6 @@ internal static (@string, bool) lookup(registry reg, uint32 id) {
     return (e.tag, true);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object lenˢ = (@string)"len:"u8;
-private static readonly object litLenˢ = (@string)"lit len:"u8;
-private static readonly object chanAssertˢ = (@string)"chan assert:"u8;
-
 internal static void Main() {
     var seen = new map<nint, EmptyStruct>();
 
@@ -40,7 +35,7 @@ internal static void Main() {
     add(seen, 7);
     add(seen, 3);
 
-    fmt.Println(lenˢ, len(seen));
+    fmt.Println("len:", len(seen));
 
     foreach (var (_, k) in new nint[]{1, 3, 5, 7}.slice()) {
         fmt.Printf("contains(%d) = %t\n"u8, k, contains(seen, k));
@@ -51,7 +46,7 @@ internal static void Main() {
         ["b"] = new()
     };
     lit["c"] = new EmptyStruct();
-    fmt.Println(litLenˢ, len(lit));
+    fmt.Println("lit len:", len(lit));
 
     foreach (var (_, s) in new @string[]{"a", "b", "c", "d"}.slice()) {
         var (_, ok) = lit[s, ꟷ];
@@ -82,7 +77,7 @@ internal static void Main() {
     var (ch, chOK) = anyDone._<channel<EmptyStruct>>(ᐧ);
     ch.ᐸꟷ(new EmptyStruct());
     ᐸꟷ(done);
-    fmt.Println(chanAssertˢ, chOK, len(done));
+    fmt.Println("chan assert:", chOK, len(done));
 }
 
 } // end main_package

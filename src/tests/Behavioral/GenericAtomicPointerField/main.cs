@@ -34,12 +34,6 @@ public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object getAˢ = (@string)"get a:"u8;
-private static readonly object getBˢ = (@string)"get b:"u8;
-private static readonly object getAAgainˢ = (@string)"get a again:"u8;
-private static readonly object missingˢ = (@string)"missing:"u8;
-
 internal static void Main() {
     ref var c = ref heap(new Cache<nint>(), out var Ꮡc);
     ref var a = ref heap<nint>(out var Ꮡa);
@@ -53,14 +47,14 @@ internal static void Main() {
     Ꮡc.Put(Ꮡa, Ꮡav);
     Ꮡc.Put(Ꮡb, Ꮡbv);
 
-    fmt.Println(getAˢ, Ꮡc.Get(Ꮡa).Value);
-    fmt.Println(getBˢ, Ꮡc.Get(Ꮡb).Value);
+    fmt.Println("get a:", Ꮡc.Get(Ꮡa).Value);
+    fmt.Println("get b:", Ꮡc.Get(Ꮡb).Value);
 
     ref var newAv = ref heap<nint>(out var ᏑnewAv);
     newAv = 99;
     Ꮡc.Put(Ꮡa, ᏑnewAv);
-    fmt.Println(getAAgainˢ, Ꮡc.Get(Ꮡa).Value);
-    fmt.Println(missingˢ, Ꮡc.Get(@new<nint>()) == nil);
+    fmt.Println("get a again:", Ꮡc.Get(Ꮡa).Value);
+    fmt.Println("missing:", Ꮡc.Get(@new<nint>()) == nil);
 }
 
 } // end main_package

@@ -48,9 +48,6 @@ public static ж<Impl> Pick(this ref Impl p, Func<ж<Impl>> gen) {
     return gen();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object eachˢ = (@string)"each"u8;
-
 internal static void use<T>(T v)
     where T : Constrained<T>
 {
@@ -58,7 +55,7 @@ internal static void use<T>(T v)
     fmt.Println(c.Name(), c.Size(), v.Name(), v.Size());
 
     var ok = v.Each("leaf", (T child) => {
-        fmt.Println(eachˢ, child.Name(), child.Size());
+        fmt.Println("each", child.Name(), child.Size());
     });
 
     var picked = v.Pick(T () => v.Clone());
@@ -70,7 +67,7 @@ internal static @string second<T>(T v)
     where T : Constrained<T>
 {
     var c = v.Clone();
-    return fmt.Sprint(c.Name(), (@string)"/"u8, c.Size(), (@string)"/"u8, v.Name(), (@string)"/"u8, v.Size());
+    return fmt.Sprint(c.Name(), "/", c.Size(), "/", v.Name(), "/", v.Size());
 }
 
 internal static void callback<T>(T v, Action<T, nint> f)

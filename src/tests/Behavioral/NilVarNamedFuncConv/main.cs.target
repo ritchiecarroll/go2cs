@@ -18,16 +18,13 @@ internal static Greetable wrap(Action<@string> handler) {
     return new GreeterᴠGreetable(NilSafeDelegateConversion<Greeter, Action<@string>>(handler));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object helloˢ = (@string)"hello"u8;
-
 internal static void Main() {
     var nilGreetable = wrap(default!);
     var (nilGreeter, nilOk) = nilGreetable._<Greeter>(ᐧ);
     fmt.Println(nilOk, nilGreeter == default!);
 
     var realGreetable = wrap((@string name) => {
-        fmt.Println(helloˢ, name);
+        fmt.Println("hello", name);
     });
     var (realGreeter, realOk) = realGreetable._<Greeter>(ᐧ);
     fmt.Println(realOk, realGreeter == default!);

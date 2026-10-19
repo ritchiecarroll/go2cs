@@ -104,33 +104,19 @@ internal static @string mixedIntArms(slice<byte> data, bool atEOF) {
     return takeSplit(onComma, data, atEOF);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sizeFuncShapeTrueˢ = (@string)"sizeFuncShape(true):"u8;
-private static readonly object sizeFuncShapeFalseˢ = (@string)"sizeFuncShape(false):"u8;
-private static readonly object negatedArmTrueˢ = (@string)"negatedArm(true):"u8;
-private static readonly object negatedArmFalseˢ = (@string)"negatedArm(false):"u8;
-private static readonly object floatShapeTrueˢ = (@string)"floatShape(true):"u8;
-private static readonly object floatShapeFalseˢ = (@string)"floatShape(false):"u8;
-private static readonly object floatControlˢ = (@string)"floatControl:"u8;
-private static readonly object intControlTrueˢ = (@string)"intControl(true):"u8;
-private static readonly object intControlFalseˢ = (@string)"intControl(false):"u8;
-private static readonly object mixedIntArmsHiByeTrueˢ = (@string)"mixedIntArms(hi,bye/true):"u8;
-private static readonly object mixedIntArmsTailTrueˢ = (@string)"mixedIntArms(tail/true):"u8;
-private static readonly object mixedIntArmsTailFalseˢ = (@string)"mixedIntArms(tail/false):"u8;
-
 internal static void Main() {
-    fmt.Println(sizeFuncShapeTrueˢ, sizeFuncShape(true));
-    fmt.Println(sizeFuncShapeFalseˢ, sizeFuncShape(false));
-    fmt.Println(negatedArmTrueˢ, negatedArm(true));
-    fmt.Println(negatedArmFalseˢ, negatedArm(false));
-    fmt.Println(floatShapeTrueˢ, floatShape(true));
-    fmt.Println(floatShapeFalseˢ, floatShape(false));
-    fmt.Println(floatControlˢ, floatControl());
-    fmt.Println(intControlTrueˢ, intControl(true));
-    fmt.Println(intControlFalseˢ, intControl(false));
-    fmt.Println(mixedIntArmsHiByeTrueˢ, mixedIntArms(slice<byte>("hi,bye"u8), true));
-    fmt.Println(mixedIntArmsTailTrueˢ, mixedIntArms(slice<byte>("tail"u8), true));
-    fmt.Println(mixedIntArmsTailFalseˢ, mixedIntArms(slice<byte>("tail"u8), false));
+    fmt.Println("sizeFuncShape(true):", sizeFuncShape(true));
+    fmt.Println("sizeFuncShape(false):", sizeFuncShape(false));
+    fmt.Println("negatedArm(true):", negatedArm(true));
+    fmt.Println("negatedArm(false):", negatedArm(false));
+    fmt.Println("floatShape(true):", floatShape(true));
+    fmt.Println("floatShape(false):", floatShape(false));
+    fmt.Println("floatControl:", floatControl());
+    fmt.Println("intControl(true):", intControl(true));
+    fmt.Println("intControl(false):", intControl(false));
+    fmt.Println("mixedIntArms(hi,bye/true):", mixedIntArms(slice<byte>("hi,bye"u8), true));
+    fmt.Println("mixedIntArms(tail/true):", mixedIntArms(slice<byte>("tail"u8), true));
+    fmt.Println("mixedIntArms(tail/false):", mixedIntArms(slice<byte>("tail"u8), false));
 }
 
 } // end main_package

@@ -46,97 +46,69 @@ internal static digest newDigest() {
     return new digest(h: new nint[]{1, 2, 3, 4}.array(), x: new byte[]{5, 6}.array(), nx: 7);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object derefˢ = (@string)"deref:      "u8;
-
 internal static void derefCopy() {
     ref var d = ref heap<digest>(out var Ꮡd);
     d = newDigest();
     var p = Ꮡd;
     var d0 = p.Value.ΔClone();
     d0.bump();
-    fmt.Println(derefˢ, (~p).show(), (@string)"|"u8, d0.show());
+    fmt.Println("deref:      ", (~p).show(), "|", d0.show());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object identˢ = (@string)"ident:      "u8;
 
 internal static void identCopy() {
     var d = newDigest();
     var c = d.ΔClone();
     c.bump();
-    fmt.Println(identˢ, d.show(), (@string)"|"u8, c.show());
+    fmt.Println("ident:      ", d.show(), "|", c.show());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object selectorˢ = (@string)"selector:   "u8;
 
 internal static void selectorCopy() {
     var n = new nest(d: newDigest(), tag: 1);
     var e = n.d.ΔClone();
     e.bump();
-    fmt.Println(selectorˢ, n.d.show(), (@string)"|"u8, e.show());
+    fmt.Println("selector:   ", n.d.show(), "|", e.show());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object compositeˢ = (@string)"composite:  "u8;
 
 internal static void compositeElement() {
     var d = newDigest();
     var n = new nest(d: d.ΔClone(), tag: 2);
     n.d.bump();
-    fmt.Println(compositeˢ, d.show(), (@string)"|"u8, n.d.show());
+    fmt.Println("composite:  ", d.show(), "|", n.d.show());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nestedˢ = (@string)"nested:     "u8;
 
 internal static void nestedStructCopy() {
     var n = new nest(d: newDigest(), tag: 3);
     var n2 = n.ΔClone();
     n2.d.bump();
     n2.tag = 4;
-    fmt.Println(nestedˢ, n.d.show(), n.tag, (@string)"|"u8, n2.d.show(), n2.tag);
+    fmt.Println("nested:     ", n.d.show(), n.tag, "|", n2.d.show(), n2.tag);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object paramˢ = (@string)"param:      "u8;
 
 internal static void paramByValue() {
     var d = newDigest();
     @string got = takeValue(d);
-    fmt.Println(paramˢ, d.show(), (@string)"|"u8, got);
+    fmt.Println("param:      ", d.show(), "|", got);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object returnˢ = (@string)"return:     "u8;
 
 internal static void returnValue() {
     var n = new nest(d: newDigest(), tag: 5);
     var r = returnField(n);
     r.bump();
-    fmt.Println(returnˢ, n.d.show(), (@string)"|"u8, r.show());
+    fmt.Println("return:     ", n.d.show(), "|", r.show());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object indexˢ = (@string)"index:      "u8;
-private static readonly object sliceIndexˢ = (@string)"sliceIndex: "u8;
 
 internal static void indexCopy() {
     var d = newDigest();
     var arr = new digest[]{d.ΔClone(), d.ΔClone()}.array();
     var f = arr[0].ΔClone();
     f.bump();
-    fmt.Println(indexˢ, arr[0].show(), (@string)"|"u8, f.show());
+    fmt.Println("index:      ", arr[0].show(), "|", f.show());
 
     var s = new digest[]{d.ΔClone()}.slice();
     var g = s[0].ΔClone();
     g.bump();
-    fmt.Println(sliceIndexˢ, s[0].show(), (@string)"|"u8, g.show());
+    fmt.Println("sliceIndex: ", s[0].show(), "|", g.show());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object rangeˢ = (@string)"range:      "u8;
 
 internal static void rangeCopy() {
     var d = newDigest();
@@ -148,28 +120,22 @@ internal static void rangeCopy() {
         g.bump();
     }
 
-    fmt.Println(rangeˢ, arr[0].show(), arr[1].show());
+    fmt.Println("range:      ", arr[0].show(), arr[1].show());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object mapˢ = (@string)"map:        "u8;
 
 internal static void mapValueCopy() {
     var m = new map<@string, digest>{["k"] = newDigest()};
     var mv = m["k"].ΔClone();
     mv.bump();
     var stored = m["k"].ΔClone();
-    fmt.Println(mapˢ, stored.show(), (@string)"|"u8, mv.show());
+    fmt.Println("map:        ", stored.show(), "|", mv.show());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object receiverˢ = (@string)"receiver:   "u8;
 
 internal static void valueReceiver() {
     var d = newDigest();
     @string before = d.show();
     @string after = d.show();
-    fmt.Println(receiverˢ, before, (@string)"|"u8, after);
+    fmt.Println("receiver:   ", before, "|", after);
 }
 
 internal static void Main() {

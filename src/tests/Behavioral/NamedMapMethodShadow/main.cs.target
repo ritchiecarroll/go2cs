@@ -69,21 +69,6 @@ public static void Set(this Hdr h, @string k, @string v) {
     h[strings.ToUpper(k)] = new @string[]{v}.slice();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object exactSetRanˢ = (@string)"exact Set ran:"u8;
-private static readonly object exactAddAccumulatedˢ = (@string)"exact Add accumulated:"u8;
-private static readonly object exactRemoveˢ = (@string)"exact Remove:"u8;
-private static readonly object exactClearˢ = (@string)"exact Clear:"u8;
-private static readonly object exactContainsKeyˢ = (@string)"exact ContainsKey:"u8;
-private static readonly object controlSetˢ = (@string)"control Set:"u8;
-private static readonly object nestedAssignRawˢ = (@string)"nested assign raw:"u8;
-private static readonly object nestedAssignInFieldˢ = (@string)"nested assign in field:"u8;
-private static readonly object pointerSetˢ = (@string)"pointer Set:"u8;
-private static readonly object nestedRawˢ = (@string)"nested raw:"u8;
-private static readonly object genericRemoveˢ = (@string)"generic Remove:"u8;
-private static readonly object exactSendˢ = (@string)"exact Send:"u8;
-private static readonly object namedSetNestedˢ = (@string)"named Set nested:"u8;
-
 internal partial struct main_named /*dyn*/ {
     internal map<@string, Env> m;
 }
@@ -93,49 +78,49 @@ internal static void Main() {
     e.Set("Key", "v");
     var (_, lower) = e["key", ꟷ];
     var (_, raw) = e["Key", ꟷ];
-    fmt.Println(exactSetRanˢ, lower, raw);
+    fmt.Println("exact Set ran:", lower, raw);
 
     var b = new Bag(new map<@string, nint>{});
     b.Add("n", 2);
     b.Add("n", 3);
-    fmt.Println(exactAddAccumulatedˢ, b["n"]);
+    fmt.Println("exact Add accumulated:", b["n"]);
 
     var c = new Cache(new map<@string, nint>{["a"] = 1});
-    fmt.Println(exactRemoveˢ, c.Remove("a"), c.Remove("a"), len(c));
+    fmt.Println("exact Remove:", c.Remove("a"), c.Remove("a"), len(c));
     c["b"] = 2;
     c.Clear();
-    fmt.Println(exactClearˢ, cleared, len(c));
-    fmt.Println(exactContainsKeyˢ, c.ContainsKey("always"), c.ContainsKey("b"));
+    fmt.Println("exact Clear:", cleared, len(c));
+    fmt.Println("exact ContainsKey:", c.ContainsKey("always"), c.ContainsKey("b"));
 
     var h = new Hdr(new map<@string, slice<@string>>{});
     h.Set("accept", "x");
-    fmt.Println(controlSetˢ, len(h["ACCEPT"]), len(h["accept"]));
+    fmt.Println("control Set:", len(h["ACCEPT"]), len(h["accept"]));
 
     var envs = new map<@string, Env>{["x"] = new map<@string, @string>{}};
     envs["x"].Set‿("Mixed", "m");
     var (_, nestedRaw) = envs["x"]["Mixed", ꟷ];
     var (_, nestedLower) = envs["x"]["mixed", ꟷ];
-    fmt.Println(nestedAssignRawˢ, nestedRaw, nestedLower);
+    fmt.Println("nested assign raw:", nestedRaw, nestedLower);
     var named = new main_named(m: new map<@string, Env>{["y"] = new map<@string, @string>{}});
     named.m["y"].Set‿("Q", "q");
-    fmt.Println(nestedAssignInFieldˢ, named.m["y"]["Q"]);
+    fmt.Println("nested assign in field:", named.m["y"]["Q"]);
 
     var pe = new PEnv(new map<@string, @string>{});
     pe.Set("low", "p");
     var penvs = new map<@string, PEnv>{["z"] = new map<@string, @string>{}};
     penvs["z"].Set‿("low", "r");
-    fmt.Println(pointerSetˢ, pe["LOW"], len(pe), nestedRawˢ, penvs["z"]["low"], len(penvs["z"]));
+    fmt.Println("pointer Set:", pe["LOW"], len(pe), "nested raw:", penvs["z"]["low"], len(penvs["z"]));
 
     var u = new Uniq<@string>(new map<@string, EmptyStruct>{["a"] = new()});
-    fmt.Println(genericRemoveˢ, u.Remove("a"u8), u.Remove("a"u8), len(u));
+    fmt.Println("generic Remove:", u.Remove("a"u8), u.Remove("a"u8), len(u));
 
     var p = new Pipe(1);
     p.Send(4);
-    fmt.Println(exactSendˢ, sends, ᐸꟷ<nint>(p));
+    fmt.Println("exact Send:", sends, ᐸꟷ<nint>(p));
 
     var sets = new map<@string, ΔSet>{["a"] = new map<@string, nint>{}};
     sets["a"].Set‿("k", 7);
-    fmt.Println(namedSetNestedˢ, sets["a"]["k"], len(sets["a"]));
+    fmt.Println("named Set nested:", sets["a"]["k"], len(sets["a"]));
 }
 
 } // end main_package

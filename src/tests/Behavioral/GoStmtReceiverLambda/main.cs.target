@@ -45,36 +45,29 @@ internal static void ping(this valueSender v) {
     v.c.ᐸꟷ(99);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object afterStartˢ = (@string)"after start:"u8;
-private static readonly object afterSecondStartˢ = (@string)"after second start:"u8;
-private static readonly object pingedˢ = (@string)"pinged:"u8;
-private static readonly object valueRecvGoˢ = (@string)"value-recv go:"u8;
-private static readonly object valueRecvNullaryGoˢ = (@string)"value-recv nullary go:"u8;
-
 internal static partial void Main() {
     var e = Ꮡ(new engine(tally: Ꮡ(new counter(done: new channel<bool>(1)))));
 
     e.start(5);
     ᐸꟷ((~(~e).tally).done);
-    fmt.Println(afterStartˢ, (~(~e).tally).n);
+    fmt.Println("after start:", (~(~e).tally).n);
 
     e.start(7);
     ᐸꟷ((~(~e).tally).done);
-    fmt.Println(afterSecondStartˢ, (~(~e).tally).n);
+    fmt.Println("after second start:", (~(~e).tally).n);
 
     e.ping();
     ᐸꟷ((~(~e).tally).done);
-    fmt.Println(pingedˢ, (~(~e).tally).n);
+    fmt.Println("pinged:", (~(~e).tally).n);
 
     ref var vs = ref heap<valueSender>(out var Ꮡvs);
     vs = new valueSender(c: new channel<nint>(0));
     var vsʗ1 = vs;
     goǃ(ᴛ1 => vsʗ1.send(ᴛ1), 7);
-    fmt.Println(valueRecvGoˢ, ᐸꟷ(vs.c));
+    fmt.Println("value-recv go:", ᐸꟷ(vs.c));
     var vsʗ2 = vs;
     goǃ(() => vsʗ2.ping());
-    fmt.Println(valueRecvNullaryGoˢ, ᐸꟷ(vs.c));
+    fmt.Println("value-recv nullary go:", ᐸꟷ(vs.c));
 }
 
 } // end main_package

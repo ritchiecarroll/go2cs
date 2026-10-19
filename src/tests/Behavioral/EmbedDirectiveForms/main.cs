@@ -15,21 +15,16 @@ internal static slice<byte> capabilitiesJson = go.embed_package.ΔEmbedBytes<byt
 
 internal static @string testfpAgain = go.embed_package.ΔEmbedString(typeof(main_package).Assembly, "go.embed/go2cs/EmbedDirectiveForms/", "testdata/testfp.txt");
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object testfpTestfpAgainˢ = (@string)"testfp == testfpAgain:"u8;
-private static readonly object unrelatedˢ = (@string)"unrelated:"u8;
-private static readonly object byteSumˢ = (@string)"byte sum:"u8;
-
 internal static void Main() {
     fmt.Printf("testfp: %d bytes, %d lines\n"u8, len(testfp), strings.Count(testfp, "\n"));
     foreach (var (i, line) in strings.Split(strings.TrimSuffix(testfp, "\n"), "\n")) {
         fmt.Printf("  %d: %q\n"u8, i, line);
     }
-    fmt.Println(testfpTestfpAgainˢ, testfp == testfpAgain);
+    fmt.Println("testfp == testfpAgain:", testfp == testfpAgain);
 
     fmt.Printf("entropyCapabilitiesJson: %d bytes, %q\n"u8, len(entropyCapabilitiesJson), entropyCapabilitiesJson);
     fmt.Printf("capabilitiesJson: %d bytes, %q\n"u8, len(capabilitiesJson), capabilitiesJson);
-    fmt.Println(unrelatedˢ, unrelated);
+    fmt.Println("unrelated:", unrelated);
 
     entropyCapabilitiesJson[0] = (rune)'[';
     fmt.Printf("after write: %c %c\n"u8, entropyCapabilitiesJson[0], capabilitiesJson[0]);
@@ -38,7 +33,7 @@ internal static void Main() {
     foreach (var (_, b) in capabilitiesJson) {
         sum += (nint)b;
     }
-    fmt.Println(byteSumˢ, sum);
+    fmt.Println("byte sum:", sum);
 }
 
 } // end main_package

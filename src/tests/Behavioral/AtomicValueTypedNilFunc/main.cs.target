@@ -24,9 +24,6 @@ internal static void recovered(@string label, Action fn) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object loadedAndCalledˢ = (@string)"loaded and called:"u8;
-
 internal static void Main() {
     ref var v1 = ref heap(new atomic.Value(), out var Ꮡv1);
     Ꮡv1.Store((nint fd) => {
@@ -63,14 +60,14 @@ internal static void Main() {
     ref var v5 = ref heap(new atomic.Value(), out var Ꮡv5);
     Ꮡv5.Store((nint)(1));
     recovered("int then string, different type", () => {
-        Ꮡv5.Store((@string)"x"u8);
+        Ꮡv5.Store("x");
     });
 
     ref var v6 = ref heap(new atomic.Value(), out var Ꮡv6);
     Ꮡv6.Store(nint (nint fd) => fd * 2);
     {
         var (f, ok) = Ꮡv6.Load()._<Func<nint, nint>>(ᐧ); if (ok) {
-            fmt.Println(loadedAndCalledˢ, f(21));
+            fmt.Println("loaded and called:", f(21));
         }
     }
 }

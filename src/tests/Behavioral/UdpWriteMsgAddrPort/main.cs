@@ -10,15 +10,12 @@ partial class main_package {
 
 internal static UntypedInt rounds => 200;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void Main() {
     writeMsgAddrPortRoundTrip("udp4", "127.0.0.1");
     writeMsgAddrPortRoundTrip("udp6", "::1");
     writeMsgUDPRoundTrip("udp4", "127.0.0.1");
     writeMsgUDPRoundTrip("udp6", "::1");
-    fmt.Println(doneˢ);
+    fmt.Println("done");
 }
 
 internal static (ж<Δnet.UDPConn> server, ж<Δnet.UDPConn> client, bool ok) listenPair(@string network, @string host) {

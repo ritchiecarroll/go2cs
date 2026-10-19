@@ -9,9 +9,6 @@ partial struct probe {
     internal Func<nint> run;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object totalˢ = (@string)"total"u8;
-
 internal static void Main() {
     var vals = new nint[]{3, 1, 4, 1, 5}.slice();
     var counts = new map<@string, nint>{["a"] = 2, ["b"] = 7};
@@ -38,7 +35,7 @@ internal static void Main() {
         fmt.Println(p.name, n);
     }
 
-    fmt.Println(totalˢ, total);
+    fmt.Println("total", total);
 
     for (nint round = 0; round < 2; round++) {
         ref var seen = ref heap<slice<@string>>(out var Ꮡseen);

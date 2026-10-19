@@ -23,9 +23,6 @@ internal static void sum(slice<nint> s, channel<nint> c) {
     c.ᐸꟷ(sum);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object quitˢ = (@string)"quit"u8;
-
 internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
@@ -38,7 +35,7 @@ internal static void fibonacci(channel<nint> f, channel<nint> quit) {
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
-            fmt.Println(quitˢ);
+            fmt.Println("quit");
             return;
         }}
     }
@@ -78,7 +75,7 @@ internal static partial void sieve() {
     goǃ(generate, ch.WithDirection(GoChanDir.Send));
     while (ᐧ) {
         nint prime = ᐸꟷ(ch);
-        fmt.Print(prime, (@string)"\n"u8);
+        fmt.Print(prime, "\n");
         var ch1 = new channel<nint>(0);
         goǃ(filter, ch.WithDirection(GoChanDir.Recv), ch1.WithDirection(GoChanDir.Send), prime);
         ch = ch1;
@@ -92,16 +89,6 @@ internal static partial void sieve() {
 internal static nint f() {
     return 0;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object gotˢ = (@string)"Got: "u8;
-private static readonly object gotˢ2 = (@string)" -- got: "u8;
-private static readonly object unexpectedSendToNilˢ = (@string)"unexpected send to nil channel"u8;
-private static readonly object unexpectedReceivedFromˢ = (@string)"unexpected received from nil channel: "u8;
-private static readonly object closedChannel2Selectedˢ = (@string)"closed channel 2 selected immediately: "u8;
-private static readonly object unexpectedOkˢ = (@string)"unexpected: OK: "u8;
-private static readonly object unexpectedˢ = (@string)"unexpected: "u8;
-private static readonly object racedˢ = (@string)"raced:"u8;
 
 internal static partial void Main() {
     var ch = new channel<nint>(2);
@@ -130,19 +117,19 @@ internal static partial void Main() {
         var selᴛ6 = ch4;
         switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ), ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
         case 0 when selᴛ3.ꟷᐳ(out var v1): {
-            fmt.Println(gotˢ, v1);
+            fmt.Println("Got: ", v1);
             break;
         }
         case 1 when selᴛ4.ꟷᐳ(out var v1): {
-            fmt.Println(gotˢ, v1);
+            fmt.Println("Got: ", v1);
             break;
         }
         case 2 when selᴛ5.ꟷᐳ(out var v1, out var okΔ1): {
-            fmt.Println((@string)"OK: "u8, okΔ1, gotˢ2, v1);
+            fmt.Println("OK: ", okΔ1, " -- got: ", v1);
             break;
         }
         case 3 when selᴛ6.ꟷᐳ(out a[f()]): {
-            fmt.Println(gotˢ, a[f()]);
+            fmt.Println("Got: ", a[f()]);
             break;
         }}
     }
@@ -157,23 +144,23 @@ internal static partial void Main() {
     var selᴛ11 = ch4;
     switch (select(selᴛ7, ᐸꟷ(selᴛ8, ꓸꓸꓸ), ᐸꟷ(selᴛ9, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ), ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
     case 0: {
-        fmt.Println(unexpectedSendToNilˢ);
+        fmt.Println("unexpected send to nil channel");
         break;
     }
     case 1 when selᴛ8.ꟷᐳ(out var v1): {
-        fmt.Println(unexpectedReceivedFromˢ, v1);
+        fmt.Println("unexpected received from nil channel: ", v1);
         break;
     }
     case 2 when selᴛ9.ꟷᐳ(out var v1): {
-        fmt.Println(closedChannel2Selectedˢ, v1);
+        fmt.Println("closed channel 2 selected immediately: ", v1);
         break;
     }
     case 3 when selᴛ10.ꟷᐳ(out var v1, out var okΔ2): {
-        fmt.Println(unexpectedOkˢ, okΔ2, gotˢ2, v1);
+        fmt.Println("unexpected: OK: ", okΔ2, " -- got: ", v1);
         break;
     }
     case 4 when selᴛ11.ꟷᐳ(out a[f()]): {
-        fmt.Println(unexpectedˢ, a[f()]);
+        fmt.Println("unexpected: ", a[f()]);
         break;
     }}
 
@@ -220,7 +207,7 @@ internal static partial void Main() {
     fmt.Println(poll(done));
 
     var (r, outerPrimary) = raceSend();
-    fmt.Println(racedˢ, r.value, r.primary, outerPrimary);
+    fmt.Println("raced:", r.value, r.primary, outerPrimary);
 }
 
 internal static @string firstMsg(channel<@string> a, channel<@string> b) {

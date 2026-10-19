@@ -27,9 +27,6 @@ public static ж<Setting> New(@string tag) {
     return Ꮡ(new Setting(tag: tag));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered:"u8;
-
 internal static void Main() {
     var s = New("debug");
 
@@ -40,7 +37,7 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println(recoveredˢ, recover());
+                fmt.Println("recovered:", recover());
             }, ref ᒐ);
             fmt.Println((~sʗ1).name);
         }

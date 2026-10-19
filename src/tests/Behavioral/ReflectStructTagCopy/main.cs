@@ -45,18 +45,6 @@ partial struct outer {
     /*embed*/ internal inner inner;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object lookupJsonˢ = (@string)"lookup json:"u8;
-private static readonly object lookupMissingˢ = (@string)"lookup missing:"u8;
-private static readonly object copySliceˢ = (@string)"copy slice:"u8;
-private static readonly object copyShortSrcˢ = (@string)"copy short src:"u8;
-private static readonly object helloˢ = (@string)"hello"u8;
-private static readonly object copyStringˢ = (@string)"copy string:"u8;
-private static readonly object copyWindowˢ = (@string)"copy window:"u8;
-private static readonly object copyArrayˢ = (@string)"copy array:"u8;
-private static readonly object copyNilDstˢ = (@string)"copy nil dst:"u8;
-private static readonly object setSuffixˢ = (@string)"SET suffix:"u8;
-
 internal static void Main() {
     var t = reflect.TypeOf(new record(nil));
 
@@ -67,34 +55,34 @@ internal static void Main() {
 
     var f = t.Field(1);
     var (v, ok) = f.Tag.Lookup("json");
-    fmt.Println(lookupJsonˢ, v, ok);
+    fmt.Println("lookup json:", v, ok);
     (v, ok) = f.Tag.Lookup("missing");
-    fmt.Println(lookupMissingˢ, v, ok);
+    fmt.Println("lookup missing:", v, ok);
 
     var dst = new slice<byte>(4);
     nint n = reflect.Copy(reflect.ValueOf(dst), reflect.ValueOf(new byte[]{1, 2, 3, 4, 5, 6}.slice()));
-    fmt.Println(copySliceˢ, n, dst);
+    fmt.Println("copy slice:", n, dst);
 
     var @short = new slice<byte>(8);
     n = reflect.Copy(reflect.ValueOf(@short), reflect.ValueOf(new byte[]{9, 8, 7}.slice()));
-    fmt.Println(copyShortSrcˢ, n, @short);
+    fmt.Println("copy short src:", n, @short);
 
     var sdst = new slice<byte>(3);
-    n = reflect.Copy(reflect.ValueOf(sdst), reflect.ValueOf(helloˢ));
-    fmt.Println(copyStringˢ, n, sdst);
+    n = reflect.Copy(reflect.ValueOf(sdst), reflect.ValueOf("hello"));
+    fmt.Println("copy string:", n, sdst);
 
     var backing = new nint[]{0, 0, 0, 0}.slice();
     var window = backing[1..3];
     n = reflect.Copy(reflect.ValueOf(window), reflect.ValueOf(new nint[]{5, 6, 7}.slice()));
-    fmt.Println(copyWindowˢ, n, backing);
+    fmt.Println("copy window:", n, backing);
 
     ref var arr = ref heap(new array<nint>(3), out var Ꮡarr);
     n = reflect.Copy(reflect.ValueOf(Ꮡarr).Elem(), reflect.ValueOf(new nint[]{11, 12, 13, 14}.slice()));
-    fmt.Println(copyArrayˢ, n, arr);
+    fmt.Println("copy array:", n, arr);
 
     slice<byte> nilDst = default!;
     n = reflect.Copy(reflect.ValueOf(nilDst), reflect.ValueOf(new byte[]{1, 2}.slice()));
-    fmt.Println(copyNilDstˢ, n);
+    fmt.Println("copy nil dst:", n);
 
     foreach (var (_, vΔ1) in new any[]{new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), ((counter)0), new record(nil)}.slice()) {
         var rt = reflect.TypeOf(vΔ1);
@@ -107,7 +95,7 @@ internal static void Main() {
     }
 
     @string nm = reflect.TypeOf(new intSET(new nint[]{}.slice())).Name();
-    fmt.Println(setSuffixˢ, len(nm) >= 3 && nm.slice(len(nm) - 3) == "SET");
+    fmt.Println("SET suffix:", len(nm) >= 3 && nm.slice(len(nm) - 3) == "SET");
 
     var lt = reflect.TypeOf(new layout(nil));
     for (nint i = 0; i < lt.NumField(); i++) {
