@@ -406,6 +406,7 @@
     <Project Path="tests/Behavioral/CrossPkgLiteralNestedField/addrlib/CrossPkgLiteralNestedField.addrlib.csproj" />
     <Project Path="tests/Behavioral/EmbedLayoutMatchesGo/EmbedLayoutMatchesGo.csproj" />
     <Project Path="tests/Behavioral/GenericArrayTypeArgZero/GenericArrayTypeArgZero.csproj" />
+    <Project Path="tests/Behavioral/InlineConstraintLift/InlineConstraintLift.csproj" />
     <Project Path="tests/Behavioral/NewExpr/NewExpr.csproj" />
     <Project Path="tests/Behavioral/RawStringLineEndings/RawStringLineEndings.csproj" />
     <Project Path="tests/Behavioral/SameNameImportAlias/SameNameImportAlias.csproj" />
@@ -507,6 +508,10 @@
     <Project Path="tests/Behavioral/FloatFormatting/FloatFormatting.csproj" />
     <Project Path="tests/Behavioral/FloatKindConstArrayLength/FloatKindConstArrayLength.csproj" />
     <Project Path="tests/Behavioral/ForClauseSpill/ForClauseSpill.csproj" />
+    <Project Path="tests/Behavioral/ForeignConstraintProxy/ForeignConstraintProxy.csproj" />
+    <Project Path="tests/Behavioral/ForeignConstraintProxy/b1/ForeignConstraintProxy.b1.csproj" />
+    <Project Path="tests/Behavioral/ForeignConstraintProxy/elem/ForeignConstraintProxy.elem.csproj" />
+    <Project Path="tests/Behavioral/ForeignConstraintProxy/lib/ForeignConstraintProxy.lib.csproj" />
     <Project Path="tests/Behavioral/ForeignDefinedConversion/ForeignDefinedConversion.csproj" />
     <Project Path="tests/Behavioral/ForeignDefinedConversion/levellib/ForeignDefinedConversion.levellib.csproj" />
     <Project Path="tests/Behavioral/ForeignIfaceFieldPointer/ForeignIfaceFieldPointer.csproj" />
@@ -978,6 +983,9 @@
     <Project Path="tests/Behavioral/ReservedTypeMethodCollision/ReservedTypeMethodCollision.csproj" />
     <Project Path="tests/Behavioral/RelationalPatternGuard/RelationalPatternGuard.csproj" />
     <Project Path="tests/Behavioral/RingPointerMethods/RingPointerMethods.csproj" />
+    <Project Path="tests/Behavioral/RootedUsingCapture/RootedUsingCapture.csproj" />
+    <Project Path="tests/Behavioral/RootedUsingCapture/internal/sync/RootedUsingCapture.internal.sync.csproj" />
+    <Project Path="tests/Behavioral/RootedUsingCapture/lib/RootedUsingCapture.lib.csproj" />
     <Project Path="tests/Behavioral/RuntimeCallerFrames/RuntimeCallerFrames.csproj" />
     <Project Path="tests/Behavioral/SelfRefGenerics/SelfRefGenerics.csproj" />
     <Project Path="tests/Behavioral/SStringElision/SStringElision.csproj" />

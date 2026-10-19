@@ -8,15 +8,11 @@ partial struct node {
     internal nint val;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilˢ = "nil"u8;
-private static readonly @string setˢ = "set"u8;
-
 internal static @string onlyNilCheck(ж<node> Ꮡp) {
     if (Ꮡp == nil) {
-        return nilˢ;
+        return "nil";
     }
-    return setˢ;
+    return "set";
 }
 
 internal static bool inner(ж<node> Ꮡp) {

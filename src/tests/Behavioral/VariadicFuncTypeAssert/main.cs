@@ -12,14 +12,12 @@ internal static @string escaper(params ꓸꓸꓸany argsʗp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string valueVFlagVˢ = "value=%v flag=%v"u8;
 private static readonly object noMatchˢ = (@string)"no match"u8;
 private static readonly object plainˢ = (@string)"plain"u8;
 private static readonly object unexpectedMatchˢ = (@string)"unexpected match"u8;
 private static readonly object noMatchForStringˢ = (@string)"no match for string"u8;
 private static readonly object directˢ = (@string)"direct:"u8;
 private static readonly object directNoMatchˢ = (@string)"direct: no match"u8;
-private static readonly @string escˢ = "esc"u8;
 private static readonly object mappedˢ = (@string)"mapped:"u8;
 private static readonly object mappedNoMatchˢ = (@string)"mapped: no match"u8;
 private static readonly object assignedˢ = (@string)"assigned:"u8;
@@ -38,7 +36,7 @@ internal static void Main() {
 
     {
         var (fnΔ1, ok) = logf._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok){
-            fnΔ1(valueVFlagVˢ, (nint)(42), true);
+            fnΔ1("value=%v flag=%v", (nint)(42), true);
         } else {
             fmt.Println(noMatchˢ);
         }
@@ -56,7 +54,7 @@ internal static void Main() {
     any plain = @string (@string s) => s + "!"u8;
     {
         var (fnΔ2, ok) = plain._<Func<@string, @string>>(ᐧ); if (ok) {
-            fmt.Println(fnΔ2("ok"u8));
+            fmt.Println(fnΔ2("ok"));
         }
     }
 
@@ -72,9 +70,9 @@ internal static void Main() {
         }
     }
 
-    var funcMap = new map<@string, any>{["esc"u8] = ((Funcꓸꓸꓸ<any, @string>)(escaper))};
+    var funcMap = new map<@string, any>{["esc"] = ((Funcꓸꓸꓸ<any, @string>)(escaper))};
     {
-        var (f, ok) = funcMap[escˢ]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
+        var (f, ok) = funcMap["esc"]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
             fmt.Println(mappedˢ, f((@string)"a"u8, (@string)"b"u8));
         } else {
             fmt.Println(mappedNoMatchˢ);
@@ -102,7 +100,7 @@ internal static void Main() {
     any directPlain = @string (@string s) => s + "?"u8;
     {
         var (f, ok) = directPlain._<Func<@string, @string>>(ᐧ); if (ok){
-            fmt.Println(directPlainˢ, f("z"u8));
+            fmt.Println(directPlainˢ, f("z"));
         } else {
             fmt.Println(directPlainNoMatchˢ);
         }

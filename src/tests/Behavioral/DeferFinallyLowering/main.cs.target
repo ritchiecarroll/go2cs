@@ -253,7 +253,7 @@ internal static void rebound(this ж<box> Ꮡx, ж<box> Ꮡother) {
 private static readonly object recoveredˢ = (@string)"recovered"u8;
 
 internal static void Main() {
-    var x = Ꮡ(new box(a: new tracer(id: "a"u8), b: new tracer(id: "b"u8)));
+    var x = Ꮡ(new box(a: new tracer(id: "a"), b: new tracer(id: "b")));
 
     x.two();
 
@@ -285,7 +285,7 @@ internal static void Main() {
     x.writeShape(false);
     x.withLit();
 
-    var other = Ꮡ(new box(a: new tracer(id: "other-a"u8), b: new tracer(id: "other-b"u8)));
+    var other = Ꮡ(new box(a: new tracer(id: "other-a"), b: new tracer(id: "other-b")));
     x.rebound(other);
 }
 

@@ -43,15 +43,15 @@ internal static void Main() {
     floats.Sort();
     fmt.Println(float64SliceSortˢ, floats);
 
-    var strs = new sort.StringSlice(new @string[]{"pear"u8, "apple"u8, "fig"u8}.slice());
+    var strs = new sort.StringSlice(new @string[]{"pear", "apple", "fig"}.slice());
     strs.Sort();
     fmt.Println(stringSliceSortˢ, strs);
 
-    var names = new @string[]{"carol"u8, "alice"u8, "bob"u8}.slice();
+    var names = new @string[]{"carol", "alice", "bob"}.slice();
     sort.Sort((sort.Interface)(((sort.StringSlice)names)));
     fmt.Println(sortSortSortStringSliceVˢ, names);
 
-    var w = new words(new @string[]{"delta"u8, "alpha"u8, "charlie"u8}.slice());
+    var w = new words(new @string[]{"delta", "alpha", "charlie"}.slice());
     w.Sort();
     fmt.Println(userWordsSortˢ, w);
 }

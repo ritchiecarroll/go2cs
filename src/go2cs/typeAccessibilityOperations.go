@@ -804,6 +804,7 @@ func collectPublicizedTypes(pkg *types.Package, fset *token.FileSet) {
 					// An EXPORTED generic type's constraints are named in its public declaration's
 					// where clauses, and in those of the extension methods its methods become.
 					collectTypeParamConstraintTypes(named.TypeParams(), pkg)
+					collectInlineConstraintLifts(named.TypeParams())
 				}
 
 				// An EXPORTED named FUNC type is emitted as a public C# delegate; an unexported
@@ -876,11 +877,26 @@ func collectPublicizedTypes(pkg *types.Package, fset *token.FileSet) {
 						collectSignatureTypes(results.At(i).Type(), pkg)
 					}
 				}
+
+				collectInlineConstraintLifts(sig.TypeParams())
 			}
 		}
 	}
 
 	collectSiblingTestPublicizedTypes(scope, pkg)
+}
+
+// collectInlineConstraintLifts publicizes the lift of every anonymous inline constraint carrying
+// methods in an EXPORTED declaration's type-parameter list (liftTypeParamConstraints). The public
+// generic's `where T : Show_T` names the lift, and C# requires a constraint type to be at least as
+// accessible as the declaration it constrains (CS0703), while a lift defaults to internal. Keyed by
+// the constraint type itself, as every lifted anonymous type is (collectPublicizedLiftedType).
+func collectInlineConstraintLifts(typeParams *types.TypeParamList) {
+	for i := 0; i < typeParams.Len(); i++ {
+		if iface, ok := typeParams.At(i).Constraint().(*types.Interface); ok && iface.NumMethods() > 0 {
+			packagePublicizedLiftedTypes[iface] = true
+		}
+	}
 }
 
 // collectTypeParamConstraintTypes publicizes the unexported named types a public generic member's where
@@ -963,9 +979,20 @@ func collectSiblingTestPublicizedTypes(scope *types.Scope, pkg *types.Package) {
 // type's EXPORTED methods are emitted public (see the receiver-access logic in visitFuncDecl), so
 // their parameter/result types face the same accessibility rule (CS0050/CS0051). Runs to a fixpoint
 // since each newly publicized type exposes its own exported methods.
+//
+// A publicized STRUCT's exported FIELDS are public members too, so everything their types name must
+// be public, the LIFT of an anonymous struct or interface included. collectPublicizedTypes' field walk
+// (collectUnexportedNamedTypes) records named types only, which was enough while the struct itself
+// stayed internal. Go 1.26's crypto/tls test half publicizes `bogoResults` through reportData's exported
+// `Results` field, and bogoResults' exported `Tests map[string]struct{…}` named the bare, internal lift
+// `bogoResults_Tests` from a public field: CS0050/CS0051/CS0052 (found and rooted by P1). The fields go
+// through collectSignatureTypes, the walker that already records lifts alongside named types for
+// public signatures, and the fixpoint counts both sets, since a lift's own exported fields can
+// publicize further types.
 func cascadePublicizedMethodTypes() {
 	for {
 		before := len(packagePublicizedTypes)
+		beforeLifts := len(packagePublicizedLiftedTypes)
 
 		for obj := range packagePublicizedTypes {
 			named, ok := types.Unalias(obj.Type()).(*types.Named)
@@ -976,6 +1003,14 @@ func cascadePublicizedMethodTypes() {
 
 			collectMethodSignatureUnexportedTypes(named, obj.Pkg())
 
+			if structType, ok := named.Underlying().(*types.Struct); ok {
+				for i := range structType.NumFields() {
+					if field := structType.Field(i); field.Exported() {
+						collectSignatureTypes(field.Type(), obj.Pkg())
+					}
+				}
+			}
+
 			// A publicized WRAPPER (an unexported `type A b` reached here through the field/
 			// method cascade) also exposes its wrapped RHS through the public wrapper —
 			// propagate through the RHS, same as the exported-wrapper seed below.
@@ -984,7 +1019,7 @@ func cascadePublicizedMethodTypes() {
 			}
 		}
 
-		if len(packagePublicizedTypes) == before {
+		if len(packagePublicizedTypes) == before && len(packagePublicizedLiftedTypes) == beforeLifts {
 			break
 		}
 	}

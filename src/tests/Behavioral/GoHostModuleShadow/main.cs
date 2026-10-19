@@ -6,11 +6,8 @@ using GoHostModuleShadow;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goLangˢ = "GoLang"u8;
-
 internal static void Main() {
-    fmt.Println(consumer.Describe(goLangˢ));
+    fmt.Println(consumer.Describe("GoLang"));
 }
 
 } // end main_package

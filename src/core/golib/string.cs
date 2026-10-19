@@ -517,10 +517,12 @@ public readonly struct @string :
 
     #region [ Operators ]
 
-    // Enable implicit conversions between string and @string struct
+    // Enable implicit conversions between string and @string struct. A C# string LITERAL converts
+    // once per process and is shared from then on (Go's RODATA cost model; see StringLiteralCache);
+    // any other string converts exactly as `new @string(value)` does.
     public static implicit operator @string(string value)
     {
-        return new @string(value);
+        return StringLiteralCache.Get(value);
     }
 
     public static implicit operator string(@string value)

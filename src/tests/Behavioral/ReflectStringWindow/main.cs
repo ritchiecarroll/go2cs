@@ -18,12 +18,7 @@ internal static void show(@string label, reflectꓸValue v) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object hLloˢ = (@string)"héllo"u8;
-private static readonly @string namedWholeˢ = "named whole"u8;
-private static readonly @string named25ˢ = "named [2:5]"u8;
-private static readonly @string named0ˢ = "named [:0]"u8;
-private static readonly @string named66ˢ = "named [6:6]"u8;
 private static readonly object abcdefˢ = (@string)"abcdef"u8;
-private static readonly @string plain14ˢ = "plain [1:4]"u8;
 private static readonly object panicsˢ = (@string)"panics:"u8;
 
 internal static void Main() {
@@ -38,14 +33,14 @@ internal static void Main() {
     var b = new box(S: "abcdef"u8, B: slice<byte>("wxyz"u8));
     var rb = reflect.ValueOf(b);
     var sv = rb.Field(0);
-    show(namedWholeˢ, sv);
-    show(named25ˢ, sv.Slice(2, 5));
-    show(named0ˢ, sv.Slice(0, 0));
-    show(named66ˢ, sv.Slice(6, 6));
+    show("named whole", sv);
+    show("named [2:5]", sv.Slice(2, 5));
+    show("named [:0]", sv.Slice(0, 0));
+    show("named [6:6]", sv.Slice(6, 6));
 
     ref var plain = ref heap<reflectꓸValue>(out var Ꮡplain);
     plain = reflect.ValueOf(abcdefˢ);
-    show(plain14ˢ, plain.Slice(1, 4));
+    show("plain [1:4]", plain.Slice(1, 4));
 
     var full = new nint[]{0, 1, 2, 3, 4, 5, 6, 7}.slice();
     ref var rf = ref heap<reflectꓸValue>(out var Ꮡrf);
@@ -88,9 +83,6 @@ internal static void Main() {
         }));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noPanicˢ = "no panic"u8;
-
 internal static @string /*msg*/ probe(Action f) {
     @string msg = default!;
     GoFrame ᒐ = default;
@@ -103,7 +95,7 @@ internal static @string /*msg*/ probe(Action f) {
             }
         }, ref ᒐ);
         f();
-        msg = noPanicˢ;
+        msg = "no panic";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

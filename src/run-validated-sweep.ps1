@@ -1225,10 +1225,16 @@ $longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto
 #     floor itself is a safe bound for it.
 #   go/parser 90m: 836 s solo for the whole package, and it blew 40m under sweep load; TestParseDepthLimit is
 #     its long test, not measured alone, so the row takes its package floor.
-# runtime is deliberately ABSENT: its hangs (TestProfBufWakeup took the whole 2 h deadline) are what the
-# per-test deadline exists for. Every key here must also be a $longTimeouts row: a test bound above its own
-# package's default deadline is meaningless, and run-h10-recon.ps1 refuses such an orphan by name.
-$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m' }
+#   runtime 60m, added 2026-10-19 (COORD ruling on the i9's full runtime row at hop bd90790448, windows): four tests
+#     were ABANDONED at the 900 s default -- TestChanSendBarrier, TestChanSendSelectBarrier, TestConcurrentReadsAfterGrowth,
+#     TestConcurrentReadsAfterGrowthReflect -- and all four PASSED in C# on 2026-10-17, before the watchdog, at 2,339 /
+#     2,339 / 1,854 / 2,157 s (Go: 4.0 / 5.3 / 0.15 / 0.78 s): slow, legitimate runs, not hangs. 60m is about 1.5x the
+#     slowest. The four ran concurrently inside a 2,709 s row, so the 120m $longTimeouts floor stays as it is.
+#     Until then runtime was deliberately ABSENT, because its hangs (TestProfBufWakeup took the whole 2 h deadline) are
+#     what the per-test deadline exists for; at 60m such a hang is still abandoned, 60 minutes in rather than 15.
+# Every key here must also be a $longTimeouts row: a test bound above its own package's default deadline is
+# meaningless, and run-h10-recon.ps1 refuses such an orphan by name.
+$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m'; 'runtime' = '60m' }
 
 # A row's per-test deadline: the LONGER of the asked -TestDeadline and the row's floor, compared as Go
 # durations, the package floor's rule. '0' is no deadline, which is longer than any duration, so an asked

@@ -45,9 +45,6 @@ internal static bool ok(this ж<conn> Ꮡc) {
     return Ꮡc != nil && c.fd != nil;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string writeˢ = "write"u8;
-
 internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -55,12 +52,9 @@ internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
         return (0, fmt.Errorf("invalid conn"u8));
     }
     c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
-    c.fd.Value.mode = writeˢ;
+    c.fd.Value.mode = "write";
     return (len(b), default!);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string writeBuffersˢ = "writeBuffers"u8;
 
 internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -74,7 +68,7 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
         c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
         n += (int64)len(b);
     }
-    c.fd.Value.mode = writeBuffersˢ;
+    c.fd.Value.mode = "writeBuffers";
     return (n, default!);
 }
 
@@ -99,7 +93,7 @@ internal static (nint, error) Write(this ж<plainConn> Ꮡc, slice<byte> b) {
         return (0, fmt.Errorf("invalid conn"u8));
     }
     c.fd.Value.bytes = appendꓸꓸꓸ((~c.fd).bytes, b);
-    c.fd.Value.mode = writeˢ;
+    c.fd.Value.mode = "write";
     return (len(b), default!);
 }
 
@@ -113,7 +107,7 @@ partial struct valueSink {
 
 internal static (nint, error) Write(this valueSink s, slice<byte> b) {
     s.fd.Value.bytes = appendꓸꓸꓸ((~s.fd).bytes, b);
-    s.fd.Value.mode = writeˢ;
+    s.fd.Value.mode = "write";
     return (len(b), default!);
 }
 
@@ -125,7 +119,7 @@ internal static (int64, error) writeBuffers(this valueSink s, ж<Buffers> Ꮡv) 
         s.fd.Value.bytes = appendꓸꓸꓸ((~s.fd).bytes, b);
         n += (int64)len(b);
     }
-    s.fd.Value.mode = writeBuffersˢ;
+    s.fd.Value.mode = "writeBuffers";
     return (n, default!);
 }
 
@@ -138,10 +132,6 @@ internal static void report(@string label, ref sink s, int64 n, error err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tcpConnˢ = "TCPConn"u8;
-private static readonly @string connˢ = "conn"u8;
-private static readonly @string valueSinkˢ = "ValueSink"u8;
-private static readonly @string plainConnˢ = "PlainConn"u8;
 private static readonly object directˢ = (@string)"direct"u8;
 private static readonly object missˢ = (@string)"miss"u8;
 
@@ -153,22 +143,22 @@ internal static void Main() {
     var tcp = Ꮡ(new TCPConn(new conn(fd: tcpSink)));
     Δio.Writer w = new TCPConnжWriter(tcp);
     var (n, err) = Ꮡbufs.WriteTo(w);
-    report(tcpConnˢ, ref (tcpSink).DerefOrNull(), n, err);
+    report("TCPConn", ref (tcpSink).DerefOrNull(), n, err);
 
     var connSink = Ꮡ(new sink(nil));
     var c = Ꮡ(new conn(fd: connSink));
     (n, err) = Ꮡbufs.WriteTo(new connжWriter(c));
-    report(connˢ, ref (connSink).DerefOrNull(), n, err);
+    report("conn", ref (connSink).DerefOrNull(), n, err);
 
     var vsSink = Ꮡ(new sink(nil));
     var vs = new ValueSink(new valueSink(fd: vsSink));
     (n, err) = Ꮡbufs.WriteTo(vs);
-    report(valueSinkˢ, ref (vsSink).DerefOrNull(), n, err);
+    report("ValueSink", ref (vsSink).DerefOrNull(), n, err);
 
     var plainSink = Ꮡ(new sink(nil));
     var p = Ꮡ(new PlainConn(new plainConn(fd: plainSink)));
     (n, err) = Ꮡbufs.WriteTo(new PlainConnжWriter(p));
-    report(plainConnˢ, ref (plainSink).DerefOrNull(), n, err);
+    report("PlainConn", ref (plainSink).DerefOrNull(), n, err);
 
     {
         var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok){

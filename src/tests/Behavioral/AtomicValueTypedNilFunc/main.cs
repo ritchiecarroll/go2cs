@@ -25,11 +25,6 @@ internal static void recovered(@string label, Action fn) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string liveThenTypedNilSameTypeˢ = "live then typed-nil, same type"u8;
-private static readonly @string typedNilThenLiveSameTypeˢ = "typed-nil then live, same type"u8;
-private static readonly @string typedNilThenTypedNilˢ = "typed-nil then typed-nil, DIFFERENT type"u8;
-private static readonly @string liveThenLiveSameTypeˢ = "live then live, same type"u8;
-private static readonly @string intThenStringDifferentˢ = "int then string, different type"u8;
 private static readonly object loadedAndCalledˢ = (@string)"loaded and called:"u8;
 
 internal static void Main() {
@@ -37,13 +32,13 @@ internal static void Main() {
     Ꮡv1.Store((nint fd) => {
         _ = fd;
     });
-    recovered(liveThenTypedNilSameTypeˢ, () => {
+    recovered("live then typed-nil, same type", () => {
         Ꮡv1.Store(((Action<nint>)(default!)).OrTypedNilFunc());
     });
 
     ref var v2 = ref heap(new atomic.Value(), out var Ꮡv2);
     Ꮡv2.Store(((Action<nint>)(default!)).OrTypedNilFunc());
-    recovered(typedNilThenLiveSameTypeˢ, () => {
+    recovered("typed-nil then live, same type", () => {
         Ꮡv2.Store((nint fd) => {
             _ = fd;
         });
@@ -51,7 +46,7 @@ internal static void Main() {
 
     ref var v3 = ref heap(new atomic.Value(), out var Ꮡv3);
     Ꮡv3.Store(((Action<nint>)(default!)).OrTypedNilFunc());
-    recovered(typedNilThenTypedNilˢ, () => {
+    recovered("typed-nil then typed-nil, DIFFERENT type", () => {
         Ꮡv3.Store(((Action<@string>)(default!)).OrTypedNilFunc());
     });
 
@@ -59,7 +54,7 @@ internal static void Main() {
     Ꮡv4.Store((nint fd) => {
         _ = fd;
     });
-    recovered(liveThenLiveSameTypeˢ, () => {
+    recovered("live then live, same type", () => {
         Ꮡv4.Store((nint fd) => {
             _ = fd;
         });
@@ -67,7 +62,7 @@ internal static void Main() {
 
     ref var v5 = ref heap(new atomic.Value(), out var Ꮡv5);
     Ꮡv5.Store((nint)(1));
-    recovered(intThenStringDifferentˢ, () => {
+    recovered("int then string, different type", () => {
         Ꮡv5.Store((@string)"x"u8);
     });
 

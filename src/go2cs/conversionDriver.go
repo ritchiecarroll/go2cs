@@ -305,6 +305,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)
 		currentPackageGorootVendored = isGorootVendoredDir(packageInputPath, options.goRoot)
+		packageHoistsLiterals = literalsHoistedFor(packageInputPath, options)
 
 		if projectFileName, projectFileContents, err = prepareProjectFiles(projectName, packageNamespace, packageOutputPath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", packageOutputPath, err)
@@ -607,6 +608,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// now that every file's lifted names are registered in the shared registry.
 		resolveDynamicTypeMarkers(outputFileNames)
 		resolveDynamicInterfaceBases(outputFileNames)
+
+		// Inline-constraint records an instantiation deferred until its lift was named (the
+		// names are all registered now), ahead of the metadata file below.
+		replayDeferredConstraintRecords()
 
 		// Write project file with correct output type and unsafe code settings
 		options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)

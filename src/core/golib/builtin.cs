@@ -279,7 +279,7 @@ public static partial class builtin
     /// Returns a new <see cref="PanicException"/> with the specified <paramref name="state"/>.
     /// </summary>
     /// <param name="state">State of panic exception.</param>
-    public static PanicException panic(object? state)
+    public static PanicException panic([GoTakesCSharpString] object? state)
     {
         // Go's `panic` takes an `any`, so the value's DYNAMIC TYPE is observable: a recovering
         // comparison (`if p != "x"`), a type assertion (`err.(string)`), and a `case string:` arm
@@ -2263,7 +2263,7 @@ public static partial class builtin
     /// for pure-ASCII values, so the C# <see cref="string.Length"/> shortcut is wrong for
     /// any multi-byte rune (<c>len("a☺b☻")</c> is 8, not 4).
     /// </remarks>
-    public static nint len(string str)
+    public static nint len([GoTakesCSharpString] string str)
     {
         return Encoding.UTF8.GetByteCount(str);
     }
@@ -2987,6 +2987,8 @@ public static partial class builtin
 
                 if (args[i] is @string text)
                     sink.Write(text.ToSpan());
+                else if (args[i] is IRuntimePrintable printable)
+                    printable.RuntimePrint(); // runtime.hex and runtime.quoted: printhex and printquoted
                 else
                     writePrintText(sink, printArg(args[i]).AsSpan(), buffer);
             }

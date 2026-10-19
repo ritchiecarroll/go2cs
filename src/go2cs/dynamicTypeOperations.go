@@ -204,6 +204,37 @@ func registerDynamicTypeName(signature, csTypeName string) {
 	packageLock.Unlock()
 }
 
+// constraintLiftKey names a generic TYPE's index'th type parameter's inline constraint by its
+// DECLARATION, the key the type and each method's receiver copy share (liftTypeParamConstraints). It
+// is no Go type's text, so it can never match a signature lookup or a published GoDynamicTypeLift.
+func constraintLiftKey(owner *types.Named, index int) string {
+	obj := owner.Origin().Obj()
+	path := ""
+
+	if obj.Pkg() != nil {
+		path = obj.Pkg().Path()
+	}
+
+	return fmt.Sprintf("constraint %s.%s#%d", path, obj.Name(), index)
+}
+
+// registerConstraintLift records a generic type's inline-constraint lift by declaration. Not
+// published: a lift is referenced only by its own package's declarations and methods.
+func registerConstraintLift(key, csTypeName string) {
+	packageLock.Lock()
+	packageConstraintLiftNames[key] = csTypeName
+	packageLock.Unlock()
+}
+
+// lookupConstraintLift returns the lift registered for a declaration key, or "" if its declaring
+// file has not been visited yet (the deferred marker then resolves it at the barrier).
+func lookupConstraintLift(key string) string {
+	packageLock.Lock()
+	name := packageConstraintLiftNames[key]
+	packageLock.Unlock()
+	return name
+}
+
 // lookupDynamicTypeName returns the lifted C# name registered for a signature, or
 // "" if none is registered yet (the declaring file may not have been visited).
 func lookupDynamicTypeName(signature string) string {
@@ -300,6 +331,10 @@ func resolveDynamicTypeMarkers(outputFileNames []string) {
 
 			if replacement == "" {
 				replacement = lookupProductionDynamicTypeName(signature)
+			}
+
+			if replacement == "" {
+				replacement = lookupConstraintLift(signature)
 			}
 
 			if replacement == "" {

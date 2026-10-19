@@ -736,8 +736,16 @@ public static partial class GoReflect
     // name — `B[internal/reflectlite_test.A]`, verified against the toolchain by reflectlite's
     // TestNames. A predeclared or unnamed argument keeps its ordinary Go spelling (`B[int]`,
     // `B[[]byte]`), and nesting recurses through the same rule.
+    //
+    // A pointer-sourced adapter stands for *T here as everywhere (R10, TryAdapterWrappedType), and a
+    // self-referential CONSTRAINT PROXY is the one adapter that reaches a type argument: Go's
+    // `lib.Ord2[*elem.Node]` is `lib.Ord2<lib.жLesser<elem.Node>>`. Nested in its package class, the
+    // proxy has a package path of its own, so it is unwrapped before the path is read.
     private static string goTypeArgumentName(Type t)
     {
+        if (TryAdapterWrappedType(t, out Type? wrapped, out bool pointerSourced) && pointerSourced)
+            return "*" + goTypeArgumentName(wrapped);
+
         string path = GoPackagePath(t);
 
         if (path.Length == 0)

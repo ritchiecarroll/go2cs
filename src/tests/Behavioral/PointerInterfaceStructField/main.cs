@@ -26,20 +26,20 @@ internal static void assignDescriber(ref holder h, ж<Setting> Ꮡs) {
     h.d = new SettingжDescriber(Ꮡs);
 }
 
-internal static ж<Setting> ᏑglobalSetting = new StandardBox<Setting>(new Setting(name: "verbosity"u8, value: 3));
+internal static ж<Setting> ᏑglobalSetting = new StandardBox<Setting>(new Setting(name: "verbosity", value: 3));
 internal static ref Setting globalSetting => ref ᏑglobalSetting.Value;
 
 internal static void Main() {
-    var h = Ꮡ(new holder(new SettingжDescriber(ᏑglobalSetting), "positional"u8));
+    var h = Ꮡ(new holder(new SettingжDescriber(ᏑglobalSetting), "positional"));
     fmt.Println((~h).label, (~h).d.Describe());
 
     ref var local = ref heap<Setting>(out var Ꮡlocal);
-    local = new Setting(name: "count"u8, value: 7);
-    var h2 = new holder(d: new SettingжDescriber(Ꮡlocal), label: "keyed"u8);
+    local = new Setting(name: "count", value: 7);
+    var h2 = new holder(d: new SettingжDescriber(Ꮡlocal), label: "keyed");
     fmt.Println(h2.label, h2.d.Describe());
 
     ref var replacement = ref heap<Setting>(out var Ꮡreplacement);
-    replacement = new Setting(name: "assigned"u8, value: 11);
+    replacement = new Setting(name: "assigned", value: 11);
     assignDescriber(ref (h).DerefOrNull(), Ꮡreplacement);
     replacement.value = 12;
     fmt.Println((~h).label, (~h).d.Describe());

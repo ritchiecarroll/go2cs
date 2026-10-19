@@ -40,21 +40,16 @@ internal static F32b typedF32b => 1.5f;
 internal static F64 typedF64 => 0.1;
 internal const float32 plainF32 = 0.1f;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string zeroˢ = "zero"u8;
-private static readonly @string smallˢ = "small"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static @string classify(C128 c) {
     var exprᴛ1 = c;
     if (exprᴛ1 == (C128)(0D)) {
-        return zeroˢ;
+        return "zero";
     }
     if (exprᴛ1 == (C128)(1D) || exprᴛ1 == (C128)(2.5D)) {
-        return smallˢ;
+        return "small";
     }
 
-    return otherˢ;
+    return "other";
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -101,7 +96,6 @@ internal static (C128, C64) retMulti() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object assignˢ = (@string)"assign:"u8;
-private static readonly @string twoˢ = "two"u8;
 private static readonly object mapˢ = (@string)"map:"u8;
 private static readonly object callˢ = (@string)"call:"u8;
 private static readonly object compositeˢ = (@string)"composite:"u8;
@@ -121,8 +115,8 @@ internal static void Main() {
     C128b ab = 6D;
     fmt.Println(assignˢ, a, b, ab);
 
-    var m = new map<C128, @string>{[0D] = "zero"u8, [1.5D] = "one-half"u8};
-    m[2D] = twoˢ;
+    var m = new map<C128, @string>{[0D] = "zero", [1.5D] = "one-half"};
+    m[2D] = "two";
     fmt.Println(mapˢ, m[0D], m[1.5D], m[2D], len(m));
 
     var (x, y) = retMulti();
@@ -131,8 +125,8 @@ internal static void Main() {
     var s = new C128[]{1D, 2D, 3D.i()}.slice();
     var arr = new C64[]{1F, 2F}.array();
     var p = new pair(a: 4D, b: 5F);
-    var mv = new map<@string, C64>{["k"u8] = 9F};
-    fmt.Println(compositeˢ, s, arr, p, mv["k"u8]);
+    var mv = new map<@string, C64>{["k"] = 9F};
+    fmt.Println(compositeˢ, s, arr, p, mv["k"]);
 
     var c = ((C128)2D);
     c = c * 2D;

@@ -17,7 +17,7 @@ internal static ж<Value> applyPtr(Func<ж<Value>> f) {
 }
 
 internal static map<@string, nint> applyMap(Func<@string, map<@string, nint>> f) {
-    return f("x"u8);
+    return f("x");
 }
 
 internal static channel<nint> applyChan(Func<channel<nint>> f) {
@@ -51,7 +51,7 @@ internal static void Main() {
     fmt.Println(a1SliceResultˢ, g(default!) == default!, len(g(default!)));
 
     var m = map<@string, nint> (@string k) => default!;
-    fmt.Println(a2MapResultˢ, applyMap(m) == default!, len(m("x"u8)));
+    fmt.Println(a2MapResultˢ, applyMap(m) == default!, len(m("x")));
 
     var p = ж<Value> () => default!;
     fmt.Println(a3PointerResultˢ, p() == nil);
@@ -72,7 +72,7 @@ internal static void Main() {
         _ = a;
         _ = b;
     }
-    v("x"u8, "y"u8);
+    v("x", "y");
     fmt.Println(b2VoidLambdaRanˢ);
 
     slice<Value> r() => new Value[]{new(N: 7)}.slice();

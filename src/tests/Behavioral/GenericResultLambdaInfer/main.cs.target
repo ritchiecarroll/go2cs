@@ -49,19 +49,15 @@ internal static E pick<E>(slice<E> xs, Func<E, E, bool> better) {
 
 internal static Func<nint> fortyTwo = Once(nint () => 42);
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilˢ = "<nil>"u8;
-
 internal static @string describe(any v) {
     if (v == default!) {
-        return nilˢ;
+        return "<nil>";
     }
     return fmt.Sprintf("%v"u8, v);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object recoveredˢ = (@string)"recovered:"u8;
-private static readonly @string sevenˢ = "seven"u8;
 
 internal static void Main() {
     fmt.Println(fortyTwo(), fortyTwo());
@@ -89,15 +85,15 @@ internal static void Main() {
     var (p, q) = pairOnce();
     fmt.Println(describe(p), describe(q));
 
-    var both = Once2((nint, @string) () => (7, sevenˢ));
+    var both = Once2((nint, @string) () => (7, "seven"));
     var (n, s) = both();
     fmt.Println(n, s);
 
     fmt.Println(reduce(new nint[]{1, 2, 3, 4}.slice(), nint (nint a, nint b) => a + b));
-    fmt.Println(reduce(new @string[]{"a"u8, "b"u8, "c"u8}.slice(), @string (@string a, @string b) => a + b));
+    fmt.Println(reduce(new @string[]{"a", "b", "c"}.slice(), @string (@string a, @string b) => a + b));
 
     fmt.Println(pick(new nint[]{3, 9, 4}.slice(), (nint a, nint b) => a > b));
-    fmt.Println(pick(new @string[]{"pear"u8, "fig"u8, "plum"u8}.slice(), (@string a, @string b) => len(a) < len(b)));
+    fmt.Println(pick(new @string[]{"pear", "fig", "plum"}.slice(), (@string a, @string b) => len(a) < len(b)));
 }
 
 } // end main_package

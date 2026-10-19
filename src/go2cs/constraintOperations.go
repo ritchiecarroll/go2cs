@@ -1279,9 +1279,15 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		constraint := typeParam.Constraint()
 		var constraintName string
 
-		// Check if the constraint type is an anonymous interface
-		if _, ok := constraint.(*types.Interface); ok {
+		// Check if the constraint type is an anonymous interface. One carrying methods was LIFTED to a
+		// named interface (liftTypeParamConstraints) and is named by that lift; an operator-only type
+		// set keeps its Go text, which only the arms below read and none emits.
+		if iface, ok := constraint.(*types.Interface); ok {
 			constraintName = constraint.String()
+
+			if iface.NumMethods() > 0 {
+				constraintName = v.liftedConstraintName(iface, genericOwner(named, signature, typeParams), i)
+			}
 		} else {
 			constraintName = v.getAliasQualifiedTypeName(constraint, false)
 		}
@@ -1586,6 +1592,132 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 	return fmt.Sprintf("<%s>", strings.Join(emittedNames, ", ")), strings.Join(constraintNames, "")
 }
 
+// recordValueConstraintImplementation records the nominal implementation a VALUE type argument needs at
+// a method-set constraint naming no type parameter — `pair[T nameI]`, or the lifted
+// `pair[T interface{ Name() string }]`, at `tagged`. C# checks `where T : nameI` as `tagged : nameI`,
+// which only a GoImplement record makes go2cs-gen declare, and a record was minted only where a CALL
+// converted an argument to the type parameter (convertToInterfaceType). A generic TYPE instantiated
+// at a value type with no such call — `pair[tagged]{…}` — was CS0315, named or inline alike. Both
+// instantiation forms call it, a generic TYPE from constraintProxyArg and a FUNCTION from
+// constraintProxySigArg, so the record is minted there; it is a set, so a pair a call already
+// recorded is unchanged. An instantiated GENERIC constraint
+// (`Adder[A]`, `Adder[int]`) is recordClosedConstraintImplementation's, which closes it over the
+// argument; a lifted inline constraint naming a type parameter (`Min_T<T>`) is not closed by either.
+//
+// fn is the generic FUNCTION whose index'th parameter this is, nil for a generic TYPE. A function's
+// method-set clause is emitted only where its body needs it (methodSetConstraintNeeded), and no
+// clause asks for no record: Go 1.26's errors.AsType[E error] at a value error type drops its clause,
+// and recording `GoImplement<alert, error>` there declared an implementation nothing checks.
+func (v *Visitor) recordValueConstraintImplementation(typeParam *types.TypeParam, typeArg types.Type, fn *types.Func, index int) {
+	named, ok := types.Unalias(typeArg).(*types.Named)
+
+	if !ok || typeContainsTypeParams(typeArg) {
+		return
+	}
+
+	if _, isInterface := named.Underlying().(*types.Interface); isInterface {
+		return
+	}
+
+	constraint := types.Unalias(typeParam.Constraint())
+
+	if generic, ok := constraint.(*types.Named); ok && generic.TypeArgs().Len() > 0 {
+		return
+	}
+
+	iface, ok := constraint.Underlying().(*types.Interface)
+
+	if !ok || iface.NumMethods() == 0 || !iface.IsMethodSet() || typeContainsTypeParams(constraint) {
+		return
+	}
+
+	for i := 0; i < iface.NumMethods(); i++ {
+		sig := iface.Method(i).Type().(*types.Signature)
+
+		for _, tuple := range []*types.Tuple{sig.Params(), sig.Results()} {
+			for j := 0; j < tuple.Len(); j++ {
+				if typeContainsTypeParams(tuple.At(j).Type()) {
+					return
+				}
+			}
+		}
+	}
+
+	if !types.Implements(typeArg, iface) {
+		return
+	}
+
+	if fn != nil && !v.methodSetConstraintNeeded(fn, index) {
+		return
+	}
+
+	v.convertToInterfaceType(constraint, typeArg, "")
+}
+
+// liftedConstraintName names an anonymous inline constraint by the interface liftTypeParamConstraints
+// lifted it to. The lift is found by this visitor's own map (the declaration itself, or a function's
+// own constraint). A METHOD of a generic type reaches the constraint as its receiver's copy, a
+// different object, possibly in another file: a lift that captures no parameter is found by its
+// signature in the package registry, and one that captures any (`Ord_T<T>`) by its DECLARATION
+// (constraintLiftKey on owner and index), since such a lift is never registered by signature. Either
+// way a lift not yet visited is a deferred marker the file-visit barrier resolves.
+//
+// The lift is declared over the parameters it captures, in declared order (liftCapturedTypeParams), so
+// its arguments are composed HERE from the same walk over this copy: a receiver may rename them
+// (`func (b *Box[U]) …`), and its constraint then names U where the declaration named T.
+func (v *Visitor) liftedConstraintName(iface *types.Interface, owner *types.Named, index int) string {
+	captured := liftCapturedTypeParams(iface)
+	name, ok := v.liftedNameFor(iface)
+
+	if !ok && len(captured) > 0 && owner != nil {
+		key := constraintLiftKey(owner, index)
+
+		if name = lookupConstraintLift(key); name == "" {
+			name = dynamicTypeMarker(key)
+		}
+
+		ok = true
+	}
+
+	if !ok {
+		if name = lookupDynamicTypeName(iface.String()); name == "" {
+			if name = lookupProductionDynamicTypeName(iface.String()); name == "" {
+				name = dynamicTypeMarker(iface.String())
+			}
+		}
+	}
+
+	if idx := strings.Index(name, "<"); idx >= 0 {
+		name = name[:idx]
+	}
+
+	return name + liftedTypeParamList(capturedTypeParamNames(captured))
+}
+
+// genericOwner is the generic TYPE whose parameter list typeParams is: the named type itself, or a
+// method's receiver type (its origin); nil for a function's own list.
+func genericOwner(named *types.Named, signature *types.Signature, typeParams *types.TypeParamList) *types.Named {
+	if named != nil {
+		return named.Origin()
+	}
+
+	if signature == nil || signature.Recv() == nil || signature.RecvTypeParams() != typeParams {
+		return nil
+	}
+
+	recv := signature.Recv().Type()
+
+	if pointer, ok := recv.(*types.Pointer); ok {
+		recv = pointer.Elem()
+	}
+
+	if recvNamed, ok := types.Unalias(recv).(*types.Named); ok {
+		return recvNamed.Origin()
+	}
+
+	return nil
+}
+
 // constraintUnionText renders a constraint's type set when it is exactly one union of type terms, NAMED
 // (`type EventDetails interface { Metric | Label | … }`) or inline (`[P string | net.IP | parsedURI]`), each
 // term spelled as Go writes it: with its package NAME (never its import path), bare in the package that
@@ -1657,6 +1789,8 @@ func (v *Visitor) constraintProxyArg(named *types.Named, i int) (string, bool) {
 	if typeParams == nil || i >= typeParams.Len() || named.TypeArgs() == nil || i >= named.TypeArgs().Len() {
 		return "", false
 	}
+
+	v.recordValueConstraintImplementation(typeParams.At(i), named.TypeArgs().At(i), nil, i)
 
 	return v.constraintProxyFor(typeParams.At(i), named.TypeArgs().At(i))
 }
@@ -1741,7 +1875,16 @@ func (v *Visitor) recordClosedConstraintImplementation(typeParam *types.TypePara
 		return
 	}
 
-	constraintNamed, ok := types.Unalias(typeParam.Constraint()).(*types.Named)
+	// An inline constraint naming its own parameter is read through its lift's named view
+	// (inlineConstraintNamed); one whose lift is not named yet replays after the barrier.
+	constraint, resolved := v.effectiveConstraint(typeParam)
+
+	if !resolved {
+		v.deferConstraintRecord(typeParam, func() { v.recordClosedConstraintImplementation(typeParam, typeArg) })
+		return
+	}
+
+	constraintNamed, ok := types.Unalias(constraint).(*types.Named)
 
 	if !ok || constraintNamed.TypeArgs().Len() == 0 {
 		return
@@ -1824,8 +1967,10 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 	}
 
 	// The constraint must be an INSTANTIATED generic method-set interface (nistPoint[Point]);
-	// a plain non-generic method-set interface (go/ast's Node) widens to itself instead.
-	constraintNamed, ok := typeParam.Constraint().(*types.Named)
+	// a plain non-generic method-set interface (go/ast's Node) widens to itself instead. An inline
+	// constraint naming its own parameter is read through its lift's named view (inlineConstraintNamed).
+	constraint, resolved := v.effectiveConstraint(typeParam)
+	constraintNamed, ok := constraint.(*types.Named)
 
 	if !ok || constraintNamed.TypeArgs() == nil || constraintNamed.TypeArgs().Len() == 0 {
 		return "", false
@@ -1857,9 +2002,11 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 	// ImplementGenerator's `elementType.Name + PointerPrefix + interfaceDef.Name`.
 	proxyName := elemNamed.Obj().Name() + PointerPrefix + interfaceOrigin.Obj().Name()
 
-	// A FOREIGN constraint interface: the package that declares it OWNS the proxy. It records the pair wherever it closes
-	// the constraint over the element, and ImplementGenerator makes that proxy public when both sides are, so a consumer
-	// names THE OWNER'S proxy through the interface package's C# qualifier and records none of its own. A second record
+	// A FOREIGN constraint interface: the package that declares it OWNS the proxy (foreignConstraintProxy: its concrete
+	// proxy when it published one for this element, else its generic proxy, which this package binds). A concrete one is
+	// recorded wherever the owner closes the constraint over the element, and ImplementGenerator makes that proxy public
+	// when both sides are, so a consumer names THE OWNER'S proxy through the interface package's C# qualifier and records
+	// no concrete proxy of its own. A second record
 	// here would mint a second class of the same simple name in this assembly, which the owner's signatures do not accept:
 	// crypto/ecdsa passing crypto/internal/fips140/ecdsa's `P224()` result to its own generics was CS1503 x16, and the
 	// record itself spelled the interface by its Go import path, a parse error (RED 8, COORD a4eb648a6 g2a/g2b). The
@@ -1906,7 +2053,7 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 			return "", false
 		}
 
-		return qualified[:dot+len(sep)] + proxyName, true
+		return v.foreignConstraintProxy(interfaceOrigin, elemNamed, proxyName, qualified[:dot+len(sep)], sep == TypeAliasDot)
 	}
 
 	// Register the (element, interface) pair so package_info emits the ConstraintProxy record.
@@ -1942,6 +2089,13 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 
 	if interfaceConstrainsItself(interfaceOrigin) {
 		placeholder = proxyName
+	}
+
+	// A lift not named yet: the proxy name above carries the deferred marker, which the barrier
+	// resolves in the emitted source, and the record replays after it under the real name.
+	if !resolved {
+		v.deferConstraintRecord(typeParam, func() { v.constraintProxyFor(typeParam, typeArg) })
+		return proxyName, true
 	}
 
 	packageLock.Lock()
@@ -1982,6 +2136,21 @@ func (v *Visitor) namedHasConstraintProxy(named *types.Named) bool {
 	return false
 }
 
+// proxiedTypeInstantiation renders a WRITTEN generic type instantiation (`lib.Ord2[*elem.Node]`, an IndexExpr or
+// IndexListExpr in a type position) through the resolved type when a type argument takes a constraint proxy, so it
+// names exactly the type a declaration of the same Go type names: `lib.Ord2<lib.жLesser<elem.Node>>`. The AST walk
+// rendered the box (`lib.Ord2<ж<elem.Node>>`), which satisfies no constraint and is another type (CS0311 at a type
+// assertion or a conversion). Gated to the proxy case, as the composite-literal re-render is, so nothing else changes.
+func (v *Visitor) proxiedTypeInstantiation(instantiation ast.Expr) (string, bool) {
+	if tv, ok := v.info.Types[instantiation]; ok && tv.IsType() {
+		if named, ok := types.Unalias(tv.Type).(*types.Named); ok && v.namedHasConstraintProxy(named) {
+			return convertToCSTypeName(v.getAliasQualifiedTypeName(named, false)), true
+		}
+	}
+
+	return "", false
+}
+
 // signatureTypeParams resolves the declared type-parameter list of the generic FUNCTION `funIdent`
 // names, or nil when it names something that is not a generic function.
 func (v *Visitor) signatureTypeParams(funIdent *ast.Ident) *types.TypeParamList {
@@ -2012,6 +2181,10 @@ func (v *Visitor) constraintProxySigArg(funIdent *ast.Ident, typeArgs *types.Typ
 
 	if typeParams == nil || i >= typeParams.Len() || typeArgs == nil || i >= typeArgs.Len() {
 		return "", false
+	}
+
+	if fn, ok := v.info.ObjectOf(funIdent).(*types.Func); ok {
+		v.recordValueConstraintImplementation(typeParams.At(i), typeArgs.At(i), fn, i)
 	}
 
 	return v.constraintProxyFor(typeParams.At(i), typeArgs.At(i))

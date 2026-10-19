@@ -57,7 +57,7 @@ internal static void Main() {
     var c = new Counter(v: 3);
     var w = new Wide(v: 4);
     var p = new Plain(a: 1, b: 2);
-    var m = new Managed(s: "managed"u8);
+    var m = new Managed(s: "managed");
     fmt.Println(c.v, w.v, p.a, p.b, m.s);
 
     c = new Counter(nil);

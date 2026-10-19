@@ -14,14 +14,11 @@ partial struct Blob {
     public @string Data;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilBlobˢ = "<nil blob>"u8;
-
 public static (@string, error) Encode(this ж<Blob> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
-        return (nilBlobˢ, default!);
+        return ("<nil blob>", default!);
     }
     return (b.Data, default!);
 }
@@ -30,14 +27,11 @@ partial struct Tag {
     public nint N;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilTagˢ = "<nil tag>"u8;
-
 public static (@string, error) Encode(this ж<Tag> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
-        return (nilTagˢ, default!);
+        return ("<nil tag>", default!);
     }
     return (fmt.Sprintf("tag:%d"u8, t.N), default!);
 }
@@ -51,26 +45,20 @@ partial struct Stamp {
     public @string S;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilStampˢ = "nil stamp"u8;
-
 public static @string Error(this ж<Stamp> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
-        return nilStampˢ;
+        return "nil stamp";
     }
     return s.S;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noneˢ = "none"u8;
 
 internal static @string sink(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (len(args) == 0) {
-        return noneˢ;
+        return "none";
     }
     return fmt.Sprintf("argIsNil=%v valid=%v type=%v printed=%v"u8,
         args[0] == default!, reflect.ValueOf(args[0]).IsValid(), reflect.TypeOf(args[0]), fmt.Sprint(args[0]));
@@ -88,7 +76,6 @@ internal static void report(@string label, reflectꓸValue v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string newBlobElemˢ = "new(*Blob).Elem()"u8;
 private static readonly object assertErrorOkFalseˢ = (@string)"  assert error ok=false"u8;
 
 internal partial struct main_si /*dyn*/ {
@@ -105,7 +92,7 @@ internal partial struct main_sh /*dyn*/ {
 
 internal static void Main() {
     var s = new slice<ж<Blob>>(2);
-    s[1] = Ꮡ(new Blob(Data: "second"u8));
+    s[1] = Ꮡ(new Blob(Data: "second"));
     var rs = reflect.ValueOf(s);
     for (nint i = 0; i < rs.Len(); i++) {
         report(fmt.Sprintf("slice[%d]"u8, i), rs.Index(i));
@@ -124,14 +111,14 @@ internal static void Main() {
         report("field "u8 + rh.Type().Field(i).Name, rh.Field(i));
     }
 
-    var m = new map<@string, ж<Blob>>{["nil"u8] = default!};
+    var m = new map<@string, ж<Blob>>{["nil"] = default!};
     var it = reflect.ValueOf(m).MapRange();
     while (it.Next()) {
         report("map["u8 + it.Key().String() + "]"u8, it.Value());
     }
 
     var rn = reflect.New(reflect.TypeOf(((ж<Blob>)nil))).Elem();
-    report(newBlobElemˢ, rn);
+    report("new(*Blob).Elem()", rn);
 
     var iface = rs.Index(0).Interface();
     fmt.Printf("roundtrip: ==(*Blob)(nil) %v, ==nil %v\n"u8, AreEqual(iface, ((ж<Blob>)nil)), iface == default!);

@@ -25,8 +25,6 @@ internal static bool prefixMatch<T>(T s, T sep)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "hello"u8;
-private static readonly @string helˢ = "hel"u8;
 private static readonly object sumStringˢ = (@string)"sum(string):"u8;
 private static readonly object sumByteˢ = (@string)"sum([]byte):"u8;
 private static readonly object prefixStringˢ = (@string)"prefix string:"u8;
@@ -47,9 +45,9 @@ private static readonly object wholeStringˢ = (@string)"whole(string):"u8;
 private static readonly object wholeByteˢ = (@string)"whole([]byte):"u8;
 
 internal static void Main() {
-    @string str = helloˢ;
+    @string str = "hello";
     var bs = slice<byte>(str);
-    @string hel = helˢ;
+    @string hel = "hel";
     var helBytes = slice<byte>(hel);
 
     fmt.Println(sumStringˢ, byteSum(str));
