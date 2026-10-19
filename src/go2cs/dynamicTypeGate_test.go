@@ -316,7 +316,9 @@ func TestMainChecksTheDynamicTypeGateAfterEveryDriver(t *testing.T) {
 		t.Fatalf("reading %s: %v", mainSource, err)
 	}
 
-	text := string(contents)
+	// A windows checkout under core.autocrlf reads the source with CRLF line endings; the searches below
+	// are written in LF, so normalize first.
+	text := strings.ReplaceAll(string(contents), "\r\n", "\n")
 	start := strings.Index(text, "\nfunc main() {")
 
 	if start == -1 {
