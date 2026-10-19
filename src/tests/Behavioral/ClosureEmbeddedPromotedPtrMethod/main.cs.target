@@ -17,11 +17,8 @@ internal static nint apply(Func<nint> f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string startˢ = "start"u8;
-private static readonly @string builtˢ = "built"u8;
 private static readonly object innerˢ = (@string)"inner:"u8;
-private static readonly @string appliedˢ = "applied"u8;
-private static readonly object appliedˢ2 = (@string)"applied:"u8;
+private static readonly object appliedˢ = (@string)"applied:"u8;
 
 internal partial struct run_rep /*dyn*/ {
     /*embed*/ internal counter counter;
@@ -30,11 +27,11 @@ internal partial struct run_rep /*dyn*/ {
 
 internal static (@string, nint) run() {
     run_rep rep = new(nil);
-    rep.label = startˢ;
+    rep.label = "start";
 
     nint build() {
         rep.counter.bump();
-        rep.label = builtˢ;
+        rep.label = "built";
         return rep.n;
     }
 
@@ -43,12 +40,12 @@ internal static (@string, nint) run() {
     nint got = apply(() => {
         void touch() {
             rep.counter.bump();
-            rep.label = appliedˢ;
+            rep.label = "applied";
         }
         touch();
         return rep.n;
     });
-    fmt.Println(appliedˢ2, got);
+    fmt.Println(appliedˢ, got);
 
     return (rep.label, rep.n);
 }

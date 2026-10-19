@@ -32,7 +32,7 @@ internal static (any, nint) pairConstParen() {
 private static readonly object litˢ = (@string)"lit"u8;
 
 internal static void Main() {
-    @string a = "v"u8;
+    @string a = "v";
 
     @catch(() => {
         throw panic("pn1" + "pn2");

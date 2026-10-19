@@ -13,6 +13,7 @@ using @internal.runtime;
 using @internal.runtime.syscall;
 using ꓸꓸꓸuintptr = Span<uintptr>;
 
+[GoFieldAccess(typeof(windows.Context))]
 partial class runtime_package {
 
 // TODO(brainman): should not need those
@@ -515,7 +516,7 @@ internal static void goenvs() {
     //     "envA=valA\x00envB=valB\x00\x00" (in UTF-16)
     // Two consecutive zero bytes end the list.
     @unsafe.Pointer strings = (@unsafe.Pointer)stdcall(_GetEnvironmentStringsW);
-    var Δp = (~(ж<array<uint16>>)(uintptr)(strings))[..];
+    var Δp = ((ж<array<uint16>>)(uintptr)(strings)).slice();
 
     nint n = 0;
     for ((nint from, nint i) = (0, 0); true; i++) {
@@ -1086,7 +1087,7 @@ internal static void profilem(ж<m> Ꮡmp, uintptr thread) {
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
     c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
 
-    c.Value.ContextFlags = windows.CONTEXT_CONTROL;
+    c.ContextFlags = windows.CONTEXT_CONTROL;
     stdcall(_GetThreadContext, thread, (uintptr)c);
 
     var gp = gFromSP(ref (Ꮡmp).DerefOrNull(), c.SP());
@@ -1231,7 +1232,7 @@ internal static void preemptM(ж<m> Ꮡmp) {
     ж<windows.Context> c = default!;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
     c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
-    c.Value.ContextFlags = windows.CONTEXT_CONTROL;
+    c.ContextFlags = windows.CONTEXT_CONTROL;
 
     // Serialize thread suspension. SuspendThread is asynchronous,
     // so it's otherwise possible for two threads to suspend each

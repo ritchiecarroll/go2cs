@@ -85,17 +85,20 @@ partial struct sliceKey {
     internal nint len;
 }
 
-internal static (bool, bool) zeroAgrees<T>() {
-    var p = @new<T>();
+internal static (bool, bool) zeroAgrees<T, Tᴀ>()
+    where Tᴀ : IGoArrayDims
+{
+    var p = GoArrayZero.New<T, Tᴀ>();
     var v = reflect.New(reflect.TypeOf(p.OrTypedNil()).Elem());
-    return (reflect.DeepEqual(p.OrTypedNil(), v.Interface()), reflect.DeepEqual(p.ValueSlot, v.Elem().Interface()));
+    return (reflect.DeepEqual(p.OrTypedNil(), v.Interface()), reflect.DeepEqual((p.ValueSlot).OrTypedNilOf(), v.Elem().Interface()));
 }
+
+private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = [3]; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object fieldsˢ = (@string)"fields:"u8;
 private static readonly object promotedThroughAnˢ = (@string)"promoted through an unexported embed:"u8;
 private static readonly object embedAndPlainUnexportedˢ = (@string)"embed and plain unexported are read-only:"u8;
-private static readonly @string innerˢ = "inner"u8;
 private static readonly object mapNilElementSeparationsˢ = (@string)"map nil element separations:"u8;
 private static readonly object mapNilInterfaceElementˢ = (@string)"map nil interface element:"u8;
 private static readonly object newReflectNewˢ = (@string)"new==reflect.New:"u8;
@@ -108,7 +111,7 @@ private static readonly object sliceKeyIdentityˢ = (@string)"slice key identity
 internal static void Main() {
     var ht = reflect.TypeOf(new host(nil));
     fmt.Println(fieldsˢ, ht.NumField());
-    foreach (var (_, name) in new @string[]{"Plain"u8, "inner"u8, "tagged"u8, "Named"u8}.slice()) {
+    foreach (var (_, name) in new @string[]{"Plain", "inner", "tagged", "Named"}.slice()) {
         var (f, ok) = ht.FieldByName(name);
         fmt.Printf("field %s found=%v anonymous=%v tag=%q exported=%v type=%s\n"u8, name, ok, f.Anonymous, ((@string)f.Tag), f.IsExported(), f.Type);
     }
@@ -144,11 +147,11 @@ internal static void Main() {
 
     ref var h = ref heap(new host(), out var Ꮡh);
     var hv = reflect.ValueOf(Ꮡh).Elem();
-    hv.FieldByName("X"u8).SetInt(7);
-    var (promoted, promotedOK) = reflect.TypeOf(h).FieldByName("X"u8);
-    var (_, ambiguous) = reflect.TypeOf(new clash(nil)).FieldByName("Y"u8);
-    fmt.Println(promotedThroughAnˢ, h.inner.X, hv.FieldByName("X"u8).CanSet(), promotedOK, len(promoted.Index), promoted.Name, ambiguous);
-    fmt.Println(embedAndPlainUnexportedˢ, hv.FieldByName(innerˢ).CanSet(), reflect.ValueOf(Ꮡ(new nested(nil))).Elem().Field(0).CanSet());
+    hv.FieldByName("X").SetInt(7);
+    var (promoted, promotedOK) = reflect.TypeOf(h).FieldByName("X");
+    var (_, ambiguous) = reflect.TypeOf(new clash(nil)).FieldByName("Y");
+    fmt.Println(promotedThroughAnˢ, h.inner.X, hv.FieldByName("X").CanSet(), promotedOK, len(promoted.Index), promoted.Name, ambiguous);
+    fmt.Println(embedAndPlainUnexportedˢ, hv.FieldByName("inner").CanSet(), reflect.ValueOf(Ꮡ(new nested(nil))).Elem().Field(0).CanSet());
 
     var lit = new ж<inner>[]{default!}.slice();
     var built = reflect.MakeSlice(reflect.TypeOf(lit), 1, 1);
@@ -162,29 +165,29 @@ internal static void Main() {
     tv.Set(grown);
     fmt.Printf("decoded vs literal: %v %v %v\n"u8, reflect.DeepEqual(target, want), want.Ps[1].OrTypedNil(), target.Ps[1].OrTypedNil());
 
-    var mapWant = new mapHolder(Ms: new map<@string, ж<inner>>{["a"u8] = Ꮡ(new inner(X: 1)), ["b"u8] = default!});
+    var mapWant = new mapHolder(Ms: new map<@string, ж<inner>>{["a"] = Ꮡ(new inner(X: 1)), ["b"] = default!});
     ref var mapTarget = ref heap(new mapHolder(), out var ᏑmapTarget);
     var mv2 = reflect.ValueOf(ᏑmapTarget).Elem().Field(0);
     mv2.Set(reflect.MakeMap(mv2.Type()));
     mv2.SetMapIndex(reflect.ValueOf((@string)"a"u8), reflect.ValueOf(Ꮡ(new inner(X: 1))));
     mv2.SetMapIndex(reflect.ValueOf((@string)"b"u8), reflect.Zero(mv2.Type().Elem()));
     fmt.Printf("map nil element: %v %v %v %v\n"u8, reflect.DeepEqual(mapTarget, mapWant),
-        reflect.DeepEqual(mapWant, mapTarget), mapWant.Ms["b"u8].OrTypedNil(), mapTarget.Ms["b"u8].OrTypedNil());
+        reflect.DeepEqual(mapWant, mapTarget), mapWant.Ms["b"].OrTypedNil(), mapTarget.Ms["b"].OrTypedNil());
 
-    var nilElem = new map<@string, ж<inner>>{["b"u8] = default!};
-    var otherKey = new map<@string, ж<inner>>{["c"u8] = default!};
-    var nonNil = new map<@string, ж<inner>>{["b"u8] = Ꮡ(new inner(X: 1))};
+    var nilElem = new map<@string, ж<inner>>{["b"] = default!};
+    var otherKey = new map<@string, ж<inner>>{["c"] = default!};
+    var nonNil = new map<@string, ж<inner>>{["b"] = Ꮡ(new inner(X: 1))};
     fmt.Println(mapNilElementSeparationsˢ, reflect.DeepEqual(nilElem, otherKey),
-        reflect.DeepEqual(nilElem, nonNil), reflect.DeepEqual(nilElem, new map<@string, ж<inner>>{["b"u8] = default!}));
+        reflect.DeepEqual(nilElem, nonNil), reflect.DeepEqual(nilElem, new map<@string, ж<inner>>{["b"] = default!}));
 
-    var anyNil = new map<@string, any>{["a"u8] = default!, ["b"u8] = (nint)(1)};
-    fmt.Println(mapNilInterfaceElementˢ, reflect.DeepEqual(anyNil, new map<@string, any>{["a"u8] = default!, ["b"u8] = (nint)(1)}),
-        reflect.DeepEqual(anyNil, new map<@string, any>{["a"u8] = (nint)(0), ["b"u8] = (nint)(1)}));
+    var anyNil = new map<@string, any>{["a"] = default!, ["b"] = (nint)(1)};
+    fmt.Println(mapNilInterfaceElementˢ, reflect.DeepEqual(anyNil, new map<@string, any>{["a"] = default!, ["b"] = (nint)(1)}),
+        reflect.DeepEqual(anyNil, new map<@string, any>{["a"] = (nint)(0), ["b"] = (nint)(1)}));
 
-    var (sliceEq, sliceElemEq) = zeroAgrees<slice<any>>();
-    var (mapEq, mapElemEq) = zeroAgrees<map<@string, nint>>();
-    var (arrEq, arrElemEq) = zeroAgrees<array<nint>>();
-    var (strEq, strElemEq) = zeroAgrees<inner>();
+    var (sliceEq, sliceElemEq) = zeroAgrees<slice<any>, ᴀnone>();
+    var (mapEq, mapElemEq) = zeroAgrees<map<@string, nint>, ᴀnone>();
+    var (arrEq, arrElemEq) = zeroAgrees<array<nint>, ᴀ3>();
+    var (strEq, strElemEq) = zeroAgrees<inner, ᴀnone>();
     fmt.Println(newReflectNewˢ, sliceEq, sliceElemEq, mapEq, mapElemEq, arrEq, arrElemEq, strEq, strElemEq);
 
     var ps = @new<slice<nint>>();
@@ -204,7 +207,7 @@ internal static void Main() {
     fmt.Println(nanKeysˢ, len(nm), found);
 
     var seen = new map<any, EmptyStruct>{};
-    var backing = new map<@string, nint>{["a"u8] = 1};
+    var backing = new map<@string, nint>{["a"] = 1};
     var mv = reflect.ValueOf(backing);
     seen[@unsafe.Pointer.OrTypedNil((uintptr)mv.UnsafePointer())] = new EmptyStruct();
     var (_, again) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(backing).UnsafePointer()), ꟷ];
@@ -212,7 +215,7 @@ internal static void Main() {
     var sv = reflect.ValueOf(sl);
     seen[@unsafe.Pointer.OrTypedNil((uintptr)sv.UnsafePointer())] = new EmptyStruct();
     var (_, slAgain) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(sl).UnsafePointer()), ꟷ];
-    var (_, other) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(new map<@string, nint>{["b"u8] = 2}).UnsafePointer()), ꟷ];
+    var (_, other) = seen[@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(new map<@string, nint>{["b"] = 2}).UnsafePointer()), ꟷ];
     fmt.Println(pointerIdentityˢ, again, slAgain, other, len(seen));
 
     var boxed = new map<any, EmptyStruct>{};

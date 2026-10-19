@@ -983,19 +983,19 @@ internal static ref array<sync.Pool> http2dataChunkPools => ref Ꮡhttp2dataChun
 internal static slice<byte> http2getDataBufferChunk(int64 size) {
     switch (ᐧ) {
     case {} when size <= ((int64)1 << (int)(10)): {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(0).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(0).Get()._<ж<array<byte>>>().slice();
     }
     case {} when size <= ((int64)2 << (int)(10)): {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(1).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(1).Get()._<ж<array<byte>>>().slice();
     }
     case {} when size <= ((int64)4 << (int)(10)): {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(2).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(2).Get()._<ж<array<byte>>>().slice();
     }
     case {} when size <= ((int64)8 << (int)(10)): {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(3).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(3).Get()._<ж<array<byte>>>().slice();
     }
     default: {
-        return (~Ꮡhttp2dataChunkPools.at<sync.Pool>(4).Get()._<ж<array<byte>>>())[..];
+        return Ꮡhttp2dataChunkPools.at<sync.Pool>(4).Get()._<ж<array<byte>>>().slice();
     }}
 }
 
@@ -1961,7 +1961,7 @@ internal static (http2Frame, error) ReadFrameForHeader(this ж<http2Framer> Ꮡf
         fr.debugReadLoggerf("http2: Framer %p: read %v"u8, Ꮡfr.OrTypedNil(), http2summarizeFrame(f));
     }
     if (fh.Type == http2FrameHeaders && fr.ReadMetaHeaders != nil) {
-        return Ꮡfr.readMetaFrame(f._<ж<http2HeadersFrame>>());
+        return Ꮡfr.readMetaFrame(f._<http2Frame, ж<http2HeadersFrame>>());
     }
     return (f, default!);
 }
@@ -3219,7 +3219,7 @@ internal static (http2Frame, error) readMetaFrame(this ж<http2Framer> Ꮡfr, ж
                 var (f, err) = Ꮡfr.ReadFrame(); if (err != default!){
                     return (default!, err);
                 } else {
-                    hc = new http2ContinuationFrameжhttp2headersOrContinuation(f._<ж<http2ContinuationFrame>>()); // guaranteed by checkFrameOrder
+                    hc = new http2ContinuationFrameжhttp2headersOrContinuation(f._<http2Frame, ж<http2ContinuationFrame>>()); // guaranteed by checkFrameOrder
                 }
             }
         }

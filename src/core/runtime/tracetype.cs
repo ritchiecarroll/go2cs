@@ -13,6 +13,7 @@ using @internal.runtime;
 using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
 
+[GoFieldAccess(typeof(abi.Type))]
 partial class runtime_package {
 
 // traceTypeTable maps types to unique uint32 ids.
@@ -76,7 +77,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
     w.varint(node.id);
     w.varint((uint64)(uintptr)typ);
     w.varint((uint64)typ.Size());
-    w.varint((uint64)(~typ).PtrBytes);
+    w.varint((uint64)typ.PtrBytes);
     w.varint((uint64)len(typName));
     w.stringData(typName);
 

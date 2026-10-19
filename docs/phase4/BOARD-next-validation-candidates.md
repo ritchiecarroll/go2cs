@@ -27118,6 +27118,25 @@ the i9's reflect reading (owner G if it routes).
 
 — G (measured 2026-10-16; COORD ruled: accessor refusal now, this row post-hop)
 
+**Amended 2026-10-17 (C1, the array-dims companion cut, `claude/c1-runtime-array-dims`; COORD: correct the population
+line in the cut).** Two corrections to the population above, measured with a go/types census of std plus tests at
+go1.26.9 (linux):
+- runtime_test `testFreegc` ×8 reaches no TYPE-ONLY sink, as stated, but it does reach two ZERO-VALUE sinks, `var
+  zero T` and `new(T)`. Those built a length-0 array, so `unsafe.Sizeof(*p)` read 0 and every live `p` shared one
+  data address. Measured at the cut's red commit (`-test.run ^TestFreegc$`, linux): Go reports 89 rows (65 pass, 24
+  skip). In C#, the 8 `gc=yes/ptrs=false/size=*/duplicate-check` rows fail with "found duplicate pointer (0x…). i: 0
+  j: 1", one address for all 8 sizes, and their 8 parents and `TestFreegc` fail with them. The other 72 rows agree
+  with Go, but only because nothing else reads the length: `freegc` is a no-op while `runtimeFreegcEnabled` is false.
+  The cut gives an unexported generic like it an ARRAY-DIMS COMPANION type parameter (`Tᴀ`, golib `IGoArrayDims`),
+  which each call site supplies (`ᴀ16`). That is this row's descriptor-companion vehicle, applied to the value
+  surface. It does not touch the type-only surface (`TypeFor`, `abi.TypeFor`, `unique.Make`), which stays as ruled.
+  At the cut's fix commit all 89 rows equal Go. A probe line in the converted `free` closure (run only, never
+  committed) reads `unsafe.Sizeof(*p)` as 16, 17, 64, 500, 512, 4096, 20000 and 32760; at the red commit it read 0.
+- the `runtime.AddCleanup` instantiation is in reflect/all_test.go:2243 (`AddCleanup[[2]int64, *atomic.Uint32]`,
+  inferred), not malloc_test.go.
+
+**Amended 2026-10-19 (C2, `claude/c2-go-growslice`; G: ACCEPTABLE AS RECORDED).** A further site of this row: `reflect.Value.Grow` on a nil or empty `[][N]T` whose slice recorded no element length (golib slice.cs `ReflectGrow`) has no value to size from, so its capacity skips Go's size-class rounding (only `cap()` differs) and `GoSizeClasses.UnroundedElementTypes` records the type; every appending growth is sized from its value.
+
 ## 2026-10-16 — G: testing/cryptotest's two linkname PULLS stay throwing stubs; no std test reaches them — RECORDED, no seat (owner G if a caller appears)
 
 `testing/cryptotest/rand.go` declares two bodyless functions under two-arg directives naming OTHER packages: PULLS,
@@ -27254,5 +27273,137 @@ A test that parses a traceback for `.go:` (runtime's parseTraceback, pprof's loc
 - (c) Leave as is and disclose per test where a verdict reads it.
 
 — C1 (found 2026-10-17 in passing; COORD ruled: write the row, P1 later)
+
+**2026-10-19, P1: creator sites CLOSED; ordinary frames INTERIM (c); the durable fix is OWED (COORD ruling of
+2026-10-19 on P1's proposal).**
+- (1) The `go` statements of hand-owned files take option (b) in its smallest form: a hand-kept `GoPositionMap`
+  record in the hand-owned file itself, one table entry per `goǃ(` line mapping it to the Go `go` statement it
+  replaces, each followed by a zero entry so no other line of the file claims a Go position. Correction to P1's
+  sizing: the sites are **3 in 2 files**, not 5 in 3 (the two `goǃ(runfinq)` in runtime/mfinal.cs are in comments):
+  sync/waitgroup.cs (Go waitgroup.go:238) and net/windows/lookup_windows.cs (Go lookup_windows.go:56 and :164).
+  Guard: repoguard `TestHandOwnedGoStatementsMapToGo` (a `goǃ(` on a code line of a hand-owned file needs a record
+  for that file that maps it to a `go` statement of the recorded Go file at the pinned GOROOT, and maps nothing
+  else), with `TestHandOwnedGoStatementScannerFires` as its positive control; a planted uncovered site was named
+  and the file restored byte-identical. Probe (linux, `wg.Go` printing its own `created by` line): before
+  `waitgroup.cs:230`, after `waitgroup.go:238`, which is Go's.
+  The guard has already fired once in use: merging hop tip a0a80ec3cd (P2's lookup-field-view rewrote
+  lookup_windows.cs) moved both of that file's sites down 10 lines, and it named all four stale entries until the
+  table was re-encoded.
+- (2) INTERIM ONLY: an ordinary frame line inside a hand-owned file stays (c), disclosed per test where a verdict
+  reads one. It is not the end state, because nothing is left out for being unreached. **OWED: a GENERATED
+  function-granularity map for hand-owned files**, each hand-owned method paired with its Go declaration and the
+  record emitted from the Go AST, never hand-kept. G designs it post-hop.
+- (3) A test that reads such a frame line is the sizing for (b) at its frames.
+
+— P1 (branch `claude/p1-frame-line-creators`, cut on hop tip 5f774114a5, merged with a0a80ec3cd)
+## 2026-10-17 — C1: runtime.AddCleanup's closes-over-ptr check is UNCHECKED for a func value the converter cannot trace — residual 0 in go1.26.9
+
+Go 1.26's AddCleanup panics "cleanup function closes over ptr, cleanup will never run" when the cleanup's funcval holds
+a pointer into ptr's allocation. The managed AddCleanup (src/core/runtime/mcleanup.cs, divergence 5) checks the
+captures the converter passes at the call (src/go2cs/addCleanupCaptures.go). The converter can trace three shapes:
+a func literal at the call, a method value `x.m`, and a func-typed LOCAL whose every assignment in its function is
+one of those two (the union of their captures is passed; a superset is safe, since any literal that could flow there
+and closes over ptr is one Go refuses).
+
+**Residual (unchecked; the call keeps its three-argument form).** A parameter, a package-level variable, a field, a
+call result, a local assigned from any of those or from a multi-value assignment, and a local whose address is taken.
+Such a cleanup that DOES close over ptr registers here where Go panics.
+
+**Population, go1.26.9.** 55 AddCleanup calls: 33 func literals, 2 selectors, 20 func-variable idents. A go/types
+census of the 20 by the predicate above (runtime, internal/sync, runtime/race/testdata; a planted file of seven
+shapes classified as planted): 20 covered, **residual 0**. Covered does not mean a capture is passed. 18 of the 20
+are in converted test files (runtime/race/testdata is not converted), and 15 of those 18 pass one, `t`, all in
+runtime/mcleanup_test.go. Its :265 captures only a channel. internal/sync/hashtriemap_test.go:951 and :960 capture
+only `m`, a `HashTrieMap` STRUCT value, and the check never passes a struct capture.
+
+**Trigger to revisit.** A tree whose census shows a residual site, or a dropped capture, inside a test Go FAILS with
+the closes-over-ptr panic.
+
+**Amended 2026-10-17 (struct and array captures, COORD follow-up after G's review).** A struct or array captured BY
+VALUE whose field or element is a pointer slot is now passed too (a fifth AddCleanup argument), and golib walks it
+through GoReflect.GoFields, bounded by depth 16. A capture over cmd/compile's 128-byte by-value limit is captured by
+reference in Go and is not passed. **One case Go refuses and we do not:** a SLICE whose backing array is ptr's own
+allocation (`s := ptr[:]` with ptr a `*[N]E`, then the cleanup reads `s`). Go's slot scan sees the slice's data
+pointer inside ptr's object; we do not follow slices, maps, channels or funcs, so that cleanup registers here.
+Population, go1.26.9 std: 44 AddCleanup calls, 3 composite captures, all `weak.Pointer` values (crypto/tls/cache.go:38,
+unique/canonmap.go:136, weak/pointer_test.go:167), each holding a weak handle, not ptr, so Go accepts all three. The
+only slice captures are crypto/tls/cache.go:33 and :38's `der []byte`, the caller's input bytes, not ptr's (`cert`'s)
+allocation, so no slice-over-ptr case exists in the tree (census: a go/types walk of `std` with tests).
+
+— C1 (2026-10-17; COORD ruled the predicate and this row)
+## 2026-10-17 — P2: an untyped-constant call to a MULTI-parameter generic must spell every type argument, so one C# cannot name would break it — RECORDED, not reproduced, no seat
+
+The untyped-constant rule (claude/p2-untyped-const-typearg, d8740b96ce) gives a call explicit type
+arguments when only untyped constants fix one of its type parameters. C# has no partial explicit
+type arguments, so on a multi-parameter callee it spells ALL of them: `keyed(k, 4)` becomes
+`keyed<K', nint>(k, 4)`. If the other argument's type had no C# name, a call that compiled bare would
+stop compiling. G raised this in review.
+
+**Measured** with a probe through `keyed[K comparable, V any](k K, v V)`, base and cut converters,
+Release build, linux, go1.26.9. Six K shapes: an anonymous struct, a function-local type, an array
+of anonymous structs, an anonymous struct over a type parameter inside a generic function, an
+anonymous interface, and a bool. All six compile with the cut, because the converter lifts anonymous
+and local types to named C# types (`main_k`, `main_loc`, `inGeneric_k<T>`) before any call names
+them. The cut prints Go's output for all six (`int`); the base prints `int32`.
+
+The shape does occur in the rule's std population: 3 of its 20 calls are reflect's
+`setField[S, V any](in S, offset uintptr, value V)` with S an anonymous struct
+(`setField(struct{ _, a, _ uintptr }{}, …, 1)`, all_test.go TestIsZero). Copied into the probe, the
+cut emits `setField<main_in, nint>(new main_in(), …, 1)`, which compiles and prints Go's values.
+
+**Not seated.** No shape broke. If one the converter cannot name is found, the remedy is to decline
+the rule for that call and keep the bare form.
+
+— P2 (measured 2026-10-17; raised by G in review of d8740b96ce)
+
+## 2026-10-17 — P1: a failed single-value type assertion names its static source interface; four residuals keep "interface {}" — SEATED (owner P1)
+
+Go prints the static interface an assertion started from (`interface conversion: io.Reader is *os.File, not
+*bytes.Buffer`). golib's `_<T>(this object)` cannot see it and printed `interface {}`. Part 1 (error source) landed
+earlier; this row records part 2, the named-interface source, and what it deliberately leaves.
+
+**Mechanism, three call spellings.** The converter chooses by what the source interface can name
+(`assertSourceFormFor`, convTypeAssertExpr.go):
+- **bare** `x._<T>()` for an exported interface whose overload C# lookup reaches. go2cs-gen emits
+  `_<T>(this I source)` in a top-level `<pkg>_package_asserts` class (an extension method cannot nest), and the exact
+  interface beats `object` by identity conversion;
+- **explicit** `x._<I, T>()` (golib `_<TSource, T>`) where the interface can be named but no overload is reachable:
+  an unexported interface (a private nested type no sibling class can name), a generic instance, or an exported
+  interface in a namespace the file cannot see from where it is;
+- **widened** `((object)x)._<T>()` for a source the file cannot name that embeds named interfaces, where a bare call
+  would bind an embedded interface's overload and name the wrong one.
+
+**Two probes that shaped it.** (1) An overload as a member of the package class made `_` a method group inside that
+class, so every `_ = x` and `out _` there stopped being a discard (CS1656, CS1657; core/runtime arena_impl.cs).
+GenTests `TheOverloadLeavesDiscardsInThePackageClassBound` fails if the overload moves back (checked). (2) C#
+extension lookup tries a namespace's own types before its using directives, and golib's object form sits in the root
+namespace and applies to everything. So a file in the root namespace (every `main` and every root-level std package)
+never reaches an overload in a nested namespace; that is why those sites take the explicit form
+(`assertOverloadIsReachable`; TypeAssertionSource's `lib.RW` case was CS0121 until then).
+
+**Population (Go 1.26.9 std, linux/amd64, non-test, 226 named non-empty sources).** 105 exported same package and 58
+exported imported stay bare; 54 unexported same package and 9 exported-imported-nested-from-root take the explicit
+form. The `-stdlib` two-seeded reconvert (3 targets) moved 66 lines on linux and darwin and 68 on windows, every one
+only the inserted source type argument (checked mechanically), no other drift, no marker, no `using` or position-map
+line. Predicted 63; the 3 extra are `driver.Value` (a named EMPTY interface, which the census had counted with `any`)
+and two `fs.FS` sites in testing/fstest, whose caller imports io/fs by alias, not by namespace.
+
+**Residuals, which keep `interface {}` (named in the InterfaceTypeTemplate remarks).**
+1. An **unexported interface of another package** (reachable by value only through an exported function). Not
+   nameable from the asserting file. Stdlib sites: 0. Third-party code can have them.
+2. A **named interface declared inside a function**. Same reason. Stdlib sites: 0.
+3. **Test files and third-party modules** were not censused; the converter's tests pin the forms, the behavioral
+   project TypeAssertionSource pins them end to end, byte-equal to Go.
+4. An **anonymous interface literal** keeps whatever golib prints for its dynamic name; TypeAssertionSource's
+   `anonymous-to-*b` case is byte-equal to Go today, which is the only evidence.
+
+**Gates (linux, 2026-10-17).** go test ./... rc 0; GenTests 230/230; go2cs-stdlib.slnx Debug 0 errors (317 asserts-class
+overloads generated); go2cs.slnx Debug fails only in the 10 windows-API behavioral projects, which fail the same way at
+the part 1 tip (OsGetpagesize built there for comparison) and are the runner's platform-exclusive set. The CNR
+equivalent over 830 behavioral projects (transpile and target phases; no pwsh on this box) moved 3 goldens,
+AliasStructToInterface, MethodValueReceiverSnapshot and ValueAdapterDynamicType, one line each in two of them and two
+in the third, only the added type argument; all three compile and print the same as Go.
+
+— P1 (measured 2026-10-17)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

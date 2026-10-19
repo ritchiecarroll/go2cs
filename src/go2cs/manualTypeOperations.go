@@ -611,6 +611,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// header, which the managed model refuses).
 		"writeErrData": goosAny,
 		"bytes":        goosAny,
+		// hexdumpWords (Go 1.26 hexdump.go) symbolizes each aligned word through findfunc, funcname and
+		// funcInfo.entry, which walk a pclntab this host does not have: fn.valid() is always false, so the
+		// "<pkg.Func+0xOFF>" annotation line was never written and TestHexdumpWords read a dump without it.
+		// The hand-owned body (hexdump_impl.cs) is the converted one line for line, symbolizing through the
+		// caller records, as printDebugLogPC does.
+		"hexdumpWords": goosAny,
 		// syscall.AllThreadsSyscall's runtime half refuses by name BEFORE the world (Q6): there are
 		// no Ms to signal, so a stop that now succeeds would run the call on one thread and report
 		// success. linux-only: the function exists only in os_linux.go (linux/os_linux_impl.cs).
@@ -656,6 +662,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"userArena.free":  goosAny,
 		"arena_heapify":   goosAny,
 		"UserArena.New":   goosAny,
+		// rtype.string reads the type's name through nameOff into the linker's name blob. A descriptor
+		// synthesized from a managed type (abi.synthType) has no blob and a zero Str, so the converted body
+		// answered "" for it: a *TypeAssertionError built from two golib descriptors printed "interface
+		// conversion:  is , not ". typestring_impl.cs answers a managed-backed descriptor with its Go
+		// spelling (GoReflect.GoTypeName, the renderer maps' typeString uses) and keeps Go's body for the rest.
+		"rtype.string": goosAny,
 		// traceMap's node lives in Go-layout memory: newTraceMapNode reinterprets traceRegionAlloc
 		// bytes as a reference-bearing traceMapNode. It is allocated managed instead (tracemap_impl.cs).
 		"traceMap.newTraceMapNode": goosAny,
@@ -2262,6 +2274,19 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// cost a registration, a placeholder and a body apiece to change the behaviour of code with
 		// no caller. wsaSendtoNoCallers_test.go is the guard for the day that stops being true.
 		"WSASendto": goosWindows,
+		// readFile and writeFile joined on 2026-10-17: the KERNEL32 members of the same seam, and the
+		// TransmitFile defect over a file handle. internal/poll's execIO submits every read and write
+		// on an overlapped file or pipe FD through them with `&o.o`, and the generated bodies created
+		// no record, so the handle was never bound to the CLR's completion port. The i9 measured all
+		// three steps of docs/phase4/probes/p2-named-pipe-deadline hanging (a deadline read, a plain
+		// write+read, a Close under a pending read), which is os
+		// TestVariousDeadlines1Proc/named_overlapped_pipe. Unlike the Winsock members these also
+		// serve SYNCHRONOUS callers (a nil overlapped, or Pread on a blocking handle), so the hand-own
+		// takes the seam only for a descriptor the poller owns and keeps the generated body for every
+		// other call. Body in zsyscall_windows_file_impl.cs; its harvest twin is
+		// internal/syscall/windows' GetOverlappedResult.
+		"readFile":  goosWindows,
+		"writeFile": goosWindows,
 		//
 		// LoadConnectEx is NOT overlapped at all, and is here because the netpoll design recorded the
 		// extension-pointer lookup as "synchronous and already working" and the crypto/tls census
@@ -2600,6 +2625,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// [module: go.GoRequiresUnsafe] and the csproj flipping to true is part of the intended
 		// footprint — unlike `syscall`, which already emits true.
 		"WSAGetOverlappedResult": goosWindows,
+		// GetOverlappedResult is its FILE twin (2026-10-17): execIO harvests a file or pipe FD's
+		// operation with it, and once syscall's readFile/writeFile submit through the seam the
+		// control block the kernel wrote is the record's, not the managed `o.o`. Same predicate as
+		// the submit, so a caller's own overlapped keeps the generated body.
+		"GetOverlappedResult": goosWindows,
 		// The SUBMIT half of the WriteMsg path, and the second defect on it. Its generated body hands
 		// the kernel `uintptr(unsafe.Pointer(msg))` -- the address of the MANAGED WSAMsg, whose
 		// syscall.Pointer class reference, ж<WSABuf> and inline reference-bearing Control land nowhere

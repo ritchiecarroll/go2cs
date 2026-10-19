@@ -25,7 +25,7 @@ internal static entry Process(this impl _, entry e) {
 }
 
 public static entry Run(deps d) {
-    return d.Process(new entry(ID: 1, Name: "seed"u8));
+    return d.Process(new entry(ID: 1, Name: "seed"));
 }
 
 internal static void Main() {

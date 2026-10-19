@@ -20,8 +20,6 @@ private static readonly object firstˢ = (@string)"First"u8;
 private static readonly object secondˢ = (@string)"Second"u8;
 private static readonly object thirdˢ = (@string)"Third"u8;
 private static readonly object fourthˢ = (@string)"Fourth"u8;
-private static readonly @string stoppedˢ = "stopped"u8;
-private static readonly @string goStoppedˢ = "go-stopped"u8;
 private static readonly object afterCloseˢ = (@string)"after close:"u8;
 private static readonly @string fifthˢ = "Fifth"u8;
 private static readonly object afterˢ = (@string)"after:"u8;
@@ -42,11 +40,11 @@ internal static partial void Main() {
         defer(ᴛ1 => f1ʗ1(ᴛ1), fourthˢ, ref ᒐ);
 
         var msgs = new channel<@string>(2);
-        var cancel = makeStop(stoppedˢ, msgs.WithDirection(GoChanDir.Send));
+        var cancel = makeStop("stopped", msgs.WithDirection(GoChanDir.Send));
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         var msgsʗ1 = msgs;
-        goǃ(() => makeStop(goStoppedˢ, msgsʗ1.WithDirection(GoChanDir.Send))());
+        goǃ(() => makeStop("go-stopped", msgsʗ1.WithDirection(GoChanDir.Send))());
         fmt.Println(ᐸꟷ(msgs));
 
         var drained = new channel<nint>(1);

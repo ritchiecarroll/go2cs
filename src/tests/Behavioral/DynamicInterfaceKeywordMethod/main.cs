@@ -83,11 +83,11 @@ internal static void direct(any v) {
 }
 
 internal static void Main() {
-    commandContext(new harness(name: "cmd"u8, deadline: 100));
+    commandContext(new harness(name: "cmd", deadline: 100));
 
-    direct(new gate(name: "v"u8));
+    direct(new gate(name: "v"));
 
-    direct(Ꮡ(new gate(name: "p"u8)));
+    direct(Ꮡ(new gate(name: "p")));
 }
 
 } // end main_package

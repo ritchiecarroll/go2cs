@@ -107,7 +107,7 @@ internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
     }
     {
         var (existing, ok) = d.get(id); if (ok) {
-            return fmt.Errorf("multiple %Ts with the same ID: id=%d, new=%v, existing=%v"u8, data, id, data, existing);
+            return fmt.Errorf("multiple %Ts with the same ID: id=%d, new=%v, existing=%v"u8, (data).OrTypedNilOf(), id, (data).OrTypedNilOf(), (existing).OrTypedNilOf());
         }
     }
     d.sparse[id] = data;
@@ -222,7 +222,7 @@ internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
 {
     var (data, ok) = d.get(id);
     if (!ok) {
-        throw panic(fmt.Sprintf("expected id %d in %T table"u8, id, data));
+        throw panic(fmt.Sprintf("expected id %d in %T table"u8, id, (data).OrTypedNilOf()));
     }
     return data;
 }

@@ -11,6 +11,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(findfuncbucket))]
 partial class runtime_package {
 
 // Frames may be used to get function/file/line information for a
@@ -670,7 +671,7 @@ internal static int32 startLine(this ж<Func> Ꮡf) {
     var fn = Ꮡf.raw();
     if (fn.isInlined()) { // inlined version
         var fi = fn.Reinterpret<_func, funcinl>();
-        return (~fi).startLine;
+        return fi.of(funcinl.ᏑstartLine).Value;
     }
     return fn.funcInfo().startLine;
 }
@@ -761,7 +762,7 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
     var i = x % (uintptr)abi.FuncTabBucketSize / (uintptr)((uintptr)abi.FuncTabBucketSize / nsub);
 
     var ffb = (ж<findfuncbucket>)(uintptr)(add((@unsafe.Pointer)(~datap).findfunctab, b * /* unsafe.Sizeof(findfuncbucket{}) */ (uintptr)20));
-    var idx = (~ffb).idx + (uint32)(~ffb).subbuckets[i];
+    var idx = ffb.idx + (uint32)ffb.of(findfuncbucket.Ꮡsubbuckets).ElementRef(i);
 
     // Find the ftab entry.
     while ((~datap).ftab[idx + 1].entryoff <= pcOff) {

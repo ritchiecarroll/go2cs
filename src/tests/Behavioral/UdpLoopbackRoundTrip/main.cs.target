@@ -18,7 +18,6 @@ internal static void Main() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string udp4ˢ = "udp4"u8;
 private static readonly object ipv4ListenFailedˢ = (@string)"ipv4: listen failed"u8;
 private static readonly object ipv4ClientListenFailedˢ = (@string)"ipv4: client listen failed"u8;
 private static readonly object ipv4WriteToFailedˢ = (@string)"ipv4: WriteTo failed"u8;
@@ -29,7 +28,7 @@ private static readonly object ipv4ReplyReadFromFailedˢ = (@string)"ipv4: reply
 internal static void unconnectedRoundTrip() {
     GoFrame ᒐ = default;
     try {
-        var (server, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(ipv4ListenFailedˢ);
             return;
@@ -37,7 +36,7 @@ internal static void unconnectedRoundTrip() {
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
 
-        (var client, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        (var client, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(ipv4ClientListenFailedˢ);
             return;
@@ -91,7 +90,7 @@ private static readonly object zerolenWriteToFailedˢ = (@string)"zerolen: Write
 internal static void zeroLengthDatagram() {
     GoFrame ᒐ = default;
     try {
-        var (server, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(zerolenListenFailedˢ);
             return;
@@ -99,7 +98,7 @@ internal static void zeroLengthDatagram() {
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
 
-        (var client, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        (var client, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(zerolenClientListenˢ);
             return;
@@ -133,7 +132,7 @@ private static readonly object connectedReplyFailedˢ = (@string)"connected: rep
 internal static void connectedRoundTrip() {
     GoFrame ᒐ = default;
     try {
-        var (server, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
             fmt.Println(connectedListenFailedˢ);
             return;
@@ -141,7 +140,7 @@ internal static void connectedRoundTrip() {
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
 
-        (var conn, err) = Δnet.Dial(udp4ˢ, server.LocalAddr().String());
+        (var conn, err) = Δnet.Dial("udp4", server.LocalAddr().String());
         if (err != default!) {
             fmt.Println(connectedDialFailedˢ);
             return;
@@ -180,7 +179,6 @@ internal static void connectedRoundTrip() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string udp6ˢ = "udp6"u8;
 private static readonly object ipv6AvailableFalseˢ = (@string)"ipv6: available=false"u8;
 private static readonly object ipv6AvailableTrueˢ = (@string)"ipv6: available=true"u8;
 private static readonly object ipv6WriteToFailedˢ = (@string)"ipv6: WriteTo failed"u8;
@@ -189,7 +187,7 @@ private static readonly object ipv6ReadFromFailedˢ = (@string)"ipv6: ReadFrom f
 internal static void ipv6RoundTrip() {
     GoFrame ᒐ = default;
     try {
-        var (server, err) = Δnet.ListenPacket(udp6ˢ, "[::1]:0"u8);
+        var (server, err) = Δnet.ListenPacket("udp6", "[::1]:0");
         if (err != default!) {
             fmt.Println(ipv6AvailableFalseˢ);
             return;
@@ -197,7 +195,7 @@ internal static void ipv6RoundTrip() {
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
 
-        (var client, err) = Δnet.ListenPacket(udp6ˢ, "[::1]:0"u8);
+        (var client, err) = Δnet.ListenPacket("udp6", "[::1]:0");
         if (err != default!) {
             fmt.Println(ipv6AvailableFalseˢ);
             return;

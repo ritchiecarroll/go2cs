@@ -34,11 +34,8 @@ internal static (ж<encKey>, error) newEncapKey(slice<byte> b) {
     return (Ꮡ(new encKey(b: appendꓸꓸꓸ(slice<byte>(default!), b))), default!);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string roundTripˢ = "round trip"u8;
-
 internal static void Main() {
-    keylike.RoundTrip<keylike.EncapKey, keylike.DecapKey<keylike.EncapKey>>(roundTripˢ, widenResult<ж<decKey>, keylike.DecapKey<keylike.EncapKey>>(generateKey, elemᴛ1 => new decKeyжDecapKey(elemᴛ1)), widen<slice<byte>, ж<encKey>, keylike.EncapKey>(newEncapKey, elemᴛ2 => new encKeyжEncapKey(elemᴛ2)));
+    keylike.RoundTrip<keylike.EncapKey, keylike.DecapKey<keylike.EncapKey>>("round trip", widenResult<ж<decKey>, keylike.DecapKey<keylike.EncapKey>>(generateKey, elemᴛ1 => new decKeyжDecapKey(elemᴛ1)), widen<slice<byte>, ж<encKey>, keylike.EncapKey>(newEncapKey, elemᴛ2 => new encKeyжEncapKey(elemᴛ2)));
 }
 
 } // end main_package

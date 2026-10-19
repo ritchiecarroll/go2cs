@@ -1568,6 +1568,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// A conversion to an anonymous struct type, `q := (*struct{…})(e)`, lifts it under the variable's name,
+			// as a composite literal in this position is named (liftConversionTargetAnonStruct).
+			if call, ok := rhs.(*ast.CallExpr); ok && ident != nil {
+				v.liftConversionTargetAnonStruct(call, ident.Name)
+			}
+
 			if _, ok := rhs.(*ast.CompositeLit); ok {
 				if ident != nil {
 					// Track the name of the variable on the LHS for composite literals,
@@ -1611,6 +1617,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// across even when nil (see typedNilInterfaceBoxing.go). appendRhsPtrContext has
 				// already rendered it as the BOX rather than a deref alias.
 				rhsExpr = v.applyTypedNilPointerBox(rhs, rhsExpr)
+
+				// The TYPE-PARAMETER twin, only for a REAL empty-interface LHS (lhsIsEmptyInterface also answers for
+				// an LHS of type-parameter type, where wrapping would turn E into object).
+				if typeParam, ok := v.getType(rhs, false).(*types.TypeParam); ok && isEmptyInterfaceTarget(v.getType(lhs, false)) {
+					rhsExpr = applyTypedNilTypeParamBox(typeParam, rhsExpr)
+				}
 			}
 
 			// A `:=` DECLARATION whose RHS is a constant-folded NAMED-NUMERIC conversion
@@ -1922,6 +1934,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						result.WriteString(decls)
 					}
 				}
+			}
+
+			// A conversion to an anonymous struct type, `q := (*struct{…})(e)`, lifts it under the variable's name,
+			// as a composite literal in this position is named (liftConversionTargetAnonStruct).
+			if call, ok := rhs.(*ast.CallExpr); ok && ident != nil {
+				v.liftConversionTargetAnonStruct(call, ident.Name)
 			}
 
 			if _, ok := rhs.(*ast.CompositeLit); ok {

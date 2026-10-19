@@ -85,11 +85,11 @@ internal static void direct() {
 private static readonly object directStrˢ = (@string)"directStr:"u8;
 
 internal static void directStr() {
-    var d = new DirectStr(new map<@string, DirectStr>{["a"u8] = new DirectStr(new map<@string, DirectStr>{["b"u8] = default!}), ["c"u8] = new map<@string, DirectStr>{}});
-    d["e"u8] = d["a"u8];
-    var e = d["e"u8];
-    e["f"u8] = default!;
-    fmt.Println(directStrˢ, len(d), len(d["a"u8]), d["a"u8]["b"u8] == default!, d["c"u8] == default!);
+    var d = new DirectStr(new map<@string, DirectStr>{["a"] = new DirectStr(new map<@string, DirectStr>{["b"] = default!}), ["c"] = new map<@string, DirectStr>{}});
+    d["e"] = d["a"];
+    var e = d["e"];
+    e["f"] = default!;
+    fmt.Println(directStrˢ, len(d), len(d["a"]), d["a"]["b"] == default!, d["c"] == default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -190,7 +190,7 @@ internal static void reflection() {
 
     fmt.Println(reflectDeepequalˢ, reflect.DeepEqual(new Direct(new map<nint, Direct>{[1] = new Direct(new map<nint, Direct>{[2] = default!})}), new Direct(new map<nint, Direct>{[1] = new Direct(new map<nint, Direct>{[2] = default!})})), reflect.DeepEqual(new Direct(new map<nint, Direct>{[1] = default!}), new Direct(new map<nint, Direct>{[2] = default!})));
 
-    var s = new DirectStr(new map<@string, DirectStr>{["a"u8] = new DirectStr(new map<@string, DirectStr>{["b"u8] = default!})});
+    var s = new DirectStr(new map<@string, DirectStr>{["a"] = new DirectStr(new map<@string, DirectStr>{["b"] = default!})});
     fmt.Printf("fmt: %v %d\n"u8, s, len(s));
 
     var ds = new DefinedOverStruct(new viaStructV(n: 7, m: new ViaStruct(new map<nint, viaStructV>{[1] = new()})));

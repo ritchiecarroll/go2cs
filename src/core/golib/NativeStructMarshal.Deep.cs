@@ -8,6 +8,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -102,6 +103,45 @@ public static unsafe partial class NativeStructMarshal
 
     /// <summary>Whether a token argument of Go type <paramref name="type"/> can cross the deep form (the guard's probe).</summary>
     internal static string? DeepRefusal(Type type) => deepRefusal(type, 0, new HashSet<Type>());
+
+    /// <summary>
+    /// The outermost value at <paramref name="box"/>'s Go address that the deep form can copy: what a token for that
+    /// address is copied as.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A FIRST field's view and its struct's box are one address in Go, so they share one order token, and the token
+    /// resolves to whichever was converted last: &amp;s and &amp;s.f passed together could both resolve to the narrower
+    /// f, and a callee reading s from the first would read past f's copy. The token names the outermost value at that
+    /// address, so that is what is copied (f lies at offset 0 inside it); a parent with no native image keeps the
+    /// narrower view, which is then all the caller can have meant. A REINTERPRET view is a hop at Go offset 0 too, so
+    /// <c>(*byte)(unsafe.Pointer(&amp;rdb.header))</c> widens to rdb, whose bytes a callee such as DeviceIoControl
+    /// reads past the header (FieldRefBox's StorageKind, the reinterpret-of-a-first-field exception, decides when such a
+    /// view crosses as a token at all).
+    /// </para>
+    /// <para>
+    /// A WIDENED copy is the whole root, and the decode after the call writes the whole root back: a field of it the
+    /// callee did not touch is rewritten with the value it had when the call began, so a write another goroutine makes
+    /// to a sibling field DURING the call is lost. Go has no such window. Every caller of this shape today passes a
+    /// call-local root (os_windows_test.go's createDirLink, whose rdb lives in createMountPoint or createSymbolicLink).
+    /// </para>
+    /// </remarks>
+    internal static object WidestAtSameAddress(object box)
+    {
+        while (box is IFirstFieldView { FirstFieldParent: IGoReflectBox parent } &&
+               PointeeTypeOfValue(parent) is { } parentType && HasDeepImage(parentType))
+        {
+            box = parent;
+        }
+
+        return box;
+    }
+
+    // DeepRefusal walks the type and allocates; the widening walk asks on every ж -> uintptr of a reinterpret view, so
+    // the answer, a pure function of the type, is kept per type.
+    private static bool HasDeepImage(Type type) => s_hasDeepImage.GetOrAdd(type, static t => DeepRefusal(t) is null);
+
+    private static readonly ConcurrentDictionary<Type, bool> s_hasDeepImage = new();
 
     // Null when every field of the type has a native image under the deep rules, else the path of the first
     // field that does not. Pointer fields are not followed here: their pointees are judged per value, when
@@ -217,7 +257,7 @@ public static unsafe partial class NativeStructMarshal
                             "value, so it has no native image to pass");
             }
 
-            box = widestAtSameAddress(box);
+            box = WidestAtSameAddress(box);
 
             if (m_byBox.TryGetValue(box, out DeepCopy? known))
                 return (nuint)known.Buffer;
@@ -282,22 +322,6 @@ public static unsafe partial class NativeStructMarshal
                 encodeValue(backing.GetValue(index + i), type, (byte*)copy.Buffer + (nuint)i * stride);
 
             return (nuint)copy.Buffer;
-        }
-
-        // A FIRST field's view and its struct's box are one address in Go, so they share one order token, and
-        // the token resolves to whichever was converted last: &s and &s.f passed together could both resolve
-        // to the narrower f, and a callee reading s from the first would read past f's copy. The token names
-        // the outermost value at that address, so that is what is copied (f lies at offset 0 inside it); a
-        // parent with no native image keeps the narrower view, which is then all the caller can have meant.
-        private static object widestAtSameAddress(object box)
-        {
-            while (box is IFirstFieldView { FirstFieldParent: IGoReflectBox parent } &&
-                   PointeeTypeOfValue(parent) is { } parentType && DeepRefusal(parentType) is null)
-            {
-                box = parent;
-            }
-
-            return box;
         }
 
         // A box that is a different VIEW of storage already copied (a field view beside its struct's own box,

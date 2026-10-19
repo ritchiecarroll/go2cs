@@ -18,7 +18,7 @@ internal partial struct probe_innerᴛ1 /*dyn*/ {
 }
 
 internal static @string probe(this Why _) {
-    var v = new probe_innerᴛ1(s: "seven"u8);
+    var v = new probe_innerᴛ1(s: "seven");
     return fmt.Sprintf("why inner s=%s reserved=%v"u8, v.s, yReserved == nil);
 }
 

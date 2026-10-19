@@ -192,6 +192,9 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
         }
     }
 
+    // The element's native address, 0 for a managed element: array<T>.AliasPointer views native memory from it.
+    internal nuint NativeElementAddress => nativeElementIdentity();
+
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute
     // index x Go element size), so same-storage element pointers order exactly like Go addresses and a

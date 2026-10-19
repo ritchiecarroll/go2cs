@@ -12,7 +12,7 @@ internal static void Main() {
         ((Func<ж<mep.Reader>, byte, (@string, error)>)(mep.Peek))
     }.slice();
 
-    var r = Ꮡ(new Reader(Name: "go2cs"u8));
+    var r = Ꮡ(new Reader(Name: "go2cs"));
 
     foreach (var (_, read) in readers) {
         var (s, _) = read(r, (rune)',');

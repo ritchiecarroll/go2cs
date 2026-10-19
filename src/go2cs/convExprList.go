@@ -185,7 +185,16 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// takes the explicit (@string) cast instead — otherwise the parameter infers as C#
 			// string and the method-group-to-Action conversion fails (fmt's
 			// `defer p.catchPanic(p.arg, verb, "Format")`, CS0123 x4).
-			basicLitContext.castToGoString = callContext.useGoStringArg[i] || (callArgs != nil && callContext.u8StringArgOK[i])
+			//
+			// EVERY literal in the capture list, not only one in a slot that accepts u8: a variadic
+			// tail element (past the parameter array, so u8StringArgOK reads false) and an `any`
+			// slot such as panic's took no cast, so `defer note("a", "b")` and
+			// `defer panic("from defer")` inferred T = System.String. Each happened to be correct
+			// (the thunk converts at the call; panic normalizes), and GO2CS0004 reports exactly that
+			// inference (A2) once plain literals made the analyzer read converted code: measured on
+			// DeferVariadicCallee, DeferPanicArg and DeferLambdaParam. The cast makes T = @string, Go's
+			// own type for the literal.
+			basicLitContext.castToGoString = callContext.useGoStringArg[i] || callArgs != nil
 
 			// Check if the argument is a pointer type
 			identContext.isPointer = callContext.argTypeIsPtr[i]
@@ -369,6 +378,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// the row's `==` flipped to Go's opposite. reflect's TestIsZero table is the same shape.
 		if callContext != nil && callContext.anyBoxedUnsafePointerArgs[i] && !spreadArg && !totalReplacement {
 			resultExpr = v.applyTypedNilUnsafePointerBox(v.getType(expr, false), v.unsafePointerExprNeverRendersNull(expr), resultExpr)
+		}
+
+		// The TYPE-PARAMETER sibling: `fmt.Sprintf("%T", e)` and `[]any{e}` inside a generic body, where E may be a nil
+		// pointer or func at run time (errors_test's testAsType named its subtests by `%T` of a nil *fs.PathError).
+		if callContext != nil && callContext.anyBoxedTypeParamArgs[i] && !spreadArg && !totalReplacement {
+			if typeParam, isTypeParam := v.getType(expr, false).(*types.TypeParam); isTypeParam {
+				resultExpr = applyTypedNilTypeParamBox(typeParam, resultExpr)
+			}
 		}
 
 		if !totalReplacement && replacementArgs != nil && i < len(replacementArgs) && len(replacementArgs[i]) > 0 {

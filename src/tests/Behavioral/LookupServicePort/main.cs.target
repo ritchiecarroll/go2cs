@@ -12,13 +12,13 @@ internal partial struct main_queries /*dyn*/ {
 
 internal static void Main() {
     var queries = new main_queries[]{
-        new("tcp"u8, "http"u8),
-        new("tcp"u8, "https"u8),
-        new("tcp"u8, "domain"u8),
-        new("udp"u8, "domain"u8),
-        new("tcp4"u8, "https"u8),
-        new("tcp6"u8, "https"u8),
-        new("tcp"u8, "go2cs-no-such-service"u8)
+        new("tcp", "http"),
+        new("tcp", "https"),
+        new("tcp", "domain"),
+        new("udp", "domain"),
+        new("tcp4", "https"),
+        new("tcp6", "https"),
+        new("tcp", "go2cs-no-such-service")
     }.slice();
 
     foreach (var (_, q) in queries) {

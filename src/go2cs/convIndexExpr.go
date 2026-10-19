@@ -173,6 +173,11 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	}
 
 	if v.isGenericTypeArgument(indexExpr) {
+		// A type argument taking a constraint proxy renders through the resolved type (see proxiedTypeInstantiation).
+		if render, ok := v.proxiedTypeInstantiation(indexExpr); ok {
+			return render
+		}
+
 		context := DefaultIdentContext()
 		context.isType = true
 
@@ -318,6 +323,14 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		assignContext := DefaultLambdaContext()
 		assignContext.isAssignment = true
 		xContexts = []ExprContext{assignContext}
+	}
+
+	// An element of an array field reached through a local reinterpreted from unsafe.Pointer reads in
+	// place through the field's view, in native memory too (see fieldAccess.go).
+	if selectorExpr, ok := ast.Unparen(indexExpr.X).(*ast.SelectorExpr); ok {
+		if box, ok := v.fieldAccessArrayField(selectorExpr); ok {
+			return fmt.Sprintf("%s.ElementRef(%s)", box, index)
+		}
 	}
 
 	baseExpr := v.convExpr(indexExpr.X, xContexts)

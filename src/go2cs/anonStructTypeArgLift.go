@@ -150,3 +150,34 @@ func (v *Visitor) liftExplicitAnonStructTypeArgs(callExpr *ast.CallExpr) {
 		v.liftAtCallBoundary = false
 	}
 }
+
+// liftConversionTargetAnonStruct lifts -- and publishes, as liftExplicitAnonStructTypeArgs does -- a non-empty
+// anonymous struct written in a CONVERSION's type, `q := (*struct{ Name string })(e)`, under the name a composite
+// literal in the same position takes: the assigned variable's (visitAssignStmt passes it) or "type". A shape already
+// lifted anywhere in the package is reused by signature (visitStructType's reuse block), so two conversions to one
+// shape share one C# type.
+//
+// Without it the pointee had no lift at all: the conversion's emission named it through the deferred dynamic-type
+// marker, which resolved to nothing and fell back to the raw Go signature, `Reinterpret<Employee, struct{Name
+// string; Age int}>()`, which is not C# (the PointerConversionAnonymousTarget guard).
+func (v *Visitor) liftConversionTargetAnonStruct(callExpr *ast.CallExpr, name string) {
+	if callExpr == nil || callExpr.Fun == nil {
+		return
+	}
+
+	if tv, isType := v.info.Types[callExpr.Fun]; !isType || !tv.IsType() {
+		return
+	}
+
+	structType, exprType := v.extractStructType(callExpr.Fun)
+
+	if structType == nil || v.liftedTypeExists(structType) {
+		return
+	}
+
+	v.liftAtCallBoundary = true
+	v.indentLevel++
+	v.visitStructType(structType, exprType, name, nil, true, nil)
+	v.indentLevel--
+	v.liftAtCallBoundary = false
+}

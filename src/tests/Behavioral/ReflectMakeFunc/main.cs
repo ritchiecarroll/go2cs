@@ -19,11 +19,7 @@ partial struct traceHooks {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object intSwapˢ = (@string)"intSwap:"u8;
-private static readonly @string helloˢ = "hello"u8;
-private static readonly @string worldˢ = "world"u8;
 private static readonly object stringSwapˢ = (@string)"stringSwap:"u8;
-private static readonly @string dnsˢ = "dns"u8;
-private static readonly @string connectˢ = "connect"u8;
 private static readonly object eventsˢ = (@string)"events:"u8;
 private static readonly object sumˢ = (@string)"sum:"u8;
 private static readonly object typeMatchˢ = (@string)"type match:"u8;
@@ -40,7 +36,7 @@ internal static void Main() {
 
     ref var stringSwap = ref heap<Func<@string, @string, (@string, @string)>>(out var ᏑstringSwap);
     makeSwap(ᏑstringSwap);
-    var (s1, s2) = stringSwap(helloˢ, worldˢ);
+    var (s1, s2) = stringSwap("hello", "world");
     fmt.Println(stringSwapˢ, s1, s2);
 
     ref var events = ref heap<slice<@string>>(out var Ꮡevents);
@@ -66,8 +62,8 @@ internal static void Main() {
         return ofʗ1.Call(args);
     });
     tv.Field(0).Set(newFunc);
-    t1.OnEvent(dnsˢ);
-    t1.OnEvent(connectˢ);
+    t1.OnEvent("dns");
+    t1.OnEvent("connect");
     fmt.Println(eventsˢ, events);
 
     ref var h = ref heap<traceHooks>(out var Ꮡh);

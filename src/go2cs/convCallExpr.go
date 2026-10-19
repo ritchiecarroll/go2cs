@@ -279,6 +279,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		return cgoUnsafeArgsBlockPointer(lift)
 	}
 
+	// An EXPORTED generic of this package called with an array type argument at a parameter whose
+	// zero value it builds: it cannot carry an array-dims companion, so the call is refused loudly
+	// rather than run with a length-0 array (arrayDimsCompanion.go).
+	if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
+		if instance, ok := v.info.Instances[funIdent]; ok {
+			if refusal := v.arrayDimsRefusal(funIdent, instance.TypeArgs); refusal != "" {
+				v.showWarning("%s: %s", refusal, v.getPrintedNode(callExpr))
+				return v.arrayDimsRefusalCall(callExpr, refusal)
+			}
+		}
+	}
+
 	// A call into the syscall funnel (Syscall/Syscall6/…/SyscallN) — see
 	// syscallKeepAliveAnalysis.go for why this reproduces Go's own uintptrkeepalive contract
 	// rather than every other call's ordinary argument rendering. Intercepted before anything
@@ -324,6 +336,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 		v.pendingSyscallKeepAlive = append(v.pendingSyscallKeepAlive, boxes...)
 	}
+
+	// A conversion whose type writes an anonymous struct lifts it before any arm renders the type. An assignment
+	// has already lifted it under the variable's name; every other position takes "type", as a composite literal does.
+	v.liftConversionTargetAnonStruct(callExpr, "type")
 
 	// ---- Phase 1a: shapes intercepted before the general call path ----
 	//
@@ -579,6 +595,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				_, argIsBasic := argElem.(*types.Basic)
 				basicToNamed := okBaseNamed && argIsBasic && types.Identical(argElem, baseNamed.Underlying())
 
+				// Go converts between struct types whose underlying types are identical IGNORING TAGS (the
+				// spec's Conversions), so a pointer conversion with an UNNAMED struct on either side --
+				// TypeConversion's `(*Person)(data)` -- or between named structs whose fields differ only in tags
+				// is the same pointer REINTERPRET as namedToNamed, which compares tags. Without this arm the pair
+				// reached applyImplicitConversion, which dereferences, value-converts and re-boxes: a write through
+				// the result was lost, its address differed from the source's, and a nil source became a non-nil
+				// zero box (the PointerConversionAliasing guard).
+				_, resultIsStruct := resultElem.Underlying().(*types.Struct)
+				_, argIsStruct := argElem.Underlying().(*types.Struct)
+				structPair := !namedToNamed && resultIsStruct && argIsStruct && !types.Identical(resultElem, argElem) &&
+					types.IdenticalIgnoreTags(resultElem.Underlying(), argElem.Underlying())
+
 				// `(*[4]uint64)(&s.s)` / `(*fiatScalarNonMontgomeryDomainFieldElement)(&s.s)` — pointer
 				// reinterprets of an array-backed DEFINED type (crypto/internal/edwards25519 scalar.go):
 				// to its unnamed underlying array, or to a SIBLING defined type written over the SAME
@@ -631,6 +659,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					baseName := convertToCSTypeName(v.getAliasQualifiedTypeName(resultElem, false))
 
 					return fmt.Sprintf("%s((%s)(%s.Value))", AddressPrefix, baseName, argExpr)
+				}
+
+				if structPair {
+					if emission, ok := v.structPointerConversionEmission(callExpr, arg, argElem, resultElem); ok {
+						return emission
+					}
 				}
 
 				if namedToNamed || namedToBasic || basicToNamed {
@@ -2554,6 +2588,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								callExprContext.markAnyBoxedUnsafePointerArg(j)
 							}
 
+							// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
+							if typeParam, isTypeParam := argType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) && isEmptyInterfaceTarget(paramType) {
+								callExprContext.markAnyBoxedTypeParamArg(j)
+							}
+
 							if _, argIsPtr := argType.(*types.Pointer); argIsPtr {
 								ident := getIdentifier(callExpr.Args[j])
 
@@ -2926,6 +2965,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				return fmt.Sprintf("%s(%s)", AddressPrefix, nilChan)
 			}
 
+			// `new(T)` of a type parameter that carries an array-dims companion: the box holds an array
+			// sized from the dims the call site supplied (arrayDimsCompanion.go).
+			if companion := v.arrayDimsCompanionFor(newType); companion != "" {
+				return fmt.Sprintf("GoArrayZero.New<%s, %s>()", typeName, companion)
+			}
+
 			return fmt.Sprintf("@new<%s>()", typeName)
 		}
 
@@ -3027,6 +3072,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 								if isExactUnsafePointer(argType) {
 									callExprContext.markAnyBoxedUnsafePointerArg(i)
+								}
+
+								// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
+								if typeParam, isTypeParam := argType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) {
+									callExprContext.markAnyBoxedTypeParamArg(i)
 								}
 							}
 
@@ -3177,6 +3227,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// the reassignment case above.) Both visitDeferStmt and visitGoStmt force the temp-param
 			// form for a built-in callee, so renderParams is set whenever callArgs is.
 			if deferCallArgs != nil && len(deferCallArgs) == 1 && deferRenderParams {
+				// The eager argument feeds the registration's generic type parameter, so here (and
+				// only here) a string literal takes Go's type explicitly: bare, T inferred as
+				// System.String (GO2CS0004 A2, DeferPanicArg). This is the deferred AND the spawned
+				// panic: deferCallArgs is the callArgs both visitDeferStmt and visitGoStmt set, and
+				// goǃ<T> infers exactly as defer<T> does (`go panic("x")`). panic's own normalization
+				// still covers every direct site, which keeps its bare literal.
+				if lit, isLit := ast.Unparen(callExpr.Args[0]).(*ast.BasicLit); isLit && lit.Kind == token.STRING {
+					panicValue = "(@string)" + panicValue
+				} else if constExprIsStringLiteralConcat(callExpr.Args[0]) {
+					panicValue = v.applyUntypedConstBoxCast(callExpr.Args[0], panicValue)
+				}
+
 				deferCallArgs[0] = panicValue
 
 				return fmt.Sprintf("throw panic(%s1)", TempVarMarker)
@@ -3273,8 +3335,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					(v.calleeHasConstraintOnlyTypeParam(funIdent) || v.callHasMethodGroupArg(callExpr) ||
 						v.calleeTypeParamUnsuppliedByCall(callExpr, funIdent) ||
 						v.calleeReadsDescriptorName(funIdent) ||
+						v.calleeCarriesArrayDims(funIdent) ||
 						v.callNeedsConstraintProxy(funIdent, instance.TypeArgs) ||
 						v.calleeTypeParamMixesUntypedAndTypedArgs(callExpr, funIdent) ||
+						v.calleeTypeParamFixedByUntypedConst(callExpr, funIdent) ||
 						v.callPassesNamedCompositeToCompositeParam(callExpr, funIdent)) {
 					// Erased (pointer-core) callee positions leave the emitted list — `clone[P *T,
 					// T any]` emits `clone<ΔSignature>(…)` (see renderedTypeArgs); a list that
@@ -3800,6 +3864,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	} else {
 		expr := v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext)
 
+		// runtime.AddCleanup's closes-over-ptr check reads the cleanup's by-value captures, which only
+		// the converter can see (addCleanupCaptures.go).
+		if captures := v.addCleanupCaptureArgs(callExpr); captures != "" {
+			expr += ", " + captures
+		}
+
 		if strings.HasSuffix(funcName, "(uintptr)") && strings.HasPrefix(expr, "(uintptr)") {
 			// Remove redundant cast to uintptr
 			expr = expr[9:]
@@ -3899,7 +3969,7 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 // call's target type, returning expr wrapped as the target requires.
 //
 // Every DECISION here is type-driven — funcType, argType, targetTypeName and packageTypeSpecRHS —
-// and expr is pure text that flows only to the return value (the two pointer cases wrap it). That
+// and expr is pure text that flows only to the return value (the numeric pointer case wraps it). That
 // is what lets the recording run without a conversion at all: a caller that discards the result
 // passes "" and pays no traversal. Keep it that way; reading anything out of expr would put a whole
 // second walk of the argument subtree back on every call (see the loop's note in convCallExpr).
@@ -3938,13 +4008,12 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 
 		if !types.Identical(funcType, argType) {
 			if _, ok := argType.Underlying().(*types.Struct); ok {
-				if targetTypeIsPointer {
-					// Dereference target type when casting to pointer types,
-					// in C# implicit casting operator requires the target type
-					// to be a direct type, not a pointer type
-					expr = fmt.Sprintf("(%s?.Value ?? default!)", expr)
-				}
-
+				// A struct POINTER conversion `(*U)(p)` never renders here: convCallExpr routes every such
+				// pair to an aliasing Reinterpret before this point (structPair, namedToNamed), so a pointer
+				// target reaches this arm only from the argument loop, which records and discards expr. The
+				// `(expr?.Value ?? default!)` copy it used to render lost every write through the result
+				// (PointerConversionAliasing); measured unreachable on the behavioral corpus and the
+				// three-target stdlib before it was removed.
 				argTypeName := v.getCSharpTypeName(argType)
 
 				// SKIP a conversion the [GoType] wrapper already provides: `type bitStringEncoder
@@ -4530,7 +4599,8 @@ func (v *Visitor) genericInferenceArgCastType(arg ast.Expr) string {
 // parameter (see the call-site cast), and the distinction it draws is C#'s variance rule:
 //
 //   - a result that is the BARE type parameter mis-infers to C# `int`, but the implicit int→nint
-//     conversion repairs it at the use site, so nothing is emitted and no golden moves;
+//     conversion repairs it at the use site, so no argument cast is emitted (the call's explicit
+//     type arguments come from calleeTypeParamFixedByUntypedConst);
 //   - a result that CONSTRUCTS a type over the parameter is invariant — `Action<int, bool>` is not
 //     `Action<nint, bool>` — so the mis-inference is unrepairable and the argument must carry the
 //     type Go resolved.
@@ -6416,6 +6486,181 @@ func (v *Visitor) calleeTypeParamMixesUntypedAndTypedArgs(callExpr *ast.CallExpr
 	return false
 }
 
+// calleeTypeParamFixedByUntypedConst reports whether the call leaves a type parameter to UNTYPED CONSTANTS
+// alone, and C# would infer a different type from their emission than the one Go resolved. Go gives an
+// untyped constant its default type (`show(3)` instantiates `show[int]`), while C# infers from the emitted
+// expression: a bare integer literal is System.Int32 (`int32` to Go, and to `%T`), and a named untyped
+// constant is a golib `UntypedInt`/`UntypedFloat`/`UntypedComplex` wrapper. The call then emits its type
+// arguments explicitly, `show<nint>(3)`, and the argument text does not change.
+//
+// A type parameter qualifies when every argument that reaches it is an untyped constant at a position
+// whose type IS the parameter (a variadic element included) and at least one of them mis-infers. Left
+// alone:
+//   - a parameter some TYPED argument reaches, at any position, through an alias (`Mapper[T]`) or an
+//     erased pointer-core parameter's `ж<T>` included: C# infers from that argument;
+//   - a constant whose emission already carries the Go type: a float (`2.5D`), a rune (`(rune)'a'`), a
+//     string, a bool, a complex, an integer resolved to int32, or an integer outside int32, which
+//     emits with a cast;
+//   - a constant the two argument-cast gates already retype (the sibling `~[]E` lock and an invariant
+//     result, see the call-site cast), so those calls keep their emission.
+func (v *Visitor) calleeTypeParamFixedByUntypedConst(callExpr *ast.CallExpr, funIdent *ast.Ident) bool {
+	funcObj, ok := v.info.ObjectOf(funIdent).(*types.Func)
+
+	if !ok {
+		return false
+	}
+
+	sig, ok := funcObj.Type().(*types.Signature)
+
+	if !ok || sig.TypeParams() == nil || sig.TypeParams().Len() == 0 {
+		return false
+	}
+
+	params := sig.Params()
+
+	if params.Len() == 0 {
+		return false
+	}
+
+	for i := range sig.TypeParams().Len() {
+		tp := sig.TypeParams().At(i)
+		castGate := typeParamIsSliceElementOfSibling(sig, tp) || typeParamReachesInvariantResult(sig, tp)
+		sawUntyped, sawTyped, misinfers := false, false, false
+
+		for j, arg := range callExpr.Args {
+			paramIndex := j
+
+			if sig.Variadic() && paramIndex >= params.Len()-1 {
+				paramIndex = params.Len() - 1
+			}
+
+			if paramIndex >= params.Len() {
+				break
+			}
+
+			paramType := params.At(paramIndex).Type()
+
+			if sig.Variadic() && paramIndex == params.Len()-1 && !callExpr.Ellipsis.IsValid() {
+				if slice, isSlice := paramType.(*types.Slice); isSlice {
+					paramType = slice.Elem()
+				}
+			}
+
+			if types.Unalias(paramType) != types.Type(tp) {
+				if typeMentionsTypeParam(paramType, tp, map[types.Type]bool{}) || erasedPointerCoreUsesTypeParam(paramType, tp) {
+					sawTyped = true
+				}
+
+				continue
+			}
+
+			if !v.isUntypedConstExpr(arg) {
+				sawTyped = true
+				continue
+			}
+
+			sawUntyped = true
+			castType := v.genericInferenceArgCastType(arg)
+
+			if castGate && castType != "" {
+				continue
+			}
+
+			if v.containsUntypedNamedConstRef(arg) || castType != "" && !v.untypedConstEmitsWithCast(arg) {
+				misinfers = true
+			}
+		}
+
+		if sawUntyped && !sawTyped && misinfers {
+			return true
+		}
+	}
+
+	return false
+}
+
+// erasedPointerCoreUsesTypeParam reports whether t is an ERASED pointer-core type parameter (`[P *T]`)
+// whose pointer mentions tp. The parameter renders as `ж<T>`, so C# infers tp from that argument's
+// own type and an untyped constant elsewhere in the call does not decide it.
+func erasedPointerCoreUsesTypeParam(t types.Type, tp *types.TypeParam) bool {
+	typeParam, ok := types.Unalias(t).(*types.TypeParam)
+
+	if !ok || typeParam == tp {
+		return false
+	}
+
+	pointer, ok := pointerCoreConstraint(typeParam)
+
+	return ok && typeMentionsTypeParam(pointer, tp, map[types.Type]bool{})
+}
+
+// untypedConstEmitsWithCast reports whether an untyped integer constant falls outside int32, where its
+// emission already carries the resolved type (`unchecked((nint)(9007199254740993L))`) and C# infers it.
+func (v *Visitor) untypedConstEmitsWithCast(expr ast.Expr) bool {
+	tv, ok := v.info.Types[expr]
+
+	if !ok || tv.Value == nil {
+		return false
+	}
+
+	value := constant.ToInt(tv.Value)
+
+	if value.Kind() != constant.Int {
+		return false
+	}
+
+	n, exact := constant.Int64Val(value)
+
+	return !exact || n < math.MinInt32 || n > math.MaxInt32
+}
+
+// isUntypedConstExpr reports whether expr is an untyped constant expression: a literal, a named untyped
+// constant (not a tightened local, which is declared at its concrete type), or a constant expression over
+// those. go/types records such an argument at the type it adopted, so untypedness is read from the source.
+func (v *Visitor) isUntypedConstExpr(expr ast.Expr) bool {
+	if tv, ok := v.info.Types[expr]; !ok || tv.Value == nil {
+		return false
+	}
+
+	switch e := ast.Unparen(expr).(type) {
+	case *ast.BasicLit:
+		return true
+	case *ast.Ident, *ast.SelectorExpr:
+		sel, _ := e.(*ast.Ident)
+
+		if selector, isSelector := e.(*ast.SelectorExpr); isSelector {
+			sel = selector.Sel
+		}
+
+		constObj, ok := v.info.Uses[sel].(*types.Const)
+
+		if !ok {
+			return false
+		}
+
+		if _, tightened := v.tightenedConsts[constObj]; tightened {
+			return false
+		}
+
+		basic, ok := constObj.Type().(*types.Basic)
+
+		return ok && basic.Info()&types.IsUntyped != 0
+	case *ast.UnaryExpr:
+		return v.isUntypedConstExpr(e.X)
+	case *ast.BinaryExpr:
+		switch e.Op {
+		case token.EQL, token.NEQ, token.LSS, token.LEQ, token.GTR, token.GEQ:
+			return true
+		case token.SHL, token.SHR:
+			return v.isUntypedConstExpr(e.X)
+		}
+
+		return v.isUntypedConstExpr(e.X) && v.isUntypedConstExpr(e.Y)
+	}
+
+	return false
+}
+
 // callPassesNamedCompositeToCompositeParam reports whether the call hands an argument of a NAMED map, slice,
 // channel or array type to a parameter whose declared type is an UNNAMED composite mentioning a type parameter
 // (`keys[V any](m map[int]V)` called `keys(names)` with `type Names map[int]string`). Go infers V through the
@@ -7289,4 +7534,77 @@ func (v *Visitor) sameNameMethodCapture(callExpr *ast.CallExpr, paramType types.
 	}
 
 	return ""
+}
+
+// structPointerConversionEmission renders `(*U)(p)` for two struct types identical ignoring tags (convCallExpr's
+// structPair) as golib's aliasing Reinterpret, reporting false when the source is not a Go pointer.
+//
+// One class of such pairs cannot alias in C#: a field whose two types differ only in the tags of a NESTED
+// unnamed type held through a reference -- `Address *struct{ Street string }` against the same field with
+// `json` tags -- because C# lifts the two unnamed types to two classes (ж<A> and ж<B>), and reading a
+// reference to one as the other is a CLR type-safety break. golib's own alias gate refuses that pair. The
+// conversion itself is still valid Go this host can run exactly: nil stays nil, and a converted pointer that is
+// reassigned or compared is exact; only a read or a write through it needs the aliased memory. So the emission
+// is ReinterpretUnaliased, whose view panics by name at the first read or write, and this warning names the
+// site and the two classes at conversion time (G's ruling: refuse at the dereference, diagnose at the cause).
+func (v *Visitor) structPointerConversionEmission(callExpr *ast.CallExpr, arg ast.Expr, srcElem, targetElem types.Type) (string, bool) {
+	src, srcName, targetName := v.pointerReinterpretManagedSource(callExpr, arg)
+
+	if src == nil {
+		return "", false
+	}
+
+	identContext := DefaultIdentContext()
+	identContext.isPointer = true
+
+	method := "Reinterpret"
+
+	srcStruct, _ := srcElem.Underlying().(*types.Struct)
+	targetStruct, _ := targetElem.Underlying().(*types.Struct)
+
+	if field, srcField, targetField, refused := unaliasableStructField(srcStruct, targetStruct); refused {
+		method = "ReinterpretUnaliased"
+
+		v.showWarning("pointer conversion %s at line %d: field %s is %s on one side and %s on the other, two C# classes "+
+			"that cannot alias, so a read or write through the converted pointer panics",
+			v.getPrintedNode(callExpr), v.fset.Position(callExpr.Pos()).Line, field,
+			v.getCSharpTypeName(srcField), v.getCSharpTypeName(targetField))
+	}
+
+	return fmt.Sprintf("%s.%s<%s, %s>()", v.convExpr(src, []ExprContext{identContext}), method, srcName, targetName), true
+}
+
+// unaliasableStructField reports the first field of two struct types, identical ignoring tags, whose C# forms
+// cannot alias: a field whose two types differ (so they differ in the tags of a nested unnamed type) and are not
+// themselves structs. A differing nested struct held INLINE lifts to two C# structs with the same field types,
+// which golib's LayoutCompatible compares recursively and aliases, so this recurses into it exactly as golib does.
+// Every other differing type -- a pointer, slice, array, map, channel or func over the nested type -- is a
+// reference-bearing generic over two distinct classes, which golib refuses.
+func unaliasableStructField(src, target *types.Struct) (string, types.Type, types.Type, bool) {
+	if src == nil || target == nil || src.NumFields() != target.NumFields() {
+		return "", nil, nil, false
+	}
+
+	for i := 0; i < src.NumFields(); i++ {
+		srcField, targetField := src.Field(i), target.Field(i)
+
+		if types.Identical(srcField.Type(), targetField.Type()) {
+			continue
+		}
+
+		srcInner, srcIsStruct := srcField.Type().Underlying().(*types.Struct)
+		targetInner, targetIsStruct := targetField.Type().Underlying().(*types.Struct)
+
+		if srcIsStruct && targetIsStruct {
+			if name, a, b, refused := unaliasableStructField(srcInner, targetInner); refused {
+				return srcField.Name() + "." + name, a, b, true
+			}
+
+			continue
+		}
+
+		return srcField.Name(), srcField.Type(), targetField.Type(), true
+	}
+
+	return "", nil, nil, false
 }

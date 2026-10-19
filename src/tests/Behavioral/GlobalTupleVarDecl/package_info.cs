@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("GlobalTupleVarDecl.go", "GlobalTupleVarDecl.cs", "AAwSgNSCgqzGlIKCgoySjpIACg6ApII=", "52-52:1")]
+[assembly: go.GoPositionMap("GlobalTupleVarDecl.go", "GlobalTupleVarDecl.cs", "AAwSgKSCgqymtIKCgoySjpIACg6ApII=", "52-52:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

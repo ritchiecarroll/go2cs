@@ -1959,6 +1959,14 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 		if selection, ok := v.info.Selections[selectorExpr]; ok && selection.Kind() == types.FieldVal {
 			if ptrType, isPtrType := exprType.(*types.Pointer); isPtrType {
+				// A local reinterpreted from unsafe.Pointer reads its fields through the generated field
+				// properties, at the Go offset when it aliases native memory (see fieldAccess.go).
+				if pointee := v.fieldAccessLocal(selectorExpr.X); pointee != nil {
+					if result, ok := v.fieldAccessSelector(selectorExpr, pointee); ok {
+						return result
+					}
+				}
+
 				// Check if the expression is *directly* an intra-function identifier (the
 				// receiver or a parameter) — a value-ref receiver/param accesses its fields
 				// without a deref. Use a direct type assertion, NOT getIdentifier (which digs

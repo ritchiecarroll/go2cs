@@ -75,6 +75,22 @@ internal sealed class TestOptions
     /// <summary>Environment variable the pipeline passes the JUnit-file path in.</summary>
     public const string JUnitFileEnvironmentVariable = "GO2CS_TEST_JUNIT";
 
+    /// <summary>
+    /// The per-test deadline (DESIGN-object-lifetime-disclosure.md OQ-L3(b)): a top-level test still running
+    /// this long after it started RUNNING is reported failed and abandoned, and the run goes on
+    /// (<see cref="TestRunner.WaitBounded(TestExecution, Task)"/>). <see cref="TimeSpan.Zero"/>, the default, is no deadline.
+    /// </summary>
+    /// <remarks>
+    /// Go's test binary has no such bound: a hung test holds it until <c>-timeout</c> panics the whole binary.
+    /// That is why the deadline is the pipeline's setting, carried in the environment like the result file,
+    /// and never a <c>-test.*</c> flag on the converted program's argv; the Go side of the comparison is
+    /// unbounded.
+    /// </remarks>
+    public TimeSpan TestDeadline { get; private set; } = TimeSpan.Zero;
+
+    /// <summary>Environment variable the pipeline passes the per-test deadline in, as a Go duration ("15m0s"); "0" is none.</summary>
+    public const string TestDeadlineEnvironmentVariable = "GO2CS_TEST_DEADLINE";
+
     // Reads an environment variable and removes it from this process, so nothing this process
     // starts inherits it.
     private static string? TakeEnvironmentVariable(string name)
@@ -180,6 +196,10 @@ internal sealed class TestOptions
         // in-process tier passes them directly.
         options.ResultFile = TakeEnvironmentVariable(ResultFileEnvironmentVariable);
         options.JUnitFile = TakeEnvironmentVariable(JUnitFileEnvironmentVariable);
+
+        // Cleared with the other two, so a test that re-executes this host runs its child unbounded.
+        if (TakeEnvironmentVariable(TestDeadlineEnvironmentVariable) is string deadline)
+            options.TestDeadline = deadline == "0" ? TimeSpan.Zero : ParseDuration(deadline);
 
         for (int index = 0; index < args.Length; index++)
         {

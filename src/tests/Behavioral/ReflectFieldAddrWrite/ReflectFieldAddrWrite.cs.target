@@ -28,23 +28,18 @@ internal static ж<nint> intFieldAddr(ж<conf> Ꮡc, @string name) {
     return (ж<nint>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string traceˢ = "trace"u8;
-private static readonly @string versionˢ = "version"u8;
-private static readonly @string depthˢ = "depth"u8;
-
 internal static void Main() {
     ref var c = ref heap<conf>(out var Ꮡc);
-    c = new conf(name: "cfg"u8, version: "v0"u8, depth: 3);
+    c = new conf(name: "cfg", version: "v0", depth: 3);
 
-    boolFieldAddr(Ꮡc, traceˢ).Value = true;
-    stringFieldAddr(Ꮡc, versionˢ).Value = "v1"u8;
-    intFieldAddr(Ꮡc, depthˢ).Value = 7;
+    boolFieldAddr(Ꮡc, "trace").Value = true;
+    stringFieldAddr(Ꮡc, "version").Value = "v1";
+    intFieldAddr(Ꮡc, "depth").Value = 7;
 
     fmt.Println(c.name, c.trace, c.version, c.depth);
 
-    var p1 = boolFieldAddr(Ꮡc, traceˢ);
-    var p2 = boolFieldAddr(Ꮡc, traceˢ);
+    var p1 = boolFieldAddr(Ꮡc, "trace");
+    var p2 = boolFieldAddr(Ꮡc, "trace");
     p1.Value = false;
     fmt.Println(p1.Value, p2.Value, c.trace, p1 == p2);
 

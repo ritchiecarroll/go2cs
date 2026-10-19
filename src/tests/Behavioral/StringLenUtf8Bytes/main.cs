@@ -10,10 +10,10 @@ partial struct testsᴛ1 /*dyn*/ {
     internal nint n;
 }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{
-    new("ascii"u8, len("abc")),
-    new("bmp2"u8, len("aΩb")),
-    new("bmp3"u8, len("a☺b☻c")),
-    new("astral"u8, len("z\U0001d56b"))
+    new("ascii", len("abc")),
+    new("bmp2", len("aΩb")),
+    new("bmp3", len("a☺b☻c")),
+    new("astral", len("z\U0001d56b"))
 }.slice();
 
 internal static void Main() {

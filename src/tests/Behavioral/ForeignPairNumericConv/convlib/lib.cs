@@ -10,11 +10,8 @@ public static Token NewToken(uintptr v) {
     return ((Token)v);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string handleˢ = "handle"u8;
-
 public static @string String(this Handle h) {
-    return handleˢ;
+    return "handle";
 }
 
 public static uintptr Raw(this Token t) {

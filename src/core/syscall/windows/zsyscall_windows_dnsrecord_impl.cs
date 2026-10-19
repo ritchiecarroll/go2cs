@@ -202,6 +202,13 @@ partial class syscall_package
         return r0;
     }
 
+    /// <summary>Transcribes the native DNS_RECORDW chain at <paramref name="address"/> into managed records, payloads registered.</summary>
+    /// <remarks>
+    /// Public for the guard in GolibTests, the netdb transcribe seams' shape; it widens no Go surface, since Go has
+    /// no such function. It frees nothing: the caller owns the image it hands in.
+    /// </remarks>
+    public static unsafe ж<DNSRecord> transcribeDnsRecords(nuint address) => copyDnsChain((NativeDnsRecord*)address);
+
     // Transcribes the native chain into managed records, preserving order, and registers each
     // record's typed payload in s_dnsPayloads.
     private static unsafe ж<DNSRecord> copyDnsChain(NativeDnsRecord* native) {

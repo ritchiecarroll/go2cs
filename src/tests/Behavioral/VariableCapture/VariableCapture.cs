@@ -15,16 +15,13 @@ internal static void printName(this data d) {
     fmt.Println(nameˢ, d.name);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string gretchenˢ = "Gretchen"u8;
-
 internal static void Main() {
-    var d = new data(name: "James"u8);
+    var d = new data(name: "James");
     
     var dʗ1 = d;
     var f1 = () => dʗ1.printName();
     f1();
-    d.name = gretchenˢ;
+    d.name = "Gretchen";
     f1();
 }
 

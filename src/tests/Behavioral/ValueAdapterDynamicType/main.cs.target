@@ -31,7 +31,6 @@ private static readonly object altEqˢ = (@string)"alt-eq:"u8;
 private static readonly object altAssertˢ = (@string)"alt-assert:"u8;
 private static readonly object altSwitchˢ = (@string)"alt-switch:"u8;
 private static readonly object rgbaˢ = (@string)"rgba:"u8;
-private static readonly @string fromIfaceˢ = "from-iface"u8;
 private static readonly object mapˢ = (@string)"map:"u8;
 
 internal static void Main() {
@@ -49,7 +48,7 @@ internal static void Main() {
     fmt.Println(assertˢ, ok, v.R, v.A);
     var (_, badOK) = got._<colorlike.Gray>(ᐧ);
     fmt.Println(assertMissˢ, badOK);
-    fmt.Println(assert1ˢ, got._<colorlike.NRGBA>().G);
+    fmt.Println(assert1ˢ, got._<colorlike.Color, colorlike.NRGBA>().G);
 
     switch (got.type()) {
     case colorlike.Gray t: {
@@ -86,7 +85,7 @@ internal static void Main() {
     fmt.Println(rgbaˢ, r, gg, b, a);
 
     var seen = new map<colorlike.Color, @string>{};
-    seen[got] = fromIfaceˢ;
+    seen[got] = "from-iface";
     fmt.Println(mapˢ, seen[want], len(seen));
 }
 

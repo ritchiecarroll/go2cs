@@ -44,11 +44,8 @@ internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string outputˢ = "output"u8;
-
 internal static void sendOnly(channel/*<-*/<@string> s) {
-    s.ᐸꟷ(outputˢ);
+    s.ᐸꟷ("output");
 }
 
 public static Action<Func<nint, bool>> All(this IntSlice s) {
@@ -104,7 +101,6 @@ private static readonly object unexpectedReceivedFromˢ = (@string)"unexpected r
 private static readonly object closedChannel2Selectedˢ = (@string)"closed channel 2 selected immediately: "u8;
 private static readonly object unexpectedOkˢ = (@string)"unexpected: OK: "u8;
 private static readonly object unexpectedˢ = (@string)"unexpected: "u8;
-private static readonly @string helloˢ = "hello"u8;
 private static readonly object racedˢ = (@string)"raced:"u8;
 
 internal static partial void Main() {
@@ -216,7 +212,7 @@ internal static partial void Main() {
 
     var ca = new channel<@string>(1);
     var cb = new channel<@string>(1);
-    ca.ᐸꟷ(helloˢ);
+    ca.ᐸꟷ("hello");
     fmt.Println(firstMsg(ca, cb));
     var done = new channel<EmptyStruct>(0);
     fmt.Println(poll(done));
@@ -240,20 +236,16 @@ internal static @string firstMsg(channel<@string> a, channel<@string> b) {
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string doneˢ = "done"u8;
-private static readonly @string pendingˢ = "pending"u8;
-
 internal static @string poll(channel<EmptyStruct> done) {
     var selᴛ14 = done;
     switch (trySelect(ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
     case 0 when selᴛ14.ꟷᐳ(out _): {
-        return doneˢ;
+        return "done";
     }
     default: {
         break;
     }}
-    return pendingˢ;
+    return "pending";
 }
 
 partial struct raceResult {

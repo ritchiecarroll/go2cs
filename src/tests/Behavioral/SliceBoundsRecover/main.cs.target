@@ -47,7 +47,7 @@ internal static void Main() {
     var p = Ꮡa;
     var n = ((named)s);
     ref var na = ref heap(new namedArr(), out var Ꮡna);
-    @string str = abcˢ;
+    @string str = "abc";
     namedStr ns = ((namedStr)(@string)abcˢ);
     nint neg = -1;
     nint big = unchecked((nint)(4294967301L));
@@ -120,121 +120,121 @@ internal static void Main() {
 
         var sʗ16 = s;
     var cases = new main_cases[]{
-        new("slice [:hi>cap]"u8, () => {
+        new("slice [:hi>cap]", () => {
             sink = sʗ1.slice(0, hi11);
         }),
-        new("slice [:len<hi<=cap]"u8, () => {
+        new("slice [:len<hi<=cap]", () => {
             sink = len(sʗ2.slice(0, hi5));
         }),
-        new("slice [:-1]"u8, () => {
+        new("slice [:-1]", () => {
             sink = sʗ3.slice(0, neg);
         }),
-        new("slice [-1:]"u8, () => {
+        new("slice [-1:]", () => {
             sink = sʗ4.slice(neg);
         }),
-        new("slice [-1:2]"u8, () => {
+        new("slice [-1:2]", () => {
             sink = sʗ5.slice(neg, hi2);
         }),
-        new("slice [4:2]"u8, () => {
+        new("slice [4:2]", () => {
             sink = sʗ6.slice(lo4, hi2);
         }),
-        new("slice [4:]"u8, () => {
+        new("slice [4:]", () => {
             sink = sʗ7.slice(lo4);
         }),
-        new("slice [:big]"u8, () => {
+        new("slice [:big]", () => {
             sink = sʗ8.slice(0, big);
         }),
-        new("slice [big:]"u8, () => {
+        new("slice [big:]", () => {
             sink = sʗ9.slice(big);
         }),
-        new("slice [:i64]"u8, () => {
+        new("slice [:i64]", () => {
             sink = sʗ10.slice(0, (nint)(i64));
         }),
-        new("slice [:u64]"u8, () => {
+        new("slice [:u64]", () => {
             sink = sʗ11.slice(0, (nint)(u64));
         }),
-        new("slice [:u32]"u8, () => {
+        new("slice [:u32]", () => {
             sink = sʗ12.slice(0, (nint)(u32));
         }),
-        new("named [:-1]"u8, () => {
+        new("named [:-1]", () => {
             sink = nʗ1.slice(0, neg);
         }),
-        new("named [4:2]"u8, () => {
+        new("named [4:2]", () => {
             sink = nʗ2.slice(lo4, hi2);
         }),
-        new("array [:5]"u8, () => {
+        new("array [:5]", () => {
             sink = Ꮡa.Value.slice(0, hi5);
         }),
-        new("array [:-1]"u8, () => {
+        new("array [:-1]", () => {
             sink = Ꮡa.Value.slice(0, neg);
         }),
-        new("array [4:2]"u8, () => {
+        new("array [4:2]", () => {
             sink = Ꮡa.Value.slice(lo4, hi2);
         }),
-        new("array [4:]"u8, () => {
+        new("array [4:]", () => {
             sink = Ꮡa.Value.slice(lo4);
         }),
-        new("ptrarray [:5]"u8, () => {
-            sink = (~pʗ1).slice(0, hi5);
+        new("ptrarray [:5]", () => {
+            sink = pʗ1.slice(0, hi5);
         }),
-        new("namedarr [:5]"u8, () => {
+        new("namedarr [:5]", () => {
             sink = naʗ1.slice(0, hi5);
         }),
-        new("string [:5]"u8, () => {
+        new("string [:5]", () => {
             sink = str.slice(0, hi5);
         }),
-        new("string [:-1]"u8, () => {
+        new("string [:-1]", () => {
             sink = str.slice(0, neg);
         }),
-        new("string [-1:]"u8, () => {
+        new("string [-1:]", () => {
             sink = str.slice(neg);
         }),
-        new("string [4:2]"u8, () => {
+        new("string [4:2]", () => {
             sink = str.slice(lo4, hi2);
         }),
-        new("string [4:]"u8, () => {
+        new("string [4:]", () => {
             sink = str.slice(lo4);
         }),
-        new("string [:big]"u8, () => {
+        new("string [:big]", () => {
             sink = str.slice(0, big);
         }),
-        new("namedstr [:5]"u8, () => {
+        new("namedstr [:5]", () => {
             sink = ns.slice(0, hi5);
         }),
-        new("strlit [:5]"u8, () => {
+        new("strlit [:5]", () => {
             @string t = "abc"u8.slice(0, hi5);
             sink = t;
         }),
-        new("strlit [-1:]"u8, () => {
+        new("strlit [-1:]", () => {
             @string t = "abc"u8.slice(neg);
             sink = t;
         }),
-        new("slice3 [-1:2:5]"u8, () => {
+        new("slice3 [-1:2:5]", () => {
             var t = sʗ13.slice(neg, two, five);
             sink = t;
             fmt.Println(lenˢ, len(t), capˢ, cap(t));
         }),
-        new("slice3 [0:-1:5]"u8, () => {
+        new("slice3 [0:-1:5]", () => {
             var t = sʗ14.slice(0, neg, five);
             sink = t;
             fmt.Println(lenˢ, len(t), capˢ, cap(t));
         }),
-        new("slice3 [0:2:-1]"u8, () => {
+        new("slice3 [0:2:-1]", () => {
             var t = sʗ15.slice(0, two, neg);
             sink = t;
             fmt.Println(lenˢ, len(t), capˢ, cap(t));
         }),
-        new("array3 [-1:2:5]"u8, () => {
+        new("array3 [-1:2:5]", () => {
             var t = a6ʗ1.slice(neg, two, five);
             sink = t;
             fmt.Println(lenˢ, len(t), capˢ, cap(t));
         }),
-        new("array3 [0:2:-1]"u8, () => {
+        new("array3 [0:2:-1]", () => {
             var t = a6ʗ2.slice(0, two, neg);
             sink = t;
             fmt.Println(lenˢ, len(t), capˢ, cap(t));
         }),
-        new("slice3 [:2:5] in range"u8, () => {
+        new("slice3 [:2:5] in range", () => {
             var t = sʗ16.slice(0, two, five);
             sink = t;
             fmt.Println(lenˢ, len(t), capˢ, cap(t));

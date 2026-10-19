@@ -70,24 +70,15 @@ public static void Set(this Hdr h, @string k, @string v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string keyˢ = "Key"u8;
-private static readonly @string keyˢ2 = "key"u8;
 private static readonly object exactSetRanˢ = (@string)"exact Set ran:"u8;
 private static readonly object exactAddAccumulatedˢ = (@string)"exact Add accumulated:"u8;
 private static readonly object exactRemoveˢ = (@string)"exact Remove:"u8;
 private static readonly object exactClearˢ = (@string)"exact Clear:"u8;
 private static readonly object exactContainsKeyˢ = (@string)"exact ContainsKey:"u8;
-private static readonly @string alwaysˢ = "always"u8;
-private static readonly @string acceptˢ = "accept"u8;
 private static readonly object controlSetˢ = (@string)"control Set:"u8;
-private static readonly @string acceptˢ2 = "ACCEPT"u8;
-private static readonly @string mixedˢ = "Mixed"u8;
-private static readonly @string mixedˢ2 = "mixed"u8;
 private static readonly object nestedAssignRawˢ = (@string)"nested assign raw:"u8;
 private static readonly object nestedAssignInFieldˢ = (@string)"nested assign in field:"u8;
-private static readonly @string lowˢ = "low"u8;
 private static readonly object pointerSetˢ = (@string)"pointer Set:"u8;
-private static readonly @string lowˢ2 = "LOW"u8;
 private static readonly object nestedRawˢ = (@string)"nested raw:"u8;
 private static readonly object genericRemoveˢ = (@string)"generic Remove:"u8;
 private static readonly object exactSendˢ = (@string)"exact Send:"u8;
@@ -99,52 +90,52 @@ internal partial struct main_named /*dyn*/ {
 
 internal static void Main() {
     var e = new Env(new map<@string, @string>{});
-    e.Set(keyˢ, "v"u8);
-    var (_, lower) = e[keyˢ2, ꟷ];
-    var (_, raw) = e[keyˢ, ꟷ];
+    e.Set("Key", "v");
+    var (_, lower) = e["key", ꟷ];
+    var (_, raw) = e["Key", ꟷ];
     fmt.Println(exactSetRanˢ, lower, raw);
 
     var b = new Bag(new map<@string, nint>{});
-    b.Add("n"u8, 2);
-    b.Add("n"u8, 3);
-    fmt.Println(exactAddAccumulatedˢ, b["n"u8]);
+    b.Add("n", 2);
+    b.Add("n", 3);
+    fmt.Println(exactAddAccumulatedˢ, b["n"]);
 
-    var c = new Cache(new map<@string, nint>{["a"u8] = 1});
-    fmt.Println(exactRemoveˢ, c.Remove("a"u8), c.Remove("a"u8), len(c));
-    c["b"u8] = 2;
+    var c = new Cache(new map<@string, nint>{["a"] = 1});
+    fmt.Println(exactRemoveˢ, c.Remove("a"), c.Remove("a"), len(c));
+    c["b"] = 2;
     c.Clear();
     fmt.Println(exactClearˢ, cleared, len(c));
-    fmt.Println(exactContainsKeyˢ, c.ContainsKey(alwaysˢ), c.ContainsKey("b"u8));
+    fmt.Println(exactContainsKeyˢ, c.ContainsKey("always"), c.ContainsKey("b"));
 
     var h = new Hdr(new map<@string, slice<@string>>{});
-    h.Set(acceptˢ, "x"u8);
-    fmt.Println(controlSetˢ, len(h[acceptˢ2]), len(h[acceptˢ]));
+    h.Set("accept", "x");
+    fmt.Println(controlSetˢ, len(h["ACCEPT"]), len(h["accept"]));
 
-    var envs = new map<@string, Env>{["x"u8] = new map<@string, @string>{}};
-    envs["x"u8].Set‿(mixedˢ, "m"u8);
-    var (_, nestedRaw) = envs["x"u8][mixedˢ, ꟷ];
-    var (_, nestedLower) = envs["x"u8][mixedˢ2, ꟷ];
+    var envs = new map<@string, Env>{["x"] = new map<@string, @string>{}};
+    envs["x"].Set‿("Mixed", "m");
+    var (_, nestedRaw) = envs["x"]["Mixed", ꟷ];
+    var (_, nestedLower) = envs["x"]["mixed", ꟷ];
     fmt.Println(nestedAssignRawˢ, nestedRaw, nestedLower);
-    var named = new main_named(m: new map<@string, Env>{["y"u8] = new map<@string, @string>{}});
-    named.m["y"u8].Set‿("Q"u8, "q"u8);
-    fmt.Println(nestedAssignInFieldˢ, named.m["y"u8]["Q"u8]);
+    var named = new main_named(m: new map<@string, Env>{["y"] = new map<@string, @string>{}});
+    named.m["y"].Set‿("Q", "q");
+    fmt.Println(nestedAssignInFieldˢ, named.m["y"]["Q"]);
 
     var pe = new PEnv(new map<@string, @string>{});
-    pe.Set(lowˢ, "p"u8);
-    var penvs = new map<@string, PEnv>{["z"u8] = new map<@string, @string>{}};
-    penvs["z"u8].Set‿(lowˢ, "r"u8);
-    fmt.Println(pointerSetˢ, pe[lowˢ2], len(pe), nestedRawˢ, penvs["z"u8][lowˢ], len(penvs["z"u8]));
+    pe.Set("low", "p");
+    var penvs = new map<@string, PEnv>{["z"] = new map<@string, @string>{}};
+    penvs["z"].Set‿("low", "r");
+    fmt.Println(pointerSetˢ, pe["LOW"], len(pe), nestedRawˢ, penvs["z"]["low"], len(penvs["z"]));
 
-    var u = new Uniq<@string>(new map<@string, EmptyStruct>{["a"u8] = new()});
+    var u = new Uniq<@string>(new map<@string, EmptyStruct>{["a"] = new()});
     fmt.Println(genericRemoveˢ, u.Remove("a"u8), u.Remove("a"u8), len(u));
 
     var p = new Pipe(1);
     p.Send(4);
     fmt.Println(exactSendˢ, sends, ᐸꟷ<nint>(p));
 
-    var sets = new map<@string, ΔSet>{["a"u8] = new map<@string, nint>{}};
-    sets["a"u8].Set‿("k"u8, 7);
-    fmt.Println(namedSetNestedˢ, sets["a"u8]["k"u8], len(sets["a"u8]));
+    var sets = new map<@string, ΔSet>{["a"] = new map<@string, nint>{}};
+    sets["a"].Set‿("k", 7);
+    fmt.Println(namedSetNestedˢ, sets["a"]["k"], len(sets["a"]));
 }
 
 } // end main_package

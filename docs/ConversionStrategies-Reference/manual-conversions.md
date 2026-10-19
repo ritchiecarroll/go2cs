@@ -601,8 +601,9 @@ on a `[]byte` prints `4 8` in Go and panicked here. It is now an ordinary manage
 into a named slice wrapper's slot through the single convertibility relation. Two details are
 load-bearing: growth **within** the existing capacity writes nothing at all, because Go reaches
 `growslice` only past the capacity and a spurious write would detach any other view still sharing the
-backing store; and the capacity landed on is unspecified in Go (its `growslice` rounds to a size
-class), so only `len+n` is guaranteed and the guard test asserts `cap >= n`, never an exact figure.
+backing store; and the capacity landed on is Go's `growslice` answer, the same function `append` grows
+through ([slices-and-arrays.md](slices-and-arrays.md#append-grows-a-slice-exactly-as-gos-growslice-does)),
+which GolibTests' `GoGrowSliceTests` pins for `reflect.Value.Grow` too. This guard test asserts `cap >= n`.
 
 Guard: `tests/Behavioral/ReflectZeroAndGrow` pins all four against `go run` — raw and named strings,
 raw and named arrays (zero and non-zero, including an array OF named strings), the nil-vs-empty
@@ -1682,6 +1683,12 @@ The pushed body is one line (`unsafe.String(&sysDirectory[0], sysDirectoryLen)`)
 `core/runtime/windows/os_windows_impl.cs` closes it the way `goargs_impl.cs` does: a `[ModuleInitializer]` fills the buffer from `Environment.GetFolderPath(SpecialFolder.System)`. Two details are reproduced rather than tidied. Go appends a separator (`sysDirectory[l] = '\\'; sysDirectoryLen = l + 1`), so the answer really does end in a backslash and `net`'s concatenation really does produce `C:\Windows\System32\/Drivers/etc/hosts`; and Go's `throw("Unable to determine system directory")` is mirrored rather than softened into a short answer that would read as real.
 
 What the missing row cost is out of all proportion to one symbol, and worth recording as a shape to look for: the throw came out of a package-level VAR INITIALIZER, so it surfaced from `net_package`'s type initializer — **every `httptest` consumer died in `net`'s cctor**, whatever it was actually testing.
+
+## The runtime's CPU feature flags — cpuinit's copy half
+
+Go sets the runtime's own feature flags (`x86HasAVX`, `x86HasFMA`, `x86HasPOPCNT`, `x86HasSSE41`, and the arm, arm64, loong64 and riscv64 ones in `cpuflags.go`) in `cpuinit`, which `schedinit` calls before `alginit`. `cpuinit` calls `internal/cpu.Initialize` and then copies the flags the compiler's generated guards read out of `cpu.X86` (or `cpu.ARM`, ...). go2cs never runs `schedinit`, so every flag stayed false, though `internal/cpu` itself answered correctly: `cpu_x86_impl.cs` fills `cpu.X86` from its own module initializer. The runtime's `TestHasAVX` reads `x86HasAVX` through `export_test.go` and compares it with what a child process finds, so on an AVX host it failed with `x86HasAVX: false, CheckAVX got: OK`.
+
+`core/runtime/cpuflags_impl.cs` is the copy half of `cpuinit`, line for line, in a `[ModuleInitializer]`, the same stand-in for `schedinit`'s slot that `goenvs_impl.cs` and `goargs_impl.cs` use. It does not call `cpu.Initialize`, because `internal/cpu`'s initializer has already run it (with GODEBUG's `cpu.*` options off Windows) by the time `cpu.X86` can be read. `cpuinit` itself stays converted in `proc.go` and unreachable. (Guarded by `GolibTests.RuntimeCpuinitFlagsTests`: the four x86 flags equal `cpu.X86`'s, and `x86HasAVX` is true on an AVX host.)
 
 ## Long-path awareness is process SETUP, and golib does what Go's `osinit` does
 

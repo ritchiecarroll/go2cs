@@ -337,11 +337,11 @@ internal static void checkStringParseRoundTrip<P>(ж<testing.T> Ꮡt, P x, Func<
         Ꮡt.Fatalf("s=%q err=%v"u8, s, err);
     }
     if (!AreEqual(x, y)) {
-        Ꮡt.Fatalf("%T round trip identity failure: s=%q x=%#v y=%#v"u8, x, s, x, y);
+        Ꮡt.Fatalf("%T round trip identity failure: s=%q x=%#v y=%#v"u8, (x).OrTypedNilOf(), s, (x).OrTypedNilOf(), (y).OrTypedNilOf());
     }
     @string s2 = y.String();
     if (s != s2) {
-        Ꮡt.Fatalf("%T String round trip identity failure: s=%#v s2=%#v"u8, x, s, s2);
+        Ꮡt.Fatalf("%T String round trip identity failure: s=%#v s2=%#v"u8, (x).OrTypedNilOf(), s, s2);
     }
 }
 

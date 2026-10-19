@@ -16,14 +16,13 @@ internal static (nint, bool) portOf(Δnet.Listener l) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tcpˢ = "tcp"u8;
 private static readonly object listener1ListenFailedˢ = (@string)"listener1: listen failed"u8;
 private static readonly object listener2ListenFailedˢ = (@string)"listener2: listen failed"u8;
 private static readonly object reboundListenFailedˢ = (@string)"rebound: listen failed"u8;
 private static readonly object doneˢ = (@string)"done"u8;
 
 internal static void Main() {
-    var (first, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
+    var (first, err) = Δnet.Listen("tcp", "127.0.0.1:0");
     if (err != default!) {
         fmt.Println(listener1ListenFailedˢ);
         return;
@@ -32,7 +31,7 @@ internal static void Main() {
     var (firstPort, ok1) = portOf(first);
     fmt.Printf("listener1: network=%s portAssigned=%v\n"u8, first.Addr().Network(), ok1 && firstPort > 0);
 
-    (var second, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
+    (var second, err) = Δnet.Listen("tcp", "127.0.0.1:0");
     if (err != default!) {
         fmt.Println(listener2ListenFailedˢ);
         first.Close();
@@ -50,7 +49,7 @@ internal static void Main() {
     var closeErr = second.Close();
     fmt.Printf("listener2: closed=%v\n"u8, closeErr == default!);
 
-    (var rebound, err) = Δnet.Listen(tcpˢ, "127.0.0.1:"u8 + strconv.Itoa(secondPort));
+    (var rebound, err) = Δnet.Listen("tcp", "127.0.0.1:"u8 + strconv.Itoa(secondPort));
     if (err != default!) {
         fmt.Println(reboundListenFailedˢ);
         first.Close();

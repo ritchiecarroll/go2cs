@@ -366,6 +366,11 @@ type Visitor struct {
 	// literals inside the declaration inherit it, which is what lets a `reflect.TypeFor[T]` written
 	// inside a closure render the companion the enclosing declaration declared.
 	currentFuncCompanionNames map[*types.TypeParam]string
+	// currentFuncArrayDimsNames holds the current FUNCTION declaration's ARRAY-DIMS COMPANION type
+	// parameters (see arrayDimsCompanion.go), keyed like currentFuncCompanionNames and inherited by
+	// func literals the same way, so a `var x T` inside a closure reads the enclosing declaration's
+	// companion.
+	currentFuncArrayDimsNames map[*types.TypeParam]string
 	// closedConstraintsRecorded holds the (type argument, closed constraint) pairs
 	// recordClosedConstraintImplementation has recorded, so each records once. It is also what
 	// ends the recursion of a SELF-referential constraint, whose recording renders the closed
@@ -378,6 +383,12 @@ type Visitor struct {
 	// nativeFieldViewLocalCache memoizes isNativeFieldArrayViewLocal per local (nativeFieldArrayView.go);
 	// lazily initialized and never cleared, on the same per-object reasoning as the cache above.
 	nativeFieldViewLocalCache map[types.Object]bool
+	// fieldAccessLocalCache memoizes fieldAccessLocal per local (fieldAccess.go), on the same per-object
+	// reasoning: the pointee struct type of a local the provenance rule admits, or nil.
+	fieldAccessLocalCache map[types.Object]types.Type
+	// fieldAccessTypes lists, in first-use order, the rendered struct types whose fields this FILE reaches
+	// through a provenance-scoped local, for its `[GoFieldAccess(…)]` record (fieldAccess.go).
+	fieldAccessTypes []string
 	// captureAnalysisDecl is the declaration whose body performVariableAnalysis is currently
 	// walking — the real FuncDecl, or visitValueSpec's SYNTHETIC wrapper for a package-level
 	// func-literal initializer. The shared-capture routing's write scan (varShareFacts) reads

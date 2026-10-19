@@ -12,11 +12,8 @@ internal static @string Ping(this ref thing t) {
     return fmt.Sprintf("ping %d"u8, t.n);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pongˢ = "pong"u8;
-
 internal static @string Pong(this thing t) {
-    return pongˢ;
+    return "pong";
 }
 
 partial interface speaker {

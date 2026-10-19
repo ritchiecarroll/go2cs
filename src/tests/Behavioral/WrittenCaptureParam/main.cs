@@ -39,7 +39,7 @@ internal static @string /*result*/ declDeferObserver(fmt.Stringer xʗp, fmt.Stri
         (x, y) = (y, x);
         (x, var n) = swap(x);
         _ = n;
-        result = ""u8;
+        result = "";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -50,7 +50,7 @@ internal static @string declClosureWrite(fmt.Stringer sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
     void set() {
-        Ꮡs.ValueSlot = new label(name: "closure-set"u8);
+        Ꮡs.ValueSlot = new label(name: "closure-set");
     }
     (s, var n) = swap(s);
     set();
@@ -98,8 +98,8 @@ private static readonly object litRedeclareˢ = (@string)"litRedeclare:"u8;
 private static readonly object declSliceRedeclareˢ = (@string)"declSliceRedeclare:"u8;
 
 internal static void Main() {
-    var a = new label(name: "alpha"u8);
-    var b = new label(name: "beta"u8);
+    var a = new label(name: "alpha");
+    var b = new label(name: "beta");
 
     var (before, after) = declRedeclare(a);
     fmt.Println(declRedeclareˢ, before, after);

@@ -56,10 +56,6 @@ internal static void g(nint i) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noPanicˢ = "no panic"u8;
-private static readonly @string otherNotAPlainStringˢ = "other (not a plain string)"u8;
-
 internal static @string panicValueKind(Action f) {
     @string @out = default!;
     ((Action)(() => {
@@ -69,7 +65,7 @@ internal static @string panicValueKind(Action f) {
                 var p = recover();
                 switch (p.type()) {
                 case null: {
-                    @out = noPanicˢ;
+                    @out = "no panic";
                     break;
                 }
                 case @string v: {
@@ -90,7 +86,7 @@ internal static @string panicValueKind(Action f) {
                 }
                 default: {
                     var v = p;
-                    @out = otherNotAPlainStringˢ;
+                    @out = "other (not a plain string)";
                     break;
                 }}
             }, ref ᒐ);
@@ -112,7 +108,7 @@ internal static void panicValues() {
         throw panic(fmt.Sprintf("%s"u8, (@string)"x"u8));
     }));
     fmt.Println(panicValueKind(() => {
-        @string s = "x"u8;
+        @string s = "x";
         throw panic(s);
     }));
     fmt.Println(panicValueKind(() => {
