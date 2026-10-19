@@ -318,6 +318,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// path. runtime/windows/usleep_windows_impl.cs sleeps the same microseconds without the OS call.
 		// Windows alone: linux already hand-owns its usleep (mem_linux_impl.cs) and darwin's converts.
 		"usleep": goosWindows,
+		// windows_QueryPerformanceCounter / windows_QueryPerformanceFrequency on WINDOWS: the bodies Go
+		// pushes into internal/syscall/windows (linknamePushTargets). Each is one
+		// `stdcall(_QueryPerformance*, &x)`, which reaches asmstdcall (a throwing stub) over a function
+		// pointer the not-run osinit never fills. runtime/windows/os_windows_impl.cs reads the same
+		// counter through Stopwatch (QPC/QPF on Windows). Windows alone: Go declares both only in os_windows.go.
+		"windows_QueryPerformanceCounter":   goosWindows,
+		"windows_QueryPerformanceFrequency": goosWindows,
 		// sysAllocOS / sysFreeOS on WINDOWS (COORD ruling 2026-09-22): VirtualAlloc / VirtualFree through
 		// stdcall4 / stdcall3 -> asmcgocall threw on every sysAlloc; on the runtime row one such throw under
 		// persistentalloc1 held globalAlloc's lock and echoed as 70 abandoned-lock panics.
