@@ -758,8 +758,14 @@ fmt.Println(cap(b)) // 8: the allocator's smallest size class
    past 32 KiB rounds up to whole 8 KiB pages.
 
 The element's Go size and whether it holds pointers come from golib's type layout (`GoReflect.TryGoSizeOf`,
-`GoPtrBytesOf`), read once per element type (`GoGrowthFacts<T>`). An element whose Go size is not derivable
-keeps step 1 alone, and `GoSizeClasses.UnroundedElementTypes` records it (see *What is not modeled*). A nil
+`GoPtrBytesOf`), read once per element type (`GoGrowthFacts<T>`). An **unnamed array element** is the
+exception: `[][2]uint64` and `[][3]uint64` are both `slice<array<ulong>>`, because a managed `array<T>` carries
+its length in the value, not the type. So each growth reads the element's dims off a value it appends (a
+nested `[2][3]byte` through its first element), and its size and pointer facts from those dims; no answer is
+cached per C# type. A zero-length array is zero-size in Go, so its slice grows to exactly its new length, as
+`[]struct{}` does. `reflect.Value.Grow` has no appended value, so it reads an element of the slice, or the
+length the slice recorded when it was created. A growth with neither keeps step 1 alone, and
+`GoSizeClasses.UnroundedElementTypes` records the type. A nil
 slice grows through the same rule, so its first backing is a size class (`append([]byte(nil), 1)` has cap 8,
 not 1). `reflect.Value.Grow` reaches the same function, as Go's
 `reflect_growslice` does. `internal/bytealg.MakeNoZero` (strings.Builder's buffer) reads the same table.
@@ -767,7 +773,7 @@ not 1). `reflect.Value.Grow` reaches the same function, as Go's
 The table and constants are Go's (GOROOT/src/internal/runtime/gc). The repoguard test
 `TestGolibSizeClassesMatchTheToolchain` fails when they drift from the pinned toolchain, and proves that
 golib's smallest-class-at-least-as-large search equals Go's two lookup tables at every small size.
-GolibTests' `GoGrowSliceTests` replays twenty growth sequences recorded from Go itself
+GolibTests' `GoGrowSliceTests` replays twenty-six growth sequences recorded from Go itself
 (`testdata/growslice`, under `-gcflags='-N -l'`), and `TestGoGrowSliceExpectationsMatchTheToolchain`
 re-runs that probe.
 
@@ -775,15 +781,6 @@ re-runs that probe.
 backing store, so `var s []int64; s = append(s, 1)` reports cap 4. Since Go 1.26 a slice that escapes
 only when it is returned can walk the size-class ladder inside that buffer and move to the heap at the
 end. Both are the compiler's decisions after inlining, and golib reproduces only the heap path.
-
-An **unnamed array element** (`[][3]byte`) has no Go size golib can derive, because a managed `array<T>`
-carries no length; a defined array type and an array field do carry theirs. Such a slice grows by step 1
-alone, so `append([][3]byte(nil), [3]byte{})` has cap 1 where Go gives 2. Measured on the Go 1.24 standard
-library (linux, windows and darwin alike), the class has 7 append sites, all `[]([2]uint64)` in
-`debug/dwarf`; in the behavioral corpus it has 2 (`AppendOfMake`, `ArrayValueCopySites`). An append whose
-element is a type parameter reaches the class when it is instantiated with one. Every type that
-grows this way is recorded in `GoSizeClasses.UnroundedElementTypes`, and GoGrowSliceTests fails when a type
-outside this class appears there.
 
 ## A slice of a ZERO-SIZE element type carries no storage — `make([]struct{}, math.MaxInt)` allocates nothing
 

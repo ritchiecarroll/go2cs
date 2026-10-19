@@ -88,7 +88,14 @@ public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
 
         // Go's Value.Grow reaches growslice here (reflect_growslice asks for the old length plus extra), so the
         // capacity is append's own, and the malloc is charged as growslice's is.
-        nint capacity = slice<T>.GrowCapacity(s, length + extra);
+        // An unnamed array element is sized by value: an element of the slice, else the length the slice
+        // recorded at its creation (a slice that has neither grows unrounded, and is recorded as such).
+        nint[]? elemDims = null;
+
+        if (GoGrowthFacts<T>.SizedByValue)
+            elemDims = length > 0 ? GoGrowthFacts<T>.ValueDims(s[0]) : GoReflect.SliceElemArrayDims(s);
+
+        nint capacity = slice<T>.GrowCapacity(s, length + extra, elemDims);
         T[] backing = AllocationCounter.NewArray<T>(capacity);
 
         // Block copy, not an element loop: encoding/gob's decUint8Slice grows buffers past internal/saferio's 10 MiB
@@ -1525,7 +1532,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // what was appended (append([]byte(nil), 1) has cap 8), not the exact length.
         if (slice == nil)
         {
-            nint firstCapacity = GrowCapacity(slice, elems.Length);
+            nint firstCapacity = GrowCapacity(slice, elems.Length, AppendedElemDims(elems));
             newArray = AllocationCounter.NewArray<T>(firstCapacity);
             GoMemProfile.Charge<T>(newArray, firstCapacity, GoAllocEntry.GrowSlice);
             elems.CopyTo(newArray);
@@ -1564,7 +1571,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         // native backing this is the design's §2.3 answer verbatim: the new backing is MANAGED,
         // writes through the grown slice stop reaching the mapping, and the original slice still
         // aliases it. The mapping plays the role of "the old array" in Go's own spec.
-        nint newCapacity = GrowCapacity(slice, slice.Length + elems.Length);
+        nint newCapacity = GrowCapacity(slice, slice.Length + elems.Length, AppendedElemDims(elems));
         newArray = AllocationCounter.NewArray<T>(newCapacity);
         GoMemProfile.Charge<T>(newArray, newCapacity, GoAllocEntry.GrowSlice);
 
@@ -1705,13 +1712,28 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // range" (CENSUS-golib-int32-narrowings E1), and one that fits clamps the capacity to that ceiling (Go
     // would over-allocate past it; here that capacity does not exist), so an append that fits never escapes
     // as the CLR's OutOfMemoryException.
-    internal static nint GrowCapacity(in slice<T> slice, nint neededLength)
+    //
+    // elemDims is the array dims of an appended element when T is an unnamed array (GoGrowthFacts<T>.SizedByValue):
+    // array<E> is one C# type for every [N]E, so the Go size comes from the value, never from T. Growth appends
+    // at least one element, and every array<E> value carries its length. AppendZeroed passes none: the converter
+    // never emits `append(x, make(...)...)` for an element whose zero value must be constructed.
+    internal static nint GrowCapacity(in slice<T> slice, nint neededLength, nint[]? elemDims)
     {
         if (neededLength > Array.MaxLength)
             throw RuntimeErrorPanic.GrowSliceLenOutOfRange();
 
-        return Math.Min(GoGrowthFacts<T>.RoundUpCapacity(NextSliceCap(neededLength, slice.Capacity)), Array.MaxLength);
+        nint newCap = GoGrowthFacts<T>.RoundUpCapacity(neededLength, NextSliceCap(neededLength, slice.Capacity), elemDims);
+
+        return Math.Min(newCap, Array.MaxLength);
     }
+
+    // The growth capacity for a caller with no element to read (an unnamed array element then grows unrounded,
+    // and is recorded as such).
+    internal static nint GrowCapacity(in slice<T> slice, nint neededLength) => GrowCapacity(slice, neededLength, null);
+
+    // The dims GrowCapacity reads for an unnamed array element: those of the first appended element.
+    private static nint[]? AppendedElemDims(ReadOnlySpan<T> elems) =>
+        GoGrowthFacts<T>.SizedByValue ? GoGrowthFacts<T>.ValueDims(elems[0]) : null;
 
     // Go's nextslicecap (runtime/slice.go): double below 256 elements of capacity, then step by
     // (newcap + 3*256) / 4, a smooth transition toward x1.25; a need past double the old capacity takes

@@ -48,8 +48,11 @@ public class GoGrowSliceTests
             .Select(line => line.Split(' ', StringSplitOptions.RemoveEmptyEntries))
             .ToDictionary(words => words[0] + " " + words[1], words => words.Skip(2).Select(long.Parse).ToArray());
 
-    // One element at a time, recording each capacity the slice takes (the probe's grows).
-    private static long[] Grows<T>(int n)
+    // One element at a time, recording each capacity the slice takes (the probe's grows). An array element
+    // appends its Go zero value, which has the array's length; default(array<E>) has none.
+    private static long[] Grows<T>(int n) => Grows(n, () => default(T)!);
+
+    private static long[] Grows<T>(int n, Func<T> zero)
     {
         slice<T> x = default!;
         List<long> caps = [];
@@ -57,7 +60,7 @@ public class GoGrowSliceTests
         for (int i = 0; i < n; i++)
         {
             long old = cap(x);
-            x = append(x, default(T)!);
+            x = append(x, zero());
 
             if (cap(x) != old)
                 caps.Add(cap(x));
@@ -145,6 +148,12 @@ public class GoGrowSliceTests
         ["grow p24"] = () => Grows<P24>(3000),
         ["grow s40"] = () => Grows<S40>(2000),
         ["grow empty"] = () => Grows<EmptyStruct>(20),
+        ["grow arr3byte"] = () => Grows(20, () => new array<byte>(3)),
+        ["grow arr2u64"] = () => Grows(600, () => new array<ulong>(2)),
+        ["grow arr2x3byte"] = () => Grows(2000, () => new array<array<byte>>(2, () => new array<byte>(3))),
+        ["grow arr3ptr"] = () => Grows(3000, () => new array<ж<nint>>(3)),
+        ["grow arr0int"] = () => Grows(20, () => new array<nint>(0)),
+        ["grow arr0x3int"] = () => Grows(10, () => new array<array<nint>>(0)),
         ["oneshot byte"] = OneShot<byte>,
         ["oneshot int64"] = OneShot<long>,
         ["oneshot string"] = OneShot<@string>,
@@ -175,6 +184,12 @@ public class GoGrowSliceTests
     [DataRow("grow p24")]
     [DataRow("grow s40")]
     [DataRow("grow empty")]
+    [DataRow("grow arr3byte")]
+    [DataRow("grow arr2u64")]
+    [DataRow("grow arr2x3byte")]
+    [DataRow("grow arr3ptr")]
+    [DataRow("grow arr0int")]
+    [DataRow("grow arr0x3int")]
     [DataRow("oneshot byte")]
     [DataRow("oneshot int64")]
     [DataRow("oneshot string")]
@@ -193,38 +208,31 @@ public class GoGrowSliceTests
         CollectionAssert.AreEqual(want, got, $"{name}: want {string.Join(" ", want)}\n got {string.Join(" ", got)}");
     }
 
-    // DISCLOSED: an unnamed array element has no Go size golib can derive (a managed array<T> carries no
-    // length), so its slice grows to nextslicecap unrounded. Go gives [][3]byte one element cap 2
-    // (roundupsize(3) = 8, and 8 / 3 = 2); golib gives 1, and records the type where a guard can read it.
-    // When this goes red because golib gives 2, the class is fixed: drop this case and the remarks on
-    // GoSizeClasses.UnroundedElementTypes.
+    // An unnamed array element is sized from the appended VALUE: [][3]byte and [][4]byte are one C# type,
+    // slice<array<byte>>, so a per-type answer cached by the first growth would be wrong for the next. The
+    // expected capacities are Go 1.26.9's for the same appends (-gcflags='-N -l'): 2, 2, 8 and 3.
     [TestMethod]
-    public void AnUnnamedArrayElementGrowsUnroundedAndIsRecorded()
+    public void AnUnnamedArrayElementIsSizedFromTheValueItAppends()
     {
-        slice<array<byte>> x = append(default(slice<array<byte>>)!, new array<byte>(3));
-
-        Assert.AreEqual(1L, (long)cap(x), "golib's disclosed capacity for [][3]byte after one append (Go's is 2)");
-        CollectionAssert.Contains(GoSizeClasses.UnroundedElementTypes.ToArray(), typeof(array<byte>));
+        Assert.AreEqual(2L, (long)cap(append(default(slice<array<byte>>)!, new array<byte>(3))), "[][3]byte, one element");
+        Assert.AreEqual(2L, (long)cap(append(default(slice<array<byte>>)!, new array<byte>(4))), "[][4]byte, one element");
+        Assert.AreEqual(8L, (long)cap(append(default(slice<array<byte>>)!, new array<byte>(1), new array<byte>(1), new array<byte>(1))),
+            "[][1]byte, three elements (roundupsize(3) = 8)");
+        Assert.AreEqual(3L, (long)cap(append(default(slice<array<byte>>)!, new array<byte>(5), new array<byte>(5), new array<byte>(5))),
+            "[][5]byte, three elements (roundupsize(15) = 16, 16 / 5 = 3)");
     }
 
-    // The fallback is visible: whatever element types this process has grown unrounded so far, after every
-    // recorded case has run, are the disclosed class only, and none of the cases' own element types.
+    // The fallback stays visible: after every recorded case has run, no element type has grown without Go's
+    // size-class rounding in this process.
     [TestMethod]
-    public void OnlyUnnamedArrayElementsGrowUnrounded()
+    public void NoElementTypeGrowsUnrounded()
     {
         foreach (Func<long[]> replay in s_replays.Values)
             replay();
 
         Type[] unrounded = [.. GoSizeClasses.UnroundedElementTypes];
-        Type[] outsideTheClass = [.. unrounded.Where(type => !type.IsGenericType || type.GetGenericTypeDefinition() != typeof(array<>))];
 
-        Assert.AreEqual(0, outsideTheClass.Length,
-            $"element types grown without Go's size-class rounding: {string.Join(", ", outsideTheClass.Select(type => type.ToString()))}");
-
-        Type[] recorded = [typeof(byte), typeof(int), typeof(long), typeof(@string), typeof(ж<nint>), typeof(S12), typeof(S24),
-            typeof(P24), typeof(S40), typeof(EmptyStruct)];
-
-        foreach (Type type in recorded)
-            CollectionAssert.DoesNotContain(unrounded, type);
+        Assert.AreEqual(0, unrounded.Length,
+            $"element types grown without Go's size-class rounding: {string.Join(", ", unrounded.Select(type => type.ToString()))}");
     }
 }

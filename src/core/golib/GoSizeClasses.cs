@@ -102,14 +102,14 @@ public static class GoSizeClasses
     private static readonly ConcurrentDictionary<Type, byte> s_unroundedElementTypes = new();
 
     /// <summary>
-    /// The element types whose Go size golib could not derive, so whose slices grow to Go's
-    /// <c>nextslicecap</c> without the size-class rounding, and whose <c>cap()</c> can then differ from Go's.
+    /// The element types whose Go size golib could not derive, so whose slices grew to Go's <c>nextslicecap</c>
+    /// without the size-class rounding, and whose <c>cap()</c> can then differ from Go's.
     /// </summary>
     /// <remarks>
-    /// The known class is an UNNAMED array element (<c>[][2]uint64</c>): a managed <c>array&lt;T&gt;</c>
-    /// carries no length, so <see cref="GoReflect.TryGoSizeOf"/> cannot size it. A defined array type and an
-    /// array field are sized (both carry their length as a stamp). GolibTests' GoGrowSliceTests fails when a
-    /// type outside that class is recorded here.
+    /// Empty in a correct program. An unnamed array element (<c>[][3]byte</c>) is sized from the appended value
+    /// (see <see cref="GoGrowthFacts{T}.SizedByValue"/>), so it is recorded only when a growth has no shaped
+    /// value to read: <c>reflect.Value.Grow</c> on a nil or empty slice whose element length the slice never
+    /// recorded. GolibTests' GoGrowSliceTests fails when anything is recorded here.
     /// </remarks>
     public static IReadOnlyCollection<Type> UnroundedElementTypes => [.. s_unroundedElementTypes.Keys];
 
@@ -117,44 +117,109 @@ public static class GoSizeClasses
 }
 
 /// <summary>
-/// The two facts Go's growslice reads from an element type, read once per closed <typeparamref name="T"/>:
-/// its Go size and whether it holds pointers (Go's <c>noscan</c> is the inverse).
+/// The two facts Go's growslice reads from an element type, its Go size and whether it holds pointers (Go's
+/// <c>noscan</c> is the inverse): read once per closed <typeparamref name="T"/>, or, for an unnamed array, off
+/// the value each growth appends.
 /// </summary>
 internal static class GoGrowthFacts<T>
 {
     /// <summary>
-    /// The Go (amd64) size of <typeparamref name="T"/>, or 0 when it is not derivable, which
-    /// <see cref="GoSizeClasses.UnroundedElementTypes"/> then records.
+    /// Whether <typeparamref name="T"/> is an unnamed array, whose Go size is a property of the VALUE:
+    /// <c>array&lt;ulong&gt;</c> is the one C# type for <c>[2]uint64</c> and <c>[3]uint64</c>, so no per-type
+    /// cache can answer it, and every growth reads the length off an element it appends.
+    /// </summary>
+    internal static readonly bool SizedByValue =
+        !GoReflect.TryGoSizeOf(typeof(T), null, out _) && typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>);
+
+    /// <summary>
+    /// The Go (amd64) size of <typeparamref name="T"/>, or 0 when it is sized by value or not derivable; an
+    /// underivable type is recorded in <see cref="GoSizeClasses.UnroundedElementTypes"/>.
     /// </summary>
     internal static readonly nuint Size = SizeOf();
 
     /// <summary>Whether <typeparamref name="T"/> holds no pointer; an unknown pointer prefix is not noscan.</summary>
     internal static readonly bool NoScan = GoReflect.GoPtrBytesOf(typeof(T)) == 0;
 
-    /// <summary>
-    /// The capacity Go's growslice gives <paramref name="newCap"/> elements: the bytes
-    /// <see cref="GoSizeClasses.RoundUpSize"/> provides for them, in whole elements. An element whose size is
-    /// not derivable (recorded in <see cref="GoSizeClasses.UnroundedElementTypes"/>) keeps
-    /// <paramref name="newCap"/>, as does a byte count past what the address space holds,
-    /// where Go panics and the caller's own ceiling answers first.
-    /// </summary>
     private static nuint SizeOf()
     {
         if (GoReflect.TryGoSizeOf(typeof(T), null, out nuint size))
             return size;
 
-        GoSizeClasses.RecordUnroundedElementType(typeof(T));
+        if (!SizedByValue)
+            GoSizeClasses.RecordUnroundedElementType(typeof(T));
+
         return 0;
     }
 
-    internal static nint RoundUpCapacity(nint newCap)
+    /// <summary>
+    /// The array dims of one element value, outermost first, for a <see cref="SizedByValue"/> type: a nested
+    /// array (<c>[2][3]T</c>) reads its inner length through its first element, and the walk stops at a zero
+    /// length, whose Go size is 0 whatever it nests. Null when the value is not a shaped array (a
+    /// <c>default</c> array&lt;E&gt;, which no Go value is).
+    /// </summary>
+    internal static nint[]? ValueDims(in T value)
+    {
+        List<nint> dims = [];
+        object? element = value;
+
+        while (element is IArray array and not ISlice)
+        {
+            if (array.Source is null)
+                return null;
+
+            dims.Add(array.Length);
+
+            if (array.Length == 0)
+                break;
+
+            element = array[0];
+        }
+
+        return [.. dims];
+    }
+
+    /// <summary>
+    /// The capacity Go's growslice gives a slice grown to <paramref name="newLen"/> elements, from
+    /// <c>nextslicecap</c>'s <paramref name="newCap"/>: the bytes <see cref="GoSizeClasses.RoundUpSize"/>
+    /// provides for them, in whole elements. A <see cref="SizedByValue"/> type reads its size and pointer facts
+    /// from <paramref name="valueDims"/> (<see cref="ValueDims"/> of an appended element), and a zero-size one
+    /// takes Go's zero-size answer, a capacity of exactly <paramref name="newLen"/>. An element whose size is not
+    /// derivable keeps <paramref name="newCap"/> and is recorded in
+    /// <see cref="GoSizeClasses.UnroundedElementTypes"/>, as does a byte count past what the address space holds,
+    /// where Go panics and the caller's own ceiling answers first.
+    /// </summary>
+    internal static nint RoundUpCapacity(nint newLen, nint newCap, nint[]? valueDims)
     {
         nuint size = Size;
+        bool noScan = NoScan;
+
+        if (SizedByValue)
+        {
+            if (valueDims is null)
+            {
+                GoSizeClasses.RecordUnroundedElementType(typeof(T));
+                return newCap;
+            }
+
+            if (valueDims is [.., 0])
+                return newLen;
+
+            if (!GoReflect.TryGoSizeOf(typeof(T), valueDims, out size))
+            {
+                GoSizeClasses.RecordUnroundedElementType(typeof(T));
+                return newCap;
+            }
+
+            if (size == 0)
+                return newLen;
+
+            noScan = GoReflect.GoPtrBytesOf(typeof(T), valueDims) == 0;
+        }
 
         if (size == 0 || newCap <= 0 || (nuint)newCap > nuint.MaxValue / size)
             return newCap;
 
-        nuint capacity = GoSizeClasses.RoundUpSize((nuint)newCap * size, NoScan) / size;
+        nuint capacity = GoSizeClasses.RoundUpSize((nuint)newCap * size, noScan) / size;
 
         return capacity > (nuint)nint.MaxValue ? newCap : (nint)capacity;
     }

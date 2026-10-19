@@ -87,6 +87,15 @@ func main() {
 	grows[s40]("grow s40", 2000)
 	grows[struct{}]("grow empty", 20)
 
+	// Unnamed arrays: one golib type serves every length ([2]uint64 and [3]uint64 are both array<ulong>), so
+	// golib sizes each growth from the appended value; a zero-length array is zero-size, so cap = len.
+	grows[[3]byte]("grow arr3byte", 20)
+	grows[[2]uint64]("grow arr2u64", 600)
+	grows[[2][3]byte]("grow arr2x3byte", 2000)
+	grows[[3]*int]("grow arr3ptr", 3000)
+	grows[[0]int]("grow arr0int", 20)
+	grows[[0][3]int]("grow arr0x3int", 10)
+
 	var ns []int
 	for n := 1; n <= 64; n++ {
 		ns = append(ns, n)
