@@ -8,6 +8,8 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace go;
 
@@ -96,6 +98,22 @@ public static class GoSizeClasses
 
         return classes[index >= 0 ? index : ~index];
     }
+
+    private static readonly ConcurrentDictionary<Type, byte> s_unroundedElementTypes = new();
+
+    /// <summary>
+    /// The element types whose Go size golib could not derive, so whose slices grow to Go's
+    /// <c>nextslicecap</c> without the size-class rounding, and whose <c>cap()</c> can then differ from Go's.
+    /// </summary>
+    /// <remarks>
+    /// The known class is an UNNAMED array element (<c>[][2]uint64</c>): a managed <c>array&lt;T&gt;</c>
+    /// carries no length, so <see cref="GoReflect.TryGoSizeOf"/> cannot size it. A defined array type and an
+    /// array field are sized (both carry their length as a stamp). GolibTests' GoGrowSliceTests fails when a
+    /// type outside that class is recorded here.
+    /// </remarks>
+    public static IReadOnlyCollection<Type> UnroundedElementTypes => [.. s_unroundedElementTypes.Keys];
+
+    internal static void RecordUnroundedElementType(Type type) => s_unroundedElementTypes.TryAdd(type, 0);
 }
 
 /// <summary>
@@ -104,8 +122,11 @@ public static class GoSizeClasses
 /// </summary>
 internal static class GoGrowthFacts<T>
 {
-    /// <summary>The Go (amd64) size of <typeparamref name="T"/>, or 0 when it is not derivable.</summary>
-    internal static readonly nuint Size = GoReflect.TryGoSizeOf(typeof(T), null, out nuint size) ? size : 0;
+    /// <summary>
+    /// The Go (amd64) size of <typeparamref name="T"/>, or 0 when it is not derivable, which
+    /// <see cref="GoSizeClasses.UnroundedElementTypes"/> then records.
+    /// </summary>
+    internal static readonly nuint Size = SizeOf();
 
     /// <summary>Whether <typeparamref name="T"/> holds no pointer; an unknown pointer prefix is not noscan.</summary>
     internal static readonly bool NoScan = GoReflect.GoPtrBytesOf(typeof(T)) == 0;
@@ -113,9 +134,19 @@ internal static class GoGrowthFacts<T>
     /// <summary>
     /// The capacity Go's growslice gives <paramref name="newCap"/> elements: the bytes
     /// <see cref="GoSizeClasses.RoundUpSize"/> provides for them, in whole elements. An element whose size is
-    /// not derivable keeps <paramref name="newCap"/>, as does a byte count past what the address space holds,
+    /// not derivable (recorded in <see cref="GoSizeClasses.UnroundedElementTypes"/>) keeps
+    /// <paramref name="newCap"/>, as does a byte count past what the address space holds,
     /// where Go panics and the caller's own ceiling answers first.
     /// </summary>
+    private static nuint SizeOf()
+    {
+        if (GoReflect.TryGoSizeOf(typeof(T), null, out nuint size))
+            return size;
+
+        GoSizeClasses.RecordUnroundedElementType(typeof(T));
+        return 0;
+    }
+
     internal static nint RoundUpCapacity(nint newCap)
     {
         nuint size = Size;

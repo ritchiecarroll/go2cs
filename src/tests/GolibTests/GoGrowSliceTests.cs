@@ -192,4 +192,39 @@ public class GoGrowSliceTests
 
         CollectionAssert.AreEqual(want, got, $"{name}: want {string.Join(" ", want)}\n got {string.Join(" ", got)}");
     }
+
+    // DISCLOSED: an unnamed array element has no Go size golib can derive (a managed array<T> carries no
+    // length), so its slice grows to nextslicecap unrounded. Go gives [][3]byte one element cap 2
+    // (roundupsize(3) = 8, and 8 / 3 = 2); golib gives 1, and records the type where a guard can read it.
+    // When this goes red because golib gives 2, the class is fixed: drop this case and the remarks on
+    // GoSizeClasses.UnroundedElementTypes.
+    [TestMethod]
+    public void AnUnnamedArrayElementGrowsUnroundedAndIsRecorded()
+    {
+        slice<array<byte>> x = append(default(slice<array<byte>>)!, new array<byte>(3));
+
+        Assert.AreEqual(1L, (long)cap(x), "golib's disclosed capacity for [][3]byte after one append (Go's is 2)");
+        CollectionAssert.Contains(GoSizeClasses.UnroundedElementTypes.ToArray(), typeof(array<byte>));
+    }
+
+    // The fallback is visible: whatever element types this process has grown unrounded so far, after every
+    // recorded case has run, are the disclosed class only, and none of the cases' own element types.
+    [TestMethod]
+    public void OnlyUnnamedArrayElementsGrowUnrounded()
+    {
+        foreach (Func<long[]> replay in s_replays.Values)
+            replay();
+
+        Type[] unrounded = [.. GoSizeClasses.UnroundedElementTypes];
+        Type[] outsideTheClass = [.. unrounded.Where(type => !type.IsGenericType || type.GetGenericTypeDefinition() != typeof(array<>))];
+
+        Assert.AreEqual(0, outsideTheClass.Length,
+            $"element types grown without Go's size-class rounding: {string.Join(", ", outsideTheClass.Select(type => type.ToString()))}");
+
+        Type[] recorded = [typeof(byte), typeof(int), typeof(long), typeof(@string), typeof(ж<nint>), typeof(S12), typeof(S24),
+            typeof(P24), typeof(S40), typeof(EmptyStruct)];
+
+        foreach (Type type in recorded)
+            CollectionAssert.DoesNotContain(unrounded, type);
+    }
 }

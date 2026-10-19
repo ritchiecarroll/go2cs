@@ -759,8 +759,9 @@ fmt.Println(cap(b)) // 8: the allocator's smallest size class
 
 The element's Go size and whether it holds pointers come from golib's type layout (`GoReflect.TryGoSizeOf`,
 `GoPtrBytesOf`), read once per element type (`GoGrowthFacts<T>`). An element whose Go size is not derivable
-keeps step 1 alone. A nil slice grows through the same rule, so its first backing is a size class
-(`append([]byte(nil), 1)` has cap 8, not 1). `reflect.Value.Grow` reaches the same function, as Go's
+keeps step 1 alone, and `GoSizeClasses.UnroundedElementTypes` records it (see *What is not modeled*). A nil
+slice grows through the same rule, so its first backing is a size class (`append([]byte(nil), 1)` has cap 8,
+not 1). `reflect.Value.Grow` reaches the same function, as Go's
 `reflect_growslice` does. `internal/bytealg.MakeNoZero` (strings.Builder's buffer) reads the same table.
 
 The table and constants are Go's (GOROOT/src/internal/runtime/gc). The repoguard test
@@ -774,6 +775,15 @@ re-runs that probe.
 backing store, so `var s []int64; s = append(s, 1)` reports cap 4. Since Go 1.26 a slice that escapes
 only when it is returned can walk the size-class ladder inside that buffer and move to the heap at the
 end. Both are the compiler's decisions after inlining, and golib reproduces only the heap path.
+
+An **unnamed array element** (`[][3]byte`) has no Go size golib can derive, because a managed `array<T>`
+carries no length; a defined array type and an array field do carry theirs. Such a slice grows by step 1
+alone, so `append([][3]byte(nil), [3]byte{})` has cap 1 where Go gives 2. Measured on the Go 1.24 standard
+library (linux, windows and darwin alike), the class has 7 append sites, all `[]([2]uint64)` in
+`debug/dwarf`; in the behavioral corpus it has 2 (`AppendOfMake`, `ArrayValueCopySites`). An append whose
+element is a type parameter reaches the class when it is instantiated with one. Every type that
+grows this way is recorded in `GoSizeClasses.UnroundedElementTypes`, and GoGrowSliceTests fails when a type
+outside this class appears there.
 
 ## A slice of a ZERO-SIZE element type carries no storage — `make([]struct{}, math.MaxInt)` allocates nothing
 
