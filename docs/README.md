@@ -145,7 +145,8 @@ beside the Go input.
 | `-comments` | Carry the Go comments into the C#. |
 | `-version` | Print the release this converter belongs to, and convert nothing. |
 
-[Command-line options](CommandLine.md) lists every option and more examples.
+[Command-line options](CommandLine.md) lists every option and more examples, and
+[diagnostic codes](DiagnosticCodes.md) lists every `GO2CS` code the converter and the C# build can report.
 
 ## Converting a real-world module
 

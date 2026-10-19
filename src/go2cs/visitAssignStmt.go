@@ -1568,6 +1568,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// A conversion to an anonymous struct type, `q := (*struct{…})(e)`, lifts it under the variable's name,
+			// as a composite literal in this position is named (liftConversionTargetAnonStruct).
+			if call, ok := rhs.(*ast.CallExpr); ok && ident != nil {
+				v.liftConversionTargetAnonStruct(call, ident.Name)
+			}
+
 			if _, ok := rhs.(*ast.CompositeLit); ok {
 				if ident != nil {
 					// Track the name of the variable on the LHS for composite literals,
@@ -1928,6 +1934,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						result.WriteString(decls)
 					}
 				}
+			}
+
+			// A conversion to an anonymous struct type, `q := (*struct{…})(e)`, lifts it under the variable's name,
+			// as a composite literal in this position is named (liftConversionTargetAnonStruct).
+			if call, ok := rhs.(*ast.CallExpr); ok && ident != nil {
+				v.liftConversionTargetAnonStruct(call, ident.Name)
 			}
 
 			if _, ok := rhs.(*ast.CompositeLit); ok {
