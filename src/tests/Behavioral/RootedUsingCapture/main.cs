@@ -13,7 +13,6 @@ private static readonly object embedˢ = (@string)"embed:"u8;
 private static readonly object typeˢ = (@string)"type:"u8;
 private static readonly object pkgpathˢ = (@string)"pkgpath:"u8;
 private static readonly object pointerMethodsˢ = (@string)"pointer methods:"u8;
-private static readonly @string tryLockˢ = "TryLock"u8;
 private static readonly object promotedTryLockˢ = (@string)"promoted TryLock:"u8;
 private static readonly object addˢ = (@string)"add:"u8;
 
@@ -24,7 +23,7 @@ internal static void Main() {
     fmt.Println(typeˢ, f.Type.String());
     fmt.Println(pkgpathˢ, f.Type.PkgPath());
     fmt.Println(pointerMethodsˢ, reflect.PointerTo(f.Type).NumMethod());
-    var (_, tryLock) = reflect.PointerTo(t).MethodByName(tryLockˢ);
+    var (_, tryLock) = reflect.PointerTo(t).MethodByName("TryLock");
     fmt.Println(promotedTryLockˢ, tryLock);
 
     var g = lib.New(lib.Base());
