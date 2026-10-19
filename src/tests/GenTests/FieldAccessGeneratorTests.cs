@@ -176,6 +176,89 @@ public class FieldAccessGeneratorTests
         Assert.IsFalse(generated.Contains("hidden"), "an internal foreign field is not accessible here");
     }
 
+    // A test assembly that REFERENCES its package's assembly sees the package's internal GoFieldAccess class through
+    // InternalsVisibleTo. Two extension properties of one name on one receiver are ambiguous, which C# reports as no
+    // member at all (CS9286): runtime's export_test.cs MemclrBytes, `s.Δarray` on a ж<Δsliceᴛ> that alg.cs records
+    // too. The package's class is the metadata a C# 14 `extension(ж<slice> ʗp) { public ref nint len => … }` block
+    // leaves behind, its implementation method, since this Roslyn cannot compile the block itself.
+    private static string GenerateBeside(string package, string user)
+    {
+        CSharpCompilation packageCompilation = CSharpCompilation.Create("runtime",
+            [CSharpSyntaxTree.ParseText(package), CSharpSyntaxTree.ParseText(Stubs)],
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        using MemoryStream image = new();
+        Assert.IsTrue(packageCompilation.Emit(image).Success, "the package fixture compiles");
+
+        CSharpCompilation compilation = CSharpCompilation.Create("test",
+            [CSharpSyntaxTree.ParseText(user)],
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location), MetadataReference.CreateFromImage(image.ToArray())],
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        GeneratorDriverRunResult result = CSharpGeneratorDriver.Create(new FieldAccessGenerator()).RunGenerators(compilation).GetRunResult();
+
+        Assert.AreEqual(0, result.Diagnostics.Length, string.Join("\n", result.Diagnostics));
+
+        return result.GeneratedTrees.SingleOrDefault()?.ToString() ?? "";
+    }
+
+    private const string RuntimePackage = """
+        [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("test")]
+
+        namespace go;
+
+        public static partial class runtime_package
+        {
+            internal partial struct slice
+            {
+                internal nint len;
+                internal nint cap;
+
+                internal static ref nint Ꮡlen(ref slice instance) => ref instance.len;
+                internal static ref nint Ꮡcap(ref slice instance) => ref instance.cap;
+            }
+        }
+
+        internal static class GoFieldAccess
+        {
+            public static ref nint get_len(ж<runtime_package.slice> ʗp) => throw null!;
+        }
+        """;
+
+    private const string RuntimeTest = """
+        namespace go;
+
+        [GoFieldAccess(typeof(runtime_package.slice))]
+        partial class runtime_test_package { }
+        """;
+
+    [TestMethod]
+    public void APropertyTheReferencedPackageAlreadyGivesIsNotDeclaredAgain()
+    {
+        string generated = GenerateBeside(RuntimePackage, RuntimeTest);
+
+        StringAssert.Contains(generated, "public ref nint cap => ref ʗp.field(global::go.runtime_package.slice.Ꮡcap);");
+        Assert.IsFalse(generated.Contains(" len =>"), "a second `len` on ж<slice> makes the package's own ambiguous: CS9286 at every site");
+    }
+
+    [TestMethod]
+    public void APropertyTheReferencedPackageHidesIsDeclared()
+    {
+        // The control: with no InternalsVisibleTo grant the package's class is out of reach, so nothing is shadowed.
+        // The fixture's struct and accessors are internal too, so they take the grant's place as public.
+        string package = RuntimePackage
+            .Replace("[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"test\")]", "")
+            .Replace("internal partial struct slice", "public partial struct slice")
+            .Replace("internal nint", "public nint")
+            .Replace("internal static ref", "public static ref");
+
+        string generated = GenerateBeside(package, RuntimeTest);
+
+        StringAssert.Contains(generated, "public ref nint len => ref ʗp.field(global::go.runtime_package.slice.Ꮡlen);");
+        StringAssert.Contains(generated, "public ref nint cap => ref ʗp.field(global::go.runtime_package.slice.Ꮡcap);");
+    }
+
     [TestMethod]
     public void TheClassIsInternalSoTwoPackagesExtendingOneTypeNeverMeet()
     {
