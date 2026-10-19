@@ -948,4 +948,13 @@ Examples:
 			}
 		}
 	}
+
+	// The converter never exits 0 after emitting raw Go text. A dynamic type no lift resolved is written as its
+	// Go signature, which cannot compile; the record of those sites is process-global and never reset per
+	// package, so this one check, after whichever driver ran (single package, -tests, -stdlib, -recurse,
+	// -platforms), covers them all. The files stay written; the run names every site and fails. The -tests path
+	// keeps its own earlier return of the same error (conversionDriver.go), which fails before its build step.
+	if err := unresolvedDynamicTypeError(); err != nil {
+		log.Fatalf("%v\n", err)
+	}
 }
