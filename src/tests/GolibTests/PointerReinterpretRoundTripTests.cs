@@ -136,6 +136,10 @@ public class PointerReinterpretRoundTripTests
         Assert.IsTrue(@unsafe.Pointer.FromBox(p.Reinterpret<Person, Employee>()) == @unsafe.Pointer.FromBox(e),
             "unsafe.Pointer of the round trip == unsafe.Pointer(e), FromBox");
         Assert.IsTrue(@unsafe.Pointer.FromBox(p) == @unsafe.Pointer.FromPinnedBox(e), "the two mints agree for one address");
+
+        // Not vacuous: a different allocation is a different address through the same mint.
+        ж<Employee> other = Ꮡ(new Employee { Name = "kim", Age = 12 });
+        Assert.IsFalse(@unsafe.Pointer.FromBox(other) == @unsafe.Pointer.FromBox(e), "two allocations, one address");
     }
 
     [TestMethod]
