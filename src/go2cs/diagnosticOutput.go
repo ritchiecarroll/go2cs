@@ -115,7 +115,8 @@ func (v *Visitor) showWarning(format string, a ...interface{}) {
 //
 //   - GO2CS0xxx is go2cs-gen's, a diagnostic in the C# build (src/gen/go2cs-gen/GeneratorDiagnostics.cs);
 //   - GO2CS1xxx is a package that did not load cleanly, coded by how go/packages classifies the error;
-//   - GO2CS2xxx is an input the converter refuses.
+//   - GO2CS2xxx is an input the converter refuses;
+//   - GO2CS3xxx is raised in the C# build by go2cs's MSBuild targets (src/core/golib/buildTransitive/go.lib.targets).
 //
 // Every code has one row in docs/DiagnosticCodes.md. The repoguard test TestGo2csDiagnosticCodeRegistry
 // fails by name on a code used but not registered, registered twice, registered outside its side's range,

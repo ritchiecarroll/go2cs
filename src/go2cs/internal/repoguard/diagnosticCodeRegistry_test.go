@@ -24,38 +24,54 @@ import (
 
 // THE GO2CS DIAGNOSTIC CODE REGISTRY GUARD.
 //
-// go2cs reports GO2CSnnnn codes from two sides, each with ONE registry:
+// go2cs reports GO2CSnnnn codes from three sides, each with ONE registry:
 //
+//   - go2cs-gen: the DiagnosticDescriptor fields of src/gen/go2cs-gen/GeneratorDiagnostics.cs, codes 0001-0999
+//     (a diagnostic in the C# build, from a generator or the analyzer). No other go2cs-gen file constructs a
+//     descriptor.
 //   - the converter: the const block in src/go2cs/diagnosticOutput.go, codes 1000-2999 (1xxx a package that did
 //     not load cleanly, 2xxx an input the converter refuses);
-//   - go2cs-gen: the DiagnosticDescriptor fields of src/gen/go2cs-gen/GeneratorDiagnostics.cs, codes 0001-0999
-//     (a diagnostic in the C# build). No other go2cs-gen file constructs a descriptor.
+//   - the build: the Go2csDiagnosticCodes property block in src/core/golib/buildTransitive/go.lib.targets, codes
+//     3000-3999 (raised in the C# build by go2cs's MSBuild targets). Each code is a property the raising Error or
+//     Warning task names as its Code, and no other .targets or .props file raises a GO2CS code.
 //
 // docs/DiagnosticCodes.md holds the one table that documents every code. Before this guard the generator codes
 // were declared in three files (two descriptors inline beside their single use) and only the converter's codes
 // had a table, so a new code could be minted anywhere, reuse a number, or ship undocumented, and nothing said so.
 //
-// The test fails BY NAME on each class: a code used in tracked src/ but registered on neither side; a
-// DiagnosticDescriptor constructed outside GeneratorDiagnostics.cs; a code registered twice (within a side or
-// across both); a code registered outside its side's range; a registered code with no table row; a table row
-// for a code nobody registered; and a row whose side or severity disagrees with the registry.
+// The test fails BY NAME on each class: a code used but registered on no side; a DiagnosticDescriptor constructed
+// outside GeneratorDiagnostics.cs; a GO2CS code raised or named by a .targets/.props file other than
+// go.lib.targets; a code registered twice (within a side or across sides); a code registered outside its side's
+// range; a build-side code no Error or Warning task raises; a registered code with no table row; a table row for
+// a code nobody registered; and a row whose side or severity disagrees with the registry. "Used" covers tracked
+// src/ files and the user-facing docs (docs/*.md except the PLAN-* records, and docs/ConversionStrategies-
+// Reference/), so a page cannot cite a code that does not exist; docs/phase4 and the plans are records and are
+// not read.
 //
 // POSITIVE CONTROLS, verified when this guard landed (each planted in the real tree, named by
 // TestGo2csDiagnosticCodeRegistry, then restored byte-identical): an unregistered code in a converter comment, a
 // second generator descriptor reusing a converter code, a converter const at 0999, a generator descriptor in
-// another file, a registered code with its row deleted, and a row for an unregistered code.
-// TestGo2csDiagnosticCodeRegistryNamesEachClass controls every class without the tree.
+// another file, a registered code with its row deleted, a row for an unregistered code, a build-side code
+// registered in go.lib.targets with no row and no raising task, a build-side code in another targets file, and an
+// unregistered code cited by a user-facing docs page. TestGo2csDiagnosticCodeRegistryNamesEachClass controls
+// every class without the tree.
 //
 // This file never spells a code literally (see diagnosticCode), so its own fixtures cannot reach the source scan.
 
 const (
 	converterRegistryPath = "src/go2cs/diagnosticOutput.go"
 	generatorRegistryPath = "src/gen/go2cs-gen/GeneratorDiagnostics.cs"
+	buildRegistryPath     = "src/core/golib/buildTransitive/go.lib.targets"
 	diagnosticCodesDoc    = "docs/DiagnosticCodes.md"
 
 	converterSide = "converter"
 	generatorSide = "go2cs-gen"
+	buildSide     = "build"
 )
+
+var sideRange = map[string]string{generatorSide: "0001-0999", converterSide: "1000-2999", buildSide: "3000-3999"}
+
+var sideRegistry = map[string]string{generatorSide: generatorRegistryPath, converterSide: converterRegistryPath, buildSide: buildRegistryPath}
 
 // diagnosticCodeUse is any GO2CSnnnn token: exactly four digits, so GO2CS_GOROUTINE_STACK and longer numbers
 // are not codes.
@@ -64,6 +80,13 @@ var diagnosticCodeUse = regexp.MustCompile(`\bGO2CS[0-9]{4}\b`)
 var generatorDescriptorEntry = regexp.MustCompile(`(?s)id:\s*"(GO2CS[0-9]{4})".*?defaultSeverity:\s*DiagnosticSeverity\.(\w+)`)
 
 var descriptorConstruction = regexp.MustCompile(`new\s+DiagnosticDescriptor\s*\(|DiagnosticDescriptor\s+\w+\s*=\s*new\s*\(`)
+
+var buildRegistryBlock = regexp.MustCompile(`(?s)<PropertyGroup\s+Label="Go2csDiagnosticCodes"\s*>(.*?)</PropertyGroup>`)
+
+var buildRegistryEntry = regexp.MustCompile(`<(\w+)>\s*(GO2CS[0-9]{4})\s*</(\w+)>`)
+
+// msbuildRaisesGo2csCode is an Error or Warning task whose Code is a GO2CS literal.
+var msbuildRaisesGo2csCode = regexp.MustCompile(`Code="GO2CS`)
 
 var diagnosticCodeRow = regexp.MustCompile("^\\|\\s*`(GO2CS[0-9]{4})`\\s*\\|([^|]*)\\|([^|]*)\\|")
 
@@ -75,7 +98,7 @@ func diagnosticCode(n int) string {
 type registeredCode struct {
 	code     string
 	side     string
-	severity string
+	severity string // "" for a build-side code no task raises
 	where    string
 }
 
@@ -94,6 +117,7 @@ type diagnosticCodeRowEntry struct {
 type diagnosticCodeSnapshot struct {
 	registered        []registeredCode
 	descriptorOutside []string
+	buildOutside      []string
 	uses              []codeOccurrence
 	rows              []diagnosticCodeRowEntry
 }
@@ -104,13 +128,15 @@ func codeNumber(code string) int {
 	return n
 }
 
-// sideOfCode names the side whose range holds code, or "" for a number neither side may use.
+// sideOfCode names the side whose range holds code, or "" for a number no side may use.
 func sideOfCode(code string) string {
 	switch n := codeNumber(code); {
 	case n >= 1 && n <= 999:
 		return generatorSide
 	case n >= 1000 && n <= 2999:
 		return converterSide
+	case n >= 3000 && n <= 3999:
+		return buildSide
 	default:
 		return ""
 	}
@@ -120,7 +146,7 @@ func sideOfCode(code string) string {
 func diagnosticCodeRegistryProblems(s diagnosticCodeSnapshot) []string {
 	var problems []string
 
-	bySide := map[string]map[string]registeredCode{converterSide: {}, generatorSide: {}}
+	bySide := map[string]map[string]registeredCode{converterSide: {}, generatorSide: {}, buildSide: {}}
 	firstAt := map[string]registeredCode{}
 
 	for _, r := range s.registered {
@@ -130,9 +156,12 @@ func diagnosticCodeRegistryProblems(s diagnosticCodeSnapshot) []string {
 			firstAt[r.code] = r
 		}
 
-		if inRange := sideOfCode(r.code); inRange != r.side {
-			rangeText := map[string]string{converterSide: "1000-2999", generatorSide: "0001-0999"}[r.side]
-			problems = append(problems, fmt.Sprintf("%s: %s is outside the %s range %s", r.where, r.code, r.side, rangeText))
+		if sideOfCode(r.code) != r.side {
+			problems = append(problems, fmt.Sprintf("%s: %s is outside the %s range %s", r.where, r.code, r.side, sideRange[r.side]))
+		}
+
+		if r.side == buildSide && r.severity == "" {
+			problems = append(problems, fmt.Sprintf("%s: %s is registered but no Error or Warning task in %s raises it", r.where, r.code, buildRegistryPath))
 		}
 
 		bySide[r.side][r.code] = r
@@ -142,17 +171,20 @@ func diagnosticCodeRegistryProblems(s diagnosticCodeSnapshot) []string {
 		problems = append(problems, fmt.Sprintf("%s: constructs a DiagnosticDescriptor outside %s; declare it there", where, generatorRegistryPath))
 	}
 
+	for _, where := range s.buildOutside {
+		problems = append(problems, fmt.Sprintf("%s: raises or names a GO2CS build code outside %s, the only targets file that raises one", where, buildRegistryPath))
+	}
+
 	for _, use := range s.uses {
 		side := sideOfCode(use.code)
 
 		if side == "" {
-			problems = append(problems, fmt.Sprintf("%s: %s is in neither side's range (0001-0999 go2cs-gen, 1000-2999 converter)", use.where, use.code))
+			problems = append(problems, fmt.Sprintf("%s: %s is in no side's range (0001-0999 go2cs-gen, 1000-2999 converter, 3000-3999 build)", use.where, use.code))
 			continue
 		}
 
 		if _, ok := bySide[side][use.code]; !ok {
-			registry := map[string]string{converterSide: converterRegistryPath, generatorSide: generatorRegistryPath}[side]
-			problems = append(problems, fmt.Sprintf("%s: %s is used but not registered in %s", use.where, use.code, registry))
+			problems = append(problems, fmt.Sprintf("%s: %s is used but not registered in %s", use.where, use.code, sideRegistry[side]))
 		}
 	}
 
@@ -168,7 +200,7 @@ func diagnosticCodeRegistryProblems(s diagnosticCodeSnapshot) []string {
 		registered, ok := firstAt[row.code]
 
 		if !ok {
-			problems = append(problems, fmt.Sprintf("%s: the table row for %s names a code neither registry declares", row.where, row.code))
+			problems = append(problems, fmt.Sprintf("%s: the table row for %s names a code no registry declares", row.where, row.code))
 			continue
 		}
 
@@ -176,7 +208,7 @@ func diagnosticCodeRegistryProblems(s diagnosticCodeSnapshot) []string {
 			problems = append(problems, fmt.Sprintf("%s: the table row for %s says side %q; it is registered by the %s", row.where, row.code, row.side, registered.side))
 		}
 
-		if !strings.EqualFold(row.severity, registered.severity) {
+		if registered.severity != "" && !strings.EqualFold(row.severity, registered.severity) {
 			problems = append(problems, fmt.Sprintf("%s: the table row for %s says severity %q; the registry says %q", row.where, row.code, row.severity, registered.severity))
 		}
 	}
@@ -262,17 +294,82 @@ func generatorRegistry(t *testing.T, root string) []registeredCode {
 	return codes
 }
 
+// buildRegistry reads the Go2csDiagnosticCodes property block: each property holding a code is one registration,
+// and its severity is the task (Error or Warning) whose Code names the property, "" when none does.
+func buildRegistry(t *testing.T, root string) []registeredCode {
+	t.Helper()
+
+	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(buildRegistryPath)))
+
+	if err != nil {
+		t.Fatalf("read %s: %v", buildRegistryPath, err)
+	}
+
+	content := string(data)
+	blocks := buildRegistryBlock.FindAllStringSubmatchIndex(content, -1)
+
+	// A reader that cannot find the block would read an empty registry and pass.
+	if len(blocks) != 1 {
+		t.Fatalf("%s holds %d Go2csDiagnosticCodes property blocks; the registry is exactly one", buildRegistryPath, len(blocks))
+	}
+
+	block := content[blocks[0][2]:blocks[0][3]]
+	var codes []registeredCode
+
+	for _, at := range buildRegistryEntry.FindAllStringSubmatchIndex(block, -1) {
+		name := block[at[2]:at[3]]
+		line := strings.Count(content[:blocks[0][2]+at[4]], "\n") + 1
+		severity := ""
+
+		raiser := regexp.MustCompile(`<(Error|Warning)\b[^>]*\bCode="\$\(` + regexp.QuoteMeta(name) + `\)"`)
+
+		if match := raiser.FindStringSubmatch(content); match != nil {
+			severity = match[1]
+		}
+
+		codes = append(codes, registeredCode{block[at[4]:at[5]], buildSide, severity, fmt.Sprintf("%s:%d", buildRegistryPath, line)})
+	}
+
+	return codes
+}
+
 // scannedForCodes are the tracked text files a code can be used in.
 var scannedForCodes = map[string]bool{".go": true, ".cs": true, ".ps1": true, ".psm1": true, ".md": true, ".csproj": true, ".props": true, ".targets": true, ".json": true, ".txt": true}
 
-func diagnosticCodeTreeSnapshot(t *testing.T, root string) (diagnosticCodeSnapshot, int) {
+// userFacingDoc reports whether rel is a page a user reads: a docs/*.md page other than a PLAN-* record, or a page
+// of the conversion-strategy reference. docs/phase4 and the plans are dated records, read as history.
+func userFacingDoc(rel string) bool {
+	if !strings.HasSuffix(rel, ".md") {
+		return false
+	}
+
+	if strings.HasPrefix(rel, "docs/ConversionStrategies-Reference/") {
+		return true
+	}
+
+	name := strings.TrimPrefix(rel, "docs/")
+
+	return name != rel && !strings.Contains(name, "/") && !strings.HasPrefix(name, "PLAN-")
+}
+
+func diagnosticCodeTreeSnapshot(t *testing.T, root string) (diagnosticCodeSnapshot, int, int) {
 	t.Helper()
 
-	snapshot := diagnosticCodeSnapshot{registered: append(converterRegistry(t, root), generatorRegistry(t, root)...)}
-	scanned := 0
+	snapshot := diagnosticCodeSnapshot{}
+	snapshot.registered = append(snapshot.registered, converterRegistry(t, root)...)
+	snapshot.registered = append(snapshot.registered, generatorRegistry(t, root)...)
+	snapshot.registered = append(snapshot.registered, buildRegistry(t, root)...)
+	sources, pages := 0, 0
 
 	for _, rel := range gitTrackedFiles(t, root) {
-		if !strings.HasPrefix(rel, "src/") || !scannedForCodes[strings.ToLower(filepath.Ext(rel))] {
+		ext := strings.ToLower(filepath.Ext(rel))
+
+		switch {
+		case strings.HasPrefix(rel, "src/") && scannedForCodes[ext]:
+			sources++
+		case userFacingDoc(rel):
+			pages++
+		default:
 			continue
 		}
 
@@ -282,16 +379,25 @@ func diagnosticCodeTreeSnapshot(t *testing.T, root string) (diagnosticCodeSnapsh
 			continue // a tracked file deleted in the working tree is not this guard's question
 		}
 
-		scanned++
+		msbuildFile := (ext == ".targets" || ext == ".props") && rel != buildRegistryPath
 
 		for i, line := range strings.Split(string(data), "\n") {
+			where := fmt.Sprintf("%s:%d", rel, i+1)
+
 			for _, code := range diagnosticCodeUse.FindAllString(line, -1) {
-				snapshot.uses = append(snapshot.uses, codeOccurrence{code, fmt.Sprintf("%s:%d", rel, i+1)})
+				snapshot.uses = append(snapshot.uses, codeOccurrence{code, where})
+
+				if msbuildFile && sideOfCode(code) == buildSide {
+					snapshot.buildOutside = append(snapshot.buildOutside, where)
+				}
 			}
 
-			if strings.HasPrefix(rel, "src/gen/") && strings.HasSuffix(rel, ".cs") && rel != generatorRegistryPath &&
-				descriptorConstruction.MatchString(line) {
-				snapshot.descriptorOutside = append(snapshot.descriptorOutside, fmt.Sprintf("%s:%d", rel, i+1))
+			if msbuildFile && msbuildRaisesGo2csCode.MatchString(line) && !diagnosticCodeLineHasBuildCode(line) {
+				snapshot.buildOutside = append(snapshot.buildOutside, where)
+			}
+
+			if strings.HasPrefix(rel, "src/gen/") && ext == ".cs" && rel != generatorRegistryPath && descriptorConstruction.MatchString(line) {
+				snapshot.descriptorOutside = append(snapshot.descriptorOutside, where)
 			}
 		}
 	}
@@ -309,12 +415,24 @@ func diagnosticCodeTreeSnapshot(t *testing.T, root string) (diagnosticCodeSnapsh
 		}
 	}
 
-	return snapshot, scanned
+	return snapshot, sources, pages
+}
+
+// diagnosticCodeLineHasBuildCode reports whether line already names a build-side code, which the use scan reports
+// on its own, so a raising task is not named twice.
+func diagnosticCodeLineHasBuildCode(line string) bool {
+	for _, code := range diagnosticCodeUse.FindAllString(line, -1) {
+		if sideOfCode(code) == buildSide {
+			return true
+		}
+	}
+
+	return false
 }
 
 func TestGo2csDiagnosticCodeRegistry(t *testing.T) {
 	root := repoRootFromPackageDir(t)
-	snapshot, scanned := diagnosticCodeTreeSnapshot(t, root)
+	snapshot, sources, pages := diagnosticCodeTreeSnapshot(t, root)
 
 	sides := map[string]int{}
 
@@ -322,14 +440,23 @@ func TestGo2csDiagnosticCodeRegistry(t *testing.T) {
 		sides[r.side]++
 	}
 
-	// A reader that matches nothing would make every check below pass vacuously.
-	if sides[converterSide] == 0 || sides[generatorSide] == 0 || len(snapshot.rows) == 0 || len(snapshot.uses) == 0 {
-		t.Fatalf("vacuous read: converter codes %d, go2cs-gen codes %d, table rows %d, uses %d",
-			sides[converterSide], sides[generatorSide], len(snapshot.rows), len(snapshot.uses))
+	docUses := 0
+
+	for _, use := range snapshot.uses {
+		if strings.HasPrefix(use.where, "docs/") {
+			docUses++
+		}
 	}
 
-	t.Logf("registered: converter %d, go2cs-gen %d; table rows %d; %d uses in %d tracked src/ files",
-		sides[converterSide], sides[generatorSide], len(snapshot.rows), len(snapshot.uses), scanned)
+	// A reader that matches nothing would make every check below pass vacuously. The build side may be empty: its
+	// reader refuses on a missing block instead.
+	if sides[converterSide] == 0 || sides[generatorSide] == 0 || len(snapshot.rows) == 0 || len(snapshot.uses) == 0 || pages == 0 || docUses == 0 {
+		t.Fatalf("vacuous read: converter codes %d, go2cs-gen codes %d, table rows %d, uses %d, user pages %d, uses in them %d",
+			sides[converterSide], sides[generatorSide], len(snapshot.rows), len(snapshot.uses), pages, docUses)
+	}
+
+	t.Logf("registered: converter %d, go2cs-gen %d, build %d; table rows %d; %d uses in %d tracked src/ files and %d user-facing pages (%d in the pages)",
+		sides[converterSide], sides[generatorSide], sides[buildSide], len(snapshot.rows), len(snapshot.uses), sources, pages, docUses)
 
 	for _, problem := range diagnosticCodeRegistryProblems(snapshot) {
 		t.Error(problem)
@@ -340,7 +467,8 @@ func TestGo2csDiagnosticCodeRegistry(t *testing.T) {
 // each of which must be named, beside a clean code that must not be.
 func TestGo2csDiagnosticCodeRegistryNamesEachClass(t *testing.T) {
 	clean, twice, outOfRange, undocumented := diagnosticCode(10), diagnosticCode(11), diagnosticCode(999), diagnosticCode(1010)
-	unregistered, rowOnly, neitherRange := diagnosticCode(2010), diagnosticCode(2011), diagnosticCode(3000)
+	unregistered, rowOnly, noRange := diagnosticCode(2010), diagnosticCode(2011), diagnosticCode(4000)
+	raised, unraised, docCited := diagnosticCode(3010), diagnosticCode(3011), diagnosticCode(12)
 
 	snapshot := diagnosticCodeSnapshot{
 		registered: []registeredCode{
@@ -349,18 +477,24 @@ func TestGo2csDiagnosticCodeRegistryNamesEachClass(t *testing.T) {
 			{twice, converterSide, "Error", "conv:1"},
 			{outOfRange, converterSide, "Error", "conv:2"},
 			{undocumented, converterSide, "Error", "conv:3"},
+			{raised, buildSide, "Error", "targets:1"},
+			{unraised, buildSide, "", "targets:2"},
 		},
 		descriptorOutside: []string{"src/gen/Other.cs:5"},
+		buildOutside:      []string{"src/Other.targets:7"},
 		uses: []codeOccurrence{
 			{clean, "src/a.go:1"},
 			{unregistered, "src/b.go:2"},
-			{neitherRange, "src/c.go:3"},
+			{noRange, "src/c.go:3"},
+			{docCited, "docs/Page.md:4"},
 		},
 		rows: []diagnosticCodeRowEntry{
 			{clean, generatorSide, "Error", "doc:1"},
 			{twice, generatorSide, "Error", "doc:2"},
 			{outOfRange, converterSide, "Error", "doc:3"},
 			{rowOnly, converterSide, "Error", "doc:4"},
+			{raised, buildSide, "Error", "doc:5"},
+			{unraised, buildSide, "Warning", "doc:6"},
 		},
 	}
 
@@ -371,10 +505,13 @@ func TestGo2csDiagnosticCodeRegistryNamesEachClass(t *testing.T) {
 		outOfRange + " is outside the converter range",
 		twice + " is outside the converter range",
 		"src/gen/Other.cs:5: constructs a DiagnosticDescriptor outside",
+		"src/Other.targets:7: raises or names a GO2CS build code outside",
 		unregistered + " is used but not registered",
-		neitherRange + " is in neither side's range",
+		noRange + " is in no side's range",
+		"docs/Page.md:4: " + docCited + " is used but not registered",
+		unraised + " is registered but no Error or Warning task",
 		undocumented + " is registered but has no row",
-		"the table row for " + rowOnly + " names a code neither registry declares",
+		"the table row for " + rowOnly + " names a code no registry declares",
 		"the table row for " + twice + " says severity \"Error\"; the registry says \"Warning\"",
 	} {
 		if !strings.Contains(problems, want) {
@@ -382,7 +519,9 @@ func TestGo2csDiagnosticCodeRegistryNamesEachClass(t *testing.T) {
 		}
 	}
 
-	if strings.Contains(problems, clean+" ") {
-		t.Errorf("the clean code %s was named:\n%s", clean, problems)
+	for _, quiet := range []string{clean, raised} {
+		if strings.Contains(problems, quiet+" ") {
+			t.Errorf("the clean code %s was named:\n%s", quiet, problems)
+		}
 	}
 }

@@ -16,7 +16,8 @@ namespace go2cs;
 /// <remarks>
 /// <para>
 /// Codes are ranged by side: GO2CS0xxx is go2cs-gen's (a diagnostic in the C# build); GO2CS1xxx and GO2CS2xxx are
-/// the converter's, declared in src/go2cs/diagnosticOutput.go. Every code has one row in docs/DiagnosticCodes.md,
+/// the converter's, declared in src/go2cs/diagnosticOutput.go; GO2CS3xxx is the build's, raised by go2cs's MSBuild
+/// targets and declared in src/core/golib/buildTransitive/go.lib.targets. Every code has one row in docs/DiagnosticCodes.md,
 /// and the repoguard test TestGo2csDiagnosticCodeRegistry fails by name on a code used but not registered here,
 /// a code registered twice, a code outside 0001-0999, or a code without its documentation row.
 /// </para>

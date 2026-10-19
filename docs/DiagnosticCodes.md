@@ -1,18 +1,21 @@
 # go2cs diagnostic codes
 
-go2cs reports problems with a `GO2CS` code in two places. The converter (`go2cs`) prints its codes on stderr
+go2cs reports problems with a `GO2CS` code from three sides. The converter (`go2cs`) prints its codes on stderr
 while it converts Go to C#. The source generators and analyzer in `go2cs-gen` report theirs in the C# build of a
-converted project, beside the compiler's own `CS` codes. Every code either side can report is listed below.
+converted project, beside the compiler's own `CS` codes, and so do go2cs's MSBuild targets. Every code any side
+can report is listed below.
 
 The number says which side reported it:
 
 - **`GO2CS0xxx`**: `go2cs-gen`, in the C# build.
 - **`GO2CS1xxx`**: the converter, for a Go package that did not load cleanly.
 - **`GO2CS2xxx`**: the converter, for a Go input it refuses to convert.
+- **`GO2CS3xxx`**: go2cs's MSBuild targets (`go.lib.targets`), in the C# build. No such code is defined yet.
 
 The converter prints each of its codes on stderr in MSBuild's canonical error format; the
-[command-line options](CommandLine.md#diagnostics) page shows the line format. A `go2cs-gen` code appears in
-the build output like any compiler diagnostic, and a warning can be suppressed the usual way (`NoWarn`).
+[command-line options](CommandLine.md#diagnostics) page shows the line format. A `go2cs-gen` or build code
+appears in the build output like any compiler diagnostic, and a warning can be suppressed the usual way
+(`NoWarn`).
 
 | Code | Side | Severity | Meaning | What to do |
 |:--|:--|:--|:--|:--|
@@ -32,9 +35,13 @@ Each side has one registry, and a code is declared there and nowhere else:
 
 - the converter's codes are the `const` block in `src/go2cs/diagnosticOutput.go`;
 - `go2cs-gen`'s codes are the `DiagnosticDescriptor` fields of `GeneratorDiagnostics` in
-  `src/gen/go2cs-gen/GeneratorDiagnostics.cs`.
+  `src/gen/go2cs-gen/GeneratorDiagnostics.cs`;
+- the build's codes are the properties of the `Go2csDiagnosticCodes` block in
+  `src/core/golib/buildTransitive/go.lib.targets`, each raised by an `Error` or `Warning` task whose `Code` names
+  the property. No other targets file raises a `GO2CS` code.
 
 A new code takes the next free number in its side's range, and a row in the table above in the same change. The
 repository test `TestGo2csDiagnosticCodeRegistry` (`src/go2cs/internal/repoguard`) fails, naming the code, when a
-code is used in the source but not registered, registered twice, registered outside its side's range, or missing
-its row here, and when a row names a code that is not registered.
+code is used in the source or in a user-facing page but not registered, registered twice, registered outside its
+side's range, missing its row here, or (on the build side) raised by no task, and when a row names a code that is
+not registered.
