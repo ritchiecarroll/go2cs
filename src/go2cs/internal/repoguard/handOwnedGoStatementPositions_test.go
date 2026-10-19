@@ -20,6 +20,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"go2cs/internal/releasestamp"
 )
 
 // A HAND-OWNED `go` STATEMENT NAMES ITS GO LINE (C1's BOARD row, frame lines in hand-owned files; COORD
@@ -244,12 +246,37 @@ func scanHandOwnedGoStatements(files map[string]string, readGo func(goFile strin
 	return findings
 }
 
-func pinnedGoRoot() string {
-	if goRoot := build.Default.GOROOT; goRoot != "" {
-		return goRoot
+// pinnedGoRoot is the GOROOT whose Go files the records are checked against, and it must be the Go release
+// src/version.props pins. Under another release a `go` statement can sit on another line or not exist at all
+// (WaitGroup.Go is new in Go 1.25), which reads as a confusing red or a false green, so a mismatch fails and
+// names both releases, as TestTrackedFixturesMatchPinnedGoRoot does. The version compared is the VERSION file of
+// the GOROOT this guard reads, since that is the tree the check depends on.
+func pinnedGoRoot(t *testing.T, root string) string {
+	props, err := os.ReadFile(filepath.Join(root, "src", "version.props"))
+
+	if err != nil {
+		t.Fatalf("cannot read src/version.props: %v", err)
 	}
 
-	return runtime.GOROOT()
+	pin := releasestamp.StdLibVersion(string(props))
+
+	if pin == "" {
+		t.Fatalf("src/version.props has no <GoStdLibVersion>; the Go release the records name has no source")
+	}
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	if want, got := "go"+pin, goRootVersion(goRoot); got != want {
+		t.Fatalf("the hand-owned `go` statements map to %s (src/version.props), but GOROOT %s is %q (running toolchain %s). "+
+			"Run with GOTOOLCHAIN=%s, as every lane does; this guard fails rather than skips, since a skip measures nothing",
+			want, goRoot, got, runtime.Version(), want)
+	}
+
+	return goRoot
 }
 
 // TestHandOwnedGoStatementsMapToGo is the guard.
@@ -290,7 +317,7 @@ func TestHandOwnedGoStatementsMapToGo(t *testing.T) {
 		t.Fatal("no hand-owned file found under src/core: wrong root or broken marker predicate")
 	}
 
-	goRoot := pinnedGoRoot()
+	goRoot := pinnedGoRoot(t, root)
 
 	readGo := func(goFile string) ([]string, error) {
 		data, err := os.ReadFile(filepath.Join(goRoot, "src", filepath.FromSlash(goFile)))

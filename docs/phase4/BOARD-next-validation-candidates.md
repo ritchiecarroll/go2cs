@@ -27135,6 +27135,8 @@ go1.26.9 (linux):
 - the `runtime.AddCleanup` instantiation is in reflect/all_test.go:2243 (`AddCleanup[[2]int64, *atomic.Uint32]`,
   inferred), not malloc_test.go.
 
+**Amended 2026-10-19 (C2, `claude/c2-go-growslice`; G: ACCEPTABLE AS RECORDED).** A further site of this row: `reflect.Value.Grow` on a nil or empty `[][N]T` whose slice recorded no element length (golib slice.cs `ReflectGrow`) has no value to size from, so its capacity skips Go's size-class rounding (only `cap()` differs) and `GoSizeClasses.UnroundedElementTypes` records the type; every appending growth is sized from its value.
+
 ## 2026-10-16 — G: testing/cryptotest's two linkname PULLS stay throwing stubs; no std test reaches them — RECORDED, no seat (owner G if a caller appears)
 
 `testing/cryptotest/rand.go` declares two bodyless functions under two-arg directives naming OTHER packages: PULLS,
