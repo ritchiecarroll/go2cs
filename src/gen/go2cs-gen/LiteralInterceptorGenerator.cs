@@ -249,14 +249,13 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
     // start after the receiver), which is the form GetMemberGroup reports its candidates in.
     private static void CheckOverloadDrift(SemanticModel semanticModel, InvocationExpressionSyntax invocation, IInvocationOperation operation, INamedTypeSymbol? marker, List<DiagnosticRecord> diagnostics, CancellationToken cancellationToken)
     {
-        ImmutableArray<ISymbol> group = semanticModel.GetMemberGroup(invocation.Expression, cancellationToken);
-
-        if (group.Length < 2)
+        if (!MayHaveOverloads(operation.TargetMethod))
             return;
 
         IMethodSymbol bound = semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol as IMethodSymbol ?? operation.TargetMethod;
         IMethodSymbol boundDefinition = (bound.ReducedFrom ?? bound).OriginalDefinition;
         SeparatedSyntaxList<ArgumentSyntax> arguments = invocation.ArgumentList.Arguments;
+        ImmutableArray<ISymbol>? group = null;
 
         for (int position = 0; position < arguments.Count; position++)
         {
@@ -268,7 +267,11 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
             if (SlotTakesObject(bound, position) || SlotParameter(bound, position) is { } boundParameter && IsMarked(boundParameter, marker))
                 continue;
 
-            foreach (IMethodSymbol candidate in group.OfType<IMethodSymbol>())
+            // The member group is bound only for a literal that does NOT reach an object slot: the one shape that can
+            // have drifted (an fmt.Println argument, which does, never needs it).
+            group ??= semanticModel.GetMemberGroup(invocation.Expression, cancellationToken);
+
+            foreach (IMethodSymbol candidate in group.Value.OfType<IMethodSymbol>())
             {
                 IMethodSymbol definition = (candidate.ReducedFrom ?? candidate).OriginalDefinition;
 
@@ -282,6 +285,24 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
                 break;
             }
         }
+    }
+
+    // Whether the method group of a call bound to method can hold another member: always for an extension method (the
+    // group spans every extension of that name in scope), and for any other method when its type or a base type or
+    // interface declares another member of the same name. Go has one callee per name, so a converted callee usually
+    // answers false here and the group is never bound.
+    private static bool MayHaveOverloads(IMethodSymbol method)
+    {
+        if (method.IsExtensionMethod)
+            return true;
+
+        for (INamedTypeSymbol? type = method.ContainingType; type is not null; type = type.BaseType)
+        {
+            if (type.GetMembers(method.Name).Length > (SymbolEqualityComparer.Default.Equals(type, method.ContainingType) ? 1 : 0))
+                return true;
+        }
+
+        return method.ContainingType.AllInterfaces.Any(iface => !iface.GetMembers(method.Name).IsEmpty);
     }
 
     // The parameter a call-site argument position reaches in method (the trailing params parameter for any position at
@@ -408,7 +429,8 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
         source.Append("#nullable disable\r\n\r\n");
         source.Append("namespace System.Runtime.CompilerServices\r\n{\r\n");
         source.Append("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)]\r\n");
-        source.Append("    file sealed class InterceptsLocationAttribute(int version, string data) : global::System.Attribute;\r\n}\r\n\r\n");
+        source.Append("    file sealed class InterceptsLocationAttribute : global::System.Attribute\r\n    {\r\n");
+        source.Append("        public InterceptsLocationAttribute(int version, string data) { }\r\n    }\r\n}\r\n\r\n");
         source.Append("namespace go2cs.Interceptors\r\n{\r\n");
         source.Append("file static class ˢLiterals\r\n{\r\n");
         source.Append(cache);
