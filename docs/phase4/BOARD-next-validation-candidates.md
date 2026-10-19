@@ -27331,4 +27331,54 @@ the rule for that call and keep the bare form.
 
 — P2 (measured 2026-10-17; raised by G in review of d8740b96ce)
 
+## 2026-10-17 — P1: a failed single-value type assertion names its static source interface; four residuals keep "interface {}" — SEATED (owner P1)
+
+Go prints the static interface an assertion started from (`interface conversion: io.Reader is *os.File, not
+*bytes.Buffer`). golib's `_<T>(this object)` cannot see it and printed `interface {}`. Part 1 (error source) landed
+earlier; this row records part 2, the named-interface source, and what it deliberately leaves.
+
+**Mechanism, three call spellings.** The converter chooses by what the source interface can name
+(`assertSourceFormFor`, convTypeAssertExpr.go):
+- **bare** `x._<T>()` for an exported interface whose overload C# lookup reaches. go2cs-gen emits
+  `_<T>(this I source)` in a top-level `<pkg>_package_asserts` class (an extension method cannot nest), and the exact
+  interface beats `object` by identity conversion;
+- **explicit** `x._<I, T>()` (golib `_<TSource, T>`) where the interface can be named but no overload is reachable:
+  an unexported interface (a private nested type no sibling class can name), a generic instance, or an exported
+  interface in a namespace the file cannot see from where it is;
+- **widened** `((object)x)._<T>()` for a source the file cannot name that embeds named interfaces, where a bare call
+  would bind an embedded interface's overload and name the wrong one.
+
+**Two probes that shaped it.** (1) An overload as a member of the package class made `_` a method group inside that
+class, so every `_ = x` and `out _` there stopped being a discard (CS1656, CS1657; core/runtime arena_impl.cs).
+GenTests `TheOverloadLeavesDiscardsInThePackageClassBound` fails if the overload moves back (checked). (2) C#
+extension lookup tries a namespace's own types before its using directives, and golib's object form sits in the root
+namespace and applies to everything. So a file in the root namespace (every `main` and every root-level std package)
+never reaches an overload in a nested namespace; that is why those sites take the explicit form
+(`assertOverloadIsReachable`; TypeAssertionSource's `lib.RW` case was CS0121 until then).
+
+**Population (Go 1.26.9 std, linux/amd64, non-test, 226 named non-empty sources).** 105 exported same package and 58
+exported imported stay bare; 54 unexported same package and 9 exported-imported-nested-from-root take the explicit
+form. The `-stdlib` two-seeded reconvert (3 targets) moved 66 lines on linux and darwin and 68 on windows, every one
+only the inserted source type argument (checked mechanically), no other drift, no marker, no `using` or position-map
+line. Predicted 63; the 3 extra are `driver.Value` (a named EMPTY interface, which the census had counted with `any`)
+and two `fs.FS` sites in testing/fstest, whose caller imports io/fs by alias, not by namespace.
+
+**Residuals, which keep `interface {}` (named in the InterfaceTypeTemplate remarks).**
+1. An **unexported interface of another package** (reachable by value only through an exported function). Not
+   nameable from the asserting file. Stdlib sites: 0. Third-party code can have them.
+2. A **named interface declared inside a function**. Same reason. Stdlib sites: 0.
+3. **Test files and third-party modules** were not censused; the converter's tests pin the forms, the behavioral
+   project TypeAssertionSource pins them end to end, byte-equal to Go.
+4. An **anonymous interface literal** keeps whatever golib prints for its dynamic name; TypeAssertionSource's
+   `anonymous-to-*b` case is byte-equal to Go today, which is the only evidence.
+
+**Gates (linux, 2026-10-17).** go test ./... rc 0; GenTests 230/230; go2cs-stdlib.slnx Debug 0 errors (317 asserts-class
+overloads generated); go2cs.slnx Debug fails only in the 10 windows-API behavioral projects, which fail the same way at
+the part 1 tip (OsGetpagesize built there for comparison) and are the runner's platform-exclusive set. The CNR
+equivalent over 830 behavioral projects (transpile and target phases; no pwsh on this box) moved 3 goldens,
+AliasStructToInterface, MethodValueReceiverSnapshot and ValueAdapterDynamicType, one line each in two of them and two
+in the third, only the added type argument; all three compile and print the same as Go.
+
+— P1 (measured 2026-10-17)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

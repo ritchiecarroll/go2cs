@@ -1961,7 +1961,7 @@ internal static (http2Frame, error) ReadFrameForHeader(this ж<http2Framer> Ꮡf
         fr.debugReadLoggerf("http2: Framer %p: read %v"u8, Ꮡfr.OrTypedNil(), http2summarizeFrame(f));
     }
     if (fh.Type == http2FrameHeaders && fr.ReadMetaHeaders != nil) {
-        return Ꮡfr.readMetaFrame(f._<ж<http2HeadersFrame>>());
+        return Ꮡfr.readMetaFrame(f._<http2Frame, ж<http2HeadersFrame>>());
     }
     return (f, default!);
 }
@@ -3219,7 +3219,7 @@ internal static (http2Frame, error) readMetaFrame(this ж<http2Framer> Ꮡfr, ж
                 var (f, err) = Ꮡfr.ReadFrame(); if (err != default!){
                     return (default!, err);
                 } else {
-                    hc = new http2ContinuationFrameжhttp2headersOrContinuation(f._<ж<http2ContinuationFrame>>()); // guaranteed by checkFrameOrder
+                    hc = new http2ContinuationFrameжhttp2headersOrContinuation(f._<http2Frame, ж<http2ContinuationFrame>>()); // guaranteed by checkFrameOrder
                 }
             }
         }

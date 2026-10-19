@@ -656,6 +656,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"userArena.free":  goosAny,
 		"arena_heapify":   goosAny,
 		"UserArena.New":   goosAny,
+		// rtype.string reads the type's name through nameOff into the linker's name blob. A descriptor
+		// synthesized from a managed type (abi.synthType) has no blob and a zero Str, so the converted body
+		// answered "" for it: a *TypeAssertionError built from two golib descriptors printed "interface
+		// conversion:  is , not ". typestring_impl.cs answers a managed-backed descriptor with its Go
+		// spelling (GoReflect.GoTypeName, the renderer maps' typeString uses) and keeps Go's body for the rest.
+		"rtype.string": goosAny,
 		// traceMap's node lives in Go-layout memory: newTraceMapNode reinterprets traceRegionAlloc
 		// bytes as a reference-bearing traceMapNode. It is allocated managed instead (tracemap_impl.cs).
 		"traceMap.newTraceMapNode": goosAny,

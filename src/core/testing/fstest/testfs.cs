@@ -386,7 +386,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
     // Test that malformed patterns are detected.
     // The error is likely path.ErrBadPattern but need not be.
     {
-        var (_, errΔ1) = t.fsys._<fs.GlobFS>().Glob(glob + "nonexist/[]"u8); if (errΔ1 == default!) {
+        var (_, errΔ1) = t.fsys._<fs.FS, fs.GlobFS>().Glob(glob + "nonexist/[]"u8); if (errΔ1 == default!) {
             t.errorf("%s: Glob(%#q): bad pattern not detected"u8, dir, glob + "nonexist/[]");
         }
     }
@@ -418,7 +418,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
         }
     }
 
-    var (names, err) = t.fsys._<fs.GlobFS>().Glob(glob);
+    var (names, err) = t.fsys._<fs.FS, fs.GlobFS>().Glob(glob);
     if (err != default!) {
         t.errorf("%s: Glob(%#q): %w"u8, dir, glob, err);
         return;

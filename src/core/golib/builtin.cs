@@ -3130,7 +3130,7 @@ public static partial class builtin
         while (target is IInterfaceAdapter interfaceAdapter)
             target = interfaceAdapter.Value!;
 
-        throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target)}, not {GetGoTypeName(typeof(T))}");
+        throw RuntimeErrorPanic.TypeAssertion(typeof(object), target, typeof(T));
     }
 
     /// <summary>
@@ -4250,4 +4250,30 @@ public static partial class builtin
     /// <param name="value">UTF-8 bytes.</param>
     /// <returns>Heap allocated string.</returns>
     public static @string str(ReadOnlySpan<byte> value) => (@string)value;
+
+    /// <summary>
+    /// Type asserts <paramref name="target"/>, whose Go static type is the interface <typeparamref name="TSource"/>, as
+    /// type <typeparamref name="T"/>; a failure panics with that source type in the text, as Go's does.
+    /// </summary>
+    /// <typeparam name="TSource">Static interface type of <paramref name="target"/>.</typeparam>
+    /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
+    /// <param name="target">Source value to type assert.</param>
+    /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
+    /// <remarks>
+    /// The plain <c>_&lt;T&gt;(this object)</c> form cannot see the static type, so it names the source "interface {}";
+    /// Go prints "io.Reader is *os.File, not *bytes.Buffer". A generated overload on each interface, and golib's own for
+    /// <c>error</c>, supply the source here, leaving the call site as <c>x._&lt;T&gt;()</c>.
+    /// </remarks>
+    public static T _<TSource, [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods |
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
+    )] T>(this TSource target)
+    {
+        if (TryTypeAssert((object?)target, out T value))
+            return value;
+
+        throw RuntimeErrorPanic.TypeAssertion(typeof(TSource), target, typeof(T));
+    }
 }

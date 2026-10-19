@@ -689,4 +689,48 @@ public static partial class TypeExtensions
             return [..fields.Select(field => field.Name)];
         });
     }
+
+    /// <summary>
+    /// Names the first method of <paramref name="interfaceType"/> that a value of <paramref name="valueType"/>
+    /// does not carry, in Go's method order: <c>itabInit</c>'s <c>missingMethod</c>, the name a failed
+    /// <c>x.(I)</c> reports ("... is not I: missing method M").
+    /// </summary>
+    /// <param name="valueType">Dynamic type of the value, a pointer box <c>ж&lt;X&gt;</c> for a pointer.</param>
+    /// <param name="interfaceType">Interface type asserted to.</param>
+    /// <returns>The Go name of the first missing method, or empty when <paramref name="valueType"/> carries every one.</returns>
+    /// <remarks>
+    /// The decision is <see cref="StructurallyImplements"/>'s, method by method: a method counts as carried only
+    /// when a candidate in the value's Go method set has its name AND signature (and, for an unexported one, its
+    /// package). Go sorts an interface's methods exported first, then by name, and names the first one its walk
+    /// fails to find, so every unsatisfied method is collected and the least in that order is returned.
+    /// </remarks>
+    public static string FirstMissingMethod(this Type valueType, Type interfaceType)
+    {
+        ResolveReceiverElement(valueType, out Type valueElement, out bool valueIsPointer);
+
+        List<MethodInfo> candidates = GetGoMethodSetCandidates(valueElement, valueIsPointer);
+        string first = "";
+
+        foreach (MethodInfo interfaceMethod in interfaceType.GetInterfaceMethods())
+        {
+            if (Satisfies(interfaceMethod, candidates, false) || Satisfies(interfaceMethod, candidates, true))
+                continue;
+
+            string name = ProjectGoMethodName(interfaceMethod.Name);
+
+            if (first.Length == 0 || CompareGoMethodOrder(name, first) < 0)
+                first = name;
+        }
+
+        return first;
+    }
+
+    // cmd/compile's Sym.Less for method names: exported before unexported, then by name.
+    private static int CompareGoMethodOrder(string left, string right)
+    {
+        bool leftExported = char.IsUpper(left[0]);
+        bool rightExported = char.IsUpper(right[0]);
+
+        return leftExported != rightExported ? (leftExported ? -1 : 1) : string.CompareOrdinal(left, right);
+    }
 }

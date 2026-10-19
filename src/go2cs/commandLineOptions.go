@@ -63,6 +63,7 @@ type Options struct {
 	convertTests           bool          // convert the package's _test.go variants into a runnable test project
 	testAction             string        // convert | build | run | compare | all
 	testTimeout            time.Duration // per-child-command timeout for test build/run/compare actions
+	testDeadline           time.Duration // the converted host's per-test deadline (GO2CS_TEST_DEADLINE); 0 is none
 	testFilter             string        // -run regex handed VERBATIM to BOTH compare sides, and to the host under -test-action run (block-gated census)
 	testPackagePath        string        // import path of the package under test (self-import binding, IP-3)
 	testPackageName        string        // package name of the package under test (self-import binding, IP-3)

@@ -10749,7 +10749,7 @@ storage from its address. As in Go, a number alone does not keep its object aliv
 The CLR cannot pin such a value, so golib hands out a unique stand-in number instead. A token compares
 and sorts like an address. It converts back to the same pointer while that pointer is still in use, as
 an address does in Go.
-<!-- the three storage kinds: src/core/golib/ж.cs:63-84#303dce (None = order token, Unpinnable, Pinnable); ж.StandardBox.cs:203#4b2f08 and ж.ElemRefBox.cs:301#ec7e60 (None for a reference-bearing T); ж.FieldRefBox.cs:361-379#8d313c (a field reference always names a real interior address, held still only when the enclosing variable can be pinned; the Unpinnable kind, whose address may move after it is taken, is documented at ж.cs:71-77#48cb0e). Shown by: src/tests/Behavioral/ReflectFieldAddrWrite (a reflect-projected token converted back to a pointer and written through); GolibTests PointerTokenConversionTests, ManagedPointerTokenMintTests. -->
+<!-- the three storage kinds: src/core/golib/ж.cs:63-84#303dce (None = order token, Unpinnable, Pinnable); ж.StandardBox.cs:203#4b2f08 and ж.ElemRefBox.cs:301#ec7e60 (None for a reference-bearing T); ж.FieldRefBox.cs:362-395#da3041 (a field reference always names a real interior address, held still only when the enclosing variable can be pinned, except a reinterpret of a first field whose root's CLR layout is not Go's, which answers its root's token; the Unpinnable kind, whose address may move after it is taken, is documented at ж.cs:71-77#48cb0e). Shown by: src/tests/Behavioral/ReflectFieldAddrWrite (a reflect-projected token converted back to a pointer and written through); GolibTests PointerTokenConversionTests, ManagedPointerTokenMintTests. -->
 
 A token has no memory behind it, so it has no neighbours. Adding an offset to a token and converting the
 result back to a pointer raises a Go panic that says so. Like any Go panic, `recover` can catch it
@@ -11780,8 +11780,8 @@ else.
      functions whose bodies are arith_$GOARCH.s; arith_decl_pure.go (`math_big_pure_go`) forwards each
      to the `_g` pure-Go implementation in arith.go. With purego alone, every big.Int/Float/Rat
      arithmetic path compiled and threw on first use (surfaced as time.TestTruncateRound -> big.Int.Mul
-     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:265#3fe3c3 (defaultStdLibBuildTags);
-     resolveBuildTags (commandLineOptions.go:289#0885a6) keys the default on the -stdlib and -tests flags, not on
+     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:266#3fe3c3 (defaultStdLibBuildTags);
+     resolveBuildTags (commandLineOptions.go:290#0885a6) keys the default on the -stdlib and -tests flags, not on
      the package being standard library, so a -tests run on any package gets it. `-tags=` clears the
      default. A -stdlib run prints the tags it applies, e.g.
      `Applying build tags: purego,math_big_pure_go (default; pass -tags to override)`

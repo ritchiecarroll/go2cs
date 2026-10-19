@@ -502,6 +502,7 @@
     <None Include="$(MSBuildThisFileDirectory)testAliasShadowOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)testConversion_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)testDeadline_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\hostlaunch\fixture\keys\k" />
@@ -518,6 +519,7 @@
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityInterface_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityProse_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeAssertSourceOverload_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilInterfaceBoxing.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilUnsafePointer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution.go" />

@@ -52,6 +52,53 @@ internal class InterfaceTypeTemplate : TemplateBase
               }{{RuntimeInterfaceShells}}
           """;
 
+    // Go prints the static interface type an assertion started from ("io.Reader is *os.File, not
+    // *bytes.Buffer"). The converted call is `x._<T>()` and golib's object form cannot see x's static
+    // type, so an interface carries an extension overload of its own: C# overload resolution prefers
+    // the identity conversion to the exact interface over the reference conversion to object, and the
+    // call site stays exactly as Go reads.
+    //
+    // The overload CANNOT be a member of the package class: `_` would then bind to it, as a method
+    // group, wherever the class's own code writes `_ = x` or `out _`, and those stop being discards
+    // (CS1656, CS1657). It lives in a top-level `<pkg>_package_asserts` class instead (an extension
+    // method cannot be nested), still one declaration per interface in its own package.
+    //
+    // An interface this class cannot serve is spelled by the converter instead, `x._<I, T>()`, which binds
+    // golib's `_<TSource, T>` and names the interface exactly:
+    //   - an unexported interface is a private nested type of the package class, which a sibling class
+    //     cannot name in a signature, so it gets no overload here;
+    //   - a generic interface: `_<T>` has one explicit type argument, so it takes no overload;
+    //   - an exported one whose class C# extension lookup cannot reach from the asserting file: lookup
+    //     tries a namespace's own types before its using directives, and golib's object form sits in the
+    //     root namespace and applies to everything, so a file in the root namespace never reaches an
+    //     overload in a nested one.
+    // Residuals, which keep golib's object form and so the text "interface {}": an unexported interface
+    // of ANOTHER package, and an interface declared inside a function, neither of which the asserting
+    // file can name. The converter casts the receiver to object there when the interface embeds others,
+    // since the bare call would bind an embedded interface's overload and name the wrong interface
+    // (or be ambiguous, CS0121); see assertSourceFormFor in the converter.
+    public bool EmitAssertOverload;
+
+    private bool HasAssertOverload => EmitAssertOverload && Scope is "public" or "internal";
+
+    public override string TemplateFooter => base.TemplateFooter + AssertSourceOverloadClass;
+
+    private string AssertSourceOverloadClass => !HasAssertOverload ? "" :
+        $$"""
+
+
+        public static partial class {{PackageName}}_package_asserts
+        {
+            [{{GeneratedCodeAttribute}}]
+            {{Scope}} static {{TypeT}} _<[global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
+                global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods |
+                global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors |
+                global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields |
+                global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields)] {{TypeT}}>(this {{PackageName}}_package.{{InterfaceName}} source) =>
+                source._<{{PackageName}}_package.{{InterfaceName}}, {{TypeT}}>();
+        }
+        """;
+
     private InterfaceShellEmitter? Shells => EmitShells ? m_shells ??= new InterfaceShellEmitter(NonGenericInterfaceName, Scope, Methods) : null;
 
     private string ShellAttribute => Shells?.Attribute ?? "";
