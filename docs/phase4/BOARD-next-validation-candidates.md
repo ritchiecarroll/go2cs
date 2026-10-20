@@ -27491,4 +27491,22 @@ code that ranges over a field of an OS-filled struct meets it.
 
 — P2 (found 2026-10-19)
 
+## 2026-10-19 — P2 finding: go2cs.TypeGenerator is about 92% of runtime's compile, and with ImplementGenerator about 85% of net/http's — OPEN (found by P2, a post-hop build-time candidate, not a gate; unowned)
+
+Found while measuring NativeArrayOpenerGenerator's cost (COORD's follow-up (c)). Reading: `ReportAnalyzer=true`, a
+Release `Rebuild` of the one project with `BuildProjectReferences=false` after a full dependency build, linux,
+two runs each, at claude/p2-native-array-followups 821741f7b0 (base e87a52f44b).
+
+| project | CoreCompile | all generators | TypeGenerator | ImplementGenerator | EscapeRegistryGenerator | NativeArrayOpenerGenerator |
+|---|---|---|---|---|---|---|
+| runtime | 344.3 / 334.2 s | 320.2 / 309.9 s | 296.4 / 286.7 s (92%) | 2.9 / 2.8 s | 14.9 / 14.7 s (4%) | 0.29 / 0.25 s |
+| net/http | 95.9 / 98.8 s | 83.8 / 85.9 s | 37.2 / 37.7 s (44%) | 34.9 / 35.8 s (41%) | 7.0 / 7.7 s (8%) | 0.05 / 0.05 s |
+
+Analyzers (not generators) took 2.2 / 2.1 s on runtime and 1.5 / 1.8 s on net/http. Every other go2cs generator is under 5%
+of either compile. The rows say where the time is, not why: no generator was profiled, and the generators are
+`ISourceGenerator`s, so every one re-runs in full on every compile, including in the IDE. The owner's rule
+stands: size and build time never gate parity, so this row is sized for after the hop.
+
+— P2 (measured 2026-10-19)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
