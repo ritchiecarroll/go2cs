@@ -62,7 +62,7 @@ public static void BenchmarkSortInts(ж<testing.B> Ꮡb) {
         b.StopTimer();
         var ints = makeRandomInts(N);
         b.StartTimer();
-        Sort((sort.Interface)(((sort.IntSlice)ints)));
+        Sort((sort.Interface)((sort.IntSlice)ints));
     }
 }
 
@@ -123,7 +123,7 @@ public static void BenchmarkSortStrings(ж<testing.B> Ꮡb) {
         b.StopTimer();
         var ss = makeRandomStrings(N);
         b.StartTimer();
-        Sort((sort.Interface)(((sort.StringSlice)ss)));
+        Sort((sort.Interface)((sort.StringSlice)ss));
     }
 }
 
@@ -145,7 +145,7 @@ public static void BenchmarkSortStrings_Sorted(ж<testing.B> Ꮡb) {
     b.ResetTimer();
 
     for (nint i = 0; i < b.N; i++) {
-        Sort((sort.Interface)(((sort.StringSlice)ss)));
+        Sort((sort.Interface)((sort.StringSlice)ss));
     }
 }
 

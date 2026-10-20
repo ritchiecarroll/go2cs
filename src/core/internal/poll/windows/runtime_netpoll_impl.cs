@@ -193,6 +193,10 @@ partial class poll_package
     internal static partial void runtime_pollServerInit()
     {
         Volatile.Write(ref pollServerInitialized, true);
+
+        // Pays the first deadline's one-time costs now, before any deadline is armed
+        // (deadline_prepay_impl.cs).
+        prepayDeadlinePath();
     }
 
     private static bool pollServerInitialized;
@@ -251,7 +255,7 @@ partial class poll_package
         // sides see. Registration REPLACES any previous sink for the same descriptor, and must: the
         // kernel reissues descriptor numbers after a close, so refusing to overwrite would leave a
         // retired desc being woken for a socket it no longer owns.
-        golib.GoAsyncIO.SetReadiness(handle, mode => netpollReady(ctx, mode));
+        golib.GoAsyncIO.SetReadiness(handle, readinessSink(ctx));
 
         return (ctx, 0);
     }
@@ -497,11 +501,15 @@ partial class poll_package
     {
         // One timer serves every arm of this mode for the desc's lifetime (Go's pd.rt.modify reuses
         // its timer the same way); the arm is identified by the generation republished below.
-        mode.Deadline ??= new GoTimer(static state => deadlineFired((ManagedPollMode)state!), mode);
+        mode.Deadline ??= new GoTimer(fireDeadline, mode);
 
         mode.ArmedGeneration = mode.Generation;
         mode.Deadline.Reset(mode.DueNanos);
     }
+
+    // The deadline timer's callback, named so the poller's start can compile it ahead of the first
+    // deadline (deadline_prepay_impl.cs).
+    private static readonly Action<object?> fireDeadline = static state => deadlineFired((ManagedPollMode)state!);
 
     // The armed deadline fired: Go's netpolldeadlineimpl, run inline on the timer service thread, so it
     // takes the gate briefly and wakes the waiter, and never blocks. A callback the service had already
@@ -636,4 +644,8 @@ partial class poll_package
             Monitor.PulseAll(desc.Gate);
         }
     }
+
+    // The sink pollOpen registers for a descriptor, named so the deadline pre-pay can compile it ahead
+    // of the first completion (deadline_prepay_windows_impl.cs).
+    private static Action<nint> readinessSink(uintptr ctx) => mode => netpollReady(ctx, mode);
 }

@@ -203,7 +203,7 @@ internal static void set(this ref pinState v, bool val, bool multipin) {
     if (val){
         atomic.Or8(v.bytep, mask);
     } else {
-        atomic.And8(v.bytep, (uint8)(((uint8)(~mask))));
+        atomic.And8(v.bytep, (uint8)((uint8)(~mask)));
     }
 }
 

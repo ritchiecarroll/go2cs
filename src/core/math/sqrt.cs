@@ -127,7 +127,7 @@ internal static float64 sqrt(float64 x) {
     ix <<= (int)(1);
     uint64 q = default!;                              // q = sqrt(x)
     uint64 s = default!;
-    var r = (uint64)((uint64)1 << (int)((shift + 1))); // r = moving bit from MSB to LSB
+    var r = (uint64)((uint64)1 << (int)(shift + 1)); // r = moving bit from MSB to LSB
     while (r != 0) {
         var t = s + r;
         if (t <= ix) {

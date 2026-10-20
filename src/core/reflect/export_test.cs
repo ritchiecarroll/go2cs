@@ -55,7 +55,7 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
 
     // Expand stack pointer bitmap into byte-map.
     for (var i = (uint32)0; i < (~abid.stackPtrs).n; i++) {
-        stack = builtin.append(stack, (byte)((~abid.stackPtrs).data[i / 8] >> (int)((i % 8)) & 1));
+        stack = builtin.append(stack, (byte)((~abid.stackPtrs).data[i / 8] >> (int)(i % 8) & 1));
     }
 
     // Expand register pointer bitmaps into byte-maps.
@@ -76,7 +76,7 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
         var nptrs = (~ft).PtrBytes / (uintptr)goarch.PtrSize;
         var gcdata = ft.GcSlice(0, (nptrs + 7) / 8);
         for (var i = (uintptr)0; i < nptrs; i++) {
-            gc = builtin.append(gc, (byte)(gcdata[i / 8] >> (int)((i % 8)) & 1));
+            gc = builtin.append(gc, (byte)(gcdata[i / 8] >> (int)(i % 8) & 1));
         }
     }
     return (frametype, argSize, retOffset, stack, gc, inReg, outReg, ptrs);

@@ -160,7 +160,7 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a,
         exact = false;
         if (haveRem || (mantissa & 2) != 0) {
             {
-                mantissa++; if (mantissa >= (uint32)(((uint32)1 << (int)(Msize2)))) {
+                mantissa++; if (mantissa >= (uint32)((uint32)1 << (int)(Msize2))) {
                     // Complete rollover 11...1 => 100...0, so shift is safe
                     mantissa >>= (int)(1);
                     exp++;
@@ -265,7 +265,7 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a,
         exact = false;
         if (haveRem || (mantissa & 2) != 0) {
             {
-                mantissa++; if (mantissa >= (uint64)(((uint64)1 << (int)(Msize2)))) {
+                mantissa++; if (mantissa >= (uint64)((uint64)1 << (int)(Msize2))) {
                     // Complete rollover 11...1 => 100...0, so shift is safe
                     mantissa >>= (int)(1);
                     exp++;

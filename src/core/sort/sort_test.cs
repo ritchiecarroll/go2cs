@@ -51,7 +51,7 @@ public static void TestSortFloat64sCompareSlicesSort(ж<testing.T> Ꮡt) {
     var slice1 = slices.Clone<slice<float64>, float64>(float64s[..]);
     var slice2 = slices.Clone<slice<float64>, float64>(float64s[..]);
 
-    Sort((sort.Interface)(((sort.Float64Slice)slice1)));
+    Sort((sort.Interface)((sort.Float64Slice)slice1));
     slices.Sort<slice<float64>, float64>(slice2);
 
     // Compare for equality using cmp.Compare, which considers NaNs equal.
@@ -157,7 +157,7 @@ public static void TestBreakPatterns(ж<testing.T> Ꮡt) {
     data[(len(data) / 4) * 1] = 0;
     data[(len(data) / 4) * 2] = 1;
     data[(len(data) / 4) * 3] = 2;
-    Sort((sort.Interface)(((sort.IntSlice)data)));
+    Sort((sort.Interface)((sort.IntSlice)data));
 }
 
 public static void TestReverseRange(ж<testing.T> Ꮡt) {

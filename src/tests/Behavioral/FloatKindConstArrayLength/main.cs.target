@@ -115,7 +115,7 @@ internal static void Main() {
     uintptr u = 1;
     nuint n = 1;
     int64 i64 = 1;
-    fmt.Println("shift", (uint64)(u << (int)(shiftBy)), (uint64)(n << (int)(shiftBy)), i64 << (int)(shiftBy), (nint)((1 << (int)(shiftBy))));
+    fmt.Println("shift", (uint64)(u << (int)(shiftBy)), (uint64)(n << (int)(shiftBy)), i64 << (int)(shiftBy), (nint)(1 << (int)(shiftBy)));
 }
 
 } // end main_package

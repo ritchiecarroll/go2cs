@@ -273,9 +273,9 @@ internal static slice<byte> bytes(this ref Element v, /*[32]*/ Ğ¶<array<byte>> á
     // 256      192      128       64        0
 
     var u0 = t.l1 << 51 | t.l0;
-    var u1 = t.l2 << (int)((102 - 64)) | t.l1 >> (int)((64 - 51));
-    var u2 = t.l3 << (int)((153 - 128)) | t.l2 >> (int)((128 - 102));
-    var u3 = t.l4 << (int)((204 - 192)) | t.l3 >> (int)((192 - 153));
+    var u1 = t.l2 << (int)(102 - 64) | t.l1 >> (int)(64 - 51);
+    var u2 = t.l3 << (int)(153 - 128) | t.l2 >> (int)(128 - 102);
+    var u3 = t.l4 << (int)(204 - 192) | t.l3 >> (int)(192 - 153);
 
     byteorder.LEPutUint64(@out[(int)(0 * 8)..], u0);
     byteorder.LEPutUint64(@out[(int)(1 * 8)..], u1);

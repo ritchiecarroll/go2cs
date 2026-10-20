@@ -128,7 +128,7 @@ internal static (ж<byte> bytep, uint8 mask) getCheckmark(uintptr obj) {
     }
     var wordIdx = (obj - alignDown(obj, heapArenaBytes)) / (uintptr)goarch.PtrSize;
     var arenaWord = wordIdx / 8;
-    mask = (byte)((byte)(1 << (int)((wordIdx % 8))));
+    mask = (byte)((byte)(1 << (int)(wordIdx % 8)));
     bytep = (~arena).checkmarks.at(checkmarksMap.Ꮡb, (ulong)(arenaWord));
     return (bytep, mask);
 }
