@@ -1055,3 +1055,21 @@ wrong equality), so both are kept.
 
 **Gates on the seated change**: the full GolibTests, the full behavioral corpus, and `go test ./...`
 in `src/go2cs`. The results are in the seat post, not here, because they are read at the seat's tip.
+
+**Re-measured 2026-10-20 against the batch-7 tip `0195a29022`** (linux, 4 vCPU VM, Microsoft .NET
+10.0.12, JIT, Release; one `/dev/shm` copy of the seat built twice, the base arm with the tip's
+`AdapterBinder.cs` and the cache arm with the seat's, which is the seat's only runtime change). Each
+process runs 5 warmup windows, 3 allocation windows and 15 timed windows of 1 M iterations; 17 rounds
+per arm, order alternated, round 0 dropped. The 2026-10-12 figures above were read at the seat's old
+base, so they describe a tree that no longer exists; these replace them for the hop.
+
+| reading | base | cache | delta |
+|---|---:|---:|---:|
+| allocation, B/iter (all 34 processes, every window) | 96 | 24 | **−72** (prediction −72, met exactly) |
+| steady state, ns/iter, median over 16 processes of each one's best window | 146.2 | 141.0 | **−5.3**; cache faster in 12 of 16 paired rounds |
+| controls `PerfIface` / `PerfIfaceCall`, median elapsed of 16 runs, ms | 601.8 / 469.4 | 620.3 / 453.8 | +3.1% / −3.3% (no shell on either row; opposite signs, read as this VM's spread) |
+
+Every process's checksum was the expected value. The steady-state delta sits inside the 2026-10-12
+prediction (−8 to +1 ns) and below that day's −6.9; the per-arm ranges overlap (base 136.2–160.6,
+cache 130.0–157.9), so on this VM the timing gain is smaller than the cross-process
+spread, as it was before. The allocation result does not depend on the VM.
