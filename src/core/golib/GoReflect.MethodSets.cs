@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using go.golib;
 using static go2cs.Symbols;
 
@@ -417,14 +418,15 @@ public static partial class GoReflect
 
     // The binder's form of ValueMethodRecv, for a box of any shape: the pointee a value method reached through a pointer
     // is called on, read at the call. A nil pointer is Go's panicwrap for a method the type declares and the
-    // nil-pointer fault for one it promotes from an embedded field (Go's wrapper dereferences the embed there).
+    // nil-pointer fault for one it promotes from an embedded field (Go's wrapper dereferences the embed there), which
+    // go2cs-gen's forwarder says with [GoPromoted]: a declared method shadows an embedded one of the same name.
     private static object? ValueMethodPointee(object? box, MethodInfo method)
     {
         if (box is null || box is INilPointer { IsNilPointer: true })
         {
             golib.TypeExtensions.IsCopyBoundReceiver(method, out Type receiverType);
 
-            throw PromotesMethod(receiverType, method.Name)
+            throw method.IsDefined(typeof(GoPromotedAttribute), inherit: false)
                 ? RuntimeErrorPanic.WrapperNilReceiver()
                 : RuntimeErrorPanic.Panicwrap(PanicwrapText(receiverType, method.Name));
         }
@@ -461,32 +463,40 @@ public static partial class GoReflect
             }
         }
 
-        return $"value method {GoPackagePath(element)}.{name}.{goMethod} called using nil *{name} pointer";
+        return $"value method {SymbolPackagePath(GoPackagePath(element))}.{name}.{goMethod} called using nil *{name} pointer";
     }
 
-    // Whether `element` reaches its method `method` (emitted name) through an embedded field rather than declaring it:
-    // the generated forwarder is the only method of that name, so the embedded field's own method set answers.
-    private static bool PromotesMethod(Type element, string method)
+    // A package path as Go's symbol names spell it (cmd/internal/objabi.PathToPrefix), the form panicwrap reads back
+    // from the wrapper's name: a byte that is a control, a space, '%', '"' or non-ASCII, or a '.' after the last '/',
+    // is written %xx ("example.com/probe/v%2ex").
+    private static string SymbolPackagePath(string path)
     {
-        foreach (FieldInfo field in element.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+        const string Hex = "0123456789abcdef";
+        int slash = path.LastIndexOf('/');
+        StringBuilder result = new(path.Length);
+        Span<byte> bytes = stackalloc byte[4];
+
+        for (int i = 0; i < path.Length; i++)
         {
-            if (!FieldIsEmbedded(field))
-                continue;
+            char c = path[i];
 
-            Type embedded = TryBoxPointee(field.FieldType, out Type? pointee) ? pointee : field.FieldType;
-
-            GoMethodSetEntry[] entries = embedded.IsInterface
-                ? golib.TypeExtensions.GetGoInterfaceMethodEntries(embedded)
-                : golib.TypeExtensions.GetGoMethodSetEntries(embedded, valueIsPointer: true);
-
-            foreach (GoMethodSetEntry entry in entries)
+            if (c < 0x7F && !(c <= ' ' || c == '.' && i > slash || c == '%' || c == '"'))
             {
-                if (entry.Method.Name == method)
-                    return true;
+                result.Append(c);
+                continue;
             }
+
+            // A non-ASCII rune's UTF-8 bytes are each escaped, as Go escapes the path's bytes.
+            Rune rune = Rune.GetRuneAt(path, i);
+            int count = rune.EncodeToUtf8(bytes);
+
+            foreach (byte b in bytes[..count])
+                result.Append('%').Append(Hex[b >> 4]).Append(Hex[b & 0xF]);
+
+            i += rune.Utf16SequenceLength - 1;
         }
 
-        return false;
+        return result.ToString();
     }
 
     /// <summary>

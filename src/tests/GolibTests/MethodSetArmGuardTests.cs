@@ -93,6 +93,25 @@ public class MethodValuePointeeTests
         Assert.AreEqual(Fault, CallMessage(() => GoReflect.GoMethodFunc(outer, Index(outer, "Twice"))!, static d => ((Func<ж<nilrecv_package.Outer>, nint>)d)(null!)), "promoted, unbound");
     }
 
+    [TestMethod]
+    public void ADeclaredMethodShadowsTheEmbedsAndPanicsWithPanicwrap()
+    {
+        const string ShadowPanicwrap = "value method nilrecv.Shadow.Get called using nil *Shadow pointer";
+        Type shadow = typeof(ж<nilrecv_package.Shadow>);
+
+        Assert.AreEqual(ShadowPanicwrap, CallMessage(() => GoReflect.GoMethodValue(shadow, Index(shadow, "Get"), null), static d => ((Func<nint>)d)()), "bound");
+        Assert.AreEqual(ShadowPanicwrap, CallMessage(() => GoReflect.GoMethodFunc(shadow, Index(shadow, "Get"))!, static d => ((Func<ж<nilrecv_package.Shadow>, nint>)d)(null!)), "unbound");
+    }
+
+    [TestMethod]
+    public void APanicwrapPackagePathIsEscapedAsGoSpellsItsSymbols()
+    {
+        Type d = typeof(ж<vdotx_package.D>);
+
+        Assert.AreEqual("value method example.com/probe/v%2ex.D.M called using nil *D pointer",
+            CallMessage(() => GoReflect.GoMethodValue(d, Index(d, "M"), null), static f => ((Func<nint>)f)()));
+    }
+
     // The panic's message when the bind succeeds and the call panics; anything else is named.
     private static string CallMessage(Func<Delegate> bind, Func<Delegate, nint> call)
     {
@@ -124,5 +143,24 @@ public static class nilrecv_package
 
     public static nint Twice(this Inner x) => x.i * 2;
 
+    [GoPromoted]
     public static nint Twice(this Outer target) => target.Inner.Twice();
+
+    // Shadow declares Get and embeds Cell, which has Get too: its own method shadows the embed's, as in Go, so
+    // go2cs-gen writes no forwarder and the method carries no [GoPromoted].
+    public struct Shadow
+    {
+        [GoEmbedded] public Cell Cell;
+    }
+
+    public static nint Get(this Shadow s) => -s.Cell.n;
+}
+
+// A package whose last path element holds a '.', which Go's symbol names escape (gopkg.in/yaml.v3's shape).
+[GoPackage("vdotx", ImportPath = "example.com/probe/v.x")]
+public static class vdotx_package
+{
+    public struct D { public nint n; }
+
+    public static nint M(this D d) => d.n;
 }
