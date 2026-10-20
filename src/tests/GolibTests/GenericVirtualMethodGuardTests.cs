@@ -28,7 +28,7 @@ namespace GolibTests;
 public class GenericVirtualMethodGuardTests
 {
     private const string PredatesPtrconv =
-        "predates ptrconv: every box implements it, and it is inside the measured 22-28 min folding baseline (ruled 2026-10-20)";
+        "predates ptrconv: every box implements or inherits it, and it is inside the measured 22-28 min folding baseline (ruled 2026-10-20)";
 
     private static readonly Dictionary<string, string> s_baseline = new()
     {
@@ -36,6 +36,7 @@ public class GenericVirtualMethodGuardTests
         ["go.IPointer`1: go.ж`1[TElem] of[TElem](go.FieldPtrFunc`2[T,TElem])"] = PredatesPtrconv,
         ["go.IPointer`1: go.ж`1[TElem] of[TElem](go.FieldRefFunc`1[TElem])"] = PredatesPtrconv,
         ["go.IPointer`1: go.ж`1[TElem] of[TElem](go.FieldRefFunc`2[T,TElem])"] = PredatesPtrconv,
+        ["go.ж`1: go.ж`1[TDst] TryPinnedReinterpret[TDst]()"] = PredatesPtrconv,
     };
 
     // Two populations, because a generic virtual method can be declared on an INTERFACE or on a CLASS (a virtual or

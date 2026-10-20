@@ -77,7 +77,7 @@ internal interface IFirstFieldView
     object? FirstFieldParent { get; }
 }
 
-public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView
+public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView
 {
     private readonly object m_source;
     private readonly FieldRefFunc<T> m_accessor;
@@ -555,8 +555,10 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // view, so a chain of pointer conversions stays one view over one box (PointerExtensions.Reinterpret).
     internal object? ReinterpretRoot => IsReinterpretAccessor(m_token) ? m_source : null;
 
+    object? IReinterpretView.ReinterpretRoot => ReinterpretRoot;
+
     // ReinterpretUnaliased's refusing accessor is a reinterpret view too: same address, same root.
     private static bool IsReinterpretAccessor(Delegate fieldId) =>
-        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef) or nameof(ж<byte>.UnaliasedRef), DeclaringType: { IsGenericType: true } owner } &&
+        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef) or nameof(ж<byte>.RootReinterpretRef) or nameof(ж<byte>.UnaliasedRef), DeclaringType: { IsGenericType: true } owner } &&
         owner.GetGenericTypeDefinition() == typeof(ж<>);
 }
