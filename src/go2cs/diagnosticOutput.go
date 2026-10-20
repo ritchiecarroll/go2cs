@@ -131,6 +131,10 @@ const (
 	// diagnosticProxyRefused: an instantiation needing a constraint proxy that cannot forward its constraint
 	// without breaking Go's aliasing (constraintProxyForwarding.go).
 	diagnosticProxyRefused = "GO2CS2002"
+
+	// diagnosticManualTypeReceiverRefused: a conversion to a manual type whose operand is the method's own pointer
+	// receiver, which has no box to pass (manualTypeReceiverRefusal.go).
+	diagnosticManualTypeReceiverRefused = "GO2CS2003"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST

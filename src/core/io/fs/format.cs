@@ -14,10 +14,12 @@ partial class fs_package {
 //
 //	-rw-r--r-- 100 1970-01-01 12:00:00 hello.go
 public static @string FormatFileInfo(FileInfo info) {
+    var bᴷ = new stackAppend<byte>();
+
     @string name = info.Name();
     var b = new slice<byte>(0, 40 + len(name));
     b = append(b, info.Mode().String().ꓸꓸꓸ);
-    b = append(b, (byte)((rune)' '));
+    b = append(bᴷ, b, (byte)((rune)' '));
 
     var size = info.Size();
     uint64 usize = default!;
@@ -57,6 +59,8 @@ public static @string FormatFileInfo(FileInfo info) {
 //	d subdir/
 //	- hello.go
 public static @string FormatDirEntry(DirEntry dir) {
+    var bᴷ = new stackAppend<byte>();
+
     @string name = dir.Name();
     var b = new slice<byte>(0, 5 + len(name));
 
@@ -66,7 +70,7 @@ public static @string FormatDirEntry(DirEntry dir) {
     mode = mode.slice(0, len(mode) - 9);
 
     b = append(b, mode.ꓸꓸꓸ);
-    b = append(b, (byte)((rune)' '));
+    b = append(bᴷ, b, (byte)((rune)' '));
     b = append(b, name.ꓸꓸꓸ);
     if (dir.IsDir()) {
         b = append(b, (byte)((rune)'/'));

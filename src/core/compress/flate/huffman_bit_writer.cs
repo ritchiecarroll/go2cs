@@ -433,11 +433,13 @@ internal static void writeFixedHeader(this ref huffmanBitWriter w, bool isEof) {
 // stored block.
 // If the input is nil, the tokens will always be Huffman encoded.
 internal static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+    var tokensᴷ = new stackAppend<token>();
+
     if (w.err != default!) {
         return;
     }
 
-    tokens = append(tokens, (token)(endBlockMarker));
+    tokens = append(tokensᴷ, tokens, (token)(endBlockMarker));
     var (numLiterals, numOffsets) = w.indexTokens(tokens);
 
     nint extraBits = default!;
@@ -502,11 +504,13 @@ internal static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens
 // If input is supplied and the compression savings are below 1/16th of the
 // input size the block is stored.
 internal static void writeBlockDynamic(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+    var tokensᴷ = new stackAppend<token>();
+
     if (w.err != default!) {
         return;
     }
 
-    tokens = append(tokens, (token)(endBlockMarker));
+    tokens = append(tokensᴷ, tokens, (token)(endBlockMarker));
     var (numLiterals, numOffsets) = w.indexTokens(tokens);
 
     // Generate codegen and codegenFrequencies, which indicates how to encode

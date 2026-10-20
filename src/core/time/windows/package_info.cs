@@ -61,6 +61,12 @@ using static go.time_package;
 [assembly: GoImplicitConv<ΔWeekday, absDays>(Inverted = true, ValueType = "nint")]
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -69,7 +75,7 @@ using static go.time_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("time/format.go", "format.cs", "AK4B5gKYooKUggACHgAMAoKApIKClILagoKClIKmgtqClILIgpSmgpSmlIKUlILIpqamgsiCyIKUgpSClIKUgsiClIKUgpSClILIgoKCgqaCgoKUguqmAAkUAAkUAA4eAA4iooKCgpSCgoK4poKCgqassoKCgriClKSokoKUgriCuIKUuIKCgoKClIK4luKCgoKUgoKClIKUrMSClKaCpoKClKqigoKClIKCgoKUgoKUgqYABRwACwKmgoKCgoKUkpKCgoKCgoKUgoKClKqigoKUgoKCgoK4lIKCgoKCgoKCgoKCgKSkABEigoKkggACEuKCgoKCgpSUgqq0lKSkuIKClAAIFoKCgpSClKaClIK4gqaUgoKUpKSkgqSkpKSCpKSClKSkgoKCpqSktoKClLaCgpSkpKSkpIKUtoKU6oKClIKCgoKClJSCgpSCuIKClNiCgriCgoKUlIK0pqYAChqikpIACBaCgoKCjuKCgoKmlIKCgqaClKaCqJKCnKqygpSCrLKClIKClJSsspKClIKUpoKClKqigoKClIKClIKUgpQAAloAKwSCgIK2AAIQ5IKAgrYADwaCkoKClgANHoKCgoKCgpSCgpSUgoKCtIKClIKCgpSClNaCgpSCtIKkgqSCgsikpIKUyIKCpsiCgraCgraCgsaCgpSCgriCgoKUpoKUgtaCgpSClKSk1oKClIKUpKTWgoKClMSygoKClIKClJKCgoKUkoKCgpSCgpSSgoKClJSCgpSUooKCgoLugpSClIKmgsa0+IKCgpSCgoKU6oKCgpSCxpS4goKUgqSClIKmgpKCuIKCgoKCgpKCpoKUgoKClLiClIKClJSClILKgqaCpoKCuIKCgriCgqaCpoKCgoK4goKUgoK4AAIaAAwCgqaCpoKCpoKCgpaSgoKUgIK2lKSC2ILGlKyygoKmrLKCgpSmgpSClKaC1uKCgpSCgpSAgqSCgriCgpSmluKCgoKClJSUgpSmrOKCgoKCgoKUgpSUgpSCgoKUgpQACBKCpgAKIOSSgqaCgoKCuIKUgpSCuqaCpoKCgpSmgoKCgoKUlLiCgoKCpoKUgoKCgpSUlIKmgpSmgoKmgpSClA==", "426-426:1", "", "955=quote/1/4/1,quote/2/4/2,quote/3/4/3,quote/4/4/4;957=quote/1/1/1")]
+[assembly: go.GoPositionMap("time/format.go", "format.cs", "AK4B5gKYooKUggACHgAMAoKApIKClILagoKClIKmgtqClILIgpSmgpSmlIKUlILIpqamgsiCyIKUgpSClIKUgsiClIKUgpSClILIgoKCgqaCgoKUguqmAAkUAAkUAA4eAA4iooKCgpSCgoK4poKCgqassoKCgriClKSokoKUgriCuIKUuIKCgoKClIK4luKCgoKUgoKClIKUrMSClKaCpoKClKqigoKClIKCgoKUgoKUgqYABRwADQKmgoKCgoKUkpKCgoKCgoKUgoKClKrCgoKUgoKCgoK4lIKCgoKCgoKCgoKCgKSkABEigoKkggACEuKCgoKCgpSUgqq0lKSkuIKClAAIFoKCgpSClKaClIK4gqaUgoKUpKSkgqSkpKSCpKSClKSkgoKCpqSktoKClLaCgpSkpKSkpIKUtoKU6oKClIKCgoKClJSCgpSCuIKClNiCgriCgoKUlIK0pqYAChqikpIACBaigoKCjuKCgoKmlIKCgqaClKaCqJKCnKqygpSCrLKClIKClJSsspKClIKUpoKClKqigoKClIKClIKUgpQAAloAKwSCgIK2AAIQ5IKAgrYADwaCkoKClgANHoKCgoKCgpSCgpSUgoKCtIKClIKCgpSClNaCgpSCtIKkgqSCgsikpIKUyIKCpsiCgraCgraCgsaCgpSCgriCgoKUpoKUgtaCgpSClKSk1oKClIKUpKTWgoKClMSygoKClIKClJKCgoKUkoKCgpSCgpSSgoKClJSCgpSUooKCgoLugpSClIKmgsa0+IKCgpSCgoKU6oKCgpSCxpS4goKUgqSClIKmgpKCuIKCgoKCgpKCpoKUgoKClLiClIKClJSClILKgqaCpoKCuIKCgriCgqaCpoKCgoK4goKUgoK4AAIaAAwCgqaCpoKCpoKCgpaSgoKUgIK2lKSC2ILGlKyygoKmrLKCgpSmgpSClKaC1uKCgpSCgpSAgqSCgriCgpSmluKCgoKClJSUgpSmrOKCgoKCgoKUgpSUgpSCgoKUgpQACBKCpgAKIOSSgqaCgoKCuIKUgpSCuqaCpoKCgpSmgoKCgoKUlLiCgoKCpoKUgoKCgpSUlIKmgpSmgoKmgpSClA==", "426-426:1", "", "961=quote/1/4/1,quote/2/4/2,quote/3/4/3,quote/4/4/4;963=quote/1/1/1")]
 [assembly: go.GoPositionMap("time/format_rfc3339.go", "format_rfc3339.cs", "AAkkAAgCpoKCgoKClKaCgoKCgpSCgqaCuIKCgpSUgoKC5oKCyoKUpIKCtqbqgpKCgoKUlIKClLiClIKCgoKCgoKUlpKCgpSCuIKCgpSCgoKUgoKUpoCClLamgoKCgoLcgrikpKSUpMam", "69-69:1;88-101:1;166-166:1")]
 [assembly: go.GoPositionMap("time/sleep.go", "sleep.cs", "AAwctAADSMKClIKmlAACFAAIBqYAEEYAFQKClAACNAAXAoKCggACMAAXAoKUgqjsAAkgAAoCrsKmgg==")]
 [assembly: go.GoPositionMap("time/sys_windows.go", "sys_windows.cs", "AAoatoKClIKUlKaCpoLWgoKClICCpIKCgoKUlJQ=")]
@@ -78,7 +84,7 @@ using static go.time_package;
 [assembly: go.GoPositionMap("time/zoneinfo_abbrs_windows.go", "zoneinfo_abbrs_windows.cs", "AA4e")]
 [assembly: go.GoPositionMap("time/zoneinfo_goroot.go", "zoneinfo_goroot.cs", "AAgSgoKU")]
 [assembly: go.GoPositionMap("time/zoneinfo_read.go", "zoneinfo_read.cs", "ABIwwgAPIIIADSCCgoKClIKCpoKCgoKUpoKCgoKClKaCgoKClKiSgoKokoCCpKacwqaAgriSgoCClJS0tLQABBYADBCCgoKClIKUAAcQgpQAARCClKaCgoKUgpS4goK4pqampri4lIKmgoKC3IKmlIKCgoKAgqSClIKCgIKkgoCCpIKmlNyCgoKCgIKUtoCClLaCgpSCgpSCuKa4uIKCgoKCgoKSpoCygpSAgpQACRC4poKCgqaqooKUgpQAAhgACQKClKiSgpSqwoKClJQABhKCgIKkgoKUgoCCtgAXMIKUgoKCgoKCgoKClIIAEiaCgIqklIKAgramAAoYwoKUrvKCgoKAgraCpoKCgoCCtoKmgIKCgoCCtoK2gpSu4oKClIKqgoKClIKUgqY=")]
-[assembly: go.GoPositionMap("time/zoneinfo_windows.go", "zoneinfo_windows.cs", "ABQyAA0CgoKUlKSCgpSCgIKkgILIgpSClAAJCsKCgpSUgoKUgoKCptiSgoKCpqiSgoKClIKCgoK4lKwACAyCgoKClIKAgqaCgrbWopSUgoKUlJSCgpSCgoKCgoKC3JSCgoK4goKCgoKCuJSCgoKCgoKClIKCgrgADRoADRqCgoCCgqQ=")]
+[assembly: go.GoPositionMap("time/zoneinfo_windows.go", "zoneinfo_windows.cs", "ABQyAA0CgoKUlKSCgpSCgIKkgILIgpSClAAJCsKCgpSUgoKUgoKCptiygoKCpqiSgoKClIKCgoK4lKwACAyCgoKClIKAgqaCgrbWopSUgoKUlJSCgpSCgoKCgoKC3JSCgoK4goKCgoKCuJSCgoKCgoKClIKCgrgADRoADRqCgoCCgqQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;

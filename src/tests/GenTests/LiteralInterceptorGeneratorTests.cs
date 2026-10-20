@@ -44,6 +44,9 @@ public class LiteralInterceptorGeneratorTests
             [System.AttributeUsage(System.AttributeTargets.Assembly)]
             public sealed class GoHandOwnedPackageAttribute : System.Attribute { }
 
+            [System.AttributeUsage(System.AttributeTargets.Assembly)]
+            public sealed class GoHoistedLiteralsAttribute : System.Attribute { }
+
             public readonly struct @string
             {
                 public static implicit operator @string(string value) => default;
@@ -357,6 +360,49 @@ public class LiteralInterceptorGeneratorTests
 
         Assert.AreEqual(expected, LiteralInterceptorGenerator.IsTransformInput(root));
         Assert.IsFalse(LiteralInterceptorGenerator.IsTransformInput(root.DescendantNodes().OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>().First()), "only a compilation unit is an input");
+    }
+
+    // An assembly stamped [GoHoistedLiterals] runs no semantic transform, even for a file the predicate admits: the stamp
+    // filters the candidates before the semantic step. The unstamped control runs it once and intercepts. If a stamp were
+    // wrong, the bare literal would reach the callee as System.String and GO2CS0004 would fail the build. RED with the
+    // stamp filter removed: the stamped arm ran the transform and intercepted.
+    [TestMethod]
+    public void AStampedAssemblyRunsNoTransform()
+    {
+        (int transforms, Run run) Drive(string? assemblyAttributes)
+        {
+            Compilation compilation = Generate("""return Show("one");""", assemblyAttributes: assemblyAttributes, runGenerator: false).Updated;
+
+            GeneratorDriver driver = CSharpGeneratorDriver.Create(
+                [new LiteralInterceptorGenerator().AsSourceGenerator()],
+                parseOptions: s_parseOptions,
+                driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, trackIncrementalGeneratorSteps: true));
+
+            driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation updated, out ImmutableArray<Diagnostic> diagnostics);
+            GeneratorRunResult result = driver.GetRunResult().Results.Single();
+
+            int transforms = result.TrackedSteps.TryGetValue(LiteralInterceptorGenerator.TransformStepName, out ImmutableArray<IncrementalGeneratorRunStep> steps)
+                ? steps.Sum(step => step.Outputs.Length)
+                : 0;
+
+            return (transforms, new Run(updated, diagnostics, result.GeneratedSources));
+        }
+
+        (int unstampedTransforms, Run unstamped) = Drive(null);
+
+        Assert.AreEqual(1, unstampedTransforms, "the unstamped control runs the transform for its one candidate file");
+        Assert.AreEqual(1, unstamped.Sources.Length);
+        Assert.AreEqual("go.string", Execute(unstamped.Updated));
+
+        (int stampedTransforms, Run stamped) = Drive("[assembly: go.GoHoistedLiterals]");
+
+        Assert.AreEqual(0, stampedTransforms, "a stamped assembly runs no transform");
+        Assert.AreEqual(0, stamped.Sources.Length);
+        Assert.AreEqual(0, stamped.GeneratorDiagnostics.Length, string.Join("; ", stamped.GeneratorDiagnostics));
+
+        ImmutableArray<Diagnostic> net = stamped.Updated.WithAnalyzers([new StringLiteralBindingAnalyzer()]).GetAnalyzerDiagnosticsAsync().Result;
+
+        Assert.AreEqual(1, net.Count(diagnostic => diagnostic.Id == "GO2CS0004"), "GO2CS0004 stays the net in a stamped assembly: " + string.Join("; ", net));
     }
 
     // GO2CS0004 is the net: with the generator absent a bare literal in an object slot is an error, and with it present

@@ -117,6 +117,7 @@ internal static @string stripTrailingWhitespace(@string s) {
 // Unless the result is empty, it is newline-terminated.
 public static @string Text(this ж<CommentGroup> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
+    var linesᴷ = new stackAppend<@string>();
 
     if (Ꮡg == nil) {
         return ""u8;
@@ -179,7 +180,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
 
     // Add final "" entry to get trailing newline from Join.
     if (n > 0 && lines[n - 1] != "") {
-        lines = append(lines, ""u8);
+        lines = append(linesᴷ, lines, ""u8);
     }
 
     return strings.Join(lines, "\n"u8);

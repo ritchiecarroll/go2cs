@@ -68,6 +68,9 @@ internal partial struct MutatorUtilizationV2_procsCount /*dyn*/ {
 // If the UtilPerProc flag is not given, this always returns a single
 // utilization function. Otherwise, it returns one function per P.
 public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> events, UtilFlags flags) {
+    var psᴷ = new stackAppend<MutatorUtilizationV2_perP>();
+    var procsᴷ = new stackAppend<MutatorUtilizationV2_procsCount>();
+
     var @out = new slice<MutatorUtil>[]{}.slice();
     nint stw = 0;
     var ps = new MutatorUtilizationV2_perP[]{}.slice();
@@ -116,10 +119,10 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                         series = len(@out);
                         @out = builtin.append(@out, new MutatorUtil[]{new((int64)(~ev).Time(), 1D)}.slice());
                     }
-                    ps = builtin.append(ps, new MutatorUtilizationV2_perP(series: series));
+                    ps = builtin.append(psᴷ, ps, new MutatorUtilizationV2_perP(series: series));
                 }
                 if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
-                    procs = builtin.append(procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
+                    procs = builtin.append(procsᴷ, procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
                 }
             } while (false);
         }

@@ -7,7 +7,6 @@
 global using static global::go.regexp.syntax_package;
 
 // <ImportedTypeAliases>
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -25,7 +24,6 @@ using static global::go.regexp.syntax_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.regexp.syntax_package.Regexp, ж<global::go.regexp.syntax_package.Regexp>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

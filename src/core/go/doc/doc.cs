@@ -261,6 +261,7 @@ internal static readonly @string testGoˢ = "_test.go"u8;
 public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice<ж<ast.File>> files, @string importPath, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.sslice();
     ref var fset = ref Ꮡfset.DerefOrNull();
+    var testGoFilesᴷ = new stackAppend<ж<ast.File>>();
 
     // Check for invalid API usage.
     if (Ꮡfset == nil) {
@@ -299,7 +300,7 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
             @string filename = f.Name();
             switch (ᐧ) {
             case {} when strings.HasSuffix(filename, testGoˢ): {
-                testGoFiles = append(testGoFiles, @file);
+                testGoFiles = append(testGoFilesᴷ, testGoFiles, @file);
                 break;
             }
             case {} when strings.HasSuffix(filename, ".go"u8): {

@@ -988,6 +988,8 @@ internal static slice<byte> appendTo6(this ΔAddr ip, slice<byte> ret) {
 // zeroes and no "::" compression. For example, "2001:db8::1" becomes
 // "2001:0db8:0000:0000:0000:0000:0000:0001".
 public static @string StringExpanded(this ΔAddr ip) {
+    var retᴷ = new stackAppend<byte>();
+
     var exprᴛ1 = ip.z;
     if (exprᴛ1 == z0 || exprᴛ1 == z4) {
         return ip.String();
@@ -997,7 +999,7 @@ public static @string StringExpanded(this ΔAddr ip) {
     var ret = new slice<byte>(0, size);
     for (var i = (uint8)0; i < 8; i++) {
         if (i > 0) {
-            ret = append(ret, (byte)((rune)':'));
+            ret = append(retᴷ, ret, (byte)((rune)':'));
         }
 
         ret = appendHexPad(ret, ip.v6u16(i));
@@ -1244,6 +1246,8 @@ public static nint Compare(this AddrPort p, AddrPort p2) {
 internal static readonly @string invalidAddrPortˢ = "invalid AddrPort"u8;
 
 public static @string String(this AddrPort p) {
+    var bᴷ = new stackAppend<byte>();
+
     slice<byte> b = default!;
     var exprᴛ1 = p.ip.z;
     if (exprᴛ1 == z0) {
@@ -1258,7 +1262,7 @@ public static @string String(this AddrPort p) {
         if (p.ip.Is4In6()){
             const nint max = /* len("[::ffff:255.255.255.255%enp5s0]:65535") */ 37;
             b = new slice<byte>(0, max);
-            b = append(b, (byte)((rune)'['));
+            b = append(bᴷ, b, (byte)((rune)'['));
             b = p.ip.appendTo4In6(b);
         } else {
             const nint max = /* len("[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff%enp5s0]:65535") */ 54;

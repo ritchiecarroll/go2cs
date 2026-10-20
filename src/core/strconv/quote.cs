@@ -448,6 +448,8 @@ public static (@string, error) Unquote(@string s) {
 // otherwise the input prefix is provided verbatim.
 internal static (@string @out, @string rem, error err) unquote(@string @in, bool unescape) {
     @string @out = default!;
+    var bufᴷ = new stackAppend<byte>();
+    var bufᴷΔ1 = new stackAppend<byte>();
 
     // Determine the quote form and optimistically find the terminating quote.
     if (len(@in) < 2) {
@@ -477,7 +479,7 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
             var buf = new slice<byte>(0, end - len("`") - len("\r") - len("`"));
             for (nint i = len("`"); i < end - len("`"); i++) {
                 if (@in[i] != (rune)'\r') {
-                    buf = append(buf, @in[i]);
+                    buf = append(bufᴷ, buf, @in[i]);
                 }
             }
             @out = (@string)buf;
@@ -532,7 +534,7 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
             // Append the character if unescaping the input.
             if (unescape) {
                 if (r < utf8.RuneSelf || !multibyte){
-                    buf = append(buf, (byte)r);
+                    buf = append(bufᴷΔ1, buf, (byte)r);
                 } else {
                     buf = utf8.AppendRune(buf, r);
                 }

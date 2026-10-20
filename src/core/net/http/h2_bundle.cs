@@ -8769,6 +8769,7 @@ internal static (ж<http2ClientConn>, error) NewClientConn(this ж<http2Transpor
 
 internal static partial (ж<http2ClientConn>, error) newClientConn(this ж<http2Transport> Ꮡt, net.Conn c, bool singleUse, Action internalStateHook) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var initialSettingsᴷ = new stackAppend<http2Setting>();
 
     var conf = http2configFromTransport(ref (Ꮡt).DerefOrNull());
     var cc = Ꮡ(new http2ClientConn(
@@ -8836,7 +8837,7 @@ internal static partial (ж<http2ClientConn>, error) newClientConn(this ж<http2
         new(ID: http2SettingEnablePush, Val: 0),
         new(ID: http2SettingInitialWindowSize, Val: (uint32)(~cc).initialStreamRecvWindowSize)
     }.slice();
-    initialSettings = append(initialSettings, new http2Setting(ID: http2SettingMaxFrameSize, Val: conf.MaxReadFrameSize));
+    initialSettings = append(initialSettingsᴷ, initialSettings, new http2Setting(ID: http2SettingMaxFrameSize, Val: conf.MaxReadFrameSize));
     {
         var max = t.maxHeaderListSize(); if (max != 0) {
             initialSettings = append(initialSettings, new http2Setting(ID: http2SettingMaxHeaderListSize, Val: max));

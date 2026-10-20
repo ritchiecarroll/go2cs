@@ -681,6 +681,8 @@ internal partial struct RelatedGoroutinesV2_unblockEdge /*dyn*/ {
 // The association is based on whether they have synchronized with each other in the Go
 // scheduler (one has unblocked another).
 public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, GoID goid) {
+    var unblockEdgesᴷ = new stackAppend<RelatedGoroutinesV2_unblockEdge>();
+
     slice<RelatedGoroutinesV2_unblockEdge> unblockEdges = default!;
     foreach (var (_, vᴛ1) in events) {
         var ev = vᴛ1.ΔClone();
@@ -700,7 +702,7 @@ public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, 
         if (old == @new || old != GoWaiting) {
             continue;
         }
-        unblockEdges = builtin.append(unblockEdges, new RelatedGoroutinesV2_unblockEdge(
+        unblockEdges = builtin.append(unblockEdgesᴷ, unblockEdges, new RelatedGoroutinesV2_unblockEdge(
             @operator: ev.Goroutine(),
             operand: id
         ));

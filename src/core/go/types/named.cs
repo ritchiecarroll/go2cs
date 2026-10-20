@@ -674,6 +674,8 @@ public static @string String(this ж<Named> Ꮡt) {
 // any, they were broken (by setting the respective types to invalid) during
 // the directCycles check phase.
 internal static void resolveUnderlying(this ж<Named> Ꮡn) {
+    var pathᴷ = new stackAppend<ж<Named>>();
+
     assert(Ꮡn.stateHas(unpacked));
 
     map<ж<Named>, bool> seen = default!;                            // for debugging only
@@ -708,7 +710,7 @@ internal static void resolveUnderlying(this ж<Named> Ꮡn) {
             if (debug) {
                 seen[t] = true;
             }
-            path = append(path, t);
+            path = append(pathᴷ, path, t);
 
             t.unpack();
             assert(t.rhs() != default! || (~t).allowNilRHS);

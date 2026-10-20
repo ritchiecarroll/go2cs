@@ -623,6 +623,7 @@
     <Project Path="tests/Behavioral/IncDecPointerField/IncDecPointerField.csproj" />
     <Project Path="tests/Behavioral/IndexedElementDirectBoxMethod/IndexedElementDirectBoxMethod.csproj" />
     <Project Path="tests/Behavioral/ImmediatelyInvokedFunc/ImmediatelyInvokedFunc.csproj" />
+    <Project Path="tests/Behavioral/ImplicitConvArgumentParameter/ImplicitConvArgumentParameter.csproj" />
     <Project Path="tests/Behavioral/ImportSegmentTypeShadow/ImportSegmentTypeShadow.csproj" />
     <Project Path="tests/Behavioral/IfaceFieldEmbedAdapter/IfaceFieldEmbedAdapter.csproj" />
     <Project Path="tests/Behavioral/IfaceFieldMethodValueBind/IfaceFieldMethodValueBind.csproj" />
@@ -1046,6 +1047,7 @@
     <Project Path="tests/Behavioral/SortArrayType/SortArrayType.csproj" />
     <Project Path="tests/Behavioral/SortMethodSelfCapture/SortMethodSelfCapture.csproj" />
     <Project Path="tests/Behavioral/SpreadOperator/SpreadOperator.csproj" />
+    <Project Path="tests/Behavioral/StackAppendBackingStore/StackAppendBackingStore.csproj" />
     <Project Path="tests/Behavioral/StatementTableFuncNames/StatementTableFuncNames.csproj" />
     <Project Path="tests/Behavioral/StatLayoutTruth/StatLayoutTruth.csproj" />
     <Project Path="tests/Behavioral/StdLibInternalAbi/StdLibInternalAbi.csproj" />

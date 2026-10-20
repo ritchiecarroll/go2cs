@@ -293,6 +293,8 @@ public static ж<ΔSection> SectionByType(this ref File f, SectionType typ) {
 // NewFile creates a new [File] for accessing an ELF binary in an underlying reader.
 // The ELF binary is expected to start at position 0 in the ReaderAt.
 public static (ж<File>, error) NewFile(io.ReaderAt r) {
+    var namesᴷ = new stackAppend<uint32>();
+
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
     // Read and decode ELF identifier
     array<uint8> ident = new(16);
@@ -552,7 +554,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         var exprᴛ7 = (~f).Class;
         if (exprᴛ7 == ELFCLASS32) {
             Section32 sh = default!;
-            names = append(names, bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Name) */ (uintptr)0))));
+            names = append(namesᴷ, names, bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Name) */ (uintptr)0))));
             s.Value.SectionHeader = new SectionHeader(
                 Type: ((SectionType)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Type) */ (uintptr)4)))),
                 Flags: ((SectionFlag)bo.Uint32(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Flags) */ (uintptr)8)))),

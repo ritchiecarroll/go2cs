@@ -42,6 +42,12 @@ using static go.@internal.coverage.cformat_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -50,7 +56,7 @@ using static go.@internal.coverage.cformat_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFOKClIKCgqaAgqSCgoKClIKClIKCgoKApsissoKCgriCgoCUtIKAgramgpKCgoKUgpSCgoKCpoKAgqSAgsiCgILIAAYUAAsCgpSCgpSUgpKCpoKCgpSCgu6CgoKCgpKSgoKClNaCgJS2goKCgoKUgoKUlICCyIKCgqaAgraAlKQ=", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "365=Invoke/1/1/1;404=Invoke/1/1/1")]
+[assembly: go.GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgoCmyKzSgoKCuIKCgJS0goCCtqaCkoKCgpSClIKCgoKmgoCCpICCyIKAgsgABhQADAKClIKClJSCkoKmgoKClIKC7oKCgoKCkpKCgoKU1oKAlLaCgoKCgpSCgpSUgILIgoKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "371=Invoke/1/1/1;410=Invoke/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

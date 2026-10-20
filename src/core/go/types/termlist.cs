@@ -109,6 +109,8 @@ internal static termlist union(this termlist xl, termlist yl) {
 
 // intersect returns the intersection xl ∩ yl.
 internal static termlist intersect(this termlist xl, termlist yl) {
+    var rlᴷ = new stackAppend<ж<Δterm>>();
+
     if (xl.isEmpty() || yl.isEmpty()) {
         return default!;
     }
@@ -120,7 +122,7 @@ internal static termlist intersect(this termlist xl, termlist yl) {
         foreach (var (_, y) in yl) {
             {
                 var r = x.intersect(y); if (r != nil) {
-                    rl = append(rl, r);
+                    rl = append(rlᴷ, rl, r);
                 }
             }
         }

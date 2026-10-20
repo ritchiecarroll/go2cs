@@ -74,11 +74,13 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
 internal static error Close(this ref sharedMem m) {
+    var errsᴷ = new stackAppend<error>();
+
     // Attempt all operations, even if we get an error for an earlier operation.
     // os.File.Close may fail due to I/O errors, but we still want to delete
     // the temporary file.
     slice<error> errs = default!;
-    errs = append(errs,
+    errs = append(errsᴷ, errs,
         Δsyscall.UnmapViewOfFile((uintptr)Ꮡ(m.region, 0)),
         Δsyscall.CloseHandle(m.sys.mapObj),
         m.f.Close());

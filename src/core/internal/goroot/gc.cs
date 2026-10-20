@@ -68,6 +68,8 @@ private static readonly @string prefixᶜ = "libraries: ="u8;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
 internal static void init(this ref gccgoDirs gd) {
+    var lastDirsᴷ = new stackAppend<@string>();
+
     @string gccgo = os.Getenv(gccgoˢ);
     if (gccgo == ""u8) {
         gccgo = gccgoˢ2;
@@ -123,7 +125,7 @@ internal static void init(this ref gccgoDirs gd) {
         }
         {
             var (fi, errΔ2) = os.Stat(dir); if (errΔ2 == default! && fi.IsDir()) {
-                lastDirs = append(lastDirs, dir);
+                lastDirs = append(lastDirsᴷ, lastDirs, dir);
             }
         }
     }

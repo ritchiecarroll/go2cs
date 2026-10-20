@@ -39,6 +39,8 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var x = ref Ꮡx.DerefOrNull();
         ref var call = ref Ꮡcall.DerefOrNull();
+        var typesᴷ = new stackAppend<ΔType>();
+        var sizesᴷ = new stackAppend<int64>();
 
         var argList = call.Args;
 
@@ -632,9 +634,9 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             slice<int64> sizes = default!;           // constant integer arguments, if any
             foreach (var (_, arg) in argList[1..]) {
                 var (typ, size) = Ꮡcheck.index(arg, -1); // ok to continue with typ == Typ[Invalid]
-                types = append(types, typ);
+                types = append(typesᴷ, types, typ);
                 if (size >= 0) {
-                    sizes = append(sizes, size);
+                    sizes = append(sizesᴷ, sizes, size);
                 }
             }
             if (len(sizes) == 2 && sizes[0] > sizes[1]) {

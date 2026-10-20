@@ -1188,15 +1188,27 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// stores the managed referent DIRECTLY, so the numeric cast chain
 		// `(Δguintptr)(uintptr)new @unsafe.Pointer(newg)` would lose it; unwrap the
 		// unsafe.Pointer conversion and construct from its operand — `new Δguintptr(newg)` —
-		// the referent-carrying box expression. (Every current call site passes a pointer LOCAL
-		// or an explicit box; a deref-aliased param operand would need its box form and will
-		// surface as a loud compile error, not a silent number.) Non-pointer args (e.g. a zero
-		// literal) fall through to the named-numeric route against the manual type's operators.
+		// the referent-carrying box expression. A pointer LOCAL holds its box directly; a pointer
+		// PARAMETER renders as its deref'd value alias, so it takes the box `Ꮡp` exactly as the
+		// unsafe.Pointer branch above does — runqput's `guintptr(unsafe.Pointer(gp))` stores the
+		// CALLER's g, and the alias compiled only through a self-to-box operator boxing a COPY. A
+		// pointer RECEIVER has no box to pass and never reaches here: the package is refused before
+		// conversion (manualTypeReceiverRefusal.go, GO2CS2003). Non-pointer args (e.g. a zero literal) fall through to the named-numeric route against
+		// the manual type's operators.
 		if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
 			if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg && v.isManualType(obj.Name()) {
 				if argCall, ok := arg.(*ast.CallExpr); ok && v.callExprIsTypeConversion(argCall) && len(argCall.Args) == 1 {
 					if argBasic, ok := v.info.TypeOf(argCall).(*types.Basic); ok && argBasic.Kind() == types.UnsafePointer {
-						return fmt.Sprintf("new %s(%s)", targetTypeName, v.convExpr(argCall.Args[0], nil))
+						operand := argCall.Args[0]
+
+						if v.exprIsDerefdPointerParam(operand) {
+							identContext := DefaultIdentContext()
+							identContext.isPointer = true
+
+							return fmt.Sprintf("new %s(%s)", targetTypeName, v.convExpr(operand, []ExprContext{identContext}))
+						}
+
+						return fmt.Sprintf("new %s(%s)", targetTypeName, v.convExpr(operand, nil))
 					}
 				}
 			}
@@ -3888,6 +3900,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if constructType == "new " && funcName == "@unsafe.Pointer" && len(callExpr.Args) == 1 {
 			result = v.unsafePointerBoxEmission(callExpr, callExpr.Args[0], expr)
 		} else {
+			// Go's stack backing store: a variable's first qualifying append passes the buffer its function declared
+			// at entry (stackAppendHints.go).
+			if buffer := packageStackAppendSites[callExpr]; buffer != nil {
+				expr = v.stackAppendBufferName(buffer) + ", " + expr
+			}
+
 			result = fmt.Sprintf("%s%s(%s)", constructType, funcName, expr)
 		}
 	}
@@ -3904,14 +3922,58 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// entirely type-driven, so dropping the traversal is free: it also removes the need to suppress
 	// capture-decl hoisting around the loop (the second conversion of a func-literal argument was
 	// what wrote its decls into the hoist buffer a second time).
-	for _, arg := range callExpr.Args {
-		argType := v.getType(arg, false)
-		argTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(argType, false))
+	//
+	// Each argument is compared with ITS OWN parameter, and the target is that parameter's type. The loop
+	// used to pass the callee's whole signature, which applyImplicitConversion read as Params().At(0), and
+	// the argument's own type name as the target: a pointer argument recorded a conversion to its own box
+	// (GoImplicitConv<U, ж<U>>, 255 in the corpus, every one skipped by go2cs-gen), and an unnamed struct
+	// passed where a named one is declared recorded nothing, so C# had no operator (CS1503;
+	// TestImplicitConversionsComparesEachArgumentWithItsOwnParameter, ImplicitConvArgumentParameter).
+	signature, _ := types.Unalias(funcType).(*types.Signature)
 
-		v.applyImplicitConversion(funcType, arg, argTypeName, "")
+	for i, arg := range callExpr.Args {
+		paramType := argumentParameterType(signature, i, callExpr.Ellipsis.IsValid())
+
+		if paramType == nil {
+			continue
+		}
+
+		v.applyImplicitConversion(paramType, arg, convertToCSTypeName(v.getAliasQualifiedTypeName(paramType, false)), "")
 	}
 
 	return result
+}
+
+// argumentParameterType is the type the i-th argument of a call to signature is passed as: its own
+// parameter's, or for a variadic tail the slice parameter itself when the call spreads a slice with `...`
+// and the slice's element type otherwise. Nil when there is no signature or no such parameter.
+func argumentParameterType(signature *types.Signature, i int, spread bool) types.Type {
+	if signature == nil {
+		return nil
+	}
+
+	params := signature.Params()
+	n := params.Len()
+
+	if signature.Variadic() && n > 0 && i >= n-1 {
+		last := params.At(n - 1).Type()
+
+		if spread {
+			return last
+		}
+
+		if slice, ok := last.Underlying().(*types.Slice); ok {
+			return slice.Elem()
+		}
+
+		return last
+	}
+
+	if i >= n {
+		return nil
+	}
+
+	return params.At(i).Type()
 }
 
 // identDeclaredFromMethodGroup reports whether ident resolves to a local whose `:=` declaration
@@ -3995,11 +4057,6 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 	}
 
 	var targetTypeIsPointer bool
-
-	// Check if function type is a signature, i.e., an anonymous struct
-	if sigType, ok := funcType.(*types.Signature); ok && sigType.Params().Len() > 0 {
-		funcType = sigType.Params().At(0).Type()
-	}
 
 	// Check if function type is a struct or a pointer to a struct
 	if ptrType, ok := funcType.(*types.Pointer); ok {

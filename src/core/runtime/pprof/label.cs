@@ -41,6 +41,7 @@ partial struct labelMap {
 // order.
 internal static @string String(this ж<labelMap> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
+    var keyValsᴷ = new stackAppend<@string>();
 
     if (Ꮡl == nil) {
         return ""u8;
@@ -48,7 +49,7 @@ internal static @string String(this ж<labelMap> Ꮡl) {
     var keyVals = new slice<@string>(0, len(l.Set.List));
 
     foreach (var (_, lbl) in l.Set.List) {
-        keyVals = append(keyVals, fmt.Sprintf("%q:%q"u8, lbl.Key, lbl.Value));
+        keyVals = append(keyValsᴷ, keyVals, fmt.Sprintf("%q:%q"u8, lbl.Key, lbl.Value));
     }
 
     slices.Sort<slice<@string>, @string>(keyVals);

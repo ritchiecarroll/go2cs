@@ -5,9 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using bufio = go.bufio_package;
-using testing = go.testing_package;
-using Δhttp = go.net.http_package;
 // </ImportedTypeAliases>
 
 using go;

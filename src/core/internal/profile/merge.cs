@@ -179,6 +179,9 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
 
 // key generates sampleKey to be used as a key for maps.
 internal static sampleKey key(this ref Sample sample) {
+    var labelsᴷ = new stackAppend<@string>();
+    var numlabelsᴷ = new stackAppend<@string>();
+
     var ids = new slice<@string>(len(sample.Location));
     foreach (var (i, l) in sample.Location) {
         ids[i] = strconv.FormatUint((~l).ID, 16);
@@ -186,13 +189,13 @@ internal static sampleKey key(this ref Sample sample) {
 
     var labels = new slice<@string>(0, len(sample.Label));
     foreach (var (k, v) in sample.Label) {
-        labels = append(labels, fmt.Sprintf("%q%q"u8, k, v));
+        labels = append(labelsᴷ, labels, fmt.Sprintf("%q%q"u8, k, v));
     }
     sort.Strings(labels);
 
     var numlabels = new slice<@string>(0, len(sample.NumLabel));
     foreach (var (k, v) in sample.NumLabel) {
-        numlabels = append(numlabels, fmt.Sprintf("%q%x%x"u8, k, v, sample.NumUnit[k]));
+        numlabels = append(numlabelsᴷ, numlabels, fmt.Sprintf("%q%x%x"u8, k, v, sample.NumUnit[k]));
     }
     sort.Strings(numlabels);
 

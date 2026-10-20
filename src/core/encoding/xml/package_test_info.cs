@@ -25,7 +25,6 @@ global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using xmlꓸToken = object;
 global using xmlꓸΔToken = object;
 global using ΔToken = object;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,7 +57,6 @@ using static global::go.encoding.xml_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.encoding.xml_package.Decoder, ж<global::go.encoding.xml_package.Decoder>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -12,6 +12,8 @@ using text;
 partial class printer_package {
 
 internal static void fixGoBuildLines(this ref printer p) {
+    var blockᴷ = new stackAppend<byte>();
+
     if (len(p.goBuild) + len(p.plusBuild) == 0) {
         return;
     }
@@ -93,7 +95,7 @@ internal static void fixGoBuildLines(this ref printer p) {
             block = appendꓸꓸꓸ(block, p.lineAt(pos));
         }
     } else {
-        block = append(block, (byte)(tabwriter.Escape));
+        block = append(blockᴷ, block, (byte)(tabwriter.Escape));
         block = append(block, ((@string)"//go:build "u8).ꓸꓸꓸ);
         block = append(block, x.String().ꓸꓸꓸ);
         block = append(block, (byte)(tabwriter.Escape), (byte)((rune)'\n'));

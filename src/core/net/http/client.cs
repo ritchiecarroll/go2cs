@@ -876,6 +876,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
     var icookiesʗ1 = icookies;
     var ireqhdrʗ1 = ireqhdr;
     return (ж<Request> req, bool stripSensitiveHeaders, bool stripBodyHeaders) => {
+        var ssᴷ = new stackAppend<@string>();
         // If Jar is present and there was some initial cookies provided
         // via the request header, then we may need to alter the initial
         // cookies as we follow redirects since each redirect may end up
@@ -903,7 +904,7 @@ internal static Action<ж<Request>, bool, bool> makeHeadersCopier(this ж<Client
                 slice<@string> ss = default!;
                 foreach (var (_, cs) in icookiesʗ1) {
                     foreach (var (_, cΔ3) in cs) {
-                        ss = append(ss, (~cΔ3).Name + "="u8 + (~cΔ3).Value);
+                        ss = append(ssᴷ, ss, (~cΔ3).Name + "="u8 + (~cΔ3).Value);
                     }
                 }
                 slices.Sort<slice<@string>, @string>(ss); // Ensure deterministic headers

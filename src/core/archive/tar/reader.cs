@@ -354,6 +354,8 @@ internal static error /*err*/ mergePAX(ref Header hdr, map<@string, @string> pax
 // parsePAX parses PAX headers.
 // If an extended header (type 'x') is invalid, ErrHeader is returned.
 internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
+    var sparseMapᴷ = new stackAppend<@string>();
+
     var (buf, err) = readSpecialFile(r);
     if (err != default!) {
         return (default!, err);
@@ -379,7 +381,7 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
             if ((len(sparseMap) % 2 == 0 && key != paxGNUSparseOffset) || (len(sparseMap) % 2 == 1 && key != paxGNUSparseNumBytes) || strings.Contains(value, ","u8)) {
                 return (default!, ErrHeader);
             }
-            sparseMap = append(sparseMap, value);
+            sparseMap = append(sparseMapᴷ, sparseMap, value);
         }
         else { /* default: */
             paxHdrs[key] = value;

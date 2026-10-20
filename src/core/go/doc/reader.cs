@@ -557,6 +557,8 @@ internal static ж<lazyregexp.Regexp> noteCommentRx = lazyregexp.New(@"^/[/*][ \
 // clean replaces each sequence of space, \r, or \t characters
 // with a single space and removes any trailing and leading spaces.
 internal static @string clean(@string s) {
+    var bᴷ = new stackAppend<byte>();
+
     slice<byte> b = default!;
     var p = (byte)(rune)' ';
     for (nint i = 0; i < len(s); i++) {
@@ -565,7 +567,7 @@ internal static @string clean(@string s) {
             q = (rune)' ';
         }
         if (q != (rune)' ' || p != (rune)' ') {
-            b = append(b, q);
+            b = append(bᴷ, b, q);
             p = q;
         }
     }

@@ -308,6 +308,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			log.Fatalf("Refusing to convert: %s\n", refusal)
 		}
 
+		// ...and a manual-type conversion of a pointer receiver, which has no box to pass
+		// (manualTypeReceiverRefusal.go).
+		if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
+			refusal.report()
+			log.Fatalf("Refusing to convert: %s\n", refusal)
+		}
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)
@@ -470,6 +477,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		collectHandOwnedTypes(files, info)
 
 		performEscapeAnalysis(files, fset, packageTypes, info)
+
+		// Go's stack backing store for a non-escaping append: which appends take it is the compiler's own
+		// verdict, harvested per target (stackAppendHints.go).
+		collectStackAppendHints(files, fset, packageTypes, info, pkg.Dir, options)
 
 		// Find package-level vars whose address is taken (cross-file) so their
 		// declarations can be emitted as heap boxes that &global references directly.

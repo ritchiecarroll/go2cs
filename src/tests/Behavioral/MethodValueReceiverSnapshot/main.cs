@@ -39,6 +39,9 @@ internal static ж<frame> makePtr() {
 }
 
 internal static void Main() {
+    var s10ᴷ = new stackAppend<frame>();
+    var s11ᴷ = new stackAppend<frame>();
+
     ref var a = ref heap<frame>(out var Ꮡa);
     a = new frame(Name: "a");
 
@@ -135,7 +138,7 @@ internal static void Main() {
     
     var s10ʗ1 = s10;
     var idxV = () => recvʗ3.label();
-    s10 = append(s10, new frame(Name: "grown"));
+    s10 = append(s10ᴷ, s10, new frame(Name: "grown"));
     s10[0].Name = "S10";
 
     fmt.Println("idxV    ", idxV());
@@ -143,7 +146,7 @@ internal static void Main() {
     var s11 = new slice<frame>(1, 1);
     s11[0] = new frame(Name: "s11");
     var idxP = Ꮡ(s11, 0).bump;
-    s11 = append(s11, new frame(Name: "grown"));
+    s11 = append(s11ᴷ, s11, new frame(Name: "grown"));
     idxP();
 
     fmt.Println("idxP    ", s11[0].Name);

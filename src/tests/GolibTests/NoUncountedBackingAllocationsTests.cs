@@ -33,7 +33,8 @@ namespace GolibTests;
 ///     allocates nothing (a compiler stack temp, <c>runtime.zerobase</c>), so charging them would report a
 ///     malloc Go does not make. Each reason cites Go's source for the equivalent construct. The block began
 ///     as V-fix 11's 21 unclassified sites; the follow-on seat routed the real undercounts and the sites
-///     whose charge the scan could not see, and these five are what remained.
+///     whose charge the scan could not see, and these five are what remained. The stack-append seat added a
+///     sixth, the buffer of Go's stack backing store for a non-escaping append, which Go keeps in the frame.
 ///   </description></item>
 ///   <item><description>
 ///     <see cref="Infrastructure"/>, the (c) block: allocations that are not Go-visible backings at all
@@ -59,6 +60,7 @@ public class NoUncountedBackingAllocationsTests
         ("channel.cs|ChanCore[] lockOrder = cores.ToArray();", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),
         ("channel.cs|int[] pollOrder = new int[liveCount];", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),
         ("map.cs|KeyValuePair<TKey, TValue>[] entries = count == 0 ? [] : new KeyValuePair<TKey, TValue>[count];", "the range snapshot: Go's range over a map keeps its iterator in a compiler stack temp (cmd/compile/internal/walk/order.go, Prealloc newTemp)"),
+        ("stackAppend.cs|T[] store = new T[capacity];", "the stack backing store: Go 1.25+ gives a non-escaping append's first growth a 32-byte buffer in the function's own frame (cmd/compile/internal/ssagen/ssa.go, getBackingStoreInfo and the append lowering), so the buffer allocates nothing"),
     ];
 
     // (c) INFRASTRUCTURE: not a Go-visible backing; the reason names what the array is.

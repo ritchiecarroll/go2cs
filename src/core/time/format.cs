@@ -561,6 +561,8 @@ internal static readonly @string mstˢ = "2006-01-02 15:04:05.999999999 -0700 MS
 // representation, use t.MarshalText, t.MarshalBinary, or t.Format
 // with an explicit format string.
 public static @string String(this Time t) {
+    var bufᴷ = new stackAppend<byte>();
+
     @string s = t.Format(mstˢ);
 
     // Format monotonic clock reading as m=±ddd.nnnnnnnnn.
@@ -577,7 +579,7 @@ public static @string String(this Time t) {
         m1 = m1 % 1000000000;
         var buf = new slice<byte>(0, 24);
         buf = append(buf, ((@string)" m="u8).ꓸꓸꓸ);
-        buf = append(buf, sign);
+        buf = append(bufᴷ, buf, sign);
         nint wid = 0;
         if (m0 != 0) {
             buf = appendInt(buf, (nint)m0, 0);
@@ -594,6 +596,8 @@ public static @string String(this Time t) {
 // GoString implements [fmt.GoStringer] and formats t to be printed in Go source
 // code.
 public static @string GoString(this Time t) {
+    var bufᴷ = new stackAppend<byte>();
+
     var abs = t.absSec();
     var (year, month, day) = abs.days().date();
     var (hour, minute, second) = abs.clock();
@@ -647,7 +651,7 @@ public static @string GoString(this Time t) {
             // case we hope not to hit too often.
             buf = append(buf, ((@string)@"time.Location("u8).ꓸꓸꓸ);
             buf = append(buf, quote((~loc).name).ꓸꓸꓸ);
-            buf = append(buf, (byte)((rune)')'));
+            buf = append(bufᴷ, buf, (byte)((rune)')'));
         }
     }
     buf = append(buf, (byte)((rune)')'));
@@ -914,6 +918,8 @@ internal static UntypedInt runeSelf => 0x80;
 internal static UntypedInt runeError => /* '\uFFFD' */ 65533;
 
 internal static @string quote(@string s) {
+    var bufᴷ = new stackAppend<byte>();
+
     var buf = new slice<byte>(1, len(s) + 2); // slice will be at least len(s) + quotes
     buf[0] = (rune)'"';
     foreach (var (i, c) in s) {
@@ -935,7 +941,7 @@ internal static @string quote(@string s) {
             }
             for (nint j = 0; j < width; j++) {
                 buf = append(buf, ((@string)@"\x"u8).ꓸꓸꓸ);
-                buf = append(buf, lowerhex[(s[i + j] >> 4)]);
+                buf = append(bufᴷ, buf, lowerhex[(s[i + j] >> 4)]);
                 buf = append(buf, lowerhex[(byte)(s[i + j] & 0xF)]);
             }
         } else {

@@ -116,10 +116,12 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
 // makeCmdLine builds a command line out of args by escaping "special"
 // characters and joining the arguments with spaces.
 internal static @string makeCmdLine(slice<@string> args) {
+    var bᴷ = new stackAppend<byte>();
+
     slice<byte> b = default!;
     foreach (var (_, v) in args) {
         if (len(b) > 0) {
-            b = append(b, (byte)((rune)' '));
+            b = append(bᴷ, b, (byte)((rune)' '));
         }
         b = appendEscapeArg(b, v);
     }

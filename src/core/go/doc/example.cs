@@ -58,6 +58,7 @@ internal static readonly @string exampleˢ = "Example"u8;
 //     other than the example function.
 public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFilesʗp) {
     var testFiles = testFilesʗp.sslice();
+    var flistᴷ = new stackAppend<ж<Example>>();
 
     slice<ж<Example>> list = default!;
     foreach (var (_, @file) in testFiles) {
@@ -104,7 +105,7 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             ref var output = ref heap<@string>(out var Ꮡoutput);
             ref var unordered = ref heap<bool>(out var Ꮡunordered);
             (output, unordered, var hasOutput) = exampleOutput((~f).Body, (~@file).Comments);
-            flist = append(flist, Ꮡ(new Example(
+            flist = append(flistᴷ, flist, Ꮡ(new Example(
                 Name: name[(int)(len("Example"))..],
                 Doc: doc,
                 Code: new ast.BlockStmtжNode((~f).Body),
@@ -180,6 +181,8 @@ internal static readonly @string mainˢ = "main"u8;
 // playExample synthesizes a new *ast.File based on the provided
 // file with the provided function body as the body of main.
 internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f) {
+    var blankImportsᴷ = new stackAppend<ast.Spec>();
+
     var body = f.Body;
 
     if (!strings.HasSuffix((~@file.Name).Name, testˢ2)) {
@@ -262,7 +265,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             n = s.Value.Name.Value.Name;
             var exprᴛ1 = n;
             if (exprᴛ1 == "_"u8) {
-                blankImports = append(blankImports, (ast.Spec)(new ast.ImportSpecжSpec(s)));
+                blankImports = append(blankImportsᴷ, blankImports, (ast.Spec)(new ast.ImportSpecжSpec(s)));
                 continue;
             }
             else if (exprᴛ1 == "."u8) {

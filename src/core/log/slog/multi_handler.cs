@@ -36,13 +36,14 @@ public static bool Enabled(this ref MultiHandler h, context.Context ctx, ΔLevel
 
 public static error Handle(this ref MultiHandler h, context.Context ctx, Record r) {
     r = r.ΔClone();
+    var errsᴷ = new stackAppend<error>();
 
     slice<error> errs = default!;
     foreach (var (i, _) in h.multi) {
         if (h.multi[i].Enabled(ctx, r.Level)) {
             {
                 var err = h.multi[i].Handle(ctx, r.Clone()); if (err != default!) {
-                    errs = builtin.append(errs, err);
+                    errs = builtin.append(errsᴷ, errs, err);
                 }
             }
         }

@@ -15,8 +15,10 @@ partial struct Array {
 partial struct queue /*[]ж<item>*/;
 
 internal static void Main() {
+    var qᴷ = new stackAppend<ж<item>>();
+
     var q = new queue(new ж<item>[]{Ꮡ(new item(v: 1)), Ꮡ(new item(v: 2))}.slice());
-    q = append(q, Ꮡ(new item(v: 3)));
+    q = append(qᴷ, q, Ꮡ(new item(v: 3)));
     q[1].Value.v = 5;
 
     nint sum = 0;

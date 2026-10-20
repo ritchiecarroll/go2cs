@@ -30,6 +30,8 @@ internal static error punyError(@string s) {
 
 // decode decodes a string as specified in section 6.2.
 internal static (@string, error) decode(@string encoded) {
+    var outputᴷ = new stackAppend<rune>();
+
     if (encoded == ""u8) {
         return ("", default!);
     }
@@ -43,7 +45,7 @@ internal static (@string, error) decode(@string encoded) {
     var output = new slice<rune>(0, len(encoded));
     if (pos != 0) {
         foreach (var (_, r) in encoded.slice(0, pos - 1)) {
-            output = append(output, r);
+            output = append(outputᴷ, output, r);
         }
     }
     var (i, n, bias) = ((int32)0, initialN, initialBias);
@@ -102,6 +104,8 @@ internal static (@string, error) decode(@string encoded) {
 // The "while h < length(input)" line in the specification becomes "for
 // remaining != 0" in the Go code, because len(s) in Go is in bytes, not runes.
 internal static (@string, error) encode(@string prefix, @string s) {
+    var outputᴷ = new stackAppend<byte>();
+
     var output = new slice<byte>(len(prefix), len(prefix) + 1 + 2 * len(s));
     copy(output, prefix);
     var (delta, n, bias) = ((int32)0, initialN, initialBias);
@@ -109,7 +113,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
     foreach (var (_, r) in s) {
         if (r < 0x80){
             b++;
-            output = append(output, (byte)r);
+            output = append(outputᴷ, output, (byte)r);
         } else {
             remaining++;
         }

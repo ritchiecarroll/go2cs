@@ -56,6 +56,9 @@ partial struct Pod {
 // issue warnings to stderr when it encounters non-fatal problems (for
 // orphans or a directory with no meta-data files).
 public static (slice<Pod>, error) CollectPods(slice<@string> dirs, bool warn) {
+    var filesᴷ = new stackAppend<@string>();
+    var dirIndicesᴷ = new stackAppend<nint>();
+
     var files = new @string[]{}.slice();
     var dirIndices = new nint[]{}.slice();
     foreach (var (k, dir) in dirs) {
@@ -67,8 +70,8 @@ public static (slice<Pod>, error) CollectPods(slice<@string> dirs, bool warn) {
             if (e.IsDir()) {
                 continue;
             }
-            files = append(files, filepath.Join(dir, e.Name()));
-            dirIndices = append(dirIndices, k);
+            files = append(filesᴷ, files, filepath.Join(dir, e.Name()));
+            dirIndices = append(dirIndicesᴷ, dirIndices, k);
         }
     }
     return (collectPodsImpl(files, dirIndices, warn), default!);

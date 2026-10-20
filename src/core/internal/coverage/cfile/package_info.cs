@@ -54,6 +54,12 @@ using static go.@internal.coverage.cfile_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -63,7 +69,7 @@ using static go.@internal.coverage.cfile_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCpoK4qJKCgpSCADt4goKUgoKmgoKmpg==")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFGgAbKClIKCgoKmgoKmgoKCpoCCgoLagoKUgoKUpoKCgpSsxO6Cpu6UgoKCooKClJSCgoLKgoKigIKkgoKClIKCyoKmgoKClKqigoKUgqaU7oCCyIKAgrassoKUgIKCgtykgpSmgriCAAcQgIKkgriAgqSAgtqAgraokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKAgraCgIK2rNKAgqSAgtqAgrasstailIKigpSmgpSCgoKUpoKCgpSCgriCgoKCyoKCgoKmlIKmgoKCpgAIEoKCgpKCgIKUggAIEKaCgILIlIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKUgpSCgoKCooKClJSCgg==", "455-461:1", "", "189=Getenv/1/1/2;265=Getenv/1/1/2;321=Getenv/1/1/4")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFGgAbKClIKCgoKmgoKmgoKCpoCCgoLagoKUgoKUpoKCgpSsxO6Cpu6UgoKCooKClJSCgoLKgoKigIKkgoKClIKCyoKmgoKClKqigoKUgqaU7oCCyIKAgrassoKUgIKCgtykgpSmgriCAAcQgIKkgriAgqSAgtqAgraokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKAgraCgIK2rNKAgqSAgtqAgrasstaylIKigpSmgpSCgoKUpoKCgpSCgriCgoKCyoKCgoKmlIKmgoKCpgAIEoKCgpKCgIKUggAIEKaCgILIlIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKUgpSCgoKCooKClJSCgg==", "455-461:1", "", "189=Getenv/1/1/2;265=Getenv/1/1/2;321=Getenv/1/1/4")]
 [assembly: go.GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
 [assembly: go.GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484pKCuILKgIKkgIIACBCCgqiSgoKCgoKUkoKC3AAIEoKCgoKUgILIgoCCgILqgILIgoCCpIKAgsgADBbkgoKUkpSCgoKUgoKUgoCCyKaygoKUkoKCgpSCgoKClIK4goCUgILGgoKU6IKAgtqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAIEIKCgIKkgoKAgrYAAhLigpSmgoKCgoKUgqaClIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2", "", "91=NewFormatter/1/1/2")]
 // </GoSourcePositionMaps>

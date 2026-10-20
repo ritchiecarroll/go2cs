@@ -263,22 +263,22 @@ func TestPointerBoxConversionRecordShape(t *testing.T) {
 	}
 }
 
-// TestWhiteboxProductionPointerBoxConvStillRecorded is the numeric guard's counterpart, and the two
-// together are the whole rule: a whitebox-production operand is declined when an operator WOULD be
-// hosted on it, and admitted when none can be.
+// TestWhiteboxArgumentOfItsParameterTypeRecordsNoBox is the numeric guard's counterpart on the
+// pointer-boxing shape `T` → `ж<T>`. Each call argument's implicit conversion is checked against ITS
+// OWN parameter, so `check(t, New())` — a `*Cipher` passed to a `*Cipher` parameter — owes no
+// conversion and records none.
 //
-// The pointer-boxing record `T` → `ж<T>` hosts nothing: `ж<T>` is golib's generic box and no
-// converted package declares it, so ImplicitConvGenerator finds no struct declaration and skips
-// the record before choosing a host — there is no phantom to mint and no closed production assembly
-// to extend. Excluding it anyway (2026-08-18, e61758549, whose rationale was the NUMERIC phantom)
-// silently shrank every whitebox package's committed package_test_info.cs on regen: crypto/rc4 lost
-// its Cipher record AND the `testing` qualifier alias that rides the same site, and go/types lost
-// three. Neither is caught by CNR, which never runs `-tests`.
+// This guard once asserted the opposite, that the record survived. The record was minted only because
+// every argument was compared against the FIRST parameter, and its premise — that ImplicitConvGenerator
+// hosts nothing for `ж<T>` — holds only where T has no declaration in the compilation, as in a
+// white-box test host whose production types live in a closed assembly. In production the generator
+// strips the box, finds T, and generated an operator that boxes a COPY (runtime's runqput); it now
+// refuses such a record by name (GO2CS0008). Go has no implicit `T` → `*T`, so no correct pairing
+// produces one.
 //
-// The BOTH-FOREIGN arm is the boundary this must not cross: those pairs were declined before the
-// whitebox exclusion existed (os's syscall.Handle precedent) and stay declined, so the fix restores
-// exactly what e61758549 removed and adds nothing.
-func TestWhiteboxProductionPointerBoxConvStillRecorded(t *testing.T) {
+// The BOTH-FOREIGN arm is the boundary kept from the original guard: a pair of operands that both
+// live in other assemblies is never recorded either.
+func TestWhiteboxArgumentOfItsParameterTypeRecordsNoBox(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
@@ -336,16 +336,9 @@ func TestWhiteboxProductionPointerBoxConvStillRecorded(t *testing.T) {
 		return false
 	}
 
-	// The whitebox-production operand: recorded, exactly as a plain (non--tests) conversion of the
-	// same package records it.
-	if !boxedRecord("Cipher") {
-		t.Errorf("the whitebox-production pointer-box record was dropped; got %v", indirectImplicitConversions)
-	}
-
-	// ...and so is the import qualifier the same site registers, which is what carries the
-	// `using testing = …` line into package_test_info.cs.
-	if _, ok := conversionPackageUsings["testing"]; !ok {
-		t.Errorf("the record site's package qualifier was not registered; got %v", conversionPackageUsings)
+	// The whitebox-production operand matches its own parameter's type: no record.
+	if boxedRecord("Cipher") {
+		t.Errorf("an argument of its own parameter's type recorded a pointer-box conversion; got %v", indirectImplicitConversions)
 	}
 
 	// The boundary: NEITHER operand local (both live in other assemblies) stays declined.
