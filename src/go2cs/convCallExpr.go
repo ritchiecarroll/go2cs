@@ -1188,15 +1188,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// stores the managed referent DIRECTLY, so the numeric cast chain
 		// `(Δguintptr)(uintptr)new @unsafe.Pointer(newg)` would lose it; unwrap the
 		// unsafe.Pointer conversion and construct from its operand — `new Δguintptr(newg)` —
-		// the referent-carrying box expression. (Every current call site passes a pointer LOCAL
-		// or an explicit box; a deref-aliased param operand would need its box form and will
-		// surface as a loud compile error, not a silent number.) Non-pointer args (e.g. a zero
-		// literal) fall through to the named-numeric route against the manual type's operators.
+		// the referent-carrying box expression. A pointer LOCAL holds its box directly; a pointer
+		// PARAMETER renders as its deref'd value alias, so it takes the box `Ꮡp` exactly as the
+		// unsafe.Pointer branch above does — runqput's `guintptr(unsafe.Pointer(gp))` stores the
+		// CALLER's g, and the alias compiled only through a self-to-box operator boxing a COPY.
+		// Non-pointer args (e.g. a zero literal) fall through to the named-numeric route against
+		// the manual type's operators.
 		if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
 			if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg && v.isManualType(obj.Name()) {
 				if argCall, ok := arg.(*ast.CallExpr); ok && v.callExprIsTypeConversion(argCall) && len(argCall.Args) == 1 {
 					if argBasic, ok := v.info.TypeOf(argCall).(*types.Basic); ok && argBasic.Kind() == types.UnsafePointer {
-						return fmt.Sprintf("new %s(%s)", targetTypeName, v.convExpr(argCall.Args[0], nil))
+						operand := argCall.Args[0]
+
+						if v.exprIsDerefdPointerParam(operand) {
+							identContext := DefaultIdentContext()
+							identContext.isPointer = true
+
+							return fmt.Sprintf("new %s(%s)", targetTypeName, v.convExpr(operand, []ExprContext{identContext}))
+						}
+
+						return fmt.Sprintf("new %s(%s)", targetTypeName, v.convExpr(operand, nil))
 					}
 				}
 			}
