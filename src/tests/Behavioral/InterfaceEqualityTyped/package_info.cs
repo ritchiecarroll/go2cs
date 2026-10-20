@@ -27,6 +27,7 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b4c656e282920696e747d", "main_type")]
 [assembly: GoDynamicTypeLift("7374727563747b73205b5d696e747d", "main_b")]
 [assembly: GoDynamicTypeLift("7374727563747b7620616e797d", "main_a")]
 // </ExportedTypeAliases>
@@ -39,7 +40,9 @@ using static go.main_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<errno, error>]
+[assembly: GoImplement<main_type, lener>]
 [assembly: GoImplement<pathError, error>]
+[assembly: GoImplement<thunk, lener>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -53,7 +56,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAoegAANHoAACxKApLKAkoIADgaCgpSClIKCgoKCgoKClKaClIKUgoI=", "42-42:1", "", "83=NaN/1/2/1,NaN/2/2/1,eq/3/3/1")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAoegAANHoAADRaCgpTqgKSygJKC5rKAkoIAEgaCgpSClIKCgoKCgoKClKaClIKUgoKYgoKCgoKCgpSSgpSCgoI=", "53-53:1;59-59:1;97-97:1", "", "115=NaN/1/2/1,NaN/2/2/1,eq/3/3/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -69,6 +72,8 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial interface lener {}
+    internal partial interface main_type {}
     internal partial struct celsius {}
     internal partial struct errno {}
     internal partial struct main_a {}

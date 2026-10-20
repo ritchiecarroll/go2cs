@@ -94,6 +94,26 @@ public class TypedInterfaceEqualityTests
     }
 
     [TestMethod]
+    public void AFuncDynamicTypeIsUncomparableWhicheverSideIsNil()
+    {
+        // A nil func keeps its type inside an interface (the NilFuncValue carrier), so it is no exemption: Go panics
+        // comparing two interface values that hold one func type, nil or not, and answers against the nil interface or
+        // another dynamic type.
+        Action none = null;
+        Action some = () => { };
+        object nilFunc = none.OrTypedNilFunc(), func = some.OrTypedNilFunc();
+
+        foreach ((object left, object right, string what) in new[] { (nilFunc, nilFunc, "nil == nil"), (nilFunc, func, "nil == func"), (func, nilFunc, "func == nil") })
+        {
+            PanicException panic = Assert.ThrowsException<PanicException>(() => AreEqual(left, right), what);
+            StringAssert.Contains(panic.Message, "comparing uncomparable type func()", what);
+        }
+
+        Assert.IsFalse(AreEqual(nilFunc, null), "nil func == nil interface");
+        Assert.IsFalse(AreEqual(nilFunc, (nint)1), "nil func == int");
+    }
+
+    [TestMethod]
     public void ATypedCompareAllocatesNothing()
     {
         object a = syscall.EAGAIN, b = syscall.EAGAIN;

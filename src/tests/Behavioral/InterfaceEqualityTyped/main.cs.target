@@ -36,11 +36,39 @@ partial struct node {
     internal nint n;
 }
 
+internal delegate nint thunk();
+
+internal static nint Len(this thunk f) {
+    if (f == default!) {
+        return -1;
+    }
+    return f();
+}
+
+partial interface lener {
+    nint Len();
+}
+
 internal static bool eq(any a, any b) {
     return AreEqual(a, b);
 }
 
 internal static @string /*text*/ panicText(any a, any b) {
+    @string text = default!;
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            text = fmt.Sprint(recover());
+        }, ref ᒐ);
+        _ = AreEqual(a, b);
+        text = "no panic";
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return text;
+}
+
+internal static @string /*text*/ lenText(lener a, lener b) {
     @string text = default!;
     GoFrame ᒐ = default;
     try {
@@ -61,6 +89,10 @@ internal partial struct main_b /*dyn*/ {
 
 internal partial struct main_a /*dyn*/ {
     internal any v;
+}
+
+internal partial interface main_type /*dyn*/ {
+    nint Len();
 }
 
 internal static void Main() {
@@ -92,6 +124,25 @@ internal static void Main() {
     fmt.Println("uncomparable:", panicText(new nint[]{1}.slice(), new nint[]{1}.slice()));
     fmt.Println("uncomparable field:", panicText(new pathError("x", "y", default!), new main_b()));
     fmt.Println("uncomparable in struct:", panicText(new main_a(new nint[]{1}.slice()), new main_a(new nint[]{1}.slice())));
+
+    thunk none = default!;
+    var seven = new thunk(() => 7);
+    Action unnamed = default!;
+    fmt.Println("func nil==nil:", panicText((none).OrTypedNilFunc(), (none).OrTypedNilFunc()));
+    fmt.Println("func nil==func:", panicText((none).OrTypedNilFunc(), (seven).OrTypedNilFunc()), "|", panicText((seven).OrTypedNilFunc(), (none).OrTypedNilFunc()));
+    fmt.Println("func func==func:", panicText((seven).OrTypedNilFunc(), (seven).OrTypedNilFunc()));
+    fmt.Println("unnamed func nil==nil:", panicText((unnamed).OrTypedNilFunc(), (unnamed).OrTypedNilFunc()));
+    fmt.Println("nil func vs nil interface and int:", eq((none).OrTypedNilFunc(), default!), eq((none).OrTypedNilFunc(), (nint)1));
+
+    lener x = new thunkᴠlener(none);
+    lener y = new thunkᴠlener(none);
+    lener z = new thunkᴠlener(seven);
+    fmt.Println("func through an interface:", lenText(x, y), "|", lenText(x, z));
+
+    var (v, _) = ((any)(none).OrTypedNilFunc())._<main_type>(ᐧ);
+    var (v2, _) = ((any)(none).OrTypedNilFunc())._<main_type>(ᐧ);
+    var (w, _) = ((any)(seven).OrTypedNilFunc())._<main_type>(ᐧ);
+    fmt.Println("func through an asserted interface:", lenText(new main_typeᴠlener(v), new main_typeᴠlener(v2)), "|", lenText(new main_typeᴠlener(v), new main_typeᴠlener(w)));
 }
 
 } // end main_package

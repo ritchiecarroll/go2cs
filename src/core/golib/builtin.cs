@@ -3949,10 +3949,10 @@ public static partial class builtin
         // the original interface value; Go compares such interfaces by instance value.
         // Unwrap both sides so the comparison below sees the root values.
         while (left is IInterfaceAdapter leftInterfaceAdapter)
-            left = leftInterfaceAdapter.Value;
+            left = interfaceAdapterValue(leftInterfaceAdapter);
 
         while (right is IInterfaceAdapter rightInterfaceAdapter)
-            right = rightInterfaceAdapter.Value;
+            right = interfaceAdapterValue(rightInterfaceAdapter);
 
         // An interface value created from a Go POINTER is a generated IжAdapter wrapping the
         // receiver box; Go compares such interfaces (against each other, or against a raw
@@ -3979,25 +3979,6 @@ public static partial class builtin
         if (right is IValueAdapter { Value: not null } rightValueAdapter)
             right = rightValueAdapter.Value;
 
-        // Two adapters BOTH still wrapping a nil delegate (neither matched the guard above) are
-        // exactly Go's "comparing uncomparable type" case: func values are comparable only to
-        // nil, never to each other — and that holds even when both sides are nil (verified
-        // against go1.23.12: two independently-nil-wrapped values of one named func type panic
-        // on `==`, where either compared to a literal nil correctly answers false via the null
-        // checks below). Left unguarded, this reaches the shells' generated Equals override,
-        // which calls m_value.Equals(...) on a null m_value and crashes — the general
-        // exception-to-panic translation downstream then reports Go's WRONG panic ("invalid
-        // memory address or nil pointer dereference" instead of "comparing uncomparable type"),
-        // which is what this check preempts. Rhymes with the registererr chip's Defect B
-        // (reflectPointerToken): the same null-Value shell reaching a path built only for the
-        // non-null shape.
-        if (left is IValueAdapter { Value: null } && right is IValueAdapter { Value: null } &&
-            GoReflect.ValueAdapterWrappedType(left.GetType()) is { } leftWrapped &&
-            leftWrapped == GoReflect.ValueAdapterWrappedType(right.GetType()))
-        {
-            throw RuntimeErrorPanic.ComparingUncomparableType(GetGoTypeName(leftWrapped));
-        }
-
         // Check if both are null
         if (left is null && right is null)
             return true;
@@ -4006,15 +3987,17 @@ public static partial class builtin
         if (left is null || right is null)
             return false;
 
-        Type leftType = left.GetType();
+        // Check if both are the same type. A nil func is a typed value inside an interface that reaches here as a
+        // carrier, not as its func type (equalityDynamicType), so it meets the same type match and the same
+        // comparability gate as any other func value: Go panics comparing two of one func type, nil or not.
+        Type leftType = equalityDynamicType(left);
 
-        // Check if both are the same type
-        if (leftType != right.GetType())
+        if (leftType != equalityDynamicType(right))
             return false;
 
         // Go's `==` on two interface values PANICS when their shared dynamic type has no equal
         // algorithm — "runtime error: comparing uncomparable type map[string]int" — and the C#
-        // answered quietly instead, for every shape but the nil-func-adapter one handled above.
+        // answered quietly instead.
         // Measured against go1.23.12: a map, slice or func held in an interface; a struct or an
         // array that TRANSITIVELY contains one; and a named type whose underlying type is any of
         // those, which panics under its OWN name (`main.myMap`, not `map[string]int`).
@@ -4115,6 +4098,32 @@ public static partial class builtin
     private static bool isComparableType(Type type)
     {
         return s_comparableTypes.GetOrAdd(type, static t => GoReflect.IsComparable(t));
+    }
+
+    // The managed type standing for an AreEqual operand's Go dynamic type. A nil func inside an interface arrives as a
+    // carrier whose own class is not its type: the canonical NilFuncValue (a func boxed into `any`), or a generated
+    // value shell still wrapping its null delegate (AreEqual unwraps only a non-null one). Each answers the func type it
+    // carries, so two nil funcs of one type, or a nil and a non-nil one, reach the comparability gate and panic as in
+    // Go -- before anything can call a shell's Equals over its null value. GoReflect.GoDynamicTypeOf reads the same two
+    // carriers but also canonicalizes pointer box classes, which this type match has never done.
+    private static Type equalityDynamicType(object value) => value switch
+    {
+        NilFuncValue nilFunc => nilFunc.Type,
+        IValueAdapter { Value: null } shell => GoReflect.ValueAdapterWrappedType(shell.GetType()) ?? shell.GetType(),
+        _ => value.GetType()
+    };
+
+    // The value an interface adapter stands in for. A runtime shell over a nil func (go2cs-gen's generic shell, closed
+    // over the delegate type: what asserting a typed nil func to an interface literal builds) holds a null delegate, and
+    // unwrapping it to null would turn Go's typed nil func into the nil interface; it answers the canonical NilFuncValue
+    // for its delegate type instead, the encoding a nil func has everywhere else in interface space.
+    private static object? interfaceAdapterValue(IInterfaceAdapter adapter)
+    {
+        if (adapter.Value is { } value)
+            return value;
+
+        return adapter.GetType() is { IsGenericType: true } shellType && shellType.GetGenericArguments() is [var target] &&
+            typeof(Delegate).IsAssignableFrom(target) ? GoReflect.CanonicalNilFunc(target) : null;
     }
 
     // Go names the offending type in the message exactly as `%T` spells it, and for an ARRAY that
