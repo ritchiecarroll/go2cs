@@ -82,6 +82,25 @@ public class HostGoTestFlagArityTests
 
             Assert.IsNull(options.UnrecognizedFlag, $"-{name} is defined by the host but stops its parse");
             Assert.IsTrue(options.Verbose, $"-test.v after -{name} was lost");
+
+            // The ARITY column, which the `=` spelling never reaches (G's review of 3d3b29233e): a bool given
+            // bare must not swallow the next argument, and a value flag given as two arguments must take it.
+            // Go 1.26's bools are exactly the flags whose default prints "false".
+            string[] apart = defValue == "false" ? [$"-{name}", "-test.v"] : [$"-{name}", defValue, "-test.v"];
+            TestOptions spelledApart = TestOptions.Parse(apart);
+
+            Assert.IsNull(spelledApart.UnrecognizedFlag, $"-{name} spelled apart stops the host's parse");
+            Assert.IsTrue(spelledApart.Verbose, $"-test.v after -{name} spelled apart was lost: its arity is wrong");
         }
+    }
+
+    [TestMethod]
+    public void AValueFlagTheHostActsOnTakesItsValueAsTheNextArgument()
+    {
+        TestOptions options = TestOptions.Parse(["-test.count", "3", "-test.v"]);
+
+        Assert.IsNull(options.UnrecognizedFlag);
+        Assert.AreEqual(3, options.Count, "-test.count 3: 3 is the flag's value");
+        Assert.IsTrue(options.Verbose);
     }
 }

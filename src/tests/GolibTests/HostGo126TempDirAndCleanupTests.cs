@@ -134,4 +134,75 @@ public class HostGo126TempDirAndCleanupTests
             RemoveQuietly(custom);
         }
     }
+
+    // G's review of 3d3b29233e: under GOTMPDIR the parent was the stable TempDirName, so two processes running one
+    // test name under one shared GOTMPDIR shared it and its 001.. children, and the first cleanup deleted the other's.
+    // Go's parent is os.MkdirTemp's, unique per call.
+    [TestMethod]
+    public void TwoTempDirParentsForOneNameUnderOneGotmpdirAreDistinct()
+    {
+        string runRootA = NewRunRoot("same-a");
+        string runRootB = NewRunRoot("same-b");
+        string custom = Path.Combine(Path.GetTempPath(), "r-go126-shared-gotmpdir-" + Guid.NewGuid().ToString("n"));
+        Directory.CreateDirectory(custom);
+        string fromA = string.Empty;
+        string fromB = string.Empty;
+
+        try
+        {
+            new TestExecution(NewRunner(runRootA), "TestSameNameGuard", null, "guard.go", 1).Run("same", t =>
+            {
+                TestExecution child = t.Value.Execution!;
+                child.Setenv("GOTMPDIR", custom);
+                fromA = child.TempDir().ToString();
+            });
+
+            new TestExecution(NewRunner(runRootB), "TestSameNameGuard", null, "guard.go", 1).Run("same", t =>
+            {
+                TestExecution child = t.Value.Execution!;
+                child.Setenv("GOTMPDIR", custom);
+                fromB = child.TempDir().ToString();
+            });
+
+            Assert.IsTrue(fromA.StartsWith(custom, StringComparison.Ordinal) && fromB.StartsWith(custom, StringComparison.Ordinal),
+                $"both parents must sit under GOTMPDIR: {fromA}, {fromB}");
+            Assert.AreNotEqual(Path.GetDirectoryName(fromA), Path.GetDirectoryName(fromB),
+                "one test name under one GOTMPDIR got ONE parent twice; Go's MkdirTemp makes a new one each time");
+        }
+        finally
+        {
+            RemoveQuietly(runRootA);
+            RemoveQuietly(runRootB);
+            RemoveQuietly(custom);
+        }
+    }
+
+    [TestMethod]
+    public void AMissingGotmpdirReportsGosStatError()
+    {
+        string runRoot = NewRunRoot("missing");
+        string missing = Path.Combine(Path.GetTempPath(), "r-go126-missing-gotmpdir-" + Guid.NewGuid().ToString("n"));
+        string? error = null;
+
+        try
+        {
+            new TestExecution(NewRunner(runRoot), "TestMissingGotmpdirGuard", null, "guard.go", 1).Run("missing", t =>
+            {
+                TestExecution child = t.Value.Execution!;
+                child.Setenv("GOTMPDIR", missing);
+                (_, error) = child.MakeTempDir();
+            });
+
+            // Go's MkdirTemp returns os.Stat's error for a missing directory (os/tempfile.go).
+            string want = OperatingSystem.IsWindows()
+                ? $"GetFileAttributesEx {missing}: The system cannot find the file specified."
+                : $"stat {missing}: no such file or directory";
+
+            Assert.AreEqual(want, error);
+        }
+        finally
+        {
+            RemoveQuietly(runRoot);
+        }
+    }
 }
