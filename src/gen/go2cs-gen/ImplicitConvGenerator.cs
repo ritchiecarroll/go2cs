@@ -98,7 +98,7 @@ public class ImplicitConvGenerator : ISourceGenerator
 
             if (IsBox(resultType) && !IsBox(parameterType))
             {
-                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.SelfBoxConversion, attributeSyntax.GetLocation(), attributeSyntax.ToString(), parameterType.GetFullTypeName(), resultType.GetFullTypeName()));
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.ValueToBoxConversion, attributeSyntax.GetLocation(), attributeSyntax.ToString(), parameterType.GetFullTypeName(), resultType.GetFullTypeName()));
                 continue;
             }
 

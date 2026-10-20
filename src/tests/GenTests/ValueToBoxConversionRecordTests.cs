@@ -1,4 +1,4 @@
-// SelfBoxConversionRecordTests.cs - Gbtc
+// ValueToBoxConversionRecordTests.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
 // Use of this source code is governed by an MIT-style license
@@ -25,7 +25,7 @@ namespace go2cs.Tests;
 /// box are all refused; a box-to-value record returns no box and is not.
 /// </remarks>
 [TestClass]
-public class SelfBoxConversionRecordTests
+public class ValueToBoxConversionRecordTests
 {
     private const string BoxTypes =
         """

@@ -102,7 +102,7 @@ internal static class GeneratorDiagnostics
     // so such a record means the converter put a value where Go passes a pointer. The operator it used to generate
     // boxed a COPY: the site compiled, and a write through the box never reached the original (runtime's runqput
     // stored a copy of the caller's g in runnext).
-    public static readonly DiagnosticDescriptor SelfBoxConversion = new(
+    public static readonly DiagnosticDescriptor ValueToBoxConversion = new(
         id: "GO2CS0008",
         title: "An implicit conversion record returns a box from a value",
         messageFormat: "{0} converts the value '{1}' to the box '{2}': Go never converts a value to a pointer implicitly, so the converter placed a value where Go passes a pointer; no operator is generated, because it would box a copy",
