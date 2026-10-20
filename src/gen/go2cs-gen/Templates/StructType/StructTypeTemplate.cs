@@ -111,6 +111,11 @@ internal class StructTypeTemplate : TemplateBase
     private string? m_nonGenericStructName;
     public string NonGenericStructName => m_nonGenericStructName ??= GetSimpleName(StructName, true);
 
+    // Go's == through an interface (golib builtin.AreEqual): a second partial part implements golib's IGoEquatable
+    // EXPLICITLY, through this struct's own ==, so the comparison runs in compiled code and no member is added.
+    private string GoEquatablePart =>
+        $"\r\n\r\n    partial struct {StructName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {StructName} value && this == value;\r\n    }}";
+
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)>? m_publicStructMembers;
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)> PublicStructMembers =>
         m_publicStructMembers ??= StructMembers.Where(item =>
@@ -160,7 +165,7 @@ internal class StructTypeTemplate : TemplateBase
                 [
                     {{(StructMembers.Count > 0 ? string.Join(",\r\n            ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");
-            }{{PromotedStructReceivers()}}
+            }{{GoEquatablePart}}{{PromotedStructReceivers()}}
         """;
 
     // A struct whose `default` is NOT its Go zero value (see IsNeedy) registers its parameterless

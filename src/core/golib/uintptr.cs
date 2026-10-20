@@ -49,7 +49,8 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
     // Go defines unary `-x` on every numeric type as the wrap-around `0 - x`; the operator below
     // already implements it, and the lifted Arithmetic constraint set now demands the interface
     // (reflect's rangeNum<uintptr, uint64>, CS0315).
-    IUnaryNegationOperators<uintptr, uintptr>
+    IUnaryNegationOperators<uintptr, uintptr>,
+    IGoEquatable
 {
     // Pointer-width unsigned value of the struct 'uintptr' — public for Interlocked/Volatile seams
     public nuint Value;
@@ -166,6 +167,9 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
     public static unsafe explicit operator void*(uintptr value) => (void*)value.Value;
 
     // Comparisons
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is uintptr value && this == value;
+
     public static bool operator ==(uintptr left, uintptr right) => left.Value == right.Value;
 
     public static bool operator !=(uintptr left, uintptr right) => left.Value != right.Value;

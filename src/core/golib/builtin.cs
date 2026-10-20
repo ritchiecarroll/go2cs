@@ -4028,6 +4028,41 @@ public static partial class builtin
         if (!isComparableType(leftType))
             throw RuntimeErrorPanic.ComparingUncomparableType(uncomparableTypeName(leftType, left));
 
+        // THE TYPED PATH. Both sides are one comparable type here, so the type's own `==` decides, called in
+        // compiled code: a generated type (go2cs-gen's struct and inherited-type templates) and golib's own
+        // comparable types implement IGoEquatable through their `==`, and a boxed BCL primitive compares with
+        // its own operator (IEEE for double, float and Complex: NaN is unequal to itself, as in Go). The
+        // reflective operator below remained the route for every one of them and cost 85-156 ns and 144 bytes a
+        // compare (P2, linux, Release), on the hit path of `err == io.EOF` and of every Errno test in the
+        // poller's retry loops; this path allocates nothing and needs no run-time code, so Native AOT has it.
+        // Object.Equals is NOT used: a named float's generated Equals is NaN-equal where its `==` is not.
+        if (left is IGoEquatable equatable)
+            return equatable.GoEquals(right);
+
+        switch (left)
+        {
+            case int value: return value == (int)right;
+            case long value: return value == (long)right;
+            case uint value: return value == (uint)right;
+            case ulong value: return value == (ulong)right;
+            case nint value: return value == (nint)right;
+            case nuint value: return value == (nuint)right;
+            case short value: return value == (short)right;
+            case ushort value: return value == (ushort)right;
+            case byte value: return value == (byte)right;
+            case sbyte value: return value == (sbyte)right;
+            case bool value: return value == (bool)right;
+            case char value: return value == (char)right;
+            case double value: return value == (double)right;
+            case float value: return value == (float)right;
+            case System.Numerics.Complex value: return value == (System.Numerics.Complex)right;
+            case string value: return string.Equals(value, (string)right, StringComparison.Ordinal);
+        }
+
+        // Anything left reaches its operator by reflection, as every comparison did before the typed path; each is
+        // counted (EqualityFallbacks), so a type that should have taken the typed path shows up by name.
+        EqualityFallbacks.Record(leftType);
+
         // Get equality "==" operator for type using reflection,
         // lookup is cached for performance.
         // (This already yields Go's IEEE-754 `==` for boxed floating-point values: on .NET 7+

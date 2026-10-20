@@ -721,6 +721,12 @@ internal class InheritedTypeTemplate : TemplateBase
         }
     }
 
+    // Go's == through an interface (golib builtin.AreEqual): a second partial part implements golib's IGoEquatable
+    // EXPLICITLY, through this type's own == (EqualityExpression; IEEE for a float underlying, where its Equals is
+    // NaN-equal), so the comparison runs in compiled code and no member is added.
+    private string GoEquatablePart =>
+        $"\r\n\r\n    partial {ObjectKind} {ObjectName} : global::go.IGoEquatable\r\n    {{\r\n        bool global::go.IGoEquatable.GoEquals(object? other) => other is {ObjectName} value && this == value;\r\n    }}";
+
     public override string TemplateBody =>
         $$"""
             {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
@@ -753,6 +759,6 @@ internal class InheritedTypeTemplate : TemplateBase
                 public static bool operator !=(NilType nil, {{ObjectName}} value) => value != nil;
         
                 public static implicit operator {{ObjectName}}(NilType nil) => {{NilConversionExpression}};
-            }
+            }{{GoEquatablePart}}
         """;
 }

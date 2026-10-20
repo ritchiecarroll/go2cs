@@ -85,7 +85,7 @@ public enum PointerStorage
 
 [System.Diagnostics.DebuggerDisplay("{ToString(),nq}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(ж<>.DebugView))]
-public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity
+public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IGoEquatable
 {
     // The debugger's view (DebuggerTypeProxy): the pointee, or null for the nil pointer -- reading a nil
     // box's Value would be Go's nil dereference, which a debugger must never trigger.
@@ -828,6 +828,9 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         return value is ж<T> box ? box.ValueSlot : value.Value;
     }
+
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is ж<T> value && this == value;
 
     public static bool operator ==(ж<T>? value1, ж<T>? value2)
     {

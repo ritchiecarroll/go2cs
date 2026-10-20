@@ -1387,7 +1387,7 @@ internal static class SelectRuntime
 /// <typeparam name="T">Target type for channel.</typeparam>
 [System.Diagnostics.DebuggerDisplay("len = {Length}, cap = {Capacity}, closed = {IsClosed}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(channel<>.DebugView))]
-public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>, ISelectableChannel, IGoReflectChannel
+public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>, ISelectableChannel, IGoReflectChannel, IGoEquatable
 {
     // The debugger's view (DebuggerTypeProxy): Go's len and cap of the buffer, and whether it is closed.
     // Read without the channel's lock: a debugger's read must never wait on a goroutine it has stopped.
@@ -2165,6 +2165,9 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     }
 
     // From Go spec: Two channel values are equal if they were created by the same call to make or if both have value nil.
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is channel<T> value && this == value;
+
     public static bool operator ==(channel<T> left, channel<T> right)
     {
         return ReferenceEquals(left.m_core, right.m_core);
