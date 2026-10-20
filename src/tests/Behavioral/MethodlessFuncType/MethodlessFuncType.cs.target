@@ -31,31 +31,25 @@ internal static (nint, Action<error>, error) grab(@string tag, ж<slice<@string>
     return (len(tag), makeReleaser(tag, Ꮡlog), default!);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object errˢ = (@string)"err:"u8;
-private static readonly @string fieldˢ = "field"u8;
-private static readonly @string directˢ = "direct"u8;
-private static readonly object lookupˢ = (@string)"lookup:"u8;
-
 internal static void Main() {
     ref var log = ref heap<slice<@string>>(out var Ꮡlog);
 
-    var (n, rel, err) = grab("a"u8, Ꮡlog);
+    var (n, rel, err) = grab("a", Ꮡlog);
     consume(rel, default!);
-    fmt.Println((@string)"n:"u8, n, errˢ, err == default!);
+    fmt.Println("n:", n, "err:", err == default!);
 
-    var h = new holder(release: makeReleaser(fieldˢ, Ꮡlog), name: "h"u8);
+    var h = new holder(release: makeReleaser("field", Ꮡlog), name: "h");
     h.release(fmt.Errorf("boom"u8));
     consume(h.release, default!);
 
-    Action<error> r = makeReleaser(directˢ, Ꮡlog);
+    Action<error> r = makeReleaser("direct", Ꮡlog);
     r(default!);
     consume(r, fmt.Errorf("late"u8));
 
     Func<@string, (@string, bool)> find = default!;
     find = (@string s) => (s + "!", len(s) > 0);
-    var (p, okp) = find("q"u8);
-    fmt.Println(lookupˢ, p, okp);
+    var (p, okp) = find("q");
+    fmt.Println("lookup:", p, okp);
 
     foreach (var (_, line) in log) {
         fmt.Println(line);

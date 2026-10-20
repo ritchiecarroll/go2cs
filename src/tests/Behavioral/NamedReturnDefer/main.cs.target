@@ -70,9 +70,6 @@ internal static nint /*total*/ closures(nint n) {
     return total;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string negˢ = "neg"u8;
-
 internal static (nint @out, @string label) compute(nint x) {
     nint @out = default!;
     @string label = default!;
@@ -82,7 +79,7 @@ internal static (nint @out, @string label) compute(nint x) {
             @out += 1000;
         }, ref ᒐ);
         if (x < 0) {
-            (@out, label) = (-1, negˢ);
+            (@out, label) = (-1, "neg");
             goto ᒐdone;
         }
         (@out, label) = (@double(x), fmt.Sprintf("v=%d"u8, x));
@@ -91,9 +88,6 @@ internal static (nint @out, @string label) compute(nint x) {
     finally { ᒐ.Run(); }
     ᒐdone: return (@out, label);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string recoveredˢ = "recovered"u8;
 
 internal static (nint code, @string msg) guarded(bool boom) {
     nint code = default!;
@@ -104,7 +98,7 @@ internal static (nint code, @string msg) guarded(bool boom) {
             {
                 var r = recover(); if (r != default!) {
                     code = -1;
-                    msg = recoveredˢ;
+                    msg = "recovered";
                 }
             }
         }, ref ᒐ);
@@ -112,7 +106,7 @@ internal static (nint code, @string msg) guarded(bool boom) {
             throw panic("kaboom");
         }
         code = 0;
-        msg = "ok"u8;
+        msg = "ok";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -145,10 +139,6 @@ partial struct box {
     internal nint v;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object parseLimited4ˢ = (@string)"parseLimited(4):"u8;
-private static readonly object parseLimited99ˢ = (@string)"parseLimited(99):"u8;
-
 internal static void Main() {
     fmt.Println(incr());
     fmt.Println(incrBare());
@@ -171,11 +161,11 @@ internal static void Main() {
 
     {
         var (bΔ1, err) = parseLimited(4); if (err == default!) {
-            fmt.Println(parseLimited4ˢ, (~bΔ1).v, err);
+            fmt.Println("parseLimited(4):", (~bΔ1).v, err);
         }
     }
     var (b2, err2) = parseLimited(99);
-    fmt.Println(parseLimited99ˢ, b2 == nil, err2);
+    fmt.Println("parseLimited(99):", b2 == nil, err2);
 }
 
 } // end main_package

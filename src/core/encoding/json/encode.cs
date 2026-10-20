@@ -881,6 +881,8 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(
 }
 
 internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
+    var bᴷ = new stackAppend<byte>();
+
     if (v.IsNil()) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
@@ -888,7 +890,7 @@ internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, en
 
     var s = v.Bytes();
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
-    b = append(b, (byte)((rune)'"'));
+    b = append(bᴷ, b, (byte)((rune)'"'));
     b = base64.StdEncoding.AppendEncode(b, s);
     b = append(b, (byte)((rune)'"'));
     Ꮡe.of(encodeState.ᏑBuffer).Write(b);
@@ -1076,7 +1078,7 @@ internal static (@string, error) resolveKeyName(reflectꓸValue k) {
                 return ("", default!);
             }
             var (buf, err) = tm.MarshalText();
-            return (((@string)buf), err);
+            return ((@string)buf, err);
         }
     }
     var exprᴛ1 = k.Kind();
@@ -1133,7 +1135,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
                     // because they can lead to security holes when
                     // user-controlled strings are rendered into JSON
                     // and served to some browsers.
-                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> (int)(4))], hex[(byte)(b & 0xF)]);
+                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> 4)], hex[(byte)(b & 0xF)]);
                     break;
                 }}
                 i++;
@@ -1163,7 +1165,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         // See https://en.wikipedia.org/wiki/JSON#Safety.
         if (c == (rune)'\u2028' || c == (rune)'\u2029') {
             dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
-            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(rune)(c & 0xF)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(c & 0xF)]);
             i += size;
             start = i;
             continue;

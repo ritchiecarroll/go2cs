@@ -27,14 +27,8 @@ public static ж<Setting> New(@string tag) {
     return Ꮡ(new Setting(tag: tag));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string debugˢ = "debug"u8;
-private static readonly object recoveredˢ = (@string)"recovered:"u8;
-private static readonly @string gcpacertraceˢ = "gcpacertrace"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static void Main() {
-    var s = New(debugˢ);
+    var s = New("debug");
 
     fmt.Println((~s).setting == nil);
 
@@ -43,7 +37,7 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println(recoveredˢ, recover());
+                fmt.Println("recovered:", recover());
             }, ref ᒐ);
             fmt.Println((~sʗ1).name);
         }
@@ -55,11 +49,11 @@ internal static void Main() {
     s.Value.setting = p;
     fmt.Println((~s).setting == nil);
 
-    s.Value.setting = lookup(gcpacertraceˢ);
+    s.Value.setting = lookup("gcpacertrace");
     fmt.Println((~s).setting == nil);
     fmt.Println((~s).name, s.bump(), s.bump());
 
-    var direct = lookup(otherˢ);
+    var direct = lookup("other");
     s.Value.setting = direct;
     s.Value.count = 10;
     nint before = direct.Value.count;

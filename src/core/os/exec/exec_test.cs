@@ -285,7 +285,7 @@ internal static void cmdStdinClose(params ꓸꓸꓸstring ʗp) {
         os.Exit(1);
     }
     {
-        @string s = ((@string)b); if (s != stdinCloseTestString) {
+        @string s = (@string)b; if (s != stdinCloseTestString) {
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: Read %q, want %q"u8, s, stdinCloseTestString);
             os.Exit(1);
         }
@@ -344,7 +344,7 @@ public static void TestEcho(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("echo: %v"u8, err);
     }
     {
-        @string g = ((@string)bs);
+        @string g = (@string)bs;
         @string e = fooBarBazˢ; if (g != e) {
             Ꮡt.Errorf("echo: want %q, got %q"u8, e, g);
         }
@@ -382,7 +382,7 @@ public static void TestCommandRelativeName(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("echo: %v"u8, err);
     }
     {
-        @string g = ((@string)@out);
+        @string g = (@string)@out;
         @string e = fooˢ2; if (g != e) {
             Ꮡt.Errorf("echo: want %q, got %q"u8, e, g);
         }
@@ -404,7 +404,7 @@ public static void TestCatStdin(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Errorf("cat: %v"u8, err);
     }
-    @string s = ((@string)bs);
+    @string s = (@string)bs;
     if (s != input) {
         Ꮡt.Errorf("cat: want %q, got %q"u8, input, s);
     }
@@ -462,7 +462,7 @@ public static void TestCatGoodAndBadFile(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("expected *exec.ExitError from cat combined; got %T: %v"u8, err, err);
         }
     }
-    var (errLine, body, ok) = strings.Cut(((@string)bs), "\n"u8);
+    var (errLine, body, ok) = strings.Cut((@string)bs, "\n"u8);
     if (!ok) {
         Ꮡt.Fatalf("expected two lines from cat; got %q"u8, bs);
     }
@@ -611,7 +611,7 @@ public static void TestPipes(ж<testing.T> Ꮡt) {
         if (errΔ2 != default!) {
             Ꮡt.Fatalf("%s: %v"u8, what, errΔ2);
         }
-        return ((@string)lineΔ1);
+        return (@string)lineΔ1;
     }
 
     err = c.Start();
@@ -1111,7 +1111,7 @@ public static void TestIgnorePipeErrorOnSuccess(ж<testing.T> Ꮡt) {
                 }
             }
         };
-    Ꮡt.Run("10MB"u8, testWith(new exec_test_package.strings_ReaderжReader(strings.NewReader(strings.Repeat("x"u8, (10 << (int)(20)))))));
+    Ꮡt.Run("10MB"u8, testWith(new exec_test_package.strings_ReaderжReader(strings.NewReader(strings.Repeat("x"u8, 10 << 20)))));
     Ꮡt.Run(infiniteˢ, testWith(new delayedInfiniteReader(nil)));
 }
 
@@ -1149,7 +1149,7 @@ public static void TestOutputStderrCapture(ж<testing.T> Ꮡt) {
     if (!ok) {
         Ꮡt.Fatalf("Output error type = %T; want ExitError"u8, err);
     }
-    @string got = ((@string)(~ee).Stderr);
+    @string got = (@string)(~ee).Stderr;
     @string want = someStderrTextˢ;
     if (got != want) {
         Ꮡt.Errorf("ExitError.Stderr = %q; want %q"u8, got, want);
@@ -1296,7 +1296,7 @@ public static void TestDedupEnvEcho(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     {
-        @string got = strings.TrimSpace(((@string)@out));
+        @string got = strings.TrimSpace((@string)@out);
         @string want = goodˢ; if (got != want) {
             Ꮡt.Errorf("output = %q; want %q"u8, got, want);
         }
@@ -1315,7 +1315,7 @@ public static void TestEnvNULCharacter(ж<testing.T> Ꮡt) {
     cmd.Value.Env = append(cmd.Environ(), ((@string)(new byte[]{0x46, 0x4f, 0x4f, 0x3d, 0x66, 0x6f, 0x6f, 0x00, 0x42, 0x41, 0x52, 0x3d, 0x62, 0x61, 0x72})));
     var (@out, err) = cmd.CombinedOutput();
     if (err == default!) {
-        Ꮡt.Errorf("output = %q; want error"u8, ((@string)@out));
+        Ꮡt.Errorf("output = %q; want error"u8, (@string)@out);
     }
 }
 

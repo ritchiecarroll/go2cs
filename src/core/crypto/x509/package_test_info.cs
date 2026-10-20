@@ -41,8 +41,6 @@ global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 global using urlꓸError = go.net.url_package.ΔError;
-using ecdsa = go.crypto.ecdsa_package;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -74,11 +72,6 @@ using static global::go.crypto.x509_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<ecdsa.PrivateKey, ж<ecdsa.PrivateKey>>]
-[assembly: GoImplicitConv<global::go.crypto.x509_package.CertPool, ж<global::go.crypto.x509_package.CertPool>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.x509_package.Certificate, ж<global::go.crypto.x509_package.Certificate>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.x509_package.Certificate, ж<global::go.crypto.x509_package.Certificate>>]
-[assembly: GoImplicitConv<global::go.crypto.x509_package.CertificateRequest, ж<global::go.crypto.x509_package.CertificateRequest>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

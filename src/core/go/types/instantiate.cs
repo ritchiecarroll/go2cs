@@ -95,6 +95,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     ΔType res = default!;
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
+    var ctxtsᴷ = new stackAppend<ж<Context>>();
 
     // The order of the contexts below matters: we always prefer instances in the
     // expanding instance context in order to preserve reference cycles.
@@ -103,7 +104,7 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     // recorded in expanding.inst.ctxt.
     slice<ж<Context>> ctxts = default!;
     if (Ꮡexpanding != nil) {
-        ctxts = append(ctxts, (~expanding.inst).ctxt);
+        ctxts = append(ctxtsᴷ, ctxts, (~expanding.inst).ctxt);
     }
     if (Ꮡctxt != nil) {
         ctxts = append(ctxts, Ꮡctxt);
@@ -219,7 +220,7 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
 
     @string msg = Ꮡcheck.sprintf("%s type arguments for type %s: have %d, want %d"u8, qual, name, got, want);
     if (Ꮡcheck != nil) {
-        Ꮡcheck.error(((atPos)pos), WrongTypeArgCount, msg);
+        Ꮡcheck.error((atPos)pos, WrongTypeArgCount, msg);
         return false;
     }
 

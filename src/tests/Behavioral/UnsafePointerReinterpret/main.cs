@@ -47,7 +47,7 @@ internal static void Main() {
     _ = zeroPair(@unsafe.Pointer.FromPinnedBox(Ꮡpair));
 
     linkaddr @base = 0x4000;
-    var next = ((linkaddr)((uintptr)@base + 32));
+    var next = (linkaddr)((uintptr)@base + 32);
     println(throughPointer(@base) == 0x4000, throughPointer(next) - throughPointer(@base));
 
     println((@string)"compiled"u8);

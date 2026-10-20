@@ -31,68 +31,48 @@ internal static (nn r, ns s) namedResult() {
     return (r, s);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object varNNˢ = (@string)"varNN:"u8;
-private static readonly object varNSˢ = (@string)"varNS:"u8;
-private static readonly object varNBˢ = (@string)"varNB:"u8;
-private static readonly object varNOˢ = (@string)"varNO:"u8;
-private static readonly object newNNˢ = (@string)"newNN:"u8;
-private static readonly object newNSˢ = (@string)"newNS:"u8;
-private static readonly object newNBˢ = (@string)"newNB:"u8;
-private static readonly object newNOˢ = (@string)"newNO:"u8;
-private static readonly object fieldNNˢ = (@string)"fieldNN:"u8;
-private static readonly object fieldNSˢ = (@string)"fieldNS:"u8;
-private static readonly object resNNˢ = (@string)"resNN:"u8;
-private static readonly object resNSˢ = (@string)"resNS:"u8;
-private static readonly object arrNNˢ = (@string)"arrNN:"u8;
-private static readonly object sliceNNˢ = (@string)"sliceNN:"u8;
-private static readonly object mapNNˢ = (@string)"mapNN:"u8;
-private static readonly object writeNNˢ = (@string)"writeNN:"u8;
-private static readonly object writeNSˢ = (@string)"writeNS:"u8;
-private static readonly object writePtrNNˢ = (@string)"writePtrNN:"u8;
-
 internal static void Main() {
     nn d = default!;
     ns sv = default!;
     nb b = default!;
     no o = default!;
-    fmt.Println(varNNˢ, len(d), len(d[0]), d);
-    fmt.Println(varNSˢ, len(sv), len(sv[0].a), sv);
-    fmt.Println(varNBˢ, len(b), b);
-    fmt.Println(varNOˢ, len(o), len(o[0]), o);
+    fmt.Println("varNN:", len(d), len(d[0]), d);
+    fmt.Println("varNS:", len(sv), len(sv[0].a), sv);
+    fmt.Println("varNB:", len(b), b);
+    fmt.Println("varNO:", len(o), len(o[0]), o);
 
     var pd = @new<nn>();
     var ps = @new<ns>();
     var pb = @new<nb>();
     var po = @new<no>();
-    fmt.Println(newNNˢ, len(pd.Value), len((pd.Value)[0]), pd.Value);
-    fmt.Println(newNSˢ, len(ps.Value), len((ps.Value)[0].a), ps.Value);
-    fmt.Println(newNBˢ, len(pb.Value), pb.Value);
-    fmt.Println(newNOˢ, len(po.Value), len((po.Value)[0]), po.Value);
+    fmt.Println("newNN:", len(pd.Value), len((pd.Value)[0]), pd.Value);
+    fmt.Println("newNS:", len(ps.Value), len((ps.Value)[0].a), ps.Value);
+    fmt.Println("newNB:", len(pb.Value), pb.Value);
+    fmt.Println("newNO:", len(po.Value), len((po.Value)[0]), po.Value);
 
     holder h = new();
-    fmt.Println(fieldNNˢ, len(h.f), len(h.f[0]), h.f);
-    fmt.Println(fieldNSˢ, len(h.g), len(h.g[0].a), h.g);
+    fmt.Println("fieldNN:", len(h.f), len(h.f[0]), h.f);
+    fmt.Println("fieldNS:", len(h.g), len(h.g[0].a), h.g);
 
     var (rr, ss) = namedResult();
-    fmt.Println(resNNˢ, len(rr), len(rr[0]), rr);
-    fmt.Println(resNSˢ, len(ss), len(ss[0].a), ss);
+    fmt.Println("resNN:", len(rr), len(rr[0]), rr);
+    fmt.Println("resNS:", len(ss), len(ss[0].a), ss);
 
     array<nn> aa = new(2);
-    fmt.Println(arrNNˢ, len(aa), len(aa[0]), len(aa[0][0]), aa);
+    fmt.Println("arrNN:", len(aa), len(aa[0]), len(aa[0][0]), aa);
 
     var sl = GoReflect.WithElemDims(new slice<nn>(2), 2, 3);
-    fmt.Println(sliceNNˢ, len(sl), len(sl[0]), len(sl[0][0]), sl);
+    fmt.Println("sliceNN:", len(sl), len(sl[0]), len(sl[0][0]), sl);
     var mp = new map<nint, nn>();
     var mv = mp[7].Clone();
-    fmt.Println(mapNNˢ, len(mv), len(mv[0]), mv);
+    fmt.Println("mapNN:", len(mv), len(mv[0]), mv);
 
     d[1][2] = 9;
     sv[1].a[2] = 8;
     (pd.Value)[0][1] = 5;
-    fmt.Println(writeNNˢ, d);
-    fmt.Println(writeNSˢ, sv);
-    fmt.Println(writePtrNNˢ, pd.Value);
+    fmt.Println("writeNN:", d);
+    fmt.Println("writeNS:", sv);
+    fmt.Println("writePtrNN:", pd.Value);
 }
 
 } // end main_package

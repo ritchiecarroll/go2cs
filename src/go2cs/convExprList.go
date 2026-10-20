@@ -185,7 +185,16 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// takes the explicit (@string) cast instead — otherwise the parameter infers as C#
 			// string and the method-group-to-Action conversion fails (fmt's
 			// `defer p.catchPanic(p.arg, verb, "Format")`, CS0123 x4).
-			basicLitContext.castToGoString = callContext.useGoStringArg[i] || (callArgs != nil && callContext.u8StringArgOK[i])
+			//
+			// EVERY literal in the capture list, not only one in a slot that accepts u8: a variadic
+			// tail element (past the parameter array, so u8StringArgOK reads false) and an `any`
+			// slot such as panic's took no cast, so `defer note("a", "b")` and
+			// `defer panic("from defer")` inferred T = System.String. Each happened to be correct
+			// (the thunk converts at the call; panic normalizes), and GO2CS0004 reports exactly that
+			// inference (A2) once plain literals made the analyzer read converted code: measured on
+			// DeferVariadicCallee, DeferPanicArg and DeferLambdaParam. The cast makes T = @string, Go's
+			// own type for the literal.
+			basicLitContext.castToGoString = callContext.useGoStringArg[i] || callArgs != nil
 
 			// Check if the argument is a pointer type
 			identContext.isPointer = callContext.argTypeIsPtr[i]
@@ -333,7 +342,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// extension (sameNameMethodCapture); an adapter (`new …`) is already a different type and binds
 			// the function.
 			if cast, ok := callContext.sameNameCaptureCasts[i]; ok && !strings.HasPrefix(resultExpr, "new ") {
-				resultExpr = fmt.Sprintf("(%s)(%s)", cast, resultExpr)
+				resultExpr = castOf(cast, resultExpr)
 			}
 		} else {
 			resultExpr = clonedElement(v.convExpr(expr, contexts))
@@ -408,7 +417,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 					if keyed {
 						resultExpr = fmt.Sprintf("%s: (%s)(%s)", label, castType, value)
 					} else {
-						resultExpr = fmt.Sprintf("(%s)(%s)", castType, value)
+						resultExpr = castOf(castType, value)
 					}
 				}
 			}
@@ -461,6 +470,12 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		}
 
 		arg := &strings.Builder{}
+
+		// A whole argument needs no parentheses of its own (parityOperatorEmission.go); a spread argument takes a
+		// member access below, which binds to its first token.
+		if !hasSpreadOperator || i != len(exprs)-1 {
+			resultExpr = v.unparenthesizedWholeExpression(expr, resultExpr)
+		}
 
 		arg.WriteString(resultExpr)
 

@@ -279,32 +279,22 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
 
     private ж<T>? NativeArrayWindow()
     {
-        if (NativeArrayField.Open is not { } open || ((INativeRooted)this).NativeGoFieldAddress is not (var address and not 0))
+        if (NativeArrayField.Element is not { } element || ((INativeRooted)this).NativeGoFieldAddress is not (var address and not 0))
             return null;
 
         nint length = GoArrayLengthOf(m_source, m_token);
 
-        return length >= 0 ? open(address, length) : null;
+        // The window is X's registered door (NativeArrayOpeners), compiled only for an [N]X field some compilation
+        // declares, never a generic method closed by reflection (Native AOT has no code for one over a value type).
+        // T is array<X>, so the window IS a ж<T>.
+        return length >= 0 ? (ж<T>)NativeArrayOpeners.OpenArray(element, address, length) : null;
     }
 
-    // The window door per array field type, closed over the element type once: null when T is not array<E>.
+    // X for an array field type T = array<X>, else null: a pure type query, decided once per T.
     private static class NativeArrayField
     {
-        internal static readonly Func<nuint, nint, ж<T>>? Open = create();
-
-        private static Func<nuint, nint, ж<T>>? create()
-        {
-            if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(array<>))
-                return null;
-
-            return typeof(NativeArrayField).GetMethod(nameof(open), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
-                .MakeGenericMethod(typeof(T).GetGenericArguments()[0])
-                .CreateDelegate<Func<nuint, nint, ж<T>>>();
-        }
-
-        // T is array<TElem> whenever this is reached (create's guard), so the window IS a ж<T>.
-        private static ж<T> open<TElem>(nuint address, nint length) =>
-            (ж<T>)(object)builtin.NativeArrayPointer<TElem>(address, length);
+        internal static readonly Type? Element =
+            typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>) ? typeof(T).GetGenericArguments()[0] : null;
     }
 
     // A directly declared array field's Go length (its [N]), read from the struct's Go fields: -1 when the
@@ -561,7 +551,12 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // own storage read as another type: `(*U)(unsafe.Pointer(p))` is p's address, so the hop is Go offset 0 whatever the
     // two types are. Counting it so gives the view its source's order token (one Go address, one number) and lets a
     // reinterpret of a first field widen to its struct (IFirstFieldView). Every other view resolves its field by name.
+    // The box this view re-reads as T when it is a REINTERPRET view, else null. Reinterpret re-views it rather than this
+    // view, so a chain of pointer conversions stays one view over one box (PointerExtensions.Reinterpret).
+    internal object? ReinterpretRoot => IsReinterpretAccessor(m_token) ? m_source : null;
+
+    // ReinterpretUnaliased's refusing accessor is a reinterpret view too: same address, same root.
     private static bool IsReinterpretAccessor(Delegate fieldId) =>
-        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef), DeclaringType: { IsGenericType: true } owner } &&
+        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef) or nameof(ж<byte>.UnaliasedRef), DeclaringType: { IsGenericType: true } owner } &&
         owner.GetGenericTypeDefinition() == typeof(ж<>);
 }

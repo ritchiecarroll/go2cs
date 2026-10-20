@@ -71,6 +71,12 @@ param(
     # test. The converter's own default. A row whose legitimate test runs longer carries a floor in
     # $testDeadlineFloors below; a larger value here raises it, and '0' turns the watchdog off for every row.
     [string] $TestDeadline = '15m',
+    # The converter's -test-build-maxcpu N for every row: each row's test-host `dotnet publish` runs with -m:N, at most
+    # N MSBuild nodes. 0, the default, passes no flag, so every row's invocation is character-for-character what it was
+    # before this parameter existed and MSBuild picks its own node count. A box whose thermal or memory limit an uncapped
+    # publish trips passes it here, instead of running each row by hand with this script's argv plus the flag.
+    [ValidateRange(0, [int]::MaxValue)]
+    [int] $TestBuildMaxCpu = 0,
     [switch] $SkipBuild,
     # -Filter matches by EXACT package path instead of the default substring -like. A per-package
     # campaign driver needs this: substring 'io' sweeps bufio, io/fs and every other 'io'-bearing
@@ -447,6 +453,9 @@ if (-not $sweepConfigOverride -and $executionRows.Count -gt 0) {
 if ($sweepConfigOverride) {
     Write-Host ("  -TestConfig ${sweepConfigLabel}: EVERY row runs under it, annotated or not -- " +
         'an A/B measurement, not a bank-eligible sweep') -ForegroundColor Yellow
+}
+if ($TestBuildMaxCpu -gt 0) {
+    Write-Host "  -TestBuildMaxCpu ${TestBuildMaxCpu}: every row's test-host publish runs with -m:$TestBuildMaxCpu" -ForegroundColor Cyan
 }
 
 # Not printed on a hop run: every row's Source is 'hop', so this line would report "0 row(s) carry a
@@ -1225,10 +1234,16 @@ $longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto
 #     floor itself is a safe bound for it.
 #   go/parser 90m: 836 s solo for the whole package, and it blew 40m under sweep load; TestParseDepthLimit is
 #     its long test, not measured alone, so the row takes its package floor.
-# runtime is deliberately ABSENT: its hangs (TestProfBufWakeup took the whole 2 h deadline) are what the
-# per-test deadline exists for. Every key here must also be a $longTimeouts row: a test bound above its own
-# package's default deadline is meaningless, and run-h10-recon.ps1 refuses such an orphan by name.
-$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m' }
+#   runtime 60m, added 2026-10-19 (COORD ruling on the i9's full runtime row at hop bd90790448, windows): four tests
+#     were ABANDONED at the 900 s default -- TestChanSendBarrier, TestChanSendSelectBarrier, TestConcurrentReadsAfterGrowth,
+#     TestConcurrentReadsAfterGrowthReflect -- and all four PASSED in C# on 2026-10-17, before the watchdog, at 2,339 /
+#     2,339 / 1,854 / 2,157 s (Go: 4.0 / 5.3 / 0.15 / 0.78 s): slow, legitimate runs, not hangs. 60m is about 1.5x the
+#     slowest. The four ran concurrently inside a 2,709 s row, so the 120m $longTimeouts floor stays as it is.
+#     Until then runtime was deliberately ABSENT, because its hangs (TestProfBufWakeup took the whole 2 h deadline) are
+#     what the per-test deadline exists for; at 60m such a hang is still abandoned, 60 minutes in rather than 15.
+# Every key here must also be a $longTimeouts row: a test bound above its own package's default deadline is
+# meaningless, and run-h10-recon.ps1 refuses such an orphan by name.
+$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m'; 'runtime' = '60m' }
 
 # A row's per-test deadline: the LONGER of the asked -TestDeadline and the row's floor, compared as Go
 # durations, the package floor's rule. '0' is no deadline, which is longer than any duration, so an asked
@@ -1246,6 +1261,13 @@ function Resolve-RowTestDeadline([string] $Asked, [string] $Floor) {
 # The converter arguments that carry a row's per-test deadline, verbatim.
 function Get-RowTestDeadlineArgs([string] $Deadline) {
     return @('-test-deadline', $Deadline)
+}
+
+# The converter arguments that cap a row's test-host publish at N MSBuild nodes (-test-build-maxcpu), verbatim; none
+# for 0, the default, which leaves the node count to MSBuild. run-h10-recon.ps1 derives this from here, by its AST.
+function Get-TestBuildMaxCpuArgs([int] $MaxCpu) {
+    if ($MaxCpu -le 0) { return @() }
+    return @('-test-build-maxcpu', "$MaxCpu")
 }
 
 # 'net' joined 2026-09-02 at 40m (RAISED to 120m by the Go 1.24.13 re-check below): at the 10m default the C# host dies an EXPLICIT results-tail deadline kill on
@@ -1443,6 +1465,10 @@ foreach ($row in $rows) {
     $rowTestDeadline = Resolve-RowTestDeadline $TestDeadline $testDeadlineFloors[$pkg]
     $execArgs += Get-RowTestDeadlineArgs $rowTestDeadline
     if ($testDeadlineFloors.ContainsKey($pkg)) { $execSuffix += " [test-deadline=$rowTestDeadline]" }
+
+    # The publish cap, in every row's arguments when -TestBuildMaxCpu asks for one. @() keeps an empty answer empty:
+    # a bare += of nothing would append a $null argument.
+    $execArgs += @(Get-TestBuildMaxCpuArgs $TestBuildMaxCpu)
 
     $rowStarted = Get-Date
     $out = Invoke-SweepRow -Package $pkg -GoDir $goDir -OutDir $outDir -PkgTimeout $pkgTimeout -ExecArgs $execArgs

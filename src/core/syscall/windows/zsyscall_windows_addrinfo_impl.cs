@@ -177,11 +177,27 @@ partial class syscall_package
         finally {
             // Freed here, always: nothing native escapes this function (see the file header).
             if (native != null) {
-                Syscall(procFreeAddrInfoW.Addr(), 1, (uintptr)(void*)native, 0, 0);
+                try {
+                    releaseForeign(native);
+                }
+                finally {
+                    Syscall(procFreeAddrInfoW.Addr(), 1, (uintptr)(void*)native, 0, 0);
+                }
             }
         }
 
         return default!;
+    }
+
+    // The producer's release (G's ruling, 2026-10-19): a store Go code made through a pointer read from a record is
+    // refused here by name, before ws2_32 frees the chain. Nothing reads these records through a foreign pointer array
+    // today -- the chain is transcribed above and freed right here -- so this keeps the seam's contract for the day
+    // one does.
+    private static unsafe void releaseForeign(NativeAddrinfoW* native) {
+        for (NativeAddrinfoW* record = native; record != null; record = record->Next) {
+            GoForeignMemory.Release((nuint)record, (nuint)sizeof(NativeAddrinfoW));
+            GoForeignMemory.Release((nuint)record->Addr, record->Addrlen);
+        }
     }
 
     // FreeAddrInfoW releases nothing, because GetAddrInfoW above already did. The chain a caller

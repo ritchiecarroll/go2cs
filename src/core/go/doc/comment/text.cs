@@ -188,11 +188,11 @@ internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡ
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {
-            Ꮡout.WriteString(((@string)tΔ1));
+            Ꮡout.WriteString((@string)tΔ1);
             break;
         }
         case Italic tΔ1: {
-            Ꮡout.WriteString(((@string)tΔ1));
+            Ꮡout.WriteString((@string)tΔ1);
             break;
         }
         case ж<Link> tΔ1: {
@@ -230,6 +230,9 @@ internal partial struct wrap_score /*dyn*/ {
 // [The least weight subsequence problem]: https://doi.org/10.1109/SFCS.1985.60
 internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     slice<nint> seq = default!;
+    var fᴷ = new stackAppend<wrap_score>();
+    var bestleftᴷ = new stackAppend<nint>();
+    var dᴷ = new stackAppend<nint>();
 
     // The algorithm requires that our scoring function be concave,
     // meaning that for all i₀ ≤ i₁ < j₀ ≤ j₁,
@@ -337,8 +340,8 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     var bestleft = new slice<nint>(1, len(words));
     bestleft[0] = -1;
     for (nint m = 1; m < len(words); m++) {
-        f = append(f, g(d[0], m));
-        bestleft = append(bestleft, d[0]);
+        f = append(fᴷ, f, g(d[0], m));
+        bestleft = append(bestleftᴷ, bestleft, d[0]);
         while (len(d) > 1 && cmp(g(d[1], m + 1), g(d[0], m + 1)) <= 0) {
             d = d[1..]; // “Retire”
         }
@@ -346,7 +349,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
             d = d.slice(0, len(d) - 1); // “Fire”
         }
         if (cmp(g(m, len(words)), g(d[len(d) - 1], len(words))) < 0) {
-            d = append(d, m); // “Hire”
+            d = append(dᴷ, d, m); // “Hire”
             // The next few lines are not in the paper but are necessary
             // to handle two-word inputs correctly. It appears to be
             // just a bug in the paper's pseudocode.

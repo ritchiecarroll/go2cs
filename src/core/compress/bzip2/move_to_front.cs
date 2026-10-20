@@ -20,7 +20,7 @@ internal static moveToFrontDecoder newMTFDecoder(slice<byte> symbols) {
     if (len(symbols) > 256) {
         throw panic("too many symbols");
     }
-    return ((moveToFrontDecoder)symbols);
+    return (moveToFrontDecoder)symbols;
 }
 
 // newMTFDecoderWithRange creates a move-to-front decoder with an initial
@@ -34,7 +34,7 @@ internal static moveToFrontDecoder newMTFDecoderWithRange(nint n) {
     for (nint i = 0; i < n; i++) {
         m[i] = (byte)i;
     }
-    return ((moveToFrontDecoder)m);
+    return (moveToFrontDecoder)m;
 }
 
 internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) {

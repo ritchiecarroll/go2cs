@@ -111,7 +111,7 @@ public static bool FullRune(slice<byte> p) {
         return true; // ASCII, invalid or valid.
     }
     // Must be short or invalid.
-    var accept = acceptRanges[(x >> (int)(4))];
+    var accept = acceptRanges[(x >> 4)];
     if (n > 1 && (p[1] < accept.lo || accept.hi < p[1])){
         return true;
     } else 
@@ -132,7 +132,7 @@ public static bool FullRuneInString(@string s) {
         return true; // ASCII, invalid, or valid.
     }
     // Must be short or invalid.
-    var accept = acceptRanges[(x >> (int)(4))];
+    var accept = acceptRanges[(x >> 4)];
     if (n > 1 && (s[1] < accept.lo || accept.hi < s[1])){
         return true;
     } else 
@@ -178,11 +178,11 @@ internal static (rune r, nint size) decodeRuneSlow(slice<byte> p) {
         // The following code simulates an additional check for x == xx and
         // handling the ASCII and invalid cases accordingly. This mask-and-or
         // approach prevents an additional branch.
-        var mask = (((rune)x << (int)(31)) >> (int)(31)); // Create 0x0000 or 0xFFFF.
-        return ((rune)((rune)((rune)p[0] & ~mask) | (rune)((rune)RuneError & mask)), 1);
+        var mask = ((rune)x << 31) >> 31; // Create 0x0000 or 0xFFFF.
+        return ((rune)p[0] & ~mask | (rune)RuneError & mask, 1);
     }
     nint sz = (nint)((uint8)(x & 7));
-    var accept = acceptRanges[(x >> (int)(4))];
+    var accept = acceptRanges[(x >> 4)];
     if (n < sz) {
         return (RuneError, 1);
     }
@@ -191,20 +191,20 @@ internal static (rune r, nint size) decodeRuneSlow(slice<byte> p) {
         return (RuneError, 1);
     }
     if (sz <= 2) { // <= instead of == to help the compiler eliminate some bounds checks
-        return ((rune)(((rune)((byte)(p0 & (byte)mask2)) << (int)(6)) | (rune)((byte)(b1 & (byte)maskx))), 2);
+        return ((rune)((byte)(p0 & (byte)mask2)) << 6 | (rune)((byte)(b1 & (byte)maskx)), 2);
     }
     var b2 = p[2];
     if (b2 < locb || hicb < b2) {
         return (RuneError, 1);
     }
     if (sz <= 3) {
-        return ((rune)((rune)(((rune)((byte)(p0 & (byte)mask3)) << (int)(12)) | ((rune)((byte)(b1 & (byte)maskx)) << (int)(6))) | (rune)((byte)(b2 & (byte)maskx))), 3);
+        return ((rune)((byte)(p0 & (byte)mask3)) << 12 | (rune)((byte)(b1 & (byte)maskx)) << 6 | (rune)((byte)(b2 & (byte)maskx)), 3);
     }
     var b3 = p[3];
     if (b3 < locb || hicb < b3) {
         return (RuneError, 1);
     }
-    return ((rune)((rune)((rune)(((rune)((byte)(p0 & (byte)mask4)) << (int)(18)) | ((rune)((byte)(b1 & (byte)maskx)) << (int)(12))) | ((rune)((byte)(b2 & (byte)maskx)) << (int)(6))) | (rune)((byte)(b3 & (byte)maskx))), 4);
+    return ((rune)((byte)(p0 & (byte)mask4)) << 18 | (rune)((byte)(b1 & (byte)maskx)) << 12 | (rune)((byte)(b2 & (byte)maskx)) << 6 | (rune)((byte)(b3 & (byte)maskx)), 4);
 }
 
 // DecodeRuneInString is like [DecodeRune] but its input is a string. If s is
@@ -241,11 +241,11 @@ internal static (rune, nint) decodeRuneInStringSlow(@string s) {
         // The following code simulates an additional check for x == xx and
         // handling the ASCII and invalid cases accordingly. This mask-and-or
         // approach prevents an additional branch.
-        var mask = (((rune)x << (int)(31)) >> (int)(31)); // Create 0x0000 or 0xFFFF.
-        return ((rune)((rune)((rune)s[0] & ~mask) | (rune)((rune)RuneError & mask)), 1);
+        var mask = ((rune)x << 31) >> 31; // Create 0x0000 or 0xFFFF.
+        return ((rune)s[0] & ~mask | (rune)RuneError & mask, 1);
     }
     nint sz = (nint)((uint8)(x & 7));
-    var accept = acceptRanges[(x >> (int)(4))];
+    var accept = acceptRanges[(x >> 4)];
     if (n < sz) {
         return (RuneError, 1);
     }
@@ -254,20 +254,20 @@ internal static (rune, nint) decodeRuneInStringSlow(@string s) {
         return (RuneError, 1);
     }
     if (sz <= 2) { // <= instead of == to help the compiler eliminate some bounds checks
-        return ((rune)(((rune)((byte)(s0 & (byte)mask2)) << (int)(6)) | (rune)((byte)(s1 & (byte)maskx))), 2);
+        return ((rune)((byte)(s0 & (byte)mask2)) << 6 | (rune)((byte)(s1 & (byte)maskx)), 2);
     }
     var s2 = s[2];
     if (s2 < locb || hicb < s2) {
         return (RuneError, 1);
     }
     if (sz <= 3) {
-        return ((rune)((rune)(((rune)((byte)(s0 & (byte)mask3)) << (int)(12)) | ((rune)((byte)(s1 & (byte)maskx)) << (int)(6))) | (rune)((byte)(s2 & (byte)maskx))), 3);
+        return ((rune)((byte)(s0 & (byte)mask3)) << 12 | (rune)((byte)(s1 & (byte)maskx)) << 6 | (rune)((byte)(s2 & (byte)maskx)), 3);
     }
     var s3 = s[3];
     if (s3 < locb || hicb < s3) {
         return (RuneError, 1);
     }
-    return ((rune)((rune)((rune)(((rune)((byte)(s0 & (byte)mask4)) << (int)(18)) | ((rune)((byte)(s1 & (byte)maskx)) << (int)(12))) | ((rune)((byte)(s2 & (byte)maskx)) << (int)(6))) | (rune)((byte)(s3 & (byte)maskx))), 4);
+    return ((rune)((byte)(s0 & (byte)mask4)) << 18 | (rune)((byte)(s1 & (byte)maskx)) << 12 | (rune)((byte)(s2 & (byte)maskx)) << 6 | (rune)((byte)(s3 & (byte)maskx)), 4);
 }
 
 // DecodeLastRune unpacks the last UTF-8 encoding in p and returns the rune and
@@ -394,22 +394,22 @@ internal static nint encodeRuneNonASCII(slice<byte> p, rune r) {
         switch (ᐧ) {
         case {} when i <= rune2Max: {
             _ = p[1]; // eliminate bounds checks
-            p[0] = (byte)((byte)t2 | (byte)((r >> (int)(6))));
+            p[0] = (byte)((byte)t2 | (byte)(r >> 6));
             p[1] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 2;
         }
         case {} when (i < surrogateMin) || (surrogateMax < i && i <= rune3Max): {
             _ = p[2]; // eliminate bounds checks
-            p[0] = (byte)((byte)t3 | (byte)((r >> (int)(12))));
-            p[1] = (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx));
+            p[0] = (byte)((byte)t3 | (byte)(r >> 12));
+            p[1] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
             p[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 3;
         }
         case {} when i > rune3Max && i <= MaxRune: {
             _ = p[3]; // eliminate bounds checks
-            p[0] = (byte)((byte)t4 | (byte)((r >> (int)(18))));
-            p[1] = (byte)((byte)tx | (byte)((byte)((r >> (int)(12))) & (byte)maskx));
-            p[2] = (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx));
+            p[0] = (byte)((byte)t4 | (byte)(r >> 18));
+            p[1] = (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx));
+            p[2] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
             p[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 4;
         }
@@ -440,13 +440,13 @@ internal static slice<byte> appendRuneNonASCII(slice<byte> p, rune r) {
         var i = (uint32)r;
         switch (ᐧ) {
         case {} when i <= rune2Max: {
-            return append(p, (byte)((byte)t2 | (byte)((r >> (int)(6)))), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
+            return append(p, (byte)((byte)t2 | (byte)(r >> 6)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
         }
         case {} when (i < surrogateMin) || (surrogateMax < i && i <= rune3Max): {
-            return append(p, (byte)((byte)t3 | (byte)((r >> (int)(12)))), (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
+            return append(p, (byte)((byte)t3 | (byte)(r >> 12)), (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
         }
         case {} when i > rune3Max && i <= MaxRune: {
-            return append(p, (byte)((byte)t4 | (byte)((r >> (int)(18)))), (byte)((byte)tx | (byte)((byte)((r >> (int)(12))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
+            return append(p, (byte)((byte)t4 | (byte)(r >> 18)), (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
         }
         default: {
             return append(p, (byte)(runeErrorByte0), (byte)(runeErrorByte1), (byte)(runeErrorByte2));
@@ -463,7 +463,7 @@ public static nint RuneCount(slice<byte> p) {
         {
             var c = p[n]; if (c >= RuneSelf) {
                 // non-ASCII slow path
-                return n + RuneCountInString(((@string)(p.slice(n))));
+                return n + RuneCountInString((@string)(p.slice(n)));
             }
         }
     }
@@ -495,9 +495,9 @@ internal static uintptr word<T>(T s)
     where T : /* string | []byte */ IByteSeq<T, byte>, new()
 {
     if (ptrSize == 4) {
-        return (uintptr)((uintptr)((uintptr)((uintptr)s[0] | ((uintptr)s[1] << (int)(8))) | ((uintptr)s[2] << (int)(16))) | ((uintptr)s[3] << (int)(24)));
+        return (uintptr)((uintptr)((uintptr)((uintptr)s[0] | (uintptr)s[1] << 8) | (uintptr)s[2] << 16) | (uintptr)s[3] << 24);
     }
-    return (uintptr)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)s[0] | ((uint64)s[1] << (int)(8))) | ((uint64)s[2] << (int)(16))) | ((uint64)s[3] << (int)(24))) | ((uint64)s[4] << (int)(32))) | ((uint64)s[5] << (int)(40))) | ((uint64)s[6] << (int)(48))) | ((uint64)s[7] << (int)(56))));
+    return (uintptr)((uint64)s[0] | (uint64)s[1] << 8 | (uint64)s[2] << 16 | (uint64)s[3] << 24 | (uint64)s[4] << 32 | (uint64)s[5] << 40 | (uint64)s[6] << 48 | (uint64)s[7] << 56);
 }
 
 // Valid reports whether p consists entirely of valid UTF-8-encoded runes.
@@ -528,7 +528,7 @@ public static bool Valid(slice<byte> p) {
         }
         var x = first[p0];
         nint size = (nint)((uint8)(x & 7));
-        var accept = acceptRanges[(x >> (int)(4))];
+        var accept = acceptRanges[(x >> 4)];
         switch (size) {
         case 2: {
             if (len(p) < 2 || p[1] < accept.lo || accept.hi < p[1]) {
@@ -581,7 +581,7 @@ public static bool ValidString(@string s) {
         }
         var x = first[s0];
         nint size = (nint)((uint8)(x & 7));
-        var accept = acceptRanges[(x >> (int)(4))];
+        var accept = acceptRanges[(x >> 4)];
         switch (size) {
         case 2: {
             if (len(s) < 2 || s[1] < accept.lo || accept.hi < s[1]) {

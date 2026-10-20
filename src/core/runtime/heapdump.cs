@@ -108,7 +108,7 @@ internal static void dumpint(uint64 v) {
     ref var buf = ref heap(new array<byte>(10), out var Ꮡbuf);
     nint n = default!;
     while (v >= 0x80) {
-        buf[n] = (byte)((uint64)(v | 0x80));
+        buf[n] = (byte)(v | 0x80);
         n++;
         v >>= (int)(7);
     }
@@ -152,7 +152,7 @@ internal static void dumptype(ж<_type> Ꮡt) {
 
     // If we've definitely serialized the type before,
     // no need to do it again.
-    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((uint32)(t.Hash & (uint32)((typeCacheBuckets - 1)))));
+    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((t.Hash & (uint32)(typeCacheBuckets - 1))));
     if (Ꮡt == (~b).t[0]) {
         return;
     }
@@ -427,7 +427,7 @@ internal static void dumpgs() {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ2) { /* default: */
-            print((@string)"runtime: unexpected G.status "u8, ((Δhex)(uint64)status), (@string)"\n"u8);
+            print((@string)"runtime: unexpected G.status "u8, (Δhex)(uint64)status, (@string)"\n"u8);
             @throw(dumpgsInStwBadStatusˢ);
         }
         else if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
@@ -503,7 +503,7 @@ internal static void dumpobjs() {
         }
         var Δp = s.@base();
         var size = s.Value.elemsize;
-        var n = (((~s).npages << (int)(gc.PageShift))) / size;
+        var n = ((~s).npages << (int)(gc.PageShift)) / size;
         if (n > (uintptr)len(freemark)) {
             @throw(freemarkArrayDoesnTHaveˢ);
         }
@@ -544,7 +544,7 @@ internal static void dumpparams() {
             if (ha == nil) {
                 continue;
             }
-            var @base = arenaBase((arenaIdx)((((arenaIdx)(nuint)i1) << (int)(arenaL1Shift)) | ((arenaIdx)(nuint)i)));
+            var @base = arenaBase((arenaIdx)(((arenaIdx)(nuint)i1) << (int)(arenaL1Shift) | ((arenaIdx)(nuint)i)));
             if (arenaStart == 0 || @base < arenaStart) {
                 arenaStart = @base;
             }
@@ -776,7 +776,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
             }
         }
         var i = (addr - Δp) / (uintptr)goarch.PtrSize;
-        tmpbuf[i / 8] |= (byte)((byte)(1 << (int)((i % 8))));
+        tmpbuf[i / 8] |= (byte)((byte)(1 << (int)(i % 8)));
     }
     return new bitvector((int32)nptr, Ꮡ(tmpbuf, 0));
 }

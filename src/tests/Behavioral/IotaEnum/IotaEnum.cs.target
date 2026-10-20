@@ -57,33 +57,33 @@ public static @string String(this ΔKind k) {
 }
 
 internal static slice<@string> kindNames = new golib.SparseArray<@string>{
-    [Invalid] = "invalid"u8,
-    [Bool] = "bool"u8,
-    [Int] = "int"u8,
-    [Int8] = "int8"u8,
-    [Int16] = "int16"u8,
-    [Int32] = "int32"u8,
-    [Int64] = "int64"u8,
-    [Uint] = "uint"u8,
-    [Uint8] = "uint8"u8,
-    [Uint16] = "uint16"u8,
-    [Uint32] = "uint32"u8,
-    [Uint64] = "uint64"u8,
-    [Uintptr] = "uintptr"u8,
-    [Float32] = "float32"u8,
-    [Float64] = "float64"u8,
-    [Complex64] = "complex64"u8,
-    [Complex128] = "complex128"u8,
-    [Array] = "array"u8,
-    [Chan] = "chan"u8,
-    [Func] = "func"u8,
-    [Interface] = "interface"u8,
-    [Map] = "map"u8,
-    [Pointer] = "ptr"u8,
-    [Slice] = "slice"u8,
-    [ΔString] = "string"u8,
-    [Struct] = "struct"u8,
-    [UnsafePointer] = "unsafe.Pointer"u8
+    [Invalid] = "invalid",
+    [Bool] = "bool",
+    [Int] = "int",
+    [Int8] = "int8",
+    [Int16] = "int16",
+    [Int32] = "int32",
+    [Int64] = "int64",
+    [Uint] = "uint",
+    [Uint8] = "uint8",
+    [Uint16] = "uint16",
+    [Uint32] = "uint32",
+    [Uint64] = "uint64",
+    [Uintptr] = "uintptr",
+    [Float32] = "float32",
+    [Float64] = "float64",
+    [Complex64] = "complex64",
+    [Complex128] = "complex128",
+    [Array] = "array",
+    [Chan] = "chan",
+    [Func] = "func",
+    [Interface] = "interface",
+    [Map] = "map",
+    [Pointer] = "ptr",
+    [Slice] = "slice",
+    [ΔString] = "string",
+    [Struct] = "struct",
+    [UnsafePointer] = "unsafe.Pointer"
 }.slice();
 
 partial struct NameOff /*num:int32*/;
@@ -128,7 +128,7 @@ public static ж<Type> TypeFor<T>() {
             return t;
         }
     }
-    return TypeOf(((ж<T>)nil)).Elem();
+    return TypeOf((ж<T>)nil).Elem();
 }
 
 public static ΔKind Kind(this ref Type t) {
@@ -202,9 +202,6 @@ internal const int64 wideNext = 1;
 internal static UntypedInt rawZero => iota;
 internal static UntypedInt rawOne => /* iota */ 1;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string unknownˢ = "unknown"u8;
-
 internal static @string stateMachine(nint step) {
     const nint stateInit = iota;
     const nint stateDict = 1;
@@ -220,7 +217,7 @@ internal static @string stateMachine(nint step) {
         return fmt.Sprintf("dict[%d]"u8, offset);
     }
 
-    return unknownˢ;
+    return "unknown";
 }
 
 internal static void Main() {

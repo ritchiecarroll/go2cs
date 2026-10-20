@@ -10,6 +10,6 @@ internal static Greeter varFirst = ((Func<@string, Greeter>)(s => {
     return new varFirst_type(new namedGreeter(s));
 }))("package-scope");
 
-internal static @string varFirstLabel = "varfirst"u8;
+internal static @string varFirstLabel = "varfirst";
 
 } // end main_package

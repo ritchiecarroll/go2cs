@@ -80,7 +80,7 @@ public static tokenꓸPos Pos(this ref Comment c) {
 }
 
 public static tokenꓸPos End(this ref Comment c) {
-    return ((tokenꓸPos)((nint)c.Slash + len(c.Text)));
+    return (tokenꓸPos)((nint)c.Slash + len(c.Text));
 }
 
 // A CommentGroup represents a sequence of comments
@@ -117,6 +117,7 @@ internal static @string stripTrailingWhitespace(@string s) {
 // Unless the result is empty, it is newline-terminated.
 public static @string Text(this ж<CommentGroup> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
+    var linesᴷ = new stackAppend<@string>();
 
     if (Ꮡg == nil) {
         return ""u8;
@@ -179,7 +180,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
 
     // Add final "" entry to get trailing newline from Join.
     if (n > 0 && lines[n - 1] != "") {
-        lines = append(lines, ""u8);
+        lines = append(linesᴷ, lines, ""u8);
     }
 
     return strings.Join(lines, "\n"u8);
@@ -621,7 +622,7 @@ public static tokenꓸPos End(this ref BadExpr x) {
 }
 
 public static tokenꓸPos End(this ref Ident x) {
-    return ((tokenꓸPos)((nint)x.NamePos + len(x.Name)));
+    return (tokenꓸPos)((nint)x.NamePos + len(x.Name));
 }
 
 public static tokenꓸPos End(this ref Ellipsis x) {
@@ -636,7 +637,7 @@ public static tokenꓸPos End(this ref BasicLit x) {
         // Not from parser; use a heuristic.
         // (Incorrect for `...` containing \r\n;
         // see https://go.dev/issue/76031.)
-        return ((tokenꓸPos)((nint)x.ValuePos + len(x.Value)));
+        return (tokenꓸPos)((nint)x.ValuePos + len(x.Value));
     }
     return x.ValueEnd;
 }
@@ -1129,7 +1130,7 @@ public static tokenꓸPos End(this ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
-    return ((tokenꓸPos)((nint)s.TokPos + len(s.Tok.String())));
+    return (tokenꓸPos)((nint)s.TokPos + len(s.Tok.String()));
 }
 
 public static tokenꓸPos End(this ref BlockStmt s) {

@@ -10,19 +10,16 @@ partial struct vector {
 }
 
 internal static slice<vector> vectors = new vector[]{
-    new("split"u8, slice<byte>((@string)("this is a longer than block-size key "u8 + "written as several pieces so it fits the "u8 + "source width, exactly as crypto/hmac writes it"u8))),
-    new("plain"u8, slice<byte>("single"u8))
+    new("split", slice<byte>((@string)("this is a longer than block-size key "u8 + "written as several pieces so it fits the "u8 + "source width, exactly as crypto/hmac writes it"u8))),
+    new("plain", slice<byte>("single"u8))
 }.slice();
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "hello"u8;
 
 internal static void Main() {
     var bs = slice<byte>("hello"u8);
     var rs = slice<rune>((@string)"héllo");
 
-    fmt.Println(len(bs), ((@string)bs));
-    fmt.Println(len(rs), ((@string)rs));
+    fmt.Println(len(bs), (@string)bs);
+    fmt.Println(len(rs), (@string)rs);
 
     fmt.Println(slice<byte>("hi"u8));
     fmt.Println(slice<rune>((@string)"aΩ"));
@@ -32,17 +29,17 @@ internal static void Main() {
     fmt.Println(slice<byte>(((@string)(new byte[]{0xff, 0xfe}))));
 
     var split = slice<byte>((@string)("first "u8 + "second "u8 + "third"u8));
-    fmt.Println(len(split), ((@string)split));
+    fmt.Println(len(split), (@string)split);
 
     var rsplit = slice<rune>((@string)("α"u8 + "β"u8));
-    fmt.Println(len(rsplit), ((@string)rsplit));
+    fmt.Println(len(rsplit), (@string)rsplit);
     fmt.Println(slice<byte>((@string)(@"raw "u8 + "cooked"u8)));
 
     foreach (var (_, v) in vectors) {
         fmt.Println(v.name, len(v.key), v.key[0], v.key[len(v.key) - 1]);
     }
 
-    @string s = helloˢ;
+    @string s = "hello";
     fmt.Println(((sstring)slice<byte>(s)) == ((sstring)bs));
 }
 

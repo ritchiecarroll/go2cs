@@ -305,9 +305,9 @@ internal static void panicBounds32X(uintptr pc, ref array<int32> regs) {
     e.signed = signed;
     if (xIsReg){
         // Our 4-bit register numbers are actually 2 2-bit register numbers.
-        nint lo = (nint)(xVal & 3);
-        nint hi = (xVal >> (int)(2));
-        e.x = ((int64)regs[hi] << (int)(32)) + (int64)(uint32)regs[lo];
+        nint lo = xVal & 3;
+        nint hi = xVal >> 2;
+        e.x = ((int64)regs[hi] << 32) + (int64)(uint32)regs[lo];
     } else {
         e.x = (int64)xVal;
     }
@@ -823,7 +823,7 @@ internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
         if (b < 128) {
             return (r + ((uint32)b).Lsh((int64)(shift)), fd);
         }
-        r += ((uint32)((uint8)(b & 0x7F)) << (int)(((nint)(shift & 31))));
+        r += ((uint32)((uint8)(b & 0x7F)) << (int)(shift & 31));
         shift += 7;
         if (shift > 28) {
             throw panic("Bad varint");
@@ -1436,7 +1436,7 @@ internal static void recovery(ж<g> Ꮡgp) {
 
     // Ensure we're recovering within the appropriate stack.
     if (sp != 0 && (sp < gp.stack.lo || gp.stack.hi < sp)) {
-        print((@string)"recover: "u8, ((Δhex)(uint64)sp), (@string)" not in ["u8, ((Δhex)(uint64)gp.stack.lo), (@string)", "u8, ((Δhex)(uint64)gp.stack.hi), (@string)"]\n"u8);
+        print((@string)"recover: "u8, (Δhex)(uint64)sp, (@string)" not in ["u8, (Δhex)(uint64)gp.stack.lo, (@string)", "u8, (Δhex)(uint64)gp.stack.hi, (@string)"]\n"u8);
         @throw(badRecoveryˢ);
     }
 
@@ -1635,9 +1635,9 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp, ж<synctestB
         if (signameΔ1 != ""u8){
             print((@string)"[signal "u8, signameΔ1);
         } else {
-            print((@string)"[signal "u8, ((Δhex)(uint64)gp.sig));
+            print((@string)"[signal "u8, (Δhex)(uint64)gp.sig);
         }
-        print((@string)" code="u8, ((Δhex)(uint64)gp.sigcode0), (@string)" addr="u8, ((Δhex)(uint64)gp.sigcode1), (@string)" pc="u8, ((Δhex)(uint64)gp.sigpc), (@string)"]\n"u8);
+        print((@string)" code="u8, (Δhex)(uint64)gp.sigcode0, (@string)" addr="u8, (Δhex)(uint64)gp.sigcode1, (@string)" pc="u8, (Δhex)(uint64)gp.sigpc, (@string)"]\n"u8);
     }
 
     var (level, all, docrash) = gotraceback();
@@ -1703,7 +1703,7 @@ internal static bool canpanic() {
         return false;
     }
     var status = readgstatus(gp);
-    if ((uint32)(status & ~(uint32)_Gscan) != _Grunning || (~gp).syscallsp != 0) {
+    if ((status & ~(uint32)_Gscan) != _Grunning || (~gp).syscallsp != 0) {
         releasem(ref (mp).DerefOrNull());
         return false;
     }

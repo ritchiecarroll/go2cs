@@ -44,7 +44,7 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> set
 internal static ж<bigꓸInt> asBig(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
     var bits = new slice<big.Word>(len(n.limbs));
     foreach (var (i, _) in n.limbs) {
-        bits[i] = ((big.Word)n.limbs[i]);
+        bits[i] = (big.Word)n.limbs[i];
     }
     return @new<bigꓸInt>().SetBits(bits);
 }
@@ -64,7 +64,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.@internal.fi
 
     var limbs = new slice<nuint>(size);
     for (nint i = 0; i < size; i++) {
-        limbs[i] = (nuint)((nuint)r.Uint64() & (nuint)(unchecked((nuint)(18446744073709551614UL))));
+        limbs[i] = (nuint)r.Uint64() & (nuint)(unchecked((nuint)(18446744073709551614UL)));
     }
     return reflect.ValueOf(Ꮡ(new ΔNat(limbs)));
 }

@@ -49,6 +49,12 @@ using static go.@internal.syscall.windows_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -62,7 +68,7 @@ using static go.@internal.syscall.windows_package;
 [assembly: go.GoPositionMap("internal/syscall/windows/reparse_windows.go", "reparse_windows.cs", "ADyEAZKCggATKpKCgg==")]
 [assembly: go.GoPositionMap("internal/syscall/windows/security_windows.go", "security_windows.cs", "ACZisoKUppSUAA0eggBBpgEACwjCkoKCgoKUgpSCABxuABEysoLYsoI=")]
 [assembly: go.GoPositionMap("internal/syscall/windows/string_windows.go", "string_windows.cs", "ABAowoKClKQ=")]
-[assembly: go.GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABIqooKUgoKCgpQAxAGmA/4AM9gBgoKClIKClAAnZJIAPpIBsoKCgoKUgpSUrMwAHDSCpoCkgg==")]
+[assembly: go.GoPositionMap("internal/syscall/windows/syscall_windows.go", "syscall_windows.cs", "ABIqooKUgoKCgpQAxAGmA/4AM9gBgoKClIKClAAnZJIAPpIBsoKCgoKUgpSUrOwAHjSCpoCkgg==")]
 [assembly: go.GoPositionMap("internal/syscall/windows/types_windows.go", "types_windows.cs", "AG7mAZKClIKClIKClII=")]
 [assembly: go.GoPositionMap("internal/syscall/windows/version_windows.go", "version_windows.cs", "ABxE0pKCgqqiggALFoKCAAcSooKUgoKCgpSCgoKUgoKiqKKCqqKCrLKC7IKC3IKmgpSCgoKUgoKm")]
 [assembly: go.GoPositionMap("internal/syscall/windows/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiCgoKCgoKCgpSCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggADIKLCgpSmoqKCpqKigqaiooKmooKClKaigoKUpqKigqaiAAgCgpSmouKClKaywoKClKayooKClKaigoKUooKUpqKigpSmooKClKai4oKUpqKCgoKUpqIACgKClKaiooKUpqKCgpSigpSmouKClKaywoKClKaygoKClKaywoKClKaigoKmosKClKaigoKmsoKCgpSmoqKClKaiooKUprKigoKUprKigoKUprKigoKUAAQesqKCgpSmogAKAoKUpqLCgpSmoqKClAAGJqLCgpSmssKCgpSmsoKCgpSmosKCpqIACgKCpqKigpSmoqKClKaiooKUAAQWosKClKai4oKUpqLCgpQACDaiwoKUpqLCgpQABBCiooKmooKCpqKigpSmooKClKKClKaiooKUpqLCgpSmoqKClAAEHrKigoKU")]

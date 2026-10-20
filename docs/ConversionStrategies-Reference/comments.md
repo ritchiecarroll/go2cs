@@ -61,14 +61,14 @@ the two groups is dropped and leaves no extra blank behind:
 	fmt.Println(r.h(21)) // 42
 ```
 
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:119-129 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:112-122 -->
 ```csharp
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
-    fmt.Println(convertedFuncTypeCallˢ, result.player, result.opponent, result.thisTurn, turnIsOver);
+    fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
 
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
-    var (n, @out, serr) = m.split("hi"u8);
+    var (n, @out, serr) = m.split("hi");
     fmt.Println(n, @out, serr == default!);
 
     var p = new provider(produce: (nint x) => x * 2);
@@ -76,8 +76,9 @@ the two groups is dropped and leaves no extra blank behind:
     fmt.Println(r.h(21));
 ```
 
-`convertedFuncTypeCallˢ` is a hoisted literal, declared at the end of the file; `@out` is the keyword-escaped
-name of Go's `out`.
+`"converted func type call:"` is a plain C# literal that go2cs-gen boxes as a Go string for `fmt.Println`
+([strings](strings.md#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string));
+`@out` is the keyword-escaped name of Go's `out`.
 
 With `-comments`, from the converted standard library, the blank line stays above the comment that opens
 the next group:
@@ -230,13 +231,13 @@ follows every switch whether Go has one or not. A behavioral golden shows it:
 	return "other"
 ```
 
-<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:68-72 -->
+<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:61-65 -->
 ```csharp
     case @string: {
-        return stringˢ;
+        return "string";
     }}
 
-    return otherˢ;
+    return "other";
 ```
 
 ### Between the specs of a `const` or `var` group
@@ -400,7 +401,7 @@ statement's last emitted C# line.
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1177-1179 -->
+<!-- source: src/core/strings/strings.cs:1179-1181 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -634,7 +635,7 @@ var unitMap = map[string]uint64{
 	"μs": uint64(Microsecond), // U+03BC = Greek letter mu
 ```
 
-<!-- source: src/core/time/format.cs:1765-1769 -->
+<!-- source: src/core/time/format.cs:1771-1775 -->
 ```csharp
 internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"u8] = (uint64)(int64)ΔNanosecond,
@@ -654,7 +655,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3189-3193 -->
+<!-- source: src/core/database/sql/sql.cs:3190-3194 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,
@@ -689,7 +690,7 @@ func appendLines(x, y []byte) []byte {
 }
 ```
 
-<!-- source: src/core/go/printer/gobuild.cs:145-151 -->
+<!-- source: src/core/go/printer/gobuild.cs:147-153 -->
 ```csharp
 internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     if (len(y) > 0 && isNL(y[0]) && // y starts in blank line

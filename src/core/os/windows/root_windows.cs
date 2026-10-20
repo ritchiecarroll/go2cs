@@ -48,6 +48,8 @@ internal static readonly @string fixedPrefixᶜ = @"\\?\?"u8;
 // by rejecting any input paths which contain a ?, which is not a valid character
 // in a Windows filename.
 internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix, slice<@string> suffix) {
+    var bufᴷ = new stackAppend<byte>();
+
     // Reject paths which include a ? component (see above).
     if (stringslite.IndexByte(s, (rune)'?') >= 0) {
         return ("", windows.ERROR_INVALID_NAME);
@@ -56,7 +58,7 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
     @string fixedPrefix = fixedPrefixᶜ;
     var buf = slice<byte>(fixedPrefix);
     foreach (var (_, p) in prefix) {
-        buf = append(buf, (byte)((rune)'\\'));
+        buf = append(bufᴷ, buf, (byte)((rune)'\\'));
         buf = appendꓸꓸꓸ(buf, slice<byte>(p));
     }
     buf = append(buf, (byte)((rune)'\\'));
@@ -65,7 +67,7 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
         buf = append(buf, (byte)((rune)'\\'));
         buf = appendꓸꓸꓸ(buf, slice<byte>(p));
     }
-    s = ((@string)buf);
+    s = (@string)buf;
 
     (s, var err) = syscall.FullPath(s);
     if (err != default!) {
@@ -113,7 +115,7 @@ internal static (ж<Root>, error) newRoot(syscallꓸHandle fd, @string name) {
     // which returns errors when you try to use it.
     ref var fi = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡfi);
     var err = syscall.GetFileInformationByHandle(fd, Ꮡfi);
-    if (err == default! && (uint32)(fi.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) == 0) {
+    if (err == default! && (fi.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) == 0) {
         syscall.CloseHandle(fd);
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: errors.New(notADirectoryˢ)))));
     }
@@ -151,12 +153,12 @@ internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string na
     if (err != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat"u8, Path: name, Err: err))));
     }
-    var nonblocking = (nint)(flag & (nint)windows.O_FILE_FLAG_OVERLAPPED) != 0;
+    var nonblocking = (flag & (nint)windows.O_FILE_FLAG_OVERLAPPED) != 0;
     return (newFile(fd, joinPath(root.Name(), name), kindOpenFile, nonblocking), default!);
 }
 
 internal static (syscallꓸHandle, error) openat(syscallꓸHandle dirfd, @string name, uint64 flag, FileMode perm) {
-    var (h, err) = windows.Openat(dirfd, name, (uint64)((uint64)(flag | (uint64)syscall.O_CLOEXEC) | (uint64)windows.O_NOFOLLOW_ANY), syscallMode(perm));
+    var (h, err) = windows.Openat(dirfd, name, flag | (uint64)syscall.O_CLOEXEC | (uint64)windows.O_NOFOLLOW_ANY, syscallMode(perm));
     if (AreEqual(err, syscall.ELOOP) || AreEqual(err, syscall.ENOTDIR)) {
         {
             var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == default!) {
@@ -481,7 +483,7 @@ internal static bool isLink(FileInfo fi) {
 // between the two.
 internal static bool isDirectoryLink(FileInfo fi) {
     var (fs, ok) = fi._<ж<fileStat>>(ᐧ);
-    return ok && (uint32)((~fs).FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0;
+    return ok && ((~fs).FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
 } // end os_package

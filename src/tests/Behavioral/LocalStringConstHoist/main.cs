@@ -10,127 +10,78 @@ partial struct parser {
     internal nint n;
 }
 
-internal static @string greeting;
-internal static void initᴛgreeting() { greeting = makeGreeting("world"u8); }
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string helloᶜ = "hello, "u8;
+internal static @string greeting = makeGreeting("world");
 
 internal static @string makeGreeting(@string who) {
-    @string hello = helloᶜ;
+    @string hello = "hello, ";
     return hello + who;
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string fnAtoiᶜ = "Atoi"u8;
-
 internal static @string atoi(@string s) {
-    @string fnAtoi = fnAtoiᶜ;
+    @string fnAtoi = "Atoi";
     if (s == ""u8) {
         return fnAtoi + ": empty";
     }
     return fnAtoi + "(" + s + ")";
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly Kind kᶜ = "kind-value"u8;
-
 internal static Kind named() {
-    Kind k = kᶜ;
+    Kind k = "kind-value"u8;
     return k;
 }
 
 internal partial struct localKind_tag /*@string*/;
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly localKind_tag tᶜ = "local-tag"u8;
-
 internal static @string localKind() {
-    localKind_tag t = tᶜ;
-    return ((@string)t);
+    localKind_tag t = "local-tag"u8;
+    return (@string)t;
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string aᶜ = "first-a"u8;
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string bᶜ = "second-b"u8;
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string cᶜ = "group-c"u8;
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string dᶜ = "group-d"u8;
-
 internal static @string multi() {
-    @string a = aᶜ;
-    @string b = bᶜ;
-    @string c = cᶜ;
-    @string d = dᶜ;
+    @string a = "first-a";
+    @string b = "second-b";
+    @string c = "group-c";
+    @string d = "group-d";
     return a + "|" + b + "|" + c + "|" + d;
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string labelᶜ = "label-one"u8;
-
 internal static @string labelOne() {
-    @string label = labelᶜ;
+    @string label = "label-one";
     return label;
 }
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string labelᶜ1 = "label-two"u8;
 
 internal static @string labelTwo() {
-    @string label = labelᶜ1;
+    @string label = "label-two";
     return label;
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string sᶜ = "outer-scope"u8;
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string sΔ1ᶜ = "inner-scope"u8;
-
 internal static @string shadow() {
-    @string s = sᶜ;
+    @string s = "outer-scope";
     @string inner() {
-        @string sΔ1 = sΔ1ᶜ;
+        @string sΔ1 = "inner-scope";
         return sΔ1;
     }
     return s + "/" + inner();
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string capturedᶜ = "captured-const"u8;
-
 internal static Func<@string> closure() {
-    @string captured = capturedᶜ;
+    @string captured = "captured-const";
     return () => captured;
 }
 
 internal static nint empty() {
-    @string e = ""u8;
+    @string e = "";
     return len(e);
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string wholeᶜ = "concatenated";
-
 internal static @string concatenated() {
-    @string whole = wholeᶜ;
+    @string whole = "concatenated";
     return whole;
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string yesᶜ = "matched"u8;
-
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string noᶜ = "unmatched"u8;
-
 internal static @string classify(@string x) {
-    @string yes = yesᶜ;
-    @string no = noᶜ;
+    @string yes = "matched";
+    @string no = "unmatched";
     var exprᴛ1 = x;
     if (exprᴛ1 == yes) {
         return "case:" + yes;
@@ -139,38 +90,26 @@ internal static @string classify(@string x) {
     return no;
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string rawᶜ = ((@string)(new byte[]{0xff, 0x00, 0x7f}));
-
 internal static nint bytesConst() {
-    @string raw = rawᶜ;
+    @string raw = ((@string)(new byte[]{0xff, 0x00, 0x7f}));
     return len(raw) + (nint)raw[0];
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string prefixᶜ = "generic:"u8;
-
 internal static @string genericLabel<T>(T v) {
-    @string prefix = prefixᶜ;
+    @string prefix = "generic:";
     return fmt.Sprint(prefix, (v).OrTypedNilOf());
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string methodᶜ = "parser-method"u8;
-
 internal static @string name(this ref parser p) {
-    @string method = methodᶜ;
+    @string method = "parser-method";
     p.n++;
     return fmt.Sprintf("%s#%d"u8, method, p.n);
 }
 
-// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string stepᶜ = "step"u8;
-
 internal static nint loop() {
     nint total = 0;
     for (nint i = 0; i < 3; i++) {
-        @string step = stepᶜ;
+        @string step = "step";
         total += len(step);
     }
     return total;
@@ -179,17 +118,13 @@ internal static nint loop() {
 internal static @string initValue;
 
 [GoInit] internal static void init() {
-    @string fromInit = "init-const"u8;
+    @string fromInit = "init-const";
     initValue = fromInit;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string matchedˢ = "matched"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static void Main() {
     fmt.Println(greeting);
-    fmt.Println(atoi(""u8), atoi("42"u8));
+    fmt.Println(atoi(""), atoi("42"));
     fmt.Println(named());
     fmt.Println(localKind());
     fmt.Println(multi());
@@ -198,7 +133,7 @@ internal static void Main() {
     fmt.Println(closure()());
     fmt.Println(empty());
     fmt.Println(concatenated());
-    fmt.Println(classify(matchedˢ), classify(otherˢ));
+    fmt.Println(classify("matched"), classify("other"));
     fmt.Println(bytesConst());
     fmt.Println(genericLabel<nint>(7), genericLabel((@string)"x"));
     var p = Ꮡ(new parser(nil));

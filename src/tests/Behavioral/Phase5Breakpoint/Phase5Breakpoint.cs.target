@@ -5,14 +5,10 @@ using runtime = runtime_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object beforeˢ = (@string)"before"u8;
-private static readonly object afterˢ = (@string)"after"u8;
-
 internal static void Main() {
-    fmt.Println(beforeˢ);
+    fmt.Println("before");
     runtime.Breakpoint();
-    fmt.Println(afterˢ);
+    fmt.Println("after");
 }
 
 } // end main_package

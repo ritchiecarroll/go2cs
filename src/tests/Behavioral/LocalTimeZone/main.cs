@@ -5,13 +5,10 @@ using time = time_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string mstˢ = "2006-01-02 15:04:05 MST"u8;
-
 internal static void Main() {
     var t = time.Unix(1700000000, 0).In(time.ΔLocal);
 
-    fmt.Println(t.Format(mstˢ));
+    fmt.Println(t.Format("2006-01-02 15:04:05 MST"));
     fmt.Printf("%v\n"u8, t);
     fmt.Println(t.Weekday(), t.YearDay());
 

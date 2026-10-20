@@ -110,7 +110,7 @@ partial struct chunkIdx /*num:nuint*/;
 // chunkIndex returns the global index of the palloc chunk containing the
 // pointer p.
 internal static chunkIdx chunkIndex(uintptr Δp) {
-    return ((chunkIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)pallocChunkBytes));
+    return (chunkIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)pallocChunkBytes);
 }
 
 // chunkBase returns the base address of the palloc chunk at index ci.
@@ -131,7 +131,7 @@ internal static nuint l1(this chunkIdx i) {
         // L1 map.
         return 0;
     } else {
-        return ((nuint)i >> (int)(pallocChunksL1Shift));
+        return (nuint)i >> (int)(pallocChunksL1Shift);
     }
 }
 
@@ -140,7 +140,7 @@ internal static nuint l2(this chunkIdx i) {
     if (pallocChunksL1Bits == 0){
         return (nuint)i;
     } else {
-        return (nuint)((nuint)i & (nuint)((1 << (int)(pallocChunksL2Bits)) - 1));
+        return (nuint)i & (nuint)((1 << (int)(pallocChunksL2Bits)) - 1);
     }
 }
 
@@ -739,8 +739,8 @@ internal static (uintptr, offAddr) find(this ref pageAlloc Δp, uintptr npages) 
         if (!(addrΔ1.add(size - 1).lessThan(ᏑfirstFree.Value.@base) || ᏑfirstFree.Value.bound.lessThan(addrΔ1))) {
             // This range only partially overlaps with the firstFree range,
             // so throw.
-            print((@string)"runtime: addr = "u8, ((Δhex)(uint64)addrΔ1.addr()), (@string)", size = "u8, size, (@string)"\n"u8);
-            print((@string)"runtime: base = "u8, ((Δhex)(uint64)ᏑfirstFree.Value.@base.addr()), (@string)", bound = "u8, ((Δhex)(uint64)ᏑfirstFree.Value.bound.addr()), (@string)"\n"u8);
+            print((@string)"runtime: addr = "u8, (Δhex)(uint64)addrΔ1.addr(), (@string)", size = "u8, size, (@string)"\n"u8);
+            print((@string)"runtime: base = "u8, (Δhex)(uint64)ᏑfirstFree.Value.@base.addr(), (@string)", bound = "u8, (Δhex)(uint64)ᏑfirstFree.Value.bound.addr(), (@string)"\n"u8);
             @throw(rangePartiallyOverlapsˢ);
         }
     }
@@ -771,8 +771,8 @@ nextLevel:
         // case the searchAddr should be the same as i after levelShift.
         nint j0 = 0;
         {
-            nint searchIdxΔ1 = offAddrToLevelIndex(l, Δp.searchAddr); if ((nint)(searchIdxΔ1 & ~(entriesPerBlock - 1)) == i) {
-                j0 = (nint)(searchIdxΔ1 & (entriesPerBlock - 1));
+            nint searchIdxΔ1 = offAddrToLevelIndex(l, Δp.searchAddr); if ((searchIdxΔ1 & ~(entriesPerBlock - 1)) == i) {
+                j0 = searchIdxΔ1 & (entriesPerBlock - 1);
             }
         }
 
@@ -850,7 +850,7 @@ nextLevel:
         // lied to us. In either case, dump some useful state and throw.
         print((@string)"runtime: summary["u8, l - 1, (@string)"]["u8, lastSumIdx, (@string)"] = "u8, lastSum.start(), (@string)", "u8, lastSum.max(), (@string)", "u8, lastSum.end(), (@string)"\n"u8);
         print((@string)"runtime: level = "u8, l, (@string)", npages = "u8, npages, (@string)", j0 = "u8, j0, (@string)"\n"u8);
-        print((@string)"runtime: p.searchAddr = "u8, ((Δhex)(uint64)Δp.searchAddr.addr()), (@string)", i = "u8, i, (@string)"\n"u8);
+        print((@string)"runtime: p.searchAddr = "u8, (Δhex)(uint64)Δp.searchAddr.addr(), (@string)", i = "u8, i, (@string)"\n"u8);
         print((@string)"runtime: levelShift[level] = "u8, levelShift[l], (@string)", levelBits[level] = "u8, levelBits[l], (@string)"\n"u8);
         for (nint jΔ2 = 0; jΔ2 < len(entries); jΔ2++) {
             var sum = entries[jΔ2];
@@ -868,7 +868,7 @@ break_nextLevel:;
     //
     // After iterating over all levels, i must contain a chunk index which
     // is what the final level represents.
-    chunkIdx ci = ((chunkIdx)(nuint)i);
+    chunkIdx ci = (chunkIdx)(nuint)i;
     var (j, searchIdx) = Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).find(npages, 0);
     if (j == ~(nuint)0) {
         // We couldn't find any space in this chunk despite the summaries telling
@@ -924,7 +924,7 @@ internal static (uintptr addr, uintptr scav) alloc(this ref pageAlloc Δp, uintp
                 var (j, searchIdx) = Δp.chunkOf(i).of(pallocData.ᏑpallocBits).find(npages, chunkPageIndex(Δp.searchAddr.addr()));
                 if (j == ~(nuint)0) {
                     print((@string)"runtime: max = "u8, max, (@string)", npages = "u8, npages, (@string)"\n"u8);
-                    print((@string)"runtime: searchIdx = "u8, chunkPageIndex(Δp.searchAddr.addr()), (@string)", p.searchAddr = "u8, ((Δhex)(uint64)Δp.searchAddr.addr()), (@string)"\n"u8);
+                    print((@string)"runtime: searchIdx = "u8, chunkPageIndex(Δp.searchAddr.addr()), (@string)", p.searchAddr = "u8, (Δhex)(uint64)Δp.searchAddr.addr(), (@string)"\n"u8);
                     @throw(badSummaryDataˢ);
                 }
                 addr = chunkBase(i) + (uintptr)j * (uintptr)pageSize;
@@ -1074,41 +1074,41 @@ partial struct pallocSum /*num:uint64*/;
 // packPallocSum takes a start, max, and end value and produces a pallocSum.
 internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
     if (max == maxPackedValue) {
-        return ((pallocSum)(uint64)(((uint64)1 << (int)(63))));
+        return (pallocSum)(uint64)((uint64)1 << 63);
     }
-    return ((pallocSum)((uint64)((uint64)(((uint64)((uint64)start & (uint64)((maxPackedValue - 1)))) | ((((uint64)((uint64)max & (uint64)((maxPackedValue - 1)))) << (int)(logMaxPackedValue)))) | ((((uint64)((uint64)end & (uint64)((maxPackedValue - 1)))) << (int)((2 * logMaxPackedValue)))))));
+    return (pallocSum)(((uint64)start & (uint64)(maxPackedValue - 1)) | (((uint64)max & (uint64)(maxPackedValue - 1)) << (int)(logMaxPackedValue)) | (((uint64)end & (uint64)(maxPackedValue - 1)) << (int)(2 * logMaxPackedValue)));
 }
 
 // start extracts the start value from a packed sum.
 internal static nuint start(this pallocSum Δp) {
-    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
+    if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)((uint64)((uint64)Δp & (uint64)((maxPackedValue - 1))));
+    return (nuint)((uint64)Δp & (uint64)(maxPackedValue - 1));
 }
 
 // max extracts the max value from a packed sum.
 internal static nuint max(this pallocSum Δp) {
-    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
+    if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)((uint64)((((uint64)Δp >> (int)(logMaxPackedValue))) & (uint64)((maxPackedValue - 1))));
+    return (nuint)(((uint64)Δp >> (int)(logMaxPackedValue)) & (uint64)(maxPackedValue - 1));
 }
 
 // end extracts the end value from a packed sum.
 internal static nuint end(this pallocSum Δp) {
-    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
+    if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)((uint64)((((uint64)Δp >> (int)((2 * logMaxPackedValue)))) & (uint64)((maxPackedValue - 1))));
+    return (nuint)(((uint64)Δp >> (int)(2 * logMaxPackedValue)) & (uint64)(maxPackedValue - 1));
 }
 
 // unpack unpacks all three values from the summary.
 internal static (nuint, nuint, nuint) unpack(this pallocSum Δp) {
-    if ((uint64)((uint64)Δp & (uint64)(((uint64)1 << (int)(63)))) != 0) {
+    if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return (maxPackedValue, maxPackedValue, maxPackedValue);
     }
-    return ((nuint)((uint64)((uint64)Δp & (uint64)((maxPackedValue - 1)))), (nuint)((uint64)((((uint64)Δp >> (int)(logMaxPackedValue))) & (uint64)((maxPackedValue - 1)))), (nuint)((uint64)((((uint64)Δp >> (int)((2 * logMaxPackedValue)))) & (uint64)((maxPackedValue - 1)))));
+    return ((nuint)((uint64)Δp & (uint64)(maxPackedValue - 1)), (nuint)(((uint64)Δp >> (int)(logMaxPackedValue)) & (uint64)(maxPackedValue - 1)), (nuint)(((uint64)Δp >> (int)(2 * logMaxPackedValue)) & (uint64)(maxPackedValue - 1)));
 }
 
 // mergeSummaries merges consecutive summaries which may each represent at

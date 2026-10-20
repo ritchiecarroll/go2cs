@@ -23,7 +23,6 @@ partial struct Frog {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object gobˢ = (@string)"gob"u8;
-private static readonly object canˢ = (@string)"can"u8;
 
 internal static void Main() {
     var f = @new<Frog>();
@@ -47,7 +46,7 @@ internal static void Main() {
     fmt.Printf("%T\n"u8, a);
 
     foreach (var (_, aΔ1) in zoo.ΔRangeSnapshot()) {
-        fmt.Println(aΔ1.Type(), canˢ, aΔ1.Swim());
+        fmt.Println(aΔ1.Type(), "can", aΔ1.Swim());
     }
 
     fmt.Printf("%T\n"u8, a);
@@ -62,11 +61,8 @@ internal static void Main() {
 
 partial struct errno /*num:uintptr*/;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string errnoˢ = "errno"u8;
-
 internal static @string Error(this errno e) {
-    return errnoˢ;
+    return "errno";
 }
 
 internal static errno errAgain => 11;
@@ -78,50 +74,37 @@ internal static error mayFail(nint n) {
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object gotAgainˢ = (@string)"got again"u8;
-private static readonly object notAgainˢ = (@string)"not again"u8;
-private static readonly object switchAgainˢ = (@string)"switch: again"u8;
-private static readonly object switchNilˢ = (@string)"switch: nil"u8;
-private static readonly object switchOtherˢ = (@string)"switch: other"u8;
-
 internal static void checkErr(nint n) {
     var err = mayFail(n);
     if (AreEqual(err, errAgain)) {
-        fmt.Println(gotAgainˢ);
+        fmt.Println("got again");
     }
     if (!AreEqual(err, errAgain)) {
-        fmt.Println(notAgainˢ);
+        fmt.Println("not again");
     }
     var exprᴛ1 = err;
     if (AreEqual(exprᴛ1, errAgain)) {
-        fmt.Println(switchAgainˢ);
+        fmt.Println("switch: again");
     }
     else if (AreEqual(exprᴛ1, default!)) {
-        fmt.Println(switchNilˢ);
+        fmt.Println("switch: nil");
     }
     else { /* default: */
-        fmt.Println(switchOtherˢ);
+        fmt.Println("switch: other");
     }
 
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object releasedˢ = (@string)"released"u8;
-
 internal static error release(errno e) {
-    fmt.Println(releasedˢ, (uintptr)e);
+    fmt.Println("released", (uintptr)e);
     return errAgain;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object usingˢ = (@string)"using"u8;
 
 internal static void useAndRelease() {
     GoFrame ᒐ = default;
     try {
         defer(release, errAgain, ref ᒐ);
-        fmt.Println(usingˢ);
+        fmt.Println("using");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -135,36 +118,24 @@ public static void ShowZoo(/*[2]*/ ж<array<Animal>> Ꮡzoo) {
     foreach (var (_, vᴛ1) in zoo.ΔRangeSnapshot()) {
         a = vᴛ1;
 
-        fmt.Println(a.Type(), canˢ, a.Swim());
+        fmt.Println(a.Type(), "can", a.Swim());
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string frogˢ = "Frog"u8;
-
 public static @string Type(this ref Frog f) {
-    return frogˢ;
+    return "Frog";
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string kickˢ = "Kick"u8;
 
 public static @string Swim(this ref Frog f) {
-    return kickˢ;
+    return "Kick";
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string paddleˢ = "Paddle"u8;
 
 public static @string Swim(this ref Dog d) {
-    return paddleˢ;
+    return "Paddle";
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string doggieˢ = "Doggie"u8;
-
 public static @string Type(this ref Dog d) {
-    return doggieˢ;
+    return "Doggie";
 }
 
 } // end main_package

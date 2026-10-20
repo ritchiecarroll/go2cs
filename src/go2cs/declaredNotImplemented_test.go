@@ -210,8 +210,8 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 
 	for _, entry := range census.stubs {
 		if entry.pushedBy != "" {
-			pushed = append(pushed, fmt.Sprintf("%s:%s  <- %s  (first-order callers in its own package: %d)",
-				entry.file, entry.name, entry.pushedBy, entry.callers))
+			pushed = append(pushed, fmt.Sprintf("%s:%s  <- %s  (first-order callers in its own package: %d; in other packages: %d)",
+				entry.file, entry.name, entry.pushedBy, entry.callers, len(entry.outsideCallers)))
 			measured[memberKey(entry.file, entry.name)] = entry.pushedBy
 		}
 	}
@@ -266,10 +266,28 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 			"members stops being a description of the tree.", member)
 	}
 
+	// ⚠ "LATENT" MEANS NO CALLER IN ANY PACKAGE. The disposition was judged by the first-order callers in
+	// the member's OWN package, and internal/syscall/windows.QueryPerformanceCounter had none there while
+	// crypto/internal/fips140deps/time called it: the crypto/internal/fips140test host died in it, 27 of
+	// Go's 2278 tests in (the i9, Go 1.26 hop), with this census reading it as latent. A cross-package
+	// caller is a call qualified by the member's package alias, so the outsideCallers column counts those
+	// (see crossPackageCallers), and a latent row that has one is refused here by name: either the row is
+	// wrong (the member is reached, so its push is owed now) or the caller is dead and says so elsewhere.
+	for _, entry := range census.stubs {
+		member := memberKey(entry.file, entry.name)
+
+		if declaredPushStubs[member] == dispositionLatent && len(entry.outsideCallers) > 0 {
+			t.Errorf("LATENT BUT REACHED FROM ANOTHER PACKAGE: %s <- %s\n"+
+				"\tthe declared row says nothing reaches this push stub, but %s call it by its package's name. "+
+				"The first such call throws NotImplementedException. Wire the push (linknamePushTargets) or "+
+				"supply the body, and drop the row in the same commit.", member, entry.pushedBy, strings.Join(entry.outsideCallers, ", "))
+		}
+	}
+
 	var unreached int
 
 	for _, entry := range census.stubs {
-		if entry.pushedBy != "" && entry.callers == 0 {
+		if entry.pushedBy != "" && entry.callers == 0 && len(entry.outsideCallers) == 0 {
 			unreached++
 		}
 	}
@@ -278,7 +296,7 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 		"TARGET (package, symbol) with per-GOOS flavours of one member folded; the %d lines above are "+
 		"per FILE, which is the same population counted in a different unit and is never the one "+
 		"compared", len(declaredPushStubs), len(measured), len(appeared), len(vanished), len(pushed))
-	t.Logf("first-order reach: %d of the pushed stubs have NO caller in their own package. That is not "+
+	t.Logf("first-order reach: %d of the pushed stubs have NO caller in any package. That is not "+
 		"a safety margin — it is the condition under which a member reaches a user as a dead host "+
 		"instead of as a failing gate", unreached)
 }
@@ -401,8 +419,6 @@ const (
 //
 // ⚠ EDIT THIS TABLE IN THE COMMIT THAT MOVES THE TREE, never afterwards. That is the whole mechanism.
 var declaredPushStubs = map[string]string{
-	"internal/syscall/windows.QueryPerformanceCounter":   dispositionLatent,
-	"internal/syscall/windows.QueryPerformanceFrequency": dispositionLatent,
 	"os.ignoreSIGSYS":                   dispositionLatent,
 	"os.restoreSIGSYS":                  dispositionLatent,
 	"reflect.chancap":                   dispositionLatent,
@@ -474,6 +490,12 @@ type stubEntry struct {
 	// "Nothing reaches it" is NOT a reason to relax: it is the precise condition that makes a
 	// member a booby trap, because no standing gate reddens it until something calls it.
 	callers int
+
+	// outsideCallers names the "<file>:<line>" sites in OTHER packages that call this member by its
+	// package's name (`windows.QueryPerformanceCounter()`), filled for pushed members only. It is the
+	// column whose absence let QueryPerformanceCounter read as latent while fips140deps/time called it.
+	// Textual like callers, and with the same limit: a site behind code nothing runs still counts.
+	outsideCallers []string
 }
 
 type stubCensus struct {
@@ -536,6 +558,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 
 	declsByPkg := map[string][]decl{}
 	filesByPkg := map[string][][]string{}
+	fileNamesByPkg := map[string][]string{}
 	defnsByPkg := map[string]map[string]bool{}
 	pushes := map[string]string{}
 
@@ -573,6 +596,7 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 
 		lines := strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n")
 		filesByPkg[pkg] = append(filesByPkg[pkg], lines)
+		fileNamesByPkg[pkg] = append(fileNamesByPkg[pkg], rel)
 
 		for i, line := range lines {
 			// ⚠ A TWO-ARGUMENT DIRECTIVE IS NOT A PUSH BY ITSELF. `//go:linkname local
@@ -715,6 +739,8 @@ func declaredNotImplementedIn(coreDir string) (stubCensus, error) {
 		}
 	}
 
+	crossPackageCallers(census.stubs, filesByPkg, fileNamesByPkg)
+
 	sort.Slice(census.stubs, func(i, j int) bool {
 		if census.stubs[i].file != census.stubs[j].file {
 			return census.stubs[i].file < census.stubs[j].file
@@ -796,4 +822,59 @@ func mustRel(base, path string) string {
 	}
 
 	return rel
+}
+
+// crossPackageCallers fills outsideCallers for every PUSHED stub: each line, in a package other than the
+// member's own, that calls `<alias>.<name>(` where alias is the member's package name as the converter
+// spells a cross-package qualifier (its last path segment, possibly `Δ`- or `@`-prefixed). Comment lines
+// are skipped. One pass over the corpus serves every member, because only pushed members are asked about.
+func crossPackageCallers(stubs []stubEntry, filesByPkg map[string][][]string, fileNamesByPkg map[string][]string) {
+	byName := map[string][]int{}
+
+	for i, entry := range stubs {
+		if entry.pushedBy != "" {
+			byName[entry.name] = append(byName[entry.name], i)
+		}
+	}
+
+	if len(byName) == 0 {
+		return
+	}
+
+	names := make([]string, 0, len(byName))
+
+	for name := range byName {
+		names = append(names, regexp.QuoteMeta(name))
+	}
+
+	sort.Strings(names)
+	call := regexp.MustCompile(`(?:^|[^\w.@Δ])([Δ@]?[A-Za-z_]\w*)\.(` + strings.Join(names, "|") + `)\(`)
+
+	for pkg, files := range filesByPkg {
+		for f, lines := range files {
+			for n, line := range lines {
+				if strings.HasPrefix(strings.TrimSpace(line), "//") {
+					continue
+				}
+
+				for _, match := range call.FindAllStringSubmatch(line, -1) {
+					qualifier := strings.TrimLeft(match[1], "Δ@")
+
+					for _, i := range byName[match[2]] {
+						memberPkg := strings.TrimSuffix(memberKey(stubs[i].file, stubs[i].name), "."+stubs[i].name)
+
+						if memberPkg == pkg || qualifier != memberPkg[strings.LastIndex(memberPkg, "/")+1:] {
+							continue
+						}
+
+						stubs[i].outsideCallers = append(stubs[i].outsideCallers, fmt.Sprintf("%s:%d", fileNamesByPkg[pkg][f], n+1))
+					}
+				}
+			}
+		}
+	}
+
+	for i := range stubs {
+		sort.Strings(stubs[i].outsideCallers)
+	}
 }

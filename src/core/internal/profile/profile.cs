@@ -304,10 +304,12 @@ internal static readonly @string labelHeaderᶜ = "                "u8;
 // Print dumps a text representation of a profile. Intended mainly
 // for debugging purposes.
 public static @string String(this ref Profile p) {
+    var ssᴷ = new stackAppend<@string>();
+
     var ss = new slice<@string>(0, len(p.Sample) + len(p.Mapping) + len(p.Location));
     {
         var pt = p.PeriodType; if (pt != nil) {
-            ss = append(ss, fmt.Sprintf("PeriodType: %s %s"u8, (~pt).Type, (~pt).Unit));
+            ss = append(ssᴷ, ss, fmt.Sprintf("PeriodType: %s %s"u8, (~pt).Type, (~pt).Unit));
         }
     }
     ss = append(ss, fmt.Sprintf("Period: %d"u8, p.Period));
@@ -315,7 +317,7 @@ public static @string String(this ref Profile p) {
         ss = append(ss, fmt.Sprintf("Time: %v"u8, time.Unix(0, p.TimeNanos)));
     }
     if (p.DurationNanos != 0) {
-        ss = append(ss, fmt.Sprintf("Duration: %v"u8, ((time.Duration)p.DurationNanos)));
+        ss = append(ss, fmt.Sprintf("Duration: %v"u8, (time.Duration)p.DurationNanos));
     }
 
     ss = append(ss, "Samples:"u8);

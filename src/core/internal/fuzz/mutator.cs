@@ -130,7 +130,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
             copy(m.scratch, v);
         }
         Ꮡm.mutateBytes(Ꮡm.of(mutator.Ꮡscratch));
-        vals[i] = ((@string)m.scratch);
+        vals[i] = (@string)m.scratch;
         break;
     }
     case slice<byte> v: {

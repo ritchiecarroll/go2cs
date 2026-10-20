@@ -301,10 +301,25 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			log.Fatalf("Refusing to convert: %s\n", err)
 		}
 
+		// Refuse, before any file is written as well, an instantiation whose constraint proxy could not
+		// forward its constraint without breaking Go's aliasing (constraintProxyForwarding.go).
+		if refusal := refuseUnforwardableConstraintProxies(pkg); refusal != nil {
+			refusal.report()
+			log.Fatalf("Refusing to convert: %s\n", refusal)
+		}
+
+		// ...and a manual-type conversion of a pointer receiver, which has no box to pass
+		// (manualTypeReceiverRefusal.go).
+		if refusal := refuseManualTypeReceiverOperands(pkg, goosOfTarget(options.targetPlatform)); refusal != nil {
+			refusal.report()
+			log.Fatalf("Refusing to convert: %s\n", refusal)
+		}
+
 		var projectName, projectFileName, projectFileContents string
 		projectName, packageNamespace = getProjectName(packageInputPath, options)
 		packageNamespace = namespaceWithDirectorySegment(packageNamespace, pkg.PkgPath, pkg.Name)
 		currentPackageGorootVendored = isGorootVendoredDir(packageInputPath, options.goRoot)
+		packageHoistsLiterals = literalsHoistedFor(packageInputPath, options)
 
 		if projectFileName, projectFileContents, err = prepareProjectFiles(projectName, packageNamespace, packageOutputPath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", packageOutputPath, err)
@@ -463,6 +478,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 		performEscapeAnalysis(files, fset, packageTypes, info)
 
+		// Go's stack backing store for a non-escaping append: which appends take it is the compiler's own
+		// verdict, harvested per target (stackAppendHints.go).
+		collectStackAppendHints(files, fset, packageTypes, info, pkg.Dir, options)
+
 		// Find package-level vars whose address is taken (cross-file) so their
 		// declarations can be emitted as heap boxes that &global references directly.
 		collectAddressedGlobals(files, packageTypes, info)
@@ -607,6 +626,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// now that every file's lifted names are registered in the shared registry.
 		resolveDynamicTypeMarkers(outputFileNames)
 		resolveDynamicInterfaceBases(outputFileNames)
+
+		// Inline-constraint records an instantiation deferred until its lift was named (the
+		// names are all registered now), ahead of the metadata file below.
+		replayDeferredConstraintRecords()
 
 		// Write project file with correct output type and unsafe code settings
 		options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)

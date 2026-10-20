@@ -52,7 +52,7 @@ internal static Word /*p*/ pow(Word x, nint n) {
     // (Russian Peasant Method for exponentiation)
     p = 1;
     while (n > 0) {
-        if ((nint)(n & 1) != 0) {
+        if ((n & 1) != 0) {
             p *= x;
         }
         x *= x;
@@ -182,7 +182,7 @@ internal static (Δnat res, nint b, nint count, error err) scan(this Δnat z, io
     // (corresponding to 3-bit and 5-bit chunks) that don't pack nicely into
     // words, but those are not too important.
     z = z[..0];
-    Word b1 = ((Word)(nuint)b);
+    Word b1 = (Word)(nuint)b;
     Word bn = default!;        // b1**n (or 0 for the special bit-packing cases b=2,4,16)
     nint n = default!;         // max digits that fit into Word
     switch (b) {
@@ -202,7 +202,7 @@ internal static (Δnat res, nint b, nint count, error err) scan(this Δnat z, io
         (bn, n) = maxPow(b1);
         break;
     }}
-    Word di = ((Word)0); // 0 <= di < b1**i < bn
+    Word di = (Word)0; // 0 <= di < b1**i < bn
     nint i = 0; // 0 <= i < n
     nint dp = -1; // position of decimal point
     while (err == default!) {
@@ -224,18 +224,18 @@ internal static (Δnat res, nint b, nint count, error err) scan(this Δnat z, io
             Word d1 = default!;
             switch (ᐧ) {
             case {} when (rune)'0' <= ch && ch <= (rune)'9': {
-                d1 = ((Word)(nuint)((byte)(ch - (rune)'0')));
+                d1 = (Word)(nuint)((byte)(ch - (rune)'0'));
                 break;
             }
             case {} when (rune)'a' <= ch && ch <= (rune)'z': {
-                d1 = ((Word)(nuint)((byte)(ch - (rune)'a' + 10)));
+                d1 = (Word)(nuint)((byte)(ch - (rune)'a' + 10));
                 break;
             }
             case {} when (rune)'A' <= ch && ch <= (rune)'Z': {
                 if (b <= maxBaseSmall){
-                    d1 = ((Word)(nuint)((byte)(ch - (rune)'A' + 10)));
+                    d1 = (Word)(nuint)((byte)(ch - (rune)'A' + 10));
                 } else {
-                    d1 = ((Word)(nuint)((byte)(ch - (rune)'A' + (byte)maxBaseSmall)));
+                    d1 = (Word)(nuint)((byte)(ch - (rune)'A' + (byte)maxBaseSmall));
                 }
                 break;
             }
@@ -345,7 +345,7 @@ internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
 
         // convert power of two and non power of two bases separately
         {
-            Word b = ((Word)(nuint)@base); if (b == (Word)(b & ((Word)0 - b))){
+            Word b = (Word)(nuint)@base; if (b == (Word)(b & ((Word)0 - b))){
                 // shift is base b digit size in bits
                 nuint shift = (nuint)bits.TrailingZeros((nuint)b); // shift > 0 because b >= 2
                 Word mask = (Word)((nuint)1 << (int)(shift)) - 1;
@@ -374,7 +374,7 @@ internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
                         s[i] = digits[(Word)(w & mask)];
 
                         // advance
-                        w = (x[k] >> (int)((shift - nbits)));
+                        w = x[k] >> (int)(shift - nbits);
                         nbits = (nuint)_W - (shift - nbits);
                     }
                 }
@@ -447,7 +447,7 @@ internal static void convertWords(this Δnat q, ж<stack> Ꮡstk, slice<byte> s,
         while (len(q) > leafSize) {
             // find divisor close to sqrt(q) if possible, but in any case < q
             nint maxLength = q.bitLen(); // ~= log2 q, or at of least largest possible q of this bit length
-            nint minLength = (maxLength >> (int)(1)); // ~= log2 sqrt(q)
+            nint minLength = maxLength >> 1; // ~= log2 sqrt(q)
             while (index > 0 && table[index - 1].nbits > minLength) {
                 index--; // desired
             }
@@ -539,7 +539,7 @@ internal static slice<divisor> divisors(ж<stack> Ꮡstk, nint m, Word b, nint n
 
     // determine k where (bb**leafSize)**(2**k) >= sqrt(x)
     nint k = 1;
-    for (nint words = leafSize; words < (m >> (int)(1)) && k < len(cacheBase10.table); words <<= (int)(1)) {
+    for (nint words = leafSize; words < m >> 1 && k < len(cacheBase10.table); words <<= (int)(1)) {
         k++;
     }
 
@@ -559,7 +559,7 @@ internal static slice<divisor> divisors(ж<stack> Ꮡstk, nint m, Word b, nint n
         for (nint i = 0; i < k; i++) {
             if (table[i].ndigits == 0) {
                 if (i == 0){
-                    table[0].bbb = ((Δnat)default!).expWW(Ꮡstk, bb, ((Word)(nuint)leafSize));
+                    table[0].bbb = ((Δnat)default!).expWW(Ꮡstk, bb, (Word)(nuint)leafSize);
                     table[0].ndigits = ndigits * leafSize;
                 } else {
                     table[i].bbb = ((Δnat)default!).sqr(Ꮡstk, table[i - 1].bbb);

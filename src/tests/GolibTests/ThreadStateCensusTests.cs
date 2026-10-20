@@ -87,8 +87,7 @@ public class ThreadStateCensusTests
         ("sync/runtime_impl.cs|t_procId", Disposition.Registered, "t_procId = 0;", "sync.Pool's shard id for this goroutine"),
         ("sync/runtime_impl.cs|t_procIdAssigned", Disposition.Registered, "t_procIdAssigned = false;", "sync.Pool's shard id for this goroutine"),
         ("testing/TestExecution.cs|s_current", Disposition.FlowsWithContext, "AsyncLocal<TestExecution?> s_current", "the test a goroutine belongs to, inherited from its creator"),
-        ("time/time_impl.cs|t_highResTimer", Disposition.KeptThreadResource, "private static highResTimer? t_highResTimer;", "a per-thread OS high-resolution timer handle: a thread resource, reused across goroutines on purpose"),
-        ("time/time_impl.cs|t_highResTimerProbed", Disposition.KeptThreadResource, "private static bool t_highResTimerProbed;", "whether this thread probed for that timer"),
+        ("time/time_impl.cs|t_sleepTimer", Disposition.KeptThreadResource, "private static sleepTimer? t_sleepTimer;", "this thread's sleep timer (a GoTimer and the event its firing sets), Go's gp.timer kept per thread: a sleep resets the event, re-arms the timer and returns only once its own deadline has passed, so a firing left by an earlier sleep cannot end the next one early"),
     ];
 
     private static string CoreRoot([CallerFilePath] string thisFile = "") =>

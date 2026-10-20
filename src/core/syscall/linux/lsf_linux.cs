@@ -28,7 +28,7 @@ public static (nint, error) LsfSocket(nint ifindex, nint proto) {
         return (0, e);
     }
     var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡlsall.of(SockaddrLinklayer.ᏑProtocol)));
-    p.Value[0] = (byte)((proto >> (int)(8)));
+    p.Value[0] = (byte)(proto >> 8);
     p.Value[1] = (byte)proto;
     lsall.Ifindex = ifindex;
     e = Bind(s, new SockaddrLinklayerжSockaddr(Ꮡlsall));

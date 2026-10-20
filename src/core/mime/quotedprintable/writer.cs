@@ -138,7 +138,7 @@ internal static error encode(this ref Writer w, byte b) {
     }
 
     w.line[w.i] = (rune)'=';
-    w.line[w.i + 1] = upperhex[(b >> (int)(4))];
+    w.line[w.i + 1] = upperhex[(b >> 4)];
     w.line[w.i + 2] = upperhex[(byte)(b & 0x0f)];
     w.i += 3;
 

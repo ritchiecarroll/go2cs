@@ -51,11 +51,8 @@ partial struct Composed {
 
 internal static Composed composed = new();
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string absentˢ = "absent"u8;
-
 internal static (bool, nint, nint, bool) composedReads() {
-    return (composed.Ptrs[0] == nil, len(composed.Slice), composed.ByKey[absentˢ].Count, composed.Tagged[absentˢ] == default!);
+    return (composed.Ptrs[0] == nil, len(composed.Slice), composed.ByKey["absent"].Count, composed.Tagged["absent"] == default!);
 }
 
 internal partial struct reservedIsNil_type /*dyn*/ {

@@ -29,16 +29,18 @@ internal static bool isASCII(@string s) {
 // toASCII converts the input to an ASCII C-style string.
 // This is a best effort conversion, so invalid characters are dropped.
 internal static @string toASCII(@string s) {
+    var bᴷ = new stackAppend<byte>();
+
     if (isASCII(s)) {
         return s;
     }
     var b = new slice<byte>(0, len(s));
     foreach (var (_, c) in s) {
         if (c < 0x80 && c != 0x00) {
-            b = append(b, (byte)c);
+            b = append(bᴷ, b, (byte)c);
         }
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 partial struct parser {
@@ -54,10 +56,10 @@ partial struct formatter {
 internal static @string parseString(this ref parser _, slice<byte> b) {
     {
         nint i = bytes.IndexByte(b, 0); if (i >= 0) {
-            return ((@string)(b.slice(0, i)));
+            return (@string)(b.slice(0, i));
         }
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // formatString copies s into b, NUL-terminating if possible.
@@ -117,13 +119,13 @@ internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
             if (i == 0) {
                 c &= (byte)(0x7f); // Ignore signal bit in first byte
             }
-            if (((x >> (int)(56))) > 0) {
+            if ((x >> 56) > 0) {
                 p.err = ErrHeader; // Integer overflow
                 return 0;
             }
-            x = (uint64)((x << (int)(8)) | (uint64)c);
+            x = x << 8 | (uint64)c;
         }
-        if (((x >> (int)(63))) > 0) {
+        if ((x >> 63) > 0) {
             p.err = ErrHeader; // Integer overflow
             return 0;
         }
@@ -233,7 +235,7 @@ internal static (time.Time, error) parsePAXTime(@string s) {
             }}
         }
     }
-    var (nsecs, _) = strconv.ParseInt(((@string)(nanoDigits[..])), 10, 64); // Must succeed after validation
+    var (nsecs, _) = strconv.ParseInt((@string)(nanoDigits[..]), 10, 64); // Must succeed after validation
     if (len(ss) > 0 && ss[0] == (rune)'-') {
         return (time.Unix(secs, -1 * nsecs), default!); // Negative correction
     }

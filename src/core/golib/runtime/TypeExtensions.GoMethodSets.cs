@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using static go2cs.Symbols;
 
@@ -82,9 +83,10 @@ namespace go.golib;
 //       methods, because that lookup collapses a closed `ж<X>` to the open `ж<>` definition. That
 //       collapse is correct for the registry's precedence-ranked single dispatch and wrong for a
 //       membership test — same data, different question.
-//   The one place a name-only match survives is an open-generic receiver method, whose signature
-//   carries type parameters that cannot be compared against the interface's concrete one. Both
-//   defects above were on closed types, so the narrow exemption keeps them fixed.
+//   A method of a generic type is compared by full signature too: the candidate source closes it
+//   over the value's type arguments (CloseGoMethod), so no candidate carries a type parameter. It
+//   was once matched by name alone, which let the probe count `Pair[string, int]` a fmt.Stringer
+//   while the shell binder, holding the open method, could not bind it.
 //
 // THE CANDIDATE'S EMITTED NAME IS NOT ALWAYS THE GO METHOD NAME
 //   A Go method set is a GO-level fact reconstructed here from EMITTED C#, and the emitted name can
@@ -118,8 +120,8 @@ namespace go.golib;
 //   s_goInterfaceMethodEntries are emptied by `ClearTypeCaches` in
 //   TypeExtensions.ExtensionMethodRegistry.cs on every assembly load, because their contents are
 //   derived from the extension-method scan and a late-loading package assembly changes the answer.
-//   s_structFieldNames is NOT cleared, and correctly so — a type's own fields are fixed when the
-//   type is loaded. A new cache here belongs on that clear list only if the scan feeds it.
+//   s_structFieldNames and s_goMethodSources are NOT cleared, and correctly so — a type's own
+//   fields, and its generated method source, are fixed when the type is loaded. A new cache here belongs on that clear list only if the scan feeds it.
 // ---------------------------------------------------------------------------------------------
 /// <summary>
 /// One method of a Go method set: the projected GO method name, and the emitted receiver method
@@ -135,6 +137,7 @@ public static partial class TypeExtensions
     private static readonly ConcurrentDictionary<(Type element, bool isPointer), GoMethodSetEntry[]> s_goMethodSetEntries = [];
     private static readonly ConcurrentDictionary<Type, GoMethodSetEntry[]> s_goInterfaceMethodEntries = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_structFieldNames = [];
+    private static readonly ConcurrentDictionary<Type, IGoMethodSource?> s_goMethodSources = [];
 
     /// <summary>
     /// Determines, by Go DUCK-TYPING (structural) rules, whether the method set of
@@ -164,10 +167,8 @@ public static partial class TypeExtensions
     /// Both are corrected here: candidates are restricted to the extension methods whose receiver actually
     /// belongs to <paramref name="valueType"/>'s Go method set (a pointer box <c>ж&lt;X&gt;</c> exposes the
     /// value- and pointer-receiver methods of <c>X</c>; a plain value <c>X</c> exposes only its
-    /// value-receiver methods), and each candidate is compared by full signature. Open-generic receiver
-    /// methods keep the prior name-only match, since their signatures carry type parameters that cannot be
-    /// compared structurally against the interface's concrete signature (the defects being fixed are all on
-    /// closed types).
+    /// value-receiver methods), and each candidate is compared by full signature. A generic type's method
+    /// is compared the same way, closed over the value's type arguments by the candidate source.
     /// </remarks>
     public static bool StructurallyImplements(this Type valueType, Type interfaceType)
     {
@@ -207,12 +208,6 @@ public static partial class TypeExtensions
 
             if (!UnexportedMethodPackageMatches(interfaceMethod, candidate))
                 continue;
-
-            // An open-generic receiver method (a method generic over its receiver's type parameter)
-            // carries type parameters in its signature that cannot be compared structurally against the
-            // interface's concrete signature — keep the prior name-only match for those.
-            if (candidate.IsGenericMethodDefinition || candidate.GetParameters()[0].ParameterType.ContainsGenericParameters)
-                return true;
 
             if (SignaturesMatch(interfaceMethod, candidate))
                 return true;
@@ -353,6 +348,118 @@ public static partial class TypeExtensions
         s_handOwnedPackages.GetOrAdd(method.Module.Assembly, static assembly => assembly.IsDefined(typeof(GoHandOwnedPackageAttribute), false));
 
     /// <summary>
+    /// Test hook: overrides <see cref="RuntimeFeature.IsDynamicCodeSupported"/> for <see cref="CloseGoMethod"/>, so the
+    /// refusal a Native AOT program takes can be reached under the JIT. <c>null</c> reads the runtime's own answer.
+    /// </summary>
+    internal static bool? DynamicCodeSupportedOverride { get; set; }
+
+    private static bool IsDynamicCodeSupported => DynamicCodeSupportedOverride ?? RuntimeFeature.IsDynamicCodeSupported;
+
+    // Closes the OPEN Go method `open` of a generic type over the type arguments of `valueElement`, a constructed
+    // instance of the same definition (G's design, 2026-10-19). Three routes, in order:
+    //   1. The type's generated method source (IGoMethodSource, go2cs-gen): a method compiled code closed over the
+    //      type's own parameters, which is the only route Native AOT can always answer.
+    //   2. With dynamic code: unify the receiver with the value's element type and MakeGenericMethod. A Go method
+    //      cannot declare type parameters of its own, so every type parameter of the emitted method appears in its
+    //      receiver, and the unification determines all of them.
+    //   3. Otherwise it is REFUSED BY NAME, as a Go panic. Never an open method: every consumer of the candidate
+    //      list binds what it is handed.
+    private static MethodInfo CloseGoMethod(MethodInfo open, Type receiverElement, bool pointerReceiver, Type valueElement)
+    {
+        if (GoMethodSource(valueElement)?.GoMethod(open.Name, pointerReceiver) is { IsGenericMethod: true } closed &&
+            closed.GetGenericMethodDefinition() == open)
+        {
+            return closed;
+        }
+
+        if (IsDynamicCodeSupported && UnifyReceiver(open, receiverElement, valueElement) is { } typeArguments)
+        {
+            try
+            {
+                return open.MakeGenericMethod(typeArguments);
+            }
+            catch (ArgumentException)
+            {
+                // A constraint the arguments do not satisfy: refused below, like any other method that cannot close.
+            }
+        }
+
+        throw builtin.panic($"go2cs: cannot close method {ProjectGoMethodName(open.Name)} of {GoReflect.GoTypeName(valueElement)} over its type arguments: " +
+            "the type has no generated method source (IGoMethodSource) and this runtime cannot generate code");
+    }
+
+    private static bool ReceiverCarriesEveryTypeParameter(MethodInfo open, Type receiverElement)
+    {
+        foreach (Type parameter in open.GetGenericArguments())
+        {
+            if (!Mentions(receiverElement, parameter))
+                return false;
+        }
+
+        return true;
+
+        static bool Mentions(Type type, Type parameter)
+        {
+            if (type == parameter)
+                return true;
+
+            if (type.HasElementType)
+                return Mentions(type.GetElementType()!, parameter);
+
+            if (!type.IsGenericType)
+                return false;
+
+            foreach (Type argument in type.GetGenericArguments())
+            {
+                if (Mentions(argument, parameter))
+                    return true;
+            }
+
+            return false;
+        }
+    }
+
+    // The generated method source of a constructed generic value type, reached through its zero value (as
+    // GoReflect.FieldAliasBox reaches IGoFieldBoxSource), or null when the type carries none.
+    private static IGoMethodSource? GoMethodSource(Type valueElement) =>
+        s_goMethodSources.GetOrAdd(valueElement, static type => GoTypeOps.Uninitialized(type) as IGoMethodSource);
+
+    // The emitted method's type arguments, read off the receiver: its element is the generic definition over the
+    // method's own type parameters (`Pair<K, V>`), and the value's element is the same definition constructed
+    // (`Pair<@string, nint>`). Null when any position does not unify.
+    private static Type[]? UnifyReceiver(MethodInfo open, Type receiverElement, Type valueElement)
+    {
+        if (!receiverElement.IsGenericType || !valueElement.IsGenericType)
+            return null;
+
+        Type[] formal = receiverElement.GetGenericArguments();
+        Type[] actual = valueElement.GetGenericArguments();
+        Type[] typeArguments = new Type[open.GetGenericArguments().Length];
+
+        if (formal.Length != actual.Length)
+            return null;
+
+        for (int i = 0; i < formal.Length; i++)
+        {
+            if (formal[i].IsGenericMethodParameter)
+            {
+                ref Type bound = ref typeArguments[formal[i].GenericParameterPosition];
+
+                if (bound is not null && bound != actual[i])
+                    return null;
+
+                bound = actual[i];
+            }
+            else if (formal[i] != actual[i])
+            {
+                return null;
+            }
+        }
+
+        return typeArguments.Any(static argument => argument is null) ? null : typeArguments;
+    }
+
+    /// <summary>
     /// Collects the extension methods whose receiver belongs to the Go METHOD SET of element type
     /// <paramref name="valueElement"/>, viewed as a pointer (<c>*X</c>) or as a value (<c>X</c>).
     /// </summary>
@@ -393,8 +500,38 @@ public static partial class TypeExtensions
                 if (!valueIsPointer && (receiverIsPointer || IsPointerSetByRefReceiver(method, receiver)))
                     continue;
 
-                if (ReceiverElementMatches(receiverElement, valueElement))
-                    candidates.Add(method);
+                if (!ReceiverElementMatches(receiverElement, valueElement))
+                    continue;
+
+                // A method of a Go GENERIC type is emitted as a generic extension method, and the scan
+                // finds its OPEN definition (`String<K, V>(this Pair<K, V>)`). Every consumer of this
+                // list binds what it is handed, and an open method binds nothing: reflect's CreateDelegate
+                // threw, and the shell tiers missed. So it is closed HERE, once, over the value's own
+                // type arguments (CloseGoMethod), and an open method never leaves this list.
+                if (method.ContainsGenericParameters)
+                {
+                    // golib's own generic extension methods (`slice<T>(this in slice<T>)`) are plumbing,
+                    // never a Go method: golib is not a converted package.
+                    if (method.DeclaringType?.Assembly == typeof(TypeExtensions).Assembly)
+                        continue;
+
+                    // A pointer-receiver method's `this ref X` original is closed through its ж<X> twin,
+                    // which is a candidate of its own. A copy-bound one is a VALUE-set method with no
+                    // twin, so it is closed itself.
+                    if (receiver.IsByRef && !IsCopyBoundReceiver(method, out _))
+                        continue;
+
+                    // A Go method declares no type parameters of its own, so each of the emitted method's comes from
+                    // its receiver. One the receiver does not carry (the type-assertion forms `_<T>(this X)`) makes
+                    // the method something other than a Go method.
+                    if (!ReceiverCarriesEveryTypeParameter(method, receiverElement))
+                        continue;
+
+                    candidates.Add(CloseGoMethod(method, receiverElement, receiverIsPointer, valueElement));
+                    continue;
+                }
+
+                candidates.Add(method);
             }
 
             // A RUNTIME-MINTED struct carries its promoted methods as its OWN declared statics, not

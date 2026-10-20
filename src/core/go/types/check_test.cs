@@ -132,7 +132,7 @@ internal static error parseFlags(slice<byte> src, ж<flag.FlagSet> Ꮡflags) {
         return fmt.Errorf("flags comment line too long"u8);
     }
 
-    return Ꮡflags.Parse(strings.Fields(((@string)(src.slice(0, end)))));
+    return Ꮡflags.Parse(strings.Fields((@string)(src.slice(0, end))));
 }
 
 // testFiles type-checks the package consisting of the given files, and
@@ -385,7 +385,7 @@ internal static readonly @string go116codeˢ = "go116code"u8;
 
 internal static errors.Code readCode(typesꓸError err) {
     var v = reflect.ValueOf(err);
-    return ((errors.Code)(nint)v.FieldByName(go116codeˢ).Int());
+    return (errors.Code)(nint)v.FieldByName(go116codeˢ).Int();
 }
 
 // boolFieldAddr(conf, name) returns the address of the boolean field conf.<name>.

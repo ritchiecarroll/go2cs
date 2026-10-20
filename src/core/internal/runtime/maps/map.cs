@@ -184,7 +184,7 @@ partial class maps_package {
 // Extracts the H1 portion of a hash: the 57 upper bits.
 // TODO(prattmic): what about 32-bit systems?
 internal static uintptr h1(uintptr h) {
-    return (h >> (int)(7));
+    return h >> 7;
 }
 
 // Extracts the H2 portion of a hash: the 7 bits not used for h1.
@@ -336,7 +336,7 @@ internal static uintptr directoryIndex(this ref ΔMap m, uintptr hash) {
     if (m.dirLen == 1) {
         return 0;
     }
-    return (hash >> (int)(((uint8)(m.globalShift & 63))));
+    return hash >> (int)((uint8)(m.globalShift & 63));
 }
 
 internal static ж<table> directoryAt(this ref ΔMap m, uintptr i) {
@@ -614,7 +614,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
         slotElem = emem;
     }
 
-    g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
+    g.ctrls().set(i, (ctrl)(uint8)h2(hash));
     m.used++;
 
     return slotElem;

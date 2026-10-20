@@ -38,10 +38,10 @@ internal static readonly @string regressTestGoˢ = "regress_test.go"u8;
 public static void TestRegress(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    slice<int32> int32s = new int32[]{1, 10, 32, (int32)(1 << (int)(20)), (1 << (int)(20)) + 1, 1000000000, (int32)(1 << (int)(30)), (int32)(2147483648L - 2), (int32)(2147483648L - 1)}.slice();
-    slice<uint32> uint32s = new uint32[]{1, 10, 32, ((uint32)1 << (int)(20)), (1 << (int)(20)) + 1, 1000000000, ((uint32)1 << (int)(30)), (uint32)(2147483648L - 2), (uint32)(2147483648L - 1), unchecked((uint32)(4294967294UL)), unchecked((uint32)(4294967295UL))}.slice();
-    slice<int64> int64s = new int64[]{1, 10, 32, ((int64)1 << (int)(20)), (1 << (int)(20)) + 1, 1000000000, ((int64)1 << (int)(30)), 2147483648L - 2, 2147483648L - 1, 1000000000000000000L, 1152921504606846976L, 9223372036854775806L, 9223372036854775807L}.slice();
-    slice<uint64> uint64s = new uint64[]{1, 10, 32, ((uint64)1 << (int)(20)), (1 << (int)(20)) + 1, 1000000000, ((uint64)1 << (int)(30)), (uint64)(2147483648L - 2), (uint64)(2147483648L - 1), 1000000000000000000UL, ((uint64)1 << (int)(60)), 9223372036854775806UL, 9223372036854775807UL, 18446744073709551614UL, 18446744073709551615UL}.slice();
+    slice<int32> int32s = new int32[]{1, 10, 32, (int32)(1 << 20), (1 << 20) + 1, 1000000000, (int32)(1 << 30), (int32)(2147483648L - 2), (int32)(2147483648L - 1)}.slice();
+    slice<uint32> uint32s = new uint32[]{1, 10, 32, (uint32)1 << 20, (1 << 20) + 1, 1000000000, (uint32)1 << 30, (uint32)(2147483648L - 2), (uint32)(2147483648L - 1), unchecked((uint32)(4294967294UL)), unchecked((uint32)(4294967295UL))}.slice();
+    slice<int64> int64s = new int64[]{1, 10, 32, (int64)1 << 20, (1 << 20) + 1, 1000000000, (int64)1 << 30, 2147483648L - 2, 2147483648L - 1, 1000000000000000000L, 1152921504606846976L, 9223372036854775806L, 9223372036854775807L}.slice();
+    slice<uint64> uint64s = new uint64[]{1, 10, 32, (uint64)1 << 20, (1 << 20) + 1, 1000000000, (uint64)1 << 30, (uint64)(2147483648L - 2), (uint64)(2147483648L - 1), 1000000000000000000UL, (uint64)1 << 60, 9223372036854775806UL, 9223372036854775807UL, 18446744073709551614UL, 18446744073709551615UL}.slice();
     slice<nint> permSizes = new nint[]{0, 1, 5, 8, 9, 10, 16}.slice();
 
     nint n = reflect.TypeOf(New(new rand.PCGжSource(NewPCG(1, 2))).OrTypedNil()).NumMethod();
@@ -150,7 +150,7 @@ public static void TestRegress(ж<testing.T> Ꮡt) {
             } else {
                 var want = regressGolden[p];
                 if (m.Name == "Int"u8) {
-                    want = (int64)(nint)((((nuint)(want._<int64>()) << (int)(1)) >> (int)(1)));
+                    want = (int64)(nint)(((nuint)(want._<int64>()) << 1) >> 1);
                 }
                 if (m.Name == "Uint"u8) {
                     want = (uint64)(nuint)(want._<uint64>());
@@ -211,7 +211,7 @@ public static partial void TestUpdateExample(ж<testing.T> Ꮡt) {
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// Output:\n"u8);
-        foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
+        foreach (var (_, line) in strings.Split((@string)@out, "\n"u8)) {
             if (line != ""u8) {
                 fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// %s\n"u8, line);
             }

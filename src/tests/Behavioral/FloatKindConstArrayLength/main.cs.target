@@ -47,55 +47,36 @@ internal static array<byte> roundTrip(/*[10]*/ array<byte> a) {
     return a.Clone();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object localˢ = (@string)"local"u8;
-private static readonly object bigˢ = (@string)"big"u8;
-private static readonly object localExprˢ = (@string)"local expr"u8;
-private static readonly object localLiteralˢ = (@string)"local literal"u8;
-private static readonly object localComplexˢ = (@string)"local complex"u8;
-private static readonly object multiˢ = (@string)"multi"u8;
-private static readonly object localIntˢ = (@string)"local int"u8;
-private static readonly object pkgˢ = (@string)"pkg"u8;
-private static readonly object namedˢ = (@string)"named"u8;
-private static readonly object fieldˢ = (@string)"field"u8;
-private static readonly object aliasˢ = (@string)"alias"u8;
-private static readonly object paramˢ = (@string)"param"u8;
-private static readonly object compositeˢ = (@string)"composite"u8;
-private static readonly object pointerˢ = (@string)"pointer"u8;
-private static readonly object mapValueˢ = (@string)"map value"u8;
-private static readonly object sliceElemˢ = (@string)"slice elem"u8;
-private static readonly object shiftˢ = (@string)"shift"u8;
-
 internal static void Main() {
     array<byte> localArr = new(100); /* globalLen */
     localArr[0] = 1;
     localArr[globalLen - 1] = 2;
-    fmt.Println(localˢ, len(localArr), localArr[0], localArr[99]);
+    fmt.Println("local", len(localArr), localArr[0], localArr[99]);
 
     array<byte> big = new(1000000); /* overflow */
     big[overflow - 1] = 3;
-    fmt.Println(bigˢ, len(big), big[999999]);
+    fmt.Println("big", len(big), big[999999]);
 
     array<byte> localExpr = new(100); /* exprLen */
-    fmt.Println(localExprˢ, len(localExpr));
+    fmt.Println("local expr", len(localExpr));
 
     array<byte> localLit = new(50); /* 1e2D / 2 */
-    fmt.Println(localLiteralˢ, len(localLit));
+    fmt.Println("local literal", len(localLit));
 
     array<nint> localCplx = new(10); /* cplxLen */
     localCplx[9] = 4;
-    fmt.Println(localComplexˢ, len(localCplx), localCplx[9]);
+    fmt.Println("local complex", len(localCplx), localCplx[9]);
 
     array<array<byte>> multi = new(10, () => new(10)); /* namedLen */
     multi[9][9] = 5;
-    fmt.Println(multiˢ, len(multi), len(multi[0]), multi[9][9]);
+    fmt.Println("multi", len(multi), len(multi[0]), multi[9][9]);
 
     array<byte> localInt = new(100); /* intLen */
-    fmt.Println(localIntˢ, len(localInt));
+    fmt.Println("local int", len(localInt));
 
     pkgArr[0] = 6;
     pkgCplxArr[9] = 7;
-    fmt.Println(pkgˢ, len(pkgArr), pkgArr[0], len(pkgCplxArr), pkgCplxArr[9], len(pkgExprArr), len(pkgIntArr));
+    fmt.Println("pkg", len(pkgArr), pkgArr[0], len(pkgCplxArr), pkgCplxArr[9], len(pkgExprArr), len(pkgIntArr));
 
     floatLenArr fl = default!;
     fl[9] = 8;
@@ -103,38 +84,38 @@ internal static void Main() {
     cl[9] = 9;
     exprLenArr el = default!;
     intLenArr il = default!;
-    fmt.Println(namedˢ, len(fl), fl[9], len(cl), cl[9], len(el), len(il));
+    fmt.Println("named", len(fl), fl[9], len(cl), cl[9], len(el), len(il));
 
     holder h = new();
     h.buf[99] = 10;
     h.nest[9][9] = 11;
-    fmt.Println(fieldˢ, len(h.buf), h.buf[99], len(h.nest), len(h.nest[0]), h.nest[9][9]);
+    fmt.Println("field", len(h.buf), h.buf[99], len(h.nest), len(h.nest[0]), h.nest[9][9]);
 
     aliasArr al = new(10);
     al[9] = 12;
-    fmt.Println(aliasˢ, len(al), al[9]);
+    fmt.Println("alias", len(al), al[9]);
 
     array<byte> arg = new(10); /* namedLen */
     var got = roundTrip(arg);
-    fmt.Println(paramˢ, len(got), got[0]);
+    fmt.Println("param", len(got), got[0]);
 
     ref var lit = ref heap<array<byte>>(out var Ꮡlit);
     lit = new byte[]{1, 2}.array(10);
-    fmt.Println(compositeˢ, len(lit), lit[0], lit[9]);
+    fmt.Println("composite", len(lit), lit[0], lit[9]);
 
     ж<array<byte>> ptr = Ꮡlit;
-    fmt.Println(pointerˢ, 10, ptr.Value[1]);
+    fmt.Println("pointer", 10, ptr.Value[1]);
 
-    var m = new map<@string, array<byte>>{["k"u8] = lit.Clone()};
-    fmt.Println(mapValueˢ, len(m["k"u8, () => new array<byte>(10)]), m["k"u8, () => new array<byte>(10)][1]);
+    var m = new map<@string, array<byte>>{["k"] = lit.Clone()};
+    fmt.Println("map value", len(m["k", () => new array<byte>(10)]), m["k", () => new array<byte>(10)][1]);
 
     var sl = GoReflect.WithElemDims(new array<byte>[]{lit.Clone()}.slice(), 10);
-    fmt.Println(sliceElemˢ, len(sl), len(sl[0]), sl[0][1]);
+    fmt.Println("slice elem", len(sl), len(sl[0]), sl[0][1]);
 
     uintptr u = 1;
     nuint n = 1;
     int64 i64 = 1;
-    fmt.Println(shiftˢ, (uint64)((u << (int)(shiftBy))), (uint64)((n << (int)(shiftBy))), (i64 << (int)(shiftBy)), (nint)((1 << (int)(shiftBy))));
+    fmt.Println("shift", (uint64)(u << (int)(shiftBy)), (uint64)(n << (int)(shiftBy)), i64 << (int)(shiftBy), (nint)(1 << (int)(shiftBy)));
 }
 
 } // end main_package

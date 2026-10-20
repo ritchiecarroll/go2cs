@@ -147,12 +147,12 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
     nint n = (len(src) / 3) * 3;
     while (si < n) {
         // Convert 3x 8bit source bytes into 4 bytes
-        nuint valΔ1 = (nuint)((nuint)(((nuint)src[si + 0] << (int)(16)) | ((nuint)src[si + 1] << (int)(8))) | (nuint)src[si + 2]);
+        nuint valΔ1 = (nuint)src[si + 0] << 16 | (nuint)src[si + 1] << 8 | (nuint)src[si + 2];
 
-        dst[di + 0] = enc.encode[(nuint)((valΔ1 >> (int)(18)) & 0x3F)];
-        dst[di + 1] = enc.encode[(nuint)((valΔ1 >> (int)(12)) & 0x3F)];
-        dst[di + 2] = enc.encode[(nuint)((valΔ1 >> (int)(6)) & 0x3F)];
-        dst[di + 3] = enc.encode[(nuint)(valΔ1 & 0x3F)];
+        dst[di + 0] = enc.encode[(valΔ1 >> 18 & 0x3F)];
+        dst[di + 1] = enc.encode[(valΔ1 >> 12 & 0x3F)];
+        dst[di + 2] = enc.encode[(valΔ1 >> 6 & 0x3F)];
+        dst[di + 3] = enc.encode[(valΔ1 & 0x3F)];
 
         si += 3;
         di += 4;
@@ -163,17 +163,17 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
         return;
     }
     // Add the remaining small block
-    nuint val = ((nuint)src[si + 0] << (int)(16));
+    nuint val = (nuint)src[si + 0] << 16;
     if (remain == 2) {
-        val |= (nuint)(((nuint)src[si + 1] << (int)(8)));
+        val |= (nuint)(((nuint)src[si + 1] << 8));
     }
 
-    dst[di + 0] = enc.encode[(nuint)((val >> (int)(18)) & 0x3F)];
-    dst[di + 1] = enc.encode[(nuint)((val >> (int)(12)) & 0x3F)];
+    dst[di + 0] = enc.encode[(val >> 18 & 0x3F)];
+    dst[di + 1] = enc.encode[(val >> 12 & 0x3F)];
 
     switch (remain) {
     case 2: {
-        dst[di + 2] = enc.encode[(nuint)((val >> (int)(6)) & 0x3F)];
+        dst[di + 2] = enc.encode[(val >> 6 & 0x3F)];
         if (enc.padChar != NoPadding) {
             dst[di + 3] = (byte)enc.padChar;
         }
@@ -201,7 +201,7 @@ public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, s
 public static @string EncodeToString(this ref Encoding enc, slice<byte> src) {
     var buf = new slice<byte>(enc.EncodedLen(len(src)));
     enc.Encode(buf, src);
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 partial struct encoder {
@@ -388,8 +388,8 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
     }
 
     // Convert 4x 6bit source bytes into 3 bytes
-    nuint val = (nuint)((nuint)((nuint)(((nuint)dbuf[0] << (int)(18)) | ((nuint)dbuf[1] << (int)(12))) | ((nuint)dbuf[2] << (int)(6))) | (nuint)dbuf[3]);
-    (dbuf[2], dbuf[1], dbuf[0]) = ((byte)((val >> (int)(0))), (byte)((val >> (int)(8))), (byte)((val >> (int)(16))));
+    nuint val = (nuint)dbuf[0] << 18 | (nuint)dbuf[1] << 12 | (nuint)dbuf[2] << 6 | (nuint)dbuf[3];
+    (dbuf[2], dbuf[1], dbuf[0]) = ((byte)(val >> 0), (byte)(val >> 8), (byte)(val >> 16));
     var exprᴛ1 = dlen;
     var matchᴛ1 = false;
     if (exprᴛ1 is 4) { matchᴛ1 = true;
@@ -608,7 +608,7 @@ internal static (uint32 dn, bool ok) assemble32(byte n1, byte n2, byte n3, byte 
     if ((byte)((byte)((byte)(n1 | n2) | n3) | n4) == 0xff) {
         return (0, false);
     }
-    return ((uint32)((uint32)((uint32)(((uint32)n1 << (int)(26)) | ((uint32)n2 << (int)(20))) | ((uint32)n3 << (int)(14))) | ((uint32)n4 << (int)(8))), true);
+    return ((uint32)n1 << 26 | (uint32)n2 << 20 | (uint32)n3 << 14 | (uint32)n4 << 8, true);
 }
 
 // assemble64 assembles 8 base64 digits into 6 bytes.
@@ -620,7 +620,7 @@ internal static (uint64 dn, bool ok) assemble64(byte n1, byte n2, byte n3, byte 
     if ((byte)((byte)((byte)((byte)((byte)((byte)((byte)(n1 | n2) | n3) | n4) | n5) | n6) | n7) | n8) == 0xff) {
         return (0, false);
     }
-    return ((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)n1 << (int)(58)) | ((uint64)n2 << (int)(52))) | ((uint64)n3 << (int)(46))) | ((uint64)n4 << (int)(40))) | ((uint64)n5 << (int)(34))) | ((uint64)n6 << (int)(28))) | ((uint64)n7 << (int)(22))) | ((uint64)n8 << (int)(16))), true);
+    return ((uint64)n1 << 58 | (uint64)n2 << 52 | (uint64)n3 << 46 | (uint64)n4 << 40 | (uint64)n5 << 34 | (uint64)n6 << 28 | (uint64)n7 << 22 | (uint64)n8 << 16, true);
 }
 
 partial struct newlineFilteringReader {

@@ -110,36 +110,25 @@ internal static nint viaClosure() {
     return c.n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object viaLocalˢ = (@string)"viaLocal:"u8;
-private static readonly object viaParamˢ = (@string)"viaParam:"u8;
-private static readonly object viaNamedResultˢ = (@string)"viaNamedResult:"u8;
-private static readonly object viaFieldChainˢ = (@string)"viaFieldChain:"u8;
-private static readonly object viaNamedSliceˢ = (@string)"viaNamedSlice:"u8;
-private static readonly object valueReceiverCopiesˢ = (@string)"valueReceiverCopies:"u8;
-private static readonly object pointerBaseNoPromotionˢ = (@string)"pointerBaseNoPromotion:"u8;
-private static readonly object directCallStaysUnboxedˢ = (@string)"directCallStaysUnboxed:"u8;
-private static readonly object viaClosureˢ = (@string)"viaClosure:"u8;
-
 internal static void Main() {
     var (n, sum) = viaLocal();
-    fmt.Println(viaLocalˢ, n, sum);
+    fmt.Println("viaLocal:", n, sum);
 
     (n, sum) = viaParam(new counter(n: 40));
-    fmt.Println(viaParamˢ, n, sum);
+    fmt.Println("viaParam:", n, sum);
 
     var r = viaNamedResult();
-    fmt.Println(viaNamedResultˢ, r.n, r.calls);
+    fmt.Println("viaNamedResult:", r.n, r.calls);
 
-    fmt.Println(viaFieldChainˢ, viaFieldChain());
+    fmt.Println("viaFieldChain:", viaFieldChain());
 
     var (ln, total) = viaNamedSlice();
-    fmt.Println(viaNamedSliceˢ, ln, total);
+    fmt.Println("viaNamedSlice:", ln, total);
 
-    fmt.Println(valueReceiverCopiesˢ, valueReceiverCopies());
-    fmt.Println(pointerBaseNoPromotionˢ, pointerBaseNoPromotion());
-    fmt.Println(directCallStaysUnboxedˢ, directCallStaysUnboxed());
-    fmt.Println(viaClosureˢ, viaClosure());
+    fmt.Println("valueReceiverCopies:", valueReceiverCopies());
+    fmt.Println("pointerBaseNoPromotion:", pointerBaseNoPromotion());
+    fmt.Println("directCallStaysUnboxed:", directCallStaysUnboxed());
+    fmt.Println("viaClosure:", viaClosure());
 }
 
 } // end main_package

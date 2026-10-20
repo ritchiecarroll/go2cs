@@ -51,7 +51,7 @@ public static (@string, error) Ptsname(nint fd) {
             break;
         }
     }
-    return (((@string)buf), default!);
+    return ((@string)buf, default!);
 }
 
 //go:cgo_import_dynamic libc_posix_openpt posix_openpt "/usr/lib/libSystem.B.dylib"

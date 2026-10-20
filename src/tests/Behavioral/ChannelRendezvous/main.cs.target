@@ -5,45 +5,33 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object capˢ = (@string)"cap:"u8;
-private static readonly object lenˢ = (@string)"len:"u8;
-private static readonly object sendReadyWrongForˢ = (@string)"send: ready (wrong for unbuffered)"u8;
-private static readonly object sendNotReadyNoReceiverˢ = (@string)"send: not ready (no receiver)"u8;
-private static readonly object recvReadyWrongˢ = (@string)"recv: ready (wrong):"u8;
-private static readonly object recvNotReadyNoSenderˢ = (@string)"recv: not ready (no sender)"u8;
-private static readonly object afterProbesLenˢ = (@string)"after probes: len:"u8;
-private static readonly object replyˢ = (@string)"reply:"u8;
-private static readonly object afterRendezvousLenˢ = (@string)"after rendezvous: len:"u8;
-private static readonly object pongˢ = (@string)"pong:"u8;
-
 internal static partial void Main() {
     var ch = new channel<nint>(0);
-    fmt.Println(capˢ, cap(ch), lenˢ, len(ch));
+    fmt.Println("cap:", cap(ch), "len:", len(ch));
 
     var selᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);
     switch (trySelect(selᴛ1)) {
     case 0: {
-        fmt.Println(sendReadyWrongForˢ);
+        fmt.Println("send: ready (wrong for unbuffered)");
         break;
     }
     default: {
-        fmt.Println(sendNotReadyNoReceiverˢ);
+        fmt.Println("send: not ready (no receiver)");
         break;
     }}
 
     var selᴛ2 = ch;
     switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out var v): {
-        fmt.Println(recvReadyWrongˢ, v);
+        fmt.Println("recv: ready (wrong):", v);
         break;
     }
     default: {
-        fmt.Println(recvNotReadyNoSenderˢ);
+        fmt.Println("recv: not ready (no sender)");
         break;
     }}
 
-    fmt.Println(afterProbesLenˢ, len(ch), capˢ, cap(ch));
+    fmt.Println("after probes: len:", len(ch), "cap:", cap(ch));
 
     var reply = new channel<nint>(0);
     var chʗ1 = ch;
@@ -53,8 +41,8 @@ internal static partial void Main() {
         replyʗ1.ᐸꟷ(v * 2);
     });
     ch.ᐸꟷ(21);
-    fmt.Println(replyˢ, ᐸꟷ(reply));
-    fmt.Println(afterRendezvousLenˢ, len(ch), capˢ, cap(ch));
+    fmt.Println("reply:", ᐸꟷ(reply));
+    fmt.Println("after rendezvous: len:", len(ch), "cap:", cap(ch));
 
     var ping = new channel<nint>(0);
     var pong = new channel<nint>(0);
@@ -68,7 +56,7 @@ internal static partial void Main() {
     });
     for (nint i = 0; i < 3; i++) {
         ping.ᐸꟷ(i * 10);
-        fmt.Println(pongˢ, ᐸꟷ(pong));
+        fmt.Println("pong:", ᐸꟷ(pong));
     }
 }
 

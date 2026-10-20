@@ -558,11 +558,11 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
         if (peer == default!) { // for connected-mode sockets
             var exprᴛ1 = c.LocalAddr().Network();
             if (exprᴛ1 == "udp"u8) {
-                var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, ((@string)(b.slice(0, n))));
+                var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, (@string)(b.slice(0, n)));
                 (peer, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
             }
             else if (exprᴛ1 == "unixgram"u8) {
-                var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, ((@string)(b.slice(0, n))));
+                var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, (@string)(b.slice(0, n)));
                 (peer, err) = (new global::go.net_package.UnixAddrжΔAddr(ᴛ1), ᴛ2);
             }
             if (err != default!) {
@@ -731,7 +731,7 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
         if (Δos.Getenv("GO_NET_TEST_TRANSFER"u8) == ""u8) {
             return;
         }
-        defer(Δos.Exit, (nint)(0), ref ᒐ);
+        defer(Δos.Exit, (nint)0, ref ᒐ);
 
         var f = Δos.NewFile((uintptr)3, "splice-test-conn"u8);
         var fʗ1 = f;

@@ -83,7 +83,7 @@ Cast sites emit the adapter around the box (`Incrementer inc = new CounterжIncr
 **Non-empty interface-to-interface conversions use a forwarding adapter.** A Go interface value may be assigned or passed to another non-empty interface when the source interface method set satisfies the target (`var local localLabel = foreign`, where `foreign` is `CrossPkgLib.Labeled`). C# has no structural conversion between unrelated interfaces, so the converter records the interface pair as `[assembly: GoImplement<CrossPkgLib_package.Labeled, localLabel>]` and emits the cast site as a generated adapter:
 
 ```csharp
-CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter"u8, Temp: 21);
+CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter", Temp: 21);
 localLabel local = new CrossPkgLib_LabeledᴠlocalLabel(foreign);
 fmt.Println(labelOf(new CrossPkgLib_LabeledᴠlocalLabel(foreign)));
 ```
@@ -164,6 +164,16 @@ The tier choice branches on `Type.IsValueType`, and **either tier belts to the o
 The resolution is a LOOKUP, not a re-derivation: `ImplementGenerator` already builds `localImplNames`, every method the struct declares in either receiver form, so the emitted name is a fact in hand. `Common.ResolveForwardMemberName` matches the interface member against that set — exact name FIRST, the `ShadowVarMarker` projection only as a second pass — the identical two-pass shape `GoMethodNameMatches` runs at run time, so adapter, binder and probe now agree by construction rather than by coincidence. Exact-first is load-bearing rather than stylistic: `Δ` is a Unicode letter and therefore a legal Go identifier character, so a genuinely `ΔX`-named Go method must never be displaced by a projection of `X`. The resolved name drives the forwarding RECEIVER as well as the call target, because `ForwardReceivers` is keyed by declared names too — `URLValue`'s value-receiver `ΔString(this URLValue)` needs `m_box.Value.ΔString()`, and a Go-name miss fell through to the `m_box` default and stranded the call at CS1929 even once the target was right. `ForwardName` is null for every member the collision pass left alone, which is the whole production corpus: measured byte-identical across all 627 behavioral packages, and 0 errors on both solutions. Guard: `src/tests/GenTests/CollisionRenamedForwardTests.cs`. Measured: `flag` 0 (build-blocked) → **23 of 24**.
 
 **`TryCreate` is FAIL-SOFT.** The structural probe is deliberately NAME-ONLY for an open-generic receiver method — a Go `gbox[int]` whose `Get() T` returns an `int` matches `interface{ Get() string }` under that weaker rule (measured). Go answers `ok=false` there, so a shell that cannot be built answers `false` rather than escaping as an exception; a false-positive match must reproduce today's harmless miss, never a crash.
+
+**A generic type's method reaches every consumer CLOSED, and its signature is compared in full (2026-10-19).** The name-only rule above is retired. A Go method of a generic type emits as a generic extension method (`String<K, V>(this Pair<K, V> p)`), so the method-set scan finds its OPEN definition, and before this change each consumer handled that differently: `StructurallyImplements` matched by name only, `AdapterBinder` and `error<T>` could not bind it, and `CreateStaticDelegate` closed it over the receiver's FIRST type argument, which is right for one type parameter and wrong for two. `GetGoMethodSetCandidates` now closes every open candidate before any consumer sees it, so the probe, the binder, `error<T>` and reflect all read one closed method:
+
+1. **The type's generated method source.** `go2cs-gen` (`MethodSource.cs`) implements golib's `IGoMethodSource` on every generic value type with Go methods. Each arm returns the `Method` of a delegate created over the type's own parameters, so the C# compiler instantiates the closed method and Native AOT has code for exactly the instantiations the program uses. A pointer method emitted `this ref T` is named through RecvGenerator's `ж<T>` twin.
+2. **Receiver unification, with dynamic code only.** A generic type without a source (a hand-written one, or a test fixture) closes by matching the receiver's type arguments position by position and calling `MakeGenericMethod`.
+3. **Otherwise a Go panic naming the method and the type.** An open method is never handed to a consumer, and a CLR exception never escapes in its place. Reflect's `Method(i).Func` follows the same rule: a method whose func cannot be built panics naming the type and the method, prefixed `go2cs:` because Go never raises that panic. `NumMethod`, `Method(i)` and `MethodByName` never build one, as in Go: `Method(i).Func` carries the method unbound (`GoReflect.LazyMethodFunc`) and binds at its first use, which is where that panic belongs. Under Native AOT no method func of ANY type can be bound yet (the `Func`/`Expression` instantiation over the receiver has no native code); that gap predates this change, and closing it means go2cs-gen emitting, per type, both the closed unbound delegate and the binder that binds a receiver into a method value.
+
+A generic extension method with a type parameter its receiver does not carry (golib's type-assertion forms `_<T>(this X)`) is not a Go method, since a Go method declares no type parameters of its own, and the candidate source skips it.
+
+Generic named FUNC types are the residual: they emit as delegates and so have no generated part to carry a source. They close by route 2 under JIT and refuse by route 3 under Native AOT. No Go 1.26 standard library package and no behavioral test declares a method on one. (Guarded by the `GenericMethodReflect` behavioral test, GolibTests' `GenericMethodSourceTests` and GenTests' `GoMethodSourceTests`.)
 
 **Tier order in `builtin.TryTypeAssert` is unchanged, and the shells fire only where it previously answered MISS**: nominal `case T` → `IжAdapter` unwrap → `AdapterRegistry` (compile-time adapters) → **shell memo** → `Implements<T>` gate → **shell construction**. That is the regression floor — no assertion that already resolved can take a different path. Construction costs on the order of a microsecond and `fmt` probes three interfaces per formatted value, so the memo ships in the same change: `AdapterRegistry` caches the (dynamic type, interface) decision, **including the negative**. It is deliberately **not** cleared on `AssemblyLoad` — Go fixes a type's method set at compile time, and the extension methods carrying it live in that type's own assembly, which is loaded by definition when we are holding an instance of it. (Extension-method *discovery* caches are still invalidated on load; only this decision cache is not.)
 
@@ -425,7 +435,7 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
 At a cast site the converter composes the adapter's name, with no marker:
 
-<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:99, 103 -->
+<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:98-104 -->
 ```csharp
 sizer p = new fixedжsizer(Ꮡf);
 …
@@ -1449,7 +1459,7 @@ The cast site in another file, `generation.cs`:
 
 And the record in `package_info.cs`:
 
-<!-- source: src/core/internal/trace/package_info.cs:59 -->
+<!-- source: src/core/internal/trace/package_info.cs:58 -->
 ```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
@@ -1865,6 +1875,15 @@ and `ast.FuncType` → `ж<ast.FuncType>`, and those must not start recording. (
 `TestWhiteboxProductionPointerBoxConvStillRecorded`, whose both-foreign arm is the boundary, and
 `TestPointerBoxConversionRecordShape` for the shared predicate; the numeric phantom keeps its own guard,
 `TestWhiteboxProductionNumericConvNotRecorded`.)
+
+**Superseded 2026-10-20.** Those pointer-boxing records came from a call-argument loop that compared
+every argument with the FIRST parameter. Checked against its own parameter, an argument in a `*T` slot
+never owes `T` → `ж<T>`, because Go has no implicit conversion from a value to a pointer, so the records
+no longer arise and a `-tests` regen drops them. They were not inert either: in a production build the
+generator strips the box, finds `T`, and generated an operator that boxed a COPY (runtime's `runqput`
+stored a copy of the caller's `g`). It now refuses such a record by name, `GO2CS0008`. The guard above is
+now `TestWhiteboxArgumentOfItsParameterTypeRecordsNoBox`: `check(t, New())` records nothing, and the
+both-foreign arm stays.
 
 ---
 

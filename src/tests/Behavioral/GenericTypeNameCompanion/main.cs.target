@@ -24,26 +24,16 @@ internal static void sizeOf<T>(@string label, T v) {
     fmt.Printf("%-11s dynamic=%T\n"u8, label, (v).OrTypedNilOf());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string efaceˢ = "eface"u8;
-private static readonly @string namedIfaceˢ = "namedIface"u8;
-private static readonly @string anyˢ = "any"u8;
-private static readonly @string aliasIfaceˢ = "aliasIface"u8;
-private static readonly @string inlineIfaceˢ = "inlineIface"u8;
-private static readonly @string ordinaryˢ = "ordinary"u8;
-private static readonly @string negOrdinaryˢ = "neg-ordinary"u8;
-private static readonly @string negEfaceˢ = "neg-eface"u8;
-
 internal static void Main() {
-    nameOf<eface, efaceᴅ>(efaceˢ);
-    nameOf<namedIface, namedIfaceᴅ>(namedIfaceˢ);
-    nameOf<any, any>(anyˢ);
-    nameOf<aliasIface, aliasIface>(aliasIfaceˢ);
-    nameOf<inlineIface, inlineIface>(inlineIfaceˢ);
-    nameOf<ordinary, ordinary>(ordinaryˢ);
+    nameOf<eface, efaceᴅ>("eface");
+    nameOf<namedIface, namedIfaceᴅ>("namedIface");
+    nameOf<any, any>("any");
+    nameOf<aliasIface, aliasIface>("aliasIface");
+    nameOf<inlineIface, inlineIface>("inlineIface");
+    nameOf<ordinary, ordinary>("ordinary");
 
-    sizeOf(negOrdinaryˢ, ((ordinary)(@string)"x"u8));
-    sizeOf<eface>(negEfaceˢ, default!);
+    sizeOf("neg-ordinary", (ordinary)(@string)"x"u8);
+    sizeOf<eface>("neg-eface", default!);
 }
 
 } // end main_package

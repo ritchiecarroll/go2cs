@@ -129,6 +129,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Array VALUE-COPY at every transfer site (range, composite, return, send, append) — DEEP for nested arrays](slices-and-arrays.md#array-value-copy-at-every-transfer-site-range-composite-return-send-append--deep-for-nested-arrays)
   - [A STRUCT carrying array fields copies through its generated `ΔClone()`](slices-and-arrays.md#a-struct-carrying-array-fields-copies-through-its-generated-δclone)
   - [Nil-vs-empty slice identity (`s == nil` is representation nilness, not emptiness)](slices-and-arrays.md#nil-vs-empty-slice-identity-s--nil-is-representation-nilness-not-emptiness)
+  - [`append` grows a slice exactly as Go's `growslice` does](slices-and-arrays.md#append-grows-a-slice-exactly-as-gos-growslice-does)
   - [A slice of a ZERO-SIZE element type carries no storage — `make([]struct{}, math.MaxInt)` allocates nothing](slices-and-arrays.md#a-slice-of-a-zero-size-element-type-carries-no-storage--makestruct-mathmaxint-allocates-nothing)
   - [A composite literal omitting a fixed-array field keeps the zeroed backing](slices-and-arrays.md#a-composite-literal-omitting-a-fixed-array-field-keeps-the-zeroed-backing)
   - [A fixed-array composite literal carries its DECLARED length (`.array(N)`)](slices-and-arrays.md#a-fixed-array-composite-literal-carries-its-declared-length-arrayn)
@@ -147,6 +148,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A `nil` element appended to a slice casts to the element type](slices-and-arrays.md#a-nil-element-appended-to-a-slice-casts-to-the-element-type)
 - **[Strings (`@string` and `sstring`)](strings.md)**
   - [`@string` is a byte string, and slicing it is a window](strings.md#string-is-a-byte-string-and-slicing-it-is-a-window)
+  - [A literal in a `string` slot is a plain C# literal](strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal)
   - [String literals render as `u8` spans](strings.md#string-literals-render-as-u8-spans)
   - [A string literal with raw-byte escapes emits a byte-array `@string`](strings.md#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string)
   - [Converting between strings and slices](strings.md#converting-between-strings-and-slices)

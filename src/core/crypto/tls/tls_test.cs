@@ -1166,43 +1166,43 @@ public static void TestCloneFuncFields(ж<testing.T> Ꮡt) {
     ref var c1 = ref heap<global::go.crypto.tls_package.Config>(out var Ꮡc1);
     c1 = new Config(
         Time: () => {
-            called |= (nint)((1 << (int)(0)));
+            called |= (nint)((1 << 0));
             return new time_package.Time(nil);
         },
         GetCertificate: (ж<global::go.crypto.tls_package.ClientHelloInfo> _) => {
-            called |= (nint)((1 << (int)(1)));
+            called |= (nint)((1 << 1));
             return (default!, default!);
         },
         GetClientCertificate: (ж<global::go.crypto.tls_package.CertificateRequestInfo> _) => {
-            called |= (nint)((1 << (int)(2)));
+            called |= (nint)((1 << 2));
             return (default!, default!);
         },
         GetConfigForClient: (ж<global::go.crypto.tls_package.ClientHelloInfo> _) => {
-            called |= (nint)((1 << (int)(3)));
+            called |= (nint)((1 << 3));
             return (default!, default!);
         },
         VerifyPeerCertificate: (slice<slice<byte>> rawCerts, slice<slice<ж<Δx509.Certificate>>> verifiedChains) => {
-            called |= (nint)((1 << (int)(4)));
+            called |= (nint)((1 << 4));
             return default!;
         },
         VerifyConnection: (global::go.crypto.tls_package.ΔConnectionState _) => {
-            called |= (nint)((1 << (int)(5)));
+            called |= (nint)((1 << 5));
             return default!;
         },
         UnwrapSession: (slice<byte> identity, global::go.crypto.tls_package.ΔConnectionState cs) => {
-            called |= (nint)((1 << (int)(6)));
+            called |= (nint)((1 << 6));
             return (default!, default!);
         },
         WrapSession: (global::go.crypto.tls_package.ΔConnectionState cs, ж<global::go.crypto.tls_package.SessionState> ss) => {
-            called |= (nint)((1 << (int)(7)));
+            called |= (nint)((1 << 7));
             return (default!, default!);
         },
         EncryptedClientHelloRejectionVerify: (global::go.crypto.tls_package.ΔConnectionState _) => {
-            called |= (nint)((1 << (int)(8)));
+            called |= (nint)((1 << 8));
             return default!;
         },
         GetEncryptedClientHelloKeys: (ж<global::go.crypto.tls_package.ClientHelloInfo> _) => {
-            called |= (nint)((1 << (int)(9)));
+            called |= (nint)((1 << 9));
             return (default!, default!);
         }
     );
@@ -1220,7 +1220,7 @@ public static void TestCloneFuncFields(ж<testing.T> Ꮡt) {
     (~c2).EncryptedClientHelloRejectionVerify(new ΔConnectionState(nil));
     (~c2).GetEncryptedClientHelloKeys(nil);
 
-    if (called != (nint)(((1 << (int)(expectedCount))) - 1)) {
+    if (called != (nint)((1 << (int)(expectedCount)) - 1)) {
         Ꮡt.Fatalf("expected %d calls but saw calls %b"u8, (nint)(expectedCount), called);
     }
 }
@@ -1238,7 +1238,7 @@ public static void TestCloneNonFuncFields(ж<testing.T> Ꮡt) {
             @string fn = typ.Field(i).Name;
             var exprᴛ1 = fn;
             if (exprᴛ1 == "Rand"u8) {
-                f.Set(reflect.ValueOf(((io.Reader)new tls_test_package.os_FileжReader(os.Stdin))));
+                f.Set(reflect.ValueOf((io.Reader)new tls_test_package.os_FileжReader(os.Stdin)));
             }
             else if (exprᴛ1 == "Time"u8 || exprᴛ1 == "GetCertificate"u8 || exprᴛ1 == "GetConfigForClient"u8 || exprᴛ1 == "VerifyPeerCertificate"u8 || exprᴛ1 == "VerifyConnection"u8 || exprᴛ1 == "GetClientCertificate"u8 || exprᴛ1 == "WrapSession"u8 || exprᴛ1 == "UnwrapSession"u8 || exprᴛ1 == "EncryptedClientHelloRejectionVerify"u8 || exprᴛ1 == "GetEncryptedClientHelloKeys"u8) {
                 // DeepEqual can't compare functions. If you add a
@@ -1261,7 +1261,7 @@ public static void TestCloneNonFuncFields(ж<testing.T> Ꮡt) {
                 f.Set(reflect.ValueOf(NewLRUClientSessionCache(10)));
             }
             else if (exprᴛ1 == "KeyLogWriter"u8) {
-                f.Set(reflect.ValueOf(((io.Writer)new os.FileжWriter(os.Stdout))));
+                f.Set(reflect.ValueOf((io.Writer)new os.FileжWriter(os.Stdout)));
             }
             else if (exprᴛ1 == "NextProtos"u8) {
                 f.Set(reflect.ValueOf(new @string[]{"a"u8, "b"u8}.slice()));
@@ -1450,10 +1450,10 @@ public static void BenchmarkThroughput(ж<testing.B> Ꮡb) {
             @string name = fmt.Sprintf("%sPacket/%dMB"u8, mode, size);
             Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
                 bΔ1.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ2) => {
-                    throughput(bΔ2, VersionTLS12, (int64)((size << (int)(20))), mode == "Max"u8);
+                    throughput(bΔ2, VersionTLS12, (int64)(size << 20), mode == "Max"u8);
                 });
                 bΔ1.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ3) => {
-                    throughput(bΔ3, VersionTLS13, (int64)((size << (int)(20))), mode == "Max"u8);
+                    throughput(bΔ3, VersionTLS13, (int64)(size << 20), mode == "Max"u8);
                 });
             });
         }
@@ -1671,17 +1671,17 @@ public static void TestConnectionState(ж<testing.T> Ꮡt) {
         }
 
         if (len(cs.PeerCertificates) != 1){
-            tΔ1.Errorf("got %d PeerCertificates, expected %d"u8, len(cs.PeerCertificates), (nint)(1));
+            tΔ1.Errorf("got %d PeerCertificates, expected %d"u8, len(cs.PeerCertificates), (nint)1);
         } else 
         if (!bytes.Equal((~cs.PeerCertificates[0]).Raw, testRSA2048Certificate)) {
             tΔ1.Errorf("got PeerCertificates %x, expected %x"u8, (~cs.PeerCertificates[0]).Raw, testRSA2048Certificate);
         }
 
         if (len(cs.VerifiedChains) != 1){
-            tΔ1.Errorf("got %d long verified chain, expected %d"u8, len(cs.VerifiedChains), (nint)(1));
+            tΔ1.Errorf("got %d long verified chain, expected %d"u8, len(cs.VerifiedChains), (nint)1);
         } else 
         if (len(cs.VerifiedChains[0]) != 2){
-            tΔ1.Errorf("got %d verified chain, expected %d"u8, len(cs.VerifiedChains[0]), (nint)(2));
+            tΔ1.Errorf("got %d verified chain, expected %d"u8, len(cs.VerifiedChains[0]), (nint)2);
         } else 
         if (!bytes.Equal((~cs.VerifiedChains[0][0]).Raw, testRSA2048Certificate)){
             tΔ1.Errorf("got verified chain[0][0] %x, expected %x"u8, (~cs.VerifiedChains[0][0]).Raw, testRSA2048Certificate);
@@ -1693,7 +1693,7 @@ public static void TestConnectionState(ж<testing.T> Ꮡt) {
         // Only TLS 1.3 supports OCSP and SCTs on client certs.
         if (isClient || version == VersionTLS13){
             if (len(cs.SignedCertificateTimestamps) != 2){
-                tΔ1.Errorf("got %d SCTs, expected %d"u8, len(cs.SignedCertificateTimestamps), (nint)(2));
+                tΔ1.Errorf("got %d SCTs, expected %d"u8, len(cs.SignedCertificateTimestamps), (nint)2);
             } else 
             if (!bytes.Equal(cs.SignedCertificateTimestamps[0], sctsʗ1[0])){
                 tΔ1.Errorf("got SCTs %x, expected %x"u8, cs.SignedCertificateTimestamps[0], sctsʗ1[0]);
@@ -2122,7 +2122,7 @@ public static void TestCipherSuites(ж<testing.T> Ꮡt) {
         }
 
         {
-            var tls12Only = (nint)((~c).flags & (nint)suiteTLS12) != 0; if (tls12Only && len((~cc).SupportedVersions) != 1){
+            var tls12Only = ((~c).flags & (nint)suiteTLS12) != 0; if (tls12Only && len((~cc).SupportedVersions) != 1){
                 Ꮡt.Errorf("%#04x: suite is TLS 1.2 only, but SupportedVersions is %v"u8, (~c).id, (~cc).SupportedVersions);
             } else 
             if (!tls12Only && len((~cc).SupportedVersions) != 3) {
@@ -2248,10 +2248,10 @@ public static void TestCipherSuites(ж<testing.T> Ꮡt) {
                 return +1;
             }
             // ECDHE < *
-            if ((nint)((~aSuite).flags & (nint)suiteECDHE) != 0 && (nint)((~bSuite).flags & (nint)suiteECDHE) == 0){
+            if (((~aSuite).flags & (nint)suiteECDHE) != 0 && ((~bSuite).flags & (nint)suiteECDHE) == 0){
                 return -1;
             } else 
-            if ((nint)((~aSuite).flags & (nint)suiteECDHE) == 0 && (nint)((~bSuite).flags & (nint)suiteECDHE) != 0) {
+            if (((~aSuite).flags & (nint)suiteECDHE) == 0 && ((~bSuite).flags & (nint)suiteECDHE) != 0) {
                 return +1;
             }
             // AEAD < CBC
@@ -2286,10 +2286,10 @@ public static void TestCipherSuites(ж<testing.T> Ꮡt) {
                 return +1;
             }
             // ECDSA < RSA
-            if ((nint)((~aSuite).flags & (nint)suiteECSign) != 0 && (nint)((~bSuite).flags & (nint)suiteECSign) == 0){
+            if (((~aSuite).flags & (nint)suiteECSign) != 0 && ((~bSuite).flags & (nint)suiteECSign) == 0){
                 return -1;
             } else 
-            if ((nint)((~aSuite).flags & (nint)suiteECSign) == 0 && (nint)((~bSuite).flags & (nint)suiteECSign) != 0) {
+            if (((~aSuite).flags & (nint)suiteECSign) == 0 && ((~bSuite).flags & (nint)suiteECSign) != 0) {
                 return +1;
             }
             Ꮡt.Fatalf("two ciphersuites are equal by all criteria: %v and %v"u8, aName, bName);

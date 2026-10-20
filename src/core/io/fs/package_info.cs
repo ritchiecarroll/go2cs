@@ -52,6 +52,12 @@ using static go.io.fs_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -60,7 +66,7 @@ using static go.io.fs_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAki4oKCgpSCgoKUgpSCgoKCgoKUgoKUgpSCgqYAAhLigriClIKCgoKU")]
+[assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
 [assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaAooCigKKAooAAM16CgoKCgoKCpoKClIKCgpSUlKqiqqKokqiSAAkUgKSA5pKC")]
 [assembly: go.GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgsiAgqSCgIKkpoKUgriCpoKCgpSCgoKmqJKUpAADEPKCgoKmgoKCgpSCpqqigpSm")]
 [assembly: go.GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABk6AAgCgIK2goKUpIKCpoKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1")]

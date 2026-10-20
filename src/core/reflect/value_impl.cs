@@ -40,8 +40,9 @@ partial struct ΔValue {
     [GoReflectCompanion] internal object? boxed;
     [GoReflectCompanion] internal object? addrBox;
 
-    // The LIVE value this Value represents (read-through for an addressable Value).
-    internal object? live => addrBox is null ? boxed : GoReflect.ReadPointerSlot(addrBox);
+    // The LIVE value this Value represents (read-through for an addressable Value). A Type.Method(i).Func is
+    // carried unbound (GoReflect.LazyMethodFunc) and binds here, at its first use.
+    internal object? live => addrBox is null ? (boxed is GoReflect.LazyMethodFunc lazy ? lazy.Func : boxed) : GoReflect.ReadPointerSlot(addrBox);
 
     // Go compares two Values as structs: typ_, ptr and flag. Its ptr is the datum's ADDRESS -- an
     // addressable Value's slot, a pointer-shaped value itself (pointer, map, chan, func,
@@ -1737,8 +1738,12 @@ public static ΔValue NewAt(ΔType typ, @unsafe.Pointer p) {
     // with the zero box every such field read as zero (cmpopts IgnoreUnexported and IgnoreFields
     // compared differing structs equal). EXACT ONLY (ruled 2026-10-04): a live token, or a live
     // token plus an offset landing exactly on a node of this type -- see
-    // GoReflect.ResolveNewAtPointee. Every miss keeps the zero box, so gcbits' path is unchanged.
+    // GoReflect.ResolveNewAtPointee. A pointer to a POINTER array over memory the Go runtime did not
+    // allocate reads the foreign words it holds, through E's registered opener, and refuses by name an
+    // E no compilation spells (G's ruling, 2026-10-19; GoReflect.OpenNewAtPointerArray). Every other
+    // miss keeps the zero box, so gcbits' path is unchanged: its p is a tagged storage token.
     object box = GoReflect.ResolveNewAtPointee((nuint)(uintptr)p, st) ??
+                 GoReflect.OpenNewAtPointerArray((nuint)(uintptr)p, st, dims) ??
                  GoReflect.NewPointerBox(st, GoReflect.ZeroValueOf(st, dims, chanDir));
     return makeTypedValue(box, typeof(ж<>).MakeGenericType(st), null, default, chanDir);
 }
@@ -2752,13 +2757,23 @@ internal static nint NumMethod(this ж<rtype> Ꮡt) {
 // Method.Type carries the receiver as its first argument and Func is the UNBOUND func value, Go's
 // contract for the type side; an interface method has neither a receiver nor a Func (zero Value),
 // and its PkgPath qualifies an unexported name.
+// Func is built LAZILY: it carries the method unbound and binds at its first use (ΔValue.live), so
+// Method(i).Name and MethodByName's lookup never bind, as in Go. Binding is where a method with no
+// delegate form fails (under Native AOT, any method whose Func/Expression instantiation has no native
+// code), and its Go panic belongs to the use of Func. Func's type is Method.Type itself, Go's
+// m.Func.Type() == m.Type.
 internal static ΔMethod Method(this ж<rtype> Ꮡt, nint i) {
     System.Type? st = Ꮡt.Value.t.sysType;
     if (i < 0 || i >= GoReflect.GoMethodCount(st)) {
         throw panic("reflect: Method index out of range");
     }
     string name = GoReflect.GoMethodName(st, (int)i);
-    var fn = GoReflect.GoMethodFunc(st, (int)i);
+    ж<abi.Type> ft = methodFuncType(st, (int)i);
+    ΔValue fn = new ΔValue(nil);
+    if (GoReflect.GoMethodHasFunc(st, (int)i)) {
+        fn = new ΔValue(ft, default!, ((flag)(uintptr)(uint8)Func));
+        fn.boxed = new GoReflect.LazyMethodFunc(st, (int)i);
+    }
     return new ΔMethod(
         Name: (@string)name,
         PkgPath: (@string)(isExportedGoName(name) ? "" : GoReflect.GoPackagePath(st)),
@@ -2767,8 +2782,8 @@ internal static ΔMethod Method(this ж<rtype> Ꮡt, nint i) {
         // through a delegate instance, so abi.TypeOf's func-value route cannot supply them here.
         // net/rpc reads exactly this — mtype.In(2) for every service method's reply — and without
         // the cargo a `*[1]int` reply allocated a ZERO-length array through reflect.New.
-        Type: toType(methodFuncType(st, (int)i)),
-        Func: fn is null ? new ΔValue(nil) : makeReflectValue(fn),
+        Type: toType(ft),
+        Func: fn,
         Index: i
     );
 }

@@ -32,6 +32,9 @@ namespace go2cs;
 /// The converter puts a record on the package class of each FILE with a site, naming that file's struct types, and
 /// the properties go into the USING package's own compilation, in an <c>internal</c> class: an extension block may extend a foreign type, an exported field's
 /// <c>Ꮡ</c> accessor is public, and no other assembly sees the class, so two packages extending one type never meet.
+/// The exception is a test assembly that references its package's assembly: it sees the package's class through
+/// <c>InternalsVisibleTo</c>, so a property that class already declares is not declared again (see
+/// <see cref="VisibleProperties"/>).
 /// A field is skipped when its name is in <see cref="CollisionNames"/> (a member of <c>ж&lt;T&gt;</c> would bind
 /// first, silently), when it is blank, or when it is not accessible here; a field of a FOREIGN type is skipped too
 /// when the type carries no <c>Ꮡ</c> accessor for it. A generic struct, named by its open definition, gets a
@@ -49,6 +52,8 @@ public class FieldAccessGenerator : ISourceGenerator
     private const string AttributeName = "go.GoFieldAccessAttribute";
 
     private const string ReceiverName = "ʗp";
+
+    private const string ClassName = "go.GoFieldAccess";
 
     /// <summary>
     /// The names a generated property must never take, read from the converter's <c>fieldAccessCollisions.txt</c>
@@ -117,10 +122,11 @@ public class FieldAccessGenerator : ISourceGenerator
         source.Append("internal static class GoFieldAccess\r\n{");
 
         bool first = true;
+        List<INamedTypeSymbol> visibleClasses = VisibleClasses(compilation);
 
         foreach (INamedTypeSymbol type in types)
         {
-            List<string> properties = Properties(compilation, type);
+            List<string> properties = Properties(compilation, type, VisibleProperties(visibleClasses, type));
 
             if (properties.Count == 0)
                 continue;
@@ -142,7 +148,45 @@ public class FieldAccessGenerator : ISourceGenerator
         return source.ToString();
     }
 
-    private static List<string> Properties(Compilation compilation, INamedTypeSymbol type)
+    // The GoFieldAccess classes of REFERENCED assemblies this compilation can see. Only a grant reaches one, since the
+    // class is internal: a test assembly that references its package's assembly, which grants InternalsVisibleTo.
+    private static List<INamedTypeSymbol> VisibleClasses(Compilation compilation) =>
+        compilation.GetTypesByMetadataName(ClassName)
+            .Where(type => !SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, compilation.Assembly) &&
+                           compilation.IsSymbolAccessibleWithin(type, compilation.Assembly))
+            .ToList();
+
+    /// <summary>
+    /// The names of the properties a visible referenced class already declares on <c>ж&lt;T&gt;</c> for this type.
+    /// </summary>
+    /// <remarks>
+    /// Declaring one again would make the two ambiguous, which C# reports as no member at all (CS9286): the runtime
+    /// test assembly's <c>s.Δarray</c> on a <c>ж&lt;Δsliceᴛ&gt;</c> that the runtime's own <c>alg.cs</c> records too.
+    /// A referenced block is read through the static implementation method each of its properties leaves on the
+    /// class, <c>get_&lt;name&gt;(ж&lt;T&gt; ʗp)</c>; a generic block's is generic over the same open type.
+    /// </remarks>
+    private static HashSet<string> VisibleProperties(List<INamedTypeSymbol> visibleClasses, INamedTypeSymbol type)
+    {
+        HashSet<string> names = new(StringComparer.Ordinal);
+
+        foreach (INamedTypeSymbol visibleClass in visibleClasses)
+        {
+            foreach (IMethodSymbol method in visibleClass.GetMembers().OfType<IMethodSymbol>())
+            {
+                if (method.IsStatic && method.Name.StartsWith("get_", StringComparison.Ordinal) && method.Parameters.Length == 1 &&
+                    method.Parameters[0].Type is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 } receiver &&
+                    receiver.TypeArguments[0] is INamedTypeSymbol target &&
+                    SymbolEqualityComparer.Default.Equals(target.OriginalDefinition, type))
+                {
+                    names.Add(method.Name.Substring("get_".Length));
+                }
+            }
+        }
+
+        return names;
+    }
+
+    private static List<string> Properties(Compilation compilation, INamedTypeSymbol type, HashSet<string> declared)
     {
         List<string> properties = [];
         string typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -155,7 +199,7 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string name = field.Name;
 
-            if (IsBlank(name) || s_collisionNames.Contains(name) || !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly))
+            if (IsBlank(name) || s_collisionNames.Contains(name) || declared.Contains(name) || !compilation.IsSymbolAccessibleWithin(field, compilation.Assembly))
                 continue;
 
             string accessor = $"{AddressPrefix}{name}";
@@ -181,7 +225,7 @@ public class FieldAccessGenerator : ISourceGenerator
 
             string name = property.Name;
 
-            if (s_collisionNames.Contains(name) || !compilation.IsSymbolAccessibleWithin(property, compilation.Assembly))
+            if (s_collisionNames.Contains(name) || declared.Contains(name) || !compilation.IsSymbolAccessibleWithin(property, compilation.Assembly))
                 continue;
 
             string accessor = $"{AddressPrefix}{name}";

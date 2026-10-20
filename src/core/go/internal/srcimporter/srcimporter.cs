@@ -73,6 +73,7 @@ public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @str
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
+        var filesᴷ = new stackAppend<ж<ast.File>>();
 
         if (mode != 0) {
             throw panic("non-zero import mode");
@@ -155,7 +156,7 @@ public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @str
                 if (errΔ3 != default!) {
                     return (default!, fmt.Errorf("error processing cgo for package %q: %w"u8, (~bp).ImportPath, errΔ3));
                 }
-                files = append(files, @file);
+                files = append(filesᴷ, files, @file);
             }
         }
 
@@ -243,6 +244,7 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
     try {
         ref var p = ref Ꮡp.DerefOrNull();
         ref var bp = ref Ꮡbp.DerefOrNull();
+        var argsᴷ = new stackAppend<@string>();
 
         var (tmpdir, err) = os.MkdirTemp(""u8, srcimporterˢ);
         if (err != default!) {
@@ -258,7 +260,7 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
         if (bp.Goroot) {
             var exprᴛ1 = bp.ImportPath;
             if (exprᴛ1 == "runtime/cgo"u8) {
-                args = append(args, "-import_runtime_cgo=false"u8, "-import_syscall=false");
+                args = append(argsᴷ, args, "-import_runtime_cgo=false"u8, "-import_syscall=false");
             }
             else if (exprᴛ1 == "runtime/race"u8) {
                 args = append(args, "-import_syscall=false"u8);
@@ -273,7 +275,7 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
             if (errΔ1 != default!) {
                 return (default!, fmt.Errorf("pkg-config --cflags: %w"u8, errΔ1));
             }
-            args = appendꓸꓸꓸ(args, strings.Fields(((@string)@out)));
+            args = appendꓸꓸꓸ(args, strings.Fields((@string)@out));
         }
         args = append(args, "-I"u8, tmpdir);
         args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCflagsˢ)));

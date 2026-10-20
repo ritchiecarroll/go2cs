@@ -49,7 +49,7 @@ using static go.GenericInterfaceCrossPackage.keylike_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("keylike.go", "keylike.cs", "ABQisoKCgpSCgoKClA==")]
+[assembly: go.GoPositionMap("keylike.go", "keylike.cs", "ABAisoKCgpSCgoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.GenericInterfaceCrossPackage;

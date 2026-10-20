@@ -735,7 +735,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     while (len(data) > 0) {
         (line, data, _) = bytes.Cut(data, newline);
         var addr = next();
-        var (loStr, hiStr, ok) = strings_package.Cut(((@string)addr), "-"u8);
+        var (loStr, hiStr, ok) = strings_package.Cut((@string)addr, "-"u8);
         if (!ok) {
             continue;
         }
@@ -752,7 +752,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
             // Only interested in executable mappings.
             continue;
         }
-        (var offset, err) = strconv.ParseUint(((@string)next()), 16, 64);
+        (var offset, err) = strconv.ParseUint((@string)next(), 16, 64);
         if (err != default!) {
             continue;
         }
@@ -761,7 +761,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         if (line == default!) {
             continue;
         }
-        @string @file = ((@string)line);
+        @string @file = (@string)line;
 
         // Trim deleted file marker.
         @string deletedStr = deletedˢ;

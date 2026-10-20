@@ -226,11 +226,11 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
             }
         }
         tlen += (uint64)entry.Len;
-        var ecm = ((coverage.CounterMode)entry.CounterMode);
+        var ecm = (coverage.CounterMode)entry.CounterMode;
         if (modeClash(ecm)) {
             return (default!, fmt.Errorf("coverage counter mode clash: package %s uses mode=%d, but package %s uses mode=%s\n"u8, ml[0].PkgPath, cmode, entry.PkgPath, ecm));
         }
-        var ecg = ((coverage.CounterGranularity)entry.CounterGranularity);
+        var ecg = (coverage.CounterGranularity)entry.CounterGranularity;
         if (granClash(ecg)) {
             return (default!, fmt.Errorf("coverage counter granularity clash: package %s uses gran=%d, but package %s uses gran=%s\n"u8, ml[0].PkgPath, cgran, entry.PkgPath, ecg));
         }
@@ -489,6 +489,7 @@ internal static readonly @string ioWriterˢ = "<io.Writer>"u8;
 
 internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metalist, coverage.CounterMode cmode, coverage.CounterGranularity gran, /*[16]*/ array<byte> finalHash) {
     finalHash = finalHash.Clone();
+    var blobsᴷ = new stackAppend<slice<byte>>();
 
     var mfw = encodemeta.NewCoverageMetaFileWriter(ioWriterˢ, w);
 
@@ -497,7 +498,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
         var e = vᴛ1.ΔClone();
 
         var sd = @unsafe.Slice(e.P, (nint)e.Len);
-        blobs = append(blobs, sd);
+        blobs = append(blobsᴷ, blobs, sd);
     }
     return mfw.Write(finalHash, blobs, cmode, gran);
 }

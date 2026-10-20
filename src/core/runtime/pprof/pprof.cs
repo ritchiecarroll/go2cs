@@ -473,7 +473,7 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
     // Map order is non-deterministic; make output deterministic.
     slices.SortFunc<slice<slice<uintptr>>, slice<uintptr>>(all, slices.Compare<slice<uintptr>, uintptr>);
 
-    return printCountProfile(w, debug, p.name, ((stackProfile)all));
+    return printCountProfile(w, debug, p.name, (stackProfile)all);
 }
 
 partial struct stackProfile /*[]slice<uintptr>*/;
@@ -909,14 +909,14 @@ internal static partial error writeGoroutineStacks(io.Writer w) {
     // We don't know how big the buffer needs to be to collect
     // all the goroutines. Start with 1 MB and try a few times, doubling each time.
     // Give up and use a truncated trace if 64 MB is not enough.
-    var buf = new slice<byte>((1 << (int)(20)));
+    var buf = new slice<byte>((1 << 20));
     for (nint i = 0; ᐧ ; i++) {
         nint n = runtime.Stack(buf, true);
         if (n < len(buf)) {
             buf = buf.slice(0, n);
             break;
         }
-        if (len(buf) >= (64 << (int)(20))) {
+        if (len(buf) >= 64 << 20) {
             // Filled 64 MB - stop there.
             break;
         }

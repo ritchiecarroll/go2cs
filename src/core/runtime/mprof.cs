@@ -197,7 +197,7 @@ internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) {
     uint32 cycle = default!;
 
     var v = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
-    cycle = (v >> (int)(1));
+    cycle = v >> 1;
     return cycle;
 }
 
@@ -209,9 +209,9 @@ internal static (uint32 cycle, bool alreadyFlushed) setFlushed(this ж<mProfCycl
 
     while (ᐧ) {
         var prev = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
-        cycle = (prev >> (int)(1));
-        alreadyFlushed = ((uint32)(prev & 0x1)) != 0;
-        var next = (uint32)(prev | 0x1);
+        cycle = prev >> 1;
+        alreadyFlushed = (prev & 0x1) != 0;
+        var next = prev | 0x1;
         if (Ꮡc.of(mProfCycleHolder.Ꮡvalue).CompareAndSwap(prev, next)) {
             return (cycle, alreadyFlushed);
         }
@@ -226,9 +226,9 @@ internal static void increment(this ж<mProfCycleHolder> Ꮡc) {
     // itself wrap at a power of two.
     while (ᐧ) {
         var prev = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
-        var cycle = (prev >> (int)(1));
+        var cycle = prev >> 1;
         cycle = (cycle + 1) % mProfCycleWrap;
-        var next = (cycle << (int)(1));
+        var next = cycle << 1;
         if (Ꮡc.of(mProfCycleHolder.Ꮡvalue).CompareAndSwap(prev, next)) {
             break;
         }
@@ -1195,7 +1195,7 @@ internal static goroutineProfileState goroutineProfileSatisfied => 2;
 partial struct goroutineProfileStateHolder /*global::go.@internal.runtime.atomic_package.Uint32*/;
 
 internal static goroutineProfileState Load(this ж<goroutineProfileStateHolder> Ꮡp) {
-    return ((goroutineProfileState)(Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Load());
+    return (goroutineProfileState)(Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Load();
 }
 
 internal static void Store(this ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState value) {
@@ -1232,7 +1232,7 @@ internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice
     var pʗ1 = Δp;
     var pcbufʗ1 = pcbuf;
     forEachGRace((ж<g> gp1) => {
-        if ((uint32)(readgstatus(gp1) & ~(uint32)_Gscan) == _Gleaked) {
+        if ((readgstatus(gp1) & ~(uint32)_Gscan) == _Gleaked) {
             var pʗ2 = pʗ1;
             var pcbufʗ2 = pcbufʗ1;
             systemstack(() => {
@@ -1277,7 +1277,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     // doesn't change during the collection. So, check the finalizer goroutine
     // and cleanup goroutines in particular.
     n = (nint)gcount(false);
-    if ((uint32)(ᏑfingStatus.Load() & fingRunningFinalizer) != 0) {
+    if ((ᏑfingStatus.Load() & fingRunningFinalizer) != 0) {
         n++;
     }
     n += (nint)ᏑgcCleanups.of(cleanupQueue.Ꮡrunning).Load();

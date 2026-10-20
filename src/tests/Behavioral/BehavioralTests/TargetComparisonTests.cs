@@ -73,6 +73,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnonInterfaceVarWitness() => CheckTarget("AnonInterfaceVarWitness");
 
     [TestMethod]
+    public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]
@@ -83,9 +86,6 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckAnonStructCrossFile() => CheckTarget("AnonStructCrossFile");
-
-    [TestMethod]
-    public void CheckAnonStructAliasedConversion() => CheckTarget("AnonStructAliasedConversion");
 
     [TestMethod]
     public void CheckAnonStructNamedConversion() => CheckTarget("AnonStructNamedConversion");
@@ -640,6 +640,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForeignConstraintProxy() => CheckTarget("ForeignConstraintProxy");
+
+    [TestMethod]
     public void CheckForeignDefinedConversion() => CheckTarget("ForeignDefinedConversion");
 
     [TestMethod]
@@ -746,10 +749,15 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");
+
     [TestMethod]
     public void CheckGenericInterfaceCrossPackage() => CheckTarget("GenericInterfaceCrossPackage");
+
     [TestMethod]
     public void CheckGenericLiftedInterfaceField() => CheckTarget("GenericLiftedInterfaceField");
+
+    [TestMethod]
+    public void CheckGenericMethodReflect() => CheckTarget("GenericMethodReflect");
 
     [TestMethod]
     public void CheckGenericNamedArrayType() => CheckTarget("GenericNamedArrayType");
@@ -917,6 +925,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
 
     [TestMethod]
+    public void CheckImplicitConvArgumentParameter() => CheckTarget("ImplicitConvArgumentParameter");
+
+    [TestMethod]
     public void CheckImportSegmentTypeShadow() => CheckTarget("ImportSegmentTypeShadow");
 
     [TestMethod]
@@ -938,7 +949,13 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInitFrameNames() => CheckTarget("InitFrameNames");
 
     [TestMethod]
+    public void CheckInitOrderNoInline() => CheckTarget("InitOrderNoInline");
+
+    [TestMethod]
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
+
+    [TestMethod]
+    public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
 
     [TestMethod]
     public void CheckIntFormFloatConst() => CheckTarget("IntFormFloatConst");
@@ -1343,13 +1360,13 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedNumericSwitchLiteral() => CheckTarget("NamedNumericSwitchLiteral");
 
     [TestMethod]
+    public void CheckNamedPointerEquality() => CheckTarget("NamedPointerEquality");
+
+    [TestMethod]
     public void CheckNamedPointerFieldAddress() => CheckTarget("NamedPointerFieldAddress");
 
     [TestMethod]
     public void CheckNamedPointerReflectElem() => CheckTarget("NamedPointerReflectElem");
-
-    [TestMethod]
-    public void CheckNamedPointerEquality() => CheckTarget("NamedPointerEquality");
 
     [TestMethod]
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
@@ -1535,13 +1552,10 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNilVarNamedFuncConv() => CheckTarget("NilVarNamedFuncConv");
 
     [TestMethod]
-    public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
-
-    [TestMethod]
-    public void CheckInitOrderNoInline() => CheckTarget("InitOrderNoInline");
-
-    [TestMethod]
     public void CheckNoInlinePartial() => CheckTarget("NoInlinePartial");
+
+    [TestMethod]
+    public void CheckNoinlineDirectiveFrame() => CheckTarget("NoinlineDirectiveFrame");
 
     [TestMethod]
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
@@ -1607,6 +1621,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckParenthesizedTypeAssertion() => CheckTarget("ParenthesizedTypeAssertion");
 
     [TestMethod]
+    public void CheckParityOperatorPrecedence() => CheckTarget("ParityOperatorPrecedence");
+
+    [TestMethod]
     public void CheckPartialInstantiationAnonymousTypeArg() => CheckTarget("PartialInstantiationAnonymousTypeArg");
 
     [TestMethod]
@@ -1638,6 +1655,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerCastSliceReinterpret() => CheckTarget("PointerCastSliceReinterpret");
+
+    [TestMethod]
+    public void CheckPointerConversionAliasing() => CheckTarget("PointerConversionAliasing");
+
+    [TestMethod]
+    public void CheckPointerConversionAnonymousTarget() => CheckTarget("PointerConversionAnonymousTarget");
 
     [TestMethod]
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
@@ -1758,6 +1781,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPromotedValueEmbedUser() => CheckTarget("PromotedValueEmbedUser");
+
+    [TestMethod]
+    public void CheckProxyContainerForwarding() => CheckTarget("ProxyContainerForwarding");
 
     [TestMethod]
     public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
@@ -1964,10 +1990,10 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]
-    public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
+    public void CheckRootedUsingCapture() => CheckTarget("RootedUsingCapture");
 
     [TestMethod]
-    public void CheckSelfRefGenerics() => CheckTarget("SelfRefGenerics");
+    public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
 
     [TestMethod]
     public void CheckSStringElision() => CheckTarget("SStringElision");
@@ -2019,6 +2045,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSelfContainingMapHolder() => CheckTarget("SelfContainingMapHolder");
+
+    [TestMethod]
+    public void CheckSelfRefGenerics() => CheckTarget("SelfRefGenerics");
 
     [TestMethod]
     public void CheckSendtoSeam() => CheckTarget("SendtoSeam");
@@ -2133,6 +2162,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
+
+    [TestMethod]
+    public void CheckStackAppendBackingStore() => CheckTarget("StackAppendBackingStore");
 
     [TestMethod]
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
@@ -2277,6 +2309,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
+
+    [TestMethod]
+    public void CheckTypeAssertionPanic() => CheckTarget("TypeAssertionPanic");
+
+    [TestMethod]
+    public void CheckTypeAssertionSource() => CheckTarget("TypeAssertionSource");
 
     [TestMethod]
     public void CheckTypeConversion() => CheckTarget("TypeConversion");
@@ -2447,13 +2485,13 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUntypedFloatTypedCompare() => CheckTarget("UntypedFloatTypedCompare");
 
     [TestMethod]
+    public void CheckUntypedIntExactConstArithmetic() => CheckTarget("UntypedIntExactConstArithmetic");
+
+    [TestMethod]
     public void CheckUntypedIntFloatContexts() => CheckTarget("UntypedIntFloatContexts");
 
     [TestMethod]
     public void CheckUntypedIntFloatLiteralFold() => CheckTarget("UntypedIntFloatLiteralFold");
-
-    [TestMethod]
-    public void CheckUntypedIntExactConstArithmetic() => CheckTarget("UntypedIntExactConstArithmetic");
 
     [TestMethod]
     public void CheckUntypedIntInterfaceBox() => CheckTarget("UntypedIntInterfaceBox");

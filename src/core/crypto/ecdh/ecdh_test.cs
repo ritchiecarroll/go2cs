@@ -538,9 +538,9 @@ public static void TestLinker(ж<testing.T> Ꮡt) {
         cmd.Value.Dir = dir;
         var (@out, errΔ1) = cmd.CombinedOutput();
         if (errΔ1 != default!) {
-            Ꮡt.Fatalf("%v: %v\n%s"u8, args, errΔ1, ((@string)@out));
+            Ꮡt.Fatalf("%v: %v\n%s"u8, args, errΔ1, (@string)@out);
         }
-        return ((@string)@out);
+        return (@string)@out;
     }
 
     @string goBin = testenv.GoToolPath(new testing_TжTB(Ꮡt));

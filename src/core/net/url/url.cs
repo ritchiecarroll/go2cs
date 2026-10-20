@@ -71,19 +71,19 @@ internal static bool ishex(byte c) {
 
 // Precondition: ishex(c) is true.
 internal static byte unhex(byte c) {
-    return (byte)(9 * ((c >> (int)(6))) + ((byte)(c & 15)));
+    return (byte)(9 * (c >> 6) + ((byte)(c & 15)));
 }
 
 partial struct EscapeError /*@string*/;
 
 public static @string Error(this EscapeError e) {
-    return "invalid URL escape "u8 + strconv.Quote(((@string)e));
+    return "invalid URL escape "u8 + strconv.Quote((@string)e);
 }
 
 partial struct InvalidHostError /*@string*/;
 
 public static @string Error(this InvalidHostError e) {
-    return "invalid character "u8 + strconv.Quote(((@string)e)) + " in host name"u8;
+    return "invalid character "u8 + strconv.Quote((@string)e) + " in host name"u8;
 }
 
 // See the reference implementation in gen_encoding_table.go.
@@ -145,7 +145,7 @@ internal static (@string, error) unescape(@string s, encoding mode) {
                 // That is, you can use escaping in the zone identifier but not
                 // to introduce bytes you couldn't just write directly.
                 // But Windows puts spaces here! Yay.
-                var v = (byte)((byte)(unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
+                var v = (byte)((byte)(unhex(s[i + 1]) << 4) | unhex(s[i + 2]));
                 if (s.slice(i, i + 3) != "%25" && v != (rune)' ' && shouldEscape(v, encodeHost)) {
                     return ("", ((EscapeError)(s.slice(i, i + 3))));
                 }
@@ -186,7 +186,7 @@ internal static (@string, error) unescape(@string s, encoding mode) {
         case (rune)'%': {
             // In the loop above, we established that unhex's precondition is
             // fulfilled for both s[i+1] and s[i+2].
-            Ꮡt.WriteByte((byte)((byte)(unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2])));
+            Ꮡt.WriteByte((byte)((byte)(unhex(s[i + 1]) << 4) | unhex(s[i + 2])));
             i += 2;
             break;
         }
@@ -248,7 +248,7 @@ internal static @string escape(@string s, encoding mode) {
                 t[i] = (rune)'+';
             }
         }
-        return ((@string)t);
+        return (@string)t;
     }
 
     nint j = 0;
@@ -261,7 +261,7 @@ internal static @string escape(@string s, encoding mode) {
         }
         case {} when shouldEscape(c, mode): {
             t[j] = (rune)'%';
-            t[j + 1] = upperhex[(c >> (int)(4))];
+            t[j + 1] = upperhex[(c >> 4)];
             t[j + 2] = upperhex[(byte)(c & 15)];
             j += 3;
             break;
@@ -272,7 +272,7 @@ internal static @string escape(@string s, encoding mode) {
             break;
         }}
     }
-    return ((@string)t);
+    return (@string)t;
 }
 
 // A URL represents a parsed URL (technically, a URI reference).
@@ -1132,6 +1132,8 @@ public static @string Encode(this Values v) {
 // resolvePath applies special path segments from refs and applies
 // them to base, per RFC 3986.
 internal static @string resolvePath(@string @base, @string @ref) {
+    var dstᴷ = new stackAppend<byte>();
+
     @string full = default!;
     if (@ref == ""u8){
         full = @base;
@@ -1147,7 +1149,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
     }
 
     var dst = new slice<byte>(0, len(full) + 1);
-    dst = append(dst, (byte)((rune)'/'));
+    dst = append(dstᴷ, dst, (byte)((rune)'/'));
     @string elem = ""u8;
     @string remaining = full;
     var found = true;
@@ -1184,9 +1186,9 @@ internal static @string resolvePath(@string @base, @string @ref) {
 
     // We wrote an initial '/', but we don't want two.
     if (len(dst) > 1 && dst[1] == (rune)'/') {
-        return ((@string)(dst[1..]));
+        return (@string)(dst[1..]);
     }
-    return ((@string)dst);
+    return (@string)dst;
 }
 
 // IsAbs reports whether the [URL] is absolute.
@@ -1331,7 +1333,7 @@ public static (slice<byte>, error) AppendBinary(this ref URL u, slice<byte> b) {
 }
 
 public static error UnmarshalBinary(this ref URL u, slice<byte> text) {
-    var (u1, err) = Parse(((@string)text));
+    var (u1, err) = Parse((@string)text);
     if (err != default!) {
         return err;
     }

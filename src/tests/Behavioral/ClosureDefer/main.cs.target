@@ -12,7 +12,7 @@ internal static Action makeGreeter(@string name) {
         GoFrame ᒐ = default;
         try {
             defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), byeˢ, name, ref ᒐ);
-            fmt.Println((@string)"hi"u8, name);
+            fmt.Println("hi", name);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -21,23 +21,15 @@ internal static Action makeGreeter(@string name) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object deferredˢ = (@string)"deferred"u8;
-private static readonly object bodyˢ = (@string)"body"u8;
-private static readonly object closureRecoveredˢ = (@string)"closure recovered:"u8;
-private static readonly @string go2csˢ = "go2cs"u8;
 private static readonly object argClosureDeferredˢ = (@string)"arg-closure deferred"u8;
-private static readonly object argClosureBodyˢ = (@string)"arg-closure body"u8;
-private static readonly object outerRecoveredˢ = (@string)"outer recovered:"u8;
 private static readonly object fetchDeferredˢ = (@string)"fetch deferred"u8;
-private static readonly object taskˢ = (@string)"task:"u8;
-private static readonly object fetchedˢ = (@string)"fetched:"u8;
-private static readonly object doneˢ = (@string)"done"u8;
 
 internal static void Main() {
     void f() {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => fmt.Println(ᴛ1), deferredˢ, ref ᒐ);
-            fmt.Println(bodyˢ);
+            fmt.Println("body");
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -50,7 +42,7 @@ internal static void Main() {
             defer(() => {
                 {
                     var r = recover(); if (r != default!) {
-                        fmt.Println(closureRecoveredˢ, r);
+                        fmt.Println("closure recovered:", r);
                     }
                 }
             }, ref ᒐ);
@@ -98,7 +90,7 @@ internal static void Main() {
     }
     fmt.Println(counted());
 
-    var greet = makeGreeter(go2csˢ);
+    var greet = makeGreeter("go2cs");
     greet();
 
     void run(Action fn) {
@@ -108,7 +100,7 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => fmt.Println(ᴛ1), argClosureDeferredˢ, ref ᒐ);
-            fmt.Println(argClosureBodyˢ);
+            fmt.Println("arg-closure body");
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -120,7 +112,7 @@ internal static void Main() {
             defer(() => {
                 {
                     var r = recover(); if (r != default!) {
-                        fmt.Println(outerRecoveredˢ, r);
+                        fmt.Println("outer recovered:", r);
                     }
                 }
             }, ref ᒐ);
@@ -140,10 +132,10 @@ internal static void Main() {
     }
     var (v, err) = fetch();
     var tk = makeTask(5);
-    fmt.Println(taskˢ, (~tk).fn(), (~tk).name);
-    fmt.Println(fetchedˢ, v, err);
+    fmt.Println("task:", (~tk).fn(), (~tk).name);
+    fmt.Println("fetched:", v, err);
 
-    fmt.Println(doneˢ);
+    fmt.Println("done");
 }
 
 partial struct task {
@@ -153,7 +145,7 @@ partial struct task {
 
 internal static ж<task> makeTask(nint @base) {
     nint bonus = @base * 2;
-    return Ꮡ(new task(fn: () => bonus + 1, name: "t"u8));
+    return Ꮡ(new task(fn: () => bonus + 1, name: "t"));
 }
 
 } // end main_package

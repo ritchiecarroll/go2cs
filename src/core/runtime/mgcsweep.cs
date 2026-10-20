@@ -56,7 +56,7 @@ internal static UntypedInt numSweepClasses => /* numSpanClasses * 2 */ 272;
 internal static sweepClass sweepClassDone => /* sweepClass(^uint32(0)) */ 4294967295;
 
 internal static sweepClass load(this ж<sweepClass> Ꮡs) {
-    return ((sweepClass)atomic.Load(Ꮡs.Reinterpret<sweepClass, uint32>()));
+    return (sweepClass)atomic.Load(Ꮡs.Reinterpret<sweepClass, uint32>());
 }
 
 internal static void update(this ж<sweepClass> Ꮡs, sweepClass sNew) {
@@ -82,7 +82,7 @@ internal static void clear(this ж<sweepClass> Ꮡs) {
 // unswept lists for that class, indicated as a boolean
 // (true means "full").
 internal static (spanClass spc, bool full) split(this sweepClass s) {
-    return (((spanClass)(uint8)((uint32)((s >> (int)(1))))), (sweepClass)(s & 1) == 0);
+    return ((spanClass)(uint8)((uint32)(s >> 1)), (sweepClass)(s & 1) == 0);
 }
 
 // nextSpanForSweep finds and pops the next span for sweeping from the
@@ -143,7 +143,7 @@ partial struct activeSweep {
 internal static sweepLocker begin(this ж<activeSweep> Ꮡa) {
     while (ᐧ) {
         var state = Ꮡa.of(activeSweep.Ꮡstate).Load();
-        if ((uint32)(state & (uint32)sweepDrainedMask) != 0) {
+        if ((state & (uint32)sweepDrainedMask) != 0) {
             return new sweepLocker(mheap_.sweepgen, false);
         }
         if (Ꮡa.of(activeSweep.Ꮡstate).CompareAndSwap(state, state + 1)) {
@@ -164,7 +164,7 @@ internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
     }
     while (ᐧ) {
         var state = Ꮡa.of(activeSweep.Ꮡstate).Load();
-        if (((uint32)(state & ~(uint32)sweepDrainedMask)) - 1 >= sweepDrainedMask) {
+        if ((state & ~(uint32)sweepDrainedMask) - 1 >= sweepDrainedMask) {
             @throw(mismatchedBeginEndOfˢ);
         }
         if (Ꮡa.of(activeSweep.Ꮡstate).CompareAndSwap(state, state - 1)) {
@@ -174,7 +174,7 @@ internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
             // We're the last sweeper, and there's nothing left to sweep.
             if (debug.gcpacertrace > 0) {
                 var live = ᏑgcController.of(gcControllerState.ᏑheapLive).Load();
-                print((@string)"pacer: sweep done at heap size "u8, (live >> (int)(20)), (@string)"MB; allocated "u8, ((live - mheap_.sweepHeapLiveBasis) >> (int)(20)), (@string)"MB during sweep; swept "u8, Ꮡmheap_.of(mheap.ᏑpagesSwept).Load(), (@string)" pages at "u8, mheap_.sweepPagesPerByte, (@string)" pages/byte\n"u8);
+                print((@string)"pacer: sweep done at heap size "u8, live >> 20, (@string)"MB; allocated "u8, (live - mheap_.sweepHeapLiveBasis) >> 20, (@string)"MB during sweep; swept "u8, Ꮡmheap_.of(mheap.ᏑpagesSwept).Load(), (@string)" pages at "u8, mheap_.sweepPagesPerByte, (@string)" pages/byte\n"u8);
             }
             // Now that sweeping is completely done, flush remaining cleanups.
             ᏑgcCleanups.flush();
@@ -192,10 +192,10 @@ internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) {
 internal static bool markDrained(this ж<activeSweep> Ꮡa) {
     while (ᐧ) {
         var state = Ꮡa.of(activeSweep.Ꮡstate).Load();
-        if ((uint32)(state & (uint32)sweepDrainedMask) != 0) {
+        if ((state & (uint32)sweepDrainedMask) != 0) {
             return false;
         }
-        if (Ꮡa.of(activeSweep.Ꮡstate).CompareAndSwap(state, (uint32)(state | (uint32)sweepDrainedMask))) {
+        if (Ꮡa.of(activeSweep.Ꮡstate).CompareAndSwap(state, state | (uint32)sweepDrainedMask)) {
             return true;
         }
     }
@@ -203,7 +203,7 @@ internal static bool markDrained(this ж<activeSweep> Ꮡa) {
 
 // sweepers returns the current number of active sweepers.
 internal static uint32 sweepers(this ж<activeSweep> Ꮡa) {
-    return (uint32)(Ꮡa.of(activeSweep.Ꮡstate).Load() & ~(uint32)sweepDrainedMask);
+    return Ꮡa.of(activeSweep.Ꮡstate).Load() & ~(uint32)sweepDrainedMask;
 }
 
 // isDone returns true if all sweep work has been drained and no more
@@ -691,7 +691,7 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
         // Check the first bitmap byte, where we have to be
         // careful with freeindex.
         var obj = (uintptr)(~s).freeindex;
-        if ((uint8)((((uint8)((~s).gcmarkBits.bytep(obj / 8).Value & ~(~s).allocBits.bytep(obj / 8).Value)) >> (int)((obj % 8)))) != 0) {
+        if ((uint8)((((uint8)((~s).gcmarkBits.bytep(obj / 8).Value & ~(~s).allocBits.bytep(obj / 8).Value)) >> (int)(obj % 8))) != 0) {
             s.reportZombies();
         }
         // Check remaining bytes.
@@ -898,7 +898,7 @@ internal static void reportZombies(this ж<mspan> Ꮡs) {
     var abits = s.allocBitsForIndex(0);
     for (var i = (uintptr)0; i < (uintptr)s.nelems; i++) {
         var addr = s.@base() + i * s.elemsize;
-        print(((Δhex)(uint64)addr));
+        print((Δhex)(uint64)addr);
         var alloc = i < (uintptr)s.freeindex || abits.isMarked();
         if (alloc){
             print((@string)" alloc"u8);

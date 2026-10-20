@@ -305,6 +305,9 @@ func TestSiblingTestDeclaratorsContributeAliasShadow(t *testing.T) {
 // RED PROOF: at the parent the three colliding arms read the bare `sync_package.Mutex` (the reference
 // went through rootQualifyIfAmbiguous alone, which never sees a using); the controls read the same
 // before and after.
+//
+// RED PROOF for the crypto/tls arm (2026-10-19): resolveUsingNamespace walked `go.crypto.` + using and
+// `go.` + using and stopped, never trying the using as written, so it read the bare `sync_package.Mutex`.
 func TestPackageReferenceShadowedByFileUsingIsRootQualified(t *testing.T) {
 	previousQualified := packageQualifiedNamespaces
 	t.Cleanup(func() { packageQualifiedNamespaces = previousQualified })
@@ -339,6 +342,11 @@ func TestPackageReferenceShadowedByFileUsingIsRootQualified(t *testing.T) {
 		{"relative using shadows (runtime/pprof)", "go.runtime", []string{"@internal", "text"}, nil, "sync_package.Mutex", "go.sync_package.Mutex"},
 		// net/http's test shape: a ROOTED using.
 		{"rooted using shadows (net/http tests)", "go.net", []string{"global::go.@internal", "global::go.net"}, nil, "sync_package.Mutex", "go.sync_package.Mutex"},
+		// crypto/tls's shape (conn.cs, common.cs): a rooted using written WITHOUT global::, which binds as written
+		// once no enclosing namespace holds its first segment. Its embedded `sync.Mutex` was internal/sync's Mutex.
+		{"rooted using as written shadows (crypto/tls)", "go.crypto", []string{"go.@internal", "go.crypto", "go.sync"}, nil, "sync_package.Mutex", "go.sync_package.Mutex"},
+		// Control: a rooted using of a namespace that declares no such package class.
+		{"rooted using without the class unchanged", "go.crypto", []string{"go.runtime"}, nil, "sync_package.Mutex", "sync_package.Mutex"},
 		// A using that lands only while the body is visited (a method call into an internal package):
 		// the pre-pass is what makes it visible to a reference emitted before it.
 		{"method-derived using shadows", "go.runtime", nil, []string{"@internal"}, "sync_package.Mutex", "go.sync_package.Mutex"},

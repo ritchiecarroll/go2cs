@@ -954,27 +954,27 @@ internal static slice<EscapeTest> unescapeTests = new EscapeTest[]{
     new(
         "%"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%"u8
     ),
     new(
         "%a"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%a"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%a"u8
     ),
     new(
         "%1"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%1"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%1"u8
     ),
     new(
         "123%45%6"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%6"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%6"u8
     ),
     new(
         "%zzzzz"u8, // invalid hex digits
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%zz"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%zz"u8
     ),
     new(
         "a+b"u8,

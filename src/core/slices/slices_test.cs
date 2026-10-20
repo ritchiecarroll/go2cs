@@ -384,7 +384,7 @@ public static void TestCompareFunc(ж<testing.T> Ꮡt) {
         }
     }
 
-    var cmpIntString = (nint v1, @string v2) => strings.Compare(((@string)((rune)v1 - 1 + (rune)'a')), v2);
+    var cmpIntString = (nint v1, @string v2) => strings.Compare((@string)((rune)v1 - 1 + (rune)'a'), v2);
     {
         nint got = CompareFunc(s1, s3, cmpIntString); if (got != 0) {
             Ꮡt.Errorf("CompareFunc(%v, %v, cmpIntString) = %d, want 0"u8, s1, s3, got);
@@ -463,12 +463,12 @@ public static void TestIndexFunc(ж<testing.T> Ꮡt) {
     var s1 = new @string[]{"hi"u8, "HI"u8}.slice();
     {
         nint got = IndexFunc(s1, equalToIndex<@string>(equal<@string>, (@string)"HI")); if (got != 1) {
-            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(equal[string], %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)(1));
+            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(equal[string], %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)1);
         }
     }
     {
         nint got = IndexFunc(s1, equalToIndex<@string>(strings.EqualFold, (@string)"HI")); if (got != 0) {
-            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(strings.EqualFold, %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)(0));
+            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(strings.EqualFold, %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)0);
         }
     }
 }
@@ -584,7 +584,7 @@ public static void TestInsert(ж<testing.T> Ꮡt) {
         var n = testing.AllocsPerRun(10, () => {
             var sΔ1 = new nint[]{1, 2, 3}.slice();
             for (nint i = 0; i < count; i++) {
-                sΔ1 = Insert(sΔ1, 0, (nint)(1));
+                sΔ1 = Insert(sΔ1, 0, (nint)1);
             }
         });
         if (n > /* count / 2 */ 25D) {
@@ -1463,7 +1463,7 @@ public static void TestInsertGrowthRate(ж<testing.T> Ꮡt) {
     nint nGrow = 0;
     UntypedFloat N = 1e6;
     for (nint i = 0; i < (nint)N; i++) {
-        b = Insert(b, len(b) - 1, (byte)(0));
+        b = Insert(b, len(b) - 1, (byte)0);
         if (cap(b) > maxCap) {
             maxCap = cap(b);
             nGrow++;
@@ -1481,7 +1481,7 @@ public static void TestReplaceGrowthRate(ж<testing.T> Ꮡt) {
     nint nGrow = 0;
     UntypedFloat N = 1e6;
     for (nint i = 0; i < (nint)N; i++) {
-        b = Replace(b, len(b) - 2, len(b) - 1, (byte)(0), (byte)(0));
+        b = Replace(b, len(b) - 2, len(b) - 1, (byte)0, (byte)0);
         if (cap(b) > maxCap) {
             maxCap = cap(b);
             nGrow++;

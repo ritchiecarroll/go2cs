@@ -41,7 +41,7 @@ internal static void Main() {
 
     var p = Ꮡnull;
     p.ValueSlot = append(p.ValueSlot, (byte)((rune)'!'));
-    fmt.Println(((@string)@null), ((@string)(p.ValueSlot)));
+    fmt.Println((@string)@null, (@string)(p.ValueSlot));
 }
 
 } // end main_package

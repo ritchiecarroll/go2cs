@@ -116,7 +116,7 @@ public static void TestIntJSONEncodingNil(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("marshaling of nil failed: %s"u8, err);
     }
-    @string got = ((@string)b);
+    @string got = (@string)b;
     @string want = nullˢ;
     if (got != want) {
         Ꮡt.Fatalf("marshaling of nil failed: got %s want %s"u8, got, want);

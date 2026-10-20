@@ -175,7 +175,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
         h.linkMask = (uint32)(numLinks - 1);
 
         // create link tables
-        nint link = (nextcode[huffmanChunkBits + 1] >> (int)(1));
+        nint link = nextcode[huffmanChunkBits + 1] >> 1;
         h.links = new slice<slice<uint32>>((nint)huffmanNumChunks - link);
         for (nuint j = (nuint)link; j < huffmanNumChunks; j++) {
             nint reverse = (nint)bits.Reverse16((uint16)j);
@@ -184,7 +184,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
             if (sanity && h.chunks[reverse] != 0) {
                 throw panic("impossible: overwriting existing chunk");
             }
-            h.chunks[reverse] = (uint32)((nuint)((off << (int)(huffmanValueShift)) | (nuint)(huffmanChunkBits + 1)));
+            h.chunks[reverse] = (uint32)(off << (int)(huffmanValueShift) | (nuint)(huffmanChunkBits + 1));
             h.links[off] = new slice<uint32>(numLinks);
         }
     }
@@ -195,7 +195,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
         }
         nint codeΔ1 = nextcode[n];
         nextcode[n]++;
-        var chunk = (uint32)((nint)((i << (int)(huffmanValueShift)) | n));
+        var chunk = (uint32)(i << (int)(huffmanValueShift) | n);
         nint reverse = (nint)bits.Reverse16((uint16)codeΔ1);
         reverse.RshAssign((nuint)(16 - n));
         if (n <= huffmanChunkBits){
@@ -211,13 +211,13 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
                 h.chunks[off] = chunk;
             }
         } else {
-            nint j = (nint)(reverse & (nint)(huffmanNumChunks - 1));
-            if (sanity && (uint32)(h.chunks[j] & (uint32)huffmanCountMask) != (uint32)(huffmanChunkBits + 1)) {
+            nint j = reverse & (nint)(huffmanNumChunks - 1);
+            if (sanity && (h.chunks[j] & (uint32)huffmanCountMask) != (uint32)(huffmanChunkBits + 1)) {
                 // Longer codes should have been
                 // associated with a link table above.
                 throw panic("impossible: not an indirect chunk");
             }
-            var value = (h.chunks[j] >> (int)(huffmanValueShift));
+            var value = h.chunks[j] >> (int)(huffmanValueShift);
             var linktab = h.links[value];
             reverse >>= (int)(huffmanChunkBits);
             for (nint off = reverse; off < len(linktab); off += ((nint)1).Lsh((nuint)(n - (nint)huffmanChunkBits))) {
@@ -305,9 +305,9 @@ internal static void nextBlock(this ж<decompressor> Ꮡf) {
             }
         }
     }
-    f.final = (uint32)(f.b & 1) == 1;
+    f.final = (f.b & 1) == 1;
     f.b >>= (int)(1);
-    var typ = (uint32)(f.b & 3);
+    var typ = f.b & 3;
     f.b >>= (int)(2);
     f.nb -= 1 + 2;
     switch (typ) {
@@ -388,17 +388,17 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
             }
         }
     }
-    nint nlit = (nint)((uint32)(f.b & 0x1F)) + 257;
+    nint nlit = (nint)(f.b & 0x1F) + 257;
     if (nlit > maxNumLit) {
         return ((CorruptInputError)f.roffset);
     }
     f.b >>= (int)(5);
-    nint ndist = (nint)((uint32)(f.b & 0x1F)) + 1;
+    nint ndist = (nint)(f.b & 0x1F) + 1;
     if (ndist > maxNumDist) {
         return ((CorruptInputError)f.roffset);
     }
     f.b >>= (int)(5);
-    nint nclen = (nint)((uint32)(f.b & 0xF)) + 4;
+    nint nclen = (nint)(f.b & 0xF) + 4;
     // numCodes is 19, so nclen is always valid.
     f.b >>= (int)(4);
     f.nb -= 5 + 5 + 4;
@@ -412,7 +412,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
                 }
             }
         }
-        f.codebits.Value[codeOrder[i]] = (nint)((uint32)(f.b & 0x7));
+        f.codebits.Value[codeOrder[i]] = (nint)(f.b & 0x7);
         f.b >>= (int)(3);
         f.nb -= 3;
     }
@@ -472,7 +472,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
                 }
             }
         }
-        rep += (nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1)));
+        rep += (nint)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1));
         f.b.RshAssign(nb);
         f.nb -= nb;
         if (i + rep > n) {
@@ -590,7 +590,7 @@ readLiteral:
                     }
                 }
             }
-            length += (nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(n) - 1)));
+            length += (nint)(f.b & (uint32)(((uint32)1).Lsh(n) - 1));
             f.b.RshAssign(n);
             f.nb -= n;
         }
@@ -605,7 +605,7 @@ readLiteral:
                     }
                 }
             }
-            dist = (nint)bits.Reverse8((uint8)(((uint32)(f.b & 0x1F) << (int)(3))));
+            dist = (nint)bits.Reverse8((uint8)((f.b & 0x1F) << 3));
             f.b >>= (int)(5);
             f.nb -= 5;
         } else {
@@ -623,9 +623,9 @@ readLiteral:
             break;
         }
         case {} when dist < maxNumDist: {
-            nuint nb = ((nuint)(dist - 2) >> (int)(1));
+            nuint nb = (nuint)(dist - 2) >> 1;
             // have 1 bit in bottom of dist, need nb more.
-            nint extra = ((nint)(dist & 1)).Lsh(nb);
+            nint extra = (dist & 1).Lsh(nb);
             while (f.nb < nb) {
                 {
                     err = f.moreBits(); if (err != default!) {
@@ -634,7 +634,7 @@ readLiteral:
                     }
                 }
             }
-            extra |= (nint)((nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1))));
+            extra |= (nint)((nint)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1)));
             f.b.RshAssign(nb);
             f.nb -= nb;
             dist = ((nint)1).Lsh((nb + 1)) + 1 + extra;
@@ -688,8 +688,8 @@ internal static void dataBlock(this ref decompressor f) {
         f.err = noEOF(err);
         return;
     }
-    nint n = (nint)((nint)f.buf[0] | ((nint)f.buf[1] << (int)(8)));
-    nint nn = (nint)((nint)f.buf[2] | ((nint)f.buf[3] << (int)(8)));
+    nint n = (nint)f.buf[0] | (nint)f.buf[1] << 8;
+    nint nn = (nint)f.buf[2] | (nint)f.buf[3] << 8;
     if ((uint16)nn != (uint16)(~n)) {
         f.err = ((CorruptInputError)f.roffset);
         return;
@@ -782,14 +782,14 @@ internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder
                 return (0, noEOF(err));
             }
             f.roffset++;
-            b |= (uint32)(((uint32)c << (int)(((nuint)(nb & 31)))));
+            b |= (uint32)(((uint32)c << (int)(nb & 31)));
             nb += 8;
         }
-        var chunk = h.chunks[(uint32)(b & (uint32)((huffmanNumChunks - 1)))];
-        n = (nuint)((uint32)(chunk & (uint32)huffmanCountMask));
+        var chunk = h.chunks[(b & (uint32)(huffmanNumChunks - 1))];
+        n = (nuint)(chunk & (uint32)huffmanCountMask);
         if (n > huffmanChunkBits) {
-            chunk = h.links[(chunk >> (int)(huffmanValueShift))][(uint32)(((b >> (int)(huffmanChunkBits))) & h.linkMask)];
-            n = (nuint)((uint32)(chunk & (uint32)huffmanCountMask));
+            chunk = h.links[(chunk >> (int)(huffmanValueShift))][((b >> (int)(huffmanChunkBits)) & h.linkMask)];
+            n = (nuint)(chunk & (uint32)huffmanCountMask);
         }
         if (n <= nb) {
             if (n == 0) {
@@ -798,9 +798,9 @@ internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder
                 f.err = ((CorruptInputError)f.roffset);
                 return (0, f.err);
             }
-            f.b = (b >> (int)(((nuint)(n & 31))));
+            f.b = b >> (int)(n & 31);
             f.nb = nb - n;
-            return ((nint)((chunk >> (int)(huffmanValueShift))), default!);
+            return ((nint)(chunk >> (int)(huffmanValueShift)), default!);
         }
     }
 }

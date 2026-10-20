@@ -145,10 +145,10 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
                 n--;
             }
             if (mode == readdirName){
-                names = append(names, ((@string)name));
+                names = append(names, (@string)name);
             } else 
             if (mode == readdirDirEntry){
-                var (de, errΔ1) = newUnixDirent(Ꮡf, ((@string)name), direntType(rec));
+                var (de, errΔ1) = newUnixDirent(Ꮡf, (@string)name, direntType(rec));
                 if (IsNotExist(errΔ1)) {
                     // File disappeared between readdir and stat.
                     // Treat as if it didn't exist.
@@ -159,7 +159,7 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
                 }
                 dirents = append(dirents, de);
             } else {
-                var (info, errΔ2) = Ꮡf.lstatat(((@string)name));
+                var (info, errΔ2) = Ꮡf.lstatat((@string)name);
                 if (IsNotExist(errΔ2)) {
                     // File disappeared between readdir + stat.
                     // Treat as if it didn't exist.

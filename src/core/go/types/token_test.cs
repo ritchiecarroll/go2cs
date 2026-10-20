@@ -37,7 +37,7 @@ public static void TestZeroTok(ж<testing.T> Ꮡt) {
 public static void TestAssignOp(ж<testing.T> Ꮡt) {
     // there are fewer than 256 tokens
     for (nint i = 0; i < 256; i++) {
-        token.Token tok = ((token.Token)i);
+        token.Token tok = (token.Token)i;
         token.Token got = assignOp(tok);
         token.Token want = assignOps[tok];
         if (got != want) {

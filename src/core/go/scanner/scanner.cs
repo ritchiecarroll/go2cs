@@ -258,7 +258,7 @@ exit:
         lit = stripCR(lit, lit[1] == (rune)'*');
     }
 
-    return (((@string)lit), nlOffset);
+    return ((@string)lit, nlOffset);
 }
 
 internal static slice<byte> prefix = slice<byte>("line "u8);
@@ -314,7 +314,7 @@ internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, sl
 
     // If we have a column (//line filename:line:col form),
     // an empty filename means to use the previous filename.
-    @string filename = ((@string)(text.slice(0, i - 1))); // lop off ":line", and trim white space
+    @string filename = (@string)(text.slice(0, i - 1)); // lop off ":line", and trim white space
     if (filename == ""u8 && ok2){
         filename = s.@file.Position(s.@file.Pos(offs)).Filename;
     } else 
@@ -337,7 +337,7 @@ internal static (nint, nint, bool) trailingDigits(slice<byte> text) {
         return (0, 0, false); // no ":"
     }
     // i >= 0
-    var (n, err) = strconv.ParseUint(((@string)(text.slice(i + 1))), 10, 0);
+    var (n, err) = strconv.ParseUint((@string)(text.slice(i + 1)), 10, 0);
     return (i + 1, (nint)n, err == default!);
 }
 
@@ -396,7 +396,7 @@ internal static @string scanIdentifier(this ref Scanner s) {
     s.ch = eof;
 
 exit:
-    return ((@string)(s.src.slice(offs, s.offset)));
+    return (@string)(s.src.slice(offs, s.offset));
 }
 
 internal static nint digitVal(rune ch) {
@@ -513,7 +513,7 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
         digsep |= (nint)(s.digits(@base, Ꮡinvalid));
     }
 
-    if ((nint)(digsep & 1) == 0) {
+    if ((digsep & 1) == 0) {
         s.error(s.offset, litname(prefix) + " has no digits"u8);
     }
 
@@ -536,7 +536,7 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
             }
             nint ds = s.digits(10, nil);
             digsep |= (nint)(ds);
-            if ((nint)(ds & 1) == 0) {
+            if ((ds & 1) == 0) {
                 s.error(s.offset, exponentHasNoDigitsˢ);
             }
         } else 
@@ -551,11 +551,11 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
         s.next();
     }
 
-    @string lit = ((@string)(s.src.slice(offs, s.offset)));
+    @string lit = (@string)(s.src.slice(offs, s.offset));
     if (tok == token.INT && invalid >= 0) {
         s.errorf(invalid, "invalid digit %q in %s"u8, lit[invalid - offs], litname(prefix));
     }
-    if ((nint)(digsep & 2) != 0) {
+    if ((digsep & 2) != 0) {
         {
             nint i = invalidSep(lit); if (i >= 0) {
                 s.error(offs + i, mustSeparateSuccessiveˢ);
@@ -736,7 +736,7 @@ internal static @string scanRune(this ref Scanner s) {
         s.error(offs, illegalRuneLiteralˢ);
     }
 
-    return ((@string)(s.src.slice(offs, s.offset)));
+    return (@string)(s.src.slice(offs, s.offset));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -761,7 +761,7 @@ internal static @string scanString(this ref Scanner s) {
         }
     }
 
-    return ((@string)(s.src.slice(offs, s.offset)));
+    return (@string)(s.src.slice(offs, s.offset));
 }
 
 internal static slice<byte> stripCR(slice<byte> b, bool comment) {
@@ -810,7 +810,7 @@ internal static (@string, nint) scanRawString(this ref Scanner s) {
         lit = stripCR(lit, false);
     }
 
-    return (((@string)lit), rawLen);
+    return ((@string)lit, rawLen);
 }
 
 internal static void skipWhitespace(this ref Scanner s) {
@@ -1097,7 +1097,7 @@ scanAgain:
                 }
                 insertSemi = s.insertSemi; // preserve insertSemi info
                 tok = token.ILLEGAL;
-                lit = ((@string)ch);
+                lit = (@string)ch;
             }
             break;
         }}

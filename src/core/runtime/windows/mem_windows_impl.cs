@@ -24,6 +24,11 @@
 // region some other VirtualAlloc produced; the kernel call pairs with every Windows region by
 // construction. The pages are NATIVE and outside the CLR heap.
 //
+// REGISTRATION (G's ruling, 2026-10-19): sysAllocOS and sysReserveOS record what they return in golib's
+// GoOsMemory, and sysFreeOS releases it, as the linux and darwin twins do. The runtime OWNS that memory, so a
+// pointer word in it is a Go pointer, while a word in any other native memory is a foreign address that
+// builtin.NativeArrayPointer reads as one.
+//
 // Hand-owned: there is no mem_windows_impl.go, so a -stdlib reconvert never regenerates this file.
 
 using System.Runtime.InteropServices;
@@ -48,11 +53,17 @@ partial class runtime_package
     {
         nint p = VirtualAlloc(0, (nuint)n, (uint)(_MEM_COMMIT | _MEM_RESERVE), (uint)_PAGE_READWRITE);
 
-        return p == 0 ? nil : new @unsafe.Pointer((nuint)p);
+        if (p == 0)
+            return nil;
+
+        GoOsMemory.Register((nuint)p, (nuint)n);
+        return new @unsafe.Pointer((nuint)p);
     }
 
     internal static void sysFreeOS(@unsafe.Pointer v, uintptr n)
     {
+        GoOsMemory.Unregister((nuint)(uintptr)v, (nuint)n);
+
         if (!VirtualFree((nint)(nuint)(uintptr)v, 0, (uint)_MEM_RELEASE))
         {
             print((@string)"runtime: VirtualFree of "u8, n, (@string)" bytes failed with errno="u8, (uint32)Marshal.GetLastPInvokeError(), (@string)"\n"u8);
@@ -71,13 +82,15 @@ partial class runtime_package
         // v is just a hint. First try at v; this fails if any of [v, v+n) is already reserved.
         nint p = VirtualAlloc((nint)(nuint)(uintptr)v, (nuint)n, (uint)_MEM_RESERVE, (uint)_PAGE_READWRITE);
 
-        if (p != 0)
-            return new @unsafe.Pointer((nuint)p);
-
         // Next let the kernel choose the address.
-        p = VirtualAlloc(0, (nuint)n, (uint)_MEM_RESERVE, (uint)_PAGE_READWRITE);
+        if (p == 0)
+            p = VirtualAlloc(0, (nuint)n, (uint)_MEM_RESERVE, (uint)_PAGE_READWRITE);
 
-        return p == 0 ? nil : new @unsafe.Pointer((nuint)p);
+        if (p == 0)
+            return nil;
+
+        GoOsMemory.Register((nuint)p, (nuint)n);
+        return new @unsafe.Pointer((nuint)p);
     }
 
     internal static void sysUsedOS(@unsafe.Pointer v, uintptr n)

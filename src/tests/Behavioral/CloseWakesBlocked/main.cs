@@ -9,23 +9,13 @@ internal static void expectPanic(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(name, (@string)"->"u8, recover());
+            fmt.Println(name, "->", recover());
         }, ref ᒐ);
         f();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string senderCompletedWrongˢ = "sender completed (wrong)"u8;
-private static readonly @string selectSendCompletedWrongˢ = "select send completed (wrong)"u8;
-private static readonly @string closeOfClosedˢ = "close of closed"u8;
-private static readonly @string closeOfNilˢ = "close of nil"u8;
-private static readonly @string sendOnClosedˢ = "send on closed"u8;
-private static readonly @string selectSendOnClosedWithˢ = "select send on closed with default"u8;
-private static readonly object sentWrongˢ = (@string)"sent (wrong)"u8;
-private static readonly object defaultWrongˢ = (@string)"default (wrong)"u8;
 
 internal static partial void Main() {
     var ch = new channel<nint>(0);
@@ -59,7 +49,7 @@ internal static partial void Main() {
                 }
             }, ref ᒐ);
             ch2ʗ1.ᐸꟷ(1);
-            res2ʗ1.ᐸꟷ(senderCompletedWrongˢ);
+            res2ʗ1.ᐸꟷ("sender completed (wrong)");
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -110,7 +100,7 @@ internal static partial void Main() {
             var selᴛ4 = other2ʗ1;
             switch (select(selᴛ3, ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
             case 0: {
-                res4ʗ1.ᐸꟷ(selectSendCompletedWrongˢ);
+                res4ʗ1.ᐸꟷ("select send completed (wrong)");
                 break;
             }
             case 1 when selᴛ4.ꟷᐳ(out var v): {
@@ -124,31 +114,31 @@ internal static partial void Main() {
     close(ch4);
     fmt.Println(ᐸꟷ(res4));
 
-    expectPanic(closeOfClosedˢ, () => {
+    expectPanic("close of closed", () => {
         var cc = new channel<nint>(0);
         close(cc);
         close(cc);
     });
-    expectPanic(closeOfNilˢ, () => {
+    expectPanic("close of nil", () => {
         channel<nint> nc = default!;
         close(nc);
     });
-    expectPanic(sendOnClosedˢ, () => {
+    expectPanic("send on closed", () => {
         var sc = new channel<nint>(1);
         close(sc);
         sc.ᐸꟷ(1);
     });
-    expectPanic(selectSendOnClosedWithˢ, () => {
+    expectPanic("select send on closed with default", () => {
         var sd = new channel<nint>(1);
         close(sd);
         var selᴛ5 = sd.ᐸꟷ(1, ꓸꓸꓸ);
         switch (trySelect(selᴛ5)) {
         case 0: {
-            fmt.Println(sentWrongˢ);
+            fmt.Println("sent (wrong)");
             break;
         }
         default: {
-            fmt.Println(defaultWrongˢ);
+            fmt.Println("default (wrong)");
             break;
         }}
     });

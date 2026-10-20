@@ -198,7 +198,7 @@ internal static readonly @string tlsNoServerCertificatesˢ = "tls: no server cer
 public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     var ss = Ꮡ(new SessionState(nil));
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
     ref var typ = ref heap(new uint8(), out var Ꮡtyp);
     ref var extMasterSecret = ref heap(new uint8(), out var ᏑextMasterSecret);
     ref var earlyData = ref heap(new uint8(), out var ᏑearlyData);
@@ -294,7 +294,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
         if (!readUint8LengthPrefixed(Ꮡs, Ꮡalpn)) {
             return (default!, errors.New(tlsInvalidSessionˢ));
         }
-        ss.Value.alpnProtocol = ((@string)alpn);
+        ss.Value.alpnProtocol = (@string)alpn;
     }
     if ((~ss).version >= VersionTLS13){
         if ((~ss).isClient) {

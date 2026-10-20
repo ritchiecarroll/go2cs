@@ -6,7 +6,6 @@ partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object manyDeferˢ = (@string)"many defer"u8;
-private static readonly object manyBodyˢ = (@string)"many body"u8;
 
 internal static void manyDefers() {
     GoFrame ᒐ = default;
@@ -14,7 +13,7 @@ internal static void manyDefers() {
         for (nint i = 1; i <= 6; i++) {
             defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), manyDeferˢ, i, ref ᒐ);
         }
-        fmt.Println(manyBodyˢ);
+        fmt.Println("many body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -22,7 +21,6 @@ internal static void manyDefers() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object loopDeferˢ = (@string)"loop defer"u8;
-private static readonly object loopBodyˢ = (@string)"loop body"u8;
 
 internal static void loopDefers(nint n) {
     GoFrame ᒐ = default;
@@ -30,18 +28,11 @@ internal static void loopDefers(nint n) {
         for (nint i = 0; i < n; i++) {
             defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), loopDeferˢ, i, ref ᒐ);
         }
-        fmt.Println(loopBodyˢ, n);
+        fmt.Println("loop body", n);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fromLoopˢ = "from-loop"u8;
-private static readonly @string fromSwitchˢ = "from-switch"u8;
-private static readonly @string fromSwitchExprˢ = "from-switch-expr"u8;
-private static readonly @string bigˢ = "big"u8;
-private static readonly @string fallthroughˢ = "fallthrough"u8;
 
 internal static (@string label, nint score) classify(nint n) {
     @string label = default!;
@@ -55,27 +46,27 @@ internal static (@string label, nint score) classify(nint n) {
 
         for (nint i = 0; i < 3; i++) {
             if (i == 2 && n == 2) {
-                (label, score) = (fromLoopˢ, i);
+                (label, score) = ("from-loop", i);
                 goto ᒐdone;
             }
         }
 
         switch (n) {
         case 3: {
-            (label, score) = (fromSwitchˢ, 3);
+            (label, score) = ("from-switch", 3);
             goto ᒐdone;
         }
         case 4: {
-            (label, score) = (fromSwitchExprˢ, 4); goto ᒐdone;
+            (label, score) = ("from-switch-expr", 4); goto ᒐdone;
         }}
 
         if (n > 10) {
-            label = bigˢ;
+            label = "big";
             score = n;
             goto ᒐdone;
         }
 
-        (label, score) = (fallthroughˢ, n);
+        (label, score) = ("fallthrough", n);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -85,9 +76,7 @@ internal static (@string label, nint score) classify(nint n) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object outerDefer1ˢ = (@string)"outer defer 1"u8;
 private static readonly object innerDeferˢ = (@string)"  inner defer"u8;
-private static readonly object closureBodyˢ = (@string)"  closure body"u8;
 private static readonly object outerDefer2ˢ = (@string)"outer defer 2"u8;
-private static readonly object nestedBodyˢ = (@string)"nested body"u8;
 
 internal static void nestedDeferScopes() {
     GoFrame ᒐ = default;
@@ -97,13 +86,13 @@ internal static void nestedDeferScopes() {
             GoFrame ᒐ = default;
             try {
                 defer(ᴛ1 => fmt.Println(ᴛ1), innerDeferˢ, ref ᒐ);
-                fmt.Println(closureBodyˢ);
+                fmt.Println("  closure body");
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }, ref ᒐ);
         defer(ᴛ1 => fmt.Println(ᴛ1), outerDefer2ˢ, ref ᒐ);
-        fmt.Println(nestedBodyˢ);
+        fmt.Println("nested body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -111,7 +100,6 @@ internal static void nestedDeferScopes() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object mixedDeferTotalˢ = (@string)"mixed defer, total ="u8;
-private static readonly object mixedBodyTotalˢ = (@string)"mixed body, total ="u8;
 
 internal static nint mixedScopes() {
     GoFrame ᒐ = default;
@@ -141,7 +129,7 @@ internal static nint mixedScopes() {
             finally { ᒐ.Run(); }
         }))();
 
-        fmt.Println(mixedBodyTotalˢ, total);
+        fmt.Println("mixed body, total =", total);
         return total;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -150,8 +138,6 @@ internal static nint mixedScopes() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object guardedCleanupˢ = (@string)"guarded cleanup"u8;
-private static readonly object recoveredˢ = (@string)"recovered "u8;
-private static readonly @string noPanicˢ = "no panic"u8;
 
 internal static @string /*msg*/ guarded(bool boom) {
     @string msg = default!;
@@ -161,7 +147,7 @@ internal static @string /*msg*/ guarded(bool boom) {
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
-                    msg = fmt.Sprint(recoveredˢ, r);
+                    msg = fmt.Sprint("recovered ", r);
                 }
             }
         }, ref ᒐ);
@@ -170,15 +156,12 @@ internal static @string /*msg*/ guarded(bool boom) {
             throw panic("frame boom");
         }
 
-        msg = noPanicˢ;
+        msg = "no panic";
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
     return msg;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object mixedReturnedˢ = (@string)"mixed returned"u8;
 
 internal static void Main() {
     manyDefers();
@@ -197,7 +180,7 @@ internal static void Main() {
     fmt.Println(ᴛ9, ᴛ10);
 
     nestedDeferScopes();
-    fmt.Println(mixedReturnedˢ, mixedScopes());
+    fmt.Println("mixed returned", mixedScopes());
 
     fmt.Println(guarded(false));
     fmt.Println(guarded(true));

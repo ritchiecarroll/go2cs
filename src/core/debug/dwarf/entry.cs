@@ -88,12 +88,12 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
 
         // Walk over attributes again, this time writing them down.
         abbrev a = default!;
-        a.tag = ((Tag)(uint32)b.@uint());
+        a.tag = (Tag)(uint32)b.@uint();
         a.children = b.uint8() != 0;
         a.field = new slice<afield>(n);
         foreach (var (i, _) in a.field) {
-            a.field[i].attr = ((Attr)(uint32)b.@uint());
-            a.field[i].fmt = ((format)(uint32)b.@uint());
+            a.field[i].attr = (Attr)(uint32)b.@uint();
+            a.field[i].fmt = (format)(uint32)b.@uint();
             a.field[i].@class = formToClass(a.field[i].fmt, a.field[i].attr, vers, Ꮡb);
             if (a.field[i].fmt == formImplicitConst) {
                 a.field[i].val = b.@int();
@@ -531,7 +531,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, ж<unit> Ꮡ
         (~e).Field[i].Class = a.field[i].@class;
         var fmt = a.field[i].fmt;
         if (fmt == formIndirect) {
-            fmt = ((format)(uint32)b.@uint());
+            fmt = (format)(uint32)b.@uint();
             (~e).Field[i].Class = formToClass(fmt, a.field[i].attr, vers, Ꮡb);
         }
         any val = default!;
@@ -630,16 +630,16 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, ж<unit> Ꮡ
                 b.error(unknownVersionForDwFormˢ);
             } else 
             if (versΔ2 == 2){
-                val = ((Offset)(uint32)b.addr());
+                val = (Offset)(uint32)b.addr();
             } else {
                 var (is64, known) = b.format.dwarf64();
                 if (!known){
                     b.error(unknownSizeForDwFormRefˢ);
                 } else 
                 if (is64){
-                    val = ((Offset)(uint32)b.uint64());
+                    val = (Offset)(uint32)b.uint64();
                 } else {
-                    val = ((Offset)b.uint32());
+                    val = (Offset)b.uint32();
                 }
             }
         }
@@ -1171,7 +1171,7 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
     if (ranges < 0 || ranges > (int64)len(d.ranges)) {
         return (default!, fmt.Errorf("invalid range offset %d (max %d)"u8, ranges, len(d.ranges)));
     }
-    var buf = makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), rangesˢ, ((Offset)(uint32)ranges), d.ranges.slice((nint)(ranges)));
+    var buf = makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), rangesˢ, (Offset)(uint32)ranges, d.ranges.slice((nint)(ranges)));
     while (len(buf.data) > 0) {
         var low = buf.addr();
         var high = buf.addr();

@@ -31,37 +31,27 @@ partial struct Managed {
     internal @string s;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object counterSizeˢ = (@string)"Counter size:"u8;
-private static readonly object vOffsetˢ = (@string)"v offset:"u8;
-private static readonly object wideSizeˢ = (@string)"Wide size:"u8;
-private static readonly object plainSizeˢ = (@string)"Plain size:"u8;
-private static readonly object bOffsetˢ = (@string)"b offset:"u8;
-private static readonly object viewReadsˢ = (@string)"view reads:"u8;
-private static readonly object writeThroughViewReachesˢ = (@string)"write through view reaches the original:"u8;
-private static readonly object clearedˢ = (@string)"cleared:"u8;
-
 internal static void Main() {
-    fmt.Println(counterSizeˢ, /* unsafe.Sizeof(Counter{}) */ (uintptr)4, vOffsetˢ, /* unsafe.Offsetof(Counter{}.v) */ (uintptr)0);
-    fmt.Println(wideSizeˢ, /* unsafe.Sizeof(Wide{}) */ (uintptr)8, vOffsetˢ, /* unsafe.Offsetof(Wide{}.v) */ (uintptr)0);
-    fmt.Println(plainSizeˢ, /* unsafe.Sizeof(Plain{}) */ (uintptr)16, bOffsetˢ, /* unsafe.Offsetof(Plain{}.b) */ (uintptr)8);
+    fmt.Println("Counter size:", /* unsafe.Sizeof(Counter{}) */ (uintptr)4, "v offset:", /* unsafe.Offsetof(Counter{}.v) */ (uintptr)0);
+    fmt.Println("Wide size:", /* unsafe.Sizeof(Wide{}) */ (uintptr)8, "v offset:", /* unsafe.Offsetof(Wide{}.v) */ (uintptr)0);
+    fmt.Println("Plain size:", /* unsafe.Sizeof(Plain{}) */ (uintptr)16, "b offset:", /* unsafe.Offsetof(Plain{}.b) */ (uintptr)8);
 
     ref var raw = ref heap(new int32(), out var Ꮡraw);
     raw = 7;
     var view = Ꮡraw.Reinterpret<int32, Counter>();
-    fmt.Println(viewReadsˢ, (~view).v);
+    fmt.Println("view reads:", (~view).v);
 
     view.Value.v = 42;
-    fmt.Println(writeThroughViewReachesˢ, raw);
+    fmt.Println("write through view reaches the original:", raw);
 
     var c = new Counter(v: 3);
     var w = new Wide(v: 4);
     var p = new Plain(a: 1, b: 2);
-    var m = new Managed(s: "managed"u8);
+    var m = new Managed(s: "managed");
     fmt.Println(c.v, w.v, p.a, p.b, m.s);
 
     c = new Counter(nil);
-    fmt.Println(clearedˢ, c.v);
+    fmt.Println("cleared:", c.v);
 
     namedZeroSizeWrites();
 }
@@ -84,9 +74,6 @@ internal static nocopy side() {
     return new nocopy(nil);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object reflectAddrXZˢ = (@string)"reflect Addr == &x.Z:"u8;
-
 internal static void namedZeroSizeWrites() {
     ref var x = ref heap(new Carrier(), out var Ꮡx);
     x.V = pattern;
@@ -100,7 +87,7 @@ internal static void namedZeroSizeWrites() {
     rp.Value = new nocopy(nil);
     fmt.Printf("after write through reflect's pointer: %#x\n"u8, x.V);
 
-    fmt.Println(reflectAddrXZˢ, (uintptr)rx.Field(0).Addr().UnsafePointer() == @unsafe.Pointer.FromPinnedBox(Ꮡx.of(Carrier.ᏑZ)));
+    fmt.Println("reflect Addr == &x.Z:", (uintptr)rx.Field(0).Addr().UnsafePointer() == @unsafe.Pointer.FromPinnedBox(Ꮡx.of(Carrier.ᏑZ)));
 
     x.V = pattern;
     var p = Ꮡx;

@@ -515,6 +515,8 @@ internal static error checkConnHeaders(map<@string, slice<@string>> h) {
 }
 
 internal static (@string, error) commaSeparatedTrailers(map<@string, slice<@string>> trailer) {
+    var keysᴷ = new stackAppend<@string>();
+
     var keys = new slice<@string>(0, len(trailer));
     foreach (var (kᴛ1, _) in trailer) {
         var k = kᴛ1;
@@ -524,7 +526,7 @@ internal static (@string, error) commaSeparatedTrailers(map<@string, slice<@stri
         if (exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8) {
             return ("", fmt.Errorf("invalid Trailer key %q"u8, k));
         }
-        keys = append(keys, k);
+        keys = append(keysᴷ, keys, k);
     }
     if (len(keys) > 0) {
         sort.Strings(keys);

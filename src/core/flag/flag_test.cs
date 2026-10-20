@@ -336,7 +336,7 @@ public static void TestFlagSetParse(ж<testing.T> Ꮡt) {
 partial struct flagVar /*[]@string*/;
 
 internal static @string ΔString(this ref flagVar f) {
-    return fmt.Sprint(((slice<@string>)(f)));
+    return fmt.Sprint((slice<@string>)(f));
 }
 
 internal static error ΔSet(this ref flagVar f, @string value) {
@@ -477,7 +477,7 @@ public static void TestUserDefinedBool(ж<testing.T> Ꮡt) {
     }
 
     if (b.count != 4) {
-        Ꮡt.Errorf("want: %d; got: %d"u8, (nint)(4), b.count);
+        Ꮡt.Errorf("want: %d; got: %d"u8, (nint)4, b.count);
     }
 
     if (err == default!) {

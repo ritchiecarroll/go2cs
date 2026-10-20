@@ -12,7 +12,6 @@ using strconv = strconv_package;
 using sync = sync_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
-using buffer = go.log.slog.@internal.buffer_package;
 using go.log.slog.@internal;
 using go.unicode;
 using time = time_package;
@@ -118,14 +117,14 @@ internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
                     return err;
                 }
                 // TODO: avoid the conversion to string.
-                s.appendString(((@string)data));
+                s.appendString((@string)data);
                 return default!;
             }
         }
         {
             var (bs, ok) = byteSlice(v.any); if (ok) {
                 // As of Go 1.19, this only allocates for strings longer than 32 bytes.
-                s.buf.WriteString(strconv.Quote(((@string)bs)));
+                s.buf.WriteString(strconv.Quote((@string)bs));
                 return default!;
             }
         }

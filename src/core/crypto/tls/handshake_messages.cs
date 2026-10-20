@@ -38,7 +38,7 @@ internal static void addBytesWithLength(ж<cryptobyte.Builder> Ꮡb, slice<byte>
 internal static void addUint64(ж<cryptobyte.Builder> Ꮡb, uint64 v) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    b.AddUint32((uint32)((v >> (int)(32))));
+    b.AddUint32((uint32)(v >> 32));
     b.AddUint32((uint32)v);
 }
 
@@ -52,7 +52,7 @@ internal static bool readUint64(ж<cryptobyte.String> Ꮡs, ref uint64 @out) {
     if (!s.ReadUint32(Ꮡhi) || !s.ReadUint32(Ꮡlo)) {
         return false;
     }
-    @out = (uint64)(((uint64)hi << (int)(32)) | (uint64)lo);
+    @out = (uint64)hi << 32 | (uint64)lo;
     return true;
 }
 
@@ -115,6 +115,7 @@ partial struct clientHelloMsg {
 
 internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bool echInner) {
     ref var m = ref Ꮡm.DerefOrNull();
+    var echOuterExtsᴷ = new stackAppend<uint16>();
 
     ref var exts = ref heap(new cryptobyte.Builder(), out var Ꮡexts);
     if (len(m.serverName) > 0) {
@@ -190,7 +191,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     if (m.ocspStapling) {
         // RFC 4366, Section 3.6
         if (echInner){
-            echOuterExts = append(echOuterExts, extensionStatusRequest);
+            echOuterExts = append(echOuterExtsᴷ, echOuterExts, extensionStatusRequest);
         } else {
             exts.AddUint16(extensionStatusRequest);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ11) => {
@@ -453,7 +454,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
 
     m = new clientHelloMsg(original: data);
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
 
     if (!s.Skip(4) || // message type and uint24 length field
         !s.ReadUint16(Ꮡm.of(clientHelloMsg.Ꮡvers)) || !s.ReadBytes(Ꮡm.of(clientHelloMsg.Ꮡrandom), 32) || !readUint8LengthPrefixed(Ꮡs, Ꮡm.of(clientHelloMsg.ᏑsessionId))) {
@@ -525,7 +526,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
                     // Multiple names of the same name_type are prohibited.
                     return false;
                 }
-                m.serverName = ((@string)(slice<byte>)serverName);
+                m.serverName = (@string)(slice<byte>)serverName;
                 // An SNI value may not include a trailing dot.
                 if (strings.HasSuffix(m.serverName, "."u8)) {
                     return false;
@@ -554,7 +555,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
                 if (!curves.ReadUint16(Ꮡcurve)) {
                     return false;
                 }
-                m.supportedCurves = append(m.supportedCurves, ((CurveID)curve));
+                m.supportedCurves = append(m.supportedCurves, (CurveID)curve);
             }
             break;
         }
@@ -583,7 +584,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
                     return false;
                 }
                 m.supportedSignatureAlgorithms = append(
-                    m.supportedSignatureAlgorithms, ((SignatureScheme)sigAndAlg));
+                    m.supportedSignatureAlgorithms, (SignatureScheme)sigAndAlg);
             }
             break;
         }
@@ -599,7 +600,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
                     return false;
                 }
                 m.supportedSignatureAlgorithmsCert = append(
-                    m.supportedSignatureAlgorithmsCert, ((SignatureScheme)sigAndAlg));
+                    m.supportedSignatureAlgorithmsCert, (SignatureScheme)sigAndAlg);
             }
             break;
         }
@@ -627,7 +628,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
                 if (!protoList.ReadUint8LengthPrefixed(Ꮡproto) || proto.Empty()) {
                     return false;
                 }
-                m.alpnProtocols = append(m.alpnProtocols, ((@string)(slice<byte>)proto));
+                m.alpnProtocols = append(m.alpnProtocols, (@string)(slice<byte>)proto);
             }
             break;
         }
@@ -939,7 +940,7 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
 
     m = new serverHelloMsg(original: data);
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
 
     if (!s.Skip(4) || // message type and uint24 length field
         !s.ReadUint16(Ꮡm.of(serverHelloMsg.Ꮡvers)) || !s.ReadBytes(Ꮡm.of(serverHelloMsg.Ꮡrandom), 32) || !readUint8LengthPrefixed(Ꮡs, Ꮡm.of(serverHelloMsg.ᏑsessionId)) || !s.ReadUint16(Ꮡm.of(serverHelloMsg.ᏑcipherSuite)) || !s.ReadUint8(Ꮡm.of(serverHelloMsg.ᏑcompressionMethod))) {
@@ -998,7 +999,7 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
             if (!protoList.ReadUint8LengthPrefixed(Ꮡproto) || proto.Empty() || !protoList.Empty()) {
                 return false;
             }
-            m.alpnProtocol = ((@string)(slice<byte>)proto);
+            m.alpnProtocol = (@string)(slice<byte>)proto;
             break;
         }
         case extensionSCT: {
@@ -1140,7 +1141,7 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
 
 internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> data) {
     m = new encryptedExtensionsMsg(nil);
-    var s = ((cryptobyte.String)data);
+    var s = (cryptobyte.String)data;
 
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
     if (!s.Skip(4) || // message type and uint24 length field
@@ -1171,7 +1172,7 @@ internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> da
             if (!protoList.ReadUint8LengthPrefixed(Ꮡproto) || proto.Empty() || !protoList.Empty()) {
                 return false;
             }
-            m.alpnProtocol = ((@string)(slice<byte>)proto);
+            m.alpnProtocol = (@string)(slice<byte>)proto;
             break;
         }
         case extensionQUICTransportParameters: {
@@ -1246,7 +1247,7 @@ internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
 }
 
 internal static bool unmarshal(this ref keyUpdateMsg m, slice<byte> data) {
-    var s = ((cryptobyte.String)data);
+    var s = (cryptobyte.String)data;
 
     ref var updateRequested = ref heap(new uint8(), out var ᏑupdateRequested);
     if (!s.Skip(4) || // message type and uint24 length field
@@ -1307,7 +1308,7 @@ internal static bool unmarshal(this ж<newSessionTicketMsgTLS13> Ꮡm, slice<byt
 
     m = new newSessionTicketMsgTLS13(nil);
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
 
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
     if (!s.Skip(4) || // message type and uint24 length field
@@ -1414,7 +1415,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
 
 internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte> data) {
     m = new certificateRequestMsgTLS13(nil);
-    var s = ((cryptobyte.String)data);
+    var s = (cryptobyte.String)data;
 
     ref var context = ref heap<cryptobyte.String>(out var Ꮡcontext);
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
@@ -1450,7 +1451,7 @@ internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte
                     return false;
                 }
                 m.supportedSignatureAlgorithms = append(
-                    m.supportedSignatureAlgorithms, ((SignatureScheme)sigAndAlg));
+                    m.supportedSignatureAlgorithms, (SignatureScheme)sigAndAlg);
             }
             break;
         }
@@ -1465,7 +1466,7 @@ internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte
                     return false;
                 }
                 m.supportedSignatureAlgorithmsCert = append(
-                    m.supportedSignatureAlgorithmsCert, ((SignatureScheme)sigAndAlg));
+                    m.supportedSignatureAlgorithmsCert, (SignatureScheme)sigAndAlg);
             }
             break;
         }
@@ -1510,19 +1511,19 @@ internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
     nint length = 3 + 3 * len(m.certificates) + i;
     var x = new slice<byte>(4 + length);
     x[0] = typeCertificate;
-    x[1] = (uint8)((length >> (int)(16)));
-    x[2] = (uint8)((length >> (int)(8)));
+    x[1] = (uint8)(length >> 16);
+    x[2] = (uint8)(length >> 8);
     x[3] = (uint8)length;
 
     nint certificateOctets = length - 3;
-    x[4] = (uint8)((certificateOctets >> (int)(16)));
-    x[5] = (uint8)((certificateOctets >> (int)(8)));
+    x[4] = (uint8)(certificateOctets >> 16);
+    x[5] = (uint8)(certificateOctets >> 8);
     x[6] = (uint8)certificateOctets;
 
     var y = x[7..];
     foreach (var (_, Δslice) in m.certificates) {
-        y[0] = (uint8)((len(Δslice) >> (int)(16)));
-        y[1] = (uint8)((len(Δslice) >> (int)(8)));
+        y[0] = (uint8)(len(Δslice) >> 16);
+        y[1] = (uint8)(len(Δslice) >> 8);
         y[2] = (uint8)len(Δslice);
         copy(y[3..], Δslice);
         y = y.slice(3 + len(Δslice));
@@ -1536,7 +1537,7 @@ internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
         return false;
     }
 
-    var certsLen = (uint32)((uint32)(((uint32)data[4] << (int)(16)) | ((uint32)data[5] << (int)(8))) | (uint32)data[6]);
+    var certsLen = (uint32)data[4] << 16 | (uint32)data[5] << 8 | (uint32)data[6];
     if ((uint32)len(data) != certsLen + 7) {
         return false;
     }
@@ -1547,7 +1548,7 @@ internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
         if (len(d) < 4) {
             return false;
         }
-        var certLen = (uint32)((uint32)(((uint32)d[0] << (int)(16)) | ((uint32)d[1] << (int)(8))) | (uint32)d[2]);
+        var certLen = (uint32)d[0] << 16 | (uint32)d[1] << 8 | (uint32)d[2];
         if ((uint32)len(d) < 3 + certLen) {
             return false;
         }
@@ -1559,7 +1560,7 @@ internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
     m.certificates = new slice<slice<byte>>(numCerts);
     d = data[7..];
     for (nint i = 0; i < numCerts; i++) {
-        var certLen = (uint32)((uint32)(((uint32)d[0] << (int)(16)) | ((uint32)d[1] << (int)(8))) | (uint32)d[2]);
+        var certLen = (uint32)d[0] << 16 | (uint32)d[1] << 8 | (uint32)d[2];
         m.certificates[i] = d.slice(3, (nint)(3 + certLen));
         d = d.slice((nint)(3 + certLen));
     }
@@ -1642,7 +1643,7 @@ internal static bool unmarshal(this ж<certificateMsgTLS13> Ꮡm, slice<byte> da
 
     m = new certificateMsgTLS13(nil);
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
 
     ref var context = ref heap<cryptobyte.String>(out var Ꮡcontext);
     if (!s.Skip(4) || // message type and uint24 length field
@@ -1727,8 +1728,8 @@ internal static (slice<byte>, error) marshal(this ref serverKeyExchangeMsg m) {
     nint length = len(m.key);
     var x = new slice<byte>(length + 4);
     x[0] = typeServerKeyExchange;
-    x[1] = (uint8)((length >> (int)(16)));
-    x[2] = (uint8)((length >> (int)(8)));
+    x[1] = (uint8)(length >> 16);
+    x[2] = (uint8)(length >> 8);
     x[3] = (uint8)length;
     copy(x[4..], m.key);
 
@@ -1764,7 +1765,7 @@ internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> d
     ref var m = ref Ꮡm.DerefOrNull();
 
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
 
     ref var statusType = ref heap(new uint8(), out var ᏑstatusType);
     if (!s.Skip(4) || // message type and uint24 length field
@@ -1795,8 +1796,8 @@ internal static (slice<byte>, error) marshal(this ref clientKeyExchangeMsg m) {
     nint length = len(m.ciphertext);
     var x = new slice<byte>(length + 4);
     x[0] = typeClientKeyExchange;
-    x[1] = (uint8)((length >> (int)(16)));
-    x[2] = (uint8)((length >> (int)(8)));
+    x[1] = (uint8)(length >> 16);
+    x[2] = (uint8)(length >> 8);
     x[3] = (uint8)length;
     copy(x[4..], m.ciphertext);
 
@@ -1807,7 +1808,7 @@ internal static bool unmarshal(this ref clientKeyExchangeMsg m, slice<byte> data
     if (len(data) < 4) {
         return false;
     }
-    nint l = (nint)((nint)(((nint)data[1] << (int)(16)) | ((nint)data[2] << (int)(8))) | (nint)data[3]);
+    nint l = (nint)data[1] << 16 | (nint)data[2] << 8 | (nint)data[3];
     if (l != len(data) - 4) {
         return false;
     }
@@ -1831,7 +1832,7 @@ internal static (slice<byte>, error) marshal(this ж<finishedMsg> Ꮡm) {
 
 internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
     return s.Skip(1) && readUint24LengthPrefixed(Ꮡs, Ꮡm.of(finishedMsg.ᏑverifyData)) && s.Empty();
 }
 
@@ -1859,8 +1860,8 @@ internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
 
     var x = new slice<byte>(4 + length);
     x[0] = typeCertificateRequest;
-    x[1] = (uint8)((length >> (int)(16)));
-    x[2] = (uint8)((length >> (int)(8)));
+    x[1] = (uint8)(length >> 16);
+    x[2] = (uint8)(length >> 8);
     x[3] = (uint8)length;
 
     x[4] = (uint8)len(m.certificateTypes);
@@ -1870,21 +1871,21 @@ internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
 
     if (m.hasSignatureAlgorithm) {
         nint n = len(m.supportedSignatureAlgorithms) * 2;
-        y[0] = (uint8)((n >> (int)(8)));
+        y[0] = (uint8)(n >> 8);
         y[1] = (uint8)n;
         y = y[2..];
         foreach (var (_, sigAlgo) in m.supportedSignatureAlgorithms) {
-            y[0] = (uint8)(uint16)((sigAlgo >> (int)(8)));
+            y[0] = (uint8)(uint16)((sigAlgo >> 8));
             y[1] = (uint8)(uint16)sigAlgo;
             y = y[2..];
         }
     }
 
-    y[0] = (uint8)((casLength >> (int)(8)));
+    y[0] = (uint8)(casLength >> 8);
     y[1] = (uint8)casLength;
     y = y[2..];
     foreach (var (_, ca) in m.certificateAuthorities) {
-        y[0] = (uint8)((len(ca) >> (int)(8)));
+        y[0] = (uint8)(len(ca) >> 8);
         y[1] = (uint8)len(ca);
         y = y[2..];
         copy(y, ca);
@@ -1899,7 +1900,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
         return false;
     }
 
-    var length = (uint32)((uint32)(((uint32)data[1] << (int)(16)) | ((uint32)data[2] << (int)(8))) | (uint32)data[3]);
+    var length = (uint32)data[1] << 16 | (uint32)data[2] << 8 | (uint32)data[3];
     if ((uint32)len(data) - 4 != length) {
         return false;
     }
@@ -1921,7 +1922,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
         if (len(data) < 2) {
             return false;
         }
-        var sigAndHashLen = (uint16)((uint16)((uint16)data[0] << (int)(8)) | (uint16)data[1]);
+        var sigAndHashLen = (uint16)((uint16)((uint16)data[0] << 8) | (uint16)data[1]);
         data = data[2..];
         if ((uint16)(sigAndHashLen & 1) != 0 || sigAndHashLen == 0) {
             return false;
@@ -1932,7 +1933,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
         var numSigAlgos = (uint16)(sigAndHashLen / 2);
         m.supportedSignatureAlgorithms = new slice<SignatureScheme>(numSigAlgos);
         foreach (var (i, _) in m.supportedSignatureAlgorithms) {
-            m.supportedSignatureAlgorithms[i] = (SignatureScheme)((SignatureScheme)(uint16)(((SignatureScheme)(uint16)data[0]) << (int)(8)) | ((SignatureScheme)(uint16)data[1]));
+            m.supportedSignatureAlgorithms[i] = (SignatureScheme)((SignatureScheme)(uint16)(((SignatureScheme)(uint16)data[0]) << 8) | ((SignatureScheme)(uint16)data[1]));
             data = data[2..];
         }
     }
@@ -1940,7 +1941,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
     if (len(data) < 2) {
         return false;
     }
-    var casLength = (uint16)((uint16)((uint16)data[0] << (int)(8)) | (uint16)data[1]);
+    var casLength = (uint16)((uint16)((uint16)data[0] << 8) | (uint16)data[1]);
     data = data[2..];
     if (len(data) < (nint)casLength) {
         return false;
@@ -1954,7 +1955,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
         if (len(cas) < 2) {
             return false;
         }
-        var caLen = (uint16)((uint16)((uint16)cas[0] << (int)(8)) | (uint16)cas[1]);
+        var caLen = (uint16)((uint16)((uint16)cas[0] << 8) | (uint16)cas[1]);
         cas = cas[2..];
 
         if (len(cas) < (nint)caLen) {
@@ -1993,7 +1994,7 @@ internal static bool unmarshal(this ж<certificateVerifyMsg> Ꮡm, slice<byte> d
     ref var m = ref Ꮡm.DerefOrNull();
 
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = ((cryptobyte.String)data);
+    s = (cryptobyte.String)data;
 
     if (!s.Skip(4)) { // message type and uint24 length field
         return false;
@@ -2016,10 +2017,10 @@ internal static (slice<byte>, error) marshal(this ref newSessionTicketMsg m) {
     nint length = 2 + 4 + ticketLen;
     var x = new slice<byte>(4 + length);
     x[0] = typeNewSessionTicket;
-    x[1] = (uint8)((length >> (int)(16)));
-    x[2] = (uint8)((length >> (int)(8)));
+    x[1] = (uint8)(length >> 16);
+    x[2] = (uint8)(length >> 8);
     x[3] = (uint8)length;
-    x[8] = (uint8)((ticketLen >> (int)(8)));
+    x[8] = (uint8)(ticketLen >> 8);
     x[9] = (uint8)ticketLen;
     copy(x[10..], m.ticket);
 
@@ -2031,12 +2032,12 @@ internal static bool unmarshal(this ref newSessionTicketMsg m, slice<byte> data)
         return false;
     }
 
-    var length = (uint32)((uint32)(((uint32)data[1] << (int)(16)) | ((uint32)data[2] << (int)(8))) | (uint32)data[3]);
+    var length = (uint32)data[1] << 16 | (uint32)data[2] << 8 | (uint32)data[3];
     if ((uint32)len(data) - 4 != length) {
         return false;
     }
 
-    nint ticketLen = ((nint)data[8] << (int)(8)) + (nint)data[9];
+    nint ticketLen = ((nint)data[8] << 8) + (nint)data[9];
     if (len(data) - 10 != ticketLen) {
         return false;
     }

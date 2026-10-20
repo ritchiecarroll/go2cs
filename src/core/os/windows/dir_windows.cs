@@ -80,11 +80,11 @@ internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
         // but we can still read the directory entries.
         return;
     }
-    if ((uint32)(flags & (uint32)windows.FILE_SUPPORTS_OBJECT_IDS) == 0) {
+    if ((flags & (uint32)windows.FILE_SUPPORTS_OBJECT_IDS) == 0) {
         // The file system does not support object IDs, no need to continue.
         return;
     }
-    if (allowReadDirFileID && (uint32)(flags & (uint32)windows.FILE_SUPPORTS_OPEN_BY_FILE_ID) != 0){
+    if (allowReadDirFileID && (flags & (uint32)windows.FILE_SUPPORTS_OPEN_BY_FILE_ID) != 0){
         // Use FileIdBothDirectoryRestartInfo if available as it returns the file ID
         // without the need to open the file.
         d.@class = windows.FileIdBothDirectoryRestartInfo;

@@ -62,7 +62,7 @@ internal static (slice<map<@string, any>>, error) parseLines(slice<byte> src, Fu
         }
         var (m, err) = parse(line);
         if (err != default!) {
-            return (default!, fmt.Errorf("%s: %w"u8, ((@string)line), err));
+            return (default!, fmt.Errorf("%s: %w"u8, (@string)line, err));
         }
         records = append(records, m);
     }
@@ -87,7 +87,7 @@ internal static (map<@string, any>, error) parseJSON(slice<byte> bs) {
 // handler behavior, not parsing.
 internal static (map<@string, any>, error) parseText(slice<byte> bs) {
     var top = new map<@string, any>{};
-    @string s = ((@string)bytes.TrimSpace(bs));
+    @string s = (@string)bytes.TrimSpace(bs);
     while (len(s) > 0) {
         var (kv, rest, _) = strings.Cut(s, " "u8); // assumes exactly one space between attrs
         var (k, value, found) = strings.Cut(kv, "="u8);

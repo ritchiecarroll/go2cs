@@ -42,7 +42,7 @@ internal static ж<counter> run() {
     try {
         var c = Ꮡ(new counter(nil));
         defer(() => note(), ref ᒐ);
-        defer((ᴛ1, ᴛ2) => note(ᴛ1, ᴛ2), (@string)"a", "b", ref ᒐ);
+        defer((ᴛ1, ᴛ2) => note(ᴛ1, ᴛ2), (@string)"a", (@string)"b", ref ᒐ);
         var cʗ1 = c;
         defer(() => cʗ1.bump(), ref ᒐ);
         var cʗ2 = c;
@@ -68,26 +68,21 @@ internal static void signalDone(params Span<channel<EmptyStruct>> chansʗp) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object counterˢ = (@string)"counter:"u8;
-private static readonly object goVariadicZeroArgDoneˢ = (@string)"go variadic zero-arg done"u8;
-private static readonly object goVariadicWithArgDoneˢ = (@string)"go variadic with-arg done"u8;
-
 internal static partial void Main() {
     var c = run();
     foreach (var (_, s) in order) {
         fmt.Println(s);
     }
-    fmt.Println(counterˢ, (~c).n);
+    fmt.Println("counter:", (~c).n);
 
     goǃ(() => signalDone());
     ᐸꟷ(defaultDone);
-    fmt.Println(goVariadicZeroArgDoneˢ);
+    fmt.Println("go variadic zero-arg done");
 
     var ch = new channel<EmptyStruct>(0);
     goǃ(ᴛ1 => signalDone(ᴛ1), ch);
     ᐸꟷ(ch);
-    fmt.Println(goVariadicWithArgDoneˢ);
+    fmt.Println("go variadic with-arg done");
 }
 
 } // end main_package

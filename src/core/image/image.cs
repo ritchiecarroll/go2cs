@@ -137,10 +137,10 @@ public static color.RGBA64 RGBA64At(this ref ΔRGBA p, nint x, nint y) {
     var b = (uint16)s[2];
     var a = (uint16)s[3];
     return new color.RGBA64(
-        (uint16)(((uint16)(r << (int)(8))) | r),
-        (uint16)(((uint16)(g << (int)(8))) | g),
-        (uint16)(((uint16)(b << (int)(8))) | b),
-        (uint16)(((uint16)(a << (int)(8))) | a)
+        (uint16)(((uint16)(r << 8)) | r),
+        (uint16)(((uint16)(g << 8)) | g),
+        (uint16)(((uint16)(b << 8)) | b),
+        (uint16)(((uint16)(a << 8)) | a)
     );
 }
 
@@ -178,10 +178,10 @@ public static void SetRGBA64(this ref ΔRGBA p, nint x, nint y, color.RGBA64 c) 
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((c.R >> (int)(8)));
-    s[1] = (uint8)((c.G >> (int)(8)));
-    s[2] = (uint8)((c.B >> (int)(8)));
-    s[3] = (uint8)((c.A >> (int)(8)));
+    s[0] = (uint8)(c.R >> 8);
+    s[1] = (uint8)(c.G >> 8);
+    s[2] = (uint8)(c.B >> 8);
+    s[3] = (uint8)(c.A >> 8);
 }
 
 public static void SetRGBA(this ref ΔRGBA p, nint x, nint y, colorꓸRGBA c) {
@@ -275,10 +275,10 @@ public static color.RGBA64 RGBA64At(this ref RGBA64 p, nint x, nint y) {
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
     return new color.RGBA64(
-        (uint16)((uint16)((uint16)s[0] << (int)(8)) | (uint16)s[1]),
-        (uint16)((uint16)((uint16)s[2] << (int)(8)) | (uint16)s[3]),
-        (uint16)((uint16)((uint16)s[4] << (int)(8)) | (uint16)s[5]),
-        (uint16)((uint16)((uint16)s[6] << (int)(8)) | (uint16)s[7])
+        (uint16)((uint16)((uint16)s[0] << 8) | (uint16)s[1]),
+        (uint16)((uint16)((uint16)s[2] << 8) | (uint16)s[3]),
+        (uint16)((uint16)((uint16)s[4] << 8) | (uint16)s[5]),
+        (uint16)((uint16)((uint16)s[6] << 8) | (uint16)s[7])
     );
 }
 
@@ -295,13 +295,13 @@ public static void Set(this ref RGBA64 p, nint x, nint y, color.Color c) {
     nint i = p.PixOffset(x, y);
     var c1 = color.RGBA64Model.Convert(c)._<color.Color, color.RGBA64>();
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((c1.R >> (int)(8)));
+    s[0] = (uint8)(c1.R >> 8);
     s[1] = (uint8)c1.R;
-    s[2] = (uint8)((c1.G >> (int)(8)));
+    s[2] = (uint8)(c1.G >> 8);
     s[3] = (uint8)c1.G;
-    s[4] = (uint8)((c1.B >> (int)(8)));
+    s[4] = (uint8)(c1.B >> 8);
     s[5] = (uint8)c1.B;
-    s[6] = (uint8)((c1.A >> (int)(8)));
+    s[6] = (uint8)(c1.A >> 8);
     s[7] = (uint8)c1.A;
 }
 
@@ -311,13 +311,13 @@ public static void SetRGBA64(this ref RGBA64 p, nint x, nint y, color.RGBA64 c) 
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((c.R >> (int)(8)));
+    s[0] = (uint8)(c.R >> 8);
     s[1] = (uint8)c.R;
-    s[2] = (uint8)((c.G >> (int)(8)));
+    s[2] = (uint8)(c.G >> 8);
     s[3] = (uint8)c.G;
-    s[4] = (uint8)((c.B >> (int)(8)));
+    s[4] = (uint8)(c.B >> 8);
     s[5] = (uint8)c.B;
-    s[6] = (uint8)((c.A >> (int)(8)));
+    s[6] = (uint8)(c.A >> 8);
     s[7] = (uint8)c.A;
 }
 
@@ -438,10 +438,10 @@ public static void SetRGBA64(this ref NRGBA p, nint x, nint y, color.RGBA64 c) {
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((r >> (int)(8)));
-    s[1] = (uint8)((g >> (int)(8)));
-    s[2] = (uint8)((b >> (int)(8)));
-    s[3] = (uint8)((a >> (int)(8)));
+    s[0] = (uint8)(r >> 8);
+    s[1] = (uint8)(g >> 8);
+    s[2] = (uint8)(b >> 8);
+    s[3] = (uint8)(a >> 8);
 }
 
 public static void SetNRGBA(this ref NRGBA p, nint x, nint y, color.NRGBA c) {
@@ -540,10 +540,10 @@ public static color.NRGBA64 NRGBA64At(this ref NRGBA64 p, nint x, nint y) {
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
     return new color.NRGBA64(
-        (uint16)((uint16)((uint16)s[0] << (int)(8)) | (uint16)s[1]),
-        (uint16)((uint16)((uint16)s[2] << (int)(8)) | (uint16)s[3]),
-        (uint16)((uint16)((uint16)s[4] << (int)(8)) | (uint16)s[5]),
-        (uint16)((uint16)((uint16)s[6] << (int)(8)) | (uint16)s[7])
+        (uint16)((uint16)((uint16)s[0] << 8) | (uint16)s[1]),
+        (uint16)((uint16)((uint16)s[2] << 8) | (uint16)s[3]),
+        (uint16)((uint16)((uint16)s[4] << 8) | (uint16)s[5]),
+        (uint16)((uint16)((uint16)s[6] << 8) | (uint16)s[7])
     );
 }
 
@@ -560,13 +560,13 @@ public static void Set(this ref NRGBA64 p, nint x, nint y, color.Color c) {
     nint i = p.PixOffset(x, y);
     var c1 = color.NRGBA64Model.Convert(c)._<color.Color, color.NRGBA64>();
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((c1.R >> (int)(8)));
+    s[0] = (uint8)(c1.R >> 8);
     s[1] = (uint8)c1.R;
-    s[2] = (uint8)((c1.G >> (int)(8)));
+    s[2] = (uint8)(c1.G >> 8);
     s[3] = (uint8)c1.G;
-    s[4] = (uint8)((c1.B >> (int)(8)));
+    s[4] = (uint8)(c1.B >> 8);
     s[5] = (uint8)c1.B;
-    s[6] = (uint8)((c1.A >> (int)(8)));
+    s[6] = (uint8)(c1.A >> 8);
     s[7] = (uint8)c1.A;
 }
 
@@ -582,13 +582,13 @@ public static void SetRGBA64(this ref NRGBA64 p, nint x, nint y, color.RGBA64 c)
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((r >> (int)(8)));
+    s[0] = (uint8)(r >> 8);
     s[1] = (uint8)r;
-    s[2] = (uint8)((g >> (int)(8)));
+    s[2] = (uint8)(g >> 8);
     s[3] = (uint8)g;
-    s[4] = (uint8)((b >> (int)(8)));
+    s[4] = (uint8)(b >> 8);
     s[5] = (uint8)b;
-    s[6] = (uint8)((a >> (int)(8)));
+    s[6] = (uint8)(a >> 8);
     s[7] = (uint8)a;
 }
 
@@ -598,13 +598,13 @@ public static void SetNRGBA64(this ref NRGBA64 p, nint x, nint y, color.NRGBA64 
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((c.R >> (int)(8)));
+    s[0] = (uint8)(c.R >> 8);
     s[1] = (uint8)c.R;
-    s[2] = (uint8)((c.G >> (int)(8)));
+    s[2] = (uint8)(c.G >> 8);
     s[3] = (uint8)c.G;
-    s[4] = (uint8)((c.B >> (int)(8)));
+    s[4] = (uint8)(c.B >> 8);
     s[5] = (uint8)c.B;
-    s[6] = (uint8)((c.A >> (int)(8)));
+    s[6] = (uint8)(c.A >> 8);
     s[7] = (uint8)c.A;
 }
 
@@ -682,7 +682,7 @@ public static color.Color At(this ref Alpha p, nint x, nint y) {
 
 public static color.RGBA64 RGBA64At(this ref Alpha p, nint x, nint y) {
     var a = (uint16)p.AlphaAt(x, y).A;
-    a |= (uint16)((uint16)(a << (int)(8)));
+    a |= (uint16)((uint16)(a << 8));
     return new color.RGBA64(a, a, a, a);
 }
 
@@ -713,7 +713,7 @@ public static void SetRGBA64(this ref Alpha p, nint x, nint y, color.RGBA64 c) {
         return;
     }
     nint i = p.PixOffset(x, y);
-    p.Pix[i] = (uint8)((c.A >> (int)(8)));
+    p.Pix[i] = (uint8)(c.A >> 8);
 }
 
 public static void SetAlpha(this ref Alpha p, nint x, nint y, color.Alpha c) {
@@ -806,7 +806,7 @@ public static color.Alpha16 Alpha16At(this ref Alpha16 p, nint x, nint y) {
         return new color.Alpha16(nil);
     }
     nint i = p.PixOffset(x, y);
-    return new color.Alpha16((uint16)((uint16)((uint16)p.Pix[i + 0] << (int)(8)) | (uint16)p.Pix[i + 1]));
+    return new color.Alpha16((uint16)((uint16)((uint16)p.Pix[i + 0] << 8) | (uint16)p.Pix[i + 1]));
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -821,7 +821,7 @@ public static void Set(this ref Alpha16 p, nint x, nint y, color.Color c) {
     }
     nint i = p.PixOffset(x, y);
     var c1 = color.Alpha16Model.Convert(c)._<color.Color, color.Alpha16>();
-    p.Pix[i + 0] = (uint8)((c1.A >> (int)(8)));
+    p.Pix[i + 0] = (uint8)(c1.A >> 8);
     p.Pix[i + 1] = (uint8)c1.A;
 }
 
@@ -830,7 +830,7 @@ public static void SetRGBA64(this ref Alpha16 p, nint x, nint y, color.RGBA64 c)
         return;
     }
     nint i = p.PixOffset(x, y);
-    p.Pix[i + 0] = (uint8)((c.A >> (int)(8)));
+    p.Pix[i + 0] = (uint8)(c.A >> 8);
     p.Pix[i + 1] = (uint8)c.A;
 }
 
@@ -839,7 +839,7 @@ public static void SetAlpha16(this ref Alpha16 p, nint x, nint y, color.Alpha16 
         return;
     }
     nint i = p.PixOffset(x, y);
-    p.Pix[i + 0] = (uint8)((c.A >> (int)(8)));
+    p.Pix[i + 0] = (uint8)(c.A >> 8);
     p.Pix[i + 1] = (uint8)c.A;
 }
 
@@ -917,7 +917,7 @@ public static color.Color At(this ref Gray p, nint x, nint y) {
 
 public static color.RGBA64 RGBA64At(this ref Gray p, nint x, nint y) {
     var gray = (uint16)p.GrayAt(x, y).Y;
-    gray |= (uint16)((uint16)(gray << (int)(8)));
+    gray |= (uint16)((uint16)(gray << 8));
     return new color.RGBA64(gray, gray, gray, 0xffff);
 }
 
@@ -948,7 +948,7 @@ public static void SetRGBA64(this ref Gray p, nint x, nint y, color.RGBA64 c) {
         return;
     }
     // This formula is the same as in color.grayModel.
-    var gray = ((19595 * (uint32)c.R + 38470 * (uint32)c.G + 7471 * (uint32)c.B + ((uint32)1 << (int)(15))) >> (int)(24));
+    var gray = (19595 * (uint32)c.R + 38470 * (uint32)c.G + 7471 * (uint32)c.B + ((uint32)1 << 15)) >> 24;
     nint i = p.PixOffset(x, y);
     p.Pix[i] = (uint8)gray;
 }
@@ -1029,7 +1029,7 @@ public static color.Gray16 Gray16At(this ref Gray16 p, nint x, nint y) {
         return new color.Gray16(nil);
     }
     nint i = p.PixOffset(x, y);
-    return new color.Gray16((uint16)((uint16)((uint16)p.Pix[i + 0] << (int)(8)) | (uint16)p.Pix[i + 1]));
+    return new color.Gray16((uint16)((uint16)((uint16)p.Pix[i + 0] << 8) | (uint16)p.Pix[i + 1]));
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -1044,7 +1044,7 @@ public static void Set(this ref Gray16 p, nint x, nint y, color.Color c) {
     }
     nint i = p.PixOffset(x, y);
     var c1 = color.Gray16Model.Convert(c)._<color.Color, color.Gray16>();
-    p.Pix[i + 0] = (uint8)((c1.Y >> (int)(8)));
+    p.Pix[i + 0] = (uint8)(c1.Y >> 8);
     p.Pix[i + 1] = (uint8)c1.Y;
 }
 
@@ -1053,9 +1053,9 @@ public static void SetRGBA64(this ref Gray16 p, nint x, nint y, color.RGBA64 c) 
         return;
     }
     // This formula is the same as in color.gray16Model.
-    var gray = ((19595 * (uint32)c.R + 38470 * (uint32)c.G + 7471 * (uint32)c.B + ((uint32)1 << (int)(15))) >> (int)(16));
+    var gray = (19595 * (uint32)c.R + 38470 * (uint32)c.G + 7471 * (uint32)c.B + ((uint32)1 << 15)) >> 16;
     nint i = p.PixOffset(x, y);
-    p.Pix[i + 0] = (uint8)((gray >> (int)(8)));
+    p.Pix[i + 0] = (uint8)(gray >> 8);
     p.Pix[i + 1] = (uint8)gray;
 }
 
@@ -1064,7 +1064,7 @@ public static void SetGray16(this ref Gray16 p, nint x, nint y, color.Gray16 c) 
         return;
     }
     nint i = p.PixOffset(x, y);
-    p.Pix[i + 0] = (uint8)((c.Y >> (int)(8)));
+    p.Pix[i + 0] = (uint8)(c.Y >> 8);
     p.Pix[i + 1] = (uint8)c.Y;
 }
 
@@ -1163,7 +1163,7 @@ public static void SetRGBA64(this ref CMYK p, nint x, nint y, color.RGBA64 c) {
     if (!(new Point(x, y).In(p.Rect))) {
         return;
     }
-    var (cc, mm, yy, kk) = color.RGBToCMYK((uint8)((c.R >> (int)(8))), (uint8)((c.G >> (int)(8))), (uint8)((c.B >> (int)(8))));
+    var (cc, mm, yy, kk) = color.RGBToCMYK((uint8)(c.R >> 8), (uint8)(c.G >> 8), (uint8)(c.B >> 8));
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
     s[0] = cc;

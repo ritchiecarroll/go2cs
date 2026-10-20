@@ -288,7 +288,7 @@ internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goV
 partial struct atPos /*global::go.go.token_package.ΔPos*/;
 
 internal static tokenꓸPos Pos(this atPos s) {
-    return ((tokenꓸPos)s);
+    return (tokenꓸPos)s;
 }
 
 // posSpan holds a position range along with a highlighted position within that

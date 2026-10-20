@@ -27,6 +27,16 @@
 - **Target: go1.26.9**, the newest 1.26 at the ruling. OQ-1 freezes the target at hop start. If a 1.26.10
   ships mid-hop, adopting it is an explicit restart decision and never a drift. **Upstream support at
   landing:** 1.26 is supported until 1.28 ships (about 2027-02).
+  - **RULED 2026-10-20: the target is go1.26.10.** go1.26.10 shipped mid-hop with a critical crypto/x509
+    fix (CVE-2026-111943: Verify filters chains through a short list of distrusted intermediates by SPKI
+    hash). The owner suggested adopting it if the delta was small, and COORD made the restart decision.
+    The delta, measured: three upstream commits; in the converted corpus, crypto/x509's verify.cs per
+    target, root_windows.cs, root_darwin.cs, internal/buildcfg's zbootstrap.cs (the version constant)
+    and the toolchain-sourced README text. The vendored x/net bump changes no vendored std source. The
+    population of record is membership-identical at 242 (population-go1.26.10.txt). The re-pin landed
+    as its own step before the re-bank, so every re-read runs against the go1.26.10 oracle; readings
+    taken at go1.26.9 before it stand for everything but crypto/x509. The go1.26.9 lines below are the
+    record of how the hop was run.
 - **The fold.** One hop crosses two releases. Every red is attributed to 1.25 or 1.26 **before** it is
   triaged, by the checkpoint in §4. This is the one structural novelty against hop B. Everything else is
   the runbook as written.

@@ -6,11 +6,8 @@ partial class main_package {
 
 public delegate nint Fn();
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string stringFnˢ = "String(fn)"u8;
-
 public static @string String(this Fn fn) {
-    return stringFnˢ;
+    return "String(fn)";
 }
 
 partial interface Getter {
@@ -29,18 +26,6 @@ partial interface Both :
     nint Get();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object stringerˢ = (@string)"stringer"u8;
-private static readonly object stringˢ = (@string)"string  "u8;
-private static readonly object concreteˢ = (@string)"concrete"u8;
-private static readonly object switchStringerˢ = (@string)"switch   Stringer"u8;
-private static readonly object switchDefaultˢ = (@string)"switch   default"u8;
-private static readonly object getterˢ = (@string)"getter  "u8;
-private static readonly object getterMissˢ = (@string)"getter   miss"u8;
-private static readonly object gStringerˢ = (@string)"G->Stringer"u8;
-private static readonly object fnBothˢ = (@string)"Fn->Both   "u8;
-private static readonly object plainˢ = (@string)"plain      "u8;
-
 internal static void Main() {
     Fn fn = default!;
 
@@ -52,23 +37,23 @@ internal static void Main() {
     any x = (fn).OrTypedNilFunc();
 
     var (s, ok) = x._<fmt.Stringer>(ᐧ);
-    fmt.Println(stringerˢ, ok, s != default!);
+    fmt.Println("stringer", ok, s != default!);
 
     if (ok) {
-        fmt.Println(stringˢ, s.String());
+        fmt.Println("string  ", s.String());
     }
 
     (var f2, ok) = x._<Fn>(ᐧ);
-    fmt.Println(concreteˢ, ok, f2 == default!);
+    fmt.Println("concrete", ok, f2 == default!);
 
     switch (x.type()) {
     case {} Δv when Δv._<fmt.Stringer>(out var v): {
-        fmt.Println(switchStringerˢ, v.String());
+        fmt.Println("switch   Stringer", v.String());
         break;
     }
     default: {
         var v = x;
-        fmt.Println(switchDefaultˢ);
+        fmt.Println("switch   default");
         break;
     }}
 
@@ -77,23 +62,23 @@ internal static void Main() {
 
     {
         var (gg, okΔ1) = y._<Getter>(ᐧ); if (okΔ1){
-            fmt.Println(getterˢ, gg.Get());
+            fmt.Println("getter  ", gg.Get());
         } else {
-            fmt.Println(getterMissˢ);
+            fmt.Println("getter   miss");
         }
     }
 
     (_, ok) = y._<fmt.Stringer>(ᐧ);
-    fmt.Println(gStringerˢ, ok);
+    fmt.Println("G->Stringer", ok);
 
     (_, ok) = x._<Both>(ᐧ);
-    fmt.Println(fnBothˢ, ok);
+    fmt.Println("Fn->Both   ", ok);
 
     Func<nint> plain = default!;
     any z = (plain).OrTypedNilFunc();
 
     (_, ok) = z._<fmt.Stringer>(ᐧ);
-    fmt.Println(plainˢ, ok, z != default!);
+    fmt.Println("plain      ", ok, z != default!);
     fmt.Printf("%v|%T\n"u8, (plain).OrTypedNilFunc(), (plain).OrTypedNilFunc());
 }
 

@@ -78,7 +78,7 @@ public static void TestWriteFile(ж<Δtesting.T> Ꮡt) {
         }
 
         if (((sstring)data) != msg) {
-            Ꮡt.Fatalf("ReadFile: wrong data:\nhave %q\nwant %q"u8, ((@string)data), msg);
+            Ꮡt.Fatalf("ReadFile: wrong data:\nhave %q\nwant %q"u8, (@string)data, msg);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -70,6 +70,12 @@ using static go.go.@internal.gccgoimporter_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -81,7 +87,7 @@ using static go.go.@internal.gccgoimporter_package;
 [assembly: global::go.GoPositionMap("go/internal/gccgoimporter/ar.go", "ar.cs", "AC9q0oCCtoKAgraUpKSkupKCgoKAgqSUgqaCgqaCuIKCgriClIKAggAIDqKCgpSCgpSokoKCgqaCgoKUgoK4rLKAgqTugoCCpA==")]
 [assembly: global::go.GoPositionMap("go/internal/gccgoimporter/gccgoinstallation.go", "gccgoinstallation.cs", "ACI80oKCgoKmgoKmgoKClLaCgoLsgoKClJSosoKCgoKUlIKCgpSmlKqi")]
 [assembly: global::go.GoPositionMap("go/internal/gccgoimporter/importer.go", "importer.cs", "AC1UooKClO6CgsoACSAACwKCgpSCkoK4goKCpoKmgqaCpqaCgoKCgpSCpoKCgoKClIKmggASGIIACgqCpoKCgoKAgqSCgqaCkoKClIKUgIK2goKmgoKUgqSmgoKCpoKCgpSCgriUgoKCggAWMqb8ooKAgqSAgqQ=", "83-87:1;146-247:1")]
-[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/parser.go", "parser.cs", "ADlwooKCgoKmooKAkoKCggAHEIKmgoCCtqaipoKCgpSCpoKClKaCgoK4goKClNqigpSCpoKClIKmgoKUpLiCpoKs4oKCppTGgsaCtqzEgpSCgoKUrvKCgoKUgoKUqJKUgqaCpoKAgqTY0oKCgoKUgIKUpLTE2IKClOjSlIKUlIKCgoKUgoKCgpSCgpSCgqiygoK4lNjSgoKCgoKCAAgKAAgGgoKCuJSCgoKmgrampqaCgoKmgoKCppSCgqaCgoKUuIKUgpSCpoK4gqaCgpSCpoKCgpSCgpSCpqaosoKCgpSCgoKUAAoQlgAIEIKClJSClAADEtKClIKUgpSClIKUu4KUgpS0goKClJTEAAkQ0oKCgoKmgu6CgoKUgoKClIKCgrimgoKCuIKUgpSCgpSmgoKCgpS4gpSCgpSCgoKUgpSCgoKCgoKClIK4poKCgoKUpoKCgoKUqLKCgpSClIKmgpSClILYspSClIKCgpSC2LKUgpSClIKCyIKCgsiC2LKUgpSClIKCgoKClJSC2LKClIKCgpSCgoKClKaUqLKUgoKUgoKCpoKmurKClIKUgqiylIKCgpSCpoKClMqm2LKUgpSClIKCgoKUgoKmlJSC2LKCgoKCgqaClJSospSmlKamprimpqaCACA8ggADOOKCgtjilIKUgoKClIKClJSCuIKCgqaCpoKmgqwACAKCgtoACAaCgpKClKaCgpSClJSCgoKClLT20oKChJyCgoKCpoKUyoKCgoKUlJSCgqaCtKbSgoKCpoKCgoKClIKUgoKUgrSmkoKCgoKUqJKCAAMSAAkClKaUgoKCpoKCpoKClKaUgoKUuIKUgoKCprQAAhoADQKUppSmgoKCgoKUpoKCgqaCgqaCgoKCgqaCgoKCpoKCpoKCgpSmgoKmgoKClKaCgoKmurKClIKClJSCgoCCtoI=", "66-66:1;1014-1016:1;1048-1050:1;1078-1082:1;1162-1164:1", "", "1057=Lookup/1/4/18,Type/1/4/18,Lookup/2/4/19,Type/2/4/19,Lookup/3/4/20,Type/3/4/20,Lookup/4/4/21,Type/4/4/21")]
+[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/parser.go", "parser.cs", "ADlwooKCgoKmooKAkoKCggAHEIKmgoCCtqaipoKCgpSCpoKClKaCgoK4goKClNqigpSCpoKClIKmgoKUpLiCpoKs4oKCppTGgsaCtqzEgpSCgoKUrvKCgoKUgoKUqJKUgqaCpoKAgqTY0oKCgoKUgIKUpLTE2IKClOjSlIKUlIKCgoKUgoKCgpSCgpSCgqiygoK4lNjSgoKCgoKCAAgKAAgGgoKCuJSCgoKmgrampqaCgoKmgoKCppSCgqaCgoKUuIKUgpSCpoK4gqaCgpSCpoKCgpSCgpSCpqaosoKCgpSCgoKUAAoQlgAIEIKClJSClAADEtKClIKUgpSClIKUu4KUgpS0goKClJTEAAkQ0oKCgoKmgu6CgoKUgoKClIKCgrimgoKCuIKUgpSCgpSmgoKCgpS4gpSCgpSCgoKUgpSCgoKCgoKClIK4poKCgoKUpoKCgoKUqLKCgpSClIKmgpSClILYspSClIKCgpSC2LKUgpSClIKCyIKCgsiC2LKUgpSClIKCgoKClJSC2LKClIKCgpSCgoKClKaUqLKUgoKUgoKCpoKmurKClIKUgqiylIKCgpSCpoKClMqm2LKUgpSClIKCgoKUgoKmlJSC2LKCgoKCgqaClJSospSmlKamprimpqaCACA8ggADOOKCgtjilIKUgoKClIKClJSCuIKCgqaCpoKmgqwACAKCgtoACAaCgpKClKaCgpSClJSCgoKClLT24oKChJyCgoKCpoKUyoKCgoKUlJSCgqaCtKbSgoKCpoKCgoKClIKUgoKUgrSmkoKCgoKUqJKCAAMSAAkClKaUgoKCpoKCpoKClKaUgoKUuIKUgoKCprQAAhoADQKUppSmgoKCgoKUpoKCgqaCgqaCgoKCgqaCgoKCpoKCpoKCgpSmgoKmgoKClKaCgoKmurKClIKClJSCgoCCtoI=", "66-66:1;1014-1016:1;1048-1050:1;1078-1082:1;1162-1164:1", "", "1057=Lookup/1/4/18,Type/1/4/18,Lookup/2/4/19,Type/2/4/19,Lookup/3/4/20,Type/3/4/20,Lookup/4/4/21,Type/4/4/21")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

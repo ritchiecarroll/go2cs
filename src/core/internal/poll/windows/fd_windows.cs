@@ -52,7 +52,7 @@ internal static void checkSetFileCompletionNotificationModes() {
         return;
     }
     for (var i = (int32)0; i < n; i++) {
-        if ((uint32)(buf[i].ServiceFlags1 & (uint32)Δsyscall.XP1_IFS_HANDLES) == 0) {
+        if ((buf[i].ServiceFlags1 & (uint32)Δsyscall.XP1_IFS_HANDLES) == 0) {
             return;
         }
     }
@@ -299,7 +299,7 @@ internal static (nint, error) execIO(this ж<FD> Ꮡfd, nint mode, Func<ж<opera
         defer(ᏑoperationPool.Put, o.OrTypedNil(), ref ᒐ);
         o.Value = new operation(
             o: new Δsyscall.Overlapped(
-                OffsetHigh: (uint32)((fd.offset >> (int)(32))),
+                OffsetHigh: (uint32)(fd.offset >> 32),
                 Offset: (uint32)fd.offset
             ),
             runtimeCtx: fd.pd.runtimeCtx,
@@ -505,7 +505,7 @@ public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
                 return default!;
             }
         }
-        fd.skipSyncNotif = (uint32)(info.Flags & (uint32)Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS) != 0;
+        fd.skipSyncNotif = (info.Flags & (uint32)Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS) != 0;
     }
 
     // It is safe to add overlapped handles that also perform I/O
@@ -998,6 +998,8 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
 // writeConsole writes len(b) bytes to the console File.
 // It returns the number of bytes written and an error, if any.
 internal static (nint, error) writeConsole(this ref FD fd, slice<byte> b) {
+    var runesᴷ = new stackAppend<rune>();
+
     nint n = len(b);
     var runes = new slice<rune>(0, 256);
     if (len(fd.lastbits) > 0) {
@@ -1006,7 +1008,7 @@ internal static (nint, error) writeConsole(this ref FD fd, slice<byte> b) {
     }
     while (len(b) >= utf8.UTFMax || utf8.FullRune(b)) {
         var (r, l) = utf8.DecodeRune(b);
-        runes = append(runes, r);
+        runes = append(runesᴷ, runes, r);
         b = b.slice(l);
     }
     if (len(b) > 0) {
@@ -1455,7 +1457,7 @@ public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) {
             }
         }
         var attrs = d.FileAttributes;
-        if ((uint32)(mode & (uint32)Δsyscall.S_IWRITE) != 0){
+        if ((mode & (uint32)Δsyscall.S_IWRITE) != 0){
             attrs &= unchecked((uint32)~(uint32)(Δsyscall.FILE_ATTRIBUTE_READONLY));
         } else {
             attrs |= (uint32)(Δsyscall.FILE_ATTRIBUTE_READONLY);
@@ -1863,7 +1865,7 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
     ref var nfd = ref heap(new syscallꓸHandle(), out var Ꮡnfd);
     const bool inherit = false; // analogous to CLOEXEC
     {
-        var errΔ1 = Δsyscall.DuplicateHandle(proc, ((syscallꓸHandle)(uintptr)fd), proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != default!) {
+        var errΔ1 = Δsyscall.DuplicateHandle(proc, (syscallꓸHandle)(uintptr)fd, proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != default!) {
             return (0, duplicateHandleˢ, errΔ1);
         }
     }

@@ -196,7 +196,7 @@ internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, boo
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     foreach (var (id, value) in d.dense) {
-        if ((uint8)(d.present[id / 8] & (((uint8)1).Lsh((int64)((id % 8))))) == 0) {
+        if ((uint8)(d.present[id / 8] & (((uint8)1).Lsh((int64)(id % 8)))) == 0) {
             continue;
         }
         if (!yield(ConvertToType<EI>(id), value)) {
@@ -232,7 +232,7 @@ partial struct frequency /*num:float64*/;
 
 // mul multiplies an unprocessed to produce a time in nanoseconds.
 internal static ΔTime mul(this frequency f, timestamp t) {
-    return ((ΔTime)(int64)((float64)(uint64)t * (float64)f));
+    return (ΔTime)(int64)((float64)(uint64)t * (float64)f);
 }
 
 // stringID is an index into the string table for a generation.

@@ -100,7 +100,7 @@ internal static error checkEqual(@string aname, @string bname, slice<byte> a, sl
     if (bytes.Equal(a, b)) {
         return default!;
     }
-    return errors.New(((@string)diff.Diff(aname, a, bname, b)));
+    return errors.New((@string)diff.Diff(aname, a, bname, b));
 }
 
 internal static void runcheck(ж<testing.T> Ꮡt, @string source, @string golden, checkMode mode) {

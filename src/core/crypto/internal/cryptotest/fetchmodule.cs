@@ -48,7 +48,7 @@ public static @string FetchModule(ж<testing.T> Ꮡt, @string module, @string ve
     }
     var modcacheOk = false;
     {
-        @string gomodcache = ((@string)bytes.TrimSpace(@out)); if (gomodcache != ""u8) {
+        @string gomodcache = (@string)bytes.TrimSpace(@out); if (gomodcache != ""u8) {
             {
                 var (_, errΔ1) = os.Stat(gomodcache); if (errΔ1 == default!) {
                     modcacheOk = true;

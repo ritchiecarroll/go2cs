@@ -5,6 +5,7 @@ namespace go.crypto;
 
 using bytes = bytes_package;
 using errors = errors_package;
+using slices = slices_package;
 using strings = strings_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
@@ -40,7 +41,7 @@ internal static (ж<syscall.CertContext>, error) createStoreContext(ж<Certifica
         if (err != default!) {
             return (default!, err);
         }
-        defer(syscall.CertCloseStore, handle, (uint32)(0), ref ᒐ);
+        defer(syscall.CertCloseStore, handle, (uint32)0, ref ᒐ);
 
         err = syscall.CertAddCertificateContextToStore(handle, leafCtx, syscall.CERT_STORE_ADD_ALWAYS, ᏑstoreCtx);
         if (err != default!) {
@@ -285,7 +286,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         // CertGetCertificateChain will traverse Windows's root stores in an attempt to build a verified certificate chain
         ref var topCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑtopCtx);
-        err = syscall.CertGetCertificateChain(((syscallꓸHandle)0), storeCtx, verifyTime, (~storeCtx).Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);
+        err = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, verifyTime, (~storeCtx).Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);
         if (err != default!) {
             (chains, err) = (default!, err); goto ᒐdone;
         }
@@ -308,7 +309,12 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             }
         }
 
+        chains = slices.DeleteFunc<slice<slice<ж<Certificate>>>, slice<ж<Certificate>>>(chains, containsDistrustedSPKIHash);
+
         if (builtin.len(chains) == 0) {
+            if (topErr == default!) {
+                (chains, err) = (default!, new CertificateInvalidError(Ꮡc, NoValidChains, ""u8)); goto ᒐdone;
+            }
             // Return the error from the highest quality context.
             (chains, err) = (default!, topErr); goto ᒐdone;
         }

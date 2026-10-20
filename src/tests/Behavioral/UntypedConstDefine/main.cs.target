@@ -18,7 +18,7 @@ internal static UntypedInt fsize => 5;
 
 internal static void Main() {
     rune codepoint = replacementChar;
-    @string s = ((@string)codepoint);
+    @string s = (@string)codepoint;
     fmt.Println(len(s), codepoint);
 
     float64 factor = scale;
@@ -35,6 +35,8 @@ internal static void Main() {
 internal static void tightenGuards() {
     GoFrame ᒐ = default;
     try {
+        var u16ᴷ = new stackAppend<uint16>();
+
         UntypedFloat mixed = 0.25;
         float64 f64 = mixed;
         float32 f32 = mixed;
@@ -56,7 +58,7 @@ internal static void tightenGuards() {
 
         UntypedInt sh = 3;
         uint64 v2 = 1;
-        fmt.Println((v2 << (int)(sh)));
+        fmt.Println(v2 << (int)(sh));
 
         const nint shifted = 3;
         nuint k = 2;
@@ -64,7 +66,7 @@ internal static void tightenGuards() {
 
         const uint16 localMarker = 0xFFFD;
         slice<uint16> u16 = default!;
-        u16 = append(u16, localMarker);
+        u16 = append(u16ᴷ, u16, localMarker);
         fmt.Println(u16[0]);
 
         const byte cb = 200;

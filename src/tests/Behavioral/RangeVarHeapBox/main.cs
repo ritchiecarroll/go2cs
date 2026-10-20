@@ -51,7 +51,7 @@ internal static slice<Func<@string>> stringClosures(@string s) {
         var (pi, pr) = (Ꮡi, Ꮡr);
         var piʗ1 = pi;
         var prʗ1 = pr;
-        fs = append(fs, () => fmt.Sprint(piʗ1.Value, (@string)":"u8, ((@string)(prʗ1.Value))));
+        fs = append(fs, () => fmt.Sprint(piʗ1.Value, ":", (@string)(prʗ1.Value)));
     }
     return fs;
 }
@@ -75,17 +75,17 @@ internal static void Main() {
 
     var ptrs = collectPointers(s);
     foreach (var (_, p) in ptrs) {
-        fmt.Print(p.Value, (@string)" "u8);
+        fmt.Print(p.Value, " ");
     }
     fmt.Println();
 
     foreach (var (_, f) in intClosures()) {
-        fmt.Print(f(), (@string)" "u8);
+        fmt.Print(f(), " ");
     }
     fmt.Println();
 
-    foreach (var (_, f) in stringClosures("aé!"u8)) {
-        fmt.Print(f(), (@string)" "u8);
+    foreach (var (_, f) in stringClosures("aé!")) {
+        fmt.Print(f(), " ");
     }
     fmt.Println();
 
@@ -95,7 +95,7 @@ internal static void Main() {
     ch.ᐸꟷ(9);
     close(ch);
     foreach (var (_, f) in chanClosures(ch)) {
-        fmt.Print(f(), (@string)" "u8);
+        fmt.Print(f(), " ");
     }
     fmt.Println();
 }

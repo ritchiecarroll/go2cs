@@ -38,7 +38,7 @@ internal static nint rsaAlignOf(nint salen) {
     if (salen == 0) {
         return salign;
     }
-    return (nint)((salen + salign - 1) & ~(salign - 1));
+    return (salen + salign - 1) & ~(salign - 1);
 }
 
 // parseSockaddrLink parses b as a datalink socket address.
@@ -182,7 +182,7 @@ internal static (Sockaddr, error) parseNetworkLayerAddr(slice<byte> b, byte fami
 //
 // Deprecated: Use golang.org/x/net/route instead.
 public static (slice<byte>, error) RouteRIB(nint facility, nint param) {
-    var mib = new _C_int[]{CTL_NET, AF_ROUTE, 0, 0, ((_C_int)(int32)facility), ((_C_int)(int32)param)}.slice();
+    var mib = new _C_int[]{CTL_NET, AF_ROUTE, 0, 0, (_C_int)(int32)facility, (_C_int)(int32)param}.slice();
     // Find size.
     ref var n = ref heap<uintptr>(out var Ꮡn);
     n = (uintptr)0;
@@ -232,7 +232,7 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
     var b = m.Data[..];
     var family = (uint8)AF_UNSPEC;
     for (nuint i = (nuint)0; i < RTAX_MAX && len(b) >= minRoutingSockaddrLen; i++) {
-        if ((int32)(m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
+        if ((m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
             continue;
         }
         var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddr>();
@@ -277,7 +277,7 @@ partial struct InterfaceMessage {
 
 internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
-    if ((int32)(m.Header.Addrs & (int32)RTA_IFP) == 0) {
+    if ((m.Header.Addrs & (int32)RTA_IFP) == 0) {
         return (default!, default!);
     }
     var (sa, err) = parseSockaddrLink(m.Data[..]);
@@ -302,7 +302,7 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage 
     var b = m.Data[..];
     var family = (uint8)AF_UNSPEC;
     for (nuint i = (nuint)0; i < RTAX_MAX && len(b) >= minRoutingSockaddrLen; i++) {
-        if ((int32)(m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
+        if ((m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
             continue;
         }
         var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddr>();

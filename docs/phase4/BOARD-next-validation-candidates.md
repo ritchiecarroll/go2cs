@@ -27135,6 +27135,8 @@ go1.26.9 (linux):
 - the `runtime.AddCleanup` instantiation is in reflect/all_test.go:2243 (`AddCleanup[[2]int64, *atomic.Uint32]`,
   inferred), not malloc_test.go.
 
+**Amended 2026-10-19 (C2, `claude/c2-go-growslice`; G: ACCEPTABLE AS RECORDED).** A further site of this row: `reflect.Value.Grow` on a nil or empty `[][N]T` whose slice recorded no element length (golib slice.cs `ReflectGrow`) has no value to size from, so its capacity skips Go's size-class rounding (only `cap()` differs) and `GoSizeClasses.UnroundedElementTypes` records the type; every appending growth is sized from its value.
+
 ## 2026-10-16 — G: testing/cryptotest's two linkname PULLS stay throwing stubs; no std test reaches them — RECORDED, no seat (owner G if a caller appears)
 
 `testing/cryptotest/rand.go` declares two bodyless functions under two-arg directives naming OTHER packages: PULLS,
@@ -27271,6 +27273,29 @@ A test that parses a traceback for `.go:` (runtime's parseTraceback, pprof's loc
 - (c) Leave as is and disclose per test where a verdict reads it.
 
 — C1 (found 2026-10-17 in passing; COORD ruled: write the row, P1 later)
+
+**2026-10-19, P1: creator sites CLOSED; ordinary frames INTERIM (c); the durable fix is OWED (COORD ruling of
+2026-10-19 on P1's proposal).**
+- (1) The `go` statements of hand-owned files take option (b) in its smallest form: a hand-kept `GoPositionMap`
+  record in the hand-owned file itself, one table entry per `goǃ(` line mapping it to the Go `go` statement it
+  replaces, each followed by a zero entry so no other line of the file claims a Go position. Correction to P1's
+  sizing: the sites are **3 in 2 files**, not 5 in 3 (the two `goǃ(runfinq)` in runtime/mfinal.cs are in comments):
+  sync/waitgroup.cs (Go waitgroup.go:238) and net/windows/lookup_windows.cs (Go lookup_windows.go:56 and :164).
+  Guard: repoguard `TestHandOwnedGoStatementsMapToGo` (a `goǃ(` on a code line of a hand-owned file needs a record
+  for that file that maps it to a `go` statement of the recorded Go file at the pinned GOROOT, and maps nothing
+  else), with `TestHandOwnedGoStatementScannerFires` as its positive control; a planted uncovered site was named
+  and the file restored byte-identical. Probe (linux, `wg.Go` printing its own `created by` line): before
+  `waitgroup.cs:230`, after `waitgroup.go:238`, which is Go's.
+  The guard has already fired once in use: merging hop tip a0a80ec3cd (P2's lookup-field-view rewrote
+  lookup_windows.cs) moved both of that file's sites down 10 lines, and it named all four stale entries until the
+  table was re-encoded.
+- (2) INTERIM ONLY: an ordinary frame line inside a hand-owned file stays (c), disclosed per test where a verdict
+  reads one. It is not the end state, because nothing is left out for being unreached. **OWED: a GENERATED
+  function-granularity map for hand-owned files**, each hand-owned method paired with its Go declaration and the
+  record emitted from the Go AST, never hand-kept. G designs it post-hop.
+- (3) A test that reads such a frame line is the sizing for (b) at its frames.
+
+— P1 (branch `claude/p1-frame-line-creators`, cut on hop tip 5f774114a5, merged with a0a80ec3cd)
 ## 2026-10-17 — C1: runtime.AddCleanup's closes-over-ptr check is UNCHECKED for a func value the converter cannot trace — residual 0 in go1.26.9
 
 Go 1.26's AddCleanup panics "cleanup function closes over ptr, cleanup will never run" when the cleanup's funcval holds
@@ -27380,5 +27405,239 @@ AliasStructToInterface, MethodValueReceiverSnapshot and ValueAdapterDynamicType,
 in the third, only the added type argument; all three compile and print the same as Go.
 
 — P1 (measured 2026-10-17)
+
+## 2026-10-19 — P2: a pointer array over memory the Go runtime did not allocate reads its words as foreign addresses; stores refuse by name — SEATED (owner P2)
+
+Go reads a Windows DNS TXT record's strings as
+`(*[1 << 10]*uint16)(unsafe.Pointer(&d.StringArray[0]))[:d.StringCount:d.StringCount]`. A pointer element carries a
+managed reference, so golib could not alias the block and built a zeroed managed SHADOW instead: the record read as
+`StringCount` nils. The shadow is right for the runtime's own OS memory, whose pointer words are Go pointers the
+runtime stored, and wrong for memory a system call filled. This row seats G's ruling (COORD 2026-10-19 02:39Z).
+
+**Ownership is registered at the OS mapping primitives** (golib `GoOsMemory`, a set of disjoint ranges). Linux
+registers in `sysMmap` and releases in `sysMunmap` (every linux `sys*OS` path funnels through them, no converter
+change); windows registers in `sysAllocOS`/`sysReserveOS` and releases in `sysFreeOS`, and its decommit
+(`sysUnusedOS`) does not unregister; darwin registers in a new hand-owned `mmap`/`munmap` pair
+(`sys_darwin_mmap_impl.cs`, `manualConversionFuncs` darwin only). A release splits the range it lands in and drops
+the shadows inside it. The repoguard census `TestOsMemoryRegistrationCensus` classifies every OS mapping primitive
+call in the runtime hand-owns per GOOS (REGISTERED, INSIDE, RELEASES, DECOMMIT) and fails on an unclassified one.
+
+**Routes.** `builtin.NativeArrayPointer` sends a `*[N]*E` over unowned memory to `NativePointerArrayBox<E>`:
+- the element door (`p.at(i)`, `ElementRef(i)`) reads word i, nil for zero, and the element's pointer answers the
+  word's own address, so Go's re-cast of `&p[0]` builds the same kind again;
+- the pointer-form slice reads words [low, max) into a managed slice (a 2- or 1-index form reads [low, high));
+- `Value` refuses by name, so an arena route that missed its registration fails loudly instead of reading Go
+  pointers as foreign words.
+
+A foreign array of any other reference-bearing element (not a pointer) refuses by name in `ShadowArrayBox`. Its
+reach: the one converter emission of `NativeArrayPointer` is mpagealloc.cs, over runtime-owned memory.
+
+**Stores refuse by name.** A C# `ref` cannot observe a store, so every value minted into an element slot or a
+slice is kept (golib `GoForeignWords`) and compared at every later access through a foreign array over the same
+word and when the producer releases the memory (`GoForeignMemory.Release`, called by the windows DNS and
+addrinfo seams before their native free). The premise is that producer memory is immutable until release.
+
+**Footprint (two-seeded `-stdlib`, 3 targets, linux host, go1.26.9).** Predicted before the run: windows 0, linux 0,
+darwin `sys_darwin.cs` about −33/+2 and `package_info.cs` −3/+1, markers 0. Measured: exactly that (the converted
+`mmap`/`munmap` and their arg structs become placeholders). HELD.
+
+**Red first.** On the arms-only commit (the new golib API, nothing routed or registered), 7 of the 8
+NativePointerArrayTests arms fail; the eighth pins the registry that commit adds.
+
+**Gates (linux).** go test ./... rc 0 (the census included); the seat's 24 golib arms green on the final tree; full GolibTests 1894 pass, 15 skipped, 1 fail of 1910: `FixtureLinkStagingTests` needs
+`GOROOT/src/go.mod`, which this host's toolchain does not have (not this seat's files). runtime compiles for linux,
+windows and darwin with 0 errors; net and syscall compile for windows. The windows arms and the full behavioral
+suite are the i9's.
+
+— P2 (measured 2026-10-19)
+
+## 2026-10-19 — P2 finding: a POINTER field of a struct in native memory cannot be read; it refuses by name — OPEN (found by P2, sized, unowned)
+
+Found while probing the native reader (`docs/phase4/probes/p2-native-ptr-aot`). Go's `cc.Chains`, with `cc` a
+`*T` the OS returned, reads one pointer-sized word at the field's Go offset. golib's native field route
+(`NativeBox<T>.FieldRef`) reaches the field at its Go offset, then refuses any field type that holds a managed
+reference, and a converted pointer field is `ж<E>`, a class: "cannot read native memory as main.chainContext: its
+CLR layout is not its Go layout (field Chains is a managed reference where Go stores the value inline)". The
+refusal is honest (no wrong value is read), but Go reads the word. The shape a fix needs exists already: the
+foreign pointer array's element door reads a word and answers nil or a native box over it
+(`NativePointerArrayBox`), so a pointer field is that door with one element.
+
+**Size (read at e87a52f44b, converted std, three targets).** One converted consumer found: **net's darwin libc
+resolver** (`net/darwin/cgo_unix.cs`, the two `getaddrinfo` result loops, `r = _C_ai_next(r).ValueSlot` and
+`_C_ai_addr(r).ValueSlot`), which walks a list libc allocated. Whether darwin reaches it depends on the libc
+call itself being live there; no darwin host measured it. Every windows consumer of an OS-filled struct with
+pointer fields reads through a hand-owned seam that transcribes the struct into managed memory first, so it never
+meets this: crypto/x509's chain walk (`zsyscall_windows_certchain_impl.cs`), net's adapter and DNS-server walks
+(`adapterAddresses` in `interface_windows_impl.cs`), net's lookups (hand-owned `lookup_windows.cs`) and os/user
+(`lookup_windows_impl.cs`). No linux consumer was found (the linux std reads OS data out of byte buffers). Third-party code that walks an OS list without a seam
+meets it at the first `.Next`.
+
+— P2 (found 2026-10-19)
+
+## 2026-10-19 — P2 finding: an ARRAY field of a struct in native memory cannot be read by value (`range s.F`, `x := s.F`); it refuses by name — OPEN (found by P2, sized, unowned)
+
+Found with the row above. Go's `range nr.Name`, with `nr` a `*T` over native memory, copies the `[N]E` field. The
+converted field is `array<E>`, a class, so the same `NativeBox<T>.FieldRef` refusal fires ("field Name is a
+managed reference ..."). Indexing and addressing work: `&nr.Name[i]` and a slice of the field take the field
+VIEW (`ж.of`), which over a native root is a native array box with element doors, and `p.slice()` reads its window
+(slice.cs, `tryNativeArrayView`). Only the by-value read (range over the field, assignment, passing it as an
+argument) refuses. A fix reads the N elements through those doors into a new `array<E>`, the copy Go makes, which
+is what `NativeArrayBox`'s reflect read now does (claude/p2-native-array-followups).
+
+**Size (read at e87a52f44b, converted std, three targets).** No converted std site found. The one std walk over
+OS-allocated sockaddrs, net's darwin resolver, takes the view (`sa.of(syscall.RawSockaddrInet4.ᏑAddr).slice()`),
+not the value, and the windows consumers read through the transcribing seams named in the row above. Third-party
+code that ranges over a field of an OS-filled struct meets it.
+
+— P2 (found 2026-10-19)
+
+## 2026-10-19 — P2 finding: go2cs.TypeGenerator is about 92% of runtime's compile, and with ImplementGenerator about 85% of net/http's — OPEN (found by P2, a post-hop build-time candidate, not a gate; unowned)
+
+Found while measuring NativeArrayOpenerGenerator's cost (COORD's follow-up (c)). Reading: `ReportAnalyzer=true`, a
+Release `Rebuild` of the one project with `BuildProjectReferences=false` after a full dependency build, linux,
+two runs each, at claude/p2-native-array-followups 821741f7b0 (base e87a52f44b).
+
+| project | CoreCompile | all generators | TypeGenerator | ImplementGenerator | EscapeRegistryGenerator | NativeArrayOpenerGenerator |
+|---|---|---|---|---|---|---|
+| runtime | 344.3 / 334.2 s | 320.2 / 309.9 s | 296.4 / 286.7 s (92%) | 2.9 / 2.8 s | 14.9 / 14.7 s (4%) | 0.29 / 0.25 s |
+| net/http | 95.9 / 98.8 s | 83.8 / 85.9 s | 37.2 / 37.7 s (44%) | 34.9 / 35.8 s (41%) | 7.0 / 7.7 s (8%) | 0.05 / 0.05 s |
+
+Analyzers (not generators) took 2.2 / 2.1 s on runtime and 1.5 / 1.8 s on net/http. Every other go2cs generator is under 5%
+of either compile. The rows say where the time is, not why: no generator was profiled, and the generators are
+`ISourceGenerator`s, so every one re-runs in full on every compile, including in the IDE. The owner's rule
+stands: size and build time never gate parity, so this row is sized for after the hop.
+
+— P2 (measured 2026-10-19)
+
+## 2026-10-20 — P2 finding: a `-platforms` emission that ended before its deferred cleanup left a full per-target corpus copy in the system temp directory — FIXED (claude/p2-platform-stage)
+
+Three `go2cs-platform-emit-*` directories were found in a linux box's temp directory during a disk-full
+investigation. The emission staged in `os.MkdirTemp` and removed the stage only through a `defer` in
+`runPlatformEmission`, which a `log.Fatal`, an `os.Exit` or a kill never runs (the converter's non-test sources
+hold 83 such calls at 5530cc85f4, 9 each in `conversionDriver.go` and `packageInfoWriter.go`). Nothing looked there
+again, so each such ending kept one copy of the corpus per target. As ruled (COORD, 2026-10-20 05:55Z), the default
+stage is now `.go2cs-platform-stage` under the output root, beside `core` and ignored by `.gitignore`. The run
+locks it with a PID file (`owner.pid`), refuses while a running process holds it, reclaims and reports a leftover
+at start, and removes it at the end. `-platform-stage` is unchanged. Pins: `platformEmitStage_test.go`, red 3 of 3
+at 5530cc85f4.
+
+— P2 (found and fixed 2026-10-20)
+
+**Amended 2026-10-20 (G's review):** the first cut created `owner.pid` with `O_EXCL` and wrote the PID after, so a second run arriving in that window read an empty lock as stale, replaced it, and ran beside the first (fail-open against safety floor 1). The PID is now written into a file of the run's own and linked into place with `os.Link`, which fails with `ErrExist` while any lock is present, so a lock appears whole or not at all. A lock that names no process now refuses the run. Pin: `TestEmissionStageRefusesWhenItsLockHoldsNoProcessID` (empty and unparseable), red 2 of 2 at cef77053d3. Named limits, both stated in the code: on Windows a recycled PID reads as live, so the run refuses (fail-closed); and two runs that start together over a dead run's lock can each judge it stale, so the second can remove the first's fresh lock. That window is the time between one run's read and its remove.
+## 2026-10-20 — P2 finding: crypto/x509's TestBetterTLS is a slow path on linux, not a hang (nameconstraints 390 s against Go's 2.3 s), and on a host that can make namespaces the row reads red because C# skips TestSetFallbackRoots — OPEN (found by P2, sized, unowned)
+
+Asked by COORD: is the long crypto/x509 run on linux a hang, a slow path, or a deadline? Reading: linux, uid 0,
+Microsoft .NET 10.0.12 / SDK 10.0.112, go1.26.10, tree 913d33224b (the go1.26.10 hop tip), the `-tests` row on a
+byte copy of the tree, Release, `-test-timeout 120m`, two runs (the second with the container's `SSL_CERT_FILE`
+unset).
+
+**A slow path.** Every case passes on both sides; nothing waits on a deadline or a lock.
+
+| part | Go | C# run 1 | C# run 2 | C# per case | Go per case |
+|---|---|---|---|---|---|
+| `TestBetterTLS/nameconstraints` (9,491 cases) | 2.31 s | 387.8 s | 389.8 s | about 41 ms | about 0.24 ms |
+| `TestBetterTLS/pathbuilding` (81 cases) | 0.08 s | 4.78 s | 4.67 s | about 58 ms | about 1 ms |
+| `TestBetterTLS` (with the suite fetch) | 17.04 s | 403.5 s | 405.4 s | | |
+| whole package | | 470 s | 478 s | | |
+
+The C# side is about 170 times Go on nameconstraints, and that one test is 85% of the package's wall. The runner
+read `tiered: false`. Nothing was profiled: the rows say where the time is, not why. A host about 1.5 times slower
+than this one passes Go's default 10-minute test timeout on `TestBetterTLS` alone.
+
+**The row reads red here for another reason.** `TestSetFallbackRoots` runs its nine subtests in a child process
+started with `CLONE_NEWNS | CLONE_NEWUSER`. Go runs them on this host; C# skips all nine ("posix_spawn seam:
+SysProcAttr.Cloneflags is not supported"), so the comparison fails 9 of 532. Go's own verdict depends on the
+environment: with the container's `SSL_CERT_FILE` set, Go fails the parent and the four `no_system_CAs` and
+`system_CA_read_error` subtests (the variable hands it a real bundle); with it unset, Go passes all nine. The
+roster's linux 500 was banked on a host where Go skips them too (inferred from the count, not re-read). Making
+them run needs `Cloneflags` in the posix_spawn seam, which posix_spawn cannot express: the child needs `clone` or
+`unshare` before exec.
+## 2026-10-20 — P2 finding: `err == syscall.ERRNO` reaches the errno's `==` by reflection on every call, 85-156 ns and 144 bytes where a typed compare costs 0.4 ns — OPEN (found by P2 from the i9's windows JIT list, measured on linux, unowned; for G and the perf review)
+
+Found while extending the first-deadline pre-pay on windows: the i9's JIT list of a cold run showed
+`(dynamicClass):InvokeStub_Errno.op_Equality`, a reflection invoke stub, compiled between the deadline and `Read`'s
+return. Where: golib `builtin.AreEqual(object?, object?)` (`src/core/golib/builtin.cs`, the
+`equalityOperator.Invoke(...)` at the end of the method). Go's `==` between an interface value and a value of a
+comparable type converts to `AreEqual(x, y)`, and when the two static types differ (`error` against
+`syscall.Errno`) C# cannot infer the generic `AreEqual<T>`, so the call binds the `object` overload. That overload
+unwraps adapters, checks nil, checks that the dynamic types match, then looks up the type's `op_Equality`
+(`TypeExtensions.GetEqualityOperator`, cached per type) and calls it with `MethodInfo.Invoke`. The lookup is
+cached; the invoke is not avoidable on that path, so every comparison whose two sides are non-nil and of one
+dynamic type pays it. A nil side returns before the invoke but still boxes the value argument.
+
+**Cost (linux, uid 0, Microsoft .NET 10.0.12 / SDK 10.0.112, golib at claude/p2-deadline-prepay, Release, one
+process, load 6 from a concurrent build).** A uint struct declaring `operator ==` (the shape of `syscall.Errno`),
+boxed as `object`, compared 2,000,000 times each against a matching and a non-matching value: 156.3, 110.9 and
+85.3 ns per compare over three rounds, 144-155 bytes allocated per compare (the boxed argument, the argument
+array and the boxed result). The same compare written as a type test plus the struct's `==`: 0.37-0.41 ns, no
+allocation. The second use of a type's operator also builds its invoke stub (a JIT of a dynamic method), which is how
+it showed up in the deadline window.
+
+Where it is reached: every `switch err { case syscall.X: }` and `err == syscall.X` in the converted standard
+library, a common shape of errno classification on windows (`internal/poll`'s `FD.Read` tests every file and pipe read's
+result against `ERROR_HANDLE_EOF` and `ERROR_BROKEN_PIPE`; `execIO` tests against `ERROR_OPERATION_ABORTED` and
+`ERROR_IO_INCOMPLETE`). Not sized across the corpus. A fix is the converter's or golib's (a typed equality for a
+known comparable right-hand type), not the pre-pay's: the pre-pay only builds the stub ahead of the first deadline.
+
+— P2 (measured 2026-10-20)
+
+## 2026-10-20 — P2 finding: a process's first read deadline returned 9-11 ms late under the JIT and 6-8 ms under ReadyToRun, because the deadline path compiled on its way out — FIXED (claude/p2-deadline-prepay)
+
+Go's first deadline is as prompt as its later ones (0.3-0.5 ms late on linux). Here the first one paid for compiling
+the arm, park, fire and return paths, and under ReadyToRun for the golib generics instantiated over another
+assembly's types that ReadyToRun does not pregenerate (the `fd.fdmu` field view) and for io's package-init boxes.
+Bisected with the first-deadline probe (claude/p2-first-deadline-probe) and a JIT-summary list of every method
+compiled between arming and return. As ruled (COORD 2026-10-20 05:00Z and 08:28Z), the poller's start
+(`runtime_pollServerInit`, all three seams) now pays it once: `PrepareMethod` over the named methods, three calls on
+a spare never-opened FD, io's package init, one no-op runtime timer, and an os hook for os's part
+(`deadline_prepay_impl.cs` in internal/poll and in os). It runs synchronously: run on a background thread it took
+the cost off FD.Init but left the first deadline 3.9-5.4 ms late when armed right after the poller started.
+Linux, three interleaved processes per arm, A1 late in ms (Go 0.4-0.5): no pre-pay JIT 8.9-10.8, R2R 6.1-7.6; sync
+JIT 0.9-1.6, R2R 0.3-0.6; async JIT 4.9-5.4, R2R 3.9-5.3. Cost: the first pollable FD.Init takes about 10 ms longer
+under both the JIT and ReadyToRun (first Read medians 44.3 to 53.8 ms JIT, 31.1 to 40.6 ms R2R), once per process
+and only in a process that opens a pollable descriptor. Native AOT is unaffected (nothing runs).
+
+— P2 (found and fixed 2026-10-20)
+
+**Amended 2026-10-20 (G's review of dd65b04763).** Windows read the first cut short of the bar (JIT, A1 late in ms):
+cold Go 0.0-0.6, no pre-pay 7.8-8.7, pre-pay 3.6-5.1; after a first completion Go 0.2-0.8, no pre-pay 4.6-5.4, pre-pay
+2.3-2.6. On windows the wake is followed by a cancel and an aborted completion that the first cut did not cover, so
+the windows seam now pre-pays them too (`windows/deadline_prepay_windows_impl.cs`). And because nothing guarded the
+pre-pay, a throwing hook made the first pollable FD.Init fail and skipped every later hook; this package's part, the
+windows part and each hook now run in their own try (red at dd65b04763 with a planted throwing hook, green after).
+The windows reading of the amended cut is owed by a windows host. Until it lands this row stays FIXED on linux only.
+
+**Amended 2026-10-20 (the i9's windows reading of 895445983a).** A1 moved but still missed: cold Go 0.6-0.7, C#
+6.2-7.8 (was 7.0-10.7); after a first completion Go 0.4-0.8, C# 1.3-3.4 (was 5.3-7.2). Its JIT list named 24 methods
+still compiled between the fire and the return: the timer callback, the completion callback and readiness sink, the
+overlapped field view's equality, the operation table's lookups, the inline-array helpers SyscallN's callers build,
+errnoErr, the poll error codes, the errno getters, the pinner's unpin, and a reflection invoke stub for
+`Errno.op_Equality` (its per-call cost has its own row, branch claude/p2-errno-equality). The pre-pay now reaches them: the parts
+private to syscall and internal/syscall/windows register with golib's `GoAsyncIO.AddDeadlinePathPrepay` (which also
+replaces internal/poll's public hook event), the timer callback and readiness sink are named so they can be
+prepared, and the windows part touches the rest on spare values. Windows reading owed again.
+
+**Amended 2026-10-20 (the i9's windows reading of 4f9377add3).** After a first completion A1 now meets the bar (0.4-0.7,
+Go 0.6-1.2); cold it still misses (4.2-4.8, Go 0.2-0.8), with only 4 small compiles left in the window. Since one real
+completion first removes the lag, the windows pre-pay now also makes one (a one-byte write and read on a private
+named pipe pair, closed before it returns), to be kept only if the windows reading brings cold A1 within about 1 ms;
+otherwise the residue is recorded here as the runtime's first-completion cost.
+
+**Amended 2026-10-20 (the i9's windows reading of 8967b1b1da).** The real completion closed the gap, so it stays
+(COORD's ruling, 17:14Z). Windows, JIT, Go and the two cuts interleaved, three rounds per mode, every run exit 0, no
+hang. Cold A1 late in ms: Go 0.7-0.9, 4f9377add3 1.8-2.9, 8967b1b1da 0.4-1.2; after a first completion it stays at Go's
+level. Cost: about 8.5 ms added to the first pollable FD.Init on windows (the probe's cold setup, which opens the
+first pipe pair, 29.1-29.9 ms against 20.3-21.5), once per process. A process whose first I/O is a real completion pays
+about the same either way (the probe's first write and read, 31.7-32.1 ms against 30.7-31.3), so for it the cost moves
+to FD.Init rather than adding to it. The JIT list shows the step running end to end inside the pre-pay, through waitIO
+and the completion callback. The cost is documented beside the pre-pay. This row is now FIXED on linux and windows.
+
+**Amended 2026-10-20 (G's review of the completion step).** G found the step safe as written and asked for one fix:
+nothing bounded its write and read, so a completion that never arrived (an I/O-intercepting filter, say) would hang
+the first FD.Init of every process that does I/O. Both now carry a deadline one second out, which never fires on the
+normal path; where the I/O is held, the deadline cancels it as any deadline does and the step gives up. A port that
+never posts even the cancelled operation's completion still hangs it, as it hangs every deadline in the program. The
+pipe also takes an owner-only security descriptor (`D:P(A;;GA;;;OW)`) in place of the default, which lets Everyone
+read it (COORD's ruling, defense in depth). Neither is measured here: the i9's smoke run of the probe is owed.
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

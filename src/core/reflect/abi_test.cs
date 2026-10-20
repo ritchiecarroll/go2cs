@@ -73,7 +73,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r0, a0);
         }
         if ((~s).Value != 1) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(1));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)1);
         }
 
         (s, i) = makeMethodValue(regsAndStackCallˢ);
@@ -86,7 +86,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r1, a1);
         }
         if ((~s).Value != 2) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(2));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)2);
         }
 
         (s, i) = makeMethodValue(spillStructCallˢ);
@@ -96,7 +96,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r2, a2);
         }
         if ((~s).Value != 3) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(3));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)3);
         }
 
         (s, i) = makeMethodValue(valueRegMethodSpillIntˢ);
@@ -106,10 +106,10 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3a, a2);
         }
         if (r3b != 42) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3b, (nint)(42));
+            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3b, (nint)42);
         }
         if ((~s).Value != 4) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(4));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)4);
         }
 
         (s, i) = makeMethodValue(valueRegMethodSpillPtrˢ);
@@ -124,7 +124,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r4b.OrTypedNil(), Ꮡvb);
         }
         if ((~s).Value != 5) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(5));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)5);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -87,7 +87,7 @@ public static (slice<nint>, error) ParseUnixRights(ж<SocketControlMessage> Ꮡm
     if (m.Header.Type != SCM_RIGHTS) {
         return (default!, EINVAL);
     }
-    var fds = new slice<nint>((len(m.Data) >> (int)(2)));
+    var fds = new slice<nint>((len(m.Data) >> 2));
     for ((nint i, nint j) = (0, 0); i < len(m.Data); i += 4) {
         fds[j] = (nint)(~Ꮡ(m.Data, i).Reinterpret<byte, int32>());
         j++;

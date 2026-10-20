@@ -182,7 +182,7 @@ internal static bool isPinned(this ref pinState v) {
 }
 
 internal static bool isMultiPinned(this ref pinState v) {
-    return ((uint8)(v.byteVal & ((uint8)(v.mask << (int)(1))))) != 0;
+    return ((uint8)(v.byteVal & ((uint8)(v.mask << 1)))) != 0;
 }
 
 internal static void setPinned(this ref pinState v, bool val) {
@@ -203,7 +203,7 @@ internal static void set(this ref pinState v, bool val, bool multipin) {
     if (val){
         atomic.Or8(v.bytep, mask);
     } else {
-        atomic.And8(v.bytep, (uint8)(((uint8)(~mask))));
+        atomic.And8(v.bytep, (uint8)((uint8)(~mask)));
     }
 }
 

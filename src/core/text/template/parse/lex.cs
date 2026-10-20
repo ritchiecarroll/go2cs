@@ -279,7 +279,7 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
             if (x > 0) {
                 l.pos += ((Pos)x);
                 // Do we trim any trailing space?
-                Pos trimLength = ((Pos)0);
+                Pos trimLength = (Pos)0;
                 Pos delimEnd = l.pos + ((Pos)len(l.leftDelim));
                 if (hasLeftTrimMarker(l.input.slice(delimEnd))) {
                     trimLength = rightTrimLength(l.input.slice(l.start, l.pos));
@@ -296,7 +296,7 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
             return lexLeftDelim;
         }
     }
-    l.pos = ((Pos)len(l.input));
+    l.pos = (Pos)len(l.input);
     // Correctly reached EOF.
     if (l.pos > l.start) {
         l.line += strings.Count(l.input.slice(l.start, l.pos), "\n"u8);
@@ -307,7 +307,7 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
 
 // rightTrimLength returns the length of the spaces at the end of the string.
 internal static Pos rightTrimLength(@string s) {
-    return ((Pos)(len(s) - len(strings.TrimRight(s, spaceChars))));
+    return (Pos)(len(s) - len(strings.TrimRight(s, spaceChars)));
 }
 
 // atRightDelim reports whether the lexer is at a right delimiter, possibly preceded by a trim marker.
@@ -323,7 +323,7 @@ internal static (bool delim, bool trimSpaces) atRightDelim(this ref lexer l) {
 
 // leftTrimLength returns the length of the spaces at the beginning of the string.
 internal static Pos leftTrimLength(@string s) {
-    return ((Pos)(len(s) - len(strings.TrimLeft(s, spaceChars))));
+    return (Pos)(len(s) - len(strings.TrimLeft(s, spaceChars)));
 }
 
 // lexLeftDelim scans the left delimiter, which is known to be present, possibly with a trim marker.
@@ -333,7 +333,7 @@ internal static stateFn lexLeftDelim(ж<lexer> Ꮡl) {
 
     l.pos += ((Pos)len(l.leftDelim));
     var trimSpace = hasLeftTrimMarker(l.input.slice(l.pos));
-    Pos afterMarker = ((Pos)0);
+    Pos afterMarker = (Pos)0;
     if (trimSpace) {
         afterMarker = trimMarkerLen;
     }

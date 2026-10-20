@@ -995,7 +995,7 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
             break;
         }
         case @string: {
-            valsʗ1[argsʗ2.Index] = ((@string)candidate);
+            valsʗ1[argsʗ2.Index] = (@string)candidate;
             break;
         }
         default: {
@@ -1175,7 +1175,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
                 // caused the error.
                 switch (entryOut.Values[i].type()) {
                 case @string: {
-                    entryOut.Values[i] = ((@string)mem.valueCopy());
+                    entryOut.Values[i] = (@string)mem.valueCopy();
                     break;
                 }
                 case slice<byte>: {

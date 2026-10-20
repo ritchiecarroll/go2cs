@@ -53,7 +53,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
             while (start > 0 && s[start - 1] == c) {
                 start--;
             }
-            if ((nint)((n - start) & 1) == 1) {
+            if (((n - start) & 1) == 1) {
                 // Reached for trailing minus signs since "---" is the
                 // same as "-- -".
                 return jsCtxRegexp;
@@ -181,7 +181,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         a = indirectToJSONMarshaler(args[0]);
         switch (a.type()) {
         case JS t: {
-            return ((@string)t);
+            return (@string)t;
         }
         case JSStr t: {
             // TODO: normalize quotes.
@@ -226,7 +226,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         //     x//* error marshaling y:
         //          second line of error message */null
         @string errStr = err.Error();
-        errStr = ((@string)scriptTagRe.ReplaceAll(slice<byte>(errStr), slice<byte>(@"\x3C${1}script"u8)));
+        errStr = (@string)scriptTagRe.ReplaceAll(slice<byte>(errStr), slice<byte>(@"\x3C${1}script"u8));
         errStr = strings.ReplaceAll(errStr, "*/"u8, "* /"u8);
         errStr = strings.ReplaceAll(errStr, "<!--"u8, x3Cˢ);
         return fmt.Sprintf(" /* %s */null "u8, errStr);
@@ -277,7 +277,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         }
         return buf.String();
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // jsStrEscaper produces a string that can be included between quotes in

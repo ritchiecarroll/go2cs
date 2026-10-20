@@ -854,17 +854,10 @@ public sealed class Goroutine
     // detector built on it would kill a live program (a ticker worker parked on its channel beside a
     // `select {}` main). What IS provable is the FOREVER wait: nothing can ever wake a nil-channel op or
     // a `select {}`. The report is therefore Go's rule restricted to that shape: every user goroutine,
-    // MAIN included, sits in a forever wait, no new goroutine appeared during the check, and package
-    // time holds no pending timer (an AfterFunc can still start one -- checkdead waits for timers too).
+    // MAIN included, sits in a forever wait, no new goroutine appeared during the check, and no timer is
+    // pending (an AfterFunc can still start one -- checkdead waits for timers too).
     // A deadlock that involves an ordinary channel or sync wait is not reported; it blocks, as it did
     // before this rule existed for every shape but the nil-channel one.
-
-    private static Func<bool>? s_pendingTimerProbe;
-
-    /// <summary>
-    /// Registers package time's answer to "is any timer still pending?" (Go: checkdead's timer scan).
-    /// </summary>
-    public static void RegisterPendingTimerProbe(Func<bool> anyPending) => Volatile.Write(ref s_pendingTimerProbe, anyPending);
 
     // Waits nothing can ever end: a nil-channel receive or send, and a select with no live case.
     internal static bool IsForeverWait(WaitReason reason) =>
@@ -876,9 +869,11 @@ public sealed class Goroutine
     /// </summary>
     internal static bool AllGoroutinesForeverBlocked()
     {
-        // The timer probe FIRST: a timer that fires after this read starts its goroutine through Register,
-        // which the exclusive section below either sees whole or excludes whole.
-        if (Volatile.Read(ref s_pendingTimerProbe) is { } anyPending && anyPending())
+        // The timer heap FIRST (Go's checkdead timer scan; every runtime timer, package time's among them,
+        // is a GoTimer): a timer that fires after this read starts its goroutine through Register, which the
+        // exclusive section below either sees whole or excludes whole, and one that fired before it counts
+        // until its callback has returned.
+        if (GoTimer.AnyPending)
             return false;
 
         Goroutine[] live;

@@ -143,7 +143,7 @@ internal static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBit
     // 11. Set the leftmost 8 * emLen - emBits bits of the leftmost octet in
     //     maskedDB to zero.
 
-    db[0] &= (byte)(((byte)0xff).Rsh((int64)((8 * emLen - emBits))));
+    db[0] &= (byte)(((byte)0xff).Rsh((int64)(8 * emLen - emBits)));
 
     // 12. Let EM = maskedDB || H || 0xbc.
     em[emLen - 1] = 0xbc;
@@ -193,7 +193,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     // 6.  If the leftmost 8 * emLen - emBits bits of the leftmost octet in
     //     maskedDB are not all equal to zero, output "inconsistent" and
     //     stop.
-    byte bitMask = (byte)(((byte)0xff).Rsh((int64)((8 * emLen - emBits))));
+    byte bitMask = (byte)(((byte)0xff).Rsh((int64)(8 * emLen - emBits)));
     if ((byte)(em[0] & ((byte)(~bitMask))) != 0) {
         return ErrVerification;
     }
@@ -502,12 +502,12 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
     for (nint i = 0; i < len(rest); i++) {
         nint equals0 = constanttime.ByteEq(rest[i], 0);
         nint equals1 = constanttime.ByteEq(rest[i], 1);
-        index = constanttime.Select((nint)(lookingForIndex & equals1), i, index);
+        index = constanttime.Select(lookingForIndex & equals1, i, index);
         lookingForIndex = constanttime.Select(equals1, 0, lookingForIndex);
-        invalid = constanttime.Select((nint)(lookingForIndex & ~equals0), 1, invalid);
+        invalid = constanttime.Select(lookingForIndex & ~equals0, 1, invalid);
     }
 
-    if ((nint)((nint)((nint)(firstByteIsZero & lHash2Good) & ~invalid) & ~lookingForIndex) != 1) {
+    if ((firstByteIsZero & lHash2Good & ~invalid & ~lookingForIndex) != 1) {
         return (default!, ErrDecryption);
     }
 

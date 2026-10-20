@@ -91,7 +91,7 @@ internal static @string @string(this ref buf b) {
         return ""u8;
     }
 
-    @string s = ((@string)(b.data.slice(0, i)));
+    @string s = (@string)(b.data.slice(0, i));
     b.data = b.data.slice(i + 1);
     b.off += ((Offset)(uint32)(i + 1));
     return s;
@@ -111,9 +111,9 @@ internal static uint32 uint24(this ref buf b) {
         return 0;
     }
     if ((~b.dwarf).bigEndian){
-        return (uint32)((uint32)((uint32)a[2] | ((uint32)a[1] << (int)(8))) | ((uint32)a[0] << (int)(16)));
+        return (uint32)a[2] | (uint32)a[1] << 8 | (uint32)a[0] << 16;
     } else {
-        return (uint32)((uint32)((uint32)a[0] | ((uint32)a[1] << (int)(8))) | ((uint32)a[2] << (int)(16)));
+        return (uint32)a[0] | (uint32)a[1] << 8 | (uint32)a[2] << 16;
     }
 }
 
@@ -162,7 +162,7 @@ internal static uint64 @uint(this ref buf b) {
 internal static int64 @int(this ref buf b) {
     var (ux, bits) = b.varint();
     var x = (int64)ux;
-    if ((int64)(x & (((int64)1).Lsh((bits - 1)))) != 0) {
+    if ((x & (((int64)1).Lsh((bits - 1)))) != 0) {
         x |= (int64)(((int64)(-1)).Lsh(bits));
     }
     return x;
@@ -197,10 +197,10 @@ internal static (Offset length, bool dwarf64) unitLength(this ref buf b) {
     Offset length = default!;
     bool dwarf64 = default!;
 
-    length = ((Offset)b.uint32());
+    length = (Offset)b.uint32();
     if (length == 0xffffffffU){
         dwarf64 = true;
-        length = ((Offset)(uint32)b.uint64());
+        length = (Offset)(uint32)b.uint64();
     } else 
     if (length >= 0xfffffff0U) {
         b.error(unitLengthHasReservedˢ);

@@ -271,7 +271,7 @@ internal static void computeT1Hat(slice<nttElement> t1Hat, slice<array<uint16>> 
         foreach (var (j, _) in t1[i]) {
             // t₁ <= 2¹⁰ - 1
             // t₁ ⋅ 2ᵈ <= 2ᵈ(2¹⁰ - 1) = 2²³ - 2¹³ < q = 2²³ - 2¹³ + 1
-            var (z, _) = fieldToMontgomery(((uint32)t1[i][j] << (int)(13)));
+            var (z, _) = fieldToMontgomery((uint32)t1[i][j] << 13);
             w[j] = z;
         }
         t1Hat[i] = ntt(w);
@@ -289,11 +289,11 @@ internal static slice<byte> pkEncode(slice<byte> buf, slice<byte> ρ, slice<arra
             var c1 = w[i + 1];
             var c2 = w[i + 2];
             var c3 = w[i + 3];
-            var b0 = (byte)((c0 >> (int)(0)));
-            var b1 = (byte)((uint16)(((c0 >> (int)(8))) | ((uint16)(c1 << (int)(2)))));
-            var b2 = (byte)((uint16)(((c1 >> (int)(6))) | ((uint16)(c2 << (int)(4)))));
-            var b3 = (byte)((uint16)(((c2 >> (int)(4))) | ((uint16)(c3 << (int)(6)))));
-            var b4 = (byte)((c3 >> (int)(2)));
+            var b0 = (byte)(c0 >> 0);
+            var b1 = (byte)((uint16)((c0 >> 8) | ((uint16)(c1 << 2))));
+            var b2 = (byte)((uint16)((c1 >> 6) | ((uint16)(c2 << 4))));
+            var b3 = (byte)((uint16)((c2 >> 4) | ((uint16)(c3 << 6))));
+            var b4 = (byte)(c3 >> 2);
             pk = append(pk, b0, b1, b2, b3, b4);
         }
     }
@@ -311,10 +311,10 @@ internal static (slice<byte> ρ, error err) pkDecode(slice<byte> pk, slice<array
         // Decode four at a time from 4 * 10 bits = 5 bytes.
         for (nint i = 0; i < n; i += 4) {
             var (b0, b1, b2, b3, b4) = (pk[0], pk[1], pk[2], pk[3], pk[4]);
-            t1[r][i + 0] = (uint16)((uint16)((b0 >> (int)(0))) | (uint16)((uint16)((byte)(b1 & 0b0000_0011)) << (int)(8)));
-            t1[r][i + 1] = (uint16)((uint16)((b1 >> (int)(2))) | (uint16)((uint16)((byte)(b2 & 0b0000_1111)) << (int)(6)));
-            t1[r][i + 2] = (uint16)((uint16)((b2 >> (int)(4))) | (uint16)((uint16)((byte)(b3 & 0b0011_1111)) << (int)(4)));
-            t1[r][i + 3] = (uint16)((uint16)((b3 >> (int)(6))) | (uint16)((uint16)((byte)(b4 & 0b1111_1111)) << (int)(2)));
+            t1[r][i + 0] = (uint16)((uint16)(b0 >> 0) | (uint16)((uint16)((byte)(b1 & 0b0000_0011)) << 8));
+            t1[r][i + 1] = (uint16)((uint16)(b1 >> 2) | (uint16)((uint16)((byte)(b2 & 0b0000_1111)) << 6));
+            t1[r][i + 2] = (uint16)((uint16)(b2 >> 4) | (uint16)((uint16)((byte)(b3 & 0b0011_1111)) << 4));
+            t1[r][i + 3] = (uint16)((uint16)(b3 >> 6) | (uint16)((uint16)((byte)(b4 & 0b1111_1111)) << 2));
             pk = pk[5..];
         }
     }
@@ -610,7 +610,7 @@ internal static void w1Encode(ж<sha3.SHAKE> ᏑH, /*[256]*/ array<byte> w, para
         for (nint i = 0; i < n; i += 2) {
             var b0 = w[i];
             var b1 = w[i + 1];
-            buf[i / 2] = (byte)(b0 | (byte)(b1 << (int)(4)));
+            buf[i / 2] = (byte)(b0 | (byte)(b1 << 4));
         }
         ᏑH.Write(buf);
         break;
@@ -623,9 +623,9 @@ internal static void w1Encode(ж<sha3.SHAKE> ᏑH, /*[256]*/ array<byte> w, para
             var b1 = w[i + 1];
             var b2 = w[i + 2];
             var b3 = w[i + 3];
-            buf[3 * i / 4 + 0] = (byte)(((b0 >> (int)(0))) | ((byte)(b1 << (int)(6))));
-            buf[3 * i / 4 + 1] = (byte)(((b1 >> (int)(2))) | ((byte)(b2 << (int)(4))));
-            buf[3 * i / 4 + 2] = (byte)(((b2 >> (int)(4))) | ((byte)(b3 << (int)(2))));
+            buf[3 * i / 4 + 0] = (byte)((b0 >> 0) | ((byte)(b1 << 6)));
+            buf[3 * i / 4 + 1] = (byte)((b1 >> 2) | ((byte)(b2 << 4)));
+            buf[3 * i / 4 + 2] = (byte)((b2 >> 4) | ((byte)(b3 << 2)));
         }
         ᏑH.Write(buf);
         break;

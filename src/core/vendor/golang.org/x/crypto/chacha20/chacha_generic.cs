@@ -217,10 +217,10 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
     // panic immediately. If instead we'd only reach the last block, remember
     // not to generate any more output after the buffer is drained.
     var numBlocks = ((uint64)len(src) + (uint64)blockSize - 1) / (uint64)blockSize;
-    if (s.overflow || (uint64)s.counter + numBlocks > ((uint64)1 << (int)(32))){
+    if (s.overflow || (uint64)s.counter + numBlocks > (uint64)1 << 32){
         throw panic("chacha20: counter overflow");
     } else 
-    if ((uint64)s.counter + numBlocks == ((uint64)1 << (int)(32))) {
+    if ((uint64)s.counter + numBlocks == (uint64)1 << 32) {
         s.overflow = true;
     }
 
@@ -237,7 +237,7 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
     // If using a multi-block xorKeyStreamBlocks would overflow, use the generic
     // one that does one block at a time.
     const uint64 blocksPerBuf = /* bufSize / blockSize */ 1;
-    if ((uint64)s.counter + blocksPerBuf > ((uint64)1 << (int)(32))) {
+    if ((uint64)s.counter + blocksPerBuf > (uint64)1 << 32) {
         s.buf = new byte[]{}.array(64);
         nint numBlocksΔ1 = (len(src) + (nint)blockSize - 1) / (nint)blockSize;
         var buf = s.buf.slice((nint)bufSize - numBlocksΔ1 * (nint)blockSize);

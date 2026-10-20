@@ -89,7 +89,7 @@ internal static UntypedInt spanScanManyMark => 4;            // Indicates one or
 
 // load atomically loads from a pointer to a spanScanOwnership.
 internal static spanScanOwnership load(this ж<spanScanOwnership> Ꮡo) {
-    return ((spanScanOwnership)atomic.Load8(Ꮡo.Reinterpret<spanScanOwnership, uint8>()));
+    return (spanScanOwnership)atomic.Load8(Ꮡo.Reinterpret<spanScanOwnership, uint8>());
 }
 
 internal static spanScanOwnership or(this ж<spanScanOwnership> Ꮡo, spanScanOwnership v) {
@@ -109,7 +109,7 @@ internal static spanScanOwnership or(this ж<spanScanOwnership> Ꮡo, spanScanOw
     if (goarch.BigEndian) {
         off = 32 - off - 8;
     }
-    return ((spanScanOwnership)(uint8)(atomic.Or32(o32, ((uint32)(uint8)v).Lsh((uint64)(off))).Rsh((uint64)(off))));
+    return (spanScanOwnership)(uint8)(atomic.Or32(o32, ((uint32)(uint8)v).Lsh((uint64)(off))).Rsh((uint64)(off)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -180,7 +180,7 @@ internal static bool tryAcquire(this ж<spanInlineMarkBits> Ꮡimb) {
 // Take note of the fact that this is *only* an upper-bound. In particular, it may still
 // turn out that only one mark bit was set, even if the return value indicates "many".
 internal static spanScanOwnership release(this ж<spanInlineMarkBits> Ꮡimb) {
-    return ((spanScanOwnership)atomic.Xchg8(Ꮡimb.of(spanInlineMarkBits.Ꮡowned).Reinterpret<spanScanOwnership, uint8>(), (uint8)spanScanUnowned));
+    return (spanScanOwnership)atomic.Xchg8(Ꮡimb.of(spanInlineMarkBits.Ꮡowned).Reinterpret<spanScanOwnership, uint8>(), (uint8)spanScanUnowned);
 }
 
 // spanInlineMarkBitsFromBase returns the spanInlineMarkBits for a span whose start address is base.
@@ -218,7 +218,7 @@ internal static void moveInlineMarks(this ref mspan s, ж<gcBits> Ꮡdst) {
     for (var i = (uintptr)0; i < bytes; i += goarch.PtrSize) {
         var marks = bswapIfBigEndian(imbMarks.Value[i / (uintptr)goarch.PtrSize]);
         if (i / (uintptr)goarch.PtrSize == (uintptr)((uintptr)((uintptr)(len((~imb).marks) + 1) / (uintptr)goarch.PtrSize) - 1)) {
-            marks &= unchecked((uintptr)~(uintptr)(((uintptr)0xff << (int)(((goarch.PtrSize - 1) * 8))))); // mask out class
+            marks &= unchecked((uintptr)~(uintptr)(((uintptr)0xff << (int)((goarch.PtrSize - 1) * 8)))); // mask out class
         }
         (Ꮡdst.bytep(i).Reinterpret<uint8, uintptr>()).Value |= bswapIfBigEndian(marks);
     }
@@ -248,7 +248,7 @@ internal static markBits /*bits*/ markBitsForIndex(this ref mspan s, uintptr obj
     } else {
         bits.bytep = s.gcmarkBits.bytep(objIndex / 8);
     }
-    bits.mask = (uint8)((uint8)1 << (int)((objIndex % 8)));
+    bits.mask = (uint8)((uint8)1 << (int)(objIndex % 8));
     bits.index = objIndex;
     return bits;
 }
@@ -263,7 +263,7 @@ internal static markBits markBitsForBase(this ref mspan s) {
 // scannedBitsForIndex returns a markBits representing the scanned bit
 // for objIndex in the inline mark bits.
 internal static markBits scannedBitsForIndex(this ref mspan s, uintptr objIndex) {
-    return new markBits(s.inlineMarkBits().at(spanInlineMarkBits.Ꮡscans, (ulong)(objIndex / 8)), (uint8)((uint8)1 << (int)((objIndex % 8))), objIndex);
+    return new markBits(s.inlineMarkBits().at(spanInlineMarkBits.Ꮡscans, (ulong)(objIndex / 8)), (uint8)((uint8)1 << (int)(objIndex % 8)), objIndex);
 }
 
 // gcUsesSpanInlineMarkBits returns true if a span holding objects of a certain size
@@ -291,7 +291,7 @@ internal static bool tryDeferToSpanScan(uintptr Δp, ж<gcWork> Ꮡgcw) {
         return false;
     }
     var pageIdx = ((Δp / (uintptr)pageSize) / 8) % (uintptr)len((~ha).pageInUse);
-    var pageMask = (byte)((byte)(1 << (int)(((Δp / (uintptr)pageSize) % 8))));
+    var pageMask = (byte)((byte)(1 << (int)((Δp / (uintptr)pageSize) % 8)));
     if ((uint8)((~ha).pageUseSpanInlineMarkBits[pageIdx] & pageMask) == 0) {
         return false;
     }
@@ -299,10 +299,10 @@ internal static bool tryDeferToSpanScan(uintptr Δp, ж<gcWork> Ꮡgcw) {
     // Find the object's index from the span class info stored in the inline mark bits.
     var @base = alignDown(Δp, gc.PageSize);
     var q = spanInlineMarkBitsFromBase(@base);
-    var objIndex = (uint16)((((uint64)(Δp - @base) * (uint64)gc.SizeClassToDivMagic[(~q).@class.sizeclass()]) >> (int)(32)));
+    var objIndex = (uint16)(((uint64)(Δp - @base) * (uint64)gc.SizeClassToDivMagic[(~q).@class.sizeclass()]) >> 32);
 
     // Set mark bit.
-    var (idx, mask) = ((uint16)(objIndex / 8), (uint8)((uint8)1 << (int)((objIndex % 8))));
+    var (idx, mask) = ((uint16)(objIndex / 8), (uint8)((uint8)1 << (int)(objIndex % 8)));
     if ((uint8)(atomic.Load8(q.at(spanInlineMarkBits.Ꮡmarks, (nint)(idx))) & mask) != 0) {
         return true;
     }
@@ -770,7 +770,7 @@ internal static ж<spanSPMC> newSpanSPMC(uint32 cap) {
     if (cap < pageCap) {
         cap = pageCap;
     }
-    if ((uint32)(cap & (cap - 1)) != 0) {
+    if ((cap & (cap - 1)) != 0) {
         @throw(spmcCapacityMustBeAPowerˢ);
     }
 
@@ -805,7 +805,7 @@ internal static void deinit(this ж<spanSPMC> Ꮡr) {
 
 // slot returns a pointer to slot i%r.cap.
 internal static ж<objptr> slot(this ref spanSPMC r, uint32 i) {
-    var idx = (uintptr)((uint32)(i & (r.cap - 1)));
+    var idx = (uintptr)(i & (r.cap - 1));
     return (ж<objptr>)(uintptr)((uintptr)@unsafe.Add(@unsafe.Pointer.FromBox(r.ring), idx * /* unsafe.Sizeof(objptr(0)) */ (uintptr)8));
 }
 
@@ -886,18 +886,18 @@ internal static readonly @string createdObjptrWithAddressˢ = "created objptr wi
 
 // makeObjPtr creates an objptr from a span base address and an object index.
 internal static objptr makeObjPtr(uintptr spanBase, uint16 objIndex) {
-    if (doubleCheckGreenTea && (uintptr)(spanBase & (uintptr)(((1 << (int)(gc.PageShift))) - 1)) != 0) {
+    if (doubleCheckGreenTea && (uintptr)(spanBase & (uintptr)((1 << (int)(gc.PageShift)) - 1)) != 0) {
         @throw(createdObjptrWithAddressˢ);
     }
-    return ((objptr)((uintptr)(spanBase | (uintptr)objIndex)));
+    return (objptr)((uintptr)(spanBase | (uintptr)objIndex));
 }
 
 internal static uintptr spanBase(this objptr Δp) {
-    return (uintptr)((uintptr)Δp & ~(uintptr)(((1 << (int)(gc.PageShift))) - 1));
+    return (uintptr)((uintptr)Δp & ~(uintptr)((1 << (int)(gc.PageShift)) - 1));
 }
 
 internal static uint16 objIndex(this objptr Δp) {
-    return (uint16)((uint16)(uintptr)Δp & (uint16)((((1 << (int)(gc.PageShift))) - 1)));
+    return (uint16)((uint16)(uintptr)Δp & (uint16)((1 << (int)(gc.PageShift)) - 1));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -922,7 +922,7 @@ internal static void scanSpan(objptr Δp, ж<gcWork> Ꮡgcw) {
         // That means p is the sole object we need to handle. Fast-track it.
         var objIndex = Δp.objIndex();
         var bytep = imb.at(spanInlineMarkBits.Ꮡscans, (nint)(objIndex / 8));
-        var mask = (uint8)((uint8)1 << (int)((objIndex % 8)));
+        var mask = (uint8)((uint8)1 << (int)(objIndex % 8));
         if ((uint8)(atomic.Load8(bytep) & mask) != 0) {
             return;
         }
@@ -942,7 +942,7 @@ internal static void scanSpan(objptr Δp, ж<gcWork> Ꮡgcw) {
     if (!spanclass.noscan()) {
         usableSpanSize -= gc.PageSize / goarch.PtrSize / 8;
     }
-    var nelems = (uint16)(((usableSpanSize * divMagic) >> (int)(32)));
+    var nelems = (uint16)((usableSpanSize * divMagic) >> 32);
 
     // Grey objects and return if there's nothing else to do.
     ref var toScan = ref heap(new gc.ObjMask(), out var ᏑtoScan);
@@ -1026,8 +1026,8 @@ internal static nint spanSetScans(uintptr spanBase, uint16 nelems, ж<spanInline
         scans = bswapIfBigEndian(scans);
         marks = bswapIfBigEndian(marks);
         if (i / (uintptr)goarch.PtrSize == (uintptr)((uintptr)((uintptr)(len(imb.marks) + 1) / (uintptr)goarch.PtrSize) - 1)) {
-            scans &= unchecked((uintptr)~(uintptr)(((uintptr)0xff << (int)(((goarch.PtrSize - 1) * 8))))); // mask out owned
-            marks &= unchecked((uintptr)~(uintptr)(((uintptr)0xff << (int)(((goarch.PtrSize - 1) * 8))))); // mask out class
+            scans &= unchecked((uintptr)~(uintptr)(((uintptr)0xff << (int)((goarch.PtrSize - 1) * 8)))); // mask out owned
+            marks &= unchecked((uintptr)~(uintptr)(((uintptr)0xff << (int)((goarch.PtrSize - 1) * 8)))); // mask out class
         }
         var toGrey = (uintptr)(marks & ~scans);
         toScan[i / (uintptr)goarch.PtrSize] = toGrey;

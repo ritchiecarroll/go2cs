@@ -182,13 +182,16 @@ internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
 // is not explicitly mandated by the format, but seems like a good idea
 // for repeatable/deterministic dumps).
 public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.Writer w) {
+    var pkgsᴷ = new stackAppend<@string>();
+    var unitsᴷ = new stackAppend<extcu>();
+
     if (fm.cm == coverage.CtrModeInvalid) {
         throw panic("internal error, counter mode unset");
     }
     if (len(pkgs) == 0) {
         pkgs = new slice<@string>(0, len(fm.pm));
         foreach (var (importpath, _) in fm.pm) {
-            pkgs = append(pkgs, importpath);
+            pkgs = append(pkgsᴷ, pkgs, importpath);
         }
     }
     {
@@ -204,7 +207,7 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
         }
         var units = new slice<extcu>(0, () => new(nil), len((~p).unitTable));
         foreach (var (u, _) in (~p).unitTable) {
-            units = append(units, u);
+            units = append(unitsᴷ, units, u);
         }
         p.sortUnits(units);
         foreach (var (_, u) in units) {
@@ -226,10 +229,12 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
 // 'w', selecting the set of packages in 'pkgs' and suffixing the
 // printed string with 'inpkgs'.
 public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
+    var pkgsᴷ = new stackAppend<@string>();
+
     if (len(pkgs) == 0) {
         pkgs = new slice<@string>(0, len(fm.pm));
         foreach (var (importpath, _) in fm.pm) {
-            pkgs = append(pkgs, importpath);
+            pkgs = append(pkgsᴷ, pkgs, importpath);
         }
     }
 
@@ -309,6 +314,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
     GoFrame ᒐ = default;
     try {
         ref var fm = ref Ꮡfm.DerefOrNull();
+        var unitsᴷ = new stackAppend<extcu>();
 
         if (fm.cm == coverage.CtrModeInvalid) {
             throw panic("internal error, counter mode unset");
@@ -333,7 +339,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
             }
             var units = new slice<extcu>(0, () => new(nil), len((~p).unitTable));
             foreach (var (u, _) in (~p).unitTable) {
-                units = append(units, u);
+                units = append(unitsᴷ, units, u);
             }
 
             // Within a package, sort the units, then walk through the

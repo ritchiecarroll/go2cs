@@ -24,29 +24,18 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferredˢ = (@string)"deferred:"u8;
-
 internal static void runDeferred(Tally @base) {
     GoFrame ᒐ = default;
     try {
         defer((Tally tʗp) => {
             ref var t = ref heap(tʗp, out var Ꮡt);
             Ꮡt.Add(4);
-            fmt.Println(deferredˢ, t.total, t.log);
+            fmt.Println("deferred:", t.total, t.log);
         }, @base, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object assignedˢ = (@string)"assigned:"u8;
-private static readonly object callerCopyUntouchedˢ = (@string)"caller copy untouched:"u8;
-private static readonly object iifeˢ = (@string)"iife:"u8;
-private static readonly object deferredSourceUntouchedˢ = (@string)"deferred source untouched:"u8;
-private static readonly object nestedˢ = (@string)"nested:"u8;
-private static readonly object variadicˢ = (@string)"variadic:"u8;
 
 internal static void Main() {
     (nint, @string) f(Tally tʗp, nint m) {
@@ -55,21 +44,21 @@ internal static void Main() {
         Ꮡt.Add(m);
         return (t.total, t.log);
     }
-    var seed = new Tally(total: 5, log: "s"u8);
+    var seed = new Tally(total: 5, log: "s");
     var (total, log) = f(seed, 3);
-    fmt.Println(assignedˢ, total, log);
-    fmt.Println(callerCopyUntouchedˢ, seed.total, seed.log);
+    fmt.Println("assigned:", total, log);
+    fmt.Println("caller copy untouched:", seed.total, seed.log);
 
     var (total2, log2) = ((Func<Tally, (nint, @string)>)(tʗp => {
         ref var t = ref heap(tʗp, out var Ꮡt);
         Ꮡt.Add(7);
         return (t.total, t.log);
-    }))(new Tally(total: 1, log: "i"u8));
-    fmt.Println(iifeˢ, total2, log2);
+    }))(new Tally(total: 1, log: "i"));
+    fmt.Println("iife:", total2, log2);
 
-    var @base = new Tally(total: 2, log: "d"u8);
+    var @base = new Tally(total: 2, log: "d");
     runDeferred(@base);
-    fmt.Println(deferredSourceUntouchedˢ, @base.total, @base.log);
+    fmt.Println("deferred source untouched:", @base.total, @base.log);
 
     (nint, @string) g(Tally tʗp) {
         ref var t = ref heap(tʗp, out var Ꮡt);
@@ -80,8 +69,8 @@ internal static void Main() {
         t.total++;
         return (t.total, t.log);
     }
-    var (total4, log4) = g(new Tally(total: 3, log: "n"u8));
-    fmt.Println(nestedˢ, total4, log4);
+    var (total4, log4) = g(new Tally(total: 3, log: "n"));
+    fmt.Println("nested:", total4, log4);
 
     (nint, @string) h(Tally tʗp, params ꓸꓸꓸnint nsʗp) {
         var ns = nsʗp.sslice();
@@ -91,8 +80,8 @@ internal static void Main() {
         }
         return (t.total, t.log);
     }
-    var (total5, log5) = h(new Tally(total: 10, log: "v"u8), 1, 2);
-    fmt.Println(variadicˢ, total5, log5);
+    var (total5, log5) = h(new Tally(total: 10, log: "v"), 1, 2);
+    fmt.Println("variadic:", total5, log5);
 }
 
 } // end main_package

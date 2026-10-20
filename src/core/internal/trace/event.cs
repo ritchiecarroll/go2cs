@@ -139,7 +139,7 @@ partial struct ΔTime /*num:int64*/;
 
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
 public static time.Duration Sub(this ΔTime t, ΔTime t0) {
-    return ((time.Duration)((int64)t - (int64)t0));
+    return (time.Duration)((int64)t - (int64)t0);
 }
 
 // Metric provides details about a Metric event.
@@ -350,7 +350,7 @@ public static Value ArgValue(this ExperimentalEvent e, nint i) {
         throw panic(fmt.Sprintf("experimental event argument index %d out of bounds [0, %d)"u8, i, len(e.Args)));
     }
     if (strings.HasSuffix(e.Args[i], stringˢ)) {
-        @string s = e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.argValues[i]));
+        @string s = e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.argValues[i]);
         return StringValue(s);
     }
     return Uint64Value(e.argValues[i]);
@@ -635,7 +635,7 @@ internal static (ΔEvent, error) makeStateTransitionEvent(ΔEvent e, ΔStateTran
 
     var exprᴛ1 = t.Resource.Kind;
     if (exprᴛ1 == ResourceProc) {
-        var (from, to) = (((ProcState)t.oldState), ((ProcState)t.newState));
+        var (from, to) = ((ProcState)t.oldState, (ProcState)t.newState);
         switch (ᐧ) {
         case {} when from == ProcIdle && to == ProcIdle: {
             // TODO(felixge): Could this also be a ProcStatus event?
@@ -666,7 +666,7 @@ internal static (ΔEvent, error) makeStateTransitionEvent(ΔEvent e, ΔStateTran
         }}
     }
     else if (exprᴛ1 == ResourceGoroutine) {
-        var (from, to) = (((GoState)t.oldState), ((GoState)t.newState));
+        var (from, to) = ((GoState)t.oldState, (GoState)t.newState);
         var stack = slices.Collect(t.Stack.Frames());
         var goroutine = t.Resource.Goroutine();
 
@@ -676,7 +676,7 @@ internal static (ΔEvent, error) makeStateTransitionEvent(ΔEvent e, ΔStateTran
                 e.@base.typ = tracev2.EvGoStatusStack;
             }
             e.@base.args[0] = (uint64)(int64)goroutine;
-            e.@base.args[2] = (uint64)(((uint64)(uint8)from << (int)(32)) | (uint64)(uint8)goState2Tracev2GoStatus[to]);
+            e.@base.args[2] = (uint64)(uint8)from << 32 | (uint64)(uint8)goState2Tracev2GoStatus[to];
         } else {
             var exprᴛ2 = from;
             if (exprᴛ2 == GoNotExist) {
@@ -792,7 +792,7 @@ internal static (ΔEvent, error) makeSyncEvent(ΔEvent e, ΔSync s) {
         e.table.Value.snapWall = s.ClockSnapshot.Value.Wall;
         e.table.Value.snapMono = s.ClockSnapshot.Value.Mono;
         // N.b. MakeEvent sets e.table.freq to 1.
-        e.table.Value.snapTime = ((timestamp)(uint64)(int64)(~s.ClockSnapshot).Trace);
+        e.table.Value.snapTime = (timestamp)(uint64)(int64)(~s.ClockSnapshot).Trace;
     }
     return (e.ΔClone(), default!);
 }
@@ -961,7 +961,7 @@ public static ΔStack Stack(this ΔEvent e) {
     // The stack for the main execution context is always the
     // first stack listed in StackIDs. Subtract one from this
     // because we've peeled away the timestamp argument.
-    var id = ((stackID)e.@base.args[spec.StackIDs[0] - 1]);
+    var id = (stackID)e.@base.args[spec.StackIDs[0] - 1];
     if (id == 0) {
         return NoStack;
     }
@@ -1015,7 +1015,7 @@ public static ΔLabel Label(this ΔEvent e) {
         throw panic(fmt.Sprintf("internal error: unexpected wire-format event type for Label kind: %d"u8, e.@base.typ));
     }
     return new ΔLabel(
-        ΔΔLabel: e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0])),
+        ΔΔLabel: e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.@base.args[0]),
         Resource: new ResourceID(Kind: ResourceGoroutine, id: (int64)e.ctx.G)
     );
 }
@@ -1041,7 +1041,7 @@ public static ΔRange Range(this ΔEvent e) {
     if (exprᴛ1 == tracev2.EvSTWBegin || exprᴛ1 == tracev2.EvSTWEnd) {
         // N.B. ordering.advance smuggles in the STW reason as e.base.args[0]
         // for tracev2.EvSTWEnd (it's already there for Begin).
-        r.Name = "stop-the-world ("u8 + e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0])) + ")"u8;
+        r.Name = "stop-the-world ("u8 + e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.@base.args[0]) + ")"u8;
         r.Scope = new ResourceID(Kind: ResourceGoroutine, id: (int64)e.Goroutine());
     }
     else if (exprᴛ1 == tracev2.EvGCBegin || exprᴛ1 == tracev2.EvGCActive || exprᴛ1 == tracev2.EvGCEnd) {
@@ -1111,12 +1111,12 @@ public static ΔTask Task(this ΔEvent e) {
     @string typ = default!;
     var exprᴛ1 = e.@base.typ;
     if (exprᴛ1 == tracev2.EvUserTaskBegin) {
-        parentID = ((TaskID)e.@base.args[1]);
-        typ = e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[2]));
+        parentID = (TaskID)e.@base.args[1];
+        typ = e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.@base.args[2]);
     }
     else if (exprᴛ1 == tracev2.EvUserTaskEnd) {
-        parentID = ((TaskID)e.@base.extra(version.Go122)[0]);
-        typ = e.table.getExtraString(((extraStringID)e.@base.extra(version.Go122)[1]));
+        parentID = (TaskID)e.@base.extra(version.Go122)[0];
+        typ = e.table.getExtraString((extraStringID)e.@base.extra(version.Go122)[1]);
     }
     else { /* default: */
         throw panic(fmt.Sprintf("internal error: unexpected wire-format event type for Task kind: %d"u8, e.@base.typ));
@@ -1144,7 +1144,7 @@ public static ΔRegion Region(this ΔEvent e) {
     }
     return new ΔRegion(
         Task: ((TaskID)e.@base.args[0]),
-        Type: e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[1]))
+        Type: e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.@base.args[1])
     );
 }
 
@@ -1162,8 +1162,8 @@ public static ΔLog Log(this ΔEvent e) {
     }
     return new ΔLog(
         Task: ((TaskID)e.@base.args[0]),
-        Category: e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[1])),
-        Message: e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[2]))
+        Category: e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.@base.args[1]),
+        Message: e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.@base.args[2])
     );
 }
 
@@ -1179,7 +1179,7 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
     ΔStateTransition s = default!;
     var exprᴛ1 = e.@base.typ;
     if (exprᴛ1 == tracev2.EvProcStart) {
-        s = MakeProcStateTransition(((ProcID)(int64)e.@base.args[0]), ProcIdle, ProcRunning);
+        s = MakeProcStateTransition((ProcID)(int64)e.@base.args[0], ProcIdle, ProcRunning);
     }
     else if (exprᴛ1 == tracev2.EvProcStop) {
         s = MakeProcStateTransition(e.ctx.P, ProcRunning, ProcIdle);
@@ -1194,25 +1194,25 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
             // transition.
             beforeState = ProcIdle;
         }
-        s = MakeProcStateTransition(((ProcID)(int64)e.@base.args[0]), beforeState, ProcIdle);
+        s = MakeProcStateTransition((ProcID)(int64)e.@base.args[0], beforeState, ProcIdle);
     }
     else if (exprᴛ1 == tracev2.EvProcStatus) {
         // N.B. ordering.advance populates e.base.extra.
-        s = MakeProcStateTransition(((ProcID)(int64)e.@base.args[0]), ((ProcState)(uint8)e.@base.extra(version.Go122)[0]), tracev2ProcStatus2ProcState[e.@base.args[1]]);
+        s = MakeProcStateTransition((ProcID)(int64)e.@base.args[0], (ProcState)(uint8)e.@base.extra(version.Go122)[0], tracev2ProcStatus2ProcState[e.@base.args[1]]);
     }
     else if (exprᴛ1 == tracev2.EvGoCreate || exprᴛ1 == tracev2.EvGoCreateBlocked) {
         var status = GoRunnable;
         if (e.@base.typ == tracev2.EvGoCreateBlocked) {
             status = GoWaiting;
         }
-        s = MakeGoStateTransition(((GoID)(int64)e.@base.args[0]), GoNotExist, status);
+        s = MakeGoStateTransition((GoID)(int64)e.@base.args[0], GoNotExist, status);
         s.Stack = new ΔStack(table: e.table, id: ((stackID)e.@base.args[1]));
     }
     else if (exprᴛ1 == tracev2.EvGoCreateSyscall) {
-        s = MakeGoStateTransition(((GoID)(int64)e.@base.args[0]), GoNotExist, GoSyscall);
+        s = MakeGoStateTransition((GoID)(int64)e.@base.args[0], GoNotExist, GoSyscall);
     }
     else if (exprᴛ1 == tracev2.EvGoStart) {
-        s = MakeGoStateTransition(((GoID)(int64)e.@base.args[0]), GoRunnable, GoRunning);
+        s = MakeGoStateTransition((GoID)(int64)e.@base.args[0], GoRunnable, GoRunning);
     }
     else if (exprᴛ1 == tracev2.EvGoDestroy) {
         s = MakeGoStateTransition(e.ctx.G, GoRunning, GoNotExist);
@@ -1222,19 +1222,19 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
     }
     else if (exprᴛ1 == tracev2.EvGoStop) {
         s = MakeGoStateTransition(e.ctx.G, GoRunning, GoRunnable);
-        s.Reason = e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0]));
+        s.Reason = e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.@base.args[0]);
         s.Stack = e.Stack(); // This event references the resource the event happened on.
     }
     else if (exprᴛ1 == tracev2.EvGoBlock) {
         s = MakeGoStateTransition(e.ctx.G, GoRunning, GoWaiting);
-        s.Reason = e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0]));
+        s.Reason = e.table.of(evTable.Ꮡstrings).mustGet((stringID)e.@base.args[0]);
         s.Stack = e.Stack(); // This event references the resource the event happened on.
     }
     else if (exprᴛ1 == tracev2.EvGoUnblock || exprᴛ1 == tracev2.EvGoSwitch || exprᴛ1 == tracev2.EvGoSwitchDestroy) {
         // N.B. GoSwitch and GoSwitchDestroy both emit additional events, but
         // the first thing they both do is unblock the goroutine they name,
         // identically to an unblock event (even their arguments match).
-        s = MakeGoStateTransition(((GoID)(int64)e.@base.args[0]), GoWaiting, GoRunnable);
+        s = MakeGoStateTransition((GoID)(int64)e.@base.args[0], GoWaiting, GoRunnable);
     }
     else if (exprᴛ1 == tracev2.EvGoSyscallBegin) {
         s = MakeGoStateTransition(e.ctx.G, GoRunning, GoSyscall);
@@ -1248,8 +1248,8 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
     }
     else if (exprᴛ1 == tracev2.EvGoStatus || exprᴛ1 == tracev2.EvGoStatusStack) {
         var packedStatus = e.@base.args[2];
-        var (from, to) = ((packedStatus >> (int)(32)), (uint64)(packedStatus & ((uint64)((4294967296L) - 1))));
-        s = MakeGoStateTransition(((GoID)(int64)e.@base.args[0]), ((GoState)(uint8)from), tracev2GoStatus2GoState[to]);
+        var (from, to) = (packedStatus >> 32, (uint64)(packedStatus & ((uint64)((4294967296L) - 1))));
+        s = MakeGoStateTransition((GoID)(int64)e.@base.args[0], (GoState)(uint8)from, tracev2GoStatus2GoState[to]);
         s.Stack = e.Stack(); // This event references the resource the event happened on.
     }
     else { /* default: */
@@ -1534,7 +1534,7 @@ internal static error validateTableIDs(this ΔEvent e) {
 
     // Check stacks.
     foreach (var (_, i) in spec.StackIDs) {
-        var id = ((stackID)e.@base.args[i - 1]);
+        var id = (stackID)e.@base.args[i - 1];
         var (_, ok) = e.table.of(evTable.Ꮡstacks).get(id);
         if (!ok) {
             return fmt.Errorf("found invalid stack ID %d for event %s"u8, id, spec.Name);
@@ -1545,7 +1545,7 @@ internal static error validateTableIDs(this ΔEvent e) {
 
     // Check strings.
     foreach (var (_, i) in spec.StringIDs) {
-        var id = ((stringID)e.@base.args[i - 1]);
+        var id = (stringID)e.@base.args[i - 1];
         var (_, ok) = e.table.of(evTable.Ꮡstrings).get(id);
         if (!ok) {
             return fmt.Errorf("found invalid string ID %d for event %s"u8, id, spec.Name);

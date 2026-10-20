@@ -107,7 +107,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     ref var Δp = ref Ꮡp.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
-        print((@string)"runtime: base = "u8, ((Δhex)(uint64)@base), (@string)", limit = "u8, ((Δhex)(uint64)limit), (@string)"\n"u8);
+        print((@string)"runtime: base = "u8, (Δhex)(uint64)@base, (@string)", limit = "u8, (Δhex)(uint64)limit, (@string)"\n"u8);
         @throw(sysGrowBoundsNotAlignedˢ);
     }
 
@@ -202,7 +202,7 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
-        print((@string)"runtime: base = "u8, ((Δhex)(uint64)@base), (@string)", limit = "u8, ((Δhex)(uint64)limit), (@string)"\n"u8);
+        print((@string)"runtime: base = "u8, (Δhex)(uint64)@base, (@string)", limit = "u8, (Δhex)(uint64)limit, (@string)"\n"u8);
         @throw(sysGrowBoundsNotAlignedˢ);
     }
     var scSize = /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
@@ -258,7 +258,7 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 //
 // Returns the amount of memory added to sysStat.
 internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> ᏑsysStat) {
-    var n = (uintptr)(((uintptr)1 << (int)(heapAddrBits))) / (uintptr)pallocChunkBytes;
+    var n = (uintptr)((uintptr)1 << (int)(heapAddrBits)) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
     @unsafe.Pointer r = (uintptr)sysReserve(nil, nbytes, scavengeIndexˢ);
     ref var sl = ref heap<notInHeapSlice>(out var Ꮡsl);

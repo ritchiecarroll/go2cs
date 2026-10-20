@@ -88,10 +88,10 @@ public static ж<ΔInt> NewInt(int64 x) {
     slice<Word> abs = default!;
     if (x == 0){
     } else 
-    if (_W == 32 && (u >> (int)(32)) != 0){
-        abs = new Word[]{((Word)(nuint)u), ((Word)(nuint)((u >> (int)(32))))}.slice();
+    if (_W == 32 && u >> 32 != 0){
+        abs = new Word[]{(Word)(nuint)u, (Word)(nuint)((u >> 32))}.slice();
     } else {
-        abs = new Word[]{((Word)(nuint)u)}.slice();
+        abs = new Word[]{(Word)(nuint)u}.slice();
     }
     return Ꮡ(new ΔInt(neg: x < 0, abs: abs));
 }
@@ -246,7 +246,7 @@ public static ж<ΔInt> MulRange(this ж<ΔInt> Ꮡz, int64 a, int64 b) {
 
     var neg = false;
     if (a < 0) {
-        neg = (int64)((b - a) & 1) == 0;
+        neg = ((b - a) & 1) == 0;
         (a, b) = (-b, -a);
     }
 
@@ -487,7 +487,7 @@ internal static uint64 low64(Δnat x) {
     }
     var v = (uint64)(nuint)x[0];
     if (_W == 32 && len(x) > 1) {
-        return (uint64)(((uint64)(nuint)x[1] << (int)(32)) | v);
+        return (uint64)(nuint)x[1] << 32 | v;
     }
     return v;
 }
@@ -769,15 +769,15 @@ internal static (Word u0, Word u1, Word v0, Word v1, bool even) lehmerSimulate(r
 
     // extract the top Word of bits from A and B
     nuint h = nlz(A.abs[n - 1]);
-    a1 = (Word)((A.abs[n - 1] << (int)(h)) | (A.abs[n - 2] >> (int)(((nuint)_W - h))));
+    a1 = (Word)(A.abs[n - 1] << (int)(h) | A.abs[n - 2] >> (int)((nuint)_W - h));
     // B may have implicit zero words in the high bits if the lengths differ
     switch (ᐧ) {
     case {} when n == m: {
-        a2 = (Word)((B.abs[n - 1] << (int)(h)) | (B.abs[n - 2] >> (int)(((nuint)_W - h))));
+        a2 = (Word)(B.abs[n - 1] << (int)(h) | B.abs[n - 2] >> (int)((nuint)_W - h));
         break;
     }
     case {} when n == m + 1: {
-        a2 = (B.abs[n - 2] >> (int)(((nuint)_W - h)));
+        a2 = B.abs[n - 2] >> (int)((nuint)_W - h);
         break;
     }
     default: {
@@ -1088,7 +1088,7 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
 
         // handle factors of 2 in 'a'
         nuint s = a.abs.trailingZeroBits();
-        if ((nuint)(s & 1) != 0) {
+        if ((s & 1) != 0) {
             Word bmod8 = (Word)(b.abs[0] & 7);
             if (bmod8 == 3 || bmod8 == 5) {
                 j = -j;
@@ -1281,7 +1281,7 @@ public static nuint Bit(this ref ΔInt x, nint i) {
     }
     if (x.neg) {
         var t = ((Δnat)default!).sub(x.abs, natOne);
-        return (nuint)(t.bit((nuint)i) ^ 1);
+        return t.bit((nuint)i) ^ 1;
     }
 
     return x.abs.bit((nuint)i);
@@ -1301,7 +1301,7 @@ public static ж<ΔInt> SetBit(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, nint i, nuin
     }
     if (x.neg) {
         var t = z.abs.sub(x.abs, natOne);
-        t = t.setBit(t, (nuint)i, (nuint)(b ^ 1));
+        t = t.setBit(t, (nuint)i, b ^ 1);
         z.abs = t.add(t, natOne);
         z.neg = len(z.abs) > 0;
         return Ꮡz;

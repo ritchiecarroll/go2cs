@@ -386,7 +386,7 @@ internal static void set(this ж<mSpanStateBox> Ꮡb, mSpanState s) {
 
 //go:nosplit
 internal static mSpanState get(this ж<mSpanStateBox> Ꮡb) {
-    return ((mSpanState)Ꮡb.of(mSpanStateBox.Ꮡs).Load());
+    return (mSpanState)Ꮡb.of(mSpanStateBox.Ꮡs).Load();
 }
 
 partial struct mspan {
@@ -487,7 +487,7 @@ internal static (uintptr size, uintptr n, uintptr total) layout(this ref mspan s
     uintptr n = default!;
     uintptr total = default!;
 
-    total = (s.npages << (int)(gc.PageShift));
+    total = s.npages << (int)(gc.PageShift);
     size = s.elemsize;
     if (size > 0) {
         n = total / size;
@@ -556,12 +556,12 @@ internal static UntypedInt numSpanClasses => /* gc.NumSizeClasses << 1 */ 136;
 internal static spanClass tinySpanClass => /* spanClass(tinySizeClass<<1 | 1) */ 5;
 
 internal static spanClass makeSpanClass(uint8 sizeclass, bool noscan) {
-    return (spanClass)(((spanClass)((uint8)(sizeclass << (int)(1)))) | ((spanClass)(uint8)bool2int(noscan)));
+    return (spanClass)(((spanClass)((uint8)(sizeclass << 1))) | ((spanClass)(uint8)bool2int(noscan)));
 }
 
 //go:nosplit
 internal static int8 sizeclass(this spanClass sc) {
-    return (int8)(uint8)((sc >> (int)(1)));
+    return (int8)(uint8)((sc >> 1));
 }
 
 //go:nosplit
@@ -582,7 +582,7 @@ internal static bool noscan(this spanClass sc) {
 //
 //go:nosplit
 internal static arenaIdx arenaIndex(uintptr Δp) {
-    return ((arenaIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)heapArenaBytes));
+    return (arenaIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)heapArenaBytes);
 }
 
 // arenaBase returns the low address of the region covered by heap
@@ -605,7 +605,7 @@ internal static nuint l1(this arenaIdx i) {
         // L1 map.
         return 0;
     } else {
-        return ((nuint)i >> (int)(arenaL1Shift));
+        return (nuint)i >> (int)(arenaL1Shift);
     }
 }
 
@@ -619,7 +619,7 @@ internal static nuint l2(this arenaIdx i) {
     if (arenaL1Bits == 0){
         return (nuint)i;
     } else {
-        return (nuint)((nuint)i & (nuint)((1 << (int)(arenaL2Bits)) - 1));
+        return (nuint)i & (nuint)((1 << (int)(arenaL2Bits)) - 1);
     }
 }
 
@@ -694,7 +694,7 @@ internal static (ж<heapArena> arena, uintptr pageIdx, uint8 pageMask) pageIndex
     arenaIdx ai = arenaIndex(Δp);
     arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
     pageIdx = ((Δp / (uintptr)pageSize) / 8) % (uintptr)len((~arena).pageInUse);
-    pageMask = (byte)((byte)(1 << (int)(((Δp / (uintptr)pageSize) % 8))));
+    pageMask = (byte)((byte)(1 << (int)((Δp / (uintptr)pageSize) % 8)));
     return (arena, pageIdx, pageMask);
 }
 
@@ -753,7 +753,7 @@ internal static void init(this ж<mheap> Ꮡh) {
     // h->mapcache needs no init
 
     foreach (var (i, _) in h.central) {
-        h.central[i].mcentral.init(((spanClass)(uint8)i));
+        h.central[i].mcentral.init((spanClass)(uint8)i);
     }
 
     Ꮡh.of(mheap.Ꮡpages).init(Ꮡh.of(mheap.Ꮡlock), Ꮡmemstats.of(mstats.ᏑgcMiscSys), false);
@@ -775,7 +775,7 @@ internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) {
     // could make the slow path here several times faster by
     // batching heap frees.
     // Bail early if there's no more reclaim work.
-    if (Ꮡh.of(mheap.ᏑreclaimIndex).Load() >= ((uint64)1 << (int)(63))) {
+    if (Ꮡh.of(mheap.ᏑreclaimIndex).Load() >= (uint64)1 << 63) {
         return;
     }
 
@@ -812,7 +812,7 @@ internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) {
         var idx = (uintptr)(Ꮡh.of(mheap.ᏑreclaimIndex).Add(pagesPerReclaimerChunk) - (uint64)pagesPerReclaimerChunk);
         if (idx / (uintptr)pagesPerArena >= (uintptr)len(arenas)) {
             // Page reclaiming is done.
-            Ꮡh.of(mheap.ᏑreclaimIndex).Store(((uint64)1 << (int)(63)));
+            Ꮡh.of(mheap.ᏑreclaimIndex).Store((uint64)1 << 63);
             break;
         }
 
@@ -1589,7 +1589,7 @@ internal static (uintptr, bool) grow(this ж<mheap> Ꮡh, uintptr npage) {
                 // h.curArena.base is aligned to pallocChunkBytes.
                 nint bits = logHeapArenaBytes - logPallocChunkBytes;
                 var offset = nextHeapRandBits(bits);
-                h.curArena.@base = alignDown((uintptr)(h.curArena.@base | ((offset << (int)(logPallocChunkBytes)))), pallocChunkBytes);
+                h.curArena.@base = alignDown((uintptr)(h.curArena.@base | (offset << (int)(logPallocChunkBytes))), pallocChunkBytes);
             }
         }
 
@@ -1656,13 +1656,13 @@ internal static void freeSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs) {
         if (msanenabled) {
             // Tell msan that this entire span is no longer in use.
             @unsafe.Pointer @base = (@unsafe.Pointer)Ꮡs.Value.@base();
-            var bytes = (Ꮡs.Value.npages << (int)(gc.PageShift));
+            var bytes = Ꮡs.Value.npages << (int)(gc.PageShift);
             msanfree(@base, bytes);
         }
         if (asanenabled) {
             // Tell asan that this entire span is no longer in use.
             @unsafe.Pointer @base = (@unsafe.Pointer)Ꮡs.Value.@base();
-            var bytes = (Ꮡs.Value.npages << (int)(gc.PageShift));
+            var bytes = Ꮡs.Value.npages << (int)(gc.PageShift);
             asanpoison(@base, bytes);
         }
         if (valgrindenabled) {
@@ -1730,18 +1730,18 @@ internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAll
             @throw(mheapFreeSpanLockedˢ2);
         }
         if (s.allocCount != 0 || s.sweepgen != h.sweepgen) {
-            print((@string)"mheap.freeSpanLocked - span "u8, Ꮡs.OrTypedNil(), (@string)" ptr "u8, ((Δhex)(uint64)s.@base()), (@string)" allocCount "u8, s.allocCount, (@string)" sweepgen "u8, s.sweepgen, (@string)"/"u8, h.sweepgen, (@string)"\n"u8);
+            print((@string)"mheap.freeSpanLocked - span "u8, Ꮡs.OrTypedNil(), (@string)" ptr "u8, (Δhex)(uint64)s.@base(), (@string)" allocCount "u8, s.allocCount, (@string)" sweepgen "u8, s.sweepgen, (@string)"/"u8, h.sweepgen, (@string)"\n"u8);
             @throw(mheapFreeSpanLockedˢ3);
         }
         Ꮡh.of(mheap.ᏑpagesInUse).Add(((uintptr)0 - s.npages));
 
         // Clear in-use bit in arena page bitmap.
         var (arena, pageIdx, pageMask) = pageIndexOf(s.@base());
-        atomic.And8(arena.at(heapArena.ᏑpageInUse, (ulong)(pageIdx)), (uint8)(((uint8)(~pageMask))));
+        atomic.And8(arena.at(heapArena.ᏑpageInUse, (ulong)(pageIdx)), (uint8)((uint8)(~pageMask)));
 
         // Clear small heap span bit if necessary.
         if (gcUsesSpanInlineMarkBits(s.elemsize)) {
-            atomic.And8(arena.at(heapArena.ᏑpageUseSpanInlineMarkBits, (ulong)(pageIdx)), (uint8)(((uint8)(~pageMask))));
+            atomic.And8(arena.at(heapArena.ᏑpageUseSpanInlineMarkBits, (ulong)(pageIdx)), (uint8)((uint8)(~pageMask)));
         }
     }
     else { /* default: */
@@ -2001,7 +2001,7 @@ internal static void spanHasSpecials(ж<mspan> Ꮡs) {
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
     var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
-    atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)1 << (int)((arenaPage % 8))));
+    atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)1 << (int)(arenaPage % 8)));
 }
 
 // spanHasNoSpecials marks a span as having no specials in the arena bitmap.
@@ -2011,7 +2011,7 @@ internal static void spanHasNoSpecials(ж<mspan> Ꮡs) {
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
     var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
-    atomic.And8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)(((uint8)(~((uint8)((uint8)1 << (int)((arenaPage % 8))))))));
+    atomic.And8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)(~((uint8)((uint8)1 << (int)(arenaPage % 8))))));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2743,7 +2743,7 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
         if (n.ptr == Δp) {
             return n.handle();
         }
-        m = n.at(immortalWeakHandle.Ꮡchildren, (ulong)((hashIter >> (int)((8 * goarch.PtrSize - 1)))));
+        m = n.at(immortalWeakHandle.Ꮡchildren, (ulong)((hashIter >> (int)(8 * goarch.PtrSize - 1))));
         hashIter <<= (int)(1);
     }
 }
@@ -2936,7 +2936,7 @@ internal static ж<uint8> bytep(this ж<gcBits> Ꮡb, uintptr n) {
 // bitp returns a pointer to the byte containing bit n and a mask for
 // selecting that bit from *bytep.
 internal static (ж<uint8> bytep, uint8 mask) bitp(this ж<gcBits> Ꮡb, uintptr n) {
-    return (Ꮡb.bytep(n / 8), (uint8)(1 << (int)((n % 8))));
+    return (Ꮡb.bytep(n / 8), (uint8)(1 << (int)(n % 8)));
 }
 
 internal static uintptr gcBitsChunkBytes => /* uintptr(64 << 10) */ 65536;

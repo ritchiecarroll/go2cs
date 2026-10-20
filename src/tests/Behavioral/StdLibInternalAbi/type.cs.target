@@ -79,33 +79,33 @@ public static @string String(this ΔKind k) {
 }
 
 internal static slice<@string> kindNames = new golib.SparseArray<@string>{
-    [Invalid] = "invalid"u8,
-    [Bool] = "bool"u8,
-    [Int] = "int"u8,
-    [Int8] = "int8"u8,
-    [Int16] = "int16"u8,
-    [Int32] = "int32"u8,
-    [Int64] = "int64"u8,
-    [Uint] = "uint"u8,
-    [Uint8] = "uint8"u8,
-    [Uint16] = "uint16"u8,
-    [Uint32] = "uint32"u8,
-    [Uint64] = "uint64"u8,
-    [Uintptr] = "uintptr"u8,
-    [Float32] = "float32"u8,
-    [Float64] = "float64"u8,
-    [Complex64] = "complex64"u8,
-    [Complex128] = "complex128"u8,
-    [Array] = "array"u8,
-    [Chan] = "chan"u8,
-    [Func] = "func"u8,
-    [Interface] = "interface"u8,
-    [Map] = "map"u8,
-    [Pointer] = "ptr"u8,
-    [Slice] = "slice"u8,
-    [ΔString] = "string"u8,
-    [Struct] = "struct"u8,
-    [UnsafePointer] = "unsafe.Pointer"u8
+    [Invalid] = "invalid",
+    [Bool] = "bool",
+    [Int] = "int",
+    [Int8] = "int8",
+    [Int16] = "int16",
+    [Int32] = "int32",
+    [Int64] = "int64",
+    [Uint] = "uint",
+    [Uint8] = "uint8",
+    [Uint16] = "uint16",
+    [Uint32] = "uint32",
+    [Uint64] = "uint64",
+    [Uintptr] = "uintptr",
+    [Float32] = "float32",
+    [Float64] = "float64",
+    [Complex64] = "complex64",
+    [Complex128] = "complex128",
+    [Array] = "array",
+    [Chan] = "chan",
+    [Func] = "func",
+    [Interface] = "interface",
+    [Map] = "map",
+    [Pointer] = "ptr",
+    [Slice] = "slice",
+    [ΔString] = "string",
+    [Struct] = "struct",
+    [UnsafePointer] = "unsafe.Pointer"
 }.slice();
 
 public static ж<Type> TypeOf(any aʗp) {
@@ -122,7 +122,7 @@ public static ж<Type> TypeFor<T>() {
             return t;
         }
     }
-    return TypeOf(((ж<T>)nil)).Elem();
+    return TypeOf((ж<T>)nil).Elem();
 }
 
 public static ΔKind Kind(this ref Type t) {
@@ -164,20 +164,14 @@ partial struct UncommonType {
     internal uint32 _;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tMcount0ˢ = "t.mcount > 0"u8;
-
 public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Mcount == 0) {
         return default!;
     }
-    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tMcount0ˢ)), (int)(t.Mcount)));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.mcount > 0")), (int)(t.Mcount)));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tXcount0ˢ = "t.xcount > 0"u8;
 
 public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -185,7 +179,7 @@ public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
     if (t.Xcount == 0) {
         return default!;
     }
-    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tXcount0ˢ)), (int)(t.Xcount)));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.xcount > 0")), (int)(t.Xcount)));
 }
 
 internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string whySafe) {
@@ -448,23 +442,23 @@ partial struct ΔMapType {
 }
 
 public static bool IndirectKey(this ref ΔMapType mt) {
-    return (uint32)(mt.Flags & 1) != 0;
+    return (mt.Flags & 1) != 0;
 }
 
 public static bool IndirectElem(this ref ΔMapType mt) {
-    return (uint32)(mt.Flags & 2) != 0;
+    return (mt.Flags & 2) != 0;
 }
 
 public static bool ReflexiveKey(this ref ΔMapType mt) {
-    return (uint32)(mt.Flags & 4) != 0;
+    return (mt.Flags & 4) != 0;
 }
 
 public static bool NeedKeyUpdate(this ref ΔMapType mt) {
-    return (uint32)(mt.Flags & 8) != 0;
+    return (mt.Flags & 8) != 0;
 }
 
 public static bool HashMightPanic(this ref ΔMapType mt) {
-    return (uint32)(mt.Flags & 16) != 0;
+    return (mt.Flags & 16) != 0;
 }
 
 public static ж<Type> Key(this ж<Type> Ꮡt) {
@@ -496,15 +490,12 @@ public static nint NumIn(this ref ΔFuncType t) {
 }
 
 public static nint NumOut(this ref ΔFuncType t) {
-    return (nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1)));
+    return (nint)((uint16)(t.OutCount & ((1 << 15) - 1)));
 }
 
 public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
     return (Ꮡt.OutSlice()[i]);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tInCount0ˢ = "t.inCount > 0"u8;
 
 public static slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -518,9 +509,6 @@ public static slice<ж<Type>> InSlice(this ж<ΔFuncType> Ꮡt) {
     }
     return (false ? default(slice<ж<Type>>) : throw panic("go2cs: a slice view (*[N]*Type)(p)[...] over a managed element has no managed aliasing pair (type.go:551)"));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string outCount0ˢ = "outCount > 0"u8;
 
 public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -537,7 +525,7 @@ public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
 }
 
 public static bool IsVariadic(this ref ΔFuncType t) {
-    return (uint16)(t.OutCount & ((uint16)(1 << (int)(15)))) != 0;
+    return (uint16)(t.OutCount & ((uint16)(1 << 15))) != 0;
 }
 
 partial struct PtrType {
@@ -569,33 +557,27 @@ public static ж<byte> DataChecked(this ΔName n, nint off, @string whySafe) {
     return (ж<byte>)(uintptr)(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, whySafe));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string theRuntimeDoesnTNeedToˢ = "the runtime doesn't need to give you a reason"u8;
-
 public static ж<byte> Data(this ΔName n, nint off) {
-    return (ж<byte>)(uintptr)(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢ));
+    return (ж<byte>)(uintptr)(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, "the runtime doesn't need to give you a reason"));
 }
 
 public static bool IsExported(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(0)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
 public static bool HasTag(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(1)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
 public static bool IsEmbedded(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(3)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 3))) != 0;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string readVarintˢ = "read varint"u8;
 
 public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
-        var x = n.DataChecked(off + i, readVarintˢ).Value;
-        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)((7 * i)));
+        var x = n.DataChecked(off + i, "read varint").Value;
+        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
         }
@@ -612,7 +594,7 @@ public static bool IsBlank(this ΔName n) {
 
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
-        var b = (byte)((nint)(n & 0x7f));
+        var b = (byte)(n & 0x7f);
         n >>= (int)(7);
         if (n == 0) {
             buf[i] = b;
@@ -622,31 +604,28 @@ internal static nint writeVarint(slice<byte> buf, nint n) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nonEmptyStringˢ = "non-empty string"u8;
-
 public static @string Name(this ΔName n) {
     if (n.Bytes == nil) {
-        return ""u8;
+        return "";
     }
     var (i, l) = n.ReadVarint(1);
-    return @unsafe.String(n.DataChecked(1 + i, nonEmptyStringˢ), l);
+    return @unsafe.String(n.DataChecked(1 + i, "non-empty string"), l);
 }
 
 public static @string Tag(this ΔName n) {
     if (!n.HasTag()) {
-        return ""u8;
+        return "";
     }
     var (i, l) = n.ReadVarint(1);
     var (i2, l2) = n.ReadVarint(1 + i + l);
-    return @unsafe.String(n.DataChecked(1 + i + l + i2, nonEmptyStringˢ), l2);
+    return @unsafe.String(n.DataChecked(1 + i + l + i2, "non-empty string"), l2);
 }
 
 public static ΔName NewName(@string n, @string tag, bool exported, bool embedded) {
-    if (len(n) >= (1 << (int)(29))) {
+    if (len(n) >= 1 << 29) {
         throw panic("abi.NewName: name too long: " + n[..1024] + "...");
     }
-    if (len(tag) >= (1 << (int)(29))) {
+    if (len(tag) >= 1 << 29) {
         throw panic("abi.NewName: tag too long: " + tag[..1024] + "...");
     }
     array<byte> nameLen = new(10);
@@ -657,14 +636,14 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
-        bits |= (byte)((byte)(1 << (int)(0)));
+        bits |= (byte)((byte)(1 << 0));
     }
     if (len(tag) > 0) {
         l += tagLenLen + len(tag);
-        bits |= (byte)((byte)(1 << (int)(1)));
+        bits |= (byte)((byte)(1 << 1));
     }
     if (embedded) {
-        bits |= (byte)((byte)(1 << (int)(3)));
+        bits |= (byte)((byte)(1 << 3));
     }
 
     var b = new slice<byte>(l);

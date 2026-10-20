@@ -254,7 +254,7 @@ internal static float64 erf(float64 x) {
         R = (float64)rb0 + s * ((float64)rb1 + s * ((float64)rb2 + s * ((float64)rb3 + s * ((float64)rb4 + s * ((float64)rb5 + s * (float64)rb6)))));
         S = 1D + s * ((float64)sb1 + s * ((float64)sb2 + s * ((float64)sb3 + s * ((float64)sb4 + s * ((float64)sb5 + s * ((float64)sb6 + s * (float64)sb7))))));
     }
-    var z = Float64frombits((uint64)(Float64bits(x) & 0xffffffff00000000UL)); // pseudo-single (20-bit) precision x
+    var z = Float64frombits(Float64bits(x) & 0xffffffff00000000UL); // pseudo-single (20-bit) precision x
     var r = Exp(-z * z - 0.5625D) * Exp((z - x) * (z + x) + R / S);
     if (sign) {
         return r / x - 1D;
@@ -337,7 +337,7 @@ internal static float64 erfc(float64 x) {
             R = (float64)rb0 + s * ((float64)rb1 + s * ((float64)rb2 + s * ((float64)rb3 + s * ((float64)rb4 + s * ((float64)rb5 + s * (float64)rb6)))));
             S = 1D + s * ((float64)sb1 + s * ((float64)sb2 + s * ((float64)sb3 + s * ((float64)sb4 + s * ((float64)sb5 + s * ((float64)sb6 + s * (float64)sb7))))));
         }
-        var z = Float64frombits((uint64)(Float64bits(x) & 0xffffffff00000000UL)); // pseudo-single (20-bit) precision x
+        var z = Float64frombits(Float64bits(x) & 0xffffffff00000000UL); // pseudo-single (20-bit) precision x
         var r = Exp(-z * z - 0.5625D) * Exp((z - x) * (z + x) + R / S);
         if (sign) {
             return 2D - r / x;

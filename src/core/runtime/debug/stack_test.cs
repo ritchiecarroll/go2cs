@@ -96,7 +96,7 @@ public static void TestStack(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var b = ((T)0).method();
-    var lines = strings.Split(((@string)b), "\n"u8);
+    var lines = strings.Split((@string)b, "\n"u8);
     if (len(lines) < 6) {
         Ꮡt.Fatal(tooFewLinesˢ);
     }
@@ -125,7 +125,7 @@ public static void TestStack(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 Ꮡt.Fatal(err);
             }
-            fileGoroot = ((@string)bytes.TrimSpace(@out));
+            fileGoroot = (@string)bytes.TrimSpace(@out);
         } else {
             // Since GOROOT is not set in the environment, its value (if any) must come
             // from the path embedded in the binary.
@@ -202,7 +202,7 @@ public static void TestSetCrashOutput(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("child process failed to write crash report: %v"u8, err);
     }
-    @string crash = ((@string)data);
+    @string crash = (@string)data;
     Ꮡt.Logf("crash = <<%s>>"u8, crash);
     Ꮡt.Logf("stderr = <<%s>>"u8, stderr);
 

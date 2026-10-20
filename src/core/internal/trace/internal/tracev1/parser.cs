@@ -232,7 +232,7 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
             var freq = 1e9D / (float64)p.ticksPerSec;
             for (nint i = 0; i < events.Len(); i++) {
                 var ev = events.Ptr(i);
-                ev.Value.Ts = ((Timestamp)(int64)((float64)(int64)((~ev).Ts - minTs) * freq));
+                ev.Value.Ts = (Timestamp)(int64)((float64)(int64)((~ev).Ts - minTs) * freq);
                 // Move timers and syscalls to separate fake Ps.
                 if (p.timerGoids[(~ev).G] && (~ev).Type == EvGoUnblock) {
                     ev.Value.P = TimerP;
@@ -385,6 +385,8 @@ public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) {
 // repeat. This approach ensures that we form a consistent stream even if
 // timestamps are incorrect (condition observed on some machines).
 internal static (Events, error) parseEventBatches(this ref parser p) {
+    var availableProcsᴷ = new stackAppend<ж<proc>>();
+
     // The ordering of CPU profile sample events in the data stream is based on
     // when each run of the signal handler was able to acquire the spinlock,
     // with original timestamps corresponding to when ReadTrace pulled the data
@@ -508,7 +510,7 @@ break_pidLoop:;
                 return (new Events(nil), err);
             }
         }
-        availableProcs = builtin.append(availableProcs, f.proc);
+        availableProcs = builtin.append(availableProcsᴷ, availableProcs, f.proc);
     }
 
     // At this point we have a consistent stream of events. Make sure time
@@ -535,7 +537,7 @@ break_pidLoop:;
             lastSysBlock[(~ev).G] = ev.Value.Ts;
         }
         else if (exprᴛ2 == EvGoSysExit) {
-            var ts = ((Timestamp)(int64)(~ev).Args[2]);
+            var ts = (Timestamp)(int64)(~ev).Args[2];
             if (ts == 0) {
                 continue;
             }
@@ -600,7 +602,7 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
                 }
             }
 
-            e.Ts = ((Timestamp)(int64)e.Args[0]);
+            e.Ts = (Timestamp)(int64)e.Args[0];
             e.P = (int32)e.Args[1];
             e.G = e.Args[2];
             e.Args[0] = 0;
@@ -670,7 +672,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
     if (!ok) {
         return io.EOF;
     }
-    var typ = ((EventType)(((byte)(b << (int)(2)) >> (int)(2))));
+    var typ = (EventType)((byte)(b << 2) >> 2);
     // Most events have a timestamp before the actual arguments, so we add 1 and
     // parse it like it's the first argument. EvString has a special format and
     // the number of arguments doesn't matter. EvBatch writes '1' as the number
@@ -683,14 +685,14 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
     // number of logical arguments that isn't length-prefixed, even though the
     // value 3 on the wire indicates length-prefixing. For us, that becomes narg
     // == 4.
-    var narg = (byte)((b >> (int)(6)) + 1);
+    var narg = (byte)((b >> 6) + 1);
     if (typ == EvNone || typ >= EvCount || EventDescriptions[typ].minVersion > p.ver) {
         return fmt.Errorf("unknown event type %d"u8, typ);
     }
 
     var exprᴛ1 = typ;
     if (exprᴛ1 == EvString) {
-        if ((nuint)(flags & (nuint)skipStrings) != 0){
+        if ((flags & (nuint)skipStrings) != 0){
             // String dictionary entry [ID, length, string].
             {
                 var (_, errΔ7) = p.readVal(); if (errΔ7 != default!) {
@@ -731,7 +733,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             if (err != default!) {
                 return fmt.Errorf("failed to read trace: %w"u8, err);
             }
-            p.strings[id] = ((@string)buf);
+            p.strings[id] = (@string)buf;
         }
 
         ev.typ = EvNone;
@@ -779,7 +781,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
     { /* default: */
         ev = new rawEvent(typ: typ, args: p.args[..0]);
         if (narg <= inlineArgs){
-            if ((nuint)(flags & (nuint)skipArgs) == 0){
+            if ((flags & (nuint)skipArgs) == 0){
                 for (nint i = 0; i < (nint)narg; i++) {
                     var (v, err) = p.readVal();
                     if (err != default!) {
@@ -812,7 +814,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                 }
             }
 
-            if ((nuint)(flags & (nuint)skipArgs) == 0 || typ == EvCPUSample){
+            if ((flags & (nuint)skipArgs) == 0 || typ == EvCPUSample){
                 var (buf, errΔ1) = p.readFull((nint)v);
                 if (errΔ1 != default!) {
                     return fmt.Errorf("failed to read trace: %w"u8, errΔ1);
@@ -833,7 +835,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             }
             if (typ == EvUserLog) {
                 // EvUserLog records are followed by a value string
-                if ((nuint)(flags & (nuint)skipArgs) == 0){
+                if ((flags & (nuint)skipArgs) == 0){
                     // Read string
                     var (s, errΔ2) = p.readStr();
                     if (errΔ2 != default!) {
@@ -926,7 +928,7 @@ internal static (@string s, error err) readStr(this ref parser p) {
     if (err != default!) {
         return ("", fmt.Errorf("failed to read trace: %w"u8, err));
     }
-    return (((@string)buf), default!);
+    return ((@string)buf, default!);
 }
 
 // parseEvent transforms raw events into events.
@@ -955,7 +957,7 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
             p.lastP = (int32)raw.args[0];
         }
         p.lastG = p.lastGs[p.lastP];
-        p.lastTs = ((Timestamp)(int64)raw.args[1]);
+        p.lastTs = (Timestamp)(int64)raw.args[1];
     }
     else if (exprᴛ1 == EvFrequency) {
         p.ticksPerSec = (int64)raw.args[0];
@@ -1604,14 +1606,14 @@ internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {
 public static ΔSTWReason STWReason(this ref Trace tr, uint64 kindID) {
     if (tr.Version < 21){
         if (kindID == 0 || kindID == 1){
-            return ((ΔSTWReason)(nint)(kindID + 1));
+            return (ΔSTWReason)(nint)(kindID + 1);
         } else {
             return STWUnknown;
         }
     } else 
     if (tr.Version == 21){
         if (kindID < NumSTWReasons){
-            return ((ΔSTWReason)(nint)kindID);
+            return (ΔSTWReason)(nint)kindID;
         } else {
             return STWUnknown;
         }

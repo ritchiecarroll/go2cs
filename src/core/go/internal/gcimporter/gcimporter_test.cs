@@ -273,7 +273,7 @@ internal static @string sanitizeObjectString(@string s) {
         }
         runes = append(runes, r);
     }
-    return ((@string)runes);
+    return (@string)runes;
 }
 
 internal static ж<types.Package> checkFile(ж<testing.T> Ꮡt, @string filename, slice<byte> src) {
@@ -441,7 +441,7 @@ public static void TestImportStdLib(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to run go list to determine stdlib packages: %v\nstderr:\n%v"u8, err, Ꮡstderr.String());
     }
-    var pkgs = strings.Fields(((@string)@out));
+    var pkgs = strings.Fields((@string)@out);
 
     nint nimports = default!;
     foreach (var (_, pkg) in pkgs) {

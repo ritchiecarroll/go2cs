@@ -68,7 +68,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
     var testʗ2 = test;
     Ꮡt.Run(oneHighˢ, (ж<testing.T> tΔ3) => {
         var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
-        want.Value[runtime_internal_test_package.PallocChunkPages / 64 - 1] = ((uint64)1 << (int)(63));
+        want.Value[runtime_internal_test_package.PallocChunkPages / 64 - 1] = (uint64)1 << 63;
         testʗ2(tΔ3, runtime_internal_test_package.PallocChunkPages - 1, 1, want);
     });
     if (runtime_internal_test_package.PallocChunkPages >= 512) {
@@ -104,7 +104,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
             want.Value[PallocChunkPages / 64 - 1] = ~(uint64)0;
             want.Value[PallocChunkPages / 64 - 2] = ~(uint64)0;
             want.Value[PallocChunkPages / 64 - 3] = ~(uint64)0;
-            want.Value[PallocChunkPages / 64 - 4] = ((uint64)1 << (int)(63));
+            want.Value[PallocChunkPages / 64 - 4] = (uint64)1 << 63;
             testʗ6(tΔ7, PallocChunkPages - (64 * 3 + 1), 64 * 3 + 1, want);
         });
     }
