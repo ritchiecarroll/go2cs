@@ -31,14 +31,40 @@ internal static class Program
 {
     private static int Main(string[] args)
     {
-        if (args.Length < 2)
+        if (args.Length < 2 || args.Length % 2 != 0)
         {
-            Console.Error.WriteLine("usage: ildiff <baseDir> <seatDir> [--list N]");
+            Console.Error.WriteLine("usage: ildiff <baseDir> <seatDir> [--list N] [--show <method substring>] [--roots <dir>;<dir>]");
             return 2;
         }
 
         string baseDir = Path.GetFullPath(args[0]), seatDir = Path.GetFullPath(args[1]);
-        int list = args.Length >= 4 && args[2] == "--list" ? int.Parse(args[3]) : 200;
+        int list = 200;
+
+        // --show: print both normalized bodies of each differing method whose key contains the substring.
+        string? show = null;
+
+        for (int i = 2; i < args.Length; i += 2)
+        {
+            switch (args[i])
+            {
+                case "--list":
+                    list = int.Parse(args[i + 1]);
+                    break;
+                case "--show":
+                    show = args[i + 1];
+                    break;
+                case "--roots":
+                    // The source trees the two sides were built from. A string operand that starts with one (a
+                    // [CallerFilePath] the compiler embedded) reads with the root replaced, so the comparison does not
+                    // depend on where a tree lives.
+                    Names.Roots = args[i + 1].Split(';', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(root => root.TrimEnd('\\', '/') + Path.DirectorySeparatorChar).ToArray();
+                    break;
+                default:
+                    Console.Error.WriteLine($"unknown option {args[i]}");
+                    return 2;
+            }
+        }
 
         int assemblies = 0, methods = 0, differing = 0, onlyBase = 0, onlySeat = 0, missingSeat = 0;
         List<string> report = [];
@@ -77,6 +103,9 @@ internal static class Program
                 {
                     differing++;
                     report.Add($"DIFF {relative} {method}");
+
+                    if (show is not null && method.Contains(show, StringComparison.Ordinal))
+                        Console.WriteLine($"--- base {method}\n{body}--- seat {method}\n{other}");
                 }
             }
 
@@ -282,7 +311,21 @@ internal sealed class Names(MetadataReader md) : ISignatureTypeProvider<string, 
         return $"sig({string.Join(",", decoded.ParameterTypes)}):{decoded.ReturnType}";
     }
 
-    public string UserString(int token) => m_md.GetUserString((UserStringHandle)MetadataTokens.Handle(token));
+    // The source roots --roots names; see Program.Main.
+    public static string[] Roots = [];
+
+    public string UserString(int token)
+    {
+        string value = m_md.GetUserString((UserStringHandle)MetadataTokens.Handle(token));
+
+        foreach (string root in Roots)
+        {
+            if (value.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+                return "<root>" + Path.DirectorySeparatorChar + value[root.Length..];
+        }
+
+        return value;
+    }
 
     public string Token(int token) => Entity(MetadataTokens.EntityHandle(token));
 

@@ -6,8 +6,15 @@ Such a change must read `differing=0`. A change that is not IL-identical must re
 methods it names.
 
 ```
-dotnet run --project src/tools/ildiff -c Release -- <baseDir> <seatDir> [--list N]
+dotnet run --project src/tools/ildiff -c Release -- <baseDir> <seatDir> [--list N] [--show <method>] [--roots <dir>;<dir>]
 ```
+
+- `--list N` prints the first N report lines (default 200).
+- `--show <method>` prints both normalized bodies of each differing method whose key contains the substring.
+- `--roots <dir>;<dir>` names the source trees the two sides were built from. A string operand starting with
+  one reads with the root replaced. Pass it whenever the two sides were built in different directories. A
+  `[CallerFilePath]` argument embeds the absolute source path: without `--roots`, every `go` and `defer`
+  statement (whose golib entry records its call site) reads as different, as the first parity reading did.
 
 Every `*.dll` under `baseDir` is paired with the same relative path under `seatDir`. The last line is the
 reading:
