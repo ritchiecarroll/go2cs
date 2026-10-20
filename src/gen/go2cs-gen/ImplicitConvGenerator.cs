@@ -86,6 +86,15 @@ public class ImplicitConvGenerator : ISourceGenerator
                 continue;
             }
 
+            // A type paired with its own box is a converter fault, never a conversion to generate: the
+            // operator would box a COPY, so the site would compile and a write through the box would be lost.
+            if (IsBoxOf(targetType, sourceType) || IsBoxOf(sourceType, targetType))
+            {
+                (ITypeSymbol element, ITypeSymbol box) = IsBoxOf(targetType, sourceType) ? (sourceType, targetType) : (targetType, sourceType);
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.SelfBoxConversion, attributeSyntax.GetLocation(), attributeSyntax.ToString(), element.GetFullTypeName(), box.GetFullTypeName()));
+                continue;
+            }
+
             if (sourceType.TypeKind != TypeKind.Struct)
                 // Source is not a struct (e.g. a defined type over a non-struct underlying). This one
                 // conversion can't be generated; skip it rather than aborting ALL of this generator's
@@ -413,6 +422,11 @@ public class ImplicitConvGenerator : ISourceGenerator
         "float64" => "double",
         _ => null
     };
+
+    // Whether `box` is golib's `ж<T>` with T exactly `element`.
+    private static bool IsBoxOf(ITypeSymbol box, ITypeSymbol element) =>
+        box is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 } named &&
+        SymbolEqualityComparer.Default.Equals(named.TypeArguments[0], element);
 
     private static StructDeclarationSyntax? GetStructDeclaration(GeneratorSyntaxContext context, string structName)
     {

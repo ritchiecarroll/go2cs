@@ -96,5 +96,17 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    // ImplicitConvGenerator's refusal of a record pairing a type with its own box, <T, ж<T>> in either order. Go has
+    // no implicit conversion between a value and a pointer, so such a record means the converter put a value where
+    // Go passes a pointer. The operator it used to generate boxed a COPY: the site compiled, and a write through
+    // the box never reached the original (runtime's runqput stored a copy of the caller's g in runnext).
+    public static readonly DiagnosticDescriptor SelfBoxConversion = new(
+        id: "GO2CS0008",
+        title: "An implicit conversion record pairs a type with its own box",
+        messageFormat: "{0} pairs '{1}' with its own box '{2}': Go never converts between a value and a pointer implicitly, so the converter placed a value where Go passes a pointer; no operator is generated, because it would box a copy",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }
