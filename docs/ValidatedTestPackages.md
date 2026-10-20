@@ -1,7 +1,7 @@
 # Validated Test Packages
 <!-- {% raw %} — Jekyll/Liquid guard: this doc contains {{ sequences (Go template/composite syntax) that Liquid would otherwise parse or silently eat. Keep the matching endraw as the final line. -->
 
-**What a row means.** Each package in the table below has had its own Go 1.26.9 test suite
+**What a row means.** Each package in the table below has had its own Go 1.26.10 test suite
 converted to C#, built against the converted standard library, run, and compared with `go test`,
 verdict for verdict. A package appears only when every `Test` function's result either matches Go's
 or is disclosed, by its exact failure, as something the converted code does not do; a package that
@@ -310,7 +310,7 @@ says what that proves and what it does not.
 ## Reading the table
 
 - **Tests** counts a row's matching verdicts, **Disclosed** its disclosed ones; both columns are
-  the Windows record for the Go 1.26.9 era. [Disclosures](#disclosures), below the table, defines a
+  the Windows record for the Go 1.26.10 era. [Disclosures](#disclosures), below the table, defines a
   disclosure and its classes.
 - A verdict count is a fact about a package *and* an operating system: Go runs a different test set
   per `GOOS` (build-tagged tests, `GOOS`-keyed skips, capability gates), so `path/filepath` offers

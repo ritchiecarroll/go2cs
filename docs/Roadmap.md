@@ -132,7 +132,7 @@ and the hop after it brings Go 1.27:
 
 | Hop | When | What it involves |
 |:--|:--|:--|
-| **Go 1.26** (1.26.9), straight from 1.24.13 | After 1.24.13.7, the last 1.24 release | One hop across two Go releases. Go 1.25's changes are behavioral (its nil-check fix, updated `unicode` tables, the `AllocsPerRun` change) plus testing-API additions in the converted test host; Go 1.26 adds `new(expr)` and self-referential generic constraints. Every failure is first attributed to the release that caused it, by converting at 1.25.14 as well, without publishing it. Then every package is re-validated at 1.26. |
+| **Go 1.26** (1.26.10), straight from 1.24.13 | After 1.24.13.7, the last 1.24 release | One hop across two Go releases. Go 1.25's changes are behavioral (its nil-check fix, updated `unicode` tables, the `AllocsPerRun` change) plus testing-API additions in the converted test host; Go 1.26 adds `new(expr)` and self-referential generic constraints. Every failure is first attributed to the release that caused it, by converting at 1.25.14 as well, without publishing it. Then every package is re-validated at 1.26. |
 | **Go 1.27** | Q1 2027, by about February | Generic methods, which need a conversion design first. The 1.26 series leaves support when Go 1.28 ships, around February 2027, so the corpus reaches 1.27 before then. |
 
 How often later hops run is decided ahead of the Go 1.27 hop.
