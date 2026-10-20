@@ -112,6 +112,45 @@ internal static partial void closureOuterCap() {
     fmt.Println(cap(w));
 }
 
+internal static partial void siblingScopeCaps(nint n) {
+    var bufᴷ = new stackAppend<int64>();
+    var bufᴷΔ1 = new stackAppend<int64>();
+
+    switch (n) {
+    case 0: {
+        slice<int64> buf = default!;
+        buf = append(bufᴷ, buf, (int64)(1));
+        fmt.Print(cap(buf), " ");
+        break;
+    }}
+
+    switch (n) {
+    case 0: {
+        slice<int64> buf = default!;
+        buf = append(bufᴷΔ1, buf, (int64)(2));
+        fmt.Println(cap(buf));
+        break;
+    }}
+
+}
+
+internal static partial void literalNameCaps() {
+    var bufᴷ = new stackAppend<int64>();
+
+    {
+        slice<int64> buf = default!;
+        buf = append(bufᴷ, buf, (int64)(1));
+        fmt.Print(cap(buf), " ");
+    }
+    var f = () => {
+        var bufᴷ = new stackAppend<int64>();
+        slice<int64> buf = default!;
+        buf = append(bufᴷ, buf, (int64)(1));
+        return cap(buf);
+    };
+    fmt.Println(run(f));
+}
+
 internal static partial void nonEmptyCap() {
     var xᴷ = new stackAppend<int64>();
 
@@ -132,6 +171,8 @@ internal static void Main() {
     nonEmptyCap();
     closureLocalCaps();
     closureOuterCap();
+    siblingScopeCaps(0);
+    literalNameCaps();
 }
 
 } // end main_package

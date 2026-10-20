@@ -129,6 +129,41 @@ func closureOuterCap() {
 	fmt.Println(cap(w))
 }
 
+// 4 4: two variables named buf in sibling scopes each take a buffer of their own.
+//
+//go:noinline
+func siblingScopeCaps(n int) {
+	switch n {
+	case 0:
+		var buf []int64
+		buf = append(buf, 1)
+		fmt.Print(cap(buf), " ")
+	}
+	switch n {
+	case 0:
+		var buf []int64
+		buf = append(buf, 2)
+		fmt.Println(cap(buf))
+	}
+}
+
+// 4 4: a closure's own buf takes its buffer as an outer buf in a sibling block takes its own.
+//
+//go:noinline
+func literalNameCaps() {
+	{
+		var buf []int64
+		buf = append(buf, 1)
+		fmt.Print(cap(buf), " ")
+	}
+	f := func() int {
+		var buf []int64
+		buf = append(buf, 1)
+		return cap(buf)
+	}
+	fmt.Println(run(f))
+}
+
 // 2: a slice that is not empty when it must grow takes growslice's capacity.
 //
 //go:noinline
@@ -150,4 +185,6 @@ func main() {
 	nonEmptyCap()
 	closureLocalCaps()
 	closureOuterCap()
+	siblingScopeCaps(0)
+	literalNameCaps()
 }

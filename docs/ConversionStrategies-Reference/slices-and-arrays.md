@@ -836,7 +836,11 @@ internal static partial void loopCaps() {
 }
 ```
 
-`ᴷ` (U+1D37, a modifier-letter capital K) names the buffer after its variable. The overload takes the
+`ᴷ` (U+1D37, a modifier-letter capital K) names the buffer after its variable. Two hinted variables of one
+function can share a name in sibling scopes, as strconv's `unquote` has two `buf`s in separate cases. Their
+buffers are declared together at the entry, so the second takes `Δ` and an ordinal, as a second declaration of
+a Go name does: `bufᴷ` and `bufᴷΔ1`. A function literal's own buffer may repeat a name its enclosing function
+uses, because C# lets a lambda's local shadow an enclosing one. The overload takes the
 buffer as an `in` parameter, which C# passes by reference to the caller's local with no keyword at the
 call, and sets the flag through that reference. That is sound only when the argument is a plain local of
 the calling method or lambda that no lambda captures, so the go2cs-gen analyzer GO2CS0007 makes any other
@@ -857,7 +861,11 @@ converter run each harvest runs once per package, target, toolchain and build co
 the number of targets being emitted.
 
 **What is not hinted.** A copy of an append inlined into another package is invisible to that package's
-own harvest, so the site follows its own package's copies alone. A conversion whose toolchain predates
+own harvest, so the site follows its own package's copies alone. A hinted site inside a function body that its
+package converts by hand (a `*_impl.cs` companion) reaches only the converted placeholder, so the hand-written
+body grows as growslice does. Five standard-library sites are of this kind, all in reflect: the parameter and
+result lists `rtype.Method` builds, `FuncOf`'s argument list, and `StructOf`'s method set and type string.
+<!-- The five, one hint each: GOROOT/src/reflect/type.go:660 `in = append(in, t)` and :666 `out = append(out, toRType(ret))` (rtype.Method), :1957 `args = append(args, t)` (FuncOf), :2335 `methods = append(methods, abi.Method{` and :2423 `repr = append(repr, ';')` (StructOf). Counted by COORD's std legs at e14cff064f, which emitted 5 hints fewer than predicted per target for this reason. --> A conversion whose toolchain predates
 Go 1.25 gets no harvest output and so no hints, which is Go's own behavior before 1.25.
 
 ## A slice of a ZERO-SIZE element type carries no storage — `make([]struct{}, math.MaxInt)` allocates nothing

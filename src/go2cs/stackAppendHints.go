@@ -70,11 +70,14 @@ var (
 )
 
 // stackAppendBuffer is one qualifying variable's buffer: the variable, the operand naming it at its first qualifying
-// append (the buffer's C# name is that operand's plus StackBufferMarker), and the slice's element type.
+// append (the buffer's C# name is that operand's plus StackBufferMarker), the slice's element type, the function whose
+// entry declares it, and its C# name once stackAppendBufferName has assigned it.
 type stackAppendBuffer struct {
 	variable *types.Var
 	operand  *ast.Ident
 	element  types.Type
+	frame    ast.Node
+	name     string
 }
 
 // appendSite is one builtin append call of the package, with what the selection reads.
@@ -572,18 +575,46 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 		}
 
 		for _, site := range selectStackAppendSites(sites, perTarget) {
-			buffer := &stackAppendBuffer{variable: site.variable, operand: site.operand, element: site.element}
+			buffer := &stackAppendBuffer{variable: site.variable, operand: site.operand, element: site.element, frame: site.frame}
 			packageStackAppendSites[site.call] = buffer
 			packageStackAppendBuffers[site.frame] = append(packageStackAppendBuffers[site.frame], buffer)
 		}
 	}
 }
 
+// stackAppendNamesLock guards the buffer names, which the files of a package assign as they emit.
+var stackAppendNamesLock sync.Mutex
+
 // stackAppendBufferName is a buffer's C# name: its variable's, as the operand renders, plus StackBufferMarker. The
 // marker makes a keyword-named variable's buffer an ordinary name, so its @ is dropped (@out's buffer is outᴷ), as
 // AddressPrefix drops it.
+//
+// The names are unique among the buffers one entry declares. Two Go variables of one function can share a name in
+// sibling scopes (strconv's unquote has two `buf`s in separate cases), but their buffers are declared together at the
+// entry, where one name twice is CS0128. So the second buffer of a name takes ShadowVarMarker and an ordinal (bufᴷΔ1),
+// as a second declaration of a Go name does; an entry with no repeated name keeps the plain names. A literal's buffer
+// may share an enclosing function's buffer name: C# lets a lambda's local shadow an enclosing one.
 func (v *Visitor) stackAppendBufferName(buffer *stackAppendBuffer) string {
-	return strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(buffer.operand)), "@") + StackBufferMarker
+	stackAppendNamesLock.Lock()
+	defer stackAppendNamesLock.Unlock()
+
+	if buffer.name == "" {
+		used := map[string]int{}
+
+		for _, owned := range packageStackAppendBuffers[buffer.frame] {
+			name := strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(owned.operand)), "@") + StackBufferMarker
+
+			if count := used[name]; count > 0 {
+				owned.name = fmt.Sprintf("%s%s%d", name, ShadowVarMarker, count)
+			} else {
+				owned.name = name
+			}
+
+			used[name]++
+		}
+	}
+
+	return buffer.name
 }
 
 // stackAppendBufferPrologue is the declarations a function's entry holds for its buffers, one line each at indent.

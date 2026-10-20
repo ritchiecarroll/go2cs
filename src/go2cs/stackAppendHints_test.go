@@ -423,6 +423,37 @@ func keyword() int {
 func run(f func() int) int { return f() }
 
 //go:noinline
+func siblings(n int) int {
+	switch n {
+	case 0:
+		var buf []int64
+		buf = append(buf, 1)
+		return cap(buf)
+	}
+	switch n {
+	case 1:
+		var buf []int64
+		buf = append(buf, 2)
+		return cap(buf)
+	}
+	return 0
+}
+
+//go:noinline
+func literalName() int {
+	{
+		var tmp []int64
+		tmp = append(tmp, 1)
+		_ = tmp
+	}
+	return run(func() int {
+		var tmp []int64
+		tmp = append(tmp, 1)
+		return cap(tmp)
+	})
+}
+
+//go:noinline
 func closures() int {
 	var outer []int64
 	return run(func() int {
@@ -438,7 +469,8 @@ func closures() int {
 // appends, the first qualifying site only, a function literal's own variable in the literal's body, and no buffer
 // for an address-taken variable or an outer variable appended inside a literal; a C# keyword's buffer drops its @.
 // RED before the converter read the harvest: no buffer anywhere, so x's first append grew 1 2 4 4 8 where Go's reads
-// 4 4 4 4 8; and with the @ kept, out's buffer read @outᴷ.
+// 4 4 4 4 8; with the @ kept, out's buffer read @outᴷ; and before buffers were named apart, siblings declared bufᴷ twice
+// at its entry (CS0128, strconv's unquote). literalName's lambda keeps tmpᴷ: it shadows the entry's, which C# allows.
 func TestStackAppendEmission(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
@@ -489,13 +521,22 @@ func TestStackAppendEmission(t *testing.T) {
 		"inner = append(innerᴷ, inner, (int64)(1));",
 		"    var outᴷ = new stackAppend<int64>();\n",
 		"@out = append(outᴷ, @out, (int64)(1));",
+		"    var bufᴷ = new stackAppend<int64>();\n",
+		"    var bufᴷΔ1 = new stackAppend<int64>();\n",
+		"buf = append(bufᴷ, buf, (int64)(1));",
+		"buf = append(bufᴷΔ1, buf, (int64)(2));",
+		"        var tmpᴷ = new stackAppend<int64>();\n",
 	} {
 		if strings.Count(emitted, want) != 1 {
 			t.Errorf("want exactly one %q in:\n%s", want, emitted)
 		}
 	}
 
-	for _, unwanted := range []string{"aᴷ", "outerᴷ", "@outᴷ"} {
+	if strings.Count(emitted, "var tmpᴷ = new stackAppend<int64>();") != 2 || strings.Count(emitted, "tmp = append(tmpᴷ, tmp, (int64)(1));") != 2 {
+		t.Errorf("want literalName's entry and its lambda each to declare and pass their own tmpᴷ:\n%s", emitted)
+	}
+
+	for _, unwanted := range []string{"aᴷ", "outerᴷ", "@outᴷ", "tmpᴷΔ1"} {
 		if strings.Contains(emitted, unwanted) {
 			t.Errorf("unwanted %q in:\n%s", unwanted, emitted)
 		}
