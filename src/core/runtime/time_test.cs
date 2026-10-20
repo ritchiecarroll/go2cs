@@ -105,7 +105,7 @@ internal static (slice<fakeTimeFrame>, error) parseFakeTime(slice<byte> x) {
         x = x[8..];
         var dlen = binary.BigEndian.Uint32(x);
         x = x[4..];
-        @string data = ((@string)(x.slice(0, (nint)(dlen))));
+        @string data = (@string)(x.slice(0, (nint)(dlen)));
         x = x.slice((nint)(dlen));
         frames = append(frames, new fakeTimeFrame(time, data));
     }

@@ -65,17 +65,17 @@ public static void TestLogTextHandler(ж<testing.T> Ꮡt) {
         Ꮡbuf.Value.Reset();
     }
 
-    l.Info(msgˢ, (@string)"a"u8, (nint)(1), (@string)"b"u8, (nint)(2));
+    l.Info(msgˢ, (@string)"a"u8, (nint)1, (@string)"b"u8, (nint)2);
     check(levelInfoMsgMsgA1B2ˢ);
 
     // By default, debug messages are not printed.
-    l.Debug("bg"u8, Int("a"u8, 1), (@string)"b"u8, (nint)(2));
+    l.Debug("bg"u8, Int("a"u8, 1), (@string)"b"u8, (nint)2);
     check(""u8);
 
     l.Warn("w"u8, go.log.slog_package.Duration(durˢ, (time.Duration)(3000000000L)));
     check(levelWarnMsgWDur3sˢ);
 
-    l.Error(badˢ, (@string)"a"u8, (nint)(1));
+    l.Error(badˢ, (@string)"a"u8, (nint)1);
     check(levelErrorMsgBadA1ˢ);
 
     l.Log(ctx, LevelWarn + 1, "w"u8, Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ));
@@ -127,7 +127,7 @@ public static void TestConnections(ж<testing.T> Ꮡt) {
     // The default slog.Logger's handler uses the log package's default output.
     log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(Ꮡlogbuf));
     log_package.SetFlags((nint)((nint)log_package.Lshortfile & ~(nint)(nint)log_package.LstdFlags));
-    Info(msgˢ, (@string)"a"u8, (nint)(1));
+    Info(msgˢ, (@string)"a"u8, (nint)1);
     checkLogOutput(Ꮡt, Ꮡlogbuf.String(), loggerTestGoDInfoMsgA1ˢ);
     logbuf.Reset();
     Info(msgˢ, (@string)"p"u8, (any)(default!));
@@ -137,15 +137,15 @@ public static void TestConnections(ж<testing.T> Ꮡt) {
     Info(msgˢ, (@string)"r"u8, r.OrTypedNil());
     checkLogOutput(Ꮡt, Ꮡlogbuf.String(), loggerTestGoDInfoMsgRNilˢ);
     logbuf.Reset();
-    Warn(msgˢ, (@string)"b"u8, (nint)(2));
+    Warn(msgˢ, (@string)"b"u8, (nint)2);
     checkLogOutput(Ꮡt, Ꮡlogbuf.String(), loggerTestGoDWarnMsgB2ˢ);
     logbuf.Reset();
-    go.log.slog_package.Error(msgˢ, errˢ, io.EOF, (@string)"c"u8, (nint)(3));
+    go.log.slog_package.Error(msgˢ, errˢ, io.EOF, (@string)"c"u8, (nint)3);
     checkLogOutput(Ꮡt, Ꮡlogbuf.String(), loggerTestGoDErrorMsgErrˢ);
 
     // Levels below Info are not printed.
     logbuf.Reset();
-    Debug(msgˢ, (@string)"c"u8, (nint)(3));
+    Debug(msgˢ, (@string)"c"u8, (nint)3);
     checkLogOutput(Ꮡt, Ꮡlogbuf.String(), ""u8);
 
     Ꮡt.Run(wrapDefaultHandlerˢ, (ж<testing.T> tΔ1) => {
@@ -153,7 +153,7 @@ public static void TestConnections(ж<testing.T> Ꮡt) {
         // This works because the default handler uses the pc in the Record
         // to get the source line, rather than a call depth.
         var logger = New(new wrappingHandler(Default().Handler()));
-        logger.Info(msgˢ, (@string)"d"u8, (nint)(4));
+        logger.Info(msgˢ, (@string)"d"u8, (nint)4);
         checkLogOutput(tΔ1, Ꮡlogbuf.String(), loggerTestGoDInfoMsgD4ˢ);
     });
 
@@ -218,9 +218,9 @@ public static void TestAttrs(ж<testing.T> Ꮡt) {
         }
     }
 
-    var l1 = New(new slog_internal_test_package.captureHandlerжΔHandler(Ꮡ(new captureHandler(nil)))).With((@string)"a"u8, (nint)(1));
-    var l2 = New(l1.Handler()).With((@string)"b"u8, (nint)(2));
-    l2.Info("m"u8, (@string)"c"u8, (nint)(3));
+    var l1 = New(new slog_internal_test_package.captureHandlerжΔHandler(Ꮡ(new captureHandler(nil)))).With((@string)"a"u8, (nint)1);
+    var l2 = New(l1.Handler()).With((@string)"b"u8, (nint)2);
+    l2.Info("m"u8, (@string)"c"u8, (nint)3);
     var h = l2.Handler()._<ж<captureHandler>>();
     check((~h).attrs, Int("a"u8, 1), Int("b"u8, 2));
     check(attrsSlice((~h).r), Int("c"u8, 3));
@@ -424,7 +424,7 @@ public static partial void TestCallDepthConnection(ж<testing.T> Ꮡt) {
             if (errΔ1 != default!) {
                 tΔ1.Fatalf("failed to split line: %v"u8, errΔ1);
             }
-            @string got = ((@string)firstLine);
+            @string got = (@string)firstLine;
 
             @string want = fmt.Sprintf(
                 @"msg=""logger_test.go:%d: %s"""u8,
@@ -617,11 +617,11 @@ internal partial struct TestSetAttrs_type /*dyn*/ {
 public static void TestSetAttrs(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestSetAttrs_type[]{
         new(default!, default!),
-        new(new any[]{(@string)"a"u8, (nint)(1)}.slice(), new global::go.log.slog_package.Attr[]{Int("a"u8, 1)}.slice()),
-        new(new any[]{(@string)"a"u8, (nint)(1), (@string)"b"u8, (@string)"two"u8}.slice(), new global::go.log.slog_package.Attr[]{Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ)}.slice()),
+        new(new any[]{(@string)"a"u8, (nint)1}.slice(), new global::go.log.slog_package.Attr[]{Int("a"u8, 1)}.slice()),
+        new(new any[]{(@string)"a"u8, (nint)1, (@string)"b"u8, (@string)"two"u8}.slice(), new global::go.log.slog_package.Attr[]{Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ)}.slice()),
         new(new any[]{(@string)"a"u8}.slice(), new global::go.log.slog_package.Attr[]{go.log.slog_package.String(badKey, "a"u8)}.slice()),
-        new(new any[]{(@string)"a"u8, (nint)(1), (@string)"b"u8}.slice(), new global::go.log.slog_package.Attr[]{Int("a"u8, 1), go.log.slog_package.String(badKey, "b"u8)}.slice()),
-        new(new any[]{(@string)"a"u8, (nint)(1), (nint)(2), (nint)(3)}.slice(), new global::go.log.slog_package.Attr[]{Int("a"u8, 1), Int(badKey, 2), Int(badKey, 3)}.slice())
+        new(new any[]{(@string)"a"u8, (nint)1, (@string)"b"u8}.slice(), new global::go.log.slog_package.Attr[]{Int("a"u8, 1), go.log.slog_package.String(badKey, "b"u8)}.slice()),
+        new(new any[]{(@string)"a"u8, (nint)1, (nint)2, (nint)3}.slice(), new global::go.log.slog_package.Attr[]{Int("a"u8, 1), Int(badKey, 2), Int(badKey, 3)}.slice())
     }.slice()) {
         var r = NewRecord(new time_package.Time(nil), 0, ""u8, 0);
         r.Add(test.args.ꓸꓸꓸ);
@@ -748,7 +748,7 @@ public static void TestLoggerError(ж<testing.T> Ꮡt) {
         return a;
     };
     var l = New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡ(new HandlerOptions(ReplaceAttr: removeTime)))));
-    l.Error(msgˢ, errˢ, io.EOF, (@string)"a"u8, (nint)(1));
+    l.Error(msgˢ, errˢ, io.EOF, (@string)"a"u8, (nint)1);
     checkLogOutput(Ꮡt, Ꮡbuf.String(), levelErrorMsgMsgErrEofA1ˢ);
     buf.Reset();
     // use local var 'args' to defeat vet check
@@ -998,7 +998,7 @@ public static void BenchmarkNopLog(ж<testing.B> Ꮡb) {
     Ꮡb.Run(keysValuesˢ, (ж<testing.B> bΔ4) => {
         bΔ4.ReportAllocs();
         for (nint i = 0; i < (~bΔ4).N; i++) {
-            lʗ5.Log(ctxʗ5, LevelInfo, msgˢ, (@string)"a"u8, (nint)(1), (@string)"b"u8, twoˢ, (@string)"c"u8, true);
+            lʗ5.Log(ctxʗ5, LevelInfo, msgˢ, (@string)"a"u8, (nint)1, (@string)"b"u8, twoˢ, (@string)"c"u8, true);
         }
     });
     var ctxʗ6 = ctx;
@@ -1084,10 +1084,10 @@ public static void TestPanics(ж<testing.T> Ꮡt) {
 
     SetDefault(New(new global::go.log.slog_package.defaultHandlerжΔHandler(newDefaultHandler(loginternal.DefaultOutput))));
     foreach (var (_, pt) in new TestPanics_type[]{
-        new(((ж<panicTextAndJsonMarshaler>)nil), @"logger_test.go:\d+: INFO msg p=<nil>"u8),
+        new((ж<panicTextAndJsonMarshaler>)nil, @"logger_test.go:\d+: INFO msg p=<nil>"u8),
         new(new panicTextAndJsonMarshaler(io.ErrUnexpectedEOF), @"logger_test.go:\d+: INFO msg p=""!PANIC: unexpected EOF"""u8),
         new(new panicTextAndJsonMarshaler((@string)"panicking"u8), @"logger_test.go:\d+: INFO msg p=""!PANIC: panicking"""u8),
-        new(new panicTextAndJsonMarshaler((nint)(42)), @"logger_test.go:\d+: INFO msg p=""!PANIC: 42"""u8)
+        new(new panicTextAndJsonMarshaler((nint)42), @"logger_test.go:\d+: INFO msg p=""!PANIC: 42"""u8)
     }.slice()) {
         Info(msgˢ, (@string)"p"u8, pt.@in);
         checkLogOutput(Ꮡt, ᏑlogBuf.String(), pt.@out);
@@ -1096,10 +1096,10 @@ public static void TestPanics(ж<testing.T> Ꮡt) {
 
     SetDefault(New(new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf), nil))));
     foreach (var (_, pt) in new TestPanics_type[]{
-        new(((ж<panicTextAndJsonMarshaler>)nil), @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":null}"),
+        new((ж<panicTextAndJsonMarshaler>)nil, @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":null}"),
         new(new panicTextAndJsonMarshaler(io.ErrUnexpectedEOF), @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":""!PANIC: unexpected EOF""}"),
         new(new panicTextAndJsonMarshaler((@string)"panicking"u8), @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":""!PANIC: panicking""}"),
-        new(new panicTextAndJsonMarshaler((nint)(42)), @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":""!PANIC: 42""}")
+        new(new panicTextAndJsonMarshaler((nint)42), @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":""!PANIC: 42""}")
     }.slice()) {
         Info(msgˢ, (@string)"p"u8, pt.@in);
         checkLogOutput(Ꮡt, ᏑlogBuf.String(), pt.@out);

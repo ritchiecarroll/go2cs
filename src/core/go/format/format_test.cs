@@ -178,7 +178,7 @@ public static (@string, error) String(@string s) {
     if (err != default!) {
         return ("", err);
     }
-    return (((@string)res), default!);
+    return ((@string)res, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

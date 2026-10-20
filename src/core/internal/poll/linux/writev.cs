@@ -52,8 +52,8 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
                     continue;
                 }
                 iovecs = append(iovecs, newIovecWithBase(Ꮡ(chunk, 0)));
-                if (fd.IsStream && len(chunk) > (1 << (int)(30))) {
-                    iovecs[len(iovecs) - 1].SetLen((1 << (int)(30)));
+                if (fd.IsStream && len(chunk) > 1 << 30) {
+                    iovecs[len(iovecs) - 1].SetLen(1 << 30);
                     break; // continue chunk on next writev
                 }
                 iovecs[len(iovecs) - 1].SetLen(len(chunk));

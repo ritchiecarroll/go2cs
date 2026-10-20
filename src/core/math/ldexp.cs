@@ -32,7 +32,7 @@ internal static float64 ldexp(float64 frac, nint exp) {
     (frac, var e) = normalize(frac);
     exp += e;
     var x = Float64bits(frac);
-    exp += (nint)((nint)((x >> (int)(shift))) & (nint)mask) - (nint)bias;
+    exp += ((nint)(x >> (int)(shift)) & (nint)mask) - (nint)bias;
     if (exp < -1075) {
         return Copysign(0D, frac); // underflow
     }

@@ -36,7 +36,7 @@ internal static partial void start(this ж<tracker> Ꮡt) {
 }
 
 internal static partial void startArg(this ж<tracker> Ꮡt) {
-    goǃ(Ꮡt.loopArg, (nint)(9));
+    goǃ(Ꮡt.loopArg, (nint)9);
 }
 
 internal static partial void startInner(this ж<tracker> Ꮡt) {

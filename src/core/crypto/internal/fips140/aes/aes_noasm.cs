@@ -7,7 +7,7 @@ namespace go.crypto.@internal.fips140;
 partial class aes_package {
 
 partial struct block {
-    internal partial ref blockExpanded blockExpanded { get; }
+    /*embed*/ internal blockExpanded blockExpanded;
 }
 
 internal static ж<Block> newBlock(ж<Block> Ꮡc, slice<byte> key) {

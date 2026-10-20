@@ -128,10 +128,12 @@ internal static map<Format, @string> formatNames = new map<Format, @string>{
 internal static readonly @string unknownˢ = "<unknown>"u8;
 
 public static @string String(this Format f) {
+    var ssᴷ = new stackAppend<@string>();
+
     slice<@string> ss = default!;
-    for (Format f2 = ((Format)1); f2 < formatMax; f2 <<= (int)(1)) {
+    for (Format f2 = (Format)1; f2 < formatMax; f2 <<= (int)(1)) {
         if (f.has(f2)) {
-            ss = append(ss, formatNames[f2]);
+            ss = append(ssᴷ, ss, formatNames[f2]);
         }
     }
     switch (len(ss)) {
@@ -171,7 +173,7 @@ internal static UntypedInt maxSparseFileEntries => /* 1 << 20 */ 1048576;
 // blockPadding computes the number of bytes needed to pad offset up to the
 // nearest block edge where 0 <= n < blockSize.
 internal static int64 /*n*/ blockPadding(int64 offset) {
-    return (int64)(-offset & (int64)((blockSize - 1)));
+    return -offset & (int64)(blockSize - 1);
 }
 
 internal static block zeroBlock;
@@ -205,7 +207,7 @@ internal static ж<headerUSTAR> toUSTAR(this ж<block> Ꮡb) {
 }
 
 internal static sparseArray toSparse(this ref block b) {
-    return ((sparseArray)(b.Value[..]));
+    return (sparseArray)(b.Value[..]);
 }
 
 // getFormat checks that the block is a valid tar header based on the checksum.
@@ -223,9 +225,9 @@ internal static Format getFormat(this ж<block> Ꮡb) {
     }
 
     // Guess the magic values.
-    @string magic = ((@string)Ꮡb.toUSTAR().magic());
-    @string version = ((@string)Ꮡb.toUSTAR().version());
-    @string trailer = ((@string)Ꮡb.toSTAR().trailer());
+    @string magic = (@string)Ꮡb.toUSTAR().magic();
+    @string version = (@string)Ꮡb.toUSTAR().version();
+    @string trailer = (@string)Ꮡb.toSTAR().trailer();
     switch (ᐧ) {
     case {} when magic == magicUSTAR && trailer == trailerSTAR: {
         return formatSTAR;
@@ -388,7 +390,7 @@ internal static slice<byte> changeTime(this ref headerGNU h) {
 }
 
 internal static sparseArray sparse(this ref headerGNU h) {
-    return ((sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]));
+    return (sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]);
 }
 
 internal static slice<byte> realSize(this ref headerGNU h) {
@@ -484,7 +486,7 @@ internal static slice<byte> prefix(this ref headerUSTAR h) {
 partial struct sparseArray /*[]byte*/;
 
 internal static sparseElem entry(this sparseArray s, nint i) {
-    return ((sparseElem)(slice<byte>)(s.slice(i * 24)));
+    return (sparseElem)(slice<byte>)(s.slice(i * 24));
 }
 
 internal static slice<byte> isExtended(this sparseArray s) {

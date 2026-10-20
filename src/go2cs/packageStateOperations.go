@@ -49,6 +49,10 @@ func resetPackageState(pkg *packages.Package) {
 	cgoDynamicImportPragmas = nil
 	currentPackagePath = pkg.PkgPath
 	currentPackageGorootVendored = false
+	packageHoistsLiterals = false
+	packagePlainLits = nil
+	packageStackAppendSites = nil
+	packageStackAppendBuffers = nil
 	exportedTypeAliases = make(map[string]string)
 	importedTypeAliases = make(map[string]string)
 	importedTypeAliasSourceDirs = make(map[string]string)
@@ -72,6 +76,7 @@ func resetPackageState(pkg *packages.Package) {
 	interfaceImplementations = make(map[string]hashset.HashSet[string])
 	promotedInterfaceImplementations = make(map[string]hashset.HashSet[string])
 	constraintProxies = make(map[string][3]string)
+	importedConstraintProxies = make(map[string]map[string][]string)
 	nominalProductionConstraints = hashset.HashSet[string]{}
 	interfaceInheritances = make(map[string]hashset.HashSet[string])
 	adapterClassImplementations = hashset.HashSet[string]{}
@@ -84,6 +89,8 @@ func resetPackageState(pkg *packages.Package) {
 	nameCollisions = make(map[string]bool)
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
+	packageConstraintLiftNames = make(map[string]string)
+	resetInlineConstraintState()
 	packageLiftedTypeNames = hashset.HashSet[string]{}
 	productionLiftedTypeNames = nil
 	productionAliasLiftedTypes = nil
@@ -119,6 +126,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}
 	packageRefLoweringResult = nil
+	packageHandOwnedTypes = map[*types.TypeName]bool{}
 
 	// Capture the package-level Go doc (rendered to Markdown) for the NuGet README
 	packageDoc = extractPackageDoc(pkg.Syntax)
@@ -207,6 +215,7 @@ func newFileVisitor(fset *token.FileSet, packageTypes *types.Package, info *type
 		importAliasesEmitted:      hashset.HashSet[string]{},
 		importAliasTargets:        map[string]string{},
 		importPathAliases:         map[string]string{},
+		dotImportTargets:          map[string]string{},
 		typeAliasDeclarations:     &strings.Builder{},
 		standAloneComments:        map[token.Pos]string{},
 		sortedCommentPos:          []token.Pos{},

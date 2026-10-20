@@ -79,7 +79,7 @@ public static void TestNames(ж<testing.T> Ꮡt) {
 internal static @string wrap(@string prefix, @string text, nint width) {
     var doc = Ꮡ(new comment.Doc(Content: new comment.Block[]{new comment.ParagraphжBlock(Ꮡ(new comment.Paragraph(Text: new commentꓸText[]{((comment.Plain)text)}.slice())))}.slice()));
     var pr = Ꮡ(new comment.Printer(TextPrefix: prefix, TextWidth: width));
-    return ((@string)pr.Text(doc));
+    return (@string)pr.Text(doc);
 }
 
 internal static @string formatDesc(ж<testing.T> Ꮡt) {

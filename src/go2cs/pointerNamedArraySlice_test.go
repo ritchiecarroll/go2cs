@@ -90,7 +90,7 @@ func main() {
 }
 
 // TestPointerNamedArraySliceReadsThroughTheBox requires every slice of a pointer to a named array to go through
-// `p.Value`, and the anonymous control to keep `(~p)`.
+// `p.Value`, and the anonymous control to go through golib's pointer-to-array slice methods, `p.slice(…)`.
 func TestPointerNamedArraySliceReadsThroughTheBox(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
@@ -107,8 +107,9 @@ func TestPointerNamedArraySliceReadsThroughTheBox(t *testing.T) {
 		t.Errorf("a slice of a pointer to a named array still dereferences the box (a copy whose lazy backing loses the write):\n%s", named)
 	}
 
-	// CONTROL: an anonymous array has no lazy backing; its dereference stays.
-	if anonymous := funcBody(t, cs, "void anonymous("); !strings.Contains(anonymous, "(~p)[..][2] = 9") {
-		t.Errorf("the anonymous-array control lost its dereference:\n%s", anonymous)
+	// CONTROL: an anonymous array has no lazy backing and is sliced through the box's own slice methods, which
+	// ask for a native window before they dereference (anonymousArrayBoxSlice).
+	if anonymous := funcBody(t, cs, "void anonymous("); !strings.Contains(anonymous, "p.slice()[2] = 9") {
+		t.Errorf("the anonymous-array control is not sliced through the box's slice methods:\n%s", anonymous)
 	}
 }

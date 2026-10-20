@@ -103,7 +103,7 @@ internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) n
     }
     udpReq = tcpReq[2..];
     nint l = len(tcpReq) - 2;
-    tcpReq[0] = (byte)((l >> (int)(8)));
+    tcpReq[0] = (byte)(l >> 8);
     tcpReq[1] = (byte)l;
     return (id, udpReq, tcpReq, default!);
 }
@@ -170,7 +170,7 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
             return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ2);
         }
     }
-    nint l = (nint)(((nint)b[0] << (int)(8)) | (nint)b[1]);
+    nint l = (nint)b[0] << 8 | (nint)b[1];
     if (l > len(b)) {
         b = new slice<byte>(l);
     }
@@ -713,6 +713,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     slice<IPAddr> addrs = default!;
     dnsmessage.Name cname = new();
     ref var conf = ref Ꮡconf.DerefOrNull();
+    var qtypesᴷ = new stackAppend<dnsmessage.Type>();
 
     if (order == hostLookupFilesDNS || order == hostLookupFiles) {
         @string canonical = default!;
@@ -744,7 +745,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     var lane = new channel<goLookupIPCNAMEOrder_result>(1);
     var qtypes = new dnsmessage.Type[]{dnsmessage.TypeA, dnsmessage.TypeAAAA}.slice();
     if (network == "CNAME"u8) {
-        qtypes = append(qtypes, dnsmessage.TypeCNAME);
+        qtypes = append(qtypesᴷ, qtypes, dnsmessage.TypeCNAME);
     }
     switch (ipVersion(network)) {
     case (rune)'4': {

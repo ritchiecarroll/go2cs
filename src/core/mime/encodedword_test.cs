@@ -210,7 +210,7 @@ public static void TestCharsetDecoder(ж<testing.T> Ꮡt) {
                 if (errΔ1 != default!) {
                     Ꮡt.Errorf("DecodeHeader(%q), error in reader: %v"u8, testʗ1.src, errΔ1);
                 }
-                @string gotΔ1 = ((@string)content);
+                @string gotΔ1 = (@string)content;
                 if (gotΔ1 != testʗ1.content[i]) {
                     Ꮡt.Errorf("DecodeHeader(%q), got content %q, want %q"u8, testʗ1.src, gotΔ1, testʗ1.content[i]);
                 }

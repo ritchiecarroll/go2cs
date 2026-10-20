@@ -69,7 +69,7 @@ public static (ж<UnixAddr>, error) ResolveUnixAddr(@string network, @string add
 // UnixConn is an implementation of the [Conn] interface for connections
 // to Unix domain sockets.
 partial struct UnixConn {
-    internal partial ref conn conn { get; }
+    /*embed*/ internal conn conn;
 }
 
 // SyscallConn returns a raw network connection.

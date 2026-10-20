@@ -187,7 +187,7 @@ internal static error /*err*/ connect(this ref Writer w) {
 public static (nint, error) Write(this ж<Writer> Ꮡw, slice<byte> b) {
     ref var w = ref Ꮡw.DerefOrNull();
 
-    return Ꮡw.writeAndRetry(w.priority, ((@string)b));
+    return Ꮡw.writeAndRetry(w.priority, (@string)b);
 }
 
 // Close closes a connection to the syslog daemon.

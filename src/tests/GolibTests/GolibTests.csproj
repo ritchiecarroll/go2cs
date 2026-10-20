@@ -105,6 +105,9 @@
          syscall's windows/ folder. -->
     <Compile Remove="WindowsTokenGroupsTranscriptionTests.cs" />
     <Compile Remove="SyscallGetStartupInfoWindowsTests.cs" />
+    <!-- internal/syscall/windows.QueryPerformanceCounter/Frequency, the two pushes runtime makes into that
+         windows-EXCLUSIVE package: declared nowhere else. -->
+    <Compile Remove="WindowsQueryPerformanceCounterTests.cs" />
 
     <!-- The token door lives in syscall/windows/dll_windows.cs, so SyscallN exists only on this
          flavour. Its REFUSAL arms are host-independent (the door throws in managed code before the
@@ -138,6 +141,10 @@
          folder declares. Same reason and same form as the three above; the syscall reference this
          project already carries needs no change, so only the gate FILE is conditional. -->
     <Compile Remove="WindowsNetDbTranscriptionTests.cs" />
+
+    <!-- The TXT payload pin drives syscall's DnsQuery transcription seam (transcribeDnsRecords) and its
+         DNSTXTData, both declared only in syscall's windows/ folder. Same reason and same form as above. -->
+    <Compile Remove="WindowsDnsTxtPayloadTests.cs" />
 
     <!-- TempDirCleanupOrderTests: ONE of its two arms is windows-only and the file follows that arm.
          EveryCleanupSucceedsWhenAChdirSitsBetweenTempDirCalls guards an ORDER that is

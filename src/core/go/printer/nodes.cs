@@ -864,6 +864,7 @@ internal static readonly object depth1ˢ = (@string)"depth < 1:"u8;
 
 internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var indicesᴷ = new stackAppend<ast.Expr>();
 
     p.setPos(expr.Pos());
 
@@ -1001,7 +1002,7 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         Ꮡp.print(token.LBRACK);
         var indices = new ast.Expr[]{(~x).Low, (~x).High}.slice();
         if ((~x).Max != default!) {
-            indices = append(indices, (~x).Max);
+            indices = append(indicesᴷ, indices, (~x).Max);
         }
         // determine if we need extra blanks around ':'
         bool needsBlanks = default!;

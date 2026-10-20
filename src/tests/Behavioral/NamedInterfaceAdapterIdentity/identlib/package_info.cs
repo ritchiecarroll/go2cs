@@ -49,7 +49,7 @@ using static go.NamedInterfaceAdapterIdentity.identlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAocgoL4gpSUgpS0tg==")]
+[assembly: go.GoPositionMap("lib.go", "lib.cs", "AAocgoKogpSUgpS0tg==")]
 // </GoSourcePositionMaps>
 
 namespace go.NamedInterfaceAdapterIdentity;

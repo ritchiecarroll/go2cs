@@ -15,6 +15,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(stackmap), typeof(specialfinalizer), typeof(specialprofile))]
 partial class runtime_package {
 
 // go2cs generated this placeholder — func runtime_debug_WriteHeapDump is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -107,7 +108,7 @@ internal static void dumpint(uint64 v) {
     ref var buf = ref heap(new array<byte>(10), out var Ꮡbuf);
     nint n = default!;
     while (v >= 0x80) {
-        buf[n] = (byte)((uint64)(v | 0x80));
+        buf[n] = (byte)(v | 0x80);
         n++;
         v >>= (int)(7);
     }
@@ -151,7 +152,7 @@ internal static void dumptype(ж<_type> Ꮡt) {
 
     // If we've definitely serialized the type before,
     // no need to do it again.
-    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((uint32)(t.Hash & (uint32)((typeCacheBuckets - 1)))));
+    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((t.Hash & (uint32)(typeCacheBuckets - 1))));
     if (Ꮡt == (~b).t[0]) {
         return;
     }
@@ -265,7 +266,7 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
     var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
 
     ref var bv = ref heap(new bitvector(), out var Ꮡbv);
-    if (stkmap != nil && (~stkmap).n > 0){
+    if (stkmap != nil && stkmap.n > 0){
         bv = stackmapdata(stkmap, pcdata);
     } else {
         bv.n = -1;
@@ -305,15 +306,15 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
             dumpint((uint64)off);
         }
     } else 
-    if ((~stkmap).n < 0){
+    if (stkmap.n < 0){
         // Locals size information, dump just the locals.
-        var size = (uintptr)(-(~stkmap).n);
+        var size = (uintptr)(-stkmap.n);
         for (var off = s.varp - size - s.sp; off < s.varp - s.sp; off += goarch.PtrSize) {
             dumpint(fieldKindPtr);
             dumpint((uint64)off);
         }
     } else 
-    if ((~stkmap).n > 0) {
+    if (stkmap.n > 0) {
         // Locals bitmap information, scan just the pointers in
         // locals.
         dumpbv(Ꮡbv, s.varp - (uintptr)bv.n * (uintptr)goarch.PtrSize - s.sp);
@@ -426,7 +427,7 @@ internal static void dumpgs() {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ2) { /* default: */
-            print((@string)"runtime: unexpected G.status "u8, ((Δhex)(uint64)status), (@string)"\n"u8);
+            print((@string)"runtime: unexpected G.status "u8, (Δhex)(uint64)status, (@string)"\n"u8);
             @throw(dumpgsInStwBadStatusˢ);
         }
         else if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
@@ -475,8 +476,8 @@ internal static void dumproots() {
                     continue;
                 }
                 var spf = sp.Reinterpret<special, specialfinalizer>();
-                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + (~spf).special.offset);
-                dumpfinalizer(Δp, (~spf).fn, (~spf).fint, (~spf).ot);
+                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + spf.special.offset);
+                dumpfinalizer(Δp, spf.fn, spf.fint, spf.ot);
             }
         }
     }
@@ -502,7 +503,7 @@ internal static void dumpobjs() {
         }
         var Δp = s.@base();
         var size = s.Value.elemsize;
-        var n = (((~s).npages << (int)(gc.PageShift))) / size;
+        var n = ((~s).npages << (int)(gc.PageShift)) / size;
         if (n > (uintptr)len(freemark)) {
             @throw(freemarkArrayDoesnTHaveˢ);
         }
@@ -543,7 +544,7 @@ internal static void dumpparams() {
             if (ha == nil) {
                 continue;
             }
-            var @base = arenaBase((arenaIdx)((((arenaIdx)(nuint)i1) << (int)(arenaL1Shift)) | ((arenaIdx)(nuint)i)));
+            var @base = arenaBase((arenaIdx)(((arenaIdx)(nuint)i1) << (int)(arenaL1Shift) | ((arenaIdx)(nuint)i)));
             if (arenaStart == 0 || @base < arenaStart) {
                 arenaStart = @base;
             }
@@ -681,10 +682,10 @@ internal static void dumpmemprof() {
                 continue;
             }
             var spp = sp.Reinterpret<special, specialprofile>();
-            var Δp = s.@base() + (~spp).special.offset;
+            var Δp = s.@base() + spp.special.offset;
             dumpint(tagAllocSample);
             dumpint((uint64)Δp);
-            dumpint((uint64)(uintptr)(~spp).b);
+            dumpint((uint64)(uintptr)spp.b);
         }
     }
 }
@@ -775,7 +776,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
             }
         }
         var i = (addr - Δp) / (uintptr)goarch.PtrSize;
-        tmpbuf[i / 8] |= (byte)((byte)(1 << (int)((i % 8))));
+        tmpbuf[i / 8] |= (byte)((byte)(1 << (int)(i % 8)));
     }
     return new bitvector((int32)nptr, Ꮡ(tmpbuf, 0));
 }

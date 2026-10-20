@@ -12,13 +12,13 @@ partial struct cx /*num:complex128*/;
 
 internal static void Main() {
     nint n = 0;
-    for (idx cΔ1 = ((idx)0); cΔ1 < ((idx)5); cΔ1++) {
+    for (idx cΔ1 = (idx)0; cΔ1 < ((idx)5); cΔ1++) {
         n++;
     }
     fmt.Println(n);
 
     nint m = 0;
-    for (idx cΔ2 = ((idx)4); cΔ2 > ((idx)0); cΔ2--) {
+    for (idx cΔ2 = (idx)4; cΔ2 > ((idx)0); cΔ2--) {
         m++;
     }
     fmt.Println(m);
@@ -29,7 +29,7 @@ internal static void Main() {
     d--;
     fmt.Println(d == ((sidx)4));
 
-    var c = ((cx)complex(1D, 2D));
+    var c = (cx)complex(1D, 2D);
     c++;
     c--;
     var e = c * ((cx)complex(2D, 0D)) + ((cx)complex(0D, 1D));

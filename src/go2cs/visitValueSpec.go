@@ -518,7 +518,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							// alias conversions go2cs-gen already emits for named types. Identical
 							// spellings take no cast, so the common case stays byte-clean.
 							if base := embedBaseCSTypeName(kind, elementType); base != "" && base != csTypeName {
-								initializer = fmt.Sprintf("(%s)(%s)", csTypeName, initializer)
+								initializer = castOf(csTypeName, initializer)
 							}
 
 							if v.isAddressedGlobal(ident) {
@@ -685,7 +685,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						// same cast back to the declared type as the assignment forms — Go wraps the
 						// arithmetic at the operand width, C# promotes it to int (CS0266 / lost wrap).
 						if narrowCast := v.narrowArithmeticCastTypeFor(def.Type(), valueSpec.Values[i], valExpr); len(narrowCast) > 0 {
-							valExpr = fmt.Sprintf("(%s)(%s)", narrowCast, valExpr)
+							valExpr = castOf(narrowCast, valExpr)
 						}
 
 						// A directional channel var taking a BIDIRECTIONAL value narrows the Go
@@ -993,7 +993,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 
 			if c.Val().Kind() == constant.String && len(valueSpec.Values) >= i+1 {
 				if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok && lit.Kind == token.STRING {
-					constVal = v.convBasicLit(lit, DefaultBasicLitContext())
+					if isPlainStringLiteral(lit) {
+						// A function-local const in plain mode (collectPlainLocalConsts).
+						constVal = v.convBasicLit(lit, plainBasicLitContext())
+					} else {
+						constVal = v.convBasicLit(lit, DefaultBasicLitContext())
+					}
 				} else if s := constant.StringVal(c.Val()); !utf8.ValidString(s) || stringLiteralNeedsByteArray(c.Val().ExactString()) {
 					// A CONCATENATED string const folds to one value here; unlike a single *ast.BasicLit
 					// (handled by convBasicLit's byte-array machinery above) it bypassed that path, so a

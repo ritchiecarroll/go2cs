@@ -32,7 +32,7 @@ internal static float32 randFloat32(ж<rand.Rand> Ꮡrand) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var f = randΔ1.Float64() * (float64)math.MaxFloat32;
-    if ((nint)(randΔ1.Int() & 1) == 1) {
+    if ((randΔ1.Int() & 1) == 1) {
         f = -f;
     }
     return (float32)f;
@@ -43,7 +43,7 @@ internal static float64 randFloat64(ж<rand.Rand> Ꮡrand) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var f = randΔ1.Float64() * (float64)math.MaxFloat64;
-    if ((nint)(randΔ1.Int() & 1) == 1) {
+    if ((randΔ1.Int() & 1) == 1) {
         f = -f;
     }
     return f;
@@ -84,7 +84,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
         var concrete = t;
         var exprᴛ1 = concrete.Kind();
         if (exprᴛ1 == reflect.ΔBool) {
-            v.SetBool((nint)(randΔ1.Int() & 1) == 0);
+            v.SetBool((randΔ1.Int() & 1) == 0);
         }
         else if (exprᴛ1 == reflect.Float32) {
             v.SetFloat((float64)randFloat32(Ꮡrand));
@@ -182,7 +182,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
             for (nint i = 0; i < numChars; i++) {
                 codePoints[i] = (rune)randΔ1.Intn(0x10ffff);
             }
-            v.SetString(((@string)codePoints));
+            v.SetString((@string)codePoints);
         }
         else if (exprᴛ1 == reflect.Struct) {
             nint n = v.NumField();
@@ -263,7 +263,7 @@ internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
 partial struct SetupError /*@string*/;
 
 public static @string Error(this SetupError s) {
-    return ((@string)s);
+    return (@string)s;
 }
 
 // A CheckError is the result of Check finding an error.
@@ -278,7 +278,7 @@ public static @string Error(this ref CheckError s) {
 
 // A CheckEqualError is the result [CheckEqual] finding an error.
 partial struct CheckEqualError {
-    public partial ref CheckError CheckError { get; }
+    /*embed*/ public CheckError CheckError;
     public slice<any> Out1;
     public slice<any> Out2;
 }

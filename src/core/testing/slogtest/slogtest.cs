@@ -270,6 +270,8 @@ internal static slice<testCase> cases = new testCase[]{
 // If a Handler intentionally drops an attribute that is checked by a test,
 // then the results function should check for its absence and add it to the map it returns.
 public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>> results) {
+    var errsᴷ = new stackAppend<error>();
+
     // Run the handler on the test cases.
     foreach (var (_, c) in cases) {
         var ht = h;
@@ -294,7 +296,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
         foreach (var (_, check) in c.checks) {
             {
                 @string problem = check(got); if (problem != ""u8) {
-                    errs = append(errs, fmt.Errorf("%s: %s"u8, problem, c.explanation));
+                    errs = append(errsᴷ, errs, fmt.Errorf("%s: %s"u8, problem, c.explanation));
                 }
             }
         }

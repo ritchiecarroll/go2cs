@@ -75,9 +75,9 @@ public static void CheckRuntimeTimerPeriodOverflow() {
 }
 
 public static global::go.time_package.Time MinMonoTime;
-internal static void initᴛMinMonoTime() { MinMonoTime = new Time(wall: ((uint64)1 << (int)(63)), ext: -9223372036854775808L, loc: ΔUTC); }
+internal static void initᴛMinMonoTime() { MinMonoTime = new Time(wall: ((uint64)1 << 63), ext: -9223372036854775808L, loc: ΔUTC); }
 public static global::go.time_package.Time MaxMonoTime;
-internal static void initᴛMaxMonoTime() { MaxMonoTime = new Time(wall: ((uint64)1 << (int)(63)), ext: 9223372036854775807L, loc: ΔUTC); }
+internal static void initᴛMaxMonoTime() { MaxMonoTime = new Time(wall: ((uint64)1 << 63), ext: 9223372036854775807L, loc: ΔUTC); }
 
 public static global::go.time_package.Time NotMonoNegativeTime = new Time(wall: 0, ext: -9223372036854775758L);
 

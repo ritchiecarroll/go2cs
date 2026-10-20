@@ -37,7 +37,7 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
         }
         defer(Ꮡp.handleTransientRelease, ref ᒐ);
 
-        var (s, e) = syscall.WaitForSingleObject(((syscallꓸHandle)handle), syscall.INFINITE);
+        var (s, e) = syscall.WaitForSingleObject((syscallꓸHandle)handle, syscall.INFINITE);
         var exprᴛ2 = s;
         if (exprᴛ2 == syscall.WAIT_OBJECT_0) {
             do {
@@ -51,12 +51,12 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
             (ps, err) = (default!, errors.New(osUnexpectedResultFromˢ)); goto ᒐdone;
         }
         ref var ec = ref heap(new uint32(), out var Ꮡec);
-        e = syscall.GetExitCodeProcess(((syscallꓸHandle)handle), Ꮡec);
+        e = syscall.GetExitCodeProcess((syscallꓸHandle)handle, Ꮡec);
         if (e != default!) {
             (ps, err) = (default!, NewSyscallError(getExitCodeProcessˢ, e)); goto ᒐdone;
         }
         ref var u = ref heap(new syscall.Rusage(), out var Ꮡu);
-        e = syscall.GetProcessTimes(((syscallꓸHandle)handle), Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
+        e = syscall.GetProcessTimes((syscallꓸHandle)handle, Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
         if (e != default!) {
             (ps, err) = (default!, NewSyscallError(getProcessTimesˢ, e)); goto ᒐdone;
         }
@@ -91,7 +91,7 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
 
         if (AreEqual(sig, ΔKill)) {
             ref var terminationHandle = ref heap(new syscallꓸHandle(), out var ᏑterminationHandle);
-            var e = syscall.DuplicateHandle(~((syscallꓸHandle)((syscallꓸHandle)0)), ((syscallꓸHandle)handle), ~((syscallꓸHandle)((syscallꓸHandle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
+            var e = syscall.DuplicateHandle(~((syscallꓸHandle)((syscallꓸHandle)0)), (syscallꓸHandle)handle, ~((syscallꓸHandle)((syscallꓸHandle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
             if (e != default!) {
                 return NewSyscallError(duplicateHandleˢ, e);
             }
@@ -108,7 +108,7 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
 }
 
 internal static void closeHandle(this ref processHandle ph) {
-    syscall.CloseHandle(((syscallꓸHandle)ph.handle));
+    syscall.CloseHandle((syscallꓸHandle)ph.handle);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -199,7 +199,7 @@ internal static slice<@string> commandLineToArgv(@string cmd) {
         }
         slice<byte> arg = default!;
         (arg, cmd) = readNextArg(cmd);
-        args = append(args, ((@string)arg));
+        args = append(args, (@string)arg);
     }
     return args;
 }
@@ -207,7 +207,7 @@ internal static slice<@string> commandLineToArgv(@string cmd) {
 internal static time.Duration ftToDuration(ж<syscall.Filetime> Ꮡft) {
     ref var ft = ref Ꮡft.DerefOrNull();
 
-    var n = ((int64)ft.HighDateTime << (int)(32)) + (int64)ft.LowDateTime; // in 100-nanosecond intervals
+    var n = ((int64)ft.HighDateTime << 32) + (int64)ft.LowDateTime; // in 100-nanosecond intervals
     return ((time.Duration)(n * 100)) * time.ΔNanosecond;
 }
 

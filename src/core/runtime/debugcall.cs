@@ -13,6 +13,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(debugCallWrapArgs))]
 partial class runtime_package {
 
 internal static readonly @string debugCallSystemStack = "executing on Go runtime stack"u8;
@@ -211,7 +212,7 @@ partial struct debugCallWrapArgs {
 internal static void debugCallWrap1() {
     var gp = getg();
     var args = (ж<debugCallWrapArgs>)(uintptr)((~gp).param);
-    var (dispatch, callingG) = (args.Value.dispatch, args.Value.callingG);
+    var (dispatch, callingG) = (args.dispatch, args.callingG);
     gp.Value.param = default!;
 
     // Dispatch call and trap panics.

@@ -266,33 +266,35 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // "index out of range [0] with length 0"), a filled one as a fabricated reference. A managed root, a
     // field that is not an array, and a layout that cannot be known answer null, so arrayView keeps its
     // route; a reference-bearing element answers null from the shadow kind, which keeps it too.
-    internal override IArray? TryGetNativeArrayView(Type elementType)
+    internal override IArray? TryGetNativeArrayView(Type elementType) =>
+        NativeArrayWindow() is { } window ? window.TryGetNativeArrayView(elementType) : null;
+
+    // The box ж.of hands out for a field of a struct in NATIVE memory, null for any other root: the native window
+    // above for an array field whose Go length is known, else a NativeBox at the field's Go address. So every hop
+    // of a native chain is itself native and addresses Go's layout, never the CLR slot.
+    internal ж<T>? NativeFieldBox() =>
+        ((INativeRooted)this).NativeGoFieldAddress is var address and not 0
+            ? NativeArrayWindow() ?? new NativeBox<T>(address)
+            : null;
+
+    private ж<T>? NativeArrayWindow()
     {
-        if (NativeArrayField.Open is not { } open || ((INativeRooted)this).NativeGoFieldAddress is not (var address and not 0))
+        if (NativeArrayField.Element is not { } element || ((INativeRooted)this).NativeGoFieldAddress is not (var address and not 0))
             return null;
 
         nint length = GoArrayLengthOf(m_source, m_token);
 
-        return length >= 0 ? open(address, length, elementType) : null;
+        // The window is X's registered door (NativeArrayOpeners), compiled only for an [N]X field some compilation
+        // declares, never a generic method closed by reflection (Native AOT has no code for one over a value type).
+        // T is array<X>, so the window IS a ж<T>.
+        return length >= 0 ? (ж<T>)NativeArrayOpeners.OpenArray(element, address, length) : null;
     }
 
-    // The window door per array field type, closed over the element type once: null when T is not array<E>.
+    // X for an array field type T = array<X>, else null: a pure type query, decided once per T.
     private static class NativeArrayField
     {
-        internal static readonly Func<nuint, nint, Type, IArray?>? Open = create();
-
-        private static Func<nuint, nint, Type, IArray?>? create()
-        {
-            if (!typeof(T).IsGenericType || typeof(T).GetGenericTypeDefinition() != typeof(array<>))
-                return null;
-
-            return typeof(NativeArrayField).GetMethod(nameof(open), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
-                .MakeGenericMethod(typeof(T).GetGenericArguments()[0])
-                .CreateDelegate<Func<nuint, nint, Type, IArray?>>();
-        }
-
-        private static IArray? open<TElem>(nuint address, nint length, Type elementType) =>
-            builtin.NativeArrayPointer<TElem>(address, length).TryGetNativeArrayView(elementType);
+        internal static readonly Type? Element =
+            typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>) ? typeof(T).GetGenericArguments()[0] : null;
     }
 
     // A directly declared array field's Go length (its [N]), read from the struct's Go fields: -1 when the
@@ -320,16 +322,17 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // entry records the source type it was resolved for, so it is exact on a match and re-resolved on a
     // mismatch. Resolving reads the field's name off the delegate and slices it, which allocates; the door
     // asks on every call. -1 is "no Go layout", and it is cached too.
-    private static nint GoFieldOffsetOf(object source, Delegate fieldId)
+    internal static nint GoFieldOffsetOf(object source, Delegate fieldId)
     {
         Type sourceType = source.GetType();
 
         if (s_goOffsetsByAccessor.TryGetValue(fieldId, out GoOffset? cached) && ReferenceEquals(cached.SourceType, sourceType))
             return cached.Value;
 
-        nint offset = PointeeTypeOf(source) is { } structType && FieldNameOf(fieldId) is { } fieldName
-            ? s_goFieldDisplacements.GetOrAdd((structType, fieldName), static key => ResolveGoFieldOffset(key.Item1, key.Item2))
-            : -1;
+        nint offset = IsReinterpretAccessor(fieldId) ? 0 :
+            PointeeTypeOf(source) is { } structType && FieldNameOf(fieldId) is { } fieldName
+                ? s_goFieldDisplacements.GetOrAdd((structType, fieldName), static key => ResolveGoFieldOffset(key.Item1, key.Item2))
+                : -1;
 
         s_goOffsetsByAccessor.AddOrUpdate(fieldId, new GoOffset(sourceType, offset));
 
@@ -362,9 +365,31 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // a reference-bearing syscall.Stat_t (every Root Stat/Lstat read size 1000 and mode p---------).
     // A token is refused by the kernel (EFAULT) and carried by the linux keystone's marshal. The
     // repair above is untouched: the TCP dial's Sysfd is reference-free and keeps its address.
+    //
+    // THE SECOND EXCEPTION, a REINTERPRET of a first field (COORD, G design OK 2026-10-17). Go's
+    // `(*byte)(unsafe.Pointer(&rdb.header))` names rdb's own address through its first field, and os_windows_test.go's
+    // createDirLink hands it to DeviceIoControl with a length that runs PAST the header into `detail [16384]byte`. That
+    // root is reference-bearing here (detail is an array<byte>), so the bytes after the header's raw address are the
+    // CLR's image of the struct, not Go's, and windows refused the buffer (ERROR_INVALID_REPARSE_DATA, os TestRootMulti*).
+    // So a reinterpret view that widens at Go offset 0 to a MANAGED root whose CLR layout is provably not Go's
+    // (GoReflect.ClrLayoutMismatch) yet has a deep native image answers None: ж -> uintptr hands out its order token,
+    // which is its root's own number (the reinterpret hop and the first field both sit at Go offset 0, so
+    // uintptr(&rdb.header) == uintptr(&rdb) as in Go), and the windows funnel's deep form copies the whole root at Go's
+    // layout and decodes it back (NativeStructMarshal.WidestAtSameAddress).
+    // Managed reads through the view are untouched; only the number handed out changes. Kept narrow on purpose: a DIRECT
+    // field pointer keeps its raw address (an overlapped word is written by the kernel after the call returns, so it must
+    // stay the caller's memory, never a copy freed at return), as does a root with no native image (the Sysfd repair) and
+    // a reference-free root, whose CLR layout is Go's.
     public override PointerStorage StorageKind =>
-        RuntimeHelpers.IsReferenceOrContainsReferences<T>() || TargetsSharedZeroSizeSlot ? PointerStorage.None :
+        RuntimeHelpers.IsReferenceOrContainsReferences<T>() || TargetsSharedZeroSizeSlot || CrossesAsItsRoot ? PointerStorage.None :
         PinnableStorage is null ? PointerStorage.Unpinnable : PointerStorage.Pinnable;
+
+    // The second exception above. The accessor test comes first, so every other field view pays one delegate read.
+    private bool CrossesAsItsRoot =>
+        IsReinterpretAccessor(m_token) &&
+        NativeStructMarshal.WidestAtSameAddress(this) is var root && !ReferenceEquals(root, this) &&
+        root is not INativeRooted { IsNativeRooted: true } &&
+        PointeeTypeOf(root) is { } rootType && GoReflect.ClrLayoutMismatch(rootType) is not null;
 
     /// <inheritdoc/>
     // Recurse: the source of a nested field ref is a per-call intermediate box, never an
@@ -438,6 +463,9 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
 
     private static nuint ResolveGoFieldDisplacement(object source, Delegate fieldId)
     {
+        if (IsReinterpretAccessor(fieldId))
+            return 0;
+
         Type? structType = PointeeTypeOf(source);
         string? fieldName = FieldNameOf(fieldId);
 
@@ -509,7 +537,7 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // siblings, not a guess about arbitrary delegates.
     private const char PointerFieldAccessorPrefix = 'Ꮡ';
 
-    private static string? FieldNameOf(Delegate fieldId)
+    internal static string? FieldNameOf(Delegate fieldId)
     {
         string name = fieldId.Method.Name;
 
@@ -518,4 +546,17 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
 
         return name.Length > 1 && name[0] == PointerFieldAccessorPrefix ? name[1..] : null;
     }
+
+    // A REINTERPRET view -- Reinterpret's aliasing kind, whose accessor is ж<TSource>.ReinterpretRef<T> -- is its source's
+    // own storage read as another type: `(*U)(unsafe.Pointer(p))` is p's address, so the hop is Go offset 0 whatever the
+    // two types are. Counting it so gives the view its source's order token (one Go address, one number) and lets a
+    // reinterpret of a first field widen to its struct (IFirstFieldView). Every other view resolves its field by name.
+    // The box this view re-reads as T when it is a REINTERPRET view, else null. Reinterpret re-views it rather than this
+    // view, so a chain of pointer conversions stays one view over one box (PointerExtensions.Reinterpret).
+    internal object? ReinterpretRoot => IsReinterpretAccessor(m_token) ? m_source : null;
+
+    // ReinterpretUnaliased's refusing accessor is a reinterpret view too: same address, same root.
+    private static bool IsReinterpretAccessor(Delegate fieldId) =>
+        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef) or nameof(ж<byte>.UnaliasedRef), DeclaringType: { IsGenericType: true } owner } &&
+        owner.GetGenericTypeDefinition() == typeof(ж<>);
 }

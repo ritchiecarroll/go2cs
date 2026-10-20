@@ -11,6 +11,7 @@ using @internal;
 using @internal.runtime;
 using @internal.runtime.syscall;
 
+[GoFieldAccess(typeof(pollOperation))]
 partial class runtime_package {
 
 // Sources are used to identify the event that created an overlapped entry.
@@ -35,12 +36,12 @@ internal static readonly @string runtimeSourceValueIsTooˢ = "runtime: source va
 // Bits that don't fit in the result are discarded.
 internal static uintptr packNetpollKey(uint8 source, ж<pollDesc> Ꮡpd) {
     // TODO: Consider combining the source with pd.fdseq to detect stale pollDescs.
-    if (source > (uint8)(((1 << (int)(sourceBits))) - 1)) {
+    if (source > (uint8)((1 << (int)(sourceBits)) - 1)) {
         // Also fail on 64-bit systems, even though it can hold more bits.
         @throw(runtimeSourceValueIsTooˢ);
     }
     if (goarch.PtrSize == 4) {
-        return (uintptr)(((uintptr)Ꮡpd << (int)(sourceBits)) | (uintptr)source);
+        return (uintptr)((uintptr)Ꮡpd << (int)(sourceBits) | (uintptr)source);
     }
     return (uintptr)(uint64)taggedPointerPack(@unsafe.Pointer.FromPinnedBox(Ꮡpd), (uintptr)source);
 }
@@ -74,9 +75,9 @@ internal static ж<pollOperation> pollOperationFromOverlappedEntry(ref overlappe
     // Check that the key matches the pollDesc pointer.
     bool keyMatch = default!;
     if (goarch.PtrSize == 4){
-        keyMatch = (uintptr)(e.key & ~(uintptr)(uintptr)sourceMasks) == ((uintptr)(~op).pd << (int)(sourceBits));
+        keyMatch = (uintptr)(e.key & ~(uintptr)(uintptr)sourceMasks) == (uintptr)op.pd << (int)(sourceBits);
     } else {
-        keyMatch = (ж<pollDesc>)(uintptr)(((taggedPointer)(uint64)e.key).pointer()) == (~op).pd;
+        keyMatch = (ж<pollDesc>)(uintptr)(((taggedPointer)(uint64)e.key).pointer()) == op.pd;
     }
     if (!keyMatch) {
         return default!;

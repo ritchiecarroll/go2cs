@@ -21,6 +21,14 @@ import (
 )
 
 func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
+	// An array field reached through a local reinterpreted from unsafe.Pointer slices through the field's
+	// view, which is a native window when the struct lies in native memory (see fieldAccess.go).
+	if selectorExpr, ok := ast.Unparen(sliceExpr.X).(*ast.SelectorExpr); ok {
+		if box, ok := v.fieldAccessArrayField(selectorExpr); ok {
+			return v.anonymousArrayBoxSlice(box, sliceExpr)
+		}
+	}
+
 	ident := v.convExpr(sliceExpr.X, nil)
 
 	// A sub-slice of a CONSTRAINED TYPE PARAMETER (`s[lo:hi]` / `s[lo:hi:max]` where s is
@@ -156,14 +164,13 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		return fmt.Sprintf("new slice<%s>(new ReadOnlySpan<%s>((%s*)%s, %s))", ptrType, ptrType, csPtrType, base, length)
 	}
 
-	// A slice of a POINTER-TO-ARRAY (`p[lo:hi:max]`, p of type `*[N]T`) auto-derefs in Go. The
-	// box `ж<array<T>>` has no slice/range members (its underlying `array<T>` does), so operate on
-	// the dereferenced array — `(~p).slice(…)` / `(~p)[..]` — instead of `p.slice(…)` (CS1929). The
+	// A slice of a POINTER-TO-ARRAY (`p[lo:hi:max]`, p of type `*[N]T`) auto-derefs in Go. A NAMED
+	// array's box is sliced through its wrapper, `p.Value`; an ANONYMOUS array's box is sliced through
+	// golib's pointer-to-array slice methods, `p.slice(…)` (see anonymousArrayBoxSlice). The
 	// `(*[N]T)(ptr)` pointer-CAST form is handled by the Span path above (an explicit cast, not a
 	// pointer-to-array value), so it is unaffected. A deref-aliased pointer PARAMETER or RECEIVER is
 	// EXCLUDED: it is emitted as the array value itself (`ref array<T> p` / `ref pageBits b`), which
-	// is sliced directly — a `~` on it would deref a non-pointer (CS0023). Only a pointer-to-array
-	// box (a local, a field, a call result) needs the `~`.
+	// is sliced directly — a `~` on it would deref a non-pointer (CS0023).
 	if xType := v.getType(sliceExpr.X, false); xType != nil {
 		if ptr, ok := xType.Underlying().(*types.Pointer); ok {
 			if _, isArr := ptr.Elem().Underlying().(*types.Array); isArr {
@@ -187,7 +194,7 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
 						ident += ".Value"
 					} else {
-						ident = "(" + PointerDerefOp + ident + ")"
+						return v.anonymousArrayBoxSlice(ident, sliceExpr)
 					}
 				}
 			}
@@ -243,6 +250,48 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 	expr := v.getPrintedNode(sliceExpr)
 	v.showWarning("@convSliceEpr - Failed to convert 'ast.SliceExpr' format %s", expr)
 	return fmt.Sprintf("/* %s */", expr)
+}
+
+// anonymousArrayBoxSlice renders a slice of an ANONYMOUS pointer-to-array box (`p[lo:hi:max]`, p a
+// `*[N]T` local, field or call result) as golib's pointer-to-array slice methods, every form a call:
+//
+//	p[:] => p.slice()    p[lo:] => p.slice(lo)    p[:hi] => p.slice(0, hi)    p[lo:hi] => p.slice(lo, hi)
+//	p[lo:hi:max] => p.slice(lo, hi, max)          p[:hi:max] => p.slice(0, hi, max)
+//
+// The dereference `(~p)` this replaced cannot reach an array in NATIVE memory: Go's `*[N]T` there
+// points at bare elements with no header, so the box has no `array<T>` to return and refuses by name
+// -- os's createMountPoint, `(*[0xffff]uint16)(unsafe.Pointer(&buf.PathBuffer[0]))[:n:n]` over a
+// reparse buffer viewed through unsafe.Pointer. The methods ask the box for its native window first
+// and slice that, checked against the array's length with Go's array texts ("with length"); every
+// other box is dereferenced exactly as before. Each bound is nint at its full value, as the
+// sentinel-free slice methods take it (castWideIntegerToNint), so a constant bound no longer travels
+// as an int Range. A receiver that is not a primary expression (a C# cast, a unary or binary operand)
+// is parenthesized, which the `(~p)` wrapper used to do for it.
+func (v *Visitor) anonymousArrayBoxSlice(ident string, sliceExpr *ast.SliceExpr) string {
+	// A type assertion renders as a postfix call, `x._<ж<array<T>>>()`, already a primary expression.
+	x := ast.Unparen(sliceExpr.X)
+	_, isTypeAssert := x.(*ast.TypeAssertExpr)
+
+	if !isTypeAssert && v.needsParentheses(x) || strings.HasPrefix(ident, "(") && !isFullyParenthesized(ident) {
+		ident = "(" + ident + ")"
+	}
+
+	low := "0"
+
+	if sliceExpr.Low != nil {
+		low = v.castWideIntegerToNint(sliceExpr.Low)
+	}
+
+	switch {
+	case sliceExpr.Slice3:
+		return fmt.Sprintf("%s.slice(%s, %s, %s)", ident, low, v.castWideIntegerToNint(sliceExpr.High), v.castWideIntegerToNint(sliceExpr.Max))
+	case sliceExpr.High != nil:
+		return fmt.Sprintf("%s.slice(%s, %s)", ident, low, v.castWideIntegerToNint(sliceExpr.High))
+	case sliceExpr.Low != nil:
+		return fmt.Sprintf("%s.slice(%s)", ident, low)
+	default:
+		return ident + ".slice()"
+	}
 }
 
 // sliceElemArrayDims answers the element ARRAY dimensions of a slice type, outermost first, or nil
@@ -459,7 +508,7 @@ func (v *Visitor) numericCastOperand(expr ast.Expr, converted, csType string) st
 		return fmt.Sprintf("(%s)(ConvertToUInt64<%s>(%s))", csType, v.getCSharpTypeName(tp), converted)
 	}
 
-	return fmt.Sprintf("(%s)(%s)", csType, converted)
+	return castOf(csType, converted)
 }
 
 func isIntegerLiteral(expr ast.Expr) bool {
@@ -617,6 +666,52 @@ func typeParamIsInteger(tp *types.TypeParam) bool {
 	}
 
 	return found
+}
+
+// typeParamIsNumericWithFloat reports whether every term of the type parameter's constraint type-set has a
+// NUMERIC basic underlying (integer or float) and at least one is a FLOAT (`int | float64`, math/big's
+// calibrate_test csv[T]). A conversion of such a value to a float basic routes through golib's
+// ConvertToFloat64/ConvertToFloat32, the float siblings of ConvertToUInt64; an integer-only set keeps its own
+// route (typeParamIsInteger). Mirrors typeParamIsInteger's walk.
+func typeParamIsNumericWithFloat(tp *types.TypeParam) bool {
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+
+	if !ok {
+		return false
+	}
+
+	hasFloat := false
+
+	numeric := func(t types.Type) bool {
+		basic, ok := t.Underlying().(*types.Basic)
+
+		if !ok || basic.Info()&(types.IsInteger|types.IsFloat) == 0 {
+			return false
+		}
+
+		if basic.Info()&types.IsFloat != 0 {
+			hasFloat = true
+		}
+
+		return true
+	}
+
+	for i := range iface.NumEmbeddeds() {
+		switch et := iface.EmbeddedType(i).(type) {
+		case *types.Union:
+			for j := range et.Len() {
+				if !numeric(et.Term(j).Type()) {
+					return false
+				}
+			}
+		default:
+			if !numeric(et) {
+				return false
+			}
+		}
+	}
+
+	return hasFloat
 }
 
 // typeParamIsStringByteUnion reports whether the type parameter's constraint is exactly Go's

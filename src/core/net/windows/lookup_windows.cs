@@ -27,7 +27,7 @@
 //
 // The six reads take `syscall.DnsRecordPayload<T>` instead: a REAL managed box the DnsQuery
 // hand-own transcribed and anchored, whose pointer fields are genuine boxes over copied names. Every
-// downstream read ((~v).Target, .Port, .NameExchange, .Host, .StringArray, .StringCount) is
+// downstream read (v.Target, .Port, .NameExchange, .Host, .StringArray, .StringCount) is
 // unchanged, because the accessor hands back the same shape the reinterpret was reaching for.
 //
 // RETIREMENT CONDITION: this file and its syscall-side partner retire together when the
@@ -36,7 +36,23 @@
 // of both files becomes sound. At that point this hand-own must be DROPPED, not merged forward: the
 // converter's own emission becomes the correct one.
 
+// FIELD VIEWS (2026-10-17, G's whole-read refusal): every read through a reinterpreted sockaddr or
+// payload pointer names its FIELD -- `.of(T.ᏑAddr).slice()`, `.of(T.ᏑScope_id).Value`, and the
+// go2cs-gen field properties (`a.Port`, `v.Target`) the [GoFieldAccess] record below declares, as the
+// converter's own emission now spells them -- never the whole struct (`.Value.Addr`, `(~a).Port`).
+// Today every such pointer recovers a MANAGED box (GetAddrInfoW and DnsQuery both transcribe), so the
+// whole read was served; but RawSockaddrInet4/6 hold `array<byte>` references where Go stores the
+// address inline, so the same read over NATIVE memory is refused by name, and a field view reads
+// the right bytes either way (GolibTests SockaddrFieldViewTests).
+
 [module: go.GoManualConversion]
+
+// The Go lines of this file's `go` statements, so a goroutine it starts names its creator's Go
+// position in a traceback's "created by" line. Hand-kept: the converter emits no record for a
+// hand-owned file. One table entry per statement, each followed by a zero entry, so every other
+// line of the file still reports its own C# position. repoguard's TestHandOwnedGoStatementsMapToGo
+// checks it.
+[assembly: go.GoPositionMap("net/lookup_windows.go", "lookup_windows.cs", "AHJwAABvAIoByAIAAMcC")]
 
 namespace go;
 
@@ -49,6 +65,7 @@ using time = time_package;
 using @unsafe = unsafe_package;
 using @internal.syscall;
 
+[GoFieldAccess(typeof(syscall.RawSockaddrInet4), typeof(syscall.RawSockaddrInet6), typeof(syscall.DNSSRVData), typeof(syscall.DNSMXData), typeof(syscall.DNSPTRData), typeof(syscall.DNSTXTData))]
 partial class net_package {
 
 // cgoAvailable set to true to indicate that the cgo resolver
@@ -212,13 +229,13 @@ internal static (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.
                 @unsafe.Pointer addr = ((@unsafe.Pointer)(uintptr)((~result).Addr));
                 var exprᴛ1 = (~result).Family;
                 if (exprᴛ1 == syscall.AF_INET) {
-                    var a = ((ж<syscall.RawSockaddrInet4>)(uintptr)(addr)).Value.Addr.Clone();
-                    addrs = append(addrs, new IPAddr(IP: copyIP(a[..])));
+                    var a = ((ж<syscall.RawSockaddrInet4>)(uintptr)(addr)).of(syscall.RawSockaddrInet4.ᏑAddr).slice();
+                    addrs = append(addrs, new IPAddr(IP: copyIP(a)));
                 }
                 else if (exprᴛ1 == syscall.AF_INET6) {
-                    var a = ((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).Value.Addr.Clone();
-                    @string zone = zoneCache.name((nint)((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).Value.Scope_id);
-                    addrs = append(addrs, new IPAddr(IP: copyIP(a[..]), Zone: zone));
+                    var a = ((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).of(syscall.RawSockaddrInet6.ᏑAddr).slice();
+                    @string zone = zoneCache.name((nint)((ж<syscall.RawSockaddrInet6>)(uintptr)(addr)).of(syscall.RawSockaddrInet6.ᏑScope_id).Value);
+                    addrs = append(addrs, new IPAddr(IP: copyIP(a), Zone: zone));
                 }
                 else { /* default: */
                     return (default!, new DNSErrorжerror(newDNSError(syscall.EWINDOWS, name, ""u8)));
@@ -331,11 +348,11 @@ Err: "unknown network"u8, Name: network + "/"u8 + service))));
         var exprᴛ2 = (~result).Family;
         if (exprᴛ2 == syscall.AF_INET) {
             var a = (ж<syscall.RawSockaddrInet4>)(uintptr)(addr);
-            return ((nint)syscall.Ntohs((~a).Port), default!);
+            return ((nint)syscall.Ntohs(a.Port), default!);
         }
         if (exprᴛ2 == syscall.AF_INET6) {
             var a = (ж<syscall.RawSockaddrInet6>)(uintptr)(addr);
-            return ((nint)syscall.Ntohs((~a).Port), default!);
+            return ((nint)syscall.Ntohs(a.Port), default!);
         }
 
         return (0, new DNSErrorжerror(newDNSError(syscall.EINVAL, network + "/"u8 + service, ""u8)));
@@ -417,7 +434,7 @@ internal static (@string, slice<ж<SRV>>, error) lookupSRV(this ж<Resolver> Ꮡ
         var srvs = new slice<ж<SRV>>(0, 10);
         foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_SRV, target)) {
             var v = syscall.DnsRecordPayload<syscall.DNSSRVData>(p);
-            srvs = append(srvs, Ꮡ(new SRV(absDomainName(syscall.UTF16ToString((~array<uint16>.AliasPointer((~v).Target, 256))[..])), (~v).Port, (~v).Priority, (~v).Weight)));
+            srvs = append(srvs, Ꮡ(new SRV(absDomainName(syscall.UTF16ToString((~array<uint16>.AliasPointer(v.Target, 256))[..])), v.Port, v.Priority, v.Weight)));
         }
         ((byPriorityWeight)srvs).sort();
         return (absDomainName(target), srvs, default!);
@@ -448,7 +465,7 @@ internal static (slice<ж<MX>>, error) lookupMX(this ж<Resolver> Ꮡr, context.
         var mxs = new slice<ж<MX>>(0, 10);
         foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_MX, name)) {
             var v = syscall.DnsRecordPayload<syscall.DNSMXData>(p);
-            mxs = append(mxs, Ꮡ(new MX(absDomainName(windows.UTF16PtrToString((~v).NameExchange)), (~v).Preference)));
+            mxs = append(mxs, Ꮡ(new MX(absDomainName(windows.UTF16PtrToString(v.NameExchange)), v.Preference)));
         }
         ((byPref)mxs).sort();
         return (mxs, default!);
@@ -479,7 +496,7 @@ internal static (slice<ж<NS>>, error) lookupNS(this ж<Resolver> Ꮡr, context.
         var nss = new slice<ж<NS>>(0, 10);
         foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_NS, name)) {
             var v = syscall.DnsRecordPayload<syscall.DNSPTRData>(p);
-            nss = append(nss, Ꮡ(new NS(absDomainName(syscall.UTF16ToString((~array<uint16>.AliasPointer((~v).Host, 256))[..])))));
+            nss = append(nss, Ꮡ(new NS(absDomainName(syscall.UTF16ToString((~array<uint16>.AliasPointer(v.Host, 256))[..])))));
         }
         return (nss, default!);
     }
@@ -511,16 +528,14 @@ internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, contex
             var d = syscall.DnsRecordPayload<syscall.DNSTXTData>(p);
             @string s = ""u8;
 
-            // Go walks the union's variable-length `pStringArray[1]` by aliasing a huge window from
-            // &StringArray[0] and re-slicing to StringCount. That idiom cannot survive the managed
-            // payload and must NOT be restored: `Ꮡ(expr)` on a dereferenced value boxes a COPY, so
-            // `array<T>.AliasPointer` finds no element storage (`TryGetElementStorage` fails), takes
-            // its documented raw-address fork, and yields a window of capacity ZERO -- which panics
-            // as `slice bounds out of range [::1] with capacity 0` the moment StringCount is 1. The
-            // transcription already allocated exactly StringCount elements, so the count IS the
-            // length here and a direct index is both simpler and the only correct form.
-            for (nint i = 0; i < (~d).StringCount; i++) {
-                s += windows.UTF16PtrToString((~d).StringArray[i]);
+            // Go's own spelling: a huge window aliased from &StringArray[0], re-sliced to StringCount.
+            // `d.at(field, 0)` is the element's pointer through the field view, never `Ꮡ` of a dereferenced
+            // copy, so the window aliases the payload's own elements: over the managed transcription,
+            // AliasPointer's managed window (clamped to the StringCount elements it holds); over a record
+            // read NATIVE, golib's foreign pointer array, which reads exactly the StringCount words the
+            // slice spans (G's ruling, 2026-10-19; GolibTests WindowsDnsTxtPayloadTests pins both).
+            foreach (var (_, v) in array<ж<uint16>>.AliasPointer(d.at(syscall.DNSTXTData.ᏑStringArray, 0), 1024).slice(0, d.StringCount, d.StringCount)) {
+                s += windows.UTF16PtrToString(v);
             }
             txts = append(txts, s);
         }
@@ -558,7 +573,7 @@ internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, conte
         var ptrs = new slice<@string>(0, 10);
         foreach (var (_, p) in validRecs(rec, syscall.DNS_TYPE_PTR, arpa)) {
             var v = syscall.DnsRecordPayload<syscall.DNSPTRData>(p);
-            ptrs = append(ptrs, absDomainName(windows.UTF16PtrToString((~v).Host)));
+            ptrs = append(ptrs, absDomainName(windows.UTF16PtrToString(v.Host)));
         }
         return (ptrs, default!);
     }

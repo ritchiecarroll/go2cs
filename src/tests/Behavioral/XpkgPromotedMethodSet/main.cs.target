@@ -12,6 +12,7 @@ using testing = testing_package;
 using time = time_package;
 using inner = XpkgPromotedInnerLib_package;
 using mid = XpkgPromotedMidLib_package;
+using System.Runtime.InteropServices;
 using XpkgPromotedInnerLib = XpkgPromotedInnerLib_package;
 using XpkgPromotedMidLib = XpkgPromotedMidLib_package;
 using encoding;
@@ -20,15 +21,15 @@ using ꓸꓸꓸany = Span<any>;
 partial class main_package {
 
 partial struct Direct {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct PtrDirect {
-    public partial ref ж<XpkgPromotedInnerLib_package.Inner> Inner { get; }
+    /*embed*/ public ж<XpkgPromotedInnerLib_package.Inner> Inner;
 }
 
 partial struct Outer {
-    public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
 }
 
 partial struct loc {
@@ -38,67 +39,67 @@ internal static inner.Token Tok(this loc _) {
     return new inner.Token(N: 7);
 }
 
-partial struct Five {
-    public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
-    internal partial ref loc loc { get; }
+[StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Five {
+    [FieldOffset(0)] /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
+    [FieldOffset(8)] /*embed*/ internal readonly loc loc;
 }
 
 partial struct local {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct GCounter {
-    internal partial ref local local { get; }
-    public partial ref XpkgPromotedMidLib_package.Mid Mid { get; }
+    /*embed*/ internal local local;
+    /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
 }
 
 partial struct local2 {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
-partial struct S6 {
-    internal partial ref loc loc { get; }
-    internal partial ref local2 local2 { get; }
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct S6 {
+    [FieldOffset(0)] /*embed*/ internal readonly loc loc;
+    [FieldOffset(0)] /*embed*/ internal local2 local2;
 }
 
 partial struct Within {
-    public partial ref XpkgPromotedMidLib_package.Mid2 Mid2 { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.Mid2 Mid2;
 }
 
 partial struct Shadow {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
     public nint Tok;
 }
 
 partial struct localMid {
-    public partial ref XpkgPromotedInnerLib_package.Inner Inner { get; }
+    /*embed*/ public XpkgPromotedInnerLib_package.Inner Inner;
 }
 
 partial struct Mixed {
-    internal partial ref localMid localMid { get; }
+    /*embed*/ internal localMid localMid;
 }
 
 public static nint Name = 0;
 
 partial struct brokenState {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
 }
 
 partial struct Broken {
     /*embed*/ public io_package.Reader Reader;
-    internal partial ref ж<brokenState> brokenState { get; }
+    /*embed*/ internal ж<brokenState> brokenState;
 }
 
 partial struct Stamp {
-    public partial ref time_package.Time Time { get; }
+    /*embed*/ public time_package.Time Time;
 }
 
 partial struct PtrStamp {
-    public partial ref ж<time_package.Time> Time { get; }
+    /*embed*/ public ж<time_package.Time> Time;
 }
 
 partial struct BufP {
-    public partial ref ж<bytes_package.Buffer> Buffer { get; }
+    /*embed*/ public ж<bytes_package.Buffer> Buffer;
 }
 
 partial struct deepTok {
@@ -109,41 +110,43 @@ internal static inner.Token Tok(this deepTok _) {
 }
 
 partial struct localTok {
-    internal partial ref deepTok deepTok { get; }
+    /*embed*/ internal deepTok deepTok;
 }
 
-partial struct OuterS5 {
-    public partial ref XpkgPromotedMidLib_package.Mid3 Mid3 { get; }
-    internal partial ref localTok localTok { get; }
+[StructLayout(LayoutKind.Explicit, Size = 16)] partial struct OuterS5 {
+    [FieldOffset(0)] /*embed*/ public XpkgPromotedMidLib_package.Mid3 Mid3;
+    [FieldOffset(8)] /*embed*/ internal readonly localTok localTok;
 }
 
 partial struct OuterFD {
-    public partial ref XpkgPromotedMidLib_package.MidF MidF { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.MidF MidF;
 }
 
 partial struct OuterFS {
-    public partial ref XpkgPromotedMidLib_package.PS PS { get; }
+    /*embed*/ public XpkgPromotedMidLib_package.PS PS;
 }
 
 partial struct TT {
-    public partial ref ж<testing_package.T> T { get; }
+    /*embed*/ public ж<testing_package.T> T;
 }
 
 partial struct HideC {
-    public partial ref bytes_package.Buffer Buffer { get; }
+    /*embed*/ public bytes_package.Buffer Buffer;
     /*embed*/ public io_package.WriterTo WriterTo;
 }
 
 internal static @string methods(reflectꓸType t) {
+    var namesᴷ = new stackAppend<@string>();
+
     slice<@string> names = default!;
 
     for (nint i = 0; i < t.NumMethod(); i++) {
-        names = append(names, t.Method(i).Name);
+        names = append(namesᴷ, names, t.Method(i).Name);
     }
 
     sort.Strings(names);
 
-    return fmt.Sprintf("%d [%s]"u8, t.NumMethod(), strings.Join(names, " "u8));
+    return fmt.Sprintf("%d [%s]"u8, t.NumMethod(), strings.Join(names, " "));
 }
 
 internal static void report(@string label, any v) {
@@ -169,50 +172,6 @@ internal static void probe(@string label, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string directˢ = "Direct"u8;
-private static readonly @string ptrDirectˢ = "PtrDirect"u8;
-private static readonly @string outerˢ = "Outer"u8;
-private static readonly @string fiveˢ = "Five"u8;
-private static readonly @string gCounterˢ = "GCounter"u8;
-private static readonly @string withinˢ = "Within"u8;
-private static readonly @string shadowˢ = "Shadow"u8;
-private static readonly @string mixedˢ = "Mixed"u8;
-private static readonly @string brokenˢ = "Broken"u8;
-private static readonly @string stampˢ = "Stamp"u8;
-private static readonly @string ptrStampˢ = "PtrStamp"u8;
-private static readonly @string bufPˢ = "BufP"u8;
-private static readonly @string hideCˢ = "HideC"u8;
-private static readonly @string outerS5ˢ = "OuterS5"u8;
-private static readonly @string outerFDˢ = "OuterFD"u8;
-private static readonly @string outerFSˢ = "OuterFS"u8;
-private static readonly @string s5DispatchTokˢ = "S5 dispatch Tok"u8;
-private static readonly @string ttValueHasErrorˢ = "TT value has Error"u8;
-private static readonly object fiveTokNˢ = (@string)"Five Tok N:"u8;
-private static readonly object s6TokNˢ = (@string)"S6 Tok N:"u8;
-private static readonly object stampValueIsJsonˢ = (@string)"Stamp value is json.Unmarshaler:"u8;
-private static readonly object stampIsJsonUnmarshalerˢ = (@string)"*Stamp is json.Unmarshaler:"u8;
-private static readonly object ptrStampValueIsJsonˢ = (@string)"PtrStamp value is json.Unmarshaler:"u8;
-private static readonly @string setˢ = "Set"u8;
-private static readonly object directValueMethodByNameˢ = (@string)"Direct value MethodByName Set:"u8;
-private static readonly object ptrDirectValueˢ = (@string)"PtrDirect value MethodByName Set:"u8;
-private static readonly object brokenValueIsSyncLockerˢ = (@string)"Broken value is sync.Locker:"u8;
-private static readonly object nameVarˢ = (@string)"Name var:"u8;
-private static readonly @string whereDirectCallˢ = "Where direct call"u8;
-private static readonly @string whereViaAssertDirectˢ = "Where via assert Direct"u8;
-private static readonly @string whereViaAssertOuterˢ = "Where via assert Outer"u8;
-private static readonly object directAfterSetThroughˢ = (@string)"Direct after Set through *Direct:"u8;
-private static readonly object ptrDirectAfterSetThroughˢ = (@string)"PtrDirect after Set through the value:"u8;
-private static readonly @string samePValueMethodsˢ = "SameP value methods"u8;
-private static readonly @string samePPtrMethodsˢ = "SameP ptr methods"u8;
-private static readonly @string sameVValueMethodsˢ = "SameV value methods"u8;
-private static readonly @string sameVPtrMethodsˢ = "SameV ptr methods"u8;
-private static readonly @string samePValueMethod0Callˢ = "SameP value Method(0) call"u8;
-private static readonly @string samePValueAssertCallPingˢ = "SameP value assert+call Ping"u8;
-private static readonly @string notSatisfiedˢ = "not satisfied"u8;
-private static readonly @string sameVValueAssertPingˢ = "SameV value assert Ping"u8;
-private static readonly @string sameVAssertCallPingˢ = "*SameV assert+call Ping"u8;
-
 internal partial interface main_type /*dyn*/ {
     inner.Token Tok();
 }
@@ -234,27 +193,27 @@ internal partial interface main_typeᴛ4 /*dyn*/ {
 }
 
 internal static void Main() {
-    report(directˢ, new Direct(nil));
-    report(ptrDirectˢ, new PtrDirect(nil));
-    report(outerˢ, new Outer(nil));
-    report(fiveˢ, new Five(nil));
-    report(gCounterˢ, new GCounter(nil));
-    report("S6"u8, new S6(nil));
-    report(withinˢ, new Within(nil));
-    report(shadowˢ, new Shadow(nil));
-    report(mixedˢ, new Mixed(nil));
-    report(brokenˢ, new Broken(nil));
-    report(stampˢ, new Stamp(nil));
-    report(ptrStampˢ, new PtrStamp(nil));
-    report(bufPˢ, new BufP(nil));
-    report(hideCˢ, new HideC(nil));
-    report(outerS5ˢ, new OuterS5(nil));
-    report(outerFDˢ, new OuterFD(nil));
-    report(outerFSˢ, new OuterFS(nil));
-    report("TT"u8, new TT(nil));
+    report("Direct", new Direct(nil));
+    report("PtrDirect", new PtrDirect(nil));
+    report("Outer", new Outer(nil));
+    report("Five", new Five(nil));
+    report("GCounter", new GCounter(nil));
+    report("S6", new S6(nil));
+    report("Within", new Within(nil));
+    report("Shadow", new Shadow(nil));
+    report("Mixed", new Mixed(nil));
+    report("Broken", new Broken(nil));
+    report("Stamp", new Stamp(nil));
+    report("PtrStamp", new PtrStamp(nil));
+    report("BufP", new BufP(nil));
+    report("HideC", new HideC(nil));
+    report("OuterS5", new OuterS5(nil));
+    report("OuterFD", new OuterFD(nil));
+    report("OuterFS", new OuterFS(nil));
+    report("TT", new TT(nil));
 
-    probe(s5DispatchTokˢ, () => fmt.Sprint(((any)new OuterS5(nil))._<main_type>().Tok().N));
-    probe(ttValueHasErrorˢ, () => {
+    probe("S5 dispatch Tok", () => fmt.Sprint(((any)new OuterS5(nil))._<main_type>().Tok().N));
+    probe("TT value has Error", () => {
         var (_, okΔ1) = ((any)new TT(nil))._<main_typeᴛ1>(ᐧ);
         return fmt.Sprint(okΔ1);
     });
@@ -265,7 +224,7 @@ internal static void Main() {
 
     {
         var (t, okΔ2) = f._<main_type>(ᐧ); if (okΔ2) {
-            fmt.Println(fiveTokNˢ, t.Tok().N);
+            fmt.Println("Five Tok N:", t.Tok().N);
         }
     }
 
@@ -273,62 +232,62 @@ internal static void Main() {
 
     {
         var (t, okΔ3) = s6._<main_type>(ᐧ); if (okΔ3) {
-            fmt.Println(s6TokNˢ, t.Tok().N);
+            fmt.Println("S6 Tok N:", t.Tok().N);
         }
     }
 
     var (_, ok) = ((any)new Stamp(nil))._<json.Unmarshaler>(ᐧ);
-    fmt.Println(stampValueIsJsonˢ, ok);
+    fmt.Println("Stamp value is json.Unmarshaler:", ok);
     (_, ok) = ((any)(Ꮡ(new Stamp(nil))))._<json.Unmarshaler>(ᐧ);
-    fmt.Println(stampIsJsonUnmarshalerˢ, ok);
+    fmt.Println("*Stamp is json.Unmarshaler:", ok);
     (_, ok) = ((any)new PtrStamp(nil))._<json.Unmarshaler>(ᐧ);
-    fmt.Println(ptrStampValueIsJsonˢ, ok);
-    (_, ok) = reflect.TypeOf(new Direct(nil)).MethodByName(setˢ);
-    fmt.Println(directValueMethodByNameˢ, ok);
-    (_, ok) = reflect.TypeOf(new PtrDirect(nil)).MethodByName(setˢ);
-    fmt.Println(ptrDirectValueˢ, ok);
+    fmt.Println("PtrStamp value is json.Unmarshaler:", ok);
+    (_, ok) = reflect.TypeOf(new Direct(nil)).MethodByName("Set");
+    fmt.Println("Direct value MethodByName Set:", ok);
+    (_, ok) = reflect.TypeOf(new PtrDirect(nil)).MethodByName("Set");
+    fmt.Println("PtrDirect value MethodByName Set:", ok);
 
     any l = new Broken(nil);
     (_, ok) = l._<Δsync.Locker>(ᐧ);
-    fmt.Println(brokenValueIsSyncLockerˢ, ok);
-    fmt.Println(nameVarˢ, Name);
+    fmt.Println("Broken value is sync.Locker:", ok);
+    fmt.Println("Name var:", Name);
 
-    probe(whereDirectCallˢ, () => fmt.Sprint(new Direct(nil).Inner.Where()));
-    probe(whereViaAssertDirectˢ, () => fmt.Sprint(((any)new Direct(nil))._<main_typeᴛ2>().Where()));
-    probe(whereViaAssertOuterˢ, () => fmt.Sprint(((any)new Outer(nil))._<main_typeᴛ2>().Where()));
+    probe("Where direct call", () => fmt.Sprint(new Direct(nil).Inner.Where()));
+    probe("Where via assert Direct", () => fmt.Sprint(((any)new Direct(nil))._<main_typeᴛ2>().Where()));
+    probe("Where via assert Outer", () => fmt.Sprint(((any)new Outer(nil))._<main_typeᴛ2>().Where()));
 
     var d = Ꮡ(new Direct(nil));
     ((any)d.OrTypedNil())._<main_typeᴛ3>().Set(4);
-    fmt.Println(directAfterSetThroughˢ, (~d).X);
+    fmt.Println("Direct after Set through *Direct:", (~d).X);
 
     var pd = new PtrDirect(Ꮡ(new inner.Inner(nil)));
     ((any)pd)._<main_typeᴛ3>().Set(6);
-    fmt.Println(ptrDirectAfterSetThroughˢ, pd.X);
+    fmt.Println("PtrDirect after Set through the value:", pd.X);
 
-    probe(samePValueMethodsˢ, () => methods(reflect.TypeOf(mid.NewSameP())));
-    probe(samePPtrMethodsˢ, () => methods(reflect.TypeOf(Ꮡ(new mid.SameP(nil)))));
-    probe(sameVValueMethodsˢ, () => methods(reflect.TypeOf(new mid.SameV(nil))));
-    probe(sameVPtrMethodsˢ, () => methods(reflect.TypeOf(Ꮡ(new mid.SameV(nil)))));
-    probe(samePValueMethod0Callˢ, () => fmt.Sprint(reflect.ValueOf(mid.NewSameP()).Method(0).Call(default!)[0].Int()));
-    probe(samePValueAssertCallPingˢ, () => {
+    probe("SameP value methods", () => methods(reflect.TypeOf(mid.NewSameP())));
+    probe("SameP ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameP(nil)))));
+    probe("SameV value methods", () => methods(reflect.TypeOf(new mid.SameV(nil))));
+    probe("SameV ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameV(nil)))));
+    probe("SameP value Method(0) call", () => fmt.Sprint(reflect.ValueOf(mid.NewSameP()).Method(0).Call(default!)[0].Int()));
+    probe("SameP value assert+call Ping", () => {
         var (p, okΔ4) = ((any)mid.NewSameP())._<main_typeᴛ4>(ᐧ);
 
         if (!okΔ4) {
-            return notSatisfiedˢ;
+            return "not satisfied";
         }
 
         return fmt.Sprint(p.Ping());
     });
-    probe(sameVValueAssertPingˢ, () => {
+    probe("SameV value assert Ping", () => {
         var (_, okΔ5) = ((any)new mid.SameV(nil))._<main_typeᴛ4>(ᐧ);
 
         return fmt.Sprint(okΔ5);
     });
-    probe(sameVAssertCallPingˢ, () => {
+    probe("*SameV assert+call Ping", () => {
         var (p, okΔ6) = ((any)(Ꮡ(new mid.SameV(nil))))._<main_typeᴛ4>(ᐧ);
 
         if (!okΔ6) {
-            return notSatisfiedˢ;
+            return "not satisfied";
         }
 
         return fmt.Sprint(p.Ping());

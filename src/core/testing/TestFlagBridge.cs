@@ -213,7 +213,7 @@ internal static class TestFlagBridge
         registrar.Duration("test.timeout", options.Timeout, "panic test binary after duration `d` (default 0, timeout disabled)");
         registrar.String("test.cpu", "", "comma-separated `list` of cpu counts to run each test with");
         registrar.Int("test.parallel", options.Parallel, "run at most `n` tests in parallel");
-        registrar.String("test.testlogfile", "", "write test action log to `file` (for use only by cmd/go)");
+        registrar.String("test.testlogfile", options.TestLogFile ?? "", "write test action log to `file` (for use only by cmd/go)");
         registrar.String("test.shuffle", options.ShuffleValue, "randomize the execution order of tests and benchmarks");
         registrar.Bool("test.fullpath", false, "show full file names in error messages");
 

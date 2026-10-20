@@ -18,7 +18,7 @@ partial class mlkem_internal_test_package {
 public static void TestFieldReduce(ж<testing.T> Ꮡt) {
     for (var a = (uint32)0; a < (uint32)(2 * q * q); a++) {
         var got = fieldReduce(a);
-        var exp = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)(a % (uint32)q));
+        var exp = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)(a % (uint32)q);
         if (got != exp) {
             Ꮡt.Fatalf("reduce(%d) = %d, expected %d"u8, a, got, exp);
         }
@@ -26,8 +26,8 @@ public static void TestFieldReduce(ж<testing.T> Ꮡt) {
 }
 
 public static void TestFieldAdd(ж<testing.T> Ꮡt) {
-    for (var a = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0); a < q; a++) {
-        for (var b = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0); b < q; b++) {
+    for (var a = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0; a < q; a++) {
+        for (var b = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0; b < q; b++) {
             var got = fieldAdd(a, b);
             var exp = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)((a + b) % (uint16)q);
             if (got != exp) {
@@ -38,8 +38,8 @@ public static void TestFieldAdd(ж<testing.T> Ꮡt) {
 }
 
 public static void TestFieldSub(ж<testing.T> Ꮡt) {
-    for (var a = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0); a < q; a++) {
-        for (var b = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0); b < q; b++) {
+    for (var a = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0; a < q; a++) {
+        for (var b = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0; b < q; b++) {
             var got = fieldSub(a, b);
             var exp = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)((a - b + (uint16)q) % (uint16)q);
             if (got != exp) {
@@ -50,10 +50,10 @@ public static void TestFieldSub(ж<testing.T> Ꮡt) {
 }
 
 public static void TestFieldMul(ж<testing.T> Ꮡt) {
-    for (var a = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0); a < q; a++) {
-        for (var b = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0); b < q; b++) {
+    for (var a = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0; a < q; a++) {
+        for (var b = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0; b < q; b++) {
             var got = fieldMul(a, b);
-            var exp = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)(((uint32)(uint16)a * (uint32)(uint16)b) % (uint32)q));
+            var exp = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)(((uint32)(uint16)a * (uint32)(uint16)b) % (uint32)q);
             if (got != exp) {
                 Ꮡt.Fatalf("%d * %d = %d, expected %d"u8, a, b, got, exp);
             }
@@ -74,7 +74,7 @@ public static void TestDecompressCompress(ж<testing.T> Ꮡt) {
             }
         }
 
-        for (var a = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0); a < q; a++) {
+        for (var a = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0; a < q; a++) {
             var c = compress(a, bits);
             if (c >= (uint16)(((uint16)1).Lsh((uint64)(bits)))) {
                 Ꮡt.Fatalf("compress(%d, %d) = %d >= 2^bits"u8, a, bits, c);
@@ -114,8 +114,8 @@ internal static uint16 CompressRat(global::go.crypto.@internal.fips140.mlkem_pac
 public static void TestCompress(ж<testing.T> Ꮡt) {
     for (nint d = 1; d < 12; d++) {
         for (nint n = 0; n < q; n++) {
-            var expected = CompressRat(((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)n), (uint8)d);
-            var result = compress(((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)n), (uint8)d);
+            var expected = CompressRat((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)n, (uint8)d);
+            var result = compress((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)n, (uint8)d);
             if (result != expected) {
                 Ꮡt.Errorf("compress(%d, %d): got %d, expected %d"u8, n, d, result, expected);
             }
@@ -141,7 +141,7 @@ internal static global::go.crypto.@internal.fips140.mlkem_package.fieldElement D
     }
 
     // If we rounded up, `rounded` may be equal to q, so we perform a final reduction.
-    return ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)(rounded % (int64)q));
+    return (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)(rounded % (int64)q);
 }
 
 public static void TestDecompress(ж<testing.T> Ꮡt) {
@@ -159,7 +159,7 @@ public static void TestDecompress(ж<testing.T> Ꮡt) {
 internal static global::go.crypto.@internal.fips140.mlkem_package.ringElement randomRingElement() {
     global::go.crypto.@internal.fips140.mlkem_package.ringElement r = default!;
     foreach (var (i, _) in r) {
-        r[i] = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)mathrand.IntN(q));
+        r[i] = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)mathrand.IntN(q);
     }
     return r.Clone();
 }
@@ -232,17 +232,17 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
 }
 
 public static uint8 BitRev7(uint8 n) {
-    if ((uint8)((n >> (int)(7))) != 0) {
+    if ((uint8)((n >> 7)) != 0) {
         throw panic("not 7 bits");
     }
     uint8 r = default!;
-    r |= (uint8)((uint8)((n >> (int)(6)) & 0b0000_0001));
-    r |= (uint8)((uint8)((n >> (int)(4)) & 0b0000_0010));
-    r |= (uint8)((uint8)((n >> (int)(2)) & 0b0000_0100));
+    r |= (uint8)((uint8)(n >> 6 & 0b0000_0001));
+    r |= (uint8)((uint8)(n >> 4 & 0b0000_0010));
+    r |= (uint8)((uint8)(n >> 2 & 0b0000_0100));
     r |= (uint8)((uint8)(n /**/ & 0b0000_1000));
-    r |= (uint8)((uint8)((uint8)(n << (int)(2)) & 0b0001_0000));
-    r |= (uint8)((uint8)((uint8)(n << (int)(4)) & 0b0010_0000));
-    r |= (uint8)((uint8)((uint8)(n << (int)(6)) & 0b0100_0000));
+    r |= (uint8)((uint8)((uint8)(n << 2) & 0b0001_0000));
+    r |= (uint8)((uint8)((uint8)(n << 4) & 0b0010_0000));
+    r |= (uint8)((uint8)((uint8)(n << 6) & 0b0100_0000));
     return r;
 }
 

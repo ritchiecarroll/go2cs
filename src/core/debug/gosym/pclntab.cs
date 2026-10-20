@@ -234,8 +234,8 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
         // The magic numbers are chosen such that reading the value with
         // a different endianness does not result in the same value.
         // That lets us the magic number to determine the endianness.
-        var leMagic = ((abi.PCLnTabMagic)binary.LittleEndian.Uint32(t.Data));
-        var beMagic = ((abi.PCLnTabMagic)binary.BigEndian.Uint32(t.Data));
+        var leMagic = (abi.PCLnTabMagic)binary.LittleEndian.Uint32(t.Data);
+        var beMagic = (abi.PCLnTabMagic)binary.BigEndian.Uint32(t.Data);
 
         switch (ᐧ) {
         case {} when leMagic == abi.Go12PCLnTabMagic: {
@@ -394,7 +394,7 @@ internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) {
     for (shift = 0; ᐧ ; shift += 7) {
         var b = p[0];
         p = p[1..];
-        v |= (uint32)(((uint32)((uint32)b & 0x7F)).Lsh((uint64)(shift)));
+        v |= (uint32)(((uint32)b & 0x7F).Lsh((uint64)(shift)));
         if ((byte)(b & 0x80) == 0) {
             break;
         }
@@ -411,7 +411,7 @@ internal static @string funcName(this ref LineTable t, uint32 off) {
         }
     }
     nint i = bytes.IndexByte(t.funcnametab.slice((nint)(off)), 0);
-    @string s = ((@string)(t.funcnametab.slice((nint)(off), (nint)(off + (uint32)i))));
+    @string s = (@string)(t.funcnametab.slice((nint)(off), (nint)(off + (uint32)i)));
     t.funcNames[off] = s;
     return s;
 }
@@ -424,7 +424,7 @@ internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32
         }
     }
     nint i = bytes.IndexByte(arr.slice((nint)(off)), 0);
-    @string s = ((@string)(arr.slice((nint)(off), (nint)(off + (uint32)i))));
+    @string s = (@string)(arr.slice((nint)(off), (nint)(off + (uint32)i)));
     t.strings[off] = s;
     return s;
 }
@@ -452,7 +452,7 @@ internal static ΔfuncTab funcTab(this ж<LineTable> Ꮡt) {
 // funcTab is memory corresponding to a slice of functab structs, followed by an invalid PC.
 // A functab struct is a PC and a func offset.
 partial struct ΔfuncTab {
-    public partial ref ж<LineTable> LineTable { get; }
+    /*embed*/ public ж<LineTable> LineTable;
     internal nint sz; // cached result of t.functabFieldSize
 }
 
@@ -561,8 +561,8 @@ internal static bool step(this ref LineTable t, ж<slice<byte>> Ꮡp, ж<uint64>
     if (uvdelta == 0 && !first) {
         return false;
     }
-    if ((uint32)(uvdelta & 1) != 0){
-        uvdelta = ~((uvdelta >> (int)(1)));
+    if ((uvdelta & 1) != 0){
+        uvdelta = ~(uvdelta >> 1);
     } else {
         uvdelta >>= (int)(1);
     }

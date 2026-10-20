@@ -175,6 +175,8 @@ internal static void initMime() {
 //
 // Text types have the charset parameter set to "utf-8" by default.
 public static @string TypeByExtension(@string ext) {
+    var lowerᴷ = new stackAppend<byte>();
+
     Ꮡonce.Do(initMime);
 
     // Case-sensitive lookup.
@@ -199,12 +201,12 @@ public static @string TypeByExtension(@string ext) {
             return sΔ1;
         }
         if ((rune)'A' <= c && c <= (rune)'Z'){
-            lower = append(lower, (byte)(c + ((rune)'a' - (rune)'A')));
+            lower = append(lowerᴷ, lower, (byte)(c + ((rune)'a' - (rune)'A')));
         } else {
             lower = append(lower, c);
         }
     }
-    var (si, _) = ᏑmimeTypesLower.Load(((@string)lower));
+    var (si, _) = ᏑmimeTypesLower.Load((@string)lower);
     var (s, _) = si._<@string>(ᐧ);
     return s;
 }

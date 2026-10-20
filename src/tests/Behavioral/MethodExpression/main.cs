@@ -44,7 +44,7 @@ internal static void Main() {
 
     var sh = new shifter(delta: 2);
     var shʗ1 = sh;
-    fmt.Println(((@string)mapRunes((rune p1) => shʗ1.shift(p1), slice<rune>((@string)"AB"))));
+    fmt.Println((@string)mapRunes((rune p1) => shʗ1.shift(p1), slice<rune>((@string)"AB")));
 }
 
 partial struct shifter {

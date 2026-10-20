@@ -354,6 +354,12 @@ func (v *Visitor) typeParamZero(t types.Type) string {
 		return ""
 	}
 
+	// A type parameter that carries an array-dims companion builds its zero from the dims the call
+	// site supplied, since an array type argument's length is not in its C# type (arrayDimsCompanion.go).
+	if companion := v.arrayDimsCompanionFor(t); companion != "" {
+		return fmt.Sprintf("GoArrayZero.Of<%s, %s>()", v.getCSharpTypeName(t), companion)
+	}
+
 	return fmt.Sprintf("GoZero<%s>()", v.getCSharpTypeName(t))
 }
 

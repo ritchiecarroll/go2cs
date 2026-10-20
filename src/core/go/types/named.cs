@@ -300,7 +300,7 @@ internal static void setState(this ж<Named> Ꮡn, stateMask m) {
     atomic.OrUint32(Ꮡn.of(Named.Ꮡstate_), (uint32)m);
     // verify state transitions
     if (debug) {
-        var mΔ1 = ((stateMask)atomic.LoadUint32(Ꮡn.of(Named.Ꮡstate_)));
+        var mΔ1 = (stateMask)atomic.LoadUint32(Ꮡn.of(Named.Ꮡstate_));
         var u = (stateMask)(mΔ1 & unpacked) != 0;
         // unpacked => lazyLoaded
         if (u) {
@@ -674,6 +674,8 @@ public static @string String(this ж<Named> Ꮡt) {
 // any, they were broken (by setting the respective types to invalid) during
 // the directCycles check phase.
 internal static void resolveUnderlying(this ж<Named> Ꮡn) {
+    var pathᴷ = new stackAppend<ж<Named>>();
+
     assert(Ꮡn.stateHas(unpacked));
 
     map<ж<Named>, bool> seen = default!;                            // for debugging only
@@ -708,7 +710,7 @@ internal static void resolveUnderlying(this ж<Named> Ꮡn) {
             if (debug) {
                 seen[t] = true;
             }
-            path = append(path, t);
+            path = append(pathᴷ, path, t);
 
             t.unpack();
             assert(t.rhs() != default! || (~t).allowNilRHS);

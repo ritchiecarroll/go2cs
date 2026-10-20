@@ -212,7 +212,7 @@ partial struct splicePipeFields {
 }
 
 partial struct splicePipe {
-    internal partial ref splicePipeFields splicePipeFields { get; }
+    /*embed*/ internal splicePipeFields splicePipeFields;
     internal Δruntime.Cleanup cleanup;
 }
 

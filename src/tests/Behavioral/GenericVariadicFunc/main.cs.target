@@ -42,13 +42,13 @@ public static T Or<T>(params Span<T> valsʗp) {
 }
 
 internal static void Main() {
-    fmt.Println(First(10, 20, 30));
+    fmt.Println(First<nint>(10, 20, 30));
     fmt.Println(First(1.5D, 2.5D));
-    fmt.Println(Count(1, 2, 3, 4));
+    fmt.Println(Count<nint>(1, 2, 3, 4));
     fmt.Println(DeferredCount((@string)"x", (@string)"y"));
 
-    @string s1 = "go"u8;
-    @string s2 = "2cs"u8;
+    @string s1 = "go";
+    @string s2 = "2cs";
     fmt.Println(First(s1, s2));
 
     fmt.Println(First((@string)"A", (@string)"B", (@string)"C"));

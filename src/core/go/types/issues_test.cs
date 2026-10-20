@@ -14,7 +14,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using static global::go.go.types_package;
-using constant = global::go.go.constant_package;
 using global::go.@internal;
 using global::go.go;
 using io = io_package;
@@ -882,7 +881,7 @@ public static void TestIssue51093(ж<testing.T> Ꮡt) {
         }
 
         if (n != 1) {
-            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)(1));
+            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)1);
         }
     }
 }

@@ -142,3 +142,112 @@ func main() {
 		t.Errorf("the call site no longer instantiates AsType at the box ж<MyErr>:\n%s", cs)
 	}
 }
+
+// A callee in ANOTHER FILE or PACKAGE is asked over its own syntax and types.Info (genericFuncSource):
+// errors_test's testAsType[E compError] calling errors.AsType[E] kept `where E : compError`, and every
+// ж<fs.PathError> type argument was CS0311, while that callee counted as unseen. CONTROL: a cross-package
+// callee that uses E as an error (lib.Describe) still makes its caller keep the clause.
+func TestMethodSetConstraintFollowsACalleeInAnotherFileOrPackage(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/msxpkg\n\ngo 1.24\n")
+	writeModuleFile(t, filepath.Join(appDir, "lib", "lib.go"), `package lib
+
+func AsType[E error](err error) (E, bool) {
+	var zero E
+	if e, ok := err.(E); ok {
+		return e, true
+	}
+	return zero, false
+}
+
+func Describe[E error](e E) string { return e.Error() }
+`)
+	writeModuleFile(t, filepath.Join(appDir, "other.go"), `package main
+
+func otherFileAs[E error](err error) (E, bool) {
+	var zero E
+	if e, ok := err.(E); ok {
+		return e, true
+	}
+	return zero, false
+}
+`)
+	writeModuleFile(t, filepath.Join(appDir, "main.go"), `package main
+
+import (
+	"fmt"
+
+	"example.com/msxpkg/lib"
+)
+
+type MyErr struct{ code int }
+
+func (e *MyErr) Error() string { return fmt.Sprint("code ", e.code) }
+
+func viaPackage[E error](err error) (E, bool) { return lib.AsType[E](err) }
+
+func viaOtherFile[E error](err error) (E, bool) { return otherFileAs[E](err) }
+
+func describeVia[E error](e E) string { return lib.Describe(e) }
+
+func main() {
+	var err error = &MyErr{7}
+	m, ok := viaPackage[*MyErr](err)
+	n, _ := viaOtherFile[*MyErr](err)
+	fmt.Println(m.code, ok, n.code, describeVia(m))
+}
+`)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	cs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "msxpkg", "main.cs"))
+
+	clause := func(function string) string {
+		match := regexp.MustCompile(`(?s)` + function + `<E>\([^)]*\)\s*(where E : [^\r\n{]*)?\s*\{`).FindStringSubmatch(cs)
+
+		if match == nil {
+			t.Fatalf("the fixture no longer emits %s<E>:\n%s", function, cs)
+		}
+
+		return match[1]
+	}
+
+	for _, function := range []string{"viaPackage", "viaOtherFile"} {
+		if got := clause(function); got != "" {
+			t.Errorf("%s<E> keeps a C# constraint its callee never needs (a pointer type argument cannot satisfy it): %q", function, got)
+		}
+	}
+
+	if got := clause("describeVia"); got != "where E : error" {
+		t.Errorf("CONTROL: describeVia<E> instantiates a cross-package callee that uses E as an error and must keep `where E : error`, got %q", got)
+	}
+}

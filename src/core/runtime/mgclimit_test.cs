@@ -97,7 +97,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         // And here we want n=procs:
         var factor = (1D / (1D - 2D * runtime_internal_test_package.GCBackgroundUtilization));
         var fill = (2 * time.Millisecond + 1 * time.Microsecond) * (int64)procs;
-        l.Update(advance(((time.Duration)(int64)(factor * (float64)(int64)(fill - (int64)procs) / (float64)procs))));
+        l.Update(advance((time.Duration)(int64)(factor * (float64)(int64)(fill - (int64)procs) / (float64)procs)));
         if (l.Fill() != procs) {
             Ꮡt.Fatalf("expected fill %d cpu-ns from draining after a GC started, got fill of %d cpu-ns"u8, (nint)(procs), l.Fill());
         }

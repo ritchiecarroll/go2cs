@@ -54,7 +54,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
 
         // decode any base64 encoded test files
         if (strings.HasPrefix(de.Name(), base64ˢ)) {
-            (b, errΔ2) = base64.StdEncoding.DecodeString(((@string)b));
+            (b, errΔ2) = base64.StdEncoding.DecodeString((@string)b);
             if (errΔ2 != default!) {
                 Ꮡf.Fatalf("failed to decode base64 testdata: %s"u8, errΔ2);
             }

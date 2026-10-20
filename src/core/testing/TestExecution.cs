@@ -142,11 +142,28 @@ public sealed class TestExecution
     private bool m_ctxCanceled;
     private bool m_parallel;
     private bool m_denyParallel;
-    private bool m_holdsParallelSlot;
+    // 1 while this test holds a -parallel slot. An int for Interlocked, because two threads can give it back:
+    // the test's own (Execute's finally) and the watchdog's (Abandon). Exactly one of them releases it.
+    private int m_holdsParallelSlot;
     private bool m_finished;
     private bool m_failed;
     private bool m_skipped;
     private bool m_measurementUnitNoted;
+
+    // The per-test watchdog's claim (TestRunner.WaitBounded; DESIGN-object-lifetime-disclosure.md OQ-L3(b)).
+    // Abandon sets it together with m_finished, under m_syncRoot, and reports this test's verdict for it.
+    // The CLR cannot stop the test's thread, so the body may still run, call t.Fail or t.Log, start
+    // subtests or finish; every path that would report, fail or log for it afterwards reads this flag and
+    // does nothing. Go's test was still running there, so none of Go's after-completion panics apply.
+    private bool m_abandoned;
+
+    // When the test body last started RUNNING, as a Stopwatch timestamp: in Execute, and again when a
+    // parallel test resumes holding its -parallel slot. Zero until then. The per-test deadline counts from
+    // here, so a parallel test queued behind -parallel is never charged for its wait.
+    private long m_runningSince;
+
+    // Every subtest started under this test, for Abandon: a child still in flight is abandoned with it.
+    private readonly List<TestExecution> m_children = [];
 
     internal TestExecution(TestRunner runner, string name, TestExecution? parent, string source, int line, TestRunner.NestedRoot? nestedRoot = null)
     {
@@ -156,7 +173,106 @@ public sealed class TestExecution
         Source = source;
         Line = line;
         NestedRoot = nestedRoot ?? parent?.NestedRoot;
+        parent?.AddChild(this);
     }
+
+    private void AddChild(TestExecution child)
+    {
+        lock (m_syncRoot)
+            m_children.Add(child);
+    }
+
+    /// <summary>Whether the per-test watchdog abandoned this test (see <see cref="Abandon"/>).</summary>
+    internal bool Abandoned { get { lock (m_syncRoot) return m_abandoned; } }
+
+    /// <summary>
+    /// When the test body last started running (a <see cref="Stopwatch"/> timestamp), or 0 while it has not:
+    /// a parallel test parked at its serial-phase gate, or waiting for a <c>-parallel</c> slot, is not running.
+    /// </summary>
+    internal long RunningSince => Interlocked.Read(ref m_runningSince);
+
+    /// <summary>
+    /// The per-test watchdog's verdict: this test, and every subtest of it still in flight, did not finish
+    /// within the deadline. Reports each as <c>fail</c> marked <see cref="TestEvent.Abandoned"/>, a subtest
+    /// before its parent as Go orders them, and counts the failure. Returns false, and reports nothing,
+    /// when the test has already claimed its own terminal event.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The claim is the one <see cref="RecordGoroutinePanic"/> and Execute's <c>finally</c> already make:
+    /// whichever sets <c>m_finished</c> first under <c>m_syncRoot</c> reports the verdict, and the other
+    /// reports nothing. So a test that finishes in the same instant the deadline expires is reported once.
+    /// </para>
+    /// <para>
+    /// The test's thread keeps running; the CLR has no thread abort. Its goroutines are background
+    /// threads, so they cannot hold the process at exit, but they can hold a lock or a global a later test
+    /// needs. That is what <see cref="TestEvent.AfterAbandoned"/> on every later event makes visible.
+    /// </para>
+    /// </remarks>
+    internal bool Abandon(TimeSpan deadline) => AbandonClaimed(deadline, null);
+
+    private bool AbandonClaimed(TimeSpan deadline, string? abandonedWith)
+    {
+        string message = abandonedWith is null
+            ? $"testing: {Name} did not finish within the per-test deadline ({FormatDeadline(deadline)}); the go2cs test host failed it and went on, and its goroutines may still be running"
+            : $"testing: {Name} was still running when {abandonedWith} was abandoned at the per-test deadline ({FormatDeadline(deadline)})";
+
+        double elapsed;
+        TestExecution[] children;
+
+        lock (m_syncRoot)
+        {
+            if (m_finished)
+                return false;
+
+            m_finished = true;
+            m_failed = true;
+            m_abandoned = true;
+            AppendLog(message, terminal: true);
+            children = m_children.ToArray();
+        }
+
+        // The cascade tag first, before ANY verdict of this abandon is reported: an event another parallel test
+        // reports while the subtests below are being abandoned already ran beside an abandoned test, and must
+        // carry the tag (G's review). Only the root names itself; MarkAbandoned keeps the first test it is given.
+        if (abandonedWith is null)
+            m_runner.MarkAbandoned(Name);
+
+        ReleaseParallelSlotOnce();
+
+        long since = RunningSince;
+        elapsed = since == 0 ? 0.0D : Stopwatch.GetElapsedTime(since).TotalSeconds;
+
+        // Go reports a subtest's verdict before its parent's.
+        foreach (TestExecution child in children)
+            child.AbandonClaimed(deadline, abandonedWith ?? Name);
+
+        string? output;
+        IReadOnlyList<string>? records;
+        int? dropped;
+
+        lock (m_syncRoot)
+        {
+            output = LogOutput();
+            (records, dropped) = LogRecords("fail");
+        }
+
+        m_parent?.FailFromChild();
+
+        if (!m_isSynctest)
+        {
+            ReportEvent(new TestEvent(m_runner.Package, Name, "fail", elapsed, output, Source, Line, records, dropped, Abandoned: true));
+            m_runner.Completed(this);
+        }
+
+        return true;
+    }
+
+    // Go's time.Duration.String() spelling for whole units, which is how the pipeline passes the deadline.
+    private static string FormatDeadline(TimeSpan deadline) =>
+        deadline.TotalMinutes >= 1.0D && deadline.TotalMinutes == Math.Floor(deadline.TotalMinutes)
+            ? $"{(int)deadline.TotalMinutes}m"
+            : $"{deadline.TotalSeconds.ToString(CultureInfo.InvariantCulture)}s";
 
     internal TestRunner Runner => m_runner;
 
@@ -363,6 +479,14 @@ public sealed class TestExecution
         }
     }
 
+    // Gives this test's -parallel slot back if it still holds one. An abandoned parallel test's thread may never
+    // finish, so Abandon returns its slot; without that, the parallel tests queued behind it never run.
+    private void ReleaseParallelSlotOnce()
+    {
+        if (Interlocked.Exchange(ref m_holdsParallelSlot, 0) == 1)
+            m_runner.ReleaseParallelSlot(NestedRoot);
+    }
+
     internal void Wait() => Completion.GetAwaiter().GetResult();
 
     internal void ReleaseParallel() => m_parallelGate.Set();
@@ -409,7 +533,14 @@ public sealed class TestExecution
         lock (m_syncRoot)
         {
             if (m_finished)
+            {
+                // The watchdog already failed it, and Go's test was still running: no after-completion panic.
+                if (m_abandoned)
+                    return;
+
                 throw builtin.panic(FailAfterCompleteText(Name));
+            }
+
             m_failed = true;
         }
     }
@@ -642,6 +773,10 @@ public sealed class TestExecution
                 return;
             }
 
+            // An abandoned test's late record has no verdict left to join (see m_abandoned).
+            if (m_abandoned)
+                return;
+
             // Child lock, then ancestor locks, outermost-first — the same order FailFromChild takes
             // and the same order Go takes, so this walk cannot invert against either.
             for (TestExecution? ancestor = m_parent; ancestor is not null; ancestor = ancestor.m_parent)
@@ -843,7 +978,14 @@ public sealed class TestExecution
             // A cleanup registered after the test completed can never run (the cleanup phase is
             // already over) — reject it instead of silently dropping it. Go panics here too.
             if (m_finished)
+            {
+                // An abandoned test still running registers into a phase that already ran: drop it.
+                if (m_abandoned)
+                    return;
+
                 throw new InvalidOperationException($"Cleanup called after {Name} completed");
+            }
+
             m_cleanups.Push(cleanup);
         }
     }
@@ -976,18 +1118,47 @@ public sealed class TestExecution
                 throw builtin.panic(ParallelConflictText);
             m_parallel = true;
         }
+
+        // Parked at the serial-phase gate the test is not running, so its per-test deadline stops until it
+        // resumes below. Without this the parked time, which is every later serial test's, would count.
+        Interlocked.Exchange(ref m_runningSince, 0);
         ParallelSource.TrySetResult();
         m_parallelGate.Wait();
 
         // Released from the serial-phase gate; now compete for a -parallel slot so at most
         // Options.Parallel parallel tests RUN simultaneously (Go's -parallel semantics).
+        BeforeParallelSlotForGuard?.Invoke(this);
         m_runner.AcquireParallelSlot(NestedRoot);
-        m_holdsParallelSlot = true;
+        Volatile.Write(ref m_holdsParallelSlot, 1);
+
+        // The per-test deadline restarts here: the time parked at the gate and queued for a slot is not the test's.
+        Interlocked.Exchange(ref m_runningSince, Stopwatch.GetTimestamp());
 
         // Go's parallelStart.Add(1): counted here, once the test is released and holds its slot
         // (testing.go:1805, right after t.tstate.waitParallel()), not when Parallel is called.
         Interlocked.Increment(ref s_parallelStart);
+
+        // ABANDONED WHILE QUEUED for the slot (G's review, BLOCKING): the watchdog abandoned this test while it
+        // waited above, and its Exchange found no slot to give back, so the slot just taken would be held by a
+        // body nobody waits for, and every parallel test queued behind it would wait forever. Give it back and
+        // leave without running the body, as FailNow leaves. Abandon sets the flag under m_syncRoot BEFORE its
+        // own Exchange, so in every order exactly one side releases. parallelStart was counted above and
+        // Execute's finally counts parallelStop, so the pair still balances (AllocsPerRun reads it).
+        if (Abandoned)
+        {
+            ReleaseParallelSlotOnce();
+            GoexitException.MarkGoroutineExiting();
+            throw new TestAbortException();
+        }
     }
+
+    /// <summary>
+    /// GUARD SEAM (GolibTests' TestHostWatchdogTests): runs on the test's own thread after it leaves the
+    /// serial-phase gate and before it queues for a <c>-parallel</c> slot, so an arm can hold a test there
+    /// until the watchdog has abandoned it. That interleaving is a race no test body can force. Null in
+    /// every real run.
+    /// </summary>
+    internal static Action<TestExecution>? BeforeParallelSlotForGuard { get; set; }
 
     // Go's process-wide parallel accounting (testing.go:429-430). AllocsPerRun panics while they
     // differ (allocs.go:21), so each is incremented exactly where Go increments it: parallelStart in
@@ -1418,10 +1589,12 @@ public sealed class TestExecution
         AbandonRuntimeLocks(ex);
         string message = $"unhandled exception on a goroutine started by {Name}: {ex}";
         bool completed;
+        bool abandoned;
 
         lock (m_syncRoot)
         {
             completed = m_finished;
+            abandoned = m_abandoned;
 
             if (!completed)
             {
@@ -1429,6 +1602,11 @@ public sealed class TestExecution
                 AppendLog(message);
             }
         }
+
+        // The watchdog's verdict stands: an event naming the test here would replace it as the
+        // comparison's terminal status for this test.
+        if (abandoned)
+            return;
 
         if (completed)
         {
@@ -1459,10 +1637,12 @@ public sealed class TestExecution
         string output;
         IReadOnlyList<string>? records;
         int? dropped;
+        bool abandoned;
 
         lock (m_syncRoot)
         {
             completed = m_finished;
+            abandoned = m_abandoned;
 
             if (!completed)
             {
@@ -1476,6 +1656,10 @@ public sealed class TestExecution
             output = LogOutput();
             (records, dropped) = LogRecords("fail");
         }
+
+        // The watchdog reported this test already; the runner's package event still says the binary died.
+        if (abandoned)
+            return;
 
         if (completed)
         {
@@ -1565,6 +1749,7 @@ public sealed class TestExecution
         m_ownerThread = Environment.CurrentManagedThreadId;
         m_ownerGoroutine = Goroutine.Current;
         s_current.Value = this;
+        Interlocked.Exchange(ref m_runningSince, Stopwatch.GetTimestamp());
 
         // A synctest child is not a subtest: Go's t.Run prints === RUN, and testingSynctestTest does not.
         if (!m_isSynctest)
@@ -1613,11 +1798,7 @@ public sealed class TestExecution
             // Give the -parallel slot back BEFORE waiting on parallel children (Go's ordering):
             // a parallel parent that held its slot while waiting would deadlock its own children
             // under a small -parallel cap.
-            if (m_holdsParallelSlot)
-            {
-                m_holdsParallelSlot = false;
-                m_runner.ReleaseParallelSlot(NestedRoot);
-            }
+            ReleaseParallelSlotOnce();
 
             // ONE snapshot for both passes: a child added between them would be released and
             // never waited for, which is the lost-child half of the race above.
@@ -1645,8 +1826,15 @@ public sealed class TestExecution
                     node.FlushPartialOutputLocked();
             }
 
+            // The claim Abandon also makes: if the watchdog reported this test first, its verdict stands and
+            // this late finish reports nothing and is not counted again.
+            bool abandoned;
+
             lock (m_syncRoot)
+            {
+                abandoned = m_abandoned;
                 m_finished = true;
+            }
 
             string terminal = InfrastructureFailed ? "infrastructure-error" : Failed ? "fail" : Skipped ? "skip" : "pass";
             string? output;
@@ -1661,7 +1849,7 @@ public sealed class TestExecution
 
             // Go's report: `if t.isSynctest { return // t.parent will handle reporting }`. The child's
             // failure already reached the parent through Fail, and its log records through Log.
-            if (!m_isSynctest)
+            if (!m_isSynctest && !abandoned)
                 ReportEvent(new TestEvent(m_runner.Package, Name, terminal, timer.Elapsed.TotalSeconds, output, Source, Line, records, dropped));
 
             // Go's parallelStop.Add(1) (testing.go:1949): after the cleanups and the parallel subtests,
@@ -1675,7 +1863,7 @@ public sealed class TestExecution
             if (wasParallel)
                 Interlocked.Increment(ref s_parallelStop);
 
-            if (!m_isSynctest)
+            if (!m_isSynctest && !abandoned)
                 m_runner.Completed(this);
         }
     }

@@ -1632,12 +1632,12 @@ func TestNestedSiblingTestdataIsStaged(t *testing.T) {
 	// F7: a nested fixture is a conversion INPUT, so adding one invalidates a prior comparison
 	// exactly as a top-level testdata file does.
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, out, options, "converter")
+	first, err := testInputDigest(dir, out, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	write("internal/oldtrace/testdata/http_1_19_good", "trace\n")
-	second, err := testInputDigest(dir, out, options, "converter")
+	second, err := testInputDigest(dir, out, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2906,14 +2906,14 @@ func TestInputDigestDetectsSourceChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, dir, options, "converter")
+	first, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(source, []byte("package value\nvar changed = true\n"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	second, err := testInputDigest(dir, dir, options, "converter")
+	second, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2930,7 +2930,7 @@ func TestInputDigestDetectsNewTestdataFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 	options := Options{targetPlatform: "windows/amd64"}
-	first, err := testInputDigest(dir, dir, options, "converter")
+	first, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2942,7 +2942,7 @@ func TestInputDigestDetectsNewTestdataFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	second, err := testInputDigest(dir, dir, options, "converter")
+	second, err := testInputDigest(dir, dir, options, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2958,11 +2958,11 @@ func TestInputDigestDetectsConversionOptionChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	first, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: true}, "converter")
+	first, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: true}, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: false}, "converter")
+	second, err := testInputDigest(dir, dir, Options{targetPlatform: "windows/amd64", useChannelOperators: false}, "converter", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -3723,6 +3723,41 @@ func TestMergedStaleGoImplementSpellingCollapses(t *testing.T) {
 	}
 	if !strings.Contains(contents, "[assembly: GoImplement<IntHeap, Interface>(Pointer = true)]") {
 		t.Fatalf("the surviving record must be the bare-spelling pointer form:\n%s", contents)
+	}
+}
+
+// A1 guard (COORD ruling 2026-10-16): a PRODUCTION pointer implementer of an interface declared in
+// the external test package itself anchors test-side. The pointer adapter is a class in the test
+// compilation, so it mutates no production type and the reference model can host it. crypto/mlkem at Go
+// 1.26 is the instance: *DecapsulationKey768 against mlkem_test's decapsulationKey[E encapsulationKey];
+// crypto/ecdh's lifted test-local _ᴛ1/_ᴛ2 are the same shape. Production-anchored before, these records
+// forced the recompile fallback. The controls keep the production anchor: the universe's error (bare, but
+// not the test package's), a qualified interface, a qualified generic interface, and the VALUE form,
+// whose generated partial struct must merge with the production declaration.
+func TestExternalVariantTestLocalInterfaceAnchorsTestSide(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	cases := []struct {
+		iface string
+		impl  string
+		want  bool
+	}{
+		{"decapsulationKey<encapsulationKey>", PointerPrefix + "<value_package.DecapKey>", true},            // test-local generic
+		{"decapsulationKey<encapsulationKey>", PointerPrefix + "<global::go.value_package.DecapKey>", true}, // rooted implementer
+		{"_ᴛ2", PointerPrefix + "<go.value_package.PrivateKey>", true},                                      // lifted test-local
+		{"encapsulationKey", PointerPrefix + "<value_package.EncapKey>", true},                              // test-local, non-generic
+		{"error", PointerPrefix + "<value_package.Builder>", false},                                         // universe error
+		{"io.Writer", PointerPrefix + "<value_package.Builder>", false},                                     // qualified interface
+		{"iter_package.Seq<int>", PointerPrefix + "<value_package.Builder>", false},                         // qualified generic
+		{"decapsulationKey<encapsulationKey>", "value_package.DecapKey", false},                             // value form
+	}
+
+	for _, testCase := range cases {
+		if got := isTestAnchoredImplementRecord(testCase.iface, testCase.impl, "value_package", false); got != testCase.want {
+			t.Errorf("isTestAnchoredImplementRecord(%q, %q) = %v, want %v", testCase.iface, testCase.impl, got, testCase.want)
+		}
 	}
 }
 

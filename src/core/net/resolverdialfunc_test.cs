@@ -178,7 +178,7 @@ public static void SetTTL(this ResponseWriter w, uint32 seconds) {
 }
 
 public partial struct AWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 public static void AddIP(this AWriter w, /*[4]*/ array<byte> v4) {
@@ -192,7 +192,7 @@ public static void AddIP(this AWriter w, /*[4]*/ array<byte> v4) {
 }
 
 public partial struct AAAAWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 public static void AddIP(this AAAAWriter w, /*[16]*/ array<byte> v6) {
@@ -206,7 +206,7 @@ public static void AddIP(this AAAAWriter w, /*[16]*/ array<byte> v6) {
 }
 
 public partial struct SRVWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 // AddSRV adds a SRV record. The target name must end in a period and
@@ -279,7 +279,7 @@ internal static (nint n, error err) Write(this ж<resolverFuncConn> Ꮡa, slice<
     if (len(packet) < 2) {
         return (0, fmt.Errorf("short write of %d bytes; want 2+"u8, len(packet)));
     }
-    nint reqLen = (nint)(((nint)packet[0] << (int)(8)) | (nint)packet[1]);
+    nint reqLen = (nint)packet[0] << 8 | (nint)packet[1];
     var req = packet[2..];
     if (len(req) != reqLen) {
         return (0, fmt.Errorf("packet declared length %d doesn't match body length %d"u8, reqLen, len(req)));
@@ -345,7 +345,7 @@ internal static (nint n, error err) Write(this ж<resolverFuncConn> Ꮡa, slice<
     }
 
     n = len(tcpRes) - 2;
-    tcpRes[0] = (byte)((n >> (int)(8)));
+    tcpRes[0] = (byte)(n >> 8);
     tcpRes[1] = (byte)n;
     a.rbuf.Write(tcpRes[2..]);
 

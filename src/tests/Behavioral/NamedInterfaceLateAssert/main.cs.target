@@ -9,14 +9,11 @@ partial class main_package {
 partial struct dirLike /*@string*/;
 
 internal static @string Name(this dirLike d) {
-    return ((@string)d);
+    return (@string)d;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string dirˢ = "dir"u8;
-
 internal static @string Kind(this dirLike d) {
-    return dirˢ;
+    return "dir";
 }
 
 internal static @string Detail(this dirLike d, @string prefix) {
@@ -35,11 +32,8 @@ internal static @string Name(this partial p) {
     return p.n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string partialˢ = "partial"u8;
-
 internal static @string Kind(this partial p) {
-    return partialˢ;
+    return "partial";
 }
 
 internal static void report(@string label, @string s, bool ok) {
@@ -48,46 +42,37 @@ internal static void report(@string label, @string s, bool ok) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string rootˢ = "root"u8;
-private static readonly @string topDirLikeˢ = "Top-dirLike    "u8;
-private static readonly @string midDirLikeˢ = "Mid-dirLike    "u8;
-private static readonly @string baseDirLikeˢ = "Base-dirLike   "u8;
-private static readonly @string quietDirLikeˢ = "quiet-dirLike  "u8;
-private static readonly @string topPtrDirLikeˢ = "Top-ptrDirLike "u8;
-private static readonly @string quietPtrDirˢ = "quiet-ptrDir   "u8;
-private static readonly @string topPartialˢ = "Top-partial    "u8;
-private static readonly @string midPartialˢ = "Mid-partial    "u8;
-private static readonly @string quietPartialˢ = "quiet-partial  "u8;
 
 internal static void Main() {
     ref var d = ref heap(new dirLike(), out var Ꮡd);
     d = rootˢ;
 
     var (s, ok) = latelib.TryTop(d);
-    report(topDirLikeˢ, s, ok);
+    report("Top-dirLike    ", s, ok);
 
     (s, ok) = latelib.TryMid(d);
-    report(midDirLikeˢ, s, ok);
+    report("Mid-dirLike    ", s, ok);
 
     (s, ok) = latelib.TryBase(d);
-    report(baseDirLikeˢ, s, ok);
+    report("Base-dirLike   ", s, ok);
 
     (s, ok) = latelib.TryQuiet(d);
-    report(quietDirLikeˢ, s, ok);
+    report("quiet-dirLike  ", s, ok);
 
     (s, ok) = latelib.TryTop(Ꮡd);
-    report(topPtrDirLikeˢ, s, ok);
+    report("Top-ptrDirLike ", s, ok);
 
     (s, ok) = latelib.TryQuiet(Ꮡd);
-    report(quietPtrDirˢ, s, ok);
+    report("quiet-ptrDir   ", s, ok);
 
-    (s, ok) = latelib.TryTop(new partial(n: "p"u8));
-    report(topPartialˢ, s, ok);
+    (s, ok) = latelib.TryTop(new partial(n: "p"));
+    report("Top-partial    ", s, ok);
 
-    (s, ok) = latelib.TryMid(new partial(n: "p"u8));
-    report(midPartialˢ, s, ok);
+    (s, ok) = latelib.TryMid(new partial(n: "p"));
+    report("Mid-partial    ", s, ok);
 
-    (s, ok) = latelib.TryQuiet(new partial(n: "p"u8));
-    report(quietPartialˢ, s, ok);
+    (s, ok) = latelib.TryQuiet(new partial(n: "p"));
+    report("quiet-partial  ", s, ok);
 }
 
 } // end main_package

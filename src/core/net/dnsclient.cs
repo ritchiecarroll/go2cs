@@ -20,7 +20,7 @@ partial class net_package {
 internal static partial uint64 runtime_rand();
 
 internal static nint randInt() {
-    return (nint)(((nuint)runtime_rand() >> (int)(1))); // clear sign bit
+    return (nint)((nuint)runtime_rand() >> 1); // clear sign bit
 }
 
 internal static nint randIntn(nint n) {
@@ -31,6 +31,8 @@ internal static nint randIntn(nint n) {
 // address addr suitable for rDNS (PTR) record lookup or an error if it fails
 // to parse the IP address.
 internal static (@string arpa, error err) reverseaddr(@string addr) {
+    var bufᴷ = new stackAppend<byte>();
+
     var ip = ParseIP(addr);
     if (ip == default!) {
         return ("", new DNSErrorжerror(Ꮡ(new DNSError(Err: "unrecognized address"u8, Name: addr))));
@@ -43,14 +45,14 @@ internal static (@string arpa, error err) reverseaddr(@string addr) {
     // Add it, in reverse, to the buffer
     for (nint i = len(ip) - 1; i >= 0; i--) {
         var v = ip[i];
-        buf = append(buf, hexDigit[(byte)(v & 0xF)],
+        buf = append(bufᴷ, buf, hexDigit[(byte)(v & 0xF)],
             (byte)((rune)'.'),
-            hexDigit[(v >> (int)(4))],
+            hexDigit[(v >> 4)],
             (byte)((rune)'.'));
     }
     // Append "ip6.arpa." and return (buf already has the final .)
     buf = append(buf, ((@string)"ip6.arpa."u8).ꓸꓸꓸ);
-    return (((@string)buf), default!);
+    return ((@string)buf, default!);
 }
 
 internal static bool equalASCIIName(dnsmessage.Name x, dnsmessage.Name y) {

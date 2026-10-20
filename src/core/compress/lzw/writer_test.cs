@@ -143,7 +143,7 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
                     var w = NewWriter(new lzw_internal_test_package.bytes_BufferжWriter(Ꮡbuf), order, litWidth);
                     {
                         var (_, err) = w.Write(data); if (err != default!) {
-                            tΔ2.Errorf("write: %v: %v"u8, ((@string)data), err);
+                            tΔ2.Errorf("write: %v: %v"u8, (@string)data, err);
                         }
                     }
 
@@ -160,7 +160,7 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
 
                     {
                         var (_, err) = w.Write(data); if (err != default!) {
-                            tΔ2.Errorf("write: %v: %v"u8, ((@string)data), err);
+                            tΔ2.Errorf("write: %v: %v"u8, (@string)data, err);
                         }
                     }
 

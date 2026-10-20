@@ -48,10 +48,15 @@ using static go.syscall_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<SysProcAttr, ж<SysProcAttr>>(Indirect = true)]
 [assembly: GoImplicitConv<WaitStatus, ΔSignal>(Inverted = true, ValueType = "uint32")]
 [assembly: GoImplicitConv<_C_int, WaitStatus>(Inverted = true, ValueType = "int32")]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -75,7 +80,7 @@ using static go.syscall_package;
 [assembly: go.GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACENCqsoKClAAHEJKokqiSqJKqopaimA==")]
 [assembly: go.GoPositionMap("syscall/syscall_linux.go", "syscall_linux.cs", "ABc8AAkGAAIsABQCrgAIAoKCgqzyAAwagoKs8oKCgqaSnLKmgqaCpoKmgoKUpoKCgqamgoKClNSsooIACRSCgIIAChSCpoKAgraCgqiSgoK4pqaClJSUlKaCgpSCgpSmgpS4gqasxoKCpoKSgqaUqpKmgqaCpoKqkqaCqpKClIKCgoKUqpKmgqaCqpKmgqqSpoKClKqSgpSmgoKUpqbOsoKCgqaCyoKmprKCgpSCuIKmgoKClIKClAAWboCkgKSApICkgKSCgpSmgoKUpoKClKaCgpSq0oKCgpSmggAGOKKCgoK4uIKUgoK4gqaSlKYADBqigpSCgoKCgoKCAAoWooKCgoIABIoBggAGPLKSggAIMIKCkoIABBSCgpKCAAZWsoKCgoKCgpSCgoKCgoKmgoKmgpSCgoCCpIKUqJKsAAgO7oKCgoKUgrimgoKUgoKmpoKmgqbagoKCgoKUgoKCgpS4goKCgpSCuIKCgoKUgoKCgpSmpoKmgs6CgoKCpoKCgoKmgqaygoKCpoKmgqaApICkgKiSpoKmgqaCpoKCgpSq1oKUgoKUAAI8ABsCggACQgAfJgAUAoKUgq7ygpSCrAAIDKKCgIK0gIKkyqKCgIK0gIKkyqKCgIK0gIKkyqKCgIK0gIKkyqKCgIK0gIKkyqKCgIK0gIKkyqKCgIK0gIKkyqKCgIK0gIKkABMq3IKmggACFPSqogACFAAJAoKClA==")]
 [assembly: go.GoPositionMap("syscall/syscall_linux_amd64.go", "syscall_linux_amd64.cs", "AAx4AC0CpoKmgqzEgoKClKaigoKClIKUrKKmgqaApICkgqaCpoI=")]
-[assembly: go.GoPositionMap("syscall/syscall_unix.go", "syscall_unix.cs", "ABtEkoCCpAAKGOKCuIKCuKaCgoKC5tKCuIKCgoKCuICCpIIAFiaCgoKCpqaClKSkpJSmgqaCAAgaopSkpKSU7qSCgoKCpqaygoKClIKmgpSClKaygpSCgoKmlIKUgpSClKaygoKClIKmgpSClKaygpSCgpSClIKUACJsooKSggAEHrKCkoCCpIKCgoKmsoKSgIKkgoKCgoKm0oKCgpSCgoKCptKCgoKUgoKCgoKm4oKUgpSmooIABB6igoKCgoKmpqKCgoKCgqamooKClKaigoKUAAQioqaCoqaiAAgegqaCgoKUpoKmsoKUgqaygoKCgpSmgoKU")]
+[assembly: go.GoPositionMap("syscall/syscall_unix.go", "syscall_unix.cs", "ABxEkoCCpAAKGOKCuIKCuKaCgoKC5tKCuIKCgoKCuICCpIIAFiaCgoKCpqaClKSkpJSmgqaCAAgaopSkpKSU7qSCgoKCpqaygoKClIKmgpSClKaygpSCgoKmlIKUgpSClKaygoKClIKmgpSClKaygpSCgpSClIKUACJsooKSggAEHrKCkoCCpIKCgoKmsoKSgIKkgoKCgoKm0oKCgpSCgoKCptKCgoKUgoKCgoKm4oKUgpSmooIABB6igoKCgoKmpqKCgoKCgqamooKClKaigoKUAAQioqaCoqaiAAgegqaCgoKUpoKmsoKUgqaygoKCgpSmgoKU")]
 [assembly: go.GoPositionMap("syscall/time_nofake.go", "time_nofake.cs", "AAoWlA==")]
 [assembly: go.GoPositionMap("syscall/timestruct.go", "timestruct.cs", "AAgUkKaSgoKCgpSokKaSgoKCgoKU")]
 [assembly: go.GoPositionMap("syscall/zerrors_linux_amd64.go", "zerrors_linux_amd64.cs", "AMYKmhUAhQGMAg==")]

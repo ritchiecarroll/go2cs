@@ -17,21 +17,18 @@ internal static void tryWrite(map<@string, nint> m) {
                 }
             }
         }, ref ᒐ);
-        m["x"u8] = 1;
+        m["x"] = 1;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deleteOkˢ = (@string)"delete ok"u8;
-
 internal static void Main() {
     map<@string, nint> m = default!;
 
-    fmt.Println(m["a"u8]);
+    fmt.Println(m["a"]);
 
-    var (v, ok) = m["a"u8, ꟷ];
+    var (v, ok) = m["a", ꟷ];
     fmt.Println(v, ok);
 
     fmt.Println(len(m));
@@ -43,7 +40,7 @@ internal static void Main() {
     fmt.Println(count);
 
     delete(m, "a"u8);
-    fmt.Println(deleteOkˢ);
+    fmt.Println("delete ok");
 
     fmt.Println(m == default!);
 

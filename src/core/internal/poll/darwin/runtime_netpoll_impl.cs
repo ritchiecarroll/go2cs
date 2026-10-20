@@ -39,8 +39,8 @@
 // ("when the read end of a pipe is closed the write end will not get a _EVFILT_WRITE event, but will
 // get a _EVFILT_READ event with EV_EOF set"), EVFILT_WRITE -> the write mode; the eventErr bit is
 // `flags == EV_ERROR`; then Ready on the named modes and a pulse. Deadlines are the Windows §5
-// machinery -- sticky per-mode expiry, generation-checked System.Threading.Timer, "a deadline set in
-// the past fires NOW against the current waiter", wake-without-ready for unblock -- minus the
+// machinery -- sticky per-mode expiry, a generation-checked runtime timer (golib's GoTimer), "a deadline
+// set in the past fires NOW against the current waiter", wake-without-ready for unblock -- minus the
 // cancel-and-harvest dimension, exactly as on linux. No wakeup event (Go's EVFILT_USER
 // netpollBreak): nothing needs to interrupt the drain thread -- deadlines and unblocks reach waiters
 // directly, and a registration made from another thread is observed by an in-progress kevent. Close
@@ -88,7 +88,8 @@ using System.Threading;
 // beside converted code.
 using Goroutine = go.golib.Goroutine;
 using WaitReason = go.golib.WaitReason;
-using Stopwatch = System.Diagnostics.Stopwatch;
+using GoTimer = go.golib.GoTimer;
+using MonotonicClock = go.golib.MonotonicClock;
 
 // Hand-owned (no runtime_netpoll_impl.go exists, so a reconvert never regenerates this file);
 // the marker keeps a -stdlib reconvert from touching it, and L3 routing keeps it darwin-only.
@@ -147,20 +148,19 @@ partial class poll_package
         // to the future (re-arms), or to the past (re-expires).
         internal bool Expired;
         // Invalidates timer callbacks that lost a race. Go's rseq/wseq, bumped on every deadline
-        // change and on unblock, checked by the fired callback under the desc lock. Not optional in
-        // managed land: Timer.Change/Dispose do not synchronize with an in-flight callback.
+        // change and on unblock, checked by the fired callback under the desc lock. Not optional:
+        // GoTimer.Stop does not wait for a callback the timer service has already taken.
         internal long Generation;
-        // The Generation the currently-armed Timer was armed under; a callback is inert unless the two
+        // The Generation the currently-armed timer was armed under; a callback is inert unless the two
         // still agree.
         internal long ArmedGeneration = -1;
         // The desc this mode belongs to, so a timer callback can lock the gate its setters hold.
         internal ManagedPollDesc Owner = null!;
-        // Absolute due time in the runtimeNano epoch, meaningful only while a deadline is armed. Kept
-        // because System.Threading.Timer's due time is a ~49.7-day uint of milliseconds while Go's
-        // ceiling is ~292 years: a longer deadline is armed at the ceiling and re-armed on fire.
+        // Absolute due time on runtimeNano's clock (runtime.nanotime), meaningful only while a deadline
+        // is armed: Go's pd.rd / pd.wd, and the time the mode's timer is armed for.
         internal long DueNanos;
-        // Created lazily on first arm, reused by Change (Go's pd.rt.modify), disposed at pollClose.
-        internal Timer? Deadline;
+        // Created lazily on first arm, reset by every later arm (Go's pd.rt.modify), stopped at pollClose.
+        internal GoTimer? Deadline;
     }
 
     private sealed class ManagedPollDesc
@@ -289,6 +289,10 @@ partial class poll_package
         drain.Start();
 
         Volatile.Write(ref pollServerInitialized, true);
+
+        // Pays the first deadline's one-time costs now, before any deadline is armed
+        // (deadline_prepay_impl.cs).
+        prepayDeadlinePath();
     }
 
     private static bool pollServerInitialized;
@@ -432,8 +436,6 @@ partial class poll_package
             stopDeadlineLocked(desc.Read);
             stopDeadlineLocked(desc.Write);
 
-            desc.Read.Deadline?.Dispose();
-            desc.Write.Deadline?.Dispose();
             desc.Read.Deadline = null;
             desc.Write.Deadline = null;
         }
@@ -626,25 +628,24 @@ partial class poll_package
     private static void stopDeadlineLocked(ManagedPollMode mode)
     {
         mode.ArmedGeneration = -1;
-        mode.Deadline?.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+        mode.Deadline?.Stop();
     }
 
-    // System.Threading.Timer's due time is a uint of milliseconds minus the two reserved values.
-    private const long maxTimerMillis = uint.MaxValue - 2;
-
+    // Arms the mode's runtime timer for DueNanos on golib's one timer heap (Go's pd.rt.modify).
     private static void armDeadlineLocked(ManagedPollMode mode)
     {
-        long remainingNanos = mode.DueNanos - runtimeNano();
-        long dueMillis = remainingNanos <= 0 ? 0 : Math.Min(remainingNanos / 1_000_000, maxTimerMillis);
-
-        mode.Deadline ??= new Timer(static state => deadlineFired((ManagedPollMode)state!), mode, System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+        mode.Deadline ??= new GoTimer(fireDeadline, mode);
         mode.ArmedGeneration = mode.Generation;
-        mode.Deadline.Change(dueMillis, System.Threading.Timeout.Infinite);
+        mode.Deadline.Reset(mode.DueNanos);
     }
 
-    // The timer callback. Re-validates its generation under the gate (a stale callback must be
-    // inert), re-arms if it fired early against a clamped due time, else expires the mode STICKILY
-    // and wakes the waiter WITHOUT readiness.
+    // The deadline timer's callback, named so the poller's start can compile it ahead of the first
+    // deadline (deadline_prepay_impl.cs).
+    private static readonly Action<object?> fireDeadline = static state => deadlineFired((ManagedPollMode)state!);
+
+    // The timer callback, run inline on the timer service thread (Go's netpolldeadlineimpl). Re-validates
+    // its generation under the gate (a stale callback must be inert), re-arms if it fired before
+    // DueNanos, else expires the mode STICKILY and wakes the waiter WITHOUT readiness.
     private static void deadlineFired(ManagedPollMode mode)
     {
         ManagedPollDesc desc = mode.Owner;
@@ -705,9 +706,7 @@ partial class poll_package
 
     // ---- 10. runtimeNano -------------------------------------------------------------------------
 
-    // Monotonic nanoseconds; the one clock deadlines (DueNanos) and their Timers share.
-    private static readonly long nanotimeBase = Stopwatch.GetTimestamp();
-
-    internal static partial int64 runtimeNano() =>
-        unchecked((long)((Stopwatch.GetTimestamp() - nanotimeBase) * (1_000_000_000.0 / Stopwatch.Frequency)));
+    // runtime.nanotime: golib's MonotonicClock, the one clock deadlines (DueNanos) and their timers
+    // (GoTimer) share.
+    internal static partial int64 runtimeNano() => MonotonicClock.Nanoseconds();
 }

@@ -64,9 +64,9 @@ internal static sortedHint decreasingHint => 2;
 partial struct xorshift /*num:uint64*/;
 
 internal static uint64 Next(this ref xorshift r) {
-    r ^= (xorshift)((r << (int)(13)));
-    r ^= (xorshift)((r >> (int)(7)));
-    r ^= (xorshift)((r << (int)(17)));
+    r ^= (xorshift)((r << 13));
+    r ^= (xorshift)((r >> 7));
+    r ^= (xorshift)((r << 17));
     return (uint64)(r);
 }
 

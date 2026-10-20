@@ -245,10 +245,10 @@ public static void TestProtocolDialError(ж<testing.T> Ꮡt) {
         error err = default!;
         var exprᴛ2 = network;
         if (exprᴛ2 == "tcp"u8) {
-            (_, err) = DialTCP(network, nil, Ꮡ(new TCPAddr(Port: (1 << (int)(16)))));
+            (_, err) = DialTCP(network, nil, Ꮡ(new TCPAddr(Port: (1 << 16))));
         }
         else if (exprᴛ2 == "udp"u8) {
-            (_, err) = DialUDP(network, nil, Ꮡ(new UDPAddr(Port: (1 << (int)(16)))));
+            (_, err) = DialUDP(network, nil, Ꮡ(new UDPAddr(Port: (1 << 16))));
         }
         else if (exprᴛ2 == "ip:4294967296"u8) {
             (_, err) = DialIP(network, nil, nil);
@@ -476,10 +476,10 @@ public static void TestProtocolListenError(ж<testing.T> Ꮡt) {
         error err = default!;
         var exprᴛ2 = network;
         if (exprᴛ2 == "tcp"u8) {
-            (_, err) = ListenTCP(network, Ꮡ(new TCPAddr(Port: (1 << (int)(16)))));
+            (_, err) = ListenTCP(network, Ꮡ(new TCPAddr(Port: (1 << 16))));
         }
         else if (exprᴛ2 == "udp"u8) {
-            (_, err) = ListenUDP(network, Ꮡ(new UDPAddr(Port: (1 << (int)(16)))));
+            (_, err) = ListenUDP(network, Ꮡ(new UDPAddr(Port: (1 << 16))));
         }
         else if (exprᴛ2 == "ip:4294967296"u8) {
             (_, err) = ListenIP(network, nil);

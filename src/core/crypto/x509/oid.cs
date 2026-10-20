@@ -100,7 +100,7 @@ internal static nint base128BigIntLength(ж<bigꓸInt> Ꮡn) {
 
 internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<bigꓸInt> Ꮡn) {
     if (Ꮡn.Cmp(big.NewInt(0)) == 0) {
-        return append(dst, (byte)(0));
+        return append(dst, (byte)0);
     }
 
     for (nint i = base128BigIntLength(Ꮡn) - 1; i >= 0; i--) {
@@ -126,7 +126,7 @@ public static (slice<byte>, error) MarshalText(this ΔOID o) {
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
 public static error UnmarshalText(this ref ΔOID o, slice<byte> text) {
-    return o.unmarshalOIDText(((@string)text));
+    return o.unmarshalOIDText((@string)text);
 }
 
 internal static error unmarshalOIDText(this ref ΔOID o, @string oid) {
@@ -382,7 +382,7 @@ internal static (asn1.ObjectIdentifier, bool) toASN1OID(this ΔOID oid) {
                     @out = append(@out, val / 40);
                     @out = append(@out, val % 40);
                 } else {
-                    @out = append(@out, (nint)(2));
+                    @out = append(@out, (nint)2);
                     @out = append(@out, val - 80);
                 }
                 val = 0;
@@ -401,12 +401,14 @@ internal static readonly @string x509OidComponentsMustBeˢ = "x509: OID componen
 
 // OIDFromASN1OID creates a new OID using asn1OID.
 public static (ΔOID, error) OIDFromASN1OID(asn1.ObjectIdentifier asn1OID) {
+    var uint64OIDᴷ = new stackAppend<uint64>();
+
     var uint64OID = new slice<uint64>(0, builtin.len(asn1OID));
     foreach (var (_, component) in asn1OID) {
         if (component < 0) {
             return (new ΔOID(nil), errors.New(x509OidComponentsMustBeˢ));
         }
-        uint64OID = append(uint64OID, (uint64)component);
+        uint64OID = append(uint64OIDᴷ, uint64OID, (uint64)component);
     }
     return OIDFromInts(uint64OID);
 }

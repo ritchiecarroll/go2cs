@@ -49,10 +49,10 @@ internal static color.RGBA64 RGBA64At(this ref slowestRGBA p, nint x, nint y) {
     var b = (uint16)s[2];
     var a = (uint16)s[3];
     return new color.RGBA64(
-        (uint16)(((uint16)(r << (int)(8))) | r),
-        (uint16)(((uint16)(g << (int)(8))) | g),
-        (uint16)(((uint16)(b << (int)(8))) | b),
-        (uint16)(((uint16)(a << (int)(8))) | a)
+        (uint16)(((uint16)(r << 8)) | r),
+        (uint16)(((uint16)(g << 8)) | g),
+        (uint16)(((uint16)(b << 8)) | b),
+        (uint16)(((uint16)(a << 8)) | a)
     );
 }
 
@@ -134,10 +134,10 @@ internal static color.RGBA64 RGBA64At(this ref slowerRGBA p, nint x, nint y) {
     var b = (uint16)s[2];
     var a = (uint16)s[3];
     return new color.RGBA64(
-        (uint16)(((uint16)(r << (int)(8))) | r),
-        (uint16)(((uint16)(g << (int)(8))) | g),
-        (uint16)(((uint16)(b << (int)(8))) | b),
-        (uint16)(((uint16)(a << (int)(8))) | a)
+        (uint16)(((uint16)(r << 8)) | r),
+        (uint16)(((uint16)(g << 8)) | g),
+        (uint16)(((uint16)(b << 8)) | b),
+        (uint16)(((uint16)(a << 8)) | a)
     );
 }
 
@@ -160,10 +160,10 @@ internal static void SetRGBA64(this ref slowerRGBA p, nint x, nint y, color.RGBA
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((c.R >> (int)(8)));
-    s[1] = (uint8)((c.G >> (int)(8)));
-    s[2] = (uint8)((c.B >> (int)(8)));
-    s[3] = (uint8)((c.A >> (int)(8)));
+    s[0] = (uint8)(c.R >> 8);
+    s[1] = (uint8)(c.G >> 8);
+    s[2] = (uint8)(c.B >> 8);
+    s[3] = (uint8)(c.A >> 8);
 }
 
 internal static nint PixOffset(this ref slowerRGBA p, nint x, nint y) {
@@ -767,7 +767,7 @@ public static void TestFloydSteinbergCheckerboard(ж<testing.T> Ꮡt) {
 // embeddedPaletted is an Image that behaves like an *image.Paletted but whose
 // type is not *image.Paletted.
 internal partial struct embeddedPaletted {
-    public partial ref ж<image_package.Paletted> Paletted { get; }
+    /*embed*/ public ж<image_package.Paletted> Paletted;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -834,7 +834,7 @@ public static void TestSqDiff(ж<testing.T> Ꮡt) {
         } else {
             d = (uint32)(y - x);
         }
-        return ((d * d) >> (int)(2));
+        return (d * d) >> 2;
     };
     var testCases = new int32[]{
         0,

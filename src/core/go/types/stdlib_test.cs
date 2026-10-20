@@ -208,7 +208,7 @@ internal static @string firstComment(@string filename) {
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
-        array<byte> src = new(4096); /* (4 << (int)(10)) */                      // read at most 4KB
+        array<byte> src = new(4096); /* (4 << 10) */                      // read at most 4KB
         var (n, _) = f.Read(src[..]);
 
         @string first = default!;

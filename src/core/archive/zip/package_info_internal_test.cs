@@ -5,8 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using strings = go.strings_package;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,9 +29,6 @@ using static go.archive.zip_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<WriteTest, ж<WriteTest>>(Indirect = true)]
-[assembly: GoImplicitConv<rleBuffer, ж<rleBuffer>>(Indirect = true)]
-[assembly: GoImplicitConv<suffixSaver, ж<suffixSaver>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

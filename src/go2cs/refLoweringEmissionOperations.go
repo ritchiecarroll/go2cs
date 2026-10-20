@@ -590,7 +590,7 @@ func (v *Visitor) refLoweredPtrConvArg(arg ast.Expr, deferredDecls *strings.Buil
 		value = chainValue + ".Value"
 	case "wrap":
 		// raw array → wrapper (one user-defined conversion)
-		value = fmt.Sprintf("(%s)(%s)", targetCS, chainValue)
+		value = castOf(targetCS, chainValue)
 	case "rewrap":
 		// wrapper → different wrapper over the same array: hop through the raw array (C# will
 		// not chain two user-defined conversions in one cast)

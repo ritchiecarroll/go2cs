@@ -31,9 +31,6 @@ internal static nint trimmed() {
     return len(assert);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object assertsˢ = (@string)"asserts:"u8;
-
 internal static void Main() {
     foreach (var (_, q) in quotients.ΔRangeSnapshot()) {
         fmt.Println(q);
@@ -43,7 +40,7 @@ internal static void Main() {
         fmt.Println((uint64)(nuint)w);
     }
 
-    fmt.Println(assertsˢ, trimmed());
+    fmt.Println("asserts:", trimmed());
 
     uint64 wraps = maxUint64 - 1;
     int64 inRange = small * 3;

@@ -55,7 +55,7 @@ internal static UntypedInt spanSetInitSpineCap => 256; // Enough for 1GB heap on
 
 partial struct spanSetBlockHeader {
     // Free spanSetBlocks are managed via a lock-free stack.
-    internal partial ref lfnode lfnode { get; }
+    /*embed*/ internal lfnode lfnode;
     // popped is the number of pop operations that have occurred on
     // this block. This number is used to help determine when a block
     // may be safely recycled.
@@ -63,12 +63,12 @@ partial struct spanSetBlockHeader {
 }
 
 partial struct spanSetBlockHeader2 {
-    internal partial ref spanSetBlockHeader spanSetBlockHeader { get; }
+    /*embed*/ internal spanSetBlockHeader spanSetBlockHeader;
     internal array<byte> pad = new((uintptr)tagAlign - /* unsafe.Sizeof(spanSetBlockHeader{}) */ (uintptr)24);
 }
 
 partial struct spanSetBlock {
-    internal partial ref spanSetBlockHeader2 spanSetBlockHeader2 { get; }
+    /*embed*/ internal spanSetBlockHeader2 spanSetBlockHeader2;
     // spans is the set of spans in this block.
     internal array<atomicMSpanPointer> spans = new(spanSetBlockEntries);
 }
@@ -359,12 +359,12 @@ partial struct headTailIndex /*num:uint64*/;
 // makeHeadTailIndex creates a headTailIndex value from a separate
 // head and tail.
 internal static headTailIndex makeHeadTailIndex(uint32 head, uint32 tail) {
-    return ((headTailIndex)((uint64)(((uint64)head << (int)(32)) | (uint64)tail)));
+    return (headTailIndex)((uint64)head << 32 | (uint64)tail);
 }
 
 // head returns the head of a headTailIndex value.
 internal static uint32 head(this headTailIndex h) {
-    return (uint32)(uint64)((h >> (int)(32)));
+    return (uint32)(uint64)((h >> 32));
 }
 
 // tail returns the tail of a headTailIndex value.
@@ -384,7 +384,7 @@ partial struct atomicHeadTailIndex {
 
 // load atomically reads a headTailIndex value.
 internal static headTailIndex load(this ж<atomicHeadTailIndex> Ꮡh) {
-    return ((headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Load());
+    return (headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Load();
 }
 
 // cas atomically compares-and-swaps a headTailIndex value.
@@ -394,12 +394,12 @@ internal static bool cas(this ж<atomicHeadTailIndex> Ꮡh, headTailIndex old, h
 
 // incHead atomically increments the head of a headTailIndex.
 internal static headTailIndex incHead(this ж<atomicHeadTailIndex> Ꮡh) {
-    return ((headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(4294967296L));
+    return (headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(4294967296L);
 }
 
 // decHead atomically decrements the head of a headTailIndex.
 internal static headTailIndex decHead(this ж<atomicHeadTailIndex> Ꮡh) {
-    return ((headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(-(4294967296L)));
+    return (headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(-(4294967296L));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -407,7 +407,7 @@ internal static readonly @string headTailIndexOverflowˢ = "headTailIndex overfl
 
 // incTail atomically increments the tail of a headTailIndex.
 internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
-    var ht = ((headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(1));
+    var ht = (headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(1);
     // Check for overflow.
     if (ht.tail() == 0) {
         print((@string)"runtime: head = "u8, ht.head(), (@string)", tail = "u8, ht.tail(), (@string)"\n"u8);

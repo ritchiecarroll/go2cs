@@ -55,7 +55,7 @@ internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> Ꮡdecl, @
         }
 
         if (sig.results.Len() > 0 && !check.isTerminating(new ast.BlockStmtжStmt(Ꮡbody), ""u8)) {
-            Ꮡcheck.error(((atPos)body.Rbrace), MissingReturn, missingReturnˢ);
+            Ꮡcheck.error((atPos)body.Rbrace, MissingReturn, missingReturnˢ);
         }
 
         // spec: "Implementation restriction: A compiler may make it illegal to
@@ -69,6 +69,7 @@ internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> Ꮡdecl, @
 internal static void usage(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var scope = ref Ꮡscope.DerefOrNull();
+    var unusedᴷ = new stackAppend<ж<Var>>();
 
     bool needUse(VarKind kind) => !(kind == RecvVar || kind == ParamVar || kind == ResultVar);
     slice<ж<Var>> unused = default!;
@@ -78,7 +79,7 @@ internal static void usage(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope) {
         elem = resolve(name, elem);
         {
             var (v, _) = elem._<ж<Var>>(ᐧ); if (v != nil && needUse((~v).kind) && !check.usedVars[v]) {
-                unused = append(unused, v);
+                unused = append(unusedᴷ, unused, v);
             }
         }
     }
@@ -307,7 +308,7 @@ L:
                     if (Identical(v.typ, vt.typ)) {
                         var err = Ꮡcheck.newError(DuplicateCase);
                         err.addf(new operandжpositioner(Ꮡv), "duplicate case %s in expression switch"u8, Ꮡv);
-                        err.addf(((atPos)vt.pos), "previous case"u8);
+                        err.addf((atPos)vt.pos, "previous case"u8);
                         err.report();
                         goto continue_L;
                     }
@@ -500,6 +501,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
+        var lhsVarsᴷ = new stackAppend<ж<Var>>();
 
         // statements must end with the same top scope as they started with
         if (debug) {
@@ -632,7 +634,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                 }
                 token.Token op = assignOp((~sΔ1).Tok);
                 if (op == token.ILLEGAL) {
-                    Ꮡcheck.errorf(((atPos)(~sΔ1).TokPos), InvalidSyntaxTree, "unknown assignment operation %s"u8, (~sΔ1).Tok);
+                    Ꮡcheck.errorf((atPos)(~sΔ1).TokPos, InvalidSyntaxTree, "unknown assignment operation %s"u8, (~sΔ1).Tok);
                     return;
                 }
                 ref var x = ref heap(new operand(), out var Ꮡx);
@@ -899,7 +901,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                     // For the "declared and not used" error, all lhs variables act as
                     // one; i.e., if any one of them is 'used', all of them are 'used'.
                     // Collect them for later analysis.
-                    lhsVars = append(lhsVars, obj);
+                    lhsVars = append(lhsVarsᴷ, lhsVars, obj);
                 }
                 Ꮡcheck.stmtList(inner, (~clause).Body);
                 check.closeScope();

@@ -66,7 +66,7 @@ public static void TestExitHooks(ж<testing.T> Ꮡt) {
     foreach (var (_, s) in scenarios) {
         var cmd = exec.Command(exe, new @string[]{"-mode"u8, s.mode}.slice().ꓸꓸꓸ);
         var (@out, _) = cmd.CombinedOutput();
-        @string outs = strings.ReplaceAll(((@string)@out), "\n"u8, " "u8);
+        @string outs = strings.ReplaceAll((@string)@out, "\n"u8, " "u8);
         outs = strings.TrimSpace(outs);
         if (s.expected != ""u8 && s.expected != outs) {
             Ꮡt.Fatalf("failed %s: wanted %q\noutput:\n%s"u8,

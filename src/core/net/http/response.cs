@@ -190,7 +190,7 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Reque
         }
         return (default!, err);
     }
-    resp.Value.Header = ((ΔHeader)(map<@string, slice<@string>>)mimeHeader);
+    resp.Value.Header = (ΔHeader)(map<@string, slice<@string>>)mimeHeader;
 
     fixPragmaCacheControl((~resp).Header);
 

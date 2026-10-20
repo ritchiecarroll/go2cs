@@ -35,8 +35,8 @@
         },
         {
           "class": "codegen-liveness",
-          "signature": "runtime/pprof.genericAllocFunc [1 64 1 64]",
-          "reason": "IN-USE half. Go reads the 64 B and 256 B allocations as freed after the test's GC (in-use 0 0); the managed profile still reports them in use ([1 64 1 64], [1 256 1 256]) because the discarded temporaries stay rooted for the frame's lifetime: the CLR reports a frame's slots live throughout, where Go's liveness maps drop them at their last use. Retires with that liveness gap."
+          "signature": "runtime/pprof.genericAllocFunc [1 256 1 256]",
+          "reason": "IN-USE half. Go reads every one of the test's allocations as freed after its GC (in-use 0 0). The managed profile reports the LAST allocation of each loop still in use -- [1 256 1 256] from the uint32 loop (sizes 128, 256) and [1 128 1 128] from the uint64 loop (sizes 64, 128) -- because the discarded result of each loop's last call stays rooted in a frame slot for the frame's lifetime, where Go's liveness maps drop it at its last use. The earlier allocation of each loop is freed on both sides, which is what places the pin on the last call rather than on the profiler. The signature is the uint32 loop's 256-byte line, which no other sample of the test produces. Retires with that liveness gap."
         }
       ]
     },

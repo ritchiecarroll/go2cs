@@ -55,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("ChanDirectionChain.go", "ChanDirectionChain.cs", "ACYkgpaCgpaCgoKCjIKWgpiCqoIAAhCCgoKCgoKCgoKCgoKYgoKCgoIAARSCgoI=", "", "", "58=ChanOf/1/1/1,TypeOf/1/1/1;62=ChanOf/1/1/1,TypeOf/1/1/1")]
+[assembly: go.GoPositionMap("ChanDirectionChain.go", "ChanDirectionChain.cs", "AAskgpaCgpaCgoKCjIKWgpiCqoIAAhCCgoKCgoKCgoKCgoKYgoKCgoIAARSCgoI=", "", "", "31=ChanOf/1/1/1,TypeOf/1/1/1;35=ChanOf/1/1/1,TypeOf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

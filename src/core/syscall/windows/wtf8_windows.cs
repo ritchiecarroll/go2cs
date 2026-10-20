@@ -47,7 +47,7 @@ internal static slice<uint16> encodeWTF16(@string s, slice<uint16> buf) {
             // Check if s[i:] contains a valid WTF-8 encoded surrogate.
             {
                 @string sc = s.slice(i); if (len(sc) >= 3 && sc[0] == 0xED && 0xA0 <= sc[1] && sc[1] <= 0xBF && 0x80 <= sc[2] && sc[2] <= 0xBF) {
-                    r = ((rune)((byte)(sc[0] & (byte)mask3)) << (int)(12)) + ((rune)((byte)(sc[1] & (byte)maskx)) << (int)(6)) + (rune)((byte)(sc[2] & (byte)maskx));
+                    r = ((rune)((byte)(sc[0] & (byte)mask3)) << 12) + ((rune)((byte)(sc[1] & (byte)maskx)) << 6) + (rune)((byte)(sc[2] & (byte)maskx));
                     buf = append(buf, (uint16)r);
                     i += 3;
                     continue;
@@ -87,7 +87,7 @@ internal static slice<byte> decodeWTF16(slice<uint16> s, slice<byte> buf) {
                 if (ar > utf8.MaxRune) {
                     ar = utf8.RuneError;
                 }
-                buf = append(buf, (byte)((byte)t3 | (byte)((ar >> (int)(12)))), (byte)((byte)tx | (byte)((byte)((ar >> (int)(6))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)ar & (byte)maskx)));
+                buf = append(buf, (byte)((byte)t3 | (byte)(ar >> 12)), (byte)((byte)tx | (byte)((byte)(ar >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)ar & (byte)maskx)));
                 continue;
                 break;
             }}

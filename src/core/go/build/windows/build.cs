@@ -636,6 +636,8 @@ internal partial struct Import_tried /*dyn*/ {
 // *[Package] containing partial information.
 public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
+    var pathsᴷ = new stackAppend<@string>();
+    var Sfilesᴷ = new stackAppend<@string>();
 
     var p = Ꮡ(new Package(
         ImportPath: path
@@ -864,7 +866,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
         slice<@string> paths = default!;
         @string format = sVendorTreeˢ;
         foreach (var (_, dir) in tried.vendor) {
-            paths = append(paths, fmt.Sprintf(format, dir));
+            paths = append(pathsᴷ, paths, fmt.Sprintf(format, dir));
             format = "\t%s"u8;
         }
         if (tried.goroot != ""u8){
@@ -999,7 +1001,7 @@ Found:
         }
         else if (exprᴛ3 == ".S"u8 || exprᴛ3 == ".sx"u8) {
             // special case for cgo, handled at end
-            Sfiles = append(Sfiles, name);
+            Sfiles = append(Sfilesᴷ, Sfiles, name);
             continue;
         }
         else { /* default: */
@@ -1460,7 +1462,7 @@ internal static (@string s, nint line) findImportComment(slice<byte> data) {
     }
 
     line = 1 + bytes.Count(data.slice(0, cap(data) - cap(arg)), newline);
-    return (strings.TrimSpace(((@string)arg)), line);
+    return (strings.TrimSpace((@string)arg), line);
 }
 
 internal static slice<byte> slashSlash = slice<byte>("//"u8);
@@ -1717,7 +1719,7 @@ internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this 
     // Otherwise fall back to +build processing.
     switch (ᐧ) {
     case {} when goBuild != default!: {
-        var (x, errΔ3) = constraint.Parse(((@string)goBuild));
+        var (x, errΔ3) = constraint.Parse((@string)goBuild);
         if (errΔ3 != default!) {
             return (false, false, fmt.Errorf("parsing //go:build line: %v"u8, errΔ3));
         }
@@ -1740,7 +1742,7 @@ internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this 
             if (!bytes.HasPrefix(line, slashSlash) || !bytes.Contains(line, plusBuild)) {
                 continue;
             }
-            @string text = ((@string)line);
+            @string text = (@string)line;
             if (!constraint.IsPlusBuild(text)) {
                 continue;
             }
@@ -2080,7 +2082,7 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
         case {} when unicode.IsSpace(rune): {
             if (quoted || i > 0) {
                 quoted = false;
-                args = append(args, ((@string)(arg.slice(0, i))));
+                args = append(args, (@string)(arg.slice(0, i)));
                 i = 0;
             }
             continue;
@@ -2090,7 +2092,7 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
         i++;
     }
     if (quoted || i > 0) {
-        args = append(args, ((@string)(arg.slice(0, i))));
+        args = append(args, (@string)(arg.slice(0, i)));
     }
     if (quote != 0){
         err = errors.New(unclosedQuoteˢ);

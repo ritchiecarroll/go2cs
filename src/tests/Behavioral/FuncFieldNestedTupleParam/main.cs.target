@@ -37,7 +37,7 @@ internal static void Main() {
     var (v2, err2) = m.named(3, @double);
     fmt.Println(v2, err2);
 
-    var (s, ok) = m.lookup("go"u8);
+    var (s, ok) = m.lookup("go");
     fmt.Println(s, ok);
 }
 

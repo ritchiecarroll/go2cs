@@ -33,7 +33,8 @@ namespace GolibTests;
 ///     allocates nothing (a compiler stack temp, <c>runtime.zerobase</c>), so charging them would report a
 ///     malloc Go does not make. Each reason cites Go's source for the equivalent construct. The block began
 ///     as V-fix 11's 21 unclassified sites; the follow-on seat routed the real undercounts and the sites
-///     whose charge the scan could not see, and these five are what remained.
+///     whose charge the scan could not see, and these five are what remained. The stack-append seat added a
+///     sixth, the buffer of Go's stack backing store for a non-escaping append, which Go keeps in the frame.
 ///   </description></item>
 ///   <item><description>
 ///     <see cref="Infrastructure"/>, the (c) block: allocations that are not Go-visible backings at all
@@ -59,6 +60,7 @@ public class NoUncountedBackingAllocationsTests
         ("channel.cs|ChanCore[] lockOrder = cores.ToArray();", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),
         ("channel.cs|int[] pollOrder = new int[liveCount];", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),
         ("map.cs|KeyValuePair<TKey, TValue>[] entries = count == 0 ? [] : new KeyValuePair<TKey, TValue>[count];", "the range snapshot: Go's range over a map keeps its iterator in a compiler stack temp (cmd/compile/internal/walk/order.go, Prealloc newTemp)"),
+        ("stackAppend.cs|T[] store = new T[capacity];", "the stack backing store: Go 1.25+ gives a non-escaping append's first growth a 32-byte buffer in the function's own frame (cmd/compile/internal/ssagen/ssa.go, getBackingStoreInfo and the append lowering), so the buffer allocates nothing"),
     ];
 
     // (c) INFRASTRUCTURE: not a Go-visible backing; the reason names what the array is.
@@ -70,6 +72,7 @@ public class NoUncountedBackingAllocationsTests
         ("map.cs|m_items = items.ToArray();", "debugger view: at most 1,000 of a map's pairs, built only when a debugger expands one"),
         ("slice.cs|public T[] Items => value.ToSpan().ToArray();", "debugger view: the len window's elements, built only when a debugger expands a slice"),
         ("string.cs|public byte[] Bytes => value.ToSpan().ToArray();", "debugger view: a string's bytes, built only when a debugger expands one"),
+        ("StringLiteralCache.cs|public readonly Slot[] Slots = new Slot[1 << log2];", "the literal cache's slot table: process-wide, grown by doubling at half load, so O(log n) tables for n literals; not a Go-visible backing (the UTF-8 backing each slot holds is charged through Utf8ToBytes)"),
         ("AdapterBinder.cs|MethodInvoker[] invokers = new MethodInvoker[methodNames.Length];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),
         ("AdapterBinder.cs|bool[] dereference = new bool[methodNames.Length];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),
         ("AdapterBinder.cs|object?[] arguments = new object?[args.Length + 1];", "adapter binder plumbing: per-binding invoker tables and the reflection-invoke argument array of its fallback path"),
@@ -94,6 +97,8 @@ public class NoUncountedBackingAllocationsTests
         ("GoZeroSize.cs|internal static readonly T[] Storage = IsZeroSize ? new T[1] : [];", "a per-type static singleton: the one storage slot every zero-size value of T shares"),
         ("GoFrame.cs|Sequence[] entries = state.Sequences ??= new Sequence[16];", "runtime bookkeeping: the per-thread panic-sequence entries captureCallers pairs with GoFrame.Run frames (held in the thread's GoThreadState), allocated on the thread's first panic and reused"),
         ("GoZeroSize.cs|internal static readonly T[] Backing = GoZeroSizeFacts<T>.IsZeroSize ? GoZeroSizeFacts<T>.Storage : new T[1];", "a per-type static singleton: the one slot a non-nil zero-capacity slice's data pointer names (GoZeroCapacitySlot)"),
+        ("runtime/GoTimer.cs|private static GoTimer[] s_heap = new GoTimer[16];", "runtime bookkeeping: GoTimer's heap of armed timers, Go's per-P timer heap (runtime/time.go, ts.heap), grown by doubling; not a Go-visible backing"),
+        ("runtime/GoTimer.cs|GoTimer[] due = new GoTimer[16];", "runtime bookkeeping: the timer service thread's batch of due timers, allocated once when the thread starts and reused; Go runs due timers straight off ts.heap"),
         ("runtime/BoringCaches.cs|Action[] updated = new Action[s_caches.Length + 1];", "runtime bookkeeping: the registered cache-cleanup callbacks (copy-on-register)"),
         ("runtime/CrashReport.cs|byte[] bytes = Encoding.UTF8.GetBytes(report);", "crash-report output: the UTF-8 text of a fatal report, written once as the process dies"),
         ("runtime/ExecutionTracer.cs|byte[] bytes = Encoding.UTF8.GetBytes(text);", "execution-trace output: a strings-table entry of the trace stream, written once per trace at stop; Go's tracer buffers are off-heap and never reach MemStats.Mallocs, so counting them would perturb AllocsPerRun under a running trace"),
@@ -102,6 +107,7 @@ public class NoUncountedBackingAllocationsTests
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|return Delegate.CreateDelegate(getMethodType(types.ToArray()), methodInfo);", "runtime metadata: the extension-method registry and delegate signature types"),
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|return methods.ToArray();", "runtime metadata: the extension-method registry and delegate signature types"),
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|scanned = extensionMethods.ToArray();", "runtime metadata: the extension-method registry and delegate signature types"),
+        ("runtime/TypeExtensions.GoMethodSets.cs|Type[] typeArguments = new Type[open.GetGenericArguments().Length];", "reflection metadata: the type arguments that close a generic type's method"),
         ("runtime/WaitReason.cs|WaitReason[] parked = new WaitReason[all.Length - 1];", "runtime metadata: the static table of wait reasons"),
         ("ж.PointerExtensions.cs|Type[] fieldTypes = new Type[fields.Length];", "reflection metadata: the field types of a reinterpreted struct"),
     ];

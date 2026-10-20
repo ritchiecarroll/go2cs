@@ -183,14 +183,23 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
     // A NATIVE-backed element's identity is its ADDRESS, exactly as NativeBox's is. The canonical
     // (object, index) pair cannot serve here: the foreign source is a boxed slice HEADER, and a
     // fresh box is a fresh object, so two pointers to ONE element would compare unequal — Go says
-    // `&a[i] == &a[i]`. Zero for every managed element, which keeps the canonical path unchanged.
+    // `&a[i] == &a[i]`. Zero for every managed element, which keeps the canonical path unchanged. An element
+    // of a foreign pointer array (NativePointerWords) is its word's address, the same fact.
     private nuint nativeElementIdentity()
     {
         unsafe
         {
-            return m_foreign is slice<T> ns && ns.IsNativeBacked ? ns.NativeElementAddress(m_index) : 0;
+            return m_foreign switch
+            {
+                slice<T> ns when ns.IsNativeBacked => ns.NativeElementAddress(m_index),
+                INativeWordElements words => words.ElementAddress(m_index),
+                _ => 0
+            };
         }
     }
+
+    // The element's native address, 0 for a managed element: array<T>.AliasPointer views native memory from it.
+    internal nuint NativeElementAddress => nativeElementIdentity();
 
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the element's Go BYTE offset below (absolute
@@ -411,6 +420,11 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
             // element as one taken through the slice it aliases.
             case array<T> arr when arr.Source is not null:
                 return (arr.Source, arr.Low + index);
+
+            // Words in foreign native memory (NativePointerWords) have no managed storage at all: the element's
+            // identity is its word's address (nativeElementIdentity), never a T[].
+            case INativeWordElements:
+                return (array, index);
 
             default:
                 return (array.Source ?? (object)array, index);

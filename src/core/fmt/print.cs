@@ -79,11 +79,13 @@ partial interface GoStringer {
 // omitted. This function allows a [Formatter] to reconstruct the original
 // directive triggering the call to Format.
 public static @string FormatString(State state, rune verb) {
+    var bᴷ = new stackAppend<byte>();
+
     array<byte> tmp = new(16);               // Use a local buffer.
     var b = append(tmp[..0], (byte)((rune)'%'));
     foreach (var (_, c) in (@string)" +-#0"u8) { // All known flags
         if (state.Flag((nint)c)) { // The argument is an int for historical reasons.
-            b = append(b, (byte)c);
+            b = append(bᴷ, b, (byte)c);
         }
     }
     {
@@ -98,7 +100,7 @@ public static @string FormatString(State state, rune verb) {
         }
     }
     b = utf8.AppendRune(b, verb);
-    return ((@string)b);
+    return (@string)b;
 }
 
 // Use simple []byte instead of bytes.Buffer to avoid large dependency.
@@ -256,7 +258,7 @@ public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintf(format, a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
@@ -306,7 +308,7 @@ public static @string Sprint(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrint(a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
@@ -359,7 +361,7 @@ public static @string Sprintln(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintln(a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
@@ -658,7 +660,7 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
         break;
     }
     case (rune)'q': {
-        p.fmt.fmtQ(((@string)v));
+        p.fmt.fmtQ((@string)v);
         break;
     }
     default: {

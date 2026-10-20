@@ -132,13 +132,13 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     if (sys.Foreground) {
         // This should really be pid_t, however _C_int (aka int32) is
         // generally equivalent.
-        pgrp = ((_C_int)(int32)sys.Pgid);
+        pgrp = (_C_int)(int32)sys.Pgid;
         if (pgrp == 0) {
             (r1, _, err1) = rawSyscall(abi.FuncPCABI0(libc_getpid_trampoline), 0, 0, 0);
             if (err1 != 0) {
                 goto childerror;
             }
-            pgrp = ((_C_int)(int32)r1);
+            pgrp = (_C_int)(int32)r1;
         }
 
         // Place process group in foreground.

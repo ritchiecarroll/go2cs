@@ -141,9 +141,9 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     var order1 = array<uint16>.AliasPointer(Ꮡorder0, 131072);
 
     nint ncases = nsends + nrecvs;
-    var scases = (~cas1).slice(0, ncases, ncases);
-    var pollorder = (~order1).slice(0, ncases, ncases);
-    var lockorder = (~order1).slice(ncases).slice(0, ncases, ncases);
+    var scases = cas1.slice(0, ncases, ncases);
+    var pollorder = order1.slice(0, ncases, ncases);
+    var lockorder = order1.slice(ncases).slice(0, ncases, ncases);
     // NOTE: pollorder/lockorder's underlying array was not zero-initialized by compiler.
 
     // Even when raceenabled is true, there might be select
@@ -152,7 +152,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     slice<uintptr> pcs = default!;
     if (raceenabled && Ꮡpc0 != nil) {
         var pc1 = array<uintptr>.AliasPointer(Ꮡpc0, 65536);
-        pcs = (~pc1).slice(0, ncases, ncases);
+        pcs = pc1.slice(0, ncases, ncases);
     }
     var pcsʗ1 = pcs;
     uintptr casePC(nint casiΔ1) {

@@ -118,7 +118,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         if (maxFileMemoryBytes == math.MaxInt64) {
             maxFileMemoryBytes--;
         }
-        var maxMemoryBytes = maxMemory + (int64)(((int64)10 << (int)(20)));
+        var maxMemoryBytes = maxMemory + (int64)((int64)10 << 20);
         if (maxMemoryBytes <= 0) {
             maxMemoryBytes = math.MaxInt64;
         }
@@ -323,7 +323,7 @@ partial interface File :
 
 // helper types to turn a []byte into a File
 partial struct sectionReadCloser {
-    public partial ref ж<io_package.SectionReader> SectionReader { get; }
+    /*embed*/ public ж<io_package.SectionReader> SectionReader;
     /*embed*/ public io_package.Closer Closer;
 }
 

@@ -52,7 +52,7 @@ internal static nint maxListenerBacklog() {
             return syscall.SOMAXCONN;
         }
 
-        if (n > (1 << (int)(16)) - 1) {
+        if (n > (1 << 16) - 1) {
             return maxAckBacklog(n);
         }
         return n;

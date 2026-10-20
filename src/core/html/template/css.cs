@@ -231,6 +231,7 @@ internal static slice<byte> mozBindingBytes = slice<byte>("mozbinding"u8);
 // and anything that might execute scripts.
 internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
+    var idᴷ = new stackAppend<byte>();
 
     var (s, t) = stringify(args.ꓸꓸꓸ);
     if (t == contentTypeCSS) {
@@ -264,7 +265,7 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
         }
         default: {
             if (c < utf8.RuneSelf && isCSSNmchar((rune)c)) {
-                id = append(id, c);
+                id = append(idᴷ, id, c);
             }
             break;
         }}
@@ -273,7 +274,7 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     if (bytes.Contains(id, expressionBytes) || bytes.Contains(id, mozBindingBytes)) {
         return filterFailsafe;
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 } // end template_package

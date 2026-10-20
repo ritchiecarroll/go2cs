@@ -38,7 +38,7 @@ public static void TestRawConnReadWrite(ж<Δtesting.T> Ꮡt) {
 
         ref var operr = ref heap<error>(out var Ꮡoperr);
         err = wconn.Write((uintptr s) => {
-            (_, Ꮡoperr.ValueSlot) = syscall.Write(((syscallꓸHandle)s), new byte[]{(rune)'b'}.slice());
+            (_, Ꮡoperr.ValueSlot) = syscall.Write((syscallꓸHandle)s, new byte[]{(rune)'b'}.slice());
             return !AreEqual(Ꮡoperr.ValueSlot, syscall.EAGAIN);
         });
         if (err != default!) {
@@ -52,7 +52,7 @@ public static void TestRawConnReadWrite(ж<Δtesting.T> Ꮡt) {
         var buf = new slice<byte>(1);
         var bufʗ1 = buf;
         err = rconn.Read((uintptr s) => {
-            (n, Ꮡoperr.ValueSlot) = syscall.Read(((syscallꓸHandle)s), bufʗ1);
+            (n, Ꮡoperr.ValueSlot) = syscall.Read((syscallꓸHandle)s, bufʗ1);
             return !AreEqual(Ꮡoperr.ValueSlot, syscall.EAGAIN);
         });
         if (err != default!) {

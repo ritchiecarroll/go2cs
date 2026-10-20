@@ -49,7 +49,7 @@ internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
     ᏑserverInit.Do(runtime_pollServerInit);
     var (ctx, errno) = runtime_pollOpen((uintptr)fd.Sysfd);
     if (errno != 0) {
-        return errnoErr(((Δsyscall.Errno)(uintptr)errno));
+        return errnoErr((Δsyscall.Errno)(uintptr)errno);
     }
     pd.runtimeCtx = ctx;
     return default!;

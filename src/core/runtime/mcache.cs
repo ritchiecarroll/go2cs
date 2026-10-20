@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(mcache))]
 partial class runtime_package {
 
 // Per-thread (in Go, per-P) cache for small objects.
@@ -77,7 +78,7 @@ partial struct gclinkptr /*num:uintptr*/;
 // The result should be used for accessing fields, not stored
 // in other data structures.
 internal static ж<gclink> ptr(this gclinkptr Δp) {
-    return (ж<gclink>)(uintptr)(((@unsafe.Pointer)(uintptr)Δp));
+    return (ж<gclink>)(uintptr)((@unsafe.Pointer)(uintptr)Δp);
 }
 
 partial struct stackfreelist {
@@ -97,10 +98,10 @@ internal static ж<mcache> allocmcache() {
         Ꮡc.ValueSlot.of(mcache.ᏑflushGen).Store(mheap_.sweepgen);
         unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     });
-    foreach (var (i, _) in (~c).alloc) {
-        c.Value.alloc[i] = Ꮡemptymspan;
+    foreach (var (i, _) in c.alloc) {
+        c.of(mcache.Ꮡalloc).ElementRef(i) = Ꮡemptymspan;
     }
-    c.Value.nextSample = nextSample();
+    c.nextSample = nextSample();
 
     return c;
 }
@@ -244,7 +245,7 @@ internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool nosca
     if (size + (uintptr)pageSize < size) {
         @throw(outOfMemoryˢ);
     }
-    var npages = (size >> (int)(gc.PageShift));
+    var npages = size >> (int)(gc.PageShift);
     if ((uintptr)(size & (uintptr)pageMask) != 0) {
         npages++;
     }
@@ -383,7 +384,7 @@ internal static void addReusableNoscan(this ref mcache c, spanClass spc, uintptr
     }
 
     // Add to the reusable pointers free list.
-    var v = ((gclinkptr)ptr);
+    var v = (gclinkptr)ptr;
     v.ptr().Value.next = c.reusableNoscan[spc];
     c.reusableNoscan[spc] = v;
 }

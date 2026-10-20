@@ -13,6 +13,7 @@ using @unsafe = unsafe_package;
 using go.@internal;
 using go.@internal.runtime;
 
+[GoFieldAccess(typeof(abiꓸInterfaceType), typeof(abi.EmptyInterface), typeof(abi.NonEmptyInterface), typeof(abiꓸStructType))]
 partial class maps_package {
 
 // This package contains the implementation of Go's builtin map type.
@@ -183,7 +184,7 @@ partial class maps_package {
 // Extracts the H1 portion of a hash: the 57 upper bits.
 // TODO(prattmic): what about 32-bit systems?
 internal static uintptr h1(uintptr h) {
-    return (h >> (int)(7));
+    return h >> 7;
 }
 
 // Extracts the H2 portion of a hash: the 7 bits not used for h1.
@@ -335,7 +336,7 @@ internal static uintptr directoryIndex(this ref ΔMap m, uintptr hash) {
     if (m.dirLen == 1) {
         return 0;
     }
-    return (hash >> (int)(((uint8)(m.globalShift & 63))));
+    return hash >> (int)((uint8)(m.globalShift & 63));
 }
 
 internal static ж<table> directoryAt(this ref ΔMap m, uintptr i) {
@@ -613,7 +614,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
         slotElem = emem;
     }
 
-    g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
+    g.ctrls().set(i, (ctrl)(uint8)h2(hash));
     m.used++;
 
     return slotElem;
@@ -885,19 +886,19 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
         var i = Ꮡt.Reinterpret<abi.Type, abiꓸInterfaceType>();
         ж<abi.Type> tΔ2 = default!;
         ж<@unsafe.Pointer> pdata = default!;
-        if (len((~i).Methods) == 0){
+        if (len(i.Methods) == 0){
             var a = (ж<abi.EmptyInterface>)(uintptr)(p);
-            tΔ2 = a.Value.Type;
+            tΔ2 = a.Type;
             if (tΔ2 == nil) {
                 return default!;
             }
             pdata = a.of(abi.EmptyInterface.ᏑData);
         } else {
             var a = (ж<abi.NonEmptyInterface>)(uintptr)(p);
-            if ((~a).ITab == nil) {
+            if (a.ITab == nil) {
                 return default!;
             }
-            tΔ2 = a.Value.ITab.Value.Type;
+            tΔ2 = a.ITab.Value.Type;
             pdata = a.of(abi.NonEmptyInterface.ᏑData);
         }
 
@@ -913,9 +914,9 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
     }
     if (exprᴛ1 == abi.Array) {
         var a = Ꮡt.Reinterpret<abi.Type, abiꓸArrayType>();
-        for (var i = (uintptr)0; i < (~a).Len; i++) {
+        for (var i = (uintptr)0; i < a.of(abiꓸArrayType.ᏑLen).Value; i++) {
             {
-                var err = mapKeyError2((~a).Elem, (@unsafe.Pointer)((uintptr)p + i * (~(~a).Elem).Size_)); if (err != default!) {
+                var err = mapKeyError2(a.of(abiꓸArrayType.ᏑElem).Value, (@unsafe.Pointer)((uintptr)p + i * (~a.of(abiꓸArrayType.ᏑElem).Value).Size_)); if (err != default!) {
                     return err;
                 }
             }
@@ -924,7 +925,7 @@ internal static error mapKeyError2(ж<abi.Type> Ꮡt, @unsafe.Pointer p) {
     }
     if (exprᴛ1 == abi.Struct) {
         var s = Ꮡt.Reinterpret<abi.Type, abiꓸStructType>();
-        foreach (var (_, f) in (~s).Fields) {
+        foreach (var (_, f) in s.Fields) {
             if (f.Name.IsBlank()) {
                 continue;
             }

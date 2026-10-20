@@ -213,7 +213,7 @@ internal static any Value(this emptyCtx _, any key) {
 }
 
 partial struct backgroundCtx {
-    internal partial ref emptyCtx emptyCtx { get; }
+    /*embed*/ internal emptyCtx emptyCtx;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -224,7 +224,7 @@ internal static @string String(this backgroundCtx _) {
 }
 
 partial struct todoCtx {
-    internal partial ref emptyCtx emptyCtx { get; }
+    /*embed*/ internal emptyCtx emptyCtx;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -379,7 +379,7 @@ partial interface afterFuncer {
 }
 
 partial struct afterFuncCtx {
-    internal partial ref cancelCtx cancelCtx { get; }
+    /*embed*/ internal cancelCtx cancelCtx;
     internal Δsync.Once once; // either starts running f or stops f from running
     internal Action f;
 }
@@ -754,7 +754,7 @@ public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, e
 // implement Done and Err. It implements cancel by stopping its timer then
 // delegating to cancelCtx.cancel.
 partial struct timerCtx {
-    internal partial ref cancelCtx cancelCtx { get; }
+    /*embed*/ internal cancelCtx cancelCtx;
     internal ж<time.Timer> timer; // Under cancelCtx.mu.
     internal time.Time deadline;
 }

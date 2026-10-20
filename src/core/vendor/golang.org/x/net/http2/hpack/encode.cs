@@ -207,7 +207,7 @@ internal static slice<byte> appendVarInt(slice<byte> dst, byte n, uint64 i) {
     dst = append(dst, (byte)k);
     i -= k;
     for (; i >= 128; i >>= (int)(7)) {
-        dst = append(dst, (byte)((uint64)(0x80 | ((uint64)(i & 0x7f)))));
+        dst = append(dst, (byte)(0x80 | (i & 0x7f)));
     }
     return append(dst, (byte)i);
 }

@@ -48,7 +48,7 @@ Line1
 """u8.Raw();
 
 public static nint A2 = 1;
-public static @string B2 = "42"u8;
+public static @string B2 = "42";
 public static nint C21 = dynamicFn1();
 public static bool D21;
 public static bool E2;
@@ -120,9 +120,6 @@ public static bool Less(this PeopleByAge p, nint i, nint j) {
     return (p[i].Age < p[j].Age);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "Hello"u8;
-
 public static (nint E2, @string p) Testing() {
     nint E2 = default!;
     @string p = default!;
@@ -133,7 +130,7 @@ public static (nint E2, @string p) Testing() {
     nint B2 = 2;
     fmt.Println(E2, B2);
 
-    p = helloˢ;
+    p = "Hello";
 
     {
         nint E2Δ1 = 99;
@@ -152,16 +149,12 @@ public static (nint E2, @string p) Testing() {
     return (E2, p);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloSj3ˢ = "Hello, 世界 \u0053\u004a3"u8;
-private static readonly object consumedˢ = (@string)"consumed:"u8;
-
 internal static void Main() {
-    var agesDemo = new PeopleByAge(new Person[]{new("Zed"u8, 30, 11.5F), new("Amy"u8, 25, 7.0F)}.slice());
+    var agesDemo = new PeopleByAge(new Person[]{new("Zed", 30, 11.5F), new("Amy", 25, 7.0F)}.slice());
     agesDemo.sort();
     fmt.Println(agesDemo[0].Name);
 
-    var lt = ((levelToken)markerConst);
+    var lt = (levelToken)markerConst;
     fmt.Println((uint32)lt + 1);
 
     fmt.Println(MultiLine);
@@ -170,32 +163,32 @@ internal static void Main() {
 
     Testing();
 
-    @string x = helloSj3ˢ;
+    @string x = "Hello, 世界 \u0053\u004a3";
     fmt.Println(x);
 
     var people = new Person[]{
         new(
-            Name: "Person1"u8,
+            Name: "Person1",
             Age: 26,
             ShoeSize: 8F
         ),
         new(
-            Name: "Person2"u8,
+            Name: "Person2",
             Age: 21,
             ShoeSize: 4F
         ),
         new(
-            Name: "Person3"u8,
+            Name: "Person3",
             Age: 15,
             ShoeSize: 9F
         ),
         new(
-            Name: "Person4"u8,
+            Name: "Person4",
             Age: 45,
             ShoeSize: 15F
         ),
         new(
-            Name: "Person5"u8,
+            Name: "Person5",
             Age: 25,
             ShoeSize: 8.5F
         )
@@ -203,26 +196,26 @@ internal static void Main() {
 
     fmt.Println(people);
 
-    sort_package.Sort(((PeopleByShoeSize)people));
+    sort_package.Sort((PeopleByShoeSize)people);
     fmt.Println(people);
 
-    sort_package.Sort(((PeopleByAge)people));
+    sort_package.Sort((PeopleByAge)people);
     fmt.Println(people);
 
-    var byAge = ((PeopleByAge)people);
+    var byAge = (PeopleByAge)people;
     fmt.Println(byAge[0..3].Len(), byAge[2..].Len());
 
     var pb = @new<PeopleByAge>();
     pb.ValueSlot = byAge[1..4];
     fmt.Println((~pb).Len());
 
-    var ros = ((Roster)(slice<Person>)(byAge[0..2]));
+    var ros = (Roster)(slice<Person>)(byAge[0..2]);
     fmt.Println(ros.headcount(), len(ros));
 
     ref var crew = ref heap<Roster>(out var Ꮡcrew);
-    crew = new Roster(new Person[]{new(Name: "Ann"u8, Age: 30), new(Name: "Bob"u8, Age: 40)}.slice());
+    crew = new Roster(new Person[]{new(Name: "Ann", Age: 30), new(Name: "Bob", Age: 40)}.slice());
     consumeOne(ref (Ꮡcrew.of(Roster.Ꮡm_value)).DerefOrNull());
-    fmt.Println(consumedˢ, len(crew), crew[0].Name);
+    fmt.Println("consumed:", len(crew), crew[0].Name);
 
     x = """
 

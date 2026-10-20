@@ -242,6 +242,34 @@ public static partial class GoReflect
                srcType != dstType && !dstType.IsInterface &&
                HasGoName(srcType) && HasGoName(dstType);
     }
+
+    private static readonly ConcurrentDictionary<Type, ConstructorInfo?> s_constraintProxyConstructors = new();
+
+    // The box constructor of a self-referential constraint proxy (go2cs-gen's `nodeжLesser` or
+    // `жLesser<E>`): a pointer-sourced adapter CLASS implementing a generic interface closed over
+    // ITSELF. An interface adapter never closes its interface over itself, so it is never mistaken
+    // for one. Null for every other type.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    private static ConstructorInfo? constraintProxyConstructorOf(Type dstType) =>
+        s_constraintProxyConstructors.GetOrAdd(dstType, static type =>
+        {
+            if (type.IsInterface || !TryAdapterWrappedType(type, out _, out bool pointerSourced) || !pointerSourced)
+                return null;
+
+            foreach (Type iface in type.GetInterfaces())
+            {
+                if (!iface.IsGenericType || iface.GetGenericArguments() is not [Type self] || self != type)
+                    continue;
+
+                foreach (ConstructorInfo ctor in type.GetConstructors())
+                {
+                    if (ctor.GetParameters().Length == 1)
+                        return ctor;
+                }
+            }
+
+            return null;
+        });
     /// <summary>
     /// Marshals a bridge Value's live source object for assignment into a destination slot of
     /// <paramref name="dstType"/> under Go assignability (identity, or interface-implements) —
@@ -341,6 +369,17 @@ public static partial class GoReflect
             (dynamicSrc.GetType() == dstType || dynamicSrc is not IUnsafePointer))
         {
             marshalled = dynamicSrc;
+            return true;
+        }
+
+        // A self-referential CONSTRAINT PROXY slot holds the pointer the proxy stands for (R10): the
+        // field `V T` of Go's lib.Ord2[*elem.Node] is typed lib.жLesser<elem.Node>, and reflect sees a
+        // *elem.Node there. The *T stores wrapped in a new proxy, which is what the proxy's implicit
+        // conversion does for the same assignment in converted code.
+        if (constraintProxyConstructorOf(dstType) is { } proxyCtor &&
+            proxyCtor.GetParameters()[0].ParameterType.IsAssignableFrom(dynamicSrc.GetType()))
+        {
+            marshalled = proxyCtor.Invoke([dynamicSrc]);
             return true;
         }
 

@@ -21,6 +21,7 @@ using System.Runtime.CompilerServices;
 using net;
 using vendor.golang.org.x.net.dns;
 
+[GoFieldAccess(typeof(syscall.RawSockaddrInet6))]
 partial class net_package {
 
 // cgoAvailable set to true to indicate that the cgo resolver
@@ -33,7 +34,7 @@ internal const bool cgoAvailable = true;
 partial struct addrinfoErrno /*num:nint*/;
 
 internal static @string Error(this addrinfoErrno eai) {
-    return _C_gai_strerror(((_C_int)eai));
+    return _C_gai_strerror((_C_int)eai);
 }
 
 internal static bool Temporary(this addrinfoErrno eai) {
@@ -176,7 +177,7 @@ internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinf
                 (port, err) = (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), network + "/"u8 + service, ""u8))); goto ᒐdone;
             }
             { /* default: */
-                (port, err) = (0, new DNSErrorжerror(newDNSError(((addrinfoErrno)gerrno), network + "/"u8 + service, ""u8))); goto ᒐdone;
+                (port, err) = (0, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, network + "/"u8 + service, ""u8))); goto ᒐdone;
             }
         }
         defer(_C_freeaddrinfo, res, ref ᒐ);
@@ -186,12 +187,12 @@ internal static (nint port, error err) cgoLookupServicePort(ж<_C_struct_addrinf
             if (exprᴛ2 == _C_AF_INET) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet4>();
                 var p = @unsafe.ArrayPointer<byte>.Of(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2);
-                (port, err) = ((nint)(((nint)p.ElementRef(0) << (int)(8)) | (nint)p.ElementRef(1)), default!); goto ᒐdone;
+                (port, err) = ((nint)p.ElementRef(0) << 8 | (nint)p.ElementRef(1), default!); goto ᒐdone;
             }
             if (exprᴛ2 == _C_AF_INET6) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet6>();
                 var p = @unsafe.ArrayPointer<byte>.Of(sa.of(syscall.RawSockaddrInet6.ᏑPort), 2);
-                (port, err) = ((nint)(((nint)p.ElementRef(0) << (int)(8)) | (nint)p.ElementRef(1)), default!); goto ᒐdone;
+                (port, err) = ((nint)p.ElementRef(0) << 8 | (nint)p.ElementRef(1), default!); goto ᒐdone;
             }
         }
         (port, err) = (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), network + "/"u8 + service, ""u8)));
@@ -257,7 +258,7 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ1) { /* default: */
-                (addrs, err) = (default!, new DNSErrorжerror(newDNSError(((addrinfoErrno)gerrno), name, ""u8))); goto ᒐdone;
+                (addrs, err) = (default!, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, name, ""u8))); goto ᒐdone;
             }
         }
         defer(_C_freeaddrinfo, res, ref ᒐ);
@@ -270,12 +271,12 @@ internal static (slice<IPAddr> addrs, error err) cgoLookupHostIP(@string network
             var exprᴛ2 = _C_ai_family(r).Value;
             if (exprᴛ2 == _C_AF_INET) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet4>();
-                var addr = new IPAddr(IP: copyIP((~sa).Addr[..]));
+                var addr = new IPAddr(IP: copyIP(sa.of(syscall.RawSockaddrInet4.ᏑAddr).slice()));
                 addrs = append(addrs, addr);
             }
             else if (exprᴛ2 == _C_AF_INET6) {
                 var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet6>();
-                var addr = new IPAddr(IP: copyIP((~sa).Addr[..]), Zone: zoneCache.name((nint)(~sa).Scope_id));
+                var addr = new IPAddr(IP: copyIP(sa.of(syscall.RawSockaddrInet6.ᏑAddr).slice()), Zone: zoneCache.name((nint)sa.Scope_id));
                 addrs = append(addrs, addr);
             }
         }
@@ -308,7 +309,7 @@ internal static (slice<@string> names, error err) cgoLookupPTR(context.Context c
     if (err != default!) {
         return (default!, new DNSErrorжerror(Ꮡ(new DNSError(Err: "invalid address"u8, Name: addr))));
     }
-    var (sa, salen) = cgoSockaddr(((IP)ip.AsSlice()), ip.Zone());
+    var (sa, salen) = cgoSockaddr((IP)ip.AsSlice(), ip.Zone());
     if (sa == nil) {
         return (default!, new DNSErrorжerror(Ꮡ(new DNSError(Err: "invalid address "u8 + ip.String(), Name: addr))));
     }
@@ -341,7 +342,7 @@ internal static (slice<@string> names, error err) cgoLookupAddrPTR(@string addr,
             return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), addr, ""u8)));
         }
         { /* default: */
-            return (default!, new DNSErrorжerror(newDNSError(((addrinfoErrno)gerrno), addr, ""u8)));
+            return (default!, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, addr, ""u8)));
         }
     }
     {
@@ -349,18 +350,18 @@ internal static (slice<@string> names, error err) cgoLookupAddrPTR(@string addr,
             b = b.slice(0, i);
         }
     }
-    return (new @string[]{absDomainName(((@string)b))}.slice(), default!);
+    return (new @string[]{absDomainName((@string)b)}.slice(), default!);
 }
 
 internal static (ж<_C_struct_sockaddr>, _C_socklen_t) cgoSockaddr(IP ip, @string zone) {
     {
         var ip4 = ip.To4(); if (ip4 != default!) {
-            return (cgoSockaddrInet4(ip4), ((_C_socklen_t)syscall.SizeofSockaddrInet4));
+            return (cgoSockaddrInet4(ip4), (_C_socklen_t)syscall.SizeofSockaddrInet4);
         }
     }
     {
         var ip6 = ip.To16(); if (ip6 != default!) {
-            return (cgoSockaddrInet6(ip6, zoneCache.index(zone)), ((_C_socklen_t)syscall.SizeofSockaddrInet6));
+            return (cgoSockaddrInet6(ip6, zoneCache.index(zone)), (_C_socklen_t)syscall.SizeofSockaddrInet6);
         }
     }
     return (default!, 0);

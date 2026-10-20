@@ -37,7 +37,7 @@ public static error Scan(this ж<ΔRat> Ꮡz, fmt.ScanState s, rune ch) {
         return errors.New(ratScanInvalidVerbˢ);
     }
     {
-        var (_, ok) = Ꮡz.SetString(((@string)tok)); if (!ok) {
+        var (_, ok) = Ꮡz.SetString((@string)tok); if (!ok) {
             return errors.New(ratScanInvalidSyntaxˢ);
         }
     }
@@ -212,7 +212,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
             if (n > 1000000) {
                 return (default!, false); // avoid excessively large exponents
             }
-            var pow5 = z.b.abs.expNN(stk, natFive, ((Δnat)default!).setWord(((Word)(nuint)n)), default!, false); // use underlying array of z.b.abs
+            var pow5 = z.b.abs.expNN(stk, natFive, ((Δnat)default!).setWord((Word)(nuint)n), default!, false); // use underlying array of z.b.abs
             if (exp5 > 0){
                 z.a.abs = z.a.abs.mul(stk, z.a.abs, pow5);
                 z.b.abs = z.b.abs.setWord(1);
@@ -262,6 +262,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     int64 exp = default!;
     nint @base = default!;
     error err = default!;
+    var digitsᴷ = new stackAppend<byte>();
 
     // one char look-ahead
     (var ch, err) = r.ReadByte();
@@ -297,7 +298,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     (ch, err) = r.ReadByte();
     if (err == default! && (ch == (rune)'+' || ch == (rune)'-')) {
         if (ch == (rune)'-') {
-            digits = append(digits, (byte)((rune)'-'));
+            digits = append(digitsᴷ, digits, (byte)((rune)'-'));
         }
         (ch, err) = r.ReadByte();
     }
@@ -335,7 +336,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
         err = errNoDigits;
     }
     if (err == default!) {
-        (exp, err) = strconv.ParseInt(((@string)digits), 10, 64);
+        (exp, err) = strconv.ParseInt((@string)digits, 10, 64);
     }
     // other errors take precedence over invalid separators
     if (err == default! && (invalSep || prev == (rune)'_')) {
@@ -347,7 +348,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 
 // String returns a string representation of x in the form "a/b" (even if b == 1).
 public static @string String(this ж<ΔRat> Ꮡx) {
-    return ((@string)Ꮡx.marshal(default!));
+    return (@string)Ꮡx.marshal(default!);
 }
 
 // marshal implements [Rat.String] returning a slice of bytes.
@@ -384,25 +385,26 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
+        var bufᴷ = new stackAppend<byte>();
 
         slice<byte> buf = default!;
 
         if (x.IsInt()) {
             buf = Ꮡx.of(big_package.ΔRat.Ꮡa).Append(buf, 10);
             if (prec > 0) {
-                buf = append(buf, (byte)((rune)'.'));
+                buf = append(bufᴷ, buf, (byte)((rune)'.'));
                 for (nint i = prec; i > 0; i--) {
                     buf = append(buf, (byte)((rune)'0'));
                 }
             }
-            return ((@string)buf);
+            return (@string)buf;
         }
         // x.b.abs != 0
 
         var stk = getStack();
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
-        var (q, r) = ((Δnat)default!).div(stk, ((Δnat)default!), x.a.abs, x.b.abs);
+        var (q, r) = ((Δnat)default!).div(stk, (Δnat)default!, x.a.abs, x.b.abs);
 
         var p = natOne;
         if (prec > 0) {
@@ -410,7 +412,7 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
         }
 
         r = r.mul(stk, r, p);
-        (r, var r2) = r.div(stk, ((Δnat)default!), r, x.b.abs);
+        (r, var r2) = r.div(stk, (Δnat)default!, r, x.b.abs);
 
         // see if we need to round up
         r2 = r2.add(r2, r2);
@@ -436,7 +438,7 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
             buf = appendꓸꓸꓸ(buf, rs);
         }
 
-        return ((@string)buf);
+        return (@string)buf;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -464,6 +466,8 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     bool exact = default!;
     GoFrame ᒐ = default;
     try {
+        var tabᴷ = new stackAppend<Δnat>();
+
         var stk = getStack();
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
@@ -501,7 +505,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
                     break; // f doesn't divide q evenly
                 }
             }
-            tab = append(tab, f);
+            tab = append(tabᴷ, tab, f);
             f = ((Δnat)default!).sqr(stk, f); // nat(nil) to ensure a new f for each table entry
         }
 

@@ -29,14 +29,14 @@ internal static traceWriter writeGoStatus(this traceWriter w, uint64 goid, int64
 
     // Trace the status.
     if (stackID == 0){
-        w = w.@event(tracev2.EvGoStatus, ((traceArg)goid), ((traceArg)(uint64)mid), ((traceArg)(uint64)(uint8)status));
+        w = w.@event(tracev2.EvGoStatus, (traceArg)goid, (traceArg)(uint64)mid, (traceArg)(uint64)(uint8)status);
     } else {
-        w = w.@event(tracev2.EvGoStatusStack, ((traceArg)goid), ((traceArg)(uint64)mid), ((traceArg)(uint64)(uint8)status), ((traceArg)stackID));
+        w = w.@event(tracev2.EvGoStatusStack, (traceArg)goid, (traceArg)(uint64)mid, (traceArg)(uint64)(uint8)status, (traceArg)stackID);
     }
 
     // Trace any special ranges that are in-progress.
     if (markAssist) {
-        w = w.@event(tracev2.EvGCMarkAssistActive, ((traceArg)goid));
+        w = w.@event(tracev2.EvGCMarkAssistActive, (traceArg)goid);
     }
     return w;
 }
@@ -76,7 +76,7 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
         // check if the goroutine is in a syscall. This used to be just a small problematic
         // window, but this is now the default since _Psyscall no longer exists. See #64318
         // for the history on why it was needed while _Psyscall still existed.
-        if ((~w.mp).p.ptr() == Ꮡpp && (~w.mp).curg != nil && (uint32)(readgstatus((~w.mp).curg) & ~(uint32)_Gscan) == _Gsyscall) {
+        if ((~w.mp).p.ptr() == Ꮡpp && (~w.mp).curg != nil && (readgstatus((~w.mp).curg) & ~(uint32)_Gscan) == _Gsyscall) {
             status = tracev2.ProcSyscall;
         }
     }
@@ -107,11 +107,11 @@ internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, trac
     }
 
     // Trace the status.
-    w = w.@event(tracev2.EvProcStatus, ((traceArg)pid), ((traceArg)(uint64)(uint8)status));
+    w = w.@event(tracev2.EvProcStatus, (traceArg)pid, (traceArg)(uint64)(uint8)status);
 
     // Trace any special ranges that are in-progress.
     if (inSweep) {
-        w = w.@event(tracev2.EvGCSweepActive, ((traceArg)pid));
+        w = w.@event(tracev2.EvGCSweepActive, (traceArg)pid);
     }
     return w;
 }
@@ -131,7 +131,7 @@ internal static readonly @string triedToTraceGoroutineˢ = "tried to trace gorou
 internal static tracev2.GoStatus goStatusToTraceGoStatus(uint32 status, waitReason wr) {
     // N.B. Ignore the _Gscan bit. We don't model it in the tracer.
     tracev2.GoStatus tgs = default!;
-    var exprᴛ1 = (uint32)(status & ~(uint32)_Gscan);
+    var exprᴛ1 = (status & ~(uint32)_Gscan);
     if (exprᴛ1 == _Grunnable) {
         tgs = tracev2.GoRunnable;
     }
@@ -218,7 +218,7 @@ internal static void setStatusTraced(this ref traceSchedResourceState r, uintptr
 // nextSeq returns the next sequence number for the resource.
 internal static traceArg nextSeq(this ref traceSchedResourceState r, uintptr gen) {
     r.seq[gen % 2]++;
-    return ((traceArg)r.seq[gen % 2]);
+    return (traceArg)r.seq[gen % 2];
 }
 
 } // end runtime_package

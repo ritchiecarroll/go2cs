@@ -571,7 +571,7 @@ internal static (nint advance, slice<byte> token, error err) split(this ref coun
 // Check that the looping-at-EOF check doesn't trigger for merely empty tokens.
 public static void TestEmptyLinesOK(ж<Δtesting.T> Ꮡt) {
     ref var c = ref heap<countdown>(out var Ꮡc);
-    c = ((countdown)10000);
+    c = (countdown)10000;
     var s = NewScanner(new bufio_test_package.strings_ReaderжReader(strings.NewReader(strings.Repeat("\n"u8, 10000))));
     s.Split(new Func<slice<byte>, bool, (nint, slice<byte>, error)>(Ꮡc.split));
     while (s.Scan()) {
@@ -627,7 +627,7 @@ internal static readonly object readTooManyLinesˢ = (@string)"read too many lin
 // on a reader that returns a negative count of bytes read (issue 38053).
 public static void TestNegativeEOFReader(ж<Δtesting.T> Ꮡt) {
     ref var r = ref heap<negativeEOFReader>(out var Ꮡr);
-    r = ((negativeEOFReader)10);
+    r = (negativeEOFReader)10;
     var scanner = NewScanner(new bufio_test_package.negativeEOFReaderжReader(Ꮡr));
     nint c = 0;
     while (scanner.Scan()) {

@@ -73,7 +73,7 @@ internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Read
         Ꮡp.Value.error(msg);
     };
     p.scanner.Value.Mode = (nuint)((nuint)(UntypedInt)((UntypedInt)(scanner.ScanIdents | scanner.ScanInts) | scanner.ScanFloats) | (nuint)scanner.ScanStrings);
-    p.scanner.Value.Whitespace = (uint64)((1 << (int)((rune)'\t')) | 4294967296L);
+    p.scanner.Value.Whitespace = (uint64)(1 << (int)((rune)'\t') | 4294967296L);
     p.scanner.Value.Filename = filename; // for good error messages
     p.next();
 }
@@ -147,7 +147,7 @@ internal static @string parseUnquotedString(this ref parser p) {
     Ꮡb.WriteString(p.scanner.TokenText());
     // This loop needs to examine each character before deciding whether to consume it. If we see a semicolon,
     // we need to let it be consumed by p.next().
-    for (var ch = p.scanner.Peek(); ch != (rune)'\n' && ch != (rune)';' && ch != scanner.EOF && (uint64)((~p.scanner).Whitespace & (((uint64)1).Lsh((nuint)ch))) == 0; ch = p.scanner.Peek()) {
+    for (var ch = p.scanner.Peek(); ch != (rune)'\n' && ch != (rune)';' && ch != scanner.EOF && ((~p.scanner).Whitespace & (((uint64)1).Lsh((nuint)ch))) == 0; ch = p.scanner.Peek()) {
         Ꮡb.WriteRune(ch);
         p.scanner.Next();
     }
@@ -1187,6 +1187,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
+        var typeOffsetsᴷ = new stackAppend<parseTypes_typeOffset>();
 
         nint maxp1 = p.parseInt();
         nint exportedp1 = p.parseInt();
@@ -1196,7 +1197,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
         nint total = 0;
         for (nint i = 1; i < maxp1; i++) {
             nint len = p.parseInt();
-            typeOffsets = append(typeOffsets, new parseTypes_typeOffset(total, len));
+            typeOffsets = append(typeOffsetsᴷ, typeOffsets, new parseTypes_typeOffset(total, len));
             total += len;
         }
 

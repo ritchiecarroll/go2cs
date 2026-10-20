@@ -872,7 +872,7 @@ internal static ж<sync.Pool> ᏑcopyBufPool = new StandardBox<sync.Pool>(new sy
 internal static ref sync.Pool copyBufPool => ref ᏑcopyBufPool.Value;
 
 internal static slice<byte> getCopyBuf() {
-    return (~ᏑcopyBufPool.Get()._<ж<array<byte>>>())[..];
+    return ᏑcopyBufPool.Get()._<ж<array<byte>>>().slice();
 }
 
 internal static void putCopyBuf(slice<byte> b) {
@@ -884,10 +884,10 @@ internal static void putCopyBuf(slice<byte> b) {
 
 internal static ж<sync.Pool> bufioWriterPool(nint size) {
     var exprᴛ1 = size;
-    if (exprᴛ1 == (2 << (int)(10))) {
+    if (exprᴛ1 == (2 << 10)) {
         return ᏑbufioWriter2kPool;
     }
-    if (exprᴛ1 == (4 << (int)(10))) {
+    if (exprᴛ1 == (4 << 10)) {
         return ᏑbufioWriter4kPool;
     }
     return default!;
@@ -1975,7 +1975,7 @@ internal static void setState(this ж<conn> Ꮡc, net.Conn nc, ConnState state, 
     if (state > 0xff || state < 0) {
         throw panic("internal error");
     }
-    var packedState = (uint64)((uint64)((time.Now().Unix() << (int)(8))) | (uint64)(nint)state);
+    var packedState = (uint64)(time.Now().Unix() << 8) | (uint64)(nint)state;
     Ꮡc.of(conn.ᏑcurState).Store(packedState);
     if (!runHook) {
         return;
@@ -1989,7 +1989,7 @@ internal static void setState(this ж<conn> Ꮡc, net.Conn nc, ConnState state, 
 
 internal static (ConnState state, int64 unixSec) getState(this ж<conn> Ꮡc) {
     var packedState = Ꮡc.of(conn.ᏑcurState).Load();
-    return (((ConnState)(nint)((uint64)(packedState & 0xff))), (int64)((packedState >> (int)(8))));
+    return ((ConnState)(nint)((packedState & 0xff)), (int64)(packedState >> 8));
 }
 
 // badRequestError is a literal string (used by in the server in HTML,
@@ -2161,7 +2161,7 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
 
         c.r = Ꮡ(new connReader(conn: Ꮡc, rwc: c.rwc));
         c.bufr = newBufioReader(new connReaderжReader(c.r));
-        c.bufw = newBufioWriterSize(new checkConnErrorWriter(Ꮡc), (4 << (int)(10)));
+        c.bufw = newBufioWriterSize(new checkConnErrorWriter(Ꮡc), 4 << 10);
 
         {
             var d = c.server.readHeaderTimeout(); if (d > 0) {
@@ -4428,7 +4428,7 @@ internal static void ServeHTTP(this globalOptionsHandler _, ResponseWriter w, ж
         // over that is considered a waste of server resources
         // (or an attack) and we abort and close the connection,
         // courtesy of MaxBytesReader's EOF behavior.
-        var mb = MaxBytesReader(w, r.Body, ((int64)4 << (int)(10)));
+        var mb = MaxBytesReader(w, r.Body, (int64)4 << 10);
         io.Copy(io.Discard, mb);
     }
 }

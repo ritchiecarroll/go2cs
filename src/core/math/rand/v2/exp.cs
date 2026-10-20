@@ -27,7 +27,7 @@ public static float64 ExpFloat64(this ref Rand r) {
     while (ᐧ) {
         var u = r.Uint64();
         var j = (uint32)u;
-        var i = (uint8)((u >> (int)(32)));
+        var i = (uint8)(u >> 32);
         var x = (float64)j * (float64)we[i];
         if (j < ke[i]) {
             return x;

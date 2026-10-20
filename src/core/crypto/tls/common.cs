@@ -1401,10 +1401,10 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         // Finally, there needs to be a mutual cipher suite that uses the static
         // RSA key exchange instead of ECDHE.
         var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.supportedCipherSuites(), (ж<cipherSuite> cΔ1) => {
-            if ((nint)((~cΔ1).flags & (nint)suiteECDHE) != 0) {
+            if (((~cΔ1).flags & (nint)suiteECDHE) != 0) {
                 return false;
             }
-            if (vers < VersionTLS12 && (nint)((~cΔ1).flags & (nint)suiteTLS12) != 0) {
+            if (vers < VersionTLS12 && ((~cΔ1).flags & (nint)suiteTLS12) != 0) {
                 return false;
             }
             return true;
@@ -1497,10 +1497,10 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // this certificate. Cipher suite selection will then apply the logic in
     // reverse to pick it. See also serverHandshakeState.cipherSuiteOk.
     var cipherSuite = selectCipherSuite(chi.CipherSuites, config.supportedCipherSuites(), (ж<cipherSuite> cΔ3) => {
-        if ((nint)((~cΔ3).flags & (nint)suiteECDHE) == 0) {
+        if (((~cΔ3).flags & (nint)suiteECDHE) == 0) {
             return false;
         }
-        if ((nint)((~cΔ3).flags & (nint)suiteECSign) != 0){
+        if (((~cΔ3).flags & (nint)suiteECSign) != 0){
             if (!ecdsaCipherSuite) {
                 return false;
             }
@@ -1509,7 +1509,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
                 return false;
             }
         }
-        if (vers < VersionTLS12 && (nint)((~cΔ3).flags & (nint)suiteTLS12) != 0) {
+        if (vers < VersionTLS12 && ((~cΔ3).flags & (nint)suiteTLS12) != 0) {
             return false;
         }
         return true;
@@ -1667,7 +1667,7 @@ partial interface handshakeMessageWithOriginalBytes :
 // lruSessionCache is a ClientSessionCache implementation that uses an LRU
 // caching strategy.
 partial struct lruSessionCache {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public go.sync_package.Mutex Mutex;
     internal map<@string, ж<list.Element>> m;
     internal ж<list.List> q;
     internal nint capacity;

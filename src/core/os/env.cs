@@ -13,6 +13,8 @@ partial class os_package {
 // Expand replaces ${var} or $var in the string based on the mapping function.
 // For example, [os.ExpandEnv](s) is equivalent to [os.Expand](s, [os.Getenv]).
 public static @string Expand(@string s, Func<@string, @string> mapping) {
+    var bufᴷ = new stackAppend<byte>();
+
     slice<byte> buf = default!;
     // ${} is all ASCII, so bytes are fine for this operation.
     nint i = 0;
@@ -30,7 +32,7 @@ public static @string Expand(@string s, Func<@string, @string> mapping) {
             if (name == ""u8){
                 // Valid syntax, but $ was not followed by a
                 // name. Leave the dollar character untouched.
-                buf = append(buf, s[j]);
+                buf = append(bufᴷ, buf, s[j]);
             } else {
                 buf = append(buf, mapping(name).ꓸꓸꓸ);
             }

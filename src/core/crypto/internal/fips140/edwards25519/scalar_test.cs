@@ -60,14 +60,14 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
     case {} when diceRoll is < 5: {
         // Generate a low scalar in [0, 2^125).
         Ꮡrand.Read(s[..16]);
-        s[15] &= (byte)(((1 << (int)(5))) - 1);
+        s[15] &= (byte)((1 << 5) - 1);
         break;
     }
     case {} when diceRoll is < 10: {
         // Generate a high scalar in [2^252, 2^252 + 2^124).
-        s[31] = (byte)(1 << (int)(4));
+        s[31] = (byte)(1 << 4);
         Ꮡrand.Read(s[..16]);
-        s[15] &= (byte)(((1 << (int)(4))) - 1);
+        s[15] &= (byte)((1 << 4) - 1);
         break;
     }
     default: {
@@ -75,7 +75,7 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
         // negligibly different distribution (the former has a 2^-127.6 chance
         // of being out of the latter range).
         Ꮡrand.Read(s[..]);
-        s[31] &= (byte)(((1 << (int)(4))) - 1);
+        s[31] &= (byte)((1 << 4) - 1);
         break;
     }}
 
@@ -106,7 +106,7 @@ public static void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
         @in = @in.Clone();
         ref var sc = ref heap(scʗp.ΔClone(), out var Ꮡsc);
         // Mask out top 4 bits to guarantee value falls in [0, l).
-        @in[len(@in) - 1] &= (byte)(((1 << (int)(4))) - 1);
+        @in[len(@in) - 1] &= (byte)((1 << 4) - 1);
         {
             var (_, err) = Ꮡsc.SetCanonicalBytes(@in[..]); if (err != default!) {
                 return false;
@@ -307,7 +307,7 @@ internal static reflectꓸValue Generate(this notZeroScalar _, ж<mathrand.Rand>
         var ᴛ3 = s.s.Value;
         fiatScalarNonzero(ref isNonZero, ref ᴛ3);
     }
-    return reflect.ValueOf(((notZeroScalar)s));
+    return reflect.ValueOf((notZeroScalar)s);
 }
 
 public static void TestScalarEqual(ж<testing.T> Ꮡt) {

@@ -20,15 +20,7 @@ private static readonly object firstˢ = (@string)"First"u8;
 private static readonly object secondˢ = (@string)"Second"u8;
 private static readonly object thirdˢ = (@string)"Third"u8;
 private static readonly object fourthˢ = (@string)"Fourth"u8;
-private static readonly @string stoppedˢ = "stopped"u8;
-private static readonly @string goStoppedˢ = "go-stopped"u8;
-private static readonly object afterCloseˢ = (@string)"after close:"u8;
 private static readonly @string fifthˢ = "Fifth"u8;
-private static readonly object afterˢ = (@string)"after:"u8;
-private static readonly object sentˢ = (@string)"sent:"u8;
-private static readonly object heldˢ = (@string)"| held:"u8;
-private static readonly object notifyˢ = (@string)"notify:"u8;
-private static readonly object mainFunctionˢ = (@string)"Main function"u8;
 
 internal static partial void Main() {
     GoFrame ᒐ = default;
@@ -42,18 +34,18 @@ internal static partial void Main() {
         defer(ᴛ1 => f1ʗ1(ᴛ1), fourthˢ, ref ᒐ);
 
         var msgs = new channel<@string>(2);
-        var cancel = makeStop(stoppedˢ, msgs.WithDirection(GoChanDir.Send));
+        var cancel = makeStop("stopped", msgs.WithDirection(GoChanDir.Send));
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         var msgsʗ1 = msgs;
-        goǃ(() => makeStop(goStoppedˢ, msgsʗ1.WithDirection(GoChanDir.Send))());
+        goǃ(() => makeStop("go-stopped", msgsʗ1.WithDirection(GoChanDir.Send))());
         fmt.Println(ᐸꟷ(msgs));
 
         var drained = new channel<nint>(1);
         var drainedʗ1 = drained;
         defer(() => {
             var (v, open) = ᐸꟷ(drainedʗ1, ꟷ);
-            fmt.Println(afterCloseˢ, v, open);
+            fmt.Println("after close:", v, open);
         }, ref ᒐ);
         defer(ᴛ1 => close(ᴛ1), drained, ref ᒐ);
 
@@ -67,14 +59,14 @@ internal static partial void Main() {
 
         var sm = Ꮡ(new sema(nil));
         acquireAndWork(sm);
-        fmt.Println(afterˢ, (~sm).held);
+        fmt.Println("after:", (~sm).held);
 
         watchAndSend(sm);
-        fmt.Println(sentˢ, ᐸꟷ((~sm).@out), heldˢ, (~sm).held);
+        fmt.Println("sent:", ᐸꟷ((~sm).@out), "| held:", (~sm).held);
 
-        fmt.Println(notifyˢ, notifyAll(1, 2, 3));
+        fmt.Println("notify:", notifyAll(1, 2, 3));
 
-        fmt.Println(mainFunctionˢ);
+        fmt.Println("Main function");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -85,21 +77,14 @@ partial struct sema {
     internal channel<nint> @out;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object semaReleasedˢ = (@string)"sema released"u8;
-
 internal static void release(this ref sema s) {
     s.held = false;
-    fmt.Println(semaReleasedˢ);
+    fmt.Println("sema released");
 }
 
 internal static void send(this ref sema s, nint n) {
     s.@out.ᐸꟷ(n);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sentFirstˢ = (@string)"sent-first:"u8;
-private static readonly object watchingHeldˢ = (@string)"watching, held:"u8;
 
 internal static partial void watchAndSend(ж<sema> Ꮡs) {
     GoFrame ᒐ = default;
@@ -108,18 +93,15 @@ internal static partial void watchAndSend(ж<sema> Ꮡs) {
 
         s.@out = new channel<nint>(2);
         s.held = true;
-        goǃ(Ꮡs.send, (nint)(7));
-        fmt.Println(sentFirstˢ, ᐸꟷ(s.@out));
-        defer(Ꮡs.send, (nint)(9), ref ᒐ);
+        goǃ(Ꮡs.send, (nint)7);
+        fmt.Println("sent-first:", ᐸꟷ(s.@out));
+        defer(Ꮡs.send, (nint)9, ref ᒐ);
         defer(Ꮡs.release, ref ᒐ);
-        fmt.Println(watchingHeldˢ, s.held);
+        fmt.Println("watching, held:", s.held);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object workingHeldˢ = (@string)"working, held:"u8;
 
 internal static void acquireAndWork(ж<sema> Ꮡs) {
     GoFrame ᒐ = default;
@@ -128,7 +110,7 @@ internal static void acquireAndWork(ж<sema> Ꮡs) {
 
         s.held = true;
         defer(Ꮡs.release, ref ᒐ);
-        fmt.Println(workingHeldˢ, s.held);
+        fmt.Println("working, held:", s.held);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

@@ -92,4 +92,34 @@ partial class windows_package
 
         return default!;
     }
+
+    // The FILE twin: execIO harvests an operation on a file or pipe FD with GetOverlappedResult
+    // rather than WSAGetOverlappedResult, and since 2026-10-17 syscall's readFile/writeFile submit
+    // those through the same seam (syscall/windows/zsyscall_windows_file_impl.cs), so the control
+    // block the kernel wrote is the record's, not the managed `o.o`. The predicate is the submit's
+    // own: an overlapped on a descriptor the poller owns. Anything else -- a caller's own overlapped,
+    // an FD whose Init left it unpolled -- keeps the generated body, and the predicate is what stops
+    // a POOLED key from answering with a record another descriptor's submit left behind. No decode
+    // is owed on this path: a file read lands in the caller's own pinned buffer.
+    public static unsafe error /*err*/ GetOverlappedResult(syscallꓸHandle handle, ж<syscall.Overlapped> Ꮡoverlapped, ж<uint32> Ꮡdone, bool wait) {
+        uint32 _p0 = wait ? 1u : 0u;
+
+        if (Ꮡoverlapped == nil || !GoAsyncIO.HasReadiness((nuint)(uintptr)handle) || !GoAsyncIO.TryGetOperationAddress(Ꮡoverlapped, out nuint overlapped)) {
+            // The generated body, unchanged.
+            var (r0, _, e0) = syscall.SyscallN(procGetOverlappedResult.Addr(), (uintptr)handle, (uintptr)Ꮡoverlapped, (uintptr)Ꮡdone, (uintptr)_p0);
+            System.GC.KeepAlive(Ꮡoverlapped);
+            System.GC.KeepAlive(Ꮡdone);
+            return r0 == 0 ? errnoErr(e0) : default!;
+        }
+
+        uint32 done = 0;
+
+        var (r1, _, e1) = syscall.SyscallN(procGetOverlappedResult.Addr(), (uintptr)handle, (uintptr)overlapped, (uintptr)(void*)(&done), (uintptr)_p0);
+
+        if (Ꮡdone != nil) {
+            Ꮡdone.Value = done;
+        }
+
+        return r1 == 0 ? errnoErr(e1) : default!;
+    }
 }

@@ -4,18 +4,6 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sumˢ = (@string)"sum:"u8;
-private static readonly object totalˢ = (@string)"total:"u8;
-private static readonly object indexˢ = (@string)"index:"u8;
-private static readonly object numˢ = (@string)"num:"u8;
-private static readonly object totalˢ2 = (@string)"Total:"u8;
-private static readonly object keyˢ = (@string)"key:"u8;
-private static readonly object valueˢ = (@string)"value:"u8;
-private static readonly @string subTestˢ = "sub-test"u8;
-private static readonly object valˢ = (@string)"val:"u8;
-private static readonly @string testˢ = "test"u8;
-
 internal static void Main() {
     var nums = new nint[]{2, 3, 4}.slice();
     nint sum = 0;
@@ -31,39 +19,39 @@ internal static void Main() {
         sum += num;
         total += i;
     }
-    fmt.Println(sumˢ, sum, totalˢ, total);
+    fmt.Println("sum:", sum, "total:", total);
 
     foreach (var (iΔ1, numΔ1) in nums) {
         if (numΔ1 == 3) {
-            fmt.Println(indexˢ, iΔ1);
+            fmt.Println("index:", iΔ1);
         }
     }
 
     foreach (var (_, numΔ2) in nums) {
-        fmt.Println(numˢ, numΔ2);
+        fmt.Println("num:", numΔ2);
     }
 
     foreach (var (iΔ2, _) in nums) {
-        fmt.Println(indexˢ, iΔ2);
+        fmt.Println("index:", iΔ2);
     }
 
     total = 0;
     foreach ((_, _) in nums) {
         total++;
     }
-    fmt.Println(totalˢ2, total);
+    fmt.Println("Total:", total);
 
-    var kvs = new map<@string, @string>{["a"u8] = "apple"u8, ["b"u8] = "banana"u8};
+    var kvs = new map<@string, @string>{["a"] = "apple", ["b"] = "banana"};
     foreach (var (kΔ1, vΔ1) in kvs) {
         fmt.Printf("%s -> %s\n"u8, kΔ1, vΔ1);
     }
 
     foreach (var (kΔ2, _) in kvs) {
-        fmt.Println(keyˢ, kΔ2);
+        fmt.Println("key:", kΔ2);
     }
 
     foreach (var (vΔ2, _) in kvs) {
-        fmt.Println(valueˢ, vΔ2);
+        fmt.Println("value:", vΔ2);
     }
 
     @string k = default!;
@@ -79,7 +67,7 @@ internal static void Main() {
             fmt.Printf("%s -> %s\n"u8, kΔ3, vΔ3);
         }
 
-        @string strΔ1 = subTestˢ;
+        @string strΔ1 = "sub-test";
 
         nint i1Δ1 = default!;
         rune c1Δ1 = default!;
@@ -95,13 +83,13 @@ internal static void Main() {
     foreach (var (kᴛ2, _) in kvs) {
         k = kᴛ2;
 
-        fmt.Println(keyˢ, k);
+        fmt.Println("key:", k);
     }
 
     foreach (var (_, vᴛ3) in kvs) {
         v = vᴛ3;
 
-        fmt.Println(valˢ, v);
+        fmt.Println("val:", v);
     }
 
     total = 0;
@@ -109,13 +97,13 @@ internal static void Main() {
         total++;
     }
 
-    fmt.Println(totalˢ2, total);
+    fmt.Println("Total:", total);
 
     foreach (var (iΔ3, c) in (@string)"go"u8) {
         fmt.Println(iΔ3, c);
     }
 
-    @string str = testˢ;
+    @string str = "test";
 
     nint i1 = default!;
     rune c1 = default!;
@@ -179,7 +167,7 @@ internal static void Main() {
         _ = len(kvs);
         total++;
     }
-    fmt.Println(totalˢ2, total);
+    fmt.Println("Total:", total);
 
     var ch = new channel<nint>(2);
     ch.ᐸꟷ(7);
@@ -189,7 +177,7 @@ internal static void Main() {
         _ = len(kvs);
         total++;
     }
-    fmt.Println(totalˢ2, total);
+    fmt.Println("Total:", total);
 }
 
 internal static void calculate(nint x) {

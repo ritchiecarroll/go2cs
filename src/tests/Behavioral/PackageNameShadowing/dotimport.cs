@@ -15,8 +15,8 @@ internal static @string dotImported() {
     var stamp = Date(2011, m, 12, 3, 4, 5, 600000000, loc);
 
     return fmt.Sprint(
-        m, (@string)" "u8, w, (@string)" "u8, d, (@string)" "u8, loc.OrTypedNil(), (@string)" "u8, ΔLocal != nil, (@string)" "u8,
-        stamp.Format(RFC3339Nano), (@string)" "u8,
+        m, " ", w, " ", d, " ", loc.OrTypedNil(), " ", ΔLocal != nil, " ",
+        stamp.Format(RFC3339Nano), " ",
         stamp.Hour(), stamp.Minute(), stamp.Second(), stamp.Nanosecond());
 }
 

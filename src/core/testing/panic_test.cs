@@ -177,7 +177,7 @@ ran outer cleanup
             cmd.Value.Args = appendꓸꓸꓸ((~cmd).Args, tcʗ1.flags);
             cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
             var (b, _) = cmd.CombinedOutput();
-            @string got = ((@string)b);
+            @string got = (@string)b;
             @string want = strings.TrimSpace(tcʗ1.want);
             @string re = makeRegexp(want);
             {
@@ -286,7 +286,7 @@ panic: die
         var cmd = exec.Command(Δos.Args[0], tc.flags.ꓸꓸꓸ);
         cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
         var (b, _) = cmd.CombinedOutput();
-        @string got = ((@string)b);
+        @string got = (@string)b;
         @string want = tc.want;
         @string re = makeRegexp(want);
         {

@@ -169,6 +169,13 @@
       "note": "U+1D9C - hoisted function-local big-constant field-name suffix: a Go local const whose value fits neither int64 nor uint64 emits as GoBigConst (BigInteger), and the parse hoists to one static readonly field per package so the local costs a struct copy instead of a per-call BigInteger.Parse (L11). Converter-only, so no Symbols.cs projection."
     },
     {
+      "name": "StackBufferMarker",
+      "value": "\u1d37",
+      "goEscape": true,
+      "goTrailing": "Suffix of a stack-append buffer local: var x\u1d37 = new stackAppend<T>(); at a function's entry, passed at x's first qualifying append, x = append(x\u1d37, x, v).",
+      "note": "U+1D37 - Go 1.25+ stack backing store of a non-escaping append: one local per qualifying variable, declared at the entry of the innermost function that declares the variable and appends to it (stackAppendHints.go; golib stackAppend.cs). Converter-only, so no Symbols.cs projection."
+    },
+    {
       "name": "FuncValueMarker",
       "value": "\u1da0",
       "csharp": true,
@@ -353,6 +360,17 @@
         "argument list."
       ],
       "note": "hand-owned unsafe.Pointer static method applied at every unsafe.Pointer-into-`any` boxing site; emitted by the converter only, so no Symbols.cs projection."
+    },
+    {
+      "name": "TypedNilTypeParamAccessor",
+      "value": "OrTypedNilOf()",
+      "comment": [
+        "TypedNilTypeParamAccessor is the golib extension method a value of TYPE-PARAMETER type takes on its way into an",
+        "EMPTY interface (`any`) when its type set can hold a pointer, a func or an unsafe.Pointer: the generic sibling of",
+        "TypedNilBoxAccessor and TypedNilFuncAccessor, decided per type argument at run time (golib TypedNilOf.cs), since",
+        "inside the generic body the converter cannot see which of them the argument is."
+      ],
+      "note": "golib extension method applied at every type-parameter-into-`any` boxing site whose type set can hold a nil pointer, func or unsafe.Pointer; emitted by the converter only, so no Symbols.cs projection."
     },
     {
       "name": "PackageTestInitHookMethod",

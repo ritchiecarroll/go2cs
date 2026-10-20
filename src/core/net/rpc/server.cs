@@ -154,7 +154,7 @@ public static readonly @string DefaultDebugPath = "/debug/rpc"u8;
 internal static reflectꓸType typeOfError = reflect.TypeFor<error>();
 
 public partial struct methodType {
-    public partial ref sync_package.Mutex Mutex { get; } // protects counters
+    /*embed*/ public sync_package.Mutex Mutex; // protects counters
     internal reflectꓸMethod method;
     public reflectꓸType ArgType;
     public reflectꓸType ReplyType;

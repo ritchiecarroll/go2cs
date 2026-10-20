@@ -5,10 +5,6 @@ using Δio = io_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object typeSwitchUnwrapˢ = (@string)"TypeSwitch: Unwrap ="u8;
-private static readonly object typeSwitchNoMatchˢ = (@string)"TypeSwitch: No match"u8;
-
 internal partial interface testTypeSwitch_type /*dyn*/ {
     error Unwrap();
 }
@@ -16,19 +12,15 @@ internal partial interface testTypeSwitch_type /*dyn*/ {
 internal static void testTypeSwitch(error err) {
     switch (err.type()) {
     case {} Δx when Δx._<testTypeSwitch_type>(out var x): {
-        fmt.Println(typeSwitchUnwrapˢ, x.Unwrap());
+        fmt.Println("TypeSwitch: Unwrap =", x.Unwrap());
         break;
     }
     default: {
         var x = err;
-        fmt.Println(typeSwitchNoMatchˢ);
+        fmt.Println("TypeSwitch: No match");
         break;
     }}
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object typeAssertionIsNilˢ = (@string)"TypeAssertion: Is(nil) ="u8;
-private static readonly object typeAssertionNoMatchˢ = (@string)"TypeAssertion: No match"u8;
 
 internal partial interface testTypeAssertion_type /*dyn*/ {
     bool Is(error _);
@@ -37,15 +29,12 @@ internal partial interface testTypeAssertion_type /*dyn*/ {
 internal static void testTypeAssertion(error err) {
     {
         var (x, ok) = err._<testTypeAssertion_type>(ᐧ); if (ok){
-            fmt.Println(typeAssertionIsNilˢ, x.Is(default!));
+            fmt.Println("TypeAssertion: Is(nil) =", x.Is(default!));
         } else {
-            fmt.Println(typeAssertionNoMatchˢ);
+            fmt.Println("TypeAssertion: No match");
         }
     }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object funcParamReadˢ = (@string)"FuncParam: Read ="u8;
 
 internal partial interface takesReader_r /*dyn*/ {
     (nint, error) Read(slice<byte> _Δp0);
@@ -54,17 +43,14 @@ internal partial interface takesReader_r /*dyn*/ {
 internal static void takesReader(takesReader_r r) {
     var buf = new slice<byte>(4);
     var (n, _) = r.Read(buf);
-    fmt.Println(funcParamReadˢ, ((@string)(buf.slice(0, n))));
+    fmt.Println("FuncParam: Read =", (@string)(buf.slice(0, n)));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object compositeLiteralReadˢ = (@string)"CompositeLiteral: Read ="u8;
 
 internal static void testCompositeLiteral() {
     var readers = new takesReader_r[]{new fakeReader(nil)}.slice();
     var buf = new slice<byte>(4);
     var (n, _) = readers[0].Read(buf);
-    fmt.Println(compositeLiteralReadˢ, ((@string)(buf.slice(0, n))));
+    fmt.Println("CompositeLiteral: Read =", (@string)(buf.slice(0, n)));
 }
 
 partial interface WithInlineField_R /*dyn*/ {
@@ -75,14 +61,11 @@ partial struct WithInlineField {
     public WithInlineField_R R;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object inlineFieldReadˢ = (@string)"InlineField: Read ="u8;
-
 internal static void testInlineField() {
     var s = new WithInlineField(R: new fakeReader(nil));
     var buf = new slice<byte>(4);
     var (n, _) = s.R.Read(buf);
-    fmt.Println(inlineFieldReadˢ, ((@string)(buf.slice(0, n))));
+    fmt.Println("InlineField: Read =", (@string)(buf.slice(0, n)));
 }
 
 partial interface Δtype /*dyn*/ {
@@ -105,13 +88,10 @@ internal static error Flush(this embeddedImpl _) {
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object interfaceEmbedCloseAndˢ = (@string)"InterfaceEmbed: Close and Flush OK"u8;
-
 internal static void testInterfaceEmbedding(InlineEmbed x) {
     _ = x.Close();
     _ = x.Flush();
-    fmt.Println(interfaceEmbedCloseAndˢ);
+    fmt.Println("InterfaceEmbed: Close and Flush OK");
 }
 
 partial struct fakeReader {
@@ -125,11 +105,8 @@ internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
 partial struct fakeError {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fakeErrorˢ = "fake error"u8;
-
 internal static @string Error(this fakeError _) {
-    return fakeErrorˢ;
+    return "fake error";
 }
 
 internal static error Unwrap(this fakeError _) {

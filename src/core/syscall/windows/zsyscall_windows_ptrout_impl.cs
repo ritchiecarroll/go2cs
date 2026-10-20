@@ -32,6 +32,13 @@
 //     the nil it started with. `crypto/x509`'s systemVerify then nil-dereferences three frames
 //     away, which is where this was first seen;
 //
+//     (Amended 2026-10-16: the operator now asks the STRUCTURAL nil question, so `&storeCtx` with
+//     storeCtx nil converts to the box's order token, non-zero and the same number before and
+//     after the call. A token is no slot the kernel may write either, so the remedy below is
+//     unchanged. A generated wrapper NOT taken here now reaches dll_windows.cs's funnel with a
+//     token instead of 0, and the funnel hands such a call to NativeStructMarshal.CallDeep, which
+//     passes a native copy and decodes the word the callee wrote back into the caller's pointer.)
+//
 //   * once the held pointer is NON-null the same operator answers a real MANAGED address --
 //     measured as a live GC-heap address -- and the kernel would write a raw native pointer
 //     over a slot the collector reads as an object reference. That is heap corruption, and it

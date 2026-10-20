@@ -68,6 +68,8 @@ private static readonly @string prefixᶜ = "libraries: ="u8;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
 internal static void init(this ref gccgoDirs gd) {
+    var lastDirsᴷ = new stackAppend<@string>();
+
     @string gccgo = os.Getenv(gccgoˢ);
     if (gccgo == ""u8) {
         gccgo = gccgoˢ2;
@@ -85,14 +87,14 @@ internal static void init(this ref gccgoDirs gd) {
     if (err != default!) {
         return;
     }
-    @string version = strings.TrimSpace(((@string)versionB));
+    @string version = strings.TrimSpace((@string)versionB);
     (var machineB, err) = exec.Command(bin, dumpmachineˢ).Output();
     if (err != default!) {
         return;
     }
-    @string machine = strings.TrimSpace(((@string)machineB));
+    @string machine = strings.TrimSpace((@string)machineB);
 
-    var dirsEntries = strings.Split(((@string)allDirs), "\n"u8);
+    var dirsEntries = strings.Split((@string)allDirs, "\n"u8);
     @string prefix = prefixᶜ;
     slice<@string> dirs = default!;
     foreach (var (_, dirEntry) in dirsEntries) {
@@ -123,7 +125,7 @@ internal static void init(this ref gccgoDirs gd) {
         }
         {
             var (fi, errΔ2) = os.Stat(dir); if (errΔ2 == default! && fi.IsDir()) {
-                lastDirs = append(lastDirs, dir);
+                lastDirs = append(lastDirsᴷ, lastDirs, dir);
             }
         }
     }

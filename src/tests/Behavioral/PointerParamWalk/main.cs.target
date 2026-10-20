@@ -73,11 +73,6 @@ internal static slice<ж<node>> collect(slice<ж<node>> list, ж<node> Ꮡp) {
     return list;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object chainˢ = (@string)"chain:"u8;
-private static readonly object visitLocalˢ = (@string)"visitLocal:"u8;
-private static readonly object collectˢ = (@string)"collect:"u8;
-
 internal static void Main() {
     var a = Ꮡ(new node(val: 1));
     var b = Ꮡ(new node(val: 2));
@@ -95,16 +90,16 @@ internal static void Main() {
     var x = Ꮡ(new node(val: 100));
     var y = Ꮡ(new node(val: 20));
     x.Value.next = y;
-    fmt.Println(chainˢ, walkChain(x));
+    fmt.Println("chain:", walkChain(x));
 
     var dup = Ꮡ(new node(val: 5));
-    fmt.Println(visitLocalˢ, visitLocal(new ж<node>[]{dup, dup, x}.slice()));
+    fmt.Println("visitLocal:", visitLocal(new ж<node>[]{dup, dup, x}.slice()));
 
     slice<ж<node>> list = default!;
     list = collect(list, a);
     list = collect(list, b);
     a.Value.val = 11;
-    fmt.Println(collectˢ, (~list[0]).val, (~list[1]).val);
+    fmt.Println("collect:", (~list[0]).val, (~list[1]).val);
 }
 
 } // end main_package

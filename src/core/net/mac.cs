@@ -11,18 +11,20 @@ internal static readonly @string hexDigit = "0123456789abcdef"u8;
 partial struct HardwareAddr /*[]byte*/;
 
 public static @string String(this HardwareAddr a) {
+    var bufᴷ = new stackAppend<byte>();
+
     if (len(a) == 0) {
         return ""u8;
     }
     var buf = new slice<byte>(0, len(a) * 3 - 1);
     foreach (var (i, b) in a) {
         if (i > 0) {
-            buf = append(buf, (byte)((rune)':'));
+            buf = append(bufᴷ, buf, (byte)((rune)':'));
         }
-        buf = append(buf, hexDigit[(b >> (int)(4))]);
+        buf = append(buf, hexDigit[(b >> 4)]);
         buf = append(buf, hexDigit[(byte)(b & 0xF)]);
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // ParseMAC parses s as an IEEE 802 MAC-48, EUI-48, EUI-64, or a 20-octet

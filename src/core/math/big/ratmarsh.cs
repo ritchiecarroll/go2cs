@@ -35,7 +35,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔRat> Ꮡx) {
     }
     byteorder.BEPutUint32(buf.slice(j - 4, j), (uint32)n);
     j -= 1 + 4;
-    var b = (byte)((ratGobVersion << (int)(1))); // make space for sign bit
+    var b = (byte)(ratGobVersion << 1); // make space for sign bit
     if (x.a.neg) {
         b |= (byte)(1);
     }
@@ -58,8 +58,8 @@ public static error GobDecode(this ref ΔRat z, slice<byte> buf) {
         return errors.New(ratGobDecodeBufferTooˢ);
     }
     var b = buf[0];
-    if ((byte)((b >> (int)(1))) != ratGobVersion) {
-        return fmt.Errorf("Rat.GobDecode: encoding version %d not supported"u8, (byte)((b >> (int)(1))));
+    if ((byte)((b >> 1)) != ratGobVersion) {
+        return fmt.Errorf("Rat.GobDecode: encoding version %d not supported"u8, (byte)((b >> 1)));
     }
     UntypedInt j = /* 1 + 4 */ 5;
     var ln = byteorder.BEUint32(buf[(int)(j - 4)..(int)(j)]);
@@ -95,7 +95,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<ΔRat> Ꮡx) {
 public static error UnmarshalText(this ж<ΔRat> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
     {
-        var (_, ok) = Ꮡz.SetString(((@string)text)); if (!ok) {
+        var (_, ok) = Ꮡz.SetString((@string)text); if (!ok) {
             return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Rat"u8, text);
         }
     }

@@ -25,15 +25,15 @@ internal static storer newDirect() {
 
 internal static void Main() {
     var m = newMap();
-    m.Store((@string)"a"u8, (nint)(1));
-    var (v, ok) = m.Load((@string)"a"u8);
+    m.Store("a", (nint)1);
+    var (v, ok) = m.Load("a");
     fmt.Println(v, ok);
 
     var d = newDirect();
-    d.Store((@string)"b"u8, (nint)(2));
-    (v, ok) = d._<ж<Δsync.Map>>().Load((@string)"b"u8);
+    d.Store("b", (nint)2);
+    (v, ok) = d._<storer, ж<Δsync.Map>>().Load((@string)"b"u8);
     fmt.Println(v, ok);
-    (_, ok) = d._<ж<Δsync.Map>>().Load((@string)"a"u8);
+    (_, ok) = d._<storer, ж<Δsync.Map>>().Load((@string)"a"u8);
     fmt.Println(ok);
 }
 

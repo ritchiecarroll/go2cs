@@ -17,7 +17,6 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -71,7 +70,6 @@ using static global::go.io_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<dataAndErrorBuffer, ж<dataAndErrorBuffer>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

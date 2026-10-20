@@ -501,7 +501,7 @@ partial struct workType {
     // debug.gctrace heap sizes for this cycle.
     internal uint64 heap0, heap1, heap2;
     // Cumulative estimated CPU usage.
-    internal partial ref cpuStats cpuStats { get; }
+    /*embed*/ internal cpuStats cpuStats;
 }
 
 // go2cs generated this placeholder — func GC is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1524,7 +1524,7 @@ internal static void gcMarkTermination(worldStop stw) {
         array<byte> sbuf = new(24);
         printlock();
         print((@string)"gc "u8, memstats.numgc,
-            (@string)" @"u8, ((@string)itoaDiv(sbuf[..], (uint64)(work.tSweepTerm - runtimeInitTime) / 1000000, 3)), (@string)"s "u8,
+            (@string)" @"u8, (@string)itoaDiv(sbuf[..], (uint64)(work.tSweepTerm - runtimeInitTime) / 1000000, 3), (@string)"s "u8,
             util, (@string)"%"u8);
         if (goroutineLeakDone) {
             print((@string)" (checking for goroutine leaks)"u8);
@@ -1535,7 +1535,7 @@ internal static void gcMarkTermination(worldStop stw) {
             if (i != 0) {
                 print((@string)"+"u8);
             }
-            print(((@string)fmtNSAsMS(sbuf[..], (uint64)(ns - prev))));
+            print((@string)fmtNSAsMS(sbuf[..], (uint64)(ns - prev)));
             prev = ns;
         }
         print((@string)" ms clock, "u8);
@@ -1553,13 +1553,13 @@ internal static void gcMarkTermination(worldStop stw) {
             if (i != 0) {
                 print((@string)"+"u8);
             }
-            print(((@string)fmtNSAsMS(sbuf[..], (uint64)ns)));
+            print((@string)fmtNSAsMS(sbuf[..], (uint64)ns));
         }
         print((@string)" ms cpu, "u8,
-            (work.heap0 >> (int)(20)), (@string)"->"u8, (work.heap1 >> (int)(20)), (@string)"->"u8, (work.heap2 >> (int)(20)), (@string)" MB, "u8,
-            (gcController.lastHeapGoal >> (int)(20)), (@string)" MB goal, "u8,
-            (ᏑgcController.of(gcControllerState.ᏑlastStackScan).Load() >> (int)(20)), (@string)" MB stacks, "u8,
-            (ᏑgcController.of(gcControllerState.ᏑglobalsScan).Load() >> (int)(20)), (@string)" MB globals, "u8,
+            work.heap0 >> 20, (@string)"->"u8, work.heap1 >> 20, (@string)"->"u8, work.heap2 >> 20, (@string)" MB, "u8,
+            gcController.lastHeapGoal >> 20, (@string)" MB goal, "u8,
+            ᏑgcController.of(gcControllerState.ᏑlastStackScan).Load() >> 20, (@string)" MB stacks, "u8,
+            ᏑgcController.of(gcControllerState.ᏑglobalsScan).Load() >> 20, (@string)" MB globals, "u8,
             work.maxprocs, (@string)" P"u8);
         if (work.userForced) {
             print((@string)" (forced)"u8);
@@ -1690,7 +1690,7 @@ partial struct gcBgMarkWorkerNode {
 }
 
 partial struct gcBgMarkWorkerNodePadded {
-    internal partial ref gcBgMarkWorkerNode gcBgMarkWorkerNode { get; }
+    /*embed*/ internal gcBgMarkWorkerNode gcBgMarkWorkerNode;
     internal array<byte> pad = new((uintptr)((uintptr)tagAlign - /* unsafe.Sizeof(gcBgMarkWorkerNode{}) */ (uintptr)32) - gcBgMarkWorkerNodeRedZoneSize);
 }
 
@@ -1939,7 +1939,7 @@ internal static void gcMark(int64 startTime) {
     // Check that there's no marking work remaining.
     {
         var (next, jobs) = (Ꮡwork.of(workType.ᏑmarkrootNext).Load(), Ꮡwork.of(workType.ᏑmarkrootJobs).Load()); if (work.full != 0 || next < jobs) {
-            print((@string)"runtime: full="u8, ((Δhex)(uint64)work.full), (@string)" next="u8, next, (@string)" jobs="u8, jobs, (@string)" nDataRoots="u8, work.nDataRoots, (@string)" nBSSRoots="u8, work.nBSSRoots, (@string)" nSpanRoots="u8, work.nSpanRoots, (@string)" nStackRoots="u8, work.nStackRoots, (@string)"\n"u8);
+            print((@string)"runtime: full="u8, (Δhex)(uint64)work.full, (@string)" next="u8, next, (@string)" jobs="u8, jobs, (@string)" nDataRoots="u8, work.nDataRoots, (@string)" nBSSRoots="u8, work.nBSSRoots, (@string)" nSpanRoots="u8, work.nSpanRoots, (@string)" nStackRoots="u8, work.nStackRoots, (@string)"\n"u8);
             throw panic("non-empty mark queue after concurrent mark");
         }
     }

@@ -48,8 +48,8 @@ internal static slice<array<js>> jsTable = GoReflect.WithElemDims(new golib.Spar
 }.slice(), 4);
 
 internal static slice<slice<@string>> sparseRows = new slice<@string>[]{
-    new golib.SparseArray<@string>{[2] = "two"u8, [0] = "zero"u8}.slice(),
-    new golib.SparseArray<@string>{[1] = "one"u8}.slice()
+    new golib.SparseArray<@string>{[2] = "two", [0] = "zero"}.slice(),
+    new golib.SparseArray<@string>{[1] = "one"}.slice()
 }.slice();
 
 internal static void Main() {

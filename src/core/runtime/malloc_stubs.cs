@@ -179,7 +179,7 @@ internal static (@unsafe.Pointer, uintptr) smallScanNoHeaderStub(uintptr size, �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -302,7 +302,7 @@ internal static (@unsafe.Pointer, uintptr) smallNoScanStub(uintptr size, ж<_typ
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -450,7 +450,7 @@ internal static (@unsafe.Pointer, uintptr) tinyStub(uintptr size, ж<_type> Ꮡt
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0; // Always zero
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
     // See if we need to replace the existing tiny block with the new one
@@ -546,7 +546,7 @@ internal static gclinkptr nextFreeFastTiny(ж<mspan> Ꮡspan) {
                 span.allocCache.RshAssign((nuint)(theBit + 1));
                 span.freeindex = freeidx;
                 span.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * (uintptr)elemsize_ + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * (uintptr)elemsize_ + span.@base());
             }
         }
     }
@@ -566,7 +566,7 @@ internal static gclinkptr nextFreeFastStub(ж<mspan> Ꮡspan) {
                 span.allocCache.RshAssign((nuint)(theBit + 1));
                 span.freeindex = freeidx;
                 span.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * (uintptr)elemsize_ + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * (uintptr)elemsize_ + span.@base());
             }
         }
     }
@@ -604,7 +604,7 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
     var scanSize = typ.PtrBytes;
     var src = src0;
     if (typ.Size_ == goarch.PtrSize){
-        src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+        src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
     } else {
         // N.B. We rely on dataSize being an exact multiple of the type size.
         // The alternative is to be defensive and mask out src to the length
@@ -613,7 +613,7 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
             @throw(runtimeMspanˢ);
         }
         for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-            src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+            src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
             scanSize += typ.Size_;
         }
     }
@@ -664,9 +664,9 @@ internal static void writeHeapBitsDoubleCheck(ж<mspan> Ꮡspan, uintptr x, uint
 
     var srcRead = span.heapBitsSmallForAddr(x);
     if (srcRead != src) {
-        print((@string)"runtime: x="u8, ((Δhex)(uint64)x), (@string)" i="u8, i, (@string)" j="u8, j, (@string)" bits="u8, bits, (@string)"\n"u8);
+        print((@string)"runtime: x="u8, (Δhex)(uint64)x, (@string)" i="u8, i, (@string)" j="u8, j, (@string)" bits="u8, bits, (@string)"\n"u8);
         print((@string)"runtime: dataSize="u8, dataSize, (@string)" typ.Size_="u8, typ.Size_, (@string)" typ.PtrBytes="u8, typ.PtrBytes, (@string)"\n"u8);
-        print((@string)"runtime: src0="u8, ((Δhex)(uint64)src0), (@string)" src="u8, ((Δhex)(uint64)src), (@string)" srcRead="u8, ((Δhex)(uint64)srcRead), (@string)"\n"u8);
+        print((@string)"runtime: src0="u8, (Δhex)(uint64)src0, (@string)" src="u8, (Δhex)(uint64)src, (@string)" srcRead="u8, (Δhex)(uint64)srcRead, (@string)"\n"u8);
         @throw(badPointerBitsWrittenForˢ);
     }
 }

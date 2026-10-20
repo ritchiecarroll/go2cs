@@ -279,7 +279,7 @@ public static partial class builtin
     /// Returns a new <see cref="PanicException"/> with the specified <paramref name="state"/>.
     /// </summary>
     /// <param name="state">State of panic exception.</param>
-    public static PanicException panic(object? state)
+    public static PanicException panic([GoTakesCSharpString] object? state)
     {
         // Go's `panic` takes an `any`, so the value's DYNAMIC TYPE is observable: a recovering
         // comparison (`if p != "x"`), a type assertion (`err.(string)`), and a `case string:` arm
@@ -386,7 +386,16 @@ public static partial class builtin
     /// slice = append(slice, elem1, elem2)
     /// slice = append(slice, anotherSlice...)
     /// </code>
+    /// <para>
+    /// Lowest priority: whenever a <see cref="slice{T}"/> overload also applies, this one is set aside.
+    /// Without that, <c>append(nums, 4, 5)</c> on a <c>slice&lt;nint&gt;</c> was CS0121: the C# int literals
+    /// inferred <c>T = int</c> here, an exact match for the elements, while every <see cref="slice{T}"/>
+    /// overload matched the slice exactly. The priority changes only calls that were that ambiguity: a call
+    /// this overload binds alone (a first argument typed <see cref="ISlice"/>) still binds it. Measured
+    /// 2026-10-16 by marking it obsolete: no call in go2cs-stdlib.slnx or go2cs.slnx bound it.
+    /// </para>
     /// </remarks>
+    [OverloadResolutionPriority(-1)]
     public static slice<T> append<T>(ISlice slice, params T[] elems)
     {
         return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
@@ -2254,7 +2263,7 @@ public static partial class builtin
     /// for pure-ASCII values, so the C# <see cref="string.Length"/> shortcut is wrong for
     /// any multi-byte rune (<c>len("a☺b☻")</c> is 8, not 4).
     /// </remarks>
-    public static nint len(string str)
+    public static nint len([GoTakesCSharpString] string str)
     {
         return Encoding.UTF8.GetByteCount(str);
     }
@@ -2389,7 +2398,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(target) : new StandardBox<T>(target);
 
         // `&T{}`, and through heap() an escaping local: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2697,12 +2706,28 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length)
     {
-        // A reference-bearing element cannot alias native bytes: its elements live in a managed store that
-        // SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox).
         if (ShadowArrayBox<T>.Needed)
+        {
+            // A POINTER element over memory the Go runtime did not allocate is a foreign address, read from its
+            // word (G's ruling, 2026-10-19; see NativePointerArrayBox and GoOsMemory). Ownership is asked FIRST, so
+            // the runtime's own arena never reaches the door, which is E's registered opener (NativeArrayOpeners).
+            if (address != 0 && !GoOsMemory.Owns(address) && ForeignPointerElement<T>.Type is { } element)
+                return (ж<array<T>>)NativeArrayOpeners.OpenPointerArray(element, address, length);
+
+            // Any other reference-bearing element cannot alias native bytes: its elements live in a managed store
+            // that SHADOWS the block, whose address stays the pointer's (A16; see ShadowArrayBox). Over foreign
+            // memory that store refuses every read by name.
             return ShadowArrayBox<T>.Over(address, length);
+        }
 
         return NativeArrayBox<T>.Over(address, length);
+    }
+
+    // E for a pointer element T = ж<E>, else null: a pure type query, decided once per T.
+    private static class ForeignPointerElement<T>
+    {
+        internal static readonly Type? Type =
+            typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ж<>) ? typeof(T).GetGenericArguments()[0] : null;
     }
 
     /// <summary>
@@ -2743,10 +2768,16 @@ public static partial class builtin
     /// </remarks>
     public static ж<array<T>>? NativeFieldArrayPointer<T>(INilPointer? field, nint length)
     {
-        if (field is not INativeRooted { NativeGoFieldAddress: var address and not 0 })
-            return null;
+        // A field view of a native box IS a native box at the field's Go offset (ж.of), so its own root address is
+        // the field's; a one-hop field reference still answers through NativeGoFieldAddress.
+        nuint address = field switch
+        {
+            INativeRooted { NativeGoFieldAddress: var fieldAddress and not 0 } => fieldAddress,
+            INativeRooted { NativeRootAddress: var rootAddress and not 0 } => rootAddress,
+            _ => 0
+        };
 
-        return NativeArrayPointer<T>(address, length);
+        return address == 0 ? null : NativeArrayPointer<T>(address, length);
     }
 
     /// <summary>
@@ -2849,7 +2880,7 @@ public static partial class builtin
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(value) : new StandardBox<T>(value);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2895,7 +2926,7 @@ public static partial class builtin
         ж<T> box = new StandardBox<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
 
         // `new(T)`: a Go allocation (GoMemProfile).
-        GoMemProfile.Charge<T>(box, 1);
+        GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
         return box;
     }
 
@@ -2972,6 +3003,8 @@ public static partial class builtin
 
                 if (args[i] is @string text)
                     sink.Write(text.ToSpan());
+                else if (args[i] is IRuntimePrintable printable)
+                    printable.RuntimePrint(); // runtime.hex and runtime.quoted: printhex and printquoted
                 else
                     writePrintText(sink, printArg(args[i]).AsSpan(), buffer);
             }
@@ -3115,7 +3148,7 @@ public static partial class builtin
         while (target is IInterfaceAdapter interfaceAdapter)
             target = interfaceAdapter.Value!;
 
-        throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target)}, not {GetGoTypeName(typeof(T))}");
+        throw RuntimeErrorPanic.TypeAssertion(typeof(object), target, typeof(T));
     }
 
     /// <summary>
@@ -4235,4 +4268,30 @@ public static partial class builtin
     /// <param name="value">UTF-8 bytes.</param>
     /// <returns>Heap allocated string.</returns>
     public static @string str(ReadOnlySpan<byte> value) => (@string)value;
+
+    /// <summary>
+    /// Type asserts <paramref name="target"/>, whose Go static type is the interface <typeparamref name="TSource"/>, as
+    /// type <typeparamref name="T"/>; a failure panics with that source type in the text, as Go's does.
+    /// </summary>
+    /// <typeparam name="TSource">Static interface type of <paramref name="target"/>.</typeparam>
+    /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
+    /// <param name="target">Source value to type assert.</param>
+    /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
+    /// <remarks>
+    /// The plain <c>_&lt;T&gt;(this object)</c> form cannot see the static type, so it names the source "interface {}";
+    /// Go prints "io.Reader is *os.File, not *bytes.Buffer". A generated overload on each interface, and golib's own for
+    /// <c>error</c>, supply the source here, leaving the call site as <c>x._&lt;T&gt;()</c>.
+    /// </remarks>
+    public static T _<TSource, [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods |
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields
+    )] T>(this TSource target)
+    {
+        if (TryTypeAssert((object?)target, out T value))
+            return value;
+
+        throw RuntimeErrorPanic.TypeAssertion(typeof(TSource), target, typeof(T));
+    }
 }

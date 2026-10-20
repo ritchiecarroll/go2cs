@@ -13,11 +13,8 @@ internal static map<K, V> pair<K, V>(K k, V v) {
     return new map<K, V>{[k] = v};
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object showˢ = (@string)"show:"u8;
-
 internal static void show(any f) {
-    fmt.Println(showˢ, reflect.TypeOf(f).String());
+    fmt.Println("show:", reflect.TypeOf(f).String());
 }
 
 internal static @string apply(Func<any, @string> f, any v) {
@@ -25,19 +22,16 @@ internal static @string apply(Func<any, @string> f, any v) {
 }
 
 internal static @string describe<T>(T v) {
-    return fmt.Sprintf("%v/%T"u8, v, v);
+    return fmt.Sprintf("%v/%T"u8, (v).OrTypedNilOf(), (v).OrTypedNilOf());
 }
 
 internal static any returned() {
     return pick<@string>;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object controlˢ = (@string)"control:"u8;
-
 internal static void Main() {
     var pf = pick<@string>;
-    fmt.Println(controlˢ, reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(new @string[]{"a"u8, "b"u8, "c"u8}.slice()));
+    fmt.Println("control:", reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(new @string[]{"a", "b", "c"}.slice()));
 
     fmt.Println(reflect.TypeOf(pick<@string>).String());
     fmt.Println(reflect.TypeOf(pair<@string, nint>).String());
@@ -50,8 +44,8 @@ internal static void Main() {
 
     fmt.Println(reflect.TypeOf(returned()).String());
 
-    fmt.Println(apply(describe<any>, (nint)(42)));
-    fmt.Println(apply(describe<any>, (@string)"go"u8));
+    fmt.Println(apply(describe<any>, (nint)42));
+    fmt.Println(apply(describe<any>, "go"));
 }
 
 } // end main_package

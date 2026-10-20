@@ -121,7 +121,7 @@ public static ж<TCPAddr> TCPAddrFromAddrPort(netip.AddrPort addr) {
 // TCPConn is an implementation of the [Conn] interface for TCP network
 // connections.
 partial struct TCPConn {
-    internal partial ref conn conn { get; }
+    /*embed*/ internal conn conn;
 }
 
 // KeepAliveConfig contains TCP keep-alive options.

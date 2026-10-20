@@ -153,7 +153,7 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    foreach (var (i, line) in strings.Split(((@string)src), "\n"u8)) {
+    foreach (var (i, line) in strings.Split((@string)src, "\n"u8)) {
         if (strings.Contains(line, "BISECT"u8 + " "u8 + "BUG"u8)) {
             want = append(want, fmt.Sprintf("godebug_test.go:%d"u8, i + 1));
         }
@@ -161,7 +161,7 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     slices.Sort<slice<@string>, @string>(want);
 
     slice<@string> have = default!;
-    foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
+    foreach (var (_, line) in strings.Split((@string)@out, "\n"u8)) {
         if (strings.Contains(line, godebugTestGoˢ2)) {
             have = append(have, line.slice(strings.LastIndex(line, godebugTestGoˢ2)));
         }
@@ -169,7 +169,7 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     slices.Sort<slice<@string>, @string>(have);
 
     if (!slices.Equal<slice<@string>, @string>(have, want)) {
-        Ꮡt.Errorf("bad bisect output:\nhave %v\nwant %v\ncomplete output:\n%s"u8, have, want, ((@string)@out));
+        Ꮡt.Errorf("bad bisect output:\nhave %v\nwant %v\ncomplete output:\n%s"u8, have, want, (@string)@out);
     }
 }
 

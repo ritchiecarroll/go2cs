@@ -45,7 +45,7 @@ internal static (uint8 v, nint sz) lookup(this ref bidiTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -62,13 +62,13 @@ internal static (uint8 v, nint sz) lookup(this ref bidiTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = bidiIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -91,11 +91,11 @@ internal static uint8 lookupUnsafe(this ref bidiTrie t, slice<byte> s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = bidiIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = bidiIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = bidiIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = bidiIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -134,7 +134,7 @@ internal static (uint8 v, nint sz) lookupString(this ref bidiTrie t, @string s) 
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -151,13 +151,13 @@ internal static (uint8 v, nint sz) lookupString(this ref bidiTrie t, @string s) 
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = bidiIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -180,11 +180,11 @@ internal static uint8 lookupStringUnsafe(this ref bidiTrie t, @string s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = bidiIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = bidiIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = bidiIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = bidiIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -203,7 +203,7 @@ internal static ж<bidiTrie> newBidiTrie(nint i) {
 internal static uint8 lookupValue(this ref bidiTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     default: {
-        return (uint8)bidiValues[(n << (int)(6)) + (uint32)b];
+        return (uint8)bidiValues[(n << 6) + (uint32)b];
     }}
 }
 

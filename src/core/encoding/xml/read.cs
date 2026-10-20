@@ -164,7 +164,7 @@ public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement>
 partial struct UnmarshalError /*@string*/;
 
 public static @string Error(this UnmarshalError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 // Unmarshaler is the interface implemented by objects that can unmarshal
@@ -695,7 +695,7 @@ break_Loop:;
         var t = saveComment;
         var exprᴛ4 = t.Kind();
         if (exprᴛ4 == reflect.ΔString) {
-            t.SetString(((@string)comment));
+            t.SetString((@string)comment);
         }
         else if (exprᴛ4 == reflect.ΔSlice) {
             t.Set(reflect.ValueOf(comment));
@@ -706,7 +706,7 @@ break_Loop:;
         var t = saveXML;
         var exprᴛ5 = t.Kind();
         if (exprᴛ5 == reflect.ΔString) {
-            t.SetString(((@string)saveXMLData));
+            t.SetString((@string)saveXMLData);
         }
         else if (exprᴛ5 == reflect.ΔSlice) {
             if (t.Type().Elem().Kind() == reflect.Uint8) {
@@ -737,7 +737,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
             dst.SetInt(0);
             return default!;
         }
-        var (itmp, errΔ2) = strconv.ParseInt(strings.TrimSpace(((@string)src)), 10, dst.Type().Bits());
+        var (itmp, errΔ2) = strconv.ParseInt(strings.TrimSpace((@string)src), 10, dst.Type().Bits());
         if (errΔ2 != default!) {
             return errΔ2;
         }
@@ -748,7 +748,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
             dst.SetUint(0);
             return default!;
         }
-        var (utmp, errΔ3) = strconv.ParseUint(strings.TrimSpace(((@string)src)), 10, dst.Type().Bits());
+        var (utmp, errΔ3) = strconv.ParseUint(strings.TrimSpace((@string)src), 10, dst.Type().Bits());
         if (errΔ3 != default!) {
             return errΔ3;
         }
@@ -759,7 +759,7 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
             dst.SetFloat(0D);
             return default!;
         }
-        var (ftmp, errΔ4) = strconv.ParseFloat(strings.TrimSpace(((@string)src)), dst.Type().Bits());
+        var (ftmp, errΔ4) = strconv.ParseFloat(strings.TrimSpace((@string)src), dst.Type().Bits());
         if (errΔ4 != default!) {
             return errΔ4;
         }
@@ -770,14 +770,14 @@ internal static error /*err*/ copyValue(reflectꓸValue dst, slice<byte> src) {
             dst.SetBool(false);
             return default!;
         }
-        var (value, errΔ5) = strconv.ParseBool(strings.TrimSpace(((@string)src)));
+        var (value, errΔ5) = strconv.ParseBool(strings.TrimSpace((@string)src));
         if (errΔ5 != default!) {
             return errΔ5;
         }
         dst.SetBool(value);
     }
     else if (exprᴛ1 == reflect.ΔString) {
-        dst.SetString(((@string)src));
+        dst.SetString((@string)src);
     }
     else if (exprᴛ1 == reflect.ΔSlice) {
         if (len(src) == 0) {

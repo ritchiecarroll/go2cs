@@ -54,9 +54,9 @@ public static int32 /*count*/ ScanSpanPackedGo(@unsafe.Pointer mem, ж<uintptr> 
                 // so with as little processing as possible.
                 //
                 // TODO: This is close to, but not entirely branchless.
-                nint isPtr = bool2int((uintptr)(ptrMask[wordI / (uintptr)goarch.PtrBits] & (((uintptr)1 << (int)((wordI % (uintptr)goarch.PtrBits))))) != 0);
+                nint isPtr = bool2int((uintptr)(ptrMask[wordI / (uintptr)goarch.PtrBits] & ((uintptr)1 << (int)(wordI % (uintptr)goarch.PtrBits))) != 0);
                 nint isNonNil = bool2int(val >= 4096);
-                var pred = (nint)(isPtr & isNonNil) != 0;
+                var pred = (isPtr & isNonNil) != 0;
                 buf.addIf(val, pred);
             }
         }

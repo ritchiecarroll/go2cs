@@ -48,7 +48,7 @@ partial struct bigarMemberHeader {
 
 // Archive represents an open AIX big archive.
 partial struct Archive {
-    public partial ref ArchiveHeader ArchiveHeader { get; }
+    /*embed*/ public ArchiveHeader ArchiveHeader;
     public slice<ж<Member>> Members;
     internal io.Closer closer;
 }
@@ -60,7 +60,7 @@ partial struct ArchiveHeader {
 
 // Member represents a member of an AIX big archive.
 partial struct Member {
-    public partial ref MemberHeader MemberHeader { get; }
+    /*embed*/ public MemberHeader MemberHeader;
     internal ж<io.SectionReader> sr;
 }
 
@@ -100,7 +100,7 @@ public static error Close(this ref Archive a) {
 
 // NewArchive creates a new Archive for accessing an AIX big archive in an underlying reader.
 public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
-    (int64, error) parseDecimalBytes(slice<byte> b) => strconv.ParseInt(strings.TrimSpace(((@string)b)), 10, 64);
+    (int64, error) parseDecimalBytes(slice<byte> b) => strconv.ParseInt(strings.TrimSpace((@string)b), 10, 64);
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
 
     // Read File Header
@@ -114,7 +114,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
     var arch = @new<Archive>();
     var exprᴛ1 = ((sstring)(magic[..]));
     if (exprᴛ1 == AIAMAGBIG) {
-        arch.Value.magic = ((@string)(magic[..]));
+        arch.Value.magic = (@string)(magic[..]);
     }
     else if (exprᴛ1 == AIAMAG) {
         return (default!, fmt.Errorf("small AIX archive not supported"u8));
@@ -189,10 +189,10 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
                 return (default!, errΔ7);
             }
         }
-        member.Value.Name = ((@string)name);
+        member.Value.Name = (@string)name;
 
         var fileoff = off + (int64)AR_HSZ_BIG + namlen;
-        if ((int64)(fileoff & 1) != 0) {
+        if ((fileoff & 1) != 0) {
             fileoff++;
             {
                 var (_, errΔ8) = sr.Seek(1, io.SeekCurrent); if (errΔ8 != default!) {

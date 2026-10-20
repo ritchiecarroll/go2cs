@@ -103,7 +103,7 @@ internal static ж<File> newFileFromNewFile(uintptr fd, @string name) {
         flags = 0;
     }
     var f = newFile(fdi, name, kindNewFile, unix.HasNonblockFlag(flags));
-    f.Value.appendMode = (nint)(flags & (nint)syscall.O_APPEND) != 0;
+    f.Value.appendMode = (flags & (nint)syscall.O_APPEND) != 0;
     return f;
 }
 
@@ -176,7 +176,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
         if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8) {
             ref var st = ref heap(new syscall.Stat_t(), out var Ꮡst);
             var err = ignoringEINTR(() => syscall.Fstat(fd, Ꮡst));
-            var typ = (uint32)(st.Mode & (uint32)syscall.S_IFMT);
+            var typ = st.Mode & (uint32)syscall.S_IFMT;
             // Don't try to use kqueue with regular files on *BSDs.
             // On FreeBSD a regular file is always
             // reported as ready for writing.
@@ -263,7 +263,7 @@ public static readonly @string DevNull = "/dev/null"u8;
 // Changes here should be reflected in openDirAt and openDirNolog, if relevant.
 internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMode perm) {
     var setSticky = false;
-    if (!supportsCreateWithStickyBit && (nint)(flag & O_CREATE) != 0 && (FileMode)(perm & ModeSticky) != 0) {
+    if (!supportsCreateWithStickyBit && (flag & O_CREATE) != 0 && (FileMode)(perm & ModeSticky) != 0) {
         {
             var (_, err) = Stat(name); if (IsNotExist(err)) {
                 setSticky = true;
@@ -276,7 +276,7 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
     ref var e = ref heap<error>(out var Ꮡe);
     // We have to check EINTR here, per issues 11180 and 39237.
     ignoringEINTR(() => {
-        (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, (nint)(flag | (nint)syscall.O_CLOEXEC), syscallMode(perm));
+        (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, flag | (nint)syscall.O_CLOEXEC, syscallMode(perm));
         return Ꮡe.ValueSlot;
     });
     if (e != default!) {
@@ -463,7 +463,7 @@ internal static (@string, error) readlink(@string name) {
             return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: err))));
         }
         if (n < len) {
-            return (((@string)(b.slice(0, n))), default!);
+            return ((@string)(b.slice(0, n)), default!);
         }
     }
 }

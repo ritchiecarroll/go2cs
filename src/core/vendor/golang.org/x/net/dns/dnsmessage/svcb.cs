@@ -28,14 +28,14 @@ public static @string GoString(this ref ΔSVCBResource r) {
         }
     }
     b = append(b, ((@string)"}}"u8).ꓸꓸꓸ);
-    return ((@string)b);
+    return (@string)b;
 }
 
 // An HTTPSResource is an HTTPS Resource record.
 // It has the same format as the SVCB record.
 partial struct ΔHTTPSResource {
     // Alias for SVCB resource record.
-    public partial ref ΔSVCBResource SVCBResource { get; }
+    /*embed*/ public ΔSVCBResource SVCBResource;
 }
 
 internal static Type realType(this ref ΔHTTPSResource r) {
@@ -169,7 +169,7 @@ internal static (slice<byte>, error) pack(this ref ΔSVCBResource r, slice<byte>
         if (i > 0 && param.Key <= previousKey) {
             return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SVCBResource.Params"u8, errParamOutOfOrder))));
         }
-        if (len(param.Value) > ((1 << (int)(16))) - 1) {
+        if (len(param.Value) > (1 << 16) - 1) {
             return (oldMsg, new nestedErrorжerror(Ꮡ(new nestedError("SVCBResource.Params"u8, errTooLongSVCBValue))));
         }
         msg = packUint16(msg, (uint16)param.Key);
@@ -248,7 +248,7 @@ internal static (ΔSVCBResource, error) unpackSVCBResource(slice<byte> msg, nint
                 return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("param key"u8, err))));
             }
         }
-        p.Value.Key = ((SVCParamKey)key);
+        p.Value.Key = (SVCParamKey)key;
         {
             (size, off, err) = unpackUint16(msg, off); if (err != default!) {
                 return (new ΔSVCBResource(nil), new nestedErrorжerror(Ꮡ(new nestedError("param length"u8, err))));

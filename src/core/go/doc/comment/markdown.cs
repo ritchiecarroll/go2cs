@@ -12,7 +12,7 @@ partial class comment_package {
 
 // An mdPrinter holds the state needed for printing a Doc as Markdown.
 partial struct mdPrinter {
-    public partial ref ж<Printer> Printer { get; }
+    /*embed*/ public ж<Printer> Printer;
     internal @string headingPrefix;
     internal bytes.Buffer raw;
 }
@@ -153,12 +153,12 @@ internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slic
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {
-            p.escape(Ꮡout, ((@string)tΔ1));
+            p.escape(Ꮡout, (@string)tΔ1);
             break;
         }
         case Italic tΔ1: {
             @out.WriteString("*"u8);
-            p.escape(Ꮡout, ((@string)tΔ1));
+            p.escape(Ꮡout, (@string)tΔ1);
             @out.WriteString("*"u8);
             break;
         }

@@ -447,7 +447,7 @@ internal static void round(this ж<Float> Ꮡz, nuint sbit) {
 
     // bits > z.prec: mantissa too large => round
     nuint r = (nuint)(bits - z.prec - 1); // rounding bit position; r >= 0
-    nuint rbit = (nuint)(z.mant.bit(r) & 1); // rounding bit; be safe and ensure it's a single bit
+    nuint rbit = z.mant.bit(r) & 1; // rounding bit; be safe and ensure it's a single bit
     // The sticky bit is only needed for rounding ToNearestEven
     // or when the rounding bit is zero. Avoid computation otherwise.
     if (sbit == 0 && (rbit == 0 || z.mode == ToNearestEven)) {
@@ -464,10 +464,10 @@ internal static void round(this ж<Float> Ꮡz, nuint sbit) {
 
     // determine number of trailing zero bits (ntz) and compute lsb mask of mantissa's least-significant word
     var ntz = n * (uint32)_W - z.prec; // 0 <= ntz < _W
-    Word lsb = (((Word)1) << (int)(ntz));
+    Word lsb = ((Word)1) << (int)(ntz);
 
     // round if result is inexact
-    if ((nuint)(rbit | sbit) != 0) {
+    if ((rbit | sbit) != 0) {
         // Make rounding decision: The result mantissa is truncated ("rounded down")
         // by default. Decide if we need to increment, or "round up", the (unsigned)
         // mantissa.
@@ -595,7 +595,7 @@ public static ж<Float> SetFloat64(this ж<Float> Ꮡz, float64 x) {
     // normalized x != 0
     z.form = finite;
     var (fmant, exp) = math.Frexp(x); // get normalized mantissa
-    z.mant = z.mant.setUint64((uint64)(((uint64)1 << (int)(63)) | (math.Float64bits(fmant) << (int)(11))));
+    z.mant = z.mant.setUint64((uint64)((uint64)1 << 63 | math.Float64bits(fmant) << 11));
     z.exp = (int32)exp; // always fits
     if (z.prec < 53) {
         Ꮡz.round(0);
@@ -632,7 +632,7 @@ public static ж<Float> SetInt(this ж<Float> Ꮡz, ж<ΔInt> Ꮡx) {
     // are many trailing 0's.
     var bits = (uint32)x.BitLen();
     if (z.prec == 0) {
-        z.prec = max(bits, (uint32)(64));
+        z.prec = max(bits, (uint32)64);
     }
     z.acc = Exact;
     z.neg = x.neg;
@@ -740,7 +740,7 @@ internal static uint32 msb32(Δnat x) {
     if (i < 0) {
         return 0;
     }
-    if (debugFloat && (Word)(x[i] & ((Word)((nuint)1 << (int)((_W - 1))))) == 0) {
+    if (debugFloat && (Word)(x[i] & ((Word)((nuint)1 << (int)(_W - 1)))) == 0) {
         throw panic("x not normalized");
     }
     var exprᴛ1 = _W;
@@ -748,7 +748,7 @@ internal static uint32 msb32(Δnat x) {
         return (uint32)(nuint)x[i];
     }
     if (exprᴛ1 == 64) {
-        return (uint32)(nuint)((x[i] >> (int)(32)));
+        return (uint32)(nuint)((x[i] >> 32));
     }
     throw panic("unreachable");
 }
@@ -759,12 +759,12 @@ internal static uint64 msb64(Δnat x) {
     if (i < 0) {
         return 0;
     }
-    if (debugFloat && (Word)(x[i] & ((Word)((nuint)1 << (int)((_W - 1))))) == 0) {
+    if (debugFloat && (Word)(x[i] & ((Word)((nuint)1 << (int)(_W - 1)))) == 0) {
         throw panic("x not normalized");
     }
     var exprᴛ1 = _W;
     if (exprᴛ1 == 32) {
-        var v = ((uint64)(nuint)x[i] << (int)(32));
+        var v = (uint64)(nuint)x[i] << 32;
         if (i > 0) {
             v |= (uint64)((uint64)(nuint)x[i - 1]);
         }
@@ -801,7 +801,7 @@ public static (uint64, Accuracy) Uint64(this ж<Float> Ꮡx) {
         // 1 <= x < Inf
         if (x.exp <= 64) {
             // u = trunc(x) fits into a uint64
-            var u = msb64(x.mant).Rsh((uint64)((64 - (uint32)x.exp)));
+            var u = msb64(x.mant).Rsh((uint64)(64 - (uint32)x.exp));
             if (x.MinPrec() <= 64) {
                 return (u, Exact);
             }
@@ -848,7 +848,7 @@ public static (int64, Accuracy) Int64(this ж<Float> Ꮡx) {
         // 1 <= |x| < +Inf
         if (x.exp <= 63) {
             // i = trunc(x) fits into an int64 (excluding math.MinInt64)
-            var i = (int64)(msb64(x.mant).Rsh((uint64)((64 - (uint32)x.exp))));
+            var i = (int64)(msb64(x.mant).Rsh((uint64)(64 - (uint32)x.exp)));
             if (x.neg) {
                 i = -i;
             }
@@ -965,7 +965,7 @@ public static (float32, Accuracy) Float32(this ж<Float> Ꮡx) {
         uint32 bexp = default!;
         uint32 mant = default!;
         if (x.neg) {
-            sign = ((uint32)1 << (int)((fbits - 1)));
+            sign = (uint32)1 << (int)(fbits - 1);
         }
 
         // Rounding may have caused a denormal number to
@@ -979,11 +979,11 @@ public static (float32, Accuracy) Float32(this ж<Float> Ꮡx) {
             mant = msb32(r.mant).Rsh((nuint)((nint)fbits - p));
         } else {
             // normal number: emin <= e <= emax
-            bexp = ((uint32)(e + (int32)bias) << (int)(mbits));
-            mant = (uint32)((msb32(r.mant) >> (int)(ebits)) & (uint32)(((1 << (int)(mbits)) - 1))); // cut off msb (implicit 1 bit)
+            bexp = (uint32)(e + (int32)bias) << (int)(mbits);
+            mant = msb32(r.mant) >> (int)(ebits) & (uint32)((1 << (int)(mbits)) - 1); // cut off msb (implicit 1 bit)
         }
 
-        return (math.Float32frombits((uint32)((uint32)(sign | bexp) | mant)), r.acc);
+        return (math.Float32frombits(sign | bexp | mant), r.acc);
     }
     if (exprᴛ1 == zero) {
         if (x.neg) {
@@ -1087,7 +1087,7 @@ public static (float64, Accuracy) Float64(this ж<Float> Ꮡx) {
         uint64 bexp = default!;
         uint64 mant = default!;
         if (x.neg) {
-            sign = ((uint64)1 << (int)((fbits - 1)));
+            sign = (uint64)1 << (int)(fbits - 1);
         }
 
         // Rounding may have caused a denormal number to
@@ -1101,11 +1101,11 @@ public static (float64, Accuracy) Float64(this ж<Float> Ꮡx) {
             mant = msb64(r.mant).Rsh((nuint)((nint)fbits - p));
         } else {
             // normal number: emin <= e <= emax
-            bexp = ((uint64)(e + (int32)bias) << (int)(mbits));
-            mant = (uint64)((msb64(r.mant) >> (int)(ebits)) & (uint64)(((uint64)(4503599627370496L - 1)))); // cut off msb (implicit 1 bit)
+            bexp = (uint64)(e + (int32)bias) << (int)(mbits);
+            mant = msb64(r.mant) >> (int)(ebits) & (uint64)((uint64)(4503599627370496L - 1)); // cut off msb (implicit 1 bit)
         }
 
-        return (math.Float64frombits((uint64)((uint64)(sign | bexp) | mant)), r.acc);
+        return (math.Float64frombits(sign | bexp | mant), r.acc);
     }
     if (exprᴛ1 == zero) {
         if (x.neg) {

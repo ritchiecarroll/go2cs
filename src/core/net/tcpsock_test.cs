@@ -799,8 +799,8 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
                 var lnʗ1 = ln;
                 defer(() => lnʗ1.Close(), ref ᒐ);
 
-                nint x = (nint)((1 << (int)(30)));
-                x = x * 5 + (1 << (int)(20)); // just over 5 GB on 64-bit, just over 1GB on 32-bit
+                nint x = (nint)(1 << 30);
+                x = x * 5 + (1 << 20); // just over 5 GB on 64-bit, just over 1GB on 32-bit
                 var done = new channel<nint>(0);
                 var doneʗ1 = done;
                 var lnʗ2 = ln;
@@ -996,7 +996,7 @@ public static void TestDialTCPDefaultKeepAlive(ж<testing.T> Ꮡt) {
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
-        var got = ((time.Duration)(-1));
+        var got = (time.Duration)(-1);
         testHookSetKeepAlive = (global::go.net_package.KeepAliveConfig cfg) => {
             got = cfg.Idle;
         };
