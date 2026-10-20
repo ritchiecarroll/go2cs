@@ -29,6 +29,7 @@ public static void TestChaCha8(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     p.Seed(chacha8seed);
     foreach (var (i, x) in chacha8output) {
         {
@@ -42,6 +43,7 @@ public static void TestChaCha8(ж<testing.T> Ꮡt) {
 public static void TestChaCha8Read(ж<testing.T> Ꮡt) {
     var p = NewChaCha8(chacha8seed);
     var h = sha256.New();
+
     var buf = new slice<byte>(chacha8outlen);
     {
         var (nn, err) = p.Read(buf); if (err != default!){
@@ -57,8 +59,10 @@ public static void TestChaCha8Read(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("transcript incorrect: got %x, want %x"u8, got, chacha8hash);
         }
     }
+
     p.Seed(chacha8seed);
     h.Reset();
+
     buf = new slice<byte>(chacha8outlen);
     {
         var (_, err) = io.ReadFull(iotest.OneByteReader(new rand_test_package.rand_ChaCha8жReader(p)), buf); if (err != default!) {
@@ -71,16 +75,19 @@ public static void TestChaCha8Read(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("transcript incorrect (one byte reads): got %x, want %x"u8, got, chacha8hash);
         }
     }
+
     p.Seed(chacha8seed);
     h.Reset();
+
     {
         var (nΔ1, err) = p.Read(new slice<byte>(0)); if (err != default!){
             Ꮡt.Errorf("zero length read: %v"u8, err);
         } else 
         if (nΔ1 != 0) {
-            Ꮡt.Errorf("Read zero length: got %d, expected %d"u8, nΔ1, (nint)(0));
+            Ꮡt.Errorf("Read zero length: got %d, expected %d"u8, nΔ1, (nint)0);
         }
     }
+
     nint n = default!;
     while (n < chacha8outlen) {
         if (IntN(2) == 0) {
@@ -150,6 +157,7 @@ public static void TestChaCha8Marshal(ж<testing.T> Ꮡt) {
         if (((sstring)enc) != chacha8marshal[i]) {
             Ꮡt.Errorf("#%d: MarshalBinary=%q, want %q"u8, i, enc, chacha8marshal[i]);
         }
+
         var b = new slice<byte>(4, 32);
         (b, err) = p.AppendBinary(b);
         var encAppend = b[4..];
@@ -159,6 +167,7 @@ public static void TestChaCha8Marshal(ж<testing.T> Ꮡt) {
         if (((sstring)encAppend) != chacha8marshal[i]) {
             Ꮡt.Errorf("#%d: AppendBinary=%q, want %q"u8, i, encAppend, chacha8marshal[i]);
         }
+
         p.Value = new ChaCha8(nil);
         {
             var errΔ1 = p.UnmarshalBinary(enc); if (errΔ1 != default!) {
@@ -183,6 +192,7 @@ public static void TestChaCha8MarshalRead(ж<testing.T> Ꮡt) {
         if (((sstring)enc) != chacha8marshalread[i]) {
             Ꮡt.Errorf("#%d: MarshalBinary=%q, want %q"u8, i, enc, chacha8marshalread[i]);
         }
+
         var b = new slice<byte>(4, 32);
         (b, err) = p.AppendBinary(b);
         var encAppend = b[4..];
@@ -192,6 +202,7 @@ public static void TestChaCha8MarshalRead(ж<testing.T> Ꮡt) {
         if (((sstring)encAppend) != chacha8marshalread[i]) {
             Ꮡt.Errorf("#%d: AppendBinary=%q, want %q"u8, i, encAppend, chacha8marshalread[i]);
         }
+
         p.Value = new ChaCha8(nil);
         {
             var errΔ1 = p.UnmarshalBinary(enc); if (errΔ1 != default!) {

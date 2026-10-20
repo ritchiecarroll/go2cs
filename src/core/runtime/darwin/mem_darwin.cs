@@ -11,7 +11,7 @@ partial class runtime_package {
 // which prevents us from allocating more stack.
 //
 //go:nosplit
-internal static @unsafe.Pointer sysAllocOS(uintptr n) {
+internal static @unsafe.Pointer sysAllocOS(uintptr n, @string _) {
     var (v, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
         return default!;
@@ -53,7 +53,7 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
     mmap(v, n, _PROT_NONE, (int32)((UntypedInt)(_MAP_ANON | _MAP_PRIVATE) | (int32)_MAP_FIXED), -1, 0);
 }
 
-internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n) {
+internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string _) {
     var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
         return default!;
@@ -67,7 +67,7 @@ internal static UntypedInt _ENOMEM => 12;
 internal static readonly @string runtimeOutOfMemoryˢ = "runtime: out of memory"u8;
 internal static readonly @string runtimeCannotMapPagesInˢ = "runtime: cannot map pages in arena address space"u8;
 
-internal static void sysMapOS(@unsafe.Pointer v, uintptr n) {
+internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string _) {
     var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
     if (err == _ENOMEM) {
         @throw(runtimeOutOfMemoryˢ);
@@ -76,6 +76,10 @@ internal static void sysMapOS(@unsafe.Pointer v, uintptr n) {
         print((@string)"runtime: mmap("u8, @unsafe.Pointer.OrTypedNil(v), (@string)", "u8, n, (@string)") returned "u8, @unsafe.Pointer.OrTypedNil(Δp), (@string)", "u8, err, (@string)"\n"u8);
         @throw(runtimeCannotMapPagesInˢ);
     }
+}
+
+internal static bool needZeroAfterSysUnusedOS() {
+    return true;
 }
 
 } // end runtime_package

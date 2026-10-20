@@ -7,9 +7,10 @@ using binary = encoding.binary_package;
 using fmt = fmt_package;
 using io = io_package;
 using os = os_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using encoding;
+using go;
 
 partial class xcoff_package {
 
@@ -17,6 +18,8 @@ public static UntypedInt SAIAMAG => 0x8;
 public static readonly @string AIAFMAG = "`\n"u8;
 public static readonly @string AIAMAG = "<aiaff>\n"u8;
 public static readonly @string AIAMAGBIG = "<bigaf>\n"u8;
+
+// Sizeof
 public static UntypedInt FL_HSZ_BIG => 0x80;
 public static UntypedInt AR_HSZ_BIG => 0x70;
 
@@ -45,7 +48,7 @@ partial struct bigarMemberHeader {
 
 // Archive represents an open AIX big archive.
 partial struct Archive {
-    public partial ref ArchiveHeader ArchiveHeader { get; }
+    /*embed*/ public ArchiveHeader ArchiveHeader;
     public slice<ж<Member>> Members;
     internal io.Closer closer;
 }
@@ -57,7 +60,7 @@ partial struct ArchiveHeader {
 
 // Member represents a member of an AIX big archive.
 partial struct Member {
-    public partial ref MemberHeader MemberHeader { get; }
+    /*embed*/ public MemberHeader MemberHeader;
     internal ж<io.SectionReader> sr;
 }
 
@@ -97,8 +100,9 @@ public static error Close(this ref Archive a) {
 
 // NewArchive creates a new Archive for accessing an AIX big archive in an underlying reader.
 public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
-    (int64, error) parseDecimalBytes(slice<byte> b) => strconv.ParseInt(strings.TrimSpace(((@string)b)), 10, 64);
+    (int64, error) parseDecimalBytes(slice<byte> b) => strconv.ParseInt(strings.TrimSpace((@string)b), 10, 64);
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
+
     // Read File Header
     array<byte> magic = new(8); /* SAIAMAG */
     {
@@ -106,10 +110,11 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
             return (default!, errΔ1);
         }
     }
+
     var arch = @new<Archive>();
     var exprᴛ1 = ((sstring)(magic[..]));
     if (exprᴛ1 == AIAMAGBIG) {
-        arch.Value.magic = ((@string)(magic[..]));
+        arch.Value.magic = (@string)(magic[..]);
     }
     else if (exprᴛ1 == AIAMAG) {
         return (default!, fmt.Errorf("small AIX archive not supported"u8));
@@ -129,18 +134,22 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
             return (default!, errΔ3);
         }
     }
+
     var (off, err) = parseDecimalBytes(fhdr.Flfstmoff[..]);
     if (err != default!) {
         return (default!, fmt.Errorf("error parsing offset of first member in archive header(%q); %v"u8, fhdr, err));
     }
+
     if (off == 0) {
         // Occurs if the archive is empty.
         return (arch, default!);
     }
+
     (var lastoff, err) = parseDecimalBytes(fhdr.Fllstmoff[..]);
     if (err != default!) {
         return (default!, fmt.Errorf("error parsing offset of first member in archive header(%q); %v"u8, fhdr, err));
     }
+
     // Read members
     while (ᐧ) {
         // Read Member Header
@@ -152,19 +161,23 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
                 return (default!, errΔ4);
             }
         }
+
         ref var mhdr = ref heap(new bigarMemberHeader(), out var Ꮡmhdr);
         {
             var errΔ5 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡmhdr); if (errΔ5 != default!) {
                 return (default!, errΔ5);
             }
         }
+
         var member = @new<Member>();
         arch.Value.Members = append((~arch).Members, member);
+
         var (size, errΔ6) = parseDecimalBytes(mhdr.Arsize[..]);
         if (errΔ6 != default!) {
             return (default!, fmt.Errorf("error parsing size in member header(%q); %v"u8, mhdr, errΔ6));
         }
         member.Value.Size = (uint64)size;
+
         // Read name
         (var namlen, errΔ6) = parseDecimalBytes(mhdr.Arnamlen[..]);
         if (errΔ6 != default!) {
@@ -176,9 +189,10 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
                 return (default!, errΔ7);
             }
         }
-        member.Value.Name = ((@string)name);
+        member.Value.Name = (@string)name;
+
         var fileoff = off + (int64)AR_HSZ_BIG + namlen;
-        if ((int64)(fileoff & 1) != 0) {
+        if ((fileoff & 1) != 0) {
             fileoff++;
             {
                 var (_, errΔ8) = sr.Seek(1, io.SeekCurrent); if (errΔ8 != default!) {
@@ -186,6 +200,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
                 }
             }
         }
+
         // Read AIAFMAG string
         ref var fmag = ref heap(new array<byte>(2), out var Ꮡfmag);
         {
@@ -196,8 +211,10 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
         if (((sstring)(fmag[..])) != AIAFMAG) {
             return (default!, fmt.Errorf("AIAFMAG not found after member header"u8));
         }
+
         fileoff += 2; // Add the two bytes of AIAFMAG
         member.Value.sr = io.NewSectionReader(new io.SectionReaderжReaderAt(sr), fileoff, size);
+
         if (off == lastoff) {
             break;
         }
@@ -206,6 +223,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
             return (default!, fmt.Errorf("error parsing offset of first member in archive header(%q); %v"u8, fhdr, errΔ6));
         }
     }
+
     return (arch, default!);
 }
 

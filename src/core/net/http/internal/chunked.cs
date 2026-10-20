@@ -181,6 +181,7 @@ internal static (slice<byte>, error) readChunkLine(ж<bufio.Reader> Ꮡb) {
         }
         return (default!, err);
     }
+
     // RFC 9112 permits parsers to accept a bare \n as a line ending in headers,
     // but not in chunked encoding lines. See https://www.rfc-editor.org/errata/eid7633,
     // which explicitly rejects a clarification permitting \n as a chunk terminator.
@@ -195,6 +196,7 @@ internal static (slice<byte>, error) readChunkLine(ж<bufio.Reader> Ꮡb) {
         }
     }
     p = p.slice(0, len(p) - 2); // trim CRLF
+
     if (len(p) >= maxLineLength) {
         return (default!, ErrLineTooLong);
     }
@@ -261,6 +263,7 @@ internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte>
     if (len(data) == 0) {
         return (0, default!);
     }
+
     {
         (_, err) = fmt.Fprintf(cw.Wire, "%x\r\n"u8, len(data)); if (err != default!) {
             return (0, err);
@@ -299,7 +302,7 @@ internal static error Close(this ref chunkedWriter cw) {
 // trailers, but flush out chunks aggressively in the middle for
 // request bodies which may be generated slowly. See Issue 6574.
 partial struct FlushAfterChunkWriter {
-    public partial ref ж<bufio_package.Writer> Writer { get; }
+    /*embed*/ public ж<bufio_package.Writer> Writer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -333,7 +336,6 @@ internal static (uint64 n, error err) parseHexUint(slice<byte> v) {
         default: {
             return (0, errors.New(invalidByteInChunkLengthˢ));
         }}
-
         if (i == 16) {
             return (0, errors.New(httpChunkLengthTooLargeˢ));
         }

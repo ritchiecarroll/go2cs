@@ -31,13 +31,17 @@ internal static void Main() {
     foreach (var (_, f) in new float64[]{0D, 1.5D, -2.25D, Δmath.Inf(1), Δmath.Inf(-1), Δmath.MaxFloat64, Δmath.SmallestNonzeroFloat64}.slice()) {
         fmt.Printf("%v %#016x %v\n"u8, f, Δmath.Float64bits(f), Δmath.Float64frombits(Δmath.Float64bits(f)) == f);
     }
+
     var negZero = Δmath.Copysign(0D, -1D);
     fmt.Printf("-0 %#016x %v\n"u8, Δmath.Float64bits(negZero), Δmath.Signbit(Δmath.Float64frombits(Δmath.Float64bits(negZero))));
+
     var nan = Δmath.Float64frombits(0x7FF8000000000123UL);
     fmt.Printf("nan payload %#016x %v\n"u8, Δmath.Float64bits(nan), Δmath.IsNaN(nan));
+
     foreach (var (_, f) in new float32[]{0F, 1.5F, -2.25F, (float32)Δmath.Inf(1), Δmath.MaxFloat32}.slice()) {
         fmt.Printf("%v %#08x %v\n"u8, f, Δmath.Float32bits(f), Δmath.Float32frombits(Δmath.Float32bits(f)) == f);
     }
+
     fmt.Println(localInf(), alsoAddressed(0x3FC00000), kept.Value == 0x3FC00000);
     var negZero32 = Δmath.Float32frombits(0x80000000U);
     fmt.Println(orBits(1.5F, negZero32), Δmath.Float32bits(orBits(1.5F, negZero32)) == 0xBFC00000U);

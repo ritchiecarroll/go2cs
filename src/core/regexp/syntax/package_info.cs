@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -28,6 +27,7 @@ using static go.regexp.syntax_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("7374727563747b6f6e63652073796e632e4f6e63653b206d206d61705b737472696e675d737472696e677d", "categoryAliasesᴛ1")]
 [assembly: GoTypeAlias("Error", "ΔError")]
 // </ExportedTypeAliases>
 
@@ -43,10 +43,13 @@ using static go.regexp.syntax_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Inst, ж<Inst>>(Indirect = true)]
-[assembly: GoImplicitConv<Prog, ж<Prog>>(Indirect = true)]
-[assembly: GoImplicitConv<Regexp, ж<Regexp>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,13 +59,13 @@ using static go.regexp.syntax_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("regexp/syntax/compile.go", "compile.cs", "ABcugqaigoKCgoKUgsqigpSCloKClJQADSCigoKCgoKmgoKCppKUopSkpIKUgoKCgpSmpKSkpKSkpKSkpIKCgqSkpKSClIKCgpSmpIKClKSmlIKCpoKCgqaCpoKCgoSClKaUgqqCppSClIKWgoKCgoKCpoKCgoKClIKUggACENKCgoKClIKUgqaCppSmgqaCgoKCpoKCgoKCgpSUgpaUtLS2")]
+[assembly: go.GoPositionMap("regexp/syntax/compile.go", "compile.cs", "ABcugqaigoKCgoKUgsqigpSCpoKClJQADSCigoKCgoKmgoKCppKUopSkpIKUgoKCgpSmpKSkpKSkpKSkpIKCgqSkpKSClIKCgpSmpIKClJSmlIKCpoKCgqaCpoKCgpSClKaUgsqCppSClIKmgoKCgoKCpoKCgoKClIKUggACENKCgoKClIKUgqaCppSmgqaCgoKCpoKCgoKCgpSUgqaUtLS2")]
 [assembly: go.GoPositionMap("regexp/syntax/op_string.go", "op_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCggAFEpaClIKkpA==")]
-[assembly: go.GoPositionMap("regexp/syntax/parse.go", "parse.cs", "ABQqggAVOIIAULIBgoKCgpSClIKmooKUgqaCgpSCpqLcgpSCgoKUgpSClKaCzIKCqIK4ooKAgriClKa0pIK2gpSCxoKCgpSUlsaCgqaCgpSCgoKmgriigoCCtoKCgoKmgqzSgpSClIKCkgABEoKogoKmloKCAAIYAAkCgoKWgoKCqJaCgoKCloKCqJKCgoKUgoKokoKUgoKClKqigoKuwoKCgoKUuKaCgpSCgpaCgoKCgoKChIKWAAIYAAkCgoKClIKUgpSCpoKCpqiSloKClIKWgpaotoKClIKogrqClqiylIKCgoKUgoKClKYABRLCgpSCgoKCgpSmgoKCgoKmAAIkAA8CgpiSgoKCjuKCgoKCgoKUpoIACBSUpKaCgoSCgpSEgoKogoKUAAgUgoKCjNKCgpYABhCUpKaCgoKClISCgqiClJaCgu6CupSSuIKCgqaEgoKUgqiClJSWgoKCgpSUhKrCgpSClKrCpoKCgoKCloK0goK0ksaWgoKCpqrCgpSCgoKUlKzSgoKUgpSCtIKCtJSClKaCgoKCgpSClJQAAhDSpsKCgMzEqwAEFJSAgqSY/IKCgoKCgpSAgqS2lICCpJSCgrSCtICCpLSClJS0gpSUtIKUlLSAgtaClLS0tIKAgqSCtIKCgpSCgpSUlICCpIK0gpSCgrSCgrSCgra2koKCgoKUgpS0goLIgoaSgoKUgoKCgqqAkoKCgqSGgJKkxJaClJSEgoKU7AAIAoKUgoKAgqSClIKUgoKUgpKAgpKUtoKUgoKs0gAPIoKElIKCqIKCgIKklpKCgIKkgqiCgoKCmJKCgoKCgoKAgqSUuIK0grSCtIK4opSGgriygpSUlJSC2AACENKClIKCpqjSgqaClIKClIKUgpSCgpSUqqKukpSkgoKmpKSkqJLMgr6yuqK4kpTIkpSCgt7WgoKClIKClIKCgpaCgoKCppSCgqaokoKUlISCgpSCgoKCpoKUlIKCgpSq0oKClIKCloK0ysyilLaCkoKUgpS4kpSAgqTKgoKCgpSAgqSClIKClIKClJSClJiCgJKkgoKUAAMSpKSkpKQACQSqooK6gpYABxoACQKClIKClKzygpaCgpSCooKClKaigoKUpoKCgoKClKamzrSClICCpICCpKwACAKCqIKClIKCgpSSlIKmgoKAgqSUgoKAgsqCgpaCgpaCgpTcgoKCgoKClKaqwoKCgoSCgoKogqiCgqaCgpSWgoKClIKCuoKClIKCqICCgriSkoCCpJSCgoCCpIKCpoKUppaCgoKUgoKq1oSCgqiCgoKUgpSmgoKWqqKSgoKUgpSUqJKClKjagpKCgoKClIKUugAFGLSUlJSUlIKUlIKogoKCgoKmqqKClKiSgpSqooKCgoKUlIKUqJKCgoKClIKmgoKCgpSCpqiSgoKCgoKUgpSCgpSmgoKCgpSClIKClKaClKqigoKCgoKCgpSUgqaUAAoWgoKCgqaCpoKCgoKmgoKCgpSUpqKCgpSmgqaCgpSClIKU", "891-902:1;1863-1872:1", "", "658=isCharClass/1/2/2,isCharClass/2/2/2")]
-[assembly: go.GoPositionMap("regexp/syntax/perl_groups.go", "perl_groups.cs", "AAkSyOzuAAkQ7NrI2trIyMjI/trI/tw=")]
-[assembly: go.GoPositionMap("regexp/syntax/prog.go", "prog.cs", "ACZSAA0cgoKUAAsq4oKClLS0tJS0tLSSlKzWAAoWgoKCqJKCgpSokoKUpKyyloKYkoKClKqigoKCgoKUpMi0grTOogACENKElKiCkpSCgoK4poKUqqKClIKmuIKCgoKAgoKUlLasspSkpKSkpKSmgoKCpqKCuKKCgoKClIKUgoK4ggAQBoKUpKSkpKSkpJSUgoKUpKSk")]
-[assembly: go.GoPositionMap("regexp/syntax/regexp.go", "regexp.cs", "ADeAAcKClIKUlpK4pqaCuIK4grYACyLSgpSCAAIQ0gABELKCgpS4qqKCgoKCgsqmpqamwpSmrNKCgoKCgoKClIKCgpSCgoKClIKmlJSUlAACrwEACboB4oKUlIKCgpSClIKUgoKClIKmlIKUgoKWmKSkgsaCgpSCgpKmgoKCgoKClLiCgoKCgpS4tKSkpKSClLakpIKCgpSUgpSkgoKClISUpKSkgoKCgoKmpIK2goKClLaCgpQAA+cBAATuAaSCgoKCgoKUgsqCgoKUgpaUtLS0tLS0goKCgpSClIKC2pKCgpSCgIK2qJKCgqaCgpSC")]
-[assembly: go.GoPositionMap("regexp/syntax/simplify.go", "simplify.cs", "AAccAAkCgpSWgpKClIKCgpSCpqaCqqKYhrSCqIKogoKClIKcogABENKCgoKCqpKCgoKClIKUlIKaxgACJAAUBoKmgpSCloKC")]
+[assembly: go.GoPositionMap("regexp/syntax/parse.go", "parse.cs", "ABUsggAZOIIAULIBgoKCgpSClIKmooKUgqaCgpSCpqLcgpSCgoKUgpSClKaC3IKCuIK4ooKAgsiClLakpIK2gpSCxoKCgpSUpraCgqaCgpSCgoKmgriigoCCtoKCgoKmgqzSgpSClIKCkgABEoK4goKmpoKCAAIYAAkCgoKmgoKCuKaCgoKCpoKCqJKCgoKUgoKokoKUgoKClKqigoKuwoKCgoKUuKaCgpSCgqaCgoKCgoKClIKmAAIYAAkCgoKClIKUgpSCpoKCpqiSpoKClIKmgqaotoKClIK4gsqCpqiylIKCgoKUgoKClKYABBLCgpSCgoKCgpSmgoKCgoKmAAIkAA8CgqiSgoKCjuKCgoKCgoKUpoIACRSklKaCgpSCgpSUgoK4goKUAAkUgoKCjNKCgqYABxCklKaCgoKClJSCgriClKaCgu6CyqSCuIKCgqaUgoKUgriClJSmgoKCgpSUlKrCgpSClKrCpoKCgoKCpoK0goK0gramgoKCpqrCgpSCgoKUlKzSgoKUgpSCtIKCpJSClKaCgoKCgpSClJQAAhDSpsKCgNykqwAEFJSAgqSozIKCgoKCgpSAgqS2lICCpJSCgrSCtICCpLSClJS0gpSUtIKUlLSAgtaClLS0pIKAgqSCtIKCgpSCgpSUlICCpIK0gpSCgrSCgrSCgsamkoKCgoKUgpS0goLIgqaCgoKUgoKCgsqAgoKCgqSmgIKktKaClJSUgoKU7AAIAoKUgoKAgqSClIKUgoKUgpKAgpKUtoKUgoKs0gAQIoKUlIKCuIKCgIKkppKCgIKkgriCgoKCqJKCgoKCgoKAgqSUyIK0grSCtILIgpSmgsiCgpSUlJSC2AACENKClIKCpqjSgqaClIKClIKUgpSCgpSUqqKukpSkgoKmpKSUqJLcgr6y2oLIgpTYgpSCgs7WgoKClIKClIKCgqaCgoKCppSCgqaokoKUlJSCgpSCgoKCpoKUlIKCgpSq0oKClIKCpoK0yuyClMaCgoKUgpTIgpSAgqTKgoKCgpSAgqSClIKClIKClJSClLiCgIKkgoKUAAkSpKSkpKSkqqKCyoKmAAcaAAkCgpSCgpSs8oKmgoKUgqKCgpSmooKClKaCgoKCgpSmpsq4ABAgkoKCAAMS8oKCgoKUtIKUtIK2gpSUgpSClJSClKyyuJSkpKSUgIKkgILsgoCCgqSsAAgCgriCgpSCgoKUkpSCpoKCgIKklIKCgILagoKmgoKUgqaCgpTcgoKCgoKClKaqwoKCgpSCgoK4griCgqaCgpSmgoKClIKCyoKClIKCuICCgsiSkoCCpJSCgoCCpIKCpoKUpqaCgoKUgoKq1pSCgriCgoKUgpSmgoKmqqKSgoKUgpSUqJKClKjagoKCgoKClIKUygAHGLSUlJSUlIKUlIK4goKCgoKmqqKClKiSgpSqooKCgoKUlIKUqJKCgoKClIKmgoKCgpSCpqiSgoKCgoKUgpSCgpSmgoKCgpSClIKClKaClKqigoKCgoKCgpSUgqaUAAoWgoKCgqaCpoKCgoKmgoKCgpSUpqKCgpSmgqaCgpSClIKU", "892-903:1;1956-1965:1", "", "686=isCharClass/1/2/2,isCharClass/2/2/2")]
+[assembly: go.GoPositionMap("regexp/syntax/perl_groups.go", "perl_groups.cs", "AAgSuNzuAAgQ3Mq4ysq4uLi47sq47tw=")]
+[assembly: go.GoPositionMap("regexp/syntax/prog.go", "prog.cs", "ACdSAA0cgoKUAAwq4oKClLS0pJS0tKSClKzWAAoWgoKCqJKCgpSokoKUlKyypoKokoKClKqigoKCgoKUpNiUgrTOogACENKUlLiCgpSCgoK4poKUyoKClIKmuIKCgoKAgoKUlLasspSkpKSkpJSmgoKCpqKCuKKCgoKClIKUgoK4ggAQBoKUpKSkpKSkpJSUgoKUpKSk")]
+[assembly: go.GoPositionMap("regexp/syntax/regexp.go", "regexp.cs", "ADmAAcKClIKUpoK4pqaCuIK4gqYADCKigpSCAAIQ0gAEEIKCgpS4yoKCgoKCgsqmpqamgpSmrNKCgoKCgoKClIKCgpSCgoKClIKmlJSUlAACrwEACLoB4oKUlIKCgpSClIKUgoKClIKmlIKUgoKmmKSkgsaCgpSCgpKmgoKCgoKClLiCgoKCgpS4tKSkpKSClLakpIKCgpSUgpSkgoKClJSUpKSkgoKCgoKmlIK2goKClLaCgpQAA+cBAAPuAaSCgoKCgoKUgsqCgoKUgqaUtLS0tLS0goKCgpSClIKCypKCgpSCgIK2qJKCgqaCgpSC")]
+[assembly: go.GoPositionMap("regexp/syntax/simplify.go", "simplify.cs", "AAccAAkCgpSmgoKClIKCgpSCpqaCyoK4ppSCuIK4goKClILcggAGEJKCgoKCyoKCgoKClIKUlILKpgACJAAUBoKmgpSCpoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.regexp;
@@ -77,6 +80,7 @@ public static partial class syntax_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct categoryAliasesᴛ1 {}
     internal partial struct charGroup {}
     internal partial struct compiler {}
     internal partial struct frag {}
@@ -106,6 +110,7 @@ public static partial class syntax_package
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸunicode() => builtin.initPackage(typeof(unicode_package));
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(go.unicode.utf8_package));
     // </ImportInitializers>

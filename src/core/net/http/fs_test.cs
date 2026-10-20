@@ -50,8 +50,6 @@ partial struct wantRange {
     internal int64 start, end; // range [start,end)
 }
 
-// ignore wasteful range request
-
 partial struct ServeFileRangeTestsᴛ1 /*dyn*/ {
     internal @string r;
     internal nint code;
@@ -67,7 +65,7 @@ public static slice<ServeFileRangeTestsᴛ1> ServeFileRangeTests = new ServeFile
     new(r: "bytes=0-1,5-8"u8, code: StatusPartialContent, ranges: new wantRange[]{new(0, 2), new(5, 9)}.slice()),
     new(r: "bytes=0-1,5-"u8, code: StatusPartialContent, ranges: new wantRange[]{new(0, 2), new(5, testFileLen)}.slice()),
     new(r: "bytes=5-1000"u8, code: StatusPartialContent, ranges: new wantRange[]{new(5, testFileLen)}.slice()),
-    new(r: "bytes=0-,1-,2-,3-,4-"u8, code: StatusOK),
+    new(r: "bytes=0-,1-,2-,3-,4-"u8, code: StatusOK), // ignore wasteful range request
     new(r: "bytes=0-9"u8, code: StatusPartialContent, ranges: new wantRange[]{new(0, testFileLen - 1)}.slice()),
     new(r: "bytes=0-10"u8, code: StatusPartialContent, ranges: new wantRange[]{new(0, testFileLen)}.slice()),
     new(r: "bytes=0-11"u8, code: StatusPartialContent, ranges: new wantRange[]{new(0, testFileLen)}.slice()),
@@ -100,11 +98,14 @@ internal static void testServeFile(ж<testing.T> Ꮡt, testMode mode) {
         ServeFile(w, r, testdataFileˢ);
     }))).Value.ts;
     var c = ts.Client();
+
     error err = default!;
+
     (var @file, err) = os.ReadFile(testFile);
     if (err != default!) {
         Ꮡt.Fatal(readingFileˢ, err);
     }
+
     // set up the Request (re-used for all tests)
     Δhttp.Request req = default!;
     req.Header = new httpꓸHeader(0);
@@ -113,6 +114,7 @@ internal static void testServeFile(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Fatal(parseURLˢ, err);
         }
     }
+
     // Get contents via various methods.
     //
     // See https://go.dev/issue/59471 for a proposal to limit the set of methods handled.
@@ -132,6 +134,7 @@ internal static void testServeFile(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Fatalf("body mismatch for %v request: got %q, want %q"u8, method, bodyΔ1, @file);
         }
     }
+
     // HEAD request.
     req.Method = MethodHead;
     var (resp, body) = getBody(Ꮡt, headˢ, req, c);
@@ -144,6 +147,7 @@ internal static void testServeFile(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Fatalf("Content-Length mismatch for HEAD request: got %v, want %v"u8, got, want);
         }
     }
+
     // Range tests
     req.Method = MethodGet;
 Cases:
@@ -303,7 +307,6 @@ public static void TestServeContentWithEmptyContentIgnoreRanges(ж<testing.T> �
     }
 }
 
-
 partial struct fsRedirectTestDataᴛ1 /*dyn*/ {
     internal @string original, redirect;
 }
@@ -322,6 +325,7 @@ internal static readonly @string testˢ = "/test"u8;
 
 internal static void testFSRedirect(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, StripPrefix(testˢ, FileServer(((Δhttp.Dir)(@string)"."u8)))).Value.ts;
+
     foreach (var (_, data) in fsRedirectTestData) {
         var (res, err) = ts.Client().Get((~ts).URL + data.original);
         if (err != default!) {
@@ -409,6 +413,7 @@ internal static void testFileServerEscapesNames(ж<testing.T> Ꮡt, testMode mod
         new(@"<combo>?foo"u8, @"<a href=""%3Ccombo%3E%3Ffoo"">&lt;combo&gt;?foo</a>"u8),
         new(@"foo:bar"u8, @"<a href=""./foo:bar"">foo:bar</a>"u8)
     }.slice();
+
     // We put each test file in its own directory in the fakeFS so we can look at it in isolation.
     ref var fs = ref heap<fakeFS>(out var Ꮡfs);
     fs = new fakeFS(0);
@@ -421,6 +426,7 @@ internal static void testFileServerEscapesNames(ж<testing.T> Ꮡt, testMode mod
         ));
         fs[fmt.Sprintf("/%d/%s"u8, i, test.name)] = testFile;
     }
+
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(new http_test_package.fakeFSжFileSystem(Ꮡfs))).Value.ts;
     foreach (var (i, test) in tests) {
         @string url = fmt.Sprintf("%s/%d"u8, (~ts).URL, i);
@@ -479,13 +485,16 @@ internal static void testFileServerSortsNames(ж<testing.T> Ꮡt, testMode mode)
                 }.slice()
             ))
         });
+
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(new http_test_package.fakeFSжFileSystem(Ꮡfs))).Value.ts;
+
         var (res, err) = ts.Client().Get((~ts).URL);
         if (err != default!) {
             Ꮡt.Fatalf("Get: %v"u8, err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         (var b, err) = io.ReadAll((~res).Body);
         if (err != default!) {
             Ꮡt.Fatalf("read Body: %v"u8, err);
@@ -595,6 +604,7 @@ public static void TestDirJoin(ж<testing.T> Ꮡt) {
     test(((Δhttp.Dir)(@string)etcˢ2), hostsˢ);
     test(((Δhttp.Dir)(@string)etcˢ2), hostsˢ2);
     test(((Δhttp.Dir)(@string)etcˢ2), hostsˢ3);
+
     // Not really directories, but since we use this trick in
     // ServeFile, test it:
     test(((Δhttp.Dir)(@string)etcHostsˢ), ""u8);
@@ -643,10 +653,9 @@ internal static void testServeFileContentType(ж<testing.T> Ꮡt, testMode mode)
             w.Header().Set(contentTypeˢ, ctype);
         }
         else if (exprᴛ1 == "2"u8) {
+            // Explicitly inhibit sniffing.
             w.Header()[contentTypeˢ] = new @string[]{}.slice();
         }
-
-        // Explicitly inhibit sniffing.
         ServeFile(w, r, testdataFileˢ);
     }))).Value.ts;
     var tsʗ1 = ts;
@@ -742,11 +751,10 @@ public static void TestServeFileWithContentEncoding(ж<testing.T> Ꮡt) {
 }
 
 internal static void testServeFileWithContentEncoding(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(contentEncodingˢ, fooˢ);
         ServeFile(w, r, testdataFileˢ);
+
         // Because the testdata is so small, it would fit in
         // both the h1 and h2 Server's write buffers. For h1,
         // sendfile is used, though, forcing a header flush at
@@ -780,13 +788,12 @@ internal static readonly @string ifNoneMatchˢ = "If-None-Match"u8;
 internal static readonly object readingBodyˢ = (@string)"reading Body:"u8;
 
 internal static void testServeFileNotModified(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(contentTypeˢ, applicationJsonˢ);
         w.Header().Set(contentEncodingˢ, fooˢ);
         w.Header().Set(etagˢ, @"""123"""u8);
         ServeFile(w, r, testdataFileˢ);
+
         // Because the testdata is so small, it would fit in
         // both the h1 and h2 Server's write buffers. For h1,
         // sendfile is used, though, forcing a header flush at
@@ -859,10 +866,10 @@ internal static void testServeIndexHtml(ж<testing.T> Ꮡt, testMode mode) {
             name = dirFSˢ;
             break;
         }}
-
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
             @string want = wantᶜ;
             var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, Ꮡh.ValueSlot).Value.ts;
+
             foreach (var (_, path) in new @string[]{"/testdata/"u8, "/testdata/index.html"u8}.slice()) {
                 var (res, err) = ts.Client().Get((~ts).URL + path);
                 if (err != default!) {
@@ -897,6 +904,7 @@ internal static void testServeIndexHtmlFS(ж<testing.T> Ꮡt, testMode mode) {
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)"."u8))).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
+
         foreach (var (_, path) in new @string[]{"/testdata/"u8, "/testdata/index.html"u8}.slice()) {
             var (res, err) = ts.Client().Get((~ts).URL + path);
             if (err != default!) {
@@ -929,6 +937,7 @@ internal static void testFileServerZeroByte(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)"."u8))).Value.ts;
+
         var (c, err) = net.Dial(tcpˢ, (~ts).Listener.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -958,14 +967,11 @@ public static void TestFileServerNamesEscape(ж<testing.T> Ꮡt) {
 }
 
 internal static void testFileServerNamesEscape(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)testdataˢ))).Value.ts;
     foreach (var (_, path) in new @string[]{
         "/../testdata/file"u8,
-        "/NUL"u8
+        "/NUL"u8 // don't read from device files on Windows
     }.slice()) {
-        // don't read from device files on Windows
         var (res, err) = ts.Client().Get((~ts).URL + path);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1037,6 +1043,7 @@ internal static (slice<fs.FileInfo>, error) Readdir(this ref fakeFile f, nint co
         return (default!, fs.ErrInvalid);
     }
     slice<fs.FileInfo> fis = default!;
+
     nint limit = f.entpos + count;
     if (count <= 0 || limit > len((~f.fi).ents)) {
         limit = len((~f.fi).ents);
@@ -1044,6 +1051,7 @@ internal static (slice<fs.FileInfo>, error) Readdir(this ref fakeFile f, nint co
     for (; f.entpos < limit; f.entpos++) {
         fis = append(fis, (fs.FileInfo)(new http_test_package.fakeFileInfoжFileInfo((~f.fi).ents[f.entpos])));
     }
+
     if (len(fis) == 0 && count > 0){
         return (fis, io.EOF);
     } else {
@@ -1095,7 +1103,9 @@ internal static void testDirectoryIfNotModified(ж<testing.T> Ꮡt, testMode mod
         )),
         ["/index.html"u8] = indexFile
     });
+
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(fs)).Value.ts;
+
     var (res, err) = ts.Client().Get((~ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1108,12 +1118,15 @@ internal static void testDirectoryIfNotModified(ж<testing.T> Ꮡt, testMode mod
         Ꮡt.Fatalf("Got body %q; want %q"u8, b, indexContents);
     }
     (~res).Body.Close();
+
     @string lastMod = (~res).Header.Get(lastModifiedˢ);
     if (lastMod != fileModStr) {
         Ꮡt.Fatalf("initial Last-Modified = %q; want %q"u8, lastMod, fileModStr);
     }
+
     var (req, _) = NewRequest(getˢ2, (~ts).URL, default!);
     (~req).Header.Set(ifModifiedSinceˢ, lastMod);
+
     var c = ts.Client();
     (res, err) = c.Do(req);
     if (err != default!) {
@@ -1123,8 +1136,10 @@ internal static void testDirectoryIfNotModified(ж<testing.T> Ꮡt, testMode mod
         Ꮡt.Fatalf("Code after If-Modified-Since request = %v; want 304"u8, (~res).StatusCode);
     }
     (~res).Body.Close();
+
     // Advance the index.html file's modtime, but not the directory's.
     indexFile.Value.modtime = (~indexFile).modtime.Add((time.Duration)(3600000000000L));
+
     (res, err) = c.Do(req);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1206,7 +1221,6 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
             ["not_modified_modtime"u8] = new(
                 @file: "testdata/style.css"u8,
                 serveETag: @"""foo"""u8, // Last-Modified sent only when no ETag
-
                 modtime: htmlModTime,
                 reqHeader: new map<@string, @string>{
                     ["If-Modified-Since"u8] = htmlModTime.UTC().Format(TimeFormat)
@@ -1216,9 +1230,7 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
             ["not_modified_modtime_with_contenttype"u8] = new(
                 @file: "testdata/style.css"u8,
                 serveContentType: "text/css"u8, // explicit content type
-
                 serveETag: @"""foo"""u8, // Last-Modified sent only when no ETag
-
                 modtime: htmlModTime,
                 reqHeader: new map<@string, @string>{
                     ["If-Modified-Since"u8] = htmlModTime.UTC().Format(TimeFormat)
@@ -1235,9 +1247,7 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
             ),
             ["not_modified_etag_no_seek"u8] = new(
                 content: new panicOnSeek((io.ReadSeeker)(default!)), // should never be called
-
                 serveETag: @"W/""foo"""u8, // If-None-Match uses weak ETag comparison
-
                 reqHeader: new map<@string, @string>{
                     ["If-None-Match"u8] = @"""baz"", W/""foo"""u8
                 },
@@ -1301,9 +1311,9 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
                 wantStatus: StatusRequestedRangeNotSatisfiable,
                 wantContentType: "text/plain; charset=utf-8"u8,
                 wantContentRange: "bytes */8"u8
-            ), // An If-Range resource for entity "A", but entity "B" is now current.
- // The Range request should be ignored.
-
+            ),
+            // An If-Range resource for entity "A", but entity "B" is now current.
+            // The Range request should be ignored.
             ["range_no_match"u8] = new(
                 @file: "testdata/style.css"u8,
                 serveETag: @"""A"""u8,
@@ -1316,8 +1326,7 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
             ),
             ["range_with_modtime"u8] = new(
                 @file: "testdata/style.css"u8,
-                modtime: time.Date(2014, 6, 25, 17, 12, 18, 0, /* nanos */
- time.ΔUTC),
+                modtime: time.Date(2014, 6, 25, 17, 12, 18, 0, /* nanos */ time.ΔUTC),
                 reqHeader: new map<@string, @string>{
                     ["Range"u8] = "bytes=0-4"u8,
                     ["If-Range"u8] = "Wed, 25 Jun 2014 17:12:18 GMT"u8
@@ -1329,8 +1338,7 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
             ),
             ["range_with_modtime_mismatch"u8] = new(
                 @file: "testdata/style.css"u8,
-                modtime: time.Date(2014, 6, 25, 17, 12, 18, 0, /* nanos */
- time.ΔUTC),
+                modtime: time.Date(2014, 6, 25, 17, 12, 18, 0, /* nanos */ time.ΔUTC),
                 reqHeader: new map<@string, @string>{
                     ["Range"u8] = "bytes=0-4"u8,
                     ["If-Range"u8] = "Wed, 25 Jun 2014 17:12:19 GMT"u8
@@ -1341,8 +1349,7 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
             ),
             ["range_with_modtime_nanos"u8] = new(
                 @file: "testdata/style.css"u8,
-                modtime: time.Date(2014, 6, 25, 17, 12, 18, 123, /* nanos */
- time.ΔUTC),
+                modtime: time.Date(2014, 6, 25, 17, 12, 18, 123, /* nanos */ time.ΔUTC),
                 reqHeader: new map<@string, @string>{
                     ["Range"u8] = "bytes=0-4"u8,
                     ["If-Range"u8] = "Wed, 25 Jun 2014 17:12:18 GMT"u8
@@ -1432,6 +1439,7 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
                         contentΔ1.Seek(0, io.SeekStart);
                     }
                 }
+
                 servec.ᐸꟷ(new testServeContent_serveParam(
                     name: filepath.Base(tt.@file),
                     content: content,
@@ -1446,6 +1454,7 @@ internal static void testServeContent(ж<testing.T> Ꮡt, testMode mode) {
                 foreach (var (k, v) in tt.reqHeader) {
                     (~req).Header.Set(k, v);
                 }
+
                 var c = ts.Client();
                 (var res, err) = c.Do(req);
                 if (err != default!) {
@@ -1615,6 +1624,7 @@ public static void TestLinuxSendfile(ж<testing.T> Ꮡt) {
                 Ꮡt.Skip(skippingStraceNotFoundInˢ);
             }
         }
+
         var (ln, err) = net.Listen(tcpˢ, "127.0.0.1:0"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1625,20 +1635,24 @@ public static void TestLinuxSendfile(ж<testing.T> Ꮡt) {
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         // Attempt to run strace, and skip on failure - this test requires SYS_PTRACE.
         {
             var errΔ2 = testenv.Command(new http_test_package.testing_TжTB(Ꮡt), straceˢ, "-f"u8, "-q", os.Args[0], testRunˢ).Run(); if (errΔ2 != default!) {
                 Ꮡt.Skipf("skipping; failed to run strace: %v"u8, errΔ2);
             }
         }
+
         @string filename = fmt.Sprintf("1kb-%d"u8, os.Getpid());
         @string filepath = path.Join(os.TempDir(), filename);
+
         {
             var errΔ3 = os.WriteFile(filepath, bytes.Repeat(new byte[]{(rune)'a'}.slice(), (1 << (int)(10))), 493); if (errΔ3 != default!) {
                 Ꮡt.Fatal(errΔ3);
             }
         }
         defer(os.Remove, filepath, ref ᒐ);
+
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var child = testenv.Command(new http_test_package.testing_TжTB(Ꮡt), straceˢ, "-f"u8, "-q", os.Args[0], testRunˢ2);
         child.Value.ExtraFiles = append((~child).ExtraFiles, lnf);
@@ -1650,6 +1664,7 @@ public static void TestLinuxSendfile(ж<testing.T> Ꮡt) {
                 Ꮡt.Skipf("skipping; failed to start straced child: %v"u8, errΔ4);
             }
         }
+
         (var res, err) = Get(fmt.Sprintf("http://%s/%s"u8, ln.Addr(), filename));
         if (err != default!) {
             Ꮡt.Fatalf("http client error: %v"u8, err);
@@ -1659,9 +1674,11 @@ public static void TestLinuxSendfile(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("client body read error: %v"u8, err);
         }
         (~res).Body.Close();
+
         // Force child to exit cleanly.
         Post(fmt.Sprintf("http://%s/quit"u8, ln.Addr()), ""u8, default!);
         child.Wait();
+
         var rx = regexp.MustCompile(bN64Sendfile64ˢ);
         @string @out = buf.String();
         if (!rx.MatchString(@out)) {
@@ -1743,6 +1760,7 @@ internal static readonly @string absolutePathˢ = "AbsolutePath"u8;
 
 internal static void testFileServerNotDirError(ж<testing.T> Ꮡt, testMode mode, Func<@string, Δhttp.FileSystem> newfs) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(newfs(testdataˢ))).Value.ts;
+
     ref var err = ref heap<error>(out var Ꮡerr);
     (var res, err) = ts.Client().Get((~ts).URL + "/index.html/not-a-file"u8);
     if (err != default!) {
@@ -1752,6 +1770,7 @@ internal static void testFileServerNotDirError(ж<testing.T> Ꮡt, testMode mode
     if ((~res).StatusCode != 404) {
         Ꮡt.Errorf("StatusCode = %v; want 404"u8, (~res).StatusCode);
     }
+
     void test(@string name, Δhttp.FileSystem fsys) {
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
             (_, Ꮡerr.ValueSlot) = fsys.Open(indexHtmlNotAFileˢ);
@@ -1762,6 +1781,7 @@ internal static void testFileServerNotDirError(ж<testing.T> Ꮡt, testMode mode
                 tΔ1.Errorf("err = %v; errors.Is(err, fs.ErrNotExist) = %v; want true"u8, Ꮡerr.ValueSlot,
                     errors.Is(Ꮡerr.ValueSlot, fs.ErrNotExist));
             }
+
             (_, Ꮡerr.ValueSlot) = fsys.Open(indexHtmlNotADirNotAFileˢ);
             if (Ꮡerr.ValueSlot == default!) {
                 tΔ1.Fatal(errNilWantNilˢ);
@@ -1772,10 +1792,12 @@ internal static void testFileServerNotDirError(ж<testing.T> Ꮡt, testMode mode
             }
         });
     }
+
     (var absPath, err) = filepath.Abs(testdataˢ);
     if (err != default!) {
         Ꮡt.Fatal(getAbsPathˢ, err);
     }
+
     test(relativePathˢ, newfs(testdataˢ));
     test(absolutePathˢ, newfs(absPath));
 }
@@ -1862,6 +1884,7 @@ internal partial struct testServeFileRejectsInvalidSuffixLengths_tests /*dyn*/ {
 
 internal static void testServeFileRejectsInvalidSuffixLengths(ж<testing.T> Ꮡt, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)testdataˢ))).Value.ts;
+
     var tests = new testServeFileRejectsInvalidSuffixLengths_tests[]{
         new("bytes=--6"u8, 416, "invalid range\n"u8),
         new("bytes=--0"u8, 416, "invalid range\n"u8),
@@ -1872,6 +1895,7 @@ internal static void testServeFileRejectsInvalidSuffixLengths(ж<testing.T> Ꮡt
         new("bytes=-0"u8, 206, ""u8),
         new("bytes="u8, 200, "index.html says hello\n"u8)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         ref var ttΔ1 = ref heap<testServeFileRejectsInvalidSuffixLengths_tests>(out var ᏑttΔ1);
         ttΔ1 = tt;
@@ -1914,10 +1938,12 @@ public static void TestFileServerMethods(ж<testing.T> Ꮡt) {
 
 internal static void testFileServerMethods(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)testdataˢ))).Value.ts;
+
     var (@file, err) = os.ReadFile(testFile);
     if (err != default!) {
         Ꮡt.Fatal(readingFileˢ, err);
     }
+
     // Get contents via various methods.
     //
     // See https://go.dev/issue/59471 for a proposal to limit the set of methods handled.
@@ -1973,6 +1999,7 @@ public static void TestFileServerFS(ж<testing.T> Ꮡt) {
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), http1Mode, FileServerFS(fsys)).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
+
         var (res, err) = ts.Client().Get((~ts).URL + "/"u8 + filename);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -2006,6 +2033,7 @@ public static void TestServeFileFS(ж<testing.T> Ꮡt) {
         }))).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
+
         var (res, err) = ts.Client().Get((~ts).URL + "/"u8 + filename);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -2028,8 +2056,6 @@ public static void TestServeFileFS(ж<testing.T> Ꮡt) {
 public static void TestServeFileZippingResponseWriter(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // This test exercises a pattern which is incorrect,
         // but has been observed enough in the world that we don't want to break it.
         //
@@ -2063,6 +2089,7 @@ public static void TestServeFileZippingResponseWriter(ж<testing.T> Ꮡt) {
         }))).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
+
         var (res, err) = ts.Client().Get((~ts).URL + "/"u8 + filename);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -2116,6 +2143,7 @@ internal static void testFileServerDirWithRootFile(ж<testing.T> Ꮡt, testMode 
             var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, h).Value.ts;
             var tsʗ1 = ts;
             defer(tsʗ1.Close, ref ᒐ);
+
             var (res, err) = ts.Client().Get((~ts).URL);
             if (err != default!) {
                 tΔ1.Fatal(err);
@@ -2131,10 +2159,12 @@ internal static void testFileServerDirWithRootFile(ж<testing.T> Ꮡt, testMode 
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     var testDirFileʗ1 = testDirFile;
     Ꮡt.Run(fileServerˢ, (ж<testing.T> tΔ2) => {
         testDirFileʗ1(tΔ2, FileServer(((Δhttp.Dir)(@string)testdataIndexHtmlˢ)));
     });
+
     var testDirFileʗ2 = testDirFile;
     Ꮡt.Run(fileServerFSˢ, (ж<testing.T> tΔ3) => {
         testDirFileʗ2(tΔ3, FileServerFS(os.DirFS(testdataIndexHtmlˢ)));
@@ -2181,18 +2211,22 @@ internal static void testServeContentHeadersWithError(ж<testing.T> Ꮡt, bool k
         }))).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
+
         var (req, err) = NewRequest(getˢ2, (~ts).URL, default!);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         (~req).Header.Set(rangeˢ, bytes10010000ˢ);
+
         var c = ts.Client();
         (var res, err) = c.Do(req);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var (@out, _) = io.ReadAll((~res).Body);
         (~res).Body.Close();
+
         @string ifKept(@string s) {
             if (keepHeaders) {
                 return s;

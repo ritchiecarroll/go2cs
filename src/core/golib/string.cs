@@ -517,10 +517,12 @@ public readonly struct @string :
 
     #region [ Operators ]
 
-    // Enable implicit conversions between string and @string struct
+    // Enable implicit conversions between string and @string struct. A C# string LITERAL converts
+    // once per process and is shared from then on (Go's RODATA cost model; see StringLiteralCache);
+    // any other string converts exactly as `new @string(value)` does.
     public static implicit operator @string(string value)
     {
-        return new @string(value);
+        return StringLiteralCache.Get(value);
     }
 
     public static implicit operator string(@string value)
@@ -962,4 +964,65 @@ public readonly struct @string :
     private const rune RuneReplacementChar = 0xFFFD;
 
     #endregion
+}
+
+/// <summary>
+/// Restores Go's raw string literal semantics to a converted multi-line raw string.
+/// </summary>
+/// <remarks>
+/// <para>
+/// A Go raw string literal never holds a carriage return: the Go compiler discards every CR between
+/// the backquotes. The converter emits a raw string that spans lines as a C# raw string literal, and C#
+/// takes that literal's line breaks from the source file. The converter writes LF inside the literal,
+/// but <c>.gitattributes</c> pins <c>*.cs</c> to <c>eol=crlf</c>, so every checkout carries CRLF there
+/// and a build of the checked-out file would hold <c>\r\n</c> where Go holds <c>\n</c>.
+/// </para>
+/// <para>
+/// The converter therefore emits <c>"""..."""u8.Raw()</c>. Removing every CR is exactly Go's rule, so
+/// the value is the same on any checkout. This applies to RAW literals only: an interpreted
+/// <c>"\r\n"u8</c> legitimately holds a CR, which is why the strip is not inside the shared
+/// <c>ReadOnlySpan&lt;byte&gt;</c> to <see cref="@string"/> conversion.
+/// </para>
+/// </remarks>
+public static class RawStringLiteral
+{
+    /// <summary>
+    /// Returns the Go string a multi-line raw literal denotes: its UTF-8 bytes with every CR removed.
+    /// </summary>
+    /// <remarks>
+    /// Allocates the one array the implicit <see cref="ReadOnlySpan{T}"/> to <see cref="@string"/>
+    /// conversion would have allocated anyway, skipping CRs as it copies, so it adds no allocation.
+    /// </remarks>
+    public static @string Raw(this ReadOnlySpan<byte> literal)
+    {
+        int carriageReturns = literal.Count((byte)'\r');
+
+        if (carriageReturns == 0)
+            return new @string(literal);
+
+        byte[] bytes = AllocationCounter.NewArray<byte>(literal.Length - carriageReturns);
+        int length = 0;
+
+        foreach (byte value in literal)
+        {
+            if (value != (byte)'\r')
+                bytes[length++] = value;
+        }
+
+        return new @string(bytes);
+    }
+
+    /// <summary>
+    /// Returns a multi-line raw literal's text with every CR removed, for a literal the converter emits
+    /// as a C# <see cref="string"/>: an operand of a <c>+</c> chain of constant pieces.
+    /// </summary>
+    public static string Raw(this string literal)
+    {
+        if (!literal.Contains('\r'))
+            return literal;
+
+        AllocationCounter.Count();
+
+        return literal.Replace("\r", "");
+    }
 }

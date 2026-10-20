@@ -42,7 +42,7 @@ public static void TestBasicEncoderDecoder(ж<testing.T> Ꮡt) {
         (complex64)(1.2345F + 2.3456F.i()),
         (complex128)(1.2345678D + 2.3456789D.i()),
         slice<byte>("hello"u8),
-        ((@string)"hello"u8)
+        (@string)"hello"u8
     }.slice();
     foreach (var (_, value) in values) {
         var b = @new<bytes.Buffer>();
@@ -73,54 +73,66 @@ public static void TestEncodeIntSlice(ж<testing.T> Ꮡt) {
     var s16 = new int16[]{145, 176, 210, 247, 287, 330, 376, 425, 477}.slice();
     var s32 = new int32[]{532, 590, 651, 715, 782, 852, 925, 1001, 1080}.slice();
     var s64 = new int64[]{1162, 1247, 1335, 1426, 1520, 1617, 1717, 1820, 1926}.slice();
+
     var s8ʗ1 = s8;
     Ꮡt.Run(int8ˢ, (ж<testing.T> tΔ1) => {
         ref var sink = ref heap(new bytes.Buffer(), out var Ꮡsink);
         var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡsink));
         enc.Encode(s8ʗ1);
+
         var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡsink));
         ref var res = ref heap<slice<int8>>(out var Ꮡres);
         res = new slice<int8>(9);
         dec.Decode(Ꮡres);
+
         if (!slices.Equal<slice<int8>, int8>(s8ʗ1, res)) {
             tΔ1.Fatalf("EncodeIntSlice: expected %v, got %v"u8, s8ʗ1, res);
         }
     });
+
     var s16ʗ1 = s16;
     Ꮡt.Run(int16ˢ, (ж<testing.T> tΔ2) => {
         ref var sink = ref heap(new bytes.Buffer(), out var Ꮡsink);
         var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡsink));
         enc.Encode(s16ʗ1);
+
         var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡsink));
         ref var res = ref heap<slice<int16>>(out var Ꮡres);
         res = new slice<int16>(9);
         dec.Decode(Ꮡres);
+
         if (!slices.Equal<slice<int16>, int16>(s16ʗ1, res)) {
             tΔ2.Fatalf("EncodeIntSlice: expected %v, got %v"u8, s16ʗ1, res);
         }
     });
+
     var s32ʗ1 = s32;
     Ꮡt.Run(int32ˢ, (ж<testing.T> tΔ3) => {
         ref var sink = ref heap(new bytes.Buffer(), out var Ꮡsink);
         var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡsink));
         enc.Encode(s32ʗ1);
+
         var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡsink));
         ref var res = ref heap<slice<int32>>(out var Ꮡres);
         res = new slice<int32>(9);
         dec.Decode(Ꮡres);
+
         if (!slices.Equal<slice<int32>, int32>(s32ʗ1, res)) {
             tΔ3.Fatalf("EncodeIntSlice: expected %v, got %v"u8, s32ʗ1, res);
         }
     });
+
     var s64ʗ1 = s64;
     Ꮡt.Run(int64ˢ, (ж<testing.T> tΔ4) => {
         ref var sink = ref heap(new bytes.Buffer(), out var Ꮡsink);
         var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡsink));
         enc.Encode(s64ʗ1);
+
         var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡsink));
         ref var res = ref heap<slice<int64>>(out var Ꮡres);
         res = new slice<int64>(9);
         dec.Decode(Ꮡres);
+
         if (!slices.Equal<slice<int64>, int64>(s64ʗ1, res)) {
             tΔ4.Fatalf("EncodeIntSlice: expected %v, got %v"u8, s64ʗ1, res);
         }
@@ -168,8 +180,6 @@ internal static readonly object round3EncoderFailˢ = (@string)"round 3: encoder
 internal static readonly object round3ExpectedBadTypeˢ = (@string)"round 3: expected `bad type' error decoding ET2"u8;
 
 public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     var et0 = @new<ET0>();
@@ -187,6 +197,7 @@ public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(errorDecodingEt0ˢ, err);
     }
+
     if (!reflect.DeepEqual(et0.OrTypedNil(), newEt0.OrTypedNil())) {
         Ꮡt.Fatalf("invalid data for et0: expected %+v; got %+v"u8, et0.Value, newEt0.Value);
     }
@@ -194,6 +205,7 @@ public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {
         Ꮡt.Error(notAtEofˢ, b.Len(), bytesLeftˢ);
     }
     //	t.FailNow()
+
     b = @new<bytes.Buffer>();
     enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     var et1 = @new<ET1>();
@@ -209,12 +221,14 @@ public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(errorDecodingEt1ˢ, err);
     }
+
     if (!reflect.DeepEqual(et1.OrTypedNil(), newEt1.OrTypedNil())) {
         Ꮡt.Fatalf("invalid data for et1: expected %+v; got %+v"u8, et1.Value, newEt1.Value);
     }
     if (b.Len() != 0) {
         Ꮡt.Error(notAtEofˢ, b.Len(), bytesLeftˢ);
     }
+
     enc.Encode(et1.OrTypedNil());
     newEt1 = @new<ET1>();
     err = dec.Decode(newEt1.OrTypedNil());
@@ -227,6 +241,7 @@ public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {
     if (b.Len() != 0) {
         Ꮡt.Error(round2NotAtEofˢ, b.Len(), bytesLeftˢ);
     }
+
     // Now test with a running encoder/decoder pair that we recognize a type mismatch.
     err = enc.Encode(et1.OrTypedNil());
     if (err != default!) {
@@ -495,17 +510,17 @@ public partial struct SingleTest {
     internal @string err;
 }
 
-// case that once triggered a bug
-// Decode errors
 internal static slice<SingleTest> singleTests = new SingleTest[]{
-    new((nint)(17), ᏑtestInt, ""u8),
+    new((nint)17, ᏑtestInt, ""u8),
     new((float32)17.5F, ᏑtestFloat32, ""u8),
     new((@string)"bike shed"u8, ᏑtestString, ""u8),
     new(new @string[]{"bike"u8, "shed"u8, "paint"u8, "color"u8}.slice(), ᏑtestSlice, ""u8),
     new(new map<@string, nint>{["seven"u8] = 7, ["twelve"u8] = 12}, ᏑtestMap, ""u8),
-    new(new nint[]{4, 55, 0, 0, 0, 0, 0}.array(), ᏑtestArray, ""u8),
+    new(new nint[]{4, 55, 0, 0, 0, 0, 0}.array(), ᏑtestArray, ""u8), // case that once triggered a bug
     new(new nint[]{4, 55, 1, 44, 22, 66, 1234}.array(), ᏑtestArray, ""u8),
-    new((nint)(172), ᏑtestFloat32, "type"u8)
+
+    // Decode errors
+    new((nint)172, ᏑtestFloat32, "type"u8)
 }.slice();
 
 public static void TestSingletons(ж<testing.T> Ꮡt) {
@@ -538,7 +553,6 @@ public static void TestSingletons(ж<testing.T> Ꮡt) {
             continue;
             break;
         }}
-
         // Get rid of the pointer in the rhs
         var val = reflect.ValueOf(test.@out).Elem().Interface();
         if (!reflect.DeepEqual(test.@in, val)) {
@@ -620,6 +634,7 @@ public static void TestInterfaceIndirect(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(encodeErrorˢ, err);
     }
+
     ref var r = ref heap<slice<interfaceIndirectTestI>>(out var Ꮡr);
     err = NewDecoder(new gob_test_package.bytes_BufferжReader(b)).Decode(Ꮡr);
     if (err != default!) {
@@ -646,23 +661,22 @@ internal partial struct ignoreTest {
     internal any @in, @out;
 }
 
-// Decode normal struct into an empty struct
-// Decode normal struct into a nil.
-// Decode singleton string into a nil.
-// Decode singleton slice into a nil.
-// Decode struct containing an interface into a nil.
-// Decode singleton slice of interfaces into a nil.
-
     partial struct Δtype /*dyn*/ {
         public nint A;
     }
 internal static slice<ignoreTest> ignoreTests = new ignoreTest[]{
+    // Decode normal struct into an empty struct
     new(Ꮡ(new Δtype(23)), Ꮡ(new EmptyStruct())),
+    // Decode normal struct into a nil.
     new(Ꮡ(new Δtype(23)), default!),
+    // Decode singleton string into a nil.
     new((@string)"hello, world"u8, default!),
+    // Decode singleton slice into a nil.
     new(new nint[]{1, 2, 3, 4}.slice(), default!),
+    // Decode struct containing an interface into a nil.
     new(Ꮡ(new Struct0(Ꮡ(new NewType0("value0"u8)))), default!),
-    new(new any[]{(@string)"hi"u8, Ꮡ(new NewType0("value1"u8)), (nint)(23)}.slice(), default!)
+    // Decode singleton slice of interfaces into a nil.
+    new(new any[]{(@string)"hi"u8, Ꮡ(new NewType0("value1"u8)), (nint)23}.slice(), default!)
 }.slice();
 
 public static void TestDecodeIntoNothing(ж<testing.T> Ꮡt) {
@@ -700,8 +714,6 @@ public static void TestDecodeIntoNothing(ж<testing.T> Ꮡt) {
 }
 
 public static void TestIgnoreRecursiveType(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // It's hard to build a self-contained test for this because
     // we can't build compatible types in one package with
     // different items so something is ignored. Here is
@@ -770,7 +782,7 @@ public static void TestNestedInterfaces(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("v.Bug0Field.Bug0Field not Bug0Inner: %T"u8, (~outer2).Bug0Field);
     }
     if ((~inner).A != 7) {
-        Ꮡt.Fatalf("final value %d; expected %d"u8, (~inner).A, (nint)(7));
+        Ꮡt.Fatalf("final value %d; expected %d"u8, (~inner).A, (nint)7);
     }
 }
 
@@ -790,6 +802,7 @@ public static void TestMapBug1(ж<testing.T> Ꮡt) {
     var @in = new Bug1StructMap(0);
     @in[val1ˢ] = new Bug1Elem("elem1"u8, 1);
     @in[val2ˢ] = new Bug1Elem("elem2"u8, 2);
+
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     var err = enc.Encode(@in);
@@ -1013,6 +1026,7 @@ public static void TestGobPtrSlices(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(encodeˢ, err);
     }
+
     ref var @out = ref heap<slice<ж<Bug3>>>(out var Ꮡout);
     err = NewDecoder(new gob_test_package.bytes_BufferжReader(b)).Decode(Ꮡout);
     if (err != default!) {
@@ -1036,6 +1050,7 @@ public static void TestPtrToMapOfMap(ж<testing.T> Ꮡt) {
     subdata[barˢ] = bazˢ;
     var data = new map<@string, any>();
     data[fooˢ] = subdata;
+
     var b = @new<bytes.Buffer>();
     var err = NewEncoder(new gob_test_package.bytes_BufferжWriter(b)).Encode(data);
     if (err != default!) {
@@ -1111,6 +1126,7 @@ internal static (error encodeErr, error panicErr) encodeAndRecover(any value) {
                 }}
             }
         }, ref ᒐ);
+
         encodeErr = NewEncoder(io.Discard).Encode(value);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1136,6 +1152,7 @@ public static void TestNilPointerPanics(ж<testing.T> Ꮡt) {
     slice<@string> nilStringSlice = default!;
     slice<@string> stringSlice = new slice<@string>(1);
     ж<slice<@string>> nilStringSlicePtr = default!;
+
     var testCases = new TestNilPointerPanics_testCases[]{
         new(nilStringPtr.OrTypedNil(), true),
         new(intMap, false),
@@ -1148,6 +1165,7 @@ public static void TestNilPointerPanics(ж<testing.T> Ꮡt) {
         new(nilBoolChannel, false),
         new(nilBoolChannelPtr.OrTypedNil(), true)
     }.slice();
+
     foreach (var (_, tt) in testCases) {
         var (_, panicErr) = encodeAndRecover(tt.value);
         if (tt.mustPanic) {
@@ -1244,6 +1262,7 @@ public static void Test29ElementSlice(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("encode: %v"u8, err);
         return;
     }
+
     ref var dst = ref heap<slice<any>>(out var Ꮡdst);
     err = NewDecoder(new gob_test_package.bytes_BufferжReader(buf)).Decode(Ꮡdst);
     if (err != default!) {
@@ -1285,19 +1304,17 @@ internal partial struct badDataTest {
     internal any data;    // What to decode into.
 }
 
-// Issue 6323.
-// Issue 10270.
-// Issue 10273.
-// Issue 10491.
 internal static slice<badDataTest> badDataTests = new badDataTest[]{
     new(""u8, "EOF"u8, default!),
     new("7F6869"u8, "unexpected EOF"u8, default!),
     new("036e6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e"u8, "unknown type id"u8, @new<ET2>()),
-    new("0424666f6f"u8, "field numbers out of bounds"u8, @new<ET2>()),
-    new("05100028557b02027f8302"u8, "interface encoding"u8, default!),
+    new("0424666f6f"u8, "field numbers out of bounds"u8, @new<ET2>()), // Issue 6323.
+    new("05100028557b02027f8302"u8, "interface encoding"u8, default!), // Issue 10270.
+    // Issue 10273.
     new("130a00fb5dad0bf8ff020263e70002fa28020202a89859"u8, "slice length too large"u8, default!),
     new("0f1000fb285d003316020735ff023a65c5"u8, "interface encoding"u8, default!),
     new("03fffb0616fffc00f902ff02ff03bf005d02885802a311a8120228022c028ee7"u8, "GobDecoder"u8, default!),
+    // Issue 10491.
     new("10fe010f020102fe01100001fe010e000016fe010d030102fe010e00010101015801fe01100000000bfe011000f85555555555555555"u8, "exceeds input size"u8, default!)
 }.slice();
 
@@ -1332,6 +1349,7 @@ internal partial struct TestDecodeErrorMultipleTypes_Test /*dyn*/ {
 public static void TestDecodeErrorMultipleTypes(ж<testing.T> Ꮡt) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡb)).Encode(new TestDecodeErrorMultipleTypes_Test("one"u8, 1));
+
     ref var result = ref heap(new TestDecodeErrorMultipleTypes_Test(), out var Ꮡresult);
     ref var result2 = ref heap(new TestDecodeErrorMultipleTypes_Test(), out var Ꮡresult2);
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡb));
@@ -1339,6 +1357,7 @@ public static void TestDecodeErrorMultipleTypes(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Errorf("decode: unexpected error %v"u8, err);
     }
+
     b.Reset();
     NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡb)).Encode(new TestDecodeErrorMultipleTypes_Test("two"u8, 2));
     err = dec.Decode(Ꮡresult2);
@@ -1358,12 +1377,14 @@ internal partial struct TestMarshalFloatMap_mapEntry /*dyn*/ {
 // Issue 24075
 public static void TestMarshalFloatMap(ж<testing.T> Ꮡt) {
     var nan1 = math.NaN();
-    var nan2 = math.Float64frombits((uint64)(math.Float64bits(nan1) ^ 1)); // A different NaN in the same class.
+    var nan2 = math.Float64frombits(math.Float64bits(nan1) ^ 1); // A different NaN in the same class.
+
     var @in = new map<float64, @string>{
         [nan1] = "a"u8,
         [nan1] = "b"u8,
         [nan2] = "c"u8
     };
+
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡb));
     {
@@ -1371,6 +1392,7 @@ public static void TestMarshalFloatMap(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Encode : %v"u8, err);
         }
     }
+
     ref var @out = ref heap<map<float64, @string>>(out var Ꮡout);
     @out = new map<float64, @string>{};
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡb));
@@ -1393,6 +1415,7 @@ public static void TestMarshalFloatMap(ж<testing.T> Ꮡt) {
         });
         return entries;
     }
+
     var got = readMap(@out);
     var want = readMap(@in);
     if (!slices.Equal<slice<TestMarshalFloatMap_mapEntry>, TestMarshalFloatMap_mapEntry>(got, want)) {
@@ -1412,21 +1435,25 @@ public static void TestDecodePartial(ж<testing.T> Ꮡt) {
     ref var t2 = ref heap<TestDecodePartial_T>(out var Ꮡt2);
     t2 = new TestDecodePartial_T(X: new nint[]{4, 5, 6}.slice(), Y: "bar"u8);
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡbuf));
+
     nint t1start = 0;
     {
         var err = enc.Encode(Ꮡt1); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     nint t2start = buf.Len();
     {
         var err = enc.Encode(Ꮡt2); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     var data = buf.Bytes();
     for (nint i = 0; i <= len(data); i++) {
         var bufr = bytes.NewReader(data.slice(0, i));
+
         // Decode both values, stopping at the first error.
         ref var t1b = ref heap(new TestDecodePartial_T(), out var Ꮡt1b);
         ref var t2b = ref heap(new TestDecodePartial_T(), out var Ꮡt2b);
@@ -1436,16 +1463,17 @@ public static void TestDecodePartial(ж<testing.T> Ꮡt) {
         if (err == default!) {
             err = dec.Decode(Ꮡt2b);
         }
+
         var exprᴛ1 = i;
         if (exprᴛ1 == t1start || exprᴛ1 == t2start) {
+            // Either the first or the second Decode calls had zero input.
             if (!AreEqual(err, io.EOF)) {
-                // Either the first or the second Decode calls had zero input.
                 Ꮡt.Errorf("%d/%d: expected io.EOF: %v"u8, i, len(data), err);
             }
         }
         else if (exprᴛ1 == len(data)) {
+            // We reached the end of the entire input.
             if (err != default!) {
-                // We reached the end of the entire input.
                 Ꮡt.Errorf("%d/%d: unexpected error: %v"u8, i, len(data), err);
             }
             if (!reflect.DeepEqual(t1b, t1)) {
@@ -1456,15 +1484,14 @@ public static void TestDecodePartial(ж<testing.T> Ꮡt) {
             }
         }
         else { /* default: */
+            // In between, we must see io.ErrUnexpectedEOF.
+            // The decoder used to erroneously return io.EOF in some cases here,
+            // such as if the input was cut off right after some type specs,
+            // but before any value was actually transmitted.
             if (!AreEqual(err, io.ErrUnexpectedEOF)) {
-                // In between, we must see io.ErrUnexpectedEOF.
-                // The decoder used to erroneously return io.EOF in some cases here,
-                // such as if the input was cut off right after some type specs,
-                // but before any value was actually transmitted.
                 Ꮡt.Errorf("%d/%d: expected io.ErrUnexpectedEOF: %v"u8, i, len(data), err);
             }
         }
-
     }
 }
 

@@ -56,7 +56,7 @@ partial struct tagged {
     public nint Bare;   /* `json:"bare"`*/
     public nint Quote;   /* "json:\"q\""*/
     public nint Empty;
-    public partial ref Inner Inner { get; } /*`json:"inner"`*/
+    /*embed*/ public Inner Inner; /*`json:"inner"`*/
     /*embed*/ public fmt_package.Stringer Stringer; /*`json:"str"`*/
 }
 
@@ -116,7 +116,7 @@ internal static void Main() {
     any sink = (lambda).OrTypedNilFunc();
     holder h = default!;
     h.put(new nint[]{}.array(3));
-    fmt.Println(new inline(nil), new marked(nil), new tagged(nil), new nn(new array<array<nint>>(2, () => new(3))), ((P)nil), h, hash(new byte[]{}.array(32)), first(new nint[]{}.array(2)), noted(new byte[]{}.array(4), 1), local(new nint[]{}.array(3)), sink != default!);
+    fmt.Println(new inline(nil), new marked(nil), new tagged(nil), new nn(new array<array<nint>>(2, () => new(3))), (P)nil, h, hash(new byte[]{}.array(32)), first(new nint[]{}.array(2)), noted(new byte[]{}.array(4), 1), local(new nint[]{}.array(3)), sink != default!);
     fill(0, ref ((ж<array<int32>>)default!).DerefOrNull(), new array<byte>[]{}.array(4, () => new(8)));
 }
 

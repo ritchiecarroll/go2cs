@@ -43,6 +43,12 @@ using static go.net.@internal.socktest_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -51,10 +57,10 @@ using static go.net.@internal.socktest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABc0goKCqLKCgoKClIKosoKCgpSCAAQQkKaQppCkggAJFIIAEyyCyoKCgoKUAA00goKUAAQYgoKUqLKCgoI=")]
-[assembly: go.GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABAcgpSkpKQACgiCgpSkpKSkpICCpPaClKSkpA==")]
-[assembly: go.GoPositionMap("net/internal/socktest/switch_unix.go", "switch_unix.cs", "AAoY0oKCkoKU2sKCkoI=")]
-[assembly: go.GoPositionMap("net/internal/socktest/sys_unix.go", "sys_unix.cs", "AAoY8oSCgoKEgoKUgoCCgpSmgoKCgpSCgujigoKUgoKEgoKUgoCCpoKCgoKUgoLo4oKClIKChIKClIKAgqaCgoKClILo4oKClIKChIKClIKAgqaCgoKClILoAAgCgoKUgoKEgoKUgoCCgpSmgoKCgpSCgujSgoKUgoKEgoKUgoKAgqaClIKCgpQ=")]
+[assembly: go.GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABc0goKCqLKCgoKClIKosoKCgpSCAAYQkKaQppCkggAJFIIAEyyCyoKCgoKUABc0goKUAAsYgoKUqLKCgoI=")]
+[assembly: go.GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABAcgpSkpKQACQiCgpSkpKSklICCpPaClKSkpA==")]
+[assembly: go.GoPositionMap("net/internal/socktest/switch_unix.go", "switch_unix.cs", "AAsY0oKCkoKU2sKCkoI=")]
+[assembly: go.GoPositionMap("net/internal/socktest/sys_unix.go", "sys_unix.cs", "AAoY8pSCgoKUgoKUgoCCgpS2goKCgpSCgujigoKUgoKUgoKUgoCCtoKCgoKUgoLo4oKClIKClIKClIKAgraCgoKClILo4oKClIKClIKClIKAgraCgoKClILoAAgCgoKUgoKUgoKUgoCCgpS2goKCgpSCgujSgoKUgoKUgoKUgoKAgraClIKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net.@internal;

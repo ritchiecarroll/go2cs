@@ -33,7 +33,6 @@ public static bool Verified;
 // See cmd/link/internal/ld/fips.go for details.
 //
 //go:linkname Linkinfo go:fipsinfo
-
 partial struct Linkinfoᴛ1_Sects /*dyn*/ {
     // Note: These must be unsafe.Pointer, not uintptr,
     // or else checkptr panics about turning uintptrs

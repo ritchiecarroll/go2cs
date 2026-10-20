@@ -24,14 +24,15 @@ internal static @string PrintTrie(this ж<global::go.strings_package.Replacer> �
 
 internal static @string /*s*/ printNode(this ref global::go.strings_package.genericReplacer r, ж<global::go.strings_package.trieNode> Ꮡt, nint depth) {
     @string s = default!;
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     if (t.priority > 0){
         s += "+"u8;
     } else {
         s += "-"u8;
     }
     s += "\n"u8;
+
     if (t.prefix != ""u8){
         s += Repeat("."u8, depth) + t.prefix;
         s += r.printNode(t.next, depth + len(t.prefix));

@@ -15,29 +15,27 @@ internal static class Go2CsTestHost
             "batchcursor_test.go",
             "event.go",
             "event_test.go",
+            "export_reader_test.go",
             "export_test.go",
             "gc.go",
             "gc_test.go",
             "generation.go",
-            "internal/oldtrace/testdata/fmt_1_21_pprof_good",
-            "internal/oldtrace/testdata/http_1_19_good",
-            "internal/oldtrace/testdata/http_1_21_good",
-            "internal/oldtrace/testdata/stress_1_11_good",
-            "internal/oldtrace/testdata/stress_1_19_good",
-            "internal/oldtrace/testdata/stress_1_21_good",
-            "internal/oldtrace/testdata/stress_start_stop_1_11_good",
-            "internal/oldtrace/testdata/stress_start_stop_1_19_good",
-            "internal/oldtrace/testdata/stress_start_stop_1_21_good",
-            "internal/oldtrace/testdata/user_task_region_1_11_good",
-            "internal/oldtrace/testdata/user_task_region_1_19_good",
-            "internal/oldtrace/testdata/user_task_region_1_21_good",
+            "internal/tracev1/testdata/fmt_1_21_pprof_good",
+            "internal/tracev1/testdata/http_1_19_good",
+            "internal/tracev1/testdata/http_1_21_good",
+            "internal/tracev1/testdata/stress_1_11_good",
+            "internal/tracev1/testdata/stress_1_19_good",
+            "internal/tracev1/testdata/stress_1_21_good",
+            "internal/tracev1/testdata/stress_start_stop_1_11_good",
+            "internal/tracev1/testdata/stress_start_stop_1_19_good",
+            "internal/tracev1/testdata/stress_start_stop_1_21_good",
+            "internal/tracev1/testdata/user_task_region_1_11_good",
+            "internal/tracev1/testdata/user_task_region_1_19_good",
+            "internal/tracev1/testdata/user_task_region_1_21_good",
             "mud.go",
             "mud_test.go",
-            "oldtrace.go",
-            "oldtrace_test.go",
             "order.go",
             "order_test.go",
-            "parser.go",
             "reader.go",
             "reader_test.go",
             "resources.go",
@@ -83,15 +81,19 @@ internal static class Go2CsTestHost
             "testdata/tests/go122-syscall-steal-proc-simple.test",
             "testdata/tests/go122-syscall-steal-proc-sitting-in-syscall.test",
             "testdata/tests/go122-task-across-generations.test",
+            "testdata/tests/go123-sync.test",
+            "testdata/tests/go125-sync.test",
             "trace_test.go",
+            "tracev1.go",
+            "tracev1_test.go",
             "value.go",
         }, new string[]
         {
-            "event",
             "internal",
             "raw",
             "testdata",
             "testtrace",
+            "tracev2",
             "traceviewer",
             "version",
         }, new string[]
@@ -104,27 +106,30 @@ internal static class Go2CsTestHost
         registry.Add("TestMMUTrace", trace_test_package.TestMMUTrace, "gc_test.go", 80);
         registry.Add("TestMUD", trace_internal_test_package.TestMUD, "mud_test.go", 13);
         registry.Add("TestMUDTracking", trace_internal_test_package.TestMUDTracking, "mud_test.go", 52);
-        registry.Add("TestOldtrace", trace_test_package.TestOldtrace, "oldtrace_test.go", 16);
-        registry.Add("TestPanicEvent", trace_internal_test_package.TestPanicEvent, "event_test.go", 9);
+        registry.Add("TestMakeEvent", trace_internal_test_package.TestMakeEvent, "event_test.go", 16);
+        registry.Add("TestMakeStack", trace_internal_test_package.TestMakeStack, "event_test.go", 734);
+        registry.Add("TestPanicEvent", trace_internal_test_package.TestPanicEvent, "event_test.go", 750);
         registry.Add("TestQueue", trace_internal_test_package.TestQueue, "order_test.go", 9);
-        registry.Add("TestReaderGolden", trace_test_package.TestReaderGolden, "reader_test.go", 28);
-        registry.Add("TestRelatedGoroutinesV2Trace", trace_test_package.TestRelatedGoroutinesV2Trace, "summary_test.go", 389);
-        registry.Add("TestSummarizeGoroutinesRegionsTrace", trace_test_package.TestSummarizeGoroutinesRegionsTrace, "summary_test.go", 46);
+        registry.Add("TestReaderGolden", trace_test_package.TestReaderGolden, "reader_test.go", 26);
+        registry.Add("TestRelatedGoroutinesV2Trace", trace_test_package.TestRelatedGoroutinesV2Trace, "summary_test.go", 394);
+        registry.Add("TestSummarizeGoroutinesRegionsTrace", trace_test_package.TestSummarizeGoroutinesRegionsTrace, "summary_test.go", 51);
         registry.Add("TestSummarizeGoroutinesTrace", trace_test_package.TestSummarizeGoroutinesTrace, "summary_test.go", 14);
-        registry.Add("TestSummarizeTasksTrace", trace_test_package.TestSummarizeTasksTrace, "summary_test.go", 80);
-        registry.Add("TestTraceAnnotations", trace_test_package.TestTraceAnnotations, "trace_test.go", 24);
-        registry.Add("TestTraceAnnotationsStress", trace_test_package.TestTraceAnnotationsStress, "trace_test.go", 85);
-        registry.Add("TestTraceCPUProfile", trace_test_package.TestTraceCPUProfile, "trace_test.go", 99);
-        registry.Add("TestTraceCgoCallback", trace_test_package.TestTraceCgoCallback, "trace_test.go", 89);
-        registry.Add("TestTraceFutileWakeup", trace_test_package.TestTraceFutileWakeup, "trace_test.go", 212);
-        registry.Add("TestTraceGCStress", trace_test_package.TestTraceGCStress, "trace_test.go", 305);
-        registry.Add("TestTraceGOMAXPROCS", trace_test_package.TestTraceGOMAXPROCS, "trace_test.go", 309);
-        registry.Add("TestTraceIterPull", trace_test_package.TestTraceIterPull, "trace_test.go", 528);
-        registry.Add("TestTraceManyStartStop", trace_test_package.TestTraceManyStartStop, "trace_test.go", 515);
-        registry.Add("TestTraceStacks", trace_test_package.TestTraceStacks, "trace_test.go", 313);
-        registry.Add("TestTraceStress", trace_test_package.TestTraceStress, "trace_test.go", 499);
-        registry.Add("TestTraceStressStartStop", trace_test_package.TestTraceStressStartStop, "trace_test.go", 507);
-        registry.Add("TestTraceWaitOnPipe", trace_test_package.TestTraceWaitOnPipe, "trace_test.go", 519);
+        registry.Add("TestSummarizeTasksTrace", trace_test_package.TestSummarizeTasksTrace, "summary_test.go", 85);
+        registry.Add("TestTraceAnnotations", trace_test_package.TestTraceAnnotations, "trace_test.go", 25);
+        registry.Add("TestTraceAnnotationsStress", trace_test_package.TestTraceAnnotationsStress, "trace_test.go", 86);
+        registry.Add("TestTraceCPUProfile", trace_test_package.TestTraceCPUProfile, "trace_test.go", 100);
+        registry.Add("TestTraceCgoCallback", trace_test_package.TestTraceCgoCallback, "trace_test.go", 90);
+        registry.Add("TestTraceFutileWakeup", trace_test_package.TestTraceFutileWakeup, "trace_test.go", 213);
+        registry.Add("TestTraceGCStress", trace_test_package.TestTraceGCStress, "trace_test.go", 306);
+        registry.Add("TestTraceGOMAXPROCS", trace_test_package.TestTraceGOMAXPROCS, "trace_test.go", 310);
+        registry.Add("TestTraceGenSync", trace_test_package.TestTraceGenSync, "reader_test.go", 130);
+        registry.Add("TestTraceIterPull", trace_test_package.TestTraceIterPull, "trace_test.go", 545);
+        registry.Add("TestTraceManyStartStop", trace_test_package.TestTraceManyStartStop, "trace_test.go", 532);
+        registry.Add("TestTraceStacks", trace_test_package.TestTraceStacks, "trace_test.go", 314);
+        registry.Add("TestTraceStress", trace_test_package.TestTraceStress, "trace_test.go", 516);
+        registry.Add("TestTraceStressStartStop", trace_test_package.TestTraceStressStartStop, "trace_test.go", 524);
+        registry.Add("TestTraceV1", trace_test_package.TestTraceV1, "tracev1_test.go", 17);
+        registry.Add("TestTraceWaitOnPipe", trace_test_package.TestTraceWaitOnPipe, "trace_test.go", 536);
         return TestHost.Run(registry, args);
     }
 }

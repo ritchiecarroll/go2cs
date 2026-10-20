@@ -18,6 +18,7 @@ public static void BenchmarkEncode(ж<testing.B> Ꮡb) {
     doBench(Ꮡb, (ж<testing.B> bΔ1, slice<byte> buf0, nint level, nint n) => {
         bΔ1.StopTimer();
         bΔ1.SetBytes((int64)n);
+
         var buf1 = new slice<byte>(n);
         for (nint i = 0; i < n; i += len(buf0)) {
             if (len(buf0) > n - i) {
@@ -109,6 +110,7 @@ public static void TestWriteError(ж<testing.T> Ꮡt) {
             if (err == default!) {
                 Ꮡt.Fatal(levelˢ, l, expectedAnErrorOnCloseˢ);
             }
+
             w.Reset(io.Discard);
             (n2, err) = w.Write(new byte[]{1, 2, 3, 4, 5, 6}.slice());
             if (err != default!) {
@@ -150,12 +152,14 @@ internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         length /= 10;
     }
+
     // Create a random, but compressible stream.
     var rng = rand.New(rand.NewSource(1));
     var t1 = new slice<byte>(length);
     foreach (var (iΔ1, _) in t1) {
-        t1[iΔ1] = (byte)((int64)(rng.Int63() & 7));
+        t1[iΔ1] = (byte)(rng.Int63() & 7);
     }
+
     // Do our first encode.
     ref var b1 = ref heap(new bytes.Buffer(), out var Ꮡb1);
     var br = bytes.NewBuffer(t1);
@@ -170,6 +174,7 @@ internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     w.Close();
+
     // We choose a different buffer size,
     // bigger than a maximum block, and also a prime.
     ref var b2 = ref heap(new bytes.Buffer(), out var Ꮡb2);
@@ -184,8 +189,10 @@ internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     w2.Close();
+
     var b1b = b1.Bytes();
     var b2b = b2.Bytes();
+
     if (!bytes.Equal(b1b, b2b)) {
         Ꮡt.Errorf("level %d did not produce deterministic result, result mismatch, len(a) = %d, len(b) = %d"u8, i, len(b1b), len(b2b));
     }
@@ -197,6 +204,7 @@ internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
 public static void TestDeflateFast_Reset(ж<testing.T> Ꮡt) {
     var buf = @new<bytes.Buffer>();
     nint n = 65536;
+
     for (nint i = 0; i < n; i++) {
         fmt.Fprintf(new flate_test_package.bytes_BufferжWriter(buf), "asdfasdfasdfasdf%d%dfghfgujyut%dyutyu\n"u8, i, i, i);
     }
@@ -207,22 +215,26 @@ public static void TestDeflateFast_Reset(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         offset = 256;
     }
+
     // We do an encode with a clean buffer to compare.
     ref var want = ref heap(new bytes.Buffer(), out var Ꮡwant);
     var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡwant), level);
     if (err != default!) {
         Ꮡt.Fatalf("NewWriter: level %d: %v"u8, (nint)(level), err);
     }
+
     // Output written 3 times.
     w.Write(@in);
     w.Write(@in);
     w.Write(@in);
     w.Close();
+
     for (; offset <= 256; offset *= 2) {
         var (wΔ1, errΔ1) = NewWriter(io.Discard, level);
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("NewWriter: level %d: %v"u8, (nint)(level), errΔ1);
         }
+
         // Reset until we are right before the wraparound.
         // Each reset adds maxMatchOffset to the offset.
         for (nint i = 0; i < ((nint)bufferReset - len(@in) - offset - (nint)maxMatchOffset) / (nint)maxMatchOffset; i++) {
@@ -231,6 +243,7 @@ public static void TestDeflateFast_Reset(ж<testing.T> Ꮡt) {
         }
         ref var got = ref heap(new bytes.Buffer(), out var Ꮡgot);
         wΔ1.Reset(new flate_test_package.bytes_BufferжWriter(Ꮡgot));
+
         // Write 3 times, close.
         for (nint i = 0; i < 3; i++) {
             (_, errΔ1) = wΔ1.Write(@in);

@@ -15,7 +15,6 @@ internal static bool isNoFollowErr(error err) {
     if (AreEqual(exprᴛ1, syscall.ELOOP) || AreEqual(exprᴛ1, syscall.EMLINK)) {
         return true;
     }
-
     if (runtime.GOOS == "dragonfly"u8) {
         // Dragonfly appears to return EINVAL from openat in this case.
         if (AreEqual(err, syscall.EINVAL)) {

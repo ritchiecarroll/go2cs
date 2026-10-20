@@ -181,10 +181,10 @@
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/asan/internal.asan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/bytealg/internal.bytealg.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/itoa/internal.itoa.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/msan/internal.msan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/oserror/internal.oserror.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
@@ -205,11 +205,13 @@
   <ItemGroup Condition="'$(GoTargetOS)'=='linux'">
     <ProjectReference Include="$(go2csPath)core/internal/byteorder/internal.byteorder.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/goarch/internal.goarch.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/internal.runtime.syscall.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/linux/internal.runtime.syscall.linux.csproj" />
+    <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(GoTargetOS)'=='windows'">
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/sysdll/internal.syscall.windows.sysdll.csproj" />
+    <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/unicode/utf16/unicode.utf16.csproj" />
     <ProjectReference Include="$(go2csPath)core/unicode/utf8/unicode.utf8.csproj" />
   </ItemGroup>

@@ -70,7 +70,7 @@ public static void TestLevelMarshalJSON(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (!bytes.Equal(data, wantData)) {
-        Ꮡt.Errorf("got %s, want %s"u8, ((@string)data), ((@string)wantData));
+        Ꮡt.Errorf("got %s, want %s"u8, (@string)data, (@string)wantData);
     }
     ref var got = ref heap(new global::go.log.slog_package.ΔLevel(), out var Ꮡgot);
     {
@@ -91,7 +91,7 @@ public static void TestLevelMarshalText(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (!bytes.Equal(data, wantData)) {
-        Ꮡt.Errorf("got %s, want %s"u8, ((@string)data), ((@string)wantData));
+        Ꮡt.Errorf("got %s, want %s"u8, (@string)data, (@string)wantData);
     }
     ref var got = ref heap(new global::go.log.slog_package.ΔLevel(), out var Ꮡgot);
     {
@@ -113,7 +113,7 @@ public static void TestLevelAppendText(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (!bytes.Equal(data, wantData)) {
-        Ꮡt.Errorf("got %s, want %s"u8, ((@string)data), ((@string)wantData));
+        Ꮡt.Errorf("got %s, want %s"u8, (@string)data, (@string)wantData);
     }
 }
 
@@ -259,6 +259,30 @@ public static void TestLevelVarString(ж<testing.T> Ꮡt) {
     @string want = levelVarErrorˢ;
     if (got != want) {
         Ꮡt.Errorf("got %q, want %q"u8, got, want);
+    }
+}
+
+public static void BenchmarkLevelString(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var levels = new global::go.log.slog_package.ΔLevel[]{
+        0,
+        LevelError,
+        LevelError + 2,
+        LevelError - 2,
+        LevelWarn,
+        LevelWarn - 1,
+        LevelInfo,
+        LevelInfo + 1,
+        LevelInfo - 3,
+        LevelDebug,
+        LevelDebug - 2
+    }.slice();
+    b.ResetTimer();
+    while (Ꮡb.Loop()) {
+        foreach (var (_, level) in levels) {
+            _ = level.String();
+        }
     }
 }
 

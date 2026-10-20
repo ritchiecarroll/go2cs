@@ -110,7 +110,7 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
     if (err != default!) {
         return err;
     }
-    if (((nint)(flag & (nint)O_NONBLOCK) != 0) == nonblocking) {
+    if (((flag & (nint)O_NONBLOCK) != 0) == nonblocking) {
         return default!;
     }
     if (nonblocking){
@@ -169,11 +169,7 @@ internal static partial void runtime_AfterExec();
 
 // execveLibc is non-nil on OS using libc syscall, set to execve in exec_libc.go; this
 // avoids a build dependency for other platforms.
-internal static Func<uintptr, uintptr, uintptr, Errno> execveLibc;
-
-internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveDarwin;
-
-internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveOpenBSD;
+internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveLibc;
 
 // go2cs generated this placeholder — func Exec is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

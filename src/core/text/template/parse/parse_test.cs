@@ -25,18 +25,10 @@ internal partial struct numberTest {
     /*embed*/ internal complex128 complex128;
 }
 
-// basics
-// check that -0 is a uint.
-// not octal!
-// complex with 0 imaginary are float (and maybe integer)
-// funny bases
-// character constants
-// some broken syntax
-// Integer too large - issue 10634.
-// Issue 8622 - 0xe parsed as floating point. Very embarrassing.
 internal static slice<numberTest> numberTests = new numberTest[]{
+    // basics
     new("0"u8, true, true, true, false, 0, 0, 0D, 0D),
-    new("-0"u8, true, true, true, false, 0, 0, 0D, 0D),
+    new("-0"u8, true, true, true, false, 0, 0, 0D, 0D), // check that -0 is a uint.
     new("73"u8, true, true, true, false, 73, 73, 73D, 0D),
     new("7_3"u8, true, true, true, false, 73, 73, 73D, 0D),
     new("0b10_010_01"u8, true, true, true, false, 73, 73, 73D, 0D),
@@ -62,14 +54,17 @@ internal static slice<numberTest> numberTests = new numberTest[]{
     new("0x_1p-4"u8, false, false, true, false, 0, 0, 1D / 16D, 0D),
     new("4i"u8, false, false, false, true, 0, 0, 0D, 4D.i()),
     new("-1.2+4.2i"u8, false, false, false, true, 0, 0, 0D, -1.2D + 4.2D.i()),
-    new("073i"u8, false, false, false, true, 0, 0, 0D, 73D.i()),
+    new("073i"u8, false, false, false, true, 0, 0, 0D, 73D.i()), // not octal!
+    // complex with 0 imaginary are float (and maybe integer)
     new("0i"u8, true, true, true, true, 0, 0, 0D, 0D),
     new("-1.2+0i"u8, false, false, true, true, 0, 0, -1.2D, -1.2D),
     new("-12+0i"u8, true, false, true, true, -12, 0, -12D, -12D),
     new("13+0i"u8, true, true, true, true, 13, 13, 13D, 13D),
+    // funny bases
     new("0123"u8, true, true, true, false, 83, 83, 83D, 0D),
     new("-0x0"u8, true, true, true, false, 0, 0, 0D, 0D),
     new("0xdeadbeef"u8, true, true, true, false, 0xdeadbeefL, 0xdeadbeefU, 3735928559D, 0D),
+    // character constants
     new(@"'a'"u8, true, true, true, false, (rune)'a', (rune)'a', (rune)'a', 0D),
     new(@"'\n'"u8, true, true, true, false, (rune)'\n', (rune)'\n', (rune)'\n', 0D),
     new(@"'\\'"u8, true, true, true, false, (rune)'\\', (rune)'\\', (rune)'\\', 0D),
@@ -78,6 +73,7 @@ internal static slice<numberTest> numberTests = new numberTest[]{
     new(@"'パ'"u8, true, true, true, false, 0x30d1, 0x30d1, 12497D, 0D),
     new(@"'\u30d1'"u8, true, true, true, false, 0x30d1, 0x30d1, 12497D, 0D),
     new(@"'\U000030d1'"u8, true, true, true, false, 0x30d1, 0x30d1, 12497D, 0D),
+    // some broken syntax
     new(text: "+-2"u8),
     new(text: "0x123."u8),
     new(text: "1e."u8),
@@ -85,7 +81,8 @@ internal static slice<numberTest> numberTests = new numberTest[]{
     new(text: "1+2."u8),
     new(text: "'x"u8),
     new(text: "'xx'"u8),
-    new(text: "'433937734937734969526500969526500'"u8),
+    new(text: "'433937734937734969526500969526500'"u8), // Integer too large - issue 10634.
+    // Issue 8622 - 0xe parsed as floating point. Very embarrassing.
     new("0xef"u8, true, true, true, false, 0xef, 0xef, 239D, 0D)
 }.slice();
 
@@ -182,18 +179,6 @@ internal partial struct parseTest {
 internal const bool noError = true;
 internal const bool hasError = false;
 
-// Trimming spaces.
-// Errors.
-// Other kinds of assignments and operators aren't available yet.
-// Check the parse fails for := rather than comma.
-// Another bug: variable read must ignore following punctuation.
-// ! is just illegal here.
-// $x+2 should not parse as ($x) (+2).
-// It's OK with a space.
-// Check the range handles assignment vs. declaration properly.
-// dot following a literal value
-// Wrong pipeline
-// Missing pipeline in block
 internal static slice<parseTest> parseTests = new parseTest[]{
     new("empty"u8, ""u8, noError,
         @""u8),
@@ -267,6 +252,7 @@ internal static slice<parseTest> parseTests = new parseTest[]{
         @"{{with .X}}""hello""{{else}}{{with .Y}}""goodbye""{{end}}{{end}}"u8),
     new("with else chain"u8, "{{with .X}}X{{else with .Y}}Y{{else with .Z}}Z{{end}}"u8, noError,
         @"{{with .X}}""X""{{else}}{{with .Y}}""Y""{{else}}{{with .Z}}""Z""{{end}}{{end}}{{end}}"u8),
+    // Trimming spaces.
     new("trim left"u8, "x \r\n\t{{- 3}}"u8, noError, @"""x""{{3}}"u8),
     new("trim right"u8, "{{3 -}}\n\n\ty"u8, noError, @"{{3}}""y"""u8),
     new("trim left and right"u8, "x \r\n\t{{- 3 -}}\n\n\ty"u8, noError, @"""x""{{3}}""y"""u8),
@@ -285,6 +271,8 @@ internal static slice<parseTest> parseTests = new parseTest[]{
         @"{{range .SI}}{{.}}{{continue}}{{end}}"u8),
     new("spaces around break"u8, "{{range .SI}}{{.}}{{ break }}{{end}}"u8, noError,
         @"{{range .SI}}{{.}}{{break}}{{end}}"u8),
+
+    // Errors.
     new("unclosed action"u8, "hello{{range"u8, hasError, ""u8),
     new("unmatched end"u8, "{{end}}"u8, hasError, ""u8),
     new("unmatched else"u8, "{{else}}"u8, hasError, ""u8),
@@ -310,16 +298,21 @@ internal static slice<parseTest> parseTests = new parseTest[]{
     new("continue outside range"u8, "{{range .}}{{end}} {{continue}}"u8, hasError, ""u8),
     new("break in range else"u8, "{{range .}}{{else}}{{break}}{{end}}"u8, hasError, ""u8),
     new("continue in range else"u8, "{{range .}}{{else}}{{continue}}{{end}}"u8, hasError, ""u8),
+    // Other kinds of assignments and operators aren't available yet.
     new("bug0a"u8, "{{$x := 0}}{{$x}}"u8, noError, "{{$x := 0}}{{$x}}"u8),
     new("bug0b"u8, "{{$x += 1}}{{$x}}"u8, hasError, ""u8),
     new("bug0c"u8, "{{$x ! 2}}{{$x}}"u8, hasError, ""u8),
     new("bug0d"u8, "{{$x % 3}}{{$x}}"u8, hasError, ""u8),
+    // Check the parse fails for := rather than comma.
     new("bug0e"u8, "{{range $x := $y := 3}}{{end}}"u8, hasError, ""u8),
-    new("bug1a"u8, "{{$x:=.}}{{$x!2}}"u8, hasError, ""u8),
-    new("bug1b"u8, "{{$x:=.}}{{$x+2}}"u8, hasError, ""u8),
-    new("bug1c"u8, "{{$x:=.}}{{$x +2}}"u8, noError, "{{$x := .}}{{$x +2}}"u8),
+    // Another bug: variable read must ignore following punctuation.
+    new("bug1a"u8, "{{$x:=.}}{{$x!2}}"u8, hasError, ""u8), // ! is just illegal here.
+    new("bug1b"u8, "{{$x:=.}}{{$x+2}}"u8, hasError, ""u8), // $x+2 should not parse as ($x) (+2).
+    new("bug1c"u8, "{{$x:=.}}{{$x +2}}"u8, noError, "{{$x := .}}{{$x +2}}"u8), // It's OK with a space.
+    // Check the range handles assignment vs. declaration properly.
     new("bug2a"u8, "{{range $x := 0}}{{$x}}{{end}}"u8, noError, "{{range $x := 0}}{{$x}}{{end}}"u8),
     new("bug2b"u8, "{{range $x = 0}}{{$x}}{{end}}"u8, noError, "{{range $x = 0}}{{$x}}{{end}}"u8),
+    // dot following a literal value
     new("dot after integer"u8, "{{1.E}}"u8, hasError, ""u8),
     new("dot after float"u8, "{{0.1.E}}"u8, hasError, ""u8),
     new("dot after boolean"u8, "{{true.E}}"u8, hasError, ""u8),
@@ -327,6 +320,7 @@ internal static slice<parseTest> parseTests = new parseTest[]{
     new("dot after string"u8, @"{{""hello"".guys}}"u8, hasError, ""u8),
     new("dot after dot"u8, "{{..E}}"u8, hasError, ""u8),
     new("dot after nil"u8, "{{nil.E}}"u8, hasError, ""u8),
+    // Wrong pipeline
     new("wrong pipeline dot"u8, "{{12|.}}"u8, hasError, ""u8),
     new("wrong pipeline number"u8, "{{.|12|printf}}"u8, hasError, ""u8),
     new("wrong pipeline string"u8, "{{.|printf|\"error\"}}"u8, hasError, ""u8),
@@ -334,6 +328,7 @@ internal static slice<parseTest> parseTests = new parseTest[]{
     new("wrong pipeline boolean"u8, "{{.|true}}"u8, hasError, ""u8),
     new("wrong pipeline nil"u8, "{{'c'|nil}}"u8, hasError, ""u8),
     new("empty pipeline"u8, @"{{printf ""%d"" ( ) }}"u8, hasError, ""u8),
+    // Missing pipeline in block
     new("block definition"u8, @"{{block ""foo""}}hello{{end}}"u8, hasError, ""u8)
 }.slice();
 
@@ -365,14 +360,13 @@ internal static void testParse(bool doCopy, ж<testing.T> Ꮡt) {
                 break;
             }
             case {} when err != default! && !test.ok: {
+                // expected error, got one
                 if (debug.Value) {
-                    // expected error, got one
                     fmt.Printf("%s: %s\n\t%s\n"u8, test.name, test.input, err);
                 }
                 continue;
                 break;
             }}
-
             @string result = default!;
             if (doCopy){
                 result = (~tmpl).Root.Copy().String();
@@ -442,8 +436,6 @@ internal static readonly @string rangeXBreak20Endˢ = @"{{range .X}}{{break 20}}
 public static void TestKeywordsAndFuncs(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Check collisions between functions and new keywords like 'break'. When a
         // break function is provided, the parser should treat 'break' as a function,
         // not a keyword.
@@ -451,6 +443,7 @@ public static void TestKeywordsAndFuncs(ж<testing.T> Ꮡt) {
         defer(() => {
             textFormat = "%s"u8;
         }, ref ᒐ);
+
         @string inp = rangeXBreak20Endˢ;
         {
             // 'break' is a defined function, don't treat it as a keyword: it should
@@ -463,6 +456,7 @@ public static void TestKeywordsAndFuncs(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("with break func: unexpected error: %v"u8, err);
             }
         }
+
         {
             // No function called 'break'; treat it as a keyword. Results in a parse
             // error.
@@ -566,11 +560,9 @@ public static void TestErrorContextWithTreeCopy(ж<testing.T> Ꮡt) {
     }
 }
 
-// Check line numbers are accurate.
-// Specific errors.
-// Declare $x so it's defined, to avoid that error, and then check we don't parse a declaration.
 // All failures, and the result is a string that must appear in the error message.
 internal static slice<parseTest> errorTests = new parseTest[]{
+    // Check line numbers are accurate.
     new("unclosed1"u8,
         "line1\n{{"u8,
         hasError, @"unclosed1:2: unclosed action"u8),
@@ -586,6 +578,7 @@ internal static slice<parseTest> errorTests = new parseTest[]{
     new("var1"u8,
         "line1\n{{\nx\n}}"u8,
         hasError, @"var1:3: function ""x"" not defined"u8),
+    // Specific errors.
     new("function"u8,
         "{{foo}}"u8,
         hasError, @"function ""foo"" not defined"u8),
@@ -629,6 +622,7 @@ internal static slice<parseTest> errorTests = new parseTest[]{
         "{{range .X}}"u8,
         hasError, @"unexpected EOF"u8),
     new("variable"u8,
+        // Declare $x so it's defined, to avoid that error, and then check we don't parse a declaration.
         "{{$x := 23}}{{with $x.y := 3}}{{$x 23}}{{end}}"u8,
         hasError, @"unexpected "":="""u8),
     new("multidecl"u8,
@@ -811,7 +805,7 @@ internal static readonly @string printfField1Field2Field3ˢ = """
 	{{printf "%v" (contains $z.Field1.Field2 $y)}}
 {{end}}
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkListString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

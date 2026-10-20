@@ -12,6 +12,7 @@ using time = time_package;
 using go.@internal;
 using go.@internal.trace;
 using static go.@internal.trace_internal_test_package;
+using version = go.@internal.trace.version_package;
 
 partial class trace_test_package {
 
@@ -34,6 +35,7 @@ internal partial struct TestMMU_type /*dyn*/ {
 
 public static void TestMMU(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     // MU
     // 1.0  *****   *****   *****
     // 0.5      *   *   *   *
@@ -48,6 +50,7 @@ public static void TestMMU(ж<testing.T> Ꮡt) {
         new(5000000000, 0D)}.slice()
     }.slice();
     var mmuCurve = Δtrace.NewMMUCurve(util);
+
     foreach (var (_, test) in new TestMMU_type[]{
         new(0, 0D, new float64[]{}.slice()),
         new(time.Millisecond, 0D, new float64[]{0D, 0D}.slice()),
@@ -86,8 +89,6 @@ internal static readonly object skippingInShortModeˢ = (@string)"skipping in -s
 internal static readonly @string testdataTestsGo122Gcˢ = "testdata/tests/go122-gc-stress.test"u8;
 
 public static void TestMMUTrace(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Can't be t.Parallel() because it modifies the
     // testingOneBand package variable.
     if (testing.Short()) {
@@ -98,6 +99,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
         GoFrame ᒐ = default;
         try {
             var mmuCurve = Δtrace.NewMMUCurve(mu);
+
             // Test the optimized implementation against the "obviously
             // correct" implementation.
             for (var window = time.ΔNanosecond; window < (time.Duration)(10000000000L); window *= 10) {
@@ -107,6 +109,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("want %f, got %f mutator utilization in window %s"u8, want, got, window);
                 }
             }
+
             // Test MUD with band optimization against MUD without band
             // optimization. We don't have a simple testing implementation
             // of MUDs (the simplest implementation is still quite
@@ -134,7 +137,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
     var checkʗ1 = check;
     Ꮡt.Run("V2"u8, (ж<testing.T> tΔ2) => {
         @string testPath = testdataTestsGo122Gcˢ;
-        var (r, _, err) = testtrace.ParseFile(testPath);
+        var (r, _, _, err) = testtrace.ParseFile(testPath);
         if (err != default!) {
             tΔ2.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, err);
         }
@@ -162,11 +165,13 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
     float64 mmu = default!;
 
     {
-        var max = ((time.Duration)(util[len(util) - 1].Time - util[0].Time)); if (window > max) {
+        var max = (time.Duration)(util[len(util) - 1].Time - util[0].Time); if (window > max) {
             window = max;
         }
     }
+
     mmu = 1.0D;
+
     // muInWindow returns the mean mutator utilization between
     // util[0].Time and end.
     float64 muInWindow(slice<Δtrace.MutatorUtil> utilΔ1, int64 end) {
@@ -191,6 +196,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
             mmu = math.Min(mmu, muInWindowʗ1(util.slice(i), u.Time + (int64)window));
         }
     }
+
     // Consider all left-aligned windows.
     update();
     // Reverse the trace. Slightly subtle because each MutatorUtil

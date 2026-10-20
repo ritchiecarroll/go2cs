@@ -60,6 +60,7 @@ public static void TestGobEncodingNilIntInSlice(ж<testing.T> Ꮡt) {
     var buf = @new<bytes.Buffer>();
     var enc = gob.NewEncoder(new big_test_package.bytes_BufferжWriter(buf));
     var dec = gob.NewDecoder(new big_test_package.bytes_BufferжReader(buf));
+
     ref var @in = ref heap<slice<ж<global::go.math.big_package.ΔInt>>>(out var Ꮡin);
 
     @in = new slice<ж<global::go.math.big_package.ΔInt>>(1);
@@ -115,7 +116,7 @@ public static void TestIntJSONEncodingNil(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("marshaling of nil failed: %s"u8, err);
     }
-    @string got = ((@string)b);
+    @string got = (@string)b;
     @string want = nullˢ;
     if (got != want) {
         Ꮡt.Fatalf("marshaling of nil failed: got %s want %s"u8, got, want);

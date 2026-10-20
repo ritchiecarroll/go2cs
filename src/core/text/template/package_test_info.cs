@@ -42,6 +42,12 @@ using static global::go.text.template_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -50,8 +56,8 @@ using static global::go.text.template_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/template/examplefiles_test.go", "examplefiles_test.cs", "ABkqooKClIKCgpSSgoKmAAgI6AAIEpa6lIKCuAAKCgALCO6WqKSCgqaCgriCgpSCgroADAgACwjulqjMgoKmgoK6goKmgoK6goKUgoK8")]
-[assembly: go.GoPositionMap("text/template/link_test.go", "link_test.cs", "ADEkooKUggAAJoSAgqSCgoCCpIKClII=")]
+[assembly: go.GoPositionMap("text/template/examplefiles_test.go", "examplefiles_test.cs", "ABkqooKClIKCgpSSgoKmAAgI6AAIEqbKpIKC2AAKCgAICO6muKSCgqaCgriCgpSCguoADAj47qa47IKCpoKCyoKCpoKCyoKClIKC/A==")]
+[assembly: go.GoPositionMap("text/template/link_test.go", "link_test.cs", "ADEkooKUggAAJpSAgqSCgoCCpIKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

@@ -41,6 +41,12 @@ using static go.crypto.@internal.fips140.edwards25519.field_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -49,10 +55,9 @@ using static go.crypto.@internal.fips140.edwards25519.field_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AChMlrKCppaygqiyzoKCgoKohIKCgoKCgoKUhKjSgoKCgsqo9oKCgoKCqJKstgAKBIKCgoKCgoSCgpSEgoKUhIKClISCgpSEgoKUhIKClISCgpSEgoKCgoSowoIABRYACgKCqIKUgpSClIKmgoSolqKmopKEgoKCgoKCgpSoqLKCqJCm0oKCgoKCgqiygoKCgoKCgoKCgoKCgoKCqJKosqiSgqiSgqjCgoKCgoKCgoKCpqjCgoKCqLKkgoKCgoKCgoKSlIKCkpSCgpKUgoKSlIKCkpSCgpKUgoKSlIKCgrgAAhAACQKWgoKChISCgoKElISC")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AChMlrKCppaygqiy7oKCgoK4lIKCgoKCgoKUlKjSgoKCgoKo9oKCgoKCqJKstgALBIKCgoKCgpSCgpSUgoKUlIKClJSCgpSUgoKUlIKClJSCgpSUgoKCgpSowoIABRYACgKCuIKUgpSClIKmgpSolqKmopIACBKCgoKUgoKClKiygqiQptKCgoKCgoKosoKCgoKCgoKCgoKCgoKCgqiSqLKokoKokoKowoKCgoKCgoKCgqaowoKCgqiStIKCgoKCgoKCgpSCgoKUgoKClIKCgpSCgoKUgoKClIKCgpSCgoK4AAIQ0qaCgoKUlIKCgpSUlII=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_amd64_noasm.go", "fe_amd64_noasm.cs", "AAgSgKSA")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_arm64_noasm.go", "fe_arm64_noasm.cs", "AAgSgg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABAgkoKokoKCgqiSpqKCgoKChIKCgoIAH0SCgoKWgoKCgpaCgoKCloKCgoKWgoKCgpaCgoKCABo6goKCgoSCgoKCuoKmooKCgoIAGDaChIKChIKWgoKWgoKWgoKWgoKWgoKEgoKCgoSCgoKChIKqwoKCgoKogoKCgoQ=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABAgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCquaCgoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;

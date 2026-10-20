@@ -3,7 +3,31 @@
 // license that can be found in the LICENSE file.
 
 // Package crypto collects common cryptographic constants.
+
+// PublicKey represents a public key using an unspecified algorithm.
+//
+// Although this type is an empty interface for backwards compatibility reasons,
+// all public key types in the standard library implement the following interface
+//
+//	interface{
+//	    Equal(x crypto.PublicKey) bool
+//	}
+//
+// which can be used for increased type safety within applications.
 global using PublicKey = object;
+
+// PrivateKey represents a private key using an unspecified algorithm.
+//
+// Although this type is an empty interface for backwards compatibility reasons,
+// all private key types in the standard library implement the following interface
+//
+//	interface{
+//	    Public() crypto.PublicKey
+//	    Equal(x crypto.PrivateKey) bool
+//	}
+//
+// as well as purpose-specific interfaces such as [Signer] and [Decrypter], which
+// can be used for increased type safety within applications.
 global using PrivateKey = object;
 global using DecrypterOpts = object;
 
@@ -15,6 +39,8 @@ using strconv = strconv_package;
 
 partial class crypto_package {
 
+// Hash identifies a cryptographic hash function that is implemented in another
+// package.
 partial struct Hash /*num:nuint*/;
 
 // HashFunc simply returns the value of h so that [Hash] implements [SignerOpts].
@@ -105,7 +131,6 @@ public static @string String(this Hash h) {
     { /* default: */
         return "unknown hash value "u8 + strconv.Itoa((nint)(nuint)h);
     }
-
 }
 
 public static Hash MD4 => /* 1 + iota */ 1;              // import golang.org/x/crypto/md4
@@ -117,10 +142,10 @@ public static Hash SHA384 => 6;           // import crypto/sha512
 public static Hash SHA512 => 7;           // import crypto/sha512
 public static Hash MD5SHA1 => 8;          // no implementation; MD5+SHA1 used for TLS RSA
 public static Hash RIPEMD160 => 9;        // import golang.org/x/crypto/ripemd160
-public static Hash SHA3_224 => 10;         // import golang.org/x/crypto/sha3
-public static Hash SHA3_256 => 11;         // import golang.org/x/crypto/sha3
-public static Hash SHA3_384 => 12;         // import golang.org/x/crypto/sha3
-public static Hash SHA3_512 => 13;         // import golang.org/x/crypto/sha3
+public static Hash SHA3_224 => 10;         // import crypto/sha3
+public static Hash SHA3_256 => 11;         // import crypto/sha3
+public static Hash SHA3_384 => 12;         // import crypto/sha3
+public static Hash SHA3_512 => 13;         // import crypto/sha3
 public static Hash SHA512_224 => 14;       // import crypto/sha512
 public static Hash SHA512_256 => 15;       // import crypto/sha512
 public static Hash BLAKE2s_256 => 16;      // import golang.org/x/crypto/blake2s
@@ -212,6 +237,24 @@ partial interface Signer {
     (slice<byte> signature, error err) Sign(io.Reader rand, slice<byte> digest, SignerOpts opts);
 }
 
+// MessageSigner is an interface for an opaque private key that can be used for
+// signing operations where the message is not pre-hashed by the caller.
+// It is a superset of the Signer interface so that it can be passed to APIs
+// which accept Signer, which may try to do an interface upgrade.
+//
+// MessageSigner.SignMessage and MessageSigner.Sign should produce the same
+// result given the same opts. In particular, MessageSigner.SignMessage should
+// only accept a zero opts.HashFunc if the Signer would also accept messages
+// which are not pre-hashed.
+//
+// Implementations which do not provide the pre-hashed Sign API should implement
+// Signer.Sign by always returning an error.
+partial interface MessageSigner :
+    Signer
+{
+    (slice<byte> signature, error err) SignMessage(io.Reader rand, slice<byte> msg, SignerOpts opts);
+}
+
 // SignerOpts contains options for signing with a [Signer].
 partial interface SignerOpts {
     // HashFunc returns an identifier for the hash function used to produce
@@ -231,6 +274,41 @@ partial interface Decrypter {
     // the primitive used. See the documentation in each implementation for
     // details.
     (slice<byte> plaintext, error err) Decrypt(io.Reader rand, slice<byte> msg, DecrypterOpts opts);
+}
+
+// SignMessage signs msg with signer. If signer implements [MessageSigner],
+// [MessageSigner.SignMessage] is called directly. Otherwise, msg is hashed
+// with opts.HashFunc() and signed with [Signer.Sign].
+public static (slice<byte> signature, error err) SignMessage(Signer signer, io.Reader rand, slice<byte> msg, SignerOpts opts) {
+    {
+        var (ms, ok) = signer._<MessageSigner>(ᐧ); if (ok) {
+            return ms.SignMessage(rand, msg, opts);
+        }
+    }
+    if (opts.HashFunc() != 0) {
+        var h = opts.HashFunc().New();
+        h.Write(msg);
+        msg = h.Sum(default!);
+    }
+    return signer.Sign(rand, msg, opts);
+}
+
+// Decapsulator is an interface for an opaque private KEM key that can be used for
+// decapsulation operations. For example, an ML-KEM key kept in a hardware module.
+//
+// It is implemented, for example, by [crypto/mlkem.DecapsulationKey768].
+partial interface Decapsulator {
+    Encapsulator Encapsulator();
+    (slice<byte> sharedKey, error err) Decapsulate(slice<byte> ciphertext);
+}
+
+// Encapsulator is an interface for a public KEM key that can be used for
+// encapsulation operations.
+//
+// It is implemented, for example, by [crypto/mlkem.EncapsulationKey768].
+partial interface Encapsulator {
+    slice<byte> Bytes();
+    (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate();
 }
 
 } // end crypto_package

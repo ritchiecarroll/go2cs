@@ -24,8 +24,8 @@ partial class slog_test_package {
 // The log record contains the source position of the caller of Infof.
 public static partial void Infof(ж<Δslog.Logger> Ꮡlogger, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
-
     ref var logger = ref Ꮡlogger.DerefOrNull();
+
     if (!logger.Enabled(context.Background(), Δslog.LevelInfo)) {
         return;
     }
@@ -46,16 +46,16 @@ public static void Example_wrapping() {
         }
         // Remove the directory from the source's filename.
         if (a.Key == Δslog.SourceKey) {
-            var source = a.Value.Any()._<ж<Δslog.Source>>();
+            var source = a.Value.Any()._<ж<slogꓸSource>>();
             source.Value.File = filepath.Base((~source).File);
         }
         return a;
     };
     var logger = Δslog.New(new Δslog.TextHandlerжΔHandler(Δslog.NewTextHandler(new os.FileжWriter(os.Stdout), Ꮡ(new Δslog.HandlerOptions(AddSource: true, ReplaceAttr: replace)))));
     Infof(logger, "message, %s"u8, formattedˢ);
-}
 
-// Output:
-// level=INFO source=example_wrap_test.go:43 msg="message, formatted"
+    // Output:
+    // level=INFO source=example_wrap_test.go:43 msg="message, formatted"
+}
 
 } // end slog_test_package

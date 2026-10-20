@@ -105,9 +105,11 @@ built the exe. That one is H1 step 1's, and it is verified by running, never by 
 behind each "(ruled)" remain recorded in that plan's §8. **Steps marked GATE are pass/fail and block
 the next; steps marked ⟲ are re-measured at every migration and never carried forward.**
 
-**Four orderings are not negotiable**, and each has a mechanical reason rather than a preference (the fourth is the
-AMENDED 2026-09-07 block below: the outgoing corpus's final release ships ahead of the H1↔H2 pair).
+**Five orderings are not negotiable**, and each has a mechanical reason rather than a preference (the fourth is the
+AMENDED 2026-09-07 block below: the outgoing corpus's final release ships ahead of the H1↔H2 pair; the fifth is the
+AMENDED 2026-10-14 block after it: toolchain-adjacent pins land before that release).
 *(Edited in place 2026-09-26, §7 fix A1: this line read "Three" after the fourth ordering was added below it.)*
+*(Edited in place 2026-10-14, Q13 ruled: this line read "Four" before the fifth ordering moved here from H1.)*
 
 - **The toolchain step and the pin bump land as ONE reviewable pair.** Between them the binary claims
   the new release (its embedded runtime version is what the NuGet compatibility guard reads) while
@@ -152,6 +154,87 @@ Everything else may be reordered by the executing lane.
 > at the anchor are neither carried forward nor owed anything special: **H10 re-derives every row from
 > scratch at the new release regardless**, so they re-bank there on exactly the footing of the rows
 > that did bank.
+
+> **AMENDED 2026-10-14 — a FIFTH ordering: toolchain-adjacent pins land BEFORE the outgoing corpus's final
+> release, never inside the hop.** A side seat that moves the .NET SDK `global.json`, the emitted `LangVersion` or a
+> C# keyword escape lands, with its regeneration, ahead of the fourth ordering's release. Inside a hop, H5 would
+> measure the csproj files such a pin moves (about 1,364 at TRAIN K) instead of inheriting them. **Ruled as decided
+> by events** (COORD, 2026-10-14, closing `phase4/NOTES-next-hop.md` §5 Q13): TRAIN K seated both pins this way, read
+> from master's first-parent merges: S1, the .NET pin (NOTES E1), merge `53eef3cda8` (seat `272afeef93`) with its
+> regeneration `4016a2269c`; S2, the C# 15 escape, merge `d87e4f883c` (seat `ac2fefdf88`). Both first shipped in
+> 1.24.13.3, four releases before the final 1.24.13.7. This rule stood in H1 as a "Default order" until then.
+
+> **AMENDED 2026-10-13 — a hop that crosses TWO Go releases.** *(Drafted ahead of its first use, the
+> go1.24.13 → go1.26.9 hop; it takes effect when that hop's H1 starts.)*
+>
+> **The ladder is written for one release per hop, and that stays the default.** A hop that goes from
+> release *N* straight to *N+2*, with no release of *N+1*, is a **release fold**. *(Not to be confused
+> with H7a's **master fold**, which merges master into the release branch. They share a word and nothing
+> else; this document says "release fold" for the first and "master fold" for the second.)*
+>
+> **A release fold is admitted only by an explicit ruling, recorded where the standing rule lives**
+> ([`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md) §8, ⟨OQ-18⟩, or the instance plan that re-rules
+> it). The executing lane never chooses one. The reason is the one OQ-18 names: a folded hop's `.auto`
+> differential, its compile reds and its hand-own deltas each show the **union** of two releases' upstream
+> changes, so a regression can no longer be read as "this release did it", and H6's both-directions
+> question doubles.
+>
+> **A release fold therefore carries an ATTRIBUTION CHECKPOINT, and the ladder gains one rung for it.**
+> It restores, at the compile and hand-own levels, the attribution that two separate hops would have
+> given, without minting the skipped release.
+>
+> - **Where it sits:** after H4a closes, before H5's real reconvert. H4 is closed first because both
+>   conversions use **one converter binary**, built once after H4 and recorded by hash; the new
+>   release's language features are inert at the skipped release.
+> - **What it runs:** H5's seeded reconvert and H7's compile ladder, **twice**, into two scratch roots:
+>   once at the skipped release *N+1*, once at the target *N+2*. The *N+2* run **is** H5 proper, with
+>   H5's own gate. The *N+1* run pins the skipped release in the **seed only**: the repository's
+>   `version.props` never names *N+1*, nothing from that root is committed, and no golden, roster row or
+>   package is produced from it. **At *N+1*, H5c is applied in the scratch root only, never in the
+>   repository.**
+> - **The *N+1* ladder stops early, and the checkpoint says where.** No H6 work is done at *N+1*, so
+>   its ladder stops at the rung where the hand-owned files, still written for *N*, block the build.
+>   The checkpoint **states that stop**; it is not a red to triage. The reds at *N+1* are attribution
+>   evidence **up to that stop** and no further. A red at *N+2* beyond it has no *N+1* reading to be
+>   compared with, so it is read against **both** releases' source, by name, the rule the "does not do"
+>   paragraph below gives for H10.
+> - **One box runs both, serially.** Two conversions never overlap on one box, and each root takes
+>   exactly one conversion (CLAUDE.md's safety floor, items 1 and 11). Disk is H5's floor, twice.
+> - **What it yields:** every red at *N+2* is attributed before it is triaged, by comparison up to the
+>   *N+1* stop and by source reading beyond it. A site red at both
+>   releases was born at *N+1*; a site red only at *N+2* was born there; a site red at *N+1* and green
+>   at *N+2* was closed upstream, and is recorded as such with its evidence. H6's
+>   [`handown-census.ps1`](../src/handown-census.ps1) runs once per leg (*N* → *N+1*, then *N+1* → *N+2*),
+>   so each substantive hand-owned file carries the leg or legs that moved it.
+> - **Its record** is `docs/phase4/CHECKPOINT-go<N+1>-attribution.md`, named for the skipped release
+>   (`CHECKPOINT-go125-attribution.md` in the worked instance). It lists the per-class counts at both
+>   pins, the rung where the *N+1* ladder stopped, every red by site with its attribution, and the
+>   binary's hash.
+> - **Its gate:** every red at *N+2* and every substantive H6 file carries an attribution, and the
+>   record states the *N+1* stop. **A red is never triaged without one.** It is not a parity gate, and
+>   it blocks H6 and H7, not H5.
+>
+> **What the checkpoint does not do.** It does not run behavioral goldens or roster rows at the skipped
+> release: that is the cost of the second hop the fold exists to save. H9 and H10 attribute through the
+> compile-level and hand-own-level attribution above; a row that goes red at H10 with no attributed
+> cause is read against **both** releases' source, by name, before it is classified.
+>
+> **What else a release fold changes in the ladder, and nothing more:**
+>
+> - **H0** captures one baseline, at *N*. There is no baseline at *N+1*.
+> - **H1** installs **both** toolchains side by side, *N+1* on the checkpoint's box at least; H2 pins
+>   *N+2* only.
+> - **H3**'s package census, new package IDs and relocations are derived at *N+2*, against *N*.
+> - **H6**'s audit records the attribution column. Its completeness gate is unchanged.
+> - **H11** deprecates removed package IDs against what the outgoing releases actually published; the
+>   skipped release published nothing.
+> - **§7** closes with the checkpoint's cost and what it found, so the next ruling on a release fold has
+>   a measured price to weigh.
+>
+> **Worked instance — the 1.24 → 1.26 hop.** Admitted by the owner's ruling of 2026-10-11, which
+> re-rules OQ-18 for that hop; the instance plan is `PLAN-hop-go126.md` (proposed, and on its own branch
+> until it lands), whose §4 is this checkpoint with its boxes, releases and estimates named. That hop's
+> reconnaissance measured the *N+1* stop at the ladder's first rung.
 
 ### Readiness — before H0 **GATE**
 
@@ -200,6 +283,9 @@ A per-box record, taken and read before H0:
 
 ### H0 — Baseline capture ⟲
 
+*(A release fold captures ONE baseline here, at the outgoing release; there is none at the skipped one: §2, AMENDED
+2026-10-13.)*
+
 Capture, on the **outgoing** toolchain and the **new** converter build, everything the migration will
 diff against: the hand-own `.cs.auto` baseline, the package census, the roster snapshot, the
 disclosure manifests — and three comparands later stages otherwise reconstruct mid-hop: the outgoing
@@ -220,11 +306,16 @@ the differential. This is a ruled decision, not a preference.
 
 ### H1 — Toolchain provisioning **GATE**
 
-**Default order** (a COORD proposal, NOTES §5 Q13, unruled at 172d437e66; TRAIN K seated it this way): any side seat
-that moves a toolchain-adjacent pin (the .NET SDK `global.json`, the emitted `LangVersion`, a C# keyword escape) lands
-and regenerates before the outgoing corpus's final release, never inside the hop.
+*(A release fold installs BOTH toolchains here, side by side, the skipped release on the checkpoint's box at least;
+H2 pins the target only: §2, AMENDED
+2026-10-13.)*
+
+**Toolchain-adjacent pins** (the .NET SDK `global.json`, the emitted `LangVersion`, a C# keyword escape) land and
+regenerate before the outgoing corpus's final release, never inside the hop: §2's FIFTH ordering.
 *(Edited in place 2026-10-01, §7 lesson 47: inside a hop, H5 would measure the csproj files such a pin moves instead
 of inheriting them. Once Q13 is ruled, cite the ruling here or move the rule into §2's orderings.)*
+*(Edited in place 2026-10-14: Q13 RULED AS DECIDED BY EVENTS; the rule moved to §2, AMENDED 2026-10-14. This
+paragraph read "Default order (a COORD proposal, NOTES §5 Q13, unruled at 172d437e66; TRAIN K seated it this way)".)*
 
 1. Install the target release **side-by-side**; confirm the target actually **executes** — run
    `<target-root>/bin/go version` and require its OUTPUT to name the exact target. **Reading
@@ -283,11 +374,20 @@ of inheriting them. Once Q13 is ruled, cite the ruling here or move the rule int
    `GO111MODULE=off` cancels a `GOTOOLCHAIN` redirect.
 7. **`go vet` under the new directive is step 2's own bill**: the directive alone enables the new release's vet
    checks, and their fixes block step 4.
-8. **Read the release's GODEBUG default changes against the test host** (1.24 dropped `winsymlink=0`, refusing
+8. **Read the release's (under a release fold, the skipped release's too) GODEBUG default changes against the test
+   host** (1.24 dropped `winsymlink=0`, refusing
    junction-staged hosts).
 *(Edited in place 2026-09-26, §7 lessons 7-9: steps 6-8 added.)*
 
 **Gate:** converter unit tests green **and** `go2cs.exe` demonstrably built by the new toolchain.
+*(Edited in place 2026-10-14, the Go 1.26 hop's H1, ruled by COORD: **under a pin window** (the converter's `go`
+directive has moved while H2 has not moved the corpus pin, or H5 has not regenerated the corpus), "green" admits
+ONLY tests that read GOROOT's new-release sources against something still at the corpus release: the corpus pin, the
+committed corpus, or a registry of the old release's facts. Each such test is NAMED with an owner and the stage
+that clears it. Every other test must be green. A test outside the named set is red, and so is a member still failing
+past its clearing stage. Prove the set by running the BASE (no H1 commit) under the same pin, and compare by name.
+The pairing does not rescue the converter suite, because `auto` switches `go` itself inside `src/go2cs`. Worked
+instance: [`phase4/H1-go126-toolchain.md`](phase4/H1-go126-toolchain.md) §5, eight named, three of them owed as work.)*
 
 ### H2 — The pin bump **GATE**
 
@@ -350,6 +450,13 @@ alone — but its step 1 warning block supplies the mechanism: a hop leg sets **
 under a 1.23.12 `GOROOT` converts 1.23.12 sources. Ruled `014bfe84f`, corrected `84b5913098`, measured
 `e96349c54`.
 
+*(Noted 2026-10-14, PLAN-hop-go126 §9: the releases in this ruling are the 1.23 → 1.24 hop's. At any hop, read
+"1.24.13" below as the converter's build release, the `go` directive of `src/go2cs/go.mod` after H1 step 2, and
+"1.23.12" as the corpus release, `<GoStdLibVersion>` in `src/version.props` until H2 moves it. The harness guards
+named below already read those sources: `ConverterBuildInputs.IsConverterStale` compares the binary's embedded
+release with `GOVERSION`, and the sweep's toolchain guard reads `version.props`. The hand-run steps have no
+instrument, so whoever copies them substitutes the two releases.)*
+
 **Both arms, measured at `f4d2b981b`:** building `src/go2cs` under the 1.23.12 pin exits **1** with no binary
 (`go: go.mod requires go >= 1.24.13 (running go 1.23.12; GOTOOLCHAIN=local)`); the **same** build under the
 1.24.13 pin exits **0**. Arm 2 is what makes the refusal a toolchain fact rather than a broken build.
@@ -406,6 +513,10 @@ the 1.23.12 pin; a cost-canary or sweep leg here takes the two-pin shape above, 
 
 ### H3 — Package census ⟲
 
+*(A release fold derives this stage's census, new package IDs and relocations at the target, against the outgoing
+release: §2, AMENDED
+2026-10-13.)*
+
 Diff the conversion queue's package set against the outgoing corpus: **added**, **removed**,
 **renamed or promoted**, and **experiment-gated and therefore deliberately absent**. The last category
 matters as much as the others: experiment-gated packages stay out until they graduate to the default
@@ -429,6 +540,29 @@ package IDs** get their NuGet prefix reservation filed now, not at H11.
 *(Edited in place 2026-09-26, §7 lessons 11-12: two rulings were withdrawn over counts with unstated axes, and the
 reservation was still an
 external wait after the release.)*
+
+> **Amendment 2026-10-15 — a relocation arc is checked for what its moved tests read (the Go 1.26 hop).** An arc in
+> `relocations-go<rel>.tsv` is derived by body, and a body score compares control flow: two unrelated tests that share
+> a range/compare/`Errorf` skeleton score high. A test that truly moves brings the tables and helpers it reads.
+> **Before the TSV lands, run** (from `src/go2cs`, with the incoming toolchain):
+>
+> `go run ./internal/relocscan -from <outgoing GOROOT> -to <incoming GOROOT> -arcs docs/phase4/data/relocations-go<rel>.tsv`
+>
+> A MOVED test is a Test/Benchmark/Fuzz/Example function that is in the source package at the outgoing release,
+> absent from it at the incoming one, and present by name in the target at the incoming one. Each package-level
+> declaration of the source that the test's body reads must be declared at package level in the target. One that is
+> not prints as `MISSING`, its arc prints `REFUSED`, and the run exits 1. A refused arc is dropped from the TSV or
+> re-derived; it is never kept with a note. Each arc's line states its moved tests and the reads it checked. An arc
+> with 0 reads checked passes without evidence, so say so wherever the arc is cited.
+<!-- C2, 2026-10-15, on the campaign tip f7d8f0b135, toolchain go1.26.9, -from go1.24.13. RED against the 5-arc TSV
+     at e7316d8a53: arc 5 `REFUSED runtime -> internal/strconv: 1 moved test(s), 3 package-level read(s) checked`,
+     `MISSING TestAtoi reads atoi32tests, atoi64tests, declared nowhere in internal/strconv at -to`, exit 1; the other
+     four arcs OK. GREEN against the 4-arc TSV at ab12a78f61 (arc 5 dropped by H3 route 2): wasitest 2 moved / 3
+     reads, oldtrace -> tracev1 3 / 8, go/ast/internal/tests -> go/ast 1 / 0 (passes without evidence), strconv ->
+     internal/strconv 37 / 76; exit 0. The first build also listed ok, out and test as MISSING: TestAtoi's locals,
+     which share names with runtime package-level declarations. Identifiers the parser resolves to a declaration
+     inside the test function are now excluded, and the red names only the two tables. COORD logged the arc-5
+     lesson (a moved test carries its tables) and ruled this guard as S3. -->
 
 ### H4 — Converter feature work **GATE**
 
@@ -555,6 +689,11 @@ pin_pair () {  # the H2->H5 window pairing at go1.23.12: pin_pair <GOROOT-1.23.1
      setup-convert.sh:26-28 exits rather than returning. GOTOOLCHAIN non-auto: KICKOFF-fleet.md:176 at a02ac3df3 (a user-level
      `go env -w GOTOOLCHAIN=go1.23.1` made bare `go version` report go1.23.1). Mechanics: setup-convert.sh:21-28 (2026-09-13); the
      GOMOD arm is added because that script assumes its temp dir has no module above it. -->
+*(Noted 2026-10-14, PLAN-hop-go126 §9: `pin_pair` asserts the literal `go1.23.12`, the outgoing corpus release of
+the 1.23 → 1.24 hop, in its assertion line and its usage comment. At a later hop that literal is `go` plus the
+`<GoStdLibVersion>` in `<landing>:src/version.props`, and the `<GOROOT-1.23.12>` and `<GOROOT-1.24.13>`
+placeholders name the outgoing and incoming roots. `pin` takes its release as an argument; `pin_pair` does not.
+No instrument derives either block: both are copied by hand.)*
 
 - **Build half** — `pin go1.24.13 '<GOROOT-1.24.13>' '<GOROOT-1.24.13-posix>' || exit 3`, then build (the
   seeded-roots amendment under H5; `src/go2cs/go.mod` already reads `go 1.24.13` at `a02ac3df3`); after it,
@@ -577,6 +716,12 @@ pin_pair () {  # the H2->H5 window pairing at go1.23.12: pin_pair <GOROOT-1.23.1
      After-the-run clause: COORD 214f2bf7d (loader-directory root and its VERSION printed) and 0b5d72d0e §3 (read the emission's own
      path lines; a presence check is a cheap second arm). Provenance line: 7c1d8832f:src/go2cs/toolchainResolution.go:399; ancestry
      measured 2026-09-13 (merge-base --is-ancestor false against a02ac3df3 and 44fbc381a). No-value posting: .claude/rules/docs-records.md. -->
+*(Noted 2026-10-14, PLAN-hop-go126 §9: the H4a and H5 commands from here to H5c spell the 1.23 → 1.24 hop's
+releases. `go1.24.13` (the build pin, the embedded-toolchain check, the `h5` root's pin) is the incoming release:
+`<GoStdLibVersion>` in `<H2>:src/version.props`, equal to the `go` directive of `src/go2cs/go.mod` after H1 step 2.
+`go1.23.12` (the H4a convert pin, the `h4a` root's pin) is the outgoing release: `<GoStdLibVersion>` in
+`<landing>:src/version.props`. The seeded-roots amendment's `pv` already reads both files; the literal each `pv`
+result is compared with is the hand-copied part. No instrument derives these commands.)*
 
 #### Amendment 2026-09-13 — for the 1.23 → 1.24 hop, H4a is a staging BASELINE, not a landing
 
@@ -618,6 +763,9 @@ until it is.
 
 
 ### H5 — Seeded full reconvert **GATE**
+
+*(A release fold runs its attribution checkpoint here, before this stage's real reconvert: §2, AMENDED
+2026-10-13.)*
 
 **CLAUDE.md's reconvert ritual, unchanged and unabridged.** A migration is the *most* likely moment to
 skip a step of it, so the non-negotiables are restated rather than referenced:
@@ -696,6 +844,9 @@ nothing — `internal/goexperiment/exp_aliastypeparams_off.cs` (seeded, 1.23.12)
 `*.cs` so both compile, and the result is **CS0102 ×2 in a leaf essentially the whole corpus depends
 on**. A stale sibling is not a diff to classify at leisure; at a hop it is a compile error in front of
 every other measurement.
+*(Noted 2026-10-14, PLAN-hop-go126 §9: `REHEARSAL-h5-go124.md`, and every `REHEARSAL-*-go124` name in this
+stage, is the 1.23 → 1.24 hop's record, cited for what it measured. It is not an instrument input and keeps its
+name. A later hop's rehearsals are new records named for their own release; no instrument reads one.)*
 
 **So H5 gains a step, between the reconvert and the overlay:**
 
@@ -764,6 +915,43 @@ rather than the target is what keeps a **removed** package a candidate — `inte
      "inside a package the converter emits — generated metadata (package_info.cs, package_init.cs) and anything else
      whose stem maps to no .go name", which the new KEEP-METADATA row contradicted
      (src/reconvert-deletions.ps1:128-135). -->
+
+> **AMENDED 2026-10-12, §7 lesson 87: a package whose own source is gone while a GOOS-named child package
+> remains.**
+>
+> **The case.** At go1.24.13, `internal/runtime/syscall` is a linux-only package in the per-OS layout: its
+> project file sits at `core/internal/runtime/syscall/`, and its `.cs` files sit in a `linux/` folder. At
+> go1.26.9 that package is gone. Go has two packages on its paths instead: `internal/runtime/syscall/linux`
+> and a new `internal/runtime/syscall/windows`.
+>
+> **What the pass did.** It keyed whole-package removal on each deleted FILE's directory, so the only
+> absent "package" it saw was the `linux/` folder. The parent's project file, README and icons were never
+> residue. The stale project survived H5c and stayed in `go2cs-stdlib.slnx`, and its `$(GoTargetOS)/*.cs`
+> glob compiled the new `windows` package's files into the wrong assembly (CS0234 ×12 at 1.26.9 rung 1).
+> `-Apply` then refused on the solution post-condition, after deleting.
+>
+> **Arm 1: the parent is residue.** A staged project directory qualifies when all three hold:
+> - its own non-test Go source existed at the SOURCE release;
+> - it is gone at the TARGET;
+> - a child named for a GOOS holds Go source at the target.
+>
+> The directory's own files (project, README, icons) are then residue, and its solution entry is removed.
+> The child directories are never touched. This is decided from the two GOROOTs' files, never from the
+> rows, so all three flavours agree. Under `-Goos linux`, the old `linux/` files resolve to the NEW
+> package and are not delete rows at all. Solution entries are matched to the project file DIRECTLY in
+> the package directory, because a prefix match would drop the children's entries. A per-OS folder key is
+> never counted as a package that lost its project.
+>
+> **Arm 2: the hazard is refused.** A project directory that survives the pass, beside a child directory
+> named for a GOOS that carries a project of its own, is REFUSED by name (exit 3, nothing deleted). Its
+> per-OS glob would compile the child package. No release from 1.24 to 1.27 has that shape: the only
+> parents with GOOS-named child packages, `internal/syscall` and `internal/runtime/syscall`, have no Go
+> source of their own.
+>
+> **The check.** [`src/check-h5c-goos-child.ps1`](../src/check-h5c-goos-child.ps1) builds a fixture shaped
+> like `internal/runtime/syscall` at go1.26.9 and asserts both arms against real GOROOTs. It was red first.
+> **It runs at H5c, on the hop host, BEFORE `-Apply`, with the hop's source and target GOROOTs
+> (`-SourceGoRoot`, `-GoRoot`). It is not a CI test:** like the instrument, it needs both releases installed.
 
 **`UNRESOLVED` stops the step for a human.** Those rows are always listed, and the class is not
 hypothetical and not automatable from a file name: the rehearsal's 25 contains exactly one,
@@ -1038,12 +1226,48 @@ done
   survivor proposal and the fifth rehearsal's re-derivation, agreeing).
 - **(f) Flat rows** (no `windows`/`linux`/`darwin` segment) that are not in the same class in all three
   flavour files are posted by name: an `-Apply` deletes a flat file on one flavour's selection alone.
+
+> **Amendment 2026-10-15 — FILE rows in the expected set (the Go 1.26 hop).** This hop's list is
+> **`docs/phase4/h5-removals-go126.txt`**, so read it in place of `h5-removals.txt` in step 1. It names
+> `internal/runtime/syscall` by its **9 files**, not as a directory. That directory survives as the parent of
+> the 1.26 packages `internal/runtime/syscall/linux` and `/windows`, and its 1.24 per-GOOS folder `linux/` is the
+> new package's own path, so a directory row would claim the new package's files. Step 3 as written reads only
+> directory rows: `[ -d "$D" ]` skips a file, and `under.awk` matches only a row's directory prefixes. The 9 files
+> would map to `-`, and (a) would STOP on linux. For a list that carries file rows, make two changes:
+> - **`under.awk`: an exact path wins first.** In the second rule, replace `hit = ""` with
+>   `hit = ($2 in d) ? $2 : ""`, ahead of the prefix loop.
+> - **Step 3's loop: `[ -e "$D" ]` in place of `[ -d "$D" ]`.** `find` given a file prints it when it passes the
+>   tests, so a seeded `.cs` named by file is counted in (b) as its own key. The non-`.cs` file rows (csproj,
+>   README, icons) join (c)'s residue.
+<!-- C2, 2026-10-15, at 83288cc484: under.awk run over h5-removals-go126.txt and four synthetic rows. As written,
+     internal/runtime/syscall/linux/defs_linux.cs (DELETE-ABSENT, package not in std at target) mapped to `-`. With the
+     exact-path arm it mapped to itself, a removed directory's row (internal/trace/event/go122/...) still mapped to its
+     directory, and a new 1.26 package's file under internal/runtime/syscall/linux/ stayed `-`, unclaimed. NOT MEASURED
+     against a real H5c dry run; the i9 runs that at H5. Derivation of the 20 rows: the file's own header. -->
 <!-- The list's own header, 826045a74:docs/phase4/h5-removals.txt:14-19 ("removed BY THE SEEDED RE-CONVERT ... never by hand"), applied
      through this step: C1 fa98268df §2, COORD db6d9462f §3.3, COORD 93c967d4d (boarded as the executable form), COORD 210d49537. Per-file
      amendment: COORD 0b5d72d0e §2 and c58b4c01d §3. Two-pin key: COORD 0b5d72d0e §2; C1 e8d90a664 §2 (produced = it or its .cs.auto
      sibling newer than the seed). Order of tests: src/reconvert-deletions.ps1:746-756 (Resolve-Principal, Test-ConversionTarget with
      Get-SourceStdSet -ForGoos, :679) before the name and marker test :758-771; std membership is flavour-dependent :498-500.
      (f) is a posting rule only: src/reconvert-deletions.ps1:153-156 asks flat files under -Goos. -->
+*(Noted 2026-10-15, the Go 1.26 hop's H5, i9's first real `-Apply` with `-Orphan`: three instrument changes, each red
+on the real post-H5c root first. **(1)** The after-count owes `- $orphansDeleted`: the run deleted 88 rows, 9 residue
+`.cs` and the 3 ruled orphans, then refused 4405 against 4402 on disk, exit 3. **(2) Arm 1 without a child:** a
+package removed whole whose staged `.cs` all sit in per-GOOS folders, with no GOOS child at the target, now has its
+parent's project, README, icons and `.editorconfig` swept as residue. `vendor/golang.org/x/net/route` (darwin-only)
+kept all five, and its solution entry, under exit 0 ×3. **(3) An emptied `<Folder>` goes with its last `<Project>`**,
+through the instrument's own solution editor: 8 empty Folders were left (9 with route's), against 0 in the generated
+file. A Folder that was empty before the pass, or still holds a line, is never touched. Re-applied from the backup:
+exit 0 ×3, 363 `<Project>` entries, 0 empty Folders; `check-h5c-goos-child.ps1` still passes all 18 arms. **Usage:**
+`-Orphan` is `[string[]]`, so give it ONCE as an array through `-Command`
+(`-Orphan @('<p1>=delete','<p2>=delete') -Apply; exit $LASTEXITCODE`). Under `-File`, a repeated `-Orphan` is
+ParameterAlreadyBound before the script runs, and `a,b` arrives as one string. On a later flavour, pass only the
+orphans still present: the stale arm refuses a disposition that names a deleted path.)*
+*(Noted 2026-10-14, PLAN-hop-go126 §9: in step 2, `-ExpectGo go1.24.13` is the incoming release and
+`-ExpectSourceGo go1.23.12` the outgoing one, as the H4a and H5 note above defines them. `reconvert-deletions.ps1`
+requires `-ExpectGo`, and derives `-ExpectSourceGo` from the `version.props` beside the script only when it is
+omitted, which after H2 names the target; that is why step 2 always passes it. In step 4, `std-1.24.13.txt` and
+"absent at go1.24.13" name the incoming release.)*
 
 **4. The UNRESOLVED disposition, row by row, posted before any removal.** The rule of record (COORD `5123a14a2`):
 an `UNRESOLVED` row is **STALE** only when BOTH hold — *not emitted by any target this run* (no copy newer than
@@ -1217,6 +1441,58 @@ first, and only by derivation; H5 meets them first.)*
 <!-- The first sentence of this paragraph is not in the draft: it was added at the apply (2026-10-02), because the code
      block above copies .cs, .csproj and README.md only, and close lesson 2 (H10's close amendment) widens the overlay
      "by every file an emitted csproj names in <EmbeddedResource Include>, derived from the emission". -->
+*(Noted 2026-10-15, the Go 1.26 hop's H5, ruled COORD: **the overlay also carries the icons of every package new at
+the target.** Each emitted csproj names `go2cs.ico` as its `ApplicationIcon` and packs `go2cs.png`. The `find` above
+copies neither, and a package that is not tracked yet has neither in `<tree>`. Derive them from the applied root:
+every stage file that is neither tracked nor in `overlay-set.txt`. At go1.26.9 that was 57 files: the png and ico of
+the 28 new packages, plus the ico of the relocated test-only `internal/runtime/wasitest`. All were byte-identical to
+the tracked template, and no other kind was left over. **The deletion set is wider than H5c's**, too: (1) the
+three-target merge's own layout moves, a flat file moved per-GOOS or three identical per-GOOS copies hoisted flat (10
+at go1.26.9, each `git rm`'d once all three targets carried its counterpart); (2) a removed package's `-tests`
+residue, which H5c never takes (`<Compile Remove>`d by design). That was 11 files at go1.26.9, under
+go/ast/internal/tests and runtime/internal/wasitest. Census: every tracked file absent from the applied root must be
+one of H5c's deletions or a named merge move.)*
+*(Noted 2026-10-15, the Go 1.26 hop's H5, the FIXTURE REFRESH, one commit after the overlay and before the ladder
+(PLAN-hop-go126 A5).
+**The instrument is the two guards' own lists:**
+- `TestTrackedFixturesMatchPinnedGoRoot` names each stale fixture as "differs" or "absent at the pinned GOROOT";
+- `TestEveryStagedFixtureIsTrackedOrIgnored` names each staged fixture that is neither tracked nor ignored.
+**The refresh:**
+- GOROOT's bytes over every "differs" row (76);
+- every "neither" row added from GOROOT by explicit path (43);
+- every "absent" row `git rm`'d (20) only when its removal is named: either H5c removed its package
+  (crypto/internal/hpke, 1; internal/trace/internal/oldtrace, 12, relocated to tracev1), or a successor exists at the
+  target (A5's STOP, ruled COORD 2026-10-15):
+  - archive/tar's four `.tar` fixtures and compress/bzip2's `fail-issue5747.bz2`, renamed by Go to `<name>.base64`;
+  - strconv's `testfp.txt`, which went with the strconv → internal/strconv arc;
+  - encoding/json's `code.json.gz`, which Go deleted (its bench now reads
+    `internal/jsontest/testdata/golang_source.json.zst`).
+**The gate:**
+- every refreshed or added file's INDEX blob equals `git hash-object --no-filters` of GOROOT's file (0 of 119
+  differed), and each working copy `cmp`-equals GOROOT's;
+- `git check-attr text` is `unset` on every binary fixture;
+- both guards go green.)*
+*(Noted 2026-10-15, the Go 1.26 hop's H5, the TARGETED `-tests` REGEN (COORD's ruling on
+`TestCommittedCoreReferencesResolve`: a `.tests.csproj` naming an H5-removed package is regenerated, never
+hand-edited). A `-tests` convert into a seeded package writes what it emits, but never removes a test file Go deleted.
+So:
+- Remove the package's FLAT test-side files first (`*_test.cs`, `package_test_info.cs`, `go2cs_test_host.cs`,
+  `*.tests.csproj`), in the git-backed worktree.
+- Convert. Then `git status` reads M = re-emitted, A = new, D = not emitted at the target.
+- A D whose `<name>.go` still exists at the target is restored as unselected, never deleted.
+- **First, list every `*_impl_test.cs` and every marked test file, and keep them out of the removal.** A hand-written
+  test companion is unmarked and `_impl`-named, and the converter never emits it. i9's run took runtime's
+  `export_impl_test.cs` and `export_windows_impl_test.cs` and restored them before committing.
+- Restore from HEAD what the run rewrites outside its scope: README Tests badges (it demotes them to "not yet
+  validated"; badges are the bank's), `.cs.auto` review siblings (H6's), and a production `package_init.cs` it
+  gives an `initᴛᴛtests()` hook. The hook item is *superseded 2026-10-15 (COORD, the H7 re-emit ruling)*:
+  - this note first said "keep" the hook;
+  - a file both modes write must come out identical from either, and `-stdlib` emits no hook (an unimplemented
+    partial is erased);
+  - so the `-stdlib` form is the record. Revert the hook and name it in the post, until G's seat makes `-tests` add
+    it only when the tests project supplies an implementer.
+  - The H7 consolidated re-emit (`2f669be61c`) removed the two that i9's follow-up 2 had committed
+    (internal/trace, runtime/windows).)*
 
 Then the marker census re-measured in `<tree>`, T0 phantoms restored per §4, and staging by explicit path —
 never `git add -A` (floor 8). `<tree>` is a worktree ON the version branch COORD names (checked out at `<H2>`, not
@@ -1290,6 +1566,9 @@ Commit the regenerated file with the change that moved it; re-run if a later com
 
 
 ### H6 — The hand-own re-audit ⟲ **GATE**
+
+*(A release fold's audit records the attribution column here; the completeness gate is unchanged: §2, AMENDED
+2026-10-13.)*
 
 The step that distinguishes a corpus *upgrade* from a corpus *regeneration*, and the one a migration
 is most likely to skip **because everything compiles without it**.
@@ -1403,10 +1682,19 @@ behavioral divergence, an added branch shows up as nothing.
 > marker list and asserting that every absent entry has a closed row. Banked, not cut during a
 > migration — the list's baseline moves at every hop and a guard whose baseline moves needs the hop to
 > be over before it can be written honestly.
-> The 1.24.13 hop is over, so the guard is owed before the next hop's H6. It is absent at 172d437e66, and its
-> baseline is that hop's `logs/handowns-outgoing.txt`.
+> **The guard is [`retiredHandOwns_test.go`](../src/go2cs/internal/repoguard/retiredHandOwns_test.go).** Its
+> baseline is the union of the marker census at the previous hop's OUTGOING commit and at the commit it is
+> generated at. [`src/handown-baseline.ps1`](../src/handown-baseline.ps1) writes it, and the guard re-derives it
+> from the SHAs in its header. No `logs/handowns-outgoing.txt` was ever committed. That is no loss, because the
+> list is H6's own `git grep` at the outgoing commit, and any clone can re-run it. A census of the
+> generation commit alone reads zero absent entries and proves nothing about the hop that just closed. Each
+> retirement is a row in `testdata/handowns-retired.tsv`, either `moved <path marked at HEAD>` or `deleted`, with
+> its record. **When a hop closes, regenerate the baseline, naming that hop's outgoing commit, and add a row
+> for each of its retirements.** The population is the marked set only: AUDIT-h6 OQ-1 was ruled out 2026-10-12,
+> because a deleted `*_impl.cs` companion already breaks the build.
 > *(Edited in place 2026-10-01, §7 lesson 60: missing the comm step let sha3's fabricated `array<T>` class return
-> while H6 passed.)*
+> while H6 passed. Edited in place 2026-10-12: the guard landed. Its first run named
+> `runtime/pprof/pprof_impl.cs`, which `b415d4d9d9` had deleted after the hop with no record.)*
 
 **The instrument** is `.cs.auto` — the converter's answer to *"what would the automatic conversion of
 this file be, today, from this Go tree?"*
@@ -1501,6 +1789,12 @@ hosts.)*
 - **The audit file** is `docs/phase4/AUDIT-h6-handown-go124.md`: one row per marked path. R cut the skeleton
   (`d18059950`, train 48 seat 4) and G filled it (blocks 1–19, landed on master at `4e672aa4a`, 144 of 145 rows
   classified, row 130 recorded REWRITE OWED (c)); it reaches the version branch with master at H12.
+  *(Noted 2026-10-14, PLAN-hop-go126 §9: `AUDIT-h6-handown-go124.md` is the 1.23 → 1.24 hop's audit, a record.
+  `src/check-h6-completeness.ps1` now derives its default audit from the pin as
+  `docs/phase4/AUDIT-h6-handown-go<GoStdLibVersion>.md` (`AUDIT-h6-handown-go1.26.9.md` at the 1.26.9 pin). It
+  refuses by name when that file is absent, and when `-ToGoRoot`'s `VERSION` is not the pinned release (NOTES A8,
+  `1666c83e9d`). The name is A8's default while NOTES Q14 is unruled. An earlier hop's audit is read only through
+  `-AuditFile`.)*
 <!-- The pair: COORD db6d9462f §3.2 (b). Population: 146 by handown-census.ps1's predicate against 105 by a literal grep at bd1d26faf
      (db6d9462f §1, H6 row). Identical writes skipped: src/go2cs/platformEmit.go:420-422 at a02ac3df3. Unconditional sibling create:
      a02ac3df3:src/go2cs/autoSiblingOperations.go:122-137 (os.Create). Census parameters: 44fbc381a:src/handown-census.ps1:36-39. No gate
@@ -1611,6 +1905,31 @@ go1.24.13 … || exit 3`, run from a no-module directory.
      its command's rc" comment owned as unimplemented at the time it was written, then implemented. i9's linux prediction
      2c6aa2259: the golib arm, 338 predicted against 343 measured. The i7's windows second read at COORD fe23ab855 is the
      second of the two windows boxes. COORD's rung-7 close: a065b1bd9. -->
+
+*(Noted 2026-10-15, the Go 1.26 hop's H7, ruled COORD: **the ladder of record is the stub census's own Release build,
+plus one Debug build per flavour at H7's close.**
+- `pwsh -File src/check-stub-census.ps1 -Flavors <fl> -Predicted docs/phase4/data/stub-census-h0/predicted-h5.tsv` purges
+  `Generated/` and builds `go2cs-stdlib.slnx -c Release -p:GoTargetOS=<fl> --no-incremental -m:4
+  -p:UseSharedCompilation=false`. That one build per flavour per pass is scored in this section's units.
+- The census REFUSES (exit 2) on any build error. During the ladder, exit 2 is expected and only the build reading
+  is reported. The census VERDICT (exit 0 every appearance predicted, 1 FINDING) is read when that flavour first
+  reaches 0 errors. Never weaken the refusal.
+- Exit 3 is an INSTRUMENT ERROR, never a verdict: a Desktop edition (Windows PowerShell 5.1 is refused up front;
+  the instrument is ruled pwsh 7) or any unhandled error in the script. At H7 pass 8, 5.1 crashed after a green
+  build and exited 1, the FINDING code.
+- At H7's close, one Debug build per flavour confirms the record (an `#if DEBUG` divergence surfaces only there).
+**Scoring that log:**
+- Under Windows PowerShell 5.1, `*>` wrote it UTF-16LE; under pwsh 7 it is UTF-8. Decode by what the bytes are
+  (NULs in the first 200 bytes) and prove the decode: 0 NULs, and a known line present. Scored raw, i9's first
+  pass read 0 errors against 26.
+- Turn backslashes into `/` with `tr '\134' '/'`, not a sed escape; the shell layer collapses `\\`.
+- Key a site on any non-space run ending `.cs(l,c): error CSnnnn`, after cutting the trailing `[project.csproj]`.
+  Generated file names carry non-ASCII (`Δ`), and an ASCII-only key mis-split ROOTS/CASCADE 10/3 against 4/9.
+  A greedy `.*/core/` reaches into that bracket.
+- **A `Generated/` site whose cause is its own** (a duplicate member, as at pass 2's
+  `NoInliningPartialGenerator/stubs_impl.noinline.g.cs` CS0111) is reported as a ROOT beside the CASCADE unit,
+  which keeps its definition.
+- ASM reads `bin/Release`.)*
 
 
 ### H7a — The master fold **GATE**
@@ -2064,6 +2383,35 @@ states which roots it ran under. **State the toolchain's location beside the pin
      the one discrepancy (linux +1 at both releases) is the CGO_ENABLED axis in (d), not a disagreement.
      Script self-test 20/20 at the cut, each arm red-proved then restored. -->
 
+#### Amendment 2026-10-14 (G, F-H0-3) — per-GOOS review siblings come from their own target, and the one case the merge REFUSES
+
+**Fixed at H1:** a three-target emission now carries a `.cs.auto` that sits in a per-GOOS folder from **that GOOS's
+stage** to the root. Before, every stage held such a file as its seed copy, because each stage is a whole-tree copy
+of the L3 seed. The companion merge took the first target that *had* the file, which is Windows, so the root got its
+own seed bytes back. H0 read the lost rewrites from the linux stage instead: `siginfo_linux.cs.auto`,
+`exec_unix.cs.auto`. Flat siblings are unchanged, and the head of `-platforms` still wins for them.
+
+**By design, the merge REFUSES one shape:** a hand-owned file duplicated across GOOS folders whose `.cs.auto`
+siblings differ. The hand-own pass moves a hand-own and its sibling as ONE copy each
+(`platformHandOwn.go:257`), and two copies that disagree are an error, not a first-wins choice
+(`platformHandOwn.go:308`). Now that per-GOOS siblings carry their own target's bytes, such a pair can genuinely
+differ. If a hop meets this refusal, it is real: a hand-own that has to be split per GOOS is a hand decision, never
+a merge default. **Measured at master 65693fc862:** 9 per-GOOS `.cs.auto`, none of them in two GOOS folders of one
+package, so no current hand-own trips it.
+
+<!-- G, 2026-10-14, COORD's F-H0-3 ruling. Cause chain: platformEmit.go mergeCompanionArtifacts, the
+     "FIRST TARGET that has this artifact" source rule (master 65693fc862 lines 658-665), over stages snapshotted
+     whole by snapshotConvertedRoot (platformCensus.go:657). Evidence: the i9's H0 (logs/h0-go126/, master
+     f216c6300a): linux stage wrote siginfo_linux/exec_unix with bytes differing from the seed, and the root was
+     not rewritten; fd_writev_unix/wait_waitid were written equal in the stage (a no-op either way). Fix: the
+     source is the emission whose goos is the folder, read through the snapshot's own fold
+     (normalizeArtifactLogicalPaths), so a PACKAGE named windows (internal/syscall/windows) is not a per-GOOS
+     folder. Guard: platformCompanion_test.go, red on master (root kept "seed sibling"), flat and
+     named-package controls green on both. Census: git ls-tree of src/core for */{windows,linux,darwin}/*.cs.auto
+     = 10 rows; 9 under the fold rule (folder holds no .csproj, parent does), one GOOS folder each.
+     The 10th, internal/syscall/windows/exec_windows_test.cs.auto, is a PACKAGE named windows. G first posted
+     "10" to COORD from the unfolded grep; corrected here and in the seat post. -->
+
 
 
 
@@ -2394,7 +2742,10 @@ Per banked package:
    retires — full definitions in
    [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md).
    - (a) A reading-run TSV from the landed, red-proved unit extractor (NOTES A14), then the relabel, then rulings,
-     then page banking; labels are classed against the plan bar at the first classing.
+     then page banking; labels are classed against the plan bar at the first classing. The extractor is
+     [`src/tools/alloc-units`](../src/tools/alloc-units/README.md): give it the reading-owed entries with `-entries`
+     and every row's package directory, and it writes one TSV row per entry. It refuses rather than guess, so a
+     refusal stops the reading until it is understood.
    - (b) Every structural label is read against its design records.
    - (c) Unit-claiming classes are checked against measured units, and reading-vs-run MOVE rows are listed.
    - (d) Every failure line each signature matches is listed on both OSes; over-absorbing pins are narrowed and
@@ -2559,6 +2910,10 @@ a set that contains it, which is what struck four E1 rows from the roster's tabl
 *(Edited in place 2026-10-01, §7 lesson 52: the path read
 `docs/phase4/hopA-inputs/recon-lists/population-go1.24.13.txt`; the roster guard, the sweep's `-Hop` and push-nuget's
 preflight read the `docs/phase4/data/` file and refuse without it.)*
+*(Noted 2026-10-14, PLAN-hop-go126 §9: NOTES A9 has landed (`841fc39322`). `shardmap.py` reads
+`docs/phase4/data/population-go<GoStdLibVersion>.txt`, the release taken from `src/version.props`, which is the
+file the roster guard reads (A13). It refuses by name, before reading any other file, when the pin is absent or
+that release has no population file. No instrument reads the `hopA-inputs/recon-lists/` copy any more.)*
 
 ⚠ **AMENDED 2026-09-22 (the two live members COSTED, coordinator ruling; ledger 16:31 · 3469154a95;
 evidence ledger 11:36 · 553cdcbae3). The closing check above now closes.** The basis
@@ -3414,6 +3769,10 @@ FROM THE CLOSE SEAT ITSELF.** The seat stopped three times and each stop was rul
 
 ### H11 — Publication and compatibility guards **GATE**
 
+*(A release fold deprecates removed package IDs against what the outgoing releases actually published; the skipped
+release published nothing: §2, AMENDED
+2026-10-13.)*
+
 - The published version is the pinned Go release plus the build counter, already set at H2.
 - **Verify EXISTENCE-PLUS-MONOTONICITY with a scripted comparison before the first publish**, never
   believe it. A non-monotonic sequence on a public feed is not correctable. Whether an unreadable origin may degrade
@@ -4265,6 +4624,12 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     `git grep -n -E '<outgoing release spellings>' -- 'src/*.ps1' 'src/*.sh' 'docs/phase4/**/*.py' '.claude/coord-scripts'`;
     for a hop out of 1.24.13 the pattern is `'go1\.24\.13|go124'`. Every hit is either a derivation or a named record.
     Why: hard-coded instruments silently read the old release. **Step text:** Readiness.
+    *(Noted 2026-10-14, PLAN-hop-go126 §9: the three open instances in the comment below are closed on master:
+    A7 `db025b1f8b` (the recon wrapper's pin), A8 `1666c83e9d` (the H6 audit) and A9 `841fc39322` (shardmap's
+    population). At `b594cd90af` the grep reads 42 hits. Three files still pin a release literal: the two linux fleet
+    templates (named in the comment below), and `src/check-h5c-goos-child.ps1`, whose defaults are this hop's own
+    pair (`go1.24.13`, `go1.26.9`) and go stale at the next hop. The rest are comments, help examples, self-test cases
+    and one test fixture.)*
     <!-- ledger 2026-09-29 14:01 aa4ec663c5 and 16:11 422af93f53 (the roster guard and push-nuget's preflight were found
     hard-coded and fixed). This hop's open instances: NOTES-next-hop.md §2 A7-A10 (src/run-h10-recon.ps1:841-843,
     src/check-h6-completeness.ps1:76, docs/phase4/hopA-inputs/shardmap.py:94) and §5 Q14 (one naming convention).
@@ -4295,7 +4660,9 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     until COORD rules NOTES-next-hop.md §5 Q13. Why: inside a hop, H5 would measure about 1,364 moved csproj instead of
     inheriting them. **Step text:** H1.
     <!-- 53eef3cda8; d87e4f883c; TRAIN K 4016a2269c; NOTES-next-hop.md E1, E2. Q13 is a COORD proposal, unruled at
-    172d437e66 (NOTES-next-hop.md:520); TRAIN K seated S1 and S2 this way. -->
+    172d437e66 (NOTES-next-hop.md:520); TRAIN K seated S1 and S2 this way.
+    2026-10-14: Q13 RULED AS DECIDED BY EVENTS (COORD). The rule's home is now §2, AMENDED 2026-10-14 (the fifth
+    ordering), which cites the merges read from master's first-parent line. -->
 48. **At H0, before H2's pin bump, commit each UNBANKED row's reading as matched / disclosed / undisclosed.** The
     denominator is their sum. Name each undisclosed test and its disposition, and mark CONTESTED any disclosure disputed
     at that reading. Why: reflect circulated as 326 of 385 against a record reading 388, and unique's "4 of 19" was
@@ -4370,9 +4737,10 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     "does this package exist" from `git ls-files`/`git ls-tree` at the ref, never from `os.Stat`.** Why: a newer GOROOT
     reported a false linkname regression, and removed directories read as absent, empty or populated depending on the box.
     <!-- BOARD:25674-25692. -->
-60. **Cut the retired-hand-own guard (H6's durable form) after each hop closes and before the next hop's H6, baselined
-    on that hop's `logs/handowns-outgoing.txt`.** Why: missing the comm step let sha3's fabricated `array<T>` class return
-    while H6 passed, and repoguard has no such guard at 172d437e66. **Step text:** H6.
+60. **After each hop closes and before the next hop's H6, re-baseline the retired-hand-own guard (H6's durable form) on
+    that hop's outgoing commit with `src/handown-baseline.ps1`, and add a row for each retirement.** Why: missing the
+    comm step let sha3's fabricated `array<T>` class return while H6 passed. Repoguard had no such guard until 2026-10-12,
+    and its first run found a hand-own that had been deleted after the hop with no record. **Step text:** H6.
     <!-- 172d437e66:docs/GoCorpusMigration.md:1256-1262, :1288, :1318-1321; NOTES-next-hop.md A15 (owed: the
     entry itself is not in NOTES yet; a separate seat adds it). -->
 
@@ -4381,9 +4749,12 @@ healthy run look hung — and, in the other direction, what lets a hung one look
 61. **Before pass 1, run
     `src/run-h10-recon.ps1 -SelfTest -Tree <worktree> -NameList x -GoRoot x -Out x -ExpectTip x -Scratch x`
     under every shell a launcher uses. Its row-invocation contract must pass: the deadline is the longer of the derived
-    floor and the asked `-TestTimeout`, and every row carries its roster execution pin.** Re-key `$longTimeouts`
-    (run-validated-sweep.ps1:1203) to the release's relocations, and check it against the recon walls: raise a floor when
-    its wall passes 0.75 of it, never lower one. Why: the floor and pin defects were found only at pass 3, after rows read
+    floor and the asked `-TestTimeout`, and every row carries its roster execution pin.** The contract also holds the
+    per-test deadline: a row runs at the longer of `-TestDeadline` (default 15m) and its `$testDeadlineFloors` floor, `0`
+    turns it off, and a per-test floor on a row with no `$longTimeouts` floor is refused by name. Re-key `$longTimeouts`
+    (run-validated-sweep.ps1:1203) and `$testDeadlineFloors` together to the release's relocations, and check them against
+    the recon walls: raise a floor when its wall passes 0.75 of it, never lower one. Raise a per-test floor only for a
+    row whose read shows an abandoned verdict on a test Go passes. Why: the floor and pin defects were found only at pass 3, after rows read
     without their pin had been reported as converter defects. **Step text:** H10 step 5.
     <!-- Fixed at c8c77eadff (the wrapper takes max(asked, floor) and the roster pin, with the 1.24.13 floor re-check),
     branch tip d095fe8108. The self-test's contract cases are at run-h10-recon.ps1:616-810. Ledger 2026-09-22 14:52
@@ -4393,7 +4764,12 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     Mandatory (run-h10-recon.ps1:89-111), so that form fails at parameter binding before any self-test code runs. Under
     -SelfTest only -Tree is read (:238-242, :634-650: a per-run copy takes the sweep's and the roster's rules from the
     tree), so it names the worktree and the other five take any value. Read at e2008427b1 under pwsh 7: rc 0 and
-    "SELF-TEST PASSED". $longTimeouts is at run-validated-sweep.ps1:1203 at e2008427b1 (:1189 at 172d437e66). -->
+    "SELF-TEST PASSED". $longTimeouts is at run-validated-sweep.ps1:1203 at e2008427b1 (:1189 at 172d437e66).
+    Per-test deadline added 2026-10-17 with the watchdog seat (claude/c1-test-host-watchdog; COORD ruled option (A), the
+    15m default with a per-row floor column: crypto/dsa 120m, go/parser 90m, runtime at the default). The recon AST-loads
+    Resolve-RowTestDeadline and Get-RowTestDeadlineArgs from the sweep and derives the table through
+    Get-SweepTestDeadlineFloors. Made to fail: the floor replacing the ask failed the raise case, and the orphan check
+    removed failed the orphan case; both passed after a byte-identical restore. -->
 62. **At the END of pass 1, run three checks.** The first is a page census: every row's first proof link is at the new
     release. The second is the population identity, enumerated two ways: dispatched + unscheduled = population. The third
     re-dispatches every NOVERDICT or hand-stopped row at a raised budget. Why: two rows were in no shard plan and 14
@@ -4521,6 +4897,11 @@ healthy run look hung — and, in the other direction, what lets a hung one look
 79. **Every seat, docs seats included, runs plain `go test ./... -count=1` in `src/go2cs` at its own tip before
     admission, and the union rehearsal runs it again.** Why: union-only reds recurred at nearly every train, twice in a row
     from a docs seat failing repoguard's kramdown guard.
+    *(Extended 2026-10-13, TRAIN T4.)* The union rehearsal also reads the `-stdlib` emission check (leg E), at least its
+    union-attributable count per target (windows, linux, darwin), not only CNR. CNR re-converts the behavioral corpus
+    only, so a seat whose emission lands in `src/core` is invisible to it, to the suites and to a solution build. Why:
+    T4's four rehearsals read CNR green while one seat's uncommitted `src/core` footprint (1,548 paths, 3,772 drifted
+    files across the three targets) surfaced only at assembly.
     <!-- ledger 2026-09-22 08:18 ae2f25198; 2026-09-25 00:08 ff67c57420; 2026-09-29 12:43 d51a62eaad; 2026-09-30 14:02;
     coord-handover trainK/tK-seats-draft.txt:51. Extends §7 lesson 15. -->
 80. **At each status, read every lane's last post and unread count.** A lane is declared OFFLINE in one ledger line, with
@@ -4555,6 +4936,15 @@ healthy run look hung — and, in the other direction, what lets a hung one look
      template-currency checks, launch-check tables, isolation re-runs, complement-shard bisection and frozen unions),
      and the skill does not hold them at e2008427b1. The draft's placement note lands 86 with or after the seat that
      adds them (draft lessons 97 and 102-110, routed as §7's intro routes instrument discipline). -->
+
+87. **(2026-10-12, the Go 1.26 hop's recon.) A package's directory is where its PROJECT lives, not where its
+    `.cs` files live.** Key a whole-package removal on the package directory, and decide it from the
+    releases' own files rather than from a flavour's rows. A per-OS-layout package can vanish while Go
+    reuses its `linux/` and `windows/` paths as new packages. Why: the file-directory key missed
+    `internal/runtime/syscall`'s project at go1.26.9; the stale project then compiled the new `windows`
+    package's files, and `-Apply` refused after deleting. **Step text:** H5c, AMENDED 2026-10-12.
+    <!-- docs/phase4/RECON-go1.26-hop.md §4-§5 (F1) on claude/i9-recon-go126 bd69190547; COORD ruling 2026-10-12;
+         src/check-h5c-goos-child.ps1 red at 94306766a9, green at 58952d5e85. -->
 
 <!-- SEED COVERAGE (owner order 2026-09-23; ledger 2026-09-23 14:52 · OWNER ORDER · c9e15c73a0), each verified against the cited source:
   1 hosts before the hop: DNS (relay NXDOMAIN->SERVFAIL, per-box public IPv4, IPv6 unbound) .......... 42 (+ the Readiness Host bullet)

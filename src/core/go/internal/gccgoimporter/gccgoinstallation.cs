@@ -44,10 +44,12 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
     if (err != default!) {
         return err;
     }
+
     err = cmd.Start();
     if (err != default!) {
         return err;
     }
+
     var scanner = bufio.NewScanner(stderr);
     while (scanner.Scan()) {
         @string line = scanner.Text();
@@ -65,14 +67,15 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
             }
             break;
         }}
-
     }
+
     argv = appendꓸꓸꓸ(new @string[]{"-dumpversion"u8}.slice(), args);
     (var stdout, err) = exec.Command(gccgoPath, argv.ꓸꓸꓸ).Output();
     if (err != default!) {
         return err;
     }
-    inst.GccVersion = strings.TrimSpace(((@string)stdout));
+    inst.GccVersion = strings.TrimSpace((@string)stdout);
+
     return err;
 }
 
@@ -87,6 +90,7 @@ public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation in
             continue;
         }
         paths = append(paths, spath);
+
         spath = filepath.Join(spath, inst.TargetTriple);
         (fi, err) = os.Stat(spath);
         if (err != default! || !fi.IsDir()) {
@@ -94,7 +98,9 @@ public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation in
         }
         paths = append(paths, spath);
     }
+
     paths = appendꓸꓸꓸ(paths, inst.LibPaths);
+
     return paths;
 }
 

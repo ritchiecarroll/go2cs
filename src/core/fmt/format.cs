@@ -35,7 +35,7 @@ partial struct fmtFlags {
 // It prints into a buffer that must be set up separately.
 partial struct fmt {
     internal ж<buffer> buf;
-    internal partial ref fmtFlags fmtFlags { get; }
+    /*embed*/ internal fmtFlags fmtFlags;
     internal nint wid; // width
     internal nint prec; // precision
     // intbuf is large enough to store %b of an int64 with a sign and
@@ -58,8 +58,7 @@ internal static void init(this ref fmt f, ж<buffer> Ꮡbuf) {
 
 // writePadding generates n bytes of padding.
 internal static void writePadding(this ref fmt f, nint n) {
-    if (n <= 0) {
-        // No padding bytes needed.
+    if (n <= 0) { // No padding bytes needed.
         return;
     }
     var buf = f.buf.ValueSlot;
@@ -136,6 +135,7 @@ internal static void fmtBoolean(this ref fmt f, bool v) {
 // fmtUnicode formats a uint64 as "U+0078" or with f.sharp set as "U+0078 'x'".
 internal static void fmtUnicode(this ref fmt f, uint64 u) {
     var buf = f.intbuf[0..];
+
     // With default precision set the maximum needed buf length is 18
     // for formatting -1 with %#U ("U+FFFFFFFFFFFFFFFF") which fits
     // into the already allocated intbuf with a capacity of 68 bytes.
@@ -148,8 +148,10 @@ internal static void fmtUnicode(this ref fmt f, uint64 u) {
             buf = new slice<byte>(width);
         }
     }
+
     // Format into buf, ending at buf[i]. Formatting numbers is easier right-to-left.
     nint i = len(buf);
+
     // For %#U we want to add a space and a quoted character at the end of the buffer.
     if (f.sharp && u <= utf8.MaxRune && strconv.IsPrint((rune)u)) {
         i--;
@@ -164,7 +166,7 @@ internal static void fmtUnicode(this ref fmt f, uint64 u) {
     // Format the Unicode code point u as a hexadecimal number.
     while (u >= 16) {
         i--;
-        buf[i] = udigits[(uint64)(u & 0xF)];
+        buf[i] = udigits[(u & 0xF)];
         prec--;
         u >>= (int)(4);
     }
@@ -182,6 +184,7 @@ internal static void fmtUnicode(this ref fmt f, uint64 u) {
     buf[i] = (rune)'+';
     i--;
     buf[i] = (rune)'U';
+
     var oldZero = f.zero;
     f.zero = false;
     f.pad(buf.slice(i));
@@ -194,6 +197,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     if (negative) {
         u = ((uint64)0 - u);
     }
+
     var buf = f.intbuf[0..];
     // The already allocated f.intbuf with a capacity of 68 bytes
     // is large enough for integer formatting when no precision or width is set.
@@ -205,6 +209,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
             buf = new slice<byte>(width);
         }
     }
+
     // Two ways to ask for extra leading zero digits: %.3d or %03d.
     // If both are specified the f.zero flag is ignored and
     // padding with spaces is used instead.
@@ -220,13 +225,13 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
             return;
         }
     } else 
-    if (f.zero && !f.minus && f.widPresent) {
-        // Zero padding is allowed only to the left.
+    if (f.zero && !f.minus && f.widPresent) { // Zero padding is allowed only to the left.
         prec = f.wid;
         if (negative || f.plus || f.space) {
             prec--; // leave room for sign
         }
     }
+
     // Because printing is easier right-to-left: format u into buf, ending at buf[i].
     // We could make things marginally faster by splitting the 32-bit case out
     // into a separate block but it's not worth the duplication, so u has 64 bits.
@@ -246,7 +251,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     case 16: {
         while (u >= 16) {
             i--;
-            buf[i] = digits[(uint64)(u & 0xF)];
+            buf[i] = digits[(u & 0xF)];
             u >>= (int)(4);
         }
         break;
@@ -254,7 +259,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     case 8: {
         while (u >= 8) {
             i--;
-            buf[i] = (byte)((rune)'0' + (uint64)(u & 7));
+            buf[i] = (byte)((rune)'0' + (u & 7));
             u >>= (int)(3);
         }
         break;
@@ -262,7 +267,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     case 2: {
         while (u >= 2) {
             i--;
-            buf[i] = (byte)((rune)'0' + (uint64)(u & 1));
+            buf[i] = (byte)((rune)'0' + (u & 1));
             u >>= (int)(1);
         }
         break;
@@ -271,17 +276,18 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
         throw panic("fmt: unknown base; can't happen");
         break;
     }}
-
     i--;
     buf[i] = digits[u];
     while (i > 0 && prec > len(buf) - i) {
         i--;
         buf[i] = (rune)'0';
     }
+
     // Various prefixes: 0x, -, etc.
     if (f.sharp) {
         switch (@base) {
         case 2: {
+            // Add a leading 0b.
             i--;
             buf[i] = (rune)'b';
             i--;
@@ -290,28 +296,27 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
         }
         case 8: {
             if (buf[i] != (rune)'0') {
-                // Add a leading 0b.
                 i--;
                 buf[i] = (rune)'0';
             }
             break;
         }
         case 16: {
+            // Add a leading 0x or 0X.
             i--;
             buf[i] = digits[16];
             i--;
             buf[i] = (rune)'0';
             break;
         }}
-
     }
-    // Add a leading 0x or 0X.
     if (verb == (rune)'O') {
         i--;
         buf[i] = (rune)'o';
         i--;
         buf[i] = (rune)'0';
     }
+
     if (negative){
         i--;
         buf[i] = (rune)'-';
@@ -324,6 +329,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
         i--;
         buf[i] = (rune)' ';
     }
+
     // Left padding with zeros has already been handled like precision earlier
     // or the f.zero flag is ignored due to an explicitly set precision.
     var oldZero = f.zero;
@@ -355,10 +361,7 @@ internal static slice<byte> truncate(this ref fmt f, slice<byte> b) {
             if (n < 0) {
                 return b.slice(0, i);
             }
-            nint wid = 1;
-            if (b[i] >= utf8.RuneSelf) {
-                (_, wid) = utf8.DecodeRune(b.slice(i));
-            }
+            var (_, wid) = utf8.DecodeRune(b.slice(i));
             i += wid;
         }
     }
@@ -403,8 +406,7 @@ internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring di
             // Only a leading 0x or 0X will be added for the whole string.
             width += 2;
         }
-    } else {
-        // The byte slice or string that should be encoded is empty.
+    } else { // The byte slice or string that should be encoded is empty.
         if (f.widPresent) {
             f.writePadding(f.wid);
         }
@@ -436,7 +438,7 @@ internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring di
             c = s[i]; // Take a byte from the input string.
         }
         // Encode each byte as two hexadecimal digits.
-        buf = append(buf, digits[(c >> (int)(4))], digits[(byte)(c & 0xF)]);
+        buf = append(buf, digits[(c >> 4)], digits[(byte)(c & 0xF)]);
     }
     f.buf.ValueSlot = buf;
     // Handle padding to the right.
@@ -503,6 +505,8 @@ internal static void fmtQc(this ref fmt f, uint64 c) {
 // fmtFloat formats a float64. It assumes that verb is a valid format specifier
 // for strconv.AppendFloat and therefore fits into a byte.
 internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, nint prec) {
+    var numᴷ = new stackAppend<byte>();
+
     // Explicit precision in format specifier overrules default precision.
     if (f.precPresent) {
         prec = f.prec;
@@ -539,8 +543,8 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
         switch (verb) {
         case (rune)'v' or (rune)'g' or (rune)'G' or (rune)'x': {
             digits = prec;
+            // If no precision is set explicitly use a precision of 6.
             if (digits == -1) {
-                // If no precision is set explicitly use a precision of 6.
                 digits = 6;
             }
             break;
@@ -550,6 +554,7 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
         // exponent notations of the form "e+123" or "p-1023".
         array<byte> tailBuf = new(6);
         var tail = tailBuf[..0];
+
         var hasDecimalPoint = false;
         var sawNonzeroDigit = false;
         // Starting from i = 1 to skip sign at num[0].
@@ -577,19 +582,18 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
                 if (num[i] != (rune)'0') {
                     sawNonzeroDigit = true;
                 }
+                // Count significant digits after the first non-zero digit.
                 if (sawNonzeroDigit) {
-                    // Count significant digits after the first non-zero digit.
                     digits--;
                 }
             }
-
         }
         if (!hasDecimalPoint) {
             // Leading digit 0 should contribute once to digits.
             if (len(num) == 2 && num[1] == (rune)'0') {
                 digits--;
             }
-            num = append(num, (byte)((rune)'.'));
+            num = append(numᴷ, num, (byte)((rune)'.'));
         }
         while (digits > 0) {
             num = append(num, (byte)((rune)'0'));

@@ -95,15 +95,18 @@ public static void TestSignAndVerify(ж<testing.T> Ꮡt) {
 
 internal static void testSignAndVerify(ж<testing.T> Ꮡt, elliptic.Curve c) {
     var (priv, _) = GenerateKey(c, rand.Reader);
+
     var hashed = slice<byte>("testing"u8);
     var (r, s, err) = Sign(rand.Reader, priv, hashed);
     if (err != default!) {
         Ꮡt.Errorf("error signing: %s"u8, err);
         return;
     }
+
     if (!Verify(priv.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), hashed, r, s)) {
         Ꮡt.Errorf("Verify failed"u8);
     }
+
     hashed[0] ^= (byte)(0xff);
     if (Verify(priv.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), hashed, r, s)) {
         Ꮡt.Errorf("Verify always works!"u8);
@@ -116,15 +119,18 @@ public static void TestSignAndVerifyASN1(ж<testing.T> Ꮡt) {
 
 internal static void testSignAndVerifyASN1(ж<testing.T> Ꮡt, elliptic.Curve c) {
     var (priv, _) = GenerateKey(c, rand.Reader);
+
     var hashed = slice<byte>("testing"u8);
     var (sig, err) = SignASN1(rand.Reader, priv, hashed);
     if (err != default!) {
         Ꮡt.Errorf("error signing: %s"u8, err);
         return;
     }
+
     if (!VerifyASN1(priv.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), hashed, sig)) {
         Ꮡt.Errorf("VerifyASN1 failed"u8);
     }
+
     hashed[0] ^= (byte)(0xff);
     if (VerifyASN1(priv.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), hashed, sig)) {
         Ꮡt.Errorf("VerifyASN1 always works!"u8);
@@ -137,22 +143,26 @@ public static void TestNonceSafety(ж<testing.T> Ꮡt) {
 
 internal static void testNonceSafety(ж<testing.T> Ꮡt, elliptic.Curve c) {
     var (priv, _) = GenerateKey(c, rand.Reader);
+
     var hashed = slice<byte>("testing"u8);
     var (r0, s0, err) = Sign(new ecdsa_internal_test_package.readerFuncᴠReader(zeroReader), priv, hashed);
     if (err != default!) {
         Ꮡt.Errorf("error signing: %s"u8, err);
         return;
     }
+
     hashed = slice<byte>("testing..."u8);
     (var r1, var s1, err) = Sign(new ecdsa_internal_test_package.readerFuncᴠReader(zeroReader), priv, hashed);
     if (err != default!) {
         Ꮡt.Errorf("error signing: %s"u8, err);
         return;
     }
+
     if (s0.Cmp(s1) == 0) {
         // This should never happen.
         Ꮡt.Errorf("the signatures on two different messages were the same"u8);
     }
+
     if (r0.Cmp(r1) == 0) {
         Ꮡt.Errorf("the nonce used for two different messages was the same"u8);
     }
@@ -175,20 +185,24 @@ public static void TestINDCCA(ж<testing.T> Ꮡt) {
 
 internal static void testINDCCA(ж<testing.T> Ꮡt, elliptic.Curve c) {
     var (priv, _) = GenerateKey(c, rand.Reader);
+
     var hashed = slice<byte>("testing"u8);
     var (r0, s0, err) = Sign(rand.Reader, priv, hashed);
     if (err != default!) {
         Ꮡt.Errorf("error signing: %s"u8, err);
         return;
     }
+
     (var r1, var s1, err) = Sign(rand.Reader, priv, hashed);
     if (err != default!) {
         Ꮡt.Errorf("error signing: %s"u8, err);
         return;
     }
+
     if (s0.Cmp(s1) == 0) {
         Ꮡt.Errorf("two signatures of the same message produced the same result"u8);
     }
+
     if (r0.Cmp(r1) == 0) {
         Ꮡt.Errorf("two signatures of the same message produced the same nonce"u8);
     }
@@ -220,11 +234,14 @@ internal static void testVectors(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         return;
     }
+
     var (f, err) = os.Open(testdataSigVerRspBz2ˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var buf = bufio.NewReader(bzip2.NewReader(new ecdsa_test_package.os_FileжReader(f)));
+
     nint lineNo = 1;
     hash.Hash h = default!;
     slice<byte> msg = default!;
@@ -232,6 +249,7 @@ internal static void testVectors(ж<testing.T> Ꮡt) {
     ж<bigꓸInt> r = default!;
     ж<bigꓸInt> s = default!;
     var pub = @new<global::go.crypto.ecdsa_package.PublicKey>();
+
     while (ᐧ) {
         var (line, errΔ1) = buf.ReadString((rune)'\n');
         if (len(line) == 0) {
@@ -246,12 +264,15 @@ internal static void testVectors(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("bad line ending (expected \\r\\n) on line %d"u8, lineNo);
         }
         line = line.slice(0, len(line) - 2);
+
         if (len(line) == 0 || line[0] == (rune)'#') {
             continue;
         }
+
         if (line[0] == (rune)'[') {
             line = line.slice(1, len(line) - 1);
             var (curve, hashΔ1, _) = strings.Cut(line, ","u8);
+
             var exprᴛ1 = curve;
             if (exprᴛ1 == "P-224"u8) {
                 pub.Value.Curve = elliptic.P224();
@@ -291,9 +312,11 @@ internal static void testVectors(ж<testing.T> Ꮡt) {
 
             continue;
         }
+
         if (h == default! || (~pub).Curve == default!) {
             continue;
         }
+
         switch (ᐧ) {
         case {} when strings.HasPrefix(line, msgˢ): {
             {
@@ -333,7 +356,6 @@ internal static void testVectors(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("unknown variable on line %d: %s"u8, lineNo, line);
             break;
         }}
-
     }
 }
 
@@ -346,11 +368,12 @@ internal static void testNegativeInputs(ж<testing.T> Ꮡt, elliptic.Curve curve
     if (err != default!) {
         Ꮡt.Errorf("failed to generate key"u8);
     }
+
     array<byte> hash = new(32);
     var r = @new<bigꓸInt>().SetInt64(1);
-    r.Lsh(r, 550);
-    /* larger than any supported curve */
+    r.Lsh(r, 550 /* larger than any supported curve */);
     r.Neg(r);
+
     if (Verify(key.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), hash[..], r, r)) {
         Ꮡt.Errorf("bogus signature accepted"u8);
     }
@@ -362,15 +385,18 @@ public static void TestZeroHashSignature(ж<testing.T> Ꮡt) {
 
 internal static void testZeroHashSignature(ж<testing.T> Ꮡt, elliptic.Curve curve) {
     var zeroHash = new slice<byte>(64);
+
     var (privKey, err) = GenerateKey(curve, rand.Reader);
     if (err != default!) {
         throw panic(err);
     }
+
     // Sign a hash consisting of all zeros.
     (var r, var s, err) = Sign(rand.Reader, privKey, zeroHash);
     if (err != default!) {
         throw panic(err);
     }
+
     // Confirm that it can be verified.
     if (!Verify(privKey.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), zeroHash, r, s)) {
         Ꮡt.Errorf("zero hash signature verify failed for %T"u8, curve);
@@ -386,6 +412,7 @@ internal static void testZeroSignature(ж<testing.T> Ꮡt, elliptic.Curve curve)
     if (err != default!) {
         throw panic(err);
     }
+
     if (Verify(privKey.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), new slice<byte>(64), big.NewInt(0), big.NewInt(0))) {
         Ꮡt.Errorf("Verify with r,s=0 succeeded: %T"u8, curve);
     }
@@ -397,6 +424,7 @@ public static void TestNegativeSignature(ж<testing.T> Ꮡt) {
 
 internal static void testNegativeSignature(ж<testing.T> Ꮡt, elliptic.Curve curve) {
     var zeroHash = new slice<byte>(64);
+
     var (privKey, err) = GenerateKey(curve, rand.Reader);
     if (err != default!) {
         throw panic(err);
@@ -405,6 +433,7 @@ internal static void testNegativeSignature(ж<testing.T> Ꮡt, elliptic.Curve cu
     if (err != default!) {
         throw panic(err);
     }
+
     r = r.Neg(r);
     if (Verify(privKey.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), zeroHash, r, s)) {
         Ꮡt.Errorf("Verify with r=-r succeeded: %T"u8, curve);
@@ -417,6 +446,7 @@ public static void TestRPlusNSignature(ж<testing.T> Ꮡt) {
 
 internal static void testRPlusNSignature(ж<testing.T> Ꮡt, elliptic.Curve curve) {
     var zeroHash = new slice<byte>(64);
+
     var (privKey, err) = GenerateKey(curve, rand.Reader);
     if (err != default!) {
         throw panic(err);
@@ -425,6 +455,7 @@ internal static void testRPlusNSignature(ж<testing.T> Ꮡt, elliptic.Curve curv
     if (err != default!) {
         throw panic(err);
     }
+
     r = r.Add(r, (~curve.Params()).N);
     if (Verify(privKey.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), zeroHash, r, s)) {
         Ꮡt.Errorf("Verify with r=r+n succeeded: %T"u8, curve);
@@ -437,6 +468,7 @@ public static void TestRMinusNSignature(ж<testing.T> Ꮡt) {
 
 internal static void testRMinusNSignature(ж<testing.T> Ꮡt, elliptic.Curve curve) {
     var zeroHash = new slice<byte>(64);
+
     var (privKey, err) = GenerateKey(curve, rand.Reader);
     if (err != default!) {
         throw panic(err);
@@ -445,6 +477,7 @@ internal static void testRMinusNSignature(ж<testing.T> Ꮡt, elliptic.Curve cur
     if (err != default!) {
         throw panic(err);
     }
+
     r = r.Sub(r, (~curve.Params()).N);
     if (Verify(privKey.of(global::go.crypto.ecdsa_package.PrivateKey.ᏑPublicKey), zeroHash, r, s)) {
         Ꮡt.Errorf("Verify with r=r-n succeeded: %T"u8, curve);
@@ -496,6 +529,7 @@ public static void TestRFC6979(ж<testing.T> Ꮡt) {
             wvVnXˢ,
             "EFD9073B652E76DA1B5A019C0E4A2E3FA529B035A6ABB91EF67F0ED7A1F21234"u8,
             "3DB4706C9D9F4A4FE13BB5E08EF0FAB53A57DBAB2061C83A35FA411C68D2BA33"u8);
+
         // The remaining vectors are from RFC 6979.
         testRFC6979(tΔ2, elliptic.P256(),
             "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721"u8,
@@ -591,12 +625,13 @@ internal static void benchmarkAllCurves(ж<testing.B> Ꮡb, Action<ж<testing.B>
 
 public static void BenchmarkSign(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var (priv, err) = GenerateKey(curve, new ecdsa_test_package.bufio_ReaderжReader(r));
         if (err != default!) {
             bΔ1.Fatal(err);
         }
         var hashed = slice<byte>("testing"u8);
+
         bΔ1.ReportAllocs();
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -615,7 +650,7 @@ internal static readonly object verifyFailedˢ = (@string)"verify failed"u8;
 
 public static void BenchmarkVerify(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var (priv, err) = GenerateKey(curve, new ecdsa_test_package.bufio_ReaderжReader(r));
         if (err != default!) {
             bΔ1.Fatal(err);
@@ -625,6 +660,7 @@ public static void BenchmarkVerify(ж<testing.B> Ꮡb) {
         if (err != default!) {
             bΔ1.Fatal(err);
         }
+
         bΔ1.ReportAllocs();
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -637,7 +673,7 @@ public static void BenchmarkVerify(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkGenerateKey(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         bΔ1.ReportAllocs();
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {

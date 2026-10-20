@@ -482,8 +482,8 @@ for _, row := range m { row[0] = 99 }  // → foreach (var (_, vᴛ1) in m) { va
 for i, row = range m { … }             // pre-existing vars → row = vᴛ1.Clone(); inside the body
 m := [2][3]int{a, b}                   // → new array<nint>[]{a.Clone(), b.Clone()}.array()
 s1 := holder{arr: a}                   // keyed struct field  → new holder(arr: a.Clone())
-mv := map[string][3]int{"x": a}        // map value           → ["x"u8] = a.Clone()
-mk := map[[2]int]string{k: "kv"}       // map KEY             → [k.Clone()] = "kv"u8
+mv := map[string][3]int{"x": a}        // map value           → ["x"] = a.Clone()
+mk := map[[2]int]string{k: "kv"}       // map KEY             → [k.Clone()] = "kv"
 lst := []any{b}                        // interface boxing    → new any[]{b.Clone()}.slice()
 return h.arr                           // return              → return h.arr.Clone();
 ch <- a                                // channel send        → ch.ᐸꟷ(a.Clone())
@@ -591,7 +591,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:45-51, 192, 195-197 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-58, 210, 213-215 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);
@@ -737,6 +737,137 @@ the `Reslice` fix, `appendNilNothing` the `Append` fix, and `packZeroArgs`/`spre
 re-spread a callee typically performs before observing it. `NilSliceConversion` continues to guard
 the `[]T(nil)` conversion row.)
 
+## `append` grows a slice exactly as Go's `growslice` does
+
+`cap()` after an append is observable, so golib computes the capacity a grown slice gets the way Go's
+`runtime.growslice` does, for every element type:
+
+```go
+var b []byte
+b = append(b, 1)
+fmt.Println(cap(b)) // 8: the allocator's smallest size class
+```
+
+1. **`nextslicecap`.** Double the old capacity below 256 elements. From 256 on, step by
+   `(newcap + 3*256) / 4`, a smooth move toward ×1.25. A need past double the old capacity takes the need
+   itself.
+2. **`roundupsize`.** Multiply by the element's Go size and round up to the allocator's size class
+   (`GoSizeClasses.RoundUpSize`), then divide back. A pointer-bearing object larger than
+   `goarch.PtrSize * goarch.PtrBits` bytes (512 on amd64, the target the standard library is converted
+   for) carries an 8-byte malloc header inside its class, so a `[]string` steps 32, 71, 143. A request
+   past 32 KiB rounds up to whole 8 KiB pages.
+
+The element's Go size and whether it holds pointers come from golib's type layout (`GoReflect.TryGoSizeOf`,
+`GoPtrBytesOf`), read once per element type (`GoGrowthFacts<T>`). An **unnamed array element** is the
+exception: `[][2]uint64` and `[][3]uint64` are both `slice<array<ulong>>`, because a managed `array<T>` carries
+its length in the value, not the type. So each growth reads the element's dims off a value it appends (a
+nested `[2][3]byte` through its first element), and its size and pointer facts from those dims; no answer is
+cached per C# type. A zero-length array is zero-size in Go, so its slice grows to exactly its new length, as
+`[]struct{}` does. `reflect.Value.Grow` has no appended value, so it reads an element of the slice, or the
+length the slice recorded when it was created. A growth with neither keeps step 1 alone, and
+`GoSizeClasses.UnroundedElementTypes` records the type. A nil
+slice grows through the same rule, so its first backing is a size class (`append([]byte(nil), 1)` has cap 8,
+not 1). `reflect.Value.Grow` reaches the same function, as Go's
+`reflect_growslice` does. `internal/bytealg.MakeNoZero` (strings.Builder's buffer) reads the same table.
+
+The table and constants are Go's (GOROOT/src/internal/runtime/gc). The repoguard test
+`TestGolibSizeClassesMatchTheToolchain` fails when they drift from the pinned toolchain, and proves that
+golib's smallest-class-at-least-as-large search equals Go's two lookup tables at every small size.
+GolibTests' `GoGrowSliceTests` replays twenty-six growth sequences recorded from Go itself
+(`testdata/growslice`, under `-gcflags='-N -l'`), and `TestGoGrowSliceExpectationsMatchTheToolchain`
+re-runs that probe.
+
+**What is not modeled.** Since Go 1.26 a slice that escapes only when it is returned can walk the
+size-class ladder inside a stack buffer and move to the heap at the end. That is the compiler's decision
+after inlining, and golib reproduces only the heap path. The Go 1.25 stack buffer of a non-escaping append
+is modeled: see the next section.
+
+## A non-escaping append can take Go's 32-byte stack buffer
+
+Since Go 1.25 the compiler gives an append whose result does not escape a 32-byte backing store in the
+frame of the function that appends. At a variable's first qualifying append, when the slice must grow, is
+empty and the new length is at most K = 32 / the element's size, the slice becomes that buffer, with
+capacity K:
+
+<!-- source: src/tests/Behavioral/StackAppendBackingStore/main.go:13-20 -->
+```go
+func loopCaps() {
+	var x []int64
+	for i := 0; i < 5; i++ {
+		x = append(x, int64(i))
+		fmt.Print(cap(x), " ")
+	}
+	fmt.Println()
+}
+```
+
+Go prints `4 4 4 4 8`, where growslice alone gives `1 2 4 4 8`. A flag in the frame records that the
+buffer is taken, so a function takes it at most once per call: a slice reset to nil and refilled grows as
+growslice does. An element of zero size or over 32 bytes, a spread `append(x, s...)`, a slice that is not
+empty, and a variable whose address is taken never take it.
+
+Which appends qualify is the compiler's decision, made after inlining and escape analysis, so the converter
+reads it from the compiler instead of re-deriving it (`src/go2cs/stackAppendHints.go`). For each package
+it runs `go build`, or `go test -c` for test files, with `-gcflags='-m -d=variablemakehash=vy'` for
+windows/amd64, linux/amd64 and darwin/amd64, whatever the conversion's own target. It hints a site when:
+
+- the site's own copy does not escape;
+- the backing-store check logged the variable's declaration, which it does not for a variable whose
+  address is taken;
+- every copy inlined elsewhere in the package that can be attributed to the site agrees, and none that
+  cannot be attributed exists (a callee with more than one append, inlined, leaves all of them unhinted);
+- every target that compiles the site picks it as the variable's first qualifying append, and none refuses
+  it.
+
+The function that appends declares one `stackAppend<T>` per hinted variable at its entry, and the site
+passes it to golib's `append`:
+
+<!-- source: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:8-17 -->
+```csharp
+internal static partial void loopCaps() {
+    var xᴷ = new stackAppend<int64>();
+
+    slice<int64> x = default!;
+    for (nint i = 0; i < 5; i++) {
+        x = append(xᴷ, x, (int64)i);
+        fmt.Print(cap(x), " ");
+    }
+    fmt.Println();
+}
+```
+
+`ᴷ` (U+1D37, a modifier-letter capital K) names the buffer after its variable. Two hinted variables of one
+function can share a name in sibling scopes, as strconv's `unquote` has two `buf`s in separate cases. Their
+buffers are declared together at the entry, so the second takes `Δ` and an ordinal, as a second declaration of
+a Go name does: `bufᴷ` and `bufᴷΔ1`. A function literal's own buffer may repeat a name its enclosing function
+uses, because C# lets a lambda's local shadow an enclosing one. The overload takes the
+buffer as an `in` parameter, which C# passes by reference to the caller's local with no keyword at the
+call, and sets the flag through that reference. That is sound only when the argument is a plain local of
+the calling method or lambda that no lambda captures, so the go2cs-gen analyzer GO2CS0007 makes any other
+argument a build error. A variable declared inside a function literal gets its buffer at the top of the
+lambda's body, one per call as in Go. An outer variable appended inside a function literal gets none:
+the literal captures it by reference, so Go lowers that append in place.
+
+Taking the buffer charges no allocation to golib's allocation counter, because Go's buffer is on the stack.
+GolibTests' `StackAppendTests` hold the runtime rule, and the `StackAppendBackingStore` behavioral test
+compares eleven arms with Go.
+
+**Conversion time.** The harvest compiles the package, so it adds to conversion time. On a box's first
+conversion, with an empty Go build cache, it compiles the package and everything it imports for all three
+targets, which can take tens of seconds for a large package. The build cache keeps those compiles, so a
+later conversion pays a fraction of a second, and an edited package recompiles only itself. A `main`
+package costs more on every conversion, because each of its three harvests also links a binary. Within one
+converter run each harvest runs once per package, target, toolchain and build configuration, whatever
+the number of targets being emitted.
+
+**What is not hinted.** A copy of an append inlined into another package is invisible to that package's
+own harvest, so the site follows its own package's copies alone. A hinted site inside a function body that its
+package converts by hand (a `*_impl.cs` companion) reaches only the converted placeholder, so the hand-written
+body grows as growslice does. Five standard-library sites are of this kind, all in reflect: the parameter and
+result lists `rtype.Method` builds, `FuncOf`'s argument list, and `StructOf`'s method set and type string.
+<!-- The five, one hint each: GOROOT/src/reflect/type.go:660 `in = append(in, t)` and :666 `out = append(out, toRType(ret))` (rtype.Method), :1957 `args = append(args, t)` (FuncOf), :2335 `methods = append(methods, abi.Method{` and :2423 `repr = append(repr, ';')` (StructOf). Counted by COORD's std legs at e14cff064f, which emitted 5 hints fewer than predicted per target for this reason. --> A conversion whose toolchain predates
+Go 1.25 gets no harvest output and so no hints, which is Go's own behavior before 1.25.
+
 ## A slice of a ZERO-SIZE element type carries no storage — `make([]struct{}, math.MaxInt)` allocates nothing
 
 Go's `struct{}` has size 0, so `mallocgc(0, …)` returns the address of the runtime's global
@@ -765,7 +896,8 @@ golib's `zerobase` — so `s == nil` keeps the representation-nilness rule above
 nil, the zero header still is), while every window bound is checked against `m_length`/`m_capacity`
 alone. Each operation Go answers from length arithmetic does the same here: `make` skips the allocation
 and the `Array.MaxLength` ceiling (Go's `len < 0` rule stays), `Reslice` rebuilds the header directly,
-`append` bumps the length and applies the identical growth rule, `copy` returns `min(len(dst), len(src))`
+`append` bumps the length and grows the capacity to exactly the new length, as Go's zero-size
+`growslice` does, `copy` returns `min(len(dst), len(src))`
 and moves nothing (Go's `memmove` of `n * 0` bytes), `clear` is complete before it starts, indexing
 answers the ONE shared element (Go computes `&s[i]` as `data + i*0`, so every index names the same
 address), and `range` is a counted loop.
@@ -791,7 +923,7 @@ Inside golib the window's own span still serves every copy a span can express (m
 int-bounded by `T[]`, so allocation counts and in-place/grow behavior are byte-identical to the span
 core), zero-size windows route by pure length arithmetic BEFORE any span form (which is what lets
 `TestConcat_too_large`'s `make([]struct{}, math.MaxInt)` fakes flow through `Concat`'s Grow chain
-allocation-free, with the growth rule's even-rounding guarded against wrapping past `MaxInt`), and a
+allocation-free, a grown capacity being exactly the new length), and a
 named-slice wrapper arriving through the boxed interface lends its own `ꓸꓸꓸ` projection — one
 interface call, inside the core. Two shapes are deliberate: the constrained form takes BOTH type
 arguments explicitly (`appendꓸꓸꓸ<S, E>`), because a constraint surface does not participate in C#
@@ -815,7 +947,7 @@ s = subslice<S, E>(appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, cap(s)), makeꓸ�
 golib's `makeꓸꓸꓸ<T>` validates the length as `make` does (same panic), and `appendꓸꓸꓸ` over it calls
 `slice<T>.AppendZeroed`. That mirrors `Append`'s arms: the zero-size arm, so `TestConcat_too_large`'s
 `MaxInt` fakes still allocate nothing; nil; in place, zeroing the shared backing's new elements, which a
-stale write beyond `len` would otherwise leak; and growth through `CalculateNewCapacity`. So no `cap()`
+stale write beyond `len` would otherwise leak; and growth through `GrowCapacity`, Go's `growslice`. So no `cap()`
 moves. Refused, each keeping the make-then-append emission:
 - a capacity argument (Go does not recognise it either);
 - an element whose zero value must be constructed (`arrayElemFactory`);
@@ -1520,9 +1652,9 @@ z, ok := entity2["alsomissing"]       // comma-ok form
 v := nilMap[7]                        // quadMap is map[int][4]byte, nil — len 4
 ```
 ```csharp
-var x = entity2[notthereˢ, () => new array<rune>(2)].Clone();
-var n = nested[zzzˢ, () => new array<array<nint>>(2, () => new(3))].Clone();
-var (z, ok) = entity2[alsomissingˢ, () => new array<rune>(2), ꟷ];
+var x = entity2["notthere", () => new array<rune>(2)].Clone();
+var n = nested["zzz", () => new array<array<nint>>(2, () => new(3))].Clone();
+var (z, ok) = entity2["alsomissing", () => new array<rune>(2), ꟷ];
 var v = nilMap[7, () => new array<byte>(4)].Clone();
 ```
 
@@ -1590,9 +1722,10 @@ A value appended to a `[]Iface` slice whose type is not already the interface --
 pack = append(pack, (Animal)(new CatжAnimal(Ꮡ(new Cat(nil)))));
 pack = append(pack, (Animal)(new Dog(nil)));
 ```
-An already-interface-typed element stays bare. The **empty interface** (`any`) element type is affected identically and takes the same cast — `append(args[:len(args):len(args)], c.output)` with `args []any` and `c.output []byte` infers `T=[]byte` on the `ISlice` overload but `T=any` on the `slice<T>` overload (testing's `flushToParent`, CS0121), and appending a scalar (`append(anys, 5)`) is the same shape; the differing element is cast to `any` so both overloads agree:
+An already-interface-typed element stays bare. The **empty interface** (`any`) element type is affected identically and takes the same cast — `append(args[:len(args):len(args)], c.output)` with `args []any` and `c.output []byte` infers `T=[]byte` on the `ISlice` overload but `T=any` on the `slice<T>` overload (testing's `flushToParent`, CS0121), and appending a scalar (`append(anys, 5)`) is the same shape; the differing element is cast to `any` so both overloads agree, as in the `AppendUntypedConst` golden:
+<!-- source: src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 -->
 ```csharp
-args = append(args.slice(-1, len(args), len(args)), (any)(c.output));
+anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));
 ```
 Guarded by `InterfaceCasting` (non-empty interface) and `AppendUntypedConst` (the empty-interface `[]byte`-into-`[]any` and scalar-into-`[]any` cases).
 

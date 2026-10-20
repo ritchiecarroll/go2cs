@@ -13,7 +13,14 @@ using path;
 
 partial class x509_package {
 
+// certFileEnv is the environment variable which identifies where to locate
+// the SSL certificate file. If set this overrides the system default.
 internal static readonly @string certFileEnv = "SSL_CERT_FILE"u8;
+
+// certDirEnv is the environment variable which identifies which directory
+// to check for SSL certificate files. If set this overrides the system default.
+// It is a colon separated list of directories.
+// See https://www.openssl.org/docs/man1.0.2/man1/c_rehash.html.
 internal static readonly @string certDirEnv = "SSL_CERT_DIR"u8;
 
 internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> Ꮡopts) {
@@ -22,12 +29,14 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
 internal static (ж<CertPool>, error) loadSystemRoots() {
     var roots = NewCertPool();
+
     var files = certFiles;
     {
         @string f = os.Getenv(certFileEnv); if (f != ""u8) {
             files = new @string[]{f}.slice();
         }
     }
+
     error firstErr = default!;
     foreach (var (_, @file) in files) {
         var (data, err) = os.ReadFile(@file);
@@ -39,6 +48,7 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
             firstErr = err;
         }
     }
+
     var dirs = certDirectories;
     {
         @string d = os.Getenv(certDirEnv); if (d != ""u8) {
@@ -49,6 +59,7 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
             dirs = strings.Split(d, ":"u8);
         }
     }
+
     foreach (var (_, directory) in dirs) {
         var (fis, err) = readUniqueDirectoryEntries(directory);
         if (err != default!) {
@@ -64,9 +75,11 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
             }
         }
     }
+
     if (roots.len() > 0 || firstErr == default!) {
         return (roots, default!);
     }
+
     return (default!, firstErr);
 }
 

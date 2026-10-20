@@ -51,6 +51,7 @@ internal static ж<coro> newcoro(Action<ж<coro>> f) {
         start = corostart;
         var startfv = ~Ꮡstart.Reinterpret<Action, ж<funcval>>();
         Ꮡgp.ValueSlot = newproc1(startfv, Ꮡgp.ValueSlot, pc, true, waitReasonCoroutine);
+
         // Scribble down locked thread state if needed and/or donate
         // thread-lock state to the new goroutine.
         if ((~mp).lockedExt + (~mp).lockedInt != 0) {
@@ -73,6 +74,7 @@ internal static void corostart() {
         var gp = getg();
         var c = gp.Value.coroarg;
         gp.Value.coroarg = default!;
+
         defer(coroexit, c, ref ᒐ);
         (~c).f(c);
     }
@@ -124,6 +126,7 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     var exit = gp.coroexit;
     gp.coroexit = false;
     var mp = gp.m;
+
     // Track and validate thread-lock interactions.
     //
     // The rules with thread-lock interactions are simple. When a coro goroutine is switched to,
@@ -139,6 +142,7 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
             @throw(coroOsThreadLockingMustˢ);
         }
     }
+
     // Acquire tracer for writing for the duration of this call.
     //
     // There's a lot of state manipulation performed with shortcuts
@@ -146,20 +150,23 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     // start and end states to maintain a coherent model and avoid
     // emitting an event for every single transition.
     var Δtrace = traceAcquire();
+
     var canCAS = true;
-    var sg = gp.syncGroup;
-    if (sg != nil) {
+    var bubble = gp.bubble;
+    if (bubble != nil) {
         // If we're in a synctest group, always use casgstatus (which tracks
         // group idleness) rather than directly CASing. Mark the group as active
         // while we're in the process of transferring control.
         canCAS = false;
-        sg.incActive();
+        bubble.incActive();
     }
+
     if (locked) {
         // Detach the goroutine from the thread; we'll attach to the goroutine we're
         // switching to before returning.
         gp.lockedm.set(nil);
     }
+
     if (exit){
         // The M might have a non-zero OS thread lock count when we get here, gdestroy
         // will avoid destroying the M if the G isn't explicitly locked to it via lockedm,
@@ -177,9 +184,11 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
             // coordinating with the garbage collector about the state change.
             casgstatus(Ꮡgp, _Grunning, _Gwaiting);
         }
+
         // Clear gp.m.
         setMNoWB(Ꮡgp.of(g.Ꮡm), nil);
     }
+
     // The goroutine stored in c is the one to run next.
     // Swap it with ourselves.
     ж<g> gnext = default!;
@@ -205,6 +214,7 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
             break;
         }
     }
+
     // Check if we're switching to ourselves. This case is able to break our
     // thread-lock invariants and an unbuffered channel implementation of
     // coroswitch would deadlock. It's clear that this case should just not
@@ -212,17 +222,20 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     if (gnext == Ꮡgp) {
         @throw(coroswitchOfAGoroutineToˢ);
     }
+
     // Emit the trace event after getting gnext but before changing curg.
     // GoSwitch expects that the current G is running and that we haven't
     // switched yet for correct status emission.
     if (Δtrace.ok()) {
         Δtrace.GoSwitch(gnext, exit);
     }
+
     // Start running next, without heavy scheduling machinery.
     // Set mp.curg and gnext.m and then update scheduling state
     // directly if possible.
     setGNoWB(mp.of(m.Ꮡcurg), gnext);
     setMNoWB(gnext.of(g.Ꮡm), mp);
+
     // Synchronize with any out-standing goroutine profile. We're about to start
     // executing, and an invariant of the profiler is that we tryRecordGoroutineProfile
     // whenever a goroutine is about to start running.
@@ -233,24 +246,29 @@ internal static void coroswitch_m(ж<g> Ꮡgp) {
     if (goroutineProfile.active) {
         tryRecordGoroutineProfile(gnext, default!, osyield);
     }
+
     if (!canCAS || !gnext.of(g.Ꮡatomicstatus).CompareAndSwap(_Gwaiting, _Grunning)) {
         // The CAS failed: use casgstatus, which will take care of
         // coordinating with the garbage collector about the state change.
         casgstatus(gnext, _Gwaiting, _Grunnable);
         casgstatus(gnext, _Grunnable, _Grunning);
     }
+
     // Donate locked state.
     if (locked) {
         mp.of(m.Ꮡlockedg).set(gnext);
         gnext.of(g.Ꮡlockedm).set(mp);
     }
+
     // Release the trace locker. We've completed all the necessary transitions..
     if (Δtrace.ok()) {
         traceRelease(Δtrace);
     }
-    if (sg != nil) {
-        sg.decActive();
+
+    if (bubble != nil) {
+        bubble.decActive();
     }
+
     // Switch to gnext. Does not return.
     gogo(gnext.of(g.Ꮡsched));
 }

@@ -11,27 +11,21 @@ internal static bool /*_*/ valid(bool flag) {
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string setˢ = "set"u8;
-
 internal static (nint, @string label) pair(@string tag) {
     @string label = default!;
 
     label = "empty:"u8 + tag;
     if (tag == "set"u8) {
-        return (7, setˢ);
+        return (7, "set");
     }
     return (default!, label);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string baseˢ = "base"u8;
-
 internal static void Main() {
     fmt.Println(valid(true), valid(false));
-    var (n, label) = pair(baseˢ);
+    var (n, label) = pair("base");
     fmt.Println(n, label);
-    (n, label) = pair(setˢ);
+    (n, label) = pair("set");
     fmt.Println(n, label);
 }
 

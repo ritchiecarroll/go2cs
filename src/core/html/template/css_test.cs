@@ -70,7 +70,7 @@ public static void TestIsCSSNmchar(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in tests) {
         var got = isCSSNmchar(test.rune);
         if (got != test.want) {
-            Ꮡt.Errorf("%q: want %t but got %t"u8, ((@string)test.rune), test.want, got);
+            Ꮡt.Errorf("%q: want %t but got %t"u8, (@string)test.rune, test.want, got);
         }
     }
 }
@@ -112,13 +112,13 @@ public static void TestDecodeCSS(ж<testing.T> Ꮡt) {
         )
     }.slice();
     foreach (var (_, test) in tests) {
-        @string got1 = ((@string)decodeCSS(slice<byte>(test.css)));
+        @string got1 = (@string)decodeCSS(slice<byte>(test.css));
         if (got1 != test.want) {
             Ꮡt.Errorf("%q: want\n\t%q\nbut got\n\t%q"u8, test.css, test.want, got1);
         }
         @string recoded = cssEscaper(got1);
         {
-            @string got2 = ((@string)decodeCSS(slice<byte>(recoded))); if (got2 != test.want) {
+            @string got2 = (@string)decodeCSS(slice<byte>(recoded)); if (got2 != test.want) {
                 Ꮡt.Errorf("%q: escape & decode not dual for %q"u8, test.css, recoded);
             }
         }
@@ -164,7 +164,7 @@ public static void TestSkipCSSSpace(ж<testing.T> Ꮡt) {
         new(@"\20"u8, @"\20"u8)
     }.slice();
     foreach (var (_, test) in tests) {
-        @string got = ((@string)skipCSSSpace(slice<byte>(test.css)));
+        @string got = (@string)skipCSSSpace(slice<byte>(test.css));
         if (got != test.want) {
             Ꮡt.Errorf("%q: want %q but got %q"u8, test.css, test.want, got);
         }
@@ -175,12 +175,15 @@ public static void TestCSSEscaper(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string input = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f"u8 + "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"u8 + @" !""#$%&'()*+,-./"u8 + @"0123456789:;<=>?"u8 + @"@ABCDEFGHIJKLMNO"u8 + @"PQRSTUVWXYZ[\]^_"u8 + "`abcdefghijklmno"u8 + "pqrstuvwxyz{|}~\x7f"u8 + "\u00A0\u0100\u2028\u2029\ufeff\U0001D11E"u8);
+
     @string want = ("\\0\x01\x02\x03\x04\x05\x06\x07"u8 + "\x08\\9 \\a\x0b\\c \\d\x0E\x0F"u8 + "\x10\x11\x12\x13\x14\x15\x16\x17"u8 + "\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"u8 + @" !\22#$%\26\27\28\29*\2b,-.\2f "u8 + @"0123456789\3a\3b\3c=\3e?"u8 + @"@ABCDEFGHIJKLMNO"u8 + @"PQRSTUVWXYZ[\\]^_"u8 + "`abcdefghijklmno"u8 + @"pqrstuvwxyz\7b|\7d~"u8 + "\u007f"u8 + "\u00A0\u0100\u2028\u2029\ufeff\U0001D11E"u8);
+
     @string got = cssEscaper(input);
     if (got != want) {
         Ꮡt.Errorf("encode: want\n\t%q\nbut got\n\t%q"u8, want, got);
     }
-    got = ((@string)decodeCSS(slice<byte>(got)));
+
+    got = (@string)decodeCSS(slice<byte>(got));
     if (input != got) {
         Ꮡt.Errorf("decode: want\n\t%q\nbut got\n\t%q"u8, input, got);
     }

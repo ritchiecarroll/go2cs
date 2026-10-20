@@ -51,6 +51,7 @@ public static void TestOpenArchive(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("open archive %s:\n\thave %#v\n\twant %#v\n"u8, (~tt).@file, (~arch).ArchiveHeader, (~tt).hdr);
             continue;
         }
+
         foreach (var (iΔ1, mem) in (~arch).Members) {
             if (iΔ1 >= len((~tt).members)) {
                 break;
@@ -60,6 +61,7 @@ public static void TestOpenArchive(ж<testing.T> Ꮡt) {
             if (!reflect.DeepEqual(have.OrTypedNil(), want.OrTypedNil())) {
                 Ꮡt.Errorf("open %s, member %d:\n\thave %#v\n\twant %#v\n"u8, (~tt).@file, iΔ1, have.OrTypedNil(), want.OrTypedNil());
             }
+
             var (f, errΔ1) = arch.GetFile((~mem).Name);
             if (errΔ1 != default!) {
                 Ꮡt.Error(errΔ1);

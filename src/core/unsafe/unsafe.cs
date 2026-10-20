@@ -204,6 +204,13 @@ unsafe partial class unsafe_package  {
 //	hdr.Data = uintptr(unsafe.Pointer(p))
 //	hdr.Len = n
 //	s := *(*string)(unsafe.Pointer(&hdr)) // p possibly already lost
+// Registers unsafe.Pointer's canonical nil with golib's type-parameter typed-nil boundary
+// (TypedNilOfExtensions.OrTypedNilOf), which cannot name this package's type.
+internal static class PointerTypedNilRegistration {
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Register() => TypedNilOfExtensions.UnsafePointerNil = Pointer.Nil;
+}
+
 public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     // The ZERO address IS the nil pointer: Go's `unsafe.Pointer(uintptr(0)) == nil` holds, and
     // every uintptr round-trip of a nil pointer lands here (the converter bridges an
@@ -982,7 +989,7 @@ public static slice<T> Slice<T>(ж<T> ptr, uintptr len) {
 // five-element slice. It is refused by name instead (coordinator ruling 2026-09-29 11:33).
 //
 // The order matters. NEGATIVE first, on the full-width value: any negative length returns -1 for the
-// caller's own "len is negative" panic (Go's text), because narrowing a length below Int32.MinValue
+// caller's own "unsafe.Slice/String: len out of range" panic (runtime/unsafe.go's errorString), because narrowing a length below Int32.MinValue
 // wrapped it POSITIVE (-(2^32) + 5 came back as five elements; TRAIN J review, 2026-09-29). Then the
 // Int32 representation limit, which binds every element type, zero-size included. Then golib's ONE
 // maximum (GoSliceLimit), the same bound the native-backed slice window refuses at, with the same
@@ -1002,14 +1009,14 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
     int n = SpanLength<T, TLen>(len, "unsafe.Slice");
 
     if (n < 0)
-        throw go.golib.RuntimeErrorPanic.RuntimeRaised("len is negative");
+        throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.Slice: len out of range");
 
     if (ptr == nil)
     {
         if (n == 0)
             return [];
 
-        throw go.golib.RuntimeErrorPanic.RuntimeRaised("ptr is nil and len is not zero");
+        throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.Slice: ptr is nil and len is not zero");
     }
 
     // A zero-size element has no storage to span, so a length beyond any managed span is still a
@@ -1039,14 +1046,23 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
     // surface at first read, named, rather than as corruption), and the mapping arm proceeds
     // exactly as before for the audit's 13 native sites, mmap first among them.
     if (ptr.IsNative && ManagedPointerTokens.Resolve(ptr.NativeAddress) is null)
+    {
+        // A POINTER element cannot alias native memory: its words are read through the pointer-array kinds, which
+        // read memory the Go runtime did not allocate as the foreign addresses its words are (G's ruling,
+        // 2026-10-19: crypto/x509's windows chain reads, unsafe.Slice(chainCtx.Chains, n)) and keep the runtime's
+        // own words in a shadow. The slice reads the n words (see builtin.NativeArrayPointer).
+        if (NativePointerElement<T>.Is)
+            return builtin.NativeArrayPointer<T>(ptr.NativeAddress, n).slice(0, n, n);
+
         return slice<T>.OverNativeMemory(ptr.NativeAddress, n);
+    }
 
     // A pointer INTO managed array/slice storage (`unsafe.Slice(&s[i], n)`) yields a window that
     // ALIASES that storage, exactly as Go's unsafe.Slice does: writes through the rebuilt slice must
     // reach the original backing. The snapshot below silently swallowed them — crypto/subtle's
     // xorBytes rebuilds dst/x/y from `&dst[0]` and writes every XOR result through dst, so XORBytes
     // wrote NOTHING (its whole test matrix compared dst against its untouched 0xdd fill).
-    if (ptr.TryGetElementWindow(n, out slice<T> window))
+    if (ElementWindow.TryGet(ptr, n, out slice<T> window))
         return window;
 
     // No aliasable managed storage — a heap box, a struct field, or a REINTERPRETING pointer over a
@@ -1055,6 +1071,11 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
     // result do not reach the source.
     fixed (T* pointer = &ptr.Value)
         return new slice<T>(new ReadOnlySpan<T>(pointer, n));
+}
+
+// Whether T is a Go pointer, ж<E>: a pure type query, decided once per T.
+private static class NativePointerElement<T> {
+    internal static readonly bool Is = typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(ж<>);
 }
 
 // SliceData returns a pointer to the underlying array of the argument
@@ -1088,7 +1109,7 @@ public static ж<T> SliceData<T>(slice<T> slice) {
     //      threw InvalidOperationException instead of reading the element.
     //
     // The element reference also makes the round trip ALIAS rather than snapshot: unsafe.Slice's
-    // TryGetElementWindow arm rebuilds a window over the original backing, so a write through the
+    // ElementWindow.TryGet arm rebuilds a window over the original backing, so a write through the
     // rebuilt slice reaches the source — Go's semantics. Guarded by the UnsafeStringEmpty and
     // UnsafeSliceDataAliasing behavioral tests.
     //
@@ -1118,7 +1139,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
     int n = SpanLength<byte, TLen>(len, "unsafe.String");
 
     if (n < 0)
-        throw go.golib.RuntimeErrorPanic.RuntimeRaised("len is negative");
+        throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.String: len out of range");
 
     // A zero length reads no bytes, so the pointer is never dereferenced — in Go, and now here
     // either. SliceData over a non-nil slice of capacity 0 is documented to return a NON-nil
@@ -1133,7 +1154,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
 
     // Only a nil pointer with a NON-zero length is the panic Go specifies.
     if (ptr == nil)
-        throw go.golib.RuntimeErrorPanic.RuntimeRaised("ptr is nil and len is not zero");
+        throw go.golib.RuntimeErrorPanic.ErrorString("unsafe.String: ptr is nil and len is not zero");
 
     // A pointer that ALIASES a native address reads its n bytes from that address (see Slice above).
     // @string has no native-backed representation — its header is (byte[], offset, length) — so this
@@ -1149,7 +1170,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
     // prohibition — "the bytes passed to String must not be modified as long as the returned string
     // value exists" — and a prohibition is only meaningful because the aliasing is OBSERVABLE.
     //
-    // This is the exact mirror of Slice's element-window arm above (same TryGetElementWindow, same
+    // This is the exact mirror of Slice's element-window arm above (same ElementWindow.TryGet, same
     // absolute-index bounds), and until it existed unsafe.String was the ONE member of the family
     // that snapshotted: Slice, SliceData and StringData all alias, and SliceData's own note already
     // claimed "the round trip through unsafe.String/unsafe.Slice now ALIASES instead of
@@ -1169,7 +1190,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
     // length), so aliasing costs +0 B per string. Guarded by GolibTests' UnsafeStringAliasingTests
     // — four aliasing arms and four invariance arms, the latter pinning that the zero-length
     // early-out above still precedes any dereference and that the snapshot arm below survives.
-    if (ptr.TryGetElementWindow(n, out slice<byte> window))
+    if (ElementWindow.TryGet(ptr, n, out slice<byte> window))
         return @string.AliasOf(window);
 
     // No aliasable managed storage — a heap box, a struct field, or a REINTERPRETING pointer over a

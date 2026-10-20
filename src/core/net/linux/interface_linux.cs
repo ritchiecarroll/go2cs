@@ -49,13 +49,14 @@ loop:
                 }
             }
         }
-
 continue_loop:;
     }
 break_loop:;
     return (ift, default!);
 }
 
+// See linux/if_arp.h.
+// Note that Linux doesn't support IPv4 over IPv6 tunneling.
 internal static UntypedInt sysARPHardwareIPv4IPv4 => 768; // IPv4 over IPv4 tunneling
 internal static UntypedInt sysARPHardwareIPv6IPv6 => 769; // IPv6 over IPv6 tunneling
 internal static UntypedInt sysARPHardwareIPv6IPv4 => 776; // IPv6 over IPv4 tunneling
@@ -67,25 +68,22 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
     foreach (var (_, a) in attrs) {
         var exprᴛ1 = a.Attr.Type;
         if (exprᴛ1 == syscall.IFLA_ADDRESS) {
+            // We never return any /32 or /128 IP address
+            // prefix on any IP tunnel interface as the
+            // hardware address.
             var exprᴛ2 = len(a.Value);
             if (exprᴛ2 == IPv4len) {
                 var exprᴛ3 = ifim.Type;
                 if (exprᴛ3 == sysARPHardwareIPv4IPv4 || exprᴛ3 == sysARPHardwareGREIPv4 || exprᴛ3 == sysARPHardwareIPv6IPv4) {
                     continue;
                 }
-
             }
             else if (exprᴛ2 == IPv6len) {
                 var exprᴛ4 = ifim.Type;
                 if (exprᴛ4 == sysARPHardwareIPv6IPv6 || exprᴛ4 == sysARPHardwareGREIPv6) {
                     continue;
                 }
-
             }
-
-// We never return any /32 or /128 IP address
-// prefix on any IP tunnel interface as the
-// hardware address.
             bool nonzero = default!;
             foreach (var (_, b) in a.Value) {
                 if (b != 0) {
@@ -98,34 +96,33 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
             }
         }
         else if (exprᴛ1 == syscall.IFLA_IFNAME) {
-            ifi.Value.Name = ((@string)(a.Value.slice(0, len(a.Value) - 1)));
+            ifi.Value.Name = (@string)(a.Value.slice(0, len(a.Value) - 1));
         }
         else if (exprᴛ1 == syscall.IFLA_MTU) {
             ifi.Value.MTU = (nint)(~Ꮡ(a.Value[..4], 0).Reinterpret<byte, uint32>());
         }
-
     }
     return ifi;
 }
 
 internal static Flags linkFlags(uint32 rawFlags) {
     Flags f = default!;
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_UP) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_UP) != 0) {
         f |= (Flags)(FlagUp);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_RUNNING) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_RUNNING) != 0) {
         f |= (Flags)(FlagRunning);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_BROADCAST) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_BROADCAST) != 0) {
         f |= (Flags)(FlagBroadcast);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_LOOPBACK) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_LOOPBACK) != 0) {
         f |= (Flags)(FlagLoopback);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_POINTOPOINT) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_POINTOPOINT) != 0) {
         f |= (Flags)(FlagPointToPoint);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_MULTICAST) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_MULTICAST) != 0) {
         f |= (Flags)(FlagMulticast);
     }
     return f;
@@ -176,7 +173,6 @@ loop:
                 }
             }
         }
-
 continue_loop:;
     }
 break_loop:;
@@ -207,7 +203,6 @@ internal static ΔAddr newAddr(ref syscall.IfAddrmsg ifam, slice<syscall.Netlink
             copy((~ifa).IP, a.Value[..]);
             return new IPNetжΔAddr(ifa);
         }
-
     }
     return default!;
 }
@@ -245,13 +240,12 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
                 continue;
             }
             switch (ᐧ) {
-            case {} when l[0] != (rune)' ' && l[0] != (rune)'\t': {
+            case {} when l[0] != (rune)' ' && l[0] != (rune)'\t': { // new interface line
                 name = f[1];
                 break;
             }
             case {} when len(f[0]) is 8: {
                 if (Ꮡifi == nil || name == ifi.Name) {
-                    // new interface line
                     // The Linux kernel puts the IP
                     // address in /proc/net/igmp in native
                     // endianness.
@@ -259,12 +253,11 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
                         (b[iΔ1 / 2], _) = xtoi2(f[0].slice(iΔ1, iΔ1 + 2), 0);
                     }
                     var i = ~Ꮡ(b[..4], 0).Reinterpret<byte, uint32>();
-                    var ifma = Ꮡ(new IPAddr(IP: IPv4((byte)((i >> (int)(24))), (byte)((i >> (int)(16))), (byte)((i >> (int)(8))), (byte)i)));
+                    var ifma = Ꮡ(new IPAddr(IP: IPv4((byte)(i >> 24), (byte)(i >> 16), (byte)(i >> 8), (byte)i)));
                     ifmat = append(ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));
                 }
                 break;
             }}
-
         }
         return ifmat;
     }

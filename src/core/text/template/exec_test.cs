@@ -141,9 +141,6 @@ public static @string Error(this ж<W> Ꮡw) {
 internal static ж<I> ᏑsiVal = new StandardBox<I>(((I)new S(new @string[]{"a"u8, "b"u8}.slice())));
 internal static ref I siVal => ref ᏑsiVal.ValueSlot;
 
-// leave V2 as nil
-// leave W2 as nil
-// "x" is the value of .X
 internal static ж<T> tVal;
 internal static void initᴛtVal() {
     var (ᴛ1, ᴛ2) = New("x"u8).Parse("test template"u8);
@@ -155,9 +152,9 @@ internal static void initᴛtVal() {
     S: "xyz"u8,
     U: Ꮡ(new U("v"u8)),
     V0: new V(6666),
-    V1: Ꮡ(new V(7777)),
+    V1: Ꮡ(new V(7777)), // leave V2 as nil
     W0: new W(888),
-    W1: Ꮡ(new W(999)),
+    W1: Ꮡ(new W(999)), // leave W2 as nil
     SI: new nint[]{3, 4, 5}.slice(),
     SICap: new slice<nint>(5, 10),
     AI: new nint[]{3, 4, 5}.array(),
@@ -206,7 +203,7 @@ internal static void initᴛtVal() {
     },
     TooManyReturnCountFunc: () => ("", default!, 0),
     InvalidReturnTypeFunc: () => ("", false),
-    Tmpl: Must(ᴛ1, ᴛ2)
+    Tmpl: Must(ᴛ1, ᴛ2) // "x" is the value of .X
 ));
 }
 
@@ -315,65 +312,7 @@ internal partial struct execTest {
 // of the max int boundary.
 // We do it this way so the test doesn't depend on ints being 32 bits.
 internal static @string bigInt = fmt.Sprintf("0x%x"u8, (nint)(((nint)1).Lsh((nuint)(reflect.TypeFor<nint>().Bits() - 1)) - 1));
-
 internal static @string bigUint = fmt.Sprintf("0x%x"u8, (nuint)(((nuint)1).Lsh((nuint)(reflect.TypeFor<nint>().Bits() - 1))));
-
-// Trivial cases.
-// Ideal constants.
-// Fields of structs.
-// Fields on maps.
-// Dots of all kinds to test basic evaluation.
-// Variables.
-// Type with String method.
-// Type with Error method.
-// Pointers.
-// Empty interfaces holding values.
-// Edge cases with <no value> with an interface value
-// Issue 31810: Parenthesized first element of pipeline with arguments.
-// See also TestIssue31810.
-// This is fine.
-// Method calls.
-// Function call builtin.
-// Erroneous function calls (check args).
-// Pipelines.
-// Nil values aren't missing arguments.
-// Parenthesized expressions
-// Parenthesized expressions with field accesses
-// If.
-// Print etc.
-// HTML.
-// JavaScript.
-// URL query.
-// Booleans
-// Indexing.
-// Slicing.
-// Len.
-// With.
-// Range.
-// Cute examples.
-// Error handling.
-// Numbers
-// Fixed bugs.
-// Must separate dot and receiver; otherwise args are evaluated with dot set to variable.
-// Do not loop endlessly in indirect for non-empty interfaces.
-// The bug appears with *interface only; looped forever.
-// Was taking address of interface field, so method set was empty.
-// Struct values were not legal in with - mere oversight.
-// Nil interface values in if.
-// Stringer.
-// Args need to be indirected and dereferenced sometimes.
-// Legal parse but illegal execution: non-function should have no arguments.
-// Pipelined arg was not being type-checked.
-// A bug was introduced that broke map lookups for lower-case names.
-// Field chain starting with function did not work.
-// Dereferencing nil pointer while evaluating function arguments should not panic. Issue 7333.
-// 0xef gave constant type float64. Issue 8622.
-// Chained nodes did not work as arguments. Issue 8473.
-// Didn't protect against nil or literal values in field chains.
-// Didn't call validateType on function results. Issue 10800.
-// Variadic function corner cases. Issue 10946.
-// More variadic function corner cases. Some runes would get evaluated
-// as constant floats instead of ints. Issue 34483.
 
     partial struct Δtype /*dyn*/ {
         internal nint a;
@@ -381,9 +320,12 @@ internal static @string bigUint = fmt.Sprintf("0x%x"u8, (nuint)(((nuint)1).Lsh((
     }
 internal static slice<execTest> execTests;
 internal static void initᴛexecTests() { execTests = new execTest[]{
+    // Trivial cases.
     new("empty"u8, ""u8, ""u8, default!, true),
     new("text"u8, "some text"u8, "some text"u8, default!, true),
     new("nil action"u8, "{{nil}}"u8, ""u8, default!, false),
+
+    // Ideal constants.
     new("ideal int"u8, "{{typeOf 3}}"u8, "int"u8, (nint)(0), true),
     new("ideal float"u8, "{{typeOf 1.0}}"u8, "float64"u8, (nint)(0), true),
     new("ideal exp float"u8, "{{typeOf 1e1}}"u8, "float64"u8, (nint)(0), true),
@@ -391,15 +333,21 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("ideal int"u8, "{{typeOf "u8 + bigInt + "}}"u8, "int"u8, (nint)(0), true),
     new("ideal too big"u8, "{{typeOf "u8 + bigUint + "}}"u8, ""u8, (nint)(0), false),
     new("ideal nil without type"u8, "{{nil}}"u8, ""u8, (nint)(0), false),
+
+    // Fields of structs.
     new(".X"u8, "-{{.X}}-"u8, "-x-"u8, tVal.OrTypedNil(), true),
     new(".U.V"u8, "-{{.U.V}}-"u8, "-v-"u8, tVal.OrTypedNil(), true),
     new(".unexported"u8, "{{.unexported}}"u8, ""u8, tVal.OrTypedNil(), false),
+
+    // Fields on maps.
     new("map .one"u8, "{{.MSI.one}}"u8, "1"u8, tVal.OrTypedNil(), true),
     new("map .two"u8, "{{.MSI.two}}"u8, "2"u8, tVal.OrTypedNil(), true),
     new("map .NO"u8, "{{.MSI.NO}}"u8, "<no value>"u8, tVal.OrTypedNil(), true),
     new("map .one interface"u8, "{{.MXI.one}}"u8, "1"u8, tVal.OrTypedNil(), true),
     new("map .WRONG args"u8, "{{.MSI.one 1}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("map .WRONG type"u8, "{{.MII.one}}"u8, ""u8, tVal.OrTypedNil(), false),
+
+    // Dots of all kinds to test basic evaluation.
     new("dot int"u8, "<{{.}}>"u8, "<13>"u8, (nint)(13), true),
     new("dot uint"u8, "<{{.}}>"u8, "<14>"u8, (nuint)14, true),
     new("dot float"u8, "<{{.}}>"u8, "<15.1>"u8, 15.1D, true),
@@ -409,6 +357,8 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("dot slice"u8, "<{{.}}>"u8, "<[-1 -2 -3]>"u8, new nint[]{-1, -2, -3}.slice(), true),
     new("dot map"u8, "<{{.}}>"u8, "<map[two:22]>"u8, new map<@string, nint>{["two"u8] = 22}, true),
     new("dot struct"u8, "<{{.}}>"u8, "<{7 seven}>"u8, new Δtype(7, "seven"u8), true),
+
+    // Variables.
     new("$ int"u8, "{{$}}"u8, "123"u8, (nint)(123), true),
     new("$.I"u8, "{{$.I}}"u8, "17"u8, tVal.OrTypedNil(), true),
     new("$.U.V"u8, "{{$.U.V}}"u8, "v"u8, tVal.OrTypedNil(), true),
@@ -420,28 +370,43 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("nested assignment changes the last declaration"u8,
         "{{$x := 1}}{{if true}}{{$x := 2}}{{if true}}{{$x = 3}}{{end}}{{end}}{{$x}}"u8,
         "1"u8, tVal.OrTypedNil(), true),
+
+    // Type with String method.
     new("V{6666}.String()"u8, "-{{.V0}}-"u8, "-<6666>-"u8, tVal.OrTypedNil(), true),
     new("&V{7777}.String()"u8, "-{{.V1}}-"u8, "-<7777>-"u8, tVal.OrTypedNil(), true),
     new("(*V)(nil).String()"u8, "-{{.V2}}-"u8, "-nilV-"u8, tVal.OrTypedNil(), true),
+
+    // Type with Error method.
     new("W{888}.Error()"u8, "-{{.W0}}-"u8, "-[888]-"u8, tVal.OrTypedNil(), true),
     new("&W{999}.Error()"u8, "-{{.W1}}-"u8, "-[999]-"u8, tVal.OrTypedNil(), true),
     new("(*W)(nil).Error()"u8, "-{{.W2}}-"u8, "-nilW-"u8, tVal.OrTypedNil(), true),
+
+    // Pointers.
     new("*int"u8, "{{.PI}}"u8, "23"u8, tVal.OrTypedNil(), true),
     new("*string"u8, "{{.PS}}"u8, "a string"u8, tVal.OrTypedNil(), true),
     new("*[]int"u8, "{{.PSI}}"u8, "[21 22 23]"u8, tVal.OrTypedNil(), true),
     new("*[]int[1]"u8, "{{index .PSI 1}}"u8, "22"u8, tVal.OrTypedNil(), true),
     new("NIL"u8, "{{.NIL}}"u8, "<nil>"u8, tVal.OrTypedNil(), true),
+
+    // Empty interfaces holding values.
     new("empty nil"u8, "{{.Empty0}}"u8, "<no value>"u8, tVal.OrTypedNil(), true),
     new("empty with int"u8, "{{.Empty1}}"u8, "3"u8, tVal.OrTypedNil(), true),
     new("empty with string"u8, "{{.Empty2}}"u8, "empty2"u8, tVal.OrTypedNil(), true),
     new("empty with slice"u8, "{{.Empty3}}"u8, "[7 8]"u8, tVal.OrTypedNil(), true),
     new("empty with struct"u8, "{{.Empty4}}"u8, "{UinEmpty}"u8, tVal.OrTypedNil(), true),
     new("empty with struct, field"u8, "{{.Empty4.V}}"u8, "UinEmpty"u8, tVal.OrTypedNil(), true),
+
+    // Edge cases with <no value> with an interface value
     new("field on interface"u8, "{{.foo}}"u8, "<no value>"u8, default!, true),
     new("field on parenthesized interface"u8, "{{(.).foo}}"u8, "<no value>"u8, default!, true),
+
+    // Issue 31810: Parenthesized first element of pipeline with arguments.
+    // See also TestIssue31810.
     new("unparenthesized non-function"u8, "{{1 2}}"u8, ""u8, default!, false),
     new("parenthesized non-function"u8, "{{(1) 2}}"u8, ""u8, default!, false),
-    new("parenthesized non-function with no args"u8, "{{(1)}}"u8, "1"u8, default!, true),
+    new("parenthesized non-function with no args"u8, "{{(1)}}"u8, "1"u8, default!, true), // This is fine.
+
+    // Method calls.
     new(".Method0"u8, "-{{.Method0}}-"u8, "-M0-"u8, tVal.OrTypedNil(), true),
     new(".Method1(1234)"u8, "-{{.Method1 1234}}-"u8, "-1234-"u8, tVal.OrTypedNil(), true),
     new(".Method1(.I)"u8, "-{{.Method1 .I}}-"u8, "-17-"u8, tVal.OrTypedNil(), true),
@@ -464,6 +429,8 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new(".NilOKFunc nil"u8, "{{call .NilOKFunc nil}}"u8, "true"u8, tVal.OrTypedNil(), true),
     new("method on nil value from slice"u8, "-{{range .}}{{.Method1 1234}}{{end}}-"u8, "-1234-"u8, tSliceOfNil, true),
     new("method on typed nil interface value"u8, "{{.NonEmptyInterfaceTypedNil.Method0}}"u8, "M0"u8, tVal.OrTypedNil(), true),
+
+    // Function call builtin.
     new(".BinaryFunc"u8, "{{call .BinaryFunc `1` `2`}}"u8, "[1=2]"u8, tVal.OrTypedNil(), true),
     new(".VariadicFunc0"u8, "{{call .VariadicFunc}}"u8, "<>"u8, tVal.OrTypedNil(), true),
     new(".VariadicFunc2"u8, "{{call .VariadicFunc `he` `llo`}}"u8, "<he+llo>"u8, tVal.OrTypedNil(), true),
@@ -476,6 +443,8 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("empty call"u8, "{{call}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("empty call after pipe valid"u8, "{{.ErrFunc | call}}"u8, "bla"u8, tVal.OrTypedNil(), true),
     new("empty call after pipe invalid"u8, "{{1 | call}}"u8, ""u8, tVal.OrTypedNil(), false),
+
+    // Erroneous function calls (check args).
     new(".BinaryFuncTooFew"u8, "{{call .BinaryFunc `1`}}"u8, ""u8, tVal.OrTypedNil(), false),
     new(".BinaryFuncTooMany"u8, "{{call .BinaryFunc `1` `2` `3`}}"u8, ""u8, tVal.OrTypedNil(), false),
     new(".BinaryFuncBad0"u8, "{{call .BinaryFunc 1 3}}"u8, ""u8, tVal.OrTypedNil(), false),
@@ -484,16 +453,26 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new(".VariadicFuncIntBad0"u8, "{{call .VariadicFuncInt}}"u8, ""u8, tVal.OrTypedNil(), false),
     new(".VariadicFuncIntBad`"u8, "{{call .VariadicFuncInt `x`}}"u8, ""u8, tVal.OrTypedNil(), false),
     new(".VariadicFuncNilBad"u8, "{{call .VariadicFunc nil}}"u8, ""u8, tVal.OrTypedNil(), false),
+
+    // Pipelines.
     new("pipeline"u8, "-{{.Method0 | .Method2 .U16}}-"u8, "-Method2: 16 M0-"u8, tVal.OrTypedNil(), true),
     new("pipeline func"u8, "-{{call .VariadicFunc `llo` | call .VariadicFunc `he` }}-"u8, "-<he+<llo>>-"u8, tVal.OrTypedNil(), true),
+
+    // Nil values aren't missing arguments.
     new("nil pipeline"u8, "{{ .Empty0 | call .NilOKFunc }}"u8, "true"u8, tVal.OrTypedNil(), true),
     new("nil call arg"u8, "{{ call .NilOKFunc .Empty0 }}"u8, "true"u8, tVal.OrTypedNil(), true),
     new("bad nil pipeline"u8, "{{ .Empty0 | .VariadicFunc }}"u8, ""u8, tVal.OrTypedNil(), false),
+
+    // Parenthesized expressions
     new("parens in pipeline"u8, "{{printf `%d %d %d` (1) (2 | add 3) (add 4 (add 5 6))}}"u8, "1 5 15"u8, tVal.OrTypedNil(), true),
+
+    // Parenthesized expressions with field accesses
     new("parens: $ in paren"u8, "{{($).X}}"u8, "x"u8, tVal.OrTypedNil(), true),
     new("parens: $.GetU in paren"u8, "{{($.GetU).V}}"u8, "v"u8, tVal.OrTypedNil(), true),
     new("parens: $ in paren in pipe"u8, "{{($ | echo).X}}"u8, "x"u8, tVal.OrTypedNil(), true),
     new("parens: spaces and args"u8, @"{{(makemap ""up"" ""down"" ""left"" ""right"").left}}"u8, "right"u8, tVal.OrTypedNil(), true),
+
+    // If.
     new("if true"u8, "{{if true}}TRUE{{end}}"u8, "TRUE"u8, tVal.OrTypedNil(), true),
     new("if false"u8, "{{if false}}TRUE{{else}}FALSE{{end}}"u8, "FALSE"u8, tVal.OrTypedNil(), true),
     new("if nil"u8, "{{if nil}}TRUE{{end}}"u8, ""u8, tVal.OrTypedNil(), false),
@@ -516,6 +495,8 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("if $x with $x int"u8, "{{if $x := true}}{{with $x := .I}}{{$x}},{{end}}{{$x}}{{end}}"u8, "17,true"u8, tVal.OrTypedNil(), true),
     new("if else if"u8, "{{if false}}FALSE{{else if true}}TRUE{{end}}"u8, "TRUE"u8, tVal.OrTypedNil(), true),
     new("if else chain"u8, "{{if eq 1 3}}1{{else if eq 2 3}}2{{else if eq 3 3}}3{{end}}"u8, "3"u8, tVal.OrTypedNil(), true),
+
+    // Print etc.
     new("print"u8, @"{{print ""hello, print""}}"u8, "hello, print"u8, tVal.OrTypedNil(), true),
     new("print 123"u8, @"{{print 1 2 3}}"u8, "1 2 3"u8, tVal.OrTypedNil(), true),
     new("print nil"u8, @"{{print nil}}"u8, "<nil>"u8, tVal.OrTypedNil(), true),
@@ -530,6 +511,8 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("printf dot"u8, @"{{with .I}}{{printf ""%d"" .}}{{end}}"u8, "17"u8, tVal.OrTypedNil(), true),
     new("printf var"u8, @"{{with $x := .I}}{{printf ""%d"" $x}}{{end}}"u8, "17"u8, tVal.OrTypedNil(), true),
     new("printf lots"u8, @"{{printf ""%d %s %g %s"" 127 ""hello"" 7-3i .Method0}}"u8, "127 hello (7-3i) M0"u8, tVal.OrTypedNil(), true),
+
+    // HTML.
     new("html"u8, @"{{html ""<script>alert(\""XSS\"");</script>""}}"u8,
         "&lt;script&gt;alert(&#34;XSS&#34;);&lt;/script&gt;"u8, default!, true),
     new("html pipeline"u8, @"{{printf ""<script>alert(\""XSS\"");</script>"" | html}}"u8,
@@ -537,8 +520,14 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("html"u8, @"{{html .PS}}"u8, "a string"u8, tVal.OrTypedNil(), true),
     new("html typed nil"u8, @"{{html .NIL}}"u8, "&lt;nil&gt;"u8, tVal.OrTypedNil(), true),
     new("html untyped nil"u8, @"{{html .Empty0}}"u8, "&lt;no value&gt;"u8, tVal.OrTypedNil(), true),
+
+    // JavaScript.
     new("js"u8, @"{{js .}}"u8, @"It\'d be nice."u8, (@string)@"It'd be nice."u8, true),
+
+    // URL query.
     new("urlquery"u8, @"{{""http://www.example.org/""|urlquery}}"u8, "http%3A%2F%2Fwww.example.org%2F"u8, default!, true),
+
+    // Booleans
     new("not"u8, "{{not true}} {{not false}}"u8, "false true"u8, default!, true),
     new("and"u8, "{{and false 0}} {{and 1 0}} {{and 0 true}} {{and 1 1}}"u8, "false 0 0 1"u8, default!, true),
     new("or"u8, "{{or 0 0}} {{or 1 0}} {{or 0 true}} {{or 1 1}}"u8, "0 1 true 1"u8, default!, true),
@@ -555,6 +544,8 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("boolean if"u8, "{{if and true 1 `hi`}}TRUE{{else}}FALSE{{end}}"u8, "TRUE"u8, tVal.OrTypedNil(), true),
     new("boolean if not"u8, "{{if and true 1 `hi` | not}}TRUE{{else}}FALSE{{end}}"u8, "FALSE"u8, default!, true),
     new("boolean if pipe"u8, "{{if true | not | and 1}}TRUE{{else}}FALSE{{end}}"u8, "FALSE"u8, default!, true),
+
+    // Indexing.
     new("slice[0]"u8, "{{index .SI 0}}"u8, "3"u8, tVal.OrTypedNil(), true),
     new("slice[1]"u8, "{{index .SI 1}}"u8, "4"u8, tVal.OrTypedNil(), true),
     new("slice[HUGE]"u8, "{{index .SI 10}}"u8, ""u8, tVal.OrTypedNil(), false),
@@ -574,6 +565,8 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("map MI8S"u8, "{{index .MI8S 3}}"u8, "i83"u8, tVal.OrTypedNil(), true),
     new("map MUI8S"u8, "{{index .MUI8S 2}}"u8, "u82"u8, tVal.OrTypedNil(), true),
     new("index of an interface field"u8, "{{index .Empty3 0}}"u8, "7"u8, tVal.OrTypedNil(), true),
+
+    // Slicing.
     new("slice[:]"u8, "{{slice .SI}}"u8, "[3 4 5]"u8, tVal.OrTypedNil(), true),
     new("slice[1:]"u8, "{{slice .SI 1}}"u8, "[4 5]"u8, tVal.OrTypedNil(), true),
     new("slice[1:2]"u8, "{{slice .SI 1 2}}"u8, "[4]"u8, tVal.OrTypedNil(), true),
@@ -598,11 +591,15 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("out of range"u8, "{{slice .S 1 5}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("3-index slice of string"u8, "{{slice .S 1 2 2}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("slice of an interface field"u8, "{{slice .Empty3 0 1}}"u8, "[7]"u8, tVal.OrTypedNil(), true),
+
+    // Len.
     new("slice"u8, "{{len .SI}}"u8, "3"u8, tVal.OrTypedNil(), true),
     new("map"u8, "{{len .MSI }}"u8, "3"u8, tVal.OrTypedNil(), true),
     new("len of int"u8, "{{len 3}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("len of nothing"u8, "{{len .Empty0}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("len of an interface field"u8, "{{len .Empty3}}"u8, "2"u8, tVal.OrTypedNil(), true),
+
+    // With.
     new("with true"u8, "{{with true}}{{.}}{{end}}"u8, "true"u8, tVal.OrTypedNil(), true),
     new("with false"u8, "{{with false}}{{.}}{{else}}FALSE{{end}}"u8, "FALSE"u8, tVal.OrTypedNil(), true),
     new("with 1"u8, "{{with 1}}{{.}}{{else}}ZERO{{end}}"u8, "1"u8, tVal.OrTypedNil(), true),
@@ -624,6 +621,8 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("with on typed nil interface value"u8, "{{with .NonEmptyInterfaceTypedNil}}TRUE{{ end }}"u8, ""u8, tVal.OrTypedNil(), true),
     new("with else with"u8, "{{with 0}}{{.}}{{else with true}}{{.}}{{end}}"u8, "true"u8, tVal.OrTypedNil(), true),
     new("with else with chain"u8, "{{with 0}}{{.}}{{else with false}}{{.}}{{else with `notempty`}}{{.}}{{end}}"u8, "notempty"u8, tVal.OrTypedNil(), true),
+
+    // Range.
     new("range []int"u8, "{{range .SI}}-{{.}}-{{end}}"u8, "-3--4--5-"u8, tVal.OrTypedNil(), true),
     new("range empty no else"u8, "{{range .SIEmpty}}-{{.}}-{{end}}"u8, ""u8, tVal.OrTypedNil(), true),
     new("range []int else"u8, "{{range .SI}}-{{.}}-{{else}}EMPTY{{end}}"u8, "-3--4--5-"u8, tVal.OrTypedNil(), true),
@@ -670,10 +669,16 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("range uintptr"u8, rangeTestInt, rangeTestData<uintptr>(), (uintptr)5, true),
     new("range uintptr(0)"u8, @"{{range $v := .}}{{print $v}}{{else}}empty{{end}}"u8, "empty"u8, (uintptr)0, true),
     new("range 5"u8, @"{{range $v := 5}}{{printf ""%T%d"" $v $v}}{{end}}"u8, rangeTestData<nint>(), default!, true),
+
+    // Cute examples.
     new("or as if true"u8, @"{{or .SI ""slice is empty""}}"u8, "[3 4 5]"u8, tVal.OrTypedNil(), true),
     new("or as if false"u8, @"{{or .SIEmpty ""slice is empty""}}"u8, "slice is empty"u8, tVal.OrTypedNil(), true),
+
+    // Error handling.
     new("error method, error"u8, "{{.MyError true}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("error method, no error"u8, "{{.MyError false}}"u8, "false"u8, tVal.OrTypedNil(), true),
+
+    // Numbers
     new("decimal"u8, "{{print 1234}}"u8, "1234"u8, tVal.OrTypedNil(), true),
     new("decimal _"u8, "{{print 12_34}}"u8, "1234"u8, tVal.OrTypedNil(), true),
     new("binary"u8, "{{print 0b101}}"u8, "5"u8, tVal.OrTypedNil(), true),
@@ -693,34 +698,54 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("HEX float"u8, "{{print +0X1.EP+2}}"u8, "7.5"u8, tVal.OrTypedNil(), true),
     new("print multi"u8, "{{print 1_2_3_4 7.5_00_00_00}}"u8, "1234 7.5"u8, tVal.OrTypedNil(), true),
     new("print multi2"u8, "{{print 1234 0x0_1.e_0p+02}}"u8, "1234 7.5"u8, tVal.OrTypedNil(), true),
+
+    // Fixed bugs.
+    // Must separate dot and receiver; otherwise args are evaluated with dot set to variable.
     new("bug0"u8, "{{range .MSIone}}{{if $.Method1 .}}X{{end}}{{end}}"u8, "X"u8, tVal.OrTypedNil(), true),
+    // Do not loop endlessly in indirect for non-empty interfaces.
+    // The bug appears with *interface only; looped forever.
     new("bug1"u8, "{{.Method0}}"u8, "M0"u8, ᏑiVal, true),
+    // Was taking address of interface field, so method set was empty.
     new("bug2"u8, "{{$.NonEmptyInterface.Method0}}"u8, "M0"u8, tVal.OrTypedNil(), true),
+    // Struct values were not legal in with - mere oversight.
     new("bug3"u8, "{{with $}}{{.Method0}}{{end}}"u8, "M0"u8, tVal.OrTypedNil(), true),
+    // Nil interface values in if.
     new("bug4"u8, "{{if .Empty0}}non-nil{{else}}nil{{end}}"u8, "nil"u8, tVal.OrTypedNil(), true),
+    // Stringer.
     new("bug5"u8, "{{.Str}}"u8, "foozle"u8, tVal.OrTypedNil(), true),
     new("bug5a"u8, "{{.Err}}"u8, "erroozle"u8, tVal.OrTypedNil(), true),
+    // Args need to be indirected and dereferenced sometimes.
     new("bug6a"u8, "{{vfunc .V0 .V1}}"u8, "vfunc"u8, tVal.OrTypedNil(), true),
     new("bug6b"u8, "{{vfunc .V0 .V0}}"u8, "vfunc"u8, tVal.OrTypedNil(), true),
     new("bug6c"u8, "{{vfunc .V1 .V0}}"u8, "vfunc"u8, tVal.OrTypedNil(), true),
     new("bug6d"u8, "{{vfunc .V1 .V1}}"u8, "vfunc"u8, tVal.OrTypedNil(), true),
+    // Legal parse but illegal execution: non-function should have no arguments.
     new("bug7a"u8, "{{3 2}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("bug7b"u8, "{{$x := 1}}{{$x 2}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("bug7c"u8, "{{$x := 1}}{{3 | $x}}"u8, ""u8, tVal.OrTypedNil(), false),
+    // Pipelined arg was not being type-checked.
     new("bug8a"u8, "{{3|oneArg}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("bug8b"u8, "{{4|dddArg 3}}"u8, ""u8, tVal.OrTypedNil(), false),
+    // A bug was introduced that broke map lookups for lower-case names.
     new("bug9"u8, "{{.cause}}"u8, "neglect"u8, new map<@string, @string>{["cause"u8] = "neglect"u8}, true),
+    // Field chain starting with function did not work.
     new("bug10"u8, "{{mapOfThree.three}}-{{(mapOfThree).three}}"u8, "3-3"u8, (nint)(0), true),
+    // Dereferencing nil pointer while evaluating function arguments should not panic. Issue 7333.
     new("bug11"u8, "{{valueString .PS}}"u8, ""u8, new T(nil), false),
+    // 0xef gave constant type float64. Issue 8622.
     new("bug12xe"u8, "{{printf `%T` 0xef}}"u8, "int"u8, new T(nil), true),
     new("bug12xE"u8, "{{printf `%T` 0xEE}}"u8, "int"u8, new T(nil), true),
     new("bug12Xe"u8, "{{printf `%T` 0Xef}}"u8, "int"u8, new T(nil), true),
     new("bug12XE"u8, "{{printf `%T` 0XEE}}"u8, "int"u8, new T(nil), true),
+    // Chained nodes did not work as arguments. Issue 8473.
     new("bug13"u8, "{{print (.Copy).I}}"u8, "17"u8, tVal.OrTypedNil(), true),
+    // Didn't protect against nil or literal values in field chains.
     new("bug14a"u8, "{{(nil).True}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("bug14b"u8, "{{$x := nil}}{{$x.anything}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("bug14c"u8, @"{{$x := (1.0)}}{{$y := (""hello"")}}{{$x.anything}}{{$y.true}}"u8, ""u8, tVal.OrTypedNil(), false),
+    // Didn't call validateType on function results. Issue 10800.
     new("bug15"u8, "{{valueString returnInt}}"u8, ""u8, tVal.OrTypedNil(), false),
+    // Variadic function corner cases. Issue 10946.
     new("bug16a"u8, "{{true|printf}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("bug16b"u8, "{{1|printf}}"u8, ""u8, tVal.OrTypedNil(), false),
     new("bug16c"u8, "{{1.1|printf}}"u8, ""u8, tVal.OrTypedNil(), false),
@@ -737,6 +762,9 @@ internal static void initᴛexecTests() { execTests = new execTest[]{
     new("bug17c"u8, "{{len .NonEmptyInterfacePtS}}"u8, "2"u8, tVal.OrTypedNil(), true),
     new("bug17d"u8, "{{index .NonEmptyInterfacePtS 0}}"u8, "a"u8, tVal.OrTypedNil(), true),
     new("bug17e"u8, "{{range .NonEmptyInterfacePtS}}-{{.}}-{{end}}"u8, "-a--b-"u8, tVal.OrTypedNil(), true),
+
+    // More variadic function corner cases. Some runes would get evaluated
+    // as constant floats instead of ints. Issue 34483.
     new("bug18a"u8, "{{eq . '.'}}"u8, "true"u8, (rune)'.', true),
     new("bug18b"u8, "{{eq . 'e'}}"u8, "true"u8, (rune)'e', true),
     new("bug18c"u8, "{{eq . 'P'}}"u8, "true"u8, (rune)'P', true),
@@ -920,13 +948,12 @@ internal static void testExecute(slice<execTest> execTests, ж<global::go.text.t
             break;
         }
         case {} when !test.ok && err != default!: {
+            // expected error, got one
             if (debug.Value) {
-                // expected error, got one
                 fmt.Printf("%s: %s\n\t%s\n"u8, test.name, test.input, err);
             }
             break;
         }}
-
         @string result = b.String();
         if (result != test.output) {
             Ꮡt.Errorf("%s: expected\n\t%q\ngot\n\t%q"u8, test.name, test.output, result);
@@ -938,17 +965,12 @@ public static void TestExecute(ж<testing.T> Ꮡt) {
     testExecute(execTests, nil, Ꮡt);
 }
 
-// default
-// same as default
-// distinct
-// same
-// peculiar
 internal static slice<@string> delimPairs = new @string[]{
-    ""u8, ""u8,
-    "{{"u8, "}}"u8,
-    "<<"u8, ">>"u8,
-    "|"u8, "|"u8,
-    "(日)"u8, "(本)"u8
+    ""u8, ""u8, // default
+    "{{"u8, "}}"u8, // same as default
+    "<<"u8, ">>"u8, // distinct
+    "|"u8, "|"u8, // same
+    "(日)"u8, "(本)"u8 // peculiar
 }.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -971,12 +993,10 @@ public static void TestDelims(ж<testing.T> Ꮡt) {
         @string trueLeft = left;
         @string right = delimPairs[i + 1];
         @string trueRight = right;
-        if (left == ""u8) {
-            // default case
+        if (left == ""u8) { // default case
             trueLeft = "{{"u8;
         }
-        if (right == ""u8) {
-            // default case
+        if (right == ""u8) { // default case
             trueRight = "}}"u8;
         }
         text = trueLeft + text + trueRight;
@@ -1032,7 +1052,7 @@ line 3
 {{define "one"}}{{template "two" .}}{{end}}
 {{define "two"}}{{template "three" .}}{{end}}
 {{define "three"}}{{index "hi" $}}{{end}}
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string topˢ = "top"u8;
@@ -1080,8 +1100,10 @@ public static void TestExecError_CustomError(ж<testing.T> Ꮡt) {
         ["err"u8] = (failingFunc).OrTypedNilFunc()
     })).Parse(errˢ);
     var tmpl = Must(ᴛ3, ᴛ4);
+
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), default!);
+
     ref var e = ref heap<ж<CustomError>>(out var Ꮡe);
     if (!errors.As(err, Ꮡe)) {
         Ꮡt.Fatalf("expected custom error; got %s"u8, err);
@@ -1133,7 +1155,7 @@ internal static readonly @string treeTemplate = """
 	]
 	(- end -)
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rootˢ = "root"u8;
@@ -1288,21 +1310,6 @@ internal partial struct cmpTest {
     internal bool ok;
 }
 
-// Mixing signed and unsigned integers.
-// The example that triggered this rule.
-// Uncomparable types but nil is OK.
-// Uncomparable types but nil is OK.
-// Uncomparable types but nil is OK.
-// Uncomparable types but nil is OK.
-// Errors
-// Different types.
-// Different types.
-// Unordered types.
-// Unordered types.
-// Incompatible types.
-// Incompatible types.
-// Uncomparable types.
-// Uncomparable types.
 internal static slice<cmpTest> cmpTests = new cmpTest[]{
     new("eq true true"u8, "true"u8, true),
     new("eq true false"u8, "false"u8, true),
@@ -1372,6 +1379,7 @@ internal static slice<cmpTest> cmpTests = new cmpTest[]{
     new("ge .Uthree .Uthree"u8, "true"u8, true),
     new("ge .Uthree .Ufour"u8, "false"u8, true),
     new("ge .Ufour .Uthree"u8, "true"u8, true),
+    // Mixing signed and unsigned integers.
     new("eq .Uthree .Three"u8, "true"u8, true),
     new("eq .Three .Uthree"u8, "true"u8, true),
     new("le .Uthree .Three"u8, "true"u8, true),
@@ -1397,7 +1405,7 @@ internal static slice<cmpTest> cmpTests = new cmpTest[]{
     new("gt .Uthree .NegOne"u8, "true"u8, true),
     new("ge .NegOne .Uthree"u8, "false"u8, true),
     new("ge .Uthree .NegOne"u8, "true"u8, true),
-    new("eq (index `x` 0) 'x'"u8, "true"u8, true),
+    new("eq (index `x` 0) 'x'"u8, "true"u8, true), // The example that triggered this rule.
     new("eq (index `x` 0) 'y'"u8, "false"u8, true),
     new("eq .V1 .V2"u8, "true"u8, true),
     new("eq .Ptr .Ptr"u8, "true"u8, true),
@@ -1409,18 +1417,19 @@ internal static slice<cmpTest> cmpTests = new cmpTest[]{
     new("eq .NilIface .Iface1"u8, "false"u8, true),
     new("eq .NilIface 0"u8, "false"u8, true),
     new("eq 0 .NilIface"u8, "false"u8, true),
-    new("eq .Map .Map"u8, "true"u8, true),
-    new("eq .Map nil"u8, "true"u8, true),
-    new("eq nil .Map"u8, "true"u8, true),
-    new("eq .Map .NonNilMap"u8, "false"u8, true),
-    new("eq `xy` 1"u8, ""u8, false),
-    new("eq 2 2.0"u8, ""u8, false),
-    new("lt true true"u8, ""u8, false),
-    new("lt 1+0i 1+0i"u8, ""u8, false),
-    new("eq .Ptr 1"u8, ""u8, false),
-    new("eq .Ptr .NegOne"u8, ""u8, false),
-    new("eq .Map .V1"u8, ""u8, false),
-    new("eq .NonNilMap .NonNilMap"u8, ""u8, false)
+    new("eq .Map .Map"u8, "true"u8, true), // Uncomparable types but nil is OK.
+    new("eq .Map nil"u8, "true"u8, true), // Uncomparable types but nil is OK.
+    new("eq nil .Map"u8, "true"u8, true), // Uncomparable types but nil is OK.
+    new("eq .Map .NonNilMap"u8, "false"u8, true), // Uncomparable types but nil is OK.
+    // Errors
+    new("eq `xy` 1"u8, ""u8, false), // Different types.
+    new("eq 2 2.0"u8, ""u8, false), // Different types.
+    new("lt true true"u8, ""u8, false), // Unordered types.
+    new("lt 1+0i 1+0i"u8, ""u8, false), // Unordered types.
+    new("eq .Ptr 1"u8, ""u8, false), // Incompatible types.
+    new("eq .Ptr .NegOne"u8, ""u8, false), // Incompatible types.
+    new("eq .Map .V1"u8, ""u8, false), // Uncomparable types.
+    new("eq .NonNilMap .NonNilMap"u8, ""u8, false) // Uncomparable types.
 }.slice();
 
 internal partial struct TestComparison_type /*dyn*/ {
@@ -1567,8 +1576,6 @@ internal static readonly @string helloXYˢ = "hello, {{.X.Y}}"u8;
 internal static readonly @string fieldXInTypeIntˢ = "field X in type int"u8;
 
 public static void TestExecuteGivesExecError(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // First, a non-execution error shouldn't be an ExecError.
     var (tmpl, err) = New("X"u8).Parse(helloˢ);
     if (err != default!) {
@@ -1683,6 +1690,7 @@ public static void TestBlock(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     {
         var errΔ1 = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), helloˢ); if (errΔ1 != default!) {
@@ -1694,6 +1702,7 @@ public static void TestBlock(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("got %q, want %q"u8, got, want);
         }
     }
+
     buf.Reset();
     {
         var errΔ2 = tmpl2.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), goodbyeˢ); if (errΔ2 != default!) {
@@ -1722,10 +1731,10 @@ public static void TestEvalFieldErrors(ж<testing.T> Ꮡt) {
 
     var tests = new TestEvalFieldErrors_tests[]{
         new(
-            "MissingFieldOnNil"u8, // Check that calling an invalid field on nil pointer
- // prints a field error instead of a distracting nil
- // pointer error. https://golang.org/issue/15125
-
+            // Check that calling an invalid field on nil pointer
+            // prints a field error instead of a distracting nil
+            // pointer error. https://golang.org/issue/15125
+            "MissingFieldOnNil"u8,
             "{{.MissingField}}"u8,
             ((ж<T>)nil),
             "can't evaluate field MissingField in type *template.T"u8
@@ -1876,6 +1885,7 @@ public static void TestInterfaceValues(ж<testing.T> Ꮡt) {
         new(@"{{lt (index .Slice 0) .One}}"u8, "true"u8),
         new(@"{{lt (index .Slice 1) .Zero}}"u8, "false"u8)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         var (ᴛ13, ᴛ14) = New(tmplˢ).Parse(tt.text);
         var tmpl = Must(ᴛ13, ᴛ14);
@@ -2031,6 +2041,7 @@ public static void TestFunctionCheckDuringCall(ж<testing.T> Ꮡt) {
             wantErr: "error calling call: non-function len \"test\" of type int"u8
         )
     }.slice();
+
     foreach (var (_, tc) in tests) {
         var b = @new<bytes.Buffer>();
         var (tmpl, err) = New("t"u8).Parse(tc.input);
@@ -2076,6 +2087,7 @@ public static void TestIssue31810(ж<testing.T> Ꮡt) {
     if (b.String() != "result"u8) {
         Ꮡt.Errorf("%s got %q, expected %q"u8, text, b.String(), resultˢ);
     }
+
     // Even a plain function fails - need to use call.
     var f = @string () => resultˢ;
     b.Reset();
@@ -2083,6 +2095,7 @@ public static void TestIssue31810(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Error(expectedErrorWithNoCallˢ);
     }
+
     // Works if the function is explicitly called.
     @string textCall = textCallᶜ;
     (tmpl, err) = New(""u8).Parse(textCall);
@@ -2124,16 +2137,20 @@ internal static readonly @string barˢ = "bar"u8;
 // Issue 39807: data race in html/template & text/template
 public static partial void TestIssue39807(ж<testing.T> Ꮡt) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+
     var (tplFoo, err) = New(fooˢ).Parse(templateBarˢ);
     if (err != default!) {
         Ꮡt.Error(err);
     }
+
     (var tplBar, err) = New(barˢ).Parse(barˢ);
     if (err != default!) {
         Ꮡt.Error(err);
     }
+
     nint gofuncs = 10;
     nint numTemplates = 10;
+
     for (nint i = 1; i <= gofuncs; i++) {
         Ꮡwg.Add(1);
         var tplBarʗ1 = tplBar;
@@ -2157,6 +2174,7 @@ public static partial void TestIssue39807(ж<testing.T> Ꮡt) {
             finally { ᒐ.Run(); }
         });
     }
+
     Ꮡwg.Wait();
 }
 

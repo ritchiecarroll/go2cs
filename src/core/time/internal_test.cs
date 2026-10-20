@@ -62,6 +62,7 @@ public static void CheckRuntimeTimerPeriodOverflow() {
         var t = newTimer(runtimeNano(), 9223372036854775807L, empty, default!, nil);
         var tʗ1 = t;
         defer(() => tʗ1.Stop(), ref ᒐ);
+
         // If this test fails, we will either throw (when siftdownTimer detects
         // bad when on update), or other timers will hang (if the timer in a
         // heap is in a bad state). There is no reliable way to test this, but
@@ -74,9 +75,10 @@ public static void CheckRuntimeTimerPeriodOverflow() {
 }
 
 public static global::go.time_package.Time MinMonoTime;
-internal static void initᴛMinMonoTime() { MinMonoTime = new Time(wall: ((uint64)1 << (int)(63)), ext: -9223372036854775808L, loc: ΔUTC); }
+internal static void initᴛMinMonoTime() { MinMonoTime = new Time(wall: ((uint64)1 << 63), ext: -9223372036854775808L, loc: ΔUTC); }
 public static global::go.time_package.Time MaxMonoTime;
-internal static void initᴛMaxMonoTime() { MaxMonoTime = new Time(wall: ((uint64)1 << (int)(63)), ext: 9223372036854775807L, loc: ΔUTC); }
+internal static void initᴛMaxMonoTime() { MaxMonoTime = new Time(wall: ((uint64)1 << 63), ext: 9223372036854775807L, loc: ΔUTC); }
+
 public static global::go.time_package.Time NotMonoNegativeTime = new Time(wall: 0, ext: -9223372036854775758L);
 
 } // end time_internal_test_package

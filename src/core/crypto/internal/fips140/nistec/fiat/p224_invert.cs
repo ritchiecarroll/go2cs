@@ -33,6 +33,7 @@ public static ж<P224Element> Invert(this ж<P224Element> Ꮡe, ж<P224Element> 
     ж<P224Element> t0 = @new<P224Element>();
     ж<P224Element> t1 = @new<P224Element>();
     ж<P224Element> t2 = @new<P224Element>();
+
     z.Square(Ꮡx);
     t0.Mul(Ꮡx, z);
     z.Square(t0);
@@ -80,6 +81,7 @@ public static ж<P224Element> Invert(this ж<P224Element> Ꮡe, ж<P224Element> 
         t0.Square(t0);
     }
     z.Mul(z, t0);
+
     return Ꮡe.Set(z);
 }
 

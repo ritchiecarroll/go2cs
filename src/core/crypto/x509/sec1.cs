@@ -9,7 +9,6 @@ using elliptic = go.crypto.elliptic_package;
 using asn1 = encoding.asn1_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using big = go.math.big_package;
 using encoding;
 using go.crypto;
 using go.math;
@@ -55,24 +54,26 @@ public static (slice<byte>, error) MarshalECPrivateKey(ж<ecdsa.PrivateKey> Ꮡk
     if (!ok) {
         return (default!, errors.New(x509UnknownEllipticCurveˢ));
     }
-    return marshalECPrivateKeyWithOID(ref (Ꮡkey).DerefOrNull(), oid);
-}
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidEllipticKeyPublicˢ = "invalid elliptic key public key"u8;
+    return marshalECPrivateKeyWithOID(Ꮡkey, oid);
+}
 
 // marshalECPrivateKeyWithOID marshals an EC private key into ASN.1, DER format and
 // sets the curve ID to the given OID, or omits it if OID is nil.
-internal static (slice<byte>, error) marshalECPrivateKeyWithOID(ref ecdsa.PrivateKey key, asn1.ObjectIdentifier oid) {
-    if (!key.Curve.IsOnCurve(key.X, key.Y)) {
-        return (default!, errors.New(invalidEllipticKeyPublicˢ));
+internal static (slice<byte>, error) marshalECPrivateKeyWithOID(ж<ecdsa.PrivateKey> Ꮡkey, asn1.ObjectIdentifier oid) {
+    var (privateKey, err) = Ꮡkey.Bytes();
+    if (err != default!) {
+        return (default!, err);
     }
-    var privateKey = new slice<byte>(((~key.Curve.Params()).N.BitLen() + 7) / 8);
+    (var publicKey, err) = Ꮡkey.of(ecdsa.PrivateKey.ᏑPublicKey).Bytes();
+    if (err != default!) {
+        return (default!, err);
+    }
     return asn1.Marshal(new ecPrivateKey(
         Version: 1,
-        PrivateKey: key.D.FillBytes(privateKey),
+        PrivateKey: privateKey,
         NamedCurveOID: oid,
-        PublicKey: new asn1.BitString(Bytes: elliptic.Marshal(key.Curve, key.X, key.Y))
+        PublicKey: new asn1.BitString(Bytes: publicKey)
     ));
 }
 
@@ -89,7 +90,6 @@ internal static (slice<byte>, error) marshalECDHPrivateKey(ж<ecdh.PrivateKey> �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string x509InvalidEllipticCurveˢ = "x509: invalid elliptic curve private key value"u8;
 internal static readonly @string x509InvalidPrivateKeyˢ = "x509: invalid private key length"u8;
 
 // parseECPrivateKey parses an ASN.1 Elliptic Curve Private Key Structure.
@@ -118,6 +118,7 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
     if (privKey.Version != ecPrivKeyVersion) {
         return (default!, fmt.Errorf("x509: unknown EC private key version %d"u8, privKey.Version));
     }
+
     elliptic.Curve curve = default!;
     if (ᏑnamedCurveOID != nil){
         curve = namedCurveFromOID(namedCurveOID);
@@ -127,15 +128,10 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
     if (curve == default!) {
         return (default!, errors.New(x509UnknownEllipticCurveˢ));
     }
-    var k = @new<bigꓸInt>().SetBytes(privKey.PrivateKey);
-    var curveOrder = curve.Params().Value.N;
-    if (k.Cmp(curveOrder) >= 0) {
-        return (default!, errors.New(x509InvalidEllipticCurveˢ));
-    }
-    var priv = @new<ecdsa.PrivateKey>();
-    priv.Value.Curve = curve;
-    priv.Value.D = k;
-    var privateKey = new slice<byte>((curveOrder.BitLen() + 7) / 8);
+
+    nint size = ((~curve.Params()).N.BitLen() + 7) / 8;
+    var privateKey = new slice<byte>(size);
+
     // Some private keys have leading zero padding. This is invalid
     // according to [SEC1], but this code will ignore it.
     while (builtin.len(privKey.PrivateKey) > builtin.len(privateKey)) {
@@ -144,12 +140,13 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
         }
         privKey.PrivateKey = privKey.PrivateKey[1..];
     }
+
     // Some private keys remove all leading zeros, this is also invalid
     // according to [SEC1] but since OpenSSL used to do this, we ignore
     // this too.
     copy(privateKey.slice(builtin.len(privateKey) - builtin.len(privKey.PrivateKey)), privKey.PrivateKey);
-    (priv.Value.X, priv.Value.Y) = curve.ScalarBaseMult(privateKey);
-    return (priv, default!);
+
+    return ecdsa.ParseRawPrivateKey(curve, privateKey);
 }
 
 } // end x509_package

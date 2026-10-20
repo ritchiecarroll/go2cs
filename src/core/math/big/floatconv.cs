@@ -35,25 +35,29 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     ж<Float> f = default!;
     nint b = default!;
     error err = default!;
-
     ref var z = ref Ꮡz.DerefOrNull();
+
     var prec = z.prec;
     if (prec == 0) {
         prec = 64;
     }
+
     // A reasonable value in case of an error.
     z.form = zero;
+
     // sign
     (z.neg, err) = scanSign(r);
     if (err != default!) {
         return (f, b, err);
     }
+
     // mantissa
     nint fcount = default!;  // fractional digit count; valid if <= 0
     (z.mant, b, fcount, err) = z.mant.scan(r, @base, true);
     if (err != default!) {
         return (f, b, err);
     }
+
     // exponent
     int64 exp = default!;
     nint ebase = default!;
@@ -61,6 +65,7 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     if (err != default!) {
         return (f, b, err);
     }
+
     // special-case 0
     if (len(z.mant) == 0) {
         z.prec = prec;
@@ -70,6 +75,7 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
         return (f, b, err);
     }
     // len(z.mant) > 0
+
     // The mantissa may have a radix point (fcount <= 0) and there
     // may be a nonzero exponent exp. The radix point amounts to a
     // division by b**(-fcount). An exponent means multiplication by
@@ -80,9 +86,11 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     // we split powers of 10 into the product of the same powers of
     // 2 and 5. This reduces the size of the multiplication factor
     // needed for base-10 exponents.
+
     // normalize mantissa and determine initial exponent contributions
     var exp2 = (int64)len(z.mant) * (int64)_W - fnorm(z.mant);
     var exp5 = (int64)0;
+
     // determine binary or decimal exponent contribution of radix point
     if (fcount < 0) {
         // The mantissa has a radix point ddd.dddd; and
@@ -107,9 +115,9 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
         else if (!matchᴛ1) { /* default: */
             throw panic("unexpected mantissa base");
         }
-
+        // fcount consumed - not needed anymore
     }
-    // fcount consumed - not needed anymore
+
     // take actual exponent into account
     var exprᴛ2 = ebase;
     var matchᴛ2 = false;
@@ -123,8 +131,8 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     else if (!matchᴛ2) { /* default: */
         throw panic("unexpected exponent base");
     }
-
     // exp consumed - not needed anymore
+
     // apply 2**exp2
     if (MinExp <= exp2 && exp2 <= MaxExp){
         z.prec = prec;
@@ -135,12 +143,14 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
         err = fmt.Errorf("exponent overflow"u8);
         return (f, b, err);
     }
+
     if (exp5 == 0) {
         // no decimal exponent contribution
         Ꮡz.round(0);
         return (f, b, err);
     }
     // exp5 != 0
+
     // apply 5**exp5
     var p = @new<Float>().SetPrec(z.Prec() + 64); // use more bits for p -- TODO(gri) what is the right number?
     if (exp5 < 0){
@@ -148,6 +158,7 @@ internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.By
     } else {
         Ꮡz.Mul(Ꮡz, p.pow5((uint64)exp5));
     }
+
     return (f, b, err);
 }
 
@@ -197,18 +208,22 @@ internal static ж<Float> pow5(this ж<Float> Ꮡz, uint64 n) {
         return Ꮡz.SetUint64(pow5tab[n]);
     }
     // n > m
+
     Ꮡz.SetUint64(pow5tab[m]);
     n -= m;
+
     // use more bits for f than for z
     // TODO(gri) what is the right number?
     var f = @new<Float>().SetPrec(z.Prec() + 64).SetUint64(5);
+
     while (n > 0) {
-        if ((uint64)(n & 1) != 0) {
+        if ((n & 1) != 0) {
             Ꮡz.Mul(Ꮡz, f);
         }
         f.Mul(f, f);
         n >>= (int)(1);
     }
+
     return Ꮡz;
 }
 
@@ -271,12 +286,14 @@ public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @strin
         f = Ꮡz.SetInf(s[0] == (rune)'-');
         return (f, b, err);
     }
+
     var r = strings.NewReader(s);
     {
         (f, b, err) = Ꮡz.scan(new strings_ReaderжByteScanner(r), @base); if (err != default!) {
             return (f, b, err);
         }
     }
+
     // entire string must have been consumed
     {
         var (ch, err2) = r.ReadByte(); if (err2 == default!){
@@ -286,6 +303,7 @@ public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @strin
             err = err2;
         }
     }
+
     return (f, b, err);
 }
 

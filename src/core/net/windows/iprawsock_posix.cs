@@ -67,11 +67,11 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     if (len(b) < 20) {
         return n;
     }
-    nint l = ((nint)((byte)(b[0] & 0x0f)) << (int)(2));
+    nint l = (nint)((byte)(b[0] & 0x0f)) << 2;
     if (20 > l || l > len(b)) {
         return n;
     }
-    if ((byte)((b[0] >> (int)(4))) != 4) {
+    if ((byte)((b[0] >> 4)) != 4) {
         return n;
     }
     copy(b, b.slice(l));
@@ -142,7 +142,6 @@ internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Con
     else { /* default: */
         return (default!, ((UnknownNetworkError)sd.network));
     }
-
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == default! && sd.Dialer.Control != default!) {
         ctrlCtxFn = (context.Context ctxΔ1, @string networkΔ1, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(networkΔ1, address, c);
@@ -167,7 +166,6 @@ internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context
     else { /* default: */
         return (default!, ((UnknownNetworkError)sl.network));
     }
-
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default!;
     if (sl.ListenConfig.Control != default!) {
         ctrlCtxFn = (context.Context ctxΔ1, @string networkΔ1, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(networkΔ1, address, c);

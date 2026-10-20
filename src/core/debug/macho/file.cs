@@ -34,7 +34,7 @@ partial class macho_package {
 
 // A File represents an open Mach-O file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public binary.ByteOrder ByteOrder;
     public slice<Load> Loads;
     public slice<ж<ΔSection>> Sections;
@@ -48,6 +48,7 @@ partial interface Load {
     slice<byte> Raw();
 }
 
+// A LoadBytes is the uninterpreted bytes of a Mach-O load command.
 partial struct LoadBytes /*[]byte*/;
 
 public static slice<byte> Raw(this LoadBytes b) {
@@ -71,8 +72,8 @@ partial struct SegmentHeader {
 
 // A Segment represents a Mach-O 32-bit or 64-bit load segment command.
 partial struct ΔSegment {
-    public partial ref LoadBytes LoadBytes { get; }
-    public partial ref SegmentHeader SegmentHeader { get; }
+    /*embed*/ public LoadBytes LoadBytes;
+    /*embed*/ public SegmentHeader SegmentHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.
@@ -120,7 +121,7 @@ partial struct Reloc {
 }
 
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
@@ -144,7 +145,7 @@ public static io.ReadSeeker Open(this ref ΔSection s) {
 
 // A Dylib represents a Mach-O load dynamic library command.
 partial struct Dylib {
-    public partial ref LoadBytes LoadBytes { get; }
+    /*embed*/ public LoadBytes LoadBytes;
     public @string Name;
     public uint32 Time;
     public uint32 CurrentVersion;
@@ -153,21 +154,21 @@ partial struct Dylib {
 
 // A Symtab represents a Mach-O symbol table command.
 partial struct Symtab {
-    public partial ref LoadBytes LoadBytes { get; }
-    public partial ref SymtabCmd SymtabCmd { get; }
+    /*embed*/ public LoadBytes LoadBytes;
+    /*embed*/ public SymtabCmd SymtabCmd;
     public slice<Symbol> Syms;
 }
 
 // A Dysymtab represents a Mach-O dynamic symbol table command.
 partial struct Dysymtab {
-    public partial ref LoadBytes LoadBytes { get; }
-    public partial ref DysymtabCmd DysymtabCmd { get; }
+    /*embed*/ public LoadBytes LoadBytes;
+    /*embed*/ public DysymtabCmd DysymtabCmd;
     public slice<uint32> IndirectSyms; // indices into Symtab.Syms
 }
 
 // A Rpath represents a Mach-O rpath command.
 partial struct Rpath {
-    public partial ref LoadBytes LoadBytes { get; }
+    /*embed*/ public LoadBytes LoadBytes;
     public @string Path;
 }
 
@@ -233,6 +234,7 @@ public static error Close(this ref File f) {
 public static (ж<File>, error) NewFile(io.ReaderAt r) {
     var f = @new<File>();
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
+
     // Read and decode Mach magic to determine byte order, size.
     // Magic32 and Magic64 differ only in the bottom bit.
     array<byte> ident = new(4);
@@ -262,6 +264,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default!, errΔ2);
         }
     }
+
     // Then load commands.
     ref var offset = ref heap<int64>(out var Ꮡoffset);
     offset = (int64)fileHeaderSize32;
@@ -283,7 +286,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         if (len(dat) < 8) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "command block too small"u8, default!))));
         }
-        var (cmd, siz) = (((LoadCmd)bo.Uint32(dat[0..4])), bo.Uint32(dat[4..8]));
+        var (cmd, siz) = ((LoadCmd)bo.Uint32(dat[0..4]), bo.Uint32(dat[4..8]));
         if (siz < 8 || siz > (uint32)len(dat)) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid command block size"u8, default!))));
         }
@@ -305,7 +308,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid path in rpath command"u8, hdr.Path))));
             }
             l.Value.Path = cstring(cmddat.slice((nint)(hdr.Path)));
-            l.Value.LoadBytes = ((LoadBytes)cmddat);
+            l.Value.LoadBytes = (LoadBytes)cmddat;
             f.Value.Loads = append((~f).Loads, (Load)(new RpathжLoad(l)));
         }
         else if (exprᴛ2 == LoadCmdDylib) {
@@ -324,7 +327,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             l.Value.Time = hdr.Time;
             l.Value.CurrentVersion = hdr.CurrentVersion;
             l.Value.CompatVersion = hdr.CompatVersion;
-            l.Value.LoadBytes = ((LoadBytes)cmddat);
+            l.Value.LoadBytes = (LoadBytes)cmddat;
             f.Value.Loads = append((~f).Loads, (Load)(new DylibжLoad(l)));
         }
         else if (exprᴛ2 == LoadCmdSymtab) {
@@ -388,7 +391,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 }
             }
             var st = @new<Dysymtab>();
-            st.Value.LoadBytes = ((LoadBytes)cmddat);
+            st.Value.LoadBytes = (LoadBytes)cmddat;
             st.Value.DysymtabCmd = hdr;
             st.Value.IndirectSyms = x;
             f.Value.Loads = append((~f).Loads, (Load)(new DysymtabжLoad(st)));
@@ -487,9 +490,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             }
         }
         else { /* default: */
-            f.Value.Loads = append((~f).Loads, (Load)(((LoadBytes)cmddat)));
+            f.Value.Loads = append((~f).Loads, (Load)((LoadBytes)cmddat));
         }
-
         if (s != nil) {
             if ((int64)(~s).Offset < 0) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid section offset"u8, (~s).Offset))));
@@ -552,7 +554,7 @@ internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> sym
         ));
     }
     var st = @new<Symtab>();
-    st.Value.LoadBytes = ((LoadBytes)cmddat);
+    st.Value.LoadBytes = (LoadBytes)cmddat;
     st.Value.Syms = symtab;
     return (st, default!);
 }
@@ -568,55 +570,59 @@ internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.Reade
     f.Sections = append(f.Sections, Ꮡsh);
     sh.sr = io.NewSectionReader(r, (int64)sh.Offset, (int64)sh.Size);
     sh.ReaderAt = new io.SectionReaderжReaderAt(sh.sr);
+
     if (sh.Nreloc > 0) {
         var (reldat, err) = saferio.ReadDataAt(r, (uint64)sh.Nreloc * 8, (int64)sh.Reloff);
         if (err != default!) {
             return err;
         }
         var b = bytes.NewReader(reldat);
+
         var bo = f.ByteOrder;
+
         sh.Relocs = new slice<Reloc>((nint)(sh.Nreloc));
         foreach (var (i, _) in sh.Relocs) {
             var rel = Ꮡ(sh.Relocs, i);
+
             ref var ri = ref heap(new relocInfo(), out var Ꮡri);
             {
                 var errΔ1 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡri); if (errΔ1 != default!) {
                     return errΔ1;
                 }
             }
-            if ((uint32)(ri.Addr & (((uint32)1 << (int)(31)))) != 0){
-                // scattered
-                rel.Value.Addr = (uint32)(ri.Addr & ((1 << (int)(24)) - 1));
-                rel.Value.Type = (uint8)((uint32)(((ri.Addr >> (int)(24))) & ((1 << (int)(4)) - 1)));
-                rel.Value.Len = (uint8)((uint32)(((ri.Addr >> (int)(28))) & ((1 << (int)(2)) - 1)));
-                rel.Value.Pcrel = (uint32)(ri.Addr & (((uint32)1 << (int)(30)))) != 0;
+
+            if ((uint32)(ri.Addr & ((uint32)1 << 31)) != 0){ // scattered
+                rel.Value.Addr = (uint32)(ri.Addr & ((1 << 24) - 1));
+                rel.Value.Type = (uint8)((uint32)((ri.Addr >> 24) & ((1 << 4) - 1)));
+                rel.Value.Len = (uint8)((uint32)((ri.Addr >> 28) & ((1 << 2) - 1)));
+                rel.Value.Pcrel = (uint32)(ri.Addr & ((uint32)1 << 30)) != 0;
                 rel.Value.Value = ri.Symnum;
                 rel.Value.Scattered = true;
             } else {
                 var exprᴛ1 = bo;
                 if (AreEqual(exprᴛ1, binary.LittleEndian)) {
                     rel.Value.Addr = ri.Addr;
-                    rel.Value.Value = (uint32)(ri.Symnum & ((1 << (int)(24)) - 1));
-                    rel.Value.Pcrel = (uint32)(ri.Symnum & (((uint32)1 << (int)(24)))) != 0;
-                    rel.Value.Len = (uint8)((uint32)(((ri.Symnum >> (int)(25))) & ((1 << (int)(2)) - 1)));
-                    rel.Value.Extern = (uint32)(ri.Symnum & (((uint32)1 << (int)(27)))) != 0;
-                    rel.Value.Type = (uint8)((uint32)(((ri.Symnum >> (int)(28))) & ((1 << (int)(4)) - 1)));
+                    rel.Value.Value = (uint32)(ri.Symnum & ((1 << 24) - 1));
+                    rel.Value.Pcrel = (uint32)(ri.Symnum & ((uint32)1 << 24)) != 0;
+                    rel.Value.Len = (uint8)((uint32)((ri.Symnum >> 25) & ((1 << 2) - 1)));
+                    rel.Value.Extern = (uint32)(ri.Symnum & ((uint32)1 << 27)) != 0;
+                    rel.Value.Type = (uint8)((uint32)((ri.Symnum >> 28) & ((1 << 4) - 1)));
                 }
                 else if (AreEqual(exprᴛ1, binary.BigEndian)) {
                     rel.Value.Addr = ri.Addr;
-                    rel.Value.Value = (ri.Symnum >> (int)(8));
-                    rel.Value.Pcrel = (uint32)(ri.Symnum & (((uint32)1 << (int)(7)))) != 0;
-                    rel.Value.Len = (uint8)((uint32)(((ri.Symnum >> (int)(5))) & ((1 << (int)(2)) - 1)));
-                    rel.Value.Extern = (uint32)(ri.Symnum & (((uint32)1 << (int)(4)))) != 0;
-                    rel.Value.Type = (uint8)((uint32)(ri.Symnum & ((1 << (int)(4)) - 1)));
+                    rel.Value.Value = ri.Symnum >> 8;
+                    rel.Value.Pcrel = (uint32)(ri.Symnum & ((uint32)1 << 7)) != 0;
+                    rel.Value.Len = (uint8)((uint32)((ri.Symnum >> 5) & ((1 << 2) - 1)));
+                    rel.Value.Extern = (uint32)(ri.Symnum & ((uint32)1 << 4)) != 0;
+                    rel.Value.Type = (uint8)((uint32)(ri.Symnum & ((1 << 4) - 1)));
                 }
                 else { /* default: */
                     throw panic("unreachable");
                 }
-
             }
         }
     }
+
     return default!;
 }
 
@@ -625,7 +631,7 @@ internal static @string cstring(slice<byte> b) {
     if (i == -1) {
         i = len(b);
     }
-    return ((@string)(b.slice(0, i)));
+    return (@string)(b.slice(0, i));
 }
 
 // Segment returns the first Segment with the given name, or nil if no such segment exists.
@@ -677,7 +683,6 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         default: {
             return ""u8;
         }}
-
         // Mach-O executables truncate section names to 16 characters, mangling some DWARF sections.
         // As of DWARFv5 these are the only problematic section names (see DWARFv5 Appendix G).
         foreach (var (_, longname) in new @string[]{
@@ -701,6 +706,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         if (errΔ1 != default! && (uint64)len(b) < (~s).Size) {
             return (default!, errΔ1);
         }
+
         if (len(b) >= 12 && ((sstring)(b[..4])) == "ZLIB"u8) {
             var dlen = binary.BigEndian.Uint64(b[4..12]);
             var dbuf = new slice<byte>((nint)(dlen));
@@ -722,6 +728,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         }
         return (b, default!);
     }
+
     // There are many other DWARF sections, but these
     // are the ones the debug/dwarf package uses.
     // Don't bother loading others.
@@ -742,10 +749,12 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         }
         dat[suffix] = b;
     }
+
     var (d, err) = dwarf.New(dat[abbrevˢ], default!, default!, dat[infoˢ], dat[lineˢ], default!, dat[rangesˢ], dat[strˢ]);
     if (err != default!) {
         return (default!, err);
     }
+
     // Look for DWARF4 .debug_types sections and DWARF5 sections.
     foreach (var (i, s) in f.Sections) {
         @string suffix = dwarfSuffix(s);
@@ -758,10 +767,12 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
                 continue;
             }
         }
+
         var (b, errΔ6) = sectionData(s);
         if (errΔ6 != default!) {
             return (default!, errΔ6);
         }
+
         if (suffix == "types"u8){
             errΔ6 = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b);
         } else {
@@ -771,6 +782,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
             return (default!, errΔ6);
         }
     }
+
     return (d, default!);
 }
 
@@ -778,14 +790,27 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 public static (slice<@string>, error) ImportedSymbols(this ref File f) {
-    if (f.Dysymtab == nil || f.Symtab == nil) {
+    if (f.Symtab == nil) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "missing symbol table"u8, default!))));
     }
+
     var st = f.Symtab;
     var dt = f.Dysymtab;
     slice<@string> all = default!;
-    foreach (var (_, s) in (~st).Syms.slice((nint)((~dt).Iundefsym), (nint)((~dt).Iundefsym + (~dt).Nundefsym))) {
-        all = append(all, s.Name);
+    if (dt != nil){
+        foreach (var (_, s) in (~st).Syms.slice((nint)((~dt).Iundefsym), (nint)((~dt).Iundefsym + (~dt).Nundefsym))) {
+            all = append(all, s.Name);
+        }
+    } else {
+        // From Darwin's include/mach-o/nlist.h
+        const uint8 N_TYPE = 0x0e;
+        const uint8 N_UNDF = 0x0;
+        const uint8 N_EXT = 0x01;
+        foreach (var (_, s) in (~st).Syms) {
+            if ((uint8)(s.Type & N_TYPE) == N_UNDF && (uint8)(s.Type & N_EXT) != 0) {
+                all = append(all, s.Name);
+            }
+        }
     }
     return (all, default!);
 }

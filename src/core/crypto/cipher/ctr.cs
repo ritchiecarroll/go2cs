@@ -43,7 +43,7 @@ public static Stream NewCTR(Block block, slice<byte> iv) {
             return new aesCtrWrapper(aes.NewCTR(blockΔ1, iv));
         }
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CTR with non-AES ciphers is not allowed in FIPS 140-only mode");
     }
     {
@@ -83,6 +83,7 @@ internal static void refill(this ref ctr x) {
     while (remain <= len(x.@out) - bs) {
         x.b.Encrypt(x.@out.slice(remain), x.Δctr);
         remain += bs;
+
         // Increment counter
         for (nint i = len(x.Δctr) - 1; i >= 0; i--) {
             x.Δctr[i]++;

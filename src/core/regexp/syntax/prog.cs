@@ -22,6 +22,7 @@ partial struct Prog {
     public nint NumCap; // number of InstCapture insts in re
 }
 
+// An InstOp is an instruction opcode.
 partial struct InstOp /*num:uint8*/;
 
 public static InstOp InstAlt => /* iota */ 0;
@@ -57,6 +58,7 @@ public static @string String(this InstOp i) {
     return instOpNames[i];
 }
 
+// An EmptyOp specifies a kind or mixture of zero-width assertions.
 partial struct EmptyOp /*num:uint8*/;
 
 public static EmptyOp EmptyBeginLine => /* 1 << iota */ 1;
@@ -88,7 +90,6 @@ public static EmptyOp EmptyOpContext(rune r1, rune r2) {
         op |= (EmptyOp)((EmptyOp)(EmptyBeginText | EmptyBeginLine));
         break;
     }}
-
     switch (ᐧ) {
     case {} when IsWordChar(r2): {
         boundary ^= (byte)(1);
@@ -102,9 +103,7 @@ public static EmptyOp EmptyOpContext(rune r1, rune r2) {
         op |= (EmptyOp)((EmptyOp)(EmptyEndText | EmptyEndLine));
         break;
     }}
-
-    if (boundary != 0) {
-        // IsWordChar(r1) != IsWordChar(r2)
+    if (boundary != 0) { // IsWordChar(r1) != IsWordChar(r2)
         op ^= (EmptyOp)(((EmptyOp)(EmptyWordBoundary | EmptyNoWordBoundary)));
     }
     return op;
@@ -149,7 +148,6 @@ internal static InstOp op(this ref Inst i) {
     if (exprᴛ1 == InstRune1 || exprᴛ1 == InstRuneAny || exprᴛ1 == InstRuneAnyNotNL) {
         op = InstRune;
     }
-
     return op;
 }
 
@@ -158,10 +156,12 @@ internal static InstOp op(this ref Inst i) {
 // is the entire match.
 public static (@string prefix, bool complete) Prefix(this ref Prog p) {
     var i = p.skipNop((uint32)p.Start);
+
     // Avoid allocation of buffer if prefix is empty.
     if (i.op() != InstRune || len((~i).Rune) != 1) {
         return ("", (~i).Op == InstMatch);
     }
+
     // Have prefix; gather characters.
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     while (i.op() == InstRune && len((~i).Rune) == 1 && (Flags)(((Flags)(uint16)(~i).Arg) & FoldCase) == 0 && (~i).Rune[0] != utf8.RuneError) {
@@ -187,12 +187,11 @@ Loop:
             return (EmptyOp)(~((EmptyOp)((EmptyOp)0)));
         }
         else if (exprᴛ1 == InstCapture || exprᴛ1 == InstNop) {
+            // skip
         }
         else { /* default: */
             goto break_Loop;
         }
-
-        // skip
         pc = i.Value.Out;
         i = Ꮡ(p.Inst, pc);
 continue_Loop:;
@@ -216,14 +215,15 @@ public static bool MatchRune(this ref Inst i, rune r) {
 // MatchRunePos should only be called when i.Op == [InstRune].
 public static nint MatchRunePos(this ref Inst i, rune r) {
     var rune = i.Rune;
+
     switch (len(rune)) {
     case 0: {
         return noMatch;
     }
     case 1: {
+        // Special case: single-rune slice is from literal string, not char class.
         var r0 = rune[0];
         if (r == r0) {
-            // Special case: single-rune slice is from literal string, not char class.
             return 0;
         }
         if ((Flags)(((Flags)(uint16)i.Arg) & FoldCase) != 0) {
@@ -242,9 +242,9 @@ public static nint MatchRunePos(this ref Inst i, rune r) {
         return noMatch;
     }
     case 4 or 6 or 8: {
+        // Linear search for a few pairs.
+        // Should handle ASCII well.
         for (nint j = 0; j < len(rune); j += 2) {
-            // Linear search for a few pairs.
-            // Should handle ASCII well.
             if (r < rune[j]) {
                 return noMatch;
             }
@@ -259,7 +259,7 @@ public static nint MatchRunePos(this ref Inst i, rune r) {
     nint lo = 0;
     nint hi = len(rune) / 2;
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         {
             var c = rune[2 * m]; if (c <= r){
                 if (r <= rune[2 * m + 1]) {
@@ -297,7 +297,6 @@ public static bool MatchEmptyWidth(this ref Inst i, rune before, rune after) {
     if (exprᴛ1 == EmptyNoWordBoundary) {
         return IsWordChar(before) == IsWordChar(after);
     }
-
     throw panic("unknown empty width arg");
 }
 
@@ -379,14 +378,14 @@ internal static void dumpInst(ж<strings.Builder> Ꮡb, ref Inst i) {
             // shouldn't happen
             bw(Ꮡb, runeNilˢ);
         }
-        bw(Ꮡb, runeˢ, strconv.QuoteToASCII(((@string)i.Rune)));
+        bw(Ꮡb, runeˢ, strconv.QuoteToASCII((@string)i.Rune));
         if ((Flags)(((Flags)(uint16)i.Arg) & FoldCase) != 0) {
             bw(Ꮡb, "/i"u8);
         }
         bw(Ꮡb, " -> "u8, u32(i.Out));
     }
     else if (exprᴛ1 == InstRune1) {
-        bw(Ꮡb, rune1ˢ, strconv.QuoteToASCII(((@string)i.Rune)), " -> ", u32(i.Out));
+        bw(Ꮡb, rune1ˢ, strconv.QuoteToASCII((@string)i.Rune), " -> ", u32(i.Out));
     }
     else if (exprᴛ1 == InstRuneAny) {
         bw(Ꮡb, anyˢ, u32(i.Out));
@@ -394,7 +393,6 @@ internal static void dumpInst(ж<strings.Builder> Ꮡb, ref Inst i) {
     else if (exprᴛ1 == InstRuneAnyNotNL) {
         bw(Ꮡb, anynotnlˢ, u32(i.Out));
     }
-
 }
 
 } // end syntax_package

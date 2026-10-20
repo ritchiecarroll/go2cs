@@ -19,6 +19,7 @@ public static void TestWithClientTrace(ж<testing.T> Ꮡt) {
     Action<@string, @string> connectStart(byte b) => (@string network, @string addr) => {
             Ꮡbuf.WriteByte(b);
         };
+
     var ctx = context.Background();
     var oldtrace = Ꮡ(new ClientTrace(
         ConnectStart: connectStart((rune)'O')
@@ -29,6 +30,7 @@ public static void TestWithClientTrace(ж<testing.T> Ꮡt) {
     ));
     ctx = WithClientTrace(ctx, newtrace);
     var trace = ContextClientTrace(ctx);
+
     buf.Reset();
     (~trace).ConnectStart(netˢ, addrˢ);
     {
@@ -47,12 +49,14 @@ internal partial struct TestCompose_tests /*dyn*/ {
 public static void TestCompose(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     nint testNum = default!;
+
     Action<@string, @string> connectStart(byte b) => (@string network, @string addr) => {
             if (addr != "addr"u8) {
                 Ꮡt.Errorf(@"%d. args for %q case = %q, %q; want addr of ""addr"""u8, testNum, b, network, addr);
             }
             Ꮡbuf.WriteByte(b);
         };
+
     var tests = new array<TestCompose_tests>(3){
         [0] = new(
             want: "T"u8,
@@ -76,6 +80,7 @@ public static void TestCompose(ж<testing.T> Ꮡt) {
     foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
         testNum = i;
         buf.Reset();
+
         ref var tr = ref heap<global::go.net.http.httptrace_package.ClientTrace>(out var Ꮡtr);
         tr = tt.trace.Value;
         Ꮡtr.compose(tt.old);

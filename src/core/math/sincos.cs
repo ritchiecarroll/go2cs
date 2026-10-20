@@ -36,6 +36,7 @@ public static (float64 sin, float64 cos) Sincos(float64 x) {
         x = -x;
         sinSign = true;
     }
+
     uint64 j = default!;
     float64 y = default!;
     float64 z = default!;
@@ -44,22 +45,22 @@ public static (float64 sin, float64 cos) Sincos(float64 x) {
     } else {
         j = (uint64)(x * /* (4 / Pi) */ 1.2732395447351628D); // integer part of x/(Pi/4), as integer for tests on the phase angle
         y = (float64)j; // integer part of x/(Pi/4), as float
-        if ((uint64)(j & 1) == 1) {
-            // map zeros to origin
+
+        if ((j & 1) == 1) { // map zeros to origin
             j++;
             y++;
         }
         j &= (uint64)(7); // octant modulo 2Pi radians (360 degrees)
         z = ((x - y * PI4A) - y * PI4B) - y * PI4C; // Extended precision modular arithmetic
     }
-    if (j > 3) {
-        // reflect in x axis
+    if (j > 3) { // reflect in x axis
         j -= 4;
         (sinSign, cosSign) = (!sinSign, !cosSign);
     }
     if (j > 1) {
         cosSign = !cosSign;
     }
+
     var zz = z * z;
     cos = 1.0D - 0.5D * zz + zz * zz * ((((((_cos[0] * zz) + _cos[1]) * zz + _cos[2]) * zz + _cos[3]) * zz + _cos[4]) * zz + _cos[5]);
     sin = z + z * zz * ((((((_sin[0] * zz) + _sin[1]) * zz + _sin[2]) * zz + _sin[3]) * zz + _sin[4]) * zz + _sin[5]);

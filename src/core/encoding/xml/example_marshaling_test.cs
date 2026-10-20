@@ -58,7 +58,6 @@ public static error MarshalXML(this Animal a, ж<xml.Encoder> Ꮡe, xml.StartEle
     else { /* default: */
         s = unknownˢ;
     }
-
     return Ꮡe.EncodeElement(s, start);
 }
 
@@ -75,7 +74,7 @@ internal static readonly @string animalsAnimalGopherˢ = """
 		<animal>gopher</animal>
 		<animal>zebra</animal>
 	</animals>
-"""u8;
+"""u8.Raw();
 
 internal partial struct Example_customMarshalXML_zoo /*dyn*/ {
     public slice<Animal> Animals; /*`xml:"animal"`*/
@@ -89,18 +88,20 @@ public static void Example_customMarshalXML() {
             log.Fatal(err);
         }
     }
+
     var census = new map<Animal, nint>();
     foreach (var (_, animal) in zoo.Animals) {
         census[animal] += 1;
     }
+
     fmt.Printf("Zoo Census:\n* Gophers: %d\n* Zebras:  %d\n* Unknown: %d\n"u8,
         census[Gopher], census[Zebra], census[Unknown]);
-}
 
-// Output:
-// Zoo Census:
-// * Gophers: 3
-// * Zebras:  2
-// * Unknown: 3
+    // Output:
+    // Zoo Census:
+    // * Gophers: 3
+    // * Zebras:  2
+    // * Unknown: 3
+}
 
 } // end xml_test_package

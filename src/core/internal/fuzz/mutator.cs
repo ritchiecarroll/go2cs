@@ -47,7 +47,6 @@ internal static nint chooseLen(this ref mutator m, nint n) {
             return m.rand(n) + 1;
         }}
     }
-
 }
 
 // mutate performs several mutations on the provided values.
@@ -61,6 +60,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
     // allowed after mutating, giving an equal amount of capacity to each line.
     // Allow a little wiggle room for the encoding.
     nint maxPerVal = maxBytes / len(vals) - 100;
+
     // Pick a random value to mutate.
     // TODO: consider mutating more than one value at a time.
     nint i = m.rand(len(vals));
@@ -111,14 +111,12 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
         }
         break;
     }
-    case rune v: {
-        vals[i] = (rune)m.mutateInt((int64)v, // int32
- math.MaxInt32);
+    case rune v: { // int32
+        vals[i] = (rune)m.mutateInt((int64)v, math.MaxInt32);
         break;
     }
-    case byte v: {
-        vals[i] = (byte)m.mutateUInt((uint64)v, // uint8
- math.MaxUint8);
+    case byte v: { // uint8
+        vals[i] = (byte)m.mutateUInt((uint64)v, math.MaxUint8);
         break;
     }
     case @string v: {
@@ -132,7 +130,7 @@ internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxByte
             copy(m.scratch, v);
         }
         Ꮡm.mutateBytes(Ꮡm.of(mutator.Ꮡscratch));
-        vals[i] = ((@string)m.scratch);
+        vals[i] = (@string)m.scratch;
         break;
     }
     case slice<byte> v: {
@@ -162,8 +160,8 @@ internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) {
         max = 100;
         switch (m.rand(2)) {
         case 0: {
+            // Add a random number
             if (v >= maxValue) {
-                // Add a random number
                 continue;
             }
             if (v > 0 && maxValue - v < max) {
@@ -174,8 +172,8 @@ internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) {
             return v;
         }
         case 1: {
+            // Subtract a random number
             if (v <= -maxValue) {
-                // Subtract a random number
                 continue;
             }
             if (v < 0 && maxValue + v < max) {
@@ -185,7 +183,6 @@ internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) {
             v -= (int64)(1 + m.rand((nint)max));
             return v;
         }}
-
     }
 }
 
@@ -195,20 +192,21 @@ internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue)
         max = 100;
         switch (m.rand(2)) {
         case 0: {
+            // Add a random number
             if (v >= maxValue) {
-                // Add a random number
                 continue;
             }
             if (v > 0 && maxValue - v < max) {
                 // Don't let v exceed maxValue
                 max = maxValue - v;
             }
+
             v += (uint64)(1 + m.rand((nint)max));
             return v;
         }
         case 1: {
+            // Subtract a random number
             if (v <= 0) {
-                // Subtract a random number
                 continue;
             }
             if (v < max) {
@@ -218,7 +216,6 @@ internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue)
             v -= (uint64)(1 + m.rand((nint)max));
             return v;
         }}
-
     }
 }
 
@@ -227,8 +224,8 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
     while (ᐧ) {
         switch (m.rand(4)) {
         case 0: {
+            // Add a random number
             if (v >= maxValue) {
-                // Add a random number
                 continue;
             }
             max = 100D;
@@ -240,8 +237,8 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
             return v;
         }
         case 1: {
+            // Subtract a random number
             if (v <= -maxValue) {
-                // Subtract a random number
                 continue;
             }
             max = 100D;
@@ -253,9 +250,9 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
             return v;
         }
         case 2: {
+            // Multiply by a random number
             var absV = math.Abs(v);
             if (v == 0D || absV >= maxValue) {
-                // Multiply by a random number
                 continue;
             }
             max = 10D;
@@ -267,14 +264,13 @@ internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxVa
             return v;
         }
         case 3: {
+            // Divide by a random number
             if (v == 0D) {
-                // Divide by a random number
                 continue;
             }
             v /= (float64)(1 + m.rand(10));
             return v;
         }}
-
     }
 }
 
@@ -316,6 +312,7 @@ internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB)
             }
             ᏑptrB.ValueSlot = Ꮡb.ValueSlot;
         }, ref ᒐ);
+
         while (ᐧ) {
             var mut = byteSliceMutators[m.rand(len(byteSliceMutators))];
             {
@@ -337,7 +334,7 @@ internal static slice<int32> interesting32 = new int32[]{-2147483648, -100663046
 internal const uint64 maxUint = /* uint64(^uint(0)) */ 18446744073709551615;
 internal const int64 maxInt = /* int64(maxUint >> 1) */ 9223372036854775807;
 
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     foreach (var (_, v) in interesting8) {
         interesting16 = append(interesting16, (int16)v);
     }

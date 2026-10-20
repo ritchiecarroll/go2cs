@@ -18,8 +18,18 @@ using math;
 
 partial class chacha20_package {
 
+// KeySize is the size of the key used by this cipher, in bytes.
 public static UntypedInt KeySize => 32;
+
+// NonceSize is the size of the nonce used with the standard variant of this
+// cipher, in bytes.
+//
+// Note that this is too short to be safely generated at random if the same
+// key is reused more than 2³² times.
 public static UntypedInt NonceSize => 12;
+
+// NonceSizeX is the size of the nonce used with the XChaCha20 variant of
+// this cipher, in bytes.
 public static UntypedInt NonceSizeX => 24;
 
 // Cipher is a stateful instance of ChaCha20 or XChaCha20 using a particular key
@@ -87,6 +97,7 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
     if (len(nonce) != NonceSize) {
         return (default!, errors.New(chacha20WrongNonceSizeˢ));
     }
+
     (key, nonce) = (key[..(int)(KeySize)], nonce[..(int)(NonceSize)]); // bounds check elimination hint
     c.key = new uint32[]{
         binary.LittleEndian.Uint32(key[0..4]),
@@ -108,11 +119,8 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
 
 // The constant first 4 words of the ChaCha20 state.
 internal const uint32 j0 = 0x61707865;      // expa
-
 internal const uint32 j1 = 0x3320646e;      // nd 3
-
 internal const uint32 j2 = 0x79622d32;      // 2-by
-
 internal const uint32 j3 = 0x6b206574;      // te k
 
 internal static UntypedInt blockSize => 64;
@@ -153,6 +161,7 @@ public static void SetCounter(this ref Cipher s, uint32 counter) {
     if (s.overflow || counter < outputCounter) {
         throw panic("chacha20: SetCounter attempted to rollback counter");
     }
+
     // In the general case, we set the new counter value and reset s.len to 0,
     // causing the next call to XORKeyStream to refill the buffer. However, if
     // we're advancing within the existing buffer, we can save work by simply
@@ -186,6 +195,7 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
     if (alias.InexactOverlap(dst, src)) {
         throw panic("chacha20: invalid buffer overlap");
     }
+
     // First, drain any remaining key stream from a previous XORKeyStream.
     if (s.len != 0) {
         var keyStream = s.buf.slice((nint)bufSize - s.len);
@@ -202,28 +212,32 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
     if (len(src) == 0) {
         return;
     }
+
     // If we'd need to let the counter overflow and keep generating output,
     // panic immediately. If instead we'd only reach the last block, remember
     // not to generate any more output after the buffer is drained.
     var numBlocks = ((uint64)len(src) + (uint64)blockSize - 1) / (uint64)blockSize;
-    if (s.overflow || (uint64)s.counter + numBlocks > ((uint64)1 << (int)(32))){
+    if (s.overflow || (uint64)s.counter + numBlocks > (uint64)1 << 32){
         throw panic("chacha20: counter overflow");
     } else 
-    if ((uint64)s.counter + numBlocks == ((uint64)1 << (int)(32))) {
+    if ((uint64)s.counter + numBlocks == (uint64)1 << 32) {
         s.overflow = true;
     }
+
     // xorKeyStreamBlocks implementations expect input lengths that are a
     // multiple of bufSize. Platform-specific ones process multiple blocks at a
     // time, so have bufSizes that are a multiple of blockSize.
+
     nint full = len(src) - len(src) % (nint)bufSize;
     if (full > 0) {
         s.xorKeyStreamBlocks(dst.slice(0, full), src.slice(0, full));
     }
     (dst, src) = (dst.slice(full), src.slice(full));
+
     // If using a multi-block xorKeyStreamBlocks would overflow, use the generic
     // one that does one block at a time.
     const uint64 blocksPerBuf = /* bufSize / blockSize */ 1;
-    if ((uint64)s.counter + blocksPerBuf > ((uint64)1 << (int)(32))) {
+    if ((uint64)s.counter + blocksPerBuf > (uint64)1 << 32) {
         s.buf = new byte[]{}.array(64);
         nint numBlocksΔ1 = (len(src) + (nint)blockSize - 1) / (nint)blockSize;
         var buf = s.buf.slice((nint)bufSize - numBlocksΔ1 * (nint)blockSize);
@@ -232,6 +246,7 @@ public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> 
         s.len = len(buf) - copy(dst, buf);
         return;
     }
+
     // If we have a partial (multi-)block, pad it for xorKeyStreamBlocks, and
     // keep the leftover keystream for the next XORKeyStream invocation.
     if (len(src) > 0) {
@@ -246,6 +261,7 @@ internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> ds
     if (len(dst) != len(src) || len(dst) % (nint)blockSize != 0) {
         throw panic("chacha20: internal error: wrong dst and/or src length");
     }
+
     // To generate each block of key stream, the initial cipher state
     // (represented below) is passed through 20 rounds of shuffling,
     // alternatively applying quarterRounds by columns (like 1, 5, 9, 13)
@@ -261,21 +277,19 @@ internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> ds
     uint32 c1 = j1;
     uint32 c2 = j2;
     uint32 c3 = j3;
-    
     uint32 c4 = s.key[0];
     uint32 c5 = s.key[1];
     uint32 c6 = s.key[2];
     uint32 c7 = s.key[3];
-    
     uint32 c8 = s.key[4];
     uint32 c9 = s.key[5];
     uint32 c10 = s.key[6];
     uint32 c11 = s.key[7];
-    
     uint32 _ᴛ1 = s.counter;
     uint32 c13 = s.nonce[0];
     uint32 c14 = s.nonce[1];
     uint32 c15 = s.nonce[2];
+
     // Three quarters of the first round don't depend on the counter, so we can
     // calculate them here, and reuse them for multiple blocks in the loop, and
     // for future XORKeyStream invocations.
@@ -285,16 +299,19 @@ internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> ds
         (s.p3, s.p7, s.p11, s.p15) = quarterRound(c3, c7, c11, c15);
         s.precompDone = true;
     }
+
     // A condition of len(src) > 0 would be sufficient, but this also
     // acts as a bounds check elimination hint.
     while (len(src) >= 64 && len(dst) >= 64) {
         // The remainder of the first column round.
         var (fcr0, fcr4, fcr8, fcr12) = quarterRound(c0, c4, c8, s.counter);
+
         // The second diagonal round.
         var (x0, x5, x10, x15) = quarterRound(fcr0, s.p5, s.p10, s.p15);
         var (x1, x6, x11, x12) = quarterRound(s.p1, s.p6, s.p11, fcr12);
         var (x2, x7, x8, x13) = quarterRound(s.p2, s.p7, fcr8, s.p13);
         var (x3, x4, x9, x14) = quarterRound(s.p3, fcr4, s.p9, s.p14);
+
         // The remaining 18 rounds.
         for (nint i = 0; i < 9; i++) {
             // Column round.
@@ -302,12 +319,14 @@ internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> ds
             (x1, x5, x9, x13) = quarterRound(x1, x5, x9, x13);
             (x2, x6, x10, x14) = quarterRound(x2, x6, x10, x14);
             (x3, x7, x11, x15) = quarterRound(x3, x7, x11, x15);
+
             // Diagonal round.
             (x0, x5, x10, x15) = quarterRound(x0, x5, x10, x15);
             (x1, x6, x11, x12) = quarterRound(x1, x6, x11, x12);
             (x2, x7, x8, x13) = quarterRound(x2, x7, x8, x13);
             (x3, x4, x9, x14) = quarterRound(x3, x4, x9, x14);
         }
+
         // Add back the initial state to generate the key stream, then
         // XOR the key stream with the source and write out the result.
         addXor(dst[0..4], src[0..4], x0, c0);
@@ -326,7 +345,9 @@ internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> ds
         addXor(dst[52..56], src[52..56], x13, c13);
         addXor(dst[56..60], src[56..60], x14, c14);
         addXor(dst[60..64], src[60..64], x15, c15);
+
         s.counter += 1;
+
         (src, dst) = (src[(int)(blockSize)..], dst[(int)(blockSize)..]);
     }
 }
@@ -353,6 +374,7 @@ internal static (slice<byte>, error) hChaCha20(slice<byte> @out, slice<byte> key
     if (len(nonce) != 16) {
         return (default!, errors.New(chacha20WrongHChaCha20ˢ2));
     }
+
     var (x0, x1, x2, x3) = (j0, j1, j2, j3);
     var x4 = binary.LittleEndian.Uint32(key[0..4]);
     var x5 = binary.LittleEndian.Uint32(key[4..8]);
@@ -366,18 +388,21 @@ internal static (slice<byte>, error) hChaCha20(slice<byte> @out, slice<byte> key
     var x13 = binary.LittleEndian.Uint32(nonce[4..8]);
     var x14 = binary.LittleEndian.Uint32(nonce[8..12]);
     var x15 = binary.LittleEndian.Uint32(nonce[12..16]);
+
     for (nint i = 0; i < 10; i++) {
         // Diagonal round.
         (x0, x4, x8, x12) = quarterRound(x0, x4, x8, x12);
         (x1, x5, x9, x13) = quarterRound(x1, x5, x9, x13);
         (x2, x6, x10, x14) = quarterRound(x2, x6, x10, x14);
         (x3, x7, x11, x15) = quarterRound(x3, x7, x11, x15);
+
         // Column round.
         (x0, x5, x10, x15) = quarterRound(x0, x5, x10, x15);
         (x1, x6, x11, x12) = quarterRound(x1, x6, x11, x12);
         (x2, x7, x8, x13) = quarterRound(x2, x7, x8, x13);
         (x3, x4, x9, x14) = quarterRound(x3, x4, x9, x14);
     }
+
     _ = @out[31]; // bounds check elimination hint
     binary.LittleEndian.PutUint32(@out[0..4], x0);
     binary.LittleEndian.PutUint32(@out[4..8], x1);

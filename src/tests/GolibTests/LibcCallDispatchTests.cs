@@ -85,6 +85,35 @@ public class LibcCallDispatchTests
         Assert.AreNotEqual((nuint)0, errnoFail, "and errno must be set");
     }
 
+    [TestMethod]
+    public unsafe void TheAlwaysReadRuleReadsErrnoAfterASuccessfulCall()
+    {
+        // Go 1.26's syscalln reads errno after every call and leaves the failure test to its caller. getpid
+        // cannot fail and does not touch errno, so the value planted just before it is what comes back;
+        // under Int32MinusOne the same call reports 0.
+        int* location = ((delegate* unmanaged[Cdecl]<int*>)ErrnoReader)();
+
+        *location = 4242;
+        nuint pid = GoLibcCall.Call(Export("getpid"), ReadOnlySpan<nuint>.Empty, GoLibcErrnoRule.AlwaysRead, ErrnoReader, out nuint errno);
+
+        Assert.AreEqual((nuint)Environment.ProcessId, pid);
+        Assert.AreEqual((nuint)4242, errno, "AlwaysRead must read errno on success too");
+
+        *location = 4242;
+        GoLibcCall.Call(Export("getpid"), ReadOnlySpan<nuint>.Empty, GoLibcErrnoRule.Int32MinusOne, ErrnoReader, out nuint errnoInt32);
+
+        Assert.AreEqual((nuint)0, errnoInt32, "the Int32 rule reads errno only on failure");
+    }
+
+    [TestMethod]
+    public void TheAlwaysReadRuleReportsAFailuresErrno()
+    {
+        nuint r = GoLibcCall.Call(Export("fcntl"), new nuint[] { unchecked((nuint)(uint)(-1)), F_GETFL, 0 }, GoLibcErrnoRule.AlwaysRead, ErrnoReader, out nuint errno);
+
+        Assert.AreEqual(-1, unchecked((int)(uint)r), "fcntl on a bad descriptor returns -1");
+        Assert.AreEqual((nuint)EBADF, errno);
+    }
+
     // The runtime.libcCall protocol, driven through the same shape runtime/darwin/sys_darwin.cs lifts:
     //     [GoType("dyn")] internal partial struct fcntl_args { internal int32 fd, cmd, arg; internal int32 ret, errno; }
     private struct FcntlArgs

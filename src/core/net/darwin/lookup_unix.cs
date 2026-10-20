@@ -12,23 +12,19 @@ using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 
 partial class net_package {
 
-internal static ж<Δsync.Once> ᏑonceReadProtocols = new StandardBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once onceReadProtocols => ref ᏑonceReadProtocols.Value;
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string etcProtocolsˢ = "/etc/protocols"u8;
-
-// readProtocols loads contents of /etc/protocols into protocols map
+// readProtocolsOnce loads contents of /etc/protocols into protocols map
 // for quick access.
-internal static void readProtocols() {
+internal static Action readProtocolsOnce;
+internal static void initᴛreadProtocolsOnce() { readProtocolsOnce = Δsync.OnceFunc(() => {
     GoFrame ᒐ = default;
     try {
-        var (Δfile, err) = open(etcProtocolsˢ);
+        var (Δfile, err) = open("/etc/protocols"u8);
         if (err != default!) {
             return;
         }
         var fileʗ1 = Δfile;
         defer(fileʗ1.close, ref ᒐ);
+
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
             // tcp    6   TCP    # transmission control protocol
             {
@@ -60,12 +56,12 @@ internal static void readProtocols() {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
-}
+}); }
 
 // lookupProtocol looks up IP protocol name in /etc/protocols and
 // returns correspondent protocol number.
 internal static (nint, error) lookupProtocol(context.Context _, @string name) {
-    ᏑonceReadProtocols.Do(readProtocols);
+    readProtocolsOnce();
     return lookupProtocolMap(name);
 }
 
@@ -111,8 +107,8 @@ internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Con
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name);
     if (order == hostLookupCgo) {
         {
-            var (cname, err, ok) = cgoLookupCNAME(ctx, name); if (ok) {
-                return (cname, err);
+            var (cname, err) = cgoLookupCNAME(ctx, name); if (err == default!) {
+                return (cname, default!);
             }
         }
     }

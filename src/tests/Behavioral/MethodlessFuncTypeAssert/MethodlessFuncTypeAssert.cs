@@ -19,7 +19,8 @@ internal static void Main() {
     any i = new Func<nint, nint>((nint w) => w * 2);
     var c = lookup(i);
     fmt.Println(c(21));
-    any j = (nint)(7);
+
+    any j = (nint)7;
     fmt.Println(lookup(j) == default!);
 }
 

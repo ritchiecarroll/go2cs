@@ -35,6 +35,7 @@ internal static void verify(ж<testing.T> Ꮡt, ж<global::go.container.ring_pac
     if (n != N) {
         Ꮡt.Errorf("r.Len() == %d; expected %d"u8, n, N);
     }
+
     // iteration
     n = 0;
     nint s = 0;
@@ -50,9 +51,11 @@ internal static void verify(ж<testing.T> Ꮡt, ж<global::go.container.ring_pac
     if (sum >= 0 && s != sum) {
         Ꮡt.Errorf("forward ring sum = %d; expected %d"u8, s, sum);
     }
+
     if (Ꮡr == nil) {
         return;
     }
+
     // connections
     if (r.next != nil) {
         ж<global::go.container.ring_package.Ring> p = default!;                                             // previous element
@@ -66,6 +69,7 @@ internal static void verify(ж<testing.T> Ꮡt, ж<global::go.container.ring_pac
             Ꮡt.Errorf("prev = %p, expected r.prev = %p\n"u8, p.OrTypedNil(), r.prev.OrTypedNil());
         }
     }
+
     // Next, Prev
     if (Ꮡr.Next() != r.next) {
         Ꮡt.Errorf("r.Next() != r.next"u8);
@@ -73,6 +77,7 @@ internal static void verify(ж<testing.T> Ꮡt, ж<global::go.container.ring_pac
     if (Ꮡr.Prev() != r.prev) {
         Ꮡt.Errorf("r.Prev() != r.prev"u8);
     }
+
     // Move
     if (Ꮡr.Move(0) != Ꮡr) {
         Ꮡt.Errorf("r.Move(0) != r"u8);
@@ -146,11 +151,13 @@ public static void TestLink1(ж<testing.T> Ꮡt) {
     if (r2a != r1a) {
         Ꮡt.Errorf("a) 2-element link failed"u8);
     }
+
     var r2b = r2a.Link(r2a.Next());
     verify(Ꮡt, r2b, 2, 1);
     if (r2b != r2a.Next()) {
         Ꮡt.Errorf("b) 2-element link failed"u8);
     }
+
     var r1c = r2b.Link(r2b);
     verify(Ꮡt, r1c, 1, 1);
     verify(Ꮡt, r2b, 1, 0);
@@ -158,15 +165,19 @@ public static void TestLink1(ж<testing.T> Ꮡt) {
 
 public static void TestLink2(ж<testing.T> Ꮡt) {
     ж<global::go.container.ring_package.Ring> r0 = default!;
-    var r1a = Ꮡ(new Ring(Value: (nint)(42)));
-    var r1b = Ꮡ(new Ring(Value: (nint)(77)));
+    var r1a = Ꮡ(new Ring(Value: (nint)42));
+    var r1b = Ꮡ(new Ring(Value: (nint)77));
     var r10 = makeN(10);
+
     r1a.Link(r0);
     verify(Ꮡt, r1a, 1, 42);
+
     r1a.Link(r1b);
     verify(Ꮡt, r1a, 2, 42 + 77);
+
     r10.Link(r0);
     verify(Ꮡt, r10, 10, sumN(10));
+
     r10.Link(r1a);
     verify(Ꮡt, r10, 12, sumN(10) + 42 + 77);
 }
@@ -183,14 +194,19 @@ public static void TestLink3(ж<testing.T> Ꮡt) {
 public static void TestUnlink(ж<testing.T> Ꮡt) {
     var r10 = makeN(10);
     var s10 = r10.Move(6);
+
     nint sum10 = sumN(10);
+
     verify(Ꮡt, r10, 10, sum10);
     verify(Ꮡt, s10, 10, sum10);
+
     var r0 = r10.Unlink(0);
     verify(Ꮡt, r0, 0, 0);
+
     var r1 = r10.Unlink(1);
     verify(Ꮡt, r1, 1, 2);
     verify(Ꮡt, r10, 9, sum10 - 2);
+
     var r9 = r10.Unlink(9);
     verify(Ꮡt, r9, 9, sum10 - 2);
     verify(Ꮡt, r10, 9, sum10 - 2);
@@ -212,6 +228,7 @@ public static void TestLinkUnlink(ж<testing.T> Ꮡt) {
 // Test that calling Move() on an empty Ring initializes it.
 public static void TestMoveEmptyRing(ж<testing.T> Ꮡt) {
     ref var r = ref heap(new global::go.container.ring_package.Ring(), out var Ꮡr);
+
     Ꮡr.Move(1);
     verify(Ꮡt, Ꮡr, 1, 0);
 }

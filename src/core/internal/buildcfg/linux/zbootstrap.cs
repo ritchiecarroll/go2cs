@@ -27,12 +27,14 @@ internal static readonly @string defaultGO_EXTLINK_ENABLED = @""u8;
 
 internal static readonly @string defaultGO_LDSO = @""u8;
 
-internal static readonly @string version = @"go1.24.13"u8;
+internal static readonly @string version = @"go1.26.10"u8;
 
 internal static readonly @string defaultGOOS = "linux";
 
 internal static readonly @string defaultGOARCH = "amd64";
 
 public static readonly @string DefaultGOFIPS140 = @"off"u8;
+
+public static readonly @string DefaultCGO_ENABLED = ""u8;
 
 } // end buildcfg_package

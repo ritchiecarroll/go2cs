@@ -224,6 +224,7 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
         // The spec says to ignore unknown request IDs.
         return default!;
     }
+
     var exprᴛ1 = rec.h.Type;
     if (exprᴛ1 == typeBeginRequest) {
         if (req != nil) {
@@ -231,6 +232,7 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
             // as an in-progress request. This is an error.
             return errors.New(fcgiReceivedIdThatIsˢ);
         }
+
         beginRequest br = new();
         {
             var err = br.read(rec.content()); if (err != default!) {
@@ -246,9 +248,9 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
         return default!;
     }
     if (exprᴛ1 == typeParams) {
+        // NOTE(eds): Technically a key-value pair can straddle the boundary
+        // between two packets. We buffer until we've received all parameters.
         if (len(rec.content()) > 0) {
-            // NOTE(eds): Technically a key-value pair can straddle the boundary
-            // between two packets. We buffer until we've received all parameters.
             req.Value.rawParams = appendꓸꓸꓸ((~req).rawParams, rec.content());
             return default!;
         }
@@ -287,11 +289,11 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
         return default!;
     }
     if (exprᴛ1 == typeData) {
+        // If the filter role is implemented, read the data stream here.
         return default!;
     }
     if (exprᴛ1 == typeAbortRequest) {
-        delete(c.requests, // If the filter role is implemented, read the data stream here.
- rec.h.Id);
+        delete(c.requests, rec.h.Id);
         c.conn.writeEndRequest(rec.h.Id, 0, statusRequestComplete);
         if ((~req).pw != nil) {
             (~req).pw.CloseWithError(ErrRequestAborted);
@@ -308,7 +310,6 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
         c.conn.writeRecord(typeUnknownType, 0, b);
         return default!;
     }
-
 }
 
 // filterOutUsedEnvVars returns a new map of env vars without the
@@ -344,6 +345,7 @@ internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.Re
     r.Write(default!);
     r.Close();
     c.conn.writeEndRequest(req.reqId, 0, statusRequestComplete);
+
     // Consume the entire body, so the host isn't still writing to
     // us when we close the socket below in the !keepConn case,
     // otherwise we'd send a RST. (golang.org/issue/4183)
@@ -351,8 +353,9 @@ internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.Re
     // some sort of abort request to the host, so the host
     // can properly cut off the client sending all the data.
     // For now just bound it a little and
-    io.CopyN(io.Discard, body, ((int64)100 << (int)(20)));
+    io.CopyN(io.Discard, body, (int64)100 << 20);
     body.Close();
+
     if (!req.keepConn) {
         c.conn.Close();
     }
@@ -424,7 +427,6 @@ internal static bool addFastCGIEnvToContext(@string s) {
     if (exprᴛ1 == "CONTENT_LENGTH"u8 || exprᴛ1 == "CONTENT_TYPE"u8 || exprᴛ1 == "HTTPS"u8 || exprᴛ1 == "PATH_INFO"u8 || exprᴛ1 == "QUERY_STRING"u8 || exprᴛ1 == "REMOTE_ADDR"u8 || exprᴛ1 == "REMOTE_HOST"u8 || exprᴛ1 == "REMOTE_PORT"u8 || exprᴛ1 == "REQUEST_METHOD"u8 || exprᴛ1 == "REQUEST_URI"u8 || exprᴛ1 == "SCRIPT_NAME"u8 || exprᴛ1 == "SERVER_PROTOCOL"u8) {
         return false;
     }
-
     if (strings.HasPrefix(s, httpˢ)) {
         return false;
     }
@@ -436,7 +438,6 @@ internal static bool addFastCGIEnvToContext(@string s) {
     if (exprᴛ2 == "REMOTE_USER"u8) {
         return true;
     }
-
     // Unknown, so include it to be safe.
     return true;
 }

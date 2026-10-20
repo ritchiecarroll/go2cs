@@ -120,6 +120,7 @@ internal static void addLine(this ref Writer b, bool flushed) {
             b.lines = builtin.append(b.lines, (slice<cell>)(default!));
         }
     }
+
     if (!flushed) {
         // The previous line is probably a good indicator
         // of how many cells the current line will have.
@@ -172,16 +173,28 @@ internal static void reset(this ref Writer b) {
 // buf                start of incomplete cell  pos
 
 // Formatting can be controlled with these flags.
+// Ignore html tags and treat entities (starting with '&'
+// and ending in ';') as single characters (width = 1).
 public const nuint FilterHTML = /* 1 << iota */ 1;
 
+// Strip Escape characters bracketing escaped text segments
+// instead of passing them through unchanged with the text.
 public const nuint StripEscape = 2;
 
+// Force right-alignment of cell content.
+// Default is left-alignment.
 public const nuint AlignRight = 4;
 
+// Handle empty columns as if they were not present in
+// the input in the first place.
 public const nuint DiscardEmptyColumns = 8;
 
+// Always use tabs for indentation columns (i.e., padding of
+// leading empty cells on the left) independent of padchar.
 public const nuint TabIndent = 16;
 
+// Print a vertical bar ('|') between columns (after formatting).
+// Discarded columns appear as zero-width columns ("||").
 public const nuint Debug = 32;
 
 // A [Writer] must be initialized with a call to Init. The first parameter (output)
@@ -215,7 +228,9 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
         flags &= unchecked((nuint)~(nuint)(AlignRight));
     }
     b.flags = flags;
+
     b.reset();
+
     return Ꮡb;
 }
 
@@ -225,7 +240,7 @@ internal static void dump(this ref Writer b) {
     foreach (var (i, line) in b.lines) {
         print((@string)"("u8, i, (@string)") "u8);
         foreach (var (_, c) in line) {
-            print((@string)"["u8, ((@string)(b.buf.slice(pos, pos + c.size))), (@string)"]"u8);
+            print((@string)"["u8, (@string)(b.buf.slice(pos, pos + c.size)), (@string)"]"u8);
             pos += c.size;
         }
         print((@string)"\n"u8);
@@ -275,6 +290,7 @@ internal static void writePadding(this ref Writer b, nint textw, nint cellw, boo
         b.writeN(tabs, quo((n + b.tabwidth - 1), b.tabwidth));
         return;
     }
+
     // padding is done with non-tab characters
     b.writeN(b.padbytes[0..], cellw - textw);
 }
@@ -287,13 +303,16 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
     pos = pos0;
     for (nint i = line0; i < line1; i++) {
         var line = b.lines[i];
+
         // if TabIndent is set, use tabs to pad leading empty cells
-        var useTabs = (nuint)(b.flags & TabIndent) != 0;
+        var useTabs = (b.flags & TabIndent) != 0;
+
         foreach (var (j, c) in line) {
-            if (j > 0 && (nuint)(b.flags & Debug) != 0) {
+            if (j > 0 && (b.flags & Debug) != 0) {
                 // indicate column break
                 b.write0(vbar);
             }
+
             if (c.size == 0){
                 // empty cell
                 if (j < len(b.widths)) {
@@ -302,15 +321,13 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
             } else {
                 // non-empty cell
                 useTabs = false;
-                if ((nuint)(b.flags & AlignRight) == 0){
-                    // align left
+                if ((b.flags & AlignRight) == 0){ // align left
                     b.write0(b.buf.slice(pos, pos + c.size));
                     pos += c.size;
                     if (j < len(b.widths)) {
                         b.writePadding(c.width, b.widths[j], false);
                     }
-                } else {
-                    // align right
+                } else { // align right
                     if (j < len(b.widths)) {
                         b.writePadding(c.width, b.widths[j], false);
                     }
@@ -319,6 +336,7 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
                 }
             }
         }
+
         if (i + 1 == len(b.lines)){
             // last buffered line - we don't have a newline, so just write
             // any outstanding buffered data
@@ -343,6 +361,7 @@ internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, ni
     nint column = len(b.widths);
     for (nint @this = line0; @this < line1; @this++) {
         var line = b.lines[@this];
+
         if (column >= len(line) - 1) {
             continue;
         }
@@ -352,9 +371,11 @@ internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, ni
         // tab-terminated; the last cell per line describes the
         // text before the newline/formfeed and does not belong
         // to a column)
+
         // print unprinted lines until beginning of block
         pos = b.writeLines(pos, line0, @this);
         line0 = @this;
+
         // column block begin
         nint width = b.minwidth; // minimal column width
         var discardable = true; // true if all cells in this column are empty and "soft"
@@ -377,10 +398,12 @@ internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, ni
             }
         }
         // column block end
+
         // discard empty columns if necessary
-        if (discardable && (nuint)(b.flags & DiscardEmptyColumns) != 0) {
+        if (discardable && (b.flags & DiscardEmptyColumns) != 0) {
             width = 0;
         }
+
         // format and print all columns to the right of this column
         // (we know the widths of this column and all columns to the left)
         b.widths = builtin.append(b.widths, width); // push width
@@ -388,6 +411,7 @@ internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, ni
         b.widths = b.widths.slice(0, len(b.widths) - 1); // pop width
         line0 = @this;
     }
+
     // print unprinted lines until end
     return b.writeLines(pos, line0, line1);
 }
@@ -424,7 +448,6 @@ internal static void startEscape(this ref Writer b, byte ch) {
     else if (exprᴛ1 is (rune)'&') {
         b.endChar = (rune)';';
     }
-
 }
 
 // Terminate escaped mode. If the escaped text was an HTML tag, its width
@@ -435,17 +458,15 @@ internal static void endEscape(this ref Writer b) {
     var exprᴛ1 = b.endChar;
     if (exprᴛ1 == Escape) {
         b.updateWidth();
-        if ((nuint)(b.flags & StripEscape) == 0) {
+        if ((b.flags & StripEscape) == 0) {
             b.cell.width -= 2; // don't count the Escape chars
         }
     }
-    else if (exprᴛ1 is (rune)'>') {
+    else if (exprᴛ1 is (rune)'>') { // tag of zero width
     }
     else if (exprᴛ1 is (rune)';') {
         b.cell.width++; // entity, count as one rune
     }
-
-    // tag of zero width
     b.pos = len(b.buf);
     b.endChar = 0;
 }
@@ -504,8 +525,8 @@ internal static error /*err*/ flush(this ж<Writer> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         defer(Ꮡb.handlePanic, Ꮡerr, flushˢ, ref ᒐ);
         b.flushNoDefers();
         err = default!;
@@ -527,6 +548,7 @@ internal static void flushNoDefers(this ref Writer b) {
         }
         b.terminateCell(false);
     }
+
     // format contents of buffer
     b.format(0, 0, len(b.lines));
     b.reset();
@@ -546,9 +568,10 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         defer(Ꮡb.handlePanic, Ꮡerr, writeˢ, ref ᒐ);
+
         // split text into cells
         n = 0;
         foreach (var (i, ch) in buf) {
@@ -556,12 +579,12 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                 // outside escape
                 var exprᴛ1 = ch;
                 if (exprᴛ1 is (rune)'\t' or (rune)'\v' or (rune)'\n' or (rune)'\f') {
+                    // end of cell
                     b.append(buf.slice(n, i));
                     b.updateWidth();
                     n = i + 1; // ch consumed
                     nint ncells = b.terminateCell(ch == (rune)'\t');
                     if (ch == (rune)'\n' || ch == (rune)'\f') {
-                        // end of cell
                         // terminate line
                         b.addLine(ch == (rune)'\f');
                         if (ch == (rune)'\f' || ncells == 1) {
@@ -571,7 +594,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                             // line is ignored by format()), thus we can flush the
                             // Writer contents.
                             b.flushNoDefers();
-                            if (ch == (rune)'\f' && (nuint)(b.flags & Debug) != 0) {
+                            if (ch == (rune)'\f' && (b.flags & Debug) != 0) {
                                 // indicate section break
                                 b.write0(hbar);
                             }
@@ -579,18 +602,18 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                     }
                 }
                 else if (exprᴛ1 == Escape) {
+                    // start of escaped sequence
                     b.append(buf.slice(n, i));
                     b.updateWidth();
                     n = i;
-                    if ((nuint)(b.flags & StripEscape) != 0) {
-                        // start of escaped sequence
+                    if ((b.flags & StripEscape) != 0) {
                         n++; // strip Escape
                     }
                     b.startEscape(Escape);
                 }
                 else if (exprᴛ1 is (rune)'<' or (rune)'&') {
-                    if ((nuint)(b.flags & FilterHTML) != 0) {
-                        // possibly an html tag/entity
+                    // possibly an html tag/entity
+                    if ((b.flags & FilterHTML) != 0) {
                         // begin of tag/entity
                         b.append(buf.slice(n, i));
                         b.updateWidth();
@@ -598,13 +621,12 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                         b.startEscape(ch);
                     }
                 }
-
             } else {
                 // inside escape
                 if (ch == b.endChar) {
                     // end of tag/entity
                     nint j = i + 1;
-                    if (ch == Escape && (nuint)(b.flags & StripEscape) != 0) {
+                    if (ch == Escape && (b.flags & StripEscape) != 0) {
                         j = i; // strip Escape
                     }
                     b.append(buf.slice(n, j));
@@ -613,6 +635,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                 }
             }
         }
+
         // append leftover text
         b.append(buf.slice(n));
         n = len(buf);

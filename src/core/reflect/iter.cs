@@ -129,7 +129,6 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
             }
         };
     }
-
     throw panic("reflect: " + v.Type().String() + " cannot produce iter.Seq[Value]");
 }
 
@@ -189,7 +188,6 @@ public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
             }
         };
     }
-
     throw panic("reflect: " + v.Type().String() + " cannot produce iter.Seq2[Value, Value]");
 }
 

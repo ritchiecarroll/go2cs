@@ -25,12 +25,13 @@ using static go.image.gif_package;
 
 partial class gif_internal_test_package {
 
-// width=2, height=1
 // header, palette and trailer are parts of a valid 2x1 GIF image.
-internal static readonly @string headerStr = ((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x02, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00})); // headerFields=(a color table of 2 pixels), backgroundIndex, aspect
-
+internal static readonly @string headerStr = ((@string)(new byte[]{
+    0x47, 0x49, 0x46, 0x38, 0x39, 0x61,
+    0x02, 0x00, 0x01, 0x00, // width=2, height=1
+    0x80, 0x00, 0x00 // headerFields=(a color table of 2 pixels), backgroundIndex, aspect
+}));
 internal static readonly @string paletteStr = "\x10\x20\x30\x40\x50\x60"u8; // the color table, also known as a palette
-
 internal static readonly @string trailerStr = "\x3b"u8;
 
 // lzw.NewReader wants an io.ByteReader, this ensures we're compatible.
@@ -71,24 +72,25 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
     // of an existing data sub-block (past the LZW End of Information code) or in
     // a separate data sub-block. The 0x02 values are arbitrary.
     @string extra = extraᶜ;
+
     var testCases = new TestDecode_testCases[]{
         new(0, 0, 0, errNotEnough),
         new(1, 0, 0, errNotEnough),
-        new(2, 0, 0, default!), // An extra data sub-block after the compressed section with 1 byte which we
- // silently skip.
-
-        new(2, 0, 1, default!), // An extra data sub-block after the compressed section with 2 bytes. In
- // this case we complain that there is too much data.
-
-        new(2, 0, 2, errTooMuch), // Too much pixel data.
-
-        new(3, 0, 0, errTooMuch), // An extra byte after LZW data, but inside the same data sub-block.
-
-        new(2, 1, 0, default!), // Two extra bytes after LZW data, but inside the same data sub-block.
-
-        new(2, 2, 0, default!), // Extra data exists in the final sub-block with LZW data, AND there is
- // a bogus sub-block following.
-
+        new(2, 0, 0, default!),
+        // An extra data sub-block after the compressed section with 1 byte which we
+        // silently skip.
+        new(2, 0, 1, default!),
+        // An extra data sub-block after the compressed section with 2 bytes. In
+        // this case we complain that there is too much data.
+        new(2, 0, 2, errTooMuch),
+        // Too much pixel data.
+        new(3, 0, 0, errTooMuch),
+        // An extra byte after LZW data, but inside the same data sub-block.
+        new(2, 1, 0, default!),
+        // Two extra bytes after LZW data, but inside the same data sub-block.
+        new(2, 2, 0, default!),
+        // Extra data exists in the final sub-block with LZW data, AND there is
+        // a bogus sub-block following.
         new(2, 1, 1, errTooMuch)
     }.slice();
     foreach (var (_, tc) in testCases) {
@@ -107,14 +109,18 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
                     tc.nPix, tc.extraExisting, tc.extraSeparate, len(enc));
                 continue;
             }
+
             // Write the size of the data sub-block containing the LZW data.
             b.WriteByte((byte)(len(enc) + tc.extraExisting));
+
             // Write the LZW data.
             b.Write(enc);
+
             // Write extra bytes inside the same data sub-block where LZW data
             // ended. Each arbitrarily 0x02.
             b.WriteString(extra.slice(0, tc.extraExisting));
         }
+
         if (tc.extraSeparate > 0) {
             // Data sub-block size. This indicates how many extra bytes follow.
             b.WriteByte((byte)tc.extraSeparate);
@@ -122,11 +128,13 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
         }
         b.WriteByte(0x00); // An empty block signifies the end of the image data.
         b.WriteString(trailerStr);
+
         var (got, err) = Decode(new gif_internal_test_package.bytes_BufferжReader(b));
         if (!AreEqual(err, tc.wantErr)) {
             Ꮡt.Errorf("nPix=%d, extraExisting=%d, extraSeparate=%d\ngot  %v\nwant %v"u8,
                 tc.nPix, tc.extraExisting, tc.extraSeparate, err, tc.wantErr);
         }
+
         if (tc.wantErr != default!) {
             continue;
         }
@@ -166,6 +174,7 @@ public static void TestTransparentIndex(ж<testing.T> Ꮡt) {
         b.WriteByte(0x00);
     }
     b.WriteString(trailerStr);
+
     var (g, err) = DecodeAll(new gif_internal_test_package.bytes_BufferжReader(b));
     if (err != default!) {
         Ꮡt.Fatalf("DecodeAll: %v"u8, err);
@@ -189,26 +198,20 @@ public static void TestTransparentIndex(ж<testing.T> Ꮡt) {
     }
 }
 
-// w=1, h=1 (6)
-// headerFields, bg, aspect (10)
-// color table and graphics control (13)
-// (19)
-// frame 1 (0,0 - 1,1)
-// (32)
-// lzw pixels
-// trailer
 // testGIF is a simple GIF that we can modify to test different scenarios.
 internal static slice<byte> testGIF = new byte[]{
     (rune)'G', (rune)'I', (rune)'F', (rune)'8', (rune)'9', (rune)'a',
-    1, 0, 1, 0,
-    128, 0, 0,
-    0, 0, 0, 1, 1, 1,
-    0x21, 0xf9, 0x04, 0x00, 0x00, 0x00, 0xff, 0x00,
+    1, 0, 1, 0, // w=1, h=1 (6)
+    128, 0, 0, // headerFields, bg, aspect (10)
+    0, 0, 0, 1, 1, 1, // color table and graphics control (13)
+    0x21, 0xf9, 0x04, 0x00, 0x00, 0x00, 0xff, 0x00, // (19)
+    // frame 1 (0,0 - 1,1)
     0x2c,
     0x00, 0x00, 0x00, 0x00,
-    0x01, 0x00, 0x01, 0x00,
+    0x01, 0x00, 0x01, 0x00, // (32)
     0x00,
-    0x02, 0x02, 0x4c, 0x01, 0x00,
+    0x02, 0x02, 0x4c, 0x01, 0x00, // lzw pixels
+    // trailer
     0x3b
 }.slice();
 
@@ -234,12 +237,14 @@ public static void TestBounds(ж<testing.T> Ꮡt) {
     gif[32] = 2;
     @string want = gifFrameBoundsLargerThanˢ;
     @try(Ꮡt, gif, want);
+
     // Make the bounds too small; does not trigger bounds
     // check, but now there's too much data.
     gif[32] = 0;
     want = gifTooMuchImageDataˢ;
     @try(Ꮡt, gif, want);
     gif[32] = 1;
+
     // Make the bounds really big, expect an error.
     want = gifFrameBoundsLargerThanˢ;
     for (nint i = 0; i < 4; i++) {
@@ -250,18 +255,23 @@ public static void TestBounds(ж<testing.T> Ꮡt) {
 
 public static void TestNoPalette(ж<testing.T> Ꮡt) {
     var b = Ꮡ(new bytes.Buffer(nil));
+
     // Manufacture a GIF with no palette, so any pixel at all
     // will be invalid.
     b.WriteString(headerStr[..(int)(len(headerStr) - 3)]);
     b.WriteString("\x00\x00\x00"u8); // No global palette.
+
     // Image descriptor: 2x1, no local palette, and 2-bit LZW literals.
     b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02"u8);
+
     // Encode the pixels: neither is in range, because there is no palette.
     var enc = lzwEncode(new byte[]{0x00, 0x03}.slice());
     b.WriteByte((byte)len(enc));
     b.Write(enc);
     b.WriteByte(0x00); // An empty block signifies the end of the image data.
+
     b.WriteString(trailerStr);
+
     @try(Ꮡt, b.Bytes(), gifNoColorTableˢ);
 }
 
@@ -271,17 +281,22 @@ internal static readonly @string gifInvalidPixelValueˢ = "gif: invalid pixel va
 public static void TestPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
     foreach (var (_, pval) in new byte[]{0, 1, 2, 3}.slice()) {
         var b = Ꮡ(new bytes.Buffer(nil));
+
         // Manufacture a GIF with a 2 color palette.
         b.WriteString(headerStr);
         b.WriteString(paletteStr);
+
         // Image descriptor: 2x1, no local palette, and 2-bit LZW literals.
         b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02"u8);
+
         // Encode the pixels; some pvals trigger the expected error.
         var enc = lzwEncode(new byte[]{pval, pval}.slice());
         b.WriteByte((byte)len(enc));
         b.Write(enc);
         b.WriteByte(0x00); // An empty block signifies the end of the image data.
+
         b.WriteString(trailerStr);
+
         // No error expected, unless the pixels are beyond the 2 color palette.
         @string want = ""u8;
         if (pval >= 2) {
@@ -293,9 +308,11 @@ public static void TestPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
 
 public static void TestTransparentPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
     var b = Ꮡ(new bytes.Buffer(nil));
+
     // Manufacture a GIF with a 2 color palette.
     b.WriteString(headerStr);
     b.WriteString(paletteStr);
+
     // Graphic Control Extension: transparency, transparent color index = 3.
     //
     // This index, 3, is out of range of the global palette and there is no
@@ -304,14 +321,18 @@ public static void TestTransparentPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
     //
     // See golang.org/issue/15059.
     b.WriteString(((@string)(new byte[]{0x21, 0xf9, 0x04, 0x01, 0x00, 0x00, 0x03, 0x00})));
+
     // Image descriptor: 2x1, no local palette, and 2-bit LZW literals.
     b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02"u8);
+
     // Encode the pixels.
     var enc = lzwEncode(new byte[]{0x03, 0x03}.slice());
     b.WriteByte((byte)len(enc));
     b.Write(enc);
     b.WriteByte(0x00); // An empty block signifies the end of the image data.
+
     b.WriteString(trailerStr);
+
     @try(Ꮡt, b.Bytes(), ""u8);
 }
 
@@ -329,32 +350,30 @@ public static void TestLoopCount(ж<testing.T> Ꮡt) {
     var testCases = new TestLoopCount_testCases[]{
         new(
             "loopcount-missing"u8,
-            slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00, 0x3b}))), // image 0 descriptor & color table
- // image 0 image data & trailer
-
+            slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + // image 0 descriptor & color table
+                ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00, 0x3b}))), // image 0 image data & trailer
             -1
         ),
         new(
             "loopcount-0"u8,
-            slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30, 0x03, 0x01, 0x00, 0x00, 0x00})) + ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00})) + ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00, 0x3b}))), // loop count = 0
- // image 0 descriptor & color table
- // image 0 image data
- // image 1 descriptor & color table
- // image 1 image data & trailer
-
+            slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30, 0x03, 0x01, 0x00, 0x00, 0x00})) + // loop count = 0
+                ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + // image 0 descriptor & color table
+                ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00})) + // image 0 image data
+                ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + // image 1 descriptor & color table
+                ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00, 0x3b}))), // image 1 image data & trailer
             0
         ),
         new(
             "loopcount-1"u8,
-            slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30, 0x03, 0x01, 0x01, 0x00, 0x00})) + ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00})) + ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00, 0x3b}))), // loop count = 1
- // image 0 descriptor & color table
- // image 0 image data
- // image 1 descriptor & color table
- // image 1 image data & trailer
-
+            slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30, 0x03, 0x01, 0x01, 0x00, 0x00})) + // loop count = 1
+                ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + // image 0 descriptor & color table
+                ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00})) + // image 0 image data
+                ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + // image 1 descriptor & color table
+                ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00, 0x3b}))), // image 1 image data & trailer
             1
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestLoopCount_testCases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -439,8 +458,8 @@ public static void TestDecodeMemoryConsumption(ж<testing.T> Ꮡt) {
         }
         runtime.ReadMemStats(s1);
         {
-            var heapDiff = (int64)((~s1).HeapAlloc - (~s0).HeapAlloc); if (heapDiff > ((int64)30 << (int)(20))) {
-                Ꮡt.Fatalf("Decode of %d frames increased heap by %dMB"u8, (nint)(frames), (heapDiff >> (int)(20)));
+            var heapDiff = (int64)((~s1).HeapAlloc - (~s0).HeapAlloc); if (heapDiff > (int64)30 << 20) {
+                Ꮡt.Fatalf("Decode of %d frames increased heap by %dMB"u8, (nint)(frames), heapDiff >> 20);
             }
         }
     }

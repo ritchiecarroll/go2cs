@@ -25,6 +25,7 @@ import (
 )
 
 func TestAnInternalTestLocalInterfaceCarriesItsLocalNameStamp(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}

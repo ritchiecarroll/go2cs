@@ -14,6 +14,7 @@ global using slogꓸHandler = go.log.slog_package.ΔHandler;
 global using slogꓸKind = go.log.slog_package.ΔKind;
 global using slogꓸLevel = go.log.slog_package.ΔLevel;
 global using slogꓸLogValuer = go.log.slog_package.ΔLogValuer;
+global using slogꓸSource = go.log.slog_package.ΔSource;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
@@ -50,6 +51,12 @@ using static go.log.slog.@internal.benchmarks_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -58,8 +65,8 @@ using static go.log.slog.@internal.benchmarks_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "ACJGuJY=", "", "", "41=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
-[assembly: go.GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqaA9NKClIKCgpSCgoKCgpKCgoKClIKC1qKUpKSkpKSkpIKUxMbIoqaCpoIADyCCpoCkooKCpoKmguyAooCkgqaC", "50-56:1")]
+[assembly: go.GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "AChSuIKW", "", "", "48=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
+[assembly: go.GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqaA9NKCpIKCgpSCgoKCgpKCgoKClIKC1qKUpKSkpKSkpIKUxMa4oqaCpoIADyCCpoCkooKCpoKmguyAooCkgqaC", "50-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;
@@ -74,6 +81,7 @@ public static partial class benchmarks_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct @event {}
     [GoValueClone("ringBuffer")] internal partial struct asyncHandler {}
     internal partial struct disabledHandler {}
     internal partial struct fastTextHandler {}

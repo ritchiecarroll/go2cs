@@ -763,9 +763,16 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	savedPendingKeepAlive := v.pendingSyscallKeepAlive
 	v.pendingSyscallKeepAlive = nil
 
+	// A comment past the literal's closing brace is not its body's: `func(x int) int { return x + 1 }, // c`
+	// labels the element the literal is, and the list holding it writes it there.
+	savedFuncLitRbrace := v.funcLitRbrace
+	v.funcLitRbrace = funcLit.Body.Rbrace
+
 	v.pushBlock()
 	v.visitBlockStmt(funcLit.Body, blockStatementContext)
 	body := v.popBlockAppend(false)
+
+	v.funcLitRbrace = savedFuncLitRbrace
 
 	v.assertNoPendingKeepAlive("func literal")
 	v.pendingSyscallKeepAlive = savedPendingKeepAlive
@@ -887,6 +894,17 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			if strings.HasPrefix(trimmedBody, "{") {
 				body = "{" + prologue.String() + strings.TrimPrefix(trimmedBody, "{")
 			}
+		}
+	}
+
+	// Go's stack backing store for each qualifying append variable the literal declares: a lambda invocation is a
+	// fresh frame, as a Go closure call is, so the buffer and its used flag reset per call (stackAppendHints.go).
+	// Spliced before the single-return collapse below, so a body that carries one keeps its block form.
+	if prologue := v.stackAppendBufferPrologue(funcLit, bodyIndent); prologue != "" {
+		trimmedBody := strings.TrimSpace(body)
+
+		if strings.HasPrefix(trimmedBody, "{") {
+			body = "{" + prologue + strings.TrimPrefix(trimmedBody, "{")
 		}
 	}
 
@@ -1315,6 +1333,13 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			// needs the declared result type stated.
 			hasConvertedForward := false
 
+			// A numeric literal whose natural C# type does not convert, as a TYPE, to its declared
+			// element (an `int` into a uint32 or a uintptr, a `double` into a float32) leaves the
+			// arms with no best common type even beside a fully typed arm: neither tuple converts
+			// to the other. Go 1.26's os rootMkdirAll returns `fd, err` and `0, &PathError{…}` at a
+			// windows syscall.Handle position, CS8917. See numericLiteralConvertsTo.
+			hasUnconvertibleLiteral := false
+
 			ast.Inspect(funcLit.Body, func(n ast.Node) bool {
 				if _, isLit := n.(*ast.FuncLit); isLit && n != funcLit.Body {
 					return false // a nested literal's returns belong to it
@@ -1383,6 +1408,12 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 							}
 						}
 					}
+
+					for i, res := range ret.Results {
+						if lit, isNumeric := numericBasicLit(res); isNumeric && !numericLiteralConvertsTo(lit, results.At(i).Type()) {
+							hasUnconvertibleLiteral = true
+						}
+					}
 				}
 
 				return true
@@ -1397,7 +1428,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 				}
 			}
 
-			if hasReturn && (!hasFullyTypedArm || mixedIntConflict || hasConvertedForward) {
+			if hasReturn && (!hasFullyTypedArm || mixedIntConflict || hasConvertedForward || hasUnconvertibleLiteral) {
 				returnTypePrefix = v.generateResultSignature(litSig) + " "
 			}
 		}
@@ -1455,4 +1486,30 @@ func (v *Visitor) funcLitHeapBoxParamIdents(funcLit *ast.FuncLit) []*ast.Ident {
 	}
 
 	return boxed
+}
+
+// numericLiteralConvertsTo reports whether a bare numeric literal's natural C# type (`int` for an
+// INT literal, `double` for a FLOAT one) converts implicitly, as a TYPE, to the C# type of a
+// declared result element. Lambda return-type inference works from the arms' TYPES, so the constant
+// conversions that let `0` initialize a `uint` do not apply. A NAMED element is judged by its
+// underlying type: its generated conversions take the underlying (and, for uintptr, nuint), which
+// the literal's type reaches no more readily. A non-numeric element answers true (nothing to judge),
+// and so do the complex kinds, which have no measured instance.
+func numericLiteralConvertsTo(lit *ast.BasicLit, declared types.Type) bool {
+	basic, ok := types.Unalias(declared).Underlying().(*types.Basic)
+
+	if !ok || basic.Info()&types.IsNumeric == 0 || basic.Info()&types.IsComplex != 0 {
+		return true
+	}
+
+	if lit.Kind == token.FLOAT {
+		return basic.Kind() == types.Float64
+	}
+
+	switch basic.Kind() {
+	case types.Int8, types.Int16, types.Uint8, types.Uint16, types.Uint32, types.Uint64, types.Uint, types.Uintptr:
+		return false
+	}
+
+	return true
 }

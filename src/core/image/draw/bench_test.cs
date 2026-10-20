@@ -32,6 +32,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
+
     global::go.image.draw_package.Image dst = default!;
     var exprᴛ1 = dcm;
     if (AreEqual(exprᴛ1, color.RGBAModel)) {
@@ -63,13 +64,13 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
         dst = new draw_test_package.image_RGBA64жImage(dst1);
     }
     else { /* default: */
-        if (reflect.DeepEqual(dcm, // The == operator isn't defined on a color.Palette (a slice), so we
- // use reflection.
- palette)){
+        // The == operator isn't defined on a color.Palette (a slice), so we
+        // use reflection.
+        if (reflect.DeepEqual(dcm, palette)){
             var dst1 = image.NewPaletted(image.Rect(0, 0, dstw, dsth), palette);
             for (nint y = 0; y < dsth; y++) {
                 for (nint x = 0; x < dstw; x++) {
-                    dst1.SetColorIndex(x, y, (uint8)((uint8)((nint)(x ^ y)) & 1));
+                    dst1.SetColorIndex(x, y, (uint8)((uint8)(x ^ y) & 1));
                 }
             }
             dst = new draw_test_package.image_PalettedжImage(dst1);
@@ -176,10 +177,10 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
     image.Image mask = default!;
     var exprᴛ3 = mcm;
     if (AreEqual(exprᴛ3, default!)) {
+        // No-op.
     }
     else if (AreEqual(exprᴛ3, color.AlphaModel)) {
-        var mask1 = image.NewAlpha(image.Rect(0, // No-op.
- 0, srcw, srch));
+        var mask1 = image.NewAlpha(image.Rect(0, 0, srcw, srch));
         for (nint y = 0; y < srch; y++) {
             for (nint x = 0; x < srcw; x++) {
                 var a = (uint8)((23 * x + 29 * y) % 0x100);
@@ -201,6 +202,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
         // Scatter the destination rectangle to draw into.
         nint x = 3 * i % (nint)(dstw - srcw);
         nint y = 7 * i % (nint)(dsth - srch);
+
         DrawMask(dst, dst.Bounds().Add(image.Pt(x, y)), src, new image.Point(nil), mask, new image.Point(nil), op);
     }
 }

@@ -28,6 +28,7 @@ public static void TestErrorCalls(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, @file) in files) {
         var fsetʗ1 = fset;
         ast.Inspect(new ast.FileжNode(@file), (ast.Node n) => {
@@ -107,7 +108,6 @@ internal static bool balancedParentheses(@string s) {
             continue;
             break;
         }}
-
         // closing parenthesis/bracket must have matching opening
         nint top = len(stack) - 1;
         if (top < 0 || stack[top] != open) {

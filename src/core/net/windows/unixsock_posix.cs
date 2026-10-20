@@ -98,7 +98,6 @@ internal static @string sotypeToNet(nint sotype) {
     { /* default: */
         throw panic("sotypeToNet unknown socket type");
     }
-
 }
 
 internal static nint family(this ref UnixAddr a) {
@@ -143,6 +142,7 @@ internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) re
     if (readMsgFlags == 0 && err == default! && oobn > 0) {
         setReadMsgCloseOnExec(oob.slice(0, oobn));
     }
+
     switch (sa.type()) {
     case ж<syscall.SockaddrUnix> saΔ1: {
         if ((~saΔ1).Name != ""u8) {

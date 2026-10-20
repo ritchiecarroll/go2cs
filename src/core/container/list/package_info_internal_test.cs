@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +28,7 @@ using static go.container.list_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("container/list/list_test.go", "list_test.cs", "AAoSooCCgqSmooSCqIKClLqCgoKCgpSAgqSAgqaCgoKClICCpICCAAgKgoKWgoKCgoKCgpaCgoKChIKEgoSCgoSCgoKEgoKChIKCgoKCgoKChIKCgoKCgoKCloKCgIK2gpiSgoKUpqKCloKCgoKUuIKChIKChIKEgoKCgoSCgoKChIKEgoKCgoSCgoKChIKCgoKmgoKCgoKCgoKCpoKCgoSCgoSCgoCCpoKAgsiCgoKEgoKClIKUgriCgoKCgoSCgoKEgoKChIKChIKChIKChIKokoKChIKChIKChIKCqJKCgoKCgqiSgoKCgoKokoKEgoSCgoSCgg==")]
+[assembly: go.GoPositionMap("container/list/list_test.go", "list_test.cs", "AAoSooCCgqSmopSCuIKClMqCgoKCgpSAgqSAgraCgoKClICCpICCAAgKgoKmgoKCgoKCgqaCgoKClIKUgpSCgpSCgoKUgoKClIKCgoKCgoKClIKCgoKCgoKCpoKCgIK2gqiSgoKUpqKCpoKCgoKUuIKClIKClIKUgoKCgpSCgoKClIKUgoKCgpSCgoKClIKCgoKmgoKCgoKCgoKCpoKCgpSCgpSCgoCCtoKAgsiCgoKUgoKClIKUgriCgoKCgpSCgoKUgoKClIKClIKClIKClIKokoKClIKClIKClIKCqJKCgoKCgqiSgoKCgoKokoKUgpSCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.container;

@@ -72,6 +72,41 @@ public static partial class GoReflect
     }
 
     /// <summary>
+    /// reflect.NewAt's door for a pointer to a POINTER array, <c>*[N]*E</c>, over memory the Go runtime did not
+    /// allocate: the foreign pointer array E's registered opener builds (NativeArrayOpeners), or <c>null</c> when
+    /// <paramref name="number"/> is not such an address or <paramref name="target"/> is not such an array, and NewAt
+    /// keeps the zero box it has always returned.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A <c>reflect.NewAt(ArrayOf(N, PointerTo(E)), p)</c> over native words reads the addresses they hold in Go. The
+    /// zero box read nil for every element. An E no compilation spells has no registered opener, so it refuses by
+    /// name rather than reading nil (G's ruling, 2026-10-19).
+    /// </para>
+    /// <para>
+    /// Only a REAL user address reaches the opener: never a tagged token or a number derived from one, never a pinned
+    /// managed object the token table still validates (<see cref="ResolveNewAtPointee"/> answered those first), and
+    /// never the runtime's own memory (<see cref="GoOsMemory"/>), whose words are the runtime's own boxes.
+    /// </para>
+    /// </remarks>
+    public static object? OpenNewAtPointerArray(nuint number, Type target, nint[]? dims)
+    {
+        if (!target.IsGenericType || target.GetGenericTypeDefinition() != typeof(array<>) || dims is not [var length, ..] || length < 0)
+            return null;
+
+        Type pointer = target.GetGenericArguments()[0];
+
+        if (!pointer.IsGenericType || pointer.GetGenericTypeDefinition() != typeof(ж<>))
+            return null;
+
+        if (number == 0 || ManagedPointerTokens.NamesNoUserMemory(number) || ManagedPointerTokens.IsTokenArithmetic(number) ||
+            ManagedPointerTokens.Resolve(number) is not null || GoOsMemory.Owns(number))
+            return null;
+
+        return NativeArrayOpeners.OpenPointerArray(pointer.GetGenericArguments()[0], number, length);
+    }
+
+    /// <summary>
     /// Resolves the Go interior pointer <c>(*V)(base + offset)</c> to an alias box over the real
     /// storage of <paramref name="baseBox"/>, or returns <c>null</c> when the offset does not land
     /// EXACTLY on a <paramref name="target"/>-typed node of the base's Go layout.
@@ -154,6 +189,8 @@ public static partial class GoReflect
 
                 case Array:
                 {
+                    dims ??= DeclaredArrayDims(nodeType);
+
                     if (dims is not { Length: > 0 } || dims[0] < 0 || ElementType(nodeType) is not { } elemType)
                     {
                         shape += " refused: unknown-dims array";

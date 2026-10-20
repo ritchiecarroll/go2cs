@@ -58,19 +58,18 @@ internal static readonly @string toolˢ = "tool"u8;
 // This catches accidental dependencies between the HTTP transport and
 // server code.
 public static void TestCmdGoNoHTTPServer(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
     @string goBin = testenv.GoToolPath(new http_test_package.testing_TжTB(Ꮡt));
     var (@out, err) = testenv.Command(new http_test_package.testing_TжTB(Ꮡt), goBin, toolˢ, "nm", goBin).CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("go tool nm: %v: %s"u8, err, @out);
     }
-    var wantSym = new map<@string, bool>{ // Verify these exist: (sanity checking this test)
-
+    var wantSym = new map<@string, bool>{
+        // Verify these exist: (sanity checking this test)
         ["net/http.(*Client).do"u8] = true,
-        ["net/http.(*Transport).RoundTrip"u8] = true, // Verify these don't exist:
+        ["net/http.(*Transport).RoundTrip"u8] = true,
 
+        // Verify these don't exist:
         ["net/http.http2Server"u8] = false,
         ["net/http.(*Server).Serve"u8] = false,
         ["net/http.(*ServeMux).ServeHTTP"u8] = false,
@@ -155,9 +154,8 @@ public static void BenchmarkCopyValues(ж<testing.B> Ꮡb) {
     }
 }
 
-// Functions that use Unicode-aware case folding.
-// Functions that use Unicode-aware spaces.
 internal static map<@string, bool> forbiddenStringsFunctions = new map<@string, bool>{
+    // Functions that use Unicode-aware case folding.
     ["EqualFold"u8] = true,
     ["Title"u8] = true,
     ["ToLower"u8] = true,
@@ -166,6 +164,8 @@ internal static map<@string, bool> forbiddenStringsFunctions = new map<@string, 
     ["ToTitleSpecial"u8] = true,
     ["ToUpper"u8] = true,
     ["ToUpperSpecial"u8] = true,
+
+    // Functions that use Unicode-aware spaces.
     ["Fields"u8] = true,
     ["TrimSpace"u8] = true
 };
@@ -179,6 +179,7 @@ internal static readonly @string testGoˢ = "_test.go"u8;
 // Unicode-aware case folding or space stripping can introduce vulnerabilities.
 public static void TestNoUnicodeStrings(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new http_test_package.testing_TжTB(Ꮡt));
+
     var re = regexp.MustCompile(stringsBytesAZaZˢ);
     {
         var reʗ1 = re;
@@ -186,17 +187,19 @@ public static void TestNoUnicodeStrings(ж<testing.T> Ꮡt) {
             if (errΔ1 != default!) {
                 Ꮡt.Fatal(errΔ1);
             }
+
             if (path == "internal/ascii"u8) {
                 return fs.SkipDir;
             }
             if (!strings.HasSuffix(path, ".go"u8) || strings.HasSuffix(path, testGoˢ) || path == "h2_bundle.go"u8 || d.IsDir()) {
                 return default!;
             }
+
             (var contents, errΔ1) = os.ReadFile(path);
             if (errΔ1 != default!) {
                 Ꮡt.Fatal(errΔ1);
             }
-            foreach (var (lineNum, line) in strings.Split(((@string)contents), "\n"u8)) {
+            foreach (var (lineNum, line) in strings.Split((@string)contents, "\n"u8)) {
                 foreach (var (_, match) in reʗ1.FindAllStringSubmatch(line, -1)) {
                     if (!forbiddenStringsFunctions[match[2]]) {
                         continue;
@@ -204,6 +207,7 @@ public static void TestNoUnicodeStrings(ж<testing.T> Ꮡt) {
                     Ꮡt.Errorf("disallowed call to %s at %s:%d"u8, match[0], path, lineNum + 1);
                 }
             }
+
             return default!;
         }); if (err != default!) {
             Ꮡt.Fatal(err);
@@ -239,6 +243,7 @@ public static void BenchmarkHexEscapeNonASCII(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
+
     for (nint i = 0; i < b.N; i++) {
         hexEscapeNonASCII(redirectURL);
     }

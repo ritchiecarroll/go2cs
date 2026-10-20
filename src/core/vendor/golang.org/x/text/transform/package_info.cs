@@ -45,6 +45,12 @@ using static go.vendor.golang.org.x.text.transform_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -53,7 +59,7 @@ using static go.vendor.golang.org.x.text.transform_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/transform/transform.go", "transform.cs", "ABQqiIiIiABDjAEAFzaiggAHEpKSlIKCgoKUkoLegoKChJSCmIK26IbilOyClIIAESqiggAHFtKCpoKClIKCgIKkgoKSpoKCgoKmlpK2gqaClIKS7raCtrqSgoKCgIKkgpT8ooKClKaC6oKshgAQJIKAgoIADBiCpoKosoKUgoKmgoKUqJKCgpS+5IKCgoLugoKCgoKClIKoopSCyoKY1JSCmuiClpK6soK2yILMgoKUlKiSyqbShICClISUgoLcgoKClJSCuIKCgpSUlKqigoKSgpSUgoLOwoKmgILcgoK6kgAHEIKWgoKCqIKUgpSSgpSmkgAIFIKCgpSCgrqEqIKCgoKCqIKCpIKClIKkgs6iqqKCgoKUpoKCgoKCgoKCuoI=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/transform/transform.go", "transform.cs", "ABYquLi4uABDjAEAFzaiggAHEpKSlIKCgoKUkoLugoKClJSCuILG+KaClOyClIIAESqiggAHFtKCpoKClIKCgIKkgoKSpoKCgoKmpoK2gqaClIKS7raCprqSgoKCgIKkgpT8ooKClKaC6oLMpgAQJIKAgoIADBiCpoKosoKUgoKmgoKUqJKCgpS+5IKCgoL+goKCgoKClILIgpSCyoK4tJSCyriCpoLqgoK2uILcgoKUlKiSyqbShICClJSUgoLcgoKClJSCyIKCgpSUlKqigoKSgpSUgoLOwoKmgILsgoLKkgAIEIKWgoKCuIKUgpSSgpS2ggAJFIKCgpSCgsqEuIKCgoKCuIKCpIKClIKkgs6iqqKCgoKUpoKCgoKCgoKCyoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text;

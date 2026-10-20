@@ -23,6 +23,12 @@ using static global::go.@internal.saferio_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -31,7 +37,7 @@ using static global::go.@internal.saferio_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/saferio/io_test.go", "io_test.cs", "ABUagoKEkoKClIKokoKCqJKCgqiCgoKogoKCqIKCgvqCgoSSgoKUgqiSgoKokoKCqMiCgoKUggAICoKCgoKogoKCkoKogoKCqIKCgg==", "17-25:1;27-32:2;34-39:3;41-46:4;48-53:5;55-60:6;67-75:1;77-82:2;84-89:3;91-103:4;107-112:1;114-121:2;123-128:3;130-135:4")]
+[assembly: go.GoPositionMap("internal/saferio/io_test.go", "io_test.cs", "ABUagoKUkoKClIK4koKCuJKCgriCgoK4goKCuIKCgvqCgpSSgoKUgriSgoK4koKCuMiCgoKUggAICoKCgoK4goKCkoK4goKCuIKCgg==", "17-25:1;27-32:2;34-39:3;41-46:4;48-53:5;55-60:6;67-75:1;77-82:2;84-89:3;91-103:4;107-112:1;114-121:2;123-128:3;130-135:4")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -54,7 +54,6 @@ internal static float64 remainder(float64 x, float64 y) {
     case {} when IsInf(y, 0): {
         return x;
     }}
-
     var sign = false;
     if (x < 0D) {
         x = -x;

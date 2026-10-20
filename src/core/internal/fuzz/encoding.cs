@@ -9,9 +9,10 @@ using ast = global::go.go.ast_package;
 using parser = global::go.go.parser_package;
 using token = global::go.go.token_package;
 using math = math_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using strings = strings_package;
 using utf8 = unicode.utf8_package;
+using global::go;
 using global::go.go;
 using io = io_package;
 using unicode;
@@ -89,37 +90,34 @@ internal static slice<byte> marshalCorpusFile(params ꓸꓸꓸany valsʗp) {
             fmt.Fprintf(new bytes_BufferжWriter(b), "string(%q)\n"u8, t);
             break;
         }
-        case rune t: {
+        case rune t: { // int32
+            // Although rune and int32 are represented by the same type, only a subset
+            // of valid int32 values can be expressed as rune literals. Notably,
+            // negative numbers, surrogate halves, and values above unicode.MaxRune
+            // have no quoted representation.
+            //
+            // fmt with "%q" (and the corresponding functions in the strconv package)
+            // would quote out-of-range values to the Unicode replacement character
+            // instead of the original value (see https://go.dev/issue/51526), so
+            // they must be treated as int32 instead.
+            //
+            // We arbitrarily draw the line at UTF-8 validity, which biases toward the
+            // "rune" interpretation. (However, we accept either format as input.)
             if (utf8.ValidRune(t)){
-                // int32
-                // Although rune and int32 are represented by the same type, only a subset
-                // of valid int32 values can be expressed as rune literals. Notably,
-                // negative numbers, surrogate halves, and values above unicode.MaxRune
-                // have no quoted representation.
-                //
-                // fmt with "%q" (and the corresponding functions in the strconv package)
-                // would quote out-of-range values to the Unicode replacement character
-                // instead of the original value (see https://go.dev/issue/51526), so
-                // they must be treated as int32 instead.
-                //
-                // We arbitrarily draw the line at UTF-8 validity, which biases toward the
-                // "rune" interpretation. (However, we accept either format as input.)
                 fmt.Fprintf(new bytes_BufferжWriter(b), "rune(%q)\n"u8, t);
             } else {
                 fmt.Fprintf(new bytes_BufferжWriter(b), "int32(%v)\n"u8, t);
             }
             break;
         }
-        case byte t: {
-            fmt.Fprintf(new bytes_BufferжWriter(b), // uint8
- // For bytes, we arbitrarily prefer the character interpretation.
- // (Every byte has a valid character encoding.)
- "byte(%q)\n"u8, t);
+        case byte t: { // uint8
+            // For bytes, we arbitrarily prefer the character interpretation.
+            // (Every byte has a valid character encoding.)
+            fmt.Fprintf(new bytes_BufferжWriter(b), "byte(%q)\n"u8, t);
             break;
         }
-        case slice<byte> t: {
-            fmt.Fprintf(new bytes_BufferжWriter(b), // []uint8
- "[]byte(%q)\n"u8, t);
+        case slice<byte> t: { // []uint8
+            fmt.Fprintf(new bytes_BufferжWriter(b), "[]byte(%q)\n"u8, t);
             break;
         }
         default: {
@@ -140,7 +138,7 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
     if (len(lines) < 2) {
         return (default!, fmt.Errorf("must include version and at least one value"u8));
     }
-    @string version = strings.TrimSuffix(((@string)lines[0]), "\r"u8);
+    @string version = strings.TrimSuffix((@string)lines[0], "\r"u8);
     if (version != encVersion1) {
         return (default!, fmt.Errorf("unknown encoding version: %s"u8, version));
     }
@@ -183,6 +181,7 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
         return (default!, fmt.Errorf("expected call expression with 1 argument; got %d"u8, len((~call).Args)));
     }
     var arg = (~call).Args[0];
+
     {
         var (arrayType, okΔ1) = (~call).Fun._<ж<ast.ArrayType>>(ᐧ); if (okΔ1) {
             if ((~arrayType).Len != default!) {
@@ -203,6 +202,7 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             return (slice<byte>(s), default!);
         }
     }
+
     ж<ast.Ident> idType = default!;
     {
         var (selector, okΔ3) = (~call).Fun._<ж<ast.SelectorExpr>>(ᐧ); if (okΔ3){
@@ -220,7 +220,6 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             else { /* default: */
                 return (default!, fmt.Errorf("invalid selector type"u8));
             }
-
         } else {
             (idType, okΔ3) = (~call).Fun._<ж<ast.Ident>>(ᐧ);
             if (!okΔ3) {
@@ -242,6 +241,7 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             }
         }
     }
+
     @string val = default!;
     token.Token kind = default!;
     {
@@ -251,13 +251,13 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
                 if ((~op).Op != token.SUB) {
                     return (default!, fmt.Errorf("unsupported operation on int/float: %v"u8, (~op).Op));
                 }
+                // Special case for negative numbers.
                 val = (~op).Op.String() + (~lit).Value; // e.g. "-" + "124"
                 kind = lit.Value.Kind;
                 break;
             }
             case ж<ast.Ident> lit: {
                 if ((~lit).Name != "Inf"u8) {
-                    // Special case for negative numbers.
                     return (default!, fmt.Errorf("expected operation on int or float type"u8));
                 }
                 if ((~op).Op == token.SUB){
@@ -291,6 +291,7 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             }}
         }
     }
+
     {
         @string typ = idType.Value.Name;
         var exprᴛ2 = typ;
@@ -310,7 +311,6 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
                 if (exprᴛ3 == "byte"u8) {
                     return parseUint(val, typ);
                 }
-
             }
             if (kind != token.CHAR) {
                 return (default!, fmt.Errorf("character literal required for byte/rune types"u8));
@@ -381,19 +381,18 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
             return (default!, fmt.Errorf("expected []byte or primitive type"u8));
         }
     }
-
 }
 
 // parseInt returns an integer of value val and type typ.
 internal static (any, error) parseInt(@string val, @string typ) {
     var exprᴛ1 = typ;
     if (exprᴛ1 == "int"u8) {
-        var (i, err) = strconv.ParseInt(val, // The int type may be either 32 or 64 bits. If 32, the fuzz tests in the
- // corpus may include 64-bit values produced by fuzzing runs on 64-bit
- // architectures. When running those tests, we implicitly wrap the values to
- // fit in a regular int. (The test case is still “interesting”, even if the
- // specific values of its inputs are platform-dependent.)
- 0, 64);
+        // The int type may be either 32 or 64 bits. If 32, the fuzz tests in the
+        // corpus may include 64-bit values produced by fuzzing runs on 64-bit
+        // architectures. When running those tests, we implicitly wrap the values to
+        // fit in a regular int. (The test case is still “interesting”, even if the
+        // specific values of its inputs are platform-dependent.)
+        var (i, err) = strconv.ParseInt(val, 0, 64);
         return ((nint)i, err);
     }
     if (exprᴛ1 == "int8"u8) {
@@ -415,7 +414,6 @@ internal static (any, error) parseInt(@string val, @string typ) {
     { /* default: */
         throw panic("unreachable");
     }
-
 }
 
 // parseUint returns an unsigned integer of value val and type typ.
@@ -444,7 +442,6 @@ internal static (any, error) parseUint(@string val, @string typ) {
     { /* default: */
         throw panic("unreachable");
     }
-
 }
 
 } // end fuzz_package

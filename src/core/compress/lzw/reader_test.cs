@@ -23,8 +23,6 @@ internal partial struct lzwTest {
     internal error err;
 }
 
-// This example comes from https://en.wikipedia.org/wiki/Graphics_Interchange_Format.
-// This example comes from http://compgroups.net/comp.lang.ruby/Decompressing-LZW-compression-from-PDF-file
 internal static slice<lzwTest> lzwTests = new lzwTest[]{
     new(
         "empty;LSB;8"u8,
@@ -68,12 +66,14 @@ internal static slice<lzwTest> lzwTests = new lzwTest[]{
         ((@string)(new byte[]{0x54, 0x9e, 0x08, 0x29, 0xf2, 0x44, 0x8a, 0x93, 0x27, 0x54, 0x04})),
         io.ErrUnexpectedEOF
     ),
+    // This example comes from https://en.wikipedia.org/wiki/Graphics_Interchange_Format.
     new(
         "gif;LSB;8"u8,
         ((@string)(new byte[]{0x28, 0xff, 0xff, 0xff, 0x28, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})),
         ((@string)(new byte[]{0x00, 0x51, 0xfc, 0x1b, 0x28, 0x70, 0xa0, 0xc1, 0x83, 0x01, 0x01})),
         default!
     ),
+    // This example comes from http://compgroups.net/comp.lang.ruby/Decompressing-LZW-compression-from-PDF-file
     new(
         "pdf;MSB;8"u8,
         "-----A---B"u8,
@@ -99,7 +99,6 @@ public static void TestReader(ж<testing.T> Ꮡt) {
             else { /* default: */
                 Ꮡt.Errorf("%s: bad order %q"u8, tt.desc, d[1]);
             }
-
             var (litWidth, _) = strconv.Atoi(d[2]);
             var rc = NewReader(new lzw_internal_test_package.strings_ReaderжReader(strings.NewReader(tt.compressed)), order, litWidth);
             var rcʗ1 = rc;
@@ -146,7 +145,6 @@ public static void TestReaderReset(ж<testing.T> Ꮡt) {
             else { /* default: */
                 Ꮡt.Errorf("%s: bad order %q"u8, tt.desc, d[1]);
             }
-
             var (litWidth, _) = strconv.Atoi(d[2]);
             var rc = NewReader(new lzw_internal_test_package.strings_ReaderжReader(strings.NewReader(tt.compressed)), order, litWidth);
             var rcʗ1 = rc;
@@ -167,6 +165,7 @@ public static void TestReaderReset(ж<testing.T> Ꮡt) {
                 }
                 continue;
             }
+
             b.Reset();
             rc._<ж<global::go.compress.lzw_package.Reader>>().Reset(new lzw_internal_test_package.strings_ReaderжReader(strings.NewReader(tt.compressed)), order, litWidth);
             (n, err) = io.Copy(new lzw_internal_test_package.bytes_BufferжWriter(Ꮡb), rc);
@@ -222,9 +221,9 @@ internal partial struct TestNoLongerSavingPriorExpansions_iterations /*dyn*/ {
 public static void TestNoLongerSavingPriorExpansions(ж<testing.T> Ꮡt) {
     // Iterations is used to calculate how many input bits are needed to get
     // the decoder.hi and decoder.width values up to their maximum.
-    var iterations = new TestNoLongerSavingPriorExpansions_iterations[]{ // The final term is 257, not 256, as NewReader initializes d.hi to
- // d.clear+1 and the clear code is 256.
-
+    var iterations = new TestNoLongerSavingPriorExpansions_iterations[]{
+        // The final term is 257, not 256, as NewReader initializes d.hi to
+        // d.clear+1 and the clear code is 256.
         new(9, 512 - 257),
         new(10, 1024 - 512),
         new(11, 2048 - 1024),
@@ -237,11 +236,12 @@ public static void TestNoLongerSavingPriorExpansions(ж<testing.T> Ꮡt) {
         nBits += e.n * e.width;
     }
     if (nCodes != 3839) {
-        Ꮡt.Fatalf("nCodes: got %v, want %v"u8, nCodes, (nint)(3839));
+        Ꮡt.Fatalf("nCodes: got %v, want %v"u8, nCodes, (nint)3839);
     }
     if (nBits != 43255) {
-        Ꮡt.Fatalf("nBits: got %v, want %v"u8, nBits, (nint)(43255));
+        Ꮡt.Fatalf("nBits: got %v, want %v"u8, nBits, (nint)43255);
     }
+
     // Construct our input of 43255 zero bits (which gets d.hi and d.width up
     // to 4095 and 12), followed by 0xfff (4095) as 12 bits, followed by 0x101
     // (EOF) as 12 bits.
@@ -270,7 +270,8 @@ public static void TestNoLongerSavingPriorExpansions(ж<testing.T> Ꮡt) {
     //
     // The 'z' bit is unused.
     var @in = new slice<byte>(5406);
-    @in = append(@in, (byte)(0x80), (byte)(0xff), (byte)(0x0f), (byte)(0x08));
+    @in = append(@in, (byte)0x80, (byte)0xff, (byte)0x0f, (byte)0x08);
+
     var r = NewReader(new lzw_internal_test_package.bytes_ReaderжReader(bytes.NewReader(@in)), LSB, 8);
     var (nDecoded, err) = io.Copy(io.Discard, r);
     if (err != default!) {
@@ -295,6 +296,7 @@ public static void BenchmarkDecoder(ж<testing.B> Ꮡb) {
     if (len(buf) == 0) {
         Ꮡb.Fatalf("test file has no data"u8);
     }
+
     slice<byte> getInputBuf(slice<byte> bufΔ1, nint n) {
         var compressed = @new<bytes.Buffer>();
         var w = NewWriter(new lzw_internal_test_package.bytes_BufferжWriter(compressed), LSB, 8);
@@ -307,6 +309,7 @@ public static void BenchmarkDecoder(ж<testing.B> Ꮡb) {
         w.Close();
         return compressed.Bytes();
     }
+
     for (nint e = 4; e <= 6; e++) {
         nint n = (nint)math.Pow10(e);
         var bufʗ1 = buf;

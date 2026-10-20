@@ -28,7 +28,6 @@ public static bool PanicOnExit0() {
 // panicOnExit0 is the flag used for PanicOnExit0. This uses a lock
 // because the value can be cleared via a timer call that may race
 // with calls to os.Exit
-
 partial struct panicOnExit0ᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal bool val;

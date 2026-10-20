@@ -6,15 +6,32 @@ import (
 )
 
 func (p *pipelineRunner) build(ctx context.Context, request runRequest) (stageResult, error) {
+	if request.ConversionID == "" {
+		return stageResult{}, validationError("conversionId is required")
+	}
+	if err := p.waitForWarmup(ctx); err != nil {
+		return stageResult{}, err
+	}
+	// A conversion made for the page started its build the moment it was saved; that build is
+	// the answer, finished or not. Only a conversion with no such build, or one whose build was
+	// cancelled, is built here.
+	if result, ok, err := p.awaitPrebuild(ctx, request.ConversionID); err != nil || ok {
+		return result, err
+	}
 	artifact, err := p.savedArtifact(ctx, request.ConversionID)
 	if err != nil {
 		return stageResult{}, err
 	}
 	defer p.release()
 
+	return p.buildStage(ctx, artifact), nil
+}
+
+// buildStage runs the .NET build of a saved conversion. The caller holds a pipeline slot.
+func (p *pipelineRunner) buildStage(ctx context.Context, artifact *conversionArtifact) stageResult {
 	args := []string{"build", artifact.project, "--nologo", "--verbosity:minimal"}
 	args = append(args, runtimeMSBuildArgs(artifact.runtime)...)
-	return p.runStage(ctx, "build", "Build", artifact.outputDir, buildTimeout, "dotnet", args...), nil
+	return p.runStage(ctx, "build", "Build", artifact.outputDir, buildTimeout, "dotnet", args...)
 }
 
 func (p *pipelineRunner) execute(ctx context.Context, request runRequest) (stageResult, error) {

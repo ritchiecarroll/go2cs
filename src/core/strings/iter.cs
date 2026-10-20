@@ -30,30 +30,23 @@ public static iter.Seq<@string> Lines(@string s) {
                 return;
             }
         }
-        return;
-    };
-}
-
-// explodeSeq returns an iterator over the runes in s.
-internal static iter.Seq<@string> explodeSeq(@string s) {
-    return (Func<@string, bool> yield) => {
-        while (len(s) > 0) {
-            var (_, size) = utf8.DecodeRuneInString(s);
-            if (!yield(s.slice(0, size))) {
-                return;
-            }
-            s = s.slice(size);
-        }
     };
 }
 
 // splitSeq is SplitSeq or SplitAfterSeq, configured by how many
 // bytes of sep to include in the results (none or all).
 internal static iter.Seq<@string> splitSeq(@string s, @string sep, nint sepSave) {
-    if (len(sep) == 0) {
-        return explodeSeq(s);
-    }
     return (Func<@string, bool> yield) => {
+        if (len(sep) == 0) {
+            while (len(s) > 0) {
+                var (_, size) = utf8.DecodeRuneInString(s);
+                if (!yield(s.slice(0, size))) {
+                    return;
+                }
+                s = s.slice(size);
+            }
+            return;
+        }
         while (ᐧ) {
             nint i = Index(s, sep);
             if (i < 0) {
@@ -127,11 +120,7 @@ public static iter.Seq<@string> FieldsFuncSeq(@string s, Func<rune, bool> f) {
     return (Func<@string, bool> yield) => {
         nint start = -1;
         for (nint i = 0; i < len(s); ) {
-            nint size = 1;
-            var r = (rune)s[i];
-            if (r >= utf8.RuneSelf) {
-                (r, size) = utf8.DecodeRuneInString(s.slice(i));
-            }
+            var (r, size) = utf8.DecodeRuneInString(s.slice(i));
             if (f(r)){
                 if (start >= 0) {
                     if (!yield(s.slice(start, i))) {

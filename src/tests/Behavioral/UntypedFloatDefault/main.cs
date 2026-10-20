@@ -12,6 +12,7 @@ internal static void Main() {
         x = x - 1D;
     }
     fmt.Println(z);
+
     float32 f = 2.5F;
     f = f * 2F;
     fmt.Println(f);

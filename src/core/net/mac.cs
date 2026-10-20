@@ -7,21 +7,24 @@ partial class net_package {
 
 internal static readonly @string hexDigit = "0123456789abcdef"u8;
 
+// A HardwareAddr represents a physical hardware address.
 partial struct HardwareAddr /*[]byte*/;
 
 public static @string String(this HardwareAddr a) {
+    var bufᴷ = new stackAppend<byte>();
+
     if (len(a) == 0) {
         return ""u8;
     }
     var buf = new slice<byte>(0, len(a) * 3 - 1);
     foreach (var (i, b) in a) {
         if (i > 0) {
-            buf = append(buf, (byte)((rune)':'));
+            buf = append(bufᴷ, buf, (byte)((rune)':'));
         }
-        buf = append(buf, hexDigit[(b >> (int)(4))]);
+        buf = append(buf, hexDigit[(b >> 4)]);
         buf = append(buf, hexDigit[(byte)(b & 0xF)]);
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // ParseMAC parses s as an IEEE 802 MAC-48, EUI-48, EUI-64, or a 20-octet
@@ -36,12 +39,14 @@ public static @string String(this HardwareAddr a) {
 //	0000.5e00.5301
 //	0200.5e10.0000.0001
 //	0000.0000.fe80.0000.0000.0000.0200.5e10.0000.0001
+//	00005e005301
 public static (HardwareAddr hw, error err) ParseMAC(@string s) {
     HardwareAddr hw = default!;
 
-    if (len(s) < 14) {
+    if (len(s) < 12) {
         goto error;
     }
+
     if (s[2] == (rune)':' || s[2] == (rune)'-'){
         if ((len(s) + 1) % 3 != 0) {
             goto error;
@@ -85,9 +90,28 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
             x += 5;
         }
     } else {
-        goto error;
+        if (len(s) % 2 != 0) {
+            goto error;
+        }
+
+        nint n = len(s) / 2;
+        if (n != 6 && n != 8 && n != 20) {
+            goto error;
+        }
+
+        hw = new HardwareAddr(len(s) / 2);
+        for ((nint x, nint i) = (0, 0); i < n; i++) {
+            bool ok = default!;
+            {
+                (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
+                    goto error;
+                }
+            }
+            x += 2;
+        }
     }
     return (hw, default!);
+
 error:
     return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid MAC address"u8, Addr: s))));
 }

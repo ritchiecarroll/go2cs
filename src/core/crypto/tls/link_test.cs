@@ -6,9 +6,9 @@ namespace go.crypto;
 using bytes = bytes_package;
 using testenv = go.@internal.testenv_package;
 using os = os_package;
-using exec = go.os.exec_package;
 using filepath = path.filepath_package;
 using testing = testing_package;
+using exec = go.os.exec_package;
 using fs = go.io.fs_package;
 using go.@internal;
 using go.os;
@@ -36,8 +36,7 @@ public static void TestLinkerGC(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
     Ꮡt.Parallel();
-    @string goBin = testenv.GoToolPath(new tls_test_package.testing_TжTB(Ꮡt));
-    testenv.MustHaveGoBuild(new tls_test_package.testing_TжTB(Ꮡt));
+
     var tests = new TestLinkerGC_tests[]{
         new(
             name: "empty_import"u8,
@@ -46,7 +45,7 @@ package main
 import _ "crypto/tls"
 func main() {}
 
-"""u8,
+"""u8.Raw(),
             bad: new @string[]{
                 "tls.(*Conn)"u8,
                 "type:crypto/tls.clientHandshakeState"u8,
@@ -63,7 +62,7 @@ func main() {
   tls.Server(nil, nil)
 }
 
-"""u8,
+"""u8.Raw(),
             want: new @string[]{
                 "crypto/tls.(*Conn).clientHandshake"u8,
                 "crypto/tls.(*Conn).serverHandshake"u8
@@ -76,7 +75,7 @@ package main
 import "crypto/tls"
 func main() { tls.Dial("", "", nil) }
 
-"""u8,
+"""u8.Raw(),
             want: new @string[]{
                 "crypto/tls.(*Conn).clientHandshake"u8
             }.slice(),
@@ -84,9 +83,9 @@ func main() { tls.Dial("", "", nil) }
                 "crypto/tls.(*Conn).serverHandshake"u8
             }.slice()
         )
+        // TODO: add only_server like func main() { tls.Server(nil, nil) }
+        // That currently brings in the client via Conn.handleRenegotiation.
     }.slice();
-    // TODO: add only_server like func main() { tls.Server(nil, nil) }
-    // That currently brings in the client via Conn.handleRenegotiation.
     @string tmpDir = Ꮡt.TempDir();
     @string goFile = filepath.Join(tmpDir, xGoˢ);
     @string exeFile = filepath.Join(tmpDir, xExeˢ);
@@ -102,18 +101,19 @@ func main() { tls.Dial("", "", nil) }
                 }
             }
             os.Remove(exeFile);
-            var cmd = exec.Command(goBin, buildˢ, "-o", xExeˢ, xGoˢ);
+            var cmd = testenv.Command(new tls_test_package.testing_TжTB(tΔ1), testenv.GoToolPath(new tls_test_package.testing_TжTB(tΔ1)), buildˢ, "-o", xExeˢ, xGoˢ);
             cmd.Value.Dir = tmpDir;
             {
                 var (@out, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != default!) {
-                    tΔ1.Fatalf("compile: %v, %s"u8, errΔ2, @out);
+                    tΔ1.Fatalf("compile: %v\n%s"u8, errΔ2, @out);
                 }
             }
-            cmd = exec.Command(goBin, toolˢ, "nm", xExeˢ);
+
+            cmd = testenv.Command(new tls_test_package.testing_TжTB(tΔ1), testenv.GoToolPath(new tls_test_package.testing_TжTB(tΔ1)), toolˢ, "nm", xExeˢ);
             cmd.Value.Dir = tmpDir;
-            var (nm, err) = cmd.CombinedOutput();
+            var (nm, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
             if (err != default!) {
-                tΔ1.Fatalf("nm: %v, %s"u8, err, nm);
+                tΔ1.Fatalf("nm: %v\n%s"u8, err, nm);
             }
             foreach (var (_, sym) in ttʗ1.want) {
                 if (!bytes.Contains(nm, slice<byte>(sym))) {

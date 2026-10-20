@@ -64,6 +64,21 @@ comparable operators ALONE, with no arithmetic siblings. (Guarded by `Constraint
 `recordA | recordB | recordC` union through a generic function instantiated at each term; without the
 fix it reproduces CS0315 at all three sites.)
 
+The breadcrumb is spelled as Go writes the constraint: a foreign term by its package NAME
+(`runtime.StackRecord`) and a term of the constraint's own package bare, never by import path
+(`crypto/x509.parsedURI`). A NAMED methodless union carries its union beside its name, so the reader
+sees the type set at the declaration and the elided-constraint ratchet (repoguard) can tell it from a
+lost constraint:
+
+```csharp
+internal static T firstOf<T>(slice<T> p)
+    where T : /* RecordUnion = recordA | recordB | recordC */ new()
+```
+
+(`constraintUnionText`, guarded by `TestNamedUnionConstraintBreadcrumbCarriesItsUnion` and the
+`Constraints` golden. With the bare name the ratchet gated `internal/trace/event.cs`'s two
+`EventDetails` clauses; with the import-path form it gated `crypto/x509/constraints.cs`.)
+
 ## A single-term pointer constraint `[P *T]` erases the parameter to `ж<T>`
 
 A type parameter constrained to a single, non-tilde pointer term — go/types' flat-copy helper
@@ -194,9 +209,9 @@ would infer a different `T`:
 x := max(u8, 1)
 x += 100
 ```
-<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:92-93 -->
+<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:104-105 -->
 ```csharp
-var x = max(u8, (uint8)(1));
+var x = max(u8, (uint8)1);
 x += 100;
 ```
 
@@ -312,6 +327,77 @@ interface, and embedded-interface instantiations of a method-set-constrained gen
 constraint method on the parameter and widening walkList-style, values vs Go; clears go/ast's
 CS0308, the go/* toolchain gate.)
 
+An **anonymous inline** constraint carrying methods — `func Show[T interface{ Name() string }]`,
+`type Box[T interface{ Name() string }] struct` — is lifted to a named interface, exactly as an
+anonymous parameter interface is, and named `<declaration>_<parameter>` (`Show_T`, `Box_T`;
+`liftTypeParamConstraints`). Before the lift, `getGenericDefinition` named the constraint by its Go
+text, and `where T : interface{Name() string}` is a C# syntax cascade that takes the whole package
+down; lifted, it takes the same arms a named constraint takes. The lift is public when the declaration
+is exported (CS0703 otherwise). A constraint that names the declaration's own parameters
+(`[T interface{ Less(T) bool }]`) lifts generic over the ones it captures (`Min_T<T>`,
+`liftCapturedTypeParams`), and each use composes its own arguments, so a receiver that renames the
+parameter still binds. A method of a generic type reaches the constraint as its receiver's own copy, a
+different object and possibly in another file: a lift capturing no parameter is found by its signature
+in the package registry, and one capturing a parameter, which is never registered by signature, by its
+DECLARATION (`constraintLiftKey`: the type and the parameter's index). Operator-only type
+sets carry no methods and are not lifted.
+
+A **value** instantiation of a method-set constraint that names no type parameter — named or lifted,
+`slot[T nameI]` at `tagged` — is recorded at the instantiation (`recordValueConstraintImplementation`,
+on `constraintProxyFor`'s per-instantiation path), not only where a call converts an argument to the
+type parameter. A generic TYPE instantiated at a value type with no such call was CS0315. A
+FUNCTION's clause is emitted only where its body needs it (`methodSetConstraintNeeded`), and the
+record follows the clause: `errors.AsType[E error]` drops it, so `AsType[alert]` records nothing. An
+instantiated GENERIC constraint is left to `recordClosedConstraintImplementation`, below.
+
+A **value** instantiation of a **generic** method-set constraint — `Sum[A Adder[A]]` at `vec` —
+satisfies `where A : Adder<A>` only as `vec : Adder<vec>`, a base go2cs-gen declares from a
+`[assembly: GoImplement<vec, Adder<vec>>]` record. A non-generic constraint (`where T : Namer`) gets
+its record where the argument converts to the type parameter, but that site sees the constraint over
+the callee's own parameter, `Adder[A]`, which no concrete type implements, so the generic form was
+never recorded and every such instantiation was CS0315. `recordClosedConstraintImplementation`, on
+the per-instantiation path every form reaches (`constraintProxyFor`), closes the constraint over the
+argument and records it, once per pair: rendering a self-referential closed form re-enters the same
+path, so the once-guard is also what ends that recursion. A constraint naming a SECOND type parameter
+(`Linker[T, N]` at `N`) is left alone, since only the instantiation knows the other argument. The gap
+dates from Go generics' arrival (`Adder[A any]` failed identically), and it is the shape Go 1.26's
+self-referential constraints are written in. (Guarded by `SelfRefGenerics`, output-compared vs Go.)
+
+An INLINE constraint naming its own parameter (`type Ord[T interface{ Less(T) bool }]`, lifted to
+`Ord_T<T>`) is closed over each instantiation exactly as the named `Lesser[T]` is: `inlineConstraintNamed`
+presents the lift as a synthetic generic interface (`Ord_T[T]`, its method set rewritten over fresh
+parameters by `substituteTypeParams`, since go/types offers no substitution for an anonymous interface
+over a parameter bound elsewhere), and `recordClosedConstraintImplementation` and `constraintProxyFor`
+read it through `effectiveConstraint`. `Ord[age]` records `GoImplement<age, Ord_T<age>>`, `Ord[*node]`
+takes the proxy `nodeжOrd_T`, and `Ord[wrap[string]]` records the closed pair the generator re-opens
+over `wrap<E>` (below). The lift's name is assigned by the declaration's own visit, so an instantiation
+in a file visited first DEFERS: its record replays after the file-visit barrier
+(`replayDeferredConstraintRecords`, before any metadata file is written), and a proxy name carries the
+deferred marker the barrier resolves. A constraint declared in ANOTHER package takes the lift name
+its package PUBLISHED: the lift is generic over the parameter it captures, so it is published by
+DECLARATION, never by signature, as `[assembly: GoInlineConstraintLift("Ord", 0, "Ord_T")]` (the
+owning type or function's Go name, the type parameter's index, the lift). An importer finds the
+declaration by the type parameter itself in its package's scope and reads the record
+(`importedInlineConstraintLift`), so `lib.Ord[age]` records `GoImplement<age, lib.Ord_T<age>>` and
+`lib.Ord[*node]` takes the lift's generic proxy (below). A package that published none (an older
+conversion) leaves the anonymous form.
+
+A GENERIC value type implementing a generic interface at its own instantiation
+(`var l Lesser[wrap[string]] = wrap[string]{1}`, or the constraint above at `wrap[string]`) is recorded
+CLOSED (an attribute's type arguments cannot be open), and a partial can extend only the open
+definition, so go2cs-gen emitted `partial struct wrap<E> : Lesser<wrap<@string>>`, whose forwarding
+call cannot bind. The generator now RE-OPENS the interface over the target's own parameters
+(`wrap<E> : Lesser<wrap<E>>`), validated member by member against the target's Go methods, so every
+closed record of `wrap` shares one partial and an argument that only coincides with the target's (a
+`namer[E]` whose `Get` returns `string`) keeps the closed form. (GenTests
+`GenericValueInterfaceReopenTests`.)
+
+One shape remains. A constraint with type TERMS beside its methods
+(`interface{ ~int; String() string }`) emits as the CRTP `Str_T<ΔT>`, and no record can name its
+closed form `Str_T<myint>`: an interface with static abstract members cannot be a type argument, not
+even an attribute's (CS8920), so `myint` never implements it (CS0535, named or inline). (Guarded by
+`InlineConstraintLift`, output-compared vs Go.)
+
 ## A SELF-REFERENTIAL generic method-set constraint uses a box-wrapping proxy as the type argument
 
 The widen-to-the-interface escape above works only when the constraint interface is **non-generic**
@@ -410,6 +496,95 @@ deep and another two, recorded from two instantiation sites to exercise the per-
 output-compared vs `go run`. Reverting the walk reproduces CS0535 on `Middle.Size()` and `Base.Name()`
 — both levels. Embedding the constrained generic and greening the whole crypto-curve family is the
 next subsection.)
+
+6. **An interface that constrains ITSELF takes the proxy as the record's placeholder.** Go 1.26 lets
+   a generic type name itself in its own type-parameter list — `type GraphNode[N GraphNode[N]]
+   interface { Next() N; Owner() *Graph[N] }`, and `type Graph[N GraphNode[N]] struct`, a cycle that
+   was "invalid recursive type" before. The interface declaration carries `where N : GraphNode<N>`,
+   and C# enforces it on an attribute's type arguments too, so the element placeholder in
+   `GoImplement<gnode, GraphNode<gnode>>` was CS0315 on the record itself. For such an interface
+   (`interfaceConstrainsItself`) the placeholder is the proxy, `GraphNode<gnodeжGraphNode>`: it
+   implements the interface over itself, so it satisfies the bound by construction, and the generator
+   reads only the interface's open definition. Every other record keeps the element. The proxy is
+   generated into the class that carries the record, so the placeholder is named bare. (Guarded by
+   `SelfRefGenerics`: the cycle at a pointer instantiation, values vs Go.)
+
+### A FOREIGN interface's proxy is the interface package's: concrete when it published one, else its generic proxy
+
+The proxy is the type argument, so it is part of the instantiated type's identity: `lib.Ord2[*elem.Node]`
+is ONE C# type only if every package that names it names ONE proxy. So no package ever declares a
+proxy for an interface another package declares; a second importer would declare a second one. The
+choice is made in `foreignConstraintProxy`, by two rules:
+
+1. **A concrete proxy the interface's package PUBLISHED for the element wins.** That package records the
+   pair wherever it closes the constraint over the element, which it can do only for an element it
+   imports, and every instantiator imports it, so every importer reads the same record
+   (`publishedConstraintProxyElements`, from whichever source `loadImportedTypeAliases` reads, applying
+   nothing). std's crypto/ecdh and crypto/ecdsa name `fips140/ecdh`'s and `fips140/ecdsa`'s
+   `P256PointжPoint` this way. The element's package cannot publish one for a foreign interface: that
+   would be the consumer-local proxy this rule forbids. Two published proxies of one name (two elements
+   called `Node`) are refused by name, leaving the box.
+2. **Otherwise the interface package's GENERIC proxy, closed over the element**:
+   `lib.Ord2<lib.жLesser<elem.Node>>`. go2cs-gen publishes `жLesser<E> : Lesser<жLesser<E>>` beside every
+   interface a package declares and closes over the parameter it constrains (`where T : Lesser<T>`, named
+   or an inline lift; `ConstraintProxyGenerator`, driven by the constraint clauses, so the converter
+   writes no record for it). It cannot forward by itself, because the element's Go methods are extension
+   methods over `ж<Node>` and an extension method does not bind through a type parameter. So each
+   forwarder calls a static slot typed over the box, and every package that instantiates the constraint
+   records the pair, `GoImplement<elem.Node, lib.Lesser<elem.Node>>(ConstraintProxy = true)`, which
+   for a FOREIGN interface the generator turns into a `[ModuleInitializer]` binding the slots
+   (`lib.жLesser<elem.Node>.ᴛLess = static (recv, ᴛ0) => recv.Less(ᴛ0);`). A module initializer runs
+   before any code of its assembly, so no value of the type exists unbound, including one made by
+   reflection. Every binder binds the same methods, so a second changes nothing. A slot nobody bound
+   panics naming the proxy, the element, the interface and the method.
+
+**Cost:** a generic-proxy forwarder makes one delegate call per forwarded method, where a concrete
+proxy calls the extension directly. The forwarders are listed for the adversarial performance review;
+std pays nothing, since all of its foreign-interface sites take rule 1.
+
+A WRITTEN instantiation in a type position, such as a type assertion or a conversion, renders through
+the resolved type whenever an argument takes a proxy (`proxiedTypeInstantiation`, gated to that case).
+The AST walk rendered the box, `lib.Ord2<ж<elem.Node>>`, which is another type. To reflection, a proxy
+is the pointer it stands for (R10): `%T` prints `lib.Ord2[*ForeignConstraintProxy/elem.Node]`, and
+`reflect.Set` of a `*elem.Node` into the proxy-typed field stores it wrapped. (Guarded by
+`ForeignConstraintProxy`: two, three and four packages, named and inline, b1's value received,
+assigned, boxed, asserted, `%T` and `reflect.TypeOf` compared, and a reflect-created value filled
+through `reflect`, output-compared vs Go. Also GenTests `ForeignConstraintProxyTests`, which executes
+separately built assemblies.)
+
+### What a proxy forwards, and the instantiations go2cs refuses
+
+A proxy is a separate C# object per pointer, wrapping the element's box. So each forwarder marshals every
+position of a constraint method that mentions the self parameter `N`, in both proxy kinds
+(`MarshalAcrossProxy` in go2cs-gen):
+
+* **The whole `N`, or a tuple of such values**: the proxy's implicit conversions, as above.
+* **A func, at any depth, named or not** (`Next() func() N`, `Each(func(func(N) bool) bool)`, `Path() iter.Seq[N]`): re-wrapped in a lambda over
+  the target's own parameter types, and a nil func stays nil
+  (`ᴛNext(m_box) is { } ᴛf0 ? new Func<жFlow<E>>(() => ᴛf0()) : null`).
+* **A Go array** (`Triple() [3]N`): copied element by element, which is exact, because Go copies arrays too.
+* **A type that names `N` only as a type argument whose parameter is itself self-constrained**
+  (`Owner() *Graph[N]` with `Graph[N GraphNode[N]]`) is the same C# type on both sides and passes as written.
+
+Every other position SHARES the element's storage in Go: a `[]N`, `map[K]N`, `chan N` or `*N`, or a generic
+type carrying `N` through a parameter that is not self-constrained (`List[N]`). A slice of proxies is a
+different array from the slice of boxes the element holds, so a forwarded copy would compile and silently
+break Go's aliasing. The converter therefore refuses, before any file is written, every instantiation that
+would name such a proxy (`refuseUnforwardableConstraintProxies`, `error GO2CS2002`, naming the site, the
+interface and each method). An instantiation over a VALUE element needs no proxy and converts, and its
+`Children()` slice aliases the element's backing array exactly as in Go. Because go2cs-gen publishes the
+generic proxy for every self-referential constraint, it also gives such a method no slot and makes its
+forwarder throw the same refusal. The interface's own package still compiles: before this rule, a single
+`Children() []N` broke that package's build (CS0029), even when only value elements used it. No Go 1.24
+standard-library package and no behavioral fixture reaches a refused shape (census of 2026-10-19: 6
+interfaces in std, 12 in the behavioral tree, 0 sharing shapes).
+
+Two exact designs remain open, and nothing in the corpus needs them: a per-element copy of the generic function
+in which `N` is the box itself (monomorphization), or static-abstract witness types in place of the proxy.
+Both are larger and read less like the Go source. (Guarded by the converter's `constraintProxyForwarding_test.go`,
+GenTests `ProxyContainerForwardingTests`, which executes both proxy kinds, and behavioral
+`ProxyContainerForwarding`, where a value element's shared `Children()` slice and a pointer element's func
+and array results are output-compared with Go.)
 
 ### A func LITERAL at a proxied delegate position declares its parameters AT the proxy
 
@@ -559,6 +734,7 @@ Three further shapes in the same family were fixed with it, all first measured a
 - **An explicitly-instantiated generic function argument is still a method group.** `EqualFunc(s1, s2, equal[int])`, `CompareFunc(s1, s2, cmp.Compare[int])`, `CompactFunc(s, equal[int])`, `equalToCmp(equal[int])` — writing the type arguments fixes the group's *shape*, not its C#-inference status, so the enclosing generic call still needs its own arguments spelled. `exprIsMethodGroup` met an `*ast.IndexExpr`, matched neither of its two cases, and answered "not a method group"; it now peels `ParenExpr`/`IndexExpr`/`IndexListExpr` (indexing a function *value* is not legal Go, so peeling can never reclassify an ordinary map/slice index). Eight of the sixteen errors.
 - **A type parameter reachable only through an UNSUPPLIED parameter position.** `Insert[S ~[]E, E any](s S, i int, v ...E)` called as `Insert(s, 0)` hands C# an empty `params Span<E>`, and `E` is inferable from nothing — while `calleeHasConstraintOnlyTypeParam` cannot see it, because `E` *does* appear in a parameter type. `calleeTypeParamUnsuppliedByCall` asks the question C# inference actually asks — which parameter positions did this call supply — and since every non-variadic parameter is always supplied in a well-typed Go call, it can fire on nothing but an empty variadic. `Insert(s, 0, 7, 8)` keeps its bare form.
 - **A PARTIAL explicit instantiation.** Go allows a written prefix and infers the rest through core types (`Equal[Slice]` against `Equal[S ~[]E, E comparable]`, slices' own `iter_test`); C# has no partial instantiation, so the prefix alone is CS0305, "requires 2 type arguments". `completedInstantiationTypeArgs` replaces the written list with the resolved one *only* when the resolved list is longer — a complete instantiation, which is nearly all of them, renders verbatim and byte-identically. The comparison is made after erasure filtering on both sides, so an erased pointer-core position cannot make a complete instantiation look partial.
+  A written ANONYMOUS type argument is lifted before the list is rendered (2026-10-16, Go 1.26 reflect's `testTypeAssert[interface{ A() }](t, vv, nil, false)`). The completed list renders each position from its go/types TYPE, and only visiting a type expression lifts an anonymous interface or struct, so the written argument rendered as raw Go text, `interface{A()}`. That unresolved dynamic type failed reflect's whole `-tests` conversion. `liftWrittenTypeArgs` visits each written argument that spells an anonymous type. It emits `testTypeAssert<TestTypeAssert_type, testTypeWithMethod, …>`, the lift and name a complete list gives. Guarded by `TestPartialInstantiationLiftsAnonymousTypeArg` and the `PartialInstantiationAnonymousTypeArg` behavioral project, which asserts through each lifted interface and gets Go's answers.
 
 Every one of the four is an ADDITION to the existing trigger set rather than a replacement, and each is gated on a property that is arithmetic rather than heuristic (is this argument a function reference; did this position receive an argument; is the written list shorter than the resolved one). That is what keeps the footprint at exactly the shapes that were failing: **CNR at 645 behavioral packages moves only the guard project itself, and a seeded reconvert of the whole converted standard library re-emits 4,173 artifacts byte for byte** (0 changed, 0 new; marker gate 0 violations across 78 marked files) — `slices` and `maps` included, whose own production code leans hardest on the inference this arc is about. Guarded by the `MethodGroupGenericArg` extension, which fails on the pre-change converter with exactly the `slices` error set — CS0411 ×4 (instantiated method-group argument, empty variadic, bare-ident generic value ×2) plus CS0305 ×1 (partial instantiation) — and passes after.
 
@@ -755,7 +931,7 @@ Guarded by `GenericTypeInference` (`seqOf[T ~int64, N ~int32 | ~int64](n N) Seq[
 ## A CONSTANT argument that fixes a type parameter is retyped to the instantiation
 Go infers a type parameter from an untyped constant's default type; go2cs then maps that Go type to C#. The two do not meet: an untyped int defaults to Go `int`, which is go2cs `nint`, but the constant emits as a bare C# literal whose own type is `int` (System.Int32). C# infers the type argument from the ARGUMENT, so `wantValue(0)` makes C# choose `T = int` where Go chose `nint`.
 
-Most such calls are fine and deliberately stay bare, because C# repairs the mismatch wherever an implicit conversion bridges it -- `int` -> `nint` is implicit, so a result that IS the bare type parameter converts at the use site. What cannot be repaired is an **invariant** position: C# generics have no variance for these, so `Action<int, bool>` is not `Action<nint, bool>` and `slice<int>` is not `slice<nint>`. Wherever the type parameter reaches a CONSTRUCTED type, the wrong instantiation is terminal (CS1503/CS0315/CS0411).
+Where the mismatch only reaches a VALUE, C# repairs it -- `int` -> `nint` is implicit, so a result that IS the bare type parameter converts at the use site. It does not repair what the callee observes of its own type argument (`%T`, a type switch, an interface box); the next section gives every such call explicit type arguments instead. What cannot be repaired is an **invariant** position: C# generics have no variance for these, so `Action<int, bool>` is not `Action<nint, bool>` and `slice<int>` is not `slice<nint>`. Wherever the type parameter reaches a CONSTRUCTED type, the wrong instantiation is terminal (CS1503/CS0315/CS0411).
 
 Two gates therefore retype the constant to the C# spelling of the type Go resolved (`untypedIntGenericArgCastType`, applied through the per-argument `castArgToType` plumbing):
 
@@ -764,8 +940,8 @@ Two gates therefore retype the constant to the C# spelling of the type Go resolv
 
 ```csharp
 wantValue((nint)(0))(i, false);      // V reaches func(V, bool) -- retyped
-wantPresent(15)(true);               // V absent from the result -- bare
-bareResult(42);                      // result IS V; implicit conversion repairs it -- bare
+wantPresent<nint>(15)(true);         // V absent from the result -- explicit type argument (next section)
+bareResult<nint>(42);                // result IS V -- explicit type argument (next section)
 wantValue<nint>(0)(i, false);        // Go wrote the type argument -- bare
 sliceOf((nint)(9));                  // []V is invariant -- retyped
 wantInt64((int64)(1234567890123L));  // the cast follows the RESOLVED width, not always nint
@@ -774,6 +950,29 @@ wantInt64((int64)(1234567890123L));  // the cast follows the RESOLVED width, not
 The cast type comes from the resolved type, so it is `nint`, `long`, `byte`, `nuint` and so on as the instantiation requires; a resolved `int32`/`rune` is skipped because a bare C# literal already IS System.Int32. A generic NAMED result is skipped too -- invariant likewise, but the explicit type-argument rule above already pins that instantiation, and retyping the argument as well would be redundant. Non-constant arguments never qualify: their emitted C# already carries the mapped Go type. Folded constant EXPRESSIONS do qualify (`3 + 4`, `1 << 10`), since they emit as bare C# arithmetic in exactly the same way.
 
 Guarded by `GenericUntypedIntArg` (the `~[]E` lock) and `GenericUntypedConstInfer` (the invariant-result gate, its control shapes, and the nint/long/byte widths), both output-compared vs `go run`.
+
+## A type parameter fixed only by untyped constants gets explicit type arguments
+The cast above repairs the invariant positions; it leaves the callee itself instantiated wrong. `show[E any](e E)` called `show(3)` is `show[int]` in Go, and `fmt.Sprintf("%T", e)` inside it prints `int`. Emitted bare, C# infers `E` from the literal and instantiates `show<int>`, so the same line prints `int32`. A named untyped constant is worse: it emits as its golib `UntypedInt` wrapper, so `show(named)` instantiates `show<UntypedInt>` and prints the wrapper's fields.
+
+When every argument that reaches a type parameter is an untyped constant at a position whose type IS that parameter (a variadic element included), and at least one of those constants would infer a different C# type, the call emits the instantiation go/types resolved (`calleeTypeParamFixedByUntypedConst`). The argument text does not change:
+
+<!-- source: src/tests/Behavioral/UntypedConstTypeArg/main.cs.target:28-37 -->
+```csharp
+fmt.Println(show<nint>(3));
+fmt.Println(show(2.5D));
+fmt.Println(show((rune)'a'));
+fmt.Println(show(1D + 2D.i()));
+fmt.Println(show<nint>(named));
+fmt.Println(show<nint>(1 << 10));
+fmt.Println(show((@string)"s"));
+fmt.Println(show(true));
+fmt.Println(many<nint>(1, 2, 3));
+fmt.Println(keyed<@string, nint>((@string)"k", 4));
+```
+
+Calls stay bare where C# already infers Go's type: a float (`2.5D`), rune, string, bool or complex constant, whose emission carries its type; an integer resolved to `int32`; an integer outside the `int32` range, which emits with a cast (`toFloat64(unchecked((nint)(9007199254740993L)))`); a parameter some typed argument also reaches, at any position (`pair(x, 3)` with `x int8`), since C# infers from that argument, including through an alias (`lib.Twice(f, 3)` with `f lib.Mapper[int]`) and through an erased pointer-core parameter's `ж<T>` (`setThrough(Ꮡn, 55)`, above); and a constant the two cast gates above already retype, so those calls keep their emission. Measured over std and its tests on windows, linux and darwin, the shape occurs only in `_test.go` files (20 calls), so the converted stdlib does not change.
+
+Guarded by `UntypedConstTypeArg` (`%T` of int, float, rune, complex, string, bool, named and shifted constants through generics, a variadic and a two-parameter callee, and typed-argument controls), output-compared vs `go run`.
 
 ## Increment/decrement on a type parameter
 `i++` / `i--` on a constrained type parameter binds `IIncrementOperators<T>` / `IDecrementOperators<T>`, which the lifted **Arithmetic** operator set now includes (reflect `rangeNum`'s loop, CS0023). They live in the numeric-only Arithmetic set -- never the string-including Sum set, since `@string` implements neither. The list is emitted in two places that must stay in sync: the converter's `getLiftedConstraints` (`constraintOperations.go`) and the go2cs-gen `InterfaceTypeTemplate`.

@@ -53,7 +53,6 @@ internal static FileMode direntType(slice<byte> buf) {
     if (exprᴛ1 == syscall.DT_SOCK) {
         return ModeSocket;
     }
-
     return ~((fs.FileMode)((fs.FileMode)0)); // unknown
 }
 

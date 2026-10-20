@@ -7,6 +7,8 @@ namespace go;
 
 partial class runtime_package {
 
+// vdsoArrayMax is the byte-size of a maximally sized array on this architecture.
+// See cmd/compile/internal/amd64/galign.go arch.MAXWIDTH initialization.
 internal static UntypedInt vdsoArrayMax => /* 1<<50 - 1 */ 1125899906842623;
 
 internal static ж<vdsoVersionKey> ᏑvdsoLinuxVersion = new StandardBox<vdsoVersionKey>(new vdsoVersionKey("LINUX_2.6"u8, 0x3ae75f6));

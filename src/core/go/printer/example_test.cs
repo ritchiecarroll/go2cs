@@ -45,35 +45,38 @@ internal static void printSelf() {
     // this function, with position information referring to the
     // file set fset.
     var (funcAST, fset) = parseFunc(exampleTestGoˢ, printSelfˢ);
+
     // Print the function body into buffer buf.
     // The file set is provided to the printer so that it knows
     // about the original source formatting and can add additional
     // line breaks where they were present in the source.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     printer.Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, (~funcAST).Body.OrTypedNil());
+
     // Remove braces {} enclosing the function body, unindent,
     // and trim leading and trailing white space.
     @string s = Ꮡbuf.String();
     s = s.slice(1, len(s) - 1);
     s = strings.TrimSpace(strings.ReplaceAll(s, "\n\t"u8, "\n"u8));
+
     // Print the cleaned-up body text to stdout.
     fmt.Println(s);
 }
 
 public static void ExampleFprint() {
     printSelf();
-}
 
-// Output:
-// funcAST, fset := parseFunc("example_test.go", "printSelf")
-//
-// var buf bytes.Buffer
-// printer.Fprint(&buf, fset, funcAST.Body)
-//
-// s := buf.String()
-// s = s[1 : len(s)-1]
-// s = strings.TrimSpace(strings.ReplaceAll(s, "\n\t", "\n"))
-//
-// fmt.Println(s)
+    // Output:
+    // funcAST, fset := parseFunc("example_test.go", "printSelf")
+    //
+    // var buf bytes.Buffer
+    // printer.Fprint(&buf, fset, funcAST.Body)
+    //
+    // s := buf.String()
+    // s = s[1 : len(s)-1]
+    // s = strings.TrimSpace(strings.ReplaceAll(s, "\n\t", "\n"))
+    //
+    // fmt.Println(s)
+}
 
 } // end printer_test_package

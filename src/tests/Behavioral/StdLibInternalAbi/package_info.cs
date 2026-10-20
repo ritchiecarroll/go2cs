@@ -61,9 +61,9 @@ using static go.main_package;
 [assembly: go.GoPositionMap("abi.go", "abi.cs", "ABFcgoKClIKCgpSCgoKUAAIYgoKUgoKUAAUQggACEoI=")]
 [assembly: go.GoPositionMap("compiletype.go", "compiletype.cs", "AAgegKaAqICmgKaA")]
 [assembly: go.GoPositionMap("escape.go", "escape.cs", "AAomgoLugoKU")]
-[assembly: go.GoPositionMap("main.go", "main.cs", "7oKCgoSEgoI=")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "7oKCgpSUgoI=")]
 [assembly: go.GoPositionMap("switch.go", "switch.cs", "ABtAgoKYlKQ=")]
-[assembly: go.GoPositionMap("type.go", "type.cs", "AEiIAoKClKYAHT6ijKiCgoCCpKaApIKogKaCqIKmggAULqKClNaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSogKaApIAACBCCgoKUpqKCgpSogAAOIoKkgqSCpIKkgqaigpQADTKCpoKmgqaC1qKCgpSClNSigoKUgoKUpoIADRyCAAxSgtqCqIKogqiC2oKCgoKCgsyCgpSCrIKCgoKCgpTqgoKUgqiCgpSCgqaCgpSClIKCgoSCgoKUgoKUgpaCgoKCgoKClg==")]
+[assembly: go.GoPositionMap("type.go", "type.cs", "AEmIAoKClKYAHT6ijKiCgoCCpKaApIKogKaCqIKmggARLqKClKaigpQAAhSCAA4kooKUpoIAFDKigoKUACoIooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSogKaApIAACBCCgoKUpqKCgpSogAAOIoKkgqSCpIKkgqaigpQADTKCpoKmgqaCpqKCgpSClKSigoKUgoKUpoIADRyCAAxSgqqCqIKogqiCqoKCgoKCgsyCgpSCrIKCgoKCgpS6goKUgqiCgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

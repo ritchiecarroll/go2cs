@@ -50,6 +50,7 @@ internal static void Main() {
     bump(o, 5);
     fmt.Println((~o).h.of(holder.Ꮡwait).get());
     fmt.Println((~o).deep.of(holder.Ꮡprof).of(profile.Ꮡwait).get());
+
     var o2 = Ꮡ(new owner(h: Ꮡ(new holder(nil))));
     fmt.Println(viaPointerLocal(ref (o2).DerefOrNull(), 4));
 }

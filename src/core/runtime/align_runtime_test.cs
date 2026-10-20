@@ -14,27 +14,25 @@ partial class runtime_internal_test_package {
 // AtomicFields is the set of fields on which we perform 64-bit atomic
 // operations (all the *64 operations in internal/runtime/atomic).
 public static slice<uintptr> AtomicFields = new uintptr[]{
-    /* unsafe.Offsetof(m{}.procid) */ (uintptr)72,
-    /* unsafe.Offsetof(p{}.gcFractionalMarkTime) */ (uintptr)4648,
+    /* unsafe.Offsetof(m{}.procid) */ (uintptr)64,
     /* unsafe.Offsetof(profBuf{}.overflow) */ (uintptr)16,
     /* unsafe.Offsetof(profBuf{}.overflowTime) */ (uintptr)24,
-    /* unsafe.Offsetof(heapStatsDelta{}.tinyAllocCount) */ (uintptr)48,
-    /* unsafe.Offsetof(heapStatsDelta{}.smallAllocCount) */ (uintptr)72,
-    /* unsafe.Offsetof(heapStatsDelta{}.smallFreeCount) */ (uintptr)632,
-    /* unsafe.Offsetof(heapStatsDelta{}.largeAlloc) */ (uintptr)56,
-    /* unsafe.Offsetof(heapStatsDelta{}.largeAllocCount) */ (uintptr)64,
-    /* unsafe.Offsetof(heapStatsDelta{}.largeFree) */ (uintptr)616,
-    /* unsafe.Offsetof(heapStatsDelta{}.largeFreeCount) */ (uintptr)624,
+    /* unsafe.Offsetof(heapStatsDelta{}.tinyAllocCount) */ (uintptr)40,
+    /* unsafe.Offsetof(heapStatsDelta{}.smallAllocCount) */ (uintptr)64,
+    /* unsafe.Offsetof(heapStatsDelta{}.smallFreeCount) */ (uintptr)624,
+    /* unsafe.Offsetof(heapStatsDelta{}.largeAlloc) */ (uintptr)48,
+    /* unsafe.Offsetof(heapStatsDelta{}.largeAllocCount) */ (uintptr)56,
+    /* unsafe.Offsetof(heapStatsDelta{}.largeFree) */ (uintptr)608,
+    /* unsafe.Offsetof(heapStatsDelta{}.largeFreeCount) */ (uintptr)616,
     /* unsafe.Offsetof(heapStatsDelta{}.committed) */ (uintptr)0,
     /* unsafe.Offsetof(heapStatsDelta{}.released) */ (uintptr)8,
     /* unsafe.Offsetof(heapStatsDelta{}.inHeap) */ (uintptr)16,
     /* unsafe.Offsetof(heapStatsDelta{}.inStacks) */ (uintptr)24,
-    /* unsafe.Offsetof(heapStatsDelta{}.inPtrScalarBits) */ (uintptr)40,
     /* unsafe.Offsetof(heapStatsDelta{}.inWorkBufs) */ (uintptr)32,
     /* unsafe.Offsetof(lfnode{}.next) */ (uintptr)0,
-    /* unsafe.Offsetof(mstats{}.last_gc_nanotime) */ (uintptr)7720,
-    /* unsafe.Offsetof(mstats{}.last_gc_unix) */ (uintptr)3592,
-    /* unsafe.Offsetof(workType{}.bytesMarked) */ (uintptr)192
+    /* unsafe.Offsetof(mstats{}.last_gc_nanotime) */ (uintptr)7696,
+    /* unsafe.Offsetof(mstats{}.last_gc_unix) */ (uintptr)3568,
+    /* unsafe.Offsetof(workType{}.bytesMarked) */ (uintptr)368
 }.slice();
 
 // AtomicVariables is the set of global variables on which we perform

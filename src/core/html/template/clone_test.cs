@@ -81,9 +81,11 @@ public static void TestClone(ж<testing.T> Ꮡt) {
     // In the t3 template, it will be in a CSS context.
     @string tmpl = tmplᶜ;
     var b = @new<strings.Builder>();
+
     // Create an incomplete template t0.
     var (ᴛ5, ᴛ6) = New("t0"u8).Parse(tmpl);
     var t0 = Must(ᴛ5, ᴛ6);
+
     // Clone t0 as t1.
     var (ᴛ7, ᴛ8) = t0.Clone();
     var t1 = Must(ᴛ7, ᴛ8);
@@ -91,6 +93,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
     Must(ᴛ9, ᴛ10);
     var (ᴛ11, ᴛ12) = t1.Parse(defineRhsAEndˢ);
     Must(ᴛ11, ᴛ12);
+
     // Execute t1.
     b.Reset();
     {
@@ -104,6 +107,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("t1: got %q want %q"u8, got, want);
         }
     }
+
     // Clone t0 as t2.
     var (ᴛ13, ᴛ14) = t0.Clone();
     var t2 = Must(ᴛ13, ᴛ14);
@@ -111,6 +115,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
     Must(ᴛ15, ᴛ16);
     var (ᴛ17, ᴛ18) = t2.Parse(defineRhsPEndˢ);
     Must(ᴛ17, ᴛ18);
+
     // Execute t2.
     b.Reset();
     {
@@ -124,6 +129,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("t2: got %q want %q"u8, got, want);
         }
     }
+
     // Clone t0 as t3, but do not execute t3 yet.
     var (ᴛ19, ᴛ20) = t0.Clone();
     var t3 = Must(ᴛ19, ᴛ20);
@@ -131,11 +137,13 @@ public static void TestClone(ж<testing.T> Ꮡt) {
     Must(ᴛ21, ᴛ22);
     var (ᴛ23, ᴛ24) = t3.Parse(defineRhsStyleEndˢ);
     Must(ᴛ23, ᴛ24);
+
     // Complete t0.
     var (ᴛ25, ᴛ26) = t0.Parse(defineLhsEndˢ);
     Must(ᴛ25, ᴛ26);
     var (ᴛ27, ᴛ28) = t0.Parse(defineRhsEndˢ);
     Must(ᴛ27, ᴛ28);
+
     // Clone t0 as t4. Redefining the "lhs" template should not fail.
     var (ᴛ29, ᴛ30) = t0.Clone();
     var t4 = Must(ᴛ29, ᴛ30);
@@ -156,6 +164,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
             Ꮡt.Error(redefineLhsGotNilErrWantˢ);
         }
     }
+
     // Execute t0.
     b.Reset();
     {
@@ -169,12 +178,14 @@ public static void TestClone(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("t0: got %q want %q"u8, got, want);
         }
     }
+
     // Clone t0. This should fail, as t0 has already executed.
     {
         var (_, err) = t0.Clone(); if (err == default!) {
             Ꮡt.Error(t0CloneGotNilErrWantNonˢ);
         }
     }
+
     // Similarly, cloning sub-templates should fail.
     {
         var (_, err) = t0.Lookup("a"u8).Clone(); if (err == default!) {
@@ -186,6 +197,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
             Ꮡt.Error(t0LookupLhsCloneGotNilˢ);
         }
     }
+
     // Execute t3.
     b.Reset();
     {
@@ -210,7 +222,7 @@ internal static readonly @string tmplᶜ1 = """
 		{{define "a"}}{{template "lhs"}}{{.}}{{template "rhs"}}{{end}}
 		{{define "lhs"}} <a href=" {{end}}
 		{{define "rhs"}} "></a> {{end}}
-"""u8;
+"""u8.Raw();
 
 public static void TestTemplates(ж<testing.T> Ꮡt) {
     var names = new @string[]{"t0"u8, "a"u8, "lhs"u8, "rhs"u8}.slice();
@@ -258,8 +270,6 @@ internal static readonly object expectedNoSuchTemplateˢ = (@string)"expected 'n
 // "Further calls to Parse in the copy will add templates
 // to the copy but not to the original."
 public static void TestCloneThenParse(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (ᴛ35, ᴛ36) = New("t0"u8).Parse(defineATemplateEmbeddedˢ);
     var t0 = Must(ᴛ35, ᴛ36);
     var (ᴛ37, ᴛ38) = t0.Clone();
@@ -284,10 +294,12 @@ internal static readonly @string customFuncˢ = "{{customFunc}}"u8;
 public static void TestFuncMapWorksAfterClone(ж<testing.T> Ꮡt) {
     var funcs = new FuncMap(new map<@string, any>{["customFunc"u8] = (@string, error) () => ("", errors.New(issue5980ˢ))
     });
+
     // get the expected error output (no clone)
     var (ᴛ41, ᴛ42) = New(""u8).Funcs(funcs).Parse(customFuncˢ);
     var uncloned = Must(ᴛ41, ᴛ42);
     var wantErr = uncloned.Execute(io.Discard, default!);
+
     // toClone must be the same as uncloned. It has to be recreated from scratch,
     // since cloning cannot occur after execution.
     var (ᴛ43, ᴛ44) = New(""u8).Funcs(funcs).Parse(customFuncˢ);
@@ -295,6 +307,7 @@ public static void TestFuncMapWorksAfterClone(ж<testing.T> Ꮡt) {
     var (ᴛ45, ᴛ46) = toClone.Clone();
     var cloned = Must(ᴛ45, ᴛ46);
     var gotErr = cloned.Execute(io.Discard, default!);
+
     if (wantErr.Error() != gotErr.Error()) {
         Ꮡt.Errorf("clone error message mismatch want %q got %q"u8, wantErr, gotErr);
     }
@@ -320,6 +333,7 @@ public static partial void TestTemplateCloneExecuteRace(ж<testing.T> Ꮡt) {
 
     var (ᴛ51, ᴛ52) = Must(ᴛ49, ᴛ50).Parse(overlay);
     var tmpl = Must(ᴛ51, ᴛ52);
+
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 10; i++) {
         Ꮡwg.Add(1);
@@ -347,8 +361,6 @@ public static partial void TestTemplateCloneExecuteRace(ж<testing.T> Ꮡt) {
 internal static readonly object afterCloneTmplLookupTmplˢ = (@string)"after Clone, tmpl.Lookup(tmpl.Name()) != tmpl"u8;
 
 public static void TestTemplateCloneLookup(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Template.escape makes an assumption that the template associated
     // with t.Name() is t. Check that this holds.
     var (ᴛ53, ᴛ54) = New("x"u8).Parse("a"u8);
@@ -385,7 +397,7 @@ internal static readonly @string @baseᶜ = """
 {{ define "a" -}}<title>{{ template "b" . -}}</title>{{ end -}}
 {{ define "b" }}{{ end -}}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string pageᶜ = @"{{ template ""a"" . }}"u8;
@@ -394,8 +406,10 @@ internal static readonly @string pageᶜ = @"{{ template ""a"" . }}"u8;
 public static void TestCloneRedefinedName(ж<testing.T> Ꮡt) {
     @string @base = @baseᶜ;
     @string page = pageᶜ;
+
     var (ᴛ63, ᴛ64) = New("a"u8).Parse(@base);
     var t1 = Must(ᴛ63, ᴛ64);
+
     for (nint i = 0; i < 2; i++) {
         var (ᴛ65, ᴛ66) = t1.Clone();
         var t2 = Must(ᴛ65, ᴛ66);

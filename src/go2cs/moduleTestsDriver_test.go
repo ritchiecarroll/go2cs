@@ -23,6 +23,7 @@ import (
 // shares p's PkgPath) never stands in for a production package, so a test's import does NOT become an
 // ordering edge from the production package under test.
 func TestTestClosureDiscoveryAddsNoOrderEdges(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture module via go/packages")
 	}

@@ -22,10 +22,10 @@ public static void TestPanicWithDirectlyPrintableCustomTypes(ж<testing.T> Ꮡt)
 
     var tests = new TestPanicWithDirectlyPrintableCustomTypes_tests[]{
         new("panicCustomBool"u8, @"panic: main.MyBool(true)"u8),
-        new("panicCustomComplex128"u8, @"panic: main.MyComplex128(+3.210000e+001+1.000000e+001i)"u8),
-        new("panicCustomComplex64"u8, @"panic: main.MyComplex64(+1.100000e-001+3.000000e+000i)"u8),
-        new("panicCustomFloat32"u8, @"panic: main.MyFloat32(-9.370000e+001)"u8),
-        new("panicCustomFloat64"u8, @"panic: main.MyFloat64(-9.370000e+001)"u8),
+        new("panicCustomComplex128"u8, @"panic: main.MyComplex128(32.1+10i)"u8),
+        new("panicCustomComplex64"u8, @"panic: main.MyComplex64(0.11+3i)"u8),
+        new("panicCustomFloat32"u8, @"panic: main.MyFloat32(-93.7)"u8),
+        new("panicCustomFloat64"u8, @"panic: main.MyFloat64(-93.7)"u8),
         new("panicCustomInt"u8, @"panic: main.MyInt(93)"u8),
         new("panicCustomInt8"u8, @"panic: main.MyInt8(93)"u8),
         new("panicCustomInt16"u8, @"panic: main.MyInt16(93)"u8),
@@ -37,8 +37,11 @@ public static void TestPanicWithDirectlyPrintableCustomTypes(ж<testing.T> Ꮡt)
         new("panicCustomUint16"u8, @"panic: main.MyUint16(93)"u8),
         new("panicCustomUint32"u8, @"panic: main.MyUint32(93)"u8),
         new("panicCustomUint64"u8, @"panic: main.MyUint64(93)"u8),
-        new("panicCustomUintptr"u8, @"panic: main.MyUintptr(93)"u8)
+        new("panicCustomUintptr"u8, @"panic: main.MyUintptr(93)"u8),
+        new("panicDeferFatal"u8, "panic: runtime.errorString(\"invalid memory address or nil pointer dereference\")\n\tfatal error: sync: unlock of unlocked mutex"u8),
+        new("panicDoublieDeferFatal"u8, "panic: runtime.errorString(\"invalid memory address or nil pointer dereference\") [recovered, repanicked]\n\tfatal error: sync: unlock of unlocked mutex"u8)
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestPanicWithDirectlyPrintableCustomTypes_tests(), out var Ꮡtt);
         tt = vᴛ1;

@@ -24,7 +24,6 @@ global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using templateꓸError = go.html.template_package.ΔError;
 global using templateꓸFuncMap = go.text.template_package.FuncMap;
-using parse = go.text.template.parse_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,8 +43,13 @@ using static global::go.html.template_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<parse.TextNode, ж<parse.TextNode>>]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,8 +59,8 @@ using static global::go.html.template_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAgMAAgIAAgSlrqUgoK45gAJCLrMkoLMuJSCgrgACg4ADAjulqikgoKmgoK4goKUgoK6AAwMAAwI7paozIKCpoKCuoKCpoKCuoKClIKCvA==", "90-94:1", "", "121=Join/1/2/1,Join/2/2/2")]
-[assembly: go.GoPositionMap("html/template/template_test.go", "template_test.cs", "ABogtIKCgpSCloKSgoKClICCAAkIgoKCgqaCgoKCgvaCgoKCgtaCgoKCgtaCgoKCgqaCgoKCgvaCgoK4guaCgoKCgvaCgoKCgIKkgIKkgIL4goKCABIGtAALGKqSsqKCgIKkgoKAgqSCAAkMgoKCgoKClIKClAAHEILcgqaigoK4ooKCuKKCgoKUgg==", "147-160:1", "", "269=New/1/1/2")]
+[assembly: go.GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAgMAAgIAAgSpsqkgoLY5ujK3JKC3LikgoLYAAoOAAoI7qa4pIKCpoKCuIKClIKC6gAMDAAJCO6muOyCgqaCgsqCgqaCgsqCgpSCgvw=", "90-94:1", "", "126=Join/1/2/1,Join/2/2/2")]
+[assembly: go.GoPositionMap("html/template/template_test.go", "template_test.cs", "ABogtIKCgpSCpoKSgoKClICCAAkIgoKCgqaCgoKCgvaCgoKCgtaCgoKCgtaCgoKCgqaCgoKCgvaCgoK4guaCgoKCgvaCgoKCgIKkgIKkgIL4goKCABIGtAALGKqSsqKCgIKkgoKAgqSCAAkMgoKCgoKClIKClAAHEILcgqaigoK4ooKCuKKCgoKUgg==", "147-160:1", "", "270=New/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.html;

@@ -28,8 +28,7 @@ using static go.@internal.runtime.maps_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/maps/export_swiss_test.go", "export_swiss_test.cs", "AA0cgoKCgg==")]
-[assembly: go.GoPositionMap("internal/runtime/maps/export_test.go", "export_test.cs", "ABAgAAkSgoKmgoKUqJKCgpSWgoKCgoKUgpQAAhDygpaCgoKClISCgoKCqIKClIKClLqosoKWgoKmgqiSqJI=")]
+[assembly: go.GoPositionMap("internal/runtime/maps/export_test.go", "export_test.cs", "ABAgAAkSgoKCgqaCgqaCgpSokoKClKaCgoKCgpSClAACEPKCpoKCgoKUlIKCgoK4goKUgoKUyqiygqaCgqaCqJKokg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

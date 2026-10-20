@@ -28,6 +28,7 @@ public static void FuzzDecode(ж<testing.F> Ꮡf) {
     if (testing.Short()) {
         Ꮡf.Skip(skippingInShortModeˢ);
     }
+
     var (testdata, err) = os.ReadDir(testdataˢ);
     if (err != default!) {
         Ꮡf.Fatalf("failed to read testdata directory: %s"u8, err);
@@ -42,6 +43,7 @@ public static void FuzzDecode(ж<testing.F> Ꮡf) {
         }
         f.Add(b);
     }
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
         var (cfg, _, errΔ2) = image.DecodeConfig(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
         if (errΔ2 != default!) {

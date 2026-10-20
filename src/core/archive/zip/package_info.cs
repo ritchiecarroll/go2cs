@@ -18,8 +18,6 @@ global using osꓸSignal = go.os_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using bufio = go.bufio_package;
-using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -67,9 +65,13 @@ using static go.archive.zip_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bufio.Reader, ж<bufio.Reader>>(Indirect = true)]
-[assembly: GoImplicitConv<io.SectionReader, ж<io.SectionReader>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -79,10 +81,10 @@ using static go.archive.zip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("archive/zip/reader.go", "reader.cs", "ABwyloKCggAhXAAJAoKClIKCgpSCgIKCpIIABRoACgKClIKCgIKkpqKCgpSC7oKUgoKAgqTMgoKCgpSClIKUtpSCgpS4goK4rLKClKaCgoKUqJIAAhAACAKCgpSqwoKClAAJFIKUpoKCgoKUgoKClNyqooKClILugqaCAAsYgqaygpSCgoKClIKUgoKUgoCCgpSkguyCuIKmgKiigoCCpIKAgqSCgoKssoKAgqSCgIKkgoKCgoKCgoKCgoKCgoKCgoKCgIKkgoKWgoKWtrwACQaCgoqygpKCgoKUhJSMwoKClJSCgoKUlIKCgpS2gpSCkoKCgpSCgpaCgoKCgraClIKCpIKUgtiCgoIACBSCAAoYhIKWpoIAChaAgqSCgqaUgIKkgoIABhLWpJKCooKUgoCCpICCgoKkgrqCAAgSgoKUloKCgoKUgqiCgpaWgIIABxCCgoKSqKyygoKUgoCCpIKAgqSSlIKSlKqigoCCpoKAgqaCgoKCgoKEpoKUlIK4lKbKgoKCpoKCgqaCgoKmgoKCpoKCggARIqKClIKUqJCAooCigKKAooCigKSCgpSmgKSCqJKChISClqaiuIKohIKCgoKWgIKCpICCgqaCgoCClKSClJaCyoKClKaCgIKAgpTK2ryCgoKClK7ihIKUgoKUgpSCgpSmooKCgpSmlIKCloKCgoKClJSCgoKmpoKCgoKCppSCgoKmlAAIEoCigNSCpoKCgpSCgpSUgoKCgpSUgg==", "806-877:1;874-876:1.1;931-937:1;949-956:1;957-964:2", "", "265=NewIEEE/1/1/2;640=uint16/1/5/1,uint16/2/5/2,uint16/3/5/3,uint16/4/5/4,uint32/1/2/5,uint32/2/2/6,uint16/5/5/7")]
-[assembly: go.GoPositionMap("archive/zip/register.go", "register.cs", "ABQ8goKClJQAChDigoKClObSgoKCgoKClAAICoKCgpSUAAoQ4oKCgpTm0oKCgoKCgpQAChCCgoSCqqKAgsyigILIgoKClKaCgoKU", "110-110:1;111-111:2")]
-[assembly: go.GoPositionMap("archive/zip/struct.go", "struct.cs", "AIMByAKSAAcQgKKCgpSkgKKCgpSkgKKAooCkgKSCAAIU8oK4goKClJQADSCiqoKClKyyAA0m4oKCrsKuwoKCABAuspSkpIKUqJKCloKUgrqSpoKmooKUlIKUpoKCmKSkpKSkAAIXAAIcgpSClIKUpoKClKSkpKTItIKUgpSClA==", "", "", "193=Name/1/1/1")]
-[assembly: go.GoPositionMap("archive/zip/writer.go", "writer.cs", "ABYoggAUMJKuwoKUqqLaooKUgtqigoCCpJSClJaCgoKCgoKCgoKCgoK4goaSgoKCgoKClIKWgoKCgoKClJSAgqSAgqSAgqSAgraEgoKEgIKmgoKWgoKCgoKCgoKCloKCgoSAgsqCgpiSgoKCgoKCgoKAgqSAgqYAAhoACgK4rNKCgu6CgpSm2qKCgIK2lJQAAhQACQKAggASJoKClLS2gpYACBIAABDigoKCgoKClpi6yoKWgoKChJSEyoKClIKCgpSCgpSCgIK2gqaigoKUgpaCgoKCgoKCuIKCgriCgpSCgoCCpICCpIIAAhoADAKAgqaChMqCgIKmgoKWuIKqwoKCuJKCgpSCrLKClNyyooKUgpSCgpSClIKClIKClIKCgpSClIKClJKC6IKCgpQACAqCgpQADxqCgpSClILWgoKUgoKUgIK4goKChIKCgpSClqaCgp7SgpSUgoKCgoKUgpSCAAcQgoKC7oLKgoKmgoKmgoKmgoI=", "504-541:1", "", "378=NewIEEE/1/1/3")]
+[assembly: go.GoPositionMap("archive/zip/reader.go", "reader.cs", "AB00loKCggAhXAAJAoKClIKCgpSCgIKCpIIABRoACgKClIKCgIKkpqKCgpSC7oKUgoKAgqTcgoKCgpSClIKUppSCgpS4goK4rLKClKaCgoKUqJIAAhAACAKCgpSqwoKClAAJFIKUpoKCgoKUgoKClNyqooKClILugqaCAAsYgqaygpSCgoKClIKUgoKUgoCCgpSkguyCuIKmgKiigoCCpIKAgqSCgoKssoKAgqSCgIKkgoKCgoKCgoKCgoKCgoKCgoKCgIKkgoKmgoKmxvy2goKasoKCgoKClJSU3IKCgpSUgoKClJSCgoKUtoKUgoKCgoKUgoKmgoKCgoK2gpSCgqSClILYgoKCAAkUggALGJSCpqaCAAoWgIKkgoKmlICCpIKCAAgS1qSSgqKClIKAgqSAgoKCpILKggAIEoKClKaCgoKClIK4goKmpoCCAAgQgoKCkrissoKClIKAgqSCgIKkgpSCgpSqooKAgraCgIK2goKCgoKClKaClJSCuJSmyoKCgqaCgoKmgoKCpoKCgqaCgoIAESKigpSClKiQgKKAooCigKKAooCkgoKUpoCkgqiSgpSUgqamgqa4griUgoKCgqaAgoKkgIKCtoKCgIKUpIKUpoLKgoKUpoKAgoCClMrqvIKCgoKUruKUgpSCgpSClIKClKaigoKClKaUgoKmgoKCgoKUlIKCgqamgoKCgoKmlIKCgqaUAAgSgKKA1IKmgoKClIKClJSCgoKCkoLclII=", "807-881:1;878-880:1.1;935-941:1;953-960:1;961-968:2", "", "266=NewIEEE/1/1/2;651=uint16/1/5/1,uint16/2/5/2,uint16/3/5/3,uint16/4/5/4,uint32/1/2/5,uint32/2/2/6,uint16/5/5/7;1116=Errorf/1/1/3")]
+[assembly: go.GoPositionMap("archive/zip/register.go", "register.cs", "AB48goKClJQAChDigoKClObSgoKCgoKClAAICoKCgpSUAAoQ4oKCgpTm0oKCgoKCgpQAChCCgpSCqqKAgsyigILIgoKClKaCgoKU", "110-110:1;111-111:2")]
+[assembly: go.GoPositionMap("archive/zip/struct.go", "struct.cs", "AJIByAKSAAcQgKKCgpSkgKKCgpSkgKKAooCkgKSCAAIU8oK4goKClJQADSCiqoKClKyyAA0m4oKCrsKuwoKCABMuspSklIKUqJKCpoKUgrqSpoKmooKUlIKUpoKCmKSkpKSkAAIXAAEcgpSClIKUpoKClKSkpKTYlIKUgpSClA==", "", "", "208=Name/1/1/1")]
+[assembly: go.GoPositionMap("archive/zip/writer.go", "writer.cs", "ABYoggAUMJKuwoKUqqLaooKUgtqigoCCpJSClKaCgoKCgoKCgoKCgoK4gpaSgoKCgoKClIKmgoKCgoKClJSAgqSAgqSAgqSAgraUgoKUgIK2goKmgoKCgoKCgoKCpoKCgpSAgtqCgqiSgoKCgoKCgoKAgqSAgrYAAhoACgK4rNKCgu6CgpSm2qKCgIK2lJQAAhQACQKAggATJoKClLS2gqYACBIAARDigoKCgoKCppjKyoKmgoKClJSUyoKClIKCgpSCgpSCgIK2gqaigoKUgqaCgoKCgoKCuIKCgriCgpSCgoCCpICCpIIAAhoADAKAgraClMqCgIK2goKmuIKqwoKCuJKCgpSCrLKClNyyooKUgpSCgpSClIKClIKClIKCgpSClIKClJKC6IKCgpQACAqCgpQADxqCgpSClILWgoKUgoKUgILIgoKClIKCgpSCpqaCgp7SgpSUgoKCgoKUgpSCAAcQgoKC7oLKgoKmgoKmgoKmgoI=", "504-541:1", "", "398=NewIEEE/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.archive;
@@ -131,6 +133,7 @@ public static partial class zip_package
     [GoInit] internal static void initᴛᴛimportꓸcompressꓸflate() => builtin.initPackage(typeof(compress.flate_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(encoding.binary_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸhashꓸcrc32() => builtin.initPackage(typeof(go.hash.crc32_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(@internal.godebug_package));

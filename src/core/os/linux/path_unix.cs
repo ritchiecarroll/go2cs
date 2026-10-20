@@ -18,17 +18,22 @@ public static bool IsPathSeparator(uint8 c) {
 internal static (@string, @string) splitPath(@string path) {
     // if no better parent is found, the path is relative from "here"
     @string dirname = "."u8;
+
     // Remove all but one leading slash.
     while (len(path) > 1 && path[0] == (rune)'/' && path[1] == (rune)'/') {
         path = path[1..];
     }
+
     nint i = len(path) - 1;
+
     // Remove trailing slashes.
     for (; i > 0 && path[i] == (rune)'/'; i--) {
         path = path.slice(0, i);
     }
+
     // if no slashes in path, base is path
     @string basename = path;
+
     // Remove leading directory path
     for (i--; i >= 0; i--) {
         if (path[i] == (rune)'/') {
@@ -41,6 +46,7 @@ internal static (@string, @string) splitPath(@string path) {
             break;
         }
     }
+
     return (dirname, basename);
 }
 

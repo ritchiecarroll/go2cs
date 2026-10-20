@@ -1,0 +1,500 @@
+// Copyright 2024 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+namespace go;
+
+using errors = errors_package;
+using bytealg = @internal.bytealg_package;
+using stringslite = @internal.stringslite_package;
+using testlog = @internal.testlog_package;
+using fs = go.io.fs_package;
+using runtime = runtime_package;
+using slices = slices_package;
+using time = time_package;
+using @internal;
+using go.io;
+
+partial class os_package {
+
+// OpenInRoot opens the file name in the directory dir.
+// It is equivalent to OpenRoot(dir) followed by opening the file in the root.
+//
+// OpenInRoot returns an error if any component of the name
+// references a location outside of dir.
+//
+// See [Root] for details and limitations.
+public static (ж<File>, error) OpenInRoot(@string dir, @string name) {
+    GoFrame ᒐ = default;
+    try {
+        var (r, err) = OpenRoot(dir);
+        if (err != default!) {
+            return (default!, err);
+        }
+        var rʗ1 = r;
+        defer(() => rʗ1.Close(), ref ᒐ);
+        return r.Open(name);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+// Root may be used to only access files within a single directory tree.
+//
+// Methods on Root can only access files and directories beneath a root directory.
+// If any component of a file name passed to a method of Root references a location
+// outside the root, the method returns an error.
+// File names may reference the directory itself (.).
+//
+// Methods on Root will follow symbolic links, but symbolic links may not
+// reference a location outside the root.
+// Symbolic links must not be absolute.
+//
+// Methods on Root do not prohibit traversal of filesystem boundaries,
+// Linux bind mounts, /proc special files, or access to Unix device files.
+//
+// Methods on Root are safe to be used from multiple goroutines simultaneously.
+//
+// On most platforms, creating a Root opens a file descriptor or handle referencing
+// the directory. If the directory is moved, methods on Root reference the original
+// directory in its new location.
+//
+// Root's behavior differs on some platforms:
+//
+//   - When GOOS=windows, file names may not reference Windows reserved device names
+//     such as NUL and COM1.
+//   - On Unix, [Root.Chmod], [Root.Chown], and [Root.Chtimes] are vulnerable to a race condition.
+//     If the target of the operation is changed from a regular file to a symlink
+//     while the operation is in progress, the operation may be performed on the link
+//     rather than the link target.
+//   - When GOOS=js, Root is vulnerable to TOCTOU (time-of-check-time-of-use)
+//     attacks in symlink validation, and cannot ensure that operations will not
+//     escape the root.
+//   - When GOOS=plan9 or GOOS=js, Root does not track directories across renames.
+//     On these platforms, a Root references a directory name, not a file descriptor.
+//   - WASI preview 1 (GOOS=wasip1) does not support [Root.Chmod].
+partial struct Root {
+    internal ж<root> root;
+}
+
+// Maximum number of symbolic links we will follow when resolving a file in a root.
+// 8 is __POSIX_SYMLOOP_MAX (the minimum allowed value for SYMLOOP_MAX),
+// and a common limit.
+internal static UntypedInt rootMaxSymlinks => 8;
+
+// OpenRoot opens the named directory.
+// It follows symbolic links in the directory name.
+// If there is an error, it will be of type [*PathError].
+public static (ж<Root>, error) OpenRoot(@string name) {
+    testlog.Open(name);
+    return openRootNolog(name);
+}
+
+// Name returns the name of the directory presented to OpenRoot.
+//
+// It is safe to call Name after [Close].
+public static @string Name(this ref Root r) {
+    return r.root.Name();
+}
+
+// Close closes the Root.
+// After Close is called, methods on Root return errors.
+public static error Close(this ref Root r) {
+    return r.root.Close();
+}
+
+// Open opens the named file in the root for reading.
+// See [Open] for more details.
+public static (ж<File>, error) Open(this ж<Root> Ꮡr, @string name) {
+    return Ꮡr.OpenFile(name, O_RDONLY, 0);
+}
+
+// Create creates or truncates the named file in the root.
+// See [Create] for more details.
+public static (ж<File>, error) Create(this ж<Root> Ꮡr, @string name) {
+    return Ꮡr.OpenFile(name, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_TRUNC), 438);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string unsupportedFileModeˢ = "unsupported file mode"u8;
+
+// OpenFile opens the named file in the root.
+// See [OpenFile] for more details.
+//
+// If perm contains bits other than the nine least-significant bits (0o777),
+// OpenFile returns an error.
+public static (ж<File>, error) OpenFile(this ж<Root> Ꮡr, @string name, nint flag, FileMode perm) {
+    ref var r = ref Ꮡr.DerefOrNull();
+
+    if ((FileMode)(perm & 511) != perm) {
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat"u8, Path: name, Err: errors.New(unsupportedFileModeˢ)))));
+    }
+    r.logOpen(name);
+    var (rf, err) = rootOpenFileNolog(Ꮡr, name, flag, perm);
+    if (err != default!) {
+        return (default!, err);
+    }
+    rf.Value.appendMode = (flag & O_APPEND) != 0;
+    return (rf, default!);
+}
+
+// OpenRoot opens the named directory in the root.
+// If there is an error, it will be of type [*PathError].
+public static (ж<Root>, error) OpenRoot(this ж<Root> Ꮡr, @string name) {
+    ref var r = ref Ꮡr.DerefOrNull();
+
+    r.logOpen(name);
+    return openRootInRoot(Ꮡr, name);
+}
+
+// Chmod changes the mode of the named file in the root to mode.
+// See [Chmod] for more details.
+public static error Chmod(this ж<Root> Ꮡr, @string name, FileMode mode) {
+    return rootChmod(ref (Ꮡr).DerefOrNull(), name, mode);
+}
+
+// Mkdir creates a new directory in the root
+// with the specified name and permission bits (before umask).
+// See [Mkdir] for more details.
+//
+// If perm contains bits other than the nine least-significant bits (0o777),
+// Mkdir returns an error.
+public static error Mkdir(this ж<Root> Ꮡr, @string name, FileMode perm) {
+    if ((FileMode)(perm & 511) != perm) {
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat"u8, Path: name, Err: errors.New(unsupportedFileModeˢ))));
+    }
+    return rootMkdir(ref (Ꮡr).DerefOrNull(), name, perm);
+}
+
+// MkdirAll creates a new directory in the root, along with any necessary parents.
+// See [MkdirAll] for more details.
+//
+// If perm contains bits other than the nine least-significant bits (0o777),
+// MkdirAll returns an error.
+public static error MkdirAll(this ж<Root> Ꮡr, @string name, FileMode perm) {
+    if ((FileMode)(perm & 511) != perm) {
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat"u8, Path: name, Err: errors.New(unsupportedFileModeˢ))));
+    }
+    return rootMkdirAll(Ꮡr, name, perm);
+}
+
+// Chown changes the numeric uid and gid of the named file in the root.
+// See [Chown] for more details.
+public static error Chown(this ж<Root> Ꮡr, @string name, nint uid, nint gid) {
+    return rootChown(ref (Ꮡr).DerefOrNull(), name, uid, gid);
+}
+
+// Lchown changes the numeric uid and gid of the named file in the root.
+// See [Lchown] for more details.
+public static error Lchown(this ж<Root> Ꮡr, @string name, nint uid, nint gid) {
+    return rootLchown(ref (Ꮡr).DerefOrNull(), name, uid, gid);
+}
+
+// Chtimes changes the access and modification times of the named file in the root.
+// See [Chtimes] for more details.
+public static error Chtimes(this ж<Root> Ꮡr, @string name, time.Time atime, time.Time mtime) {
+    return rootChtimes(ref (Ꮡr).DerefOrNull(), name, atime, mtime);
+}
+
+// Remove removes the named file or (empty) directory in the root.
+// See [Remove] for more details.
+public static error Remove(this ж<Root> Ꮡr, @string name) {
+    return rootRemove(ref (Ꮡr).DerefOrNull(), name);
+}
+
+// RemoveAll removes the named file or directory and any children that it contains.
+// See [RemoveAll] for more details.
+public static error RemoveAll(this ж<Root> Ꮡr, @string name) {
+    return rootRemoveAll(ref (Ꮡr).DerefOrNull(), name);
+}
+
+// Stat returns a [FileInfo] describing the named file in the root.
+// See [Stat] for more details.
+public static (FileInfo, error) Stat(this ж<Root> Ꮡr, @string name) {
+    ref var r = ref Ꮡr.DerefOrNull();
+
+    r.logStat(name);
+    return rootStat(ref (Ꮡr).DerefOrNull(), name, false);
+}
+
+// Lstat returns a [FileInfo] describing the named file in the root.
+// If the file is a symbolic link, the returned FileInfo
+// describes the symbolic link.
+// See [Lstat] for more details.
+public static (FileInfo, error) Lstat(this ж<Root> Ꮡr, @string name) {
+    ref var r = ref Ꮡr.DerefOrNull();
+
+    r.logStat(name);
+    return rootStat(ref (Ꮡr).DerefOrNull(), name, true);
+}
+
+// Readlink returns the destination of the named symbolic link in the root.
+// See [Readlink] for more details.
+public static (@string, error) Readlink(this ж<Root> Ꮡr, @string name) {
+    return rootReadlink(ref (Ꮡr).DerefOrNull(), name);
+}
+
+// Rename renames (moves) oldname to newname.
+// Both paths are relative to the root.
+// See [Rename] for more details.
+public static error Rename(this ж<Root> Ꮡr, @string oldname, @string newname) {
+    return rootRename(Ꮡr, oldname, newname);
+}
+
+// Link creates newname as a hard link to the oldname file.
+// Both paths are relative to the root.
+// See [Link] for more details.
+//
+// If oldname is a symbolic link, Link creates new link to oldname and not its target.
+// This behavior may differ from that of [Link] on some platforms.
+//
+// When GOOS=js, Link returns an error if oldname is a symbolic link.
+public static error Link(this ж<Root> Ꮡr, @string oldname, @string newname) {
+    return rootLink(Ꮡr, oldname, newname);
+}
+
+// Symlink creates newname as a symbolic link to oldname.
+// See [Symlink] for more details.
+//
+// Symlink does not validate oldname,
+// which may reference a location outside the root.
+//
+// On Windows, a directory link is created if oldname references
+// a directory within the root. Otherwise a file link is created.
+public static error Symlink(this ж<Root> Ꮡr, @string oldname, @string newname) {
+    return rootSymlink(Ꮡr, oldname, newname);
+}
+
+// ReadFile reads the named file in the root and returns its contents.
+// See [ReadFile] for more details.
+public static (slice<byte>, error) ReadFile(this ж<Root> Ꮡr, @string name) {
+    GoFrame ᒐ = default;
+    try {
+        var (f, err) = Ꮡr.Open(name);
+        if (err != default!) {
+            return (default!, err);
+        }
+        var fʗ1 = f;
+        defer(() => fʗ1.Close(), ref ᒐ);
+        return readFileContents(statOrZero(f), f.Read);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+// WriteFile writes data to the named file in the root, creating it if necessary.
+// See [WriteFile] for more details.
+public static error WriteFile(this ж<Root> Ꮡr, @string name, slice<byte> data, FileMode perm) {
+    var (f, err) = Ꮡr.OpenFile(name, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_TRUNC), perm);
+    if (err != default!) {
+        return err;
+    }
+    (_, err) = f.Write(data);
+    {
+        var err1 = f.Close(); if (err == default!) {
+            err = err1;
+        }
+    }
+    return err;
+}
+
+internal static void logOpen(this ref Root r, @string name) {
+    {
+        var log = testlog.Logger(); if (log != default!) {
+            // This won't be right if r's name has changed since it was opened,
+            // but it's the best we can do.
+            log.Open(joinPath(r.Name(), name));
+        }
+    }
+}
+
+internal static void logStat(this ref Root r, @string name) {
+    {
+        var log = testlog.Logger(); if (log != default!) {
+            // This won't be right if r's name has changed since it was opened,
+            // but it's the best we can do.
+            log.Stat(joinPath(r.Name(), name));
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string emptyPathˢ = "empty path"u8;
+
+// splitPathInRoot splits a path into components
+// and joins it with the given prefix and suffix.
+//
+// The path is relative to a Root, and must not be
+// absolute, volume-relative, or "".
+//
+// "." components are removed, except in the last component.
+//
+// endsInSlash reports whether the path ends in one or more slashes.
+internal static (slice<@string>, bool endsInSlash, error err) splitPathInRoot(@string s, slice<@string> prefix, slice<@string> suffix) {
+    bool endsInSlash = default!;
+    error err = default!;
+
+    if (len(s) == 0) {
+        return (default!, false, errors.New(emptyPathˢ));
+    }
+    if (IsPathSeparator(s[0])) {
+        return (default!, false, errPathEscapes);
+    }
+
+    if (runtime.GOOS == "windows"u8) {
+        // Windows cleans paths before opening them.
+        (s, err) = rootCleanPath(s, prefix, suffix);
+        if (err != default!) {
+            return (default!, false, err);
+        }
+        prefix = default!;
+        suffix = default!;
+    }
+
+    var parts = slices.Clone<slice<@string>, @string>(prefix);
+    nint i = 0;
+    nint j = 1;
+    while (ᐧ) {
+        if (j < len(s) && !IsPathSeparator(s[j])) {
+            // Keep looking for the end of this component.
+            j++;
+            continue;
+        }
+        parts = append(parts, s.slice(i, j));
+        // Advance to the next component, or end of the path.
+        nint partEnd = j;
+        while (j < len(s) && IsPathSeparator(s[j])) {
+            j++;
+        }
+        if (j == len(s)) {
+            // If this is the last path component,
+            // check for any trailing path separators.
+            if (len(s.slice(partEnd)) > 0) {
+                endsInSlash = true;
+            }
+            break;
+        }
+        if (parts[len(parts) - 1] == ".") {
+            // Remove "." components, except at the end.
+            parts = parts.slice(0, len(parts) - 1);
+        }
+        i = j;
+    }
+    if (len(suffix) > 0 && len(parts) > 0 && parts[len(parts) - 1] == ".") {
+        // Remove a trailing "." component if we're joining to a suffix.
+        parts = parts.slice(0, len(parts) - 1);
+    }
+    parts = appendꓸꓸꓸ(parts, suffix);
+    return (parts, endsInSlash, default!);
+}
+
+// FS returns a file system (an fs.FS) for the tree of files in the root.
+//
+// The result implements [io/fs.StatFS], [io/fs.ReadFileFS],
+// [io/fs.ReadDirFS], and [io/fs.ReadLinkFS].
+public static fs.FS FS(this ж<Root> Ꮡr) {
+    return new rootFSжFS(Ꮡr.Reinterpret<Root, rootFS>());
+}
+
+partial struct rootFS /*Root*/;
+
+internal static (fs.File, error) Open(this ж<rootFS> Ꮡrfs, @string name) {
+    var r = Ꮡrfs.Reinterpret<rootFS, Root>();
+    if (!isValidRootFSPath(name)) {
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: ErrInvalid))));
+    }
+    var (f, err) = r.Open(name);
+    if (err != default!) {
+        return (default!, err);
+    }
+    return (new FileжFile(f), default!);
+}
+
+internal static (slice<DirEntry>, error) ReadDir(this ж<rootFS> Ꮡrfs, @string name) {
+    GoFrame ᒐ = default;
+    try {
+        var r = Ꮡrfs.Reinterpret<rootFS, Root>();
+        if (!isValidRootFSPath(name)) {
+            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: ErrInvalid))));
+        }
+
+        // This isn't efficient: We just open a regular file and ReadDir it.
+        // Ideally, we would skip creating a *File entirely and operate directly
+        // on the file descriptor, but that will require some extensive reworking
+        // of directory reading in general.
+        //
+        // This suffices for the moment.
+        var (f, err) = r.Open(name);
+        if (err != default!) {
+            return (default!, err);
+        }
+        var fʗ1 = f;
+        defer(() => fʗ1.Close(), ref ᒐ);
+        (var dirs, err) = f.ReadDir(-1);
+        slices.SortFunc(dirs, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
+        return (dirs, err);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+internal static (slice<byte>, error) ReadFile(this ж<rootFS> Ꮡrfs, @string name) {
+    GoFrame ᒐ = default;
+    try {
+        var r = Ꮡrfs.Reinterpret<rootFS, Root>();
+        if (!isValidRootFSPath(name)) {
+            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readfile"u8, Path: name, Err: ErrInvalid))));
+        }
+        var (f, err) = r.Open(name);
+        if (err != default!) {
+            return (default!, err);
+        }
+        var fʗ1 = f;
+        defer(() => fʗ1.Close(), ref ᒐ);
+        return readFileContents(statOrZero(f), f.Read);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+internal static (@string, error) ReadLink(this ж<rootFS> Ꮡrfs, @string name) {
+    var r = Ꮡrfs.Reinterpret<rootFS, Root>();
+    if (!isValidRootFSPath(name)) {
+        return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: ErrInvalid))));
+    }
+    return r.Readlink(name);
+}
+
+internal static (FileInfo, error) Stat(this ж<rootFS> Ꮡrfs, @string name) {
+    var r = Ꮡrfs.Reinterpret<rootFS, Root>();
+    if (!isValidRootFSPath(name)) {
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat"u8, Path: name, Err: ErrInvalid))));
+    }
+    return r.Stat(name);
+}
+
+internal static (FileInfo, error) Lstat(this ж<rootFS> Ꮡrfs, @string name) {
+    var r = Ꮡrfs.Reinterpret<rootFS, Root>();
+    if (!isValidRootFSPath(name)) {
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat"u8, Path: name, Err: ErrInvalid))));
+    }
+    return r.Lstat(name);
+}
+
+// isValidRootFSPath reports whether name is a valid filename to pass a Root.FS method.
+internal static bool isValidRootFSPath(@string name) {
+    if (!fs.ValidPath(name)) {
+        return false;
+    }
+    if (runtime.GOOS == "windows"u8) {
+        // fs.FS paths are /-separated.
+        // On Windows, reject the path if it contains any \ separators.
+        // Other forms of invalid path (for example, "NUL") are handled by
+        // Root's usual file lookup mechanisms.
+        if (stringslite.IndexByte(name, (rune)'\\') >= 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+} // end os_package

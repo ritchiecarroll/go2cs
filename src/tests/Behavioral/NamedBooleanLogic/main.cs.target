@@ -28,18 +28,16 @@ internal static Value binary(@string op, Value x, Value y) {
     return ((boolVal)((bool)a  ||  (bool)b));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string andˢ = "and"u8;
-
 internal static void Main() {
     Value t = ((boolVal)true);
     Value f = ((boolVal)false);
+
     fmt.Println(unary(t).isSet());
     fmt.Println(unary(f).isSet());
-    fmt.Println(binary(andˢ, t, f).isSet());
-    fmt.Println(binary(andˢ, t, t).isSet());
-    fmt.Println(binary("or"u8, t, f).isSet());
-    fmt.Println(binary("or"u8, f, f).isSet());
+    fmt.Println(binary("and", t, f).isSet());
+    fmt.Println(binary("and", t, t).isSet());
+    fmt.Println(binary("or", t, f).isSet());
+    fmt.Println(binary("or", f, f).isSet());
 }
 
 } // end main_package

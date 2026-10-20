@@ -17,15 +17,15 @@ partial class types_test_package {
 
 internal static error checkMono(ж<testing.T> Ꮡt, @string body) {
     @string src = "package x; import `unsafe`; var _ unsafe.Pointer;\n"u8 + body;
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new types.Config(
         Error: (error err) => {
             fmt.Fprintln(new types_test_package.strings_BuilderжWriter(Ꮡbuf), err);
         },
-        Importer: defaultImporter(fset)
+        Importer: defaultImporter(fset) // TODO(adonovan): use same FileSet as typecheck
     );
-    // TODO(adonovan): use same FileSet as typecheck
     typecheck(src, Ꮡconf, nil);
     if (buf.Len() == 0) {
         return default!;

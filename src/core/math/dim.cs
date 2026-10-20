@@ -60,7 +60,6 @@ internal static float64 max(float64 x, float64 y) {
         }
         return x;
     }}
-
     if (x > y) {
         return x;
     }
@@ -99,7 +98,6 @@ internal static float64 min(float64 x, float64 y) {
         }
         return y;
     }}
-
     if (x < y) {
         return x;
     }

@@ -11,33 +11,33 @@ partial struct Box<T> {
 public static any GetValue(nint index) {
     var values = new any[]{
         new Box<nint>(Value: 42),
-        new Box<@string>(Value: "hello"u8),
+        new Box<@string>(Value: "hello"),
         new Box<float64>(Value: 3.14D)
     }.slice();
+
     if (index >= 0 && index < len(values)) {
         return values[index];
     }
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object notAStringBoxˢ = (@string)"Not a string box"u8;
-private static readonly object unknownBoxTypeˢ = (@string)"Unknown box type"u8;
-
 internal static void Main() {
     var value = GetValue(0);
+
     {
         var (intBox, ok) = value._<Box<nint>>(ᐧ); if (ok) {
             fmt.Printf("Found an int box with value: %d\n"u8, intBox.Value);
         }
     }
+
     {
         var (strBox, ok) = value._<Box<@string>>(ᐧ); if (ok){
             fmt.Printf("Found a string box with value: %s\n"u8, strBox.Value);
         } else {
-            fmt.Println(notAStringBoxˢ);
+            fmt.Println("Not a string box");
         }
     }
+
     var switchᴛ1 = GetValue(1);
     switch (switchᴛ1.type()) {
     case Box<nint> v: {
@@ -54,7 +54,7 @@ internal static void Main() {
     }
     default: {
         var v = switchᴛ1;
-        fmt.Println(unknownBoxTypeˢ);
+        fmt.Println("Unknown box type");
         break;
     }}
 }

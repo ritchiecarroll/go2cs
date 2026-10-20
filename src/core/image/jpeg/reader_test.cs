@@ -59,6 +59,7 @@ public static void TestDecodeProgressive(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: bad bounds: %v"u8, tc, m0.Bounds());
             continue;
         }
+
         switch (m0.type()) {
         case ж<image.YCbCr> m0Δ1: {
             var m1Δ1 = m1._<ж<image.YCbCr>>();
@@ -151,6 +152,7 @@ public static void TestDecodeEOF(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     nint n = len(data);
     for (nint i = 0; i < n; ) {
         var r = Ꮡ(new eofReader(data.slice(0, n - i), data.slice(n - i), -1));
@@ -186,6 +188,7 @@ internal static error check(image.Rectangle bounds, slice<byte> pix0, slice<byte
                 // refinement passes only process one 8x8 block within the MCU.
                 continue;
             }
+
             for (nint j = 0; j < 8; j++) {
                 for (nint i = 0; i < 8; i++) {
                     nint index0 = (y + j) * stride0 + (x + i);
@@ -247,8 +250,6 @@ internal static readonly @string inputᶜ = ((@string)(new byte[]{0xff, 0xd8, 0x
 public static void TestLargeImageWithShortData(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // This input is an invalid JPEG image, based on the fuzzer-generated image
         // in issue 10413. It is only 504 bytes, and shouldn't take long for Decode
         // to return an error. The Start Of Frame marker gives the image dimensions
@@ -256,12 +257,14 @@ public static void TestLargeImageWithShortData(ж<testing.T> Ꮡt) {
         // doesn't technically lead to an infinite loop, such a bug can still cause
         // an unreasonably long loop for such a short input.
         @string input = inputᶜ;
+
         var timer = time.AfterFunc((time.Duration)(30000000000L), () => {
             debug.SetTraceback(allˢ);
             throw panic("TestLargeImageWithShortData stuck in Decode");
         });
         var timerʗ1 = timer;
         defer(() => timerʗ1.Stop(), ref ᒐ);
+
         var (_, err) = Decode(new jpeg_internal_test_package.strings_ReaderжReader(strings.NewReader(input)));
         if (err == default!) {
             Ꮡt.Fatalf("got nil error, want non-nil"u8);
@@ -430,11 +433,12 @@ vxrWemxlTZCvMe4BTg/nSRKHVsjGfpSe90C1VmTsG2H2x3rF1J1eVxgcHr+FVQWtyK7srFGAgOrHqDnp
 7VPGNzO/O3kkCut7pnGno0idCCNyt6Crca5ZiDjpgVzXsnc6X71rDyBgcbtucn8KhjBMpOfrz7VlTdtT
 Sqm7JH//2Q==
 
-"""u8;
+"""u8.Raw();
 
 public static void TestPaddedRSTMarker(ж<testing.T> Ꮡt) {
     // This test image comes from golang.org/issue/28717
     @string base64EncodedImage = base64EncodedImageᶜ;
+
     var (data, err) = base64.StdEncoding.DecodeString(base64EncodedImage);
     if (err != default!) {
         Ꮡt.Fatalf("base64 DecodeString: %v"u8, err);
@@ -494,6 +498,7 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
         }
         // Write the "\xff\xd9" EOI marker.
         buf.WriteString(((@string)(new byte[]{0xff, 0xd9})));
+
         // Check that we can still decode the resultant image.
         var (got, err) = Decode(new jpeg_internal_test_package.bytes_BufferжReader(buf));
         if (err != default!) {
@@ -506,7 +511,7 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
             nerr++;
             continue;
         }
-        if (averageDelta(got, new image.ΔRGBAжImage(src)) > ((int64)2 << (int)(8))) {
+        if (averageDelta(got, new image.ΔRGBAжImage(src)) > (int64)2 << 8) {
             Ꮡt.Errorf("image #%d changed too much after a round trip"u8, i);
             nerr++;
             continue;
@@ -519,7 +524,9 @@ public static void TestIssue56724(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     b = b[..24]; // truncate image data
+
     (_, err) = Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
     if (!AreEqual(err, io.ErrUnexpectedEOF)) {
         Ꮡt.Errorf("got: %v, want: %v"u8, err, io.ErrUnexpectedEOF);
@@ -543,6 +550,7 @@ public static void TestBadRestartMarker(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(testImageDidNotHaveFfD1ˢ);
     }
     var (prefix, suffix) = (b[..2816], b[2816..]);
+
     var testCases = new @string[]{
         "PASS:"u8,
         "PASS:\x00"u8,
@@ -555,15 +563,18 @@ public static void TestBadRestartMarker(ж<testing.T> Ꮡt) {
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0xd5})),
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0xff, 0xd5}))
     }.slice();
+
     foreach (var (_, tc) in testCases) {
         var want = tc[..5] == "PASS:";
         @string infix = tc[5..];
+
         var data = slice<byte>(default!);
         data = appendꓸꓸꓸ(data, prefix);
         data = append(data, infix.ꓸꓸꓸ);
         data = appendꓸꓸꓸ(data, suffix);
         var (_, errΔ1) = Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data)));
         var got = errΔ1 == default!;
+
         if (got != want) {
             Ꮡt.Errorf("%q: got %v, want %v"u8, tc, got, want);
         }

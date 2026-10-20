@@ -35,6 +35,7 @@ global using traceꓸRange = go.@internal.trace_package.ΔRange;
 global using traceꓸRegion = go.@internal.trace_package.ΔRegion;
 global using traceꓸStack = go.@internal.trace_package.ΔStack;
 global using traceꓸStateTransition = go.@internal.trace_package.ΔStateTransition;
+global using traceꓸSync = go.@internal.trace_package.ΔSync;
 global using traceꓸTask = go.@internal.trace_package.ΔTask;
 global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
@@ -75,6 +76,12 @@ using static go.@internal.trace.traceviewer_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -83,11 +90,11 @@ using static go.@internal.trace.traceviewer_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/traceviewer/emitter.go", "emitter.cs", "AB42soKCgoKEggALBIKCpoKUlKKClKKClIKUgpSmpqaCggAKCoIABSCE9Ka4gpKClJKClJSCgraClIKUgqbcgoKCzgADEIKogoKCgpSCgpaCgrqCgu6CgoKUgoKWgIIAFCiCgqYAAB4AEBCEloKCloKUgoKoqJKCgoKUggAJHKKEACNGgoK4goKUpoKmgqaCpoKClKaCpoKClAAXMIKClIKUkoKUggAKFgAUKoKClIKUkgAWLoKClKaCpoKClIIACBIAEiaCpoKCpoKmgoKCgpSCAAsYpoKCgpSCAAsYpoiygpSCpoKClJKClIIABxCokoIABhCmgqqiAAkGgoSClIKWhIKCgoSCgpSUlqaC7gAIEoLcAAcUoqiSgpSCgoSCgoKCgoKUAAcQggBaiAEAGTSCgg==", "36-40:1;41-65:2;47-50:2.1;51-54:2.2;66-68:3;69-73:4;97-99:1;100-129:2;106-109:2.1;110-113:2.2;121-123:2.3;124-126:2.4;130-132:3;133-206:4", "", "195=Sprintf/1/1/1;213=Sprintf/1/1/1;373=viewerTime/1/2/3,viewerTime/2/2/4;410=viewerTime/1/1/4;421=viewerTime/1/1/4;451=viewerTime/1/1/5;490=viewerTime/1/1/6;499=viewerTime/1/1/6;538=viewerTime/1/1/3;559=viewerTime/1/1/3;596=viewerTime/1/1/3")]
-[assembly: go.GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABculpKCgpSCgpSCgpSClKiSqLKCloSCgoKogoKUgpSmgpSCqIKC")]
+[assembly: go.GoPositionMap("internal/trace/traceviewer/emitter.go", "emitter.cs", "AB82soKCgoKUggALBIKCpoKUlKKClKKClIKUgpSmpqaCggAKCoIACSCU9Ka4gpKClJKClJSCgraClIKUgqbcgoKC7gAFEIK4goKCgpSCgqaCgsqCgu6CgoKUgoKmgIIAFCiCgqYAAB4AExCUpoKCpoKUgoK4qJKCgoKUggAJHKKUACNGgoK4goKUpoKmgqaCpoKClKaCpoKClAAXMIKClIKUkoKUggAKFgAUKoKClIKUkgAWLoKClKaCpoKClIIACBIAEiaCpoKCpoKmgoKCgpSCAAsYpoKCgpSCAAsYpoiygpSCpoKClJKClIIABxCokoIABhCmgqqiAAkGgpSClIKmlIKCgpSCgpSUpqaC7gAIEoLcAAcUoqiSgpSCgpSCgoKCgoKUAAcQggA9iAEAGTSCgg==", "36-40:1;41-65:2;47-50:2.1;51-54:2.2;66-68:3;69-73:4;97-99:1;100-129:2;106-109:2.1;110-113:2.2;121-123:2.3;124-126:2.4;130-132:3;133-206:4", "", "209=Sprintf/1/1/1;228=Sprintf/1/1/1;396=viewerTime/1/2/3,viewerTime/2/2/4;433=viewerTime/1/1/4;444=viewerTime/1/1/4;474=viewerTime/1/1/5;513=viewerTime/1/1/6;522=viewerTime/1/1/6;561=viewerTime/1/1/3;582=viewerTime/1/1/3;619=viewerTime/1/1/3")]
+[assembly: go.GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABculpKCgpSCgpSCgpSClKiSqLKCppSCgoK4goKUgpSmgpSCqIKC")]
 [assembly: go.GoPositionMap("internal/trace/traceviewer/http.go", "http.cs", "ABEegpKAgoIALVYAxwGKA4KClAAKFoLWgoKAgoKkggCIAY4Cgg==", "16-21:1;279-286:1")]
-[assembly: go.GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "AC9WgsqSlIKkgqS4AAoQgoKClAAQIqKCgoKClISSgoKUgqaokoKCgpaCgoKCuoKCgIKkppSCgoKUgqaAgraCgoKCgoKClIKUqIKCggDLAZADsoKCgpaCgoKClIaSgpaCgoIACBKEkqKCpg==", "49-59:1;101-109:1")]
-[assembly: go.GoPositionMap("internal/trace/traceviewer/pprof.go", "pprof.cs", "ACkykqKChJKCgpSCgoKUgIKCpJaCgoKUkoKUgoKUgoCCgqSAgoKkgIKCpIKAgoKkgoKiAAkSggAHEIKCgoKCgoKCgtyClAAJFIKUlMrmgoKClIKAgqQ=", "26-81:1;30-34:1.1;52-55:1.2")]
+[assembly: go.GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "ADBWgsqSlIKkgpS4AAoQgoKClAAQIqKCgoKClJSSgoKUgqaokoKCgqaCgoKCyoKCgIKkppSCgoKUgqaAgraCgoKCgoKClIKUuIKCggDLAZADsoKCgqaCgoKClJaSgqaCgoIACBKEkqKCpg==", "49-59:1;101-109:1")]
+[assembly: go.GoPositionMap("internal/trace/traceviewer/pprof.go", "pprof.cs", "ACkykqKClJKCgpSCgoKUgIKCpKaCgoKUkoKUgoKUgoCCgqSAgoKkgIKCpIKAgoKkgoKiAAkSggAHEIKCgoKCgoKCgtyClAAJFIKUlMrmgoKClIKAgqQ=", "26-81:1;30-34:1.1;52-55:1.2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
@@ -149,7 +156,7 @@ public static partial class traceviewer_package
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(go.sync_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));

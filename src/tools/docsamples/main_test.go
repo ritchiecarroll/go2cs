@@ -10,6 +10,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -232,6 +233,43 @@ func TestAMissingFileIsRefusedByName(t *testing.T) {
 
 	if len(outcomes) != 1 || outcomes[0].class != "refused" || !outcomes[0].changed {
 		t.Errorf("outcomes %+v, want one refused and marked changed", outcomes)
+	}
+}
+
+// A GOROOT/ comment is read from the toolchain -goroot names, so -recite reaches it like any other;
+// without -goroot it names no readable file and is refused as missing, as every GOROOT/ comment was.
+func TestAGorootCommentIsReadFromTheToolchain(t *testing.T) {
+	goroot := t.TempDir()
+	dir := filepath.Join(goroot, "src", "pkg")
+
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(dir, "a.go"), []byte("package pkg\n\nfunc A() {}\n\nfunc B() {}\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Cited one line off: func B is line 5.
+	in := page(
+		"<!-- source: GOROOT/src/pkg/a.go:4 -->",
+		"```go",
+		"func B() {}",
+		"```",
+	)
+
+	src := gitReader("HEAD", goroot)
+	out, outcomes := regenerate("docs/p.md", in, src, src, true)
+
+	if classes(outcomes) != "rewritten" || out[0] != "<!-- source: GOROOT/src/pkg/a.go:5 -->" {
+		t.Errorf("with -goroot: outcomes %+v, comment %q; want it re-cited at :5", outcomes, out[0])
+	}
+
+	none := gitReader("HEAD", "")
+	_, outcomes = regenerate("docs/p.md", in, none, none, true)
+
+	if classes(outcomes) != "refused" || !strings.Contains(outcomes[0].reason, "missing") {
+		t.Errorf("without -goroot: outcomes %+v, want one refused as missing", outcomes)
 	}
 }
 

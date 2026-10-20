@@ -43,8 +43,10 @@ internal static slice<byte> itoa(global::go.math.big_package.nat x, nint @base) 
     // allocate buffer for conversion
     nint i = quo(x.bitLen(), log2(((global::go.math.big_package.Word)(nuint)@base))) + 1; // +1: round up
     var s = new slice<byte>(i);
+
     // don't destroy x
     var q = ((global::go.math.big_package.nat)default!).set(x);
+
     // convert
     while (len(q) > 0) {
         i--;
@@ -52,9 +54,9 @@ internal static slice<byte> itoa(global::go.math.big_package.nat x, nint @base) 
         (q, r) = q.divW(q, ((global::go.math.big_package.Word)(nuint)@base));
         s[i] = digits[r];
     }
+
     return s.slice(i);
 }
-
 
 partial struct strTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.nat x;    // nat value to be converted
@@ -91,11 +93,13 @@ public static void TestString(ж<testing.T> Ꮡt) {
     if (panicStr != "invalid base"u8) {
         Ꮡt.Errorf("expected panic for invalid base"u8);
     }
+
     foreach (var (_, a) in strTests) {
         @string s = ((@string)a.x.utoa(a.b));
         if (s != a.s) {
             Ꮡt.Errorf("string%+v\n\tgot s = %s; want %s"u8, a, s, a.s);
         }
+
         var (x, b, _, err) = ((global::go.math.big_package.nat)default!).scan(new big_test_package.strings_ReaderжByteScanner(strings.NewReader(a.s)), a.b, false);
         if (x.cmp(a.x) != 0) {
             Ꮡt.Errorf("scan%+v\n\tgot z = %v; want %v"u8, a, x, a.x);
@@ -109,15 +113,6 @@ public static void TestString(ж<testing.T> Ꮡt) {
     }
 }
 
-// invalid: no digits
-// invalid: incorrect use of decimal point
-// invalid: incorrect use of separators
-// valid: separators are not accepted for base != 0
-// valid, no decimal point
-// octal 0
-// valid, with decimal point
-// valid, with separators
-
 partial struct natScanTestsᴛ1 /*dyn*/ {
     internal @string s; // string to be scanned
     internal nint @base;   // input base
@@ -130,6 +125,7 @@ partial struct natScanTestsᴛ1 /*dyn*/ {
 }
 internal static slice<natScanTestsᴛ1> natScanTests;
 internal static void initᴛnatScanTests() { natScanTests = new natScanTestsᴛ1[]{
+    // invalid: no digits
     new(""u8, 0, false, default!, 10, 0, errNoDigits, 0),
     new("_"u8, 0, false, default!, 10, 0, errNoDigits, 0),
     new("?"u8, 0, false, default!, 10, 0, errNoDigits, (rune)'?'),
@@ -148,6 +144,8 @@ internal static void initᴛnatScanTests() { natScanTests = new natScanTestsᴛ1
     new("0xg"u8, 0, false, default!, 16, 0, errNoDigits, (rune)'g'),
     new("0Xg"u8, 0, false, default!, 16, 0, errNoDigits, (rune)'g'),
     new("345"u8, 2, false, default!, 2, 0, errNoDigits, (rune)'3'),
+
+    // invalid: incorrect use of decimal point
     new("._"u8, 0, true, default!, 10, 0, errNoDigits, 0),
     new(".0"u8, 0, false, default!, 10, 0, errNoDigits, (rune)'.'),
     new(".0"u8, 10, false, default!, 10, 0, errNoDigits, (rune)'.'),
@@ -155,6 +153,8 @@ internal static void initᴛnatScanTests() { natScanTests = new natScanTestsᴛ1
     new("0x."u8, 0, true, default!, 16, 0, errNoDigits, 0),
     new("0x.g"u8, 0, true, default!, 16, 0, errNoDigits, (rune)'g'),
     new("0x.0"u8, 0, false, default!, 16, 0, errNoDigits, (rune)'.'),
+
+    // invalid: incorrect use of separators
     new("_0"u8, 0, false, default!, 10, 1, errInvalSep, 0),
     new("0_"u8, 0, false, default!, 10, 1, errInvalSep, 0),
     new("0__0"u8, 0, false, default!, 8, 1, errInvalSep, 0),
@@ -171,17 +171,21 @@ internal static void initᴛnatScanTests() { natScanTests = new natScanTestsᴛ1
     new("0._1"u8, 0, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, -1, errInvalSep, 0),
     new("2.7_"u8, 0, true, new nat(new global::go.math.big_package.Word[]{27}.slice()), 10, -1, errInvalSep, 0),
     new("0x1.0_"u8, 0, true, new nat(new global::go.math.big_package.Word[]{0x10}.slice()), 16, -1, errInvalSep, 0),
+
+    // valid: separators are not accepted for base != 0
     new("0_"u8, 10, false, default!, 10, 1, default!, (rune)'_'),
     new("1__0"u8, 10, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default!, (rune)'_'),
     new("0__8"u8, 10, false, default!, 10, 1, default!, (rune)'_'),
     new("xy_z_"u8, 36, false, new nat(new global::go.math.big_package.Word[]{33 * 36 + 34}.slice()), 36, 2, default!, (rune)'_'),
+
+    // valid, no decimal point
     new("0"u8, 0, false, default!, 10, 1, default!, 0),
     new("0"u8, 36, false, default!, 36, 1, default!, 0),
     new("0"u8, 62, false, default!, 62, 1, default!, 0),
     new("1"u8, 0, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default!, 0),
     new("1"u8, 10, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, 1, default!, 0),
     new("0 "u8, 0, false, default!, 10, 1, default!, (rune)' '),
-    new("00 "u8, 0, false, default!, 8, 1, default!, (rune)' '),
+    new("00 "u8, 0, false, default!, 8, 1, default!, (rune)' '), // octal 0
     new("0b1"u8, 0, false, new nat(new global::go.math.big_package.Word[]{1}.slice()), 2, 1, default!, 0),
     new("0B11000101"u8, 0, false, new nat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, 8, default!, 0),
     new("0B110001012"u8, 0, false, new nat(new global::go.math.big_package.Word[]{0xc5}.slice()), 2, 8, default!, (rune)'2'),
@@ -203,6 +207,8 @@ internal static void initᴛnatScanTests() { natScanTests = new natScanTestsᴛ1
     new("0x"u8, 16, false, default!, 16, 1, default!, (rune)'x'),
     new("0xdeadbeef"u8, 0, false, new nat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, 8, default!, 0),
     new("0XDEADBEEF"u8, 0, false, new nat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, 8, default!, 0),
+
+    // valid, with decimal point
     new("0."u8, 0, false, default!, 10, 1, default!, (rune)'.'),
     new("0."u8, 10, true, default!, 10, 0, default!, 0),
     new("0.1.2"u8, 10, true, new nat(new global::go.math.big_package.Word[]{1}.slice()), 10, -1, default!, (rune)'.'),
@@ -217,6 +223,8 @@ internal static void initᴛnatScanTests() { natScanTests = new natScanTestsᴛ1
     new("0o0.7"u8, 0, true, new nat(new global::go.math.big_package.Word[]{7}.slice()), 8, -1, default!, 0),
     new("0O0.78"u8, 0, true, new nat(new global::go.math.big_package.Word[]{7}.slice()), 8, -1, default!, (rune)'8'),
     new("0xdead.beef"u8, 0, true, new nat(new global::go.math.big_package.Word[]{0xdeadbeefU}.slice()), 16, -4, default!, 0),
+
+    // valid, with separators
     new("1_000"u8, 0, false, new nat(new global::go.math.big_package.Word[]{1000}.slice()), 10, 4, default!, 0),
     new("0_466"u8, 0, false, new nat(new global::go.math.big_package.Word[]{310}.slice()), 8, 3, default!, 0),
     new("0o_600"u8, 0, false, new nat(new global::go.math.big_package.Word[]{384}.slice()), 8, 3, default!, 0),
@@ -320,6 +328,7 @@ public static void BenchmarkScan(ж<testing.B> Ꮡb) {
                 bΔ1.StopTimer();
                 global::go.math.big_package.nat z = default!;
                 z = z.expWW(x, y);
+
                 var s = z.utoa(@base);
                 {
                     var t = itoa(z, @base); if (!bytes_package.Equal(s, t)) {
@@ -327,6 +336,7 @@ public static void BenchmarkScan(ж<testing.B> Ꮡb) {
                     }
                 }
                 bΔ1.StartTimer();
+
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     z.scan(new big_test_package.bytes_ReaderжByteScanner(bytes_package.NewReader(s)), @base, false);
                 }
@@ -348,6 +358,7 @@ public static void BenchmarkString(ж<testing.B> Ꮡb) {
                 z = z.expWW(x, y);
                 z.utoa(@base); // warm divisor cache
                 bΔ1.StartTimer();
+
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     _ = z.utoa(@base);
                 }
@@ -379,16 +390,19 @@ public static void LeafSizeHelper(ж<testing.B> Ꮡb, nint @base, nint size) {
     resetTable(cacheBase10.table[..]);
     leafSize = size;
     b.StartTimer();
+
     for (nint d = 1; d <= 10000; d *= 10) {
         b.StopTimer();
         global::go.math.big_package.nat z = default!;
         z = z.expWW(((global::go.math.big_package.Word)(nuint)@base), ((global::go.math.big_package.Word)(nuint)d)); // build target number
         _ = z.utoa(@base); // warm divisor cache
         b.StartTimer();
+
         for (nint i = 0; i < b.N; i++) {
             _ = z.utoa(@base);
         }
     }
+
     b.StopTimer();
     resetTable(cacheBase10.table[..]);
     leafSize = originalLeafSize;

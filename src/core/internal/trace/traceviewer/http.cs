@@ -65,13 +65,13 @@ textarea.code {
   white-space: pre;
 }
 
-"""u8;
+"""u8.Raw();
 
 internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New(""u8).Parse("""
 
 <html>
 <style>
-""" + CommonStyle + """
+""".Raw() + CommonStyle + """
 </style>
 <body>
 <h1>cmd/trace: the Go trace event viewer</h1>
@@ -254,7 +254,7 @@ internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New(""u8).
 </body>
 </html>
 
-""");
+""".Raw());
 internal static ж<template.Template> templMain = template.Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
 
 partial struct View {
@@ -430,7 +430,7 @@ function onTraceViewerImportFail() {
 </body>
 </html>
 
-"""u8;
+"""u8.Raw();
 
 //go:embed static/trace_viewer_full.html static/webcomponents.min.js
 internal static embed.FS staticContent = go.embed_package.ΔEmbedFS(typeof(traceviewer_package).Assembly, "go.embed/internal/trace/traceviewer/", ["static/", "static/trace_viewer_full.html", "static/webcomponents.min.js"]);

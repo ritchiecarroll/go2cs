@@ -104,28 +104,28 @@ public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> Ꮡt) {
     p = default!;
     Δruntime.GC();
     Δruntime.GC();
-    var selᴛ74 = done;
-    var selᴛ75 = time.After(time.Millisecond * 10);
-    switch (select(ᐸꟷ(selᴛ74, ꓸꓸꓸ), ᐸꟷ(selᴛ75, ꓸꓸꓸ))) {
-    case 0 when selᴛ74.ꟷᐳ(out _): {
+    var selᴛ75 = done;
+    var selᴛ76 = time.After(time.Millisecond * 10);
+    switch (select(ᐸꟷ(selᴛ75, ꓸꓸꓸ), ᐸꟷ(selᴛ76, ꓸꓸꓸ))) {
+    case 0 when selᴛ75.ꟷᐳ(out _): {
         Ꮡt.Fatal(pinDidnTKeepObjectAliveˢ);
         break;
     }
-    case 1 when selᴛ75.ꟷᐳ(out _): {
+    case 1 when selᴛ76.ꟷᐳ(out _): {
         break;
         break;
     }}
     pinner.Unpin();
     Δruntime.GC();
     Δruntime.GC();
-    var selᴛ76 = done;
-    var selᴛ77 = time.After(time.ΔSecond);
-    switch (select(ᐸꟷ(selᴛ76, ꓸꓸꓸ), ᐸꟷ(selᴛ77, ꓸꓸꓸ))) {
-    case 0 when selᴛ76.ꟷᐳ(out _): {
+    var selᴛ77 = done;
+    var selᴛ78 = time.After(time.ΔSecond);
+    switch (select(ᐸꟷ(selᴛ77, ꓸꓸꓸ), ᐸꟷ(selᴛ78, ꓸꓸꓸ))) {
+    case 0 when selᴛ77.ꟷᐳ(out _): {
         break;
         break;
     }
-    case 1 when selᴛ77.ꟷᐳ(out _): {
+    case 1 when selᴛ78.ꟷᐳ(out _): {
         Ꮡt.Fatal(unpinDidnTReleaseObjectˢ);
         break;
     }}
@@ -267,7 +267,7 @@ public static void TestPinnerInterface(ж<testing.T> Ꮡt) {
     Δruntime.Pinner pinner = new(nil);
     var o = @new<obj>();
     ref var ifc = ref heap<any>(out var Ꮡifc);
-    ifc = ((any)o.OrTypedNil());
+    ifc = (any)o.OrTypedNil();
     pinner.Pin(Ꮡifc);
     if (!runtime_internal_test_package.IsPinned(@unsafe.Pointer.FromPinnedBox(Ꮡifc))) {
         Ꮡt.Fatal(notMarkedAsPinnedˢ);
@@ -347,14 +347,14 @@ public static void TestPinnerLeakPanics(ж<testing.T> Ꮡt) {
     }))();
     Δruntime.GC();
     Δruntime.GC();
-    var selᴛ78 = done;
-    var selᴛ79 = time.After(time.ΔSecond);
-    switch (select(ᐸꟷ(selᴛ78, ꓸꓸꓸ), ᐸꟷ(selᴛ79, ꓸꓸꓸ))) {
-    case 0 when selᴛ78.ꟷᐳ(out _): {
+    var selᴛ79 = done;
+    var selᴛ80 = time.After(time.ΔSecond);
+    switch (select(ᐸꟷ(selᴛ79, ꓸꓸꓸ), ᐸꟷ(selᴛ80, ꓸꓸꓸ))) {
+    case 0 when selᴛ79.ꟷᐳ(out _): {
         break;
         break;
     }
-    case 1 when selᴛ79.ꟷᐳ(out _): {
+    case 1 when selᴛ80.ꟷᐳ(out _): {
         Ꮡt.Fatal(leakDidnTMakeGcToPanicˢ);
         break;
     }}

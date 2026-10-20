@@ -21,6 +21,7 @@ internal static void Main() {
     var c = Ꮡ(new node(val: 3));
     var b = Ꮡ(new node(next: c, val: 2));
     var a = Ꮡ(new node(next: b, val: 1));
+
     fmt.Println((~advance(ref (a).DerefOrNull())).val);
     fmt.Println((~advance(ref (advance(ref (a).DerefOrNull())).DerefOrNull())).val);
     fmt.Println((~self(a)).val);

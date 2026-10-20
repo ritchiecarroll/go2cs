@@ -41,7 +41,7 @@ internal static @string variadic(params ꓸꓸꓸany xsʗp) {
 }
 
 internal static @string gen<T>(T x) {
-    return fmt.Sprintf("%v %T"u8, x, x);
+    return fmt.Sprintf("%v %T"u8, (x).OrTypedNilOf(), (x).OrTypedNilOf());
 }
 
 internal static void arm(@string @class, Func<@string> f) {
@@ -50,6 +50,7 @@ internal static void arm(@string @class, Func<@string> f) {
         if (len(os.Args) > 1 && os.Args[1] != @class) {
             return;
         }
+
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
@@ -57,138 +58,105 @@ internal static void arm(@string @class, Func<@string> f) {
                 }
             }
         }, ref ᒐ);
+
         fmt.Println(@class + ":", f());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fmtArgˢ = "fmt arg"u8;
-private static readonly @string fmtTˢ = "fmt %T"u8;
-private static readonly @string anyVarˢ = "any var"u8;
-private static readonly @string anyParamˢ = "any param"u8;
-private static readonly @string anyReturnˢ = "any return"u8;
-private static readonly @string variadicAnyˢ = "variadic any"u8;
-private static readonly @string compositeAnyˢ = "composite any"u8;
-private static readonly @string chanAnyˢ = "chan any"u8;
-private static readonly @string typeOnlyˢ = "type only"u8;
-private static readonly @string namedAnyˢ = "named any"u8;
-private static readonly @string genericˢ = "generic"u8;
-private static readonly @string wideningˢ = "widening"u8;
-private static readonly @string sliceIndexˢ = "slice index"u8;
-private static readonly @string arrayIndexˢ = "array index"u8;
-private static readonly @string stringIndexˢ = "string index"u8;
-private static readonly @string sliceBoundˢ = "slice bound"u8;
-private static readonly @string shiftCountˢ = "shift count"u8;
-private static readonly @string divremOperandˢ = "divrem operand"u8;
-private static readonly @string shrOperandˢ = "shr operand"u8;
-private static readonly @string minint81ˢ = "minint8 / -1"u8;
-private static readonly @string parenCompareˢ = "paren compare"u8;
-private static readonly @string switchTagˢ = "switch tag"u8;
-private static readonly @string case144ˢ = "case 144"u8;
-private static readonly @string defaultˢ = "default"u8;
-private static readonly @string caseComparisonˢ = "case comparison"u8;
-private static readonly @string wrappedˢ = "wrapped"u8;
-private static readonly @string unwrappedˢ = "unwrapped"u8;
-private static readonly @string caseValueˢ = "case value"u8;
-private static readonly @string interfaceCaseˢ = "interface case"u8;
-private static readonly @string nomatchˢ = "nomatch"u8;
-private static readonly @string matchˢ = "match"u8;
-private static readonly @string guardedShrˢ = "guarded shr"u8;
-private static readonly @string guardedShlˢ = "guarded shl"u8;
-private static readonly @string unaryXorPlusˢ = "unary xor plus"u8;
-private static readonly @string makeAndBoundsˢ = "make and bounds"u8;
-private static readonly @string divisorˢ = "divisor"u8;
-private static readonly @string negatedMinimumˢ = "negated minimum"u8;
-private static readonly @string namedFuncParamˢ = "named func param"u8;
-private static readonly @string invariantˢ = "invariant"u8;
-private static readonly @string builtinArgˢ = "builtin arg"u8;
-private static readonly @string parenDefineˢ = "paren define"u8;
-
 internal static void Main() {
-    arm(fmtArgˢ, () => fmt.Sprint((int8)(a + a), (@string)" "u8, (uint8)(u + u), (@string)" "u8, (int16)(w + w), (@string)" "u8, (uint16)(z + z)));
-    arm(fmtTˢ, () => fmt.Sprintf("%T %T %T %T"u8, (int8)(a + a), (uint8)(u + u), (int8)(-a - a), ((uint8)(~u))));
-    arm(anyVarˢ, () => {
+    arm("fmt arg", () => fmt.Sprint((int8)(a + a), " ", (uint8)(u + u), " ", (int16)(w + w), " ", (uint16)(z + z)));
+    arm("fmt %T", () => fmt.Sprintf("%T %T %T %T"u8, (int8)(a + a), (uint8)(u + u), (int8)(-a - a), ((uint8)(~u))));
+    arm("any var", () => {
         any x = (int8)(a + a);
         return show(x);
     });
-    arm(anyParamˢ, () => show((uint8)(u * 2)) + " "u8 + show((uint8)(((uint8)0 - u))));
-    arm(anyReturnˢ, () => show(ret(a)));
-    arm(variadicAnyˢ, () => variadic((int8)(a + a), (uint8)(u + u)));
-    arm(compositeAnyˢ, () => {
+    arm("any param", () => show((uint8)(u * 2)) + " "u8 + show((uint8)(((uint8)0 - u))));
+    arm("any return", () => show(ret(a)));
+    arm("variadic any", () => variadic((int8)(a + a), (uint8)(u + u)));
+    arm("composite any", () => {
         var s = new any[]{(int8)(a + a), (uint8)(u + u)}.slice();
-        var m = new map<@string, any>{["k"u8] = (int16)(w + w)};
+        var m = new map<@string, any>{["k"] = (int16)(w + w)};
         var hΔ1 = new holder(v: (uint16)(z + z));
-        return fmt.Sprint(s, m, hΔ1.v, ((any)((int8)(a + a))));
+        return fmt.Sprint(s, m, hΔ1.v, (any)((int8)(a + a)));
     });
-    arm(chanAnyˢ, () => {
+    arm("chan any", () => {
         var ch = new channel<any>(1);
         ch.ᐸꟷ((uint8)(u + u));
         return show(ᐸꟷ(ch));
     });
-    arm(typeOnlyˢ, () => show((uint8)(u / 3)) + " "u8 + show((int8)(a % 7)) + " "u8 + show((uint8)((u >> (int)(1)))) + " "u8 + show((int8)(+a)) + " "u8 + show((int8)(~a)));
-    arm(namedAnyˢ, () => {
+    arm("type only", () => show((uint8)(u / 3)) + " "u8 + show((int8)(a % 7)) + " "u8 + show((uint8)((u >> 1))) + " "u8 + show((int8)(+a)) + " "u8 + show((int8)(~a)));
+
+    arm("named any", () => {
         I i = (int8)(a + a);
         return show(i);
     });
-    arm(genericˢ, () => gen((int8)(a + a)) + " "u8 + gen((uint8)(u + u)));
-    arm(wideningˢ, () => fmt.Sprint((nint)((uint8)(u + u)), (@string)" "u8, (int64)((int8)(a + a)), (@string)" "u8, (float64)((int8)(a + a)), (@string)" "u8, (nint)((byte)(c - (rune)'0')), (@string)" "u8, (uint32)((uint16)(z + z)), (@string)" "u8, (int32)((int16)(w + w))));
+
+    arm("generic", () => gen((int8)(a + a)) + " "u8 + gen((uint8)(u + u)));
+
+    arm("widening", () => fmt.Sprint((nint)((uint8)(u + u)), " ", (int64)((int8)(a + a)), " ", (float64)((int8)(a + a)), " ", (nint)((byte)(c - (rune)'0')), " ", (uint32)((uint16)(z + z)), " ", (int32)((int16)(w + w))));
+
     var tbl = new slice<nint>(256);
     foreach (var (k, _) in tbl) {
         tbl[k] = k;
     }
     ref var arr = ref heap<array<nint>>(out var Ꮡarr);
     arr = new array<nint>(256){[144] = 7};
-    @string str = "0123456789"u8;
+    @string str = "0123456789";
     var tblʗ1 = tbl;
-    arm(sliceIndexˢ, () => fmt.Sprint(tblʗ1[(uint8)(u + u)]));
+    arm("slice index", () => fmt.Sprint(tblʗ1[(uint8)(u + u)]));
     var arrʗ1 = arr;
-    arm(arrayIndexˢ, () => fmt.Sprint(arrʗ1[(uint8)(u + u)]));
-    arm(stringIndexˢ, () => fmt.Sprint(str[(uint8)(d + 10)]));
+    arm("array index", () => fmt.Sprint(arrʗ1[(uint8)(u + u)]));
+    arm("string index", () => fmt.Sprint(str[(uint8)(d + 10)]));
     var tblʗ2 = tbl;
-    arm(sliceBoundˢ, () => fmt.Sprint(len(tblʗ2.slice((uint8)(u + u))), (@string)" "u8, len(tblʗ2.slice(0, (uint8)(u + u))), (@string)" "u8, str.slice((uint8)(d + 10))));
-    arm(shiftCountˢ, () => {
+    arm("slice bound", () => fmt.Sprint(len(tblʗ2.slice((uint8)(u + u))), " ", len(tblʗ2.slice(0, (uint8)(u + u))), " ", str.slice((uint8)(d + 10))));
+
+    arm("shift count", () => {
         var y = (uint32)1;
         y.LshAssign((uint64)((uint8)(d + 10)));
-        return fmt.Sprint(((nint)1).Lsh((uint64)((uint8)(u + u - 140))), (@string)" "u8, ((uint32)1).Lsh((uint64)((uint8)(d + 10))), (@string)" "u8, y);
+        return fmt.Sprint(((nint)1).Lsh((uint64)((uint8)(u + u - 140))), " ", ((uint32)1).Lsh((uint64)((uint8)(d + 10))), " ", y);
     });
-    arm(divremOperandˢ, () => fmt.Sprint((int8)((int8)(a + a) / 2), (@string)" "u8, (int8)((int8)(a + a) % 7), (@string)" "u8, (uint8)((uint8)(u + u) / 3)));
-    arm(shrOperandˢ, () => fmt.Sprint((int8)(((int8)(a + a) >> (int)(1))), (@string)" "u8, (uint8)(((uint8)(u + u) >> (int)(4)))));
-    arm(minint81ˢ, () => fmt.Sprint((int8)(m8 / n1), (@string)" "u8, (int8)(m8 % n1)));
-    arm(parenCompareˢ, () => fmt.Sprint((int8)(a + a) < 0, (@string)" "u8, (uint8)(u + u) == 144));
-    arm(switchTagˢ, () => {
+
+    arm("divrem operand", () => fmt.Sprint((int8)((int8)(a + a) / 2), " ", (int8)((int8)(a + a) % 7), " ", (uint8)((uint8)(u + u) / 3)));
+    arm("shr operand", () => fmt.Sprint((int8)(((int8)(a + a) >> 1)), " ", (uint8)(((uint8)(u + u) >> 4))));
+    arm("minint8 / -1", () => fmt.Sprint((int8)(m8 / n1), " ", (int8)(m8 % n1)));
+
+    arm("paren compare", () => fmt.Sprint((int8)(a + a) < 0, " ", (uint8)(u + u) == 144));
+
+    arm("switch tag", () => {
         switch ((uint8)(u + u)) {
         case 144: {
-            return case144ˢ;
+            return "case 144";
         }}
 
-        return defaultˢ;
+        return "default";
     });
-    arm(caseComparisonˢ, () => {
+    arm("case comparison", () => {
         switch (ᐧ) {
         case {} when (uint8)(u + u) is < 150: {
-            return wrappedˢ;
+            return "wrapped";
         }}
 
-        return unwrappedˢ;
+        return "unwrapped";
     });
-    arm(caseValueˢ, () => {
+    arm("case value", () => {
         uint8 v = 144;
         var exprᴛ1 = v;
         if (exprᴛ1 == (uint8)(u + u)) {
-            return wrappedˢ;
+            return "wrapped";
         }
 
-        return unwrappedˢ;
+        return "unwrapped";
     });
-    arm(interfaceCaseˢ, () => {
+
+    arm("interface case", () => {
         any x = (int8)50;
         any y = (uint8)66;
-        @string r = nomatchˢ;
+        @string r = "nomatch";
         var exprᴛ2 = x;
-        if (AreEqual(exprᴛ2, (int8)((h >> (int)(1))))) {
-            r = matchˢ;
+        if (AreEqual(exprᴛ2, (int8)((h >> 1)))) {
+            r = "match";
         }
 
         var exprᴛ3 = y;
@@ -198,39 +166,45 @@ internal static void Main() {
 
         return r;
     });
-    arm(guardedShrˢ, () => {
+
+    arm("guarded shr", () => {
         int8 x = (int8)(((int8)(a + a)).Rsh(n));
         any y = ((uint8)(u + u)).Rsh(n);
-        return fmt.Sprint(x, (@string)" "u8, y, (@string)" "u8, (int8)(((int8)(a + a)).Rsh(n)) == -28, (@string)" "u8, ((int8)(m8 / n1)).Rsh(n), (@string)" "u8, ((int8)(-(a + a))).Rsh(n), (@string)" "u8, ((int8)(a + a)).Rsh((uint64)(10)));
+        return fmt.Sprint(x, " ", y, " ", (int8)(((int8)(a + a)).Rsh(n)) == -28, " ", ((int8)(m8 / n1)).Rsh(n), " ", ((int8)(-(a + a))).Rsh(n), " ", ((int8)(a + a)).Rsh((uint64)10));
     });
-    arm(guardedShlˢ, () => {
+    arm("guarded shl", () => {
         any y = ((int8)(a + a)).Lsh(n);
-        return fmt.Sprint((nint)(((int8)(a + a)).Lsh(n)), (@string)" "u8, y, (@string)" "u8, (int8)((((int8)(a + a)).Lsh(n)) / 3), (@string)" "u8, (nint)(((int8)((h >> (int)(1)))).Lsh((n + 1))), (@string)" "u8, ((uint8)(u + w8)).Lsh((uint64)(8)));
+        return fmt.Sprint((nint)(((int8)(a + a)).Lsh(n)), " ", y, " ", (int8)((((int8)(a + a)).Lsh(n)) / 3), " ", (nint)(((int8)((h >> 1))).Lsh((n + 1))), " ", ((uint8)(u + w8)).Lsh((uint64)8));
     });
+
     var tblʗ3 = tbl;
-    arm(unaryXorPlusˢ, () => {
+    arm("unary xor plus", () => {
         int8 q = (int8)((int8)(~(a + a)) / 2);
-        return fmt.Sprint((nint)((int8)(~(a + a))), (@string)" "u8, q, (@string)" "u8, (int8)(((int8)(~(a + a)) >> (int)(1))), (@string)" "u8, tblʗ3[(uint8)(+(u + u))], (@string)" "u8, (nint)((int8)(+(a * a))));
+        return fmt.Sprint((nint)((int8)(~(a + a))), " ", q, " ", (int8)(((int8)(~(a + a)) >> 1)), " ", tblʗ3[(uint8)(+(u + u))], " ", (nint)((int8)(+(a * a))));
     });
+
     var tblʗ4 = tbl;
-    arm(makeAndBoundsˢ, () => fmt.Sprint(len(new slice<nint>((uint8)(u + u))), (@string)" "u8, cap(new slice<nint>(0, (uint8)(u + u))), (@string)" "u8, cap(tblʗ4.slice(0, 1, (uint8)(u + u)))));
-    arm(divisorˢ, () => {
+    arm("make and bounds", () => fmt.Sprint(len(new slice<nint>((uint8)(u + u))), " ", cap(new slice<nint>(0, (uint8)(u + u))), " ", cap(tblʗ4.slice(0, 1, (uint8)(u + u)))));
+    arm("divisor", () => {
         var q = d;
         q /= (uint8)(u + u);
-        return fmt.Sprint((uint8)(d / (uint8)(u + u)), (@string)" "u8, (uint8)(d % (uint8)(u + u)), (@string)" "u8, q);
+        return fmt.Sprint((uint8)(d / (uint8)(u + u)), " ", (uint8)(d % (uint8)(u + u)), " ", q);
     });
-    arm(negatedMinimumˢ, () => fmt.Sprint((nint)((int8)(-m8)), (@string)" "u8, (int64)((int8)(-m8))));
-    arm(namedFuncParamˢ, () => {
+    arm("negated minimum", () => fmt.Sprint((nint)((int8)(-m8)), " ", (int64)((int8)(-m8))));
+    arm("named func param", () => {
 
         Func<byte, @string> f = (byte b) => fmt.Sprint(b);
-        return f((byte)(u + w8)) + " "u8 + f((byte)((u >> (int)(1))));
+        return f((byte)(u + w8)) + " "u8 + f((byte)((u >> 1)));
     });
-    arm(invariantˢ, () => fmt.Sprint((int8)(u + u), (@string)" "u8, (int8)(a + a + a), (@string)" "u8, (uint8)(w + w)));
-    arm(builtinArgˢ, () => {
+
+    arm("invariant", () => fmt.Sprint((int8)(u + u), " ", (int8)(a + a + a), " ", (uint8)(w + w)));
+
+    arm("builtin arg", () => {
         var b = append(new byte[]{}.slice(), (byte)(u + u), (byte)(u * 2), (byte)(u - 1));
-        return fmt.Sprint(min((int8)(a + a), (int8)(0)), (@string)" "u8, max((uint8)(u + u), (uint8)(0)), (@string)" "u8, b);
+        return fmt.Sprint(min((int8)(a + a), (int8)0), " ", max((uint8)(u + u), (uint8)0), " ", b);
     });
-    arm(parenDefineˢ, () => {
+
+    arm("paren define", () => {
         var t2 = (int8)(a + a);
         return show(t2);
     });

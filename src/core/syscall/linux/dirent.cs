@@ -35,12 +35,11 @@ internal static uint64 readIntBE(slice<byte> b, uintptr size) {
         return (uint64)byteorder.BEUint32(b);
     }
     if (exprᴛ1 == 8) {
-        return (uint64)byteorder.BEUint64(b);
+        return byteorder.BEUint64(b);
     }
     { /* default: */
         throw panic("syscall: readInt with unsupported size");
     }
-
 }
 
 internal static uint64 readIntLE(slice<byte> b, uintptr size) {
@@ -55,12 +54,11 @@ internal static uint64 readIntLE(slice<byte> b, uintptr size) {
         return (uint64)byteorder.LEUint32(b);
     }
     if (exprᴛ1 == 8) {
-        return (uint64)byteorder.LEUint64(b);
+        return byteorder.LEUint64(b);
     }
     { /* default: */
         throw panic("syscall: readInt with unsupported size");
     }
-
 }
 
 // ParseDirent parses up to max directory entries in buf,
@@ -85,8 +83,7 @@ public static (nint consumed, nint count, slice<@string> newnames) ParseDirent(s
         }
         // See src/os/dir_unix.go for the reason why this condition is
         // excluded on wasip1 and linux.
-        if (ino == 0 && runtime.GOOS != "linux"u8 && runtime.GOOS != "wasip1"u8) {
-            // File absent in directory.
+        if (ino == 0 && runtime.GOOS != "linux"u8 && runtime.GOOS != "wasip1"u8) { // File absent in directory.
             continue;
         }
         const uint64 namoff = /* uint64(unsafe.Offsetof(Dirent{}.Name)) */ 19;
@@ -107,7 +104,7 @@ public static (nint consumed, nint count, slice<@string> newnames) ParseDirent(s
         }
         max--;
         count++;
-        names = append(names, ((@string)name));
+        names = append(names, (@string)name);
     }
     return (origlen - len(buf), count, names);
 }

@@ -7,26 +7,17 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tcpˢ = "tcp"u8;
-private static readonly object listenˢ = (@string)"listen:"u8;
-private static readonly object dialˢ = (@string)"dial:"u8;
-private static readonly object wroteˢ = (@string)"wrote:"u8;
-private static readonly object errˢ = (@string)"err:"u8;
-private static readonly object lenˢ = (@string)"len:"u8;
-private static readonly object bytesˢ = (@string)"bytes:"u8;
-private static readonly object eachIovecDeliveredItsOwnˢ = (@string)"each iovec delivered its own byte in order:"u8;
-
 internal static partial void Main() {
     GoFrame ᒐ = default;
     try {
-        var (ln, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
+        var (ln, err) = Δnet.Listen("tcp", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(listenˢ, err);
+            fmt.Println("listen:", err);
             return;
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var done = new channel<slice<byte>>(1);
         var doneʗ1 = done;
         var lnʗ2 = ln;
@@ -46,27 +37,32 @@ internal static partial void Main() {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        (var c, err) = Δnet.Dial(tcpˢ, ln.Addr().String());
+
+        (var c, err) = Δnet.Dial("tcp", ln.Addr().String());
         if (err != default!) {
-            fmt.Println(dialˢ, err);
+            fmt.Println("dial:", err);
             return;
         }
+
         ref var bufs = ref heap<Δnet.Buffers>(out var Ꮡbufs);
         bufs = new Δnet.Buffers(new slice<byte>[]{}.slice());
         for (nint i = 0; i < 10; i++) {
             bufs = append(bufs, new byte[]{(byte)i}.slice());
         }
+
         (var n, err) = Ꮡbufs.WriteTo(new net_ConnᴠWriter(c));
         c._<ж<Δnet.TCPConn>>().CloseWrite();
-        fmt.Println(wroteˢ, n, errˢ, err);
+        fmt.Println("wrote:", n, "err:", err);
+
         var got = ᐸꟷ(done);
-        fmt.Println(lenˢ, len(got));
-        fmt.Println(bytesˢ, got);
+        fmt.Println("len:", len(got));
+        fmt.Println("bytes:", got);
+
         var ordered = len(got) == 10;
         for (nint i = 0; ordered && i < 10; i++) {
             ordered = got[i] == (byte)i;
         }
-        fmt.Println(eachIovecDeliveredItsOwnˢ, ordered);
+        fmt.Println("each iovec delivered its own byte in order:", ordered);
         c.Close();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -69,7 +69,6 @@ internal static (nint, ж<UDPAddr>, error) readFrom(this ref UDPConn c, slice<by
             addr = new UDPAddr(IP: ip[..], Port: from.Port, Zone: zoneCache.name((nint)from.ZoneId));
         }
     }
-
     if (err != default!) {
         // No sockaddr, so don't return UDPAddr.
         Ꮡaddr = default!; addr = ref Ꮡaddr.DerefOrNull();
@@ -101,7 +100,6 @@ internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort(this r
             port = from.Port;
         }
     }
-
     if (err == default!) {
         addr = netip.AddrPortFrom(ip, (uint16)port);
     }
@@ -128,7 +126,6 @@ internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) 
         var ip = netip.AddrFrom16(sa.Addr).WithZone(zoneCache.name((nint)sa.ZoneId));
         addr = netip.AddrPortFrom(ip, (uint16)sa.Port);
     }
-
     return (n, oobn, flags, addr, err);
 }
 
@@ -141,6 +138,7 @@ internal static (nint, error) writeTo(this ref UDPConn c, slice<byte> b, ж<UDPA
     if (Ꮡaddr == nil) {
         return (0, errMissingAddress);
     }
+
     var exprᴛ1 = (~c.fd).family;
     if (exprᴛ1 == syscall.AF_INET) {
         ref var sa = ref heap<syscall.SockaddrInet4>(out var Ꮡsa);
@@ -161,7 +159,6 @@ internal static (nint, error) writeTo(this ref UDPConn c, slice<byte> b, ж<UDPA
     { /* default: */
         return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid address family"u8, Addr: addr.IP.String()))));
     }
-
 }
 
 internal static (nint, error) writeToAddrPort(this ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
@@ -171,6 +168,7 @@ internal static (nint, error) writeToAddrPort(this ref UDPConn c, slice<byte> b,
     if (!addr.IsValid()) {
         return (0, errMissingAddress);
     }
+
     var exprᴛ1 = (~c.fd).family;
     if (exprᴛ1 == syscall.AF_INET) {
         ref var sa = ref heap<syscall.SockaddrInet4>(out var Ꮡsa);
@@ -191,7 +189,6 @@ internal static (nint, error) writeToAddrPort(this ref UDPConn c, slice<byte> b,
     { /* default: */
         return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid address family"u8, Addr: addr.Addr().String()))));
     }
-
 }
 
 internal static (nint n, nint oobn, error err) writeMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> Ꮡaddr) {
@@ -217,27 +214,35 @@ internal static (nint n, nint oobn, error err) writeMsgAddrPort(this ref UDPConn
     if (!(~c.fd).isConnected && !addr.IsValid()) {
         return (0, 0, errMissingAddress);
     }
+
     var exprᴛ1 = (~c.fd).family;
     if (exprᴛ1 == syscall.AF_INET) {
-        ref var sa = ref heap<syscall.SockaddrInet4>(out var Ꮡsa);
-        (sa, var errΔ2) = addrPortToSockaddrInet4(addr);
-        if (errΔ2 != default!) {
-            return (0, 0, errΔ2);
+        ж<syscall.SockaddrInet4> sap = default!;
+        if (addr.IsValid()) {
+            ref var sa = ref heap<syscall.SockaddrInet4>(out var Ꮡsa);
+            (sa, var errΔ3) = addrPortToSockaddrInet4(addr);
+            if (errΔ3 != default!) {
+                return (0, 0, errΔ3);
+            }
+            sap = Ꮡsa;
         }
-        return c.fd.writeMsgInet4(b, oob, Ꮡsa);
+        return c.fd.writeMsgInet4(b, oob, sap);
     }
     if (exprᴛ1 == syscall.AF_INET6) {
-        ref var sa = ref heap<syscall.SockaddrInet6>(out var Ꮡsa);
-        (sa, var errΔ3) = addrPortToSockaddrInet6(addr);
-        if (errΔ3 != default!) {
-            return (0, 0, errΔ3);
+        ж<syscall.SockaddrInet6> sap = default!;
+        if (addr.IsValid()) {
+            ref var sa = ref heap<syscall.SockaddrInet6>(out var Ꮡsa);
+            (sa, var errΔ4) = addrPortToSockaddrInet6(addr);
+            if (errΔ4 != default!) {
+                return (0, 0, errΔ4);
+            }
+            sap = Ꮡsa;
         }
-        return c.fd.writeMsgInet6(b, oob, Ꮡsa);
+        return c.fd.writeMsgInet6(b, oob, sap);
     }
     { /* default: */
         return (0, 0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid address family"u8, Addr: addr.Addr().String()))));
     }
-
 }
 
 internal static (ж<UDPConn>, error) dialUDP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> Ꮡladdr, ж<UDPAddr> Ꮡraddr) {

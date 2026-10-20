@@ -18,10 +18,9 @@ internal partial struct rc4Test {
     internal slice<byte> key, keystream;
 }
 
-// Test vectors from the original cypherpunk posting of ARC4:
-//   https://groups.google.com/group/sci.crypt/msg/10a300c9d21afca0?pli=1
-// Test vectors from the Wikipedia page: https://en.wikipedia.org/wiki/RC4
 internal static slice<rc4Test> golden = new rc4Test[]{
+    // Test vectors from the original cypherpunk posting of ARC4:
+    //   https://groups.google.com/group/sci.crypt/msg/10a300c9d21afca0?pli=1
     new(
         new byte[]{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}.slice(),
         new byte[]{0x74, 0x94, 0xc2, 0xe7, 0x10, 0x4b, 0x08, 0x79}.slice()
@@ -34,6 +33,8 @@ internal static slice<rc4Test> golden = new rc4Test[]{
         new byte[]{0xef, 0x01, 0x23, 0x45}.slice(),
         new byte[]{0xd6, 0xa1, 0x41, 0xa7, 0xec, 0x3c, 0x38, 0xdf, 0xbd, 0x61}.slice()
     ),
+
+    // Test vectors from the Wikipedia page: https://en.wikipedia.org/wiki/RC4
     new(
         new byte[]{0x4b, 0x65, 0x79}.slice(),
         new byte[]{0xeb, 0x9f, 0x77, 0x81, 0xb7, 0x34, 0xca, 0x72, 0xa7, 0x19}.slice()
@@ -95,15 +96,18 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
         foreach (var (i, _) in data) {
             data[i] = (byte)i;
         }
+
         var expect = new slice<byte>(len(g.keystream));
         foreach (var (i, _) in expect) {
             expect[i] = (byte)((byte)i ^ g.keystream[i]);
         }
+
         for (nint size = 1; size <= len(g.keystream); size++) {
             var (c, err) = NewCipher(g.key);
             if (err != default!) {
                 Ꮡt.Fatalf("#%d: NewCipher: %v"u8, gi, err);
             }
+
             nint off = 0;
             while (off < len(g.keystream)) {
                 nint n = len(g.keystream) - off;
@@ -121,16 +125,18 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
 public static void TestBlock(ж<testing.T> Ꮡt) {
     var (c1a, _) = NewCipher(golden[0].key);
     var (c1b, _) = NewCipher(golden[1].key);
-    var data1 = new slice<byte>((1 << (int)(20)));
+    var data1 = new slice<byte>((1 << 20));
     foreach (var (i, _) in data1) {
         c1a.XORKeyStream(data1.slice(i, i + 1), data1.slice(i, i + 1));
         c1b.XORKeyStream(data1.slice(i, i + 1), data1.slice(i, i + 1));
     }
+
     var (c2a, _) = NewCipher(golden[0].key);
     var (c2b, _) = NewCipher(golden[1].key);
-    var data2 = new slice<byte>((1 << (int)(20)));
+    var data2 = new slice<byte>((1 << 20));
     c2a.XORKeyStream(data2, data2);
     c2b.XORKeyStream(data2, data2);
+
     if (!bytes.Equal(data1, data2)) {
         Ꮡt.Fatalf("bad block"u8);
     }
@@ -152,6 +158,7 @@ internal static void benchmark(ж<testing.B> Ꮡb, int64 size) {
         throw panic(err);
     }
     b.SetBytes(size);
+
     for (nint i = 0; i < b.N; i++) {
         c.XORKeyStream(buf, buf);
     }

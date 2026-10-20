@@ -5,9 +5,6 @@ using Δmath = math_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sprintˢ = (@string)"sprint:"u8;
-
 internal static void Main() {
     complex128 c128 = 2D + 3D.i();
     complex128 neg = 2D + -3D.i();
@@ -18,6 +15,7 @@ internal static void Main() {
     complex64 c64pos = 1F + 2F.i();
     var inf = complex(Δmath.Inf(1), Δmath.Inf(-1));
     var nan = complex(Δmath.NaN(), Δmath.NaN());
+
     fmt.Println(c128);
     fmt.Println(neg);
     fmt.Println(frac);
@@ -29,7 +27,8 @@ internal static void Main() {
     fmt.Println(nan);
     fmt.Println(2D + 3D.i());
     fmt.Printf("%v;%v\n"u8, c128, c64);
-    fmt.Println(sprintˢ, fmt.Sprint(neg));
+    fmt.Println("sprint:", fmt.Sprint(neg));
+
     fmt.Println(2748D.i());
     fmt.Println(83D.i());
     fmt.Println(5D.i());
@@ -37,9 +36,11 @@ internal static void Main() {
     fmt.Println(0D.i());
     fmt.Println(100D.i());
     fmt.Println(0.25D.i());
+
     fmt.Println(.25D.i());
     fmt.Println(2.5e-3D.i());
     fmt.Println(1_000D.i());
+
     complex64 c64hex = 16F.i();
     fmt.Println(c64hex);
 }

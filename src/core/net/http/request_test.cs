@@ -79,6 +79,7 @@ public static void TestParseFormQuery(ж<testing.T> Ꮡt) {
     var (req, _) = NewRequest(postˢ, httpWwwGoogleComSearchQˢ3,
         new http_test_package.strings_ReaderжReader(strings.NewReader(zPostBothYPrio2Nokeyˢ)));
     (~req).Header.Set(contentTypeˢ, applicationXWwwFormˢ2);
+
     {
         @string q = req.FormValue("q"u8); if (q != "foo"u8) {
             Ꮡt.Errorf(@"req.FormValue(""q"") = %q, want ""foo"""u8, q);
@@ -160,9 +161,9 @@ internal partial struct TestParseFormUnknownContentType_type /*dyn*/ {
 
 public static void TestParseFormUnknownContentType(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in new TestParseFormUnknownContentType_type[]{
-        new("text"u8, ""u8, new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{"text/plain"u8}.slice()})), // Empty content type is legal - may be treated as
- // application/octet-stream (RFC 7231, section 3.1.1.5)
-
+        new("text"u8, ""u8, new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{"text/plain"u8}.slice()})),
+        // Empty content type is legal - may be treated as
+        // application/octet-stream (RFC 7231, section 3.1.1.5)
         new("empty"u8, ""u8, new httpꓸHeader(new map<@string, slice<@string>>{})),
         new("boundary"u8, "mime: invalid media parameter"u8, new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{"text/plain; boundary="u8}.slice()})),
         new("unknown"u8, ""u8, new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{"application/unknown"u8}.slice()}))
@@ -192,7 +193,6 @@ public static void TestParseFormUnknownContentType(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("got error %q; want %q"u8, err, testʗ1.wantErr);
                     break;
                 }}
-
             });
     }
 }
@@ -228,6 +228,7 @@ public static void TestMultipartReader(ж<testing.T> Ꮡt) {
         new(false, @"multipart/mixed; boundary=""foo123"""u8),
         new(true, @"text/plain"u8)
     }.slice();
+
     foreach (var (i, test) in tests) {
         var req = Ꮡ(new Request(
             Method: "POST"u8,
@@ -265,7 +266,7 @@ Content-Transfer-Encoding: binary
 binary data
 --xxx--
 
-"""u8;
+"""u8.Raw();
 
 // Issue 9305: ParseMultipartForm should populate PostForm too
 public static void TestParseMultipartFormPopulatesPostForm(ж<testing.T> Ꮡt) {
@@ -275,20 +276,24 @@ public static void TestParseMultipartFormPopulatesPostForm(ж<testing.T> Ꮡt) {
         Header: new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"multipart/form-data; boundary=xxx"u8}.slice()}),
         Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(postData)))
     ));
+
     var initialFormItems = new map<@string, @string>{
         ["language"u8] = "Go"u8,
         ["name"u8] = "gopher"u8,
         ["skill"u8] = "go-ing"u8,
         ["field2"u8] = "initial-value2"u8
     };
+
     req.Value.Form = new url.Values(0);
     foreach (var (k, v) in initialFormItems) {
         (~req).Form.Add(k, v);
     }
+
     var err = req.ParseMultipartForm(10000);
     if (err != default!) {
         Ꮡt.Fatalf("unexpected multipart error %v"u8, err);
     }
+
     var wantForm = new url.Values(new map<@string, slice<@string>>{
         ["language"u8] = new @string[]{"Go"u8}.slice(),
         ["name"u8] = new @string[]{"gopher"u8}.slice(),
@@ -299,6 +304,7 @@ public static void TestParseMultipartFormPopulatesPostForm(ж<testing.T> Ꮡt) {
     if (!reflect.DeepEqual((~req).Form, wantForm)) {
         Ꮡt.Fatalf("req.Form = %v, want %v"u8, (~req).Form, wantForm);
     }
+
     var wantPostForm = new url.Values(new map<@string, slice<@string>>{
         ["field1"u8] = new @string[]{"value1"u8}.slice(),
         ["field2"u8] = new @string[]{"value2"u8}.slice()
@@ -322,6 +328,7 @@ public static void TestParseMultipartForm(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Error(expectedMultipartEofGotˢ);
     }
+
     req.Value.Header = new httpꓸHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{"text/plain"u8}.slice()});
     err = req.ParseMultipartForm(25);
     if (!AreEqual(err, ErrNotMultipart)) {
@@ -337,7 +344,7 @@ Content-Type: text/plain
 
 --xxx--
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string fileˢ = "file"u8;
 
 // Issue 45789: multipart form should not include directory path in filename
@@ -368,7 +375,7 @@ public static void TestMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T> �
 internal static readonly @string myfileTxtˢ = "myfile.txt"u8;
 
 internal static void testMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T> Ꮡt, testMode mode) {
-    nint payloadSize = (1 << (int)(10));
+    nint payloadSize = 1 << 10;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> reqΔ1) => {
         // The combination of:
         //      MaxInt64 + payloadSize + (internal spare of 10MiB)
@@ -435,8 +442,8 @@ internal static void testRequestRedirect(ж<testing.T> Ꮡt, testMode mode) {
         else { /* default: */
             w.WriteHeader(StatusBadRequest);
         }
-
     })));
+
     ж<regexp.Regexp> end = regexp.MustCompile(fooˢ6);
     var (r, err) = (~cst).c.Get((~(~cst).ts).URL);
     if (err != default!) {
@@ -642,10 +649,6 @@ public static void TestFormFileOrder(ж<testing.T> Ꮡt) {
     }
 }
 
-// Multiple Content-Length values should either be
-// deduplicated if same or reject otherwise
-// See Issue 16490.
-
 partial struct readRequestErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string err;
@@ -659,6 +662,10 @@ internal static slice<readRequestErrorTestsᴛ1> readRequestErrorTests = new sli
         @in: "HEAD / HTTP/1.1\r\n\r\n"u8,
         header: new httpꓸHeader(new map<@string, slice<@string>>{})
     ),
+
+    // Multiple Content-Length values should either be
+    // deduplicated if same or reject otherwise
+    // See Issue 16490.
     [4] = new(
         @in: "POST / HTTP/1.1\r\nContent-Length: 10\r\nContent-Length: 0\r\n\r\nGopher hey\r\n"u8,
         err: "cannot contain multiple Content-Length headers"u8
@@ -697,17 +704,18 @@ public static void TestReadRequestErrors(ж<testing.T> Ꮡt) {
             if (tt.err != ""u8) {
                 Ꮡt.Errorf("#%d: got nil err; want %q"u8, i, tt.err);
             }
+
             if (!reflect.DeepEqual(tt.header, (~req).Header)) {
                 Ꮡt.Errorf("#%d: gotHeader: %q wantHeader: %q"u8, i, (~req).Header, tt.header);
             }
             continue;
         }
+
         if (tt.err == ""u8 || !strings.Contains(err.Error(), tt.err)) {
             Ꮡt.Errorf("%d: got error = %v; want %v"u8, i, err, tt.err);
         }
     }
 }
-
 
 partial struct newRequestHostTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
@@ -759,6 +767,7 @@ public static void TestRequestInvalidMethod(ж<testing.T> Ꮡt) {
     if (err == default! || !strings.Contains(err.Error(), invalidMethodˢ)) {
         Ꮡt.Errorf("Transport error = %v; want invalid method"u8, err);
     }
+
     (req, err) = NewRequest(""u8, httpFooComˢ, default!);
     if (err != default!){
         Ꮡt.Errorf("NewRequest(empty method) = %v; want nil"u8, err);
@@ -792,10 +801,11 @@ public static void TestNewRequestContentLength(ж<testing.T> Ꮡt) {
         new(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(slice<byte>("1234"u8))), 4),
         new(new http_test_package.strings_ReaderжReader(strings.NewReader("12345"u8)), 5),
         new(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8)), 0),
-        new(new http_test_package.http_noBodyᴠReader(NoBody), 0), // Not detected. During Go 1.8 we tried to make these set to -1, but
- // due to Issue 18117, we keep these returning 0, even though they're
- // unknown.
+        new(new http_test_package.http_noBodyᴠReader(NoBody), 0),
 
+        // Not detected. During Go 1.8 we tried to make these set to -1, but
+        // due to Issue 18117, we keep these returning 0, even though they're
+        // unknown.
         new(new TestNewRequestContentLength_type(new http_test_package.strings_ReaderжReader(strings.NewReader(xyzˢ))), 0),
         new(new io.SectionReaderжReader(io.NewSectionReader(new http_test_package.strings_ReaderжReaderAt(strings.NewReader("x"u8)), 0, 6)), 0),
         new(readByte(new io.SectionReaderжReader(io.NewSectionReader(new http_test_package.strings_ReaderжReaderAt(strings.NewReader("xy"u8)), 0, 6))), 0)
@@ -810,7 +820,6 @@ public static void TestNewRequestContentLength(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct parseHTTPVersionTestsᴛ1 /*dyn*/ {
     internal @string vers;
@@ -860,7 +869,6 @@ partial struct basicAuthCredentialsTest {
     internal @string username, password;
 }
 
-
 partial struct getBasicAuthTestsᴛ1 /*dyn*/ {
     internal @string username, password;
     internal bool ok;
@@ -894,14 +902,14 @@ public static void TestGetBasicAuth(ж<testing.T> Ꮡt) {
     }
 }
 
-// Case doesn't matter:
-
 partial struct parseBasicAuthTestsᴛ1 /*dyn*/ {
     internal @string header, username, password;
     internal bool ok;
 }
 internal static slice<parseBasicAuthTestsᴛ1> parseBasicAuthTests = new parseBasicAuthTestsᴛ1[]{
     new("Basic "u8 + base64.StdEncoding.EncodeToString(slice<byte>("Aladdin:open sesame"u8)), "Aladdin"u8, "open sesame"u8, true),
+
+    // Case doesn't matter:
     new("BASIC "u8 + base64.StdEncoding.EncodeToString(slice<byte>("Aladdin:open sesame"u8)), "Aladdin"u8, "open sesame"u8, true),
     new("basic "u8 + base64.StdEncoding.EncodeToString(slice<byte>("Aladdin:open sesame"u8)), "Aladdin"u8, "open sesame"u8, true),
     new("Basic "u8 + base64.StdEncoding.EncodeToString(slice<byte>("Aladdin:open:sesame"u8)), "Aladdin"u8, "open:sesame"u8, true),
@@ -936,7 +944,7 @@ internal static error WriteByte(this logWrites l, byte c) {
 }
 
 internal static (nint n, error err) Write(this logWrites l, slice<byte> p) {
-    l.dst.ValueSlot = append(l.dst.ValueSlot, ((@string)p));
+    l.dst.ValueSlot = append(l.dst.ValueSlot, (@string)p);
     return (len(p), default!);
 }
 
@@ -1022,6 +1030,7 @@ public static void TestStarRequest(ж<testing.T> Ꮡt) {
     if ((~req).Body == default!) {
         Ꮡt.Errorf("Body = nil; want non-nil"u8);
     }
+
     // Request.Write has Client semantics for Body/ContentLength,
     // where ContentLength 0 means unknown if Body is non-nil, and
     // thus chunking will happen unless we change semantics and
@@ -1031,12 +1040,14 @@ public static void TestStarRequest(ж<testing.T> Ꮡt) {
     ref var clientReq = ref heap<Δhttp.Request>(out var ᏑclientReq);
     clientReq = req.Value;
     clientReq.Body = default!;
+
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
     {
         var errΔ1 = ᏑclientReq.Write(new http_test_package.strings_BuilderжWriter(Ꮡout)); if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     if (strings.Contains(@out.String(), chunkedˢ)) {
         Ꮡt.Error(wroteChunkedRequestWantˢ);
     }
@@ -1154,8 +1165,6 @@ internal partial struct TestMaxBytesReaderDifferentLimits_tests /*dyn*/ {
 // Issue 45101: maxBytesReader's Read panicked when n < -1. This test
 // also ensures that Read treats negative limits as equivalent to 0.
 public static void TestMaxBytesReaderDifferentLimits(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string testStr = testStrᶜ;
     var tests = new array<TestMaxBytesReaderDifferentLimits_tests>(11){
         [0] = new(
@@ -1219,9 +1228,8 @@ public static void TestMaxBytesReaderDifferentLimits(ж<testing.T> Ꮡt) {
             wantN: len(testStr),
             wantErr: false
         ),
-        [10] = new(
-            limit: (int64)(9223372036854775807L), /* Issue 54408 */
-
+        [10] = new( /* Issue 54408 */
+            limit: (int64)(9223372036854775807L),
             lenP: len(testStr),
             wantN: len(testStr),
             wantErr: false
@@ -1229,10 +1237,13 @@ public static void TestMaxBytesReaderDifferentLimits(ж<testing.T> Ꮡt) {
     };
     foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
         var rc = MaxBytesReader(default!, io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(testStr))), tt.limit);
+
         var (n, err) = rc.Read(new slice<byte>(tt.lenP));
+
         if (n != tt.wantN) {
             Ꮡt.Errorf("%d. n: %d, want n: %d"u8, i, n, tt.wantN);
         }
+
         if ((err != default!) != tt.wantErr) {
             Ꮡt.Errorf("%d. error: %v"u8, i, err);
         }
@@ -1248,6 +1259,7 @@ public static void TestWithContextNilURL(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // Issue 20601
     req.Value.URL = default!;
     var reqCopy = req.WithContext(context_package.Background());
@@ -1270,9 +1282,11 @@ public static void TestRequestCloneTransferEncoding(ж<testing.T> Ꮡt) {
     req.Value.TransferEncoding = new @string[]{
         "encoding1"u8
     }.slice();
+
     var clonedReq = req.Clone(context_package.Background());
     // modify original after deep copy
     req.Value.TransferEncoding[0] = encoding2ˢ;
+
     if ((~req).TransferEncoding[0] != "encoding2") {
         Ꮡt.Error(expectedReqˢ);
     }
@@ -1290,8 +1304,10 @@ internal static readonly @string copyˢ = "copy"u8;
 public static void TestRequestClonePathValue(ж<testing.T> Ꮡt) {
     var (req, _) = Δhttp.NewRequest(getˢ2, httpsExampleOrgˢ, default!);
     req.SetPathValue("p1"u8, origˢ);
+
     var clonedReq = req.Clone(context_package.Background());
     clonedReq.SetPathValue("p2"u8, copyˢ);
+
     // Ensure that any modifications to the cloned
     // request do not pollute the original request.
     {
@@ -1306,6 +1322,7 @@ public static void TestRequestClonePathValue(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("p1 mismatch got %q, want %q"u8, g, w);
         }
     }
+
     // Assert on the changes to the cloned request.
     {
         @string g = clonedReq.PathValue("p1"u8);
@@ -1329,6 +1346,7 @@ public static void TestNoPanicOnRoundTripWithBasicAuth(ж<testing.T> Ꮡt) {
 internal static void testNoPanicWithBasicAuth(ж<testing.T> Ꮡt, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     })));
+
     var (u, err) = url.Parse((~(~cst).ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1451,6 +1469,7 @@ internal static void validateTestMultipartContents(ж<testing.T> Ꮡt, ж<Δhttp
                 Ꮡt.Errorf("missing value = %q, want empty string"u8, g);
             }
         }
+
         void assertMem(@string n, multipart.File fd) {
             {
                 var (_, ok) = fd._<ж<os.File>>(ᐧ); if (ok) {
@@ -1474,6 +1493,7 @@ internal static void validateTestMultipartContents(ж<testing.T> Ꮡt, ж<Δhttp
                 }
             }
         }
+
         testMissingFile(Ꮡt, Ꮡreq);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1533,6 +1553,7 @@ public static void TestRequestCookie(ж<testing.T> Ꮡt) {
         if (!AreEqual(err, tt.expectedErr)) {
             Ꮡt.Errorf("got %v, want %v"u8, err, tt.expectedErr);
         }
+
         // skip if error occurred.
         if (err != default!) {
             continue;
@@ -1594,6 +1615,7 @@ public static void TestRequestCookiesByName(ж<testing.T> Ꮡt) {
             want: new ж<httpꓸCookie>[]{}.slice()
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestRequestCookiesByName_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1607,11 +1629,13 @@ public static void TestRequestCookiesByName(ж<testing.T> Ꮡt) {
             foreach (var (_, c) in ttʗ1.@in) {
                 req.AddCookie(c);
             }
+
             var got = req.CookiesNamed(ttʗ1.filter);
+
             if (!reflect.DeepEqual(got, ttʗ1.want)) {
                 @string asStr(any v) {
                     var (blob, _) = json.MarshalIndent(v, ""u8, "  "u8);
-                    return ((@string)blob);
+                    return (@string)blob;
                 }
                 tΔ1.Fatalf("Result mismatch\n\tGot: %s\n\tWant: %s"u8, asStr(got), asStr(ttʗ1.want));
             }
@@ -1669,7 +1693,7 @@ Accept-Language: en-US,en;q=0.8
 Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
 Cookie: __utma=1.1978842379.1323102373.1323102373.1323102373.1; EPi:NumberOfVisits=1,2012-02-28T13:42:18; CrmSession=5b707226b9563e1bc69084d07a107c98; plushContainerWidth=100%25; plushNoTopMenu=0; hudson_auto_refresh=false
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestChrome(ж<testing.B> Ꮡb) {
     // https://github.com/felixge/node-http-perf/blob/master/fixtures/get.http
@@ -1683,7 +1707,7 @@ User-Agent: curl/7.27.0
 Host: localhost:8080
 Accept: */*
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestCurl(ж<testing.B> Ꮡb) {
     // curl http://localhost:8080/
@@ -1697,7 +1721,7 @@ Host: localhost:8080
 User-Agent: ApacheBench/2.3
 Accept: */*
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestApachebench(ж<testing.B> Ꮡb) {
     // ab -n 1 -c 1 http://localhost:8080/
@@ -1713,7 +1737,7 @@ Accept-Encoding: gzip
 User-Agent: JoeDog/1.00 [en] (X11; I; Siege 2.70)
 Connection: keep-alive
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestSiege(ж<testing.B> Ꮡb) {
     // siege -r 1 -c 1 http://localhost:8080/
@@ -1725,7 +1749,7 @@ internal static readonly @string getHttp11HostLocalhostˢ3 = """
 GET / HTTP/1.1
 Host: localhost:8080
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestWrk(ж<testing.B> Ꮡb) {
     // wrk -t 1 -r 1 -c 1 http://localhost:8080/
@@ -1733,15 +1757,15 @@ public static void BenchmarkReadRequestWrk(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkFileAndServer_1KB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(10)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 10);
 }
 
 public static void BenchmarkFileAndServer_16MB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(24)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 24);
 }
 
 public static void BenchmarkFileAndServer_64MB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(26)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 26);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1754,16 +1778,19 @@ internal static void benchmarkFileAndServer(ж<testing.B> Ꮡb, int64 n) {
         if (err != default!) {
             Ꮡb.Fatalf("Failed to create temp file: %v"u8, err);
         }
+
         var fʗ1 = f;
         defer(() => {
             fʗ1.Close();
             os.RemoveAll(fʗ1.Name());
         }, ref ᒐ);
+
         {
             var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, n); if (errΔ1 != default!) {
                 Ꮡb.Fatalf("Failed to copy %d bytes: %v"u8, n, errΔ1);
             }
         }
+
         var fʗ2 = f;
         run<BжTBRun>(Ꮡb, (BжTBRun bΔ1Δp, testMode mode) => {
             var bΔ1 = (ж<testing.B>)bΔ1Δp;
@@ -1785,6 +1812,7 @@ internal static void runFileAndServerBenchmarks(ж<testing.B> Ꮡb, testMode mod
             if (err != default!) {
                 throw panic(err);
             }
+
             if (nc != n) {
                 throw panic(fmt.Errorf("Copied %d Wanted %d bytes"u8, nc, n));
             }
@@ -1792,7 +1820,9 @@ internal static void runFileAndServerBenchmarks(ж<testing.B> Ꮡb, testMode mod
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     var cst = newClientServerTest(new http_test_package.testing_BжTB(Ꮡb), mode, new http_test_package.http_HandlerFuncᴠΔHandler(handler)).Value.ts;
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         // Perform some setup.
@@ -1802,11 +1832,13 @@ internal static void runFileAndServerBenchmarks(ж<testing.B> Ꮡb, testMode mod
                 Ꮡb.Fatalf("Failed to seek back to file: %v"u8, errΔ1);
             }
         }
+
         b.StartTimer();
         var (req, err) = NewRequest(putˢ, (~cst).URL, io.NopCloser(new http_test_package.os_FileжReader(Ꮡf)));
         if (err != default!) {
             Ꮡb.Fatal(err);
         }
+
         req.Value.ContentLength = n;
         // Prevent mime sniffing by setting the Content-Type.
         (~req).Header.Set(contentTypeˢ, applicationOctetStreamˢ);
@@ -1814,6 +1846,7 @@ internal static void runFileAndServerBenchmarks(ж<testing.B> Ꮡb, testMode mod
         if (err != default!) {
             Ꮡb.Fatalf("Failed to make request to backend: %v"u8, err);
         }
+
         (~res).Body.Close();
         b.SetBytes(n);
     }
@@ -1987,6 +2020,7 @@ public static void TestStatus(ж<testing.T> Ꮡt) {
         var server = httptest.NewServer(new Δhttp.ServeMuxжΔHandler(mux));
         var serverʗ1 = server;
         defer(serverʗ1.Close, ref ᒐ);
+
         foreach (var (_, test) in new TestStatus_type[]{
             new("GET"u8, "/g"u8, 200, ""u8),
             new("HEAD"u8, "/g"u8, 200, ""u8),
@@ -1996,10 +2030,8 @@ public static void TestStatus(ж<testing.T> Ꮡt) {
             new("GET"u8, "/./p"u8, 405, "PATCH, POST"u8),
             new("GET"u8, "/r/"u8, 200, ""u8),
             new("GET"u8, "/r"u8, 200, ""u8), // redirected
-
             new("HEAD"u8, "/r/"u8, 200, ""u8),
             new("HEAD"u8, "/r"u8, 200, ""u8), // redirected
-
             new("PUT"u8, "/r/"u8, 405, "GET, HEAD"u8),
             new("PUT"u8, "/r"u8, 200, ""u8)
         }.slice()) {

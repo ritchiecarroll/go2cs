@@ -68,7 +68,6 @@ public static @string String(this SignatureScheme i) {
     default: {
         return "SignatureScheme("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
     }}
-
 }
 
 internal static void _ᴛ2() {
@@ -80,13 +79,16 @@ internal static void _ᴛ2() {
     _ = x[CurveP521 - 25];
     _ = x[X25519 - 29];
     _ = x[X25519MLKEM768 - 4588];
+    _ = x[SecP256r1MLKEM768 - 4587];
+    _ = x[SecP384r1MLKEM1024 - 4589];
 }
 
 internal static readonly @string _CurveID_name_0 = "CurveP256CurveP384CurveP521"u8;
 internal static readonly @string _CurveID_name_1 = "X25519"u8;
-internal static readonly @string _CurveID_name_2 = "X25519MLKEM768"u8;
+internal static readonly @string _CurveID_name_2 = "SecP256r1MLKEM768X25519MLKEM768SecP384r1MLKEM1024"u8;
 
 internal static array<uint8> _CurveID_index_0 = new uint8[]{0, 9, 18, 27}.array();
+internal static array<uint8> _CurveID_index_2 = new uint8[]{0, 17, 31, 49}.array();
 
 public static @string String(this CurveID i) {
     switch (ᐧ) {
@@ -97,13 +99,13 @@ public static @string String(this CurveID i) {
     case {} when i == 29: {
         return _CurveID_name_1;
     }
-    case {} when i == 4588: {
-        return _CurveID_name_2;
+    case {} when 4587 <= i && i <= 4589: {
+        i -= 4587;
+        return _CurveID_name_2.slice(_CurveID_index_2[i], _CurveID_index_2[i + 1]);
     }
     default: {
         return "CurveID("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
     }}
-
 }
 
 internal static void _ᴛ3() {

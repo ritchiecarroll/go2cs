@@ -23,6 +23,7 @@ public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
     if (Ꮡx == nil) {
         return (default!, default!);
     }
+
     // determine max. space (bytes) required for encoding
     nint sz = 1 + 1 + 4; // version + mode|acc|form|neg (3+2+2+1bit) + prec
     nint n = 0; // number of mantissa words
@@ -41,17 +42,20 @@ public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
         sz += 4 + n * (nint)_S; // exp + mant
     }
     var buf = new slice<byte>(sz);
+
     buf[0] = floatGobVersion;
-    var b = (byte)((byte)((byte)((byte)((RoundingMode)(x.mode & 7)) << (int)(5)) | (byte)((byte)(int8)((Accuracy)((x.acc + 1) & 3)) << (int)(3))) | (byte)((byte)((form)(x.form & 3)) << (int)(1)));
+    var b = (byte)((byte)((byte)((byte)((RoundingMode)(x.mode & 7)) << 5) | (byte)((byte)(int8)((Accuracy)((x.acc + 1) & 3)) << 3)) | (byte)((byte)((form)(x.form & 3)) << 1));
     if (x.neg) {
         b |= (byte)(1);
     }
     buf[1] = b;
     byteorder.BEPutUint32(buf[2..], x.prec);
+
     if (x.form == finite) {
         byteorder.BEPutUint32(buf[6..], (uint32)x.exp);
         x.mant.slice(len(x.mant) - n).bytes(buf[10..]); // cut off unused trailing words
     }
+
     return (buf, default!);
 }
 
@@ -74,17 +78,21 @@ public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
     if (len(buf) < 6) {
         return errors.New(floatGobDecodeBufferTooˢ);
     }
+
     if (buf[0] != floatGobVersion) {
         return fmt.Errorf("Float.GobDecode: encoding version %d not supported"u8, buf[0]);
     }
+
     var oldPrec = z.prec;
     var oldMode = z.mode;
+
     var b = buf[1];
-    z.mode = ((RoundingMode)((byte)(((b >> (int)(5))) & 7)));
-    z.acc = (Accuracy)(((Accuracy)(int8)((byte)(((b >> (int)(3))) & 3))) - 1);
-    z.form = ((form)((byte)(((b >> (int)(1))) & 3)));
+    z.mode = (RoundingMode)((byte)((b >> 5) & 7));
+    z.acc = (Accuracy)(((Accuracy)(int8)((byte)((b >> 3) & 3))) - 1);
+    z.form = (form)((byte)((b >> 1) & 3));
     z.neg = (byte)(b & 1) != 0;
     z.prec = byteorder.BEUint32(buf[2..]);
+
     if (z.form == finite) {
         if (len(buf) < 10) {
             return errors.New(floatGobDecodeBufferTooˢ2);
@@ -92,15 +100,18 @@ public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
         z.exp = (int32)byteorder.BEUint32(buf[6..]);
         z.mant = z.mant.setBytes(buf[10..]);
     }
+
     if (oldPrec != 0) {
         z.mode = oldMode;
         Ꮡz.SetPrec((nuint)oldPrec);
     }
+
     {
         @string msg = Ꮡz.validate0(); if (msg != ""u8) {
             return errors.New("Float.GobDecode: "u8 + msg);
         }
     }
+
     return default!;
 }
 
@@ -127,7 +138,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
 // effect.
 public static error UnmarshalText(this ж<Float> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
-    var (_, _, err) = Ꮡz.Parse(((@string)text), 0);
+    var (_, _, err) = Ꮡz.Parse((@string)text, 0);
     if (err != default!) {
         err = fmt.Errorf("math/big: cannot unmarshal %q into a *big.Float (%v)"u8, text, err);
     }

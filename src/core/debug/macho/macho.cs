@@ -32,6 +32,7 @@ public const uint32 Magic32 = 0xfeedface;
 public const uint32 Magic64 = 0xfeedfacf;
 public const uint32 MagicFat = 0xcafebabe;
 
+// A Type is the Mach-O file type, e.g. an object file, executable, or dynamic library.
 partial struct Type /*num:uint32*/;
 
 public static Type TypeObj => 1;
@@ -54,6 +55,7 @@ public static @string GoString(this Type t) {
     return stringName((uint32)t, typeStrings, true);
 }
 
+// A Cpu is a Mach-O cpu type.
 partial struct Cpu /*num:uint32*/;
 
 internal static UntypedInt cpuArch64 => 0x01000000;
@@ -82,6 +84,7 @@ public static @string GoString(this Cpu i) {
     return stringName((uint32)i, cpuStrings, true);
 }
 
+// A LoadCmd is a Mach-O load command.
 partial struct LoadCmd /*num:uint32*/;
 
 public static LoadCmd LoadCmdSegment => 0x1;
@@ -111,6 +114,7 @@ public static @string GoString(this LoadCmd i) {
     return stringName((uint32)i, cmdStrings, true);
 }
 
+// A Segment32 is a 32-bit Mach-O segment load command.
 partial struct Segment32 {
     public LoadCmd Cmd;
     public uint32 Len;
@@ -125,6 +129,7 @@ partial struct Segment32 {
     public uint32 Flag;
 }
 
+// A Segment64 is a 64-bit Mach-O segment load command.
 partial struct Segment64 {
     public LoadCmd Cmd;
     public uint32 Len;
@@ -139,6 +144,7 @@ partial struct Segment64 {
     public uint32 Flag;
 }
 
+// A SymtabCmd is a Mach-O symbol table command.
 partial struct SymtabCmd {
     public LoadCmd Cmd;
     public uint32 Len;
@@ -148,6 +154,7 @@ partial struct SymtabCmd {
     public uint32 Strsize;
 }
 
+// A DysymtabCmd is a Mach-O dynamic symbol table command.
 partial struct DysymtabCmd {
     public LoadCmd Cmd;
     public uint32 Len;
@@ -171,6 +178,7 @@ partial struct DysymtabCmd {
     public uint32 Nlocrel;
 }
 
+// A DylibCmd is a Mach-O load dynamic library command.
 partial struct DylibCmd {
     public LoadCmd Cmd;
     public uint32 Len;
@@ -180,12 +188,14 @@ partial struct DylibCmd {
     public uint32 CompatVersion;
 }
 
+// A RpathCmd is a Mach-O rpath command.
 partial struct RpathCmd {
     public LoadCmd Cmd;
     public uint32 Len;
     public uint32 Path;
 }
 
+// A Thread is a Mach-O thread state command.
 partial struct Thread {
     public LoadCmd Cmd;
     public uint32 Len;

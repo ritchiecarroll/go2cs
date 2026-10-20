@@ -63,7 +63,7 @@ func F[T *U, U any](param1, param2 int) /*param1=undef*/ (res1 /*res1=undef*/, r
 }
 /*main=undef*/
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string undefˢ = "undef"u8;
 internal static readonly @string typesˢ2 = "*types."u8;
 
@@ -87,6 +87,7 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     makePkg(libˢ, mustParse(fset, packageLibVarXIntˢ));
     // Each /*name=kind:line*/ comment makes the test look up the
     // name at that point and checks that it resolves to a decl of
@@ -95,6 +96,7 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
     // comments) need the ";" to ensure that the recorded scope extends
     // past the comments.
     @string mainSrc = libPkgname5XVar1PiConst8ˢ;
+
     info.Uses = new map<ж<ast.Ident>, types.Object>();
     var f = mustParse(fset, mainSrc);
     makePkg(mainˢ, f);
@@ -111,6 +113,7 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
             }
             @string name = m[1];
             @string want = m[2];
+
             // Look up the name in the innermost enclosing scope.
             var inner = mainScope.Innermost(comment.Pos());
             if (inner == nil) {
@@ -131,9 +134,11 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Check that for each referring identifier,
     // a lookup of its name on the innermost
     // enclosing scope returns the correct object.
+
     foreach (var (id, wantObj) in info.Uses) {
         var inner = mainScope.Innermost(id.Pos());
         if (inner == nil) {
@@ -141,6 +146,7 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
                 fset.Position(id.Pos()), (~id).Name);
             continue;
         }
+
         // Exclude selectors and qualified identifiers---lexical
         // refs only.  (Ideally, we'd see if the AST parent is a
         // SelectorExpr, but that requires PathEnclosingInterval
@@ -148,6 +154,7 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
         if ((~id).Name == "X"u8) {
             continue;
         }
+
         var (_, gotObj) = inner.LookupParent((~id).Name, id.Pos());
         if (!AreEqual(gotObj, wantObj)) {
             // Print the scope tree of mainScope in case of error.
@@ -164,6 +171,7 @@ public static void TestScopeLookupParent(ж<testing.T> Ꮡt) {
                 }
             };
             printScopeTree(""u8, mainScope);
+
             Ꮡt.Errorf("%s: Scope(%s).LookupParent(%s@%v) got %v, want %v [scopePos=%v]"u8,
                 fset.Position(id.Pos()),
                 types_internal_test_package.ScopeComment(inner),

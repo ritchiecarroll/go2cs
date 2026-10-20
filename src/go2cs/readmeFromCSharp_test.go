@@ -110,6 +110,7 @@ func TestReadmeFromCSharpLineSurvivesTheRefreshAfterProof(t *testing.T) {
 
 // The class is the one package_info.cs declares: the conversion's namespace and the sanitized <name>_package.
 func TestPackageReadmeCSharpClassIsThePackageInfoClass(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	savedNamespace, savedName := packageNamespace, packageName
 
 	t.Cleanup(func() { packageNamespace, packageName = savedNamespace, savedName })

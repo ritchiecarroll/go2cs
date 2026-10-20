@@ -115,6 +115,11 @@ type proofPageProvenance struct {
 	// (packageInputDigest.go): what the proven conversion was made from, which nugetgo-pack.ps1 compares with the
 	// packed project's. "" renders nothing, so a stdlib page is unchanged.
 	inputDigest string
+
+	// disclosureURL is a THIRD-PARTY page's link to the disclosure manifest its run read, when that manifest is in
+	// the go2cs checkout's committed -module-disclosures tree (thirdPartyDisclosureURL); "" names the manifest beside
+	// the converted package instead. A stdlib page keeps its src/core link and never reads this.
+	disclosureURL string
 }
 
 // proofInputDigestPattern reads a third-party proof page's input digest back, for its MODULE.md row.
@@ -390,8 +395,15 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 			fmt.Fprintf(&page, "A disclosed divergence is a specific Go assertion %s — not\n", claim)
 			page.WriteString("a skipped test and not a tolerance. Each one is pinned by exact failure signature in the package's\n")
 		}
-		fmt.Fprintf(&page, "hand-owned [`go2cs_test_disclosures.json`](%s/blob/master/src/core/%s/go2cs_test_disclosures.json);\n",
-			go2csRepositoryURL, provenance.importPath)
+		switch {
+		case provenance.convertedPath == "":
+			fmt.Fprintf(&page, "hand-owned [`go2cs_test_disclosures.json`](%s/blob/master/src/core/%s/go2cs_test_disclosures.json);\n",
+				go2csRepositoryURL, provenance.importPath)
+		case provenance.disclosureURL != "":
+			fmt.Fprintf(&page, "hand-owned [`go2cs_test_disclosures.json`](%s);\n", provenance.disclosureURL)
+		default:
+			fmt.Fprintf(&page, "hand-owned `go2cs_test_disclosures.json` beside the converted package (`%s`);\n", provenance.convertedPath)
+		}
 		page.WriteString("a disclosed test that fails any *other* way is still a hard mismatch.\n\n")
 
 		if hasDeferred {
@@ -409,7 +421,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				// A parent whose Go=pass/C#=fail divergence is purely the roll-up of disclosed
 				// subtests carries no manifest entry of its own (matchTerminalStatuses' aggregation
 				// rule), so say what it actually is rather than rendering two empty cells.
-				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), "aggregate",
+				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), disclosureClassAggregate,
 					escapeProofCell("no failure text of its own — the roll-up of this test's disclosed subtests"))
 				continue
 			}
@@ -1011,6 +1023,7 @@ func writeThirdPartyProofPage(outputPath string, pagePath string, comparison tes
 		convertedPath: filepath.ToSlash(converted),
 		buildTags:     options.buildTags,
 		inputDigest:   productionProjectInputDigest(outputPath, manifest),
+		disclosureURL: thirdPartyDisclosureURL(outputPath, manifest, options),
 	}
 
 	if err := os.MkdirAll(filepath.Dir(pagePath), 0o755); err != nil {
@@ -1024,6 +1037,34 @@ func writeThirdPartyProofPage(outputPath string, pagePath string, comparison tes
 	moduleDir := filepath.Join(outRoot, "validation", filepath.FromSlash(manifest.ModulePath))
 
 	return writeThirdPartyModuleSummary(moduleDir, manifest.ModulePath)
+}
+
+// thirdPartyDisclosureURL is the go2cs repository URL of the disclosure manifest a third-party -tests run read, when
+// the run read it from the committed -module-disclosures tree inside the checkout it converted against, or "". The
+// manifest is resolved by resolveDisclosureManifestDir with the inputs testConversion gave it, so the page links the
+// file that was applied. A manifest in the package's output directory, or a tree outside the checkout, has no go2cs
+// URL. The golang.org/x/sync kit (2026-10-12) found the page linking src/core/<importPath>, the standard library's
+// home, which no module manifest lives in.
+func thirdPartyDisclosureURL(outputPath string, manifest testManifest, options Options) string {
+	if options.go2csPath == "" || options.mainModuleDir == "" {
+		return ""
+	}
+
+	rel := strings.TrimPrefix(strings.TrimPrefix(manifest.PackageImportPath, manifest.ModulePath), "/")
+	pkgDir := filepath.Join(options.mainModuleDir, filepath.FromSlash(rel))
+	manifestDir, _ := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, pkgDir)
+
+	if filepath.Clean(manifestDir) == filepath.Clean(outputPath) {
+		return ""
+	}
+
+	inRepo, err := filepath.Rel(filepath.Dir(filepath.Clean(options.go2csPath)), manifestDir)
+
+	if err != nil || inRepo == ".." || strings.HasPrefix(inRepo, ".."+string(filepath.Separator)) || filepath.IsAbs(inRepo) {
+		return ""
+	}
+
+	return go2csRepositoryURL + "/blob/master/" + filepath.ToSlash(filepath.Join(inRepo, testDisclosureFileName))
 }
 
 // productionProjectInputDigest is the GoInputDigest the package's production project in outputPath records: the value
@@ -1042,9 +1083,20 @@ func productionProjectInputDigest(outputPath string, manifest testManifest) stri
 	return projectInputDigest(string(data))
 }
 
+// disclosureClassAggregate is the class a proof page and the console summary give a disclosed parent that is purely
+// the roll-up of its disclosed subtests: it has no manifest entry, so no class of its own.
+const disclosureClassAggregate = "aggregate"
+
 // writeThirdPartyModuleSummary regenerates <moduleDir>/MODULE.md from the package pages beneath it: one
 // row per page (its import path, matched and disclosed counts, a link) and the module's totals.
 func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
+	return writeThirdPartyModuleSummaryWith(moduleDir, modulePath, nil)
+}
+
+// writeThirdPartyModuleSummaryWith is writeThirdPartyModuleSummary for a -tests -recurse run that knows which of the
+// module's tested packages did not validate (import path -> the run's reason). MODULE.md names each of them, and a
+// page of one of them on disk (an earlier run's, into this root) is not summed: it is not this run's proof.
+func writeThirdPartyModuleSummaryWith(moduleDir string, modulePath string, unvalidated map[string]string) error {
 	type pageRow struct {
 		importPath  string
 		link        string
@@ -1083,6 +1135,10 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 		importPath := ""
 		if match := proofTitlePattern.FindStringSubmatch(strings.ReplaceAll(string(data), "\r", "")); match != nil {
 			importPath = match[1]
+		}
+
+		if _, failed := unvalidated[importPath]; failed {
+			return nil
 		}
 
 		if excluded := proofExcludedDeclarations(string(data)); len(excluded) > 0 {
@@ -1143,6 +1199,25 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 
 	fmt.Fprintf(&page, "\n**Total: %d matched · %d disclosed** across %d package(s).\n", totalMatched, totalDisclosed, len(rows))
 
+	// A tested package that did not validate has no row above, so the summary says so outright rather than leaving
+	// the row absent (COORD ruling 2026-10-13, the go-cmp dry run). nugetgo-pack.ps1 refuses to pack one.
+	if len(unvalidated) > 0 {
+		failed := make([]string, 0, len(unvalidated))
+		for importPath := range unvalidated {
+			failed = append(failed, importPath)
+		}
+
+		sort.Strings(failed)
+
+		page.WriteString("\n## Packages that did not validate\n\n")
+		fmt.Fprintf(&page, "%d package(s) of this module have Go tests that this run did not validate. Nothing above proves them,\n", len(failed))
+		page.WriteString("and a module pack refuses to ship them.\n\n")
+
+		for _, importPath := range failed {
+			fmt.Fprintf(&page, "- `%s`: %s\n", importPath, unvalidatedReasonLine(unvalidated[importPath]))
+		}
+	}
+
 	if len(excludedByPackage) > 0 {
 		count := 0
 		for _, excluded := range excludedByPackage {
@@ -1163,6 +1238,34 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 	_, err = writeStableDocFile(filepath.Join(moduleDir, thirdPartyModuleSummaryName), page.String())
 
 	return err
+}
+
+// unvalidatedReasonLimit is the longest reason, in runes, MODULE.md gives for a package that did not validate.
+const unvalidatedReasonLimit = 200
+
+// unvalidatedReasonLine is the reason MODULE.md gives for a package that did not validate: the first line of the
+// run's error (later lines carry the test host's raw output), clipped to unvalidatedReasonLimit runes.
+func unvalidatedReasonLine(reason string) string {
+	line, _, _ := strings.Cut(strings.TrimSpace(strings.ReplaceAll(reason, "\r", "")), "\n")
+	line = strings.TrimSpace(line)
+
+	if runes := []rune(line); len(runes) > unvalidatedReasonLimit {
+		line = strings.TrimSpace(string(runes[:unvalidatedReasonLimit])) + "…"
+	}
+
+	return line
+}
+
+// recordUnvalidatedModulePackages rewrites <outRoot>/validation/<modulePath>/MODULE.md naming the tested packages that
+// did not validate in a -tests -recurse run (import path -> the run's reason).
+func recordUnvalidatedModulePackages(outRoot string, modulePath string, unvalidated map[string]string) error {
+	moduleDir := filepath.Join(outRoot, "validation", filepath.FromSlash(modulePath))
+
+	if err := os.MkdirAll(moduleDir, 0o755); err != nil {
+		return err
+	}
+
+	return writeThirdPartyModuleSummaryWith(moduleDir, modulePath, unvalidated)
 }
 
 // proofExcludedDeclarations reads a proof page's "Excluded declarations" list back: each entry as the page names it,

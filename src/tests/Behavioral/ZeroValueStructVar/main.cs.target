@@ -22,6 +22,7 @@ partial struct point {
 internal static void Main() {
     holder z = new();
     fmt.Println(len(z.name), len(z.tbl), len(z.tail));
+
     foreach (var (i, _) in z.tbl) {
         z.tbl[i] = i * i;
     }
@@ -30,9 +31,11 @@ internal static void Main() {
         sum += v;
     }
     fmt.Println(sum, z.tbl[7]);
+
     wrapper w = new();
     w.h.tbl[3] = 42;
     fmt.Println(w.id, len(w.h.tbl), w.h.tbl[3]);
+
     point p = default!;
     p.x = 3;
     fmt.Println(p.x + p.y);

@@ -106,7 +106,6 @@ internal static float64 tanh(float64 x) {
         z = x + x * s * ((tanhP[0] * s + tanhP[1]) * s + tanhP[2]) / (((s + tanhQ[0]) * s + tanhQ[1]) * s + tanhQ[2]);
         break;
     }}
-
     return z;
 }
 

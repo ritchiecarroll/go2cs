@@ -35,13 +35,6 @@ internal partial struct fileTest {
     internal bool hasNoDwarfInfo;
 }
 
-// testdata/vmlinuz-4.15.0-47-generic is a trimmed down version of Linux Kernel image.
-// The original Linux Kernel image is about 8M and it is not recommended to add such a big binary file to the repo.
-// Moreover only a very small portion of the original Kernel image was being parsed by debug/pe package.
-// In order to identify this portion, the original image was first parsed by modified debug/pe package.
-// Modification essentially communicated reader's positions before and after parsing.
-// Finally, bytes between those positions where written to a separate file,
-// generating trimmed down version Linux Kernel image used in this test case.
 internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTest>>(new fileTest[]{
     new(
         @file: "testdata/gcc-386-mingw-obj"u8,
@@ -226,6 +219,13 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
         }.slice()
     ),
     new(
+        // testdata/vmlinuz-4.15.0-47-generic is a trimmed down version of Linux Kernel image.
+        // The original Linux Kernel image is about 8M and it is not recommended to add such a big binary file to the repo.
+        // Moreover only a very small portion of the original Kernel image was being parsed by debug/pe package.
+        // In order to identify this portion, the original image was first parsed by modified debug/pe package.
+        // Modification essentially communicated reader's positions before and after parsing.
+        // Finally, bytes between those positions where written to a separate file,
+        // generating trimmed down version Linux Kernel image used in this test case.
         @file: "testdata/vmlinuz-4.15.0-47-generic"u8,
         hdr: new FileHeader(0x8664, 0x4, 0x0, 0x0, 0x1, 0xa0, 0x206),
         opthdr: Ꮡ(new OptionalHeader64(
@@ -285,6 +285,7 @@ internal static bool isOptHdrEq(any a, any b) {
 public static void TestOpen(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in fileTests) {
         var tt = Ꮡ(fileTests, i);
+
         var (f, err) = Open((~tt).@file);
         if (err != default!) {
             Ꮡt.Error(err);
@@ -298,6 +299,7 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("open %s:\n\thave %#v\n\twant %#v\n"u8, (~tt).@file, (~f).OptionalHeader, (~tt).opthdr);
             continue;
         }
+
         foreach (var (iΔ1, sh) in (~f).Sections) {
             if (iΔ1 >= len((~tt).sections)) {
                 break;
@@ -335,8 +337,6 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
 internal static readonly @string fileGoˢ = "file.go"u8;
 
 public static void TestOpenFailure(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string filename = fileGoˢ; // not a PE file
     var (_, err) = Open(filename); // don't crash
     if (err == default!) {
@@ -384,7 +384,9 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
             Ꮡt.Skip(skippingWindowsOnlyTestˢ);
         }
         testenv.MustHaveGoRun(new pe_internal_test_package.testing_TжTB(Ꮡt));
+
         @string tmpdir = Ꮡt.TempDir();
+
         @string src = filepath.Join(tmpdir, aGoˢ);
         var (@file, err) = os.Create(src);
         if (err != default!) {
@@ -405,6 +407,7 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
+
         @string exe = filepath.Join(tmpdir, aExeˢ);
         var args = new @string[]{"build"u8, "-o"u8, exe}.slice();
         var exprᴛ1 = linktype;
@@ -421,7 +424,6 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
         else { /* default: */
             Ꮡt.Fatalf("invalid linktype parameter of %v"u8, linktype);
         }
-
         args = append(args, src);
         (var @out, err) = exec.Command(testenv.GoToolPath(new pe_internal_test_package.testing_TжTB(Ꮡt)), args.ꓸꓸꓸ).CombinedOutput();
         if (err != default!) {
@@ -431,8 +433,9 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
         if (err != default!) {
             Ꮡt.Fatalf("running test executable failed: %s %s"u8, err, @out);
         }
-        Ꮡt.Logf("Testprog output:\n%s"u8, ((@string)@out));
-        var matches = regexp.MustCompile(offsetˢ).FindStringSubmatch(((@string)@out));
+        Ꮡt.Logf("Testprog output:\n%s"u8, (@string)@out);
+
+        var matches = regexp.MustCompile(offsetˢ).FindStringSubmatch((@string)@out);
         if (len(matches) < 2) {
             Ꮡt.Fatalf("unexpected program output: %s"u8, @out);
         }
@@ -440,13 +443,16 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
         if (err != default!) {
             Ꮡt.Fatalf("unexpected main offset %q: %s"u8, matches[1], err);
         }
+
         (var f, err) = Open(exe);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         var imageBase = getImageBase(f);
+
         bool foundDebugGDBScriptsSection = default!;
         foreach (var (_, sect) in (~f).Sections) {
             if ((~sect).Name == ".debug_gdb_scripts"u8) {
@@ -456,10 +462,12 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
         if (!foundDebugGDBScriptsSection) {
             Ꮡt.Error(debugGdbScriptsSectionIsˢ);
         }
+
         (var d, err) = f.DWARF();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         // look for main.main
         var r = d.Reader();
         while (ᐧ) {
@@ -508,7 +516,7 @@ main(void)
 	return 0;
 }
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string aObjˢ = "a.obj"u8;
 internal static readonly object couldNotFindBssSectionˢ = (@string)"could not find .bss section"u8;
 internal static readonly object bssDataSucceededExpectedˢ = (@string)"bss.Data succeeded, expected error"u8;
@@ -517,6 +525,7 @@ public static void TestBSSHasZeros(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveExec(new pe_internal_test_package.testing_TжTB(Ꮡt));
+
         if (runtime.GOOS != "windows"u8) {
             Ꮡt.Skip(skippingWindowsOnlyTestˢ);
         }
@@ -524,25 +533,30 @@ public static void TestBSSHasZeros(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Skip(skippingTestGccIsMissingˢ);
         }
+
         @string tmpdir = Ꮡt.TempDir();
+
         @string srcpath = filepath.Join(tmpdir, "a.c");
         @string src = includeStdioHIntZero0Intˢ;
         err = os.WriteFile(srcpath, slice<byte>(src), 420);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         @string objpath = filepath.Join(tmpdir, aObjˢ);
         var cmd = exec.Command(gccpath, "-c"u8, srcpath, "-o", objpath);
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build object file: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build object file: %v - %v"u8, err, (@string)@out);
         }
+
         (var f, err) = Open(objpath);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         ж<global::go.debug.pe_package.ΔSection> bss = default!;
         foreach (var (_, sect) in (~f).Sections) {
             if ((~sect).Name == ".bss"u8) {
@@ -621,7 +635,7 @@ func main() {
 	fmt.Printf("offset=0x%x\n", offset)
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string buildˢ = "build"u8;
@@ -632,10 +646,12 @@ public static void TestBuildingWindowsGUI(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveGoBuild(new pe_internal_test_package.testing_TжTB(Ꮡt));
+
         if (runtime.GOOS != "windows"u8) {
             Ꮡt.Skip(skippingWindowsOnlyTestˢ);
         }
         @string tmpdir = Ꮡt.TempDir();
+
         @string src = filepath.Join(tmpdir, aGoˢ);
         {
             var errΔ1 = os.WriteFile(src, slice<byte>(@"package main; func main() {}"u8), 420); if (errΔ1 != default!) {
@@ -648,12 +664,14 @@ public static void TestBuildingWindowsGUI(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("building test executable failed: %s %s"u8, err, @out);
         }
+
         (var f, err) = Open(exe);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         switch ((~f).OptionalHeader.type()) {
         case ж<global::go.debug.pe_package.OptionalHeader32> oh: {
             if ((~oh).Subsystem != IMAGE_SUBSYSTEM_WINDOWS_GUI) {
@@ -689,6 +707,7 @@ public static void TestImportTableInUnknownSection(ж<testing.T> Ꮡt) {
         if (runtime.GOOS != "windows"u8) {
             Ꮡt.Skip(skippingWindowsOnlyTestˢ2);
         }
+
         // ws2_32.dll import table is located in ".rdata" section,
         // so it is good enough to test issue #16103.
         @string filename = filenameᶜ;
@@ -696,17 +715,20 @@ public static void TestImportTableInUnknownSection(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("unable to locate required file %q in search path: %s"u8, filename, err);
         }
+
         (var f, err) = Open(path);
         if (err != default!) {
             Ꮡt.Error(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         // now we can extract its imports
         (var symbols, err) = f.ImportedSymbols();
         if (err != default!) {
             Ꮡt.Error(err);
         }
+
         if (len(symbols) == 0) {
             Ꮡt.Fatalf("unable to locate any imported symbols within file %q."u8, path);
         }
@@ -723,6 +745,7 @@ public static void TestInvalidOptionalHeaderMagic(ж<testing.T> Ꮡt) {
     // (see https://golang.org/issue/30250 and https://golang.org/issue/32126 for details).
     // Input generated by gofuzz
     var data = slice<byte>(((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x30, 0x30, 0x30, 0x30, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x30, 0x30, 0x30})) + "00000000000000000000" + ((@string)(new byte[]{0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x00, 0x00, 0x00, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + "00000000000000000000" + "0000000000000000");
+
     var (_, err) = NewFile(new pe_internal_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data)));
     if (err == default!) {
         Ꮡt.Fatal(newFileSucceededˢ);
@@ -734,45 +757,48 @@ internal static readonly @string testdataGccAmd64MingwObjˢ = "testdata/gcc-amd6
 internal static readonly object expectedFOptionalHeaderˢ = (@string)"expected f.OptionalHeader to be nil, received non-nil optional header"u8;
 
 public static void TestImportedSymbolsNoPanicMissingOptionalHeader(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // https://golang.org/issue/30250
     // ImportedSymbols shouldn't panic if optional headers is missing
     var (data, err) = os.ReadFile(testdataGccAmd64MingwObjˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var f, err) = NewFile(new pe_internal_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data)));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if ((~f).OptionalHeader != default!) {
         Ꮡt.Fatal(expectedFOptionalHeaderˢ);
     }
+
     (var syms, err) = f.ImportedSymbols();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (len(syms) != 0) {
         Ꮡt.Fatalf("expected len(syms) == 0, received len(syms) = %d"u8, len(syms));
     }
 }
 
 public static void TestImportedSymbolsNoPanicWithSliceOutOfBound(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // https://golang.org/issue/30253
     // ImportedSymbols shouldn't panic with slice out of bounds
     // Input generated by gofuzz
     var data = slice<byte>(((@string)(new byte[]{0x4c, 0x01, 0x08, 0x00, 0x72, 0x65, 0x67, 0x69, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x00, 0x0f, 0x03})) + ((@string)(new byte[]{0x0b, 0x01, 0x02, 0x18, 0x00, 0x0e, 0x00, 0x00, 0x00, 0x1e, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x80, 0x12, 0x00, 0x00})) + "\x00\x10\x00\x00\x00 \x00\x00\x00\x00@\x00\x00\x10\x00\x00\x00\x02\x00\x00" + ((@string)(new byte[]{0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x00, 0x00})) + "\x00\x04\x00\x00\x06S\x00\x00\x03\x00\x00\x00\x00\x00 \x00\x00\x10\x00\x00" + "\x00\x00\x10\x00\x00\x10\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00" + "\x00\x00\x00\x00\x00`\x00\x00x\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x80, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})) + ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb8, 0x60, 0x00, 0x00, 0x7c, 0x00, 0x00, 0x00})) + "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + ((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x2e, 0x74, 0x65, 0x78, 0x74, 0x00, 0x00, 0x00, 0x64, 0x0c, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00})) + "\x00\x0e\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + "`\x00P`.data\x00\x00\x00\x10\x00\x00\x00\x00 \x00\x00" + "\x00\x02\x00\x00\x00\x12\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + ((@string)(new byte[]{0x40, 0x00, 0x30, 0xc0, 0x2e, 0x72, 0x64, 0x61, 0x74, 0x61, 0x00, 0x00, 0x34, 0x01, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00})) + "\x00\x02\x00\x00\x00\x14\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + ((@string)(new byte[]{0x40, 0x00, 0x30, 0x40, 0x2e, 0x65, 0x68, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0xa0, 0x03, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00})) + "\x00\x04\x00\x00\x00\x16\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + ((@string)(new byte[]{0x40, 0x00, 0x30, 0x40, 0x2e, 0x62, 0x73, 0x73, 0x00, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x50, 0x00, 0x00})) + "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" + ((@string)(new byte[]{0x80, 0x00, 0x30, 0xc0, 0x2e, 0x69, 0x64, 0x61, 0x74, 0x61, 0x00, 0x00, 0x78, 0x03, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00})) + "\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00@\x00" + ((@string)(new byte[]{0x30, 0xc0, 0x2e, 0x43, 0x52, 0x54, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x70, 0x00, 0x00, 0x00, 0x02})) + "\x00\x00\x00\x1e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00@\x00" + ((@string)(new byte[]{0x30, 0xc0, 0x2e, 0x74, 0x6c, 0x73, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x02})) + ((@string)(new byte[]{0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x31, 0xc9})) + ((@string)(new byte[]{0x48, 0x89, 0x35, 0x1d})));
+
     var (f, err) = NewFile(new pe_internal_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data)));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var syms, err) = f.ImportedSymbols();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (len(syms) != 0) {
         Ꮡt.Fatalf("expected len(syms) == 0, received len(syms) = %d"u8, len(syms));
     }

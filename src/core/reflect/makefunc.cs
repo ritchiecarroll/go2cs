@@ -5,6 +5,7 @@
 namespace go;
 
 using abi = @internal.abi_package;
+using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
 using Δsync = sync_package;
@@ -17,7 +18,7 @@ partial class reflect_package {
 // methodValue and runtime.reflectMethodValue.
 // Any changes should be reflected in all three.
 partial struct makeFuncImpl {
-    internal partial ref makeFuncCtxt makeFuncCtxt { get; }
+    /*embed*/ internal makeFuncCtxt makeFuncCtxt;
     internal ж<funcType> ftyp;
     internal Func<slice<ΔValue>, slice<ΔValue>> fn;
 }
@@ -35,7 +36,7 @@ internal static partial void makeFuncStub();
 // makeFuncImpl and runtime.reflectMethodValue.
 // Any changes should be reflected in all three.
 partial struct methodValue {
-    internal partial ref makeFuncCtxt makeFuncCtxt { get; }
+    /*embed*/ internal makeFuncCtxt makeFuncCtxt;
     internal nint method;
     internal ΔValue rcvr;
 }
@@ -51,14 +52,18 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
     if ((flag)(v.flag & flagMethod) == 0) {
         throw panic("reflect: internal error: invalid use of makeMethodValue");
     }
+
     // Ignoring the flagMethod bit, v describes the receiver, not the method type.
     var fl = (flag)(v.flag & ((flag)((flag)(flagRO | flagAddr) | flagIndir)));
     fl |= (flag)(((flag)(uintptr)(uint8)v.typ().Kind()));
     ref var rcvr = ref heap<ΔValue>(out var Ꮡrcvr);
     rcvr = new ΔValue(v.typ(), v.ptr, fl);
+
     // v.Type returns the actual type of the method value.
     var ftyp = v.Type()._<ж<rtype>>().Reinterpret<rtype, abi.Type>().FuncType();
+
     var code = methodValueCallCodePtr();
+
     // methodValue contains a stack map for use by the runtime
     var (_, _, abid) = funcLayout(ftyp, nil);
     var fv = Ꮡ(new methodValue(
@@ -71,10 +76,12 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
         method: ((nint)(uintptr)v.flag >> (int)(flagMethodShift)),
         rcvr: rcvr
     ));
+
     // Cause panic if method is not appropriate.
     // The panic would still happen during the call if we omit this,
     // but we want Interface() and other operations to fail early.
     methodReceiver(op, (~fv).rcvr, (~fv).method);
+
     return new ΔValue(ftyp.of(funcType.ᏑType).Common(), @unsafe.Pointer.FromPinnedBox(fv), (flag)((flag)(v.flag & flagRO) | ((flag)(uintptr)(nuint)Func)));
 }
 
@@ -98,6 +105,9 @@ partial struct makeFuncCtxt {
     internal abi.IntArgRegBitmap regPtrs;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string alwaysIn0IntArgRegsˢ = "always in [0:IntArgRegs]"u8;
+
 // moveMakeFuncArgPtrs uses ctxt.regPtrs to copy integer pointer arguments
 // in args.Ints to args.Ptrs where the GC can see them.
 //
@@ -109,20 +119,22 @@ partial struct makeFuncCtxt {
 // memory.
 //
 //go:nosplit
-internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> Ꮡctxt, ж<abi.RegArgs> Ꮡargs) {
-    ref var ctxt = ref Ꮡctxt.DerefOrNull();
-    ref var args = ref Ꮡargs.DerefOrNull();
-
+internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> Ꮡctxt, ref abi.RegArgs args) {
     foreach (var (i, arg) in args.Ints.ΔRangeSnapshot()) {
         // Avoid write barriers! Because our write barrier enqueues what
         // was there before, we might enqueue garbage.
-        if (ctxt.regPtrs.Get(i)){
-            (Ꮡargs.at(abi.RegArgs.ᏑPtrs, i).Reinterpret<@unsafe.Pointer, uintptr>()).Value = arg;
+        // Also avoid bounds checks, we don't have the stack space for it.
+        // (Normally the prove pass removes them, but for -N builds we
+        // use too much stack.)
+        // ptr := &args.Ptrs[i] (but cast from *unsafe.Pointer to *uintptr)
+        var ptr = (ж<uintptr>)(uintptr)((uintptr)add(@unsafe.Pointer.FromBox(@unsafe.SliceData(args.Ptrs[..])), (uintptr)i * (uintptr)goarch.PtrSize, alwaysIn0IntArgRegsˢ));
+        if (Ꮡctxt.of(makeFuncCtxt.ᏑregPtrs).Get(i)){
+            ptr.Value = arg;
         } else {
             // We *must* zero this space ourselves because it's defined in
             // assembly code and the GC will scan these pointers. Otherwise,
             // there will be garbage here.
-            (Ꮡargs.at(abi.RegArgs.ᏑPtrs, i).Reinterpret<@unsafe.Pointer, uintptr>()).Value = 0;
+            ptr.Value = 0;
         }
     }
 }

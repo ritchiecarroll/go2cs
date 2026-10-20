@@ -28,7 +28,6 @@ public static void TestImplicitSetConversion(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct implementsTestsᴛ1 /*dyn*/ {
     internal any x;
     internal any t;
@@ -95,7 +94,6 @@ public static void TestImplements(ж<testing.T> Ꮡt) {
     }
 }
 
-// test runs implementsTests too
 internal static slice<implementsTestsᴛ1> assignableTests = new implementsTestsᴛ1[]{
     new(@new<channel<nint>>(), Ꮡ(/*<-*/channel<nint>.RecvOnly), true),
     new(Ꮡ(/*<-*/channel<nint>.RecvOnly), @new<channel<nint>>(), false),
@@ -103,6 +101,7 @@ internal static slice<implementsTestsᴛ1> assignableTests = new implementsTests
     new(@new<IntPtr>(), @new<ж<nint>>(), true),
     new(@new<IntPtr>(), @new<IntPtr1>(), false),
     new(@new<Ch>(), Ꮡ(/*<-*/channel<any>.RecvOnly), true)
+    // test runs implementsTests too
 }.slice();
 
 partial class IntPtr /*ж<nint>*/;

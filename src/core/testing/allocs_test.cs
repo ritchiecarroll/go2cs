@@ -9,7 +9,6 @@ partial class testing_test_package {
 
 internal static any global;
 
-
 partial struct allocsPerRunTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action fn;

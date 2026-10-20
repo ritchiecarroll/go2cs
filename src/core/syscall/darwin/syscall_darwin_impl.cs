@@ -5,9 +5,19 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// The syscall package's darwin keystone family — twelve bodyless declarations whose Go bodies are
-// runtime's assembly (`runtime·syscall`, `syscallX`, `syscallPtr`, `syscall6`, `syscall6X`,
-// `syscall9`, pushed here by //go:linkname), realized on golib's platform-neutral dispatcher.
+// The syscall package's darwin keystone family, realized on golib's platform-neutral dispatcher.
+//
+// GO 1.26. The runtime-provided family is now TWO bodyless declarations, `syscalln` and `rawsyscalln`
+// (runtime/sys_darwin.go's syscall_syscalln and syscall_rawsyscalln, pushed here by //go:linkname). Go
+// 1.26 gives syscall, syscallX, syscall6, syscall6X, syscall9, rawSyscall, rawSyscall6, rawSyscall9 and
+// syscallPtr Go bodies in syscall_darwin.go, which call those two and then apply errno, errnoX or
+// errnoPtr to the result. Those bodies are converted, so this file no longer carries them. The runtime
+// entry reads errno after EVERY call (`err = *errnoAddr`, success or not) and tests nothing itself, which
+// is golib's GoLibcErrnoRule.AlwaysRead. The cooked and raw forms differ only by entersyscall/exitsyscall,
+// which the managed host already discharges, so both are the same call here.
+//
+// The exported Syscall, Syscall6, Syscall9, RawSyscall and RawSyscall6 below keep their Go 1.24 shape:
+// one libc call applying Go's failure test to the result. Their notes follow, unchanged.
 //
 // On darwin `fn`/`trap` is not a syscall number but the address of a libc function — every generated
 // wrapper in zsyscall_darwin_amd64.cs passes FuncPCABI0(libc_<sym>_trampoline), which the class-B
@@ -29,6 +39,8 @@
 //
 // Hand-owned companion: these are `partial` bodies pairing with the bodyless declarations in
 // syscall_darwin.cs and syscall_darwin_amd64.cs, so no converter change and no corpus footprint.
+// syscall_darwin.cs's syscalln and rawsyscalln take `params Span<uintptr>`; the arity reaching golib is
+// the Go call's, at most nine.
 // Since darwin increment 10 (a) it also carries the two public doors (GoSyscall6X, GoSyscallPtr)
 // through which internal/syscall/unix's linkname pulls of the family reach the rules that have no
 // exported twin -- see the bottom of the file.
@@ -79,39 +91,33 @@ public static partial (uintptr r1, uintptr r2, Errno err) RawSyscall6(uintptr tr
     return call(trap, stackalloc nuint[] { a1, a2, a3, a4, a5, a6 }, GoLibcErrnoRule.Int32MinusOne);
 }
 
-// The runtime-provided family the generated wrappers call.
-internal static partial (uintptr r1, uintptr r2, Errno err) syscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    return call(fn, stackalloc nuint[] { a1, a2, a3 }, GoLibcErrnoRule.Int32MinusOne);
+// The Go 1.26 runtime entries every converted keystone in syscall_darwin.cs calls.
+internal static partial (uintptr r1, uintptr r2, Errno err) syscalln(uintptr fn, params Span<uintptr> argsʗp) {
+    return calln(fn, argsʗp);
 }
 
-internal static partial (uintptr r1, uintptr r2, Errno err) syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    return call(fn, stackalloc nuint[] { a1, a2, a3, a4, a5, a6 }, GoLibcErrnoRule.Int32MinusOne);
+internal static partial (uintptr r1, uintptr r2, Errno err) rawsyscalln(uintptr fn, params Span<uintptr> argsʗp) {
+    return calln(fn, argsʗp);
 }
 
-internal static partial (uintptr r1, uintptr r2, Errno err) syscall6X(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    return call(fn, stackalloc nuint[] { a1, a2, a3, a4, a5, a6 }, GoLibcErrnoRule.Int64MinusOne);
-}
+private static (uintptr r1, uintptr r2, Errno err) calln(uintptr fn, Span<uintptr> args) {
+    if (args.Length > GoLibcCall.MaxArgs) {
+        throw new ArgumentException($"go2cs: syscalln with {args.Length} arguments; the darwin family tops out at {GoLibcCall.MaxArgs}", nameof(args));
+    }
 
-internal static partial (uintptr r1, uintptr r2, Errno err) syscallX(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    return call(fn, stackalloc nuint[] { a1, a2, a3 }, GoLibcErrnoRule.Int64MinusOne);
-}
+    Span<nuint> words = stackalloc nuint[args.Length];
 
-internal static partial (uintptr r1, uintptr r2, Errno err) rawSyscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    return call(fn, stackalloc nuint[] { a1, a2, a3 }, GoLibcErrnoRule.Int32MinusOne);
-}
+    for (int i = 0; i < args.Length; i++) {
+        words[i] = args[i];
+    }
 
-internal static partial (uintptr r1, uintptr r2, Errno err) rawSyscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    return call(fn, stackalloc nuint[] { a1, a2, a3, a4, a5, a6 }, GoLibcErrnoRule.Int32MinusOne);
-}
-
-internal static partial (uintptr r1, uintptr r2, Errno err) syscallPtr(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    return call(fn, stackalloc nuint[] { a1, a2, a3 }, GoLibcErrnoRule.NullPointer);
+    return call(fn, words, GoLibcErrnoRule.AlwaysRead);
 }
 
 // The two failure rules that have no exported twin, opened for the //go:linkname PULLS
 // internal/syscall/unix makes of this family (its net_darwin_impl.cs, darwin increment 10 (a)):
-// the Go-prefixed PUBLIC helper per operation, the dispatcher staying private to this file.
-// Syscall/Syscall6/Syscall9 already serve the Int32MinusOne pulls, being the same call.
+// the Go-prefixed PUBLIC helper per operation. Since Go 1.26 each forwards to the converted Go body
+// in syscall_darwin.cs. Syscall/Syscall6/Syscall9 still serve the Int32MinusOne pulls.
 public static (uintptr r1, uintptr r2, Errno err) GoSyscall6X(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
     return syscall6X(fn, a1, a2, a3, a4, a5, a6);
 }

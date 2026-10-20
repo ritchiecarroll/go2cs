@@ -57,6 +57,12 @@ using static go.go.build_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -65,9 +71,9 @@ using static go.go.build_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/build.go", "build.cs", "AHHuAbKAgqSokoCCpKiSgIKkqJKAgqSCqtKAgriAgtyChICCpICCpNiSgoKClIKCgpSopICCgoKUgoKUpKiSgIKmgoKUrLKCgpSCqJKCgsqUAAwalJTcsoKCgoKmgoKCpvzmkoKCkoKUgIKCppSkABwygoSCgoCCpIKChAAHEoKWhIKClJSktpKClLamgoKClABRhgKyqqIACRSCAAoWlKaCgoKUpgAWIgARAqaCloKCgoKClJSkprSSlIKktoSCgoKClILKhoKCgIKCgoKCtoKCgoC4goCCgraCgIKC3IKCguyCloCCkoKmhq6CooKClIKCgoKCgoKCgoKUlIKClJSUgpSCgszKgoKUgoKCgoKCgoKCppS4goKCpoKCgoKCgoKUzIKCgoKCgoKCgqaYkoKCgpSClJSCgoKUgpSWgoKCgoKmloKClAAIFIKUqJaClIKWlJaCgpaCgqKClIKCqIKSgoKCgoKCgoKCgpSClKiChIKCgpSClJKSgpSouqKkgIKkppSCuoKCgoKCqIKCgoKWgoKSuO6CloKCgoKCkoKCkoLMgoKCgoKUgoKAgtyCkoKUgoKCgoKmxoKCgrSCgoK0goKCtIKCgqaCgqaCqIKUhIKChIKCuoKClIKWgpSClKaClKSkpKSkpKSkpKaCgpSCgoKCgoKmpgAHGAAPCITMgt6ClOqCgoKSgpiigoLegILKgILKgpiCgpSmgqamgoCCgoKClLaCgpSogoSClpKChIKClAAFEICCpoKClIKCpsyCgoKCpoKClIKCpq7igoKCpqa0goKoqIKWgpS0goKUlILGloKCloKogoKCmJKClIK0goKClIKUgoKCgpSCxpSs4paCgoKCgpSWgoKWAAISAAgCggAcUAAPAoSWgoKUhJSWgpaClJaCgpaCgoKmgpSCgqiCgpSCloKWpoKCgpSCqJKokqiEhJaCgpSCgtwAASYAFwiCgrqUgoKUtoKCgoKAgpSkgoKUgoKUgIKC/AACGAAMAoKCgoSCgoKAgpSkggAJEoKUkpaCgpSUgpaCgoKAgoKCpJSClIKCgqborOKCorqCgqiAgriCgqiCgpaSgoKCgoKmgqiCgpSigIKklpa2lKSkpKSkpLba2ISCgpSCgpSCggACHAALAoKCgoKUkoKClIIADyCCgpSCgIK2AAYkABECgoKCgoKCgpS0grSCgsaCgrSCgoKUtIKUgpSCkoKUAAIQ0oKUlIKClKaCAAYiAA4CgqiClIKUgpSClIKUgpSCqIKCpoKCpoKCqAACJAAPAgAHEoKClISCgIKkgoKUlJSClLiYogAFEtI=", "600-608:1;623-625:2;688-714:3;866-874:4;1942-1942:1", "", "1176=equal/1/2/1,equal/2/2/1;1505=HasPrefix/2/2/1;2142=HasPrefix/1/2/1,HasPrefix/2/2/1")]
+[assembly: global::go.GoPositionMap("go/build/build.go", "build.cs", "AHLuAbKAgqSokoCCpKiSgIKkqJKAgqSCqtKAgsiAguyClICCpICCpNiSgoKClIKCgpSopICCgoKUgoKUpKiSgIK2goKUrLKCgpSCqJKCgsqUAAwalJTcsoKCgoKmgoKCpvzmkoKCkoKUgIKCppSkABwygpSCgoCCpIKClAAIEoKmlIKClJSkxoKClLamgoKClAB3hgKyqqIACRSCAAoWlKaCgoKUpgAWIgATAqaCpoKCgoKClJSktpSSlIKkppSCgoKClILKhoKCgIKCgoKCtoKCgoC4goCCgraCgIKC7IKCguyCpoCCkoK2lr6CooKClIKCgoKCgoKCgoKUlIKClJSUgpSCgtzKgoKUgoKCgoKCgoKCppS4goKCpoKCgoKCgoKU3IKCgoKCgoKCgqaokoKCgpSClJSCgoKUgpSmgoKCgoKmpoKClAAJFIKUuKaClIKmlKaCgqaCgqKClIKCuIKSgoKCgoKCgoKCgpSClLiClIKCgpSCpIKSgpS42oKkgIKkpqSCyoKCgoKCuIKCgoKmgoKSuO6CpoKCgoKCkoKCkoLcgoKCgoKUgoKAguyCkoKUgoKCgoKmxoKCgrSCgoK0goKCpIKCgqaCgqaCuIKUlIKClIKCyoKClIKmgpSClKaClKSkpKSkpKSklKaCgpSCgoKCgoKmpgAHGAAPCITcgu6ClNqCgoKSgpiigoLugILagILagpiCgpSmgqamgoCCgoKClLaCgpS4gpSCppKClIKClAAGEICCtoKClIKCptyCgoKCruKCgoKmprSCgri4gqaClLSCgpSUgramgoKmgqiCgoKYkoKUgrSCgoKUgpSCgoKClIK2lKzipoKCgoKClKaCgqYAAhIACAKCABxQAA8ChKaCgpSUlKaCpoKUpoKCpoKCgqaClIKCuIKClIKmgqamgoKClIKokqiSqJSUloKClIKC3AABJgAXCIKCypSCgpS2goKCgoCClKSCgpSCgpSAgoL8AAIYAAwCgoKClIKCgoCClKSCAAgSgpSCpoKClJSCpoKCgoCCgoKklIKUgoKCpvis4oKSyoKCuICCyIKCuIKCppKCgoKCgqaCuIKClKKAgqSmpqaUpKSkpKSkptrYlIKClIKClIKCAAIcAAsCgoKCgpSSgoKUggAPIIKClIKAgrYABiQAEQKCgoKCgoKClLSCtIKCxoKCtIKCgpSkgpSClIKSgpQAAhDSgpSUgoKUpoIABiIADgKCuIKUgpSClIKUgpSClIK4AAImAA8CAAgSgoKUlIKAgqSCgpSUlIKUuJiiAAUS0g==", "600-608:1;623-625:2;688-714:3;866-874:4;1930-1930:1", "", "1256=Equal/1/2/1,Equal/2/2/1;1590=HasPrefix/2/2/1;2175=Contains/3/3/1;2235=HasPrefix/1/2/1,HasPrefix/2/2/1")]
 [assembly: global::go.GoPositionMap("go/build/gc.go", "gc.cs", "AAwekg==")]
-[assembly: global::go.GoPositionMap("go/build/read.go", "read.cs", "ACJElILKgIKkAAkUgqiCmJKCvKKCgoKCpoKCkoKUlKqigoKCgpSCgqiCgpKClJSCgoKUlKqigoCCpMyCgpSCppSCtoKCgqSCgoKClKaUgsaUgqiSgoKmmvqCgoKCgpS27IKSgpSCgoKCgpSUgoKmtoKCgpSCgoLagoKClIKCgoKClJSCgtqClIK2goKClJS2lIKCgqaClKaCgrQACAiqooKCgoKmgryigoKClIK8opSCgpSC2IKCgpSClILY3KKCgpKClAACHgAMAoKClJQABhTyhIKCgoKCgoKUlKiogrqCgoKUlIKWgqiCgpaCgoKClIKCgpSCgoKUpoKClIKWgoKUuoKClIKCAAsagoKCgoKCgoKUyoKCut7CgoKCpq7CgoKClJKCloKCgoKClIKCgoKmgraCgoKUtoKCgoKUgoKClIKCpoLYgoKCppQ=", "557-561:1;562-565:2")]
+[assembly: global::go.GoPositionMap("go/build/read.go", "read.cs", "ACJElILKgIKkAAkUgqiCmJKCvKKCgoKCpoKCkoKUlKiSgpSUgoKCgpKClM6igoCCpNyCgpSCppSCtoKCgqSCgoKClKaUgraUgqiSgoKqooKCgoKmgryigoKClIK8opSCgpSC2IKCgpSClILYzKKCgpKClAACHgAMAoKClJQABxTylIKCgoKCgoKUlLi4gsqCgoKUgqaCuIKCpoKCgoKUgoKClIKCgpSmgoKUgqaCgpTKgoKUgoIADBqCgoKCgoKCgoKUpoKC3N7CgoKCpqyygoKUgoKUgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -112,11 +118,11 @@ public static partial class build_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸparser() => builtin.initPackage(typeof(global::go.go.parser_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸscanner() => builtin.initPackage(typeof(global::go.go.scanner_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸbuildcfg() => builtin.initPackage(typeof(@internal.buildcfg_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(@internal.godebug_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgoroot() => builtin.initPackage(typeof(@internal.goroot_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸplatform() => builtin.initPackage(typeof(@internal.platform_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyslist() => builtin.initPackage(typeof(@internal.syslist_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸbuildcfg() => builtin.initPackage(typeof(global::go.@internal.buildcfg_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(global::go.@internal.godebug_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgoroot() => builtin.initPackage(typeof(global::go.@internal.goroot_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸplatform() => builtin.initPackage(typeof(global::go.@internal.platform_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyslist() => builtin.initPackage(typeof(global::go.@internal.syslist_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(global::go.io.fs_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));

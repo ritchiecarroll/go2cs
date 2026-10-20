@@ -9,6 +9,7 @@ using static go.sort_internal_test_package;
 
 partial class sort_test_package {
 
+// A couple of type definitions to make the units clear.
 partial struct earthMass /*num:float64*/;
 
 partial struct au /*num:float64*/;
@@ -20,15 +21,15 @@ partial struct Planet {
     internal au distance;
 }
 
+// By is the type of a "less" function that defines the ordering of its Planet arguments.
 public delegate bool By(ж<Planet> p1, ж<Planet> p2);
 
 // Sort is a method on the function type, By, that sorts the argument slice according to the function.
 public static void ΔSort(this By by, slice<Planet> planets) {
     var ps = Ꮡ(new planetSorter(
         planets: planets,
-        by: new Func<ж<Planet>, ж<Planet>, bool>(by)
+        by: new Func<ж<Planet>, ж<Planet>, bool>(by) // The Sort method's receiver is the function (closure) that defines the sort order.
     ));
-    // The Sort method's receiver is the function (closure) that defines the sort order.
     sort.Sort(new sort_test_package.planetSorterжInterface(ps));
 }
 
@@ -74,20 +75,24 @@ public static void Example_sortKeys() {
     var distance = (ж<Planet> p1, ж<Planet> p2) => (~p1).distance < (~p2).distance;
     var distanceʗ1 = distance;
     var decreasingDistance = (ж<Planet> p1, ж<Planet> p2) => distanceʗ1(p2, p1);
+
     // Sort the planets by the various criteria.
     NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(name).ΔSort(planets);
     fmt.Println(byNameˢ, planets);
+
     NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(mass).ΔSort(planets);
     fmt.Println(byMassˢ, planets);
+
     NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(distance).ΔSort(planets);
     fmt.Println(byDistanceˢ, planets);
+
     NilSafeDelegateConversion<By, Func<ж<Planet>, ж<Planet>, bool>>(decreasingDistance).ΔSort(planets);
     fmt.Println(byDecreasingDistanceˢ, planets);
-}
 
-// Output: By name: [{Earth 1 1} {Mars 0.107 1.5} {Mercury 0.055 0.4} {Venus 0.815 0.7}]
-// By mass: [{Mercury 0.055 0.4} {Mars 0.107 1.5} {Venus 0.815 0.7} {Earth 1 1}]
-// By distance: [{Mercury 0.055 0.4} {Venus 0.815 0.7} {Earth 1 1} {Mars 0.107 1.5}]
-// By decreasing distance: [{Mars 0.107 1.5} {Earth 1 1} {Venus 0.815 0.7} {Mercury 0.055 0.4}]
+    // Output: By name: [{Earth 1 1} {Mars 0.107 1.5} {Mercury 0.055 0.4} {Venus 0.815 0.7}]
+    // By mass: [{Mercury 0.055 0.4} {Mars 0.107 1.5} {Venus 0.815 0.7} {Earth 1 1}]
+    // By distance: [{Mercury 0.055 0.4} {Venus 0.815 0.7} {Earth 1 1} {Mars 0.107 1.5}]
+    // By decreasing distance: [{Mars 0.107 1.5} {Earth 1 1} {Venus 0.815 0.7} {Mercury 0.055 0.4}]
+}
 
 } // end sort_test_package

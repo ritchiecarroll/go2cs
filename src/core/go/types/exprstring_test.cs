@@ -12,15 +12,8 @@ using static global::go.go.types_internal_test_package;
 
 partial class types_test_package {
 
-// basic type literals
-// func and composite literals
-// type expressions
-// new interfaces
-// generic constraints
-// generic types
-// non-type expressions
-// generic functions
 internal static slice<testEntry> testExprs = new testEntry[]{
+    // basic type literals
     dup("x"u8),
     dup("true"u8),
     dup("42"u8),
@@ -30,9 +23,13 @@ internal static slice<testEntry> testExprs = new testEntry[]{
     dup(@"""foo"""u8),
     dup("`bar`"u8),
     dup("any"u8),
+
+    // func and composite literals
     new("func(){}"u8, "(func() literal)"u8),
     new("func(x int) complex128 {}"u8, "(func(x int) complex128 literal)"u8),
     new("[]int{1, 2, 3}"u8, "[]int{…}"u8),
+
+    // type expressions
     dup("[1 << 10]byte"u8),
     dup("[]int"u8),
     dup("*int"u8),
@@ -46,15 +43,23 @@ internal static slice<testEntry> testExprs = new testEntry[]{
     dup("chan E"u8),
     dup("<-chan E"u8),
     dup("chan<- E"u8),
+
+    // new interfaces
     dup("interface{int}"u8),
     dup("interface{~int}"u8),
+
+    // generic constraints
     dup("interface{~a | ~b | ~c; ~int | ~string; float64; m()}"u8),
     dup("interface{int | string}"u8),
     dup("interface{~int | ~string; float64; m()}"u8),
     dup("interface{~T[int, string] | string}"u8),
+
+    // generic types
     dup("x[T]"u8),
     dup("x[N | A | S]"u8),
     dup("x[N, A]"u8),
+
+    // non-type expressions
     dup("(x)"u8),
     dup("x.f"u8),
     dup("a[i]"u8),
@@ -91,6 +96,8 @@ internal static slice<testEntry> testExprs = new testEntry[]{
     dup("f(x, x + y)"u8),
     dup("f(s...)"u8),
     dup("f(a, s...)"u8),
+
+    // generic functions
     dup("f[T]()"u8),
     dup("f[T](T)"u8),
     dup("f[T, T1]()"u8),

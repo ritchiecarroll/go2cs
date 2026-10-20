@@ -300,6 +300,7 @@ public static void TestSwapPointer(ж<testing.T> Ꮡt) {
     x.before = magicptr;
     x.after = magicptr;
     @unsafe.Pointer j = default!;
+
     foreach (var (_, p) in testPointers()) {
         @unsafe.Pointer k = (uintptr)SwapPointer(Ꮡx.of(TestSwapPointer_x.Ꮡi), p);
         if (x.i != p || k != j) {
@@ -2076,7 +2077,7 @@ internal static map<@string, Action<ж<uint32>, nint>> hammer32 = new map<@strin
 };
 
 [GoInit] internal static void init() {
-    uint64 v = ((uint64)1 << (int)(50));
+    uint64 v = ((uint64)1 << 50);
     if ((uintptr)v != 0) {
         // 64-bit system; clear uintptr tests
         delete(hammer32, "SwapUintptr"u8);
@@ -2094,9 +2095,9 @@ internal static void hammerSwapInt32(ж<uint32> Ꮡuaddr, nint countʗp) {
     var addr = Ꮡuaddr.Reinterpret<uint32, int32>();
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uint32)(((uint32)(seed + i) << (int)(16)) | (((uint32)(seed + i) << (int)(16)) >> (int)(16)));
+        var @new = (uint32)(seed + i) << 16 | ((uint32)(seed + i) << 16) >> 16;
         var old = (uint32)SwapInt32(addr, (int32)@new);
-        if ((old >> (int)(16)) != ((old << (int)(16)) >> (int)(16))) {
+        if (old >> 16 != (old << 16) >> 16) {
             throw panic(fmt.Sprintf("SwapInt32 is not atomic: %v"u8, old));
         }
     }
@@ -2108,9 +2109,9 @@ internal static void hammerSwapInt32Method(ж<uint32> Ꮡuaddr, nint countʗp) {
     var addr = Ꮡuaddr.Reinterpret<uint32, atomic.Int32>();
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uint32)(((uint32)(seed + i) << (int)(16)) | (((uint32)(seed + i) << (int)(16)) >> (int)(16)));
+        var @new = (uint32)(seed + i) << 16 | ((uint32)(seed + i) << 16) >> 16;
         var old = (uint32)addr.Swap((int32)@new);
-        if ((old >> (int)(16)) != ((old << (int)(16)) >> (int)(16))) {
+        if (old >> 16 != (old << 16) >> 16) {
             throw panic(fmt.Sprintf("SwapInt32 is not atomic: %v"u8, old));
         }
     }
@@ -2121,9 +2122,9 @@ internal static void hammerSwapUint32(ж<uint32> Ꮡaddr, nint countʗp) {
 
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uint32)(((uint32)(seed + i) << (int)(16)) | (((uint32)(seed + i) << (int)(16)) >> (int)(16)));
+        var @new = (uint32)(seed + i) << 16 | ((uint32)(seed + i) << 16) >> 16;
         var old = SwapUint32(Ꮡaddr, @new);
-        if ((old >> (int)(16)) != ((old << (int)(16)) >> (int)(16))) {
+        if (old >> 16 != (old << 16) >> 16) {
             throw panic(fmt.Sprintf("SwapUint32 is not atomic: %v"u8, old));
         }
     }
@@ -2135,9 +2136,9 @@ internal static void hammerSwapUint32Method(ж<uint32> Ꮡuaddr, nint countʗp) 
     var addr = Ꮡuaddr.Reinterpret<uint32, atomic.Uint32>();
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uint32)(((uint32)(seed + i) << (int)(16)) | (((uint32)(seed + i) << (int)(16)) >> (int)(16)));
+        var @new = (uint32)(seed + i) << 16 | ((uint32)(seed + i) << 16) >> 16;
         var old = addr.Swap(@new);
-        if ((old >> (int)(16)) != ((old << (int)(16)) >> (int)(16))) {
+        if (old >> 16 != (old << 16) >> 16) {
             throw panic(fmt.Sprintf("SwapUint32 is not atomic: %v"u8, old));
         }
     }
@@ -2151,9 +2152,9 @@ internal static void hammerSwapUintptr32(ж<uint32> Ꮡuaddr, nint countʗp) {
     var addr = Ꮡuaddr.Reinterpret<uint32, uintptr>();
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uintptr)(((uintptr)(seed + i) << (int)(16)) | (((uintptr)(seed + i) << (int)(16)) >> (int)(16)));
+        var @new = (uintptr)((uintptr)(seed + i) << 16 | ((uintptr)(seed + i) << 16) >> 16);
         var old = SwapUintptr(addr, @new);
-        if ((old >> (int)(16)) != ((old << (int)(16)) >> (int)(16))) {
+        if (old >> 16 != (old << 16) >> 16) {
             throw panic(fmt.Sprintf("SwapUintptr is not atomic: %#08x"u8, old));
         }
     }
@@ -2167,9 +2168,9 @@ internal static void hammerSwapUintptr32Method(ж<uint32> Ꮡuaddr, nint countʗ
     var addr = Ꮡuaddr.Reinterpret<uint32, atomic.Uintptr>();
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uintptr)(((uintptr)(seed + i) << (int)(16)) | (((uintptr)(seed + i) << (int)(16)) >> (int)(16)));
+        var @new = (uintptr)((uintptr)(seed + i) << 16 | ((uintptr)(seed + i) << 16) >> 16);
         var old = addr.Swap(@new);
-        if ((old >> (int)(16)) != ((old << (int)(16)) >> (int)(16))) {
+        if (old >> 16 != (old << 16) >> 16) {
             throw panic(fmt.Sprintf("Uintptr.Swap is not atomic: %#08x"u8, old));
         }
     }
@@ -2307,6 +2308,7 @@ public static partial void TestHammer32(ж<testing.T> Ꮡt) {
             n = 1000;
         }
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS(p), ref ᒐ);
+
         foreach (var (name, testf) in hammer32) {
             var c = new channel<nint>(0);
             ref var val = ref heap(new uint32(), out var Ꮡval);
@@ -2365,7 +2367,7 @@ internal static map<@string, Action<ж<uint64>, nint>> hammer64 = new map<@strin
 };
 
 [GoInit] internal static void initΔ1() {
-    uint64 v = ((uint64)1 << (int)(50));
+    uint64 v = ((uint64)1 << 50);
     if ((uintptr)v == 0) {
         // 32-bit system; clear uintptr tests
         delete(hammer64, "SwapUintptr"u8);
@@ -2383,9 +2385,9 @@ internal static void hammerSwapInt64(ж<uint64> Ꮡuaddr, nint countʗp) {
     var addr = Ꮡuaddr.Reinterpret<uint64, int64>();
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uint64)(((uint64)(seed + i) << (int)(32)) | (((uint64)(seed + i) << (int)(32)) >> (int)(32)));
+        var @new = (uint64)(seed + i) << 32 | ((uint64)(seed + i) << 32) >> 32;
         var old = (uint64)SwapInt64(addr, (int64)@new);
-        if ((old >> (int)(32)) != ((old << (int)(32)) >> (int)(32))) {
+        if (old >> 32 != (old << 32) >> 32) {
             throw panic(fmt.Sprintf("SwapInt64 is not atomic: %v"u8, old));
         }
     }
@@ -2397,9 +2399,9 @@ internal static void hammerSwapInt64Method(ж<uint64> Ꮡuaddr, nint countʗp) {
     var addr = Ꮡuaddr.Reinterpret<uint64, atomic.Int64>();
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uint64)(((uint64)(seed + i) << (int)(32)) | (((uint64)(seed + i) << (int)(32)) >> (int)(32)));
+        var @new = (uint64)(seed + i) << 32 | ((uint64)(seed + i) << 32) >> 32;
         var old = (uint64)addr.Swap((int64)@new);
-        if ((old >> (int)(32)) != ((old << (int)(32)) >> (int)(32))) {
+        if (old >> 32 != (old << 32) >> 32) {
             throw panic(fmt.Sprintf("SwapInt64 is not atomic: %v"u8, old));
         }
     }
@@ -2410,9 +2412,9 @@ internal static void hammerSwapUint64(ж<uint64> Ꮡaddr, nint countʗp) {
 
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uint64)(((uint64)(seed + i) << (int)(32)) | (((uint64)(seed + i) << (int)(32)) >> (int)(32)));
+        var @new = (uint64)(seed + i) << 32 | ((uint64)(seed + i) << 32) >> 32;
         var old = SwapUint64(Ꮡaddr, @new);
-        if ((old >> (int)(32)) != ((old << (int)(32)) >> (int)(32))) {
+        if (old >> 32 != (old << 32) >> 32) {
             throw panic(fmt.Sprintf("SwapUint64 is not atomic: %v"u8, old));
         }
     }
@@ -2424,9 +2426,9 @@ internal static void hammerSwapUint64Method(ж<uint64> Ꮡuaddr, nint countʗp) 
     var addr = Ꮡuaddr.Reinterpret<uint64, atomic.Uint64>();
     nint seed = (nint)(uintptr)Ꮡcount;
     for (nint i = 0; i < count; i++) {
-        var @new = (uint64)(((uint64)(seed + i) << (int)(32)) | (((uint64)(seed + i) << (int)(32)) >> (int)(32)));
+        var @new = (uint64)(seed + i) << 32 | ((uint64)(seed + i) << 32) >> 32;
         var old = addr.Swap(@new);
-        if ((old >> (int)(32)) != ((old << (int)(32)) >> (int)(32))) {
+        if (old >> 32 != (old << 32) >> 32) {
             throw panic(fmt.Sprintf("SwapUint64 is not atomic: %v"u8, old));
         }
     }
@@ -2443,9 +2445,9 @@ internal static void hammerSwapUintptr64(ж<uint64> Ꮡuaddr, nint countʗp) {
         var addr = Ꮡuaddr.Reinterpret<uint64, uintptr>();
         nint seed = (nint)(uintptr)Ꮡcount;
         for (nint i = 0; i < count; i++) {
-            var @new = (uintptr)(((uintptr)(seed + i) << (int)(32)) | (((uintptr)(seed + i) << (int)(32)) >> (int)(32)));
+            var @new = (uintptr)((uintptr)(seed + i) << 32 | ((uintptr)(seed + i) << 32) >> 32);
             var old = SwapUintptr(addr, @new);
-            if ((old >> (int)(32)) != ((old << (int)(32)) >> (int)(32))) {
+            if (old >> 32 != (old << 32) >> 32) {
                 throw panic(fmt.Sprintf("SwapUintptr is not atomic: %v"u8, old));
             }
         }
@@ -2461,9 +2463,9 @@ internal static void hammerSwapUintptr64Method(ж<uint64> Ꮡuaddr, nint countʗ
         var addr = Ꮡuaddr.Reinterpret<uint64, atomic.Uintptr>();
         nint seed = (nint)(uintptr)Ꮡcount;
         for (nint i = 0; i < count; i++) {
-            var @new = (uintptr)(((uintptr)(seed + i) << (int)(32)) | (((uintptr)(seed + i) << (int)(32)) >> (int)(32)));
+            var @new = (uintptr)((uintptr)(seed + i) << 32 | ((uintptr)(seed + i) << 32) >> 32);
             var old = addr.Swap(@new);
-            if ((old >> (int)(32)) != ((old << (int)(32)) >> (int)(32))) {
+            if (old >> 32 != (old << 32) >> 32) {
                 throw panic(fmt.Sprintf("SwapUintptr is not atomic: %v"u8, old));
             }
         }
@@ -2599,6 +2601,7 @@ public static partial void TestHammer64(ж<testing.T> Ꮡt) {
             n = 1000;
         }
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS(p), ref ᒐ);
+
         foreach (var (name, testf) in hammer64) {
             var c = new channel<nint>(0);
             ref var val = ref heap(new uint64(), out var Ꮡval);
@@ -2638,12 +2641,12 @@ public static partial void TestHammer64(ж<testing.T> Ꮡt) {
 internal static void hammerStoreLoadInt32(ж<testing.T> Ꮡt, @unsafe.Pointer paddr) {
     var addr = (ж<int32>)(uintptr)(paddr);
     var v = LoadInt32(addr);
-    var vlo = (int32)(v & (((1 << (int)(16))) - 1));
-    var vhi = (v >> (int)(16));
+    var vlo = (int32)(v & ((1 << 16) - 1));
+    var vhi = v >> 16;
     if (vlo != vhi) {
         Ꮡt.Fatalf("Int32: %#x != %#x"u8, vlo, vhi);
     }
-    var @new = v + 1 + (int32)(1 << (int)(16));
+    var @new = v + 1 + (int32)(1 << 16);
     if (vlo == 10000) {
         @new = 0;
     }
@@ -2653,12 +2656,12 @@ internal static void hammerStoreLoadInt32(ж<testing.T> Ꮡt, @unsafe.Pointer pa
 internal static void hammerStoreLoadInt32Method(ж<testing.T> Ꮡt, @unsafe.Pointer paddr) {
     var addr = (ж<int32>)(uintptr)(paddr);
     var v = LoadInt32(addr);
-    var vlo = (int32)(v & (((1 << (int)(16))) - 1));
-    var vhi = (v >> (int)(16));
+    var vlo = (int32)(v & ((1 << 16) - 1));
+    var vhi = v >> 16;
     if (vlo != vhi) {
         Ꮡt.Fatalf("Int32: %#x != %#x"u8, vlo, vhi);
     }
-    var @new = v + 1 + (int32)(1 << (int)(16));
+    var @new = v + 1 + (int32)(1 << 16);
     if (vlo == 10000) {
         @new = 0;
     }
@@ -2668,12 +2671,12 @@ internal static void hammerStoreLoadInt32Method(ж<testing.T> Ꮡt, @unsafe.Poin
 internal static void hammerStoreLoadUint32(ж<testing.T> Ꮡt, @unsafe.Pointer paddr) {
     var addr = (ж<uint32>)(uintptr)(paddr);
     var v = LoadUint32(addr);
-    var vlo = (uint32)(v & (((1 << (int)(16))) - 1));
-    var vhi = (v >> (int)(16));
+    var vlo = (uint32)(v & ((1 << 16) - 1));
+    var vhi = v >> 16;
     if (vlo != vhi) {
         Ꮡt.Fatalf("Uint32: %#x != %#x"u8, vlo, vhi);
     }
-    var @new = v + 1 + ((uint32)1 << (int)(16));
+    var @new = v + 1 + ((uint32)1 << 16);
     if (vlo == 10000) {
         @new = 0;
     }
@@ -2683,12 +2686,12 @@ internal static void hammerStoreLoadUint32(ж<testing.T> Ꮡt, @unsafe.Pointer p
 internal static void hammerStoreLoadUint32Method(ж<testing.T> Ꮡt, @unsafe.Pointer paddr) {
     var addr = (ж<atomic.Uint32>)(uintptr)(paddr);
     var v = addr.Load();
-    var vlo = (uint32)(v & (((1 << (int)(16))) - 1));
-    var vhi = (v >> (int)(16));
+    var vlo = (uint32)(v & ((1 << 16) - 1));
+    var vhi = v >> 16;
     if (vlo != vhi) {
         Ꮡt.Fatalf("Uint32: %#x != %#x"u8, vlo, vhi);
     }
-    var @new = v + 1 + ((uint32)1 << (int)(16));
+    var @new = v + 1 + ((uint32)1 << 16);
     if (vlo == 10000) {
         @new = 0;
     }
@@ -2699,7 +2702,7 @@ internal static void hammerStoreLoadInt64(ж<testing.T> Ꮡt, @unsafe.Pointer pa
     var addr = (ж<int64>)(uintptr)(paddr);
     var v = LoadInt64(addr);
     var vlo = (int64)(v & (4294967295L));
-    var vhi = (v >> (int)(32));
+    var vhi = v >> 32;
     if (vlo != vhi) {
         Ꮡt.Fatalf("Int64: %#x != %#x"u8, vlo, vhi);
     }
@@ -2711,7 +2714,7 @@ internal static void hammerStoreLoadInt64Method(ж<testing.T> Ꮡt, @unsafe.Poin
     var addr = (ж<atomic.Int64>)(uintptr)(paddr);
     var v = addr.Load();
     var vlo = (int64)(v & (4294967295L));
-    var vhi = (v >> (int)(32));
+    var vhi = v >> 32;
     if (vlo != vhi) {
         Ꮡt.Fatalf("Int64: %#x != %#x"u8, vlo, vhi);
     }
@@ -2723,11 +2726,11 @@ internal static void hammerStoreLoadUint64(ж<testing.T> Ꮡt, @unsafe.Pointer p
     var addr = (ж<uint64>)(uintptr)(paddr);
     var v = LoadUint64(addr);
     var vlo = (uint64)(v & ((uint64)((4294967296L) - 1)));
-    var vhi = (v >> (int)(32));
+    var vhi = v >> 32;
     if (vlo != vhi) {
         Ꮡt.Fatalf("Uint64: %#x != %#x"u8, vlo, vhi);
     }
-    var @new = v + 1 + ((uint64)1 << (int)(32));
+    var @new = v + 1 + ((uint64)1 << 32);
     StoreUint64(addr, @new);
 }
 
@@ -2735,11 +2738,11 @@ internal static void hammerStoreLoadUint64Method(ж<testing.T> Ꮡt, @unsafe.Poi
     var addr = (ж<atomic.Uint64>)(uintptr)(paddr);
     var v = addr.Load();
     var vlo = (uint64)(v & ((uint64)((4294967296L) - 1)));
-    var vhi = (v >> (int)(32));
+    var vhi = v >> 32;
     if (vlo != vhi) {
         Ꮡt.Fatalf("Uint64: %#x != %#x"u8, vlo, vhi);
     }
-    var @new = v + 1 + ((uint64)1 << (int)(32));
+    var @new = v + 1 + ((uint64)1 << 32);
     addr.Store(@new);
 }
 
@@ -2748,18 +2751,18 @@ internal static void hammerStoreLoadUintptr(ж<testing.T> Ꮡt, @unsafe.Pointer 
     var v = LoadUintptr(addr);
     var @new = v;
     if (arch32){
-        var vlo = (uintptr)(v & (uintptr)(((1 << (int)(16))) - 1));
-        var vhi = (v >> (int)(16));
+        var vlo = (uintptr)(v & (uintptr)((1 << 16) - 1));
+        var vhi = v >> 16;
         if (vlo != vhi) {
             Ꮡt.Fatalf("Uintptr: %#x != %#x"u8, vlo, vhi);
         }
-        @new = v + 1 + ((uintptr)1 << (int)(16));
+        @new = v + 1 + ((uintptr)1 << 16);
         if (vlo == 10000) {
             @new = 0;
         }
     } else {
         var vlo = (uintptr)(v & (uintptr)((uintptr)((4294967296L) - 1)));
-        var vhi = (v >> (int)(32));
+        var vhi = v >> 32;
         if (vlo != vhi) {
             Ꮡt.Fatalf("Uintptr: %#x != %#x"u8, vlo, vhi);
         }
@@ -2775,18 +2778,18 @@ internal static void hammerStoreLoadUintptrMethod(ж<testing.T> Ꮡt, @unsafe.Po
     var v = addr.Load();
     var @new = v;
     if (arch32){
-        var vlo = (uintptr)(v & (uintptr)(((1 << (int)(16))) - 1));
-        var vhi = (v >> (int)(16));
+        var vlo = (uintptr)(v & (uintptr)((1 << 16) - 1));
+        var vhi = v >> 16;
         if (vlo != vhi) {
             Ꮡt.Fatalf("Uintptr: %#x != %#x"u8, vlo, vhi);
         }
-        @new = v + 1 + ((uintptr)1 << (int)(16));
+        @new = v + 1 + ((uintptr)1 << 16);
         if (vlo == 10000) {
             @new = 0;
         }
     } else {
         var vlo = (uintptr)(v & (uintptr)((uintptr)((4294967296L) - 1)));
-        var vhi = (v >> (int)(32));
+        var vhi = v >> 32;
         if (vlo != vhi) {
             Ꮡt.Fatalf("Uintptr: %#x != %#x"u8, vlo, vhi);
         }
@@ -2805,18 +2808,18 @@ internal static void hammerStoreLoadPointer(ж<testing.T> Ꮡt, @unsafe.Pointer 
     var v = (uintptr)(uintptr)LoadPointer(addr);
     var @new = v;
     if (arch32){
-        var vlo = (uintptr)(v & (uintptr)(((1 << (int)(16))) - 1));
-        var vhi = (v >> (int)(16));
+        var vlo = (uintptr)(v & (uintptr)((1 << 16) - 1));
+        var vhi = v >> 16;
         if (vlo != vhi) {
             Ꮡt.Fatalf("Pointer: %#x != %#x"u8, vlo, vhi);
         }
-        @new = v + 1 + ((uintptr)1 << (int)(16));
+        @new = v + 1 + ((uintptr)1 << 16);
         if (vlo == 10000) {
             @new = 0;
         }
     } else {
         var vlo = (uintptr)(v & (uintptr)((uintptr)((4294967296L) - 1)));
-        var vhi = (v >> (int)(32));
+        var vhi = v >> 32;
         if (vlo != vhi) {
             Ꮡt.Fatalf("Pointer: %#x != %#x"u8, vlo, vhi);
         }
@@ -2835,18 +2838,18 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
     var v = (uintptr)addr.Load();
     var @new = v;
     if (arch32){
-        var vlo = (uintptr)(v & (uintptr)(((1 << (int)(16))) - 1));
-        var vhi = (v >> (int)(16));
+        var vlo = (uintptr)(v & (uintptr)((1 << 16) - 1));
+        var vhi = v >> 16;
         if (vlo != vhi) {
             Ꮡt.Fatalf("Pointer: %#x != %#x"u8, vlo, vhi);
         }
-        @new = v + 1 + ((uintptr)1 << (int)(16));
+        @new = v + 1 + ((uintptr)1 << 16);
         if (vlo == 10000) {
             @new = 0;
         }
     } else {
         var vlo = (uintptr)(v & (uintptr)((uintptr)((4294967296L) - 1)));
-        var vhi = (v >> (int)(32));
+        var vhi = v >> 32;
         if (vlo != vhi) {
             Ꮡt.Fatalf("Pointer: %#x != %#x"u8, vlo, vhi);
         }
@@ -2859,8 +2862,6 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
 public static partial void TestHammerStoreLoad(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var tests = new Action<ж<testing.T>, @unsafe.Pointer>[]{
             hammerStoreLoadInt32, hammerStoreLoadUint32,
             hammerStoreLoadUintptr, hammerStoreLoadPointer,
@@ -3117,6 +3118,7 @@ internal static void shouldPanic(ж<testing.T> Ꮡt, @string name, Action f) {
         defer(() => {
             // Check that all GC maps are sane.
             runtime.GC();
+
             var err = recover();
             @string want = unaligned64BitAtomicˢ;
             if (err == default!){
@@ -3151,8 +3153,10 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     if (!arch32) {
         Ꮡt.Skip(testOnlyRunsOn32Bitˢ);
     }
+
     var x = new slice<uint32>(4);
     var p = Ꮡ(x, 1).Reinterpret<uint32, uint64>(); // misaligned
+
     var pʗ1 = p;
     shouldPanic(Ꮡt, loadUint64ˢ, () => {
         LoadUint64(pʗ1);
@@ -3209,6 +3213,7 @@ public static void TestAutoAligned64(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Int64 pointer = %#x, want 8-aligned"u8, p);
         }
     }
+
     ref var unsigned = ref heap(new TestAutoAligned64_unsigned(), out var Ꮡunsigned);
     {
         var o = reflect.TypeOf(Ꮡunsigned).Elem().Field(1).Offset; if (o != 8) {

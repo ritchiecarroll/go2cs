@@ -28,8 +28,6 @@ internal partial struct testCase {
     internal slice<@string> patterns; // patterns to lookup
 }
 
-// 10 a's
-// 11 a's
 internal static slice<testCase> testCases = new testCase[]{
     new(
         "empty string"u8,
@@ -44,7 +42,7 @@ internal static slice<testCase> testCases = new testCase[]{
     ),
     new(
         "all a's"u8,
-        "aaaaaaaaaa"u8,
+        "aaaaaaaaaa"u8, // 10 a's
         new @string[]{
             ""u8,
             "a"u8,
@@ -57,7 +55,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "aaaaaaaa"u8,
             "aaaaaaaaa"u8,
             "aaaaaaaaaa"u8,
-            "aaaaaaaaaaa"u8,
+            "aaaaaaaaaaa"u8, // 11 a's
             "."u8,
             ".*"u8,
             "a+"u8,
@@ -133,14 +131,17 @@ internal static void testLookup(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<globa
 
     var res = Ꮡx.Lookup(slice<byte>(s), n);
     var exp = find(tc.source, s, n);
+
     // check that the lengths match
     if (builtin.len(res) != builtin.len(exp)) {
         Ꮡt.Errorf("test %q, lookup %q (n = %d): expected %d results; got %d"u8, tc.name, s, n, builtin.len(exp), builtin.len(res));
     }
+
     // if n >= 0 the number of results is limited --- unless n >= all results,
     // we may obtain different positions from the Index and from find (because
     // Index may not find the results in the same order as find) => in general
     // we cannot simply check that the res and exp lists are equal
+
     // check that each result is in fact a correct match and there are no duplicates
     slices.Sort<slice<nint>, nint>(res);
     foreach (var (i, r) in res) {
@@ -154,6 +155,7 @@ internal static void testLookup(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<globa
             Ꮡt.Errorf("test %q, lookup %q, result %d (n = %d): found duplicate index %d"u8, tc.name, s, i, n, r);
         }
     }
+
     if (n < 0) {
         // all results computed - sorted res and exp must be equal
         foreach (var (i, r) in res) {
@@ -170,14 +172,17 @@ internal static void testFindAllIndex(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж
 
     var res = Ꮡx.FindAllIndex(Ꮡrx, n);
     var exp = Ꮡrx.FindAllStringIndex(tc.source, n);
+
     // check that the lengths match
     if (builtin.len(res) != builtin.len(exp)) {
         Ꮡt.Errorf("test %q, FindAllIndex %q (n = %d): expected %d results; got %d"u8, tc.name, Ꮡrx.OrTypedNil(), n, builtin.len(exp), builtin.len(res));
     }
+
     // if n >= 0 the number of results is limited --- unless n >= all results,
     // we may obtain different positions from the Index and from regexp (because
     // Index may not find the results in the same order as regexp) => in general
     // we cannot simply check that the res and exp lists are equal
+
     // check that each result is in fact a correct match and the result is sorted
     foreach (var (i, r) in res) {
         if (r[0] < 0 || r[0] > r[1] || builtin.len(tc.source) < r[1]){
@@ -187,6 +192,7 @@ internal static void testFindAllIndex(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж
             Ꮡt.Errorf("test %q, FindAllIndex %q, result %d (n = %d): [%d, %d] not a match"u8, tc.name, Ꮡrx.OrTypedNil(), i, n, r[0], r[1]);
         }
     }
+
     if (n < 0) {
         // all results computed - sorted res and exp must be equal
         foreach (var (i, r) in res) {
@@ -212,6 +218,7 @@ internal static void testLookups(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<glob
     }
 }
 
+// index is used to hide the sort.Interface
 internal partial struct index /*global::go.index.suffixarray_package.Index*/;
 
 internal static nint Len(this ref index x) {
@@ -285,6 +292,7 @@ internal static nint testSaveRestore(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<
         if (!equal(Ꮡx, Ꮡy)) {
             Ꮡt.Errorf("restored index doesn't match saved index %s"u8, tc.name);
         }
+
         nint old = maxData32;
         defer(() => {
             maxData32 = old;
@@ -300,6 +308,7 @@ internal static nint testSaveRestore(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<
         if (!equal(Ꮡx, Ꮡy)) {
             Ꮡt.Errorf("restored index doesn't match saved index %s"u8, tc.name);
         }
+
         // Reread as forced 64.
         y = new Index(nil);
         maxData32 = -1;
@@ -311,6 +320,7 @@ internal static nint testSaveRestore(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<
         if (!equal(Ꮡx, Ꮡy)) {
             Ꮡt.Errorf("restored index doesn't match saved index %s"u8, tc.name);
         }
+
         return size;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -397,6 +407,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         }
         testSA(tΔ1, x, build);
     });
+
     Ꮡt.Run(forceallocˢ, (ж<testing.T> tΔ2) => {
         // Construct a pathological input that forces
         // recurse_32 to allocate a new temporary buffer.
@@ -430,6 +441,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         x.slice(0, cap(x))[builtin.len(x)] = 0; // for sais.New
         testSA(tΔ2, x, build);
     });
+
     Ꮡt.Run(exhaustive2ˢ, (ж<testing.T> tΔ3) => {
         // All inputs over {0,1} up to length 21.
         // Runs in about 10 seconds on my laptop.
@@ -444,6 +456,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
             testRec(tΔ3, x.slice(0, n), 0, 2, ᏑnumFail, build);
         }
     });
+
     Ꮡt.Run(exhaustive3ˢ, (ж<testing.T> tΔ4) => {
         // All inputs over {0,1,2} up to length 14.
         // Runs in about 10 seconds on my laptop.
@@ -471,6 +484,7 @@ internal static void testRec(ж<testing.T> Ꮡt, slice<byte> x, nint i, nint max
         }
         return;
     }
+
     if (!testSA(Ꮡt, x, build)) {
         numFail++;
         if (numFail >= 10) {
@@ -509,6 +523,7 @@ internal static bool testSA(ж<testing.T> Ꮡt, slice<byte> x, Func<slice<byte>,
                 return false;
             }
         }
+
         return true;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -579,7 +594,6 @@ internal static (slice<byte>, error) makeText(@string name) {
             data[i] = (byte)rand.Intn(256);
         }
     }
-
     return (data, default!);
 }
 
@@ -602,7 +616,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
                 bΔ1.Fatal(err);
             }
             if (testing.Short() && builtin.len(data) > 5000000) {
-                data = data[..(int)(5000000)];
+                data = data[..(int)5000000];
             }
             foreach (var (_, size) in new nint[]{100000, 500000, 1000000, 5000000, 10000000, 50000000}.slice()) {
                 if (builtin.len(data) < size) {
@@ -626,6 +640,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
                                 var cleanup = setBits(bits);
                                 var cleanupʗ1 = cleanup;
                                 defer(cleanupʗ1, ref ᒐ);
+
                                 bΔ3.SetBytes((int64)builtin.len(dataʗ2));
                                 bΔ3.ReportAllocs();
                                 for (nint i = 0; i < (~bΔ3).N; i++) {
@@ -644,7 +659,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkSaveRestore(ж<testing.B> Ꮡb) {
     var r = rand.New(rand.NewSource(0x5a77a1)); // guarantee always same sequence
-    var data = new slice<byte>((1 << (int)(20))); // 1MB of data to index
+    var data = new slice<byte>((1 << 20)); // 1MB of data to index
     foreach (var (i, _) in data) {
         data[i] = (byte)r.Intn(256);
     }
@@ -659,6 +674,7 @@ public static void BenchmarkSaveRestore(ж<testing.B> Ꮡb) {
                 var cleanup = setBits(bits);
                 var cleanupʗ1 = cleanup;
                 defer(cleanupʗ1, ref ᒐ);
+
                 bΔ1.StopTimer();
                 var x = New(dataʗ1);
                 nint size = testSaveRestore(nil, nil, x); // verify correctness

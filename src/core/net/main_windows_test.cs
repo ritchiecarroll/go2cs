@@ -12,6 +12,7 @@ using syscall = syscall_package;
 
 partial class net_internal_test_package {
 
+// Placeholders for saving original socket system calls.
 internal static Func<int32, int32, int32, ж<syscall.WSAProtocolInfo>, uint32, uint32, (syscallꓸHandle, error)> origWSASocket;
 internal static void initᴛorigWSASocket() { origWSASocket = wsaSocketFunc; }
 internal static Func<syscallꓸHandle, error> origClosesocket = poll.CloseFunc;

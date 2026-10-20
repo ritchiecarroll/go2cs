@@ -74,6 +74,12 @@ public static @string ImportPath(this TestDeps _) {
     return ΔImportPath;
 }
 
+public static @string ΔModulePath;
+
+public static @string ModulePath(this TestDeps _) {
+    return ΔModulePath;
+}
+
 // testLog implements testlog.Interface, logging actions by package os.
 partial struct testLog {
     internal sync.Mutex mu;
@@ -119,6 +125,7 @@ internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
         if (strings.Contains(name, "\n"u8) || name == ""u8) {
             return;
         }
+
         l.mu.Lock();
         ᒐd1 = true;
         if (l.w == nil) {
@@ -252,9 +259,7 @@ public static slice<@string> CoverSelectedPackages;
 // things this way allows us to have tests import internal/coverage/cfile
 // only when -cover is in effect (as opposed to importing for all tests).
 public static Func<float64> CoverSnapshotFunc;
-
 public static Func<@string, @string, @string, @string, io.Writer, slice<@string>, error> CoverProcessTestDirFunc;
-
 public static Action<bool> CoverMarkProfileEmittedFunc;
 
 public static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) {

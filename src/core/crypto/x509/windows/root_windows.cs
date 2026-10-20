@@ -5,6 +5,7 @@ namespace go.crypto;
 
 using bytes = bytes_package;
 using errors = errors_package;
+using slices = slices_package;
 using strings = strings_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
@@ -29,20 +30,24 @@ internal static (ж<syscall.CertContext>, error) createStoreContext(ж<Certifica
         ref var leaf = ref Ꮡleaf.DerefOrNull();
 
         ref var storeCtx = ref heap<ж<syscall.CertContext>>(out var ᏑstoreCtx);
+
         var (leafCtx, err) = syscall.CertCreateCertificateContext((uint32)((uint32)syscall.X509_ASN_ENCODING | (uint32)syscall.PKCS_7_ASN_ENCODING), Ꮡ(leaf.Raw, 0), (uint32)builtin.len(leaf.Raw));
         if (err != default!) {
             return (default!, err);
         }
         defer(syscall.CertFreeCertificateContext, leafCtx, ref ᒐ);
+
         (var handle, err) = syscall.CertOpenStore(syscall.CERT_STORE_PROV_MEMORY, 0, 0, syscall.CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG, 0);
         if (err != default!) {
             return (default!, err);
         }
-        defer(syscall.CertCloseStore, handle, (uint32)(0), ref ᒐ);
+        defer(syscall.CertCloseStore, handle, (uint32)0, ref ᒐ);
+
         err = syscall.CertAddCertificateContextToStore(handle, leafCtx, syscall.CERT_STORE_ADD_ALWAYS, ᏑstoreCtx);
         if (err != default!) {
             return (default!, err);
         }
+
         if (opts.Intermediates != nil) {
             for (nint i = 0; i < opts.Intermediates.len(); i++) {
                 var (intermediate, _, errΔ1) = opts.Intermediates.cert(i);
@@ -53,6 +58,7 @@ internal static (ж<syscall.CertContext>, error) createStoreContext(ж<Certifica
                 if (errΔ1 != default!) {
                     return (default!, errΔ1);
                 }
+
                 errΔ1 = syscall.CertAddCertificateContextToStore(handle, ctx, syscall.CERT_STORE_ADD_ALWAYS, nil);
                 syscall.CertFreeCertificateContext(ctx);
                 if (errΔ1 != default!) {
@@ -60,6 +66,7 @@ internal static (ж<syscall.CertContext>, error) createStoreContext(ж<Certifica
                 }
             }
         }
+
         return (storeCtx, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -76,6 +83,7 @@ internal static (slice<ж<Certificate>> chain, error err) extractSimpleChain(ж<
     if (ᏑsimpleChain == nil || count == 0) {
         return (default!, errors.New(x509InvalidSimpleChainˢ));
     }
+
     var simpleChains = @unsafe.Slice(ᏑsimpleChain, count);
     var lastChain = simpleChains[count - 1];
     var elements = @unsafe.Slice((~lastChain).Elements, (~lastChain).NumElements);
@@ -90,6 +98,7 @@ internal static (slice<ж<Certificate>> chain, error err) extractSimpleChain(ж<
         }
         chain = append(chain, parsedCert);
     }
+
     return (chain, default!);
 }
 
@@ -105,11 +114,10 @@ internal static error checkChainTrustStatus(ж<Certificate> Ꮡc, ref syscall.Ce
         if (exprᴛ1 == syscall.CERT_TRUST_IS_NOT_VALID_FOR_USAGE) {
             return new CertificateInvalidError(Ꮡc, IncompatibleUsage, ""u8);
         }
+        // TODO(filippo): surface more error statuses.
         { /* default: */
-            return new UnknownAuthorityError( // TODO(filippo): surface more error statuses.
-Ꮡc, default!, nil);
+            return new UnknownAuthorityError(Ꮡc, default!, nil);
         }
-
     }
     return default!;
 }
@@ -117,8 +125,6 @@ internal static error checkChainTrustStatus(ж<Certificate> Ꮡc, ref syscall.Ce
 // checkChainSSLServerPolicy checks that the certificate chain in chainCtx is valid for
 // use as a certificate chain for a SSL/TLS server.
 internal static error checkChainSSLServerPolicy(ж<Certificate> Ꮡc, ж<syscall.CertChainContext> ᏑchainCtx, ref VerifyOptions opts) {
-    ref var c = ref Ꮡc.DerefOrNull();
-
     var (servernamep, err) = syscall.UTF16PtrFromString(strings.TrimSuffix(opts.DNSName, "."u8));
     if (err != default!) {
         return err;
@@ -128,16 +134,19 @@ internal static error checkChainSSLServerPolicy(ж<Certificate> Ꮡc, ж<syscall
         ServerName: servernamep
     ));
     sslPara.Value.Size = (uint32)/* unsafe.Sizeof(*sslPara) */ (uintptr)24;
+
     var para = Ꮡ(new syscall.CertChainPolicyPara(
         ExtraPolicyPara: ((syscall.Pointer)ManagedPointerTokens.MintOpaque(sslPara))
     ));
     para.Value.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)16;
+
     ref var status = ref heap<syscall.CertChainPolicyStatus>(out var Ꮡstatus);
     status = new syscall.CertChainPolicyStatus(nil);
     err = syscall.CertVerifyCertificateChainPolicy(syscall.CERT_CHAIN_POLICY_SSL, ᏑchainCtx, para, Ꮡstatus);
     if (err != default!) {
         return err;
     }
+
     // TODO(mkrautz): use the lChainIndex and lElementIndex fields
     // of the CertChainPolicyStatus to provide proper context, instead
     // using c.
@@ -155,8 +164,8 @@ internal static error checkChainSSLServerPolicy(ж<Certificate> Ꮡc, ж<syscall
         { /* default: */
             return new UnknownAuthorityError(Ꮡc, default!, nil);
         }
-
     }
+
     return default!;
 }
 
@@ -165,7 +174,7 @@ internal static error checkChainSSLServerPolicy(ж<Certificate> Ꮡc, ж<syscall
 internal static map<ExtKeyUsage, slice<byte>> windowsExtKeyUsageOIDs;
 internal static void initᴛwindowsExtKeyUsageOIDs() { windowsExtKeyUsageOIDs = new map<ExtKeyUsage, slice<byte>>(builtin.len(extKeyUsageOIDs)); }
 
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     foreach (var (_, eku) in extKeyUsageOIDs) {
         windowsExtKeyUsageOIDs[eku.extKeyUsage] = slice<byte>(eku.oid.String() + "\x00");
     }
@@ -177,19 +186,21 @@ internal static readonly @string x509InternalErrorSystemˢ = "x509: internal err
 internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certificate> Ꮡc, ж<syscall.CertChainContext> ᏑchainCtx, ж<VerifyOptions> Ꮡopts) {
     slice<ж<Certificate>> chain = default!;
     error err = default!;
-
     ref var chainCtx = ref ᏑchainCtx.DerefOrNull();
     ref var opts = ref Ꮡopts.DerefOrNull();
+
     err = checkChainTrustStatus(Ꮡc, ref (ᏑchainCtx).DerefOrNull());
     if (err != default!) {
         return (default!, err);
     }
+
     if (Ꮡopts != nil && builtin.len(opts.DNSName) > 0) {
         err = checkChainSSLServerPolicy(Ꮡc, ᏑchainCtx, ref (Ꮡopts).DerefOrNull());
         if (err != default!) {
             return (default!, err);
         }
     }
+
     (chain, err) = extractSimpleChain(chainCtx.Chains, (nint)chainCtx.ChainCount);
     if (err != default!) {
         return (default!, err);
@@ -197,6 +208,7 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
     if (builtin.len(chain) == 0) {
         return (default!, errors.New(x509InternalErrorSystemˢ));
     }
+
     // Mitigate CVE-2020-0601, where the Windows system verifier might be
     // tricked into using custom curve parameters for a trusted root, by
     // double-checking all ECDSA signatures. If the system was tricked into
@@ -230,8 +242,10 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             (chains, err) = (default!, err); goto ᒐdone;
         }
         defer(syscall.CertFreeCertificateContext, storeCtx, ref ᒐ);
+
         var para = @new<syscall.CertChainPara>();
         para.Value.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)80;
+
         var keyUsages = opts.KeyUsages;
         if (builtin.len(keyUsages) == 0) {
             keyUsages = new ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice();
@@ -257,27 +271,32 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             para.Value.RequestedUsage.Usage.Length = 0;
             para.Value.RequestedUsage.Usage.UsageIdentifiers = default!;
         }
+
         ж<syscall.Filetime> verifyTime = default!;
         if (Ꮡopts != nil && !opts.CurrentTime.IsZero()) {
             ref var ft = ref heap<syscall.Filetime>(out var Ꮡft);
             ft = syscall.NsecToFiletime(opts.CurrentTime.UnixNano());
             verifyTime = Ꮡft;
         }
+
         // The default is to return only the highest quality chain,
         // setting this flag will add additional lower quality contexts.
         // These are returned in the LowerQualityChains field.
         const uint32 CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS = 0x00000080;
+
         // CertGetCertificateChain will traverse Windows's root stores in an attempt to build a verified certificate chain
         ref var topCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑtopCtx);
-        err = syscall.CertGetCertificateChain(((syscallꓸHandle)0), storeCtx, verifyTime, (~storeCtx).Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);
+        err = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, verifyTime, (~storeCtx).Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);
         if (err != default!) {
             (chains, err) = (default!, err); goto ᒐdone;
         }
         defer(syscall.CertFreeCertificateChain, topCtx, ref ᒐ);
+
         var (chain, topErr) = verifyChain(Ꮡc, topCtx, Ꮡopts);
         if (topErr == default!) {
             chains = append(chains, chain);
         }
+
         {
             var lqCtxCount = topCtx.Value.LowerQualityChainCount; if (lqCtxCount > 0) {
                 var lqCtxs = @unsafe.Slice((~topCtx).LowerQualityChains, lqCtxCount);
@@ -289,10 +308,17 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
                 }
             }
         }
+
+        chains = slices.DeleteFunc<slice<slice<ж<Certificate>>>, slice<ж<Certificate>>>(chains, containsDistrustedSPKIHash);
+
         if (builtin.len(chains) == 0) {
+            if (topErr == default!) {
+                (chains, err) = (default!, new CertificateInvalidError(Ꮡc, NoValidChains, ""u8)); goto ᒐdone;
+            }
             // Return the error from the highest quality context.
             (chains, err) = (default!, topErr); goto ᒐdone;
         }
+
         (chains, err) = (chains, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -14,10 +14,13 @@ partial class fs_package {
 //
 //	-rw-r--r-- 100 1970-01-01 12:00:00 hello.go
 public static @string FormatFileInfo(FileInfo info) {
+    var bᴷ = new stackAppend<byte>();
+
     @string name = info.Name();
     var b = new slice<byte>(0, 40 + len(name));
     b = append(b, info.Mode().String().ꓸꓸꓸ);
-    b = append(b, (byte)((rune)' '));
+    b = append(bᴷ, b, (byte)((rune)' '));
+
     var size = info.Size();
     uint64 usize = default!;
     if (size >= 0){
@@ -37,13 +40,16 @@ public static @string FormatFileInfo(FileInfo info) {
     buf[i] = (byte)((rune)'0' + usize);
     b = appendꓸꓸꓸ(b, buf.slice(i));
     b = append(b, (byte)((rune)' '));
+
     b = append(b, info.ModTime().Format(time.DateTime).ꓸꓸꓸ);
     b = append(b, (byte)((rune)' '));
+
     b = append(b, name.ꓸꓸꓸ);
     if (info.IsDir()) {
         b = append(b, (byte)((rune)'/'));
     }
-    return ((@string)b);
+
+    return (@string)b;
 }
 
 // FormatDirEntry returns a formatted version of dir for human readability.
@@ -53,19 +59,23 @@ public static @string FormatFileInfo(FileInfo info) {
 //	d subdir/
 //	- hello.go
 public static @string FormatDirEntry(DirEntry dir) {
+    var bᴷ = new stackAppend<byte>();
+
     @string name = dir.Name();
     var b = new slice<byte>(0, 5 + len(name));
+
     // The Type method does not return any permission bits,
     // so strip them from the string.
     @string mode = dir.Type().String();
     mode = mode.slice(0, len(mode) - 9);
+
     b = append(b, mode.ꓸꓸꓸ);
-    b = append(b, (byte)((rune)' '));
+    b = append(bᴷ, b, (byte)((rune)' '));
     b = append(b, name.ꓸꓸꓸ);
     if (dir.IsDir()) {
         b = append(b, (byte)((rune)'/'));
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 } // end fs_package

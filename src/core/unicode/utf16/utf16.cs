@@ -13,9 +13,13 @@ partial class utf16_package {
 internal static UntypedInt replacementChar => /* '\uFFFD' */ 65533; // Unicode replacement character
 internal static UntypedInt maxRune => /* '\U0010FFFF' */ 1114111; // Maximum valid Unicode code point.
 
+// 0xd800-0xdc00 encodes the high 10 bits of a pair.
+// 0xdc00-0xe000 encodes the low 10 bits of a pair.
+// the value is those 20 bits plus 0x10000.
 internal static UntypedInt surr1 => 0xd800;
 internal static UntypedInt surr2 => 0xdc00;
 internal static UntypedInt surr3 => 0xe000;
+
 internal static UntypedInt surrSelf => 0x10000;
 
 // IsSurrogate reports whether the specified Unicode code point
@@ -29,7 +33,7 @@ public static bool IsSurrogate(rune r) {
 // the Unicode replacement code point U+FFFD.
 public static rune DecodeRune(rune r1, rune r2) {
     if (surr1 <= r1 && r1 < surr2 && surr2 <= r2 && r2 < surr3) {
-        return (rune)(((r1 - (rune)surr1) << (int)(10)) | (r2 - (rune)surr2)) + (rune)surrSelf;
+        return ((r1 - (rune)surr1) << 10 | (r2 - (rune)surr2)) + (rune)surrSelf;
     }
     return replacementChar;
 }
@@ -42,7 +46,7 @@ public static (rune r1, rune r2) EncodeRune(rune r) {
         return (replacementChar, replacementChar);
     }
     r -= surrSelf;
-    return ((rune)surr1 + (rune)(((r >> (int)(10))) & 0x3ff), (rune)surr2 + (rune)(r & 0x3ff));
+    return ((rune)surr1 + ((r >> 10) & 0x3ff), (rune)surr2 + (r & 0x3ff));
 }
 
 // RuneLen returns the number of 16-bit words in the UTF-16 encoding of the rune.
@@ -58,7 +62,6 @@ public static nint RuneLen(rune r) {
     default: {
         return -1;
     }}
-
 }
 
 // Encode returns the UTF-16 encoding of the Unicode code point sequence s.
@@ -69,16 +72,17 @@ public static slice<uint16> Encode(slice<rune> s) {
             n++;
         }
     }
+
     var a = new slice<uint16>(n);
     n = 0;
     foreach (var (_, v) in s) {
         switch (RuneLen(v)) {
-        case 1: {
+        case 1: { // normal rune
             a[n] = (uint16)v;
             n++;
             break;
         }
-        case 2: {
+        case 2: { // needs surrogate sequence
             var (r1, r2) = EncodeRune(v);
             a[n] = (uint16)r1;
             a[n + 1] = (uint16)r2;
@@ -90,10 +94,7 @@ public static slice<uint16> Encode(slice<rune> s) {
             n++;
             break;
         }}
-
     }
-    // normal rune
-    // needs surrogate sequence
     return a.slice(0, n);
 }
 
@@ -104,15 +105,14 @@ public static slice<uint16> AppendRune(slice<uint16> a, rune r) {
     // This function is inlineable for fast handling of ASCII.
     switch (ᐧ) {
     case {} when (0 <= r && r < surr1) || (surr3 <= r && r < surrSelf): {
-        return append(a, // normal rune
- (uint16)r);
+        // normal rune
+        return append(a, (uint16)r);
     }
     case {} when surrSelf <= r && r <= maxRune: {
+        // needs surrogate sequence
         var (r1, r2) = EncodeRune(r);
-        return append(a, // needs surrogate sequence
- (uint16)r1, (uint16)r2);
+        return append(a, (uint16)r1, (uint16)r2);
     }}
-
     return append(a, (uint16)(replacementChar));
 }
 
@@ -134,23 +134,22 @@ internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
             var r = s[i];
             switch (ᐧ) {
             case {} when (r < surr1) || (surr3 <= r): {
+                // normal rune
                 ar = (rune)r;
                 break;
             }
             case {} when surr1 <= r && r < surr2 && i + 1 < len(s) && surr2 <= s[i + 1] && s[i + 1] < surr3: {
-                ar = DecodeRune((rune)r, // normal rune
- // valid surrogate sequence
- (rune)s[i + 1]);
+                // valid surrogate sequence
+                ar = DecodeRune((rune)r, (rune)s[i + 1]);
                 i++;
                 break;
             }
             default: {
+                // invalid surrogate sequence
                 ar = replacementChar;
                 break;
             }}
         }
-
-        // invalid surrogate sequence
         buf = append(buf, ar);
     }
     return buf;

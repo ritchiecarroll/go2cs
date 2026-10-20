@@ -52,6 +52,12 @@ using static go.encoding.binary_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -60,8 +66,8 @@ using static go.encoding.binary_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACBCACNIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA0YgNSA2pKCqJKCgqiSzpKCqJKCgoKCqJIABhKSgqqSgoKCgoKCgoKokgANGIDUgNSA1IAAAiQAEQSAgoKAgqaCyoKClIKkpIKWgoCCpIKuwoCCgpaCyoKClIKkpIKWgpSCgqaClLS0tLS0tLS0tLS0ksaCxrSCxoLGgsaCxoLGgsaCxoLWlAACFgAJBICCgoKWgriCgoKWgoKCgq7UgIKCloK4goKCloKUgoKu1ICCgoK4goKCloKCgqaClIKUxoKUxoKClNi0tILGtLS0tLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCxrS0ggAFELLEpIKUpIKUpIKUpKSkxKSClKSClKSkxKSClKSClKSkxKSClKSClKSkpKSClKSkgpSkpJQABRLClIKAgqaCgoKUuIKAgqSCgqaCuKiSlICCyIKCgoKUlKymAAwYgoKCpoKClJSmgoKCpoKCpoKCgqaCgqaCgoKmgoKmgoKCpoKCpoCkgKSApICkgKSApICkgKSClIKCuIKC3ICClNqCgrimpKSkpqSkpKakpsrugpSCgriCgpSAgpTagoK4pqSkpKakpKSmpKaCgqSCgsiCpoKCgqyy9KSkpOSkpOSkpOSkpMTEpKSUqqKCgg==", "", "", "1106=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1111=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
-[assembly: go.GoPositionMap("encoding/binary/varint.go", "varint.cs", "ACRSooKClKqigoKCgpSCAAIS4oKCgqaUgoKUlIKUqqKCgpSqooKClAACEuKCgoKUppzCgoKCgoKClJSCgpSUgpSuwoKCgpQ=")]
+[assembly: go.GoPositionMap("encoding/binary/binary.go", "binary.cs", "ACBCACNIkoKokoKCqJLOkoKokoKCgoKokgAGEpKCqpKCgoKCgoKCgqiSAA0YgNSA2pKCqJKCgqiSzpKCqJKCgoKCqJIABhKSgqqSgoKCgoKCgoKokgANGIDUgNSA1IAAAiQAEQSAgoKAgraC2oKClIKklIKmgoCCpIKuwoCCgqaC2oKClIKklIKmgpSCgqaClLS0tLS0tLS0tLS0gsaCxrSCxoLGgsaCxoLGgsaCxoLWlAACFgAJBICCgoKmgsiCgoKmgoKCgq7UgIKCpoLIgoKCpoKUgoKu1ICCgoLIgoKCpoKCgqaClIKUxoKUxoKClNi0tILGtLS0tLSCxrS0gsa0tILGtLSCxrS0gsa0tILGtLSCxrS0ggAFELLEpIKUpIKUpIKUpKSkxKSClKSClKSkxKSClKSClKSkxKSClKSClKSkpKSClKSkgpSkpJQABRLClIKAgraCgoKUuIKAgqSCgqaCuKiSlICCyIKCgoKUlKymAAwYgoKCpoKClJSmgoKCpoKCpoKCgqaCgqaCgoKmgoKmgoKCpoKCpoCkgKSApICkgKSApICkgKSClIKCuIKC3ICClNqCgrimpKSkpqSkpKakpsregpSCgriCgpSAgpTagoK4pqSkpKakpKSmpKaCgqSCgriCpoKCgqyy9KSkpOSkpOSkpOSkpMTEpKSUqqKCgg==", "", "", "1118=uint32/1/2/1,Float32frombits/1/2/1,uint32/2/2/2,Float32frombits/2/2/2;1123=uint64/1/2/1,Float64frombits/1/2/1,uint64/2/2/2,Float64frombits/2/2/2")]
+[assembly: go.GoPositionMap("encoding/binary/varint.go", "varint.cs", "ACJSooKClKqigoKCgpSCAAIS4oKCgqaUgoKUlIKUqqKCgpSqooKClAACEuKCgoKUppzCgoKCgoKClJSCgpSUgpSuwoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

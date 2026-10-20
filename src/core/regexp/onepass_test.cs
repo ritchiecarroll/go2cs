@@ -12,20 +12,6 @@ using static go.regexp_package;
 
 partial class regexp_internal_test_package {
 
-// empty rhs
-// identical runes, identical targets
-// identical runes, different targets
-// append right-first
-// append, left-first
-// successful interleave
-// left surrounds right
-// right surrounds left
-// overlap at interval begin
-// overlap ar interval end
-// overlap from above
-// overlap from below
-// out of order []rune
-
 partial struct runeMergeTestsᴛ1 /*dyn*/ {
     internal slice<rune> left, right, merged;
     internal slice<uint32> next;
@@ -33,6 +19,7 @@ partial struct runeMergeTestsᴛ1 /*dyn*/ {
 }
 internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ1[]{
     new(
+        // empty rhs
         new rune[]{69, 69}.slice(),
         new rune[]{}.slice(),
         new rune[]{69, 69}.slice(),
@@ -40,6 +27,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // identical runes, identical targets
         new rune[]{69, 69}.slice(),
         new rune[]{69, 69}.slice(),
         new rune[]{}.slice(),
@@ -47,6 +35,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 1
     ),
     new(
+        // identical runes, different targets
         new rune[]{69, 69}.slice(),
         new rune[]{69, 69}.slice(),
         new rune[]{}.slice(),
@@ -54,6 +43,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // append right-first
         new rune[]{69, 69}.slice(),
         new rune[]{71, 71}.slice(),
         new rune[]{69, 69, 71, 71}.slice(),
@@ -61,6 +51,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // append, left-first
         new rune[]{71, 71}.slice(),
         new rune[]{69, 69}.slice(),
         new rune[]{69, 69, 71, 71}.slice(),
@@ -68,6 +59,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // successful interleave
         new rune[]{60, 60, 71, 71, 101, 101}.slice(),
         new rune[]{69, 69, 88, 88}.slice(),
         new rune[]{60, 60, 69, 69, 71, 71, 88, 88, 101, 101}.slice(),
@@ -75,6 +67,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // left surrounds right
         new rune[]{69, 74}.slice(),
         new rune[]{71, 71}.slice(),
         new rune[]{}.slice(),
@@ -82,6 +75,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // right surrounds left
         new rune[]{69, 74}.slice(),
         new rune[]{68, 75}.slice(),
         new rune[]{}.slice(),
@@ -89,6 +83,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // overlap at interval begin
         new rune[]{69, 74}.slice(),
         new rune[]{74, 75}.slice(),
         new rune[]{}.slice(),
@@ -96,6 +91,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // overlap ar interval end
         new rune[]{69, 74}.slice(),
         new rune[]{65, 69}.slice(),
         new rune[]{}.slice(),
@@ -103,6 +99,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // overlap from above
         new rune[]{69, 74}.slice(),
         new rune[]{71, 74}.slice(),
         new rune[]{}.slice(),
@@ -110,6 +107,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // overlap from below
         new rune[]{69, 74}.slice(),
         new rune[]{65, 71}.slice(),
         new rune[]{}.slice(),
@@ -117,6 +115,7 @@ internal static slice<runeMergeTestsᴛ1> runeMergeTests = new runeMergeTestsᴛ
         1, 2
     ),
     new(
+        // out of order []rune
         new rune[]{69, 74, 60, 65}.slice(),
         new rune[]{66, 67}.slice(),
         new rune[]{}.slice(),
@@ -139,7 +138,6 @@ public static void TestMergeRuneSet(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct onePassTestsᴛ1 /*dyn*/ {
     internal @string re;
@@ -182,7 +180,7 @@ internal static slice<onePassTestsᴛ1> onePassTests = new onePassTestsᴛ1[]{
     new(@"^.bc(d|e)*$"u8, true),
     new(@"^(?:(?:aa)|.)$"u8, false),
     new(@"^(?:(?:a{1,2}){1,2})$"u8, false),
-    new(@"^l"u8 + strings.Repeat("o"u8, (2 << (int)(8))) + @"ng$"u8, true)
+    new(@"^l"u8 + strings.Repeat("o"u8, 2 << 8) + @"ng$"u8, true)
 }.slice();
 
 public static void TestCompileOnePass(ж<testing.T> Ꮡt) {
@@ -211,15 +209,13 @@ public static void TestCompileOnePass(ж<testing.T> Ꮡt) {
     }
 }
 
-// golang.org/issue/11905
 // TODO(cespare): Unify with onePassTests and rationalize one-pass test cases.
-
 partial struct onePassTests1ᴛ1 /*dyn*/ {
     internal @string re;
     internal @string match;
 }
 internal static slice<onePassTests1ᴛ1> onePassTests1 = new onePassTests1ᴛ1[]{
-    new(@"^a(/b+(#c+)*)*$"u8, "a/b#c"u8)
+    new(@"^a(/b+(#c+)*)*$"u8, "a/b#c"u8) // golang.org/issue/11905
 }.slice();
 
 public static void TestRunOnePass(ж<testing.T> Ꮡt) {

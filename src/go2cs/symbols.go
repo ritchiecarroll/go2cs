@@ -68,6 +68,7 @@ const CapturedVarMarker = "\u0297"               // Variants: ʗ ɔ ᴄ
 const TempVarMarker = "\u1D1B"                   // Variants: ᴛ Ŧ ᵀ
 const HoistedLiteralMarker = "\u02E2"            // Suffix of a hoisted string-literal field name (trueˢ). Variants: ˢ ˢˢ
 const HoistedConstMarker = "\u1D9C"              // Suffix of a hoisted function-local constant field name: a big constant (maskᶜ) or a string constant (fnAtoiᶜ). Variants: ᶜ ᶜᶜ
+const StackBufferMarker = "\u1D37"               // Suffix of a stack-append buffer local: var xᴷ = new stackAppend<T>(); at a function's entry, passed at x's first qualifying append, x = append(xᴷ, x, v).
 const FuncValueMarker = "\u1DA0"                 // Suffix of an sstring twin's canonical value delegate (Sprintfᶠ). Variants: ᶠ ᶠᶠ
 const TrueMarker = "\u1427"                      // Variants: ᐧ true
 const OpaqueTrueMarker = TrueMarker + TrueMarker // golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)
@@ -147,6 +148,12 @@ const TypedNilFuncAccessor = "OrTypedNilFunc()"
 // and would answer ж<uintptr>'s nil box, a different dynamic type. No `()`: the caller supplies the
 // argument list.
 const TypedNilUnsafePointerAccessor = "OrTypedNil"
+
+// TypedNilTypeParamAccessor is the golib extension method a value of TYPE-PARAMETER type takes on its way into an
+// EMPTY interface (`any`) when its type set can hold a pointer, a func or an unsafe.Pointer: the generic sibling of
+// TypedNilBoxAccessor and TypedNilFuncAccessor, decided per type argument at run time (golib TypedNilOf.cs), since
+// inside the generic body the converter cannot see which of them the argument is.
+const TypedNilTypeParamAccessor = "OrTypedNilOf()"
 
 // The -tests package-init hook: the erasable classic-partial method a production
 // package_init.cs static ctor ends with when converting under -tests, IMPLEMENTED by the

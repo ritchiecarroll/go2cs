@@ -30,6 +30,7 @@ internal static ref @string gopherType => ref ᏑgopherType.Value;
     flag.StringVar(ᏑgopherType, "g"u8, defaultGopher, usage + " (shorthand)");
 }
 
+// Example 3: A user-defined flag type, a slice of durations.
 partial struct interval /*[]global::go.time_package.Duration*/;
 
 // String is the method to format the flag's value, part of the flag.Value interface.
@@ -76,15 +77,14 @@ internal static ref interval intervalFlag => ref ᏑintervalFlag.ValueSlot;
 }
 
 public static void Example() {
+    // All the interesting pieces are with the variables declared above, but
+    // to enable the flag package to see the flags defined there, one must
+    // execute, typically at the start of main (not init!):
+    //	flag.Parse()
+    // We don't call it here because this code is a function called "Example"
+    // that is part of the testing suite for the package, which has already
+    // parsed the flags. When viewed at pkg.go.dev, however, the function is
+    // renamed to "main" and it could be run as a standalone example.
 }
-
-// All the interesting pieces are with the variables declared above, but
-// to enable the flag package to see the flags defined there, one must
-// execute, typically at the start of main (not init!):
-//	flag.Parse()
-// We don't call it here because this code is a function called "Example"
-// that is part of the testing suite for the package, which has already
-// parsed the flags. When viewed at pkg.go.dev, however, the function is
-// renamed to "main" and it could be run as a standalone example.
 
 } // end flag_test_package

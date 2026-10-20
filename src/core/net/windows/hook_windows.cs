@@ -10,6 +10,8 @@ using @internal.syscall;
 partial class net_package {
 
 internal static @string hostsFilePath = windows.GetSystemDirectory() + "/Drivers/etc/hosts"u8;
+
+// Placeholders for socket system calls.
 internal static Func<int32, int32, int32, ж<syscall.WSAProtocolInfo>, uint32, uint32, (syscallꓸHandle, error)> wsaSocketFunc = windows.WSASocket;
 internal static Func<syscallꓸHandle, syscallꓸSockaddr, error> connectFunc = syscall.Connect;
 internal static Func<syscallꓸHandle, nint, error> listenFunc = syscall.Listen;

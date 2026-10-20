@@ -33,7 +33,6 @@ internal static slice<byte> fromHex(@string s) {
     return b;
 }
 
-
 partial struct marshalTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<Δhash.Hash> @new;
@@ -70,9 +69,11 @@ public static void TestMarshalHash(ж<testing.T> Ꮡt) {
             foreach (var (i, _) in buf) {
                 buf[i] = (byte)i;
             }
+
             var h = ttʗ1.@new();
             h.Write(buf[..256]);
             var sum = h.Sum(default!);
+
             var h2 = ttʗ1.@new();
             var h3 = ttʗ1.@new();
             const nint split = 249;

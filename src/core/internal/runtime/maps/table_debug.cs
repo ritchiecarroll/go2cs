@@ -1,8 +1,6 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-// Package maps implements Go's builtin map type.
 namespace go.@internal.runtime;
 
 using abi = go.@internal.abi_package;
@@ -13,13 +11,14 @@ partial class maps_package {
 
 internal const bool debugLog = false;
 
-internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (!debugLog) {
         return;
     }
+
     // For every non-empty slot, verify we can retrieve the key using Get.
     // Count the number of used and deleted slots.
     uint16 used = default!;
@@ -27,7 +26,7 @@ internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡt
     uint16 empty = default!;
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         var g = t.groups.group(Ꮡtyp, i);
-        for (var j = (uintptr)0; j < abi.SwissMapGroupSlots; j++) {
+        for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
             var c = g.ctrls().get(j);
             switch (ᐧ) {
             case {} when c == ctrlDeleted: {
@@ -40,15 +39,18 @@ internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡt
             }
             default: {
                 used++;
+
                 @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
                     key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
                 }
-                if (!(~typ.Key).Equal(key, // Can't lookup keys that don't compare equal
- // to themselves (e.g., NaN).
- key)) {
+
+                // Can't lookup keys that don't compare equal
+                // to themselves (e.g., NaN).
+                if (!(~typ.Key).Equal(key, key)) {
                     continue;
                 }
+
                 {
                     var (_, ok) = t.Get(Ꮡtyp, Ꮡm, key); if (!ok) {
                         var hash = typ.Hasher(key, m.seed);
@@ -61,15 +63,16 @@ internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡt
                 }
                 break;
             }}
-
         }
     }
+
     if (used != t.used) {
         print((@string)"invariant failed: found "u8, used, (@string)" used slots, but used count is "u8, t.used, (@string)"\n"u8);
         t.Print(Ꮡtyp, Ꮡm);
         throw panic("invariant failed: found mismatched used slot count");
     }
-    var growthLeft = (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.SwissMapGroupSlots - t.used - deleted);
+
+    var growthLeft = (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.MapGroupSlots - t.used - deleted);
     if (growthLeft != t.growthLeft) {
         print((@string)"invariant failed: found "u8, t.growthLeft, (@string)" growthLeft, but expected "u8, growthLeft, (@string)"\n"u8);
         t.Print(Ꮡtyp, Ꮡm);
@@ -80,6 +83,7 @@ internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡt
         t.Print(Ꮡtyp, Ꮡm);
         throw panic("invariant failed: found mismatched tombstones");
     }
+
     if (empty == 0) {
         print((@string)"invariant failed: found no empty slots (violates probe invariant)\n"u8);
         t.Print(Ꮡtyp, Ꮡm);
@@ -87,35 +91,38 @@ internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡt
     }
 }
 
-public static void Print(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+public static void Print(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""
 table{
 	index: 
-"""u8, t.index, (@string)"""
+"""u8.Raw(), t.index, (@string)"""
 
 	localDepth: 
-"""u8, t.localDepth, (@string)"""
+"""u8.Raw(), t.localDepth, (@string)"""
 
 	capacity: 
-"""u8, t.capacity, (@string)"""
+"""u8.Raw(), t.capacity, (@string)"""
 
 	used: 
-"""u8, t.used, (@string)"""
+"""u8.Raw(), t.used, (@string)"""
 
 	growthLeft: 
-"""u8, t.growthLeft, (@string)"""
+"""u8.Raw(), t.growthLeft, (@string)"""
 
 	groups:
 
-"""u8);
+"""u8.Raw());
+
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         print((@string)"\t\tgroup "u8, i, (@string)"\n"u8);
+
         var g = t.groups.group(Ꮡtyp, i);
         var ctrls = g.ctrls();
-        for (var j = (uintptr)0; j < abi.SwissMapGroupSlots; j++) {
+        for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
             print((@string)"\t\t\tslot "u8, j, (@string)"\n"u8);
+
             var c = ctrls.get(j);
             print((@string)"\t\t\t\tctrl "u8, c);
             var exprᴛ1 = c;

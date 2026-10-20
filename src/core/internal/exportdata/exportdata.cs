@@ -64,17 +64,19 @@ private static readonly @string markerᶜ = "\n$$\n"u8;
 public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
     slice<byte> data = default!;
     error err = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     // We historically guaranteed headers at the default buffer size (4096) work.
     // This ensures we can use ReadSlice throughout.
     const nint minBufferSize = 4096;
     Ꮡr = bufio.NewReaderSize(new bufio_ReaderжReader(Ꮡr), minBufferSize); r = ref Ꮡr.DerefOrNull();
+
     (var size, err) = FindPackageDefinition(Ꮡr);
     if (err != default!) {
         return (data, err);
     }
     nint n = size;
+
     (var objapi, var headers, err) = ReadObjectHeaders(Ꮡr);
     if (err != default!) {
         return (data, err);
@@ -83,23 +85,28 @@ public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
     foreach (var (_, h) in headers) {
         n -= len(h);
     }
+
     (var hdrlen, err) = ReadExportDataHeader(Ꮡr);
     if (err != default!) {
         return (data, err);
     }
     n -= hdrlen;
+
     // size also includes the end of section marker. Remove that many bytes from the end.
     @string marker = markerᶜ;
     n -= len(marker);
+
     if (n < 0) {
         err = fmt.Errorf("invalid size (%d) in the archive file: %d bytes remain without section headers (recompile package)"u8, size, n);
         return (data, err);
     }
+
     // Read n bytes from buf.
     (data, err) = saferio.ReadData(new bufio_ReaderжReader(Ꮡr), (uint64)n);
     if (err != default!) {
         return (data, err);
     }
+
     // Check for marker at the end.
     array<byte> suffix = new(4); /* len(marker) */
     (_, err) = io.ReadFull(new bufio_ReaderжReader(Ꮡr), suffix[..]);
@@ -107,11 +114,12 @@ public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
         return (data, err);
     }
     {
-        @string s = ((@string)(suffix[..])); if (s != marker) {
+        @string s = (@string)(suffix[..]); if (s != marker) {
             err = fmt.Errorf("read %q instead of end-of-section marker (%q)"u8, s, marker);
             return (data, err);
         }
     }
+
     return (data, err);
 }
 
@@ -129,8 +137,8 @@ private static readonly @string pkgdefˢ = "__.PKGDEF"u8;
 public static (nint size, error err) FindPackageDefinition(ж<bufio.Reader> Ꮡr) {
     nint size = default!;
     error err = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     // Uses ReadSlice to limit risk of malformed inputs.
     // Read first line to make sure this is an object file.
     (var line, err) = r.ReadSlice((rune)'\n');
@@ -138,17 +146,20 @@ public static (nint size, error err) FindPackageDefinition(ж<bufio.Reader> Ꮡr
         err = fmt.Errorf("can't find export data (%v)"u8, err);
         return (size, err);
     }
+
     // Is the first line an archive file signature?
     if (((sstring)line) != "!<arch>\n"u8) {
         err = fmt.Errorf("not the start of an archive file (%q)"u8, line);
         return (size, err);
     }
+
     // package export block should be first
     size = readArchiveHeader(Ꮡr, pkgdefˢ);
     if (size <= 0) {
         err = fmt.Errorf("not a package file"u8);
         return (size, err);
     }
+
     return (size, err);
 }
 
@@ -165,11 +176,12 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
     @string objapi = default!;
     slice<@string> headers = default!;
     error err = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     // line is a temporary buffer for headers.
     // Use bounded reads (ReadSlice, Peek) to limit risk of malformed inputs.
     slice<byte> line = default!;
+
     // objapi header should be the first line
     {
         (line, err) = r.ReadSlice((rune)'\n'); if (err != default!) {
@@ -177,12 +189,14 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
             return (objapi, headers, err);
         }
     }
-    objapi = ((@string)line);
+    objapi = (@string)line;
+
     // objapi header begins with "go object ".
     if (!strings.HasPrefix(objapi, goObjectˢ)) {
         err = fmt.Errorf("not a go object file: %s"u8, objapi);
         return (objapi, headers, err);
     }
+
     // process remaining object header lines
     while (ᐧ) {
         // check for an end of section marker "$$"
@@ -193,12 +207,13 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
         if (((sstring)line) == "$$"u8) {
             return (objapi, headers, err); // stop
         }
+
         // read next header
         (line, err) = r.ReadSlice((rune)'\n');
         if (err != default!) {
             return (objapi, headers, err);
         }
-        headers = append(headers, ((@string)line));
+        headers = append(headers, (@string)line);
     }
 }
 
@@ -211,14 +226,15 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
 public static (nint n, error err) ReadExportDataHeader(ж<bufio.Reader> Ꮡr) {
     nint n = default!;
     error err = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     // Read export data header.
     (var line, err) = r.ReadSlice((rune)'\n');
     if (err != default!) {
         return (n, err);
     }
-    @string hdr = ((@string)line);
+
+    @string hdr = (@string)line;
     var exprᴛ1 = hdr;
     if (exprᴛ1 == "$$\n"u8) {
         err = fmt.Errorf("old textual export format no longer supported (recompile package)"u8);
@@ -230,20 +246,19 @@ public static (nint n, error err) ReadExportDataHeader(ж<bufio.Reader> Ꮡr) {
         if (err != default!) {
             return (n, err);
         }
+        // The unified export format starts with a 'u'.
         switch (format) {
         case (rune)'u': {
             break;
         }
         default: {
-            err = fmt.Errorf("binary export format %q is no longer supported (recompile package)"u8, // The unified export format starts with a 'u'.
- // Older no longer supported export formats include:
- // indexed export format which started with an 'i'; and
- // the older binary export format which started with a 'c',
- // 'd', or 'v' (from "version").
- format);
+            // Older no longer supported export formats include:
+            // indexed export format which started with an 'i'; and
+            // the older binary export format which started with a 'c',
+            // 'd', or 'v' (from "version").
+            err = fmt.Errorf("binary export format %q is no longer supported (recompile package)"u8, format);
             return (n, err);
         }}
-
     }
     else { /* default: */
         err = fmt.Errorf("unknown export data header: %q"u8, hdr);
@@ -269,14 +284,14 @@ public static (@string filename, @string id, error err) FindPkg(@string path, @s
     if (path == ""u8) {
         return ("", "", errors.New(pathIsEmptyˢ));
     }
+
     @string noext = default!;
     switch (ᐧ) {
     default: {
+        // "x" -> "$GOPATH/pkg/$GOOS_$GOARCH/x.ext", "x"
+        // Don't require the source files to be present.
         {
-            var (abs, errΔ2) = filepath.Abs(srcDir); if (errΔ2 == default!) {
-                // "x" -> "$GOPATH/pkg/$GOOS_$GOARCH/x.ext", "x"
-                // Don't require the source files to be present.
-                // see issue 14282
+            var (abs, errΔ2) = filepath.Abs(srcDir); if (errΔ2 == default!) { // see issue 14282
                 srcDir = abs;
             }
         }
@@ -300,26 +315,26 @@ public static (@string filename, @string id, error err) FindPkg(@string path, @s
         break;
     }
     case {} when build.IsLocalImport(path): {
-        noext = filepath.Join(srcDir, // "./x" -> "/this/directory/x.ext", "/this/directory/x"
- path);
+        // "./x" -> "/this/directory/x.ext", "/this/directory/x"
+        noext = filepath.Join(srcDir, path);
         id = noext;
         break;
     }
     case {} when filepath.IsAbs(path): {
+        // for completeness only - go/build.Import
+        // does not support absolute imports
+        // "/x" -> "/x.ext", "/x"
         noext = path;
         id = path;
         break;
     }}
 
-    // for completeness only - go/build.Import
-    // does not support absolute imports
-    // "/x" -> "/x.ext", "/x"
-    if (false) {
-        // for debugging
+    if (false) { // for debugging
         if (path != id) {
             fmt.Printf("%s -> %s\n"u8, path, id);
         }
     }
+
     // try extensions
     foreach (var (_, ext) in pkgExts.ΔRangeSnapshot()) {
         filename = noext + ext;
@@ -331,6 +346,7 @@ public static (@string filename, @string id, error err) FindPkg(@string path, @s
             err = statErr;
         }
     }
+
 notfound:
     if (err == default!) {
         return ("", path, fmt.Errorf("can't find import: %q"u8, path));
@@ -372,21 +388,25 @@ internal static (@string, error) lookupGorootExport(@string pkgDir) {
                 if (Ꮡerr.ValueSlot != default!) {
                     {
                         var (ee, okΔ1) = Ꮡerr.ValueSlot._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && len((~ee).Stderr) > 0) {
-                            Ꮡerr.ValueSlot = errors.New(((@string)(~ee).Stderr));
+                            Ꮡerr.ValueSlot = errors.New((@string)(~ee).Stderr);
                         }
                     }
                     return;
                 }
-                var exports = strings.Split(((@string)bytes.TrimSpace(output)), "\n"u8);
+
+                var exports = strings.Split((@string)bytes.TrimSpace(output), "\n"u8);
                 if (len(exports) != 1) {
                     Ꮡerr.ValueSlot = fmt.Errorf("go list reported %d exports; expected 1"u8, len(exports));
                     return;
                 }
+
                 exportPath = exports[0];
             });
+
             return (exportPath, Ꮡerr.ValueSlot);
         });
     }
+
     return f._<Func<(@string, error)>>()();
 }
 

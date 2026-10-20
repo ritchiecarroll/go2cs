@@ -116,6 +116,7 @@ partial class math_package {
 //              erfc(0) = 1, erfc(inf) = 0, erfc(-inf) = 2,
 //              erfc/erf(NaN) is NaN
 internal static UntypedFloat erx => 8.45062911510467529297e-01; // 0x3FEB0AC160000000
+// Coefficients for approximation to  erf in [0, 0.84375]
 internal static UntypedFloat efx => 1.28379167095512586316e-01; // 0x3FC06EBA8214DB69
 internal static UntypedFloat efx8 => 1.02703333676410069053e+00; // 0x3FF06EBA8214DB69
 internal static UntypedFloat pp0 => 1.28379167095512558561e-01; // 0x3FC06EBA8214DB68
@@ -128,6 +129,7 @@ internal static UntypedFloat qq2 => 6.50222499887672944485e-02; // 0x3FB0A54C553
 internal static UntypedFloat qq3 => 5.08130628187576562776e-03; // 0x3F74D022C4D36B0F
 internal static UntypedFloat qq4 => 1.32494738004321644526e-04; // 0x3F215DC9221C1A10
 internal static UntypedFloat qq5 => -3.96022827877536812320e-06; // 0xBED09C4342A26120
+// Coefficients for approximation to  erf  in [0.84375, 1.25]
 internal static UntypedFloat pa0 => -2.36211856075265944077e-03; // 0xBF6359B8BEF77538
 internal static UntypedFloat pa1 => 4.14856118683748331666e-01; // 0x3FDA8D00AD92B34D
 internal static UntypedFloat pa2 => -3.72207876035701323847e-01; // 0xBFD7D240FBB8C3F1
@@ -141,6 +143,7 @@ internal static UntypedFloat qa3 => 7.18286544141962662868e-02; // 0x3FB2635CD99
 internal static UntypedFloat qa4 => 1.26171219808761642112e-01; // 0x3FC02660E763351F
 internal static UntypedFloat qa5 => 1.36370839120290507362e-02; // 0x3F8BEDC26B51DD1C
 internal static UntypedFloat qa6 => 1.19844998467991074170e-02; // 0x3F888B545735151D
+// Coefficients for approximation to  erfc in [1.25, 1/0.35]
 internal static UntypedFloat ra0 => -9.86494403484714822705e-03; // 0xBF843412600D6435
 internal static UntypedFloat ra1 => -6.93858572707181764372e-01; // 0xBFE63416E4BA7360
 internal static UntypedFloat ra2 => -1.05586262253232909814e+01; // 0xC0251E0441B0E726
@@ -157,6 +160,7 @@ internal static UntypedFloat sa5 => 4.29008140027567833386e+02; // 0x407AD021577
 internal static UntypedFloat sa6 => 1.08635005541779435134e+02; // 0x405B28A3EE48AE2C
 internal static UntypedFloat sa7 => 6.57024977031928170135e+00; // 0x401A47EF8E484A93
 internal static UntypedFloat sa8 => -6.04244152148580987438e-02; // 0xBFAEEFF2EE749A62
+// Coefficients for approximation to  erfc in [1/.35, 28]
 internal static UntypedFloat rb0 => -9.86494292470009928597e-03; // 0xBF84341239E86F4A
 internal static UntypedFloat rb1 => -7.99283237680523006574e-01; // 0xBFE993BA70C285DE
 internal static UntypedFloat rb2 => -1.77579549177547519889e+01; // 0xC031C209555F995A
@@ -200,17 +204,14 @@ internal static float64 erf(float64 x) {
     case {} when IsInf(x, -1): {
         return -1D;
     }}
-
     var sign = false;
     if (x < 0D) {
         x = -x;
         sign = true;
     }
-    if (x < 0.84375D) {
-        // |x| < 0.84375
+    if (x < 0.84375D) { // |x| < 0.84375
         float64 temp = default!;
-        if (x < Small){
-            // |x| < 2**-28
+        if (x < Small){ // |x| < 2**-28
             if (x < VeryTiny){
                 temp = 0.125D * (8.0D * x + (float64)efx8 * x); // avoid underflow
             } else {
@@ -228,8 +229,7 @@ internal static float64 erf(float64 x) {
         }
         return temp;
     }
-    if (x < 1.25D) {
-        // 0.84375 <= |x| < 1.25
+    if (x < 1.25D) { // 0.84375 <= |x| < 1.25
         var sΔ2 = x - 1D;
         var P = (float64)pa0 + sΔ2 * ((float64)pa1 + sΔ2 * ((float64)pa2 + sΔ2 * ((float64)pa3 + sΔ2 * ((float64)pa4 + sΔ2 * ((float64)pa5 + sΔ2 * (float64)pa6)))));
         var Q = 1D + sΔ2 * ((float64)qa1 + sΔ2 * ((float64)qa2 + sΔ2 * ((float64)qa3 + sΔ2 * ((float64)qa4 + sΔ2 * ((float64)qa5 + sΔ2 * (float64)qa6)))));
@@ -238,8 +238,7 @@ internal static float64 erf(float64 x) {
         }
         return (float64)erx + P / Q;
     }
-    if (x >= 6D) {
-        // inf > |x| >= 6
+    if (x >= 6D) { // inf > |x| >= 6
         if (sign) {
             return -1D;
         }
@@ -248,16 +247,14 @@ internal static float64 erf(float64 x) {
     var s = 1D / (x * x);
     float64 R = default!;
     float64 S = default!;
-    if (x < 1D / 0.35D){
-        // |x| < 1 / 0.35  ~ 2.857143
+    if (x < 1D / 0.35D){ // |x| < 1 / 0.35  ~ 2.857143
         R = (float64)ra0 + s * ((float64)ra1 + s * ((float64)ra2 + s * ((float64)ra3 + s * ((float64)ra4 + s * ((float64)ra5 + s * ((float64)ra6 + s * (float64)ra7))))));
         S = 1D + s * ((float64)sa1 + s * ((float64)sa2 + s * ((float64)sa3 + s * ((float64)sa4 + s * ((float64)sa5 + s * ((float64)sa6 + s * ((float64)sa7 + s * (float64)sa8)))))));
-    } else {
-        // |x| >= 1 / 0.35  ~ 2.857143
+    } else { // |x| >= 1 / 0.35  ~ 2.857143
         R = (float64)rb0 + s * ((float64)rb1 + s * ((float64)rb2 + s * ((float64)rb3 + s * ((float64)rb4 + s * ((float64)rb5 + s * (float64)rb6)))));
         S = 1D + s * ((float64)sb1 + s * ((float64)sb2 + s * ((float64)sb3 + s * ((float64)sb4 + s * ((float64)sb5 + s * ((float64)sb6 + s * (float64)sb7))))));
     }
-    var z = Float64frombits((uint64)(Float64bits(x) & 0xffffffff00000000UL)); // pseudo-single (20-bit) precision x
+    var z = Float64frombits(Float64bits(x) & 0xffffffff00000000UL); // pseudo-single (20-bit) precision x
     var r = Exp(-z * z - 0.5625D) * Exp((z - x) * (z + x) + R / S);
     if (sign) {
         return r / x - 1D;
@@ -292,25 +289,21 @@ internal static float64 erfc(float64 x) {
     case {} when IsInf(x, -1): {
         return 2D;
     }}
-
     var sign = false;
     if (x < 0D) {
         x = -x;
         sign = true;
     }
-    if (x < 0.84375D) {
-        // |x| < 0.84375
+    if (x < 0.84375D) { // |x| < 0.84375
         float64 temp = default!;
-        if (x < Tiny){
-            // |x| < 2**-56
+        if (x < Tiny){ // |x| < 2**-56
             temp = x;
         } else {
             var z = x * x;
             var r = (float64)pp0 + z * ((float64)pp1 + z * ((float64)pp2 + z * ((float64)pp3 + z * (float64)pp4)));
             var s = 1D + z * ((float64)qq1 + z * ((float64)qq2 + z * ((float64)qq3 + z * ((float64)qq4 + z * (float64)qq5))));
             var y = r / s;
-            if (x < 0.25D){
-                // |x| < 1/4
+            if (x < 0.25D){ // |x| < 1/4
                 temp = x + x * y;
             } else {
                 temp = 0.5D + (x * y + (x - 0.5D));
@@ -321,8 +314,7 @@ internal static float64 erfc(float64 x) {
         }
         return 1D - temp;
     }
-    if (x < 1.25D) {
-        // 0.84375 <= |x| < 1.25
+    if (x < 1.25D) { // 0.84375 <= |x| < 1.25
         var s = x - 1D;
         var P = (float64)pa0 + s * ((float64)pa1 + s * ((float64)pa2 + s * ((float64)pa3 + s * ((float64)pa4 + s * ((float64)pa5 + s * (float64)pa6)))));
         var Q = 1D + s * ((float64)qa1 + s * ((float64)qa2 + s * ((float64)qa3 + s * ((float64)qa4 + s * ((float64)qa5 + s * (float64)qa6)))));
@@ -331,24 +323,21 @@ internal static float64 erfc(float64 x) {
         }
         return /* 1 - erx */ 0.15493708848953247D - P / Q;
     }
-    if (x < 28D) {
-        // |x| < 28
+    if (x < 28D) { // |x| < 28
         var s = 1D / (x * x);
         float64 R = default!;
         float64 S = default!;
-        if (x < 1D / 0.35D){
-            // |x| < 1 / 0.35 ~ 2.857143
+        if (x < 1D / 0.35D){ // |x| < 1 / 0.35 ~ 2.857143
             R = (float64)ra0 + s * ((float64)ra1 + s * ((float64)ra2 + s * ((float64)ra3 + s * ((float64)ra4 + s * ((float64)ra5 + s * ((float64)ra6 + s * (float64)ra7))))));
             S = 1D + s * ((float64)sa1 + s * ((float64)sa2 + s * ((float64)sa3 + s * ((float64)sa4 + s * ((float64)sa5 + s * ((float64)sa6 + s * ((float64)sa7 + s * (float64)sa8)))))));
-        } else {
-            // |x| >= 1 / 0.35 ~ 2.857143
+        } else { // |x| >= 1 / 0.35 ~ 2.857143
             if (sign && x > 6D) {
                 return 2D; // x < -6
             }
             R = (float64)rb0 + s * ((float64)rb1 + s * ((float64)rb2 + s * ((float64)rb3 + s * ((float64)rb4 + s * ((float64)rb5 + s * (float64)rb6)))));
             S = 1D + s * ((float64)sb1 + s * ((float64)sb2 + s * ((float64)sb3 + s * ((float64)sb4 + s * ((float64)sb5 + s * ((float64)sb6 + s * (float64)sb7))))));
         }
-        var z = Float64frombits((uint64)(Float64bits(x) & 0xffffffff00000000UL)); // pseudo-single (20-bit) precision x
+        var z = Float64frombits(Float64bits(x) & 0xffffffff00000000UL); // pseudo-single (20-bit) precision x
         var r = Exp(-z * z - 0.5625D) * Exp((z - x) * (z + x) + R / S);
         if (sign) {
             return 2D - r / x;

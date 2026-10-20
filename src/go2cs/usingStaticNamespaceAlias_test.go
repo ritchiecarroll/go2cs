@@ -129,6 +129,7 @@ func main() {
 }
 
 func TestAFileWithAUsingStaticImportsNoDotNetNamespace(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dotted, dottedLater, plain := convertUsingStaticFixture(t)
 
 	const (
@@ -214,6 +215,7 @@ func TestAFileWithAUsingStaticImportsNoDotNetNamespace(t *testing.T) {
 // not the Go member). So every file of such a test project takes the aliases, the internal file
 // (which also holds its own file-level using static) and the external one (which holds none).
 func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads a module fixture through go/packages")
 	}
@@ -296,6 +298,7 @@ func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
 // project-level trigger can reach it. This is the shape COORD's probe measured binding the .NET
 // Unsafe on the union.
 func TestAnExternalOnlyTestFileBindsByAlias(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads a module fixture through go/packages")
 	}

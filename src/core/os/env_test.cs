@@ -48,12 +48,8 @@ internal static @string testGetenv(@string s) {
     if (exprᴛ1 == "_"u8) {
         return underscoreˢ;
     }
-
     return ""u8;
 }
-
-// invalid syntax; eat up the characters
-// invalid syntax; eat up the characters
 
 partial struct expandTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
@@ -75,8 +71,8 @@ internal static slice<expandTestsᴛ1> expandTests = new expandTestsᴛ1[]{
     new("mixed$|bag$$$"u8, "mixed$|bagPID$"u8),
     new("$"u8, "$"u8),
     new("$}"u8, "$}"u8),
-    new("${"u8, ""u8),
-    new("${}"u8, ""u8)
+    new("${"u8, ""u8), // invalid syntax; eat up the characters
+    new("${}"u8, ""u8) // invalid syntax; eat up the characters
 }.slice();
 
 public static void TestExpand(ж<Δtesting.T> Ꮡt) {
@@ -175,6 +171,7 @@ public static void TestClearenv(ж<Δtesting.T> Ꮡt) {
 
         @string testKey = testKeyᶜ1;
         @string testValue = testValueᶜ;
+
         // reset env
         defer((slice<@string> origEnv) => {
             foreach (var (_, pair) in origEnv) {
@@ -188,6 +185,7 @@ public static void TestClearenv(ж<Δtesting.T> Ꮡt) {
                 }
             }
         }, Environ(), ref ᒐ);
+
         {
             var err = Setenv(testKey, testValue); if (err != default!) {
                 Ꮡt.Fatalf("Setenv(%q, %q) failed: %v"u8, testKey, testValue, err);
@@ -244,6 +242,7 @@ public static void TestEnvironConsistency(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.Parallel();
+
     foreach (var (_, kv) in Environ()) {
         nint i = strings.Index(kv, "="u8);
         if (i == 0) {
@@ -256,6 +255,7 @@ public static void TestEnvironConsistency(ж<Δtesting.T> Ꮡt) {
         if (i < 0) {
             Ꮡt.Errorf("Environ entry missing '=': %q"u8, kv);
         }
+
         @string k = kv.slice(0, i);
         @string v = kv.slice(i + 1);
         var (v2, ok) = LookupEnv(k);
@@ -264,6 +264,7 @@ public static void TestEnvironConsistency(ж<Δtesting.T> Ꮡt) {
         } else {
             Ꮡt.Errorf("Environ contains %q, but LookupEnv(%q) = %q, %t"u8, kv, k, v2, ok);
         }
+
         // Since k=v is already present in the environment,
         // setting it should be a no-op.
         {

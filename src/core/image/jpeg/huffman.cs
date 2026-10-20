@@ -53,10 +53,10 @@ internal static error ensureNBits(this ref decoder d, int32 n) {
             }
             return err;
         }
-        d.bits.a = (uint32)((d.bits.a << (int)(8)) | (uint32)c);
+        d.bits.a = d.bits.a << 8 | (uint32)c;
         d.bits.n += 8;
         if (d.bits.m == 0){
-            d.bits.m = ((uint32)1 << (int)(7));
+            d.bits.m = (uint32)1 << 7;
         } else {
             d.bits.m <<= (int)(8);
         }
@@ -80,8 +80,8 @@ internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) {
     d.bits.n -= (int32)t;
     d.bits.m.RshAssign((uint64)(t));
     var s = ((int32)1).Lsh((uint64)(t));
-    var x = (int32)((int32)(d.bits.a.Rsh((uint64)((uint8)d.bits.n))) & (s - 1));
-    if (x < (s >> (int)(1))) {
+    var x = (int32)(d.bits.a.Rsh((uint64)((uint8)d.bits.n))) & (s - 1);
+    if (x < s >> 1) {
         x += ((-1).Lsh((uint64)(t))) + 1;
     }
     return (x, default!);
@@ -106,7 +106,7 @@ internal static error processDHT(this ref decoder d, nint n) {
                 return err;
             }
         }
-        var tc = (byte)((d.tmp[0] >> (int)(4)));
+        var tc = (byte)((d.tmp[0] >> 4));
         if (tc > maxTc) {
             return ((FormatError)(@string)badTcValueˢ);
         }
@@ -116,6 +116,7 @@ internal static error processDHT(this ref decoder d, nint n) {
             return ((FormatError)(@string)badThValueˢ);
         }
         var h = Ꮡ(d.huff[tc], th);
+
         // Read nCodes and h.vals (and derive h.nCodes).
         // nCodes[i] is the number of codes with code length i.
         // h.nCodes is the total number of codes.
@@ -140,6 +141,7 @@ internal static error processDHT(this ref decoder d, nint n) {
                 return err;
             }
         }
+
         // Derive the look-up table.
         clear((~h).lut[..]);
         uint32 x = default!;
@@ -152,15 +154,16 @@ internal static error processDHT(this ref decoder d, nint n) {
                 // whose codeLength's high bits matches code.
                 // The high 8 bits of lutValue are the encoded value.
                 // The low 8 bits are 1 plus the codeLength.
-                var @base = (uint8)(code.Lsh((uint64)((7 - i))));
-                var lutValue = (uint16)((uint16)((uint16)(~h).vals[x] << (int)(8)) | (uint16)(2 + i));
-                for (var k = (uint8)0; k < (uint8)(((uint8)1).Lsh((uint64)((7 - i)))); k++) {
+                var @base = (uint8)(code.Lsh((uint64)(7 - i)));
+                var lutValue = (uint16)((uint16)((uint16)(~h).vals[x] << 8) | (uint16)(2 + i));
+                for (var k = (uint8)0; k < (uint8)(((uint8)1).Lsh((uint64)(7 - i))); k++) {
                     h.Value.lut[(uint8)(@base | k)] = lutValue;
                 }
                 code++;
                 x++;
             }
         }
+
         // Derive minCodes, maxCodes, and valsIndices.
         int32 c = default!;
         int32 index = default!;
@@ -194,6 +197,7 @@ internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡ
     if (h.nCodes == 0) {
         return (0, ((FormatError)(@string)uninitializedHuffmanˢ));
     }
+
     if (d.bits.n < 8) {
         {
             var err = d.ensureNBits(8); if (err != default!) {
@@ -211,13 +215,14 @@ internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡ
         }
     }
     {
-        var v = h.lut[(uint32)((d.bits.a.Rsh((uint64)((uint32)(d.bits.n - (int32)lutSize)))) & 0xff)]; if (v != 0) {
+        var v = h.lut[((d.bits.a.Rsh((uint64)((uint32)(d.bits.n - (int32)lutSize)))) & 0xff)]; if (v != 0) {
             var n = (uint16)(((uint16)(v & 0xff)) - 1);
             d.bits.n -= (int32)n;
             d.bits.m.RshAssign((uint64)(n));
-            return ((uint8)((v >> (int)(8))), default!);
+            return ((uint8)(v >> 8), default!);
         }
     }
+
 slowPath:
     for ((nint i, var code) = (0, (int32)0); i < maxCodeLength; i++) {
         if (d.bits.n == 0) {
@@ -227,7 +232,7 @@ slowPath:
                 }
             }
         }
-        if ((uint32)(d.bits.a & d.bits.m) != 0) {
+        if ((d.bits.a & d.bits.m) != 0) {
             code |= (int32)(1);
         }
         d.bits.n--;
@@ -250,7 +255,7 @@ internal static (bool, error) decodeBit(this ref decoder d) {
             }
         }
     }
-    var ret = (uint32)(d.bits.a & d.bits.m) != 0;
+    var ret = (d.bits.a & d.bits.m) != 0;
     d.bits.n--;
     d.bits.m >>= (int)(1);
     return (ret, default!);

@@ -76,6 +76,7 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
         I: "${ asd `` }"u8
     );
     var pdata = Ꮡdata;
+
     var tests = new TestEscape_tests[]{
         new(
             "if"u8,
@@ -269,8 +270,8 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
         ),
         new(
             "jsStrNotUnderEscaped"u8,
-            "<button onclick='alert({{.C | urlquery}})'>"u8, // URL escaped, then quoted for JS.
-
+            "<button onclick='alert({{.C | urlquery}})'>"u8,
+            // URL escaped, then quoted for JS.
             @"<button onclick='alert(&#34;%3CCincinnati%3E&#34;)'>"u8
         ),
         new(
@@ -285,9 +286,9 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
         ),
         new(
             "jsReAmbigOk"u8,
-            @"<script>{{if true}}var x = 1{{end}}</script>"u8, // The {if} ends in an ambiguous jsCtx but there is
- // no slash following so we shouldn't care.
-
+            @"<script>{{if true}}var x = 1{{end}}</script>"u8,
+            // The {if} ends in an ambiguous jsCtx but there is
+            // no slash following so we shouldn't care.
             @"<script>var x = 1</script>"u8
         ),
         new(
@@ -392,8 +393,8 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
         ),
         new(
             "styleStrEncodedProtocolEncoded"u8,
-            @"<a style=""background: '{{""javascript\\3a alert(1337)""}}'"">"u8, // The CSS string 'javascript\\3a alert(1337)' does not contain a colon.
-
+            @"<a style=""background: '{{""javascript\\3a alert(1337)""}}'"">"u8,
+            // The CSS string 'javascript\\3a alert(1337)' does not contain a colon.
             @"<a style=""background: 'javascript\\3a alert\28 1337\29 '"">"u8
         ),
         new(
@@ -488,18 +489,18 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
         ),
         new(
             "JS multiline block comment"u8,
-            "<script>for (;;) { if (c()) break/* foo not a label\n"u8 + " */foo({{.T}});}</script>"u8, // Newline separates break from call. If newline
- // removed, then break will consume label leaving
- // code invalid.
-
+            "<script>for (;;) { if (c()) break/* foo not a label\n"u8 + " */foo({{.T}});}</script>"u8,
+            // Newline separates break from call. If newline
+            // removed, then break will consume label leaving
+            // code invalid.
             "<script>for (;;) { if (c()) break\n"u8 + "foo( true );}</script>"u8
         ),
         new(
             "JS single-line block comment"u8,
-            "<script>for (;;) {\n"u8 + "if (c()) break/* foo a label */foo;"u8 + "x({{.T}});}</script>"u8, // Newline separates break from call. If newline
- // removed, then break will consume label leaving
- // code invalid.
-
+            "<script>for (;;) {\n"u8 + "if (c()) break/* foo a label */foo;"u8 + "x({{.T}});}</script>"u8,
+            // Newline separates break from call. If newline
+            // removed, then break will consume label leaving
+            // code invalid.
             "<script>for (;;) {\n"u8 + "if (c()) break foo;"u8 + "x( true );}</script>"u8
         ),
         new(
@@ -544,9 +545,9 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
         ),
         new(
             "JS attr block comment"u8,
-            @"<a onclick=""f(&quot;&quot;); /* alert({{.H}}) */"">"u8, // Attribute comment tests should pass if the comments
- // are successfully elided.
-
+            @"<a onclick=""f(&quot;&quot;); /* alert({{.H}}) */"">"u8,
+            // Attribute comment tests should pass if the comments
+            // are successfully elided.
             @"<a onclick=""f(&quot;&quot;); /* alert() */"">"u8
         ),
         new(
@@ -616,11 +617,14 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
         ),
         new(
             "optional attrs"u8,
-            @"<img class=""{{""iconClass""}}"""u8 + @"{{if .T}} id=""{{""<iconId>""}}""{{end}}"u8 + @" src="u8 + @"{{if .T}}""?{{""<iconPath>""}}"""u8 + @"{{else}}""images/cleardot.gif""{{end}}"u8 + @"{{if .T}}title=""{{""<title>""}}""{{end}}"u8 + @" alt="""u8 + @"{{if .T}}{{""<alt>""}}"u8 + @"{{else}}{{if .F}}{{""<title>""}}{{end}}"u8 + @"{{end}}"""u8 + @">"u8, // Double quotes inside if/else.
- // Missing space before title, but it is not a
- // part of the src attribute.
- // Quotes outside if/else.
-
+            @"<img class=""{{""iconClass""}}"""u8 + @"{{if .T}} id=""{{""<iconId>""}}""{{end}}"u8 +
+                // Double quotes inside if/else.
+                @" src="u8 + @"{{if .T}}""?{{""<iconPath>""}}"""u8 + @"{{else}}""images/cleardot.gif""{{end}}"u8 +
+                // Missing space before title, but it is not a
+                // part of the src attribute.
+                @"{{if .T}}title=""{{""<title>""}}""{{end}}"u8 +
+                // Quotes outside if/else.
+                @" alt="""u8 + @"{{if .T}}{{""<alt>""}}"u8 + @"{{else}}{{if .F}}{{""<title>""}}{{end}}"u8 + @"{{end}}"""u8 + @">"u8,
             @"<img class=""iconClass"" id=""&lt;iconId&gt;"" src=""?%3ciconPath%3e""title=""&lt;title&gt;"" alt=""&lt;alt&gt;"">"u8
         ),
         new(
@@ -640,14 +644,14 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
         ),
         new(
             "dynamic attribute name"u8,
-            @"<img on{{""load""}}=""alert({{""loaded""}})"">"u8, // Treated as JS since quotes are inserted.
-
+            @"<img on{{""load""}}=""alert({{""loaded""}})"">"u8,
+            // Treated as JS since quotes are inserted.
             @"<img onload=""alert(&#34;loaded&#34;)"">"u8
         ),
         new(
-            "bad dynamic attribute name 1"u8, // Allow checked, selected, disabled, but not JS or
- // CSS attributes.
-
+            "bad dynamic attribute name 1"u8,
+            // Allow checked, selected, disabled, but not JS or
+            // CSS attributes.
             @"<input {{""onchange""}}=""{{""doEvil()""}}"">"u8,
             @"<input ZgotmplZ=""doEvil()"">"u8
         ),
@@ -657,15 +661,15 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
             @"<div ZgotmplZ=""color: expression(alert(1337))"">"u8
         ),
         new(
-            "bad dynamic attribute name 3"u8, // Allow title or alt, but not a URL.
-
+            "bad dynamic attribute name 3"u8,
+            // Allow title or alt, but not a URL.
             @"<img {{""src""}}=""{{""javascript:doEvil()""}}"">"u8,
             @"<img ZgotmplZ=""javascript:doEvil()"">"u8
         ),
         new(
-            "bad dynamic attribute name 4"u8, // Structure preservation requires values to associate
- // with a consistent attribute.
-
+            "bad dynamic attribute name 4"u8,
+            // Structure preservation requires values to associate
+            // with a consistent attribute.
             @"<input checked {{""""}}=""Whose value am I?"">"u8,
             @"<input checked ZgotmplZ=""Whose value am I?"">"u8
         ),
@@ -675,24 +679,24 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
             @"<h3><table><thead>...</h3>"u8
         ),
         new(
-            "bad dynamic element name"u8, // Dynamic element names are typically used to switch
- // between (thead, tfoot, tbody), (ul, ol), (th, td),
- // and other replaceable sets.
- // We do not currently easily support (ul, ol).
- // If we do change to support that, this test should
- // catch failures to filter out special tag names which
- // would violate the structure preservation property --
- // if any special tag name could be substituted, then
- // the content could be raw text/RCDATA for some inputs
- // and regular HTML content for others.
-
+            "bad dynamic element name"u8,
+            // Dynamic element names are typically used to switch
+            // between (thead, tfoot, tbody), (ul, ol), (th, td),
+            // and other replaceable sets.
+            // We do not currently easily support (ul, ol).
+            // If we do change to support that, this test should
+            // catch failures to filter out special tag names which
+            // would violate the structure preservation property --
+            // if any special tag name could be substituted, then
+            // the content could be raw text/RCDATA for some inputs
+            // and regular HTML content for others.
             @"<{{""script""}}>{{""doEvil()""}}</{{""script""}}>"u8,
             @"&lt;script>doEvil()&lt;/script>"u8
         ),
         new(
             "srcset bad URL in second position"u8,
-            @"<img srcset=""{{""/not-an-image#,javascript:alert(1)""}}"">"u8, // The second URL is also filtered.
-
+            @"<img srcset=""{{""/not-an-image#,javascript:alert(1)""}}"">"u8,
+            // The second URL is also filtered.
             @"<img srcset=""/not-an-image#,#ZgotmplZ"">"u8
         ),
         new(
@@ -731,6 +735,7 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
             "<script>var a = `${ var a = \"a \\u0022 d\" }`</script>"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestEscape_tests(), out var Ꮡtest);
         test = vᴛ1;
@@ -787,14 +792,14 @@ public static void TestEscapeMap(ж<testing.T> Ꮡt) {
         ["html"u8] = @"<h1>Hi!</h1>"u8,
         ["urlquery"u8] = @"http://www.foo.com/index.html?title=main"u8
     };
-    foreach (var (_, test) in new TestEscapeMap_type[]{ // covering issue 20323
-
+    foreach (var (_, test) in new TestEscapeMap_type[]{
+        // covering issue 20323
         new(
             "field with predefined escaper name 1"u8,
             @"{{.html | print}}"u8,
             @"&lt;h1&gt;Hi!&lt;/h1&gt;"u8
-        ), // covering issue 20323
-
+        ),
+        // covering issue 20323
         new(
             "field with predefined escaper name 2"u8,
             @"{{.urlquery | print}}"u8,
@@ -846,75 +851,76 @@ public static void TestEscapeSet(ж<testing.T> Ꮡt) {
                 }.slice()))
         }.slice()
     );
-    var tests = new TestEscapeSet_tests[]{ // The trivial set.
 
+    var tests = new TestEscapeSet_tests[]{
+        // The trivial set.
         new(
             new map<@string, @string>{
                 ["main"u8] = @""u8
             },
             @""u8
-        ), // A template called in the start context.
-
+        ),
+        // A template called in the start context.
         new(
             new map<@string, @string>{
-                ["main"u8] = @"Hello, {{template ""helper""}}!"u8, // Not a valid top level HTML template.
- // "<b" is not a full tag.
-
+                ["main"u8] = @"Hello, {{template ""helper""}}!"u8,
+                // Not a valid top level HTML template.
+                // "<b" is not a full tag.
                 ["helper"u8] = @"{{""<World>""}}"u8
             },
             @"Hello, &lt;World&gt;!"u8
-        ), // A template called in a context other than the start.
-
+        ),
+        // A template called in a context other than the start.
         new(
             new map<@string, @string>{
-                ["main"u8] = @"<a onclick='a = {{template ""helper""}};'>"u8, // Not a valid top level HTML template.
- // "<b" is not a full tag.
-
+                ["main"u8] = @"<a onclick='a = {{template ""helper""}};'>"u8,
+                // Not a valid top level HTML template.
+                // "<b" is not a full tag.
                 ["helper"u8] = @"{{""<a>""}}<b"u8
             },
             @"<a onclick='a = &#34;\u003ca\u003e&#34;<b;'>"u8
-        ), // A recursive template that ends in its start context.
-
+        ),
+        // A recursive template that ends in its start context.
         new(
             new map<@string, @string>{
                 ["main"u8] = @"{{range .Children}}{{template ""main"" .}}{{else}}{{.X}} {{end}}"u8
             },
             @"foo &lt;bar&gt; baz "u8
-        ), // A recursive helper template that ends in its start context.
-
+        ),
+        // A recursive helper template that ends in its start context.
         new(
             new map<@string, @string>{
                 ["main"u8] = @"{{template ""helper"" .}}"u8,
                 ["helper"u8] = @"{{if .Children}}<ul>{{range .Children}}<li>{{template ""main"" .}}</li>{{end}}</ul>{{else}}{{.X}}{{end}}"u8
             },
             @"<ul><li>foo</li><li>&lt;bar&gt;</li><li><ul><li>baz</li></ul></li></ul>"u8
-        ), // Co-recursive templates that end in its start context.
-
+        ),
+        // Co-recursive templates that end in its start context.
         new(
             new map<@string, @string>{
                 ["main"u8] = @"<blockquote>{{range .Children}}{{template ""helper"" .}}{{end}}</blockquote>"u8,
                 ["helper"u8] = @"{{if .Children}}{{template ""main"" .}}{{else}}{{.X}}<br>{{end}}"u8
             },
             @"<blockquote>foo<br>&lt;bar&gt;<br><blockquote>baz<br></blockquote></blockquote>"u8
-        ), // A template that is called in two different contexts.
-
+        ),
+        // A template that is called in two different contexts.
         new(
             new map<@string, @string>{
                 ["main"u8] = @"<button onclick=""title='{{template ""helper""}}'; ..."">{{template ""helper""}}</button>"u8,
                 ["helper"u8] = @"{{11}} of {{""<100>""}}"u8
             },
             @"<button onclick=""title='11 of \u003c100\u003e'; ..."">11 of &lt;100&gt;</button>"u8
-        ), // A non-recursive template that ends in a different context.
- // helper starts in jsCtxRegexp and ends in jsCtxDivOp.
-
+        ),
+        // A non-recursive template that ends in a different context.
+        // helper starts in jsCtxRegexp and ends in jsCtxDivOp.
         new(
             new map<@string, @string>{
                 ["main"u8] = @"<script>var x={{template ""helper""}}/{{""42""}};</script>"u8,
                 ["helper"u8] = "{{126}}"u8
             },
             @"<script>var x= 126 /""42"";</script>"u8
-        ), // A recursive template that ends in a similar context.
-
+        ),
+        // A recursive template that ends in a similar context.
         new(
             new map<@string, @string>{
                 ["main"u8] = @"<script>var x=[{{template ""countdown"" 4}}];</script>"u8,
@@ -922,9 +928,8 @@ public static void TestEscapeSet(ж<testing.T> Ꮡt) {
             },
             @"<script>var x=[ 4 , 3 , 2 , 1 , 0 ];</script>"u8
         )
-    }.slice();
-    // A recursive template that ends in a different context.
-    /*
+        // A recursive template that ends in a different context.
+        /*
 			{
 				map[string]string{
 					"main":   `<a href="/foo{{template "helper" .}}">`,
@@ -933,6 +938,8 @@ public static void TestEscapeSet(ж<testing.T> Ꮡt) {
 				`<a href="/foo?x=foo?x=%3cbar%3e?x=baz">`,
 			},
 		*/
+    }.slice();
+
     // pred is a template function that returns the predecessor of a
     // natural number for testing recursive templates.
     var fns = new FuncMap(new map<@string, any>{["pred"u8] = ((Funcꓸꓸꓸ<any, (any, error)>)((any, error) (params ꓸꓸꓸany aʗp) => {
@@ -947,6 +954,7 @@ public static void TestEscapeSet(ж<testing.T> Ꮡt) {
         return (default!, fmt.Errorf("undefined pred(%v)"u8, (any)(a)));
     }))
     });
+
     foreach (var (_, test) in tests) {
         @string source = ""u8;
         foreach (var (name, body) in test.inputs) {
@@ -958,6 +966,7 @@ public static void TestEscapeSet(ж<testing.T> Ꮡt) {
             continue;
         }
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+
         {
             var errΔ1 = tmpl.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), mainˢ, data); if (errΔ1 != default!) {
                 Ꮡt.Errorf("%q executing %v"u8, errΔ1.Error(), tmpl.Lookup(mainˢ).OrTypedNil());
@@ -980,8 +989,8 @@ internal partial struct TestErrors_tests /*dyn*/ {
 public static void TestErrors(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var tests = new TestErrors_tests[]{ // Non-error cases.
-
+    var tests = new TestErrors_tests[]{
+        // Non-error cases.
         new(
             "{{if .Cond}}<a>{{else}}<b>{{end}}"u8,
             ""u8
@@ -1049,8 +1058,9 @@ public static void TestErrors(ж<testing.T> Ꮡt) {
         new(
             "<script>var tmpl = `asd ${return \"{\"}`;</script>"u8,
             @""u8
-        ), // Error cases.
+        ),
 
+        // Error cases.
         new(
             "{{if .Cond}}<a{{end}}"u8,
             "z:1:5: {{if}} branches"u8
@@ -1060,13 +1070,13 @@ public static void TestErrors(ж<testing.T> Ꮡt) {
             "z:1:5: {{if}} branches"u8
         ),
         new(
-            @"{{if .Cond}}<a href=""foo"">{{else}}<a href=""bar>{{end}}"u8, // Missing quote in the else branch.
-
+            // Missing quote in the else branch.
+            @"{{if .Cond}}<a href=""foo"">{{else}}<a href=""bar>{{end}}"u8,
             "z:1:5: {{if}} branches"u8
         ),
         new(
-            "<a {{if .Cond}}href='{{else}}title='{{end}}{{.X}}'>"u8, // Different kind of attribute: href implies a URL.
-
+            // Different kind of attribute: href implies a URL.
+            "<a {{if .Cond}}href='{{else}}title='{{end}}{{.X}}'>"u8,
             "z:1:8: {{if}} branches"u8
         ),
         new(
@@ -1126,12 +1136,12 @@ public static void TestErrors(ж<testing.T> Ꮡt) {
             @"unfinished JS regexp charset: ""foo[\\]/"""u8
         ),
         new(
-            @"<script>{{if false}}var x = 1{{end}}/-{{""1.5""}}/i.test(x)</script>"u8, // It is ambiguous whether 1.5 should be 1\.5 or 1.5.
- // Either `var x = 1/- 1.5 /i.test(x)`
- // where `i.test(x)` is a method call of reference i,
- // or `/-1\.5/i.test(x)` which is a method call on a
- // case insensitive regular expression.
-
+            // It is ambiguous whether 1.5 should be 1\.5 or 1.5.
+            // Either `var x = 1/- 1.5 /i.test(x)`
+            // where `i.test(x)` is a method call of reference i,
+            // or `/-1\.5/i.test(x)` which is a method call on a
+            // case insensitive regular expression.
+            @"<script>{{if false}}var x = 1{{end}}/-{{""1.5""}}/i.test(x)</script>"u8,
             @"'/' could start a division or regexp: ""/-"""u8
         ),
         new(
@@ -1139,13 +1149,15 @@ public static void TestErrors(ж<testing.T> Ꮡt) {
             "z:1:11: no such template \"foo\""u8
         ),
         new(
-            @"<div{{template ""y""}}>"u8 + @"{{define ""y""}} foo<b{{end}}"u8, // Illegal starting in stateTag but not in stateText.
-
+            @"<div{{template ""y""}}>"u8 +
+                // Illegal starting in stateTag but not in stateText.
+                @"{{define ""y""}} foo<b{{end}}"u8,
             @"""<"" in attribute name: "" foo<b"""u8
         ),
         new(
-            @"<script>reverseList = [{{template ""t""}}]</script>"u8 + @"{{define ""t""}}{{if .Tail}}{{template ""t"" .Tail}}{{end}}{{.Head}}"",{{end}}"u8, // Missing " after recursive call.
-
+            @"<script>reverseList = [{{template ""t""}}]</script>"u8 +
+                // Missing " after recursive call.
+                @"{{define ""t""}}{{if .Tail}}{{template ""t"" .Tail}}{{end}}{{.Head}}"",{{end}}"u8,
             @": cannot compute output context for template t$htmltemplate_stateJS_elementScript"u8
         ),
         new(
@@ -1173,29 +1185,29 @@ public static void TestErrors(ж<testing.T> Ꮡt) {
             @": expected space, attr name, or end of tag, but got ""=foo>"""u8
         ),
         new(
-            @"Hello, {{. | urlquery | print}}!"u8, // urlquery is disallowed if it is not the last command in the pipeline.
-
+            @"Hello, {{. | urlquery | print}}!"u8,
+            // urlquery is disallowed if it is not the last command in the pipeline.
             @"predefined escaper ""urlquery"" disallowed in template"u8
         ),
         new(
-            @"Hello, {{. | html | print}}!"u8, // html is disallowed if it is not the last command in the pipeline.
-
+            @"Hello, {{. | html | print}}!"u8,
+            // html is disallowed if it is not the last command in the pipeline.
             @"predefined escaper ""html"" disallowed in template"u8
         ),
         new(
-            @"Hello, {{html . | print}}!"u8, // A direct call to html is disallowed if it is not the last command in the pipeline.
-
+            @"Hello, {{html . | print}}!"u8,
+            // A direct call to html is disallowed if it is not the last command in the pipeline.
             @"predefined escaper ""html"" disallowed in template"u8
         ),
         new(
-            @"<div class={{. | html}}>Hello<div>"u8, // html is disallowed in a pipeline that is in an unquoted attribute context,
- // even if it is the last command in the pipeline.
-
+            @"<div class={{. | html}}>Hello<div>"u8,
+            // html is disallowed in a pipeline that is in an unquoted attribute context,
+            // even if it is the last command in the pipeline.
             @"predefined escaper ""html"" disallowed in template"u8
         ),
         new(
-            @"Hello, {{. | urlquery | html}}!"u8, // html is allowed since it is the last command in the pipeline, but urlquery is not.
-
+            @"Hello, {{. | urlquery | html}}!"u8,
+            // html is allowed since it is the last command in the pipeline, but urlquery is not.
             @"predefined escaper ""urlquery"" disallowed in template"u8
         )
     }.slice();
@@ -1248,8 +1260,8 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
             new context(nil)
         ),
         new(
-            @"I <3 Ponies!"u8, // An orphaned "<" is OK.
-
+            // An orphaned "<" is OK.
+            @"I <3 Ponies!"u8,
             new context(nil)
         ),
         new(
@@ -1625,9 +1637,9 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
             new context(state: stateJS, element: elementScript)
         ),
         new(
-            @"<script>document.write(""<script>alert(1)</script>"");"u8, // <script and </script tags are escaped, so </script> should not
- // cause us to exit the JS state.
-
+            // <script and </script tags are escaped, so </script> should not
+            // cause us to exit the JS state.
+            @"<script>document.write(""<script>alert(1)</script>"");"u8,
             new context(state: stateJS, element: elementScript)
         ),
         new(
@@ -1661,13 +1673,13 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
         new(
             @"<script type=""text/template"">"u8,
             new context(state: stateText)
-        ), // covering issue 19968
-
+        ),
+        // covering issue 19968
         new(
             @"<script type=""TEXT/JAVASCRIPT"">"u8,
             new context(state: stateJS, element: elementScript)
-        ), // covering issue 19965
-
+        ),
+        // covering issue 19965
         new(
             @"<script TYPE=""text/template"">"u8,
             new context(state: stateText)
@@ -1857,6 +1869,7 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
             new context(state: stateJSTmplLit, element: elementScript)
         )
     }.slice();
+
     foreach (var (_, test) in tests) {
         var (b, e) = (slice<byte>(test.input), makeEscaper(nil));
         var c = e.escapeText(new context(nil), Ꮡ(new parse.TextNode(NodeType: parse.NodeText, Text: b)));
@@ -1929,19 +1942,19 @@ public static void TestEnsurePipelineContains(ж<testing.T> Ꮡt) {
             new @string[]{"urlquery"u8, "html"u8}.slice()
         ),
         new(
-            "{{.X | println.x }}"u8, // covering issue 10801
-
+            // covering issue 10801
+            "{{.X | println.x }}"u8,
             ".X | println.x | urlquery | html"u8,
             new @string[]{"urlquery"u8, "html"u8}.slice()
         ),
         new(
-            "{{.X | (print 12 | println).x }}"u8, // covering issue 10801
-
+            // covering issue 10801
+            "{{.X | (print 12 | println).x }}"u8,
             ".X | (print 12 | println).x | urlquery | html"u8,
             new @string[]{"urlquery"u8, "html"u8}.slice()
-        ), // The following test cases ensure that the merging of internal escapers
- // with the predefined "html" and "urlquery" escapers is correct.
-
+        ),
+        // The following test cases ensure that the merging of internal escapers
+        // with the predefined "html" and "urlquery" escapers is correct.
         new(
             "{{.X | urlquery}}"u8,
             ".X | _html_template_urlfilter | urlquery"u8,
@@ -2056,13 +2069,14 @@ public static void TestRedundantFuncs(ж<testing.T> Ꮡt) {
 
     var inputs = new any[]{
         (@string)("\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f" + "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f" + @" !""#$%&'()*+,-./" + @"0123456789:;<=>?" + @"@ABCDEFGHIJKLMNO" + @"PQRSTUVWXYZ[\]^_" + "`abcdefghijklmno" + "pqrstuvwxyz{|}~\x7f" + "\u00A0\u0100\u2028\u2029\ufeff\ufdec\ufffd\uffff\U0001D11E" + "&amp;%22\\"),
-        ((global::go.html.template_package.CSS)(@string)aHrefExampleComFooˢ),
-        ((global::go.html.template_package.HTML)(@string)helloBWorldBAmpTcˢ),
-        ((global::go.html.template_package.HTMLAttr)(@string)dirLtrˢ),
-        ((global::go.html.template_package.JS)(@string)cAlertHelloWorldˢ),
-        ((global::go.html.template_package.JSStr)(@string)helloWorldOReillyX21ˢ),
-        ((global::go.html.template_package.URL)(@string)greetingH69Addresseeˢ3)
+        (global::go.html.template_package.CSS)(@string)aHrefExampleComFooˢ,
+        (global::go.html.template_package.HTML)(@string)helloBWorldBAmpTcˢ,
+        (global::go.html.template_package.HTMLAttr)(@string)dirLtrˢ,
+        (global::go.html.template_package.JS)(@string)cAlertHelloWorldˢ,
+        (global::go.html.template_package.JSStr)(@string)helloWorldOReillyX21ˢ,
+        (global::go.html.template_package.URL)(@string)greetingH69Addresseeˢ3
     }.slice();
+
     foreach (var (n0, m) in redundantFuncs) {
         var f0 = funcMap[n0]._<Funcꓸꓸꓸ<any, @string>>();
         foreach (var (n1, _) in m) {
@@ -2159,7 +2173,7 @@ public static void TestPipeToMethodIsEscaped(ж<testing.T> Ꮡt) {
                 }
             }, ref ᒐ);
             ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-            tmplʗ1.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), ((Issue7379)0));
+            tmplʗ1.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), (Issue7379)0);
             return b.String();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2183,6 +2197,7 @@ internal static readonly @string incompleteˢ = "incomplete"u8;
 // This is issue #10204.
 public static void TestErrorOnUndefined(ж<testing.T> Ꮡt) {
     var tmpl = New(undefinedˢ);
+
     var err = tmpl.Execute(default!, default!);
     if (err == default!){
         Ꮡt.Error(expectedErrorˢ);
@@ -2272,6 +2287,7 @@ public static void TestOrphanedTemplate(ж<testing.T> Ꮡt) {
     var t1 = Must(ᴛ19, ᴛ20);
     var (ᴛ21, ᴛ22) = t1.New(fooˢ2).Parse(barˢ);
     var t2 = Must(ᴛ21, ᴛ22);
+
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     @string wantError = wantErrorᶜ;
     {

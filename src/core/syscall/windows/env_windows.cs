@@ -78,15 +78,16 @@ public static slice<@string> Environ() {
             return default!;
         }
         defer(FreeEnvironmentStrings, envp, ref ᒐ);
+
         var r = new slice<@string>(0, 50); // Empty with room to grow.
         uintptr size = /* unsafe.Sizeof(*envp) */ 2;
-        while (envp.Value != 0) {
-            // environment block ends with empty string
+        while (envp.Value != 0) { // environment block ends with empty string
             // find NUL terminator
             @unsafe.Pointer end = @unsafe.Pointer.FromPinnedBox(envp);
             while (~(ж<uint16>)(uintptr)(end) != 0) {
                 end = (uintptr)@unsafe.Add(end, size);
             }
+
             var entry = @unsafe.Slice(envp, ((uintptr)end - (uintptr)envp) / size);
             r = append(r, UTF16ToString(entry));
             envp = (ж<uint16>)(uintptr)(@unsafe.Add(end, size));

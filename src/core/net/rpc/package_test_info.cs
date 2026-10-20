@@ -26,7 +26,6 @@ global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,8 +48,13 @@ using static global::go.net.rpc_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.net.rpc_package.Server, ж<global::go.net.rpc_package.Server>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,8 +64,8 @@ using static global::go.net.rpc_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("net/rpc/client_test.go", "client_test.cs", "ABUogKKA0oKCpIKC1oKCgoKCggALGKKCAAkGooKCgpSCpoSCgpSEgoKWgoKCloKEog==", "55-63:1")]
-[assembly: global::go.GoPositionMap("net/rpc/server_test.go", "server_test.cs", "ADJcsoKmsoLWooKUgqaygqaigqaCpqKCyqKCAAkSsoKmsoKmsoKCpoKCgpTmgoKCgoSCgoKEgvaCgoKCgoSCgoKEgtaCgoKmgoKCgoIAGAbCgoKUpoKCgoKUgqiCgoKClIKogoKUgpKCqIKCgoKSgqiCgoKChIKClIKWgoKUgqiCgpSCkoKogoKCkoKYkpKCgoKSgqiCgoKClIKCloKCgoKUgqiCgoKClIK01KKCgpSmgoKCgpSCtKSCgoKCpqKCgoKUlIKUpoKCgoKUgrT0ooSCgpSmgpKCgpSCqIKSgoKUgIK4gpKCgpSAgsQADBjCgoKCgoKClJSClKaigoKmgoKUgqaigpSUpoKmgoKCgqaikoSCgoKClIKWgoK0AA0QgqaCpoKmggAKCJKCgpSCgpSCgpSCgpKCAAgMlKaCtoK2gtaigpSCooKClLSkxKSigpSCgqKkgqaC1qKCgoKUlIKCsoKClIIACwqCgpSClKaCgpSClO6CpoKC1oL2ooKClJKCgpSClKLUooSCgpSUgoKCgpSCgrTUgoSCgpSCgpSCgrqSgoKChIKCgtaCgoKCwpKCgpSikoKClIKCloKClIKCgoKC3oKCgoKCgujCgoKClKaChKKCgoKClILYpMKClIKCgoKUpoKCkpKCgoKChILCgoKCpqKCgoKCgoKUgoKmpqKkgqaCpoKmgg==", "546-550:1;560-562:1;586-594:1;705-712:1;760-771:1;798-804:1;805-820:2")]
+[assembly: global::go.GoPositionMap("net/rpc/client_test.go", "client_test.cs", "ABUogKKA0oKCpIKC1oKCgoKCggALGKKCAAkGooKCgpSCppSCgpSUgoKmgoKCpoKUog==", "55-63:1")]
+[assembly: global::go.GoPositionMap("net/rpc/server_test.go", "server_test.cs", "ADJcsoKmsoLWooKUgqaygqaigqaCpqKCyqKCAAkSsoKmsoKmsoKCpoKCgpTmgoKCgpSCgoKUgvaCgoKCgpSCgoKUgtaCgoKmgoKCgoIAGAbCgoKUtoKCgoKUgriCgoKClIK4goKUgpKCuIKCgoKSgriCgoKClIKClIKmgoKUgriCgpSCkoK4goKCkoKokpKCgoKSgriCgoKClIKCpoKCgoKUgriCgoKClIK01KKCgpS2goKCgpSCtKSCgoKCpqKCgoKUlIKUtoKCgoKUgrT0opSCgpS2gpKCgpSCuIKSgoKUgILIgpKCgpSAgsQADBjCgoKCgoKClJSClKaigoKmgoKUgqaigpSUpoKmgoKCgqaikpSCgoKClIKmgoK0AA0QgqaCpoKmggAKCJKCgpSCgpSCgpSCgpKCAAgMlKaCtoK2gtaigqSCooKClLSkxKSigpSCgqKkgqaC1qKCgoKUpIKCsoKClIIACwqCgpSClKaCgpSClO6CpoKC1oL2ooKCpJKCgpSClKLUopSCgpSkgoKCgpSCgrTUgpSCgpSCgpSCgrqSgoKClIKCgtaCgoKCwpKCgpSikoKClIKCpoKCpIKCgoKC7oKCgoKCgujCgoKClLaClKKCgoKClILYpMKClIKCgoKUtoKCkpKCgoKClILCgoKCpqKCgoKCgoKUgoKmpqKkgqaCpoKmgg==", "546-550:1;560-562:1;586-594:1;705-712:1;760-771:1;798-804:1;805-820:2")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

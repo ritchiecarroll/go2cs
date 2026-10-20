@@ -39,6 +39,8 @@ partial struct mud {
     internal array<float64> hist = new(mudDegree);
 }
 
+// mudDegree is the number of buckets in the MUD summary
+// histogram.
 internal static UntypedInt mudDegree => 1024;
 
 partial struct edge {
@@ -56,16 +58,19 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
     if (area == 0D) {
         return;
     }
+
     if (r < l) {
         (l, r) = (r, l);
     }
+
     // Add the edges.
     if (l == r){
-        d.unsorted = append(d.unsorted, new edge(l, 0D, area));
+        d.unsorted = builtin.append(d.unsorted, new edge(l, 0D, area));
     } else {
         var delta = area / (r - l);
-        d.unsorted = append(d.unsorted, new edge(l, delta, 0D), new edge(r, -delta, 0D));
+        d.unsorted = builtin.append(d.unsorted, new edge(l, delta, 0D), new edge(r, -delta, 0D));
     }
+
     // Update the histogram.
     var h = Ꮡd.of(mud.Ꮡhist);
     var (lbFloat, lf) = math.Modf(l * (float64)mudDegree);
@@ -92,6 +97,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
             }
         }
     }
+
     // Update mass tracking.
     {
         var thresh = (float64)d.trackBucket / (float64)mudDegree; if (l < thresh) {
@@ -116,6 +122,7 @@ internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) 
 // approxInvCumulativeSum.
 internal static void setTrackMass(this ref mud d, float64 mass) {
     d.trackMass = mass;
+
     // Find the bucket currently containing trackMass by computing
     // the cumulative sum.
     var sum = 0.0D;
@@ -156,6 +163,7 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
     if (len(d.sorted) == 0 && len(d.unsorted) == 0) {
         return (math.NaN(), false);
     }
+
     // Sort edges.
     var edges = d.unsorted;
     slices.SortFunc(edges, (edge a, edge b) => cmp.Compare(a.x, b.x));
@@ -187,6 +195,7 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
         }
         d.sorted = newSorted;
     }
+
     // Traverse edges in order computing a cumulative sum.
     var (csum, rate, prevX) = (0.0D, 0.0D, 0.0D);
     foreach (var (_, e) in d.sorted) {

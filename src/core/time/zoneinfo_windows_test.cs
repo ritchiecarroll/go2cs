@@ -16,6 +16,7 @@ internal static void testZoneAbbr(ж<Δtesting.T> Ꮡt) {
     var t1 = Now();
     // discard nsec
     t1 = Date(t1.Year(), t1.Month(), t1.Day(), t1.Hour(), t1.Minute(), t1.Second(), 0, t1.Location());
+
     var (t2, err) = Parse(RFC1123, t1.Format(RFC1123));
     if (err != default!) {
         Ꮡt.Fatalf("Parse failed: %v"u8, err);
@@ -65,6 +66,7 @@ public static void TestToEnglishName(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("cannot open CEST time zone information from registry: %s"u8, err);
         }
         defer(() => k.Close(), ref ᒐ);
+
         @string std = default!;
         @string dlt = default!;
         // Try MUI_Std and MUI_Dlt first, fallback to Std and Dlt if *any* error occurs
@@ -72,8 +74,7 @@ public static void TestToEnglishName(ж<Δtesting.T> Ꮡt) {
         if (err == default!) {
             (dlt, err) = k.GetMUIStringValue(muiDltˢ);
         }
-        if (err != default!) {
-            // Fallback to Std and Dlt
+        if (err != default!) { // Fallback to Std and Dlt
             {
                 (std, _, err) = k.GetStringValue(stdˢ); if (err != default!) {
                     Ꮡt.Fatalf("cannot read CEST Std registry key: %s"u8, err);
@@ -85,6 +86,7 @@ public static void TestToEnglishName(ж<Δtesting.T> Ꮡt) {
                 }
             }
         }
+
         (var name, err) = time_internal_test_package.ToEnglishName(std, dlt);
         if (err != default!) {
             Ꮡt.Fatalf("toEnglishName failed: %s"u8, err);

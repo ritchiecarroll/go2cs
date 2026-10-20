@@ -41,10 +41,10 @@ internal static bool isCSSNmchar(rune r) {
     // Based on the CSS3 nmchar production but ignores multi-rune escape
     // sequences.
     // https://www.w3.org/TR/css3-syntax/#SUBTOK-nmchar
-    return (rune)'a' <= r && r <= (rune)'z' || (rune)'A' <= r && r <= (rune)'Z' || (rune)'0' <= r && r <= (rune)'9' || r == (rune)'-' || r == (rune)'_' || 0x80 <= r && r <= 0xd7ff || 0xe000 <= r && r <= 0xfffd || 0x10000 <= r && r <= 0x10ffff;
+    return (rune)'a' <= r && r <= (rune)'z' || (rune)'A' <= r && r <= (rune)'Z' || (rune)'0' <= r && r <= (rune)'9' || r == (rune)'-' || r == (rune)'_' ||
+        // Non-ASCII cases below.
+        0x80 <= r && r <= 0xd7ff || 0xe000 <= r && r <= 0xfffd || 0x10000 <= r && r <= 0x10ffff;
 }
-
-// Non-ASCII cases below.
 
 // decodeCSS decodes CSS3 escapes given a sequence of stringchars.
 // If there is no change, it returns the input, otherwise it returns a slice
@@ -122,7 +122,6 @@ internal static rune hexDecode(slice<byte> s) {
             throw panic(fmt.Sprintf("Bad hex digit in %q"u8, s));
             break;
         }}
-
     }
     return n;
 }
@@ -138,15 +137,14 @@ internal static slice<byte> skipCSSSpace(slice<byte> c) {
         return c[1..];
     }
     case (rune)'\r': {
+        // This differs from CSS3's wc production because it contains a
+        // probable spec error whereby wc contains all the single byte
+        // sequences in nl (newline) but not CRLF.
         if (len(c) >= 2 && c[1] == (rune)'\n') {
-            // This differs from CSS3's wc production because it contains a
-            // probable spec error whereby wc contains all the single byte
-            // sequences in nl (newline) but not CRLF.
             return c[2..];
         }
         return c[1..];
     }}
-
     return c;
 }
 
@@ -156,7 +154,6 @@ internal static bool isCSSSpace(byte b) {
     case (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r' or (rune)' ': {
         return true;
     }}
-
     return false;
 }
 
@@ -182,7 +179,6 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
             continue;
             break;
         }}
-
         if (written == 0) {
             Ꮡb.Grow(len(s));
         }
@@ -200,14 +196,14 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
     return b.String();
 }
 
-// Encode HTML specials as hex so the output can be embedded
-// in HTML attributes without further encoding.
 internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [0] = @"\0"u8,
     [(rune)'\t'] = @"\9"u8,
     [(rune)'\n'] = @"\a"u8,
     [(rune)'\f'] = @"\c"u8,
     [(rune)'\r'] = @"\d"u8,
+    // Encode HTML specials as hex so the output can be embedded
+    // in HTML attributes without further encoding.
     [(rune)'"'] = @"\22"u8,
     [(rune)'&'] = @"\26"u8,
     [(rune)'\''] = @"\27"u8,
@@ -235,12 +231,14 @@ internal static slice<byte> mozBindingBytes = slice<byte>("mozbinding"u8);
 // and anything that might execute scripts.
 internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
+    var idᴷ = new stackAppend<byte>();
 
     var (s, t) = stringify(args.ꓸꓸꓸ);
     if (t == contentTypeCSS) {
         return s;
     }
     var (b, id) = (decodeCSS(slice<byte>(s)), new slice<byte>(0, 64));
+
     // CSS3 error handling is specified as honoring string boundaries per
     // https://www.w3.org/TR/css3-syntax/#error-handling :
     //     Malformed declarations. User agents must handle unexpected
@@ -258,26 +256,25 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
             return filterFailsafe;
         }
         case (rune)'-': {
+            // Disallow <!-- or -->.
+            // -- should not appear in valid identifiers.
             if (i != 0 && b[i - 1] == (rune)'-') {
-                // Disallow <!-- or -->.
-                // -- should not appear in valid identifiers.
                 return filterFailsafe;
             }
             break;
         }
         default: {
             if (c < utf8.RuneSelf && isCSSNmchar((rune)c)) {
-                id = append(id, c);
+                id = append(idᴷ, id, c);
             }
             break;
         }}
-
     }
     id = bytes.ToLower(id);
     if (bytes.Contains(id, expressionBytes) || bytes.Contains(id, mozBindingBytes)) {
         return filterFailsafe;
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 } // end template_package

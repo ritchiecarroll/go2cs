@@ -26,6 +26,10 @@ public class ShadowArrayPointerTests
     {
         nint block = Marshal.AllocHGlobal(4096);
 
+        // The block stands for a sysAlloc'd one, so it is registered as the runtime's own, as sysAllocOS registers
+        // what it maps: over memory the runtime does not own, the store refuses instead (NativePointerArrayTests).
+        GoOsMemory.Register((nuint)block, 4096);
+
         try
         {
             // AllocHGlobal does not zero; the untouched-block check below needs a known starting word.
@@ -53,6 +57,7 @@ public class ShadowArrayPointerTests
         }
         finally
         {
+            GoOsMemory.Unregister((nuint)block, 4096);
             Marshal.FreeHGlobal(block);
         }
     }

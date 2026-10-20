@@ -26,6 +26,7 @@ public static void TestConnAndListener(ж<testing.T> Ꮡt) {
                 if (!testableNetwork(networkΔ1)) {
                     tΔ1.Skipf("skipping %s test"u8, networkΔ1);
                 }
+
                 var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), networkΔ1);
                 var lsʗ1 = ls;
                 defer(() => lsʗ1.teardown(), ref ᒐ);
@@ -42,6 +43,7 @@ public static void TestConnAndListener(ж<testing.T> Ꮡt) {
                 if ((~ls).Listener.Addr().Network() != networkΔ1) {
                     tΔ1.Fatalf("got %s; want %s"u8, (~ls).Listener.Addr().Network(), networkΔ1);
                 }
+
                 var (c, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
                 if (err != default!) {
                     tΔ1.Fatal(err);
@@ -54,6 +56,7 @@ public static void TestConnAndListener(ж<testing.T> Ꮡt) {
                 c.SetDeadline(time.Now().Add(someTimeout));
                 c.SetReadDeadline(time.Now().Add(someTimeout));
                 c.SetWriteDeadline(time.Now().Add(someTimeout));
+
                 {
                     var (_, errΔ1) = c.Write(slice<byte>("CONN AND LISTENER TEST"u8)); if (errΔ1 != default!) {
                         tΔ1.Fatal(errΔ1);
@@ -65,6 +68,7 @@ public static void TestConnAndListener(ж<testing.T> Ꮡt) {
                         tΔ1.Fatal(errΔ2);
                     }
                 }
+
                 foreach (var errΔ3 in ch) {
                     tΔ1.Errorf("#%d: %v"u8, iΔ1, errΔ3);
                 }

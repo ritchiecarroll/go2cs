@@ -37,7 +37,7 @@ internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) {
     for (nint i = 0; i < N; i++) {
         testBytes[i] = (byte)((rune)'a' + (byte)(i % 26));
     }
-    testString = ((@string)testBytes);
+    testString = (@string)testBytes;
 }
 
 // Verify that contents of buf match the string s.
@@ -49,14 +49,17 @@ internal static void check(ж<testing.T> Ꮡt, @string testname, ж<bytes.Buffer
     if (buf.Len() != len(bytes)) {
         Ꮡt.Errorf("%s: buf.Len() == %d, len(buf.Bytes()) == %d"u8, testname, buf.Len(), len(bytes));
     }
+
     if (buf.Len() != len(str)) {
         Ꮡt.Errorf("%s: buf.Len() == %d, len(buf.String()) == %d"u8, testname, buf.Len(), len(str));
     }
+
     if (buf.Len() != len(s)) {
         Ꮡt.Errorf("%s: buf.Len() == %d, len(s) == %d"u8, testname, buf.Len(), len(s));
     }
+
     if (((sstring)bytes) != s) {
-        Ꮡt.Errorf("%s: string(buf.Bytes()) == %q, s == %q"u8, testname, ((@string)bytes), s);
+        Ꮡt.Errorf("%s: string(buf.Bytes()) == %q, s == %q"u8, testname, (@string)bytes, s);
     }
 }
 
@@ -141,6 +144,7 @@ internal static void empty(ж<testing.T> Ꮡt, @string testname, ж<bytes.Buffer
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     check(Ꮡt, testname + " (empty 1)"u8, Ꮡbuf, s);
+
     while (ᐧ) {
         var (n, err) = buf.Read(fub);
         if (n == 0) {
@@ -152,6 +156,7 @@ internal static void empty(ж<testing.T> Ꮡt, @string testname, ж<bytes.Buffer
         s = s.slice(n);
         check(Ꮡt, testname + " (empty 3)"u8, Ꮡbuf, s);
     }
+
     check(Ꮡt, testname + " (empty 4)"u8, Ꮡbuf, ""u8);
 }
 
@@ -169,12 +174,16 @@ internal static readonly @string testBasicOperations10ˢ = "TestBasicOperations 
 
 public static void TestBasicOperations(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     for (nint i = 0; i < 5; i++) {
         check(Ꮡt, testBasicOperations1ˢ, Ꮡbuf, ""u8);
+
         buf.Reset();
         check(Ꮡt, testBasicOperations2ˢ, Ꮡbuf, ""u8);
+
         buf.Truncate(0);
         check(Ꮡt, testBasicOperations3ˢ, Ꮡbuf, ""u8);
+
         var (n, err) = buf.Write(testBytes[0..1]);
         {
             nint want = 1; if (err != default! || n != want) {
@@ -182,8 +191,10 @@ public static void TestBasicOperations(ж<testing.T> Ꮡt) {
             }
         }
         check(Ꮡt, testBasicOperations4ˢ, Ꮡbuf, "a"u8);
+
         buf.WriteByte(testString[1]);
         check(Ꮡt, testBasicOperations5ˢ, Ꮡbuf, "ab"u8);
+
         (n, err) = buf.Write(testBytes[2..26]);
         {
             nint want = 24; if (err != default! || n != want) {
@@ -191,12 +202,16 @@ public static void TestBasicOperations(ж<testing.T> Ꮡt) {
             }
         }
         check(Ꮡt, testBasicOperations6ˢ, Ꮡbuf, testString[0..26]);
+
         buf.Truncate(26);
         check(Ꮡt, testBasicOperations7ˢ, Ꮡbuf, testString[0..26]);
+
         buf.Truncate(20);
         check(Ꮡt, testBasicOperations8ˢ, Ꮡbuf, testString[0..20]);
+
         empty(Ꮡt, testBasicOperations9ˢ, Ꮡbuf, testString[0..20], new slice<byte>(5));
         empty(Ꮡt, testBasicOperations10ˢ, Ꮡbuf, ""u8, new slice<byte>(100));
+
         buf.WriteByte(testString[1]);
         (var c, err) = buf.ReadByte();
         {
@@ -286,6 +301,7 @@ public static void TestMixedReadsAndWrites(ж<testing.T> Ꮡt) {
         } else {
             s = fillBytes(Ꮡt, testMixedReadsAndWrites1ˢ, Ꮡbuf, s, 1, testBytes.slice(0, wlen));
         }
+
         nint rlen = rand.Intn(len(testString));
         var fub = new slice<byte>(rlen);
         var (n, _) = buf.Read(fub);
@@ -359,9 +375,10 @@ public static void TestReadFromPanicReader(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         if (i != 0) {
-            Ꮡt.Fatalf("unexpected return from bytes.ReadFrom (1): got: %d, want %d"u8, i, (nint)(0));
+            Ꮡt.Fatalf("unexpected return from bytes.ReadFrom (1): got: %d, want %d"u8, i, (nint)0);
         }
         check(Ꮡt, testReadFromPanicReader1ˢ, Ꮡbuf, ""u8);
+
         // Confirm that when Reader panics, the empty buffer remains empty
         ref var buf2 = ref heap(new bytes.Buffer(), out var Ꮡbuf2);
         defer(() => {
@@ -390,9 +407,9 @@ public static void TestReadFromNegativeReader(ж<testing.T> Ꮡt) {
                 break;
             }
             case {} Δerr when Δerr._<error>(out var err): {
+                // this is the error string of errNegativeRead
                 @string wantError = bytesBufferReaderˢ;
                 if (err.Error() != wantError) {
-                    // this is the error string of errNegativeRead
                     Ꮡt.Fatalf("recovered panic: got %v, want %v"u8, err.Error(), wantError);
                 }
                 break;
@@ -403,6 +420,7 @@ public static void TestReadFromNegativeReader(ж<testing.T> Ꮡt) {
                 break;
             }}
         }, ref ᒐ);
+
         b.ReadFrom(new bytes_test_package.negativeReaderжReader(@new<negativeReader>()));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -435,6 +453,7 @@ public static void TestWriteAppend(ж<testing.T> Ꮡt) {
     if (!Equal(got.Bytes(), want)) {
         Ꮡt.Fatalf("Bytes() = %q, want %q"u8, got, want);
     }
+
     // With a sufficiently sized buffer, there should be no allocations.
     var n = testing.AllocsPerRun(100, () => {
         Ꮡgot.Value.Reset();
@@ -472,10 +491,12 @@ public static void TestRuneIO(ж<testing.T> Ꮡt) {
         n += size;
     }
     b = b.slice(0, n);
+
     // Check the resulting bytes
     if (!Equal(buf.Bytes(), b)) {
         Ꮡt.Fatalf("incorrect result from WriteRune: %q not %q"u8, buf.Bytes(), b);
     }
+
     var p = new slice<byte>(utf8.UTFMax);
     // Read it back with ReadRune
     for (var r = (rune)0; r < NRune; r++) {
@@ -485,8 +506,10 @@ public static void TestRuneIO(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("ReadRune(%U) got %U,%d not %U,%d (err=%s)"u8, r, nr, nbytes, r, size, err);
         }
     }
+
     // Check that UnreadRune works
     buf.Reset();
+
     // check at EOF
     {
         var err = buf.UnreadRune(); if (err == default!) {
@@ -503,6 +526,7 @@ public static void TestRuneIO(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(unreadRuneAfterReadRuneˢ);
         }
     }
+
     // check not at EOF
     buf.Write(b);
     for (var r = (rune)0; r < NRune; r++) {
@@ -561,7 +585,6 @@ public static void TestNext(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct readBytesTestsᴛ1 /*dyn*/ {
     internal @string buffer;
@@ -623,6 +646,7 @@ public static void BenchmarkReadString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     UntypedInt n = /* 32 << 10 */ 32768;
+
     var data = new slice<byte>(n);
     data[n - 1] = (rune)'x';
     b.SetBytes((int64)n);
@@ -642,6 +666,7 @@ public static void TestGrow(ж<testing.T> Ꮡt) {
     foreach (var (_, growLen) in new nint[]{0, 100, 1000, 10000, 100000}.slice()) {
         foreach (var (_, startLen) in new nint[]{0, 100, 1000, 10000, 100000}.slice()) {
             var xBytes = Repeat(x, startLen);
+
             var buf = NewBuffer(xBytes);
             // If we read, this affects buf.off, which is good to test.
             var (readBytes, _) = buf.Read(tmp);
@@ -677,6 +702,7 @@ public static void TestGrowOverflow(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         var buf = NewBuffer(new slice<byte>(1));
         nint maxInt = /* int(^uint(0) >> 1) */ unchecked((nint)9223372036854775807);
         buf.Grow(maxInt);
@@ -706,6 +732,7 @@ internal static readonly object unreadByteAfterReadNilˢ = (@string)"UnreadByte 
 
 public static void TestUnreadByte(ж<testing.T> Ꮡt) {
     var b = @new<bytes.Buffer>();
+
     // check at EOF
     {
         var errΔ1 = b.UnreadByte(); if (errΔ1 == default!) {
@@ -722,8 +749,10 @@ public static void TestUnreadByte(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(unreadByteAfterReadByteˢ);
         }
     }
+
     // check not at EOF
     b.WriteString("abcdefghijklmnopqrstuvwxyz"u8);
+
     // after unsuccessful read
     {
         var (n, errΔ4) = b.Read(default!); if (n != 0 || errΔ4 != default!) {
@@ -735,6 +764,7 @@ public static void TestUnreadByte(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(unreadByteAfterReadNilˢ);
         }
     }
+
     // after successful read
     {
         var (_, errΔ6) = b.ReadBytes((rune)'m'); if (errΔ6 != default!) {
@@ -761,7 +791,7 @@ public static void TestBufferGrowth(ж<testing.T> Ꮡt) {
     var buf = new slice<byte>(1024);
     b.Write(buf[0..1]);
     nint cap0 = default!;
-    for (nint i = 0; i < (5 << (int)(10)); i++) {
+    for (nint i = 0; i < 5 << 10; i++) {
         b.Write(buf);
         b.Read(buf);
         if (i == 0) {
@@ -813,7 +843,7 @@ public static void BenchmarkBufferNotEmptyWriteRead(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         bytes.Buffer bΔ1 = default!;
         bΔ1.Write(buf[0..1]);
-        for (nint iΔ1 = 0; iΔ1 < (5 << (int)(10)); iΔ1++) {
+        for (nint iΔ1 = 0; iΔ1 < 5 << 10; iΔ1++) {
             bΔ1.Write(buf);
             bΔ1.Read(buf);
         }
@@ -831,7 +861,7 @@ public static void BenchmarkBufferFullSmallReads(ж<testing.B> Ꮡb) {
         while (bΔ1.Len() + 20 < bΔ1.Cap()) {
             bΔ1.Write(buf[..10]);
         }
-        for (nint iΔ1 = 0; iΔ1 < (5 << (int)(10)); iΔ1++) {
+        for (nint iΔ1 = 0; iΔ1 < 5 << 10; iΔ1++) {
             bΔ1.Read(buf[..1]);
             bΔ1.Write(buf[..1]);
         }
@@ -840,7 +870,7 @@ public static void BenchmarkBufferFullSmallReads(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkBufferWriteBlock(ж<testing.B> Ꮡb) {
     var block = new slice<byte>(1024);
-    foreach (var (_, n) in new nint[]{(1 << (int)(12)), (1 << (int)(16)), (1 << (int)(20))}.slice()) {
+    foreach (var (_, n) in new nint[]{1 << 12, 1 << 16, 1 << 20}.slice()) {
         var blockʗ1 = block;
         Ꮡb.Run(fmt.Sprintf("N%d"u8, n), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
@@ -858,7 +888,7 @@ public static void BenchmarkBufferAppendNoCopy(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     bytes.Buffer bb = default!;
-    bb.Grow((16 << (int)(20)));
+    bb.Grow(16 << 20);
     b.SetBytes((int64)bb.Available());
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {

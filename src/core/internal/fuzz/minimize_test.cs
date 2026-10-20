@@ -88,7 +88,6 @@ public static void TestMinimizeInput(ж<testing.T> Ꮡt) {
                 return default!;
             },
             input: new any[]{slice<byte>("ท"u8)}.slice(), // ท is 3 bytes
-
             expected: new any[]{slice<byte>("000"u8)}.slice()
         ),
         new(
@@ -135,6 +134,7 @@ public static void TestMinimizeInput(ж<testing.T> Ꮡt) {
             expected: new any[]{(@string)"A"u8}.slice()
         )
     }.slice();
+
     foreach (var (_, tc) in cases) {
         ref var tcΔ1 = ref heap<TestMinimizeInput_testcase>(out var ᏑtcΔ1);
         tcΔ1 = tc;

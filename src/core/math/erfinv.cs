@@ -11,6 +11,8 @@ partial class math_package {
 // This implementation is based on the rational approximation
 // of percentage points of normal distribution available from
 // https://www.jstor.org/stable/2347330.
+
+// Coefficients for approximation to erf in |x| <= 0.85
 internal static UntypedFloat a0 => 1.1975323115670912564578e0;
 internal static UntypedFloat a1 => 4.7072688112383978012285e1;
 internal static UntypedFloat a2 => 6.9706266534389598238465e2;
@@ -27,6 +29,7 @@ internal static UntypedFloat b4 => 2.1213794301586595867e4;
 internal static UntypedFloat b5 => 3.9307895800092710610e4;
 internal static UntypedFloat b6 => 2.8729085735721942674e4;
 internal static UntypedFloat b7 => 5.2264952788528545610e3;
+// Coefficients for approximation to erf in 0.85 < |x| <= 1-2*exp(-25)
 internal static UntypedFloat c0 => 1.42343711074968357734e0;
 internal static UntypedFloat c1 => 4.63033784615654529590e0;
 internal static UntypedFloat c2 => 5.76949722146069140550e0;
@@ -43,6 +46,7 @@ internal static UntypedFloat d4 => 2.0945065210512749128288442e-1;
 internal static UntypedFloat d5 => 2.1494160384252876777097297e-2;
 internal static UntypedFloat d6 => 7.7441459065157709165577218e-4;
 internal static UntypedFloat d7 => 1.4859850019840355905497876e-9;
+// Coefficients for approximation to erf in 1-2*exp(-25) < |x| < 1
 internal static UntypedFloat e0 => 6.65790464350110377720e0;
 internal static UntypedFloat e1 => 5.46378491116411436990e0;
 internal static UntypedFloat e2 => 1.78482653991729133580e0;
@@ -76,14 +80,15 @@ public static float64 Erfinv(float64 x) {
         }
         return NaN();
     }
+
     var sign = false;
     if (x < 0D) {
         x = -x;
         sign = true;
     }
+
     float64 ans = default!;
-    if (x <= 0.85D){
-        // |x| <= 0.85
+    if (x <= 0.85D){ // |x| <= 0.85
         var r = 0.180625D - 0.25D * x * x;
         var z1 = (((((((float64)a7 * r + (float64)a6) * r + (float64)a5) * r + (float64)a4) * r + (float64)a3) * r + (float64)a2) * r + (float64)a1) * r + (float64)a0;
         var z2 = (((((((float64)b7 * r + (float64)b6) * r + (float64)b5) * r + (float64)b4) * r + (float64)b3) * r + (float64)b2) * r + (float64)b1) * r + (float64)b0;
@@ -103,6 +108,7 @@ public static float64 Erfinv(float64 x) {
         }
         ans = z1 / z2;
     }
+
     if (sign) {
         return -ans;
     }

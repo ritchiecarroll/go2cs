@@ -17,6 +17,7 @@ internal static void Main() {
     t[0].v = 5;
     t[2].v = 9;
     fmt.Println(t[0].v, t[2].v, len(t));
+
     vec<nint> u = default!;
     u[0] = 7;
     u[1] = 8;

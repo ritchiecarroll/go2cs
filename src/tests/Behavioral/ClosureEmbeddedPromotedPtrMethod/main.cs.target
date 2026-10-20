@@ -16,45 +16,39 @@ internal static nint apply(Func<nint> f) {
     return f();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string startˢ = "start"u8;
-private static readonly @string builtˢ = "built"u8;
-private static readonly object innerˢ = (@string)"inner:"u8;
-private static readonly @string appliedˢ = "applied"u8;
-private static readonly object appliedˢ2 = (@string)"applied:"u8;
-
 internal partial struct run_rep /*dyn*/ {
-    internal partial ref counter counter { get; }
+    /*embed*/ internal counter counter;
     internal @string label;
 }
 
 internal static (@string, nint) run() {
     run_rep rep = new(nil);
-    rep.label = startˢ;
+    rep.label = "start";
+
     nint build() {
         rep.counter.bump();
-        rep.label = builtˢ;
+        rep.label = "built";
         return rep.n;
     }
-    fmt.Println(innerˢ, build(), rep.label);
+
+    fmt.Println("inner:", build(), rep.label);
+
     nint got = apply(() => {
         void touch() {
             rep.counter.bump();
-            rep.label = appliedˢ;
+            rep.label = "applied";
         }
         touch();
         return rep.n;
     });
-    fmt.Println(appliedˢ2, got);
+    fmt.Println("applied:", got);
+
     return (rep.label, rep.n);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object outerˢ = (@string)"outer:"u8;
-
 internal static void Main() {
     var (label, n) = run();
-    fmt.Println(outerˢ, label, n);
+    fmt.Println("outer:", label, n);
 }
 
 } // end main_package

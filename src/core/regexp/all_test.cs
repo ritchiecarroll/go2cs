@@ -167,20 +167,14 @@ public partial struct ReplaceTest {
     internal @string pattern, replacement, input, output;
 }
 
-// Test empty input and/or replacement, with pattern that matches the empty string.
-// Test empty input and/or replacement, with pattern that does not match the empty string.
-// Multibyte characters -- verify that we don't try to match in the middle
-// of a character.
-// Start and end of a string.
-// Other cases.
-// Substitutions
-// Substitution when subexpression isn't found
-// Substitutions involving a (x){0}
 internal static slice<ReplaceTest> replaceTests = new ReplaceTest[]{
+    // Test empty input and/or replacement, with pattern that matches the empty string.
     new(""u8, ""u8, ""u8, ""u8),
     new(""u8, "x"u8, ""u8, "x"u8),
     new(""u8, ""u8, "abc"u8, "abc"u8),
     new(""u8, "x"u8, "abc"u8, "xaxbxcx"u8),
+
+    // Test empty input and/or replacement, with pattern that does not match the empty string.
     new("b"u8, ""u8, ""u8, ""u8),
     new("b"u8, "x"u8, ""u8, ""u8),
     new("b"u8, ""u8, "abc"u8, "ac"u8),
@@ -189,8 +183,13 @@ internal static slice<ReplaceTest> replaceTests = new ReplaceTest[]{
     new("y"u8, "x"u8, ""u8, ""u8),
     new("y"u8, ""u8, "abc"u8, "abc"u8),
     new("y"u8, "x"u8, "abc"u8, "abc"u8),
+
+    // Multibyte characters -- verify that we don't try to match in the middle
+    // of a character.
     new("[a-c]*"u8, "x"u8, "\u65e5"u8, "x\u65e5x"u8),
     new("[^\u65e5]"u8, "x"u8, "abc\u65e5def"u8, "xxx\u65e5xxx"u8),
+
+    // Start and end of a string.
     new("^[a-c]*"u8, "x"u8, "abcdabc"u8, "xdabc"u8),
     new("[a-c]*$"u8, "x"u8, "abcdabc"u8, "abcdx"u8),
     new("^[a-c]*$"u8, "x"u8, "abcdabc"u8, "abcdabc"u8),
@@ -215,6 +214,8 @@ internal static slice<ReplaceTest> replaceTests = new ReplaceTest[]{
     new("^[a-c]+"u8, "x"u8, ""u8, ""u8),
     new("[a-c]+$"u8, "x"u8, ""u8, ""u8),
     new("^[a-c]+$"u8, "x"u8, ""u8, ""u8),
+
+    // Other cases.
     new("abc"u8, "def"u8, "abcdefg"u8, "defdefg"u8),
     new("bc"u8, "BC"u8, "abcbcdcdedef"u8, "aBCBCdcdedef"u8),
     new("abc"u8, ""u8, "abcdabc"u8, "d"u8),
@@ -225,6 +226,8 @@ internal static slice<ReplaceTest> replaceTests = new ReplaceTest[]{
     new("[a-c]*"u8, "x"u8, "def"u8, "xdxexfx"u8),
     new("[a-c]+"u8, "x"u8, "abcbcdcdedef"u8, "xdxdedef"u8),
     new("[a-c]*"u8, "x"u8, "abcbcdcdedef"u8, "xdxdxexdxexfx"u8),
+
+    // Substitutions
     new("a+"u8, "($0)"u8, "banana"u8, "b(a)n(a)n(a)"u8),
     new("a+"u8, "(${0})"u8, "banana"u8, "b(a)n(a)n(a)"u8),
     new("a+"u8, "(${0})$0"u8, "banana"u8, "b(a)an(a)an(a)a"u8),
@@ -243,16 +246,20 @@ internal static slice<ReplaceTest> replaceTests = new ReplaceTest[]{
     new("a+"u8, "${oops"u8, "aaa"u8, "${oops"u8),
     new("a+"u8, "$$"u8, "aaa"u8, "$"u8),
     new("a+"u8, "$"u8, "aaa"u8, "$"u8),
+
+    // Substitution when subexpression isn't found
     new("(x)?"u8, "$1"u8, "123"u8, "123"u8),
     new("abc"u8, "$1"u8, "123"u8, "123"u8),
+
+    // Substitutions involving a (x){0}
     new("(a)(b){0}(c)"u8, ".$1|$3."u8, "xacxacx"u8, "x.a|c.x.a|c.x"u8),
     new("(a)(((b))){0}c"u8, ".$1."u8, "xacxacx"u8, "x.a.x.a.x"u8),
     new("((a(b){0}){3}){5}(h)"u8, "y caramb$2"u8, "say aaaaaaaaaaaaaaaah"u8, "say ay caramba"u8),
     new("((a(b){0}){3}){5}h"u8, "y caramb$2"u8, "say aaaaaaaaaaaaaaaah"u8, "say ay caramba"u8)
 }.slice();
 
-// Substitutions
 internal static slice<ReplaceTest> replaceLiteralTests = new ReplaceTest[]{
+    // Substitutions
     new("a+"u8, "($0)"u8, "banana"u8, "b($0)n($0)n($0)"u8),
     new("a+"u8, "(${0})"u8, "banana"u8, "b(${0})n(${0})n(${0})"u8),
     new("a+"u8, "(${0})$0"u8, "banana"u8, "b(${0})$0n(${0})$0n(${0})$0"u8),
@@ -295,7 +302,7 @@ public static void TestReplaceAll(ж<testing.T> Ꮡt) {
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
-        actual = ((@string)re.ReplaceAll(slice<byte>(tc.input), slice<byte>(tc.replacement)));
+        actual = (@string)re.ReplaceAll(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
             Ꮡt.Errorf("%q.ReplaceAll(%q,%q) = %q; want %q"u8,
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
@@ -320,12 +327,13 @@ public static void TestReplaceAllLiteral(ж<testing.T> Ꮡt) {
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
-        actual = ((@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement)));
+        actual = (@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
             Ꮡt.Errorf("%q.ReplaceAllLiteral(%q,%q) = %q; want %q"u8,
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
     }
+
     // Run literal-specific tests.
     foreach (var (_, tc) in replaceLiteralTests) {
         var (re, err) = Compile(tc.pattern);
@@ -339,7 +347,7 @@ public static void TestReplaceAllLiteral(ж<testing.T> Ꮡt) {
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
-        actual = ((@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement)));
+        actual = (@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
             Ꮡt.Errorf("%q.ReplaceAllLiteral(%q,%q) = %q; want %q"u8,
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
@@ -364,7 +372,7 @@ public static void TestReplaceAllFunc(ж<testing.T> Ꮡt) {
         }
         // now try bytes
         var tcʗ1 = tc;
-        actual = ((@string)re.ReplaceAllFunc(slice<byte>(tc.input), (slice<byte> s) => slice<byte>(tcʗ1.replacement(((@string)s)))));
+        actual = (@string)re.ReplaceAllFunc(slice<byte>(tc.input), (slice<byte> s) => slice<byte>(tcʗ1.replacement((@string)s)));
         if (actual != tc.output) {
             Ꮡt.Errorf("%q.ReplaceFunc(%q,fn) = %q; want %q"u8,
                 tc.pattern, tc.input, actual, tc.output);
@@ -377,20 +385,18 @@ public partial struct MetaTest {
     internal bool isLiteral;
 }
 
-// has meta but no operator
-// has escaped operators and real operators
 internal static slice<MetaTest> metaTests = new MetaTest[]{
     new(@""u8, @""u8, @""u8, true),
     new(@"foo"u8, @"foo"u8, @"foo"u8, true),
     new(@"日本語+"u8, @"日本語\+"u8, @"日本語"u8, false),
-    new(@"foo\.\$"u8, @"foo\\\.\\\$"u8, @"foo.$"u8, true),
-    new(@"foo.\$"u8, @"foo\.\\\$"u8, @"foo"u8, false),
+    new(@"foo\.\$"u8, @"foo\\\.\\\$"u8, @"foo.$"u8, true), // has meta but no operator
+    new(@"foo.\$"u8, @"foo\.\\\$"u8, @"foo"u8, false), // has escaped operators and real operators
     new(@"!@#$%^&*()_+-=[{]}\|,<.>/?~"u8, @"!@#\$%\^&\*\(\)_\+-=\[\{\]\}\\\|,<\.>/\?~"u8, @"!@#"u8, false)
 }.slice();
 
-// See golang.org/issue/11175.
-// output is unused.
 internal static slice<MetaTest> literalPrefixTests = new MetaTest[]{
+    // See golang.org/issue/11175.
+    // output is unused.
     new(@"^0^0$"u8, @""u8, @"0"u8, false),
     new(@"^0^"u8, @""u8, @""u8, false),
     new(@"^0$"u8, @""u8, @"0"u8, true),
@@ -417,6 +423,7 @@ public static void TestQuoteMeta(ж<testing.T> Ꮡt) {
                 tc.pattern, quoted, tc.output);
             continue;
         }
+
         // Verify that the quoted string is in fact treated as expected
         // by Compile -- i.e. that it matches the original, unquoted string.
         if (tc.pattern != ""u8) {
@@ -510,7 +517,6 @@ public static void TestSubexp(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct splitTestsᴛ1 /*dyn*/ {
     internal @string s;
     internal @string r;
@@ -550,10 +556,12 @@ public static void TestSplit(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d: %q: compile error: %s"u8, i, test.r, err.Error());
             continue;
         }
+
         var split = re.Split(test.s, test.n);
         if (!slices.Equal<slice<@string>, @string>(split, test.@out)) {
             Ꮡt.Errorf("#%d: %q: got %q; want %q"u8, i, test.r, split, test.@out);
         }
+
         if (QuoteMeta(test.r) == test.r) {
             var strsplit = strings.SplitN(test.s, test.r, test.n);
             if (!slices.Equal<slice<@string>, @string>(split, strsplit)) {
@@ -574,6 +582,7 @@ public static void TestParseAndCompile(ж<testing.T> Ꮡt) {
 
     @string expr = "a$"u8;
     @string s = "a\nb"u8;
+
     foreach (var (i, tc) in new TestParseAndCompile_type[]{
         new((syntax.Flags)(syntax.Perl | syntax.OneLine), false),
         new((syntax.Flags)(syntax.Perl & ~syntax.OneLine), true)
@@ -617,6 +626,7 @@ public static void TestOnePassCutoff(ж<testing.T> Ꮡt) {
 public static void TestSwitchBacktrack(ж<testing.T> Ꮡt) {
     var re = MustCompile(@"a|b"u8);
     var @long = new slice<byte>(maxBacktrackVector + 1);
+
     // The following sequence of Match calls used to panic. See issue #10319.
     re.Match(@long); // triggers standard matcher
     re.Match(@long[..1]); // triggers backtracker
@@ -987,7 +997,7 @@ public static void BenchmarkQuoteMetaAll(ж<testing.B> Ꮡb) {
             specials = append(specials, i);
         }
     }
-    @string s = ((@string)specials);
+    @string s = (@string)specials;
     b.SetBytes((int64)len(s));
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -1005,7 +1015,6 @@ public static void BenchmarkQuoteMetaNone(ж<testing.B> Ꮡb) {
         sink = QuoteMeta(s);
     }
 }
-
 
 partial struct compileBenchDataᴛ1 /*dyn*/ {
     internal @string name, re;
@@ -1042,24 +1051,25 @@ internal static readonly @string abcdefghijklmnˢ = "abcdefghijklmn"u8;
 public static void TestDeepEqual(ж<testing.T> Ꮡt) {
     var re1 = MustCompile(aBCDˢ);
     var re2 = MustCompile(aBCDˢ);
-    if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) {
-        // has always been true, since Go 1.
+    if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) { // has always been true, since Go 1.
         Ꮡt.Errorf("DeepEqual(re1, re2) = false, want true"u8);
     }
+
     re1.MatchString(abcdefghijklmnˢ);
     if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) {
         Ꮡt.Errorf("DeepEqual(re1, re2) = false, want true"u8);
     }
+
     re2.MatchString(abcdefghijklmnˢ);
     if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) {
         Ꮡt.Errorf("DeepEqual(re1, re2) = false, want true"u8);
     }
+
     re2.MatchString(strings.Repeat(abcdefghijklmnˢ, 100));
     if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) {
         Ꮡt.Errorf("DeepEqual(re1, re2) = false, want true"u8);
     }
 }
-
 
 partial struct minInputLenTestsᴛ1 /*dyn*/ {
     public @string Regexp;
@@ -1112,6 +1122,7 @@ public static void TestUnmarshalText(ж<testing.T> Ꮡt) {
         if (unmarshaled.String() != goodRe[i]) {
             Ꮡt.Errorf("UnmarshalText returned unexpected value: %s"u8, unmarshaled.String());
         }
+
         var buf = new slice<byte>(4, 32);
         (var marshalAppend, err) = re.AppendText(buf);
         if (err != default!) {

@@ -49,10 +49,10 @@ internal static color.RGBA64 RGBA64At(this ref slowestRGBA p, nint x, nint y) {
     var b = (uint16)s[2];
     var a = (uint16)s[3];
     return new color.RGBA64(
-        (uint16)(((uint16)(r << (int)(8))) | r),
-        (uint16)(((uint16)(g << (int)(8))) | g),
-        (uint16)(((uint16)(b << (int)(8))) | b),
-        (uint16)(((uint16)(a << (int)(8))) | a)
+        (uint16)(((uint16)(r << 8)) | r),
+        (uint16)(((uint16)(g << 8)) | g),
+        (uint16)(((uint16)(b << 8)) | b),
+        (uint16)(((uint16)(a << 8)) | a)
     );
 }
 
@@ -134,10 +134,10 @@ internal static color.RGBA64 RGBA64At(this ref slowerRGBA p, nint x, nint y) {
     var b = (uint16)s[2];
     var a = (uint16)s[3];
     return new color.RGBA64(
-        (uint16)(((uint16)(r << (int)(8))) | r),
-        (uint16)(((uint16)(g << (int)(8))) | g),
-        (uint16)(((uint16)(b << (int)(8))) | b),
-        (uint16)(((uint16)(a << (int)(8))) | a)
+        (uint16)(((uint16)(r << 8)) | r),
+        (uint16)(((uint16)(g << 8)) | g),
+        (uint16)(((uint16)(b << 8)) | b),
+        (uint16)(((uint16)(a << 8)) | a)
     );
 }
 
@@ -160,10 +160,10 @@ internal static void SetRGBA64(this ref slowerRGBA p, nint x, nint y, color.RGBA
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-    s[0] = (uint8)((c.R >> (int)(8)));
-    s[1] = (uint8)((c.G >> (int)(8)));
-    s[2] = (uint8)((c.B >> (int)(8)));
-    s[3] = (uint8)((c.A >> (int)(8)));
+    s[0] = (uint8)(c.R >> 8);
+    s[1] = (uint8)(c.G >> 8);
+    s[2] = (uint8)(c.B >> 8);
+    s[3] = (uint8)(c.A >> 8);
 }
 
 internal static nint PixOffset(this ref slowerRGBA p, nint x, nint y) {
@@ -308,81 +308,62 @@ internal partial struct drawTest {
     internal color.Color expected;
 }
 
-// Uniform mask (0% opaque).
-// Uniform mask (100%, 75%, nil) and uniform source.
-// At (x, y) == (8, 8):
-// The destination pixel is {136, 0, 0, 255}.
-// The source pixel is {0, 0, 90, 90}.
-// Uniform mask (100%, 75%, nil) and variable source.
-// At (x, y) == (8, 8):
-// The destination pixel is {136, 0, 0, 255}.
-// The source pixel is {0, 48, 0, 90}.
-// Uniform mask (100%, 75%, nil) and variable NRGBA source.
-// At (x, y) == (8, 8):
-// The destination pixel is {136, 0, 0, 255}.
-// The source pixel is {0, 136, 0, 90} in NRGBA-space, which is {0, 48, 0, 90} in RGBA-space.
-// The result pixel is different than in the "copy*" test cases because of rounding errors.
-// Uniform mask (100%, 75%, nil) and variable YCbCr source.
-// At (x, y) == (8, 8):
-// The destination pixel is {136, 0, 0, 255}.
-// The source pixel is {0, 0, 136} in YCbCr-space, which is {11, 38, 0, 255} in RGB-space.
-// Uniform mask (100%, 75%, nil) and variable Gray source.
-// At (x, y) == (8, 8):
-// The destination pixel is {136, 0, 0, 255}.
-// The source pixel is {136} in Gray-space, which is {136, 136, 136, 255} in RGBA-space.
-// Same again, but with a slowerRGBA source.
-// Same again, but with a slowestRGBA source.
-// Uniform mask (100%, 75%, nil) and variable CMYK source.
-// At (x, y) == (8, 8):
-// The destination pixel is {136, 0, 0, 255}.
-// The source pixel is {0, 136, 0, 63} in CMYK-space, which is {192, 89, 192} in RGB-space.
-// Variable mask and uniform source.
-// At (x, y) == (8, 8):
-// The destination pixel is {136, 0, 0, 255}.
-// The source pixel is {0, 0, 255, 255}.
-// The mask pixel's alpha is 102, or 40%.
-// Same again, but with a slowerRGBA mask.
-// Same again, but with a slowestRGBA mask.
-// Variable mask and variable source.
-// At (x, y) == (8, 8):
-// The destination pixel is {136, 0, 0, 255}.
-// The source pixel is:
-//   - {0, 48, 0, 90}.
-//   - {136} in Gray-space, which is {136, 136, 136, 255} in RGBA-space.
-// The mask pixel's alpha is 102, or 40%.
 internal static slice<drawTest> drawTests = new drawTest[]{
+    // Uniform mask (0% opaque).
     new("nop"u8, vgradGreen(255), fillAlpha(0), Over, new colorꓸRGBA(136, 0, 0, 255)),
     new("clear"u8, vgradGreen(255), fillAlpha(0), Src, new colorꓸRGBA(0, 0, 0, 0)),
+    // Uniform mask (100%, 75%, nil) and uniform source.
+    // At (x, y) == (8, 8):
+    // The destination pixel is {136, 0, 0, 255}.
+    // The source pixel is {0, 0, 90, 90}.
     new("fill"u8, fillBlue(90), fillAlpha(255), Over, new colorꓸRGBA(88, 0, 90, 255)),
     new("fillSrc"u8, fillBlue(90), fillAlpha(255), Src, new colorꓸRGBA(0, 0, 90, 90)),
     new("fillAlpha"u8, fillBlue(90), fillAlpha(192), Over, new colorꓸRGBA(100, 0, 68, 255)),
     new("fillAlphaSrc"u8, fillBlue(90), fillAlpha(192), Src, new colorꓸRGBA(0, 0, 68, 68)),
     new("fillNil"u8, fillBlue(90), default!, Over, new colorꓸRGBA(88, 0, 90, 255)),
     new("fillNilSrc"u8, fillBlue(90), default!, Src, new colorꓸRGBA(0, 0, 90, 90)),
+    // Uniform mask (100%, 75%, nil) and variable source.
+    // At (x, y) == (8, 8):
+    // The destination pixel is {136, 0, 0, 255}.
+    // The source pixel is {0, 48, 0, 90}.
     new("copy"u8, vgradGreen(90), fillAlpha(255), Over, new colorꓸRGBA(88, 48, 0, 255)),
     new("copySrc"u8, vgradGreen(90), fillAlpha(255), Src, new colorꓸRGBA(0, 48, 0, 90)),
     new("copyAlpha"u8, vgradGreen(90), fillAlpha(192), Over, new colorꓸRGBA(100, 36, 0, 255)),
     new("copyAlphaSrc"u8, vgradGreen(90), fillAlpha(192), Src, new colorꓸRGBA(0, 36, 0, 68)),
     new("copyNil"u8, vgradGreen(90), default!, Over, new colorꓸRGBA(88, 48, 0, 255)),
     new("copyNilSrc"u8, vgradGreen(90), default!, Src, new colorꓸRGBA(0, 48, 0, 90)),
+    // Uniform mask (100%, 75%, nil) and variable NRGBA source.
+    // At (x, y) == (8, 8):
+    // The destination pixel is {136, 0, 0, 255}.
+    // The source pixel is {0, 136, 0, 90} in NRGBA-space, which is {0, 48, 0, 90} in RGBA-space.
+    // The result pixel is different than in the "copy*" test cases because of rounding errors.
     new("nrgba"u8, vgradGreenNRGBA(90), fillAlpha(255), Over, new colorꓸRGBA(88, 46, 0, 255)),
     new("nrgbaSrc"u8, vgradGreenNRGBA(90), fillAlpha(255), Src, new colorꓸRGBA(0, 46, 0, 90)),
     new("nrgbaAlpha"u8, vgradGreenNRGBA(90), fillAlpha(192), Over, new colorꓸRGBA(100, 34, 0, 255)),
     new("nrgbaAlphaSrc"u8, vgradGreenNRGBA(90), fillAlpha(192), Src, new colorꓸRGBA(0, 34, 0, 68)),
     new("nrgbaNil"u8, vgradGreenNRGBA(90), default!, Over, new colorꓸRGBA(88, 46, 0, 255)),
     new("nrgbaNilSrc"u8, vgradGreenNRGBA(90), default!, Src, new colorꓸRGBA(0, 46, 0, 90)),
+    // Uniform mask (100%, 75%, nil) and variable YCbCr source.
+    // At (x, y) == (8, 8):
+    // The destination pixel is {136, 0, 0, 255}.
+    // The source pixel is {0, 0, 136} in YCbCr-space, which is {11, 38, 0, 255} in RGB-space.
     new("ycbcr"u8, vgradCr(), fillAlpha(255), Over, new colorꓸRGBA(11, 38, 0, 255)),
     new("ycbcrSrc"u8, vgradCr(), fillAlpha(255), Src, new colorꓸRGBA(11, 38, 0, 255)),
     new("ycbcrAlpha"u8, vgradCr(), fillAlpha(192), Over, new colorꓸRGBA(42, 28, 0, 255)),
     new("ycbcrAlphaSrc"u8, vgradCr(), fillAlpha(192), Src, new colorꓸRGBA(8, 28, 0, 192)),
     new("ycbcrNil"u8, vgradCr(), default!, Over, new colorꓸRGBA(11, 38, 0, 255)),
     new("ycbcrNilSrc"u8, vgradCr(), default!, Src, new colorꓸRGBA(11, 38, 0, 255)),
+    // Uniform mask (100%, 75%, nil) and variable Gray source.
+    // At (x, y) == (8, 8):
+    // The destination pixel is {136, 0, 0, 255}.
+    // The source pixel is {136} in Gray-space, which is {136, 136, 136, 255} in RGBA-space.
     new("gray"u8, vgradGray(), fillAlpha(255), Over, new colorꓸRGBA(136, 136, 136, 255)),
     new("graySrc"u8, vgradGray(), fillAlpha(255), Src, new colorꓸRGBA(136, 136, 136, 255)),
     new("grayAlpha"u8, vgradGray(), fillAlpha(192), Over, new colorꓸRGBA(136, 102, 102, 255)),
     new("grayAlphaSrc"u8, vgradGray(), fillAlpha(192), Src, new colorꓸRGBA(102, 102, 102, 192)),
     new("grayNil"u8, vgradGray(), default!, Over, new colorꓸRGBA(136, 136, 136, 255)),
     new("grayNilSrc"u8, vgradGray(), default!, Src, new colorꓸRGBA(136, 136, 136, 255)),
+    // Same again, but with a slowerRGBA source.
     new("graySlower"u8, new draw_internal_test_package.slowerRGBAжimage_Image(convertToSlowerRGBA(vgradGray())), fillAlpha(255),
         Over, new colorꓸRGBA(136, 136, 136, 255)),
     new("graySrcSlower"u8, new draw_internal_test_package.slowerRGBAжimage_Image(convertToSlowerRGBA(vgradGray())), fillAlpha(255),
@@ -395,6 +376,7 @@ internal static slice<drawTest> drawTests = new drawTest[]{
         Over, new colorꓸRGBA(136, 136, 136, 255)),
     new("grayNilSrcSlower"u8, new draw_internal_test_package.slowerRGBAжimage_Image(convertToSlowerRGBA(vgradGray())), default!,
         Src, new colorꓸRGBA(136, 136, 136, 255)),
+    // Same again, but with a slowestRGBA source.
     new("graySlowest"u8, new draw_internal_test_package.slowestRGBAжimage_Image(convertToSlowestRGBA(vgradGray())), fillAlpha(255),
         Over, new colorꓸRGBA(136, 136, 136, 255)),
     new("graySrcSlowest"u8, new draw_internal_test_package.slowestRGBAжimage_Image(convertToSlowestRGBA(vgradGray())), fillAlpha(255),
@@ -407,22 +389,40 @@ internal static slice<drawTest> drawTests = new drawTest[]{
         Over, new colorꓸRGBA(136, 136, 136, 255)),
     new("grayNilSrcSlowest"u8, new draw_internal_test_package.slowestRGBAжimage_Image(convertToSlowestRGBA(vgradGray())), default!,
         Src, new colorꓸRGBA(136, 136, 136, 255)),
+    // Uniform mask (100%, 75%, nil) and variable CMYK source.
+    // At (x, y) == (8, 8):
+    // The destination pixel is {136, 0, 0, 255}.
+    // The source pixel is {0, 136, 0, 63} in CMYK-space, which is {192, 89, 192} in RGB-space.
     new("cmyk"u8, vgradMagenta(), fillAlpha(255), Over, new colorꓸRGBA(192, 89, 192, 255)),
     new("cmykSrc"u8, vgradMagenta(), fillAlpha(255), Src, new colorꓸRGBA(192, 89, 192, 255)),
     new("cmykAlpha"u8, vgradMagenta(), fillAlpha(192), Over, new colorꓸRGBA(178, 67, 145, 255)),
     new("cmykAlphaSrc"u8, vgradMagenta(), fillAlpha(192), Src, new colorꓸRGBA(145, 67, 145, 192)),
     new("cmykNil"u8, vgradMagenta(), default!, Over, new colorꓸRGBA(192, 89, 192, 255)),
     new("cmykNilSrc"u8, vgradMagenta(), default!, Src, new colorꓸRGBA(192, 89, 192, 255)),
+    // Variable mask and uniform source.
+    // At (x, y) == (8, 8):
+    // The destination pixel is {136, 0, 0, 255}.
+    // The source pixel is {0, 0, 255, 255}.
+    // The mask pixel's alpha is 102, or 40%.
     new("generic"u8, fillBlue(255), vgradAlpha(192), Over, new colorꓸRGBA(81, 0, 102, 255)),
     new("genericSrc"u8, fillBlue(255), vgradAlpha(192), Src, new colorꓸRGBA(0, 0, 102, 102)),
+    // Same again, but with a slowerRGBA mask.
     new("genericSlower"u8, fillBlue(255), new draw_internal_test_package.slowerRGBAжimage_Image(convertToSlowerRGBA(vgradAlpha(192))),
         Over, new colorꓸRGBA(81, 0, 102, 255)),
     new("genericSrcSlower"u8, fillBlue(255), new draw_internal_test_package.slowerRGBAжimage_Image(convertToSlowerRGBA(vgradAlpha(192))),
         Src, new colorꓸRGBA(0, 0, 102, 102)),
+    // Same again, but with a slowestRGBA mask.
     new("genericSlowest"u8, fillBlue(255), new draw_internal_test_package.slowestRGBAжimage_Image(convertToSlowestRGBA(vgradAlpha(192))),
         Over, new colorꓸRGBA(81, 0, 102, 255)),
     new("genericSrcSlowest"u8, fillBlue(255), new draw_internal_test_package.slowestRGBAжimage_Image(convertToSlowestRGBA(vgradAlpha(192))),
         Src, new colorꓸRGBA(0, 0, 102, 102)),
+    // Variable mask and variable source.
+    // At (x, y) == (8, 8):
+    // The destination pixel is {136, 0, 0, 255}.
+    // The source pixel is:
+    //   - {0, 48, 0, 90}.
+    //   - {136} in Gray-space, which is {136, 136, 136, 255} in RGBA-space.
+    // The mask pixel's alpha is 102, or 40%.
     new("rgbaVariableMaskOver"u8, vgradGreen(90), vgradAlpha(192), Over, new colorꓸRGBA(117, 19, 0, 255)),
     new("grayVariableMaskOver"u8, vgradGray(), vgradAlpha(192), Over, new colorꓸRGBA(136, 54, 54, 255))
 }.slice();
@@ -452,6 +452,7 @@ internal static image.Image makeGolden(image.Image dst, image.Rectangle r, image
             if (!(image.Pt(mx, my).In(mb))) {
                 continue;
             }
+
             UntypedInt M = /* 1<<16 - 1 */ 65535;
             uint32 dr = default!;
             uint32 dg = default!;
@@ -669,8 +670,10 @@ public static void TestDrawSrcNonpremultiplied(ж<testing.T> Ꮡt) {
     color.NRGBA transparentBlue = new color.NRGBA(0x00, 0x00, 0xff, 0x00);
     color.NRGBA transparentGreen = new color.NRGBA(0x00, 0xff, 0x00, 0x00);
     color.NRGBA transparentRed = new color.NRGBA(0xff, 0x00, 0x00, 0x00);
+
     color.NRGBA64 opaqueGray64 = new color.NRGBA64(0x9999, 0x9999, 0x9999, 0xffff);
     color.NRGBA64 transparentPurple64 = new color.NRGBA64(0xfedc, 0x0000, 0x7654, 0x0000);
+
     // dst and src are 1x3 images but the dr rectangle (and hence the overlap)
     // is only 1x2. The Draw call should affect dst's pixels at (1, 10) and (2,
     // 10) but the pixel at (0, 10) should be untouched.
@@ -696,8 +699,10 @@ public static void TestDrawSrcNonpremultiplied(ж<testing.T> Ꮡt) {
         src.SetNRGBA(1, 20, transparentBlue);
         src.SetNRGBA(2, 20, transparentGreen);
         src.SetNRGBA(3, 20, transparentRed);
+
         var dr = image.Rect(1, 10, 3, 11);
         Draw(new draw_test_package.image_NRGBAжImage(dst), dr, new image.NRGBAжImage(src), new image.Point(1, 20), Src);
+
         {
             var (got, want) = (dst.At(0, 10), opaqueGray); if (!AreEqual(got, want)) {
                 Ꮡt.Errorf("At(0, 10):\ngot  %#v\nwant %#v"u8, got, want);
@@ -714,6 +719,7 @@ public static void TestDrawSrcNonpremultiplied(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Check image.NRGBA64 (not image.NRGBA) similarly.
     {
         var dst = image.NewNRGBA64(image.Rect(0, 0, 1, 1));
@@ -736,8 +742,6 @@ internal static readonly object thereMayBeMoreErrorsˢ = (@string)"there may be 
 // error diffusion of a uniform 50% gray source image with a black-and-white
 // palette is a checkerboard pattern.
 public static void TestFloydSteinbergCheckerboard(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var b = image.Rect(0, 0, 640, 480);
     // We can't represent 50% exactly, but 0x7fff / 0xffff is close enough.
     var src = Ꮡ(new image.Uniform(new color.Gray16(0x7fff)));
@@ -763,7 +767,7 @@ public static void TestFloydSteinbergCheckerboard(ж<testing.T> Ꮡt) {
 // embeddedPaletted is an Image that behaves like an *image.Paletted but whose
 // type is not *image.Paletted.
 internal partial struct embeddedPaletted {
-    public partial ref ж<image_package.Paletted> Paletted { get; }
+    /*embed*/ public ж<image_package.Paletted> Paletted;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -785,12 +789,14 @@ public static void TestPaletted(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("decode: %v"u8, err);
         }
         var b = video001.Bounds();
+
         var cgaPalette = new color.Palette(new color.Color[]{new colorꓸRGBA(0x00, 0x00, 0x00, 0xff), new colorꓸRGBA(0x55, 0xff, 0xff, 0xff), new colorꓸRGBA(0xff, 0x55, 0xff, 0xff), new colorꓸRGBA(0xff, 0xff, 0xff, 0xff)
         }.slice());
         var drawers = new map<@string, global::go.image.draw_package.Drawer>{["src"u8] = Src, ["floyd-steinberg"u8] = FloydSteinberg
         };
         var sources = new map<@string, image.Image>{["uniform"u8] = new image.UniformжImage(Ꮡ(new image.Uniform(new colorꓸRGBA(0xff, 0x7f, 0xff, 0xff)))), ["video001"u8] = video001
         };
+
         foreach (var (dName, d) in drawers) {
 loop:
             foreach (var (sName, src) in sources) {
@@ -828,7 +834,7 @@ public static void TestSqDiff(ж<testing.T> Ꮡt) {
         } else {
             d = (uint32)(y - x);
         }
-        return ((d * d) >> (int)(2));
+        return (d * d) >> 2;
     };
     var testCases = new int32[]{
         0,

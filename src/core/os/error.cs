@@ -1,6 +1,8 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// PathError records an error and the operation and file path that caused it.
 global using PathError = go.io.fs_package.PathError;
 
 namespace go;
@@ -16,18 +18,16 @@ partial class os_package {
 //
 // Errors returned from this package may be tested against these errors
 // with [errors.Is].
+// ErrInvalid indicates an invalid argument.
+// Methods on File will return this error when the receiver is nil.
 public static error ErrInvalid = fs.ErrInvalid; // "invalid argument"
 
 public static error ErrPermission = fs.ErrPermission; // "permission denied"
-
 public static error ErrExist = fs.ErrExist; // "file already exists"
-
 public static error ErrNotExist = fs.ErrNotExist; // "file does not exist"
-
 public static error ErrClosed = fs.ErrClosed; // "file already closed"
 
 public static error ErrNoDeadline = errNoDeadline(); // "file type does not support deadline"
-
 public static error ErrDeadlineExceeded = errDeadlineExceeded(); // "i/o timeout"
 
 internal static error errNoDeadline() {

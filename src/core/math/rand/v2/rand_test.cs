@@ -46,8 +46,7 @@ partial struct statsResults {
 
 internal static bool nearEqual(float64 a, float64 b, float64 closeEnough, float64 maxError) {
     var absDiff = math.Abs(a - b);
-    if (absDiff < closeEnough) {
-        // Necessary when one value is zero and one value is close to zero.
+    if (absDiff < closeEnough) { // Necessary when one value is zero and one value is close to zero.
         return true;
     }
     return absDiff / max(math.Abs(a), math.Abs(b)) < maxError;
@@ -127,10 +126,13 @@ internal static void testNormalDistribution(ж<testing.T> Ꮡt, nint nsamples, f
     var samples = generateNormalSamples(nsamples, mean, stddev, seed);
     var errorScale = max(1.0D, stddev); // Error scales with stddev
     var expected = Ꮡ(new statsResults(mean, stddev, 0.10D * errorScale, 0.08D * errorScale));
+
     // Make sure that the entire set matches the expected distribution.
     checkSampleDistribution(Ꮡt, samples, expected);
+
     // Make sure that each half of the set matches the expected distribution.
     checkSampleSliceDistributions(Ꮡt, samples, 2, expected);
+
     // Make sure that each 7th of the set matches the expected distribution.
     checkSampleSliceDistributions(Ꮡt, samples, 7, expected);
 }
@@ -179,13 +181,17 @@ internal static void testExponentialDistribution(ж<testing.T> Ꮡt, nint nsampl
     mean = 1D / rate;
     ref var stddev = ref heap<float64>(out var Ꮡstddev);
     stddev = mean;
+
     var samples = generateExponentialSamples(nsamples, rate, seed);
     var errorScale = max(1.0D, 1D / rate); // Error scales with the inverse of the rate
     var expected = Ꮡ(new statsResults(mean, stddev, 0.10D * errorScale, 0.20D * errorScale));
+
     // Make sure that the entire set matches the expected distribution.
     checkSampleDistribution(Ꮡt, samples, expected);
+
     // Make sure that each half of the set matches the expected distribution.
     checkSampleSliceDistributions(Ꮡt, samples, 2, expected);
+
     // Make sure that each 7th of the set matches the expected distribution.
     checkSampleSliceDistributions(Ꮡt, samples, 7, expected);
 }
@@ -220,9 +226,11 @@ internal static (slice<uint32> testKn, slice<float32> testWn, slice<float32> tes
     float64 dn = rn;
     float64 tn = dn;
     float64 vn = 9.91256303526217e-3D;
+
     testKn = new slice<uint32>(128);
     testWn = new slice<float32>(128);
     testFn = new slice<float32>(128);
+
     var q = vn / math.Exp(-0.5D * dn * dn);
     testKn[0] = (uint32)((dn / q) * m1);
     testKn[1] = 0;
@@ -249,9 +257,11 @@ internal static (slice<uint32> testKe, slice<float32> testWe, slice<float32> tes
     float64 de = re;
     float64 te = de;
     float64 ve = 3.9496598225815571993e-3D;
+
     testKe = new slice<uint32>(256);
     testWe = new slice<float32>(256);
     testFe = new slice<float32>(256);
+
     var q = ve / math.Exp(-de);
     testKe[0] = (uint32)((de / q) * m2);
     testKe[1] = 0;
@@ -352,12 +362,11 @@ internal static bool hasSlowFloatingPoint() {
         return os.Getenv(goarmˢ) == "5"u8;
     }
     if (exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
+        // Be conservative and assume that all mips boards
+        // have emulated floating point.
+        // TODO: detect what it actually has.
         return true;
     }
-
-    // Be conservative and assume that all mips boards
-    // have emulated floating point.
-    // TODO: detect what it actually has.
     return false;
 }
 
@@ -373,6 +382,7 @@ public static void TestFloat32(ж<testing.T> Ꮡt) {
     if (testing.Short() && (testenv.Builder() == ""u8 || hasSlowFloatingPoint())) {
         num /= 100; // 1.72 seconds instead of 172 seconds
     }
+
     var r = testRand();
     for (nint ct = 0; ct < num; ct++) {
         var f = r.Float32();
@@ -437,6 +447,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
             for (nint i = 2; i <= n; i++) {
                 nfact *= i;
             }
+
             // Test a few different ways to generate a uniform distribution.
             var p = new slice<nint>(n); // re-usable slice for Shuffle generator
                 var rʗ2 = rʗ1;
@@ -460,6 +471,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                     return encodePerm(pʗ1);
                 })
             }.array();
+
             foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
                 ref var test = ref heap(new TestUniformFactorial_tests(), out var Ꮡtest);
                 test = vᴛ1;
@@ -492,6 +504,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                         χ2 /= want;
                         samples[i] = χ2;
                     }
+
                     // Check that our samples approximate the appropriate normal distribution.
                     ref var dof = ref heap<float64>(out var Ꮡdof);
                     dof = (float64)(nfact - 1);

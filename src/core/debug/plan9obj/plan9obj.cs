@@ -28,6 +28,7 @@ partial struct sym {
 }
 
 public static UntypedInt Magic64 => 0x8000; // 64-bit expanded header
+
 public static UntypedInt Magic386 => /* (4*11+0)*11 + 7 */ 491;
 public static UntypedInt MagicAMD64 => /* (4*26+0)*26 + 7 + Magic64 */ 35479;
 public static UntypedInt MagicARM => /* (4*20+0)*20 + 7 */ 1607;

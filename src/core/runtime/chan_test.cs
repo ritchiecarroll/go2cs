@@ -68,6 +68,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 c.ᐸꟷ(0);
                 c.ᐸꟷ(0);
             }
+
             {
                 // Ensure that send to full chan blocks.
                 var c = new channel<nint>(chanCap);
@@ -97,6 +98,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 }}
                 ᐸꟷ(c);
             }
+
             {
                 // Ensure that we receive 0 from closed chan.
                 var c = new channel<nint>(chanCap);
@@ -112,15 +114,16 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 }
                 {
                     nint v = ᐸꟷ(c); if (v != 0) {
-                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, (nint)(0));
+                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, (nint)0);
                     }
                 }
                 {
                     var (v, ok) = ᐸꟷ(c, ꟷ); if (v != 0 || ok) {
-                        Ꮡt.Fatalf("chan[%d]: received %v/%v, expected %v/%v"u8, chanCap, v, ok, (nint)(0), false);
+                        Ꮡt.Fatalf("chan[%d]: received %v/%v, expected %v/%v"u8, chanCap, v, ok, (nint)0, false);
                     }
                 }
             }
+
             {
                 // Ensure that close unblocks receive.
                 var c = new channel<nint>(chanCap);
@@ -137,6 +140,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("chan[%d]: received non zero from closed chan"u8, chanCap);
                 }
             }
+
             {
                 // Send 100 integers,
                 // ensure that we receive them non-corrupted in FIFO order.
@@ -153,6 +157,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                         Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, i);
                     }
                 }
+
                 // Same, but using recv2.
                 var cʗ6 = c;
                 goǃ(() => {
@@ -169,6 +174,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                         Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, i);
                     }
                 }
+
                 // Send 1000 integers in 4 goroutines,
                 // ensure that we receive what we send.
                 const nint P = 4;
@@ -209,11 +215,12 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             {
                 // Test len/cap.
                 var c = new channel<nint>(chanCap);
                 if (len(c) != 0 || cap(c) != chanCap) {
-                    Ꮡt.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v"u8, chanCap, (nint)(0), chanCap, len(c), cap(c));
+                    Ꮡt.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v"u8, chanCap, (nint)0, chanCap, len(c), cap(c));
                 }
                 for (nint i = 0; i < chanCap; i++) {
                     c.ᐸꟷ(i);
@@ -375,23 +382,23 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
             var c = new channel<nint>(chanCap);
-            for (nint p = 0; p < 2; p++) {
-                nint pΔ1 = p;
+            for (nint pᴛ1 = 0; pᴛ1 < 2; pᴛ1++) {
+                var p = pᴛ1;
                 var cʗ1 = c;
                 goǃ(() => {
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
                         for (nint i = 0; i < 1000; i++) {
-                            if (pΔ1 == 0 || i % 2 == 0){
-                                var selᴛ11 = cʗ1.ᐸꟷ(pΔ1, ꓸꓸꓸ);
+                            if (p == 0 || i % 2 == 0){
+                                var selᴛ11 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
                                 var selᴛ12 = cʗ1;
                                 switch (select(selᴛ11, ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
                                 case 0: {
                                     break;
                                 }
                                 case 1 when selᴛ12.ꟷᐳ(out var v): {
-                                    if (chanCap == 0 && v == pΔ1) {
+                                    if (chanCap == 0 && v == p) {
                                         Ꮡt.Errorf("self receive"u8);
                                         return;
                                     }
@@ -399,10 +406,10 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
                                 }}
                             } else {
                                 var selᴛ13 = cʗ1;
-                                var selᴛ14 = cʗ1.ᐸꟷ(pΔ1, ꓸꓸꓸ);
+                                var selᴛ14 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
                                 switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), selᴛ14)) {
                                 case 0 when selᴛ13.ꟷᐳ(out var v): {
-                                    if (chanCap == 0 && v == pΔ1) {
+                                    if (chanCap == 0 && v == p) {
                                         Ꮡt.Errorf("self receive"u8);
                                         return;
                                     }
@@ -446,19 +453,19 @@ public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
         // but we are careful that this whole construct does not deadlock.
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(10);
-        for (nint k = 0; k < 4; k++) {
-            nint kΔ1 = k;
+        for (nint kᴛ1 = 0; kᴛ1 < 4; kᴛ1++) {
+            var k = kᴛ1;
             var cʗ1 = c;
             goǃ(() => {
                 for (nint i = 0; i < N; i++) {
-                    cʗ1[kΔ1].ᐸꟷ(0);
+                    cʗ1[k].ᐸꟷ(0);
                 }
                 Ꮡwg.Done();
             });
             var cʗ2 = c;
             goǃ(() => {
                 for (nint i = 0; i < N; i++) {
-                    ᐸꟷ(cʗ2[kΔ1]);
+                    ᐸꟷ(cʗ2[k]);
                 }
                 Ꮡwg.Done();
             });
@@ -554,8 +561,6 @@ public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
 }
 
 public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     UntypedInt trials = 10000;
     if (Δruntime.GOOS == "linux"u8 && Δruntime.GOARCH == "ppc64le"u8) {
         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 22047);
@@ -634,7 +639,6 @@ public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
                 break;
             }}
         }
-
     }
     // If the select in the goroutine is fair,
     // cnt1 and cnt2 should be about the same value.
@@ -723,9 +727,12 @@ public static partial void TestPseudoRandomSend(ж<testing.T> Ꮡt) {
 public static partial void TestMultiConsumer(ж<testing.T> Ꮡt) {
     UntypedInt nwork = 23;
     const nint niter = 271828;
+
     var pn = new nint[]{2, 3, 7, 11, 13, 17, 19, 23, 27, 31}.slice();
+
     var q = new channel<nint>(nwork * 3);
     var r = new channel<nint>(nwork * 3);
+
     // workers
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < nwork; i++) {
@@ -744,6 +751,7 @@ public static partial void TestMultiConsumer(ж<testing.T> Ꮡt) {
             Ꮡwg.Done();
         }, i);
     }
+
     // feeder & closer
     nint expect = 0;
     var pnʗ2 = pn;
@@ -759,6 +767,7 @@ public static partial void TestMultiConsumer(ж<testing.T> Ꮡt) {
         Ꮡwg.Wait(); // workers done
         close(rʗ2); // ... so there can be no more results
     });
+
     // consume & check
     nint n = 0;
     nint s = 0;
@@ -773,8 +782,6 @@ public static partial void TestMultiConsumer(ж<testing.T> Ꮡt) {
 }
 
 public static partial void TestShrinkStackDuringBlockedSend(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // make sure that channel operations still work when we are
     // blocked on a channel send and we shrink the stack.
     // NOTE: this test probably won't fail unless stack1.go:stackDebug
@@ -782,6 +789,7 @@ public static partial void TestShrinkStackDuringBlockedSend(ж<testing.T> Ꮡt) 
     const nint n = 10;
     var c = new channel<nint>(0);
     var done = new channel<EmptyStruct>(0);
+
     var cʗ1 = c;
     var doneʗ1 = done;
     goǃ(() => {
@@ -792,6 +800,7 @@ public static partial void TestShrinkStackDuringBlockedSend(ж<testing.T> Ꮡt) 
         }
         doneʗ1.ᐸꟷ(new EmptyStruct());
     });
+
     for (nint i = 0; i < n; i++) {
         nint x = ᐸꟷ(c);
         if (x != i) {
@@ -813,6 +822,7 @@ public static partial void TestNoShrinkStackWhileParking(ж<testing.T> Ꮡt) {
     if (Δruntime.GOOS == "openbsd"u8) {
         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 51482);
     }
+
     // The goal of this test is to trigger a "racy sudog adjustment"
     // throw. Basically, there's a window between when a goroutine
     // becomes available for preemption for stack scanning (and thus,
@@ -876,6 +886,7 @@ public static partial void TestSelectDuplicateChannel(ж<testing.T> Ꮡt) {
     var c = new channel<nint>(0);
     var d = new channel<nint>(0);
     var e = new channel<nint>(0);
+
     // goroutine A
     var cʗ1 = c;
     var dʗ1 = d;
@@ -897,12 +908,14 @@ public static partial void TestSelectDuplicateChannel(ж<testing.T> Ꮡt) {
         eʗ1.ᐸꟷ(9);
     });
     time.Sleep(time.Millisecond); // make sure goroutine A gets queued first on c
+
     // goroutine B
     var cʗ2 = c;
     goǃ(() => {
         ᐸꟷ(cʗ2);
     });
     time.Sleep(time.Millisecond); // make sure goroutine B gets queued on c before continuing
+
     d.ᐸꟷ(7); // wake up A, it dequeues itself from c.  This operation used to corrupt c.recvq.
     ᐸꟷ(e); // A tells us it's done
     c.ᐸꟷ(8); // wake up B.  This operation used to fail because c.recvq was corrupted (it tries to wake up an already running G instead of B)
@@ -914,31 +927,34 @@ internal static readonly object valChangedˢ = (@string)"val changed"u8;
 internal static readonly object changingCxFailedToChangeˢ = (@string)"changing *cx failed to change val"u8;
 
 public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test that channel receive slots that contain local stack
     // pointers are adjusted correctly by stack shrinking.
     var c = new channel<ж<nint>>(0);
     var d = new channel<ж<nint>>(0);
     var ready1 = new channel<bool>(0);
     var ready2 = new channel<bool>(0);
+
     var cʗ1 = c;
     var dʗ1 = d;
     void f(channel<bool> ready, bool dup) {
         // Temporarily grow the stack to 10K.
-        stackGrowthRecursive(((10 << (int)(10))) / (128 * 8));
+        stackGrowthRecursive((10 << 10) / (128 * 8));
+
         // We're ready to trigger GC and stack shrink.
         ready.ᐸꟷ(true);
+
         ref var val = ref heap<nint>(out var Ꮡval);
         val = 42;
         ж<nint> cx = default!;
         cx = Ꮡval;
+
         channel<ж<nint>> c2 = default!;
         channel<ж<nint>> d2 = default!;
         if (dup) {
             c2 = cʗ1;
             d2 = dʗ1;
         }
+
         // Receive from d. cx won't be affected.
         var selᴛ37 = cʗ1;
         var selᴛ38 = c2;
@@ -957,6 +973,7 @@ public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
         case 3 when selᴛ40.ꟷᐳ(out _): {
             break;
         }}
+
         // Check that pointer in cx was adjusted correctly.
         if (cx != Ꮡval){
             Ꮡt.Error(cxNoLongerPointsToValˢ);
@@ -971,16 +988,20 @@ public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
         }
         ready.ᐸꟷ(true);
     }
+
     var fʗ1 = f;
     goǃ(fʗ1, ready1, (bool)false);
     var fʗ2 = f;
     goǃ(fʗ2, ready2, (bool)true);
+
     // Let the goroutines get into the select.
     ᐸꟷ(ready1);
     ᐸꟷ(ready2);
     time.Sleep(10 * time.Millisecond);
+
     // Force concurrent GC to shrink the stacks.
     Δruntime.GC();
+
     // Wake selects.
     close(d);
     ᐸꟷ(ready1);
@@ -1454,6 +1475,7 @@ public static void BenchmarkReceiveDataFromClosedChan(ж<testing.B> Ꮡb) {
         ch.ᐸꟷ(new EmptyStruct());
     }
     close(ch);
+
     b.ResetTimer();
     foreach (var _ᴛ1 in ch) {
     }

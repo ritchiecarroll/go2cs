@@ -7,12 +7,12 @@ namespace go.go;
 using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using io = io_package;
 using ꓸꓸꓸany = Span<any>;
@@ -103,6 +103,7 @@ internal static @string msg(this ref error_ err) {
     if (err.empty()) {
         return noErrorˢ;
     }
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (i, _) in err.desc) {
         var p = Ꮡ(err.desc, i);
@@ -127,6 +128,7 @@ internal static void report(this ref error_ err) {
     if (err.empty()) {
         throw panic("no error");
     }
+
     // Cheap trick: Don't report errors with messages containing
     // "invalid operand" or "invalid type" as those tend to be
     // follow-on errors which don't add useful information. Only
@@ -140,9 +142,11 @@ internal static void report(this ref error_ err) {
             return;
         }
     }
+
     if ((~(~check).conf)._Trace) {
         check.trace(err.posn().Pos(), errorSCodeDˢ, err.desc[0].msg, err.code);
     }
+
     // In go/types, if there is a sub-error with a valid position,
     // call the typechecker error handler for each sub-error.
     // Otherwise, call it once, with a single combined message.
@@ -155,6 +159,7 @@ internal static void report(this ref error_ err) {
             }
         }
     }
+
     if (multiError){
         foreach (var (i, _) in err.desc) {
             var p = Ꮡ(err.desc, i);
@@ -163,6 +168,7 @@ internal static void report(this ref error_ err) {
     } else {
         check.handleError(0, err.posn(), err.code, err.msg(), err.soft);
     }
+
     // make sure the error is not reported twice
     err.desc = default!;
 }
@@ -170,6 +176,7 @@ internal static void report(this ref error_ err) {
 // handleError should only be called by error_.report.
 internal static void handleError(this ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
     assert(code != 0);
+
     if (index == 0){
         // If we are encountering an error while evaluating an inherited
         // constant initialization expression, pos is the position of
@@ -181,10 +188,12 @@ internal static void handleError(this ref Checker check, nint index, positioner 
             assert(check.iota != default!);
             posn = check.errpos;
         }
+
         // Report invalid syntax trees explicitly.
         if (code == InvalidSyntaxTree) {
             msg = "invalid syntax tree: "u8 + msg;
         }
+
         // If we have a URL for error codes, add a link to the first line.
         if ((~check.conf)._ErrorURL != ""u8) {
             @string url = fmt.Sprintf((~check.conf)._ErrorURL, code);
@@ -201,6 +210,7 @@ internal static void handleError(this ref Checker check, nint index, positioner 
         // Position information is passed explicitly to Error, below.
         msg = "\t"u8 + msg;
     }
+
     var span = spanOf(posn);
     var e = new ΔError(
         Fset: check.fset,
@@ -211,6 +221,7 @@ internal static void handleError(this ref Checker check, nint index, positioner 
         go116start: span.start,
         go116end: span.end
     );
+
     if (check.errpos != default!) {
         // If we have an internal error and the errpos override is set, use it to
         // augment our error positioning.
@@ -221,9 +232,11 @@ internal static void handleError(this ref Checker check, nint index, positioner 
         e.go116start = spanΔ1.start;
         e.go116end = spanΔ1.end;
     }
+
     if (check.firstErr == default!) {
         check.firstErr = e;
     }
+
     var f = check.conf.Value.Error;
     if (f == default!) {
         throw panic(new bailout(nil)); // record first error and exit
@@ -271,10 +284,11 @@ internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goV
     err.report();
 }
 
+// atPos wraps a token.Pos to implement the positioner interface.
 partial struct atPos /*global::go.go.token_package.ΔPos*/;
 
 internal static tokenꓸPos Pos(this atPos s) {
-    return ((tokenꓸPos)s);
+    return (tokenꓸPos)s;
 }
 
 // posSpan holds a position range along with a highlighted position within that

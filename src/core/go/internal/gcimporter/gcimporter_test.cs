@@ -51,8 +51,8 @@ private static readonly @string importcfgˢ = "-importcfg"u8;
 // compile gives the resulting package a packagepath of testdata/<filebasename>.
 internal static @string compile(ж<testing.T> Ꮡt, @string dirname, @string filename, @string outdirname, map<@string, @string> packageFiles, params ꓸꓸꓸstring pkgImportsʗp) {
     var pkgImports = pkgImportsʗp.sslice();
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     // filename must end with ".go"
     var (basename, ok) = strings.CutSuffix(filepath.Base(filename), ".go"u8);
     if (!ok) {
@@ -60,11 +60,13 @@ internal static @string compile(ж<testing.T> Ꮡt, @string dirname, @string fil
     }
     @string objname = basename + ".o"u8;
     @string outname = filepath.Join(outdirname, objname);
+
     @string importcfgfile = os.DevNull;
     if (len(packageFiles) > 0 || len(pkgImports) > 0) {
         importcfgfile = filepath.Join(outdirname, basename) + ".importcfg"u8;
         testenv.WriteImportcfg(new testing_TжTB(Ꮡt), importcfgfile, packageFiles, pkgImports.ꓸꓸꓸ);
     }
+
     @string pkgpath = path.Join(testdataˢ, basename);
     var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.GoToolPath(new testing_TжTB(Ꮡt)), toolˢ, compileˢ, "-p", pkgpath, "-D", testdataˢ, importcfgˢ, importcfgfile, "-o", outname, filename);
     cmd.Value.Dir = dirname;
@@ -118,17 +120,22 @@ public static void TestImportTestdata(ж<testing.T> Ꮡt) {
         if (runtime.Compiler != "gc") {
             Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
         }
+
         testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
         var testfiles = new map<@string, slice<@string>>{
             ["exports.go"u8] = new @string[]{"go/ast"u8, "go/token"u8}.slice(),
             ["generics.go"u8] = default!
         };
         testfiles[exportsGoˢ] = new @string[]{"go/ast"u8}.slice();
+
         foreach (var (testfile, wantImports) in testfiles) {
             @string tmpdir = mktmpdir(Ꮡt);
             defer(os.RemoveAll, tmpdir, ref ᒐ);
+
             compile(Ꮡt, "testdata"u8, testfile, filepath.Join(tmpdir, testdataˢ), default!, wantImports.ꓸꓸꓸ);
             @string path = "./testdata/"u8 + strings.TrimSuffix(testfile, ".go"u8);
+
             {
                 var pkg = testPath(Ꮡt, path, tmpdir); if (pkg != nil) {
                     // The package's Imports list must include all packages
@@ -156,15 +163,15 @@ private static readonly @string typeparamˢ = "typeparam"u8;
 public static void TestImportTypeparamTests(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (testing.Short()) {
             Ꮡt.Skipf("in short mode, skipping test that requires export data for all of std"u8);
         }
+
         // This package only handles gc export data.
         if (runtime.Compiler != "gc") {
             Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
         }
+
         // cmd/distpack removes the GOROOT/test directory, so skip if it isn't there.
         // cmd/distpack also requires the presence of GOROOT/VERSION, so use that to
         // avoid false-positive skips.
@@ -178,9 +185,12 @@ public static void TestImportTypeparamTests(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
         @string tmpdir = mktmpdir(Ꮡt);
         defer(os.RemoveAll, tmpdir, ref ᒐ);
+
         // Check go files in test/typeparam, except those that fail for a known
         // reason.
         @string rootDir = filepath.Join(gorootTest, typeparamˢ);
@@ -188,11 +198,13 @@ public static void TestImportTypeparamTests(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         foreach (var (_, entry) in list) {
             if (entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go"u8)) {
                 // For now, only consider standalone go files.
                 continue;
             }
+
             var entryʗ1 = entry;
             Ꮡt.Run(entry.Name(), (ж<testing.T> tΔ1) => {
                 @string filename = filepath.Join(rootDir, entryʗ1.Name());
@@ -206,31 +218,37 @@ public static void TestImportTypeparamTests(ж<testing.T> Ꮡt) {
                     // changes in test/typeparams.
                     tΔ1.Skipf("not detected as a run test"u8);
                 }
+
                 // Compile and import, and compare the resulting package with the package
                 // that was type-checked directly.
                 compile(tΔ1, rootDir, entryʗ1.Name(), filepath.Join(tmpdir, testdataˢ), default!, filename);
                 @string pkgName = strings.TrimSuffix(entryʗ1.Name(), ".go"u8);
                 var imported = importPkg(tΔ1, "./testdata/"u8 + pkgName, tmpdir);
                 var @checked = checkFile(tΔ1, filename, src);
+
                 var seen = new map<@string, bool>();
                 foreach (var (_, name) in imported.Scope().Names()) {
                     if (!token.IsExported(name)) {
                         continue; // ignore synthetic names like .inittask and .dict.*
                     }
                     seen[name] = true;
+
                     var importedObj = imported.Scope().Lookup(name);
                     @string got = types.ObjectString(importedObj, types.RelativeTo(imported));
                     got = sanitizeObjectString(got);
+
                     var checkedObj = @checked.Scope().Lookup(name);
                     if (checkedObj == default!) {
                         tΔ1.Fatalf("imported object %q was not type-checked"u8, name);
                     }
                     @string want = types.ObjectString(checkedObj, types.RelativeTo(@checked));
                     want = sanitizeObjectString(want);
+
                     if (got != want) {
                         tΔ1.Errorf("imported %q as %q, want %q"u8, name, got, want);
                     }
                 }
+
                 foreach (var (_, name) in @checked.Scope().Names()) {
                     if (!token.IsExported(name) || seen[name]) {
                         continue;
@@ -255,7 +273,7 @@ internal static @string sanitizeObjectString(@string s) {
         }
         runes = append(runes, r);
     }
-    return ((@string)runes);
+    return (@string)runes;
 }
 
 internal static ж<types.Package> checkFile(ж<testing.T> Ꮡt, @string filename, slice<byte> src) {
@@ -289,18 +307,19 @@ private static readonly @string dirᶜ = "./testdata/versions"u8;
 public static void TestVersionHandling(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
         // This package only handles gc export data.
         if (runtime.Compiler != "gc") {
             Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
         }
+
         @string dir = dirᶜ;
         var (list, err) = os.ReadDir(dir);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         @string tmpdir = mktmpdir(Ꮡt);
         defer(os.RemoveAll, tmpdir, ref ᒐ);
         @string corruptdir = filepath.Join(tmpdir, testdataˢ, versionsˢ);
@@ -309,7 +328,9 @@ public static void TestVersionHandling(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
+
         var fset = token.NewFileSet();
+
         foreach (var (_, f) in list) {
             @string name = f.Name();
             if (!strings.HasSuffix(name, ".a"u8)) {
@@ -319,9 +340,11 @@ public static void TestVersionHandling(ж<testing.T> Ꮡt) {
                 continue; // don't process a leftover corrupted file
             }
             @string pkgpath = "./" + name.slice(0, len(name) - 2);
+
             if (testing.Verbose()) {
                 Ꮡt.Logf("importing %s"u8, name);
             }
+
             // test that export data can be imported
             var (_, errΔ2) = Import(fset, new map<@string, ж<types.Package>>(), pkgpath, dir, default!);
             if (errΔ2 != default!) {
@@ -331,30 +354,28 @@ public static void TestVersionHandling(ж<testing.T> Ꮡt) {
                     if (exprᴛ1 == "test_go1.8_4.a"u8 || exprᴛ1 == "test_go1.8_5.a"u8) {
                         continue;
                     }
-
+                    // fall through
                 }
-                // fall through
                 // ok to fail if it fails with a 'no longer supported' error for select files
                 if (strings.Contains(errΔ2.Error(), noLongerSupportedˢ)) {
                     var exprᴛ2 = name;
                     if (exprᴛ2 == "test_go1.7_0.a"u8 || exprᴛ2 == "test_go1.7_1.a"u8 || exprᴛ2 == "test_go1.8_4.a"u8 || exprᴛ2 == "test_go1.8_5.a"u8 || exprᴛ2 == "test_go1.11_0i.a"u8 || exprᴛ2 == "test_go1.11_6b.a"u8 || exprᴛ2 == "test_go1.11_999b.a"u8 || exprᴛ2 == "test_go1.11_999i.a"u8) {
                         continue;
                     }
-
+                    // fall through
                 }
-                // fall through
                 // ok to fail if it fails with a 'newer version' error for select files
                 if (strings.Contains(errΔ2.Error(), newerVersionˢ)) {
                     var exprᴛ3 = name;
                     if (exprᴛ3 == "test_go1.11_999i.a"u8) {
                         continue;
                     }
-
+                    // fall through
                 }
-                // fall through
                 Ꮡt.Errorf("import %q failed: %v"u8, pkgpath, errΔ2);
                 continue;
             }
+
             // create file with corrupted export data
             // 1) read file
             (var data, errΔ2) = os.ReadFile(filepath.Join(dir, name));
@@ -377,6 +398,7 @@ public static void TestVersionHandling(ж<testing.T> Ꮡt) {
             pkgpath += "_corrupted"u8;
             @string filename = filepath.Join(corruptdir, pkgpath) + ".a"u8;
             os.WriteFile(filename, data, 438);
+
             // test that importing the corrupted file results in an error
             (_, errΔ2) = Import(fset, new map<@string, ж<types.Package>>(), pkgpath, corruptdir, default!);
             if (errΔ2 == default!){
@@ -405,10 +427,12 @@ public static void TestImportStdLib(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(theImportsCanBeExpensiveˢ);
     }
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     // Get list of packages in stdlib. Filter out test-only packages with {{if .GoFiles}} check.
     ref var stderr = ref heap(new bytes.Buffer(), out var Ꮡstderr);
     var cmd = exec.Command("go"u8, listˢ, "-f", ifGoFilesImportPathEndˢ, stdˢ);
@@ -417,7 +441,8 @@ public static void TestImportStdLib(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to run go list to determine stdlib packages: %v\nstderr:\n%v"u8, err, Ꮡstderr.String());
     }
-    var pkgs = strings.Fields(((@string)@out));
+    var pkgs = strings.Fields((@string)@out);
+
     nint nimports = default!;
     foreach (var (_, pkg) in pkgs) {
         Ꮡt.Run(pkg, (ж<testing.T> tΔ1) => {
@@ -430,17 +455,16 @@ public static void TestImportStdLib(ж<testing.T> Ꮡt) {
     if (len(pkgs) < minPkgs) {
         Ꮡt.Fatalf("too few packages (%d) were imported"u8, nimports);
     }
+
     Ꮡt.Logf("tested %d imports"u8, nimports);
 }
-
-// non-interfaces
-// interfaces
 
 partial struct importedObjectTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string want;
 }
 internal static slice<importedObjectTestsᴛ1> importedObjectTests = new importedObjectTestsᴛ1[]{
+    // non-interfaces
     new("crypto.Hash"u8, "type Hash uint"u8),
     new("go/ast.ObjKind"u8, "type ObjKind int"u8),
     new("go/types.Qualifier"u8, "type Qualifier func(*Package) string"u8),
@@ -449,6 +473,8 @@ internal static slice<importedObjectTestsᴛ1> importedObjectTests = new importe
     new("math.Sin"u8, "func Sin(x float64) float64"u8),
     new("go/ast.NotNilFilter"u8, "func NotNilFilter(_ string, v reflect.Value) bool"u8),
     new("internal/exportdata.FindPkg"u8, "func FindPkg(path string, srcDir string) (filename string, id string, err error)"u8),
+
+    // interfaces
     new("context.Context"u8, "type Context interface{Deadline() (deadline time.Time, ok bool); Done() <-chan struct{}; Err() error; Value(key any) any}"u8),
     new("crypto.Decrypter"u8, "type Decrypter interface{Decrypt(rand io.Reader, msg []byte, opts DecrypterOpts) (plaintext []byte, err error); Public() PublicKey}"u8),
     new("encoding.BinaryMarshaler"u8, "type BinaryMarshaler interface{MarshalBinary() (data []byte, err error)}"u8),
@@ -463,10 +489,12 @@ private static readonly object inconsistentTestDataˢ = (@string)"inconsistent t
 
 public static void TestImportedTypes(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     var fset = token.NewFileSet();
     foreach (var (_, test) in importedObjectTests) {
         var s = strings.Split(test.name, "."u8);
@@ -475,20 +503,24 @@ public static void TestImportedTypes(ж<testing.T> Ꮡt) {
         }
         @string importPath = s[0];
         @string objName = s[1];
+
         var (pkg, err) = Import(fset, new map<@string, ж<types.Package>>(), importPath, "."u8, default!);
         if (err != default!) {
             Ꮡt.Error(err);
             continue;
         }
+
         var obj = pkg.Scope().Lookup(objName);
         if (obj == default!) {
             Ꮡt.Errorf("%s: object not found"u8, test.name);
             continue;
         }
+
         @string got = types.ObjectString(obj, types.RelativeTo(pkg));
         if (got != test.want) {
             Ꮡt.Errorf("%s: got %q; want %q"u8, test.name, got, test.want);
         }
+
         {
             var (named, _) = obj.Type()._<ж<types.Named>>(ᐧ); if (named != nil) {
                 verifyInterfaceMethodRecvs(Ꮡt, named, 0);
@@ -500,17 +532,17 @@ public static void TestImportedTypes(ж<testing.T> Ꮡt) {
 // verifyInterfaceMethodRecvs verifies that method receiver types
 // are named if the methods belong to a named interface type.
 internal static void verifyInterfaceMethodRecvs(ж<testing.T> Ꮡt, ж<types.Named> Ꮡnamed, nint level) {
-    ref var named = ref Ꮡnamed.DerefOrNull();
-
     // avoid endless recursion in case of an embedding bug that lead to a cycle
     if (level > 10) {
         Ꮡt.Errorf("%s: embeds itself"u8, Ꮡnamed.OrTypedNil());
         return;
     }
+
     var (iface, _) = Ꮡnamed.Underlying()._<ж<types.Interface>>(ᐧ);
     if (iface == nil) {
         return; // not an interface
     }
+
     // check explicitly declared methods
     for (nint i = 0; i < iface.NumExplicitMethods(); i++) {
         var m = iface.ExplicitMethod(i);
@@ -523,6 +555,7 @@ internal static void verifyInterfaceMethodRecvs(ж<testing.T> Ꮡt, ж<types.Nam
             Ꮡt.Errorf("%s: got recv type %s; want %s"u8, m.OrTypedNil(), recv.Type(), Ꮡnamed.OrTypedNil());
         }
     }
+
     // check embedded interfaces (if they are named, too)
     for (nint i = 0; i < iface.NumEmbeddeds(); i++) {
         // embedding of interfaces cannot have cycles; recursion will terminate
@@ -539,11 +572,14 @@ private static readonly @string stringsˢ = "strings"u8;
 
 public static void TestIssue5815(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     var pkg = importPkg(Ꮡt, stringsˢ, "."u8);
+
     var scope = pkg.Scope();
     foreach (var (_, name) in scope.Names()) {
         var obj = scope.Lookup(name);
@@ -573,16 +609,19 @@ private static readonly @string lockˢ = "Lock"u8;
 // Smoke test to ensure that imported methods get the correct package.
 public static void TestCorrectMethodPackage(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     var imports = new map<@string, ж<types.Package>>();
     var fset = token.NewFileSet();
     var (_, err) = Import(fset, imports, netHttpˢ, "."u8, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var mutex = imports[syncˢ].Scope().Lookup(mutexˢ)._<ж<types.TypeName>>().Type();
     var mset = types.NewMethodSet(new types.PointerжΔType(types.NewPointer(mutex))); // methods of *sync.Mutex
     var sel = mset.Lookup(nil, lockˢ);
@@ -604,16 +643,17 @@ private static readonly @string testdataBˢ = "./testdata/b"u8;
 public static void TestIssue13566(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
         // This package only handles gc export data.
         if (runtime.Compiler != "gc") {
             Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
         }
+
         @string tmpdir = mktmpdir(Ꮡt);
         defer(os.RemoveAll, tmpdir, ref ᒐ);
         @string testoutdir = filepath.Join(tmpdir, testdataˢ);
+
         // b.go needs to be compiled from the output directory so that the compiler can
         // find the compiled package a. We pass the full path to compile() so that we
         // don't have to copy the file to that directory.
@@ -621,10 +661,13 @@ public static void TestIssue13566(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         compile(Ꮡt, testdataˢ, aGoˢ, testoutdir, default!, encodingJsonˢ);
         compile(Ꮡt, testoutdir, bpath, testoutdir, new map<@string, @string>{["testdata/a"u8] = filepath.Join(testoutdir, "a.o")}, encodingJsonˢ);
+
         // import must succeed (test for issue at hand)
         var pkg = importPkg(Ꮡt, testdataBˢ, tmpdir);
+
         // make sure all indirectly imported packages have names
         foreach (var (_, imp) in pkg.Imports()) {
             if (imp.Name() == ""u8) {
@@ -644,14 +687,18 @@ public static void TestTypeNamingOrder(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
         // This package only handles gc export data.
         if (runtime.Compiler != "gc") {
             Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
         }
+
         @string tmpdir = mktmpdir(Ꮡt);
         defer(os.RemoveAll, tmpdir, ref ᒐ);
         @string testoutdir = filepath.Join(tmpdir, testdataˢ);
+
         compile(Ꮡt, testdataˢ, gGoˢ, testoutdir, default!);
+
         // import must succeed (test for issue at hand)
         _ = importPkg(Ꮡt, testdataGˢ, tmpdir);
     }
@@ -667,10 +714,12 @@ private static readonly @string pkgˢ = "Pkg"u8;
 
 public static void TestIssue13898(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     // import go/internal/gcimporter which imports go/types partially
     var fset = token.NewFileSet();
     var imports = new map<@string, ж<types.Package>>();
@@ -678,6 +727,7 @@ public static void TestIssue13898(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // look for go/types package
     ж<types.Package> goTypesPkg = default!;
     foreach (var (path, pkg) in imports) {
@@ -689,17 +739,20 @@ public static void TestIssue13898(ж<testing.T> Ꮡt) {
     if (goTypesPkg == nil) {
         Ꮡt.Fatal(goTypesNotFoundˢ);
     }
+
     // look for go/types.Object type
     var obj = lookupObj(Ꮡt, goTypesPkg.Scope(), objectˢ);
     var (typ, ok) = obj.Type()._<ж<types.Named>>(ᐧ);
     if (!ok) {
         Ꮡt.Fatalf("go/types.Object type is %v; wanted named type"u8, typ.OrTypedNil());
     }
+
     // lookup go/types.Object.Pkg method
     var (m, index, indirect) = types.LookupFieldOrMethod(new types.NamedжΔType(typ), false, nil, pkgˢ);
     if (m == default!) {
         Ꮡt.Fatalf("go/types.Object.Pkg not found (index = %v, indirect = %v)"u8, index, indirect);
     }
+
     // the method must belong to go/types
     if (m.Pkg().Path() != "go/types"u8) {
         Ꮡt.Fatalf("found %v; want go/types"u8, m.Pkg().OrTypedNil());
@@ -714,13 +767,17 @@ public static void TestIssue15517(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
         // This package only handles gc export data.
         if (runtime.Compiler != "gc") {
             Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
         }
+
         @string tmpdir = mktmpdir(Ꮡt);
         defer(os.RemoveAll, tmpdir, ref ᒐ);
+
         compile(Ꮡt, testdataˢ, pGoˢ, filepath.Join(tmpdir, testdataˢ), default!);
+
         // Multiple imports of p must succeed without redeclaration errors.
         // We use an import path that's not cleaned up so that the eventual
         // file path for the package is different from the package path; this
@@ -752,10 +809,12 @@ private static readonly @string issue15920ˢ = "issue15920"u8;
 
 public static void TestIssue15920(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     compileAndImportPkg(Ꮡt, issue15920ˢ);
 }
 
@@ -764,10 +823,12 @@ private static readonly @string issue20046ˢ = "issue20046"u8;
 
 public static void TestIssue20046(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     // "./issue20046".V.M must exist
     var pkg = compileAndImportPkg(Ꮡt, issue20046ˢ);
     var obj = lookupObj(Ꮡt, pkg.Scope(), "V"u8);
@@ -783,10 +844,12 @@ private static readonly @string issue25301ˢ = "issue25301"u8;
 
 public static void TestIssue25301(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     compileAndImportPkg(Ꮡt, issue25301ˢ);
 }
 
@@ -795,10 +858,12 @@ private static readonly @string issue25596ˢ = "issue25596"u8;
 
 public static void TestIssue25596(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     compileAndImportPkg(Ꮡt, issue25596ˢ);
 }
 
@@ -807,10 +872,12 @@ private static readonly @string issue57015ˢ = "issue57015"u8;
 
 public static void TestIssue57015(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     compileAndImportPkg(Ꮡt, issue57015ˢ);
 }
 
@@ -850,6 +917,7 @@ internal static types.Object lookupObj(ж<testing.T> Ꮡt, ж<typesꓸScope> Ꮡ
     return default!;
 }
 
+// importMap implements the types.Importer interface.
 partial struct importMap /*map[@string, ж<types.Package>]*/;
 
 internal static (ж<types.Package>, error) ΔImport(this importMap m, @string path) {
@@ -870,14 +938,16 @@ type S struct {
 	f T
 }
 
-"""u8;
+"""u8.Raw();
 
 public static partial void TestIssue69912(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     // This package only handles gc export data.
     if (runtime.Compiler != "gc") {
         Ꮡt.Skipf("gc-built packages not available (compiler = %s)"u8, runtime.Compiler);
     }
+
     @string tmpdir = Ꮡt.TempDir();
     @string testoutdir = filepath.Join(tmpdir, testdataˢ);
     {
@@ -885,12 +955,16 @@ public static partial void TestIssue69912(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("making output dir: %v"u8, errΔ1);
         }
     }
+
     compile(Ꮡt, testdataˢ, issue69912Goˢ, testoutdir, default!);
+
     var fset = token.NewFileSet();
+
     var (issue69912, err) = Import(fset, new map<@string, ж<types.Package>>(), testdataIssue69912ˢ, tmpdir, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var fsetʗ1 = fset;
     (ж<types.Package>, error) check(@string pkgname, @string src, importMap imports) {
         var (f, errΔ2) = parser.ParseFile(fsetʗ1, aGoˢ, src, 0);
@@ -902,6 +976,7 @@ public static partial void TestIssue69912(ж<testing.T> Ꮡt) {
         ));
         return config.Check(pkgname, fsetʗ1, new ж<ast.File>[]{f}.slice(), nil);
     }
+
     // Use the resulting package concurrently, via dot-imports, to exercise the
     // race of issue #69912.
     @string pSrc = pSrcᶜ;

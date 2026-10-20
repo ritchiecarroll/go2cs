@@ -97,6 +97,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(stackObjectBuf))]
 partial class runtime_package {
 
 internal const bool stackTraceDebug = false;
@@ -105,14 +106,14 @@ internal const bool stackTraceDebug = false;
 // Must be smaller than or equal to workbuf.
 partial struct stackWorkBuf {
     internal sys.NotInHeap _;
-    internal partial ref stackWorkBufHdr stackWorkBufHdr { get; }
+    /*embed*/ internal stackWorkBufHdr stackWorkBufHdr;
     internal array<uintptr> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(stackWorkBufHdr{}) */ (uintptr)32) / goarch.PtrSize);
 }
 
 // Header declaration must come after the buf declaration above, because of issue #14620.
 partial struct stackWorkBufHdr {
     internal sys.NotInHeap _;
-    internal partial ref workbufhdr workbufhdr { get; }
+    /*embed*/ internal workbufhdr workbufhdr;
     internal ж<stackWorkBuf> next; // linked list of workbufs
 }
 
@@ -124,13 +125,13 @@ partial struct stackWorkBufHdr {
 // Must be smaller than or equal to workbuf.
 partial struct stackObjectBuf {
     internal sys.NotInHeap _;
-    internal partial ref stackObjectBufHdr stackObjectBufHdr { get; }
+    /*embed*/ internal stackObjectBufHdr stackObjectBufHdr;
     internal array<stackObject> obj = new((uintptr)((uintptr)_WorkbufSize - /* unsafe.Sizeof(stackObjectBufHdr{}) */ (uintptr)32) / /* unsafe.Sizeof(stackObject{}) */ (uintptr)32);
 }
 
 partial struct stackObjectBufHdr {
     internal sys.NotInHeap _;
-    internal partial ref workbufhdr workbufhdr { get; }
+    /*embed*/ internal workbufhdr workbufhdr;
     internal ж<stackObjectBuf> next;
 }
 
@@ -290,7 +291,7 @@ internal static void addObject(this ref stackScanState s, uintptr addr, ж<stack
     if ((~x).nobj == len((~x).obj)) {
         // full buffer - allocate a new buffer, add to end of linked list
         var y = getempty().Reinterpret<workbuf, stackObjectBuf>();
-        y.Value.next = default!;
+        y.stackObjectBufHdr.next = default!;
         x.Value.next = y;
         s.tail = y;
         x = y;
@@ -318,8 +319,8 @@ internal static void buildIndex(this ref stackScanState s) {
 // If n == 0, returns nil, x.
 internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx) binarySearchTree(ж<stackObjectBuf> Ꮡx, nint idx, nint n) {
     ж<stackObject> root = default!;
-
     ref var x = ref Ꮡx.DerefOrNull();
+
     if (n == 0) {
         return (default!, Ꮡx, idx);
     }

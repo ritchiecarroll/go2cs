@@ -7,13 +7,21 @@ using unix = go.@internal.syscall.unix_package;
 using Δruntime = runtime_package;
 using sync = go.sync_package;
 using Δsyscall = syscall_package;
-using @unsafe = unsafe_package;
 using go;
 using go.@internal.syscall;
 
 partial class poll_package {
 
+// spliceNonblock doesn't make the splice itself necessarily nonblocking
+// (because the actual file descriptors that are spliced from/to may block
+// unless they have the O_NONBLOCK flag set), but it makes the splice pipe
+// operations nonblocking.
 internal static UntypedInt spliceNonblock => 0x2;
+
+// maxSpliceSize is the maximum amount of data Splice asks
+// the kernel to move in a single call to splice(2).
+// We use 1MB as Splice writes data through a pipe, and 1MB is the default maximum pipe buffer size,
+// which is determined by /proc/sys/fs/pipe-max-size.
 internal static UntypedInt maxSpliceSize => /* 1 << 20 */ 1048576;
 
 // Splice transfers at most remain bytes of data from src to dst, using the
@@ -27,8 +35,6 @@ public static (int64 written, bool handled, error err) Splice(ж<FD> Ꮡdst, ж<
     error err = default!;
     GoFrame ᒐ = default;
     try {
-        ref var src = ref Ꮡsrc.DerefOrNull();
-
         (var p, err) = getPipe();
         if (err != default!) {
             (written, handled, err) = (0, false, err); goto ᒐdone;
@@ -58,6 +64,7 @@ public static (int64 written, bool handled, error err) Splice(ж<FD> Ꮡdst, ж<
                 break;
             }
             p.Value.data += inPipe;
+
             (n, err) = splicePump(Ꮡdst, (~p).rfd, inPipe);
             if (n > 0) {
                 written += (int64)n;
@@ -205,10 +212,8 @@ partial struct splicePipeFields {
 }
 
 partial struct splicePipe {
-    internal partial ref splicePipeFields splicePipeFields { get; }
-    // We want to use a finalizer, so ensure that the size is
-    // large enough to not use the tiny allocator.
-    internal array<byte> _ = new(24 - /* unsafe.Sizeof(splicePipeFields{}) */ (uintptr)24 % 24);
+    /*embed*/ internal splicePipeFields splicePipeFields;
+    internal Δruntime.Cleanup cleanup;
 }
 
 // splicePipePool caches pipes to avoid high-frequency construction and destruction of pipe buffers.
@@ -225,7 +230,11 @@ internal static any newPoolPipe() {
     if (p == nil) {
         return default!;
     }
-    Δruntime.SetFinalizer(p.OrTypedNil(), destroyPipe);
+
+    p.Value.cleanup = Δruntime.AddCleanup(p, (splicePipeFields spf) => {
+        var ᴛ1 = new splicePipe(splicePipeFields: spf);
+        destroyPipe(ref ᴛ1);
+    }, (~p).splicePipeFields);
     return p.OrTypedNil();
 }
 
@@ -244,8 +253,8 @@ internal static void putPipe(ж<splicePipe> Ꮡp) {
     // If there is still data left in the pipe,
     // then close and discard it instead of putting it back into the pool.
     if (p.data != 0) {
-        Δruntime.SetFinalizer(Ꮡp.OrTypedNil(), default!);
-        destroyPipe(Ꮡp);
+        p.cleanup.Stop();
+        destroyPipe(ref (Ꮡp).DerefOrNull());
         return;
     }
     ᏑsplicePipePool.Put(Ꮡp.OrTypedNil());
@@ -259,19 +268,19 @@ internal static ж<splicePipe> newPipe() {
             return default!;
         }
     }
+
     // Splice will loop writing maxSpliceSize bytes from the source to the pipe,
     // and then write those bytes from the pipe to the destination.
     // Set the pipe buffer size to maxSpliceSize to optimize that.
     // Ignore errors here, as a smaller buffer size will work,
     // although it will require more system calls.
     unix.Fcntl(fds[0], Δsyscall.F_SETPIPE_SZ, maxSpliceSize);
+
     return Ꮡ(new splicePipe(splicePipeFields: new splicePipeFields(rfd: fds[0], wfd: fds[1])));
 }
 
 // destroyPipe destroys a pipe.
-internal static void destroyPipe(ж<splicePipe> Ꮡp) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
+internal static void destroyPipe(ref splicePipe p) {
     CloseFunc(p.rfd);
     CloseFunc(p.wfd);
 }

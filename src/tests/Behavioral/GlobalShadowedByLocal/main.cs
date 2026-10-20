@@ -55,7 +55,7 @@ internal static partial nint nestedBlockShadow(nint kind) {
     return total;
 }
 
-internal static map<@string, slice<@string>> hosts = new map<@string, slice<@string>>{["a"u8] = new @string[]{"x"u8, "y"u8}.slice()};
+internal static map<@string, slice<@string>> hosts = new map<@string, slice<@string>>{["a"] = new @string[]{"x", "y"}.slice()};
 
 internal static partial nint tupleInitShadow(@string key) {
     {
@@ -99,18 +99,16 @@ internal static partial nint constUnshadowedElsewhere() {
     return mlkemQ;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object mainFieldˢ = (@string)"main field:"u8;
-
 internal static void Main() {
     fmt.Println(constSelfInitShadow(), constNestedInitShadow(), constVarInitShadow(), constUnshadowedElsewhere());
     fmt.Println(collisionGlobalShadow());
     fmt.Println(plainGlobalShadow());
     fmt.Println(Δtrace.addr, plainCounter);
     fmt.Println(nestedBlockShadow(2), nestedBlockShadow(1));
-    fmt.Println(tupleInitShadow("a"u8), tupleInitShadow("z"u8));
-    var bi = new buildRec(Main: "mod/a"u8, Path: "p"u8);
-    fmt.Println(mainFieldˢ, bi.Main, mainField(bi));
+    fmt.Println(tupleInitShadow("a"), tupleInitShadow("z"));
+
+    var bi = new buildRec(Main: "mod/a", Path: "p");
+    fmt.Println("main field:", bi.Main, mainField(bi));
 }
 
 partial struct buildRec {

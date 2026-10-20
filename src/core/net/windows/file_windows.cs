@@ -3,24 +3,49 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using windows = @internal.syscall.windows_package;
 using os = os_package;
 using syscall = syscall_package;
+using @internal.syscall;
 
 partial class net_package {
 
-internal static (Conn, error) fileConn(ref os.File f) {
-    // TODO: Implement this
-    return (default!, syscall.EWINDOWS);
+internal static UntypedInt _SO_TYPE => /* windows.SO_TYPE */ 4104;
+
+internal static (syscallꓸHandle, error) dupSocket(syscallꓸHandle h) {
+    ref var info = ref heap(new syscall.WSAProtocolInfo(), out var Ꮡinfo);
+    var err = windows.WSADuplicateSocket(h, (uint32)syscall.Getpid(), Ꮡinfo);
+    if (err != default!) {
+        return (0, err);
+    }
+    return windows.WSASocket(-1, -1, -1, Ꮡinfo, 0, (uint32)((uint32)windows.WSA_FLAG_OVERLAPPED | (uint32)windows.WSA_FLAG_NO_HANDLE_INHERIT));
 }
 
-internal static (Listener, error) fileListener(ref os.File f) {
-    // TODO: Implement this
-    return (default!, syscall.EWINDOWS);
-}
+internal static (syscallꓸHandle, error) dupFileSocket(ж<os.File> Ꮡf) {
+    // Call Fd to disassociate the IOCP from the handle,
+    // it is not safe to share a duplicated handle
+    // that is associated with IOCP.
+    // Don't use the returned fd, as it might be closed
+    // if f happens to be the last reference to the file.
+    Ꮡf.Fd();
 
-internal static (PacketConn, error) filePacketConn(ref os.File f) {
-    // TODO: Implement this
-    return (default!, syscall.EWINDOWS);
+    var (sc, err) = Ꮡf.SyscallConn();
+    if (err != default!) {
+        return (0, err);
+    }
+
+    syscallꓸHandle h = default!;
+    ref var syserr = ref heap<error>(out var Ꮡsyserr);
+    err = sc.Control((uintptr fd) => {
+        (h, Ꮡsyserr.ValueSlot) = dupSocket((syscallꓸHandle)fd);
+    });
+    if (err == default!) {
+        err = syserr;
+    }
+    if (err != default!) {
+        return (0, err);
+    }
+    return (h, default!);
 }
 
 } // end net_package

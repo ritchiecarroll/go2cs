@@ -36,6 +36,7 @@ partial struct Version {
 public static nint Compare(@string x, @string y) {
     var vx = Parse(x);
     var vy = Parse(y);
+
     {
         nint c = CmpInt(vx.Major, vy.Major); if (c != 0) {
             return c;
@@ -52,8 +53,7 @@ public static nint Compare(@string x, @string y) {
         }
     }
     {
-        nint c = cmp.Compare(vx.Kind, vy.Kind); if (c != 0) {
-            // "" < alpha < beta < rc
+        nint c = cmp.Compare(vx.Kind, vy.Kind); if (c != 0) { // "" < alpha < beta < rc
             return c;
         }
     }
@@ -107,6 +107,7 @@ public static bool IsValid(@string x) {
 // It returns the zero version if x is malformed.
 public static Version Parse(@string x) {
     Version v = default!;
+
     // Parse major version.
     bool ok = default!;
     (v.Major, x, ok) = cutInt(x);
@@ -119,10 +120,12 @@ public static Version Parse(@string x) {
         v.Patch = "0"u8;
         return v;
     }
+
     // Parse . before minor version.
     if (x[0] != (rune)'.') {
         return new Version(nil);
     }
+
     // Parse minor version.
     (v.Minor, x, ok) = cutInt(x[1..]);
     if (!ok) {
@@ -136,6 +139,7 @@ public static Version Parse(@string x) {
         }
         return v;
     }
+
     // Parse patch if present.
     if (x[0] == (rune)'.') {
         (v.Patch, x, ok) = cutInt(x[1..]);
@@ -150,6 +154,7 @@ public static Version Parse(@string x) {
         }
         return v;
     }
+
     // Parse prerelease.
     nint i = 0;
     while (i < len(x) && (x[i] < (rune)'0' || (rune)'9' < x[i])) {
@@ -169,6 +174,7 @@ public static Version Parse(@string x) {
     if (!ok || x != ""u8) {
         return new Version(nil);
     }
+
     return v;
 }
 
@@ -179,8 +185,7 @@ internal static (@string n, @string rest, bool ok) cutInt(@string x) {
     while (i < len(x) && (rune)'0' <= x[i] && x[i] <= (rune)'9') {
         i++;
     }
-    if (i == 0 || x[0] == (rune)'0' && i != 1) {
-        // no digits or unnecessary leading zero
+    if (i == 0 || x[0] == (rune)'0' && i != 1) { // no digits or unnecessary leading zero
         return ("", "", false);
     }
     return (x.slice(0, i), x.slice(i), true);
@@ -224,7 +229,7 @@ public static @string DecInt(@string @decimal) {
     } else {
         digits[i]--;
     }
-    return ((@string)digits);
+    return (@string)digits;
 }
 
 } // end gover_package

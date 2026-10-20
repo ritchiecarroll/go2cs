@@ -43,13 +43,49 @@ import (
 var alwaysWriteSources atomic.Bool
 
 // writeSourceIfChanged writes a converted C# source unless its bytes already match the file on disk (always, under the
-// census). It reports whether it wrote.
+// census). It reports whether it wrote. Every source leaves here with uniform line endings (uniformLineEndings).
 func writeSourceIfChanged(fileName string, content []byte) (written bool, err error) {
+	content = uniformLineEndings(content)
+
 	if !alwaysWriteSources.Load() && !needToWriteFile(fileName, content) {
 		return false, nil
 	}
 
 	return true, os.WriteFile(fileName, content, 0644)
+}
+
+// uniformLineEndings returns content with every bare LF made CRLF: the line ending the converter writes wherever it
+// chooses one (Visitor.newline) and the one every checkout gives a .cs (.gitattributes: *.cs text eol=crlf). Text the
+// converter copies verbatim from Go kept Go's LF -- a multi-line raw literal's body and a /* */ block comment -- so a
+// fresh emission carried MIXED endings: git normalizes them away (the blob is unchanged), but the file's size differs
+// from a checkout's, and `git status` reads a size change as a modification without comparing content. CNR's verdict
+// is that status, so every fresh tree read the affected goldens as changed. Under CRLF both are inert: a raw literal's
+// Raw() removes every CR, as Go discards CR from a raw string's value, and a comment has no value. A bare CR is left as
+// it is.
+func uniformLineEndings(content []byte) []byte {
+	bare := 0
+
+	for i, b := range content {
+		if b == '\n' && (i == 0 || content[i-1] != '\r') {
+			bare++
+		}
+	}
+
+	if bare == 0 {
+		return content
+	}
+
+	uniform := make([]byte, 0, len(content)+bare)
+
+	for i, b := range content {
+		if b == '\n' && (i == 0 || content[i-1] != '\r') {
+			uniform = append(uniform, '\r')
+		}
+
+		uniform = append(uniform, b)
+	}
+
+	return uniform
 }
 
 // markedSourceState is a marker-bearing source's bytes and modification time from before this run rewrote it.

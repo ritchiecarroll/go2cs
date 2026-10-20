@@ -14,6 +14,7 @@ public static UntypedInt AI_CANONNAME => 0x2;
 public static UntypedInt AI_ALL => 0x100;
 public static UntypedInt AI_V4MAPPED => 0x800;
 public static UntypedInt AI_MASK => 0x1407;
+
 public static UntypedInt EAI_ADDRFAMILY => 1;
 public static UntypedInt EAI_AGAIN => 2;
 public static UntypedInt EAI_NODATA => 7;
@@ -21,6 +22,7 @@ public static UntypedInt EAI_NONAME => 8;
 public static UntypedInt EAI_SERVICE => 9;
 public static UntypedInt EAI_SYSTEM => 11;
 public static UntypedInt EAI_OVERFLOW => 14;
+
 public static UntypedInt NI_NAMEREQD => 4;
 
 partial struct Addrinfo {

@@ -52,35 +52,43 @@ internal static void Main() {
     var s = new nint[]{1, 2, 3}.slice();
     builtin.clear(s);
     fmt.Println(s[0], s[1], s[2]);
+
     var b = Ꮡ(new box(data: new nint[]{4, 5}.slice()));
     b.clear();
     fmt.Println(len((~b).data));
-    var m = new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2};
+
+    var m = new map<@string, nint>{["a"] = 1, ["b"] = 2};
     builtin.clear(m);
     fmt.Println(len(m));
+
     var g = Ꮡ(new guard(nil));
     g.run();
     fmt.Println((~g).err);
-    var h = new header(new map<@string, slice<@string>>{["a"u8] = new @string[]{"1"u8}.slice(), ["b"u8] = new @string[]{"2"u8}.slice()});
+
+    var h = new header(new map<@string, slice<@string>>{["a"] = new @string[]{"1"}.slice(), ["b"] = new @string[]{"2"}.slice()});
     var alias = h;
     builtin.clear(h);
     fmt.Println(len(h), len(alias));
+
     header hn = default!;
     builtin.clear(hn);
     fmt.Println(len(hn));
+
     var q = GoReflect.WithElemDims(new slice<array<int32>>(3, () => new(4)), 4);
     q[1][2] = 7;
     builtin.clear(q);
     fmt.Println(len(q[1]), q[1][2]);
     q[2][3] = 9;
     fmt.Println(q[2]);
+
     var c = new slice<cell>(2, () => new());
     c[0].v[1] = 3;
-    c[0].m = new map<@string, nint>{["x"u8] = 1};
+    c[0].m = new map<@string, nint>{["x"] = 1};
     builtin.clear(c);
     fmt.Println(len(c[0].v), c[0].v[1], c[0].m == default!);
     c[0].v[1] += 4;
     fmt.Println(c[0].v);
+
     var n = GoReflect.WithElemDims(new slice<array<array<int32>>>(2, () => new(2, () => new(3))), 2, 3);
     n[0][1][2] = 5;
     builtin.clear(n);

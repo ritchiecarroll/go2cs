@@ -118,6 +118,7 @@ public static void TestSimple(ж<testing.T> Ꮡt) {
     ref var tab = ref heap<ж<global::go.hash.crc32_package.Table>>(out var Ꮡtab);
     tab = simpleMakeTable(IEEE);
     testGoldenIEEE(Ꮡt, (slice<byte> b) => simpleUpdate(0, ref (Ꮡtab.ValueSlot).DerefOrNull(), b));
+
     tab = simpleMakeTable(Castagnoli);
     testGoldenCastagnoli(Ꮡt, (slice<byte> b) => simpleUpdate(0, ref (Ꮡtab.ValueSlot).DerefOrNull(), b));
 }
@@ -131,34 +132,42 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
         foreach (var (_, g) in golden) {
             var h = New(IEEETable);
             var h2 = New(IEEETable);
+
             io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
+
             var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 tΔ1.Errorf("could not marshal: %v"u8, err);
                 continue;
             }
+
             (var stateAppend, err) = h._<encoding.BinaryAppender>().AppendBinary(new slice<byte>(4, 32));
             if (err != default!) {
                 tΔ1.Errorf("could not marshal: %v"u8, err);
                 continue;
             }
             stateAppend = stateAppend[4..];
+
             if (((sstring)state) != g.halfStateIEEE) {
                 tΔ1.Errorf("IEEE(%q) state = %q, want %q"u8, g.@in, state, g.halfStateIEEE);
                 continue;
             }
+
             if (((sstring)stateAppend) != g.halfStateIEEE) {
                 tΔ1.Errorf("IEEE(%q) state = %q, want %q"u8, g.@in, stateAppend, g.halfStateIEEE);
                 continue;
             }
+
             {
                 var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != default!) {
                     tΔ1.Errorf("could not unmarshal: %v"u8, errΔ1);
                     continue;
                 }
             }
+
             io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
             io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
+
             if (h.Sum32() != h2.Sum32()) {
                 tΔ1.Errorf("IEEE(%s) = 0x%x != marshaled 0x%x"u8, g.@in, h.Sum32(), h2.Sum32());
             }
@@ -169,34 +178,42 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
         foreach (var (_, g) in golden) {
             var h = New(table);
             var h2 = New(table);
+
             io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
+
             var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 tΔ2.Errorf("could not marshal: %v"u8, err);
                 continue;
             }
+
             (var stateAppend, err) = h._<encoding.BinaryAppender>().AppendBinary(new slice<byte>(4, 32));
             if (err != default!) {
                 tΔ2.Errorf("could not marshal: %v"u8, err);
                 continue;
             }
             stateAppend = stateAppend[4..];
+
             if (((sstring)state) != g.halfStateCastagnoli) {
                 tΔ2.Errorf("Castagnoli(%q) state = %q, want %q"u8, g.@in, state, g.halfStateCastagnoli);
                 continue;
             }
+
             if (((sstring)stateAppend) != g.halfStateCastagnoli) {
                 tΔ2.Errorf("Castagnoli(%q) state = %q, want %q"u8, g.@in, stateAppend, g.halfStateCastagnoli);
                 continue;
             }
+
             {
                 var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != default!) {
                     tΔ2.Errorf("could not unmarshal: %v"u8, errΔ1);
                     continue;
                 }
             }
+
             io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
             io.WriteString(new crc32_test_package.hash_Hash32ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
+
             if (h.Sum32() != h2.Sum32()) {
                 tΔ2.Errorf("Castagnoli(%s) = 0x%x != marshaled 0x%x"u8, g.@in, h.Sum32(), h2.Sum32());
             }
@@ -207,10 +224,12 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
 public static void TestMarshalTableMismatch(ж<testing.T> Ꮡt) {
     var h1 = New(IEEETable);
     var h2 = New(MakeTable(Castagnoli));
+
     var (state1, err) = h1._<encoding.BinaryMarshaler>().MarshalBinary();
     if (err != default!) {
         Ꮡt.Errorf("could not marshal: %v"u8, err);
     }
+
     {
         var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state1); if (errΔ1 == default!) {
             Ꮡt.Errorf("no error when one was expected"u8);
@@ -223,8 +242,10 @@ public static void TestSlicing(ж<testing.T> Ꮡt) {
     ref var tab = ref heap<ж<global::go.hash.crc32_package.slicing8Table>>(out var Ꮡtab);
     tab = slicingMakeTable(IEEE);
     testGoldenIEEE(Ꮡt, (slice<byte> b) => slicingUpdate(0, Ꮡtab.ValueSlot, b));
+
     tab = slicingMakeTable(Castagnoli);
     testGoldenCastagnoli(Ꮡt, (slice<byte> b) => slicingUpdate(0, Ꮡtab.ValueSlot, b));
+
     // Cross-check various polys against the simple algorithm.
     foreach (var (_, poly) in new uint32[]{IEEE, Castagnoli, Koopman, 0xD5828281U}.slice()) {
         var t1 = simpleMakeTable(poly);
@@ -265,6 +286,7 @@ public static void TestArchCastagnoli(ж<testing.T> Ꮡt) {
 
 public static void TestGolden(ж<testing.T> Ꮡt) {
     testGoldenIEEE(Ꮡt, ChecksumIEEE);
+
     // Some implementations have special code to deal with misaligned
     // data; test that as well.
     for (nint deltaᴛ1 = 1; deltaᴛ1 <= 7; deltaᴛ1++) {
@@ -280,16 +302,19 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
             return ieee.Sum32();
         });
     }
+
     var castagnoliTab = MakeTable(Castagnoli);
     if (castagnoliTab == nil) {
         Ꮡt.Errorf("nil Castagnoli Table"u8);
     }
+
     var castagnoliTabʗ1 = castagnoliTab;
     testGoldenCastagnoli(Ꮡt, (slice<byte> b) => {
         var castagnoli = New(castagnoliTabʗ1);
         castagnoli.Write(b);
         return castagnoli.Sum32();
     });
+
     // Some implementations have special code to deal with misaligned
     // data; test that as well.
     for (nint deltaᴛ2 = 1; deltaᴛ2 <= 7; deltaᴛ2++) {
@@ -321,7 +346,7 @@ public static void BenchmarkCRC32(ж<testing.B> Ꮡb) {
 
 internal static Action<ж<testing.B>> benchmarkAll(hash.Hash32 h) {
     return (ж<testing.B> b) => {
-        foreach (var (_, size) in new nint[]{15, 40, 512, (1 << (int)(10)), (4 << (int)(10)), (32 << (int)(10))}.slice()) {
+        foreach (var (_, size) in new nint[]{15, 40, 512, 1 << 10, 4 << 10, 32 << 10}.slice()) {
             @string name = fmt.Sprint(size);
             if (size >= 1024) {
                 name = fmt.Sprintf("%dkB"u8, size / 1024);
@@ -348,12 +373,14 @@ internal static void benchmark(ж<testing.B> Ꮡb, hash.Hash32 h, int64 n, int64
         data[i] = (byte)i;
     }
     var @in = new slice<byte>(0, h.Size());
+
     // Warm up
     h.Reset();
     h.Write(data);
     h.Sum(@in);
     // Avoid further allocations
     @in = @in[..0];
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         h.Reset();

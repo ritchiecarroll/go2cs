@@ -25,11 +25,12 @@ partial struct dirInfo {
     internal nint bufp;    // location of next record in buf.
 }
 
+// More than 5760 to work around https://golang.org/issue/24015.
 internal static UntypedInt blockSize => 8192;
 
-// The buffer must be at least a block long.
 internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
+        // The buffer must be at least a block long.
         var buf = new slice<byte>(blockSize);
         return Ꮡ(buf);
     }
@@ -53,17 +54,26 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
         ref var f = ref Ꮡf.DerefOrNull();
 
         // If this file has no dirInfo, create one.
-        var d = Ꮡf.of(File.Ꮡdirinfo).Load();
-        if (d == nil) {
-            d = @new<dirInfo>();
-            Ꮡf.of(File.Ꮡdirinfo).Store(d);
+        ж<dirInfo> d = default!;
+        while (ᐧ) {
+            d = Ꮡf.of(File.Ꮡdirinfo).Load();
+            if (d != nil) {
+                break;
+            }
+            var newD = @new<dirInfo>();
+            if (Ꮡf.of(File.Ꮡdirinfo).CompareAndSwap(nil, newD)) {
+                d = newD;
+                break;
+            }
         }
+
         d.of(dirInfo.Ꮡmu).Lock();
         var dʗ1 = d;
         defer(dʗ1.of(dirInfo.Ꮡmu).Unlock, ref ᒐ);
         if ((~d).buf == nil) {
             d.Value.buf = ᏑdirBufPool.Get()._<ж<slice<byte>>>();
         }
+
         // Change the meaning of n for the implementation below.
         //
         // The n above was for the public interface of "if n <= 0,
@@ -76,6 +86,7 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
         if (n == 0) {
             n = -1;
         }
+
         while (n != 0) {
             // Refill the buffer if necessary
             if ((~d).bufp >= (~d).nbuf) {
@@ -93,6 +104,7 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
                     break; // EOF
                 }
             }
+
             // Drain the buffer
             var buf = ((~d).buf.ValueSlot).slice((~d).bufp, (~d).nbuf);
             var (reclen, ok) = direntReclen(buf);
@@ -129,15 +141,14 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
             if (((sstring)name) == "."u8 || ((sstring)name) == ".."u8) {
                 continue;
             }
-            if (n > 0) {
-                // see 'n == 0' comment above
+            if (n > 0) { // see 'n == 0' comment above
                 n--;
             }
             if (mode == readdirName){
-                names = append(names, ((@string)name));
+                names = append(names, (@string)name);
             } else 
             if (mode == readdirDirEntry){
-                var (de, errΔ1) = newUnixDirent(f.name, ((@string)name), direntType(rec));
+                var (de, errΔ1) = newUnixDirent(Ꮡf, (@string)name, direntType(rec));
                 if (IsNotExist(errΔ1)) {
                     // File disappeared between readdir and stat.
                     // Treat as if it didn't exist.
@@ -148,7 +159,7 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
                 }
                 dirents = append(dirents, de);
             } else {
-                var (info, errΔ2) = lstat(f.name + "/"u8 + ((@string)name));
+                var (info, errΔ2) = Ꮡf.lstatat((@string)name);
                 if (IsNotExist(errΔ2)) {
                     // File disappeared between readdir + stat.
                     // Treat as if it didn't exist.
@@ -160,6 +171,7 @@ internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> 
                 infos = append(infos, info);
             }
         }
+
         if (n > 0 && len(names) + len(dirents) + len(infos) == 0) {
             (names, dirents, infos, err) = (default!, default!, default!, Δio.EOF); goto ᒐdone;
         }
@@ -198,7 +210,6 @@ internal static uint64 readIntBE(slice<byte> b, uintptr size) {
     { /* default: */
         throw panic("syscall: readInt with unsupported size");
     }
-
 }
 
 internal static uint64 readIntLE(slice<byte> b, uintptr size) {
@@ -218,7 +229,6 @@ internal static uint64 readIntLE(slice<byte> b, uintptr size) {
     { /* default: */
         throw panic("syscall: readInt with unsupported size");
     }
-
 }
 
 } // end os_package

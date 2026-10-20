@@ -98,8 +98,7 @@ internal static void _C_res_nclose(ж<_C_struct___res_state> Ꮡstate) {
 }
 
 internal static (nint, error) cgoNameinfoPTR(slice<byte> b, ж<syscall.RawSockaddr> Ꮡsa, nint salen) {
-    var (gerrno, err) = unix.Getnameinfo(Ꮡsa, salen, Ꮡ(b, 0), len(b), nil, 0, unix.NI_NAMEREQD);
-    return ((nint)gerrno, err);
+    return unix.Getnameinfo(Ꮡsa, salen, Ꮡ(b, 0), len(b), nil, 0, unix.NI_NAMEREQD);
 }
 
 internal static ж<syscall.RawSockaddr> cgoSockaddrInet4(IP ip) {

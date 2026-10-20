@@ -52,6 +52,12 @@ using static go.crypto.cipher_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -60,12 +66,12 @@ using static go.crypto.cipher_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABs6ggAQKLKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgqaElIKWgoKopoKClAALHrKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgqSCuoKClpaCgoSCgqiClqaCgpQ=", "", "", "29=BlockSize/1/2/2,Clone/1/1/3,BlockSize/2/2/4")]
-[assembly: go.GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABcwgoKUgpSCgoKWypSCgpSCggADGgAJAoKUAAIYAAkCgpSmgpKUlO6E")]
-[assembly: go.GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACVSooCCpIKUgIKkgpSCgpQADBqCpoKCgoKCgoKWgoKCuIKmgoKUgpSAgqSCgpSCgoI=", "", "", "61=Clone/1/1/2")]
-[assembly: go.GoPositionMap("crypto/cipher/gcm.go", "gcm.cs", "ABw84oKUAAIU8oKUAAIWAAgCgpTWgoKCgpS4goKUAAUaAAoCgoKUgoKU7oKmgqaCgpaCgpSClIIAFzKCgpaCpoKClIKWgoKUgtyCgoKClIKWgoKUAA4UgoKUgpSAgqSClAALGIKmgqaCgpSClIKWgoKUgpaigoKEhIKChKaUgoKUgpaClIKWgoKUgpaigoKEgoSCgsqCloSmooKClIKCgriigoKChIKClIKCgriigqaigoKCgq7ygIKUgqSC")]
-[assembly: go.GoPositionMap("crypto/cipher/io.go", "io.cs", "ABMmsoKCAA0csoKCgpKUqqKAgqQ=")]
-[assembly: go.GoPositionMap("crypto/cipher/ofb.go", "ofb.cs", "ABY+AAkCgpaCgpSCgpTegqaCgoKClIKCgoKClIKmgoKUgpSCgpSCgoI=")]
+[assembly: go.GoPositionMap("crypto/cipher/cbc.go", "cbc.cs", "ABs6ggAQKLKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgraUlIKmgoK4poKClAALHrKClICCpIKUgIKkrsKClKaApIKClIKUgpSAgqSCyoKCpqaCgpSCgriCpqaCgpQ=", "", "", "29=BlockSize/1/2/2,Clone/1/1/3,BlockSize/2/2/4")]
+[assembly: go.GoPositionMap("crypto/cipher/cfb.go", "cfb.cs", "ABcwgoKUgpSCgoKmypSCgpSCggADGgAJAoKUAAIYAAkCgpSmgpKUlO6U")]
+[assembly: go.GoPositionMap("crypto/cipher/ctr.go", "ctr.cs", "ACVSooCCpIKUgIKkgpSCgpQADBqCpoKCgoKCgoKmgoKCuIKmgoKUgpSAgqSCgpSCgoI=", "", "", "61=Clone/1/1/2")]
+[assembly: go.GoPositionMap("crypto/cipher/gcm.go", "gcm.cs", "ABw84oKUAAIU8oKUAAIWAAgCgpTWgoKCgpS4goKUAAUaAAoCgoKUgoKU7oKmgqaCgqaCgpSClIIAGDKCgqaCpoKClIKmgoKUgtyCgoKClIKmgoKUAA4UgoKUgpSAgqSClAALGIKmgqaCgpSClIKmgoKUgqaigoKUlIKClKaUgoKUgqaClIKmgoKUgqaigoKUgpSCgsqCppSmooKClIKCgriigoKClIKClIKCgriigqaigoKCgq7ygIKUgqSC")]
+[assembly: go.GoPositionMap("crypto/cipher/io.go", "io.cs", "ABMmsoKCAA0csoKCgoKUqqKAgqQ=")]
+[assembly: go.GoPositionMap("crypto/cipher/ofb.go", "ofb.cs", "ABY+AAkCgqaCgpSCgpTugqaCgoKClIKCgoKClIKmgoKUgpSCgpSCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

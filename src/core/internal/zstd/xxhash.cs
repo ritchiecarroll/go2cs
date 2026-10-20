@@ -28,28 +28,32 @@ partial struct xxhash64 {
 // We assume a seed of 0 since that is what zstd uses.
 internal static void reset(this ref xxhash64 xh) {
     xh.len = 0;
+
     // Separate addition for awkward constant overflow.
     xh.v[0] = xxhPrime64c1;
     xh.v[0] += xxhPrime64c2;
+
     xh.v[1] = xxhPrime64c2;
     xh.v[2] = 0;
+
     // Separate negation for awkward constant overflow.
     xh.v[3] = xxhPrime64c1;
     xh.v[3] = ((uint64)0 - xh.v[3]);
-    foreach (var (i, _) in xh.buf) {
-        xh.buf[i] = 0;
-    }
+
+    clear(xh.buf[..]);
     xh.cnt = 0;
 }
 
 // update adds a buffer to the has.
 internal static void update(this ref xxhash64 xh, slice<byte> b) {
     xh.len += (uint64)builtin.len(b);
+
     if (xh.cnt + builtin.len(b) < builtin.len(xh.buf)) {
         copy(xh.buf.slice(xh.cnt), b);
         xh.cnt += builtin.len(b);
         return;
     }
+
     if (xh.cnt > 0) {
         nint n = copy(xh.buf.slice(xh.cnt), b);
         b = b.slice(n);
@@ -59,6 +63,7 @@ internal static void update(this ref xxhash64 xh, slice<byte> b) {
         xh.v[3] = xh.round(xh.v[3], binary.LittleEndian.Uint64(xh.buf[24..]));
         xh.cnt = 0;
     }
+
     while (builtin.len(b) >= 32) {
         xh.v[0] = xh.round(xh.v[0], binary.LittleEndian.Uint64(b));
         xh.v[1] = xh.round(xh.v[1], binary.LittleEndian.Uint64(b[8..]));
@@ -66,6 +71,7 @@ internal static void update(this ref xxhash64 xh, slice<byte> b) {
         xh.v[3] = xh.round(xh.v[3], binary.LittleEndian.Uint64(b[24..]));
         b = b[32..];
     }
+
     if (builtin.len(b) > 0) {
         copy(xh.buf[..], b);
         xh.cnt = builtin.len(b);
@@ -84,7 +90,9 @@ internal static uint64 digest(this ref xxhash64 xh) {
         h64 = xh.mergeRound(h64, xh.v[2]);
         h64 = xh.mergeRound(h64, xh.v[3]);
     }
+
     h64 += xh.len;
+
     var len = xh.len;
     len &= (uint64)(31);
     var buf = xh.buf[..];
@@ -107,11 +115,13 @@ internal static uint64 digest(this ref xxhash64 xh) {
         h64 = bits.RotateLeft64(h64, 11) * (uint64)xxhPrime64c1;
         len--;
     }
-    h64 ^= (uint64)((h64 >> (int)(33)));
+
+    h64 ^= (uint64)((h64 >> 33));
     h64 *= xxhPrime64c2;
-    h64 ^= (uint64)((h64 >> (int)(29)));
+    h64 ^= (uint64)((h64 >> 29));
     h64 *= xxhPrime64c3;
-    h64 ^= (uint64)((h64 >> (int)(32)));
+    h64 ^= (uint64)((h64 >> 32));
+
     return h64;
 }
 

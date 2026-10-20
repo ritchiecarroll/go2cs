@@ -17,21 +17,25 @@ public static void TestScalarAliasing(ж<testing.T> Ꮡt) {
         var x1 = x.ΔClone();
         ref var v1 = ref heap<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>(out var Ꮡv1);
         v1 = x.ΔClone();
+
         // Calculate a reference f(x) without aliasing.
         {
             var @out = f(Ꮡv, Ꮡx); if (@out != Ꮡv || !isReduced(@out.Bytes())) {
                 return false;
             }
         }
+
         // Test aliasing the argument and the receiver.
         {
             var @out = f(Ꮡv1, Ꮡv1); if (@out != Ꮡv1 || v1 != v || !isReduced(@out.Bytes())) {
                 return false;
             }
         }
+
         // Ensure the arguments was not modified.
         return x == x1;
     }
+
     bool checkAliasingTwoArgs(Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>> f, global::go.crypto.@internal.fips140.edwards25519_package.Scalar vʗp, global::go.crypto.@internal.fips140.edwards25519_package.Scalar xʗp, global::go.crypto.@internal.fips140.edwards25519_package.Scalar yʗp) {
         ref var v = ref heap(vʗp.ΔClone(), out var Ꮡv);
         ref var x = ref heap(xʗp.ΔClone(), out var Ꮡx);
@@ -40,12 +44,14 @@ public static void TestScalarAliasing(ж<testing.T> Ꮡt) {
         var y1 = y.ΔClone();
         ref var v1 = ref heap<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>(out var Ꮡv1);
         v1 = new Scalar(nil);
+
         // Calculate a reference f(x, y) without aliasing.
         {
             var @out = f(Ꮡv, Ꮡx, Ꮡy); if (@out != Ꮡv || !isReduced(@out.Bytes())) {
                 return false;
             }
         }
+
         // Test aliasing the first argument and the receiver.
         v1 = x.ΔClone();
         {
@@ -60,12 +66,14 @@ public static void TestScalarAliasing(ж<testing.T> Ꮡt) {
                 return false;
             }
         }
+
         // Calculate a reference f(x, x) without aliasing.
         {
             var @out = f(Ꮡv, Ꮡx, Ꮡx); if (@out != Ꮡv || !isReduced(@out.Bytes())) {
                 return false;
             }
         }
+
         // Test aliasing the first argument and the receiver.
         v1 = x.ΔClone();
         {
@@ -87,9 +95,11 @@ public static void TestScalarAliasing(ж<testing.T> Ꮡt) {
                 return false;
             }
         }
+
         // Ensure the arguments were not modified.
         return x == x1 && y == y1;
     }
+
         var checkAliasingOneArgʗ1 = checkAliasingOneArg;
 
         var checkAliasingTwoArgsʗ1 = checkAliasingTwoArgs;

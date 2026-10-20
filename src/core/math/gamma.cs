@@ -109,8 +109,7 @@ internal static (float64, float64) stirling(float64 x) {
     w = 1D + w * ((((_gamS[0] * w + _gamS[1]) * w + _gamS[2]) * w + _gamS[3]) * w + _gamS[4]);
     var y1 = Exp(x);
     var y2 = 1.0D;
-    if (x > MaxStirling){
-        // avoid Pow() overflow
+    if (x > MaxStirling){ // avoid Pow() overflow
         var v = Pow(x, 0.5D * x - 0.25D);
         (y1, y2) = (v, v / y1);
     } else {
@@ -145,7 +144,6 @@ public static float64 Gamma(float64 x) {
         }
         return Inf(1);
     }}
-
     var q = Abs(x);
     var p = Floor(q);
     if (q > 33D) {
@@ -158,7 +156,7 @@ public static float64 Gamma(float64 x) {
         // If |x| were >= 2⁶³ it would have to be an integer.
         nint signgam = 1;
         {
-            var ip = (int64)p; if ((int64)(ip & 1) == 0) {
+            var ip = (int64)p; if ((ip & 1) == 0) {
                 signgam = -1;
             }
         }
@@ -181,6 +179,7 @@ public static float64 Gamma(float64 x) {
         }
         return (float64)signgam * zΔ1;
     }
+
     // Reduce argument
     var z = 1.0D;
     while (x >= 3D) {
@@ -201,13 +200,16 @@ public static float64 Gamma(float64 x) {
         z = z / x;
         x = x + 1D;
     }
+
     if (x == 2D) {
         return z;
     }
+
     x = x - 2D;
     p = (((((x * _gamP[0] + _gamP[1]) * x + _gamP[2]) * x + _gamP[3]) * x + _gamP[4]) * x + _gamP[5]) * x + _gamP[6];
     q = ((((((x * _gamQ[0] + _gamQ[1]) * x + _gamQ[2]) * x + _gamQ[3]) * x + _gamQ[4]) * x + _gamQ[5]) * x + _gamQ[6]) * x + _gamQ[7];
     return z * p / q;
+
 small:
     if (x == 0D) {
         return Inf(1);

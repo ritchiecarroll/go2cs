@@ -30,11 +30,12 @@ internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @
     // Compute hash of (stk, tag).
     var h = (uintptr)0;
     foreach (var (_, x) in stk) {
-        h = (uintptr)((h << (int)(8)) | ((h >> (int)((8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1))))));
+        h = (uintptr)(h << 8 | (h >> (int)(8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1))));
         h += (uintptr)x * 41;
     }
-    h = (uintptr)((h << (int)(8)) | ((h >> (int)((8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1))))));
+    h = (uintptr)(h << 8 | (h >> (int)(8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1))));
     h += (uintptr)tag * 41;
+
     // Find entry if present.
     ж<profMapEntry> last = default!;
 Search:
@@ -57,6 +58,7 @@ Search:
 continue_Search:;
     }
 break_Search:;
+
     // Add new entry.
     if (len(m.free) < 1) {
         m.free = new slice<profMapEntry>(128);
@@ -65,12 +67,14 @@ break_Search:;
     m.free = m.free[1..];
     e.Value.nextHash = m.hash[h];
     e.Value.tag = tag;
+
     if (len(m.freeStk) < len(stk)) {
         m.freeStk = new slice<uintptr>(1024);
     }
     // Limit cap to prevent append from clobbering freeStk.
     e.Value.stk = m.freeStk.slice(0, len(stk), len(stk));
     m.freeStk = m.freeStk.slice(len(stk));
+
     foreach (var (j, _) in stk) {
         e.Value.stk[j] = (uintptr)stk[j];
     }

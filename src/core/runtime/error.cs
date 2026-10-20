@@ -12,14 +12,24 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-// The Error interface identifies a run time error.
+// Error identifies a runtime error used in panic.
+//
+// The Go runtime triggers panics for a variety of cases, as described by the
+// Go Language Spec, such as out-of-bounds slice/array access, close of nil
+// channels, type assertion failures, etc.
+//
+// When these cases occur, the Go runtime panics with an error that implements
+// Error. This can be useful when recovering from panics to distinguish between
+// custom application panics and fundamental runtime panics.
+//
+// Packages outside of the Go standard library should not implement Error.
 partial interface ΔError :
     error
 {
     // RuntimeError is a no-op function but
-    // serves to distinguish types that are run time
+    // serves to distinguish types that are runtime
     // errors from ordinary errors: a type is a
-    // run time error if it has a RuntimeError method.
+    // runtime error if it has a RuntimeError method.
     void RuntimeError();
 }
 
@@ -33,9 +43,6 @@ partial struct TypeAssertionError {
 
 public static void RuntimeError(this ref TypeAssertionError _) {
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string interfaceˢ = "interface"u8;
 
 public static @string Error(this ref TypeAssertionError e) {
     @string inter = interfaceˢ;
@@ -78,6 +85,7 @@ internal static slice<byte> itoa(slice<byte> buf, uint64 val) {
     return buf.slice(i);
 }
 
+// An errorString represents a runtime error described by a single string.
 partial struct errorString /*@string*/;
 
 internal static void RuntimeError(this errorString e) {
@@ -108,13 +116,16 @@ internal static uintptr Addr(this errorAddressString e) {
     return e.addr;
 }
 
+// plainError represents a runtime error described a string without
+// the prefix "runtime error: " after invoking errorString.Error().
+// See Issue #14965.
 partial struct plainError /*@string*/;
 
 internal static void RuntimeError(this plainError e) {
 }
 
 internal static @string Error(this plainError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 // A boundsError represents an indexing or slicing operation gone wrong.
@@ -126,48 +137,34 @@ partial struct boundsError {
     // Instead, we keep track of whether x should be interpreted as signed or unsigned.
     // y is known to be nonnegative and to fit in an int.
     internal bool signed;
-    internal boundsErrorCode code;
+    internal abi.BoundsErrorCode code;
 }
-
-partial struct boundsErrorCode /*num:uint8*/;
-
-internal static boundsErrorCode boundsIndex => /* iota */ 0; // s[x], 0 <= x < len(s) failed
-internal static boundsErrorCode boundsSliceAlen => 1; // s[?:x], 0 <= x <= len(s) failed
-internal static boundsErrorCode boundsSliceAcap => 2; // s[?:x], 0 <= x <= cap(s) failed
-internal static boundsErrorCode boundsSliceB => 3; // s[x:y], 0 <= x <= y failed (but boundsSliceA didn't happen)
-internal static boundsErrorCode boundsSlice3Alen => 4; // s[?:?:x], 0 <= x <= len(s) failed
-internal static boundsErrorCode boundsSlice3Acap => 5; // s[?:?:x], 0 <= x <= cap(s) failed
-internal static boundsErrorCode boundsSlice3B => 6; // s[?:x:y], 0 <= x <= y failed (but boundsSlice3A didn't happen)
-internal static boundsErrorCode boundsSlice3C => 7; // s[x:y:?], 0 <= x <= y failed (but boundsSlice3A/B didn't happen)
-internal static boundsErrorCode boundsConvert => 8; // (*[x]T)(s), 0 <= x <= len(s) failed
-
-// Note: in the above, len(s) and cap(s) are stored in y
 
 // boundsErrorFmts provide error text for various out-of-bounds panics.
 // Note: if you change these strings, you should adjust the size of the buffer
 // in boundsError.Error below as well.
 internal static array<@string> boundsErrorFmts = new golib.SparseArray<@string>{
-    [boundsIndex] = "index out of range [%x] with length %y"u8,
-    [boundsSliceAlen] = "slice bounds out of range [:%x] with length %y"u8,
-    [boundsSliceAcap] = "slice bounds out of range [:%x] with capacity %y"u8,
-    [boundsSliceB] = "slice bounds out of range [%x:%y]"u8,
-    [boundsSlice3Alen] = "slice bounds out of range [::%x] with length %y"u8,
-    [boundsSlice3Acap] = "slice bounds out of range [::%x] with capacity %y"u8,
-    [boundsSlice3B] = "slice bounds out of range [:%x:%y]"u8,
-    [boundsSlice3C] = "slice bounds out of range [%x:%y:]"u8,
-    [boundsConvert] = "cannot convert slice with length %y to array or pointer to array with length %x"u8
+    [abi.BoundsIndex] = "index out of range [%x] with length %y"u8,
+    [abi.BoundsSliceAlen] = "slice bounds out of range [:%x] with length %y"u8,
+    [abi.BoundsSliceAcap] = "slice bounds out of range [:%x] with capacity %y"u8,
+    [abi.BoundsSliceB] = "slice bounds out of range [%x:%y]"u8,
+    [abi.BoundsSlice3Alen] = "slice bounds out of range [::%x] with length %y"u8,
+    [abi.BoundsSlice3Acap] = "slice bounds out of range [::%x] with capacity %y"u8,
+    [abi.BoundsSlice3B] = "slice bounds out of range [:%x:%y]"u8,
+    [abi.BoundsSlice3C] = "slice bounds out of range [%x:%y:]"u8,
+    [abi.BoundsConvert] = "cannot convert slice with length %y to array or pointer to array with length %x"u8
 }.array();
 
 // boundsNegErrorFmts are overriding formats if x is negative. In this case there's no need to report y.
 internal static array<@string> boundsNegErrorFmts = new golib.SparseArray<@string>{
-    [boundsIndex] = "index out of range [%x]"u8,
-    [boundsSliceAlen] = "slice bounds out of range [:%x]"u8,
-    [boundsSliceAcap] = "slice bounds out of range [:%x]"u8,
-    [boundsSliceB] = "slice bounds out of range [%x:]"u8,
-    [boundsSlice3Alen] = "slice bounds out of range [::%x]"u8,
-    [boundsSlice3Acap] = "slice bounds out of range [::%x]"u8,
-    [boundsSlice3B] = "slice bounds out of range [:%x:]"u8,
-    [boundsSlice3C] = "slice bounds out of range [%x::]"u8
+    [abi.BoundsIndex] = "index out of range [%x]"u8,
+    [abi.BoundsSliceAlen] = "slice bounds out of range [:%x]"u8,
+    [abi.BoundsSliceAcap] = "slice bounds out of range [:%x]"u8,
+    [abi.BoundsSliceB] = "slice bounds out of range [%x:]"u8,
+    [abi.BoundsSlice3Alen] = "slice bounds out of range [::%x]"u8,
+    [abi.BoundsSlice3Acap] = "slice bounds out of range [::%x]"u8,
+    [abi.BoundsSlice3B] = "slice bounds out of range [:%x:]"u8,
+    [abi.BoundsSlice3C] = "slice bounds out of range [%x::]"u8
 }.array();
 
 internal static void RuntimeError(this boundsError e) {
@@ -184,6 +181,8 @@ internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
 }
 
 internal static @string Error(this boundsError e) {
+    var bᴷ = new stackAppend<byte>();
+
     @string fmt = boundsErrorFmts[e.code];
     if (e.signed && e.x < 0) {
         fmt = boundsNegErrorFmts[e.code];
@@ -195,7 +194,7 @@ internal static @string Error(this boundsError e) {
     for (nint i = 0; i < len(fmt); i++) {
         var c = fmt[i];
         if (c != (rune)'%') {
-            b = append(b, c);
+            b = append(bᴷ, b, c);
             continue;
         }
         i++;
@@ -208,9 +207,8 @@ internal static @string Error(this boundsError e) {
             b = appendIntStr(b, (int64)e.y, true);
             break;
         }}
-
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 partial interface stringer {
@@ -312,7 +310,8 @@ internal static void printanycustomtype(any iʗp) {
 
     var eface = efaceOf(Ꮡi);
     @string typestring = toRType((~eface)._type).@string();
-    var exprᴛ1 = (~(~eface)._type).Kind_;
+
+    var exprᴛ1 = (~eface)._type.Kind();
     if (exprᴛ1 == abi.ΔString) {
         print(typestring, (@string)@"("""u8);
         printindented(~(ж<@string>)(uintptr)((~eface).data));
@@ -369,7 +368,6 @@ internal static void printanycustomtype(any iʗp) {
     else { /* default: */
         print((@string)"("u8, typestring, (@string)") "u8, @unsafe.Pointer.OrTypedNil((~eface).data));
     }
-
 }
 
 // printindented prints s, replacing "\n" with "\n\t".

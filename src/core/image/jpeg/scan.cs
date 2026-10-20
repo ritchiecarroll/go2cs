@@ -14,12 +14,13 @@ internal static void makeImg(this ref decoder d, nint mxx, nint myy) {
         d.img1 = mΔ1.SubImage(image.Rect(0, 0, d.width, d.height))._<ж<image.Gray>>();
         return;
     }
+
     nint h0 = d.comp[0].h;
     nint v0 = d.comp[0].v;
     nint hRatio = quo(h0, d.comp[1].h);
     nint vRatio = quo(v0, d.comp[1].v);
     image.YCbCrSubsampleRatio subsampleRatio = default!;
-    switch ((nint)((hRatio << (int)(4)) | vRatio)) {
+    switch ((hRatio << 4 | vRatio)) {
     case 0x11: {
         subsampleRatio = image.YCbCrSubsampleRatio444;
         break;
@@ -48,9 +49,9 @@ internal static void makeImg(this ref decoder d, nint mxx, nint myy) {
         throw panic("unreachable");
         break;
     }}
-
     var m = image.NewYCbCr(image.Rect(0, 0, 8 * h0 * mxx, 8 * v0 * myy), subsampleRatio);
     d.img3 = m.SubImage(image.Rect(0, 0, d.width, d.height))._<ж<image.YCbCr>>();
+
     if (d.nComp == 4) {
         nint h3 = d.comp[3].h;
         nint v3 = d.comp[3].v;
@@ -120,8 +121,9 @@ internal static error processSOS(this ref decoder d, nint n) {
             }
         }
         totalHV += d.comp[compIndex].h * d.comp[compIndex].v;
+
         // The baseline t <= 1 restriction is specified in table B.3.
-        scan[i].td = (uint8)((d.tmp[2 + 2 * i] >> (int)(4)));
+        scan[i].td = (uint8)((d.tmp[2 + 2 * i] >> 4));
         {
             var t = scan[i].td; if (t > maxTh || (d.baseline && t > 1)) {
                 return ((FormatError)(@string)badTdValueˢ);
@@ -139,6 +141,7 @@ internal static error processSOS(this ref decoder d, nint n) {
     if (d.nComp > 1 && totalHV > 10) {
         return ((FormatError)(@string)totalSamplingFactorsTooˢ);
     }
+
     // zigStart and zigEnd are the spectral selection bounds.
     // ah and al are the successive approximation high and low values.
     // The spec calls these values Ss, Se, Ah and Al.
@@ -160,7 +163,7 @@ internal static error processSOS(this ref decoder d, nint n) {
     if (d.progressive) {
         zigStart = (int32)d.tmp[1 + 2 * nComp];
         zigEnd = (int32)d.tmp[2 + 2 * nComp];
-        ah = (uint32)((d.tmp[3 + 2 * nComp] >> (int)(4)));
+        ah = (uint32)(d.tmp[3 + 2 * nComp] >> 4);
         al = (uint32)((byte)(d.tmp[3 + 2 * nComp] & 0x0f));
         if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || blockSize <= zigEnd) {
             return ((FormatError)(@string)badSpectralSelectionˢ);
@@ -172,6 +175,7 @@ internal static error processSOS(this ref decoder d, nint n) {
             return ((FormatError)(@string)badSuccessiveˢ);
         }
     }
+
     // mxx and myy are the number of MCUs (Minimum Coded Units) in the image.
     nint h0 = d.comp[0].h;
     nint v0 = d.comp[0].v; // The h and v values from the Y components.
@@ -188,11 +192,15 @@ internal static error processSOS(this ref decoder d, nint n) {
             }
         }
     }
+
     d.bits = new bits(nil);
     nint mcu = 0;
     var expectedRST = (uint8)rst0Marker;
+    // b is the decoded coefficients, in natural (not zig-zag) order.
     ref var b = ref heap(new block(), out var Ꮡb);
     array<int32> dc = new(4); /* maxComponents */
+    // bx and by are the location of the current block, in units of 8x8
+    // blocks: the third block in the first row has (bx, by) = (2, 0).
     nint bx = default!;
     nint by = default!;
     nint blockCount = default!;
@@ -240,12 +248,14 @@ internal static error processSOS(this ref decoder d, nint n) {
                             continue;
                         }
                     }
+
                     // Load the previous partially decoded coefficients, if applicable.
                     if (d.progressive){
                         b = d.progCoeffs[compIndex][by * mxx * hi + bx].Clone();
                     } else {
                         b = new block(new int32[64].array());
                     }
+
                     if (ah != 0){
                         {
                             var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable], scan[i].ta), zigStart, zigEnd, ((int32)1).Lsh((uint64)(al))); if (err != default!) {
@@ -271,6 +281,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                             dc[compIndex] += dcDelta;
                             b[0] = dc[compIndex].Lsh((uint64)(al));
                         }
+
                         if (zig <= zigEnd && d.eobRun > 0){
                             d.eobRun--;
                         } else {
@@ -281,7 +292,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                                 if (err != default!) {
                                     return err;
                                 }
-                                var val0 = (uint8)((value >> (int)(4)));
+                                var val0 = (uint8)((value >> 4));
                                 var val1 = (uint8)(value & 0x0f);
                                 if (val1 != 0){
                                     zig += (int32)val0;
@@ -311,6 +322,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                             }
                         }
                     }
+
                     if (d.progressive) {
                         // Save the coefficients.
                         d.progCoeffs[compIndex][by * mxx * hi + bx] = b.Clone();
@@ -360,6 +372,7 @@ internal static error processSOS(this ref decoder d, nint n) {
             }
         } // for mx
     } // for my
+
     return default!;
 }
 
@@ -386,6 +399,7 @@ internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> Ꮡ
         }
         return default!;
     }
+
     // Refining AC components is more complicated; see sections G.1.2.2 and G.1.2.3.
     var zig = zigStart;
     if (d.eobRun == 0) {
@@ -396,8 +410,9 @@ loop:
             if (err != default!) {
                 return err;
             }
-            var val0 = (uint8)((value >> (int)(4)));
+            var val0 = (uint8)((value >> 4));
             var val1 = (uint8)(value & 0x0f);
+
             switch (val1) {
             case 0: {
                 if (val0 != 0x0f) {
@@ -546,7 +561,6 @@ internal static error reconstructBlock(this ref decoder d, ж<block> Ꮡb, nint 
         default: {
             return ((UnsupportedError)(@string)tooManyComponentsˢ);
         }}
-
     }
     // Level shift by +128, clip to [0, 255], and write to dst.
     for (nint y = 0; y < 8; y++) {
@@ -587,6 +601,7 @@ internal static error findRST(this ref decoder d, uint8 expectedRST) {
         // holds the next two bytes of JPEG-encoded input. It is either 0 or 1,
         // so that each iteration advances by 1 or 2 bytes (or returns).
         nint i = 0;
+
         if (d.tmp[0] == 0xff){
             if (d.tmp[1] == expectedRST){
                 return default!;
@@ -609,6 +624,7 @@ internal static error findRST(this ref decoder d, uint8 expectedRST) {
             d.tmp[0] = 0xff;
             i = 1;
         }
+
         {
             var err = d.readFull(d.tmp.slice(i, 2)); if (err != default!) {
                 return err;

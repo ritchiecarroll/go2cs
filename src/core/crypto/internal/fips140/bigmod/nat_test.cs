@@ -44,7 +44,7 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> set
 internal static ж<bigꓸInt> asBig(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
     var bits = new slice<big.Word>(len(n.limbs));
     foreach (var (i, _) in n.limbs) {
-        bits[i] = ((big.Word)n.limbs[i]);
+        bits[i] = (big.Word)n.limbs[i];
     }
     return @new<bigꓸInt>().SetBits(bits);
 }
@@ -64,7 +64,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.@internal.fi
 
     var limbs = new slice<nuint>(size);
     for (nint i = 0; i < size; i++) {
-        limbs[i] = (nuint)((nuint)r.Uint64() & (nuint)(unchecked((nuint)(18446744073709551614UL))));
+        limbs[i] = (nuint)r.Uint64() & (nuint)(unchecked((nuint)(18446744073709551614UL)));
     }
     return reflect.ValueOf(Ꮡ(new ΔNat(limbs)));
 }
@@ -160,6 +160,7 @@ public static void TestShiftIn(ж<testing.T> Ꮡt) {
         expected: new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06}.slice()
     )
     }.slice();
+
     foreach (var (i, tt) in examples) {
         var m = modulusFromBytes(tt.m);
         var got = natFromBytes(tt.x).ExpandFor(m).shiftIn((nuint)tt.y, m);
@@ -233,6 +234,7 @@ public static void TestSetBytes(ж<testing.T> Ꮡt) {
         fail: true
     )
     }.slice();
+
     foreach (var (i, tt) in tests) {
         var m = modulusFromBytes(tt.m);
         var (got, errΔ1) = NewNat().SetBytes(tt.b, m);
@@ -252,6 +254,7 @@ public static void TestSetBytes(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var f = (slice<byte> xBytes) => {
         var m = maxModulus((nuint)(len(xBytes) * 8 / (nint)_W + 1));
         var (got, errΔ2) = NewNat().SetBytes(xBytes, m);
@@ -260,6 +263,7 @@ public static void TestSetBytes(ж<testing.T> Ꮡt) {
         }
         return got.Equal(natFromBytes(xBytes).ExpandFor(m)) == yes;
     };
+
     var err = quick.Check((f).OrTypedNilFunc(), Ꮡ(new quick.Config(nil)));
     if (err != default!) {
         Ꮡt.Error(err);
@@ -288,6 +292,7 @@ public static void TestExpand(ж<testing.T> Ꮡt) {
         new nuint[]{1, 2}.slice()
     )
     }.slice();
+
     foreach (var (i, tt) in examples) {
         var got = (Ꮡ(new ΔNat(tt.@in))).expand(tt.n);
         if (len((~got).limbs) != len(tt.@out) || got.Equal(Ꮡ(new ΔNat(tt.@out))) != 1) {
@@ -373,17 +378,21 @@ public static void TestMulReductions(ж<testing.T> Ꮡt) {
     var (a, _) = @new<bigꓸInt>().SetString("773608962677651230850240281261679752031633236267106044359907"u8, 10);
     var (b, _) = @new<bigꓸInt>().SetString("180692823610368451951102211649591374573781973061758082626801"u8, 10);
     var n = @new<bigꓸInt>().Mul(a, b);
+
     var (N, _) = NewModulus(n.Bytes());
     var A = NewNat().setBig(a).ExpandFor(N);
     var B = NewNat().setBig(b).ExpandFor(N);
+
     if (A.Mul(B, N).IsZero() != 1) {
         Ꮡt.Error(aBModAB0ˢ);
     }
+
     var i = @new<bigꓸInt>().ModInverse(a, b);
     (N, _) = NewModulus(b.Bytes());
     A = NewNat().setBig(a).ExpandFor(N);
     var I = NewNat().setBig(i).ExpandFor(N);
     var one = NewNat().setBig(big.NewInt(1)).ExpandFor(N);
+
     if (A.Mul(I, N).Equal(one) != 1) {
         Ꮡt.Error(aInvAModB1ˢ);
     }
@@ -412,6 +421,7 @@ internal static void testMul(ж<testing.T> Ꮡt, nint n) {
     cryptorand.Read(a);
     cryptorand.Read(b);
     cryptorand.Read(m);
+
     // Pick the highest as the modulus.
     if (bytes.Compare(a, m) > 0) {
         (a, m) = (m, a);
@@ -419,6 +429,7 @@ internal static void testMul(ж<testing.T> Ꮡt, nint n) {
     if (bytes.Compare(b, m) > 0) {
         (b, m) = (m, b);
     }
+
     var (M, err) = NewModulus(m);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -431,8 +442,10 @@ internal static void testMul(ж<testing.T> Ꮡt, nint n) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     A.Mul(B, M);
     var ABytes = A.Bytes(M);
+
     var mBig = @new<bigꓸInt>().SetBytes(m);
     var aBig = @new<bigꓸInt>().SetBytes(a);
     var bBig = @new<bigꓸInt>().SetBytes(b);
@@ -440,6 +453,7 @@ internal static void testMul(ж<testing.T> Ꮡt, nint n) {
     nBig.Mod(nBig, mBig);
     var nBigBytes = new slice<byte>(len(ABytes));
     nBig.FillBytes(nBigBytes);
+
     if (!bytes.Equal(ABytes, nBigBytes)) {
         Ꮡt.Errorf("got %x, want %x"u8, ABytes, nBigBytes);
     }
@@ -480,6 +494,7 @@ public static void TestIs(ж<testing.T> Ꮡt) {
             Ꮡt.Error(errΔ2);
         }
     }
+
     var mFour = modulusFromBytes(new byte[]{4}.slice());
     var (n, err) = NewNat().SetBytes(new byte[]{3}.slice(), mFour);
     if (err != default!) {
@@ -509,6 +524,7 @@ public static void TestIs(ж<testing.T> Ꮡt) {
     checkNot(n.IsZero(), isZeroˢ4);
     checkNot(n.IsOne(), isOneˢ4);
     checkYes(n.IsOdd(), mod4IsNotOddˢ);
+
     var mTwoLimbs = maxModulus(2);
     (n, err) = NewNat().SetBytes(new byte[]{0x01}.slice(), mTwoLimbs);
     if (err != default!) {
@@ -620,6 +636,7 @@ public static void BenchmarkModAdd(ж<testing.B> Ꮡb) {
     var x = makeBenchmarkValue();
     var y = makeBenchmarkValue();
     var m = makeBenchmarkModulus();
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         x.Add(y, m);
@@ -632,6 +649,7 @@ public static void BenchmarkModSub(ж<testing.B> Ꮡb) {
     var x = makeBenchmarkValue();
     var y = makeBenchmarkValue();
     var m = makeBenchmarkModulus();
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         x.Sub(y, m);
@@ -643,6 +661,7 @@ public static void BenchmarkMontgomeryRepr(ж<testing.B> Ꮡb) {
 
     var x = makeBenchmarkValue();
     var m = makeBenchmarkModulus();
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         x.montgomeryRepresentation(m);
@@ -656,6 +675,7 @@ public static void BenchmarkMontgomeryMul(ж<testing.B> Ꮡb) {
     var y = makeBenchmarkValue();
     var @out = makeBenchmarkValue();
     var m = makeBenchmarkModulus();
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         @out.montgomeryMul(x, y, m);
@@ -668,6 +688,7 @@ public static void BenchmarkModMul(ж<testing.B> Ꮡb) {
     var x = makeBenchmarkValue();
     var y = makeBenchmarkValue();
     var m = makeBenchmarkModulus();
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         x.Mul(y, m);
@@ -684,6 +705,7 @@ public static void BenchmarkExpBig(ж<testing.B> Ꮡb) {
     var n = @new<bigꓸInt>().SetBytes(exponentBytes);
     var one = @new<bigꓸInt>().SetUint64(1);
     n.Add(n, one);
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         @out.Exp(x, e, n);
@@ -697,6 +719,7 @@ public static void BenchmarkExp(ж<testing.B> Ꮡb) {
     var e = makeBenchmarkExponent();
     var @out = makeBenchmarkValue();
     var m = makeBenchmarkModulus();
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         @out.Exp(x, e, m);
@@ -780,6 +803,7 @@ public static void TestInverse(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     @string ModInv = default!;
     @string A = default!;
     @string M = default!;
@@ -791,6 +815,7 @@ public static void TestInverse(ж<testing.T> Ꮡt) {
         if (len(line) == 0 || line[0] == (rune)'#') {
             continue;
         }
+
         var (k, v, _) = strings.Cut(line, " = "u8);
         var exprᴛ1 = k;
         if (exprᴛ1 == "ModInv"u8) {
@@ -801,6 +826,7 @@ public static void TestInverse(ж<testing.T> Ꮡt) {
         }
         else if (exprᴛ1 == "M"u8) {
             M = v;
+
             Ꮡt.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
                 var (m, errΔ2) = NewModulus(decodeHex(tΔ2, M));
                 if (errΔ2 != default!) {
@@ -810,6 +836,7 @@ public static void TestInverse(ж<testing.T> Ꮡt) {
                 if (errΔ2 != default!) {
                     tΔ2.Fatal(errΔ2);
                 }
+
                 var (got, ok) = NewNat().InverseVarTime(a, m);
                 if (!ok) {
                     tΔ2.Fatal(notInvertibleˢ);
@@ -826,7 +853,6 @@ public static void TestInverse(ж<testing.T> Ꮡt) {
         else { /* default: */
             Ꮡt.Fatalf("unknown key %q on line %d"u8, k, lineNum);
         }
-
     }
     {
         var errΔ3 = scanner.Err(); if (errΔ3 != default!) {

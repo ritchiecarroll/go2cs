@@ -12,7 +12,6 @@ using static go.crypto.x509_package;
 
 partial class x509_internal_test_package {
 
-
 partial struct oidTestsᴛ1 /*dyn*/ {
     internal slice<byte> raw;
     internal bool valid;
@@ -54,14 +53,17 @@ public static void TestOID(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("newOIDFromDER(%v) = (%v, %v); want = (OID, %v)"u8, v.raw, oid, ok, v.valid);
             continue;
         }
+
         if (!ok) {
             continue;
         }
+
         {
             @string str = oid.String(); if (str != v.str) {
                 Ꮡt.Errorf("(%#v).String() = %v, want; %v"u8, oid, str, v.str);
             }
         }
+
         asn1.ObjectIdentifier asn1OID = default!;
         foreach (var (_, vΔ1) in v.ints) {
             if (vΔ1 > math.MaxInt32) {
@@ -70,6 +72,7 @@ public static void TestOID(ж<testing.T> Ꮡt) {
             }
             asn1OID = append(asn1OID, (nint)vΔ1);
         }
+
         (var o, ok) = oid.toASN1OID();
         {
             var shouldOk = asn1OID != default!; if (shouldOk != ok) {
@@ -77,9 +80,11 @@ public static void TestOID(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
+
         if (asn1OID != default! && !o.Equal(asn1OID)) {
             Ꮡt.Errorf("(%#v).toASN1OID() = (%v, true); want = (%v, true)"u8, oid, o, asn1OID);
         }
+
         if (v.ints != default!) {
             var (oid2, err) = OIDFromInts(v.ints);
             if (err != default!) {
@@ -106,15 +111,18 @@ public static void TestInvalidOID(ж<testing.T> Ꮡt) {
         new(str: "1.81"u8, ints: new uint64[]{1, 81}.slice()),
         new(str: "1.81.200"u8, ints: new uint64[]{1, 81, 200}.slice())
     }.slice();
+
     foreach (var (_, tt) in cases) {
         var (oid, err) = OIDFromInts(tt.ints);
         if (err == default!) {
             Ꮡt.Errorf("OIDFromInts(%v) = (%v, %v); want = (OID{}, %v)"u8, tt.ints, oid, err, errInvalidOID);
         }
+
         (var oid2, err) = ParseOID(tt.str);
         if (err == default!) {
             Ꮡt.Errorf("ParseOID(%v) = (%v, %v); want = (OID{}, %v)"u8, tt.str, oid2, err, errInvalidOID);
         }
+
         global::go.crypto.x509_package.OID oid3 = default!;
         err = oid3.UnmarshalText(slice<byte>(tt.str));
         if (err == default!) {
@@ -138,6 +146,7 @@ public static void TestOIDEqual(ж<testing.T> Ꮡt) {
         new(oid: new OID(nil), oid2: new OID(nil), eq: true),
         new(oid: new OID(nil), oid2: mustNewOIDFromInts(new uint64[]{2, 33, 23}.slice()), eq: false)
     }.slice();
+
     foreach (var (_, tt) in cases) {
         {
             var eq = tt.oid.Equal(tt.oid2); if (eq != tt.eq) {
@@ -176,6 +185,7 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
         new(@in: "1.-2"u8, err: errInvalidOID),
         new(@in: "1.2.+333"u8, err: errInvalidOID)
     }.slice();
+
     foreach (var (_, v) in oidTests) {
         var (oid, ok) = newOIDFromDER(v.raw);
         if (!ok) {
@@ -187,67 +197,80 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
             err: default!
         ));
     }
+
     foreach (var (_, tt) in cases) {
         var (o, err) = ParseOID(tt.@in);
         if (!AreEqual(err, tt.err)) {
             Ꮡt.Errorf("ParseOID(%q) = %v; want = %v"u8, tt.@in, err, tt.err);
             continue;
         }
+
         global::go.crypto.x509_package.OID o2 = default!;
         err = o2.UnmarshalText(slice<byte>(tt.@in));
         if (!AreEqual(err, tt.err)) {
             Ꮡt.Errorf("(*OID).UnmarshalText(%q) = %v; want = %v"u8, tt.@in, err, tt.err);
             continue;
         }
+
         if (err != default!) {
             continue;
         }
+
         if (!o.Equal(tt.@out)) {
             Ꮡt.Errorf("(*OID).UnmarshalText(%q) = %v; want = %v"u8, tt.@in, o, tt.@out);
             continue;
         }
+
         if (!o2.Equal(tt.@out)) {
             Ꮡt.Errorf("ParseOID(%q) = %v; want = %v"u8, tt.@in, o2, tt.@out);
             continue;
         }
+
         (var marshalled, err) = o.MarshalText();
         if (((sstring)marshalled) != tt.@in || err != default!) {
-            Ꮡt.Errorf("(%#v).MarshalText() = (%v, %v); want = (%v, nil)"u8, o, ((@string)marshalled), err, tt.@in);
+            Ꮡt.Errorf("(%#v).MarshalText() = (%v, %v); want = (%v, nil)"u8, o, (@string)marshalled, err, tt.@in);
             continue;
         }
+
         var textAppend = new slice<byte>(4);
         (textAppend, err) = o.AppendText(textAppend);
         textAppend = textAppend[4..];
         if (((sstring)textAppend) != tt.@in || err != default!) {
-            Ꮡt.Errorf("(%#v).AppendText() = (%v, %v); want = (%v, nil)"u8, o, ((@string)textAppend), err, tt.@in);
+            Ꮡt.Errorf("(%#v).AppendText() = (%v, %v); want = (%v, nil)"u8, o, (@string)textAppend, err, tt.@in);
             continue;
         }
+
         (var binary, err) = o.MarshalBinary();
         if (err != default!) {
             Ꮡt.Errorf("(%#v).MarshalBinary() = %v; want = nil"u8, o, err);
         }
+
         global::go.crypto.x509_package.OID o3 = default!;
         {
             var errΔ1 = o3.UnmarshalBinary(binary); if (errΔ1 != default!) {
                 Ꮡt.Errorf("(*OID).UnmarshalBinary(%v) = %v; want = nil"u8, binary, errΔ1);
             }
         }
+
         if (!o3.Equal(tt.@out)) {
             Ꮡt.Errorf("(*OID).UnmarshalBinary(%v) = %v; want = %v"u8, binary, o3, tt.@out);
             continue;
         }
+
         var binaryAppend = new slice<byte>(4);
         (binaryAppend, err) = o.AppendBinary(binaryAppend);
         binaryAppend = binaryAppend[4..];
         if (err != default!) {
             Ꮡt.Errorf("(%#v).AppendBinary() = %v; want = nil"u8, o, err);
         }
+
         global::go.crypto.x509_package.OID o4 = default!;
         {
             var errΔ2 = o4.UnmarshalBinary(binaryAppend); if (errΔ2 != default!) {
                 Ꮡt.Errorf("(*OID).UnmarshalBinary(%v) = %v; want = nil"u8, binaryAppend, errΔ2);
             }
         }
+
         if (!o4.Equal(tt.@out)) {
             Ꮡt.Errorf("(*OID).UnmarshalBinary(%v) = %v; want = %v"u8, binaryAppend, o4, tt.@out);
             continue;
@@ -263,7 +286,6 @@ internal partial struct TestOIDEqualASN1OID_type /*dyn*/ {
 
 public static void TestOIDEqualASN1OID(ж<testing.T> Ꮡt) {
     var maxInt32PlusOne = 2147483648L;
-/*convert to int, so that it compiles on 32bit*/
     slice<TestOIDEqualASN1OID_type> cases = new TestOIDEqualASN1OID_type[]{
         new(oid: mustNewOIDFromInts(new uint64[]{1, 2, 3}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{1, 2, 3}.slice()), eq: true),
         new(oid: mustNewOIDFromInts(new uint64[]{1, 2, 3}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{1, 2, 4}.slice()), eq: false),
@@ -285,13 +307,14 @@ public static void TestOIDEqualASN1OID(ж<testing.T> Ꮡt) {
         new(oid: mustNewOIDFromInts(new uint64[]{1, 33, math.MaxInt32}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, math.MaxInt32}.slice()), eq: true),
         new(
             oid: mustNewOIDFromInts(new uint64[]{1, 33, math.MaxInt32 + 1}.slice()),
-            oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, (nint)maxInt32PlusOne}.slice()),
+            oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, /*convert to int, so that it compiles on 32bit*/ (nint)maxInt32PlusOne}.slice()),
             eq: false
         ),
         new(oid: mustNewOIDFromInts(new uint64[]{1, 33, 256}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{}.slice()), eq: false),
         new(oid: new OID(nil), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, 256}.slice()), eq: false),
         new(oid: new OID(nil), oid2: new asn1.ObjectIdentifier(new nint[]{}.slice()), eq: false)
     }.slice();
+
     foreach (var (_, tt) in cases) {
         {
             var eq = tt.oid.EqualASN1OID(tt.oid2); if (eq != tt.eq) {
@@ -305,10 +328,12 @@ public static void TestOIDUnmarshalBinary(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in oidTests) {
         global::go.crypto.x509_package.OID o = default!;
         var err = o.UnmarshalBinary(tt.raw);
+
         var expectErr = errInvalidOID;
         if (tt.valid) {
             expectErr = default!;
         }
+
         if (!AreEqual(err, expectErr)) {
             Ꮡt.Errorf("(o *OID).UnmarshalBinary(%v) = %v; want = %v; (o = %v)"u8, tt.raw, err, expectErr, o);
         }

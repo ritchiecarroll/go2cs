@@ -45,8 +45,8 @@ partial class printer_package {
 // future (not yet interspersed) comments in this function.
 internal static nint /*nbreaks*/ linebreak(this ж<printer> Ꮡp, nint line, nint min, whiteSpace ws, bool newSection) {
     nint nbreaks = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     nint n = max(nlimit(line - p.pos.Line), min);
     if (n > 0) {
         Ꮡp.print(ws);
@@ -147,10 +147,12 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
         }
         return;
     }
+
     var prev = p.posFor(prev0);
     var next = p.posFor(next0);
     nint line = p.lineFor(list[0].Pos());
     nint endLine = p.lineFor(list[len(list) - 1].End());
+
     if (prev.IsValid() && prev.Line == line && line == endLine) {
         // all list entries on a single line
         foreach (var (i, x) in list) {
@@ -167,14 +169,17 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
         }
         return;
     }
+
     // list entries span multiple lines;
     // use source code positions to guide line breaks
+
     // Don't add extra indentation if noIndent is set;
     // i.e., pretend that the first line is already indented.
     var ws = ignore;
     if ((exprListMode)(mode & noIndent) == 0) {
         ws = indent;
     }
+
     // The first linebreak is always a formfeed since this section must not
     // depend on any previous formatting.
     nint prevBreak = -1; // index of last expression that was followed by a linebreak
@@ -182,24 +187,29 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
         ws = ignore;
         prevBreak = 0;
     }
+
     // initialize expression/key size: a zero value indicates expr/key doesn't fit on a single line
     nint size = 0;
+
     // We use the ratio between the geometric mean of the previous key sizes and
     // the current size to determine if there should be a break in the alignment.
     // To compute the geometric mean we accumulate the ln(size) values (lnsum)
     // and the number of sizes included (count).
     var lnsum = 0.0D;
     nint count = 0;
+
     // print all list elements
     nint prevLine = prev.Line;
     foreach (var (i, x) in list) {
         line = p.lineFor(x.Pos());
+
         // Determine if the next linebreak, if any, needs to use formfeed:
         // in general, use the entire node size to make the decision; for
         // key:value expressions, use the key size.
         // TODO(gri) for a better result, should probably incorporate both
         //           the key and the node size into the decision process
         var useFF = true;
+
         // Determine element size: All bets are off if we don't have
         // position information for the previous and next token (likely
         // generated code - simply ignore the size in this case by setting
@@ -217,6 +227,7 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
             // size too large or we don't have good layout information
             size = 0;
         }
+
         // If the previous line and the current line had single-
         // line-expressions and the key sizes are small or the
         // ratio between the current key and the geometric mean
@@ -233,6 +244,7 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
                 useFF = r * ratio <= 1D || r <= ratio;
             }
         }
+
         var needsLinebreak = 0 < prevLine && prevLine < line;
         if (i > 0) {
             // Use position of expression following the comma as
@@ -266,6 +278,7 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
                 Ꮡp.print(blank);
             }
         }
+
         if (len(list) > 1 && isPair && size > 0 && needsLinebreak){
             // We have a key:value expression that fits onto one line
             // and it's not on the same line as the prior expression:
@@ -279,12 +292,15 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
         } else {
             Ꮡp.expr0(x, depth);
         }
+
         if (size > 0) {
             lnsum += math.Log((float64)size);
             count++;
         }
+
         prevLine = line;
     }
+
     if ((exprListMode)(mode & commaTerm) != 0 && next.IsValid() && p.pos.Line < next.Line) {
         // Print a terminating comma if the next token is on a new line.
         Ꮡp.print(token.COMMA);
@@ -299,10 +315,12 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
         Ꮡp.print(formfeed); // terminating comma needs a line break to look good
         return;
     }
+
     if (isIncomplete) {
         Ꮡp.print(token.COMMA, newline);
         Ꮡp.print("// " + filteredMsg, newline);
     }
+
     if (ws == ignore && (exprListMode)(mode & noIndent) == 0) {
         // unindent if we indented
         Ꮡp.print(unindent);
@@ -369,6 +387,7 @@ internal static void parameters(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfiel
             Ꮡp.expr(stripParensAlways((~par).Type));
             prevLine = parLineEnd;
         }
+
         // if the closing ")" is on a separate line from the last parameter,
         // print an additional "," and line break
         {
@@ -384,11 +403,13 @@ internal static void parameters(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfiel
                 Ꮡp.print(token.COMMA);
             }
         }
+
         // unindent if we indented
         if (ws == ignore) {
             Ꮡp.print(unindent);
         }
     }
+
     p.setPos(fields.Closing);
     Ꮡp.print(closeTok);
 }
@@ -401,6 +422,7 @@ internal static void parameters(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfiel
 internal static bool combinesWithName(ast.Expr x) {
     switch (x.type()) {
     case ж<ast.StarExpr> xΔ1: {
+        // name *x.X combines to name*x.X if x.X is not a type element
         return !isTypeElem((~xΔ1).X);
     }
     case ж<ast.BinaryExpr> xΔ1: {
@@ -409,7 +431,6 @@ internal static bool combinesWithName(ast.Expr x) {
     case ж<ast.ParenExpr> xΔ1: {
         return !isTypeElem((~xΔ1).X);
     }}
-    // name *x.X combines to name*x.X if x.X is not a type element
     return false;
 }
 
@@ -512,6 +533,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
     tokenꓸPos rbrace = fields.Closing;
     var hasComments = isIncomplete || p.commentBefore(p.posFor(rbrace));
     var srcIsOneLine = lbrace.IsValid() && rbrace.IsValid() && p.lineFor(lbrace) == p.lineFor(rbrace);
+
     if (!hasComments && srcIsOneLine) {
         // possibly a one-line struct/interface
         if (len(list) == 0){
@@ -540,8 +562,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
                     Ꮡp.print(blank);
                 }
                 Ꮡp.expr((~f).Type);
-            } else {
-                // interface
+            } else { // interface
                 if (len((~f).Names) > 0){
                     var name = (~f).Names[0]; // method name
                     Ꮡp.expr(new ast.IdentжExpr(name));
@@ -558,12 +579,14 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
         }
     }
     // hasComments || !srcIsOneLine
+
     Ꮡp.print(blank);
     p.setPos(lbrace);
     Ꮡp.print(token.LBRACE, indent);
     if (hasComments || len(list) > 0) {
         Ꮡp.print(formfeed);
     }
+
     if (isStruct){
         var sep = vtab;
         if (len(list) == 1) {
@@ -610,8 +633,7 @@ internal static void fieldList(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfield
             Ꮡp.flush(p.posFor(rbrace), token.RBRACE); // make sure we don't lose the last line comment
             Ꮡp.setLineComment("// " + filteredMsg);
         }
-    } else {
-        // interface
+    } else { // interface
         ref var line = ref heap(new nint(), out var Ꮡline);
         ж<ast.Ident> prev = default!;                  // previous "type" identifier
         foreach (var (i, f) in list) {
@@ -686,6 +708,7 @@ internal static (bool has4, bool has5, nint maxProblem) walkBinary(ref ast.Binar
         maxProblem = max(maxProblem, mp);
         break;
     }}
+
     switch (e.Y.type()) {
     case ж<ast.BinaryExpr> r: {
         if ((~r).Op.Precedence() <= e.Op.Precedence()) {
@@ -700,8 +723,7 @@ internal static (bool has4, bool has5, nint maxProblem) walkBinary(ref ast.Binar
         break;
     }
     case ж<ast.StarExpr> r: {
-        if (e.Op == token.QUO) {
-            // `*/`
+        if (e.Op == token.QUO) { // `*/`
             maxProblem = 5;
         }
         break;
@@ -714,7 +736,6 @@ internal static (bool has4, bool has5, nint maxProblem) walkBinary(ref ast.Binar
         else if (exprᴛ1 == "++"u8 || exprᴛ1 == "--"u8) {
             maxProblem = max(maxProblem, 4);
         }
-
         break;
     }}
     return (has4, has5, maxProblem);
@@ -803,7 +824,9 @@ internal static void binaryExpr(this ж<printer> Ꮡp, ж<ast.BinaryExpr> Ꮡx, 
         Ꮡp.print(token.RPAREN);
         return;
     }
+
     var printBlank = prec < cutoff;
+
     var ws = indent;
     Ꮡp.expr1(x.X, prec, depth + diffPrec(x.X, prec));
     if (printBlank) {
@@ -841,8 +864,10 @@ internal static readonly object depth1ˢ = (@string)"depth < 1:"u8;
 
 internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var indicesᴷ = new stackAppend<ast.Expr>();
 
     p.setPos(expr.Pos());
+
     switch (expr.type()) {
     case ж<ast.BadExpr> x: {
         Ꮡp.print(badExprˢ);
@@ -910,10 +935,10 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
     case ж<ast.FuncLit> x: {
         p.setPos((~x).Type.Pos());
         Ꮡp.print(token.FUNC);
+        // See the comment in funcDecl about how the header size is computed.
         nint startCol = p.@out.Column - len("func");
         Ꮡp.signature((~x).Type);
-        Ꮡp.funcBody(p.distanceFrom((~x).Type.Pos(), // See the comment in funcDecl about how the header size is computed.
- startCol), blank, (~x).Body);
+        Ꮡp.funcBody(p.distanceFrom((~x).Type.Pos(), startCol), blank, (~x).Body);
         break;
     }
     case ж<ast.ParenExpr> x: {
@@ -950,8 +975,8 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         break;
     }
     case ж<ast.IndexExpr> x: {
-        Ꮡp.expr1((~x).X, // TODO(gri): should treat[] like parentheses and undo one level of depth
- token.HighestPrec, 1);
+        // TODO(gri): should treat[] like parentheses and undo one level of depth
+        Ꮡp.expr1((~x).X, token.HighestPrec, 1);
         p.setPos((~x).Lbrack);
         Ꮡp.print(token.LBRACK);
         Ꮡp.expr0((~x).Index, depth + 1);
@@ -960,9 +985,9 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         break;
     }
     case ж<ast.IndexListExpr> x: {
-        Ꮡp.expr1((~x).X, // TODO(gri): as for IndexExpr, should treat [] like parentheses and undo
- // one level of depth
- token.HighestPrec, 1);
+        // TODO(gri): as for IndexExpr, should treat [] like parentheses and undo
+        // one level of depth
+        Ꮡp.expr1((~x).X, token.HighestPrec, 1);
         p.setPos((~x).Lbrack);
         Ꮡp.print(token.LBRACK);
         Ꮡp.exprList((~x).Lbrack, (~x).Indices, depth + 1, commaTerm, (~x).Rbrack, false);
@@ -971,13 +996,13 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         break;
     }
     case ж<ast.SliceExpr> x: {
-        Ꮡp.expr1((~x).X, // TODO(gri): should treat[] like parentheses and undo one level of depth
- token.HighestPrec, 1);
+        // TODO(gri): should treat[] like parentheses and undo one level of depth
+        Ꮡp.expr1((~x).X, token.HighestPrec, 1);
         p.setPos((~x).Lbrack);
         Ꮡp.print(token.LBRACK);
         var indices = new ast.Expr[]{(~x).Low, (~x).High}.slice();
         if ((~x).Max != default!) {
-            indices = append(indices, (~x).Max);
+            indices = append(indicesᴷ, indices, (~x).Max);
         }
         // determine if we need extra blanks around ':'
         bool needsBlanks = default!;
@@ -1018,6 +1043,9 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         if (len((~x).Args) > 1) {
             depth++;
         }
+
+        // Conversions to literal function types or <-chan
+        // types require parentheses around the type.
         var paren = false;
         switch ((~x).Fun.type()) {
         case ж<ast.FuncType> t: {
@@ -1029,14 +1057,13 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
             break;
         }}
         if (paren) {
-            // Conversions to literal function types or <-chan
-            // types require parentheses around the type.
             Ꮡp.print(token.LPAREN);
         }
         var wasIndented = Ꮡp.possibleSelectorExpr((~x).Fun, token.HighestPrec, depth);
         if (paren) {
             Ꮡp.print(token.RPAREN);
         }
+
         p.setPos((~x).Lparen);
         Ꮡp.print(token.LPAREN);
         if ((~x).Ellipsis.IsValid()){
@@ -1057,26 +1084,26 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         break;
     }
     case ж<ast.CompositeLit> x: {
+        // composite literal elements that are composite literals themselves may have the type omitted
         if ((~x).Type != default!) {
-            // composite literal elements that are composite literals themselves may have the type omitted
             Ꮡp.expr1((~x).Type, token.HighestPrec, depth);
         }
         p.level++;
         p.setPos((~x).Lbrace);
         Ꮡp.print(token.LBRACE);
         Ꮡp.exprList((~x).Lbrace, (~x).Elts, 1, commaTerm, (~x).Rbrace, (~x).Incomplete);
+        // do not insert extra line break following a /*-style comment
+        // before the closing '}' as it might break the code if there
+        // is no trailing ','
         pmode mode = noExtraLinebreak;
+        // do not insert extra blank following a /*-style comment
+        // before the closing '}' unless the literal is empty
         if (len((~x).Elts) > 0) {
-            // do not insert extra line break following a /*-style comment
-            // before the closing '}' as it might break the code if there
-            // is no trailing ','
-            // do not insert extra blank following a /*-style comment
-            // before the closing '}' unless the literal is empty
             mode |= (pmode)(noExtraBlank);
         }
-        Ꮡp.print(indent, // need the initial indent to print lone comments with
- // the proper level of indentation
- unindent, mode);
+        // need the initial indent to print lone comments with
+        // the proper level of indentation
+        Ꮡp.print(indent, unindent, mode);
         p.setPos((~x).Rbrace);
         Ꮡp.print(token.RBRACE, mode);
         p.level--;
@@ -1133,7 +1160,6 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
             p.setPos((~x).Arrow);
             Ꮡp.print(token.ARROW);
         }
-
         Ꮡp.print(blank);
         Ꮡp.expr((~x).Value);
         break;
@@ -1163,6 +1189,7 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
         return Ꮡlit; // only one digit (common case) - nothing to do
     }
     // len(lit.Value) >= 2
+
     // We ignore lit.Kind because for lit.Kind == token.IMAG the literal may be an integer
     // or floating-point value, decimal or not. Instead, just consider the literal pattern.
     ref var x = ref heap<@string>(out var Ꮡx);
@@ -1170,18 +1197,16 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
     var exprᴛ1 = x[..2];
     if (exprᴛ1 == "0X"u8) {
         x = "0x" + x[2..];
+        // possibly a hexadecimal float
         {
-            nint i = strings.LastIndexByte(x, // 0-prefix octal, decimal int, or float (possibly with 'i' suffix)
- // remove leading 0's from integer (but not floating-point) imaginary literals
- // possibly a hexadecimal float
- (rune)'P'); if (i >= 0) {
+            nint i = strings.LastIndexByte(x, (rune)'P'); if (i >= 0) {
                 x = x.slice(0, i) + "p" + x.slice(i + 1);
             }
         }
     }
     else if (exprᴛ1 == "0x"u8) {
-        nint i = strings.LastIndexByte(x, // possibly a hexadecimal float
- (rune)'P');
+        // possibly a hexadecimal float
+        nint i = strings.LastIndexByte(x, (rune)'P');
         if (i == -1) {
             return Ꮡlit; // nothing to do
         }
@@ -1201,12 +1226,14 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
     }
     else { /* default: */
         do {
+            // 0-prefix octal, decimal int, or float (possibly with 'i' suffix)
             {
                 nint i = strings.LastIndexByte(x, (rune)'E'); if (i >= 0) {
                     x = x.slice(0, i) + "e" + x.slice(i + 1);
                     break;
                 }
             }
+            // remove leading 0's from integer (but not floating-point) imaginary literals
             if (x[len(x) - 1] == (rune)'i' && !strings.ContainsAny(x, ".e"u8)) {
                 x = strings.TrimLeft(x, "0_"u8);
                 if (x == "i"u8) {
@@ -1342,11 +1369,11 @@ internal static ast.Expr stripParens(ast.Expr x) {
             ast.Inspect((~px).X, (ast.Node node) => {
                 switch (node.type()) {
                 case ж<ast.ParenExpr> xΔ1: {
+                    // parentheses protect enclosed composite literals
                     return false;
                 }
                 case ж<ast.CompositeLit> xΔ1: {
                     if (isTypeName((~xΔ1).Type)) {
-                        // parentheses protect enclosed composite literals
                         strip = false; // do not strip parentheses
                     }
                     return false;
@@ -1446,6 +1473,7 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.setPos(stmt.Pos());
+
     switch (stmt.type()) {
     case ж<ast.BadStmt> s: {
         Ꮡp.print(badStmtˢ);
@@ -1456,17 +1484,17 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
         break;
     }
     case ж<ast.EmptyStmt> s: {
+        // nothing to do
         break;
     }
     case ж<ast.LabeledStmt> s: {
+        // a "correcting" unindent immediately following a line break
+        // is applied before the line break if there is no comment
+        // between (see writeWhitespace)
         Ꮡp.print(unindent);
         Ꮡp.expr(new ast.IdentжExpr((~s).Label));
         p.setPos((~s).Colon);
-        Ꮡp.print(token.COLON, // nothing to do
- // a "correcting" unindent immediately following a line break
- // is applied before the line break if there is no comment
- // between (see writeWhitespace)
- indent);
+        Ꮡp.print(token.COLON, indent);
         {
             var (e, isEmpty) = (~s).Stmt._<ж<ast.EmptyStmt>>(ᐧ); if (isEmpty){
                 if (!nextIsRBrace) {
@@ -1571,15 +1599,14 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
                 break;
             }
             default: {
-                Ꮡp.print(token.LBRACE, // This can only happen with an incorrectly
- // constructed AST. Permit it but print so
- // that it can be parsed without errors.
- indent, formfeed);
+                // This can only happen with an incorrectly
+                // constructed AST. Permit it but print so
+                // that it can be parsed without errors.
+                Ꮡp.print(token.LBRACE, indent, formfeed);
                 Ꮡp.stmt((~s).Else, true);
                 Ꮡp.print(unindent, formfeed, token.RBRACE);
                 break;
             }}
-
         }
         break;
     }
@@ -1703,6 +1730,7 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
 //		-  V          V  -          false     V is moved into T column
 internal static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
     var m = new slice<bool>(len(specs));
+
     var mʗ1 = m;
     void populate(nint i, nint j, bool keepTypeΔ1) {
         if (keepTypeΔ1) {
@@ -1711,6 +1739,7 @@ internal static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
             }
         }
     }
+
     nint i0 = -1; // if i0 >= 0 we are in a run and i0 is the start of the run
     bool keepType = default!;
     foreach (var (i, s) in specs) {
@@ -1736,6 +1765,7 @@ internal static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
         // end of a run
         populate(i0, len(specs), keepType);
     }
+
     return m;
 }
 
@@ -1786,6 +1816,7 @@ internal static ж<ast.BasicLit> sanitizeImportPath(ж<ast.BasicLit> Ꮡlit) {
     if (err != default!) {
         return Ꮡlit;
     }
+
     // if the string is an invalid path, return whatever we have
     //
     // spec: "Implementation restriction: A compiler may restrict
@@ -1803,6 +1834,7 @@ internal static ж<ast.BasicLit> sanitizeImportPath(ж<ast.BasicLit> Ꮡlit) {
             return Ꮡlit;
         }
     }
+
     // otherwise, return the double-quoted path
     s = strconv.Quote(s);
     if (s == lit.Value) {
@@ -1881,6 +1913,7 @@ internal static void genDecl(this ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
     Ꮡp.setComment(d.Doc);
     p.setPos(d.Pos());
     Ꮡp.print(d.Tok, blank);
+
     if (d.Lparen.IsValid() || len(d.Specs) != 1){
         // group of parenthesized declarations
         p.setPos(d.Lparen);
@@ -1958,8 +1991,10 @@ internal static nint /*size*/ nodeSize(this ref printer p, ast.Node n, nint maxS
             return sizeΔ1;
         }
     }
+
     size = maxSize + 1; // assume n doesn't fit
     p.nodeSizes[n] = size;
+
     // nodeSize computation must be independent of particular
     // style so that we always get the same decision; print
     // in RawFormat
@@ -2036,11 +2071,13 @@ internal static void funcBody(this ж<printer> Ꮡp, nint headerSize, whiteSpace
         if (Ꮡb == nil) {
             return;
         }
+
         // save/restore composite literal nesting level
         defer((nint level) => {
             Ꮡp.Value.level = level;
         }, Ꮡp.Value.level, ref ᒐ);
         p.level = 0;
+
         const nint maxSize = 100;
         if (headerSize + Ꮡp.bodySize(Ꮡb, maxSize) <= maxSize) {
             Ꮡp.print(sep);
@@ -2061,6 +2098,7 @@ internal static void funcBody(this ж<printer> Ꮡp, nint headerSize, whiteSpace
             Ꮡp.print(token.RBRACE, noExtraLinebreak);
             return;
         }
+
         if (sep != ignore) {
             Ꮡp.print(blank); // always use blank
         }

@@ -67,10 +67,12 @@ public class GoroutineParkAccountingTests
             // The bubble's two (S1c), golib SyncTestBubble.
             [WaitReason.SynctestRun] = "synctest.Run",
             [WaitReason.SynctestWait] = "synctest.Wait",
-            // Bubbled channels (S2).
-            [WaitReason.SynctestChanReceive] = "chan receive (synctest)",
-            [WaitReason.SynctestChanSend] = "chan send (synctest)",
-            [WaitReason.SynctestSelect] = "select (synctest)"
+            // Bubbled channels (S2), in Go 1.26's spelling (go1.26.9 runtime2.go:1315-1317).
+            [WaitReason.SynctestChanReceive] = "chan receive (durable)",
+            [WaitReason.SynctestChanSend] = "chan send (durable)",
+            [WaitReason.SynctestSelect] = "select (durable)",
+            // A Wait on a WaitGroup bubbled to the waiter's bubble, new at Go 1.25 (runtime2.go:1318).
+            [WaitReason.SynctestWaitGroupWait] = "sync.WaitGroup.Wait (durable)"
         };
 
         // Both directions. The forward one catches a wrong string; this one catches a member added

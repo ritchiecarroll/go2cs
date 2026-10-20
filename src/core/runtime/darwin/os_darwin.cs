@@ -15,6 +15,10 @@ partial struct mOS {
     internal pthreadmutex mutex;
     internal pthreadcond cond;
     internal nint count;
+    // address of errno variable for this thread.
+    // This is an optimization to avoid calling libc_error
+    // on every syscall_rawsyscalln.
+    internal ж<int32> errnoAddr;
 }
 
 internal static void unimplemented(@string name) {
@@ -137,6 +141,7 @@ internal static void sigNoteSetup(ж<note> _) {
     }
     closeonexec(sigNoteRead);
     closeonexec(sigNoteWrite);
+
     // Make the write end of the pipe non-blocking, so that if the pipe
     // buffer is somehow full we will not block in the signal handler.
     // Leave the read end of the pipe blocking so that we will block
@@ -167,8 +172,9 @@ internal static void sigNoteSleep(ж<note> _) {
 internal static void osinit() {
     // pthread_create delayed until end of goenvs so that we
     // can look at the environment first.
-    ncpu = getncpu();
+    numCPUStartup = getCPUCount();
     physPageSize = getPageSize();
+
     osinit_hack();
 }
 
@@ -181,16 +187,28 @@ internal static (int32, int32) sysctlbynameInt32(slice<byte> name) {
     return (ret, @out);
 }
 
-//go:linkname internal_cpu_getsysctlbyname internal/cpu.getsysctlbyname
-internal static (int32, int32) internal_cpu_getsysctlbyname(slice<byte> name) {
+internal static int32 sysctlbynameBytes(slice<byte> name, slice<byte> @out) {
+    ref var nout = ref heap<uintptr>(out var Ꮡnout);
+    nout = (uintptr)len(@out);
+    var ret = sysctlbyname(Ꮡ(name, 0), Ꮡ(@out, 0), Ꮡnout, nil, 0);
+    return ret;
+}
+
+//go:linkname internal_cpu_sysctlbynameInt32 internal/cpu.sysctlbynameInt32
+internal static (int32, int32) internal_cpu_sysctlbynameInt32(slice<byte> name) {
     return sysctlbynameInt32(name);
+}
+
+//go:linkname internal_cpu_sysctlbynameBytes internal/cpu.sysctlbynameBytes
+internal static int32 internal_cpu_sysctlbynameBytes(slice<byte> name, slice<byte> @out) {
+    return sysctlbynameBytes(name, @out);
 }
 
 internal static UntypedInt _CTL_HW => 6;
 internal static UntypedInt _HW_NCPU => 3;
 internal static UntypedInt _HW_PAGESIZE => 7;
 
-internal static int32 getncpu() {
+internal static int32 getCPUCount() {
     // Use sysctl to fetch hw.ncpu.
     ref var mib = ref heap<array<uint32>>(out var Ꮡmib);
     mib = new uint32[]{_CTL_HW, _HW_NCPU}.array();
@@ -240,6 +258,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
     if (false) {
         print((@string)"newosproc stk="u8, @unsafe.Pointer.OrTypedNil(stk), (@string)" m="u8, Ꮡmp.OrTypedNil(), (@string)" g="u8, mp.g0.OrTypedNil(), (@string)" id="u8, mp.id, (@string)" ostk="u8, Ꮡ(mp), (@string)"\n"u8);
     }
+
     // Initialize an attribute object.
     ref var attr = ref heap(new pthreadattr(), out var Ꮡattr);
     int32 err = default!;
@@ -248,6 +267,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
         writeErrStr(failthreadcreate);
         exit(1);
     }
+
     // Find out OS stack size for our own stack guard.
     ref var stacksize = ref heap(new uintptr(), out var Ꮡstacksize);
     if (pthread_attr_getstacksize(Ꮡattr, Ꮡstacksize) != 0) {
@@ -255,11 +275,13 @@ internal static void newosproc(ж<m> Ꮡmp) {
         exit(1);
     }
     mp.g0.Value.stack.hi = stacksize; // for mstart
+
     // Tell the pthread library we won't join with this thread.
     if (pthread_attr_setdetachstate(Ꮡattr, _PTHREAD_CREATE_DETACHED) != 0) {
         writeErrStr(failthreadcreate);
         exit(1);
     }
+
     // Finally, create the thread. It starts at mstart_stub, which does some low-level
     // setup and then calls mstart.
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
@@ -292,6 +314,7 @@ internal static void newosproc0(uintptr stacksizeʗp, uintptr fn) {
         writeErrStr(failthreadcreate);
         exit(1);
     }
+
     // The caller passes in a suggested stack size,
     // from when we allocated the stack and thread ourselves,
     // without libpthread. Now that we're using libpthread,
@@ -303,11 +326,13 @@ internal static void newosproc0(uintptr stacksizeʗp, uintptr fn) {
     }
     g0.stack.hi = stacksize; // for mstart
     Ꮡmemstats.of(mstats.Ꮡstacks_sys).add((int64)stacksize);
+
     // Tell the pthread library we won't join with this thread.
     if (pthread_attr_setdetachstate(Ꮡattr, _PTHREAD_CREATE_DETACHED) != 0) {
         writeErrStr(failthreadcreate);
         exit(1);
     }
+
     // Finally, create the thread. It starts at mstart_stub, which does some low-level
     // setup and then calls mstart.
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
@@ -355,6 +380,7 @@ internal static void minit() {
     }
     minitSignalMask();
     getg().Value.m.Value.procid = (uint64)(uintptr)pthread_self();
+    libc_error_addr((~getg()).m.of(m.ᏑerrnoAddr));
 }
 
 // Called from dropm to undo the effect of an minit.
@@ -373,6 +399,7 @@ internal static void unminit() {
 // resources in minit, semacreate, or elsewhere. Do not take locks after calling this.
 //
 // This always runs without a P, so //go:nowritebarrierrec is required.
+//
 //go:nowritebarrierrec
 internal static void mdestroy(ref m mp) {
 }
@@ -406,8 +433,7 @@ internal static void setsig(uint32 i, uintptr fn) {
     ref var sa = ref heap(new usigactiont(), out var Ꮡsa);
     sa.sa_flags = (int32)((UntypedInt)(_SA_SIGINFO | _SA_ONSTACK) | (int32)_SA_RESTART);
     sa.sa_mask = ~(uint32)0;
-    if (fn == abi.FuncPCABIInternal(sighandler)) {
-        // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
+    if (fn == abi.FuncPCABIInternal(sighandler)) { // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
         if (iscgo){
             fn = abi.FuncPCABI0(cgoSigtramp);
         } else {
@@ -430,13 +456,13 @@ internal static void setsigstack(uint32 i) {
     ref var osa = ref heap(new usigactiont(), out var Ꮡosa);
     sigaction(i, nil, Ꮡosa);
     var handler = ~Ꮡosa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>();
-    if ((int32)(osa.sa_flags & (int32)_SA_ONSTACK) != 0) {
+    if ((osa.sa_flags & (int32)_SA_ONSTACK) != 0) {
         return;
     }
     ref var sa = ref heap(new usigactiont(), out var Ꮡsa);
     (Ꮡsa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>()).Value = handler;
     sa.sa_mask = osa.sa_mask;
-    sa.sa_flags = (int32)(osa.sa_flags | (int32)_SA_ONSTACK);
+    sa.sa_flags = osa.sa_flags | (int32)_SA_ONSTACK;
     sigaction(i, Ꮡsa, nil);
 }
 
@@ -458,11 +484,11 @@ internal static void setSignalstackSP(ж<stackt> Ꮡs, uintptr sp) {
 //go:nosplit
 //go:nowritebarrierrec
 internal static void sigaddset(ref sigset mask, nint i) {
-    mask |= (sigset)((sigset)((uint32)1 << (int)(((uint32)i - 1))));
+    mask |= (sigset)((sigset)((uint32)1 << (int)((uint32)i - 1)));
 }
 
 internal static void sigdelset(ref sigset mask, nint i) {
-    mask &= unchecked((sigset)~(sigset)((sigset)((uint32)1 << (int)(((uint32)i - 1)))));
+    mask &= unchecked((sigset)~(sigset)((sigset)((uint32)1 << (int)((uint32)i - 1))));
 }
 
 // go2cs generated this placeholder — func setProcessCPUProfiler is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -481,20 +507,19 @@ public static @string executablePath;
 internal static readonly @string executablePathˢ = "executable_path="u8;
 
 internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
-    ref var argv = ref Ꮡargv.DerefOrNull();
-
     // skip over argv, envv and the first string will be the path
     var n = argc + 1;
     while (argv_index(Ꮡargv, n) != nil) {
         n++;
     }
     executablePath = gostringnocopy(argv_index(Ꮡargv, n + 1));
+
     // strip "executable_path=" prefix if available, it's added after OS X 10.11.
     executablePath = stringslite.TrimPrefix(executablePath, executablePathˢ);
 }
 
 internal static void signalM(ref m mp, nint sig) {
-    pthread_kill(((pthread)(uintptr)mp.procid), (uint32)sig);
+    pthread_kill((pthread)(uintptr)mp.procid, (uint32)sig);
 }
 
 // sigPerThreadSyscall is only used on linux, so we assign a bogus signal

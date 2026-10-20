@@ -29,7 +29,6 @@ internal static array<byte> padding255Bad = new byte[]{}.array(256);
 // will be initialized with {255, 255, 255, ..., 255}
 internal static array<byte> padding255Good = new byte[]{255}.array(256);
 
-
 partial struct paddingTestsᴛ1 /*dyn*/ {
     internal slice<byte> @in;
     internal bool good;
@@ -97,7 +96,9 @@ public static void TestCertificateSelection(ж<testing.T> Ꮡt) {
             )
         }.slice()
     );
+
     config.BuildNameToCertificate();
+
     nint pointerToIndex(ж<global::go.crypto.tls_package.Certificate> c) {
         foreach (var (i, _) in Ꮡconfig.Value.Certificates) {
             if (c == Ꮡ(Ꮡconfig.Value.Certificates, i)) {
@@ -106,6 +107,7 @@ public static void TestCertificateSelection(ж<testing.T> Ꮡt) {
         }
         return -1;
     }
+
     ж<global::go.crypto.tls_package.Certificate> certificateForName(@string name) {
         var clientHello = Ꮡ(new ClientHelloInfo(
             ServerName: name
@@ -119,6 +121,7 @@ public static void TestCertificateSelection(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     {
         nint n = pointerToIndex(certificateForName(exampleComˢ)); if (n != 0) {
             Ꮡt.Errorf("example.com returned certificate %d, not 0"u8, n);
@@ -146,15 +149,17 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
     GoFrame ᒐ = default;
     try {
         var (clientConn, serverConn) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
+
         var serverConfig = Ꮡconfig.Clone();
         serverConfig.Value.DynamicRecordSizingDisabled = false;
         var tlsConn = Server(serverConn, serverConfig);
+
         var handshakeDone = new channel<EmptyStruct>(0);
         var recordSizesChan = new channel<slice<nint>>(1);
         var recordSizesChanʗ1 = recordSizesChan;
         defer(() => {
-            ᐸꟷ(recordSizesChanʗ1); // wait for the goroutine to exit
-        }, ref ᒐ);
+            ᐸꟷ(recordSizesChanʗ1);
+        }, ref ᒐ); // wait for the goroutine to exit
         var clientConnʗ1 = clientConn;
         var handshakeDoneʗ1 = handshakeDone;
         var recordSizesChanʗ2 = recordSizesChan;
@@ -167,6 +172,7 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
                 defer(ᴛ1 => close(ᴛ1), recordSizesChanʗ2, ref ᒐ);
                 var clientConnʗ2 = clientConnʗ1;
                 defer(() => clientConnʗ2.Close(), ref ᒐ);
+
                 var tlsConnΔ1 = Client(clientConnʗ1, Ꮡconfig);
                 {
                     var err = tlsConnΔ1.Handshake(); if (err != default!) {
@@ -175,9 +181,11 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
                     }
                 }
                 close(handshakeDoneʗ1);
+
                 ref var recordHeader = ref heap(new array<byte>(5), out var ᏑrecordHeader);
                 slice<byte> record = default!;
                 slice<nint> recordSizesΔ1 = default!;
+
                 while (ᐧ) {
                     var (n, err) = io.ReadFull(new tls_test_package.net_ConnᴠReader(clientConnʗ1), recordHeader[..]);
                     if (AreEqual(err, io.EOF)) {
@@ -187,34 +195,41 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
                         Ꮡt.Errorf("io.ReadFull = %d, %v"u8, n, err);
                         return;
                     }
-                    nint length = (nint)(((nint)recordHeader[3] << (int)(8)) | (nint)recordHeader[4]);
+
+                    nint length = (nint)recordHeader[3] << 8 | (nint)recordHeader[4];
                     if (len(record) < length) {
                         record = new slice<byte>(length);
                     }
+
                     (n, err) = io.ReadFull(new tls_test_package.net_ConnᴠReader(clientConnʗ1), record.slice(0, length));
                     if (err != default! || n != length) {
                         Ꮡt.Errorf("io.ReadFull = %d, %v"u8, n, err);
                         return;
                     }
+
                     recordSizesΔ1 = append(recordSizesΔ1, (nint)recordHeaderLen + length);
                 }
+
                 recordSizesChanʗ2.ᐸꟷ(recordSizesΔ1);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         {
             var err = tlsConn.Handshake(); if (err != default!) {
                 Ꮡt.Fatalf("Error from server handshake: %s"u8, err);
             }
         }
         ᐸꟷ(handshakeDone);
+
         // The server writes these plaintexts in order.
         var plaintext = bytes.Join(new slice<byte>[]{
             bytes.Repeat(slice<byte>("x"u8), recordSizeBoostThreshold),
             bytes.Repeat(slice<byte>("y"u8), maxPlaintext * 2),
             bytes.Repeat(slice<byte>("z"u8), maxPlaintext)
         }.slice(), default!);
+
         {
             var (_, err) = tlsConn.Write(plaintext); if (err != default!) {
                 Ꮡt.Fatalf("Error from server write: %s"u8, err);
@@ -225,13 +240,16 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
                 Ꮡt.Fatalf("Error from server close: %s"u8, err);
             }
         }
+
         var recordSizes = ᐸꟷ(recordSizesChan);
         if (recordSizes == default!) {
             Ꮡt.Fatalf("Client encountered an error"u8);
         }
+
         // Drop the size of the second to last record, which is likely to be
         // truncated, and the last record, which is a close_notify alert.
         recordSizes = recordSizes.slice(0, len(recordSizes) - 2);
+
         // recordSizes should contain a series of records smaller than
         // tcpMSSEstimate followed by some larger than maxPlaintext.
         var seenLargeRecord = false;
@@ -248,6 +266,7 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
                 Ꮡt.Fatalf("Record #%d has size %d but should be full sized"u8, i, size);
             }
         }
+
         if (!seenLargeRecord) {
             Ꮡt.Fatalf("No large records observed"u8);
         }
@@ -258,6 +277,7 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
 
 public static void TestDynamicRecordSizingWithStreamCipher(ж<testing.T> Ꮡt) {
     skipFIPS(Ꮡt); // No RC4 in FIPS mode.
+
     var config = testConfig.Clone();
     config.Value.MaxVersion = VersionTLS12;
     config.Value.CipherSuites = new uint16[]{TLS_RSA_WITH_RC4_128_SHA}.slice();
@@ -266,6 +286,7 @@ public static void TestDynamicRecordSizingWithStreamCipher(ж<testing.T> Ꮡt) {
 
 public static void TestDynamicRecordSizingWithCBC(ж<testing.T> Ꮡt) {
     skipFIPS(Ꮡt); // No CBC cipher suites in defaultCipherSuitesFIPS.
+
     var config = testConfig.Clone();
     config.Value.MaxVersion = VersionTLS12;
     config.Value.CipherSuites = new uint16[]{TLS_RSA_WITH_AES_256_CBC_SHA}.slice();
@@ -334,6 +355,7 @@ public static void TestHairpinInClose(ж<testing.T> Ꮡt) {
         defer(() => serverʗ1.Close(), ref ᒐ);
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         var conn = Ꮡ(new hairpinConn(client, nil));
         var tlsConn = Server(new tls_internal_test_package.hairpinConnжConn(conn), Ꮡ(new Config(
             GetCertificate: (ж<global::go.crypto.tls_package.ClientHelloInfo> _) => {
@@ -341,6 +363,7 @@ public static void TestHairpinInClose(ж<testing.T> Ꮡt) {
             }
         )));
         conn.Value.tlsConn = tlsConn;
+
         // This call should not deadlock.
         tlsConn.Close();
     }
@@ -359,8 +382,10 @@ public static partial void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
         defer(() => serverʗ1.Close(), ref ᒐ);
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         var config = testConfig.Clone();
         (config.Value.MinVersion, config.Value.MaxVersion) = (VersionTLS13, VersionTLS13);
+
         var clientʗ2 = client;
         var configʗ1 = config;
         goǃ(() => {
@@ -374,6 +399,7 @@ public static partial void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
             tlsConnΔ1.Value.vers = 0x1111;
             tlsConnΔ1.Write(new byte[]{1}.slice());
         });
+
         var tlsConn = Server(server, config);
         {
             var errΔ2 = tlsConn.Handshake(); if (errΔ2 != default!) {
@@ -381,10 +407,60 @@ public static partial void TestRecordBadVersionTLS13(ж<testing.T> Ꮡt) {
                 return;
             }
         }
+
         @string expectedErr = tlsReceivedRecordWithˢ;
+
         var (_, err) = tlsConn.Read(new slice<byte>(10));
         if (err.Error() != expectedErr) {
             Ꮡt.Fatalf("unexpected error: got %q, want %q"u8, err, expectedErr);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// TestKeyUpdateSpamPostHandshakeTLS13 tests that TLS 1.3 KeyUpdate messages do
+// not count as a state-advancing message after a handshake has been completed.
+public static partial void TestKeyUpdateSpamPostHandshakeTLS13(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        var (client, server) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
+        var serverʗ1 = server;
+        defer(() => serverʗ1.Close(), ref ᒐ);
+        var clientʗ1 = client;
+        defer(() => clientʗ1.Close(), ref ᒐ);
+
+        var clientʗ2 = client;
+        goǃ(() => {
+            var c = Client(clientʗ2, testConfig.Clone());
+            {
+                var errΔ1 = c.Handshake(); if (errΔ1 != default!) {
+                    Ꮡt.Error(errΔ1);
+                    return;
+                }
+            }
+            var (ku, err) = (Ꮡ(new keyUpdateMsg(nil))).marshal();
+            if (err != default!) {
+                Ꮡt.Error(err);
+                return;
+            }
+            var cs = cipherSuiteTLS13ByID((~c).cipherSuite);
+            for (nint i = 0; i <= maxUselessRecords; i++) {
+                c.writeRecordLocked(recordTypeHandshake, ku);
+                c.setWriteTrafficSecret(cs, QUICEncryptionLevelInitial, cs.nextTrafficSecret((~c).@out.trafficSecret));
+            }
+        });
+        var s = Server(server, testConfig.Clone());
+        {
+            var err = s.Handshake(); if (err != default!) {
+                Ꮡt.Fatal(err);
+            }
+        }
+        @string expectedErr = tlsTooManyNonAdvancingˢ;
+        {
+            var (_, err) = s.Read(new slice<byte>(1)); if (err == default! || err.Error() != expectedErr) {
+                Ꮡt.Fatalf("unexpected error: got %v, want %q"u8, err, expectedErr);
+            }
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -9,12 +9,15 @@ using io = io_package;
 
 partial class bzip2_package {
 
-partial struct StructuralError /*@string*/;
-
 // There's no RFC for bzip2. I used the Wikipedia page for reference and a lot
 // of guessing: https://en.wikipedia.org/wiki/Bzip2
 // The source code to pyflate was useful for debugging:
 // http://www.paul.sladen.org/projects/pyflate
+
+// A StructuralError is returned when the bzip2 data is found to be
+// syntactically invalid.
+partial struct StructuralError /*@string*/;
+
 public static @string Error(this StructuralError s) {
     return "bzip2 data invalid: "u8 + ((@string)s);
 }
@@ -38,7 +41,7 @@ partial struct reader {
     internal nuint repeats;    // the number of copies of lastByte to output.
 }
 
-// NewReader returns an io.Reader which decompresses bzip2 data from r.
+// NewReader returns an [io.Reader] which decompresses bzip2 data from r.
 // If r does not also implement [io.ByteReader],
 // the decompressor may read more data than necessary from r.
 public static io.Reader NewReader(io.Reader r) {
@@ -63,20 +66,24 @@ internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) {
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
     var br = Ꮡbz2.of(reader.Ꮡbr);
+
     if (needMagic) {
         nint magic = br.ReadBits(16);
         if (magic != bzip2FileMagic) {
             return ((StructuralError)(@string)badMagicValueˢ);
         }
     }
+
     nint t = br.ReadBits(8);
     if (t != (rune)'h') {
         return ((StructuralError)(@string)nonHuffmanEntropyˢ);
     }
+
     nint level = br.ReadBits(8);
     if (level < (rune)'1' || level > (rune)'9') {
         return ((StructuralError)(@string)invalidCompressionLevelˢ);
     }
+
     bz2.fileCRC = 0;
     bz2.blockSize = 100 * 1000 * (level - (rune)'0');
     if (bz2.blockSize > len(bz2.tt)) {
@@ -88,11 +95,12 @@ internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) {
 internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf) {
     nint n = default!;
     error err = default!;
-
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
+
     if (bz2.eof) {
         return (0, io.EOF);
     }
+
     if (!bz2.setupDone) {
         err = Ꮡbz2.setup(true);
         var brErrΔ1 = bz2.br.Err();
@@ -104,6 +112,7 @@ internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf
         }
         bz2.setupDone = true;
     }
+
     (n, err) = Ꮡbz2.read(buf);
     var brErr = bz2.br.Err();
     if (brErr != default!) {
@@ -137,24 +146,29 @@ internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
             }
             continue;
         }
+
         bz2.tPos = bz2.preRLE[bz2.tPos];
         var b = (byte)bz2.tPos;
         bz2.tPos >>= (int)(8);
         bz2.preRLEUsed++;
+
         if (bz2.byteRepeats == 3) {
             bz2.repeats = (nuint)b;
             bz2.byteRepeats = 0;
             continue;
         }
+
         if (bz2.lastByte == (nint)b){
             bz2.byteRepeats++;
         } else {
             bz2.byteRepeats = 0;
         }
         bz2.lastByte = (nint)b;
+
         buf[n] = b;
         n++;
     }
+
     return n;
 }
 
@@ -173,35 +187,38 @@ internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
             bz2.blockCRC = updateCRC(bz2.blockCRC, buf.slice(0, n));
             return (n, default!);
         }
+
         // End of block. Check CRC.
         if (bz2.blockCRC != bz2.wantBlockCRC) {
             bz2.br.err = ((StructuralError)(@string)blockChecksumMismatchˢ);
             return (0, bz2.br.err);
         }
+
         // Find next block.
         var br = Ꮡbz2.of(reader.Ꮡbr);
         var exprᴛ1 = br.ReadBits64(48);
         if (exprᴛ1 == bzip2BlockMagic) {
+            // Start of block.
             var err = Ꮡbz2.readBlock();
             if (err != default!) {
-                // Start of block.
                 return (0, err);
             }
         }
         else if (exprᴛ1 == bzip2FinalMagic) {
+            // Check end-of-file CRC.
             var wantFileCRC = (uint32)br.ReadBits64(32);
             if ((~br).err != default!) {
-                // Check end-of-file CRC.
                 return (0, (~br).err);
             }
             if (bz2.fileCRC != wantFileCRC) {
                 br.Value.err = ((StructuralError)(@string)fileChecksumMismatchˢ);
                 return (0, (~br).err);
             }
+
+            // Skip ahead to byte boundary.
+            // Is there a file concatenated to this one?
+            // It would start with BZ.
             if ((~br).bits % 8 != 0) {
-                // Skip ahead to byte boundary.
-                // Is there a file concatenated to this one?
-                // It would start with BZ.
                 br.ReadBits((~br).bits % 8);
             }
             var (b, err) = (~br).r.ReadByte();
@@ -234,7 +251,6 @@ internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
         else { /* default: */
             return (0, ((StructuralError)(@string)badMagicValueFoundˢ));
         }
-
     }
 }
 
@@ -255,17 +271,18 @@ internal static readonly @string origPtrOutOfBoundsˢ = "origPtr out of bounds"u
 // readBlock reads a bzip2 block. The magic number should already have been consumed.
 internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     error err = default!;
-
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
+
     var br = Ꮡbz2.of(reader.Ꮡbr);
     bz2.wantBlockCRC = (uint32)br.ReadBits64(32); // skip checksum. TODO: check it if we can figure out what it is.
     bz2.blockCRC = 0;
-    bz2.fileCRC = (uint32)(((uint32)((bz2.fileCRC << (int)(1)) | (bz2.fileCRC >> (int)(31)))) ^ bz2.wantBlockCRC);
+    bz2.fileCRC = (bz2.fileCRC << 1 | bz2.fileCRC >> 31) ^ bz2.wantBlockCRC;
     nint randomized = br.ReadBits(1);
     if (randomized != 0) {
         return ((StructuralError)(@string)deprecatedRandomizedˢ);
     }
     nuint origPtr = (nuint)br.ReadBits(24);
+
     // If not every byte value is used in the block (i.e., it's text) then
     // the symbol set is reduced. The symbols used are stored as a
     // two-level, 16x16 bitmap.
@@ -273,29 +290,33 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     var symbolPresent = new slice<bool>(256);
     nint numSymbols = 0;
     for (nuint symRange = (nuint)0; symRange < 16; symRange++) {
-        if ((nint)(symbolRangeUsedBitmap & (((nint)1).Lsh((15 - symRange)))) != 0) {
+        if ((symbolRangeUsedBitmap & (((nint)1).Lsh((15 - symRange)))) != 0) {
             nint bits = br.ReadBits(16);
             for (nuint symbol = (nuint)0; symbol < 16; symbol++) {
-                if ((nint)(bits & (((nint)1).Lsh((15 - symbol)))) != 0) {
+                if ((bits & (((nint)1).Lsh((15 - symbol)))) != 0) {
                     symbolPresent[16 * symRange + symbol] = true;
                     numSymbols++;
                 }
             }
         }
     }
+
     if (numSymbols == 0) {
         // There must be an EOF symbol.
         return ((StructuralError)(@string)noSymbolsInInputˢ);
     }
+
     // A block uses between two and six different Huffman trees.
     nint numHuffmanTrees = br.ReadBits(3);
     if (numHuffmanTrees < 2 || numHuffmanTrees > 6) {
         return ((StructuralError)(@string)invalidNumberOfHuffmanˢ);
     }
+
     // The Huffman tree can switch every 50 symbols so there's a list of
     // tree indexes telling us which tree to use for each 50 symbol block.
     nint numSelectors = br.ReadBits(15);
     var treeIndexes = new slice<uint8>(numSelectors);
+
     // The tree indexes are move-to-front transformed and stored as unary
     // numbers.
     var mtfTreeDecoder = newMTFDecoderWithRange(numHuffmanTrees);
@@ -313,6 +334,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
         }
         treeIndexes[i] = mtfTreeDecoder.Decode(c);
     }
+
     // The list of symbols for the move-to-front transform is taken from
     // the previously decoded symbol bitmap.
     var symbols = new slice<byte>(numSymbols);
@@ -324,8 +346,10 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
         }
     }
     var mtf = newMTFDecoder(symbols);
+
     numSymbols += 2; // to account for RUNA and RUNB symbols
     var huffmanTrees = new slice<huffmanTree>(numHuffmanTrees);
+
     // Now we decode the arrays of code-lengths for each tree.
     var lengths = new slice<uint8>(numSymbols);
     foreach (var (i, _) in huffmanTrees) {
@@ -352,6 +376,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
             return err;
         }
     }
+
     nint selectorIndex = 1; // the next tree index to use
     if (len(treeIndexes) == 0) {
         return ((StructuralError)(@string)noTreeSelectorsGivenˢ);
@@ -367,8 +392,10 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     // details.
     nint repeat = 0;
     nint repeatPower = 0;
+
     // The `C' array (used by the inverse BWT) needs to be zero initialized.
     clear(bz2.c[..]);
+
     nint decoded = 0; // counts the number of symbols decoded by the current tree.
     while (ᐧ) {
         if (decoded == 50) {
@@ -382,8 +409,10 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
             selectorIndex++;
             decoded = 0;
         }
+
         var v = currentHuffmanTree.Decode(br);
         decoded++;
+
         if (v < 2) {
             // This is either the RUNA or RUNB symbol.
             if (repeat == 0) {
@@ -391,6 +420,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
             }
             repeat += repeatPower.Lsh((uint64)(v));
             repeatPower <<= (int)(1);
+
             // This limit of 2 million comes from the bzip2 source
             // code. It prevents repeat from overflowing.
             if (repeat > 2 * 1024 * 1024) {
@@ -398,6 +428,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
             }
             continue;
         }
+
         if (repeat > 0) {
             // We have decoded a complete run-length so we need to
             // replicate the last output symbol.
@@ -412,12 +443,14 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
             }
             repeat = 0;
         }
+
         if ((nint)v == numSymbols - 1) {
             // This is the EOF symbol. Because it's always at the
             // end of the move-to-front list, and never gets moved
             // to the front, it has this unique value.
             break;
         }
+
         // Since two metasymbols (RUNA and RUNB) have values 0 and 1,
         // one would expect |v-2| to be passed to the MTF decoder.
         // However, the front of the MTF list is never referenced as 0,
@@ -432,9 +465,11 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
         bz2.c[b]++;
         bufIndex++;
     }
+
     if (origPtr >= (nuint)bufIndex) {
         return ((StructuralError)(@string)origPtrOutOfBoundsˢ);
     }
+
     // We have completed the entropy decoding. Now we can perform the
     // inverse BWT and setup the RLE buffer.
     bz2.preRLE = bz2.tt.slice(0, bufIndex);
@@ -443,6 +478,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     bz2.lastByte = -1;
     bz2.byteRepeats = 0;
     bz2.repeats = 0;
+
     return default!;
 }
 
@@ -462,12 +498,14 @@ internal static uint32 inverseBWT(slice<uint32> tt, nuint origPtr, slice<nuint> 
         sum += c[i];
         c[i] = sum - c[i];
     }
+
     foreach (var (i, _) in tt) {
-        var b = (uint32)(tt[i] & 0xff);
-        tt[c[b]] |= (uint32)(((uint32)i << (int)(8)));
+        var b = tt[i] & 0xff;
+        tt[c[b]] |= (uint32)(((uint32)i << 8));
         c[b]++;
     }
-    return (tt[origPtr] >> (int)(8));
+
+    return tt[origPtr] >> 8;
 }
 
 // This is a standard CRC32 like in hash/crc32 except that all the shifts are reversed,
@@ -477,10 +515,10 @@ internal static array<uint32> crctab = new(256);
 [GoInit] internal static void init() {
     const uint32 poly = 0x04C11DB7;
     foreach (var (i, _) in crctab) {
-        var crc = ((uint32)i << (int)(24));
+        var crc = (uint32)i << 24;
         for (nint j = 0; j < 8; j++) {
-            if ((uint32)(crc & 0x80000000U) != 0){
-                crc = (uint32)(((crc << (int)(1))) ^ poly);
+            if ((crc & 0x80000000U) != 0){
+                crc = (uint32)((crc << 1) ^ poly);
             } else {
                 crc <<= (int)(1);
             }
@@ -494,7 +532,7 @@ internal static array<uint32> crctab = new(256);
 internal static uint32 updateCRC(uint32 val, slice<byte> b) {
     var crc = ~val;
     foreach (var (_, v) in b) {
-        crc = (uint32)(crctab[(byte)((byte)((crc >> (int)(24))) ^ v)] ^ ((crc << (int)(8))));
+        crc = crctab[(byte)((byte)(crc >> 24) ^ v)] ^ (crc << 8);
     }
     return ~crc;
 }

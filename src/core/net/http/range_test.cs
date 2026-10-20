@@ -8,8 +8,6 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-// Match Apache laxity:
-
 partial struct ParseRangeTestsᴛ1 /*dyn*/ {
     internal @string s;
     internal int64 length;
@@ -53,6 +51,8 @@ public static slice<ParseRangeTestsᴛ1> ParseRangeTests = new ParseRangeTests�
     new("bytes=0-0,-1"u8, 10000, new global::go.net.http_package.httpRange[]{new(0, 1), new(9999, 1)}.slice()),
     new("bytes=500-600,601-999"u8, 10000, new global::go.net.http_package.httpRange[]{new(500, 101), new(601, 399)}.slice()),
     new("bytes=500-700,601-999"u8, 10000, new global::go.net.http_package.httpRange[]{new(500, 201), new(601, 399)}.slice()),
+
+    // Match Apache laxity:
     new("bytes=   1 -2   ,  4- 5, 7 - 8 , ,,"u8, 11, new global::go.net.http_package.httpRange[]{new(1, 2), new(4, 2), new(7, 2)}.slice())
 }.slice();
 

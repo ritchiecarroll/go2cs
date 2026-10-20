@@ -2,21 +2,37 @@ name: Release binaries
 
 # Builds the converter for six platforms and proves each binary runs on its own platform's runner.
 #
-# ON A nuget-<version> TAG (the tag the release ritual pushes last, after the packages are public) it also:
-#   - refuses a tag that is not nuget-N.N.N.N;
+# A RELEASE RUN is a push of a nuget-N.N.N.N tag, or a start by hand with that tag typed into the `tag` input.
+# It builds from the release's RECORD COMMIT, not from the tag's own commit. The release ritual mints the tag
+# before it commits the version: the tag sits on the last commit before `release: go2cs converted stdlib
+# <version>`, and that record commit is the one whose src/go2cs/corpus-release.txt reads <version>. A converter
+# built at the tag would name the previous release (the first tag run, 38268359067, showed exactly that and
+# failed its own version check). So a release run:
+#   - refuses a tag that is not nuget-N.N.N.N, or that does not exist;
+#   - finds the record commit on master: the first commit after the tag whose corpus-release.txt reads the
+#     tag's version. On a tag push it waits for it, up to two hours, because the record lands minutes after the
+#     tag; started by hand it looks once;
+#   - requires the tag's commit to be an ancestor of the record commit, and src/go2cs to be byte-identical
+#     between the two apart from corpus-release.txt, so what is built is the tagged converter source;
 #   - attests the archives' build provenance (verify one with `gh attestation verify <file> --repo <owner>/<repo>`);
 #   - fails unless `go2cs -version` on every platform names the tag's version as go2cs.release;
-#   - creates a DRAFT GitHub Release holding the six archives, SHA256SUMS and the attestation bundle.
+#   - creates a DRAFT GitHub Release for the tag holding the six archives, SHA256SUMS and the attestation bundle.
 # A DRAFT IS NOT PUBLISHED. A person reads it, replaces its placeholder notes with the release notes, and
 # publishes it. This workflow never publishes, and it refuses to touch a Release that already exists for the tag.
 #
-# STARTED BY HAND (workflow_dispatch) it builds and smokes only: no attestation, no Release, read-only token.
+# STARTED BY HAND WITH NO TAG it builds the commit it was started on and smokes it: no attestation, no Release.
 #
 # The converter is pure Go (CGO_ENABLED=0), so one Linux runner cross-compiles all six. Archive names carry no
 # version, so releases/latest/download/<name> is a stable URL once a Release is published.
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'An existing release tag, nuget-N.N.N.N, to build and draft a Release for. Empty: build and smoke only.'
+        required: false
+        default: ''
+        type: string
   push:
     tags: ['nuget-*']
 
@@ -24,7 +40,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-binaries-${{ github.ref }}
+  group: release-binaries-${{ inputs.tag || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -33,26 +49,91 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write       # the attestation's signing identity; used only on a tag
-      attestations: write   # to store the attestation; used only on a tag
+      id-token: write       # the attestation's signing identity; used only on a release run
+      attestations: write   # to store the attestation; used only on a release run
     outputs:
       go-version: ${{ steps.go.outputs.go-version }}
       release-version: ${{ steps.tag.outputs.version }}
+      release-tag: ${{ steps.tag.outputs.tag }}
+      record-sha: ${{ steps.tag.outputs.record }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # the record commit is found in master's history
 
-      - name: Read the release version from the tag
+      - name: Find the release's record commit and check it out
         id: tag
-        if: github.ref_type == 'tag'
         env:
-          TAG: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          if ! printf '%s' "$TAG" | grep -Eq '^nuget-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "::error::tag '$TAG' is not nuget-N.N.N.N; this workflow releases nothing for it"
+          trap 'echo "::error::the record step failed at line $LINENO: $BASH_COMMAND (exit $?)"' ERR
+          release_file=src/go2cs/corpus-release.txt
+          if [ "$REF_TYPE" = tag ]; then tag="$REF_NAME"; tries=60; else tag="${INPUT_TAG:-}"; tries=1; fi
+          if [ -z "$tag" ]; then
+            echo "No tag given: build and smoke only, at $(git rev-parse HEAD)."
+            exit 0
+          fi
+          if ! printf '%s' "$tag" | grep -Eq '^nuget-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::tag '$tag' is not nuget-N.N.N.N; this workflow releases nothing for it"
             exit 1
           fi
-          echo "version=${TAG#nuget-}" >> "$GITHUB_OUTPUT"
+          version="${tag#nuget-}"
+          # --force: on a tag push the checkout already wrote this tag as a lightweight ref at its commit, and
+          # origin's annotated tag would otherwise be refused as a clobber (run 38523494714 died here).
+          if ! git fetch --quiet --tags --force origin; then
+            echo "::error::git fetch --tags from origin failed"
+            exit 1
+          fi
+          if ! tag_commit="$(git rev-parse --verify --quiet "refs/tags/$tag^{commit}")"; then
+            echo "::error::tag '$tag' does not exist in this repository"
+            exit 1
+          fi
+          reads() { git show "$1:$release_file" 2>/dev/null | tr -d '[:space:]'; }
+          record=""
+          try=1
+          while :; do
+            if ! git fetch --quiet origin master; then
+              echo "::error::git fetch of origin master failed"
+              exit 1
+            fi
+            if [ "$(reads "$tag_commit")" = "$version" ]; then
+              record="$tag_commit"
+            else
+              for c in $(git log --reverse --format=%H "$tag_commit..origin/master" -- "$release_file"); do
+                if [ "$(reads "$c")" = "$version" ]; then record="$c"; break; fi
+              done
+            fi
+            if [ -n "$record" ] || [ "$try" -ge "$tries" ]; then break; fi
+            echo "The record commit for $version is not on master yet (look $try of $tries). Waiting two minutes."
+            sleep 120
+            try=$((try + 1))
+          done
+          if [ -z "$record" ]; then
+            echo "::error::record commit not found: no commit on master after $tag sets $release_file to $version. Re-run with workflow_dispatch tag=$tag once it has landed."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$tag_commit" "$record"; then
+            echo "::error::the tag's commit $tag_commit is not an ancestor of the record commit $record"
+            exit 1
+          fi
+          if ! git diff --quiet "$tag_commit" "$record" -- src/go2cs ":(exclude)$release_file"; then
+            echo "::error::src/go2cs differs between the tag's commit and the record commit, beyond $release_file; the record commit is not the tagged converter"
+            git diff --stat "$tag_commit" "$record" -- src/go2cs ":(exclude)$release_file"
+            exit 1
+          fi
+          if ! git checkout --quiet --detach "$record"; then
+            echo "::error::could not check out the record commit $record"
+            exit 1
+          fi
+          {
+            echo "tag=$tag"
+            echo "version=$version"
+            echo "record=$record"
+          } >> "$GITHUB_OUTPUT"
+          echo "Release run for \`$tag\`: tag commit \`$tag_commit\`, record commit \`$record\` (checked out and built)." >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/setup-go@v6
         id: go
@@ -70,9 +151,9 @@ jobs:
           out="$GITHUB_WORKSPACE/dist"
           mkdir -p "$out"
           {
-            echo '## Release binaries (prototype)'
+            echo '## Release binaries'
             echo
-            echo "Built by $(go version) at \`${GITHUB_SHA}\`."
+            echo "Built by $(go version) at \`$(git rev-parse HEAD)\`."
             echo
             echo '| RID | binary bytes | archive | archive bytes |'
             echo '|:--|--:|:--|--:|'
@@ -105,13 +186,13 @@ jobs:
 
       - name: Attest the archives' build provenance
         id: attest
-        if: github.ref_type == 'tag'
+        if: steps.tag.outputs.version != ''
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: dist/go2cs-*
 
       - name: Keep the attestation bundle beside the archives
-        if: github.ref_type == 'tag'
+        if: steps.tag.outputs.version != ''
         env:
           BUNDLE: ${{ steps.attest.outputs.bundle-path }}
         run: |
@@ -176,17 +257,17 @@ jobs:
           $release = ($report | Where-Object { $_ -like 'go2cs.release=*' }) -replace '^go2cs\.release=', ''
           if (-not $release -or $release -eq 'unknown') { throw "go2cs -version named no release on $rid" }
           $want = '${{ needs.build.outputs.release-version }}'
-          if ($want -and $release -ne $want) { throw "go2cs.release is $release on $rid, and the tag says ${want}: the tag is not on the release commit" }
+          if ($want -and $release -ne $want) { throw "go2cs.release is $release on $rid, and the tag says ${want}: the binary was not built from the release's record commit" }
           $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
           Add-Content $env:GITHUB_STEP_SUMMARY "``$rid`` on ``${{ matrix.runner }}`` ($arch): ``go2cs -version`` exit 0, release ``$release``, archive $($archive.Length) bytes, checksum verified."
 
   draft-release:
     name: Create the DRAFT GitHub Release
     needs: [build, smoke]
-    if: github.ref_type == 'tag'
+    if: needs.build.outputs.release-version != ''
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # to create the draft Release; nothing else in this workflow can write
+      contents: write   # to create the draft Release, on a release run only; nothing else here can write
     steps:
       - uses: actions/download-artifact@v5
         with:
@@ -197,11 +278,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ needs.build.outputs.release-tag }}
           VERSION: ${{ needs.build.outputs.release-version }}
+          RECORD: ${{ needs.build.outputs.record-sha }}
         run: |
           set -euo pipefail
           test -n "$VERSION"
+          test -n "$TAG"
+          test -n "$RECORD"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "::error::a Release already exists for $TAG; this workflow does not overwrite one"
             exit 1
@@ -210,7 +294,7 @@ jobs:
           test "$(ls dist/go2cs-*.zip dist/go2cs-*.tar.gz | wc -l)" -eq 6
           test -s dist/SHA256SUMS
           test -s dist/go2cs-attestation.sigstore.jsonl
-          notes="DRAFT, created by the release-binaries workflow from tag $TAG. Replace this text with the release notes before publishing."
+          notes="DRAFT, created by the release-binaries workflow for tag $TAG. The binaries were built from the release record commit $RECORD. Replace this text with the release notes before publishing."
           gh release create "$TAG" --draft --verify-tag --title "go2cs $VERSION" --notes "$notes" \
             dist/go2cs-*.zip dist/go2cs-*.tar.gz dist/SHA256SUMS dist/go2cs-attestation.sigstore.jsonl
           draft="$(gh release view "$TAG" --json isDraft --jq .isDraft)"

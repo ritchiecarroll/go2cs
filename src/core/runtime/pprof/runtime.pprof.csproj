@@ -187,7 +187,9 @@
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/abi/internal.abi.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/goexperiment/internal.goexperiment.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/profilerecord/internal.profilerecord.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/pprof/label/internal.runtime.pprof.label.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
@@ -208,7 +210,9 @@
        (docs/phase4/DESIGN-multiplatform-corpus.md §8). A group with no items is not noise: it
        records that the platform takes part in this package's axis and adds nothing beyond the
        shared list above, which is what lets a single-target reconvert reproduce this file. -->
-  <ItemGroup Condition="'$(GoTargetOS)'=='darwin'" />
+  <ItemGroup Condition="'$(GoTargetOS)'=='darwin'">
+    <ProjectReference Include="$(go2csPath)core/internal/byteorder/internal.byteorder.csproj" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(GoTargetOS)'=='linux'" />
 

@@ -7,21 +7,99 @@ using strings = strings_package;
 
 partial class tar_package {
 
+// Format represents the tar archive format.
+//
+// The original tar format was introduced in Unix V7.
+// Since then, there have been multiple competing formats attempting to
+// standardize or extend the V7 format to overcome its limitations.
+// The most common formats are the USTAR, PAX, and GNU formats,
+// each with their own advantages and limitations.
+//
+// The following table captures the capabilities of each format:
+//
+//	                  |  USTAR |       PAX |       GNU
+//	------------------+--------+-----------+----------
+//	Name              |   256B | unlimited | unlimited
+//	Linkname          |   100B | unlimited | unlimited
+//	Size              | uint33 | unlimited |    uint89
+//	Mode              | uint21 |    uint21 |    uint57
+//	Uid/Gid           | uint21 | unlimited |    uint57
+//	Uname/Gname       |    32B | unlimited |       32B
+//	ModTime           | uint33 | unlimited |     int89
+//	AccessTime        |    n/a | unlimited |     int89
+//	ChangeTime        |    n/a | unlimited |     int89
+//	Devmajor/Devminor | uint21 |    uint21 |    uint57
+//	------------------+--------+-----------+----------
+//	string encoding   |  ASCII |     UTF-8 |    binary
+//	sub-second times  |     no |       yes |        no
+//	sparse files      |     no |       yes |       yes
+//
+// The table's upper portion shows the [Header] fields, where each format reports
+// the maximum number of bytes allowed for each string field and
+// the integer type used to store each numeric field
+// (where timestamps are stored as the number of seconds since the Unix epoch).
+//
+// The table's lower portion shows specialized features of each format,
+// such as supported string encodings, support for sub-second timestamps,
+// or support for sparse files.
+//
+// The Writer currently provides no support for sparse files.
 partial struct Format /*num:nint*/;
 
 // Constants to identify various tar formats.
+// Deliberately hide the meaning of constants from public API.
 internal static Format _ᴛ1ʗ => /* (1 << iota) / 4 */ 0;     // Sequence of 0, 0, 1, 2, 4, 8, etc...
 
+// FormatUnknown indicates that the format is unknown.
 public static Format FormatUnknown => 0;
 
+// The format of the original Unix V7 tar tool prior to standardization.
 internal static Format formatV7 => 1;
 
+// FormatUSTAR represents the USTAR header format defined in POSIX.1-1988.
+//
+// While this format is compatible with most tar readers,
+// the format has several limitations making it unsuitable for some usages.
+// Most notably, it cannot support sparse files, files larger than 8GiB,
+// filenames larger than 256 characters, and non-ASCII filenames.
+//
+// Reference:
+//	http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06
 public static Format FormatUSTAR => 2;
 
+// FormatPAX represents the PAX header format defined in POSIX.1-2001.
+//
+// PAX extends USTAR by writing a special file with Typeflag TypeXHeader
+// preceding the original header. This file contains a set of key-value
+// records, which are used to overcome USTAR's shortcomings, in addition to
+// providing the ability to have sub-second resolution for timestamps.
+//
+// Some newer formats add their own extensions to PAX by defining their
+// own keys and assigning certain semantic meaning to the associated values.
+// For example, sparse file support in PAX is implemented using keys
+// defined by the GNU manual (e.g., "GNU.sparse.map").
+//
+// Reference:
+//	http://pubs.opengroup.org/onlinepubs/009695399/utilities/pax.html
 public static Format FormatPAX => 4;
 
+// FormatGNU represents the GNU header format.
+//
+// The GNU header format is older than the USTAR and PAX standards and
+// is not compatible with them. The GNU format supports
+// arbitrary file sizes, filenames of arbitrary encoding and length,
+// sparse files, and other features.
+//
+// It is recommended that PAX be chosen over GNU unless the target
+// application can only parse GNU formatted archives.
+//
+// Reference:
+//	https://www.gnu.org/software/tar/manual/html_node/Standard.html
 public static Format FormatGNU => 8;
 
+// Schily's tar format, which is incompatible with USTAR.
+// This does not cover STAR extensions to the PAX format; these fall under
+// the PAX format.
 internal static Format formatSTAR => 16;
 
 internal static Format formatMax => 32;
@@ -50,10 +128,12 @@ internal static map<Format, @string> formatNames = new map<Format, @string>{
 internal static readonly @string unknownˢ = "<unknown>"u8;
 
 public static @string String(this Format f) {
+    var ssᴷ = new stackAppend<@string>();
+
     slice<@string> ss = default!;
-    for (Format f2 = ((Format)1); f2 < formatMax; f2 <<= (int)(1)) {
+    for (Format f2 = (Format)1; f2 < formatMax; f2 <<= (int)(1)) {
         if (f.has(f2)) {
-            ss = append(ss, formatNames[f2]);
+            ss = append(ssᴷ, ss, formatNames[f2]);
         }
     }
     switch (len(ss)) {
@@ -66,31 +146,34 @@ public static @string String(this Format f) {
     default: {
         return "("u8 + strings.Join(ss, " | "u8) + ")"u8;
     }}
-
 }
 
 // Magics used to identify various formats.
 internal static readonly @string magicGNU = "ustar "u8;
 internal static readonly @string versionGNU = " \x00"u8;
-
 internal static readonly @string magicUSTAR = "ustar\x00"u8;
 internal static readonly @string versionUSTAR = "00"u8;
-
 internal static readonly @string trailerSTAR = "tar\x00"u8;
 
 // Size constants from various tar specifications.
 internal static UntypedInt blockSize => 512; // Size of each block in a tar stream
-
 internal static UntypedInt nameSize => 100; // Max length of the name field in USTAR format
-
 internal static UntypedInt prefixSize => 155; // Max length of the prefix field in USTAR format
 
+// Max length of a special file (PAX header, GNU long name or link).
+// This matches the limit used by libarchive.
 internal static UntypedInt maxSpecialFileSize => /* 1 << 20 */ 1048576;
+
+// Maximum number of sparse file entries.
+// We should never actually hit this limit
+// (every sparse encoding will first be limited by maxSpecialFileSize),
+// but this adds an additional layer of defense.
+internal static UntypedInt maxSparseFileEntries => /* 1 << 20 */ 1048576;
 
 // blockPadding computes the number of bytes needed to pad offset up to the
 // nearest block edge where 0 <= n < blockSize.
 internal static int64 /*n*/ blockPadding(int64 offset) {
-    return (int64)(-offset & (int64)((blockSize - 1)));
+    return -offset & (int64)(blockSize - 1);
 }
 
 internal static block zeroBlock;
@@ -124,7 +207,7 @@ internal static ж<headerUSTAR> toUSTAR(this ж<block> Ꮡb) {
 }
 
 internal static sparseArray toSparse(this ref block b) {
-    return ((sparseArray)(b.Value[..]));
+    return (sparseArray)(b.Value[..]);
 }
 
 // getFormat checks that the block is a valid tar header based on the checksum.
@@ -140,10 +223,11 @@ internal static Format getFormat(this ж<block> Ꮡb) {
     if (p.err != default! || (value != chksum1 && value != chksum2)) {
         return FormatUnknown;
     }
+
     // Guess the magic values.
-    @string magic = ((@string)Ꮡb.toUSTAR().magic());
-    @string version = ((@string)Ꮡb.toUSTAR().version());
-    @string trailer = ((@string)Ꮡb.toSTAR().trailer());
+    @string magic = (@string)Ꮡb.toUSTAR().magic();
+    @string version = (@string)Ꮡb.toUSTAR().version();
+    @string trailer = (@string)Ꮡb.toSTAR().trailer();
     switch (ᐧ) {
     case {} when magic == magicUSTAR && trailer == trailerSTAR: {
         return formatSTAR;
@@ -157,7 +241,6 @@ internal static Format getFormat(this ж<block> Ꮡb) {
     default: {
         return formatV7;
     }}
-
 }
 
 // setFormat writes the magic values necessary for specified format
@@ -168,11 +251,11 @@ internal static void setFormat(this ж<block> Ꮡb, Format format) {
     // Set the magic values.
     switch (ᐧ) {
     case {} when format.has(formatV7): {
+        // Do nothing.
         break;
     }
     case {} when format.has(FormatGNU): {
-        copy(Ꮡb.toGNU().magic(), // Do nothing.
- magicGNU);
+        copy(Ꮡb.toGNU().magic(), magicGNU);
         copy(Ꮡb.toGNU().version(), versionGNU);
         break;
     }
@@ -307,7 +390,7 @@ internal static slice<byte> changeTime(this ref headerGNU h) {
 }
 
 internal static sparseArray sparse(this ref headerGNU h) {
-    return ((sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]));
+    return (sparseArray)(h.Value[386..][..(int)(24 * 4 + 1)]);
 }
 
 internal static slice<byte> realSize(this ref headerGNU h) {
@@ -403,7 +486,7 @@ internal static slice<byte> prefix(this ref headerUSTAR h) {
 partial struct sparseArray /*[]byte*/;
 
 internal static sparseElem entry(this sparseArray s, nint i) {
-    return ((sparseElem)(slice<byte>)(s.slice(i * 24)));
+    return (sparseElem)(slice<byte>)(s.slice(i * 24));
 }
 
 internal static slice<byte> isExtended(this sparseArray s) {

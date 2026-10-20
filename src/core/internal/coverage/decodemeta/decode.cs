@@ -69,6 +69,7 @@ internal static error readStringTable(this ref CoverageMetaDataDecoder d) {
             return err;
         }
     }
+
     // Read the table itself.
     d.strtab = stringtab.NewReader(d.r);
     d.strtab.Read();
@@ -99,6 +100,7 @@ public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж
     if (fidx >= d.hdr.NumFuncs) {
         return fmt.Errorf("illegal function index"u8);
     }
+
     // Seek to the correct location to read the function offset and read it.
     var funcOffsetLocation = (int64)((uint32)coverage.CovMetaHeaderSize + 4 * fidx);
     {
@@ -107,10 +109,12 @@ public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж
         }
     }
     var foff = d.r.ReadUint32();
+
     // Check assumptions
     if (foff < (uint32)funcOffsetLocation || foff > d.hdr.Length) {
         return fmt.Errorf("malformed func offset %d"u8, foff);
     }
+
     // Seek to the correct location to read the function.
     var floc = (int64)foff;
     {
@@ -118,12 +122,15 @@ public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж
             return err;
         }
     }
+
     // Preamble containing number of units, file, and function.
     var numUnits = (uint32)d.r.ReadULEB128();
     var fnameidx = (uint32)d.r.ReadULEB128();
     var fileidx = (uint32)d.r.ReadULEB128();
+
     f.Srcfile = d.strtab.Get(fileidx);
     f.Funcname = d.strtab.Get(fnameidx);
+
     // Now the units
     f.Units = f.Units[..0];
     if (cap(f.Units) < (nint)numUnits) {

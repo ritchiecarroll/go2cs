@@ -8,12 +8,15 @@ namespace go.debug;
 
 using bytes = bytes_package;
 using binary = encoding.binary_package;
+using abi = @internal.abi_package;
 using sort = sort_package;
 using sync = sync_package;
+using @internal;
 using encoding;
 
 partial class gosym_package {
 
+// version of the pclntab
 partial struct version /*num:nint*/;
 
 internal static version verUnknown => /* iota */ 0;
@@ -112,7 +115,6 @@ internal static (slice<byte> b, uint64 pc, nint line) parse(this ref LineTable t
             continue;
             break;
         }}
-
         pc += oldQuantum;
     }
     return (b, pc, line);
@@ -186,11 +188,6 @@ internal static bool isGo12(this ж<LineTable> Ꮡt) {
     return t.version >= ver12;
 }
 
-internal static UntypedInt go12magic => 0xfffffffb;
-internal static UntypedInt go116magic => 0xfffffffa;
-internal static UntypedInt go118magic => 0xfffffff0;
-internal static UntypedInt go120magic => 0xfffffff1;
-
 // uintptr returns the pointer-sized value encoded at b.
 // The pointer size is dictated by the table being read.
 internal static uint64 uintptr(this ref LineTable t, slice<byte> b) {
@@ -211,71 +208,81 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
         if (t.version != verUnknown) {
             return;
         }
+
         // Note that during this function, setting the version is the last thing we do.
         // If we set the version too early, and parsing failed (likely as a panic on
         // slice lookups), we'd have a mistaken version.
         //
         // Error paths through this code will default the version to 1.1.
         t.version = ver11;
+
         if (!disableRecover) {
             defer(() => {
                 // If we panic parsing, assume it's a Go 1.1 pclntab.
                 recover();
             }, ref ᒐ);
         }
+
         // Check header: 4-byte magic, two zeros, pc quantum, pointer size.
-        if (len(t.Data) < 16 || t.Data[4] != 0 || t.Data[5] != 0 || (t.Data[6] != 1 && t.Data[6] != 2 && t.Data[6] != 4) || (t.Data[7] != 4 && t.Data[7] != 8)) {
-            // pc quantum
-            // pointer size
+        if (len(t.Data) < 16 || t.Data[4] != 0 || t.Data[5] != 0 || (t.Data[6] != 1 && t.Data[6] != 2 && t.Data[6] != 4) || // pc quantum
+            (t.Data[7] != 4 && t.Data[7] != 8)) { // pointer size
             return;
         }
+
         version possibleVersion = default!;
-        var leMagic = binary.LittleEndian.Uint32(t.Data);
-        var beMagic = binary.BigEndian.Uint32(t.Data);
+
+        // The magic numbers are chosen such that reading the value with
+        // a different endianness does not result in the same value.
+        // That lets us the magic number to determine the endianness.
+        var leMagic = (abi.PCLnTabMagic)binary.LittleEndian.Uint32(t.Data);
+        var beMagic = (abi.PCLnTabMagic)binary.BigEndian.Uint32(t.Data);
+
         switch (ᐧ) {
-        case {} when leMagic == go12magic: {
+        case {} when leMagic == abi.Go12PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.LittleEndian, ver12);
             break;
         }
-        case {} when beMagic == go12magic: {
+        case {} when beMagic == abi.Go12PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.BigEndian, ver12);
             break;
         }
-        case {} when leMagic == go116magic: {
+        case {} when leMagic == abi.Go116PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.LittleEndian, ver116);
             break;
         }
-        case {} when beMagic == go116magic: {
+        case {} when beMagic == abi.Go116PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.BigEndian, ver116);
             break;
         }
-        case {} when leMagic == go118magic: {
+        case {} when leMagic == abi.Go118PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.LittleEndian, ver118);
             break;
         }
-        case {} when beMagic == go118magic: {
+        case {} when beMagic == abi.Go118PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.BigEndian, ver118);
             break;
         }
-        case {} when leMagic == go120magic: {
+        case {} when leMagic == abi.Go120PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.LittleEndian, ver120);
             break;
         }
-        case {} when beMagic == go120magic: {
+        case {} when beMagic == abi.Go120PCLnTabMagic: {
             (t.binary, possibleVersion) = (binary.BigEndian, ver120);
             break;
         }
         default: {
             return;
         }}
-
         t.version = possibleVersion;
+
         // quantum and ptrSize are the same between 1.2, 1.16, and 1.18
         t.quantum = (uint32)t.Data[6];
         t.ptrsize = (uint32)t.Data[7];
+
         uint64 offset(uint32 word) => Ꮡt.Value.uintptr(Ꮡt.Value.Data.slice((nint)(8 + word * Ꮡt.Value.ptrsize)));
         var offsetʗ1 = offset;
         slice<byte> data(uint32 word) => Ꮡt.Value.Data.slice((nint)(offsetʗ1(word)));
+
         var exprᴛ1 = possibleVersion;
         if (exprᴛ1 == ver118 || exprᴛ1 == ver120) {
             t.nfunctab = (uint32)offset(0);
@@ -318,7 +325,6 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
         else { /* default: */
             throw panic("unreachable");
         }
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -336,6 +342,7 @@ internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) {
                 recover();
             }, ref ᒐ);
         }
+
         var ft = Ꮡt.funcTab();
         var funcs = new slice<Func>(ft.Count(), () => new(nil));
         var syms = new slice<Sym>(len(funcs));
@@ -387,7 +394,7 @@ internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) {
     for (shift = 0; ᐧ ; shift += 7) {
         var b = p[0];
         p = p[1..];
-        v |= (uint32)(((uint32)((uint32)b & 0x7F)).Lsh((uint64)(shift)));
+        v |= (uint32)(((uint32)b & 0x7F).Lsh((uint64)(shift)));
         if ((byte)(b & 0x80) == 0) {
             break;
         }
@@ -404,7 +411,7 @@ internal static @string funcName(this ref LineTable t, uint32 off) {
         }
     }
     nint i = bytes.IndexByte(t.funcnametab.slice((nint)(off)), 0);
-    @string s = ((@string)(t.funcnametab.slice((nint)(off), (nint)(off + (uint32)i))));
+    @string s = (@string)(t.funcnametab.slice((nint)(off), (nint)(off + (uint32)i)));
     t.funcNames[off] = s;
     return s;
 }
@@ -417,7 +424,7 @@ internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32
         }
     }
     nint i = bytes.IndexByte(arr.slice((nint)(off)), 0);
-    @string s = ((@string)(arr.slice((nint)(off), (nint)(off + (uint32)i))));
+    @string s = (@string)(arr.slice((nint)(off), (nint)(off + (uint32)i)));
     t.strings[off] = s;
     return s;
 }
@@ -445,7 +452,7 @@ internal static ΔfuncTab funcTab(this ж<LineTable> Ꮡt) {
 // funcTab is memory corresponding to a slice of functab structs, followed by an invalid PC.
 // A functab struct is a PC and a func offset.
 partial struct ΔfuncTab {
-    public partial ref ж<LineTable> LineTable { get; }
+    /*embed*/ public ж<LineTable> LineTable;
     internal nint sz; // cached result of t.functabFieldSize
 }
 
@@ -554,8 +561,8 @@ internal static bool step(this ref LineTable t, ж<slice<byte>> Ꮡp, ж<uint64>
     if (uvdelta == 0 && !first) {
         return false;
     }
-    if ((uint32)(uvdelta & 1) != 0){
-        uvdelta = ~((uvdelta >> (int)(1)));
+    if ((uvdelta & 1) != 0){
+        uvdelta = ~(uvdelta >> 1);
     } else {
         uvdelta >>= (int)(1);
     }
@@ -572,6 +579,7 @@ internal static bool step(this ref LineTable t, ж<slice<byte>> Ꮡp, ж<uint64>
 internal static int32 pcvalue(this ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) {
     ref var p = ref heap<slice<byte>>(out var Ꮡp);
     p = t.pctab.slice((nint)(off));
+
     ref var val = ref heap<int32>(out var Ꮡval);
     val = (int32)(-1);
     ref var pc = ref heap<uint64>(out var Ꮡpc);
@@ -594,6 +602,7 @@ internal static uint64 findFileLine(this ref LineTable t, uint64 entry, uint32 f
     if (filetab == 0 || linetab == 0) {
         return 0;
     }
+
     ref var fp = ref heap<slice<byte>>(out var Ꮡfp);
     fp = t.pctab.slice((nint)(filetab));
     ref var fl = ref heap<slice<byte>>(out var Ꮡfl);
@@ -648,6 +657,7 @@ internal static nint /*line*/ go12PCToLine(this ж<LineTable> Ꮡt, uint64 pc) {
                 line = -1;
             }
         }, ref ᒐ);
+
         var f = Ꮡt.findFunc(pc);
         if (f.IsZero()) {
             line = -1; goto ᒐdone;
@@ -673,6 +683,7 @@ internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc
                 @file = ""u8;
             }
         }, ref ᒐ);
+
         var f = Ꮡt.findFunc(pc);
         if (f.IsZero()) {
             @file = ""u8; goto ᒐdone;
@@ -687,8 +698,7 @@ internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc
             @file = t.@string(t.binary.Uint32(t.filetab.slice(4 * fno))); goto ᒐdone;
         }
         // Go ≥ 1.16
-        if (fno < 0) {
-            // 0 is valid for ≥ 1.16
+        if (fno < 0) { // 0 is valid for ≥ 1.16
             @file = ""u8; goto ᒐdone;
         }
         var cuoff = f.cuOffset();
@@ -716,11 +726,13 @@ internal static uint64 /*pc*/ go12LineToPC(this ж<LineTable> Ꮡt, @string @fil
                 pc = 0;
             }
         }, ref ᒐ);
+
         Ꮡt.initFileMap();
         var (filenum, ok) = t.fileMap[@file, ꟷ];
         if (!ok) {
             pc = 0; goto ᒐdone;
         }
+
         // Scan all functions.
         // If this turns out to be a bottleneck, we could build a map[int32][]int32
         // mapping file number to a list of functions with code from that file.
@@ -758,10 +770,12 @@ internal static void initFileMap(this ж<LineTable> Ꮡt) {
 
         t.mu.Lock();
         ᒐd1 = true;
+
         if (t.fileMap != default!) {
             return;
         }
         var m = new map<@string, uint32>();
+
         if (t.version == ver12){
             for (var i = (uint32)1; i < t.nfiletab; i++) {
                 @string s = t.@string(t.binary.Uint32(t.filetab.slice((nint)(4 * i))));
@@ -794,6 +808,7 @@ internal static void go12MapFiles(this ж<LineTable> Ꮡt, map<@string, ж<Obj>>
                 recover();
             }, ref ᒐ);
         }
+
         Ꮡt.initFileMap();
         foreach (var (@file, _) in t.fileMap) {
             m[@file] = Ꮡobj;

@@ -19,7 +19,7 @@ internal static void fillFileStatFromSys(ж<fileStat> Ꮡfs, @string name) {
     fs.size = fs.sys.Size;
     var (ᴛ1, ᴛ2) = fs.sys.Mtimespec.Unix();
     fs.modTime = time.Unix(ᴛ1, ᴛ2);
-    fs.mode = ((FileMode)(uint32)((uint16)(fs.sys.Mode & 511)));
+    fs.mode = (FileMode)(uint32)((uint16)(fs.sys.Mode & 511));
     var exprᴛ1 = (uint16)(fs.sys.Mode & (uint16)syscall.S_IFMT);
     if (exprᴛ1 == syscall.S_IFBLK || exprᴛ1 == syscall.S_IFWHT) {
         fs.mode |= (fs.FileMode)(ModeDevice);
@@ -37,12 +37,11 @@ internal static void fillFileStatFromSys(ж<fileStat> Ꮡfs, @string name) {
         fs.mode |= (fs.FileMode)(ModeSymlink);
     }
     else if (exprᴛ1 == syscall.S_IFREG) {
+        // nothing to do
     }
     else if (exprᴛ1 == syscall.S_IFSOCK) {
         fs.mode |= (fs.FileMode)(ModeSocket);
     }
-
-    // nothing to do
     if ((uint16)(fs.sys.Mode & (uint16)syscall.S_ISGID) != 0) {
         fs.mode |= (fs.FileMode)(ModeSetgid);
     }

@@ -73,8 +73,6 @@ internal static readonly @string gammaˢ = "gamma"u8;
 internal static readonly @string alphabetagammaˢ = "alphabetagamma"u8;
 
 public static void TestBuilderString(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     Ꮡb.WriteString(alphaˢ);
     check(Ꮡt, Ꮡb, alphaˢ);
@@ -85,6 +83,7 @@ public static void TestBuilderString(ж<testing.T> Ꮡt) {
     Ꮡb.WriteString(gammaˢ);
     check(Ꮡt, Ꮡb, alphabetagammaˢ);
     @string s3 = b.String();
+
     // Check that subsequent operations didn't change the returned strings.
     {
         @string want = alphaˢ; if (s1 != want) {
@@ -108,8 +107,6 @@ internal static readonly @string aaaˢ = "aaa"u8;
 internal static readonly @string bbbˢ = "bbb"u8;
 
 public static void TestBuilderReset(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     check(Ꮡt, Ꮡb, ""u8);
     Ꮡb.WriteString(aaaˢ);
@@ -117,6 +114,7 @@ public static void TestBuilderReset(ж<testing.T> Ꮡt) {
     check(Ꮡt, Ꮡb, aaaˢ);
     b.Reset();
     check(Ꮡt, Ꮡb, ""u8);
+
     // Ensure that writing after Reset doesn't alter
     // previously returned strings.
     Ꮡb.WriteString(bbbˢ);
@@ -228,6 +226,7 @@ public static void TestBuilderWrite2(ж<testing.T> Ꮡt) {
                 tΔ1.Errorf("first call: got n=%d; want %d"u8, n, ttʗ1.n);
             }
             check(tΔ1, Ꮡb, ttʗ1.want);
+
             (n, err) = ttʗ1.fn(Ꮡb);
             if (err != default!) {
                 tΔ1.Fatalf("second call: got %s"u8, err);
@@ -260,8 +259,6 @@ internal static readonly object testAllocatesMoreWithˢ = (@string)"test allocat
 internal static readonly @string abcdeˢ = "abcde"u8;
 
 public static void TestBuilderAllocs(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (asan.Enabled) {
         Ꮡt.Skip(testAllocatesMoreWithˢ);
     }
@@ -461,7 +458,7 @@ public static void BenchmarkBuildString_Builder(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkBuildString_WriteString(ж<testing.B> Ꮡb) {
-    @string someString = ((@string)someBytes);
+    @string someString = (@string)someBytes;
     benchmarkBuilder(Ꮡb, (ж<testing.B> bΔ1, nint numWrite, bool grow) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
             ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);

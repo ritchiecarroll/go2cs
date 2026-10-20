@@ -48,6 +48,7 @@ public static void TestGenerate(ж<testing.T> Ꮡt) {
             files = append(files, @file);
         }
     }
+
     foreach (var (_, filename) in files) {
         generate(Ꮡt, filename, write);
     }
@@ -60,14 +61,17 @@ internal static void generate(ж<testing.T> Ꮡt, @string filename, bool write) 
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // fix package name
     @file.Value.Name.Value.Name = strings.ReplaceAll((~(~@file).Name).Name, types2ˢ, typesˢ);
+
     // rewrite AST as needed
     {
         var action = filemap[filename]; if (action != default!) {
             action(@file);
         }
     }
+
     // format AST
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var (rel, _) = filepath.Rel(dstDir, srcDir);
@@ -79,12 +83,14 @@ internal static void generate(ж<testing.T> Ꮡt, @string filename, bool write) 
         }
     }
     var generatedContent = buf.Bytes();
+
     // read dst (go/types)
     @string dstFilename = filepath.FromSlash(runtime.GOROOT() + dstDir + filename);
     (var onDiskContent, err) = os.ReadFile(dstFilename);
     if (err != default!) {
         Ꮡt.Fatalf("reading %q: %v"u8, filename, err);
     }
+
     // compare on-disk dst with buffer generated from src.
     {
         var d = diff.Diff(filename + " (on disk in "u8 + dstDir + ")"u8, onDiskContent, filename + " (generated from "u8 + srcDir + ")"u8, generatedContent); if (d != default!) {
@@ -104,19 +110,11 @@ internal static void generate(ж<testing.T> Ꮡt, @string filename, bool write) 
 
 // type action is a methodless func type — rendered inline as its base delegate
 
-// must happen before renaming identifiers
-// must happen before renaming identifiers
-// "initorder.go": fixErrErrorfCall, // disabled for now due to unresolved error_ use implications for gopls
-// must happen before renaming identifiers
-// TODO(gri) needs adjustments for TestObjectString - disabled for now
-// "object_test.go": func(f *ast.File) { renameImportPath(f, `"cmd/compile/internal/types2"->"go/types"`) },
-// must happen before renaming identifiers
-// must happen before renaming identifiers
 internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Action<ж<ast.File>>>{
     ["alias.go"u8] = fixTokenPos,
     ["assignments.go"u8] = (ж<ast.File> f) => {
         renameImportPath(f, @"""cmd/compile/internal/syntax""->""go/ast"""u8);
-        renameSelectorExprs(f, "syntax.Name->ast.Ident"u8, "ident.Value->ident.Name", "ast.Pos->token.Pos");
+        renameSelectorExprs(f, "syntax.Name->ast.Ident"u8, "ident.Value->ident.Name", "ast.Pos->token.Pos"); // must happen before renaming identifiers
         renameIdents(f, "syntax->ast"u8, "poser->positioner", "nopos->noposn");
     },
     ["array.go"u8] = default!,
@@ -131,7 +129,7 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
     },
     ["builtins_test.go"u8] = (ж<ast.File> f) => {
         renameImportPath(f, @"""cmd/compile/internal/syntax""->""go/ast"""u8, @"""cmd/compile/internal/types2""->""go/types""");
-        renameSelectorExprs(f, "syntax.Name->ast.Ident"u8, "p.Value->p.Name");
+        renameSelectorExprs(f, "syntax.Name->ast.Ident"u8, "p.Value->p.Name"); // must happen before renaming identifiers
         renameIdents(f, "syntax->ast"u8);
     },
     ["chan.go"u8] = default!,
@@ -155,6 +153,7 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
         fixInferSig(f);
     },
     ["initorder.go"u8] = default!,
+    // "initorder.go": fixErrErrorfCall, // disabled for now due to unresolved error_ use implications for gopls
     ["instantiate.go"u8] = (ж<ast.File> f) => {
         fixTokenPos(f);
         fixCheckErrorfCall(f);
@@ -167,7 +166,7 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
         renameImportPath(f, @"""cmd/compile/internal/syntax""->""go/ast"""u8);
         renameSelectorExprs(f,
             "syntax.IntLit->token.INT"u8, "syntax.FloatLit->token.FLOAT", "syntax.ImagLit->token.IMAG",
-            "syntax.Name->ast.Ident", "key.Value->key.Name", "atyp.Elem->atyp.Elt");
+            "syntax.Name->ast.Ident", "key.Value->key.Name", "atyp.Elem->atyp.Elt"); // must happen before renaming identifiers
         renameIdents(f, "syntax->ast"u8);
         renameSelectors(f, "ElemList->Elts"u8);
     },
@@ -189,6 +188,8 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
         fixTokenPos(f);
         renameIdents(f, "NewTypeNameLazy->_NewTypeNameLazy"u8);
     },
+    // TODO(gri) needs adjustments for TestObjectString - disabled for now
+    // "object_test.go": func(f *ast.File) { renameImportPath(f, `"cmd/compile/internal/types2"->"go/types"`) },
     ["objset.go"u8] = default!,
     ["operand.go"u8] = (ж<ast.File> f) => {
         insertImportPath(f, @"""go/token"""u8);
@@ -197,7 +198,7 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
             "syntax.Pos->token.Pos"u8, "syntax.LitKind->token.Token",
             "syntax.IntLit->token.INT", "syntax.FloatLit->token.FLOAT",
             "syntax.ImagLit->token.IMAG", "syntax.RuneLit->token.CHAR",
-            "syntax.StringLit->token.STRING");
+            "syntax.StringLit->token.STRING"); // must happen before renaming identifiers
         renameIdents(f, "syntax->ast"u8);
     },
     ["package.go"u8] = default!,
@@ -205,7 +206,7 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
     ["predicates.go"u8] = default!,
     ["recording.go"u8] = (ж<ast.File> f) => {
         renameImportPath(f, @"""cmd/compile/internal/syntax""->""go/ast"""u8);
-        renameSelectorExprs(f, "syntax.Name->ast.Ident"u8);
+        renameSelectorExprs(f, "syntax.Name->ast.Ident"u8); // must happen before renaming identifiers
         renameIdents(f, "syntax->ast"u8);
         fixAtPosCall(f);
     },
@@ -244,10 +245,11 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
     }
 };
 
-partial struct renameMap /*map[@string, @string]*/;
-
 // TODO(gri) We should be able to make these rewriters more configurable/composable.
 //           For now this is a good starting point.
+
+// A renameMap maps old strings to new strings.
+partial struct renameMap /*map[@string, @string]*/;
 
 // makeRenameMap returns a renameMap populates from renames entries of the form "from->to".
 internal static renameMap makeRenameMap(params ꓸꓸꓸstring renamesʗp) {
@@ -390,22 +392,22 @@ internal static void fixTokenPos(ж<ast.File> Ꮡf) {
     ast.Inspect(new ast.FileжNode(Ꮡf), (ast.Node n) => {
         switch (n.type()) {
         case ж<ast.ImportSpec> nΔ1: {
+            // rewrite import path "cmd/compile/internal/syntax" to "go/token"
             if ((~(~nΔ1).Path).Kind != token.STRING) {
-                // rewrite import path "cmd/compile/internal/syntax" to "go/token"
                 throw panic("invalid import path");
             }
             mʗ1.rename((~nΔ1).Path.of(ast.BasicLit.ᏑValue));
             return false;
         }
         case ж<ast.SelectorExpr> nΔ1: {
+            // rewrite syntax.Pos to token.Pos
             mʗ1.renameSel(nΔ1);
             break;
         }
         case ж<ast.CallExpr> nΔ1: {
+            // rewrite x.IsKnown() to x.IsValid()
             {
                 var (fun, _) = (~nΔ1).Fun._<ж<ast.SelectorExpr>>(ᐧ); if (fun != nil && len((~nΔ1).Args) == 0) {
-                    // rewrite syntax.Pos to token.Pos
-                    // rewrite x.IsKnown() to x.IsValid()
                     mʗ1.rename((~fun).Sel.of(ast.Ident.ᏑName));
                     return false;
                 }
@@ -458,8 +460,8 @@ internal static void fixInferSig(ж<ast.File> Ꮡf) {
                 var (selx, _) = (~nΔ1).Fun._<ж<ast.SelectorExpr>>(ᐧ); if (selx != nil) {
                     var exprᴛ1 = (~(~selx).Sel).Name;
                     if (exprᴛ1 == "renameTParams"u8) {
-                        if (isIdent((~nΔ1).Args[0], // rewrite check.renameTParams(pos, ... ) to check.renameTParams(posn.Pos(), ... )
- "pos"u8)) {
+                        // rewrite check.renameTParams(pos, ... ) to check.renameTParams(posn.Pos(), ... )
+                        if (isIdent((~nΔ1).Args[0], "pos"u8)) {
                             ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
                             pos = (~nΔ1).Args[0].Pos();
                             var fun = Ꮡ(new ast.SelectorExpr(X: new ast.IdentжExpr(newIdent(pos, "posn"u8)), Sel: newIdent(pos, "Pos"u8)));
@@ -469,8 +471,8 @@ internal static void fixInferSig(ж<ast.File> Ꮡf) {
                         }
                     }
                     else if (exprᴛ1 == "addf"u8) {
-                        if (isIdent((~nΔ1).Args[0], // rewrite err.addf(pos, ...) to err.addf(posn, ...)
- "pos"u8)) {
+                        // rewrite err.addf(pos, ...) to err.addf(posn, ...)
+                        if (isIdent((~nΔ1).Args[0], "pos"u8)) {
                             tokenꓸPos pos = (~nΔ1).Args[0].Pos();
                             var arg = newIdent(pos, "posn"u8);
                             nΔ1.Value.Args[0] = new ast.IdentжExpr(arg);
@@ -478,15 +480,14 @@ internal static void fixInferSig(ж<ast.File> Ꮡf) {
                         }
                     }
                     else if (exprᴛ1 == "allowVersion"u8) {
-                        if (isIdent((~nΔ1).Args[0], // rewrite check.allowVersion(pos, ...) to check.allowVersion(posn, ...)
- "pos"u8)) {
+                        // rewrite check.allowVersion(pos, ...) to check.allowVersion(posn, ...)
+                        if (isIdent((~nΔ1).Args[0], "pos"u8)) {
                             tokenꓸPos pos = (~nΔ1).Args[0].Pos();
                             var arg = newIdent(pos, "posn"u8);
                             nΔ1.Value.Args[0] = new ast.IdentжExpr(arg);
                             return false;
                         }
                     }
-
                 }
             }
             break;
@@ -539,9 +540,9 @@ internal static void fixErrErrorfCall(ж<ast.File> Ꮡf) {
                     if (isIdent((~selx).X, errˢ)) {
                         var exprᴛ1 = (~(~selx).Sel).Name;
                         if (exprᴛ1 == "errorf"u8) {
+                            // rewrite err.addf(obj, ... ) to err.addf(obj.Pos(), ... )
                             {
                                 var (ident, _) = (~nΔ1).Args[0]._<ж<ast.Ident>>(ᐧ); if (ident != nil && (~ident).Name == "obj"u8) {
-                                    // rewrite err.addf(obj, ... ) to err.addf(obj.Pos(), ... )
                                     ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
                                     pos = (~nΔ1).Args[0].Pos();
                                     var fun = Ꮡ(new ast.SelectorExpr(X: new ast.IdentжExpr(ident), Sel: newIdent(pos, posˢ)));
@@ -550,7 +551,6 @@ internal static void fixErrErrorfCall(ж<ast.File> Ꮡf) {
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -570,9 +570,9 @@ internal static void fixCheckErrorfCall(ж<ast.File> Ꮡf) {
                     if (isIdent((~selx).X, "check"u8)) {
                         var exprᴛ1 = (~(~selx).Sel).Name;
                         if (exprᴛ1 == "errorf"u8) {
+                            // rewrite check.errorf(pos, ... ) to check.errorf(atPos(pos), ... )
                             {
-                                var ident = asIdent((~nΔ1).Args[0], // rewrite check.errorf(pos, ... ) to check.errorf(atPos(pos), ... )
- "pos"u8); if (ident != nil) {
+                                var ident = asIdent((~nΔ1).Args[0], "pos"u8); if (ident != nil) {
                                     ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
                                     pos = (~nΔ1).Args[0].Pos();
                                     var fun = newIdent(pos, "atPos"u8);
@@ -581,7 +581,6 @@ internal static void fixCheckErrorfCall(ж<ast.File> Ꮡf) {
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -598,8 +597,8 @@ internal static void fixGlobalTypVarDecl(ж<ast.File> Ꮡf) {
     ast.Inspect(new ast.FileжNode(Ꮡf), (ast.Node n) => {
         switch (n.type()) {
         case ж<ast.ValueSpec> nΔ1: {
+            // rewrite type Typ = [...]Type{...} to type Typ = []Type{...}
             if (len((~nΔ1).Names) == 1 && (~(~nΔ1).Names[0]).Name == "Typ"u8 && len((~nΔ1).Values) == 1) {
-                // rewrite type Typ = [...]Type{...} to type Typ = []Type{...}
                 (~(~nΔ1).Values[0]._<ж<ast.CompositeLit>>()).Type._<ж<ast.ArrayType>>().Value.Len = default!;
                 return false;
             }

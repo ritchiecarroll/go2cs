@@ -32,6 +32,7 @@ public static void TestBlockHuff(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, @in) in match) {
         @string @out = @in; // for files where input and output are identical
         if (strings.HasSuffix(@in, ".in"u8)) {
@@ -47,8 +48,6 @@ internal static readonly object resetOkˢ = (@string)"Reset ok"u8;
 internal static readonly @string huffˢ = "huff"u8;
 
 internal static void testBlockHuff(ж<testing.T> Ꮡt, @string @in, @string @out) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (all, err) = os.ReadFile(@in);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -59,11 +58,13 @@ internal static void testBlockHuff(ж<testing.T> Ꮡt, @string @in, @string @out
     bw.writeBlockHuff(false, all);
     bw.flush();
     var got = buf.Bytes();
+
     (var want, err) = os.ReadFile(@out);
     if (err != default! && !update.Value) {
         Ꮡt.Error(err);
         return;
     }
+
     Ꮡt.Logf("Testing %q"u8, @in);
     if (!bytes.Equal(got, want)) {
         if (update.Value) {
@@ -79,6 +80,7 @@ internal static void testBlockHuff(ж<testing.T> Ꮡt, @string @in, @string @out
             // in == out: don't accidentally destroy input
             Ꮡt.Errorf("WARNING: -update did not rewrite input file %s"u8, @in);
         }
+
         Ꮡt.Errorf("%q != %q (see %q)"u8, @in, @out, @in + ".got");
         {
             var errΔ2 = os.WriteFile(@in + ".got"u8, got, 438); if (errΔ2 != default!) {
@@ -88,6 +90,7 @@ internal static void testBlockHuff(ж<testing.T> Ꮡt, @string @in, @string @out
         return;
     }
     Ꮡt.Log(outputOkˢ);
+
     // Test if the writer produces the same output after reset.
     buf.Reset();
     bw.reset(new flate_test_package.bytes_BufferжWriter(Ꮡbuf));
@@ -212,6 +215,7 @@ internal static void testBlock(ж<testing.T> Ꮡt, huffTest test, @string ttype)
                     Ꮡt.Error(errΔ1);
                     return;
                 }
+
                 (var fΔ1, errΔ1) = os.Create(test.want);
                 if (errΔ1 != default!) {
                     Ꮡt.Error(errΔ1);
@@ -222,6 +226,7 @@ internal static void testBlock(ж<testing.T> Ꮡt, huffTest test, @string ttype)
                 var bwΔ1 = newHuffmanBitWriter(new os.FileжWriter(fΔ1));
                 writeToType(Ꮡt, ttype, bwΔ1, test.tokens, input);
             }
+
             Ꮡt.Logf("Updating %q"u8, test.wantNoInput);
             var (f, errΔ2) = os.Create(test.wantNoInput);
             if (errΔ2 != default!) {
@@ -234,6 +239,7 @@ internal static void testBlock(ж<testing.T> Ꮡt, huffTest test, @string ttype)
             writeToType(Ꮡt, ttype, bwΔ2, test.tokens, default!);
             return;
         }
+
         if (test.input != ""u8) {
             Ꮡt.Logf("Testing %q"u8, test.want);
             var (input, errΔ3) = os.ReadFile(test.input);
@@ -249,6 +255,7 @@ internal static void testBlock(ж<testing.T> Ꮡt, huffTest test, @string ttype)
             ref var bufΔ1 = ref heap(new bytes.Buffer(), out var ᏑbufΔ1);
             var bwΔ3 = newHuffmanBitWriter(new flate_test_package.bytes_BufferжWriter(ᏑbufΔ1));
             writeToType(Ꮡt, ttype, bwΔ3, test.tokens, input);
+
             var gotΔ1 = bufΔ1.Bytes();
             if (!bytes.Equal(gotΔ1, want)) {
                 Ꮡt.Errorf("writeBlock did not yield expected result for file %q with input. See %q"u8, test.want, test.want + ".got");
@@ -259,6 +266,7 @@ internal static void testBlock(ж<testing.T> Ꮡt, huffTest test, @string ttype)
                 }
             }
             Ꮡt.Log(outputOkˢ);
+
             // Test if the writer produces the same output after reset.
             bufΔ1.Reset();
             bwΔ3.reset(new flate_test_package.bytes_BufferжWriter(ᏑbufΔ1));
@@ -286,6 +294,7 @@ internal static void testBlock(ж<testing.T> Ꮡt, huffTest test, @string ttype)
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var bw = newHuffmanBitWriter(new flate_test_package.bytes_BufferжWriter(Ꮡbuf));
         writeToType(Ꮡt, ttype, bw, test.tokens, default!);
+
         var got = buf.Bytes();
         if (!bytes.Equal(got, wantNI)){
             Ꮡt.Errorf("writeBlock did not yield expected result for file %q with input. See %q"u8, test.wantNoInput, test.wantNoInput + ".got");
@@ -299,7 +308,9 @@ internal static void testBlock(ж<testing.T> Ꮡt, huffTest test, @string ttype)
             Ꮡt.Error(gotUnexpectedEofˢ);
             return;
         }
+
         Ꮡt.Log(outputOkˢ);
+
         // Test if the writer produces the same output after reset.
         buf.Reset();
         bw.reset(new flate_test_package.bytes_BufferжWriter(Ꮡbuf));
@@ -340,6 +351,7 @@ internal static void writeToType(ж<testing.T> Ꮡt, @string ttype, ж<global::g
         Ꮡt.Error(bw.err);
         return;
     }
+
     bw.flush();
     if (bw.err != default!) {
         Ꮡt.Error(bw.err);
@@ -380,11 +392,11 @@ internal static void testWriterEOF(ж<testing.T> Ꮡt, @string ttype, huffTest t
     else { /* default: */
         throw panic("unknown test type");
     }
-
     if ((~bw).err != default!) {
         Ꮡt.Error((~bw).err);
         return;
     }
+
     bw.flush();
     if ((~bw).err != default!) {
         Ꮡt.Error((~bw).err);

@@ -28,7 +28,6 @@ internal static void cgiMain() {
         testCGI();
         return;
     }
-
     childCGIProcess();
 }
 
@@ -44,22 +43,27 @@ internal static void testCGI() {
     if (err != default!) {
         throw panic(err);
     }
+
     err = req.ParseForm();
     if (err != default!) {
         throw panic(err);
     }
+
     var @params = req.Value.Form;
     if (@params.Get(locˢ) != ""u8) {
         fmt.Printf("Location: %s\r\n\r\n"u8, @params.Get(locˢ));
         return;
     }
+
     fmt.Printf("Content-Type: text/html\r\n"u8);
     fmt.Printf("X-CGI-Pid: %d\r\n"u8, os.Getpid());
     fmt.Printf("X-Test-Header: X-Test-Value\r\n"u8);
     fmt.Printf("\r\n"u8);
+
     if (@params.Get(writestderrˢ) != ""u8) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "Hello, stderr!\n"u8);
     }
+
     if (@params.Get(bigresponseˢ) != ""u8) {
         // 17 MB, for OS X: golang.org/issue/4958
         @string line = strings.Repeat("A"u8, 1024);
@@ -68,14 +72,18 @@ internal static void testCGI() {
         }
         return;
     }
+
     fmt.Printf("test=Hello CGI\r\n"u8);
+
     foreach (var (_, key) in slices.Sorted(maps.Keys<url.Values, @string, slice<@string>>(@params))) {
         fmt.Printf("param-%s=%s\r\n"u8, key, @params.Get(key));
     }
+
     var envs = envMap(os.Environ());
     foreach (var (_, key) in slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(envs))) {
         fmt.Printf("env-%s=%s\r\n"u8, key, envs[key]);
     }
+
     var (cwd, _) = os.Getwd();
     fmt.Printf("cwd=%s\r\n"u8, cwd);
 }
@@ -117,7 +125,6 @@ internal static void childCGIProcess() {
         fmt.Printf("\nHello"u8);
         os.Exit(0);
     }
-
     Serve(new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter rw, ж<http.Request> req) => {
         if (req.FormValue(nilRequestBodyˢ) == "1"u8) {
             fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "nil-request-body=%v\n"u8, (~req).Body == default!);
@@ -135,7 +142,7 @@ internal static void childCGIProcess() {
             }
         }
         if (req.FormValue(writeForeverˢ) == "1"u8) {
-            io.Copy(new http_ResponseWriterᴠWriter(rw), ((neverEnding)(rune)'a'));
+            io.Copy(new http_ResponseWriterᴠWriter(rw), (neverEnding)(rune)'a');
             while (ᐧ) {
                 time.Sleep((time.Duration)(5000000000L)); // hang forever, until killed
             }

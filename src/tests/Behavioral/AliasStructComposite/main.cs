@@ -53,13 +53,16 @@ internal static void Main() {
     fmt.Println(a.V, a.W, b.V, c.V, c.W);
     var w = new uint64[]{10, 20, 30, 40}.array();
     fmt.Println(sum(w), len(w));
+
     var d = new uint64[]{10, 20, 30, 40}.array();
     fmt.Println(sum(d), rangeSum(d));
+
     words z = new(4);
     for (nint i = 0; i < len(z); i++) {
         z[i] = (uint64)(i + 1);
     }
     fmt.Println(rangeSum(z), z[3]);
+
     gw[0] = 99;
     fmt.Println(gw[0], len(gw));
 }

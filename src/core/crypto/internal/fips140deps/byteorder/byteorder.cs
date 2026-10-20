@@ -36,6 +36,10 @@ public static void BEPutUint64(slice<byte> b, uint64 v) {
     byteorder.BEPutUint64(b, v);
 }
 
+public static void LEPutUint16(slice<byte> b, uint16 v) {
+    byteorder.LEPutUint16(b, v);
+}
+
 public static void LEPutUint64(slice<byte> b, uint64 v) {
     byteorder.LEPutUint64(b, v);
 }

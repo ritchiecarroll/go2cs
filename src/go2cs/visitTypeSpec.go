@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"regexp"
 	"strings"
@@ -175,6 +176,25 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			}
 		}
 
+		// The `global using` line is the only place C# declares the alias, so its doc goes directly above it
+		// (docs/PLAN-comment-and-spacing-parity.md, the owner's decision 6), at the file's top level, after the
+		// blank line Go has above the declaration: the block sits directly under the file's leading comments
+		// (visitFile drops the blank line when nothing is above it). An alias of an anonymous struct or interface
+		// lifted that type above, and its doc with it: then there is nothing left to write here.
+		if v.options.includeComments && doc != nil {
+			aliasDoc := &strings.Builder{}
+			savedIndent := v.indentLevel
+			v.indentLevel = 0
+			v.writeCommentString(aliasDoc, doc, token.NoPos)
+			v.indentLevel = savedIndent
+
+			if aliasDoc.Len() > 0 {
+				v.typeAliasDeclarations.WriteString(v.newline)
+				v.typeAliasDeclarations.WriteString(aliasDoc.String())
+				v.typeAliasDeclarations.WriteString(v.newline)
+			}
+		}
+
 		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s;%s", aliasName, typeName, v.newline))
 
 		// THE DESCRIPTOR CARRIER. The `global using` above is a COMPILE-TIME construct: it leaves no
@@ -254,6 +274,11 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		return
 	}
 
+	// A generic type's INLINE constraints lift ahead of it (liftTypeParamConstraints), and before the
+	// access modifier below is set: the interface emitter consumes v.pendingTypeAccess on entry.
+	ownerType, _ := v.info.Defs[typeSpec.Name].Type().(*types.Named)
+	v.liftTypeParamConstraints(typeSpec.TypeParams, name, ownerType, typeSpec.Name.Name)
+
 	// An unexported type used as an exported struct field, or in an exported callable's signature,
 	// must be emitted as public (CS0050/CS0051/CS0052). Set the access modifier for the type-kind
 	// emitter below to consume.
@@ -295,6 +320,17 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	}
 
 	defer func() { v.pendingTypeAccess = "" }()
+
+	// The struct and interface emitters take the doc as an argument; every other kind writes it from
+	// here, through writePendingTypeDoc at its declaration line (class C of
+	// docs/PLAN-comment-and-spacing-parity.md: these docs were never written).
+	switch typeSpec.Type.(type) {
+	case *ast.StructType, *ast.InterfaceType:
+	default:
+		v.pendingTypeDoc, v.pendingTypeDocPos = doc, typeSpec.Pos()
+
+		defer func() { v.pendingTypeDoc = nil }()
+	}
 
 	switch typeSpecType := typeSpec.Type.(type) {
 	case *ast.ArrayType:
@@ -345,6 +381,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			if !v.inFunction {
 				target.WriteString(v.newline)
 			}
+			v.writePendingTypeDoc(target)
 
 			// Cross-package twin of visitIdent's stamp: a defined type over a struct carrying
 			// fixed-size ARRAY fields needs the forwarded `Clone()` (see wrapperValueCloneAttr).
@@ -379,6 +416,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			if !v.inFunction {
 				target.WriteString(v.newline)
 			}
+			v.writePendingTypeDoc(target)
 
 			localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
 			v.recordTypeAccessibility("class", getSanitizedIdentifier(name), "", access, localNameRecord)
@@ -405,6 +443,20 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	default:
 		panic(fmt.Sprintf("@visitTypeSpec - Unexpected TypeSpec type: %#v", v.getPrintedNode(typeSpecType)))
 	}
+}
+
+// writePendingTypeDoc writes the doc comment visitTypeSpec left for a forward-declaration type kind, once,
+// at that kind's declaration line in target (the member-level builder of a lifted local type, or the
+// output). With no pending doc it writes nothing, so a type without a doc emits what it always did.
+func (v *Visitor) writePendingTypeDoc(target *strings.Builder) {
+	doc := v.pendingTypeDoc
+
+	if doc == nil {
+		return
+	}
+
+	v.pendingTypeDoc = nil
+	v.writeDocString(target, doc, v.pendingTypeDocPos)
 }
 
 // liftLocalTypeDecl prepares a forward-declaration type-kind (array/slice, map, channel) for

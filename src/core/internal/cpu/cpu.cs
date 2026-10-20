@@ -10,11 +10,6 @@ namespace go.@internal;
 
 partial class cpu_package {
 
-// DebugOptions is set to true by the runtime if the OS supports reading
-// GODEBUG early in runtime startup.
-// This should not be changed after it is initialized.
-public static bool DebugOptions;
-
 // CacheLinePad is used to pad structs to avoid false sharing.
 partial struct CacheLinePad {
     internal array<byte> _ = new(CacheLinePadSize);
@@ -29,21 +24,33 @@ public static uintptr CacheLineSize = CacheLinePadSize;
 // HasAVX and HasAVX2 are only set if the OS does support XMM and YMM registers
 // in addition to the cpuid feature bit being set.
 // The struct is padded to avoid false sharing.
-
 partial struct X86ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasAES;
     public bool HasADX;
     public bool HasAVX;
+    public bool HasAVXVNNI;
     public bool HasAVX2;
+    public bool HasAVX512; // Virtual feature: F+CD+BW+DQ+VL
     public bool HasAVX512F;
+    public bool HasAVX512CD;
     public bool HasAVX512BW;
+    public bool HasAVX512DQ;
     public bool HasAVX512VL;
+    public bool HasAVX512GFNI;
+    public bool HasAVX512VAES;
+    public bool HasAVX512VNNI;
+    public bool HasAVX512VBMI;
+    public bool HasAVX512VBMI2;
+    public bool HasAVX512BITALG;
+    public bool HasAVX512VPOPCNTDQ;
+    public bool HasAVX512VPCLMULQDQ;
     public bool HasBMI1;
     public bool HasBMI2;
     public bool HasERMS;
     public bool HasFSRM;
     public bool HasFMA;
+    public bool HasGFNI;
     public bool HasOSXSAVE;
     public bool HasPCLMULQDQ;
     public bool HasPOPCNT;
@@ -53,6 +60,7 @@ partial struct X86ᴛ1 /*dyn*/ {
     public bool HasSSSE3;
     public bool HasSSE41;
     public bool HasSSE42;
+    public bool HasVAES;
     internal CacheLinePad __;
 }
 public static ж<X86ᴛ1> ᏑX86 = new StandardBox<X86ᴛ1>(default(X86ᴛ1));
@@ -60,7 +68,6 @@ public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
 
 // The booleans in ARM contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
-
 partial struct ARMᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasVFPv4;
@@ -72,7 +79,6 @@ public static ARMᴛ1 ARM;
 
 // The booleans in ARM64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
-
 partial struct ARM64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasAES;
@@ -80,6 +86,7 @@ partial struct ARM64ᴛ1 /*dyn*/ {
     public bool HasSHA1;
     public bool HasSHA2;
     public bool HasSHA512;
+    public bool HasSHA3;
     public bool HasCRC32;
     public bool HasATOMICS;
     public bool HasCPUID;
@@ -91,17 +98,16 @@ public static ARM64ᴛ1 ARM64;
 
 // The booleans in Loong64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
-
 partial struct Loong64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasLSX; // support 128-bit vector extension
+    public bool HasLASX; // support 256-bit vector extension
     public bool HasCRC32; // support CRC instruction
     public bool HasLAMCAS; // support AMCAS[_DB].{B/H/W/D}
     public bool HasLAM_BH; // support AM{SWAP/ADD}[_DB].{B/H} instruction
     internal CacheLinePad __;
 }
 public static Loong64ᴛ1 Loong64;
-
 
 partial struct MIPS64Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
@@ -115,7 +121,6 @@ public static MIPS64Xᴛ1 MIPS64X;
 // require kernel support to work (darn, scv), so there are feature bits for
 // those as well. The minimum processor requirement is POWER8 (ISA 2.07).
 // The struct is padded to avoid false sharing.
-
 partial struct PPC64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasDARN; // Hardware random number generator (requires kernel enablement)
@@ -126,7 +131,6 @@ partial struct PPC64ᴛ1 /*dyn*/ {
     internal CacheLinePad __;
 }
 public static PPC64ᴛ1 PPC64;
-
 
 partial struct S390Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
@@ -155,6 +159,19 @@ partial struct S390Xᴛ1 /*dyn*/ {
 }
 public static S390Xᴛ1 S390X;
 
+// RISCV64 contains the supported CPU features and performance characteristics for riscv64
+// platforms. The booleans in RISCV64, with the exception of HasFastMisaligned, indicate
+// the presence of RISC-V extensions.
+// The struct is padded to avoid false sharing.
+partial struct RISCV64ᴛ1 /*dyn*/ {
+    internal CacheLinePad _;
+    public bool HasFastMisaligned; // Fast misaligned accesses
+    public bool HasV; // Vector extension compatible with RVV 1.0
+    public bool HasZbb; // Basic bit-manipulation extension
+    internal CacheLinePad __;
+}
+public static RISCV64ᴛ1 RISCV64;
+
 // CPU feature variables are accessed by assembly code in various packages.
 //go:linkname X86
 //go:linkname ARM
@@ -163,6 +180,11 @@ public static S390Xᴛ1 S390X;
 //go:linkname MIPS64X
 //go:linkname PPC64
 //go:linkname S390X
+//go:linkname RISCV64
+
+// doDerived, if non-nil, is called after processing GODEBUG to set "derived"
+// feature flags.
+internal static Action doDerived;
 
 // Initialize examines the processor and sets the relevant variables above.
 // This is called by the runtime package early in program initialization,
@@ -171,6 +193,9 @@ public static S390Xᴛ1 S390X;
 public static void Initialize(@string env) {
     doinit();
     processOptions(env);
+    if (doDerived != default!) {
+        doDerived();
+    }
 }
 
 // options contains the cpu debug options that can be used in GODEBUG.
@@ -213,6 +238,7 @@ field:
         }
         @string key = field.slice(4, i);
         @string value = field.slice(i + 1); // e.g. "SSE2", "on"
+
         bool enable = default!;
         var exprᴛ1 = value;
         if (exprᴛ1 == "on"u8) {
@@ -233,6 +259,7 @@ field:
             }
             goto continue_field;
         }
+
         foreach (var (iΔ2, _) in options) {
             if (options[iΔ2].Name == key) {
                 options[iΔ2].Specified = true;
@@ -240,18 +267,22 @@ field:
                 goto continue_field;
             }
         }
+
         print((@string)"GODEBUG: unknown cpu feature \""u8, key, (@string)"\"\n"u8);
 continue_field:;
     }
 break_field:;
+
     foreach (var (_, o) in options) {
         if (!o.Specified) {
             continue;
         }
+
         if (o.Enable && !o.Feature.Value) {
             print((@string)"GODEBUG: can not enable \""u8, o.Name, (@string)"\", missing CPU support\n"u8);
             continue;
         }
+
         o.Feature.Value = o.Enable;
     }
 }

@@ -82,6 +82,7 @@ public static void TestReadFormWithNamelessFile(ж<testing.T> Ꮡt) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.RemoveAll(), ref ᒐ);
+
         {
             @string g = (~f).Value[hiddenfileˢ][0];
             @string e = filebContents; if (g != e) {
@@ -105,6 +106,7 @@ public static void TestReadFormWitFileNameMaxMemoryOverflow(ж<testing.T> Ꮡt) 
         }
         var fʗ1 = f;
         defer(() => fʗ1.RemoveAll(), ref ᒐ);
+
         var fd = testFile(Ꮡt, (~f).File[fileaˢ][0], fileaTxtˢ, fileaContents);
         {
             var (_, ok) = fd._<ж<os.File>>(ᐧ); if (ok) {
@@ -135,6 +137,7 @@ public static void TestReadFormMaxMemoryOverflow(ж<testing.T> Ꮡt) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.RemoveAll(), ref ᒐ);
+
         {
             @string g = (~f).Value[textaˢ][0];
             @string e = textaValue; if (g != e) {
@@ -158,6 +161,7 @@ public static void TestReadFormWithTextContentType(ж<testing.T> Ꮡt) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.RemoveAll(), ref ᒐ);
+
         {
             @string g = (~f).Value[textaˢ][0];
             @string e = textaValue; if (g != e) {
@@ -221,13 +225,15 @@ Content-Disposition: form-data; name="version"
 
 171
 -----------------------------8d345eef0d38dc9--
-"""u8;
+"""u8.Raw();
 
 public static void TestReadForm_NoReadAfterEOF(ж<testing.T> Ꮡt) {
-    var maxMemory = ((int64)32 << (int)(20));
+    var maxMemory = (int64)32 << 20;
     @string boundary = @"---------------------------8d345eef0d38dc9"u8;
     @string body = contentDispositionFormˢ;
+
     var mr = NewReader(new multipart_internal_test_package.failOnReadAfterErrorReaderжReader(Ꮡ(new failOnReadAfterErrorReader(t: Ꮡt, r: new multipart_test_package.strings_ReaderжReader(strings.NewReader(body))))), boundary);
+
     var (f, err) = mr.ReadForm(maxMemory);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -265,18 +271,18 @@ public static void TestReadForm_NonFileMaxMemory(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
-    nint n = (10 << (int)(20));
+    nint n = 10 << 20;
     @string largeTextValue = strings.Repeat("1"u8, n);
     @string message = """
 --MyBoundary
 Content-Disposition: form-data; name="largetext"
 
 
-"""u8 + largeTextValue + """
+"""u8.Raw() + largeTextValue + """
 
 --MyBoundary--
 
-"""u8;
+"""u8.Raw();
     @string testBody = strings.ReplaceAll(message, "\n"u8, "\r\n"u8);
     // Try parsing the form with increasing maxMemory values.
     // Changes in how we account for non-file form data may cause the exact point
@@ -319,7 +325,7 @@ public static void TestReadForm_MetadataTooLarge(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in new TestReadForm_MetadataTooLarge_type[]{new(
         name: "large name"u8,
         f: (ж<global::go.mime.multipart_package.Writer> fw) => {
-            @string name = strings.Repeat("a"u8, (10 << (int)(20)));
+            @string name = strings.Repeat("a"u8, 10 << 20);
             var (w, _) = fw.CreateFormField(name);
             w.Write(slice<byte>("value"u8));
         }
@@ -328,7 +334,7 @@ public static void TestReadForm_MetadataTooLarge(ж<testing.T> Ꮡt) {
         f: (ж<global::go.mime.multipart_package.Writer> fw) => {
             var h = new textproto.MIMEHeader(0);
             h.Set(contentDispositionˢ, formDataNameAˢ);
-            h.Set(xFooˢ, strings.Repeat("a"u8, (10 << (int)(20))));
+            h.Set(xFooˢ, strings.Repeat("a"u8, 10 << 20));
             var (w, _) = fw.CreatePart(h);
             w.Write(slice<byte>("value"u8));
         }
@@ -430,7 +436,7 @@ internal static void testReadFormManyFiles(ж<testing.T> Ꮡt, bool distinct) {
             (var got, errΔ3) = io.ReadAll(@file);
             @file.Close();
             if (((sstring)got) != name || errΔ3 != default!) {
-                Ꮡt.Fatalf("read form.File[%q]: %q, %v; want %q, nil"u8, name, ((@string)got), errΔ3, name);
+                Ꮡt.Fatalf("read form.File[%q]: %q, %v; want %q, nil"u8, name, (@string)got, errΔ3, name);
             }
         }
         (var dir, err) = os.Open((~fr).tempDir);
@@ -484,7 +490,6 @@ public static void TestReadFormLimits(ж<testing.T> Ꮡt) {
         new(files: 1000),
         new(files: 1001, wantErr: ErrMessageTooLarge),
         new(files: 1, extraKeysPerFile: 9998), // plus Content-Disposition and Content-Type
-
         new(files: 1, extraKeysPerFile: 10000, wantErr: ErrMessageTooLarge),
         new(godebug: "multipartmaxparts=100"u8, values: 100),
         new(godebug: "multipartmaxparts=100"u8, values: 101, wantErr: ErrMessageTooLarge),
@@ -528,7 +533,7 @@ public static void TestReadFormLimits(ж<testing.T> Ꮡt) {
                     }
                 }
                 var fr = NewReader(new multipart_test_package.bytes_ReaderжReader(bytes.NewReader(buf.Bytes())), fw.Boundary());
-                var (form, err) = fr.ReadForm(((int64)1 << (int)(10)));
+                var (form, err) = fr.ReadForm((int64)1 << 10);
                 if (err == default!) {
                     var formʗ1 = form;
                     defer(() => formʗ1.RemoveAll(), ref ᒐ);
@@ -578,9 +583,9 @@ public static void TestReadFormEndlessHeaderLine(ж<testing.T> Ꮡt) {
             s += testʗ1.prefix;
             var fr = io.MultiReader(
                 new multipart_test_package.strings_ReaderжReader(strings.NewReader(s)),
-                ((neverendingReader)(rune)'X'));
+                (neverendingReader)(rune)'X');
             var r = NewReader(fr, boundaryˢ);
-            var (_, err) = r.ReadForm(((int64)1 << (int)(20)));
+            var (_, err) = r.ReadForm((int64)1 << 20);
             if (!AreEqual(err, ErrMessageTooLarge)) {
                 tΔ1.Fatalf("ReadForm(1 << 20): %v, want ErrMessageTooLarge"u8, err);
             }
@@ -628,7 +633,7 @@ public static void BenchmarkReadForm(ж<testing.B> Ꮡb) {
         Ꮡb.Run(test.name, (ж<testing.B> bΔ1) => {
             foreach (var (_, maxMemory) in new int64[]{
                 0,
-                ((int64)1 << (int)(20))
+                (int64)1 << 20
             }.slice()) {
                 ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
                 var fw = NewWriter(new multipart_test_package.bytes_BufferжWriter(Ꮡbuf));

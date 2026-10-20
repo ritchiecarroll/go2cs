@@ -97,11 +97,11 @@ internal static ж<rawConn> newRawConn(ж<netFD> Ꮡfd) {
 //
 // Network is not intended for use outside the standard library.
 internal static poll.String Network(this ref rawConn c) {
-    return ((poll.String)(~c.fd).net);
+    return (poll.String)(~c.fd).net;
 }
 
 partial struct rawListener {
-    internal partial ref rawConn rawConn { get; }
+    /*embed*/ internal rawConn rawConn;
 }
 
 internal static error Read(this ref rawListener l, Func<uintptr, bool> _) {

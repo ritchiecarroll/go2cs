@@ -20,7 +20,7 @@ partial struct uint128 {
 // mask6 returns a uint128 bitmask with the topmost n bits of a
 // 128-bit number.
 internal static uint128 mask6(nint n) {
-    return new uint128(~((~(uint64)0).Rsh((int64)(n))), (~(uint64)0).Lsh((int64)((128 - n))));
+    return new uint128(~((~(uint64)0).Rsh((int64)(n))), (~(uint64)0).Lsh((int64)(128 - n)));
 }
 
 // isZero reports whether u == 0.
@@ -29,22 +29,22 @@ internal static uint128 mask6(nint n) {
 // 1.15/1.16b1) doesn't do this trick and instead inserts a branch in
 // its eq alg's generated code.
 internal static bool isZero(this uint128 u) {
-    return (uint64)(u.hi | u.lo) == 0;
+    return (u.hi | u.lo) == 0;
 }
 
 // and returns the bitwise AND of u and m (u&m).
 internal static uint128 and(this uint128 u, uint128 m) {
-    return new uint128((uint64)(u.hi & m.hi), (uint64)(u.lo & m.lo));
+    return new uint128(u.hi & m.hi, u.lo & m.lo);
 }
 
 // xor returns the bitwise XOR of u and m (u^m).
 internal static uint128 xor(this uint128 u, uint128 m) {
-    return new uint128((uint64)(u.hi ^ m.hi), (uint64)(u.lo ^ m.lo));
+    return new uint128(u.hi ^ m.hi, u.lo ^ m.lo);
 }
 
 // or returns the bitwise OR of u and m (u|m).
 internal static uint128 or(this uint128 u, uint128 m) {
-    return new uint128((uint64)(u.hi | m.hi), (uint64)(u.lo | m.lo));
+    return new uint128(u.hi | m.hi, u.lo | m.lo);
 }
 
 // not returns the bitwise NOT of u.

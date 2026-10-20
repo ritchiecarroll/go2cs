@@ -113,6 +113,8 @@ function New-NugetgoGeneratedBlock {
         [int]$Matched,
         [int]$Disclosed,
         [switch]$Unvalidated,
+        [int]$BehaviorRids,
+        [int]$SampleRids,
         [switch]$DefaultIcon
     )
     $repo = $RepositoryUrl.TrimEnd('/')
@@ -122,15 +124,21 @@ function New-NugetgoGeneratedBlock {
     $at = $Description.IndexOf($ModulePath, [StringComparison]::Ordinal)
     if ($at -lt 0) { throw "the description does not name the module path $ModulePath, so its blockquote cannot link the module's source" }
     $callout = $Description.Substring(0, $at) + $moduleLink + $Description.Substring($at + $ModulePath.Length)
+    # A module with no Go tests is proven by behavior, one row per RID (COORD ruling 2026-10-12): the badge says there
+    # are no Go tests to count and how many RIDs ran, never a test count.
     $tests = if ($Unvalidated) { New-NugetgoBadge 'Tests' 'Tests' 'not validated' 'orange' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
+             elseif ($BehaviorRids -gt 0) { New-NugetgoBadge 'Tests' 'Tests' "no Go tests, behavior on $BehaviorRids RIDs" 'blue' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
              else { New-NugetgoBadge 'Tests' 'Tests' "$Matched matched / $Disclosed disclosed" 'brightgreen' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
+    # A module with Go tests may also carry hosted sample rows (COORD ruling 2026-10-12): a second badge right after the
+    # Tests badge, never in its place.
+    $sample = if ($SampleRids -gt 0) { New-NugetgoBadge 'Sample behavior' 'Sample behavior' "$SampleRids RIDs" 'blue' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" } else { '' }
     $source = New-NugetgoBadge 'C# Source' 'C# Source' "@$PackageVersion" $script:DotnetPurple 'dotnet' "$repo/tree/$RepositoryTag"
     $module = New-NugetgoBadge 'Go module' 'Go module' "@$goTag" $script:GoBlue 'go' "https://pkg.go.dev/$ModulePath@$goTag"
     $release = New-NugetgoBadge 'go2cs' 'go2cs' "@$ClosureVersion" $script:DotnetPurple 'dotnet' "$script:Go2csRepository/tree/nuget-$ClosureVersion"
 
     $blocks = New-Object System.Collections.Generic.List[string]
     $blocks.Add("> $callout")
-    $blocks.Add("$tests $source\`n$module $release")
+    $blocks.Add("$tests $(if ($sample) { "$sample " })$source\`n$module $release")
     $blocks.Add("Converted from $moduleLink source; licensed under $LicenseSpdx $([char]0x2014) see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
     if ($DefaultIcon) { $blocks.Add($script:ArtworkLine) }
     $blocks -join "`n`n"
@@ -156,6 +164,8 @@ function New-NugetgoPackageReadme {
         [int]$Matched,
         [int]$Disclosed,
         [switch]$Unvalidated,
+        [int]$BehaviorRids,
+        [int]$SampleRids,
         [switch]$DefaultIcon
     )
     $blockArgs = @{} + $PSBoundParameters
@@ -291,6 +301,46 @@ function Resolve-NugetgoPackageIcon {
     & $none 'no icon: the conversion carries no go2cs.png beside its projects, and no -Icon was given'
 }
 
+# The closing section of a THIRD-PARTY conversion repository's root README (owner item, COORD ruling 2026-10-11): the
+# conversion is the go2cs project's, not the module maintainers', and the repository and its NuGet package ID are
+# theirs for the asking. COORD wrote it by hand into uuid-cs (491e0a1b2f) and jwt-cs (dffc7d6aa3); these lines are that
+# text, line breaks included. {0} is the module path, in code; {1} is who maintains it. That is a judgement, so it is
+# an input: uuid-cs names the module path (the default), jwt-cs the org, golang-jwt. The author form (hashset-cs)
+# carries no closing section.
+$script:MaintainersHeading = "## For the module's maintainers"
+$script:MaintainersLines = @(
+    'This conversion is published by the go2cs project, not by the maintainers of `{0}`. If you',
+    'maintain {1} and would like to own it, open an issue here and we will gladly transfer this',
+    'repository, and the NuGet package ID with it, to you.')
+
+function New-NugetgoMaintainersSection {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ModulePath, [string]$Maintainer, [switch]$Author)
+    if ($Author) { throw "an author conversion carries no maintainers section: $ModulePath is published by its author" }
+    if (-not $Maintainer) { $Maintainer = $ModulePath }
+    $script:MaintainersHeading + "`n`n" + ((@($script:MaintainersLines) -join "`n") -f $ModulePath, $Maintainer) + "`n"
+}
+
+# The reasons a conversion repository's root README is refused (COORD ruling 2026-10-11). A third-party README must END
+# with the maintainers section for -ModulePath, with any maintainer named. An author README (-Author) must not carry the
+# heading at all. Line endings are not compared. No reason means accepted.
+function Test-NugetgoConversionReadme([string]$Text, [string]$ModulePath, [switch]$Author) {
+    $text = $Text -replace "`r`n", "`n"
+    $headings = [regex]::Matches($text, '(?m)^' + [regex]::Escape($script:MaintainersHeading) + '\s*$').Count
+    if ($Author) {
+        if ($headings) { return @("an author conversion carries no maintainers section, and this README has '$($script:MaintainersHeading)'") }
+        return @()
+    }
+    $slot = 'NUGETGO-MAINTAINER-SLOT'
+    $lines = @($script:MaintainersLines | ForEach-Object { [regex]::Escape(($_ -f $ModulePath, $slot)) })
+    $lines[1] = $lines[1].Replace($slot, '(?<maintainer>[^\n]+)')
+    $section = '(?:^|\n)' + [regex]::Escape($script:MaintainersHeading) + '\n\n' + ($lines -join '\n') + '\s*$'
+    if ([regex]::IsMatch($text, $section)) { return @() }
+    if (-not $headings) { return @("the README does not end with '$($script:MaintainersHeading)', the offer to the maintainers of $ModulePath") }
+    @("the README's '$($script:MaintainersHeading)' is not the section for $ModulePath as the template words it, or it is not the README's last section")
+}
+
 Export-ModuleMember -Function ConvertTo-NugetgoShieldsText, ConvertTo-NugetgoMarkdownText, Get-NugetgoProofTotals, Test-NugetgoSpdx,
     Get-NugetgoModuleSourceUrl, New-NugetgoGeneratedBlock, New-NugetgoPackageReadme, Test-NugetgoReadmeFence, Merge-NugetgoReadme,
-    Select-NugetgoIconSource, Test-NugetgoReadme, Resolve-NugetgoPackageIcon
+    Select-NugetgoIconSource, Test-NugetgoReadme, Resolve-NugetgoPackageIcon, New-NugetgoMaintainersSection,
+    Test-NugetgoConversionReadme

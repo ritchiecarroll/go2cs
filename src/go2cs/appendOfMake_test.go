@@ -49,6 +49,7 @@ func literal(s []int) []int { return append(s, []int{0, 0}...) }
 //
 // RED at fa18863b94 on the four accepted cases: no operand rendered `makeꓸꓸꓸ`.
 func TestAppendOfMakeEmitsTheLengthOnlyOperandOnlyForGosExtendSliceShape(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

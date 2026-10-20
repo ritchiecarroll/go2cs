@@ -14,6 +14,7 @@ internal static nint process() {
     entries = append(entries, new process_entry(1, 10));
     entries = append(entries, new process_entry(2, 20));
     entries = append(entries, new process_entry(3, 30));
+
     nint total = 0;
     foreach (var (_, e) in entries) {
         total += e.val * e.id;

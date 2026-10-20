@@ -38,8 +38,8 @@ using static global::go.@internal.syscall.windows_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABUegoSCgoKClIQACx6CgoKCgpSCgoKClII=")]
-[assembly: go.GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSWgoKClIKCtA==")]
+[assembly: go.GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABUegpSCgoKClJQACh6CgoKCgpSCgoKClII=")]
+[assembly: go.GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSmgoKClIKCtA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall;

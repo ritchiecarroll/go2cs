@@ -15,7 +15,6 @@ global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,6 +49,12 @@ using static go.text.tabwriter_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -58,8 +63,8 @@ using static go.text.tabwriter_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUpsqAgoCC/pKCgoKCgoIAJoQBAA8CgpSCgoKCgpSUlISEqJKCgoKCgpSUAAgSgoKClIK4goKClKiCloKUgqaCgoKUgqimlKKCgpaEgpSWlIK4gpKCgoK2gpSCuqaCpqau4oKCgoSCAAgUgpaCgoKCgqaUgIK2gsyCuoKCgqiokoKokoIAChiSlKSkAAQQwpSCgti0gqqigoKCgqbSgIKUlICCgqTErMLaAAgCgoLsxIKUlKiCpsoACgKWgoKUloKCgoKkgtyClN6CgoKSlKikgoKC3JSCgpSCgsyCgtqi")]
-[assembly: go.GoPositionMap("text/tabwriter/tabwriter_test.go", "tabwriter_test.cs", "ABMmgKSApIKCgoKCgqaUpoCkgoKClIK4ooKCloKCuIKChIKWgoKCloKCgpSWgoKCgoKCpgAUBgDAAowIgoLsgqaigIKClLT21KKCgoKCgoKi1KKCgoKCgqLkgpSSgoKCgoKClIKUqIKCgpSClAAHEIKUgpKCgpSCgpTcgoKUlIKSgoKUgoKUABQmooKCpoI=", "662-686:1;663-673:1.1;675-685:1.2;695-706:1;717-728:1")]
+[assembly: go.GoPositionMap("text/tabwriter/tabwriter.go", "tabwriter.cs", "AGveAeiAgoKUtsqAgoCC/pKCgoKCgoIAMoQBAA8CgpSCgoKCgpSUlJSUqJKCgoKCgpSUAAgSgoKClIK4goKClKiCloKUgqaCgoKUgrimlKKCgqaUgpSmlIK4goKCgoKmgpSCyqaCpqau4oKCgpSCAAkUgqaCgoKCgqaUgIK2gtyCyoKCgriokoKokoIAChiSlKSkAAMQwpSCgtiUgqqigoKCgqbSgIKUlICCgqTErMLaAAgCgoLsxIKUlLiCpsoACgKmgoKUpoKCgoKUgtyClO6CgoKClLiUgoKCzJSCgpSCgtyCgtqi")]
+[assembly: go.GoPositionMap("text/tabwriter/tabwriter_test.go", "tabwriter_test.cs", "ABMmgKSApIKCgoKCgqaUpoCkgoKClIK4ooKCpoKCuIKClIKmgoKCpoKCgpSmgoKCgoKCpgAJBgDFAowIgoLsgqaigIKClLTm1KKCgoKCgoKi1KKCgoKCgqLkgpSSgoKCgoKClIKUuIKCgpSClAAHEIKUgpKCgpSCgpTcgoKUlIKSgoKUgoKUABQmooKCpoI=", "662-686:1;663-673:1.1;675-685:1.2;695-706:1;717-728:1")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

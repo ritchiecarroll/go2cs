@@ -5,6 +5,7 @@ namespace go;
 
 using binary = encoding.binary_package;
 using fmt = fmt_package;
+using byteorder = @internal.byteorder_package;
 using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using Δmath = math_package;
@@ -123,6 +124,7 @@ internal static void addS_seed(this ref HashSet s, @string x, uintptr seed) {
 internal static void check(this ref HashSet s, ж<testing.T> Ꮡt) {
     var list = s.list;
     slices.Sort<slice<uintptr>, uintptr>(list);
+
     nint collisions = 0;
     for (nint i = 1; i < len(list); i++) {
         if (list[i] == list[i - 1]) {
@@ -130,6 +132,7 @@ internal static void check(this ref HashSet s, ж<testing.T> Ꮡt) {
         }
     }
     nint n = len(list);
+
     const float64 SLOP = 50.0;
     var pairs = (int64)n * (int64)(n - 1) / 2;
     var expected = (float64)pairs / Δmath.Pow(2.0D, (float64)hashSize);
@@ -220,8 +223,10 @@ internal static void twoNonZero(ж<HashSet> Ꮡh, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var b = new slice<byte>(n);
+
     // all zero
     h.addB(b);
+
     // one non-zero byte
     for (nint i = 0; i < n; i++) {
         for (nint x = 1; x < 256; x++) {
@@ -230,6 +235,7 @@ internal static void twoNonZero(ж<HashSet> Ꮡh, nint n) {
             b[i] = 0;
         }
     }
+
     // two non-zero bytes
     for (nint i = 0; i < n; i++) {
         for (nint x = 1; x < 256; x++) {
@@ -313,9 +319,9 @@ internal static void setbits(ж<HashSet> Ꮡh, slice<byte> b, nint i, nint k) {
         return;
     }
     for (nint j = i; j < len(b) * 8; j++) {
-        b[j / 8] |= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(j & 7)))));
+        b[j / 8] |= (byte)((byte)(((byte)1).Lsh((nuint)(j & 7))));
         setbits(Ꮡh, b, j + 1, k - 1);
-        b[j / 8] &= (byte)((byte)(((byte)(~(((byte)1).Lsh((nuint)((nint)(j & 7))))))));
+        b[j / 8] &= (byte)((byte)(((byte)(~(((byte)1).Lsh((nuint)(j & 7)))))));
     }
 }
 
@@ -334,10 +340,10 @@ public static void TestSmhasherPermutation(ж<testing.T> Ꮡt) {
     testenv.ParallelOn64Bit(Ꮡt);
     var h = newHashSet();
     permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7}.slice(), 8);
-    permutation(Ꮡt, h, new uint32[]{0, ((uint32)1 << (int)(29)), ((uint32)2 << (int)(29)), ((uint32)3 << (int)(29)), ((uint32)4 << (int)(29)), ((uint32)5 << (int)(29)), ((uint32)6 << (int)(29)), ((uint32)7 << (int)(29))}.slice(), 8);
+    permutation(Ꮡt, h, new uint32[]{0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29}.slice(), 8);
     permutation(Ꮡt, h, new uint32[]{0, 1}.slice(), 20);
-    permutation(Ꮡt, h, new uint32[]{0, ((uint32)1 << (int)(31))}.slice(), 20);
-    permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7, ((uint32)1 << (int)(29)), ((uint32)2 << (int)(29)), ((uint32)3 << (int)(29)), ((uint32)4 << (int)(29)), ((uint32)5 << (int)(29)), ((uint32)6 << (int)(29)), ((uint32)7 << (int)(29))}.slice(), 6);
+    permutation(Ꮡt, h, new uint32[]{0, (uint32)1 << 31}.slice(), 20);
+    permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29}.slice(), 6);
 }
 
 internal static void permutation(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, slice<uint32> s, nint n) {
@@ -356,10 +362,7 @@ internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
         return;
     }
     foreach (var (_, v) in s) {
-        b[n] = (byte)v;
-        b[n + 1] = (byte)((v >> (int)(8)));
-        b[n + 2] = (byte)((v >> (int)(16)));
-        b[n + 3] = (byte)((v >> (int)(24)));
+        byteorder.LEPutUint32(b.slice(n), v);
         genPerm(Ꮡh, b, s, n + 4);
     }
 }
@@ -390,7 +393,7 @@ internal static nint bits(this ref BytesKey k) {
 }
 
 internal static void flipBit(this ref BytesKey k, nint i) {
-    k.b[(i >> (int)(3))] ^= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(i & 7)))));
+    k.b[(i >> 3)] ^= (byte)((byte)(((byte)1).Lsh((nuint)(i & 7))));
 }
 
 internal static partial uintptr hash(this ref BytesKey k) {
@@ -445,7 +448,7 @@ internal static void clear(this ref Int64Key k) {
 internal static void random(this ref Int64Key k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    k.i = (uint64)r.Uint32() + ((uint64)r.Uint32() << (int)(32));
+    k.i = (uint64)r.Uint32() + ((uint64)r.Uint32() << 32);
 }
 
 internal static nint bits(this ref Int64Key k) {
@@ -489,7 +492,7 @@ internal static nint bits(this ref EfaceKey k) {
 }
 
 internal static void flipBit(this ref EfaceKey k, nint i) {
-    k.i = (uint64)(k.i._<uint64>() ^ ((uint64)1).Lsh((nuint)i));
+    k.i = k.i._<uint64>() ^ ((uint64)1).Lsh((nuint)i);
 }
 
 internal static partial uintptr hash(this ref EfaceKey k) {
@@ -531,7 +534,7 @@ internal static nint bits(this ref IfaceKey k) {
 }
 
 internal static void flipBit(this ref IfaceKey k, nint i) {
-    k.i = (fInter)(k.i._<fInter>() ^ (((fInter)1) << (int)((nuint)i)));
+    k.i = (fInter)(k.i._<fInter>() ^ ((fInter)1) << (int)((nuint)i));
 }
 
 internal static partial uintptr hash(this ref IfaceKey k) {
@@ -570,23 +573,25 @@ public static void TestSmhasherAvalanche(ж<testing.T> Ꮡt) {
 }
 
 internal static void avalancheTest1(ж<testing.T> Ꮡt, Key k) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     UntypedInt REP = 100000;
     var r = rand.New(rand.NewSource(1234));
     nint n = k.bits();
+
     // grid[i][j] is a count of whether flipping
     // input bit i affects output bit j.
     var grid = GoReflect.WithElemDims(new slice<array<nint>>(n, () => new(64)), 64);
+
     for (nint z = 0; z < REP; z++) {
         // pick a random key, hash it
         k.random(r);
         var h = k.hash();
+
         // flip each bit, hash & compare the results
         for (nint i = 0; i < n; i++) {
             k.flipBit(i);
             var d = (uintptr)(h ^ k.hash());
             k.flipBit(i);
+
             // record the effects of that bit flip
             var g = Ꮡ(grid, i);
             for (nint j = 0; j < hashSize; j++) {
@@ -595,6 +600,7 @@ internal static void avalancheTest1(ж<testing.T> Ꮡt, Key k) {
             }
         }
     }
+
     // Each entry in the grid should be about REP/2.
     // More precisely, we did N = k.bits() * hashSize experiments where
     // each is the sum of REP coin flips. We want to find bounds on the
@@ -655,11 +661,12 @@ internal static void windowed(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, Key k) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
     UntypedInt BITS = 16;
+
     for (nint r = 0; r < k.bits(); r++) {
-        for (nint i = 0; i < (nint)((1 << (int)(BITS))); i++) {
+        for (nint i = 0; i < (nint)(1 << (int)(BITS)); i++) {
             k.clear();
             for (nint j = 0; j < BITS; j++) {
-                if ((nint)(i.Rsh((nuint)j) & 1) != 0) {
+                if ((i.Rsh((nuint)j) & 1) != 0) {
                     k.flipBit(rem((j + r), k.bits()));
                 }
             }
@@ -734,18 +741,17 @@ internal static readonly @string testIssue66841ˢ = "TEST_ISSUE_66841"u8;
 internal static readonly @string testRunTestIssue66841ˢ = "-test.run=^TestIssue66841$"u8;
 
 public static void TestIssue66841(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
     if (runtime_internal_test_package.UseAeshash.Value && Δos.Getenv(testIssue66841ˢ) == ""u8) {
         // We want to test the backup hash, so if we're running on a machine
         // that uses aeshash, exec ourselves while turning aes off.
-        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunTestIssue66841ˢ));
+        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunTestIssue66841ˢ));
         cmd.Value.Env = append((~cmd).Env, "GODEBUG=cpu.aes=off"u8, "TEST_ISSUE_66841=1");
         var (@out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Errorf("%s"u8, ((@string)@out));
+            Ꮡt.Errorf("%s"u8, (@string)@out);
         }
+        // Fall through. Might as well run this test when aeshash is on also.
     }
-    // Fall through. Might as well run this test when aeshash is on also.
     var h = newHashSet();
     array<byte> b = new(16);
     binary.LittleEndian.PutUint64(b[..8], 0xe7037ed1a0b428dbUL); // runtime.m2
@@ -771,6 +777,7 @@ internal static void benchmarkHash(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     @string s = strings.Repeat("A"u8, n);
+
     for (nint i = 0; i < b.N; i++) {
         runtime_internal_test_package.StringHash(s, 0);
     }
@@ -800,11 +807,11 @@ public static void BenchmarkHash65536(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fooˢ2 = "foo"u8;
 
+// Make the key type at most 128 bytes. Otherwise,
+// we get an allocation per key.
 internal partial struct TestArrayHash_key /*[8]@string*/;
 
 public static void TestArrayHash(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Make sure that "" in arrays hash correctly. The hash
     // should at least scramble the input seed so that, e.g.,
     // {"","foo"} and {"foo",""} have different hashes.
@@ -817,12 +824,13 @@ public static void TestArrayHash(ж<testing.T> Ꮡt) {
     // header is allocated on the stack.)
     var f = () => {
         var m = new map<TestArrayHash_key, bool>(70);
+
         // fill m with keys that have 4 "foo"s and 4 ""s.
         for (nint i = 0; i < 256; i++) {
             TestArrayHash_key k = default!;
             nint cnt = 0;
             for (nuint j = (nuint)0; j < 8; j++) {
-                if ((nint)(i.Rsh(j) & 1) != 0) {
+                if ((i.Rsh(j) & 1) != 0) {
                     k[j] = fooˢ2;
                     cnt++;
                 }
@@ -850,39 +858,40 @@ public static void TestStructHash(ж<testing.T> Ꮡt) {
     // See the comment in TestArrayHash.
     var f = () => {
         var m = new map<TestStructHash_key, bool>(70);
+
         // fill m with keys that have 4 "foo"s and 4 ""s.
         for (nint i = 0; i < 256; i++) {
             TestStructHash_key k = default!;
             nint cnt = 0;
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 k.a = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 2) != 0) {
+            if ((i & 2) != 0) {
                 k.b = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 4) != 0) {
+            if ((i & 4) != 0) {
                 k.c = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 8) != 0) {
+            if ((i & 8) != 0) {
                 k.d = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 16) != 0) {
+            if ((i & 16) != 0) {
                 k.e = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 32) != 0) {
+            if ((i & 32) != 0) {
                 k.f = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 64) != 0) {
+            if ((i & 64) != 0) {
                 k.g = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 128) != 0) {
+            if ((i & 128) != 0) {
                 k.h = fooˢ2;
                 cnt++;
             }
@@ -938,10 +947,10 @@ public static void TestCollisions(ж<testing.T> Ꮡt) {
                 continue;
             }
             array<byte> a = new(16);
-            var m = new map<uint16, EmptyStruct>((1 << (int)(16)));
-            for (nint n = 0; n < (1 << (int)(16)); n++) {
+            var m = new map<uint16, EmptyStruct>((1 << 16));
+            for (nint n = 0; n < 1 << 16; n++) {
                 a[i] = (byte)n;
-                a[j] = (byte)((n >> (int)(8)));
+                a[j] = (byte)(n >> 8);
                 m[(uint16)runtime_internal_test_package.BytesHash(a[..], 0)] = new EmptyStruct();
             }
             // N balls in N bins, for N=65536

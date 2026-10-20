@@ -121,6 +121,7 @@ public static (ж<CertPool>, error) SystemCertPool() {
             return (sysRoots.Clone(), default!);
         }
     }
+
     return loadSystemRoots();
 }
 
@@ -134,10 +135,14 @@ partial struct potentialParent {
 internal static slice<potentialParent> findPotentialParents(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
+    var matchingKeyIDᴷ = new stackAppend<potentialParent>();
+    var oneKeyIDᴷ = new stackAppend<potentialParent>();
+    var mismatchKeyIDᴷ = new stackAppend<potentialParent>();
 
     if (Ꮡs == nil) {
         return default!;
     }
+
     // consider all candidates where cert.Issuer matches cert.Subject.
     // when picking possible candidates the list is built in the order
     // of match plausibility as to save cycles in buildChains:
@@ -155,19 +160,19 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
         var kidMatch = bytes.Equal((~candidate).SubjectKeyId, cert.AuthorityKeyId);
         switch (ᐧ) {
         case {} when kidMatch: {
-            matchingKeyID = append(matchingKeyID, new potentialParent(candidate, constraint));
+            matchingKeyID = append(matchingKeyIDᴷ, matchingKeyID, new potentialParent(candidate, constraint));
             break;
         }
         case {} when (builtin.len((~candidate).SubjectKeyId) == 0 && builtin.len(cert.AuthorityKeyId) > 0) || (builtin.len((~candidate).SubjectKeyId) > 0 && builtin.len(cert.AuthorityKeyId) == 0): {
-            oneKeyID = append(oneKeyID, new potentialParent(candidate, constraint));
+            oneKeyID = append(oneKeyIDᴷ, oneKeyID, new potentialParent(candidate, constraint));
             break;
         }
         default: {
-            mismatchKeyID = append(mismatchKeyID, new potentialParent(candidate, constraint));
+            mismatchKeyID = append(mismatchKeyIDᴷ, mismatchKeyID, new potentialParent(candidate, constraint));
             break;
         }}
-
     }
+
     nint found = builtin.len(matchingKeyID) + builtin.len(oneKeyID) + builtin.len(mismatchKeyID);
     if (found == 0) {
         return default!;
@@ -196,7 +201,7 @@ public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) {
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), ((@string)cert.RawSubject), () => (Ꮡcert, default!), default!);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default!), default!);
 }
 
 // addCertFunc adds metadata about a certificate to a pool, along with
@@ -210,10 +215,12 @@ internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string 
     if (getCert == default!) {
         throw panic("getCert can't be nil");
     }
+
     // Check that the certificate isn't being added twice.
     if (s.haveSum[rawSum224]) {
         return;
     }
+
     s.haveSum[rawSum224] = true;
     s.lazyCerts = append(s.lazyCerts, new lazyCert(
         rawSubject: slice<byte>(rawSubject),
@@ -224,7 +231,7 @@ internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string 
 }
 
 internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
+    /*embed*/ public sync_package.Once Once;
     internal ж<Certificate> v;
 }
 
@@ -246,6 +253,7 @@ public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pe
         if ((~block).Type != "CERTIFICATE"u8 || builtin.len((~block).Headers) != 0) {
             continue;
         }
+
         ref var certBytes = ref heap<slice<byte>>(out var ᏑcertBytes);
         certBytes = block.Value.Bytes;
         var (cert, err) = ParseCertificate(certBytes);
@@ -253,7 +261,7 @@ public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pe
             continue;
         }
         ref var lazyCert = ref heap(new AppendCertsFromPEM_lazyCert(), out var ᏑlazyCert);
-        s.addCertFunc(sha256.Sum224((~cert).Raw), ((@string)(~cert).RawSubject), () => {
+        s.addCertFunc(sha256.Sum224((~cert).Raw), (@string)(~cert).RawSubject, () => {
             ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
                 // This can't fail, as the same bytes already parsed above.
                 (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
@@ -263,6 +271,7 @@ public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pe
         }, default!);
         ok = true;
     }
+
     return ok;
 }
 
@@ -313,7 +322,7 @@ public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> �
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), ((@string)cert.RawSubject), () => (Ꮡcert, default!), constraint);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default!), constraint);
 }
 
 } // end x509_package

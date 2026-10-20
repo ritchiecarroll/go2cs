@@ -4,6 +4,7 @@
 // Implementation of Server
 namespace go.net.http;
 
+using context = context_package;
 using tls = crypto.tls_package;
 using x509 = crypto.x509_package;
 using flag = flag_package;
@@ -125,6 +126,7 @@ public static ж<Server> NewUnstartedServer(httpꓸHandler handler) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string exampleCom80ˢ = ".example.com:80"u8;
 internal static readonly object httptestServingOnˢ = (@string)"httptest: serving on"u8;
 
 // Start starts a server from NewUnstartedServer.
@@ -134,8 +136,25 @@ public static void Start(this ж<Server> Ꮡs) {
     if (s.URL != ""u8) {
         throw panic("Server already started");
     }
+
     if (s.client == nil) {
-        s.client = Ꮡ(new http.Client(Transport: new http.TransportжRoundTripper(Ꮡ(new http.Transport(nil)))));
+        var tr = Ꮡ(new http.Transport(nil));
+        ref var dialer = ref heap<net.Dialer>(out var Ꮡdialer);
+        dialer = new net.Dialer(nil);
+        // User code may set either of Dial or DialContext, with DialContext taking precedence.
+        // We set DialContext here to preserve any context values that are passed in,
+        // but fall back to Dial if the user has set it.
+        var trʗ1 = tr;
+        tr.Value.DialContext = (context.Context ctx, @string network, @string addr) => {
+            if ((~trʗ1).Dial != default!) {
+                return (~trʗ1).Dial(network, addr);
+            }
+            if (addr == "example.com:80"u8 || strings.HasSuffix(addr, exampleCom80ˢ)) {
+                addr = Ꮡs.Value.Listener.Addr().String();
+            }
+            return Ꮡdialer.DialContext(ctx, network, addr);
+        };
+        s.client = Ꮡ(new http.Client(Transport: new http.TransportжRoundTripper(tr)));
     }
     s.URL = "http://"u8 + s.Listener.Addr().String();
     Ꮡs.wrap();
@@ -145,6 +164,9 @@ public static void Start(this ж<Server> Ꮡs) {
         select();
     }
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string exampleCom443ˢ = ".example.com:443"u8;
 
 // StartTLS starts TLS on a server from NewUnstartedServer.
 public static void StartTLS(this ж<Server> Ꮡs) {
@@ -160,6 +182,7 @@ public static void StartTLS(this ж<Server> Ꮡs) {
     if (err != default!) {
         throw panic(fmt.Sprintf("httptest: NewTLSServer: %v"u8, err));
     }
+
     var existingConfig = s.TLS;
     if (existingConfig != nil){
         s.TLS = existingConfig.Clone();
@@ -182,12 +205,25 @@ public static void StartTLS(this ж<Server> Ꮡs) {
     }
     var certpool = x509.NewCertPool();
     certpool.AddCert(s.certificate);
-    s.client.Value.Transport = new http.TransportжRoundTripper(Ꮡ(new http.Transport(
+    var tr = Ꮡ(new http.Transport(
         TLSClientConfig: Ꮡ(new tls.Config(
             RootCAs: certpool
         )),
         ForceAttemptHTTP2: s.EnableHTTP2
-    )));
+    ));
+    ref var dialer = ref heap<net.Dialer>(out var Ꮡdialer);
+    dialer = new net.Dialer(nil);
+    var trʗ1 = tr;
+    tr.Value.DialContext = (context.Context ctx, @string network, @string addr) => {
+        if ((~trʗ1).Dial != default!) {
+            return (~trʗ1).Dial(network, addr);
+        }
+        if (addr == "example.com:443"u8 || strings.HasSuffix(addr, exampleCom443ˢ)) {
+            addr = Ꮡs.Value.Listener.Addr().String();
+        }
+        return Ꮡdialer.DialContext(ctx, network, addr);
+    };
+    s.client.Value.Transport = new http.TransportжRoundTripper(tr);
     s.Listener = tls.NewListener(s.Listener, s.TLS);
     s.URL = "https://"u8 + s.Listener.Addr().String();
     Ꮡs.wrap();
@@ -247,6 +283,7 @@ public static void Close(this ж<Server> Ꮡs) {
             defer(() => tʗ1.Stop(), ref ᒐ);
         }
         s.mu.Unlock();
+
         // Not part of httptest.Server's correctness, but assume most
         // users of httptest.Server will be using the standard
         // transport, so help them out and close any idle connections for them.
@@ -255,6 +292,7 @@ public static void Close(this ж<Server> Ꮡs) {
                 t.CloseIdleConnections();
             }
         }
+
         // Also close the client idle connections.
         if (s.client != nil) {
             {
@@ -263,6 +301,7 @@ public static void Close(this ж<Server> Ꮡs) {
                 }
             }
         }
+
         Ꮡs.of(Server.Ꮡwg).Wait();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -304,6 +343,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
             goǃ(Ꮡs.closeConnChan, c, ch.WithDirection(GoChanDir.Send));
         }
         s.mu.Unlock();
+
         // Wait for outstanding closes to finish.
         //
         // Out of paranoia for making a late change in Go 1.6, we
@@ -321,6 +361,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out _): {
+                // Too slow. Give up.
                 return;
             }}
         }
@@ -328,8 +369,6 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Too slow. Give up.
 
 // Certificate returns the certificate used by the server, or nil if
 // the server doesn't use TLS.
@@ -341,6 +380,8 @@ public static ж<x509.Certificate> Certificate(this ref Server s) {
 // It is configured to trust the server's TLS test certificate and will
 // close its idle connections on [Server.Close].
 // Use Server.URL as the base URL to send requests to the server.
+// The returned client will also redirect any requests to "example.com"
+// or its subdomains to the server.
 public static ж<http.Client> Client(this ref Server s) {
     return s.client;
 }
@@ -370,6 +411,7 @@ internal static void wrap(this ж<Server> Ꮡs) {
         try {
             Ꮡs.Value.mu.Lock();
             defer(Ꮡs.of(Server.Ꮡmu).Unlock, ref ᒐ);
+
             var exprᴛ1 = cs;
             if (exprᴛ1 == http.StateNew) {
                 {
@@ -380,11 +422,11 @@ internal static void wrap(this ж<Server> Ꮡs) {
                 if (Ꮡs.Value.conns == default!) {
                     Ꮡs.Value.conns = new map<net.Conn, http.ConnState>();
                 }
+                // Add c to the set of tracked conns and increment it to the
+                // waitgroup.
                 Ꮡs.of(Server.Ꮡwg).Add(1);
                 Ꮡs.Value.conns[c] = cs;
                 if (Ꮡs.Value.closed) {
-                    // Add c to the set of tracked conns and increment it to the
-                    // waitgroup.
                     // Probably just a socket-late-binding dial from
                     // the default transport that lost the race (and
                     // thus this connection is now idle and will
@@ -416,10 +458,10 @@ internal static void wrap(this ж<Server> Ꮡs) {
                 }
             }
             else if (exprᴛ1 == http.StateHijacked || exprᴛ1 == http.StateClosed) {
+                // Remove c from the set of tracked conns and decrement it from the
+                // waitgroup, unless it was previously removed.
                 {
                     var (_, ok) = Ꮡs.Value.conns[c, ꟷ]; if (ok) {
-                        // Remove c from the set of tracked conns and decrement it from the
-                        // waitgroup, unless it was previously removed.
                         delete(Ꮡs.Value.conns, c);
                         // Keep Close from returning until the user's ConnState hook
                         // (if any) finishes.
@@ -427,7 +469,6 @@ internal static void wrap(this ж<Server> Ꮡs) {
                     }
                 }
             }
-
             if (oldHookʗ1 != default!) {
                 oldHookʗ1(c, cs);
             }

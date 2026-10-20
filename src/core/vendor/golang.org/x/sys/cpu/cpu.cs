@@ -30,7 +30,6 @@ partial struct CacheLinePad {
 // X86 is padded to avoid false sharing. Further the HasAVX
 // and HasAVX2 are only set if the OS supports XMM and YMM
 // registers in addition to the CPUID feature bit being set.
-
 partial struct X86ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasAES; // AES hardware implementation (AES NI)
@@ -75,6 +74,9 @@ partial struct X86ᴛ1 /*dyn*/ {
     public bool HasSSSE3; // Supplemental streaming SIMD extension 3
     public bool HasSSE41; // Streaming SIMD extension 4 and 4.1
     public bool HasSSE42; // Streaming SIMD extension 4 and 4.2
+    public bool HasAVXIFMA; // Advanced vector extension Integer Fused Multiply Add
+    public bool HasAVXVNNI; // Advanced vector extension Vector Neural Network Instructions
+    public bool HasAVXVNNIInt8; // Advanced vector extension Vector Neural Network Int8 instructions
     internal CacheLinePad __;
 }
 public static ж<X86ᴛ1> ᏑX86 = new StandardBox<X86ᴛ1>(default(X86ᴛ1));
@@ -83,7 +85,6 @@ public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
 // ARM64 contains the supported CPU features of the
 // current ARMv8(aarch64) platform. If the current platform
 // is not arm64 then all feature flags are false.
-
 partial struct ARM64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasFP; // Floating-point instruction set (always available)
@@ -121,7 +122,6 @@ public static ARM64ᴛ1 ARM64;
 // All feature flags are false if:
 //  1. the current platform is not arm, or
 //  2. the current operating system is not Linux.
-
 partial struct ARMᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasSWP; // SWP instruction support
@@ -155,10 +155,22 @@ partial struct ARMᴛ1 /*dyn*/ {
 }
 public static ARMᴛ1 ARM;
 
+// The booleans in Loong64 contain the correspondingly named cpu feature bit.
+// The struct is padded to avoid false sharing.
+partial struct Loong64ᴛ1 /*dyn*/ {
+    internal CacheLinePad _;
+    public bool HasLSX; // support 128-bit vector extension
+    public bool HasLASX; // support 256-bit vector extension
+    public bool HasCRC32; // support CRC instruction
+    public bool HasLAM_BH; // support AM{SWAP/ADD}[_DB].{B/H} instruction
+    public bool HasLAMCAS; // support AMCAS[_DB].{B/H/W/D} instruction
+    internal CacheLinePad __;
+}
+public static Loong64ᴛ1 Loong64;
+
 // MIPS64X contains the supported CPU features of the current mips64/mips64le
 // platforms. If the current platform is not mips64/mips64le or the current
 // operating system is not Linux then all feature flags are false.
-
 partial struct MIPS64Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasMSA; // MIPS SIMD architecture
@@ -173,7 +185,6 @@ public static MIPS64Xᴛ1 MIPS64X;
 // since there are no optional categories. There are some exceptions that also
 // require kernel support to work (DARN, SCV), so there are feature bits for
 // those as well. The struct is padded to avoid false sharing.
-
 partial struct PPC64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasDARN; // Hardware random number generator (requires kernel enablement)
@@ -191,7 +202,6 @@ public static PPC64ᴛ1 PPC64;
 // S390X is padded to avoid false sharing. Further HasVX is only set
 // if the OS supports vector registers in addition to the STFLE
 // feature bit being set.
-
 partial struct S390Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasZARCH; // z/Architecture mode is active [mandatory]
@@ -224,7 +234,6 @@ public static S390Xᴛ1 S390X;
 // this structure. As riscv64 Go programs require at least RV64G, the code that populates
 // this structure cannot run successfully if some of the RV64G extensions are missing.
 // The struct is padded to avoid false sharing.
-
 partial struct RISCV64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasFastMisaligned; // Fast misaligned accesses
@@ -233,6 +242,17 @@ partial struct RISCV64ᴛ1 /*dyn*/ {
     public bool HasZba; // Address generation instructions extension
     public bool HasZbb; // Basic bit-manipulation extension
     public bool HasZbs; // Single-bit instructions extension
+    public bool HasZvbb; // Vector Basic Bit-manipulation
+    public bool HasZvbc; // Vector Carryless Multiplication
+    public bool HasZvkb; // Vector Cryptography Bit-manipulation
+    public bool HasZvkt; // Vector Data-Independent Execution Latency
+    public bool HasZvkg; // Vector GCM/GMAC
+    public bool HasZvkn; // NIST Algorithm Suite (AES/SHA256/SHA512)
+    public bool HasZvknc; // NIST Algorithm Suite with carryless multiply
+    public bool HasZvkng; // NIST Algorithm Suite with GCM
+    public bool HasZvks; // ShangMi Algorithm Suite
+    public bool HasZvksc; // ShangMi Algorithm Suite with carryless multiplication
+    public bool HasZvksg; // ShangMi Algorithm Suite with GCM
     internal CacheLinePad __;
 }
 public static RISCV64ᴛ1 RISCV64;
@@ -282,6 +302,7 @@ field:
         }
         @string key = field.slice(4, i);
         @string value = field.slice(i + 1); // e.g. "SSE2", "on"
+
         bool enable = default!;
         var exprᴛ1 = value;
         if (exprᴛ1 == "on"u8) {
@@ -302,6 +323,7 @@ field:
             }
             goto continue_field;
         }
+
         foreach (var (iΔ2, _) in options) {
             if (options[iΔ2].Name == key) {
                 options[iΔ2].Specified = true;
@@ -309,22 +331,27 @@ field:
                 goto continue_field;
             }
         }
+
         print((@string)"GODEBUG sys/cpu: unknown cpu feature \""u8, key, (@string)"\"\n"u8);
 continue_field:;
     }
 break_field:;
+
     foreach (var (_, o) in options) {
         if (!o.Specified) {
             continue;
         }
+
         if (o.Enable && !o.Feature.Value) {
             print((@string)"GODEBUG sys/cpu: can not enable \""u8, o.Name, (@string)"\", missing CPU support\n"u8);
             continue;
         }
+
         if (!o.Enable && o.Required) {
             print((@string)"GODEBUG sys/cpu: can not disable \""u8, o.Name, (@string)"\", required CPU feature\n"u8);
             continue;
         }
+
         o.Feature.Value = o.Enable;
     }
 }

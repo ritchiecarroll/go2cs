@@ -52,6 +52,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -273,19 +274,19 @@ func runPlatformCensus(options Options, censusDir string, packageFilter []string
 	fmt.Printf("  seed holds %d files, %d of them hand-owned ([module: GoManualConversion])\n\n",
 		len(seed.hashes), len(seed.markedFiles))
 
-	emissions := make([]*platformEmission, 0, len(targets))
-
 	// STRICTLY SEQUENTIAL, one fresh root each — the r41 rule, mechanized.
-	for i, target := range targets {
-		fmt.Printf("=== [%d/%d] census target %s\n", i+1, len(targets), target)
-
+	emissions, err := runTargetsSkippingUnmatched(targets, packageFilter, "census", func(target string) (*platformEmission, error) {
 		emission, err := runCensusTarget(options, seedRoot, censusDir, target, packageFilter, seed)
 
 		if err != nil {
-			return fmt.Errorf("census target %s failed: %w", target, err)
+			return nil, fmt.Errorf("census target %s failed: %w", target, err)
 		}
 
-		emissions = append(emissions, emission)
+		return emission, nil
+	})
+
+	if err != nil {
+		return err
 	}
 
 	manifest := buildPlatformManifest(options, seedRoot, censusDir, emissions)
@@ -298,6 +299,49 @@ func runPlatformCensus(options Options, censusDir string, packageFilter []string
 	printPlatformCensusSummary(manifest, manifestPath)
 
 	return nil
+}
+
+// runTargetsSkippingUnmatched runs runOne for each target in order and collects the emissions.
+//
+// A -stdlib package filter is applied per target, and a package can exist on only some GOOS
+// (`internal/runtime/syscall/linux` is linux-only). A target whose conversion finds none of the
+// filtered packages is therefore SKIPPED with a one-line notice naming the target and the filter, not
+// fatal to the run; the run fails only when the filter matches nothing on EVERY target. A single-target
+// conversion never reaches this function and keeps the plain "no matching packages" error.
+func runTargetsSkippingUnmatched(targets, packageFilter []string, kind string, runOne func(target string) (*platformEmission, error)) ([]*platformEmission, error) {
+	emissions := make([]*platformEmission, 0, len(targets))
+	skipped := make([]string, 0)
+
+	for i, target := range targets {
+		fmt.Printf("=== [%d/%d] %s target %s\n", i+1, len(targets), kind, target)
+
+		emission, err := runOne(target)
+
+		if errors.Is(err, errNoMatchingPackages) {
+			fmt.Printf("  skipping %s: -stdlib filter [%s] matches no package on this target\n\n",
+				target, strings.Join(packageFilter, " "))
+			skipped = append(skipped, target)
+			continue
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		emissions = append(emissions, emission)
+	}
+
+	if len(emissions) == 0 {
+		return nil, fmt.Errorf("%w: -stdlib filter [%s] matches no package on any of the %d targets (%s)",
+			errNoMatchingPackages, strings.Join(packageFilter, " "), len(targets), strings.Join(skipped, ", "))
+	}
+
+	if len(skipped) > 0 {
+		fmt.Printf("  %d of %d targets skipped for an empty filter match: %s\n\n",
+			len(skipped), len(targets), strings.Join(skipped, ", "))
+	}
+
+	return emissions, nil
 }
 
 // runCensusTarget seeds a fresh staging root for one target, converts the standard library into it,
@@ -336,6 +380,12 @@ func runCensusTarget(options Options, seedRoot, censusDir, target string, packag
 	converter := NewStdLibConverter(targetOptions)
 
 	if err := converter.ScanAndConvertFiltered(packageFilter); err != nil {
+		// An empty filter match emits nothing for this target and the caller skips it; the seeded copy
+		// would only sit in a kept staging directory looking like an emission, so it goes.
+		if errors.Is(err, errNoMatchingPackages) {
+			os.RemoveAll(stageRoot)
+		}
+
 		return nil, fmt.Errorf("standard library conversion failed: %w", err)
 	}
 

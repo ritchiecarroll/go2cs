@@ -26,6 +26,7 @@ global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
+global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,6 +61,12 @@ using static go.net.http.httptest_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -68,9 +75,9 @@ using static go.net.http.httptest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/httptest/httptest.go", "httptest.cs", "ABMmkgAINAAXAoKUgoKUloKChIKUtLTEpICClO6EgpaC3g==")]
-[assembly: go.GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC1mkgAKHsKCgoKUAAYU8oKUgpaEgoKCgpSWqqKCgpSqooKClKYACxiCupKCloKCgoKUqqKClAAGJAAPAoKUgpTugoKUgoKUlISAgoKCooKUlIKClIKCyIKClIKUgqYAAhDSgoKUgoKU")]
-[assembly: go.GoPositionMap("net/http/httptest/server.go", "server.cs", "ADt4goKCgpSUgoKAgrYADhyCgriCgoKmqqKCggACEuIACA6ygpSClIKCgoKCurKClIKUgoKWgoKUlIKCgpSUgpSCgpSCgtyCgoKqooKCAAYS4oKCgoKCABImgriCpLqAgriCgIK4otTSgoKCgoKUoqbSgoKCgpQABhCCkoLoxqjCrsKmgoKigqK6woKygoSUgIKkgpiCguq2gIKClMaAgoKUpIK6gKKmxoK0uqCoooKC", "309-312:1;319-372:1", "", "121=newLocalListener/1/1/1")]
+[assembly: go.GoPositionMap("net/http/httptest/httptest.go", "httptest.cs", "ABMmkgAINAAXAoKUgoKUpoKClIKUtLTEpIKUgIKU/pSCpoLu")]
+[assembly: go.GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC5mkgAKHsKCgoKUAAYU8oKUgqaUgoKCgpSmqrSCgpSClKq0goKUgpSqopSkpJSmAAsYgrqSgqaCgoKClKqigpQABiQADwKClIKU7oKClIKClJSUgIKCgpKClJSCgpSCgsiCgpSClIKmAAIQ0oKClIKClA==")]
+[assembly: go.GoPositionMap("net/http/httptest/server.go", "server.cs", "ADx6goKCgpSUgoKAgrYADhyCgriCgoKmqqKCggACEuIACQ6ygqaCgsiSgpSClJSWgoKCgoLqsoKUgpSCgqaCgpSUgoKClJSClIKClIKC3JKSgpSClJSCgoKCqqKCggAGEuKCgoKCggASJoK4gqTKgILIgoCCyKLU0oKCgoKClKKm0oKCgoKUAAcQgpKC+MaoogACEuKmgoKigqK6woKygpSUgIKkgriCgsq2gIKClMaAgoKUpILagIKmtoK0uqCoooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "122=newLocalListener/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

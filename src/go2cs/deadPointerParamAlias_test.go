@@ -8,7 +8,10 @@
 
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 // A pointer parameter's deref VALUE alias is dropped when the converted body never names the value
 // (bodyReferencesIdentAsValue). The scan is a whole-word text match and deliberately errs toward
@@ -93,5 +96,54 @@ func TestBodyReferencesIdentAsValueIgnoresNamedArgumentLabels(t *testing.T) {
 				t.Fatalf("bodyReferencesIdentAsValue(%q, \"parent\") = %v, want %v", test.body, got, test.want)
 			}
 		})
+	}
+}
+
+// A comment never decides emitted code. The alias scan read the body's comments as code, so under
+// -comments a comment that names the parameter (runtime's casGToPreemptScan: "We never notify
+// gp.syncGroup …") added a dereferencing alias the conversion without -comments does not have.
+func TestPointerParamAliasIgnoresComments(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	lines := convertWithComments(t, `package main
+
+import "fmt"
+
+func touch(p *int) bool {
+	ok := p != nil
+	// p.field is never read here
+	return ok /* nor p.other */
+}
+
+func main() {
+	x := 1
+	fmt.Println(touch(&x))
+}
+`)
+
+	for i, line := range lines {
+		if strings.Contains(line, "static bool touch(") && i+1 < len(lines) && strings.Contains(lines[i+1], "ref var p") {
+			t.Errorf("touch's p gets a dereferencing alias that only its comments name: %q", strings.TrimSpace(lines[i+1]))
+		}
+	}
+}
+
+// csharpCodeWithoutComments removes comments and nothing else: a `//` or `/*` inside each literal form
+// the converter emits is code, so a value use after it is still found.
+func TestCSharpCodeWithoutComments(t *testing.T) {
+	for _, test := range []struct{ text, want string }{
+		{"a(p); // p.x\nb();", "a(p);  \nb();"},
+		{"x = /* p */ y;", "x =   y;"},
+		{`s = "http://h/" + p; // q`, `s = "http://h/" + p;  `},
+		{`s = "a\"//" + p;`, `s = "a\"//" + p;`},
+		{`s = @"a\" + p; // q`, `s = @"a\" + p;  `},
+		{`s = @"x""//""y" + p;`, `s = @"x""//""y" + p;`},
+		{`s = $@"{p}//" + q;`, `s = $@"{p}//" + q;`},
+		{"s = \"\"\"\n// raw\n\"\"\" + p;", "s = \"\"\"\n// raw\n\"\"\" + p;"},
+		{`c = '/'; // q`, `c = '/';  `},
+		{`c = '\''; d = p;`, `c = '\''; d = p;`},
+	} {
+		if got := csharpCodeWithoutComments(test.text); got != test.want {
+			t.Errorf("csharpCodeWithoutComments(%q) = %q, want %q", test.text, got, test.want)
+		}
 	}
 }

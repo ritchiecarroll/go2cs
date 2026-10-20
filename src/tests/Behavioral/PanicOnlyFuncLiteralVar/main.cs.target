@@ -16,6 +16,7 @@ internal static (any v, error err) call(Func<(any, error)> fn) {
                 }
             }
         }, ref ᒐ);
+
         (v, err) = fn();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -27,6 +28,7 @@ internal static void Main() {
     var fn = (any, error) () => {
         throw panic("boom");
     };
+
     var (v, err) = call(fn);
     fmt.Println(v, err);
 }

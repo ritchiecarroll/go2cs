@@ -14,12 +14,14 @@ public static error Unlinkat(nint dirfd, @string path, nint flags) {
     if (err != default!) {
         return err;
     }
+
     var ᴋ0 = p;
         var (_, _, errno) = syscall.Syscall(unlinkatTrap, (uintptr)dirfd, (uintptr)ᴋ0, (uintptr)flags);
     System.GC.KeepAlive(ᴋ0);
     if (errno != 0) {
         return errno;
     }
+
     return default!;
 }
 
@@ -28,12 +30,14 @@ public static (nint, error) Openat(nint dirfd, @string path, nint flags, uint32 
     if (err != default!) {
         return (0, err);
     }
+
     var ᴋ1 = p;
         var (fd, _, errno) = syscall.Syscall6(openatTrap, (uintptr)dirfd, (uintptr)ᴋ1, (uintptr)flags, (uintptr)perm, 0, 0);
     System.GC.KeepAlive(ᴋ1);
     if (errno != 0) {
         return (0, errno);
     }
+
     return ((nint)fd, default!);
 }
 
@@ -56,6 +60,7 @@ public static (nint, error) Readlinkat(nint dirfd, @string path, slice<byte> buf
     if (errno != 0) {
         return (0, errno);
     }
+
     return ((nint)n, default!);
 }
 
@@ -64,9 +69,84 @@ public static error Mkdirat(nint dirfd, @string path, uint32 mode) {
     if (err != default!) {
         return err;
     }
+
     var ᴋ4 = p;
         var (_, _, errno) = syscall.Syscall6(mkdiratTrap, (uintptr)dirfd, (uintptr)ᴋ4, (uintptr)mode, 0, 0, 0);
     System.GC.KeepAlive(ᴋ4);
+    if (errno != 0) {
+        return errno;
+    }
+    return default!;
+}
+
+public static error Fchownat(nint dirfd, @string path, nint uid, nint gid, nint flags) {
+    var (p, err) = syscall.BytePtrFromString(path);
+    if (err != default!) {
+        return err;
+    }
+    var ᴋ5 = p;
+        var (_, _, errno) = syscall.Syscall6(fchownatTrap, (uintptr)dirfd, (uintptr)ᴋ5, (uintptr)uid, (uintptr)gid, (uintptr)flags, 0);
+    System.GC.KeepAlive(ᴋ5);
+    if (errno != 0) {
+        return errno;
+    }
+    return default!;
+}
+
+public static error Renameat(nint olddirfd, @string oldpath, nint newdirfd, @string newpath) {
+    var (oldp, err) = syscall.BytePtrFromString(oldpath);
+    if (err != default!) {
+        return err;
+    }
+    (var newp, err) = syscall.BytePtrFromString(newpath);
+    if (err != default!) {
+        return err;
+    }
+    var ᴋ6 = oldp;
+    var ᴋ7 = newp;
+        var (_, _, errno) = syscall.Syscall6(renameatTrap, (uintptr)olddirfd, (uintptr)ᴋ6, (uintptr)newdirfd, (uintptr)ᴋ7, 0, 0);
+    System.GC.KeepAlive(ᴋ6);
+    System.GC.KeepAlive(ᴋ7);
+    if (errno != 0) {
+        return errno;
+    }
+    return default!;
+}
+
+public static error Linkat(nint olddirfd, @string oldpath, nint newdirfd, @string newpath, nint flag) {
+    var (oldp, err) = syscall.BytePtrFromString(oldpath);
+    if (err != default!) {
+        return err;
+    }
+    (var newp, err) = syscall.BytePtrFromString(newpath);
+    if (err != default!) {
+        return err;
+    }
+    var ᴋ8 = oldp;
+    var ᴋ9 = newp;
+        var (_, _, errno) = syscall.Syscall6(linkatTrap, (uintptr)olddirfd, (uintptr)ᴋ8, (uintptr)newdirfd, (uintptr)ᴋ9, (uintptr)flag, 0);
+    System.GC.KeepAlive(ᴋ8);
+    System.GC.KeepAlive(ᴋ9);
+    if (errno != 0) {
+        return errno;
+    }
+    return default!;
+}
+
+public static error Symlinkat(@string oldpath, nint newdirfd, @string newpath) {
+    var (oldp, err) = syscall.BytePtrFromString(oldpath);
+    if (err != default!) {
+        return err;
+    }
+    (var newp, err) = syscall.BytePtrFromString(newpath);
+    if (err != default!) {
+        return err;
+    }
+    var ᴋ10 = oldp;
+    var ᴋ11 = newp;
+        var (_, _, errno) = syscall.Syscall(symlinkatTrap, (uintptr)ᴋ10, (uintptr)newdirfd, (uintptr)ᴋ11);
+    System.GC.KeepAlive(ᴋ10);
+    System.GC.KeepAlive(ᴋ11);
     if (errno != 0) {
         return errno;
     }

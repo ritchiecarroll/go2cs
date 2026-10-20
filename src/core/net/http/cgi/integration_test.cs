@@ -32,6 +32,7 @@ internal static readonly @string textPlainCharsetUtf8ˢ = "text/plain; charset=u
 // as a child process testing the other half of CGI (child.go).
 public static void TestHostingOurselves(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
+
     var h = Ꮡ(new Handler(
         Path: os.Args[0],
         Root: "/test.go"u8
@@ -56,6 +57,7 @@ public static void TestHostingOurselves(ж<testing.T> Ꮡt) {
         ["env-SERVER_SOFTWARE"u8] = "go"u8
     };
     var replay = runCgiTest(Ꮡt, h, getTestGoFooBarABHttp10ˢ, expectedMap);
+
     {
         @string expected = textPlainCharsetUtf8ˢ;
         @string got = replay.Header().Get(contentTypeˢ2); if (got != expected) {
@@ -72,7 +74,7 @@ public static void TestHostingOurselves(ж<testing.T> Ꮡt) {
 
 internal partial struct customWriterRecorder {
     internal io.Writer w;
-    public partial ref ж<net.http.httptest_package.ResponseRecorder> ResponseRecorder { get; }
+    /*embed*/ public ж<net.http.httptest_package.ResponseRecorder> ResponseRecorder;
 }
 
 internal static (nint n, error err) Write(this ref customWriterRecorder r, slice<byte> p) {
@@ -111,6 +113,7 @@ internal static readonly @string httpExampleComTestGoˢ = "http://example.com/te
 // that we kill the child.
 public static void TestKillChildAfterCopyError(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
+
     var h = Ꮡ(new Handler(
         Path: os.Args[0],
         Root: "/test.go"u8
@@ -120,6 +123,7 @@ public static void TestKillChildAfterCopyError(ж<testing.T> Ꮡt) {
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     const nint writeLen = /* 50 << 10 */ 51200;
     var rw = Ꮡ(new customWriterRecorder(new cgi_internal_test_package.limitWriterжWriter(Ꮡ(new limitWriter(new cgi_internal_test_package.bytes_BufferжWriter(Ꮡout), writeLen))), rec));
+
     h.ServeHTTP(new cgi_internal_test_package.customWriterRecorderжResponseWriter(rw), req);
     if (@out.Len() != writeLen || @out.Bytes()[0] != (rune)'a') {
         Ꮡt.Errorf("unexpected output: %q"u8, @out.Bytes());
@@ -133,6 +137,7 @@ internal static readonly @string getTestGoNoBody1Http10ˢ = "GET /test.go?no-bod
 // golang.org/issue/7196
 public static void TestChildOnlyHeaders(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
+
     var h = Ꮡ(new Handler(
         Path: os.Args[0],
         Root: "/test.go"u8
@@ -157,6 +162,7 @@ internal static readonly @string postTestGoNilRequestBodyˢ2 = "POST /test.go?ni
 // golang.org/issue/39190
 public static void TestNilRequestBody(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
+
     var h = Ꮡ(new Handler(
         Path: os.Args[0],
         Root: "/test.go"u8
@@ -176,6 +182,7 @@ internal partial struct TestChildContentType_type /*dyn*/ {
 
 public static void TestChildContentType(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
+
     var h = Ꮡ(new Handler(
         Path: os.Args[0],
         Root: "/test.go"u8

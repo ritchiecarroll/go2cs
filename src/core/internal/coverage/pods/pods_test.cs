@@ -27,8 +27,6 @@ private static readonly @string orphanˢ = "orphan"u8;
 private static readonly @string devNullˢ = "/dev/null"u8;
 
 public static void TestPodCollection(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     //testenv.MustHaveGoBuild(t)
     @string mkdir(@string d, fs.FileMode perm) {
         @string dp = filepath.Join(Ꮡt.TempDir(), d);
@@ -39,6 +37,7 @@ public static void TestPodCollection(ж<testing.T> Ꮡt) {
         }
         return dp;
     }
+
     @string mkfile(@string d, @string fn) {
         @string fp = filepath.Join(d, fn);
         {
@@ -48,6 +47,7 @@ public static void TestPodCollection(ж<testing.T> Ꮡt) {
         }
         return fp;
     }
+
     var mkfileʗ1 = mkfile;
     @string mkmeta(@string dir, @string tag) {
         var h = fnv.New128a();
@@ -56,6 +56,7 @@ public static void TestPodCollection(ж<testing.T> Ꮡt) {
         @string fn = fmt.Sprintf("%s.%x"u8, coverage.MetaFilePref, hash);
         return mkfileʗ1(dir, fn);
     }
+
     var mkfileʗ2 = mkfile;
     @string mkcounter(@string dir, @string tag, nint nt, nint pid) {
         var h = fnv.New128a();
@@ -64,12 +65,14 @@ public static void TestPodCollection(ж<testing.T> Ꮡt) {
         @string fn = fmt.Sprintf(coverage.CounterFileTempl, coverage.CounterFilePref, hash, pid, nt);
         return mkfileʗ2(dir, fn);
     }
+
     @string trim(@string path) {
         @string b = filepath.Base(path);
         @string d = filepath.Dir(path);
         @string db = filepath.Base(d);
         return db + "/"u8 + b;
     }
+
     var trimʗ1 = trim;
     @string podToString(pods.Pod p) {
         @string rv = trimʗ1(p.MetaFile) + " [\n"u8;
@@ -82,24 +85,30 @@ public static void TestPodCollection(ж<testing.T> Ꮡt) {
         }
         return rv + "]"u8;
     }
+
     // Create a couple of directories.
     @string o1 = mkdir("o1"u8, 511);
     @string o2 = mkdir("o2"u8, 511);
+
     // Add some random files (not coverage related)
     mkfile(o1, blahTxtˢ);
     mkfile(o1, somethingExeˢ);
+
     // Add a meta-data file with two counter files to first dir.
     mkmeta(o1, "m1"u8);
     mkcounter(o1, "m1"u8, 1, 42);
     mkcounter(o1, "m1"u8, 2, 41);
     mkcounter(o1, "m1"u8, 2, 40);
+
     // Add a counter file with no associated meta file.
     mkcounter(o1, orphanˢ, 9, 39);
+
     // Add a meta-data file with three counter files to second dir.
     mkmeta(o2, "m2"u8);
     mkcounter(o2, "m2"u8, 1, 38);
     mkcounter(o2, "m2"u8, 2, 37);
     mkcounter(o2, "m2"u8, 3, 36);
+
     // Add a duplicate of the first meta-file and a corresponding
     // counter file to the second dir. This is intended to capture
     // the scenario where we have two different runs of the same
@@ -107,18 +116,22 @@ public static void TestPodCollection(ж<testing.T> Ꮡt) {
     // sent to separate directories.
     mkmeta(o2, "m1"u8);
     mkcounter(o2, "m1"u8, 11, 35);
+
     // Collect pods.
     var (podlist, err) = pods.CollectPods(new @string[]{o1, o2}.slice(), true);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // Verify pods
     if (len(podlist) != 2) {
         Ꮡt.Fatalf("expected 2 pods got %d pods"u8, len(podlist));
     }
+
     foreach (var (k, p) in podlist) {
         Ꮡt.Logf("%d: mf=%s\n"u8, k, p.MetaFile);
     }
+
     var expected = new @string[]{
         """
 o1/covmeta.0880952782ab1be95aa0733055a4d06b [
@@ -127,14 +140,14 @@ o1/covcounters.0880952782ab1be95aa0733055a4d06b.41.2 o:0
 o1/covcounters.0880952782ab1be95aa0733055a4d06b.42.1 o:0
 o2/covcounters.0880952782ab1be95aa0733055a4d06b.35.11 o:1
 ]
-"""u8,
+"""u8.Raw(),
         """
 o2/covmeta.0880952783ab1be95aa0733055a4d1a6 [
 o2/covcounters.0880952783ab1be95aa0733055a4d1a6.36.3 o:1
 o2/covcounters.0880952783ab1be95aa0733055a4d1a6.37.2 o:1
 o2/covcounters.0880952783ab1be95aa0733055a4d1a6.38.1 o:1
 ]
-"""u8
+"""u8.Raw()
     }.slice();
     foreach (var (k, exp) in expected) {
         @string got = podToString(podlist[k]);
@@ -142,6 +155,7 @@ o2/covcounters.0880952783ab1be95aa0733055a4d1a6.38.1 o:1
             Ꮡt.Errorf("pod %d: expected:\n%s\ngot:\n%s"u8, k, exp, got);
         }
     }
+
     // Check handling of bad/unreadable dir.
     if (runtime.GOOS == "linux"u8) {
         @string dbad = devNullˢ;

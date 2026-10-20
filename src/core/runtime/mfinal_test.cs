@@ -44,15 +44,11 @@ public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
     var chʗ1 = ch;
     void finalize(ж<nint> x) {
         if (x.Value != 97531) {
-            Ꮡt.Errorf("finalizer %d, want %d"u8, x.Value, (nint)(97531));
+            Ꮡt.Errorf("finalizer %d, want %d"u8, x.Value, (nint)97531);
         }
         chʗ1.ᐸꟷ(true);
     }
-// Test case for argument spill slot.
-// If the spill slot was not counted for the frame size, it will (incorrectly) choose
-// call32 as the result has (exactly) 32 bytes. When the argument actually spills,
-// it clobbers the caller's frame (likely the return PC).
-// force spill
+
 
 
         var finalizeʗ1 = finalize;
@@ -87,12 +83,17 @@ public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
         new((ж<nint> x) => x.Reinterpret<nint, Tint>().OrTypedNil(), (Tinter v) => {
             finalizeʗ5(v._<ж<Tint>>().Reinterpret<Tint, nint>());
         }),
+        // Test case for argument spill slot.
+        // If the spill slot was not counted for the frame size, it will (incorrectly) choose
+        // call32 as the result has (exactly) 32 bytes. When the argument actually spills,
+        // it clobbers the caller's frame (likely the return PC).
         new((ж<nint> x) => x.OrTypedNil(), array<int64> (any v) => {
-            builtin.print();
+            builtin.print(); // force spill
             finalizeʗ6(v._<ж<nint>>());
             return new int64[]{}.array(4);
         })
     }.slice();
+
     foreach (var (_, vᴛ1) in finalizerTests) {
         ref var tt = ref heap(new TestFinalizerType_type(), out var Ꮡtt);
         tt = vᴛ1;
@@ -199,6 +200,7 @@ partial struct objtype /*[320]byte*/;
 
 internal static (ж<objtype>, ж<objtype>) adjChunks() {
     slice<ж<objtype>> s = default!;
+
     while (ᐧ) {
         var c = @new<objtype>();
         foreach (var (_, d) in s) {
@@ -222,8 +224,10 @@ public static void TestEmptySlice(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingWithAsanTestˢ);
     }
     var (x, y) = adjChunks();
+
     // the pointer inside xs points to y.
-    var xs = (~x).Value[(int)(objsize)..]; // change objsize to objsize-1 and the test passes
+    var xs = x.Value[(int)(objsize)..]; // change objsize to objsize-1 and the test passes
+
     var fin = new channel<bool>(1);
     var finʗ1 = fin;
     Δruntime.SetFinalizer(y.OrTypedNil(), (ж<objtype> z) => {
@@ -240,7 +244,7 @@ internal static (@string, ж<objtype>) adjStringChunk() {
     var b = new slice<byte>(objsize);
     while (ᐧ) {
         ref var s = ref heap<@string>(out var Ꮡs);
-        s = ((@string)b);
+        s = (@string)b;
         var t = @new<objtype>();
         var p = ~Ꮡs.Reinterpret<@string, uintptr>();
         var q = (uintptr)t;
@@ -256,6 +260,7 @@ public static void TestEmptyString(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingWithAsanTestˢ);
     }
     var (x, y) = adjStringChunk();
+
     @string ss = x[(int)(objsize)..]; // change objsize to objsize-1 and the test passes
     var fin = new channel<bool>(1);
     // set finalizer on string contents of y
@@ -299,6 +304,7 @@ public static void TestDeferKeepAlive(ж<testing.T> Ꮡt) {
         if (flagQuick.Value) {
             Ꮡt.Skip(quickˢ);
         }
+
         // See issue 21402.
         Ꮡt.Parallel();
         var x = @new<TestDeferKeepAlive_T>();

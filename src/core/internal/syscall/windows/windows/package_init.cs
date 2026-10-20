@@ -8,6 +8,7 @@ namespace go.@internal.syscall;
 
 partial class windows_package {
     static windows_package() {
+        initᴛSupportUnlimitedTransmitFile();
         initᴛSupportTCPInitialRTONoSYNRetransmissions();
         initᴛinitTCPKeepAlive();
     }

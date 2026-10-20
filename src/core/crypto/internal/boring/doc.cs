@@ -15,6 +15,9 @@ partial class boring_package {
 // BoringCrypto is only available on linux/amd64 and linux/arm64 systems.
 public const bool Enabled = /* available */ false;
 
+// A BigInt is the raw words from a BigInt.
+// This definition allows us to avoid importing math/big.
+// Conversion between BigInt and *big.Int is in crypto/internal/boring/bbig.
 partial struct BigInt /*[]nuint*/;
 
 } // end boring_package

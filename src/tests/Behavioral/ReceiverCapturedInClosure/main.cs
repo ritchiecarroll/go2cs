@@ -74,10 +74,12 @@ internal static void Main() {
     var c = Ꮡ(new counter(n: 0));
     fmt.Println(c.addInClosure(5));
     fmt.Println(c.addViaFieldPtr(3));
+
     var add = c.makeAdder();
     add(10);
     add(2);
     fmt.Println((~c).n);
+
     var w = Ꮡ(new widget(id: 42));
     fmt.Println(w.viaFieldMethodValue());
     fmt.Println(w.viaBareMethodValue());

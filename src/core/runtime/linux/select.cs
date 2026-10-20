@@ -78,13 +78,14 @@ internal static bool selparkcommit(ж<g> Ꮡgp, @unsafe.Pointer _) {
     // channel locks we risk gp getting readied by a channel operation
     // and so gp could continue running before everything before the
     // unlock is visible (even to gp itself).
+
     // This must not access gp's stack (see gopark). In
     // particular, it must not access the *hselect. That's okay,
     // because by the time this is called, gp.waiting has all
     // channels in lock order.
     ж<Δhchan> lastc = default!;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
-        if ((~sg).c != lastc && lastc != nil) {
+        if (sg.of(sudog.Ꮡc).get() != lastc && lastc != nil) {
             // As soon as we unlock the channel, fields in
             // any sudog with that channel may change,
             // including c and waitlink. Since multiple
@@ -93,7 +94,7 @@ internal static bool selparkcommit(ж<g> Ꮡgp, @unsafe.Pointer _) {
             // of a channel.
             unlock(lastc.of(runtime_package.Δhchan.Ꮡlock));
         }
-        lastc = sg.Value.c;
+        lastc = sg.of(sudog.Ꮡc).get();
     }
     if (lastc != nil) {
         unlock(lastc.of(runtime_package.Δhchan.Ꮡlock));
@@ -133,22 +134,25 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     if (debugSelect) {
         print((@string)"select: cas0="u8, Ꮡcas0.OrTypedNil(), (@string)"\n"u8);
     }
+
     // NOTE: In order to maintain a lean stack size, the number of scases
     // is capped at 65536.
     var cas1 = array<scase>.AliasPointer(Ꮡcas0, 65536);
     var order1 = array<uint16>.AliasPointer(Ꮡorder0, 131072);
+
     nint ncases = nsends + nrecvs;
-    var scases = (~cas1).slice(0, ncases, ncases);
-    var pollorder = (~order1).slice(0, ncases, ncases);
-    var lockorder = (~order1).slice(ncases).slice(0, ncases, ncases);
+    var scases = cas1.slice(0, ncases, ncases);
+    var pollorder = order1.slice(0, ncases, ncases);
+    var lockorder = order1.slice(ncases).slice(0, ncases, ncases);
     // NOTE: pollorder/lockorder's underlying array was not zero-initialized by compiler.
+
     // Even when raceenabled is true, there might be select
     // statements in packages compiled without -race (e.g.,
     // ensureSigM in runtime/signal_unix.go).
     slice<uintptr> pcs = default!;
     if (raceenabled && Ꮡpc0 != nil) {
         var pc1 = array<uintptr>.AliasPointer(Ꮡpc0, 65536);
-        pcs = (~pc1).slice(0, ncases, ncases);
+        pcs = pc1.slice(0, ncases, ncases);
     }
     var pcsʗ1 = pcs;
     uintptr casePC(nint casiΔ1) {
@@ -157,10 +161,12 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         }
         return pcsʗ1[casiΔ1];
     }
+
     int64 t0 = default!;
     if (blockprofilerate > 0) {
         t0 = cputicks();
     }
+
     // The compiler rewrites selects that statically have
     // only 0 or 1 cases plus default into simpler constructs.
     // The only way we can end up with such small sel.ncase
@@ -168,26 +174,31 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     // have been nilled out. The general code handles those
     // cases correctly, and they are rare enough not to bother
     // optimizing (and needing to test).
+
     // generate permuted order
     nint norder = 0;
     var allSynctest = true;
     foreach (var (i, _) in scases) {
         var casΔ1 = Ꮡ(scases, i);
+
         // Omit cases without channels from the poll and lock orders.
         if ((~casΔ1).c == nil) {
             casΔ1.Value.elem = default!; // allow GC
             continue;
         }
-        if ((~(~casΔ1).c).synctest){
-            if ((~getg()).syncGroup == nil) {
-                throw panic(((plainError)(@string)selectOnSynctestChannelˢ));
+
+        if ((~(~casΔ1).c).bubble != nil){
+            if ((~getg()).bubble != (~(~casΔ1).c).bubble) {
+                fatal(selectOnSynctestChannelˢ);
             }
         } else {
             allSynctest = false;
         }
+
         if ((~(~casΔ1).c).timer != nil) {
-            (~(~casΔ1).c).timer.maybeRunChan();
+            (~(~casΔ1).c).timer.maybeRunChan((~casΔ1).c);
         }
+
         var j = cheaprandn((uint32)(norder + 1));
         pollorder[norder] = pollorder[j];
         pollorder[j] = (uint16)i;
@@ -195,12 +206,14 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     }
     pollorder = pollorder.slice(0, norder);
     lockorder = lockorder.slice(0, norder);
+
     var waitReason = waitReasonSelect;
-    if ((~gp).syncGroup != nil && allSynctest) {
+    if ((~gp).bubble != nil && allSynctest) {
         // Every channel selected on is in a synctest bubble,
         // so this goroutine will count as idle while selecting.
         waitReason = waitReasonSynctestSelect;
     }
+
     // sort the cases by Hchan address to get the locking order.
     // simple heap sort, to guarantee n log n time and constant stack footprint.
     foreach (var (i, _) in lockorder) {
@@ -236,6 +249,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         }
         lockorder[j] = o;
     }
+
     if (debugSelect) {
         for (nint i = 0; i + 1 < len(lockorder); i++) {
             if (scases[lockorder[i]].c.sortkey() > scases[lockorder[i + 1]].c.sortkey()) {
@@ -244,8 +258,10 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
             }
         }
     }
+
     // lock all the channels involved in the select
     sellock(scases, lockorder);
+
     ж<sudog> sg = default!;
     ж<Δhchan> c = default!;
     ж<scase> k = default!;
@@ -253,6 +269,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     ж<sudog> sgnext = default!;
     @unsafe.Pointer qp = default!;
     ж<ж<sudog>> nextp = default!;
+
     // pass 1 - look for something already waiting
     nint casi = default!;
     ж<scase> cas = default!;
@@ -263,6 +280,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         casi = (nint)casei;
         cas = Ꮡ(scases, casi);
         c = cas.Value.c;
+
         if (casi >= nsends){
             sg = c.of(runtime_package.Δhchan.Ꮡsendq).dequeue();
             if (sg != nil) {
@@ -290,11 +308,13 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
             }
         }
     }
+
     if (!block) {
         selunlock(scases, lockorder);
         casi = -1;
         goto retc;
     }
+
     // pass 2 - enqueue on all chans
     if ((~gp).waiting != nil) {
         @throw(gpWaitingNilˢ);
@@ -309,24 +329,27 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         sgΔ1.Value.isSelect = true;
         // No stack splits between assigning elem and enqueuing
         // sg on gp.waiting where copystack can find it.
-        sgΔ1.Value.elem = cas.Value.elem;
+        sgΔ1.of(sudog.Ꮡelem).set((~cas).elem);
         sgΔ1.Value.releasetime = 0;
         if (t0 != 0) {
             sgΔ1.Value.releasetime = -1;
         }
-        sgΔ1.Value.c = c;
+        sgΔ1.of(sudog.Ꮡc).set(c);
         // Construct waiting list in lock order.
         nextp.ValueSlot = sgΔ1;
         nextp = sgΔ1.of(sudog.Ꮡwaitlink);
+
         if (casi < nsends){
             c.of(runtime_package.Δhchan.Ꮡsendq).enqueue(sgΔ1);
         } else {
             c.of(runtime_package.Δhchan.Ꮡrecvq).enqueue(sgΔ1);
         }
+
         if ((~c).timer != nil) {
             blockTimerChan(ref (c).DerefOrNull());
         }
     }
+
     // wait for someone to wake us up
     gp.Value.param = default!;
     // Signal to anyone trying to shrink our stack that we're about
@@ -336,10 +359,13 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     gp.of(g.ᏑparkingOnChan).Store(true);
     gopark(selparkcommit, nil, waitReason, traceBlockSelect, 1);
     gp.Value.activeStackChans = false;
+
     sellock(scases, lockorder);
+
     gp.of(g.ᏑselectDone).Store(0);
     sg = (ж<sudog>)(uintptr)((~gp).param);
     gp.Value.param = default!;
+
     // pass 3 - dequeue from unsuccessful chans
     // otherwise they stack up on quiet channels
     // record the successful case, if any.
@@ -351,10 +377,11 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     // Clear all elem before unlinking from gp.waiting.
     for (var sg1 = gp.Value.waiting; sg1 != nil; sg1 = sg1.Value.waitlink) {
         sg1.Value.isSelect = false;
-        sg1.Value.elem = default!;
-        sg1.Value.c = default!;
+        sg1.of(sudog.Ꮡelem).set(nil);
+        sg1.of(sudog.Ꮡc).set(nil);
     }
     gp.Value.waiting = default!;
+
     foreach (var (_, casei) in lockorder) {
         k = Ꮡ(scases, casei);
         if ((~(~k).c).timer != nil) {
@@ -381,13 +408,17 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
         releaseSudog(sglist);
         sglist = sgnext;
     }
+
     if (cas == nil) {
         @throw(selectgoBadWakeupˢ);
     }
+
     c = cas.Value.c;
+
     if (debugSelect) {
         print((@string)"wait-return: cas0="u8, Ꮡcas0.OrTypedNil(), (@string)" c="u8, c.OrTypedNil(), (@string)" cas="u8, cas.OrTypedNil(), (@string)" send="u8, casi < nsends, (@string)"\n"u8);
     }
+
     if (casi < nsends){
         if (!caseSuccess) {
             goto sclose;
@@ -395,6 +426,7 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
     } else {
         recvOK = caseSuccess;
     }
+
     if (raceenabled) {
         if (casi < nsends){
             raceReadObjectPC(ref ((~c).elemtype).DerefOrNull(), (~cas).elem, casePC(casi), chansendpc);
@@ -419,8 +451,10 @@ internal static (nint, bool) selectgo(ж<scase> Ꮡcas0, ж<uint16> Ꮡorder0, �
             asanwrite((~cas).elem, (~(~c).elemtype).Size_);
         }
     }
+
     selunlock(scases, lockorder);
     goto retc;
+
 bufrecv:
     if (raceenabled) {
         // can receive from buffer
@@ -448,6 +482,7 @@ bufrecv:
     c.Value.qcount--;
     selunlock(scases, lockorder);
     goto retc;
+
 bufsend:
     if (raceenabled) {
         // can send to buffer
@@ -468,11 +503,12 @@ bufsend:
     c.Value.qcount++;
     selunlock(scases, lockorder);
     goto retc;
+
 recv:
     var lockorderʗ1 = lockorder;
     var scasesʗ1 = scases;
-    recv(c, // can receive from sleeping sender (sg)
- sg, (~cas).elem, () => {
+    recv(c, sg, (~cas).elem, () => {
+        // can receive from sleeping sender (sg)
         selunlock(scasesʗ1, lockorderʗ1);
     }, 2);
     if (debugSelect) {
@@ -480,9 +516,10 @@ recv:
     }
     recvOK = true;
     goto retc;
+
 rclose:
-    selunlock(scases, // read at end of closed channel
- lockorder);
+    selunlock(scases, lockorder);
+    // read at end of closed channel
     recvOK = false;
     if ((~cas).elem != nil) {
         typedmemclr((~c).elemtype, (~cas).elem);
@@ -491,6 +528,7 @@ rclose:
         raceacquire((uintptr)c.raceaddr());
     }
     goto retc;
+
 send:
     if (raceenabled) {
         // can send to a sleeping receiver (sg)
@@ -511,14 +549,16 @@ send:
         print((@string)"syncsend: cas0="u8, Ꮡcas0.OrTypedNil(), (@string)" c="u8, c.OrTypedNil(), (@string)"\n"u8);
     }
     goto retc;
+
 retc:
     if (caseReleaseTime > 0) {
         blockevent(caseReleaseTime - t0, 1);
     }
     return (casi, recvOK);
+
 sclose:
-    selunlock(scases, // send on closed channel
- lockorder);
+    selunlock(scases, lockorder);
+    // send on closed channel
     throw panic(((plainError)(@string)sendOnClosedChannelˢ));
 }
 
@@ -537,6 +577,7 @@ partial struct runtimeSelect {
     internal @unsafe.Pointer val; // ptr to data (SendDir) or ptr to receive buffer (RecvDir)
 }
 
+// These values must match ../reflect/value.go:/SelectDir.
 partial struct selectDir /*num:nint*/;
 
 internal static selectDir _ᴛ1ʗ => /* iota */ 0;
@@ -573,15 +614,18 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
         sel[j] = new scase(c: rc.ch, elem: rc.val);
         orig[j] = i;
     }
+
     // Only a default case.
     if (nsends + nrecvs == 0) {
         return (dflt, false);
     }
+
     // Compact sel and orig if necessary.
     if (nsends + nrecvs < len(cases)) {
         copy(sel.slice(nsends), sel.slice(len(cases) - nrecvs));
         copy(orig.slice(nsends), orig.slice(len(cases) - nrecvs));
     }
+
     var order = new slice<uint16>(2 * (nsends + nrecvs));
     ж<uintptr> pc0 = default!;
     if (raceenabled) {
@@ -591,7 +635,9 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
         }
         pc0 = Ꮡ(pcs, 0);
     }
+
     var (chosen, recvOK) = selectgo(Ꮡ(sel, 0), Ꮡ(order, 0), pc0, nsends, nrecvs, dflt == -1);
+
     // Translate chosen back to caller's ordering.
     if (chosen < 0){
         chosen = dflt;
@@ -628,6 +674,7 @@ internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
         sgp.next = default!;
         return;
     }
+
     // x==y==nil. Either sgp is the only element in the queue,
     // or it has already been removed. Use q.first to disambiguate.
     if (q.first == Ꮡsgp) {

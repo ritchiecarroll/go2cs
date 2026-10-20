@@ -40,8 +40,6 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<main_data, ж<Person>>(Indirect = true)]
-[assembly: GoImplicitConv<main_data_Address, ж<Person_Address>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -52,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("TypeConversion.go", "TypeConversion.cs", "ABoaggAAEISEhIQ=")]
+[assembly: go.GoPositionMap("TypeConversion.go", "TypeConversion.cs", "ABoaggABEJSUlJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;

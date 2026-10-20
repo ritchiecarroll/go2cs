@@ -42,9 +42,9 @@ internal static readonly @string httpsˢ = "https://"u8;
 //
 // An empty method means "GET".
 //
-// The provided body may be nil. If the body is of type *bytes.Reader,
-// *strings.Reader, or *bytes.Buffer, the Request.ContentLength is
-// set.
+// The provided body may be nil. If the body is of type [bytes.Reader],
+// [strings.Reader], [bytes.Buffer], or the value [http.NoBody],
+// the Request.ContentLength is set.
 //
 // NewRequest panics on error for ease of use in testing, where a
 // panic is acceptable.
@@ -60,10 +60,12 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
         throw panic("invalid NewRequest arguments; " + err.Error());
     }
     req = req.WithContext(ctx);
+
     // HTTP/1.0 was used above to avoid needing a Host field. Change it to 1.1 here.
     req.Value.Proto = http11ˢ;
     req.Value.ProtoMinor = 1;
     req.Value.Close = false;
+
     if (body != default!) {
         switch (body.type()) {
         case ж<bytes.Buffer> v: {
@@ -83,6 +85,9 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
             req.Value.ContentLength = -1;
             break;
         }}
+        if (AreEqual(body, http.NoBody)) {
+            req.Value.ContentLength = 0;
+        }
         {
             var (rc, ok) = body._<io.ReadCloser>(ᐧ); if (ok){
                 req.Value.Body = rc;
@@ -91,13 +96,16 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
             }
         }
     }
+
     // 192.0.2.0/24 is "TEST-NET" in RFC 5737 for use solely in
     // documentation and example source code and should not be
     // used publicly.
     req.Value.RemoteAddr = "192.0.2.1:1234"u8;
+
     if ((~req).Host == ""u8) {
         req.Value.Host = exampleComˢ;
     }
+
     if (strings.HasPrefix(target, httpsˢ)) {
         req.Value.TLS = Ꮡ(new tlsꓸConnectionState(
             Version: tls.VersionTLS12,
@@ -105,6 +113,7 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
             ServerName: (~req).Host
         ));
     }
+
     return req;
 }
 

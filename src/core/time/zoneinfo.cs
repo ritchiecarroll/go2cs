@@ -60,7 +60,6 @@ partial struct zoneTrans {
 // alpha and omega are the beginning and end of time for zone
 // transitions.
 internal static UntypedInt alpha => /* -1 << 63 */ -9223372036854775808; // math.MinInt64
-
 internal static UntypedInt omega => /* 1<<63 - 1 */ 9223372036854775807; // math.MaxInt64
 
 // UTC represents Universal Coordinated Time (UTC).
@@ -156,9 +155,10 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     int64 start = default!;
     int64 end = default!;
     bool isDST = default!;
-
     ref var l = ref Ꮡl.DerefOrNull();
+
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
+
     if (len(l.zone) == 0) {
         name = utcˢ;
         offset = 0;
@@ -167,6 +167,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
         isDST = false;
         return (name, offset, start, end, isDST);
     }
+
     {
         var zoneΔ1 = l.cacheZone; if (zoneΔ1 != nil && l.cacheStart <= sec && sec < l.cacheEnd) {
             name = zoneΔ1.Value.name;
@@ -177,6 +178,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
             return (name, offset, start, end, isDST);
         }
     }
+
     if (len(l.tx) == 0 || sec < l.tx[0].when) {
         var zoneΔ2 = Ꮡ(l.zone, l.lookupFirstZone());
         name = zoneΔ2.Value.name;
@@ -190,6 +192,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
         isDST = zoneΔ2.Value.isDST;
         return (name, offset, start, end, isDST);
     }
+
     // Binary search for entry with largest time <= sec.
     // Not using sort.Search to avoid dependencies.
     var tx = l.tx;
@@ -197,7 +200,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     nint lo = 0;
     nint hi = len(tx);
     while (hi - lo > 1) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var lim = tx[m].when;
         if (sec < lim){
             end = lim;
@@ -212,6 +215,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     start = tx[lo].when;
     // end = maintained during the search
     isDST = zone.Value.isDST;
+
     // If we're at the end of the known zone transitions,
     // try the extend string.
     if (lo == len(tx) - 1 && l.extend != ""u8) {
@@ -221,6 +225,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
             }
         }
     }
+
     return (name, offset, start, end, isDST);
 }
 
@@ -244,6 +249,7 @@ internal static nint lookupFirstZone(this ref ΔLocation l) {
     if (!l.firstZoneUsed()) {
         return 0;
     }
+
     // Case 2.
     if (len(l.tx) > 0 && l.zone[l.tx[0].index].isDST) {
         for (nint zi = (nint)l.tx[0].index - 1; zi >= 0; zi--) {
@@ -252,12 +258,14 @@ internal static nint lookupFirstZone(this ref ΔLocation l) {
             }
         }
     }
+
     // Case 3.
     foreach (var (zi, _) in l.zone) {
         if (!l.zone[zi].isDST) {
             return zi;
         }
     }
+
     // Case 4.
     return 0;
 }
@@ -289,6 +297,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
     @string dstName = default!;
     nint stdOffset = default!;
     nint dstOffset = default!;
+
     (stdName, s, ok) = tzsetName(s);
     if (ok) {
         (stdOffset, s, ok) = tzsetOffset(s);
@@ -296,14 +305,17 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
     if (!ok) {
         return ("", 0, 0, 0, false, false);
     }
+
     // The numbers in the tzset string are added to local time to get UTC,
     // but our offsets are added to UTC to get local time,
     // so we negate the number we see here.
     stdOffset = -stdOffset;
+
     if (len(s) == 0 || s[0] == (rune)',') {
         // No daylight savings time.
         return (stdName, stdOffset, lastTxSec, omega, false, true);
     }
+
     (dstName, s, ok) = tzsetName(s);
     if (ok) {
         if (len(s) == 0 || s[0] == (rune)','){
@@ -316,6 +328,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
     if (!ok) {
         return ("", 0, 0, 0, false, false);
     }
+
     if (len(s) == 0) {
         // Default DST rules per tzcode.
         s = m320M1110ˢ;
@@ -325,6 +338,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
         return ("", 0, 0, 0, false, false);
     }
     s = s[1..];
+
     rule startRule = default!;
     rule endRule = default!;
     (startRule, s, ok) = tzsetRule(s);
@@ -336,11 +350,13 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
     if (!ok || len(s) > 0) {
         return ("", 0, 0, 0, false, false);
     }
+
     // Compute start of year in seconds since Unix epoch,
     // and seconds since then to get to sec.
     var (year, yday) = ((absSeconds)(uint64)(sec + unixToInternal + internalToAbsolute)).days().yearYday();
     var ysec = (int64)((yday - 1) * (nint)secondsPerDay) + sec % (int64)secondsPerDay;
     var ystart = sec - ysec;
+
     var startSec = (int64)tzruleTime(year, startRule, stdOffset);
     var endSec = (int64)tzruleTime(year, endRule, dstOffset);
     var (dstIsDST, stdIsDST) = (true, false);
@@ -353,6 +369,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST, 
         (stdOffset, dstOffset) = (dstOffset, stdOffset);
         (stdIsDST, dstIsDST) = (dstIsDST, stdIsDST);
     }
+
     // The start and end values that we return are accurate
     // close to a daylight savings transition, but are otherwise
     // just the start and end of the year. That suffices for
@@ -382,7 +399,6 @@ internal static (@string, @string, bool) tzsetName(@string s) {
                 }
                 return (s.slice(0, i), s.slice(i), true);
             }}
-
         }
         if (len(s) < 3) {
             return ("", "", false);
@@ -415,6 +431,7 @@ internal static (nint offset, @string rest, bool ok) tzsetOffset(@string s) {
         s = s[1..];
         neg = true;
     }
+
     // The tzdata code permits values up to 24 * 7 here,
     // although POSIX does not.
     nint hours = default!;
@@ -429,6 +446,7 @@ internal static (nint offset, @string rest, bool ok) tzsetOffset(@string s) {
         }
         return (off, s, true);
     }
+
     nint mins = default!;
     (mins, s, ok) = tzsetNum(s[1..], 0, 59);
     if (!ok) {
@@ -441,18 +459,21 @@ internal static (nint offset, @string rest, bool ok) tzsetOffset(@string s) {
         }
         return (off, s, true);
     }
+
     nint secs = default!;
     (secs, s, ok) = tzsetNum(s[1..], 0, 59);
     if (!ok) {
         return (0, "", false);
     }
     off += secs;
+
     if (neg) {
         off = -off;
     }
     return (off, s, true);
 }
 
+// ruleKind is the kinds of rules that can be seen in a tzset string.
 partial struct ruleKind /*num:nint*/;
 
 internal static ruleKind ruleJulian => /* iota */ 0;
@@ -514,15 +535,18 @@ internal static (rule, @string, bool) tzsetRule(@string s) {
         r.kind = ruleDOY;
         r.day = day;
     }
+
     if (len(s) == 0 || s[0] != (rune)'/') {
         r.time = 2 * secondsPerHour; // 2am is the default
         return (r, s, true);
     }
+
     (var offset, s, ok) = tzsetOffset(s[1..]);
     if (!ok) {
         return (new rule(nil), "", false);
     }
     r.time = offset;
+
     return (r, s, true);
 }
 
@@ -571,10 +595,10 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
         s = r.day * (nint)secondsPerDay;
     }
     else if (exprᴛ1 == ruleMonthWeekDay) {
+        // Zeller's Congruence.
         nint m1 = (r.mon + 9) % 12 + 1;
         nint yy0 = year;
         if (r.mon <= 2) {
-            // Zeller's Congruence.
             yy0--;
         }
         nint yy1 = yy0 / 100;
@@ -583,19 +607,19 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
         if (dow < 0) {
             dow += 7;
         }
+        // Now dow is the day-of-week of the first day of r.mon.
+        // Get the day-of-month of the first "dow" day.
         nint d = r.day - dow;
         if (d < 0) {
-            // Now dow is the day-of-week of the first day of r.mon.
-            // Get the day-of-month of the first "dow" day.
             d += 7;
         }
         for (nint i = 1; i < r.week; i++) {
-            if (d + 7 >= daysIn(((ΔMonth)r.mon), year)) {
+            if (d + 7 >= daysIn((ΔMonth)r.mon, year)) {
                 break;
             }
             d += 7;
         }
-        d += (nint)daysBefore(((ΔMonth)r.mon));
+        d += daysBefore((ΔMonth)r.mon);
         if (isLeap(year) && r.mon > 2) {
             d++;
         }
@@ -611,9 +635,10 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
 internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @string name, int64 unix) {
     nint offset = default!;
     bool ok = default!;
-
     ref var l = ref Ꮡl.DerefOrNull();
+
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
+
     // First try for a zone with the right name that was actually
     // in effect at the given time. (In Sydney, Australia, both standard
     // and daylight-savings time are abbreviated "EST". Using the
@@ -629,6 +654,7 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
             }
         }
     }
+
     // Otherwise fall back to an ordinary name match.
     foreach (var (i, _) in l.zone) {
         var zone = Ꮡ(l.zone, i);
@@ -636,6 +662,7 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
             return ((~zone).offset, true);
         }
     }
+
     // Otherwise, give up.
     return (offset, ok);
 }

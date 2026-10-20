@@ -42,6 +42,7 @@ using static go.log.slog_package;
 [assembly: GoTypeAlias("Kind", "ΔKind")]
 [assembly: GoTypeAlias("Level", "ΔLevel")]
 [assembly: GoTypeAlias("LogValuer", "ΔLogValuer")]
+[assembly: GoTypeAlias("Source", "ΔSource")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -53,6 +54,7 @@ using static go.log.slog_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<JSONHandler, ΔHandler>(Pointer = true)]
 [assembly: GoImplement<LevelVar, Leveler>(Pointer = true)]
+[assembly: GoImplement<MultiHandler, ΔHandler>(Pointer = true)]
 [assembly: GoImplement<TextHandler, ΔHandler>(Pointer = true)]
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<defaultHandler, ΔHandler>(Pointer = true)]
@@ -66,6 +68,12 @@ using static go.log.slog_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -74,14 +82,15 @@ using static go.log.slog_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/attr.go", "attr.cs", "ABAkkqiSqqKokqiSqJKqoqiSAAIUAAkCpoKYgoKUqqKokqaCqqI=")]
-[assembly: go.GoPositionMap("log/slog/handler.go", "handler.cs", "AFu+AYLcgqwACAKCgoKCkoKC1oKmggBCmAGUAAscwoKClKbmgpSUkoKCgIKCgsiCgoKmppTWgoKCqvKSgoKmgoKUgoKCgoKUuIKCgoKUpoKUgoKCgpSUgoKEgoKC1sSAgoKCgoLsgoLKgoKCgoKClJSCgqaUgqa6koKUAA4egoLGou6CgpSmgoKUgIKCpKaCggAGEqKCgoKUgqaCupKClKSCgryigoKCpqzSgoCCgoKmlLaCpoCCgIKClNiClMqUgpSCgpSCuIKUpoKmgoKUlJSClJSmgoKCgqaClPrCkoDcgJKCuLiCgpSUgrSkooKUuIrCgoKCgsrIgKKAooCigA==", "341-346:1;557-572:1", "", "200=Clip/1/2/3,Clip/2/2/5;414=New/1/1/5")]
-[assembly: go.GoPositionMap("log/slog/json_handler.go", "json_handler.cs", "ABw80oKUAAkYoqqipoIAAkIAIALYsoCmpIKCpqKUpKSqgLLGprSkgoKAgpTGpKakkoKCgIKkgoIABxDSgJKAlIKCgIKCgpSClIKUtLS0toKCxIKCpIKCgpSCgoIACBKCgpSCgoKClJSClAAMGg==", "161-161:1;162-162:2")]
-[assembly: go.GoPositionMap("log/slog/level.go", "level.cs", "ADZ2AAkCgoKUlpSkpKTM2AACENKCgpSqoqqiAAIQ0tbSgoKogoKAgoKCgraUpKSkpKSC6qAACxiSqJKmgqqiqqKqooKAgqSC", "60-65:1;123-127:1")]
-[assembly: go.GoPositionMap("log/slog/logger.go", "logger.cs", "ABxYABgCgoKmgqiQrvLugIKSggAMGIKCgpSChJKCqIKCggAMGoKSqJCq4oKUgoIAAhIACAKClIKCqJKClKiyqJKClKyyAAIaAAwCqLKosqiyqLKosqiyqLKosqiyrNKClIKClIKUgoKClKiygpSCgpSClIKCgpSosqiyqLKosqiyqLKosqiyqLKosg==")]
-[assembly: go.GoPositionMap("log/slog/record.go", "record.cs", "AC900gAHFtKCqLKqwoKCpoKCAAgOwoKCgoKUgriCgpSCpoKCgoIABBDSgoKCgpSCgpSClMySgoKCgIK2AAQW4pSClKa2ABQowoKClIKUgpSu4oKC")]
-[assembly: go.GoPositionMap("log/slog/text_handler.go", "text_handler.cs", "ABs40oKUAAkYoqqipoIAAk4AJgKmopSkpICCgoKmgqSAlIKkpKSssoCCtoKClKaCgpSCgqaClIKUgoKUlA==")]
-[assembly: go.GoPositionMap("log/slog/value.go", "value.cs", "ADp8AA8agoKUAAQQkpSkxKSkpLS+wqiSqJKokqiSqJKCgpQABhyiypSCgpS4qJKq+ICCgoKCpqSokoKCgqYAAiQADwKUpKSkpKSkpKSkpKSkpKSkpKSkpLS+spSAgqSkpKSkpKSkpKSkzrKAgqSCpoKqooCSpKqigJKkqqKAkqSmgqqigJKmpoKqooCSpqaCqqKAkqSokpSClKS0zKKqooCCpKaCrLKCgoKUlKSkpKSkpMqSgsqqopSkpKSkpKSkpKQADioACgKCgoCCuIKClJSCAAkGgoKCgpSCgoKCgoKClIKCgqY=", "502-506:1")]
+[assembly: go.GoPositionMap("log/slog/attr.go", "attr.cs", "ABEkkqiSqqKokqiSqJKqoqiSAAIUAAkCAAIQ8qaCmIKClKqiqJKmgqqi")]
+[assembly: go.GoPositionMap("log/slog/handler.go", "handler.cs", "AGDIAYLcgqwACAKCgoKCkoKC1oKmggBHmAGUAAscooKClKbmgpSUkoKCgIKCgsiCgoKmppTWgoKCqvKSgoKmgoKUgoKCgoKUuIKCgoKUpoKCgpSUgoKCgpSUgoKUgoKC1sSAgoKCgoLsgoLKgoKCgoKClJSCgqaUgqa6koKUAA4egoLGou6CgpSmgoKUgIKCpKaCggAGEqKCgoKUgqaCupKClKSCgryigoKCpqzSgoCCgoKmlLaCpoCCgIKClIKU2IKUypSClIKClIK4gpSmgqaCgoKUlIKUlKiSgpSCgoK0grSkpoKCgoKmgpT6wpKA3ICSgsjIgoKUlIK0pKKClLiKwoKCgoLKyICigKKAooA=", "350-355:1;586-601:1", "", "210=Clip/1/2/3,Clip/2/2/5;427=New/1/1/5")]
+[assembly: go.GoPositionMap("log/slog/json_handler.go", "json_handler.cs", "ABw80oKUAAkYoqqipoIAAj4AHgLYsoCmpIKCpqKUpKTagILGtqSkgoKAgpTGlAAIEpSmgoK4woKUkoKUgqaAgraCggAKENKAkoCkgoKAgoKClIKUgpS0tLTGgoKkgoKkgoKClIKCggAIEoKClIKCgoKUlIKUAAwa", "159-167:1;184-184:1;185-185:2")]
+[assembly: go.GoPositionMap("log/slog/level.go", "level.cs", "ADV2AAkCgoKUgoKUppSkpKS82AACENKCgpSqoqqiAAIQ0tbSgoK4goKAgoKCgraUpKSkpJSC6qAACxiSqJKmgqqiqqKqooKAgqSC", "60-69:1;127-131:1")]
+[assembly: go.GoPositionMap("log/slog/logger.go", "logger.cs", "ABxYABgCgoKmgqiQrvLugIKSggAMGIKCgpSChJKCuIKCggAMGoKSqJCq4oKUgoIAAhIACAKClIKCqJKClKiyqJKClKyyAAIaAAwCqLKosqiyqLKosqiyqLKosqiyrNKClIKUgoKUgpSCgqiygpSClIKClIKUgoKosqiyqLKosqiyqLKosqiyqLKosg==")]
+[assembly: go.GoPositionMap("log/slog/multi_handler.go", "multi_handler.cs", "AAsasoKCAAkUgoKCpqaygoKCgILIpoKCgpSmgoKClA==")]
+[assembly: go.GoPositionMap("log/slog/record.go", "record.cs", "AC900gAHFtKCqLKqwoKCpoKCAAgOwoKCgoKUgriCgpSCpoKCgoIABBDSgoKCgpSCgpSClMySgoKCgIK2AAQW4pSClKa2ABQowoKClIKUgpSosKrSgqaCgg==")]
+[assembly: go.GoPositionMap("log/slog/text_handler.go", "text_handler.cs", "ABo40oKUAAkYoqqipoIAAkoAJAKmopSkpICCgoKmgqSAlIKkpJSssoCCtoKClKaCgpSCgqaClIKUgoKUlA==")]
+[assembly: go.GoPositionMap("log/slog/value.go", "value.cs", "ADt8AA8agoKUAAYQkpSkxKSkpLS+sqiSqJKokqiSqJKCgpQACRyiypSCgpS4qJKq+ICCgoKCpqSokoKCgqYAAiQADwKUpKSkpKSkpKSkpKSkpKSkpKSkpLS+spSAgqSkpKSkpKSkpKSkvrKAgqSCpoKqooCSpKqigJKkqqKAkqSmgqqigJK2poKqooCStqaCqqKAkqSokpSClKS0zKKqooCCpKaCrLKCgoKUlKSkpKSkpLqSgsqqopSkpKSkpKSkpKQADSoACgKCgoCCyIKClJSCAAkGgoKCgpSCgoKCgoKClIKCgqY=", "502-506:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log;
@@ -104,6 +113,7 @@ public static partial class slog_package
     internal partial struct discardHandler {}
     internal partial struct handleState {}
     internal partial struct handlerWriter {}
+    internal partial struct jsonEncoder {}
     internal partial struct kind {}
     internal partial struct timeTime {}
     public partial interface Leveler {}
@@ -114,12 +124,13 @@ public static partial class slog_package
     public partial struct JSONHandler {}
     public partial struct LevelVar {}
     public partial struct Logger {}
+    public partial struct MultiHandler {}
     [GoValueClone("front")] public partial struct Record {}
-    public partial struct Source {}
     public partial struct TextHandler {}
     public partial struct Value {}
     public partial struct ΔKind {}
     public partial struct ΔLevel {}
+    public partial struct ΔSource {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

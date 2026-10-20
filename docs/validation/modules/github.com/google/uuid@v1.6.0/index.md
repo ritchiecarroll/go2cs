@@ -7,14 +7,19 @@ comparison, and written beside the conversion: it is not a row of go2cs's standa
 
 *Validated 2026-10-09*
 
-**54 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**54 matched · 0 disclosed** — Go 1.24.13, `linux/amd64`, converted package
 `src/github.com/google/uuid`.
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 linux/amd64`, with no controlling terminal.
 
 Both sides were built with `-tags purego,math_big_pure_go,safe`.
 
+Input digest `sha256-1d40aaa871f4e430ac651e70e05593f11e9ed13539146378156e81f13af51b28`: the package's Go sources, conversion options, target and converter, as its
+project records them (`GoInputDigest`).
+
 Both runtimes skip 1 of the matched tests identically.
+
+> Upstream test race, cited and not disclosed (COORD ruling, 2026-10-09): TestVersion6 can fail on either runtime with "time reversed". In google/uuid v1.6.0, NewV6 writes the version nibble over bits 12-15 of the timestamp and Time() reads those bits back, so the test fails whenever the timestamp crosses a multiple of 409.6 microseconds between its two NewV6 calls. Native Go fails it about 3 times in 20,000 runs. This proof is a run in which both sides passed.
 
 ## Verdicts
 

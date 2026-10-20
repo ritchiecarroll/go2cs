@@ -48,6 +48,7 @@ public static void TestPrefixValid(ж<testing.T> Ꮡt) {
         if (got != tt.want) {
             Ꮡt.Errorf("(%v).IsValid() = %v want %v"u8, tt.ipp, got, tt.want);
         }
+
         // Test that there is only one invalid Prefix representation per Addr.
         var invalid = PrefixFrom(tt.ipp.Addr(), -1);
         if (!got && tt.ipp != invalid) {
@@ -55,7 +56,6 @@ public static void TestPrefixValid(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct nextPrevTestsᴛ1 /*dyn*/ {
     internal ΔAddr ip;
@@ -78,6 +78,7 @@ internal static void initᴛnextPrevTests() { nextPrevTests = new nextPrevTests�
 
 public static void TestIPNextPrev(ж<testing.T> Ꮡt) {
     doNextPrev(new testing_TжTB(Ꮡt));
+
     foreach (var (_, ip) in new ΔAddr[]{
         mustIP("0.0.0.0"u8),
         mustIP("::"u8)
@@ -87,10 +88,12 @@ public static void TestIPNextPrev(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("IP(%v).Prev = %v; want zero"u8, ip, got);
         }
     }
+
     array<byte> allFF = new(16);
     foreach (var (i, _) in allFF) {
         allFF[i] = 0xff;
     }
+
     foreach (var (_, ip) in new ΔAddr[]{
         mustIP("255.255.255.255"u8),
         AddrFrom16(allFF)
@@ -174,20 +177,20 @@ public static void TestPrefixContains(ж<testing.T> Ꮡt) {
         new(mustPrefix("::1/127"u8), mustIP("::1"u8), true),
         new(mustPrefix("::1/127"u8), mustIP("::2"u8), false),
         new(mustPrefix("::1/128"u8), mustIP("::1"u8), true),
-        new(mustPrefix("::1/127"u8), mustIP("::2"u8), false), // Zones ignored: https://go.dev/issue/51899
-
+        new(mustPrefix("::1/127"u8), mustIP("::2"u8), false),
+        // Zones ignored: https://go.dev/issue/51899
         new(new ΔPrefix(mustIP("1.2.3.4"u8).WithZone("a"u8), 32), mustIP("1.2.3.4"u8), true),
-        new(new ΔPrefix(mustIP("::1"u8).WithZone("a"u8), 128), mustIP("::1"u8), true), // invalid IP
-
+        new(new ΔPrefix(mustIP("::1"u8).WithZone("a"u8), 128), mustIP("::1"u8), true),
+        // invalid IP
         new(mustPrefix("::1/0"u8), new ΔAddr(nil), false),
-        new(mustPrefix("1.2.3.4/0"u8), new ΔAddr(nil), false), // invalid Prefix
-
+        new(mustPrefix("1.2.3.4/0"u8), new ΔAddr(nil), false),
+        // invalid Prefix
         new(PrefixFrom(mustIP("::1"u8), 129), mustIP("::1"u8), false),
         new(PrefixFrom(mustIP("1.2.3.4"u8), 33), mustIP("1.2.3.4"u8), false),
         new(PrefixFrom(new ΔAddr(nil), 0), mustIP("1.2.3.4"u8), false),
         new(PrefixFrom(new ΔAddr(nil), 32), mustIP("1.2.3.4"u8), false),
-        new(PrefixFrom(new ΔAddr(nil), 128), mustIP("::1"u8), false), // wrong IP family
-
+        new(PrefixFrom(new ΔAddr(nil), 128), mustIP("::1"u8), false),
+        // wrong IP family
         new(mustPrefix("::1/0"u8), mustIP("1.2.3.4"u8), false),
         new(mustPrefix("1.2.3.4/0"u8), mustIP("::1"u8), false)
     }.slice();
@@ -271,9 +274,8 @@ public static void TestParseAddrPort(ж<testing.T> Ꮡt) {
         new(@in: "[::1]:1234"u8, want: new AddrPort(mustIP("::1"u8), 1234)),
         new(@in: "[1.2.3.4]:1234"u8, wantErr: true),
         new(@in: "fe80::1:1234"u8, wantErr: true),
-        new(@in: ":0"u8, wantErr: true)
+        new(@in: ":0"u8, wantErr: true) // if we need to parse this form, there should be a separate function that explicitly allows it
     }.slice();
-    // if we need to parse this form, there should be a separate function that explicitly allows it
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestParseAddrPort_tests(), out var Ꮡtest);
         test = vᴛ1;
@@ -294,6 +296,7 @@ public static void TestParseAddrPort(ж<testing.T> Ꮡt) {
                 tΔ1.Errorf("String = %q; want %q"u8, got.String(), testʗ1.@in);
             }
         });
+
         var testʗ2 = test;
         Ꮡt.Run(test.@in + "/AppendTo"u8, (ж<testing.T> tΔ2) => {
             var (got, err) = ParseAddrPort(testʗ2.@in);
@@ -301,6 +304,7 @@ public static void TestParseAddrPort(ж<testing.T> Ꮡt) {
                 testAppendToMarshal(tΔ2, got);
             }
         });
+
         // TextMarshal and TextUnmarshal mostly behave like
         // ParseAddrPort and String. Divergent behavior are handled in
         // TestAddrPortMarshalUnmarshal.
@@ -323,7 +327,7 @@ public static void TestParseAddrPort(ж<testing.T> Ꮡt) {
                 tΔ3.Fatal(err);
             }
             if (((sstring)gotb) != jsin) {
-                tΔ3.Errorf("Marshal = %q; want %q"u8, ((@string)gotb), jsin);
+                tΔ3.Errorf("Marshal = %q; want %q"u8, (@string)gotb, jsin);
             }
         });
     }
@@ -338,6 +342,7 @@ public static void TestAddrPortMarshalUnmarshal(ж<testing.T> Ꮡt) {
     var tests = new TestAddrPortMarshalUnmarshal_tests[]{
         new(""u8, new AddrPort(nil))
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestAddrPortMarshalUnmarshal_tests(), out var Ꮡtest);
         test = vᴛ1;
@@ -345,20 +350,24 @@ public static void TestAddrPortMarshalUnmarshal(ж<testing.T> Ꮡt) {
         var testʗ1 = test;
         Ꮡt.Run(test.@in, (ж<testing.T> tΔ1) => {
             @string orig = @""""u8 + testʗ1.@in + @""""u8;
+
             ref var ipp = ref heap(new AddrPort(), out var Ꮡipp);
             {
                 var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡipp); if (errΔ1 != default!) {
                     tΔ1.Fatalf("failed to unmarshal: %v"u8, errΔ1);
                 }
             }
+
             var (ippb, err) = json.Marshal(ipp);
             if (err != default!) {
                 tΔ1.Fatalf("failed to marshal: %v"u8, err);
             }
-            @string back = ((@string)ippb);
+
+            @string back = (@string)ippb;
             if (orig != back) {
                 tΔ1.Errorf("Marshal = %q; want %q"u8, back, orig);
             }
+
             testAppendToMarshal(tΔ1, ipp);
         });
     }

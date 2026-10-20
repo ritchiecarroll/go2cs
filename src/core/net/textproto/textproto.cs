@@ -5,6 +5,9 @@
 // Package textproto implements generic support for text-based request/response
 // protocols in the style of HTTP, NNTP, and SMTP.
 //
+// This package enforces the HTTP/1.1 character set defined by
+// RFC 9112 for header keys and values.
+//
 // The package provides:
 //
 // [Error], which represents a numeric error response from
@@ -39,13 +42,15 @@ partial struct ΔError {
 }
 
 public static @string Error(this ref ΔError e) {
-    return fmt.Sprintf("%03d %s"u8, e.Code, e.Msg);
+    return fmt.Sprintf("%03d %q"u8, e.Code, e.Msg);
 }
 
+// A ProtocolError describes a protocol violation such
+// as an invalid response or a hung-up connection.
 partial struct ProtocolError /*@string*/;
 
 public static @string Error(this ProtocolError p) {
-    return ((@string)p);
+    return (@string)p;
 }
 
 // A Conn represents a textual network protocol connection.
@@ -54,9 +59,9 @@ public static @string Error(this ProtocolError p) {
 // These embedded types carry methods with them;
 // see the documentation of those types for details.
 partial struct Conn {
-    public partial ref Reader Reader { get; }
-    public partial ref Writer Writer { get; }
-    public partial ref Pipeline Pipeline { get; }
+    /*embed*/ public Reader Reader;
+    /*embed*/ public Writer Writer;
+    /*embed*/ public Pipeline Pipeline;
     internal io.ReadWriteCloser conn;
 }
 

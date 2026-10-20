@@ -1,6 +1,7 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using bytes = bytes_package;
@@ -26,7 +27,7 @@ internal static slice<byte> appendHTMLEscape(slice<byte> dst, slice<byte> src) {
     foreach (var (i, c) in src) {
         if (c == (rune)'<' || c == (rune)'>' || c == (rune)'&') {
             dst = appendꓸꓸꓸ(dst, src.slice(start, i));
-            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> (int)(4))], hex[(byte)(c & 0xF)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> 4)], hex[(byte)(c & 0xF)]);
             start = i + 1;
         }
         // Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).
@@ -63,7 +64,7 @@ internal static (slice<byte>, error) appendCompact(slice<byte> dst, slice<byte> 
                 if (start < i) {
                     dst = appendꓸꓸꓸ(dst, src.slice(start, i));
                 }
-                dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> (int)(4))], hex[(byte)(c & 0xF)]);
+                dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> 4)], hex[(byte)(c & 0xF)]);
                 start = i + 1;
             }
             // Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).
@@ -157,18 +158,20 @@ internal static (slice<byte>, error) appendIndent(slice<byte> dst, slice<byte> s
                 depth++;
                 dst = appendNewline(dst, prefix, indent, depth);
             }
+
             // Emit semantically uninteresting bytes
             // (in particular, punctuation in strings) unmodified.
             if (v == scanContinue) {
                 dst = append(dst, c);
                 continue;
             }
+
             // Add spacing around real punctuation.
             switch (c) {
             case (rune)'{' or (rune)'[': {
+                // delay indent so that empty object and array are formatted as {} and [].
                 needIndent = true;
-                dst = append(dst, // delay indent so that empty object and array are formatted as {} and [].
- c);
+                dst = append(dst, c);
                 break;
             }
             case (rune)',': {
@@ -195,7 +198,6 @@ internal static (slice<byte>, error) appendIndent(slice<byte> dst, slice<byte> s
                 dst = append(dst, c);
                 break;
             }}
-
         }
         if (scan.eof() == scanError) {
             return (dst.slice(0, origLen), (~scan).err);

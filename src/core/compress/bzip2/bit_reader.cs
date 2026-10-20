@@ -48,6 +48,7 @@ internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) {
         br.n |= (uint64)((uint64)b);
         br.bits += 8;
     }
+
     // br.n looks like this (assuming that br.bits = 14 and bits = 6):
     // Bit: 111111
     //      5432109876543210
@@ -62,7 +63,7 @@ internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) {
     //
     // The next line right shifts the desired bits into the
     // least-significant places and masks off anything above.
-    n = (uint64)((br.n.Rsh((br.bits - bits))) & ((((uint64)1).Lsh(bits)) - 1));
+    n = (br.n.Rsh((br.bits - bits))) & ((((uint64)1).Lsh(bits)) - 1);
     br.bits -= bits;
     return n;
 }

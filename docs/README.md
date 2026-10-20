@@ -17,13 +17,13 @@ machinery stays out of the converted files. Behavior comes first: a goroutine ru
 and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
 package, on Windows and Linux, and the same validation is in progress on macOS.
 
-## 📰 NEWS — Reflection works under Native AOT, and macOS validation passes three quarters
+## 📰 NEWS — Converted code keeps Go's comments and spacing, and HTTPS works on macOS
 
-**October 12, 2026, NuGet 1.24.13.6.** Go's `reflect` now works under Native AOT without generating code at
-run time, at a measured cost in size; two calls that reached an unimplemented stub answer as Go does;
-and validation of the standard library on macOS passes three quarters of the
-[roster](ValidatedTestPackages.md).
-[Full announcement](NEWS.md#october-12-2026--reflection-works-under-native-aot-and-macos-validation-passes-three-quarters).
+**October 14, 2026, NuGet 1.24.13.7.** With `-comments`, converted C# now carries Go's doc
+comments and in-function comments where Go put them, and blank lines follow Go's in every conversion. An `https` request from a converted program works on macOS.
+Two defects in fully trimmed Native AOT publishes are fixed, including the one that printed named
+types raw. This is the last release built from Go 1.24; the next moves to Go 1.26.
+[Full announcement](NEWS.md#october-14-2026--converted-code-keeps-gos-comments-and-spacing-and-https-works-on-macos).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
@@ -59,16 +59,16 @@ public static bool IsAdult(this Person p) {
 ## Real standard-library conversions, side by side
 
 The goal — *reads like Go* — is easiest to judge on real code. Below are converted standard-library files
-next to their original **Go 1.24.13** source, in order of increasing richness:
+next to their original **Go 1.26.10** source, in order of increasing richness:
 
-| Package | Go 1.24.13 source | Converted C# | What it shows |
+| Package | Go 1.26.10 source | Converted C# | What it shows |
 |:--|:--|:--|:--|
-| `errors` | [errors.go](https://github.com/golang/go/blob/go1.24.13/src/errors/errors.go) | [errors.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/errors/errors.cs) | Error values and an unexported type satisfying the `error` interface. |
-| `cmp` | [cmp.go](https://github.com/golang/go/blob/go1.24.13/src/cmp/cmp.go) | [cmp.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/cmp/cmp.cs) | Generics with an ordered-type constraint. |
-| `unicode/utf8` | [utf8.go](https://github.com/golang/go/blob/go1.24.13/src/unicode/utf8/utf8.go) | [utf8.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8.cs) | Constants keeping Go's hex/binary literal formatting; arrays and structs. |
-| `sort` | [search.go](https://github.com/golang/go/blob/go1.24.13/src/sort/search.go) | [search.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/sort/search.cs) | Binary search driven by a `func(int) bool` closure. |
-| `strings` | [reader.go](https://github.com/golang/go/blob/go1.24.13/src/strings/reader.go) | [reader.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/strings/reader.cs) | A struct with receiver methods, tuple returns, and interface implementation. |
-| `container/list` | [list.go](https://github.com/golang/go/blob/go1.24.13/src/container/list/list.go) | [list.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/container/list/list.cs) | A doubly-linked list — pointers and receiver methods. |
+| `errors` | [errors.go](https://github.com/golang/go/blob/go1.26.10/src/errors/errors.go) | [errors.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/errors/errors.cs) | Error values and an unexported type satisfying the `error` interface. |
+| `cmp` | [cmp.go](https://github.com/golang/go/blob/go1.26.10/src/cmp/cmp.go) | [cmp.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/cmp/cmp.cs) | Generics with an ordered-type constraint. |
+| `unicode/utf8` | [utf8.go](https://github.com/golang/go/blob/go1.26.10/src/unicode/utf8/utf8.go) | [utf8.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8.cs) | Constants keeping Go's hex/binary literal formatting; arrays and structs. |
+| `sort` | [search.go](https://github.com/golang/go/blob/go1.26.10/src/sort/search.go) | [search.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/sort/search.cs) | Binary search driven by a `func(int) bool` closure. |
+| `strings` | [reader.go](https://github.com/golang/go/blob/go1.26.10/src/strings/reader.go) | [reader.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/strings/reader.cs) | A struct with receiver methods, tuple returns, and interface implementation. |
+| `container/list` | [list.go](https://github.com/golang/go/blob/go1.26.10/src/container/list/list.go) | [list.cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/container/list/list.cs) | A doubly-linked list — pointers and receiver methods. |
 
 Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core).
 
@@ -90,7 +90,7 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 ## Requirements
 
 - **[.NET 10.0 SDK](https://dotnet.microsoft.com/download)**, to build and run the converted C#.
-- **[Go 1.24.13](https://go.dev/dl/)**, exactly that release. The converter is a Go program and uses
+- **[Go 1.26.10](https://go.dev/dl/)**, exactly that release. The converter is a Go program and uses
   the Go toolchain to load and type-check the source it converts, so that source must already build
   with `go build`. Go 1.24 is out of upstream support, so the converted standard library carries none
   of the Go security fixes issued since; the [Roadmap](Roadmap.md#go-releases) says which Go releases
@@ -98,6 +98,9 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 - **Windows or Linux on x64**, where the converted standard library is validated against Go's own
   tests. macOS, on Intel and Apple silicon, has packages and is being validated package by package
   ([Platforms](Roadmap.md#platforms)).
+  A minimal Linux, such as a container or a fresh server, also needs `git` and `curl`, and .NET's
+  native dependencies ICU and OpenSSL
+  ([Microsoft's list](https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual#dependencies)).
 
 ## Installing the converter
 
@@ -121,7 +124,7 @@ go2cs [options] <input_dir> [output_dir]
 
 ```shell
 go2cs -recurse=nuget module_dir out      # a module and its dependencies; the standard library comes from NuGet
-go2cs -recurse=module module_dir out     # only the module's own packages
+go2cs -recurse=module,nuget module_dir out   # only the module's own packages
 go2cs package_dir out                    # one package
 go2cs example.go out/example.cs          # one file
 go2cs -platforms linux/amd64 -recurse=nuget module_dir out-linux    # convert for another operating system
@@ -135,14 +138,15 @@ beside the Go input.
 | Option | What it does |
 |:--|:--|
 | `-recurse=nuget` | Convert a module and its third-party dependencies, in dependency order. The standard library, the runtime and the source generators are NuGet package references, so nothing is staged on your machine. Start here. |
-| `-recurse=module` | Convert only the module's own packages. Use it when a dependency does not convert yet. |
-| `-tests` | Also convert the Go test suite. With `-test-action all`, build it, run it, and compare its results with `go test`. |
+| `-recurse=module,nuget` | Convert only the module's own packages, and reference the dependencies without converting them. Use it when a dependency does not convert yet; the solution builds once the dependencies are in place. |
+| `-tests` | Also convert the Go test suite. With `-test-action all`, build it, run it, and compare its results with `go test`. For a module it takes plain `-recurse`, not `=nuget` or `=module`. |
 | `-platforms <os/arch>` | The platform to convert for. It defaults to the machine you are on. |
 | `-tags <list>` | The build tags to select files with, as in `go build -tags`. |
 | `-comments` | Carry the Go comments into the C#. |
 | `-version` | Print the release this converter belongs to, and convert nothing. |
 
-[Command-line options](CommandLine.md) lists every option and more examples.
+[Command-line options](CommandLine.md) lists every option and more examples, and
+[diagnostic codes](DiagnosticCodes.md) lists every `GO2CS` code the converter and the C# build can report.
 
 ## Converting a real-world module
 
@@ -183,7 +187,8 @@ NuGet packages. Wondering which Go modules make good conversions? The
 ## Status
 
 The whole Go standard library converts and compiles as .NET assemblies, and every package that can be
-validated passes its own Go test suite in C#, on Windows and Linux.
+validated matches its own Go test suite in C#, verdict for verdict, with every difference disclosed, on
+Windows and Linux.
 [Validated Test Packages](ValidatedTestPackages.md) carries the current counts, package by package, and
 the [Roadmap](Roadmap.md) says where the project stands and what comes next.
 

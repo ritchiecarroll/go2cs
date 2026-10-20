@@ -13,9 +13,22 @@ using go.crypto;
 
 partial class chacha20poly1305_package {
 
+// KeySize is the size of the key used by this AEAD, in bytes.
 public static UntypedInt KeySize => 32;
+
+// NonceSize is the size of the nonce used with the standard variant of this
+// AEAD, in bytes.
+//
+// Note that this is too short to be safely generated at random if the same
+// key is reused more than 2³² times.
 public static UntypedInt ΔNonceSize => 12;
+
+// NonceSizeX is the size of the nonce used with the XChaCha20-Poly1305
+// variant of this AEAD, in bytes.
 public static UntypedInt NonceSizeX => 24;
+
+// Overhead is the size of the Poly1305 authentication tag, and the
+// difference between a ciphertext length and its plaintext.
 public static UntypedInt ΔOverhead => 16;
 
 partial struct chacha20poly1305 {
@@ -23,10 +36,14 @@ partial struct chacha20poly1305 {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string chacha20poly1305UseOfˢ = "chacha20poly1305: use of ChaCha20Poly1305 is not allowed in FIPS 140-only mode"u8;
 private static readonly @string chacha20poly1305BadKeyˢ = "chacha20poly1305: bad key length"u8;
 
 // New returns a ChaCha20-Poly1305 AEAD that uses the given 256-bit key.
 public static (cipher.AEAD, error) New(slice<byte> key) {
+    if (fips140Enforced()) {
+        return (default!, errors.New(chacha20poly1305UseOfˢ));
+    }
     if (len(key) != KeySize) {
         return (default!, errors.New(chacha20poly1305BadKeyˢ));
     }
@@ -47,9 +64,11 @@ internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, s
     if (len(nonce) != ΔNonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
+
     if ((uint64)len(plaintext) > (uint64)((274877906944L) - 64)) {
         throw panic("chacha20poly1305: plaintext too large");
     }
+
     return c.seal(dst, nonce, plaintext, additionalData);
 }
 
@@ -65,6 +84,7 @@ internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byt
     if ((uint64)len(ciphertext) > (uint64)((274877906944L) - 48)) {
         throw panic("chacha20poly1305: ciphertext too large");
     }
+
     return c.open(dst, nonce, ciphertext, additionalData);
 }
 

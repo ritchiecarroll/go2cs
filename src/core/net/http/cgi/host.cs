@@ -59,7 +59,6 @@ internal static slice<@string> osDefaultInheritEnv = ((Func<slice<@string>>)(() 
     if (exprᴛ1 == "windows"u8) {
         return new @string[]{"SystemRoot"u8, "COMSPEC"u8, "PATHEXT"u8, "WINDIR"u8}.slice();
     }
-
     return default!;
 }))();
 
@@ -141,8 +140,10 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             rw.Write(slice<byte>("Chunked request bodies are not supported by CGI."u8));
             return;
         }
+
         @string root = strings.TrimRight(h.Root, "/"u8);
         @string pathInfo = strings.TrimPrefix((~req.URL).Path, root);
+
         @string port = "80"u8;
         if (req.TLS != nil) {
             port = "443"u8;
@@ -152,6 +153,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 port = matches[1];
             }
         }
+
         var env = new @string[]{
             "SERVER_SOFTWARE=go"u8,
             "SERVER_PROTOCOL=HTTP/1.1"u8,
@@ -165,6 +167,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             "SCRIPT_FILENAME="u8 + h.Path,
             "SERVER_PORT="u8 + port
         }.slice();
+
         {
             var (remoteIP, remotePort, errΔ1) = net.SplitHostPort(req.RemoteAddr); if (errΔ1 == default!){
                 env = append(env, "REMOTE_ADDR="u8 + remoteIP, "REMOTE_HOST=" + remoteIP, "REMOTE_PORT=" + remotePort);
@@ -173,6 +176,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 env = append(env, "REMOTE_ADDR="u8 + req.RemoteAddr, "REMOTE_HOST=" + req.RemoteAddr);
             }
         }
+
         {
             var (hostDomain, _, errΔ2) = net.SplitHostPort(req.Host); if (errΔ2 == default!){
                 env = append(env, "SERVER_NAME="u8 + hostDomain);
@@ -180,9 +184,11 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 env = append(env, "SERVER_NAME="u8 + req.Host);
             }
         }
+
         if (req.TLS != nil) {
             env = append(env, "HTTPS=on"u8);
         }
+
         foreach (var (kᴛ1, v) in req.Header) {
             var k = kᴛ1;
 
@@ -197,6 +203,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             }
             env = append(env, "HTTP_"u8 + k + "="u8 + strings.Join(v, joinStr));
         }
+
         if (req.ContentLength > 0) {
             env = append(env, fmt.Sprintf("CONTENT_LENGTH=%d"u8, req.ContentLength));
         }
@@ -205,11 +212,13 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 env = append(env, "CONTENT_TYPE="u8 + ctype);
             }
         }
+
         @string envPath = os.Getenv(pathˢ);
         if (envPath == ""u8) {
             envPath = binUsrBinUsrUcbUsrBsdUsrˢ;
         }
         env = append(env, "PATH="u8 + envPath);
+
         foreach (var (_, e) in h.InheritEnv) {
             {
                 @string v = os.Getenv(e); if (v != ""u8) {
@@ -217,6 +226,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 }
             }
         }
+
         foreach (var (_, e) in osDefaultInheritEnv) {
             {
                 @string v = os.Getenv(e); if (v != ""u8) {
@@ -224,10 +234,13 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 }
             }
         }
+
         if (h.Env != default!) {
             env = appendꓸꓸꓸ(env, h.Env);
         }
+
         env = removeLeadingDuplicates(env);
+
         ref var cwd = ref heap(new @string(), out var Ꮡcwd);
         ref var path = ref heap(new @string(), out var Ꮡpath);
         if (h.Dir != ""u8){
@@ -239,10 +252,12 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         if (cwd == ""u8) {
             cwd = "."u8;
         }
+
         void internalError(error errΔ3) {
             rw.WriteHeader(http.StatusInternalServerError);
             Ꮡh.Value.printf("CGI error: %v"u8, errΔ3);
         }
+
         var cmd = Ꮡ(new exec.Cmd(
             Path: path,
             Args: appendꓸꓸꓸ(new @string[]{h.Path}.slice(), h.Args),
@@ -258,6 +273,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             internalError(err);
             return;
         }
+
         err = cmd.Start();
         if (err != default!) {
             internalError(err);
@@ -272,6 +288,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         defer(() => cmdʗ1.Wait(), ref ᒐ);
         var stdoutReadʗ1 = stdoutRead;
         defer(() => stdoutReadʗ1.Close(), ref ᒐ);
+
         var linebody = bufio.NewReaderSize(stdoutRead, 1024);
         var headers = new httpꓸHeader(0);
         nint statusCode = 0;
@@ -297,7 +314,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 break;
             }
             headerLines++;
-            var (header, val, ok) = strings.Cut(((@string)line), ":"u8);
+            var (header, val, ok) = strings.Cut((@string)line, ":"u8);
             if (!ok) {
                 h.printf("cgi: bogus header line: %s"u8, line);
                 continue;
@@ -326,13 +343,13 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 headers.Add(header, val);
                 break;
             }}
-
         }
         if (headerLines == 0 || !sawBlankLine) {
             rw.WriteHeader(http.StatusInternalServerError);
             h.printf("cgi: no headers"u8);
             return;
         }
+
         {
             @string loc = headers.Get(locationˢ); if (loc != ""u8) {
                 if (strings.HasPrefix(loc, "/"u8) && h.PathLocationHandler != default!) {
@@ -344,14 +361,17 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 }
             }
         }
+
         if (statusCode == 0 && headers.Get(contentTypeˢ2) == ""u8) {
             rw.WriteHeader(http.StatusInternalServerError);
             h.printf("cgi: missing required Content-Type in headers"u8);
             return;
         }
+
         if (statusCode == 0) {
             statusCode = http.StatusOK;
         }
+
         // Copy headers to rw's headers, after we've decided not to
         // go into handleInternalRedirect, which won't want its rw
         // headers to have been touched.
@@ -360,7 +380,9 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 rw.Header().Add(k, v);
             }
         }
+
         rw.WriteHeader(statusCode);
+
         (_, err) = io.Copy(new http_ResponseWriterᴠWriter(rw), new bufio_ReaderжReader(linebody));
         if (err != default!) {
             h.printf("cgi: copy error: %v"u8, err);
@@ -428,12 +450,11 @@ internal static rune upperCaseAndUnderscore(rune r) {
         return (rune)'_';
     }
     case {} when r is (rune)'=': {
+        // Maybe not part of the CGI 'spec' but would mess up
+        // the environment in any case, as Go represents the
+        // environment as a slice of "key=value" strings.
         return (rune)'_';
     }}
-
-    // Maybe not part of the CGI 'spec' but would mess up
-    // the environment in any case, as Go represents the
-    // environment as a slice of "key=value" strings.
     // TODO: other transformations in spec or practice?
     return r;
 }

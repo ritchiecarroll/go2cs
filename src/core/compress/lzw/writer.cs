@@ -17,10 +17,16 @@ partial interface writer :
     error Flush();
 }
 
+// A code is a 12 bit value, stored as a uint32 when encoding to avoid
+// type conversions when shifting bits.
 internal static UntypedInt maxCode => /* 1<<12 - 1 */ 4095;
 internal static UntypedInt invalidCode => /* 1<<32 - 1 */ 4294967295;
+// There are 1<<12 possible codes, which is an upper bound on the number of
+// valid hash table entries at any given point in time. tableSize is 4x that.
 internal static UntypedInt tableSize => /* 4 * 1 << 12 */ 16384;
 internal static UntypedInt tableMask => /* tableSize - 1 */ 16383;
+// A hash table entry is a uint32. Zero is an invalid entry since the
+// lower 12 bits of a valid entry must be a non-literal code.
 internal static UntypedInt invalidEntry => 0;
 
 // Writer is an LZW compressor. It writes the compressed form of the data
@@ -75,7 +81,7 @@ internal static error writeMSB(this ref Writer w, uint32 c) {
     w.nBits += w.width;
     while (w.nBits >= 8) {
         {
-            var err = w.w.WriteByte((uint8)((w.bits >> (int)(24)))); if (err != default!) {
+            var err = w.w.WriteByte((uint8)(w.bits >> 24)); if (err != default!) {
                 return err;
             }
         }
@@ -109,7 +115,7 @@ internal static error incHi(this ж<Writer> Ꮡw) {
         }
         w.width = w.litWidth + 1;
         w.hi = clear + 1;
-        w.overflow = (clear << (int)(1));
+        w.overflow = clear << 1;
         foreach (var (i, _) in w.table) {
             w.table[i] = invalidEntry;
         }
@@ -124,8 +130,8 @@ internal static readonly @string lzwInputByteTooLargeForˢ = "lzw: input byte to
 // Write writes a compressed representation of p to w's underlying writer.
 public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
     nint n = default!;
-
     ref var w = ref Ꮡw.DerefOrNull();
+
     if (w.err != default!) {
         return (0, w.err);
     }
@@ -165,16 +171,16 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
 loop:
     foreach (var (_, x) in p) {
         var literal = (uint32)x;
-        var key = (uint32)((code << (int)(8)) | literal);
+        var key = code << 8 | literal;
         // If there is a hash table hit for this key then we continue the loop
         // and do not emit a code yet.
-        var hash = (uint32)(((uint32)((key >> (int)(12)) ^ key)) & (uint32)tableMask);
+        var hash = (key >> 12 ^ key) & (uint32)tableMask;
         for (var (h, t) = (hash, w.table[hash]); t != invalidEntry; ) {
-            if (key == (t >> (int)(12))) {
-                code = (uint32)(t & (uint32)maxCode);
+            if (key == t >> 12) {
+                code = t & (uint32)maxCode;
                 goto continue_loop;
             }
-            h = (uint32)((h + 1) & (uint32)tableMask);
+            h = (h + 1) & (uint32)tableMask;
             t = w.table[h];
         }
         // Otherwise, write the current code, and literal becomes the start of
@@ -199,10 +205,10 @@ loop:
         // Otherwise, insert key -> e.hi into the map that e.table represents.
         while (ᐧ) {
             if (w.table[hash] == invalidEntry) {
-                w.table[hash] = (uint32)(((key << (int)(12))) | w.hi);
+                w.table[hash] = (key << 12) | w.hi;
                 break;
             }
-            hash = (uint32)((hash + 1) & (uint32)tableMask);
+            hash = (hash + 1) & (uint32)tableMask;
         }
 continue_loop:;
     }
@@ -304,7 +310,6 @@ internal static void init(this ref Writer w, io.Writer dst, Order order, nint li
         w.err = errors.New(lzwUnknownOrderˢ);
         return;
     }
-
     if (litWidth < 2 || 8 < litWidth) {
         w.err = fmt.Errorf("lzw: litWidth %d out of range"u8, litWidth);
         return;

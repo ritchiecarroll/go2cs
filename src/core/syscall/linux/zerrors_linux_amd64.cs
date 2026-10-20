@@ -1177,340 +1177,174 @@ public static UntypedInt WUNTRACED => 0x2;
 
 // Errors
 public static Errno E2BIG => /* Errno(0x7) */ 7;
-
 public static Errno EACCES => /* Errno(0xd) */ 13;
-
 public static Errno EADDRINUSE => /* Errno(0x62) */ 98;
-
 public static Errno EADDRNOTAVAIL => /* Errno(0x63) */ 99;
-
 public static Errno EADV => /* Errno(0x44) */ 68;
-
 public static Errno EAFNOSUPPORT => /* Errno(0x61) */ 97;
-
 public static Errno EAGAIN => /* Errno(0xb) */ 11;
-
 public static Errno EALREADY => /* Errno(0x72) */ 114;
-
 public static Errno EBADE => /* Errno(0x34) */ 52;
-
 public static Errno EBADF => /* Errno(0x9) */ 9;
-
 public static Errno EBADFD => /* Errno(0x4d) */ 77;
-
 public static Errno EBADMSG => /* Errno(0x4a) */ 74;
-
 public static Errno EBADR => /* Errno(0x35) */ 53;
-
 public static Errno EBADRQC => /* Errno(0x38) */ 56;
-
 public static Errno EBADSLT => /* Errno(0x39) */ 57;
-
 public static Errno EBFONT => /* Errno(0x3b) */ 59;
-
 public static Errno EBUSY => /* Errno(0x10) */ 16;
-
 public static Errno ECANCELED => /* Errno(0x7d) */ 125;
-
 public static Errno ECHILD => /* Errno(0xa) */ 10;
-
 public static Errno ECHRNG => /* Errno(0x2c) */ 44;
-
 public static Errno ECOMM => /* Errno(0x46) */ 70;
-
 public static Errno ECONNABORTED => /* Errno(0x67) */ 103;
-
 public static Errno ECONNREFUSED => /* Errno(0x6f) */ 111;
-
 public static Errno ECONNRESET => /* Errno(0x68) */ 104;
-
 public static Errno EDEADLK => /* Errno(0x23) */ 35;
-
 public static Errno EDEADLOCK => /* Errno(0x23) */ 35;
-
 public static Errno EDESTADDRREQ => /* Errno(0x59) */ 89;
-
 public static Errno EDOM => /* Errno(0x21) */ 33;
-
 public static Errno EDOTDOT => /* Errno(0x49) */ 73;
-
 public static Errno EDQUOT => /* Errno(0x7a) */ 122;
-
 public static Errno EEXIST => /* Errno(0x11) */ 17;
-
 public static Errno EFAULT => /* Errno(0xe) */ 14;
-
 public static Errno EFBIG => /* Errno(0x1b) */ 27;
-
 public static Errno EHOSTDOWN => /* Errno(0x70) */ 112;
-
 public static Errno EHOSTUNREACH => /* Errno(0x71) */ 113;
-
 public static Errno EIDRM => /* Errno(0x2b) */ 43;
-
 public static Errno EILSEQ => /* Errno(0x54) */ 84;
-
 public static Errno EINPROGRESS => /* Errno(0x73) */ 115;
-
 public static Errno EINTR => /* Errno(0x4) */ 4;
-
 public static Errno EINVAL => /* Errno(0x16) */ 22;
-
 public static Errno EIO => /* Errno(0x5) */ 5;
-
 public static Errno EISCONN => /* Errno(0x6a) */ 106;
-
 public static Errno EISDIR => /* Errno(0x15) */ 21;
-
 public static Errno EISNAM => /* Errno(0x78) */ 120;
-
 public static Errno EKEYEXPIRED => /* Errno(0x7f) */ 127;
-
 public static Errno EKEYREJECTED => /* Errno(0x81) */ 129;
-
 public static Errno EKEYREVOKED => /* Errno(0x80) */ 128;
-
 public static Errno EL2HLT => /* Errno(0x33) */ 51;
-
 public static Errno EL2NSYNC => /* Errno(0x2d) */ 45;
-
 public static Errno EL3HLT => /* Errno(0x2e) */ 46;
-
 public static Errno EL3RST => /* Errno(0x2f) */ 47;
-
 public static Errno ELIBACC => /* Errno(0x4f) */ 79;
-
 public static Errno ELIBBAD => /* Errno(0x50) */ 80;
-
 public static Errno ELIBEXEC => /* Errno(0x53) */ 83;
-
 public static Errno ELIBMAX => /* Errno(0x52) */ 82;
-
 public static Errno ELIBSCN => /* Errno(0x51) */ 81;
-
 public static Errno ELNRNG => /* Errno(0x30) */ 48;
-
 public static Errno ELOOP => /* Errno(0x28) */ 40;
-
 public static Errno EMEDIUMTYPE => /* Errno(0x7c) */ 124;
-
 public static Errno EMFILE => /* Errno(0x18) */ 24;
-
 public static Errno EMLINK => /* Errno(0x1f) */ 31;
-
 public static Errno EMSGSIZE => /* Errno(0x5a) */ 90;
-
 public static Errno EMULTIHOP => /* Errno(0x48) */ 72;
-
 public static Errno ENAMETOOLONG => /* Errno(0x24) */ 36;
-
 public static Errno ENAVAIL => /* Errno(0x77) */ 119;
-
 public static Errno ENETDOWN => /* Errno(0x64) */ 100;
-
 public static Errno ENETRESET => /* Errno(0x66) */ 102;
-
 public static Errno ENETUNREACH => /* Errno(0x65) */ 101;
-
 public static Errno ENFILE => /* Errno(0x17) */ 23;
-
 public static Errno ENOANO => /* Errno(0x37) */ 55;
-
 public static Errno ENOBUFS => /* Errno(0x69) */ 105;
-
 public static Errno ENOCSI => /* Errno(0x32) */ 50;
-
 public static Errno ENODATA => /* Errno(0x3d) */ 61;
-
 public static Errno ENODEV => /* Errno(0x13) */ 19;
-
 public static Errno ENOENT => /* Errno(0x2) */ 2;
-
 public static Errno ENOEXEC => /* Errno(0x8) */ 8;
-
 public static Errno ENOKEY => /* Errno(0x7e) */ 126;
-
 public static Errno ENOLCK => /* Errno(0x25) */ 37;
-
 public static Errno ENOLINK => /* Errno(0x43) */ 67;
-
 public static Errno ENOMEDIUM => /* Errno(0x7b) */ 123;
-
 public static Errno ENOMEM => /* Errno(0xc) */ 12;
-
 public static Errno ENOMSG => /* Errno(0x2a) */ 42;
-
 public static Errno ENONET => /* Errno(0x40) */ 64;
-
 public static Errno ENOPKG => /* Errno(0x41) */ 65;
-
 public static Errno ENOPROTOOPT => /* Errno(0x5c) */ 92;
-
 public static Errno ENOSPC => /* Errno(0x1c) */ 28;
-
 public static Errno ENOSR => /* Errno(0x3f) */ 63;
-
 public static Errno ENOSTR => /* Errno(0x3c) */ 60;
-
 public static Errno ENOSYS => /* Errno(0x26) */ 38;
-
 public static Errno ENOTBLK => /* Errno(0xf) */ 15;
-
 public static Errno ENOTCONN => /* Errno(0x6b) */ 107;
-
 public static Errno ENOTDIR => /* Errno(0x14) */ 20;
-
 public static Errno ENOTEMPTY => /* Errno(0x27) */ 39;
-
 public static Errno ENOTNAM => /* Errno(0x76) */ 118;
-
 public static Errno ENOTRECOVERABLE => /* Errno(0x83) */ 131;
-
 public static Errno ENOTSOCK => /* Errno(0x58) */ 88;
-
 public static Errno ENOTSUP => /* Errno(0x5f) */ 95;
-
 public static Errno ENOTTY => /* Errno(0x19) */ 25;
-
 public static Errno ENOTUNIQ => /* Errno(0x4c) */ 76;
-
 public static Errno ENXIO => /* Errno(0x6) */ 6;
-
 public static Errno EOPNOTSUPP => /* Errno(0x5f) */ 95;
-
 public static Errno EOVERFLOW => /* Errno(0x4b) */ 75;
-
 public static Errno EOWNERDEAD => /* Errno(0x82) */ 130;
-
 public static Errno EPERM => /* Errno(0x1) */ 1;
-
 public static Errno EPFNOSUPPORT => /* Errno(0x60) */ 96;
-
 public static Errno EPIPE => /* Errno(0x20) */ 32;
-
 public static Errno EPROTO => /* Errno(0x47) */ 71;
-
 public static Errno EPROTONOSUPPORT => /* Errno(0x5d) */ 93;
-
 public static Errno EPROTOTYPE => /* Errno(0x5b) */ 91;
-
 public static Errno ERANGE => /* Errno(0x22) */ 34;
-
 public static Errno EREMCHG => /* Errno(0x4e) */ 78;
-
 public static Errno EREMOTE => /* Errno(0x42) */ 66;
-
 public static Errno EREMOTEIO => /* Errno(0x79) */ 121;
-
 public static Errno ERESTART => /* Errno(0x55) */ 85;
-
 public static Errno ERFKILL => /* Errno(0x84) */ 132;
-
 public static Errno EROFS => /* Errno(0x1e) */ 30;
-
 public static Errno ESHUTDOWN => /* Errno(0x6c) */ 108;
-
 public static Errno ESOCKTNOSUPPORT => /* Errno(0x5e) */ 94;
-
 public static Errno ESPIPE => /* Errno(0x1d) */ 29;
-
 public static Errno ESRCH => /* Errno(0x3) */ 3;
-
 public static Errno ESRMNT => /* Errno(0x45) */ 69;
-
 public static Errno ESTALE => /* Errno(0x74) */ 116;
-
 public static Errno ESTRPIPE => /* Errno(0x56) */ 86;
-
 public static Errno ETIME => /* Errno(0x3e) */ 62;
-
 public static Errno ETIMEDOUT => /* Errno(0x6e) */ 110;
-
 public static Errno ETOOMANYREFS => /* Errno(0x6d) */ 109;
-
 public static Errno ETXTBSY => /* Errno(0x1a) */ 26;
-
 public static Errno EUCLEAN => /* Errno(0x75) */ 117;
-
 public static Errno EUNATCH => /* Errno(0x31) */ 49;
-
 public static Errno EUSERS => /* Errno(0x57) */ 87;
-
 public static Errno EWOULDBLOCK => /* Errno(0xb) */ 11;
-
 public static Errno EXDEV => /* Errno(0x12) */ 18;
-
 public static Errno EXFULL => /* Errno(0x36) */ 54;
 
 // Signals
 public static ΔSignal SIGABRT => /* Signal(0x6) */ 6;
-
 public static ΔSignal SIGALRM => /* Signal(0xe) */ 14;
-
 public static ΔSignal SIGBUS => /* Signal(0x7) */ 7;
-
 public static ΔSignal SIGCHLD => /* Signal(0x11) */ 17;
-
 public static ΔSignal SIGCLD => /* Signal(0x11) */ 17;
-
 public static ΔSignal SIGCONT => /* Signal(0x12) */ 18;
-
 public static ΔSignal SIGFPE => /* Signal(0x8) */ 8;
-
 public static ΔSignal SIGHUP => /* Signal(0x1) */ 1;
-
 public static ΔSignal SIGILL => /* Signal(0x4) */ 4;
-
 public static ΔSignal SIGINT => /* Signal(0x2) */ 2;
-
 public static ΔSignal SIGIO => /* Signal(0x1d) */ 29;
-
 public static ΔSignal SIGIOT => /* Signal(0x6) */ 6;
-
 public static ΔSignal SIGKILL => /* Signal(0x9) */ 9;
-
 public static ΔSignal SIGPIPE => /* Signal(0xd) */ 13;
-
 public static ΔSignal SIGPOLL => /* Signal(0x1d) */ 29;
-
 public static ΔSignal SIGPROF => /* Signal(0x1b) */ 27;
-
 public static ΔSignal SIGPWR => /* Signal(0x1e) */ 30;
-
 public static ΔSignal SIGQUIT => /* Signal(0x3) */ 3;
-
 public static ΔSignal SIGSEGV => /* Signal(0xb) */ 11;
-
 public static ΔSignal SIGSTKFLT => /* Signal(0x10) */ 16;
-
 public static ΔSignal SIGSTOP => /* Signal(0x13) */ 19;
-
 public static ΔSignal SIGSYS => /* Signal(0x1f) */ 31;
-
 public static ΔSignal SIGTERM => /* Signal(0xf) */ 15;
-
 public static ΔSignal SIGTRAP => /* Signal(0x5) */ 5;
-
 public static ΔSignal SIGTSTP => /* Signal(0x14) */ 20;
-
 public static ΔSignal SIGTTIN => /* Signal(0x15) */ 21;
-
 public static ΔSignal SIGTTOU => /* Signal(0x16) */ 22;
-
 public static ΔSignal SIGUNUSED => /* Signal(0x1f) */ 31;
-
 public static ΔSignal SIGURG => /* Signal(0x17) */ 23;
-
 public static ΔSignal SIGUSR1 => /* Signal(0xa) */ 10;
-
 public static ΔSignal SIGUSR2 => /* Signal(0xc) */ 12;
-
 public static ΔSignal SIGVTALRM => /* Signal(0x1a) */ 26;
-
 public static ΔSignal SIGWINCH => /* Signal(0x1c) */ 28;
-
 public static ΔSignal SIGXCPU => /* Signal(0x18) */ 24;
-
 public static ΔSignal SIGXFSZ => /* Signal(0x19) */ 25;
 
 // Error table
@@ -1628,7 +1462,7 @@ internal static array<@string> errors = new array<@string>(133){
     [113] = "no route to host"u8,
     [114] = "operation already in progress"u8,
     [115] = "operation now in progress"u8,
-    [116] = "stale NFS file handle"u8,
+    [116] = "stale file handle"u8,
     [117] = "structure needs cleaning"u8,
     [118] = "not a XENIX named type file"u8,
     [119] = "no XENIX semaphores available"u8,

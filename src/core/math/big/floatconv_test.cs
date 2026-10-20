@@ -25,8 +25,9 @@ internal partial struct TestFloatSetFloat64String_type /*dyn*/ {
 public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
     var inf = math.Inf(0);
     var nan = math.NaN();
-    foreach (var (_, test) in new TestFloatSetFloat64String_type[]{ // basics
 
+    foreach (var (_, test) in new TestFloatSetFloat64String_type[]{
+        // basics
         new("0"u8, 0D),
         new("-0"u8, -zero_),
         new("+0"u8, 0D),
@@ -38,29 +39,33 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         new("+1.234"u8, 1.234D),
         new(".1"u8, 0.1D),
         new("1."u8, 1D),
-        new("+1."u8, 1D), // various zeros
+        new("+1."u8, 1D),
 
+        // various zeros
         new("0e100"u8, 0D),
         new("-0e+100"u8, -zero_),
         new("+0e-100"u8, 0D),
         new("0E100"u8, 0D),
         new("-0E+100"u8, -zero_),
-        new("+0E-100"u8, 0D), // various decimal exponent formats
+        new("+0E-100"u8, 0D),
 
+        // various decimal exponent formats
         new("1.e10"u8, 1e10D),
         new("1e+10"u8, 1e10D),
         new("+1e-10"u8, 1e-10D),
         new("1E10"u8, 1e10D),
         new("1.E+10"u8, 1e10D),
-        new("+1E-10"u8, 1e-10D), // infinities
+        new("+1E-10"u8, 1e-10D),
 
+        // infinities
         new("Inf"u8, inf),
         new("+Inf"u8, inf),
         new("-Inf"u8, -inf),
         new("inf"u8, inf),
         new("+inf"u8, inf),
-        new("-inf"u8, -inf), // invalid numbers
+        new("-inf"u8, -inf),
 
+        // invalid numbers
         new(""u8, nan),
         new("-"u8, nan),
         new("0x"u8, nan),
@@ -69,8 +74,9 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         new("2..3"u8, nan),
         new("123.."u8, nan),
         new("infinity"u8, nan),
-        new("foobar"u8, nan), // invalid underscores
+        new("foobar"u8, nan),
 
+        // invalid underscores
         new("_"u8, nan),
         new("0_"u8, nan),
         new("1__0"u8, nan),
@@ -83,23 +89,26 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         new("10._0"u8, nan),
         new("10.0e_0"u8, nan),
         new("10.0e0_"u8, nan),
-        new("0P-0__0"u8, nan), // misc decimal values
+        new("0P-0__0"u8, nan),
 
+        // misc decimal values
         new("3.14159265"u8, 3.14159265D),
         new("-687436.79457e-245"u8, -687436.79457e-245D),
         new("-687436.79457E245"u8, -687436.79457e245D),
         new(".0000000000000000000000000000000000000001"u8, 1e-40D),
-        new("+10000000000000000000000000000000000000000e-0"u8, 1e40D), // decimal mantissa, binary exponent
+        new("+10000000000000000000000000000000000000000e-0"u8, 1e40D),
 
+        // decimal mantissa, binary exponent
         new("0p0"u8, 0D),
         new("-0p0"u8, -zero_),
-        new("1p10"u8, (1 << (int)(10))),
-        new("1p+10"u8, (1 << (int)(10))),
-        new("+1p-10"u8, 1.0D / ((1 << (int)(10)))),
+        new("1p10"u8, 1 << 10),
+        new("1p+10"u8, 1 << 10),
+        new("+1p-10"u8, 1.0D / (1 << 10)),
         new("1024p-12"u8, 0.25D),
         new("-1p10"u8, -1024D),
-        new("1.5p1"u8, 3D), // binary mantissa, decimal exponent
+        new("1.5p1"u8, 3D),
 
+        // binary mantissa, decimal exponent
         new("0b0"u8, 0D),
         new("-0b0"u8, -zero_),
         new("0b0e+10"u8, 0D),
@@ -108,8 +117,9 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         new("0B1010E2"u8, 1000D),
         new("0b.1"u8, 0.5D),
         new("0b.001"u8, 0.125D),
-        new("0b.001e3"u8, 125D), // binary mantissa, binary exponent
+        new("0b.001e3"u8, 125D),
 
+        // binary mantissa, binary exponent
         new("0b0p+10"u8, 0D),
         new("-0b0p-10"u8, -zero_),
         new("0b.1010p4"u8, 10D),
@@ -117,8 +127,9 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         new("0b001p-3"u8, 0.125D),
         new("0b.001p3"u8, 1D),
         new("0b0.01p2"u8, 1D),
-        new("0b0.01P+2"u8, 1D), // octal mantissa, decimal exponent
+        new("0b0.01P+2"u8, 1D),
 
+        // octal mantissa, decimal exponent
         new("0o0"u8, 0D),
         new("-0o0"u8, -zero_),
         new("0o0e+10"u8, 0D),
@@ -127,8 +138,9 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         new("0O12E2"u8, 1000D),
         new("0o.4"u8, 0.5D),
         new("0o.01"u8, 0.015625D),
-        new("0o.01e3"u8, 15.625D), // octal mantissa, binary exponent
+        new("0o.01e3"u8, 15.625D),
 
+        // octal mantissa, binary exponent
         new("0o0p+10"u8, 0D),
         new("-0o0p-10"u8, -zero_),
         new("0o.12p6"u8, 10D),
@@ -136,8 +148,9 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         new("0o0014p-6"u8, 0.1875D),
         new("0o.001p9"u8, 1D),
         new("0o0.01p7"u8, 2D),
-        new("0O0.01P+2"u8, 0.0625D), // hexadecimal mantissa and exponent
+        new("0O0.01P+2"u8, 0.0625D),
 
+        // hexadecimal mantissa and exponent
         new("0x0"u8, 0D),
         new("-0x0"u8, -zero_),
         new("0x0p+10"u8, 0D),
@@ -147,8 +160,9 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         new("-0X0.00008p16"u8, -0.5D),
         new("-0X0.00008P+16"u8, -0.5D),
         new("0x0.0000000000001p-1022"u8, math.SmallestNonzeroFloat64),
-        new("0x1.fffffffffffffp1023"u8, math.MaxFloat64), // underscores
+        new("0x1.fffffffffffffp1023"u8, math.MaxFloat64),
 
+        // underscores
         new("0_0"u8, 0D),
         new("1_000."u8, 1000D),
         new("1_2_3.4_5_6"u8, 123.456D),
@@ -198,8 +212,6 @@ internal partial struct TestFloat64Text_type /*dyn*/ {
 }
 
 public static void TestFloat64Text(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, test) in new TestFloat64Text_type[]{
         new(0D, (rune)'f', 0, "0"u8),
         new(math.Copysign(0D, -1D), (rune)'f', 0, "-0"u8),
@@ -227,8 +239,9 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(0D, (rune)'p', 0, "0"u8),
         new(math.Copysign(0D, -1D), (rune)'p', 0, "-0"u8),
         new(1024.0D, (rune)'p', 0, "0x.8p+11"u8),
-        new(-1024.0D, (rune)'p', 0, "-0x.8p+11"u8), // all test cases below from strconv/ftoa_test.go
+        new(-1024.0D, (rune)'p', 0, "-0x.8p+11"u8),
 
+        // all test cases below from strconv/ftoa_test.go
         new(1D, (rune)'e', 5, "1.00000e+00"u8),
         new(1D, (rune)'f', 5, "1.00000"u8),
         new(1D, (rune)'g', 5, "1"u8),
@@ -236,8 +249,9 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(20D, (rune)'g', -1, "20"u8),
         new(1234567.8D, (rune)'g', -1, "1.2345678e+06"u8),
         new(200000D, (rune)'g', -1, "200000"u8),
-        new(2000000D, (rune)'g', -1, "2e+06"u8), // g conversion and zero suppression
+        new(2000000D, (rune)'g', -1, "2e+06"u8),
 
+        // g conversion and zero suppression
         new(400D, (rune)'g', 2, "4e+02"u8),
         new(40D, (rune)'g', 2, "40"u8),
         new(4D, (rune)'g', 2, "4"u8),
@@ -287,19 +301,19 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(5e-304D / 1e20D, (rune)'g', -1, "5e-324"u8),
         new(-5e-304D / 1e20D, (rune)'g', -1, "-5e-324"u8),
         new(fdiv(5e-304D, 1e20D), (rune)'g', -1, "5e-324"u8), // avoid constant arithmetic
-
         new(fdiv(-5e-304D, 1e20D), (rune)'g', -1, "-5e-324"u8), // avoid constant arithmetic
-
         new(32D, (rune)'g', -1, "32"u8),
         new(32D, (rune)'g', 0, "3e+01"u8),
-        new(100D, (rune)'x', -1, "0x1.9p+06"u8), // {math.NaN(), 'g', -1, "NaN"},  // Float doesn't support NaNs
- // {-math.NaN(), 'g', -1, "NaN"}, // Float doesn't support NaNs
+        new(100D, (rune)'x', -1, "0x1.9p+06"u8),
 
+        // {math.NaN(), 'g', -1, "NaN"},  // Float doesn't support NaNs
+        // {-math.NaN(), 'g', -1, "NaN"}, // Float doesn't support NaNs
         new(math.Inf(0), (rune)'g', -1, "+Inf"u8),
         new(math.Inf(-1), (rune)'g', -1, "-Inf"u8),
         new(-math.Inf(0), (rune)'g', -1, "-Inf"u8),
-        new(-1D, (rune)'b', -1, "-4503599627370496p-52"u8), // fixed bugs
+        new(-1D, (rune)'b', -1, "-4503599627370496p-52"u8),
 
+        // fixed bugs
         new(0.9D, (rune)'f', 1, "0.9"u8),
         new(0.09D, (rune)'f', 1, "0.1"u8),
         new(0.0999D, (rune)'f', 1, "0.1"u8),
@@ -307,15 +321,18 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(0.05D, (rune)'f', 0, "0"u8),
         new(0.5D, (rune)'f', 1, "0.5"u8),
         new(0.5D, (rune)'f', 0, "0"u8),
-        new(1.5D, (rune)'f', 0, "2"u8), // https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
+        new(1.5D, (rune)'f', 0, "2"u8),
 
-        new(2.2250738585072012e-308D, (rune)'g', -1, "2.2250738585072014e-308"u8), // https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
+        // https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
+        new(2.2250738585072012e-308D, (rune)'g', -1, "2.2250738585072014e-308"u8),
+        // https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
+        new(2.2250738585072011e-308D, (rune)'g', -1, "2.225073858507201e-308"u8),
 
-        new(2.2250738585072011e-308D, (rune)'g', -1, "2.225073858507201e-308"u8), // Issue 2625.
-
+        // Issue 2625.
         new(383260575764816448D, (rune)'f', 0, "383260575764816448"u8),
-        new(383260575764816448D, (rune)'g', -1, "3.8326057576481645e+17"u8), // Issue 15918.
+        new(383260575764816448D, (rune)'g', -1, "3.8326057576481645e+17"u8),
 
+        // Issue 15918.
         new(1D, (rune)'f', -10, "1"u8),
         new(1D, (rune)'f', -11, "1"u8),
         new(1D, (rune)'f', -12, "1"u8)
@@ -331,12 +348,14 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%v: got %s; want %s"u8, test, got, test.want);
             continue;
         }
+
         if (test.format == (rune)'b' && test.x == 0D) {
             continue; // 'b' format in strconv.Float requires knowledge of bias for 0.0
         }
         if (test.format == (rune)'p') {
             continue; // 'p' format not supported in strconv.Format
         }
+
         // verify that Float format matches strconv format
         @string want = strconv.FormatFloat(test.x, test.format, test.prec, 64);
         if (got != want) {
@@ -348,7 +367,7 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
 // actualPrec returns the number of actually used mantissa bits.
 internal static nuint actualPrec(float64 x) {
     {
-        var mant = math.Float64bits(x); if (x != 0D && (uint64)(mant & (((uint64)0x7ff << (int)(52)))) == 0) {
+        var mant = math.Float64bits(x); if (x != 0D && (uint64)(mant & ((uint64)0x7ff << 52)) == 0) {
             // x is denormalized
             return 64 - (nuint)bits.LeadingZeros64((uint64)(mant & ((uint64)(4503599627370496L - 1))));
         }
@@ -366,9 +385,8 @@ internal partial struct TestFloatText_type /*dyn*/ {
 }
 
 public static void TestFloatText(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     global::go.math.big_package.RoundingMode defaultRound = /* ^RoundingMode(0) */ 255;
+
     foreach (var (_, test) in new TestFloatText_type[]{
         new("0"u8, defaultRound, 10, (rune)'f', 0, "0"u8),
         new("-0"u8, defaultRound, 10, (rune)'f', 0, "-0"u8),
@@ -409,8 +427,9 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("3"u8, defaultRound, 10, (rune)'g', 40, "3"u8),
         new("3e40"u8, defaultRound, 100, (rune)'e', 40, "3.0000000000000000000000000000000000000000e+40"u8),
         new("3e40"u8, defaultRound, 100, (rune)'f', 4, "30000000000000000000000000000000000000000.0000"u8),
-        new("3e40"u8, defaultRound, 100, (rune)'g', 40, "3e+40"u8), // make sure "stupid" exponents don't stall the machine
+        new("3e40"u8, defaultRound, 100, (rune)'g', 40, "3e+40"u8),
 
+        // make sure "stupid" exponents don't stall the machine
         new("1e1000000"u8, defaultRound, 64, (rune)'p', 0, "0x.88b3a28a05eade3ap+3321929"u8),
         new("1e646456992"u8, defaultRound, 64, (rune)'p', 0, "0x.e883a0c5c8c7c42ap+2147483644"u8),
         new("1e646456993"u8, defaultRound, 64, (rune)'p', 0, "+Inf"u8),
@@ -418,19 +437,22 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("1e-1000000"u8, defaultRound, 64, (rune)'p', 0, "0x.efb4542cc8ca418ap-3321928"u8),
         new("1e-646456993"u8, defaultRound, 64, (rune)'p', 0, "0x.e17c8956983d9d59p-2147483647"u8),
         new("1e-646456994"u8, defaultRound, 64, (rune)'p', 0, "0"u8),
-        new("1e-1000000000"u8, defaultRound, 64, (rune)'p', 0, "0"u8), // minimum and maximum values
+        new("1e-1000000000"u8, defaultRound, 64, (rune)'p', 0, "0"u8),
 
+        // minimum and maximum values
         new("1p2147483646"u8, defaultRound, 64, (rune)'p', 0, "0x.8p+2147483647"u8),
         new("0x.8p2147483647"u8, defaultRound, 64, (rune)'p', 0, "0x.8p+2147483647"u8),
         new("0x.8p-2147483647"u8, defaultRound, 64, (rune)'p', 0, "0x.8p-2147483647"u8),
-        new("1p-2147483649"u8, defaultRound, 64, (rune)'p', 0, "0x.8p-2147483648"u8), // TODO(gri) need tests for actual large Floats
+        new("1p-2147483649"u8, defaultRound, 64, (rune)'p', 0, "0x.8p-2147483648"u8),
 
+        // TODO(gri) need tests for actual large Floats
         new("0"u8, defaultRound, 53, (rune)'b', 0, "0"u8),
         new("-0"u8, defaultRound, 53, (rune)'b', 0, "-0"u8),
         new("1.0"u8, defaultRound, 53, (rune)'b', 0, "4503599627370496p-52"u8),
         new("-1.0"u8, defaultRound, 53, (rune)'b', 0, "-4503599627370496p-52"u8),
-        new("4503599627370496"u8, defaultRound, 53, (rune)'b', 0, "4503599627370496p+0"u8), // issue 9939
+        new("4503599627370496"u8, defaultRound, 53, (rune)'b', 0, "4503599627370496p+0"u8),
 
+        // issue 9939
         new("3"u8, defaultRound, 350, (rune)'b', 0, "1720123961992553633708115671476565205597423741876210842803191629540192157066363606052513914832594264915968p-348"u8),
         new("03"u8, defaultRound, 350, (rune)'b', 0, "1720123961992553633708115671476565205597423741876210842803191629540192157066363606052513914832594264915968p-348"u8),
         new("3."u8, defaultRound, 350, (rune)'b', 0, "1720123961992553633708115671476565205597423741876210842803191629540192157066363606052513914832594264915968p-348"u8),
@@ -491,8 +513,9 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("8191.53125"u8, ToNegativeInf, 53, (rune)'x', 4, "0x1.fff8p+12"u8),
         new("-8191.53125"u8, ToNegativeInf, 53, (rune)'x', 4, "-0x1.fff9p+12"u8),
         new("8191.53125"u8, ToPositiveInf, 53, (rune)'x', 4, "0x1.fff9p+12"u8),
-        new("-8191.53125"u8, ToPositiveInf, 53, (rune)'x', 4, "-0x1.fff8p+12"u8), // issue 34343
+        new("-8191.53125"u8, ToPositiveInf, 53, (rune)'x', 4, "-0x1.fff8p+12"u8),
 
+        // issue 34343
         new("0x.8p-2147483648"u8, ToNearestEven, 4, (rune)'p', -1, "0x.8p-2147483648"u8),
         new("0x.8p-2147483648"u8, ToNearestEven, 4, (rune)'x', -1, "0x1p-2147483649"u8)
     }.slice()) {
@@ -504,10 +527,12 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         if (test.round != defaultRound) {
             f.SetMode(test.round);
         }
+
         @string got = f.Text(test.format, test.digits);
         if (got != test.want) {
             Ꮡt.Errorf("%v: got %s; want %s"u8, test, got, test.want);
         }
+
         // compare with strconv.FormatFloat output if possible
         // ('p' format is not supported by strconv.FormatFloat,
         // and its output for 0.0 prints a biased exponent value
@@ -533,8 +558,8 @@ internal partial struct TestFloatFormat_type /*dyn*/ {
 }
 
 public static void TestFloatFormat(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFloatFormat_type[]{ // from fmt/fmt_test.go
-
+    foreach (var (_, test) in new TestFloatFormat_type[]{
+        // from fmt/fmt_test.go
         new("%+.3e"u8, 0.0D, "+0.000e+00"u8),
         new("%+.3e"u8, 1.0D, "+1.000e+00"u8),
         new("%+.3f"u8, -1.0D, "-1.000"u8),
@@ -552,8 +577,9 @@ public static void TestFloatFormat(ж<testing.T> Ꮡt) {
         new("% .3g"u8, -1.0D, "-1"u8),
         new("% .3g"u8, 1.0D, " 1"u8),
         new("%b"u8, (float32)1.0F, "8388608p-23"u8),
-        new("%b"u8, 1.0D, "4503599627370496p-52"u8), // from fmt/fmt_test.go: old test/fmt_test.go
+        new("%b"u8, 1.0D, "4503599627370496p-52"u8),
 
+        // from fmt/fmt_test.go: old test/fmt_test.go
         new("%e"u8, 1.0D, "1.000000e+00"u8),
         new("%e"u8, 1234.5678e3D, "1.234568e+06"u8),
         new("%e"u8, 1234.5678e-8D, "1.234568e-05"u8),
@@ -595,8 +621,9 @@ public static void TestFloatFormat(ж<testing.T> Ꮡt) {
         new("%g"u8, 1.23456789e-3D, "0.00123456789"u8),
         new("%g"u8, 1.23456789e20D, "1.23456789e+20"u8),
         new("%20e"u8, math.Inf(1), "                +Inf"u8),
-        new("%-20f"u8, math.Inf(-1), "-Inf                "u8), // from fmt/fmt_test.go: comparison of padding rules with C printf
+        new("%-20f"u8, math.Inf(-1), "-Inf                "u8),
 
+        // from fmt/fmt_test.go: comparison of padding rules with C printf
         new("%.2f"u8, 1.0D, "1.00"u8),
         new("%.2f"u8, -1.0D, "-1.00"u8),
         new("% .2f"u8, 1.0D, " 1.00"u8),
@@ -614,29 +641,33 @@ public static void TestFloatFormat(ж<testing.T> Ꮡt) {
         new("% 07.2f"u8, 1.0D, " 001.00"u8),
         new("% 07.2f"u8, -1.0D, "-001.00"u8),
         new("%+07.2f"u8, 1.0D, "+001.00"u8),
-        new("%+07.2f"u8, -1.0D, "-001.00"u8), // from fmt/fmt_test.go: zero padding does not apply to infinities
+        new("%+07.2f"u8, -1.0D, "-001.00"u8),
 
+        // from fmt/fmt_test.go: zero padding does not apply to infinities
         new("%020f"u8, math.Inf(-1), "                -Inf"u8),
         new("%020f"u8, math.Inf(+1), "                +Inf"u8),
         new("% 020f"u8, math.Inf(-1), "                -Inf"u8),
         new("% 020f"u8, math.Inf(+1), "                 Inf"u8),
         new("%+020f"u8, math.Inf(-1), "                -Inf"u8),
         new("%+020f"u8, math.Inf(+1), "                +Inf"u8),
-        new("%20f"u8, -1.0D, "           -1.000000"u8), // handle %v like %g
+        new("%20f"u8, -1.0D, "           -1.000000"u8),
 
+        // handle %v like %g
         new("%v"u8, 0.0D, "0"u8),
         new("%v"u8, -7.0D, "-7"u8),
         new("%v"u8, -1e-9D, "-1e-09"u8),
         new("%v"u8, (float32)(-1e-9F), "-1e-09"u8),
-        new("%010v"u8, 0.0D, "0000000000"u8), // *Float cases
+        new("%010v"u8, 0.0D, "0000000000"u8),
 
+        // *Float cases
         new("%.20f"u8, (@string)"1e-20"u8, "0.00000000000000000001"u8),
         new("%.20f"u8, (@string)"-1e-20"u8, "-0.00000000000000000001"u8),
         new("%30.20f"u8, (@string)"-1e-20"u8, "       -0.00000000000000000001"u8),
         new("%030.20f"u8, (@string)"-1e-20"u8, "-00000000.00000000000000000001"u8),
         new("%030.20f"u8, (@string)"+1e-20"u8, "000000000.00000000000000000001"u8),
-        new("% 030.20f"u8, (@string)"+1e-20"u8, " 00000000.00000000000000000001"u8), // erroneous formats
+        new("% 030.20f"u8, (@string)"+1e-20"u8, " 00000000.00000000000000000001"u8),
 
+        // erroneous formats
         new("%s"u8, 1.0D, "%!s(*big.Float=1)"u8)
     }.slice()) {
         var value = @new<global::go.math.big_package.Float>();
@@ -658,6 +689,7 @@ public static void TestFloatFormat(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("unsupported test value: %v (%T)"u8, v, v);
             break;
         }}
+
         {
             @string got = fmt.Sprintf(test.format, value.OrTypedNil()); if (got != test.want) {
                 Ꮡt.Errorf("%v: got %q; want %q"u8, test, got, test.want);
@@ -743,9 +775,6 @@ internal partial struct TestFloatScan_type /*dyn*/ {
 }
 
 public static void TestFloatScan(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-// Scan doesn't handle ±Inf.
     slice<TestFloatScan_type> floatScanTests = new slice<TestFloatScan_type>(13){
         [0] = new("10.0"u8, "%f"u8, "10"u8, 0, false),
         [1] = new("23.98+2.0"u8, "%v"u8, "23.98"u8, 4, false),
@@ -757,10 +786,13 @@ public static void TestFloatScan(ж<testing.T> Ꮡt) {
         [7] = new("-1.234E-56"u8, "%E"u8, "-1.234e-56"u8, 0, false),
         [8] = new("-1.234e+567"u8, "%g"u8, "-1.234e+567"u8, 0, false),
         [9] = new("+1234567891011.234"u8, "%G"u8, "1.234567891e+12"u8, 0, false),
+
+        // Scan doesn't handle ±Inf.
         [10] = new("Inf"u8, "%v"u8, ""u8, 3, true),
         [11] = new("-Inf"u8, "%v"u8, ""u8, 3, true),
         [12] = new("-Inf"u8, "%v"u8, ""u8, 3, true)
     };
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (i, test) in floatScanTests) {
         var x = @new<global::go.math.big_package.Float>();
@@ -773,9 +805,11 @@ public static void TestFloatScan(ж<testing.T> Ꮡt) {
             }
             continue;
         }
+
         if (err != default!) {
             Ꮡt.Errorf("#%d error: %s"u8, i, err);
         }
+
         if (x.String() != test.output) {
             Ꮡt.Errorf("#%d got %s; want %s"u8, i, x.String(), test.output);
         }

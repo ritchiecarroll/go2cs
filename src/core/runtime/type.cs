@@ -20,26 +20,25 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
-using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(structtype), typeof(interfacetype), typeof(chantype), typeof(functype))]
 partial class runtime_package {
+
+//go:linkname maps_typeString internal/runtime/maps.typeString
+internal static @string maps_typeString(ж<abi.Type> Ꮡtyp) {
+    return toRType(Ꮡtyp).@string();
+}
 
 // rtype is a wrapper that allows us to define additional methods.
 partial struct Δrtype {
-    public partial ref ж<@internal.abi_package.Type> Type { get; } // embedding is okay here (unlike reflect) because none of this is public
+    /*embed*/ public ж<@internal.abi_package.Type> Type; // embedding is okay here (unlike reflect) because none of this is public
 }
 
-internal static @string @string(this Δrtype t) {
-    @string s = t.nameOff(t.Str).Name();
-    if ((abi.TFlag)(t.TFlag & abi.TFlagExtraStar) != 0) {
-        return s[1..];
-    }
-    return s;
-}
+// go2cs generated this placeholder — func string is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static ж<uncommontype> uncommon(this Δrtype t) {
     return t.Type.Uncommon();
@@ -62,7 +61,6 @@ internal static @string name(this Δrtype t) {
             sqBrackets--;
             break;
         }}
-
         i--;
     }
     return s.slice(i + 1);
@@ -78,16 +76,15 @@ internal static @string pkgpath(this Δrtype t) {
             return t.nameOff((~u).PkgPath).Name();
         }
     }
-    var exprᴛ1 = (abiꓸKind)(t.Kind_ & abi.KindMask);
+    var exprᴛ1 = t.Type.Value.Kind();
     if (exprᴛ1 == abi.Struct) {
         var st = t.Type.Reinterpret<abi.Type, structtype>();
-        return (~st).PkgPath.Name();
+        return st.PkgPath.Name();
     }
     if (exprᴛ1 == abi.Interface) {
         var it = t.Type.Reinterpret<abi.Type, interfacetype>();
-        return (~it).PkgPath.Name();
+        return it.PkgPath.Name();
     }
-
     return ""u8;
 }
 
@@ -124,42 +121,42 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
     // TODO: we could use &t.GCData as the slot, but types are
     // in read-only memory currently.
     @unsafe.Pointer addr = @unsafe.Pointer.FromPinnedBox(t.GCData);
+
     if (GOOS == "aix"u8) {
         addr = (uintptr)add(addr, firstmoduledata.data - aixStaticDataBase);
     }
+
     while (ᐧ) {
         ref var Δp = ref heap<ж<byte>>(out var Ꮡp);
         Δp = (ж<byte>)(uintptr)(atomic.Loadp(addr));
         var exprᴛ1 = Δp;
-        if (exprᴛ1 == ᏑinProgress) {
+        if (exprᴛ1 == ᏑinProgress) { // Someone else is currently building it.
+            // Just wait until the builder is done.
+            // We can't block here, so spinning while having
+            // the OS thread yield is about the best we can do.
             osyield();
             continue;
         }
-        else if (exprᴛ1 == default!) {
-            if (!atomic.Casp1((ж<@unsafe.Pointer>)(uintptr)(addr), // Already built.
- // Someone else is currently building it.
- // Just wait until the builder is done.
- // We can't block here, so spinning while having
- // the OS thread yield is about the best we can do.
- // Not built yet.
- // Attempt to get exclusive access to build it.
- nil, @unsafe.Pointer.FromPinnedBox(ᏑinProgress))) {
+        else if (exprᴛ1 == default!) { // Not built yet.
+            // Attempt to get exclusive access to build it.
+            if (!atomic.Casp1((ж<@unsafe.Pointer>)(uintptr)(addr), nil, @unsafe.Pointer.FromPinnedBox(ᏑinProgress))) {
                 continue;
             }
-            var bytes = (uintptr)goarch.PtrSize * divRoundUp(t.PtrBytes / (uintptr)goarch.PtrSize, // Build gcmask for this type.
- 8 * goarch.PtrSize);
+
+            // Build gcmask for this type.
+            var bytes = (uintptr)goarch.PtrSize * divRoundUp(t.PtrBytes / (uintptr)goarch.PtrSize, 8 * goarch.PtrSize);
             Δp = (ж<byte>)(uintptr)(persistentalloc(bytes, goarch.PtrSize, Ꮡmemstats.of(mstats.Ꮡother_sys)));
             systemstack(() => {
                 buildGCMask(Ꮡt, new bitCursor(ptr: Ꮡp.ValueSlot, n: 0));
             });
-            atomic.StorepNoWB(addr, // Store the newly-built gcmask for future callers.
- @unsafe.Pointer.FromPinnedBox(Δp));
-            return Δp;
-        }
-        else { /* default: */
-            return Δp;
-        }
 
+            // Store the newly-built gcmask for future callers.
+            atomic.StorepNoWB(addr, @unsafe.Pointer.FromPinnedBox(Δp));
+            return Δp;
+        }
+        else { /* default: */ // Already built.
+            return Δp;
+        }
     }
 }
 
@@ -177,10 +174,12 @@ internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
 
     // Starting byte for writing.
     var Δp = addb(b.ptr, b.n / 8);
+
     // Note: if we're starting halfway through a byte, we load the
     // existing lower bits so we don't clobber them.
     var n = b.n % 8; // # of valid bits in buf
     var buf = (uintptr)((uintptr)(Δp.Value) & (((uintptr)1).Lsh((uint64)(n)) - 1)); // buffered bits to start
+
     // Work 8 bits at a time.
     while (cnt > 8) {
         // Read 8 more bits, now buf has 8-15 valid bits in it.
@@ -197,6 +196,7 @@ internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
     // Read remaining bits.
     buf |= (uintptr)(((uintptr)((uintptr)(data) & (((uintptr)1).Lsh((uint64)(cnt)) - 1))).Lsh((uint64)(n)));
     n += cnt;
+
     // Flush remaining bits.
     if (n > 8) {
         Δp.Value = (byte)buf;
@@ -282,7 +282,6 @@ top:
     else { /* default: */
         @throw(unexpectedKindˢ);
     }
-
 }
 
 // reflectOffs holds type offsets defined at run time by the reflect package.
@@ -298,7 +297,6 @@ top:
 // do not overlap with any compile-time module offsets.
 //
 // Entries are created by reflect.addReflectOff.
-
 partial struct reflectOffsᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal int32 next;
@@ -335,20 +333,21 @@ internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff o
         if (@base >= (~md).types && @base < (~md).etypes) {
             var resΔ1 = (~md).types + (uintptr)(int32)off;
             if (resΔ1 > (~md).etypes) {
-                println((@string)"runtime: nameOff"u8, ((Δhex)(uint64)(int32)off), (@string)"out of range"u8, ((Δhex)(uint64)(~md).types), (@string)"-"u8, ((Δhex)(uint64)(~md).etypes));
+                println((@string)"runtime: nameOff"u8, (Δhex)(uint64)(int32)off, (@string)"out of range"u8, (Δhex)(uint64)(~md).types, (@string)"-"u8, (Δhex)(uint64)(~md).etypes);
                 @throw(runtimeNameOffsetOutOfˢ);
             }
             return new abiꓸName(Bytes: (ж<byte>)(uintptr)((@unsafe.Pointer)resΔ1));
         }
     }
+
     // No module found. see if it is a run time name.
     reflectOffsLock();
     var (res, found) = reflectOffs.m[(int32)off, ꟷ];
     reflectOffsUnlock();
     if (!found) {
-        println((@string)"runtime: nameOff"u8, ((Δhex)(uint64)(int32)off), (@string)"base"u8, ((Δhex)(uint64)@base), (@string)"not in ranges:"u8);
+        println((@string)"runtime: nameOff"u8, (Δhex)(uint64)(int32)off, (@string)"base"u8, (Δhex)(uint64)@base, (@string)"not in ranges:"u8);
         for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
-            println((@string)"\ttypes"u8, ((Δhex)(uint64)(~next).types), (@string)"etypes"u8, ((Δhex)(uint64)(~next).etypes));
+            println((@string)"\ttypes"u8, (Δhex)(uint64)(~next).types, (@string)"etypes"u8, (Δhex)(uint64)(~next).etypes);
         }
         @throw(runtimeNameOffsetBaseˢ);
     }
@@ -382,9 +381,9 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
         @unsafe.Pointer resΔ1 = reflectOffs.m[(int32)off];
         reflectOffsUnlock();
         if (resΔ1 == nil) {
-            println((@string)"runtime: typeOff"u8, ((Δhex)(uint64)(int32)off), (@string)"base"u8, ((Δhex)(uint64)@base), (@string)"not in ranges:"u8);
+            println((@string)"runtime: typeOff"u8, (Δhex)(uint64)(int32)off, (@string)"base"u8, (Δhex)(uint64)@base, (@string)"not in ranges:"u8);
             for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
-                println((@string)"\ttypes"u8, ((Δhex)(uint64)(~next).types), (@string)"etypes"u8, ((Δhex)(uint64)(~next).etypes));
+                println((@string)"\ttypes"u8, (Δhex)(uint64)(~next).types, (@string)"etypes"u8, (Δhex)(uint64)(~next).etypes);
             }
             @throw(runtimeTypeOffsetBaseˢ);
         }
@@ -397,7 +396,7 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
     }
     var res = (~md).types + (uintptr)(int32)off;
     if (res > (~md).etypes) {
-        println((@string)"runtime: typeOff"u8, ((Δhex)(uint64)(int32)off), (@string)"out of range"u8, ((Δhex)(uint64)(~md).types), (@string)"-"u8, ((Δhex)(uint64)(~md).etypes));
+        println((@string)"runtime: typeOff"u8, (Δhex)(uint64)(int32)off, (@string)"out of range"u8, (Δhex)(uint64)(~md).types, (@string)"-"u8, (Δhex)(uint64)(~md).etypes);
         @throw(runtimeTypeOffsetOutOfˢ);
     }
     return (ж<_type>)(uintptr)((@unsafe.Pointer)res);
@@ -429,9 +428,9 @@ internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
         @unsafe.Pointer resΔ1 = reflectOffs.m[(int32)off];
         reflectOffsUnlock();
         if (resΔ1 == nil) {
-            println((@string)"runtime: textOff"u8, ((Δhex)(uint64)(int32)off), (@string)"base"u8, ((Δhex)(uint64)@base), (@string)"not in ranges:"u8);
+            println((@string)"runtime: textOff"u8, (Δhex)(uint64)(int32)off, (@string)"base"u8, (Δhex)(uint64)@base, (@string)"not in ranges:"u8);
             for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
-                println((@string)"\ttypes"u8, ((Δhex)(uint64)(~next).types), (@string)"etypes"u8, ((Δhex)(uint64)(~next).etypes));
+                println((@string)"\ttypes"u8, (Δhex)(uint64)(~next).types, (@string)"etypes"u8, (Δhex)(uint64)(~next).etypes);
             }
             @throw(runtimeTextOffsetBaseˢ);
         }
@@ -442,17 +441,17 @@ internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
 }
 
 internal static @string pkgPath(abiꓸName n) {
-    if (n.Bytes == nil || (byte)(n.Data(0).Value & ((byte)(1 << (int)(2)))) == 0) {
+    if (n.Bytes == nil || (byte)(n.Data(0).Value & ((byte)(1 << 2))) == 0) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
     nint off = 1 + i + l;
-    if ((byte)(n.Data(0).Value & ((byte)(1 << (int)(1)))) != 0) {
+    if ((byte)(n.Data(0).Value & ((byte)(1 << 1))) != 0) {
         var (i2, l2) = n.ReadVarint(off);
         off += i2 + l2;
     }
     ref var nameOff = ref heap(new nameOff(), out var ᏑnameOff);
-    copy((~(ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)))[..], (~array<byte>.AliasPointer(n.Data(off), 4))[..]);
+    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.Data(off), 4).slice());
     var pkgPathName = resolveNameOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff);
     return pkgPathName.Name();
 }
@@ -464,6 +463,7 @@ internal static void typelinksinit() {
         return;
     }
     var typehash = new map<uint32, slice<ж<_type>>>(len(firstmoduledata.typelinks));
+
     var modules = activeModules();
     var prev = modules[0];
     foreach (var (_, md) in modules[1..]) {
@@ -487,6 +487,7 @@ collect:
 continue_collect:;
         }
 break_collect:;
+
         if ((~md).typemap == default!) {
             // If any of this module's typelinks match a type from a
             // prior module, prefer that prior type by adding the offset
@@ -506,6 +507,7 @@ break_collect:;
                 md.Value.typemap[((typeOff)tl)] = t;
             }
         }
+
         prev = md;
     }
 }
@@ -544,15 +546,17 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
             return true;
         }
     }
+
     // mark these types as seen, and thus equivalent which prevents an infinite loop if
     // the two types are identical, but recursively defined and loaded from
     // different modules
     seen[tp] = new EmptyStruct();
+
     if (Ꮡt == Ꮡv) {
         return true;
     }
-    var kind = (abiꓸKind)(t.Kind_ & abi.KindMask);
-    if (kind != (abiꓸKind)(v.Kind_ & abi.KindMask)) {
+    var kind = t.Kind();
+    if (kind != v.Kind()) {
         return false;
     }
     var (rt, rv) = (toRType(Ꮡt), toRType(Ꮡv));
@@ -581,17 +585,17 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
     if (exprᴛ1 == abi.Array) {
         var at = Ꮡt.Reinterpret<_type, arraytype>();
         var av = Ꮡv.Reinterpret<_type, arraytype>();
-        return typesEqual((~at).Elem, (~av).Elem, seen) && (~at).Len == (~av).Len;
+        return typesEqual(at.of(arraytype.ᏑElem).Value, av.of(arraytype.ᏑElem).Value, seen) && at.of(arraytype.ᏑLen).Value == av.of(arraytype.ᏑLen).Value;
     }
     if (exprᴛ1 == abi.Chan) {
         var ct = Ꮡt.Reinterpret<_type, chantype>();
         var cv = Ꮡv.Reinterpret<_type, chantype>();
-        return (~ct).Dir == (~cv).Dir && typesEqual((~ct).Elem, (~cv).Elem, seen);
+        return ct.Dir == cv.Dir && typesEqual(ct.of(chantype.ᏑElem).Value, cv.of(chantype.ᏑElem).Value, seen);
     }
     if (exprᴛ1 == abi.Func) {
         var ft = Ꮡt.FuncType();
         var fv = Ꮡv.FuncType();
-        if ((~ft).OutCount != (~fv).OutCount || (~ft).InCount != (~fv).InCount) {
+        if (ft.OutCount != fv.OutCount || ft.InCount != fv.InCount) {
             return false;
         }
         var (tin, vin) = (ft.InSlice(), fv.InSlice());
@@ -611,15 +615,15 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
     if (exprᴛ1 == abi.Interface) {
         var it = Ꮡt.Reinterpret<_type, interfacetype>();
         var iv = Ꮡv.Reinterpret<_type, interfacetype>();
-        if ((~it).PkgPath.Name() != (~iv).PkgPath.Name()) {
+        if (it.PkgPath.Name() != iv.PkgPath.Name()) {
             return false;
         }
-        if (len((~it).Methods) != len((~iv).Methods)) {
+        if (len(it.Methods) != len(iv.Methods)) {
             return false;
         }
-        foreach (var (i, _) in (~it).Methods) {
-            var tm = Ꮡ((~it).Methods, i);
-            var vm = Ꮡ((~iv).Methods, i);
+        foreach (var (i, _) in it.Methods) {
+            var tm = Ꮡ(it.Methods, i);
+            var vm = Ꮡ(iv.Methods, i);
             // Note the mhdr array can be relocated from
             // another module. See #17724.
             var tname = resolveNameOff(@unsafe.Pointer.FromPinnedBox(tm), (~tm).Name);
@@ -639,37 +643,32 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         return true;
     }
     if (exprᴛ1 == abi.Map) {
-        if (goexperiment.SwissMap) {
-            var mtΔ1 = Ꮡt.Reinterpret<_type, abi.SwissMapType>();
-            var mvΔ1 = Ꮡv.Reinterpret<_type, abi.SwissMapType>();
-            return typesEqual((~mtΔ1).Key, (~mvΔ1).Key, seen) && typesEqual((~mtΔ1).Elem, (~mvΔ1).Elem, seen);
-        }
-        var mt = Ꮡt.Reinterpret<_type, abi.OldMapType>();
-        var mv = Ꮡv.Reinterpret<_type, abi.OldMapType>();
-        return typesEqual((~mt).Key, (~mv).Key, seen) && typesEqual((~mt).Elem, (~mv).Elem, seen);
+        var mt = Ꮡt.Reinterpret<_type, abiꓸMapType>();
+        var mv = Ꮡv.Reinterpret<_type, abiꓸMapType>();
+        return typesEqual(mt.of(abiꓸMapType.ᏑKey).Value, mv.of(abiꓸMapType.ᏑKey).Value, seen) && typesEqual(mt.of(abiꓸMapType.ᏑElem).Value, mv.of(abiꓸMapType.ᏑElem).Value, seen);
     }
     if (exprᴛ1 == abi.Pointer) {
         var pt = Ꮡt.Reinterpret<_type, ptrtype>();
         var pv = Ꮡv.Reinterpret<_type, ptrtype>();
-        return typesEqual((~pt).Elem, (~pv).Elem, seen);
+        return typesEqual(pt.of(ptrtype.ᏑElem).Value, pv.of(ptrtype.ᏑElem).Value, seen);
     }
     if (exprᴛ1 == abi.Slice) {
         var st = Ꮡt.Reinterpret<_type, slicetype>();
         var sv = Ꮡv.Reinterpret<_type, slicetype>();
-        return typesEqual((~st).Elem, (~sv).Elem, seen);
+        return typesEqual(st.of(slicetype.ᏑElem).Value, sv.of(slicetype.ᏑElem).Value, seen);
     }
     if (exprᴛ1 == abi.Struct) {
         var st = Ꮡt.Reinterpret<_type, structtype>();
         var sv = Ꮡv.Reinterpret<_type, structtype>();
-        if (len((~st).Fields) != len((~sv).Fields)) {
+        if (len(st.Fields) != len(sv.Fields)) {
             return false;
         }
-        if ((~st).PkgPath.Name() != (~sv).PkgPath.Name()) {
+        if (st.PkgPath.Name() != sv.PkgPath.Name()) {
             return false;
         }
-        foreach (var (i, _) in (~st).Fields) {
-            var tf = Ꮡ((~st).Fields, i);
-            var vf = Ꮡ((~sv).Fields, i);
+        foreach (var (i, _) in st.Fields) {
+            var tf = Ꮡ(st.Fields, i);
+            var vf = Ꮡ(sv.Fields, i);
             if ((~tf).Name.Name() != (~vf).Name.Name()) {
                 return false;
             }
@@ -693,7 +692,6 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         @throw(runtimeImpossibleTypeˢ);
         return false;
     }
-
 }
 
 } // end runtime_package

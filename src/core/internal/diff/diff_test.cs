@@ -29,6 +29,7 @@ public static void Test(ж<testing.T> Ꮡt) {
     if (len(files) == 0) {
         Ꮡt.Fatalf("no testdata"u8);
     }
+
     foreach (var (_, @file) in files) {
         Ꮡt.Run(filepath.Base(@file), (ж<testing.T> tΔ1) => {
             var (a, err) = txtar.ParseFile(@file);

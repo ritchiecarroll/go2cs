@@ -8,12 +8,12 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -65,11 +65,12 @@ internal static void arityMatch(this ж<Checker> Ꮡcheck, ж<ast.ValueSpec> Ꮡ
     if (Ꮡinit != nil) {
         r = len(init.Values);
     }
+
     errors.Code code = /* WrongAssignCount */ 17;
     switch (ᐧ) {
     case {} when Ꮡinit == nil && r == 0: {
+        // var decl w/o init expr
         if (s.Type == default!) {
-            // var decl w/o init expr
             Ꮡcheck.error(new ast_ValueSpecжpositioner(Ꮡs), code, missingTypeOrInitExprˢ);
         }
         break;
@@ -79,20 +80,19 @@ internal static void arityMatch(this ж<Checker> Ꮡcheck, ж<ast.ValueSpec> Ꮡ
             // init exprs from s
             var n = s.Values[l];
             Ꮡcheck.errorf(new ast_Exprᴠpositioner(n), code, "extra init expr %s"u8, n);
-        } else {
             // TODO(gri) avoid declared and not used error here
+        } else {
             // init exprs "inherited"
             Ꮡcheck.errorf(new ast_ValueSpecжpositioner(Ꮡs), code, "extra init expr at %s"u8, check.fset.Position(init.Pos()));
+            // TODO(gri) avoid declared and not used error here
         }
         break;
     }
     case {} when l > r && (Ꮡinit != nil || r != 1): {
         var n = s.Names[r];
-        Ꮡcheck.errorf(new ast_Identжpositioner(n), // TODO(gri) avoid declared and not used error here
- code, "missing init expr for %s"u8, n.OrTypedNil());
+        Ꮡcheck.errorf(new ast_Identжpositioner(n), code, "missing init expr for %s"u8, n.OrTypedNil());
         break;
     }}
-
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -126,18 +126,21 @@ internal static void declarePkgObj(this ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡi
     ref var ident = ref Ꮡident.DerefOrNull();
 
     assert(ident.Name == obj.Name());
+
     // spec: "A package-scope or file-scope identifier with name init
     // may only be declared to be a function with this (func()) signature."
     if (ident.Name == "init"u8) {
         Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidInitDecl, cannotDeclareInitMustBeˢ);
         return;
     }
+
     // spec: "The main package must have package name main and declare
     // a function main that takes no arguments and returns no value."
     if (ident.Name == "main"u8 && (~check.pkg).name == "main"u8) {
         Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidMainDecl, cannotDeclareMainMustBeˢ);
         return;
     }
+
     Ꮡcheck.declare((~check.pkg).scope, Ꮡident, obj, nopos);
     check.objMap[obj] = Ꮡd;
     obj.setOrder((uint32)len(check.objMap));
@@ -170,6 +173,7 @@ internal static ж<Package> importPackage(this ж<Checker> Ꮡcheck, positioner 
     if (imp != nil) {
         return imp;
     }
+
     // no package yet => import it
     if (path == "C"u8 && ((~check.conf).FakeImportC || (~check.conf).go115UsesCgo)){
         if ((~check.conf).FakeImportC && (~check.conf).go115UsesCgo) {
@@ -227,6 +231,7 @@ internal static ж<Package> importPackage(this ж<Checker> Ꮡcheck, positioner 
             imp.Value.fake = true; // avoid follow-up lookup failures
         }
     }
+
     // package should be complete or marked fake, but be cautious
     if ((~imp).complete || (~imp).fake) {
         check.impMap[key] = imp;
@@ -238,6 +243,7 @@ internal static ж<Package> importPackage(this ж<Checker> Ꮡcheck, positioner 
         }
         return imp;
     }
+
     // something went wrong (importer may have returned incomplete package without error)
     return default!;
 }
@@ -260,6 +266,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pkg = check.pkg;
+
     // pkgImports is the set of packages already imported by any package file seen
     // so far. Used to avoid duplicate entries in pkg.imports. Allocate and populate
     // it (pkg.imports may not be empty if we are checking test files incrementally).
@@ -271,12 +278,15 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
         pkgImports[imp] = true;
     }
     ref var methods = ref heap<slice<collectObjects_methodInfo>>(out var Ꮡmethods);                                  // collected methods with valid receivers and non-blank _ names
+
     var fileScopes = new slice<ж<ΔScope>>(len(check.files)); // fileScopes[i] corresponds to check.files[i]
     foreach (var (fileNo, @file) in check.files) {
         check.version = asGoVersion(check.versions[@file]);
+
         // The package identifier denotes the current package,
         // but there is no corresponding package object.
         check.recordDef((~@file).Name, default!);
+
         // Use the actual source file extent rather than *ast.File extent since the
         // latter doesn't include comments which appear at the start or end of the file.
         // Be conservative and use the *ast.File extent if we don't have a *token.File.
@@ -284,24 +294,26 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
         tokenꓸPos end = @file.End();
         {
             var f = check.fset.File(@file.Pos()); if (f != nil) {
-                (pos, end) = (((tokenꓸPos)f.Base()), ((tokenꓸPos)(f.Base() + f.Size())));
+                (pos, end) = ((tokenꓸPos)f.Base(), f.End());
             }
         }
         var fileScope = NewScope((~pkg).scope, pos, end, check.filename(fileNo));
         fileScopes[fileNo] = fileScope;
         check.recordScope(new ast.FileжNode(@file), fileScope);
+
         // determine file directory, necessary to resolve imports
         // FileName may be "" (typically for tests) in which case
         // we get "." as the directory which is what we would want.
         @string fileDir = dir(check.fset.Position((~@file).Name.Pos()).Filename);
+
         var fileScopeʗ1 = fileScope;
         var pkgʗ1 = pkg;
         var pkgImportsʗ1 = pkgImports;
         Ꮡcheck.walkDecls((~@file).Decls, (decl d) => {
             switch (d.type()) {
             case importDecl dΔ1: {
+                // import package
                 if ((~(~dΔ1.spec).Path).Value == ""u8) {
-                    // import package
                     return; // error reported by parser
                 }
                 var (path, err) = validatedImportPath((~(~dΔ1.spec).Path).Value);
@@ -309,13 +321,15 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                     Ꮡcheck.errorf(new ast_BasicLitжpositioner((~dΔ1.spec).Path), BadImportPath, "invalid import path (%s)"u8, err);
                     return;
                 }
+
                 var imp = Ꮡcheck.importPackage(new ast_BasicLitжpositioner((~dΔ1.spec).Path), path, fileDir);
                 if (imp == nil) {
                     return;
                 }
+
+                // local name overrides imported package name
                 @string name = imp.Value.name;
                 if ((~dΔ1.spec).Name != nil) {
-                    // local name overrides imported package name
                     name = dΔ1.spec.Value.Name.Value.Name;
                     if (path == "C"u8) {
                         // match 1.17 cmd/compile (not prescribed by spec)
@@ -323,17 +337,20 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                         return;
                     }
                 }
+
                 if (name == "init"u8) {
                     Ꮡcheck.error(new ast_ImportSpecжpositioner(dΔ1.spec), InvalidInitDecl, cannotImportPackageAsˢ);
                     return;
                 }
+
+                // add package to list of explicit imports
+                // (this functionality is provided as a convenience
+                // for clients; it is not needed for type-checking)
                 if (!pkgImportsʗ1[imp]) {
-                    // add package to list of explicit imports
-                    // (this functionality is provided as a convenience
-                    // for clients; it is not needed for type-checking)
                     pkgImportsʗ1[imp] = true;
                     pkgʗ1.Value.imports = append((~pkgʗ1).imports, imp);
                 }
+
                 var pkgName = NewPkgName(dΔ1.spec.Pos(), pkgʗ1, name, imp);
                 if ((~dΔ1.spec).Name != nil){
                     // in a dot-import, the dot represents the package
@@ -341,12 +358,14 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                 } else {
                     Ꮡcheck.Value.recordImplicit(new ast.ImportSpecжNode(dΔ1.spec), new PkgNameжObject(pkgName));
                 }
+
                 if ((~imp).fake) {
                     // match 1.17 cmd/compile (not prescribed by spec)
                     Ꮡcheck.Value.usedPkgNames[pkgName] = true;
                 }
-                Ꮡcheck.Value.imports = append(Ꮡcheck.Value.imports, // add import to file scope
- pkgName);
+
+                // add import to file scope
+                Ꮡcheck.Value.imports = append(Ꮡcheck.Value.imports, pkgName);
                 if (name == "."u8){
                     // dot-import
                     if (Ꮡcheck.Value.dotImportMap == default!) {
@@ -385,13 +404,15 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                 break;
             }
             case ΔconstDecl dΔ1: {
+                // declare all constants
                 foreach (var (i, name) in (~dΔ1.spec).Names) {
-                    // declare all constants
                     var obj = NewConst(name.Pos(), pkgʗ1, (~name).Name, default!, constant.MakeInt64((int64)dΔ1.iota));
+
                     ast.Expr init = default!;
                     if (i < len(dΔ1.init)) {
                         init = dΔ1.init[i];
                     }
+
                     var dΔ2 = Ꮡ(new declInfo(@file: fileScopeʗ1, version: Ꮡcheck.Value.version, vtyp: dΔ1.typ, init: init, inherited: dΔ1.inherited));
                     Ꮡcheck.declarePkgObj(name, new ConstжObject(obj), dΔ2);
                 }
@@ -410,10 +431,12 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                     // for a later phase.
                     d1 = Ꮡ(new declInfo(@file: fileScopeʗ1, version: Ꮡcheck.Value.version, lhs: lhs, vtyp: (~dΔ1.spec).Type, init: (~dΔ1.spec).Values[0]));
                 }
+
+                // declare all variables
                 foreach (var (i, name) in (~dΔ1.spec).Names) {
-                    // declare all variables
-                    var obj = NewVar(name.Pos(), pkgʗ1, (~name).Name, default!);
+                    var obj = newVar(PackageVar, name.Pos(), pkgʗ1, (~name).Name, default!);
                     lhs[i] = obj;
+
                     var di = d1;
                     if (di == nil) {
                         // individual assignments
@@ -423,6 +446,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                         }
                         di = Ꮡ(new declInfo(@file: fileScopeʗ1, version: Ꮡcheck.Value.version, vtyp: (~dΔ1.spec).Type, init: init));
                     }
+
                     Ꮡcheck.declarePkgObj(name, new VarжObject(obj), di);
                 }
                 break;
@@ -440,8 +464,8 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                     // regular function
                     if ((~dΔ1.decl).Recv != nil) {
                         Ꮡcheck.error(new ast_FieldListжpositioner((~dΔ1.decl).Recv), BadRecv, methodHasNoReceiverˢ);
+                        // treat as function
                     }
-                    // treat as function
                     if (name == "init"u8 || (name == "main"u8 && (~Ꮡcheck.Value.pkg).name == "main"u8)) {
                         errors.Code code = InvalidInitDecl;
                         if (name == "main"u8) {
@@ -462,10 +486,8 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                         // don't declare init functions in the package scope - they are invisible
                         obj.Value.parent = pkgʗ1.Value.scope;
                         Ꮡcheck.Value.recordDef((~dΔ1.decl).Name, new FuncжObject(obj));
-                        // init functions must have a body
                         if ((~dΔ1.decl).Body == nil) {
-                            // TODO(gri) make this error message consistent with the others above
-                            Ꮡcheck.softErrorf(new Funcжpositioner(obj), MissingInitBody, "missing function body"u8);
+                            Ꮡcheck.softErrorf(new Funcжpositioner(obj), MissingInitBody, "func init must have a body"u8);
                         }
                     } else {
                         Ꮡcheck.declare((~pkgʗ1).scope, (~dΔ1.decl).Name, new FuncжObject(obj), nopos);
@@ -489,16 +511,17 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                 }
                 _ = (~(~dΔ1.decl).Type).TypeParams.NumFields() != 0 && !hasTParamError && Ꮡcheck.verifyVersionf(new ast_Fieldжpositioner((~(~(~dΔ1.decl).Type).TypeParams).List[0]), go1_18, "type parameter"u8);
                 var info = Ꮡ(new declInfo(@file: fileScopeʗ1, version: Ꮡcheck.Value.version, fdecl: dΔ1.decl));
+                // Methods are not package-level objects but we still track them in the
+                // object map so that we can handle them like regular functions (if the
+                // receiver is invalid); also we need their fdecl info when associating
+                // them with their receiver base type, below.
                 Ꮡcheck.Value.objMap[new FuncжObject(obj)] = info;
                 obj.of(Func.Ꮡobject).setOrder((uint32)len(Ꮡcheck.Value.objMap));
                 break;
             }}
         });
     }
-    // Methods are not package-level objects but we still track them in the
-    // object map so that we can handle them like regular functions (if the
-    // receiver is invalid); also we need their fdecl info when associating
-    // them with their receiver base type, below.
+
     // verify that objects in package and file scopes have different names
     foreach (var (_, scope) in fileScopes) {
         foreach (var (name, vᴛ1) in (~scope).elems) {
@@ -523,6 +546,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
             }
         }
     }
+
     // Now that we have all package scope objects and all methods,
     // associate methods with receiver base type name where possible.
     // Ignore methods that have an invalid receiver. They will be
@@ -530,6 +554,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     if (methods == default!) {
         return;
     }
+
     check.methods = new map<ж<TypeName>, slice<ж<Func>>>();
     foreach (var (i, _) in methods) {
         var m = Ꮡ(methods, i);
@@ -540,6 +565,17 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
             check.methods[@base] = append(check.methods[@base], (~m).obj);
         }
     }
+}
+
+// sortObjects sorts package-level objects by source-order for reproducible processing
+internal static void sortObjects(this ref Checker check) {
+    check.objList = new slice<Object>(len(check.objMap));
+    nint i = 0;
+    foreach (var (obj, _) in check.objMap) {
+        check.objList[i] = obj;
+        i++;
+    }
+    slices.SortFunc(check.objList, (Object a, Object b) => cmp_package.Compare(a.order(), b.order()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -567,6 +603,7 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
             @base = ast.Unparen((~t).X);
         }
     }
+
     // unpack type parameters, if any
     switch (@base.type()) {
     case ж<ast.IndexExpr> _:
@@ -582,11 +619,11 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
                     break;
                 }
                 case ж<ast.BadExpr> argΔ1: {
+                    // ignore - error already reported by parser
                     break;
                 }
                 case null: {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner((~ix).orig), // ignore - error already reported by parser
- InvalidSyntaxTree, parameterizedReceiverˢ);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner((~ix).orig), InvalidSyntaxTree, parameterizedReceiverˢ);
                     break;
                 }
                 default: {
@@ -625,32 +662,39 @@ internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Che
         if (obj == default!) {
             break;
         }
+
         // the object must be a type name...
         var (tname, _) = obj._<ж<TypeName>>(ᐧ);
         if (tname == nil) {
             break;
         }
+
         // ... which we have not seen before
         if (seen[tname]) {
             break;
         }
+
         // we're done if tdecl describes a defined type (not an alias)
         var tdecl = check.objMap[new TypeNameжObject(tname)].Value.tdecl; // must exist for objects in package scope
         if (!(~tdecl).Assign.IsValid()) {
             return (ptr, tname);
         }
+
         // an alias must not be generic
         // (importantly, we must not collect such methods - was https://go.dev/issue/70417)
         if ((~tdecl).TypeParams != nil) {
             break;
         }
+
         // otherwise, remember this type name and continue resolving
         if (seen == default!) {
             seen = new map<ж<TypeName>, bool>();
         }
         seen[tname] = true;
+
         // The go/parser keeps parentheses; strip them, if any.
         var typ = ast.Unparen((~tdecl).Type);
+
         // dereference a pointer type
         {
             var (pexpr, _) = typ._<ж<ast.StarExpr>>(ᐧ); if (pexpr != nil) {
@@ -662,6 +706,7 @@ internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Che
                 typ = ast.Unparen((~pexpr).X); // continue with pointer base type
             }
         }
+
         // After dereferencing, typ must be a locally defined type name.
         // Referring to other packages (qualified identifiers) or going
         // through instantiated types (index expressions) is not permitted,
@@ -671,6 +716,7 @@ internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Che
             break;
         }
     }
+
     // no base type found
     return (false, default!);
 }
@@ -678,23 +724,18 @@ internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Che
 // packageObjects typechecks all package objects, but not function bodies.
 internal static void packageObjects(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
+    var aliasListᴷ = new stackAppend<ж<TypeName>>();
+    var othersListᴷ = new stackAppend<Object>();
 
-    // process package objects in source order for reproducible results
-    var objList = new slice<Object>(len(check.objMap));
-    nint i = 0;
-    foreach (var (obj, _) in check.objMap) {
-        objList[i] = obj;
-        i++;
-    }
-    slices.SortFunc(objList, (Object a, Object b) => cmp_package.Compare(a.order(), b.order()));
     // add new methods to already type-checked types (from a prior Checker.Files call)
-    foreach (var (_, obj) in objList) {
+    foreach (var (_, obj) in check.objList) {
         {
             var (objΔ1, _) = obj._<ж<TypeName>>(ᐧ); if (objΔ1 != nil && (~objΔ1).typ != default!) {
                 Ꮡcheck.collectMethods(objΔ1);
             }
         }
     }
+
     if (false && (~check.conf)._EnableAlias){
         // With Alias nodes we can process declarations in any order.
         //
@@ -712,8 +753,8 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         // its Type is Invalid.
         //
         // Investigate and reenable this branch.
-        foreach (var (_, obj) in objList) {
-            Ꮡcheck.objDecl(obj, nil);
+        foreach (var (_, obj) in check.objList) {
+            Ꮡcheck.objDecl(obj);
         }
     } else {
         // Without Alias nodes, we process non-alias type declarations first, followed by
@@ -724,28 +765,29 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
         slice<ж<TypeName>> aliasList = default!;
         slice<Object> othersList = default!;        // everything that's not a type
         // phase 1: non-alias type declarations
-        foreach (var (_, obj) in objList) {
+        foreach (var (_, obj) in check.objList) {
             {
                 var (tname, _) = obj._<ж<TypeName>>(ᐧ); if (tname != nil){
                     if ((~(~check.objMap[new TypeNameжObject(tname)]).tdecl).Assign.IsValid()){
-                        aliasList = append(aliasList, tname);
+                        aliasList = append(aliasListᴷ, aliasList, tname);
                     } else {
-                        Ꮡcheck.objDecl(obj, nil);
+                        Ꮡcheck.objDecl(obj);
                     }
                 } else {
-                    othersList = append(othersList, obj);
+                    othersList = append(othersListᴷ, othersList, obj);
                 }
             }
         }
         // phase 2: alias type declarations
         foreach (var (_, obj) in aliasList) {
-            Ꮡcheck.objDecl(new TypeNameжObject(obj), nil);
+            Ꮡcheck.objDecl(new TypeNameжObject(obj));
         }
         // phase 3: all other declarations
         foreach (var (_, obj) in othersList) {
-            Ꮡcheck.objDecl(obj, nil);
+            Ꮡcheck.objDecl(obj);
         }
     }
+
     // At this point we may have a non-empty check.methods map; this means that not all
     // entries were deleted at the end of typeDecl because the respective receiver base
     // types were not found. In that case, an error was reported when declaring those
@@ -761,9 +803,11 @@ internal static void unusedImports(this ж<Checker> Ꮡcheck) {
     if ((~check.conf).IgnoreFuncBodies) {
         return;
     }
+
     // spec: "It is illegal (...) to directly import a package without referring to
     // any of its exported identifiers. To import a package solely for its side-effects
     // (initialization), use the blank identifier as explicit package name."
+
     foreach (var (_, obj) in check.imports) {
         if ((~obj).name != "_"u8 && !check.usedPkgNames[obj]) {
             Ꮡcheck.errorUnusedPkg(obj);

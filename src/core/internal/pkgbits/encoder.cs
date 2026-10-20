@@ -30,7 +30,7 @@ partial struct PkgEncoder {
     // stringsIdx maps previously encoded strings to their index within
     // the RelocString section, to allow deduplication. That is,
     // elems[RelocString][stringsIdx[s]] == s (if present).
-    internal map<@string, Index> stringsIdx;
+    internal map<@string, RelElemIdx> stringsIdx;
     // syncFrames is the number of frames to write at each sync
     // marker. A negative value means sync markers are omitted.
     internal nint syncFrames;
@@ -51,7 +51,7 @@ public static bool SyncMarkers(this ref PkgEncoder pw) {
 public static PkgEncoder NewPkgEncoder(ΔVersion version, nint syncFrames) {
     return new PkgEncoder(
         version: version,
-        stringsIdx: new map<@string, Index>(),
+        stringsIdx: new map<@string, RelElemIdx>(),
         syncFrames: syncFrames
     );
 }
@@ -60,15 +60,18 @@ public static PkgEncoder NewPkgEncoder(ΔVersion version, nint syncFrames) {
 // package fingerprint.
 public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.Writer out0) {
     array<byte> fingerprint = new(8);
-
     ref var pw = ref Ꮡpw.DerefOrNull();
+
     var h = sha256.New();
     var @out = io.MultiWriter(out0, h);
+
     var outʗ1 = @out;
     void writeUint32(uint32 x) {
         assert(binary.Write(outʗ1, binary.LittleEndian, x) == default!);
     }
+
     writeUint32((uint32)pw.version);
+
     if (pw.version.Has(Flags)) {
         uint32 flags = default!;
         if (pw.SyncMarkers()) {
@@ -76,13 +79,18 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
         }
         writeUint32(flags);
     }
-    // Write elemEndsEnds.
+
+    // TODO(markfreeman): Also can use delta encoding to write section ends,
+    // but not as impactful.
     uint32 sum = default!;
     foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
         sum += (uint32)len(elems);
         writeUint32(sum);
     }
-    // Write elemEnds.
+
+    // TODO(markfreeman): Use delta encoding to store element ends and inflate
+    // back to this representation during decoding; the numbers will be much
+    // smaller.
     sum = 0;
     foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
         foreach (var (_, elem) in elems) {
@@ -90,6 +98,7 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
             writeUint32(sum);
         }
     }
+
     // Write elemData.
     foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
         foreach (var (_, elem) in elems) {
@@ -97,24 +106,27 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
             assert(errΔ1 == default!);
         }
     }
+
     // Write fingerprint.
     copy(fingerprint[..], h.Sum(default!));
     var (_, err) = out0.Write(fingerprint[..]);
     assert(err == default!);
+
     return fingerprint;
 }
 
 // StringIdx adds a string value to the strings section, if not
 // already present, and returns its index.
-public static Index StringIdx(this ref PkgEncoder pw, @string s) {
+public static RelElemIdx StringIdx(this ref PkgEncoder pw, @string s) {
     {
         var (idxΔ1, ok) = pw.stringsIdx[s, ꟷ]; if (ok) {
-            assert(pw.elems[RelocString][idxΔ1] == s);
+            assert(pw.elems[SectionString][idxΔ1] == s);
             return idxΔ1;
         }
     }
-    var idx = ((Index)(int32)len(pw.elems[RelocString]));
-    pw.elems[RelocString] = append(pw.elems[RelocString], s);
+
+    var idx = (RelElemIdx)(int32)len(pw.elems[SectionString]);
+    pw.elems[SectionString] = append(pw.elems[SectionString], s);
     pw.stringsIdx[s] = idx;
     return idx;
 }
@@ -122,7 +134,7 @@ public static Index StringIdx(this ref PkgEncoder pw, @string s) {
 // NewEncoder returns an Encoder for a new element within the given
 // section, and encodes the given SyncMarker as the start of the
 // element bitstream.
-public static Encoder NewEncoder(this ж<PkgEncoder> Ꮡpw, RelocKind k, SyncMarker marker) {
+public static ж<Encoder> NewEncoder(this ж<PkgEncoder> Ꮡpw, SectionKind k, SyncMarker marker) {
     var e = Ꮡpw.NewEncoderRaw(k);
     e.Sync(marker);
     return e;
@@ -132,38 +144,42 @@ public static Encoder NewEncoder(this ж<PkgEncoder> Ꮡpw, RelocKind k, SyncMar
 // section.
 //
 // Most callers should use NewEncoder instead.
-public static Encoder NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, RelocKind k) {
+public static ж<Encoder> NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, SectionKind k) {
     ref var pw = ref Ꮡpw.DerefOrNull();
 
-    var idx = ((Index)(int32)len(pw.elems[k]));
+    ref var idx = ref heap<RelElemIdx>(out var Ꮡidx);
+    idx = (RelElemIdx)(int32)len(pw.elems[k]);
     pw.elems[k] = append(pw.elems[k], ""u8); // placeholder
-    return new Encoder(
+
+    return Ꮡ(new Encoder(
         p: Ꮡpw,
         k: k,
         Idx: idx
-    );
+    ));
 }
 
 // An Encoder provides methods for encoding an individual element's
 // bitstream data.
 partial struct Encoder {
     internal ж<PkgEncoder> p;
-    public slice<RelocEnt> Relocs;
-    public map<RelocEnt, uint32> RelocMap;
+    public slice<RefTableEntry> Relocs;
+    public map<RefTableEntry, uint32> RelocMap;
     public bytes.Buffer Data; // accumulated element bitstream data
     internal bool encodingRelocHeader;
-    internal RelocKind k;
-    public Index Idx; // index within relocation section
+    internal SectionKind k;
+    public RelElemIdx Idx; // index within relocation section
 }
 
-// Flush finalizes the element's bitstream and returns its Index.
-public static Index Flush(this ж<Encoder> Ꮡw) {
+// Flush finalizes the element's bitstream and returns its [RelElemIdx].
+public static RelElemIdx Flush(this ж<Encoder> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
+
     // Backup the data so we write the relocations at the front.
     ref var tmp = ref heap(new bytes.Buffer(), out var Ꮡtmp);
     io.Copy(new bytes_BufferжWriter(Ꮡtmp), new bytes_BufferжReader(Ꮡw.of(Encoder.ᏑData)));
+
     // TODO(mdempsky): Consider writing these out separately so they're
     // easier to strip, along with function bodies, so that we can prune
     // down to just the data that's relevant to go/types.
@@ -178,9 +194,11 @@ public static Index Flush(this ж<Encoder> Ꮡw) {
         w.Len((nint)(int32)rEnt.Kind);
         w.Len((nint)(int32)rEnt.Idx);
     }
+
     io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡw.of(Encoder.ᏑData)));
     io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡtmp));
     (~w.p).elems[w.k][w.Idx] = sb.String();
+
     return w.Idx;
 }
 
@@ -199,15 +217,16 @@ internal static void rawUvarint(this ref Encoder w, uint64 x) {
 
 internal static void rawVarint(this ref Encoder w, int64 x) {
     // Zig-zag encode.
-    var ux = ((uint64)x << (int)(1));
+    var ux = (uint64)x << 1;
     if (x < 0) {
         ux = ~ux;
     }
+
     w.rawUvarint(ux);
 }
 
-internal static nint rawReloc(this ref Encoder w, RelocKind r, Index idx) {
-    var e = new RelocEnt(r, idx);
+internal static nint rawReloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
+    var e = new RefTableEntry(k, idx);
     if (w.RelocMap != default!){
         {
             var (iΔ1, ok) = w.RelocMap[e, ꟷ]; if (ok) {
@@ -215,8 +234,9 @@ internal static nint rawReloc(this ref Encoder w, RelocKind r, Index idx) {
             }
         }
     } else {
-        w.RelocMap = new map<RelocEnt, uint32>();
+        w.RelocMap = new map<RefTableEntry, uint32>();
     }
+
     nint i = len(w.Relocs);
     w.RelocMap[e] = (uint32)i;
     w.Relocs = append(w.Relocs, e);
@@ -227,6 +247,7 @@ public static partial void Sync(this ref Encoder w, SyncMarker m) {
     if (!w.p.SyncMarkers()) {
         return;
     }
+
     // Writing out stack frame string references requires working
     // relocations, but writing out the relocations themselves involves
     // sync markers. To prevent infinite recursion, we simply trim the
@@ -237,12 +258,13 @@ public static partial void Sync(this ref Encoder w, SyncMarker m) {
         nint n = Δruntime.Callers(2, pcs);
         frames = fmtFrames(pcs.slice(0, n).ꓸꓸꓸ);
     }
+
     // TODO(mdempsky): Save space by writing out stack frames as a
     // linked list so we can share common stack frames.
     w.rawUvarint((uint64)(nint)m);
     w.rawUvarint((uint64)len(frames));
     foreach (var (_, frame) in frames) {
-        w.rawUvarint((uint64)w.rawReloc(RelocString, w.p.StringIdx(frame)));
+        w.rawUvarint((uint64)w.rawReloc(SectionString, w.p.StringIdx(frame)));
     }
 }
 
@@ -304,9 +326,9 @@ public static void Uint(this ref Encoder w, nuint x) {
 // Note: Only the index is formally written into the element
 // bitstream, so bitstream decoders must know from context which
 // section an encoded relocation refers to.
-public static void Reloc(this ref Encoder w, RelocKind r, Index idx) {
+public static void Reloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
     w.Sync(SyncUseReloc);
-    w.Len(w.rawReloc(r, idx));
+    w.Len(w.rawReloc(k, idx));
 }
 
 // Code encodes and writes a Code value into the element bitstream.
@@ -327,9 +349,9 @@ public static void String(this ref Encoder w, @string s) {
 
 // StringRef writes a reference to the given index, which must be a
 // previously encoded string value.
-public static void StringRef(this ref Encoder w, Index idx) {
+public static void StringRef(this ref Encoder w, RelElemIdx idx) {
     w.Sync(SyncString);
-    w.Reloc(RelocString, idx);
+    w.Reloc(SectionString, idx);
 }
 
 // Strings encodes and writes a variable-length slice of strings into
@@ -398,13 +420,13 @@ internal static void bigInt(this ref Encoder w, ж<bigꓸInt> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     var b = v.Bytes();
-    w.String(((@string)b)); // TODO: More efficient encoding.
+    w.String((@string)b); // TODO: More efficient encoding.
     w.Bool(v.Sign() < 0);
 }
 
 internal static void bigFloat(this ref Encoder w, ж<big.Float> Ꮡv) {
     var b = Ꮡv.Append(default!, (rune)'p', -1);
-    w.String(((@string)b)); // TODO: More efficient encoding.
+    w.String((@string)b); // TODO: More efficient encoding.
 }
 
 // Version reports the version of the bitstream.

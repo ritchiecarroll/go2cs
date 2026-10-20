@@ -65,6 +65,7 @@ public static void Test3PrimeKeyGeneration(ж<testing.T> Ꮡt) {
         Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
         size = 256;
     }
+
     var (priv, err) = GenerateMultiPrimeKey(rand.Reader, 3, size);
     if (err != default!) {
         Ꮡt.Errorf("failed to generate key"u8);
@@ -78,6 +79,7 @@ public static void Test4PrimeKeyGeneration(ж<testing.T> Ꮡt) {
         Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
         size = 256;
     }
+
     var (priv, err) = GenerateMultiPrimeKey(rand.Reader, 4, size);
     if (err != default!) {
         Ꮡt.Errorf("failed to generate key"u8);
@@ -105,8 +107,6 @@ public static void TestNPrimeKeyGeneration(ж<testing.T> Ꮡt) {
 }
 
 public static void TestImpossibleKeyGeneration(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // This test ensures that trying to generate or validate toy RSA keys
     // doesn't enter an infinite loop or panic.
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
@@ -147,7 +147,7 @@ MGECAQACEQDar8EuoZuSosYtE9SeXSyPAgMBAAECEBf7XDET8e6jjTcfO7y/sykC
 CQDozXjCjkBzLQIJAPB6MqNbZaQrAghbZTdQoko5LQIIUp9ZiKDdYjMCCCCpqzmX
 d8Y7
 -----END RSA TESTING KEY-----
-"""u8;
+"""u8.Raw();
 
 public static void TestGnuTLSKey(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
@@ -169,12 +169,14 @@ internal static void testKeyBasics(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpri
     if (priv.D.Cmp(priv.N) > 0) {
         Ꮡt.Errorf("private exponent too large"u8);
     }
+
     var msg = slice<byte>("hi!"u8);
     var (enc, err) = EncryptPKCS1v15(rand.Reader, Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey), msg);
     if (err != default!) {
         Ꮡt.Errorf("EncryptPKCS1v15: %v"u8, err);
         return;
     }
+
     (var dec, err) = DecryptPKCS1v15(default!, Ꮡpriv, enc);
     if (err != default!) {
         Ꮡt.Errorf("DecryptPKCS1v15: %v"u8, err);
@@ -187,11 +189,13 @@ internal static void testKeyBasics(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpri
 
 public static void TestAllocations(ж<testing.T> Ꮡt) {
     cryptotest.SkipTestAllocations(Ꮡt);
+
     var m = slice<byte>("Hello Gophers"u8);
     var (c, err) = EncryptPKCS1v15(rand.Reader, test2048Key.of(rsa.PrivateKey.ᏑPublicKey), m);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     {
         var cʗ1 = c;
         var mʗ1 = m;
@@ -223,6 +227,7 @@ public static void TestEverything(ж<testing.T> Ꮡt) {
         }
         return;
     }
+
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
     nint min = 32;
     nint max = 560; // any smaller than this and not all tests will run
@@ -265,6 +270,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
             Ꮡt.Errorf("Validate() failed: %s"u8, errΔ1);
         }
     }
+
     var msg = slice<byte>("test"u8);
     var (enc, err) = EncryptPKCS1v15(rand.Reader, Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey), msg);
     if (AreEqual(err, ErrMessageTooLong)){
@@ -286,6 +292,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
             Ꮡt.Errorf("got:%x want:%x (%+v)"u8, dec, msg, Ꮡpriv.OrTypedNil());
         }
     }
+
     var label = slice<byte>("label"u8);
     (enc, err) = EncryptOAEP(sha256.New(), rand.Reader, Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey), msg, label);
     if (AreEqual(err, ErrMessageTooLong)){
@@ -303,11 +310,13 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
             Ꮡt.Errorf("got:%x want:%x (%+v)"u8, dec, msg, Ꮡpriv.OrTypedNil());
         }
     }
+
     @string hashMsg = hashMsgᶜ;
     (var sig, err) = SignPKCS1v15(default!, Ꮡpriv, crypto.SHA256, msg);
     if (err == default! || err.Error() != hashMsg) {
         Ꮡt.Errorf("SignPKCS1v15 with bad hash: err = %q, want %q"u8, err, hashMsg);
     }
+
     var hash = sha256.Sum256(msg);
     (sig, err) = SignPKCS1v15(default!, Ꮡpriv, crypto.SHA256, hash[..]);
     if (AreEqual(err, ErrMessageTooLong)){
@@ -334,6 +343,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
         }
         hash[1] ^= (byte)(0x80);
     }
+
     var opts = Ꮡ(new PSSOptions(SaltLength: PSSSaltLengthAuto));
     (sig, err) = SignPSS(rand.Reader, Ꮡpriv, crypto.SHA256, hash[..], opts);
     if (AreEqual(err, ErrMessageTooLong)){
@@ -360,6 +370,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
         }
         hash[1] ^= (byte)(0x80);
     }
+
     opts.Value.SaltLength = PSSSaltLengthEqualsHash;
     (sig, err) = SignPSS(rand.Reader, Ꮡpriv, crypto.SHA256, hash[..], opts);
     if (AreEqual(err, ErrMessageTooLong)){
@@ -386,6 +397,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
         }
         hash[1] ^= (byte)(0x80);
     }
+
     // Check that an input bigger than the modulus is handled correctly,
     // whether it is longer than the byte size of the modulus or not.
     var c = bytes.Repeat(new byte[]{0xff}.slice(), Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey).Size());
@@ -397,7 +409,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
     if (err == default!) {
         Ꮡt.Errorf("DecryptPKCS1v15 accepted a large ciphertext"u8);
     }
-    c = append(c, (byte)(0xff));
+    c = append(c, (byte)0xff);
     err = VerifyPSS(Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey), crypto.SHA256, hash[..], c, opts);
     if (err == default!) {
         Ꮡt.Errorf("VerifyPSS accepted a long signature"u8);
@@ -406,6 +418,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
     if (err == default!) {
         Ꮡt.Errorf("DecryptPKCS1v15 accepted a long ciphertext"u8);
     }
+
     (var der, err) = Δx509.MarshalPKCS8PrivateKey(Ꮡpriv.OrTypedNil());
     if (err != default!) {
         Ꮡt.Errorf("MarshalPKCS8PrivateKey: %v"u8, err);
@@ -417,6 +430,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
     if (!key._<ж<rsa.PrivateKey>>().Equal(Ꮡpriv.OrTypedNil())) {
         Ꮡt.Errorf("private key mismatch"u8);
     }
+
     (der, err) = Δx509.MarshalPKIXPublicKey(Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey));
     if (err != default!) {
         Ꮡt.Errorf("MarshalPKIXPublicKey: %v"u8, err);
@@ -449,6 +463,7 @@ public static void TestKeyTooSmall(ж<testing.T> Ꮡt) {
         Ꮡt.Helper();
         checkErrʗ1(err);
     }
+
     var buf = new slice<byte>(512 / 8);
     var (ᴛ1, ᴛ2) = test512Key.Sign(rand.Reader, buf, crypto.SHA512);
     checkErr2(ᴛ1, ᴛ2);
@@ -509,7 +524,7 @@ EO+ZJ79TJKN5yiGBRsv5yvx5UiHxajEXAiAhAol5N4EUyq6I9w1rYdhPMGpLfk7A
 IU2snfRJ6Nq2CQIgFrPsWRCkV+gOYcajD17rEqmuLrdIRexpg8N1DOSXoJ8CIGlS
 tAboUGBxTDq3ZroNism3DaMIbKPyYrAqhKov1h5V
 -----END RSA TESTING KEY-----
-"""u8)));
+"""u8.Raw())));
 internal static ref ж<rsa.PrivateKey> test512Key => ref Ꮡtest512Key.ValueSlot;
 
 internal static ж<rsa.PrivateKey> test512KeyTwo = parseKey(testingKey("""
@@ -523,7 +538,7 @@ MQIhAMp5i2WCNeNpD6n/WkqBU6kJMXPSaPZy82mm5feYHgt5AiEAkg/QnhB9fjma
 1BzRqD4Uv0pDMXIkhooe+Rrn0OwtI3ECIQDP6nxML3JOjbAS7ydFBv176uVsMJib
 r4PZozCXKuuGNg==
 -----END PRIVATE KEY-----
-"""u8));
+"""u8.Raw()));
 
 internal static ж<rsa.PrivateKey> test1024Key = parseKey(testingKey("""
 -----BEGIN RSA TESTING KEY-----
@@ -541,7 +556,7 @@ eRYWciE+Cre5dzfZkomeXE0xBrhecV0bOq6EKWLSVE+yr6mAl05ThRK9DCfPSOpy
 F6rgN3QiyCA9J/1FluUCQQC5nX+PTU1FXx+6Ri2ZCi6EjEKMHr7gHcABhMinZYOt
 N59pra9UdVQw9jxCU9G7eMyb0jJkNACAuEwakX3gi27b
 -----END RSA TESTING KEY-----
-"""u8));
+"""u8.Raw()));
 
 internal static @string test2048KeyPEM = testingKey("""
 -----BEGIN TESTING KEY-----
@@ -572,7 +587,7 @@ ZWPxPAyQUEA7EkuUhAX1bVNG6UJTYA8kmGcUCG4jPTgWzi00IyUUr8jK7efyU/zs
 qiJuVs1bia+flYIQpysMl1VzZh8gW1nkB4SVPm5l2wBvVJDIr9Mc6rueC/oVNkh2
 fLVGuFoTVIu2bF0cWAjNNMg=
 -----END TESTING KEY-----
-"""u8);
+"""u8.Raw());
 
 internal static ж<ж<rsa.PrivateKey>> Ꮡtest2048Key = new StandardBox<ж<rsa.PrivateKey>>(parseKey(test2048KeyPEM));
 internal static ref ж<rsa.PrivateKey> test2048Key => ref Ꮡtest2048Key.ValueSlot;
@@ -618,7 +633,7 @@ Fh4jJb+4zwSML9R6iJu/LH5B7Fre2Te8QrYP+k/jIHPYJtGesVt/WlAtpDCNsC3j
 17IGHe9jZX/EVnSshCkXOBHG31buV10k5GSkeKcoDrkpp25wQ6FjW9L3Q68y6Y8r
 8h02sdAMB9Yc2A4EgzOySWoD
 -----END TESTING KEY-----
-"""u8));
+"""u8.Raw()));
 
 internal static ж<rsa.PrivateKey> test4096Key = parseKey(testingKey("""
 -----BEGIN TESTING KEY-----
@@ -673,7 +688,7 @@ T10qfQol54KjGld/HVDhzbsZJxzLDqvPlroWgwLdOLDMXhwJYfTnqMEQkaG4Aawr
 Nx2YZ03g6Kt6B6c43LJx1a/zEPYSZcPERgWOSHlcjmwRfTs6uoN9xt1qs4zEUaKv
 Axreud3rJ0rekUp6rI1joG717Wls
 -----END TESTING KEY-----
-"""u8));
+"""u8.Raw()));
 
 public static void BenchmarkDecryptPKCS1v15(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
@@ -690,12 +705,14 @@ public static void BenchmarkDecryptPKCS1v15(ж<testing.B> Ꮡb) {
 internal static void benchmarkDecryptPKCS1v15(ж<testing.B> Ꮡb, ж<rsa.PrivateKey> Ꮡk) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+    var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
+
     var m = slice<byte>("Hello Gophers"u8);
     var (c, err) = EncryptPKCS1v15(new rsa_test_package.bufio_ReaderжReader(r), Ꮡk.of(rsa.PrivateKey.ᏑPublicKey), m);
     if (err != default!) {
         Ꮡb.Fatal(err);
     }
+
     b.ResetTimer();
     byte sink = default!;
     for (nint i = 0; i < b.N; i++) {
@@ -712,8 +729,9 @@ internal static void benchmarkDecryptPKCS1v15(ж<testing.B> Ꮡb, ж<rsa.Private
 
 public static void BenchmarkEncryptPKCS1v15(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var m = slice<byte>("Hello Gophers"u8);
+
         byte sink = default!;
         for (nint i = 0; i < (~bΔ1).N; i++) {
             var (c, err) = EncryptPKCS1v15(new rsa_test_package.bufio_ReaderжReader(r), test2048Key.of(rsa.PrivateKey.ᏑPublicKey), m);
@@ -727,12 +745,14 @@ public static void BenchmarkEncryptPKCS1v15(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkDecryptOAEP(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
+
         var m = slice<byte>("Hello Gophers"u8);
         var (c, err) = EncryptOAEP(sha256.New(), new rsa_test_package.bufio_ReaderжReader(r), test2048Key.of(rsa.PrivateKey.ᏑPublicKey), m, default!);
         if (err != default!) {
             bΔ1.Fatal(err);
         }
+
         bΔ1.ResetTimer();
         byte sink = default!;
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -750,8 +770,9 @@ public static void BenchmarkDecryptOAEP(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkEncryptOAEP(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var m = slice<byte>("Hello Gophers"u8);
+
         byte sink = default!;
         for (nint i = 0; i < (~bΔ1).N; i++) {
             var (c, err) = EncryptOAEP(sha256.New(), new rsa_test_package.bufio_ReaderжReader(r), test2048Key.of(rsa.PrivateKey.ᏑPublicKey), m, default!);
@@ -766,6 +787,7 @@ public static void BenchmarkEncryptOAEP(ж<testing.B> Ꮡb) {
 public static void BenchmarkSignPKCS1v15(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
         var hashed = sha256.Sum256(slice<byte>("testing"u8));
+
         byte sink = default!;
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -785,6 +807,7 @@ public static void BenchmarkVerifyPKCS1v15(ж<testing.B> Ꮡb) {
         if (err != default!) {
             bΔ1.Fatal(err);
         }
+
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             var errΔ1 = VerifyPKCS1v15(test2048Key.of(rsa.PrivateKey.ᏑPublicKey), crypto.SHA256, hashed[..], s);
@@ -798,6 +821,7 @@ public static void BenchmarkVerifyPKCS1v15(ж<testing.B> Ꮡb) {
 public static void BenchmarkSignPSS(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
         var hashed = sha256.Sum256(slice<byte>("testing"u8));
+
         byte sink = default!;
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -817,6 +841,7 @@ public static void BenchmarkVerifyPSS(ж<testing.B> Ꮡb) {
         if (err != default!) {
             bΔ1.Fatal(err);
         }
+
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             var errΔ1 = VerifyPSS(test2048Key.of(rsa.PrivateKey.ᏑPublicKey), crypto.SHA256, hashed[..], s, nil);
@@ -873,6 +898,7 @@ public static void TestEncryptOAEP(ж<testing.T> Ꮡt) {
         n.SetString(test.modulus, 16);
         ref var @public = ref heap<rsa.PublicKey>(out var Ꮡpublic);
         @public = new PublicKey(N: n, E: test.e);
+
         foreach (var (j, message) in test.msgs) {
             var randomSource = bytes.NewReader(message.seed);
             var (@out, err) = EncryptOAEP(sha1Δ1, new rsa_test_package.bytes_ReaderжReader(randomSource), Ꮡpublic, message.@in, default!);
@@ -888,6 +914,7 @@ public static void TestEncryptOAEP(ж<testing.T> Ꮡt) {
 
 public static void TestDecryptOAEP(ж<testing.T> Ꮡt) {
     var random = rand.Reader;
+
     var sha1Δ1 = sha1.New();
     var n = @new<bigꓸInt>();
     var d = @new<bigꓸInt>();
@@ -897,6 +924,7 @@ public static void TestDecryptOAEP(ж<testing.T> Ꮡt) {
         var @private = @new<rsa.PrivateKey>();
         @private.Value.PublicKey = new PublicKey(N: n, E: test.e);
         @private.Value.D = d;
+
         foreach (var (j, message) in test.msgs) {
             var (@out, err) = DecryptOAEP(sha1Δ1, default!, @private, message.@out, default!);
             if (err != default!){
@@ -905,6 +933,7 @@ public static void TestDecryptOAEP(ж<testing.T> Ꮡt) {
             if (!bytes.Equal(@out, message.@in)) {
                 Ꮡt.Errorf("#%d,%d bad result: %#v (want %#v)"u8, i, j, @out, message.@in);
             }
+
             // Decrypt with blinding.
             (@out, err) = DecryptOAEP(sha1Δ1, random, @private, message.@out, default!);
             if (err != default!){
@@ -922,8 +951,10 @@ public static void TestDecryptOAEP(ж<testing.T> Ꮡt) {
 
 public static void Test2DecryptOAEP(ж<testing.T> Ꮡt) {
     var random = rand.Reader;
+
     var msg = new byte[]{0xed, 0x36, 0x90, 0x8d, 0xbe, 0xfc, 0x35, 0x40, 0x70, 0x4f, 0xf5, 0x9d, 0x6e, 0xc2, 0xeb, 0xf5, 0x27, 0xae, 0x65, 0xb0, 0x59, 0x29, 0x45, 0x25, 0x8c, 0xc1, 0x91, 0x22}.slice();
     var @in = new byte[]{0x72, 0x26, 0x84, 0xc9, 0xcf, 0xd6, 0xa8, 0x96, 0x04, 0x3e, 0x34, 0x07, 0x2c, 0x4f, 0xe6, 0x52, 0xbe, 0x46, 0x3c, 0xcf, 0x79, 0x21, 0x09, 0x64, 0xe7, 0x33, 0x66, 0x9b, 0xf8, 0x14, 0x22, 0x43, 0xfe, 0x8e, 0x52, 0x8b, 0xe0, 0x5f, 0x98, 0xef, 0x54, 0xac, 0x6b, 0xc6, 0x26, 0xac, 0x5b, 0x1b, 0x4b, 0x7d, 0x2e, 0xd7, 0x69, 0x28, 0x5a, 0x2f, 0x4a, 0x95, 0x89, 0x6c, 0xc7, 0x53, 0x95, 0xc7, 0xd2, 0x89, 0x04, 0x6f, 0x94, 0x74, 0x9b, 0x09, 0x0d, 0xf4, 0x61, 0x2e, 0xab, 0x48, 0x57, 0x4a, 0xbf, 0x95, 0xcb, 0xff, 0x15, 0xe2, 0xa0, 0x66, 0x58, 0xf7, 0x46, 0xf8, 0xc7, 0x0b, 0xb5, 0x1e, 0xa7, 0xba, 0x36, 0xce, 0xdd, 0x36, 0x41, 0x98, 0x6e, 0x10, 0xf9, 0x3b, 0x70, 0xbb, 0xa1, 0xda, 0x00, 0x40, 0xd5, 0xa5, 0x3f, 0x87, 0x64, 0x32, 0x7c, 0xbc, 0x50, 0x52, 0x0e, 0x4f, 0x21, 0xbd}.slice();
+
     var n = @new<bigꓸInt>();
     var d = @new<bigꓸInt>();
     n.SetString(testEncryptOAEPData[0].modulus, 16);
@@ -935,7 +966,9 @@ public static void Test2DecryptOAEP(ж<testing.T> Ꮡt) {
     sha1 = crypto.SHA1;
     ref var sha256 = ref heap<crypto.Hash>(out var Ꮡsha256);
     sha256 = crypto.SHA256;
+
     var (@out, err) = priv.Decrypt(random, @in, Ꮡ(new OAEPOptions(MGFHash: sha1, Hash: sha256)));
+
     if (err != default!){
         Ꮡt.Errorf("error: %s"u8, err);
     } else 
@@ -954,6 +987,7 @@ public static void TestEncryptDecryptOAEP(ж<testing.T> Ꮡt) {
         var priv = @new<rsa.PrivateKey>();
         priv.Value.PublicKey = new PublicKey(N: n, E: test.e);
         priv.Value.D = d;
+
         foreach (var (j, message) in test.msgs) {
             var label = slice<byte>(fmt.Sprintf("hi#%d"u8, j));
             var (enc, err) = EncryptOAEP(sha256Δ1, rand.Reader, priv.of(rsa.PrivateKey.ᏑPublicKey), message.@in, label);
@@ -973,18 +1007,14 @@ public static void TestEncryptDecryptOAEP(ж<testing.T> Ꮡt) {
     }
 }
 
-// Key 1
-// Example 1.1
-// Example 1.2
-// Example 1.3
-// Key 10
-// Example 10.1
 // testEncryptOAEPData contains a subset of the vectors from RSA's "Test vectors for RSA-OAEP".
 internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = new testEncryptOAEPStruct[]{
+    // Key 1
     new("a8b3b284af8eb50b387034a860f146c4919f318763cd6c5598c8ae4811a1e0abc4c7e0b082d693a5e7fced675cf4668512772c0cbc64a742c6c630f533c8cc72f62ae833c40bf25842e984bb78bdbf97c0107d55bdb662f5c4e0fab9845cb5148ef7392dd3aaff93ae1e6b667bb3d4247616d4f5ba10d4cfd226de88d39f16fb"u8,
         65537,
         "53339cfdb79fc8466a655c7316aca85c55fd8f6dd898fdaf119517ef4f52e8fd8e258df93fee180fa0e4ab29693cd83b152a553d4ac4d1812b8b9fa5af0e7f55fe7304df41570926f3311f15c4d65a732c483116ee3d3d2d0af3549ad9bf7cbfb78ad884f84d5beb04724dc7369b31def37d0cf539e9cfcdd3de653729ead5d1"u8,
         new testEncryptOAEPMessage[]{
+            // Example 1.1
             new(
                 new byte[]{0x66, 0x28, 0x19, 0x4e, 0x12, 0x07, 0x3d, 0xb0,
                     0x3b, 0xa9, 0x4c, 0xda, 0x9e, 0xf9, 0x53, 0x23, 0x97,
@@ -1012,6 +1042,7 @@ internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = new testEncry
                     0xc7, 0x2e, 0x8a
                 }.slice()
             ),
+            // Example 1.2
             new(
                 new byte[]{0x75, 0x0c, 0x40, 0x47, 0xf5, 0x47, 0xe8, 0xe4,
                     0x14, 0x11, 0x85, 0x65, 0x23, 0x29, 0x8a, 0xc9, 0xba,
@@ -1039,6 +1070,7 @@ internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = new testEncry
                     0x49, 0x2b, 0x44
                 }.slice()
             ),
+            // Example 1.3
             new(
                 new byte[]{0xd9, 0x4a, 0xe0, 0x83, 0x2e, 0x64, 0x45, 0xce,
                     0x42, 0x33, 0x1c, 0xb0, 0x6d, 0x53, 0x1a, 0x82, 0xb1,
@@ -1071,10 +1103,12 @@ internal static slice<testEncryptOAEPStruct> testEncryptOAEPData = new testEncry
             )
         }.slice()
     ),
+    // Key 10
     new("ae45ed5601cec6b8cc05f803935c674ddbe0d75c4c09fd7951fc6b0caec313a8df39970c518bffba5ed68f3f0d7f22a4029d413f1ae07e4ebe9e4177ce23e7f5404b569e4ee1bdcf3c1fb03ef113802d4f855eb9b5134b5a7c8085adcae6fa2fa1417ec3763be171b0c62b760ede23c12ad92b980884c641f5a8fac26bdad4a03381a22fe1b754885094c82506d4019a535a286afeb271bb9ba592de18dcf600c2aeeae56e02f7cf79fc14cf3bdc7cd84febbbf950ca90304b2219a7aa063aefa2c3c1980e560cd64afe779585b6107657b957857efde6010988ab7de417fc88d8f384c4e6e72c3f943e0c31c0c4a5cc36f879d8a3ac9d7d59860eaada6b83bb"u8,
         65537,
         "056b04216fe5f354ac77250a4b6b0c8525a85c59b0bd80c56450a22d5f438e596a333aa875e291dd43f48cb88b9d5fc0d499f9fcd1c397f9afc070cd9e398c8d19e61db7c7410a6b2675dfbf5d345b804d201add502d5ce2dfcb091ce9997bbebe57306f383e4d588103f036f7e85d1934d152a323e4a8db451d6f4a5b1b0f102cc150e02feee2b88dea4ad4c1baccb24d84072d14e1d24a6771f7408ee30564fb86d4393a34bcf0b788501d193303f13a2284b001f0f649eaf79328d4ac5c430ab4414920a9460ed1b7bc40ec653e876d09abc509ae45b525190116a0c26101848298509c1c3bf3a483e7274054e15e97075036e989f60932807b5257751e79"u8,
         new testEncryptOAEPMessage[]{
+            // Example 10.1
             new(
                 new byte[]{0x8b, 0xba, 0x6b, 0xf8, 0x2a, 0x6c, 0x0f, 0x86,
                     0xd5, 0xf1, 0x75, 0x6e, 0x97, 0x95, 0x68, 0x70, 0xb0,
@@ -1131,7 +1165,7 @@ TQIhAKMSvzIBnni7ot/OSie2TmJLY4SwTQAevXysE2RbFDYdAiEBCUEaRQnMnbp7
 v/Ow5T0q5gIJAiEAyS4RaI9YG8EWx/2w0T67ZUVAw8eOMB6BIUg0Xcu+3okCIBOs
 /5OiPgoTdSy7bcF9IGpSE8ZgGKzgYQVZeN97YE00
 -----END RSA TESTING KEY-----
-"""u8;
+"""u8.Raw();
 internal static readonly object boringCryptoModeReturnsˢ = (@string)"BoringCrypto mode returns the wrong error from SignPSS"u8;
 
 public static void TestPSmallerThanQ(ж<testing.T> Ꮡt) {

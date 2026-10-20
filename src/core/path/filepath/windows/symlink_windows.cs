@@ -13,10 +13,11 @@ partial class filepath_package {
 // EvalSymlinks(`c:\a`) == EvalSymlinks(`C:\a`).
 internal static @string normVolumeName(@string path) {
     @string volume = VolumeName(path);
-    if (len(volume) > 2) {
-        // isUNC
+
+    if (len(volume) > 2) { // isUNC
         return volume;
     }
+
     return strings.ToUpper(volume);
 }
 
@@ -26,12 +27,15 @@ internal static (@string, error) normBase(@string path) {
     if (err != default!) {
         return ("", err);
     }
+
     ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
+
     (var h, err) = syscall.FindFirstFile(p, Ꮡdata);
     if (err != default!) {
         return ("", err);
     }
     syscall.FindClose(h);
+
     return (syscall.UTF16ToString(data.FileName[..]), default!);
 }
 
@@ -57,35 +61,46 @@ internal static (@string, error) toNorm(@string path, Func<@string, (@string, er
     if (path == ""u8) {
         return (path, default!);
     }
+
     @string volume = normVolumeName(path);
     path = path.slice(len(volume));
+
     // skip special cases
     if (path == ""u8 || path == "."u8 || path == @"\"u8) {
         return (volume + path, default!);
     }
+
     @string normPath = default!;
+
     while (ᐧ) {
         if (baseIsDotDot(path)) {
             normPath = path + @"\"u8 + normPath;
+
             break;
         }
+
         var (name, err) = normBase(volume + path);
         if (err != default!) {
             return ("", err);
         }
+
         normPath = name + @"\"u8 + normPath;
+
         nint i = strings.LastIndexByte(path, Separator);
         if (i == -1) {
             break;
         }
-        if (i == 0) {
-            // `\Go` or `C:\Go`
+        if (i == 0) { // `\Go` or `C:\Go`
             normPath = @"\"u8 + normPath;
+
             break;
         }
+
         path = path.slice(0, i);
     }
+
     normPath = normPath.slice(0, len(normPath) - 1); // remove trailing '\'
+
     return (volume + normPath, default!);
 }
 

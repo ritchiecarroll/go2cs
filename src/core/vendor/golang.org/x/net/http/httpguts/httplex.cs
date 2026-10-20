@@ -230,23 +230,6 @@ public static bool ValidHostHeader(@string h) {
     return true;
 }
 
-// sub-delims
-// sub-delims
-// pct-encoded (and used in IPv6 zones)
-// sub-delims
-// sub-delims
-// sub-delims
-// sub-delims
-// sub-delims
-// sub-delims
-// unreserved
-// unreserved
-// IPv6address + Host expression's optional port
-// sub-delims
-// sub-delims
-// sub-delims
-// unreserved
-// unreserved
 // See the validHostHeader comment.
 internal static array<bool> validHostByte = new array<bool>(256){
     [(rune)'0'] = true, [(rune)'1'] = true, [(rune)'2'] = true, [(rune)'3'] = true, [(rune)'4'] = true, [(rune)'5'] = true, [(rune)'6'] = true, [(rune)'7'] = true,
@@ -259,25 +242,25 @@ internal static array<bool> validHostByte = new array<bool>(256){
     [(rune)'I'] = true, [(rune)'J'] = true, [(rune)'K'] = true, [(rune)'L'] = true, [(rune)'M'] = true, [(rune)'N'] = true, [(rune)'O'] = true, [(rune)'P'] = true,
     [(rune)'Q'] = true, [(rune)'R'] = true, [(rune)'S'] = true, [(rune)'T'] = true, [(rune)'U'] = true, [(rune)'V'] = true, [(rune)'W'] = true, [(rune)'X'] = true,
     [(rune)'Y'] = true, [(rune)'Z'] = true,
-    [(rune)'!'] = true,
-    [(rune)'$'] = true,
-    [(rune)'%'] = true,
-    [(rune)'&'] = true,
-    [(rune)'('] = true,
-    [(rune)')'] = true,
-    [(rune)'*'] = true,
-    [(rune)'+'] = true,
-    [(rune)','] = true,
-    [(rune)'-'] = true,
-    [(rune)'.'] = true,
-    [(rune)':'] = true,
-    [(rune)';'] = true,
-    [(rune)'='] = true,
+    [(rune)'!'] = true, // sub-delims
+    [(rune)'$'] = true, // sub-delims
+    [(rune)'%'] = true, // pct-encoded (and used in IPv6 zones)
+    [(rune)'&'] = true, // sub-delims
+    [(rune)'('] = true, // sub-delims
+    [(rune)')'] = true, // sub-delims
+    [(rune)'*'] = true, // sub-delims
+    [(rune)'+'] = true, // sub-delims
+    [(rune)','] = true, // sub-delims
+    [(rune)'-'] = true, // unreserved
+    [(rune)'.'] = true, // unreserved
+    [(rune)':'] = true, // IPv6address + Host expression's optional port
+    [(rune)';'] = true, // sub-delims
+    [(rune)'='] = true, // sub-delims
     [(rune)'['] = true,
-    [(rune)'\''] = true,
+    [(rune)'\''] = true, // sub-delims
     [(rune)']'] = true,
-    [(rune)'_'] = true,
-    [(rune)'~'] = true
+    [(rune)'_'] = true, // unreserved
+    [(rune)'~'] = true // unreserved
 };
 
 // ValidHeaderFieldValue reports whether v is a valid "field-value" according to
@@ -343,6 +326,7 @@ public static (@string, error) PunycodeHostPort(@string v) {
     if (isASCII(v)) {
         return (v, default!);
     }
+
     var (host, port, err) = net.SplitHostPort(v);
     if (err != default!) {
         // The input 'v' argument was just a "host" argument,

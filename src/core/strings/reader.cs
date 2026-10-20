@@ -108,12 +108,6 @@ public static (rune ch, nint size, error err) ReadRune(this ref Reader r) {
         return (0, 0, io.EOF);
     }
     r.prevRune = (nint)r.i;
-    {
-        var c = r.s[(nint)(r.i)]; if (c < utf8.RuneSelf) {
-            r.i++;
-            return ((rune)c, 1, default!);
-        }
-    }
     (ch, size) = utf8.DecodeRuneInString(r.s.slice((nint)(r.i)));
     r.i += (int64)size;
     return (ch, size, err);
@@ -157,7 +151,6 @@ public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) 
     else { /* default: */
         return (0, errors.New(stringsReaderSeekInvalidˢ));
     }
-
     if (abs < 0) {
         return (0, errors.New(stringsReaderSeekˢ));
     }

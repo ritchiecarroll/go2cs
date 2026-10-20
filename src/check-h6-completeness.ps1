@@ -12,11 +12,11 @@
     passed straight through. Its own guards stay armed: a zero marker count throws and a classification
     that does not sum to the census fails its self-verify. Either one REFUSES this gate (exit 2).
 
-    ROWS -- the audit's row table is found by its HEADER: the one Markdown table whose header cells
+    ROWS -- the audit's row tables are found by their HEADER: every Markdown table whose header cells
     include '#', a cell starting 'path', a cell exactly 'class', a cell starting 'reason' and two cells
-    naming an '.auto' sha256. Every '|' line under its delimiter row, up to the first line that is not
-    one, is a row. Cells split on unescaped '|' (GFM). A path cell is read with its backticks removed,
-    relative to src/core. Prose elsewhere in the file (fill blocks, open questions) is never a row.
+    naming an '.auto' sha256. All of them are gated as ONE population, under one identical header. Every
+    '|' line under a delimiter row, up to the first that is not one, is a row. Cells split on unescaped
+    '|' (GFM). A path cell is read without its backticks, relative to src/core. Prose is never a row.
 
     ASSERTIONS -- each violation is printed on one line, prefixed by its kind:
       MISSING    a census path with no row
@@ -33,7 +33,7 @@
                  its path also reads MISSING)
 
     VACUITY -- refused (exit 2), never passed: a census that throws, a census of zero paths, a census
-    that exposed no population, an audit with no row table (or more than one), a table with zero rows.
+    that exposed no population, an audit with no row table, tables whose headers differ, a zero-row table.
     Both counts are printed on every run, before any verdict.
 
     NAMED BLIND SPOTS -- what a clean exit does NOT say:
@@ -53,10 +53,14 @@
     GOROOT of the outgoing release, passed through to handown-census.ps1 (mandatory there too).
 
 .PARAMETER ToGoRoot
-    GOROOT of the incoming release, passed through to handown-census.ps1.
+    GOROOT of the incoming release, passed through to handown-census.ps1. Its VERSION must name the
+    release src/version.props pins (bumped at H2, so at H6 it is the incoming one), or the gate refuses.
 
 .PARAMETER AuditFile
-    The migration's audit file. Default: docs/phase4/AUDIT-h6-handown-go124.md in this tree.
+    The migration's audit file. Default: docs/phase4/AUDIT-h6-handown-go<GoStdLibVersion>.md in this
+    tree, the release read from src/version.props, never a literal (NOTES-next-hop A8). A default that
+    names no file REFUSES by name rather than reading an earlier hop's audit; an earlier hop's audit
+    (hop B's is AUDIT-h6-handown-go124.md) is passed explicitly.
 
 .NOTES
     Requires PowerShell 5.1 (Windows) or PowerShell 7+. Exit 0 clean, 1 on any violation, 2 when the
@@ -73,7 +77,6 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-if (-not $AuditFile) { $AuditFile = Join-Path $repo 'docs/phase4/AUDIT-h6-handown-go124.md' }
 $censusScript = Join-Path $PSScriptRoot 'handown-census.ps1'
 
 $emDash = [string][char]0x2014
@@ -121,7 +124,28 @@ function Get-CensusPopulation([string] $Census, [string] $From, [string] $To) {
 }
 
 if (-not (Test-Path $censusScript)) { Stop-Refused "the census instrument is absent: src/handown-census.ps1" }
-if (-not (Test-Path $AuditFile)) { Stop-Refused "the audit file is absent: $AuditFile" }
+
+# --- 0. The release: src/version.props <GoStdLibVersion>, the runbook's one source of record -------
+# A literal default here read the PREVIOUS hop's audit when run without -AuditFile, and passed or
+# failed on rows nobody wrote for this hop (NOTES-next-hop A8).
+$propsPath = Join-Path $repo 'src/version.props'
+$pinMatch = if (Test-Path -LiteralPath $propsPath) {
+    [regex]::Match([System.IO.File]::ReadAllText($propsPath), '<GoStdLibVersion>\s*([^<\s]+)\s*</GoStdLibVersion>')
+}
+if (-not $pinMatch -or -not $pinMatch.Success) { Stop-Refused "src/version.props carries no <GoStdLibVersion>, so the release under audit has no source of record" }
+$goPin = $pinMatch.Groups[1].Value
+if (-not $AuditFile) { $AuditFile = Join-Path $repo "docs/phase4/AUDIT-h6-handown-go$goPin.md" }
+if (-not (Test-Path $AuditFile)) { Stop-Refused "the audit file is absent: $AuditFile (the release pinned in src/version.props is go$goPin)" }
+
+# The census classifies against -ToGoRoot while src/core is the pinned release's, so the two must name
+# one release. Matched whole: go1.24.13 is not met by go1.24.130.
+$toVersionPath = Join-Path $ToGoRoot 'VERSION'
+if (-not (Test-Path -LiteralPath $toVersionPath)) { Stop-Refused "-ToGoRoot has no VERSION file, so its release cannot be checked against the pin go$goPin" }
+$toVersion = (Get-Content -LiteralPath $toVersionPath -TotalCount 1)
+if (-not [regex]::IsMatch($toVersion, '(?<![0-9A-Za-z.])go' + [regex]::Escape($goPin) + '(?![0-9.])')) {
+    Stop-Refused "-ToGoRoot's VERSION is '$toVersion', not the release src/version.props pins (go$goPin)"
+}
+Write-Host "h6-completeness: release go$goPin (src/version.props); audit $AuditFile"
 
 Write-Host "h6-completeness: population by src/handown-census.ps1 over src/core"
 try {
@@ -160,42 +184,62 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
     }
 }
 if ($headers.Count -eq 0) { Stop-Refused "VACUOUS: no row table in the audit (no header with #, path, class, reason and two .auto sha256 cells)" }
-if ($headers.Count -gt 1) {
-    Stop-Refused ("the audit carries $($headers.Count) row tables, at lines " + (($headers | ForEach-Object { $_[0] + 1 }) -join ', ') + '; exactly one is gated')
-}
-$hdrLine = $headers[0][0]
+# Every table carrying the row header is gated, as ONE population (an audit with a section per lane carries
+# one table per lane). Each table's rows are read under its own header, and every header must match the
+# first cell for cell: a column that meant different things in different tables would be gated as one.
 $hdr = $headers[0][1]
+foreach ($h in $headers) {
+    if (($h[1] -join '|') -cne ($hdr -join '|')) {
+        Stop-Refused ("the row table at line $($h[0] + 1) has a different header from the one at line $($headers[0][0] + 1); every gated table must carry the same columns")
+    }
+}
 $colNum = [array]::IndexOf($hdr, '#')
 $colPath = @(0..($hdr.Count - 1) | Where-Object { $hdr[$_] -match '^path\b' })[0]
 $colClass = @(0..($hdr.Count - 1) | Where-Object { $hdr[$_] -ceq 'class' })[0]
 $colReason = @(0..($hdr.Count - 1) | Where-Object { $hdr[$_] -match '^reason\b' })[0]
 $colHash = @(0..($hdr.Count - 1) | Where-Object { $hdr[$_] -match '^\.auto\b.*\bsha256\b' })
 
-$delim = if ($hdrLine + 1 -lt $lines.Count) { $lines[$hdrLine + 1].Trim() } else { '' }
-if ($delim -notmatch '^\|(\s*:?-+:?\s*\|)+$') { Stop-Refused "the row table's header (line $($hdrLine + 1)) has no delimiter row under it" }
-
 $rows = New-Object System.Collections.Generic.List[object]
 $violations = New-Object System.Collections.Generic.List[string]
-for ($i = $hdrLine + 2; $i -lt $lines.Count; $i++) {
-    if (-not $lines[$i].TrimStart().StartsWith('|')) { break }
-    $cells = Split-Row $lines[$i]
-    $ln = $i + 1
-    if ($cells.Count -ne $hdr.Count) {
-        [void]$violations.Add("MALFORMED line ${ln}: $($cells.Count) cells, the header has $($hdr.Count): $(Show-Cell $lines[$i] 120)")
-        continue
+$auditRel = (Resolve-Path $AuditFile).Path.Replace($repo, '').TrimStart('\', '/')
+foreach ($h in $headers) {
+    $hdrLine = $h[0]
+    $delim = if ($hdrLine + 1 -lt $lines.Count) { $lines[$hdrLine + 1].Trim() } else { '' }
+    if ($delim -notmatch '^\|(\s*:?-+:?\s*\|)+$') { Stop-Refused "the row table's header (line $($hdrLine + 1)) has no delimiter row under it" }
+
+    $tableRows = 0
+    $lastLine = $hdrLine + 2
+    for ($i = $hdrLine + 2; $i -lt $lines.Count; $i++) {
+        if (-not $lines[$i].TrimStart().StartsWith('|')) { break }
+        $cells = Split-Row $lines[$i]
+        $ln = $i + 1
+        if ($cells.Count -ne $hdr.Count) {
+            [void]$violations.Add("MALFORMED line ${ln}: $($cells.Count) cells, the header has $($hdr.Count): $(Show-Cell $lines[$i] 120)")
+            continue
+        }
+        $rows.Add([pscustomobject]@{
+            Line   = $ln
+            Num    = Get-CellText $cells[$colNum]
+            Path   = Get-CellText $cells[$colPath]
+            Class  = Get-CellText $cells[$colClass]
+            Reason = $cells[$colReason]
+            Hashes = @($colHash | ForEach-Object { $cells[$_] })
+            Cells  = $cells
+        })
+        $tableRows++
+        $lastLine = $ln
     }
-    $rows.Add([pscustomobject]@{
-        Line   = $ln
-        Num    = Get-CellText $cells[$colNum]
-        Path   = Get-CellText $cells[$colPath]
-        Class  = Get-CellText $cells[$colClass]
-        Reason = $cells[$colReason]
-        Hashes = @($colHash | ForEach-Object { $cells[$_] })
-        Cells  = $cells
-    })
+    if ($headers.Count -gt 1) {
+        Write-Host "h6-completeness: table  = $tableRows rows (header line $($hdrLine + 1), rows through line $lastLine)"
+        if ($tableRows -eq 0) { Stop-Refused "VACUOUS: the row table at line $($hdrLine + 1) parsed 0 rows" }
+    }
 }
-$lastLine = if ($rows.Count -gt 0) { $rows[$rows.Count - 1].Line } else { $hdrLine + 2 }
-Write-Host "h6-completeness: audit  = $($rows.Count) rows parsed ($((Resolve-Path $AuditFile).Path.Replace($repo, '').TrimStart('\', '/')), header line $($hdrLine + 1), rows through line $lastLine)"
+if ($headers.Count -eq 1) {
+    Write-Host "h6-completeness: audit  = $($rows.Count) rows parsed ($auditRel, header line $($headers[0][0] + 1), rows through line $lastLine)"
+}
+else {
+    Write-Host "h6-completeness: audit  = $($rows.Count) rows parsed ($auditRel, $($headers.Count) tables gated as one population)"
+}
 if ($rows.Count -eq 0) { Stop-Refused 'VACUOUS: the audit row table parsed 0 rows' }
 
 # --- 3. Assertions ------------------------------------------------------------------------------------

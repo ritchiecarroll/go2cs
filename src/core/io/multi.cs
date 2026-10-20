@@ -62,8 +62,7 @@ internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr
     foreach (var (i, r) in mr.readers) {
         int64 n = default!;
         {
-            var (subMr, ok) = r._<ж<multiReader>>(ᐧ); if (ok){
-                // reuse buffer with nested multiReaders
+            var (subMr, ok) = r._<ж<multiReader>>(ᐧ); if (ok){ // reuse buffer with nested multiReaders
                 (n, err) = subMr.writeToWithBuffer(w, buf);
             } else {
                 (n, err) = copyBuffer(w, r, buf);

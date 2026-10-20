@@ -49,6 +49,7 @@ internal static (@string, error) findExportFile(slice<@string> searchpaths, @str
     foreach (var (_, spath) in searchpaths) {
         @string pkgfullpath = filepath.Join(spath, pkgpath);
         var (pkgdir, name) = filepath.Split(pkgfullpath);
+
         foreach (var (_, filepathΔ1) in new @string[]{
             pkgfullpath,
             pkgfullpath + ".gox"u8,
@@ -62,6 +63,7 @@ internal static (@string, error) findExportFile(slice<@string> searchpaths, @str
             }
         }
     }
+
     return ("", fmt.Errorf("%s: could not find export data (tried %s)"u8, pkgpath, strings.Join(searchpaths, ":"u8)));
 }
 
@@ -95,14 +97,17 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
                 fʗ1.Close();
             }
         }, ref ᒐ);
+
         array<byte> magic = new(4);
         (_, err) = f.ReadAt(magic[..], 0);
         if (err != default!) {
             goto ᒐdone;
         }
+
         io.ReaderAt objreader = default!;
         var exprᴛ1 = ((sstring)(magic[..]));
         if (exprᴛ1 == gccgov1Magic || exprᴛ1 == gccgov2Magic || exprᴛ1 == gccgov3Magic || exprᴛ1 == goimporterMagic) {
+            // Raw export data.
             reader = new os_FileжReadSeeker(f);
             goto ᒐdone;
         }
@@ -114,7 +119,6 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
             objreader = new os_FileжReaderAt(f);
         }
 
-        // Raw export data.
         (var ef, err) = elf.NewFile(objreader);
         if (err == default!) {
             var sec = ef.Section(goExportˢ);
@@ -125,6 +129,7 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
             reader = sec.Open();
             goto ᒐdone;
         }
+
         (var xf, err) = xcoff.NewFile(objreader);
         if (err == default!) {
             var sdat = xf.CSect(goExportˢ);
@@ -135,6 +140,7 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
             reader = new bytes_ReaderжReadSeeker(bytes.NewReader(sdat));
             goto ᒐdone;
         }
+
         err = fmt.Errorf("%s: unrecognized file format"u8, fpath);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -142,6 +148,13 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
     ᒐdone: return (reader, closer, Ꮡerr.ValueSlot);
 }
 
+// An Importer resolves import paths to Packages. The imports map records
+// packages already known, indexed by package path.
+// An importer must determine the canonical package path and check imports
+// to see if it is already present in the map. If so, the Importer can return
+// the map entry. Otherwise, the importer must load the package data for the
+// given path into a new *Package, record it in imports map, and return the
+// package.
 // type Importer is a methodless func type — rendered inline as its base delegate
 
 internal partial interface GetImporter_type /*dyn*/ {
@@ -163,6 +176,7 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
             if (pkgpath == "unsafe"u8) {
                 (pkg, err) = (types.Unsafe, default!); goto ᒐdone;
             }
+
             io.ReadSeeker reader = default!;
             @string fpath = default!;
             io.ReadCloser rc = default!;
@@ -197,6 +211,7 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
                 if (err != default!) {
                     (pkg, err) = (default!, err); goto ᒐdone;
                 }
+
                 var (r, closer, errΔ1) = openExportFile(fpath);
                 if (errΔ1 != default!) {
                     (pkg, err) = (default!, errΔ1); goto ᒐdone;
@@ -207,11 +222,13 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
                 }
                 reader = r;
             }
+
             @string magics = default!;
             (magics, err) = readMagic(reader);
             if (err != default!) {
                 goto ᒐdone;
             }
+
             if (magics == archiveMagic || magics == aixbigafMagic) {
                 (reader, err) = arExportData(reader);
                 if (err != default!) {
@@ -222,6 +239,7 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
                     goto ᒐdone;
                 }
             }
+
             var exprᴛ1 = magics;
             if (exprᴛ1 == gccgov1Magic || exprᴛ1 == gccgov2Magic || exprᴛ1 == gccgov3Magic) {
                 ref var p = ref heap(new parser(), out var Ꮡp);
@@ -231,27 +249,27 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
                     initmapʗ1[pkg] = p.initdata;
                 }
             }
+            // Excluded for now: Standard gccgo doesn't support this import format currently.
+            // case goimporterMagic:
+            // 	var data []byte
+            // 	data, err = io.ReadAll(reader)
+            // 	if err != nil {
+            // 		return
+            // 	}
+            // 	var n int
+            // 	n, pkg, err = importer.ImportData(imports, data)
+            // 	if err != nil {
+            // 		return
+            // 	}
+            // 	if initmap != nil {
+            // 		suffixreader := bytes.NewReader(data[n:])
+            // 		var p parser
+            // 		p.init(fpath, suffixreader, nil)
+            // 		p.parseInitData()
+            // 		initmap[pkg] = p.initdata
+            // 	}
             else { /* default: */
-                err = fmt.Errorf("unrecognized magic string: %q"u8, // Excluded for now: Standard gccgo doesn't support this import format currently.
- // case goimporterMagic:
- // 	var data []byte
- // 	data, err = io.ReadAll(reader)
- // 	if err != nil {
- // 		return
- // 	}
- // 	var n int
- // 	n, pkg, err = importer.ImportData(imports, data)
- // 	if err != nil {
- // 		return
- // 	}
- // 	if initmap != nil {
- // 		suffixreader := bytes.NewReader(data[n:])
- // 		var p parser
- // 		p.init(fpath, suffixreader, nil)
- // 		p.parseInitData()
- // 		initmap[pkg] = p.initdata
- // 	}
- magics);
+                err = fmt.Errorf("unrecognized magic string: %q"u8, magics);
             }
 
             goto ᒐdone;
@@ -276,7 +294,7 @@ internal static (@string, error) readMagic(io.ReadSeeker reader) {
             return ("", err);
         }
     }
-    return (((@string)(magic[..])), default!);
+    return ((@string)(magic[..]), default!);
 }
 
 } // end gccgoimporter_package

@@ -40,6 +40,7 @@ import (
 // any slot of a keyed composite — single-result and multi-result alike — and pins the CONTROL
 // that a concrete func-typed slot, which does have a delegate target, is left exactly as it was.
 func TestUntypedInterfaceFuncLitResultType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -125,7 +126,7 @@ func main() {
 
 	// The defect's own signature: the panic-only literal rendered with no return type at all,
 	// which is exactly what C# reads as Action.
-	if strings.Contains(mainCs, "[\"die\"u8] = () =>") {
+	if strings.Contains(mainCs, "[\"die\"] = () =>") {
 		t.Errorf("panic-only func literal in an any map slot lost its result type (renders as Action): %s", mainCs)
 	}
 
@@ -139,9 +140,9 @@ func main() {
 	// they are emitted at the same site and a change to either would otherwise be invisible: the
 	// result type must still be stated INSIDE the cast, not replaced by it.
 	for _, want := range []string{
-		"[\"die\"u8] = bool () =>",
-		"[\"live\"u8] = @string () =>",
-		"[\"pred\"u8] = ((Funcꓸꓸꓸ<any, (any, error)>)((any, error) (params ",
+		"[\"die\"] = bool () =>", // a `string` map key takes the plain literal
+		"[\"live\"] = @string () =>",
+		"[\"pred\"] = ((Funcꓸꓸꓸ<any, (any, error)>)((any, error) (params ",
 		"fn: nint () =>",
 	} {
 		if !strings.Contains(mainCs, want) {
@@ -152,7 +153,7 @@ func main() {
 	// CONTROL: the concrete map[string]func() bool slot keeps the bare, target-typed lambda.
 	// A return-type prefix here would be pure churn — the delegate type is already stated by
 	// the map's own value type.
-	if !strings.Contains(mainCs, "new map<@string, Func<bool>>{[\"t\"u8] = () => {") {
+	if !strings.Contains(mainCs, "new map<@string, Func<bool>>{[\"t\"] = () => {") {
 		t.Errorf("a concrete func-typed slot must keep its target-typed lambda unchanged: %s", mainCs)
 	}
 }

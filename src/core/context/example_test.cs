@@ -48,15 +48,23 @@ public static void ExampleWithCancel() {
             });
             return dst.WithDirection(GoChanDir.Recv);
         }
+
         var (ctx, cancel) = context.WithCancel(context.Background());
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ); // cancel when we are finished consuming integers
+
         foreach (var n in gen(ctx)) {
             fmt.Println(n);
             if (n == 5) {
                 break;
             }
         }
+        // Output:
+        // 1
+        // 2
+        // 3
+        // 4
+        // 5
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -65,13 +73,6 @@ public static void ExampleWithCancel() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readyˢ = (@string)"ready"u8;
 
-// Output:
-// 1
-// 2
-// 3
-// 4
-// 5
-
 // This example passes a context with an arbitrary deadline to tell a blocking
 // function that it should abandon its work as soon as it gets to it.
 public static void ExampleWithDeadline() {
@@ -79,11 +80,13 @@ public static void ExampleWithDeadline() {
     try {
         var d = time.Now().Add(shortDuration);
         var (ctx, cancel) = context.WithDeadline(context.Background(), d);
+
         // Even though ctx will be expired, it is good practice to call its
         // cancellation function in any case. Failure to do so may keep the
         // context and its parent alive longer than necessary.
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         var selᴛ5 = neverReady;
         var selᴛ6 = ctx.Done();
         switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
@@ -95,13 +98,13 @@ public static void ExampleWithDeadline() {
             fmt.Println(ctx.Err());
             break;
         }}
+
+        // Output:
+        // context deadline exceeded
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Output:
-// context deadline exceeded
 
 // This example passes a context with a timeout to tell a blocking function that
 // it should abandon its work after the timeout elapses.
@@ -113,6 +116,7 @@ public static void ExampleWithTimeout() {
         var (ctx, cancel) = context.WithTimeout(context.Background(), shortDuration);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         var selᴛ7 = neverReady;
         var selᴛ8 = ctx.Done();
         switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
@@ -124,6 +128,9 @@ public static void ExampleWithTimeout() {
             fmt.Println(ctx.Err()); // prints "context deadline exceeded"
             break;
         }}
+
+        // Output:
+        // context deadline exceeded
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -137,9 +144,6 @@ internal static readonly @string colorˢ = "color"u8;
 
 internal partial struct ExampleWithValue_favContextKey /*@string*/;
 
-// Output:
-// context deadline exceeded
-
 // This example demonstrates how a value can be passed to the context
 // and also how to retrieve it if it exists.
 public static void ExampleWithValue() {
@@ -152,15 +156,17 @@ public static void ExampleWithValue() {
         }
         fmt.Println(keyNotFoundˢ, kΔ1);
     }
-    ExampleWithValue_favContextKey k = ((ExampleWithValue_favContextKey)(@string)languageˢ);
-    var ctx = context.WithValue(context.Background(), k, (@string)"Go"u8);
-    f(ctx, k);
-    f(ctx, ((ExampleWithValue_favContextKey)(@string)colorˢ));
-}
 
-// Output:
-// found value: Go
-// key not found: color
+    ExampleWithValue_favContextKey k = (ExampleWithValue_favContextKey)(@string)languageˢ;
+    var ctx = context.WithValue(context.Background(), k, (@string)"Go"u8);
+
+    f(ctx, k);
+    f(ctx, (ExampleWithValue_favContextKey)(@string)colorˢ);
+
+    // Output:
+    // found value: Go
+    // key not found: color
+}
 
 // This example uses AfterFunc to define a function which waits on a sync.Cond,
 // stopping the wait when a context is canceled.
@@ -176,6 +182,7 @@ public static partial void ExampleAfterFunc_cond() {
                     // in a missed signal (and deadlock).
                     (~condΔ1).L.Lock();
                     defer((~condΔ1).L.Unlock, ref ᒐ);
+
                     // If multiple goroutines are waiting on cond simultaneously,
                     // we need to make sure we wake up exactly this one.
                     // That means that we need to Broadcast to all of the goroutines,
@@ -191,6 +198,7 @@ public static partial void ExampleAfterFunc_cond() {
             });
             var stopfʗ1 = stopf;
             defer(() => stopfʗ1(), ref ᒐ);
+
             // Since the wakeups are using Broadcast instead of Signal, this call to
             // Wait may unblock due to some other goroutine's context being canceled,
             // so to be sure that ctx is actually canceled we need to check it in a loop.
@@ -200,12 +208,15 @@ public static partial void ExampleAfterFunc_cond() {
                     return ctx.Err();
                 }
             }
+
             return default!;
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
         finally { ᒐ.Run(); }
     }
+
     var cond = Δsync.NewCond(new Δsync.MutexжLocker(@new<Δsync.Mutex>()));
+
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 4; i++) {
         Ꮡwg.Add(1);
@@ -215,12 +226,15 @@ public static partial void ExampleAfterFunc_cond() {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
+
                 var (ctx, cancel) = context.WithTimeout(context.Background(), 1 * time.Millisecond);
                 var cancelʗ1 = cancel;
                 defer(() => cancelʗ1(), ref ᒐ);
+
                 (~condʗ1).L.Lock();
                 var condʗ2 = condʗ1;
                 defer((~condʗ2).L.Unlock, ref ᒐ);
+
                 var err = waitOnCondʗ1(ctx, condʗ1, () => false);
                 fmt.Println(err);
             }
@@ -229,17 +243,17 @@ public static partial void ExampleAfterFunc_cond() {
         });
     }
     Ꮡwg.Wait();
+
+    // Output:
+    // context deadline exceeded
+    // context deadline exceeded
+    // context deadline exceeded
+    // context deadline exceeded
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tcpˢ = "tcp"u8;
 internal static readonly @string localhost0ˢ = "localhost:0"u8;
-
-// Output:
-// context deadline exceeded
-// context deadline exceeded
-// context deadline exceeded
-// context deadline exceeded
 
 // This example uses AfterFunc to define a function which reads from a net.Conn,
 // stopping the read when a context is canceled.
@@ -265,6 +279,7 @@ public static void ExampleAfterFunc_connection() {
             }
             return (n, errΔ1);
         }
+
         var (listener, err) = Δnet.Listen(tcpˢ, localhost0ˢ);
         if (err != default!) {
             fmt.Println(err);
@@ -272,6 +287,7 @@ public static void ExampleAfterFunc_connection() {
         }
         var listenerʗ1 = listener;
         defer(() => listenerʗ1.Close(), ref ᒐ);
+
         (var conn, err) = Δnet.Dial(listener.Addr().Network(), listener.Addr().String());
         if (err != default!) {
             fmt.Println(err);
@@ -279,12 +295,17 @@ public static void ExampleAfterFunc_connection() {
         }
         var connʗ1 = conn;
         defer(() => connʗ1.Close(), ref ᒐ);
+
         var (ctx, cancel) = context.WithTimeout(context.Background(), 1 * time.Millisecond);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         var b = new slice<byte>(1024);
         (_, err) = readFromConn(ctx, conn, b);
         fmt.Println(err);
+
+        // Output:
+        // context deadline exceeded
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -293,9 +314,6 @@ public static void ExampleAfterFunc_connection() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ctx1Canceledˢ = "ctx1 canceled"u8;
 internal static readonly @string ctx2Canceledˢ = "ctx2 canceled"u8;
-
-// Output:
-// context deadline exceeded
 
 // This example uses AfterFunc to define a function which combines
 // the cancellation signals of two Contexts.
@@ -317,22 +335,26 @@ public static void ExampleAfterFunc_merge() {
                 cancelʗ2(context.Canceled);
             }));
         }
+
         var (ctx1, cancel1) = context.WithCancelCause(context.Background());
         var cancel1ʗ1 = cancel1;
         defer(cancel1ʗ1, errors.New(ctx1Canceledˢ), ref ᒐ);
+
         var (ctx2, cancel2) = context.WithCancelCause(context.Background());
+
         var (mergedCtx, mergedCancel) = mergeCancel(ctx1, ctx2);
         var mergedCancelʗ1 = mergedCancel;
         defer(() => mergedCancelʗ1(), ref ᒐ);
+
         cancel2(errors.New(ctx2Canceledˢ));
         ᐸꟷ(mergedCtx.Done());
         fmt.Println(context.Cause(mergedCtx));
+
+        // Output:
+        // ctx2 canceled
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Output:
-// ctx2 canceled
 
 } // end context_test_package

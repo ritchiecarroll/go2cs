@@ -17,7 +17,7 @@ internal static readonly @string socketˢ = "socket"u8;
 // Wrapper around the socket system call that marks the returned file
 // descriptor as nonblocking and close-on-exec.
 internal static (nint, error) sysSocket(nint family, nint sotype, nint proto) {
-    var (s, err) = socketFunc(family, (nint)((nint)(sotype | (nint)syscall.SOCK_NONBLOCK) | (nint)syscall.SOCK_CLOEXEC), proto);
+    var (s, err) = socketFunc(family, sotype | (nint)syscall.SOCK_NONBLOCK | (nint)syscall.SOCK_CLOEXEC, proto);
     if (err != default!) {
         return (-1, os.NewSyscallError(socketˢ, err));
     }

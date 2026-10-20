@@ -23,17 +23,6 @@ partial struct testVector {
     internal slice<byte> output;
 }
 
-// // This one takes too long
-// {
-// 	"password",
-// 	"salt",
-// 	16777216,
-// 	[]byte{
-// 		0xee, 0xfe, 0x3d, 0x61, 0xcd, 0x4d, 0xa4, 0xe4,
-// 		0xe9, 0x94, 0x5b, 0x3d, 0x6b, 0xa2, 0x15, 0x8c,
-// 		0x26, 0x34, 0xe9, 0x84,
-// 	},
-// },
 // Test vectors from RFC 6070, http://tools.ietf.org/html/rfc6070
 internal static slice<testVector> sha1TestVectors = new testVector[]{
     new(
@@ -66,6 +55,17 @@ internal static slice<testVector> sha1TestVectors = new testVector[]{
             0x65, 0xa4, 0x29, 0xc1
         }.slice()
     ),
+    // // This one takes too long
+    // {
+    // 	"password",
+    // 	"salt",
+    // 	16777216,
+    // 	[]byte{
+    // 		0xee, 0xfe, 0x3d, 0x61, 0xcd, 0x4d, 0xa4, 0xe4,
+    // 		0xe9, 0x94, 0x5b, 0x3d, 0x6b, 0xa2, 0x15, 0x8c,
+    // 		0x26, 0x34, 0xe9, 0x84,
+    // 	},
+    // },
     new(
         "passwordPASSWORDpassword"u8,
         "saltSALTsaltSALTsaltSALTsaltSALTsalt"u8,
@@ -178,7 +178,7 @@ internal static void benchmark(ж<testing.B> Ꮡb, Func<hash.Hash> h) {
     var password = new slice<byte>(h().Size());
     var salt = new slice<byte>(8);
     for (nint i = 0; i < b.N; i++) {
-        (password, err) = pbkdf2.Key(h, ((@string)password), salt, 4096, len(password));
+        (password, err) = pbkdf2.Key(h, (@string)password, salt, 4096, len(password));
         if (err != default!) {
             Ꮡb.Error(err);
         }
@@ -204,7 +204,9 @@ public static void TestPBKDF2ServiceIndicator(ж<testing.T> Ꮡt) {
     if (boring.Enabled) {
         Ꮡt.Skip(inBoringCryptoModePbkdf2ˢ);
     }
+
     var goodSalt = new byte[]{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}.slice();
+
     fips140.ResetServiceIndicator();
     var (_, err) = pbkdf2.Key<hash.Hash>(sha256.New, passwordˢ, goodSalt, 1, 32);
     if (err != default!) {
@@ -213,6 +215,7 @@ public static void TestPBKDF2ServiceIndicator(ж<testing.T> Ꮡt) {
     if (!fips140.ServiceIndicator()) {
         Ꮡt.Error(fipsServiceIndicatorˢ);
     }
+
     // Salt too short
     fips140.ResetServiceIndicator();
     (_, err) = pbkdf2.Key<hash.Hash>(sha256.New, passwordˢ, goodSalt[..8], 1, 32);
@@ -222,6 +225,7 @@ public static void TestPBKDF2ServiceIndicator(ж<testing.T> Ꮡt) {
     if (fips140.ServiceIndicator()) {
         Ꮡt.Error(fipsServiceIndicatorˢ2);
     }
+
     // Key length too short
     fips140.ResetServiceIndicator();
     (_, err) = pbkdf2.Key<hash.Hash>(sha256.New, passwordˢ, goodSalt, 1, 10);

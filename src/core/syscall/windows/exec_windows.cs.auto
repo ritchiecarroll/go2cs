@@ -42,7 +42,7 @@ public static @string EscapeArg(@string s) {
         case (rune)'"' or (rune)'\\' or (rune)' ' or (rune)'\t': {
             var b = new slice<byte>(0, len(s) + 2);
             b = appendEscapeArg(b, s);
-            return ((@string)b);
+            return (@string)b;
         }}
 
     }
@@ -116,14 +116,16 @@ internal static slice<byte> appendEscapeArg(slice<byte> b, @string s) {
 // makeCmdLine builds a command line out of args by escaping "special"
 // characters and joining the arguments with spaces.
 internal static @string makeCmdLine(slice<@string> args) {
+    var bᴷ = new stackAppend<byte>();
+
     slice<byte> b = default!;
     foreach (var (_, v) in args) {
         if (len(b) > 0) {
-            b = append(b, (byte)((rune)' '));
+            b = append(bᴷ, b, (byte)((rune)' '));
         }
         b = appendEscapeArg(b, v);
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // createEnvBlock converts an array of environment strings into
@@ -345,11 +347,11 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
         var fd = new slice<ΔHandle>(len(attr.Files));
         foreach (var (i, _) in attr.Files) {
             if (attr.Files[i] > 0) {
-                var errΔ2 = DuplicateHandle(p, ((ΔHandle)attr.Files[i]), parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
+                var errΔ2 = DuplicateHandle(p, (ΔHandle)attr.Files[i], parentProcess, Ꮡ(fd, i), 0, true, DUPLICATE_SAME_ACCESS);
                 if (errΔ2 != default!) {
                     (pid, handle, err) = (0, 0, errΔ2); goto ᒐdone;
                 }
-                defer(DuplicateHandle, parentProcess, fd[i], (ΔHandle)(0), (ж<ΔHandle>)(nil), (uint32)(0), (bool)false, (uint32)(DUPLICATE_CLOSE_SOURCE), ref ᒐ);
+                defer(DuplicateHandle, parentProcess, fd[i], (ΔHandle)0, (ж<ΔHandle>)(nil), (uint32)0, (bool)false, (uint32)(DUPLICATE_CLOSE_SOURCE), ref ᒐ);
             }
         }
         var si = @new<_STARTUPINFOEXW>();
@@ -397,7 +399,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
             (pid, handle, err) = (0, 0, err); goto ᒐdone;
         }
         var pi = @new<ProcessInformation>();
-        var flags = (uint32)((uint32)((~sys).CreationFlags | (uint32)CREATE_UNICODE_ENVIRONMENT) | (uint32)_EXTENDED_STARTUPINFO_PRESENT);
+        var flags = (~sys).CreationFlags | (uint32)CREATE_UNICODE_ENVIRONMENT | (uint32)_EXTENDED_STARTUPINFO_PRESENT;
         if ((~sys).Token != 0){
             err = CreateProcessAsUser((~sys).Token, argv0p, argvp, (~sys).ProcessAttributes, (~sys).ThreadAttributes, willInheritHandles, flags, Ꮡ(envBlock, 0), dirp, si.of(_STARTUPINFOEXW.ᏑStartupInfo), pi);
         } else {

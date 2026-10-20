@@ -34,6 +34,7 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
             return (default!, err);
         }
     }
+
     // This function makes a network file descriptor for the
     // following applications:
     //
@@ -55,6 +56,7 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
     // from stream or datagram listeners when laddr is not nil but
     // raddr is nil. Otherwise we assume it's just for dialers or
     // the other connection holders.
+
     if (laddr != default! && raddr == default!) {
         var exprᴛ1 = sotype;
         if (exprᴛ1 == syscall.SOCK_STREAM || exprᴛ1 == syscall.SOCK_SEQPACKET) {
@@ -75,7 +77,6 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
             }
             return (fd, default!);
         }
-
     }
     {
         var errΔ5 = fd.dial(ctx, laddr, raddr, ctrlCtxFn); if (errΔ5 != default!) {
@@ -91,12 +92,10 @@ internal static @string ctrlNetwork(this ref netFD fd) {
     if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
         return fd.net;
     }
-
     switch (fd.net[len(fd.net) - 1]) {
     case (rune)'4' or (rune)'6': {
         return fd.net;
     }}
-
     if (fd.family == syscall.AF_INET) {
         return fd.net + "4"u8;
     }
@@ -122,6 +121,7 @@ internal static error dial(this ж<netFD> Ꮡfd, context.Context ctx, Δsockaddr
             }
         }
     }
+
     syscallꓸSockaddr lsa = default!;
     error err = default!;
     if (laddr != default!) {
@@ -194,6 +194,7 @@ internal static error listenStream(this ж<netFD> Ꮡfd, context.Context ctx, Δ
             return err;
         }
     }
+
     if (ctrlCtxFn != default!) {
         var c = newRawConn(Ꮡfd);
         {
@@ -202,6 +203,7 @@ internal static error listenStream(this ж<netFD> Ꮡfd, context.Context ctx, Δ
             }
         }
     }
+
     {
         err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != default!) {
             return os.NewSyscallError(bindˢ, err);
@@ -227,14 +229,14 @@ internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, 
 
     switch (laddr.type()) {
     case ж<UDPAddr> addr: {
+        // We provide a socket that listens to a wildcard
+        // address with reusable UDP port when the given laddr
+        // is an appropriate UDP multicast address prefix.
+        // This makes it possible for a single UDP listener to
+        // join multiple different group addresses, for
+        // multiple UDP listeners that listen on the same UDP
+        // port to join the same group address.
         if ((~addr).IP != default! && (~addr).IP.IsMulticast()) {
-            // We provide a socket that listens to a wildcard
-            // address with reusable UDP port when the given laddr
-            // is an appropriate UDP multicast address prefix.
-            // This makes it possible for a single UDP listener to
-            // join multiple different group addresses, for
-            // multiple UDP listeners that listen on the same UDP
-            // port to join the same group address.
             {
                 var errΔ1 = setDefaultMulticastSockopts(fd.pfd.Sysfd); if (errΔ1 != default!) {
                     return errΔ1;
@@ -249,7 +251,6 @@ internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, 
             else if (exprᴛ1 == syscall.AF_INET6) {
                 addrΔ1.IP = IPv6unspecified;
             }
-
             laddr = new UDPAddrжΔsockaddr(ᏑaddrΔ1);
         }
         break;
@@ -261,6 +262,7 @@ internal static error listenDatagram(this ж<netFD> Ꮡfd, context.Context ctx, 
             return err;
         }
     }
+
     if (ctrlCtxFn != default!) {
         var c = newRawConn(Ꮡfd);
         {

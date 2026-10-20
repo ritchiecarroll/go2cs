@@ -24,6 +24,7 @@ using saferio = @internal.saferio_package;
 using math = math_package;
 using big = go.math.big_package;
 using reflect = reflect_package;
+using runtime = runtime_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
@@ -65,6 +66,7 @@ internal static (bool ret, error err) parseBool(slice<byte> bytes) {
         err = new SyntaxError("invalid boolean"u8);
         return (ret, err);
     }
+
     // DER demands that "If the encoding represents the boolean value TRUE,
     // its single contents octet shall have all eight bits set to one."
     // Thus only 0 and 255 are valid encoded values.
@@ -121,6 +123,7 @@ internal static (int64 ret, error err) parseInt64(slice<byte> bytes) {
         ret <<= (int)(8);
         ret |= (int64)((int64)bytes[bytesRead]);
     }
+
     // Shift up and down in order to sign extend the result.
     ret.LshAssign((uint64)((uint8)(64 - (uint8)len(bytes) * 8)));
     ret.RshAssign((uint64)((uint8)(64 - (uint8)len(bytes) * 8)));
@@ -189,7 +192,7 @@ public static nint At(this BitString b, nint i) {
     }
     nint x = i / 8;
     nuint y = 7 - (nuint)(i % 8);
-    return (nint)((nint)(b.Bytes[x].Rsh(y)) & 1);
+    return (nint)(b.Bytes[x].Rsh(y)) & 1;
 }
 
 // RightAlign returns a slice where the padding bits are at the beginning. The
@@ -199,12 +202,14 @@ public static slice<byte> RightAlign(this BitString b) {
     if (shift == 8 || len(b.Bytes) == 0) {
         return b.Bytes;
     }
+
     var a = new slice<byte>(len(b.Bytes));
     a[0] = (byte)(b.Bytes[0].Rsh(shift));
     for (nint i = 1; i < len(b.Bytes); i++) {
         a[i] = (byte)(b.Bytes[i - 1].Lsh((8 - shift)));
         a[i] |= (byte)(b.Bytes[i].Rsh(shift));
     }
+
     return a;
 }
 
@@ -235,9 +240,10 @@ public static RawValue NullRawValue = new RawValue(Tag: TagNull);
 // NullBytes contains bytes representing the DER-encoded ASN.1 NULL type.
 public static slice<byte> NullBytes = new byte[]{TagNull, 0}.slice();
 
-partial struct ObjectIdentifier /*[]nint*/;
-
 // OBJECT IDENTIFIER
+
+// An ObjectIdentifier represents an ASN.1 OBJECT IDENTIFIER.
+partial struct ObjectIdentifier /*[]nint*/;
 
 // Equal reports whether oi and other represent the same identifier.
 public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) {
@@ -247,6 +253,7 @@ public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) {
 public static @string String(this ObjectIdentifier oi) {
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.Grow(32);
+
     var buf = new slice<byte>(0, 19);
     foreach (var (i, v) in oi) {
         if (i > 0) {
@@ -254,6 +261,7 @@ public static @string String(this ObjectIdentifier oi) {
         }
         Ꮡs.Write(strconv.AppendInt(buf, (int64)v, 10));
     }
+
     return s.String();
 }
 
@@ -268,9 +276,11 @@ internal static (ObjectIdentifier s, error err) parseObjectIdentifier(slice<byte
         err = new SyntaxError("zero length OBJECT IDENTIFIER"u8);
         return (s, err);
     }
+
     // In the worst case, we get two elements from the first byte (which is
     // encoded differently) and then every varint is a single byte long.
     s = new slice<nint>(len(bytes) + 1);
+
     // The first varint is 40*value1 + value2:
     // According to this packing, value1 can take the values 0, 1 and 2 only.
     // When value1 = 0 or value1 = 1, then value2 is <= 39. When value1 = 2,
@@ -286,6 +296,7 @@ internal static (ObjectIdentifier s, error err) parseObjectIdentifier(slice<byte
         s[0] = 2;
         s[1] = v - 80;
     }
+
     nint i = 2;
     for (; offset < len(bytes); i++) {
         (v, offset, err) = parseBase128Int(bytes, offset);
@@ -298,12 +309,15 @@ internal static (ObjectIdentifier s, error err) parseObjectIdentifier(slice<byte
     return (s, err);
 }
 
+// ENUMERATED
+
+// An Enumerated is represented as a plain int.
 partial struct Enumerated /*num:nint*/;
 
-partial struct Flag /*bool*/;
-
-// ENUMERATED
 // FLAG
+
+// A Flag accepts any data and is set to true if present.
+partial struct Flag /*bool*/;
 
 // parseBase128Int parses a base-128 encoded int from the given offset in the
 // given byte slice. It returns the value and the new offset.
@@ -349,7 +363,8 @@ internal static (time.Time ret, error err) parseUTCTime(slice<byte> bytes) {
     time.Time ret = default!;
     error err = default!;
 
-    @string s = ((@string)bytes);
+    @string s = (@string)bytes;
+
     @string formatStr = "0601021504Z0700"u8;
     (ret, err) = time.Parse(formatStr, s);
     if (err != default!) {
@@ -359,16 +374,19 @@ internal static (time.Time ret, error err) parseUTCTime(slice<byte> bytes) {
     if (err != default!) {
         return (ret, err);
     }
+
     {
         @string serialized = ret.Format(formatStr); if (serialized != s) {
             err = fmt.Errorf("asn1: time did not serialize back to the original value and may be invalid: given %q, but serialized as %q"u8, s, serialized);
             return (ret, err);
         }
     }
+
     if (ret.Year() >= 2050) {
         // UTCTime only encodes times prior to 2050. See https://tools.ietf.org/html/rfc5280#section-4.1.2.5.1
         ret = ret.AddDate(-100, 0, 0);
     }
+
     return (ret, err);
 }
 
@@ -382,17 +400,20 @@ internal static (time.Time ret, error err) parseGeneralizedTime(slice<byte> byte
     error err = default!;
 
     @string formatStr = formatStrᶜ;
-    @string s = ((@string)bytes);
+    @string s = (@string)bytes;
+
     {
         (ret, err) = time.Parse(formatStr, s); if (err != default!) {
             return (ret, err);
         }
     }
+
     {
         @string serialized = ret.Format(formatStr); if (serialized != s) {
             err = fmt.Errorf("asn1: time did not serialize back to the original value and may be invalid: given %q, but serialized as %q"u8, s, serialized);
         }
     }
+
     return (ret, err);
 }
 
@@ -406,7 +427,7 @@ internal static (@string ret, error err) parseNumericString(slice<byte> bytes) {
             return ("", new SyntaxError("NumericString contains invalid character"u8));
         }
     }
-    return (((@string)bytes), default!);
+    return ((@string)bytes, default!);
 }
 
 // isNumeric reports whether the given b is in the ASN.1 NumericString set.
@@ -428,7 +449,7 @@ internal static (@string ret, error err) parsePrintableString(slice<byte> bytes)
             return (ret, err);
         }
     }
-    ret = ((@string)bytes);
+    ret = (@string)bytes;
     return (ret, err);
 }
 
@@ -438,6 +459,7 @@ partial struct ampersandFlag /*bool*/;
 
 internal static asteriskFlag allowAsterisk => true;
 internal static asteriskFlag rejectAsterisk => false;
+
 internal static ampersandFlag allowAmpersand => true;
 internal static ampersandFlag rejectAmpersand => false;
 
@@ -445,16 +467,18 @@ internal static ampersandFlag rejectAmpersand => false;
 // If asterisk is allowAsterisk then '*' is also allowed, reflecting existing
 // practice. If ampersand is allowAmpersand then '&' is allowed as well.
 internal static bool isPrintable(byte b, asteriskFlag asterisk, ampersandFlag ampersand) {
-    return (rune)'a' <= b && b <= (rune)'z' || (rune)'A' <= b && b <= (rune)'Z' || (rune)'0' <= b && b <= (rune)'9' || (rune)'\'' <= b && b <= (rune)')' || (rune)'+' <= b && b <= (rune)'/' || b == (rune)' ' || b == (rune)':' || b == (rune)'=' || b == (rune)'?' || ((bool)asterisk && b == (rune)'*') || ((bool)ampersand && b == (rune)'&');
+    return (rune)'a' <= b && b <= (rune)'z' || (rune)'A' <= b && b <= (rune)'Z' || (rune)'0' <= b && b <= (rune)'9' || (rune)'\'' <= b && b <= (rune)')' || (rune)'+' <= b && b <= (rune)'/' || b == (rune)' ' || b == (rune)':' || b == (rune)'=' || b == (rune)'?' ||
+        // This is technically not allowed in a PrintableString.
+        // However, x509 certificates with wildcard strings don't
+        // always use the correct string type so we permit it.
+        ((bool)asterisk && b == (rune)'*') ||
+        // This is not technically allowed either. However, not
+        // only is it relatively common, but there are also a
+        // handful of CA certificates that contain it. At least
+        // one of which will not expire until 2027.
+        ((bool)ampersand && b == (rune)'&');
 }
 
-// This is technically not allowed in a PrintableString.
-// However, x509 certificates with wildcard strings don't
-// always use the correct string type so we permit it.
-// This is not technically allowed either. However, not
-// only is it relatively common, but there are also a
-// handful of CA certificates that contain it. At least
-// one of which will not expire until 2027.
 // IA5String
 
 // parseIA5String parses an ASN.1 IA5String (ASCII string) from the given
@@ -469,7 +493,7 @@ internal static (@string ret, error err) parseIA5String(slice<byte> bytes) {
             return (ret, err);
         }
     }
-    ret = ((@string)bytes);
+    ret = (@string)bytes;
     return (ret, err);
 }
 
@@ -478,7 +502,21 @@ internal static (@string ret, error err) parseIA5String(slice<byte> bytes) {
 // parseT61String parses an ASN.1 T61String (8-bit clean string) from the given
 // byte slice and returns it.
 internal static (@string ret, error err) parseT61String(slice<byte> bytes) {
-    return (((@string)bytes), default!);
+    // T.61 is a defunct ITU 8-bit character encoding which preceded Unicode.
+    // T.61 uses a code page layout that _almost_ exactly maps to the code
+    // page layout of the ISO 8859-1 (Latin-1) character encoding, with the
+    // exception that a number of characters in Latin-1 are not present
+    // in T.61.
+    //
+    // Instead of mapping which characters are present in Latin-1 but not T.61,
+    // we just treat these strings as being encoded using Latin-1. This matches
+    // what most of the world does, including BoringSSL.
+    var buf = new slice<byte>(0, len(bytes));
+    foreach (var (_, v) in bytes) {
+        // All the 1-byte UTF-8 runes map 1-1 with Latin-1.
+        buf = utf8.AppendRune(buf, (rune)v);
+    }
+    return ((@string)buf, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -492,32 +530,51 @@ internal static (@string ret, error err) parseUTF8String(slice<byte> bytes) {
     if (!utf8.Valid(bytes)) {
         return ("", errors.New(asn1InvalidUtf8Stringˢ));
     }
-    return (((@string)bytes), default!);
+    return ((@string)bytes, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pkcs12OddLengthBmpStringˢ = "pkcs12: odd-length BMP string"u8;
+internal static readonly @string invalidBMPStringˢ = "invalid BMPString"u8;
 
 // BMPString
 
 // parseBMPString parses an ASN.1 BMPString (Basic Multilingual Plane of
 // ISO/IEC/ITU 10646-1) from the given byte slice and returns it.
 internal static (@string, error) parseBMPString(slice<byte> bmpString) {
+    var sᴷ = new stackAppend<uint16>();
+
+    // BMPString uses the defunct UCS-2 16-bit character encoding, which
+    // covers the Basic Multilingual Plane (BMP). UTF-16 was an extension of
+    // UCS-2, containing all of the same code points, but also including
+    // multi-code point characters (by using surrogate code points). We can
+    // treat a UCS-2 encoded string as a UTF-16 encoded string, as long as
+    // we reject out the UTF-16 specific code points. This matches the
+    // BoringSSL behavior.
     if (len(bmpString) % 2 != 0) {
-        return ("", errors.New(pkcs12OddLengthBmpStringˢ));
+        return ("", errors.New(invalidBMPStringˢ));
     }
+
     // Strip terminator if present.
     {
         nint l = len(bmpString); if (l >= 2 && bmpString[l - 1] == 0 && bmpString[l - 2] == 0) {
             bmpString = bmpString.slice(0, l - 2);
         }
     }
+
     var s = new slice<uint16>(0, len(bmpString) / 2);
     while (len(bmpString) > 0) {
-        s = append(s, (uint16)((uint16)((uint16)bmpString[0] << (int)(8)) + (uint16)bmpString[1]));
+        var point = (uint16)((uint16)((uint16)bmpString[0] << 8) + (uint16)bmpString[1]);
+        // Reject UTF-16 code points that are permanently reserved
+        // noncharacters (0xfffe, 0xffff, and 0xfdd0-0xfdef) and surrogates
+        // (0xd800-0xdfff).
+        if (point == 0xfffe || point == 0xffff || (point >= 0xfdd0 && point <= 0xfdef) || (point >= 0xd800 && point <= 0xdfff)) {
+            return ("", errors.New(invalidBMPStringˢ));
+        }
+        s = append(sᴷ, s, point);
         bmpString = bmpString[2..];
     }
-    return (((@string)utf16.Decode(s)), default!);
+
+    return ((@string)utf16.Decode(s), default!);
 }
 
 // A RawValue represents an undecoded ASN.1 object.
@@ -528,6 +585,9 @@ partial struct RawValue {
     public slice<byte> FullBytes; // includes the tag and length
 }
 
+// RawContent is used to signal that the undecoded, DER data needs to be
+// preserved for a struct. To use it, the first field of the struct must have
+// this type. It's an error for any of the other fields to have this type.
 partial struct RawContent /*[]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -553,9 +613,10 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
     }
     var b = bytes[offset];
     offset++;
-    ret.@class = (nint)((b >> (int)(6)));
+    ret.@class = (nint)(b >> 6);
     ret.isCompound = (byte)(b & 0x20) == 0x20;
     ret.tag = (nint)((byte)(b & 0x1f));
+
     // If the bottom five bits are set, then the tag number is actually base 128
     // encoded afterwards
     if (ret.tag == 0x1f) {
@@ -593,7 +654,7 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
             }
             b = bytes[offset];
             offset++;
-            if (ret.length >= (1 << (int)(23))) {
+            if (ret.length >= 1 << 23) {
                 // We can't shift ret.length up without
                 // overflowing.
                 err = new StructuralError("length too large"u8);
@@ -613,13 +674,14 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
             return (ret, offset, err);
         }
     }
+
     return (ret, offset, err);
 }
 
 // parseSequenceOf is used for SEQUENCE OF and SET OF values. It tries to parse
 // a number of ASN.1 values from the given byte slice and returns them as a
 // slice of Go values of the given type.
-internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> bytes, reflectꓸType sliceType, reflectꓸType elemType) {
+internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> bytes, reflectꓸType sliceType, reflectꓸType elemType, nint depth) {
     reflectꓸValue ret = new(nil);
     error err = default!;
 
@@ -628,6 +690,7 @@ internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> byt
         err = new StructuralError("unknown Go type for slice"u8);
         return (ret, err);
     }
+
     // First we iterate over the input and count the number of elements,
     // checking that the types are correct in each case.
     nint numElements = 0;
@@ -639,16 +702,16 @@ internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> byt
         }
         var exprᴛ1 = t.tag;
         if (exprᴛ1 == TagIA5String || exprᴛ1 == TagGeneralString || exprᴛ1 == TagT61String || exprᴛ1 == TagUTF8String || exprᴛ1 == TagNumericString || exprᴛ1 == TagBMPString) {
+            // We pretend that various other string types are
+            // PRINTABLE STRINGs so that a sequence of them can be
+            // parsed into a []string.
             t.tag = TagPrintableString;
         }
         else if (exprᴛ1 == TagGeneralizedTime || exprᴛ1 == TagUTCTime) {
+            // Likewise, both time types are treated the same.
             t.tag = TagUTCTime;
         }
 
-        // We pretend that various other string types are
-        // PRINTABLE STRINGs so that a sequence of them can be
-        // parsed into a []string.
-        // Likewise, both time types are treated the same.
         if (!matchAny && (t.@class != ClassUniversal || t.isCompound != compoundType || t.tag != expectedTag)) {
             err = new StructuralError("sequence tag mismatch"u8);
             return (ret, err);
@@ -671,7 +734,7 @@ internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> byt
     nint offset = 0;
     for (nint i = 0; i < numElements; i++) {
         ret = reflect.Append(ret, reflect.Zero(elemType));
-        (offset, err) = parseField(ret.Index(i), bytes, offset, @params);
+        (offset, err) = parseField(ret.Index(i), bytes, offset, @params, depth);
         if (err != default!) {
             return (ret, err);
         }
@@ -700,12 +763,19 @@ internal static readonly @string asn1ˢ = "asn1"u8;
 // parseField is the main parsing function. Given a byte slice and an offset
 // into the array, it will try to parse a suitable ASN.1 value out and store it
 // in the given Value.
-internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byte> bytes, nint initOffset, fieldParameters @params) {
+internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byte> bytes, nint initOffset, fieldParameters @params, nint depth) {
     nint offset = default!;
     error err = default!;
 
+    depth++;
+    const nint maxDecodeDepth = 10000;
+    const nint maxDecodeDepthWasm = 5000; // go.dev/issue/56498
+    if (depth > maxDecodeDepth || runtime.GOARCH == "wasm"u8 && depth > maxDecodeDepthWasm) {
+        return (initOffset, new StructuralError("nesting depth exceeded"u8));
+    }
     offset = initOffset;
     var fieldType = v.Type();
+
     // If we have run out of data, it may be that there are optional elements at the end.
     if (offset == len(bytes)) {
         if (!setDefaultValue(v, @params)) {
@@ -713,6 +783,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         }
         return (offset, err);
     }
+
     // Deal with the ANY type.
     {
         var ifaceType = fieldType; if (ifaceType.Kind() == reflect.ΔInterface && ifaceType.NumMethod() == 0) {
@@ -769,10 +840,9 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
                     (result, err) = parseBMPString(innerBytesΔ1);
                 }
                 else { /* default: */
+                    // If we don't know how to handle the type, we just leave Value as nil.
                 }
-
             }
-            // If we don't know how to handle the type, we just leave Value as nil.
             offset += tΔ1.length;
             if (err != default!) {
                 return (offset, err);
@@ -783,6 +853,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             return (offset, err);
         }
     }
+
     (var t, offset, err) = parseTagAndLength(bytes, offset);
     if (err != default!) {
         return (offset, err);
@@ -798,9 +869,9 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         }
         if (t.@class == expectedClassΔ1 && t.tag == @params.tag.Value && (t.length == 0 || t.isCompound)){
             if (AreEqual(fieldType, rawValueType)){
+                // The inner element should not be parsed for RawValues.
             } else 
             if (t.length > 0){
-                // The inner element should not be parsed for RawValues.
                 (t, offset, err) = parseTagAndLength(bytes, offset);
                 if (err != default!) {
                     return (offset, err);
@@ -824,11 +895,13 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             return (offset, err);
         }
     }
+
     var (matchAny, universalTag, compoundType, ok1) = getUniversalType(fieldType);
     if (!ok1) {
         err = new StructuralError(fmt.Sprintf("unknown Go type: %v"u8, fieldType));
         return (offset, err);
     }
+
     // Special case for strings: all the ASN.1 string types map to the Go
     // type string. getUniversalType returns the tag for PrintableString
     // when it sees a string, so if we see a different string type on the
@@ -839,38 +912,54 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             if (exprᴛ2 == TagIA5String || exprᴛ2 == TagGeneralString || exprᴛ2 == TagT61String || exprᴛ2 == TagUTF8String || exprᴛ2 == TagNumericString || exprᴛ2 == TagBMPString) {
                 universalTag = t.tag;
             }
-
         } else 
         if (@params.stringType != 0) {
             universalTag = @params.stringType;
         }
     }
+
     // Special case for time: UTCTime and GeneralizedTime both map to the
-    // Go type time.Time.
-    if (universalTag == TagUTCTime && t.tag == TagGeneralizedTime && t.@class == ClassUniversal) {
-        universalTag = TagGeneralizedTime;
+    // Go type time.Time. getUniversalType returns the tag for UTCTime when
+    // it sees a time.Time, so if we see a different time type on the wire,
+    // or the field is tagged with a different type, we change the universal
+    // type to match.
+    if (universalTag == TagUTCTime) {
+        if (t.@class == ClassUniversal){
+            if (t.tag == TagGeneralizedTime) {
+                universalTag = t.tag;
+            }
+        } else 
+        if (@params.timeType != 0) {
+            universalTag = @params.timeType;
+        }
     }
+
     if (@params.set) {
         universalTag = TagSet;
     }
+
     var matchAnyClassAndTag = matchAny;
     nint expectedClass = ClassUniversal;
     nint expectedTag = universalTag;
+
     if (!@params.@explicit && @params.tag != nil) {
         expectedClass = ClassContextSpecific;
         expectedTag = @params.tag.Value;
         matchAnyClassAndTag = false;
     }
+
     if (!@params.@explicit && @params.application && @params.tag != nil) {
         expectedClass = ClassApplication;
         expectedTag = @params.tag.Value;
         matchAnyClassAndTag = false;
     }
+
     if (!@params.@explicit && @params.@private && @params.tag != nil) {
         expectedClass = ClassPrivate;
         expectedTag = @params.tag.Value;
         matchAnyClassAndTag = false;
     }
+
     // We have unwrapped any explicit tagging at this point.
     if (!matchAnyClassAndTag && (t.@class != expectedClass || t.tag != expectedTag) || (!matchAny && t.isCompound != compoundType)) {
         // Tags don't match. Again, it could be an optional element.
@@ -888,6 +977,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }
     var innerBytes = bytes.slice(offset, offset + t.length);
     offset += t.length;
+
     // We deal with the structures defined in this package first.
     switch (v.Addr().Interface().type()) {
     case ж<RawValue> vΔ1: {
@@ -913,7 +1003,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     case ж<Enumerated> vΔ1: {
         var (parsedInt, err1) = parseInt32(innerBytes);
         if (err1 == default!) {
-            vΔ1.Value = ((Enumerated)(nint)parsedInt);
+            vΔ1.Value = (Enumerated)(nint)parsedInt;
         }
         err = err1;
         return (offset, err);
@@ -957,43 +1047,46 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             }
             return (offset, err);
         }
+        // TODO(dfc) Add support for the remaining integer types
         if (exprᴛ3 == reflect.Struct) {
             var structType = fieldType;
+
             for (nint i = 0; i < structType.NumField(); i++) {
-                // TODO(dfc) Add support for the remaining integer types
                 if (!structType.Field(i).IsExported()) {
                     err = new StructuralError("struct contains unexported fields"u8);
                     return (offset, err);
                 }
             }
+
             if (structType.NumField() > 0 && AreEqual(structType.Field(0).Type, rawContentsType)) {
                 var bytesΔ2 = bytes.slice(initOffset, offset);
-                val.Field(0).Set(reflect.ValueOf(((RawContent)bytesΔ2)));
+                val.Field(0).Set(reflect.ValueOf((RawContent)bytesΔ2));
             }
+
             nint innerOffset = 0;
             for (nint i = 0; i < structType.NumField(); i++) {
                 var field = structType.Field(i);
                 if (i == 0 && AreEqual(field.Type, rawContentsType)) {
                     continue;
                 }
-                (innerOffset, err) = parseField(val.Field(i), innerBytes, innerOffset, parseFieldParameters(field.Tag.Get(asn1ˢ)));
+                (innerOffset, err) = parseField(val.Field(i), innerBytes, innerOffset, parseFieldParameters(field.Tag.Get(asn1ˢ)), depth);
                 if (err != default!) {
                     return (offset, err);
                 }
             }
+            // We allow extra bytes at the end of the SEQUENCE because
+            // adding elements to the end has been used in X.509 as the
+            // version numbers have increased.
             return (offset, err);
         }
         if (exprᴛ3 == reflect.ΔSlice) {
             var sliceType = fieldType;
             if (sliceType.Elem().Kind() == reflect.Uint8) {
-                // We allow extra bytes at the end of the SEQUENCE because
-                // adding elements to the end has been used in X.509 as the
-                // version numbers have increased.
                 val.Set(reflect.MakeSlice(sliceType, len(innerBytes), len(innerBytes)));
                 reflect.Copy(val, reflect.ValueOf(innerBytes));
                 return (offset, err);
             }
-            var (newSlice, err1) = parseSequenceOf(innerBytes, sliceType, sliceType.Elem());
+            var (newSlice, err1) = parseSequenceOf(innerBytes, sliceType, sliceType.Elem(), depth);
             if (err1 == default!) {
                 val.Set(newSlice);
             }
@@ -1019,26 +1112,24 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
                 (vΔ3, err) = parseUTF8String(innerBytes);
             }
             else if (exprᴛ4 == TagGeneralString) {
+                // GeneralString is specified in ISO-2022/ECMA-35,
+                // A brief review suggests that it includes structures
+                // that allow the encoding to change midstring and
+                // such. We give up and pass it as an 8-bit string.
                 (vΔ3, err) = parseT61String(innerBytes);
             }
             else if (exprᴛ4 == TagBMPString) {
                 (vΔ3, err) = parseBMPString(innerBytes);
             }
             else { /* default: */
-                err = new SyntaxError( // GeneralString is specified in ISO-2022/ECMA-35,
- // A brief review suggests that it includes structures
- // that allow the encoding to change midstring and
- // such. We give up and pass it as an 8-bit string.
-fmt.Sprintf("internal error: unknown string type %d"u8, universalTag));
+                err = new SyntaxError(fmt.Sprintf("internal error: unknown string type %d"u8, universalTag));
             }
-
             if (err == default!) {
                 val.SetString(vΔ3);
             }
             return (offset, err);
         }
     }
-
     err = new StructuralError("unsupported: "u8 + v.Type().String());
     return (offset, err);
 }
@@ -1132,6 +1223,13 @@ internal static bool /*ok*/ setDefaultValue(reflectꓸValue v, fieldParameters @
 //	numeric causes strings to be unmarshaled as ASN.1 NumericString values
 //	utf8    causes strings to be unmarshaled as ASN.1 UTF8String values
 //
+// When decoding an ASN.1 value with an IMPLICIT tag into a time.Time field,
+// Unmarshal will default to a UTCTime, which doesn't support time zones or
+// fractional seconds. To force usage of GeneralizedTime, use the following
+// tag:
+//
+//	generalized causes time.Times to be unmarshaled as ASN.1 GeneralizedTime values
+//
 // If the type of the first field of a structure is RawContent then the raw
 // ASN1 contents of the struct will be stored in it.
 //
@@ -1159,6 +1257,7 @@ internal static @string Error(this ref invalidUnmarshalError e) {
     if (e.Type == default!) {
         return asn1UnmarshalRecipientˢ;
     }
+
     if (e.Type.Kind() != reflect.ΔPointer) {
         return "asn1: Unmarshal recipient value is non-pointer "u8 + e.Type.String();
     }
@@ -1174,7 +1273,7 @@ public static (slice<byte> rest, error err) UnmarshalWithParams(slice<byte> b, a
     if (v.Kind() != reflect.ΔPointer || v.IsNil()) {
         return (default!, new invalidUnmarshalErrorжerror(Ꮡ(new invalidUnmarshalError(reflect.TypeOf(val)))));
     }
-    (var offset, err) = parseField(v.Elem(), b, 0, parseFieldParameters(@params));
+    (var offset, err) = parseField(v.Elem(), b, 0, parseFieldParameters(@params), 0);
     if (err != default!) {
         return (default!, err);
     }

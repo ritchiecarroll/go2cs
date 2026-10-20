@@ -9,6 +9,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(traceRegionAllocBlock))]
 partial class runtime_package {
 
 // traceRegionAlloc is a thread-safe region allocator.
@@ -27,7 +28,7 @@ partial struct traceRegionAlloc {
 // not need write barriers.
 partial struct traceRegionAllocBlock {
     internal sys.NotInHeap _;
-    internal partial ref traceRegionAllocBlockHeader traceRegionAllocBlockHeader { get; }
+    /*embed*/ internal traceRegionAllocBlockHeader traceRegionAllocBlockHeader;
     internal array<byte> data = new(traceRegionAllocBlockData);
 }
 
@@ -41,12 +42,11 @@ internal static uintptr traceRegionAllocBlockData => /* 64<<10 - unsafe.Sizeof(t
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string traceRegionAllocTooLargeˢ = "traceRegion: alloc too large"u8;
 internal static readonly @string traceRegionAllocWithˢ = "traceRegion: alloc with concurrent drop"u8;
+internal static readonly @string traceArenaAllocˢ = "trace arena alloc"u8;
 internal static readonly @string traceRegionOutOfMemoryˢ = "traceRegion: out of memory"u8;
 
 // alloc allocates n-byte block. The block is always aligned to 8 bytes, regardless of platform.
 internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
-    ref var a = ref Ꮡa.DerefOrNull();
-
     n = alignUp(n, 8);
     if (n > traceRegionAllocBlockData) {
         @throw(traceRegionAllocTooLargeˢ);
@@ -54,41 +54,55 @@ internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) {
     if (Ꮡa.of(traceRegionAlloc.Ꮡdropping).Load()) {
         @throw(traceRegionAllocWithˢ);
     }
+
     // Try to bump-pointer allocate into the current block.
-    var block = (ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Load());
-    if (block != nil) {
-        var r = block.of(traceRegionAllocBlock.Ꮡoff).Add(n);
-        if (r <= (uintptr)len((~block).data)) {
-            return block.at(traceRegionAllocBlock.Ꮡdata, (ulong)(r - n)).Reinterpret<byte, notInHeap>();
-        }
-    }
-    // Try to install a new block.
-    @lock(Ꮡa.of(traceRegionAlloc.Ꮡlock));
-    // Check block again under the lock. Someone may
-    // have gotten here first.
+    ref var block = ref heap<ж<traceRegionAllocBlock>>(out var Ꮡblock);
     block = (ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Load());
     if (block != nil) {
         var r = block.of(traceRegionAllocBlock.Ꮡoff).Add(n);
-        if (r <= (uintptr)len((~block).data)) {
-            unlock(Ꮡa.of(traceRegionAlloc.Ꮡlock));
+        if (r <= (uintptr)len(block.data)) {
             return block.at(traceRegionAllocBlock.Ꮡdata, (ulong)(r - n)).Reinterpret<byte, notInHeap>();
         }
-        // Add the existing block to the full list.
-        block.Value.next = a.full;
-        a.full = block;
     }
-    // Allocate a new block.
-    block = (ж<traceRegionAllocBlock>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.of(mstats.Ꮡother_sys)));
-    if (block == nil) {
-        @throw(traceRegionOutOfMemoryˢ);
-    }
-    // Allocate space for our current request, so we always make
-    // progress.
-    block.of(traceRegionAllocBlock.Ꮡoff).Store(n);
-    var x = block.at(traceRegionAllocBlock.Ꮡdata, 0).Reinterpret<byte, notInHeap>();
-    // Publish the new block.
-    Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Store(@unsafe.Pointer.FromPinnedBox(block));
-    unlock(Ꮡa.of(traceRegionAlloc.Ꮡlock));
+
+    // Try to install a new block.
+    ref var x = ref heap<ж<notInHeap>>(out var Ꮡx);
+    systemstack(() => {
+        // Acquire a.lock on the systemstack to avoid stack growth
+        // and accidentally entering the tracer again.
+        @lock(Ꮡa.of(traceRegionAlloc.Ꮡlock));
+
+        // Check block again under the lock. Someone may
+        // have gotten here first.
+        Ꮡblock.ValueSlot = (ж<traceRegionAllocBlock>)(uintptr)(Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Load());
+        if (Ꮡblock.ValueSlot != nil) {
+            var r = Ꮡblock.ValueSlot.of(traceRegionAllocBlock.Ꮡoff).Add(n);
+            if (r <= (uintptr)len(Ꮡblock.ValueSlot.data)) {
+                unlock(Ꮡa.of(traceRegionAlloc.Ꮡlock));
+                Ꮡx.ValueSlot = Ꮡblock.ValueSlot.at(traceRegionAllocBlock.Ꮡdata, (ulong)(r - n)).Reinterpret<byte, notInHeap>();
+                return;
+            }
+
+            // Add the existing block to the full list.
+            Ꮡblock.ValueSlot.traceRegionAllocBlockHeader.next = Ꮡa.Value.full;
+            Ꮡa.Value.full = Ꮡblock.ValueSlot;
+        }
+
+        // Allocate a new block.
+        Ꮡblock.ValueSlot = (ж<traceRegionAllocBlock>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceRegionAllocBlock{}) */ (uintptr)65536, Ꮡmemstats.of(mstats.Ꮡother_sys), traceArenaAllocˢ));
+        if (Ꮡblock.ValueSlot == nil) {
+            @throw(traceRegionOutOfMemoryˢ);
+        }
+
+        // Allocate space for our current request, so we always make
+        // progress.
+        Ꮡblock.ValueSlot.of(traceRegionAllocBlock.Ꮡoff).Store(n);
+        Ꮡx.ValueSlot = Ꮡblock.ValueSlot.at(traceRegionAllocBlock.Ꮡdata, 0).Reinterpret<byte, notInHeap>();
+
+        // Publish the new block.
+        Ꮡa.of(traceRegionAlloc.Ꮡcurrent).Store(@unsafe.Pointer.FromPinnedBox(Ꮡblock.ValueSlot));
+        unlock(Ꮡa.of(traceRegionAlloc.Ꮡlock));
+    });
     return x;
 }
 

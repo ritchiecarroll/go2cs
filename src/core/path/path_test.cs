@@ -13,13 +13,8 @@ partial struct PathTest {
     internal @string path, result;
 }
 
-// Already clean
-// Remove trailing slash
-// Remove doubled slash
-// Remove . elements
-// Remove .. elements
-// Combinations
 internal static slice<PathTest> cleantests = new PathTest[]{
+    // Already clean
     new(""u8, "."u8),
     new("abc"u8, "abc"u8),
     new("abc/def"u8, "abc/def"u8),
@@ -30,6 +25,8 @@ internal static slice<PathTest> cleantests = new PathTest[]{
     new("../../abc"u8, "../../abc"u8),
     new("/abc"u8, "/abc"u8),
     new("/"u8, "/"u8),
+
+    // Remove trailing slash
     new("abc/"u8, "abc"u8),
     new("abc/def/"u8, "abc/def"u8),
     new("a/b/c/"u8, "a/b/c"u8),
@@ -37,14 +34,20 @@ internal static slice<PathTest> cleantests = new PathTest[]{
     new("../"u8, ".."u8),
     new("../../"u8, "../.."u8),
     new("/abc/"u8, "/abc"u8),
+
+    // Remove doubled slash
     new("abc//def//ghi"u8, "abc/def/ghi"u8),
     new("//abc"u8, "/abc"u8),
     new("///abc"u8, "/abc"u8),
     new("//abc//"u8, "/abc"u8),
     new("abc//"u8, "abc"u8),
+
+    // Remove . elements
     new("abc/./def"u8, "abc/def"u8),
     new("/./abc/def"u8, "/abc/def"u8),
     new("abc/."u8, "abc"u8),
+
+    // Remove .. elements
     new("abc/def/ghi/../jkl"u8, "abc/def/jkl"u8),
     new("abc/def/../ghi/../jkl"u8, "abc/jkl"u8),
     new("abc/def/.."u8, "abc"u8),
@@ -53,6 +56,8 @@ internal static slice<PathTest> cleantests = new PathTest[]{
     new("abc/def/../../.."u8, ".."u8),
     new("/abc/def/../../.."u8, "/"u8),
     new("abc/def/../../../ghi/jkl/../../../mno"u8, "../../mno"u8),
+
+    // Combinations
     new("abc/./../def"u8, "def"u8),
     new("abc//./../def"u8, "def"u8),
     new("abc/../../././../def"u8, "../../def"u8)
@@ -85,6 +90,7 @@ public static void TestCleanMallocs(ж<testing.T> Ꮡt) {
         Ꮡt.Log(skippingAllocsPerRunˢ);
         return;
     }
+
     foreach (var (_, vᴛ1) in cleantests) {
         ref var test = ref heap(new PathTest(), out var Ꮡtest);
         test = vᴛ1;
@@ -126,13 +132,15 @@ partial struct JoinTest {
     internal @string path;
 }
 
-// zero parameters
-// one parameter
-// two parameters
 internal static slice<JoinTest> jointests = new JoinTest[]{
+    // zero parameters
     new(new @string[]{}.slice(), ""u8),
+
+    // one parameter
     new(new @string[]{""u8}.slice(), ""u8),
     new(new @string[]{"a"u8}.slice(), "a"u8),
+
+    // two parameters
     new(new @string[]{"a"u8, "b"u8}.slice(), "a/b"u8),
     new(new @string[]{"a"u8, ""u8}.slice(), "a"u8),
     new(new @string[]{""u8, "b"u8}.slice(), "b"u8),
@@ -175,8 +183,8 @@ public static void TestExt(ж<testing.T> Ꮡt) {
     }
 }
 
-// Already clean
 internal static slice<PathTest> basetests = new PathTest[]{
+    // Already clean
     new(""u8, "."u8),
     new("."u8, "."u8),
     new("/."u8, "."u8),

@@ -1,14 +1,13 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-// Package maps implements Go's builtin map type.
 namespace go.@internal.runtime;
 
 using abi = go.@internal.abi_package;
-using goarch = go.@internal.goarch_package;
+using math = go.@internal.runtime.math_package;
 using @unsafe = unsafe_package;
 using go.@internal;
+using go.@internal.runtime;
 
 partial class maps_package {
 
@@ -36,7 +35,7 @@ public partial struct table {
     // The number of filled slots (i.e. the number of elements in the table).
     internal uint16 used;
     // The total number of slots (always 2^N). Equal to
-    // `(groups.lengthMask+1)*abi.SwissMapGroupSlots`.
+    // `(groups.lengthMask+1)*abi.MapGroupSlots`.
     internal uint16 capacity;
     // The number of slots we can still fill without needing to rehash.
     //
@@ -50,12 +49,12 @@ public partial struct table {
     internal uint8 localDepth;
     // Index of this table in the Map directory. This is the index of the
     // _first_ location in the directory. The table may occur in multiple
-    // sequential indicies.
+    // sequential indices.
     //
     // index is -1 if the table is stale (no longer installed in the
     // directory).
     internal nint index;
-    // groups is an array of slot groups. Each group holds abi.SwissMapGroupSlots
+    // groups is an array of slot groups. Each group holds abi.MapGroupSlots
     // key/elem slots and their control bytes. A table has a fixed size
     // groups array. The table is replaced (in rehash) when more space is
     // required.
@@ -67,64 +66,68 @@ public partial struct table {
     internal groupsReference groups;
 }
 
-internal static ж<table> newTable(ж<abi.SwissMapType> Ꮡtyp, uint64 capacity, nint index, uint8 localDepth) {
-    if (capacity < abi.SwissMapGroupSlots) {
-        capacity = abi.SwissMapGroupSlots;
+internal static ж<table> newTable(ж<abiꓸMapType> Ꮡtyp, uint64 capacity, nint index, uint8 localDepth) {
+    if (capacity < abi.MapGroupSlots) {
+        capacity = abi.MapGroupSlots;
     }
+
     var t = Ꮡ(new table(
         index: index,
         localDepth: localDepth
     ));
+
     if (capacity > maxTableCapacity) {
         throw panic("initial table capacity too large");
     }
+
     // N.B. group count must be a power of two for probeSeq to visit every
     // group.
     (capacity, var overflow) = alignUpPow2(capacity);
     if (overflow) {
         throw panic("rounded-up capacity overflows uint64");
     }
+
     t.reset(Ꮡtyp, (uint16)capacity);
+
     return t;
 }
 
 // reset resets the table with new, empty groups with the specified new total
 // capacity.
-internal static void reset(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uint16 capacity) {
-    var groupCount = (uint64)capacity / (uint64)abi.SwissMapGroupSlots;
+internal static void reset(this ref table t, ж<abiꓸMapType> Ꮡtyp, uint16 capacity) {
+    var groupCount = (uint64)capacity / (uint64)abi.MapGroupSlots;
     t.groups = newGroups(ref (Ꮡtyp).DerefOrNull(), groupCount);
     t.capacity = capacity;
-    t.resetGrowthLeft();
+    t.growthLeft = t.maxGrowthLeft();
+
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         var g = t.groups.group(Ꮡtyp, i);
         g.ctrls().setEmpty();
     }
 }
 
-// Preconditions: table must be empty.
-internal static void resetGrowthLeft(this ref table t) {
-    uint16 growthLeft = default!;
+// maxGrowthLeft is the number of inserts we can do before
+// resizing, starting from an empty table.
+internal static uint16 maxGrowthLeft(this ref table t) {
     if (t.capacity == 0){
         // No real reason to support zero capacity table, since an
         // empty Map simply won't have a table.
         throw panic("table must have positive capacity");
     } else 
-    if (t.capacity <= abi.SwissMapGroupSlots){
+    if (t.capacity <= abi.MapGroupSlots){
         // If the map fits in a single group then we're able to fill all of
         // the slots except 1 (an empty slot is needed to terminate find
         // operations).
         //
         // TODO(go.dev/issue/54766): With a special case in probing for
         // single-group tables, we could fill all slots.
-        growthLeft = (uint16)(t.capacity - 1);
+        return (uint16)(t.capacity - 1);
     } else {
-        if ((uint16)(t.capacity * (uint16)maxAvgGroupLoad) < t.capacity) {
-            // TODO(prattmic): Do something cleaner.
+        if (t.capacity > (uint16)(math.MaxUint16 / (uint16)maxAvgGroupLoad)) {
             throw panic("overflow");
         }
-        growthLeft = (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.SwissMapGroupSlots);
+        return (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.MapGroupSlots);
     }
-    t.growthLeft = growthLeft;
 }
 
 public static uint64 Used(this ref table t) {
@@ -133,7 +136,7 @@ public static uint64 Used(this ref table t) {
 
 // Get performs a lookup of the key that key points to. It returns a pointer to
 // the element, or false if the key doesn't exist.
-public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -157,7 +160,7 @@ public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abi.SwissMapType>
 // expose updated elements. For NeedsKeyUpdate keys, iteration also must return
 // the new key value, not the old key value.
 // hash must be the hash of the key.
-internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref table t, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     // To find the location of a key in the table, we compute hash(key). From
@@ -188,11 +191,15 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
     // load factors, k is less than 32, meaning that the number of false
     // positive comparisons we must perform is less than 1/8 per find.
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
+    var h2Hash = h2(hash);
     for (; ᐧ ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
-        var match = (~g.ctrls()).matchH2(h2(hash));
+
+        var match = (~g.ctrls()).matchH2(h2Hash);
+
         while (match != 0) {
             var i = match.first();
+
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
@@ -206,6 +213,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
             }
             match = match.removeFirst();
         }
+
         match = (~g.ctrls()).matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
@@ -215,15 +223,19 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
     }
 }
 
-internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
+    var h2Hash = h2(hash);
     for (; ᐧ ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
-        var match = (~g.ctrls()).matchH2(h2(hash));
+
+        var match = (~g.ctrls()).matchH2(h2Hash);
+
         while (match != 0) {
             var i = match.first();
+
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
@@ -237,6 +249,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi.S
             }
             match = match.removeFirst();
         }
+
         match = (~g.ctrls()).matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
@@ -253,22 +266,27 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi.S
 // the new table.
 //
 // hash must be the hash of key.
-public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uintptr hash, @unsafe.Pointer key) {
+public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uintptr hash, @unsafe.Pointer key) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
+
     // As we look for a match, keep track of the first deleted slot we
     // find, which we'll use to insert the new entry if necessary.
     groupReference firstDeletedGroup = default!;
     uintptr firstDeletedSlot = default!;
+
+    var h2Hash = h2(hash);
     for (; ᐧ ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
-        var match = (~g.ctrls()).matchH2(h2(hash));
+        var match = (~g.ctrls()).matchH2(h2Hash);
+
         // Look for an existing slot containing this key.
         while (match != 0) {
             var iΔ1 = match.first();
+
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, iΔ1);
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
@@ -277,15 +295,18 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
                 if (typ.NeedKeyUpdate()) {
                     typedmemmove(typ.Key, slotKey, key);
                 }
+
                 @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, iΔ1);
                 if (typ.IndirectElem()) {
                     slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
                 }
+
                 t.checkInvariants(Ꮡtyp, Ꮡm);
                 return (slotElem, true);
             }
             match = match.removeFirst();
         }
+
         // No existing slot for this key in this group. Is this the end
         // of the probe sequence?
         match = (~g.ctrls()).matchEmptyOrDeleted();
@@ -304,6 +325,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
         }
         // We've found an empty slot, which means we've reached the end of
         // the probe sequence.
+
         // If we found a deleted slot along the way, we can
         // replace it without consuming growthLeft.
         if (firstDeletedGroup.data != nil) {
@@ -311,6 +333,12 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
             i = firstDeletedSlot;
             t.growthLeft++; // will be decremented below to become a no-op.
         }
+
+        // If we have no space left, first try to remove some tombstones.
+        if (t.growthLeft == 0) {
+            t.pruneTombstones(Ꮡtyp, Ꮡm);
+        }
+
         // If there is room left to grow, just insert the new entry.
         if (t.growthLeft > 0) {
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
@@ -320,19 +348,23 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
                 slotKey = kmem;
             }
             typedmemmove(typ.Key, slotKey, key);
+
             @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
                 @unsafe.Pointer emem = (uintptr)newobject(typ.Elem);
                 ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = emem;
                 slotElem = emem;
             }
-            g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
+
+            g.ctrls().set(i, (ctrl)(uint8)h2Hash);
             t.growthLeft--;
             t.used++;
             m.used++;
+
             t.checkInvariants(Ꮡtyp, Ꮡm);
             return (slotElem, true);
         }
+
         Ꮡt.rehash(Ꮡtyp, Ꮡm);
         return (default!, false);
     }
@@ -354,12 +386,13 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
 // requires the caller to ensure that the referenced memory never
 // changes (by sourcing those pointers from another indirect key/elem
 // map).
-internal static void uncheckedPutSlot(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) {
+internal static void uncheckedPutSlot(this ref table t, ж<abiꓸMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (t.growthLeft == 0) {
         throw panic("invariant failed: growthLeft is unexpectedly 0");
     }
+
     // Given key and its hash hash(key), to insert it, we construct a
     // probeSeq, and use it to find the first group with an unoccupied (empty
     // or deleted) slot. We place the key/value into the first such slot in
@@ -367,47 +400,57 @@ internal static void uncheckedPutSlot(this ref table t, ж<abi.SwissMapType> Ꮡ
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
     for (; ᐧ ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
+
         var match = (~g.ctrls()).matchEmptyOrDeleted();
         if (match != 0) {
             var i = match.first();
+
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
             if (typ.IndirectKey()){
                 ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value = key;
             } else {
                 typedmemmove(typ.Key, slotKey, key);
             }
+
             @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()){
                 ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = elem;
             } else {
                 typedmemmove(typ.Elem, slotElem, elem);
             }
+
             t.growthLeft--;
             t.used++;
-            g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
+            g.ctrls().set(i, (ctrl)(uint8)h2(hash));
             return;
         }
     }
 }
 
-public static void Delete(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uintptr hash, @unsafe.Pointer key) {
+// Delete returns true if it put a tombstone in t.
+public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
+    var h2Hash = h2(hash);
     for (; ᐧ ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
-        var match = (~g.ctrls()).matchH2(h2(hash));
+        var match = (~g.ctrls()).matchH2(h2Hash);
+
         while (match != 0) {
             var i = match.first();
+
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
             @unsafe.Pointer origSlotKey = slotKey;
             if (typ.IndirectKey()) {
                 slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
             }
+
             if ((~typ.Key).Equal(key, slotKey)) {
                 t.used--;
                 m.used--;
+
                 if (typ.IndirectKey()){
                     // Clearing the pointer is sufficient.
                     ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default!;
@@ -417,6 +460,7 @@ public static void Delete(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMa
                     // are pointers in it.
                     typedmemclr(typ.Key, slotKey);
                 }
+
                 @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
                 if (typ.IndirectElem()){
                     // Clearing the pointer is sufficient.
@@ -429,6 +473,7 @@ public static void Delete(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMa
                     // https://go.dev/issue/25936.
                     typedmemclr(typ.Elem, slotElem);
                 }
+
                 // Only a full group can appear in the middle
                 // of a probe sequence (a group with at least
                 // one empty slot terminates probing). Once a
@@ -437,23 +482,126 @@ public static void Delete(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMa
                 // full now, we can simply remove the element.
                 // Otherwise, we create a tombstone to mark the
                 // slot as deleted.
+                bool tombstone = default!;
                 if ((~g.ctrls()).matchEmpty() != 0){
                     g.ctrls().set(i, ctrlEmpty);
                     t.growthLeft++;
                 } else {
                     g.ctrls().set(i, ctrlDeleted);
+                    tombstone = true;
                 }
+
                 t.checkInvariants(Ꮡtyp, Ꮡm);
-                return;
+                return tombstone;
             }
             match = match.removeFirst();
         }
+
         match = (~g.ctrls()).matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
-            return;
+            return false;
         }
+    }
+}
+
+// pruneTombstones goes through the table and tries to remove
+// tombstones that are no longer needed. Best effort.
+// Note that it only removes tombstones, it does not move elements.
+// Moving elements would do a better job but is infeasbile due to
+// iterator semantics.
+//
+// Pruning should only succeed if it can remove O(n) tombstones.
+// It would be bad if we did O(n) work to find 1 tombstone to remove.
+// Then the next insert would spend another O(n) work to find 1 more
+// tombstone to remove, etc.
+//
+// We really need to remove O(n) tombstones so we can pay for the cost
+// of finding them. If we can't, then we need to grow (which is also O(n),
+// but guarantees O(n) subsequent inserts can happen in constant time).
+internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+    ref var typ = ref Ꮡtyp.DerefOrNull();
+    ref var m = ref Ꮡm.DerefOrNull();
+
+    if ((uint16)(t.tombstones() * 10) < t.capacity) { // 10% of capacity
+        // Not enough tombstones to be worth the effort.
+        return;
+    }
+
+    // Bit set marking all the groups whose tombstones are needed.
+    array<uint32> needed = new(4); /* (maxTableCapacity / abi.MapGroupSlots + 31) / 32 */
+
+    // Trace the probe sequence of every full entry.
+    for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
+        var g = t.groups.group(Ꮡtyp, i);
+        var match = (~g.ctrls()).matchFull();
+        while (match != 0) {
+            var j = match.first();
+            match = match.removeFirst();
+            @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
+            if (typ.IndirectKey()) {
+                key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
+            }
+            if (!(~typ.Key).Equal(key, key)) {
+                // Key not equal to itself. We never have to find these
+                // keys on lookup (only on iteration), so we can break
+                // their probe sequences at will.
+                continue;
+            }
+            // Walk probe sequence for this key.
+            // Each tombstone group we need to walk past is marked required.
+            var hash = typ.Hasher(key, m.seed);
+            for (var seq = makeProbeSeq(h1(hash), t.groups.lengthMask); ᐧ ; seq = seq.next()) {
+                if (seq.offset == i) {
+                    break; // reached group of element in probe sequence
+                }
+                var gΔ1 = t.groups.group(Ꮡtyp, seq.offset);
+                var mΔ1 = (~gΔ1.ctrls()).matchEmptyOrDeleted();
+                if (mΔ1 != 0) { // must be deleted, not empty, as we haven't found our key yet
+                    // Mark this group's tombstone as required.
+                    needed[seq.offset / 32] |= (uint32)(((uint32)1 << (int)(seq.offset % 32)));
+                }
+            }
+        }
+        if ((~g.ctrls()).matchEmpty() != 0) {
+            // Also mark non-tombstone-containing groups, so we don't try
+            // to remove tombstones from them below.
+            needed[i / 32] |= (uint32)(((uint32)1 << (int)(i % 32)));
+        }
+    }
+
+    // First, see if we can remove enough tombstones to restore capacity.
+    // This function is O(n), so only remove tombstones if we can remove
+    // enough of them to justify the O(n) cost.
+    nint cnt = 0;
+    for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
+        if ((needed[i / 32] >> (int)(i % 32) & 1) != 0) {
+            continue;
+        }
+        var g = t.groups.group(Ꮡtyp, i);
+        var mΔ2 = (~g.ctrls()).matchEmptyOrDeleted(); // must be deleted
+        cnt += mΔ2.count();
+    }
+    if (cnt * 10 < (nint)t.capacity) { // Can we restore 10% of capacity?
+        return; // don't bother removing tombstones. Caller will grow instead.
+    }
+
+    // Prune unneeded tombstones.
+    for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
+        if ((needed[i / 32] >> (int)(i % 32) & 1) != 0) {
+            continue;
+        }
+        var g = t.groups.group(Ꮡtyp, i);
+        var mΔ3 = (~g.ctrls()).matchEmptyOrDeleted(); // must be deleted
+        while (mΔ3 != 0) {
+            var k = mΔ3.first();
+            mΔ3 = mΔ3.removeFirst();
+            g.ctrls().set(k, ctrlEmpty);
+            t.growthLeft++;
+        }
+        // TODO: maybe we could convert all slots at once
+        // using some bitvector trickery.
     }
 }
 
@@ -461,26 +609,57 @@ public static void Delete(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMa
 // tombstone is a slot that has been deleted but is still considered occupied
 // so as not to violate the probing invariant.
 internal static uint16 tombstones(this ref table t) {
-    return (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.SwissMapGroupSlots - t.used - t.growthLeft);
+    return (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.MapGroupSlots - t.used - t.growthLeft);
 }
 
-// Clear deletes all entries from the map resulting in an empty map.
-public static void Clear(this ref table t, ж<abi.SwissMapType> Ꮡtyp) {
+// Clear deletes all entries from the table resulting in an empty table.
+public static void Clear(this ref table t, ж<abiꓸMapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
-    for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
-        var g = t.groups.group(Ꮡtyp, i);
-        typedmemclr(typ.Group, g.data);
-        g.ctrls().setEmpty();
+    var mgl = t.maxGrowthLeft();
+    if (t.used == 0 && t.growthLeft == mgl) { // no current entries and no tombstones
+        return;
+    }
+    // We only want to do the work of clearing slots
+    // if they are full. But we also don't want to do too
+    // much work to figure out whether a slot is full or not,
+    // especially if clearing a slot is cheap.
+    //  1) We decide group-by-group instead of slot-by-slot.
+    //     If any slot in a group is full, we zero the whole group.
+    //  2) If groups are unlikely to be empty, don't bother
+    //     testing for it.
+    //  3) If groups are 50%/50% likely to be empty, also don't
+    //     bother testing, as it confuses the branch predictor. See #75097.
+    //  4) But if a group is really large, do the test anyway, as
+    //     clearing is expensive.
+    var fullTest = (uint64)t.used * 4 <= t.groups.lengthMask; // less than ~0.25 entries per group -> >3/4 empty groups
+    if (typ.SlotSize > 32) {
+        // For large slots, it is always worth doing the test first.
+        fullTest = true;
+    }
+    if (fullTest){
+        for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
+            var g = t.groups.group(Ꮡtyp, i);
+            if ((~g.ctrls()).anyFull()) {
+                typedmemclr(typ.Group, g.data);
+            }
+            g.ctrls().setEmpty();
+        }
+    } else {
+        for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
+            var g = t.groups.group(Ꮡtyp, i);
+            typedmemclr(typ.Group, g.data);
+            g.ctrls().setEmpty();
+        }
     }
     t.used = 0;
-    t.resetGrowthLeft();
+    t.growthLeft = mgl;
 }
 
 partial struct Iter {
     internal @unsafe.Pointer key; // Must be in first position.  Write nil to indicate iteration end (see cmd/compile/internal/walk/range.go).
     internal @unsafe.Pointer elem; // Must be in second position (see cmd/compile/internal/walk/range.go).
-    internal ж<abi.SwissMapType> typ;
+    internal ж<abiꓸMapType> typ;
     internal ж<ΔMap> m;
     // Randomize iteration order by starting iteration at a random slot
     // offset. The offset into the directory uses a separate offset, as it
@@ -507,14 +686,16 @@ partial struct Iter {
 }
 
 // Init initializes Iter for iteration.
-public static void Init(this ref Iter it, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+public static void Init(this ref Iter it, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
     it.typ = Ꮡtyp;
+
     if (Ꮡm == nil || m.used == 0) {
         return;
     }
+
     nint dirIdx = 0;
     groupReference groupSmall = default!;
     if (m.dirLen <= 0) {
@@ -522,6 +703,7 @@ public static void Init(this ref Iter it, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap>
         dirIdx = -1;
         groupSmall.data = m.dirPtr;
     }
+
     it.m = Ꮡm;
     it.entryOffset = rand();
     it.dirOffset = rand();
@@ -547,7 +729,7 @@ public static @unsafe.Pointer Key(this ref Iter it) {
     return it.key;
 }
 
-// Key returns a pointer to the current element. nil indicates end of
+// Elem returns a pointer to the current element. nil indicates end of
 // iteration.
 //
 // Must not be called prior to Next.
@@ -624,9 +806,11 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElem(this ref I
             }
             return (key, elem, true);
         }
+
         // This entry doesn't exist anymore.
         return (default!, default!, false);
     }
+
     return (newKey, newElem, true);
 }
 
@@ -647,22 +831,27 @@ public static void Next(this ref Iter it) {
         it.elem = default!;
         return;
     }
+
     if ((~it.m).writing != 0) {
         fatal(concurrentMapIterationˢ);
         return;
     }
+
     if (it.dirIdx < 0) {
         // Map was small at Init.
-        for (; it.entryIdx < abi.SwissMapGroupSlots; it.entryIdx++) {
-            var k = (uintptr)(it.entryIdx + it.entryOffset) % (uintptr)abi.SwissMapGroupSlots;
+        for (; it.entryIdx < abi.MapGroupSlots; it.entryIdx++) {
+            var k = (uintptr)(it.entryIdx + it.entryOffset) % (uintptr)abi.MapGroupSlots;
+
             if (((ctrl)(it.group.ctrls().get(k) & ctrlEmpty)) == ctrlEmpty) {
                 // Empty or deleted.
                 continue;
             }
+
             @unsafe.Pointer key = (uintptr)it.group.key(it.typ, k);
             if (it.typ.IndirectKey()) {
                 key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
             }
+
             // As below, if we have grown to a full map since Init,
             // we continue to use the old group to decide the keys
             // to return, but must look them up again in the new
@@ -692,6 +881,7 @@ public static void Next(this ref Iter it) {
                     elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
                 }
             }
+
             it.entryIdx++;
             it.key = key;
             it.elem = elem;
@@ -701,6 +891,7 @@ public static void Next(this ref Iter it) {
         it.elem = default!;
         return;
     }
+
     if (it.globalDepth != (~it.m).globalDepth) {
         // Directory has grown since the last call to Next. Adjust our
         // directory index.
@@ -735,13 +926,15 @@ public static void Next(this ref Iter it) {
         it.dirIdx.LshAssign((uint64)(orders));
         it.dirOffset.LshAssign((uint64)(orders));
         // it.m.dirLen was already adjusted when the directory grew.
+
         it.globalDepth = it.m.Value.globalDepth;
     }
+
     // Continue iteration until we find a full slot.
     for (; it.dirIdx < (~it.m).dirLen; it.nextDirIdx()) {
         // Resolve the table.
         if (it.tab == nil) {
-            nint dirIdx = (nint)((uint64)(((uint64)it.dirIdx + it.dirOffset) & (uint64)((~it.m).dirLen - 1)));
+            nint dirIdx = (nint)(((uint64)it.dirIdx + it.dirOffset) & (uint64)((~it.m).dirLen - 1));
             var newTab = it.m.directoryAt((uintptr)dirIdx);
             if ((~newTab).index != dirIdx) {
                 // Normally we skip past all duplicates of the
@@ -761,14 +954,17 @@ public static void Next(this ref Iter it) {
             }
             it.tab = newTab;
         }
+
         // N.B. Use it.tab, not newTab. It is important to use the old
         // table for key selection if the table has grown. See comment
         // on grown below.
+
         var entryMask = (uint64)(~it.tab).capacity - 1;
         if (it.entryIdx > entryMask) {
             // Continue to next table.
             continue;
         }
+
         // Fast path: skip matching and directly check if entryIdx is a
         // full slot.
         //
@@ -779,22 +975,25 @@ public static void Next(this ref Iter it) {
         // mostly full map has a high probability of being full. Thus
         // it is cheaper to check a single slot than do a full control
         // match.
-        var entryIdx = (uint64)((it.entryIdx + it.entryOffset) & entryMask);
-        var slotIdx = (uintptr)((uint64)(entryIdx & (uint64)((abi.SwissMapGroupSlots - 1))));
+
+        var entryIdx = (it.entryIdx + it.entryOffset) & entryMask;
+        var slotIdx = (uintptr)(entryIdx & (uint64)(abi.MapGroupSlots - 1));
         if (slotIdx == 0 || it.group.data == nil) {
             // Only compute the group (a) when we switch
             // groups (slotIdx rolls over) and (b) on the
             // first iteration in this table (slotIdx may
             // not be zero due to entryOffset).
-            var groupIdx = (entryIdx >> (int)(abi.SwissMapGroupSlotsBits));
+            var groupIdx = entryIdx >> (int)(abi.MapGroupSlotsBits);
             it.group = it.tab.of(table.Ꮡgroups).group(it.typ, groupIdx);
         }
+
         if (((ctrl)(it.group.ctrls().get(slotIdx) & ctrlEmpty)) == 0) {
             // Slot full.
             @unsafe.Pointer key = (uintptr)it.group.key(it.typ, slotIdx);
             if (it.typ.IndirectKey()) {
                 key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
             }
+
             var grown = (~it.tab).index == -1;
             @unsafe.Pointer elem = default!;
             if (grown){
@@ -814,13 +1013,16 @@ public static void Next(this ref Iter it) {
                     elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
                 }
             }
+
             it.entryIdx++;
             it.key = key;
             it.elem = elem;
             return;
         }
+
 next:
         it.entryIdx++;
+
         // Slow path: use a match on the control word to jump ahead to
         // the next full slot.
         //
@@ -837,33 +1039,39 @@ next:
         // iterator to use across Next calls. However because entries
         // may be deleted between calls later calls would still need to
         // double-check the control value.
+
         bitset groupMatch = default!;
         while (it.entryIdx <= entryMask) {
-            var entryIdxΔ1 = (uint64)((it.entryIdx + it.entryOffset) & entryMask);
-            var slotIdxΔ1 = (uintptr)((uint64)(entryIdxΔ1 & (uint64)((abi.SwissMapGroupSlots - 1))));
+            var entryIdxΔ1 = (it.entryIdx + it.entryOffset) & entryMask;
+            var slotIdxΔ1 = (uintptr)(entryIdxΔ1 & (uint64)(abi.MapGroupSlots - 1));
+
             if (slotIdxΔ1 == 0 || it.group.data == nil) {
                 // Only compute the group (a) when we switch
                 // groups (slotIdx rolls over) and (b) on the
                 // first iteration in this table (slotIdx may
                 // not be zero due to entryOffset).
-                var groupIdx = (entryIdxΔ1 >> (int)(abi.SwissMapGroupSlotsBits));
+                var groupIdx = entryIdxΔ1 >> (int)(abi.MapGroupSlotsBits);
                 it.group = it.tab.of(table.Ꮡgroups).group(it.typ, groupIdx);
             }
+
             if (groupMatch == 0) {
                 groupMatch = (~it.group.ctrls()).matchFull();
+
                 if (slotIdxΔ1 != 0) {
                     // Starting in the middle of the group.
                     // Ignore earlier groups.
                     groupMatch = groupMatch.removeBelow(slotIdxΔ1);
                 }
+
                 // Skip over groups that are composed of only empty or
                 // deleted slots.
                 if (groupMatch == 0) {
                     // Jump past remaining slots in this
                     // group.
-                    it.entryIdx += (uint64)abi.SwissMapGroupSlots - (uint64)slotIdxΔ1;
+                    it.entryIdx += (uint64)abi.MapGroupSlots - (uint64)slotIdxΔ1;
                     continue;
                 }
+
                 var i = groupMatch.first();
                 it.entryIdx += (uint64)(i - slotIdxΔ1);
                 if (it.entryIdx > entryMask) {
@@ -873,10 +1081,12 @@ next:
                 entryIdxΔ1 += (uint64)(i - slotIdxΔ1);
                 slotIdxΔ1 = i;
             }
+
             @unsafe.Pointer key = (uintptr)it.group.key(it.typ, slotIdxΔ1);
             if (it.typ.IndirectKey()) {
                 key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
             }
+
             // If the table has changed since the last
             // call, then it has grown or split. In this
             // case, further mutations (changes to
@@ -900,9 +1110,10 @@ next:
                         // No more entries in this
                         // group. Continue to next
                         // group.
-                        it.entryIdx += (uint64)abi.SwissMapGroupSlots - (uint64)slotIdxΔ1;
+                        it.entryIdx += (uint64)abi.MapGroupSlots - (uint64)slotIdxΔ1;
                         continue;
                     }
+
                     // Next full slot.
                     var i = groupMatch.first();
                     it.entryIdx += (uint64)(i - slotIdxΔ1);
@@ -917,24 +1128,28 @@ next:
                     elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
                 }
             }
+
             // Jump ahead to the next full slot or next group.
             groupMatch = groupMatch.removeFirst();
             if (groupMatch == 0){
                 // No more entries in
                 // this group. Continue
                 // to next group.
-                it.entryIdx += (uint64)abi.SwissMapGroupSlots - (uint64)slotIdxΔ1;
+                it.entryIdx += (uint64)abi.MapGroupSlots - (uint64)slotIdxΔ1;
             } else {
                 // Next full slot.
                 var i = groupMatch.first();
                 it.entryIdx += (uint64)(i - slotIdxΔ1);
             }
+
             it.key = key;
             it.elem = elem;
             return;
         }
+
+        // Continue to next table.
     }
-    // Continue to next table.
+
     it.key = default!;
     it.elem = default!;
     return;
@@ -943,7 +1158,7 @@ next:
 // Replaces the table with one larger table or two split tables to fit more
 // entries. Since the table is replaced, t is now stale and should not be
 // modified.
-internal static void rehash(this ж<table> Ꮡt, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+internal static void rehash(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // TODO(prattmic): SwissTables typically perform a "rehash in place"
@@ -965,45 +1180,52 @@ internal static void rehash(this ж<table> Ꮡt, ж<abi.SwissMapType> Ꮡtyp, ж
         t.grow(Ꮡtyp, Ꮡm, newCapacity);
         return;
     }
+
     Ꮡt.split(Ꮡtyp, Ꮡm);
 }
 
 // Bitmask for the last selection bit at this depth.
 internal static uintptr localDepthMask(uint8 localDepth) {
-    if (goarch.PtrSize == 4) {
+    if (!Use64BitHash) {
         return ((uintptr)1).Lsh((uint64)((uint8)(32 - localDepth)));
     }
     return ((uintptr)1).Lsh((uint64)((uint8)(64 - localDepth)));
 }
 
 // split the table into two, installing the new tables in the map directory.
-internal static void split(this ж<table> Ꮡt, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+internal static void split(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
     var localDepth = t.localDepth;
     localDepth++;
+
     // TODO: is this the best capacity?
     var left = newTable(Ꮡtyp, maxTableCapacity, -1, localDepth);
     var right = newTable(Ꮡtyp, maxTableCapacity, -1, localDepth);
+
     // Split in half at the localDepth bit from the top.
     var mask = localDepthMask(localDepth);
+
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         var g = t.groups.group(Ꮡtyp, i);
-        for (var j = (uintptr)0; j < abi.SwissMapGroupSlots; j++) {
+        for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
             if (((ctrl)(g.ctrls().get(j) & ctrlEmpty)) == ctrlEmpty) {
                 // Empty or deleted
                 continue;
             }
+
             @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
             if (typ.IndirectKey()) {
                 key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
             }
+
             @unsafe.Pointer elem = (uintptr)g.elem(Ꮡtyp, j);
             if (typ.IndirectElem()) {
                 elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
             }
+
             var hash = typ.Hasher(key, m.seed);
             ж<table> newTableΔ1 = default!;
             if ((uintptr)(hash & mask) == 0){
@@ -1014,6 +1236,7 @@ internal static void split(this ж<table> Ꮡt, ж<abi.SwissMapType> Ꮡtyp, ж<
             newTableΔ1.uncheckedPutSlot(Ꮡtyp, hash, key, elem);
         }
     }
+
     m.installTableSplit(Ꮡt, left, right);
     t.index = -1;
 }
@@ -1022,32 +1245,38 @@ internal static void split(this ж<table> Ꮡt, ж<abi.SwissMapType> Ꮡtyp, ж<
 // and uncheckedPutting each element of the table into the new table (we know
 // that no insertion here will Put an already-present value), and discard the
 // old table.
-internal static void grow(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint16 newCapacity) {
+internal static void grow(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint16 newCapacity) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
     var newTableΔ1 = newTable(Ꮡtyp, (uint64)newCapacity, t.index, t.localDepth);
+
     if (t.capacity > 0) {
         for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
             var g = t.groups.group(Ꮡtyp, i);
-            for (var j = (uintptr)0; j < abi.SwissMapGroupSlots; j++) {
+            for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
                 if (((ctrl)(g.ctrls().get(j) & ctrlEmpty)) == ctrlEmpty) {
                     // Empty or deleted
                     continue;
                 }
+
                 @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
                     key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
                 }
+
                 @unsafe.Pointer elem = (uintptr)g.elem(Ꮡtyp, j);
                 if (typ.IndirectElem()) {
                     elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
                 }
+
                 var hash = typ.Hasher(key, m.seed);
+
                 newTableΔ1.uncheckedPutSlot(Ꮡtyp, hash, key, elem);
             }
         }
     }
+
     newTableΔ1.checkInvariants(Ꮡtyp, Ꮡm);
     m.replaceTable(newTableΔ1);
     t.index = -1;
@@ -1055,8 +1284,10 @@ internal static void grow(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMa
 
 // probeSeq maintains the state for a probe sequence that iterates through the
 // groups in a table. The sequence is a triangular progression of the form
+// hash, hash + 1, hash + 1 + 2, hash + 1 + 2 + 3, ..., modulo mask + 1.
+// The i-th term of the sequence is
 //
-//	p(i) := (i^2 + i)/2 + hash (mod mask+1)
+//	p(i) := hash + (i^2 + i)/2 (mod mask+1)
 //
 // The sequence effectively outputs the indexes of *groups*. The group
 // machinery allows us to check an entire group with minimal branching.
@@ -1073,15 +1304,36 @@ partial struct probeSeq {
 internal static probeSeq makeProbeSeq(uintptr hash, uint64 mask) {
     return new probeSeq(
         mask: mask,
-        offset: (uint64)((uint64)hash & mask),
+        offset: ((uint64)hash & mask),
         index: 0
     );
 }
 
 internal static probeSeq next(this probeSeq s) {
     s.index++;
-    s.offset = (uint64)((s.offset + s.index) & s.mask);
+    s.offset = (s.offset + s.index) & s.mask;
     return s;
+}
+
+internal static ж<table> clone(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    // Shallow copy the table structure.
+    var t2 = @new<table>();
+    t2.Value = t;
+    Ꮡt = t2; t = ref Ꮡt.DerefOrNull();
+
+    // We need to just deep copy the groups.data field.
+    var oldGroups = t.groups;
+    var newGroupsΔ1 = newGroups(ref (Ꮡtyp).DerefOrNull(), oldGroups.lengthMask + 1);
+    for (var i = (uint64)0; i <= oldGroups.lengthMask; i++) {
+        var oldGroup = oldGroups.group(Ꮡtyp, i);
+        var newGroup = newGroupsΔ1.group(Ꮡtyp, i);
+        cloneGroup(Ꮡtyp, newGroup, oldGroup);
+    }
+    t.groups = newGroupsΔ1;
+
+    return Ꮡt;
 }
 
 } // end maps_package

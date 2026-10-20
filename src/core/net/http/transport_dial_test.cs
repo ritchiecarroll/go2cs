@@ -20,12 +20,14 @@ partial class http_test_package {
 
 public static void TestTransportPoolConnReusePriorConnection(ж<testing.T> Ꮡt) {
     var dt = newTransportDialTester(Ꮡt, http1Mode);
+
     // First request creates a new connection.
     var rt1 = dt.roundTrip();
     var c1 = dt.wantDial();
     c1.finish(default!);
     rt1.wantDone(c1);
     rt1.finish();
+
     // Second request reuses the first connection.
     var rt2 = dt.roundTrip();
     rt2.wantDone(c1);
@@ -34,11 +36,13 @@ public static void TestTransportPoolConnReusePriorConnection(ж<testing.T> Ꮡt)
 
 public static void TestTransportPoolConnCannotReuseConnectionInUse(ж<testing.T> Ꮡt) {
     var dt = newTransportDialTester(Ꮡt, http1Mode);
+
     // First request creates a new connection.
     var rt1 = dt.roundTrip();
     var c1 = dt.wantDial();
     c1.finish(default!);
     rt1.wantDone(c1);
+
     // Second request is made while the first request is still using its connection,
     // so it goes on a new connection.
     var rt2 = dt.roundTrip();
@@ -49,11 +53,13 @@ public static void TestTransportPoolConnCannotReuseConnectionInUse(ж<testing.T>
 
 public static void TestTransportPoolConnConnectionBecomesAvailableDuringDial(ж<testing.T> Ꮡt) {
     var dt = newTransportDialTester(Ꮡt, http1Mode);
+
     // First request creates a new connection.
     var rt1 = dt.roundTrip();
     var c1 = dt.wantDial();
     c1.finish(default!);
     rt1.wantDone(c1);
+
     // Second request is made while the first request is still using its connection.
     // The first connection completes while the second Dial is in progress, so the
     // second request uses the first connection.
@@ -61,6 +67,7 @@ public static void TestTransportPoolConnConnectionBecomesAvailableDuringDial(ж<
     var c2 = dt.wantDial();
     rt1.finish();
     rt2.wantDone(c1);
+
     // This section is a bit overfitted to the current Transport implementation:
     // A third request starts. We have an in-progress dial that was started by rt2,
     // but this new request (rt3) is going to ignore it and make a dial of its own.
@@ -69,6 +76,7 @@ public static void TestTransportPoolConnConnectionBecomesAvailableDuringDial(ж<
     var c3 = dt.wantDial();
     c2.finish(default!);
     rt3.wantDone(c2);
+
     c3.finish(default!);
 }
 
@@ -205,11 +213,14 @@ internal static void wantDone(this ref transportDialTesterRoundTrip rt, ж<trans
 // and closing the response body.
 internal static void finish(this ref transportDialTesterRoundTrip rt) {
     rt.t.Helper();
+
     if (rt.finished) {
         return;
     }
     rt.finished = true;
+
     ᐸꟷ(rt.done);
+
     if (rt.err != default!) {
         return;
     }

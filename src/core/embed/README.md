@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/embed@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/embed) [![Source](https://img.shields.io/badge/Source-@1.24.13.6-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.6/src/core/embed)
+[![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/embed@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/embed) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/embed)
 
 From C#, call this package through the static class go.embed_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -81,13 +81,13 @@ If any patterns are invalid or have invalid matches, the build will fail.
 
 The //go:embed line for a variable of type string or \[]byte can have only a single pattern, and that pattern can match only a single file. The string or \[]byte is initialized with the contents of that file.
 
-The //go:embed directive requires importing "embed", even when using a string or \[]byte. In source files that don't refer to [embed.FS](https://pkg.go.dev/embed@go1.24.13#FS), use a blank import (import \_ "embed").
+The //go:embed directive requires importing "embed", even when using a string or \[]byte. In source files that don't refer to [embed.FS](https://pkg.go.dev/embed@go1.26.10#FS), use a blank import (import \_ "embed").
 
 ### File Systems
 
 For embedding a single file, a variable of type string or \[]byte is often best. The \[FS] type enables embedding a tree of files, such as a directory of static web server content, as in the example above.
 
-FS implements the [io/fs](https://pkg.go.dev/io/fs@go1.24.13) package's \[FS] interface, so it can be used with any package that understands file systems, including [net/http](https://pkg.go.dev/net/http@go1.24.13), [text/template](https://pkg.go.dev/text/template@go1.24.13), and [html/template](https://pkg.go.dev/html/template@go1.24.13).
+FS implements the [io/fs](https://pkg.go.dev/io/fs@go1.26.10) package's \[FS] interface, so it can be used with any package that understands file systems, including [net/http](https://pkg.go.dev/net/http@go1.26.10), [text/template](https://pkg.go.dev/text/template@go1.26.10), and [html/template](https://pkg.go.dev/html/template@go1.26.10).
 
 For example, given the content variable in the example above, we can write:
 

@@ -1,6 +1,8 @@
 // Copyright 2014 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// For TestRawConnReadWrite.
 global using syscallDescriptor = go.syscall_package.ΔHandle;
 
 namespace go;
@@ -41,15 +43,18 @@ internal static ж<godebug.Setting> winreadlinkvolume = godebug.New("winreadlink
 
 public static void TestSameWindowsFile(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Chdir(Ꮡt.TempDir());
+
     var (f, err) = Δos.Create("a"u8);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     f.Close();
+
     (var ia1, err) = Δos.Stat("a"u8);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var path, err) = filepath.Abs("a"u8);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -61,6 +66,7 @@ public static void TestSameWindowsFile(ж<Δtesting.T> Ꮡt) {
     if (!Δos.SameFile(ia1, ia2)) {
         Ꮡt.Errorf("files should be same"u8);
     }
+
     @string p = filepath.VolumeName(path) + filepath.Base(path);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -86,6 +92,7 @@ internal static readonly @string abcˢ = "abc"u8;
 internal static void testDirLinks(ж<Δtesting.T> Ꮡt, slice<dirLinkTest> tests) {
     @string tmpdir = Ꮡt.TempDir();
     Ꮡt.Chdir(tmpdir);
+
     @string dir = filepath.Join(tmpdir, dirˢ);
     var err = Δos.Mkdir(dir, 511);
     if (err != default!) {
@@ -106,6 +113,7 @@ internal static void testDirLinks(ж<Δtesting.T> Ꮡt, slice<dirLinkTest> tests
             Ꮡt.Errorf("creating link for %q test failed: %v"u8, test.name, errΔ1);
             continue;
         }
+
         (var data, errΔ1) = Δos.ReadFile(filepath.Join(link, abcˢ));
         if (errΔ1 != default!) {
             Ꮡt.Errorf("failed to read abc file: %v"u8, errΔ1);
@@ -115,6 +123,7 @@ internal static void testDirLinks(ж<Δtesting.T> Ꮡt, slice<dirLinkTest> tests
             Ꮡt.Errorf(@"abc file is expected to have ""abc"" in it, but has %v"u8, data);
             continue;
         }
+
         (var fi1, errΔ1) = Δos.Stat(link);
         if (errΔ1 != default!) {
             Ꮡt.Errorf("failed to stat link %v: %v"u8, link, errΔ1);
@@ -134,6 +143,7 @@ internal static void testDirLinks(ж<Δtesting.T> Ꮡt, slice<dirLinkTest> tests
             Ꮡt.Errorf("%q should point to %q"u8, link, dir);
             continue;
         }
+
         (var fi2, errΔ1) = Δos.Lstat(link);
         if (errΔ1 != default!) {
             Ꮡt.Errorf("failed to lstat link %v: %v"u8, link, errΔ1);
@@ -223,6 +233,7 @@ internal static error createDirLink(@string link, ж<_REPARSE_DATA_BUFFER> Ꮡrd
         if (err != default!) {
             return err;
         }
+
         var linkp = syscall.StringToUTF16(link);
         (var fd, err) = syscall.CreateFile(Ꮡ(linkp, 0), syscall.GENERIC_WRITE, 0, nil, syscall.OPEN_EXISTING,
             (uint32)((uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT | (uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS), 0);
@@ -230,6 +241,7 @@ internal static error createDirLink(@string link, ж<_REPARSE_DATA_BUFFER> Ꮡrd
             return err;
         }
         defer(syscall.CloseHandle, fd, ref ᒐ);
+
         var buflen = (uint32)rdb.header.ReparseDataLength + (uint32)/* unsafe.Sizeof(rdb.header) */ (uintptr)8;
         ref var bytesReturned = ref heap(new uint32(), out var ᏑbytesReturned);
         return syscall.DeviceIoControl(fd, windows.FSCTL_SET_REPARSE_POINT,
@@ -252,10 +264,12 @@ internal static error createMountPoint(@string link, ж<reparseData> Ꮡtarget) 
     buf.Value.PrintNameLength = target.printName.length;
     nint pbuflen = len(target.pathBuf);
     copy((~array<uint16>.AliasPointer(buf.at(windows.MountPointReparseBuffer.ᏑPathBuffer, 0), 2048)).slice(0, pbuflen, pbuflen), target.pathBuf);
+
     ref var rdb = ref heap(new _REPARSE_DATA_BUFFER(), out var Ꮡrdb);
     rdb.header.ReparseTag = windows.IO_REPARSE_TAG_MOUNT_POINT;
     rdb.header.ReparseDataLength = buflen;
     copy(rdb.detail[..], byteblob);
+
     return createDirLink(link, Ꮡrdb);
 }
 
@@ -265,10 +279,9 @@ internal static readonly @string mklinkˢ = "mklink"u8;
 internal static readonly object skippingUseMklinkCmdTestˢ = (@string)@"skipping ""use_mklink_cmd"" test, mklink does not supports directory junctions"u8;
 
 public static void TestDirectoryJunction(ж<Δtesting.T> Ꮡt) {
-// Create link similar to what mklink does, by inserting \??\ at the front of absolute target.
-// Do as junction utility https://learn.microsoft.com/en-us/sysinternals/downloads/junction does - set PrintNameLength to 0.
     slice<dirLinkTest> tests = new dirLinkTest[]{
         new(
+            // Create link similar to what mklink does, by inserting \??\ at the front of absolute target.
             name: "standard"u8,
             isMountPoint: true,
             mklink: (@string link, @string target) => {
@@ -279,6 +292,7 @@ public static void TestDirectoryJunction(ж<Δtesting.T> Ꮡt) {
             }
         ),
         new(
+            // Do as junction utility https://learn.microsoft.com/en-us/sysinternals/downloads/junction does - set PrintNameLength to 0.
             name: "have_blank_print_name"u8,
             isMountPoint: true,
             mklink: (@string link, @string target) => {
@@ -323,7 +337,9 @@ internal static error enableCurrentThreadPrivilege(@string privilegeName) {
             return err;
         }
         defer(syscall.CloseHandle, ((syscallꓸHandle)(uintptr)t), ref ᒐ);
+
         ref var tp = ref heap(new windows.TOKEN_PRIVILEGES(), out var Ꮡtp);
+
         (var privStr, err) = syscall.UTF16PtrFromString(privilegeName);
         if (err != default!) {
             return err;
@@ -356,10 +372,12 @@ internal static error createSymbolicLink(@string link, ж<reparseData> Ꮡtarget
     }
     nint pbuflen = len(target.pathBuf);
     copy((~array<uint16>.AliasPointer(buf.at(windows.SymbolicLinkReparseBuffer.ᏑPathBuffer, 0), 2048)).slice(0, pbuflen, pbuflen), target.pathBuf);
+
     ref var rdb = ref heap(new _REPARSE_DATA_BUFFER(), out var Ꮡrdb);
     rdb.header.ReparseTag = syscall.IO_REPARSE_TAG_SYMLINK;
     rdb.header.ReparseDataLength = buflen;
     copy(rdb.detail[..], byteblob);
+
     return createDirLink(link, Ꮡrdb);
 }
 
@@ -387,14 +405,17 @@ public static void TestDirectorySymbolicLink(ж<Δtesting.T> Ꮡt) {
         } else {
             Ꮡt.Log(skippingUseMklinkCmdTestˢ2);
         }
+
         // The rest of these test requires SeCreateSymbolicLinkPrivilege to be held.
         Δruntime.LockOSThread();
         defer(Δruntime.UnlockOSThread, ref ᒐ);
+
         var err = windows.ImpersonateSelf(windows.SecurityImpersonation);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(() => windows.RevertToSelf(), ref ᒐ);
+
         err = enableCurrentThreadPrivilege("SeCreateSymbolicLinkPrivilege"u8);
         if (err != default!) {
             Ꮡt.Skipf(@"skipping some tests, could not enable ""SeCreateSymbolicLinkPrivilege"": %v"u8, err);
@@ -404,8 +425,8 @@ public static void TestDirectorySymbolicLink(ж<Δtesting.T> Ꮡt) {
                 name: "use_os_pkg"u8,
                 mklink: (@string link, @string target) => Δos.Symlink(target, link)
             ),
-            new dirLinkTest( // Create link similar to what mklink does, by inserting \??\ at the front of absolute target.
-
+            new dirLinkTest(
+                // Create link similar to what mklink does, by inserting \??\ at the front of absolute target.
                 name: "standard"u8,
                 mklink: (@string link, @string target) => {
                     ref var tΔ1 = ref heap(new reparseData(), out var ᏑtΔ1);
@@ -466,20 +487,23 @@ internal static readonly @string testDirˢ = "TestDir"u8;
 public static void TestNetworkSymbolicLink(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
+
         syscall.Errno _NERR_ServerNotStarted = /* syscall.Errno(2114) */ 2114;
+
         @string dir = Ꮡt.TempDir();
         Ꮡt.Chdir(dir);
+
         nint pid = Δos.Getpid();
         @string shareName = fmt.Sprintf("GoSymbolicLinkTestShare%d"u8, pid);
         @string sharePath = filepath.Join(dir, shareName);
         @string testDir = testDirˢ;
+
         var err = Δos.MkdirAll(filepath.Join(sharePath, testDir), 511);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (var wShareName, err) = syscall.UTF16PtrFromString(shareName);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -488,6 +512,7 @@ public static void TestNetworkSymbolicLink(ж<Δtesting.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         // Per https://learn.microsoft.com/en-us/windows/win32/api/lmshare/ns-lmshare-share_info_2:
         //
         // “[The shi2_permissions field] indicates the shared resource's permissions
@@ -498,6 +523,7 @@ public static void TestNetworkSymbolicLink(ж<Δtesting.T> Ꮡt) {
         //
         // So it shouldn't matter what permissions we set here.
         const uint32 permissions = 0;
+
         ref var p = ref heap<windows.SHARE_INFO_2>(out var Ꮡp);
         p = new windows.SHARE_INFO_2(
             Netname: wShareName,
@@ -509,6 +535,7 @@ public static void TestNetworkSymbolicLink(ж<Δtesting.T> Ꮡt) {
             Path: wSharePath,
             Passwd: nil
         );
+
         err = windows.NetShareAdd(nil, 2, Ꮡp.Reinterpret<windows.SHARE_INFO_2, byte>(), nil);
         if (err != default!) {
             if (AreEqual(err, syscall.ERROR_ACCESS_DENIED) || AreEqual(err, _NERR_ServerNotStarted)) {
@@ -523,7 +550,9 @@ public static void TestNetworkSymbolicLink(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ1);
             }
         }, ref ᒐ);
+
         @string UNCPath = @"\\localhost\"u8 + shareName + @"\"u8;
+
         (var fi1, err) = Δos.Stat(sharePath);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -536,13 +565,16 @@ public static void TestNetworkSymbolicLink(ж<Δtesting.T> Ꮡt) {
         if (!Δos.SameFile(fi1, fi2)) {
             Ꮡt.Fatalf("%q and %q should be the same directory, but not"u8, sharePath, UNCPath);
         }
+
         @string target = filepath.Join(UNCPath, testDir);
         @string link = linkˢ;
+
         err = Δos.Symlink(target, link);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(Δos.Remove, link, ref ᒐ);
+
         (var got, err) = Δos.Readlink(link);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -550,6 +582,7 @@ public static void TestNetworkSymbolicLink(ж<Δtesting.T> Ꮡt) {
         if (got != target) {
             Ꮡt.Errorf(@"os.Readlink(%#q): got %v, want %v"u8, link, got, target);
         }
+
         (got, err) = filepath.EvalSymlinks(link);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -576,25 +609,28 @@ internal static readonly @string targetᶜ = "target"u8;
 internal static readonly @string linkᶜ1 = "link"u8;
 
 public static void TestStatLxSymLink(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     {
         var (_, errΔ1) = exec.LookPath(wslˢ); if (errΔ1 != default!) {
             Ꮡt.Skip(skippingWslNotDetectedˢ);
         }
     }
+
     Ꮡt.Chdir(Ꮡt.TempDir());
+
     @string target = targetᶜ;
     @string link = linkᶜ1;
+
     var (_, err) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), wslˢ, binMkdirˢ, target).Output();
     if (err != default!) {
         // This normally happens when WSL still doesn't have a distro installed to run on.
         Ꮡt.Skipf("skipping: WSL is not correctly installed: %v"u8, err);
     }
+
     (_, err) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), wslˢ, binLnˢ, "-s", target, link).Output();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var fi, err) = Δos.Lstat(link);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -618,6 +654,7 @@ public static void TestStartProcessAttr(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var (p, err) = Δos.StartProcess(Δos.Getenv(comspecˢ), new @string[]{"/c"u8, "cd"u8}.slice(), @new<Δos.ProcAttr>());
         if (err != default!) {
             return;
@@ -640,6 +677,7 @@ public static void TestShareNotExistError(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Skip(slowTestThatUsesNetworkˢ);
     }
     Ꮡt.Parallel();
+
     var (_, err) = Δos.Stat(noSuchServerNoSuchShareˢ);
     if (err == default!) {
         Ꮡt.Fatal(statSucceededButExpectedˢ);
@@ -666,24 +704,29 @@ public static void TestStatDir(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Chdir(Ꮡt.TempDir());
+
         var (f, err) = Δos.Open("."u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var fi, err) = f.Stat();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         err = Δos.Chdir(".."u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (var fi2, err) = f.Stat();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         if (!Δos.SameFile(fi, fi2)) {
             Ꮡt.Fatal(raceConditionOccurredˢ);
         }
@@ -697,6 +740,7 @@ public static void TestOpenVolumeName(ж<Δtesting.T> Ꮡt) {
     try {
         @string tmpdir = Ꮡt.TempDir();
         Ꮡt.Chdir(tmpdir);
+
         var want = new @string[]{"file1"u8, "file2"u8, "file3"u8, "gopher.txt"u8}.slice();
         slices.Sort<slice<@string>, @string>(want);
         foreach (var (_, name) in want) {
@@ -705,17 +749,20 @@ public static void TestOpenVolumeName(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
+
         var (f, err) = Δos.Open(filepath.VolumeName(tmpdir));
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var have, err) = f.Readdirnames(-1);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         slices.Sort<slice<@string>, @string>(have);
+
         if (strings.Join(want, "/"u8) != strings.Join(have, "/"u8)) {
             Ꮡt.Fatalf("unexpected file list %q, want %q"u8, have, want);
         }
@@ -726,6 +773,7 @@ public static void TestOpenVolumeName(ж<Δtesting.T> Ꮡt) {
 
 public static void TestDeleteReadOnly(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string tmpdir = Ꮡt.TempDir();
     @string p = filepath.Join(tmpdir, "a");
     // This sets FILE_ATTRIBUTE_READONLY.
@@ -734,6 +782,7 @@ public static void TestDeleteReadOnly(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     f.Close();
+
     {
         err = Δos.Chmod(p, 256); if (err != default!) {
             Ꮡt.Fatal(err);
@@ -754,6 +803,7 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
         defer(() => {
             poll.ReadConsole = oldʗ1;
         }, ref ᒐ);
+
         var (p, err) = syscall.GetCurrentProcess();
         if (err != default!) {
             Ꮡt.Fatalf("Unable to get handle to current process: %v"u8, err);
@@ -764,6 +814,7 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("Unable to duplicate stdin: %v"u8, err);
         }
         var testConsole = os_internal_test_package.NewConsoleFile(stdinDuplicate, testˢ);
+
         slice<@string> tests = new @string[]{
             "abc"u8,
             "äöü"u8,
@@ -772,6 +823,7 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
             "hello\x1aworld"u8,
             "\U0001F648\U0001F649\U0001F64A"u8
         }.slice();
+
         foreach (var (_, consoleSize) in new nint[]{1, 2, 3, 10, 16, 100, 1000}.slice()) {
             foreach (var (_, readSize) in new nint[]{1, 2, 3, 4, 5, 8, 10, 16, 20, 50, 100}.slice()) {
                 foreach (var (_, s) in tests) {
@@ -793,6 +845,7 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
                             tΔ1.Logf("read %d -> %d"u8, toread, read.Value);
                             return default!;
                         };
+
                         slice<@string> all = default!;
                         slice<byte> buf = default!;
                         var chunk = new slice<byte>(readSize);
@@ -813,6 +866,7 @@ public static void TestReadStdin(ж<Δtesting.T> Ꮡt) {
                                 tΔ1.Fatalf("reading %q: stuck in loop: %q"u8, s, buf);
                             }
                         }
+
                         var want = strings.Split(s, "\x1a"u8);
                         while (len(want) < 5) {
                             want = append(want, ""u8);
@@ -837,6 +891,7 @@ internal static readonly @string pathᶜ = @"c:\pagefile.sys"u8;
 
 public static void TestStatPagefile(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string path = pathᶜ;
     var (fi, err) = Δos.Stat(path);
     if (err == default!) {
@@ -863,6 +918,7 @@ internal static (slice<@string>, error) syscallCommandLineToArgv(@string cmd) {
             return (default!, err);
         }
         defer(syscall.LocalFree, ((syscallꓸHandle)(uintptr)argv), ref ᒐ);
+
         slice<@string> args = default!;
         foreach (var (_, v) in (argv.Value).slice(0, argc)) {
             args = append(args, syscall.UTF16ToString((v.Value)[..]));
@@ -909,7 +965,7 @@ func main() {
 	fmt.Printf("%q", os.Args)
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -918,7 +974,9 @@ public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Skipf("in short mode; skipping test that builds a binary"u8);
     }
     Ꮡt.Parallel();
+
     @string tmpdir = Ꮡt.TempDir();
+
     @string prog = progᶜ;
     @string src = filepath.Join(tmpdir, mainGoˢ);
     {
@@ -926,6 +984,7 @@ public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     @string exe = filepath.Join(tmpdir, mainExeˢ);
     var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new os_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", exe, src);
     cmd.Value.Dir = tmpdir;
@@ -933,12 +992,7 @@ public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("building main.exe failed: %v\n%s"u8, err, @out);
     }
-// examples from https://learn.microsoft.com/en-us/cpp/cpp/main-function-command-line-args
-// http://daviddeley.com/autohotkey/parameters/parameters.htm#WINARGV
-// from 5.4  Examples
-// from 5.5  Some Common Tasks
-// from 5.6  The Microsoft Examples Explained
-// from 5.7  Double Double Quote Examples (pre 2008)
+
     slice<@string> cmds = new @string[]{
         @""u8,
         @" a b c"u8,
@@ -958,10 +1012,13 @@ public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
         @" \\\\\""""x""""""y z"u8,
         "\tb\t\"x\ty\""u8,
         @" ""Брад"" d e"u8,
+        // examples from https://learn.microsoft.com/en-us/cpp/cpp/main-function-command-line-args
         @" ""abc"" d e"u8,
         @" a\\b d""e f""g h"u8,
         @" a\\\""b c d"u8,
         @" a\\\\""b c"" d e"u8,
+        // http://daviddeley.com/autohotkey/parameters/parameters.htm#WINARGV
+        // from 5.4  Examples
         @" CallMeIshmael"u8,
         @" ""Call Me Ishmael"""u8,
         @" Cal""l Me I""shmael"u8,
@@ -971,14 +1028,17 @@ public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
         @" ""CallMe\\\""Ishmael"""u8,
         @" a\\\b"u8,
         @" ""a\\\b"""u8,
+        // from 5.5  Some Common Tasks
         @" ""\""Call Me Ishmael\"""""u8,
         @" ""C:\TEST A\\"""u8,
         @" ""\""C:\TEST A\\\"""""u8,
+        // from 5.6  The Microsoft Examples Explained
         @" ""a b c""  d  e"u8,
         @" ""ab\""c""  ""\\""  d"u8,
         @" a\\\b d""e f""g h"u8,
         @" a\\\""b c d"u8,
         @" a\\\\""b c"" d e"u8,
+        // from 5.7  Double Double Quote Examples (pre 2008)
         @" ""a b c"""""u8,
         @" """"""CallMeIshmael""""""  b  c"u8,
         @" """"""Call Me Ishmael"""""""u8,
@@ -988,6 +1048,7 @@ public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
         compareCommandLineToArgvWithSyscall(Ꮡt, "test"u8 + cmdΔ1);
         compareCommandLineToArgvWithSyscall(Ꮡt, @"""cmd line"""u8 + cmdΔ1);
         compareCommandLineToArgvWithSyscall(Ꮡt, exe + cmdΔ1);
+
         // test both syscall.EscapeArg and os.commandLineToArgv
         var args = os_internal_test_package.CommandLineToArgv(exe + cmdΔ1);
         var (outΔ1, errΔ2) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), args[0], args[1..].ꓸꓸꓸ).CombinedOutput();
@@ -1020,10 +1081,12 @@ internal static (@string, error) findOneDriveDir() {
             return ("", fmt.Errorf("OpenKey(%q) failed: %v"u8, onedrivekey, err));
         }
         defer(() => k.Close(), ref ᒐ);
+
         (var path, var valtype, err) = k.GetStringValue(userFolderˢ);
         if (err != default!) {
             return ("", fmt.Errorf("reading UserFolder failed: %v"u8, err));
         }
+
         // REG_SZ values may also contain environment variables that need to be expanded.
         // It's recommended but not required to use REG_EXPAND_SZ for paths that contain environment variables.
         if (valtype == registry.EXPAND_SZ || valtype == registry.SZ) {
@@ -1033,6 +1096,7 @@ internal static (@string, error) findOneDriveDir() {
             }
             path = expanded;
         }
+
         return (path, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1042,6 +1106,7 @@ internal static (@string, error) findOneDriveDir() {
 // TestOneDrive verifies that OneDrive folder is a directory and not a symlink.
 public static void TestOneDrive(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (dir, err) = findOneDriveDir();
     if (err != default!) {
         Ꮡt.Skipf("Skipping, because we did not find OneDrive directory: %v"u8, err);
@@ -1057,26 +1122,31 @@ public static void TestWindowsDevNullFile(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var (f1, err) = Δos.Open(nulˢ4);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var f1ʗ1 = f1;
         defer(() => f1ʗ1.Close(), ref ᒐ);
+
         (var fi1, err) = f1.Stat();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (var f2, err) = Δos.Open(nulˢ5);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var f2ʗ1 = f2;
         defer(() => f2ʗ1.Close(), ref ᒐ);
+
         (var fi2, err) = f2.Stat();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         if (!Δos.SameFile(fi1, fi2)) {
             Ꮡt.Errorf(@"""NUL"" and ""nul"" are not the same file"u8);
         }
@@ -1089,12 +1159,14 @@ public static void TestFileStatNUL(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var (f, err) = Δos.Open(nulˢ4);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var fi, err) = f.Stat();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1111,6 +1183,7 @@ public static void TestFileStatNUL(ж<Δtesting.T> Ꮡt) {
 
 public static void TestStatNUL(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (fi, err) = Δos.Stat(nulˢ4);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1133,6 +1206,7 @@ public static void TestSymlinkCreation(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Skip(skippingTestNoSymlinkˢ);
     }
     Ꮡt.Parallel();
+
     @string temp = Ꮡt.TempDir();
     @string dummyFile = filepath.Join(temp, fileˢ2);
     {
@@ -1140,6 +1214,7 @@ public static void TestSymlinkCreation(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     @string linkFile = filepath.Join(temp, linkˢ);
     {
         var err = Δos.Symlink(dummyFile, linkFile); if (err != default!) {
@@ -1157,6 +1232,7 @@ public static void TestRootRelativeDirSymlink(ж<Δtesting.T> Ꮡt) {
     try {
         testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
         Ꮡt.Parallel();
+
         @string temp = Ꮡt.TempDir();
         @string dir = filepath.Join(temp, dirˢ);
         {
@@ -1164,13 +1240,16 @@ public static void TestRootRelativeDirSymlink(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
+
         @string volumeRelDir = strings.TrimPrefix(dir, filepath.VolumeName(dir)); // leaves leading backslash
+
         @string link = filepath.Join(temp, linkˢ);
         var err = Δos.Symlink(volumeRelDir, link);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         Ꮡt.Logf("Symlink(%#q, %#q)"u8, volumeRelDir, link);
+
         (var f, err) = Δos.Open(link);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1203,6 +1282,7 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> Ꮡt) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
+
         // Construct a directory to be symlinked.
         @string temp = Ꮡt.TempDir();
         {
@@ -1210,12 +1290,14 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Skipf("Can't test relative symlinks: t.TempDir() (%#q) does not begin with a drive letter."u8, temp);
             }
         }
+
         @string absDir = filepath.Join(temp, dirSubˢ);
         {
             var errΔ1 = Δos.MkdirAll(absDir, 493); if (errΔ1 != default!) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
+
         // Change to the temporary directory and construct a
         // working-directory-relative symlink.
         var (oldwd, err) = Δos.Getwd();
@@ -1224,6 +1306,7 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> Ꮡt) {
         }
         Ꮡt.Chdir(temp);
         Ꮡt.Logf("Chdir(%#q)"u8, temp);
+
         @string wdRelDir = filepath.VolumeName(temp) + @"dir\sub"u8; // no backslash after volume.
         @string absLink = filepath.Join(temp, linkˢ);
         err = Δos.Symlink(wdRelDir, absLink);
@@ -1231,6 +1314,7 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         Ꮡt.Logf("Symlink(%#q, %#q)"u8, wdRelDir, absLink);
+
         // Now change back to the original working directory and verify that the
         // symlink still refers to its original path and is correctly marked as a
         // directory.
@@ -1240,6 +1324,7 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> Ꮡt) {
             }
         }
         Ꮡt.Logf("Chdir(%#q)"u8, oldwd);
+
         (var resolved, err) = Δos.Readlink(absLink);
         if (err != default!){
             Ꮡt.Errorf("Readlink(%#q): %v"u8, absLink, err);
@@ -1247,12 +1332,14 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> Ꮡt) {
         if (resolved != absDir) {
             Ꮡt.Errorf("Readlink(%#q) = %#q; want %#q"u8, absLink, resolved, absDir);
         }
+
         (var linkFile, err) = Δos.Open(absLink);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var linkFileʗ1 = linkFile;
         defer(() => linkFileʗ1.Close(), ref ᒐ);
+
         (var linkInfo, err) = linkFile.Stat();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1260,10 +1347,12 @@ public static void TestWorkingDirectoryRelativeSymlink(ж<Δtesting.T> Ꮡt) {
         if (!linkInfo.IsDir()) {
             Ꮡt.Errorf("Open(%#q).Stat().IsDir() = false; want true"u8, absLink);
         }
+
         (var absInfo, err) = Δos.Stat(absDir);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         if (!Δos.SameFile(absInfo, linkInfo)) {
             Ꮡt.Errorf("SameFile(Stat(%#q), Open(%#q).Stat()) = false; want true"u8, absDir, absLink);
         }
@@ -1278,6 +1367,7 @@ internal static readonly object osStatGoUnexpectedlyˢ = (@string)@"os.Stat(""*.
 // TestStatOfInvalidName is regression test for issue #24999.
 public static void TestStatOfInvalidName(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (_, err) = Δos.Stat("*.go"u8);
     if (err == default!) {
         Ꮡt.Fatal(osStatGoUnexpectedlyˢ);
@@ -1311,13 +1401,17 @@ public static void TestRootDirAsTemp(ж<Δtesting.T> Ꮡt) {
         fmt.Print(Δos.TempDir());
         Δos.Exit(0);
     }
+
     testenv.MustHaveExec(new os_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Parallel();
+
     @string exe = testenv.Executable(new os_test_package.testing_TжTB(Ꮡt));
+
     var (newtmp, err) = findUnusedDriveLetter();
     if (err != default!) {
         Ꮡt.Skip(err);
     }
+
     var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), exe, testRunTestRootDirAsTempˢ);
     cmd.Value.Env = cmd.Environ();
     cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
@@ -1397,6 +1491,7 @@ public static void TestReadlink(ж<Δtesting.T> Ꮡt) {
         } else {
             name += "_absolute"u8;
         }
+
         var ttʗ1 = ttΔ1;
         Ꮡt.Run(name, (ж<Δtesting.T> tΔ1) => {
             if (!ttʗ1.junction) {
@@ -1478,9 +1573,8 @@ public static void TestReadlink(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string dir1ˢ = "dir1"u8;
 
 public static void TestOpenDirTOCTOU(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
+
     // Check opened directories can't be renamed until the handle is closed.
     // See issue 52747.
     @string tmpdir = Ꮡt.TempDir();
@@ -1514,8 +1608,6 @@ internal static readonly @string microsoftWindowsAppsˢ = @"Microsoft\WindowsApp
 internal static readonly object skippingTestBecauseˢ = (@string)"skipping test, because Python 3 is not installed via the Windows App Store on this system; see https://golang.org/issue/42919"u8;
 
 public static void TestAppExecLinkStat(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // We expect executables installed to %LOCALAPPDATA%\Microsoft\WindowsApps to
     // be reparse points with tag IO_REPARSE_TAG_APPEXECLINK. Here we check that
     // such reparse points are treated as irregular (but executable) files, not
@@ -1524,27 +1616,33 @@ public static void TestAppExecLinkStat(ж<Δtesting.T> Ꮡt) {
     if (appdata == ""u8) {
         Ꮡt.Skipf("skipping: LOCALAPPDATA not set"u8);
     }
+
     @string pythonExeName = python3Exeˢ;
     @string pythonPath = filepath.Join(appdata, microsoftWindowsAppsˢ, pythonExeName);
+
     var (lfi, err) = Δos.Lstat(pythonPath);
     if (err != default!) {
         Ꮡt.Skip(skippingTestBecauseˢ);
     }
+
     // An APPEXECLINK reparse point is not a symlink, so os.Readlink should return
     // a non-nil error for it, and Stat should return results identical to Lstat.
     (var linkName, err) = Δos.Readlink(pythonPath);
     if (err == default!) {
         Ꮡt.Errorf("os.Readlink(%q) = %q, but expected an error\n(should be an APPEXECLINK reparse point, not a symlink)"u8, pythonPath, linkName);
     }
+
     (var sfi, err) = Δos.Stat(pythonPath);
     if (err != default!) {
         Ꮡt.Fatalf("Stat %s: %v"u8, pythonPath, err);
     }
+
     if (lfi.Name() != sfi.Name()) {
         Ꮡt.Logf("os.Lstat(%q) = %+v"u8, pythonPath, lfi);
         Ꮡt.Logf("os.Stat(%q)  = %+v"u8, pythonPath, sfi);
         Ꮡt.Errorf("files should be same"u8);
     }
+
     if (lfi.Name() != pythonExeName) {
         Ꮡt.Errorf("Stat %s: got %q, but wanted %q"u8, pythonPath, lfi.Name(), pythonExeName);
     }
@@ -1555,6 +1653,7 @@ public static void TestAppExecLinkStat(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("%q should not be a an irregular file (mode=0x%x)"u8, pythonPath, (uint32)tp);
         }
     }
+
     if (sfi.Name() != pythonExeName) {
         Ꮡt.Errorf("Stat %s: got %q, but wanted %q"u8, pythonPath, sfi.Name(), pythonExeName);
     }
@@ -1575,6 +1674,7 @@ public static void TestAppExecLinkStat(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("%q should not be a regular file (mode=0x%x)"u8, pythonPath, (uint32)m);
         }
     }
+
     (var p, err) = exec.LookPath(pythonPath);
     if (err != default!) {
         Ꮡt.Errorf("exec.LookPath(%q): %v"u8, pythonPath, err);
@@ -1591,15 +1691,15 @@ internal static readonly object fileNotListedˢ = (@string)"file not listed"u8;
 internal static readonly @string sepᶜ = "\\";
 
 public static void TestIllformedUTF16FileName(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string dir = Ꮡt.TempDir();
     @string sep = sepᶜ;
     if (!strings.HasSuffix(dir, sep)) {
         dir += sep;
     }
+
     // This UTF-16 file name is ill-formed as it contains low surrogates that are not preceded by high surrogates ([1:5]).
     var namew = new uint16[]{0x2e, 0xdc6d, 0xdc73, 0xdc79, 0xdc73, 0x30, 0x30, 0x30, 0x31, 0}.slice();
+
     // Create a file whose name contains unpaired surrogates.
     // Use syscall.CreateFile instead of os.Create to simulate a file that is created by
     // a non-Go program so the file name hasn't gone through syscall.UTF16FromString.
@@ -1610,6 +1710,7 @@ public static void TestIllformedUTF16FileName(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     syscall.CloseHandle(fd);
+
     @string name = syscall.UTF16ToString(namew);
     @string path = filepath.Join(dir, name);
     // Verify that os.Lstat can query the file.
@@ -1693,6 +1794,7 @@ public static void TestReadDirNoFileID(ж<Δtesting.T> Ꮡt) {
         defer(() => {
             os_internal_test_package.AllowReadDirFileID.Value = true;
         }, ref ᒐ);
+
         @string dir = Ꮡt.TempDir();
         @string pathA = filepath.Join(dir, "a");
         @string pathB = filepath.Join(dir, "b");
@@ -1706,6 +1808,7 @@ public static void TestReadDirNoFileID(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
+
         var (files, err) = Δos.ReadDir(dir);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1713,6 +1816,7 @@ public static void TestReadDirNoFileID(ж<Δtesting.T> Ꮡt) {
         if (len(files) != 2) {
             Ꮡt.Fatalf("ReadDir(%q) = %v; want 2 files"u8, dir, files);
         }
+
         // Check that os.SameFile works with files returned by os.ReadDir.
         (var f1, err) = files[0].Info();
         if (err != default!) {
@@ -1731,6 +1835,7 @@ public static void TestReadDirNoFileID(ж<Δtesting.T> Ꮡt) {
         if (Δos.SameFile(f1, f2)) {
             Ꮡt.Errorf("SameFile(%v, %v) = true; want false"u8, f1, f2);
         }
+
         // Check that os.SameFile works with a mix of os.ReadDir and os.Stat files.
         (var f1s, err) = Δos.Stat(pathA);
         if (err != default!) {

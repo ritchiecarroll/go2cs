@@ -49,6 +49,7 @@ public static void TestVectoredHandlerExceptionInNonGoThread(ж<testing.T> Ꮡt)
         Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Lock();
         defer(Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Unlock, ref ᒐ);
         @string dir = Ꮡt.TempDir();
+
         // build c program
         @string dll = filepath.Join(dir, vehDllˢ);
         var cmd = exec.Command(gccˢ, sharedˢ, "-o", dll, testdataTestwinlibthrowˢ);
@@ -56,6 +57,7 @@ public static void TestVectoredHandlerExceptionInNonGoThread(ж<testing.T> Ꮡt)
         if (err != default!) {
             Ꮡt.Fatalf("failed to build c exe: %s\n%s"u8, err, @out);
         }
+
         // build go exe
         @string exe = filepath.Join(dir, testExeˢ);
         cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", exe, testdataTestwinlibthrowˢ2);
@@ -63,6 +65,7 @@ public static void TestVectoredHandlerExceptionInNonGoThread(ж<testing.T> Ꮡt)
         if (err != default!) {
             Ꮡt.Fatalf("failed to build go library: %s\n%s"u8, err, @out);
         }
+
         // run test program in same thread
         cmd = exec.Command(exe);
         (@out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
@@ -99,7 +102,6 @@ public static void TestVectoredHandlerExceptionInNonGoThread(ж<testing.T> Ꮡt)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object thisTestCanTRunOnWindowsˢ = (@string)"this test can't run on windows/arm"u8;
 internal static readonly @string testwinlibDllˢ = "testwinlib.dll"u8;
 internal static readonly @string buildmodeˢ = "-buildmode"u8;
 internal static readonly @string cSharedˢ = "c-shared"u8;
@@ -115,18 +117,14 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
         if (flagQuick.Value) {
             Ꮡt.Skip(quickˢ);
         }
-        if (Δruntime.GOARCH == "arm"u8) {
-            //TODO: remove this skip and update testwinlib/main.c
-            // once windows/arm supports c-shared buildmode.
-            // See go.dev/issues/43800.
-            Ꮡt.Skip(thisTestCanTRunOnWindowsˢ);
-        }
+
         testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
         testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
         testenv.MustHaveExecPath(new runtime_test_package.testing_TжTB(Ꮡt), gccˢ);
         Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Lock();
         defer(Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Unlock, ref ᒐ);
         @string dir = Ꮡt.TempDir();
+
         // build go dll
         @string dll = filepath.Join(dir, testwinlibDllˢ);
         var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", dll, buildmodeˢ, cSharedˢ, testdataTestwinlibMainGoˢ);
@@ -134,6 +132,7 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("failed to build go library: %s\n%s"u8, err, @out);
         }
+
         // build c program
         @string exe = filepath.Join(dir, testExeˢ);
         cmd = exec.Command(gccˢ, "-L"u8 + dir, "-I" + dir, ltestwinlibˢ, "-o", exe, testdataTestwinlibMainCˢ);
@@ -141,6 +140,7 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("failed to build c exe: %s\n%s"u8, err, @out);
         }
+
         // run test program
         cmd = exec.Command(exe);
         (@out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
@@ -148,14 +148,14 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failure while running executable: %s\n%s"u8, err, @out);
         }
         @string expectedOutput = default!;
-        if (Δruntime.GOARCH == "arm64"u8 || Δruntime.GOARCH == "arm"u8){
-            // TODO: remove when windows/arm64 and windows/arm support SEH stack unwinding.
+        if (Δruntime.GOARCH == "arm64"u8){
+            // TODO: remove when windows/arm64 support SEH stack unwinding.
             expectedOutput = exceptionCount1ˢ;
         } else {
             expectedOutput = exceptionCount1ˢ2;
         }
         // cleaning output
-        @string cleanedOut = strings.ReplaceAll(((@string)@out), "\r\n"u8, "\n"u8);
+        @string cleanedOut = strings.ReplaceAll((@string)@out, "\r\n"u8, "\n"u8);
         if (cleanedOut != expectedOutput) {
             Ꮡt.Errorf("expected output %q, got %q"u8, expectedOutput, cleanedOut);
         }
@@ -194,6 +194,7 @@ public static void TestCtrlHandler(ж<testing.T> Ꮡt) {
     try {
         testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
         Ꮡt.Parallel();
+
         // build go program
         @string exe = filepath.Join(Ꮡt.TempDir(), testExeˢ);
         var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", exe, testdataTestwinsignalˢ);
@@ -201,6 +202,7 @@ public static void TestCtrlHandler(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("failed to build go exe: %v\n%s"u8, err, @out);
         }
+
         // run test program
         cmd = exec.Command(exe);
         ref var stdout = ref heap(new strings.Builder(), out var Ꮡstdout);
@@ -214,6 +216,7 @@ public static void TestCtrlHandler(ж<testing.T> Ꮡt) {
         // keep inPipe alive until the end of the test
         var inPipeʗ1 = inPipe;
         defer(() => inPipeʗ1.Close(), ref ᒐ);
+
         // in a new command window
         const uint32 _CREATE_NEW_CONSOLE = 0x00000010;
         cmd.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(
@@ -230,12 +233,14 @@ public static void TestCtrlHandler(ж<testing.T> Ꮡt) {
             (~cmdʗ1).Process.Kill();
             cmdʗ1.Wait();
         }, ref ᒐ);
+
         // check child exited gracefully, did not timeout
         {
             var errΔ2 = cmd.Wait(); if (errΔ2 != default!) {
                 Ꮡt.Fatalf("Program exited with error: %v\n%s"u8, errΔ2, Ꮡstderr);
             }
         }
+
         // check child received, handled SIGTERM
         {
             @string expected = syscall.SIGTERM.String();
@@ -271,6 +276,7 @@ public static partial void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
         Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Lock();
         defer(Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Unlock, ref ᒐ);
         @string dir = Ꮡt.TempDir();
+
         // build go dll
         @string dll = filepath.Join(dir, dummyDllˢ);
         var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", dll, buildmodeˢ, cSharedˢ, testdataTestwinlibsignalˢ);
@@ -278,6 +284,7 @@ public static partial void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("failed to build go library: %s\n%s"u8, err, @out);
         }
+
         // build c program
         @string exe = filepath.Join(dir, testExeˢ);
         cmd = exec.Command(gccˢ, "-o"u8, exe, testdataTestwinlibsignalˢ2);
@@ -285,6 +292,7 @@ public static partial void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("failed to build c exe: %s\n%s"u8, err, @out);
         }
+
         // run test program
         cmd = exec.Command(exe);
         ref var stderr = ref heap(new bytes.Buffer(), out var Ꮡstderr);
@@ -294,6 +302,7 @@ public static partial void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Failed to create stdout pipe: %v"u8, err);
         }
         var outReader = bufio.NewReader(outPipe);
+
         cmd.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(
             CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP
         ));
@@ -302,6 +311,7 @@ public static partial void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("Start failed: %v"u8, errΔ1);
             }
         }
+
         var errCh = new channel<error>(1);
         var cmdʗ1 = cmd;
         var errChʗ1 = errCh;
@@ -318,6 +328,7 @@ public static partial void TestLibraryCtrlHandler(ж<testing.T> Ꮡt) {
                 }
             }
         });
+
         {
             var errΔ3 = ᐸꟷ(errCh); if (errΔ3 != default!) {
                 Ꮡt.Fatal(errΔ3);
@@ -352,29 +363,36 @@ public static void TestIssue59213(ж<testing.T> Ꮡt) {
     }
     testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
     testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
+
     @string goEnv(@string arg) {
         var cmdΔ1 = testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), envˢ, arg);
         cmdΔ1.Value.Stderr = new runtime_test_package.bytes_BufferжWriter(@new<bytes.Buffer>());
+
         var (line, errΔ1) = cmdΔ1.Output();
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("%v: %v\n%s"u8, cmdΔ1.OrTypedNil(), errΔ1, (~cmdΔ1).Stderr);
         }
-        @string outΔ1 = ((@string)bytes.TrimSpace(line));
+        @string outΔ1 = (@string)bytes.TrimSpace(line);
         Ꮡt.Logf("%v: %q"u8, cmdΔ1.OrTypedNil(), outΔ1);
         return outΔ1;
     }
+
     @string cc = goEnv("CC"u8);
     @string cgoCflags = goEnv(cgoCflagsˢ);
+
     Ꮡt.Parallel();
+
     @string tmpdir = Ꮡt.TempDir();
     @string dllfile = filepath.Join(tmpdir, testDllˢ);
     @string exefile = filepath.Join(tmpdir, gotestExeˢ);
+
     // build go dll
     var cmd = testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", dllfile, buildmodeˢ, cSharedˢ, testdataTestwintlsMainGoˢ);
     var (@out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("failed to build go library: %s\n%s"u8, err, @out);
     }
+
     // build c program
     cmd = testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), cc, "-o"u8, exefile, testdataTestwintlsMainCˢ);
     testenv.CleanCmdEnv(cmd);
@@ -383,6 +401,7 @@ public static void TestIssue59213(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to build c exe: %s\n%s"u8, err, @out);
     }
+
     // run test program
     cmd = testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), exefile, dllfile, goFuncˢ);
     (@out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();

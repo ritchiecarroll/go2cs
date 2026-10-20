@@ -47,9 +47,7 @@ public static void TestValueEqual(ж<testing.T> Ꮡt) {
         TimeValue(new time_package.Time(nil)),
         TimeValue(time_package.Date(2001, 1, 2, 3, 4, 5, 0, time_package.ΔUTC)),
         TimeValue(time_package.Date(2300, 1, 1, 0, 0, 0, 0, time_package.ΔUTC)), // overflows nanoseconds
-
         TimeValue(time_package.Date(1715, 6, 13, 0, 25, 26, 290448384, time_package.ΔUTC)), // overflowed value
-
         AnyValue(Ꮡx),
         AnyValue(Ꮡy),
         GroupValue(go.log.slog_package.Bool("b"u8, true), Int("i"u8, 3)),
@@ -118,28 +116,19 @@ public static void TestValueString(ж<testing.T> Ꮡt) {
 internal static readonly object testAllocatesMoreWithˢ = (@string)"test allocates more with -asan; see #70079"u8;
 
 public static void TestValueNoAlloc(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (asan.Enabled) {
         Ꮡt.Skip(testAllocatesMoreWithˢ);
     }
+
     // Assign values just to make sure the compiler doesn't optimize away the statements.
     ref var i = ref heap(new int64(), out var Ꮡi);
-    
     uint64 u = default!;
-    
     float64 f = default!;
-    
     bool b = default!;
-    
     @string s = default!;
-    
     ref var x = ref heap<any>(out var Ꮡx);
-    
     ж<int64> p = Ꮡi;
-    
     time.Duration d = default!;
-    
     ref var tm = ref heap(new time.Time(), out var Ꮡtm);
     var pʗ1 = p;
     nint a = (nint)testing.AllocsPerRun(5, () => {
@@ -181,7 +170,7 @@ internal partial struct TestAnyValue_type /*dyn*/ {
 
 public static void TestAnyValue(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestAnyValue_type[]{
-        new((nint)(1), IntValue(1)),
+        new((nint)1, IntValue(1)),
         new(1.5D, Float64Value(1.5D)),
         new((float32)2.5F, Float64Value(2.5D)),
         new((@string)"s"u8, StringValue("s"u8)),
@@ -214,9 +203,7 @@ public static void TestValueAny(ж<testing.T> Ꮡt) {
         default!,
         LevelDebug + 100,
         time_package.ΔUTC.OrTypedNil(), // time.Locations treated specially...
-
         KindBool, // ...as are Kinds
-
         new global::go.log.slog_package.Attr[]{Int("a"u8, 1)}.slice(),
         (int64)2,
         (uint64)3,
@@ -252,11 +239,13 @@ public static void TestLogValue(ж<testing.T> Ꮡt) {
     if (!AreEqual(got, want)) {
         Ꮡt.Errorf("got %#v, want %#v"u8, got, want);
     }
+
     // Test Resolve.
     got = v.Resolve().Any();
     if (!AreEqual(got, want)) {
         Ꮡt.Errorf("got %#v, want %#v"u8, got, want);
     }
+
     // Test Resolve max iteration.
     r.Value.v = AnyValue(r.OrTypedNil()); // create a cycle
     got = AnyValue(r.OrTypedNil()).Resolve().Any();
@@ -265,6 +254,7 @@ public static void TestLogValue(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("expected error, got %T"u8, got);
         }
     }
+
     // Groups are not recursively resolved.
     var c = go.log.slog_package.Any("c"u8, Ꮡ(new replace(StringValue("d"u8))));
     v = AnyValue(Ꮡ(new replace(GroupValue(Int("a"u8, 1), Group("b"u8, c)))));
@@ -273,6 +263,7 @@ public static void TestLogValue(ж<testing.T> Ꮡt) {
     if (!attrsEqual(got2, want2)) {
         Ꮡt.Errorf("got %v, want %v"u8, got2, want2);
     }
+
     // Verify that panics in Resolve are caught and turn into errors.
     v = AnyValue(new panickingLogValue(nil));
     got = v.Resolve().Any();
@@ -295,10 +286,8 @@ public static void TestValueTime(ж<testing.T> Ꮡt) {
     foreach (var (_, tm) in new time.Time[]{
         new time_package.Time(nil),
         time_package.Unix(0, 1000000000000000), // UnixNanos is defined
-
-        time_package.Date(2300, 1, 1, 0, 0, 0, 0, time_package.ΔUTC)
+        time_package.Date(2300, 1, 1, 0, 0, 0, 0, time_package.ΔUTC) // overflows UnixNanos
     }.slice()) {
-        // overflows UnixNanos
         var got = TimeValue(tm).Time();
         if (!got.Equal(tm)) {
             Ꮡt.Errorf("got %s (%#[1]v), want %s (%#[2]v)"u8, got, tm);

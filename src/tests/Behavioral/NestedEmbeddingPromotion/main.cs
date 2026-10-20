@@ -14,12 +14,12 @@ internal static @string describe(this inner i) {
 }
 
 partial struct mid {
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
     internal nint m;
 }
 
 partial struct top {
-    internal partial ref mid mid { get; }
+    /*embed*/ internal mid mid;
     internal nint t;
 }
 
@@ -29,9 +29,11 @@ internal static void Main() {
     x.p = 9;
     x.m = 2;
     x.t = 3;
+
     fmt.Println(x.n, x.p, x.m, x.t);
     fmt.Println(x.inner.n, x.mid.m);
     fmt.Println(x.describe());
+
     x.n = 42;
     fmt.Println(x.n, x.inner.n);
 }

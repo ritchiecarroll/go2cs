@@ -31,6 +31,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
     if (defaultSampleType != ""u8) {
         b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_DefaultSampleType, b.stringIndex(defaultSampleType));
     }
+
     var values = new int64[]{0, 0, 0, 0}.slice();
     slice<uint64> locs = default!;
     foreach (var (_, vᴛ1) in p) {
@@ -60,6 +61,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
             }
             hideRuntime = false; // try again, and show all frames next time.
         }
+
         (values[0], values[1]) = scaleHeapSample(r.AllocObjects, r.AllocBytes, rate);
         (values[2], values[3]) = scaleHeapSample(r.InUseObjects(), r.InUseBytes(), rate);
         int64 blockSize = default!;
@@ -73,8 +75,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
             }
         });
     }
-    b.build();
-    return default!;
+    return b.build();
 }
 
 // scaleHeapSample adjusts the data from a heap Sample to
@@ -90,13 +91,16 @@ internal static (int64, int64) scaleHeapSample(int64 count, int64 size, int64 ra
     if (count == 0 || size == 0) {
         return (0, 0);
     }
+
     if (rate <= 1) {
         // if rate==1 all samples were collected so no adjustment is needed.
         // if rate<1 treat as unknown and skip scaling.
         return (count, size);
     }
+
     var avgSize = (float64)size / (float64)count;
     var scale = 1D / (1D - math.Exp(-avgSize / (float64)rate));
+
     return ((int64)((float64)count * scale), (int64)((float64)size * scale));
 }
 

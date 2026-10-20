@@ -361,7 +361,9 @@ public static class AdapterBinder
 
             MethodInfo? bound = isPointer ? byPtr ?? byVal : byVal;
 
-            if (bound is null || bound.IsGenericMethodDefinition || bound.ContainsGenericParameters)
+            // A generic type's method arrives CLOSED over the value's type arguments: the candidate source closes it
+            // (GoTypeExtensions.CloseGoMethod), so no open definition reaches this binder.
+            if (bound is null)
                 return false;
 
             invokers[i] = MethodInvoker.Create(bound);

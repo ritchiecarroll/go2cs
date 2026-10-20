@@ -37,10 +37,10 @@ internal static @string String(this item i) {
     case {} when len(i.val) is > 10: {
         return fmt.Sprintf("%.10q..."u8, i.val);
     }}
-
     return fmt.Sprintf("%q"u8, i.val);
 }
 
+// itemType identifies the type of lex items.
 partial struct itemType /*num:nint*/;
 
 internal static itemType itemError => /* iota */ 0;       // error occurred; value is text of error
@@ -65,6 +65,7 @@ internal static itemType itemSpace => 18; // run of spaces separating arguments
 internal static itemType itemString => 19; // quoted string (includes quotes)
 internal static itemType itemText => 20; // plain text
 internal static itemType itemVariable => 21; // variable starting with '$', such as '$' or  '$1' or '$hello'
+// Keywords appear after all the rest.
 internal static itemType itemKeyword => 22; // used only to delimit the keywords
 internal static itemType itemBlock => 23; // block keyword
 internal static itemType itemBreak => 24; // break keyword
@@ -105,11 +106,10 @@ internal static UntypedInt eof => -1;
 // better with the space present anyway. For simplicity, only ASCII
 // does the job.
 internal static readonly @string spaceChars = " \t\r\n"u8; // These are the space characters defined by Go itself.
-
 internal static UntypedInt trimMarker => /* '-' */ 45; // Attached to left/right delimiter, trims trailing spaces from preceding/following text.
-
 internal static Pos trimMarkerLen => /* Pos(1 + 1) */ 2; // marker plus space before or after
 
+// stateFn represents the state of the scanner as a function that returns the next state.
 internal delegate stateFn stateFn(ж<lexer> _);
 
 // lexer holds the state of the scanner.
@@ -279,7 +279,7 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
             if (x > 0) {
                 l.pos += ((Pos)x);
                 // Do we trim any trailing space?
-                Pos trimLength = ((Pos)0);
+                Pos trimLength = (Pos)0;
                 Pos delimEnd = l.pos + ((Pos)len(l.leftDelim));
                 if (hasLeftTrimMarker(l.input.slice(delimEnd))) {
                     trimLength = rightTrimLength(l.input.slice(l.start, l.pos));
@@ -296,7 +296,7 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
             return lexLeftDelim;
         }
     }
-    l.pos = ((Pos)len(l.input));
+    l.pos = (Pos)len(l.input);
     // Correctly reached EOF.
     if (l.pos > l.start) {
         l.line += strings.Count(l.input.slice(l.start, l.pos), "\n"u8);
@@ -307,17 +307,15 @@ internal static stateFn lexText(ж<lexer> Ꮡl) {
 
 // rightTrimLength returns the length of the spaces at the end of the string.
 internal static Pos rightTrimLength(@string s) {
-    return ((Pos)(len(s) - len(strings.TrimRight(s, spaceChars))));
+    return (Pos)(len(s) - len(strings.TrimRight(s, spaceChars)));
 }
 
 // atRightDelim reports whether the lexer is at a right delimiter, possibly preceded by a trim marker.
 internal static (bool delim, bool trimSpaces) atRightDelim(this ref lexer l) {
-    if (hasRightTrimMarker(l.input.slice(l.pos)) && strings.HasPrefix(l.input.slice(l.pos + trimMarkerLen), l.rightDelim)) {
-        // With trim marker.
+    if (hasRightTrimMarker(l.input.slice(l.pos)) && strings.HasPrefix(l.input.slice(l.pos + trimMarkerLen), l.rightDelim)) { // With trim marker.
         return (true, true);
     }
-    if (strings.HasPrefix(l.input.slice(l.pos), l.rightDelim)) {
-        // Without trim marker.
+    if (strings.HasPrefix(l.input.slice(l.pos), l.rightDelim)) { // Without trim marker.
         return (true, false);
     }
     return (false, false);
@@ -325,7 +323,7 @@ internal static (bool delim, bool trimSpaces) atRightDelim(this ref lexer l) {
 
 // leftTrimLength returns the length of the spaces at the beginning of the string.
 internal static Pos leftTrimLength(@string s) {
-    return ((Pos)(len(s) - len(strings.TrimLeft(s, spaceChars))));
+    return (Pos)(len(s) - len(strings.TrimLeft(s, spaceChars)));
 }
 
 // lexLeftDelim scans the left delimiter, which is known to be present, possibly with a trim marker.
@@ -335,7 +333,7 @@ internal static stateFn lexLeftDelim(ж<lexer> Ꮡl) {
 
     l.pos += ((Pos)len(l.leftDelim));
     var trimSpace = hasLeftTrimMarker(l.input.slice(l.pos));
-    Pos afterMarker = ((Pos)0);
+    Pos afterMarker = (Pos)0;
     if (trimSpace) {
         afterMarker = trimMarkerLen;
     }
@@ -450,8 +448,8 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
             return lexChar;
         }
         if (r is (rune)'.') { matchᴛ1 = true;
+            // special look-ahead for ".field" so we don't break l.backup().
             if (l.pos < ((Pos)len(l.input))) {
-                // special look-ahead for ".field" so we don't break l.backup().
                 var rΔ2 = l.input[l.pos];
                 if (rΔ2 < (rune)'0' || (rune)'9' < rΔ2) {
                     return lexField;
@@ -486,7 +484,6 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
         }
         return default!;
     }
-
 }
 
 // lexSpace scans a run of space characters.
@@ -525,13 +522,13 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
             var r = l.next();
             switch (ᐧ) {
             case {} when isAlphaNumeric(r): {
+                // absorb.
                 break;
             }
             default: {
                 l.backup();
                 @string word = l.input.slice(l.start, l.pos);
                 if (!l.atTerminator()) {
-                    // absorb.
                     return l.errorf("bad character %#U"u8, r);
                 }
                 switch (ᐧ) {
@@ -551,11 +548,9 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
                 default: {
                     return l.emit(itemIdentifier);
                 }}
-
                 break;
             }}
         }
-
     }
 }
 
@@ -570,8 +565,7 @@ internal static stateFn lexField(ж<lexer> Ꮡl) {
 internal static stateFn lexVariable(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
-    if (l.atTerminator()) {
-        // Nothing interesting follows -> "$".
+    if (l.atTerminator()) { // Nothing interesting follows -> "$".
         return l.emit(itemVariable);
     }
     return lexFieldOrVariable(Ꮡl, itemVariable);
@@ -582,8 +576,7 @@ internal static stateFn lexVariable(ж<lexer> Ꮡl) {
 internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
     ref var l = ref Ꮡl.DerefOrNull();
 
-    if (l.atTerminator()) {
-        // Nothing interesting follows -> "." or "$".
+    if (l.atTerminator()) { // Nothing interesting follows -> "." or "$".
         if (typ == itemVariable) {
             return l.emit(itemVariable);
         }
@@ -616,7 +609,6 @@ internal static bool atTerminator(this ref lexer l) {
     if (exprᴛ1 == eof || exprᴛ1 == (rune)'.' || exprᴛ1 == (rune)',' || exprᴛ1 == (rune)'|' || exprᴛ1 == (rune)':' || exprᴛ1 == (rune)')' || exprᴛ1 == (rune)'(') {
         return true;
     }
-
     return strings.HasPrefix(l.input.slice(l.pos), l.rightDelim);
 }
 
@@ -645,7 +637,6 @@ Loop:
         else if (exprᴛ1 is (rune)'\'') { matchᴛ1 = true;
             goto break_Loop;
         }
-
 continue_Loop:;
     }
 break_Loop:;
@@ -737,7 +728,6 @@ Loop:
         else if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
             goto break_Loop;
         }
-
 continue_Loop:;
     }
 break_Loop:;
@@ -757,7 +747,6 @@ Loop:
         if (exprᴛ1 is (rune)'`') {
             goto break_Loop;
         }
-
 continue_Loop:;
     }
 break_Loop:;

@@ -53,7 +53,7 @@ partial struct macState {
 }
 
 partial struct macGeneric {
-    internal partial ref macState macState { get; }
+    /*embed*/ internal macState macState;
     internal array<byte> buffer = new(TagSize);
     internal nint offset;
 }
@@ -101,15 +101,14 @@ internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> Ꮡout)
 // clears some bits of the secret coefficient to make it possible to implement
 // multiplication more efficiently.
 internal static UntypedInt rMask0 => 0x0FFFFFFC0FFFFFFF;
-
 internal static UntypedInt rMask1 => 0x0FFFFFFC0FFFFFFC;
 
 // initialize loads the 256-bit key into the two 128-bit secret values r and s.
 internal static void initialize(/*[32]*/ ж<array<byte>> Ꮡkey, ref macState m) {
     ref var key = ref Ꮡkey.DerefOrNull();
 
-    m.r[0] = (uint64)(binary.LittleEndian.Uint64(key[0..8]) & (uint64)rMask0);
-    m.r[1] = (uint64)(binary.LittleEndian.Uint64(key[8..16]) & (uint64)rMask1);
+    m.r[0] = binary.LittleEndian.Uint64(key[0..8]) & (uint64)rMask0;
+    m.r[1] = binary.LittleEndian.Uint64(key[8..16]) & (uint64)rMask1;
     m.s[0] = binary.LittleEndian.Uint64(key[16..24]);
     m.s[1] = binary.LittleEndian.Uint64(key[24..32]);
 }
@@ -135,8 +134,8 @@ internal static uint128 add128(uint128 a, uint128 b) {
 }
 
 internal static uint128 shiftRightBy2(uint128 a) {
-    a.lo = (uint64)((a.lo >> (int)(2)) | (((uint64)(a.hi & 3)) << (int)(62)));
-    a.hi = (a.hi >> (int)(2));
+    a.lo = a.lo >> 2 | (a.hi & 3) << 62;
+    a.hi = a.hi >> 2;
     return a;
 }
 
@@ -150,8 +149,10 @@ internal static uint128 shiftRightBy2(uint128 a) {
 internal static void updateGeneric(ref macState state, slice<byte> msg) {
     var (h0, h1, h2) = (state.h[0], state.h[1], state.h[2]);
     var (r0, r1) = (state.r[0], state.r[1]);
+
     while (len(msg) > 0) {
         uint64 c = default!;
+
         // For the first step, h + m, we use a chain of bits.Add64 intrinsics.
         // The resulting value of h might exceed 2¹³⁰ - 5, but will be partially
         // reduced at the end of the multiplication below.
@@ -163,16 +164,20 @@ internal static void updateGeneric(ref macState state, slice<byte> msg) {
             (h0, c) = bits.Add64(h0, binary.LittleEndian.Uint64(msg[0..8]), 0);
             (h1, c) = bits.Add64(h1, binary.LittleEndian.Uint64(msg[8..16]), c);
             h2 += c + 1;
+
             msg = msg[(int)(TagSize)..];
         } else {
             array<byte> buf = new(16); /* TagSize */
             copy(buf[..], msg);
             buf[len(msg)] = 1;
+
             (h0, c) = bits.Add64(h0, binary.LittleEndian.Uint64(buf[0..8]), 0);
             (h1, c) = bits.Add64(h1, binary.LittleEndian.Uint64(buf[8..16]), c);
             h2 += c;
+
             msg = default!;
         }
+
         // Multiplication of big number limbs is similar to elementary school
         // columnar multiplication. Instead of digits, there are 64-bit limbs.
         //
@@ -194,12 +199,14 @@ internal static void updateGeneric(ref macState state, slice<byte> msg) {
         // The main difference from pen-and-paper multiplication is that we do
         // carry propagation in a separate step, as if we wrote two digit sums
         // at first (the 128-bit limbs), and then carried the tens all at once.
+
         var h0r0 = mul64(h0, r0);
         var h1r0 = mul64(h1, r0);
         var h2r0 = mul64(h2, r0);
         var h0r1 = mul64(h0, r1);
         var h1r1 = mul64(h1, r1);
         var h2r1 = mul64(h2, r1);
+
         // Since h2 is known to be at most 7 (5 + 1 + 1), and r0 and r1 have their
         // top 4 bits cleared by rMask{0,1}, we know that their product is not going
         // to overflow 64 bits, so we can ignore the high part of the products.
@@ -211,14 +218,17 @@ internal static void updateGeneric(ref macState state, slice<byte> msg) {
         if (h2r1.hi != 0) {
             throw panic("poly1305: unexpected overflow");
         }
+
         var m0 = h0r0;
         var m1 = add128(h1r0, h0r1); // These two additions don't overflow thanks again
         var m2 = add128(h2r0, h1r1); // to the 4 masked bits at the top of r0 and r1.
         var m3 = h2r1;
+
         var t0 = m0.lo;
         (var t1, c) = bits.Add64(m1.lo, m0.hi, 0);
         (var t2, c) = bits.Add64(m2.lo, m1.hi, c);
         var (t3, _) = bits.Add64(m3.lo, m2.hi, c);
+
         // Now we have the result as 4 64-bit limbs, and we need to reduce it
         // modulo 2¹³⁰ - 5. The special shape of this Crandall prime lets us do
         // a cheap partial reduction according to the reduction identity
@@ -230,23 +240,30 @@ internal static void updateGeneric(ref macState state, slice<byte> msg) {
         // assumptions we make about h in the rest of the code.
         //
         // See also https://speakerdeck.com/gtank/engineering-prime-numbers?slide=23
+
         // We split the final result at the 2¹³⁰ mark into h and cc, the carry.
         // Note that the carry bits are effectively shifted left by 2, in other
         // words, cc = c * 4 for the c in the reduction identity.
-        (h0, h1, h2) = (t0, t1, (uint64)(t2 & maskLow2Bits));
-        var cc = new uint128((uint64)(t2 & maskNotLow2Bits), t3);
+        (h0, h1, h2) = (t0, t1, t2 & maskLow2Bits);
+        var cc = new uint128(t2 & maskNotLow2Bits, t3);
+
         // To add c * 5 to h, we first add cc = c * 4, and then add (cc >> 2) = c.
+
         (h0, c) = bits.Add64(h0, cc.lo, 0);
         (h1, c) = bits.Add64(h1, cc.hi, c);
         h2 += c;
+
         cc = shiftRightBy2(cc);
+
         (h0, c) = bits.Add64(h0, cc.lo, 0);
         (h1, c) = bits.Add64(h1, cc.hi, c);
         h2 += c;
+
+        // h2 is at most 3 + 1 + 1 = 5, making the whole of h at most
+        //
+        //     5 * 2¹²⁸ + (2¹²⁸ - 1) = 6 * 2¹²⁸ - 1
     }
-    // h2 is at most 3 + 1 + 1 = 5, making the whole of h at most
-    //
-    //     5 * 2¹²⁸ + (2¹²⁸ - 1) = 6 * 2¹²⁸ - 1
+
     (state.h[0], state.h[1], state.h[2]) = (h0, h1, h2);
 }
 
@@ -255,14 +272,12 @@ internal const uint64 maskNotLow2Bits = /* ^maskLow2Bits */ 18446744073709551612
 
 // select64 returns x if v == 1 and y if v == 0, in constant time.
 internal static uint64 select64(uint64 v, uint64 x, uint64 y) {
-    return (uint64)((uint64)(~(v - 1) & x) | (uint64)((v - 1) & y));
+    return ~(v - 1) & x | (v - 1) & y;
 }
 
 // [p0, p1, p2] is 2¹³⁰ - 5 in little endian order.
 internal static UntypedInt p0 => 0xFFFFFFFFFFFFFFFB;
-
 internal static UntypedInt p1 => 0xFFFFFFFFFFFFFFFF;
-
 internal static UntypedInt p2 => 0x0000000000000003;
 
 // finalize completes the modular reduction of h and computes
@@ -272,16 +287,20 @@ internal static void finalize(/*[16]*/ ж<array<byte>> Ꮡout, ref array<uint64>
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var (h0, h1, h2) = (h[0], h[1], h[2]);
+
     // After the partial reduction in updateGeneric, h might be more than
     // 2¹³⁰ - 5, but will be less than 2 * (2¹³⁰ - 5). To complete the reduction
     // in constant time, we compute t = h - (2¹³⁰ - 5), and select h as the
     // result if the subtraction underflows, and t otherwise.
+
     var (hMinusP0, b) = bits.Sub64(h0, p0, 0);
     (var hMinusP1, b) = bits.Sub64(h1, p1, b);
     (_, b) = bits.Sub64(h2, p2, b);
+
     // h = h if h < p else h - p
     h0 = select64(b, h0, hMinusP0);
     h1 = select64(b, h1, hMinusP1);
+
     // Finally, we compute the last Poly1305 step
     //
     //     tag = h + s  mod  2¹²⁸
@@ -290,6 +309,7 @@ internal static void finalize(/*[16]*/ ж<array<byte>> Ꮡout, ref array<uint64>
     // the overflow.
     (h0, var c) = bits.Add64(h0, s[0], 0);
     (h1, _) = bits.Add64(h1, s[1], c);
+
     binary.LittleEndian.PutUint64(@out[0..8], h0);
     binary.LittleEndian.PutUint64(@out[8..16], h1);
 }

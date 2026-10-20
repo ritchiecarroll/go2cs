@@ -14,11 +14,8 @@ partial struct p224 {
     internal nint v;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string p224ˢ = "p224"u8;
-
 internal static @string label(this ref p224 p) {
-    return p224ˢ;
+    return "p224";
 }
 
 internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
@@ -76,13 +73,15 @@ partial interface Named {
 }
 
 partial struct p224Curve {
-    internal partial ref curve<p224жpoint> curve { get; }
+    /*embed*/ internal curve<p224жpoint> curve;
 }
 
 internal static void Main() {
-    var pc = Ꮡ(new p224Curve(new curve<p224жpoint>(name: "p224c"u8, newPoint: () => newP224(), seed: Ꮡ(new p224(v: 3)))));
+    var pc = Ꮡ(new p224Curve(new curve<p224жpoint>(name: "p224c", newPoint: () => newP224(), seed: Ꮡ(new p224(v: 3)))));
+
     fmt.Println((~pc).name);
     fmt.Println(pc.of(p224Curve.Ꮡcurve).LabelOf((~pc).seed));
+
     Named n = new p224CurveжNamed(pc);
     fmt.Println(n.Tag());
     fmt.Println(n.SeedLabel());

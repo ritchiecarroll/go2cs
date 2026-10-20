@@ -39,10 +39,12 @@ internal static void heapSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E
     nint first = a;
     nint lo = 0;
     nint hi = b - a;
+
     // Build heap with greatest element at top.
     for (nint i = (hi - 1) / 2; i >= 0; i--) {
         siftDownCmpFunc(data, i, hi, first, cmp);
     }
+
     // Pop elements, largest first, into end of data.
     for (nint i = hi - 1; i >= 0; i--) {
         (data[first], data[first + i]) = (data[first + i], data[first]);
@@ -58,24 +60,30 @@ internal static void heapSortCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E
 // limit is the number of allowed bad (very unbalanced) pivots before falling back to heapsort.
 internal static void pdqsortCmpFunc<E>(slice<E> data, nint a, nint b, nint limit, Func<E, E, nint> cmp) {
     const nint maxInsertion = 12;
+
     bool wasBalanced = true;   // whether the last partitioning was reasonably balanced
     bool wasPartitioned = true; // whether the slice was already partitioned
+
     while (ᐧ) {
         nint length = b - a;
+
         if (length <= maxInsertion) {
             insertionSortCmpFunc(data, a, b, cmp);
             return;
         }
+
         // Fall back to heapsort if too many bad choices were made.
         if (limit == 0) {
             heapSortCmpFunc(data, a, b, cmp);
             return;
         }
+
         // If the last partitioning was imbalanced, we need to breaking patterns.
         if (!wasBalanced) {
             breakPatternsCmpFunc(data, a, b, cmp);
             limit--;
         }
+
         var (pivot, hint) = choosePivotCmpFunc(data, a, b, cmp);
         if (hint == decreasingHint) {
             reverseRangeCmpFunc(data, a, b, cmp);
@@ -85,12 +93,14 @@ internal static void pdqsortCmpFunc<E>(slice<E> data, nint a, nint b, nint limit
             pivot = (b - 1) - (pivot - a);
             hint = increasingHint;
         }
+
         // The slice is likely already sorted.
         if (wasBalanced && wasPartitioned && hint == increasingHint) {
             if (partialInsertionSortCmpFunc(data, a, b, cmp)) {
                 return;
             }
         }
+
         // Probably the slice contains many duplicate elements, partition the slice into
         // elements equal to and elements greater than the pivot.
         if (a > 0 && !(cmp(data[a - 1], data[pivot]) < 0)) {
@@ -98,8 +108,10 @@ internal static void pdqsortCmpFunc<E>(slice<E> data, nint a, nint b, nint limit
             a = midΔ1;
             continue;
         }
+
         var (mid, alreadyPartitioned) = partitionCmpFunc(data, a, b, pivot, cmp);
         wasPartitioned = alreadyPartitioned;
+
         nint leftLen = mid - a;
         nint rightLen = b - mid;
         nint balanceThreshold = length / 8;
@@ -123,6 +135,7 @@ internal static (nint newpivot, bool alreadyPartitioned) partitionCmpFunc<E>(sli
     (data[a], data[pivot]) = (data[pivot], data[a]);
     nint i = a + 1;
     nint j = b - 1; // i and j are inclusive of the elements remaining to be partitioned
+
     while (i <= j && (cmp(data[i], data[a]) < 0)) {
         i++;
     }
@@ -136,6 +149,7 @@ internal static (nint newpivot, bool alreadyPartitioned) partitionCmpFunc<E>(sli
     (data[i], data[j]) = (data[j], data[i]);
     i++;
     j--;
+
     while (ᐧ) {
         while (i <= j && (cmp(data[i], data[a]) < 0)) {
             i++;
@@ -160,6 +174,7 @@ internal static nint /*newpivot*/ partitionEqualCmpFunc<E>(slice<E> data, nint a
     (data[a], data[pivot]) = (data[pivot], data[a]);
     nint i = a + 1;
     nint j = b - 1; // i and j are inclusive of the elements remaining to be partitioned
+
     while (ᐧ) {
         while (i <= j && !(cmp(data[a], data[i]) < 0)) {
             i++;
@@ -186,13 +201,17 @@ internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint 
         while (i < b && !(cmp(data[i], data[i - 1]) < 0)) {
             i++;
         }
+
         if (i == b) {
             return true;
         }
+
         if (b - a < shortestShifting) {
             return false;
         }
+
         (data[i], data[i - 1]) = (data[i - 1], data[i]);
+
         // Shift the smaller one to the left.
         if (i - a >= 2) {
             for (nint jΔ1 = i - 1; jΔ1 >= 1; jΔ1--) {
@@ -220,10 +239,11 @@ internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint 
 internal static void breakPatternsCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
     nint length = b - a;
     if (length >= 8) {
-        var random = ((xorshift)(uint64)length);
+        var random = (xorshift)(uint64)length;
         nuint modulus = nextPowerOfTwo(length);
+
         for (nint idx = a + (length / 4) * 2 - 1; idx <= a + (length / 4) * 2 + 1; idx++) {
-            nint other = (nint)((nuint)((nuint)random.Next() & (modulus - 1)));
+            nint other = (nint)((nuint)random.Next() & (modulus - 1));
             if (other >= length) {
                 other -= length;
             }
@@ -240,11 +260,14 @@ internal static void breakPatternsCmpFunc<E>(slice<E> data, nint a, nint b, Func
 internal static (nint pivot, sortedHint hint) choosePivotCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
     const nint shortestNinther = 50;
     const nint maxSwaps = /* 4 * 3 */ 12;
+
     nint l = b - a;
+
     nint swaps = default!;
     nint i = a + l / 4 * 1;
     nint j = a + l / 4 * 2;
     nint k = a + l / 4 * 3;
+
     if (l >= 8) {
         if (l >= shortestNinther) {
             // Tukey ninther method, the idea came from Rust's implementation.
@@ -255,6 +278,7 @@ internal static (nint pivot, sortedHint hint) choosePivotCmpFunc<E>(slice<E> dat
         // Find the median among i, j, k and stores it into j.
         j = medianCmpFunc(data, i, j, k, ref swaps, cmp);
     }
+
     var exprᴛ1 = swaps;
     if (exprᴛ1 is 0) {
         return (j, increasingHint);
@@ -265,7 +289,6 @@ internal static (nint pivot, sortedHint hint) choosePivotCmpFunc<E>(slice<E> dat
     { /* default: */
         return (j, unknownHint);
     }
-
 }
 
 // order2CmpFunc returns x,y where data[x] <= data[y], where x,y=a,b or x,y=b,a.
@@ -316,6 +339,7 @@ internal static void stableCmpFunc<E>(slice<E> data, nint n, Func<E, E, nint> cm
         b += blockSize;
     }
     insertionSortCmpFunc(data, a, n, cmp);
+
     while (blockSize < n) {
         (a, b) = (0, 2 * blockSize);
         while (b <= n) {
@@ -362,7 +386,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         nint i = m;
         nint j = b;
         while (i < j) {
-            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
+            nint h = (nint)((nuint)(i + j) >> 1);
             if (cmp(data[h], data[a]) < 0){
                 i = h + 1;
             } else {
@@ -375,6 +399,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         }
         return;
     }
+
     // Avoid unnecessary recursions of symMerge
     // by direct insertion of data[m] into data[a:m]
     // if data[m:b] only contains one element.
@@ -385,7 +410,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         nint i = a;
         nint j = m;
         while (i < j) {
-            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
+            nint h = (nint)((nuint)(i + j) >> 1);
             if (!(cmp(data[m], data[h]) < 0)){
                 i = h + 1;
             } else {
@@ -398,7 +423,8 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         }
         return;
     }
-    nint mid = (nint)(((nuint)(a + b) >> (int)(1)));
+
+    nint mid = (nint)((nuint)(a + b) >> 1);
     nint n = mid + m;
     nint start = default!;
     nint r = default!;
@@ -410,14 +436,16 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         r = m;
     }
     nint p = n - 1;
+
     while (start < r) {
-        nint c = (nint)(((nuint)(start + r) >> (int)(1)));
+        nint c = (nint)((nuint)(start + r) >> 1);
         if (!(cmp(data[p - c], data[c]) < 0)){
             start = c + 1;
         } else {
             r = c;
         }
     }
+
     nint end = n - start;
     if (start < m && m < end) {
         rotateCmpFunc(data, start, m, end, cmp);
@@ -437,6 +465,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
 internal static void rotateCmpFunc<E>(slice<E> data, nint a, nint m, nint b, Func<E, E, nint> cmp) {
     nint i = m - a;
     nint j = b - m;
+
     while (i != j) {
         if (i > j){
             swapRangeCmpFunc(data, m - i, m, j, cmp);

@@ -26,10 +26,20 @@ partial class sha512_package {
     crypto.RegisterHash(crypto.SHA512_256, New512_256);
 }
 
+// Size is the size, in bytes, of a SHA-512 checksum.
 public static UntypedInt Size => 64;
+
+// Size224 is the size, in bytes, of a SHA-512/224 checksum.
 public static UntypedInt Size224 => 28;
+
+// Size256 is the size, in bytes, of a SHA-512/256 checksum.
 public static UntypedInt Size256 => 32;
+
+// Size384 is the size, in bytes, of a SHA-384 checksum.
 public static UntypedInt Size384 => 48;
+
+// BlockSize is the block size, in bytes, of the SHA-512/224,
+// SHA-512/256, SHA-384 and SHA-512 hash functions.
 public static UntypedInt BlockSize => 128;
 
 // New returns a new [hash.Hash] computing the SHA-512 checksum. The Hash

@@ -6,7 +6,7 @@ namespace go.@internal.trace;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
 using io = io_package;
-using Δevent = go.@internal.trace.event_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using encoding;
 using go.@internal.trace;
@@ -23,7 +23,7 @@ partial struct Writer {
     internal io.Writer w;
     internal slice<byte> buf;
     internal version.Version v;
-    internal slice<Δevent.Spec> specs;
+    internal slice<tracev2.EventSpec> specs;
 }
 
 // NewWriter creates a new byte format writer.
@@ -38,8 +38,10 @@ public static error WriteEvent(this ref Writer w, Event e) {
     if (e.Version != w.v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);
     }
+
     // Write event header byte.
     w.buf = append(w.buf, (uint8)e.Ev);
+
     // Write out all arguments.
     var spec = w.specs[e.Ev];
     foreach (var (_, arg) in e.Args.slice(0, len(spec.Args))) {
@@ -51,16 +53,19 @@ public static error WriteEvent(this ref Writer w, Event e) {
             w.buf = binary.AppendUvarint(w.buf, frameArgs[i]);
         }
     }
+
     // Write out the length of the data.
     if (spec.HasData) {
         w.buf = binary.AppendUvarint(w.buf, (uint64)len(e.Data));
     }
+
     // Write out varint events.
     var (_, err) = w.w.Write(w.buf);
     w.buf = w.buf[..0];
     if (err != default!) {
         return err;
     }
+
     // Write out data.
     if (spec.HasData) {
         var (_, errΔ1) = w.w.Write(e.Data);

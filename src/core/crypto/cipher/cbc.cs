@@ -55,7 +55,7 @@ public static BlockMode NewCBCEncrypter(Block b, slice<byte> iv) {
             return new aes_CBCEncrypterжBlockMode(aes.NewCBCEncrypter(bΔ1, new array<byte>(iv, 16)));
         }
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CBC with non-AES ciphers is not allowed in FIPS 140-only mode");
     }
     {
@@ -96,16 +96,20 @@ internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice
             throw panic("crypto/cipher: internal error: generic CBC used with AES");
         }
     }
+
     var iv = x.iv;
+
     while (len(src) > 0) {
         // Write the xor to dst, then encrypt in place.
         subtle.XORBytes(dst.slice(0, x.blockSize), src.slice(0, x.blockSize), iv);
         x.b.Encrypt(dst.slice(0, x.blockSize), dst.slice(0, x.blockSize));
+
         // Move to the next block with this block as the next iv.
         iv = dst.slice(0, x.blockSize);
         src = src.slice(x.blockSize);
         dst = dst.slice(x.blockSize);
     }
+
     // Save the iv for the next CryptBlocks call.
     copy(x.iv, iv);
 }
@@ -138,7 +142,7 @@ public static BlockMode NewCBCDecrypter(Block b, slice<byte> iv) {
             return new aes_CBCDecrypterжBlockMode(aes.NewCBCDecrypter(bΔ1, new array<byte>(iv, 16)));
         }
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CBC with non-AES ciphers is not allowed in FIPS 140-only mode");
     }
     {
@@ -182,24 +186,30 @@ internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice
     if (len(src) == 0) {
         return;
     }
+
     // For each block, we need to xor the decrypted data with the previous block's ciphertext (the iv).
     // To avoid making a copy each time, we loop over the blocks BACKWARDS.
     nint end = len(src);
     nint start = end - x.blockSize;
     nint prev = start - x.blockSize;
+
     // Copy the last block of ciphertext in preparation as the new iv.
     copy(x.tmp, src.slice(start, end));
+
     // Loop over all but the first block.
     while (start > 0) {
         x.b.Decrypt(dst.slice(start, end), src.slice(start, end));
         subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), src.slice(prev, start));
+
         end = start;
         start = prev;
         prev -= x.blockSize;
     }
+
     // The first block is special because it uses the saved iv.
     x.b.Decrypt(dst.slice(start, end), src.slice(start, end));
     subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), x.iv);
+
     // Set the new iv to the first block we copied earlier.
     (x.iv, x.tmp) = (x.tmp, x.iv);
 }

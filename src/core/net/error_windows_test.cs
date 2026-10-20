@@ -10,6 +10,7 @@ using static go.net_package;
 partial class net_internal_test_package {
 
 internal static syscall.Errno errOpNotSupported = syscall.EOPNOTSUPP;
+
 internal static slice<error> abortedConnRequestErrors = new error[]{syscall.ERROR_NETNAME_DELETED, syscall.WSAECONNRESET}.slice(); // see accept in fd_windows.go
 
 internal static bool isPlatformError(error err) {

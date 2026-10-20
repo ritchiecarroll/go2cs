@@ -30,7 +30,7 @@ partial struct onePassProg {
 // A onePassInst is a single instruction in a one-pass regular expression program.
 // It is the same as syntax.Inst except for the new 'Next' field.
 public partial struct onePassInst {
-    public partial ref regexp.syntax_package.Inst Inst { get; }
+    /*embed*/ public regexp.syntax_package.Inst Inst;
     public slice<uint32> Next;
 }
 
@@ -42,8 +42,8 @@ public partial struct onePassInst {
 internal static (@string prefix, bool complete, uint32 pc) onePassPrefix(ж<syntax.Prog> Ꮡp) {
     bool complete = default!;
     uint32 pc = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     var i = Ꮡ(p.Inst, p.Start);
     if ((~i).Op != syntax.InstEmptyWidth || (syntax.EmptyOp)((((syntax.EmptyOp)(uint8)(~i).Arg)) & syntax.EmptyBeginText) == 0) {
         return ("", (~i).Op == syntax.InstMatch, (uint32)p.Start);
@@ -58,6 +58,7 @@ internal static (@string prefix, bool complete, uint32 pc) onePassPrefix(ж<synt
     if (iop(ref (i).DerefOrNull()) != syntax.InstRune || len((~i).Rune) != 1) {
         return ("", (~i).Op == syntax.InstMatch, (uint32)p.Start);
     }
+
     // Have prefix; gather characters.
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     while (iop(ref (i).DerefOrNull()) == syntax.InstRune && len((~i).Rune) == 1 && (syntax.Flags)(((syntax.Flags)(uint16)(~i).Arg) & syntax.FoldCase) == 0 && (~i).Rune[0] != utf8.RuneError) {
@@ -93,7 +94,6 @@ internal static syntax.InstOp iop(ref syntax.Inst i) {
     if (exprᴛ1 == syntax.InstRune1 || exprᴛ1 == syntax.InstRuneAny || exprᴛ1 == syntax.InstRuneAnyNotNL) {
         op = syntax.InstRune;
     }
-
     return op;
 }
 
@@ -168,7 +168,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
 
         nint leftLen = len(leftRunes);
         nint rightLen = len(rightRunes);
-        if ((nint)(leftLen & 0x1) != 0 || (nint)(rightLen & 0x1) != 0) {
+        if ((leftLen & 0x1) != 0 || (rightLen & 0x1) != 0) {
             throw panic("mergeRuneSets odd length []rune");
         }
         ref var lx = ref heap(new nint(), out var Ꮡlx);
@@ -184,6 +184,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
                 Ꮡnext.ValueSlot = default!;
             }
         }, ref ᒐ);
+
         nint ix = -1;
         bool extend(ж<nint> newLow, ж<slice<rune>> newArray, uint32 pc) {
             if (ix > 0 && (newArray.ValueSlot)[newLow.Value] <= Ꮡmerged.ValueSlot[ix]) {
@@ -195,6 +196,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
             Ꮡnext.ValueSlot = append(Ꮡnext.ValueSlot, pc);
             return true;
         }
+
         while (lx < leftLen || rx < rightLen) {
             switch (ᐧ) {
             case {} when rx >= rightLen: {
@@ -213,7 +215,6 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
                 ok = extend(Ꮡlx, ᏑleftRunes, leftPC);
                 break;
             }}
-
             if (!ok) {
                 return (noRune, noNext);
             }
@@ -237,7 +238,6 @@ internal static void cleanupOnePass(ref onePassProg prog, ref syntax.Prog origin
             prog.Inst[ix].Next = default!;
             prog.Inst[ix] = new onePassInst(Inst: instOriginal);
         }
-
     }
 }
 
@@ -251,6 +251,7 @@ internal static ж<onePassProg> onePassCopy(ref syntax.Prog prog) {
     foreach (var (i, inst) in prog.Inst) {
         p.Value.Inst[i] = new onePassInst(Inst: inst);
     }
+
     // rewrites one or more common Prog constructs that enable some otherwise
     // non-onepass Progs to be onepass. A:BD (for example) means an InstAlt at
     // ip A, that points to ips B & C.
@@ -259,12 +260,12 @@ internal static ж<onePassProg> onePassCopy(ref syntax.Prog prog) {
     foreach (var (pc, _) in (~p).Inst) {
         var exprᴛ1 = (~p).Inst[pc].Op;
         if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
+            // A:Bx + B:Ay
             var p_A_Other = Ꮡ((~p).Inst, pc).of(onePassInst.ᏑOut);
             var p_A_Alt = Ꮡ((~p).Inst, pc).of(onePassInst.ᏑArg);
+            // make sure a target is another Alt
             var instAlt = (~p).Inst[p_A_Alt.Value];
             if (!(instAlt.Op == syntax.InstAlt || instAlt.Op == syntax.InstAltMatch)) {
-                // A:Bx + B:Ay
-                // make sure a target is another Alt
                 (p_A_Alt, p_A_Other) = (p_A_Other, p_A_Alt);
                 instAlt = (~p).Inst[p_A_Alt.Value];
                 if (!(instAlt.Op == syntax.InstAlt || instAlt.Op == syntax.InstAltMatch)) {
@@ -272,17 +273,17 @@ internal static ж<onePassProg> onePassCopy(ref syntax.Prog prog) {
                 }
             }
             var instOther = (~p).Inst[p_A_Other.Value];
+            // Analyzing both legs pointing to Alts is for another day
             if (instOther.Op == syntax.InstAlt || instOther.Op == syntax.InstAltMatch) {
-                // Analyzing both legs pointing to Alts is for another day
                 // too complicated
                 continue;
             }
+            // simple empty transition loop
+            // A:BC + B:DA => A:BC + B:DC
             var p_B_Alt = Ꮡ((~p).Inst, p_A_Alt.Value).of(onePassInst.ᏑOut);
             var p_B_Other = Ꮡ((~p).Inst, p_A_Alt.Value).of(onePassInst.ᏑArg);
             var patch = false;
             if (instAlt.Out == (uint32)pc){
-                // simple empty transition loop
-                // A:BC + B:DA => A:BC + B:DC
                 patch = true;
             } else 
             if (instAlt.Arg == (uint32)pc) {
@@ -292,16 +293,16 @@ internal static ж<onePassProg> onePassCopy(ref syntax.Prog prog) {
             if (patch) {
                 p_B_Alt.Value = p_A_Other.Value;
             }
+
+            // empty transition to common target
+            // A:BC + B:DC => A:DC + B:DC
             if (p_A_Other.Value == p_B_Alt.Value) {
-                // empty transition to common target
-                // A:BC + B:DC => A:DC + B:DC
                 p_A_Alt.Value = p_B_Other.Value;
             }
         }
         else { /* default: */
             continue;
         }
-
     }
     return p;
 }
@@ -322,10 +323,12 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
     if (len(p.Inst) >= 1000) {
         return default!;
     }
+
     ж<queueOnePass> instQueue = newQueue(len(p.Inst));
     ж<queueOnePass> visitQueue = newQueue(len(p.Inst));
     ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
     slice<slice<rune>> onePassRunes = new slice<slice<rune>>(len(p.Inst));
+
     // check that paths from Alt instructions are unambiguous, and rebuild the new
     // program as a onepass program
     var instQueueʗ1 = instQueue;
@@ -343,15 +346,15 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
         if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
             do {
                 ok = Ꮡcheck.ValueSlot((~inst).Out, mΔ1) && Ꮡcheck.ValueSlot((~inst).Arg, mΔ1);
+                // check no-input paths to InstMatch
                 var matchOut = mΔ1[(~inst).Out];
                 var matchArg = mΔ1[(~inst).Arg];
                 if (matchOut && matchArg) {
-                    // check no-input paths to InstMatch
                     ok = false;
                     break;
                 }
+                // Match on empty goes in inst.Out
                 if (matchArg) {
-                    // Match on empty goes in inst.Out
                     (inst.Value.Out, inst.Value.Arg) = (inst.Value.Arg, inst.Value.Out);
                     (matchOut, matchArg) = (matchArg, matchOut);
                 }
@@ -359,9 +362,10 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
                     mΔ1[pc] = true;
                     inst.Value.Op = syntax.InstAltMatch;
                 }
+
+                // build a dispatch operator from the two legs of the alt.
                 (onePassRunesʗ1[pc], inst.Value.Next) = mergeRuneSets(
-                    Ꮡ(onePassRunesʗ1, (~inst).Out), // build a dispatch operator from the two legs of the alt.
- Ꮡ(onePassRunesʗ1, (~inst).Arg), (~inst).Out, (~inst).Arg);
+                    Ꮡ(onePassRunesʗ1, (~inst).Out), Ꮡ(onePassRunesʗ1, (~inst).Arg), (~inst).Out, (~inst).Arg);
                 if (len((~inst).Next) > 0 && (~inst).Next[0] == mergeFailed) {
                     ok = false;
                     break;
@@ -371,8 +375,8 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
         else if (exprᴛ1 == syntax.InstCapture || exprᴛ1 == syntax.InstNop) {
             ok = Ꮡcheck.ValueSlot((~inst).Out, mΔ1);
             mΔ1[pc] = mΔ1[(~inst).Out];
-            onePassRunesʗ1[pc] = appendꓸꓸꓸ(new rune[]{}.slice(), // pass matching runes back through these no-ops.
- onePassRunesʗ1[(~inst).Out]);
+            // pass matching runes back through these no-ops.
+            onePassRunesʗ1[pc] = appendꓸꓸꓸ(new rune[]{}.slice(), onePassRunesʗ1[(~inst).Out]);
             inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
             foreach (var (i, _) in (~inst).Next) {
                 inst.Value.Next[i] = inst.Value.Out;
@@ -429,8 +433,8 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
                 }
                 instQueueʗ1.insert((~inst).Out);
                 var runes = new rune[]{}.slice();
+                // expand case-folded runes
                 if ((syntax.Flags)(((syntax.Flags)(uint16)(~inst).Arg) & syntax.FoldCase) != 0){
-                    // expand case-folded runes
                     var r0 = (~inst).Rune[0];
                     runes = append(runes, r0, r0);
                     for (var r1 = Δunicode.SimpleFold(r0); r1 != r0; r1 = Δunicode.SimpleFold(r1)) {
@@ -473,9 +477,9 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
                 }
             } while (false);
         }
-
         return ok;
     };
+
     instQueue.clear();
     instQueue.insert((uint32)p.Start);
     var m = new slice<bool>(len(p.Inst));
@@ -539,13 +543,14 @@ internal static ж<onePassProg> /*p*/ compileOnePass(ref syntax.Prog prog) {
                 return default!;
             }
         }
-
     }
     // Creates a slightly optimized copy of the original Prog
     // that cleans up some Prog idioms that block valid onepass programs
     p = onePassCopy(ref prog);
+
     // checkAmbiguity on InstAlts, build onepass Prog if possible
     p = makeOnePass(p);
+
     if (p != nil) {
         cleanupOnePass(ref (p).DerefOrNull(), ref prog);
     }

@@ -49,6 +49,7 @@ public static void TestComment(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(missingPackagePkgdocˢ);
     }
     var pkg = New(pkgs[pkgdocˢ], testdataPkgdocˢ, 0);
+
     @string input = tAndUAreTypesAndTMIsAˢ;
     @string wantHTML = @"<p><a href=""#T"">T</a> and <a href=""#U"">U</a> are types, and <a href=""#T.M"">T.M</a> is a method, but [V] is a broken link. <a href=""/math/rand#Int"">rand.Int</a> and <a href=""/crypto/rand#Reader"">crand.Reader</a> are things. <a href=""#G.M1"">G.M1</a> and <a href=""#G.M2"">G.M2</a> are generic methods."u8 + "\n"u8;
     @string wantOldHTML = pTAndUAreITypesIAndTMIsAˢ;
@@ -57,6 +58,7 @@ public static void TestComment(ж<testing.T> Ꮡt) {
     @string wantOldText = tAndUAreTypesAndTMIsAˢ3;
     @string wantSynopsis = tAndUAreTypesAndTMIsAˢ4;
     @string wantOldSynopsis = tAndUAreTypesAndTMIsAˢ5;
+
     {
         var b = pkg.HTML(input); if (((sstring)b) != wantHTML) {
             Ꮡt.Errorf("%s"u8, diff.Diff(pkgHtmlˢ, b, wantˢ, slice<byte>(wantHTML)));
@@ -77,7 +79,9 @@ public static void TestComment(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s"u8, diff.Diff(pkgSynopsisˢ, slice<byte>(b), wantˢ, slice<byte>(wantText)));
         }
     }
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     buf.Reset();
     ToHTML(new doc_test_package.bytes_BufferжWriter(Ꮡbuf), input, new map<@string, @string>{["types"u8] = ""u8});
     {
@@ -85,6 +89,7 @@ public static void TestComment(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s"u8, diff.Diff(toHTMLˢ, b, wantˢ, slice<byte>(wantOldHTML)));
         }
     }
+
     buf.Reset();
     ToText(new doc_test_package.bytes_BufferжWriter(Ꮡbuf), input, ""u8, "\t"u8, 80);
     {
@@ -92,6 +97,7 @@ public static void TestComment(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s"u8, diff.Diff(toTextˢ, b, wantˢ, slice<byte>(wantOldText)));
         }
     }
+
     {
         @string b = Synopsis(input); if (b != wantOldSynopsis) {
             Ꮡt.Errorf("%s"u8, diff.Diff(synopsisˢ, slice<byte>(b), wantˢ, slice<byte>(wantOldText)));

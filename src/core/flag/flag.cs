@@ -124,6 +124,7 @@ internal static error numError(error err) {
     return err;
 }
 
+// -- bool Value
 partial struct boolValue /*bool*/;
 
 internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
@@ -138,7 +139,7 @@ internal static error Set(this ref boolValue b, @string s) {
     if (err != default!) {
         err = errParse;
     }
-    b = ((boolValue)v);
+    b = (boolValue)v;
     return err;
 }
 
@@ -162,6 +163,7 @@ partial interface boolFlag :
     bool IsBoolFlag();
 }
 
+// -- int Value
 partial struct intValue /*num:nint*/;
 
 internal static ж<intValue> newIntValue(nint val, ж<nint> Ꮡp) {
@@ -176,7 +178,7 @@ internal static error Set(this ref intValue i, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((intValue)(nint)v);
+    i = (intValue)(nint)v;
     return err;
 }
 
@@ -188,6 +190,7 @@ internal static @string String(this ref intValue i) {
     return strconv.Itoa((nint)(i));
 }
 
+// -- int64 Value
 partial struct int64Value /*num:int64*/;
 
 internal static ж<int64Value> newInt64Value(int64 val, ж<int64> Ꮡp) {
@@ -202,7 +205,7 @@ internal static error Set(this ref int64Value i, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((int64Value)v);
+    i = (int64Value)v;
     return err;
 }
 
@@ -214,6 +217,7 @@ internal static @string String(this ref int64Value i) {
     return strconv.FormatInt((int64)(i), 10);
 }
 
+// -- uint Value
 partial struct uintValue /*num:nuint*/;
 
 internal static ж<uintValue> newUintValue(nuint val, ж<nuint> Ꮡp) {
@@ -228,7 +232,7 @@ internal static error Set(this ref uintValue i, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((uintValue)(nuint)v);
+    i = (uintValue)(nuint)v;
     return err;
 }
 
@@ -240,6 +244,7 @@ internal static @string String(this ref uintValue i) {
     return strconv.FormatUint((uint64)(nuint)(i), 10);
 }
 
+// -- uint64 Value
 partial struct uint64Value /*num:uint64*/;
 
 internal static ж<uint64Value> newUint64Value(uint64 val, ж<uint64> Ꮡp) {
@@ -254,7 +259,7 @@ internal static error Set(this ref uint64Value i, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    i = ((uint64Value)v);
+    i = (uint64Value)v;
     return err;
 }
 
@@ -266,6 +271,7 @@ internal static @string String(this ref uint64Value i) {
     return strconv.FormatUint((uint64)(i), 10);
 }
 
+// -- string Value
 partial struct stringValue /*@string*/;
 
 internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
@@ -276,18 +282,19 @@ internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
 }
 
 internal static error Set(this ref stringValue s, @string val) {
-    s = ((stringValue)val);
+    s = (stringValue)val;
     return default!;
 }
 
 internal static any Get(this ref stringValue s) {
-    return ((@string)(s));
+    return (@string)(s);
 }
 
 internal static @string String(this ref stringValue s) {
-    return ((@string)(s));
+    return (@string)(s);
 }
 
+// -- float64 Value
 partial struct float64Value /*num:float64*/;
 
 internal static ж<float64Value> newFloat64Value(float64 val, ж<float64> Ꮡp) {
@@ -302,7 +309,7 @@ internal static error Set(this ref float64Value f, @string s) {
     if (err != default!) {
         err = numError(err);
     }
-    f = ((float64Value)v);
+    f = (float64Value)v;
     return err;
 }
 
@@ -314,6 +321,7 @@ internal static @string String(this ref float64Value f) {
     return strconv.FormatFloat((float64)(f), (rune)'g', -1, 64);
 }
 
+// -- time.Duration Value
 partial struct durationValue /*global::go.time_package.Duration*/;
 
 internal static ж<durationValue> newDurationValue(time.Duration val, ж<time.Duration> Ꮡp) {
@@ -328,12 +336,12 @@ internal static error Set(this ref durationValue d, @string s) {
     if (err != default!) {
         err = errParse;
     }
-    d = ((durationValue)v);
+    d = (durationValue)v;
     return err;
 }
 
 internal static any Get(this ref durationValue d) {
-    return ((time.Duration)d);
+    return (time.Duration)d;
 }
 
 internal static @string String(this ж<durationValue> Ꮡd) {
@@ -374,7 +382,7 @@ internal static @string String(this textValue v) {
         var (m, ok) = v.p._<encoding.TextMarshaler>(ᐧ); if (ok) {
             {
                 var (b, err) = m.MarshalText(); if (err == default!) {
-                    return ((@string)b);
+                    return (@string)b;
                 }
             }
         }
@@ -382,6 +390,7 @@ internal static @string String(this textValue v) {
     return ""u8;
 }
 
+// -- func Value
 internal delegate error funcValue(@string _);
 
 internal static partial error Set(this funcValue f, @string s) {
@@ -392,6 +401,7 @@ internal static @string String(this funcValue f) {
     return ""u8;
 }
 
+// -- boolFunc Value
 internal delegate error boolFuncValue(@string _);
 
 internal static partial error Set(this boolFuncValue f, @string s) {
@@ -432,13 +442,12 @@ partial interface Getter :
     any Get();
 }
 
+// ErrorHandling defines how [FlagSet.Parse] behaves if the parse fails.
 partial struct ΔErrorHandling /*num:nint*/;
 
 // These constants cause [FlagSet.Parse] to behave as described if the parse fails.
 public static ΔErrorHandling ContinueOnError => /* iota */ 0; // Return a descriptive error.
-
 public static ΔErrorHandling ExitOnError => 1;    // Call os.Exit(2) or for -h/-help Exit(0).
-
 public static ΔErrorHandling PanicOnError => 2;   // Call panic with a descriptive error.
 
 // A FlagSet represents a set of defined flags. The zero value of a FlagSet
@@ -572,6 +581,7 @@ internal static partial error set(this ref FlagSet f, @string name, @string valu
             f.undef = new map<@string, @string>{};
         }
         f.undef[name] = fmt.Sprintf("%s:%d"u8, @file, line);
+
         return fmt.Errorf("no such flag -%v"u8, name);
     }
     var err = (~flag).Value.Set(value);
@@ -646,8 +656,8 @@ internal static readonly @string uintˢ = "uint"u8;
 public static (@string name, @string usage) UnquoteUsage(ж<Flag> Ꮡflag) {
     @string name = default!;
     @string usage = default!;
-
     ref var flag = ref Ꮡflag.DerefOrNull();
+
     // Look for a back-quoted name, but avoid the strings package.
     usage = flag.Usage;
     for (nint i = 0; i < len(usage); i++) {
@@ -715,8 +725,7 @@ public static void PrintDefaults(this ж<FlagSet> Ꮡf) {
         }
         // Boolean flags of one ASCII letter are so common we
         // treat them specially, putting their usage on the same line.
-        if (b.Len() <= 4){
-            // space, space, '-', 'x'.
+        if (b.Len() <= 4){ // space, space, '-', 'x'.
             Ꮡb.WriteString("\t"u8);
         } else {
             // Four spaces before the tab triggers good alignment
@@ -724,6 +733,7 @@ public static void PrintDefaults(this ж<FlagSet> Ꮡf) {
             Ꮡb.WriteString("\n    \t"u8);
         }
         Ꮡb.WriteString(strings.ReplaceAll(usage, "\n"u8, "\n    \t"u8));
+
         // Print the default value only if it differs to the zero value
         // for this flag type.
         {
@@ -1136,6 +1146,7 @@ public static void Var(this ref FlagSet f, Value value, @string name, @string us
     if (strings.Contains(name, "="u8)) {
         throw panic(f.sprintf("flag %q contains ="u8, name));
     }
+
     // Remember the default value as a string; it won't change.
     var flag = Ꮡ(new Flag(name, usage, value, value.String()));
     var (_, alreadythere) = f.formal[name, ꟷ];
@@ -1182,8 +1193,8 @@ internal static @string sprintf(this ref FlagSet f, @string format, params ꓸ�
 // returns the error.
 internal static error failf(this ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     @string msg = f.sprintf(format, a.ꓸꓸꓸ);
     Ꮡf.usage();
     return errors.New(msg);
@@ -1218,8 +1229,7 @@ internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) {
     nint numMinuses = 1;
     if (s[1] == (rune)'-') {
         numMinuses++;
-        if (len(s) == 2) {
-            // "--" terminates the flags
+        if (len(s) == 2) { // "--" terminates the flags
             f.args = f.args[1..];
             return (false, default!);
         }
@@ -1228,12 +1238,12 @@ internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) {
     if (len(name) == 0 || name[0] == (rune)'-' || name[0] == (rune)'=') {
         return (false, Ꮡf.failf("bad flag syntax: %s"u8, s));
     }
+
     // it's a flag. does it have an argument?
     f.args = f.args[1..];
     var hasValue = false;
     @string value = ""u8;
-    for (nint i = 1; i < len(name); i++) {
-        // equals cannot be first
+    for (nint i = 1; i < len(name); i++) { // equals cannot be first
         if (name[i] == (rune)'=') {
             value = name.slice(i + 1);
             hasValue = true;
@@ -1241,18 +1251,18 @@ internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) {
             break;
         }
     }
+
     var (flag, ok) = f.formal[name, ꟷ];
     if (!ok) {
-        if (name == "help"u8 || name == "h"u8) {
-            // special case for nice help message.
+        if (name == "help"u8 || name == "h"u8) { // special case for nice help message.
             Ꮡf.usage();
             return (false, ErrHelp);
         }
         return (false, Ꮡf.failf("flag provided but not defined: -%s"u8, name));
     }
+
     {
-        var (fv, okΔ1) = (~flag).Value._<boolFlag>(ᐧ); if (okΔ1 && fv.IsBoolFlag()){
-            // special case: doesn't need an arg
+        var (fv, okΔ1) = (~flag).Value._<boolFlag>(ᐧ); if (okΔ1 && fv.IsBoolFlag()){ // special case: doesn't need an arg
             if (hasValue){
                 {
                     var err = fv.Set(value); if (err != default!) {
@@ -1320,7 +1330,6 @@ public static error Parse(this ж<FlagSet> Ꮡf, slice<@string> arguments) {
         else if (exprᴛ1 == PanicOnError) {
             throw panic(err);
         }
-
     }
     return default!;
 }
@@ -1354,6 +1363,7 @@ public static ж<FlagSet> CommandLine;
     } else {
         CommandLine = NewFlagSet(os.Args[0], ExitOnError);
     }
+
     // Override generic FlagSet default Usage with call to global Usage.
     // Note: This is not CommandLine.Usage = Usage,
     // because we want any eventual call to use any updated value of Usage,

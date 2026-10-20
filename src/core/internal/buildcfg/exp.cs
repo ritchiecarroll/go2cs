@@ -8,13 +8,14 @@ using reflect = reflect_package;
 using strings = strings_package;
 using goexperiment = go.@internal.goexperiment_package;
 using go.@internal;
+using iter = iter_package;
 
 partial class buildcfg_package {
 
 // ExperimentFlags represents a set of GOEXPERIMENT flags relative to a baseline
 // (platform-default) experiment configuration.
 partial struct ExperimentFlags {
-    public partial ref go.@internal.goexperiment_package.Flags Flags { get; }
+    /*embed*/ public go.@internal.goexperiment_package.Flags Flags;
     internal goexperiment.Flags baseline;
 }
 
@@ -24,7 +25,7 @@ partial struct ExperimentFlags {
 // (This is not necessarily the set of experiments the compiler itself
 // was built with.)
 //
-// experimentBaseline specifies the experiment flags that are enabled by
+// Experiment.baseline specifies the experiment flags that are enabled by
 // default in the current toolchain. This is, in effect, the "control"
 // configuration and any variation from this is an experiment.
 public static ж<ExperimentFlags> ᏑExperiment = new StandardBox<ExperimentFlags>(default(ExperimentFlags));
@@ -59,7 +60,7 @@ internal static readonly @string regabiˢ = "regabi"u8;
 // configuration tuple and returns the enabled and baseline experiment
 // flag sets.
 //
-// TODO(mdempsky): Move to internal/goexperiment.
+// TODO(mdempsky): Move to [internal/goexperiment].
 public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @string goarch, @string goexp) {
     // regabiSupported is set to true on platforms where register ABI is
     // supported and enabled by default.
@@ -72,28 +73,34 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
         regabiAlwaysOn = true;
         regabiSupported = true;
     }
-
-    bool haveXchg8 = default!;
-    var exprᴛ2 = goarch;
-    if (exprᴛ2 == "386"u8 || exprᴛ2 == "amd64"u8 || exprᴛ2 == "arm"u8 || exprᴛ2 == "arm64"u8 || exprᴛ2 == "ppc64le"u8 || exprᴛ2 == "ppc64"u8) {
-        haveXchg8 = true;
+    else if (exprᴛ1 == "s390x"u8) {
+        regabiSupported = true;
     }
+
+    // Older versions (anything before V16) of dsymutil don't handle
+    // the .debug_rnglists section in DWARF5. See
+    // https://github.com/golang/go/issues/26379#issuecomment-2677068742
+    // for more context. This disables all DWARF5 on mac, which is not
+    // ideal (would be better to disable just for cases where we know
+    // the build will use external linking). In the GOOS=aix case, the
+    // XCOFF format (as far as can be determined) doesn't seem to
+    // support the necessary section subtypes for DWARF-specific
+    // things like .debug_addr (needed for DWARF 5).
+    var dwarf5Supported = (goos != "darwin"u8 && goos != "ios"u8 && goos != "aix"u8);
 
     ref var baseline = ref heap<goexperiment.Flags>(out var Ꮡbaseline);
     baseline = new goexperiment.Flags(
         RegabiWrappers: regabiSupported,
         RegabiArgs: regabiSupported,
-        CoverageRedesign: true,
-        AliasTypeParams: true,
-        SwissMap: true,
-        SpinbitMutex: haveXchg8,
-        SyncHashTrieMap: true
+        Dwarf5: dwarf5Supported,
+        RandomizedHeapBase64: true,
+        GreenTeaGC: true
     );
-    // Start with the statically enabled set of experiments.
     var flags = Ꮡ(new ExperimentFlags(
         Flags: baseline,
         baseline: baseline
     ));
+
     // Pick up any changes to the baseline configuration from the
     // GOEXPERIMENT environment. This can be set at make.bash time
     // and overridden at build time.
@@ -107,6 +114,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
             var fieldʗ1 = field;
                         names[strings.ToLower(rt.Field(i).Name)] = (bool p1) => fieldʗ1.SetBool(p1);
         }
+
         // "regabi" is an alias for all working regabi
         // subexperiments, and not an experiment itself. Doing
         // this as an alias make both "regabi" and "noregabi"
@@ -116,10 +124,10 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
             flagsʗ1.Value.RegabiWrappers = v;
             flagsʗ1.Value.RegabiArgs = v;
         };
-        // Parse names.
-        foreach (var (_, vᴛ1) in strings.Split(goexp, ","u8)) {
-            var f = vᴛ1;
 
+        // Parse names.
+        foreach (var iᴛ1 in range<@string>(strings.SplitSeq(goexp, ","u8).Invoke)) {
+            var f = iᴛ1;
             if (f == ""u8) {
                 continue;
             }
@@ -141,11 +149,12 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
             set(val);
         }
     }
+
     if (regabiAlwaysOn) {
         flags.Value.RegabiWrappers = true;
         flags.Value.RegabiArgs = true;
     }
-    // regabi is only supported on amd64, arm64, loong64, riscv64, ppc64 and ppc64le.
+    // regabi is only supported on amd64, arm64, loong64, riscv64, s390x, ppc64 and ppc64le.
     if (!regabiSupported) {
         flags.Value.RegabiWrappers = false;
         flags.Value.RegabiArgs = false;

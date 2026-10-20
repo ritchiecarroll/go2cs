@@ -26,13 +26,15 @@ internal static readonly @string cryptoEcdsaUseOfCustomˢ = "crypto/ecdsa: use o
 // This file contains a math/big implementation of ECDSA that is only used for
 // deprecated custom curves.
 internal static (ж<PrivateKey>, error) generateLegacy(elliptic.Curve c, io.Reader rand) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoEcdsaUseOfCustomˢ));
     }
+
     var (k, err) = randFieldElement(c, rand);
     if (err != default!) {
         return (default!, err);
     }
+
     var priv = @new<PrivateKey>();
     priv.Value.PublicKey.Curve = c;
     priv.Value.D = k;
@@ -49,6 +51,7 @@ internal static ж<bigꓸInt> hashToInt(slice<byte> hash, elliptic.Curve c) {
     if (len(hash) > orderBytes) {
         hash = hash.slice(0, orderBytes);
     }
+
     var ret = @new<bigꓸInt>().SetBytes(hash);
     nint excess = len(hash) * 8 - orderBits;
     if (excess > 0) {
@@ -67,6 +70,11 @@ internal static readonly @string invalidAsn1FromSignASN1ˢ = "invalid ASN.1 from
 // private key's curve order, the hash will be truncated to that length. It
 // returns the signature as a pair of integers. Most applications should use
 // [SignASN1] instead of dealing directly with r, s.
+//
+// The signature is randomized. Since Go 1.26, a secure source of random bytes
+// is always used, and the Reader is ignored unless GODEBUG=cryptocustomrand=1
+// is set. This setting will be removed in a future Go release. Instead, use
+// [testing/cryptotest.SetGlobalRandom].
 public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
     ж<bigꓸInt> r = default!;
     ж<bigꓸInt> s = default!;
@@ -76,9 +84,10 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
     if (err != default!) {
         return (default!, default!, err);
     }
+
     (r, s) = (@new<bigꓸInt>(), @new<bigꓸInt>());
     ref var inner = ref heap<cryptobyte.String>(out var Ꮡinner);
-    var input = ((cryptobyte.String)sig);
+    var input = (cryptobyte.String)sig;
     if (!input.ReadASN1(Ꮡinner, asn1.SEQUENCE) || !input.Empty() || !inner.ReadASN1Integer(r.OrTypedNil()) || !inner.ReadASN1Integer(s.OrTypedNil()) || !inner.Empty()) {
         return (default!, default!, errors.New(invalidAsn1FromSignASN1ˢ));
     }
@@ -88,10 +97,12 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
 internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.Reader csprng, slice<byte> hash) {
     error err = default!;
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoEcdsaUseOfCustomˢ));
     }
+
     var c = priv.Curve;
+
     // A cheap version of hedged signatures, for the deprecated path.
     array<byte> seed = new(32);
     {
@@ -106,6 +117,7 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
         seed[i % 32] ^= (byte)(b);
     }
     csprng = new rand_ChaCha8жReader(rand.NewChaCha8(seed));
+
     // SEC 1, Version 2.0, Section 4.1.3
     var N = c.Params().Value.N;
     if (N.Sign() == 0) {
@@ -121,13 +133,16 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
             if (err != default!) {
                 return (default!, err);
             }
+
             kInv = @new<bigꓸInt>().ModInverse(k, N);
+
             (r, _) = c.ScalarBaseMult(k.Bytes());
             r.Mod(r, N);
             if (r.Sign() != 0) {
                 break;
             }
         }
+
         var e = hashToInt(hash, c);
         s = @new<bigꓸInt>().Mul(priv.D, r);
         s.Add(s, e);
@@ -137,6 +152,7 @@ internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.
             break;
         }
     }
+
     return encodeSignature(r.Bytes(), s.Bytes());
 }
 
@@ -161,32 +177,39 @@ public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> 
 }
 
 internal static bool verifyLegacy(ref PublicKey pub, slice<byte> hash, slice<byte> sig) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/ecdsa: use of custom curves is not allowed in FIPS 140-only mode");
     }
+
     var (rBytes, sBytes, err) = parseSignature(sig);
     if (err != default!) {
         return false;
     }
     var (r, s) = (@new<bigꓸInt>().SetBytes(rBytes), @new<bigꓸInt>().SetBytes(sBytes));
+
     var c = pub.Curve;
     var N = c.Params().Value.N;
+
     if (r.Sign() <= 0 || s.Sign() <= 0) {
         return false;
     }
     if (r.Cmp(N) >= 0 || s.Cmp(N) >= 0) {
         return false;
     }
+
     // SEC 1, Version 2.0, Section 4.1.4
     var e = hashToInt(hash, c);
     var w = @new<bigꓸInt>().ModInverse(s, N);
+
     var u1 = e.Mul(e, w);
     u1.Mod(u1, N);
     var u2 = w.Mul(r, w);
     u2.Mod(u2, N);
+
     var (x1, y1) = c.ScalarBaseMult(u1.Bytes());
     var (x2, y2) = c.ScalarMult(pub.X, pub.Y, u2.Bytes());
     var (x, y) = c.Add(x1, y1, x2, y2);
+
     if (x.Sign() == 0 && y.Sign() == 0) {
         return false;
     }

@@ -35,8 +35,11 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
+        var nestᴷ = new stackAppend<ж<Named>>();
+        var pathᴷ = new stackAppend<ж<Named>>();
 
         typ = Unalias(typ);
+
         if ((~check.conf)._Trace) {
             {
                 var (t, _) = typ._<ж<Named>>(ᐧ); if (t != nil && (~t).obj != nil) {
@@ -50,11 +53,12 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                 Ꮡcheck.Value.indent--;
             }, ref ᒐ);
         }
+
         switch (typ.type()) {
         case null: {
+            // We should never see a nil type but be conservative and panic
+            // only in debug mode.
             if (debug) {
-                // We should never see a nil type but be conservative and panic
-                // only in debug mode.
                 throw panic("validType0(nil)");
             }
             break;
@@ -87,34 +91,28 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             break;
         }
         case ж<Named> t: {
-            if (!isValid(t.Underlying())) {
-                // TODO(gri) The optimization below is incorrect (see go.dev/issue/65711):
-                //           in that issue `type A[P any] [1]P` is a valid type on its own
-                //           and the (uninstantiated) A is recorded in check.valids. As a
-                //           consequence, when checking the remaining declarations, which
-                //           are not valid, the validity check ends prematurely because A
-                //           is considered valid, even though its validity depends on the
-                //           type argument provided to it.
-                //
-                //           A correct optimization is important for pathological cases.
-                //           Keep code around for reference until we found an optimization.
-                //
-                // // Exit early if we already know t is valid.
-                // // This is purely an optimization but it prevents excessive computation
-                // // times in pathological cases such as testdata/fixedbugs/issue6977.go.
-                // // (Note: The valids map could also be allocated locally, once for each
-                // // validType call.)
-                // if check.valids.lookup(t) != nil {
-                // 	break
-                // }
-                // Don't report a 2nd error if we already know the type is invalid
-                // (e.g., if a cycle was detected earlier, via under).
-                // Note: ensure that t.orig is fully resolved by calling Underlying().
-                return false;
-            }
+            // TODO(gri) The optimization below is incorrect (see go.dev/issue/65711):
+            //           in that issue `type A[P any] [1]P` is a valid type on its own
+            //           and the (uninstantiated) A is recorded in check.valids. As a
+            //           consequence, when checking the remaining declarations, which
+            //           are not valid, the validity check ends prematurely because A
+            //           is considered valid, even though its validity depends on the
+            //           type argument provided to it.
+            //
+            //           A correct optimization is important for pathological cases.
+            //           Keep code around for reference until we found an optimization.
+            //
+            // // Exit early if we already know t is valid.
+            // // This is purely an optimization but it prevents excessive computation
+            // // times in pathological cases such as testdata/fixedbugs/issue6977.go.
+            // // (Note: The valids map could also be allocated locally, once for each
+            // // validType call.)
+            // if check.valids.lookup(t) != nil {
+            // 	break
+            // }
+            // If the current type t is also found in nest, (the memory of) t is
+            // embedded in itself, indicating an invalid recursive type.
             foreach (var (_, e) in nest) {
-                // If the current type t is also found in nest, (the memory of) t is
-                // embedded in itself, indicating an invalid recursive type.
                 if (Identical(new NamedжΔType(e), new NamedжΔType(t))) {
                     // We have a cycle. If t != t.Origin() then t is an instance of
                     // the generic type t.Origin(). Because t is in the nest, t must
@@ -139,8 +137,10 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                     // are not yet available to other goroutines).
                     assert((~(~t).obj).pkg == check.pkg);
                     assert((~(~t.Origin()).obj).pkg == check.pkg);
-                    t.Value.underlying = new BasicжΔType(Typ[Invalid]);
-                    t.Origin().Value.underlying = new BasicжΔType(Typ[Invalid]);
+
+                    // let t become invalid when it is unpacked
+                    t.Origin().Value.fromRHS = new BasicжΔType(Typ[Invalid]);
+
                     // Find the starting point of the cycle and report it.
                     // Because each type in nest must also appear in path (see invariant below),
                     // type t must be in path since it was found in nest. But not every type in path
@@ -155,23 +155,26 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
                     throw panic("cycle start not found");
                 }
             }
-            if (!Ꮡcheck.validType0(pos, // No cycle was found. Check the RHS of t.
- // Every type added to nest is also added to path; thus every type that is in nest
- // must also be in path (invariant). But not every type in path is in nest, since
- // nest may be pruned (see below, *TypeParam case).
- (~t.Origin()).fromRHS, append(nest, t), append(path, t))) {
+
+            // No cycle was found. Check the RHS of t.
+            // Every type added to nest is also added to path; thus every type that is in nest
+            // must also be in path (invariant). But not every type in path is in nest, since
+            // nest may be pruned (see below, *TypeParam case).
+            t.Origin().unpack();
+            if (!Ꮡcheck.validType0(pos, t.Origin().rhs(), append(nestᴷ, nest, t), append(pathᴷ, path, t))) {
                 return false;
             }
+
+            // see TODO above
+            // check.valids.add(t) // t is valid
             break;
         }
         case ж<TypeParam> t: {
+            // A type parameter stands for the type (argument) it was instantiated with.
+            // Check the corresponding type argument for validity if we are in an
+            // instantiated type.
             {
                 nint d = len(nest) - 1; if (d >= 0) {
-                    // see TODO above
-                    // check.valids.add(t) // t is valid
-                    // A type parameter stands for the type (argument) it was instantiated with.
-                    // Check the corresponding type argument for validity if we are in an
-                    // instantiated type.
                     var inst = nest[d]; // the type instance
                     // Find the corresponding type argument for the type parameter
                     // and proceed with checking that type argument.
@@ -198,6 +201,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             }
             break;
         }}
+
         return true;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }

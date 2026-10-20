@@ -325,6 +325,9 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
 // The returned os.File's file descriptor is different from the connection's.
 // Attempting to change properties of the original using this duplicate
 // may or may not have the desired effect.
+//
+// On Windows, the returned os.File's file descriptor is not usable
+// on other processes.
 internal static (ж<os.File> f, error err) File(this ref conn c) {
     ж<os.File> f = default!;
     error err = default!;
@@ -393,9 +396,8 @@ partial interface PacketConn :
     error SetWriteDeadline(time.Time t);
 }
 
-
 partial struct listenerBacklogCacheᴛ1 /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
+    /*embed*/ public sync_package.Once Once;
     internal nint val;
 }
 internal static ж<listenerBacklogCacheᴛ1> ᏑlistenerBacklogCache = new StandardBox<listenerBacklogCacheᴛ1>(new listenerBacklogCacheᴛ1(nil));
@@ -445,12 +447,14 @@ partial interface ΔError :
 }
 
 // Various errors contained in OpError.
+// For connection setup operations.
 internal static error errNoSuitableAddress = errors.New("no suitable address found"u8);
 
+// For connection setup and write operations.
 internal static error errMissingAddress = errors.New("missing address"u8);
 
+// For both read and write operations.
 internal static canceledError errCanceled = new canceledError(nil);
-
 public static error ErrWriteToConnected = errors.New("use of WriteTo with pre-connected connection"u8);
 
 // canceledError lets us return the same error string we have always
@@ -482,7 +486,6 @@ internal static error mapErr(error err) {
     { /* default: */
         return err;
     }
-
 }
 
 // OpError is the error type usually returned by functions in the net
@@ -540,7 +543,12 @@ public static @string Error(this ж<OpError> Ꮡe) {
     return s;
 }
 
+// aLongTimeAgo is a non-zero time, far in the past, used for
+// immediate cancellation of dials.
 internal static time.Time aLongTimeAgo = time.Unix(1, 0);
+
+// noDeadline and noCancel are just zero values for
+// readability with functions taking too many parameters.
 internal static time.Time noDeadline = new time.Time(nil);
 internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!);
 
@@ -569,6 +577,7 @@ public static bool Temporary(this ref OpError e) {
     if (e.Op == "accept"u8 && isConnError(e.Err)) {
         return true;
     }
+
     {
         var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
             var (tΔ1, okΔ2) = (~ne).Err._<temporary>(ᐧ);
@@ -643,7 +652,7 @@ public static bool Temporary(this UnknownNetworkError e) {
 partial struct InvalidAddrError /*@string*/;
 
 public static @string Error(this InvalidAddrError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 public static bool Timeout(this InvalidAddrError e) {
@@ -713,7 +722,6 @@ public static bool Temporary(this ref DNSConfigError e) {
 
 // Various errors contained in DNSError.
 internal static ж<notFoundError> errNoSuchHost = Ꮡ(new notFoundError("no such host"u8));
-
 internal static ж<notFoundError> errUnknownPort = Ꮡ(new notFoundError("unknown port"u8));
 
 // notFoundError is a special error understood by the newDNSError function,
@@ -764,17 +772,20 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
     ref var isTimeout = ref heap(new bool(), out var ᏑisTimeout);
     ref var isTemporary = ref heap(new bool(), out var ᏑisTemporary);
     error unwrapErr = default!;
+
     {
         var (errΔ1, ok) = err._<ΔError>(ᐧ); if (ok) {
             isTimeout = errΔ1.Timeout();
             isTemporary = errΔ1.Temporary();
         }
     }
+
     // At this time, the only errors we wrap are context errors, to allow
     // users to check for canceled/timed out requests.
     if (errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled)) {
         unwrapErr = err;
     }
+
     ref var isNotFound = ref heap<bool>(out var ᏑisNotFound);
     (_, isNotFound) = err._<ж<notFoundError>>(ᐧ);
     return Ꮡ(new DNSError(
@@ -847,8 +858,8 @@ internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
 // without leading to a recursive call to ReadFrom.
 partial struct tcpConnWithoutReadFrom {
-    internal partial ref noReadFrom noReadFrom { get; }
-    public partial ref ж<TCPConn> TCPConn { get; }
+    /*embed*/ internal noReadFrom noReadFrom;
+    /*embed*/ public ж<TCPConn> TCPConn;
 }
 
 // Fallback implementation of io.ReaderFrom's ReadFrom, when sendfile isn't
@@ -873,8 +884,8 @@ internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) 
 // than WriteTo. This is used to permit WriteTo to call io.Copy
 // without leading to a recursive call to WriteTo.
 partial struct tcpConnWithoutWriteTo {
-    internal partial ref noWriteTo noWriteTo { get; }
-    public partial ref ж<TCPConn> TCPConn { get; }
+    /*embed*/ internal noWriteTo noWriteTo;
+    /*embed*/ public ж<TCPConn> TCPConn;
 }
 
 // Fallback implementation of io.WriterTo's WriteTo, when zero-copy isn't applicable.
@@ -897,13 +908,13 @@ internal static error acquireThread(context.Context ctx) {
     ᏑthreadOnce.Do(() => {
         threadLimit = new channel<EmptyStruct>(concurrentThreadsLimit());
     });
-    var selᴛ19 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
-    var selᴛ20 = ctx.Done();
-    switch (select(selᴛ19, ᐸꟷ(selᴛ20, ꓸꓸꓸ))) {
+    var selᴛ17 = threadLimit.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
+    var selᴛ18 = ctx.Done();
+    switch (select(selᴛ17, ᐸꟷ(selᴛ18, ꓸꓸꓸ))) {
     case 0: {
         return default!;
     }
-    case 1 when selᴛ20.ꟷᐳ(out _): {
+    case 1 when selᴛ18.ꟷᐳ(out _): {
         return ctx.Err();
     }}
     return default!;
@@ -921,6 +932,11 @@ partial interface buffersWriter {
     (int64, error) writeBuffers(ж<Buffers> _);
 }
 
+// Buffers contains zero or more runs of bytes to write.
+//
+// On certain machines, for certain types of connections, this is
+// optimized into an OS-specific batch write operation (such as
+// "writev").
 partial struct Buffers /*[]slice<byte>*/;
 
 internal static Δio.WriterTo _ᴛ2ʗ = new BuffersжWriterTo(((ж<Buffers>)nil));
@@ -934,8 +950,8 @@ internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)nil));
 // but does not modify v[i][j] for any i, j.
 public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
     int64 n = default!;
-
     ref var v = ref Ꮡv.DerefOrNull();
+
     {
         var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok) {
             return wv.writeBuffers(Ꮡv);

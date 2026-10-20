@@ -17,6 +17,7 @@ internal static UntypedInt rngMax => /* 1 << 63 */ 9223372036854775808;
 internal static UntypedInt rngMask => /* rngMax - 1 */ 9223372036854775807;
 internal static UntypedInt int32max => /* (1 << 31) - 1 */ 2147483647;
 
+// rngCooked used for seeding. See gen_cooked.go for details.
 internal static array<int64> rngCooked = new int64[]{
     -4181792142133755926L, -4576982950128230565L, 1395769623340756751L, 5333664234075297259L,
     -6347679516498800754L, 9033628115061424579L, 7143218595135194537L, 4812947590706362721L,
@@ -183,6 +184,7 @@ internal static int32 seedrand(int32 x) {
     const int32 A = 48271;
     const int32 Q = 44488;
     const int32 R = 3399;
+
     var hi = x / Q;
     var lo = x % Q;
     x = A * lo - R * hi;
@@ -196,6 +198,7 @@ internal static int32 seedrand(int32 x) {
 internal static void Seed(this ref rngSource rng, int64 seed) {
     rng.tap = 0;
     rng.feed = rngLen - rngTap;
+
     seed = seed % (int64)int32max;
     if (seed < 0) {
         seed += int32max;
@@ -203,14 +206,15 @@ internal static void Seed(this ref rngSource rng, int64 seed) {
     if (seed == 0) {
         seed = 89482311;
     }
+
     var x = (int32)seed;
     for (nint i = -20; i < rngLen; i++) {
         x = seedrand(x);
         if (i >= 0) {
             int64 u = default!;
-            u = ((int64)x << (int)(40));
+            u = (int64)x << 40;
             x = seedrand(x);
-            u ^= (int64)(((int64)x << (int)(20)));
+            u ^= (int64)(((int64)x << 20));
             x = seedrand(x);
             u ^= (int64)((int64)x);
             u ^= (int64)(rngCooked[i]);
@@ -221,7 +225,7 @@ internal static void Seed(this ref rngSource rng, int64 seed) {
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
 internal static int64 Int63(this ref rngSource rng) {
-    return (int64)((uint64)(rng.Uint64() & (uint64)rngMask));
+    return (int64)(rng.Uint64() & (uint64)rngMask);
 }
 
 // Uint64 returns a non-negative pseudo-random 64-bit integer as a uint64.
@@ -230,10 +234,12 @@ internal static uint64 Uint64(this ref rngSource rng) {
     if (rng.tap < 0) {
         rng.tap += rngLen;
     }
+
     rng.feed--;
     if (rng.feed < 0) {
         rng.feed += rngLen;
     }
+
     var x = rng.vec[rng.feed] + rng.vec[rng.tap];
     rng.vec[rng.feed] = x;
     return (uint64)x;

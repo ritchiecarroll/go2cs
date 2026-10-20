@@ -74,8 +74,9 @@ partial struct ThreadCountersArg {
     public int64 InSyscall;
 }
 
-partial struct ThreadIDArg {
-    public uint64 ThreadID;
+partial struct SchedCtxArg {
+    public uint64 ThreadID; /*`json:"thread,omitempty"`*/
+    public uint64 ProcID; /*`json:"proc,omitempty"`*/
 }
 
 } // end format_package

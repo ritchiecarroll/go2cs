@@ -94,13 +94,15 @@ public static @string IfaceShadowEmbed(this ref Box b, ж<Box> Ꮡother) {
 internal static void Main() {
     var recv = Ꮡ(new Thing(val: 5, inner: new Inner(n: 3)));
     var other = Ꮡ(new Thing(val: 4, inner: new Inner(n: 2)));
+
     fmt.Println(recv.PtrShadowCall(other));
     fmt.Println(recv.PtrShadowChain(other));
     fmt.Println((~other).inner.n);
     fmt.Println(recv.ValShadowField());
     fmt.Println(recv.SliceShadowIndex());
-    var box = Ꮡ(new Box(HasName: new Tag(tag: "R"u8), id: 1));
-    var obox = Ꮡ(new Box(HasName: new Tag(tag: "S"u8), id: 2));
+
+    var box = Ꮡ(new Box(HasName: new Tag(tag: "R"), id: 1));
+    var obox = Ꮡ(new Box(HasName: new Tag(tag: "S"), id: 2));
     fmt.Println(box.IfaceShadowEmbed(obox));
 }
 

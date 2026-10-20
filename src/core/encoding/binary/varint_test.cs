@@ -35,11 +35,13 @@ internal static void testVarint(ж<testing.T> Ꮡt, int64 x) {
     if (n != m) {
         Ꮡt.Errorf("Varint(%d): got n = %d; want %d"u8, x, m, n);
     }
+
     var buf2 = slice<byte>("prefix"u8);
     buf2 = AppendVarint(buf2, x);
     if (((@string)buf2) != "prefix"u8 + ((sstring)(buf.slice(0, n)))) {
         Ꮡt.Errorf("AppendVarint(%d): got %q, want %q"u8, x, buf2, "prefix" + ((sstring)(buf.slice(0, n))));
     }
+
     (y, var err) = ReadVarint(new binary_test_package.bytes_ReaderжByteReader(bytes.NewReader(buf)));
     if (err != default!) {
         Ꮡt.Errorf("ReadVarint(%d): %s"u8, x, err);
@@ -59,11 +61,13 @@ internal static void testUvarint(ж<testing.T> Ꮡt, uint64 x) {
     if (n != m) {
         Ꮡt.Errorf("Uvarint(%d): got n = %d; want %d"u8, x, m, n);
     }
+
     var buf2 = slice<byte>("prefix"u8);
     buf2 = AppendUvarint(buf2, x);
     if (((@string)buf2) != "prefix"u8 + ((sstring)(buf.slice(0, n)))) {
         Ꮡt.Errorf("AppendUvarint(%d): got %q, want %q"u8, x, buf2, "prefix" + ((sstring)(buf.slice(0, n))));
     }
+
     (y, var err) = ReadUvarint(new binary_test_package.bytes_ReaderжByteReader(bytes.NewReader(buf)));
     if (err != default!) {
         Ꮡt.Errorf("ReadUvarint(%d): %s"u8, x, err);
@@ -122,6 +126,7 @@ public static void TestBufferTooSmall(ж<testing.T> Ꮡt) {
         if (x != 0 || n != 0) {
             Ꮡt.Errorf("Uvarint(%v): got x = %d, n = %d"u8, bufΔ1, x, n);
         }
+
         (x, var err) = ReadUvarint(new binary_test_package.bytes_ReaderжByteReader(bytes.NewReader(bufΔ1)));
         var wantErr = io.EOF;
         if (i > 0) {
@@ -176,6 +181,7 @@ public static void TestBufferTooBigWithOverflow(ж<testing.T> Ꮡt) {
             wantValue: 0
         )
     }.slice();
+
     foreach (var (_, tt) in tests) {
         ref var ttΔ1 = ref heap<TestBufferTooBigWithOverflow_tests>(out var ᏑttΔ1);
         ttΔ1 = tt;
@@ -202,6 +208,7 @@ internal static void testOverflow(ж<testing.T> Ꮡt, slice<byte> buf, uint64 x0
     if (x != 0 || n != n0) {
         Ꮡt.Errorf("Uvarint(% X): got x = %d, n = %d; want 0, %d"u8, buf, x, n, n0);
     }
+
     var r = bytes.NewReader(buf);
     nint len = r.Len();
     (x, var err) = ReadUvarint(new binary_test_package.bytes_ReaderжByteReader(r));

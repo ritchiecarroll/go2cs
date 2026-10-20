@@ -100,8 +100,8 @@ internal static (nint n, error err) Read(this ref stringReader r, slice<byte> b)
 // than the number of arguments, err will report why.
 public static (nint n, error err) Sscan(@string strʗp, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
-
     ref var str = ref heap(strʗp, out var Ꮡstr);
+
     return Fscan(new stringReaderжReader(Ꮡstr.Reinterpret<@string, stringReader>()), a.ꓸꓸꓸ);
 }
 
@@ -109,8 +109,8 @@ public static (nint n, error err) Sscan(@string strʗp, params ꓸꓸꓸany aʗp
 // after the final item there must be a newline or EOF.
 public static (nint n, error err) Sscanln(@string strʗp, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
-
     ref var str = ref heap(strʗp, out var Ꮡstr);
+
     return Fscanln(new stringReaderжReader(Ꮡstr.Reinterpret<@string, stringReader>()), a.ꓸꓸꓸ);
 }
 
@@ -120,8 +120,8 @@ public static (nint n, error err) Sscanln(@string strʗp, params ꓸꓸꓸany a�
 // Newlines in the input must match newlines in the format.
 public static (nint n, error err) Sscanf(@string strʗp, sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
-
     ref var str = ref heap(strʗp, out var Ꮡstr);
+
     return Fscanf(new stringReaderжReader(Ꮡstr.Reinterpret<@string, stringReader>()), format, a.ꓸꓸꓸ);
 }
 
@@ -182,7 +182,7 @@ partial struct ss {
     internal buffer buf;         // token accumulator
     internal nint count;           // runes consumed so far.
     internal bool atEOF;           // already read EOF
-    internal partial ref ssave ssave { get; }
+    /*embed*/ internal ssave ssave;
 }
 
 // ssave holds the parts of ss that need to be
@@ -215,6 +215,7 @@ internal static (rune r, nint size, error err) ReadRune(this ref ss s) {
         err = Δio.EOF;
         return (r, size, err);
     }
+
     (r, size, err) = s.rs.ReadRune();
     if (err == default!){
         s.count++;
@@ -326,7 +327,7 @@ internal static slice<array<uint16>> space = GoReflect.WithElemDims(new array<ui
 }.slice(), 2);
 
 internal static bool isSpace(rune r) {
-    if (r >= (rune)(1 << (int)(16))) {
+    if (r >= (rune)(1 << 16)) {
         return false;
     }
     var rx = (uint16)r;
@@ -395,8 +396,7 @@ internal static (rune rr, nint size, error err) ReadRune(this ref readRune r) {
     if (err != default!) {
         return (rr, size, err);
     }
-    if (r.buf[0] < utf8.RuneSelf) {
-        // fast check for common ASCII case
+    if (r.buf[0] < utf8.RuneSelf) { // fast check for common ASCII case
         rr = (rune)r.buf[0];
         size = 1; // Known to be 1.
         // Flip the bits of the rune so it's available to UnreadRune.
@@ -415,8 +415,7 @@ internal static (rune rr, nint size, error err) ReadRune(this ref readRune r) {
         }
     }
     (rr, size) = utf8.DecodeRune(r.buf.slice(0, n));
-    if (size < n) {
-        // an error, save the bytes for the next read
+    if (size < n) { // an error, save the bytes for the next read
         copy(r.pendBuf.slice(r.pending), r.buf.slice(size, n));
         r.pending += n - size;
     }
@@ -633,23 +632,16 @@ internal static bool scanBool(this ref ss s, rune verb) {
         }
         return false;
     }}
-
     return false;
 }
 
 // Numerical elements
 internal static readonly @string binaryDigits = "01"u8;
-
 internal static readonly @string octalDigits = "01234567"u8;
-
 internal static readonly @string decimalDigits = "0123456789"u8;
-
 internal static readonly @string hexadecimalDigits = "0123456789aAbBcCdDeEfF"u8;
-
 internal static readonly @string sign = "+-"u8;
-
 internal static readonly @string period = "."u8;
-
 internal static readonly @string exponent = "eEpP"u8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -680,7 +672,6 @@ internal static (nint @base, @string digits) getBase(this ref ss s, rune verb) {
         digits = hexadecimalDigits;
         break;
     }}
-
     return (@base, digits);
 }
 
@@ -697,7 +688,7 @@ internal static @string scanNumber(this ref ss s, sstring digits, bool haveDigit
     }
     while (s.accept(digits)) {
     }
-    return ((@string)(slice<byte>)s.buf);
+    return (@string)(slice<byte>)s.buf;
 }
 
 // scanRune returns the next rune value in the input.
@@ -737,7 +728,6 @@ internal static (nint @base, @string digits, bool zeroFound) scanBasePrefix(this
     default: {
         return (0, octalDigits + "_", true);
     }}
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -814,13 +804,13 @@ internal static @string floatToken(this ref ss s) {
     s.buf = s.buf[..0];
     // NaN?
     if (s.accept("nN"u8) && s.accept("aA"u8) && s.accept("nN"u8)) {
-        return ((@string)(slice<byte>)s.buf);
+        return (@string)(slice<byte>)s.buf;
     }
     // leading sign?
     s.accept(sign);
     // Inf?
     if (s.accept("iI"u8) && s.accept("nN"u8) && s.accept("fF"u8)) {
-        return ((@string)(slice<byte>)s.buf);
+        return (@string)(slice<byte>)s.buf;
     }
     @string digits = decimalDigits + "_";
     @string exp = exponent;
@@ -845,7 +835,7 @@ internal static @string floatToken(this ref ss s) {
         while (s.accept(decimalDigits + "_")) {
         }
     }
-    return ((@string)(slice<byte>)s.buf);
+    return (@string)(slice<byte>)s.buf;
 }
 
 // complexTokens returns the real and imaginary parts of the complex number starting here.
@@ -864,7 +854,7 @@ internal static (@string real, @string imag) complexTokens(this ref ss s) {
         s.error(errComplex);
     }
     // Sign is now in buffer
-    @string imagSign = ((@string)(slice<byte>)s.buf);
+    @string imagSign = (@string)(slice<byte>)s.buf;
     imag = s.floatToken();
     if (!s.accept("i"u8)) {
         s.error(errComplex);
@@ -966,10 +956,9 @@ internal static @string /*str*/ convertString(this ref ss s, rune verb) {
         break;
     }
     default: {
-        str = ((@string)s.token(true, notSpace)); // %s and %v just return the next word
+        str = (@string)s.token(true, notSpace); // %s and %v just return the next word
         break;
     }}
-
     return str;
 }
 
@@ -982,20 +971,20 @@ internal static @string quotedString(this ref ss s) {
     var quote = s.getRune();
     switch (quote) {
     case (rune)'`': {
+        // Back-quoted: Anything goes until EOF or back quote.
         while (ᐧ) {
-            // Back-quoted: Anything goes until EOF or back quote.
             var r = s.mustReadRune();
             if (r == quote) {
                 break;
             }
             s.buf.writeRune(r);
         }
-        return ((@string)(slice<byte>)s.buf);
+        return (@string)(slice<byte>)s.buf;
     }
     case (rune)'"': {
+        // Double-quoted: Include the quotes and let strconv.Unquote do the backslash escapes.
         s.buf.writeByte((rune)'"');
         while (ᐧ) {
-            // Double-quoted: Include the quotes and let strconv.Unquote do the backslash escapes.
             var r = s.mustReadRune();
             s.buf.writeRune(r);
             if (r == (rune)'\\'){
@@ -1008,7 +997,7 @@ internal static @string quotedString(this ref ss s) {
                 break;
             }
         }
-        var (result, err) = strconv.Unquote(((@string)(slice<byte>)s.buf));
+        var (result, err) = strconv.Unquote((@string)(slice<byte>)s.buf);
         if (err != default!) {
             s.error(err);
         }
@@ -1018,7 +1007,6 @@ internal static @string quotedString(this ref ss s) {
         s.errorString(expectedQuotedStringˢ);
         break;
     }}
-
     return ""u8;
 }
 
@@ -1035,7 +1023,6 @@ internal static (nint, bool) hexDigit(rune d) {
     case (rune)'A' or (rune)'B' or (rune)'C' or (rune)'D' or (rune)'E' or (rune)'F': {
         return (10 + digit - (rune)'A', true);
     }}
-
     return (-1, false);
 }
 
@@ -1063,7 +1050,7 @@ internal static (byte b, bool ok) hexByte(this ref ss s) {
         s.errorString(illegalHexDigitˢ);
         return (b, ok);
     }
-    return ((byte)((nint)((value1 << (int)(4)) | value2)), true);
+    return ((byte)(value1 << 4 | value2), true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1083,11 +1070,13 @@ internal static @string hexString(this ref ss s) {
         s.errorString(noHexDataForXStringˢ);
         return ""u8;
     }
-    return ((@string)(slice<byte>)s.buf);
+    return (@string)(slice<byte>)s.buf;
 }
 
 internal static readonly @string floatVerbs = "beEfFgGv"u8;
+
 internal static UntypedInt hugeWid => /* 1 << 30 */ 1073741824;
+
 internal static UntypedInt intBits => /* 32 << (^uint(0) >> 63) */ 64;
 internal static UntypedInt uintptrBits => /* 32 << (^uintptr(0) >> 63) */ 64;
 
@@ -1126,6 +1115,7 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
             return;
         }
     }
+
     switch (arg.type()) {
     case ж<bool> v: {
         v.Value = s.scanBool(verb);
@@ -1183,10 +1173,10 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
         v.Value = (uintptr)s.scanUint(verb, uintptrBits);
         break;
     }
+    // Floats are tricky because you want to scan in the precision of the result, not
+    // scan in high precision and convert, in order to preserve the correct error condition.
     case ж<float32> v: {
-        if (s.okVerb(verb, // Floats are tricky because you want to scan in the precision of the result, not
- // scan in high precision and convert, in order to preserve the correct error condition.
- floatVerbs, float32ˢ)) {
+        if (s.okVerb(verb, floatVerbs, float32ˢ)) {
             s.SkipSpace();
             s.notEOF();
             v.Value = (float32)s.convertFloat(s.floatToken(), 32);
@@ -1206,6 +1196,8 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
         break;
     }
     case ж<slice<byte>> v: {
+        // We scan to string and convert so we get a copy of the data.
+        // If we scanned to bytes, the slice would point at the buffer.
         v.ValueSlot = slice<byte>(s.convertString(verb));
         break;
     }
@@ -1214,8 +1206,6 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
         var val = reflect.ValueOf(v);
         var ptr = val;
         if (ptr.Kind() != reflect.ΔPointer) {
-            // We scan to string and convert so we get a copy of the data.
-            // If we scanned to bytes, the slice would point at the buffer.
             s.errorString("type not a pointer: "u8 + val.Type().String());
             return;
         }
@@ -1235,9 +1225,9 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
                 vΔ1.SetString(s.convertString(verb));
             }
             else if (exprᴛ1 == reflect.ΔSlice) {
+                // For now, can only handle (renamed) []byte.
                 var typ = vΔ1.Type();
                 if (typ.Elem().Kind() != reflect.Uint8) {
-                    // For now, can only handle (renamed) []byte.
                     s.errorString("can't scan type: "u8 + val.Type().String());
                 }
                 @string str = s.convertString(verb);
@@ -1258,7 +1248,6 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
                 s.errorString("can't scan type: "u8 + val.Type().String());
             }
         }
-
         break;
     }}
 }
@@ -1270,13 +1259,11 @@ internal static void errorHandler(ref error errp) {
         {
             var e = recover(); if (e != default!) {
                 {
-                    var (se, ok) = e._<scanError>(ᐧ); if (ok){
-                        // catch local error
+                    var (se, ok) = e._<scanError>(ᐧ); if (ok){ // catch local error
                         errp = se.err;
                     } else 
                     {
-                        var (eof, okΔ1) = e._<error>(ᐧ); if (okΔ1 && AreEqual(eof, Δio.EOF)){
-                            // out of input
+                        var (eof, okΔ1) = e._<error>(ᐧ); if (okΔ1 && AreEqual(eof, Δio.EOF)){ // out of input
                             errp = eof;
                         } else {
                             throw panic(e);
@@ -1300,8 +1287,8 @@ internal static (nint numProcessed, error err) doScan(this ж<ss> Ꮡs, slice<an
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
         foreach (var (_, arg) in a) {
             Ꮡs.scanOne((rune)'v', arg);
@@ -1345,6 +1332,7 @@ internal static nint /*i*/ advance(this ref ss s, sstring format) {
 
     while (i < len(format)) {
         var (fmtc, w) = utf8.DecodeRuneInString(format.slice(i));
+
         // Space processing.
         // In the rest of this comment "space" means spaces other than newline.
         // Newline in the format matches input of zero or more spaces and then newline or end-of-input.
@@ -1394,6 +1382,7 @@ internal static nint /*i*/ advance(this ref ss s, sstring format) {
             }
             continue;
         }
+
         // Verbs.
         if (fmtc == (rune)'%') {
             // % at end of string is an error.
@@ -1407,6 +1396,7 @@ internal static nint /*i*/ advance(this ref ss s, sstring format) {
             }
             i += w; // skip the first %
         }
+
         // Literals.
         var inputc = s.mustReadRune();
         if (fmtc != inputc) {
@@ -1430,8 +1420,8 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
         nint end = len(format) - 1;
         // We process one item per non-trivial format
@@ -1451,14 +1441,17 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
                 break;
             }
             i++; // % is one byte
+
             // do we have 20 (width)?
             bool widPresent = default!;
             (s.maxWid, widPresent, i) = parsenum(format, i, end);
             if (!widPresent) {
                 s.maxWid = hugeWid;
             }
+
             (var c, w) = utf8.DecodeRuneInString(format.slice(i));
             i += w;
+
             if (c != (rune)'c') {
                 s.SkipSpace();
             }
@@ -1472,12 +1465,13 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
                     s.argLimit = f;
                 }
             }
-            if (numProcessed >= len(a)) {
-                // out of operands
+
+            if (numProcessed >= len(a)) { // out of operands
                 s.errorString("too few operands for format '%" + format.slice(i - w) + "'");
                 break;
             }
             var arg = a[numProcessed];
+
             Ꮡs.scanOne(c, arg);
             numProcessed++;
             s.argLimit = s.limit;

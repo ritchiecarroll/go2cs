@@ -100,11 +100,11 @@ internal partial struct TestWriter_vectors /*dyn*/ {
 
 public static void TestWriter(ж<testing.T> Ꮡt) {
     var vectors = new TestWriter_vectors[]{new(
-        @file: "testdata/writer.tar"u8, // The writer test file was produced with this command:
- // tar (GNU tar) 1.26
- //   ln -s small.txt link.txt
- //   tar -b 1 --format=ustar -c -f writer.tar small.txt small2.txt link.txt
-
+        // The writer test file was produced with this command:
+        // tar (GNU tar) 1.26
+        //   ln -s small.txt link.txt
+        //   tar -b 1 --format=ustar -c -f writer.tar small.txt small2.txt link.txt
+        @file: "testdata/writer.tar"u8,
         tests: new TestWriter_testFnc[]{
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
@@ -145,10 +145,10 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             new TestWriter_testClose((error)(default!))
         }.slice()
     ), new(
-        @file: "testdata/writer-big.tar"u8, // The truncated test file was produced using these commands:
- //   dd if=/dev/zero bs=1048576 count=16384 > /tmp/16gig.txt
- //   tar -b 1 -c -f- /tmp/16gig.txt | dd bs=512 count=8 > writer-big.tar
-
+        // The truncated test file was produced using these commands:
+        //   dd if=/dev/zero bs=1048576 count=16384 > /tmp/16gig.txt
+        //   tar -b 1 -c -f- /tmp/16gig.txt | dd bs=512 count=8 > writer-big.tar
+        @file: "testdata/writer-big.tar"u8,
         tests: new TestWriter_testFnc[]{
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
@@ -164,14 +164,14 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             ), default!)
         }.slice()
     ), new(
-        @file: "testdata/writer-big-long.tar"u8, // This truncated file was produced using this library.
- // It was verified to work with GNU tar 1.27.1 and BSD tar 3.1.2.
- //  dd if=/dev/zero bs=1G count=16 >> writer-big-long.tar
- //  gnutar -xvf writer-big-long.tar
- //  bsdtar -xvf writer-big-long.tar
- //
- // This file is in PAX format.
-
+        // This truncated file was produced using this library.
+        // It was verified to work with GNU tar 1.27.1 and BSD tar 3.1.2.
+        //  dd if=/dev/zero bs=1G count=16 >> writer-big-long.tar
+        //  gnutar -xvf writer-big-long.tar
+        //  bsdtar -xvf writer-big-long.tar
+        //
+        // This file is in PAX format.
+        @file: "testdata/writer-big-long.tar"u8,
         tests: new TestWriter_testFnc[]{
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
@@ -186,9 +186,9 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             ), default!)
         }.slice()
     ), new(
-        @file: "testdata/ustar.tar"u8, // This file was produced using GNU tar v1.17.
- //	gnutar -b 4 --format=ustar (longname/)*15 + file.txt
-
+        // This file was produced using GNU tar v1.17.
+        //	gnutar -b 4 --format=ustar (longname/)*15 + file.txt
+        @file: "testdata/ustar.tar"u8,
         tests: new TestWriter_testFnc[]{
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
@@ -205,11 +205,11 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             new TestWriter_testClose((error)(default!))
         }.slice()
     ), new(
-        @file: "testdata/hardlink.tar"u8, // This file was produced using GNU tar v1.26:
- //	echo "Slartibartfast" > file.txt
- //	ln file.txt hard.txt
- //	tar -b 1 --format=ustar -c -f hardlink.tar file.txt hard.txt
-
+        // This file was produced using GNU tar v1.26:
+        //	echo "Slartibartfast" > file.txt
+        //	ln file.txt hard.txt
+        //	tar -b 1 --format=ustar -c -f hardlink.tar file.txt hard.txt
+        @file: "testdata/hardlink.tar"u8,
         tests: new TestWriter_testFnc[]{
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
@@ -261,9 +261,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 Uname: strings.Repeat(longˢ, 10),
                 PAXRecords: new map<@string, @string>{
                     ["path"u8] = "FILE"u8, // Should be ignored
-
                     ["GNU.sparse.map"u8] = "0,0"u8, // Should be ignored
-
                     ["comment"u8] = "Hello, 世界"u8,
                     ["GOLANG.pkg"u8] = "tar"u8
                 }
@@ -271,37 +269,37 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             new TestWriter_testClose((error)(default!))
         }.slice()
     ), new(
-        @file: "testdata/pax-global-records.tar"u8, // Craft a theoretically valid PAX archive with global headers.
- // The GNU and BSD tar tools do not parse these the same way.
- //
- // BSD tar v3.1.2 parses and ignores all global headers;
- // the behavior is verified by researching the source code.
- //
- //	$ bsdtar -tvf pax-global-records.tar
- //	----------  0 0      0           0 Dec 31  1969 file1
- //	----------  0 0      0           0 Dec 31  1969 file2
- //	----------  0 0      0           0 Dec 31  1969 file3
- //	----------  0 0      0           0 May 13  2014 file4
- //
- // GNU tar v1.27.1 applies global headers to subsequent records,
- // but does not do the following properly:
- //	* It does not treat an empty record as deletion.
- //	* It does not use subsequent global headers to update previous ones.
- //
- //	$ gnutar -tvf pax-global-records.tar
- //	---------- 0/0               0 2017-07-13 19:40 global1
- //	---------- 0/0               0 2017-07-13 19:40 file2
- //	gnutar: Substituting `.' for empty member name
- //	---------- 0/0               0 1969-12-31 16:00
- //	gnutar: Substituting `.' for empty member name
- //	---------- 0/0               0 2014-05-13 09:53
- //
- // According to the PAX specification, this should have been the result:
- //	---------- 0/0               0 2017-07-13 19:40 global1
- //	---------- 0/0               0 2017-07-13 19:40 file2
- //	---------- 0/0               0 2017-07-13 19:40 file3
- //	---------- 0/0               0 2014-05-13 09:53 file4
-
+        // Craft a theoretically valid PAX archive with global headers.
+        // The GNU and BSD tar tools do not parse these the same way.
+        //
+        // BSD tar v3.1.2 parses and ignores all global headers;
+        // the behavior is verified by researching the source code.
+        //
+        //	$ bsdtar -tvf pax-global-records.tar
+        //	----------  0 0      0           0 Dec 31  1969 file1
+        //	----------  0 0      0           0 Dec 31  1969 file2
+        //	----------  0 0      0           0 Dec 31  1969 file3
+        //	----------  0 0      0           0 May 13  2014 file4
+        //
+        // GNU tar v1.27.1 applies global headers to subsequent records,
+        // but does not do the following properly:
+        //	* It does not treat an empty record as deletion.
+        //	* It does not use subsequent global headers to update previous ones.
+        //
+        //	$ gnutar -tvf pax-global-records.tar
+        //	---------- 0/0               0 2017-07-13 19:40 global1
+        //	---------- 0/0               0 2017-07-13 19:40 file2
+        //	gnutar: Substituting `.' for empty member name
+        //	---------- 0/0               0 1969-12-31 16:00
+        //	gnutar: Substituting `.' for empty member name
+        //	---------- 0/0               0 2014-05-13 09:53
+        //
+        // According to the PAX specification, this should have been the result:
+        //	---------- 0/0               0 2017-07-13 19:40 global1
+        //	---------- 0/0               0 2017-07-13 19:40 file2
+        //	---------- 0/0               0 2017-07-13 19:40 file3
+        //	---------- 0/0               0 2014-05-13 09:53 file4
+        @file: "testdata/pax-global-records.tar"u8,
         tests: new TestWriter_testFnc[]{
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeXGlobalHeader,
@@ -317,9 +315,8 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             ), default!),
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeXGlobalHeader,
-                PAXRecords: new map<@string, @string>{["path"u8] = ""u8}
-            ), // Should delete "path", but keep "mtime"
- default!),
+                PAXRecords: new map<@string, @string>{["path"u8] = ""u8} // Should delete "path", but keep "mtime"
+            ), default!),
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg, Name: "file3"u8
             ), default!),
@@ -485,8 +482,8 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             new TestWriter_testClose((error)(default!))
         }.slice()
     ), new(
-        @file: "testdata/file-and-dir.tar"u8, // Automatically promote zero value of Typeflag depending on the name.
-
+        // Automatically promote zero value of Typeflag depending on the name.
+        @file: "testdata/file-and-dir.tar"u8,
         tests: new TestWriter_testFnc[]{
             new TestWriter_testHeader(new Header(Name: "small.txt"u8, Size: 5), default!),
             new TestWriter_testWrite("Kilts"u8, 5, default!),
@@ -495,6 +492,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         }.slice()
     )
     }.slice();
+
     bool equalError(error x, error y) {
         var (_, ok1) = x._<headerError>(ᐧ);
         var (_, ok2) = y._<headerError>(ᐧ);
@@ -513,6 +511,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             const int64 maxSize = /* 10 << 10 */ 10240; // 10KiB
             var buf = @new<bytes.Buffer>();
             var tw = NewWriter(iotest.TruncateWriter(new tar_test_package.bytes_BufferжWriter(buf), maxSize));
+
             foreach (var (i, tf) in vʗ1.tests) {
                 switch (tf.type()) {
                 case TestWriter_testHeader tfΔ1ᴛ1: {
@@ -559,6 +558,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                     break;
                 }}
             }
+
             if (vʗ1.@file != ""u8) {
                 var (want, err) = os.ReadFile(vʗ1.@file);
                 if (err != default!) {
@@ -640,6 +640,7 @@ public static void TestPaxSymlink(ж<testing.T> Ꮡt) {
     // Force a PAX long linkname to be written
     @string longLinkname = strings.Repeat("1234567890/1234567890"u8, 10);
     hdr.Value.Linkname = longLinkname;
+
     hdr.Value.Size = 0;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
@@ -680,18 +681,23 @@ public static void TestPaxNonAscii(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var hdr, err) = FileInfoHeader(fileinfo, ""u8);
     if (err != default!) {
         Ꮡt.Fatalf("os.Stat:1 %v"u8, err);
     }
+
     // some sample data
     @string chineseFilename = "文件名"u8;
     @string chineseGroupname = "組"u8;
     @string chineseUsername = "用戶名"u8;
+
     hdr.Value.Name = chineseFilename;
     hdr.Value.Gname = chineseGroupname;
     hdr.Value.Uname = chineseUsername;
+
     @string contents = strings.Repeat(" "u8, (nint)(~hdr).Size);
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
@@ -737,6 +743,7 @@ public static void TestPaxXattrs(ж<testing.T> Ꮡt) {
     var xattrs = new map<@string, @string>{
         ["user.key"u8] = "value"u8
     };
+
     // Create an archive with an xattr
     var (fileinfo, err) = os.Stat(testdataSmallTxtˢ);
     if (err != default!) {
@@ -790,12 +797,14 @@ public static void TestPaxHeadersSorted(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("os.Stat: %v"u8, err);
     }
     @string contents = strings.Repeat(" "u8, (nint)(~hdr).Size);
+
     hdr.Value.Xattrs = new map<@string, @string>{
         ["foo"u8] = "foo"u8,
         ["bar"u8] = "bar"u8,
         ["baz"u8] = "baz"u8,
         ["qux"u8] = "qux"u8
     };
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
@@ -817,6 +826,7 @@ public static void TestPaxHeadersSorted(ж<testing.T> Ꮡt) {
     if (!bytes.Contains(buf.Bytes(), slice<byte>("PaxHeaders.0"u8))) {
         Ꮡt.Fatal(expectedAtLeastOnePaxˢ);
     }
+
     // xattr bar should always appear before others
     var indices = new nint[]{
         bytes.Index(buf.Bytes(), slice<byte>("bar=bar"u8)),
@@ -847,6 +857,7 @@ public static void TestUSTARLongName(ж<testing.T> Ꮡt) {
     // that fails and replaced ever char through numbers to anonymize the sample.
     @string longName = "/0000_0000000/00000-000000000/0000_0000000/00000-0000000000000/0000_0000000/00000-0000000-00000000/0000_0000000/00000000/0000_0000000/000/0000_0000000/00000000v00/0000_0000000/000000/0000_0000000/0000000/0000_0000000/00000y-00/0000/0000/00000000/0x000000/"u8;
     hdr.Value.Name = longName;
+
     hdr.Value.Size = 0;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
@@ -874,8 +885,10 @@ public static void TestUSTARLongName(ж<testing.T> Ꮡt) {
 public static void TestValidTypeflagWithPAXHeader(ж<testing.T> Ꮡt) {
     ref var buffer = ref heap(new bytes.Buffer(), out var Ꮡbuffer);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuffer));
+
     ref var fileName = ref heap<@string>(out var ᏑfileName);
     fileName = strings.Repeat("ab"u8, 100);
+
     var hdr = Ꮡ(new Header(
         Name: fileName,
         Size: 4,
@@ -892,7 +905,9 @@ public static void TestValidTypeflagWithPAXHeader(ж<testing.T> Ꮡt) {
         }
     }
     tw.Close();
+
     var tr = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡbuffer));
+
     while (ᐧ) {
         var (header, err) = tr.Next();
         if (AreEqual(err, io.EOF)) {
@@ -907,6 +922,7 @@ public static void TestValidTypeflagWithPAXHeader(ж<testing.T> Ꮡt) {
     }
 }
 
+// failOnceWriter fails exactly once and then always reports success.
 internal partial struct failOnceWriter /*bool*/;
 
 internal static (nint, error) Write(this ref failOnceWriter w, slice<byte> b) {
@@ -941,6 +957,7 @@ public static void TestWriterErrors(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     Ꮡt.Run(negativeSizeˢ, (ж<testing.T> tΔ2) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
         var hdr = Ꮡ(new Header(Name: "small.txt"u8, Size: -1));
@@ -950,6 +967,7 @@ public static void TestWriterErrors(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     Ꮡt.Run(beforeHeaderˢ, (ж<testing.T> tΔ3) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
         {
@@ -958,6 +976,7 @@ public static void TestWriterErrors(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     Ꮡt.Run(afterCloseˢ, (ж<testing.T> tΔ4) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
         var hdr = Ꮡ(new Header(Name: "small.txt"u8));
@@ -987,6 +1006,7 @@ public static void TestWriterErrors(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     Ꮡt.Run(prematureFlushˢ, (ж<testing.T> tΔ5) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
         var hdr = Ꮡ(new Header(Name: "small.txt"u8, Size: 5));
@@ -1001,6 +1021,7 @@ public static void TestWriterErrors(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     Ꮡt.Run(prematureCloseˢ, (ж<testing.T> tΔ6) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
         var hdr = Ꮡ(new Header(Name: "small.txt"u8, Size: 5));
@@ -1015,6 +1036,7 @@ public static void TestWriterErrors(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     Ꮡt.Run(persistenceˢ, (ж<testing.T> tΔ7) => {
         var tw = NewWriter(new tar_internal_test_package.failOnceWriterжWriter(@new<failOnceWriter>()));
         {
@@ -1054,6 +1076,7 @@ internal partial struct TestSplitUSTARPath_vectors /*dyn*/ {
 
 public static void TestSplitUSTARPath(ж<testing.T> Ꮡt) {
     var sr = strings.Repeat;
+
     var vectors = new TestSplitUSTARPath_vectors[]{
         new(""u8, ""u8, ""u8, false),
         new("abc"u8, ""u8, ""u8, false),
@@ -1070,6 +1093,7 @@ public static void TestSplitUSTARPath(ж<testing.T> Ꮡt) {
         new(sr("a"u8, prefixSize) + "//"u8 + sr("b"u8, nameSize), ""u8, ""u8, false),
         new(sr("a/"u8, nameSize), sr("a/"u8, 77) + "a"u8, sr("a/"u8, 22), true)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         var (prefix, suffix, ok) = splitUSTARPath(v.input);
         if (prefix != v.prefix || suffix != v.suffix || ok != v.ok) {
@@ -1091,18 +1115,19 @@ public static void TestIssue12594(ж<testing.T> Ꮡt) {
         "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000/file.txt"u8,
         "/home/support/.openoffice.org/3/user/uno_packages/cache/registry/com.sun.star.comp.deployment.executable.PackageRegistryBackend"u8
     }.slice();
+
     foreach (var (i, vᴛ1) in names) {
         ref var name = ref heap(new @string(), out var Ꮡname);
         name = vᴛ1;
 
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
+
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡb));
         {
             var errΔ1 = tw.WriteHeader(Ꮡ(new Header(
                 Name: name,
-                Uid: (1 << (int)(25))
+                Uid: (1 << (int)(25)) // Prevent USTAR format
             ))); if (errΔ1 != default!) {
-                // Prevent USTAR format
                 Ꮡt.Errorf("test %d, unexpected WriteHeader error: %v"u8, i, errΔ1);
             }
         }
@@ -1111,6 +1136,7 @@ public static void TestIssue12594(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("test %d, unexpected Close error: %v"u8, i, errΔ2);
             }
         }
+
         // The prefix field should never appear in the GNU format.
         ref var blk = ref heap(new global::go.archive.tar_package.block(), out var Ꮡblk);
         copy(blk[..], b.Bytes());
@@ -1119,6 +1145,7 @@ public static void TestIssue12594(ж<testing.T> Ꮡt) {
         if (Ꮡblk.getFormat() == FormatGNU && len(prefix) > 0 && strings.HasPrefix(name, prefix)) {
             Ꮡt.Errorf("test %d, found prefix in GNU format: %s"u8, i, prefix);
         }
+
         var tr = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡb));
         var (hdr, err) = tr.Next();
         if (err != default! && !AreEqual(err, ErrInsecurePath)) {
@@ -1415,6 +1442,7 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
         }.slice()
     )
     }.slice();
+
     foreach (var (i, v) in vectors) {
         @string wantStr = default!;
         var bb = @new<strings.Builder>();
@@ -1442,6 +1470,7 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("test %d, unknown make operation: %T"u8, i, maker);
             break;
         }}
+
         foreach (var (j, tf) in v.tests) {
             switch (tf.type()) {
             case TestFileWriter_testWrite tfΔ1: {
@@ -1486,6 +1515,7 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
                 break;
             }}
         }
+
         {
             @string got = bb.String(); if (got != wantStr) {
                 Ꮡt.Fatalf("test %d, String() = %q, want %q"u8, i, got, wantStr);
@@ -1498,15 +1528,13 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
 internal static readonly @string subfolderˢ = "subfolder"u8;
 
 public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
         ["emptyfolder"u8] = Ꮡ(new fstest.MapFile(Mode: (fs.FileMode)(493 | os.ModeDir))),
         ["file.go"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("hello"u8))),
         ["subfolder/another.go"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("world"u8)))
+        // Notably missing here is the "subfolder" directory. This makes sure even
+        // if we don't have a subfolder directory listed.
     });
-    // Notably missing here is the "subfolder" directory. This makes sure even
-    // if we don't have a subfolder directory listed.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
@@ -1519,18 +1547,23 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     // Add subfolder into fsys to match what we'll read from the tar.
     fsys[subfolderˢ] = Ꮡ(new fstest.MapFile(Mode: (fs.FileMode)(365 | os.ModeDir)));
+
     // Test that we can get the files back from the archive
     var tr = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡbuf));
+
     var names = new slice<@string>(0, len(fsys));
     foreach (var (name, _) in fsys) {
         names = append(names, name);
     }
     sort.Strings(names);
+
     nint entriesLeft = len(fsys);
     foreach (var (_, name) in names) {
         entriesLeft--;
+
         var (entryInfo, err) = fsys.Stat(name);
         if (err != default!) {
             Ꮡt.Fatalf("getting entry info error: %v"u8, err);
@@ -1542,6 +1575,7 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         @string tmpName = name;
         if (entryInfo.IsDir()) {
             tmpName += "/"u8;
@@ -1550,13 +1584,16 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("test fs has filename %v; archive header has %v"u8,
                 name, (~hdr).Name);
         }
+
         if (entryInfo.Mode() != hdr.FileInfo().Mode()) {
             Ꮡt.Errorf("%s: test fs has mode %v; archive header has %v"u8,
                 name, entryInfo.Mode(), hdr.FileInfo().Mode());
         }
+
         if (entryInfo.IsDir()) {
             continue;
         }
+
         (var data, err) = io.ReadAll(new global::go.archive.tar_package.ReaderжReader(tr));
         if (err != default!) {
             Ꮡt.Fatal(err);

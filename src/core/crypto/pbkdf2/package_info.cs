@@ -36,11 +36,16 @@ using static go.crypto.pbkdf2_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<hash_package.Hash, go.crypto.@internal.fips140_package.Hash>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -50,7 +55,7 @@ using static go.crypto.pbkdf2_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/pbkdf2/pbkdf2.go", "pbkdf2.cs", "ABxQABUCgoKClIKUgqY=")]
+[assembly: go.GoPositionMap("crypto/pbkdf2/pbkdf2.go", "pbkdf2.cs", "ABtQABUCgoKClIKUgqY=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

@@ -142,6 +142,7 @@ internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) 
     }
     e.prev.Value.next = e.next;
     e.next.Value.prev = e.prev;
+
     e.prev = Ꮡat;
     e.next = at.next;
     e.prev.Value.next = Ꮡe;
@@ -181,7 +182,6 @@ public static ж<Element> PushBack(this ж<List> Ꮡl, any v) {
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
 public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
-    ref var l = ref Ꮡl.DerefOrNull();
     ref var mark = ref Ꮡmark.DerefOrNull();
 
     if (mark.list != Ꮡl) {
@@ -195,7 +195,6 @@ public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> �
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
 public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
-    ref var l = ref Ꮡl.DerefOrNull();
     ref var mark = ref Ꮡmark.DerefOrNull();
 
     if (mark.list != Ꮡl) {

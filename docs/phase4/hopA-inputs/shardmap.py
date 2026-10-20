@@ -88,10 +88,14 @@ HERE = Path(__file__).resolve().parent
 DATA = HERE.parent / "DATA-sweep-row-walltimes.md"
 ROSTER = HERE.parent.parent / "ValidatedTestPackages.md"
 POPULATION = HERE / "recon-lists" / "population.txt"
-# The POPULATION OF RECORD at go1.24.13 -- the enumerated N the roster's header measures against.
-# NOT the same file as POPULATION above, which is the recon leg's own 228-row shard input and stays
-# a record of the leg it drove. See the closing check at the foot of this file.
-POPULATION_OF_RECORD = HERE / "recon-lists" / "population-go1.24.13.txt"
+# The POPULATION OF RECORD -- the enumerated N the roster's header measures against -- is the PINNED
+# release's: docs/phase4/data/population-go<GoStdLibVersion>.txt, the file check-roster-format.ps1
+# reads (NOTES-next-hop A9, A13). The release comes from src/version.props, the runbook's one source
+# of record, never a literal; it is resolved below, once die() exists, and refuses by name when the
+# pin or its population is missing. NOT the same file as POPULATION above, which is the recon leg's own
+# 228-row shard input and stays a record of the leg it drove. See the closing check at the foot of
+# this file.
+VERSION_PROPS = HERE.parent.parent.parent / "src" / "version.props"
 SWEEP = HERE.parent.parent.parent / "src" / "run-validated-sweep.ps1"
 
 # The block this map is parameterized by, as a (OS, corpus SHA, machine) key rather than "the first
@@ -106,6 +110,20 @@ HAND_STOPPED = {"net"}
 
 def die(msg):
     raise SystemExit(f"shardmap: REFUSED -- {msg}")
+
+
+# The pin and its population, before anything else reads a file: a run at a release whose population
+# has not been enumerated has nothing to close against, so it refuses here rather than after the map.
+_pin = re.search(r"<GoStdLibVersion>\s*([^<\s]+)\s*</GoStdLibVersion>",
+                 VERSION_PROPS.read_text(encoding="utf-8")) if VERSION_PROPS.exists() else None
+if not _pin:
+    die(f"no <GoStdLibVersion> in {VERSION_PROPS} -- the Go release, and so the population of record, "
+        f"has no source of record")
+GO_PIN = _pin.group(1)
+POPULATION_OF_RECORD = HERE.parent / "data" / f"population-go{GO_PIN}.txt"
+if not POPULATION_OF_RECORD.exists():
+    die(f"no population of record for go{GO_PIN} at {POPULATION_OF_RECORD} -- the pinned release "
+        f"(src/version.props) has not been enumerated")
 
 
 # ---------------------------------------------------------------- argv, before anything reads a file

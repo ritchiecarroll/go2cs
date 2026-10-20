@@ -10,9 +10,6 @@ using static go.bytes_internal_test_package;
 
 partial class bytes_test_package {
 
-// test runtime·memeq's chunked implementation
-// nil tests
-
 partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
@@ -30,10 +27,12 @@ internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
     new(slice<byte>("ab"u8), slice<byte>("x"u8), -1),
     new(slice<byte>("x"u8), slice<byte>("a"u8), 1),
     new(slice<byte>("b"u8), slice<byte>("x"u8), -1),
+    // test runtime·memeq's chunked implementation
     new(slice<byte>("abcdefgh"u8), slice<byte>("abcdefgh"u8), 0),
     new(slice<byte>("abcdefghi"u8), slice<byte>("abcdefghi"u8), 0),
     new(slice<byte>("abcdefghi"u8), slice<byte>("abcdefghj"u8), -1),
     new(slice<byte>("abcdefghj"u8), slice<byte>("abcdefghi"u8), 1),
+    // nil tests
     new(default!, default!, 0),
     new(slice<byte>(""u8), default!, 0),
     new(default!, slice<byte>(""u8), 0),
@@ -75,10 +74,12 @@ public static void TestCompareBytes(ж<testing.T> Ꮡt) {
     for (nint i = 0; i <= 128; i++) {
         lengths = append(lengths, i);
     }
-    lengths = append(lengths, (nint)(256), (nint)(512), (nint)(1024), (nint)(1333), (nint)(4095), (nint)(4096), (nint)(4097));
+    lengths = append(lengths, (nint)256, (nint)512, (nint)1024, (nint)1333, (nint)4095, (nint)4096, (nint)4097);
+
     if (!testing.Short()) {
-        lengths = append(lengths, (nint)(65535), (nint)(65536), (nint)(65537), (nint)(99999));
+        lengths = append(lengths, (nint)65535, (nint)65536, (nint)65537, (nint)99999);
     }
+
     nint n = lengths[len(lengths) - 1];
     var a = new slice<byte>(n + 1);
     var b = new slice<byte>(n + 1);
@@ -241,8 +242,8 @@ internal static void benchmarkCompareBytesBigUnaligned(ж<testing.B> Ꮡb, nint 
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var b1 = new slice<byte>(0, (1 << (int)(20)));
-    while (len(b1) < (1 << (int)(20))) {
+    var b1 = new slice<byte>(0, (1 << 20));
+    while (len(b1) < 1 << 20) {
         b1 = append(b1, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
     }
     var b2 = appendꓸꓸꓸ(slice<byte>("12345678"u8).slice(0, offset), b1);
@@ -269,8 +270,8 @@ internal static void benchmarkCompareBytesBigBothUnaligned(ж<testing.B> Ꮡb, n
 
     b.StopTimer();
     var pattern = slice<byte>("Hello Gophers!"u8);
-    var b1 = new slice<byte>(0, (1 << (int)(20)) + len(pattern));
-    while (len(b1) < (1 << (int)(20))) {
+    var b1 = new slice<byte>(0, (1 << 20) + len(pattern));
+    while (len(b1) < 1 << 20) {
         b1 = appendꓸꓸꓸ(b1, pattern);
     }
     var b2 = new slice<byte>(len(b1));
@@ -297,8 +298,8 @@ public static void BenchmarkCompareBytesBig(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var b1 = new slice<byte>(0, (1 << (int)(20)));
-    while (len(b1) < (1 << (int)(20))) {
+    var b1 = new slice<byte>(0, (1 << 20));
+    while (len(b1) < 1 << 20) {
         b1 = append(b1, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
     }
     var b2 = appendꓸꓸꓸ(new byte[]{}.slice(), b1);
@@ -315,8 +316,8 @@ public static void BenchmarkCompareBytesBigIdentical(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var b1 = new slice<byte>(0, (1 << (int)(20)));
-    while (len(b1) < (1 << (int)(20))) {
+    var b1 = new slice<byte>(0, (1 << 20));
+    while (len(b1) < 1 << 20) {
         b1 = append(b1, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
     }
     var b2 = b1;

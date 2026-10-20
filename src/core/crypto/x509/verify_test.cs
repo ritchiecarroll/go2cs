@@ -51,47 +51,6 @@ internal partial struct verifyTest {
     internal slice<slice<@string>> expectedChains;
 }
 
-// does not chain to a system root
-// does not chain to a system root
-// Skip when using systemVerify, since Windows
-// *will* find the missing intermediate cert.
-// CAPI doesn't build the chain with the duplicated GeoTrust
-// entry so the results don't match.
-// The specific error message may not occur when using system
-// verification.
-// EKULeaf tests use an unconstrained chain leading to a leaf certificate
-// with an E-mail Protection EKU but not a Server Auth one, checking that
-// the EKUs on the leaf are enforced.
-// Check that a name constrained intermediate works even when
-// it lists multiple constraints.
-// Check that SHA-384 intermediates (which are popping up)
-// work.
-// CryptoAPI can find alternative validation paths.
-// Putting a certificate as a root directly should work as a
-// way of saying “exactly this”.
-// does not chain to a system root
-// Putting a certificate as a root directly should not skip
-// other checks however.
-// does not chain to a system root
-// An X.509 v1 certificate should not be accepted as an
-// intermediate.
-// does not chain to a system root
-// does not chain to a system root
-// Test that excluded names are respected.
-// does not chain to a system root
-// Test that unknown critical extensions in a leaf cause a
-// verify error.
-// does not chain to a system root
-// Test that unknown critical extensions in an intermediate
-// cause a verify error.
-// does not chain to a system root
-// does not chain to a system root
-// A certificate with an AKID should still chain to a parent without SKID.
-// See Issue 30079.
-// does not chain to a system root
-// When there are two parents, one with an incorrect subject but matching SKID
-// and one with a correct subject but missing SKID, the latter should be
-// considered as a possible parent.
 internal static slice<verifyTest> verifyTests;
 internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
     new(
@@ -142,7 +101,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{generatePEMCertWithRepeatSAN(1677615892, 200, "fake.dns"u8)}.slice(),
         currentTime: 1677615892,
         dnsName: "www.example.com"u8,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectHostnameError("certificate is valid for 200 names, but none matched"u8)
     ),
     new(
@@ -151,7 +110,7 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{generatePEMCertWithRepeatSAN(1677615892, 150, "4.3.2.1"u8)}.slice(),
         currentTime: 1677615892,
         dnsName: "1.2.3.4"u8,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectHostnameError("certificate is valid for 150 IP SANs, but none matched"u8)
     ),
     new(
@@ -178,6 +137,9 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1677615892,
         dnsName: "www.google.com"u8,
+
+        // Skip when using systemVerify, since Windows
+        // *will* find the missing intermediate cert.
         systemSkip: true,
         errorCallback: expectAuthorityUnknown
     ),
@@ -191,6 +153,8 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         expectedChains: new slice<@string>[]{
             new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
         }.slice(),
+        // CAPI doesn't build the chain with the duplicated GeoTrust
+        // entry so the results don't match.
         systemLax: true
     ),
     new(
@@ -200,9 +164,15 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         roots: new @string[]{gtsRoot}.slice(),
         currentTime: 1677615892,
         dnsName: "www.google.com"u8,
+
+        // The specific error message may not occur when using system
+        // verification.
         systemLax: true,
         errorCallback: expectHashError
     ),
+    // EKULeaf tests use an unconstrained chain leading to a leaf certificate
+    // with an E-mail Protection EKU but not a Server Auth one, checking that
+    // the EKUs on the leaf are enforced.
     new(
         name: "EKULeaf"u8,
         leaf: smimeLeaf,
@@ -232,6 +202,8 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         }.slice()
     ),
     new(
+        // Check that a name constrained intermediate works even when
+        // it lists multiple constraints.
         name: "MultipleConstraints"u8,
         leaf: nameConstraintsLeaf,
         intermediates: new @string[]{nameConstraintsIntermediate1, nameConstraintsIntermediate2}.slice(),
@@ -247,12 +219,16 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         }.slice()
     ),
     new(
+        // Check that SHA-384 intermediates (which are popping up)
+        // work.
         name: "SHA-384"u8,
         leaf: trustAsiaLeaf,
         intermediates: new @string[]{trustAsiaSHA384Intermediate}.slice(),
         roots: new @string[]{digicertRoot}.slice(),
         currentTime: 1558051200,
         dnsName: "tm.cn"u8,
+
+        // CryptoAPI can find alternative validation paths.
         systemLax: true,
         expectedChains: new slice<@string>[]{
             new @string[]{
@@ -262,32 +238,38 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         }.slice()
     ),
     new(
+        // Putting a certificate as a root directly should work as a
+        // way of saying “exactly this”.
         name: "LeafInRoots"u8,
         leaf: selfSigned,
         roots: new @string[]{selfSigned}.slice(),
         currentTime: 1471624472,
         dnsName: "foo.example"u8,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         expectedChains: new slice<@string>[]{
             new @string[]{"Acme Co"u8}.slice()
         }.slice()
     ),
     new(
+        // Putting a certificate as a root directly should not skip
+        // other checks however.
         name: "LeafInRootsInvalid"u8,
         leaf: selfSigned,
         roots: new @string[]{selfSigned}.slice(),
         currentTime: 1471624472,
         dnsName: "notfoo.example"u8,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectHostnameError("certificate is valid for"u8)
     ),
     new(
+        // An X.509 v1 certificate should not be accepted as an
+        // intermediate.
         name: "X509v1Intermediate"u8,
         leaf: x509v1TestLeaf,
         intermediates: new @string[]{x509v1TestIntermediate}.slice(),
         roots: new @string[]{x509v1TestRoot}.slice(),
         currentTime: 1481753183,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectNotAuthorizedError
     ),
     new(
@@ -296,35 +278,40 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         dnsName: "foo.example.com"u8,
         roots: new @string[]{ignoreCNWithSANRoot}.slice(),
         currentTime: 1486684488,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectHostnameError("certificate is not valid for any names"u8)
     ),
     new(
+        // Test that excluded names are respected.
         name: "ExcludedNames"u8,
         leaf: excludedNamesLeaf,
         dnsName: "bender.local"u8,
         intermediates: new @string[]{excludedNamesIntermediate}.slice(),
         roots: new @string[]{excludedNamesRoot}.slice(),
         currentTime: 1486684488,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectNameConstraintsError
     ),
     new(
+        // Test that unknown critical extensions in a leaf cause a
+        // verify error.
         name: "CriticalExtLeaf"u8,
         leaf: criticalExtLeafWithExt,
         intermediates: new @string[]{criticalExtIntermediate}.slice(),
         roots: new @string[]{criticalExtRoot}.slice(),
         currentTime: 1486684488,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectUnhandledCriticalExtension
     ),
     new(
+        // Test that unknown critical extensions in an intermediate
+        // cause a verify error.
         name: "CriticalExtIntermediate"u8,
         leaf: criticalExtLeaf,
         intermediates: new @string[]{criticalExtIntermediateWithExt}.slice(),
         roots: new @string[]{criticalExtRoot}.slice(),
         currentTime: 1486684488,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectUnhandledCriticalExtension
     ),
     new(
@@ -333,21 +320,26 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         dnsName: "foo.example.com"u8,
         roots: new @string[]{invalidCNRoot}.slice(),
         currentTime: 1540000000,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         errorCallback: expectHostnameError("certificate relies on legacy Common Name field"u8)
     ),
     new(
+        // A certificate with an AKID should still chain to a parent without SKID.
+        // See Issue 30079.
         name: "AKIDNoSKID"u8,
         leaf: leafWithAKID,
         roots: new @string[]{rootWithoutSKID}.slice(),
         currentTime: 1550000000,
         dnsName: "example"u8,
-        systemSkip: true,
+        systemSkip: true, // does not chain to a system root
         expectedChains: new slice<@string>[]{
             new @string[]{"Acme LLC"u8, "Acme Co"u8}.slice()
         }.slice()
     ),
     new(
+        // When there are two parents, one with an incorrect subject but matching SKID
+        // and one with a correct subject but missing SKID, the latter should be
+        // considered as a possible parent.
         leaf: leafMatchingAKIDMatchingIssuer,
         roots: new @string[]{rootMatchingSKIDMismatchingSubject, rootMismatchingSKIDMatchingSubject}.slice(),
         currentTime: 1550000000,
@@ -455,6 +447,7 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
         CurrentTime: time.Unix(test.currentTime, 0),
         KeyUsages: test.keyUsages
     );
+
     if (!useSystemRoots) {
         opts.Roots = NewCertPool();
         foreach (var (j, root) in test.roots) {
@@ -464,17 +457,21 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
             }
         }
     }
+
     foreach (var (j, intermediate) in test.intermediates) {
         var ok = opts.Intermediates.AppendCertsFromPEM(slice<byte>(intermediate));
         if (!ok) {
             Ꮡt.Fatalf("failed to parse intermediate #%d"u8, j);
         }
     }
+
     var (leaf, err) = certificateFromPEM(test.leaf);
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse leaf: %v"u8, err);
     }
+
     (var chains, err) = leaf.Verify(opts);
+
     if (test.errorCallback == default! && err != default!) {
         if (runtime.GOOS == "windows"u8 && strings.HasSuffix(testenv.Builder(), "-2008"u8) && err.Error() == "x509: certificate signed by unknown authority"u8) {
             testenv.SkipFlaky(new x509_test_package.testing_TжTB(Ꮡt), 19564);
@@ -490,10 +487,12 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
             test.errorCallback(Ꮡt, err);
         }
     }
+
     bool doesMatch(slice<@string> expectedChain, slice<ж<global::go.crypto.x509_package.Certificate>> chain) {
         if (builtin.len(chain) != builtin.len(expectedChain)) {
             return false;
         }
+
         foreach (var (k, cert) in chain) {
             if (!strings.Contains(nameToKey(cert.of(global::go.crypto.x509_package.Certificate.ᏑSubject)), expectedChain[k])) {
                 return false;
@@ -501,6 +500,7 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
         }
         return true;
     }
+
     // Every expected chain should match one (or more) returned chain. We tolerate multiple
     // matches, as due to root store semantics it is plausible that (at least on the system
     // verifiers) multiple identical (looking) chains may be returned when two roots with the
@@ -513,10 +513,12 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
                 break;
             }
         }
+
         if (!match) {
             Ꮡt.Errorf("No match found for %v"u8, expectedChain);
         }
     }
+
     // Every returned chain should match 1 expected chain (or <2 if testing against the system)
     foreach (var (_, chain) in chains) {
         nint nMatched = 0;
@@ -553,6 +555,7 @@ public static void TestSystemVerify(ж<testing.T> Ꮡt) {
     if (runtime.GOOS != "windows"u8) {
         Ꮡt.Skipf("skipping verify test using system APIs on %q"u8, runtime.GOOS);
     }
+
     foreach (var (_, vᴛ1) in verifyTests) {
         ref var test = ref heap(new verifyTest(), out var Ꮡtest);
         test = vᴛ1;
@@ -605,10 +608,10 @@ internal static @string generatePEMCertWithRepeatSAN(int64 currentTime, nint cou
     if (err != default!) {
         log.Fatal(err);
     }
-    return ((@string)pem.EncodeToMemory(Ꮡ(new pem.Block(
+    return (@string)pem.EncodeToMemory(Ꮡ(new pem.Block(
         Type: "CERTIFICATE"u8,
         Bytes: certBytes
-    ))));
+    )));
 }
 
 internal static readonly @string gtsIntermediate = """
@@ -644,7 +647,7 @@ AJ2xDx8hcFH1mt0G/FX0Kw4zd8NLQsLxdxP8c4CU6x+7Nz/OAipmsHMdMqUybDKw
 juDEI/9bfU1lcKwrmz3O2+BtjjKAvpafkmO8l7tdufThcV4q5O8DIrGKZTqPwJNl
 1IXNDw9bg1kWRxYtnCQ6yICmJhSFm/Y3m6xv+cXDBlHz4n/FsRC6UfTd
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string gtsRoot = """
 -----BEGIN CERTIFICATE-----
@@ -678,7 +681,7 @@ Z6tGn6D/Qqc6f1zLXbBwHSs09dR2CQzreExZBfMzQsNhFRAbd03OIozUhfJFfbdT
 2tIMPNuzjsmhDYAPexZ3FL//2wmUspO8IFgV6dtxQ/PeEMMA3KgqlbbC1j+Qa3bb
 bP6MvPJwNQzcmRk13NfIRmPVNnGuV/u3gm3c
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string googleLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -712,7 +715,7 @@ zWfTn1IcKhA3IC7A1n/5bkkWD1Xi1mdWFQ6DQDMp//667zz7pKOgFMlB93aPDjvI
 c78zEqNswn6xGKXpWF5xVwdFcsx9HKhJ6UAi2bQ/KQ1yb7LPUOR6wXXWrG1cLnNP
 i8eNLnKL9PXQ+5SwJFCzfEhcIZuhzg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // googleLeafWithInvalidHash is the same as googleLeaf, but the signature
 // algorithm in the certificate contains a nonsense OID.
@@ -748,7 +751,7 @@ zWfTn1IcKhA3IC7A1n/5bkkWD1Xi1mdWFQ6DQDMp//667zz7pKOgFMlB93aPDjvI
 c78zEqNswn6xGKXpWF5xVwdFcsx9HKhJ6UAi2bQ/KQ1yb7LPUOR6wXXWrG1cLnNP
 i8eNLnKL9PXQ+5SwJFCzfEhcIZuhzg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string smimeLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -797,7 +800,7 @@ d0cnKTfA6IpjGo8EeHcxnIXT8NPImWaRj0qqonvYady7ci6U4m3lkNSdXNn1afgw
 mYust+gxVtOZs1gk2MUCgJ1V1X+g7r/Cg7viIn6TLkLrpS1kS1hvMqkl9M+7XqPo
 Qd95nJKOkusQpy99X4dF/lfbYAQnnjnqh3DLD2gvYObXFaAYFaiBKTiMTV2X72F+
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string smimeIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -841,7 +844,7 @@ FlKAn0OvYp4niKhAJwaBVN3kowmJuOU5Rid+TUnfyxbJ9cttSgzaF3hP/N4zgMEM
 5tikXUskeckt8LUK96EH0QyssavAMECUEb/xrupyRdYWwjQGvNLq6T5+fViDGyOw
 k+lzD44wofy8paAy9uC9Owae0zMEzhcsyRm7
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string smimeRoot = """
 -----BEGIN CERTIFICATE-----
@@ -878,7 +881,7 @@ QnMFlEPVjjxOAToZpR9GTnfQXeWBIiGH/pR9hNiTrdZoQ0iy2+tzJOeRf1SktoA+
 naM8THLCV8Sg1Mw4J87VBp6iSNnpn86CcDaTmjvfliHjWbcM2pE38P1ZWrOZyGls
 QyYBNWNgVYkDOnXYukrZVP/u3oDYLdE41V4tC5h9Pmzb/CaIxw==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string nameConstraintsLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -921,7 +924,7 @@ OSWK3CLz8qAEBe72XGoBjBzuk9VQxg6k52qjxCyYf7CBSQpTZhsNMf0gzu+JNATc
 b+XaOqJT6uI/RfqAJVe16ZeXZIFZgQlzIwRS9vobq9fqTIpH/QxqgXROGqAlbBVp
 /ByH6FEe6+oH1UCklhg=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string nameConstraintsIntermediate1 = """
 -----BEGIN CERTIFICATE-----
@@ -966,7 +969,7 @@ RtyTqKsuh/rRvKMmgUdEPZbVI23yzUKhi/mTbyml/35x/f6f5p7OYIKcQ/34sts8
 xoW9dfkWBQKAXCstXat3WJVilGXBFub6GoVZdnxTDipyMZhUT/vzXq2bPphjcdR5
 YGbmwyYmChfa
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string nameConstraintsIntermediate2 = """
 -----BEGIN CERTIFICATE-----
@@ -995,7 +998,7 @@ qCPorxi0xoRogj8kqkS2xyzYLElhx9X7jIzfZ8dC4mgOeoCtVvwM9xvmef3n6Vyb
 rc2yJS70DvfkPiEnBJ2x2AHZV3yKTALUqurkV705JledqUT9I5frAwYNXZ8pNzde
 n+DIcSIo7yKy6MX9czbFWQ==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string globalSignRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1019,7 +1022,7 @@ mcIfeg7jLQitChws/zyrVQ4PkX4268NXSb7hLi18YIvDQVETI53O9zJrlAGomecs
 Mx86OyXShkDOOyyGeMlhLxS67ttVb9+E7gUJTb0o2HLO02JQZR7rkpeDMdmztcpH
 WD9f
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string digicertRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1044,7 +1047,7 @@ PnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls
 YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk
 CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string trustAsiaSHA384Intermediate = """
 -----BEGIN CERTIFICATE-----
@@ -1071,7 +1074,7 @@ SlUpboB5vyT7jFePZ2v95CKjcr0EhiQ0gwxpdgoipZdfYTiMFGxCLsk6v8pUv7Tq
 PT/qadOGyC+PfLuZh1PtLp20mF06K+MzheCiv+w1NT5ofhmcObvukc68wvbvRFL6
 rRzZxAYN36q1SX8=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string trustAsiaLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1102,7 +1105,7 @@ CgYIKoZIzj0EAwMDaAAwZQIwHg8JmjRtcq+OgV0vVmdVBPqehi1sQJ9PZ+51CG+Z
 0GOu+2HwS/fyLRViwSc/MZoVAjEA7NgbgpPN4OIsZn2XjMGxemtVxGFS6ZR+1364
 EEeHB9vhZAEjQSePAfjR9aAGhXRa
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string selfSigned = """
 -----BEGIN CERTIFICATE-----
@@ -1123,7 +1126,7 @@ pl01FCBGTcncVqr6RK1r4fTpeCCfRIERD+YRJz8TtPH6ydesfLL8jIV40H8NiDfG
 vRAvOtNiKtPzFeQVdbRPOskC4rcHyPeiDAMAMixeLi63+CFty4da3r5lRezeedCE
 cw3ESZzThBwWqvPOtJdpXdm+r57pDW8qD+/0lY8wfImMNkQAyCUCLg/1Lxt/hrBj
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string issuerSubjectMatchRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1140,7 +1143,7 @@ VsvqWmsOAGrRWm4fBiMH/8vRGnTkJEMLqiqgc3Ulgry/P6n4SIis7TqUOw3TiMhn
 RGEz33Fsxa/tFoy/gvlJu+MqB1M2NyV33pGkdwl/b7KRWMQFieqO+uE7Ge/49pS3
 eyfm5ITdK/WT9TzYhsU4AVZcn20=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string issuerSubjectMatchLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1157,7 +1160,7 @@ hvcNAQELBQADgYEAjYYF2on1HcUWFEG5NIcrXDiZ49laW3pb3gtcCEUJbxydMV8I
 ynqjmdqDCyK+TwI1kU5dXDe/iSJYfTB20i/QoO53nnfA1hnr7KBjNWqAm4AagN5k
 vEA4PCJprUYmoj3q9MKSSRYDlq5kIbl87mSRR4GqtAwJKxIasvOvULOxziQ=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string x509v1TestRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1174,7 +1177,7 @@ YjpGpYkQ6b248xijCK7zI+lOeWN89zfSXn1AvfsC9pSdTMeDklWktbF/Ad0IN8Md
 h2NtN34ard0hEfHc8qW8mkXdsysVmq6cPvFYaHz+dBtkHuHDoy8YQnC0zdN/WyYB
 /1JmacUUofl+HusHuLkDxmadogI=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string x509v1TestIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -1189,7 +1192,7 @@ DRG6FbF9kL9jb/TDHkbVBk+sl/Pxi4/XjuFyIALlARgAkeZcPmL5tNW1ImHkwsHR
 zWE77kJDibzd141u21ZbLsKvEdUJXjla43bdyMmEqf5VGpC3D4sFt3QVH7lGeRur
 x5Wlq1u3YDL/j6s1nU2dQ3ySB/oP7J+vQ9V4QeM+
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string x509v1TestLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1206,7 +1209,7 @@ CwUAA4GBADYzYUvaToO/ucBskPdqXV16AaakIhhSENswYVSl97/sODaxsjishKq9
 5R7siu+JnIFotA7IbBe633p75xEnLN88X626N/XRFG9iScLzpj0o0PWXBUiB+fxL
 /jt8qszOXCv2vYdUTPNuPqufXLWMoirpuXrr1liJDmedCcAHepY/
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string ignoreCNWithSANRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1229,7 +1232,7 @@ nJHMB1q07YHpbwIkcV/lfCE9pig2nPXTLwYZz9cl46Ul5RCpPUi+IKURo3x8y0FU
 aSLjI/Ya0zwUARMmyZ3RRGCyhIarPb20mKSaMf1/Nb23pS3k1QgmZhk5pAnXYsWu
 BJ6bvwEAasFiLGP6Zbdmxb2hIA==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string ignoreCNWithSANLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1253,7 +1256,7 @@ sZKEHSs3RUJvm7qqpA9Yfzm9jg+i9j32zh1xFacghAOmFRFXa9eCVeigZ/KK2mEY
 j2kBQyvnyKsXHLAKUoUOpd6t/1PHrfXnGj+HmzZNloJ/BZ1kiWb4eLvMljoLGkZn
 xZbqP3Krgjj4XNaXjg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string excludedNamesLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1279,7 +1282,7 @@ qKlWE+0S16+pzsWvKn831uylqwIb8ANBPsCX4aM4muFBHavSWAHgRO+P+yXVw8Q+
 VQDnMHUe5PbZd1/+1KKVs1K/CkBCtoHNHp1d/JT+2zUQJphwja9CcgfFdVhSnHL4
 oEEOFtqVMIuQfR2isi08qW/JGOHc4sFoLYB8hvdaxKWSE19A
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string excludedNamesIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -1305,7 +1308,7 @@ A264BwLo6v1Mos1o1JUvFFcp4GANlw0XFiWh7JXYRl8WmS5DoouUC+aNJ3lmyF6z
 LbIjZCSfgZnk/LK1KU1j91FI2bc2ULYZvAC1PAg8/zvIgxn6YM2Q7ZsdEgWw0FpS
 zMBX1/lk4wkFckeUIlkD55Y=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string excludedNamesRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1332,7 +1335,7 @@ yU1yRHUqUYpN0DWFpsPbBqgM6uUAVO2ayBFhPgWUaqkmSbZ/Nq7isGvknaTmcIwT
 6mOAFN0qFb4RGzfGJW7x6z7KCULS7qVDp6fU3tRoScHFEgRubks6jzQ1W5ooSm4o
 +NQCZDd5eFeU8PpNX7rgaYE4GPq+EEmLVCBYmdctr8QVdqJ//8Xu3+1phjDy
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string invalidCNRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1343,7 +1346,7 @@ QXaPXYCc2cIyCdqp0ROUksRz0pOLTc5iY2nraUheRUD1vRRneq7GeXOVNn7uXONg
 oCGMjNwwCgYIKoZIzj0EAwIDRwAwRAIgDSiwgIn8g1lpruYH0QD1GYeoWVunfmrI
 XzZZl0eW/ugCICgOfXeZ2GGy3wIC0352BaC3a8r5AAb2XSGNe+e9wNN6
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string validCNWithoutSAN = """
 -----BEGIN CERTIFICATE-----
@@ -1355,7 +1358,7 @@ p4ULTPdFToFAeqnGHbu62bkms8pQkDAKBggqhkjOPQQDAgNHADBEAiBTbNe3WWFR
 cqUYo0sNUuoV+tCTMDJUS+0PWIW4qBqCOwIgFHdLDn5PCk9kJpfc0O2qZx03hdq0
 h7olHCpY9yMRiz0=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string rootWithoutSKID = """
 -----BEGIN CERTIFICATE-----
@@ -1368,7 +1371,7 @@ BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MBIGA1UdEQQLMAmCB2V4YW1wbGUwCgYI
 KoZIzj0EAwIDSQAwRgIhAMaBYWFCjTfn0MNyQ0QXvYT/iIFompkIqzw6wB7qjLrA
 AiEA3sn65V7G4tsjZEOpN0Jykn9uiTjqniqn/S/qmv8gIec=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string leafWithAKID = """
 -----BEGIN CERTIFICATE-----
@@ -1382,7 +1385,7 @@ ssWvTAveakIwEgYDVR0RBAswCYIHZXhhbXBsZTAKBggqhkjOPQQDAgNHADBEAiBk
 4LpWiWPOIl5PIhX9PDVkmjpre5oyoH/3aYwG8ABYuAIgCeSfbYueOOG2AdXuMqSU
 ZZMqeJS7JldLx91sPUArY5A=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string rootMatchingSKIDMismatchingSubject = """
 -----BEGIN CERTIFICATE-----
@@ -1394,7 +1397,7 @@ MA8GA1UdJQQIMAYGBFUdJQAwDwYDVR0TAQH/BAUwAwEB/zAMBgNVHQ4EBQQDAQID
 MAoGCCqGSM49BAMCA0gAMEUCIQDgtAp7iVHxMnKxZPaLQPC+Tv2r7+DJc88k2SKH
 MPs/wQIgFjjNvBoQEl7vSHTcRGCCcFMdlN4l0Dqc9YwGa9fyrQs=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string rootMismatchingSKIDMatchingSubject = """
 -----BEGIN CERTIFICATE-----
@@ -1406,7 +1409,7 @@ MA8GA1UdJQQIMAYGBFUdJQAwDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNI
 ADBFAiEAukWOiuellx8bugRiwCS5XQ6IOJ1SZcjuZxj76WojwxkCIHqa71qNw8FM
 DtA5yoL9M2pDFF6ovFWnaCe+KlzSwAW/
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string leafMatchingAKIDMatchingIssuer = """
 -----BEGIN CERTIFICATE-----
@@ -1418,8 +1421,7 @@ BgNVHSMEBzAFgAMBAgMwEgYDVR0RBAswCYIHZXhhbXBsZTAKBggqhkjOPQQDAgNJ
 ADBGAiEAnV9XV7a4h0nfJB8pWv+pBUXRlRFA2uZz3mXEpee8NYACIQCWa+wL70GL
 ePBQCV1F9sE2q4ZrnsT9TZoNrSe/bMDjzA==
 -----END CERTIFICATE-----
-"""u8;
-
+"""u8.Raw();
 
 partial struct unknownAuthorityErrorTestsᴛ1 /*dyn*/ {
     internal @string name;
@@ -1461,7 +1463,6 @@ public static void TestUnknownAuthorityError(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct nameConstraintTestsᴛ1 /*dyn*/ {
     internal @string constraint, domain;
     internal bool expectError;
@@ -1487,14 +1488,17 @@ public static void TestNameConstraints(ж<testing.T> Ꮡt) {
 
     foreach (var (i, test) in nameConstraintTests) {
         var (result, err) = matchDomainConstraint(test.domain, test.constraint, false, new map<@string, slice<@string>>{}, new map<@string, slice<@string>>{});
+
         if (err != default! && !test.expectError) {
             Ꮡt.Errorf("unexpected error for test #%d: domain=%s, constraint=%s, err=%s"u8, i, test.domain, test.constraint, err);
             continue;
         }
+
         if (err == default! && test.expectError) {
             Ꮡt.Errorf("unexpected success for test #%d: domain=%s, constraint=%s"u8, i, test.domain, test.constraint);
             continue;
         }
+
         if (result != test.shouldMatch) {
             Ꮡt.Errorf("unexpected result for test #%d: domain=%s, constraint=%s, result=%t"u8, i, test.domain, test.constraint, result);
         }
@@ -1521,7 +1525,7 @@ jP5cBaVl50t4qoCuVIE9cOucnxYXnI7X5HpXWvu8Pfxo4SwVjb1az8Fk5s8ZnxGe
 fPB6Q3L/pKBe0SEe5GywpwtokPLB3lAygcuHbxp/1FlQ1NQZqq+vgXRIla26bNJf
 IuYkJwt6w+LH/9HZgf8=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string selfSignedNoCommonNameWithOrgName = """
 -----BEGIN CERTIFICATE-----
@@ -1542,7 +1546,7 @@ rD8cNkHf74v98KvBhcwBlDifVzmkWzMG6TL1EkRXUyLKiWgoTUFSkCDV927oXXMR
 DKnszq+AVw+K8hbeV2A7GqT7YfeqOAvSbatTDnDtKOPmlCnQui8A149VgZzXv7eU
 29ssJSqjUPyp58dlV6ZuynxPho1QVZUOQgnJToXIQ3/5vIvJRXy52GJCs4/Gh/w=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string selfSignedNoCommonNameNoOrgName = """
 -----BEGIN CERTIFICATE-----
@@ -1563,7 +1567,7 @@ w67CoNRb81dy+4Q1lGpA8ORoLWh5fIq2t2eNGc4qB8vlTIKiESzAwu7u3sRfuWQi
 4R+gnfLd37FWflMHwztFbVTuNtPOljCX0LN7KcuoXYlr05RhQrmoN7fQHsrZMNLs
 8FVjHdKKu+uPstwd04Uy4BR/H2y1yerN9j/L6ZkMl98iiA==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1577,7 +1581,7 @@ BDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDwYDVR0TAQH/BAUwAwEB
 uBx+VAQnjFkBMAoGCCqGSM49BAMCA0gAMEUCIFeSV00fABFceWR52K+CfIgOHotY
 FizzGiLB47hGwjMuAiEA8e0um2Kr8FPQ4wmFKaTRKHMaZizCGl3m+RG5QsE1KWo=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -1592,7 +1596,7 @@ EEA31wH7QC+4HH5UBCeMWQEwCgYIKoZIzj0EAwIDSAAwRQIhAOhhNRb6KV7h3wbE
 cdap8bojzvUcPD78fbsQPCNw1jPxAiBOeAJhlTwpKn9KHpeJphYSzydj9NqcS26Y
 xXbdbm27KQ==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtLeafWithExt = """
 -----BEGIN CERTIFICATE-----
@@ -1607,7 +1611,7 @@ IwQUMBKAEIwaaKi1dttdV3sfjRSyBqMwCgYDUQMEAQH/BAAwCgYIKoZIzj0EAwID
 SAAwRQIgVjy8GBgZFiagexEuDLqtGjIRJQtBcf7lYgf6XFPH1h4CIQCT6nHhGo6E
 I+crEm4P5q72AnA/Iy0m24l7OvLuXObAmg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtIntermediateWithExt = """
 -----BEGIN CERTIFICATE-----
@@ -1622,7 +1626,7 @@ UuQZ6sO3XvBsxgNZ3zAbBgNVHSMEFDASgBBAN9cB+0AvuBx+VAQnjFkBMAoGA1ED
 BAEB/wQAMAoGCCqGSM49BAMCA0kAMEYCIQCQzTPd6XKex+OAPsKT/1DsoMsg8vcG
 c2qZ4Q0apT/kvgIhAKu2TnNQMIUdcO0BYQIl+Uhxc78dc9h4lO+YJB47pHGx
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1637,7 +1641,7 @@ UNhY4JhezH9gQYqvDMWrWDAbBgNVHSMEFDASgBArF29S5Bnqw7de8GzGA1nfMAoG
 CCqGSM49BAMCA0gAMEUCIQClA3d4tdrDu9Eb5ZBpgyC+fU1xTZB0dKQHz6M5fPZA
 2AIgN96lM+CPGicwhN24uQI6flOsO3H0TJ5lNzBYLtnQtlc=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestValidHostname_tests /*dyn*/ {
     internal @string host;
@@ -1683,8 +1687,10 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
     if (err != default!) {
         return (default!, default!, err);
     }
+
     var serialNumberLimit = @new<bigꓸInt>().Lsh(big.NewInt(1), 128);
     var (serialNumber, _) = rand.Int(rand.Reader, serialNumberLimit);
+
     var template = Ꮡ(new Certificate(
         SerialNumber: serialNumber,
         Subject: new pkix.Name(CommonName: cn),
@@ -1699,6 +1705,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
         Ꮡissuer = template; issuer = ref Ꮡissuer.DerefOrNull();
         issuerKey = priv.OrTypedNil();
     }
+
     (var derBytes, err) = CreateCertificate(rand.Reader, template, Ꮡissuer, priv.Public(), issuerKey);
     if (err != default!) {
         return (default!, default!, err);
@@ -1707,6 +1714,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
     if (err != default!) {
         return (default!, default!, err);
     }
+
     return (cert, priv.OrTypedNil(), default!);
 }
 
@@ -1721,14 +1729,17 @@ public static void TestPathologicalChain(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingGenerationOfAˢ);
     }
+
     // Build a chain where all intermediates share the same subject, to hit the
     // path building worst behavior.
     var (roots, intermediates) = (NewCertPool(), NewCertPool());
+
     var (parent, parentKey, err) = generateCert(rootCaˢ, true, nil, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     roots.AddCert(parent);
+
     for (nint i = 1; i < 100; i++) {
         (parent, parentKey, err) = generateCert(intermediateCaˢ, true, parent, parentKey);
         if (err != default!) {
@@ -1736,16 +1747,19 @@ public static void TestPathologicalChain(ж<testing.T> Ꮡt) {
         }
         intermediates.AddCert(parent);
     }
+
     (var leaf, _, err) = generateCert(leafˢ, false, parent, parentKey);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var start = time.Now();
     (_, err) = leaf.Verify(new VerifyOptions(
         Roots: roots,
         Intermediates: intermediates
     ));
     Ꮡt.Logf("verification took %v"u8, time.Since(start));
+
     if (err == default! || !strings.Contains(err.Error(), signatureCheckAttemptsˢ)) {
         Ꮡt.Errorf("expected verification to fail with a signature checks limit error; got %v"u8, err);
     }
@@ -1755,12 +1769,15 @@ public static void TestLongChain(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingGenerationOfAˢ);
     }
+
     var (roots, intermediates) = (NewCertPool(), NewCertPool());
+
     var (parent, parentKey, err) = generateCert(rootCaˢ, true, nil, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     roots.AddCert(parent);
+
     for (nint i = 1; i < 15; i++) {
         @string name = fmt.Sprintf("Intermediate CA #%d"u8, i);
         (parent, parentKey, err) = generateCert(name, true, parent, parentKey);
@@ -1769,10 +1786,12 @@ public static void TestLongChain(ж<testing.T> Ꮡt) {
         }
         intermediates.AddCert(parent);
     }
+
     (var leaf, _, err) = generateCert(leafˢ, false, parent, parentKey);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var start = time.Now();
     {
         var (_, errΔ1) = leaf.Verify(new VerifyOptions(
@@ -1794,24 +1813,30 @@ public static void TestSystemRootsError(ж<testing.T> Ꮡt) {
         if (runtime.GOOS == "windows"u8 || runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) {
             Ꮡt.Skip(windowsAndDarwinDoNotUseˢ);
         }
+
         defer((ж<global::go.crypto.x509_package.CertPool> oldSystemRoots) => {
             systemRoots = oldSystemRoots;
         }, systemRootsPool(), ref ᒐ);
+
         var opts = new VerifyOptions(
             Intermediates: NewCertPool(),
             DNSName: "www.google.com"u8,
             CurrentTime: time.Unix(1677615892, 0)
         );
+
         {
             var ok = opts.Intermediates.AppendCertsFromPEM(slice<byte>(gtsIntermediate)); if (!ok) {
                 Ꮡt.Fatalf("failed to parse intermediate"u8);
             }
         }
+
         var (leaf, err) = certificateFromPEM(googleLeaf);
         if (err != default!) {
             Ꮡt.Fatalf("failed to parse leaf: %v"u8, err);
         }
+
         systemRoots = default!;
+
         (_, err) = leaf.Verify(opts);
         {
             var (_, ok) = err._<SystemRootsError>(ᐧ); if (!ok) {
@@ -1850,11 +1875,12 @@ internal static (nint, error) macosMajorVersion(ж<testing.T> Ꮡt) {
         }
         return (0, fmt.Errorf("%v: %v"u8, cmd.OrTypedNil(), err));
     }
-    var (before, _, ok) = strings.Cut(((@string)@out), "."u8);
+    var (before, _, ok) = strings.Cut((@string)@out, "."u8);
     (var major, err) = strconv.Atoi(before);
     if (!ok || err != default!) {
         return (0, fmt.Errorf("%v: unexpected output: %q"u8, cmd.OrTypedNil(), @out));
     }
+
     return (major, default!);
 }
 
@@ -1873,6 +1899,7 @@ public static void TestIssue51759(ж<testing.T> Ꮡt) {
     if (runtime.GOOS != "darwin"u8) {
         Ꮡt.Skip(onlyAffectsDarwinˢ);
     }
+
     testenv.MustHaveExecPath(new x509_test_package.testing_TжTB(Ꮡt), swVersˢ);
     {
         var (vers, errΔ1) = macosMajorVersion(Ꮡt); if (errΔ1 != default!){
@@ -1888,6 +1915,7 @@ public static void TestIssue51759(ж<testing.T> Ꮡt) {
             Ꮡt.Skip(behaviorOnlyEnforcedInˢ);
         }
     }
+
     // badCertData contains a cert that we parse as valid
     // but that macOS SecCertificateCreateWithData rejects.
     @string badCertData = badCertDataᶜ;
@@ -1896,6 +1924,7 @@ public static void TestIssue51759(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var badCertʗ1 = badCert;
     Ꮡt.Run(leafˢ2, (ж<testing.T> tΔ1) => {
         var opts = new VerifyOptions(nil);
@@ -1905,10 +1934,12 @@ public static void TestIssue51759(ж<testing.T> Ꮡt) {
             tΔ1.Fatalf("unexpected error: want %q, got %q"u8, expectedErr, Ꮡerr.ValueSlot);
         }
     });
+
     (var goodCert, err) = certificateFromPEM(googleLeaf);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var badCertʗ2 = badCert;
     var goodCertʗ1 = goodCert;
     Ꮡt.Run(intermediateˢ, (ж<testing.T> tΔ2) => {
@@ -1948,6 +1979,7 @@ internal static ж<global::go.crypto.x509_package.Certificate> genCertEdge(ж<te
     ref var issuer = ref Ꮡissuer.DerefOrNull();
 
     Ꮡt.Helper();
+
     var (serial, err) = rand.Int(rand.Reader, big.NewInt(100));
     if (err != default!) {
         Ꮡt.Fatalf("failed to generate test serial: %s"u8, err);
@@ -1968,10 +2000,12 @@ internal static ж<global::go.crypto.x509_package.Certificate> genCertEdge(ж<te
     if (mutateTmpl != default!) {
         mutateTmpl(tmpl);
     }
+
     if (certType == rootCertificate) {
         Ꮡissuer = tmpl; issuer = ref Ꮡissuer.DerefOrNull();
         signer = key;
     }
+
     (var d, err) = CreateCertificate(rand.Reader, tmpl, Ꮡissuer, key.Public(), signer);
     if (err != default!) {
         Ꮡt.Fatalf("failed to generate test cert: %s"u8, err);
@@ -1985,6 +2019,7 @@ internal static ж<global::go.crypto.x509_package.Certificate> genCertEdge(ж<te
 
 internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.crypto.x509_package.CertPool>, ж<global::go.crypto.x509_package.Certificate>) buildTrustGraph(ж<testing.T> Ꮡt, trustGraphDescription d) {
     Ꮡt.Helper();
+
     var certs = new map<@string, ж<global::go.crypto.x509_package.Certificate>>{};
     var keys = new map<@string, crypto.Signer>{};
     var rootPool = NewCertPool();
@@ -2002,6 +2037,7 @@ internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.cryp
         certs[r.Subject] = root;
         keys[r.Subject] = new x509_test_package.ecdsa_PrivateKeyжSigner(k);
     }
+
     var intermediatePool = NewCertPool();
     ж<global::go.crypto.x509_package.Certificate> leaf = default!;
     foreach (var (_, e) in d.Graph) {
@@ -2013,6 +2049,7 @@ internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.cryp
         if (!ok) {
             Ꮡt.Fatalf("unknown issuer %s"u8, e.Issuer);
         }
+
         (var k, ok) = keys[e.Subject, ꟷ];
         if (!ok) {
             error err = default!;
@@ -2035,6 +2072,7 @@ internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.cryp
             }
         }
     }
+
     return (rootPool, intermediatePool, leaf);
 }
 
@@ -2066,32 +2104,32 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
 
     var tests = new TestPathBuilding_tests[]{
         new(
-            name: "bad EKU"u8, // Build the following graph from RFC 4158, figure 7 (note that in this graph edges represent
- // certificates where the parent is the issuer and the child is the subject.) For the certificate
- // C->B, use an unsupported ExtKeyUsage (in this case ExtKeyUsageCodeSigning) which invalidates
- // the path Trust Anchor -> C -> B -> EE. The remaining valid paths should be:
- //   * Trust Anchor -> A -> B -> EE
- //   * Trust Anchor -> C -> A -> B -> EE
- //
- //     +---------+
- //     |  Trust  |
- //     | Anchor  |
- //     +---------+
- //      |       |
- //      v       v
- //   +---+    +---+
- //   | A |<-->| C |
- //   +---+    +---+
- //    |         |
- //    |  +---+  |
- //    +->| B |<-+
- //       +---+
- //         |
- //         v
- //       +----+
- //       | EE |
- //       +----+
-
+            // Build the following graph from RFC 4158, figure 7 (note that in this graph edges represent
+            // certificates where the parent is the issuer and the child is the subject.) For the certificate
+            // C->B, use an unsupported ExtKeyUsage (in this case ExtKeyUsageCodeSigning) which invalidates
+            // the path Trust Anchor -> C -> B -> EE. The remaining valid paths should be:
+            //   * Trust Anchor -> A -> B -> EE
+            //   * Trust Anchor -> C -> A -> B -> EE
+            //
+            //     +---------+
+            //     |  Trust  |
+            //     | Anchor  |
+            //     +---------+
+            //      |       |
+            //      v       v
+            //   +---+    +---+
+            //   | A |<-->| C |
+            //   +---+    +---+
+            //    |         |
+            //    |  +---+  |
+            //    +->| B |<-+
+            //       +---+
+            //         |
+            //         v
+            //       +----+
+            //       | EE |
+            //       +----+
+            name: "bad EKU"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
                 Leaf: "leaf"u8,
@@ -2142,32 +2180,32 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         new(
-            name: "bad EKU"u8, // Build the following graph from RFC 4158, figure 7 (note that in this graph edges represent
- // certificates where the parent is the issuer and the child is the subject.) For the certificate
- // C->B, use a unconstrained SAN which invalidates the path Trust Anchor -> C -> B -> EE. The
- // remaining valid paths should be:
- //   * Trust Anchor -> A -> B -> EE
- //   * Trust Anchor -> C -> A -> B -> EE
- //
- //     +---------+
- //     |  Trust  |
- //     | Anchor  |
- //     +---------+
- //      |       |
- //      v       v
- //   +---+    +---+
- //   | A |<-->| C |
- //   +---+    +---+
- //    |         |
- //    |  +---+  |
- //    +->| B |<-+
- //       +---+
- //         |
- //         v
- //       +----+
- //       | EE |
- //       +----+
-
+            // Build the following graph from RFC 4158, figure 7 (note that in this graph edges represent
+            // certificates where the parent is the issuer and the child is the subject.) For the certificate
+            // C->B, use a unconstrained SAN which invalidates the path Trust Anchor -> C -> B -> EE. The
+            // remaining valid paths should be:
+            //   * Trust Anchor -> A -> B -> EE
+            //   * Trust Anchor -> C -> A -> B -> EE
+            //
+            //     +---------+
+            //     |  Trust  |
+            //     | Anchor  |
+            //     +---------+
+            //      |       |
+            //      v       v
+            //   +---+    +---+
+            //   | A |<-->| C |
+            //   +---+    +---+
+            //    |         |
+            //    |  +---+  |
+            //    +->| B |<-+
+            //       +---+
+            //         |
+            //         v
+            //       +----+
+            //       | EE |
+            //       +----+
+            name: "bad EKU"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
                 Leaf: "leaf"u8,
@@ -2219,37 +2257,37 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         new(
-            name: "all paths"u8, // Build the following graph, we should find both paths:
- //   * Trust Anchor -> A -> C -> EE
- //   * Trust Anchor -> A -> B -> C -> EE
- //
- //	       +---------+
- //	       |  Trust  |
- //	       | Anchor  |
- //	       +---------+
- //	            |
- //	            v
- //	          +---+
- //	          | A |
- //	          +---+
- //	           | |
- //	           | +----+
- //	           |      v
- //	           |    +---+
- //	           |    | B |
- //	           |    +---+
- //	           |      |
- //	           |  +---v
- //	           v  v
- //            +---+
- //            | C |
- //            +---+
- //              |
- //              v
- //            +----+
- //            | EE |
- //            +----+
-
+            // Build the following graph, we should find both paths:
+            //   * Trust Anchor -> A -> C -> EE
+            //   * Trust Anchor -> A -> B -> C -> EE
+            //
+            //	       +---------+
+            //	       |  Trust  |
+            //	       | Anchor  |
+            //	       +---------+
+            //	            |
+            //	            v
+            //	          +---+
+            //	          | A |
+            //	          +---+
+            //	           | |
+            //	           | +----+
+            //	           |      v
+            //	           |    +---+
+            //	           |    | B |
+            //	           |    +---+
+            //	           |      |
+            //	           |  +---v
+            //	           v  v
+            //            +---+
+            //            | C |
+            //            +---+
+            //              |
+            //              v
+            //            +----+
+            //            | EE |
+            //            +----+
+            name: "all paths"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
                 Leaf: "leaf"u8,
@@ -2287,33 +2325,33 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         new(
-            name: "ignore cross-sig loops"u8, // Build the following graph, which contains a cross-signature loop
- // (A and C cross sign each other). Paths that include the A -> C -> A
- // (and vice versa) loop should be ignored, resulting in the paths:
- //   * Trust Anchor -> A -> B -> EE
- //   * Trust Anchor -> C -> B -> EE
- //   * Trust Anchor -> A -> C -> B -> EE
- //   * Trust Anchor -> C -> A -> B -> EE
- //
- //     +---------+
- //     |  Trust  |
- //     | Anchor  |
- //     +---------+
- //      |       |
- //      v       v
- //   +---+    +---+
- //   | A |<-->| C |
- //   +---+    +---+
- //    |         |
- //    |  +---+  |
- //    +->| B |<-+
- //       +---+
- //         |
- //         v
- //       +----+
- //       | EE |
- //       +----+
-
+            // Build the following graph, which contains a cross-signature loop
+            // (A and C cross sign each other). Paths that include the A -> C -> A
+            // (and vice versa) loop should be ignored, resulting in the paths:
+            //   * Trust Anchor -> A -> B -> EE
+            //   * Trust Anchor -> C -> B -> EE
+            //   * Trust Anchor -> A -> C -> B -> EE
+            //   * Trust Anchor -> C -> A -> B -> EE
+            //
+            //     +---------+
+            //     |  Trust  |
+            //     | Anchor  |
+            //     +---------+
+            //      |       |
+            //      v       v
+            //   +---+    +---+
+            //   | A |<-->| C |
+            //   +---+    +---+
+            //    |         |
+            //    |  +---+  |
+            //    +->| B |<-+
+            //       +---+
+            //         |
+            //         v
+            //       +----+
+            //       | EE |
+            //       +----+
+            name: "ignore cross-sig loops"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
                 Leaf: "leaf"u8,
@@ -2363,10 +2401,10 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         new(
-            name: "leaf with same subject, key, as parent but with SAN"u8, // Build a simple two node graph, where the leaf is directly issued from
- // the root and both certificates have matching subject and public key, but
- // the leaf has SANs.
-
+            // Build a simple two node graph, where the leaf is directly issued from
+            // the root and both certificates have matching subject and public key, but
+            // the leaf has SANs.
+            name: "leaf with same subject, key, as parent but with SAN"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
                 Leaf: "root"u8,
@@ -2386,9 +2424,9 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         new(
-            name: "ignore invalid EKU path"u8, // Build a basic graph with two paths from leaf to root, but the path passing
- // through C should be ignored, because it has invalid EKU nesting.
-
+            // Build a basic graph with two paths from leaf to root, but the path passing
+            // through C should be ignored, because it has invalid EKU nesting.
+            name: "ignore invalid EKU path"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
                 Leaf: "leaf"u8,
@@ -2434,9 +2472,9 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             }.slice()
         ),
         new(
-            name: "constrained root, invalid intermediate"u8, // A name constraint on the root should apply to any names that appear
- // on the intermediate, meaning there is no valid chain.
-
+            // A name constraint on the root should apply to any names that appear
+            // on the intermediate, meaning there is no valid chain.
+            name: "constrained root, invalid intermediate"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{
                     new(
@@ -2469,9 +2507,9 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             expectedErr: "x509: a root or intermediate certificate is not authorized to sign for this name: DNS name \"beep.com\" is not permitted by any constraint"u8
         ),
         new(
-            name: "constrained intermediate, non-matching SAN"u8, // A name constraint on the intermediate does not apply to the intermediate
- // itself, so this is a valid chain.
-
+            // A name constraint on the intermediate does not apply to the intermediate
+            // itself, so this is a valid chain.
+            name: "constrained intermediate, non-matching SAN"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
                 Leaf: "leaf"u8,
@@ -2498,9 +2536,9 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             expectedChains: new @string[]{"CN=leaf -> CN=inter -> CN=root"u8}.slice()
         ),
         new(
-            name: "code constrained root, two paths, one valid"u8, // A code constraint on the root, applying to one of two intermediates in the graph, should
- // result in only one valid chain.
-
+            // A code constraint on the root, applying to one of two intermediates in the graph, should
+            // result in only one valid chain.
+            name: "code constrained root, two paths, one valid"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8, Constraint: error (slice<ж<global::go.crypto.x509_package.Certificate>> chain) => {
                     foreach (var (_, c) in chain) {
@@ -2543,8 +2581,8 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             expectedChains: new @string[]{"CN=leaf -> CN=inter c -> CN=inter b -> CN=root"u8}.slice()
         ),
         new(
-            name: "code constrained root, one invalid path"u8, // A code constraint on the root, applying to the only path, should result in an error.
-
+            // A code constraint on the root, applying to the only path, should result in an error.
+            name: "code constrained root, one invalid path"u8,
             graph: new trustGraphDescription(
                 Roots: new rootDescription[]{new(Subject: "root"u8, Constraint: error (slice<ж<global::go.crypto.x509_package.Certificate>> chain) => {
                     foreach (var (_, c) in chain) {
@@ -2572,6 +2610,7 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             expectedErr: "x509: certificate signed by unknown authority (possibly because of \"bad\" while trying to verify candidate authority certificate \"root\")"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestPathBuilding_tests(), out var Ꮡtc);
         tc = vᴛ1;
@@ -2682,10 +2721,12 @@ public static void TestEKUEnforcement(ж<testing.T> Ꮡt) {
             err: "x509: certificate specifies an incompatible key usage"u8
         )
     }.slice();
+
     var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != default!) {
         Ꮡt.Fatalf("failed to generate test key: %s"u8, err);
     }
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestEKUEnforcement_tests(), out var Ꮡtc);
         tc = vᴛ1;
@@ -2700,6 +2741,7 @@ public static void TestEKUEnforcement(ж<testing.T> Ꮡt) {
                 c.Value.UnknownExtKeyUsage = tcʗ2.root.Unknown;
             }, rootCertificate, nil, new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1));
             rootPool.AddCert(root);
+
             var parent = root;
             var interPool = NewCertPool();
             foreach (var (i, vᴛ2) in tcʗ1.inters) {
@@ -2714,11 +2756,13 @@ public static void TestEKUEnforcement(ж<testing.T> Ꮡt) {
                 interPool.AddCert(inter);
                 parent = inter;
             }
+
             var tcʗ3 = tcʗ1;
             var leaf = genCertEdge(tΔ1, leafˢ2, new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1), (ж<global::go.crypto.x509_package.Certificate> c) => {
                 c.Value.ExtKeyUsage = tcʗ3.leaf.EKUs;
                 c.Value.UnknownExtKeyUsage = tcʗ3.leaf.Unknown;
             }, intermediateCertificate, parent, new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1));
+
             var (_, errΔ1) = leaf.Verify(new VerifyOptions(Roots: rootPool, Intermediates: interPool, KeyUsages: tcʗ1.verifyEKUs));
             if (errΔ1 == default! && tcʗ1.err != ""u8){
                 tΔ1.Errorf("expected error"u8);
@@ -2744,6 +2788,7 @@ public static void TestVerifyEKURootAsLeaf(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to generate key: %s"u8, err);
     }
+
     foreach (var (_, vᴛ1) in new TestVerifyEKURootAsLeaf_type[]{
         new(
             verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
@@ -2798,6 +2843,7 @@ public static void TestVerifyEKURootAsLeaf(ж<testing.T> Ꮡt) {
             }
             var roots = NewCertPool();
             roots.AddCert(root);
+
             (_, errΔ1) = root.Verify(new VerifyOptions(Roots: roots, KeyUsages: tcʗ1.verifyEKUs));
             if (errΔ1 == default! && !tcʗ1.succeed){
                 tΔ1.Error(verificationSucceedˢ);
@@ -2821,6 +2867,7 @@ public static void TestVerifyNilPubKey(ж<testing.T> Ꮡt) {
         SubjectKeyId: new byte[]{1, 2, 3}.slice()
     ));
     (~opts).Roots.AddCert(r);
+
     var (_, err) = c.buildChains(new ж<global::go.crypto.x509_package.Certificate>[]{r}.slice(), nil, opts);
     {
         var (_, ok) = err._<UnknownAuthorityError>(ᐧ); if (!ok) {
@@ -2852,6 +2899,7 @@ public static void TestVerifyBareWildcard(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
     }
+
     {
         var errΔ1 = c.VerifyHostname(labelˢ); if (errΔ1 == default!) {
             Ꮡt.Fatalf("VerifyHostname unexpected success with bare wildcard SAN"u8);
@@ -2906,6 +2954,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
     var testOID3 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 3}.slice());
     var testOID4 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 4}.slice());
     var testOID5 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 5}.slice());
+
     ж<global::go.crypto.x509_package.Certificate> loadTestCert(ж<testing.T> tΔ1, @string path) {
         var (b, err) = os.ReadFile(path);
         if (err != default!) {
@@ -2918,6 +2967,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         }
         return c;
     }
+
     var root = loadTestCert(Ꮡt, testdataPolicyRootPemˢ);
     var root_cross_inhibit_mapping = loadTestCert(Ꮡt, testdataPolicyRootCrossˢ);
     var root2 = loadTestCert(Ꮡt, testdataPolicyRoot2Pemˢ);
@@ -2940,8 +2990,9 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
     var leaf_oid5 = loadTestCert(Ꮡt, testdataPolicyLeafOid5ˢ);
     var leaf_require = loadTestCert(Ꮡt, testdataPolicyLeafˢ);
     var leaf_require1 = loadTestCert(Ꮡt, testdataPolicyLeafˢ2);
-    var tests = new TestPoliciesValid_testCase[]{ // The chain is good for |oid1| and |oid2|, but not |oid3|.
 
+    var tests = new TestPoliciesValid_testCase[]{
+        // The chain is good for |oid1| and |oid2|, but not |oid3|.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
             requireExplicitPolicy: true,
@@ -2976,10 +3027,10 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             policies: new global::go.crypto.x509_package.OID[]{testOID1, testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: true
-        ), // Without |X509_V_FLAG_EXPLICIT_POLICY|, the policy tree is built and
- // intersected with user-specified policies, but it is not required to result
- // in any valid policies.
-
+        ),
+        // Without |X509_V_FLAG_EXPLICIT_POLICY|, the policy tree is built and
+        // intersected with user-specified policies, but it is not required to result
+        // in any valid policies.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
@@ -2989,8 +3040,8 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
             valid: true
-        ), // However, a CA with policy constraints can require an explicit policy.
-
+        ),
+        // However, a CA with policy constraints can require an explicit policy.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
@@ -3000,16 +3051,16 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
             valid: false
-        ), // requireExplicitPolicy applies even if the application does not configure a
- // user-initial-policy-set. If the validation results in no policies, the
- // chain is invalid.
-
+        ),
+        // requireExplicitPolicy applies even if the application does not configure a
+        // user-initial-policy-set. If the validation results in no policies, the
+        // chain is invalid.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_none, intermediate_require, root}.slice(),
             requireExplicitPolicy: true,
             valid: false
-        ), // A leaf can also set requireExplicitPolicy.
-
+        ),
+        // A leaf can also set requireExplicitPolicy.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate, root}.slice(),
             valid: true
@@ -3023,9 +3074,9 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
             valid: false
-        ), // requireExplicitPolicy is a count of certificates to skip. If the value is
- // not zero by the end of the chain, it doesn't count.
-
+        ),
+        // requireExplicitPolicy is a count of certificates to skip. If the value is
+        // not zero by the end of the chain, it doesn't count.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require1, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
@@ -3040,9 +3091,9 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require1, intermediate, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
             valid: true
-        ), // If multiple certificates specify the constraint, the more constrained value
- // wins.
-
+        ),
+        // If multiple certificates specify the constraint, the more constrained value
+        // wins.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require1, intermediate_require1, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
@@ -3052,23 +3103,23 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate_require2, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
             valid: false
-        ), // An intermediate that requires an explicit policy, but then specifies no
- // policies should fail verification as a result.
-
+        ),
+        // An intermediate that requires an explicit policy, but then specifies no
+        // policies should fail verification as a result.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require_no_policies, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
             valid: false
-        ), // A constrained intermediate's policy extension has a duplicate policy, which
- // is invalid.
- // {
- // 	chain:    []*Certificate{leaf, intermediate_require_duplicate, root},
- // 	policies: []OID{testOID1},
- // 	valid:    false,
- // },
- // The leaf asserts anyPolicy, but the intermediate does not. The resulting
- // valid policies are the intersection.
-
+        ),
+        // A constrained intermediate's policy extension has a duplicate policy, which
+        // is invalid.
+        // {
+        // 	chain:    []*Certificate{leaf, intermediate_require_duplicate, root},
+        // 	policies: []OID{testOID1},
+        // 	valid:    false,
+        // },
+        // The leaf asserts anyPolicy, but the intermediate does not. The resulting
+        // valid policies are the intersection.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
@@ -3080,9 +3131,9 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: false
-        ), // The intermediate asserts anyPolicy, but the leaf does not. The resulting
- // valid policies are the intersection.
-
+        ),
+        // The intermediate asserts anyPolicy, but the leaf does not. The resulting
+        // valid policies are the intersection.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_any, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
@@ -3094,8 +3145,8 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: false
-        ), // Both assert anyPolicy. All policies are valid.
-
+        ),
+        // Both assert anyPolicy. All policies are valid.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate_any, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
@@ -3107,16 +3158,16 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
             requireExplicitPolicy: true,
             valid: true
-        ), // With just a trust anchor, policy checking silently succeeds.
-
+        ),
+        // With just a trust anchor, policy checking silently succeeds.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
             requireExplicitPolicy: true,
             valid: true
-        ), // Although |intermediate_mapped_oid3| contains many mappings, it only accepts
- // OID3. Nodes should not be created for the other mappings.
-
+        ),
+        // Although |intermediate_mapped_oid3| contains many mappings, it only accepts
+        // OID3. Nodes should not be created for the other mappings.
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediate_mapped_oid3, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
@@ -3128,10 +3179,10 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             policies: new global::go.crypto.x509_package.OID[]{testOID4}.slice(),
             requireExplicitPolicy: true,
             valid: false
-        ), // Policy mapping can be inhibited, either by the caller or a certificate in
- // the chain, in which case mapped policies are unassertable (apart from some
- // anyPolicy edge cases).
-
+        ),
+        // Policy mapping can be inhibited, either by the caller or a certificate in
+        // the chain, in which case mapped policies are unassertable (apart from some
+        // anyPolicy edge cases).
         new(
             chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediate_mapped_oid3, root}.slice(),
             policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
@@ -3146,6 +3197,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             valid: false
         )
     }.slice();
+
     foreach (var (_, useAny) in new bool[]{false, true}.slice()) {
         ж<global::go.crypto.x509_package.Certificate> intermediateΔ1 = default!;
         if (useAny){
@@ -3153,9 +3205,9 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         } else {
             intermediateΔ1 = intermediate_mapped;
         }
-        var extraTests = new TestPoliciesValid_testCase[]{ // OID3 is mapped to {OID1, OID2}, which means OID1 and OID2 (or both) are
- // acceptable for OID3.
-
+        var extraTests = new TestPoliciesValid_testCase[]{
+            // OID3 is mapped to {OID1, OID2}, which means OID1 and OID2 (or both) are
+            // acceptable for OID3.
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediateΔ1, root}.slice(),
                 policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
@@ -3173,36 +3225,36 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
                 policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
                 requireExplicitPolicy: true,
                 valid: true
-            ), // If the intermediate's policies were anyPolicy, OID3 at the leaf, despite
- // being mapped, is still acceptable as OID3 at the root. Despite the OID3
- // having expected_policy_set = {OID1, OID2}, it can match the anyPolicy
- // node instead.
- //
- // If the intermediate's policies listed OIDs explicitly, OID3 at the leaf
- // is not acceptable as OID3 at the root. OID3 has expected_polciy_set =
- // {OID1, OID2} and no other node allows OID3.
-
+            ),
+            // If the intermediate's policies were anyPolicy, OID3 at the leaf, despite
+            // being mapped, is still acceptable as OID3 at the root. Despite the OID3
+            // having expected_policy_set = {OID1, OID2}, it can match the anyPolicy
+            // node instead.
+            //
+            // If the intermediate's policies listed OIDs explicitly, OID3 at the leaf
+            // is not acceptable as OID3 at the root. OID3 has expected_polciy_set =
+            // {OID1, OID2} and no other node allows OID3.
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid3, intermediateΔ1, root}.slice(),
                 policies: new global::go.crypto.x509_package.OID[]{testOID3}.slice(),
                 requireExplicitPolicy: true,
                 valid: useAny
-            ), // If the intermediate's policies were anyPolicy, OID1 at the leaf is no
- // longer acceptable as OID1 at the root because policies only match
- // anyPolicy when they match no other policy.
- //
- // If the intermediate's policies listed OIDs explicitly, OID1 at the leaf
- // is acceptable as OID1 at the root because it will match both OID1 and
- // OID3 (mapped) policies.
-
+            ),
+            // If the intermediate's policies were anyPolicy, OID1 at the leaf is no
+            // longer acceptable as OID1 at the root because policies only match
+            // anyPolicy when they match no other policy.
+            //
+            // If the intermediate's policies listed OIDs explicitly, OID1 at the leaf
+            // is acceptable as OID1 at the root because it will match both OID1 and
+            // OID3 (mapped) policies.
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediateΔ1, root}.slice(),
                 policies: new global::go.crypto.x509_package.OID[]{testOID1}.slice(),
                 requireExplicitPolicy: true,
                 valid: !useAny
-            ), // All pairs of OID4 and OID5 are mapped together, so either can stand for
- // the other.
-
+            ),
+            // All pairs of OID4 and OID5 are mapped together, so either can stand for
+            // the other.
             new(
                 chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediateΔ1, root}.slice(),
                 policies: new global::go.crypto.x509_package.OID[]{testOID4}.slice(),
@@ -3236,6 +3288,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         }.slice();
         tests = appendꓸꓸꓸ(tests, extraTests);
     }
+
     foreach (var (i, vᴛ1) in tests) {
         ref var tc = ref heap(new TestPoliciesValid_testCase(), out var Ꮡtc);
         tc = vᴛ1;
@@ -3272,12 +3325,16 @@ public static void TestInvalidPolicyWithAnyKeyUsage(ж<testing.T> Ꮡt) {
         }
         return c;
     }
+
     var testOID3 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 3}.slice());
     var (root, intermediate, leaf) = (loadTestCert(Ꮡt, testdataPolicyRootPemˢ), loadTestCert(Ꮡt, testdataPolicyˢ6), loadTestCert(Ꮡt, testdataPolicyLeafPemˢ));
+
     @string expectedErr = x509NoValidChainsBuiltˢ2;
+
     var (roots, intermediates) = (NewCertPool(), NewCertPool());
     roots.AddCert(root);
     intermediates.AddCert(intermediate);
+
     var (_, err) = leaf.Verify(new VerifyOptions(
         Roots: roots,
         Intermediates: intermediates,
@@ -3317,6 +3374,7 @@ public static void TestCertificateChainSignedByECDSA(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var (leafKey, _) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     var leaf = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(42),
@@ -3335,13 +3393,16 @@ public static void TestCertificateChainSignedByECDSA(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var inter, err) = ParseCertificate(dsaSelfSignedCNX(Ꮡt));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var inters = NewCertPool();
     inters.AddCert(root);
     inters.AddCert(inter);
+
     @string wantErr = certificateSignedByˢ;
     (_, err) = leaf.Verify(new VerifyOptions(Intermediates: inters, Roots: NewCertPool()));
     if (!strings.Contains(err.Error(), wantErr)) {
@@ -3368,6 +3429,7 @@ internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     ref var dsaPriv = ref heap(new dsa.PrivateKey(), out var ᏑdsaPriv);
     dsaPriv.Parameters = @params;
     {
@@ -3384,6 +3446,7 @@ internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var spki = new publicKeyInfo(
         Algorithm: new pkix.AlgorithmIdentifier(
             Algorithm: oidPublicKeyDSA,
@@ -3391,12 +3454,14 @@ internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> Ꮡt) {
         ),
         PublicKey: new asn1.BitString(Bytes: yDER, BitLength: 8 * builtin.len(yDER))
     );
+
     var rdn = new pkix.Name(CommonName: "X"u8).ToRDNSequence();
     (var b, err) = asn1.Marshal(rdn);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     var rawName = new asn1.RawValue(FullBytes: b);
+
     var algoIdent = new pkix.AlgorithmIdentifier(Algorithm: oidSignatureDSAWithSHA256);
     var tbs = new tbsCertificate(
         Version: 0,

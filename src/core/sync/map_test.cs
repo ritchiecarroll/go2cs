@@ -98,7 +98,6 @@ internal static (any, bool) apply(this mapCall c, mapInterface m) {
     { /* default: */
         throw panic("invalid mapOp");
     }
-
 }
 
 partial struct mapResult {
@@ -113,7 +112,7 @@ internal static any randValue(ж<rand.Rand> Ꮡr) {
     foreach (var (i, _) in b) {
         b[i] = (byte)((rune)'a' + (byte)rand.Intn(26));
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 internal static reflectꓸValue Generate(this mapCall _, ж<rand.Rand> Ꮡr, nint size) {
@@ -122,7 +121,6 @@ internal static reflectꓸValue Generate(this mapCall _, ж<rand.Rand> Ꮡr, nin
     if (exprᴛ1 == opStore || exprᴛ1 == opLoadOrStore) {
         c.v = randValue(Ꮡr);
     }
-
     return reflect.ValueOf(c);
 }
 
@@ -134,12 +132,14 @@ internal static (slice<mapResult> results, map<any, any> final) applyCalls(mapIn
         var (v, ok) = c.apply(m);
         results = append(results, new mapResult(v, ok));
     }
+
     final = new map<any, any>();
     var finalʗ1 = final;
     m.Range((any k, any v) => {
         finalʗ1[k] = v;
         return true;
     });
+
     return (results, final);
 }
 
@@ -187,10 +187,12 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         UntypedInt mapSize = /* 1 << 10 */ 1024;
+
         var m = @new<Δsync.Map>();
         for (var n = (int64)1; n <= mapSize; n++) {
             m.Store(n, (int64)n);
         }
+
         var done = new channel<EmptyStruct>(0);
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         var doneʗ1 = done;
@@ -230,12 +232,14 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
                 finally { ᒐ.Run(); }
             }, g);
         }
-        nint iters = (1 << (int)(10));
+
+        nint iters = 1 << 10;
         if (Δtesting.Short()) {
             iters = 16;
         }
         for (nint n = iters; n > 0; n--) {
             var seen = new map<int64, bool>(mapSize);
+
             var seenʗ1 = seen;
             m.Range((any ki, any vi) => {
                 var (k, v) = (ki._<int64>(), vi._<int64>());
@@ -248,6 +252,7 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
                 seenʗ1[k] = true;
                 return true;
             });
+
             if (len(seen) != mapSize) {
                 Ꮡt.Fatalf("Range visited %v elements of %v-element Map"u8, len(seen), (nint)(mapSize));
             }
@@ -259,11 +264,14 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
 
 public static void TestIssue40999(ж<Δtesting.T> Ꮡt) {
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
+
     // Since the miss-counting in missLocked (via Delete)
     // compares the miss count with len(m.dirty),
     // add an initial entry to bias len(m.dirty) above the miss count.
     Ꮡm.Store(default!, new EmptyStruct());
+
     ref var finalized = ref heap(new uint32(), out var Ꮡfinalized);
+
     // Set finalizers that count for collected keys. A non-zero count
     // indicates that keys have not been leaked.
     while (atomic.LoadUint32(Ꮡfinalized) == 0) {
@@ -282,8 +290,6 @@ internal static readonly object dummyˢ = (@string)"dummy"u8;
 internal static readonly @string syncMapˢ = "sync.Map"u8;
 
 public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Issue 46399
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
     foreach (var (i, v) in new @string[]{"hello"u8, "world"u8, "Go"u8}.array()) {
@@ -298,31 +304,35 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
                     Ꮡt.Fatalf("Nested Range loads unexpected value, got %+v want %+v"u8, v, valueΔ1);
                 }
             }
+
             // We didn't keep 42 and a value into the map before, if somehow we loaded
             // a value from such a key, meaning there must be an internal bug regarding
             // nested range in the Map.
             {
-                var (_, loaded) = Ꮡm.LoadOrStore((nint)(42), dummyˢ); if (loaded) {
+                var (_, loaded) = Ꮡm.LoadOrStore((nint)42, dummyˢ); if (loaded) {
                     Ꮡt.Fatalf("Nested Range loads unexpected value, want store a new value"u8);
                 }
             }
+
             // Try to Store then LoadAndDelete the corresponding value with the key
             // 42 to the Map. In this case, the key 42 and associated value should be
             // removed from the Map. Therefore any future range won't observe key 42
             // as we checked in above.
             @string val = syncMapˢ;
-            Ꮡm.Store((nint)(42), val);
+            Ꮡm.Store((nint)42, val);
             {
-                var (v, loaded) = Ꮡm.LoadAndDelete((nint)(42)); if (!loaded || !reflect.DeepEqual(v, val)) {
+                var (v, loaded) = Ꮡm.LoadAndDelete((nint)42); if (!loaded || !reflect.DeepEqual(v, val)) {
                     Ꮡt.Fatalf("Nested Range loads unexpected value, got %v, want %v"u8, v, val);
                 }
             }
             return true;
         });
+
         // Remove key from Map on-the-fly.
         Ꮡm.Delete(key);
         return true;
     });
+
     // After a Range of Delete, all keys should be removed and any
     // further Range won't invoke the callback. Hence length remains 0.
     nint length = 0;
@@ -330,14 +340,15 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
         length++;
         return true;
     });
+
     if (length != 0) {
-        Ꮡt.Fatalf("Unexpected sync.Map size, got %v want %v"u8, length, (nint)(0));
+        Ꮡt.Fatalf("Unexpected sync.Map size, got %v want %v"u8, length, (nint)0);
     }
 }
 
 public static void TestCompareAndSwap_NonExistingKey(ж<Δtesting.T> Ꮡt) {
     var m = Ꮡ(new Δsync.Map(nil));
-    if (m.CompareAndSwap(m.OrTypedNil(), default!, (nint)(42))) {
+    if (m.CompareAndSwap(m.OrTypedNil(), default!, (nint)42)) {
         // See https://go.dev/issue/51972#issuecomment-1126408637.
         Ꮡt.Fatalf("CompareAndSwap on a non-existing key succeeded"u8);
     }
@@ -359,9 +370,11 @@ public static void TestMapRangeNoAllocations(ж<Δtesting.T> Ꮡt) {
 // Checks for proper synchronization between Clear, Store, Load operations.
 public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
+
     ref var wg = ref heap<Δsync.WaitGroup>(out var Ꮡwg);
     wg = new Δsync.WaitGroup(nil);
     Ꮡwg.Add(30); // 10 goroutines for writing, 10 goroutines for reading, 10 goroutines for waiting
+
     // Writing data to the map concurrently
     for (nint i = 0; i < 10; i++) {
         goǃ((nint k, nint v) => {
@@ -374,6 +387,7 @@ public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
             finally { ᒐ.Run(); }
         }, i, i * 10);
     }
+
     // Reading data from the map concurrently
     for (nint i = 0; i < 10; i++) {
         goǃ((nint k) => {
@@ -392,6 +406,7 @@ public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
             finally { ᒐ.Run(); }
         }, i);
     }
+
     // Clearing data from the map concurrently
     for (nint i = 0; i < 10; i++) {
         goǃ(() => {
@@ -404,10 +419,14 @@ public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
             finally { ᒐ.Run(); }
         });
     }
+
     Ꮡwg.Wait();
+
     Ꮡm.Clear();
+
     Ꮡm.Range((any k, any v) => {
         Ꮡt.Errorf("after Clear, Map contains (%v, %v); expected to be empty"u8, k, v);
+
         return true;
     });
 }

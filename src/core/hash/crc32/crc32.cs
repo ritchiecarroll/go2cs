@@ -26,12 +26,21 @@ partial class crc32_package {
 public static UntypedInt ΔSize => 4;
 
 // Predefined polynomials.
+// IEEE is by far and away the most common CRC-32 polynomial.
+// Used by ethernet (IEEE 802.3), v.42, fddi, gzip, zip, png, ...
 public static UntypedInt IEEE => 0xedb88320;
 
+// Castagnoli's polynomial, used in iSCSI.
+// Has better error detection characteristics than IEEE.
+// https://dx.doi.org/10.1109/26.231911
 public static UntypedInt Castagnoli => 0x82f63b78;
 
+// Koopman's polynomial.
+// Also has better error detection characteristics than IEEE.
+// https://dx.doi.org/10.1109/DSN.2002.1028931
 public static UntypedInt Koopman => 0xeb31d82e;
 
+// Table is a 256-word table representing the polynomial for efficient processing.
 partial struct Table /*[256]uint32*/;
 
 // This file makes use of functions implemented in architecture-specific files.
@@ -75,17 +84,19 @@ internal static Func<uint32, slice<byte>, uint32> updateCastagnoli;
 internal static ж<atomic.Bool> ᏑhaveCastagnoli = new StandardBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool haveCastagnoli => ref ᏑhaveCastagnoli.Value;
 
-// Initialize the slicing-by-8 table.
 internal static Action castagnoliInitOnce;
 internal static void initᴛcastagnoliInitOnce() { castagnoliInitOnce = sync.OnceFunc(() => {
     castagnoliTable = simpleMakeTable(Castagnoli);
+
     if (archAvailableCastagnoli()){
         archInitCastagnoli();
         updateCastagnoli = archUpdateCastagnoli;
     } else {
+        // Initialize the slicing-by-8 table.
         castagnoliTable8 = slicingMakeTable(Castagnoli);
         updateCastagnoli = (uint32 crc, slice<byte> p) => slicingUpdate(crc, castagnoliTable8, p);
     }
+
     ᏑhaveCastagnoli.Store(true);
 }); }
 
@@ -97,13 +108,13 @@ internal static ж<slicing8Table> ieeeTable8;
 
 internal static Func<uint32, slice<byte>, uint32> updateIEEE;
 
-// Initialize the slicing-by-8 table.
 internal static Action ieeeInitOnce;
 internal static void initᴛieeeInitOnce() { ieeeInitOnce = sync.OnceFunc(() => {
     if (archAvailableIEEE()){
         archInitIEEE();
         updateIEEE = archUpdateIEEE;
     } else {
+        // Initialize the slicing-by-8 table.
         ieeeTable8 = slicingMakeTable(IEEE);
         updateIEEE = (uint32 crc, slice<byte> p) => slicingUpdate(crc, ieeeTable8, p);
     }
@@ -124,7 +135,6 @@ public static ж<Table> MakeTable(uint32 poly) {
     { /* default: */
         return simpleMakeTable(poly);
     }
-
 }
 
 // digest represents the partial evaluation of a checksum.
@@ -199,6 +209,12 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default!;
 }
 
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d;
+    return (new digestжCloner(Ꮡr), default!);
+}
+
 internal static uint32 update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p, bool checkInitIEEE) {
     switch (ᐧ) {
     case {} when ᏑhaveCastagnoli.Load() && Ꮡtab == castagnoliTable: {
@@ -213,7 +229,6 @@ internal static uint32 update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p, bool 
     default: {
         return simpleUpdate(crc, ref (Ꮡtab).DerefOrNull(), p);
     }}
-
 }
 
 // Update returns the result of adding the bytes in p to the crc.
@@ -236,7 +251,7 @@ internal static uint32 Sum32(this ref digest d) {
 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum32();
-    return append(@in, (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
+    return append(@in, (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
 
 // Checksum returns the CRC-32 checksum of data

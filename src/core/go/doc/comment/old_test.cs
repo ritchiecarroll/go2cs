@@ -9,7 +9,6 @@ using static global::go.go.doc.comment_package;
 
 partial class comment_internal_test_package {
 
-
 partial struct oldHeadingTestsᴛ1 /*dyn*/ {
     internal @string line;
     internal bool ok;
@@ -42,9 +41,6 @@ public static void TestIsOldHeading(ж<testing.T> Ꮡt) {
     }
 }
 
-// inner ] causes (]) to be cut off from URL
-// same
-
 partial struct autoURLTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
@@ -73,8 +69,8 @@ internal static slice<autoURLTestsᴛ1> autoURLTests = new autoURLTestsᴛ1[]{
     new("http://golang.org/)"u8, "http://golang.org/"u8),
     new("http://golang.org/hello())"u8, "http://golang.org/hello()"u8),
     new("http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD"u8, "http://git.qemu.org/?p=qemu.git;a=blob;f=qapi-schema.json;hb=HEAD"u8),
-    new("https://foo.bar/bal/x(])"u8, "https://foo.bar/bal/x"u8),
-    new("http://bar(])"u8, "http://bar"u8)
+    new("https://foo.bar/bal/x(])"u8, "https://foo.bar/bal/x"u8), // inner ] causes (]) to be cut off from URL
+    new("http://bar(])"u8, "http://bar"u8) // same
 }.slice();
 
 public static void TestAutoURL(ж<testing.T> Ꮡt) {

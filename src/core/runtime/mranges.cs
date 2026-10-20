@@ -115,7 +115,13 @@ internal static addrRange removeGreaterEqual(this addrRange a, uintptr addr) {
     return makeAddrRange(a.@base.addr(), addr);
 }
 
+// minOffAddr is the minimum address in the offset space, and
+// it corresponds to the virtual address arenaBaseOffset.
 internal static offAddr minOffAddr = new offAddr(arenaBaseOffset);
+
+// maxOffAddr is the maximum address in the offset address
+// space. It corresponds to the highest virtual address representable
+// by the page alloc chunk and heap arena maps.
 internal static offAddr maxOffAddr = new offAddr(unchecked((nuint)(140737488355327UL)));
 
 // offAddr represents an address in a contiguous view
@@ -256,6 +262,7 @@ partial struct addrRanges {
 // less than the base of the addrRange at that index.
 internal static nint findSucc(this ref addrRanges a, uintptr addr) {
     var @base = new offAddr(addr);
+
     // Narrow down the search space via a binary search
     // for large addrRanges until we have at most iterMax
     // candidates left.
@@ -263,7 +270,7 @@ internal static nint findSucc(this ref addrRanges a, uintptr addr) {
     nint bot = 0;
     nint top = len(a.ranges);
     while (top - bot > iterMax) {
-        nint i = (nint)(((nuint)(bot + top) >> (int)(1)));
+        nint i = (nint)((nuint)(bot + top) >> 1);
         if (a.ranges[i].contains(@base.addr())) {
             // a.ranges[i] contains base, so
             // its successor is the next index.

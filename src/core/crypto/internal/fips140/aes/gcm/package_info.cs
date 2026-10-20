@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-using aes = go.crypto.@internal.fips140.aes_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,8 +39,13 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<aes.Block, ж<aes.Block>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -52,13 +56,13 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/cast.go", "cast.cs", "AA4cuIK4uNyCgpSCgpQ=", "18-42:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/cmac.go", "cmac.cs", "ABgwooKCpqKCgoSCgqaigoKClIKCgpSCgpSUgpSUgoKClKiygoKU")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/ctrkdf.go", "ctrkdf.cs", "ABo2kqiygoSCgoSChIKEgoI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm.go", "gcm.cs", "ABcslP7ygpSClIKUgoKCggAHFIKmgqaCgqaigpSClIKWgoKUgpaCppSigriCloKUgpaCgpSCloKAyoKkrvKAgpSCpII=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_generic.go", "gcm_generic.cs", "AA0agqKCgoSEgoKmoqKCgoSChIKCgpaErAALDoKClIKCvtKEgoKEgoKWgoKCvMKCqsKCgoKCgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/cmac.go", "cmac.cs", "ABgwooKCpqKCgpSCgqaigoKClIKCgpSCgpSUgpSUgoKClKiygoKU")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/ctrkdf.go", "ctrkdf.cs", "ABo2kqiygpSCgpSClIKUgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm.go", "gcm.cs", "ABcslP7ygpSClIKUgoKCggAHFIKmgqaCgqaigpSClIKmgoKUgqaCppSigriCpoKUgqaCgpSCpoKAyoKkrvKAgpSCpII=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_generic.go", "gcm_generic.cs", "AA0agqKCgpSUgoKmoqKCgpSClIKCgqaUrAALDoKClIKCvtKUgoKUgoKmgoKCvMKCqsKCgoKCgoI=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_noasm.go", "gcm_noasm.cs", "AAgS2KSCpoI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABEwAAgCgpSClIKUgpSClIKCAAIS4oKClAAKFoCkgKSigpaClIKClIKUloKUgpSEgqaCggACENKCgpQABxCApICkooKWloKUgpSEgqaCgqqigoKUAAkUgKSApKKCloKUgpSWgpSClISCpoKCrsKCgpQACRSApICkooKWgpSClJaClIKUhIKmgoI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/ghash.go", "ghash.cs", "ABg20oKCgq4ACAb+uISCgpaCgpaCqJKCgqikqLKWgoIABxKClqbMkoSCgoK6goKCgoKohIKCqKqigoKCgryigoSCgoI=", "", "", "54=BEUint64/1/2/1,BEUint64/2/2/2")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/gcm_nonces.go", "gcm_nonces.cs", "ABIyAAgCgpSClIKUgpSClIKCAAIWAAgCgoKUAAIQ0oKCpq7CgoKUAAsYgKSArOKCpoKUgpSCpoKUgpSmgpSClKaCpoKCAAIaAAoCgoKUrsKCgpSuwoKClAACHAALAoKClIKAgqQADigACQKClIKUgoKCpoCkgKzigqaCgriCgpSClKaClIKUpoKmgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/gcm/ghash.go", "ghash.cs", "ABg20oKCgq4ACAYACA64lIKCpoKCpoKokoKCqKSosqaCggAIEoKmpsySlIKCgsqCgoKCgriUgoK4qqKCgoKCvKKClIKCgg==", "", "", "55=BEUint64/1/2/1,BEUint64/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.aes;
@@ -78,10 +82,8 @@ public static partial class gcm_package
     [GoValueClone("k1", "k2")] public partial struct CMAC {}
     [GoValueClone("mac")] public partial struct CounterKDF {}
     public partial struct GCM {}
-    public partial struct GCMForSSH {}
-    public partial struct GCMForTLS12 {}
-    public partial struct GCMForTLS13 {}
     public partial struct GCMWithCounterNonce {}
+    public partial struct GCMWithXORCounterNonce {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

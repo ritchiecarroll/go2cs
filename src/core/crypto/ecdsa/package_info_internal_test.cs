@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using big = go.math.big_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,7 +29,7 @@ using static go.crypto.ecdsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ACc2ggAGFIKUsoKikoIABRTCkqaCpoKCgpSCuIKmgoSCgoKCloKWgoK4gqaChIKCgoKWgpaCgriCpoKEgoKCgpaCgoKClpSWgtyApIKCpoKmgoSCgoKCloKCgpaCloK4goKClKaC9t6CloKCloSCgoKCkoSCgoKClJSUgpSEgpaCgoSUpKSkpKaUpKSkpKSmloKWlICC1rS0tLSCgoKCgsbqgqaCgoKWgoKShIK4gqaChIKCqIKCqIK4gqaCgoKWgriCpoKEgoKUgoKWgoK4gqaChIKClIKCloKCuIKmgoSCgpSCgpaCggAMCIKC7gAHEAALGAAHEu4ABxCC7gAHEILuAAkUggAHEIKCgpSCgpSCAAgIggAEEIKCksqCgoKCgpSEgoKCgoKm+oKCgoKClIKCgpaCgoKC3IKCgoKCgoCC", "43-48:1;44-47:1.1;440-455:1;456-491:2;492-507:3;508-523:4;560-562:1;567-585:1;589-608:1;612-621:1", "", "41=P256/1/2/4,P224/1/1/5,P384/1/1/6,P521/1/1/7,P256/2/2/8,genericParamsForCurve/1/1/8;550=fromHex/1/3/1,fromHex/2/3/4,fromHex/3/3/5;578=P256/1/1/4,P384/1/1/5,P521/1/1/6")]
+[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ACc2ggAGFIKUsoKikoIABRTCkqaCpoKCgpSCuIKmgpSCgoKCpoKmgoK4gqaClIKCgoKmgqaCgriCpoKUgoKCgqaCgoKCppSmgtyApIKCpoKmgpSCgoKCpoKCgqaCpoK4goKClKaC9t6CpoKCppSCgoKCkpSCgoKClJSUgpSUgqaCgpSUpKSkpKaUpKSkpKSmpoKmlICC1rS0tLSCgoKCgsbagqaCgoKmgoKClIK4gqaClIKCuIKCuIK4gqaCgoKmgriCpoKUgoKUgoKmgoK4gqaClIKClIKCpoKCuIKmgpSCgpSCgqaCggAMCIKC7gAHEAALGAAIEu4ABxCC7gAHEILuAAkUggAHEIKCgpSCgpSCAAgIggAEEIKCksqCgoKCgpSUgoKCgoKm+oKCgoKClIKCgqaCgoKC3IKCgoKCgoCC", "43-48:1;44-47:1.1;440-455:1;456-491:2;492-507:3;508-523:4;560-562:1;567-585:1;589-608:1;612-621:1", "", "41=P256/1/2/4,P224/1/1/5,P384/1/1/6,P521/1/1/7,P256/2/2/8,genericParamsForCurve/1/1/8;584=fromHex/1/3/1,fromHex/2/3/4,fromHex/3/3/5;612=P256/1/1/4,P384/1/1/5,P521/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

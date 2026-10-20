@@ -46,21 +46,24 @@ internal static void testResponseControllerFlush(ж<testing.T> Ꮡt, testMode mo
             ᐸꟷ(continuecʗ1);
             w.Write(slice<byte>("two"u8));
         })));
+
         var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
         if (err != default!) {
             Ꮡt.Fatalf("unexpected connection error: %v"u8, err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         var buf = new slice<byte>(16);
         (var n, err) = (~res).Body.Read(buf);
         builtin.close(continuec);
         if (err != default! || ((sstring)(buf.slice(0, n))) != "one"u8) {
-            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, ((@string)(buf.slice(0, n))), err, oneˢ);
+            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, (@string)(buf.slice(0, n)), err, oneˢ);
         }
+
         (var got, err) = io.ReadAll((~res).Body);
         if (err != default! || ((sstring)got) != "two"u8) {
-            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, ((@string)got), err, twoˢ);
+            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, (@string)got, err, twoˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -128,6 +131,7 @@ internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> �
                     Ꮡt.Errorf("ctl.SetWriteDeadline() = %v, want nil"u8, errΔ2);
                 }
             }
+
             w.Write(slice<byte>("two"u8));
             {
                 var errΔ3 = ctl.Flush(); if (errΔ3 == default!) {
@@ -150,6 +154,7 @@ internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> �
                 }
             }
         })));
+
         var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
         if (err != default!) {
             Ꮡt.Fatalf("unexpected connection error: %v"u8, err);
@@ -158,7 +163,7 @@ internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> �
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
         var (b, _) = io.ReadAll((~res).Body);
         if (((sstring)b) != "one"u8) {
-            Ꮡt.Errorf("unexpected body: %q"u8, ((@string)b));
+            Ꮡt.Errorf("unexpected body: %q"u8, (@string)b);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -172,8 +177,6 @@ public static void TestResponseControllerSetFutureWriteDeadline(ж<testing.T> �
 internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var errc = new channel<error>(1);
         var startwritec = new channel<EmptyStruct>(0);
         var errcʗ1 = errc;
@@ -192,9 +195,10 @@ internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> 
                     Ꮡt.Errorf("ctl.SetWriteDeadline() = %v, want nil"u8, errΔ2);
                 }
             }
-            var (_, errΔ3) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), ((neverEnding)(rune)'a'));
+            var (_, errΔ3) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), (neverEnding)(rune)'a');
             errcʗ1.ᐸꟷ(errΔ3);
         })));
+
         var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
         builtin.close(startwritec);
         if (err != default!) {
@@ -238,7 +242,7 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 var (n, errΔ1) = io.ReadFull((~r).Body, b);
                 b = b.slice(0, n);
                 if (errΔ1 != default! || ((sstring)b) != "one"u8) {
-                    Ꮡt.Errorf("before setting read deadline: Read = %v, %q, want nil, %q"u8, errΔ1, ((@string)b), oneˢ);
+                    Ꮡt.Errorf("before setting read deadline: Read = %v, %q, want nil, %q"u8, errΔ1, (@string)b, oneˢ);
                     return;
                 }
                 {
@@ -249,7 +253,7 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 }
                 (b, errΔ1) = io.ReadAll((~r).Body);
                 if (errΔ1 == default! || ((sstring)b) != ""u8) {
-                    Ꮡt.Errorf("after setting read deadline: Read = %q, nil, want error"u8, ((@string)b));
+                    Ꮡt.Errorf("after setting read deadline: Read = %q, nil, want error"u8, (@string)b);
                 }
                 builtin.close(readcʗ1);
                 // Connection errors are sticky, so resetting the deadline does not permit
@@ -263,12 +267,13 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 }
                 (b, errΔ1) = io.ReadAll((~r).Body);
                 if (errΔ1 == default!) {
-                    Ꮡt.Errorf("after resetting read deadline: Read = %q, nil, want error"u8, ((@string)b));
+                    Ꮡt.Errorf("after resetting read deadline: Read = %q, nil, want error"u8, (@string)b);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         })));
+
         var (pr, pw) = io.Pipe();
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);
@@ -350,7 +355,7 @@ internal static void testResponseControllerSetFutureReadDeadline(ж<testing.T> �
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
         (var got, err) = io.ReadAll((~res).Body);
         if (((sstring)got) != respBody || err != default!) {
-            Ꮡt.Errorf("client read response body: %q, %v; want %q, nil"u8, ((@string)got), err, respBody);
+            Ꮡt.Errorf("client read response body: %q, %v; want %q, nil"u8, (@string)got, err, respBody);
         }
         pw.Close();
     }

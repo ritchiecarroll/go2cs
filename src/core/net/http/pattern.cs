@@ -107,6 +107,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
                 err = fmt.Errorf("at offset %d: %w"u8, off, err);
             }
         }, ref ᒐ);
+
         ref var method = ref heap<@string>(out var Ꮡmethod);
         method = s;
         @string rest = ""u8;
@@ -124,6 +125,7 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
             (_ᴛ1, err) = (default!, fmt.Errorf("invalid method %q"u8, method)); goto ᒐdone;
         }
         var p = Ꮡ(new pattern(str: s, method: method));
+
         if (found) {
             off = builtin.len(method) + 1;
         }
@@ -141,11 +143,13 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
         }
         // At this point, rest is the path.
         off += i;
+
         // An unclean path with a method that is not CONNECT can never match,
         // because paths are cleaned before matching.
         if (method != ""u8 && method != "CONNECT"u8 && rest != cleanPath(rest)) {
             (_ᴛ1, err) = (default!, errors.New(nonConnectPatternWithˢ)); goto ᒐdone;
         }
+
         var seenNames = new map<@string, bool>{}; // remember wildcard names to catch dups
         while (builtin.len(rest) > 0) {
             // Invariant: rest[0] == '/'.
@@ -230,6 +234,7 @@ internal static @string pathUnescape(@string path) {
     return u;
 }
 
+// relationship is a relationship between two patterns, p1 and p2.
 partial struct relationship /*@string*/;
 
 internal static readonly relationship equivalent = "equivalent"u8;              // both match the same requests
@@ -314,6 +319,7 @@ internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2
     if (builtin.len(p1.segments) != builtin.len(p2.segments) && !p1.lastSegment().multi && !p2.lastSegment().multi) {
         return disjoint;
     }
+
     // Consider corresponding segments in the two path patterns.
     slice<segment> segs1 = default!;
     slice<segment> segs2 = default!;
@@ -409,12 +415,10 @@ internal static relationship combineRelationships(relationship r1, relationship 
         { /* default: */
             return r2;
         }
-
     }
     else { /* default: */
         throw panic(fmt.Sprintf("unknown relationship %q"u8, r1));
     }
-
 }
 
 // If p1 has relationship `r` to p2, then
@@ -430,15 +434,6 @@ internal static relationship inverseRelationship(relationship r) {
     { /* default: */
         return r;
     }
-
-}
-
-// isLitOrSingle reports whether the segment is a non-dollar literal or a single wildcard.
-internal static bool isLitOrSingle(segment seg) {
-    if (seg.wild) {
-        return !seg.multi;
-    }
-    return seg.s != "/"u8;
 }
 
 // describeConflict returns an explanation of why two patterns conflict.
@@ -460,7 +455,7 @@ internal static @string describeConflict(ж<pattern> Ꮡp1, ж<pattern> Ꮡp2) {
 But neither is more specific than the other.
 %[1]s matches %[4]q, but %[2]s doesn't.
 %[2]s matches %[5]q, but %[1]s doesn't.
-"""u8,
+"""u8.Raw(),
             Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil(), commonPath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp2).DerefOrNull(), ref (Ꮡp1).DerefOrNull()));
     }
     if (mrel == moreGeneral && prel == moreSpecific) {
@@ -514,6 +509,7 @@ internal static @string commonPath(ref pattern p1, ref pattern p2) {
 // It assumes there is such a path.
 internal static @string differencePath(ref pattern p1, ref pattern p2) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
+
     slice<segment> segs1 = default!;
     slice<segment> segs2 = default!;
     for ((segs1, segs2) = (p1.segments, p2.segments); builtin.len(segs1) > 0 && builtin.len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {

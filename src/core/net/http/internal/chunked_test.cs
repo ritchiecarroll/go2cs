@@ -28,18 +28,21 @@ internal static readonly @string chunk2ᶜ = "world! 0123456789abcdef"u8;
 
 public static void TestChunk(ж<testing.T> Ꮡt) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
+
     var w = NewChunkedWriter(new internal_internal_test_package.bytes_BufferжWriter(Ꮡb));
     @string chunk1 = chunk1ᶜ;
     @string chunk2 = chunk2ᶜ;
     w.Write(slice<byte>(chunk1));
     w.Write(slice<byte>(chunk2));
     w.Close();
+
     {
         @string g = Ꮡb.String();
         @string e = hello17Worldˢ; if (g != e) {
             Ꮡt.Fatalf("chunk writer wrote %q; want %q"u8, g, e);
         }
     }
+
     var r = NewChunkedReader(new internal_internal_test_package.bytes_BufferжReader(Ꮡb));
     var (data, err) = io.ReadAll(r);
     if (err != default!) {
@@ -47,7 +50,7 @@ public static void TestChunk(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ReadAll from reader: %v"u8, err);
     }
     {
-        @string g = ((@string)data);
+        @string g = (@string)data;
         @string e = chunk1 + chunk2; if (g != e) {
             Ꮡt.Errorf("chunk reader read %q; want %q"u8, g, e);
         }
@@ -65,8 +68,6 @@ internal static readonly @string fillBufChunkᶜ = "0123456789a"u8;
 internal static readonly @string shortChunkᶜ = "foo"u8;
 
 public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Bunch of small chunks, all read together.
     {
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
@@ -74,6 +75,7 @@ public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
         w.Write(slice<byte>("foo"u8));
         w.Write(slice<byte>("bar"u8));
         w.Close();
+
         var r = NewChunkedReader(new internal_internal_test_package.bytes_BufferжReader(Ꮡb));
         var buf = new slice<byte>(10);
         var (n, err) = r.Read(buf);
@@ -85,6 +87,7 @@ public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Read = %q; want %q"u8, buf, foobarˢ);
         }
     }
+
     // One big chunk followed by a little chunk, but the small bufio.Reader size
     // should prevent the second chunk header from being read.
     {
@@ -99,6 +102,7 @@ public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
         w.Write(slice<byte>(fillBufChunk));
         w.Write(slice<byte>(shortChunk));
         w.Close();
+
         var r = NewChunkedReader(new internal_internal_test_package.bufio_ReaderжReader(bufio.NewReaderSize(new internal_internal_test_package.bytes_BufferжReader(Ꮡb), 16)));
         var buf = new slice<byte>(len(fillBufChunk) + len(shortChunk));
         var (n, err) = r.Read(buf);
@@ -109,11 +113,13 @@ public static void TestChunkReadMultiple(ж<testing.T> Ꮡt) {
         if (((sstring)buf) != fillBufChunk) {
             Ꮡt.Errorf("Read = %q; want %q"u8, buf, fillBufChunk);
         }
+
         (n, err) = r.Read(buf);
         if (n != len(shortChunk) || !AreEqual(err, io.EOF)) {
             Ꮡt.Errorf("Read = %d, %v; want %d, EOF"u8, n, err, len(shortChunk));
         }
     }
+
     // And test that we see an EOF chunk, even though our buffer is already full:
     {
         var r = NewChunkedReader(new internal_internal_test_package.bufio_ReaderжReader(bufio.NewReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(foo0ˢ)))));
@@ -142,6 +148,7 @@ public static void TestChunkReaderAllocs(ж<testing.T> Ꮡt) {
     w.Write(b);
     w.Write(c);
     w.Close();
+
     var readBuf = new slice<byte>(len(a) + len(b) + len(c) + 1);
     var byter = bytes.NewReader(buf.Bytes());
     var bufr = bufio.NewReader(new internal_internal_test_package.bytes_ReaderжReader(byter));
@@ -179,10 +186,8 @@ public static void TestParseHexUint(ж<testing.T> Ꮡt) {
         new("ffffffffffffffff"u8, 18446744073709551615UL, ""u8),
         new("000000000000bogus"u8, 0, "invalid byte in chunk length"u8),
         new("00000000000000000"u8, 0, "http chunk length too large"u8), // could accept if we wanted
-
         new("10000000000000000"u8, 0, "http chunk length too large"u8),
         new("00000000000000001"u8, 0, "http chunk length too large"u8), // could accept if we wanted
-
         new(""u8, 0, "empty hex number for chunk length"u8)
     }.slice();
     for (var i = (uint64)0; i <= 1234; i++) {
@@ -206,15 +211,15 @@ public static void TestParseHexUint(ж<testing.T> Ꮡt) {
 internal static readonly @string helloWorldˢ = "hello, world! 0123456789abcdef"u8;
 
 public static void TestChunkReadingIgnoresExtensions(ж<testing.T> Ꮡt) {
-    @string @in = "7;ext=\"some quoted string\"\r\n"u8 + "hello, \r\n"u8 + "17;someext\r\n"u8 + "world! 0123456789abcdef\r\n"u8 + "0;someextension=sometoken\r\n"u8; // token=token
-    // token=quoted string
-    // token without value
+    @string @in = "7;ext=\"some quoted string\"\r\n"u8 + // token=quoted string
+        "hello, \r\n"u8 + "17;someext\r\n"u8 + // token without value
+        "world! 0123456789abcdef\r\n"u8 + "0;someextension=sometoken\r\n"u8; // token=token
     var (data, err) = io.ReadAll(NewChunkedReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(@in))));
     if (err != default!) {
         Ꮡt.Fatalf("ReadAll = %q, %v"u8, data, err);
     }
     {
-        @string g = ((@string)data);
+        @string g = (@string)data;
         @string e = helloWorldˢ; if (g != e) {
             Ꮡt.Errorf("read %q; want %q"u8, g, e);
         }
@@ -260,6 +265,7 @@ internal static readonly @string validᶜ = "4\r\nabcd\r\n5\r\nabc\r\n\r\n0\r\n"
 // Issue 48861: ChunkedReader should report incomplete chunks
 public static void TestIncompleteChunk(ж<testing.T> Ꮡt) {
     @string valid = validᶜ;
+
     for (nint i = 0; i < len(valid); i++) {
         @string incomplete = valid.slice(0, i);
         var rΔ1 = NewChunkedReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(incomplete)));
@@ -269,6 +275,7 @@ public static void TestIncompleteChunk(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var r = NewChunkedReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(valid)));
     {
         var (_, err) = io.ReadAll(r); if (err != default!) {
@@ -282,6 +289,7 @@ internal static readonly @string abcdˢ = "4\r\nabcd"u8;
 
 public static void TestChunkEndReadError(ж<testing.T> Ꮡt) {
     var readErr = fmt.Errorf("chunk end read error"u8);
+
     var r = NewChunkedReader(io.MultiReader(new internal_internal_test_package.strings_ReaderжReader(strings.NewReader(abcdˢ)), iotest.ErrReader(readErr)));
     {
         var (_, err) = io.ReadAll(r); if (!AreEqual(err, readErr)) {

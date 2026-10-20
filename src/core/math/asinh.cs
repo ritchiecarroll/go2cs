@@ -76,7 +76,6 @@ internal static float64 asinh(float64 x) {
         temp = Log1p(x + x * x / (1D + Sqrt(1D + x * x))); // 2.0 > |x| > 2**-28
         break;
     }}
-
     if (sign) {
         temp = -temp;
     }

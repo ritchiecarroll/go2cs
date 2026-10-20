@@ -40,7 +40,6 @@ public static void TestUint128AddSub(ж<testing.T> Ꮡt) {
         else { /* default: */
             throw panic("bogus op");
         }
-
         if (got != tt.want) {
             Ꮡt.Errorf("%v add %d = %v; want %v"u8, tt.@in, tt.op, got, tt.want);
         }
@@ -55,10 +54,10 @@ internal partial struct TestBitsSetFrom_tests /*dyn*/ {
 public static void TestBitsSetFrom(ж<testing.T> Ꮡt) {
     var tests = new TestBitsSetFrom_tests[]{
         new(0, new uint128(~(uint64)0, ~(uint64)0)),
-        new(1, new uint128((~(uint64)0 >> (int)(1)), ~(uint64)0)),
+        new(1, new uint128(~(uint64)0 >> 1, ~(uint64)0)),
         new(63, new uint128(1, ~(uint64)0)),
         new(64, new uint128(0, ~(uint64)0)),
-        new(65, new uint128(0, (~(uint64)0 >> (int)(1)))),
+        new(65, new uint128(0, ~(uint64)0 >> 1)),
         new(127, new uint128(0, 1)),
         new(128, new uint128(0, 0))
     }.slice();
@@ -79,10 +78,10 @@ internal partial struct TestBitsClearedFrom_tests /*dyn*/ {
 public static void TestBitsClearedFrom(ж<testing.T> Ꮡt) {
     var tests = new TestBitsClearedFrom_tests[]{
         new(0, new uint128(0, 0)),
-        new(1, new uint128(((uint64)1 << (int)(63)), 0)),
+        new(1, new uint128((uint64)1 << 63, 0)),
         new(63, new uint128((uint64)(~(uint64)0 & ~(uint64)1), 0)),
         new(64, new uint128(~(uint64)0, 0)),
-        new(65, new uint128(~(uint64)0, ((uint64)1 << (int)(63)))),
+        new(65, new uint128(~(uint64)0, (uint64)1 << 63)),
         new(127, new uint128(~(uint64)0, (uint64)(~(uint64)0 & ~(uint64)1))),
         new(128, new uint128(~(uint64)0, ~(uint64)0))
     }.slice();

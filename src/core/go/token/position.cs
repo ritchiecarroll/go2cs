@@ -10,6 +10,8 @@ using strconv = strconv_package;
 using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using global::go.sync;
+using iter = iter_package;
+using ꓸꓸꓸжFile = Span<ж<token_package.ΔFile>>;
 
 partial class token_package {
 
@@ -60,6 +62,28 @@ public static @string String(this ΔPosition pos) {
     return s;
 }
 
+// Pos is a compact encoding of a source position within a file set.
+// It can be converted into a [Position] for a more convenient, but much
+// larger, representation.
+//
+// The Pos value for a given file is a number in the range [base, base+size],
+// where base and size are specified when a file is added to the file set.
+// The difference between a Pos value and the corresponding file base
+// corresponds to the byte offset of that position (represented by the Pos value)
+// from the beginning of the file. Thus, the file base offset is the Pos value
+// representing the first byte in the file.
+//
+// To create the Pos value for a specific source offset (measured in bytes),
+// first add the respective file to the current file set using [FileSet.AddFile]
+// and then call [File.Pos](offset) for that file. Given a Pos value p
+// for a specific file set fset, the corresponding [Position] value is
+// obtained by calling fset.Position(p).
+//
+// Pos values can be compared directly with the usual comparison operators:
+// If two Pos values p and q are in the same file, comparing p and q is
+// equivalent to comparing the respective source file offsets. If p and q
+// are in different files, p < q is true if the file implied by p was added
+// to the respective file set before the file implied by q.
 partial struct ΔPos /*num:nint*/;
 
 // The zero value for [Pos] is NoPos; there is no file and line information
@@ -78,6 +102,9 @@ public static bool IsValid(this ΔPos p) {
 
 // A File is a handle for a file belonging to a [FileSet].
 // A File has a name, size, and line offset table.
+//
+// Use [FileSet.AddFile] to create a File.
+// A File may belong to more than one FileSet; see [FileSet.AddExistingFiles].
 partial struct ΔFile {
     internal @string name; // file name as provided to AddFile
     internal nint @base;   // Pos value range for this file is [base...base+size]
@@ -101,6 +128,11 @@ public static nint Base(this ref ΔFile f) {
 // Size returns the size of file f as registered with AddFile.
 public static nint Size(this ref ΔFile f) {
     return f.size;
+}
+
+// End returns the end position of file f as registered with AddFile.
+public static ΔPos End(this ref ΔFile f) {
+    return (ΔPos)(f.@base + f.size);
 }
 
 // LineCount returns the number of lines in file f.
@@ -187,6 +219,7 @@ public static bool SetLines(this ж<ΔFile> Ꮡf, slice<nint> lines) {
             return false;
         }
     }
+
     // set lines table
     f.mutex.Lock();
     f.lines = lines;
@@ -210,6 +243,7 @@ public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content)
             line = offset + 1;
         }
     }
+
     // set lines table
     f.mutex.Lock();
     f.lines = lines;
@@ -233,7 +267,7 @@ public static ΔPos LineStart(this ж<ΔFile> Ꮡf, nint line) {
         if (line > len(f.lines)) {
             throw panic(fmt.Sprintf("invalid line number %d (should be < %d)"u8, line, len(f.lines)));
         }
-        return ((ΔPos)(f.@base + f.lines[line - 1]));
+        return (ΔPos)(f.@base + f.lines[line - 1]);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { if (ᒐd1) Ꮡf.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
@@ -297,8 +331,7 @@ internal static nint fixOffset(this ref ΔFile f, nint offset) {
     // only generate this code if needed
     if (debug) {
         throw panic(fmt.Sprintf("offset %d out of bounds [%d, %d] (position %d out of bounds [%d, %d])"u8,
-            (nint)(0), /* for symmetry */
- offset, f.size,
+            (nint)0, /* for symmetry */ offset, f.size,
             f.@base + offset, f.@base, f.@base + f.size));
     }
     return 0;
@@ -314,7 +347,7 @@ internal static nint fixOffset(this ref ΔFile f, nint offset) {
 // in general, holds for the result p:
 // f.Pos(f.Offset(p)) == p.
 public static ΔPos Pos(this ref ΔFile f, nint offset) {
-    return ((ΔPos)(f.@base + f.fixOffset(offset)));
+    return (ΔPos)(f.@base + f.fixOffset(offset));
 }
 
 // Offset returns the offset for the given file position p.
@@ -353,8 +386,8 @@ internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile
     @string filename = default!;
     nint line = default!;
     nint column = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     f.mutex.Lock();
     filename = f.name;
     {
@@ -398,8 +431,8 @@ internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile
 
 internal static ΔPosition /*pos*/ position(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
     ΔPosition pos = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     nint offset = f.fixOffset((nint)p - f.@base);
     pos.Offset = offset;
     (pos.Filename, pos.Line, pos.Column) = Ꮡf.unpack(offset, adjusted);
@@ -455,18 +488,16 @@ public static ΔPosition /*pos*/ Position(this ж<ΔFile> Ꮡf, ΔPos p) {
 partial struct FileSet {
     internal sync.RWMutex mutex;         // protects the file set
     internal nint @base;                 // base offset for the next file
-    internal slice<ж<ΔFile>> files;      // list of files in the order added to the set
+    internal tree tree;                 // tree of files in ascending base order
     internal atomic.Pointer<ΔFile> last; // cache of last file looked up
 }
 
 // NewFileSet creates a new file set.
 public static ж<FileSet> NewFileSet() {
     return Ꮡ(new FileSet(
-        @base: 1
+        @base: 1 // 0 == NoPos
     ));
 }
-
-// 0 == NoPos
 
 // Base returns the minimum base offset that must be provided to
 // [FileSet.AddFile] when adding the next file.
@@ -502,6 +533,7 @@ public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @
 
         // Allocate f outside the critical section.
         var f = Ꮡ(new ΔFile(name: filename, size: size, lines: new nint[]{0}.slice()));
+
         Ꮡs.of(FileSet.Ꮡmutex).Lock();
         ᒐd1 = true;
         if (@base < 0) {
@@ -521,11 +553,51 @@ public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @
         }
         // add the file to the file set
         s.@base = @base;
-        s.files = append(s.files, f);
+        Ꮡs.of(FileSet.Ꮡtree).add(f);
         Ꮡs.of(FileSet.Ꮡlast).Store(f);
         return f;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { if (ᒐd1) Ꮡs.of(FileSet.Ꮡmutex).Unlock(); ᒐ.Run(); }
+}
+
+// AddExistingFiles adds the specified files to the
+// FileSet if they are not already present.
+// The caller must ensure that no pair of Files that
+// would appear in the resulting FileSet overlap.
+public static void AddExistingFiles(this ж<FileSet> Ꮡs, params ꓸꓸꓸжFile filesʗp) {
+    GoFrame ᒐ = default;
+    bool ᒐd1 = false;
+    try {
+        var files = filesʗp.sslice();
+        ref var s = ref Ꮡs.DerefOrNull();
+
+        // This function cannot be implemented as:
+        //
+        //	for _, file := range files {
+        //		if prev := fset.File(token.Pos(file.Base())); prev != nil {
+        //			if prev != file {
+        //				panic("FileSet contains a different file at the same base")
+        //			}
+        //			continue
+        //		}
+        //		file2 := fset.AddFile(file.Name(), file.Base(), file.Size())
+        //		file2.SetLines(file.Lines())
+        //	}
+        //
+        // because all calls to AddFile must be in increasing order.
+        // AddExistingFiles lets us augment an existing FileSet
+        // sequentially, so long as all sets of files have disjoint ranges.
+        // This approach also does not preserve line directives.
+        Ꮡs.of(FileSet.Ꮡmutex).Lock();
+        ᒐd1 = true;
+
+        foreach (var (_, f) in files) {
+            Ꮡs.of(FileSet.Ꮡtree).add(f);
+            s.@base = max(s.@base, f.Base() + f.Size() + 1);
+        }
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡs.of(FileSet.Ꮡmutex).Unlock(); ᒐ.Run(); }
 }
 
@@ -542,74 +614,67 @@ public static void RemoveFile(this ж<FileSet> Ꮡs, ж<ΔFile> Ꮡfile) {
         ref var s = ref Ꮡs.DerefOrNull();
         ref var @file = ref Ꮡfile.DerefOrNull();
 
-        Ꮡs.of(FileSet.Ꮡlast).CompareAndSwap(Ꮡfile, nil); // clear last file cache
         Ꮡs.of(FileSet.Ꮡmutex).Lock();
         ᒐd1 = true;
-        {
-            nint i = searchFiles(s.files, @file.@base); if (i >= 0 && s.files[i] == Ꮡfile) {
-                var last = Ꮡ(s.files, len(s.files) - 1);
-                s.files = slices.Delete<slice<ж<ΔFile>>, ж<ΔFile>>(s.files, i, i + 1);
-                last.ValueSlot = default!; // don't prolong lifetime when popping last element
-            }
+
+        Ꮡs.of(FileSet.Ꮡlast).CompareAndSwap(Ꮡfile, nil); // clear last file cache
+
+        var (pn, _) = Ꮡs.of(FileSet.Ꮡtree).locate(@file.key());
+        if (pn.ValueSlot != nil && (~(pn.ValueSlot)).@file == Ꮡfile) {
+            s.tree.delete(pn);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡs.of(FileSet.Ꮡmutex).Unlock(); ᒐ.Run(); }
 }
 
-// Iterate calls f for the files in the file set in the order they were added
-// until f returns false.
-public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<ΔFile>, bool> f) {
-    ref var s = ref Ꮡs.DerefOrNull();
-
-    for (nint i = 0; ᐧ ; i++) {
-        ж<ΔFile> @file = default!;
+// Iterate calls yield for the files in the file set in ascending Base
+// order until yield returns false.
+public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<ΔFile>, bool> yield) {
+    GoFrame ᒐ = default;
+    try {
         Ꮡs.of(FileSet.Ꮡmutex).RLock();
-        if (i < len(s.files)) {
-            @file = s.files[i];
-        }
-        Ꮡs.of(FileSet.Ꮡmutex).RUnlock();
-        if (@file == nil || !f(@file)) {
-            break;
-        }
-    }
-}
+        defer(Ꮡs.of(FileSet.Ꮡmutex).RUnlock, ref ᒐ);
 
-internal static nint searchFiles(slice<ж<ΔFile>> a, nint x) {
-    var (i, found) = slices.BinarySearchFunc(a, x, (ж<ΔFile> aΔ1, nint xΔ1) => cmp.Compare((~aΔ1).@base, xΔ1));
-    if (!found) {
-        // We want the File containing x, but if we didn't
-        // find x then i is the next one.
-        i--;
+        // Unlock around user code.
+        // The iterator is robust to modification by yield.
+        // Avoid range here, so we can use defer.
+        Ꮡs.of(FileSet.Ꮡtree).all()((ж<ΔFile> f) => {
+            GoFrame ᒐ = default;
+            try {
+                Ꮡs.of(FileSet.Ꮡmutex).RUnlock();
+                defer(Ꮡs.of(FileSet.Ꮡmutex).RLock, ref ᒐ);
+                return yield(f);
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            finally { ᒐ.Run(); }
+        });
     }
-    return i;
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        ref var s = ref Ꮡs.DerefOrNull();
-
         // common case: p is in last file.
         {
             var f = Ꮡs.of(FileSet.Ꮡlast).Load(); if (f != nil && (~f).@base <= (nint)p && (nint)p <= (~f).@base + (~f).size) {
                 return f;
             }
         }
+
         Ꮡs.of(FileSet.Ꮡmutex).RLock();
         ᒐd1 = true;
-        // p is not in last file - search all files
+
+        var (pn, _) = Ꮡs.of(FileSet.Ꮡtree).locate(new Δkey((nint)p, (nint)p));
         {
-            nint i = searchFiles(s.files, (nint)p); if (i >= 0) {
-                var f = s.files[i];
-                // f.base <= int(p) by definition of searchFiles
-                if ((nint)p <= (~f).@base + (~f).size) {
-                    // Update cache of last file. A race is ok,
-                    // but an exclusive lock causes heavy contention.
-                    Ꮡs.of(FileSet.Ꮡlast).Store(f);
-                    return f;
-                }
+            var n = pn.ValueSlot; if (n != nil) {
+                // Update cache of last file. A race is ok,
+                // but an exclusive lock causes heavy contention.
+                Ꮡs.of(FileSet.Ꮡlast).Store((~n).@file);
+                return (~n).@file;
             }
         }
         return default!;
@@ -668,7 +733,7 @@ internal static nint searchInts(slice<nint> a, nint x) {
     nint i = 0;
     nint j = len(a);
     while (i < j) {
-        nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+        nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
         if (a[h] <= x){
             i = h + 1;

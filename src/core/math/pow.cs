@@ -14,8 +14,9 @@ internal static bool isOddInt(float64 x) {
         // on some architectures (and does so on arm64). See issue #57465.
         return false;
     }
+
     var (xi, xf) = Modf(x);
-    return xf == 0D && (int64)((int64)xi & 1) == 1;
+    return xf == 0D && ((int64)xi & 1) == 1;
 }
 
 // Special cases taken from FreeBSD's /usr/src/lib/msun/src/e_pow.c
@@ -77,7 +78,6 @@ internal static float64 pow(float64 x, float64 y) {
             }
             return 0D;
         }}
-
         break;
     }
     case {} when IsInf(y, 0): {
@@ -91,7 +91,6 @@ internal static float64 pow(float64 x, float64 y) {
         default: {
             return Inf(1);
         }}
-
         break;
     }
     case {} when IsInf(x, 0): {
@@ -105,7 +104,6 @@ internal static float64 pow(float64 x, float64 y) {
         case {} when y is > 0D: {
             return Inf(1);
         }}
-
         break;
     }
     case {} when y is 0.5D: {
@@ -132,11 +130,12 @@ internal static float64 pow(float64 x, float64 y) {
         default: {
             return Inf(1);
         }}
-
     }
+
     // ans = a1 * 2**ae (= 1 for now).
     var a1 = 1.0D;
     nint ae = 0;
+
     // ans *= x**yf
     if (yf != 0D) {
         if (yf > 0.5D) {
@@ -145,13 +144,14 @@ internal static float64 pow(float64 x, float64 y) {
         }
         a1 = Exp(yf * Log(x));
     }
+
     // ans *= x**yi
     // by multiplying in successive squarings
     // of x according to bits of yi.
     // accumulate powers of two into exp.
     var (x1, xe) = Frexp(x);
     for (var i = (int64)yi; i != 0; i >>= (int)(1)) {
-        if (xe < (-1 << (int)(12)) || (1 << (int)(12)) < xe) {
+        if (xe < -1 << 12 || 1 << 12 < xe) {
             // catch xe before it overflows the left shift below
             // Since i !=0 it has at least one bit still set, so ae will accumulate xe
             // on at least one more iteration, ae += xe is a lower bound on ae
@@ -160,7 +160,7 @@ internal static float64 pow(float64 x, float64 y) {
             ae += xe;
             break;
         }
-        if ((int64)(i & 1) == 1) {
+        if ((i & 1) == 1) {
             a1 *= x1;
             ae += xe;
         }
@@ -171,6 +171,7 @@ internal static float64 pow(float64 x, float64 y) {
             xe--;
         }
     }
+
     // ans = a1*2**ae
     // if y < 0 { ans = 1 / ans }
     // but in the opposite order

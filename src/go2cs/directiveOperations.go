@@ -10,10 +10,12 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"go/build"
 	"go/build/constraint"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -33,9 +35,11 @@ type BuildConstraintEvaluator struct {
 	// tags apply; empty means there is no loader context. releaseTags caches the resolved set and is
 	// filled on FIRST USE — resolving it costs a `go env` subprocess, and most files never mention a
 	// release tag at all (no behavioral package does, and exactly one standard-library package does),
-	// so resolving eagerly would buy nothing and cost one subprocess per module root.
+	// so resolving eagerly would buy nothing and cost one subprocess per module root. toolTags is the
+	// same for the dotted tool tags (`goexperiment.swissmap`), resolved by loaderToolTags.
 	loaderDir   string
 	releaseTags []string
+	toolTags    []string
 }
 
 // NewBuildConstraintEvaluator creates a new build constraint evaluator
@@ -156,15 +160,22 @@ func (e *BuildConstraintEvaluator) matchTag(tag string) bool {
 	}
 
 	// A DOTTED build tag — `goexperiment.coverageredesign`, `amd64.v1` — is matched against the
-	// host toolchain's active tool tags (go/build's ToolTags), again exactly as go/packages did.
-	// Without this the tag falls through to `false`, so a `//go:build goexperiment.X` _on.go file
-	// for an experiment ON by default (coverageredesign, regabiwrappers, regabiargs) was
-	// re-EXCLUDED here after packages.Load had INCLUDED it, dropping that file's consts (testing's
-	// `goexperiment.CoverageRedesign`, CS0117). An experiment that is off keeps its tag out of
-	// ToolTags → false → the `!goexperiment.X` _off.go file is included instead, so exactly one of
-	// the pair survives, as Go intends.
+	// LOADER toolchain's active tool tags, again exactly as go/packages did. Without this the tag
+	// falls through to `false`, so a `//go:build goexperiment.X` _on.go file for an experiment ON by
+	// default (coverageredesign, regabiwrappers, regabiargs) was re-EXCLUDED here after packages.Load
+	// had INCLUDED it, dropping that file's consts (testing's `goexperiment.CoverageRedesign`,
+	// CS0117). An experiment that is off keeps its tag out of ToolTags → false → the
+	// `!goexperiment.X` _off.go file is included instead, so exactly one of the pair survives, as Go
+	// intends.
+	//
+	// The LOADER's tags, not go/build's: build.Default.ToolTags is the set compiled into THIS binary,
+	// and the default experiments change with every release. A go1.26.9-built go2cs converting the
+	// 1.24.13 GOROOT matched `goexperiment.swissmap` against 1.26's list, which no longer has it, and
+	// dropped internal/runtime/maps' runtime_swiss.go and its three fast paths after go/packages had
+	// selected them — and go/packages had already excluded runtime_noswiss.go, so the package kept
+	// NEITHER half. It is the release-tag divergence below, on the other half of the tag namespace.
 	if strings.Contains(tag, ".") {
-		for _, toolTag := range build.Default.ToolTags {
+		for _, toolTag := range e.resolveToolTags() {
 			if strings.EqualFold(toolTag, tag) {
 				return true
 			}
@@ -222,6 +233,94 @@ func (e *BuildConstraintEvaluator) resolveReleaseTags() []string {
 	}
 
 	return e.releaseTags
+}
+
+// resolveToolTags returns this evaluator's tool tags, resolving them from the loader directory on first
+// use and caching the answer for the rest of the evaluator's life.
+func (e *BuildConstraintEvaluator) resolveToolTags() []string {
+	if e.toolTags == nil {
+		e.toolTags = loaderToolTags(e.loaderDir)
+	}
+
+	return e.toolTags
+}
+
+var (
+	toolTagsLock  sync.Mutex
+	toolTagsCache = map[string][]string{}
+)
+
+// loaderToolTags returns the tool tags (go/build's ToolTags: `goexperiment.*` for every active
+// experiment, and the GOARCH feature level such as `amd64.v1`) of the toolchain the go command selects
+// in loaderDir, under the converter's own environment — so GOEXPERIMENT and GOAMD64 apply exactly as
+// they did when go/packages selected the files. It is loaderReleaseTags for the dotted half of the tag
+// namespace: lazy, cached per MODULE ROOT, and falling back to the tags compiled into this binary when
+// there is no loader context or the go command cannot answer, so an unreachable toolchain never starts
+// excluding files.
+func loaderToolTags(loaderDir string) []string {
+	if loaderDir == "" {
+		return build.Default.ToolTags
+	}
+
+	moduleRoot := moduleRootDir(loaderDir)
+
+	toolTagsLock.Lock()
+	defer toolTagsLock.Unlock()
+
+	if tags, cached := toolTagsCache[moduleRoot]; cached {
+		return tags
+	}
+
+	tags := build.Default.ToolTags
+
+	if resolved, err := goListToolTags(moduleRoot); err == nil {
+		tags = resolved
+	}
+
+	toolTagsCache[moduleRoot] = tags
+
+	return tags
+}
+
+// goListToolTags asks the go command in dir for its build context's tool tags. `-find` lists the one
+// named package without loading its dependencies, and `unsafe` exists in every toolchain, so the
+// question costs one short subprocess (~150-220ms on Windows) whatever the module holds.
+func goListToolTags(dir string) ([]string, error) {
+	cmd := exec.Command("go", "list", "-find", "-f", "{{context.ToolTags}}", "unsafe")
+	cmd.Dir = dir
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("failed to list tool tags: %w", err)
+	}
+
+	return parseToolTagsList(out.String())
+}
+
+// parseToolTagsList parses go list's rendering of a []string — `[goexperiment.regabiargs amd64.v1]` —
+// into its elements. An empty list is a valid answer (no experiment active and no feature level).
+func parseToolTagsList(text string) ([]string, error) {
+	text = strings.TrimSpace(text)
+
+	inner, ok := strings.CutPrefix(text, "[")
+
+	if ok {
+		inner, ok = strings.CutSuffix(inner, "]")
+	}
+
+	if !ok {
+		return nil, fmt.Errorf("unrecognized tool tag list %q", text)
+	}
+
+	tags := strings.Fields(inner)
+
+	if tags == nil {
+		tags = []string{}
+	}
+
+	return tags, nil
 }
 
 // loaderReleaseTags returns the Go release tags satisfied by the toolchain the go command selects in

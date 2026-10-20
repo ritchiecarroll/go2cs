@@ -87,10 +87,12 @@ internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Respo
             return err;
         }
     }
+
     c.mutex.Lock();
     r.ServiceMethod = c.pending[c.resp.Id];
     delete(c.pending, c.resp.Id);
     c.mutex.Unlock();
+
     r.Error = ""u8;
     r.Seq = c.resp.Id;
     if (c.resp.Error != default! || c.resp.Result == nil) {
@@ -129,7 +131,7 @@ public static (ж<rpc.Client>, error) Dial(@string network, @string address) {
     if (err != default!) {
         return (default!, err);
     }
-    return (NewClient(new net_ConnᴠReadWriteCloser(conn)), err);
+    return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default!);
 }
 
 } // end jsonrpc_package

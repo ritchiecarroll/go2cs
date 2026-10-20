@@ -27,8 +27,10 @@ internal static bool ipv6Enabled;
 internal static bool canListenTCP6OnLoopback;
 internal static bool unStrmDgramEnabled;
 internal static bool rawSocketSess;
+
 internal static time.Time aLongTimeAgo = time.Unix(233431200, 0);
 internal static time.Time neverTimeout = new time.Time(nil);
+
 internal static error errNoAvailableInterface = errors.New("no available interface"u8);
 internal static error errNoAvailableAddress = errors.New("no available address"u8);
 
@@ -65,20 +67,18 @@ internal static void probeStack() {
     rawSocketSess = supportsRawSocket();
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "aix"u8) {
-        var (@out, _) = exec.Command(oslevelˢ, // Unix network isn't properly working on AIX 7.2 with
- // Technical Level < 2.
- "-s"u8).Output();
-        if (len(@out) >= len("7200-XX-ZZ-YYMM")) {
-            // AIX 7.2, Tech Level XX, Service Pack ZZ, date YYMM
-            sstring ver = ((sstring)(@out[..4]));
-            var (tl, _) = strconv.Atoi(((@string)(@out[5..7])));
+        // Unix network isn't properly working on AIX 7.2 with
+        // Technical Level < 2.
+        var (@out, _) = exec.Command(oslevelˢ, "-s"u8).Output();
+        if (len(@out) >= len("7200-XX-ZZ-YYMM")) { // AIX 7.2, Tech Level XX, Service Pack ZZ, date YYMM
+            sstring ver = (sstring)(@out[..4]);
+            var (tl, _) = strconv.Atoi((@string)(@out[5..7]));
             unStrmDgramEnabled = ver > "7200"u8 || (ver == "7200"u8 && tl >= 2);
         }
     }
     else { /* default: */
         unStrmDgramEnabled = true;
     }
-
 }
 
 internal static bool unixStrmDgramEnabled() {
@@ -115,11 +115,12 @@ public static bool TestableNetwork(@string network) {
     var ss = strings.Split(network, ":"u8);
     var exprᴛ1 = ss[0];
     if (exprᴛ1 == "ip+nopriv"u8) {
+        // This is an internal network name for testing on the
+        // package net of the standard library.
         var exprᴛ2 = runtime.GOOS;
         if (exprᴛ2 == "android"u8 || exprᴛ2 == "fuchsia"u8 || exprᴛ2 == "hurd"u8 || exprᴛ2 == "ios"u8 || exprᴛ2 == "js"u8 || exprᴛ2 == "nacl"u8 || exprᴛ2 == "plan9"u8 || exprᴛ2 == "wasip1"u8 || exprᴛ2 == "windows"u8) {
             return false;
         }
-
     }
     else if (exprᴛ1 == "ip"u8 || exprᴛ1 == "ip4"u8 || exprᴛ1 == "ip6"u8) {
         var exprᴛ3 = runtime.GOOS;
@@ -128,12 +129,9 @@ public static bool TestableNetwork(@string network) {
         }
         { /* default: */
             if (os.Getuid() != 0) {
-                // This is an internal network name for testing on the
-                // package net of the standard library.
                 return false;
             }
         }
-
     }
     else if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8) {
         var exprᴛ4 = runtime.GOOS;
@@ -143,16 +141,13 @@ public static bool TestableNetwork(@string network) {
         if (exprᴛ4 == "aix"u8) {
             return unixStrmDgramEnabled();
         }
-
     }
     else if (exprᴛ1 == "unixpacket"u8) {
         var exprᴛ5 = runtime.GOOS;
         if (exprᴛ5 == "aix"u8 || exprᴛ5 == "android"u8 || exprᴛ5 == "fuchsia"u8 || exprᴛ5 == "hurd"u8 || exprᴛ5 == "darwin"u8 || exprᴛ5 == "ios"u8 || exprᴛ5 == "js"u8 || exprᴛ5 == "nacl"u8 || exprᴛ5 == "plan9"u8 || exprᴛ5 == "wasip1"u8 || exprᴛ5 == "windows"u8 || exprᴛ5 == "zos"u8) {
             return false;
         }
-
     }
-
     var exprᴛ6 = ss[0];
     if (exprᴛ6 == "tcp4"u8 || exprᴛ6 == "udp4"u8 || exprᴛ6 == "ip4"u8) {
         return SupportsIPv4();
@@ -160,7 +155,6 @@ public static bool TestableNetwork(@string network) {
     if (exprᴛ6 == "tcp6"u8 || exprᴛ6 == "udp6"u8 || exprᴛ6 == "ip6"u8) {
         return SupportsIPv6();
     }
-
     return true;
 }
 
@@ -171,13 +165,12 @@ public static bool TestableAddress(@string network, @string address) {
         var ss = strings.Split(network, ":"u8);
         var exprᴛ1 = ss[0];
         if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
+            // Abstract unix domain sockets, a Linux-ism.
             if (address[0] == (rune)'@' && runtime.GOOS != "linux"u8) {
-                // Abstract unix domain sockets, a Linux-ism.
                 return false;
             }
         }
     }
-
     return true;
 }
 
@@ -218,7 +211,6 @@ public static (net.Listener, error) NewLocalListener(@string network) {
         }
         return net.Listen(network, path);
     }
-
     return (default!, fmt.Errorf("%s is not supported on %s/%s"u8, network, runtime.GOOS, runtime.GOARCH));
 }
 
@@ -262,7 +254,6 @@ public static (net.PacketConn, error) NewLocalPacketListener(@string network) {
         }
         return net.ListenPacket(network, path);
     }
-
     return (default!, fmt.Errorf("%s is not supported on %s/%s"u8, network, runtime.GOOS, runtime.GOARCH));
 }
 
@@ -300,7 +291,6 @@ public static (net.IP, error) MulticastSource(@string network, ж<net.Interface>
     else { /* default: */
         return (default!, errNoAvailableAddress);
     }
-
     if (Ꮡifi == nil || (net.Flags)(ifi.Flags & net.FlagUp) == 0 || (net.Flags)(ifi.Flags & net.FlagMulticast) == 0) {
         return (default!, errNoAvailableAddress);
     }
@@ -340,7 +330,6 @@ public static (ж<net.Interface>, error) RoutedInterface(@string network, net.Fl
     else { /* default: */
         return (default!, errNoAvailableInterface);
     }
-
     var (ift, err) = net.Interfaces();
     if (err != default!) {
         return (default!, errNoAvailableInterface);
@@ -402,8 +391,7 @@ internal static (net.IP, bool) routableIP(@string network, net.IP ip) {
         }
     }
     else if (exprᴛ1 == "ip6"u8) {
-        if (ip.IsLoopback()) {
-            // addressing scope of the loopback address depends on each implementation
+        if (ip.IsLoopback()) { // addressing scope of the loopback address depends on each implementation
             return (default!, false);
         }
         {
@@ -424,7 +412,6 @@ internal static (net.IP, bool) routableIP(@string network, net.IP ip) {
             }
         }
     }
-
     return (default!, false);
 }
 

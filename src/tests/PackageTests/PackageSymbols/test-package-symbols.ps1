@@ -209,10 +209,20 @@ if ($Aot -or $AotOnly) {
         Clear-Build
         $out = Join-Path $work 'out-aot'
         $wall = [System.Diagnostics.Stopwatch]::StartNew()
-        [void](Invoke-Dotnet 'AOT' (@('publish', $project, '-c', 'Release', '-r', $rid, '-p:PublishAot=true', '-o', $out) + $common))
+        $publishLog = @(Invoke-Dotnet 'AOT' (@('publish', $project, '-c', 'Release', '-r', $rid, '-p:PublishAot=true', '-o', $out, '-clp:PerformanceSummary') + $common))
         $wall.Stop()
         Write-Host "    AOT: publish wall $([int]$wall.Elapsed.TotalMinutes) min ($([int]$wall.Elapsed.TotalSeconds) s) for $(@(Get-ChildItem (Join-Path $work 'packages') -Directory -Filter 'go.*').Count) go.* package(s)"
         Write-Host "READ (AOT publish wall): $([int]$wall.Elapsed.TotalSeconds) s"
+
+        # MEASURED, NOT JUDGED (2026-10-14). A local publish of this consumer logged 30,797 "ILC: Method '...' will always
+        # throw because: Failed to load type ..." lines: ILC instantiating golib's array`1, ElemRefBox`1 and their
+        # enumerators into self-nesting generics until its cycle cutoff, compiling each level before the cut. These two
+        # lines say, per RID and per tree, how much of the wall is ILC and how much of that cycle work it did. Distinct
+        # lines are counted, so a repeated summary cannot double them. "n/a" means MSBuild printed no IlcCompile line.
+        $cutoffs = @($publishLog | Where-Object { $_ -match "ILC: Method '.*' will always throw because" } | Sort-Object -Unique).Count
+        $ilcMs = @($publishLog | ForEach-Object { if ($_ -match '^\s*(\d+) ms\s+IlcCompile\s+\d+ calls') { $Matches[1] } } | Select-Object -First 1)
+        Write-Host "READ (ILC cycle-cutoff methods): $cutoffs"
+        Write-Host "READ (IlcCompile ms): $(if ($ilcMs.Count) { $ilcMs[0] } else { 'n/a' })"
 
         $run = @(& (Join-Path $out $exe) 2>&1 | ForEach-Object { "$_" })
         $code = $LASTEXITCODE

@@ -50,12 +50,14 @@ public static void TestNextStdChunk(ж<Δtesting.T> Ꮡt) {
         }
         return @out;
     }
+
     var noParens = (rune r) => {
         if (r == (rune)'(' || r == (rune)')') {
             return -1;
         }
         return r;
     };
+
     foreach (var (_, marked) in nextStdChunkTests) {
         // marked is an expected output from markChunks.
         // If we delete the parens and pass it through markChunks,
@@ -145,8 +147,6 @@ partial struct FormatTest {
     internal @string result;
 }
 
-// Three-letter months and days must not be followed by lower-case letter.
-// Time stamps, Fractional seconds.
 internal static slice<FormatTest> formatTests = new FormatTest[]{
     new("ANSIC"u8, ANSIC, "Wed Feb  4 21:00:57 2009"u8),
     new("UnixDate"u8, UnixDate, "Wed Feb  4 21:00:57 PST 2009"u8),
@@ -161,7 +161,9 @@ internal static slice<FormatTest> formatTests = new FormatTest[]{
     new("am/pm"u8, "3pm"u8, "9pm"u8),
     new("AM/PM"u8, "3PM"u8, "9PM"u8),
     new("two-digit year"u8, "06 01 02"u8, "09 02 04"u8),
+    // Three-letter months and days must not be followed by lower-case letter.
     new("Janet"u8, "Hi Janet, the Month is January"u8, "Hi Janet, the Month is February"u8),
+    // Time stamps, Fractional seconds.
     new("Stamp"u8, Stamp, "Feb  4 21:00:57"u8),
     new("StampMilli"u8, StampMilli, "Feb  4 21:00:57.012"u8),
     new("StampMicro"u8, StampMicro, "Feb  4 21:00:57.012345"u8),
@@ -189,7 +191,6 @@ public static void TestFormat(ж<Δtesting.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct goStringTestsᴛ1 /*dyn*/ {
     internal Δtime.Time @in;
@@ -241,6 +242,7 @@ public static void TestFormatShortYear(ж<Δtesting.T> Ꮡt) {
         9999, 10000, 10001,
         99999, 100000, 100001
     }.slice();
+
     foreach (var (_, y) in years) {
         var time = Date(y, January, 1, 0, 0, 0, 0, ΔUTC);
         @string result = time.Format("2006.01.02"u8);
@@ -248,9 +250,9 @@ public static void TestFormatShortYear(ж<Δtesting.T> Ꮡt) {
         if (y < 0){
             // The 4 in %04d counts the - sign, so print -y instead
             // and introduce our own - sign.
-            want = fmt.Sprintf("-%04d.%02d.%02d"u8, -y, (nint)(1), (nint)(1));
+            want = fmt.Sprintf("-%04d.%02d.%02d"u8, -y, (nint)1, (nint)1);
         } else {
-            want = fmt.Sprintf("%04d.%02d.%02d"u8, y, (nint)(1), (nint)(1));
+            want = fmt.Sprintf("%04d.%02d.%02d"u8, y, (nint)1, (nint)1);
         }
         if (result != want) {
             Ꮡt.Errorf("(jan 1 %d).Format(\"2006.01.02\") = %q, want %q"u8, y, result, want);
@@ -268,21 +270,6 @@ partial struct ParseTest {
     internal nint fracDigits; // number of digits of fractional second
 }
 
-// Optional fractional seconds.
-// Amount of white space should not matter.
-// Case should not matter
-// Fractional seconds.
-// Leading zeros in other places should not be taken as fractional seconds.
-// Month and day names only match when not followed by a lower-case letter.
-// GMT with offset.
-// Accept any number of fractional second digits (including none) for .999...
-// In Go 1, .999... was completely ignored in the format, meaning the first two
-// cases would succeed, but the next four would not. Go 1.1 accepts all six.
-// decimal "." separator.
-// comma "," separator.
-// issue 4502.
-// Day of year.
-// Time zone offsets
 internal static slice<ParseTest> parseTests = new ParseTest[]{
     new("ANSIC"u8, ANSIC, "Thu Feb  4 21:00:57 2010"u8, false, true, 1, 0),
     new("UnixDate"u8, UnixDate, "Thu Feb  4 21:00:57 PST 2010"u8, true, true, 1, 0),
@@ -293,6 +280,7 @@ internal static slice<ParseTest> parseTests = new ParseTest[]{
     new("RFC1123Z"u8, RFC1123Z, "Thu, 04 Feb 2010 21:00:57 -0800"u8, true, true, 1, 0),
     new("RFC3339"u8, RFC3339, "2010-02-04T21:00:57-08:00"u8, true, false, 1, 0),
     new("custom: \"2006-01-02 15:04:05-07\""u8, "2006-01-02 15:04:05-07"u8, "2010-02-04 21:00:57-08"u8, true, false, 1, 0),
+    // Optional fractional seconds.
     new("ANSIC"u8, ANSIC, "Thu Feb  4 21:00:57.0 2010"u8, false, true, 1, 1),
     new("UnixDate"u8, UnixDate, "Thu Feb  4 21:00:57.01 PST 2010"u8, true, true, 1, 2),
     new("RubyDate"u8, RubyDate, "Thu Feb 04 21:00:57.012 -0800 2010"u8, true, true, 1, 3),
@@ -301,42 +289,62 @@ internal static slice<ParseTest> parseTests = new ParseTest[]{
     new("RFC1123Z"u8, RFC1123Z, "Thu, 04 Feb 2010 21:00:57.01234 -0800"u8, true, true, 1, 5),
     new("RFC3339"u8, RFC3339, "2010-02-04T21:00:57.012345678-08:00"u8, true, false, 1, 9),
     new("custom: \"2006-01-02 15:04:05\""u8, "2006-01-02 15:04:05"u8, "2010-02-04 21:00:57.0"u8, false, false, 1, 0),
+    // Amount of white space should not matter.
     new("ANSIC"u8, ANSIC, "Thu Feb 4 21:00:57 2010"u8, false, true, 1, 0),
     new("ANSIC"u8, ANSIC, "Thu      Feb     4     21:00:57     2010"u8, false, true, 1, 0),
+    // Case should not matter
     new("ANSIC"u8, ANSIC, "THU FEB 4 21:00:57 2010"u8, false, true, 1, 0),
     new("ANSIC"u8, ANSIC, "thu feb 4 21:00:57 2010"u8, false, true, 1, 0),
+    // Fractional seconds.
     new("millisecond:: dot separator"u8, "Mon Jan _2 15:04:05.000 2006"u8, "Thu Feb  4 21:00:57.012 2010"u8, false, true, 1, 3),
     new("microsecond:: dot separator"u8, "Mon Jan _2 15:04:05.000000 2006"u8, "Thu Feb  4 21:00:57.012345 2010"u8, false, true, 1, 6),
     new("nanosecond:: dot separator"u8, "Mon Jan _2 15:04:05.000000000 2006"u8, "Thu Feb  4 21:00:57.012345678 2010"u8, false, true, 1, 9),
     new("millisecond:: comma separator"u8, "Mon Jan _2 15:04:05,000 2006"u8, "Thu Feb  4 21:00:57.012 2010"u8, false, true, 1, 3),
     new("microsecond:: comma separator"u8, "Mon Jan _2 15:04:05,000000 2006"u8, "Thu Feb  4 21:00:57.012345 2010"u8, false, true, 1, 6),
     new("nanosecond:: comma separator"u8, "Mon Jan _2 15:04:05,000000000 2006"u8, "Thu Feb  4 21:00:57.012345678 2010"u8, false, true, 1, 9),
+
+    // Leading zeros in other places should not be taken as fractional seconds.
     new("zero1"u8, "2006.01.02.15.04.05.0"u8, "2010.02.04.21.00.57.0"u8, false, false, 1, 1),
     new("zero2"u8, "2006.01.02.15.04.05.00"u8, "2010.02.04.21.00.57.01"u8, false, false, 1, 2),
+    // Month and day names only match when not followed by a lower-case letter.
     new("Janet"u8, "Hi Janet, the Month is January: Jan _2 15:04:05 2006"u8, "Hi Janet, the Month is February: Feb  4 21:00:57 2010"u8, false, true, 1, 0),
+
+    // GMT with offset.
     new("GMT-8"u8, UnixDate, "Fri Feb  5 05:00:57 GMT-8 2010"u8, true, true, 1, 0),
+
+    // Accept any number of fractional second digits (including none) for .999...
+    // In Go 1, .999... was completely ignored in the format, meaning the first two
+    // cases would succeed, but the next four would not. Go 1.1 accepts all six.
+    // decimal "." separator.
     new(""u8, "2006-01-02 15:04:05.9999 -0700 MST"u8, "2010-02-04 21:00:57 -0800 PST"u8, true, false, 1, 0),
     new(""u8, "2006-01-02 15:04:05.999999999 -0700 MST"u8, "2010-02-04 21:00:57 -0800 PST"u8, true, false, 1, 0),
     new(""u8, "2006-01-02 15:04:05.9999 -0700 MST"u8, "2010-02-04 21:00:57.0123 -0800 PST"u8, true, false, 1, 4),
     new(""u8, "2006-01-02 15:04:05.999999999 -0700 MST"u8, "2010-02-04 21:00:57.0123 -0800 PST"u8, true, false, 1, 4),
     new(""u8, "2006-01-02 15:04:05.9999 -0700 MST"u8, "2010-02-04 21:00:57.012345678 -0800 PST"u8, true, false, 1, 9),
     new(""u8, "2006-01-02 15:04:05.999999999 -0700 MST"u8, "2010-02-04 21:00:57.012345678 -0800 PST"u8, true, false, 1, 9),
+    // comma "," separator.
     new(""u8, "2006-01-02 15:04:05,9999 -0700 MST"u8, "2010-02-04 21:00:57 -0800 PST"u8, true, false, 1, 0),
     new(""u8, "2006-01-02 15:04:05,999999999 -0700 MST"u8, "2010-02-04 21:00:57 -0800 PST"u8, true, false, 1, 0),
     new(""u8, "2006-01-02 15:04:05,9999 -0700 MST"u8, "2010-02-04 21:00:57.0123 -0800 PST"u8, true, false, 1, 4),
     new(""u8, "2006-01-02 15:04:05,999999999 -0700 MST"u8, "2010-02-04 21:00:57.0123 -0800 PST"u8, true, false, 1, 4),
     new(""u8, "2006-01-02 15:04:05,9999 -0700 MST"u8, "2010-02-04 21:00:57.012345678 -0800 PST"u8, true, false, 1, 9),
     new(""u8, "2006-01-02 15:04:05,999999999 -0700 MST"u8, "2010-02-04 21:00:57.012345678 -0800 PST"u8, true, false, 1, 9),
+
+    // issue 4502.
     new(""u8, StampNano, "Feb  4 21:00:57.012345678"u8, false, false, -1, 9),
     new(""u8, "Jan _2 15:04:05.999"u8, "Feb  4 21:00:57.012300000"u8, false, false, -1, 4),
     new(""u8, "Jan _2 15:04:05.999"u8, "Feb  4 21:00:57.012345678"u8, false, false, -1, 9),
     new(""u8, "Jan _2 15:04:05.999999999"u8, "Feb  4 21:00:57.0123"u8, false, false, -1, 4),
     new(""u8, "Jan _2 15:04:05.999999999"u8, "Feb  4 21:00:57.012345678"u8, false, false, -1, 9),
+
+    // Day of year.
     new(""u8, "2006-01-02 002 15:04:05"u8, "2010-02-04 035 21:00:57"u8, false, false, 1, 0),
     new(""u8, "2006-01 002 15:04:05"u8, "2010-02 035 21:00:57"u8, false, false, 1, 0),
     new(""u8, "2006-002 15:04:05"u8, "2010-035 21:00:57"u8, false, false, 1, 0),
     new(""u8, "200600201 15:04:05"u8, "201003502 21:00:57"u8, false, false, 1, 0),
     new(""u8, "200600204 15:04:05"u8, "201003504 21:00:57"u8, false, false, 1, 0),
+
+    // Time zone offsets
     new(""u8, "2006-01-02T15:04:05Z07"u8, "2010-02-04T21:00:57Z"u8, false, false, 1, 0),
     new(""u8, "2006-01-02T15:04:05Z07"u8, "2010-02-04T21:00:57+08"u8, false, false, 1, 0),
     new(""u8, "2006-01-02T15:04:05Z07"u8, "2010-02-04T21:00:57-08"u8, true, false, 1, 0),
@@ -369,7 +377,6 @@ public static void TestParse(ж<Δtesting.T> Ꮡt) {
 }
 
 // All parsed with ANSIC.
-
 partial struct dayOutOfRangeTestsᴛ1 /*dyn*/ {
     internal @string date;
     internal bool ok;
@@ -412,11 +419,11 @@ public static void TestParseDayOutOfRange(ж<Δtesting.T> Ꮡt) {
         var (_, err) = Parse(ANSIC, test.date);
         switch (ᐧ) {
         case {} when test.ok && err == default!: {
+            // OK
             break;
         }
         case {} when !test.ok && err != default!: {
-            if (!strings.Contains(err.Error(), // OK
- dayOutOfRangeˢ)) {
+            if (!strings.Contains(err.Error(), dayOutOfRangeˢ)) {
                 Ꮡt.Errorf("%q: expected 'day' error, got %v"u8, test.date, err);
             }
             break;
@@ -429,7 +436,6 @@ public static void TestParseDayOutOfRange(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("%q: expected 'day' error, got none"u8, test.date);
             break;
         }}
-
     }
 }
 
@@ -454,13 +460,17 @@ public static void TestParseInLocation(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     Δtime.Time t1 = default!;
     Δtime.Time t2 = default!;
+
     (t1, err) = ParseInLocation(jan022006Mstˢ, feb012013Astˢ, baghdad);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var (_, offset) = t1.Zone();
+
     // A zero offset means that ParseInLocation did not recognize the
     // 'AST' abbreviation as matching the current location (Baghdad,
     // where we'd expect a +03 hrs offset); likely because we're using
@@ -475,10 +485,12 @@ public static void TestParseInLocation(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("ParseInLocation(Feb 01 2013 AST, Baghdad).Zone = _, %d, want _, %d"u8, offset, (nint)(3 * 60 * 60));
         }
     }
+
     (var blancSablon, err) = LoadLocation(americaBlancSablonˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // In this case 'AST' means 'Atlantic Standard Time', and we
     // expect the abbreviation to correctly match the american
     // location.
@@ -505,6 +517,7 @@ public static void TestLoadLocationZipFile(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
+
         var (_, err) = LoadLocation(australiaSydneyˢ);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -514,9 +527,9 @@ public static void TestLoadLocationZipFile(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-// Ignore the time zone in the test. If it parses, it'll be OK.
 internal static slice<ParseTest> rubyTests = new ParseTest[]{
     new("RubyDate"u8, RubyDate, "Thu Feb 04 21:00:57 -0800 2010"u8, true, true, 1, 0),
+    // Ignore the time zone in the test. If it parses, it'll be OK.
     new("RubyDate"u8, RubyDate, "Thu Feb 04 21:00:57 -0000 2010"u8, false, true, 1, 0),
     new("RubyDate"u8, RubyDate, "Thu Feb 04 21:00:57 +0000 2010"u8, false, true, 1, 0),
     new("RubyDate"u8, RubyDate, "Thu Feb 04 21:00:57 +1130 2010"u8, false, true, 1, 0)
@@ -542,22 +555,22 @@ internal static void checkTime(Δtime.Time time, ж<ParseTest> Ꮡtest, ж<Δtes
 
     // The time should be Thu Feb  4 21:00:57 PST 2010
     if (test.yearSign >= 0 && test.yearSign * time.Year() != 2010) {
-        Ꮡt.Errorf("%s: bad year: %d not %d"u8, test.name, time.Year(), (nint)(2010));
+        Ꮡt.Errorf("%s: bad year: %d not %d"u8, test.name, time.Year(), (nint)2010);
     }
     if (time.Month() != February) {
         Ꮡt.Errorf("%s: bad month: %s not %s"u8, test.name, time.Month(), February);
     }
     if (time.Day() != 4) {
-        Ꮡt.Errorf("%s: bad day: %d not %d"u8, test.name, time.Day(), (nint)(4));
+        Ꮡt.Errorf("%s: bad day: %d not %d"u8, test.name, time.Day(), (nint)4);
     }
     if (time.Hour() != 21) {
-        Ꮡt.Errorf("%s: bad hour: %d not %d"u8, test.name, time.Hour(), (nint)(21));
+        Ꮡt.Errorf("%s: bad hour: %d not %d"u8, test.name, time.Hour(), (nint)21);
     }
     if (time.Minute() != 0) {
-        Ꮡt.Errorf("%s: bad minute: %d not %d"u8, test.name, time.Minute(), (nint)(0));
+        Ꮡt.Errorf("%s: bad minute: %d not %d"u8, test.name, time.Minute(), (nint)0);
     }
     if (time.Second() != 57) {
-        Ꮡt.Errorf("%s: bad second: %d not %d"u8, test.name, time.Second(), (nint)(57));
+        Ꮡt.Errorf("%s: bad second: %d not %d"u8, test.name, time.Second(), (nint)57);
     }
     // Nanoseconds must be checked against the precision of the input.
     var (nanosec, err) = strconv.ParseUint(((@string)"012345678"u8.slice(0, test.fracDigits)) + "000000000"u8.slice(0, 9 - test.fracDigits), 10, 0);
@@ -601,6 +614,7 @@ public static void TestFormatAndParse(ж<Δtesting.T> Ꮡt) {
     var fʗ1 = f;
     var f32 = (int32 sec) => fʗ1((int64)sec);
     var cfg = Ꮡ(new quick.Config(MaxCount: 10000));
+
     // Try a reasonable date first, then the huge ones.
     {
         var err = quick.Check((f32).OrTypedNilFunc(), cfg); if (err != default!) {
@@ -620,12 +634,6 @@ partial struct ParseTimeZoneTest {
     internal bool ok;
 }
 
-// four letters must end in T.
-// run of upper-case letters too long.
-// five letters must end in T.
-// Issue #18251
-// Issue #24071
-// Issue #26032
 internal static slice<ParseTimeZoneTest> parseTimeZoneTests = new ParseTimeZoneTest[]{
     new("gmt hi there"u8, 0, false),
     new("GMT hi there"u8, 3, true),
@@ -640,13 +648,15 @@ internal static slice<ParseTimeZoneTest> parseTimeZoneTests = new ParseTimeZoneT
     new("ChST hi there"u8, 4, true),
     new("MeST hi there"u8, 4, true),
     new("MSDx"u8, 3, true),
-    new("MSDY"u8, 0, false),
+    new("MSDY"u8, 0, false), // four letters must end in T.
     new("ESAST hi"u8, 5, true),
-    new("ESASTT hi"u8, 0, false),
-    new("ESATY hi"u8, 0, false),
-    new("WITA hi"u8, 4, true),
+    new("ESASTT hi"u8, 0, false), // run of upper-case letters too long.
+    new("ESATY hi"u8, 0, false), // five letters must end in T.
+    new("WITA hi"u8, 4, true), // Issue #18251
+    // Issue #24071
     new("+03 hi"u8, 3, true),
     new("-04 hi"u8, 3, true),
+    // Issue #26032
     new("+00"u8, 3, true),
     new("-11"u8, 3, true),
     new("-12"u8, 3, true),
@@ -678,16 +688,6 @@ partial struct ParseErrorTest {
     internal @string expect; // must appear within the error
 }
 
-// issue 4502. StampNano requires exactly 9 digits of precision.
-// issue 4493. Helpful errors.
-// invalid second followed by optional fractional seconds
-// issue 54569
-// issue 21113
-// invalid or mismatched day-of-year
-// issue 45391.
-// issue 54570
-// issue 56730
-// issue 67470
 internal static slice<ParseErrorTest> parseErrorTests = new ParseErrorTest[]{
     new(ANSIC, "Feb  4 21:00:60 2010"u8, @"cannot parse ""Feb  4 21:00:60 2010"" as ""Mon"""u8),
     new(ANSIC, "Thu Feb  4 21:00:57 @2010"u8, @"cannot parse ""@2010"" as ""2006"""u8),
@@ -697,26 +697,41 @@ internal static slice<ParseErrorTest> parseErrorTests = new ParseErrorTest[]{
     new("Mon Jan _2 15:04:05.000 2006"u8, "Thu Feb  4 23:00:59x01 2010"u8, @"cannot parse ""x01 2010"" as "".000"""u8),
     new("Mon Jan _2 15:04:05.000 2006"u8, "Thu Feb  4 23:00:59.xxx 2010"u8, @"cannot parse "".xxx 2010"" as "".000"""u8),
     new("Mon Jan _2 15:04:05.000 2006"u8, "Thu Feb  4 23:00:59.-123 2010"u8, "fractional second out of range"u8),
+    // issue 4502. StampNano requires exactly 9 digits of precision.
     new(StampNano, "Dec  7 11:22:01.000000"u8, @"cannot parse "".000000"" as "".000000000"""u8),
     new(StampNano, "Dec  7 11:22:01.0000000000"u8, @"extra text: ""0"""u8),
+    // issue 4493. Helpful errors.
     new(RFC3339, "2006-01-02T15:04:05Z07:00"u8, @"parsing time ""2006-01-02T15:04:05Z07:00"": extra text: ""07:00"""u8),
     new(RFC3339, "2006-01-02T15:04_abc"u8, @"parsing time ""2006-01-02T15:04_abc"" as ""2006-01-02T15:04:05Z07:00"": cannot parse ""_abc"" as "":"""u8),
     new(RFC3339, "2006-01-02T15:04:05_abc"u8, @"parsing time ""2006-01-02T15:04:05_abc"" as ""2006-01-02T15:04:05Z07:00"": cannot parse ""_abc"" as ""Z07:00"""u8),
     new(RFC3339, "2006-01-02T15:04:05Z_abc"u8, @"parsing time ""2006-01-02T15:04:05Z_abc"": extra text: ""_abc"""u8),
+    // invalid second followed by optional fractional seconds
     new(RFC3339, "2010-02-04T21:00:67.012345678-08:00"u8, "second out of range"u8),
+    // issue 54569
     new(RFC3339, "0000-01-01T00:00:.0+00:00"u8, @"parsing time ""0000-01-01T00:00:.0+00:00"" as ""2006-01-02T15:04:05Z07:00"": cannot parse "".0+00:00"" as ""05"""u8),
+    // issue 21113
     new("_2 Jan 06 15:04 MST"u8, "4 --- 00 00:00 GMT"u8, @"cannot parse ""--- 00 00:00 GMT"" as ""Jan"""u8),
     new("_2 January 06 15:04 MST"u8, "4 --- 00 00:00 GMT"u8, @"cannot parse ""--- 00 00:00 GMT"" as ""January"""u8),
+
+    // invalid or mismatched day-of-year
     new("Jan _2 002 2006"u8, "Feb  4 034 2006"u8, "day-of-year does not match day"u8),
     new("Jan _2 002 2006"u8, "Feb  4 004 2006"u8, "day-of-year does not match month"u8),
+
+    // issue 45391.
     new(@"""2006-01-02T15:04:05Z07:00"""u8, "0"u8, @"parsing time ""0"" as ""\""2006-01-02T15:04:05Z07:00\"""": cannot parse ""0"" as ""\"""""u8),
     new(RFC3339, "\""u8, @"parsing time ""\"""" as ""2006-01-02T15:04:05Z07:00"": cannot parse ""\"""" as ""2006"""u8),
+
+    // issue 54570
     new(RFC3339, "0000-01-01T00:00:00+00:+0"u8, @"parsing time ""0000-01-01T00:00:00+00:+0"" as ""2006-01-02T15:04:05Z07:00"": cannot parse ""+00:+0"" as ""Z07:00"""u8),
     new(RFC3339, "0000-01-01T00:00:00+-0:00"u8, @"parsing time ""0000-01-01T00:00:00+-0:00"" as ""2006-01-02T15:04:05Z07:00"": cannot parse ""+-0:00"" as ""Z07:00"""u8),
+
+    // issue 56730
     new("2006-01-02"u8, "22-10-25"u8, @"parsing time ""22-10-25"" as ""2006-01-02"": cannot parse ""22-10-25"" as ""2006"""u8),
     new("06-01-02"u8, "a2-10-25"u8, @"parsing time ""a2-10-25"" as ""06-01-02"": cannot parse ""a2-10-25"" as ""06"""u8),
     new("03:04PM"u8, "12:03pM"u8, @"parsing time ""12:03pM"" as ""03:04PM"": cannot parse ""pM"" as ""PM"""u8),
     new("03:04pm"u8, "12:03pM"u8, @"parsing time ""12:03pM"" as ""03:04pm"": cannot parse ""pM"" as ""pm"""u8),
+
+    // issue 67470
     new("-07"u8, "-25"u8, "time zone offset hour out of range"u8),
     new("-07:00"u8, "+25:00"u8, "time zone offset hour out of range"u8),
     new("-07:00"u8, "-23:61"u8, "time zone offset minute out of range"u8),
@@ -938,7 +953,6 @@ public static void TestStd0xParseError(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct monthOutOfRangeTestsᴛ1 /*dyn*/ {
     internal @string value;
     internal bool ok;
@@ -970,7 +984,6 @@ public static void TestParseMonthOutOfRange(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("%q: expected 'month' error, got none"u8, test.value);
             break;
         }}
-
     }
 }
 
@@ -984,7 +997,7 @@ public static void TestParseYday(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("unexpected error for %s: %v"u8, d, err);
         } else 
         if (tm.Year() != 2020 || tm.YearDay() != i) {
-            Ꮡt.Errorf("got year %d yearday %d, want %d %d"u8, tm.Year(), tm.YearDay(), (nint)(2020), i);
+            Ꮡt.Errorf("got year %d yearday %d, want %d %d"u8, tm.Year(), tm.YearDay(), (nint)2020, i);
         }
     }
 }
@@ -1025,6 +1038,7 @@ public static void TestFormatFractionalSecondSeparators(ж<Δtesting.T> Ꮡt) {
         new(@"15:04:05,000"u8, @"21:00:57,012"u8),
         new(@"15:04:05,999"u8, @"21:00:57,012"u8)
     }.slice();
+
     // The numeric time represents Thu Feb  4 21:00:57.012345600 PST 2009
     var time = Unix(0, 1233810057012345600L);
     foreach (var (_, tt) in tests) {
@@ -1036,32 +1050,31 @@ public static void TestFormatFractionalSecondSeparators(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// 9 digits
-// 10 digits, truncates
-// 11 digits, truncates
-// 12 digits, truncates
-// 15 digits, truncates
-
 partial struct longFractionalDigitsTestsᴛ1 /*dyn*/ {
     internal @string value;
     internal nint want;
 }
 internal static slice<longFractionalDigitsTestsᴛ1> longFractionalDigitsTests = new longFractionalDigitsTestsᴛ1[]{
+    // 9 digits
     new("2021-09-29T16:04:33.000000000Z"u8, 0),
     new("2021-09-29T16:04:33.000000001Z"u8, 1),
     new("2021-09-29T16:04:33.100000000Z"u8, 100_000_000),
     new("2021-09-29T16:04:33.100000001Z"u8, 100_000_001),
     new("2021-09-29T16:04:33.999999999Z"u8, 999_999_999),
     new("2021-09-29T16:04:33.012345678Z"u8, 12_345_678),
+    // 10 digits, truncates
     new("2021-09-29T16:04:33.0000000000Z"u8, 0),
     new("2021-09-29T16:04:33.0000000001Z"u8, 0),
     new("2021-09-29T16:04:33.1000000000Z"u8, 100_000_000),
     new("2021-09-29T16:04:33.1000000009Z"u8, 100_000_000),
     new("2021-09-29T16:04:33.9999999999Z"u8, 999_999_999),
     new("2021-09-29T16:04:33.0123456789Z"u8, 12_345_678),
+    // 11 digits, truncates
     new("2021-09-29T16:04:33.10000000000Z"u8, 100_000_000),
     new("2021-09-29T16:04:33.00123456789Z"u8, 1_234_567),
+    // 12 digits, truncates
     new("2021-09-29T16:04:33.000123456789Z"u8, 123_456),
+    // 15 digits, truncates
     new("2021-09-29T16:04:33.9999999999999999Z"u8, 999_999_999)
 }.slice();
 
@@ -1088,25 +1101,21 @@ public static void FuzzFormatRFC3339(ж<Δtesting.F> Ꮡf) {
 
     foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<int64>[]{
         new int64[]{Δmath.MinInt64, Δmath.MinInt64}.array(), // 292277026304-08-26T15:42:51Z
-
         new int64[]{-62167219200L, 0}.array(), // 0000-01-01T00:00:00Z
-
         new int64[]{1661201140, 676836973}.array(), // 2022-08-22T20:45:40.676836973Z
-
         new int64[]{253402300799L, 999999999}.array(), // 9999-12-31T23:59:59.999999999Z
-
-        new int64[]{Δmath.MaxInt64, Δmath.MaxInt64}.array()
+        new int64[]{Δmath.MaxInt64, Δmath.MaxInt64}.array() // -292277022365-05-08T08:17:07Z
     }.slice(), 2)) {
         var ts = vᴛ1.Clone();
 
-        // -292277022365-05-08T08:17:07Z
-        f.Add(ts[0], ts[1], true, false, (nint)(0));
-        f.Add(ts[0], ts[1], false, true, (nint)(0));
+        f.Add(ts[0], ts[1], true, false, (nint)0);
+        f.Add(ts[0], ts[1], false, true, (nint)0);
         foreach (var (_, offset) in new nint[]{0, 60, 60 * 60, 99 * 60 * 60 + 99 * 60, 123456789}.slice()) {
             f.Add(ts[0], ts[1], false, false, -offset);
             f.Add(ts[0], ts[1], false, false, +offset);
         }
     }
+
     Ꮡf.Fuzz((ж<Δtesting.T> t, int64 sec, int64 nsec, bool useUTC, bool useLocal, nint tzOffset) => {
         ж<timeꓸLocation> loc = default!;
         switch (ᐧ) {
@@ -1122,13 +1131,14 @@ public static void FuzzFormatRFC3339(ж<Δtesting.F> Ꮡf) {
             loc = FixedZone(""u8, tzOffset);
             break;
         }}
-
         var ts = Unix(sec, nsec).In(loc);
+
         var got = time_internal_test_package.AppendFormatRFC3339(ts, default!, false);
         var want = time_internal_test_package.AppendFormatAny(ts, default!, RFC3339);
         if (!bytes.Equal(got, want)) {
             t.Errorf("Format(%s, RFC3339) mismatch:\n\tgot:  %s\n\twant: %s"u8, ts, got, want);
         }
+
         var gotNanos = time_internal_test_package.AppendFormatRFC3339(ts, default!, true);
         var wantNanos = time_internal_test_package.AppendFormatAny(ts, default!, RFC3339Nano);
         if (!bytes.Equal(gotNanos, wantNanos)) {
@@ -1152,6 +1162,7 @@ public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
     foreach (var (_, tt) in longFractionalDigitsTests) {
         f.Add(tt.value);
     }
+
     Ꮡf.Fuzz((ж<Δtesting.T> t, @string s) => {
         // equalTime is like time.Time.Equal, but also compares the time zone.
         bool equalTime(Δtime.Time t1, Δtime.Time t2) {
@@ -1159,6 +1170,7 @@ public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
             var (name2, offset2) = t2.Zone();
             return t1.Equal(t2) && name1 == name2 && offset1 == offset2;
         }
+
         foreach (var (_, tz) in new ж<timeꓸLocation>[]{ΔUTC, ΔLocal}.slice()) {
             // Parsing as RFC3339 or RFC3339Nano should be identical.
             var (t1, err1) = time_internal_test_package.ParseAny(RFC3339, s, ΔUTC, tz);
@@ -1190,8 +1202,8 @@ public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
                     t.Skipf("ParseAny(%q) incorrectly allows out-of-range zone offset"u8, s);
                     break;
                 }}
-
             }
+
             // Customized parser should be identical to general parser.
             {
                 var (got, ok) = time_internal_test_package.ParseRFC3339(s, tz);
@@ -1205,7 +1217,6 @@ public static void FuzzParseRFC3339(ж<Δtesting.F> Ꮡf) {
                     break;
                 }}
             }
-
         }
     });
 }

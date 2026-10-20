@@ -11,7 +11,6 @@ using token = global::go.go.token_package;
 using slices = slices_package;
 using strings = strings_package;
 using System.Runtime.CompilerServices;
-using ast = global::go.go.ast_package;
 using global::go.go;
 
 partial class types_package {
@@ -42,6 +41,8 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var @params = ref Ꮡparams.DerefOrNull();
         ref var err = ref Ꮡerr.DerefOrNull();
+        var untypedᴷ = new stackAppend<nint>();
+        var dirtyᴷ = new stackAppend<nint>();
 
         // Don't verify result conditions if there's no error handler installed:
         // in that case, an error leads to an exit panic and the result value may
@@ -53,6 +54,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                 assert(inferred == default! || len(inferred) == len(tparamsʗ1) && !slices.Contains(inferred, (ΔType)(default!)));
             }, ref ᒐ);
         }
+
         if (traceInference) {
             Ꮡcheck.dump(inferSSSˢ, tparams, Ꮡparams.OrTypedNil(), targs); // aligned with rename print below
             var tparamsʗ2 = tparams;
@@ -60,15 +62,19 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                 Ꮡcheck.dump("=> %s ➞ %s\n"u8, tparamsʗ2, inferred);
             }, ref ᒐ);
         }
+
         // There must be at least one type parameter, and no more type arguments than type parameters.
         nint n = len(tparams);
         assert(n > 0 && len(targs) <= n);
+
         // Parameters and arguments must match in number.
         assert(Ꮡparams.Len() == len(args));
+
         // If we already have all type arguments, we're done.
         if (len(targs) == n && !slices.Contains(targs, (ΔType)(default!))) {
             inferred = targs; goto ᒐdone;
         }
+
         // If we have invalid (ordinary) arguments, an error was reported before.
         // Avoid additional inference errors and exit early (go.dev/issue/60434).
         foreach (var (_, arg) in args) {
@@ -76,6 +82,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                 inferred = default!; goto ᒐdone;
             }
         }
+
         // Make sure we have a "full" list of type arguments, some of which may
         // be nil (unknown). Make a copy so as to not clobber the incoming slice.
         if (len(targs) < n) {
@@ -84,11 +91,13 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
             targs = targs2;
         }
         // len(targs) == n
+
         // Continue with the type arguments we have. Avoid matching generic
         // parameters that already have type arguments against function arguments:
         // It may fail because matching uses type identity while parameter passing
         // uses assignment rules. Instantiate the parameter list with the type
         // arguments we have, and continue with that parameter list.
+
         // Substitute type arguments for their respective type parameters in params,
         // if any. Note that nil targs entries are ignored by check.subst.
         // We do this for better error messages; it's not needed for correctness.
@@ -114,10 +123,12 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
             var smap = makeSubstMap(tparams, targs);
             Ꮡparams = Ꮡcheck.subst(nopos, new TupleжΔType(Ꮡparams), smap, nil, check.context())._<ж<Tuple>>(); @params = ref Ꮡparams.DerefOrNull();
         }
+
         // Unify parameter and argument types for generic parameters with typed arguments
         // and collect the indices of generic parameters with untyped arguments.
         // Terminology: generic parameter = function parameter with a type-parameterized type
         var u = newUnifier(tparams, targs, check.allowVersion(go1_21));
+
         var tparamsʗ3 = tparams;
         var uʗ1 = u;
         void errorf(ΔType tpar, ΔType targ, ж<operand> arg) {
@@ -156,14 +167,18 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                 Ꮡerr.Value.addf(new operandжpositioner(arg), "type %s of %s does not match %s"u8, targ, (~arg).expr, tpar);
             }
         }
+
         // indices of generic parameters with untyped arguments, for later use
         slice<nint> untyped = default!;
+
         // --- 1 ---
         // use information from function arguments
+
         if (traceInference) {
             u.tracef("== function parameters: %s"u8, Ꮡparams.OrTypedNil());
             u.tracef("-- function arguments : %s"u8, args);
         }
+
         foreach (var (i, arg) in args) {
             if ((~arg).mode == invalid) {
                 // An error was reported earlier. Ignore this arg
@@ -194,20 +209,24 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                         // parameter declared by the current function and use it in the same
                         // function signature; hence we don't need to Unalias before the
                         // .(*TypeParam) type assertion above.
-                        untyped = append(untyped, i);
+                        untyped = append(untypedᴷ, untyped, i);
                     }
                 }
             }
         }
+
         if (traceInference) {
             var inferredΔ2 = u.inferred(tparams);
             u.tracef("=> %s ➞ %s\n"u8, tparams, inferredΔ2);
         }
+
         // --- 2 ---
         // use information from type parameter constraints
+
         if (traceInference) {
             u.tracef("== type parameters: %s"u8, tparams);
         }
+
         // Unify type parameters with their constraints as long
         // as progress is being made.
         //
@@ -231,12 +250,14 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                 }
                 u.tracef("-- iteration %d"u8, i);
             }
+
             foreach (var (_, tpar) in tparams) {
                 var tx = u.at(tpar);
                 var (core, single) = coreTerm(tpar);
                 if (traceInference) {
                     u.tracef("-- type parameter %s = %s: core(%s) = %s, single = %v"u8, tpar.OrTypedNil(), tx, tpar.OrTypedNil(), core.OrTypedNil(), single);
                 }
+
                 // If the type parameter's constraint has a core term (i.e., a core type with tilde information)
                 // try to unify the type parameter with that core type.
                 if (core != nil) {
@@ -246,17 +267,17 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                         if (traceInference) {
                             u.tracef("-> unify type parameter %s (type %s) with constraint core type %s"u8, tpar.OrTypedNil(), tx, (~core).typ);
                         }
-                        if (!u.unify(tx, // The corresponding type argument tx is known. There are 2 cases:
- // 1) If the core type has a tilde, per spec requirement for tilde
- //    elements, the core type is an underlying (literal) type.
- //    And because of the tilde, the underlying type of tx must match
- //    against the core type.
- //    But because unify automatically matches a defined type against
- //    an underlying literal type, we can simply unify tx with the
- //    core type.
- // 2) If the core type doesn't have a tilde, we also must unify tx
- //    with the core type.
- (~core).typ, 0)) {
+                        // The corresponding type argument tx is known. There are 2 cases:
+                        // 1) If the core type has a tilde, per spec requirement for tilde
+                        //    elements, the core type is an underlying (literal) type.
+                        //    And because of the tilde, the underlying type of tx must match
+                        //    against the core type.
+                        //    But because unify automatically matches a defined type against
+                        //    an underlying literal type, we can simply unify tx with the
+                        //    core type.
+                        // 2) If the core type doesn't have a tilde, we also must unify tx
+                        //    with the core type.
+                        if (!u.unify(tx, (~core).typ, 0)) {
                             // TODO(gri) Type parameters that appear in the constraint and
                             //           for which we have type arguments inferred should
                             //           use those type arguments for a better error message.
@@ -267,16 +288,16 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                     }
                     case {} when single && !(~core).tilde: {
                         if (traceInference) {
-                            u.tracef("-> set type parameter %s to constraint core type %s"u8, tpar.OrTypedNil(), (~core).typ);
+                            u.tracef("-> set type parameter %s to constraint's common underlying type %s"u8, tpar.OrTypedNil(), (~core).typ);
                         }
-                        u.set(tpar, // The corresponding type argument tx is unknown and the core term
- // describes a single specific type and no tilde.
- // In this case the type argument must be that single type; set it.
- (~core).typ);
+                        // The corresponding type argument tx is unknown and the core term
+                        // describes a single specific type and no tilde.
+                        // In this case the type argument must be that single type; set it.
+                        u.set(tpar, (~core).typ);
                         break;
                     }}
-
                 }
+
                 // Independent of whether there is a core term, if the type argument tx is known
                 // it must implement the methods of the type constraint, possibly after unification
                 // of the relevant method signatures, otherwise tx cannot satisfy the constraint.
@@ -310,19 +331,24 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                     }
                 }
             }
+
             if (u.unknowns() == nn) {
                 break; // no progress
             }
         }
+
         if (traceInference) {
             var inferredΔ3 = u.inferred(tparams);
             u.tracef("=> %s ➞ %s\n"u8, tparams, inferredΔ3);
         }
+
         // --- 3 ---
         // use information from untyped constants
+
         if (traceInference) {
             u.tracef("== untyped arguments: %v"u8, untyped);
         }
+
         // Some generic parameters with untyped arguments may have been given a type by now.
         // Collect all remaining parameters that don't have a type yet and determine the
         // maximum untyped type for each of those parameters, if possible.
@@ -355,7 +381,9 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
             assert(isTyped(d));
             u.set(tpar, d);
         }
+
         // --- simplify ---
+
         // u.inferred(tparams) now contains the incoming type arguments plus any additional type
         // arguments which were inferred. The inferred non-nil entries may still contain
         // references to other type parameters found in constraints.
@@ -369,6 +397,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                 assert(targ == default! || AreEqual(inferred[i], targ));
             }
         }
+
         // The data structure of each (provided or inferred) type represents a graph, where
         // each node corresponds to a type and each (directed) vertex points to a component
         // type. The substitution process described above repeatedly replaces type parameter
@@ -393,15 +422,17 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         //           any user-supplied type. But should that change, reporting an error
         //           would be wrong.
         killCycles(tparams, inferred);
+
         // dirty tracks the indices of all types that may still contain type parameters.
         // We know that nil type entries and entries corresponding to provided (non-nil)
         // type arguments are clean, so exclude them from the start.
         slice<nint> dirty = default!;
         foreach (var (i, typ) in inferred) {
             if (typ != default! && (i >= len(targs) || targs[i] == default!)) {
-                dirty = append(dirty, i);
+                dirty = append(dirtyᴷ, dirty, i);
             }
         }
+
         while (len(dirty) > 0) {
             if (traceInference) {
                 u.tracef("-- simplify %s ➞ %s"u8, tparams, inferred);
@@ -422,7 +453,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                         // Note that if t0 was a signature, t1 must be a signature, and t1
                         // can only be a generic signature if it originated from a generic
                         // function argument. Those signatures are never defined types and
-                        // thus there is no need to call under below.
+                        // thus there is no need to call Underlying below.
                         // TODO(gri) Consider doing this in Checker.subst.
                         //           Then this would fall out automatically here and also
                         //           in instantiation (where we also explicitly nil out
@@ -440,6 +471,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
             }
             dirty = dirty.slice(0, nΔ1);
         }
+
         // Once nothing changes anymore, we may still have type parameters left;
         // e.g., a constraint with core type *P may match a type parameter Q but
         // we don't have any type arguments to fill in for *P or Q (go.dev/issue/45548).
@@ -497,16 +529,19 @@ internal static (slice<ж<TypeParam>>, ΔType) renameTParams(this ж<Checker> �
     if (len(tparams) == 0) {
         return (default!, typ); // nothing to do
     }
+
     var tparams2 = new slice<ж<TypeParam>>(len(tparams));
     foreach (var (i, tparam) in tparams) {
         var tname = NewTypeName(tparam.Obj().of(TypeName.Ꮡobject).Pos(), tparam.Obj().of(TypeName.Ꮡobject).Pkg(), tparam.Obj().of(TypeName.Ꮡobject).Name(), default!);
         tparams2[i] = NewTypeParam(tname, default!);
         tparams2[i].Value.index = tparam.Value.index; // == i
     }
+
     var renameMap = makeRenameMap(tparams, tparams2);
     foreach (var (i, tparam) in tparams) {
         tparams2[i].Value.bound = Ꮡcheck.subst(pos, (~tparam).bound, renameMap, nil, check.context());
     }
+
     return (tparams2, Ꮡcheck.subst(pos, typ, renameMap, nil, check.context()));
 }
 
@@ -575,8 +610,10 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ)
         defer(() => {
             Ꮡw.Value.seen[typ] = res;
         }, ref ᒐ);
+
         switch (typ.type()) {
         case ж<Basic> t: {
+            // nothing to do
             break;
         }
         case ж<Alias> t: {
@@ -595,27 +632,26 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ)
             res = Ꮡw.isParameterized((~t).@base); goto ᒐdone;
         }
         case ж<Tuple> t: {
+            // This case does not occur from within isParameterized
+            // because tuples only appear in signatures where they
+            // are handled explicitly. But isParameterized is also
+            // called by Checker.callExpr with a function result tuple
+            // if instantiation failed (go.dev/issue/59890).
             res = t != nil && Ꮡw.varList((~t).vars); goto ᒐdone;
         }
         case ж<ΔSignature> t: {
+            // t.tparams may not be nil if we are looking at a signature
+            // of a generic function type (or an interface method) that is
+            // part of the type we're testing. We don't care about these type
+            // parameters.
+            // Similarly, the receiver of a method may declare (rather than
+            // use) type parameters, we don't care about those either.
+            // Thus, we only need to look at the input and result parameters.
             res = (~t).@params != nil && Ꮡw.varList((~(~t).@params).vars) || (~t).results != nil && Ꮡw.varList((~(~t).results).vars); goto ᒐdone;
         }
         case ж<Interface> t: {
             var tset = t.typeSet();
             foreach (var (_, m) in (~tset).methods) {
-                // nothing to do
-                // This case does not occur from within isParameterized
-                // because tuples only appear in signatures where they
-                // are handled explicitly. But isParameterized is also
-                // called by Checker.callExpr with a function result tuple
-                // if instantiation failed (go.dev/issue/59890).
-                // t.tparams may not be nil if we are looking at a signature
-                // of a generic function type (or an interface method) that is
-                // part of the type we're testing. We don't care about these type
-                // parameters.
-                // Similarly, the receiver of a method may declare (rather than
-                // use) type parameters, we don't care about those either.
-                // Thus, we only need to look at the input and result parameters.
                 if (Ꮡw.isParameterized((~m).typ)) {
                     res = true; goto ᒐdone;
                 }
@@ -644,6 +680,7 @@ internal static bool /*res*/ isParameterized(this ж<tpWalker> Ꮡw, ΔType typ)
             throw panic(fmt.Sprintf("unexpected %T"u8, typ));
             break;
         }}
+
         res = false;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -684,12 +721,13 @@ internal static (ж<Δterm>, bool) coreTerm(ж<TypeParam> Ꮡtpar) {
     });
     if (n == 1) {
         if (debug) {
-            assert(debug && AreEqual(under((~single).typ), coreType(new TypeParamжΔType(Ꮡtpar))));
+            var (u, _) = commonUnder(new TypeParamжΔType(Ꮡtpar), default!);
+            assert(AreEqual((~single).typ.Underlying(), u));
         }
         return (single, true);
     }
     {
-        var typ = coreType(new TypeParamжΔType(Ꮡtpar)); if (typ != default!) {
+        var (typ, _) = commonUnder(new TypeParamжΔType(Ꮡtpar), default!); if (typ != default!) {
             // A core type is always an underlying type.
             // If any term of tpar has a tilde, we don't
             // have a precise core type and we must return
@@ -747,8 +785,12 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
         }
         w.seen[typ] = true;
         defer((ᴛ1, ᴛ2) => delete(ᴛ1, ᴛ2), Ꮡw.Value.seen, typ, ref ᒐ);
+
         switch (typ.type()) {
         case ж<Basic> t: {
+            // nothing to do
+            // *Alias:
+            //      This case should not occur because of Unalias(typ) at the top.
             break;
         }
         case ж<Array> t: {
@@ -767,14 +809,11 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
             Ꮡw.typ((~t).@base);
             break;
         }
+        // case *Tuple:
+        //      This case should not occur because tuples only appear
+        //      in signatures where they are handled explicitly.
         case ж<ΔSignature> t: {
             if ((~t).@params != nil) {
-                // nothing to do
-                // *Alias:
-                //      This case should not occur because of Unalias(typ) at the top.
-                // case *Tuple:
-                //      This case should not occur because tuples only appear
-                //      in signatures where they are handled explicitly.
                 Ꮡw.varList((~(~t).@params).vars);
             }
             if ((~t).results != nil) {

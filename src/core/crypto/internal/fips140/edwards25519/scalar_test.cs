@@ -58,33 +58,34 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
         break;
     }
     case {} when diceRoll is < 5: {
+        // Generate a low scalar in [0, 2^125).
         Ꮡrand.Read(s[..16]);
-        s[15] &= (byte)(((1 << (int)(5))) - 1);
+        s[15] &= (byte)((1 << 5) - 1);
         break;
     }
     case {} when diceRoll is < 10: {
-        s[31] = (byte)(1 << (int)(4));
+        // Generate a high scalar in [2^252, 2^252 + 2^124).
+        s[31] = (byte)(1 << 4);
         Ꮡrand.Read(s[..16]);
-        s[15] &= (byte)(((1 << (int)(4))) - 1);
+        s[15] &= (byte)((1 << 4) - 1);
         break;
     }
     default: {
+        // Generate a valid scalar in [0, l) by returning [0, 2^252) which has a
+        // negligibly different distribution (the former has a 2^-127.6 chance
+        // of being out of the latter range).
         Ꮡrand.Read(s[..]);
-        s[31] &= (byte)(((1 << (int)(4))) - 1);
+        s[31] &= (byte)((1 << 4) - 1);
         break;
     }}
 
-    // Generate a low scalar in [0, 2^125).
-    // Generate a high scalar in [2^252, 2^252 + 2^124).
-    // Generate a valid scalar in [0, l) by returning [0, 2^252) which has a
-    // negligibly different distribution (the former has a 2^-127.6 chance
-    // of being out of the latter range).
     ref var val = ref heap<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>(out var Ꮡval);
     val = new Scalar(nil);
     var ᴛ1 = val.s.Value;
     fiatScalarFromBytes(ref ᴛ1, Ꮡs);
     var ᴛ2 = (global::go.crypto.@internal.fips140.edwards25519_package.fiatScalarNonMontgomeryDomainFieldElement)((val.s).Value);
     fiatScalarToMontgomery(ref val.s, ref ᴛ2);
+
     return reflect.ValueOf(val);
 }
 
@@ -105,7 +106,7 @@ public static void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
         @in = @in.Clone();
         ref var sc = ref heap(scʗp.ΔClone(), out var Ꮡsc);
         // Mask out top 4 bits to guarantee value falls in [0, l).
-        @in[len(@in) - 1] &= (byte)(((1 << (int)(4))) - 1);
+        @in[len(@in) - 1] &= (byte)((1 << 4) - 1);
         {
             var (_, err) = Ꮡsc.SetCanonicalBytes(@in[..]); if (err != default!) {
                 return false;
@@ -119,6 +120,7 @@ public static void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("failed bytes->scalar->bytes round-trip: %v"u8, err);
         }
     }
+
     var f2 = (global::go.crypto.@internal.fips140.edwards25519_package.Scalar sc1ʗp, global::go.crypto.@internal.fips140.edwards25519_package.Scalar sc2ʗp) => {
         ref var sc1 = ref heap(sc1ʗp.ΔClone(), out var Ꮡsc1);
         ref var sc2 = ref heap(sc2ʗp.ΔClone(), out var Ꮡsc2);
@@ -134,6 +136,7 @@ public static void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("failed scalar->bytes->scalar round-trip: %v"u8, err);
         }
     }
+
     var b = scalarMinusOneBytes.Clone();
     b[31] += 1;
     var s = scOne;
@@ -184,6 +187,7 @@ public static void TestScalarSetBytesWithClamping(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("random: got %q, want %q"u8, got, want);
         }
     }
+
     @string zero = "0000000000000000000000000000000000000000000000000000000000000000"u8;
     (s, _) = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().SetBytesWithClamping(decodeHex(zero));
     p = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().ScalarBaseMult(s);
@@ -193,6 +197,7 @@ public static void TestScalarSetBytesWithClamping(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("zero: got %q, want %q"u8, got, want);
         }
     }
+
     @string one = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8;
     (s, _) = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().SetBytesWithClamping(decodeHex(one));
     p = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().ScalarBaseMult(s);
@@ -221,15 +226,19 @@ public static void TestScalarMultiplyDistributesOverAdd(ж<testing.T> Ꮡt) {
         ref var t1 = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡt1);
         Ꮡt1.Add(Ꮡx, Ꮡy);
         Ꮡt1.Multiply(Ꮡt1, Ꮡz);
+
         // Compute t2 = x*z + y*z
         ref var t2 = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡt2);
         ref var t3 = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡt3);
         Ꮡt2.Multiply(Ꮡx, Ꮡz);
         Ꮡt3.Multiply(Ꮡy, Ꮡz);
         Ꮡt2.Add(Ꮡt2, Ꮡt3);
+
         var (reprT1, reprT2) = (Ꮡt1.Bytes(), Ꮡt2.Bytes());
+
         return t1 == t2 && isReduced(reprT1) && isReduced(reprT2);
     };
+
     {
         var err = quick.Check((multiplyDistributesOverAdd).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
             Ꮡt.Error(err);
@@ -244,12 +253,15 @@ public static void TestScalarAddLikeSubNeg(ж<testing.T> Ꮡt) {
         // Compute t1 = x - y
         ref var t1 = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡt1);
         Ꮡt1.Subtract(Ꮡx, Ꮡy);
+
         // Compute t2 = -y + x
         ref var t2 = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡt2);
         Ꮡt2.Negate(Ꮡy);
         Ꮡt2.Add(Ꮡt2, Ꮡx);
+
         return t1 == t2 && isReduced(Ꮡt1.Bytes());
     };
+
     {
         var err = quick.Check((addLikeSubNeg).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
             Ꮡt.Error(err);
@@ -264,6 +276,7 @@ public static void TestScalarNonAdjacentForm(ж<testing.T> Ꮡt) {
         0xa7, 0x58, 0xaa, 0x1b, 0x88, 0xe0, 0x40, 0xd1,
         0x58, 0x9e, 0x7b, 0x7f, 0x23, 0x76, 0xef, 0x09
     }.slice());
+
     var expectedNaf = new int8[]{
         0, 13, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, (int8)(-9), 0, 0, 0, 0, (int8)(-11), 0, 0, 0, 0, 3, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 9, 0, 0, 0, 0, (int8)(-5), 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 11, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0,
@@ -274,7 +287,9 @@ public static void TestScalarNonAdjacentForm(ж<testing.T> Ꮡt) {
         0, 0, 0, 11, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, (int8)(-9), 0, 0, 0, 0, 0, 0, 0, (int8)(-1), 0, 0, 0, 0, 0, 0, 0, 7,
         0, 0, 0, 0, 0, (int8)(-15), 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 15, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0
     }.array();
+
     var sNaf = s.nonAdjacentForm(5);
+
     for (nint i = 0; i < 256; i++) {
         if (expectedNaf[i] != sNaf[i]) {
             Ꮡt.Errorf("Wrong digit at position %d, got %d, expected %d"u8, i, sNaf[i], expectedNaf[i]);
@@ -292,7 +307,7 @@ internal static reflectꓸValue Generate(this notZeroScalar _, ж<mathrand.Rand>
         var ᴛ3 = s.s.Value;
         fiatScalarNonzero(ref isNonZero, ref ᴛ3);
     }
-    return reflect.ValueOf(((notZeroScalar)s));
+    return reflect.ValueOf((notZeroScalar)s);
 }
 
 public static void TestScalarEqual(ж<testing.T> Ꮡt) {

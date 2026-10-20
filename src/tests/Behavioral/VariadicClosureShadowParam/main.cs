@@ -10,16 +10,18 @@ internal static void add(@string verb, slice<@string> args) {
         var argsΔ1 = argsΔ1ʗp.sslice();
         fmt.Println(fmt.Sprintf(format, argsΔ1.ꓸꓸꓸ));
     }
+
     if (len(args) != 1) {
         errorf("%s: want 1 argument, got %d"u8, verb, len(args));
         return;
     }
+
     errorf("%s: %s"u8, verb, args[0]);
 }
 
 internal static void Main() {
-    add("go"u8, new @string[]{"1.23.0"u8}.slice());
-    add("go"u8, default!);
+    add("go", new @string[]{"1.23.0"}.slice());
+    add("go", default!);
 }
 
 } // end main_package

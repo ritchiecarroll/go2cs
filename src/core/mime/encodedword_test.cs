@@ -42,6 +42,7 @@ public static void TestEncodeWord(ж<testing.T> Ꮡt) {
         new(BEncoding, iso88591, strings.Repeat(((@string)(new byte[]{0xe9})), 45), "=?iso-8859-1?b?"u8 + strings.Repeat("6enp"u8, 15) + "?="u8),
         new(BEncoding, utf8, strings.Repeat(((@string)(new byte[]{0x80})), 48), "=?utf-8?b?"u8 + strings.Repeat(gICAˢ, 15) + "?= =?utf-8?b?gICA?="u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         {
             @string s = test.enc.Encode(test.charset, test.src); if (s != test.exp) {
@@ -65,6 +66,7 @@ public static void TestEncodedWordLength(ж<testing.T> Ꮡt) {
         new(BEncoding, strings.Repeat(((@string)(new byte[]{0x80})), 50)),
         new(QEncoding, "{$firstname} Bienvendio a Apostolica, aquà inicia el camino de tu"u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         @string s = test.enc.Encode(utf8ˢ2, test.src);
         nint wordLen = 0;
@@ -73,6 +75,7 @@ public static void TestEncodedWordLength(ж<testing.T> Ꮡt) {
                 wordLen = 0;
                 continue;
             }
+
             wordLen++;
             if (wordLen > maxEncodedWordLen) {
                 Ꮡt.Errorf("Encode(%q) has more than %d characters: %q"u8,
@@ -103,6 +106,7 @@ public static void TestDecodeWord(ж<testing.T> Ꮡt) {
         new("=?UTF-8???="u8, ""u8, true),
         new("=?UTF-8?Q??="u8, ""u8, false)
     }.slice();
+
     foreach (var (_, test) in tests) {
         var dec = @new<global::go.mime_package.WordDecoder>();
         var (s, err) = dec.Decode(test.src);
@@ -138,8 +142,8 @@ public static void TestDecodeHeader(ж<testing.T> Ꮡt) {
         new("=?UTF-8?A?Test?="u8, "=?UTF-8?A?Test?="u8),
         new("=?UTF-8?Q?A=B?="u8, "=?UTF-8?Q?A=B?="u8),
         new("=?UTF-8?Q?=A?="u8, "=?UTF-8?Q?=A?="u8),
-        new("=?UTF-8?A?A?="u8, "=?UTF-8?A?A?="u8), // Incomplete words
-
+        new("=?UTF-8?A?A?="u8, "=?UTF-8?A?A?="u8),
+        // Incomplete words
         new("=?"u8, "=?"u8),
         new("=?UTF-8?"u8, "=?UTF-8?"u8),
         new("=?UTF-8?="u8, "=?UTF-8?="u8),
@@ -147,8 +151,8 @@ public static void TestDecodeHeader(ж<testing.T> Ꮡt) {
         new("=?UTF-8?Q?"u8, "=?UTF-8?Q?"u8),
         new("=?UTF-8?Q?="u8, "=?UTF-8?Q?="u8),
         new("=?UTF-8?Q?A"u8, "=?UTF-8?Q?A"u8),
-        new("=?UTF-8?Q?A?"u8, "=?UTF-8?Q?A?"u8), // Tests from RFC 2047
-
+        new("=?UTF-8?Q?A?"u8, "=?UTF-8?Q?A?"u8),
+        // Tests from RFC 2047
         new("=?ISO-8859-1?Q?a?="u8, "a"u8),
         new("=?ISO-8859-1?Q?a?= b"u8, "a b"u8),
         new("=?ISO-8859-1?Q?a?= =?ISO-8859-1?Q?b?="u8, "ab"u8),
@@ -156,6 +160,7 @@ public static void TestDecodeHeader(ж<testing.T> Ꮡt) {
         new("=?ISO-8859-1?Q?a?= \r\n\t =?ISO-8859-1?Q?b?="u8, "ab"u8),
         new("=?ISO-8859-1?Q?a_b?="u8, "a b"u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         var dec = @new<global::go.mime_package.WordDecoder>();
         var (s, err) = dec.DecodeHeader(test.src);
@@ -189,6 +194,7 @@ public static void TestCharsetDecoder(ж<testing.T> Ꮡt) {
             new @string[]{((@string)(new byte[]{0x66, 0xf5, 0xf6})), ((@string)(new byte[]{0x62, 0xe0, 0x72}))}.slice()
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestCharsetDecoder_tests(), out var Ꮡtest);
         test = vᴛ1;
@@ -204,11 +210,12 @@ public static void TestCharsetDecoder(ж<testing.T> Ꮡt) {
                 if (errΔ1 != default!) {
                     Ꮡt.Errorf("DecodeHeader(%q), error in reader: %v"u8, testʗ1.src, errΔ1);
                 }
-                @string gotΔ1 = ((@string)content);
+                @string gotΔ1 = (@string)content;
                 if (gotΔ1 != testʗ1.content[i]) {
                     Ꮡt.Errorf("DecodeHeader(%q), got content %q, want %q"u8, testʗ1.src, gotΔ1, testʗ1.content[i]);
                 }
                 i++;
+
                 return (new mime_test_package.strings_ReaderжReader(strings.NewReader(gotΔ1)), default!);
             }
         ));
@@ -231,6 +238,7 @@ public static void TestCharsetDecoderError(ж<testing.T> Ꮡt) {
     var dec = Ꮡ(new WordDecoder(
         CharsetReader: (@string charset, Δio.Reader input) => (default!, errors.New(testErrorˢ))
     ));
+
     {
         var (_, err) = dec.DecodeHeader(charsetQFooˢ); if (err == default!) {
             Ꮡt.Error(decodeHeaderShouldReturnˢ);
@@ -256,6 +264,7 @@ public static void BenchmarkQDecodeWord(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var dec = @new<global::go.mime_package.WordDecoder>();
+
     for (nint i = 0; i < b.N; i++) {
         dec.Decode(utf8QC2A1HolaSeC3B1orˢ);
     }
@@ -265,6 +274,7 @@ public static void BenchmarkQDecodeHeader(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var dec = @new<global::go.mime_package.WordDecoder>();
+
     for (nint i = 0; i < b.N; i++) {
         dec.DecodeHeader(utf8QC2A1HolaSeC3B1orˢ);
     }

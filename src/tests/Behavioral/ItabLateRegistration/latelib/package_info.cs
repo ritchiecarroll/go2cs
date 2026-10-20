@@ -49,7 +49,7 @@ using static go.ItabLateRegistration.latelib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("latelib.go", "latelib.cs", "AAcYgpKUgoQ=")]
+[assembly: go.GoPositionMap("latelib.go", "latelib.cs", "AAcYgpKkgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.ItabLateRegistration;

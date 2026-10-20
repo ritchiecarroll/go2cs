@@ -25,6 +25,7 @@ internal static readonly object stringUnexpectedNewlineˢ = (@string)"String: un
 
 public static void TestWriter(ж<testing.T> Ꮡt) {
     var fileContents = slice<byte>("my file contents"u8);
+
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var w = NewWriter(new multipart_test_package.bytes_BufferжWriter(Ꮡb));
     {
@@ -50,7 +51,9 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(stringUnexpectedNewlineˢ);
         }
     }
+
     var r = NewReader(new multipart_test_package.bytes_BufferжReader(Ꮡb), w.Boundary());
+
     var (part, err) = r.NextPart();
     if (err != default!) {
         Ꮡt.Fatalf("part 1: %v"u8, err);
@@ -66,11 +69,12 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("part 1: ReadAll: %v"u8, err);
     }
     {
-        @string e = ((@string)fileContents);
-        @string g = ((@string)slurp); if (e != g) {
+        @string e = (@string)fileContents;
+        @string g = (@string)slurp; if (e != g) {
             Ꮡt.Errorf("part 1: want contents %q, got %q"u8, e, g);
         }
     }
+
     (part, err) = r.NextPart();
     if (err != default!) {
         Ꮡt.Fatalf("part 2: %v"u8, err);
@@ -87,10 +91,11 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
     }
     {
         @string e = valˢ;
-        @string g = ((@string)slurp); if (e != g) {
+        @string g = (@string)slurp; if (e != g) {
             Ꮡt.Errorf("part 2: want contents %q, got %q"u8, e, g);
         }
     }
+
     (part, err) = r.NextPart();
     if (part != nil || err == default!) {
         Ꮡt.Fatalf("expected end of parts; got %v, %v"u8, part.OrTypedNil(), err);
@@ -132,6 +137,7 @@ public static void TestWriterSetBoundary(ж<testing.T> Ꮡt) {
             if (gotΔ1 != tt.b) {
                 Ꮡt.Errorf("boundary = %q; want %q"u8, gotΔ1, tt.b);
             }
+
             @string ct = w.FormDataContentType();
             var (mt, @params, errΔ1) = mime.ParseMediaType(ct);
             if (errΔ1 != default!){
@@ -145,6 +151,7 @@ public static void TestWriterSetBoundary(ж<testing.T> Ꮡt) {
                     Ꮡt.Errorf("unexpected boundary parameter %q; want %q"u8, bΔ1, tt.b);
                 }
             }
+
             w.Close();
             @string wantSub = "\r\n--"u8 + tt.b + "--\r\n"u8;
             {
@@ -188,6 +195,7 @@ public static void TestSortedHeader(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Error setting mime boundary: %v"u8, errΔ1);
         }
     }
+
     var header = new textproto.MIMEHeader(new map<@string, slice<@string>>{
         ["A"u8] = new @string[]{"2"u8}.slice(),
         ["B"u8] = new @string[]{"5"u8, "7"u8, "6"u8}.slice(),
@@ -195,12 +203,15 @@ public static void TestSortedHeader(ж<testing.T> Ꮡt) {
         ["M"u8] = new @string[]{"3"u8}.slice(),
         ["Z"u8] = new @string[]{"1"u8}.slice()
     });
+
     var (part, err) = w.CreatePart(header);
     if (err != default!) {
         Ꮡt.Fatalf("Unable to create part: %v"u8, err);
     }
     part.Write(slice<byte>("foo"u8));
+
     w.Close();
+
     @string want = mimeboundaryA2B5B7B6C4M3ˢ;
     if (want != buf.String()) {
         Ꮡt.Fatalf("\n got: %q\nwant: %q\n"u8, buf.String(), want);

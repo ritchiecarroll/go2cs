@@ -29,37 +29,38 @@ q.go:20.0,25.0 3 0
 q.go:30.0,31.0 2 1
 q.go:33.0,40.0 7 2
 lit.go:99.0,100.0 1 0
-"""u8;
+"""u8.Raw();
 private static readonly @string modeAtomicLitGo990100010ˢ = """
 
 mode: atomic
 lit.go:99.0,100.0 1 0
-"""u8;
+"""u8.Raw();
 private static readonly @string myPack1Coverage667Ofˢ = """
 
        	my/pack1		coverage: 66.7% of statements
         my/pack2		coverage: 0.0% of statements
 
-"""u8;
+"""u8.Raw();
 private static readonly @string coverage625OfStatementsˢ = """
 
 		coverage: 62.5% of statements in ./...
 
-"""u8;
+"""u8.Raw();
 private static readonly @string pGo10F1333QGo20F2750ˢ = """
 
 p.go:10:	f1		33.3%
 q.go:20:	f2		75.0%
 total		(statements)	62.5%
-"""u8;
+"""u8.Raw();
 private static readonly @string myPack1Coverage667Ofˢ2 = """
 
        	my/pack1		coverage: 66.7% of statements
 
-"""u8;
+"""u8.Raw();
 
 public static void TestBasics(ж<testing.T> Ꮡt) {
     var fm = cformat.NewFormatter(coverage.CtrModeAtomic);
+
     coverage.CoverableUnit mku(uint32 stl, uint32 enl, uint32 nx) => new coverage.CoverableUnit(
             StLine: stl,
             EnLine: enl,
@@ -89,6 +90,7 @@ public static void TestBasics(ж<testing.T> Ꮡt) {
     foreach (var (_, u) in fn3units) {
         fm.AddUnit(litGoˢ, "f3"u8, true, u, 0);
     }
+
     ref var b1 = ref heap(new strings.Builder(), out var Ꮡb1);
     ref var b2 = ref heap(new strings.Builder(), out var Ꮡb2);
     ref var b3 = ref heap(new strings.Builder(), out var Ꮡb3);
@@ -104,6 +106,7 @@ public static void TestBasics(ж<testing.T> Ꮡt) {
     if (wantText != gotText) {
         Ꮡt.Errorf("emit text: got:\n%s\nwant:\n%s\n"u8, gotText, wantText);
     }
+
     var selected = new @string[]{"my/pack2"u8}.slice();
     {
         var err = fm.EmitTextual(selected, new strings_BuilderжWriter(Ꮡb5)); if (err != default!) {
@@ -115,6 +118,7 @@ public static void TestBasics(ж<testing.T> Ꮡt) {
     if (wantText != gotText) {
         Ꮡt.Errorf("emit text: got:\n%s\nwant:\n%s\n"u8, gotText, wantText);
     }
+
     // Percent output with no aggregation.
     @string noCoverPkg = ""u8;
     {
@@ -128,6 +132,7 @@ public static void TestBasics(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("emit percent: got:\n%+v\nwant:\n%+v\n"u8,
             gotPercent, wantPercent);
     }
+
     // Percent mode with aggregation.
     @string withCoverPkg = " in ./..."u8;
     {
@@ -141,6 +146,7 @@ public static void TestBasics(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("emit percent: got:\n%+v\nwant:\n%+v\n"u8,
             gotPercent, wantPercent);
     }
+
     {
         var err = fm.EmitFuncs(new strings_BuilderжWriter(Ꮡb4)); if (err != default!) {
             Ꮡt.Fatalf("EmitFuncs returned %v"u8, err);
@@ -157,6 +163,7 @@ public static void TestBasics(ж<testing.T> Ꮡt) {
         Ꮡt.Logf("perc2 is %s\n"u8, b3.String());
         Ꮡt.Logf("funcs is %s\n"u8, b4.String());
     }
+
     // Percent output with specific packages selected.
     {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
@@ -181,17 +188,18 @@ private static readonly @string myPack1CoverageNoˢ = """
        	my/pack1 coverage:	[no statements]
         my/pack2 coverage:	[no statements]
 
-"""u8;
+"""u8.Raw();
 private static readonly @string coverageNoStatementsˢ = """
 
        	coverage:	[no statements]
 
-"""u8;
+"""u8.Raw();
 
 public static void TestEmptyPackages(ж<testing.T> Ꮡt) {
     var fm = cformat.NewFormatter(coverage.CtrModeAtomic);
     fm.SetPackage(myPack1ˢ);
     fm.SetPackage(myPack2ˢ);
+
     // No aggregation.
     {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
@@ -208,6 +216,7 @@ public static void TestEmptyPackages(ж<testing.T> Ꮡt) {
                 gotPercent, wantPercent);
         }
     }
+
     // With aggregation.
     {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);

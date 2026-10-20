@@ -17,7 +17,6 @@ using static go.net.http.fcgi_package;
 
 partial class fcgi_internal_test_package {
 
-
 partial struct sizeTestsᴛ1 /*dyn*/ {
     internal uint32 size;
     internal slice<byte> bytes;
@@ -47,11 +46,6 @@ public static void TestSize(ж<testing.T> Ꮡt) {
     }
 }
 
-// this data will have to be split into two records
-// header for the first record
-// header for the second
-// header for the empty record
-
 partial struct streamTestsᴛ1 /*dyn*/ {
     internal @string desc;
     internal global::go.net.http.fcgi_package.recType recType;
@@ -63,12 +57,16 @@ internal static slice<streamTestsᴛ1> streamTests = new streamTestsᴛ1[]{
     new("single record"u8, typeStdout, 1, default!,
         new byte[]{1, (byte)typeStdout, 0, 1, 0, 0, 0, 0}.slice()
     ),
+    // this data will have to be split into two records
     new("two records"u8, typeStdin, 300, new slice<byte>(66000),
         bytes.Join(new slice<byte>[]{
+            // header for the first record
             new byte[]{1, (byte)typeStdin, 0x01, 0x2C, 0xFF, 0xFF, 1, 0}.slice(),
             new slice<byte>(65536),
+            // header for the second
             new byte[]{1, (byte)typeStdin, 0x01, 0x2C, 0x01, 0xD1, 7, 0}.slice(),
             new slice<byte>(472),
+            // header for the empty record
             new byte[]{1, (byte)typeStdin, 0x01, 0x2C, 0, 0, 0, 0}.slice()
         }.slice(),
             default!)
@@ -159,15 +157,17 @@ internal static readonly @string wantᶜ = ((@string)(new byte[]{0x01, 0x0a, 0x0
 public static void TestGetValues(ж<testing.T> Ꮡt) {
     ref var rec = ref heap(new global::go.net.http.fcgi_package.record(), out var Ꮡrec);
     rec.h.Type = typeGetValues;
+
     var wc = @new<writeOnlyConn>();
     var c = newChild(new fcgi_internal_test_package.writeOnlyConnжReadWriteCloser(wc), default!);
     var err = c.handleRecord(Ꮡrec);
     if (err != default!) {
         Ꮡt.Fatalf("handleRecord: %v"u8, err);
     }
+
     @string want = wantᶜ;
     {
-        @string got = ((@string)(~wc).buf); if (got != want) {
+        @string got = (@string)(~wc).buf; if (got != want) {
             Ꮡt.Errorf(" got: %q\nwant: %q\n"u8, got, want);
         }
     }
@@ -184,10 +184,11 @@ internal static slice<byte> nameValuePair11(@string nameData, @string valueData)
 }
 
 internal static slice<byte> makeRecord(global::go.net.http.fcgi_package.recType recordType, uint16 requestId, slice<byte> contentData) {
-    var requestIdB1 = (byte)((requestId >> (int)(8)));
+    var requestIdB1 = (byte)(requestId >> 8);
     var requestIdB0 = (byte)requestId;
+
     nint contentLength = len(contentData);
-    var contentLengthB1 = (byte)((contentLength >> (int)(8)));
+    var contentLengthB1 = (byte)(contentLength >> 8);
     var contentLengthB0 = (byte)contentLength;
     return bytes.Join(new slice<byte>[]{
         new byte[]{1, (byte)recordType, requestIdB1, requestIdB0, contentLengthB1,
@@ -197,23 +198,20 @@ internal static slice<byte> makeRecord(global::go.net.http.fcgi_package.recType 
         default!);
 }
 
-// set up request 1
-// add required parameters to request 1
-// begin sending body of request 1
 // a series of FastCGI records that start a request and begin sending the
 // request body
 internal static slice<byte> streamBeginTypeStdin = bytes.Join(new slice<byte>[]{
+    // set up request 1
     makeRecord(typeBeginRequest, 1,
         new byte[]{0, (byte)roleResponder, 0, 0, 0, 0, 0, 0}.slice()),
+    // add required parameters to request 1
     makeRecord(typeParams, 1, nameValuePair11("REQUEST_METHOD"u8, "GET"u8)),
     makeRecord(typeParams, 1, nameValuePair11("SERVER_PROTOCOL"u8, "HTTP/1.1"u8)),
     makeRecord(typeParams, 1, default!),
+    // begin sending body of request 1
     makeRecord(typeStdin, 1, slice<byte>("0123456789abcdef"u8))
 }.slice(),
     default!);
-
-// confirm that child.handleRecord closes req.pw after aborting req
-// confirm that child.serve closes all pipes after error reading record
 
 partial struct cleanUpTestsᴛ1 /*dyn*/ {
     internal slice<byte> input;
@@ -221,6 +219,7 @@ partial struct cleanUpTestsᴛ1 /*dyn*/ {
 }
 internal static slice<cleanUpTestsᴛ1> cleanUpTests;
 internal static void initᴛcleanUpTests() { cleanUpTests = new cleanUpTestsᴛ1[]{
+    // confirm that child.handleRecord closes req.pw after aborting req
     new(
         bytes.Join(new slice<byte>[]{
             streamBeginTypeStdin,
@@ -229,6 +228,7 @@ internal static void initᴛcleanUpTests() { cleanUpTests = new cleanUpTestsᴛ1
             default!),
         ErrRequestAborted
     ),
+    // confirm that child.serve closes all pipes after error reading record
     new(
         bytes.Join(new slice<byte>[]{
             streamBeginTypeStdin,
@@ -255,8 +255,6 @@ internal static error Close(this nopWriteCloser _) {
 // bodies of all requests before returning. Causes deadlock if either condition
 // isn't met. See issue 6934.
 public static void TestChildServeCleansUp(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, vᴛ1) in cleanUpTests) {
         ref var tt = ref heap(new cleanUpTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
@@ -293,12 +291,12 @@ internal static error Close(this rwNopCloser _) {
 
 // Verifies it doesn't crash. 	Issue 11824.
 public static void TestMalformedParams(ж<testing.T> Ꮡt) {
-    var input = new byte[]{ // beginRequest, requestId=1, contentLength=8, role=1, keepConn=1
-
-        1, 1, 0, 1, 0, 8, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, // params, requestId=1, contentLength=10, k1Len=50, v1Len=50 (malformed, wrong length)
-
-        1, 4, 0, 1, 0, 10, 0, 0, 50, 50, 3, 4, 5, 6, 7, 8, 9, 10, // end of params
-
+    var input = new byte[]{
+        // beginRequest, requestId=1, contentLength=8, role=1, keepConn=1
+        1, 1, 0, 1, 0, 8, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+        // params, requestId=1, contentLength=10, k1Len=50, v1Len=50 (malformed, wrong length)
+        1, 4, 0, 1, 0, 10, 0, 0, 50, 50, 3, 4, 5, 6, 7, 8, 9, 10,
+        // end of params
         1, 4, 0, 1, 0, 0, 0, 0
     }.slice();
     var rw = new rwNopCloser(new fcgi_internal_test_package.bytes_ReaderжReader(bytes.NewReader(input)), io.Discard);
@@ -306,25 +304,24 @@ public static void TestMalformedParams(ж<testing.T> Ꮡt) {
     c.serve();
 }
 
-// set up request
-// add required parameters
-// set optional parameters
-// begin sending body of request
-// end request
 // a series of FastCGI records that start and end a request
 internal static slice<byte> streamFullRequestStdin = bytes.Join(new slice<byte>[]{
+    // set up request
     makeRecord(typeBeginRequest, 1,
         new byte[]{0, (byte)roleResponder, 0, 0, 0, 0, 0, 0}.slice()),
+    // add required parameters
     makeRecord(typeParams, 1, nameValuePair11("REQUEST_METHOD"u8, "GET"u8)),
     makeRecord(typeParams, 1, nameValuePair11("SERVER_PROTOCOL"u8, "HTTP/1.1"u8)),
+    // set optional parameters
     makeRecord(typeParams, 1, nameValuePair11("REMOTE_USER"u8, "jane.doe"u8)),
     makeRecord(typeParams, 1, nameValuePair11("QUERY_STRING"u8, "/foo/bar"u8)),
     makeRecord(typeParams, 1, default!),
+    // begin sending body of request
     makeRecord(typeStdin, 1, slice<byte>("0123456789abcdef"u8)),
+    // end request
     makeRecord(typeEndRequest, 1, default!)
 }.slice(),
     default!);
-
 
 partial struct envVarTestsᴛ1 /*dyn*/ {
     internal slice<byte> input;
@@ -466,6 +463,7 @@ public static partial void TestSlowRequest(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var (pr, pw) = io.Pipe();
+
         var writerDone = new channel<EmptyStruct>(0);
         var pwʗ1 = pw;
         var writerDoneʗ1 = writerDone;
@@ -485,14 +483,17 @@ public static partial void TestSlowRequest(ж<testing.T> Ꮡt) {
             ᐸꟷ(writerDoneʗ2);
             pwʗ2.Close();
         }, ref ᒐ);
+
         var rc = Ꮡ(new signalingNopWriteCloser(new io.PipeReaderжReadCloser(pr), new channel<bool>(0)));
         var handlerDone = new channel<bool>(0);
+
         var handlerDoneʗ1 = handlerDone;
         var c = newChild(new fcgi_internal_test_package.signalingNopWriteCloserжReadWriteCloser(rc), new fcgi_internal_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.WriteHeader(200);
             close(handlerDoneʗ1);
         })));
         c.serve();
+
         ᐸꟷ(handlerDone);
         ᐸꟷ((~rc).closed);
         Ꮡt.Log(fastCGIChildClosedˢ);

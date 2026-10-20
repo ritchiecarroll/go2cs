@@ -20,6 +20,7 @@ import (
 )
 
 func TestASingleReturnLiteralWithATrailingCommentKeepsItsBlockBody(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -46,7 +47,7 @@ func main() {
 	for _, want := range []string{
 		"var f = wrap((nint n) => {\n",
 		"        return n < limit; // below the limit\n",
-		"    }, \"x\"u8);",
+		"    }, \"x\");", // a plain literal (the string slot): see hoistedLiteralOperations.go
 	} {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("want %q: a trailing comment must not end inside the enclosing call:\n%s", want, emitted)
@@ -54,7 +55,7 @@ func main() {
 	}
 
 	// CONTROL: a literal with no comment still collapses to an expression body.
-	if want := `var h = wrap((nint n) => n == limit, "z"u8);`; !strings.Contains(emitted, want) {
+	if want := `var h = wrap((nint n) => n == limit, "z");`; !strings.Contains(emitted, want) {
 		t.Errorf("control: want %q unchanged:\n%s", want, emitted)
 	}
 }

@@ -11,9 +11,9 @@ partial class math_test_package {
 
 // Inputs to test trig_reduce
 internal static slice<float64> trigHuge = new float64[]{
-    (1 << (int)(28)),
-    (1 << (int)(29)),
-    (1 << (int)(30)),
+    1 << 28,
+    1 << 29,
+    1 << 30,
     34359738368D,
     1329227995784915872903807060280344576D,
     1766847064778384329583297500742918515827483896875618958121606201292619776D,

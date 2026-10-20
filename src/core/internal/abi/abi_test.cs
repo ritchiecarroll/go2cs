@@ -19,11 +19,13 @@ partial class abi_test_package {
 public static void TestFuncPC(ж<testing.T> Ꮡt) {
     // Test that FuncPC* can get correct function PC.
     var pcFromAsm = abi_internal_test_package.FuncPCTestFnAddr;
+
     // Test FuncPC for locally defined function
     var pcFromGo = abi_internal_test_package.FuncPCTest();
     if (pcFromGo != pcFromAsm) {
         Ꮡt.Errorf("FuncPC returns wrong PC, want %x, got %x"u8, pcFromAsm, pcFromGo);
     }
+
     // Test FuncPC for imported function
     pcFromGo = abi.FuncPCABI0(abi_internal_test_package.FuncPCTestFn);
     if (pcFromGo != pcFromAsm) {
@@ -46,6 +48,7 @@ internal static readonly @string symabisˢ = "-symabis"u8;
 public static void TestFuncPCCompileError(ж<testing.T> Ꮡt) {
     // Test that FuncPC* on a function of a mismatched ABI is rejected.
     testenv.MustHaveGoBuild(new abi_test_package.testing_TжTB(Ꮡt));
+
     // We want to test internal package, which we cannot normally import.
     // Run the assembler and compiler manually.
     @string tmpdir = Ꮡt.TempDir();
@@ -53,24 +56,28 @@ public static void TestFuncPCCompileError(ж<testing.T> Ꮡt) {
     @string goSrc = filepath.Join(testdataˢ, xGoˢ);
     @string symabi = filepath.Join(tmpdir, symabiˢ);
     @string obj = filepath.Join(tmpdir, "x.o");
+
     // Write an importcfg file for the dependencies of the package.
     @string importcfgfile = filepath.Join(tmpdir, helloImportcfgˢ);
     testenv.WriteImportcfg(new abi_test_package.testing_TжTB(Ꮡt), importcfgfile, default!, internalAbiˢ);
+
     // parse assembly code for symabi.
     var cmd = testenv.Command(new abi_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new abi_test_package.testing_TжTB(Ꮡt)), toolˢ, asmˢ, "-p=p", gensymabisˢ, "-o", symabi, asmSrc);
     var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("go tool asm -gensymabis failed: %v\n%s"u8, err, @out);
     }
+
     // compile go code.
     cmd = testenv.Command(new abi_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new abi_test_package.testing_TжTB(Ꮡt)), toolˢ, compileˢ, "-importcfg=" + importcfgfile, "-p=p", symabisˢ, symabi, "-o", obj, goSrc);
     (@out, err) = cmd.CombinedOutput();
     if (err == default!) {
         Ꮡt.Fatalf("go tool compile did not fail"u8);
     }
+
     // Expect errors in line 17, 18, 20, no errors on other lines.
     var want = new @string[]{"x.go:17"u8, "x.go:18"u8, "x.go:20"u8}.slice();
-    var got = strings.Split(((@string)@out), "\n"u8);
+    var got = strings.Split((@string)@out, "\n"u8);
     if (got[len(got) - 1] == "") {
         got = got.slice(0, len(got) - 1); // remove last empty line
     }
@@ -83,7 +90,7 @@ public static void TestFuncPCCompileError(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("unexpected number of errors, want %d, got %d"u8, len(want), len(got));
     }
     if (Ꮡt.Failed()) {
-        Ꮡt.Logf("output:\n%s"u8, ((@string)@out));
+        Ꮡt.Logf("output:\n%s"u8, (@string)@out);
     }
 }
 

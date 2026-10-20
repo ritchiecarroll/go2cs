@@ -1,5 +1,14 @@
 # DESIGN — managed profiling: sizing the `runtime/pprof` and `net/http/pprof` rows
 
+> **⚠ 2026-10-13: SUPERSEDED.** Both rows this note sizes have since banked: `net/http/pprof` at
+> 15 + 0 on 2026-09-28 (`c753fb2b71`), and `runtime/pprof` at 145 + 7 on 2026-10-01 with TRAIN K
+> (`133ca704eb`). Class C did not stay an owner decision: a CPU sampler was built, an in-process
+> EventPipe session (`src/core/runtime/cpusampler_impl.cs`, guarded by
+> `src/tests/GolibTests/EventPipeSamplerTests.cs`). The current counts and disclosures are on the
+> roster, [`../ValidatedTestPackages.md`](../ValidatedTestPackages.md). This note stays on the record for
+> its divergence mechanisms (§2) and increment shapes (§4). Its readings, predictions and asks are
+> as of 2026-09-26 and are not current.
+
 > **STATUS: PROPOSED (lane P2, 2026-09-26). A SIZING, not a cut. Docs only; no code lands until COORD
 > rules on this note.** Base: master `db1bd885a2`. Every reading below was taken by P2 on a linux
 > cloud container (Ubuntu 24.04, x64), go1.24.13 (GOROOT `/usr/local/go1.24.13`, as `go env GOROOT`

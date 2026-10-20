@@ -19,7 +19,9 @@ partial struct machVMRegionBasicInfoData {
 internal static UntypedInt _VM_PROT_READ => 0x1;
 internal static UntypedInt _VM_PROT_WRITE => 0x2;
 internal static UntypedInt _VM_PROT_EXECUTE => 0x4;
+
 internal static UntypedInt _MACH_SEND_INVALID_DEST => 0x10000003;
+
 internal static UntypedInt _MAXPATHLEN => 0x400;
 
 } // end pprof_package

@@ -3,6 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go.@internal;
 
+using goarch = go.@internal.goarch_package;
+using go.@internal;
+
 partial class abi_package {
 
 partial struct InterfaceSwitch {
@@ -27,22 +30,16 @@ partial struct InterfaceSwitchCacheEntry {
     public uintptr Itab;
 }
 
-internal const bool go122InterfaceSwitchCache = true;
-
-public static bool UseInterfaceSwitchCache(@string goarch) {
-    if (!go122InterfaceSwitchCache) {
-        return false;
-    }
+public static bool UseInterfaceSwitchCache(goarch.ArchFamilyType arch) {
     // We need an atomic load instruction to make the cache multithreaded-safe.
     // (AtomicLoadPtr needs to be implemented in cmd/compile/internal/ssa/_gen/ARCH.rules.)
-    var exprᴛ1 = goarch;
-    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "s390x"u8) {
+    var exprᴛ1 = arch;
+    if (exprᴛ1 == goarch.AMD64 || exprᴛ1 == goarch.ARM64 || exprᴛ1 == goarch.LOONG64 || exprᴛ1 == goarch.MIPS || exprᴛ1 == goarch.MIPS64 || exprᴛ1 == goarch.PPC64 || exprᴛ1 == goarch.RISCV64 || exprᴛ1 == goarch.S390X) {
         return true;
     }
     { /* default: */
         return false;
     }
-
 }
 
 partial struct TypeAssert {

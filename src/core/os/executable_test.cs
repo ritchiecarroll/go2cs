@@ -27,6 +27,7 @@ internal static readonly @string helperEnvVarᶜ = "OSTEST_OUTPUT_EXECPATH"u8;
 
 public static void TestExecutable(ж<Δtesting.T> Ꮡt) {
     @string helperEnvVar = helperEnvVarᶜ;
+
     if (Δos.Getenv(helperEnvVar) != ""u8) {
         // First chdir to another path.
         @string dirΔ1 = "/"u8;
@@ -47,6 +48,7 @@ public static void TestExecutable(ж<Δtesting.T> Ꮡt) {
         }
         Δos.Exit(0);
     }
+
     Ꮡt.Parallel();
     @string ep = testenv.Executable(new os_test_package.testing_TжTB(Ꮡt));
     // we want fn to be of the form "dir/prog"
@@ -55,13 +57,14 @@ public static void TestExecutable(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("filepath.Rel: %v"u8, err);
     }
+
     var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), fn, "-test.run=^"u8 + Ꮡt.Name() + "$"u8);
     // make child start with a relative program path
     cmd.Value.Dir = dir;
     cmd.Value.Path = fn;
     if (Δruntime.GOOS == "openbsd"u8 || Δruntime.GOOS == "aix"u8){
-    } else {
         // OpenBSD and AIX rely on argv[0]
+    } else {
         // forge argv[0] for child, so that we can verify we could correctly
         // get real path of the executable without influenced by argv[0].
         cmd.Value.Args[0] = "-"u8;
@@ -71,7 +74,7 @@ public static void TestExecutable(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("exec(self) failed: %v"u8, err);
     }
-    @string outs = ((@string)@out);
+    @string outs = (@string)@out;
     if (!filepath.IsAbs(outs)) {
         Ꮡt.Fatalf("Child returned %q, want an absolute path"u8, @out);
     }
@@ -106,20 +109,24 @@ public static void TestExecutableDeleted(ж<Δtesting.T> Ꮡt) {
     else if (exprᴛ1 == "openbsd"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "aix"u8) {
         Ꮡt.Skipf("%v does not support reading deleted binary name"u8, Δruntime.GOOS);
     }
-
     Ꮡt.Parallel();
+
     @string dir = Ꮡt.TempDir();
+
     @string src = filepath.Join(dir, testdelGoˢ);
     @string exe = filepath.Join(dir, testdelExeˢ);
+
     var err = Δos.WriteFile(src, slice<byte>(testExecutableDeletion), 438);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var @out, err) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new os_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", exe, src).CombinedOutput();
     Ꮡt.Logf("build output:\n%s"u8, @out);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (@out, err) = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), exe).CombinedOutput();
     Ꮡt.Logf("exec output:\n%s"u8, @out);
     if (err != default!) {
@@ -160,6 +167,6 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 } // end os_test_package

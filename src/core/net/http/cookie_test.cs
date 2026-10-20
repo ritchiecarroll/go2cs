@@ -19,11 +19,6 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-// According to IETF 6265 Section 5.1.1.5, the year cannot be less than 1601
-// The "special" cookies have values containing commas or spaces which
-// are disallowed by RFC 6265 but are common in the wild.
-// Quoted values (issue #46443)
-
 partial struct writeSetCookiesTestsᴛ1 /*dyn*/ {
     public ж<global::go.net.http_package.ΔCookie> Cookie;
     public @string Raw;
@@ -65,6 +60,7 @@ internal static slice<writeSetCookiesTestsᴛ1> writeSetCookiesTests = new write
         Ꮡ(new ΔCookie(Name: "cookie-9"u8, Value: "expiring"u8, Expires: time.Unix(1257894000, 0))),
         "cookie-9=expiring; Expires=Tue, 10 Nov 2009 23:00:00 GMT"u8
     ),
+    // According to IETF 6265 Section 5.1.1.5, the year cannot be less than 1601
     new(
         Ꮡ(new ΔCookie(Name: "cookie-10"u8, Value: "expiring-1601"u8, Expires: time.Date(1601, 1, 1, 1, 1, 1, 1, time.ΔUTC))),
         "cookie-10=expiring-1601; Expires=Mon, 01 Jan 1601 01:01:01 GMT"u8
@@ -93,6 +89,8 @@ internal static slice<writeSetCookiesTestsᴛ1> writeSetCookiesTests = new write
         Ꮡ(new ΔCookie(Name: "cookie-16"u8, Value: "partitioned"u8, SameSite: SameSiteNoneMode, Secure: true, Path: "/"u8, Partitioned: true)),
         "cookie-16=partitioned; Path=/; Secure; SameSite=None; Partitioned"u8
     ),
+    // The "special" cookies have values containing commas or spaces which
+    // are disallowed by RFC 6265 but are common in the wild.
     new(
         Ꮡ(new ΔCookie(Name: "special-1"u8, Value: "a z"u8)),
         @"special-1=""a z"""u8
@@ -157,6 +155,7 @@ internal static slice<writeSetCookiesTestsᴛ1> writeSetCookiesTests = new write
         Ꮡ(new ΔCookie(Name: "a\rb"u8, Value: "v"u8)),
         @""u8
     ),
+    // Quoted values (issue #46443)
     new(
         Ꮡ(new ΔCookie(Name: "cookie"u8, Value: "quoted"u8, Quoted: true)),
         @"cookie=""quoted"""u8
@@ -180,6 +179,7 @@ public static void TestWriteSetCookies(ж<testing.T> Ꮡt) {
         defer(log.SetOutput, new os.FileжWriter(os.Stderr), ref ᒐ);
         ref var logbuf = ref heap(new strings.Builder(), out var Ꮡlogbuf);
         log.SetOutput(new http_test_package.strings_BuilderжWriter(Ꮡlogbuf));
+
         foreach (var (i, tt) in writeSetCookiesTests) {
             {
                 @string g = tt.Cookie.String();
@@ -188,6 +188,7 @@ public static void TestWriteSetCookies(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         {
             @string got = logbuf.String();
             @string sub = droppingDomainAttributeˢ; if (!strings.Contains(got, sub)) {
@@ -202,7 +203,7 @@ public static void TestWriteSetCookies(ж<testing.T> Ꮡt) {
 internal partial struct headerOnlyResponseWriter /*global::go.net.http_package.ΔHeader*/;
 
 internal static global::go.net.http_package.ΔHeader Header(this headerOnlyResponseWriter ho) {
-    return ((global::go.net.http_package.ΔHeader)ho);
+    return (global::go.net.http_package.ΔHeader)ho;
 }
 
 internal static (nint, error) Write(this headerOnlyResponseWriter ho, slice<byte> _) {
@@ -219,11 +220,11 @@ internal static readonly @string cookie2TwoMaxAge3600ˢ = "cookie-2=two; Max-Age
 
 public static void TestSetCookie(ж<testing.T> Ꮡt) {
     var m = new global::go.net.http_package.ΔHeader(0);
-    SetCookie(((headerOnlyResponseWriter)m), Ꮡ(new ΔCookie(Name: "cookie-1"u8, Value: "one"u8, Path: "/restricted/"u8)));
-    SetCookie(((headerOnlyResponseWriter)m), Ꮡ(new ΔCookie(Name: "cookie-2"u8, Value: "two"u8, MaxAge: 3600)));
+    SetCookie((headerOnlyResponseWriter)m, Ꮡ(new ΔCookie(Name: "cookie-1"u8, Value: "one"u8, Path: "/restricted/"u8)));
+    SetCookie((headerOnlyResponseWriter)m, Ꮡ(new ΔCookie(Name: "cookie-2"u8, Value: "two"u8, MaxAge: 3600)));
     {
         nint l = builtin.len(m[setCookieˢ]); if (l != 2) {
-            Ꮡt.Fatalf("expected %d cookies, got %d"u8, (nint)(2), l);
+            Ꮡt.Fatalf("expected %d cookies, got %d"u8, (nint)2, l);
         }
     }
     {
@@ -239,8 +240,6 @@ public static void TestSetCookie(ж<testing.T> Ꮡt) {
         }
     }
 }
-
-// Quoted values (issue #46443)
 
 partial struct addCookieTestsᴛ1 /*dyn*/ {
     public slice<ж<global::go.net.http_package.ΔCookie>> Cookies;
@@ -263,6 +262,7 @@ internal static slice<addCookieTestsᴛ1> addCookieTests = new addCookieTestsᴛ
         }.slice(),
         "cookie-1=v$1; cookie-2=v$2; cookie-3=v$3"u8
     ),
+    // Quoted values (issue #46443)
     new(
         new ж<global::go.net.http_package.ΔCookie>[]{
             Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie-1"u8, Value: "quoted"u8, Quoted: true)),
@@ -289,17 +289,6 @@ public static void TestAddCookie(ж<testing.T> Ꮡt) {
         }
     }
 }
-
-// Make sure we can properly read back the Set-Cookie headers we create
-// for values containing spaces or commas:
-// Make sure we can properly read back the Set-Cookie headers
-// for names containing spaces:
-// Quoted values (issue #46443)
-// TODO(bradfitz): users have reported seeing this in the
-// wild, but do browsers handle it? RFC 6265 just says "don't
-// do that" (section 3) and then never mentions header folding
-// again.
-// Header{"Set-Cookie": {"ASP.NET_SessionId=foo; path=/; HttpOnly, .ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"}},
 
 partial struct readSetCookiesTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader header;
@@ -391,6 +380,8 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = new readSet
             Raw: "samesitenone=foo; SameSite=None"u8))
         }.slice()
     ),
+    // Make sure we can properly read back the Set-Cookie headers we create
+    // for values containing spaces or commas:
     new(
         header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"u8] = new @string[]{@"special-1=a z"u8}.slice()}),
         cookies: new ж<global::go.net.http_package.ΔCookie>[]{Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-1"u8, Value: "a z"u8, Raw: @"special-1=a z"u8))}.slice()
@@ -423,10 +414,13 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = new readSet
         header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"u8] = new @string[]{@"special-8="","""u8}.slice()}),
         cookies: new ж<global::go.net.http_package.ΔCookie>[]{Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-8"u8, Value: ","u8, Quoted: true, Raw: @"special-8="","""u8))}.slice()
     ),
+    // Make sure we can properly read back the Set-Cookie headers
+    // for names containing spaces:
     new(
         header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"u8] = new @string[]{@"special-9 ="","""u8}.slice()}),
         cookies: new ж<global::go.net.http_package.ΔCookie>[]{Ꮡ(new global::go.net.http_package.ΔCookie(Name: "special-9"u8, Value: ","u8, Quoted: true, Raw: @"special-9 ="","""u8))}.slice()
     ),
+    // Quoted values (issue #46443)
     new(
         header: new ΔHeader(new map<@string, slice<@string>>{["Set-Cookie"u8] = new @string[]{@"cookie=""quoted"""u8}.slice()}),
         cookies: new ж<global::go.net.http_package.ΔCookie>[]{Ꮡ(new global::go.net.http_package.ΔCookie(Name: "cookie"u8, Value: "quoted"u8, Quoted: true, Raw: @"cookie=""quoted"""u8))}.slice()
@@ -450,6 +444,12 @@ internal static slice<readSetCookiesTestsᴛ1> readSetCookiesTests = new readSet
         cookies: slices.Repeat<slice<ж<global::go.net.http_package.ΔCookie>>, ж<global::go.net.http_package.ΔCookie>>(new ж<global::go.net.http_package.ΔCookie>[]{Ꮡ(new global::go.net.http_package.ΔCookie(Name: "a"u8, Value: ""u8, Quoted: false, Raw: "a="u8))}.slice(), defaultCookieMaxNum + 1),
         godebug: fmt.Sprintf("httpcookiemaxnum=%v"u8, (nint)(defaultCookieMaxNum + 1))
     )
+
+    // TODO(bradfitz): users have reported seeing this in the
+    // wild, but do browsers handle it? RFC 6265 just says "don't
+    // do that" (section 3) and then never mentions header folding
+    // again.
+    // Header{"Set-Cookie": {"ASP.NET_SessionId=foo; path=/; HttpOnly, .ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"}},
 }.slice();
 
 internal static @string toJSON(any v) {
@@ -457,19 +457,16 @@ internal static @string toJSON(any v) {
     if (err != default!) {
         return fmt.Sprintf("%#v"u8, v);
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string godebugˢ = "GODEBUG"u8;
 
 public static void TestReadSetCookies(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (i, tt) in readSetCookiesTests) {
         Ꮡt.Setenv(godebugˢ, tt.godebug);
-        for (nint n = 0; n < 2; n++) {
-            // to verify readSetCookies doesn't mutate its input
+        for (nint n = 0; n < 2; n++) { // to verify readSetCookies doesn't mutate its input
             var c = readSetCookies(tt.header);
             if (!reflect.DeepEqual(c, tt.cookies)) {
                 Ꮡt.Errorf("#%d readSetCookies: have\n%s\nwant\n%s\n"u8, i, toJSON(c), toJSON(tt.cookies));
@@ -477,9 +474,6 @@ public static void TestReadSetCookies(ж<testing.T> Ꮡt) {
         }
     }
 }
-
-// GODEBUG=httpcookiemaxnum should work regardless if all cookies are sent
-// via one "Cookie" field, or multiple fields.
 
 partial struct readCookiesTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader header;
@@ -539,6 +533,8 @@ internal static slice<readCookiesTestsᴛ1> readCookiesTests = new readCookiesTe
         filter: ""u8,
         cookies: new ж<global::go.net.http_package.ΔCookie>[]{}.slice()
     ),
+    // GODEBUG=httpcookiemaxnum should work regardless if all cookies are sent
+    // via one "Cookie" field, or multiple fields.
     new(
         header: new ΔHeader(new map<@string, slice<@string>>{["Cookie"u8] = new @string[]{strings.Repeat(";a="u8, defaultCookieMaxNum + 1)[1..]}.slice()}),
         cookies: new ж<global::go.net.http_package.ΔCookie>[]{}.slice()
@@ -561,12 +557,9 @@ internal static slice<readCookiesTestsᴛ1> readCookiesTests = new readCookiesTe
 }.slice();
 
 public static void TestReadCookies(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (i, tt) in readCookiesTests) {
         Ꮡt.Setenv(godebugˢ, tt.godebug);
-        for (nint n = 0; n < 2; n++) {
-            // to verify readCookies doesn't mutate its input
+        for (nint n = 0; n < 2; n++) { // to verify readCookies doesn't mutate its input
             var c = readCookies(tt.header, tt.filter);
             if (!reflect.DeepEqual(c, tt.cookies)) {
                 Ꮡt.Errorf("#%d readCookies:\nhave: %s\nwant: %s\n"u8, i, toJSON(c), toJSON(tt.cookies));
@@ -620,6 +613,7 @@ public static void TestCookieSanitizeValue(ж<testing.T> Ꮡt) {
         defer(log.SetOutput, new os.FileжWriter(os.Stderr), ref ᒐ);
         ref var logbuf = ref heap(new strings.Builder(), out var Ꮡlogbuf);
         log.SetOutput(new http_test_package.strings_BuilderжWriter(Ꮡlogbuf));
+
         var tests = new TestCookieSanitizeValue_tests[]{
             new("foo"u8, false, "foo"u8),
             new("foo;bar"u8, false, "foobar"u8),
@@ -628,7 +622,6 @@ public static void TestCookieSanitizeValue(ж<testing.T> Ꮡt) {
             new(((@string)(new byte[]{0x00, 0x7e, 0x7f, 0x80})), false, "\x7e"u8),
             new(@"withquotes"u8, true, @"""withquotes"""u8),
             new(@"""withquotes"""u8, true, @"""withquotes"""u8), // double quotes are not valid octets
-
             new("a z"u8, false, @"""a z"""u8),
             new(" z"u8, false, @""" z"""u8),
             new("a "u8, false, @"""a """u8),
@@ -643,6 +636,7 @@ public static void TestCookieSanitizeValue(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         {
             @string got = logbuf.String();
             @string sub = droppingInvalidBytesˢ; if (!strings.Contains(got, sub)) {
@@ -664,6 +658,7 @@ public static void TestCookieSanitizePath(ж<testing.T> Ꮡt) {
         defer(log.SetOutput, new os.FileжWriter(os.Stderr), ref ᒐ);
         ref var logbuf = ref heap(new strings.Builder(), out var Ꮡlogbuf);
         log.SetOutput(new http_test_package.strings_BuilderжWriter(Ꮡlogbuf));
+
         var tests = new TestCookieSanitizePath_tests[]{
             new("/path"u8, "/path"u8),
             new("/path with space/"u8, "/path with space/"u8),
@@ -676,6 +671,7 @@ public static void TestCookieSanitizePath(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         {
             @string got = logbuf.String();
             @string sub = droppingInvalidBytesˢ; if (!strings.Contains(got, sub)) {
@@ -707,6 +703,7 @@ public static void TestCookieValid(ж<testing.T> Ꮡt) {
         new(Ꮡ(new ΔCookie(Name: "valid-all-fields"u8, Value: "foo"u8, Path: "/bar"u8, Domain: "example.com"u8, Expires: time.Unix(0, 0), MaxAge: 0)), true),
         new(Ꮡ(new ΔCookie(Name: "valid-partitioned"u8, Value: "foo"u8, Path: "/"u8, Secure: true, Partitioned: true)), true)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         var err = tt.cookie.Valid();
         if (err != default! && tt.valid) {
@@ -979,9 +976,9 @@ public static void TestParseSetCookie(ж<testing.T> Ꮡt) {
                 SameSite: SameSiteNoneMode,
                 Raw: "samesitenone=foo; SameSite=None"u8
             ))
-        ), // Make sure we can properly read back the Set-Cookie headers we create
- // for values containing spaces or commas:
-
+        ),
+        // Make sure we can properly read back the Set-Cookie headers we create
+        // for values containing spaces or commas:
         new(
             line: @"special-1=a z"u8,
             cookie: Ꮡ(new ΔCookie(Name: "special-1"u8, Value: "a z"u8, Raw: @"special-1=a z"u8))
@@ -1013,9 +1010,9 @@ public static void TestParseSetCookie(ж<testing.T> Ꮡt) {
         new(
             line: @"special-8="","""u8,
             cookie: Ꮡ(new ΔCookie(Name: "special-8"u8, Value: ","u8, Quoted: true, Raw: @"special-8="","""u8))
-        ), // Make sure we can properly read back the Set-Cookie headers
- // for names containing spaces:
-
+        ),
+        // Make sure we can properly read back the Set-Cookie headers
+        // for names containing spaces:
         new(
             line: @"special-9 ="","""u8,
             cookie: Ꮡ(new ΔCookie(Name: "special-9"u8, Value: ","u8, Quoted: true, Raw: @"special-9 ="","""u8))

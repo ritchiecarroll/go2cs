@@ -35,10 +35,12 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
 
         d.mu.Lock();
         ᒐd1 = true;
+
         if (d.timer != nil && !d.timer.Stop()) {
             ᐸꟷ(d.cancel); // Wait for the timer callback to finish and close cancel
         }
         d.timer = default!;
+
         // Time is zero, then there is no deadline.
         var closed = isClosedChan(d.cancel.WithDirection(GoChanDir.Recv));
         if (t.IsZero()) {
@@ -47,6 +49,7 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
             }
             return;
         }
+
         // Time in the future, setup a timer to cancel in the future.
         {
             var dur = time.Until(t); if (dur > 0) {
@@ -59,6 +62,7 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
                 return;
             }
         }
+
         // Time in the past, so close immediately.
         if (!closed) {
             builtin.close(d.cancel);
@@ -84,9 +88,9 @@ internal static channel<EmptyStruct> wait(this ж<pipeDeadline> Ꮡd) {
 }
 
 internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
-    var selᴛ22 = c;
-    switch (trySelect(ᐸꟷ(selᴛ22, ꓸꓸꓸ))) {
-    case 0 when selᴛ22.ꟷᐳ(out _): {
+    var selᴛ20 = c;
+    switch (trySelect(ᐸꟷ(selᴛ20, ꓸꓸꓸ))) {
+    case 0 when selᴛ20.ꟷᐳ(out _): {
         return true;
     }
     default: {
@@ -137,6 +141,7 @@ public static (Conn, Conn) Pipe() {
     var cn2 = new channel<nint>(0);
     var done1 = new channel<EmptyStruct>(0);
     var done2 = new channel<EmptyStruct>(0);
+
     var p1 = Ꮡ(new pipe(
         rdRx: cb1, rdTx: cn1,
         wrTx: cb2, wrRx: cn2,
@@ -184,23 +189,23 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
         return (0, os.ErrDeadlineExceeded);
     }}
 
-    var selᴛ23 = p.rdRx;
-    var selᴛ24 = p.localDone;
-    var selᴛ25 = p.remoteDone;
-    var selᴛ26 = Ꮡp.of(pipe.ᏑreadDeadline).wait();
-    switch (select(ᐸꟷ(selᴛ23, ꓸꓸꓸ), ᐸꟷ(selᴛ24, ꓸꓸꓸ), ᐸꟷ(selᴛ25, ꓸꓸꓸ), ᐸꟷ(selᴛ26, ꓸꓸꓸ))) {
-    case 0 when selᴛ23.ꟷᐳ(out var bw): {
+    var selᴛ21 = p.rdRx;
+    var selᴛ22 = p.localDone;
+    var selᴛ23 = p.remoteDone;
+    var selᴛ24 = Ꮡp.of(pipe.ᏑreadDeadline).wait();
+    switch (select(ᐸꟷ(selᴛ21, ꓸꓸꓸ), ᐸꟷ(selᴛ22, ꓸꓸꓸ), ᐸꟷ(selᴛ23, ꓸꓸꓸ), ᐸꟷ(selᴛ24, ꓸꓸꓸ))) {
+    case 0 when selᴛ21.ꟷᐳ(out var bw): {
         nint nr = copy(b, bw);
         p.rdTx.ᐸꟷ(nr);
         return (nr, default!);
     }
-    case 1 when selᴛ24.ꟷᐳ(out _): {
+    case 1 when selᴛ22.ꟷᐳ(out _): {
         return (0, Δio.ErrClosedPipe);
     }
-    case 2 when selᴛ25.ꟷᐳ(out _): {
+    case 2 when selᴛ23.ꟷᐳ(out _): {
         return (0, Δio.EOF);
     }
-    case 3 when selᴛ26.ꟷᐳ(out _): {
+    case 3 when selᴛ24.ꟷᐳ(out _): {
         return (0, os.ErrDeadlineExceeded);
     }}
     return default!;
@@ -235,24 +240,24 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
         p.wrMu.Lock(); // Ensure entirety of b is written together
         defer(Ꮡp.of(pipe.ᏑwrMu).Unlock, ref ᒐ);
         for (var once = true; once || len(b) > 0; once = false) {
-            var selᴛ27 = p.wrTx.ᐸꟷ(b, ꓸꓸꓸ);
-            var selᴛ28 = p.localDone;
-            var selᴛ29 = p.remoteDone;
-            var selᴛ30 = Ꮡp.of(pipe.ᏑwriteDeadline).wait();
-            switch (select(selᴛ27, ᐸꟷ(selᴛ28, ꓸꓸꓸ), ᐸꟷ(selᴛ29, ꓸꓸꓸ), ᐸꟷ(selᴛ30, ꓸꓸꓸ))) {
+            var selᴛ25 = p.wrTx.ᐸꟷ(b, ꓸꓸꓸ);
+            var selᴛ26 = p.localDone;
+            var selᴛ27 = p.remoteDone;
+            var selᴛ28 = Ꮡp.of(pipe.ᏑwriteDeadline).wait();
+            switch (select(selᴛ25, ᐸꟷ(selᴛ26, ꓸꓸꓸ), ᐸꟷ(selᴛ27, ꓸꓸꓸ), ᐸꟷ(selᴛ28, ꓸꓸꓸ))) {
             case 0: {
                 nint nw = ᐸꟷ(p.wrRx);
                 b = b.slice(nw);
                 n += nw;
                 break;
             }
-            case 1 when selᴛ28.ꟷᐳ(out _): {
+            case 1 when selᴛ26.ꟷᐳ(out _): {
                 (n, err) = (n, Δio.ErrClosedPipe); goto ᒐdone;
             }
-            case 2 when selᴛ29.ꟷᐳ(out _): {
+            case 2 when selᴛ27.ꟷᐳ(out _): {
                 (n, err) = (n, Δio.ErrClosedPipe); goto ᒐdone;
             }
-            case 3 when selᴛ30.ꟷᐳ(out _): {
+            case 3 when selᴛ28.ꟷᐳ(out _): {
                 (n, err) = (n, os.ErrDeadlineExceeded); goto ᒐdone;
             }}
         }

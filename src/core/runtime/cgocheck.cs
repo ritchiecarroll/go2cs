@@ -22,8 +22,6 @@ internal static readonly @string cgoWriteBarrierFail = "unpinned Go pointer stor
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer src) {
-    ref var dst = ref Ꮡdst.DerefOrNull();
-
     if (!mainStarted) {
         // Something early in startup hates this function.
         // Don't start doing any actual checking until the
@@ -36,30 +34,35 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
     if (cgoIsGoPointer(@unsafe.Pointer.FromPinnedBox(Ꮡdst))) {
         return;
     }
+
     // If we are running on the system stack then dst might be an
     // address on the stack, which is OK.
     var gp = getg();
     if (gp == (~(~gp).m).g0 || gp == (~(~gp).m).gsignal) {
         return;
     }
+
     // Allocating memory can write to various mfixalloc structs
     // that look like they are non-Go memory.
     if ((~(~gp).m).mallocing != 0) {
         return;
     }
+
     // If the object is pinned, it's safe to store it in C memory. The GC
     // ensures it will not be moved or freed.
     if (isPinned(src)) {
         return;
     }
+
     // It's OK if writing to memory allocated by persistentalloc.
     // Do this check last because it is more expensive and rarely true.
     // If it is false the expense doesn't matter since we are crashing.
     if (inPersistentAlloc((uintptr)Ꮡdst)) {
         return;
     }
+
     systemstack(() => {
-        println((@string)"write of unpinned Go pointer"u8, ((Δhex)(uint64)(uintptr)src), (@string)"to non-Go memory"u8, ((Δhex)(uint64)(uintptr)Ꮡdst));
+        println((@string)"write of unpinned Go pointer"u8, (Δhex)(uint64)(uintptr)src, (@string)"to non-Go memory"u8, (Δhex)(uint64)(uintptr)Ꮡdst);
         @throw(cgoWriteBarrierFail);
     });
 }
@@ -146,6 +149,7 @@ internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, u
             size = ptrdataSize;
         }
     }
+
     cgoCheckBits(src, getGCMask(Ꮡtyp), off, size);
 }
 
@@ -173,7 +177,7 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintp
         if (off > 0){
             off -= goarch.PtrSize;
         } else {
-            if ((uint32)(bits & 1) != 0) {
+            if ((bits & 1) != 0) {
                 @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(src, i));
                 if (cgoIsGoPointer(v) && !isPinned(v)) {
                     @throw(cgoWriteBarrierFail);
@@ -181,32 +185,6 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintp
             }
         }
     }
-}
-
-// cgoCheckUsingType is like cgoCheckTypedBlock, but is a last ditch
-// fall back to look for pointers in src using the type information.
-// We only use this when looking at a value on the stack when the type
-// uses a GC program, because otherwise it's more efficient to use the
-// GC bits. This is called on the system stack.
-//
-//go:nowritebarrier
-//go:systemstack
-internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, uintptr off, uintptr size) {
-    ref var typ = ref Ꮡtyp.DerefOrNull();
-
-    if (!typ.Pointers()) {
-        return;
-    }
-    // Anything past typ.PtrBytes is not a pointer.
-    if (typ.PtrBytes <= off) {
-        return;
-    }
-    {
-        var ptrdataSize = typ.PtrBytes - off; if (size > ptrdataSize) {
-            size = ptrdataSize;
-        }
-    }
-    cgoCheckBits(src, getGCMask(Ꮡtyp), off, size);
 }
 
 } // end runtime_package

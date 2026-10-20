@@ -11,58 +11,47 @@ internal static void Main() {
     unsafeStrings();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object utf16ToStringˢ = (@string)"-- UTF16ToString --"u8;
-private static readonly @string allNul14ˢ = "all-NUL [14]"u8;
-private static readonly @string allNul260ˢ = "all-NUL [260]"u8;
-private static readonly @string readmeTxtˢ = "README.TXT"u8;
-private static readonly @string terminatedˢ = "terminated"u8;
-private static readonly @string unterminatedˢ = "unterminated"u8;
-private static readonly @string noTerminatorˢ = "NoTerminator"u8;
-private static readonly @string leadingNulˢ = "leading NUL"u8;
-private static readonly @string emptySliceˢ = "empty slice"u8;
-private static readonly @string nilSliceˢ = "nil slice"u8;
-
 internal static void utf16() {
-    fmt.Println(utf16ToStringˢ);
+    fmt.Println("-- UTF16ToString --");
+
     array<uint16> alt = new(14);
     array<uint16> name = new(260);
-    show(allNul14ˢ, syscall.UTF16ToString(alt[..]));
-    show(allNul260ˢ, syscall.UTF16ToString(name[..]));
-    copy(name[..], encode(readmeTxtˢ));
-    show(terminatedˢ, syscall.UTF16ToString(name[..]));
-    show(unterminatedˢ, syscall.UTF16ToString(encode(noTerminatorˢ)));
+
+    show("all-NUL [14]", syscall.UTF16ToString(alt[..]));
+    show("all-NUL [260]", syscall.UTF16ToString(name[..]));
+
+    copy(name[..], encode("README.TXT"));
+    show("terminated", syscall.UTF16ToString(name[..]));
+
+    show("unterminated", syscall.UTF16ToString(encode("NoTerminator")));
+
     var poisoned = new uint16[]{0, (rune)'x', (rune)'y', (rune)'z'}.array();
-    show(leadingNulˢ, syscall.UTF16ToString(poisoned[..]));
-    show(emptySliceˢ, syscall.UTF16ToString(new uint16[]{}.slice()));
-    show(nilSliceˢ, syscall.UTF16ToString(default!));
+    show("leading NUL", syscall.UTF16ToString(poisoned[..]));
+
+    show("empty slice", syscall.UTF16ToString(new uint16[]{}.slice()));
+    show("nil slice", syscall.UTF16ToString(default!));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object unsafeStringˢ = (@string)"-- unsafe.String --"u8;
-private static readonly @string makeLen0ˢ = "make len 0"u8;
-private static readonly @string literalˢ = "literal {}"u8;
-private static readonly @string makeCap8ˢ = "make cap 8"u8;
-private static readonly @string resliced0ˢ = "resliced [:0]"u8;
-private static readonly @string emptyStringˢ = "empty string"u8;
-private static readonly @string fullˢ = "full"u8;
-private static readonly @string prefixˢ = "prefix"u8;
-private static readonly object zeroLengthSliceLenˢ = (@string)"zero-length Slice len ="u8;
-
 internal static void unsafeStrings() {
-    fmt.Println(unsafeStringˢ);
+    fmt.Println("-- unsafe.String --");
+
     var empty = new slice<byte>(0);
-    show(makeLen0ˢ, @unsafe.String(@unsafe.SliceData(empty), 0));
-    show(literalˢ, @unsafe.String(@unsafe.SliceData(new byte[]{}.slice()), 0));
-    show(makeCap8ˢ, @unsafe.String(@unsafe.SliceData(new slice<byte>(0, 8)), 0));
+    show("make len 0", @unsafe.String(@unsafe.SliceData(empty), 0));
+    show("literal {}", @unsafe.String(@unsafe.SliceData(new byte[]{}.slice()), 0));
+
+    show("make cap 8", @unsafe.String(@unsafe.SliceData(new slice<byte>(0, 8)), 0));
+
     var body = slice<byte>("hello"u8);
-    show(resliced0ˢ, @unsafe.String(@unsafe.SliceData(body[..0]), 0));
+    show("resliced [:0]", @unsafe.String(@unsafe.SliceData(body[..0]), 0));
+
     slice<byte> nilSlice = default!;
-    show(nilSliceˢ, @unsafe.String(@unsafe.SliceData(nilSlice), 0));
-    show(emptyStringˢ, @unsafe.String(@unsafe.StringData(""u8), 0));
-    show(fullˢ, @unsafe.String(@unsafe.SliceData(body), len(body)));
-    show(prefixˢ, @unsafe.String(@unsafe.SliceData(body), 3));
-    fmt.Println(zeroLengthSliceLenˢ, len(@unsafe.Slice(@unsafe.SliceData(empty), 0)));
+    show("nil slice", @unsafe.String(@unsafe.SliceData(nilSlice), 0));
+    show("empty string", @unsafe.String(@unsafe.StringData(""u8), 0));
+
+    show("full", @unsafe.String(@unsafe.SliceData(body), len(body)));
+    show("prefix", @unsafe.String(@unsafe.SliceData(body), 3));
+
+    fmt.Println("zero-length Slice len =", len(@unsafe.Slice(@unsafe.SliceData(empty), 0)));
 }
 
 internal static slice<uint16> encode(@string s) {

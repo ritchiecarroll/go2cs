@@ -25,9 +25,7 @@ partial class user_package {
 // These may be set to false in init() for a particular platform and/or
 // build flags to let the tests know to skip tests of some features.
 internal static bool userImplemented = true;
-
 internal static bool groupImplemented = true;
-
 internal static bool groupListImplemented = true;
 
 // User represents a user account.
@@ -63,24 +61,31 @@ partial struct Group {
     public @string Name; // group name
 }
 
+// UnknownUserIdError is returned by [LookupId] when a user cannot be found.
 partial struct UnknownUserIdError /*num:nint*/;
 
 public static @string Error(this UnknownUserIdError e) {
     return "user: unknown userid "u8 + strconv.Itoa((nint)e);
 }
 
+// UnknownUserError is returned by [Lookup] when
+// a user cannot be found.
 partial struct UnknownUserError /*@string*/;
 
 public static @string Error(this UnknownUserError e) {
     return "user: unknown user "u8 + ((@string)e);
 }
 
+// UnknownGroupIdError is returned by [LookupGroupId] when
+// a group cannot be found.
 partial struct UnknownGroupIdError /*@string*/;
 
 public static @string Error(this UnknownGroupIdError e) {
     return "group: unknown groupid "u8 + ((@string)e);
 }
 
+// UnknownGroupError is returned by [LookupGroup] when
+// a group cannot be found.
 partial struct UnknownGroupError /*@string*/;
 
 public static @string Error(this UnknownGroupError e) {

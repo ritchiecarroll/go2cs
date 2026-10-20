@@ -23,11 +23,13 @@ partial class sysrand_internal_test_package {
 
 public static void TestRead(ж<testing.T> Ꮡt) {
     // 40MiB, more than the documented maximum of 32Mi-1 on Linux 32-bit.
-    var b = new slice<byte>((40 << (int)(20)));
+    var b = new slice<byte>((40 << 20));
     Read(b);
+
     if (testing.Short()) {
         b = b.slice(len(b) - 100_000);
     }
+
     ref var z = ref heap(new bytes.Buffer(), out var Ꮡz);
     var (f, _) = flate.NewWriter(new sysrand_internal_test_package.bytes_BufferжWriter(Ꮡz), 5);
     f.Write(b);
@@ -123,6 +125,7 @@ public static void TestReadError(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingTestInShortModeˢ);
     }
     testenv.MustHaveExec(new sysrand_internal_test_package.testing_TжTB(Ꮡt));
+
     // We run this test in a subprocess because it's expected to crash.
     if (os.Getenv(goTestReadErrorˢ) == "1"u8) {
         testingOnlyFailRead = true;
@@ -130,6 +133,7 @@ public static void TestReadError(ж<testing.T> Ꮡt) {
         Ꮡt.Error(readDidNotCrashˢ);
         return;
     }
+
     var cmd = testenv.Command(new sysrand_internal_test_package.testing_TжTB(Ꮡt), os.Args[0], testRunTestReadErrorˢ);
     cmd.Value.Env = append(os.Environ(), "GO_TEST_READ_ERROR=1"u8);
     var (@out, err) = cmd.CombinedOutput();

@@ -38,6 +38,7 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
     if (err == default! || !fragmentOk || !strings.Contains(err.Error(), expectedPackageˢ)) {
         return (@file, sourceAdj, indentAdj, err);
     }
+
     // If this is a declaration list, make it a source file
     // by inserting a package clause.
     // Insert using a ';', not a newline, so that the line numbers
@@ -59,6 +60,7 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
     if (!strings.Contains(err.Error(), expectedDeclarationˢ)) {
         return (@file, sourceAdj, indentAdj, err);
     }
+
     // If this is a statement list, make it a source file
     // by inserting a package clause and turning the list
     // into a function body. This handles expressions too.
@@ -85,6 +87,7 @@ internal static (ж<ast.File> @file, Func<slice<byte>, nint, slice<byte>> source
         // Adjust that with indentAdj.
         indentAdj = -1;
     }
+
     // Succeeded, or out of options.
     return (@file, sourceAdj, indentAdj, err);
 }
@@ -104,6 +107,7 @@ internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.Fi
         }
         return (bufΔ1.Bytes(), default!);
     }
+
     // Partial source file.
     // Determine and prepend leading space.
     nint i = 0;
@@ -116,6 +120,7 @@ internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.Fi
     }
     slice<byte> res = default!;
     res = appendꓸꓸꓸ(res, src.slice(0, i));
+
     // Determine and prepend indentation of first code line.
     // Spaces are ignored unless there are no tabs,
     // in which case spaces count as one tab.
@@ -131,7 +136,6 @@ internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.Fi
             indent++;
             break;
         }}
-
     }
     if (indent == 0 && hasSpace) {
         indent = 1;
@@ -139,6 +143,7 @@ internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.Fi
     for (nint iΔ1 = 0; iΔ1 < indent; iΔ1++) {
         res = append(res, (byte)((rune)'\t'));
     }
+
     // Format the source.
     // Write it without any leading and trailing space.
     cfg.Indent = indent + indentAdj;
@@ -148,14 +153,17 @@ internal static (slice<byte>, error) format(ж<token.FileSet> Ꮡfset, ж<ast.Fi
         return (default!, err);
     }
     var @out = sourceAdj(buf.Bytes(), cfg.Indent);
+
     // If the adjusted output is empty, the source
     // was empty but (possibly) for white space.
     // The result is the incoming source.
     if (len(@out) == 0) {
         return (src, default!);
     }
+
     // Otherwise, append output to leading space.
     res = appendꓸꓸꓸ(res, @out);
+
     // Determine and append trailing space.
     i = len(src);
     while (i > 0 && isSpace(src[i - 1])) {

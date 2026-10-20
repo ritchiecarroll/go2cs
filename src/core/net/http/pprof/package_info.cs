@@ -60,6 +60,12 @@ using static go.net.http.pprof_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -68,7 +74,7 @@ using static go.net.http.pprof_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGG+AYKCgpSCgoKCAAgMsoKCpqIACgyigoKEgviCgoKCgvyygoKClqiCgoCUlKSC3LKCgoKWqIKCgJSUpIKs0oKI2oSCgpSWgoKClIKCgoLMgoKUqKqiAAgKgoKCgoKUgIKCpIKClIKClIKUAAkGwoKCgqaCgpaEgoKClIKCgpaClLSCgqSUyIKCgpSChISCgoKWgoSCgqKkgoKAgqSCgoKUgqYACBIAFzDigIKCgriChIKCAAcSgt6IgIIAKgiCggAAKIKClo6ClIqC", "416-418:1", "", "184=Sprintf/1/1/1;213=Sprintf/1/1/1;449=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4")]
+[assembly: go.GoPositionMap("net/http/pprof/pprof.go", "pprof.cs", "AGLAAYKCgpSCgoKCAAgMsoKCpqIACgyigoKUgviCgoKCgvyygoKCpriCgoCUlKSC3LKCgoKmuIKCgJSUpIKs0oKY6pSCgpSmgoKClIKCgoLcgoKUuKqiAAgKgoKCgoKUgIKCpIKClIKClIKUAAkGwoKCgqaCgqaUgoKClIKCgqaCpLSCgpSU2IKCgpSClJSCgoKmgpSCgqKkgoKAgqSCgoKUgqYACRQADBqCggAOHuKAgoKCyIKUgoIACBKC7piAggAqCIKCAAEogoKmjoKUmoI=", "424-426:1", "", "188=Sprintf/1/1/1;219=Sprintf/1/1/1;478=Name/1/3/1,Name/2/3/2,Name/3/3/3,Count/1/1/4")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

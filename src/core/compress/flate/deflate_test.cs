@@ -81,7 +81,7 @@ internal static slice<ж<reverseBitsTest>> reverseBitsTests = new ж<reverseBits
 internal static slice<byte> largeDataChunk() {
     var result = new slice<byte>(100000);
     foreach (var (i, _) in result) {
-        result[i] = (byte)((nint)(i * i & 0xFF));
+        result[i] = (byte)(i * i & 0xFF);
     }
     return result;
 }
@@ -135,32 +135,39 @@ public static void TestWriterClose(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("NewWriter: %v"u8, err);
     }
+
     {
         var (c, errΔ1) = zw.Write(slice<byte>("Test"u8)); if (errΔ1 != default! || c != 4) {
             Ꮡt.Fatalf("Write to not closed writer: %s, %d"u8, errΔ1, c);
         }
     }
+
     {
         var errΔ2 = zw.Close(); if (errΔ2 != default!) {
             Ꮡt.Fatalf("Close: %v"u8, errΔ2);
         }
     }
+
     nint afterClose = b.Len();
+
     {
         var (c, errΔ3) = zw.Write(slice<byte>("Test"u8)); if (errΔ3 == default! || c != 0) {
             Ꮡt.Fatalf("Write to closed writer: %v, %d"u8, errΔ3, c);
         }
     }
+
     {
         var errΔ4 = zw.Flush(); if (errΔ4 == default!) {
             Ꮡt.Fatalf("Flush to closed writer: %s"u8, errΔ4);
         }
     }
+
     {
         var errΔ5 = zw.Close(); if (errΔ5 != default!) {
             Ꮡt.Fatalf("Close: %v"u8, errΔ5);
         }
     }
+
     if (afterClose != b.Len()) {
         Ꮡt.Fatalf("Writer wrote data after close. After close: %d. After writes on closed stream: %d"u8, afterClose, b.Len());
     }
@@ -187,7 +194,7 @@ internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b)
         cur = r.l;
     }
     foreach (var (i, _) in b.slice(0, n)) {
-        if (r.cur + (int64)i >= r.l - ((int64)1 << (int)(16))){
+        if (r.cur + (int64)i >= r.l - ((int64)1 << 16)){
             b[i] = 1;
         } else {
             b[i] = 0;
@@ -231,8 +238,8 @@ internal static ж<syncBuffer> newSyncBuffer() {
 internal static (nint n, error err) Read(this ж<syncBuffer> Ꮡb, slice<byte> p) {
     nint n = default!;
     error err = default!;
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     while (ᐧ) {
         Ꮡb.of(syncBuffer.Ꮡmu).RLock();
         (n, err) = b.buf.Read(p);
@@ -285,6 +292,7 @@ internal static void testSync(ж<testing.T> Ꮡt, nint level, slice<byte> input,
     if (len(input) == 0) {
         return;
     }
+
     Ꮡt.Logf("--testSync %d, %d, %s"u8, level, len(input), name);
     var buf = newSyncBuffer();
     var buf1 = @new<bytes.Buffer>();
@@ -295,6 +303,7 @@ internal static void testSync(ж<testing.T> Ꮡt, nint level, slice<byte> input,
         return;
     }
     var r = NewReader(new flate_internal_test_package.syncBufferжReader(buf));
+
     // Write half the input and read back.
     for (nint i = 0; i < 2; i++) {
         nint lo = default!;
@@ -360,6 +369,7 @@ internal static void testSync(ж<testing.T> Ꮡt, nint level, slice<byte> input,
         Ꮡt.Errorf("testSync (%d, %d, %s): extra data at end"u8, level, len(input), name);
     }
     r.Close();
+
     // stream should work for ordinary reader too
     r = NewReader(new flate_test_package.bytes_BufferжReader(buf1));
     (@out, err) = io.ReadAll(r);
@@ -494,13 +504,14 @@ public static void TestReaderDict(ж<testing.T> Ꮡt) {
     b.Reset();
     w.Write(slice<byte>(text));
     w.Close();
+
     var r = NewReaderDict(new flate_test_package.bytes_BufferжReader(Ꮡb), slice<byte>(dict));
     (var data, err) = io.ReadAll(r);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     if (((sstring)data) != "hello again world"u8) {
-        Ꮡt.Fatalf("read returned %q want %q"u8, ((@string)data), text);
+        Ꮡt.Fatalf("read returned %q want %q"u8, (@string)data, text);
     }
 }
 
@@ -523,10 +534,12 @@ public static void TestWriterDict(ж<testing.T> Ꮡt) {
     b.Reset();
     w.Write(slice<byte>(text));
     w.Close();
+
     ref var b1 = ref heap(new bytes.Buffer(), out var Ꮡb1);
     (w, _) = NewWriterDict(new flate_test_package.bytes_BufferжWriter(Ꮡb1), 5, slice<byte>(dict));
     w.Write(slice<byte>(text));
     w.Close();
+
     if (!bytes.Equal(b1.Bytes(), b.Bytes())) {
         Ꮡt.Fatalf("writer wrote %q want %q"u8, b1.Bytes(), b.Bytes());
     }
@@ -557,8 +570,6 @@ public static void TestRegression2508(ж<testing.T> Ꮡt) {
 internal static readonly @string dictˢ = "dict"u8;
 
 public static void TestWriterReset(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
     for (nint level = 0; level <= 9; level++) {
         if (testing.Short() && level > 1) {
@@ -577,10 +588,12 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
             w.Write(buf);
         }
         w.Reset(io.Discard);
+
         (var wref, err) = NewWriter(io.Discard, level);
         if (err != default!) {
             Ꮡt.Fatalf("NewWriter: %v"u8, err);
         }
+
         // DeepEqual doesn't compare functions.
         (w.Value.d.fill, wref.Value.d.fill) = (default!, default!);
         (w.Value.d.step, wref.Value.d.step) = (default!, default!);
@@ -593,18 +606,21 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
         }
         // As long as the length is 0, we don't care about the content.
         w.Value.d.tokens = wref.Value.d.tokens;
+
         // We don't care if there are values in the window, as long as it is at d.index is 0
         w.Value.d.window = wref.Value.d.window;
         if (!reflect.DeepEqual(w.OrTypedNil(), wref.OrTypedNil())) {
             Ꮡt.Errorf("level %d Writer not reset after Reset"u8, level);
         }
     }
+
     var levels = new nint[]{0, 1, 2, 5, 9}.slice();
     foreach (var (_, level) in levels) {
         Ꮡt.Run(fmt.Sprint(level), (ж<testing.T> tΔ1) => {
             testResetOutput(tΔ1, level, default!);
         });
     }
+
     var levelsʗ1 = levels;
     Ꮡt.Run(dictˢ, (ж<testing.T> tΔ2) => {
         foreach (var (_, level) in levelsʗ1) {
@@ -623,13 +639,16 @@ internal static void testResetOutput(ж<testing.T> Ꮡt, nint level, slice<byte>
         var msg = slice<byte>("now is the time for all good gophers"u8);
         wΔ1.Write(msg);
         wΔ1.Flush();
+
         var hello = slice<byte>("hello world"u8);
         for (nint i = 0; i < 1024; i++) {
             wΔ1.Write(hello);
         }
+
         var fill = bytes.Repeat(slice<byte>("x"u8), 65000);
         wΔ1.Write(fill);
     }
+
     var buf = @new<bytes.Buffer>();
     ж<global::go.compress.flate_package.Writer> w = default!;
     error err = default!;
@@ -641,14 +660,17 @@ internal static void testResetOutput(ж<testing.T> Ꮡt, nint level, slice<byte>
     if (err != default!) {
         Ꮡt.Fatalf("NewWriter: %v"u8, err);
     }
+
     writeData(w);
     w.Close();
     var out1 = buf.Bytes();
+
     var buf2 = @new<bytes.Buffer>();
     w.Reset(new flate_test_package.bytes_BufferжWriter(buf2));
     writeData(w);
     w.Close();
     var out2 = buf2.Bytes();
+
     if (len(out1) != len(out2)) {
         Ꮡt.Errorf("got %d, expected %d bytes"u8, len(out2), len(out1));
         return;
@@ -682,6 +704,7 @@ public static void TestBestSpeed(ж<testing.T> Ꮡt) {
     }
     var abcabc = bytes.Repeat(abc, 131072 / len(abc));
     slice<byte> want = default!;
+
     var testCases = new slice<nint>[]{
         new nint[]{65536, 0}.slice(),
         new nint[]{65536, 1}.slice(),
@@ -700,6 +723,7 @@ public static void TestBestSpeed(ж<testing.T> Ꮡt) {
         new nint[]{65536, 65536, 256}.slice(),
         new nint[]{65536, 65536, 65536}.slice()
     }.slice();
+
     foreach (var (i, tc) in testCases) {
         if (i >= 3 && testing.Short()) {
             break;
@@ -710,6 +734,7 @@ outer:
             foreach (var (_, flush) in new bool[]{false, true}.slice()) {
                 var buf = @new<bytes.Buffer>();
                 want = want[..0];
+
                 var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(buf), BestSpeed);
                 if (err != default!) {
                     Ꮡt.Errorf("i=%d, firstN=%d, flush=%t: NewWriter: %v"u8, i, firstN, flush, err);
@@ -739,6 +764,7 @@ outer:
                         continue;
                     }
                 }
+
                 var r = NewReader(new flate_test_package.bytes_BufferжReader(buf));
                 (var got, err) = io.ReadAll(r);
                 if (err != default!) {
@@ -746,6 +772,7 @@ outer:
                     continue;
                 }
                 r.Close();
+
                 if (!bytes.Equal(got, want)) {
                     Ꮡt.Errorf("i=%d, firstN=%d, flush=%t: corruption during deflate-then-inflate"u8, i, firstN, flush);
                     continue;
@@ -782,10 +809,12 @@ public static void TestWriterPersistentWriteError(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ReadFile: %v"u8, err);
     }
     d = d[..10000]; // Keep this test short
+
     (var zw, err) = NewWriter(default!, DefaultCompression);
     if (err != default!) {
         Ꮡt.Fatalf("NewWriter: %v"u8, err);
     }
+
     // Sweep over the threshold at which an error is returned.
     // The variable i makes it such that the ith call to failWriter.Write will
     // return errIO. Since failWriter errors are not persistent, we must ensure
@@ -795,6 +824,7 @@ public static void TestWriterPersistentWriteError(ж<testing.T> Ꮡt) {
         i = iᴛ1;
         var fw = Ꮡ(new failWriter(i));
         zw.Reset(new flate_internal_test_package.failWriterжWriter(fw));
+
         var (_, werr) = zw.Write(d);
         var cerr = zw.Close();
         var ferr = zw.Flush();
@@ -837,6 +867,7 @@ public static void TestWriterPersistentCloseError(ж<testing.T> Ꮡt) {
     var flushErr = zw.Flush();
     var (_, writeErr) = zw.Write(slice<byte>("Test"u8));
     checkErrors(new error[]{closeErr, flushErr, writeErr}.slice(), errIO, Ꮡt);
+
     // After closing writer we should persistent "write after close" error across Flush and Write calls, but return nil
     // on next Close calls.
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
@@ -849,6 +880,7 @@ public static void TestWriterPersistentCloseError(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Second call to close returned error: %s"u8, err);
     }
+
     flushErr = zw.Flush();
     (_, writeErr) = zw.Write(slice<byte>("Test"u8));
     checkErrors(new error[]{flushErr, writeErr}.slice(), errWriterClosed, Ꮡt);
@@ -1013,7 +1045,9 @@ public static void TestBestSpeedMaxMatchOffset(ж<testing.T> Ꮡt) {
                     Ꮡt.Errorf("matchBefore=%t, extra=%d, offsetAdj=%d: %s%v"u8,
                         matchBefore, extra, offsetAdj, desc, errΔ1);
                 }
+
                 nint offset = (nint)maxMatchOffset + offsetAdj;
+
                 // Make src to be a []byte of the form
                 //	"%s%s%s%s%s" % (abc, zeros0, xyzMaybe, abc, zeros1)
                 // where:
@@ -1028,6 +1062,7 @@ public static void TestBestSpeedMaxMatchOffset(ж<testing.T> Ꮡt) {
                     copy(src.slice(offset - len(xyz)), xyz);
                 }
                 copy(src.slice(offset), abc);
+
                 var buf = @new<bytes.Buffer>();
                 var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(buf), BestSpeed);
                 if (err != default!) {
@@ -1046,6 +1081,7 @@ public static void TestBestSpeedMaxMatchOffset(ж<testing.T> Ꮡt) {
                         continue;
                     }
                 }
+
                 var r = NewReader(new flate_test_package.bytes_BufferжReader(buf));
                 (var dst, err) = io.ReadAll(r);
                 r.Close();
@@ -1053,6 +1089,7 @@ public static void TestBestSpeedMaxMatchOffset(ж<testing.T> Ꮡt) {
                     report(readAllˢ, err);
                     continue;
                 }
+
                 if (!bytes.Equal(dst, src)) {
                     report(""u8, fmt.Errorf("bytes differ after round-tripping"u8));
                     continue;
@@ -1066,42 +1103,51 @@ public static void TestBestSpeedShiftOffsets(ж<testing.T> Ꮡt) {
     // Test if shiftoffsets properly preserves matches and resets out-of-range matches
     // seen in https://github.com/golang/go/issues/4142
     var enc = newDeflateFast();
+
     // testData may not generate internal matches.
     var testData = new slice<byte>(32);
     var rng = rand.New(rand.NewSource(0));
     foreach (var (i, _) in testData) {
         testData[i] = (byte)rng.Uint32();
     }
+
     // Encode the testdata with clean state.
     // Second part should pick up matches from the first block.
     nint wantFirstTokens = len(enc.encode(default!, testData));
     nint wantSecondTokens = len(enc.encode(default!, testData));
+
     if (wantFirstTokens <= wantSecondTokens) {
         Ꮡt.Fatalf("test needs matches between inputs to be generated"u8);
     }
     // Forward the current indicator to before wraparound.
     enc.Value.cur = (int32)bufferReset - (int32)len(testData);
+
     // Part 1 before wrap, should match clean state.
     nint got = len(enc.encode(default!, testData));
     if (wantFirstTokens != got) {
         Ꮡt.Errorf("got %d, want %d tokens"u8, got, wantFirstTokens);
     }
+
     // Verify we are about to wrap.
     if ((~enc).cur != bufferReset) {
         Ꮡt.Errorf("got %d, want e.cur to be at bufferReset (%d)"u8, (~enc).cur, (nint)(bufferReset));
     }
+
     // Part 2 should match clean state as well even if wrapped.
     got = len(enc.encode(default!, testData));
     if (wantSecondTokens != got) {
         Ꮡt.Errorf("got %d, want %d token"u8, got, wantSecondTokens);
     }
+
     // Verify that we wrapped.
     if ((~enc).cur >= bufferReset) {
         Ꮡt.Errorf("want e.cur to be < bufferReset (%d), got %d"u8, (nint)(bufferReset), (~enc).cur);
     }
+
     // Forward the current buffer, leaving the matches at the bottom.
     enc.Value.cur = bufferReset;
     enc.shiftOffsets();
+
     // Ensure that no matches were picked up.
     got = len(enc.encode(default!, testData));
     if (wantFirstTokens != got) {
@@ -1114,11 +1160,13 @@ public static partial void TestMaxStackSize(ж<testing.T> Ꮡt) {
     try {
         // This test must not run in parallel with other tests as debug.SetMaxStack
         // affects all goroutines.
-        nint n = debug.SetMaxStack((1 << (int)(16)));
+        nint n = debug.SetMaxStack(1 << 16);
         defer(debug.SetMaxStack, n, ref ᒐ);
+
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
-        var b = new slice<byte>((1 << (int)(20)));
+
+        var b = new slice<byte>((1 << 20));
         for (nint level = HuffmanOnly; level <= BestCompression; level++) {
             // Run in separate goroutine to increase probability of stack regrowth.
             Ꮡwg.Add(1);

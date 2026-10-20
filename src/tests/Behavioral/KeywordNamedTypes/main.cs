@@ -21,7 +21,7 @@ partial struct @short /*num:int16*/;
 partial struct dword /*num:uint32*/;
 
 internal static @short toShort(dword d) {
-    return ((@short)(int16)(uint32)d);
+    return (@short)(int16)(uint32)d;
 }
 
 internal static nint size(this @fixed f, @string of) {
@@ -85,26 +85,29 @@ internal static uintptr plainLocalStruct() {
 
 internal static sizer std = new @fixed(n: 3);
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "hello"u8;
-private static readonly @string ptrˢ = "ptr"u8;
-
 internal static void Main() {
-    fmt.Println(std.size(helloˢ));
+    fmt.Println(std.size("hello"));
+
     ref var f = ref heap<@fixed>(out var Ꮡf);
     f = new @fixed(n: 1);
-    fmt.Println(f.size("ab"u8));
+    fmt.Println(f.size("ab"));
+
     f.grow(4);
-    fmt.Println(f.size(""u8));
+    fmt.Println(f.size(""));
+
     sizer p = new fixedжsizer(Ꮡf);
-    fmt.Println(p.size(ptrˢ));
+    fmt.Println(p.size("ptr"));
+
     @lock l = f;
     fmt.Println(l.held());
+
     @lock lp = new fixedжlock(Ꮡf);
     fmt.Println(lp.held());
+
     dword d = 40000;
     var s = toShort(d);
     fmt.Println((nint)(int16)s, (nint)(uint32)((dword)(uint32)(int16)s));
+
     fmt.Println(keywordLocalStruct());
     fmt.Println(keywordLocalIface());
     fmt.Println(keywordLocalRef());

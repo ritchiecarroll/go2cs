@@ -173,6 +173,7 @@ internal static (ж<Part>, error) newPart(ж<Reader> Ꮡmr, bool rawPart, int64 
         }
     }
     bp.Value.r = new partReader(bp);
+
     // rawPart is used to switch between Part.NextPart and Part.NextRawPart.
     if (!rawPart) {
         @string cte = cteᶜ;
@@ -212,6 +213,7 @@ partial struct partReader {
 internal static (nint, error) Read(this partReader pr, slice<byte> d) {
     var p = pr.p;
     var br = p.Value.mr.Value.bufReader;
+
     // Read into buffer until we identify some data to return,
     // or we find a reason to stop (boundary or read error).
     while ((~p).n == 0 && (~p).err == default!) {
@@ -225,6 +227,7 @@ internal static (nint, error) Read(this partReader pr, slice<byte> d) {
             }
         }
     }
+
     // Read out from "data to return" part of buffer.
     if ((~p).n == 0) {
         return (0, (~p).err);
@@ -266,12 +269,12 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
             if (exprᴛ1 == +1) {
                 return (0, io.EOF);
             }
-
         }
         if (bytes.HasPrefix(dashBoundary, buf)) {
             return (0, readErr);
         }
     }
+
     // Search for "\n--boundary".
     {
         nint iΔ1 = bytes.Index(buf, nlDashBoundary); if (iΔ1 >= 0) {
@@ -285,12 +288,12 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
             if (exprᴛ2 == +1) {
                 return (iΔ1, io.EOF);
             }
-
         }
     }
     if (bytes.HasPrefix(nlDashBoundary, buf)) {
         return (0, readErr);
     }
+
     // Otherwise, anything up to the final \n is not part of the boundary
     // and so must be part of the body.
     // Also if the section from the final \n onward is not a prefix of the boundary,
@@ -322,9 +325,11 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
         return 0;
     }
     var c = buf[len(prefix)];
+
     if (c == (rune)' ' || c == (rune)'\t' || c == (rune)'\r' || c == (rune)'\n') {
         return +1;
     }
+
     // Try to detect boundaryDash
     if (c == (rune)'-') {
         if (len(buf) == len(prefix) + 1) {
@@ -338,6 +343,7 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
             return +1;
         }
     }
+
     return -1;
 }
 
@@ -414,6 +420,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
     var expectNewPart = false;
     while (ᐧ) {
         var (line, err) = r.bufReader.ReadSlice((rune)'\n');
+
         if (AreEqual(err, io.EOF) && r.isFinalBoundary(line)) {
             // If the buffer ends in "--boundary--" without the
             // trailing "\r\n", ReadSlice will return an error
@@ -425,6 +432,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
         if (err != default!) {
             return (default!, fmt.Errorf("multipart: NextPart: %w"u8, err));
         }
+
         if (r.isBoundaryDelimiterLine(line)) {
             r.partsRead++;
             var (bp, errΔ1) = newPart(Ꮡr, rawPart, maxMIMEHeaderSize, maxMIMEHeaders);
@@ -434,17 +442,21 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
             r.currentPart = bp;
             return (bp, default!);
         }
+
         if (r.isFinalBoundary(line)) {
             // Expected EOF
             return (default!, io.EOF);
         }
+
         if (expectNewPart) {
-            return (default!, fmt.Errorf("multipart: expecting a new Part; got line %q"u8, ((@string)line)));
+            return (default!, fmt.Errorf("multipart: expecting a new Part; got line %q"u8, (@string)line));
         }
+
         if (r.partsRead == 0) {
             // skip line
             continue;
         }
+
         // Consume the "\n" or "\r\n" separator between the
         // body of the previous part and the boundary line we
         // now expect will follow. (either a new part or the
@@ -453,6 +465,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
             expectNewPart = true;
             continue;
         }
+
         return (default!, fmt.Errorf("multipart: unexpected line in Next(): %q"u8, line));
     }
 }
@@ -481,6 +494,7 @@ internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<by
     }
     var rest = line.slice(len(r.dashBoundary));
     rest = skipLWSPChar(rest);
+
     // On the first part, see our lines are ending in \n instead of \r\n
     // and switch into that mode if so. This is a violation of the spec,
     // but occurs in practice.

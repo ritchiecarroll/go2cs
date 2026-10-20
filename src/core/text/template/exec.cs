@@ -233,8 +233,8 @@ internal static error /*err*/ execute(this ж<Template> Ꮡt, io.Writer wr, any 
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         defer(ᴛ1 => errRecover(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
         var (value, ok) = data._<reflectꓸValue>(ᐧ);
         if (!ok) {
@@ -293,7 +293,6 @@ public static @string DefinedTemplates(this ж<Template> Ꮡt) {
 
 // Sentinel errors for use with panic to signal early exits from range loops.
 internal static error walkBreak = errors.New("break"u8);
-
 internal static error walkContinue = errors.New("continue"u8);
 
 // Walk functions step through the major pieces of the template structure,
@@ -304,9 +303,9 @@ internal static void walk(this ж<state> Ꮡs, reflectꓸValue dot, parse.Node n
     s.at(node);
     switch (node.type()) {
     case ж<parse.ActionNode> nodeΔ1: {
-        var val = s.evalPipeline(dot, // Do not pop variables so they persist until next end.
- // Also, if the action declares variables, don't print the result.
- (~nodeΔ1).Pipe);
+        // Do not pop variables so they persist until next end.
+        // Also, if the action declares variables, don't print the result.
+        var val = s.evalPipeline(dot, (~nodeΔ1).Pipe);
         if (len((~(~nodeΔ1).Pipe).Decl) == 0) {
             s.printValue(new parse.ActionNodeжNode(nodeΔ1), val);
         }
@@ -413,7 +412,7 @@ internal static (bool truth, bool ok) isTrue(reflectꓸValue val) {
     else if (exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
         truth = val.Complex() != 0D;
     }
-    else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔInterface) {
+    else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔUnsafePointer || exprᴛ1 == reflect.ΔInterface) {
         truth = !val.IsNil();
     }
     else if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
@@ -431,7 +430,6 @@ internal static (bool truth, bool ok) isTrue(reflectꓸValue val) {
     else { /* default: */
         return (truth, ok);
     }
-
     return (truth, true);
 }
 
@@ -608,7 +606,6 @@ internal static void walkRange(this ж<state> Ꮡs, reflectꓸValue dot, ж<pars
         if (fallthrough || !matchᴛ1) { /* default: */
             s.errorf("range can't iterate over %v"u8, val);
         }
-
         if (r.ElseList != nil) {
             Ꮡs.walk(dot, new parse.ListNodeжNode(r.ElseList));
         }
@@ -649,8 +646,8 @@ internal static void walkTemplate(this ref state s, reflectꓸValue dot, ж<pars
 // executing commands depending on the pipeline value.
 internal static reflectꓸValue /*value*/ evalPipeline(this ref state s, reflectꓸValue dot, ж<parse.PipeNode> Ꮡpipe) {
     reflectꓸValue value = new(nil);
-
     ref var pipe = ref Ꮡpipe.DerefOrNull();
+
     if (Ꮡpipe == nil) {
         return value;
     }
@@ -691,12 +688,12 @@ internal static reflectꓸValue evalCommand(this ref state s, reflectꓸValue do
         return s.evalChainNode(dot, n, cmd.Args, final);
     }
     case ж<parse.IdentifierNode> n: {
-        return s.evalFunction(dot, // Must be a function.
- n, new parse.CommandNodeжNode(Ꮡcmd), cmd.Args, final);
+        // Must be a function.
+        return s.evalFunction(dot, n, new parse.CommandNodeжNode(Ꮡcmd), cmd.Args, final);
     }
     case ж<parse.PipeNode> n: {
-        s.notAFunction(cmd.Args, // Parenthesized pipeline. The arguments are all inside the pipeline; final must be absent.
- final);
+        // Parenthesized pipeline. The arguments are all inside the pipeline; final must be absent.
+        s.notAFunction(cmd.Args, final);
         return s.evalPipeline(dot, n);
     }
     case ж<parse.VariableNode> n: {
@@ -757,7 +754,6 @@ internal static reflectꓸValue idealConstant(this ref state s, ж<parse.NumberN
         s.errorf("%s overflows int"u8, constant.Text);
         break;
     }}
-
     return zero;
 }
 
@@ -833,8 +829,7 @@ internal static reflectꓸValue evalFunction(this ref state s, reflectꓸValue d
 // value of the pipeline, if any.
 internal static reflectꓸValue evalField(this ref state s, reflectꓸValue dot, @string fieldName, parse.Node node, slice<parse.Node> args, reflectꓸValue final, reflectꓸValue receiver) {
     if (!receiver.IsValid()) {
-        if ((~s.tmpl).option.missingKey == mapError) {
-            // Treat invalid value as missing map key.
+        if ((~s.tmpl).option.missingKey == mapError) { // Treat invalid value as missing map key.
             s.errorf("nil data; no entry for key %q"u8, fieldName);
         }
         return zero;
@@ -847,6 +842,7 @@ internal static reflectꓸValue evalField(this ref state s, reflectꓸValue dot,
         s.errorf("nil pointer evaluating %s.%s"u8, typ, fieldName);
         return zero;
     }
+
     // Unless it's an interface, need to get to a value of type *T to guarantee
     // we see all methods of T and *T.
     var ptr = receiver;
@@ -879,9 +875,9 @@ internal static reflectꓸValue evalField(this ref state s, reflectꓸValue dot,
         }
     }
     else if (exprᴛ1 == reflect.Map) {
+        // If it's a map, attempt to use the field name as a key.
         var nameVal = reflect.ValueOf(fieldName);
         if (nameVal.Type().AssignableTo(receiver.Type().Key())) {
-            // If it's a map, attempt to use the field name as a key.
             if (hasArgs) {
                 s.errorf("%s is not a method but has arguments"u8, fieldName);
             }
@@ -889,15 +885,14 @@ internal static reflectꓸValue evalField(this ref state s, reflectꓸValue dot,
             if (!result.IsValid()) {
                 var exprᴛ2 = (~s.tmpl).option.missingKey;
                 if (exprᴛ2 == mapInvalid) {
+                    // Just use the invalid value.
                 }
                 else if (exprᴛ2 == mapZeroValue) {
                     result = reflect.Zero(receiver.Type().Elem());
                 }
                 else if (exprᴛ2 == mapError) {
-                    s.errorf("map has no entry for key %q"u8, // Just use the invalid value.
- fieldName);
+                    s.errorf("map has no entry for key %q"u8, fieldName);
                 }
-
             }
             return result;
         }
@@ -919,7 +914,6 @@ internal static reflectꓸValue evalField(this ref state s, reflectꓸValue dot,
             }
         } while (false);
     }
-
     s.errorf("can't evaluate field %s in type %s"u8, fieldName, typ);
     throw panic("not reached");
 }
@@ -955,12 +949,14 @@ internal static reflectꓸValue evalCall(this ref state s, reflectꓸValue dot, 
             s.errorf("%v"u8, errΔ1);
         }
     }
+
     reflectꓸValue unwrap(reflectꓸValue vΔ1) {
         if (AreEqual(vΔ1.Type(), reflectValueType)) {
             vΔ1 = vΔ1.Interface()._<reflectꓸValue>();
         }
         return vΔ1;
     }
+
     // Special case for builtin and/or, which short-circuit.
     if (isBuiltin && (name == "and"u8 || name == "or"u8)) {
         var argType = typ.In(0);
@@ -984,6 +980,7 @@ internal static reflectꓸValue evalCall(this ref state s, reflectꓸValue dot, 
         }
         return vΔ2;
     }
+
     // Build the arg list.
     var argv = new slice<reflectꓸValue>(numIn, () => new(nil));
     // Args must be evaluated. Fixed args first.
@@ -1014,6 +1011,7 @@ internal static reflectꓸValue evalCall(this ref state s, reflectꓸValue dot, 
         }
         argv[i] = s.validateType(final, t);
     }
+
     // Special case for the "call" builtin.
     // Insert the name of the callee function as the first argument.
     if (isBuiltin && name == "call"u8) {
@@ -1027,6 +1025,7 @@ internal static reflectꓸValue evalCall(this ref state s, reflectꓸValue dot, 
         argv = appendꓸꓸꓸ(new reflectꓸValue[]{reflect.ValueOf(calleeName)}.slice(), argv);
         fun = reflect.ValueOf(call);
     }
+
     var (v, err) = safeCall(fun, argv);
     // If we have an error that is not nil, stop execution and return that
     // error to the caller.
@@ -1046,7 +1045,6 @@ internal static bool canBeNil(reflectꓸType typ) {
     if (exprᴛ1 == reflect.Struct) {
         return AreEqual(typ, reflectValueType);
     }
-
     return false;
 }
 
@@ -1072,8 +1070,8 @@ internal static reflectꓸValue validateType(this ref state s, reflectꓸValue v
             if (value.Type().AssignableTo(typ)) {
                 return value;
             }
+            // fallthrough
         }
-        // fallthrough
         // Does one dereference or indirection work? We could do more, as we
         // do with method receivers, but that gets messy and method receivers
         // are much more constrained, so it makes more sense there than here.
@@ -1094,7 +1092,6 @@ internal static reflectꓸValue validateType(this ref state s, reflectꓸValue v
             s.errorf("wrong type for value; expected %s; got %s"u8, typ, value.Type());
             break;
         }}
-
     }
     return value;
 }
@@ -1156,7 +1153,6 @@ internal static reflectꓸValue evalArg(this ref state s, reflectꓸValue dot, r
     else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
         return s.evalUnsignedInteger(typ, n);
     }
-
     s.errorf("can't handle %s for arg of type %s"u8, n, typ);
     throw panic("not reached");
 }
@@ -1254,6 +1250,7 @@ internal static reflectꓸValue evalEmptyInterface(this ref state s, reflectꓸV
         return s.evalFunction(dot, nΔ1, new parse.IdentifierNodeжNode(nΔ1), default!, missingVal);
     }
     case ж<parse.NilNode> nΔ1: {
+        // NilNode is handled in evalArg, the only place that calls here.
         s.errorf("evalEmptyInterface: nil (can't happen)"u8);
         break;
     }
@@ -1264,8 +1261,7 @@ internal static reflectꓸValue evalEmptyInterface(this ref state s, reflectꓸV
         return reflect.ValueOf((~nΔ1).Text);
     }
     case ж<parse.VariableNode> nΔ1: {
-        return s.evalVariableNode(dot, // NilNode is handled in evalArg, the only place that calls here.
- nΔ1, default!, missingVal);
+        return s.evalVariableNode(dot, nΔ1, default!, missingVal);
     }
     case ж<parse.PipeNode> nΔ1: {
         return s.evalPipeline(dot, nΔ1);
@@ -1326,6 +1322,7 @@ internal static (any, bool) printableValue(reflectꓸValue v) {
     if (!v.IsValid()) {
         return (noValueˢ, true);
     }
+
     if (!v.Type().Implements(errorType) && !v.Type().Implements(fmtStringerType)) {
         if (v.CanAddr() && (reflect.PointerTo(v.Type()).Implements(errorType) || reflect.PointerTo(v.Type()).Implements(fmtStringerType))){
             v = v.Addr();
@@ -1334,7 +1331,6 @@ internal static (any, bool) printableValue(reflectꓸValue v) {
             if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func) {
                 return (default!, false);
             }
-
         }
     }
     return (v.Interface(), true);

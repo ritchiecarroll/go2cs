@@ -11,15 +11,11 @@ using unicode;
 
 partial class html_package {
 
-// First entry is what 0x80 should be replaced with.
-// Last entry is 0x9F.
-// 0x00->'\uFFFD' is handled programmatically.
-// 0x0D->'\u000D' is a no-op.
 // These replacements permit compatibility with old numeric entities that
 // assumed Windows-1252 encoding.
 // https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state
 internal static array<rune> replacementTable = new rune[]{
-    (rune)'\u20AC',
+    (rune)'\u20AC', // First entry is what 0x80 should be replaced with.
     (rune)'\u0081',
     (rune)'\u201A',
     (rune)'\u0192',
@@ -50,7 +46,9 @@ internal static array<rune> replacementTable = new rune[]{
     (rune)'\u0153',
     (rune)'\u009D',
     (rune)'\u017E',
-    (rune)'\u0178'
+    (rune)'\u0178' // Last entry is 0x9F.
+    // 0x00->'\uFFFD' is handled programmatically.
+    // 0x0D->'\u000D' is a no-op.
 }.array();
 
 // unescapeEntity reads an entity like "&lt;" from b[src:] and writes the
@@ -61,17 +59,20 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
     nint src1 = default!;
 
     const bool attribute = false;
+
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/tokenization.html#consume-a-character-reference
+
     // i starts at 1 because we already know that s[0] == '&'.
     nint i = 1;
     var s = b.slice(src);
+
     if (len(s) <= 1) {
         b[dst] = b[src];
         return (dst + 1, src + 1);
     }
+
     if (s[i] == (rune)'#') {
-        if (len(s) <= 3) {
-            // We need to have at least "&#.".
+        if (len(s) <= 3) { // We need to have at least "&#.".
             b[dst] = b[src];
             return (dst + 1, src + 1);
         }
@@ -82,6 +83,7 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
             hex = true;
             i++;
         }
+
         var x = (rune)'\x00';
         while (i < len(s)) {
             c = s[i];
@@ -109,11 +111,12 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
             }
             break;
         }
-        if (i <= 3) {
-            // No characters matched.
+
+        if (i <= 3) { // No characters matched.
             b[dst] = b[src];
             return (dst + 1, src + 1);
         }
+
         if (0x80 <= x && x <= 0x9F){
             // Replace characters from Windows-1252 with UTF-8 equivalents.
             x = replacementTable[x - 0x80];
@@ -122,10 +125,13 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
             // Replace invalid characters with the replacement character.
             x = (rune)'\uFFFD';
         }
+
         return (dst + utf8.EncodeRune(b.slice(dst), x), src + i);
     }
+
     // Consume the maximum number of characters possible, with the
     // consumed characters matching one of the named references.
+
     while (i < len(s)) {
         var c = s[i];
         i++;
@@ -138,15 +144,16 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
         }
         break;
     }
+
     var entityName = s.slice(1, i);
     if (len(entityName) == 0){
+        // No-op.
     } else 
     if (attribute && entityName[len(entityName) - 1] != (rune)';' && len(s) > i && s[i] == (rune)'='){
+        // No-op.
     } else 
     {
         var x = entity[tmpstring(entityName)]; if (x != 0){
-            // No-op.
-            // No-op.
             return (dst + utf8.EncodeRune(b.slice(dst), x), src + i);
         } else 
         {
@@ -169,38 +176,40 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
             }
         }
     }
+
     (dst1, src1) = (dst + i, src + i);
     copy(b.slice(dst, dst1), b.slice(src, src1));
     return (dst1, src1);
 }
 
-// "&#39;" is shorter than "&apos;" and apos was not in HTML until HTML5.
-// "&#34;" is shorter than "&quot;".
 internal static ж<strings.Replacer> htmlEscaper = strings.NewReplacer(
     @"&"u8, "&amp;",
-    @"'", "&#39;",
+    @"'", "&#39;", // "&#39;" is shorter than "&apos;" and apos was not in HTML until HTML5.
     @"<", "&lt;",
     @">", "&gt;",
-    @"""", "&#34;");
+    @"""", "&#34;" // "&#34;" is shorter than "&quot;".
+);
 
 // EscapeString escapes special characters like "<" to become "&lt;". It
 // escapes only five such characters: <, >, &, ' and ".
-// UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
+// [UnescapeString](EscapeString(s)) == s always holds, but the converse isn't
 // always true.
 public static @string EscapeString(@string s) {
     return htmlEscaper.Replace(s);
 }
 
 // UnescapeString unescapes entities like "&lt;" to become "<". It unescapes a
-// larger range of entities than EscapeString escapes. For example, "&aacute;"
+// larger range of entities than [EscapeString] escapes. For example, "&aacute;"
 // unescapes to "á", as does "&#225;" and "&#xE1;".
-// UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
+// UnescapeString([EscapeString](s)) == s always holds, but the converse isn't
 // always true.
 public static @string UnescapeString(@string s) {
     nint i = strings.IndexByte(s, (rune)'&');
+
     if (i < 0) {
         return s;
     }
+
     var b = slice<byte>(s);
     var (entity, entity2) = entityMaps();
     var (dst, src) = unescapeEntity(b, i, i, entity, entity2);
@@ -214,12 +223,13 @@ public static @string UnescapeString(@string s) {
             dst += copy(b.slice(dst), s.slice(src));
             break;
         }
+
         if (i > 0) {
             copy(b.slice(dst), s.slice(src, src + i));
         }
         (dst, src) = unescapeEntity(b, dst + i, src + i, entity, entity2);
     }
-    return ((@string)(b.slice(0, dst)));
+    return (@string)(b.slice(0, dst));
 }
 
 } // end html_package

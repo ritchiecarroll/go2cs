@@ -15,15 +15,14 @@ public static void TestReadRandom(ж<testing.T> Ꮡt) {
     if (runtime_internal_test_package.ReadRandomFailed.Value) {
         var exprᴛ1 = GOOS;
         if (exprᴛ1 == "plan9"u8) {
+            // ok
         }
         else { /* default: */
             Ꮡt.Fatalf("readRandom failed at startup"u8);
         }
-
     }
 }
 
-// ok
 public static void BenchmarkFastrand(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
@@ -84,8 +83,6 @@ public static void BenchmarkFastrandn(ж<testing.B> Ꮡb) {
 }
 
 public static void TestLegacyFastrand(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Testing mainly that the calls work at all,
     // but check that all three don't return the same number (1 in 2^64 chance)
     {

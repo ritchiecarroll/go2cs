@@ -26,11 +26,8 @@ internal static ж<Node> build() {
     return r;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recordedˢ = (@string)"recorded:"u8;
-
 internal static void record(nint a, nint b) {
-    fmt.Println(recordedˢ, a, b);
+    fmt.Println("recorded:", a, b);
 }
 
 internal static (nint, nint) tupleᴛ1ʗ = parts();
@@ -41,8 +38,10 @@ internal static void Main() {
     var (ᴛ3, ᴛ4) = parts();
     nint s = combine(ᴛ3, ᴛ4);
     fmt.Println((~n).a, (~n).b, s);
+
     var (ᴛ5, ᴛ6) = parts();
     record(ᴛ5, ᴛ6);
+
     fmt.Println(g);
 }
 

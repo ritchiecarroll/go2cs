@@ -65,7 +65,6 @@ public static (int64 ret, error err) Seek(this ref Reader r, int64 offset, nint 
         r.off = newoff;
         return (r.off, default!);
     }
-
     // other modes are not supported
     return (0, fmt.Errorf("unsupported seek mode %d"u8, whence));
 }
@@ -98,6 +97,7 @@ public static uint64 /*value*/ ReadULEB128(this ref Reader r) {
     uint64 value = default!;
 
     nuint shift = default!;
+
     while (ᐧ) {
         var b = r.b[(nint)(r.off)];
         r.off++;
@@ -116,7 +116,7 @@ public static @string ReadString(this ref Reader r, int64 len) {
     if (r.@readonly) {
         return toString(b); // backed by RO memory, ok to make unsafe string
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 internal static @string toString(slice<byte> b) {

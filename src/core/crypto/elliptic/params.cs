@@ -38,11 +38,14 @@ public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) {
 internal static ж<bigꓸInt> polynomial(this ref CurveParams curve, ж<bigꓸInt> Ꮡx) {
     var x3 = @new<bigꓸInt>().Mul(Ꮡx, Ꮡx);
     x3.Mul(x3, Ꮡx);
+
     var threeX = @new<bigꓸInt>().Lsh(Ꮡx, 1);
     threeX.Add(threeX, Ꮡx);
+
     x3.Sub(x3, threeX);
     x3.Add(x3, curve.B);
     x3.Mod(x3, curve.P);
+
     return x3;
 }
 
@@ -64,12 +67,15 @@ public static bool IsOnCurve(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> Ꮡx, 
             return specific.IsOnCurve(Ꮡx, Ꮡy);
         }
     }
+
     if (x.Sign() < 0 || Ꮡx.Cmp(curve.P) >= 0 || y.Sign() < 0 || Ꮡy.Cmp(curve.P) >= 0) {
         return false;
     }
+
     // y² = x³ - 3x + b
     var y2 = @new<bigꓸInt>().Mul(Ꮡy, Ꮡy);
     y2.Mod(y2, curve.P);
+
     return curve.polynomial(Ꮡx).Cmp(y2) == 0;
 }
 
@@ -92,13 +98,15 @@ internal static ж<bigꓸInt> zForAffine(ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
 internal static (ж<bigꓸInt> xOut, ж<bigꓸInt> yOut) affineFromJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy, ж<bigꓸInt> Ꮡz) {
     ж<bigꓸInt> xOut = default!;
     ж<bigꓸInt> yOut = default!;
-
     ref var z = ref Ꮡz.DerefOrNull();
+
     if (z.Sign() == 0) {
         return (@new<bigꓸInt>(), @new<bigꓸInt>());
     }
+
     var zinv = @new<bigꓸInt>().ModInverse(Ꮡz, curve.P);
     var zinvsq = @new<bigꓸInt>().Mul(zinv, zinv);
+
     xOut = @new<bigꓸInt>().Mul(Ꮡx, zinvsq);
     xOut.Mod(xOut, curve.P);
     zinvsq.Mul(zinvsq, zinv);
@@ -125,6 +133,7 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Add(this ж<CurveParams> Ꮡcurve, 
     }
     panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), Ꮡx1, Ꮡy1);
     panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), Ꮡx2, Ꮡy2);
+
     var z1 = zForAffine(Ꮡx1, Ꮡy1);
     var z2 = zForAffine(Ꮡx2, Ꮡy2);
     var (ᴛ1, ᴛ2, ᴛ3) = curve.addJacobian(Ꮡx1, Ꮡy1, z1, Ꮡx2, Ꮡy2, z2);
@@ -151,10 +160,12 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this r
         z3.Set(Ꮡz1);
         return (x3, y3, z3);
     }
+
     var z1z1 = @new<bigꓸInt>().Mul(Ꮡz1, Ꮡz1);
     z1z1.Mod(z1z1, curve.P);
     var z2z2 = @new<bigꓸInt>().Mul(Ꮡz2, Ꮡz2);
     z2z2.Mod(z2z2, curve.P);
+
     var u1 = @new<bigꓸInt>().Mul(Ꮡx1, z2z2);
     u1.Mod(u1, curve.P);
     var u2 = @new<bigꓸInt>().Mul(Ꮡx2, z1z1);
@@ -167,6 +178,7 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this r
     var i = @new<bigꓸInt>().Lsh(h, 1);
     i.Mul(i, i);
     var j = @new<bigꓸInt>().Mul(h, i);
+
     var s1 = @new<bigꓸInt>().Mul(Ꮡy1, Ꮡz2);
     s1.Mul(s1, z2z2);
     s1.Mod(s1, curve.P);
@@ -183,12 +195,14 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this r
     }
     r.Lsh(r, 1);
     var v = @new<bigꓸInt>().Mul(u1, i);
+
     x3.Set(r);
     x3.Mul(x3, x3);
     x3.Sub(x3, j);
     x3.Sub(x3, v);
     x3.Sub(x3, v);
     x3.Mod(x3, curve.P);
+
     y3.Set(r);
     v.Sub(v, x3);
     y3.Mul(y3, v);
@@ -196,12 +210,14 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this r
     s1.Lsh(s1, 1);
     y3.Sub(y3, s1);
     y3.Mod(y3, curve.P);
+
     z3.Add(Ꮡz1, Ꮡz2);
     z3.Mul(z3, z3);
     z3.Sub(z3, z1z1);
     z3.Sub(z3, z2z2);
     z3.Mul(z3, h);
     z3.Mod(z3, curve.P);
+
     return (x3, y3, z3);
 }
 
@@ -222,6 +238,7 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Double(this ж<CurveParams> Ꮡcurv
         }
     }
     panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), Ꮡx1, Ꮡy1);
+
     var z1 = zForAffine(Ꮡx1, Ꮡy1);
     var (ᴛ4, ᴛ5, ᴛ6) = curve.doubleJacobian(Ꮡx1, Ꮡy1, z1);
     return curve.affineFromJacobian(ᴛ4, ᴛ5, ᴛ6);
@@ -244,7 +261,9 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(thi
     alpha2.Set(alpha);
     alpha.Lsh(alpha, 1);
     alpha.Add(alpha, alpha2);
+
     var beta = alpha2.Mul(Ꮡx, gamma);
+
     var x3 = @new<bigꓸInt>().Mul(alpha, alpha);
     var beta8 = @new<bigꓸInt>().Lsh(beta, 3);
     beta8.Mod(beta8, curve.P);
@@ -253,6 +272,7 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(thi
         x3.Add(x3, curve.P);
     }
     x3.Mod(x3, curve.P);
+
     var z3 = @new<bigꓸInt>().Add(Ꮡy, Ꮡz);
     z3.Mul(z3, z3);
     z3.Sub(z3, gamma);
@@ -264,20 +284,24 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(thi
         z3.Add(z3, curve.P);
     }
     z3.Mod(z3, curve.P);
+
     beta.Lsh(beta, 2);
     beta.Sub(beta, x3);
     if (beta.Sign() == -1) {
         beta.Add(beta, curve.P);
     }
     var y3 = alpha.Mul(alpha, beta);
+
     gamma.Mul(gamma, gamma);
     gamma.Lsh(gamma, 3);
     gamma.Mod(gamma, curve.P);
+
     y3.Sub(y3, gamma);
     if (y3.Sign() == -1) {
         y3.Add(y3, curve.P);
     }
     y3.Mod(y3, curve.P);
+
     return (x3, y3, z3);
 }
 
@@ -298,19 +322,22 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult(this ж<CurveParams> Ꮡ
         }
     }
     panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), ᏑBx, ᏑBy);
+
     var Bz = @new<bigꓸInt>().SetInt64(1);
     var (x, y, z) = (@new<bigꓸInt>(), @new<bigꓸInt>(), @new<bigꓸInt>());
-    foreach (var (_, vᴛ1) in k) {
-        var @byte = vᴛ1;
 
-        for (nint bitNum = 0; bitNum < 8; bitNum++) {
+    foreach (var (_, vᴛ1) in k) {
+        var b = vᴛ1;
+
+        foreach (var _ᴛ1 in range(8)) {
             (x, y, z) = curve.doubleJacobian(x, y, z);
-            if ((byte)(@byte & 0x80) == 0x80) {
+            if ((byte)(b & 0x80) == 0x80) {
                 (x, y, z) = curve.addJacobian(ᏑBx, ᏑBy, Bz, x, y, z);
             }
-            @byte <<= (int)(1);
+            b <<= (int)(1);
         }
     }
+
     return curve.affineFromJacobian(x, y, z);
 }
 
@@ -330,11 +357,12 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult(this ж<CurveParams>
             return specific.ScalarBaseMult(k);
         }
     }
+
     return Ꮡcurve.ScalarMult(curve.Gx, curve.Gy, k);
 }
 
 internal static (Curve, bool) matchesSpecificCurve(ж<CurveParams> Ꮡparams) {
-    foreach (var (_, c) in new Curve[]{new nistCurveжCurve<P224PointжnistPoint>(p224), new p256CurveжCurve(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)}.slice()) {
+    foreach (var (_, c) in new Curve[]{new nistCurveжCurve<P224PointжnistPoint>(p224), new nistCurveжCurve<P256PointжnistPoint>(p256), new nistCurveжCurve<P384PointжnistPoint>(p384), new nistCurveжCurve<P521PointжnistPoint>(p521)}.slice()) {
         if (Ꮡparams == c.Params()) {
             return (c, true);
         }

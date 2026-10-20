@@ -26,14 +26,8 @@ partial struct PathTest {
     internal @string path, result;
 }
 
-// Already clean
-// Empty is current dir
-// Remove trailing slash
-// Remove doubled slash
-// Remove . elements
-// Remove .. elements
-// Combinations
 internal static slice<PathTest> cleantests = new PathTest[]{
+    // Already clean
     new("abc"u8, "abc"u8),
     new("abc/def"u8, "abc/def"u8),
     new("a/b/c"u8, "a/b/c"u8),
@@ -43,7 +37,11 @@ internal static slice<PathTest> cleantests = new PathTest[]{
     new("../../abc"u8, "../../abc"u8),
     new("/abc"u8, "/abc"u8),
     new("/"u8, "/"u8),
+
+    // Empty is current dir
     new(""u8, "."u8),
+
+    // Remove trailing slash
     new("abc/"u8, "abc"u8),
     new("abc/def/"u8, "abc/def"u8),
     new("a/b/c/"u8, "a/b/c"u8),
@@ -51,11 +49,17 @@ internal static slice<PathTest> cleantests = new PathTest[]{
     new("../"u8, ".."u8),
     new("../../"u8, "../.."u8),
     new("/abc/"u8, "/abc"u8),
+
+    // Remove doubled slash
     new("abc//def//ghi"u8, "abc/def/ghi"u8),
     new("abc//"u8, "abc"u8),
+
+    // Remove . elements
     new("abc/./def"u8, "abc/def"u8),
     new("/./abc/def"u8, "/abc/def"u8),
     new("abc/."u8, "abc"u8),
+
+    // Remove .. elements
     new("abc/def/ghi/../jkl"u8, "abc/def/jkl"u8),
     new("abc/def/../ghi/../jkl"u8, "abc/jkl"u8),
     new("abc/def/.."u8, "abc"u8),
@@ -66,20 +70,20 @@ internal static slice<PathTest> cleantests = new PathTest[]{
     new("abc/def/../../../ghi/jkl/../../../mno"u8, "../../mno"u8),
     new("/../abc"u8, "/abc"u8),
     new("a/../b:/../../c"u8, @"../c"u8),
+
+    // Combinations
     new("abc/./../def"u8, "def"u8),
     new("abc//./../def"u8, "def"u8),
     new("abc/../../././../def"u8, "../../def"u8)
 }.slice();
 
-// Remove leading doubled slash
 internal static slice<PathTest> nonwincleantests = new PathTest[]{
+    // Remove leading doubled slash
     new("//abc"u8, "/abc"u8),
     new("///abc"u8, "/abc"u8),
     new("//abc//"u8, "/abc"u8)
 }.slice();
 
-// Don't allow cleaning to move an element with a colon to the start of the path.
-// Don't allow cleaning to create a Root Local Device path like \??\a.
 internal static slice<PathTest> wincleantests = new PathTest[]{
     new(@"c:"u8, @"c:."u8),
     new(@"c:\"u8, @"c:\"u8),
@@ -109,11 +113,15 @@ internal static slice<PathTest> wincleantests = new PathTest[]{
     new(@"//abc//"u8, @"\\abc\\"u8),
     new(@"\\?\C:\"u8, @"\\?\C:\"u8),
     new(@"\\?\C:\a"u8, @"\\?\C:\a"u8),
+
+    // Don't allow cleaning to move an element with a colon to the start of the path.
     new(@"a/../c:"u8, @".\c:"u8),
     new(@"a\..\c:"u8, @".\c:"u8),
     new(@"a/../c:/a"u8, @".\c:\a"u8),
     new(@"a/../../c:"u8, @"..\c:"u8),
     new(@"foo:bar"u8, @"foo:bar"u8),
+
+    // Don't allow cleaning to create a Root Local Device path like \??\a.
     new(@"/a/../??/a"u8, @"\.\??\a"u8)
 }.slice();
 
@@ -143,6 +151,7 @@ public static void TestClean(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if (testing.Short()) {
         Ꮡt.Skip(skippingMallocCountInˢ);
     }
@@ -150,6 +159,7 @@ public static void TestClean(ж<testing.T> Ꮡt) {
         Ꮡt.Log(skippingAllocsPerRunˢ);
         return;
     }
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new PathTest(), out var Ꮡtest);
         test = vᴛ1;
@@ -185,7 +195,6 @@ internal static slice<IsLocalTest> islocaltests = new IsLocalTest[]{
     new(@"a/../b:/../../c"u8, false)
 }.slice();
 
-// not a special file name
 internal static slice<IsLocalTest> winislocaltests = new IsLocalTest[]{
     new("NUL"u8, false),
     new("nul"u8, false),
@@ -222,7 +231,7 @@ internal static slice<IsLocalTest> winislocaltests = new IsLocalTest[]{
     new(@"conin$"u8, false),
     new(@"CONOUT$"u8, false),
     new(@"conout$"u8, false),
-    new(@"dollar$"u8, true)
+    new(@"dollar$"u8, true) // not a special file name
 }.slice();
 
 internal static slice<IsLocalTest> plan9islocaltests = new IsLocalTest[]{
@@ -306,7 +315,6 @@ public static void TestLocalize(ж<testing.T> Ꮡt) {
     else { /* default: */
         tests = appendꓸꓸꓸ(tests, unixlocalizetests);
     }
-
     foreach (var (_, test) in tests) {
         var (got, err) = filepath.Localize(test.path);
         @string wantErr = nilˢ;
@@ -323,7 +331,7 @@ internal static UntypedInt sep => /* filepath.Separator */ 92;
 
 internal static slice<PathTest> slashtests = new PathTest[]{
     new(""u8, ""u8),
-    new("/"u8, ((@string)(rune)sep)),
+    new("/"u8, (@string)(rune)sep),
     new("/a/b"u8, ((@string)new byte[]{sep, (rune)'a', sep, (rune)'b'}.slice())),
     new("a//b"u8, ((@string)new byte[]{(rune)'a', sep, sep, (rune)'b'}.slice()))
 }.slice();
@@ -356,15 +364,17 @@ internal static slice<SplitListTest> splitlisttests = new SplitListTest[]{
     new(((@string)new byte[]{lsep, (rune)'a', lsep, (rune)'b'}.slice()), new @string[]{""u8, "a"u8, "b"u8}.slice())
 }.slice();
 
-// quoted
-// semicolon
-// partially quoted
 internal static slice<SplitListTest> winsplitlisttests = new SplitListTest[]{
+    // quoted
     new(@"""a"""u8, new @string[]{@"a"u8}.slice()),
+
+    // semicolon
     new(@""";"""u8, new @string[]{@";"u8}.slice()),
     new(@"""a;b"""u8, new @string[]{@"a;b"u8}.slice()),
     new(@""";"";"u8, new @string[]{@";"u8, @""u8}.slice()),
     new(@";"";"""u8, new @string[]{@""u8, @";"u8}.slice()),
+
+    // partially quoted
     new(@"a"";""b"u8, new @string[]{@"a;b"u8}.slice()),
     new(@"a; """"b"u8, new @string[]{@"a"u8, @" b"u8}.slice()),
     new(@"""a;b"u8, new @string[]{@"a;b"u8}.slice()),
@@ -435,15 +445,16 @@ partial struct JoinTest {
     internal @string path;
 }
 
-// zero parameters
-// one parameter
-// two parameters
-// three parameters
 internal static slice<JoinTest> jointests = new JoinTest[]{
+    // zero parameters
     new(new @string[]{}.slice(), ""u8),
+
+    // one parameter
     new(new @string[]{""u8}.slice(), ""u8),
     new(new @string[]{"/"u8}.slice(), "/"u8),
     new(new @string[]{"a"u8}.slice(), "a"u8),
+
+    // two parameters
     new(new @string[]{"a"u8, "b"u8}.slice(), "a/b"u8),
     new(new @string[]{"a"u8, ""u8}.slice(), "a"u8),
     new(new @string[]{""u8, "b"u8}.slice(), "b"u8),
@@ -456,6 +467,8 @@ internal static slice<JoinTest> jointests = new JoinTest[]{
     new(new @string[]{"a/"u8, "b"u8}.slice(), "a/b"u8),
     new(new @string[]{"a/"u8, ""u8}.slice(), "a"u8),
     new(new @string[]{""u8, ""u8}.slice(), ""u8),
+
+    // three parameters
     new(new @string[]{"/"u8, "a"u8, "b"u8}.slice(), "/a/b"u8)
 }.slice();
 
@@ -630,10 +643,12 @@ internal static error mark(fs.DirEntry d, error err, ж<slice<error>> Ꮡerrors,
 // that the returned path does not contain symlinks.
 internal static @string tempDirCanonical(ж<testing.T> Ꮡt) {
     @string dir = Ꮡt.TempDir();
+
     var (cdir, err) = filepath.EvalSymlinks(dir);
     if (err != default!) {
         Ꮡt.Errorf("tempDirCanonical: %v"u8, err);
     }
+
     return cdir;
 }
 
@@ -653,6 +668,7 @@ internal static readonly object skippingInShortModeˢ = (@string)"skipping in sh
 
 internal static void testWalk(ж<testing.T> Ꮡt, Func<@string, Func<@string, fs.DirEntry, error, error>, error> walk, nint errVisit) {
     Ꮡt.Chdir(Ꮡt.TempDir());
+
     makeTree(Ꮡt);
     ref var errors = ref heap<slice<error>>(out var Ꮡerrors);
     errors = new slice<error>(0, 10);
@@ -668,6 +684,7 @@ internal static void testWalk(ж<testing.T> Ꮡt, Func<@string, Func<@string, fs
     }
     checkMarks(Ꮡt, true);
     errors = errors[0..0];
+
     var markFnʗ1 = markFn;
     Ꮡt.Run(permErrˢ, (ж<testing.T> tΔ1) => {
         // Test permission errors. Only possible if we're not root
@@ -683,9 +700,11 @@ internal static void testWalk(ж<testing.T> Ꮡt, Func<@string, Func<@string, fs
         if (testing.Short()) {
             tΔ1.Skip(skippingInShortModeˢ);
         }
+
         // introduce 2 errors: chmod top-level directories to 0
         os.Chmod(filepath.Join((~tree).name, (~(~tree).entries[1]).name), 0);
         os.Chmod(filepath.Join((~tree).name, (~(~tree).entries[3]).name), 0);
+
         // 3) capture errors, expect two.
         // mark respective subtrees manually
         markTree((~tree).entries[1]);
@@ -703,6 +722,7 @@ internal static void testWalk(ж<testing.T> Ꮡt, Func<@string, Func<@string, fs
         // the inaccessible subtrees were marked manually
         checkMarks(tΔ1, true);
         Ꮡerrors.ValueSlot = Ꮡerrors.ValueSlot[0..0];
+
         // 4) capture errors, stop after first error.
         // mark respective subtrees manually
         markTree((~tree).entries[1]);
@@ -721,6 +741,7 @@ internal static void testWalk(ж<testing.T> Ꮡt, Func<@string, Func<@string, fs
         // the inaccessible subtrees were marked manually
         checkMarks(tΔ1, false);
         Ꮡerrors.ValueSlot = Ꮡerrors.ValueSlot[0..0];
+
         // restore permissions
         os.Chmod(filepath.Join((~tree).name, (~(~tree).entries[1]).name), 504);
         os.Chmod(filepath.Join((~tree).name, (~(~tree).entries[3]).name), 504);
@@ -750,6 +771,7 @@ internal static readonly @string walkDirˢ = "WalkDir"u8;
 
 public static void TestWalkSkipDirOnFile(ж<testing.T> Ꮡt) {
     @string td = Ꮡt.TempDir();
+
     {
         var err = os.MkdirAll(filepath.Join(td, dirˢ), 493); if (err != default!) {
             Ꮡt.Fatal(err);
@@ -757,6 +779,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> Ꮡt) {
     }
     touch(Ꮡt, filepath.Join(td, dirFoo1ˢ));
     touch(Ꮡt, filepath.Join(td, dirFoo2ˢ));
+
     var sawFoo2 = false;
     error walker(@string path) {
         if (strings.HasSuffix(path, foo2ˢ)) {
@@ -771,6 +794,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> Ꮡt) {
     var walkFn = (@string path, fs.FileInfo _Δp1, error _Δp2) => walkerʗ1(path);
     var walkerʗ2 = walker;
     var walkDirFn = (@string path, fs.DirEntry _Δp1, error _Δp2) => walkerʗ2(path);
+
     void check(ж<testing.T> tΔ1, Func<@string, error> walk, @string root) {
         tΔ1.Helper();
         sawFoo2 = false;
@@ -782,6 +806,7 @@ public static void TestWalkSkipDirOnFile(ж<testing.T> Ꮡt) {
             tΔ1.Errorf("SkipDir on file foo1 did not block processing of foo2"u8);
         }
     }
+
     var checkʗ1 = check;
     var walkFnʗ1 = walkFn;
     Ꮡt.Run(walkˢ, (ж<testing.T> tΔ2) => {
@@ -810,6 +835,7 @@ internal static readonly @string lastˢ = "last"u8;
 
 public static void TestWalkSkipAllOnFile(ж<testing.T> Ꮡt) {
     @string td = Ꮡt.TempDir();
+
     {
         var err = os.MkdirAll(filepath.Join(td, dirˢ, subdirˢ), 493); if (err != default!) {
             Ꮡt.Fatal(err);
@@ -820,26 +846,31 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     touch(Ꮡt, filepath.Join(td, dirˢ, foo1ˢ));
     touch(Ꮡt, filepath.Join(td, dirˢ, foo2ˢ));
     touch(Ꮡt, filepath.Join(td, dirˢ, subdirˢ, foo3ˢ));
     touch(Ꮡt, filepath.Join(td, dirˢ, foo4ˢ));
     touch(Ꮡt, filepath.Join(td, dir2ˢ, barˢ));
     touch(Ꮡt, filepath.Join(td, lastˢ));
+
     var remainingWereSkipped = true;
     error walker(@string path) {
         if (strings.HasSuffix(path, foo2ˢ)) {
             return filepath.SkipAll;
         }
+
         if (strings.HasSuffix(path, foo3ˢ) || strings.HasSuffix(path, foo4ˢ) || strings.HasSuffix(path, barˢ) || strings.HasSuffix(path, lastˢ)) {
             remainingWereSkipped = false;
         }
         return default!;
     }
+
     var walkerʗ1 = walker;
     var walkFn = (@string path, fs.FileInfo _Δp1, error _Δp2) => walkerʗ1(path);
     var walkerʗ2 = walker;
     var walkDirFn = (@string path, fs.DirEntry _Δp1, error _Δp2) => walkerʗ2(path);
+
     void check(ж<testing.T> tΔ1, Func<@string, error> walk, @string root) {
         tΔ1.Helper();
         remainingWereSkipped = true;
@@ -852,6 +883,7 @@ public static void TestWalkSkipAllOnFile(ж<testing.T> Ꮡt) {
             tΔ1.Errorf("SkipAll on file foo2 did not block processing of remaining files and directories"u8);
         }
     }
+
     var checkʗ1 = check;
     var walkFnʗ1 = walkFn;
     Ꮡt.Run(walkˢ, (ж<testing.T> tΔ2) => {
@@ -880,6 +912,7 @@ public static void TestWalkFileError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         @string td = Ꮡt.TempDir();
+
         touch(Ꮡt, filepath.Join(td, fooˢ));
         touch(Ꮡt, filepath.Join(td, barˢ));
         @string dir = filepath.Join(td, dirˢ);
@@ -935,6 +968,7 @@ internal partial struct TestWalkSymlinkRoot_type /*dyn*/ {
 
 public static void TestWalkSymlinkRoot(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+
     @string td = Ꮡt.TempDir();
     @string dir = filepath.Join(td, dirˢ);
     {
@@ -943,24 +977,28 @@ public static void TestWalkSymlinkRoot(ж<testing.T> Ꮡt) {
         }
     }
     touch(Ꮡt, filepath.Join(dir, fooˢ));
+
     @string link = filepath.Join(td, linkˢ);
     {
         var err = os.Symlink(dirˢ, link); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     @string abslink = filepath.Join(td, abslinkˢ);
     {
         var err = os.Symlink(dir, abslink); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     @string linklink = filepath.Join(td, linklinkˢ);
     {
         var err = os.Symlink(linkˢ, linklink); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     // Per https://pubs.opengroup.org/onlinepubs/9699919799.2013edition/basedefs/V1_chap04.html#tag_04_12:
     // “A pathname that contains at least one non- <slash> character and that ends
     // with one or more trailing <slash> characters shall not be resolved
@@ -1022,6 +1060,7 @@ public static void TestWalkSymlinkRoot(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
+
             if (!slices.Equal<slice<@string>, @string>(Ꮡwalked.ValueSlot, ttʗ1.want)) {
                 tΔ1.Logf("Walk(%#q) visited %#q; want %#q"u8, ttʗ1.root, Ꮡwalked.ValueSlot, ttʗ1.want);
                 if (slices.Contains(ttʗ1.buggyGOOS, runtime.GOOS)){
@@ -1180,6 +1219,7 @@ public static void TestIsAbs(ж<testing.T> Ꮡt) {
     } else {
         tests = isabstests;
     }
+
     foreach (var (_, test) in tests) {
         {
             var r = filepath.IsAbs(test.path); if (r != test.isAbs) {
@@ -1194,7 +1234,6 @@ partial struct EvalSymlinksTest {
     internal @string path, dest;
 }
 
-// Issue 23444.
 public static slice<EvalSymlinksTest> EvalSymlinksTestDirs = new EvalSymlinksTest[]{
     new("test"u8, ""u8),
     new("test/dir"u8, ""u8),
@@ -1204,6 +1243,7 @@ public static slice<EvalSymlinksTest> EvalSymlinksTestDirs = new EvalSymlinksTes
     new("test/linkabs"u8, "/"u8),
     new("test/link4"u8, "../test2"u8),
     new("test2"u8, "test/dir"u8),
+    // Issue 23444.
     new("src"u8, ""u8),
     new("src/pool"u8, ""u8),
     new("src/pool/test"u8, ""u8),
@@ -1265,7 +1305,9 @@ internal static readonly @string testˢ = "test"u8;
 
 public static void TestEvalSymlinks(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+
     @string tmpDir = Ꮡt.TempDir();
+
     // /tmp may itself be a symlink! Avoid the confusion, although
     // it means trusting the thing we're testing.
     error err = default!;
@@ -1273,6 +1315,7 @@ public static void TestEvalSymlinks(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(evalSymlinkForTmpDirˢ, err);
     }
+
     // Create the symlink farm using relative paths.
     foreach (var (_, d) in EvalSymlinksTestDirs) {
         error errΔ1 = default!;
@@ -1286,21 +1329,26 @@ public static void TestEvalSymlinks(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     // Evaluate the symlink farm.
     foreach (var (_, test) in EvalSymlinksTests) {
         @string path = simpleJoin(tmpDir, test.path);
+
         @string dest = simpleJoin(tmpDir, test.dest);
         if (filepath.IsAbs(test.dest) || os.IsPathSeparator(test.dest[0])) {
             dest = test.dest;
         }
         testEvalSymlinks(Ꮡt, path, dest);
+
         // test EvalSymlinks(".")
         testEvalSymlinksAfterChdir(Ꮡt, path, "."u8, "."u8);
+
         // test EvalSymlinks("C:.") on Windows
         if (runtime.GOOS == "windows"u8) {
             @string volDot = filepath.VolumeName(tmpDir) + "."u8;
             testEvalSymlinksAfterChdir(Ꮡt, path, volDot, volDot);
         }
+
         // test EvalSymlinks(".."+path)
         @string dotdotPath = simpleJoin(".."u8, test.dest);
         if (filepath.IsAbs(test.dest) || os.IsPathSeparator(test.dest[0])) {
@@ -1310,6 +1358,7 @@ public static void TestEvalSymlinks(ж<testing.T> Ꮡt) {
             simpleJoin(tmpDir, testˢ),
             simpleJoin(".."u8, test.path),
             dotdotPath);
+
         // test EvalSymlinks(p) where p is relative path
         testEvalSymlinksAfterChdir(Ꮡt, tmpDir, test.path, test.dest);
     }
@@ -1323,15 +1372,18 @@ public static void TestEvalSymlinksIsNotExist(ж<testing.T> Ꮡt) {
     try {
         testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
         Ꮡt.Chdir(Ꮡt.TempDir());
+
         var (_, err) = filepath.EvalSymlinks(notexistˢ);
         if (!os.IsNotExist(err)) {
             Ꮡt.Errorf("expected the file is not found, got %v\n"u8, err);
         }
+
         err = os.Symlink(notexistˢ, linkˢ);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(os.Remove, linkˢ, ref ᒐ);
+
         (_, err) = filepath.EvalSymlinks(linkˢ);
         if (!os.IsNotExist(err)) {
             Ꮡt.Errorf("expected the file is not found, got %v\n"u8, err);
@@ -1353,7 +1405,9 @@ internal partial struct TestIssue13582_tests /*dyn*/ {
 
 public static void TestIssue13582(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+
     @string tmpDir = Ꮡt.TempDir();
+
     @string dir = filepath.Join(tmpDir, dirˢ);
     var err = os.Mkdir(dir, 493);
     if (err != default!) {
@@ -1379,6 +1433,7 @@ public static void TestIssue13582(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // /tmp may itself be a symlink!
     (var realTmpDir, err) = filepath.EvalSymlinks(tmpDir);
     if (err != default!) {
@@ -1386,6 +1441,7 @@ public static void TestIssue13582(ж<testing.T> Ꮡt) {
     }
     @string realDir = filepath.Join(realTmpDir, dirˢ);
     @string realFile = filepath.Join(realDir, fileˢ);
+
     var tests = new TestIssue13582_tests[]{
         new(dir, realDir),
         new(linkToDir, realDir),
@@ -1406,12 +1462,12 @@ public static void TestIssue13582(ж<testing.T> Ꮡt) {
 
 // Issue 57905.
 public static void TestRelativeSymlinkToAbsolute(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
     // Not parallel: uses t.Chdir.
+
     @string tmpDir = Ꮡt.TempDir();
     Ꮡt.Chdir(tmpDir);
+
     // Create "link" in the current working directory as a symlink to an arbitrary
     // absolute path. On macOS, this path is likely to begin with a symlink
     // itself: generally either in /var (symlinked to "private/var") or /tmp
@@ -1422,6 +1478,7 @@ public static void TestRelativeSymlinkToAbsolute(ж<testing.T> Ꮡt) {
         }
     }
     Ꮡt.Logf(@"os.Symlink(%q, ""link"")"u8, tmpDir);
+
     var (p, err) = filepath.EvalSymlinks(linkˢ);
     if (err != default!) {
         Ꮡt.Fatalf(@"EvalSymlinks(""link""): %v"u8, err);
@@ -1471,12 +1528,14 @@ public static void TestAbs(ж<testing.T> Ꮡt) {
 
     @string root = Ꮡt.TempDir();
     Ꮡt.Chdir(root);
+
     foreach (var (_, dir) in absTestDirs) {
         var errΔ1 = os.Mkdir(dir, 511);
         if (errΔ1 != default!) {
             Ꮡt.Fatal(mkdirFailedˢ, errΔ1);
         }
     }
+
     // Make sure the global absTests slice is not
     // modified by multiple invocations of TestAbs.
     var tests = absTests;
@@ -1494,10 +1553,12 @@ public static void TestAbs(ж<testing.T> Ꮡt) {
         }
         tests = appendꓸꓸꓸ(slices.Clip<slice<@string>, @string>(tests), extra);
     }
+
     var err = os.Chdir(absTestDirs[0]);
     if (err != default!) {
         Ꮡt.Fatal(chdirFailedˢ, err);
     }
+
     foreach (var (_, vᴛ2) in tests) {
         var path = vᴛ2;
 
@@ -1507,6 +1568,7 @@ public static void TestAbs(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: %s"u8, path, errΔ2);
             continue;
         }
+
         (var abspath, errΔ2) = filepath.Abs(path);
         if (errΔ2 != default!) {
             Ꮡt.Errorf("Abs(%q) error: %v"u8, path, errΔ2);
@@ -1533,10 +1595,12 @@ public static void TestAbsEmptyString(ж<testing.T> Ꮡt) {
 
     @string root = Ꮡt.TempDir();
     Ꮡt.Chdir(root);
+
     var (info, err) = os.Stat(root);
     if (err != default!) {
         Ꮡt.Fatalf("%s: %s"u8, root, err);
     }
+
     (var abspath, err) = filepath.Abs(""u8);
     if (err != default!) {
         Ꮡt.Fatalf(@"Abs("""") error: %v"u8, err);
@@ -1557,7 +1621,6 @@ partial struct RelTests {
     internal @string root, path, want;
 }
 
-// can't do purely lexically
 internal static slice<RelTests> reltests = new RelTests[]{
     new("a/b"u8, "a/b"u8, "."u8),
     new("a/b/."u8, "a/b"u8, "."u8),
@@ -1593,6 +1656,8 @@ internal static slice<RelTests> reltests = new RelTests[]{
     new("/../../a/b"u8, "/../../a/b/c/d"u8, "c/d"u8),
     new("."u8, "a/b"u8, "a/b"u8),
     new("."u8, ".."u8, ".."u8),
+
+    // can't do purely lexically
     new(".."u8, "."u8, "err"u8),
     new(".."u8, "a"u8, "err"u8),
     new("../.."u8, ".."u8, "err"u8),
@@ -1743,6 +1808,7 @@ public static void TestBug3486(ж<testing.T> Ꮡt) {
         if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);
         }
+
         var exprᴛ1 = pth;
         if (exprᴛ1 == utf16) {
             seenUTF16 = true;
@@ -1754,7 +1820,6 @@ public static void TestBug3486(ж<testing.T> Ꮡt) {
             }
             seenUTF8 = true;
         }
-
         return default!;
     });
     if (err != default!) {
@@ -1768,10 +1833,12 @@ public static void TestBug3486(ж<testing.T> Ꮡt) {
 internal static void testWalkSymlink(ж<testing.T> Ꮡt, Func<@string, @string, error> mklink) {
     @string tmpdir = Ꮡt.TempDir();
     Ꮡt.Chdir(tmpdir);
+
     var err = mklink(tmpdir, linkˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var visited = ref heap<slice<@string>>(out var Ꮡvisited);
     err = filepath.Walk(tmpdir, (@string path, fs.FileInfo info, error errΔ1) => {
         if (errΔ1 != default!) {
@@ -1804,12 +1871,14 @@ internal static readonly @string fileTxtˢ = "file.txt"u8;
 
 public static void TestIssue29372(ж<testing.T> Ꮡt) {
     @string tmpDir = Ꮡt.TempDir();
+
     @string path = filepath.Join(tmpDir, fileTxtˢ);
     var err = os.WriteFile(path, default!, 420);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    @string pathSeparator = ((@string)(rune)filepath.Separator);
+
+    @string pathSeparator = (@string)(rune)filepath.Separator;
     var tests = new @string[]{
         path + strings.Repeat(pathSeparator, 1),
         path + strings.Repeat(pathSeparator, 2),
@@ -1818,6 +1887,7 @@ public static void TestIssue29372(ж<testing.T> Ꮡt) {
         path + strings.Repeat(pathSeparator, 1) + ".."u8,
         path + strings.Repeat(pathSeparator, 2) + ".."u8
     }.slice();
+
     foreach (var (i, test) in tests) {
         (_, err) = filepath.EvalSymlinks(test);
         if (!AreEqual(err, syscall.ENOTDIR)) {
@@ -1829,12 +1899,16 @@ public static void TestIssue29372(ж<testing.T> Ꮡt) {
 // Issue 30520 part 1.
 public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+
     Ꮡt.Parallel();
+
     @string tmpDir = Ꮡt.TempDir();
+
     var (evalTmpDir, err) = filepath.EvalSymlinks(tmpDir);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     {
         var errΔ1 = os.Mkdir(filepath.Join(evalTmpDir, "a"), 511); if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);
@@ -1850,22 +1924,25 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ3);
         }
     }
+
     // Count the number of ".." elements to get to the root directory.
     @string vol = filepath.VolumeName(evalTmpDir);
-    nint c = strings.Count(evalTmpDir.slice(len(vol)), ((@string)(rune)os.PathSeparator));
+    nint c = strings.Count(evalTmpDir.slice(len(vol)), (@string)(rune)os.PathSeparator);
     slice<@string> dd = default!;
     for (nint i = 0; i < c + 2; i++) {
         dd = append(dd, ".."u8);
     }
-    @string wantSuffix = strings.Join(new @string[]{"a"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
+
+    @string wantSuffix = strings.Join(new @string[]{"a"u8, "file"u8}.slice(), (@string)(rune)os.PathSeparator);
+
     // Try different numbers of "..".
     foreach (var (_, i) in new nint[]{c, c + 1, c + 2}.slice()) {
-        @string check = strings.Join(new @string[]{evalTmpDir, strings.Join(dd.slice(0, i), ((@string)(rune)os.PathSeparator)), evalTmpDir.slice(len(vol) + 1), "b"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
+        @string check = strings.Join(new @string[]{evalTmpDir, strings.Join(dd.slice(0, i), (@string)(rune)os.PathSeparator), evalTmpDir.slice(len(vol) + 1), "b"u8, "file"u8}.slice(), (@string)(rune)os.PathSeparator);
         var (resolved, errΔ4) = filepath.EvalSymlinks(check);
         switch (ᐧ) {
         case {} when runtime.GOOS == "darwin"u8 && errors.Is(errΔ4, fs.ErrNotExist): {
-            testenv.SkipFlaky(new filepath_test_package.testing_TжTB(Ꮡt), // On darwin, the temp dir is sometimes cleaned up mid-test (issue 37910).
- 37910);
+            // On darwin, the temp dir is sometimes cleaned up mid-test (issue 37910).
+            testenv.SkipFlaky(new filepath_test_package.testing_TжTB(Ꮡt), 37910);
             break;
         }
         case {} when errΔ4 != default!: {
@@ -1880,7 +1957,6 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
             Ꮡt.Logf("EvalSymlinks(%q) = %q"u8, check, resolved);
             break;
         }}
-
     }
 }
 
@@ -1888,6 +1964,7 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
 public static void TestEvalSymlinksAboveRootChdir(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Chdir(Ꮡt.TempDir());
+
     @string subdir = filepath.Join("a"u8, "b");
     {
         var err = os.MkdirAll(subdir, 511); if (err != default!) {
@@ -1904,6 +1981,7 @@ public static void TestEvalSymlinksAboveRootChdir(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     subdir = filepath.Join("d"u8, "e", "f");
     {
         var err = os.MkdirAll(subdir, 511); if (err != default!) {
@@ -1915,6 +1993,7 @@ public static void TestEvalSymlinksAboveRootChdir(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     @string check = filepath.Join(".."u8, "..", "..", "c", fileˢ);
     @string wantSuffix = filepath.Join("a"u8, "b", fileˢ);
     {
@@ -1950,7 +2029,7 @@ public static void TestIssue51617(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
-        defer(os.Chmod, bad, (fs.FileMode)(448), ref ᒐ); // avoid errors on cleanup
+        defer(os.Chmod, bad, (fs.FileMode)448, ref ᒐ); // avoid errors on cleanup
         ref var saw = ref heap<slice<@string>>(out var Ꮡsaw);
         var err = filepath.WalkDir(dir, error (@string path, fs.DirEntry d, error errΔ3) => {
             if (errΔ3 != default!) {
@@ -1980,6 +2059,7 @@ public static void TestIssue51617(ж<testing.T> Ꮡt) {
 public static void TestEscaping(ж<testing.T> Ꮡt) {
     @string dir = Ꮡt.TempDir();
     Ꮡt.Chdir(Ꮡt.TempDir());
+
     foreach (var (_, p) in new @string[]{
         filepath.Join(dir, "x")
     }.slice()) {

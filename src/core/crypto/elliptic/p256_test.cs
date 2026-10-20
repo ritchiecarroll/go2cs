@@ -36,6 +36,7 @@ internal static slice<scalarMultTest> p256MultTests = new scalarMultTest[]{
 public static void TestP256BaseMult(ж<testing.T> Ꮡt) {
     var p256 = P256();
     var p256Generic = genericParamsForCurve(p256);
+
     var scalars = new slice<ж<bigꓸInt>>(0, len(p224BaseMultTests) + 1);
     foreach (var (_, e) in p224BaseMultTests) {
         var (kΔ1, _) = @new<bigꓸInt>().SetString(e.k, 10);
@@ -44,12 +45,14 @@ public static void TestP256BaseMult(ж<testing.T> Ꮡt) {
     var k = @new<bigꓸInt>().SetInt64(1);
     k.Lsh(k, 500);
     scalars = append(scalars, k);
+
     foreach (var (i, kΔ2) in scalars) {
         var (x, y) = p256.ScalarBaseMult(kΔ2.Bytes());
         var (x2, y2) = p256Generic.ScalarBaseMult(kΔ2.Bytes());
         if (x.Cmp(x2) != 0 || y.Cmp(y2) != 0) {
             Ꮡt.Errorf("#%d: got (%x, %x), want (%x, %x)"u8, i, x.OrTypedNil(), y.OrTypedNil(), x2.OrTypedNil(), y2.OrTypedNil());
         }
+
         if (testing.Short() && i > 5) {
             break;
         }
@@ -64,6 +67,7 @@ public static void TestP256Mult(ж<testing.T> Ꮡt) {
         var (k, _) = @new<bigꓸInt>().SetString(e.k, 16);
         var (expectedX, _) = @new<bigꓸInt>().SetString(e.xOut, 16);
         var (expectedY, _) = @new<bigꓸInt>().SetString(e.yOut, 16);
+
         var (xx, yy) = p256.ScalarMult(x, y, k.Bytes());
         if (xx.Cmp(expectedX) != 0 || yy.Cmp(expectedY) != 0) {
             Ꮡt.Errorf("#%d: got (%x, %x), want (%x, %x)"u8, i, xx.OrTypedNil(), yy.OrTypedNil(), expectedX.OrTypedNil(), expectedY.OrTypedNil());
@@ -92,34 +96,41 @@ public static void TestP256CombinedMult(ж<testing.T> Ꮡt) {
     if (!ok) {
         p256 = new elliptic_internal_test_package.synthCombinedMultжTestP256CombinedMult_combinedMult(Ꮡ(new synthCombinedMult(P256())));
     }
+
     var gx = p256.Params().Value.Gx;
     var gy = p256.Params().Value.Gy;
+
     var zero = new slice<byte>(32);
     var one = new slice<byte>(32);
     one[31] = 1;
     var two = new slice<byte>(32);
     two[31] = 2;
+
     // 0×G + 0×G = ∞
     var (x, y) = p256.CombinedMult(gx, gy, zero, zero);
     if (x.Sign() != 0 || y.Sign() != 0) {
         Ꮡt.Errorf("0×G + 0×G = (%d, %d), should be ∞"u8, x.OrTypedNil(), y.OrTypedNil());
     }
+
     // 1×G + 0×G = G
     (x, y) = p256.CombinedMult(gx, gy, one, zero);
     if (x.Cmp(gx) != 0 || y.Cmp(gy) != 0) {
         Ꮡt.Errorf("1×G + 0×G = (%d, %d), should be (%d, %d)"u8, x.OrTypedNil(), y.OrTypedNil(), gx.OrTypedNil(), gy.OrTypedNil());
     }
+
     // 0×G + 1×G = G
     (x, y) = p256.CombinedMult(gx, gy, zero, one);
     if (x.Cmp(gx) != 0 || y.Cmp(gy) != 0) {
         Ꮡt.Errorf("0×G + 1×G = (%d, %d), should be (%d, %d)"u8, x.OrTypedNil(), y.OrTypedNil(), gx.OrTypedNil(), gy.OrTypedNil());
     }
+
     // 1×G + 1×G = 2×G
     (x, y) = p256.CombinedMult(gx, gy, one, one);
     var (ggx, ggy) = p256.ScalarBaseMult(two);
     if (x.Cmp(ggx) != 0 || y.Cmp(ggy) != 0) {
         Ꮡt.Errorf("1×G + 1×G = (%d, %d), should be (%d, %d)"u8, x.OrTypedNil(), y.OrTypedNil(), ggx.OrTypedNil(), ggy.OrTypedNil());
     }
+
     var minusOne = @new<bigꓸInt>().Sub((~p256.Params()).N, big.NewInt(1));
     // 1×G + (-1)×G = ∞
     (x, y) = p256.CombinedMult(gx, gy, one, minusOne.Bytes());

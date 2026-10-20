@@ -24,22 +24,27 @@ internal static void Main() {
     fmt.Println(f(c, 2));
     var cv = c.Value;
     fmt.Println(cv.get());
+
     var g = ((Func<counter, nint>)(get));
     fmt.Println(g(c.Value));
+
     nint apply(Func<ж<counter>, nint, nint> fn, ж<counter> @base, nint dΔ1) => fn(@base, dΔ1);
     fmt.Println(apply(((Func<ж<counter>, nint, nint>)(add)), c, 3));
     fmt.Println(g(c.Value));
+
     Func<nint, nint> bump = c.add;
     fmt.Println(bump(4));
     fmt.Println(bump(1));
     fmt.Println(g(c.Value));
+
     dispatcher d = default!;
     var recvʗ1 = new reader(readTen);
     d.compute = (nint p1) => recvʗ1.sum(p1);
     fmt.Println(d.compute(3));
+
     var sh = new shifter(delta: 2);
     var shʗ1 = sh;
-    fmt.Println(((@string)mapRunes((rune p1) => shʗ1.shift(p1), slice<rune>((@string)"AB"))));
+    fmt.Println((@string)mapRunes((rune p1) => shʗ1.shift(p1), slice<rune>((@string)"AB")));
 }
 
 partial struct shifter {

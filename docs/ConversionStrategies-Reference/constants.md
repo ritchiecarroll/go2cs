@@ -410,6 +410,44 @@ guard over the trigonometric reduction at 2^63, 2^64 and 1e300; `UntypedFloatTyp
 comparison cast (float32 and 64-bit integer operands, with arithmetic, literal, computed-constant and
 float64 controls).
 
+## Arithmetic around a named untyped integer constant that leaves int64 folds to Go's value
+Go evaluates a constant expression exactly, at compile time, in arbitrary precision. A named untyped
+integer constant renders as golib's `UntypedInt`, whose operators run at RUN time on an `int64`: they
+wrap `+ - *`, truncate `/` and `%` on the signed bits, and mask a shift count to six bits. Most constant
+arithmetic never leaves int64, or wraps back to Go's bits (`maxUint64 - 1`), and keeps its operators.
+When the int64 evaluation reaches a different value than Go's constant, the converter emits Go's value
+with the Go text beside it, typed to the expression the way the float-operand fold above types it:
+
+```go
+const maxUint64 = 1<<64 - 1
+var quotients = [3]uint64{maxUint64 / 5, maxUint64 / 5 / 5, maxUint64/10 + 1}
+
+const div1e8m = 0xc767074b22e90e21
+_ = assert[(div1e8m*5*5*5*5*5*5*5*5)%(1<<64)-1]  // a compile-time assert: the index is 0
+```
+```csharp
+internal static array<uint64> quotients = new uint64[]{/* maxUint64 / 5 */ 3689348814741910323UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL, /* maxUint64/10 + 1 */ 1844674407370955162UL}.array();
+
+_ = assert[(nint)(/* (div1e8m*5*5*5*5*5*5*5*5)%(1<<64) - 1 */ 0L)];
+```
+
+- **What it cost.** Go 1.26's `internal/strconv` writes both shapes. As `UntypedInt` arithmetic,
+  `maxUint64 / 5` was `-1 / 5`, which is 0, and `1 << 64` was 1, so the assert's index was -1. The
+  shortest float formatter (`dboxFtoa64` → `trimZeros`) runs that assert, so every `%v` of a `float64`
+  that reached it panicked with `index out of range [-1]`.
+- **The decision is a model, not a spelling.** `untypedIntEvaluationDiffers` evaluates the expression
+  with `UntypedInt`'s own operator semantics over the exact values go/types records, and compares the
+  low 64 bits with Go's constant. It runs only where the expression names an untyped integer constant,
+  because that is what makes the arithmetic around it `UntypedInt`. Literal-only arithmetic is already
+  folded where C# would overflow, and arithmetic over typed operands runs in the operand's own C# type.
+- **Readability.** A folded site keeps its Go expression in the comment. An expression whose int64
+  evaluation is already right keeps its operators, so the fold appears only where the operators would
+  compute the wrong number.
+
+Guarded by `TestUntypedIntArithmeticThatLeavesInt64FoldsToGoValue` (converter: the quotient, the assert,
+and the wrap-equal and in-range controls) and the `UntypedIntExactConstArithmetic` behavioral project
+(the quotient table, a named-type mask table, `trimZeros`' four asserts, and shortest float output).
+
 ---
 
 [← Compiled Library versus Source Code](compiled-library-vs-source.md) · [Index](README.md) · [Native and Narrow Integer Types →](native-and-narrow-integers.md)

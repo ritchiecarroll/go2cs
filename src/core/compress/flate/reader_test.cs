@@ -20,16 +20,15 @@ public static void TestNlitOutOfRange(ж<testing.T> Ꮡt) {
         ((@string)(new byte[]{0xfc, 0xfe, 0x36, 0xe7, 0x5e, 0x1c, 0xef, 0xb3, 0x55, 0x58, 0x77, 0xb6, 0x56, 0xb5, 0x43, 0xf4})) + ((@string)(new byte[]{0x6f, 0xf2, 0xd2, 0xe6, 0x3d, 0x99, 0xa0, 0x85, 0x8c, 0x48, 0xeb, 0xf8, 0xda, 0x83, 0x04, 0x2a})) + ((@string)(new byte[]{0x75, 0xc4, 0xf8, 0x0f, 0x12, 0x11, 0xb9, 0xb4, 0x4b, 0x09, 0xa0, 0xbe, 0x8b, 0x91, 0x4c}))))));
 }
 
-// Digits is the digits of the irrational number e. Its decimal representation
-// does not repeat, but there are only 10 possible digits, so it should be
-// reasonably compressible.
-// Newton is Isaac Newtons's educational text on Opticks.
-
 partial struct suitesᴛ1 /*dyn*/ {
     internal @string name, @file;
 }
 internal static slice<suitesᴛ1> suites = new suitesᴛ1[]{
+    // Digits is the digits of the irrational number e. Its decimal representation
+    // does not repeat, but there are only 10 possible digits, so it should be
+    // reasonably compressible.
     new("Digits"u8, "../testdata/e.txt"u8),
+    // Newton is Isaac Newtons's educational text on Opticks.
     new("Newton"u8, "../../testdata/Isaac.Newton-Opticks.txt"u8)
 }.slice();
 
@@ -38,6 +37,7 @@ public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
         bΔ1.ReportAllocs();
         bΔ1.StopTimer();
         bΔ1.SetBytes((int64)n);
+
         var compressed = @new<bytes.Buffer>();
         var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(compressed), level);
         if (err != default!) {
@@ -60,7 +60,6 @@ public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
     });
 }
 
-
 partial struct levelTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint level;
@@ -71,7 +70,6 @@ internal static slice<levelTestsᴛ1> levelTests = new levelTestsᴛ1[]{
     new("Default"u8, DefaultCompression),
     new("Compression"u8, BestCompression)
 }.slice();
-
 
 partial struct sizesᴛ1 /*dyn*/ {
     internal @string name;

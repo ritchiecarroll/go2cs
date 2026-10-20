@@ -39,12 +39,11 @@ internal static readonly @string valueRegMethodSpillPtrˢ = "ValueRegMethodSpill
 public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Enable register-based reflect.Call and ensure we don't
         // use potentially incorrect cached versions by clearing
         // the cache before we start and after we're done.
         defer(ᴛ1 => reflect_internal_test_package.SetArgRegs(ᴛ1.Item1, ᴛ1.Item2, ᴛ1.Item3), reflect_internal_test_package.SetArgRegs(abi.IntArgRegs, abi.FloatArgRegs, abi.EffectiveFloatRegSize), ref ᒐ);
+
         // This test is simple. Calling a method value involves
         // pretty much just plumbing whatever arguments in whichever
         // location through to reflectcall. They're already set up
@@ -56,6 +55,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             var v = Δreflect.ValueOf(sΔ1.OrTypedNil()).MethodByName(method);
             return (sΔ1, v.Interface());
         }
+
         var a0 = new StructFewRegs(
             10, 11, 12, 13,
             20.0D, 21.0D, 22.0D, 23.0D
@@ -65,6 +65,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             1, 2, 3, 4, 5, 6, 7, 8, 9,
             1.0D, 2.0D, 3.0D, 4.0D, 5.0D, 6.0D, 7.0D, 8.0D, 9.0D, 10.0D, 11.0D, 12.0D, 13.0D, 14.0D, 15.0D
         );
+
         var (s, i) = makeMethodValue(allRegsCallˢ);
         var f0 = i._<Func<StructFewRegs, MagicLastTypeNameForTestingRegisterABI, StructFewRegs>>();
         var r0 = f0(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -72,8 +73,9 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r0, a0);
         }
         if ((~s).Value != 1) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(1));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)1);
         }
+
         (s, i) = makeMethodValue(regsAndStackCallˢ);
         var f1 = i._<Func<StructFewRegs, array<uint64>, MagicLastTypeNameForTestingRegisterABI, (StructFewRegs, array<uint64>)>>();
         (r0, var r1) = f1(a0, a1, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -84,8 +86,9 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r1, a1);
         }
         if ((~s).Value != 2) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(2));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)2);
         }
+
         (s, i) = makeMethodValue(spillStructCallˢ);
         var f2 = i._<Func<StructFillRegs, MagicLastTypeNameForTestingRegisterABI, StructFillRegs>>();
         var r2 = f2(a2, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -93,8 +96,9 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r2, a2);
         }
         if ((~s).Value != 3) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(3));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)3);
         }
+
         (s, i) = makeMethodValue(valueRegMethodSpillIntˢ);
         var f3 = i._<Func<StructFillRegs, nint, MagicLastTypeNameForTestingRegisterABI, (StructFillRegs, nint)>>();
         var (r3a, r3b) = f3(a2, 42, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -102,11 +106,12 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3a, a2);
         }
         if (r3b != 42) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3b, (nint)(42));
+            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3b, (nint)42);
         }
         if ((~s).Value != 4) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(4));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)4);
         }
+
         (s, i) = makeMethodValue(valueRegMethodSpillPtrˢ);
         var f4 = i._<Func<StructFillRegs, ж<byte>, MagicLastTypeNameForTestingRegisterABI, (StructFillRegs, ж<byte>)>>();
         ref var vb = ref heap<byte>(out var Ꮡvb);
@@ -119,7 +124,7 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r4b.OrTypedNil(), Ꮡvb);
         }
         if ((~s).Value != 5) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)(5));
+            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)5);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -174,12 +179,11 @@ public static (StructFillRegs, ж<byte>) ValueRegMethodSpillPtr(this ref StructW
 public static void TestReflectCallABI(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Enable register-based reflect.Call and ensure we don't
         // use potentially incorrect cached versions by clearing
         // the cache before we start and after we're done.
         defer(ᴛ1 => reflect_internal_test_package.SetArgRegs(ᴛ1.Item1, ᴛ1.Item2, ᴛ1.Item3), reflect_internal_test_package.SetArgRegs(abi.IntArgRegs, abi.FloatArgRegs, abi.EffectiveFloatRegSize), ref ᒐ);
+
         // Execute the functions defined below which all have the
         // same form and perform the same function: pass all arguments
         // to return values. The purpose is to test the call boundary
@@ -223,12 +227,11 @@ internal static readonly @string onlyPointerInRegisterGCˢ = "OnlyPointerInRegis
 public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Enable register-based reflect.MakeFunc and ensure we don't
         // use potentially incorrect cached versions by clearing
         // the cache before we start and after we're done.
         defer(ᴛ1 => reflect_internal_test_package.SetArgRegs(ᴛ1.Item1, ᴛ1.Item2, ᴛ1.Item3), reflect_internal_test_package.SetArgRegs(abi.IntArgRegs, abi.FloatArgRegs, abi.EffectiveFloatRegSize), ref ᒐ);
+
         // Execute the functions defined below which all have the
         // same form and perform the same function: pass all arguments
         // to return values. The purpose is to test the call boundary
@@ -279,13 +282,16 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
                 return args[..1];
             });
             var fn = mkfn.Interface()._<Func<ж<uint64>, MagicLastTypeNameForTestingRegisterABI, ж<uint64>>>();
+
             // Call the MakeFunc'd function while trying pass the only pointer
             // to a new heap-allocated uint64.
             reflect_internal_test_package.CallGC.Value = true;
             var x = fn(@new<uint64>(), new MagicLastTypeNameForTestingRegisterABI(nil));
             reflect_internal_test_package.CallGC.Value = false;
+
             // Check for bad pointers (which should be x if things went wrong).
             Δruntime.GC();
+
             // Sanity check x.
             if (x.Value != 5) {
                 tΔ2.Fatalf("failed to set value in object"u8);
@@ -296,9 +302,6 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-// TODO(mknyszek): Test passing interface values.
-// TODO(mknyszek): Test passing unsafe.Pointer values.
-// TODO(mknyszek): Test passing chan values.
 internal static slice<any> abiCallTestCases = new any[]{
     passNone,
     passInt,
@@ -321,6 +324,7 @@ internal static slice<any> abiCallTestCases = new any[]{
     passArray,
     passArray1Mix,
     passString,
+    // TODO(mknyszek): Test passing interface values.
     passSlice,
     passPointer,
     passStruct1,
@@ -333,6 +337,8 @@ internal static slice<any> abiCallTestCases = new any[]{
     passStruct8,
     passStruct9,
     passStruct10,
+    // TODO(mknyszek): Test passing unsafe.Pointer values.
+    // TODO(mknyszek): Test passing chan values.
     passStruct11,
     passStruct12,
     passStruct13,
@@ -607,9 +613,6 @@ internal static partial (Struct10, byte, nuint) passStruct10AndSmall(Struct10 a,
     return (a, b, c);
 }
 
-// TODO(mknyszek): Test callArgsing interface values.
-// TODO(mknyszek): Test callArgsing unsafe.Pointer values.
-// TODO(mknyszek): Test callArgsing chan values.
 internal static slice<any> abiMakeFuncTestCases = new any[]{
     callArgsNone,
     callArgsInt,
@@ -632,6 +635,7 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
     callArgsArray,
     callArgsArray1Mix,
     callArgsString,
+    // TODO(mknyszek): Test callArgsing interface values.
     callArgsSlice,
     callArgsPointer,
     callArgsStruct1,
@@ -644,6 +648,8 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
     callArgsStruct8,
     callArgsStruct9,
     callArgsStruct10,
+    // TODO(mknyszek): Test callArgsing unsafe.Pointer values.
+    // TODO(mknyszek): Test callArgsing chan values.
     callArgsStruct11,
     callArgsStruct12,
     callArgsStruct13,

@@ -164,11 +164,13 @@ internal static void testEquivalents<P>(ж<testing.T> Ꮡt, Func<P> newPoint, el
     where P : nistPoint<P>
 {
     var p = newPoint().SetGenerator();
+
     nint elementSize = ((~c.Params()).BitSize + 7) / 8;
     var two = new slice<byte>(elementSize);
     two[len(two) - 1] = 2;
     var nPlusTwo = new slice<byte>(elementSize);
     @new<bigꓸInt>().Add((~c.Params()).N, big.NewInt(2)).FillBytes(nPlusTwo);
+
     var p1 = newPoint().Double(p);
     var p2 = newPoint().Add(p, p);
     var (p3, err) = newPoint().ScalarMult(p, two);
@@ -179,6 +181,7 @@ internal static void testEquivalents<P>(ж<testing.T> Ꮡt, Func<P> newPoint, el
     fatalIfErr(Ꮡt, err);
     (var p6, err) = newPoint().ScalarBaseMult(nPlusTwo);
     fatalIfErr(Ꮡt, err);
+
     if (!bytes.Equal(p1.Bytes(), p2.Bytes())) {
         Ꮡt.Error(pP2Pˢ);
     }
@@ -231,6 +234,7 @@ internal static void testScalarMult<P>(ж<testing.T> Ꮡt, Func<P> newPoint, ell
         if (!bytes.Equal(p1.Bytes(), p2.Bytes())) {
             tΔ1.Error(kGScalarBaseMultKˢ);
         }
+
         var expectInfinity = @new<bigꓸInt>().Mod(@new<bigꓸInt>().SetBytes(scalar), (~c.Params()).N).Sign() == 0;
         if (expectInfinity){
             if (!bytes.Equal(p1.Bytes(), newPoint().Bytes())) {
@@ -247,6 +251,7 @@ internal static void testScalarMult<P>(ж<testing.T> Ꮡt, Func<P> newPoint, ell
                 tΔ1.Error((@string)"[k]G == ∞"u8);
             }
         }
+
         var d = @new<bigꓸInt>().SetBytes(scalar);
         d.Sub((~c.Params()).N, d);
         d.Mod(d, (~c.Params()).N);
@@ -257,6 +262,7 @@ internal static void testScalarMult<P>(ж<testing.T> Ꮡt, Func<P> newPoint, ell
             tΔ1.Error(nKGKGˢ);
         }
     }
+
     nint byteLen = len((~c.Params()).N.Bytes());
     nint bitLen = (~c.Params()).N.BitLen();
     var checkScalarʗ1 = checkScalar;

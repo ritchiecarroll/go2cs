@@ -53,37 +53,26 @@ internal partial struct conversionTest {
 // Target variables for scanning into.
 internal static ж<@string> Ꮡscanstr = new StandardBox<@string>(default(@string));
 internal static ref @string scanstr => ref Ꮡscanstr.Value;
-
 internal static ж<slice<byte>> Ꮡscanbytes = new StandardBox<slice<byte>>(default(slice<byte>));
 internal static ref slice<byte> scanbytes => ref Ꮡscanbytes.ValueSlot;
-
 internal static ж<global::go.database.sql_package.RawBytes> Ꮡscanraw = new StandardBox<global::go.database.sql_package.RawBytes>(default(global::go.database.sql_package.RawBytes));
 internal static ref global::go.database.sql_package.RawBytes scanraw => ref Ꮡscanraw.ValueSlot;
-
 internal static ж<nint> Ꮡscanint = new StandardBox<nint>(default(nint));
 internal static ref nint scanint => ref Ꮡscanint.Value;
-
 internal static ж<uint8> Ꮡscanuint8 = new StandardBox<uint8>(default(uint8));
 internal static ref uint8 scanuint8 => ref Ꮡscanuint8.Value;
-
 internal static ж<uint16> Ꮡscanuint16 = new StandardBox<uint16>(default(uint16));
 internal static ref uint16 scanuint16 => ref Ꮡscanuint16.Value;
-
 internal static ж<bool> Ꮡscanbool = new StandardBox<bool>(default(bool));
 internal static ref bool scanbool => ref Ꮡscanbool.Value;
-
 internal static ж<float32> Ꮡscanf32 = new StandardBox<float32>(default(float32));
 internal static ref float32 scanf32 => ref Ꮡscanf32.Value;
-
 internal static ж<float64> Ꮡscanf64 = new StandardBox<float64>(default(float64));
 internal static ref float64 scanf64 => ref Ꮡscanf64.Value;
-
 internal static ж<time.Time> Ꮡscantime = new StandardBox<time.Time>(default(time.Time));
 internal static ref time.Time scantime => ref Ꮡscantime.Value;
-
 internal static ж<ж<int64>> Ꮡscanptr = new StandardBox<ж<int64>>(default(ж<int64>));
 internal static ref ж<int64> scanptr => ref Ꮡscanptr.ValueSlot;
-
 internal static ж<any> Ꮡscaniface = new StandardBox<any>(default(any));
 internal static ref any scaniface => ref Ꮡscaniface.ValueSlot;
 
@@ -92,110 +81,124 @@ internal static readonly @string hereˢ = "here"u8;
 
 internal static slice<conversionTest> conversionTests() {
     // Return a fresh instance to test so "go test -count 2" works correctly.
-    return new conversionTest[]{ // Exact conversions (destination pointer type matches source type)
-
+    return new conversionTest[]{
+        // Exact conversions (destination pointer type matches source type)
         new(s: (@string)"foo"u8, d: Ꮡscanstr, wantstr: "foo"u8),
-        new(s: (nint)(123), d: Ꮡscanint, wantint: 123),
-        new(s: someTime, d: Ꮡscantime, wanttime: someTime), // To strings
+        new(s: (nint)123, d: Ꮡscanint, wantint: 123),
+        new(s: someTime, d: Ꮡscantime, wanttime: someTime),
 
+        // To strings
         new(s: (@string)"string"u8, d: Ꮡscanstr, wantstr: "string"u8),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscanstr, wantstr: "byteslice"u8),
-        new(s: (nint)(123), d: Ꮡscanstr, wantstr: "123"u8),
+        new(s: (nint)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (int8)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (int64)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (uint8)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (uint16)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (uint32)123, d: Ꮡscanstr, wantstr: "123"u8),
         new(s: (uint64)123, d: Ꮡscanstr, wantstr: "123"u8),
-        new(s: 1.5D, d: Ꮡscanstr, wantstr: "1.5"u8), // From time.Time:
+        new(s: 1.5D, d: Ꮡscanstr, wantstr: "1.5"u8),
 
+        // From time.Time:
         new(s: time.Unix(1, 0).UTC(), d: Ꮡscanstr, wantstr: "1970-01-01T00:00:01Z"u8),
         new(s: time.Unix(1453874597, 0).In(time.FixedZone(hereˢ, -3600 * 8)), d: Ꮡscanstr, wantstr: "2016-01-26T22:03:17-08:00"u8),
         new(s: time.Unix(1, 2).UTC(), d: Ꮡscanstr, wantstr: "1970-01-01T00:00:01.000000002Z"u8),
         new(s: new time.Time(nil), d: Ꮡscanstr, wantstr: "0001-01-01T00:00:00Z"u8),
         new(s: time.Unix(1, 2).UTC(), d: Ꮡscanbytes, wantbytes: slice<byte>("1970-01-01T00:00:01.000000002Z"u8)),
-        new(s: time.Unix(1, 2).UTC(), d: Ꮡscaniface, wantiface: time.Unix(1, 2).UTC()), // To []byte
+        new(s: time.Unix(1, 2).UTC(), d: Ꮡscaniface, wantiface: time.Unix(1, 2).UTC()),
 
+        // To []byte
         new(s: default!, d: Ꮡscanbytes, wantbytes: default!),
         new(s: (@string)"string"u8, d: Ꮡscanbytes, wantbytes: slice<byte>("string"u8)),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscanbytes, wantbytes: slice<byte>("byteslice"u8)),
-        new(s: (nint)(123), d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
+        new(s: (nint)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (int8)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (int64)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (uint8)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (uint16)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (uint32)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
         new(s: (uint64)123, d: Ꮡscanbytes, wantbytes: slice<byte>("123"u8)),
-        new(s: 1.5D, d: Ꮡscanbytes, wantbytes: slice<byte>("1.5"u8)), // To RawBytes
+        new(s: 1.5D, d: Ꮡscanbytes, wantbytes: slice<byte>("1.5"u8)),
 
+        // To RawBytes
         new(s: default!, d: Ꮡscanraw, wantraw: default!),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"byteslice"u8))),
         new(s: (@string)"string"u8, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"string"u8))),
-        new(s: (nint)(123), d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
+        new(s: (nint)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (int8)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (int64)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (uint8)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (uint16)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (uint32)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
         new(s: (uint64)123, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"123"u8))),
-        new(s: 1.5D, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"1.5"u8))), // time.Time has been placed here to check that the RawBytes slice gets
- // correctly reset when calling time.Time.AppendFormat.
+        new(s: 1.5D, d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"1.5"u8))),
+        // time.Time has been placed here to check that the RawBytes slice gets
+        // correctly reset when calling time.Time.AppendFormat.
+        new(s: time.Unix(2, 5).UTC(), d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"1970-01-01T00:00:02.000000005Z"u8))),
 
-        new(s: time.Unix(2, 5).UTC(), d: Ꮡscanraw, wantraw: ((global::go.database.sql_package.RawBytes)slice<byte>((@string)"1970-01-01T00:00:02.000000005Z"u8))), // Strings to integers
-
+        // Strings to integers
         new(s: (@string)"255"u8, d: Ꮡscanuint8, wantuint: 255),
         new(s: (@string)"256"u8, d: Ꮡscanuint8, wanterr: "converting driver.Value type string (\"256\") to a uint8: value out of range"u8),
         new(s: (@string)"256"u8, d: Ꮡscanuint16, wantuint: 256),
         new(s: (@string)"-1"u8, d: Ꮡscanint, wantint: -1),
-        new(s: (@string)"foo"u8, d: Ꮡscanint, wanterr: "converting driver.Value type string (\"foo\") to a int: invalid syntax"u8), // int64 to smaller integers
+        new(s: (@string)"foo"u8, d: Ꮡscanint, wanterr: "converting driver.Value type string (\"foo\") to a int: invalid syntax"u8),
 
+        // int64 to smaller integers
         new(s: (int64)5, d: Ꮡscanuint8, wantuint: 5),
         new(s: (int64)256, d: Ꮡscanuint8, wanterr: "converting driver.Value type int64 (\"256\") to a uint8: value out of range"u8),
         new(s: (int64)256, d: Ꮡscanuint16, wantuint: 256),
-        new(s: (int64)65536, d: Ꮡscanuint16, wanterr: "converting driver.Value type int64 (\"65536\") to a uint16: value out of range"u8), // True bools
+        new(s: (int64)65536, d: Ꮡscanuint16, wanterr: "converting driver.Value type int64 (\"65536\") to a uint16: value out of range"u8),
 
+        // True bools
         new(s: true, d: Ꮡscanbool, wantbool: true),
         new(s: (@string)"True"u8, d: Ꮡscanbool, wantbool: true),
         new(s: (@string)"TRUE"u8, d: Ꮡscanbool, wantbool: true),
         new(s: (@string)"1"u8, d: Ꮡscanbool, wantbool: true),
-        new(s: (nint)(1), d: Ꮡscanbool, wantbool: true),
+        new(s: (nint)1, d: Ꮡscanbool, wantbool: true),
         new(s: (int64)1, d: Ꮡscanbool, wantbool: true),
-        new(s: (uint16)1, d: Ꮡscanbool, wantbool: true), // False bools
+        new(s: (uint16)1, d: Ꮡscanbool, wantbool: true),
 
+        // False bools
         new(s: false, d: Ꮡscanbool, wantbool: false),
         new(s: (@string)"false"u8, d: Ꮡscanbool, wantbool: false),
         new(s: (@string)"FALSE"u8, d: Ꮡscanbool, wantbool: false),
         new(s: (@string)"0"u8, d: Ꮡscanbool, wantbool: false),
-        new(s: (nint)(0), d: Ꮡscanbool, wantbool: false),
+        new(s: (nint)0, d: Ꮡscanbool, wantbool: false),
         new(s: (int64)0, d: Ꮡscanbool, wantbool: false),
-        new(s: (uint16)0, d: Ꮡscanbool, wantbool: false), // Not bools
+        new(s: (uint16)0, d: Ꮡscanbool, wantbool: false),
 
+        // Not bools
         new(s: (@string)"yup"u8, d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert ""yup"" into type bool"u8),
-        new(s: (nint)(2), d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert 2 into type bool"u8), // Floats
+        new(s: (nint)2, d: Ꮡscanbool, wanterr: @"sql/driver: couldn't convert 2 into type bool"u8),
 
+        // Floats
         new(s: (float64)1.5D, d: Ꮡscanf64, wantf64: (float64)1.5D),
         new(s: (int64)1, d: Ꮡscanf64, wantf64: (float64)1D),
         new(s: (float64)1.5D, d: Ꮡscanf32, wantf32: (float32)1.5F),
         new(s: (@string)"1.5"u8, d: Ꮡscanf32, wantf32: (float32)1.5F),
-        new(s: (@string)"1.5"u8, d: Ꮡscanf64, wantf64: (float64)1.5D), // Pointers
+        new(s: (@string)"1.5"u8, d: Ꮡscanf64, wantf64: (float64)1.5D),
 
+        // Pointers
         new(s: ((any)default!), d: Ꮡscanptr, wantnil: true),
-        new(s: (int64)42, d: Ꮡscanptr, wantptr: Ꮡanswer), // To interface{}
+        new(s: (int64)42, d: Ꮡscanptr, wantptr: Ꮡanswer),
 
+        // To interface{}
         new(s: (float64)1.5D, d: Ꮡscaniface, wantiface: (float64)1.5D),
         new(s: (int64)1, d: Ꮡscaniface, wantiface: (int64)1),
         new(s: (@string)"str"u8, d: Ꮡscaniface, wantiface: (@string)"str"u8),
         new(s: slice<byte>("byteslice"u8), d: Ꮡscaniface, wantiface: slice<byte>("byteslice"u8)),
         new(s: true, d: Ꮡscaniface, wantiface: true),
         new(s: default!, d: Ꮡscaniface),
-        new(s: slice<byte>(default!), d: Ꮡscaniface, wantiface: slice<byte>(default!)), // To a user-defined type
+        new(s: slice<byte>(default!), d: Ꮡscaniface, wantiface: slice<byte>(default!)),
 
+        // To a user-defined type
         new(s: 1.5D, d: @new<userDefined>(), wantusrdef: 1.5D),
         new(s: (int64)123, d: @new<userDefined>(), wantusrdef: 123D),
         new(s: (@string)"1.5"u8, d: @new<userDefined>(), wantusrdef: 1.5D),
         new(s: new byte[]{1, 2, 3}.slice(), d: @new<userDefinedSlice>(), wanterr: @"unsupported Scan, storing driver.Value type []uint8 into type *sql.userDefinedSlice"u8),
-        new(s: (@string)"str"u8, d: @new<userDefinedString>(), wantusrstr: "str"u8), // Other errors
+        new(s: (@string)"str"u8, d: @new<userDefinedString>(), wantusrstr: "str"u8),
 
+        // Other errors
         new(s: complex(1D, 2D), d: Ꮡscanstr, wanterr: @"unsupported Scan, storing driver.Value type complex128 into type *string"u8)
     }.slice();
 }
@@ -392,6 +395,7 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
     if (asan.Enabled) {
         Ꮡt.Skip(testAllocatesMoreWithˢ);
     }
+
     ref var buf = ref heap<global::go.database.sql_package.RawBytes>(out var Ꮡbuf);
     var rows = Ꮡ(new Rows(nil));
     var rowsʗ1 = rows;
@@ -414,6 +418,7 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("%s: got %q (len %d); want %q (len %d)"u8, name, Ꮡbuf.ValueSlot, len(Ꮡbuf.ValueSlot), want, len(want));
         }
     }
+
     var rowsʗ2 = rows;
     var testʗ1 = test;
     var testsʗ1 = tests;
@@ -423,6 +428,7 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
             testʗ1(tt.name, tt.@in, tt.want);
         }
     });
+
     // The numbers below are only valid for 64-bit interface word sizes,
     // and gc. With 32-bit words there are more convT2E allocs, and
     // with gccgo, only pointers currently go in interface data.
@@ -436,6 +442,7 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
     if (n > 0.5D && measureAllocs) {
         Ꮡt.Fatalf("allocs = %v; want 0"u8, n);
     }
+
     // This one involves a convT2E allocation, string -> interface{}
     var testʗ2 = test;
     n = testing.AllocsPerRun(100, () => {
@@ -455,6 +462,7 @@ internal partial struct TestUserDefinedBytes_userDefinedBytes /*[]byte*/;
 public static void TestUserDefinedBytes(ж<testing.T> Ꮡt) {
     ref var u = ref heap<TestUserDefinedBytes_userDefinedBytes>(out var Ꮡu);
     var v = slice<byte>("foo"u8);
+
     convertAssign(Ꮡu, v);
     if (Ꮡ(u, 0) == Ꮡ(v, 0)) {
         Ꮡt.Fatal(userDefinedBytesGotˢ);
@@ -464,7 +472,7 @@ public static void TestUserDefinedBytes(ж<testing.T> Ꮡt) {
 public partial struct Valuer_V /*@string*/;
 
 public static (driverꓸValue, error) Value(this Valuer_V v) {
-    return (strings.ToUpper(((@string)v)), default!);
+    return (strings.ToUpper((@string)v), default!);
 }
 
 public partial struct Valuer_P /*@string*/;
@@ -478,7 +486,7 @@ public static (driverꓸValue, error) Value(this ж<Valuer_P> Ꮡp) {
     if (Ꮡp == nil) {
         return (nilToStrˢ, default!);
     }
-    return (strings.ToUpper(((@string)(p))), default!);
+    return (strings.ToUpper((@string)(p)), default!);
 }
 
 internal partial struct TestDriverArgs_tests /*dyn*/ {
@@ -492,7 +500,7 @@ public static void TestDriverArgs(ж<testing.T> Ꮡt) {
     ж<@string> nilStrPtr = default!;
     var tests = new slice<TestDriverArgs_tests>(5){
         [0] = new(
-            args: new any[]{((Valuer_V)(@string)fooˢ)}.slice(),
+            args: new any[]{(Valuer_V)(@string)fooˢ}.slice(),
             want: new driver.NamedValue[]{
                 new(
                     Ordinal: 1,
@@ -578,16 +586,17 @@ internal static error Compose(this ref dec d, byte form, bool negative, slice<by
     case 0: {
         break;
     }}
-
     d.form = form;
     d.neg = negative;
     d.exponent = exponent;
+
     // This isn't strictly correct, as the extra bytes could be all zero,
     // ignore this for this test.
     if (len(coefficient) > 16) {
         return fmt.Errorf("coefficient too large"u8);
     }
     copy(d.coefficient[..], coefficient);
+
     return default!;
 }
 
@@ -616,15 +625,16 @@ internal static error Compose(this ref decFinite d, byte form, bool negative, sl
     case 0: {
         break;
     }}
-
     d.neg = negative;
     d.exponent = exponent;
+
     // This isn't strictly correct, as the extra bytes could be all zero,
     // ignore this for this test.
     if (len(coefficient) > 16) {
         return fmt.Errorf("coefficient too large"u8);
     }
     copy(d.coefficient[..], coefficient);
+
     return default!;
 }
 
@@ -637,8 +647,9 @@ internal partial struct TestDecimal_list /*dyn*/ {
 
 public static void TestDecimal(ж<testing.T> Ꮡt) {
     var list = new TestDecimal_list[]{
-        new(name: "same"u8, @in: new dec(exponent: -6), @out: new dec(exponent: -6)), // Ensure reflection is not used to assign the value by using different types.
+        new(name: "same"u8, @in: new dec(exponent: -6), @out: new dec(exponent: -6)),
 
+        // Ensure reflection is not used to assign the value by using different types.
         new(name: "diff"u8, @in: new decFinite(exponent: -6), @out: new dec(exponent: -6)),
         new(name: "bad-form"u8, @in: new dec(form: 200), err: true)
     }.slice();

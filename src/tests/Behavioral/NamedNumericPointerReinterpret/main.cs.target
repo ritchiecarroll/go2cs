@@ -65,12 +65,8 @@ internal static partial void bump(ж<coord> Ꮡc) {
 partial struct namedString /*@string*/;
 
 internal static partial void setStr(ref namedString s, @string v) {
-    s = ((namedString)v);
+    s = (namedString)v;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string beforeˢ = "before"u8;
-private static readonly @string afterˢ = "after"u8;
 
 internal static void Main() {
     ref var a = ref heap(new lfstack(), out var Ꮡa);
@@ -79,22 +75,28 @@ internal static void Main() {
     b = 1234;
     fmt.Println(Ꮡa.peek(), Ꮡb.peek());
     fmt.Println(peekVia(Ꮡa));
+
     ref var c = ref heap(new lfstack(), out var Ꮡc);
     c = 42;
     fmt.Println(Ꮡc.peek());
-    var h = ((hexval)(uint64)a);
+
+    var h = (hexval)(uint64)a;
     fmt.Println(describe(h), (uint64)((hexval)(uint64)c));
+
     ref var g = ref heap(new gobber(), out var Ꮡg);
     Ꮡg.set(23);
     fmt.Println(g);
+
     ref var xy = ref heap<coord>(out var Ꮡxy);
     xy = new coord(1, 2);
     bump(Ꮡxy);
     fmt.Println(xy.X, xy.Y);
+
     ref var s = ref heap<@string>(out var Ꮡs);
-    s = beforeˢ;
-    setStr(ref (Ꮡs.Reinterpret<@string, namedString>()).DerefOrNull(), afterˢ);
+    s = "before";
+    setStr(ref (Ꮡs.Reinterpret<@string, namedString>()).DerefOrNull(), "after");
     fmt.Println(s);
+
     ref var d = ref heap(new lfstack(), out var Ꮡd);
     d = 7;
     storeInt64(ref (Ꮡd.Reinterpret<lfstack, uint64>()).DerefOrNull(), 99);

@@ -140,11 +140,13 @@ internal static float64 expm1(float64 x) {
     UntypedFloat Ln2Lo = 1.90821492927058770002e-10; // 0x3dea39ef35793c76
     const float64 InvLn2 = 1.44269504088896338700e+00; // 0x3ff71547652b82fe
     const float64 Tiny = /* 1.0 / (1 << 54) */ 5.551115123125783e-17; // 2**-54 = 0x3c90000000000000
+    // scaled coefficients related to expm1
     const float64 Q1 = -3.33333333333331316428e-02; // 0xBFA11111111110F4
     const float64 Q2 = 1.58730158725481460165e-03; // 0x3F5A01A019FE5585
     const float64 Q3 = -7.93650757867487942473e-05; // 0xBF14CE199EAADBB7
     const float64 Q4 = 4.00821782732936239552e-06; // 0x3ED0CFCA86E65239
     const float64 Q5 = -2.01099218183624371326e-07; // 0xBE8AFDB76E09C32D
+
     // special cases
     switch (ᐧ) {
     case {} when IsInf(x, 1) || IsNaN(x): {
@@ -160,26 +162,24 @@ internal static float64 expm1(float64 x) {
         absx = -absx;
         sign = true;
     }
+
     // filter out huge argument
-    if (absx >= Ln2X56) {
-        // if |x| >= 56 * ln2
+    if (absx >= Ln2X56) { // if |x| >= 56 * ln2
         if (sign) {
             return -1D; // x < -56*ln2, return -1
         }
-        if (absx >= Othreshold) {
-            // if |x| >= 709.78...
+        if (absx >= Othreshold) { // if |x| >= 709.78...
             return Inf(1);
         }
     }
+
     // argument reduction
     float64 c = default!;
     nint k = default!;
-    if (absx > Ln2Half){
-        // if  |x| > 0.5 * ln2
+    if (absx > Ln2Half){ // if  |x| > 0.5 * ln2
         float64 hi = default!;
         float64 lo = default!;
-        if (absx < Ln2HalfX3){
-            // and |x| < 1.5 * ln2
+        if (absx < Ln2HalfX3){ // and |x| < 1.5 * ln2
             if (!sign){
                 hi = x - Ln2Hi;
                 lo = Ln2Lo;
@@ -202,12 +202,12 @@ internal static float64 expm1(float64 x) {
         x = hi - lo;
         c = (hi - x) - lo;
     } else 
-    if (absx < Tiny){
-        // when |x| < 2**-54, return x
+    if (absx < Tiny){ // when |x| < 2**-54, return x
         return x;
     } else {
         k = 0;
     }
+
     // x is now in primary range
     var hfx = 0.5D * x;
     var hxs = x * hfx;
@@ -229,23 +229,21 @@ internal static float64 expm1(float64 x) {
         }
         return 1D + 2D * (x - e);
     }
-    case {} when k <= -2 || k > 56: {
+    case {} when k <= -2 || k > 56: { // suffice to return exp(x)-1
         var yΔ2 = 1D - (e - x);
-        yΔ2 = Float64frombits(Float64bits(yΔ2) + ((uint64)k << (int)(52))); // add k to y's exponent
+        yΔ2 = Float64frombits(Float64bits(yΔ2) + ((uint64)k << 52)); // add k to y's exponent
         return yΔ2 - 1D;
     }}
-
-    // suffice to return exp(x)-1
     if (k < 20) {
         var tΔ2 = Float64frombits(0x3ff0000000000000UL - (((uint64)0x20000000000000UL).Rsh((nuint)k))); // t=1-2**-k
         var yΔ3 = tΔ2 - (e - x);
-        yΔ3 = Float64frombits(Float64bits(yΔ3) + ((uint64)k << (int)(52))); // add k to y's exponent
+        yΔ3 = Float64frombits(Float64bits(yΔ3) + ((uint64)k << 52)); // add k to y's exponent
         return yΔ3;
     }
-    t = Float64frombits(((uint64)(0x3ff - k) << (int)(52))); // 2**-k
+    t = Float64frombits((uint64)(0x3ff - k) << 52); // 2**-k
     var y = x - (e + t);
     y++;
-    y = Float64frombits(Float64bits(y) + ((uint64)k << (int)(52))); // add k to y's exponent
+    y = Float64frombits(Float64bits(y) + ((uint64)k << 52)); // add k to y's exponent
     return y;
 }
 

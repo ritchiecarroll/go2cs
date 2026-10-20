@@ -35,8 +35,8 @@ internal static void record(this ref Checker check, ж<operand> Ꮡx) {
     else { /* default: */
         typ = x.typ;
     }
-
     assert(x.expr != default! && typ != default!);
+
     if (isUntyped(typ)){
         // delay type and value recording until we know the type
         // or until the end of type checking
@@ -55,6 +55,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     if (!debug && !check.recordTypes()) {
         return; // nothing to do
     }
+
     foreach (var (x, info) in check.untyped) {
         if (debug && isTyped(new BasicжΔType(info.typ))) {
             Ꮡcheck.dump(vSTypeSIsTypedˢ, x.Pos(), x, info.typ.OrTypedNil());
@@ -126,8 +127,8 @@ internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slic
                 assert(tv.Type != default!); // should have been recorded already
                 tokenꓸPos pos = x.Pos();
                 tv.Type = new TupleжΔType(NewTuple(
-                    NewVar(pos, check.pkg, ""u8, t0),
-                    NewVar(pos, check.pkg, ""u8, t1)));
+                    newVar(LocalVar, pos, check.pkg, ""u8, t0),
+                    newVar(LocalVar, pos, check.pkg, ""u8, t1)));
                 m[x] = tv;
                 // if x is a parenthesized expression (p.X), update p.X
                 var (p, _) = x._<ж<ast.ParenExpr>>(ᐧ);

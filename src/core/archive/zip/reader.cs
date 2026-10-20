@@ -6,6 +6,7 @@ namespace go.archive;
 using bufio = bufio_package;
 using binary = encoding.binary_package;
 using errors = errors_package;
+using fmt = fmt_package;
 using hash = hash_package;
 using crc32 = go.hash.crc32_package;
 using godebug = @internal.godebug_package;
@@ -51,14 +52,14 @@ partial struct Reader {
 // A ReadCloser is a [Reader] that must be closed when no longer needed.
 partial struct ReadCloser {
     internal ж<os.File> f;
-    public partial ref Reader Reader { get; }
+    /*embed*/ public Reader Reader;
 }
 
 // A File is a single file in a ZIP archive.
 // The file information is in the embedded [FileHeader].
 // The file content can be accessed by calling [File.Open].
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     internal ж<Reader> zip;
     internal io.ReaderAt zipr;
     internal int64 headerOffset; // includes overall ZIP archive baseOffset
@@ -148,6 +149,7 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
         }
     }
     var buf = bufio.NewReader(new io.SectionReaderжReader(rs));
+
     // The count of files inside a zip is truncated to fit in a uint16.
     // Gloss over this by reading headers until we encounter
     // a bad one, and then only report an ErrFormat or UnexpectedEOF if
@@ -164,8 +166,7 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
         f.Value.headerOffset += r.baseOffset;
         r.File = append(r.File, f);
     }
-    if ((uint16)len(r.File) != (uint16)(~end).directoryRecords) {
-        // only compare 16 bits here
+    if ((uint16)len(r.File) != (uint16)(~end).directoryRecords) { // only compare 16 bits here
         // Return the readDirectoryHeader error if we read
         // the wrong number of directory entries.
         return err;
@@ -366,7 +367,7 @@ internal static (int64, error) findBodyOffset(this ref File f) {
             return (0, err);
         }
     }
-    var b = ((readBuf)(buf[..]));
+    var b = (readBuf)(buf[..]);
     {
         var sig = b.uint32(); if (sig != fileHeaderSignature) {
             return (0, ErrFormat);
@@ -388,7 +389,7 @@ internal static error readDirectoryHeader(ref File f, io.Reader r) {
             return err;
         }
     }
-    var b = ((readBuf)(buf[..]));
+    var b = (readBuf)(buf[..]);
     {
         var sig = b.uint32(); if (sig != directoryHeaderSignature) {
             return ErrFormat;
@@ -417,56 +418,59 @@ internal static error readDirectoryHeader(ref File f, io.Reader r) {
             return err;
         }
     }
-    f.Name = ((@string)(d.slice(0, filenameLen)));
+    f.Name = (@string)(d.slice(0, filenameLen));
     f.Extra = d.slice(filenameLen, filenameLen + extraLen);
-    f.Comment = ((@string)(d.slice(filenameLen + extraLen)));
+    f.Comment = (@string)(d.slice(filenameLen + extraLen));
+
     // Determine the character encoding.
     var (utf8Valid1, utf8Require1) = detectUTF8(f.Name);
     var (utf8Valid2, utf8Require2) = detectUTF8(f.Comment);
     switch (ᐧ) {
     case {} when !utf8Valid1 || !utf8Valid2: {
+        // Name and Comment definitely not UTF-8.
         f.NonUTF8 = true;
         break;
     }
     case {} when !utf8Require1 && !utf8Require2: {
+        // Name and Comment use only single-byte runes that overlap with UTF-8.
         f.NonUTF8 = false;
         break;
     }
     default: {
+        // Might be UTF-8, might be some other encoding; preserve existing flag.
+        // Some ZIP writers use UTF-8 encoding without setting the UTF-8 flag.
+        // Since it is impossible to always distinguish valid UTF-8 from some
+        // other encoding (e.g., GBK or Shift-JIS), we trust the flag.
         f.NonUTF8 = (uint16)(f.Flags & 0x800) == 0;
         break;
     }}
 
-    // Name and Comment definitely not UTF-8.
-    // Name and Comment use only single-byte runes that overlap with UTF-8.
-    // Might be UTF-8, might be some other encoding; preserve existing flag.
-    // Some ZIP writers use UTF-8 encoding without setting the UTF-8 flag.
-    // Since it is impossible to always distinguish valid UTF-8 from some
-    // other encoding (e.g., GBK or Shift-JIS), we trust the flag.
     var needUSize = f.UncompressedSize == ~(uint32)0;
     var needCSize = f.CompressedSize == ~(uint32)0;
     var needHeaderOffset = f.headerOffset == (int64)(~(uint32)0);
+
     // Best effort to find what we need.
     // Other zip authors might not even follow the basic format,
     // and we'll just ignore the Extra content in that case.
     time.Time modified = default!;
 parseExtras:
-    for (var extra = ((readBuf)f.Extra); len(extra) >= 4; ) {
-        // need at least tag and size
+    for (var extra = (readBuf)f.Extra; len(extra) >= 4; ) { // need at least tag and size
         var fieldTag = extra.uint16();
         nint fieldSize = (nint)extra.uint16();
         if (len(extra) < fieldSize) {
             break;
         }
         var fieldBuf = extra.sub(fieldSize);
+
         var exprᴛ1 = fieldTag;
         if (exprᴛ1 == zip64ExtraID) {
             f.zip64 = true;
+
+            // update directory values from the zip64 extra block.
+            // They should only be consulted if the sizes read earlier
+            // are maxed out.
+            // See golang.org/issue/13367.
             if (needUSize) {
-                // update directory values from the zip64 extra block.
-                // They should only be consulted if the sizes read earlier
-                // are maxed out.
-                // See golang.org/issue/13367.
                 needUSize = false;
                 if (len(fieldBuf) < 8) {
                     return ErrFormat;
@@ -493,8 +497,7 @@ parseExtras:
                 goto continue_parseExtras;
             }
             fieldBuf.uint32(); // reserved (ignored)
-            while (len(fieldBuf) >= 4) {
-                // need at least tag and size
+            while (len(fieldBuf) >= 4) { // need at least tag and size
                 var attrTag = fieldBuf.uint16();
                 nint attrSize = (nint)fieldBuf.uint16();
                 if (len(fieldBuf) < attrSize) {
@@ -504,6 +507,7 @@ parseExtras:
                 if (attrTag != 1 || attrSize != 24) {
                     continue; // Ignore irrelevant attributes
                 }
+
                 UntypedFloat ticksPerSecond = 1e7; // Windows timestamp resolution
                 var ts = (int64)attrBuf.uint64(); // ModTime since Windows epoch
                 var secs = ts / (int64)ticksPerSecond;
@@ -527,14 +531,15 @@ parseExtras:
             var ts = (int64)fieldBuf.uint32(); // ModTime since Unix epoch
             modified = time.Unix(ts, 0);
         }
-
 continue_parseExtras:;
     }
 break_parseExtras:;
+
     var msdosModified = msDosTimeToTime(f.ModifiedDate, f.ModifiedTime);
     f.Modified = msdosModified;
     if (!modified.IsZero()) {
         f.Modified = modified.UTC();
+
         // If legacy MS-DOS timestamps are set, we can use the delta between
         // the legacy and extended versions to estimate timezone offset.
         //
@@ -547,6 +552,7 @@ break_parseExtras:;
             f.Modified = modified.In(timeZone(msdosModified.Sub(modified)));
         }
     }
+
     // Assume that uncompressed size 2³²-1 could plausibly happen in
     // an old zip32 file that was sharding inputs into the largest chunks
     // possible (or is just malicious; search the web for 42.zip).
@@ -556,9 +562,11 @@ break_parseExtras:;
     // accept the uncompressed size 2³²-1 as valid.
     // If nothing else, this keeps archive/zip working with 42.zip.
     _ = needUSize;
+
     if (needCSize || needHeaderOffset) {
         return ErrFormat;
     }
+
     return default!;
 }
 
@@ -580,7 +588,7 @@ internal static error readDataDescriptor(io.Reader r, ref File f) {
         }
     }
     nint off = 0;
-    var maybeSig = ((readBuf)(buf[..4]));
+    var maybeSig = (readBuf)(buf[..4]);
     if (maybeSig.uint32() != dataDescriptorSignature) {
         // No data descriptor signature. Keep these four
         // bytes.
@@ -591,15 +599,17 @@ internal static error readDataDescriptor(io.Reader r, ref File f) {
             return err;
         }
     }
-    var b = ((readBuf)(buf[..12]));
+    var b = (readBuf)(buf[..12]);
     if (b.uint32() != f.CRC32) {
         return ErrChecksum;
     }
+
     // The two sizes that follow here can be either 32 bits or 64 bits
     // but the spec is not very clear on this and different
     // interpretations has been made causing incompatibilities. We
     // already have the sizes from the central directory so we can
     // just ignore these.
+
     return default!;
 }
 
@@ -635,8 +645,9 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
             return (default!, 0, ErrFormat);
         }
     }
+
     // read header into struct
-    var b = ((readBuf)(buf[4..])); // skip signature
+    var b = (readBuf)(buf[4..]); // skip signature
     var d = Ꮡ(new directoryEnd(
         diskNbr: (uint32)b.uint16(),
         dirDiskNbr: (uint32)b.uint16(),
@@ -650,7 +661,8 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
     if (l > len(b)) {
         return (default!, 0, errors.New(zipInvalidCommentLengthˢ));
     }
-    d.Value.comment = ((@string)(slice<byte>)b.slice(0, l));
+    d.Value.comment = (@string)(slice<byte>)b.slice(0, l);
+
     // These values mean that the file can be a zip64 file
     if ((~d).directoryRecords == 0xffff || (~d).directorySize == 0xffff || (~d).directoryOffset == 0xffffffffU) {
         var (p, errΔ2) = findDirectory64End(r, directoryEndOffset);
@@ -662,17 +674,21 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
             return (default!, 0, errΔ2);
         }
     }
+
     var maxInt64 = (uint64)(9223372036854775807UL);
     if ((~d).directorySize > maxInt64 || (~d).directoryOffset > maxInt64) {
         return (default!, 0, ErrFormat);
     }
+
     baseOffset = directoryEndOffset - (int64)(~d).directorySize - (int64)(~d).directoryOffset;
+
     // Make sure directoryOffset points to somewhere in our file.
     {
         var o = baseOffset + (int64)(~d).directoryOffset; if (o < 0 || o >= size) {
             return (default!, 0, ErrFormat);
         }
     }
+
     // If the directory end data tells us to use a non-zero baseOffset,
     // but we would find a valid directory entry if we assume that the
     // baseOffset is 0, then just use a baseOffset of 0.
@@ -686,6 +702,7 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
             baseOffset = 0;
         }
     }
+
     return (d, baseOffset, default!);
 }
 
@@ -703,19 +720,17 @@ internal static (int64, error) findDirectory64End(io.ReaderAt r, int64 directory
             return (-1, err);
         }
     }
-    var b = ((readBuf)buf);
+    var b = (readBuf)buf;
     {
         var sig = b.uint32(); if (sig != directory64LocSignature) {
             return (-1, default!);
         }
     }
-    if (b.uint32() != 0) {
-        // number of the disk with the start of the zip64 end of central directory
+    if (b.uint32() != 0) { // number of the disk with the start of the zip64 end of central directory
         return (-1, default!); // the file is not a valid zip64-file
     }
     var p = b.uint64(); // relative offset of the zip64 end of central directory record
-    if (b.uint32() != 1) {
-        // total number of disks
+    if (b.uint32() != 1) { // total number of disks
         return (-1, default!); // the file is not a valid zip64-file
     }
     return ((int64)p, default!);
@@ -730,12 +745,14 @@ internal static error /*err*/ readDirectory64End(io.ReaderAt r, int64 offset, re
             return errΔ1;
         }
     }
-    var b = ((readBuf)buf);
+
+    var b = (readBuf)buf;
     {
         var sig = b.uint32(); if (sig != directory64EndSignature) {
             return ErrFormat;
         }
     }
+
     b = b[12..]; // skip dir size, version and version needed (uint64 + 2x uint16)
     d.diskNbr = b.uint32(); // number of this disk
     d.dirDiskNbr = b.uint32(); // number of the disk with the start of the central directory
@@ -743,6 +760,7 @@ internal static error /*err*/ readDirectory64End(io.ReaderAt r, int64 offset, re
     d.directoryRecords = b.uint64(); // total number of entries in the central directory
     d.directorySize = b.uint64(); // size of the central directory
     d.directoryOffset = b.uint64(); // offset of start of central directory with respect to the starting disk number
+
     return default!;
 }
 
@@ -751,7 +769,7 @@ internal static nint findSignatureInBlock(slice<byte> b) {
         // defined from directoryEndSignature in struct.go
         if (b[i] == (rune)'P' && b[i + 1] == (rune)'K' && b[i + 2] == 0x05 && b[i + 3] == 0x06) {
             // n is length of comment
-            nint n = (nint)((nint)b[i + (nint)directoryEndLen - 2] | ((nint)b[i + (nint)directoryEndLen - 1] << (int)(8)));
+            nint n = (nint)b[i + (nint)directoryEndLen - 2] | (nint)b[i + (nint)directoryEndLen - 1] << 8;
             if (n + (nint)directoryEndLen + i > len(b)) {
                 // Truncated comment.
                 // Some parsers (such as Info-ZIP) ignore the truncated comment
@@ -868,31 +886,38 @@ internal static @string String(this ж<fileListEntry> Ꮡf) {
 internal static @string toValidName(@string name) {
     name = strings.ReplaceAll(name, @"\"u8, @"/"u8);
     @string p = path.Clean(name);
+
     p = strings.TrimPrefix(p, "/"u8);
+
     while (strings.HasPrefix(p, "../"u8)) {
         p = p[(int)(len("../"))..];
     }
+
     return p;
 }
 
 internal static void initFileList(this ж<Reader> Ꮡr) {
-    ref var r = ref Ꮡr.DerefOrNull();
-
     Ꮡr.of(Reader.ᏑfileListOnce).Do(() => {
+        // Preallocate the minimum size of the index.
+        // We may also synthesize additional directory entries.
+        Ꮡr.Value.fileList = new slice<fileListEntry>(0, len(Ꮡr.Value.File));
         // files and knownDirs map from a file/directory name
         // to an index into the r.fileList entry that we are
         // building. They are used to mark duplicate entries.
         var files = new map<@string, nint>();
         var knownDirs = new map<@string, nint>();
+
         // dirs[name] is true if name is known to be a directory,
         // because it appears as a prefix in a path.
         var dirs = new map<@string, bool>();
+
         foreach (var (_, @file) in Ꮡr.Value.File) {
             var isDir = len((~@file).Name) > 0 && (~@file).Name[len((~@file).Name) - 1] == (rune)'/';
             @string name = toValidName((~@file).Name);
             if (name == ""u8) {
                 continue;
             }
+
             {
                 var (idxΔ1, ok) = files[name, ꟷ]; if (ok) {
                     Ꮡr.Value.fileList[idxΔ1].isDup = true;
@@ -905,6 +930,7 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
                     continue;
                 }
             }
+
             @string dir = name;
             while (ᐧ) {
                 {
@@ -919,6 +945,7 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
                 }
                 dirs[dir] = true;
             }
+
             nint idx = len(Ꮡr.Value.fileList);
             var entry = new fileListEntry(
                 name: name,
@@ -950,6 +977,7 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
                 }
             }
         }
+
         slices.SortFunc(Ꮡr.Value.fileList, (fileListEntry a, fileListEntry b) => fileEntryCompare(a.name, b.name));
     });
 }
@@ -971,6 +999,7 @@ public static (fs.File, error) Open(this ж<Reader> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.initFileList();
+
     if (!fs.ValidPath(name)) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrInvalid))));
     }
@@ -1005,6 +1034,7 @@ internal static ж<fileListEntry> openLookup(this ref Reader r, @string name) {
     if (name == "."u8) {
         return dotFile;
     }
+
     var (dir, elem, _) = split(name);
     var files = r.fileList;
     var (i, _) = slices.BinarySearchFunc(files, dir, (fileListEntry a, @string dirΔ1) => {
@@ -1079,8 +1109,15 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
     var list = new slice<fs.DirEntry>(n);
     foreach (var (i, _) in list) {
         var (s, err) = Ꮡ(d.files, d.offset + i).stat();
-        if (err != default!) {
+        if (err != default!){
             return (default!, err);
+        } else 
+        if (((fs.FileInfo)(s)).Name() == "."u8 || !fs.ValidPath(((fs.FileInfo)(s)).Name())) {
+            return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(
+                Op: "readdir"u8,
+                Path: (~d.e).name,
+                Err: fmt.Errorf("invalid file name: %v"u8, d.files[d.offset + i].name)
+            ))));
         }
         list[i] = s;
     }

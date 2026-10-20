@@ -83,7 +83,7 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     foreach (var (_, val) in vals) {
         total += val;
     }
-    @string s = ""u8;
+    @string s = "";
     foreach (var (_, val) in vals) {
         if (s != ""u8) {
             s += ", "u8;
@@ -94,19 +94,13 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     return s;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object convertedFuncTypeCallˢ = (@string)"converted func type call:"u8;
-private static readonly @string pkgFmtˢ = "pkg/fmt"u8;
-private static readonly @string fmtˢ = "fmt"u8;
-private static readonly @string printfˢ = "Printf"u8;
-private static readonly object collapseHoistˢ = (@string)"collapse hoist:"u8;
-
 internal static void Main() {
     var strategies = new slice<strategy>(win);
     foreach (var (kΔ1, _) in strategies) {
         strategies[kΔ1] = stayAtK(kΔ1 + 1);
     }
     var (wins, games) = roundRobin(strategies);
+
     nint k = default!;
     foreach (var (iᴛ1, _) in strategies) {
         k = iᴛ1;
@@ -114,27 +108,33 @@ internal static void Main() {
         fmt.Printf("Wins, losses staying at k =% 4d: %s\n"u8,
             k + 1, ratioString(wins[k], games - wins[k]));
     }
+
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
-    fmt.Println(convertedFuncTypeCallˢ, result.player, result.opponent, result.thisTurn, turnIsOver);
+    fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
+
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
-    var (n, @out, serr) = m.split("hi"u8);
+    var (n, @out, serr) = m.split("hi");
     fmt.Println(n, @out, serr == default!);
+
     var p = new provider(produce: (nint x) => x * 2);
     var r = new registry(h: new handler(p.produce));
     fmt.Println(r.h(21));
+
     tagged tg = new handlerᴠtagged(r.h);
     fmt.Println(tg.tag(), r.h(1));
+
     var wk = Ꮡ(new worker(n: 3));
     {
         var err = wk.initWorker(0); if (err == default!) {
             fmt.Println(wk.run(new byte[]{1, 2}.slice()), lastN.Value);
         }
     }
+
     var res = new resolver(
         lookupPackage: (@string name) => {
             if (name == "fmt"u8) {
-                return (pkgFmtˢ, true);
+                return ("pkg/fmt", true);
             }
             return ("", false);
         },
@@ -142,14 +142,16 @@ internal static void Main() {
             return recv == ""u8 && name == "Printf"u8;
         }
     );
-    var (ip, found) = res.lookupPackage(fmtˢ);
-    fmt.Println(ip, found, res.lookupSym(""u8, printfˢ), res.lookupSym("T"u8, "M"u8));
+    var (ip, found) = res.lookupPackage("fmt");
+    fmt.Println(ip, found, res.lookupSym("", "Printf"), res.lookupSym("T", "M"));
+
     (any, error) fetch() {
         var (ᴛ1, ᴛ2) = fetchPair();
         return (ᴛ1, ᴛ2);
     }
     var (got, gerr) = fetch();
-    fmt.Println(collapseHoistˢ, got, gerr == default!);
+    fmt.Println("collapse hoist:", got, gerr == default!);
+
     fmt.Println(passThrough());
 }
 
@@ -158,19 +160,13 @@ internal static @string passThrough() {
     return joinPair(ᴛ1, ᴛ2);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pairˢ = "pair"u8;
-
 internal static (@string, error) fetchPair() {
-    return (pairˢ, default!);
+    return ("pair", default!);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string errˢ = "err"u8;
 
 internal static @string joinPair(@string s, error err) {
     if (err != default!) {
-        return errˢ;
+        return "err";
     }
     return "got:"u8 + s;
 }
@@ -228,11 +224,8 @@ internal static nint run(this ж<worker> Ꮡw, slice<byte> b) {
 
 internal delegate nint handler(nint _);
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string handlerˢ = "handler"u8;
-
 internal static @string tag(this handler h) {
-    return handlerˢ;
+    return "handler";
 }
 
 partial interface tagged {

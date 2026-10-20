@@ -17,6 +17,7 @@ public static void TestRawConnReadWrite(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var (r, w, err) = Δos.Pipe();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -25,6 +26,7 @@ public static void TestRawConnReadWrite(ж<Δtesting.T> Ꮡt) {
         defer(() => rʗ1.Close(), ref ᒐ);
         var wʗ1 = w;
         defer(() => wʗ1.Close(), ref ᒐ);
+
         (var rconn, err) = r.SyscallConn();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -33,9 +35,10 @@ public static void TestRawConnReadWrite(ж<Δtesting.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         ref var operr = ref heap<error>(out var Ꮡoperr);
         err = wconn.Write((uintptr s) => {
-            (_, Ꮡoperr.ValueSlot) = syscall.Write(((syscallꓸHandle)s), new byte[]{(rune)'b'}.slice());
+            (_, Ꮡoperr.ValueSlot) = syscall.Write((syscallꓸHandle)s, new byte[]{(rune)'b'}.slice());
             return !AreEqual(Ꮡoperr.ValueSlot, syscall.EAGAIN);
         });
         if (err != default!) {
@@ -44,11 +47,12 @@ public static void TestRawConnReadWrite(ж<Δtesting.T> Ꮡt) {
         if (operr != default!) {
             Ꮡt.Fatal(err);
         }
+
         nint n = default!;
         var buf = new slice<byte>(1);
         var bufʗ1 = buf;
         err = rconn.Read((uintptr s) => {
-            (n, Ꮡoperr.ValueSlot) = syscall.Read(((syscallꓸHandle)s), bufʗ1);
+            (n, Ꮡoperr.ValueSlot) = syscall.Read((syscallꓸHandle)s, bufʗ1);
             return !AreEqual(Ꮡoperr.ValueSlot, syscall.EAGAIN);
         });
         if (err != default!) {

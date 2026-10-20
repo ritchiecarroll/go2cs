@@ -53,6 +53,7 @@ func (v *Visitor) visitMapType(mapType *ast.MapType, identType types.Type, name 
 	if !v.inFunction {
 		target.WriteString(v.newline)
 	}
+	v.writePendingTypeDoc(target)
 
 	// A generic defined map (`type Set[T comparable] map[T]void`) declares its type parameters and their
 	// constraints, as the array and slice shells do: without them the shell is a non-generic struct over an

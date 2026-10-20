@@ -348,15 +348,12 @@ internal static slice<float64> absSC = new float64[]{
     math.NaN()
 }.slice();
 
-// G.6.1.1
-// imaginary sign unspecified
-// imaginary sign unspecified
-
 partial struct acosSCᴛ1 /*dyn*/ {
     internal complex128 @in, want;
 }
 internal static slice<acosSCᴛ1> acosSC;
 internal static void initᴛacosSC() { acosSC = new acosSCᴛ1[]{
+    // G.6.1.1
     new(complex(zero, zero),
         complex(math.Pi / 2D, -zero)),
     new(complex(-zero, zero),
@@ -378,9 +375,9 @@ internal static void initᴛacosSC() { acosSC = new acosSCᴛ1[]{
     new(complex(inf, inf),
         complex(math.Pi / 4D, -inf)),
     new(complex(inf, nan),
-        complex(nan, -inf)),
+        complex(nan, -inf)), // imaginary sign unspecified
     new(complex(-inf, nan),
-        complex(nan, inf)),
+        complex(nan, inf)), // imaginary sign unspecified
     new(complex(nan, 1.0D),
         NaN()),
     new(complex(nan, inf),
@@ -389,9 +386,9 @@ internal static void initᴛacosSC() { acosSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// G.6.2.1
 internal static slice<acosSCᴛ1> acoshSC;
 internal static void initᴛacoshSC() { acoshSC = new acosSCᴛ1[]{
+    // G.6.2.1
     new(complex(zero, zero),
         complex(zero, math.Pi / 2D)),
     new(complex(-zero, zero),
@@ -420,10 +417,9 @@ internal static void initᴛacoshSC() { acoshSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// Derived from Asin(z) = -i * Asinh(i * z), G.6 #7
-// imaginary sign unspecified
 internal static slice<acosSCᴛ1> asinSC;
 internal static void initᴛasinSC() { asinSC = new acosSCᴛ1[]{
+    // Derived from Asin(z) = -i * Asinh(i * z), G.6 #7
     new(complex(zero, zero),
         complex(zero, zero)),
     new(complex(1.0D, inf),
@@ -435,7 +431,7 @@ internal static void initᴛasinSC() { asinSC = new acosSCᴛ1[]{
     new(complex(inf, inf),
         complex(math.Pi / 4D, inf)),
     new(complex(inf, nan),
-        complex(nan, inf)),
+        complex(nan, inf)), // imaginary sign unspecified
     new(complex(nan, zero),
         NaN()),
     new(complex(nan, 1D),
@@ -446,10 +442,9 @@ internal static void initᴛasinSC() { asinSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// G.6.2.2
-// sign of real part unspecified
 internal static slice<acosSCᴛ1> asinhSC;
 internal static void initᴛasinhSC() { asinhSC = new acosSCᴛ1[]{
+    // G.6.2.2
     new(complex(zero, zero),
         complex(zero, zero)),
     new(complex(1.0D, inf),
@@ -467,14 +462,14 @@ internal static void initᴛasinhSC() { asinhSC = new acosSCᴛ1[]{
     new(complex(nan, 1.0D),
         NaN()),
     new(complex(nan, inf),
-        complex(inf, nan)),
+        complex(inf, nan)), // sign of real part unspecified
     new(NaN(),
         NaN())
 }.slice(); }
 
-// Derived from Atan(z) = -i * Atanh(i * z), G.6 #7
 internal static slice<acosSCᴛ1> atanSC;
 internal static void initᴛatanSC() { atanSC = new acosSCᴛ1[]{
+    // Derived from Atan(z) = -i * Atanh(i * z), G.6 #7
     new(complex(0D, zero),
         complex(0D, zero)),
     new(complex(0D, nan),
@@ -499,10 +494,9 @@ internal static void initᴛatanSC() { atanSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// G.6.2.3
-// sign of real part not specified.
 internal static slice<acosSCᴛ1> atanhSC;
 internal static void initᴛatanhSC() { atanhSC = new acosSCᴛ1[]{
+    // G.6.2.3
     new(complex(zero, zero),
         complex(zero, zero)),
     new(complex(zero, nan),
@@ -510,7 +504,7 @@ internal static void initᴛatanhSC() { atanhSC = new acosSCᴛ1[]{
     new(complex(1.0D, zero),
         complex(inf, zero)),
     new(complex(1.0D, inf),
-        complex((float64)(0D), (float64)(math.Pi / 2D))),
+        complex((float64)0D, (float64)(math.Pi / 2D))),
     new(complex(1.0D, nan),
         NaN()),
     new(complex(inf, 1.0D),
@@ -522,7 +516,7 @@ internal static void initᴛatanhSC() { atanhSC = new acosSCᴛ1[]{
     new(complex(nan, 1.0D),
         NaN()),
     new(complex(nan, inf),
-        complex(zero, math.Pi / 2D)),
+        complex(zero, math.Pi / 2D)), // sign of real part not specified.
     new(NaN(),
         NaN())
 }.slice(); }
@@ -535,18 +529,15 @@ internal static slice<complex128> conjSC = new complex128[]{
     NaN()
 }.slice();
 
-// Derived from Cos(z) = Cosh(i * z), G.6 #7
-// imaginary sign unspecified
-// real sign unspecified
-// imaginary sign unspecified
 internal static slice<acosSCᴛ1> cosSC;
 internal static void initᴛcosSC() { cosSC = new acosSCᴛ1[]{
+    // Derived from Cos(z) = Cosh(i * z), G.6 #7
     new(complex(zero, zero),
         complex(1.0D, -zero)),
     new(complex(zero, inf),
         complex(inf, -zero)),
     new(complex(zero, nan),
-        complex(nan, zero)),
+        complex(nan, zero)), // imaginary sign unspecified
     new(complex(1.0D, inf),
         complex(inf, -inf)),
     new(complex(1.0D, nan),
@@ -556,11 +547,11 @@ internal static void initᴛcosSC() { cosSC = new acosSCᴛ1[]{
     new(complex(inf, 1.0D),
         NaN()),
     new(complex(inf, inf),
-        complex(inf, nan)),
+        complex(inf, nan)), // real sign unspecified
     new(complex(inf, nan),
         NaN()),
     new(complex(nan, zero),
-        complex(nan, -zero)),
+        complex(nan, -zero)), // imaginary sign unspecified
     new(complex(nan, 1.0D),
         NaN()),
     new(complex(nan, inf),
@@ -569,20 +560,15 @@ internal static void initᴛcosSC() { cosSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// G.6.2.4
-// imaginary sign unspecified
-// imaginary sign unspecified
-// +inf  cis(y)
-// real sign unspecified
-// imaginary sign unspecified
 internal static slice<acosSCᴛ1> coshSC;
 internal static void initᴛcoshSC() { coshSC = new acosSCᴛ1[]{
+    // G.6.2.4
     new(complex(zero, zero),
         complex(1.0D, zero)),
     new(complex(zero, inf),
-        complex(nan, zero)),
+        complex(nan, zero)), // imaginary sign unspecified
     new(complex(zero, nan),
-        complex(nan, zero)),
+        complex(nan, zero)), // imaginary sign unspecified
     new(complex(1.0D, inf),
         NaN()),
     new(complex(1.0D, nan),
@@ -590,13 +576,13 @@ internal static void initᴛcoshSC() { coshSC = new acosSCᴛ1[]{
     new(complex(inf, zero),
         complex(inf, zero)),
     new(complex(inf, 1.0D),
-        complex(inf * math.Cos(1.0D), inf * math.Sin(1.0D))),
+        complex(inf * math.Cos(1.0D), inf * math.Sin(1.0D))), // +inf  cis(y)
     new(complex(inf, inf),
-        complex(inf, nan)),
+        complex(inf, nan)), // real sign unspecified
     new(complex(inf, nan),
         complex(inf, nan)),
     new(complex(nan, zero),
-        complex(nan, zero)),
+        complex(nan, zero)), // imaginary sign unspecified
     new(complex(nan, 1.0D),
         NaN()),
     new(complex(nan, inf),
@@ -605,15 +591,9 @@ internal static void initᴛcoshSC() { coshSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// G.6.3.1
-// +0 cis(y)
-// +inf  cis(y)
-// real and imaginary sign unspecified
-// real sign unspecified
-// real and imaginary sign unspecified
-// real sign unspecified
 internal static slice<acosSCᴛ1> expSC;
 internal static void initᴛexpSC() { expSC = new acosSCᴛ1[]{
+    // G.6.3.1
     new(complex(zero, zero),
         complex(1.0D, zero)),
     new(complex(-zero, zero),
@@ -625,17 +605,17 @@ internal static void initᴛexpSC() { expSC = new acosSCᴛ1[]{
     new(complex(inf, zero),
         complex(inf, zero)),
     new(complex(-inf, 1.0D),
-        complex(math.Copysign(0.0D, math.Cos(1.0D)), math.Copysign(0.0D, math.Sin(1.0D)))),
+        complex(math.Copysign(0.0D, math.Cos(1.0D)), math.Copysign(0.0D, math.Sin(1.0D)))), // +0 cis(y)
     new(complex(inf, 1.0D),
-        complex(inf * math.Cos(1.0D), inf * math.Sin(1.0D))),
+        complex(inf * math.Cos(1.0D), inf * math.Sin(1.0D))), // +inf  cis(y)
     new(complex(-inf, inf),
-        complex(zero, zero)),
+        complex(zero, zero)), // real and imaginary sign unspecified
     new(complex(inf, inf),
-        complex(inf, nan)),
+        complex(inf, nan)), // real sign unspecified
     new(complex(-inf, nan),
-        complex(zero, zero)),
+        complex(zero, zero)), // real and imaginary sign unspecified
     new(complex(inf, nan),
-        complex(inf, nan)),
+        complex(inf, nan)), // real sign unspecified
     new(complex(nan, zero),
         complex(nan, zero)),
     new(complex(nan, 1.0D),
@@ -670,9 +650,9 @@ internal static slice<bool> isNaNSC = new bool[]{
     true
 }.slice();
 
-// G.6.3.2
 internal static slice<acosSCᴛ1> logSC;
 internal static void initᴛlogSC() { logSC = new acosSCᴛ1[]{
+    // G.6.3.2
     new(complex(zero, zero),
         complex(-inf, zero)),
     new(complex(-zero, zero),
@@ -701,9 +681,9 @@ internal static void initᴛlogSC() { logSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// derived from Log special cases via Log10(x) = math.Log10E*Log(x)
 internal static slice<acosSCᴛ1> log10SC;
 internal static void initᴛlog10SC() { log10SC = new acosSCᴛ1[]{
+    // derived from Log special cases via Log10(x) = math.Log10E*Log(x)
     new(complex(zero, zero),
         complex(-inf, zero)),
     new(complex(-zero, zero),
@@ -750,9 +730,9 @@ internal static slice<complex128> powSC = new complex128[]{
     NaN()
 }.slice();
 
-// Derived from Sin(z) = -i * Sinh(i * z), G.6 #7
 internal static slice<acosSCᴛ1> sinSC;
 internal static void initᴛsinSC() { sinSC = new acosSCᴛ1[]{
+    // Derived from Sin(z) = -i * Sinh(i * z), G.6 #7
     new(complex(zero, zero),
         complex(zero, zero)),
     new(complex(zero, inf),
@@ -781,20 +761,15 @@ internal static void initᴛsinSC() { sinSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// G.6.2.5
-// real sign unspecified
-// real sign unspecified
-// +inf  cis(y)
-// real sign unspecified
-// real sign unspecified
 internal static slice<acosSCᴛ1> sinhSC;
 internal static void initᴛsinhSC() { sinhSC = new acosSCᴛ1[]{
+    // G.6.2.5
     new(complex(zero, zero),
         complex(zero, zero)),
     new(complex(zero, inf),
-        complex(zero, nan)),
+        complex(zero, nan)), // real sign unspecified
     new(complex(zero, nan),
-        complex(zero, nan)),
+        complex(zero, nan)), // real sign unspecified
     new(complex(1.0D, inf),
         NaN()),
     new(complex(1.0D, nan),
@@ -802,11 +777,11 @@ internal static void initᴛsinhSC() { sinhSC = new acosSCᴛ1[]{
     new(complex(inf, zero),
         complex(inf, zero)),
     new(complex(inf, 1.0D),
-        complex(inf * math.Cos(1.0D), inf * math.Sin(1.0D))),
+        complex(inf * math.Cos(1.0D), inf * math.Sin(1.0D))), // +inf  cis(y)
     new(complex(inf, inf),
-        complex(inf, nan)),
+        complex(inf, nan)), // real sign unspecified
     new(complex(inf, nan),
-        complex(inf, nan)),
+        complex(inf, nan)), // real sign unspecified
     new(complex(nan, zero),
         complex(nan, zero)),
     new(complex(nan, 1.0D),
@@ -817,10 +792,9 @@ internal static void initᴛsinhSC() { sinhSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// G.6.4.2
-// imaginary sign unspecified
 internal static slice<acosSCᴛ1> sqrtSC;
 internal static void initᴛsqrtSC() { sqrtSC = new acosSCᴛ1[]{
+    // G.6.4.2
     new(complex(zero, zero),
         complex(zero, zero)),
     new(complex(-zero, zero),
@@ -836,7 +810,7 @@ internal static void initᴛsqrtSC() { sqrtSC = new acosSCᴛ1[]{
     new(complex(inf, 1.0D),
         complex(inf, zero)),
     new(complex(-inf, nan),
-        complex(nan, inf)),
+        complex(nan, inf)), // imaginary sign unspecified
     new(complex(inf, nan),
         complex(inf, nan)),
     new(complex(nan, 1.0D),
@@ -845,9 +819,9 @@ internal static void initᴛsqrtSC() { sqrtSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// Derived from Tan(z) = -i * Tanh(i * z), G.6 #7
 internal static slice<acosSCᴛ1> tanSC;
 internal static void initᴛtanSC() { tanSC = new acosSCᴛ1[]{
+    // Derived from Tan(z) = -i * Tanh(i * z), G.6 #7
     new(complex(zero, zero),
         complex(zero, zero)),
     new(complex(zero, nan),
@@ -872,12 +846,9 @@ internal static void initᴛtanSC() { tanSC = new acosSCᴛ1[]{
         NaN())
 }.slice(); }
 
-// G.6.2.6
-// 1 + i 0 sin(2y)
-// imaginary sign unspecified
-// imaginary sign unspecified
 internal static slice<acosSCᴛ1> tanhSC;
 internal static void initᴛtanhSC() { tanhSC = new acosSCᴛ1[]{
+    // G.6.2.6
     new(complex(zero, zero),
         complex(zero, zero)),
     new(complex(1.0D, inf),
@@ -885,11 +856,11 @@ internal static void initᴛtanhSC() { tanhSC = new acosSCᴛ1[]{
     new(complex(1.0D, nan),
         NaN()),
     new(complex(inf, 1.0D),
-        complex(1.0D, math.Copysign(0.0D, math.Sin(2D * 1.0D)))),
+        complex(1.0D, math.Copysign(0.0D, math.Sin(2D * 1.0D)))), // 1 + i 0 sin(2y)
     new(complex(inf, inf),
-        complex(1.0D, zero)),
+        complex(1.0D, zero)), // imaginary sign unspecified
     new(complex(inf, nan),
-        complex(1.0D, zero)),
+        complex(1.0D, zero)), // imaginary sign unspecified
     new(complex(nan, zero),
         complex(nan, zero)),
     new(complex(nan, 1.0D),
@@ -924,6 +895,7 @@ internal static bool tolerance(float64 a, float64 b, float64 e) {
     if (d < 0D) {
         d = -d;
     }
+
     // note: b is correct (expected) value, a is actual value.
     // make error tolerance a fraction of b, not a.
     if (b != 0D) {
@@ -941,14 +913,12 @@ internal static bool veryclose(float64 a, float64 b) {
 
 internal static bool alike(float64 a, float64 b) {
     switch (ᐧ) {
-    case {} when a != a && b != b: {
+    case {} when a != a && b != b: { // math.IsNaN(a) && math.IsNaN(b):
         return true;
     }
     case {} when a == b: {
         return math.Signbit(a) == math.Signbit(b);
     }}
-
-    // math.IsNaN(a) && math.IsNaN(b):
     return false;
 }
 

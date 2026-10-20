@@ -27,11 +27,13 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
     if (err != default!) {
         return (default!, false);
     }
+
     // The go version is stored separately from other build info, mostly for
     // historical reasons. It is not part of the modinfo() string, and
     // ParseBuildInfo does not recognize it. We inject it here to hide this
     // awkwardness from the user.
     bi.Value.GoVersion = runtime.Version();
+
     return (bi, true);
 }
 
@@ -39,25 +41,25 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
 partial struct BuildInfo {
     // GoVersion is the version of the Go toolchain that built the binary
     // (for example, "go1.19.2").
-    public @string GoVersion;
+    public @string GoVersion; /*`json:",omitempty"`*/
     // Path is the package path of the main package for the binary
     // (for example, "golang.org/x/tools/cmd/stringer").
-    public @string Path;
+    public @string Path; /*`json:",omitempty"`*/
     // Main describes the module that contains the main package for the binary.
-    public Module Main;
+    public Module Main; /*`json:""`*/
     // Deps describes all the dependency modules, both direct and indirect,
     // that contributed packages to the build of this binary.
-    public slice<ж<Module>> Deps;
+    public slice<ж<Module>> Deps; /*`json:",omitempty"`*/
     // Settings describes the build settings used to build the binary.
-    public slice<BuildSetting> Settings;
+    public slice<BuildSetting> Settings; /*`json:",omitempty"`*/
 }
 
 // A Module describes a single module included in a build.
 partial struct Module {
-    public @string Path; // module path
-    public @string Version; // module version
-    public @string Sum; // checksum
-    public ж<Module> Replace; // replaced by this module
+    public @string Path; /*`json:",omitempty"`*/ // module path
+    public @string Version; /*`json:",omitempty"`*/ // module version
+    public @string Sum; /*`json:",omitempty"`*/ // checksum
+    public ж<Module> Replace; /*`json:",omitempty"`*/ // replaced by this module
 }
 
 // A BuildSetting is a key-value pair describing one setting that influenced a build.
@@ -83,8 +85,9 @@ partial struct Module {
 partial struct BuildSetting {
     // Key and Value describe the build setting.
     // Key must not contain an equals sign, space, tab, or newline.
+    public @string Key; /*`json:",omitempty"`*/
     // Value must not contain newlines ('\n').
-    public @string Key, Value;
+    public @string Value; /*`json:",omitempty"`*/
 }
 
 // quoteKey reports whether key is required to be quoted.
@@ -144,6 +147,7 @@ public static @string String(this ref BuildInfo bi) {
         }
         fmt.Fprintf(new strings_BuilderжWriter(buf), "build\t%s=%s\n"u8, key, value);
     }
+
     return buf.String();
 }
 
@@ -185,6 +189,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                 err = fmt.Errorf("could not parse Go build info: line %d: %w"u8, lineNum, err);
             }
         }, ref ᒐ);
+
         @string pathLine = pathLineᶜ;
         @string modLine = modLineᶜ;
         @string depLine = depLineᶜ;
@@ -192,6 +197,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
         @string buildLine = buildLineᶜ;
         @string newline = newlineᶜ;
         @string tab = tabᶜ;
+
         (Module, error) readModuleLine(slice<@string> elem) {
             if (len(elem) != 2 && len(elem) != 3) {
                 return (new Module(nil), fmt.Errorf("expected 2 or 3 columns; got %d"u8, len(elem)));
@@ -207,6 +213,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                 Sum: sum
             ), default!);
         }
+
         bi = @new<BuildInfo>();
         ж<Module> last = default!;
         @string line = default!;
@@ -263,6 +270,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                 if (len(kv) < 1) {
                     (bi, err) = (default!, fmt.Errorf("build line missing '='"u8)); goto ᒐdone;
                 }
+
                 @string key = default!;
                 @string rawValue = default!;
                 switch (kv[0]) {
@@ -316,12 +324,11 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                         }
                         break;
                     }}
-
                 }
+
                 bi.Value.Settings = append((~bi).Settings, new BuildSetting(Key: key, Value: value));
                 break;
             }}
-
             lineNum++;
         }
         (bi, err) = (bi, default!);

@@ -71,6 +71,12 @@ using static go.archive.tar_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -79,13 +85,13 @@ using static go.archive.tar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAkKgoKCgoKmgpQAVJwBAEqgAYAABlLGgpSCgpSkpKSklAACFPKCgoKCgpSCpgACFgAIAoKCgoKUgoKUlIIAHSgADAKChKKC2IKCgoKUgoKAgoKkgoKUpoCCtqKCgpSCgoKCgpSmgIK2ooKUgoKUgoKCgpSCgoKCgpSmgIK6koKCgoKCgoKCgoKCgoKCgoailpK2pIKClIKkgqiCgpSClIKCgKS0tNaClIKCABk4gIKClKSClKSkpLaokgAHEICigKKAooCmkoKUqMSWgpSClIKogKSkpKSkgqS2lKSCpKSkpqaCABNGAAsCgpSC2pSCtIK0grSClMa0pKSClIKUgriApoKCgoKCgoKUgoKUpIKAgoKCgoKUgoK2gpQADiCilKQ=", "350-376:1;377-395:2;396-423:3", "", "703=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
-[assembly: go.GoPositionMap("archive/tar/format.go", "format.cs", "ABzYAYCigKKAooCk6IKCgoKmlKSkABYwogAHELCioKKgoqCigKrUkoKCgqiCgoKUpKSkzNTIkrSCgrSCtLqigoKCrvKigpSClKiS2oCigKKAooCigKKAooCigKKA2KCigKKAooCigKKAooCigKKAooCigNigooCigKKAooCigKKAooCigKKAooDYoKKAooCigKKAooCigKKAyICigKKAyICigA==")]
-[assembly: go.GoPositionMap("archive/tar/reader.go", "reader.cs", "ACVOkgACHAANAoKUgoKCgoKmpqKC7oKUgIKkgIKkhIKClICCpJaUgoKClIKCAAcQpIKCgpaClKSkqoCipIKUgpSCgpSsgKKqgKKokpSCAAUQ0pKClIKWgoKqwoKCgpS6goKUgpSu5JKSlLS0pLSkloCCpIKClIKCgpSogpSosoKClIKUpKSkpIKkgqSkpKSkgoKUtoKmgqqigoKUirSCgoKClISWlpSktoKUAAIWAAsEgIKkgoCCpIKUqIKCloKWgoKCgoKCgoKWgoKCgoKEgpSCgoigkoKUgoTGgoKCtIKCgoCCpICCAAIwABUCgoKAgqTGgqYAAhYADgiClISCgoKUgoKClIKUgoKClJaUgIKkgpQAAxwACgIABRKSgoKClICCpIKCgri6goKCuoCCpIKCzICCpIKCgoKClJSqxoKCgqiCgpSCuoKCgoKClIKUAAIaAAoCgpSCgpQAAhoACgKClIKClAAIErKClIKClJSkpAAICIKokqiSAAkUsoKCloKCgoKCkoKkgpSCgoKogpSkpKSkyMKCgoCCtoKWgoKCgoKSgqSCgoKUlIKCzIKCloKUpKSkyIKkgtqCgqqigoKUqtKCgoKUgpSqooKClKiawoDKgpSCgpS4goKU", "407-407:1;411-411:2;539-556:1;560-564:2", "", "368=Contains/1/1/2;452=modTime/1/1/1,Invoke/5/7/1,devMajor/1/1/1,Invoke/6/7/1,devMinor/1/1/1,Invoke/7/7/1")]
+[assembly: go.GoPositionMap("archive/tar/common.go", "common.cs", "AB8+loKCgoKCgoKCAAkKooKCgoKmgpQASZwBAEqgAYAAJlLGgpSCgpSkpKSUlAACFPKCgoKCgpSCpgACFgAIAoKCgoKUgoKUlIIAHSgADAKClKKC2IKCgoKUgoKAgoKkgoKUpoCCtqKCgpSCgoKCgpSmgIK2ooKUgoKUgoKCgpSCgoKCgpSmgILKkoKCgoKCgoKCgoKCgoKCgpaipoK2pIKClIKUgriCgpSClIKCgKS0tMaClIKCABs4gIKClKSClKSkpKaokgAHEICigKKAooCmkoKUqMSmgpSClIK4gKSkpKSkgqS2lKSCpKSkpqaCABhGAAsCgpSCypSCtIK0grSClMa0pJSClIKUgriApoKCgoKCgoKUgoKUpIKAgoKCgoKUgoK2gpQADiCilKQ=", "350-376:1;377-395:2;396-423:3", "", "735=Name/1/1/1,ModTime/1/1/2,Perm/1/1/3")]
+[assembly: go.GoPositionMap("archive/tar/format.go", "format.cs", "AGrYAYCigKKAooCk6KKCgoKmlKSkABk8ogAHELCioKKgoqCigKrUkoKCgriCgoKUpKSkvNTYgrSCgrSCtLqigoKCrvKigpSClKiS2oCigKKAooCigKKAooCigKKA2KCigKKAooCigKKAooCigKKAooCigNigooCigKKAooCigKKAooCigKKAooDYoKKAooCigKKAooCigKKAyICigKKAyICigA==")]
+[assembly: go.GoPositionMap("archive/tar/reader.go", "reader.cs", "ACVOkgACHAANAoKUgoKCgoKmpqKC/oKUgIKkgIKklIKClICCpKaUgoKClIKCAAcQpIKCgqaClKSUyoCCpIKUgpSCgpTcgILagILIgpSCAAQQ0pKClIKmgoKqwoKCgpTKgoKUgpSu5JKSlLS0pLSUpoCCpIKClIKCgpS4gpSosoKClIKUpKSkpIKkgqSkpKSkgoKUpoKmgqrCgoKUmsSCgoKClJSmhpSkpoKUAAIWAAsEgIKkgoCCpIKUuIKCpoKmgoKCgoKCgoKmgoKCgoKUgpSCgriCgpSChMaCgoK0goKCgIKkgIIAGDCCgoKAgqS2gqYAAhYADgiClJSCgoKUgoKCgpSClIKCgpSCgoK4lICCpIKClJQAAhoACgIABhKSgoKClICCpIKCgrjKgoKCyoCCpIKC3ICCpIKCgoKClIKCpqrGgoKCuIKClILKgoKCgoKUgoKUlKaCgpQAAhoACgKClIKClAACGgAKAoKUgoKUAAgSsoKUgoKUlKSk+IKokqiSAAkUsoKCpoKCgoKCgoKUgpSCgoK4gpSkpKSkuMKCgoCCtoKmgoKCgoKCgpSCgoKUlIKC3IKCpoKUpKSkuIKkgtqCgqqigoKUqtKCgoKUgpSqooKClKiawoDKgpSCgpTIgoKU", "407-407:1;411-411:2;546-563:1;567-571:2", "", "381=Contains/1/1/2;467=modTime/1/1/1,Invoke/5/7/1,devMajor/1/1/1,Invoke/6/7/1,devMinor/1/1/1,Invoke/7/7/1")]
 [assembly: go.GoPositionMap("archive/tar/stat_actime2.go", "stat_actime2.cs", "AAscorai")]
-[assembly: go.GoPositionMap("archive/tar/stat_unix.go", "stat_unix.cs", "ABIkggAJDqKCgpSCgriAgpKAgoK0gIKSgIKCxoKWgoKUkoKCpoKCgoKmgoKmgoKmgoKmgoKCpoKCggAMCg==")]
-[assembly: go.GoPositionMap("archive/tar/strconv.go", "strconv.cs", "AA0gkqiSgoKmqqKClIKCgqYAChqigIKkqJKClIKCzIKCAAMW8oKs6IzSgpaCooKClIKClJSCgpSClKiqooKCloKCgpSCloKm3ISClIKClKaCgoKWlICCpKqigqyylpaCgpSCqIKUgpSUgoKUqqKSgqiCgoKClKz0goKogoKUgoKoooKogoKWgpSqooKWgoKCloKClAACGgAKAoKUlKQ=")]
-[assembly: go.GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClICCpICCpIKu8oCCpKiCgpQABxKCgoKWgpSCpIKkgqTItJKAgqiSgoKCgpTmsgAjSJaChKSCgoKUmJKCgoKClJSCgpSCgpSAgrqSgJKCgoCCAA4e1rSSgoKAgraCgoCCupKCgoKClIIAJ1CCgIK4lICCpJQABhwACQKEgoKWgoKCgoKCgoKEgoKCgoSs0paCgpSEgoKCgoKCgoKCgoKogIKkgqzSgIKkgIKkgpSCgtyyooKUgpSCgqaClIKClIKClICCpIKUgoKUkoLsooKCkoKSgpaCgoKClAACFPKClIKClAACGgAKAoKUgoKUrLKClIKogoKoggAIErKCgpSCgpSUpKQACAiCqJKokgAJFLKCgpaCgoKCgpKCpIKUgoKCqIKUpKSkpMjCgoKAgraCloKCgoKCkoKCgpSkgpSCgsyCgpaClKSkpKTIgqaC7IKCgqaokoKUpKQ=", "209-209:1;407-443:1")]
+[assembly: go.GoPositionMap("archive/tar/stat_unix.go", "stat_unix.cs", "ABIkggAJDqKCgpSCgriAgpKAgoK0gIKSgIKCxoKmgoKUkoKCtoKCgoK2goK2goK2goK2goKCtoKCgto=")]
+[assembly: go.GoPositionMap("archive/tar/strconv.go", "strconv.cs", "AA0gkqiSgoKmqsKClIKCgqYAChqigIKkqJKClIKC3IKCAAMW8oKs6IzSgqaCooKClIKClJSCgpSClLiqooKCpoKCgpSCpoKm3JSClIKClKaCgoKmlICCpKqigqyypqaCgpSCyoKCgKSkxoKClKqikoK4goKCgpSs9IKCuIKClIKCuKKCuIKCpoKUqqKCpoKCgqaCgpQAAhoACgKClJSk")]
+[assembly: go.GoPositionMap("archive/tar/writer.go", "writer.cs", "ACJIkgAJHtKClICCpICCpIKu8oCCpLiCgpQACBKCgoKmgpSCpIKkgqS4tJKAgriSgoKCgpTmsgAkSKaChKSCgoKUqJKCgoKClJSCgpSCgpSAgsqSgJKCgoCCAA8e1rSSgoKAgraCgoCCypKCgoKClIIAJ1CCgILIlICCpJQABhwACQKUgoKmgoKCgoKCgoKUgoKCgpSs0qaCgpSUgoKCgoKCgoKCgoK4gIKkgqzSgIKkgIKkgpSCgtyyooKUgpSCgpSCgIKCgoKkgqSCgpSCgpSAgqSClIKClJKC7KKCgpKCkoKmgoKCgpQAAhTygpSCgpQAAhoACgKClIKClKyygpSCuIKCuIIACBKygoKUgoKUlKSk+IKokqiSAAkUsoKCpoKCgoKCgoKUgpSCgoK4gpSkpKSkuMKCgoCCtoKmgoKCgoKCgoKClJSClIKC3IKCpoKUpKSkpLiCpoLsgoKCpqiSgpSkpA==", "209-209:1;407-449:1")]
 // </GoSourcePositionMaps>
 
 namespace go.archive;

@@ -40,12 +40,14 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
         }
         f.Add(b);
     }
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
         var (r, errΔ2) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)), (int64)len(b));
         if (errΔ2 != default!) {
             return;
         }
         var files = new FuzzReader_file[]{}.slice();
+
         foreach (var (_, fΔ1) in (~r).File) {
             var (fr, errΔ3) = fΔ1.Open();
             if (errΔ3 != default!) {
@@ -62,11 +64,13 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
                 }
             }
         }
+
         // If we were unable to read anything out of the archive don't
         // bother trying to roundtrip it.
         if (len(files) == 0) {
             return;
         }
+
         var w = NewWriter(io.Discard);
         foreach (var (_, fΔ2) in files) {
             var (ww, errΔ5) = w.CreateHeader(fΔ2.header);
@@ -79,14 +83,15 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
                 }
             }
         }
+
         {
             var errΔ7 = w.Close(); if (errΔ7 != default!) {
                 t.Fatalf("Unable to write archive: %s"u8, errΔ7);
             }
         }
+
+        // TODO: We may want to check if the archive roundtrips.
     });
 }
-
-// TODO: We may want to check if the archive roundtrips.
 
 } // end zip_internal_test_package

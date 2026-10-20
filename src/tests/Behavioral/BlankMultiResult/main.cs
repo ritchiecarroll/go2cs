@@ -23,6 +23,7 @@ internal static void Main() {
     fmt.Println(a, b);
     var (c, d) = match(1, 9);
     fmt.Println(c, d);
+
     var (lo, hi) = keyed(7, 3);
     fmt.Println(lo, hi);
 }

@@ -166,6 +166,7 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/hmac/crypto.internal.fips140.hmac.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/sha256/crypto.internal.fips140.sha256.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
+    <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
   </ItemGroup>
 
   <ItemGroup>

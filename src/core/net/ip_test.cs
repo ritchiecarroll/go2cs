@@ -13,10 +13,6 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-//6 zeroes in one group
-//5 zeroes in one group edge case
-// Issue 6628
-
 partial struct parseIPTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.net_package.IP @out;
@@ -41,9 +37,11 @@ internal static void initᴛparseIPTests() { parseIPTests = new parseIPTestsᴛ1
     new("fe80::1%lo0"u8, default!),
     new("fe80::1%911"u8, default!),
     new(""u8, default!),
+    //6 zeroes in one group
     new("0:0:0:0:000000:ffff:127.1.2.3"u8, default!),
+    //5 zeroes in one group edge case
     new("0:0:0:0:00000:ffff:127.1.2.3"u8, default!),
-    new("a1:a2:a3:a4::b1:b2:b3:b4"u8, default!),
+    new("a1:a2:a3:a4::b1:b2:b3:b4"u8, default!), // Issue 6628
     new("127.001.002.003"u8, default!),
     new("::ffff:127.001.002.003"u8, default!),
     new("123.000.000.000"u8, default!),
@@ -72,8 +70,6 @@ public static void TestParseIP(ж<testing.T> Ꮡt) {
 }
 
 public static void TestLookupWithIP(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (_, err) = LookupIP(""u8);
     if (err == default!) {
         Ꮡt.Errorf(@"LookupIP("""") succeeded, should fail"u8);
@@ -82,6 +78,7 @@ public static void TestLookupWithIP(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Errorf(@"LookupIP("""") succeeded, should fail"u8);
     }
+
     // Test that LookupHost and LookupIP, which normally
     // expect host names, work with IP addresses.
     foreach (var (_, tt) in parseIPTests) {
@@ -100,6 +97,7 @@ public static void TestLookupWithIP(ж<testing.T> Ꮡt) {
                 Ꮡt.Logf("warning: LookupHost(%q) = %v, want error"u8, tt.@in, addrs);
             }
         }
+
         if (tt.@out != default!){
             var (ips, errΔ3) = LookupIP(tt.@in);
             if (len(ips) != 1 || !reflect.DeepEqual(ips[0], tt.@out) || errΔ3 != default!) {
@@ -120,6 +118,7 @@ public static void BenchmarkParseIP(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, tt) in parseIPTests) {
             ParseIP(tt.@in);
@@ -131,6 +130,7 @@ public static void BenchmarkParseIPValidIPv4(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     for (nint i = 0; i < b.N; i++) {
         ParseIP("192.0.2.1"u8);
     }
@@ -143,6 +143,7 @@ public static void BenchmarkParseIPValidIPv6(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     for (nint i = 0; i < b.N; i++) {
         ParseIP(db81ˢ);
     }
@@ -166,6 +167,7 @@ public static void TestMarshalEmptyIP(ж<testing.T> Ꮡt) {
     if (!reflect.DeepEqual(got, slice<byte>(""u8))) {
         Ꮡt.Errorf(@"got %#v, want []byte("""")"u8, got);
     }
+
     var buf = new slice<byte>(4);
     (got, err) = ip.AppendText(buf);
     if (err != default!) {
@@ -176,12 +178,6 @@ public static void TestMarshalEmptyIP(ж<testing.T> Ꮡt) {
     }
 }
 
-// IPv4 address
-// IPv4-mapped IPv6 address
-// IPv6 address
-// IP wildcard equivalent address in Dial/Listen API
-// Opaque byte sequence
-
 partial struct ipStringTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IP @in;     // see RFC 791 and RFC 4291
     internal @string str; // see RFC 791, RFC 4291 and RFC 5952
@@ -190,6 +186,7 @@ partial struct ipStringTestsᴛ1 /*dyn*/ {
 }
 internal static slice<ж<ipStringTestsᴛ1>> ipStringTests;
 internal static void initᴛipStringTests() { ipStringTests = new ж<ipStringTestsᴛ1>[]{
+    // IPv4 address
     Ꮡ(new ipStringTestsᴛ1(
         new IP(new byte[]{192, 0, 2, 1}.slice()),
         "192.0.2.1"u8,
@@ -200,6 +197,8 @@ internal static void initᴛipStringTests() { ipStringTests = new ж<ipStringTes
         "0.0.0.0"u8,
         slice<byte>("0.0.0.0"u8),
         default!)),
+
+    // IPv4-mapped IPv6 address
     Ꮡ(new ipStringTestsᴛ1(
         new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 192, 0, 2, 1}.slice()),
         "192.0.2.1"u8,
@@ -210,6 +209,8 @@ internal static void initᴛipStringTests() { ipStringTests = new ж<ipStringTes
         "0.0.0.0"u8,
         slice<byte>("0.0.0.0"u8),
         default!)),
+
+    // IPv6 address
     Ꮡ(new ipStringTestsᴛ1(
         new IP(new byte[]{0x20, 0x1, 0xd, 0xb8, 0, 0, 0, 0, 0, 0, 0x1, 0x23, 0, 0x12, 0, 0x1}.slice()),
         "2001:db8::123:12:1"u8,
@@ -255,11 +256,15 @@ internal static void initᴛipStringTests() { ipStringTests = new ж<ipStringTes
         "::"u8,
         slice<byte>("::"u8),
         default!)),
+
+    // IP wildcard equivalent address in Dial/Listen API
     Ꮡ(new ipStringTestsᴛ1(
         default!,
         "<nil>"u8,
         default!,
         default!)),
+
+    // Opaque byte sequence
     Ꮡ(new ipStringTestsᴛ1(
         new IP(new byte[]{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}.slice()),
         "?0123456789abcdef"u8,
@@ -339,9 +344,11 @@ internal static @string sink;
 
 public static void BenchmarkIPString(ж<testing.B> Ꮡb) {
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     Ꮡb.Run(iPv4ˢ, (ж<testing.B> bΔ1) => {
         benchmarkIPString(bΔ1, IPv4len);
     });
+
     Ꮡb.Run(iPv6ˢ, (ж<testing.B> bΔ2) => {
         benchmarkIPString(bΔ2, IPv6len);
     });
@@ -361,7 +368,6 @@ internal static void benchmarkIPString(ж<testing.B> Ꮡb, nint size) {
     }
 }
 
-
 partial struct ipMaskTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IP @in;
     internal global::go.net_package.IPMask mask;
@@ -370,11 +376,11 @@ partial struct ipMaskTestsᴛ1 /*dyn*/ {
 internal static slice<ipMaskTestsᴛ1> ipMaskTests;
 internal static void initᴛipMaskTests() { ipMaskTests = new ipMaskTestsᴛ1[]{
     new(IPv4(192, 168, 1, 127), IPv4Mask(255, 255, 255, 128), IPv4(192, 168, 1, 0)),
-    new(IPv4(192, 168, 1, 127), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("255.255.255.192"u8))), IPv4(192, 168, 1, 64)),
-    new(IPv4(192, 168, 1, 127), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffe0"u8))), IPv4(192, 168, 1, 96)),
+    new(IPv4(192, 168, 1, 127), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("255.255.255.192"u8)), IPv4(192, 168, 1, 64)),
+    new(IPv4(192, 168, 1, 127), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffe0"u8)), IPv4(192, 168, 1, 96)),
     new(IPv4(192, 168, 1, 127), IPv4Mask(255, 0, 255, 0), IPv4(192, 0, 1, 0)),
-    new(ParseIP("2001:db8::1"u8), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8))), ParseIP("2001:d80::"u8)),
-    new(ParseIP("2001:db8::1"u8), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("f0f0:0f0f::"u8))), ParseIP("2000:d08::"u8))
+    new(ParseIP("2001:db8::1"u8), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8)), ParseIP("2001:d80::"u8)),
+    new(ParseIP("2001:db8::1"u8), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("f0f0:0f0f::"u8)), ParseIP("2000:d08::"u8))
 }.slice(); }
 
 public static void TestIPMask(ж<testing.T> Ꮡt) {
@@ -387,7 +393,6 @@ public static void TestIPMask(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct ipMaskStringTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IPMask @in;
     internal @string @out;
@@ -395,8 +400,8 @@ partial struct ipMaskStringTestsᴛ1 /*dyn*/ {
 internal static slice<ipMaskStringTestsᴛ1> ipMaskStringTests = new ipMaskStringTestsᴛ1[]{
     new(IPv4Mask(255, 255, 255, 240), "fffffff0"u8),
     new(IPv4Mask(255, 0, 128, 0), "ff008000"u8),
-    new(((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8))), "ffffff80000000000000000000000000"u8),
-    new(((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ef00:ff80::cafe:0"u8))), "ef00ff800000000000000000cafe0000"u8),
+    new((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8)), "ffffff80000000000000000000000000"u8),
+    new((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ef00:ff80::cafe:0"u8)), "ef00ff800000000000000000cafe0000"u8),
     new(default!, "<nil>"u8)
 }.slice();
 
@@ -414,13 +419,13 @@ public static void BenchmarkIPMaskString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, tt) in ipMaskStringTests) {
             sink = tt.@in.String();
         }
     }
 }
-
 
 partial struct parseCIDRTestsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -472,7 +477,6 @@ public static void TestParseCIDR(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct ipNetContainsTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IP ip;
     internal ж<global::go.net_package.IPNet> net;
@@ -500,7 +504,6 @@ public static void TestIPNetContains(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct ipNetStringTestsᴛ1 /*dyn*/ {
     internal ж<global::go.net_package.IPNet> @in;
     internal @string @out;
@@ -523,7 +526,6 @@ public static void TestIPNetString(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct cidrMaskTestsᴛ1 /*dyn*/ {
     internal nint ones;
@@ -564,7 +566,6 @@ internal static global::go.net_package.IPMask v6mask = new IPMask(new byte[]{0xf
 internal static global::go.net_package.IP badaddr = new IP(new byte[]{192, 168, 0}.slice());
 internal static global::go.net_package.IPMask badmask = new IPMask(new byte[]{255, 255, 0}.slice());
 internal static global::go.net_package.IPMask v4maskzero = new IPMask(new byte[]{0, 0, 0, 0}.slice());
-
 
 partial struct networkNumberAndMaskTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IPNet @in;
@@ -613,49 +614,46 @@ internal partial struct TestSplitHostPort_typeᴛ1 /*dyn*/ {
 }
 
 public static void TestSplitHostPort(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    foreach (var (_, tt) in new TestSplitHostPort_type[]{ // Host name
-
+    foreach (var (_, tt) in new TestSplitHostPort_type[]{
+        // Host name
         new("localhost:http"u8, "localhost"u8, "http"u8),
-        new("localhost:80"u8, "localhost"u8, "80"u8), // Go-specific host name with zone identifier
+        new("localhost:80"u8, "localhost"u8, "80"u8),
 
+        // Go-specific host name with zone identifier
         new("localhost%lo0:http"u8, "localhost%lo0"u8, "http"u8),
         new("localhost%lo0:80"u8, "localhost%lo0"u8, "80"u8),
         new("[localhost%lo0]:http"u8, "localhost%lo0"u8, "http"u8), // Go 1 behavior
-
         new("[localhost%lo0]:80"u8, "localhost%lo0"u8, "80"u8), // Go 1 behavior
- // IP literal
 
+        // IP literal
         new("127.0.0.1:http"u8, "127.0.0.1"u8, "http"u8),
         new("127.0.0.1:80"u8, "127.0.0.1"u8, "80"u8),
         new("[::1]:http"u8, "::1"u8, "http"u8),
-        new("[::1]:80"u8, "::1"u8, "80"u8), // IP literal with zone identifier
+        new("[::1]:80"u8, "::1"u8, "80"u8),
 
+        // IP literal with zone identifier
         new("[::1%lo0]:http"u8, "::1%lo0"u8, "http"u8),
-        new("[::1%lo0]:80"u8, "::1%lo0"u8, "80"u8), // Go-specific wildcard for host name
+        new("[::1%lo0]:80"u8, "::1%lo0"u8, "80"u8),
 
+        // Go-specific wildcard for host name
         new(":http"u8, ""u8, "http"u8), // Go 1 behavior
-
         new(":80"u8, ""u8, "80"u8), // Go 1 behavior
- // Go-specific wildcard for service name or transport port number
 
+        // Go-specific wildcard for service name or transport port number
         new("golang.org:"u8, "golang.org"u8, ""u8), // Go 1 behavior
-
         new("127.0.0.1:"u8, "127.0.0.1"u8, ""u8), // Go 1 behavior
-
         new("[::1]:"u8, "::1"u8, ""u8), // Go 1 behavior
- // Opaque service name
 
-        new("golang.org:https%foo"u8, "golang.org"u8, "https%foo"u8)
+        // Opaque service name
+        new("golang.org:https%foo"u8, "golang.org"u8, "https%foo"u8) // Go 1 behavior
     }.slice()) {
-        // Go 1 behavior
         {
             var (host, port, err) = SplitHostPort(tt.hostPort); if (host != tt.host || port != tt.port || err != default!) {
                 Ꮡt.Errorf("SplitHostPort(%q) = %q, %q, %v; want %q, %q, nil"u8, tt.hostPort, host, port, err, tt.host, tt.port);
             }
         }
     }
+
     foreach (var (_, tt) in new TestSplitHostPort_typeᴛ1[]{
         new("golang.org"u8, "missing port in address"u8),
         new("127.0.0.1"u8, "missing port in address"u8),
@@ -665,8 +663,9 @@ public static void TestSplitHostPort(ж<testing.T> Ꮡt) {
         new("localhost%lo0"u8, "missing port in address"u8),
         new("::1"u8, "too many colons in address"u8),
         new("fe80::1%lo0"u8, "too many colons in address"u8),
-        new("fe80::1%lo0:80"u8, "too many colons in address"u8), // Test cases that didn't fail in Go 1
+        new("fe80::1%lo0:80"u8, "too many colons in address"u8),
 
+        // Test cases that didn't fail in Go 1
         new("[foo:bar]"u8, "missing port in address"u8),
         new("[foo:bar]baz"u8, "missing port in address"u8),
         new("[foo]bar:baz"u8, "missing port in address"u8),
@@ -698,37 +697,37 @@ internal partial struct TestJoinHostPort_type /*dyn*/ {
 }
 
 public static void TestJoinHostPort(ж<testing.T> Ꮡt) {
-    foreach (var (_, tt) in new TestJoinHostPort_type[]{ // Host name
-
+    foreach (var (_, tt) in new TestJoinHostPort_type[]{
+        // Host name
         new("localhost"u8, "http"u8, "localhost:http"u8),
-        new("localhost"u8, "80"u8, "localhost:80"u8), // Go-specific host name with zone identifier
+        new("localhost"u8, "80"u8, "localhost:80"u8),
 
+        // Go-specific host name with zone identifier
         new("localhost%lo0"u8, "http"u8, "localhost%lo0:http"u8),
-        new("localhost%lo0"u8, "80"u8, "localhost%lo0:80"u8), // IP literal
+        new("localhost%lo0"u8, "80"u8, "localhost%lo0:80"u8),
 
+        // IP literal
         new("127.0.0.1"u8, "http"u8, "127.0.0.1:http"u8),
         new("127.0.0.1"u8, "80"u8, "127.0.0.1:80"u8),
         new("::1"u8, "http"u8, "[::1]:http"u8),
-        new("::1"u8, "80"u8, "[::1]:80"u8), // IP literal with zone identifier
+        new("::1"u8, "80"u8, "[::1]:80"u8),
 
+        // IP literal with zone identifier
         new("::1%lo0"u8, "http"u8, "[::1%lo0]:http"u8),
-        new("::1%lo0"u8, "80"u8, "[::1%lo0]:80"u8), // Go-specific wildcard for host name
+        new("::1%lo0"u8, "80"u8, "[::1%lo0]:80"u8),
 
+        // Go-specific wildcard for host name
         new(""u8, "http"u8, ":http"u8), // Go 1 behavior
-
         new(""u8, "80"u8, ":80"u8), // Go 1 behavior
- // Go-specific wildcard for service name or transport port number
 
+        // Go-specific wildcard for service name or transport port number
         new("golang.org"u8, ""u8, "golang.org:"u8), // Go 1 behavior
-
         new("127.0.0.1"u8, ""u8, "127.0.0.1:"u8), // Go 1 behavior
-
         new("::1"u8, ""u8, "[::1]:"u8), // Go 1 behavior
- // Opaque service name
 
-        new("golang.org"u8, "https%foo"u8, "golang.org:https%foo"u8)
+        // Opaque service name
+        new("golang.org"u8, "https%foo"u8, "golang.org:https%foo"u8) // Go 1 behavior
     }.slice()) {
-        // Go 1 behavior
         {
             @string hostPort = JoinHostPort(tt.host, tt.port); if (hostPort != tt.hostPort) {
                 Ꮡt.Errorf("JoinHostPort(%q, %q) = %q; want %q"u8, tt.host, tt.port, hostPort, tt.hostPort);
@@ -736,7 +735,6 @@ public static void TestJoinHostPort(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct ipAddrFamilyTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IP @in;
@@ -776,7 +774,6 @@ public static void TestIPAddrFamily(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct ipAddrScopeTestsᴛ1 /*dyn*/ {
     internal Func<global::go.net_package.IP, bool> scope;

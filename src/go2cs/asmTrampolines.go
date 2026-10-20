@@ -410,15 +410,17 @@ func isGoRootSourceDir(dir string, goRoot string) bool {
 }
 
 // asmBuildContext is the go/build context the conversion selects assembly with: the target platform,
-// the -tags set and the LOADER toolchain's release tags (loaderReleaseTags). The `cgo` constraint is
-// satisfied exactly as CheckBuildConstraints satisfies it for the package's Go files: only when -tags
-// names it, so a .s file and the Go file declaring its functions are never selected under different
-// answers.
+// the -tags set and the LOADER toolchain's release and tool tags (loaderReleaseTags, loaderToolTags),
+// never the ones compiled into this binary, so an experiment-gated .s file is chosen by the GOROOT
+// being converted. The `cgo` constraint is satisfied exactly as CheckBuildConstraints satisfies it for
+// the package's Go files: only when -tags names it, so a .s file and the Go file declaring its
+// functions are never selected under different answers.
 func asmBuildContext(sourceDir string, targetPlatform string, buildTags []string) build.Context {
 	context := build.Default
 	context.GOOS, context.GOARCH, _ = strings.Cut(targetPlatform, "/")
 	context.BuildTags = append([]string(nil), buildTags...)
 	context.ReleaseTags = loaderReleaseTags(sourceDir)
+	context.ToolTags = loaderToolTags(sourceDir)
 	context.CgoEnabled = slices.Contains(buildTags, "cgo")
 
 	return context

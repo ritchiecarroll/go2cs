@@ -22,6 +22,7 @@ internal static void Main() {
     fmt.Println((~registry).count);
     fmt.Println(len((~sizedTable).codes), (nint)(tableSize));
     fmt.Println(len(chunkHolder.chunks), (nint)(numChunks));
+
     chunkHolder.chunks[numChunks - 1] = 7;
     fmt.Println(chunkHolder.chunks[numChunks - 1]);
     fmt.Println(len(kindNames), kindNames[kindFile], kindNames[kindPipe]);

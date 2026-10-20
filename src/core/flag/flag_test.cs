@@ -73,6 +73,7 @@ public static void TestEverything(ж<testing.T> Ꮡt) {
     Duration(testDurationˢ, 0, timeDurationValueˢ);
     Func(testFuncˢ, funcValueˢ, (@string _) => default!);
     BoolFunc(testBoolfuncˢ, funcˢ, (@string _) => default!);
+
     ref var m = ref heap<map<@string, ж<flag.Flag>>>(out var Ꮡm);
     m = new map<@string, ж<flag.Flag>>();
     @string desired = "0"u8;
@@ -101,7 +102,6 @@ public static void TestEverything(ж<testing.T> Ꮡt) {
                 ok = true;
                 break;
             }}
-
             if (!ok) {
                 Ꮡt.Error(visitBadValueˢ, (~f).Value.String(), forˢ, (~f).Name);
             }
@@ -161,6 +161,7 @@ public static void TestGet(ж<testing.T> Ꮡt) {
     String(testStringˢ, "5"u8, stringValueˢ);
     Float64(testFloat64ˢ, 6D, float64Valueˢ);
     Duration(testDurationˢ, 7, timeDurationValueˢ);
+
     var visitor = (ж<flag.Flag> f) => {
         if (len((~f).Name) > 5 && (~f).Name[0..5] == "test_") {
             var (g, ok) = (~f).Value._<Getter>(ᐧ);
@@ -193,7 +194,6 @@ public static void TestGet(ж<testing.T> Ꮡt) {
             else if (exprᴛ1 == "test_duration"u8) {
                 ok = AreEqual(g.Get(), ((time.Duration)7));
             }
-
             if (!ok) {
                 Ꮡt.Errorf("Visit: bad value %T(%v) for %s"u8, g.Get(), g.Get(), (~f).Name);
             }
@@ -332,10 +332,11 @@ public static void TestFlagSetParse(ж<testing.T> Ꮡt) {
     testParse(NewFlagSet(testˢ, ContinueOnError), Ꮡt);
 }
 
+// Declare a user-defined flag type.
 partial struct flagVar /*[]@string*/;
 
 internal static @string ΔString(this ref flagVar f) {
-    return fmt.Sprint(((slice<@string>)(f)));
+    return fmt.Sprint((slice<@string>)(f));
 }
 
 internal static error ΔSet(this ref flagVar f, @string value) {
@@ -474,9 +475,11 @@ public static void TestUserDefinedBool(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if (b.count != 4) {
-        Ꮡt.Errorf("want: %d; got: %d"u8, (nint)(4), b.count);
+        Ꮡt.Errorf("want: %d; got: %d"u8, (nint)4, b.count);
     }
+
     if (err == default!) {
         Ꮡt.Error(expectedErrorGotNoneˢ);
     }
@@ -555,6 +558,7 @@ public static void TestChangingArgs(ж<testing.T> Ꮡt) {
         var after = Bool(afterˢ, false, ""u8);
         Parse();
         var args = Args();
+
         if (!before.Value || cmd != "subcmd"u8 || !after.Value || len(args) != 1 || args[0] != "args") {
             Ꮡt.Fatalf("expected true subcmd true [args] got %v %v %v %v"u8, before.Value, cmd, after.Value, args);
         }
@@ -677,7 +681,7 @@ internal static readonly @string defaultOutput = """
 panic calling String method on zero flag_test.zeroPanicker for flag ZP0: panic!
 panic calling String method on zero flag_test.zeroPanicker for flag ZP1: panic!
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string printDefaultsTestˢ = "print defaults test"u8;
@@ -785,6 +789,7 @@ public static void TestGetters(ж<testing.T> Ꮡt) {
     flagꓸErrorHandling expectedErrorHandling = ContinueOnError;
     var expectedOutput = ((Δio.Writer)new Δos.FileжWriter(Δos.Stderr));
     var fs = NewFlagSet(expectedName, expectedErrorHandling);
+
     if (fs.Name() != expectedName) {
         Ꮡt.Errorf("unexpected name: got %s, expected %s"u8, fs.Name(), expectedName);
     }
@@ -794,11 +799,13 @@ public static void TestGetters(ж<testing.T> Ꮡt) {
     if (!AreEqual(fs.Output(), expectedOutput)) {
         Ꮡt.Errorf("unexpected output: got %#v, expected %#v"u8, fs.Output(), expectedOutput);
     }
+
     expectedName = gopherˢ;
     expectedErrorHandling = ExitOnError;
     expectedOutput = new Δos.FileжWriter(Δos.Stdout);
     fs.Init(expectedName, expectedErrorHandling);
     fs.SetOutput(expectedOutput);
+
     if (fs.Name() != expectedName) {
         Ꮡt.Errorf("unexpected name: got %s, expected %s"u8, fs.Name(), expectedName);
     }
@@ -883,6 +890,7 @@ internal partial struct TestExitCode_tests /*dyn*/ {
 
 public static void TestExitCode(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new flag_test_package.testing_TжTB(Ꮡt));
+
     nint magic = 123;
     if (Δos.Getenv(goChildFlagˢ) != ""u8) {
         var fs = NewFlagSet(testˢ, ExitOnError);
@@ -893,6 +901,7 @@ public static void TestExitCode(ж<testing.T> Ꮡt) {
         fs.Parse(new @string[]{Δos.Getenv(goChildFlagˢ)}.slice());
         Δos.Exit(magic);
     }
+
     var tests = new TestExitCode_tests[]{
         new(
             flag: "-h"u8,
@@ -917,6 +926,7 @@ public static void TestExitCode(ж<testing.T> Ꮡt) {
             expectExit: magic
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         var test = vᴛ1;
 
@@ -985,14 +995,17 @@ public static void TestInvalidFlags(ж<testing.T> Ꮡt) {
             errorMsg: "flag \"foo=bar\" contains ="u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestInvalidFlags_tests(), out var Ꮡtest);
         test = vᴛ1;
 
         @string testName = fmt.Sprintf("FlagSet.Var(&v, %q, \"\")"u8, test.flag);
+
         var fs = NewFlagSet(""u8, ContinueOnError);
         var buf = Ꮡ(new strings.Builder(nil));
         fs.SetOutput(new flag_test_package.strings_BuilderжWriter(buf));
+
         var fsʗ1 = fs;
         var testʗ1 = test;
         mustPanic(Ꮡt, testName, test.errorMsg, () => {
@@ -1026,13 +1039,17 @@ public static void TestRedefinedFlags(ж<testing.T> Ꮡt) {
             errorMsg: "fs flag redefined: foo"u8
         )
     }.slice();
+
     foreach (var (_, test) in tests) {
         @string testName = fmt.Sprintf("flag redefined in FlagSet(%q)"u8, test.flagSetName);
+
         var fs = NewFlagSet(test.flagSetName, ContinueOnError);
         var buf = Ꮡ(new strings.Builder(nil));
         fs.SetOutput(new flag_test_package.strings_BuilderжWriter(buf));
+
         ref var v = ref heap<flagVar>(out var Ꮡv);
         fs.Var(new flag_test_package.flagVarжValue(Ꮡv), fooˢ, ""u8);
+
         var fsʗ1 = fs;
         mustPanic(Ꮡt, testName, test.errorMsg, () => {
             fsʗ1.Var(new flag_test_package.flagVarжValue(Ꮡv), fooˢ, ""u8);
@@ -1111,11 +1128,10 @@ internal static readonly @string flagMyFlagSetAtFlagTestˢ = "flag myFlag set at
 internal static readonly @string defaultˢ = "default"u8;
 
 public static void TestDefineAfterSet(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var flags = NewFlagSet(testˢ, ContinueOnError);
     // Set by itself doesn't panic.
     flags.Set(myFlagˢ, valueˢ);
+
     // Define-after-set panics.
     var flagsʗ1 = flags;
     mustPanic(Ꮡt, defineAfterSetˢ, flagMyFlagSetAtFlagTestˢ, () => {

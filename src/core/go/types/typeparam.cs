@@ -126,9 +126,10 @@ internal static void cleanup(this ref TypeParam t) {
 // iface returns the constraint interface of t.
 internal static ж<Interface> iface(this ref TypeParam t) {
     var bound = t.bound;
+
     // determine constraint interface
     ж<Interface> ityp = default!;
-    switch (under(bound).type()) {
+    switch (bound.Underlying().type()) {
     case ж<Basic> u: {
         if (!isValid(new BasicжΔType(u))) {
             // error is reported elsewhere
@@ -144,12 +145,14 @@ internal static ж<Interface> iface(this ref TypeParam t) {
         ityp = u;
         break;
     }}
+
     // If we don't have an interface, wrap constraint into an implicit interface.
     if (ityp == nil) {
         ityp = NewInterfaceType(default!, new ΔType[]{bound}.slice());
         ityp.Value.@implicit = true;
         t.bound = new InterfaceжΔType(ityp); // update t.bound for next time (optimization)
     }
+
     // compute type set if necessary
     if ((~ityp).tset == nil) {
         // pos is used for tracing output; start with the type parameter position.
@@ -162,6 +165,7 @@ internal static ж<Interface> iface(this ref TypeParam t) {
         }
         computeInterfaceTypeSet(t.check, pos, ityp);
     }
+
     return ityp;
 }
 
@@ -172,12 +176,12 @@ internal static bool @is(this ref TypeParam t, Func<ж<Δterm>, bool> f) {
     return t.iface().typeSet().@is(f);
 }
 
-// typeset is an iterator over the (type/underlying type) pairs of the
+// typeset reports whether f(t, y) is true for all (type/underlying type) pairs of the
 // specific type terms of t's constraint.
-// If there are no specific terms, typeset calls yield with (nil, nil).
-// In any case, typeset is guaranteed to call yield at least once.
-internal static void typeset(this ref TypeParam t, Func<ΔType, ΔType, bool> yield) {
-    t.iface().typeSet().typeset(yield);
+// If there are no specific terms, typeset returns f(nil, nil).
+// In any case, typeset is guaranteed to call f at least once.
+internal static bool typeset(this ref TypeParam t, Func<ΔType, ΔType, bool> f) {
+    return t.iface().typeSet().all(f);
 }
 
 } // end types_package

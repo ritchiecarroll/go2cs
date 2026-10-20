@@ -11,6 +11,7 @@
 namespace go;
 
 using atomic = @internal.runtime.atomic_package;
+using gc = @internal.runtime.gc_package;
 using sys = @internal.runtime.sys_package;
 using @internal.runtime;
 
@@ -45,10 +46,10 @@ partial struct mcentral {
 // Initialize a single central free list.
 internal static void init(this ref mcentral c, spanClass spc) {
     c.spanclass = spc;
-    lockInit(Ꮡ(c.partial, 0).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡ(c.partial, 1).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡ(c.full, 0).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
-    lockInit(Ꮡ(c.full, 1).of(spanSet.ᏑspineLock), lockRankSpanSetSpine);
+    lockInit(ref nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
+    lockInit(ref nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
+    lockInit(ref nonnil(ref c).full[0].spineLock, lockRankSpanSetSpine);
+    lockInit(ref nonnil(ref c).full[1].spineLock, lockRankSpanSetSpine);
 }
 
 // partialUnswept returns the spanSet which holds partially-filled
@@ -81,14 +82,16 @@ internal static readonly @string spanHasNoFreeObjectsˢ = "span has no free obje
 // Allocate a span to use in an mcache.
 internal static ж<mspan> cacheSpan(this ref mcentral c) {
     // Deduct credit for this span allocation and sweep if necessary.
-    var spanBytes = (uintptr)class_to_allocnpages[c.spanclass.sizeclass()] * (uintptr)_PageSize;
+    var spanBytes = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()] * (uintptr)pageSize;
     deductSweepCredit(spanBytes, 0);
+
     var traceDone = false;
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
         Δtrace.GCSweepStart();
         traceRelease(Δtrace);
     }
+
     // If we sweep spanBudget spans without finding any free
     // space, just allocate a fresh span. This limits the amount
     // of time we can spend trying to find free space and
@@ -103,8 +106,10 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
     // running free-to-used budget and switch to fresh span
     // allocation if the budget runs low.
     nint spanBudget = 100;
+
     ж<mspan> s = default!;
     sweepLocker sl = default!;
+
     // Try partial swept spans first.
     var sg = mheap_.sweepgen;
     {
@@ -112,6 +117,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
             goto havespan;
         }
     }
+
     sl = ᏑΔsweep.of(sweepdata.Ꮡactive).begin();
     if (sl.valid) {
         // Now try partial unswept spans.
@@ -128,13 +134,13 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
                     goto havespan;
                 }
             }
+            // We failed to get ownership of the span, which means it's being or
+            // has been swept by an asynchronous sweeper that just couldn't remove it
+            // from the unswept list. That sweeper took ownership of the span and
+            // responsibility for either freeing it to the heap or putting it on the
+            // right swept list. Either way, we should just ignore it (and it's unsafe
+            // for us to do anything else).
         }
-        // We failed to get ownership of the span, which means it's being or
-        // has been swept by an asynchronous sweeper that just couldn't remove it
-        // from the unswept list. That sweeper took ownership of the span and
-        // responsibility for either freeing it to the heap or putting it on the
-        // right swept list. Either way, we should just ignore it (and it's unsafe
-        // for us to do anything else).
         // Now try full unswept spans, sweeping them and putting them into the
         // right list if we fail to get a span.
         for (; spanBudget >= 0; spanBudget--) {
@@ -157,8 +163,8 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
                     c.fullSwept(sg).push(sΔ2.mspan);
                 }
             }
+            // See comment for partial unswept spans.
         }
-        // See comment for partial unswept spans.
         ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
     }
     Δtrace = traceAcquire();
@@ -167,11 +173,13 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
         traceDone = true;
         traceRelease(Δtrace);
     }
+
     // We failed to get a span from the mcentral so get one from mheap.
     s = c.grow();
     if (s == nil) {
         return default!;
     }
+
     // At this point s is a span that should have free slots.
 havespan:
     if (!traceDone) {
@@ -189,9 +197,11 @@ havespan:
     var whichByte = (uint16)(freeByteBase / 8);
     // Init alloc bits cache.
     s.refillAllocCache(whichByte);
+
     // Adjust the allocCache so that s.freeindex corresponds to the low bit in
     // s.allocCache.
     s.Value.allocCache >>= (int)((~s).freeindex % 64);
+
     return s;
 }
 
@@ -208,8 +218,10 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
     if (s.allocCount == 0) {
         @throw(uncachingSpanButSˢ);
     }
+
     var sg = mheap_.sweepgen;
     var stale = s.sweepgen == sg + 1;
+
     // Fix up sweepgen.
     if (stale){
         // Span was cached before sweep began. It's our
@@ -223,6 +235,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
         // Indicate that s is no longer cached.
         atomic.Store(Ꮡs.of(mspan.Ꮡsweepgen), sg);
     }
+
     // Put the span in the appropriate place.
     if (stale){
         // It's stale, so just sweep it. Sweeping will put it on
@@ -248,7 +261,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
 
 // grow allocates a new empty span from the heap and initializes it for c's size class.
 internal static ж<mspan> grow(this ref mcentral c) {
-    var npages = (uintptr)class_to_allocnpages[c.spanclass.sizeclass()];
+    var npages = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()];
     var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {
         return default!;

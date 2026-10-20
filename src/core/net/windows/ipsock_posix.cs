@@ -37,13 +37,13 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
 
         var exprᴛ1 = runtime.GOOS;
         if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
+            // Both ipv4 and ipv6 are faked; see net_fake.go.
             p.ipv4Enabled = true;
             p.ipv6Enabled = true;
             p.ipv4MappedIPv6Enabled = true;
             return;
         }
 
-        // Both ipv4 and ipv6 are faked; see net_fake.go.
         var (s, err) = sysSocket(syscall.AF_INET, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
         var exprᴛ2 = err;
         if (AreEqual(exprᴛ2, syscall.EAFNOSUPPORT) || AreEqual(exprᴛ2, syscall.EPROTONOSUPPORT)) {
@@ -52,21 +52,19 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
             poll.CloseFunc(s);
             p.ipv4Enabled = true;
         }
-
-// IPv6 communication capability
-// IPv4-mapped IPv6 address communication capability
         slice<probe_type> probes = new probe_type[]{
+            // IPv6 communication capability
             new(laddr: new TCPAddr(IP: ParseIP("::1"u8)), value: 1),
+            // IPv4-mapped IPv6 address communication capability
             new(laddr: new TCPAddr(IP: IPv4(127, 0, 0, 1)), value: 0)
         }.slice();
         var exprᴛ3 = runtime.GOOS;
         if (exprᴛ3 == "dragonfly"u8 || exprᴛ3 == "openbsd"u8) {
+            // The latest DragonFly BSD and OpenBSD kernels don't
+            // support IPV6_V6ONLY=0. They always return an error
+            // and we don't need to probe the capability.
             probes = probes[..1];
         }
-
-        // The latest DragonFly BSD and OpenBSD kernels don't
-        // support IPV6_V6ONLY=0. They always return an error
-        // and we don't need to probe the capability.
         foreach (var (i, _) in probes) {
             var (sΔ1, errΔ1) = sysSocket(syscall.AF_INET6, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
             if (errΔ1 != default!) {
@@ -163,6 +161,7 @@ internal static (nint family, bool ipv6only) favoriteAddrFamily(@string network,
         }
         return (laddr.family(), false);
     }
+
     if ((laddr == default! || laddr.family() == syscall.AF_INET) && (raddr == default! || raddr.family() == syscall.AF_INET)) {
         return (syscall.AF_INET, false);
     }
@@ -176,7 +175,6 @@ internal static (ж<netFD> fd, error err) internetSocket(context.Context ctx, @s
             raddr = raddr.toLocal(net);
         }
     }
-
     var (family, ipv6only) = favoriteAddrFamily(net, laddr, raddr, mode);
     return socket(ctx, net, family, sotype, proto, ipv6only, laddr, raddr, ctrlCtxFn);
 }
@@ -248,7 +246,6 @@ internal static (syscallꓸSockaddr, error) ipToSockaddr(nint family, IP ip, nin
         }
         return (new syscall.SockaddrInet6жΔSockaddr(Ꮡsa), default!);
     }
-
     return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid address family"u8, Addr: ip.String()))));
 }
 
@@ -278,9 +275,6 @@ internal static (syscall.SockaddrInet6, error) addrPortToSockaddrInet6(netip.Add
     // to an IPv4-mapped IPv6 address.
     // The error message is kept consistent with ipToSockaddrInet6.
     var addr = ap.Addr();
-    if (!addr.IsValid()) {
-        return (new syscall.SockaddrInet6(nil), new AddrErrorжerror(Ꮡ(new AddrError(Err: "non-IPv6 address"u8, Addr: addr.String()))));
-    }
     var sa = new syscall.SockaddrInet6(
         Addr: addr.As16(),
         Port: (nint)ap.Port(),

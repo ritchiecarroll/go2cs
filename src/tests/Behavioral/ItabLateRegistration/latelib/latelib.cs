@@ -10,8 +10,10 @@ public static (@string, nint) Prime() {
     c = new lib.Circle(R: 7);
     ref var q = ref heap<lib.Square>(out var Ꮡq);
     q = new lib.Square(S: 8);
+
     lib.Named n = new lib.CircleжNamed(Ꮡc);
     lib.Sized s = new lib.SquareжSized(Ꮡq);
+
     return (n.Name(), s.Size());
 }
 

@@ -12,9 +12,12 @@ using text;
 partial class printer_package {
 
 internal static void fixGoBuildLines(this ref printer p) {
+    var blockᴷ = new stackAppend<byte>();
+
     if (len(p.goBuild) + len(p.plusBuild) == 0) {
         return;
     }
+
     // Find latest possible placement of //go:build and // +build comments.
     // That's just after the last blank line before we find a non-comment.
     // (We'll add another blank line after our comment block.)
@@ -41,10 +44,12 @@ internal static void fixGoBuildLines(this ref printer p) {
             break;
         }
         pos++;
+
         if (blank) {
             insert = pos;
         }
     }
+
     // If there is a //go:build comment before the place we identified,
     // use that point instead. (Earlier in the file is always fine.)
     if (len(p.goBuild) > 0 && p.goBuild[0] < insert){
@@ -53,11 +58,12 @@ internal static void fixGoBuildLines(this ref printer p) {
     if (len(p.plusBuild) > 0 && p.plusBuild[0] < insert) {
         insert = p.plusBuild[0];
     }
+
     constraint.Expr x = default!;
     switch (len(p.goBuild)) {
     case 0: {
+        // Synthesize //go:build expression from // +build lines.
         foreach (var (_, pos) in p.plusBuild) {
-            // Synthesize //go:build expression from // +build lines.
             var (y, err) = constraint.Parse(p.commentTextAt(pos));
             if (err != default!) {
                 x = default!;
@@ -72,11 +78,11 @@ internal static void fixGoBuildLines(this ref printer p) {
         break;
     }
     case 1: {
+        // Parse //go:build expression.
         (x, _) = constraint.Parse(p.commentTextAt(p.goBuild[0]));
         break;
     }}
 
-    // Parse //go:build expression.
     slice<byte> block = default!;
     if (x == default!){
         // Don't have a valid //go:build expression to treat as truth.
@@ -89,7 +95,7 @@ internal static void fixGoBuildLines(this ref printer p) {
             block = appendꓸꓸꓸ(block, p.lineAt(pos));
         }
     } else {
-        block = append(block, (byte)(tabwriter.Escape));
+        block = append(blockᴷ, block, (byte)(tabwriter.Escape));
         block = append(block, ((@string)"//go:build "u8).ꓸꓸꓸ);
         block = append(block, x.String().ꓸꓸꓸ);
         block = append(block, (byte)(tabwriter.Escape), (byte)((rune)'\n'));
@@ -106,9 +112,11 @@ internal static void fixGoBuildLines(this ref printer p) {
         }
     }
     block = append(block, (byte)((rune)'\n'));
+
     // Build sorted list of lines to delete from remainder of output.
     var toDelete = appendꓸꓸꓸ(p.goBuild, p.plusBuild);
     slices.Sort<slice<nint>, nint>(toDelete);
+
     // Collect output after insertion point, with lines deleted, into after.
     slice<byte> after = default!;
     nint start = insert;
@@ -125,6 +133,7 @@ internal static void fixGoBuildLines(this ref printer p) {
             after = after.slice(0, n - 1);
         }
     }
+
     p.output = p.output.slice(0, insert);
     p.output = appendꓸꓸꓸ(p.output, block);
     p.output = appendꓸꓸꓸ(p.output, after);
@@ -136,9 +145,8 @@ internal static void fixGoBuildLines(this ref printer p) {
 // It assumes that only whole blocks of lines are being appended,
 // not line fragments.
 internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
-    if (len(y) > 0 && isNL(y[0]) && (len(x) == 0 || len(x) >= 2 && isNL(x[len(x) - 1]) && isNL(x[len(x) - 2]))) {
-        // y starts in blank line
-        // x is empty or ends in blank line
+    if (len(y) > 0 && isNL(y[0]) && // y starts in blank line
+        (len(x) == 0 || len(x) >= 2 && isNL(x[len(x) - 1]) && isNL(x[len(x) - 2]))) { // x is empty or ends in blank line
         y = y[1..]; // delete y's leading blank line
     }
     return appendꓸꓸꓸ(x, y);
@@ -163,7 +171,7 @@ internal static @string commentTextAt(this ref printer p, nint start) {
     while (pos < len(p.output) && p.output[pos] != tabwriter.Escape && !isNL(p.output[pos])) {
         pos++;
     }
-    return ((@string)(p.output.slice(start, pos)));
+    return (@string)(p.output.slice(start, pos));
 }
 
 internal static bool isNL(byte b) {

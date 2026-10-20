@@ -28,6 +28,7 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
     @string abc = abcᶜ1;
     @string fox = foxᶜ;
     @string poem = poemᶜ;
+
     slice<TestDictDecoder_type> poemRefs = new TestDictDecoder_type[]{
         new(0, 38), new(33, 3), new(0, 48), new(79, 3), new(0, 11), new(34, 5), new(0, 6), new(23, 7),
         new(0, 8), new(50, 3), new(0, 2), new(69, 3), new(34, 5), new(0, 4), new(97, 3), new(0, 4),
@@ -51,16 +52,19 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
         new(314, 3), new(0, 1), new(473, 6), new(317, 5), new(0, 1), new(400, 3), new(0, 3), new(109, 3),
         new(151, 3), new(48, 4), new(0, 4), new(125, 3), new(108, 3), new(0, 2)
     }.slice();
+
     ref var got = ref heap(new bytes.Buffer(), out var Ꮡgot);
     ref var want = ref heap(new bytes.Buffer(), out var Ꮡwant);
     ref var dd = ref heap(new global::go.compress.flate_package.dictDecoder(), out var Ꮡdd);
-    dd.init((1 << (int)(11)), default!);
+    dd.init(1 << 11, default!);
+
     Action<nint, nint> writeCopy = (nint dist, nint length) => {
         while (length > 0) {
             nint cnt = Ꮡdd.Value.tryWriteCopy(dist, length);
             if (cnt == 0) {
                 cnt = Ꮡdd.Value.writeCopy(dist, length);
             }
+
             length -= cnt;
             if (Ꮡdd.Value.availWrite() == 0) {
                 Ꮡgot.Value.Write(Ꮡdd.Value.readFlush());
@@ -77,8 +81,10 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
             }
         }
     };
+
     writeString("."u8);
     want.WriteByte((rune)'.');
+
     @string str = poem;
     foreach (var (_, @ref) in poemRefs) {
         if (@ref.dist == 0){
@@ -89,22 +95,29 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
         str = str.slice(@ref.length);
     }
     want.WriteString(poem);
+
     writeCopy(dd.histSize(), 33);
     want.Write(want.Bytes()[..33]);
+
     writeString(abc);
     writeCopy(len(abc), 59 * len(abc));
     want.WriteString(strings.Repeat(abc, 60));
+
     writeString(fox);
     writeCopy(len(fox), 9 * len(fox));
     want.WriteString(strings.Repeat(fox, 10));
+
     writeString("."u8);
     writeCopy(1, 9);
     want.WriteString(strings.Repeat("."u8, 10));
+
     writeString(strings.ToUpper(poem));
     writeCopy(len(poem), 7 * len(poem));
     want.WriteString(strings.Repeat(strings.ToUpper(poem), 8));
+
     writeCopy(dd.histSize(), 10);
     want.Write(want.Bytes().slice(want.Len() - dd.histSize())[..10]);
+
     got.Write(dd.readFlush());
     if (Ꮡgot.String() != Ꮡwant.String()) {
         Ꮡt.Errorf("final string mismatch:\ngot  %q\nwant %q"u8, Ꮡgot.String(), Ꮡwant.String());

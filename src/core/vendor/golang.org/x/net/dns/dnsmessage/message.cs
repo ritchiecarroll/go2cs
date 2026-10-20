@@ -16,9 +16,25 @@ using errors = errors_package;
 
 partial class dnsmessage_package {
 
+// Message formats
+//
+// To add a new Resource Record type:
+// 1. Create Resource Record types
+//   1.1. Add a Type constant named "Type<name>"
+//   1.2. Add the corresponding entry to the typeNames map
+//   1.3. Add a [ResourceBody] implementation named "<name>Resource"
+// 2. Implement packing
+//   2.1. Implement Builder.<name>Resource()
+// 3. Implement unpacking
+//   3.1. Add the unpacking code to unpackResourceBody()
+//   3.2. Implement Parser.<name>Resource()
+
+// A Type is the type of a DNS Resource Record, as defined in the [IANA registry].
+//
+// [IANA registry]: https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-4
 partial struct Type /*num:uint16*/;
 
-// Message formats
+// ResourceHeader.Type and Question.Type
 public static Type TypeA => 1;
 public static Type TypeNS => 2;
 public static Type TypeCNAME => 5;
@@ -29,6 +45,10 @@ public static Type TypeTXT => 16;
 public static Type TypeAAAA => 28;
 public static Type TypeSRV => 33;
 public static Type TypeOPT => 41;
+public static Type TypeSVCB => 64;
+public static Type TypeHTTPS => 65;
+
+// Question.Type
 public static Type TypeWKS => 11;
 public static Type TypeHINFO => 13;
 public static Type TypeMINFO => 14;
@@ -46,6 +66,8 @@ internal static map<Type, @string> typeNames = new map<Type, @string>{
     [TypeAAAA] = "TypeAAAA"u8,
     [TypeSRV] = "TypeSRV"u8,
     [TypeOPT] = "TypeOPT"u8,
+    [TypeSVCB] = "TypeSVCB"u8,
+    [TypeHTTPS] = "TypeHTTPS"u8,
     [TypeWKS] = "TypeWKS"u8,
     [TypeHINFO] = "TypeHINFO"u8,
     [TypeMINFO] = "TypeMINFO"u8,
@@ -73,12 +95,16 @@ public static @string GoString(this Type t) {
     return printUint16((uint16)t);
 }
 
+// A Class is a type of network.
 partial struct Class /*num:uint16*/;
 
+// ResourceHeader.Class and Question.Class
 public static Class ClassINET => 1;
 public static Class ClassCSNET => 2;
 public static Class ClassCHAOS => 3;
 public static Class ClassHESIOD => 4;
+
+// Question.Class
 public static Class ClassANY => 255;
 
 internal static map<Class, @string> classNames = new map<Class, @string>{
@@ -109,6 +135,7 @@ public static @string GoString(this Class c) {
     return printUint16((uint16)c);
 }
 
+// An OpCode is a DNS operation code.
 partial struct OpCode /*num:uint16*/;
 
 // GoString implements fmt.GoStringer.GoString.
@@ -116,19 +143,15 @@ public static @string GoString(this OpCode o) {
     return printUint16((uint16)o);
 }
 
+// An RCode is a DNS response status code.
 partial struct RCode /*num:uint16*/;
 
 // Header.RCode values.
 public static RCode RCodeSuccess => 0;      // NoError
-
 public static RCode RCodeFormatError => 1;  // FormErr
-
 public static RCode RCodeServerFailure => 2; // ServFail
-
 public static RCode RCodeNameError => 3;    // NXDomain
-
 public static RCode RCodeNotImplemented => 4; // NotImp
-
 public static RCode RCodeRefused => 5;      // Refused
 
 internal static map<RCode, @string> rCodeNames = new map<RCode, @string>{
@@ -181,30 +204,35 @@ internal static slice<byte> printUint8Bytes(slice<byte> buf, uint8 i) {
 }
 
 internal static @string printByteSlice(slice<byte> b) {
+    var bufᴷ = new stackAppend<byte>();
+
     if (len(b) == 0) {
         return ""u8;
     }
     var buf = new slice<byte>(0, 5 * len(b));
     buf = printUint8Bytes(buf, (uint8)b[0]);
     foreach (var (_, n) in b[1..]) {
-        buf = append(buf, (byte)((rune)','), (byte)((rune)' '));
+        buf = append(bufᴷ, buf, (byte)((rune)','), (byte)((rune)' '));
         buf = printUint8Bytes(buf, (uint8)n);
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static readonly @string hexDigits = "0123456789abcdef"u8;
 
 internal static @string printString(slice<byte> str) {
+    var bufᴷ = new stackAppend<byte>();
+
     var buf = new slice<byte>(0, len(str));
     for (nint i = 0; i < len(str); i++) {
         var c = str[i];
         if (c == (rune)'.' || c == (rune)'-' || c == (rune)' ' || (rune)'A' <= c && c <= (rune)'Z' || (rune)'a' <= c && c <= (rune)'z' || (rune)'0' <= c && c <= (rune)'9') {
-            buf = append(buf, c);
+            buf = append(bufᴷ, buf, c);
             continue;
         }
-        var upper = (byte)((c >> (int)(4)));
-        var lower = (byte)((((byte)(c << (int)(4))) >> (int)(4)));
+
+        var upper = (byte)((c >> 4));
+        var lower = (byte)((((byte)(c << 4)) >> 4));
         buf = append(
             buf,
             (byte)((rune)'\\'),
@@ -212,7 +240,7 @@ internal static @string printString(slice<byte> str) {
             hexDigits[upper],
             hexDigits[lower]);
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static @string printUint16(uint16 i) {
@@ -230,7 +258,7 @@ internal static @string printUint32(uint32 i) {
         b = b[1..];
         i %= d;
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -244,8 +272,15 @@ internal static @string printBool(bool b) {
     return falseˢ;
 }
 
+// ErrNotStarted indicates that the prerequisite information isn't
+// available yet because the previous records haven't been appropriately
+// parsed, skipped or finished.
 public static error ErrNotStarted = errors.New("parsing/packing of this type isn't available yet"u8);
+
+// ErrSectionDone indicated that all records in the section have been
+// parsed or finished.
 public static error ErrSectionDone = errors.New("parsing/packing of this section has completed"u8);
+
 internal static error errBaseLen = errors.New("insufficient data for base length type"u8);
 internal static error errCalcLen = errors.New("insufficient data for calculated length type"u8);
 internal static error errReserved = errors.New("segment prefix is reserved"u8);
@@ -264,14 +299,26 @@ internal static error errTooManyAuthorities = errors.New("too many Authorities t
 internal static error errTooManyAdditionals = errors.New("too many Additionals to pack (>65535)"u8);
 internal static error errNonCanonicalName = errors.New("name is not in canonical format (it must end with a .)"u8);
 internal static error errStringTooLong = errors.New("character string exceeds maximum length (255)"u8);
+internal static error errParamOutOfOrder = errors.New("parameter out of order"u8);
+internal static error errTooLongSVCBValue = errors.New("value too long (>65535 bytes)"u8);
 
 // Internal constants.
+// packStartingCap is the default initial buffer size allocated during
+// packing.
+//
+// The starting capacity doesn't matter too much, but most DNS responses
+// Will be <= 512 bytes as it is the limit for DNS over UDP.
 internal static UntypedInt packStartingCap => 512;
 
+// uint16Len is the length (in bytes) of a uint16.
 internal static UntypedInt uint16Len => 2;
 
+// uint32Len is the length (in bytes) of a uint32.
 internal static UntypedInt uint32Len => 4;
 
+// headerLen is the length (in bytes) of a DNS header.
+//
+// A header is comprised of 6 uint16s and no padding.
 internal static UntypedInt headerLen => /* 6 * uint16Len */ 12;
 
 partial struct nestedError {
@@ -305,7 +352,7 @@ internal static (uint16 id, uint16 bits) pack(this ref Header m) {
     uint16 bits = default!;
 
     id = m.ID;
-    bits = (uint16)((uint16)((uint16)m.OpCode << (int)(11)) | (uint16)m.RCode);
+    bits = (uint16)((uint16)((uint16)m.OpCode << 11) | (uint16)m.RCode);
     if (m.RecursionAvailable) {
         bits |= (uint16)(headerBitRA);
     }
@@ -337,7 +384,7 @@ public static @string GoString(this ref Header m) {
 
 // Message is a representation of a DNS message.
 partial struct Message {
-    public partial ref Header Header { get; }
+    /*embed*/ public Header Header;
     public slice<ΔQuestion> Questions;
     public slice<Resource> Answers;
     public slice<Resource> Authorities;
@@ -353,6 +400,7 @@ internal static section sectionAnswers => 3;
 internal static section sectionAuthorities => 4;
 internal static section sectionAdditionals => 5;
 internal static section sectionDone => 6;
+
 internal static UntypedInt headerBitQR => /* 1 << 15 */ 32768; // query/response (response=1)
 internal static UntypedInt headerBitAA => /* 1 << 10 */ 1024; // authoritative
 internal static UntypedInt headerBitTC => /* 1 << 9 */ 512; // truncated
@@ -393,7 +441,6 @@ internal static uint16 count(this ref Δheader h, section sec) {
     if (exprᴛ1 == sectionAdditionals) {
         return h.additionals;
     }
-
     return 0;
 }
 
@@ -447,7 +494,7 @@ internal static Header header(this ref Δheader h) {
     return new Header(
         ID: h.id,
         Response: ((uint16)(h.bits & (uint16)headerBitQR)) != 0,
-        OpCode: (OpCode)(((OpCode)((h.bits >> (int)(11)))) & 0xF),
+        OpCode: (OpCode)(((OpCode)(h.bits >> 11)) & 0xF),
         Authoritative: ((uint16)(h.bits & (uint16)headerBitAA)) != 0,
         Truncated: ((uint16)(h.bits & (uint16)headerBitTC)) != 0,
         RecursionDesired: ((uint16)(h.bits & (uint16)headerBitRD)) != 0,
@@ -581,6 +628,7 @@ internal static (ResourceHeader, error) resourceHeader(this ref Parser p, sectio
     if (p.resHeaderValid) {
         p.off = p.resHeaderOffset;
     }
+
     {
         var errΔ1 = p.checkAdvance(sec); if (errΔ1 != default!) {
             return (new ResourceHeader(nil), errΔ1);
@@ -1131,14 +1179,18 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
     if (len(m.Additionals) > (nint)(unchecked((uint16)(~(uint16)0)))) {
         return (default!, errTooManyAdditionals);
     }
+
     Δheader h = default!;
     (h.id, h.bits) = m.Header.pack();
+
     h.questions = (uint16)len(m.Questions);
     h.answers = (uint16)len(m.Answers);
     h.authorities = (uint16)len(m.Authorities);
     h.additionals = (uint16)len(m.Additionals);
+
     nint compressionOff = len(b);
     var msg = h.pack(b);
+
     // RFC 1035 allows (but does not require) compression for packing. RFC
     // 1035 requires unpacking implementations to support compression, so
     // unconditionally enabling it is fine.
@@ -1148,6 +1200,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
     // many DNS response messages are over this limit, so enabling
     // compression will help ensure compliance.
     var compression = new map<@string, uint16>{};
+
     foreach (var (i, _) in m.Questions) {
         error err = default!;
         {
@@ -1180,6 +1233,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
             }
         }
     }
+
     return (msg, default!);
 }
 
@@ -1363,7 +1417,6 @@ internal static error incrementSectionCount(this ж<Builder> Ꮡb) {
         count = Ꮡb.of(Builder.Ꮡheader).of(dnsmessage_package.Δheader.Ꮡadditionals);
         err = errTooManyAdditionals;
     }
-
     if (count.Value == unchecked((uint16)(~(uint16)0))) {
         return err;
     }
@@ -1374,8 +1427,8 @@ internal static error incrementSectionCount(this ж<Builder> Ꮡb) {
 // Question adds a single Question.
 public static error Question(this ж<Builder> Ꮡb, ΔQuestion q) {
     q = q.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     if (b.section < sectionQuestions) {
         return ErrNotStarted;
     }
@@ -1409,8 +1462,8 @@ internal static error checkResourceSection(this ref Builder b) {
 public static error CNAMEResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔCNAMEResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1445,8 +1498,8 @@ public static error CNAMEResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔCNA
 public static error MXResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔMXResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1481,8 +1534,8 @@ public static error MXResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔMXReso
 public static error NSResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔNSResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1517,8 +1570,8 @@ public static error NSResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔNSReso
 public static error PTRResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔPTRResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1553,8 +1606,8 @@ public static error PTRResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔPTRRe
 public static error SOAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSOAResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1588,8 +1641,8 @@ public static error SOAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSOARe
 // TXTResource adds a single TXTResource.
 public static error TXTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔTXTResource r) {
     h = h.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1624,8 +1677,8 @@ public static error TXTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔTXTRe
 public static error SRVResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSRVResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1660,8 +1713,8 @@ public static error SRVResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSRVRe
 public static error AResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1696,8 +1749,8 @@ public static error AResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAResour
 public static error AAAAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAAAAResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1731,8 +1784,8 @@ public static error AAAAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAAAA
 // OPTResource adds a single OPTResource.
 public static error OPTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔOPTResource r) {
     h = h.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1766,8 +1819,8 @@ public static error OPTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔOPTRe
 // UnknownResource adds a single UnknownResource.
 public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔUnknownResource r) {
     h = h.ΔClone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     {
         var errΔ1 = b.checkResourceSection(); if (errΔ1 != default!) {
             return errΔ1;
@@ -1900,9 +1953,11 @@ internal static error fixLen(this ref ResourceHeader h, slice<byte> msg, nint le
     if (conLen > (nint)(unchecked((uint16)(~(uint16)0)))) {
         return errResTooLong;
     }
+
     // Fill in the length now that we know how long the content is.
     packUint16(msg.slice(lenOff, lenOff), (uint16)conLen);
     h.Length = (uint16)conLen;
+
     return default!;
 }
 
@@ -1910,9 +1965,7 @@ internal static error fixLen(this ref ResourceHeader h, slice<byte> msg, nint le
 internal static UntypedInt edns0Version => 0;
 
 internal static UntypedInt edns0DNSSECOK => 0x00008000;
-
 internal static UntypedInt ednsVersionMask => 0x00ff0000;
-
 internal static UntypedInt edns0DNSSECOKMask => 0x00ff8000;
 
 // SetEDNS0 configures h for EDNS(0).
@@ -1921,8 +1974,8 @@ internal static UntypedInt edns0DNSSECOKMask => 0x00ff8000;
 public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCode extRCode, bool dnssecOK) {
     h.Name = new Name(Data: new byte[]{(rune)'.'}.array(255), Length: 1); // RFC 6891 section 6.1.2
     h.Type = TypeOPT;
-    h.Class = ((Class)(uint16)udpPayloadLen);
-    h.TTL = (((uint32)(uint16)extRCode >> (int)(4)) << (int)(24));
+    h.Class = (Class)(uint16)udpPayloadLen;
+    h.TTL = ((uint32)(uint16)extRCode >> 4) << 24;
     if (dnssecOK) {
         h.TTL |= (uint32)(edns0DNSSECOK);
     }
@@ -1931,16 +1984,15 @@ public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCod
 
 // DNSSECAllowed reports whether the DNSSEC OK bit is set.
 public static bool DNSSECAllowed(this ref ResourceHeader h) {
-    return (uint32)(h.TTL & (uint32)edns0DNSSECOKMask) == edns0DNSSECOK; // RFC 6891 section 6.1.3
+    return (h.TTL & (uint32)edns0DNSSECOKMask) == edns0DNSSECOK; // RFC 6891 section 6.1.3
 }
 
 // ExtendedRCode returns an extended RCode.
 //
 // The provided rcode must be the RCode in DNS message header.
 public static RCode ExtendedRCode(this ref ResourceHeader h, RCode rcode) {
-    if ((uint32)(h.TTL & (uint32)ednsVersionMask) == edns0Version) {
-        // RFC 6891 section 6.1.3
-        return (RCode)(((RCode)(uint16)(((h.TTL >> (int)(24)) << (int)(4)))) | rcode);
+    if ((h.TTL & (uint32)ednsVersionMask) == edns0Version) { // RFC 6891 section 6.1.3
+        return (RCode)(((RCode)(uint16)(((h.TTL >> 24) << 4))) | rcode);
     }
     return rcode;
 }
@@ -1979,14 +2031,14 @@ internal static (nint, error) skipResource(slice<byte> msg, nint off) {
 
 // packUint16 appends the wire format of field to msg.
 internal static slice<byte> packUint16(slice<byte> msg, uint16 field) {
-    return append(msg, (byte)((field >> (int)(8))), (byte)field);
+    return append(msg, (byte)(field >> 8), (byte)field);
 }
 
 internal static (uint16, nint, error) unpackUint16(slice<byte> msg, nint off) {
     if (off + (nint)uint16Len > len(msg)) {
         return (0, off, errBaseLen);
     }
-    return ((uint16)((uint16)((uint16)msg[off] << (int)(8)) | (uint16)msg[off + 1]), off + (nint)uint16Len, default!);
+    return ((uint16)((uint16)((uint16)msg[off] << 8) | (uint16)msg[off + 1]), off + (nint)uint16Len, default!);
 }
 
 internal static (nint, error) skipUint16(slice<byte> msg, nint off) {
@@ -2003,7 +2055,7 @@ internal static slice<byte> packType(slice<byte> msg, Type field) {
 
 internal static (Type, nint, error) unpackType(slice<byte> msg, nint off) {
     var (t, o, err) = unpackUint16(msg, off);
-    return (((Type)t), o, err);
+    return ((Type)t, o, err);
 }
 
 internal static (nint, error) skipType(slice<byte> msg, nint off) {
@@ -2017,7 +2069,7 @@ internal static slice<byte> packClass(slice<byte> msg, Class field) {
 
 internal static (Class, nint, error) unpackClass(slice<byte> msg, nint off) {
     var (c, o, err) = unpackUint16(msg, off);
-    return (((Class)c), o, err);
+    return ((Class)c, o, err);
 }
 
 internal static (nint, error) skipClass(slice<byte> msg, nint off) {
@@ -2028,9 +2080,9 @@ internal static (nint, error) skipClass(slice<byte> msg, nint off) {
 internal static slice<byte> packUint32(slice<byte> msg, uint32 field) {
     return append(
         msg,
-        (byte)((field >> (int)(24))),
-        (byte)((field >> (int)(16))),
-        (byte)((field >> (int)(8))),
+        (byte)(field >> 24),
+        (byte)(field >> 16),
+        (byte)(field >> 8),
         (byte)field);
 }
 
@@ -2038,7 +2090,7 @@ internal static (uint32, nint, error) unpackUint32(slice<byte> msg, nint off) {
     if (off + (nint)uint32Len > len(msg)) {
         return (0, off, errBaseLen);
     }
-    var v = (uint32)((uint32)((uint32)(((uint32)msg[off] << (int)(24)) | ((uint32)msg[off + 1] << (int)(16))) | ((uint32)msg[off + 2] << (int)(8))) | (uint32)msg[off + 3]);
+    var v = (uint32)msg[off] << 24 | (uint32)msg[off + 1] << 16 | (uint32)msg[off + 2] << 8 | (uint32)msg[off + 3];
     return (v, off + (nint)uint32Len, default!);
 }
 
@@ -2057,6 +2109,7 @@ internal static (slice<byte>, error) packText(slice<byte> msg, @string field) {
     }
     msg = append(msg, (byte)l);
     msg = append(msg, field.ꓸꓸꓸ);
+
     return (msg, default!);
 }
 
@@ -2069,7 +2122,7 @@ internal static (@string, nint, error) unpackText(slice<byte> msg, nint off) {
     if (endOff > len(msg)) {
         return ("", off, errCalcLen);
     }
-    return (((@string)(msg.slice(beginOff, endOff))), endOff, default!);
+    return ((@string)(msg.slice(beginOff, endOff)), endOff, default!);
 }
 
 // packBytes appends the wire format of field to msg.
@@ -2120,7 +2173,7 @@ public static Name MustNewName(@string name) {
 public static @string String(this Name n) {
     n = n.ΔClone();
 
-    return ((@string)(n.Data.slice(0, n.Length)));
+    return (@string)(n.Data.slice(0, n.Length));
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -2137,18 +2190,23 @@ public static @string GoString(this ref Name n) {
 // is nil, compression will not be used.
 internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
+
     if (n.Length > nonEncodedNameMax) {
         return (default!, errNameTooLong);
     }
+
     // Add a trailing dot to canonicalize name.
     if (n.Length == 0 || n.Data[(uint8)(n.Length - 1)] != (rune)'.') {
         return (oldMsg, errNonCanonicalName);
     }
+
     // Allow root domain.
     if (n.Data[0] == (rune)'.' && n.Length == 1) {
-        return (append(msg, (byte)(0)), default!);
+        return (append(msg, (byte)0), default!);
     }
+
     @string nameAsStr = default!;
+
     // Emit sequence of counted strings, chopping at dots.
     for ((nint i, nint begin) = (0, 0); i < (nint)n.Length; i++) {
         // Check for the end of the segment.
@@ -2156,20 +2214,25 @@ internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<
             // The two most significant bits have special meaning.
             // It isn't allowed for segments to be long enough to
             // need them.
-            if (i - begin >= (1 << (int)(6))) {
+            if (i - begin >= 1 << 6) {
                 return (oldMsg, errSegTooLong);
             }
+
             // Segments must have a non-zero length.
             if (i - begin == 0) {
                 return (oldMsg, errZeroSegLen);
             }
+
             msg = append(msg, (byte)(i - begin));
+
             for (nint j = begin; j < i; j++) {
                 msg = append(msg, n.Data[j]);
             }
+
             begin = i + 1;
             continue;
         }
+
         // We can only compress domain suffixes starting with a new
         // segment. A pointer is two bytes with the two most significant
         // bits set to 1 to indicate that it is a pointer.
@@ -2178,37 +2241,44 @@ internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<
                 var (ptr, ok) = compression[tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
                     // Hit. Emit a pointer instead of the rest of
                     // the domain.
-                    return (append(msg, (byte)((uint16)((ptr >> (int)(8)) | 0xC0)), (byte)ptr), default!);
+                    return (append(msg, (byte)((uint16)(ptr >> 8 | 0xC0)), (byte)ptr), default!);
                 }
             }
+
             // Miss. Add the suffix to the compression table if the
             // offset can be stored in the available 14 bits.
             nint newPtr = len(msg) - compressionOff;
-            if (newPtr <= (nint)((unchecked((uint16)(~(uint16)0)) >> (int)(2)))) {
+            if (newPtr <= (nint)(unchecked((uint16)(~(uint16)0)) >> 2)) {
                 if (nameAsStr == ""u8) {
                     // allocate n.Data on the heap once, to avoid allocating it
                     // multiple times (for next labels).
-                    nameAsStr = ((@string)(n.Data.slice(0, n.Length)));
+                    nameAsStr = (@string)(n.Data.slice(0, n.Length));
                 }
                 compression[nameAsStr.slice(i)] = (uint16)newPtr;
             }
         }
     }
-    return (append(msg, (byte)(0)), default!);
+    return (append(msg, (byte)0), default!);
 }
 
 // unpack unpacks a domain name.
 internal static (nint, error) unpack(this ref Name n, slice<byte> msg, nint off) {
+    var nameᴷ = new stackAppend<byte>();
+
     // currOff is the current working offset.
     nint currOff = off;
+
     // newOff is the offset where the next record will start. Pointers lead
     // to data that belongs to other names and thus doesn't count towards to
     // the usage of this name.
     nint newOff = off;
+
     // ptr is the number of pointers followed.
     nint ptr = default!;
+
     // Name is a slice representation of the name data.
     var name = n.Data[..0];
+
 Loop:
     while (ᐧ) {
         if (currOff >= len(msg)) {
@@ -2216,10 +2286,9 @@ Loop:
         }
         nint c = (nint)msg[currOff];
         currOff++;
-        switch ((nint)(c & 0xC0)) {
-        case 0x00: {
+        switch ((c & 0xC0)) {
+        case 0x00: { // String segment
             if (c == 0x00) {
-                // String segment
                 // A zero length signals the end of the name.
                 goto break_Loop;
             }
@@ -2227,21 +2296,22 @@ Loop:
             if (endOff > len(msg)) {
                 return (off, errCalcLen);
             }
+
+            // Reject names containing dots.
+            // See issue golang/go#56246
             foreach (var (_, v) in msg.slice(currOff, endOff)) {
-                // Reject names containing dots.
-                // See issue golang/go#56246
                 if (v == (rune)'.') {
                     return (off, errInvalidName);
                 }
             }
+
             name = appendꓸꓸꓸ(name, msg.slice(currOff, endOff));
-            name = append(name, (byte)((rune)'.'));
+            name = append(nameᴷ, name, (byte)((rune)'.'));
             currOff = endOff;
             break;
         }
-        case 0xC0: {
+        case 0xC0: { // Pointer
             if (currOff >= len(msg)) {
-                // Pointer
                 return (off, errInvalidPtr);
             }
             var c1 = msg[currOff];
@@ -2249,23 +2319,22 @@ Loop:
             if (ptr == 0) {
                 newOff = currOff;
             }
+            // Don't follow too many pointers, maybe there's a loop.
             {
                 ptr++; if (ptr > 10) {
-                    // Don't follow too many pointers, maybe there's a loop.
                     return (off, errTooManyPtr);
                 }
             }
-            currOff = (nint)((((nint)(c ^ 0xC0)) << (int)(8)) | (nint)c1);
+            currOff = (c ^ 0xC0) << 8 | (nint)c1;
             break;
         }
         default: {
+            // Prefixes 0x80 and 0x40 are reserved.
             return (off, errReserved);
         }}
-
 continue_Loop:;
     }
 break_Loop:;
-    // Prefixes 0x80 and 0x40 are reserved.
     if (len(name) == 0) {
         name = append(name, (byte)((rune)'.'));
     }
@@ -2284,6 +2353,7 @@ internal static (nint, error) skipName(slice<byte> msg, nint off) {
     // to data that belongs to other names and thus doesn't count towards to
     // the usage of this name.
     nint newOff = off;
+
 Loop:
     while (ᐧ) {
         if (newOff >= len(msg)) {
@@ -2291,35 +2361,36 @@ Loop:
         }
         nint c = (nint)msg[newOff];
         newOff++;
-        switch ((nint)(c & 0xC0)) {
+        switch ((c & 0xC0)) {
         case 0x00: {
             if (c == 0x00) {
                 // A zero length signals the end of the name.
                 goto break_Loop;
             }
+            // literal string
             newOff += c;
             if (newOff > len(msg)) {
-                // literal string
                 return (off, errCalcLen);
             }
             break;
         }
         case 0xC0: {
+            // Pointer to somewhere else in msg.
+            // Pointers are two bytes.
             newOff++;
+
+            // Don't follow the pointer as the data here has ended.
             goto break_Loop;
             break;
         }
         default: {
+            // Prefixes 0x80 and 0x40 are reserved.
             return (off, errReserved);
         }}
-
 continue_Loop:;
     }
 break_Loop:;
-    // Pointer to somewhere else in msg.
-    // Pointers are two bytes.
-    // Don't follow the pointer as the data here has ended.
-    // Prefixes 0x80 and 0x40 are reserved.
+
     return (newOff, default!);
 }
 
@@ -2352,6 +2423,8 @@ private static readonly @string ptrˢ = "PTR"u8;
 private static readonly @string txtˢ = "TXT"u8;
 private static readonly @string aaaaˢ = "AAAA"u8;
 private static readonly @string srvˢ = "SRV"u8;
+private static readonly @string svcbˢ = "SVCB"u8;
+private static readonly @string httpsˢ = "HTTPS"u8;
 private static readonly @string optˢ = "OPT"u8;
 private static readonly @string unknownˢ = "Unknown"u8;
 
@@ -2416,6 +2489,18 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
         r = new ΔSRVResourceжResourceBody(Ꮡrb);
         name = srvˢ;
     }
+    else if (exprᴛ1 == TypeSVCB) {
+        ref var rb = ref heap(new ΔSVCBResource(), out var Ꮡrb);
+        (rb, err) = unpackSVCBResource(msg, off, hdr.Length);
+        r = new ΔSVCBResourceжResourceBody(Ꮡrb);
+        name = svcbˢ;
+    }
+    else if (exprᴛ1 == TypeHTTPS) {
+        ref var rb = ref heap(new ΔHTTPSResource(), out var Ꮡrb);
+        (rb.SVCBResource, err) = unpackSVCBResource(msg, off, hdr.Length);
+        r = new ΔHTTPSResourceжResourceBody(Ꮡrb);
+        name = httpsˢ;
+    }
     else if (exprᴛ1 == TypeOPT) {
         ref var rb = ref heap(new ΔOPTResource(), out var Ꮡrb);
         (rb, err) = unpackOPTResource(msg, off, hdr.Length);
@@ -2428,7 +2513,6 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
         r = new ΔUnknownResourceжResourceBody(Ꮡrb);
         name = unknownˢ;
     }
-
     if (err != default!) {
         return (default!, off, new nestedErrorжerror(Ꮡ(new nestedError(name + " record"u8, err))));
     }

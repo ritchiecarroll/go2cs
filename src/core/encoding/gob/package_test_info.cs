@@ -25,7 +25,6 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,9 +45,13 @@ using static global::go.encoding.gob_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.encoding.gob_package.decoderState, ж<global::go.encoding.gob_package.decoderState>>(Indirect = true)]
-[assembly: GoImplicitConv<testing.T, ж<testing.T>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,7 +61,7 @@ using static global::go.encoding.gob_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/gob/example_interface_test.go", "example_interface_test.cs", "ABQmggAGFLK6loKCqIKCggAGFAANDoKC6paigoKU")]
+[assembly: go.GoPositionMap("encoding/gob/example_interface_test.go", "example_interface_test.cs", "ABQmggAGFLLKpoKCuIKCggALFAAIDoKC6paigoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

@@ -40,6 +40,7 @@ internal static void incr(ref nint p) {
 
 internal static void run() {
     incr(ref cpuprof.count);
+
     cpuprof.log.push(cpuprof.count);
     cpuprof.log.push(cpuprof.count);
 }
@@ -59,6 +60,7 @@ internal static void Main() {
     run();
     fmt.Println(cpuprof.count);
     fmt.Println(cpuprof.log.sum());
+
     var h = Ꮡ(new holder(span: Ꮡ(new cpuProfile(log: Ꮡ(new profBuf(nil))))));
     fmt.Println(viaLocal(ref (h).DerefOrNull()));
 }

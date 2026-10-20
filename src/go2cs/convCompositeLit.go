@@ -1132,7 +1132,12 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, typeRender, lbracePrefix, lbrace))
 
 	if len(compositeLit.Elts) > 0 {
-		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
+		// The element list writes the comments ahead of its first element itself (writeListComments);
+		// the interface-cast elements below are written on one line, so theirs are written here, each
+		// ending its own line.
+		if needsInterfaceCast && !isEmpty {
+			v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
+		}
 	} else {
 		// If constructing a struct with no parameters, pass in a nill value (a named-map
 		// composite's braces belong to the inner CONCRETE map literal — nothing to fill)
@@ -1183,6 +1188,18 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		result.WriteString(elements.String())
 	} else {
 		result.WriteString(v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext))
+
+		// Comments after the last element stay inside the literal, above its closing brace, which a line
+		// comment must not take onto its own line.
+		lastEnd := compositeLit.Lbrace
+
+		if len(compositeLit.Elts) > 0 {
+			lastEnd = compositeLit.Elts[len(compositeLit.Elts)-1].End()
+		}
+
+		if v.writeListComments(result, compositeLit.Lbrace, lastEnd, compositeLit.Rbrace, v.indentLevel+1) && rbracePrefix == "" {
+			rbracePrefix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
+		}
 	}
 
 	result.WriteString(fmt.Sprintf("%s%s%s", rbracePrefix, rbrace, compositeSuffix))
@@ -1454,6 +1471,11 @@ func (v *Visitor) markAnyFieldLits(structType *types.Struct, elts []ast.Expr, co
 			if isExactUnsafePointer(eltType) {
 				context.markAnyBoxedUnsafePointerArg(i)
 			}
+
+			// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
+			if typeParam, isTypeParam := eltType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) {
+				context.markAnyBoxedTypeParamArg(i)
+			}
 		}
 	}
 }
@@ -1514,6 +1536,12 @@ func (v *Visitor) markEmptyInterfaceElems(elts []ast.Expr, context *CallExprCont
 			// And the unsafe.Pointer sibling: `[]any{nilUnsafePointer}`.
 			if isExactUnsafePointer(eltType) {
 				context.markAnyBoxedUnsafePointerArg(i)
+				marked = true
+			}
+
+			// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
+			if typeParam, isTypeParam := eltType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) {
+				context.markAnyBoxedTypeParamArg(i)
 				marked = true
 			}
 		}

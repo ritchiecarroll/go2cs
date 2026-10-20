@@ -28,6 +28,7 @@ public static void TestTempFile(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(os.RemoveAll, dir, ref ᒐ);
+
         @string nonexistentDir = filepath.Join(dir, notExistsˢ);
         (var f, err) = TempFile(nonexistentDir, fooˢ);
         if (f != nil || err == default!) {
@@ -88,6 +89,7 @@ public static void TestTempFile_BadPattern(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(os.RemoveAll, tmpDir, ref ᒐ);
+
         @string sep = sepᶜ;
         var tests = new TestTempFile_BadPattern_tests[]{
             new("ioutil*test"u8, false),
@@ -150,12 +152,15 @@ public static void TestTempDir(ж<testing.T> Ꮡt) {
     if (name != ""u8 || err == default!) {
         Ꮡt.Errorf("TempDir(`/_not_exists_`, `foo`) = %v, %v"u8, name, err);
     }
+
     var tests = new TestTempDir_tests[]{
         new("ioutil_test"u8, "ioutil_test"u8, ""u8),
         new("ioutil_test*"u8, "ioutil_test"u8, ""u8),
         new("ioutil_test*xyz"u8, "ioutil_test"u8, "xyz"u8)
     }.slice();
+
     @string dir = os.TempDir();
+
     void runTestTempDir(ж<testing.T> tΔ1, @string pattern, @string wantRePat) {
         GoFrame ᒐ = default;
         try {
@@ -164,6 +169,7 @@ public static void TestTempDir(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("TempDir(dir, `ioutil_test`) = %v, %v"u8, nameΔ1, errΔ1);
             }
             defer(os.Remove, nameΔ1, ref ᒐ);
+
             var re = regexp.MustCompile(wantRePat);
             if (!re.MatchString(nameΔ1)) {
                 tΔ1.Errorf("TempDir(%q, %q) created bad name\n\t%q\ndid not match pattern\n\t%q"u8, dir, pattern, nameΔ1, wantRePat);
@@ -172,6 +178,7 @@ public static void TestTempDir(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestTempDir_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -183,6 +190,7 @@ public static void TestTempDir(ж<testing.T> Ꮡt) {
             runTestTempDirʗ1(tΔ2, ttʗ1.pattern, wantRePat);
         });
     }
+
     // Separately testing "*xyz" (which has no prefix). That is when constructing the
     // pattern to assert on, as in the previous loop, using filepath.Join for an empty
     // prefix filepath.Join(dir, ""), produces the pattern:
@@ -191,7 +199,7 @@ public static void TestTempDir(ж<testing.T> Ꮡt) {
     //     "^<DIR>/[0-9]+xyz"
     var runTestTempDirʗ2 = runTestTempDir;
     Ꮡt.Run(xyzˢ, (ж<testing.T> tΔ3) => {
-        @string wantRePat = "^"u8 + regexp.QuoteMeta(filepath.Join(dir)) + regexp.QuoteMeta(((@string)(rune)filepath.Separator)) + "[0-9]+xyz$"u8;
+        @string wantRePat = "^"u8 + regexp.QuoteMeta(filepath.Join(dir)) + regexp.QuoteMeta((@string)(rune)filepath.Separator) + "[0-9]+xyz$"u8;
         runTestTempDirʗ2(tΔ3, xyzˢ, wantRePat);
     });
 }
@@ -210,6 +218,7 @@ public static void TestTempDir_BadDir(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(os.RemoveAll, dir, ref ᒐ);
+
         @string badDir = filepath.Join(dir, notExistˢ);
         (_, err) = TempDir(badDir, fooˢ);
         {
@@ -238,6 +247,7 @@ public static void TestTempDir_BadPattern(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(os.RemoveAll, tmpDir, ref ᒐ);
+
         @string sep = sepᶜ1;
         var tests = new TestTempDir_BadPattern_tests[]{
             new("ioutil*test"u8, false),

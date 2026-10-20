@@ -66,10 +66,11 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
                 }
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
+
                 var b = new slice<byte>(100);
                 (var n, errΔ1) = c.Read(b);
                 if (errΔ1 == default! || AreEqual(errΔ1, Δio.EOF)) {
-                    return (((@string)(b.slice(0, n))), default!);
+                    return ((@string)(b.slice(0, n)), default!);
                 }
                 var (errno, ok) = toErrno(errΔ1);
                 if (ok && ignoreSomeReadErrors && (errno == syscall.ERROR_NETNAME_DELETED || errno == syscall.WSAECONNRESET)) {
@@ -80,6 +81,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
             finally { ᒐ.Run(); }
         }
+
         error send(@string addr, @string data) {
             GoFrame ᒐ = default;
             try {
@@ -89,6 +91,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
                 }
                 var cʗ2 = c;
                 defer(() => cʗ2.Close(), ref ᒐ);
+
                 var b = slice<byte>(data);
                 (var n, errΔ2) = c.Write(b);
                 if (errΔ2 != default!) {
@@ -102,6 +105,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
             finally { ᒐ.Run(); }
         }
+
         {
             @string envaddr = Δos.Getenv(gotestDialAddrˢ); if (envaddr != ""u8) {
                 // In child process.
@@ -114,12 +118,14 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
                 c.Close();
             }
         }
+
         var (ln, err) = Listen(tcpˢ, "127.0.0.1:0"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         // Start child process that connects to our listener.
         var cmd = exec.Command(Δos.Args[0], testRunˢ);
         cmd.Value.Env = append(Δos.Environ(), "GOTEST_DIAL_ADDR="u8 + ln.Addr().String());
@@ -143,10 +149,12 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
         }
         var cmdʗ1 = cmd;
         defer(() => cmdʗ1.Wait(), ref ᒐ); // ignore error - we know it is getting killed
+
         time.Duration alittle = /* 100 * time.Millisecond */ 100000000;
         time.Sleep(alittle);
         (~cmd).Process.Kill(); // the only way to trigger the errors
         time.Sleep(alittle);
+
         // Send second connection data (with delay in a separate goroutine).
         var result = new channel<error>(0);
         var lnʗ2 = ln;
@@ -167,6 +175,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("send failed: %v"u8, errΔ6);
             }
         }, ref ᒐ);
+
         // Receive first or second connection.
         (var s, err) = recv(ln, true);
         if (err != default!) {
@@ -174,14 +183,14 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
         }
         var exprᴛ1 = s;
         if (exprᴛ1 == ""u8) {
+            // First connection data is received, let's get second connection data.
         }
         else if (exprᴛ1 == "abc"u8) {
+            // First connection is lost forever, but that is ok.
             return;
         }
         else { /* default: */
-            Ꮡt.Fatalf(@"""%s"" received from recv, but """" or ""abc"" expected"u8, // First connection data is received, let's get second connection data.
- // First connection is lost forever, but that is ok.
- s);
+            Ꮡt.Fatalf(@"""%s"" received from recv, but """" or ""abc"" expected"u8, s);
         }
 
         // Get second connection data.
@@ -223,7 +232,7 @@ internal static (slice<byte>, error) runCmd(params ꓸꓸꓸstring argsʗp) {
         (var @out, err) = exec.Command(powershellˢ, commandˢ, cmd).CombinedOutput();
         if (err != default!) {
             if (len(@out) != 0) {
-                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, ((@string)removeUTF8BOM(@out))));
+                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
             }
             error err2 = default!;
             (@out, err2) = Δos.ReadFile(f.Name());
@@ -231,7 +240,7 @@ internal static (slice<byte>, error) runCmd(params ꓸꓸꓸstring argsʗp) {
                 return (default!, err2);
             }
             if (len(@out) != 0) {
-                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, ((@string)removeUTF8BOM(@out))));
+                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
             }
             return (default!, fmt.Errorf("%s failed: %v"u8, args[0], err));
         }
@@ -294,7 +303,7 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
         if (bytes.HasPrefix(line, slice<byte>("Interface "u8)) && bytes.HasSuffix(line, slice<byte>(" Parameters"u8))) {
             var f = line[(int)(len("Interface "))..];
             f = f.slice(0, len(f) - len(" Parameters"));
-            name = ((@string)f);
+            name = (@string)f;
             continue;
         }
         bool isup = default!;
@@ -308,7 +317,6 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
         else { /* default: */
             continue;
         }
-
         if (name != ""u8) {
             {
                 var (v, ok) = ifaces[name, ꟷ]; if (ok && v != isup) {
@@ -328,12 +336,14 @@ internal static readonly @string ipv4ˢ = "ipv4"u8;
 
 public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
     checkNetsh(Ꮡt);
+
     @string toString(@string name, bool isup) {
         if (isup) {
             return name + ":up"u8;
         }
         return name + ":down"u8;
     }
+
     var (ift, err) = Interfaces();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -343,6 +353,7 @@ public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
         have = append(have, toString(ifi.Name, (global::go.net_package.Flags)(ifi.Flags & FlagUp) != 0));
     }
     slices.Sort<slice<@string>, @string>(have);
+
     var ifaces = new map<@string, bool>();
     err = netshInterfaceIPShowInterface(ipv6ˢ, ifaces);
     if (err != default!) {
@@ -357,6 +368,7 @@ public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
         want = append(want, toString(name, isup));
     }
     slices.Sort<slice<@string>, @string>(want);
+
     if (strings.Join(want, "/"u8) != strings.Join(have, "/"u8)) {
         Ꮡt.Fatalf("unexpected interface list %q, want %q"u8, have, want);
     }
@@ -407,7 +419,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
                 if (len(f) == 2) {
                     f = bytes.Split(f[0], new byte[]{(rune)'/'}.slice());
                     if (len(f) == 2) {
-                        subnetprefix = ((@string)bytes.TrimSpace(f[1]));
+                        subnetprefix = (@string)bytes.TrimSpace(f[1]);
                         if (addr != ""u8 && subnetprefix != ""u8) {
                             addrs = append(addrs, addr + "/"u8 + subnetprefix);
                         }
@@ -419,7 +431,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
         if (bytes.Contains(line, slice<byte>("IP Address:"u8))) {
             var f = bytes.Split(line, new byte[]{(rune)':'}.slice());
             if (len(f) == 2) {
-                addr = ((@string)bytes.TrimSpace(f[1]));
+                addr = (@string)bytes.TrimSpace(f[1]);
             }
         }
     }
@@ -481,13 +493,15 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
         }
         // remove scope ID if present
         f = bytes.Split(f[1], new byte[]{(rune)'%'}.slice());
+
         // netsh can create IPv4-embedded IPv6 addresses, like fe80::5efe:192.168.140.1.
         // Convert these to all hexadecimal fe80::5efe:c0a8:8c01 for later string comparisons.
         var ipv4Tail = Δregexp.MustCompile(dDDDˢ);
         if (ipv4Tail.Match(f[0])) {
-            f[0] = slice<byte>(ParseIP(((@string)f[0])).String());
+            f[0] = slice<byte>(ParseIP((@string)f[0]).String());
         }
-        addr = ((@string)bytes.ToLower(bytes.TrimSpace(f[0])));
+
+        addr = (@string)bytes.ToLower(bytes.TrimSpace(f[0]));
     }
     return addrs;
 }
@@ -497,6 +511,7 @@ internal static readonly @string addressˢ = "address"u8;
 
 public static void TestInterfaceAddrsWithNetsh(ж<testing.T> Ꮡt) {
     checkNetsh(Ꮡt);
+
     var (outIPV4, err) = runCmd(netshˢ, interfaceˢ, ipv4ˢ, showˢ, addressˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -505,6 +520,7 @@ public static void TestInterfaceAddrsWithNetsh(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var ift, err) = Interfaces();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -546,10 +562,12 @@ public static void TestInterfaceAddrsWithNetsh(ж<testing.T> Ꮡt) {
             }}
         }
         slices.Sort<slice<@string>, @string>(have);
+
         var want = netshInterfaceIPv4ShowAddress(ifi.Name, outIPV4);
         var wantIPv6 = netshInterfaceIPv6ShowAddress(ifi.Name, outIPV6);
         want = appendꓸꓸꓸ(want, wantIPv6);
         slices.Sort<slice<@string>, @string>(want);
+
         if (strings.Join(want, "/"u8) != strings.Join(have, "/"u8)) {
             Ꮡt.Errorf("%s: unexpected addresses list %q, want %q"u8, ifi.Name, have, want);
         }
@@ -583,6 +601,7 @@ internal static readonly @string connectionNameˢ = "Connection Name"u8;
 
 public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
     checkGetmac(Ꮡt);
+
     var (ift, err) = Interfaces();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -595,6 +614,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
         }
         have[ifi.Name] = ifi.HardwareAddr.String();
     }
+
     (var @out, err) = runCmd(getmacˢ, "/fo", listˢ, "/v");
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -665,9 +685,10 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
         if (i == -1) {
             Ꮡt.Fatalf("line %q has no : in it"u8, line);
         }
-        group[((@string)(line.slice(0, i)))] = ((@string)bytes.TrimSpace(line.slice(i + 1)));
+        group[((@string)(line.slice(0, i)))] = (@string)bytes.TrimSpace(line.slice(i + 1));
     }
     processGroup();
+
     var dups = new map<@string, slice<@string>>();
     foreach (var (name, addr) in want) {
         {
@@ -677,6 +698,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
         }
         dups[addr] = append(dups[addr], name);
     }
+
 nextWant:
     foreach (var (name, wantAddr) in want) {
         {

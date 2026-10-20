@@ -64,11 +64,12 @@ public static void TestPull(ж<testing.T> Ꮡt) {
             foreach (var _ᴛ1 in range(2)) {
                 var (v, ok) = next();
                 if (v != 0 || ok != false) {
-                    tΔ1.Fatalf("next() = %d, %v, want %d, %v"u8, v, ok, (nint)(0), false);
+                    tΔ1.Fatalf("next() = %d, %v, want %d, %v"u8, v, ok, (nint)0, false);
                 }
                 wantNG(0);
             }
             wantNG(0);
+
             stop();
             stop();
             stop();
@@ -108,11 +109,12 @@ public static void TestPull2(ж<testing.T> Ꮡt) {
             foreach (var _ᴛ1 in range(2)) {
                 var (k, v, ok) = next();
                 if (v != 0 || ok != false) {
-                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v"u8, k, v, ok, (nint)(0), (nint)(0), false);
+                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v"u8, k, v, ok, (nint)0, (nint)0, false);
                 }
                 wantNG(0);
             }
             wantNG(0);
+
             stop();
             stop();
             stop();
@@ -136,6 +138,7 @@ internal static nint stableNumGoroutine() {
         // ensure all goroutines get a chance to run to completion (or to
         // some block point) for a small group of test goroutines.
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(1), ref ᒐ);
+
         nint c = 0;
         nint ng = Δruntime.NumGoroutine();
         for (nint i = 0; i < 1000; i++) {
@@ -563,6 +566,7 @@ internal static iter.Seq2<nint, nint> goexitCleanupSeq2() {
 
 internal static partial bool goexits(ж<testing.T> Ꮡt, Action f) {
     Ꮡt.Helper();
+
     var exit = new channel<bool>(0);
     var exitʗ1 = exit;
     goǃ(() => {
@@ -586,8 +590,6 @@ internal static partial bool goexits(ж<testing.T> Ꮡt, Action f) {
 private static readonly object nextReturnedTrueAfterˢ2 = (@string)"next returned true after iterator was stopped"u8;
 
 public static void TestPullImmediateStop(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (next, stop) = Pull(panicSeq());
     stop();
     // Make sure we don't panic if we try to call next or stop.
@@ -599,8 +601,6 @@ public static void TestPullImmediateStop(ж<testing.T> Ꮡt) {
 }
 
 public static void TestPull2ImmediateStop(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (next, stop) = Pull2(panicSeq2());
     stop();
     // Make sure we don't panic if we try to call next or stop.

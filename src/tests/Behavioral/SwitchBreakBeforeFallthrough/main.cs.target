@@ -9,12 +9,9 @@ internal static UntypedInt numZone => 1;
 internal static UntypedInt loopZone => 2;
 internal static UntypedInt nameZone => 3;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string unsetˢ = "unset"u8;
-private static readonly @string anonymousˢ = "anonymous"u8;
-
 internal static @string zone(nint kind, @string s) {
-    @string @out = unsetˢ;
+    @string @out = "unset";
+
     var exprᴛ1 = kind;
     var matchᴛ1 = false;
     if (exprᴛ1 == isoZone) { matchᴛ1 = true;
@@ -41,7 +38,7 @@ internal static @string zone(nint kind, @string s) {
     if (fallthrough || !matchᴛ1 && exprᴛ1 == nameZone) {
         do {
             if (s == ""u8) {
-                @out = anonymousˢ;
+                @out = "anonymous";
                 break;
             }
             @out = "named("u8 + s + ")"u8;
@@ -61,15 +58,16 @@ internal partial struct main_cases /*dyn*/ {
 
 internal static void Main() {
     var cases = new main_cases[]{
-        new(isoZone, "Z07:00"u8),
-        new(isoZone, "Z"u8),
-        new(isoZone, "+08:00"u8),
-        new(numZone, "-05:00"u8),
-        new(loopZone, "x"u8),
-        new(nameZone, ""u8),
-        new(nameZone, "MST"u8),
-        new(9, "?"u8)
+        new(isoZone, "Z07:00"),
+        new(isoZone, "Z"),
+        new(isoZone, "+08:00"),
+        new(numZone, "-05:00"),
+        new(loopZone, "x"),
+        new(nameZone, ""),
+        new(nameZone, "MST"),
+        new(9, "?")
     }.slice();
+
     foreach (var (_, c) in cases) {
         fmt.Printf("%d %q -> %s\n"u8, c.kind, c.s, zone(c.kind, c.s));
     }

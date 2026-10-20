@@ -61,7 +61,6 @@ internal static ж<global::go.net.http.cookiejar_package.Jar> newTestJar() {
     return jar;
 }
 
-
 partial struct hasDotSuffixTestsᴛ1 /*dyn*/ {
     internal @string s, suffix;
 }
@@ -137,9 +136,6 @@ public static void TestHasDotSuffix(ж<testing.T> Ꮡt) {
     }
 }
 
-// TODO: Fix canonicalHost so that all of the following malformed
-// domain names trigger an error. (This list is not exhaustive, e.g.
-// malformed internationalized domain names are missing.)
 internal static map<@string, @string> canonicalHostTests = new map<@string, @string>{
     ["www.example.com"u8] = "www.example.com"u8,
     ["WWW.EXAMPLE.COM"u8] = "www.example.com"u8,
@@ -151,6 +147,9 @@ internal static map<@string, @string> canonicalHostTests = new map<@string, @str
     ["[2001:4860:0:::68]:8080"u8] = "2001:4860:0:::68"u8,
     ["www.bücher.de"u8] = "www.xn--bcher-kva.de"u8,
     ["www.example.com."u8] = "www.example.com"u8,
+    // TODO: Fix canonicalHost so that all of the following malformed
+    // domain names trigger an error. (This list is not exhaustive, e.g.
+    // malformed internationalized domain names are missing.)
     ["."u8] = ""u8,
     [".."u8] = "."u8,
     ["..."u8] = ".."u8,
@@ -203,8 +202,6 @@ public static void TestHasPort(ж<testing.T> Ꮡt) {
     }
 }
 
-// The following are actual outputs of canonicalHost for
-// malformed inputs to canonicalHost (see above).
 internal static map<@string, @string> jarKeyTests = new map<@string, @string>{
     ["foo.www.example.com"u8] = "example.com"u8,
     ["www.example.com"u8] = "example.com"u8,
@@ -218,6 +215,8 @@ internal static map<@string, @string> jarKeyTests = new map<@string, @string>{
     ["192.168.0.5"u8] = "192.168.0.5"u8,
     ["www.buggy.psl"u8] = "www.buggy.psl"u8,
     ["www2.buggy.psl"u8] = "buggy.psl"u8,
+    // The following are actual outputs of canonicalHost for
+    // malformed inputs to canonicalHost (see above).
     [""u8] = ""u8,
     ["."u8] = "."u8,
     [".."u8] = "."u8,
@@ -237,8 +236,6 @@ public static void TestJarKey(ж<testing.T> Ꮡt) {
     }
 }
 
-// The following are actual outputs of canonicalHost for
-// malformed inputs to canonicalHost.
 internal static map<@string, @string> jarKeyNilPSLTests = new map<@string, @string>{
     ["foo.www.example.com"u8] = "example.com"u8,
     ["www.example.com"u8] = "example.com"u8,
@@ -250,6 +247,8 @@ internal static map<@string, @string> jarKeyNilPSLTests = new map<@string, @stri
     ["co.uk"u8] = "co.uk"u8,
     ["uk"u8] = "uk"u8,
     ["192.168.0.5"u8] = "192.168.0.5"u8,
+    // The following are actual outputs of canonicalHost for
+    // malformed inputs to canonicalHost.
     [""u8] = ""u8,
     ["."u8] = "."u8,
     [".."u8] = ".."u8,
@@ -316,7 +315,6 @@ public static void TestDefaultPath(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct domainAndTypeTestsᴛ1 /*dyn*/ {
     internal @string host; // host Set-Cookie header was received from
@@ -418,6 +416,7 @@ internal static void run(this jarTest test, ж<testing.T> Ꮡt, ж<global::go.ne
     ref var jar = ref Ꮡjar.DerefOrNull();
 
     var now = tNow;
+
     // Populate jar with cookies.
     var setCookies = new slice<ж<httpꓸCookie>>(len(test.setCookies));
     foreach (var (i, csΔ1) in test.setCookies) {
@@ -429,6 +428,7 @@ internal static void run(this jarTest test, ж<testing.T> Ꮡt, ж<global::go.ne
     }
     Ꮡjar.setCookies(mustParseURL(test.fromURL), setCookies, now);
     now = now.Add(1001 * time.Millisecond);
+
     // Serialize non-expired entries in the form "name1=val1 name2=val2".
     slice<@string> cs = default!;
     foreach (var (_, submap) in jar.entries) {
@@ -436,6 +436,7 @@ internal static void run(this jarTest test, ж<testing.T> Ꮡt, ж<global::go.ne
             if (!cookie.Expires.After(now)) {
                 continue;
             }
+
             @string v = cookie.Value;
             if (strings.ContainsAny(v, " ,"u8) || cookie.Quoted) {
                 v = @""""u8 + v + @""""u8;
@@ -445,11 +446,13 @@ internal static void run(this jarTest test, ж<testing.T> Ꮡt, ж<global::go.ne
     }
     slices.Sort<slice<@string>, @string>(cs);
     @string got = strings.Join(cs, " "u8);
+
     // Make sure jar content matches our expectations.
     if (got != test.content) {
         Ꮡt.Errorf("Test %q Content\ngot  %q\nwant %q"u8,
             test.description, got, test.content);
     }
+
     // Test different calls to Cookies.
     foreach (var (i, query) in test.queries) {
         now = now.Add(1001 * time.Millisecond);
@@ -465,10 +468,6 @@ internal static void run(this jarTest test, ж<testing.T> Ꮡt, ж<global::go.ne
     }
 }
 
-// allowed
-// rejected, can't set cookie for other IP
-// rejected like in most browsers
-// issue #46443
 // basicsTests contains fundamental tests. Each jarTest has to be performed on
 // a fresh, empty Jar.
 internal static array<jarTest> basicsTests = new jarTest[]{
@@ -638,9 +637,9 @@ internal static array<jarTest> basicsTests = new jarTest[]{
         "Domain cookies on IP."u8,
         "http://192.168.0.10"u8,
         new @string[]{
-            "a=1; domain=192.168.0.10"u8,
-            "b=2; domain=172.31.9.9"u8,
-            "c=3; domain=.192.168.0.10"u8
+            "a=1; domain=192.168.0.10"u8, // allowed
+            "b=2; domain=172.31.9.9"u8, // rejected, can't set cookie for other IP
+            "c=3; domain=.192.168.0.10"u8 // rejected like in most browsers
         }.slice(),
         "a=1"u8,
         new query[]{
@@ -680,7 +679,7 @@ internal static array<jarTest> basicsTests = new jarTest[]{
         }.slice()
     ),
     new(
-        "Retrieval of cookies with quoted values"u8,
+        "Retrieval of cookies with quoted values"u8, // issue #46443
         "http://www.host.test/"u8,
         new @string[]{
             @"cookie-1=""quoted"""u8,
@@ -705,10 +704,6 @@ public static void TestBasics(ж<testing.T> Ꮡt) {
     }
 }
 
-// delete via MaxAge
-// delete via Expires
-// delete via both
-// MaxAge takes precedence
 // updateAndDeleteTests contains jarTests which must be performed on the same
 // Jar.
 internal static array<jarTest> updateAndDeleteTests = new jarTest[]{
@@ -753,10 +748,10 @@ internal static array<jarTest> updateAndDeleteTests = new jarTest[]{
         "Delete all."u8,
         "http://www.host.test/"u8,
         new @string[]{
-            "a=1; max-Age=-1"u8,
-            "b=2; "u8 + expiresIn(-10),
-            "c=2; max-age=-1; "u8 + expiresIn(-10),
-            "d=4; max-age=-1; "u8 + expiresIn(10)}.slice(),
+            "a=1; max-Age=-1"u8, // delete via MaxAge
+            "b=2; "u8 + expiresIn(-10), // delete via Expires
+            "c=2; max-age=-1; "u8 + expiresIn(-10), // delete via both
+            "d=4; max-age=-1; "u8 + expiresIn(10)}.slice(), // MaxAge takes precedence
         ""u8,
         new query[]{new("http://www.host.test"u8, ""u8)}.slice()
     ),
@@ -872,20 +867,14 @@ public static void TestExpiration(ж<testing.T> Ꮡt) {
             "f=6; max-age=100"u8
         }.slice(),
         "a=1 b=2 c=3 d=4 e=5 f=6"u8, // executed at t0 + 1001 ms
-
         new query[]{
             new("http://www.host.test"u8, "a=1 b=2 c=3 d=4 e=5 f=6"u8), // t0 + 2002 ms
-
             new("http://www.host.test"u8, "a=1 d=4 e=5 f=6"u8), // t0 + 3003 ms
-
             new("http://www.host.test"u8, "a=1 d=4 e=5 f=6"u8), // t0 + 4004 ms
-
             new("http://www.host.test"u8, "a=1 f=6"u8), // t0 + 5005 ms
-
-            new("http://www.host.test"u8, "a=1 f=6"u8)
+            new("http://www.host.test"u8, "a=1 f=6"u8) // t0 + 6006 ms
         }.slice()
-    ).run(Ꮡt, // t0 + 6006 ms
- jar);
+    ).run(Ꮡt, jar);
 }
 
 //
@@ -895,7 +884,7 @@ public static void TestExpiration(ж<testing.T> Ꮡt) {
 // Some of the original tests are in a bad condition (e.g.
 // DomainWithTrailingDotTest) or are not RFC 6265 conforming (e.g.
 // TestNonDottedAndTLD #1 and #6) and have not been ported.
-// Jar is empty.
+
 // chromiumBasicsTests contains fundamental tests. Each jarTest has to be
 // performed on a fresh, empty Jar.
 internal static array<jarTest> chromiumBasicsTests = new jarTest[]{
@@ -962,7 +951,7 @@ internal static array<jarTest> chromiumBasicsTests = new jarTest[]{
             "n=14; domain=.foo.bar.com:"u8,
             "o=15; domain=.foo.bar.com#sup"u8
         }.slice(),
-        ""u8,
+        ""u8, // Jar is empty.
         new query[]{new("http://foo.bar.com"u8, ""u8)}.slice()
     ),
     new(

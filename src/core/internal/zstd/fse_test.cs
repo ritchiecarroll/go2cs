@@ -81,12 +81,14 @@ public static void TestPredefinedTables(ж<testing.T> Ꮡt) {
                     tΔ1.Fatal(err);
                 }
             }
+
             var baselineTable = new slice<global::go.@internal.zstd_package.fseBaselineEntry>(builtin.len(table));
             {
                 var err = testʗ1.toBaseline(Ꮡr, 0, table, baselineTable); if (err != default!) {
                     tΔ1.Fatal(err);
                 }
             }
+
             if (!slices.Equal<slice<global::go.@internal.zstd_package.fseBaselineEntry>, global::go.@internal.zstd_package.fseBaselineEntry>(baselineTable, testʗ1.predef)) {
                 tΔ1.Errorf("got %v, want %v"u8, baselineTable, testʗ1.predef);
             }

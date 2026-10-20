@@ -38,22 +38,26 @@ public static void TestFloatGobEncoding(ж<testing.T> Ꮡt) {
                 foreach (var (_, mode) in new global::go.math.big_package.RoundingMode[]{ToNearestEven, ToNearestAway, ToZero, AwayFromZero, ToNegativeInf, ToPositiveInf}.slice()) {
                     medium.Reset(); // empty buffer for each test case (in case of failures)
                     @string x = sign + test;
+
                     ref var tx = ref heap(new global::go.math.big_package.Float(), out var Ꮡtx);
                     var (_, _, err) = Ꮡtx.SetPrec(prec).SetMode(mode).Parse(x, 0);
                     if (err != default!) {
                         Ꮡt.Errorf("parsing of %s (%dbits, %v) failed (invalid test case): %v"u8, x, prec, mode, err);
                         continue;
                     }
+
                     // If tx was set to prec == 0, tx.Parse(x, 0) assumes precision 64. Correct it.
                     if (prec == 0) {
                         Ꮡtx.SetPrec(0);
                     }
+
                     {
                         var errΔ1 = enc.Encode(Ꮡtx); if (errΔ1 != default!) {
                             Ꮡt.Errorf("encoding of %v (%dbits, %v) failed: %v"u8, Ꮡtx, prec, mode, errΔ1);
                             continue;
                         }
                     }
+
                     ref var rx = ref heap(new global::go.math.big_package.Float(), out var Ꮡrx);
                     {
                         var errΔ2 = dec.Decode(Ꮡrx); if (errΔ2 != default!) {
@@ -61,16 +65,20 @@ public static void TestFloatGobEncoding(ж<testing.T> Ꮡt) {
                             continue;
                         }
                     }
+
                     if (Ꮡrx.Cmp(Ꮡtx) != 0) {
                         Ꮡt.Errorf("transmission of %s failed: got %s want %s"u8, x, Ꮡrx.String(), Ꮡtx.String());
                         continue;
                     }
+
                     if (rx.Prec() != prec) {
                         Ꮡt.Errorf("transmission of %s's prec failed: got %d want %d"u8, x, rx.Prec(), prec);
                     }
+
                     if (rx.Mode() != mode) {
                         Ꮡt.Errorf("transmission of %s's mode failed: got %s want %s"u8, x, rx.Mode(), mode);
                     }
+
                     if (rx.Acc() != tx.Acc()) {
                         Ꮡt.Errorf("transmission of %s's accuracy failed: got %s want %s"u8, x, rx.Acc(), tx.Acc());
                     }
@@ -92,17 +100,20 @@ public static void TestFloatCorruptGob(ж<testing.T> Ꮡt) {
         }
     }
     var b = buf.Bytes();
+
     ref var rx = ref heap(new global::go.math.big_package.Float(), out var Ꮡrx);
     {
         var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b))).Decode(Ꮡrx); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     {
         var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b[..10]))).Decode(Ꮡrx); if (!AreEqual(err, io.ErrUnexpectedEOF)) {
             Ꮡt.Errorf("got %v want EOF"u8, err);
         }
     }
+
     b[1] = 0;
     {
         var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b))).Decode(Ꮡrx); if (err == default!) {

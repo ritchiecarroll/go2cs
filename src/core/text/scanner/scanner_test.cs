@@ -74,7 +74,6 @@ internal partial struct token {
 
 internal static @string f100 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8;
 
-// NUL character is not allowed
 internal static slice<token> tokenList = new token[]{
     new(Comment, "// line comments"u8),
     new(Comment, "//"u8),
@@ -210,8 +209,9 @@ internal static slice<token> tokenList = new token[]{
     new(RawString, "`"u8 + "\n\n/* foobar */\n\n"u8 + "`"u8),
     new(RawString, "`"u8 + f100 + "`"u8),
     new(Comment, "// individual characters"u8),
+    // NUL character is not allowed
     new((rune)'\x01', "\x01"u8),
-    new((rune)' ' - 1, ((@string)((rune)(rune)' ' - 1))),
+    new((rune)' ' - 1, (@string)((rune)(rune)' ' - 1)),
     new((rune)'+', "+"u8),
     new((rune)'/', "/"u8),
     new((rune)'.', "."u8),
@@ -276,7 +276,7 @@ internal static void testScan(ж<testing.T> Ꮡt, nuint mode) {
     var tok = s.Scan();
     nint line = 1;
     foreach (var (_, k) in tokenList) {
-        if ((nuint)(mode & (nuint)SkipComments) == 0 || k.tok != Comment) {
+        if ((mode & (nuint)SkipComments) == 0 || k.tok != Comment) {
             checkTok(Ꮡt, s, line, tok, k.tok, k.text);
             tok = s.Scan();
         }
@@ -346,8 +346,6 @@ public static void TestPosition(ж<testing.T> Ꮡt) {
 }
 
 public static void TestScanZeroMode(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var src = makeSource("%s\n"u8);
     @string str = src.String();
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.bytes_BufferжReader(src));
@@ -385,8 +383,6 @@ internal static void testScanSelectedMode(ж<testing.T> Ꮡt, nuint mode, rune @
 }
 
 public static void TestScanSelectedMask(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testScanSelectedMode(Ꮡt, 0, 0);
     testScanSelectedMode(Ꮡt, ScanIdents, Ident);
     // Don't test ScanInts and ScanNumbers since some parts of
@@ -427,7 +423,7 @@ public static void TestScanCustomIdent(ж<testing.T> Ꮡt) {
 
 public static void TestScanNext(ж<testing.T> Ꮡt) {
     UntypedInt BOM = /* '\uFEFF' */ 65279;
-    @string BOMs = ((@string)(rune)BOM);
+    @string BOMs = (@string)(rune)BOM;
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(BOMs + "if a == bcd /* com"u8 + BOMs + "ment */ {\n\ta += c\n}"u8 + BOMs + "// line comment ending in eof"u8)));
     checkTok(Ꮡt, s, 1, s.Scan(), Ident, "if"u8); // the first BOM is ignored
     checkTok(Ꮡt, s, 1, s.Scan(), Ident, "a"u8);
@@ -459,6 +455,7 @@ public static void TestScanWhitespace(ж<testing.T> Ꮡt) {
     }
     UntypedInt orig = /* 'x' */ 120;
     buf.WriteByte(orig);
+
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.bytes_BufferжReader(Ꮡbuf));
     s.Value.Mode = 0;
     s.Value.Whitespace = ws;
@@ -515,17 +512,22 @@ public static void TestError(ж<testing.T> Ꮡt) {
     testError(Ꮡt, "\x00"u8, input11ˢ, invalidCharacterNulˢ, 0);
     testError(Ꮡt, ((@string)(new byte[]{0x80})), input11ˢ, invalidUtf8Encodingˢ, utf8.RuneError);
     testError(Ꮡt, ((@string)(new byte[]{0xff})), input11ˢ, invalidUtf8Encodingˢ, utf8.RuneError);
+
     testError(Ꮡt, "a\x00"u8, input12ˢ, invalidCharacterNulˢ, Ident);
     testError(Ꮡt, ((@string)(new byte[]{0x61, 0x62, 0x80})), input13ˢ, invalidUtf8Encodingˢ, Ident);
     testError(Ꮡt, ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff})), input14ˢ, invalidUtf8Encodingˢ, Ident);
+
     testError(Ꮡt, @"""a"u8 + "\x00"u8, input13ˢ, invalidCharacterNulˢ, ΔString);
     testError(Ꮡt, @"""ab"u8 + ((@string)(new byte[]{0x80})), input14ˢ, invalidUtf8Encodingˢ, ΔString);
     testError(Ꮡt, @"""abc"u8 + ((@string)(new byte[]{0xff})), input15ˢ, invalidUtf8Encodingˢ, ΔString);
+
     testError(Ꮡt, "`a"u8 + "\x00"u8, input13ˢ, invalidCharacterNulˢ, RawString);
     testError(Ꮡt, "`ab"u8 + ((@string)(new byte[]{0x80})), input14ˢ, invalidUtf8Encodingˢ, RawString);
     testError(Ꮡt, "`abc"u8 + ((@string)(new byte[]{0xff})), input15ˢ, invalidUtf8Encodingˢ, RawString);
+
     testError(Ꮡt, @"'\""'"u8, input13ˢ, invalidCharEscapeˢ, Char);
     testError(Ꮡt, @"""\'"""u8, input13ˢ, invalidCharEscapeˢ, ΔString);
+
     testError(Ꮡt, @"01238"u8, input16ˢ, invalidDigit8InOctalˢ, Int);
     testError(Ꮡt, @"01238123"u8, input19ˢ, invalidDigit8InOctalˢ, Int);
     testError(Ꮡt, @"0x"u8, input13ˢ, hexadecimalLiteralHasNoˢ, Int);
@@ -535,6 +537,7 @@ public static void TestError(ж<testing.T> Ꮡt) {
     testError(Ꮡt, @"1.5E"u8, input15ˢ, exponentHasNoDigitsˢ, Float);
     testError(Ꮡt, @"1.5e+"u8, input16ˢ, exponentHasNoDigitsˢ, Float);
     testError(Ꮡt, @"1.5e-"u8, input16ˢ, exponentHasNoDigitsˢ, Float);
+
     testError(Ꮡt, @"'"u8, input12ˢ, literalNotTerminatedˢ, Char);
     testError(Ꮡt, @"'"u8 + "\n"u8, input12ˢ, literalNotTerminatedˢ, Char);
     testError(Ꮡt, abcˢ, input15ˢ, literalNotTerminatedˢ, ΔString);
@@ -601,7 +604,7 @@ internal static void checkScanPos(ж<testing.T> Ꮡt, ж<global::go.text.scanner
         var ch = Ꮡs.Scan(); if (ch != @char) {
             Ꮡt.Errorf("ch = %s, want %s"u8, TokenString(ch), TokenString(@char));
             if (((@string)ch) != Ꮡs.TokenText()) {
-                Ꮡt.Errorf("tok = %q, want %q"u8, Ꮡs.TokenText(), ((@string)ch));
+                Ꮡt.Errorf("tok = %q, want %q"u8, Ꮡs.TokenText(), (@string)ch);
             }
         }
     }
@@ -613,13 +616,12 @@ internal static readonly @string fooˢ = "  foo६४  \n\n本語\n"u8;
 internal static readonly @string abcXˢ = "abc\n本語\n\nx"u8;
 
 public static void TestPos(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // corner case: empty source
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(""u8)));
     checkPos(Ꮡt, s.Pos(), new Position(Offset: 0, Line: 1, Column: 1));
     s.Peek(); // peek doesn't affect the position
     checkPos(Ꮡt, s.Pos(), new Position(Offset: 0, Line: 1, Column: 1));
+
     // corner case: source with only a newline
     s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader("\n"u8)));
     checkPos(Ꮡt, s.Pos(), new Position(Offset: 0, Line: 1, Column: 1));
@@ -631,6 +633,7 @@ public static void TestPos(ж<testing.T> Ꮡt) {
     if ((~s).ErrorCount != 0) {
         Ꮡt.Errorf("%d errors"u8, (~s).ErrorCount);
     }
+
     // corner case: source with only a single character
     s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader("本"u8)));
     checkPos(Ꮡt, s.Pos(), new Position(Offset: 0, Line: 1, Column: 1));
@@ -642,6 +645,7 @@ public static void TestPos(ж<testing.T> Ꮡt) {
     if ((~s).ErrorCount != 0) {
         Ꮡt.Errorf("%d errors"u8, (~s).ErrorCount);
     }
+
     // positions after calling Next
     s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(fooˢ)));
     checkNextPos(Ꮡt, s, 1, 1, 2, (rune)' ');
@@ -666,6 +670,7 @@ public static void TestPos(ж<testing.T> Ꮡt) {
     if ((~s).ErrorCount != 0) {
         Ꮡt.Errorf("%d errors"u8, (~s).ErrorCount);
     }
+
     // positions after calling Scan
     s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(abcXˢ)));
     s.Value.Mode = 0;
@@ -702,16 +707,20 @@ internal static readonly object eofNotReportedˢ2 = (@string)"2) EOF not reporte
 
 public static void TestNextEOFHandling(ж<testing.T> Ꮡt) {
     ref var r = ref heap(new countReader(), out var Ꮡr);
+
     // corner case: empty source
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_internal_test_package.countReaderжReader(Ꮡr));
+
     var tok = s.Next();
     if (tok != EOF) {
         Ꮡt.Error(eofNotReportedˢ);
     }
+
     tok = s.Peek();
     if (tok != EOF) {
         Ꮡt.Error(eofNotReportedˢ2);
     }
+
     if (r != 1) {
         Ꮡt.Errorf("scanner called Read %d times, not once"u8, r);
     }
@@ -719,16 +728,20 @@ public static void TestNextEOFHandling(ж<testing.T> Ꮡt) {
 
 public static void TestScanEOFHandling(ж<testing.T> Ꮡt) {
     ref var r = ref heap(new countReader(), out var Ꮡr);
+
     // corner case: empty source
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_internal_test_package.countReaderжReader(Ꮡr));
+
     var tok = s.Scan();
     if (tok != EOF) {
         Ꮡt.Error(eofNotReportedˢ);
     }
+
     tok = s.Peek();
     if (tok != EOF) {
         Ꮡt.Error(eofNotReportedˢ2);
     }
+
     if (r != 1) {
         Ꮡt.Errorf("scanner called Read %d times, not once"u8, r);
     }
@@ -738,8 +751,6 @@ public static void TestScanEOFHandling(ж<testing.T> Ꮡt) {
 internal static readonly @string wantᶜ1 = @""""u8;
 
 public static void TestIssue29723(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(@"x """u8)));
     s.Value.Error = (ж<global::go.text.scanner_package.Scanner> sΔ1, @string _) => {
         @string got = sΔ1.TokenText(); // this call shouldn't panic
@@ -758,22 +769,23 @@ internal partial struct TestNumbers_type /*dyn*/ {
 }
 
 public static void TestNumbers(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestNumbers_type[]{ // binaries
-
+    foreach (var (_, test) in new TestNumbers_type[]{
+        // binaries
         new(Int, "0b0"u8, "0b0"u8, ""u8),
         new(Int, "0b1010"u8, "0b1010"u8, ""u8),
         new(Int, "0B1110"u8, "0B1110"u8, ""u8),
         new(Int, "0b"u8, "0b"u8, "binary literal has no digits"u8),
         new(Int, "0b0190"u8, "0b0190"u8, "invalid digit '9' in binary literal"u8),
         new(Int, "0b01a0"u8, "0b01 a0"u8, ""u8), // only accept 0-9
- // binary floats (invalid)
 
+        // binary floats (invalid)
         new(Float, "0b."u8, "0b."u8, "invalid radix point in binary literal"u8),
         new(Float, "0b.1"u8, "0b.1"u8, "invalid radix point in binary literal"u8),
         new(Float, "0b1.0"u8, "0b1.0"u8, "invalid radix point in binary literal"u8),
         new(Float, "0b1e10"u8, "0b1e10"u8, "'e' exponent requires decimal mantissa"u8),
-        new(Float, "0b1P-1"u8, "0b1P-1"u8, "'P' exponent requires hexadecimal mantissa"u8), // octals
+        new(Float, "0b1P-1"u8, "0b1P-1"u8, "'P' exponent requires hexadecimal mantissa"u8),
 
+        // octals
         new(Int, "0o0"u8, "0o0"u8, ""u8),
         new(Int, "0o1234"u8, "0o1234"u8, ""u8),
         new(Int, "0O1234"u8, "0O1234"u8, ""u8),
@@ -781,28 +793,29 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(Int, "0o8123"u8, "0o8123"u8, "invalid digit '8' in octal literal"u8),
         new(Int, "0o1293"u8, "0o1293"u8, "invalid digit '9' in octal literal"u8),
         new(Int, "0o12a3"u8, "0o12 a3"u8, ""u8), // only accept 0-9
- // octal floats (invalid)
 
+        // octal floats (invalid)
         new(Float, "0o."u8, "0o."u8, "invalid radix point in octal literal"u8),
         new(Float, "0o.2"u8, "0o.2"u8, "invalid radix point in octal literal"u8),
         new(Float, "0o1.2"u8, "0o1.2"u8, "invalid radix point in octal literal"u8),
         new(Float, "0o1E+2"u8, "0o1E+2"u8, "'E' exponent requires decimal mantissa"u8),
-        new(Float, "0o1p10"u8, "0o1p10"u8, "'p' exponent requires hexadecimal mantissa"u8), // 0-octals
+        new(Float, "0o1p10"u8, "0o1p10"u8, "'p' exponent requires hexadecimal mantissa"u8),
 
+        // 0-octals
         new(Int, "0"u8, "0"u8, ""u8),
         new(Int, "0123"u8, "0123"u8, ""u8),
         new(Int, "08123"u8, "08123"u8, "invalid digit '8' in octal literal"u8),
         new(Int, "01293"u8, "01293"u8, "invalid digit '9' in octal literal"u8),
         new(Int, "0F."u8, "0 F ."u8, ""u8), // only accept 0-9
-
         new(Int, "0123F."u8, "0123 F ."u8, ""u8),
-        new(Int, "0123456x"u8, "0123456 x"u8, ""u8), // decimals
+        new(Int, "0123456x"u8, "0123456 x"u8, ""u8),
 
+        // decimals
         new(Int, "1"u8, "1"u8, ""u8),
         new(Int, "1234"u8, "1234"u8, ""u8),
         new(Int, "1f"u8, "1 f"u8, ""u8), // only accept 0-9
- // decimal floats
 
+        // decimal floats
         new(Float, "0."u8, "0."u8, ""u8),
         new(Float, "123."u8, "123."u8, ""u8),
         new(Float, "0123."u8, "0123."u8, ""u8),
@@ -828,15 +841,17 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(Float, "0E+"u8, "0E+"u8, "exponent has no digits"u8),
         new(Float, "1e+f"u8, "1e+ f"u8, "exponent has no digits"u8),
         new(Float, "0p0"u8, "0p0"u8, "'p' exponent requires hexadecimal mantissa"u8),
-        new(Float, "1.0P-1"u8, "1.0P-1"u8, "'P' exponent requires hexadecimal mantissa"u8), // hexadecimals
+        new(Float, "1.0P-1"u8, "1.0P-1"u8, "'P' exponent requires hexadecimal mantissa"u8),
 
+        // hexadecimals
         new(Int, "0x0"u8, "0x0"u8, ""u8),
         new(Int, "0x1234"u8, "0x1234"u8, ""u8),
         new(Int, "0xcafef00d"u8, "0xcafef00d"u8, ""u8),
         new(Int, "0XCAFEF00D"u8, "0XCAFEF00D"u8, ""u8),
         new(Int, "0x"u8, "0x"u8, "hexadecimal literal has no digits"u8),
-        new(Int, "0x1g"u8, "0x1 g"u8, ""u8), // hexadecimal floats
+        new(Int, "0x1g"u8, "0x1 g"u8, ""u8),
 
+        // hexadecimal floats
         new(Float, "0x0p0"u8, "0x0p0"u8, ""u8),
         new(Float, "0x12efp-123"u8, "0x12efp-123"u8, ""u8),
         new(Float, "0xABCD.p+0"u8, "0xABCD.p+0"u8, ""u8),
@@ -851,8 +866,9 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(Float, "0x0p"u8, "0x0p"u8, "exponent has no digits"u8),
         new(Float, "0xeP-"u8, "0xeP-"u8, "exponent has no digits"u8),
         new(Float, "0x1234PAB"u8, "0x1234P AB"u8, "exponent has no digits"u8),
-        new(Float, "0x1.2p1a"u8, "0x1.2p1 a"u8, ""u8), // separators
+        new(Float, "0x1.2p1a"u8, "0x1.2p1 a"u8, ""u8),
 
+        // separators
         new(Int, "0b_1000_0001"u8, "0b_1000_0001"u8, ""u8),
         new(Int, "0o_600"u8, "0o_600"u8, ""u8),
         new(Int, "0_466"u8, "0_466"u8, ""u8),
@@ -876,6 +892,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
                 err = msg;
             }
         };
+
         foreach (var (i, want) in strings.Split(test.tokens, " "u8)) {
             err = ""u8;
             var tok = s.Scan();
@@ -892,6 +909,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("%q: got literal %q (%s); want %s"u8, test.src, lit, TokenString(tok), want);
             }
         }
+
         // make sure we read all
         {
             var tok = s.Scan(); if (tok != EOF) {
@@ -942,7 +960,6 @@ internal static @string /*res*/ extractInts(@string t, nuint mode) {
                 return res;
             }
         }
-
     }
 }
 
@@ -956,12 +973,14 @@ public static void TestIssue50909(ж<testing.T> Ꮡt) {
     ref var s = ref heap(new global::go.text.scanner_package.Scanner(), out var Ꮡs);
     Ꮡs.Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(helloWorldˢ)));
     s.IsIdentRune = (rune ch, nint _) => ch != (rune)'\n';
+
     @string r = ""u8;
     nint n = 0;
     while (Ꮡs.Scan() != EOF && n < 10) {
         r += Ꮡs.TokenText();
         n++;
     }
+
     @string R = Rᶜ;
     const nint N = 3;
     if (r != R || n != N) {

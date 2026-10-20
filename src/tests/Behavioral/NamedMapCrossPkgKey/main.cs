@@ -12,6 +12,7 @@ internal static void Main() {
         [((CrossPkgLib.Ticks)2)] = (nint a, nint b) => a + b,
         [((CrossPkgLib.Ticks)3)] = (nint a, nint b) => a * b
     });
+
     fmt.Println(ops[((CrossPkgLib.Ticks)2)](4, 5), ops[((CrossPkgLib.Ticks)3)](4, 5), len(ops));
 }
 

@@ -17,7 +17,7 @@
 //
 // Note that the examples in this package assume a Unix system.
 // They may not run on Windows, and they do not run in the Go Playground
-// used by golang.org and godoc.org.
+// used by go.dev and pkg.go.dev.
 //
 // # Executables in the current directory
 //
@@ -101,6 +101,7 @@ using filepath = path.filepath_package;
 using runtime = runtime_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using atomic = sync.atomic_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal;
@@ -108,6 +109,7 @@ using @internal.syscall;
 using System.Runtime.CompilerServices;
 using fs = go.io.fs_package;
 using path;
+using sync;
 using ꓸꓸꓸstring = Span<@string>;
 
 partial class exec_package {
@@ -154,8 +156,8 @@ partial struct Cmd_cachedLookExtensions /*dyn*/ {
 
 // Cmd represents an external command being prepared or run.
 //
-// A Cmd cannot be reused after calling its [Cmd.Run], [Cmd.Output] or [Cmd.CombinedOutput]
-// methods.
+// A Cmd cannot be reused after calling its [Cmd.Start], [Cmd.Run],
+// [Cmd.Output], or [Cmd.CombinedOutput] methods.
 partial struct Cmd {
     // Path is the path of the command to run.
     //
@@ -345,6 +347,10 @@ partial struct Cmd {
     // the work of resolving the extension, so Start doesn't need to do it again.
     // This is only used on Windows.
     internal Cmd_cachedLookExtensions cachedLookExtensions;
+    // startCalled records that Start was attempted, regardless of outcome.
+    // (Until go.dev/issue/77075 is resolved, we use atomic.SwapInt32,
+    // not atomic.Bool.Swap, to avoid triggering the copylocks vet check.)
+    internal int32 startCalled;
 }
 
 // A ctxResult reports the result of watching the Context associated with a
@@ -397,6 +403,7 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
         Path: name,
         Args: appendꓸꓸꓸ(new @string[]{name}.slice(), arg)
     ));
+
     {
         @string v = execwait.Value(); if (v != ""u8) {
             if (v == "2"u8) {
@@ -411,6 +418,7 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
                     }
                     stack = new slice<byte>(2 * len(stack));
                 }
+
                 {
                     nint i = bytes.Index(stack, slice<byte>("\nos/exec.Command("u8)); if (i >= 0) {
                         stack = stack.slice(i + 1);
@@ -418,6 +426,7 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
                 }
                 cmd.Value.createdByStack = stack;
             }
+
             runtime.SetFinalizer(cmd.OrTypedNil(), (ж<Cmd> c) => {
                 if ((~c).Process != nil && (~c).ProcessState == nil) {
                     @string debugHint = ""u8;
@@ -434,6 +443,7 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
             });
         }
     }
+
     if (filepath.Base(name) == name){
         var (lp, err) = LookPath(name);
         if (lp != ""u8) {
@@ -539,15 +549,18 @@ internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
         c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(f)));
         return (f, default!);
     }
+
     {
         var (f, ok) = c.Stdin._<ж<os.File>>(ᐧ); if (ok) {
             return (f, default!);
         }
     }
+
     var (pr, pw, err) = os.Pipe();
     if (err != default!) {
         return (default!, err);
     }
+
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pr)));
     c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pw)));
     var pwʗ1 = pw;
@@ -590,15 +603,18 @@ internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer 
         c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(f)));
         return (f, default!);
     }
+
     {
         var (f, ok) = w._<ж<os.File>>(ᐧ); if (ok) {
             return (f, default!);
         }
     }
+
     var (pr, pw, err) = os.Pipe();
     if (err != default!) {
         return (default!, err);
     }
+
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pw)));
     c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pr)));
     var prʗ1 = pr;
@@ -661,18 +677,23 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
 
         // Check for doubled Start calls before we defer failure cleanup. If the prior
         // call to Start succeeded, we don't want to spuriously close its pipes.
-        if (c.Process != nil) {
+        // It is an error to call Start twice even if the first call did not create a process.
+        if (atomic.SwapInt32(Ꮡc.of(Cmd.ᏑstartCalled), 1) != 0) {
             return errors.New(execAlreadyStartedˢ);
         }
+
         var started = false;
         defer(() => {
             closeDescriptors(Ꮡc.Value.childIOFiles);
             Ꮡc.Value.childIOFiles = default!;
+
             if (!started) {
                 closeDescriptors(Ꮡc.Value.parentIOPipes);
                 Ꮡc.Value.parentIOPipes = default!;
+                Ꮡc.Value.goroutine = default!; // aid GC, finalization of pipe fds
             }
         }, ref ᒐ);
+
         if (c.Path == ""u8 && c.Err == default! && c.lookPathErr == default!) {
             c.Err = errors.New(execNoCommandˢ);
         }
@@ -724,6 +745,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
                 break;
             }}
         }
+
         var childFiles = new slice<ж<os.File>>(0, 3 + len(c.ExtraFiles));
         var (stdin, err) = Ꮡc.childStdin();
         if (err != default!) {
@@ -741,10 +763,12 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
         }
         childFiles = append(childFiles, stderr);
         childFiles = appendꓸꓸꓸ(childFiles, c.ExtraFiles);
+
         (var env, err) = c.environ();
         if (err != default!) {
             return err;
         }
+
         (c.Process, err) = os.StartProcess(lp, c.argv(), Ꮡ(new os.ProcAttr(
             Dir: c.Dir,
             Files: childFiles,
@@ -755,6 +779,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
             return err;
         }
         started = true;
+
         // Don't allocate the goroutineErr channel unless there are goroutines to start.
         if (len(c.goroutine) > 0) {
             var goroutineErr = new channel<error>(1);
@@ -766,6 +791,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
                 var statuscʗ1 = statusc;
                 goǃ((Func<error> fnΔ1) => {
                     var errΔ2 = fnΔ1();
+
                     ref var status = ref heap<Start_goroutineStatus>(out var Ꮡstatus);
                     status = ᐸꟷ(statuscʗ1);
                     if (status.firstErr == default!) {
@@ -781,6 +807,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
             }
             c.goroutine = default!; // Allow the goroutines' closures to be GC'd when they complete.
         }
+
         // If we have anything to do when the command's Context expires,
         // start a goroutine to watch for cancellation.
         //
@@ -792,6 +819,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
             c.ctxResult = resultc.WithDirection(GoChanDir.Recv);
             goǃ(Ꮡc.watchCtx, resultc.WithDirection(GoChanDir.Send));
         }
+
         return default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -815,6 +843,7 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
     case 1 when selᴛ3.ꟷᐳ(out _): {
         break;
     }}
+
     error err = default!;
     if (c.Cancel != default!) {
         {
@@ -825,10 +854,10 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
                 err = c.ctx.Err();
             } else 
             if (errors.Is(interruptErr, os.ErrProcessDone)){
-            } else {
                 // The process already finished: we just didn't notice it yet.
                 // (Perhaps c.Wait hadn't been called, or perhaps it happened to race with
                 // c.ctx being canceled.) Don't inject a needless error.
+            } else {
                 err = new wrappedError(
                     prefix: "exec: canceling Cmd"u8,
                     err: interruptErr
@@ -840,18 +869,20 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
         resultc.ᐸꟷ(new ctxResult(err: err));
         return;
     }
+
     var timer = time.NewTimer(c.WaitDelay);
     var selᴛ4 = resultc.ᐸꟷ(new ctxResult(err: err, timer: timer), ꓸꓸꓸ);
     var selᴛ5 = (~timer).C;
     switch (select(selᴛ4, ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
     case 0: {
+        // c.Process.Wait returned and we've handed the timer off to c.Wait.
+        // It will take care of goroutine shutdown from here.
         return;
     }
     case 1 when selᴛ5.ꟷᐳ(out _): {
         break;
     }}
-    // c.Process.Wait returned and we've handed the timer off to c.Wait.
-    // It will take care of goroutine shutdown from here.
+
     var killed = false;
     {
         var killErr = c.Process.Kill(); if (killErr == default!){
@@ -868,46 +899,49 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
             );
         }
     }
+
     if (c.goroutineErr != default!) {
         var selᴛ6 = c.goroutineErr;
         switch (trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
         case 0 when selᴛ6.ꟷᐳ(out var goroutineErr): {
+            // Forward goroutineErr only if we don't have reason to believe it was
+            // caused by a call to Cancel or Kill above.
             if (err == default! && !killed) {
-                // Forward goroutineErr only if we don't have reason to believe it was
-                // caused by a call to Cancel or Kill above.
                 err = goroutineErr;
             }
             break;
         }
         default: {
+            // Close the child process's I/O pipes, in case it abandoned some
+            // subprocess that inherited them and is still holding them open
+            // (see https://go.dev/issue/23019).
+            //
+            // We close the goroutine pipes only after we have sent any signals we're
+            // going to send to the process (via Signal or Kill above): if we send
+            // SIGKILL to the process, we would prefer for it to die of SIGKILL, not
+            // SIGPIPE. (However, this may still cause any orphaned subprocesses to
+            // terminate with SIGPIPE.)
             closeDescriptors(c.parentIOPipes);
+            // Wait for the copying goroutines to finish, but report ErrWaitDelay for
+            // the error: any other error here could result from closing the pipes.
             _ = ᐸꟷ(c.goroutineErr);
             if (err == default!) {
-                // Close the child process's I/O pipes, in case it abandoned some
-                // subprocess that inherited them and is still holding them open
-                // (see https://go.dev/issue/23019).
-                //
-                // We close the goroutine pipes only after we have sent any signals we're
-                // going to send to the process (via Signal or Kill above): if we send
-                // SIGKILL to the process, we would prefer for it to die of SIGKILL, not
-                // SIGPIPE. (However, this may still cause any orphaned subprocesses to
-                // terminate with SIGPIPE.)
-                // Wait for the copying goroutines to finish, but report ErrWaitDelay for
-                // the error: any other error here could result from closing the pipes.
                 err = ErrWaitDelay;
             }
             break;
         }}
+
         // Since we have already received the only result from c.goroutineErr,
         // set it to nil to prevent awaitGoroutines from blocking on it.
         c.goroutineErr = default!;
     }
+
     resultc.ᐸꟷ(new ctxResult(err: err));
 }
 
 // An ExitError reports an unsuccessful exit by a command.
 partial struct ExitError {
-    public partial ref ж<os_package.ProcessState> ProcessState { get; }
+    /*embed*/ public ж<os_package.ProcessState> ProcessState;
     // Stderr holds a subset of the standard error output from the
     // Cmd.Output method if standard error was not otherwise being
     // collected.
@@ -955,11 +989,13 @@ public static error Wait(this ж<Cmd> Ꮡc) {
     if (c.ProcessState != nil) {
         return errors.New(execWaitWasAlreadyCalledˢ);
     }
+
     var (state, err) = c.Process.Wait();
     if (err == default! && !state.Success()) {
         err = new ExitErrorжerror(Ꮡ(new ExitError(ProcessState: state)));
     }
     c.ProcessState = state;
+
     ж<time.Timer> timer = default!;
     if (c.ctxResult != default!) {
         var watch = ᐸꟷ(c.ctxResult);
@@ -971,6 +1007,7 @@ public static error Wait(this ж<Cmd> Ꮡc) {
             err = watch.err;
         }
     }
+
     {
         var goroutineErr = Ꮡc.awaitGoroutines(timer); if (err == default!) {
             // Report an error from the copying goroutines only if the program otherwise
@@ -981,6 +1018,7 @@ public static error Wait(this ж<Cmd> Ꮡc) {
     }
     closeDescriptors(c.parentIOPipes);
     c.parentIOPipes = default!;
+
     return err;
 }
 
@@ -1003,31 +1041,38 @@ internal static error awaitGoroutines(this ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer
             }
             Ꮡc.Value.goroutineErr = default!;
         }, ref ᒐ);
+
         if (c.goroutineErr == default!) {
             return default!; // No running goroutines to await.
         }
+
         if (Ꮡtimer == nil) {
             if (c.WaitDelay == 0) {
                 return ᐸꟷ(c.goroutineErr);
             }
+
             var selᴛ7 = c.goroutineErr;
             switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
             case 0 when selᴛ7.ꟷᐳ(out var err): {
+                // Avoid the overhead of starting a timer.
                 return err;
             }
             default: {
                 break;
             }}
-            // Avoid the overhead of starting a timer.
+
             // No existing timer was started: either there is no Context associated with
             // the command, or c.Process.Wait completed before the Context was done.
             Ꮡtimer = time.NewTimer(c.WaitDelay); timer = ref Ꮡtimer.DerefOrNull();
         }
+
         var selᴛ8 = timer.C;
         var selᴛ9 = c.goroutineErr;
         switch (select(ᐸꟷ(selᴛ8, ꓸꓸꓸ), ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
         case 0 when selᴛ8.ꟷᐳ(out _): {
             closeDescriptors(c.parentIOPipes);
+            // Wait for the copying goroutines to finish, but ignore any error
+            // (since it was probably caused by closing the pipes).
             _ = ᐸꟷ(c.goroutineErr);
             return ErrWaitDelay;
         }
@@ -1043,9 +1088,6 @@ internal static error awaitGoroutines(this ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string execStdoutAlreadySetˢ = "exec: Stdout already set"u8;
 
-// Wait for the copying goroutines to finish, but ignore any error
-// (since it was probably caused by closing the pipes).
-
 // Output runs the command and returns its standard output.
 // Any returned error will usually be of type [*ExitError].
 // If c.Stderr was nil and the returned error is of type
@@ -1059,10 +1101,12 @@ public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
     }
     ref var stdout = ref heap(new bytes.Buffer(), out var Ꮡstdout);
     c.Stdout = new bytes_BufferжWriter(Ꮡstdout);
+
     var captureErr = c.Stderr == default!;
     if (captureErr) {
-        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << (int)(10)))));
+        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << 10))));
     }
+
     var err = Ꮡc.Run();
     if (err != default! && captureErr) {
         {
@@ -1199,6 +1243,7 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
 
     nint lenp = len(p);
     p = w.fill(Ꮡw.of(prefixSuffixSaver.Ꮡprefix), p);
+
     // Only keep the last w.N bytes of suffix data.
     {
         nint overage = len(p) - w.N; if (overage > 0) {
@@ -1207,9 +1252,9 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
         }
     }
     p = w.fill(Ꮡw.of(prefixSuffixSaver.Ꮡsuffix), p);
+
     // w.suffix is full now if p is non-empty. Overwrite it in a circle.
-    while (len(p) > 0) {
-        // 0, 1, or 2 iterations.
+    while (len(p) > 0) { // 0, 1, or 2 iterations.
         nint nΔ1 = copy(w.suffix.slice(w.suffixOff), p);
         p = p.slice(nΔ1);
         w.skipped += (int64)nΔ1;
@@ -1263,30 +1308,32 @@ internal static slice<byte> Bytes(this ref prefixSuffixSaver w) {
 // the environment, it is returned alongside the best-effort copy.
 internal static (slice<@string>, error) environ(this ref Cmd c) {
     error err = default!;
+
     var env = c.Env;
     if (env == default!) {
         (env, err) = execenv.Default(c.SysProcAttr);
         if (err != default!) {
             env = os.Environ();
+            // Note that the non-nil err is preserved despite env being overridden.
         }
-        // Note that the non-nil err is preserved despite env being overridden.
+
         if (c.Dir != ""u8) {
             var exprᴛ1 = runtime.GOOS;
             if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8) {
+                // Windows and Plan 9 do not use the PWD variable, so we don't need to
+                // keep it accurate.
             }
             else { /* default: */
+                // On POSIX platforms, PWD represents “an absolute pathname of the
+                // current working directory.” Since we are changing the working
+                // directory for the command, we should also update PWD to reflect that.
+                //
+                // Unfortunately, we didn't always do that, so (as proposed in
+                // https://go.dev/issue/50599) to avoid unintended collateral damage we
+                // only implicitly update PWD when Env is nil. That way, we're much
+                // less likely to override an intentional change to the variable.
                 {
                     var (pwd, absErr) = filepath.Abs(c.Dir); if (absErr == default!){
-                        // Windows and Plan 9 do not use the PWD variable, so we don't need to
-                        // keep it accurate.
-                        // On POSIX platforms, PWD represents “an absolute pathname of the
-                        // current working directory.” Since we are changing the working
-                        // directory for the command, we should also update PWD to reflect that.
-                        //
-                        // Unfortunately, we didn't always do that, so (as proposed in
-                        // https://go.dev/issue/50599) to avoid unintended collateral damage we
-                        // only implicitly update PWD when Env is nil. That way, we're much
-                        // less likely to override an intentional change to the variable.
                         env = append(env, "PWD="u8 + pwd);
                     } else 
                     if (err == default!) {
@@ -1294,9 +1341,9 @@ internal static (slice<@string>, error) environ(this ref Cmd c) {
                     }
                 }
             }
-
         }
     }
+
     (env, var dedupErr) = dedupEnv(env);
     if (err == default!) {
         err = dedupErr;
@@ -1335,12 +1382,14 @@ internal static (slice<@string>, error) dedupEnvCase(bool caseInsensitive, bool 
     var saw = new map<@string, bool>(len(env));
     for (nint n = len(env); n > 0; n--) {
         @string kv = env[n - 1];
+
         // Reject NUL in environment variables to prevent security issues (#56284);
         // except on Plan 9, which uses NUL as os.PathListSeparator (#56544).
         if (!nulOK && strings.IndexByte(kv, 0) != -1) {
             err = errors.New(execEnvironmentVariableˢ);
             continue;
         }
+
         nint i = strings.Index(kv, "="u8);
         if (i == 0) {
             // We observe in practice keys with a single leading "=" on Windows.
@@ -1364,14 +1413,17 @@ internal static (slice<@string>, error) dedupEnvCase(bool caseInsensitive, bool 
         if (saw[k]) {
             continue;
         }
+
         saw[k] = true;
         @out = append(@out, kv);
     }
+
     // Now reverse the slice to restore the original order.
     for (nint i = 0; i < len(@out) / 2; i++) {
         nint j = len(@out) - i - 1;
         (@out[i], @out[j]) = (@out[j], @out[i]);
     }
+
     return (@out, err);
 }
 
@@ -1414,7 +1466,6 @@ internal static error validateLookPath(@string s) {
     if (exprᴛ1 == ""u8 || exprᴛ1 == "."u8 || exprᴛ1 == ".."u8) {
         return ErrNotFound;
     }
-
     return default!;
 }
 

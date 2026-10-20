@@ -51,14 +51,12 @@ partial struct Obj {
 }
 
 internal static void objfin(ж<Obj> Ꮡx) {
+    //println("finalized", x)
 }
 
-//println("finalized", x)
 public static void TestWriteHeapDumpFinalizers(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (runtime.GOOS == "js"u8) {
             Ꮡt.Skipf("WriteHeapDump is not available on %s."u8, runtime.GOOS);
         }
@@ -69,15 +67,18 @@ public static void TestWriteHeapDumpFinalizers(ж<testing.T> Ꮡt) {
         defer(os.Remove, f.Name(), ref ᒐ);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         // bug 9172: WriteHeapDump couldn't handle more than one finalizer
         println((@string)"allocating objects"u8);
         var x = Ꮡ(new Obj(nil));
         runtime.SetFinalizer(x.OrTypedNil(), objfin);
         var y = Ꮡ(new Obj(nil));
         runtime.SetFinalizer(y.OrTypedNil(), objfin);
+
         // Trigger collection of x and y, queueing of their finalizers.
         println((@string)"starting gc"u8);
         runtime.GC();
+
         // Make sure WriteHeapDump doesn't fail with multiple queued finalizers.
         println((@string)"starting dump"u8);
         WriteHeapDump(f.Fd());

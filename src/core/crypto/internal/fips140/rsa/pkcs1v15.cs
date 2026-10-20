@@ -11,7 +11,6 @@ using go.crypto.@internal;
 
 partial class rsa_package {
 
-// A special TLS case which doesn't use an ASN1 prefix.
 // These are ASN1 DER structures:
 //
 //	DigestInfo ::= SEQUENCE {
@@ -35,7 +34,7 @@ internal static map<@string, slice<byte>> hashPrefixes = new map<@string, slice<
     ["SHA3-256"u8] = new byte[]{0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x08, 0x05, 0x00, 0x04, 0x20}.slice(),
     ["SHA3-384"u8] = new byte[]{0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x09, 0x05, 0x00, 0x04, 0x30}.slice(),
     ["SHA3-512"u8] = new byte[]{0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x0a, 0x05, 0x00, 0x04, 0x40}.slice(),
-    ["MD5+SHA1"u8] = new byte[]{}.slice(),
+    ["MD5+SHA1"u8] = new byte[]{}.slice(), // A special TLS case which doesn't use an ASN1 prefix.
     ["RIPEMD-160"u8] = new byte[]{0x30, 0x20, 0x30, 0x08, 0x06, 0x06, 0x28, 0xcf, 0x06, 0x03, 0x00, 0x31, 0x04, 0x14}.slice()
 };
 
@@ -47,6 +46,7 @@ public static (slice<byte>, error) SignPKCS1v15(ж<PrivateKey> Ꮡpriv, @string 
     fipsSelfTest();
     fips140.RecordApproved();
     checkApprovedHashName(hash);
+
     return signPKCS1v15(Ꮡpriv, hash, hashed);
 }
 
@@ -55,6 +55,7 @@ internal static (slice<byte>, error) signPKCS1v15(ж<PrivateKey> Ꮡpriv, @strin
     if (err != default!) {
         return (default!, err);
     }
+
     return decrypt(ref (Ꮡpriv).DerefOrNull(), em, withCheck);
 }
 
@@ -73,6 +74,7 @@ internal static (slice<byte>, error) pkcs1v15ConstructEM(ж<ΔPublicKey> Ꮡpub,
             return (default!, errors.New(cryptoRsaUnsupportedHashˢ));
         }
     }
+
     // EM = 0x00 || 0x01 || PS || 0x00 || T
     nint k = pub.Size();
     if (k < len(prefix) + len(hashed) + 2 + 8 + 1) {
@@ -96,6 +98,7 @@ public static error VerifyPKCS1v15(ж<ΔPublicKey> Ꮡpub, @string hash, slice<b
     fipsSelfTest();
     fips140.RecordApproved();
     checkApprovedHashName(hash);
+
     return verifyPKCS1v15(Ꮡpub, hash, hashed, sig);
 }
 
@@ -110,16 +113,19 @@ internal static error verifyPKCS1v15(ж<ΔPublicKey> Ꮡpub, @string hash, slice
             fips140.RecordNonApproved();
         }
     }
+
     // RFC 8017 Section 8.2.2: If the length of the signature S is not k
     // octets (where k is the length in octets of the RSA modulus n), output
     // "invalid signature" and stop.
     if (pub.Size() != len(sig)) {
         return ErrVerification;
     }
+
     var (em, err) = encrypt(ref (Ꮡpub).DerefOrNull(), sig);
     if (err != default!) {
         return ErrVerification;
     }
+
     (var expected, err) = pkcs1v15ConstructEM(Ꮡpub, hash, hashed);
     if (err != default!) {
         return ErrVerification;
@@ -127,6 +133,7 @@ internal static error verifyPKCS1v15(ж<ΔPublicKey> Ꮡpub, @string hash, slice
     if (!bytes.Equal(em, expected)) {
         return ErrVerification;
     }
+
     return default!;
 }
 
@@ -137,7 +144,6 @@ internal static void checkApprovedHashName(@string hash) {
     else { /* default: */
         fips140.RecordNonApproved();
     }
-
 }
 
 } // end rsa_package

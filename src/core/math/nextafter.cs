@@ -16,7 +16,7 @@ public static float32 /*r*/ Nextafter32(float32 x, float32 y) {
     float32 r = default!;
 
     switch (ᐧ) {
-    case {} when IsNaN((float64)x) || IsNaN((float64)y): {
+    case {} when IsNaN((float64)x) || IsNaN((float64)y): { // special case
         r = (float32)NaN();
         break;
     }
@@ -25,8 +25,7 @@ public static float32 /*r*/ Nextafter32(float32 x, float32 y) {
         break;
     }
     case {} when x is 0F: {
-        r = (float32)Copysign((float64)Float32frombits(1), // special case
- (float64)y);
+        r = (float32)Copysign((float64)Float32frombits(1), (float64)y);
         break;
     }
     case {} when (y > x) == (x > 0F): {
@@ -37,7 +36,6 @@ public static float32 /*r*/ Nextafter32(float32 x, float32 y) {
         r = Float32frombits(Float32bits(x) - 1);
         break;
     }}
-
     return r;
 }
 
@@ -52,7 +50,7 @@ public static float64 /*r*/ Nextafter(float64 x, float64 y) {
     float64 r = default!;
 
     switch (ᐧ) {
-    case {} when IsNaN(x) || IsNaN(y): {
+    case {} when IsNaN(x) || IsNaN(y): { // special case
         r = NaN();
         break;
     }
@@ -61,8 +59,7 @@ public static float64 /*r*/ Nextafter(float64 x, float64 y) {
         break;
     }
     case {} when x is 0D: {
-        r = Copysign(Float64frombits(1), // special case
- y);
+        r = Copysign(Float64frombits(1), y);
         break;
     }
     case {} when (y > x) == (x > 0D): {
@@ -73,7 +70,6 @@ public static float64 /*r*/ Nextafter(float64 x, float64 y) {
         r = Float64frombits(Float64bits(x) - 1);
         break;
     }}
-
     return r;
 }
 

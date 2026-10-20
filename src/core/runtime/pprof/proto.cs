@@ -56,11 +56,17 @@ partial struct memMap {
     internal bool fake; // map entry was faked; /proc/self/maps wasn't available
 }
 
+// symbolizeFlag keeps track of symbolization result.
+//
+//	0                  : no symbol lookup was performed
+//	1<<0 (lookupTried) : symbol lookup was performed
+//	1<<1 (lookupFailed): symbol lookup was performed but failed
 partial struct symbolizeFlag /*num:uint8*/;
 
 internal static symbolizeFlag lookupTried => /* 1 << iota */ 1;
 internal static symbolizeFlag lookupFailed => /* 1 << iota */ 2;
 
+// message Profile
 internal static UntypedInt tagProfile_SampleType => 1; // repeated ValueType
 internal static UntypedInt tagProfile_Sample => 2; // repeated Sample
 internal static UntypedInt tagProfile_Mapping => 3; // repeated Mapping
@@ -75,14 +81,22 @@ internal static UntypedInt tagProfile_PeriodType => 11; // ValueType (really opt
 internal static UntypedInt tagProfile_Period => 12; // int64
 internal static UntypedInt tagProfile_Comment => 13; // repeated int64
 internal static UntypedInt tagProfile_DefaultSampleType => 14; // int64
+
+// message ValueType
 internal static UntypedInt tagValueType_Type => 1; // int64 (string table index)
 internal static UntypedInt tagValueType_Unit => 2; // int64 (string table index)
+
+// message Sample
 internal static UntypedInt tagSample_Location => 1; // repeated uint64
 internal static UntypedInt tagSample_Value => 2; // repeated int64
 internal static UntypedInt tagSample_Label => 3; // repeated Label
+
+// message Label
 internal static UntypedInt tagLabel_Key => 1; // int64 (string table index)
 internal static UntypedInt tagLabel_Str => 2; // int64 (string table index)
 internal static UntypedInt tagLabel_Num => 3; // int64
+
+// message Mapping
 internal static UntypedInt tagMapping_ID => 1; // uint64
 internal static UntypedInt tagMapping_Start => 2; // uint64
 internal static UntypedInt tagMapping_Limit => 3; // uint64
@@ -93,12 +107,18 @@ internal static UntypedInt tagMapping_HasFunctions => 7; // bool
 internal static UntypedInt tagMapping_HasFilenames => 8; // bool
 internal static UntypedInt tagMapping_HasLineNumbers => 9; // bool
 internal static UntypedInt tagMapping_HasInlineFrames => 10; // bool
+
+// message Location
 internal static UntypedInt tagLocation_ID => 1; // uint64
 internal static UntypedInt tagLocation_MappingID => 2; // uint64
 internal static UntypedInt tagLocation_Address => 3; // uint64
 internal static UntypedInt tagLocation_Line => 4; // repeated Line
+
+// message Line
 internal static UntypedInt tagLine_FunctionID => 1; // uint64
 internal static UntypedInt tagLine_Line => 2; // int64
+
+// message Function
 internal static UntypedInt tagFunction_ID => 1; // uint64
 internal static UntypedInt tagFunction_Name => 2; // int64 (string table index)
 internal static UntypedInt tagFunction_SystemName => 3; // int64 (string table index)
@@ -195,10 +215,12 @@ internal static (slice<runtime.Frame>, symbolizeFlag) allFrames(uintptr addr) {
         // below doesn't allocate a useless empty location.
         return (default!, 0);
     }
+
     var symbolizeResult = lookupTried;
     if (frame.PC == 0 || frame.Function == ""u8 || frame.File == ""u8 || frame.Line == 0) {
         symbolizeResult |= (symbolizeFlag)(lookupFailed);
     }
+
     if (frame.PC == 0) {
         // If we failed to resolve the frame, at least make up
         // a reasonable call PC. This mostly happens in tests.
@@ -266,6 +288,7 @@ internal static error addCPUData(this ref profileBuilder b, slice<uint64> data, 
         // value for this record.
         tags = tags[1..];
     }
+
     // Parse CPU samples from the profile.
     // Each sample is 3+n uint64s:
     //	data[0] = 3+n
@@ -296,18 +319,20 @@ internal static error addCPUData(this ref profileBuilder b, slice<uint64> data, 
         data = data.slice((nint)(data[0]));
         @unsafe.Pointer tag = tags[0];
         tags = tags[1..];
+
         if (count == 0 && len(stk) == 1) {
             // overflow record
             count = (uint64)stk[0];
-            stk = new uint64[]{ // gentraceback guarantees that PCs in the
- // stack can be unconditionally decremented and
- // still be valid, so we must do the same.
-
+            stk = new uint64[]{
+                // gentraceback guarantees that PCs in the
+                // stack can be unconditionally decremented and
+                // still be valid, so we must do the same.
                 (uint64)(abi.FuncPCABIInternal(lostProfileEvent) + 1)
             }.slice();
         }
         b.m.lookup(stk, tag).Value.count += (int64)count;
     }
+
     if (len(tags) != 0) {
         return fmt.Errorf("mismatched profile records and tags"u8);
     }
@@ -319,46 +344,57 @@ internal static readonly @string samplesˢ = "samples"u8;
 internal static readonly @string cpuˢ = "cpu"u8;
 
 // build completes and returns the constructed profile.
-internal static void build(this ж<profileBuilder> Ꮡb) {
+internal static error build(this ж<profileBuilder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.end = time.Now();
+
     b.pb.int64Opt(tagProfile_TimeNanos, b.start.UnixNano());
-    if (b.havePeriod) {
-        // must be CPU profile
+    if (b.havePeriod) { // must be CPU profile
         b.pbValueType(tagProfile_SampleType, samplesˢ, countˢ);
         b.pbValueType(tagProfile_SampleType, cpuˢ, nanosecondsˢ);
         b.pb.int64Opt(tagProfile_DurationNanos, b.end.Sub(b.start).Nanoseconds());
         b.pbValueType(tagProfile_PeriodType, cpuˢ, nanosecondsˢ);
         b.pb.int64Opt(tagProfile_Period, b.period);
     }
+
     var values = new int64[]{0, 0}.slice();
     slice<uint64> locs = default!;
+
     for (var eᴛ1 = b.m.all; eᴛ1 != nil; eᴛ1 = eᴛ1.Value.nextAll) {
         var e = eᴛ1;
         values[0] = e.Value.count;
         values[1] = (~e).count * b.period;
+
         Action labels = default!;
         if ((~e).tag != nil) {
             var eʗ1 = e;
             labels = () => {
-                foreach (var (_, lbl) in ((ж<labelMap>)(uintptr)((~eʗ1).tag)).Value.list) {
-                    Ꮡb.Value.pbLabel(tagSample_Label, lbl.key, lbl.value, 0);
+                foreach (var (_, lbl) in ((ж<labelMap>)(uintptr)((~eʗ1).tag)).Value.Set.List) {
+                    Ꮡb.Value.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };
         }
+
         locs = Ꮡb.appendLocsForStack(locs[..0], (~e).stk);
+
         b.pbSample(values, locs, labels);
     }
+
     foreach (var (i, m) in b.mem) {
         var hasFunctions = m.funcs == lookupTried; // lookupTried but not lookupFailed
         b.pbMapping(tagProfile_Mapping, (uint64)(i + 1), (uint64)m.start, (uint64)m.end, m.offset, m.@file, m.buildID, hasFunctions);
     }
+
     // TODO: Anything for tagProfile_DropFrames?
     // TODO: Anything for tagProfile_KeepFrames?
+
     b.pb.strings(tagProfile_StringTable, b.strings);
-    b.zw.Write(b.pb.data);
-    b.zw.Close();
+    var (_, err) = b.zw.Write(b.pb.data);
+    if (err != default!) {
+        return err;
+    }
+    return b.zw.Close();
 }
 
 // appendLocsForStack appends the location IDs for the given stack trace to the given
@@ -374,9 +410,11 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.deck.reset();
+
     // The last frame might be truncated. Recover lost inline frames.
     var origStk = stk;
     stk = runtime_expandFinalInlineFrame(stk);
+
     while (len(stk) > 0) {
         var addr = stk[0];
         {
@@ -400,14 +438,17 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
                         }
                     }
                 }
+
                 // first record the location if there is any pending accumulated info.
                 {
                     var id = Ꮡb.emitLocation(); if (id > 0) {
                         locs = append(locs, id);
                     }
                 }
+
                 // then, record the cached location.
                 locs = append(locs, l.id);
+
                 // Skip the matching pcs.
                 //
                 // Even if stk was truncated due to the stack depth
@@ -420,9 +461,9 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
                 continue;
             }
         }
+
         var (frames, symbolizeResult) = allFrames(addr);
-        if (len(frames) == 0) {
-            // runtime.goexit.
+        if (len(frames) == 0) { // runtime.goexit.
             {
                 var id = Ꮡb.emitLocation(); if (id > 0) {
                     locs = append(locs, id);
@@ -431,6 +472,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
             stk = stk[1..];
             continue;
         }
+
         {
             var added = b.deck.tryAdd(addr, frames, symbolizeResult); if (added) {
                 stk = stk[1..];
@@ -445,6 +487,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
                 locs = append(locs, id);
             }
         }
+
         // check cache again - previous emitLocation added a new entry
         {
             var (l, ok) = b.locs[addr, ꟷ]; if (ok){
@@ -457,8 +500,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
         }
     }
     {
-        var id = Ꮡb.emitLocation(); if (id > 0) {
-            // emit remaining location.
+        var id = Ꮡb.emitLocation(); if (id > 0) { // emit remaining location.
             locs = append(locs, id);
         }
     }
@@ -539,20 +581,17 @@ internal static bool /*success*/ tryAdd(this ref pcDeck d, uintptr pc, slice<run
             newFrame = frames[0];
             ref var last = ref heap<runtime.Frame>(out var Ꮡlast);
             last = d.frames[existing - 1];
-            if (last.Func != nil) {
-                // the last frame can't be inlined. Flush.
+            if (last.Func != nil) { // the last frame can't be inlined. Flush.
                 return false;
             }
-            if (last.Entry == 0 || newFrame.Entry == 0) {
-                // Possibly not a Go function. Don't try to merge.
+            if (last.Entry == 0 || newFrame.Entry == 0) { // Possibly not a Go function. Don't try to merge.
                 return false;
             }
-            if (last.Entry != newFrame.Entry) {
-                // newFrame is for a different function.
+
+            if (last.Entry != newFrame.Entry) { // newFrame is for a different function.
                 return false;
             }
-            if (runtime_FrameSymbolName(Ꮡlast) == runtime_FrameSymbolName(ᏑnewFrame)) {
-                // maybe recursion.
+            if (runtime_FrameSymbolName(Ꮡlast) == runtime_FrameSymbolName(ᏑnewFrame)) { // maybe recursion.
                 return false;
             }
         }
@@ -590,9 +629,11 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
             return 0;
         }
         ᒐd1 = true;
+
         var addr = b.deck.pcs[0];
         var firstFrame = b.deck.frames[0];
         var newFuncs = new slice<emitLocation_newFunc>(0, 8);
+
         var id = (uint64)len(b.locs) + 1;
         b.locs[addr] = new locInfo(
             id: id,
@@ -600,6 +641,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
             firstPCSymbolizeResult: b.deck.firstPCSymbolizeResult,
             firstPCFrames: appendꓸꓸꓸ(new runtime.Frame[]{}.slice(), b.deck.frames.slice(0, b.deck.firstPCFrames))
         );
+
         msgOffset start = b.pb.startMessage();
         b.pb.uint64Opt(tagLocation_ID, id);
         b.pb.uint64Opt(tagLocation_Address, (uint64)firstFrame.PC);
@@ -625,6 +667,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
         foreach (var (i, _) in b.mem) {
             if (b.mem[i].start <= addr && addr < b.mem[i].end || b.mem[i].fake) {
                 b.pb.uint64Opt(tagLocation_MappingID, (uint64)(i + 1));
+
                 var m = b.mem[i];
                 m.funcs |= (symbolizeFlag)(b.deck.symbolizeResult);
                 b.mem[i] = m;
@@ -632,6 +675,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
             }
         }
         b.pb.endMessage(tagProfile_Location, start);
+
         // Write out functions we found during frame expansion.
         foreach (var (_, fn) in newFuncs) {
             msgOffset startΔ1 = b.pb.startMessage();
@@ -642,6 +686,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
             b.pb.int64Opt(tagFunction_StartLine, fn.startLine);
             b.pb.endMessage(tagProfile_Function, startΔ1);
         }
+
         b.flush();
         return id;
     }
@@ -686,10 +731,11 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         Ꮡline.ValueSlot = bytes.TrimLeft(Ꮡline.ValueSlot, " "u8);
         return f;
     }
+
     while (len(data) > 0) {
         (line, data, _) = bytes.Cut(data, newline);
         var addr = next();
-        var (loStr, hiStr, ok) = strings_package.Cut(((@string)addr), "-"u8);
+        var (loStr, hiStr, ok) = strings_package.Cut((@string)addr, "-"u8);
         if (!ok) {
             continue;
         }
@@ -706,7 +752,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
             // Only interested in executable mappings.
             continue;
         }
-        (var offset, err) = strconv.ParseUint(((@string)next()), 16, 64);
+        (var offset, err) = strconv.ParseUint((@string)next(), 16, 64);
         if (err != default!) {
             continue;
         }
@@ -715,13 +761,15 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         if (line == default!) {
             continue;
         }
-        @string @file = ((@string)line);
+        @string @file = (@string)line;
+
         // Trim deleted file marker.
         @string deletedStr = deletedˢ;
         nint deletedLen = len(deletedStr);
         if (len(@file) >= deletedLen && @file.slice(len(@file) - deletedLen) == deletedStr) {
             @file = @file.slice(0, len(@file) - deletedLen);
         }
+
         if (len(inode) == 1 && inode[0] == (rune)'0' && @file == ""u8) {
             // Huge-page text mappings list the initial fragment of
             // mapped but unpopulated memory as being inode 0.
@@ -729,6 +777,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
             // But [vdso] and [vsyscall] are inode 0, so let non-empty file names through.
             continue;
         }
+
         // TODO: pprof's remapMappingIDs makes one adjustment:
         // 1. If there is an /anon_hugepage mapping first and it is
         // consecutive to a next mapping, drop the /anon_hugepage.
@@ -736,6 +785,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
         // Let's try not doing this and see what breaks.
         // If we do need it, it would go here, before we
         // enter the mappings into b.mem in the first place.
+
         var (buildID, _) = elfBuildID(@file);
         addMapping(lo, hi, offset, @file, buildID);
     }

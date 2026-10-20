@@ -43,6 +43,12 @@ using static go.@internal.trace.raw_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -51,11 +57,11 @@ using static go.@internal.trace.raw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/raw/event.go", "event.cs", "AB5AwoSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
+[assembly: go.GoPositionMap("internal/trace/raw/event.go", "event.cs", "AB9AwpSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
 [assembly: go.GoPositionMap("internal/trace/raw/reader.go", "reader.cs", "ABg0koKSgpSokqiSgoKUgpSClIKCgoKUgoKUgoKUpoKCgoKmAAcQgoKCgoKUlKaCgoKUgoKCgpSU")]
-[assembly: go.GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "AB06koKCgpSCgpSCgpSCgpSCgpSCgoKCgqaokqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgIKklIKCgpS4lIKCgoKClIKUgpSCgqam0oKCgpSCgpSCgoKUpoKCgoKUgoKmgpSCgoKCpoKUpoKCgpSCgpQ=")]
-[assembly: go.GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABIqkoKClKikgqiC")]
-[assembly: go.GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "ABw8koKopIKoloKClIKCgrqCqIKCgqiCgpQ=")]
+[assembly: go.GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "AB46koKCgpSCgpSCgpSCgpSCgpSCgoKCgqaokqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgIKklIKCgpS4lIKCgoKClIKUgpSCgqam0oKCgpSCgpSCgpSmgoKCgpSCgqaClIKCgoKmgpSmgoKClIKClA==")]
+[assembly: go.GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABIqkoKClKikgriC")]
+[assembly: go.GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "ABw8koKopIK4poKClIKCgsqCuIKCgriCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
@@ -87,10 +93,10 @@ public static partial class raw_package
     [GoInit] internal static void initᴛᴛimportꓸbufio() => builtin.initPackage(typeof(bufio_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(encoding.binary_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸevent() => builtin.initPackage(typeof(go.@internal.trace.event_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸtracev2() => builtin.initPackage(typeof(go.@internal.trace.tracev2_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸversion() => builtin.initPackage(typeof(go.@internal.trace.version_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸunicode() => builtin.initPackage(typeof(unicode_package));
     // </ImportInitializers>

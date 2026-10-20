@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -136,7 +135,7 @@ using static go.reflect_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("reflect/export_swiss_test.go", "export_swiss_test.cs", "AAoSgoI=")]
-[assembly: global::go.GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokraeAA4CgoKClKaCgpaCqIKClJSCgqiCgoKCgqamgoKCgoKCgqam/OyUgoSCgpSCgoKUAAkcgu6CpsKCgoKCgoKCppSU", "51-56:1")]
+[assembly: global::go.GoPositionMap("reflect/export_test.go", "export_test.cs", "AA4ekoKokraeAA4CgoKClKaCgqaCuIKClJSCgriCgoKCgqamgoKCgoKCgqam/OyUgpSCgpSCgoKUAAkcgu6CpsKCgoKCgoKCppSU", "51-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

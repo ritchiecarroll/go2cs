@@ -41,7 +41,6 @@ internal static Func<syscallꓸSockaddr, ΔAddr> addrFunc(this ref netFD fd) {
         if (exprᴛ2 == syscall.SOCK_RAW) {
             return sockaddrToIP;
         }
-
     }
     else if (exprᴛ1 == syscall.AF_UNIX) {
         var exprᴛ3 = fd.sotype;
@@ -54,9 +53,7 @@ internal static Func<syscallꓸSockaddr, ΔAddr> addrFunc(this ref netFD fd) {
         if (exprᴛ3 == syscall.SOCK_SEQPACKET) {
             return sockaddrToUnixpacket;
         }
-
     }
-
     return (syscallꓸSockaddr _) => default!;
 }
 

@@ -8,6 +8,7 @@ partial class main_package {
 internal static void Main() {
     ж<strings.Reader> r = makeReader();
     nint k = 5;
+
     fmt.Println(r != nil);
     fmt.Println(k);
 }

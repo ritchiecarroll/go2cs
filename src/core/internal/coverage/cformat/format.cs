@@ -72,7 +72,7 @@ partial struct pstate {
 // extcu encapsulates a coverable unit within some function.
 partial struct extcu {
     internal uint32 fnfid; // index into p.funcs slice
-    public partial ref go.@internal.coverage_package.CoverableUnit CoverableUnit { get; }
+    /*embed*/ public go.@internal.coverage_package.CoverableUnit CoverableUnit;
 }
 
 // fnfile is a function-name/file-name tuple.
@@ -182,13 +182,16 @@ internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) {
 // is not explicitly mandated by the format, but seems like a good idea
 // for repeatable/deterministic dumps).
 public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.Writer w) {
+    var pkgsᴷ = new stackAppend<@string>();
+    var unitsᴷ = new stackAppend<extcu>();
+
     if (fm.cm == coverage.CtrModeInvalid) {
         throw panic("internal error, counter mode unset");
     }
     if (len(pkgs) == 0) {
         pkgs = new slice<@string>(0, len(fm.pm));
         foreach (var (importpath, _) in fm.pm) {
-            pkgs = append(pkgs, importpath);
+            pkgs = append(pkgsᴷ, pkgs, importpath);
         }
     }
     {
@@ -204,7 +207,7 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
         }
         var units = new slice<extcu>(0, () => new(nil), len((~p).unitTable));
         foreach (var (u, _) in (~p).unitTable) {
-            units = append(units, u);
+            units = append(unitsᴷ, units, u);
         }
         p.sortUnits(units);
         foreach (var (_, u) in units) {
@@ -226,12 +229,15 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
 // 'w', selecting the set of packages in 'pkgs' and suffixing the
 // printed string with 'inpkgs'.
 public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
+    var pkgsᴷ = new stackAppend<@string>();
+
     if (len(pkgs) == 0) {
         pkgs = new slice<@string>(0, len(fm.pm));
         foreach (var (importpath, _) in fm.pm) {
-            pkgs = append(pkgs, importpath);
+            pkgs = append(pkgsᴷ, pkgs, importpath);
         }
     }
+
     error rep(uint64 cov, uint64 tot) {
         if (tot != 0){
             {
@@ -250,6 +256,7 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
         }
         return default!;
     }
+
     slices.Sort<slice<@string>, @string>(pkgs);
     uint64 totalStmts = default!;
     uint64 coveredStmts = default!;
@@ -288,6 +295,7 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
             }
         }
     }
+
     return default!;
 }
 
@@ -306,6 +314,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
     GoFrame ᒐ = default;
     try {
         ref var fm = ref Ꮡfm.DerefOrNull();
+        var unitsᴷ = new stackAppend<extcu>();
 
         if (fm.cm == coverage.CtrModeInvalid) {
             throw panic("internal error, counter mode unset");
@@ -321,6 +330,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
         defer(() => tabberʗ1.Flush(), ref ᒐ);
         var allStmts = (uint64)0;
         var covStmts = (uint64)0;
+
         // Emit functions for each package, sorted by import path.
         foreach (var (_, importpath) in slices.Sorted(maps.Keys<map<@string, ж<pstate>>, @string, ж<pstate>>(fm.pm))) {
             var p = fm.pm[importpath];
@@ -329,8 +339,9 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
             }
             var units = new slice<extcu>(0, () => new(nil), len((~p).unitTable));
             foreach (var (u, _) in (~p).unitTable) {
-                units = append(units, u);
+                units = append(unitsᴷ, units, u);
             }
+
             // Within a package, sort the units, then walk through the
             // sorted array. Each time we hit a new function, emit the
             // summary entry for the previous function, then make one last

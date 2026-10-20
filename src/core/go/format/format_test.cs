@@ -47,17 +47,21 @@ public static void TestNode(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var fset = token.NewFileSet();
     (var @file, err) = parser.ParseFile(fset, testfile, src, parser.ParseComments);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     {
         err = Node(new format_test_package.bytes_BufferжWriter(Ꮡbuf), fset, @file.OrTypedNil()); if (err != default!) {
             Ꮡt.Fatal(nodeFailedˢ, err);
         }
     }
+
     diff(Ꮡt, buf.Bytes(), src);
 }
 
@@ -72,15 +76,18 @@ internal static readonly @string goldenᶜ = "package p\n\nconst _ = 123i\n"u8;
 public static void TestNodeNoModify(ж<testing.T> Ꮡt) {
     @string src = srcᶜ;
     @string golden = goldenᶜ;
+
     var fset = token.NewFileSet();
     var (@file, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // Capture original address and value of a BasicLit node
     // which will undergo formatting changes during printing.
     var wantLit = (~(~(~@file).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>()).Values[0]._<ж<ast.BasicLit>>();
     @string wantVal = wantLit.Value.Value;
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         err = Node(new format_test_package.bytes_BufferжWriter(Ꮡbuf), fset, @file.OrTypedNil()); if (err != default!) {
@@ -88,9 +95,11 @@ public static void TestNodeNoModify(ж<testing.T> Ꮡt) {
         }
     }
     diff(Ꮡt, buf.Bytes(), slice<byte>(golden));
+
     // Check if anything changed after Node returned.
     var gotLit = (~(~(~@file).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>()).Values[0]._<ж<ast.BasicLit>>();
     @string gotVal = gotLit.Value.Value;
+
     if (gotLit != wantLit) {
         Ꮡt.Errorf("got *ast.BasicLit address %p, want %p"u8, gotLit.OrTypedNil(), wantLit.OrTypedNil());
     }
@@ -107,65 +116,59 @@ public static void TestSource(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var res, err) = Source(src);
     if (err != default!) {
         Ꮡt.Fatal(sourceFailedˢ, err);
     }
+
     diff(Ꮡt, res, src);
 }
 
-// declaration lists
-// statement lists
-// indentation, leading and trailing space
-// no indentation added inside raw strings
-// no indentation removed inside raw strings
-// comments
-// issue #5551
-// issue #11276
-// issue #11276
-// issue #11276
-// issue #11276
-// whitespace
-// issue #11275
-// issue #11275
-// issue #11275
-// issue #11275
-// issue #11275
-// issue #11275
-// issue #11275
-// erroneous programs
-// build comments
 // Test cases that are expected to fail are marked by the prefix "ERROR".
 // The formatted result must look the same as the input for successful tests.
 internal static slice<@string> tests = new @string[]{
+    // declaration lists
     @"import ""go/format"""u8,
     "var x int"u8,
     "var x int\n\ntype T struct{}"u8,
+
+    // statement lists
     "x := 0"u8,
     "f(a, b, c)\nvar x int = f(1, 2, 3)"u8,
+
+    // indentation, leading and trailing space
     "\tx := 0\n\tgo f()"u8,
     "\tx := 0\n\tgo f()\n\n\n"u8,
     "\n\t\t\n\n\tx := 0\n\tgo f()\n\n\n"u8,
     "\n\t\t\n\n\t\t\tx := 0\n\t\t\tgo f()\n\n\n"u8,
-    "\n\t\t\n\n\t\t\tx := 0\n\t\t\tconst s = `\nfoo\n`\n\n\n"u8,
-    "\n\t\t\n\n\t\t\tx := 0\n\t\t\tconst s = `\n\t\tfoo\n`\n\n\n"u8,
+    "\n\t\t\n\n\t\t\tx := 0\n\t\t\tconst s = `\nfoo\n`\n\n\n"u8, // no indentation added inside raw strings
+    "\n\t\t\n\n\t\t\tx := 0\n\t\t\tconst s = `\n\t\tfoo\n`\n\n\n"u8, // no indentation removed inside raw strings
+
+    // comments
     "/* Comment */"u8,
     "\t/* Comment */ "u8,
     "\n/* Comment */ "u8,
-    "i := 5 /* Comment */"u8,
-    "\ta()\n//line :1"u8,
-    "\t//xxx\n\ta()\n//line :2"u8,
-    "\ta() //line :1\n\tb()\n"u8,
-    "x := 0\n//line :1\n//line :2"u8,
-    ""u8,
-    " "u8,
-    "\t"u8,
-    "\t\t"u8,
-    "\n"u8,
-    "\n\n"u8,
-    "\t\n"u8,
+    "i := 5 /* Comment */"u8, // issue #5551
+    "\ta()\n//line :1"u8, // issue #11276
+    "\t//xxx\n\ta()\n//line :2"u8, // issue #11276
+    "\ta() //line :1\n\tb()\n"u8, // issue #11276
+    "x := 0\n//line :1\n//line :2"u8, // issue #11276
+
+    // whitespace
+    ""u8, // issue #11275
+    " "u8, // issue #11275
+    "\t"u8, // issue #11275
+    "\t\t"u8, // issue #11275
+    "\n"u8, // issue #11275
+    "\n\n"u8, // issue #11275
+    "\t\n"u8, // issue #11275
+
+    // erroneous programs
     "ERROR1 + 2 +"u8,
     "ERRORx :=  0"u8,
+
+    // build comments
     "// copyright\n\n//go:build x\n\npackage p\n"u8,
     "// copyright\n\n//go:build x\n// +build x\n\npackage p\n"u8
 }.slice();
@@ -175,7 +178,7 @@ public static (@string, error) String(@string s) {
     if (err != default!) {
         return ("", err);
     }
-    return (((@string)res), default!);
+    return ((@string)res, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

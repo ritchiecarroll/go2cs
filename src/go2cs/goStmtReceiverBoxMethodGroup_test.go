@@ -24,6 +24,7 @@ import (
 )
 
 func TestAGoStatementOnTheReceiversOwnPointerMethodPromotesTheMethod(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -106,7 +107,7 @@ func main() {
 		"internal static partial void start(this ж<tracker> Ꮡt)",
 		"goǃ(Ꮡt.loop);",
 		"internal static partial void startArg(this ж<tracker> Ꮡt)",
-		"goǃ(Ꮡt.loopArg, (nint)(9));",
+		"goǃ(Ꮡt.loopArg, (nint)9);",
 		"internal static partial void startInner(this ж<tracker> Ꮡt)",
 		"goǃ(Ꮡt.of(tracker.Ꮡin).send);",
 	} {

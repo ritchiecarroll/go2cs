@@ -46,7 +46,7 @@ using static global::go.net.smtp_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/smtp/example_test.go", "example_test.cs", "ABMalIKCqICCpICCuIKClIKClIKCqIKCAAcQkuaUgoSCgriUqIKIgoI=")]
+[assembly: go.GoPositionMap("net/smtp/example_test.go", "example_test.cs", "ABMalIKCuICCpICCyIKClIKClIKCuIKCAAYQguaUgpSCgriUuIKIgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

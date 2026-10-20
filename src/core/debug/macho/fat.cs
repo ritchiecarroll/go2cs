@@ -33,8 +33,8 @@ internal static UntypedInt fatArchHeaderSize => /* 5 * 4 */ 20;
 
 // A FatArch is a Mach-O File inside a FatFile.
 partial struct FatArch {
-    public partial ref FatArchHeader FatArchHeader { get; }
-    public partial ref ж<File> File { get; }
+    /*embed*/ public FatArchHeader FatArchHeader;
+    /*embed*/ public ж<File> File;
 }
 
 // ErrNotFat is returned from [NewFatFile] or [OpenFat] when the file is not a
@@ -47,6 +47,7 @@ public static ж<FormatError> ErrNotFat = Ꮡ(new FormatError(0, "not a fat Mach
 public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
     ref var ff = ref heap(new FatFile(), out var Ꮡff);
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
+
     // Read the fat_header struct, which is always in big endian.
     // Start with the magic number.
     var err = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡff.of(FatFile.ᏑMagic));
@@ -67,6 +68,7 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
     }
     ref var offset = ref heap<int64>(out var Ꮡoffset);
     offset = (int64)4;
+
     // Read the number of FatArchHeaders that come after the fat_header.
     ref var narch = ref heap(new uint32(), out var Ꮡnarch);
     err = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡnarch);
@@ -74,14 +76,17 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid fat_header"u8, default!))));
     }
     offset += 4;
+
     if (narch < 1) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "file contains no images"u8, default!))));
     }
+
     // Combine the Cpu and SubCpu (both uint32) into a uint64 to make sure
     // there are not duplicate architectures.
     var seenArches = new map<uint64, bool>();
     // Make sure that all images are for the same MH_ type.
     Type machoType = default!;
+
     // Following the fat_header comes narch fat_arch structs that index
     // Mach-O images further in the file.
     nint c = saferio.SliceCap<FatArch>((uint64)narch);
@@ -96,19 +101,22 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid fat_arch header"u8, default!))));
         }
         offset += fatArchHeaderSize;
+
         var fr = io.NewSectionReader(r, (int64)fa.Offset, (int64)fa.Size);
         (fa.File, err) = NewFile(new io.SectionReaderжReaderAt(fr));
         if (err != default!) {
             return (default!, err);
         }
+
         // Make sure the architecture for this image is not duplicate.
-        var seenArch = (uint64)((((uint64)(uint32)fa.Cpu << (int)(32))) | (uint64)fa.SubCpu);
+        var seenArch = ((uint64)(uint32)fa.Cpu << 32) | (uint64)fa.SubCpu;
         {
             var (o, k) = seenArches[seenArch, ꟷ]; if (o || k) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, fmt.Sprintf("duplicate architecture cpu=%v, subcpu=%#x"u8, fa.Cpu, fa.SubCpu), default!))));
             }
         }
         seenArches[seenArch] = true;
+
         // Make sure the Mach-O type matches that of the first image.
         if (i == 0){
             machoType = fa.Type;
@@ -117,8 +125,10 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, fmt.Sprintf("Mach-O type for architecture #%d (type=%#x) does not match first (type=%#x)"u8, i, fa.Type, machoType), default!))));
             }
         }
+
         ff.Arches = append(ff.Arches, fa);
     }
+
     return (Ꮡff, default!);
 }
 

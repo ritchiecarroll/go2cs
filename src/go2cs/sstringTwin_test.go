@@ -152,13 +152,14 @@ func convertTwinFixtures(t *testing.T) (emitted string, packageInfo string, cons
 // both ways. RED at claude/c2-arm-c 2d068bca59, where no twin was emitted, and at
 // claude/c2-sstring-twin-pilot 5b691c9c01, where the converter emitted the companions itself.
 func TestSStringTwinEmission(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	registerFixtureTwins(t)
 
 	emitted, packageInfo, consumer := convertTwinFixtures(t)
 
 	// the consumer package: every package-qualified value site names the canonical delegate, and a
 	// call keeps the method (the priority binds the twin)
-	for _, want := range []string{"G = twin.Formatᶠ;", "f = twin.Formatᶠ;", "twin.Format(directDˢ, (nint)(1))", "twin.Plain(\"p\"u8)"} {
+	for _, want := range []string{"G = twin.Formatᶠ;", "f = twin.Formatᶠ;", "twin.Format(directDˢ, (nint)1)", "twin.Plain(\"p\")"} {
 		if !strings.Contains(consumer, want) {
 			t.Errorf("consumer: want %q in:\n%s", want, consumer)
 		}
@@ -235,6 +236,7 @@ func TestSStringTwinEmission(t *testing.T) {
 
 // TestSStringTwinSectionAbsentWhenEmpty: a package with no twin carries no trace of the record section.
 func TestSStringTwinSectionAbsentWhenEmpty(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	_, packageInfo := convertTwinFixture(t)
 
 	if strings.Contains(packageInfo, sstringTwinSectionStart) || strings.Contains(packageInfo, "GoSStringTwin") {

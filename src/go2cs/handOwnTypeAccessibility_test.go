@@ -101,6 +101,7 @@ func seedPackageInfoWithBlocks(t *testing.T, dir string) string {
 // a writePackageInfoFile that never touched the file, which is exactly the vacuous green this seat's
 // unseat was hiding behind.
 func TestADeclaredTypeAccessibilityBlockSurvivesAPackageReMint(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := seedPackageInfoWithBlocks(t, dir)
 
@@ -143,6 +144,7 @@ func TestADeclaredTypeAccessibilityBlockSurvivesAPackageReMint(t *testing.T) {
 // package_info.cs without the block must not gain one: the absence of a declaration is not an
 // invitation to infer one, and an inferred block would be the guessing this design avoids.
 func TestAPackageReMintInventsNoDeclaredTypeAccessibilityBlock(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := seedPackageInfoFile(t, dir, "weak")
 

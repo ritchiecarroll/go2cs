@@ -23,11 +23,13 @@ public static void TestPreorderBreak(ж<testing.T> Ꮡt) {
     // yield for sibling nodes even after yield had returned false. With that
     // bug, this test failed with a runtime panic.
     @string src = packagePTypeTStructFIntˢ;
+
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, ""u8, src, 0);
     if (err != default!) {
         throw panic(err);
     }
+
     foreach (var n in range<ast.Node>(ast.Preorder(new ast.FileжNode(f)).Invoke)) {
         {
             var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && (~id).Name == "F"u8) {

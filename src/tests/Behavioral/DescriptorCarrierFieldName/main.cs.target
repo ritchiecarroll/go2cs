@@ -22,6 +22,7 @@ partial struct holder {
 
 internal static void Main() {
     var t = reflect.TypeFor<holder>();
+
     for (nint i = 0; i < t.NumField(); i++) {
         var f = t.Field(i);
         fmt.Printf("%s Name=%q String=%q PkgPath=%q Kind=%v\n"u8,

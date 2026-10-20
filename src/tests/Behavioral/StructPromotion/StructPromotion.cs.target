@@ -11,7 +11,7 @@ partial struct Person {
 }
 
 public static bool IsDr(this Person p) {
-    return strings.HasPrefix(p.name, "Dr"u8);
+    return strings.HasPrefix(p.name, "Dr");
 }
 
 public static bool IsAdult(this Person p) {
@@ -27,12 +27,12 @@ public static bool IsManager(this Employee e) {
 }
 
 partial struct Record {
-    public partial ref Person Person { get; }
-    public partial ref Employee Employee { get; }
+    /*embed*/ public Person Person;
+    /*embed*/ public Employee Employee;
 }
 
 public static bool IsDr(this Record p) {
-    return strings.HasPrefix(p.name, "Dr"u8) && p.age > 18;
+    return strings.HasPrefix(p.name, "Dr") && p.age > 18;
 }
 
 partial struct commonBase {
@@ -44,7 +44,7 @@ internal static @string describe(this ref commonBase c) {
 }
 
 partial struct ledger {
-    internal partial ref commonBase commonBase { get; }
+    /*embed*/ internal commonBase commonBase;
     internal nint seq;
 }
 
@@ -56,18 +56,16 @@ internal static @string describe(this ж<ledger> Ꮡl) {
     return "ledger:"u8 + l.tag;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string drMichaˢ = "Dr. Michał"u8;
-private static readonly @string softwareEngineerˢ = "software engineer"u8;
-
 internal static void Main() {
-    var person = new Person(name: "Dr. Michał"u8, age: 29);
+    var person = new Person(name: "Dr. Michał", age: 29);
     fmt.Println(person);
     fmt.Println(person.IsDr());
+
     var record = new Record(nil);
-    record.name = drMichaˢ;
+    record.name = "Dr. Michał";
     record.age = 18;
-    record.position = softwareEngineerˢ;
+    record.position = "software engineer";
+
     fmt.Println(record);
     fmt.Println(record.name);
     fmt.Println(record.age);
@@ -75,8 +73,9 @@ internal static void Main() {
     fmt.Println(record.IsAdult());
     fmt.Println(record.IsManager());
     fmt.Println(record.IsDr());
+
     var l = Ꮡ(new ledger(nil));
-    l.Value.tag = "x"u8;
+    l.Value.tag = "x";
     fmt.Println(l.describe(), l.describe(), (~l).seq);
 }
 

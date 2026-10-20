@@ -75,6 +75,6 @@ public static readonly @string KnownEnv = """
 	GO_EXTLINK_ENABLED
 	PKG_CONFIG
 
-"""u8;
+"""u8.Raw();
 
 } // end cfg_package

@@ -15,11 +15,6 @@ using path;
 
 partial class testenv_package {
 
-// For wasip1, some runtimes forbid absolute symlinks,
-// or symlinks that escape the current working directory.
-// Perform a simple test to see whether the runtime
-// supports symlinks or not. If we get a permission
-// error, the runtime does not support symlinks.
 internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool ok, @string reason) () => {
     bool ok = default!;
     @string reason = default!;
@@ -30,6 +25,11 @@ internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool ok, @st
             (ok, reason) = (false, ""); goto ᒐdone;
         }
         if (exprᴛ1 == "android"u8 || exprᴛ1 == "wasip1"u8) {
+            // For wasip1, some runtimes forbid absolute symlinks,
+            // or symlinks that escape the current working directory.
+            // Perform a simple test to see whether the runtime
+            // supports symlinks or not. If we get a permission
+            // error, the runtime does not support symlinks.
             var (dir, err) = os.MkdirTemp(""u8, ""u8);
             if (err != default!) {
                 (ok, reason) = (false, ""); goto ᒐdone;

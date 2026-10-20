@@ -10,13 +10,14 @@ internal static UntypedInt intSize => /* 32 << (^uint(0) >> 63) */ 64;
 
 internal static nint abs(nint x) {
     // m := -1 if x < 0. m := 0 otherwise.
-    nint m = (x >> (int)((intSize - 1)));
+    nint m = x >> (int)(intSize - 1);
+
     // In two's complement representation, the negative number
     // of any number (except the smallest one) can be computed
     // by flipping all the bits and add 1. This is faster than
     // code with a branch.
     // See Hacker's Delight, section 2-4.
-    return ((nint)(x ^ m)) - m;
+    return (x ^ m) - m;
 }
 
 // paeth implements the Paeth filter function, as per the PNG specification.
@@ -62,9 +63,9 @@ internal static void filterPaeth(slice<byte> cdat, slice<byte> pdat, nint bytesP
             pa = abs(pa);
             pb = abs(pb);
             if (pa <= pb && pa <= pc){
+                // No-op.
             } else 
             if (pb <= pc){
-                // No-op.
                 a = b;
             } else {
                 a = c;

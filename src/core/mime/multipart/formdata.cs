@@ -59,8 +59,8 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         var combineFiles = true;
         if (multipartfiles.Value() == "distinct"u8) {
             combineFiles = false;
+            // multipartfiles.IncNonDefault() // TODO: uncomment after documenting
         }
-        // multipartfiles.IncNonDefault() // TODO: uncomment after documenting
         nint maxParts = 1000;
         {
             @string s = multipartmaxparts.Value(); if (s != ""u8) {
@@ -73,6 +73,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
             }
         }
         var maxHeaders = maxMIMEHeaders();
+
         var formʗ1 = form;
         defer(() => {
             if (Ꮡfile.ValueSlot != nil) {
@@ -96,6 +97,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
                 }
             }
         }, ref ᒐ);
+
         // maxFileMemoryBytes is the maximum bytes of file data we will store in memory.
         // Data past this limit is written to disk.
         // This limit strictly applies to content, not metadata (filenames, MIME headers, etc.),
@@ -109,17 +111,16 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         // The relationship between these parameters, as well as the overly-large and
         // unconfigurable 10 MB added on to maxMemory, is unfortunate but difficult to change
         // within the constraints of the API as documented.
+        if (maxMemory < 0) {
+            maxMemory = 0;
+        }
         var maxFileMemoryBytes = maxMemory;
         if (maxFileMemoryBytes == math.MaxInt64) {
             maxFileMemoryBytes--;
         }
-        var maxMemoryBytes = maxMemory + (int64)(((int64)10 << (int)(20)));
+        var maxMemoryBytes = maxMemory + (int64)((int64)10 << 20);
         if (maxMemoryBytes <= 0) {
-            if (maxMemory < 0){
-                maxMemoryBytes = 0;
-            } else {
-                maxMemoryBytes = math.MaxInt64;
-            }
+            maxMemoryBytes = math.MaxInt64;
         }
         slice<byte> copyBuf = default!;
         while (ᐧ) {
@@ -134,12 +135,14 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
                 (_ᴛ1, err) = (default!, ErrMessageTooLarge); goto ᒐdone;
             }
             maxParts--;
+
             @string name = p.FormName();
             if (name == ""u8) {
                 continue;
             }
             ref var filename = ref heap<@string>(out var Ꮡfilename);
             filename = p.FileName();
+
             // Multiple values for the same key (one map entry, longer slice) are cheaper
             // than the same number of values for different keys (many map entries), but
             // using a consistent per-value cost for overhead is simpler.
@@ -151,7 +154,9 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
                 // rejected the MIME headers for being too large. Check anyway.
                 (_ᴛ1, err) = (default!, ErrMessageTooLarge); goto ᒐdone;
             }
+
             ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
+
             if (filename == ""u8) {
                 // value, store as string in memory
                 var (nΔ1, errΔ3) = io.CopyN(new bytes_BufferжWriter(Ꮡb), new PartжReader(p), maxMemoryBytes + 1);
@@ -165,6 +170,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
                 form.Value.Value[name] = append((~form).Value[name], Ꮡb.String());
                 continue;
             }
+
             // file, store in memory or on disk
             const int64 fileHeaderSize = 100;
             maxMemoryBytes -= mimeHeaderSize((~p).Header);
@@ -224,6 +230,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
             }
             form.Value.File[name] = append((~form).File[name], fh);
         }
+
         (_ᴛ1, err) = (form, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -316,7 +323,7 @@ partial interface File :
 
 // helper types to turn a []byte into a File
 partial struct sectionReadCloser {
-    public partial ref ж<io_package.SectionReader> SectionReader { get; }
+    /*embed*/ public ж<io_package.SectionReader> SectionReader;
     /*embed*/ public io_package.Closer Closer;
 }
 

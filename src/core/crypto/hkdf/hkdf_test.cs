@@ -27,8 +27,8 @@ internal partial struct hkdfTest {
     internal slice<byte> @out;
 }
 
-// Tests from RFC 5869
 internal static slice<hkdfTest> hkdfTests = new hkdfTest[]{
+    // Tests from RFC 5869
     new(
         sha256.New,
         new byte[]{
@@ -307,17 +307,21 @@ public static void TestHKDF(ж<testing.T> Ꮡt) {
         if (!bytes.Equal(prk, tt.prk)) {
             Ꮡt.Errorf("test %d: incorrect PRK: have %v, need %v."u8, i, prk, tt.prk);
         }
-        (var key, err) = Key(tt.hash, tt.master, tt.salt, ((@string)tt.info), len(tt.@out));
+
+        (var key, err) = Key(tt.hash, tt.master, tt.salt, (@string)tt.info, len(tt.@out));
         if (err != default!) {
             Ꮡt.Errorf("test %d: key derivation failed: %v"u8, i, err);
         }
+
         if (!bytes.Equal(key, tt.@out)) {
             Ꮡt.Errorf("test %d: incorrect output: have %v, need %v."u8, i, key, tt.@out);
         }
-        (var expanded, err) = Expand(tt.hash, prk, ((@string)tt.info), len(tt.@out));
+
+        (var expanded, err) = Expand(tt.hash, prk, (@string)tt.info, len(tt.@out));
         if (err != default!) {
             Ꮡt.Errorf("test %d: key expansion failed: %v"u8, i, err);
         }
+
         if (!bytes.Equal(expanded, tt.@out)) {
             Ꮡt.Errorf("test %d: incorrect output from Expand: have %v, need %v."u8, i, expanded, tt.@out);
         }
@@ -332,11 +336,13 @@ public static void TestHKDFLimit(ж<testing.T> Ꮡt) {
     var master = new byte[]{0x00, 0x01, 0x02, 0x03}.slice();
     @string info = ""u8;
     nint limit = hash().Size() * 255;
+
     // The maximum output bytes should be extractable
     var (@out, err) = Key(hash, master, default!, info, limit);
     if (err != default! || len(@out) != limit) {
         Ꮡt.Errorf("key derivation failed: %v"u8, err);
     }
+
     // Reading one more should return an error
     (_, err) = Key(hash, master, default!, info, limit + 1);
     if (err == default!) {
@@ -366,8 +372,10 @@ internal static void benchmarkHKDF(Func<hash.Hash> hasher, nint block, ж<testin
     var master = new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07}.slice();
     var salt = new byte[]{0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17}.slice();
     @string info = ((@string)new byte[]{0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27}.slice());
+
     b.SetBytes((int64)block);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         var (_, err) = Key(hasher, master, salt, info, hasher().Size());
         if (err != default!) {
@@ -386,6 +394,7 @@ public static void TestFIPSServiceIndicator(ж<testing.T> Ꮡt) {
     if (boring.Enabled) {
         Ꮡt.Skip(inBoringCryptoModeHmacIsˢ);
     }
+
     fips140.ResetServiceIndicator();
     var (_, err) = Key<hash.Hash>(sha256.New, slice<byte>("YELLOW SUBMARINE"u8), default!, ""u8, 32);
     if (err != default!) {
@@ -394,6 +403,7 @@ public static void TestFIPSServiceIndicator(ж<testing.T> Ꮡt) {
     if (!fips140.ServiceIndicator()) {
         Ꮡt.Error(fipsServiceIndicatorˢ);
     }
+
     // Key too short.
     fips140.ResetServiceIndicator();
     (_, err) = Key<hash.Hash>(sha256.New, slice<byte>("key"u8), default!, ""u8, 32);
@@ -403,6 +413,7 @@ public static void TestFIPSServiceIndicator(ж<testing.T> Ꮡt) {
     if (fips140.ServiceIndicator()) {
         Ꮡt.Error(fipsServiceIndicatorˢ2);
     }
+
     // Salt and info are short, which is ok, but translates to a short HMAC key.
     fips140.ResetServiceIndicator();
     (_, err) = Key<hash.Hash>(sha256.New, slice<byte>("YELLOW SUBMARINE"u8), slice<byte>("salt"u8), infoˢ, 32);

@@ -31,50 +31,8 @@ internal partial struct reqWriteTest {
     public error WantError; // wanted error from Request.Write
 }
 
-// HTTP/1.1 => chunked coding; no body; no trailer
-// HTTP/1.1 => chunked coding; body; empty trailer
-// HTTP/1.1 POST => chunked coding; body; empty trailer
-// HTTP/1.1 POST with Content-Length, no chunking
-// HTTP/1.1 POST with Content-Length in headers
-// ignored
-// default to HTTP/1.1
-// Request with a 0 ContentLength and a 0 byte body.
-// as if unset by user
-// Request with a 0 ContentLength and a nil body.
-// as if unset by user
-// Request with a 0 ContentLength and a 1 byte body.
-// as if unset by user
-// Request with a ContentLength of 10 but a 5 byte body.
-// but we're going to send only 5 bytes
-// Request with a ContentLength of 4 but an 8 byte body.
-// but we're going to try to send 8 bytes
-// Request with a 5 ContentLength and nil body.
-// but we'll omit the body
-// Request with a 0 ContentLength and a body with 1 byte content and an error.
-// as if unset by user
-// Request with a 0 ContentLength and a body without content and an error.
-// as if unset by user
-// Verify that DumpRequest preserves the HTTP version number, doesn't add a Host,
-// and doesn't add a User-Agent.
-// If no Request.Host and no Request.URL.Host, we send
-// an empty Host header, and don't use
-// Request.Header["Host"]. This is just testing that
-// we don't change Go 1.0 behavior.
-// Opaque test #1 from golang.org/issue/4860
-// Opaque test #2 from golang.org/issue/4860
-// Testing custom case in header keys. Issue 5022.
-// Request with host header field; IPv6 address with zone identifier
-// Request with optional host header field; IPv6 address with zone identifier
-// CONNECT without Opaque
-// of proxy.com
-// What we used to do, locking that behavior in:
-// CONNECT with Opaque
-// of proxy.com
-// Verify that a nil header value doesn't get written.
-// or any CTL
-// Request with nil body and PATCH method. Issue #40978
-// as if unset by user
 internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice<reqWriteTest>>(new slice<reqWriteTest>(27){
+    // HTTP/1.1 => chunked coding; no body; no trailer
     [0] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -103,6 +61,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         WantWrite: "GET / HTTP/1.1\r\n"u8 + "Host: www.techcrunch.com\r\n"u8 + "User-Agent: Fake\r\n"u8 + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"u8 + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"u8 + "Accept-Encoding: gzip,deflate\r\n"u8 + "Accept-Language: en-us,en;q=0.5\r\n"u8 + "Keep-Alive: 300\r\n"u8 + "Proxy-Connection: keep-alive\r\n\r\n"u8,
         WantProxy: "GET http://www.techcrunch.com/ HTTP/1.1\r\n"u8 + "Host: www.techcrunch.com\r\n"u8 + "User-Agent: Fake\r\n"u8 + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"u8 + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"u8 + "Accept-Encoding: gzip,deflate\r\n"u8 + "Accept-Language: en-us,en;q=0.5\r\n"u8 + "Keep-Alive: 300\r\n"u8 + "Proxy-Connection: keep-alive\r\n\r\n"u8
     ),
+    // HTTP/1.1 => chunked coding; body; empty trailer
     [1] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -120,6 +79,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         WantWrite: "GET /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8),
         WantProxy: "GET http://www.google.com/search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8)
     ),
+    // HTTP/1.1 POST => chunked coding; body; empty trailer
     [2] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -138,6 +98,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         WantWrite: "POST /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Connection: close\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8),
         WantProxy: "POST http://www.google.com/search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Connection: close\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8)
     ),
+
+    // HTTP/1.1 POST with Content-Length, no chunking
     [3] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -156,13 +118,15 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         WantWrite: "POST /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 6\r\n"u8 + "\r\n"u8 + "abcdef"u8,
         WantProxy: "POST http://www.google.com/search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 6\r\n"u8 + "\r\n"u8 + "abcdef"u8
     ),
+
+    // HTTP/1.1 POST with Content-Length in headers
     [4] = new(
         Req: new Request(
             Method: "POST"u8,
             URL: mustParseURL("http://example.com/"u8),
             Host: "example.com"u8,
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Content-Length"u8] = new @string[]{"10"u8}.slice()
+                ["Content-Length"u8] = new @string[]{"10"u8}.slice() // ignored
             }),
             ContentLength: 6
         ),
@@ -170,6 +134,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         WantWrite: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 6\r\n"u8 + "\r\n"u8 + "abcdef"u8,
         WantProxy: "POST http://example.com/ HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 6\r\n"u8 + "\r\n"u8 + "abcdef"u8
     ),
+
+    // default to HTTP/1.1
     [5] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -178,6 +144,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantWrite: "GET /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "\r\n"u8
     ),
+
+    // Request with a 0 ContentLength and a 0 byte body.
     [6] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -185,12 +153,14 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 0
+            ContentLength: 0 // as if unset by user
         ),
         Body: io.ReadCloser () => io.NopCloser(io.LimitReader(new http_test_package.strings_ReaderжReader(strings.NewReader("xx"u8)), 0)),
         WantWrite: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n0\r\n\r\n"u8,
         WantProxy: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n0\r\n\r\n"u8
     ),
+
+    // Request with a 0 ContentLength and a nil body.
     [7] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -198,12 +168,14 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 0
+            ContentLength: 0 // as if unset by user
         ),
         Body: io.ReadCloser () => default!,
         WantWrite: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 0\r\n"u8 + "\r\n"u8,
         WantProxy: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 0\r\n"u8 + "\r\n"u8
     ),
+
+    // Request with a 0 ContentLength and a 1 byte body.
     [8] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -211,12 +183,14 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 0
+            ContentLength: 0 // as if unset by user
         ),
         Body: io.ReadCloser () => io.NopCloser(io.LimitReader(new http_test_package.strings_ReaderжReader(strings.NewReader("xx"u8)), 1)),
         WantWrite: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("x"u8) + chunk(""u8),
         WantProxy: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("x"u8) + chunk(""u8)
     ),
+
+    // Request with a ContentLength of 10 but a 5 byte body.
     [9] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -224,11 +198,13 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 10
+            ContentLength: 10 // but we're going to send only 5 bytes
         ),
         Body: slice<byte>("12345"u8),
         WantError: errors.New("http: ContentLength=10 with Body length 5"u8)
     ),
+
+    // Request with a ContentLength of 4 but an 8 byte body.
     [10] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -236,11 +212,13 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 4
+            ContentLength: 4 // but we're going to try to send 8 bytes
         ),
         Body: slice<byte>("12345678"u8),
         WantError: errors.New("http: ContentLength=4 with Body length 8"u8)
     ),
+
+    // Request with a 5 ContentLength and nil body.
     [11] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -248,10 +226,12 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 5
+            ContentLength: 5 // but we'll omit the body
         ),
         WantError: errors.New("http: Request.ContentLength=5 with nil Body"u8)
     ),
+
+    // Request with a 0 ContentLength and a body with 1 byte content and an error.
     [12] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -259,7 +239,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 0
+            ContentLength: 0 // as if unset by user
         ),
         Body: io.ReadCloser () => {
             var err = errors.New("Custom reader error"u8);
@@ -268,6 +248,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         },
         WantError: errors.New("Custom reader error"u8)
     ),
+
+    // Request with a 0 ContentLength and a body without content and an error.
     [13] = new(
         Req: new Request(
             Method: "POST"u8,
@@ -275,7 +257,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 0
+            ContentLength: 0 // as if unset by user
         ),
         Body: io.ReadCloser () => {
             var err = errors.New("Custom reader error"u8);
@@ -284,6 +266,9 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         },
         WantError: errors.New("Custom reader error"u8)
     ),
+
+    // Verify that DumpRequest preserves the HTTP version number, doesn't add a Host,
+    // and doesn't add a User-Agent.
     [14] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -296,6 +281,11 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantWrite: "GET /foo HTTP/1.1\r\n"u8 + "Host: \r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "X-Foo: X-Bar\r\n\r\n"u8
     ),
+
+    // If no Request.Host and no Request.URL.Host, we send
+    // an empty Host header, and don't use
+    // Request.Header["Host"]. This is just testing that
+    // we don't change Go 1.0 behavior.
     [15] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -313,6 +303,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantWrite: "GET /search HTTP/1.1\r\n"u8 + "Host: \r\n"u8 + "User-Agent: Go-http-client/1.1\r\n\r\n"u8
     ),
+
+    // Opaque test #1 from golang.org/issue/4860
     [16] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -327,6 +319,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantWrite: "GET /%2F/%2F/ HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n\r\n"u8
     ),
+
+    // Opaque test #2 from golang.org/issue/4860
     [17] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -341,6 +335,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantWrite: "GET http://y.google.com/%2F/%2F/ HTTP/1.1\r\n"u8 + "Host: x.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n\r\n"u8
     ),
+
+    // Testing custom case in header keys. Issue 5022.
     [18] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -358,6 +354,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantWrite: "GET / HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "ALL-CAPS: x\r\n"u8 + "\r\n"u8
     ),
+
+    // Request with host header field; IPv6 address with zone identifier
     [19] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -367,6 +365,8 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantWrite: "GET / HTTP/1.1\r\n"u8 + "Host: [fe80::1]\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "\r\n"u8
     ),
+
+    // Request with optional host header field; IPv6 address with zone identifier
     [20] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -377,27 +377,34 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantWrite: "GET / HTTP/1.1\r\n"u8 + "Host: [fe80::1]:8080\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "\r\n"u8
     ),
+
+    // CONNECT without Opaque
     [21] = new(
         Req: new Request(
             Method: "CONNECT"u8,
             URL: Ꮡ(new url.URL(
-                Scheme: "https"u8,
+                Scheme: "https"u8, // of proxy.com
                 Host: "proxy.com"u8
             ))
         ),
+        // What we used to do, locking that behavior in:
         WantWrite: "CONNECT proxy.com HTTP/1.1\r\n"u8 + "Host: proxy.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "\r\n"u8
     ),
+
+    // CONNECT with Opaque
     [22] = new(
         Req: new Request(
             Method: "CONNECT"u8,
             URL: Ꮡ(new url.URL(
-                Scheme: "https"u8,
+                Scheme: "https"u8, // of proxy.com
                 Host: "proxy.com"u8,
                 Opaque: "backend:443"u8
             ))
         ),
         WantWrite: "CONNECT backend:443 HTTP/1.1\r\n"u8 + "Host: proxy.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "\r\n"u8
     ),
+
+    // Verify that a nil header value doesn't get written.
     [23] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -425,19 +432,19 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Method: "GET"u8,
             URL: Ꮡ(new url.URL(
                 Host: "www.example.com"u8,
-                RawQuery: "new\nline"u8
+                RawQuery: "new\nline"u8 // or any CTL
             ))
         ),
         WantError: errors.New("net/http: can't write control character in Request.URL"u8)
     ),
-    [26] = new(
+    [26] = new( // Request with nil body and PATCH method. Issue #40978
         Req: new Request(
             Method: "PATCH"u8,
             URL: mustParseURL("/"u8),
             Host: "example.com"u8,
             ProtoMajor: 1,
             ProtoMinor: 1,
-            ContentLength: 0
+            ContentLength: 0 // as if unset by user
         ),
         Body: default!,
         WantWrite: "PATCH / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 0\r\n\r\n"u8,
@@ -449,6 +456,7 @@ internal static ref slice<reqWriteTest> reqWriteTests => ref ᏑreqWriteTests.Va
 public static void TestRequestWrite(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in reqWriteTests) {
         var tt = Ꮡ(reqWriteTests, i);
+
         var ttʗ1 = tt;
         void setBody() {
             if ((~ttʗ1).Body == default!) {
@@ -468,6 +476,7 @@ public static void TestRequestWrite(ж<testing.T> Ꮡt) {
         if ((~tt).Req.Header == default!) {
             tt.Value.Req.Header = new global::go.net.http_package.ΔHeader(0);
         }
+
         ref var braw = ref heap(new strings.Builder(), out var Ꮡbraw);
         var err = tt.of(reqWriteTest.ᏑReq).Write(new http_test_package.strings_BuilderжWriter(Ꮡbraw));
         {
@@ -480,6 +489,7 @@ public static void TestRequestWrite(ж<testing.T> Ꮡt) {
         if (err != default!) {
             continue;
         }
+
         if ((~tt).WantWrite != ""u8) {
             @string sraw = braw.String();
             if (sraw != (~tt).WantWrite) {
@@ -487,6 +497,7 @@ public static void TestRequestWrite(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
+
         if ((~tt).WantProxy != ""u8) {
             setBody();
             ref var praw = ref heap(new strings.Builder(), out var Ꮡpraw);
@@ -522,15 +533,15 @@ internal partial struct TestRequestWriteTransport_testCase /*dyn*/ {
 }
 
 public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
+
     Func<@string, error> matchSubstr(@string substr) => error (@string written) => {
             if (!strings.Contains(written, substr)) {
                 return fmt.Errorf("expected substring %q in request: %s"u8, substr, written);
             }
             return default!;
         };
+
     var noContentLengthOrTransferEncoding = error (@string req) => {
         if (strings.Contains(req, contentLengthˢ3)) {
             return fmt.Errorf("unexpected Content-Length in request: %s"u8, req);
@@ -540,6 +551,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
         }
         return default!;
     };
+
     Func<@string, error> all(params Span<Func<@string, error>> checksʗp) {
         var checks = checksʗp.slice();
         var checksʗ1 = checks;
@@ -554,6 +566,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
             return default!;
         };
     }
+
     var tests = new TestRequestWriteTransport_testCase[]{
         new(
             method: "GET"u8,
@@ -569,16 +582,16 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
             clen: -1,
             body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8))),
             want: noContentLengthOrTransferEncoding
-        ), // A GET with a body, with explicit content length:
-
+        ),
+        // A GET with a body, with explicit content length:
         new(
             method: "GET"u8,
             clen: 7,
             body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(foobodyˢ))),
             want: all(matchSubstr(contentLength7ˢ),
                 matchSubstr(foobodyˢ))
-        ), // A GET with a body, sniffing the leading "f" from "foobody".
-
+        ),
+        // A GET with a body, sniffing the leading "f" from "foobody".
         new(
             method: "GET"u8,
             clen: -1,
@@ -586,9 +599,9 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
             want: all(matchSubstr(transferEncodingChunkedˢ2),
                 matchSubstr("\r\n1\r\nf\r\n"u8),
                 matchSubstr(oobodyˢ))
-        ), // But a POST request is expected to have a body, so
- // no sniffing happens:
-
+        ),
+        // But a POST request is expected to have a body, so
+        // no sniffing happens:
         new(
             method: "POST"u8,
             clen: -1,
@@ -601,8 +614,8 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
             clen: -1,
             body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8))),
             want: all(matchSubstr(transferEncodingChunkedˢ2))
-        ), // Verify that a blocking Request.Body doesn't block forever.
-
+        ),
+        // Verify that a blocking Request.Body doesn't block forever.
         new(
             method: "GET"u8,
             clen: -1,
@@ -617,6 +630,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
             want: matchSubstr(transferEncodingChunkedˢ2)
         )
     }.slice();
+
     foreach (var (i, vᴛ1) in tests) {
         ref var tt = ref heap(new TestRequestWriteTransport_testCase(), out var Ꮡtt);
         tt = vᴛ1;
@@ -640,7 +654,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
             continue;
         }
         {
-            var errΔ1 = tt.want(((@string)got)); if (errΔ1 != default!) {
+            var errΔ1 = tt.want((@string)got); if (errΔ1 != default!) {
                 Ꮡt.Errorf("test[%d]: %v"u8, i, errΔ1);
             }
         }
@@ -717,6 +731,7 @@ public static void TestRequestWriteError(ж<testing.T> Ꮡt) {
     nint failAfter = 0;
     nint writeCount = 0;
     var errFail = errors.New(fakeWriteFailureˢ);
+
     // w is the buffered io.Writer to write the request to. It
     // fails exactly once on its Nth Write call, as controlled by
     // failAfter. It also tracks the number of calls in
@@ -734,6 +749,7 @@ public static void TestRequestWriteError(ж<testing.T> Ꮡt) {
             return (builtin.len(p), err);
         }))
     );
+
     var (req, _) = NewRequest(getˢ, httpExampleComˢ, default!);
     UntypedInt writeCalls = 4; // number of Write calls in current implementation
     var sawGood = false;
@@ -786,6 +802,7 @@ internal static partial (slice<byte>, error) dumpRequestOut(ж<global::go.net.ht
         var pwʗ1 = pw;
         defer(() => pwʗ1.Close(), ref ᒐ);
         var dr = Ꮡ(new delegateReader(c: new channel<io.Reader>(0)));
+
             var drʗ1 = dr;
             var pwʗ2 = pw;
         var t = Ꮡ(new Transport(
@@ -793,6 +810,7 @@ internal static partial (slice<byte>, error) dumpRequestOut(ж<global::go.net.ht
         ));
         var tʗ1 = t;
         defer(tʗ1.CloseIdleConnections, ref ᒐ);
+
         // Wait for the request before replying with a dummy response:
         var drʗ2 = dr;
         var prʗ2 = pr;
@@ -809,6 +827,7 @@ internal static partial (slice<byte>, error) dumpRequestOut(ж<global::go.net.ht
             }
             (~drʗ2).c.ᐸꟷ(new http_test_package.strings_ReaderжReader(strings.NewReader(http11204NoContentˢ)));
         });
+
         var (_, err) = t.RoundTrip(Ꮡreq);
         if (err != default!) {
             return (default!, err);

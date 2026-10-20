@@ -20,8 +20,6 @@ partial class dwarf_test_package {
 internal static readonly @string testdataSplitElfˢ = "testdata/split.elf"u8;
 
 public static void TestSplit(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // debug/dwarf doesn't (currently) support split DWARF, but
     // the attributes that pointed to the split DWARF used to
     // cause loading the DWARF data to fail entirely (issue
@@ -68,23 +66,25 @@ public static void TestReaderSeek(ж<testing.T> Ꮡt) {
         new(0x400600, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x40059d, 0x400601}.array()}.slice(), 2)),
         new(0x400601, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x400601, 0x400611}.array()}.slice(), 2)),
         new(0x4005f0, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x40059d, 0x400601}.array()}.slice(), 2)), // loop test
-
         new(0x10, default!),
         new(0x400611, default!)
     }.slice();
     testRanges(Ꮡt, testdataLineGccElfˢ, want);
+
     want = new wantRange[]{
         new(0x401122, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401122, 0x401166}.array()}.slice(), 2)),
         new(0x401165, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401122, 0x401166}.array()}.slice(), 2)),
         new(0x401166, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401166, 0x401179}.array()}.slice(), 2))
     }.slice();
     testRanges(Ꮡt, testdataLineGccDwarf5Elfˢ, want);
+
     want = new wantRange[]{
         new(0x401130, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401130, 0x40117e}.array()}.slice(), 2)),
         new(0x40117d, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401130, 0x40117e}.array()}.slice(), 2)),
         new(0x40117e, default!)
     }.slice();
     testRanges(Ꮡt, testdataLineClangDwarf5ˢ, want);
+
     want = new wantRange[]{
         new(0x401126, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x401126, 0x40116a}.array()}.slice(), 2)),
         new(0x40116a, GoReflect.WithElemDims(new array<uint64>[]{new uint64[]{0x40116a, 0x401180}.array()}.slice(), 2))
@@ -138,6 +138,7 @@ internal static void testRanges(ж<testing.T> Ꮡt, @string name, slice<wantRang
             }
             continue;
         }
+
         (var ranges, err) = d.Ranges(entry);
         if (err != default!) {
             Ꮡt.Errorf("%s: %v"u8, name, err);
@@ -197,18 +198,22 @@ public static void TestReaderRanges(ж<testing.T> Ꮡt) {
             }.slice())
         )
     }.slice();
+
     foreach (var (_, test) in tests) {
         var d = elfData(Ꮡt, test.filename);
         var subprograms = test.subprograms;
+
         var r = d.Reader();
         nint i = 0;
         for (var (entry, err) = r.Next(); entry != nil && err == default!; (entry, err) = r.Next()) {
             if ((~entry).Tag != TagSubprogram) {
                 continue;
             }
+
             if (i > len(subprograms)) {
                 Ꮡt.Fatalf("%s: too many subprograms (expected at most %d)"u8, test.filename, i);
             }
+
             {
                 @string got = entry.Val(AttrName)._<@string>(); if (got != subprograms[i].name) {
                     Ꮡt.Errorf("%s: subprogram %d name is %s, expected %s"u8, test.filename, i, got, subprograms[i].name);
@@ -224,6 +229,7 @@ public static void TestReaderRanges(ж<testing.T> Ꮡt) {
             }
             i++;
         }
+
         if (i < len(subprograms)) {
             Ꮡt.Errorf("%s: saw only %d subprograms, expected %d"u8, test.filename, i, len(subprograms));
         }
@@ -238,8 +244,6 @@ internal partial struct Test64Bit_tests /*dyn*/ {
 }
 
 public static void Test64Bit(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // I don't know how to generate a 64-bit DWARF debug
     // compilation unit except by using XCOFF, so this is
     // hand-written.
@@ -247,13 +251,9 @@ public static void Test64Bit(ж<testing.T> Ꮡt) {
         new(
             "32-bit little"u8,
             new byte[]{0x30, 0, 0, 0, // comp unit length
-
                 4, 0, // DWARF version 4
-
                 0, 0, 0, 0, // abbrev offset
-
                 8, // address size
-
                 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
@@ -266,15 +266,10 @@ public static void Test64Bit(ж<testing.T> Ꮡt) {
         new(
             "64-bit little"u8,
             new byte[]{0xff, 0xff, 0xff, 0xff, // 64-bit DWARF
-
                 0x30, 0, 0, 0, 0, 0, 0, 0, // comp unit length
-
                 4, 0, // DWARF version 4
-
                 0, 0, 0, 0, 0, 0, 0, 0, // abbrev offset
-
                 8, // address size
-
                 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
@@ -286,15 +281,10 @@ public static void Test64Bit(ж<testing.T> Ꮡt) {
         new(
             "64-bit big"u8,
             new byte[]{0xff, 0xff, 0xff, 0xff, // 64-bit DWARF
-
                 0, 0, 0, 0, 0, 0, 0, 0x30, // comp unit length
-
                 0, 4, // DWARF version 4
-
                 0, 0, 0, 0, 0, 0, 0, 0, // abbrev offset
-
                 8, // address size
-
                 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0,
@@ -304,11 +294,13 @@ public static void Test64Bit(ж<testing.T> Ꮡt) {
             8, binary.BigEndian
         )
     }.slice();
+
     foreach (var (_, test) in tests) {
         var (data, err) = New(default!, default!, default!, test.info, default!, default!, default!, default!);
         if (err != default!) {
             Ꮡt.Errorf("%s: %v"u8, test.name, err);
         }
+
         var r = data.Reader();
         if (r.AddressSize() != test.addrSize) {
             Ꮡt.Errorf("%s: got address size %d, want %d"u8, test.name, r.AddressSize(), test.addrSize);
@@ -366,8 +358,6 @@ public static void TestUnitIteration(ж<testing.T> Ꮡt) {
 }
 
 public static void TestIssue51758(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var abbrev = new byte[]{0x21, 0xff,
         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x5c,
         0x5c, 0x33, 0x37, 0x37, 0x5c, 0x5c, 0x33, 0x37, 0x37, 0x5c, 0x5c,
@@ -469,6 +459,7 @@ public static void TestIssue51758(ж<testing.T> Ꮡt) {
     var frame = new byte[]{}.slice();
     var info = new byte[]{0x5, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x2d, 0x0, 0x5,
         0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x2d, 0x0}.slice();
+
     // The input above is malformed; the goal here it just to make sure
     // that we don't get a panic or other bad behavior while trying to
     // construct a dwarf.Data object from the input.  For good measure,
@@ -496,6 +487,7 @@ public static void TestIssue52045(ж<testing.T> Ꮡt) {
     slice<byte> ranges = default!;
     slice<byte> str = default!;
     var info = new byte[]{0x7, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}.slice();
+
     // A hand-crafted input corresponding to a minimal-size
     // .debug_info (header only, no DIEs) and an empty abbrev table.
     var (data0, _) = New(abbrev, aranges, frame, info, line, pubnames, ranges, str);

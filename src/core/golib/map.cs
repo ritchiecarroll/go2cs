@@ -855,7 +855,7 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
 
         if (capacity == 0)
         {
-            GoMemProfile.ChargeBytes(ref allocation, groupBytes, GoMapLayout.GroupNoScan);
+            GoMemProfile.ChargeBytes(ref allocation, groupBytes, GoMapLayout.GroupNoScan, GoAllocEntry.NewArray);
             return allocation;
         }
 
@@ -867,8 +867,8 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
 
     private static void chargeTable(ref object? allocation, int capacity)
     {
-        GoMemProfile.ChargeBytes(ref allocation, GoMapLayout.TableBytes, noscan: false);
-        GoMemProfile.ChargeBytes(ref allocation, capacity / GoMapLayout.GroupSlots * GoMapLayout.GroupBytes, GoMapLayout.GroupNoScan);
+        GoMemProfile.ChargeBytes(ref allocation, GoMapLayout.TableBytes, noscan: false, GoAllocEntry.NewObject);
+        GoMemProfile.ChargeBytes(ref allocation, capacity / GoMapLayout.GroupSlots * GoMapLayout.GroupBytes, GoMapLayout.GroupNoScan, GoAllocEntry.NewArray);
     }
 
     // make([]*table, entries).
@@ -879,7 +879,7 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
         if (!GoMapLayout.Sized)
             return null;
 
-        GoMemProfile.ChargeBytes(ref allocation, 8L * entries, noscan: false);
+        GoMemProfile.ChargeBytes(ref allocation, 8L * entries, noscan: false, GoAllocEntry.MakeSlice);
         return allocation;
     }
 

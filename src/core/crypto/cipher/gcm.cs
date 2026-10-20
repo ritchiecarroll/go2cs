@@ -33,7 +33,7 @@ private static readonly @string cryptoCipherUseOfGcmWithˢ = "crypto/cipher: use
 // An exception is when the underlying [Block] was created by aes.NewCipher
 // on systems with hardware support for AES. See the [crypto/aes] package documentation for details.
 public static (AEAD, error) NewGCM(Block cipher) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoCipherUseOfGcmWithˢ));
     }
     return newGCM(cipher, gcmStandardNonceSize, gcmTagSize);
@@ -47,7 +47,7 @@ public static (AEAD, error) NewGCM(Block cipher) {
 // cryptosystem that uses non-standard nonce lengths. All other users should use
 // [NewGCM], which is faster and more resistant to misuse.
 public static (AEAD, error) NewGCMWithNonceSize(Block cipher, nint size) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoCipherUseOfGcmWithˢ));
     }
     return newGCM(cipher, size, gcmTagSize);
@@ -62,7 +62,7 @@ public static (AEAD, error) NewGCMWithNonceSize(Block cipher, nint size) {
 // cryptosystem that uses non-standard tag lengths. All other users should use
 // [NewGCM], which is more resistant to misuse.
 public static (AEAD, error) NewGCMWithTagSize(Block cipher, nint tagSize) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoCipherUseOfGcmWithˢ));
     }
     return newGCM(cipher, gcmStandardNonceSize, tagSize);
@@ -74,7 +74,7 @@ private static readonly @string cryptoCipherUseOfGcmWithˢ2 = "crypto/cipher: us
 internal static (AEAD, error) newGCM(Block cipher, nint nonceSize, nint tagSize) {
     var (c, ok) = cipher._<ж<aes.Block>>(ᐧ);
     if (!ok) {
-        if (fips140only.Enabled) {
+        if (fips140only.Enforced()) {
             return (default!, errors.New(cryptoCipherUseOfGcmWithˢ2));
         }
         return newGCMFallback(cipher, nonceSize, tagSize);
@@ -93,7 +93,7 @@ private static readonly @string cipherˢ = "cipher: NewGCMWithRandomNonce requir
 
 // NewGCMWithRandomNonce returns the given cipher wrapped in Galois Counter
 // Mode, with randomly-generated nonces. The cipher must have been created by
-// [aes.NewCipher].
+// [crypto/aes.NewCipher].
 //
 // It generates a random 96-bit nonce, which is prepended to the ciphertext by Seal,
 // and is extracted from the ciphertext by Open. The NonceSize of the AEAD is zero,
@@ -114,7 +114,7 @@ public static (AEAD, error) NewGCMWithRandomNonce(Block cipher) {
 }
 
 partial struct gcmWithRandomNonce {
-    public partial ref ж<crypto.@internal.fips140.aes.gcm_package.GCM> GCM { get; }
+    /*embed*/ public ж<crypto.@internal.fips140.aes.gcm_package.GCM> GCM;
 }
 
 internal static nint NonceSize(this gcmWithRandomNonce g) {
@@ -129,6 +129,7 @@ internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, sli
     if (len(nonce) != 0) {
         throw panic("crypto/cipher: non-empty nonce passed to GCMWithRandomNonce");
     }
+
     var (ret, @out) = sliceForAppend(dst, (nint)gcmStandardNonceSize + len(plaintext) + (nint)gcmTagSize);
     if (alias.InexactOverlap(@out, plaintext)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and input");
@@ -138,6 +139,7 @@ internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, sli
     }
     nonce = @out[..(int)(gcmStandardNonceSize)];
     var ciphertext = @out[(int)(gcmStandardNonceSize)..];
+
     // The AEAD interface allows using plaintext[:0] or ciphertext[:0] as dst.
     //
     // This is kind of a problem when trying to prepend or trim a nonce, because the
@@ -165,6 +167,7 @@ internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, sli
         copy(ciphertext, plaintext);
         plaintext = ciphertext.slice(0, len(plaintext));
     }
+
     gcm.SealWithRandomNonce(g.GCM, nonce, ciphertext, plaintext, additionalData);
     return ret;
 }
@@ -176,6 +179,7 @@ internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte>
     if (len(ciphertext) < (nint)(gcmStandardNonceSize + gcmTagSize)) {
         return (default!, errOpen);
     }
+
     var (ret, @out) = sliceForAppend(dst, len(ciphertext) - (nint)gcmStandardNonceSize - (nint)gcmTagSize);
     if (alias.InexactOverlap(@out, ciphertext)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and input");
@@ -196,6 +200,7 @@ internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte>
         nonce = ciphertext[..(int)(gcmStandardNonceSize)];
         ciphertext = ciphertext[(int)(gcmStandardNonceSize)..];
     }
+
     var (_, err) = g.GCM.Open(@out[..0], nonce, ciphertext, additionalData);
     if (err != default!) {
         return (default!, err);
@@ -260,6 +265,7 @@ internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<
     if ((uint64)len(plaintext) > (uint64)((uint64)((4294967296L) - 2) * (uint64)gcmBlockSize)) {
         throw panic("crypto/cipher: message too large for GCM");
     }
+
     var (ret, @out) = sliceForAppend(dst, len(plaintext) + g.tagSize);
     if (alias.InexactOverlap(@out, plaintext)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and input");
@@ -267,16 +273,20 @@ internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<
     if (alias.AnyOverlap(@out, additionalData)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and additional data");
     }
+
     ref var H = ref heap(new array<byte>(16), out var ᏑH);
     ref var counter = ref heap(new array<byte>(16), out var Ꮡcounter);
     ref var tagMask = ref heap(new array<byte>(16), out var ᏑtagMask);
     g.cipher.Encrypt(H[..], H[..]);
     deriveCounter(ᏑH, Ꮡcounter, nonce);
     gcmCounterCryptGeneric(g.cipher, tagMask[..], tagMask[..], Ꮡcounter);
+
     gcmCounterCryptGeneric(g.cipher, @out, plaintext, Ꮡcounter);
+
     array<byte> tag = new(16); /* gcmTagSize */
     gcmAuth(tag[..], ᏑH, ᏑtagMask, @out.slice(0, len(plaintext)), additionalData);
     copy(@out.slice(len(plaintext)), tag[..]);
+
     return ret;
 }
 
@@ -289,12 +299,14 @@ internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> ds
     if (g.tagSize < gcmMinimumTagSize) {
         throw panic("crypto/cipher: incorrect GCM tag size");
     }
+
     if (len(ciphertext) < g.tagSize) {
         return (default!, errOpen);
     }
     if ((uint64)len(ciphertext) > (uint64)((uint64)((4294967296L) - 2) * (uint64)gcmBlockSize) + (uint64)g.tagSize) {
         return (default!, errOpen);
     }
+
     var (ret, @out) = sliceForAppend(dst, len(ciphertext) - g.tagSize);
     if (alias.InexactOverlap(@out, ciphertext)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and input");
@@ -302,14 +314,17 @@ internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> ds
     if (alias.AnyOverlap(@out, additionalData)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and additional data");
     }
+
     ref var H = ref heap(new array<byte>(16), out var ᏑH);
     ref var counter = ref heap(new array<byte>(16), out var Ꮡcounter);
     ref var tagMask = ref heap(new array<byte>(16), out var ᏑtagMask);
     g.cipher.Encrypt(H[..], H[..]);
     deriveCounter(ᏑH, Ꮡcounter, nonce);
     gcmCounterCryptGeneric(g.cipher, tagMask[..], tagMask[..], Ꮡcounter);
+
     var tag = ciphertext.slice(len(ciphertext) - g.tagSize);
     ciphertext = ciphertext.slice(0, len(ciphertext) - g.tagSize);
+
     array<byte> expectedTag = new(16); /* gcmTagSize */
     gcmAuth(expectedTag[..], ᏑH, ᏑtagMask, ciphertext, additionalData);
     if (subtle.ConstantTimeCompare(expectedTag.slice(0, g.tagSize), tag) != 1) {
@@ -320,7 +335,9 @@ internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> ds
         clear(@out);
         return (default!, errOpen);
     }
+
     gcmCounterCryptGeneric(g.cipher, @out, ciphertext, Ꮡcounter);
+
     return (ret, default!);
 }
 
@@ -345,6 +362,7 @@ internal static void gcmCounterCryptGeneric(Block b, slice<byte> @out, slice<byt
     while (len(src) >= gcmBlockSize) {
         b.Encrypt(mask[..], counter[..]);
         gcmInc32(Ꮡcounter);
+
         subtle.XORBytes(@out, src, mask[..]);
         @out = @out[(int)(gcmBlockSize)..];
         src = src[(int)(gcmBlockSize)..];

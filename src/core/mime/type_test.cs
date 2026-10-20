@@ -46,6 +46,7 @@ public static void TestTypeByExtension(ж<testing.T> Ꮡt) {
     // there, which empirically it always has, for all versions of
     // Windows.
     var typeTests = initMimeForTests();
+
     foreach (var (ext, want) in typeTests) {
         @string val = TypeByExtension(ext);
         if (val != want) {
@@ -65,8 +66,6 @@ internal static readonly @string xBarCapital1ˢ = "x/bar; capital=1"u8;
 public static void TestTypeByExtension_LocalData(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var cleanup = setMimeInit(() => {
             clearMimeTypes();
             setType(fooˢ2, xFooˢ);
@@ -75,14 +74,15 @@ public static void TestTypeByExtension_LocalData(ж<testing.T> Ꮡt) {
         });
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         var tests = new map<@string, @string>{
             [".foo"u8] = "x/foo"u8,
             [".bar"u8] = "x/bar"u8,
             [".Bar"u8] = "x/bar; capital=1"u8,
             [".sdlkfjskdlfj"u8] = ""u8,
-            [".t1"u8] = ""u8
+            [".t1"u8] = ""u8 // testdata shouldn't be used
         };
-        // testdata shouldn't be used
+
         foreach (var (ext, want) in tests) {
             @string val = TypeByExtension(ext);
             if (val != want) {
@@ -110,6 +110,7 @@ public static void TestTypeByExtensionCase(ж<testing.T> Ꮡt) {
     try {
         @string custom = customᶜ;
         @string caps = capsᶜ;
+
         var cleanup = setMimeInit(() => {
             clearMimeTypes();
             setType(testˢ, caps);
@@ -117,6 +118,7 @@ public static void TestTypeByExtensionCase(ж<testing.T> Ꮡt) {
         });
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         // case-sensitive lookup
         {
             @string got = TypeByExtension(tesTˢ); if (got != custom) {
@@ -128,6 +130,7 @@ public static void TestTypeByExtensionCase(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("for .TEST, got %q; want %s"u8, got, caps);
             }
         }
+
         // case-insensitive
         {
             @string got = TypeByExtension(tesTˢ2); if (got != custom) {
@@ -165,13 +168,14 @@ public static void TestExtensionsByType(ж<testing.T> Ꮡt) {
         });
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         var tests = new TestExtensionsByType_tests[]{
             new(typ: "image/gif"u8, want: new @string[]{".gif"u8}.slice()),
             new(typ: "image/png"u8, want: new @string[]{".png"u8}.slice()), // lowercase
-
             new(typ: "foo/letter"u8, want: new @string[]{".a"u8, ".b"u8}.slice()),
             new(typ: "x/unknown"u8, want: default!)
         }.slice();
+
         foreach (var (_, tt) in tests) {
             var (got, err) = ExtensionsByType(tt.typ);
             if (err != default! && tt.wantErr != ""u8 && strings.Contains(err.Error(), tt.wantErr)) {
@@ -217,6 +221,7 @@ public static void BenchmarkTypeByExtension(ж<testing.B> Ꮡb) {
 
     initMime();
     b.ResetTimer();
+
     foreach (var (_, ext) in new @string[]{
         ".html"u8,
         ".HTML"u8,
@@ -237,6 +242,7 @@ public static void BenchmarkExtensionsByType(ж<testing.B> Ꮡb) {
 
     initMime();
     b.ResetTimer();
+
     foreach (var (_, typ) in new @string[]{
         "text/html"u8,
         "text/html; charset=utf-8"u8,
@@ -271,9 +277,11 @@ public static void TestExtensionsByType2(ж<testing.T> Ꮡt) {
         });
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         var tests = new TestExtensionsByType2_tests[]{
             new(typ: "image/jpeg"u8, want: new @string[]{".jpeg"u8, ".jpg"u8}.slice())
         }.slice();
+
         foreach (var (_, tt) in tests) {
             var (got, err) = ExtensionsByType(tt.typ);
             if (err != default!) {

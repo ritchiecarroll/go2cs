@@ -19,12 +19,13 @@ partial class httptest_internal_test_package {
 
 // type newServerFunc is a methodless func type — rendered inline as its base delegate
 
-// The manual variants of newServer create a Server manually by only filling
-// in the exported fields of Server.
 internal static map<@string, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>>> newServers;
 internal static void initᴛnewServers() { newServers = new map<@string, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>>>{
     ["NewServer"u8] = NewServer,
     ["NewTLSServer"u8] = NewTLSServer,
+
+    // The manual variants of newServer create a Server manually by only filling
+    // in the exported fields of Server.
     ["NewServerManual"u8] = (httpꓸHandler h) => {
         var ts = Ꮡ(new Server(Listener: newLocalListener(), Config: Ꮡ(new http.Server(Handler: h))));
         ts.Start();
@@ -102,7 +103,7 @@ internal static void testServer(ж<testing.T> Ꮡt, Func<httpꓸHandler, ж<glob
             Ꮡt.Fatal(err);
         }
         if (((sstring)got) != "hello"u8) {
-            Ꮡt.Errorf("got %q, want hello"u8, ((@string)got));
+            Ꮡt.Errorf("got %q, want hello"u8, (@string)got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -114,6 +115,7 @@ internal static void testGetAfterClose(ж<testing.T> Ꮡt, Func<httpꓸHandler, 
     var ts = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
         w.Write(slice<byte>("hello"u8));
     })));
+
     var (res, err) = http.Get((~ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -124,9 +126,11 @@ internal static void testGetAfterClose(ж<testing.T> Ꮡt, Func<httpꓸHandler, 
         Ꮡt.Fatal(err);
     }
     if (((sstring)got) != "hello"u8) {
-        Ꮡt.Fatalf("got %q, want hello"u8, ((@string)got));
+        Ꮡt.Fatalf("got %q, want hello"u8, (@string)got);
     }
+
     ts.Close();
+
     (res, err) = http.Get((~ts).URL);
     if (err == default!) {
         var (body, _) = io.ReadAll((~res).Body);
@@ -137,8 +141,6 @@ internal static void testGetAfterClose(ж<testing.T> Ꮡt, Func<httpꓸHandler, 
 internal static void testServerCloseBlocking(ж<testing.T> Ꮡt, Func<httpꓸHandler, ж<global::go.net.http.httptest_package.Server>> newServer) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var ts = newServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>("hello"u8));
         })));
@@ -150,10 +152,12 @@ internal static void testServerCloseBlocking(ж<testing.T> Ꮡt, Func<httpꓸHan
             }
             return c;
         }
+
         // Keep one connection in StateNew (connected, but not sending anything)
         var cnew = dial();
         var cnewʗ1 = cnew;
         defer(() => cnewʗ1.Close(), ref ᒐ);
+
         // Keep one connection in StateIdle (idle after a request)
         var cidle = dial();
         var cidleʗ1 = cidle;
@@ -163,6 +167,7 @@ internal static void testServerCloseBlocking(ж<testing.T> Ꮡt, Func<httpꓸHan
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         ts.Close(); // test we don't hang here forever.
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -209,7 +214,7 @@ internal static void testServerClient(ж<testing.T> Ꮡt, Func<httpꓸHandler, �
             Ꮡt.Fatal(err);
         }
         if (((sstring)got) != "hello"u8) {
-            Ꮡt.Errorf("got %q, want hello"u8, ((@string)got));
+            Ꮡt.Errorf("got %q, want hello"u8, (@string)got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -267,12 +272,11 @@ internal static error Close(this onlyCloseListener _) {
 // Issue 19729: panic in Server.Close for values created directly
 // without a constructor (so the unexported client field is nil).
 public static void TestServerZeroValueClose(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var ts = Ꮡ(new Server(
         Listener: new onlyCloseListener(nil),
         Config: Ꮡ(new http.Server(nil))
     ));
+
     ts.Close(); // tests that it doesn't panic
 }
 
@@ -301,6 +305,7 @@ public static partial void TestCloseHijackedConnection(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     })));
+
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(1);
     var tsʗ1 = ts;
@@ -324,6 +329,7 @@ public static partial void TestCloseHijackedConnection(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     Ꮡwg.Add(1);
     var conn = ᐸꟷ(hijacked);
     var tsʗ2 = ts;
@@ -339,6 +345,7 @@ public static partial void TestCloseHijackedConnection(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }, conn);
+
     Ꮡwg.Add(1);
     var tsʗ3 = ts;
     goǃ(() => {
@@ -366,6 +373,7 @@ public static void TestTLSServerWithHTTP2(ж<testing.T> Ꮡt) {
         new("http1"u8, "HTTP/1.1"u8),
         new("http2"u8, "HTTP/2.0"u8)
     }.slice();
+
     foreach (var (_, vᴛ1) in modes) {
         ref var tt = ref heap(new TestTLSServerWithHTTP2_modes(), out var Ꮡtt);
         tt = vᴛ1;
@@ -377,6 +385,7 @@ public static void TestTLSServerWithHTTP2(ж<testing.T> Ꮡt) {
                 var cst = NewUnstartedServer(new httptest_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
                     w.Header().Set(xProtoˢ, (~r).Proto);
                 })));
+
                 var exprᴛ1 = ttʗ1.name;
                 if (exprᴛ1 == "http2"u8) {
                     cst.Value.EnableHTTP2 = true;
@@ -388,6 +397,7 @@ public static void TestTLSServerWithHTTP2(ж<testing.T> Ꮡt) {
 
                 var cstʗ1 = cst;
                 defer(cstʗ1.Close, ref ᒐ);
+
                 var (res, err) = cst.Client().Get((~cst).URL);
                 if (err != default!) {
                     tΔ1.Fatalf("Failed to make request: %v"u8, err);

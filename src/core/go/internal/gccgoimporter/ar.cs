@@ -18,38 +18,23 @@ partial class gccgoimporter_package {
 
 // Magic strings for different archive file formats.
 internal static readonly @string armag = "!<arch>\n"u8;
-
 internal static readonly @string armagt = "!<thin>\n"u8;
-
 internal static readonly @string armagb = "<bigaf>\n"u8;
 
 // Offsets and sizes for fields in a standard archive header.
 internal static UntypedInt arNameOff => 0;
-
 internal static UntypedInt arNameSize => 16;
-
 internal static UntypedInt arDateOff => /* arNameOff + arNameSize */ 16;
-
 internal static UntypedInt arDateSize => 12;
-
 internal static UntypedInt arUIDOff => /* arDateOff + arDateSize */ 28;
-
 internal static UntypedInt arUIDSize => 6;
-
 internal static UntypedInt arGIDOff => /* arUIDOff + arUIDSize */ 34;
-
 internal static UntypedInt arGIDSize => 6;
-
 internal static UntypedInt arModeOff => /* arGIDOff + arGIDSize */ 40;
-
 internal static UntypedInt arModeSize => 8;
-
 internal static UntypedInt arSizeOff => /* arModeOff + arModeSize */ 48;
-
 internal static UntypedInt arSizeSize => 10;
-
 internal static UntypedInt arFmagOff => /* arSizeOff + arSizeSize */ 58;
-
 internal static UntypedInt arFmagSize => 2;
 
 internal static UntypedInt arHdrSize => /* arFmagOff + arFmagSize */ 60;
@@ -71,12 +56,14 @@ internal static (io.ReadSeeker, error) arExportData(io.ReadSeeker archive) {
             return (default!, err);
         }
     }
+
     array<byte> buf = new(8); /* len(armag) */
     {
         var (_, err) = archive.Read(buf[..]); if (err != default!) {
             return (default!, err);
         }
     }
+
     var exprᴛ1 = ((sstring)(buf[..]));
     if (exprᴛ1 == armag) {
         return standardArExportData(archive);
@@ -90,7 +77,6 @@ internal static (io.ReadSeeker, error) arExportData(io.ReadSeeker archive) {
     { /* default: */
         return (default!, fmt.Errorf("unrecognized archive file format %q"u8, buf[..]));
     }
-
 }
 
 // standardArExportData returns export data from a standard archive.
@@ -104,25 +90,29 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
             }
         }
         off += arHdrSize;
+
         if (!bytes.Equal(hdrBuf[(int)(arFmagOff)..(int)(arFmagOff + arFmagSize)], slice<byte>(arfmag))) {
             return (default!, fmt.Errorf("archive header format header (%q)"u8, hdrBuf[..]));
         }
-        var (size, err) = strconv.ParseInt(strings.TrimSpace(((@string)(hdrBuf[(int)(arSizeOff)..(int)(arSizeOff + arSizeSize)]))), 10, 64);
+
+        var (size, err) = strconv.ParseInt(strings.TrimSpace((@string)(hdrBuf[(int)(arSizeOff)..(int)(arSizeOff + arSizeSize)])), 10, 64);
         if (err != default!) {
             return (default!, fmt.Errorf("error parsing size in archive header (%q): %v"u8, hdrBuf[..], err));
         }
+
         var fn = hdrBuf[(int)(arNameOff)..(int)(arNameOff + arNameSize)];
         if (fn[0] == (rune)'/' && (fn[1] == (rune)' ' || fn[1] == (rune)'/' || ((sstring)(fn[..8])) == "/SYM64/ "u8)){
-        } else {
             // Archive symbol table or extended name table,
             // which we don't care about.
+        } else {
             var archiveAt = readerAtFromSeeker(archive);
             var (ret, errΔ1) = elfFromAr(io.NewSectionReader(archiveAt, off, size));
             if (ret != default! || errΔ1 != default!) {
                 return (ret, errΔ1);
             }
         }
-        if ((int64)(size & 1) != 0) {
+
+        if ((size & 1) != 0) {
             size++;
         }
         off += size;
@@ -158,6 +148,7 @@ internal static (io.ReadSeeker, error) aixBigArExportData(io.ReadSeeker archive)
     if (err != default!) {
         return (default!, err);
     }
+
     foreach (var (_, mem) in (~arch).Members) {
         var (f, errΔ1) = arch.GetFile((~mem).Name);
         if (errΔ1 != default!) {
@@ -168,6 +159,7 @@ internal static (io.ReadSeeker, error) aixBigArExportData(io.ReadSeeker archive)
             return (new bytes_ReaderжReadSeeker(bytes.NewReader(sdat)), default!);
         }
     }
+
     return (default!, fmt.Errorf(".go_export not found in this archive"u8));
 }
 

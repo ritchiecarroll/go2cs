@@ -29,9 +29,9 @@ partial class cipher_test_package {
 
 internal static slice<byte> commonCounter = new byte[]{0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff}.slice();
 
-// NIST SP 800-38A pp 55-58
 internal static slice<cbcAESTestsᴛ1> ctrAESTests;
 internal static void initᴛctrAESTests() { ctrAESTests = new cbcAESTestsᴛ1[]{
+    // NIST SP 800-38A pp 55-58
     new(
         "CTR-AES128"u8,
         commonKey128,
@@ -77,11 +77,13 @@ public static void TestCTR_AES(ж<testing.T> Ꮡt) {
 internal static void testCTR_AES(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in ctrAESTests) {
         @string test = tt.name;
+
         var (c, err) = aes.NewCipher(tt.key);
         if (err != default!) {
             Ꮡt.Errorf("%s: NewCipher(%d bytes) = %s"u8, test, len(tt.key), err);
             continue;
         }
+
         for (nint j = 0; j <= 5; j += 5) {
             var @in = tt.@in.slice(0, len(tt.@in) - j);
             var ctr = cipher.NewCTR(c, tt.iv);
@@ -93,6 +95,7 @@ internal static void testCTR_AES(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         for (nint j = 0; j <= 7; j += 7) {
             var @in = tt.@out.slice(0, len(tt.@out) - j);
             var ctr = cipher.NewCTR(c, tt.iv);
@@ -104,6 +107,7 @@ internal static void testCTR_AES(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         if (Ꮡt.Failed()) {
             break;
         }
@@ -146,6 +150,7 @@ public static void TestCTR_AES_multiblock_random_IV(ж<testing.T> Ꮡt) {
     var r = rand.New(rand.NewSource(54321));
     var iv = randBytes(Ꮡt, r, aesBlockSize);
     const nint Size = 100;
+
     foreach (var (_, keySize) in new nint[]{16, 24, 32}.slice()) {
         nint keySizeΔ1 = keySize;
         var ivʗ1 = iv;
@@ -157,12 +162,16 @@ public static void TestCTR_AES_multiblock_random_IV(ж<testing.T> Ꮡt) {
                 tΔ1.Fatal(err);
             }
             var (genericCtr, _) = makeTestingCiphers(aesBlock, ivʗ1);
+
             var plaintext = randBytes(tΔ1, rʗ1, Size);
+
             // Generate reference ciphertext.
             var genericCiphertext = new slice<byte>(len(plaintext));
             genericCtr.XORKeyStream(genericCiphertext, plaintext);
+
             // Split the text in 3 parts in all possible ways and encrypt them
             // individually using multiblock implementation to catch edge cases.
+
             for (nint part1 = 0; part1 <= Size; part1++) {
                 nint part1Δ1 = part1;
                 var aesBlockʗ1 = aesBlock;
@@ -217,8 +226,10 @@ private static readonly @string ffFfFfFfFfFfFfFeˢ2 = "00 00 00 00 00 00 00 01  
 // This test runs checks on edge cases (IV overflows).
 public static void TestCTR_AES_multiblock_overflow_IV(ж<testing.T> Ꮡt) {
     var r = rand.New(rand.NewSource(987654));
+
     const nint Size = 4096;
     var plaintext = randBytes(Ꮡt, r, Size);
+
     var ivs = new slice<byte>[]{
         parseHex(ffFfFfFfFfFfFfFfˢ),
         parseHex(ffFfFfFfFfFfFfFfFfFfFfFfˢ),
@@ -231,6 +242,7 @@ public static void TestCTR_AES_multiblock_overflow_IV(ж<testing.T> Ꮡt) {
         parseHex(ffFfFfFfFfFfFfFeˢ2),
         parseHex(ffFfFfFfFfFfFf00ˢ)
     }.slice();
+
     foreach (var (_, keySize) in new nint[]{16, 24, 32}.slice()) {
         nint keySizeΔ1 = keySize;
         var ivsʗ1 = ivs;
@@ -243,6 +255,7 @@ public static void TestCTR_AES_multiblock_overflow_IV(ж<testing.T> Ꮡt) {
                 if (err != default!) {
                     tΔ1.Fatal(err);
                 }
+
                 var aesBlockʗ1 = aesBlock;
                 var ivʗ1 = iv;
                 var plaintextʗ2 = plaintextʗ1;
@@ -254,9 +267,11 @@ public static void TestCTR_AES_multiblock_overflow_IV(ж<testing.T> Ꮡt) {
                         var plaintextʗ3 = plaintextʗ2;
                         tΔ2.Run(fmt.Sprintf("offset=%d"u8, offsetΔ1), (ж<testing.T> tΔ3) => {
                             var (genericCtr, multiblockCtr) = makeTestingCiphers(aesBlockʗ2, ivʗ2);
+
                             // Generate reference ciphertext.
                             var genericCiphertext = new slice<byte>(Size);
                             genericCtr.XORKeyStream(genericCiphertext, plaintextʗ3);
+
                             var multiblockCiphertext = new slice<byte>(Size);
                             multiblockCtr.XORKeyStream(multiblockCiphertext, plaintextʗ3.slice(0, offsetΔ1));
                             multiblockCtr.XORKeyStream(multiblockCiphertext.slice(offsetΔ1), plaintextʗ3.slice(offsetΔ1));
@@ -279,9 +294,11 @@ public static void TestCTR_AES_multiblock_XORKeyStreamAt(ж<testing.T> Ꮡt) {
     if (boring.Enabled) {
         Ꮡt.Skip(xorKeyStreamAtIsNotˢ);
     }
+
     var r = rand.New(rand.NewSource(12345));
     const nint Size = /* 32 * 1024 * 1024 */ 33554432;
     var plaintext = randBytes(Ꮡt, r, Size);
+
     foreach (var (_, keySize) in new nint[]{16, 24, 32}.slice()) {
         nint keySizeΔ1 = keySize;
         var plaintextʗ1 = plaintext;
@@ -289,15 +306,18 @@ public static void TestCTR_AES_multiblock_XORKeyStreamAt(ж<testing.T> Ꮡt) {
         Ꮡt.Run(fmt.Sprintf("keySize=%d"u8, keySizeΔ1), (ж<testing.T> tΔ1) => {
             var key = randBytes(tΔ1, rʗ1, keySizeΔ1);
             var iv = randBytes(tΔ1, rʗ1, aesBlockSize);
+
             var (aesBlock, err) = aes.NewCipher(key);
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
             var (genericCtr, _) = makeTestingCiphers(aesBlock, iv);
             var ctrAt = fipsaes.NewCTR(aesBlock._<ж<fipsaes.Block>>(), iv);
+
             // Generate reference ciphertext.
             var genericCiphertext = new slice<byte>(Size);
             genericCtr.XORKeyStream(genericCiphertext, plaintextʗ1);
+
             var multiblockCiphertext = new slice<byte>(Size);
             // Split the range to random slices.
             UntypedInt N = 1000;
@@ -305,9 +325,10 @@ public static void TestCTR_AES_multiblock_XORKeyStreamAt(ж<testing.T> Ꮡt) {
             for (nint i = 0; i < N; i++) {
                 boundaries = append(boundaries, rʗ1.Intn(Size));
             }
-            boundaries = append(boundaries, (nint)(0));
+            boundaries = append(boundaries, (nint)0);
             boundaries = append(boundaries, Size);
             sort.Ints(boundaries);
+
             foreach (var (_, i) in rʗ1.Perm(N + 1)) {
                 nint begin = boundaries[i];
                 nint end = boundaries[i + 1];
@@ -316,6 +337,7 @@ public static void TestCTR_AES_multiblock_XORKeyStreamAt(ж<testing.T> Ꮡt) {
                     plaintextʗ1.slice(begin, end),
                     (uint64)begin);
             }
+
             if (!bytes.Equal(genericCiphertext, multiblockCiphertext)) {
                 tΔ1.Fatal(multiblockCtrSOutputDoesˢ);
             }

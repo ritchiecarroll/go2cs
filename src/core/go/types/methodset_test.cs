@@ -23,62 +23,72 @@ internal partial struct TestNewMethodSet_method /*dyn*/ {
 }
 
 public static void TestNewMethodSet(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Tests are expressed src -> methods, for simplifying the composite literal.
     // Should be kept in sync with TestLookupFieldOrMethod.
-    var tests = new map<@string, slice<TestNewMethodSet_method>>{ // Named types
-
+    var tests = new map<@string, slice<TestNewMethodSet_method>>{
+        // Named types
         ["var a T; type T struct{}; func (T) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), false)}.slice(),
         ["var a *T; type T struct{}; func (T) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
         ["var a T; type T struct{}; func (*T) f() {}"u8] = new TestNewMethodSet_method[]{}.slice(),
-        ["var a *T; type T struct{}; func (*T) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(), // Generic named types
+        ["var a *T; type T struct{}; func (*T) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
 
+        // Generic named types
         ["var a T[int]; type T[P any] struct{}; func (T[P]) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), false)}.slice(),
         ["var a *T[int]; type T[P any] struct{}; func (T[P]) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
         ["var a T[int]; type T[P any] struct{}; func (*T[P]) f() {}"u8] = new TestNewMethodSet_method[]{}.slice(),
-        ["var a *T[int]; type T[P any] struct{}; func (*T[P]) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(), // Interfaces
+        ["var a *T[int]; type T[P any] struct{}; func (*T[P]) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
 
+        // Interfaces
         ["var a T; type T interface{ f() }"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
         ["var a T1; type ( T1 T2; T2 interface{ f() } )"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
-        ["var a T1; type ( T1 interface{ T2 }; T2 interface{ f() } )"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(), // Generic interfaces
+        ["var a T1; type ( T1 interface{ T2 }; T2 interface{ f() } )"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
 
+        // Generic interfaces
         ["var a T[int]; type T[P any] interface{ f() }"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
         ["var a T1[int]; type ( T1[P any] T2[P]; T2[P any] interface{ f() } )"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
-        ["var a T1[int]; type ( T1[P any] interface{ T2[P] }; T2[P any] interface{ f() } )"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(), // Embedding
+        ["var a T1[int]; type ( T1[P any] interface{ T2[P] }; T2[P any] interface{ f() } )"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
 
+        // Embedding
         ["var a struct{ E }; type E interface{ f() }"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(),
         ["var a *struct{ E }; type E interface{ f() }"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(),
         ["var a struct{ E }; type E struct{}; func (E) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), false)}.slice(),
         ["var a struct{ *E }; type E struct{}; func (E) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(),
         ["var a struct{ E }; type E struct{}; func (*E) f() {}"u8] = new TestNewMethodSet_method[]{}.slice(),
-        ["var a struct{ *E }; type E struct{}; func (*E) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(), // Embedding of generic types
+        ["var a struct{ *E }; type E struct{}; func (*E) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(),
 
+        // Embedding of generic types
         ["var a struct{ E[int] }; type E[P any] interface{ f() }"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(),
         ["var a *struct{ E[int] }; type E[P any] interface{ f() }"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(),
         ["var a struct{ E[int] }; type E[P any] struct{}; func (E[P]) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), false)}.slice(),
         ["var a struct{ *E[int] }; type E[P any] struct{}; func (E[P]) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(),
         ["var a struct{ E[int] }; type E[P any] struct{}; func (*E[P]) f() {}"u8] = new TestNewMethodSet_method[]{}.slice(),
-        ["var a struct{ *E[int] }; type E[P any] struct{}; func (*E[P]) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(), // collisions
+        ["var a struct{ *E[int] }; type E[P any] struct{}; func (*E[P]) f() {}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0, 0}.slice(), true)}.slice(),
 
+        // collisions
         ["var a struct{ E1; *E2 }; type ( E1 interface{ f() }; E2 struct{ f int })"u8] = new TestNewMethodSet_method[]{}.slice(),
-        ["var a struct{ E1; *E2 }; type ( E1 struct{ f int }; E2 struct{} ); func (E2) f() {}"u8] = new TestNewMethodSet_method[]{}.slice(), // recursive generic types; see go.dev/issue/52715
+        ["var a struct{ E1; *E2 }; type ( E1 struct{ f int }; E2 struct{} ); func (E2) f() {}"u8] = new TestNewMethodSet_method[]{}.slice(),
 
+        // recursive generic types; see go.dev/issue/52715
         ["var a T[int]; type ( T[P any] struct { *N[P] }; N[P any] struct { *T[P] } ); func (N[P]) m() {}"u8] = new TestNewMethodSet_method[]{new("m"u8, new nint[]{0, 0}.slice(), true)}.slice(),
         ["var a T[int]; type ( T[P any] struct { *N[P] }; N[P any] struct { *T[P] } ); func (T[P]) m() {}"u8] = new TestNewMethodSet_method[]{new("m"u8, new nint[]{0}.slice(), false)}.slice()
     };
-    var tParamTests = new map<@string, slice<TestNewMethodSet_method>>{ // By convention, look up a in the scope of "g"
 
+    var tParamTests = new map<@string, slice<TestNewMethodSet_method>>{
+        // By convention, look up a in the scope of "g"
         ["type C interface{ f() }; func g[T C](a T){}"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice(),
         ["type C interface{ f() }; func g[T C]() { var a T; _ = a }"u8] = new TestNewMethodSet_method[]{new("f"u8, new nint[]{0}.slice(), true)}.slice()
+
+        // go.dev/issue/43621: We don't allow this anymore. Keep this code in case we
+        // decide to revisit this decision.
+        // "type C interface{ f() }; func g[T C]() { var a struct{T}; _ = a }": {{"f", []int{0, 0}, true}},
+
+        // go.dev/issue/45639: We also don't allow this anymore.
+        // "type C interface{ f() }; func g[T C]() { type Y T; var a Y; _ = a }": {},
     };
-    // go.dev/issue/43621: We don't allow this anymore. Keep this code in case we
-    // decide to revisit this decision.
-    // "type C interface{ f() }; func g[T C]() { var a struct{T}; _ = a }": {{"f", []int{0, 0}, true}},
-    // go.dev/issue/45639: We also don't allow this anymore.
-    // "type C interface{ f() }; func g[T C]() { type Y T; var a Y; _ = a }": {},
+
     void check(@string src, slice<TestNewMethodSet_method> methods, bool generic) {
         var pkg = mustTypecheck("package p;"u8 + src, nil, nil);
+
         var scope = pkg.Scope();
         if (generic) {
             var fn = pkg.Scope().Lookup("g"u8)._<ж<types.Func>>();
@@ -89,6 +99,7 @@ public static void TestNewMethodSet(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: incorrect test case - no object a"u8, src);
             return;
         }
+
         var ms = NewMethodSet(obj.Type());
         {
             nint got = ms.Len();
@@ -117,9 +128,11 @@ public static void TestNewMethodSet(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     foreach (var (src, methods) in tests) {
         check(src, methods, false);
     }
+
     foreach (var (src, methods) in tParamTests) {
         check(src, methods, true);
     }
@@ -143,11 +156,12 @@ type Node[T any] struct {
 
 type Instance = *Tree[int]
 
-"""u8;
+"""u8.Raw();
 
 // Test for go.dev/issue/52715
 public static void TestNewMethodSet_RecursiveGeneric(ж<testing.T> Ꮡt) {
     @string src = srcᶜ30;
+
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, fooGoˢ, src, 0);
     if (err != default!) {
@@ -159,6 +173,7 @@ public static void TestNewMethodSet_RecursiveGeneric(ж<testing.T> Ꮡt) {
             throw panic(errΔ1);
         }
     }
+
     var T = pkg.Scope().Lookup(instanceˢ).Type();
     _ = NewMethodSet(T); // verify that NewMethodSet terminates
 }
@@ -174,20 +189,23 @@ package p
 type T *int
 func (T) m() {} // expected error: invalid receiver type
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue60634(ж<testing.T> Ꮡt) {
     @string src = srcᶜ31;
+
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, pGoˢ, src, 0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     (var pkg, err) = Ꮡconf.Check("p"u8, fset, new ж<ast.File>[]{f}.slice(), nil);
     if (err == default! || !strings.Contains(err.Error(), invalidReceiverTypeˢ)) {
         Ꮡt.Fatalf("missing or unexpected error: %v"u8, err);
     }
+
     // look up T.m and (*T).m
     var T = pkg.Scope().Lookup("T"u8).Type();
     @string name = "m"u8;

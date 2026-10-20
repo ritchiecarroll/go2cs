@@ -39,6 +39,7 @@ import (
 // TestLocalValueIfaceCallConversion pins the records a call-syntax conversion of a LOCAL named
 // value source must write, and pins that writing them does not move the emitted expression.
 func TestLocalValueIfaceCallConversion(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

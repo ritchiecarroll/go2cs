@@ -65,8 +65,7 @@ partial class http_test_package {
 
 // TODO: test 5 pipelined requests with responses: 1) OK, 2) OK, Connection: Close
 // and then verify that the final 2 responses get errors back.
-// Include the address of the net.Conn in addition to the RemoteAddr,
-// in case kernels reuse source ports quickly (see Issue 52450)
+
 // hostPortHandler writes back the client's "host:port".
 internal static Δhttp.HandlerFunc hostPortHandler = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     if (r.FormValue("close"u8) == "true"u8) {
@@ -74,6 +73,9 @@ internal static Δhttp.HandlerFunc hostPortHandler = new Δhttp.HandlerFunc((Δh
     }
     w.Header().Set("X-Saw-Close"u8, fmt.Sprint((~r).Close));
     w.Write(slice<byte>((~r).RemoteAddr));
+
+    // Include the address of the net.Conn in addition to the RemoteAddr,
+    // in case kernels reuse source ports quickly (see Issue 52450)
     {
         var (c, ok) = http_internal_test_package.ResponseWriterConnForTesting(w); if (ok) {
             fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), ", %T %p"u8, c, c);
@@ -216,6 +218,7 @@ internal static void testReuseRequest(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Write(slice<byte>("{}"u8));
     }))).Value.ts;
+
     var c = ts.Client();
     var (req, _) = NewRequest(getˢ2, (~ts).URL, default!);
     var (res, err) = c.Do(req);
@@ -226,6 +229,7 @@ internal static void testReuseRequest(ж<testing.T> Ꮡt, testMode mode) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (res, err) = c.Do(req);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -244,6 +248,7 @@ public static void TestTransportKeepAlives(ж<testing.T> Ꮡt) {
 
 internal static void testTransportKeepAlives(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(hostPortHandler)).Value.ts;
+
     var c = ts.Client();
     foreach (var (_, disableKeepAlive) in new bool[]{false, true}.slice()) {
         (~c).Transport._<ж<Δhttp.Transport>>().Value.DisableKeepAlives = disableKeepAlive;
@@ -258,10 +263,12 @@ internal static void testTransportKeepAlives(ж<testing.T> Ꮡt, testMode mode) 
             if (err != default!) {
                 Ꮡt.Fatalf("error in disableKeepAlive=%v, req #%d, ReadAll: %v"u8, disableKeepAlive, n, err);
             }
-            return ((@string)body);
+            return (@string)body;
         }
+
         @string body1 = fetch(1);
         @string body2 = fetch(2);
+
         var bodiesDiffer = body1 != body2;
         if (bodiesDiffer != disableKeepAlive) {
             Ꮡt.Errorf("error in disableKeepAlive=%v. unexpected bodiesDiffer=%v; body1=%q; body2=%q"u8,
@@ -276,10 +283,13 @@ public static void TestTransportConnectionCloseOnResponse(ж<testing.T> Ꮡt) {
 
 internal static void testTransportConnectionCloseOnResponse(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(hostPortHandler)).Value.ts;
+
     var (connSet, testDial) = makeTestDial(Ꮡt);
+
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
     tr.Value.Dial = testDial;
+
     foreach (var (_, connectionClose) in new bool[]{false, true}.slice()) {
         var cʗ1 = c;
         var tsʗ1 = ts;
@@ -296,6 +306,7 @@ internal static void testTransportConnectionCloseOnResponse(ж<testing.T> Ꮡt, 
                 req.Value.Proto = http11ˢ;
                 req.Value.ProtoMajor = 1;
                 req.Value.ProtoMinor = 1;
+
                 (var res, err) = cʗ1.Do(req);
                 if (err != default!) {
                     Ꮡt.Fatalf("error in connectionClose=%v, req #%d, Do: %v"u8, connectionClose, n, err);
@@ -306,11 +317,12 @@ internal static void testTransportConnectionCloseOnResponse(ж<testing.T> Ꮡt, 
                 if (err != default!) {
                     Ꮡt.Fatalf("error in connectionClose=%v, req #%d, ReadAll: %v"u8, connectionClose, n, err);
                 }
-                return ((@string)body);
+                return (@string)body;
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
             finally { ᒐ.Run(); }
         }
+
         @string body1 = fetch(1);
         @string body2 = fetch(2);
         var bodiesDiffer = body1 != body2;
@@ -318,8 +330,10 @@ internal static void testTransportConnectionCloseOnResponse(ж<testing.T> Ꮡt, 
             Ꮡt.Errorf("error in connectionClose=%v. unexpected bodiesDiffer=%v; body1=%q; body2=%q"u8,
                 connectionClose, bodiesDiffer, body1, body2);
         }
+
         tr.CloseIdleConnections();
     }
+
     connSet.check(Ꮡt);
 }
 
@@ -338,7 +352,9 @@ internal static readonly @string xSawCloseˢ = "X-Saw-Close"u8;
 
 internal static void testTransportConnectionCloseOnRequest(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(hostPortHandler)).Value.ts;
+
     var (connSet, testDial) = makeTestDial(Ꮡt);
+
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
     tr.Value.Dial = testDial;
@@ -357,6 +373,7 @@ internal static void testTransportConnectionCloseOnRequest(ж<testing.T> Ꮡt, t
             req.Value.ProtoMajor = 1;
             req.Value.ProtoMinor = 1;
             req.Value.Close = reqClose;
+
             (var res, err) = cʗ1.Do(req);
             if (err != default!) {
                 Ꮡt.Fatalf("error in Request.Close=%v, req #%d, Do: %v"u8, reqClose, n, err);
@@ -372,10 +389,12 @@ internal static void testTransportConnectionCloseOnRequest(ж<testing.T> Ꮡt, t
             if (err != default!) {
                 Ꮡt.Fatalf("for Request.Close=%v, on request %v/2: ReadAll: %v"u8, reqClose, n, err);
             }
-            return ((@string)body);
+            return (@string)body;
         }
+
         @string body1 = fetch(1);
         @string body2 = fetch(2);
+
         nint got = 1;
         if (body1 != body2) {
             got++;
@@ -388,8 +407,10 @@ internal static void testTransportConnectionCloseOnRequest(ж<testing.T> Ꮡt, t
             Ꮡt.Errorf("for Request.Close=%v: server saw %v unique connections, wanted %v\n\nbodies were: %q and %q"u8,
                 reqClose, got, want, body1, body2);
         }
+
         tr.CloseIdleConnections();
     }
+
     connSet.check(Ꮡt);
 }
 
@@ -404,8 +425,10 @@ internal static void testTransportConnectionCloseOnRequestDisableKeepAlive(ж<te
     ref var t = ref Ꮡt.DerefOrNull();
 
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(hostPortHandler)).Value.ts;
+
     var c = ts.Client();
     (~c).Transport._<ж<Δhttp.Transport>>().Value.DisableKeepAlives = true;
+
     var (res, err) = c.Get((~ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -434,6 +457,7 @@ internal static void testTransportRespectRequestWantsClose(ж<testing.T> Ꮡt, t
         new(disableKeepAlives: true, close: false),
         new(disableKeepAlives: true, close: true)
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new testTransportRespectRequestWantsClose_tests(), out var Ꮡtc);
         tc = vᴛ1;
@@ -444,6 +468,7 @@ internal static void testTransportRespectRequestWantsClose(ж<testing.T> Ꮡt, t
                 GoFrame ᒐ = default;
                 try {
                     var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(hostPortHandler)).Value.ts;
+
                     var c = ts.Client();
                     (~c).Transport._<ж<Δhttp.Transport>>().Value.DisableKeepAlives = tcʗ1.disableKeepAlives;
                     var (req, err) = NewRequest(getˢ2, (~ts).URL, default!);
@@ -489,17 +514,20 @@ internal static void testTransportIdleCacheKeys(ж<testing.T> Ꮡt, testMode mod
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(hostPortHandler)).Value.ts;
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
     {
         nint e = 0;
         nint g = len(tr.IdleConnKeysForTesting()); if (e != g) {
             Ꮡt.Errorf("After CloseIdleConnections expected %d idle conn cache keys; got %d"u8, e, g);
         }
     }
+
     var (resp, err) = c.Get((~ts).URL);
     if (err != default!) {
         Ꮡt.Error(err);
     }
     io.ReadAll((~resp).Body);
+
     var keys = tr.IdleConnKeysForTesting();
     {
         nint e = 1;
@@ -507,11 +535,13 @@ internal static void testTransportIdleCacheKeys(ж<testing.T> Ꮡt, testMode mod
             Ꮡt.Fatalf("After Get expected %d idle conn cache keys; got %d"u8, e, g);
         }
     }
+
     {
         @string e = "|http|"u8 + (~ts).Listener.Addr().String(); if (keys[0] != e) {
             Ꮡt.Errorf("Expected idle cache key %q; got %q"u8, e, keys[0]);
         }
     }
+
     tr.CloseIdleConnections();
     {
         nint e = 0;
@@ -534,6 +564,7 @@ internal static void testTransportReadToEndReusesConn(ж<testing.T> Ꮡt, testMo
     GoFrame ᒐ = default;
     try {
         @string msg = msgᶜ1;
+
         ref var addrSeen = ref heap<map<@string, nint>>(out var ᏑaddrSeen);
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             ᏑaddrSeen.ValueSlot[(~r).RemoteAddr]++;
@@ -546,6 +577,7 @@ internal static void testTransportReadToEndReusesConn(ж<testing.T> Ꮡt, testMo
             }
             w.Write(slice<byte>(msg));
         }))).Value.ts;
+
         foreach (var (pi, path) in new @string[]{"/content-length/"u8, "/chunked/"u8}.slice()) {
             nint wantLen = new nint[]{len(msg), -1}.slice()[pi];
             addrSeen = new map<@string, nint>();
@@ -562,12 +594,13 @@ internal static void testTransportReadToEndReusesConn(ж<testing.T> Ꮡt, testMo
                 // making connections be re-used for the wrong reason.
                 var resʗ1 = res;
                 defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
                 if ((~res).ContentLength != (int64)wantLen) {
                     Ꮡt.Errorf("%s res.ContentLength = %d; want %d"u8, path, (~res).ContentLength, wantLen);
                 }
                 (var got, err) = io.ReadAll((~res).Body);
                 if (((sstring)got) != msg || err != default!) {
-                    Ꮡt.Errorf("%s ReadAll(Body) = %q, %v; want %q, nil"u8, path, ((@string)got), err, msg);
+                    Ꮡt.Errorf("%s ReadAll(Body) = %q, %v; want %q, nil"u8, path, (@string)got, err, msg);
                 }
             }
             if (len(addrSeen) != 1) {
@@ -593,6 +626,7 @@ internal static partial void testTransportMaxPerHostIdleConns(ж<testing.T> Ꮡt
     try {
         var stop = new channel<EmptyStruct>(0); // stop marks the exit of main Test goroutine
         defer(ᴛ1 => builtin.close(ᴛ1), stop, ref ᒐ);
+
         var resch = new channel<@string>(0);
         var gotReq = new channel<bool>(0);
         var gotReqʗ1 = gotReq;
@@ -616,10 +650,12 @@ internal static partial void testTransportMaxPerHostIdleConns(ж<testing.T> Ꮡt
                 return;
             }
         }))).Value.ts;
+
         var c = ts.Client();
         var tr = (~c).Transport._<ж<Δhttp.Transport>>();
         nint maxIdleConnsPerHost = 2;
         tr.Value.MaxIdleConnsPerHost = maxIdleConnsPerHost;
+
         // Start 3 outstanding requests and wait for the server to get them.
         // Their responses will hang until we write to resch, though.
         var donech = new channel<bool>(0);
@@ -667,12 +703,14 @@ internal static partial void testTransportMaxPerHostIdleConns(ж<testing.T> Ꮡt
         var doReqʗ3 = doReq;
         goǃ(doReqʗ3);
         ᐸꟷ(gotReq);
+
         {
             nint e = 0;
             nint g = len(tr.IdleConnKeysForTesting()); if (e != g) {
                 Ꮡt.Fatalf("Before writes, expected %d idle conn cache keys; got %d"u8, e, g);
             }
         }
+
         resch.ᐸꟷ(res1ˢ);
         ᐸꟷ(donech);
         var keys = tr.IdleConnKeysForTesting();
@@ -693,6 +731,7 @@ internal static partial void testTransportMaxPerHostIdleConns(ж<testing.T> Ꮡt
                 Ꮡt.Errorf("after first response, expected %d idle conns; got %d"u8, e, g);
             }
         }
+
         resch.ᐸꟷ(res2ˢ);
         ᐸꟷ(donech);
         {
@@ -701,6 +740,7 @@ internal static partial void testTransportMaxPerHostIdleConns(ж<testing.T> Ꮡt
                 Ꮡt.Errorf("after second response, idle conns = %d; want %d"u8, g, w);
             }
         }
+
         resch.ᐸꟷ(res3ˢ);
         ᐸꟷ(donech);
         {
@@ -741,8 +781,10 @@ internal static partial void testTransportMaxConnsPerHostIncludeDialInProgress(�
         ᐸꟷ(stallDialʗ1);
         return net.Dial(network, addr);
     };
+
     tr.Value.DisableKeepAlives = true;
     tr.Value.MaxConnsPerHost = 1;
+
     var preDial = new channel<EmptyStruct>(0);
     var reqComplete = new channel<EmptyStruct>(0);
     var preDialʗ1 = preDial;
@@ -773,6 +815,7 @@ internal static partial void testTransportMaxConnsPerHostIncludeDialInProgress(�
     goǃ(doReqʗ1, req1ˢ2);
     ᐸꟷ(preDial);
     ᐸꟷ(dialStarted);
+
     // get req2 to waiting on conns per host to go down below max
     var doReqʗ2 = doReq;
     goǃ(doReqʗ2, req2ˢ2);
@@ -786,9 +829,11 @@ internal static partial void testTransportMaxConnsPerHostIncludeDialInProgress(�
     default: {
         break;
     }}
+
     // let req1 complete
     stallDial.ᐸꟷ(new EmptyStruct());
     ᐸꟷ(reqComplete);
+
     // let req2 complete
     ᐸꟷ(dialStarted);
     stallDial.ᐸꟷ(new EmptyStruct());
@@ -801,16 +846,19 @@ public static void TestTransportMaxConnsPerHost(ж<testing.T> Ꮡt) {
 
 internal static partial void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, testMode mode) {
     http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
+
     var h = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (_, err) = w.Write(slice<byte>("foo"u8));
         if (err != default!) {
             Ꮡt.Fatalf("Write: %v"u8, err);
         }
     });
+
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(h)).Value.ts;
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
     tr.Value.MaxConnsPerHost = 1;
+
     ref var mu = ref heap<sync.Mutex>(out var Ꮡmu);
     mu = new sync.Mutex(nil);
     ref var conns = ref heap<slice<net.Conn>>(out var Ꮡconns);
@@ -830,6 +878,7 @@ internal static partial void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, te
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
         finally { ᒐ.Run(); }
     };
+
     var cʗ1 = c;
     var tsʗ1 = ts;
     void doReq() {
@@ -848,6 +897,7 @@ internal static partial void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, te
             ));
             var (req, _) = NewRequest(getˢ2, (~tsʗ1).URL, default!);
             req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace));
+
             var (resp, err) = cʗ1.Do(req);
             if (err != default!) {
                 Ꮡt.Fatalf("request failed: %v"u8, err);
@@ -862,6 +912,7 @@ internal static partial void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, te
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     ref var wg = ref heap<sync.WaitGroup>(out var Ꮡwg);
     wg = new sync.WaitGroup(nil);
     for (nint i = 0; i < 10; i++) {
@@ -878,6 +929,7 @@ internal static partial void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, te
         });
     }
     Ꮡwg.Wait();
+
     var expected = (int32)(~tr).MaxConnsPerHost;
     if (dialCnt != expected) {
         Ꮡt.Errorf("round 1: too many dials: %d != %d"u8, dialCnt, expected);
@@ -888,9 +940,11 @@ internal static partial void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, te
     if ((~ts).TLS != nil && tlsHandshakeCnt != expected) {
         Ꮡt.Errorf("round 1: too many tls handshakes: %d != %d"u8, tlsHandshakeCnt, expected);
     }
+
     if (Ꮡt.Failed()) {
         Ꮡt.FailNow();
     }
+
     Ꮡmu.Lock();
     foreach (var (_, cΔ2) in conns) {
         cΔ2.Close();
@@ -898,6 +952,7 @@ internal static partial void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, te
     conns = default!;
     Ꮡmu.Unlock();
     tr.CloseIdleConnections();
+
     doReq();
     expected++;
     if (dialCnt != expected) {
@@ -914,7 +969,6 @@ internal static partial void testTransportMaxConnsPerHost(ж<testing.T> Ꮡt, te
 public static void TestTransportMaxConnsPerHostDialCancellation(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportMaxConnsPerHostDialCancellation(Δp0, Δp1),
         testNotParallel, // because test uses SetPendingDialHooks
-
         new testMode[]{http1Mode, https1Mode, http2Mode}.slice());
 }
 
@@ -922,12 +976,14 @@ internal static void testTransportMaxConnsPerHostDialCancellation(ж<testing.T> 
     GoFrame ᒐ = default;
     try {
         http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
+
         var h = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var (_, errΔ1) = w.Write(slice<byte>("foo"u8));
             if (errΔ1 != default!) {
                 Ꮡt.Fatalf("Write: %v"u8, errΔ1);
             }
         });
+
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(h));
         var cstʗ1 = cst;
         defer(cstʗ1.close, ref ᒐ);
@@ -935,17 +991,20 @@ internal static void testTransportMaxConnsPerHostDialCancellation(ж<testing.T> 
         var c = ts.Client();
         var tr = (~c).Transport._<ж<Δhttp.Transport>>();
         tr.Value.MaxConnsPerHost = 1;
+
         // This request is canceled when dial is queued, which preempts dialing.
         var (ctx, cancel) = context_package.WithCancel(context_package.Background());
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         http_internal_test_package.SetPendingDialHooks(cancel, default!);
         defer(http_internal_test_package.SetPendingDialHooks, (Action)(default!), (Action)(default!), ref ᒐ);
+
         var (req, _) = NewRequestWithContext(ctx, getˢ2, (~ts).URL, default!);
         var (_, err) = c.Do(req);
         if (!errors.Is(err, context_package.Canceled)) {
             Ꮡt.Errorf("expected error %v, got %v"u8, context_package.Canceled, err);
         }
+
         // This request should succeed.
         http_internal_test_package.SetPendingDialHooks(default!, default!);
         (req, _) = NewRequest(getˢ2, (~ts).URL, default!);
@@ -978,8 +1037,10 @@ internal static void testTransportRemovesDeadIdleConnections(ж<testing.T> Ꮡt,
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), (~r).RemoteAddr);
     }))).Value.ts;
+
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
     var cʗ1 = c;
     var tsʗ1 = ts;
     void doReq(@string name) {
@@ -1005,9 +1066,12 @@ internal static void testTransportRemovesDeadIdleConnections(ж<testing.T> Ꮡt,
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     doReq(firstˢ);
     var keys1 = tr.IdleConnKeysForTesting();
+
     ts.CloseClientConnections();
+
     ref var keys2 = ref heap<slice<@string>>(out var Ꮡkeys2);
     var keys1ʗ1 = keys1;
     var trʗ1 = tr;
@@ -1021,6 +1085,7 @@ internal static void testTransportRemovesDeadIdleConnections(ж<testing.T> Ꮡt,
         }
         return true;
     });
+
     doReq(secondˢ);
 }
 
@@ -1031,10 +1096,9 @@ public static void TestTransportServerClosingUnexpectedly(ж<testing.T> Ꮡt) {
 }
 
 internal static void testTransportServerClosingUnexpectedly(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(hostPortHandler)).Value.ts;
     var c = ts.Client();
+
     var cʗ1 = c;
     var tsʗ1 = ts;
     @string fetch(nint n, nint retries) {
@@ -1059,12 +1123,14 @@ internal static void testTransportServerClosingUnexpectedly(ж<testing.T> Ꮡt, 
                 continue;
             }
             (~res).Body.Close();
-            return ((@string)body);
+            return (@string)body;
         }
         throw panic("unreachable");
     }
+
     @string body1 = fetch(1, 0);
     @string body2 = fetch(2, 0);
+
     // Close all the idle connections in a way that's similar to
     // the server hanging up on us. We don't use
     // httptest.Server.CloseClientConnections because it's
@@ -1073,7 +1139,9 @@ internal static void testTransportServerClosingUnexpectedly(ж<testing.T> Ꮡt, 
     // that method to be async and cause the body3 fetch below to
     // run on an old connection. This function is synchronous.
     http_internal_test_package.ExportCloseTransportConnsAbruptly((~c).Transport._<ж<Δhttp.Transport>>());
+
     @string body3 = fetch(3, 5);
+
     if (body1 != body2) {
         Ꮡt.Errorf("expected body1 and body2 to be equal"u8);
     }
@@ -1092,8 +1160,6 @@ public static void TestStressSurpriseServerCloses(ж<testing.T> Ꮡt) {
 internal static readonly object skippingTestInShortModeˢ = (@string)"skipping test in short mode"u8;
 
 internal static partial void testStressSurpriseServerCloses(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (testing.Short()) {
         Ꮡt.Skip(skippingTestInShortModeˢ);
     }
@@ -1107,6 +1173,7 @@ internal static partial void testStressSurpriseServerCloses(ж<testing.T> Ꮡt, 
         conn.Close();
     }))).Value.ts;
     var c = ts.Client();
+
     // Do a bunch of traffic from different goroutines. Send to activityc
     // after each request completes, regardless of whether it failed.
     // If these are too high, OS X exhausts its ephemeral ports
@@ -1114,7 +1181,6 @@ internal static partial void testStressSurpriseServerCloses(ж<testing.T> Ꮡt, 
     // not what we want to test. TODO(bradfitz): use an io.Pipe
     // dialer for this test instead?
     UntypedInt numClients = 20;
-    
     UntypedInt reqsPerClient = 25;
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(numClients * reqsPerClient);
@@ -1137,6 +1203,7 @@ internal static partial void testStressSurpriseServerCloses(ж<testing.T> Ꮡt, 
             }
         });
     }
+
     // Make sure all the request come back, one way or another.
     Ꮡwg.Wait();
 }
@@ -1156,6 +1223,7 @@ internal static void testTransportHeadResponses(ж<testing.T> Ꮡt, testMode mod
         w.WriteHeader(200);
     }))).Value.ts;
     var c = ts.Client();
+
     for (nint i = 0; i < 2; i++) {
         var (res, err) = c.Head((~ts).URL);
         if (err != default!) {
@@ -1205,6 +1273,7 @@ internal static void testTransportHeadChunkedResponse(ж<testing.T> Ꮡt, testMo
             w.WriteHeader(200);
         }))).Value.ts;
         var c = ts.Client();
+
         // Ensure that we wait for the readLoop to complete before
         // calling Head again
         var didRead = new channel<bool>(0);
@@ -1213,13 +1282,17 @@ internal static void testTransportHeadChunkedResponse(ж<testing.T> Ꮡt, testMo
             didReadʗ1.ᐸꟷ(true);
         });
         defer(http_internal_test_package.SetReadLoopBeforeNextReadHook, (Action)(default!), ref ᒐ);
+
         var (res1, err) = c.Head((~ts).URL);
         ᐸꟷ(didRead);
+
         if (err != default!) {
             Ꮡt.Fatalf("request 1 error: %v"u8, err);
         }
+
         (var res2, err) = c.Head((~ts).URL);
         ᐸꟷ(didRead);
+
         if (err != default!) {
             Ꮡt.Fatalf("request 2 error: %v"u8, err);
         }
@@ -1234,18 +1307,17 @@ internal static void testTransportHeadChunkedResponse(ж<testing.T> Ꮡt, testMo
     finally { ᒐ.Run(); }
 }
 
-// Requests with no accept-encoding header use transparent compression
-// Requests with other accept-encoding should pass through unmodified
-// Requests with accept-encoding == gzip should be passed through
-
 partial struct roundTripTestsᴛ1 /*dyn*/ {
     internal @string accept;
     internal @string expectAccept;
     internal bool compressed;
 }
 internal static slice<roundTripTestsᴛ1> roundTripTests = new roundTripTestsᴛ1[]{
+    // Requests with no accept-encoding header use transparent compression
     new(""u8, "gzip"u8, false),
+    // Requests with other accept-encoding should pass through unmodified
     new("foo"u8, "foo"u8, false),
+    // Requests with accept-encoding == gzip should be passed through
     new("gzip"u8, "gzip"u8, true)
 }.slice();
 
@@ -1282,6 +1354,7 @@ internal static void testRoundTripGzip(ж<testing.T> Ꮡt, testMode mode) {
         }
     }))).Value.ts;
     var tr = (~ts.Client()).Transport._<ж<Δhttp.Transport>>();
+
     foreach (var (i, test) in roundTripTests) {
         // Test basic request (no accept-encoding)
         var (req, _) = NewRequest(getˢ2, fmt.Sprintf("%s/?testnum=%d&expect_accept=%s"u8, (~ts).URL, i, test.expectAccept), default!);
@@ -1311,7 +1384,7 @@ internal static void testRoundTripGzip(ж<testing.T> Ꮡt, testMode mode) {
             continue;
         }
         {
-            @string g = ((@string)body);
+            @string g = (@string)body;
             @string e = responseBody; if (g != e) {
                 Ꮡt.Errorf("%d. body = %q; want %q"u8, i, g, e);
             }
@@ -1365,6 +1438,7 @@ internal static void testTransportGzip(ж<testing.T> Ꮡt, testMode mode) {
                 }
             }
             rw.Header().Set(contentEncodingˢ, gzipˢ);
+
             io.Writer w = new http_test_package.http_ResponseWriterᴠWriter(rw);
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             if (req.FormValue(chunkedˢ) == "0"u8) {
@@ -1385,6 +1459,7 @@ internal static void testTransportGzip(ж<testing.T> Ꮡt, testMode mode) {
         finally { ᒐ.Run(); }
     }))).Value.ts;
     var c = ts.Client();
+
     foreach (var (_, chunked) in new @string[]{"1"u8, "0"u8}.slice()) {
         // First fetch something large, but only read some of it.
         var (resΔ1, errΔ1) = c.Get((~ts).URL + "/?body=large&chunked="u8 + chunked);
@@ -1398,7 +1473,7 @@ internal static void testTransportGzip(ж<testing.T> Ꮡt, testMode mode) {
         }
         {
             @string e = testString;
-            @string g = ((@string)buf); if (e != g) {
+            @string g = (@string)buf; if (e != g) {
                 Ꮡt.Errorf("partial read got %q, expected %q"u8, g, e);
             }
         }
@@ -1408,6 +1483,7 @@ internal static void testTransportGzip(ж<testing.T> Ꮡt, testMode mode) {
         if (n != 0 || errΔ1 == default!) {
             Ꮡt.Errorf("expected error post-closed large Read; got = %d, %v"u8, n, errΔ1);
         }
+
         // Then something small.
         (resΔ1, errΔ1) = c.Get((~ts).URL + "/?chunked="u8 + chunked);
         if (errΔ1 != default!) {
@@ -1418,7 +1494,7 @@ internal static void testTransportGzip(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Fatal(errΔ1);
         }
         {
-            @string g = ((@string)body);
+            @string g = (@string)body;
             @string e = testString; if (g != e) {
                 Ꮡt.Fatalf("body = %q; want %q"u8, g, e);
             }
@@ -1429,6 +1505,7 @@ internal static void testTransportGzip(ж<testing.T> Ꮡt, testMode mode) {
                 Ꮡt.Fatalf("Content-Encoding = %q; want %q"u8, g, e);
             }
         }
+
         // Read on the body after it's been fully read:
         (n, errΔ1) = (~resΔ1).Body.Read(buf);
         if (n != 0 || errΔ1 == default!) {
@@ -1440,6 +1517,7 @@ internal static void testTransportGzip(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Errorf("expected Read error after Close; got %d, %v"u8, n, errΔ1);
         }
     }
+
     // And a HEAD request too, because they're always weird.
     var (res, err) = c.Head((~ts).URL);
     if (err != default!) {
@@ -1471,10 +1549,12 @@ internal static partial ж<transport100ContinueTest> newTransport100ContinueTest
         var ln = newLocalListener(Ꮡt);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var test = Ꮡ(new transport100ContinueTest(
             t: Ꮡt,
             reqdone: new channel<EmptyStruct>(0)
         ));
+
         var tr = Ꮡ(new Transport(
             ExpectContinueTimeout: timeout
         ));
@@ -1495,6 +1575,7 @@ internal static partial ж<transport100ContinueTest> newTransport100ContinueTest
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         var (c, err) = ln.Accept();
         if (err != default!) {
             Ꮡt.Fatalf("Accept: %v"u8, err);
@@ -1520,6 +1601,7 @@ internal static partial ж<transport100ContinueTest> newTransport100ContinueTest
                 Ꮡt.Fatalf("Transport sent unexpected bytes: %q"u8, got);
             }
         });
+
         return test;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1551,7 +1633,7 @@ internal static void wantBodySent(this ref transport100ContinueTest test) {
         test.t.Fatalf("unexpected error reading body: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got);
+        @string gotΔ1 = (@string)got;
         @string want = transport100ContinueTestBody; if (gotΔ1 != want) {
             test.t.Fatalf("unexpected body: got %q, want %q"u8, gotΔ1, want);
         }
@@ -1689,14 +1771,13 @@ internal static void testSOCKS5Proxy(ж<testing.T> Ꮡt, testMode mode) {
                     tΔ1.Errorf("socks5 proxy second read: unexpected address type %v"u8, buf[4]);
                     return;
                 }}
-
                 {
                     var (_, errΔ5) = io.ReadFull(new http_test_package.net_ConnᴠReader(s), buf.slice(4, ipLen + 6)); if (errΔ5 != default!) {
                         tΔ1.Errorf("socks5 proxy address read: %v"u8, errΔ5);
                         return;
                     }
                 }
-                var ip = ((net.IP)(buf.slice(4, ipLen + 4)));
+                var ip = (net.IP)(buf.slice(4, ipLen + 4));
                 var port = binary.BigEndian.Uint16(buf.slice(ipLen + 4, ipLen + 6));
                 copy(buf[..3], new byte[]{5, 0, 0}.slice());
                 {
@@ -1706,6 +1787,7 @@ internal static void testSOCKS5Proxy(ж<testing.T> Ꮡt, testMode mode) {
                     }
                 }
                 chʗ1.ᐸꟷ(fmt.Sprintf("proxy for %s:%d"u8, ip, port));
+
                 // Implement proxying.
                 @string targetHost = net.JoinHostPort(ip.String(), strconv.Itoa((nint)port));
                 (var targetConn, errΔ1) = net.Dial(tcpˢ, targetHost);
@@ -1720,10 +1802,12 @@ internal static void testSOCKS5Proxy(ж<testing.T> Ꮡt, testMode mode) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
         var (pu, err) = url.Parse("socks5://"u8 + l.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         @string sentinelHeader = xSentinelˢ;
         @string sentinelValue = "12345"u8;
         var h = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -1813,17 +1897,20 @@ public static void TestTransportProxy(ж<testing.T> Ꮡt) {
                             ProtoMinor: 1,
                             Header: new httpꓸHeader(0)
                         ));
+
                         (var targetConn, errΔ1) = net.Dial(tcpˢ, (~(~r).URL).Host);
                         if (errΔ1 != default!) {
                             tΔ1.Errorf("net.Dial(%q) failed: %v"u8, (~(~r).URL).Host, errΔ1);
                             return;
                         }
+
                         {
                             var errΔ2 = res.Write(new http_test_package.net_ConnᴠWriter(clientConn)); if (errΔ2 != default!) {
                                 tΔ1.Errorf("Writing 200 OK failed: %v"u8, errΔ2);
                                 return;
                             }
                         }
+
                         goǃ((ᴛ1, ᴛ2) => io.Copy(ᴛ1, ᴛ2), new http_test_package.net_ConnᴠWriter(targetConn), new http_test_package.net_ConnᴠReader(clientConn));
                         var clientConnʗ1 = clientConn;
                         var targetConnʗ1 = targetConn;
@@ -1835,10 +1922,12 @@ public static void TestTransportProxy(ж<testing.T> Ꮡt) {
                 });
                 var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), siteMode, new http_test_package.http_HandlerFuncᴠΔHandler(h1)).Value.ts;
                 var proxy = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), proxyMode, new http_test_package.http_HandlerFuncᴠΔHandler(h2)).Value.ts;
+
                 var (pu, err) = url.Parse((~proxy).URL);
                 if (err != default!) {
                     tΔ1.Fatal(err);
                 }
+
                 // If neither server is HTTPS or both are, then c may be derived from either.
                 // If only one server is HTTPS, c must be derived from that server in order
                 // to ensure that it is configured to use the fake root CA from testcert.go.
@@ -1846,6 +1935,7 @@ public static void TestTransportProxy(ж<testing.T> Ꮡt) {
                 if (siteMode == https1Mode) {
                     c = ts.Client();
                 }
+
                 (~c).Transport._<ж<Δhttp.Transport>>().Value.Proxy = ProxyURL(pu);
                 {
                     var (_, errΔ1) = c.Head((~ts).URL); if (errΔ1 != default!) {
@@ -1871,6 +1961,7 @@ public static void TestTransportProxy(ж<testing.T> Ꮡt) {
                             tΔ1.Errorf("Got CONNECT host %q, want %q"u8, gotHost, wantHost);
                         }
                     }
+
                     // The next message on the channel should be from the site's server.
                     var next = ᐸꟷ(siteCh);
                     if ((~next).Method != "HEAD"u8) {
@@ -1920,6 +2011,7 @@ public static void TestOnProxyConnectResponse(ж<testing.T> Ꮡt) {
 
         var h1 = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         });
+
         var tcaseʗ1 = tcase;
         var h2 = new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             // Implement an entire CONNECT proxy
@@ -1945,17 +2037,20 @@ public static void TestOnProxyConnectResponse(ж<testing.T> Ꮡt) {
                     ProtoMinor: 1,
                     Header: new httpꓸHeader(0)
                 ));
+
                 (var targetConn, errΔ1) = net.Dial(tcpˢ, (~(~r).URL).Host);
                 if (errΔ1 != default!) {
                     Ꮡt.Errorf("net.Dial(%q) failed: %v"u8, (~(~r).URL).Host, errΔ1);
                     return;
                 }
+
                 {
                     var errΔ2 = res.Write(new http_test_package.net_ConnᴠWriter(clientConn)); if (errΔ2 != default!) {
                         Ꮡt.Errorf("Writing 200 OK failed: %v"u8, errΔ2);
                         return;
                     }
                 }
+
                 goǃ((ᴛ1, ᴛ2) => io.Copy(ᴛ1, ᴛ2), new http_test_package.net_ConnᴠWriter(targetConn), new http_test_package.net_ConnᴠReader(clientConn));
                 var clientConnʗ1 = clientConn;
                 var targetConnʗ1 = targetConn;
@@ -1967,11 +2062,14 @@ public static void TestOnProxyConnectResponse(ж<testing.T> Ꮡt) {
         });
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), https1Mode, new http_test_package.http_HandlerFuncᴠΔHandler(h1)).Value.ts;
         var proxy = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), https1Mode, new http_test_package.http_HandlerFuncᴠΔHandler(h2)).Value.ts;
+
         var (pu, err) = url.Parse((~proxy).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var c = proxy.Client();
+
         ref var dials = ref heap(new atomic.Int32(), out var Ꮡdials);
         ref var closes = ref heap(new atomic.Int32(), out var Ꮡcloses);
         (~c).Transport._<ж<Δhttp.Transport>>().Value.DialContext = (net.Conn, error) (context.Context ctx, @string network, @string addr) => {
@@ -1987,6 +2085,7 @@ public static void TestOnProxyConnectResponse(ж<testing.T> Ꮡt) {
                 }
             ), default!);
         };
+
         (~c).Transport._<ж<Δhttp.Transport>>().Value.Proxy = ProxyURL(pu);
         var puʗ1 = pu;
         var tcaseʗ2 = tcase;
@@ -1995,6 +2094,7 @@ public static void TestOnProxyConnectResponse(ж<testing.T> Ꮡt) {
             if (proxyURL.String() != puʗ1.String()) {
                 Ꮡt.Errorf("proxy url got %s, want %s"u8, proxyURL.OrTypedNil(), puʗ1.OrTypedNil());
             }
+
             if ("https://"u8 + (~connectReq).URL.String() != (~tsʗ1).URL) {
                 Ꮡt.Errorf("connect url got %s, want %s"u8, (~connectReq).URL.OrTypedNil(), (~tsʗ1).URL);
             }
@@ -2056,7 +2156,9 @@ public static partial void TestTransportProxyHTTPSConnectLeak(ж<testing.T> Ꮡt
             });
             return (ctx, cancel);
         });
+
         defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
+
         var ln = newLocalListener(Ꮡt);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
@@ -2086,6 +2188,7 @@ public static partial void TestTransportProxyHTTPSConnectLeak(ж<testing.T> Ꮡt
                     Ꮡt.Errorf("unexpected method %q"u8, (~cr).Method);
                     return;
                 }
+
                 // Now hang and never write a response; instead, cancel the request and wait
                 // for the client to close.
                 // (Prior to Issue 28012 being fixed, we never closed.)
@@ -2100,6 +2203,7 @@ public static partial void TestTransportProxyHTTPSConnectLeak(ж<testing.T> Ꮡt
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
                 var lnʗ3 = ln;
         var c = Ꮡ(new Client(
             Transport: new Δhttp.TransportжRoundTripper(Ꮡ(new Transport(
@@ -2114,6 +2218,7 @@ public static partial void TestTransportProxyHTTPSConnectLeak(ж<testing.T> Ꮡt
         if (err == default!) {
             Ꮡt.Errorf("unexpected Get success"u8);
         }
+
         // Wait unconditionally for the listener goroutine to exit: this should never
         // hang, so if it does we want a full goroutine dump — and that's exactly what
         // the testing package will give us when the test run times out.
@@ -2134,7 +2239,9 @@ public static void TestTransportDialPreservesNetOpProxyError(ж<testing.T> Ꮡt)
     GoFrame ᒐ = default;
     try {
         defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
+
         error errDial = errors.New(someDialErrorˢ);
+
             var errDialʗ1 = errDial;
         var tr = Ꮡ(new Transport(
             Proxy: (ж<Δhttp.Request> _Δp0) => url.Parse(httpProxyFakeTldˢ),
@@ -2142,6 +2249,7 @@ public static void TestTransportDialPreservesNetOpProxyError(ж<testing.T> Ꮡt)
         ));
         var trʗ1 = tr;
         defer(trʗ1.CloseIdleConnections, ref ᒐ);
+
         var c = Ꮡ(new Client(Transport: new Δhttp.TransportжRoundTripper(tr)));
         var (req, _) = NewRequest(getˢ2, httpFakeTldˢ, default!);
         var (res, err) = c.Do(req);
@@ -2149,6 +2257,7 @@ public static void TestTransportDialPreservesNetOpProxyError(ж<testing.T> Ꮡt)
             (~res).Body.Close();
             Ꮡt.Fatal(wantedANonNilErrorˢ);
         }
+
         var (uerr, ok) = err._<ж<urlꓸError>>(ᐧ);
         if (!ok) {
             Ꮡt.Fatalf("got %T, want *url.Error"u8, err);
@@ -2160,9 +2269,8 @@ public static void TestTransportDialPreservesNetOpProxyError(ж<testing.T> Ꮡt)
         var want = Ꮡ(new net.OpError(
             Op: "proxyconnect"u8,
             Net: "tcp"u8,
-            Err: errDial
+            Err: errDial // original error, unwrapped.
         ));
-        // original error, unwrapped.
         if (!reflect.DeepEqual(oe.OrTypedNil(), want.OrTypedNil())) {
             Ꮡt.Errorf("Got error %#v; want %#v"u8, oe.OrTypedNil(), want.OrTypedNil());
         }
@@ -2190,6 +2298,7 @@ internal static void testTransportProxyDialDoesNotMutateProxyConnectHeader(ж<te
         var proxyʗ1 = proxy;
         defer(proxyʗ1.Close, ref ᒐ);
         var c = proxy.Client();
+
         var tr = (~c).Transport._<ж<Δhttp.Transport>>();
         var proxyʗ2 = proxy;
         tr.Value.Proxy = (ж<url.URL>, error) (ж<Δhttp.Request> _Δp0) => {
@@ -2202,6 +2311,7 @@ internal static void testTransportProxyDialDoesNotMutateProxyConnectHeader(ж<te
             h = new httpꓸHeader(0);
         }
         tr.Value.ProxyConnectHeader = h.Clone();
+
         var (req, err) = NewRequest(getˢ2, httpsGolangFakeTldˢ, default!);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -2210,6 +2320,7 @@ internal static void testTransportProxyDialDoesNotMutateProxyConnectHeader(ж<te
         if (err == default!) {
             Ꮡt.Errorf("unexpected Get success"u8);
         }
+
         if (!reflect.DeepEqual((~tr).ProxyConnectHeader, h)) {
             Ꮡt.Errorf("tr.ProxyConnectHeader = %v; want %v"u8, (~tr).ProxyConnectHeader, h);
         }
@@ -2231,6 +2342,7 @@ internal static void testTransportGzipRecursive(ж<testing.T> Ꮡt, testMode mod
         w.Header().Set(contentEncodingˢ, gzipˢ);
         w.Write(rgz);
     }))).Value.ts;
+
     var c = ts.Client();
     var (res, err) = c.Get((~ts).URL);
     if (err != default!) {
@@ -2268,6 +2380,7 @@ internal static void testTransportGzipShort(ж<testing.T> Ꮡt, testMode mode) {
             w.Header().Set(contentEncodingˢ, gzipˢ);
             w.Write(new byte[]{0x1f, 0x8b}.slice());
         }))).Value.ts;
+
         var c = ts.Client();
         var (res, err) = c.Get((~ts).URL);
         if (err != default!) {
@@ -2312,6 +2425,7 @@ internal static partial void testTransportPersistConnLeak(ж<testing.T> Ꮡt, te
         Ꮡt.Skip(flakyInHttp2ˢ);
     }
     // Not parallel: counts goroutines
+
     const nint numReq = 25;
     var gotReqCh = new channel<bool>(numReq);
     var unblockCh = new channel<bool>(numReq);
@@ -2325,7 +2439,9 @@ internal static partial void testTransportPersistConnLeak(ж<testing.T> Ꮡt, te
     }))).Value.ts;
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
     nint n0 = runtime.NumGoroutine();
+
     var didReqCh = new channel<bool>(numReq);
     var failed = new channel<bool>(numReq);
     for (nint i = 0; i < numReq; i++) {
@@ -2344,31 +2460,38 @@ internal static partial void testTransportPersistConnLeak(ж<testing.T> Ꮡt, te
             (~res).Body.Close();
         });
     }
+
     // Wait for all goroutines to be stuck in the Handler.
     for (nint i = 0; i < numReq; i++) {
         var selᴛ69 = gotReqCh;
         var selᴛ70 = failed;
         switch (select(ᐸꟷ(selᴛ69, ꓸꓸꓸ), ᐸꟷ(selᴛ70, ꓸꓸꓸ))) {
         case 0 when selᴛ69.ꟷᐳ(out _): {
+            // ok
             break;
         }
         case 1 when selᴛ70.ꟷᐳ(out _): {
+            // Not great but not what we are testing:
+            // sometimes an overloaded system will fail to make all the connections.
             break;
         }}
     }
-    // ok
-    // Not great but not what we are testing:
-    // sometimes an overloaded system will fail to make all the connections.
+
     nint nhigh = runtime.NumGoroutine();
+
     // Tell all handlers to unblock and reply.
     builtin.close(unblockCh);
+
     // Wait for all HTTP clients to be done.
     for (nint i = 0; i < numReq; i++) {
         ᐸꟷ(didReqCh);
     }
+
     tr.CloseIdleConnections();
     nint nfinal = waitNumGoroutine(n0 + 5);
+
     nint growth = nfinal - n0;
+
     // We expect 0 or 1 extra goroutine, empirically. Allow up to 5.
     // Previously we were leaking one per numReq.
     if ((nint)growth > 5) {
@@ -2390,11 +2513,13 @@ internal static void testTransportPersistConnLeakShortBody(ж<testing.T> Ꮡt, t
     if (mode == http2Mode) {
         Ꮡt.Skip(flakyInHttp2ˢ);
     }
+
     // Not parallel: measures goroutines.
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     }))).Value.ts;
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
     nint n0 = runtime.NumGoroutine();
     var body = slice<byte>("Hello"u8);
     for (nint i = 0; i < 20; i++) {
@@ -2411,7 +2536,9 @@ internal static void testTransportPersistConnLeakShortBody(ж<testing.T> Ꮡt, t
     nint nhigh = runtime.NumGoroutine();
     tr.CloseIdleConnections();
     nint nfinal = waitNumGoroutine(n0 + 5);
+
     nint growth = nfinal - n0;
+
     // We expect 0 or 1 extra goroutine, empirically. Allow up to 5.
     // Previously we were leaking one per numReq.
     Ꮡt.Logf("goroutine growth: %d -> %d -> %d (delta: %d)"u8, n0, nhigh, nfinal, growth);
@@ -2442,12 +2569,15 @@ internal static (net.Conn, error) DialContext(this ж<countingDialer> Ꮡd, cont
         if (err != default!) {
             return (default!, err);
         }
+
         var counted = @new<countedConn>();
         counted.Value.Conn = conn;
+
         d.mu.Lock();
         ᒐd1 = true;
         d.total++;
         d.live++;
+
         runtime.SetFinalizer(counted.OrTypedNil(), Ꮡd.decrement);
         return (new http_test_package.countedConnжConn(counted), default!);
     }
@@ -2502,18 +2632,21 @@ internal static void testTransportPersistConnLeakNeverIdle(ж<testing.T> Ꮡt, t
         }
         conn.Close();
     }))).Value.ts;
+
     ref var d = ref heap(new countingDialer(), out var Ꮡd);
     var c = ts.Client();
     (~c).Transport._<ж<Δhttp.Transport>>().Value.DialContext = Ꮡd.DialContext;
+
     var body = slice<byte>("Hello"u8);
     for (nint i = 0; ᐧ ; i++) {
         var (total, live) = Ꮡd.Read();
         if (live < total) {
             break;
         }
-        if (i >= (1 << (int)(12))) {
+        if (i >= 1 << 12) {
             Ꮡt.Fatalf("Count of live client net.Conns (%d) not lower than total (%d) after %d Do / GC iterations."u8, live, total, i);
         }
+
         var (req, err) = NewRequest(postˢ, (~ts).URL, new http_test_package.bytes_ReaderжReader(bytes.NewReader(body)));
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -2522,6 +2655,7 @@ internal static void testTransportPersistConnLeakNeverIdle(ж<testing.T> Ꮡt, t
         if (err == default!) {
             Ꮡt.Fatal(expectedBrokenConnectionˢ);
         }
+
         runtime.GC();
     }
 }
@@ -2593,12 +2727,15 @@ internal static void testTransportPersistConnContextLeakMaxConnsPerHost(ж<testi
     if (mode == http2Mode) {
         Ꮡt.Skip(httpsGoDevIssue56021ˢ);
     }
+
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         runtime.Gosched();
         w.WriteHeader(StatusOK);
     }))).Value.ts;
+
     var c = ts.Client();
     (~c).Transport._<ж<Δhttp.Transport>>().Value.MaxConnsPerHost = 1;
+
     var ctx = context_package.Background();
     var body = slice<byte>("Hello"u8);
     var bodyʗ1 = body;
@@ -2617,11 +2754,13 @@ internal static void testTransportPersistConnContextLeakMaxConnsPerHost(ж<testi
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
+
                     var ctxΔ1 = cc.Track(ctxʗ2);
                     var (req, err) = NewRequest(postˢ, (~tsʗ2).URL, new http_test_package.bytes_ReaderжReader(bytes.NewReader(bodyʗ2)));
                     if (err != default!) {
                         Ꮡt.Error(err);
                     }
+
                     (_, err) = cʗ2.Do(req.WithContext(ctxΔ1));
                     if (err != default!) {
                         Ꮡt.Errorf("Do failed with error: %v"u8, err);
@@ -2633,8 +2772,10 @@ internal static void testTransportPersistConnContextLeakMaxConnsPerHost(ж<testi
         }
         Ꮡwg.Wait();
     }
+
     ref var initialCC = ref heap(new contextCounter(), out var ᏑinitialCC);
     doPosts(ᏑinitialCC);
+
     // flushCC exists only to put pressure on the GC to finalize the initialCC
     // contexts: the flushCC allocations should eventually displace the initialCC
     // allocations.
@@ -2659,6 +2800,7 @@ public static void TestTransportIdleConnCrash(ж<testing.T> Ꮡt) {
 
 internal static partial void testTransportIdleConnCrash(ж<testing.T> Ꮡt, testMode mode) {
     ref var tr = ref heap<ж<Δhttp.Transport>>(out var Ꮡtr);
+
     var unblockCh = new channel<bool>(1);
     var unblockChʗ1 = unblockCh;
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -2667,6 +2809,7 @@ internal static partial void testTransportIdleConnCrash(ж<testing.T> Ꮡt, test
     }))).Value.ts;
     var c = ts.Client();
     tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
     var didreq = new channel<bool>(0);
     var cʗ1 = c;
     var didreqʗ1 = didreq;
@@ -2732,8 +2875,6 @@ public static void TestIssue3595(ж<testing.T> Ꮡt) {
 internal static readonly @string deniedMsgᶜ = "sorry, denied."u8;
 
 internal static void testIssue3595(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     runTimeSensitiveTest(Ꮡt, new time.Duration[]{
         1 * time.Millisecond,
         5 * time.Millisecond,
@@ -2748,6 +2889,7 @@ internal static void testIssue3595(ж<testing.T> Ꮡt, testMode mode) {
         try {
             http_internal_test_package.SetRSTAvoidanceDelay(tΔ1, timeout);
             tΔ1.Logf("set RST avoidance delay to %v"u8, timeout);
+
             @string deniedMsg = deniedMsgᶜ;
             var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
                 Error(w, deniedMsg, StatusUnauthorized);
@@ -2758,7 +2900,8 @@ internal static void testIssue3595(ж<testing.T> Ꮡt, testMode mode) {
             defer(cstʗ1.close, ref ᒐ);
             var ts = cst.Value.ts;
             var c = ts.Client();
-            var (res, err) = c.Post((~ts).URL, applicationOctetStreamˢ, ((neverEnding)(rune)'a'));
+
+            var (res, err) = c.Post((~ts).URL, applicationOctetStreamˢ, (neverEnding)(rune)'a');
             if (err != default!) {
                 return fmt.Errorf("Post: %v"u8, err);
             }
@@ -2767,7 +2910,7 @@ internal static void testIssue3595(ж<testing.T> Ꮡt, testMode mode) {
                 return fmt.Errorf("Body ReadAll: %v"u8, err);
             }
             tΔ1.Logf("server response:\n%s"u8, got);
-            if (!strings.Contains(((@string)got), deniedMsg)) {
+            if (!strings.Contains((@string)got, deniedMsg)) {
                 // If we got an RST packet too early, we should have seen an error
                 // from io.ReadAll, not a silently-truncated body.
                 tΔ1.Errorf("Known bug: response %q does not contain %q"u8, got, deniedMsg);
@@ -2789,6 +2932,7 @@ internal static void testChunkedNoContent(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.WriteHeader(StatusNoContent);
     }))).Value.ts;
+
     var c = ts.Client();
     foreach (var (_, closeBody) in new bool[]{true, false}.slice()) {
         const nint n = 4;
@@ -2826,8 +2970,10 @@ internal static partial void testTransportConcurrency(ж<testing.T> Ꮡt, testMo
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "%v"u8, r.FormValue(echoˢ));
         }))).Value.ts;
+
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(numReqs);
+
         // Due to the Transport's "socket late binding" (see
         // idleConnCh in transport.go), the numReqs HTTP requests
         // below can finish with a dial still outstanding. To keep
@@ -2838,9 +2984,11 @@ internal static partial void testTransportConcurrency(ж<testing.T> Ꮡt, testMo
             Ꮡwg.Add(1);
         }, Ꮡwg.Done);
         defer(http_internal_test_package.SetPendingDialHooks, (Action)(default!), (Action)(default!), ref ᒐ);
+
         var c = ts.Client();
         var reqs = new channel<@string>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), reqs, ref ᒐ);
+
         for (nint i = 0; i < maxProcs * 2; i++) {
             var cʗ1 = c;
             var reqsʗ1 = reqs;
@@ -2893,9 +3041,10 @@ internal static void testIssue4191_InfiniteGetTimeout(ж<testing.T> Ꮡt, testMo
     try {
         var mux = NewServeMux();
         mux.HandleFunc(getˢ6, (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-            io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), ((neverEnding)(rune)'a'));
+            io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), (neverEnding)(rune)'a');
         });
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new Δhttp.ServeMuxжΔHandler(mux)).Value.ts;
+
         var connc = new channel<net.Conn>(1);
         var c = ts.Client();
         var conncʗ1 = connc;
@@ -2914,12 +3063,14 @@ internal static void testIssue4191_InfiniteGetTimeout(ж<testing.T> Ꮡt, testMo
             }}
             return (connΔ1, default!);
         };
+
         var (res, err) = c.Get((~ts).URL + "/get"u8);
         if (err != default!) {
             Ꮡt.Fatalf("Error issuing GET: %v"u8, err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         var conn = ᐸꟷ(connc);
         conn.SetDeadline(time.Now().Add(1 * time.Millisecond));
         (_, err) = io.Copy(io.Discard, (~res).Body);
@@ -2943,7 +3094,7 @@ internal static void testIssue4191_InfiniteGetToPutTimeout(ж<testing.T> Ꮡt, t
     const bool debug = false;
     var mux = NewServeMux();
     mux.HandleFunc(getˢ6, (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-        io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), ((neverEnding)(rune)'a'));
+        io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), (neverEnding)(rune)'a');
     });
     mux.HandleFunc(putˢ2, (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         GoFrame ᒐ = default;
@@ -2956,6 +3107,7 @@ internal static void testIssue4191_InfiniteGetToPutTimeout(ж<testing.T> Ꮡt, t
     });
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new Δhttp.ServeMuxжΔHandler(mux)).Value.ts;
     var timeout = 100 * time.Millisecond;
+
     var c = ts.Client();
     (~c).Transport._<ж<Δhttp.Transport>>().Value.Dial = (net.Conn, error) (@string n, @string addr) => {
         var (conn, err) = net.Dial(n, addr);
@@ -2968,6 +3120,7 @@ internal static void testIssue4191_InfiniteGetToPutTimeout(ж<testing.T> Ꮡt, t
         }
         return (conn, default!);
     };
+
     var getFailed = false;
     nint nRuns = 5;
     if (testing.Short()) {
@@ -3024,6 +3177,7 @@ internal static void testTransportResponseHeaderTimeout(ж<testing.T> Ꮡt, test
     if (testing.Short()) {
         Ꮡt.Skip(skippingTimeoutTestInˢ);
     }
+
     var timeout = 2 * time.Millisecond;
     var retry = true;
     while (retry && !Ꮡt.Failed()) {
@@ -3042,8 +3196,10 @@ internal static void testTransportResponseHeaderTimeout(ж<testing.T> Ꮡt, test
             ᏑsrvWG.Done();
         });
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new Δhttp.ServeMuxжΔHandler(mux)).Value.ts;
+
         var c = ts.Client();
         (~c).Transport._<ж<Δhttp.Transport>>().Value.ResponseHeaderTimeout = timeout;
+
         retry = false;
         ᏑsrvWG.Add(3);
         var tests = new testTransportResponseHeaderTimeout_tests[]{
@@ -3092,6 +3248,7 @@ internal static void testTransportResponseHeaderTimeout(ж<testing.T> Ꮡt, test
                 Ꮡt.Errorf("%d for path %q status = %d; want 200"u8, i, tt.path, (~res).StatusCode);
             }
         }
+
         ᏑsrvWG.Wait();
         ts.Close();
     }
@@ -3215,6 +3372,7 @@ internal static void testTransportCancelRequest(ж<testing.T> Ꮡt, cancelTest t
         if (testing.Short()) {
             Ꮡt.Skip(skippingTestInShortModeˢ2);
         }
+
         @string msg = msgᶜ2;
         var unblockc = new channel<bool>(0);
         var unblockcʗ1 = unblockc;
@@ -3224,8 +3382,10 @@ internal static void testTransportCancelRequest(ж<testing.T> Ꮡt, cancelTest t
             ᐸꟷ(unblockcʗ1);
         }))).Value.ts;
         defer(ᴛ1 => builtin.close(ᴛ1), unblockc, ref ᒐ);
+
         var c = ts.Client();
         var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
         var (req, _) = NewRequest(getˢ2, (~ts).URL, default!);
         req = test.newReq(req);
         var (res, err) = c.Do(req);
@@ -3238,12 +3398,14 @@ internal static void testTransportCancelRequest(ж<testing.T> Ꮡt, cancelTest t
             Ꮡt.Errorf("Body = %q; want %q"u8, body.slice(0, n), msg);
         }
         test.cancel(tr, req);
+
         (var tail, err) = io.ReadAll((~res).Body);
         (~res).Body.Close();
         test.checkErr(bodyReadˢ, err);
         if (len(tail) > 0) {
             Ꮡt.Errorf("Spurious bytes from Body.Read: %q"u8, tail);
         }
+
         // Verify no outstanding requests after readLoop/writeLoop
         // goroutines shut down.
         var trʗ1 = tr;
@@ -3274,8 +3436,10 @@ internal static partial void testTransportCancelRequestInDo(ж<testing.T> Ꮡt, 
             ᐸꟷ(unblockcʗ1);
         }))).Value.ts;
         defer(ᴛ1 => builtin.close(ᴛ1), unblockc, ref ᒐ);
+
         var c = ts.Client();
         var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
         var donec = new channel<bool>(0);
         var (req, _) = NewRequest(getˢ2, (~ts).URL, body);
         req = test.newReq(req);
@@ -3291,6 +3455,7 @@ internal static partial void testTransportCancelRequestInDo(ж<testing.T> Ꮡt, 
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         unblockc.ᐸꟷ(true);
         var donecʗ2 = donec;
         var reqʗ2 = req;
@@ -3342,7 +3507,7 @@ dial: blocking
 canceling
 Get error = true
 
-"""u8;
+"""u8.Raw();
 
 internal static partial void testTransportCancelRequestInDial(ж<testing.T> Ꮡt, cancelTest test) {
     GoFrame ᒐ = default;
@@ -3355,8 +3520,10 @@ internal static partial void testTransportCancelRequestInDial(ж<testing.T> Ꮡt
         }
         ref var logbuf = ref heap(new strings.Builder(), out var Ꮡlogbuf);
         var eventLog = log.New(new http_test_package.strings_BuilderжWriter(Ꮡlogbuf), ""u8, 0);
+
         var unblockDial = new channel<bool>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), unblockDial, ref ᒐ);
+
         var inDial = new channel<bool>(0);
             var eventLogʗ1 = eventLog;
             var inDialʗ1 = inDial;
@@ -3386,10 +3553,13 @@ internal static partial void testTransportCancelRequestInDial(ж<testing.T> Ꮡt
             testʗ1.checkErr(getˢ7, err);
             gotresʗ1.ᐸꟷ(true);
         });
+
         inDial.ᐸꟷ(true);
+
         eventLog.Printf("canceling"u8);
         test.cancel(tr, req);
         test.cancel(tr, req); // used to panic on second call to Transport.Cancel
+
         {
             var (d, ok) = t.Deadline(); if (ok) {
                 // When the test's deadline is about to expire, log the pending events for
@@ -3403,6 +3573,7 @@ internal static partial void testTransportCancelRequestInDial(ж<testing.T> Ꮡt
             }
         }
         ᐸꟷ(gotres);
+
         @string got = logbuf.String();
         @string want = dialBlockingCancelingGetˢ;
         if (got != want) {
@@ -3430,6 +3601,7 @@ internal static void testTransportCancelRequestWithBody(ж<testing.T> Ꮡt, canc
         if (testing.Short()) {
             Ꮡt.Skip(skippingTestInShortModeˢ2);
         }
+
         @string msg = msgᶜ3;
         var unblockc = new channel<EmptyStruct>(0);
         var unblockcʗ1 = unblockc;
@@ -3439,10 +3611,13 @@ internal static void testTransportCancelRequestWithBody(ж<testing.T> Ꮡt, canc
             ᐸꟷ(unblockcʗ1);
         }))).Value.ts;
         defer(ᴛ1 => builtin.close(ᴛ1), unblockc, ref ᒐ);
+
         var c = ts.Client();
         var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
         var (req, _) = NewRequest(postˢ, (~ts).URL, new http_test_package.strings_ReaderжReader(strings.NewReader(withbodyˢ)));
         req = test.newReq(req);
+
         var (res, err) = c.Do(req);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -3453,12 +3628,14 @@ internal static void testTransportCancelRequestWithBody(ж<testing.T> Ꮡt, canc
             Ꮡt.Errorf("Body = %q; want %q"u8, body.slice(0, n), msg);
         }
         test.cancel(tr, req);
+
         (var tail, err) = io.ReadAll((~res).Body);
         (~res).Body.Close();
         test.checkErr(bodyReadˢ, err);
         if (len(tail) > 0) {
             Ꮡt.Errorf("Spurious bytes from Body.Read: %q"u8, tail);
         }
+
         // Verify no outstanding requests after readLoop/writeLoop
         // goroutines shut down.
         var trʗ1 = tr;
@@ -3478,8 +3655,6 @@ internal static void testTransportCancelRequestWithBody(ж<testing.T> Ꮡt, canc
 }
 
 public static void TestTransportCancelRequestBeforeDo(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // We can't cancel a request that hasn't started using Transport.CancelRequest.
     run<TжTBRun>(Ꮡt, (TжTBRun tΔ1Δp, testMode mode) => {
         var tΔ1 = (ж<testing.T>)tΔ1Δp;
@@ -3501,10 +3676,13 @@ internal static void testTransportCancelRequestBeforeDo(ж<testing.T> Ꮡt, canc
             ᐸꟷ(unblockcʗ1);
         })));
         defer(ᴛ1 => builtin.close(ᴛ1), unblockc, ref ᒐ);
+
         var c = (~cst).ts.Client();
+
         var (req, _) = NewRequest(getˢ2, (~(~cst).ts).URL, default!);
         req = test.newReq(req);
         test.cancel((~cst).tr, req);
+
         var (_, err) = c.Do(req);
         test.checkErr("Do"u8, err);
     }
@@ -3524,6 +3702,7 @@ internal static partial void testTransportCancelRequestBeforeResponseHeaders(ж<
     GoFrame ᒐ = default;
     try {
         defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
+
         var serverConnCh = new channel<net.Conn>(1);
             var serverConnChʗ1 = serverConnCh;
         var tr = Ꮡ(new Transport(
@@ -3545,6 +3724,7 @@ internal static partial void testTransportCancelRequestBeforeResponseHeaders(ж<
             var (_, errΔ1) = trʗ2.RoundTrip(reqʗ1);
             errcʗ1.ᐸꟷ(errΔ1);
         });
+
         var sc = ᐸꟷ(serverConnCh);
         var verb = new slice<byte>(3);
         {
@@ -3557,7 +3737,9 @@ internal static partial void testTransportCancelRequestBeforeResponseHeaders(ж<
         }
         var scʗ1 = sc;
         defer(() => scʗ1.Close(), ref ᒐ);
+
         test.cancel(tr, req);
+
         var err = ᐸꟷ(errc);
         if (err == default!) {
             Ꮡt.Fatalf("unexpected success from RoundTrip"u8);
@@ -3592,18 +3774,23 @@ internal static void testTransportCloseResponseBody(ж<testing.T> Ꮡt, testMode
                 w._<Flusher>().Flush();
             }
         }))).Value.ts;
+
         var c = ts.Client();
         var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
         var (req, _) = NewRequest(getˢ2, (~ts).URL, default!);
         var trʗ1 = tr;
         defer(trʗ1.CancelRequest, req, ref ᒐ);
+
         var (res, err) = c.Do(req);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         const nint repeats = 3;
         var buf = new slice<byte>(len(msg) * repeats);
         var want = bytes.Repeat(msg, repeats);
+
         (_, err) = io.ReadFull((~res).Body, buf);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -3611,11 +3798,13 @@ internal static void testTransportCloseResponseBody(ж<testing.T> Ꮡt, testMode
         if (!bytes.Equal(buf, want)) {
             Ꮡt.Fatalf("read %q; want %q"u8, buf, want);
         }
+
         {
             var errΔ2 = (~res).Body.Close(); if (errΔ2 != default!) {
                 Ꮡt.Errorf("Close = %v"u8, errΔ2);
             }
         }
+
         {
             var errΔ3 = ᐸꟷ(writeErr); if (errΔ3 == default!) {
                 Ꮡt.Errorf("expected non-nil write error"u8);
@@ -3660,7 +3849,7 @@ public static void TestTransportAltProto(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        @string body = ((@string)bodyb);
+        @string body = (@string)bodyb;
         {
             @string e = youWantedFooBarComPathˢ; if (body != e) {
                 Ꮡt.Errorf("got response %q, want %q"u8, body, e);
@@ -3704,7 +3893,7 @@ public static void TestTransportEmptyMethod(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    if (!strings.Contains(((@string)got), getˢ)) {
+    if (!strings.Contains((@string)got, getˢ)) {
         Ꮡt.Fatalf("expected substring 'GET '; got: %s"u8, got);
     }
 }
@@ -3723,8 +3912,6 @@ internal static readonly object noAddrOnFooRequestˢ = (@string)"No addr on /foo
 internal static partial void testTransportSocketLateBinding(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var mux = NewServeMux();
         var fooGate = new channel<bool>(1);
         var fooGateʗ1 = fooGate;
@@ -3737,6 +3924,7 @@ internal static partial void testTransportSocketLateBinding(ж<testing.T> Ꮡt, 
             w.Header().Set(barIpportˢ, (~r).RemoteAddr);
         });
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new Δhttp.ServeMuxжΔHandler(mux)).Value.ts;
+
         var dialGate = new channel<bool>(1);
         var dialing = new channel<bool>(0);
         var c = ts.Client();
@@ -3759,6 +3947,7 @@ internal static partial void testTransportSocketLateBinding(ж<testing.T> Ꮡt, 
             }
         };
         defer(ᴛ1 => builtin.close(ᴛ1), dialGate, ref ᒐ);
+
         dialGate.ᐸꟷ(true); // only allow one dial
         var (fooRes, err) = c.Get((~ts).URL + "/foo"u8);
         if (err != default!) {
@@ -3768,6 +3957,7 @@ internal static partial void testTransportSocketLateBinding(ж<testing.T> Ꮡt, 
         if (fooAddr == ""u8) {
             Ꮡt.Fatal(noAddrOnFooRequestˢ);
         }
+
         var fooDone = new channel<EmptyStruct>(0);
         var dialingʗ2 = dialing;
         var fooDoneʗ1 = fooDone;
@@ -3804,6 +3994,7 @@ internal static partial void testTransportSocketLateBinding(ж<testing.T> Ꮡt, 
         defer(() => {
             ᐸꟷ(fooDoneʗ2);
         }, ref ᒐ);
+
         (var barRes, err) = c.Get((~ts).URL + "/bar"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -3830,9 +4021,11 @@ public static void TestTransportReading100Continue(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
+
         const nint numReqs = 5;
         @string reqBody(nint n) => fmt.Sprintf("request body %d"u8, n);
         @string reqID(nint n) => fmt.Sprintf("REQ-ID-%d"u8, n);
+
         var reqBodyʗ1 = reqBody;
         var reqIDʗ1 = reqID;
         void send100Response(ж<io.PipeWriter> w, ж<io.PipeReader> r) {
@@ -3876,7 +4069,7 @@ Echo-Request-Id: %s
 Content-Length: %d
 
 %s
-"""u8, resCode, id, len(body), body), "\n"u8, "\r\n"u8, -1));
+"""u8.Raw(), resCode, id, len(body), body), "\n"u8, "\r\n"u8, -1));
                     w.Write(v);
                     if (id == reqIDʗ1(numReqs)) {
                         return;
@@ -3886,6 +4079,7 @@ Content-Length: %d
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
             var send100Responseʗ1 = send100Response;
         var tr = Ꮡ(new Transport(
             Dial: [MethodImpl(MethodImplOptions.NoInlining)] (@string n, @string addr) => {
@@ -3911,6 +4105,7 @@ Content-Length: %d
         var trʗ1 = tr;
         defer(trʗ1.CloseIdleConnections, ref ᒐ);
         var c = Ꮡ(new Client(Transport: new Δhttp.TransportжRoundTripper(tr)));
+
         var cʗ1 = c;
         void testResponse(ж<Δhttp.Request> req, @string name, nint wantCode) {
             Ꮡt.Helper();
@@ -3932,6 +4127,7 @@ Content-Length: %d
                 Ꮡt.Fatalf("%s: Slurp error: %v"u8, name, err);
             }
         }
+
         // Few 100 responses, making sure we're not off-by-one.
         for (nint i = 1; i <= numReqs; i++) {
             var (req, _) = NewRequest(postˢ, httpDummyTldˢ2, new http_test_package.strings_ReaderжReader(strings.NewReader(reqBody(i))));
@@ -3962,7 +4158,9 @@ internal static void testTransportIgnore1xxResponses(ж<testing.T> Ꮡt, testMod
             conn.Close();
         })));
         cst.Value.tr.Value.DisableKeepAlives = true; // prevent log spam; our test server is hanging up anyway
+
         ref var got = ref heap(new strings.Builder(), out var Ꮡgot);
+
         var (req, _) = NewRequest(getˢ2, (~(~cst).ts).URL, default!);
         req = req.WithContext(httptrace.WithClientTrace(context_package.Background(), Ꮡ(new httptrace.ClientTrace(
             Got1xxResponse: (nint code, textproto.MIMEHeader header) => {
@@ -3976,6 +4174,7 @@ internal static void testTransportIgnore1xxResponses(ж<testing.T> Ꮡt, testMod
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         res.Write(new http_test_package.strings_BuilderжWriter(Ꮡgot));
         @string want = code123HeaderMapFooBarˢ;
         if (got.String() != want) {
@@ -4003,6 +4202,7 @@ internal static void testTransportLimits1xxResponses(ж<testing.T> Ꮡt, testMod
     })));
     cst.Value.tr.Value.DisableKeepAlives = true; // prevent log spam; our test server is hanging up anyway
     cst.Value.tr.Value.MaxResponseHeaderBytes = 1000;
+
     var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
     if (err == default!) {
         (~res).Body.Close();
@@ -4041,6 +4241,7 @@ internal static void testTransportDoesNotLimitDelivered1xxResponses(ж<testing.T
     })));
     cst.Value.tr.Value.DisableKeepAlives = true; // prevent log spam; our test server is hanging up anyway
     cst.Value.tr.Value.MaxResponseHeaderBytes = 1000;
+
     nint got1xx = 0;
     var ctx = httptrace.WithClientTrace(context_package.Background(), Ꮡ(new httptrace.ClientTrace(
         Got1xxResponse: (nint code, textproto.MIMEHeader header) => {
@@ -4130,10 +4331,6 @@ internal static @string String(this proxyFromEnvTest t) {
     return strings.TrimSpace(buf.String());
 }
 
-// Don't use secure for http
-// Use secure for https.
-// Issue 16405: don't use HTTP_PROXY in a CGI environment,
-// where HTTP_PROXY can be attacker-controlled.
 internal static slice<proxyFromEnvTest> proxyFromEnvTests = new proxyFromEnvTest[]{
     new(env: "127.0.0.1:8080"u8, want: "http://127.0.0.1:8080"u8),
     new(env: "cache.corp.example.com:1234"u8, want: "http://cache.corp.example.com:1234"u8),
@@ -4143,9 +4340,15 @@ internal static slice<proxyFromEnvTest> proxyFromEnvTests = new proxyFromEnvTest
     new(env: "https://127.0.0.1:8080"u8, want: "https://127.0.0.1:8080"u8),
     new(env: "socks5://127.0.0.1"u8, want: "socks5://127.0.0.1"u8),
     new(env: "socks5h://127.0.0.1"u8, want: "socks5h://127.0.0.1"u8),
+
+    // Don't use secure for http
     new(req: "http://insecure.tld/"u8, env: "http.proxy.tld"u8, httpsenv: "secure.proxy.tld"u8, want: "http://http.proxy.tld"u8),
+    // Use secure for https.
     new(req: "https://secure.tld/"u8, env: "http.proxy.tld"u8, httpsenv: "secure.proxy.tld"u8, want: "http://secure.proxy.tld"u8),
     new(req: "https://secure.tld/"u8, env: "http.proxy.tld"u8, httpsenv: "https://secure.proxy.tld"u8, want: "https://secure.proxy.tld"u8),
+
+    // Issue 16405: don't use HTTP_PROXY in a CGI environment,
+    // where HTTP_PROXY can be attacker-controlled.
     new(env: "http://10.1.2.3:8080"u8, reqmeth: "POST"u8,
         want: "<nil>"u8,
         wanterr: errors.New("refusing to use HTTP_PROXY value in CGI environment; see golang.org/s/cgihttpproxy"u8)),
@@ -4248,11 +4451,13 @@ internal static void testIdleConnChannelLeak(ж<testing.T> Ꮡt, testMode mode) 
         // Not parallel: uses global test hooks.
         ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
         nint n = default!;
+
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             Ꮡmu.Lock();
             n++;
             Ꮡmu.Unlock();
         }))).Value.ts;
+
         const nint nReqs = 5;
         var didRead = new channel<bool>(nReqs);
         var didReadʗ1 = didRead;
@@ -4260,10 +4465,12 @@ internal static void testIdleConnChannelLeak(ж<testing.T> Ꮡt, testMode mode) 
             didReadʗ1.ᐸꟷ(true);
         });
         defer(http_internal_test_package.SetReadLoopBeforeNextReadHook, (Action)(default!), ref ᒐ);
+
         var c = ts.Client();
         var tr = (~c).Transport._<ж<Δhttp.Transport>>();
         var tsʗ1 = ts;
         tr.Value.Dial = (@string netw, @string addr) => net.Dial(netw, (~tsʗ1).Listener.Addr().String());
+
         // First, without keep-alives.
         foreach (var (_, disableKeep) in new bool[]{true, false}.slice()) {
             tr.Value.DisableKeepAlives = disableKeep;
@@ -4272,12 +4479,13 @@ internal static void testIdleConnChannelLeak(ж<testing.T> Ꮡt, testMode mode) 
                 if (err != default!) {
                     Ꮡt.Fatal(err);
                 }
+                // Note: no res.Body.Close is needed here, since the
+                // response Content-Length is zero. Perhaps the test
+                // should be more explicit and use a HEAD, but tests
+                // elsewhere guarantee that zero byte responses generate
+                // a "Content-Length: 0" instead of chunking.
             }
-            // Note: no res.Body.Close is needed here, since the
-            // response Content-Length is zero. Perhaps the test
-            // should be more explicit and use a HEAD, but tests
-            // elsewhere guarantee that zero byte responses generate
-            // a "Content-Length: 0" instead of chunking.
+
             // At this point, each of the 5 Transport.readLoop goroutines
             // are scheduling noting that there are no response bodies (see
             // earlier comment), and are then calling putIdleConn, which
@@ -4287,6 +4495,7 @@ internal static void testIdleConnChannelLeak(ж<testing.T> Ꮡt, testMode mode) 
             for (nint i = 0; i < nReqs; i++) {
                 ᐸꟷ(didRead);
             }
+
             {
                 nint got = tr.IdleConnWaitMapSizeForTesting(); if (got != 0) {
                     Ꮡt.Fatalf("for DisableKeepAlives = %v, map size = %d; want 0"u8, disableKeep, got);
@@ -4309,9 +4518,12 @@ internal static void testTransportClosesRequestBody(ж<testing.T> Ꮡt, testMode
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         io.Copy(io.Discard, (~r).Body);
     }))).Value.ts;
+
     var c = ts.Client();
+
     ref var closes = ref heap<nint>(out var Ꮡcloses);
     closes = 0;
+
     var (res, err) = c.Post((~ts).URL, textPlainˢ, new countCloseReader(Ꮡcloses, new http_test_package.strings_ReaderжReader(strings.NewReader(helloˢ3))));
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -4339,6 +4551,7 @@ public static partial void TestTransportTLSHandshakeTimeout(ж<testing.T> Ꮡt) 
         defer(() => lnʗ1.Close(), ref ᒐ);
         var testdonec = new channel<EmptyStruct>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), testdonec, ref ᒐ);
+
         var lnʗ2 = ln;
         var testdonecʗ1 = testdonec;
         goǃ(() => {
@@ -4350,6 +4563,7 @@ public static partial void TestTransportTLSHandshakeTimeout(ж<testing.T> Ꮡt) 
             ᐸꟷ(testdonecʗ1);
             c.Close();
         });
+
             var lnʗ3 = ln;
         var tr = Ꮡ(new Transport(
             Dial: (@string _Δp0, @string _Δp1) => net.Dial(tcpˢ, lnʗ3.Addr().String()),
@@ -4403,8 +4617,10 @@ internal static void testTLSServerClosesConnection(ж<testing.T> Ꮡt, testMode 
         }
         fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "hello"u8);
     }))).Value.ts;
+
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
+
     nint nSuccess = 0;
     slice<error> errs = default!;
     const nint trials = 20;
@@ -4422,6 +4638,7 @@ internal static void testTLSServerClosesConnection(ж<testing.T> Ꮡt, testMode 
         if (((sstring)slurp) != "foo"u8) {
             Ꮡt.Errorf("Got %q, want foo"u8, slurp);
         }
+
         // Now try again and see if we successfully
         // pick a new connection.
         (res, err) = c.Get((~ts).URL + "/"u8);
@@ -4446,6 +4663,9 @@ internal static void testTLSServerClosesConnection(ж<testing.T> Ꮡt, testMode 
     }
 }
 
+// byteFromChanReader is an io.Reader that reads a single byte at a
+// time from the channel. When the channel is closed, the reader
+// returns io.EOF.
 partial struct byteFromChanReader /*chan byte*/;
 
 internal static (nint n, error err) Read(this byteFromChanReader c, slice<byte> p) {
@@ -4509,6 +4729,7 @@ internal static void testTransportNoReuseAfterEarlyResponse(ж<testing.T> Ꮡt, 
             closeConnʗ1();
             Ꮡcopying.Wait();
         }, ref ᒐ);
+
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if ((~r).Method == "GET"u8) {
                 io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), barˢ);
@@ -4519,6 +4740,7 @@ internal static void testTransportNoReuseAfterEarlyResponse(ж<testing.T> Ꮡt, 
             Ꮡsconn.Value.c = conn;
             Ꮡsconn.of(testTransportNoReuseAfterEarlyResponse_sconn.ᏑMutex).Unlock();
             conn.Write(slice<byte>("HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nfoo"u8)); // keep-alive
+
             Ꮡcopying.Add(1);
             var connʗ1 = conn;
             goǃ(() => {
@@ -4527,9 +4749,10 @@ internal static void testTransportNoReuseAfterEarlyResponse(ж<testing.T> Ꮡt, 
             });
         }))).Value.ts;
         var c = ts.Client();
+
         UntypedInt bodySize = /* 256 << 10 */ 262144;
         var finalBit = new byteFromChanReader(1);
-        var (req, _) = NewRequest(postˢ, (~ts).URL, io.MultiReader(io.LimitReader(((neverEnding)(rune)'x'), bodySize - 1), finalBit));
+        var (req, _) = NewRequest(postˢ, (~ts).URL, io.MultiReader(io.LimitReader((neverEnding)(rune)'x', bodySize - 1), finalBit));
         req.Value.ContentLength = bodySize;
         var (res, err) = c.Do(req);
         {
@@ -4537,6 +4760,7 @@ internal static void testTransportNoReuseAfterEarlyResponse(ж<testing.T> Ꮡt, 
                 Ꮡt.Errorf("POST response: %v"u8, errΔ1);
             }
         }
+
         (res, err) = c.Get((~ts).URL);
         {
             var errΔ2 = wantBody(res, err, barˢ); if (errΔ2 != default!) {
@@ -4561,8 +4785,6 @@ public static void TestTransportIssue10457(ж<testing.T> Ꮡt) {
 internal static void testTransportIssue10457(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             // Send a response with no body, keep-alive
             // (implicit), and then lie and immediately close the
@@ -4574,12 +4796,14 @@ internal static void testTransportIssue10457(ж<testing.T> Ꮡt, testMode mode) 
             conn.Close();
         }))).Value.ts;
         var c = ts.Client();
+
         var (res, err) = c.Get((~ts).URL);
         if (err != default!) {
             Ꮡt.Fatalf("Get: %v"u8, err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         // Just a sanity check that we at least get the response. The real
         // test here is that the "defer afterTest" above doesn't find any
         // leaked goroutines.
@@ -4652,6 +4876,7 @@ internal static void testRetryRequestsOnError(ж<testing.T> Ꮡt, testMode mode)
         }
         return req;
     }
+
             var newRequestʗ1 = newRequest;
 
             var newRequestʗ2 = newRequest;
@@ -4661,46 +4886,47 @@ internal static void testRetryRequestsOnError(ж<testing.T> Ꮡt, testMode mode)
             var newRequestʗ4 = newRequest;
     var testCases = new testRetryRequestsOnError_testCases[]{
         new(
-            name: "IdempotentNoBodySomeWritten"u8, // Believe that we've written some bytes to the server, so we know we're
- // not just in the "retry when no bytes sent" case".
-
-            failureN: 1, // Use the specific error that shouldRetryRequest looks for with idempotent requests.
-
+            name: "IdempotentNoBodySomeWritten"u8,
+            // Believe that we've written some bytes to the server, so we know we're
+            // not just in the "retry when no bytes sent" case".
+            failureN: 1,
+            // Use the specific error that shouldRetryRequest looks for with idempotent requests.
             failureErr: http_internal_test_package.ExportErrServerClosedIdle,
             req: () => newRequestʗ1(getˢ2, httpFakeGolangˢ, default!),
             reqString: @"GET / HTTP/1.1\r\nHost: fake.golang\r\nUser-Agent: Go-http-client/1.1\r\nAccept-Encoding: gzip\r\n\r\n"u8
         ),
         new(
-            name: "IdempotentGetBodySomeWritten"u8, // Believe that we've written some bytes to the server, so we know we're
- // not just in the "retry when no bytes sent" case".
-
-            failureN: 1, // Use the specific error that shouldRetryRequest looks for with idempotent requests.
-
+            name: "IdempotentGetBodySomeWritten"u8,
+            // Believe that we've written some bytes to the server, so we know we're
+            // not just in the "retry when no bytes sent" case".
+            failureN: 1,
+            // Use the specific error that shouldRetryRequest looks for with idempotent requests.
             failureErr: http_internal_test_package.ExportErrServerClosedIdle,
             req: () => newRequestʗ2(getˢ2, httpFakeGolangˢ, new http_test_package.strings_ReaderжReader(strings.NewReader(fooˢ7))),
             reqString: @"GET / HTTP/1.1\r\nHost: fake.golang\r\nUser-Agent: Go-http-client/1.1\r\nContent-Length: 4\r\nAccept-Encoding: gzip\r\n\r\nfoo\n"u8
         ),
         new(
-            name: "NothingWrittenNoBody"u8, // It's key that we return 0 here -- that's what enables Transport to know
- // that nothing was written, even though this is a non-idempotent request.
-
+            name: "NothingWrittenNoBody"u8,
+            // It's key that we return 0 here -- that's what enables Transport to know
+            // that nothing was written, even though this is a non-idempotent request.
             failureN: 0,
             failureErr: errors.New(secondWriteFailsˢ),
             req: () => newRequestʗ3(deleteˢ, httpFakeGolangˢ, default!),
             reqString: @"DELETE / HTTP/1.1\r\nHost: fake.golang\r\nUser-Agent: Go-http-client/1.1\r\nAccept-Encoding: gzip\r\n\r\n"u8
         ),
         new(
-            name: "NothingWrittenGetBody"u8, // It's key that we return 0 here -- that's what enables Transport to know
- // that nothing was written, even though this is a non-idempotent request.
-
+            name: "NothingWrittenGetBody"u8,
+            // It's key that we return 0 here -- that's what enables Transport to know
+            // that nothing was written, even though this is a non-idempotent request.
             failureN: 0,
-            failureErr: errors.New(secondWriteFailsˢ), // Note that NewRequest will set up GetBody for strings.Reader, which is
- // required for the retry to occur
-
+            failureErr: errors.New(secondWriteFailsˢ),
+            // Note that NewRequest will set up GetBody for strings.Reader, which is
+            // required for the retry to occur
             req: () => newRequestʗ4(postˢ, httpFakeGolangˢ, new http_test_package.strings_ReaderжReader(strings.NewReader(fooˢ7))),
             reqString: @"POST / HTTP/1.1\r\nHost: fake.golang\r\nUser-Agent: Go-http-client/1.1\r\nContent-Length: 4\r\nAccept-Encoding: gzip\r\n\r\nfoo\n"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new testRetryRequestsOnError_testCases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -4723,11 +4949,13 @@ internal static void testRetryRequestsOnError(ж<testing.T> Ꮡt, testMode mode)
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
                 }
+
                 var logfʗ1 = logf;
                 var ts = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
                     logfʗ1("Handler"u8);
                     w.Header().Set(xStatusˢ, "ok"u8);
                 }))).Value.ts;
+
                 ref var writeNumAtomic = ref heap(new int32(), out var ᏑwriteNumAtomic);
                 var c = ts.Client();
                 var logfʗ2 = logf;
@@ -4755,11 +4983,13 @@ internal static void testRetryRequestsOnError(ж<testing.T> Ꮡt, testMode mode)
                         }
                     ))), default!);
                 };
+
                 var logfʗ4 = logf;
                 http_internal_test_package.SetRoundTripRetried(() => {
                     logfʗ4("Retried."u8);
                 });
                 defer(http_internal_test_package.SetRoundTripRetried, (Action)(default!), ref ᒐ);
+
                 for (nint i = 0; i < 3; i++) {
                     var t0 = time.Now();
                     var req = tcʗ1.req();
@@ -4778,6 +5008,7 @@ internal static void testRetryRequestsOnError(ж<testing.T> Ꮡt, testMode mode)
                         tΔ1.Errorf("Response.Request != original request; want identical Request"u8);
                     }
                 }
+
                 Ꮡmu.Lock();
                 @string got = Ꮡlogbuf.Value.String();
                 Ꮡmu.Unlock();
@@ -4793,7 +5024,7 @@ Handler
 Write("%s")
 Handler
 
-"""u8, tcʗ1.reqString, tcʗ1.reqString, tcʗ1.reqString);
+"""u8.Raw(), tcʗ1.reqString, tcʗ1.reqString, tcʗ1.reqString);
                 if (got != want) {
                     tΔ1.Errorf("Log of events differs. Got:\n%s\nWant:\n%s"u8, got, want);
                 }
@@ -4833,7 +5064,7 @@ internal static void testTransportClosesBodyOnError(ж<testing.T> Ꮡt, testMode
         var didClose = new channel<bool>(1);
             var didCloseʗ1 = didClose;
         var (req, _) = NewRequest(postˢ, (~ts).URL, new testTransportClosesBodyOnError_body(
-            io.MultiReader(io.LimitReader(((neverEnding)(rune)'x'), ((int64)1 << (int)(20))), iotest.ErrReader(fakeErr)),
+            io.MultiReader(io.LimitReader((neverEnding)(rune)'x', (int64)1 << 20), iotest.ErrReader(fakeErr)),
             new http_test_package.closerFuncᴠCloser(new closerFunc(() => {
                 var selᴛ77 = didCloseʗ1.ᐸꟷ(true, ꓸꓸꓸ);
                 switch (trySelect(selᴛ77)) {
@@ -4885,6 +5116,7 @@ internal static void testTransportDialTLS(ж<testing.T> Ꮡt, testMode mode) {
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);                    // guards following
     bool gotReq = default!;
     bool didDial = default!;
+
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         Ꮡmu.Lock();
         gotReq = true;
@@ -4902,6 +5134,7 @@ internal static void testTransportDialTLS(ж<testing.T> Ꮡt, testMode mode) {
         }
         return (new tls.ConnжConn(cΔ1), cΔ1.Handshake());
     };
+
     var (res, err) = c.Get((~ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -4929,6 +5162,7 @@ internal static void testTransportDialContext(ж<testing.T> Ꮡt, testMode mode)
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);                             // guards following
     bool gotReq = default!;
     ref var gotCtxValue = ref heap<any>(out var ᏑgotCtxValue);
+
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         Ꮡmu.Lock();
         gotReq = true;
@@ -4941,6 +5175,7 @@ internal static void testTransportDialContext(ж<testing.T> Ꮡt, testMode mode)
         Ꮡmu.Unlock();
         return net.Dial(netw, addr);
     };
+
     var (req, err) = NewRequest(getˢ2, (~ts).URL, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -4973,6 +5208,7 @@ internal static void testTransportDialTLSContext(ж<testing.T> Ꮡt, testMode mo
     ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);                             // guards following
     bool gotReq = default!;
     ref var gotCtxValue = ref heap<any>(out var ᏑgotCtxValue);
+
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         Ꮡmu.Lock();
         gotReq = true;
@@ -4990,6 +5226,7 @@ internal static void testTransportDialTLSContext(ж<testing.T> Ꮡt, testMode mo
         }
         return (new tls.ConnжConn(cΔ1), cΔ1.HandshakeContext(ctxΔ1));
     };
+
     var (req, err) = NewRequest(getˢ2, (~ts).URL, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -5020,9 +5257,13 @@ internal static readonly object expectedProxyErrorToBeˢ = (@string)"Expected pr
 // Ensure that if a proxy returns an error, it is exposed by RoundTrip
 public static void TestRoundTripReturnsProxyError(ж<testing.T> Ꮡt) {
     var badProxy = (ж<url.URL>, error) (ж<Δhttp.Request> _Δp0) => (default!, errors.New(errorMessageˢ));
+
     var tr = Ꮡ(new Transport(Proxy: badProxy));
+
     var (req, _) = NewRequest(getˢ2, httpExampleComˢ, default!);
+
     var (_, err) = tr.RoundTrip(req);
+
     if (err == default!) {
         Ꮡt.Error(expectedProxyErrorToBeˢ);
     }
@@ -5070,6 +5311,7 @@ public static void TestTransportCloseIdleConnsThenReturn(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(putDidnTFailˢ);
     }
     wantIdle(afterSecondPutˢ, 0);
+
     tr.QueueForIdleConnForTesting(); // should toggle the transport out of idle mode
     if (tr.IsIdleForTesting()) {
         Ꮡt.Error(shouldnTBeIdleAfterˢ);
@@ -5146,6 +5388,7 @@ internal static partial void testTransportIdleConnRacesRequest(testing.TB t, tes
     var cst = newClientServerTest(t, mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     })), (trFunc).OrTypedNilFunc(), optFakeNet.OrTypedNil());
     cst.Value.li.Value.trackConns = true;
+
     // We want to put a connection into the pool which has never had a request made on it.
     //
     // Make a request and cancel it before the dial completes.
@@ -5180,6 +5423,7 @@ internal static partial void testTransportIdleConnRacesRequest(testing.TB t, tes
     }
     // Unblock the dial, placing a new, unused connection into the Transport's pool.
     builtin.close(dialc);
+
     // We want IdleConnTimeout to race with a new request.
     //
     // There's no perfect way to do this, but the following exercises the bug in #70515:
@@ -5224,6 +5468,7 @@ internal static void testTransportRemovesConnsAfterIdle(testing.TB t, testMode m
     if (testing.Short()) {
         t.Skip(skippingInShortModeˢ);
     }
+
     var timeout = 1 * time.ΔSecond;
     var trFunc = (ж<Δhttp.Transport> tr) => {
         tr.Value.MaxConnsPerHost = 1;
@@ -5233,6 +5478,7 @@ internal static void testTransportRemovesConnsAfterIdle(testing.TB t, testMode m
     var cst = newClientServerTest(t, mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(xAddrˢ, (~r).RemoteAddr);
     })), (trFunc).OrTypedNilFunc(), optFakeNet.OrTypedNil());
+
     // makeRequest returns the local address a request was made from
     // (unique for each connection).
     var cstʗ1 = cst;
@@ -5244,13 +5490,16 @@ internal static void testTransportRemovesConnsAfterIdle(testing.TB t, testMode m
         (~resp).Body.Close();
         return (~resp).Header.Get(xAddrˢ);
     }
+
     @string addr1 = makeRequest();
+
     time.Sleep(timeout / 2);
     synctest.Wait();
     @string addr2 = makeRequest();
     if (addr1 != addr2) {
         t.Fatalf("two requests made within IdleConnTimeout should have used the same conn, but used %v, %v"u8, addr1, addr2);
     }
+
     time.Sleep(timeout);
     synctest.Wait();
     @string addr3 = makeRequest();
@@ -5267,6 +5516,7 @@ internal static void testTransportRemovesConnsAfterBroken(testing.TB t, testMode
     if (testing.Short()) {
         t.Skip(skippingInShortModeˢ);
     }
+
     var trFunc = (ж<Δhttp.Transport> tr) => {
         tr.Value.MaxConnsPerHost = 1;
         tr.Value.MaxIdleConnsPerHost = 1;
@@ -5275,6 +5525,7 @@ internal static void testTransportRemovesConnsAfterBroken(testing.TB t, testMode
         w.Header().Set(xAddrˢ, (~r).RemoteAddr);
     })), (trFunc).OrTypedNilFunc(), optFakeNet.OrTypedNil());
     cst.Value.li.Value.trackConns = true;
+
     // makeRequest returns the local address a request was made from
     // (unique for each connection).
     var cstʗ1 = cst;
@@ -5286,11 +5537,13 @@ internal static void testTransportRemovesConnsAfterBroken(testing.TB t, testMode
         (~resp).Body.Close();
         return (~resp).Header.Get(xAddrˢ);
     }
+
     @string addr1 = makeRequest();
     @string addr2 = makeRequest();
     if (addr1 != addr2) {
         t.Fatalf("successive requests should have used the same conn, but used %v, %v"u8, addr1, addr2);
     }
+
     // The connection breaks.
     synctest.Wait();
     (~(~(~cst).li).conns[0]).peer.Close();
@@ -5324,6 +5577,7 @@ internal static void testTransportRangeAndGzip(ж<testing.T> Ꮡt, testMode mode
         }
     }))).Value.ts;
     var c = ts.Client();
+
     var (req, _) = NewRequest(getˢ2, (~ts).URL, default!);
     (~req).Header.Set(rangeˢ, bytes711ˢ);
     var (res, err) = c.Do(req);
@@ -5339,14 +5593,13 @@ public static void TestTransportResponseCancelRace(ж<testing.T> Ꮡt) {
 }
 
 internal static void testTransportResponseCancelRace(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         // important that this response has a body.
         array<byte> b = new(1024);
         w.Write(b[..]);
     }))).Value.ts;
     var tr = (~ts.Client()).Transport._<ж<Δhttp.Transport>>();
+
     var (req, err) = NewRequest(getˢ2, (~ts).URL, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -5363,6 +5616,7 @@ internal static void testTransportResponseCancelRace(ж<testing.T> Ꮡt, testMod
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     (var req2, err) = NewRequest(getˢ2, (~ts).URL, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -5394,17 +5648,20 @@ internal static void testTransportContentEncodingCaseInsensitive(ж<testing.T> �
                 gz.Write(slice<byte>(encodedString));
                 gz.Close();
             }))).Value.ts;
+
             var (res, err) = ts.Client().Get((~ts).URL);
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
+
             (var body, err) = io.ReadAll((~res).Body);
             (~res).Body.Close();
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
+
             if (((sstring)body) != encodedString) {
-                tΔ1.Fatalf("Expected body %q, got: %q\n"u8, encodedString, ((@string)body));
+                tΔ1.Fatalf("Expected body %q, got: %q\n"u8, encodedString, (@string)body);
             }
         });
     }
@@ -5495,7 +5752,7 @@ internal static (nint n, error err) Write(this ж<logWritesConn> Ꮡc, slice<byt
 
         c.mu.Lock();
         defer(Ꮡc.of(logWritesConn.Ꮡmu).Unlock, ref ᒐ);
-        c.writes = append(c.writes, ((@string)p));
+        c.writes = append(c.writes, (@string)p);
         (n, err) = c.w.Write(p);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -5568,6 +5825,7 @@ public static partial void TestTransportFlushesBodyChunks(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         io.Copy(io.Discard, (~req).Body);
+
         // Unblock the transport's roundTrip goroutine.
         resBody.ᐸꟷ(new http_test_package.strings_ReaderжReader(strings.NewReader(http11204NoContentˢ)));
         var (res, ok) = ᐸꟷ(resc, ꟷ);
@@ -5576,6 +5834,7 @@ public static partial void TestTransportFlushesBodyChunks(ж<testing.T> Ꮡt) {
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         var want = new @string[]{
             "POST / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: x\r\nTransfer-Encoding: chunked\r\nAccept-Encoding: gzip\r\n\r\n"u8,
             "5\r\nnum0\n\r\n"u8,
@@ -5602,6 +5861,7 @@ internal static partial void testTransportFlushesRequestHeader(ж<testing.T> Ꮡ
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         builtin.close(gotReqʗ1);
     })));
+
     var (pr, pw) = io.Pipe();
     var (req, err) = NewRequest(postˢ, (~(~cst).ts).URL, new io.PipeReaderжReader(pr));
     if (err != default!) {
@@ -5625,6 +5885,7 @@ internal static partial void testTransportFlushesRequestHeader(ж<testing.T> Ꮡ
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     ᐸꟷ(gotReq);
     pw.Close();
     ᐸꟷ(gotRes);
@@ -5652,11 +5913,10 @@ public static void TestTransportPrefersResponseOverWriteError(ж<testing.T> Ꮡt
 }
 
 internal static void testTransportPrefersResponseOverWriteError(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
+
     runTimeSensitiveTest(Ꮡt, new time.Duration[]{
         1 * time.Millisecond,
         5 * time.Millisecond,
@@ -5671,6 +5931,7 @@ internal static void testTransportPrefersResponseOverWriteError(ж<testing.T> �
         try {
             http_internal_test_package.SetRSTAvoidanceDelay(tΔ1, timeout);
             tΔ1.Logf("set RST avoidance delay to %v"u8, timeout);
+
             UntypedInt contentLengthLimit = /* 1024 * 1024 */ 1048576; // 1MB
             var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
                 if ((~r).ContentLength >= contentLengthLimit) {
@@ -5686,7 +5947,9 @@ internal static void testTransportPrefersResponseOverWriteError(ж<testing.T> �
             defer(cstʗ1.close, ref ᒐ);
             var ts = cst.Value.ts;
             var c = ts.Client();
+
             nint count = 100;
+
             @string bigBody = strings.Repeat("a"u8, contentLengthLimit * 2);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             defer(Ꮡwg.Wait, ref ᒐ);
@@ -5698,6 +5961,7 @@ internal static void testTransportPrefersResponseOverWriteError(ж<testing.T> �
                 ));
                 return (new http_test_package.wgReadCloserжReadCloser(body), default!);
             };
+
             for (nint i = 0; i < count; i++) {
                 var (reqBody, _) = getBody();
                 var (req, err) = NewRequest(putˢ, (~ts).URL, reqBody);
@@ -5707,6 +5971,7 @@ internal static void testTransportPrefersResponseOverWriteError(ж<testing.T> �
                 }
                 req.Value.ContentLength = (int64)len(bigBody);
                 req.Value.GetBody = getBody;
+
                 (var resp, err) = c.Do(req);
                 if (err != default!){
                     return fmt.Errorf("Do %d: %v"u8, i, err);
@@ -5812,8 +6077,8 @@ public static void TestTransportReuseConnEmptyResponseBody(ж<testing.T> Ꮡt) {
 internal static void testTransportReuseConnEmptyResponseBody(ж<testing.T> Ꮡt, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(xAddrˢ, (~r).RemoteAddr);
+        // Empty response body.
     })));
-    // Empty response body.
     nint n = 100;
     if (testing.Short()) {
         n = 10;
@@ -5853,11 +6118,13 @@ public static partial void TestNoCrashReturningTransportAltConn(ж<testing.T> �
         var ln = newLocalListener(Ꮡt);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         http_internal_test_package.SetPendingDialHooks(() => {
             Ꮡwg.Add(1);
         }, Ꮡwg.Done);
         defer(http_internal_test_package.SetPendingDialHooks, (Action)(default!), (Action)(default!), ref ᒐ);
+
         var testDone = new channel<EmptyStruct>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), testDone, ref ᒐ);
         var certʗ1 = cert;
@@ -5882,12 +6149,16 @@ public static partial void TestNoCrashReturningTransportAltConn(ж<testing.T> �
             ᐸꟷ(testDoneʗ1);
             sc.Close();
         });
+
         @string addr = ln.Addr().String();
+
         var (req, _) = NewRequest(getˢ2, httpsFakeTldˢ, default!);
         var cancel = new channel<EmptyStruct>(0);
         req.Value.Cancel = cancel.WithDirection(GoChanDir.Recv);
+
         var doReturned = new channel<bool>(1);
         var madeRoundTripper = new channel<bool>(1);
+
                 var madeRoundTripperʗ1 = madeRoundTripper;
 
 
@@ -5925,12 +6196,14 @@ public static partial void TestNoCrashReturningTransportAltConn(ж<testing.T> �
             }
         ));
         var c = Ꮡ(new Client(Transport: new Δhttp.TransportжRoundTripper(tr)));
+
         (_, err) = c.Do(req);
         {
             var (ue, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok || !AreEqual((~ue).Err, http_internal_test_package.ExportErrRequestCanceledConn)) {
                 Ꮡt.Fatalf("Do error = %v; want url.Error with errRequestCanceledConn"u8, err);
             }
         }
+
         doReturned.ᐸꟷ(true);
         ᐸꟷ(madeRoundTripper);
         Ꮡwg.Wait();
@@ -5972,6 +6245,7 @@ internal static void testTransportReuseConnection_Gzip(ж<testing.T> Ꮡt, testM
 
 
 
+
     var trace = Ꮡ(new httptrace.ClientTrace(
         GetConn: (@string hostPort) => {
             Ꮡt.Logf("GetConn(%q)"u8, hostPort);
@@ -5990,6 +6264,7 @@ internal static void testTransportReuseConnection_Gzip(ж<testing.T> Ꮡt, testM
         }
     ));
     var ctx = httptrace.WithClientTrace(context_package.Background(), trace);
+
     for (nint i = 0; i < 2; i++) {
         var (req, _) = NewRequest(getˢ2, (~ts).URL, default!);
         req = req.WithContext(ctx);
@@ -6003,10 +6278,10 @@ internal static void testTransportReuseConnection_Gzip(ж<testing.T> Ꮡt, testM
                 Ꮡt.Errorf("%d. ReadFull = %v, %v"u8, i, n, errΔ1);
             }
         }
+        // Note: no res.Body.Close call. It should work without it,
+        // since the flate.Reader's internal buffering will hit EOF
+        // and that should be sufficient.
     }
-    // Note: no res.Body.Close call. It should work without it,
-    // since the flate.Reader's internal buffering will hit EOF
-    // and that should be sufficient.
     @string a1 = ᐸꟷ(addr);
     @string a2 = ᐸꟷ(addr);
     if (a1 != a2) {
@@ -6031,11 +6306,12 @@ internal static void testTransportResponseHeaderLength(ж<testing.T> Ꮡt, testM
         }
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             if ((~(~r).URL).Path == "/long"u8) {
-                w.Header().Set(longˢ, strings.Repeat("a"u8, (1 << (int)(20))));
+                w.Header().Set(longˢ, strings.Repeat("a"u8, 1 << 20));
             }
         }))).Value.ts;
         var c = ts.Client();
-        (~c).Transport._<ж<Δhttp.Transport>>().Value.MaxResponseHeaderBytes = ((int64)512 << (int)(10));
+        (~c).Transport._<ж<Δhttp.Transport>>().Value.MaxResponseHeaderBytes = (int64)512 << 10;
+
         {
             var (resΔ1, errΔ1) = c.Get((~ts).URL); if (errΔ1 != default!){
                 Ꮡt.Fatal(errΔ1);
@@ -6043,6 +6319,7 @@ internal static void testTransportResponseHeaderLength(ж<testing.T> Ꮡt, testM
                 (~resΔ1).Body.Close();
             }
         }
+
         var (res, err) = c.Get((~ts).URL + "/long"u8);
         if (err == default!) {
             var resʗ1 = res;
@@ -6130,7 +6407,9 @@ internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, 
         });
         var cstʗ1 = cst;
         defer(cstʗ1.close, ref ᒐ);
+
         cst.Value.tr.Value.ExpectContinueTimeout = 1 * time.ΔSecond;
+
         ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);                    // guards buf
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         void logf(@string format, params ꓸꓸꓸany argsʗp) {
@@ -6145,11 +6424,13 @@ internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, 
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
         @string addrStr = (~(~cst).ts).Listener.Addr().String();
         var (ip, port, err) = net.SplitHostPort(addrStr);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         // Install a fake DNS server.
         var ctx = context_package.WithValue(context_package.Background(), new nettrace.LookupIPAltResolverKey(nil), (slice<net.IPAddr>, error) (context.Context ctxΔ1, @string network, @string host) => {
             if (host != "dns-is-faked.golang"u8) {
@@ -6158,6 +6439,7 @@ internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, 
             }
             return (new net.IPAddr[]{new(IP: net.ParseIP(ip))}.slice(), default!);
         });
+
         @string body = someBodyˢ;
         var (req, _) = NewRequest(postˢ, cst.scheme() + "://dns-is-faked.golang:"u8 + port, new http_test_package.strings_ReaderжReader(strings.NewReader(body)));
         req.Value.Header[xFooMultipleValsˢ] = new @string[]{"bar"u8, "baz"u8}.slice();
@@ -6247,6 +6529,7 @@ internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, 
             trace.Value = new httptrace.ClientTrace(nil);
         }
         req = req.WithContext(httptrace.WithClientTrace(ctx, trace));
+
         (~req).Header.Set(expectˢ, continueˢ);
         (var res, err) = (~cst).c.Do(req);
         if (err != default!) {
@@ -6262,15 +6545,18 @@ internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, 
             Ꮡt.Fatalf("Got %q, %v; want %q, 200 OK"u8, slurp, (~res).Status, resBody);
         }
         (~res).Body.Close();
+
         if (noHooks) {
             // Done at this point. Just testing a full HTTP
             // requests can happen with a trace pointing to a zero
             // ClientTrace, full of nil func pointers.
             return;
         }
+
         Ꮡmu.Lock();
         @string got = buf.String();
         Ꮡmu.Unlock();
+
         void wantOnce(@string subΔ1) {
             if (strings.Count(got, subΔ1) != 1) {
                 Ꮡt.Errorf("expected substring %q exactly once in output."u8, subΔ1);
@@ -6312,6 +6598,7 @@ internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, 
         if (Ꮡt.Failed()) {
             Ꮡt.Errorf("Output:\n%s"u8, got);
         }
+
         // And do a second request:
         (req, _) = NewRequest(getˢ2, cst.scheme() + "://dns-is-faked.golang:"u8 + port, default!);
         req = req.WithContext(httptrace.WithClientTrace(ctx, trace));
@@ -6323,9 +6610,11 @@ internal static void testTransportEventTrace(ж<testing.T> Ꮡt, testMode mode, 
             Ꮡt.Fatal((~res).Status);
         }
         (~res).Body.Close();
+
         Ꮡmu.Lock();
         got = buf.String();
         Ꮡmu.Unlock();
+
         @string sub = gettingConnForDnsIsFakedˢ;
         {
             nint gotn = strings.Count(got, sub);
@@ -6364,6 +6653,7 @@ internal static void testTransportEventTraceTLSVerify(ж<testing.T> Ꮡt, testMo
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     var logfʗ1 = logf;
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         Ꮡt.Error(unexpectedRequestˢ);
@@ -6374,8 +6664,10 @@ internal static void testTransportEventTraceTLSVerify(ж<testing.T> Ꮡt, testMo
             return (len(p), default!);
         })), ""u8, 0);
     }).Value.ts;
+
     var certpool = x509.NewCertPool();
     certpool.AddCert(ts.Certificate());
+
     var c = Ꮡ(new Client(Transport: new Δhttp.TransportжRoundTripper(Ꮡ(new Transport(
         TLSClientConfig: Ꮡ(new tls.Config(
             ServerName: "dns-is-faked.golang"u8,
@@ -6383,6 +6675,7 @@ internal static void testTransportEventTraceTLSVerify(ж<testing.T> Ꮡt, testMo
         ))
     )))
     ));
+
         var logfʗ3 = logf;
 
         var logfʗ4 = logf;
@@ -6394,23 +6687,28 @@ internal static void testTransportEventTraceTLSVerify(ж<testing.T> Ꮡt, testMo
             logfʗ4("TLSHandshakeDone: ConnectionState = %v \n err = %v"u8, s, errΔ1);
         }
     ));
+
     var (req, _) = NewRequest(getˢ2, (~ts).URL, default!);
     req = req.WithContext(httptrace.WithClientTrace(context_package.Background(), trace));
     var (_, err) = c.Do(req);
     if (err == default!) {
         Ꮡt.Error(expectedRequestToFailTlsˢ);
     }
+
     Ꮡmu.Lock();
     @string got = buf.String();
     Ꮡmu.Unlock();
+
     void wantOnce(@string sub) {
         if (strings.Count(got, sub) != 1) {
             Ꮡt.Errorf("expected substring %q exactly once in output."u8, sub);
         }
     }
+
     wantOnce(tlsHandshakeStartˢ2);
     wantOnce(tlsHandshakeDoneˢ2);
     wantOnce(errTlsFailedToVerifyˢ);
+
     if (Ꮡt.Failed()) {
         Ꮡt.Errorf("Output:\n%s"u8, got);
     }
@@ -6450,6 +6748,7 @@ public static void TestTransportEventTraceRealDNS(ж<testing.T> Ꮡt) {
         var trʗ1 = tr;
         defer(trʗ1.CloseIdleConnections, ref ᒐ);
         var c = Ꮡ(new Client(Transport: new Δhttp.TransportжRoundTripper(tr)));
+
         ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);                    // guards buf
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         void logf(@string format, params ꓸꓸꓸany argsʗp) {
@@ -6464,6 +6763,7 @@ public static void TestTransportEventTraceRealDNS(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
         var (req, _) = NewRequest(getˢ2, httpDnsShouldNotResolveˢ, default!);
             var logfʗ1 = logf;
 
@@ -6487,14 +6787,17 @@ public static void TestTransportEventTraceRealDNS(ж<testing.T> Ꮡt) {
             }
         ));
         req = req.WithContext(httptrace.WithClientTrace(context_package.Background(), trace));
+
         var (resp, err) = c.Do(req);
         if (err == default!) {
             (~resp).Body.Close();
             Ꮡt.Fatal(expectedErrorDuringDnsˢ);
         }
+
         Ꮡmu.Lock();
         @string got = buf.String();
         Ꮡmu.Unlock();
+
         void wantSub(@string sub) {
             if (!strings.Contains(got, sub)) {
                 Ꮡt.Errorf("expected substring %q in output."u8, sub);
@@ -6554,6 +6857,7 @@ internal static void testTLSHandshakeTrace(ж<testing.T> Ꮡt, testMode mode) {
     try {
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> rΔ1) => {
         }))).Value.ts;
+
         ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
         bool start = default!;
         bool done = default!;
@@ -6582,12 +6886,14 @@ internal static void testTLSHandshakeTrace(ж<testing.T> Ꮡt, testMode mode) {
                 finally { ᒐ.Run(); }
             }
         ));
+
         var c = ts.Client();
         var (req, err) = NewRequest(getˢ2, (~ts).URL, default!);
         if (err != default!) {
             Ꮡt.Fatal(unableToConstructTestˢ, err);
         }
         req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace));
+
         (var r, err) = c.Do(req);
         if (err != default!) {
             Ꮡt.Fatal(unexpectedErrorMakingˢ, err);
@@ -6612,16 +6918,18 @@ public static void TestTransportMaxIdleConns(ж<testing.T> Ꮡt) {
 
 internal static void testTransportMaxIdleConns(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+        // No body for convenience.
     }))).Value.ts;
-    // No body for convenience.
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
     tr.Value.MaxIdleConns = 4;
+
     var (ip, port, err) = net.SplitHostPort((~ts).Listener.Addr().String());
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     var ctx = context_package.WithValue(context_package.Background(), new nettrace.LookupIPAltResolverKey(nil), (slice<net.IPAddr>, error) (context.Context ctxΔ1, @string _Δp1, @string host) => (new net.IPAddr[]{new(IP: net.ParseIP(ip))}.slice(), default!));
+
     var cʗ1 = c;
     var ctxʗ1 = ctx;
     void hitHost(nint n) {
@@ -6647,6 +6955,7 @@ internal static void testTransportMaxIdleConns(ж<testing.T> Ꮡt, testMode mode
             Ꮡt.Fatalf("idle conn keys mismatch.\n got: %q\nwant: %q\n"u8, got, want);
         }
     }
+
     // Now hitting the 5th host should kick out the first host:
     hitHost(4);
     want = new @string[]{
@@ -6675,17 +6984,19 @@ internal static void testTransportIdleConnTimeout(ж<testing.T> Ꮡt, testMode m
         if (testing.Short()) {
             Ꮡt.Skip(skippingInShortModeˢ);
         }
+
         var timeout = 1 * time.Millisecond;
 timeoutLoop:
         while (ᐧ) {
             var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+                // No body for convenience.
             })));
-            // No body for convenience.
             var tr = cst.Value.tr;
             tr.Value.IdleConnTimeout = timeout;
             var trʗ1 = tr;
             defer(trʗ1.CloseIdleConnections, ref ᒐ);
             var c = Ꮡ(new Client(Transport: new Δhttp.TransportжRoundTripper(tr)));
+
             var trʗ2 = tr;
             slice<@string> idleConns() {
                 if (mode == http2Mode){
@@ -6694,6 +7005,7 @@ timeoutLoop:
                     return trʗ2.IdleConnStrsForTesting();
                 }
             }
+
             @string conn = default!;
             var cʗ1 = c;
             var cstʗ1 = cst;
@@ -6743,6 +7055,7 @@ timeoutLoop:
                 }
                 time.Sleep(timeout / 2);
             }
+
             var idleConnsʗ2 = idleConns;
             waitCondition(new http_test_package.testing_TжTB(Ꮡt), timeout / 2, (time.Duration d) => {
                 {
@@ -6783,14 +7096,17 @@ internal static void testIdleConnH2Crash(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
+            // nothing
         })));
-        // nothing
+
         var (ctx, cancel) = context_package.WithCancel(context_package.Background());
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         var sawDoErr = new channel<bool>(1);
         var testDone = new channel<EmptyStruct>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), testDone, ref ᒐ);
+
         cst.Value.tr.Value.IdleConnTimeout = 5 * time.Millisecond;
         var cancelʗ2 = cancel;
         var sawDoErrʗ1 = sawDoErr;
@@ -6811,7 +7127,9 @@ internal static void testIdleConnH2Crash(ж<testing.T> Ꮡt, testMode mode) {
                     return (default!, errors.New(bogusˢ));
                 }
             }
+
             cancelʗ2();
+
             var selᴛ79 = sawDoErrʗ1;
             var selᴛ80 = testDoneʗ1;
             switch (select(ᐸꟷ(selᴛ79, ꓸꓸꓸ), ᐸꟷ(selᴛ80, ꓸꓸꓸ))) {
@@ -6823,6 +7141,7 @@ internal static void testIdleConnH2Crash(ж<testing.T> Ꮡt, testMode mode) {
             }}
             return (new tls.ConnжConn(c), default!);
         };
+
         var (req, _) = NewRequest(getˢ2, (~(~cst).ts).URL, default!);
         req = req.WithContext(ctx);
         var (res, err) = (~cst).c.Do(req);
@@ -6831,6 +7150,7 @@ internal static void testIdleConnH2Crash(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Fatal(unexpectedSuccessˢ);
         }
         sawDoErr.ᐸꟷ(true);
+
         // Wait for the explosion.
         time.Sleep((~(~cst).tr).IdleConnTimeout * 10);
     }
@@ -6864,11 +7184,13 @@ internal static readonly @string httpFakeTldˢ2 = "http://fake.tld/"u8;
 // back to the caller.
 public static void TestTransportReturnsPeekError(ж<testing.T> Ꮡt) {
     var errValue = errors.New(specificErrorValueˢ);
+
     var wrote = new channel<EmptyStruct>(0);
     var wroteʗ1 = wrote;
     var wroteOnce = sync.OnceFunc(() => {
         builtin.close(wroteʗ1);
     });
+
         var errValueʗ1 = errValue;
         var wroteʗ2 = wrote;
         var wroteOnceʗ1 = wroteOnce;
@@ -6918,6 +7240,7 @@ internal static void testTransportIDNA(ж<testing.T> Ꮡt, testMode mode) {
 
         @string uniDomain = uniDomainᶜ;
         @string punyDomain = punyDomainᶜ;
+
         @string port = default!;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             @string want = punyDomain + ":" + port;
@@ -6938,10 +7261,12 @@ internal static void testTransportIDNA(ж<testing.T> Ꮡt, testMode mode) {
                 tr.Value.TLSClientConfig.Value.InsecureSkipVerify = true;
             }
         });
+
         (var ip, port, var err) = net.SplitHostPort((~(~cst).ts).Listener.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         // Install a fake DNS server.
         var ctx = context_package.WithValue(context_package.Background(), new nettrace.LookupIPAltResolverKey(nil), (slice<net.IPAddr>, error) (context.Context ctxΔ1, @string network, @string host) => {
             if (host != punyDomain) {
@@ -6950,6 +7275,7 @@ internal static void testTransportIDNA(ж<testing.T> Ꮡt, testMode mode) {
             }
             return (new net.IPAddr[]{new(IP: net.ParseIP(ip))}.slice(), default!);
         });
+
         var (req, _) = NewRequest(getˢ2, cst.scheme() + "://"u8 + uniDomain + ":"u8 + port, default!);
         var trace = Ꮡ(new httptrace.ClientTrace(
             GetConn: (@string hostPort) => {
@@ -6965,6 +7291,7 @@ internal static void testTransportIDNA(ж<testing.T> Ꮡt, testMode mode) {
             }
         ));
         req = req.WithContext(httptrace.WithClientTrace(ctx, trace));
+
         (var res, err) = (~cst).tr.RoundTrip(req);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -7003,6 +7330,7 @@ internal static void testTransportProxyConnectHeader(ж<testing.T> Ꮡt, testMod
         }
         cΔ1.Close();
     }))).Value.ts;
+
     var c = ts.Client();
     var tsʗ1 = ts;
     (~c).Transport._<ж<Δhttp.Transport>>().Value.Proxy = (ж<Δhttp.Request> rΔ2) => url.Parse((~tsʗ1).URL);
@@ -7010,11 +7338,13 @@ internal static void testTransportProxyConnectHeader(ж<testing.T> Ꮡt, testMod
         ["User-Agent"u8] = new @string[]{"foo"u8}.slice(),
         ["Other"u8] = new @string[]{"bar"u8}.slice()
     });
+
     var (res, err) = c.Get(httpsDummyTldˢ); // https to force a CONNECT
     if (err == default!) {
         (~res).Body.Close();
         Ꮡt.Errorf("unexpected success"u8);
     }
+
     var r = ᐸꟷ(reqc);
     {
         @string got = (~r).Header.Get(userAgentˢ2);
@@ -7052,6 +7382,7 @@ internal static void testTransportProxyGetConnectHeader(ж<testing.T> Ꮡt, test
         }
         cΔ1.Close();
     }))).Value.ts;
+
     var c = ts.Client();
     var tsʗ1 = ts;
     (~c).Transport._<ж<Δhttp.Transport>>().Value.Proxy = (ж<Δhttp.Request> rΔ2) => url.Parse((~tsʗ1).URL);
@@ -7064,11 +7395,13 @@ internal static void testTransportProxyGetConnectHeader(ж<testing.T> Ꮡt, test
             ["User-Agent"u8] = new @string[]{"foo2"u8}.slice(),
             ["Other"u8] = new @string[]{"bar2"u8}.slice()
         }), default!);
+
     var (res, err) = c.Get(httpsDummyTldˢ); // https to force a CONNECT
     if (err == default!) {
         (~res).Body.Close();
         Ꮡt.Errorf("unexpected success"u8);
     }
+
     var r = ᐸꟷ(reqc);
     {
         @string got = (~r).Header.Get(userAgentˢ2);
@@ -7184,18 +7517,22 @@ internal static readonly @string wantᶜ3 = "unknown status code"u8;
 // See Issue https://golang.org/issues/21701
 public static partial void TestMissingStatusNoPanic(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string want = wantᶜ3;
+
     var ln = newLocalListener(Ꮡt);
     @string addr = ln.Addr().String();
     var done = new channel<bool>(0);
     @string fullAddrURL = fmt.Sprintf("http://%s"u8, addr);
     @string raw = "HTTP/1.1 400\r\n"u8 + "Date: Wed, 30 Aug 2017 19:09:27 GMT\r\n"u8 + "Content-Type: text/html; charset=utf-8\r\n"u8 + "Content-Length: 10\r\n"u8 + "Last-Modified: Wed, 30 Aug 2017 19:02:02 GMT\r\n"u8 + "Vary: Accept-Encoding\r\n\r\n"u8 + "Aloha Olaa"u8;
+
     var doneʗ1 = done;
     var lnʗ1 = ln;
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
             defer(ᴛ1 => builtin.close(ᴛ1), doneʗ1, ref ᒐ);
+
             var (conn, _) = lnʗ1.Accept();
             if (conn != default!) {
                 io.WriteString(new http_test_package.net_ConnᴠWriter(conn), raw);
@@ -7206,11 +7543,14 @@ public static partial void TestMissingStatusNoPanic(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     var (proxyURL, err) = url.Parse(fullAddrURL);
     if (err != default!) {
         Ꮡt.Fatalf("proxyURL: %v"u8, err);
     }
+
     var tr = Ꮡ(new Transport(Proxy: ProxyURL(proxyURL)));
+
     var (req, _) = NewRequest(getˢ2, httpsGolangOrgˢ, default!);
     (var res, err, var panicked) = doFetchCheckPanic(tr, req);
     if (panicked) {
@@ -7220,9 +7560,11 @@ public static partial void TestMissingStatusNoPanic(ж<testing.T> Ꮡt) {
         io.Copy(io.Discard, (~res).Body);
         (~res).Body.Close();
     }
+
     if (err == default! || !strings.Contains(err.Error(), want)) {
         Ꮡt.Errorf("got=%v want=%q"u8, err, want);
     }
+
     ln.Close();
     ᐸꟷ(done);
 }
@@ -7260,15 +7602,18 @@ internal static void testNoBodyOnChunked304Response(ж<testing.T> Ꮡt, testMode
         buf.Value.Writer.Value.Flush();
         conn.Close();
     })));
+
     // Our test server above is sending back bogus data after the
     // response (the "0\r\n\r\n" part), which causes the Transport
     // code to log spam. Disable keep-alives so we never even try
     // to reuse the connection.
     cst.Value.tr.Value.DisableKeepAlives = true;
+
     var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (!AreEqual((~res).Body, NoBody)) {
         Ꮡt.Errorf("Unexpected body on 304 response"u8);
     }
@@ -7324,8 +7669,6 @@ public static void TestClientTimeoutKillsConn_BeforeHeaders(ж<testing.T> Ꮡt) 
 internal static readonly object unexpectedGetSuccessˢ = (@string)"unexpected Get success"u8;
 
 internal static void testClientTimeoutKillsConn_BeforeHeaders(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var timeout = 1 * time.Millisecond;
     while (ᐧ) {
         var inHandler = new channel<bool>(0);
@@ -7338,6 +7681,7 @@ internal static void testClientTimeoutKillsConn_BeforeHeaders(ж<testing.T> Ꮡt
             GoFrame ᒐ = default;
             try {
                 ᐸꟷ(r.Context().Done());
+
                 var selᴛ81 = cancelHandlerʗ1;
                 var selᴛ82 = inHandlerʗ1.ᐸꟷ(true, ꓸꓸꓸ);
                 switch (select(ᐸꟷ(selᴛ81, ꓸꓸꓸ), selᴛ82)) {
@@ -7351,6 +7695,7 @@ internal static void testClientTimeoutKillsConn_BeforeHeaders(ж<testing.T> Ꮡt
                 defer(() => {
                     handlerDoneʗ2.ᐸꟷ(true);
                 }, ref ᒐ);
+
                 // Read from the conn until EOF to verify that it was correctly closed.
                 var (conn, _, errΔ1) = w._<Hijacker>().Hijack();
                 if (errΔ1 != default!) {
@@ -7366,21 +7711,24 @@ internal static void testClientTimeoutKillsConn_BeforeHeaders(ж<testing.T> Ꮡt
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         })));
+
         cst.Value.c.Value.Timeout = timeout;
+
         var (_, err) = (~cst).c.Get((~(~cst).ts).URL);
         if (err == default!) {
             builtin.close(cancelHandler);
             Ꮡt.Fatal(unexpectedGetSuccessˢ);
         }
+
         var tooSlow = time.NewTimer(timeout * 10);
         var selᴛ83 = (~tooSlow).C;
         var selᴛ84 = inHandler;
         switch (select(ᐸꟷ(selᴛ83, ꓸꓸꓸ), ᐸꟷ(selᴛ84, ꓸꓸꓸ))) {
         case 0 when selᴛ83.ꟷᐳ(out _): {
-            Ꮡt.Logf("no handler seen in %v; retrying with longer timeout"u8, // If we didn't get into the Handler, that probably means the builder was
- // just slow and the Get failed in that time but never made it to the
- // server. That's fine; we'll try again with a longer timeout.
- timeout);
+            // If we didn't get into the Handler, that probably means the builder was
+            // just slow and the Get failed in that time but never made it to the
+            // server. That's fine; we'll try again with a longer timeout.
+            Ꮡt.Logf("no handler seen in %v; retrying with longer timeout"u8, timeout);
             builtin.close(cancelHandler);
             cst.close();
             timeout *= 2;
@@ -7417,6 +7765,7 @@ internal static void testClientTimeoutKillsConn_AfterHeaders(ж<testing.T> Ꮡt,
         try {
             w.Header().Set(contentLengthˢ, "100"u8);
             w._<Flusher>().Flush();
+
             var selᴛ85 = cancelHandlerʗ1;
             var selᴛ86 = inHandlerʗ1.ᐸꟷ(true, ꓸꓸꓸ);
             switch (select(ᐸꟷ(selᴛ85, ꓸꓸꓸ), selᴛ86)) {
@@ -7430,12 +7779,14 @@ internal static void testClientTimeoutKillsConn_AfterHeaders(ж<testing.T> Ꮡt,
             defer(() => {
                 handlerDoneʗ2.ᐸꟷ(true);
             }, ref ᒐ);
+
             var (conn, _, errΔ1) = w._<Hijacker>().Hijack();
             if (errΔ1 != default!) {
                 Ꮡt.Error(errΔ1);
                 return;
             }
             conn.Write(slice<byte>("foo"u8));
+
             (var n, errΔ1) = conn.Read(new byte[]{0}.slice());
             // The error should be io.EOF or "read tcp
             // 127.0.0.1:35827->127.0.0.1:40290: read: connection
@@ -7450,6 +7801,7 @@ internal static void testClientTimeoutKillsConn_AfterHeaders(ж<testing.T> Ꮡt,
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     })));
+
     // Set Timeout to something very long but non-zero to exercise
     // the codepaths that check for it. But rather than wait for it to fire
     // (which would make the test slow), we send on the req.Cancel channel instead,
@@ -7458,11 +7810,13 @@ internal static void testClientTimeoutKillsConn_AfterHeaders(ж<testing.T> Ꮡt,
     var (req, _) = NewRequest(getˢ2, (~(~cst).ts).URL, default!);
     var cancelReq = new channel<EmptyStruct>(0);
     req.Value.Cancel = cancelReq.WithDirection(GoChanDir.Recv);
+
     var (res, err) = (~cst).c.Do(req);
     if (err != default!) {
         builtin.close(cancelHandler);
         Ꮡt.Fatalf("Get error: %v"u8, err);
     }
+
     // Cancel the request while the handler is still blocked on sending to the
     // inHandler channel. Then read it until it fails, to verify that the
     // connection is broken before the handler itself closes it.
@@ -7471,6 +7825,7 @@ internal static void testClientTimeoutKillsConn_AfterHeaders(ж<testing.T> Ꮡt,
     if (err == default!) {
         Ꮡt.Errorf("unexpected success; read %q, nil"u8, got);
     }
+
     // Now unblock the handler and wait for it to complete.
     ᐸꟷ(inHandler);
     ᐸꟷ(handlerDone);
@@ -7512,6 +7867,7 @@ internal static void testTransportResponseBodyWritableOnProtocolSwitch(ж<testin
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         })));
+
         var (req, _) = NewRequest(getˢ2, (~(~cst).ts).URL, default!);
         (~req).Header.Set(upgradeˢ, fooˢ);
         (~req).Header.Set(connectionˢ, upgradeˢ2);
@@ -7725,7 +8081,7 @@ internal partial struct testTransportRequestWriteRoundTrip_cases /*dyn*/ {
 }
 
 internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, testMode mode) {
-    var nBytes = (int64)(((int64)1 << (int)(10)));
+    var nBytes = (int64)((int64)1 << 10);
     var newFileFunc = (io.Reader r, Action done, error err) () => {
         Action done = default!;
         error err = default!;
@@ -7733,6 +8089,7 @@ internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, test
         if (err != default!) {
             return (default!, default!, err);
         }
+
         // Write some bytes to the file to enable reading.
         {
             var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, nBytes); if (errΔ1 != default!) {
@@ -7744,15 +8101,19 @@ internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, test
                 return (default!, default!, fmt.Errorf("failed to seek to front: %v"u8, errΔ2));
             }
         }
+
         var fʗ1 = f;
         done = () => {
             fʗ1.Close();
             os.Remove(fʗ1.Name());
         };
+
         return (new http_test_package.os_FileжReader(f), done, default!);
     };
+
     var newBufferFunc = (io.Reader, Action, error) () => (new http_test_package.bytes_BufferжReader(bytes.NewBuffer(new slice<byte>((nint)(nBytes)))), () => {
         }, default!);
+
     var cases = new testTransportRequestWriteRoundTrip_cases[]{
         new(
             name: "file, length"u8,
@@ -7784,6 +8145,7 @@ internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, test
             readerFunc: newBufferFunc
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in cases) {
         ref var tc = ref heap(new testTransportRequestWriteRoundTrip_cases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -7798,6 +8160,7 @@ internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, test
                 }
                 var cleanupʗ1 = cleanup;
                 defer(cleanupʗ1, ref ᒐ);
+
                 var tConn = Ꮡ(new testMockTCPConn(nil));
                 var tConnʗ1 = tConn;
                 var trFunc = (ж<Δhttp.Transport> tr) => {
@@ -7808,14 +8171,17 @@ internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, test
                         if (errΔ1 != default!) {
                             return (default!, errΔ1);
                         }
+
                         var (tcpConn, ok) = conn._<ж<net.TCPConn>>(ᐧ);
                         if (!ok) {
                             return (default!, fmt.Errorf("%s/%s does not provide a *net.TCPConn"u8, network, addr));
                         }
+
                         tConnʗ2.Value.TCPConn = tcpConn;
                         return (new http_test_package.testMockTCPConnжConn(tConnʗ2), default!);
                     };
                 };
+
                 var cst = newClientServerTest(
                     new http_test_package.testing_TжTB(tΔ1),
                     mode,
@@ -7825,6 +8191,7 @@ internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, test
                         w.WriteHeader(200);
                     })),
                     (trFunc).OrTypedNilFunc());
+
                 (var req, err) = NewRequest(putˢ, (~(~cst).ts).URL, r);
                 if (err != default!) {
                     tΔ1.Fatal(err);
@@ -7840,6 +8207,7 @@ internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, test
                 if ((~resp).StatusCode != 200) {
                     tΔ1.Fatalf("status code = %d; want 200"u8, (~resp).StatusCode);
                 }
+
                 var expectedReadFrom = tcʗ1.expectedReadFrom;
                 if (mode != http1Mode) {
                     expectedReadFrom = false;
@@ -7847,6 +8215,7 @@ internal static void testTransportRequestWriteRoundTrip(ж<testing.T> Ꮡt, test
                 if (!(~tConn).ReadFromCalled && expectedReadFrom) {
                     tΔ1.Fatalf("did not call ReadFrom"u8);
                 }
+
                 if ((~tConn).ReadFromCalled && !expectedReadFrom) {
                     tΔ1.Fatalf("ReadFrom was unexpectedly invoked"u8);
                 }
@@ -7913,11 +8282,13 @@ public static void TestTransportClone(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("cloned field t2.%s is zero"u8, sf.Name);
         }
     }
+
     {
         var (_, ok) = (~tr2).TLSNextProto[fooˢ, ꟷ]; if (!ok) {
             Ꮡt.Errorf("cloned Transport lacked TLSNextProto 'foo' key"u8);
         }
     }
+
     // But test that a nil TLSNextProto is kept nil:
     tr = @new<Δhttp.Transport>();
     tr2 = tr.Clone();
@@ -7937,7 +8308,6 @@ public static void TestIs408(ж<testing.T> Ꮡt) {
         new("HTTP/1.1 408"u8, true),
         new("HTTP/1.8 408"u8, true),
         new("HTTP/2.0 408"u8, false), // maybe h2c would do this? but false for now.
-
         new("HTTP/1.1 408 "u8, true),
         new("HTTP/1.1 40"u8, false),
         new("http/1.0 408"u8, false),
@@ -7964,9 +8334,12 @@ internal static void testTransportIgnores408(ж<testing.T> Ꮡt, testMode mode) 
     try {
         // Not parallel. Relies on mutating the log package's global Output.
         defer(log.SetOutput, log.Writer(), ref ᒐ);
+
         ref var logout = ref heap(new strings.Builder(), out var Ꮡlogout);
         log.SetOutput(new http_test_package.strings_BuilderжWriter(Ꮡlogout));
+
         @string target = targetᶜ1;
+
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             GoFrame ᒐ = default;
             try {
@@ -8001,6 +8374,7 @@ internal static void testTransportIgnores408(ж<testing.T> Ꮡt, testMode mode) 
         if (((sstring)slurp) != "ok"u8) {
             Ꮡt.Fatalf("got %q; want ok"u8, slurp);
         }
+
         var cstʗ1 = cst;
         waitCondition(new http_test_package.testing_TжTB(Ꮡt), 1 * time.Millisecond, (time.Duration d) => {
             {
@@ -8091,7 +8465,9 @@ internal static void testTransportClosesBodyOnInvalidRequests(ж<testing.T> Ꮡt
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         Ꮡt.Errorf("Should not have been invoked"u8);
     }))).Value.ts;
+
     var (u, _) = url.Parse((~cst).URL);
+
     var tests = new testTransportClosesBodyOnInvalidRequests_tests[]{
         new(
             name: "invalid method"u8,
@@ -8143,6 +8519,7 @@ internal static void testTransportClosesBodyOnInvalidRequests(ж<testing.T> Ꮡt
             wantErr: @"no Host in request URL"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new testTransportClosesBodyOnInvalidRequests_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -8240,10 +8617,13 @@ public static void TestDontCacheBrokenHTTP2Conn(ж<testing.T> Ꮡt) {
 internal static void testDontCacheBrokenHTTP2Conn(ж<testing.T> Ꮡt, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
     })), (optQuietLog).OrTypedNilFunc());
+
     ref var brokenState = ref heap(new brokenState(), out var ᏑbrokenState);
+
     const nint numReqs = 5;
     ref var numDials = ref heap(new uint32(), out var ᏑnumDials);                // atomic
     ref var gotConns = ref heap(new uint32(), out var ᏑgotConns);
+
     cst.Value.tr.Value.Dial = (@string netw, @string addr) => {
         atomic.AddUint32(ᏑnumDials, 1);
         var (c, err) = net.Dial(netw, addr);
@@ -8253,14 +8633,17 @@ internal static void testDontCacheBrokenHTTP2Conn(ж<testing.T> Ꮡt, testMode m
         }
         return (new http_test_package.breakableConnжConn(Ꮡ(new breakableConn(c, ᏑbrokenState))), err);
     };
+
     for (nint i = 1; i <= numReqs; i++) {
         ᏑbrokenState.of(http_test_package.brokenState.ᏑMutex).Lock();
         brokenState.broken = false;
         ᏑbrokenState.of(http_test_package.brokenState.ᏑMutex).Unlock();
+
         // doBreak controls whether we break the TCP connection after the TLS
         // handshake (before the HTTP/2 handshake). We test a few failures
         // in a row followed by a final success.
         var doBreak = i != numReqs;
+
         var ctx = httptrace.WithClientTrace(context_package.Background(), Ꮡ(new httptrace.ClientTrace(
             GotConn: (httptrace.GotConnInfo info) => {
                 Ꮡt.Logf("got conn: %v, reused=%v, wasIdle=%v, idleTime=%v"u8, info.Conn.LocalAddr(), info.Reused, info.WasIdle, info.IdleTime);
@@ -8312,16 +8695,20 @@ public static void TestTransportDecrementConnWhenIdleConnRemoved(ж<testing.T> �
 
 internal static partial void testTransportDecrementConnWhenIdleConnRemoved(ж<testing.T> Ꮡt, testMode mode) {
     http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
+
     var h = new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         var (_, err) = w.Write(slice<byte>("foo"u8));
         if (err != default!) {
             Ꮡt.Fatalf("Write: %v"u8, err);
         }
     });
+
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(h)).Value.ts;
+
     var c = ts.Client();
     var tr = (~c).Transport._<ж<Δhttp.Transport>>();
     tr.Value.MaxConnsPerHost = 1;
+
     var errCh = new channel<error>(300);
     var cʗ1 = c;
     var errChʗ1 = errCh;
@@ -8344,6 +8731,7 @@ internal static partial void testTransportDecrementConnWhenIdleConnRemoved(ж<te
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 300; i++) {
         Ꮡwg.Add(1);
@@ -8360,6 +8748,7 @@ internal static partial void testTransportDecrementConnWhenIdleConnRemoved(ж<te
     }
     Ꮡwg.Wait();
     builtin.close(errCh);
+
     foreach (var err in errCh) {
         Ꮡt.Errorf("error occurred: %v"u8, err);
     }
@@ -8463,6 +8852,7 @@ internal static void testTransportRejectsSignInContentLength(ж<testing.T> Ꮡt,
         w.Header().Set(contentLengthˢ, "+3"u8);
         w.Write(slice<byte>("abc"u8));
     }))).Value.ts;
+
     var c = cst.Client();
     var (res, err) = c.Get((~cst).URL);
     if (err == default! || res != nil) {
@@ -8540,6 +8930,7 @@ internal static partial void testTransportRace(ж<Δhttp.Request> Ꮡreq) {
         var pwʗ1 = pw;
         defer(() => pwʗ1.Close(), ref ᒐ);
         var dr = Ꮡ(new delegateReader(c: new channel<io.Reader>(0)));
+
             var drʗ1 = dr;
             var pwʗ2 = pw;
         var t = Ꮡ(new Transport(
@@ -8547,6 +8938,7 @@ internal static partial void testTransportRace(ж<Δhttp.Request> Ꮡreq) {
         ));
         var tʗ1 = t;
         defer(tʗ1.CloseIdleConnections, ref ᒐ);
+
         var quitReadCh = new channel<EmptyStruct>(0);
         // Wait for the request before replying with a dummy response:
         var drʗ2 = dr;
@@ -8556,6 +8948,7 @@ internal static partial void testTransportRace(ж<Δhttp.Request> Ꮡreq) {
             GoFrame ᒐ = default;
             try {
                 defer(ᴛ1 => builtin.close(ᴛ1), quitReadChʗ1, ref ᒐ);
+
                 var (reqΔ1, err) = ReadRequest(bufio.NewReader(new io.PipeReaderжReader(prʗ2)));
                 if (err == default!) {
                     // Ensure all the body is read; otherwise
@@ -8570,6 +8963,7 @@ internal static partial void testTransportRace(ж<Δhttp.Request> Ꮡreq) {
                     break;
                 }
                 case 1: {
+                    // Ensure delegate is closed so Read doesn't block forever.
                     builtin.close((~drʗ2).c);
                     break;
                 }}
@@ -8577,12 +8971,14 @@ internal static partial void testTransportRace(ж<Δhttp.Request> Ꮡreq) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        // Ensure delegate is closed so Read doesn't block forever.
+
         t.RoundTrip(Ꮡreq);
+
         // Ensure the reader returns before we reset req.Body to prevent
         // a data race on req.Body.
         pw.Close();
         ᐸꟷ(quitReadCh);
+
         req.Body = save;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -8605,11 +9001,13 @@ public static void TestErrorWriteLoopRace(ж<testing.T> Ꮡt) {
             var (ctx, cancel) = context_package.WithTimeout(context_package.Background(), delay);
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
+
             var r = bytes.NewBuffer(new slice<byte>(10000));
             var (req, err) = NewRequestWithContext(ctx, MethodPost, httpExampleComˢ, new http_test_package.bytes_BufferжReader(r));
             if (err != default!) {
                 Ꮡt.Fatal(err);
             }
+
             testTransportRace(req);
         }
     }
@@ -8633,11 +9031,14 @@ internal static partial void testCancelRequestWhenSharingConnection(ж<testing.T
         ᐸꟷ(ch);
         w.Header().Add(contentLengthˢ, "0"u8);
     }))).Value.ts;
+
     var client = ts.Client();
     var transport = (~client).Transport._<ж<Δhttp.Transport>>();
     transport.Value.MaxIdleConns = 1;
     transport.Value.MaxConnsPerHost = 1;
+
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+
     Ꮡwg.Add(1);
     var putidlec = new channel<channel<EmptyStruct>>(1);
     var reqerrc = new channel<error>(1);
@@ -8671,6 +9072,7 @@ internal static partial void testCancelRequestWhenSharingConnection(ж<testing.T
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     // Wait for the first request to receive a response and return the
     // connection to the idle pool.
     var selᴛ89 = reqerrc;
@@ -8695,6 +9097,7 @@ internal static partial void testCancelRequestWhenSharingConnection(ж<testing.T
     case 1 when selᴛ92.ꟷᐳ(out idlec): {
         break;
     }}
+
     Ꮡwg.Add(1);
     var (cancelctx, cancel) = context_package.WithCancel(context_package.Background());
     var cancelctxʗ1 = cancelctx;
@@ -8713,17 +9116,21 @@ internal static partial void testCancelRequestWhenSharingConnection(ж<testing.T
             if (!errors.Is(err, context_package.Canceled)) {
                 Ꮡt.Errorf("request 2: got err %v, want Canceled"u8, err);
             }
+
             // Unblock the first request.
             builtin.close(idlecʗ1);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     // Wait for the second request to arrive at the server, and then cancel
     // the request context.
     var r2c = ᐸꟷ(reqc);
     cancel();
+
     ᐸꟷ(idlec);
+
     builtin.close(r2c);
     Ꮡwg.Wait();
 }
@@ -8737,6 +9144,7 @@ internal static partial void testHandlerAbortRacesBodyRead(ж<testing.T> Ꮡt, t
         goǃ((ᴛ1, ᴛ2) => io.Copy(ᴛ1, ᴛ2), io.Discard, (~req).Body);
         throw panic(ErrAbortHandler);
     }))).Value.ts;
+
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 2; i++) {
         Ꮡwg.Add(1);
@@ -8843,6 +9251,7 @@ public static partial void TestTransportReqCancelerCleanupOnRequestBodyWriteErro
     try {
         var ln = newLocalListener(Ꮡt);
         @string addr = ln.Addr().String();
+
         var done = new channel<EmptyStruct>(0);
         var doneʗ1 = done;
         var lnʗ1 = ln;
@@ -8864,27 +9273,35 @@ public static partial void TestTransportReqCancelerCleanupOnRequestBodyWriteErro
             ᐸꟷ(doneʗ1);
             conn.Close();
         });
+
         var didRead = new channel<bool>(0);
         var didReadʗ1 = didRead;
         http_internal_test_package.SetReadLoopBeforeNextReadHook(() => {
             didReadʗ1.ᐸꟷ(true);
         });
         defer(http_internal_test_package.SetReadLoopBeforeNextReadHook, (Action)(default!), ref ᒐ);
+
         var tr = Ꮡ(new Transport(nil));
+
         // Send a request with a body guaranteed to fail on write.
-        var (req, err) = NewRequest(postˢ, "http://"u8 + addr, io.LimitReader(((neverEnding)(rune)'x'), ((int64)1 << (int)(30))));
+        var (req, err) = NewRequest(postˢ, "http://"u8 + addr, io.LimitReader((neverEnding)(rune)'x', (int64)1 << 30));
         if (err != default!) {
             Ꮡt.Fatalf("NewRequest: %v"u8, err);
         }
+
         (var resp, err) = tr.RoundTrip(req);
         if (err != default!) {
             Ꮡt.Fatalf("tr.RoundTrip: %v"u8, err);
         }
+
         builtin.close(done);
+
         // Before closing response body wait for readLoopDone goroutine
         // to complete due to closed connection by writeLoop.
         ᐸꟷ(didRead);
+
         (~resp).Body.Close();
+
         // Verify no outstanding requests after readLoop/writeLoop
         // goroutines shut down.
         var trʗ1 = tr;
@@ -8921,10 +9338,12 @@ internal static void testValidateClientRequestTrailers(ж<testing.T> Ꮡt, testM
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
         rw.Write(slice<byte>("Hello"u8));
     }))).Value.ts;
+
     var cases = new testValidateClientRequestTrailers_cases[]{
         new(new httpꓸHeader(new map<@string, slice<@string>>{["Trx"u8] = new @string[]{"x\r\nX-Another-One"u8}.slice()}), @"invalid trailer field value for ""Trx"""u8),
         new(new httpꓸHeader(new map<@string, slice<@string>>{["\r\nTrx"u8] = new @string[]{"X-Another-One"u8}.slice()}), @"invalid trailer field name ""\r\nTrx"""u8)
     }.slice();
+
     foreach (var (i, vᴛ1) in cases) {
         ref var tt = ref heap(new testValidateClientRequestTrailers_cases(), out var Ꮡtt);
         tt = vᴛ1;
@@ -8970,10 +9389,9 @@ internal partial struct TestTransportServerProtocols_type /*dyn*/ {
 }
 
 public static void TestTransportServerProtocols(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
     DefaultTransport._<ж<Δhttp.Transport>>().CloseIdleConnections();
+
     ref var cert = ref heap<tls.Certificate>(out var Ꮡcert);
     (cert, var err) = tls.X509KeyPair(testcert.LocalhostCert, testcert.LocalhostKey);
     if (err != default!) {
@@ -8985,6 +9403,7 @@ public static void TestTransportServerProtocols(ж<testing.T> Ꮡt) {
     }
     var certpool = x509.NewCertPool();
     certpool.AddCert(leafCert);
+
     foreach (var (_, vᴛ1) in new TestTransportServerProtocols_type[]{new(
         name: "http default"u8,
         scheme: "http"u8,
@@ -8993,8 +9412,8 @@ public static void TestTransportServerProtocols(ж<testing.T> Ꮡt) {
         name: "https default"u8,
         scheme: "https"u8,
         transport: (ж<Δhttp.Transport> tr) => {
-        }, // Transport default is HTTP/1.
-
+            // Transport default is HTTP/1.
+        },
         want: "HTTP/1.1"u8
     ), new(
         name: "https transport protocols include HTTP2"u8,
@@ -9188,6 +9607,7 @@ public static void TestTransportServerProtocols(ж<testing.T> Ꮡt) {
                     RootCAs: certpoolʗ1
                 ))
             ));
+
             if (testʗ1.setup != default!) {
                 testʗ1.setup(tΔ3);
             }
@@ -9201,6 +9621,7 @@ public static void TestTransportServerProtocols(ж<testing.T> Ꮡt) {
                 (~tr).Protocols.SetHTTP1(true);
                 (~tr).Protocols.SetHTTP2(true);
             }
+
             var listener = newLocalListener(tΔ3);
             var srvc = new channel<error>(1);
             var listenerʗ1 = listener;
@@ -9215,7 +9636,6 @@ public static void TestTransportServerProtocols(ж<testing.T> Ꮡt) {
                 else if (exprᴛ1 == "https"u8) {
                     srvcʗ1.ᐸꟷ(srvʗ1.ServeTLS(listenerʗ1, ""u8, ""u8));
                 }
-
             });
             var srvʗ2 = srv;
             var srvcʗ2 = srvc;
@@ -9223,6 +9643,7 @@ public static void TestTransportServerProtocols(ж<testing.T> Ꮡt) {
                 srvʗ2.Close();
                 ᐸꟷ(srvcʗ2);
             });
+
             var client = Ꮡ(new Client(Transport: new Δhttp.TransportжRoundTripper(tr)));
             var (resp, errΔ1) = client.Get(testʗ1.scheme + "://"u8 + listener.Addr().String());
             if (errΔ1 != default!) {
@@ -9250,15 +9671,15 @@ internal static readonly object testIsTooLargeˢ = (@string)"test is too large"u
 internal static partial void testIssue61474(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (testing.Short()) {
             return;
         }
+
         // This test reliably exercises the condition causing #61474,
         // but requires many iterations to do so.
         // Keep the test around for now, but don't run it by default.
         Ꮡt.Skip(testIsTooLargeˢ);
+
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> req) => {
         })), (ж<Δhttp.Transport> tr) => {
             tr.Value.MaxConnsPerHost = 1;

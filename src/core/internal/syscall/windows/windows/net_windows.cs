@@ -12,6 +12,7 @@ partial class windows_package {
 
 // go2cs generated this placeholder — func WSASendtoInet6 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+public static UntypedInt SO_TYPE => 0x1008;
 public static UntypedInt SIO_TCP_INITIAL_RTO => /* syscall.IOC_IN | syscall.IOC_VENDOR | 17 */ 2550136849;
 public const uint16 TCP_INITIAL_RTO_UNSPECIFIED_RTT = /* ^uint16(0) */ 65535;
 public const uint8 TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS = /* ^uint8(1) */ 254;

@@ -15,17 +15,19 @@ public static void TestFastLog2(ж<testing.T> Ꮡt) {
     // implementation over the range of interest for heap sampling.
     UntypedInt randomBitCount = 26;
     float64 e = default!;
+
     nint inc = 1;
     if (testing.Short()) {
         // Check 1K total values, down from 64M.
-        inc = (1 << (int)(16));
+        inc = 1 << 16;
     }
-    for (nint i = 1; i < (nint)((1 << (int)(randomBitCount))); i += inc) {
+    for (nint i = 1; i < (nint)(1 << (int)(randomBitCount)); i += inc) {
         var (l, fl) = (Δmath.Log2((float64)i), runtime_internal_test_package.Fastlog2((float64)i));
         var d = l - fl;
         e += d * d;
     }
     e = Δmath.Sqrt(e);
+
     if (e > 1.0D) {
         Ꮡt.Fatalf("imprecision on fastlog2 implementation, want <=1.0, got %f"u8, e);
     }

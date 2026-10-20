@@ -18,9 +18,11 @@ internal static readonly @string wwwGoogleComHttpˢ = "www.google.com:http"u8;
 
 public static void TestResolveGoogle(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     if (!supportsIPv4() || !supportsIPv6() || !testIPv4.Value || !testIPv6.Value) {
         Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
     }
+
     foreach (var (_, network) in new @string[]{"tcp"u8, "tcp4"u8, "tcp6"u8}.slice()) {
         var (addr, err) = ResolveTCPAddr(network, wwwGoogleComHttpˢ);
         if (err != default!) {
@@ -37,10 +39,8 @@ public static void TestResolveGoogle(ж<testing.T> Ꮡt) {
         else if (network == "tcp6"u8 && ((~addr).IP.To16() == default! || (~addr).IP.To4() != default!)) { matchᴛ1 = true;
             Ꮡt.Errorf("got %v; want an IPv6 address on %s"u8, addr.OrTypedNil(), network);
         }
-
     }
 }
-
 
 partial struct dialGoogleTestsᴛ1 /*dyn*/ {
     internal Func<@string, @string, (global::go.net_package.Conn, error)> dial;
@@ -69,9 +69,11 @@ internal static void initᴛdialGoogleTests() { dialGoogleTests = new dialGoogle
 
 public static void TestDialGoogle(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     if (!supportsIPv4() || !supportsIPv6() || !testIPv4.Value || !testIPv6.Value) {
         Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
     }
+
     error err = default!;
     (dialGoogleTests[1].addrs, dialGoogleTests[2].addrs, err) = googleLiteralAddrs();
     if (err != default!) {

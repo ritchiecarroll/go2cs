@@ -12,285 +12,146 @@ partial struct abbr {
     internal @string dst;
 }
 
-// Africa/Cairo
-// Africa/Casablanca
-// Africa/Johannesburg
-// Africa/Juba
-// Africa/Khartoum
-// Africa/Lagos
-// Africa/Nairobi
-// Africa/Sao_Tome
-// Africa/Tripoli
-// Africa/Windhoek
-// America/Adak
-// America/Anchorage
-// America/Araguaina
-// America/Asuncion
-// America/Bahia
-// America/Bogota
-// America/Buenos_Aires
-// America/Cancun
-// America/Caracas
-// America/Cayenne
-// America/Chicago
-// America/Cuiaba
-// America/Denver
-// America/Godthab
-// America/Grand_Turk
-// America/Guatemala
-// America/Halifax
-// America/Havana
-// America/Indianapolis
-// America/La_Paz
-// America/Los_Angeles
-// America/Mazatlan
-// America/Mexico_City
-// America/Miquelon
-// America/Montevideo
-// America/New_York
-// America/Phoenix
-// America/Port-au-Prince
-// America/Punta_Arenas
-// America/Regina
-// America/Santiago
-// America/Sao_Paulo
-// America/St_Johns
-// America/Tijuana
-// America/Whitehorse
-// Asia/Amman
-// Asia/Baghdad
-// Asia/Baku
-// Asia/Bangkok
-// Asia/Barnaul
-// Asia/Beirut
-// Asia/Bishkek
-// Asia/Calcutta
-// Asia/Chita
-// Asia/Colombo
-// Asia/Damascus
-// Asia/Dhaka
-// Asia/Dubai
-// Asia/Hebron
-// Asia/Hovd
-// Asia/Irkutsk
-// Asia/Jerusalem
-// Asia/Kabul
-// Asia/Kamchatka
-// Asia/Karachi
-// Asia/Katmandu
-// Asia/Krasnoyarsk
-// Asia/Magadan
-// Asia/Novosibirsk
-// Asia/Omsk
-// Asia/Pyongyang
-// Asia/Qyzylorda
-// Asia/Rangoon
-// Asia/Riyadh
-// Asia/Sakhalin
-// Asia/Seoul
-// Asia/Shanghai
-// Asia/Singapore
-// Asia/Srednekolymsk
-// Asia/Taipei
-// Asia/Tashkent
-// Asia/Tbilisi
-// Asia/Tehran
-// Asia/Tokyo
-// Asia/Tomsk
-// Asia/Ulaanbaatar
-// Asia/Vladivostok
-// Asia/Yakutsk
-// Asia/Yekaterinburg
-// Asia/Yerevan
-// Atlantic/Azores
-// Atlantic/Cape_Verde
-// Atlantic/Reykjavik
-// Australia/Adelaide
-// Australia/Brisbane
-// Australia/Darwin
-// Australia/Eucla
-// Australia/Hobart
-// Australia/Lord_Howe
-// Australia/Perth
-// Australia/Sydney
-// Etc/GMT+11
-// Etc/GMT+12
-// Etc/GMT+2
-// Etc/GMT+8
-// Etc/GMT+9
-// Etc/GMT-12
-// Etc/GMT-13
-// Etc/UTC
-// Europe/Astrakhan
-// Europe/Berlin
-// Europe/Bucharest
-// Europe/Budapest
-// Europe/Chisinau
-// Europe/Istanbul
-// Europe/Kaliningrad
-// Europe/Kiev
-// Europe/London
-// Europe/Minsk
-// Europe/Moscow
-// Europe/Paris
-// Europe/Samara
-// Europe/Saratov
-// Europe/Volgograd
-// Europe/Warsaw
-// Indian/Mauritius
-// Pacific/Apia
-// Pacific/Auckland
-// Pacific/Bougainville
-// Pacific/Chatham
-// Pacific/Easter
-// Pacific/Fiji
-// Pacific/Guadalcanal
-// Pacific/Honolulu
-// Pacific/Kiritimati
-// Pacific/Marquesas
-// Pacific/Norfolk
-// Pacific/Port_Moresby
-// Pacific/Tongatapu
 internal static map<@string, abbr> abbrs = new map<@string, abbr>{
-    ["Egypt Standard Time"u8] = new("EET"u8, "EEST"u8),
-    ["Morocco Standard Time"u8] = new("+00"u8, "+01"u8),
-    ["South Africa Standard Time"u8] = new("SAST"u8, "SAST"u8),
-    ["South Sudan Standard Time"u8] = new("CAT"u8, "CAT"u8),
-    ["Sudan Standard Time"u8] = new("CAT"u8, "CAT"u8),
-    ["W. Central Africa Standard Time"u8] = new("WAT"u8, "WAT"u8),
-    ["E. Africa Standard Time"u8] = new("EAT"u8, "EAT"u8),
-    ["Sao Tome Standard Time"u8] = new("GMT"u8, "GMT"u8),
-    ["Libya Standard Time"u8] = new("EET"u8, "EET"u8),
-    ["Namibia Standard Time"u8] = new("CAT"u8, "CAT"u8),
-    ["Aleutian Standard Time"u8] = new("HST"u8, "HDT"u8),
-    ["Alaskan Standard Time"u8] = new("AKST"u8, "AKDT"u8),
-    ["Tocantins Standard Time"u8] = new("-03"u8, "-03"u8),
-    ["Paraguay Standard Time"u8] = new("-04"u8, "-03"u8),
-    ["Bahia Standard Time"u8] = new("-03"u8, "-03"u8),
-    ["SA Pacific Standard Time"u8] = new("-05"u8, "-05"u8),
-    ["Argentina Standard Time"u8] = new("-03"u8, "-03"u8),
-    ["Eastern Standard Time (Mexico)"u8] = new("EST"u8, "EST"u8),
-    ["Venezuela Standard Time"u8] = new("-04"u8, "-04"u8),
-    ["SA Eastern Standard Time"u8] = new("-03"u8, "-03"u8),
-    ["Central Standard Time"u8] = new("CST"u8, "CDT"u8),
-    ["Central Brazilian Standard Time"u8] = new("-04"u8, "-04"u8),
-    ["Mountain Standard Time"u8] = new("MST"u8, "MDT"u8),
-    ["Greenland Standard Time"u8] = new("-02"u8, "-01"u8),
-    ["Turks And Caicos Standard Time"u8] = new("EST"u8, "EDT"u8),
-    ["Central America Standard Time"u8] = new("CST"u8, "CST"u8),
-    ["Atlantic Standard Time"u8] = new("AST"u8, "ADT"u8),
-    ["Cuba Standard Time"u8] = new("CST"u8, "CDT"u8),
-    ["US Eastern Standard Time"u8] = new("EST"u8, "EDT"u8),
-    ["SA Western Standard Time"u8] = new("-04"u8, "-04"u8),
-    ["Pacific Standard Time"u8] = new("PST"u8, "PDT"u8),
-    ["Mountain Standard Time (Mexico)"u8] = new("MST"u8, "MST"u8),
-    ["Central Standard Time (Mexico)"u8] = new("CST"u8, "CST"u8),
-    ["Saint Pierre Standard Time"u8] = new("-03"u8, "-02"u8),
-    ["Montevideo Standard Time"u8] = new("-03"u8, "-03"u8),
-    ["Eastern Standard Time"u8] = new("EST"u8, "EDT"u8),
-    ["US Mountain Standard Time"u8] = new("MST"u8, "MST"u8),
-    ["Haiti Standard Time"u8] = new("EST"u8, "EDT"u8),
-    ["Magallanes Standard Time"u8] = new("-03"u8, "-03"u8),
-    ["Canada Central Standard Time"u8] = new("CST"u8, "CST"u8),
-    ["Pacific SA Standard Time"u8] = new("-04"u8, "-03"u8),
-    ["E. South America Standard Time"u8] = new("-03"u8, "-03"u8),
-    ["Newfoundland Standard Time"u8] = new("NST"u8, "NDT"u8),
-    ["Pacific Standard Time (Mexico)"u8] = new("PST"u8, "PDT"u8),
-    ["Yukon Standard Time"u8] = new("MST"u8, "MST"u8),
-    ["Jordan Standard Time"u8] = new("+03"u8, "+03"u8),
-    ["Arabic Standard Time"u8] = new("+03"u8, "+03"u8),
-    ["Azerbaijan Standard Time"u8] = new("+04"u8, "+04"u8),
-    ["SE Asia Standard Time"u8] = new("+07"u8, "+07"u8),
-    ["Altai Standard Time"u8] = new("+07"u8, "+07"u8),
-    ["Middle East Standard Time"u8] = new("EET"u8, "EEST"u8),
-    ["Central Asia Standard Time"u8] = new("+06"u8, "+06"u8),
-    ["India Standard Time"u8] = new("IST"u8, "IST"u8),
-    ["Transbaikal Standard Time"u8] = new("+09"u8, "+09"u8),
-    ["Sri Lanka Standard Time"u8] = new("+0530"u8, "+0530"u8),
-    ["Syria Standard Time"u8] = new("+03"u8, "+03"u8),
-    ["Bangladesh Standard Time"u8] = new("+06"u8, "+06"u8),
-    ["Arabian Standard Time"u8] = new("+04"u8, "+04"u8),
-    ["West Bank Standard Time"u8] = new("EET"u8, "EEST"u8),
-    ["W. Mongolia Standard Time"u8] = new("+07"u8, "+07"u8),
-    ["North Asia East Standard Time"u8] = new("+08"u8, "+08"u8),
-    ["Israel Standard Time"u8] = new("IST"u8, "IDT"u8),
-    ["Afghanistan Standard Time"u8] = new("+0430"u8, "+0430"u8),
-    ["Russia Time Zone 11"u8] = new("+12"u8, "+12"u8),
-    ["Pakistan Standard Time"u8] = new("PKT"u8, "PKT"u8),
-    ["Nepal Standard Time"u8] = new("+0545"u8, "+0545"u8),
-    ["North Asia Standard Time"u8] = new("+07"u8, "+07"u8),
-    ["Magadan Standard Time"u8] = new("+11"u8, "+11"u8),
-    ["N. Central Asia Standard Time"u8] = new("+07"u8, "+07"u8),
-    ["Omsk Standard Time"u8] = new("+06"u8, "+06"u8),
-    ["North Korea Standard Time"u8] = new("KST"u8, "KST"u8),
-    ["Qyzylorda Standard Time"u8] = new("+05"u8, "+05"u8),
-    ["Myanmar Standard Time"u8] = new("+0630"u8, "+0630"u8),
-    ["Arab Standard Time"u8] = new("+03"u8, "+03"u8),
-    ["Sakhalin Standard Time"u8] = new("+11"u8, "+11"u8),
-    ["Korea Standard Time"u8] = new("KST"u8, "KST"u8),
-    ["China Standard Time"u8] = new("CST"u8, "CST"u8),
-    ["Singapore Standard Time"u8] = new("+08"u8, "+08"u8),
-    ["Russia Time Zone 10"u8] = new("+11"u8, "+11"u8),
-    ["Taipei Standard Time"u8] = new("CST"u8, "CST"u8),
-    ["West Asia Standard Time"u8] = new("+05"u8, "+05"u8),
-    ["Georgian Standard Time"u8] = new("+04"u8, "+04"u8),
-    ["Iran Standard Time"u8] = new("+0330"u8, "+0330"u8),
-    ["Tokyo Standard Time"u8] = new("JST"u8, "JST"u8),
-    ["Tomsk Standard Time"u8] = new("+07"u8, "+07"u8),
-    ["Ulaanbaatar Standard Time"u8] = new("+08"u8, "+08"u8),
-    ["Vladivostok Standard Time"u8] = new("+10"u8, "+10"u8),
-    ["Yakutsk Standard Time"u8] = new("+09"u8, "+09"u8),
-    ["Ekaterinburg Standard Time"u8] = new("+05"u8, "+05"u8),
-    ["Caucasus Standard Time"u8] = new("+04"u8, "+04"u8),
-    ["Azores Standard Time"u8] = new("-01"u8, "+00"u8),
-    ["Cape Verde Standard Time"u8] = new("-01"u8, "-01"u8),
-    ["Greenwich Standard Time"u8] = new("GMT"u8, "GMT"u8),
-    ["Cen. Australia Standard Time"u8] = new("ACST"u8, "ACDT"u8),
-    ["E. Australia Standard Time"u8] = new("AEST"u8, "AEST"u8),
-    ["AUS Central Standard Time"u8] = new("ACST"u8, "ACST"u8),
-    ["Aus Central W. Standard Time"u8] = new("+0845"u8, "+0845"u8),
-    ["Tasmania Standard Time"u8] = new("AEST"u8, "AEDT"u8),
-    ["Lord Howe Standard Time"u8] = new("+1030"u8, "+11"u8),
-    ["W. Australia Standard Time"u8] = new("AWST"u8, "AWST"u8),
-    ["AUS Eastern Standard Time"u8] = new("AEST"u8, "AEDT"u8),
-    ["UTC-11"u8] = new("-11"u8, "-11"u8),
-    ["Dateline Standard Time"u8] = new("-12"u8, "-12"u8),
-    ["UTC-02"u8] = new("-02"u8, "-02"u8),
-    ["UTC-08"u8] = new("-08"u8, "-08"u8),
-    ["UTC-09"u8] = new("-09"u8, "-09"u8),
-    ["UTC+12"u8] = new("+12"u8, "+12"u8),
-    ["UTC+13"u8] = new("+13"u8, "+13"u8),
-    ["UTC"u8] = new("UTC"u8, "UTC"u8),
-    ["Astrakhan Standard Time"u8] = new("+04"u8, "+04"u8),
-    ["W. Europe Standard Time"u8] = new("CET"u8, "CEST"u8),
-    ["GTB Standard Time"u8] = new("EET"u8, "EEST"u8),
-    ["Central Europe Standard Time"u8] = new("CET"u8, "CEST"u8),
-    ["E. Europe Standard Time"u8] = new("EET"u8, "EEST"u8),
-    ["Turkey Standard Time"u8] = new("+03"u8, "+03"u8),
-    ["Kaliningrad Standard Time"u8] = new("EET"u8, "EET"u8),
-    ["FLE Standard Time"u8] = new("EET"u8, "EEST"u8),
-    ["GMT Standard Time"u8] = new("GMT"u8, "BST"u8),
-    ["Belarus Standard Time"u8] = new("+03"u8, "+03"u8),
-    ["Russian Standard Time"u8] = new("MSK"u8, "MSK"u8),
-    ["Romance Standard Time"u8] = new("CET"u8, "CEST"u8),
-    ["Russia Time Zone 3"u8] = new("+04"u8, "+04"u8),
-    ["Saratov Standard Time"u8] = new("+04"u8, "+04"u8),
-    ["Volgograd Standard Time"u8] = new("MSK"u8, "MSK"u8),
-    ["Central European Standard Time"u8] = new("CET"u8, "CEST"u8),
-    ["Mauritius Standard Time"u8] = new("+04"u8, "+04"u8),
-    ["Samoa Standard Time"u8] = new("+13"u8, "+13"u8),
-    ["New Zealand Standard Time"u8] = new("NZST"u8, "NZDT"u8),
-    ["Bougainville Standard Time"u8] = new("+11"u8, "+11"u8),
-    ["Chatham Islands Standard Time"u8] = new("+1245"u8, "+1345"u8),
-    ["Easter Island Standard Time"u8] = new("-06"u8, "-05"u8),
-    ["Fiji Standard Time"u8] = new("+12"u8, "+12"u8),
-    ["Central Pacific Standard Time"u8] = new("+11"u8, "+11"u8),
-    ["Hawaiian Standard Time"u8] = new("HST"u8, "HST"u8),
-    ["Line Islands Standard Time"u8] = new("+14"u8, "+14"u8),
-    ["Marquesas Standard Time"u8] = new("-0930"u8, "-0930"u8),
-    ["Norfolk Standard Time"u8] = new("+11"u8, "+12"u8),
-    ["West Pacific Standard Time"u8] = new("+10"u8, "+10"u8),
-    ["Tonga Standard Time"u8] = new("+13"u8, "+13"u8)
+    ["Egypt Standard Time"u8] = new("EET"u8, "EEST"u8), // Africa/Cairo
+    ["Morocco Standard Time"u8] = new("+00"u8, "+01"u8), // Africa/Casablanca
+    ["South Africa Standard Time"u8] = new("SAST"u8, "SAST"u8), // Africa/Johannesburg
+    ["South Sudan Standard Time"u8] = new("CAT"u8, "CAT"u8), // Africa/Juba
+    ["Sudan Standard Time"u8] = new("CAT"u8, "CAT"u8), // Africa/Khartoum
+    ["W. Central Africa Standard Time"u8] = new("WAT"u8, "WAT"u8), // Africa/Lagos
+    ["E. Africa Standard Time"u8] = new("EAT"u8, "EAT"u8), // Africa/Nairobi
+    ["Sao Tome Standard Time"u8] = new("GMT"u8, "GMT"u8), // Africa/Sao_Tome
+    ["Libya Standard Time"u8] = new("EET"u8, "EET"u8), // Africa/Tripoli
+    ["Namibia Standard Time"u8] = new("CAT"u8, "CAT"u8), // Africa/Windhoek
+    ["Aleutian Standard Time"u8] = new("HST"u8, "HDT"u8), // America/Adak
+    ["Alaskan Standard Time"u8] = new("AKST"u8, "AKDT"u8), // America/Anchorage
+    ["Tocantins Standard Time"u8] = new("-03"u8, "-03"u8), // America/Araguaina
+    ["Paraguay Standard Time"u8] = new("-04"u8, "-03"u8), // America/Asuncion
+    ["Bahia Standard Time"u8] = new("-03"u8, "-03"u8), // America/Bahia
+    ["SA Pacific Standard Time"u8] = new("-05"u8, "-05"u8), // America/Bogota
+    ["Argentina Standard Time"u8] = new("-03"u8, "-03"u8), // America/Buenos_Aires
+    ["Eastern Standard Time (Mexico)"u8] = new("EST"u8, "EST"u8), // America/Cancun
+    ["Venezuela Standard Time"u8] = new("-04"u8, "-04"u8), // America/Caracas
+    ["SA Eastern Standard Time"u8] = new("-03"u8, "-03"u8), // America/Cayenne
+    ["Central Standard Time"u8] = new("CST"u8, "CDT"u8), // America/Chicago
+    ["Central Brazilian Standard Time"u8] = new("-04"u8, "-04"u8), // America/Cuiaba
+    ["Mountain Standard Time"u8] = new("MST"u8, "MDT"u8), // America/Denver
+    ["Greenland Standard Time"u8] = new("-02"u8, "-01"u8), // America/Godthab
+    ["Turks And Caicos Standard Time"u8] = new("EST"u8, "EDT"u8), // America/Grand_Turk
+    ["Central America Standard Time"u8] = new("CST"u8, "CST"u8), // America/Guatemala
+    ["Atlantic Standard Time"u8] = new("AST"u8, "ADT"u8), // America/Halifax
+    ["Cuba Standard Time"u8] = new("CST"u8, "CDT"u8), // America/Havana
+    ["US Eastern Standard Time"u8] = new("EST"u8, "EDT"u8), // America/Indianapolis
+    ["SA Western Standard Time"u8] = new("-04"u8, "-04"u8), // America/La_Paz
+    ["Pacific Standard Time"u8] = new("PST"u8, "PDT"u8), // America/Los_Angeles
+    ["Mountain Standard Time (Mexico)"u8] = new("MST"u8, "MST"u8), // America/Mazatlan
+    ["Central Standard Time (Mexico)"u8] = new("CST"u8, "CST"u8), // America/Mexico_City
+    ["Saint Pierre Standard Time"u8] = new("-03"u8, "-02"u8), // America/Miquelon
+    ["Montevideo Standard Time"u8] = new("-03"u8, "-03"u8), // America/Montevideo
+    ["Eastern Standard Time"u8] = new("EST"u8, "EDT"u8), // America/New_York
+    ["US Mountain Standard Time"u8] = new("MST"u8, "MST"u8), // America/Phoenix
+    ["Haiti Standard Time"u8] = new("EST"u8, "EDT"u8), // America/Port-au-Prince
+    ["Magallanes Standard Time"u8] = new("-03"u8, "-03"u8), // America/Punta_Arenas
+    ["Canada Central Standard Time"u8] = new("CST"u8, "CST"u8), // America/Regina
+    ["Pacific SA Standard Time"u8] = new("-04"u8, "-03"u8), // America/Santiago
+    ["E. South America Standard Time"u8] = new("-03"u8, "-03"u8), // America/Sao_Paulo
+    ["Newfoundland Standard Time"u8] = new("NST"u8, "NDT"u8), // America/St_Johns
+    ["Pacific Standard Time (Mexico)"u8] = new("PST"u8, "PDT"u8), // America/Tijuana
+    ["Yukon Standard Time"u8] = new("MST"u8, "MST"u8), // America/Whitehorse
+    ["Jordan Standard Time"u8] = new("+03"u8, "+03"u8), // Asia/Amman
+    ["Arabic Standard Time"u8] = new("+03"u8, "+03"u8), // Asia/Baghdad
+    ["Azerbaijan Standard Time"u8] = new("+04"u8, "+04"u8), // Asia/Baku
+    ["SE Asia Standard Time"u8] = new("+07"u8, "+07"u8), // Asia/Bangkok
+    ["Altai Standard Time"u8] = new("+07"u8, "+07"u8), // Asia/Barnaul
+    ["Middle East Standard Time"u8] = new("EET"u8, "EEST"u8), // Asia/Beirut
+    ["Central Asia Standard Time"u8] = new("+06"u8, "+06"u8), // Asia/Bishkek
+    ["India Standard Time"u8] = new("IST"u8, "IST"u8), // Asia/Calcutta
+    ["Transbaikal Standard Time"u8] = new("+09"u8, "+09"u8), // Asia/Chita
+    ["Sri Lanka Standard Time"u8] = new("+0530"u8, "+0530"u8), // Asia/Colombo
+    ["Syria Standard Time"u8] = new("+03"u8, "+03"u8), // Asia/Damascus
+    ["Bangladesh Standard Time"u8] = new("+06"u8, "+06"u8), // Asia/Dhaka
+    ["Arabian Standard Time"u8] = new("+04"u8, "+04"u8), // Asia/Dubai
+    ["West Bank Standard Time"u8] = new("EET"u8, "EEST"u8), // Asia/Hebron
+    ["W. Mongolia Standard Time"u8] = new("+07"u8, "+07"u8), // Asia/Hovd
+    ["North Asia East Standard Time"u8] = new("+08"u8, "+08"u8), // Asia/Irkutsk
+    ["Israel Standard Time"u8] = new("IST"u8, "IDT"u8), // Asia/Jerusalem
+    ["Afghanistan Standard Time"u8] = new("+0430"u8, "+0430"u8), // Asia/Kabul
+    ["Russia Time Zone 11"u8] = new("+12"u8, "+12"u8), // Asia/Kamchatka
+    ["Pakistan Standard Time"u8] = new("PKT"u8, "PKT"u8), // Asia/Karachi
+    ["Nepal Standard Time"u8] = new("+0545"u8, "+0545"u8), // Asia/Katmandu
+    ["North Asia Standard Time"u8] = new("+07"u8, "+07"u8), // Asia/Krasnoyarsk
+    ["Magadan Standard Time"u8] = new("+11"u8, "+11"u8), // Asia/Magadan
+    ["N. Central Asia Standard Time"u8] = new("+07"u8, "+07"u8), // Asia/Novosibirsk
+    ["Omsk Standard Time"u8] = new("+06"u8, "+06"u8), // Asia/Omsk
+    ["North Korea Standard Time"u8] = new("KST"u8, "KST"u8), // Asia/Pyongyang
+    ["Qyzylorda Standard Time"u8] = new("+05"u8, "+05"u8), // Asia/Qyzylorda
+    ["Myanmar Standard Time"u8] = new("+0630"u8, "+0630"u8), // Asia/Rangoon
+    ["Arab Standard Time"u8] = new("+03"u8, "+03"u8), // Asia/Riyadh
+    ["Sakhalin Standard Time"u8] = new("+11"u8, "+11"u8), // Asia/Sakhalin
+    ["Korea Standard Time"u8] = new("KST"u8, "KST"u8), // Asia/Seoul
+    ["China Standard Time"u8] = new("CST"u8, "CST"u8), // Asia/Shanghai
+    ["Singapore Standard Time"u8] = new("+08"u8, "+08"u8), // Asia/Singapore
+    ["Russia Time Zone 10"u8] = new("+11"u8, "+11"u8), // Asia/Srednekolymsk
+    ["Taipei Standard Time"u8] = new("CST"u8, "CST"u8), // Asia/Taipei
+    ["West Asia Standard Time"u8] = new("+05"u8, "+05"u8), // Asia/Tashkent
+    ["Georgian Standard Time"u8] = new("+04"u8, "+04"u8), // Asia/Tbilisi
+    ["Iran Standard Time"u8] = new("+0330"u8, "+0330"u8), // Asia/Tehran
+    ["Tokyo Standard Time"u8] = new("JST"u8, "JST"u8), // Asia/Tokyo
+    ["Tomsk Standard Time"u8] = new("+07"u8, "+07"u8), // Asia/Tomsk
+    ["Ulaanbaatar Standard Time"u8] = new("+08"u8, "+08"u8), // Asia/Ulaanbaatar
+    ["Vladivostok Standard Time"u8] = new("+10"u8, "+10"u8), // Asia/Vladivostok
+    ["Yakutsk Standard Time"u8] = new("+09"u8, "+09"u8), // Asia/Yakutsk
+    ["Ekaterinburg Standard Time"u8] = new("+05"u8, "+05"u8), // Asia/Yekaterinburg
+    ["Caucasus Standard Time"u8] = new("+04"u8, "+04"u8), // Asia/Yerevan
+    ["Azores Standard Time"u8] = new("-01"u8, "+00"u8), // Atlantic/Azores
+    ["Cape Verde Standard Time"u8] = new("-01"u8, "-01"u8), // Atlantic/Cape_Verde
+    ["Greenwich Standard Time"u8] = new("GMT"u8, "GMT"u8), // Atlantic/Reykjavik
+    ["Cen. Australia Standard Time"u8] = new("ACST"u8, "ACDT"u8), // Australia/Adelaide
+    ["E. Australia Standard Time"u8] = new("AEST"u8, "AEST"u8), // Australia/Brisbane
+    ["AUS Central Standard Time"u8] = new("ACST"u8, "ACST"u8), // Australia/Darwin
+    ["Aus Central W. Standard Time"u8] = new("+0845"u8, "+0845"u8), // Australia/Eucla
+    ["Tasmania Standard Time"u8] = new("AEST"u8, "AEDT"u8), // Australia/Hobart
+    ["Lord Howe Standard Time"u8] = new("+1030"u8, "+11"u8), // Australia/Lord_Howe
+    ["W. Australia Standard Time"u8] = new("AWST"u8, "AWST"u8), // Australia/Perth
+    ["AUS Eastern Standard Time"u8] = new("AEST"u8, "AEDT"u8), // Australia/Sydney
+    ["UTC-11"u8] = new("-11"u8, "-11"u8), // Etc/GMT+11
+    ["Dateline Standard Time"u8] = new("-12"u8, "-12"u8), // Etc/GMT+12
+    ["UTC-02"u8] = new("-02"u8, "-02"u8), // Etc/GMT+2
+    ["UTC-08"u8] = new("-08"u8, "-08"u8), // Etc/GMT+8
+    ["UTC-09"u8] = new("-09"u8, "-09"u8), // Etc/GMT+9
+    ["UTC+12"u8] = new("+12"u8, "+12"u8), // Etc/GMT-12
+    ["UTC+13"u8] = new("+13"u8, "+13"u8), // Etc/GMT-13
+    ["UTC"u8] = new("UTC"u8, "UTC"u8), // Etc/UTC
+    ["Astrakhan Standard Time"u8] = new("+04"u8, "+04"u8), // Europe/Astrakhan
+    ["W. Europe Standard Time"u8] = new("CET"u8, "CEST"u8), // Europe/Berlin
+    ["GTB Standard Time"u8] = new("EET"u8, "EEST"u8), // Europe/Bucharest
+    ["Central Europe Standard Time"u8] = new("CET"u8, "CEST"u8), // Europe/Budapest
+    ["E. Europe Standard Time"u8] = new("EET"u8, "EEST"u8), // Europe/Chisinau
+    ["Turkey Standard Time"u8] = new("+03"u8, "+03"u8), // Europe/Istanbul
+    ["Kaliningrad Standard Time"u8] = new("EET"u8, "EET"u8), // Europe/Kaliningrad
+    ["FLE Standard Time"u8] = new("EET"u8, "EEST"u8), // Europe/Kiev
+    ["GMT Standard Time"u8] = new("GMT"u8, "BST"u8), // Europe/London
+    ["Belarus Standard Time"u8] = new("+03"u8, "+03"u8), // Europe/Minsk
+    ["Russian Standard Time"u8] = new("MSK"u8, "MSK"u8), // Europe/Moscow
+    ["Romance Standard Time"u8] = new("CET"u8, "CEST"u8), // Europe/Paris
+    ["Russia Time Zone 3"u8] = new("+04"u8, "+04"u8), // Europe/Samara
+    ["Saratov Standard Time"u8] = new("+04"u8, "+04"u8), // Europe/Saratov
+    ["Volgograd Standard Time"u8] = new("MSK"u8, "MSK"u8), // Europe/Volgograd
+    ["Central European Standard Time"u8] = new("CET"u8, "CEST"u8), // Europe/Warsaw
+    ["Mauritius Standard Time"u8] = new("+04"u8, "+04"u8), // Indian/Mauritius
+    ["Samoa Standard Time"u8] = new("+13"u8, "+13"u8), // Pacific/Apia
+    ["New Zealand Standard Time"u8] = new("NZST"u8, "NZDT"u8), // Pacific/Auckland
+    ["Bougainville Standard Time"u8] = new("+11"u8, "+11"u8), // Pacific/Bougainville
+    ["Chatham Islands Standard Time"u8] = new("+1245"u8, "+1345"u8), // Pacific/Chatham
+    ["Easter Island Standard Time"u8] = new("-06"u8, "-05"u8), // Pacific/Easter
+    ["Fiji Standard Time"u8] = new("+12"u8, "+12"u8), // Pacific/Fiji
+    ["Central Pacific Standard Time"u8] = new("+11"u8, "+11"u8), // Pacific/Guadalcanal
+    ["Hawaiian Standard Time"u8] = new("HST"u8, "HST"u8), // Pacific/Honolulu
+    ["Line Islands Standard Time"u8] = new("+14"u8, "+14"u8), // Pacific/Kiritimati
+    ["Marquesas Standard Time"u8] = new("-0930"u8, "-0930"u8), // Pacific/Marquesas
+    ["Norfolk Standard Time"u8] = new("+11"u8, "+12"u8), // Pacific/Norfolk
+    ["West Pacific Standard Time"u8] = new("+10"u8, "+10"u8), // Pacific/Port_Moresby
+    ["Tonga Standard Time"u8] = new("+13"u8, "+13"u8) // Pacific/Tongatapu
 };
 
 } // end time_package

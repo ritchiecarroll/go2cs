@@ -12,22 +12,22 @@ partial struct Request {
     public slice<@string> Body;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string acceptˢ = "Accept"u8;
-private static readonly @string xTagˢ = "X-Tag"u8;
-private static readonly @string hitsˢ = "hits"u8;
-
 internal static void Main() {
-    var req = Ꮡ(new Request(Header: new Header(new map<@string, slice<@string>>{}), Count: new map<@string, nint>{}, Body: new @string[]{"a"u8, "b"u8}.slice()));
-    req.Value.Header[acceptˢ] = new @string[]{"text/html"u8, "text/plain"u8}.slice();
-    req.Value.Header[xTagˢ] = new @string[]{"a"u8}.slice();
-    req.Value.Count[hitsˢ] = (~req).Count[hitsˢ] + 1;
-    req.Value.Count[hitsˢ] += 2;
-    req.Value.Count[hitsˢ]++;
-    req.Value.Body[1] = "z"u8;
-    fmt.Println((~req).Header[acceptˢ]);
-    fmt.Println((~req).Header[xTagˢ]);
-    fmt.Println((~req).Count[hitsˢ]);
+    var req = Ꮡ(new Request(Header: new Header(new map<@string, slice<@string>>{}), Count: new map<@string, nint>{}, Body: new @string[]{"a", "b"}.slice()));
+
+    req.Value.Header["Accept"] = new @string[]{"text/html", "text/plain"}.slice();
+    req.Value.Header["X-Tag"] = new @string[]{"a"}.slice();
+
+    req.Value.Count["hits"] = (~req).Count["hits"] + 1;
+
+    req.Value.Count["hits"] += 2;
+    req.Value.Count["hits"]++;
+
+    req.Value.Body[1] = "z";
+
+    fmt.Println((~req).Header["Accept"]);
+    fmt.Println((~req).Header["X-Tag"]);
+    fmt.Println((~req).Count["hits"]);
     fmt.Println((~req).Body[0], (~req).Body[1]);
 }
 

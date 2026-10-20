@@ -33,7 +33,7 @@ using static global::go.crypto.mlkem_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/mlkem/example_test.go", "example_test.cs", "AAwYlIKClKiWgoKoprSCgpSWlg==")]
+[assembly: go.GoPositionMap("crypto/mlkem/example_test.go", "example_test.cs", "AAwYlIKClLimgoK4prSCgpSmpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

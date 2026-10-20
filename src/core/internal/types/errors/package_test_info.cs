@@ -37,6 +37,12 @@ using static global::go.@internal.types.errors_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -45,7 +51,7 @@ using static global::go.@internal.types.errors_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("internal/types/errors/codes_test.go", "codes_test.cs", "ABksgoSCgoKCgoKCgpSCgpSAggALDoKCgoKClJLKgoKUgoKClIKCgpSCgIKClIKCAAkMgoL2goKCgpSCgpTIgqamABs0AAcQgoKEsoKUgoKUgpSClIKCgqaCgpKClIKCgrqCkoKClIKCgoI=", "25-44:1;26-43:1.1;151-183:1", "", "122=Default/1/1/2")]
+[assembly: global::go.GoPositionMap("internal/types/errors/codes_test.go", "codes_test.cs", "ABksgpSCgoKCgoKCgpSCgpSAggALDoKCgoKClJLKgoKUgoKClIKCgpSCgIKClIKCAAkMgoL2goKCgpSCgpTIgqamABk0AAcQgoKUsoKUgoKUgpSClIKCgqaCgpKClIKCgsqCkoKClIKCgoI=", "25-44:1;26-43:1.1;151-183:1", "", "123=Default/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.types;

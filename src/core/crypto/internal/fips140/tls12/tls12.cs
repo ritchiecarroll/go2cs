@@ -7,6 +7,7 @@ using fips140 = go.crypto.@internal.fips140_package;
 using hmac = go.crypto.@internal.fips140.hmac_package;
 using sha256 = go.crypto.@internal.fips140.sha256_package;
 using sha512 = go.crypto.@internal.fips140.sha512_package;
+using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 
@@ -14,24 +15,26 @@ partial class tls12_package {
 
 // PRF implements the TLS 1.2 pseudo-random function, as defined in RFC 5246,
 // Section 5 and allowed by SP 800-135, Revision 1, Section 4.2.2.
-public static slice<byte> PRF<H>(Func<H> hash, slice<byte> secret, @string label, slice<byte> seed, nint keyLen)
-    where H : fips140.Hash
+public static slice<byte> PRF<H>(Func<H> hashΔ1, slice<byte> secret, @string label, slice<byte> seed, nint keyLen)
+    where H : hash.Hash
 {
     var labelAndSeed = new slice<byte>(len(label) + len(seed));
     copy(labelAndSeed, label);
     copy(labelAndSeed.slice(len(label)), seed);
+
     var result = new slice<byte>(keyLen);
-    pHash(hash, result, secret, labelAndSeed);
+    pHash(hashΔ1, result, secret, labelAndSeed);
     return result;
 }
 
 // pHash implements the P_hash function, as defined in RFC 5246, Section 5.
-internal static void pHash<H>(Func<H> hash, slice<byte> result, slice<byte> secret, slice<byte> seed)
-    where H : fips140.Hash
+internal static void pHash<H>(Func<H> hashΔ1, slice<byte> result, slice<byte> secret, slice<byte> seed)
+    where H : hash.Hash
 {
-    var h = hmac.New(hash, secret);
+    var h = hmac.New(hashΔ1, secret);
     h.Write(seed);
     var a = h.Sum(default!);
+
     while (len(result) > 0) {
         h.Reset();
         h.Write(a);
@@ -39,6 +42,7 @@ internal static void pHash<H>(Func<H> hash, slice<byte> result, slice<byte> secr
         var b = h.Sum(default!);
         nint n = copy(result, b);
         result = result.slice(n);
+
         h.Reset();
         h.Write(a);
         a = h.Sum(default!);
@@ -51,13 +55,13 @@ internal static readonly @string extendedMasterSecretLabel = "extended master se
 
 // MasterSecret implements the TLS 1.2 extended master secret derivation, as
 // defined in RFC 7627 and allowed by SP 800-135, Revision 1, Section 4.2.2.
-public static slice<byte> MasterSecret<H>(Func<H> hash, slice<byte> preMasterSecret, slice<byte> transcript)
-    where H : fips140.Hash
+public static slice<byte> MasterSecret<H>(Func<H> hashΔ1, slice<byte> preMasterSecret, slice<byte> transcript)
+    where H : hash.Hash
 {
     // "The TLS 1.2 KDF is an approved KDF when the following conditions are
     // satisfied: [...] (3) P_HASH uses either SHA-256, SHA-384 or SHA-512."
-    var h = hash();
-    switch (((any)h).type()) {
+    var h = hashΔ1();
+    switch (((any)(h).OrTypedNilOf()).type()) {
     case ж<sha256.Digest>: {
         if (h.Size() != 32) {
             fips140.RecordNonApproved();
@@ -75,7 +79,7 @@ public static slice<byte> MasterSecret<H>(Func<H> hash, slice<byte> preMasterSec
         break;
     }}
 
-    return PRF(hash, preMasterSecret, extendedMasterSecretLabel, transcript, masterSecretLength);
+    return PRF(hashΔ1, preMasterSecret, extendedMasterSecretLabel, transcript, masterSecretLength);
 }
 
 } // end tls12_package

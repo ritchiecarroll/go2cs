@@ -38,6 +38,7 @@ internal static partial void crashViaPanic() {
     Δdebug.SetTraceback(systemˢ);
     writeSentinel(new Δos.FileжWriter(Δos.Stdout));
     Δdebug.SetCrashOutput(Δos.Stdout, new Δdebug.CrashOptions(nil));
+
     goǃ(() => {
         // This call is typically inlined.
         child1();
@@ -52,6 +53,7 @@ internal static partial void crashViaTrap() {
     Δdebug.SetTraceback(systemˢ);
     writeSentinel(new Δos.FileжWriter(Δos.Stdout));
     Δdebug.SetCrashOutput(Δos.Stdout, new Δdebug.CrashOptions(nil));
+
     goǃ(() => {
         // This call is typically inlined.
         trap1();
@@ -104,6 +106,7 @@ internal static partial void child7() {
     nint n = Δruntime.Callers(1, pcs[..]);
     fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "Callers: %#x\n"u8, pcs.slice(0, n));
     Δio.WriteString(new Δos.FileжWriter(Δos.Stderr), formatStack(pcs.slice(0, n)));
+
     // Cause the crash report to be written to stdout.
     throw panic("oops");
 }
@@ -142,12 +145,11 @@ internal partial struct TestTracebackSystem_tests /*dyn*/ {
 // The test is a distillation of the crash monitor in
 // golang.org/x/telemetry/crashmonitor.
 public static void TestTracebackSystem(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
     if (Δruntime.GOOS == "android"u8) {
         Ꮡt.Skip(canTReadSourceCodeForˢ);
     }
+
     var tests = new TestTracebackSystem_tests[]{
         new(
             name: "panic"u8,
@@ -163,14 +165,14 @@ traceback_system_test.go:56: runtime_test.child1: 	child2()
 traceback_system_test.go:35: runtime_test.crashViaPanic.func1: 		child1()
 redacted.go:0: runtime.goexit
 
-"""u8
+"""u8.Raw()
         ),
         new(
-            name: "trap"u8, // Test panic via trap. x/telemetry is aware that trap
- // PCs follow runtime.sigpanic and need to be
- // incremented to offset the decrement done by
- // CallersFrames.
-
+            // Test panic via trap. x/telemetry is aware that trap
+            // PCs follow runtime.sigpanic and need to be
+            // incremented to offset the decrement done by
+            // CallersFrames.
+            name: "trap"u8,
             want: """
 redacted.go:0: runtime.gopanic
 redacted.go:0: runtime.panicmem
@@ -181,9 +183,10 @@ traceback_system_test.go:104: runtime_test.trap1: 	trap2()
 traceback_system_test.go:50: runtime_test.crashViaTrap.func1: 		trap1()
 redacted.go:0: runtime.goexit
 
-"""u8
+"""u8.Raw()
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestTracebackSystem_tests(), out var Ꮡtc);
         tc = vᴛ1;
@@ -204,15 +207,18 @@ redacted.go:0: runtime.goexit
             cmd.Run(); // expected to crash
             tΔ1.Logf("stderr:\n%s\nstdout: %s\n"u8, stderr.Bytes(), stdout.Bytes());
             @string crash = Ꮡstdout.String();
+
             // If the only line is the sentinel, it wasn't a crash.
             if (strings.Count(crash, "\n"u8) < 2) {
                 tΔ1.Fatalf("child process did not produce a crash report"u8);
             }
+
             // Parse the PCs out of the child's crash report.
             (var pcs, err) = parseStackPCs(crash);
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
+
             // Unwind the stack using this executable's symbol table.
             @string got = formatStack(pcs);
             if (strings.TrimSpace(got) != strings.TrimSpace(tcʗ1.want)) {
@@ -225,7 +231,7 @@ redacted.go:0: runtime.goexit
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string sentinelˢ = "sentinel "u8;
 internal static readonly @string runningˢ = " [running]:"u8;
-internal static readonly @string createdByˢ = "created by "u8;
+internal static readonly @string createdByˢ2 = "created by "u8;
 
 // parseStackPCs parses the parent process's program counters for the
 // first running goroutine out of a GOTRACEBACK=system traceback,
@@ -266,6 +272,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
         }
         return ("", fmt.Errorf("no symbol for stack frame: %s"u8, line));
     }
+
     // getPC parses the PC out of a line of the form:
     //     \tFILE:LINE +0xRELPC sp=... fp=... pc=...
     (uint64, error) getPC(@string line) {
@@ -275,6 +282,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
         }
         return strconv.ParseUint(pcstr, 0, 64); // 0 => allow 0x prefix
     }
+
     slice<uintptr> pcs = default!;
     ref var parentSentinel = ref heap(new uint64(), out var ᏑparentSentinel);
     uint64 childSentinel = sentinel();
@@ -285,6 +293,7 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
     @string prevSymbol = default!;        // symbol of the most recent previous frame with a PC.
     for (nint i = 0; i < len(lines); i++) {
         @string line = lines[i];
+
         // Read sentinel value.
         if (parentSentinel == 0 && strings.HasPrefix(line, sentinelˢ)) {
             var (_, err) = fmt.Sscanf(line, "sentinel %x"u8, ᏑparentSentinel);
@@ -293,35 +302,42 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
             }
             continue;
         }
+
         // Search for "goroutine GID [STATUS]"
         if (!on) {
-            if (strings.HasPrefix(line, goroutineˢ) && strings.Contains(line, runningˢ)) {
+            if (strings.HasPrefix(line, goroutineˢ2) && strings.Contains(line, runningˢ)) {
                 on = true;
+
                 if (parentSentinel == 0) {
                     return (default!, fmt.Errorf("no sentinel value in crash report"u8));
                 }
             }
             continue;
         }
+
         // A blank line marks end of a goroutine stack.
         if (line == ""u8) {
             break;
         }
+
         // Skip the final "created by SYMBOL in goroutine GID" part.
-        if (strings.HasPrefix(line, createdByˢ)) {
+        if (strings.HasPrefix(line, createdByˢ2)) {
             break;
         }
+
         // Expect a pair of lines:
         //   SYMBOL(ARGS)
         //   \tFILE:LINE +0xRELPC sp=0x%x fp=0x%x pc=0x%x
         // Note: SYMBOL may contain parens "pkg.(*T).method"
         // The RELPC is sometimes missing.
+
         if (symLine){
             error err = default!;
             (currSymbol, err) = getSymbol(line);
             if (err != default!) {
                 return (default!, fmt.Errorf("error extracting symbol: %v"u8, err));
             }
+
             symLine = false; // Next line is FILE:LINE.
         } else {
             // Parse the PC, and correct for the parent and child's
@@ -337,7 +353,9 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
                 symLine = true;
                 continue;
             }
+
             pc = pc - parentSentinel + childSentinel;
+
             // If the previous frame was sigpanic, then this frame
             // was a trap (e.g., SIGSEGV).
             //
@@ -374,7 +392,9 @@ internal static (slice<uintptr>, error) parseStackPCs(@string crash) {
             if (prevSymbol == "runtime.sigpanic"u8) {
                 pc++;
             }
+
             pcs = append(pcs, (uintptr)pc);
+
             // Done with this frame. Next line is a new frame.
             prevSymbol = currSymbol;
             currSymbol = ""u8;
@@ -403,6 +423,7 @@ internal static void writeSentinel(Δio.Writer @out) {
 internal static @string formatStack(slice<uintptr> pcs) {
     // When debugging, show file/line/content of files other than this one.
     const bool debug = false;
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     nint i = 0;
     var frames = Δruntime.CallersFrames(pcs);
@@ -425,6 +446,7 @@ internal static @string formatStack(slice<uintptr> pcs) {
                 fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡbuf), "redacted.go:0: %s\n"u8, fr.Function);
             }
         }
+
         if (!more) {
             break;
         }

@@ -27,6 +27,7 @@ internal partial struct TestOpen_tests /*dyn*/ {
 
 public static void TestOpen(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string dir = Ꮡt.TempDir();
     @string @file = filepath.Join(dir, "a");
     var (f, err) = Δos.Create(@file);
@@ -34,6 +35,7 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     f.Close();
+
     var tests = new TestOpen_tests[]{
         new(dir, syscall.O_RDONLY, default!),
         new(dir, syscall.O_CREAT, default!),
@@ -80,6 +82,7 @@ internal partial struct TestWin32finddata_X /*dyn*/ {
 
 public static void TestWin32finddata(ж<testing.T> Ꮡt) {
     @string dir = Ꮡt.TempDir();
+
     @string path = filepath.Join(dir, longNameAndExtensionˢ);
     var (f, err) = Δos.Create(path);
     if (err != default!) {
@@ -89,6 +92,7 @@ public static void TestWin32finddata(ж<testing.T> Ꮡt) {
     byte want = 2;     // it is unlikely to have this character in the filename
     ref var x = ref heap<TestWin32finddata_X>(out var Ꮡx);
     x = new TestWin32finddata_X(got: want);
+
     var (pathp, _) = syscall.UTF16PtrFromString(path);
     (var h, err) = syscall.FindFirstFile(pathp, Ꮡ((x.fd)));
     if (err != default!) {
@@ -98,6 +102,7 @@ public static void TestWin32finddata(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("FindClose failed: %v"u8, err);
     }
+
     if (x.got != want) {
         Ꮡt.Fatalf("memory corruption: want=%d got=%d"u8, want, x.got);
     }
@@ -127,8 +132,8 @@ public static void ExampleLoadLibrary() {
         }
         var (r, _, _) = syscall.Syscall((uintptr)proc, 0, 0, 0, 0);
         var major = (byte)r;
-        var minor = (uint8)((r >> (int)(8)));
-        var build = (uint16)((r >> (int)(16)));
+        var minor = (uint8)(r >> 8);
+        var build = (uint16)(r >> 16);
         print((@string)"windows version "u8, major, (@string)"."u8, minor, (@string)" (Build "u8, build, (@string)")\n"u8);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -167,7 +172,7 @@ func HelloWorld() {
 
 func main() {}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string exetextᶜ = """
@@ -182,13 +187,15 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new syscall_test_package.testing_TжTB(Ꮡt));
     testenv.MustHaveCGO(new syscall_test_package.testing_TжTB(Ꮡt));
     testenv.MustHaveExecPath(new syscall_test_package.testing_TжTB(Ꮡt), gccˢ);
+
     @string tmpdir = Ꮡt.TempDir();
+
     // build go dll
     @string dlltext = dlltextᶜ;
     @string dllsrc = filepath.Join(tmpdir, helloworldGoˢ);
@@ -202,6 +209,7 @@ public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to build go library: %s\n%s"u8, err, @out);
     }
+
     // build c exe
     @string exetext = exetextᶜ;
     @string exe = filepath.Join(tmpdir, helloworldExeˢ);
@@ -213,13 +221,15 @@ public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
     }
     (@out, err) = exec.Command(exe).Output();
     if (err != default!) {
-        Ꮡt.Fatalf("c program execution failed: %v: %v"u8, err, ((@string)@out));
+        Ꮡt.Fatalf("c program execution failed: %v: %v"u8, err, (@string)@out);
     }
+
     (var hostname, err) = Δos.Hostname();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    @string have = strings.ReplaceAll(((@string)@out), "\n"u8, ""u8);
+
+    @string have = strings.ReplaceAll((@string)@out, "\n"u8, ""u8);
     have = strings.ReplaceAll(have, "\r"u8, ""u8);
     @string want = fmt.Sprintf("%sHello World%s"u8, hostname, hostname);
     if (have != want) {
@@ -228,16 +238,16 @@ public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
 }
 
 public static void TestGetwd_DoesNotPanicWhenPathIsLong(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Regression test for https://github.com/golang/go/issues/60051.
     @string tmp = Ꮡt.TempDir();
     Ꮡt.Chdir(tmp);
+
     // The length of a filename is also limited, so we can't reproduce the
     // crash by creating a single directory with a very long name; we need two
     // layers.
     @string a200 = strings.Repeat("a"u8, 200);
     @string dirname = filepath.Join(tmp, a200, a200);
+
     var err = Δos.MkdirAll(dirname, 448);
     if (err != default!) {
         Ꮡt.Skipf("MkdirAll failed: %v"u8, err);
@@ -246,6 +256,7 @@ public static void TestGetwd_DoesNotPanicWhenPathIsLong(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Skipf("Chdir failed: %v"u8, err);
     }
+
     syscall.Getwd();
 }
 
@@ -265,9 +276,8 @@ internal static readonly @string syscallˢ = "Syscall"u8;
 public static void TestSyscallAllocations(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         testenv.SkipIfOptimizationOff(new syscall_test_package.testing_TжTB(Ꮡt));
+
         // Test that syscall.SyscallN arguments do not escape.
         // The function used (in this case GetVersion) doesn't matter
         // as long as it is always available and doesn't panic.
@@ -280,6 +290,7 @@ public static void TestSyscallAllocations(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         void testAllocs(ж<testing.T> tΔ1, @string name, Func<error> fn) {
             tΔ1.Run(name, (ж<testing.T> tΔ2) => {
                 nint n = (nint)testing.AllocsPerRun(10, () => {
@@ -294,6 +305,7 @@ public static void TestSyscallAllocations(ж<testing.T> Ꮡt) {
                 }
             });
         }
+
         testAllocs(Ꮡt, syscallNˢ, error () => {
             var (r0, _, e1) = syscall.SyscallN(proc, 0, 0, 0);
             if (r0 == 0) {
@@ -323,6 +335,7 @@ public static void FuzzUTF16FromString(ж<testing.F> Ꮡf) {
     f.Add(((@string)(new byte[]{0x90}))); // invalid byte
     f.Add(((@string)(new byte[]{0xe3, 0x81}))); // truncated
     f.Add(((@string)(new byte[]{0xe3, 0xc1, 0x81}))); // invalid middle byte
+
     Ꮡf.Fuzz((ж<testing.T> t, @string tst) => {
         var (res, err) = syscall.UTF16FromString(tst);
         if (err != default!) {
@@ -332,6 +345,7 @@ public static void FuzzUTF16FromString(ж<testing.F> Ꮡf) {
             t.Fatalf("UTF16FromString(%q): %v"u8, tst, err);
         }
         t.Logf("UTF16FromString(%q) = %04x"u8, tst, res);
+
         if (len(res) < 1 || res[len(res) - 1] != 0) {
             t.Fatalf("missing NUL terminator"u8);
         }

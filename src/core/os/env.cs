@@ -13,6 +13,8 @@ partial class os_package {
 // Expand replaces ${var} or $var in the string based on the mapping function.
 // For example, [os.ExpandEnv](s) is equivalent to [os.Expand](s, [os.Getenv]).
 public static @string Expand(@string s, Func<@string, @string> mapping) {
+    var bufᴷ = new stackAppend<byte>();
+
     slice<byte> buf = default!;
     // ${} is all ASCII, so bytes are fine for this operation.
     nint i = 0;
@@ -24,13 +26,13 @@ public static @string Expand(@string s, Func<@string, @string> mapping) {
             buf = append(buf, s.slice(i, j).ꓸꓸꓸ);
             var (name, w) = getShellName(s.slice(j + 1));
             if (name == ""u8 && w > 0){
-            } else 
-            if (name == ""u8){
                 // Encountered invalid syntax; eat the
                 // characters.
+            } else 
+            if (name == ""u8){
                 // Valid syntax, but $ was not followed by a
                 // name. Leave the dollar character untouched.
-                buf = append(buf, s[j]);
+                buf = append(bufᴷ, buf, s[j]);
             } else {
                 buf = append(buf, mapping(name).ꓸꓸꓸ);
             }
@@ -58,7 +60,6 @@ internal static bool isShellSpecialVar(uint8 c) {
     case (rune)'*' or (rune)'#' or (rune)'$' or (rune)'@' or (rune)'!' or (rune)'?' or (rune)'-' or (rune)'0' or (rune)'1' or (rune)'2' or (rune)'3' or (rune)'4' or (rune)'5' or (rune)'6' or (rune)'7' or (rune)'8' or (rune)'9': {
         return true;
     }}
-
     return false;
 }
 
@@ -76,8 +77,8 @@ internal static (@string, nint) getShellName(@string s) {
         if (len(s) > 2 && isShellSpecialVar(s[1]) && s[2] == (rune)'}') {
             return (s[1..2], 3);
         }
+        // Scan to closing brace
         for (nint iΔ2 = 1; iΔ2 < len(s); iΔ2++) {
-            // Scan to closing brace
             if (s[iΔ2] == (rune)'}') {
                 if (iΔ2 == 1) {
                     return ("", 2); // Bad syntax; eat "${}"
@@ -90,7 +91,6 @@ internal static (@string, nint) getShellName(@string s) {
     case {} when isShellSpecialVar(s[0]): {
         return (s[0..1], 1);
     }}
-
     // Scan alphanumerics.
     nint i = default!;
     for (i = 0; i < len(s) && isAlphaNum(s[i]); i++) {

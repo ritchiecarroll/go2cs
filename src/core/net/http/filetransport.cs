@@ -58,7 +58,7 @@ internal static partial (ж<Response> resp, error err) RoundTrip(this fileTransp
     // sends our *Response on, once the *Response itself has been
     // populated (even if the body itself is still being
     // written to the res.Body, a pipe)
-    var (rw, resc) = newPopulateResponseWriter();
+    var (rw, resc) = newPopulateResponseWriter(Ꮡreq);
     var rwʗ1 = rw;
     goǃ(() => {
         t.fh.ServeHTTP(new populateResponseжResponseWriter(rwʗ1), Ꮡreq);
@@ -67,7 +67,7 @@ internal static partial (ж<Response> resp, error err) RoundTrip(this fileTransp
     return (ᐸꟷ(resc), default!);
 }
 
-internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateResponseWriter() {
+internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateResponseWriter(ж<Request> Ꮡreq) {
     var (pr, pw) = io.Pipe();
     var rw = Ꮡ(new populateResponse(
         ch: new channel<ж<Response>>(0),
@@ -77,7 +77,8 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
             ProtoMajor: 1,
             Header: new ΔHeader(0),
             Close: true,
-            Body: new io.PipeReaderжReadCloser(pr)
+            Body: new io.PipeReaderжReadCloser(pr),
+            Request: Ꮡreq
         ))
     ));
     return (rw, (~rw).ch.WithDirection(GoChanDir.Recv));
@@ -111,6 +112,7 @@ internal static void sendResponse(this ref populateResponse pr) {
         return;
     }
     pr.sentResponse = true;
+
     if (pr.hasContent) {
         pr.res.Value.ContentLength = -1;
     }
@@ -126,6 +128,7 @@ internal static void WriteHeader(this ref populateResponse pr, nint code) {
         return;
     }
     pr.wroteHeader = true;
+
     pr.res.Value.StatusCode = code;
     pr.res.Value.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
 }

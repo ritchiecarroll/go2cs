@@ -48,6 +48,12 @@ using static go.image.png_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,9 +62,9 @@ using static go.image.png_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/png/paeth.go", "paeth.cs", "AAoUlN6oAAgQgoKCgoKCgpKClKqi0oKCgoKCgoKCgpSSlJSCgoI=")]
-[assembly: go.GoPositionMap("image/png/reader.go", "reader.cs", "AERkgqaCABs0ADFigO6AAAoEgoKUgIKkgoKUgpSClISCgoKUgoKCpoKWgoKUlKTWlKTWlKTWlKSkpKTWlKSkpNaClILmgoKClIKClIKUgoKU3JTKxOaClIKUgoKUhIKUpKSkpoKUgoKUhIKmgpSCgpSEgpSCgrikAAYYAAkCgpSUgILIgIKkgoKUgpSClIKCgtjSgoKUkoKCgoKklIKClIKCgpSCzIKCgpSUgpSClgAICJKCggAHFJKClIK4gqaUgoKClIK2goKkgoKClIK2goKkgoKkgoKClIK2goKkgoKClIK2goKkgpSWgoKmgoSUgoKClKiCgriStoK8spSCtqS4lIKCgoKCgoKClIK4goKCgtqCgoKCgoKCgpSCuIKCgoLagoKCgoKCgoKUgriCgoKC2oKCgoKCgpSmgraCgraCooKCgoKCgoKUgoKCgoKUlKKCgoKCgoKUtoKCgoKClILIgoKCgoKUgsiCgoKCgpSCyIKCgriCpIKkgoKCgoKClKaCgsiCgoK2goKCgoKCgoKCgpSmgoKCgsiCgoKCgsqWqJKCzpSCgrSCgrSCgrSCgrSCgrSCgrSCgoKCysaCgrSCgqSSgoKCgoLKsoKCgpTWgoKUprSAgqSCgpaUgpSCpIKUgqSCgqSCgqSClIK0gpLclIKClLSClIKkgpaSgoKClIKU1oKAgqSClNaCgoKUgpSqoriAgoKUpIKAgoKUtqqiuICCgpSmgoCCgpSmgoKmgrqClKSkpKSkpKSkpO6C", "", "", "1131=NewIEEE/1/1/2;1159=NewIEEE/1/1/2")]
-[assembly: go.GoPositionMap("image/png/writer.go", "writer.cs", "AESQAZKAgqSCgoKCgriokoKUpoKClIKCgpSCgoKCgoKCgoSCgpSCgpTWgoKClJSCpIKkgqSCpIKkgqSCpIKkgqSCpIKCguaCgoKUgoKCgoKCgpSUgoIABhTigoKUquqCgoKCgoKWgoKClIKWgoKClIKCgoKmgoKogoKCgqaCgqiCgoKUgoKCgqaCgqiCgoKUgoKCgqaClqbSgoKClIKUlISElKSkpKSkpKSkpAAHEIKCgoKUlJSCgpSClISCgoKElIKUgoKUgoKCyoKSkpKClIKCgoKCgoKmgoKCgoLIgoKUgoKCyoSCgoKCgoKCgoKCpoKCgpS4goKSgoKCgoKCgoKCgpKCAAEUAAgCgoKCgsqCgoKCgoLIgoKCgriSgoKCgoKCgriSgoKCgoKCgoKCAAcQgqaCqICCuJTYsoKUgpSUgoKUqqKUpKSkpPiAqKKCqAAICIKCloKCgpaClIKWgoKElICCpIKCkoKSgpSmlKSkgpS2gpTKgoKClIKC")]
+[assembly: go.GoPositionMap("image/png/paeth.go", "paeth.cs", "AAoUlO6oAAgQgoKCgoKCgpKClKqi0oKCgoKCgoKCgqSClJSCgoI=")]
+[assembly: go.GoPositionMap("image/png/reader.go", "reader.cs", "ADFkgqaCABU0AC1igP6AAAoEgoKUgIKkgoKUgpSClJSCgoKUgoKCpoKmgoKUlKTGlKTGlKTGlKSkpKTGlKSkpLaClILmgoKClIKClIKUgoKU3JTqlOaClIKUgoKUlIKUpKSUpoKUgoKUlIKmgpSCgpSUgpSCgriUAAYYAAkCgpSUgILIgIKkgoKUgpSClIKCgtjSgoKUkoKCgoKklIKClIKCgpSC3IKCgpSUgpSCpgAICJKCggAHFJKClIK4gqaUgoKClIK2goKkgoKClIK2goKkgoKkgoKClIK2goKkgoKClIK2goKUgpSmgoKmgpSUgoKClLiCgsiCtoLsgpSCtqS4lIKCgoKCgoKClIK4goKCgtqCgoKCgoKCgpSCuIKCgoLagoKCgoKCgoKUgriCgoKC2oKCgoKCgpSmgraCgraCooKCgoKCgoKUgoKCgoKUlKKCgoKCgoKUtoKCgoKClILIgoKCgoKUgsiCgoKCgpSCyIKCgriCpIKkgoKCgoKClKaCgsiCgoK2goKCgoKCgoKCgpSmgoKCgsiCgoKCgsqmqJKCzpSCgrSCgrSCgrSCgrSCgrSCgrSCgoKCysaCgrSCgqSSgoKCgoLKsoKCgpTWgoKUprSAgqSCgqaUgpSCpIKUgqSCgqSCgqSClIK0gpLclIKClLSClIKUgpaSgoKClIKU1oKAgqSClNaCgoKUgpSqoriAgoKUpIKAgoKUtqqiuICCgpS2goCCgpS2goKmgsqClKSkpKSkpKSklO6C", "", "", "1104=NewIEEE/1/1/2;1132=NewIEEE/1/1/2")]
+[assembly: go.GoPositionMap("image/png/writer.go", "writer.cs", "AEaQAZKAgqSCgoKCgriokoKUpoKClIKCgpSCgoKCgoKCgpSCgpSCgpTWgoKClJSCpIKkgqSCpIKkgqSCpIKkgqSClIKCguaCgoKUgoKCgoKCgpSUgoIABhTigoKUquqCgoKCgoKmgoKClIKmgoKClIKCgoKmgoK4goKCgqaCgriCgoKUgoKCgqaCgriCgoKUgoKCgqaCpqbSgoKClIKUlJSUlKSkpKSkpKSkpAAHEIKCgoKUlJSCgpSClJSCgoKUlIKUgoKUgoKC2oKSgpKClIKCgoKCgoKmgoKCgoLIgoKUgoKCypSCgoKCgoKCgoKCpoKCgpS4goKSgoKCgoKCgoKCgpKCAAEUAAgCgoKCgsqCgoKCgoLIgoKCgsiCgoKCgoKCgsiCgoKCgoKCgoKCAAcQgqaCuICCyJTYsoKUgpSUgoKUqqKUpKSkpOiAqKKCqAAICIKCpoKCgpaClIKmgoKUlICCpIKCkoKSgpSmlKSkgpS2gpTKgoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

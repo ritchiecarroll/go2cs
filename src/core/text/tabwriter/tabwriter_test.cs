@@ -40,7 +40,7 @@ internal static (nint written, error err) Write(this ref buffer b, slice<byte> b
 }
 
 internal static @string String(this ref buffer b) {
-    return ((@string)b.a);
+    return (@string)b.a;
 }
 
 internal static void write(ж<testing.T> Ꮡt, @string testname, ж<tabwriter.Writer> Ꮡw, @string src) {
@@ -60,6 +60,7 @@ internal static void verify(ж<testing.T> Ꮡt, @string testname, ж<tabwriter.W
     if (err != default!) {
         Ꮡt.Errorf("--- test: %s\n--- src:\n%q\n--- flush error: %v\n"u8, testname, src, err);
     }
+
     @string res = b.String();
     if (res != expected) {
         Ꮡt.Errorf("--- test: %s\n--- src:\n%q\n--- found:\n%q\n--- expected:\n%q\n"u8, testname, src, res, expected);
@@ -69,13 +70,16 @@ internal static void verify(ж<testing.T> Ꮡt, @string testname, ж<tabwriter.W
 internal static void check(ж<testing.T> Ꮡt, @string testname, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags, @string src, @string expected) {
     ref var b = ref heap(new buffer(), out var Ꮡb);
     b.init(1000);
+
     ref var w = ref heap(new tabwriter.Writer(), out var Ꮡw);
     Ꮡw.Init(new bufferжWriter(Ꮡb), minwidth, tabwidth, padding, padchar, flags);
+
     // write all at once
     @string title = testname + " (written all at once)"u8;
     b.clear();
     write(Ꮡt, title, Ꮡw, src);
     verify(Ꮡt, title, Ꮡw, Ꮡb, src, expected);
+
     // write byte-by-byte
     title = testname + " (written byte-by-byte)"u8;
     b.clear();
@@ -83,6 +87,7 @@ internal static void check(ж<testing.T> Ꮡt, @string testname, nint minwidth, 
         write(Ꮡt, title, Ꮡw, src.slice(i, i + 1));
     }
     verify(Ꮡt, title, Ꮡw, Ꮡb, src, expected);
+
     // write using Fibonacci slice sizes
     title = testname + " (written in fibonacci slices)"u8;
     b.clear();
@@ -95,17 +100,6 @@ internal static void check(ж<testing.T> Ꮡt, @string testname, nint minwidth, 
     }
     verify(Ꮡt, title, Ꮡw, Ꮡb, src, expected);
 }
-
-// unterminated escape
-// unterminated escape
-// '\t' terminates an empty cell on last line - nothing to print
-// '\t' terminates an empty cell on last line - nothing to print
-// \f inside HTML is ignored
-// \f causes a newline and flush
-// \f causes a newline and flush
-// htabs - do not discard column
-// hard tabs - do not discard column
-// hard tabs - do not discard column
 
 partial struct testsᴛ1 /*dyn*/ {
     internal @string testname;
@@ -166,13 +160,13 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     new(
         "1e esc stripped"u8,
         8, 0, 1, (rune)'.', StripEscape,
-        ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x09, 0x64, 0x65, 0x66})),
+        ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x09, 0x64, 0x65, 0x66})), // unterminated escape
         "abc\tdef"u8
     ),
     new(
         "1e esc"u8,
         8, 0, 1, (rune)'.', 0,
-        ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x09, 0x64, 0x65, 0x66})),
+        ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x09, 0x64, 0x65, 0x66})), // unterminated escape
         ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x09, 0x64, 0x65, 0x66}))
     ),
     new(
@@ -190,13 +184,13 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     new(
         "4a"u8,
         8, 0, 1, (rune)'.', 0,
-        "\t"u8,
+        "\t"u8, // '\t' terminates an empty cell on last line - nothing to print
         ""u8
     ),
     new(
         "4b"u8,
         8, 0, 1, (rune)'.', AlignRight,
-        "\t"u8,
+        "\t"u8, // '\t' terminates an empty cell on last line - nothing to print
         ""u8
     ),
     new(
@@ -298,19 +292,22 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     new(
         "9b"u8,
         1, 0, 0, (rune)'.', FilterHTML,
-        "1\t2<!---\f--->\t3\t4\n"u8 + "11\t222\t3333\t44444\n"u8,
+        "1\t2<!---\f--->\t3\t4\n"u8 + // \f inside HTML is ignored
+            "11\t222\t3333\t44444\n"u8,
         "1.2<!---\f--->..3...4\n"u8 + "11222333344444\n"u8
     ),
     new(
         "9c"u8,
         1, 0, 0, (rune)'.', 0,
-        "1\t2\t3\t4\f"u8 + "11\t222\t3333\t44444\n"u8,
+        "1\t2\t3\t4\f"u8 + // \f causes a newline and flush
+            "11\t222\t3333\t44444\n"u8,
         "1234\n"u8 + "11222333344444\n"u8
     ),
     new(
         "9c debug"u8,
         1, 0, 0, (rune)'.', Debug,
-        "1\t2\t3\t4\f"u8 + "11\t222\t3333\t44444\n"u8,
+        "1\t2\t3\t4\f"u8 + // \f causes a newline and flush
+            "11\t222\t3333\t44444\n"u8,
         "1|2|3|4\n"u8 + "---\n"u8 + "11|222|3333|44444\n"u8
     ),
     new(
@@ -388,7 +385,7 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     new(
         "15b"u8,
         4, 0, 0, (rune)'.', DiscardEmptyColumns,
-        "a\t\tb"u8,
+        "a\t\tb"u8, // htabs - do not discard column
         "a.......b"u8
     ),
     new(
@@ -424,13 +421,15 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     new(
         "16c"u8,
         100, 100, 0, (rune)'\t', DiscardEmptyColumns,
-        "a\tb\t\td\n"u8 + "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8,
+        "a\tb\t\td\n"u8 + // hard tabs - do not discard column
+            "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8,
         "a\tb\t\td\n"u8 + "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8
     ),
     new(
         "16c debug"u8,
         100, 100, 0, (rune)'\t', (nuint)(DiscardEmptyColumns | Debug),
-        "a\tb\t\td\n"u8 + "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8,
+        "a\tb\t\td\n"u8 + // hard tabs - do not discard column
+            "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8,
         "a\t|b\t|\t|d\n"u8 + "a\t|b\t|\t|d\t|e\n"u8 + "a\n"u8 + "a\t|b\t|c\t|d\n"u8 + "a\t|b\t|c\t|d\t|e\n"u8
     )
 }.slice();
@@ -463,7 +462,6 @@ internal static void wantPanicString(ж<testing.T> Ꮡt, @string want) {
                     Ꮡt.Errorf("wrong panic message: got %q, want %q"u8, got, want);
                     break;
                 }}
-
             }
         }
     }
@@ -529,6 +527,7 @@ public static void BenchmarkTable(ж<testing.B> Ꮡb) {
                         wΔ1.Flush();
                     }
                 });
+
                 bΔ1.Run(reuseˢ, (ж<testing.B> bΔ3) => {
                     bΔ3.ReportAllocs();
                     var wΔ2 = NewWriter(io.Discard, 4, 4, 1, (rune)' ', 0); // no particular reason for these settings
@@ -601,7 +600,7 @@ single
 cell
 lines
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkCode(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

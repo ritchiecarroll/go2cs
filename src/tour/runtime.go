@@ -22,6 +22,7 @@ type pipelineOptions struct {
 	nugetSource    string
 	nugetVersion   string
 	toolTimeout    time.Duration
+	noWarmup       bool
 }
 
 type runtimeConfiguration struct {

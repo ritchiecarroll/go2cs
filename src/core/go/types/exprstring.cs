@@ -198,7 +198,6 @@ public static void WriteExpr(ж<bytes.Buffer> Ꮡbuf, ast.Expr x) {
         else { /* default: */
             s = chanˢ3;
         }
-
         buf.WriteString(s);
         WriteExpr(Ꮡbuf, (~xΔ1).Value);
         break;
@@ -211,18 +210,21 @@ internal static void writeSigExpr(ж<bytes.Buffer> Ꮡbuf, ref ast.FuncType sig)
     buf.WriteByte((rune)'(');
     writeFieldList(Ꮡbuf, (~sig.Params).List, ", "u8, false);
     buf.WriteByte((rune)')');
+
     var res = sig.Results;
     nint n = res.NumFields();
     if (n == 0) {
         // no result
         return;
     }
+
     buf.WriteByte((rune)' ');
     if (n == 1 && len((~(~res).List[0]).Names) == 0) {
         // single unnamed result
         WriteExpr(Ꮡbuf, (~(~res).List[0]).Type);
         return;
     }
+
     // multiple or named result(s)
     buf.WriteByte((rune)'(');
     writeFieldList(Ꮡbuf, (~res).List, ", "u8, false);
@@ -236,8 +238,10 @@ internal static void writeFieldList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Field>
         if (i > 0) {
             buf.WriteString(sep);
         }
+
         // field list names
         writeIdentList(Ꮡbuf, (~f).Names);
+
         // types of interface methods consist of signatures only
         {
             var (sig, _) = (~f).Type._<ж<ast.FuncType>>(ᐧ); if (sig != nil && iface) {
@@ -245,15 +249,18 @@ internal static void writeFieldList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Field>
                 continue;
             }
         }
+
         // named fields are separated with a blank from the field type
         if (len((~f).Names) > 0) {
             buf.WriteByte((rune)' ');
         }
+
         WriteExpr(Ꮡbuf, (~f).Type);
+
+        // ignore tag
     }
 }
 
-// ignore tag
 internal static void writeIdentList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Ident>> list) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 

@@ -8,8 +8,6 @@ global using static global::go.crypto.@internal.fips140.ecdsa_package;
 
 // <ImportedTypeAliases>
 global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
-using testing = go.testing_package;
-using Δnistec = go.crypto.@internal.fips140.nistec_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -24,11 +22,13 @@ using static global::go.crypto.@internal.fips140.ecdsa_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P224PointжPoint>, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P224PointжPoint>>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P256PointжPoint>, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P256PointжPoint>>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P384PointжPoint>, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P384PointжPoint>>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P521PointжPoint>, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P521PointжPoint>>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -38,7 +38,7 @@ using static global::go.crypto.@internal.fips140.ecdsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ABcegoCSgJKAkoAACgbCgJKCgLiSgIKClJKCkoKkgpSWgoCCgpSSgpKCpIKUzIKUgIKClJKCkoKkgriCgJKAkoCSgLaigoI=", "16-16:1;17-17:2;18-18:3;19-19:4;23-23:1;25-25:2;30-33:3;47-50:4;69-72:5;85-85:1;86-86:2;87-87:3;88-88:4")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ABcegoCSgJKAkoAACgbCgJKCgMiSgIKClJKCkoKkgpSmgoCCgpSSgpKCpIKU3IKUgIKClJKCkoKkgriCgJKAkoCSgLaigoI=", "16-16:1;17-17:2;18-18:3;19-19:4;23-23:1;25-25:2;30-33:3;47-50:4;69-72:5;85-85:1;86-86:2;87-87:3;88-88:4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

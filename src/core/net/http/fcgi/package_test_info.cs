@@ -54,6 +54,12 @@ using static global::go.net.http.fcgi_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -62,7 +68,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABgiAAcWgoKCgoKUgoKUggAQCgATPICkgoKCgoKCgoCCgqSUgoKUgoKUgoKUgoKCgIKCpICCgqSCAAoSgoLWgqaC1oKChIKCgoKWhoCCyIIACBSKgoSCgoIADBQAERoAFjiCpoKs0rKCgoKCuoKCppSUAAgSgqiSAAcQgoIACAgAEyQADi6ysoKCgoKogoCCpIKklIIADAiCABQyspKCgoKCgqiCgpSCgoCCAA8WgqaCgtrChIKiuIKUlKKCloKEmIKUhIKCog==", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "62=Join/1/1/12;205=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;223=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;315=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;392=Repeat/1/2/16,Repeat/2/2/21")]
+[assembly: go.GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABciAAcWgoKCgoKUgoKUggALCgAXPICkgoKCgoKCgoCCgqSUgoKUgoKUgoKUgoKCgIKCpICCgqSCAAoSgoLWgqaC1oKClIKCgoKmhoCCyIIACBSKgpSCgoIACRQAERoAGDiCpoKssrKCgoKCuoKCppSUAAgSgqiSAAcQgoK4ABckAA4usrKCgoKCqIKAgqSCpJSCAAwIggAUMrKSgoKCgoKogoKUgoKAggAPFoKmgoLawpSCoriClJSigqaClJiClJSCgqI=", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "56=Join/1/1/12;203=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;221=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;308=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;389=Repeat/1/2/16,Repeat/2/2/21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

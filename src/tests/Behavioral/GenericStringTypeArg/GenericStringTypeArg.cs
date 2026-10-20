@@ -13,25 +13,24 @@ partial struct Pair<A, B> {
     internal B b;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string boxedˢ = "boxed"u8;
-private static readonly @string deepˢ = "deep"u8;
-
 internal static void Main() {
     Pair<nint, @string> p = default!;
     p.a = 5;
-    p.b = "hi"u8;
+    p.b = "hi";
     fmt.Println(p.a, p.b);
+
     Box<@string> b = default!;
-    b.v = boxedˢ;
+    b.v = "boxed";
     fmt.Println(b.v);
+
     Pair<@string, @string> sp = default!;
-    sp.a = "x"u8;
-    sp.b = "y"u8;
+    sp.a = "x";
+    sp.b = "y";
     fmt.Println(sp.a, sp.b);
+
     Pair<nint, Box<@string>> nested = default!;
     nested.a = 9;
-    nested.b.v = deepˢ;
+    nested.b.v = "deep";
     fmt.Println(nested.a, nested.b.v);
 }
 

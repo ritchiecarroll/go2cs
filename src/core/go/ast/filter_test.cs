@@ -34,7 +34,7 @@ func (t2) f1() {}
 func (t2) f2() {}
 func (x *t2) f2() {}
 
-"""u8;
+"""u8.Raw();
 
 // Calling ast.MergePackageFiles with ast.FilterFuncDuplicates
 // keeps a duplicate entry with attached documentation in favor
@@ -57,7 +57,7 @@ func (t2) f1() {}
 
 func (x *t2) f2() {}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestFilterDuplicates(ж<testing.T> Ꮡt) {
     // parse input
@@ -66,14 +66,17 @@ public static void TestFilterDuplicates(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // create package
     var files = new map<@string, ж<ast.File>>{[""u8] = @file};
     (var pkg, err) = ast.NewPackage(fset, files, default!, nil);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // filter
     var merged = ast.MergePackageFiles(pkg, ast.FilterFuncDuplicates);
+
     // pretty-print
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     {
@@ -82,6 +85,7 @@ public static void TestFilterDuplicates(ж<testing.T> Ꮡt) {
         }
     }
     @string output = buf.String();
+
     if (output != golden) {
         Ꮡt.Errorf("incorrect output:\n%s"u8, output);
     }

@@ -45,35 +45,31 @@ internal static ж<Pt> advance(ж<Pt> Ꮡp) {
     return Ꮡp;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object structˢ = (@string)"struct:"u8;
-private static readonly object namedNumˢ = (@string)"named num:"u8;
-private static readonly object viaUnsafeWritesThroughˢ = (@string)"via unsafe writes through:"u8;
-private static readonly object convIdentityWritesˢ = (@string)"conv identity writes through:"u8;
-private static readonly object copyˢ = (@string)"copy:"u8;
-private static readonly object originalˢ = (@string)"original:"u8;
-private static readonly object assignedThroughˢ = (@string)"assigned through:"u8;
-private static readonly object localˢ = (@string)"local:"u8;
-private static readonly object callSurvivesˢ = (@string)"call survives:"u8;
-
 internal static void Main() {
     ref var pt = ref heap<Pt>(out var Ꮡpt);
     pt = new Pt(1, 2);
     ref var c = ref heap(new Count(), out var Ꮡc);
     c = 42;
-    fmt.Println(structˢ, derefStruct(Ꮡpt));
-    fmt.Println(namedNumˢ, derefNamedNum(Ꮡc));
+
+    fmt.Println("struct:", derefStruct(Ꮡpt));
+    fmt.Println("named num:", derefNamedNum(Ꮡc));
+
     viaUnsafe(Ꮡpt).Value.Y = 20;
-    fmt.Println(viaUnsafeWritesThroughˢ, pt);
+    fmt.Println("via unsafe writes through:", pt);
+
     convIdentity(Ꮡpt).Value.X = 10;
-    fmt.Println(convIdentityWritesˢ, pt);
+    fmt.Println("conv identity writes through:", pt);
+
     var got = derefStruct(Ꮡpt);
     got.X = 555;
-    fmt.Println(copyˢ, got, originalˢ, pt);
+    fmt.Println("copy:", got, "original:", pt);
+
     assignThrough(Ꮡpt);
-    fmt.Println(assignedThroughˢ, pt);
-    fmt.Println(localˢ, derefLocal());
-    fmt.Println(callSurvivesˢ, advance(Ꮡpt).Value);
+    fmt.Println("assigned through:", pt);
+
+    fmt.Println("local:", derefLocal());
+
+    fmt.Println("call survives:", advance(Ꮡpt).Value);
 }
 
 } // end main_package

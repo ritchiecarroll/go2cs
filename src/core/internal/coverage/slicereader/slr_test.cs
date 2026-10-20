@@ -17,14 +17,17 @@ internal static readonly @string bazbasherˢ = "bazbasher"u8;
 
 public static void TestSliceReader(ж<testing.T> Ꮡt) {
     var b = new byte[]{}.slice();
+
     var bt = new slice<byte>(4);
     var e32 = (uint32)1030507;
     binary.LittleEndian.PutUint32(bt, e32);
     b = appendꓸꓸꓸ(b, bt);
+
     bt = new slice<byte>(8);
     var e64 = (uint64)907050301;
     binary.LittleEndian.PutUint64(bt, e64);
     b = appendꓸꓸꓸ(b, bt);
+
     b = appendUleb128(b, (nuint)e32);
     b = appendUleb128(b, (nuint)e64);
     b = appendUleb128(b, 6);
@@ -35,10 +38,12 @@ public static void TestSliceReader(ж<testing.T> Ꮡt) {
     @string s2 = bazbasherˢ;
     var s2b = slice<byte>(s2);
     b = appendꓸꓸꓸ(b, s2b);
+
     @string readStr(ж<global::go.@internal.coverage.slicereader_package.Reader> slr) {
         var len = slr.ReadULEB128();
         return slr.ReadString((int64)len);
     }
+
     for (nint i = 0; i < 2; i++) {
         var slr = NewReader(b, i == 0);
         var g32 = slr.ReadUint32();
@@ -83,7 +88,7 @@ public static void TestSliceReader(ж<testing.T> Ꮡt) {
 
 internal static slice<byte> appendUleb128(slice<byte> b, nuint v) {
     while (ᐧ) {
-        var c = (uint8)((nuint)(v & 0x7f));
+        var c = (uint8)(v & 0x7f);
         v >>= (int)(7);
         if (v != 0) {
             c |= (uint8)(0x80);

@@ -113,7 +113,6 @@ internal static @string valueToStringImpl(reflectꓸValue val) {
     { /* default: */
         throw panic("valueToString: can't print type " + typ.String());
     }
-
 }
 
 } // end reflectlite_test_package

@@ -44,6 +44,7 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
     // Get a reference we can use to ask the runtime about
     // which of its instructions are unsafe preemption points.
     var f = Δruntime.FuncForPC(reflect.ValueOf(setGlobalPointer).Pointer());
+
     // Disassemble the test function.
     // Note that normally "go test runtime" would strip symbols
     // and prevent this step from working. So there's a hack in
@@ -52,9 +53,10 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
     var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), toolˢ, objdumpˢ, "-s", setGlobalPointerˢ, Δos.Args[0]);
     var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
-        Ꮡt.Fatalf("can't objdump %v"u8, err);
+        Ꮡt.Fatalf("can't objdump %v:\n%s"u8, err, @out);
     }
-    var lines = strings.Split(((@string)@out), "\n"u8)[1..];
+    var lines = strings.Split((@string)@out, "\n"u8)[1..];
+
     // Walk through assembly instructions, checking preemptible flags.
     uint64 entry = default!;
     bool startedWB = default!;
@@ -89,10 +91,12 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
         if (@unsafe) {
             unsafeCount++;
         }
+
         // All the instructions inside the write barrier must be unpreemptible.
         if (startedWB && !doneWB && !@unsafe) {
             Ꮡt.Errorf("instruction %s must be marked unsafe, but isn't"u8, parts[1]);
         }
+
         // Detect whether we're in the write barrier.
         var exprᴛ2 = Δruntime.GOARCH;
         if (exprᴛ2 == "arm64"u8) {
@@ -115,20 +119,19 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
                 doneWB = true;
             }
         }
-
     }
+
     if (instructionCount == 0) {
         Ꮡt.Errorf("no instructions"u8);
     }
     if (unsafeCount == instructionCount) {
         Ꮡt.Errorf("no interruptible instructions"u8);
     }
+    // Note that there are other instructions marked unpreemptible besides
+    // just the ones required by the write barrier. Those include possibly
+    // the preamble and postamble, as well as bleeding out from the
+    // write barrier proper into adjacent instructions (in both directions).
+    // Hopefully we can clean up the latter at some point.
 }
-
-// Note that there are other instructions marked unpreemptible besides
-// just the ones required by the write barrier. Those include possibly
-// the preamble and postamble, as well as bleeding out from the
-// write barrier proper into adjacent instructions (in both directions).
-// Hopefully we can clean up the latter at some point.
 
 } // end runtime_test_package

@@ -59,7 +59,6 @@ internal static float64 atan2(float64 y, float64 x) {
             default: {
                 return Copysign(0D, y);
             }}
-
         }
         switch (ᐧ) {
         case {} when IsInf(y, 0): {
@@ -68,7 +67,6 @@ internal static float64 atan2(float64 y, float64 x) {
         default: {
             return Copysign(Pi, y);
         }}
-
         break;
     }
     case {} when IsInf(y, 0): {

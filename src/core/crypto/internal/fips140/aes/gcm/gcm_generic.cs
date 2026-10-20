@@ -18,7 +18,9 @@ internal static void sealGeneric(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> non
     aes.EncryptBlockInternal(Ꮡg.of(GCM.Ꮡcipher), H[..], H[..]);
     deriveCounterGeneric(ᏑH, Ꮡcounter, nonce);
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), tagMask[..], tagMask[..], Ꮡcounter);
+
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), @out, plaintext, Ꮡcounter);
+
     array<byte> tag = new(16); /* gcmTagSize */
     gcmAuthGeneric(tag[..], ᏑH, ᏑtagMask, @out.slice(0, len(plaintext)), additionalData);
     copy(@out.slice(len(plaintext)), tag[..]);
@@ -33,14 +35,18 @@ internal static error openGeneric(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> no
     aes.EncryptBlockInternal(Ꮡg.of(GCM.Ꮡcipher), H[..], H[..]);
     deriveCounterGeneric(ᏑH, Ꮡcounter, nonce);
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), tagMask[..], tagMask[..], Ꮡcounter);
+
     var tag = ciphertext.slice(len(ciphertext) - g.tagSize);
     ciphertext = ciphertext.slice(0, len(ciphertext) - g.tagSize);
+
     array<byte> expectedTag = new(16); /* gcmTagSize */
     gcmAuthGeneric(expectedTag[..], ᏑH, ᏑtagMask, ciphertext, additionalData);
     if (subtle.ConstantTimeCompare(expectedTag.slice(0, g.tagSize), tag) != 1) {
         return errOpen;
     }
+
     gcmCounterCryptGeneric(Ꮡg.of(GCM.Ꮡcipher), @out, ciphertext, Ꮡcounter);
+
     return default!;
 }
 
@@ -73,13 +79,16 @@ internal static void gcmCounterCryptGeneric(ж<aes.Block> Ꮡb, slice<byte> @out
     ref var counter = ref Ꮡcounter.DerefOrNull();
 
     array<byte> mask = new(16); /* gcmBlockSize */
+
     while (len(src) >= gcmBlockSize) {
         aes.EncryptBlockInternal(Ꮡb, mask[..], counter[..]);
         gcmInc32(Ꮡcounter);
+
         subtle.XORBytes(@out, src, mask[..]);
         @out = @out[(int)(gcmBlockSize)..];
         src = src[(int)(gcmBlockSize)..];
     }
+
     if (len(src) > 0) {
         aes.EncryptBlockInternal(Ꮡb, mask[..], counter[..]);
         gcmInc32(Ꮡcounter);

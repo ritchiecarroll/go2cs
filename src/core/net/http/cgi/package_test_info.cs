@@ -25,7 +25,6 @@ global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 global using urlꓸError = go.net.url_package.ΔError;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -51,7 +50,6 @@ using static global::go.net.http.cgi_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.net.http.cgi_package.Handler, ж<global::go.net.http.cgi_package.Handler>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -63,8 +61,8 @@ using static global::go.net.http.cgi_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ABwkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICS+IIACRSCgpSAkqSC6ILugoKUgpSAkviCAAgSgoKUgpSAksiCAAcQgoKUgJIADQiCABQyspKCyoKClICCpIKCgIKkgg==", "184-206:1", "", "225=Repeat/1/2/16,Repeat/2/2/21;253=NewRequest/1/1/1,NewWriter/1/1/3")]
-[assembly: go.GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACM6tIKClqaCgoKClIKmpoKCgoLWxoKCgoKCgpS0tIKCgoKmtoKClIKCgqaCpoL4goK4ABImhICSpICS+IKCuAASKIKCgoKmgpKClIK4ytaCgrgABxDWgoK47qaCgqbcAAYYsoKmyqyAggAICoKCuO4ADAaCgoy47qaC6JKC/riCgoCSAAkKgoK4goCSpICS+IKCgoKUyrgABhDyhLiClIKClIKCgpSCgpSSgoKCloKUgoSCgoKCgpS02KKCgoKCgrjogoKSyqaEgoK4ptaCgoSSAAgS3OaCgoLMgoKCgJIACQiCAAkagoKC", "260-264:1;348-351:1", "", "357=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5")]
-[assembly: go.GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "AB42ooS4ABImhICSpICSAAkSggAKELKClIKClIKU2qKEuIKCgoKEgoLsooS4poKAkgAIDKKEuKaCAAgGgoS4ABQysqKCgoKAggAJDpDSgNKApIK4poKC", "179-186:1", "", "183=Repeat/1/2/16,Repeat/2/2/21")]
+[assembly: go.GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACM6tIKCpqaCgoKClIKmpoKCgoLWxoKCgoKCgpS0pIKCgoKmxoKClIKCgqaCpoL4goK4ABImlICSpICS+IKCuAATKIKCgoKmgpKClIK4ytaCgrgABxDWgoK47qaCgqbcAAYYsoKmyqyAggAICoKCuO4ADAaCgoy47qaC6JKCAAgOuIKCgJIACQqCgriCgJKkgJL4goKCgpTKuAAGEPKUuIKkgoKUgoKClIKClJKCgoKmgpSClIKCgoKClLTYooKCgoKCuOiCgpLKppSCgrim1oKClJIACBLc5oKCgtyCgoKAkgAJCIIACRqCgoI=", "260-264:1;348-351:1", "", "360=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5")]
+[assembly: go.GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "AB42opS4ABImlICSpICSAAkSggAKELKClIKClIKU2qKUuIKCgoKUgoLsopS4poKAkgAIDKKUuKaCAAgGgpS4ABQysqKCgoKAggAJDpDSgNKApIK4poKC", "179-186:1", "", "190=Repeat/1/2/16,Repeat/2/2/21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

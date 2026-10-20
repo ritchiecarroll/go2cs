@@ -27,9 +27,11 @@ public static void TestReadError(ж<testing.T> Ꮡt) {
             }
             var fʗ1 = f;
             defer(() => fʗ1.Close(), ref ᒐ);
+
             // Give scheduler a chance to have two separated
             // goroutines: an event poller and an event waiter.
             time.Sleep(100 * time.Millisecond);
+
             array<byte> b = new(1);
             (_, err) = f.Read(b[..]);
             {

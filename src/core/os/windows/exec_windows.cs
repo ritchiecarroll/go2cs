@@ -18,7 +18,7 @@ internal static readonly @string osUnexpectedResultFromˢ = "os: unexpected resu
 internal static readonly @string getExitCodeProcessˢ = "GetExitCodeProcess"u8;
 internal static readonly @string getProcessTimesˢ = "GetProcessTimes"u8;
 
-// Note that Process.mode is always modeHandle because Windows always requires
+// Note that Process.handle is never nil because Windows always requires
 // a handle. A manually-created Process literal is not valid.
 internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
     ж<ProcessState> ps = default!;
@@ -35,9 +35,9 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
         if (exprᴛ1 == statusReleased) {
             (ps, err) = (default!, syscall.EINVAL); goto ᒐdone;
         }
-
         defer(Ꮡp.handleTransientRelease, ref ᒐ);
-        var (s, e) = syscall.WaitForSingleObject(((syscallꓸHandle)handle), syscall.INFINITE);
+
+        var (s, e) = syscall.WaitForSingleObject((syscallꓸHandle)handle, syscall.INFINITE);
         var exprᴛ2 = s;
         if (exprᴛ2 == syscall.WAIT_OBJECT_0) {
             do {
@@ -50,18 +50,21 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
         else { /* default: */
             (ps, err) = (default!, errors.New(osUnexpectedResultFromˢ)); goto ᒐdone;
         }
-
         ref var ec = ref heap(new uint32(), out var Ꮡec);
-        e = syscall.GetExitCodeProcess(((syscallꓸHandle)handle), Ꮡec);
+        e = syscall.GetExitCodeProcess((syscallꓸHandle)handle, Ꮡec);
         if (e != default!) {
             (ps, err) = (default!, NewSyscallError(getExitCodeProcessˢ, e)); goto ᒐdone;
         }
         ref var u = ref heap(new syscall.Rusage(), out var Ꮡu);
-        e = syscall.GetProcessTimes(((syscallꓸHandle)handle), Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
+        e = syscall.GetProcessTimes((syscallꓸHandle)handle, Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
         if (e != default!) {
             (ps, err) = (default!, NewSyscallError(getProcessTimesˢ, e)); goto ᒐdone;
         }
-        defer(() => Ꮡp.Release(), ref ᒐ);
+
+        // For compatibility we use statusReleased here rather
+        // than statusDone.
+        Ꮡp.doRelease(statusReleased);
+
         (ps, err) = (Ꮡ(new ProcessState(p.Pid, new syscall.WaitStatus(ExitCode: ec), Ꮡu)), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -84,11 +87,11 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
         if (exprᴛ1 == statusReleased) {
             return syscall.EINVAL;
         }
-
         defer(Ꮡp.handleTransientRelease, ref ᒐ);
+
         if (AreEqual(sig, ΔKill)) {
             ref var terminationHandle = ref heap(new syscallꓸHandle(), out var ᏑterminationHandle);
-            var e = syscall.DuplicateHandle(~((syscallꓸHandle)((syscallꓸHandle)0)), ((syscallꓸHandle)handle), ~((syscallꓸHandle)((syscallꓸHandle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
+            var e = syscall.DuplicateHandle(~((syscallꓸHandle)((syscallꓸHandle)0)), (syscallꓸHandle)handle, ~((syscallꓸHandle)((syscallꓸHandle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
             if (e != default!) {
                 return NewSyscallError(duplicateHandleˢ, e);
             }
@@ -104,24 +107,8 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
     finally { ᒐ.Run(); }
 }
 
-internal static error release(this ж<Process> Ꮡp) {
-    // Drop the Process' reference and mark handle unusable for
-    // future calls.
-    //
-    // The API on Windows expects EINVAL if Release is called multiple
-    // times.
-    {
-        var old = Ꮡp.handlePersistentRelease(statusReleased); if (old == statusReleased) {
-            return syscall.EINVAL;
-        }
-    }
-    // no need for a finalizer anymore
-    runtime.SetFinalizer(Ꮡp.OrTypedNil(), default!);
-    return default!;
-}
-
-internal static void closeHandle(this ref Process p) {
-    syscall.CloseHandle(((syscallꓸHandle)p.handle));
+internal static void closeHandle(this ref processHandle ph) {
+    syscall.CloseHandle((syscallꓸHandle)ph.handle);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -193,7 +180,6 @@ internal static (slice<byte> arg, @string rest) readNextArg(@string cmd) {
             continue;
             break;
         }}
-
         b = appendBSBytes(b, nslash);
         nslash = 0;
         b = append(b, c);
@@ -213,7 +199,7 @@ internal static slice<@string> commandLineToArgv(@string cmd) {
         }
         slice<byte> arg = default!;
         (arg, cmd) = readNextArg(cmd);
-        args = append(args, ((@string)arg));
+        args = append(args, (@string)arg);
     }
     return args;
 }
@@ -221,7 +207,7 @@ internal static slice<@string> commandLineToArgv(@string cmd) {
 internal static time.Duration ftToDuration(ж<syscall.Filetime> Ꮡft) {
     ref var ft = ref Ꮡft.DerefOrNull();
 
-    var n = ((int64)ft.HighDateTime << (int)(32)) + (int64)ft.LowDateTime; // in 100-nanosecond intervals
+    var n = ((int64)ft.HighDateTime << 32) + (int64)ft.LowDateTime; // in 100-nanosecond intervals
     return ((time.Duration)(n * 100)) * time.ΔNanosecond;
 }
 

@@ -48,7 +48,6 @@ public static @string String(this Op i) {
     default: {
         return "Op("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
     }}
-
 }
 
 } // end syntax_package

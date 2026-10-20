@@ -15,7 +15,6 @@ internal partial struct TestEqualFold_type /*dyn*/ {
 }
 
 public static void TestEqualFold(ж<testing.T> Ꮡt) {
-// This "K" is 'KELVIN SIGN' (\u212A)
     slice<TestEqualFold_type> tests = new TestEqualFold_type[]{
         new(
             name: "empty"u8,
@@ -35,7 +34,7 @@ public static void TestEqualFold(ж<testing.T> Ꮡt) {
         ),
         new(
             name: "Unicode Kelvin symbol"u8,
-            a: "chunKed"u8,
+            a: "chunKed"u8, // This "K" is 'KELVIN SIGN' (\u212A)
             b: "chunked"u8,
             want: false
         )
@@ -62,7 +61,6 @@ internal partial struct TestIsPrint_type /*dyn*/ {
 }
 
 public static void TestIsPrint(ж<testing.T> Ꮡt) {
-// This "K" is 'KELVIN SIGN' (\u212A)
     slice<TestIsPrint_type> tests = new TestIsPrint_type[]{
         new(
             name: "empty"u8,
@@ -90,7 +88,7 @@ public static void TestIsPrint(ж<testing.T> Ꮡt) {
         ),
         new(
             name: "Unicode letter"u8,
-            @in: "Today it's 280K outside: it's freezing!"u8,
+            @in: "Today it's 280K outside: it's freezing!"u8, // This "K" is 'KELVIN SIGN' (\u212A)
             want: false
         ),
         new(

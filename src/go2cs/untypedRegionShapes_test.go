@@ -116,6 +116,7 @@ var untypedRegionShapes = []struct{ name, decls, body string }{
 }
 
 func TestUntypedRegionShapesConvertWithoutPanic(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads each fixture package via go/packages")
 	}

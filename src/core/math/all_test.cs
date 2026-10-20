@@ -897,81 +897,44 @@ internal static slice<array<float64>> vfatan2SC = GoReflect.WithElemDims(new arr
     new float64[]{NaN(), NaN()}.array()
 }.slice(), 2);
 
-// atan2(-Inf, -Inf)
-// atan2(-Inf, -Pi)
-// atan2(-Inf, +0)
-// atan2(-Inf, +Pi)
-// atan2(-Inf, +Inf)
-// atan2(-Inf, NaN)
-// atan2(-Pi, -Inf)
-// atan2(-Pi, +0)
-// atan2(-Pi, Inf)
-// atan2(-Pi, NaN)
-// atan2(-0, -Inf)
-// atan2(-0, -Pi)
-// atan2(-0, -0)
-// atan2(-0, +0)
-// atan2(-0, +Pi)
-// atan2(-0, +Inf)
-// atan2(-0, NaN)
-// atan2(+0, -Inf)
-// atan2(+0, -Pi)
-// atan2(+0, -0)
-// atan2(+0, +0)
-// atan2(+0, +Pi)
-// atan2(+0, +Inf)
-// atan2(+0, NaN)
-// atan2(+Pi, -Inf)
-// atan2(+Pi, +0)
-// atan2(+Pi, +Inf)
-// atan2(+1, +Inf)
-// atan2(-1, +Inf)
-// atan2(+Pi, NaN)
-// atan2(+Inf, -Inf)
-// atan2(+Inf, -Pi)
-// atan2(+Inf, +0)
-// atan2(+Inf, +Pi)
-// atan2(+Inf, +Inf)
-// atan2(+Inf, NaN)
-// atan2(NaN, NaN)
 internal static slice<float64> atan2SC = new float64[]{
-    -3D * Pi / 4D,
-    -Pi / 2D,
-    -Pi / 2D,
-    -Pi / 2D,
-    -Pi / 4D,
-    NaN(),
-    -Pi,
-    -Pi / 2D,
-    Copysign(0D, -1D),
-    NaN(),
-    -Pi,
-    -Pi,
-    -Pi,
-    Copysign(0D, -1D),
-    Copysign(0D, -1D),
-    Copysign(0D, -1D),
-    NaN(),
-    Pi,
-    Pi,
-    Pi,
-    0D,
-    0D,
-    0D,
-    NaN(),
-    Pi,
-    Pi / 2D,
-    0D,
-    0D,
-    Copysign(0D, -1D),
-    NaN(),
-    3D * Pi / 4D,
-    Pi / 2D,
-    Pi / 2D,
-    Pi / 2D,
-    Pi / 4D,
-    NaN(),
-    NaN()
+    -3D * Pi / 4D, // atan2(-Inf, -Inf)
+    -Pi / 2D, // atan2(-Inf, -Pi)
+    -Pi / 2D, // atan2(-Inf, +0)
+    -Pi / 2D, // atan2(-Inf, +Pi)
+    -Pi / 4D, // atan2(-Inf, +Inf)
+    NaN(), // atan2(-Inf, NaN)
+    -Pi, // atan2(-Pi, -Inf)
+    -Pi / 2D, // atan2(-Pi, +0)
+    Copysign(0D, -1D), // atan2(-Pi, Inf)
+    NaN(), // atan2(-Pi, NaN)
+    -Pi, // atan2(-0, -Inf)
+    -Pi, // atan2(-0, -Pi)
+    -Pi, // atan2(-0, -0)
+    Copysign(0D, -1D), // atan2(-0, +0)
+    Copysign(0D, -1D), // atan2(-0, +Pi)
+    Copysign(0D, -1D), // atan2(-0, +Inf)
+    NaN(), // atan2(-0, NaN)
+    Pi, // atan2(+0, -Inf)
+    Pi, // atan2(+0, -Pi)
+    Pi, // atan2(+0, -0)
+    0D, // atan2(+0, +0)
+    0D, // atan2(+0, +Pi)
+    0D, // atan2(+0, +Inf)
+    NaN(), // atan2(+0, NaN)
+    Pi, // atan2(+Pi, -Inf)
+    Pi / 2D, // atan2(+Pi, +0)
+    0D, // atan2(+Pi, +Inf)
+    0D, // atan2(+1, +Inf)
+    Copysign(0D, -1D), // atan2(-1, +Inf)
+    NaN(), // atan2(+Pi, NaN)
+    3D * Pi / 4D, // atan2(+Inf, -Inf)
+    Pi / 2D, // atan2(+Inf, -Pi)
+    Pi / 2D, // atan2(+Inf, +0)
+    Pi / 2D, // atan2(+Inf, +Pi)
+    Pi / 4D, // atan2(+Inf, +Inf)
+    NaN(), // atan2(+Inf, NaN)
+    NaN() // atan2(NaN, NaN)
 }.slice();
 
 internal static slice<float64> vfcbrtSC = new float64[]{
@@ -990,8 +953,6 @@ internal static slice<float64> cbrtSC = new float64[]{
     NaN()
 }.slice();
 
-// largest fractional float64
-// smallest fractional float64
 internal static slice<float64> vfceilSC = new float64[]{
     Inf(-1),
     Copysign(0D, -1D),
@@ -999,10 +960,10 @@ internal static slice<float64> vfceilSC = new float64[]{
     Inf(1),
     NaN(),
     4503599627370495D,
-    4503599627370496D - 0.5D,
+    4503599627370496D - 0.5D, // largest fractional float64
     4503599627370496D,
     -4503599627370496D,
-    -4503599627370496D + 0.5D,
+    -4503599627370496D + 0.5D, // smallest fractional float64
     -4503599627370495D,
     9007199254740992D,
     -9007199254740992D
@@ -1158,21 +1119,21 @@ internal static slice<float64> erfcinvSC = new float64[]{
     NaN()
 }.slice();
 
-// smallest float64 that overflows Exp(x)
-// Issue 18912
-// near zero
-// denormal
 internal static slice<float64> vfexpSC = new float64[]{
     Inf(-1),
     -2000D,
     2000D,
     Inf(1),
     NaN(),
+    // smallest float64 that overflows Exp(x)
     7.097827128933841e+02D,
+    // Issue 18912
     1.48852223e+09D,
     1.4885222e+09D,
     1D,
+    // near zero
     3.725290298461915e-09D,
+    // denormal
     -740D
 }.slice();
 
@@ -1190,17 +1151,17 @@ internal static slice<float64> expSC = new float64[]{
     4.2e-322D
 }.slice();
 
-// smallest float64 that overflows Exp2(x)
-// near underflow
-// near zero
 internal static slice<float64> vfexp2SC = new float64[]{
     Inf(-1),
     -2000D,
     2000D,
     Inf(1),
     NaN(),
+    // smallest float64 that overflows Exp2(x)
     1024D,
+    // near underflow
     -1.07399999999999e+03D,
+    // near zero
     3.725290298461915e-09D
 }.slice();
 
@@ -1380,75 +1341,41 @@ internal static slice<array<float64>> vffmodSC = GoReflect.WithElemDims(new arra
     new float64[]{NaN(), NaN()}.array()
 }.slice(), 2);
 
-// fmod(-Inf, -Inf)
-// fmod(-Inf, -Pi)
-// fmod(-Inf, 0)
-// fmod(-Inf, Pi)
-// fmod(-Inf, +Inf)
-// fmod(-Inf, NaN)
-// fmod(-Pi, -Inf)
-// fmod(-Pi, 0)
-// fmod(-Pi, +Inf)
-// fmod(-Pi, NaN)
-// fmod(-0, -Inf)
-// fmod(-0, 0)
-// fmod(-0, Inf)
-// fmod(-0, NaN)
-// fmod(0, -Inf)
-// fmod(0, 0)
-// fmod(0, +Inf)
-// fmod(0, NaN)
-// fmod(Pi, -Inf)
-// fmod(Pi, 0)
-// fmod(Pi, +Inf)
-// fmod(Pi, NaN)
-// fmod(+Inf, -Inf)
-// fmod(+Inf, -Pi)
-// fmod(+Inf, 0)
-// fmod(+Inf, Pi)
-// fmod(+Inf, +Inf)
-// fmod(+Inf, NaN)
-// fmod(NaN, -Inf)
-// fmod(NaN, -Pi)
-// fmod(NaN, 0)
-// fmod(NaN, Pi)
-// fmod(NaN, +Inf)
-// fmod(NaN, NaN)
 internal static slice<float64> fmodSC = new float64[]{
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    -Pi,
-    NaN(),
-    -Pi,
-    NaN(),
-    Copysign(0D, -1D),
-    NaN(),
-    Copysign(0D, -1D),
-    NaN(),
-    0D,
-    NaN(),
-    0D,
-    NaN(),
-    Pi,
-    NaN(),
-    Pi,
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN(),
-    NaN()
+    NaN(), // fmod(-Inf, -Inf)
+    NaN(), // fmod(-Inf, -Pi)
+    NaN(), // fmod(-Inf, 0)
+    NaN(), // fmod(-Inf, Pi)
+    NaN(), // fmod(-Inf, +Inf)
+    NaN(), // fmod(-Inf, NaN)
+    -Pi, // fmod(-Pi, -Inf)
+    NaN(), // fmod(-Pi, 0)
+    -Pi, // fmod(-Pi, +Inf)
+    NaN(), // fmod(-Pi, NaN)
+    Copysign(0D, -1D), // fmod(-0, -Inf)
+    NaN(), // fmod(-0, 0)
+    Copysign(0D, -1D), // fmod(-0, Inf)
+    NaN(), // fmod(-0, NaN)
+    0D, // fmod(0, -Inf)
+    NaN(), // fmod(0, 0)
+    0D, // fmod(0, +Inf)
+    NaN(), // fmod(0, NaN)
+    Pi, // fmod(Pi, -Inf)
+    NaN(), // fmod(Pi, 0)
+    Pi, // fmod(Pi, +Inf)
+    NaN(), // fmod(Pi, NaN)
+    NaN(), // fmod(+Inf, -Inf)
+    NaN(), // fmod(+Inf, -Pi)
+    NaN(), // fmod(+Inf, 0)
+    NaN(), // fmod(+Inf, Pi)
+    NaN(), // fmod(+Inf, +Inf)
+    NaN(), // fmod(+Inf, NaN)
+    NaN(), // fmod(NaN, -Inf)
+    NaN(), // fmod(NaN, -Pi)
+    NaN(), // fmod(NaN, 0)
+    NaN(), // fmod(NaN, Pi)
+    NaN(), // fmod(NaN, +Inf)
+    NaN() // fmod(NaN, NaN)
 }.slice();
 
 internal static slice<float64> vffrexpSC = new float64[]{
@@ -1467,15 +1394,6 @@ internal static slice<fi> frexpSC = new fi[]{
     new(NaN(), 0)
 }.slice();
 
-// Test inputs inspired by Python test suite.
-// Outputs computed at high precision by PARI/GP.
-// If recomputing table entries, be careful to use
-// high-precision (%.1000g) formatting of the float64 inputs.
-// For example, -2.0000000000000004 is the float64 with exact value
-// -2.00000000000000044408920985626161695, and
-// gamma(-2.0000000000000004) = -1249999999999999.5386078562728167651513, while
-// gamma(-2.00000000000000044408920985626161695) = -1125899906826907.2044875028130093136826.
-// Thus the table lists -1.1258999068426235e+15 as the answer.
 internal static slice<array<float64>> vfgamma = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(1), Inf(1)}.array(),
     new float64[]{Inf(-1), NaN()}.array(),
@@ -1488,6 +1406,16 @@ internal static slice<array<float64>> vfgamma = GoReflect.WithElemDims(new array
     new float64[]{-1e16D, NaN()}.array(),
     new float64[]{-1e300D, NaN()}.array(),
     new float64[]{1.7e308D, Inf(1)}.array(),
+
+    // Test inputs inspired by Python test suite.
+    // Outputs computed at high precision by PARI/GP.
+    // If recomputing table entries, be careful to use
+    // high-precision (%.1000g) formatting of the float64 inputs.
+    // For example, -2.0000000000000004 is the float64 with exact value
+    // -2.00000000000000044408920985626161695, and
+    // gamma(-2.0000000000000004) = -1249999999999999.5386078562728167651513, while
+    // gamma(-2.00000000000000044408920985626161695) = -1125899906826907.2044875028130093136826.
+    // Thus the table lists -1.1258999068426235e+15 as the answer.
     new float64[]{0.5D, 1.772453850905516D}.array(),
     new float64[]{1.5D, 0.886226925452758D}.array(),
     new float64[]{2.5D, 1.329340388179137D}.array(),
@@ -1550,7 +1478,6 @@ internal static slice<array<float64>> vfgamma = GoReflect.WithElemDims(new array
     new float64[]{-127.45117632943295D, 1.183111089623681e-214D}.array()
 }.slice(), 2);
 
-// +0, +0
 internal static slice<array<float64>> vfhypotSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(-1), Inf(-1)}.array(),
     new float64[]{Inf(-1), 0D}.array(),
@@ -1559,7 +1486,7 @@ internal static slice<array<float64>> vfhypotSC = GoReflect.WithElemDims(new arr
     new float64[]{Copysign(0D, -1D), Copysign(0D, -1D)}.array(),
     new float64[]{Copysign(0D, -1D), 0D}.array(),
     new float64[]{0D, Copysign(0D, -1D)}.array(),
-    new float64[]{0D, 0D}.array(),
+    new float64[]{0D, 0D}.array(), // +0, +0
     new float64[]{0D, Inf(-1)}.array(),
     new float64[]{0D, Inf(1)}.array(),
     new float64[]{0D, NaN()}.array(),
@@ -1723,7 +1650,6 @@ internal static slice<float64> logbSC = new float64[]{
     NaN()
 }.slice();
 
-// Issue #29488
 internal static slice<float64> vflog1pSC = new float64[]{
     Inf(-1),
     -Pi,
@@ -1732,10 +1658,9 @@ internal static slice<float64> vflog1pSC = new float64[]{
     0D,
     Inf(1),
     NaN(),
-    4503599627370496.5D
+    4503599627370496.5D // Issue #29488
 }.slice();
 
-// Issue #29488
 internal static slice<float64> log1pSC = new float64[]{
     NaN(),
     NaN(),
@@ -1744,7 +1669,7 @@ internal static slice<float64> log1pSC = new float64[]{
     0D,
     Inf(1),
     NaN(),
-    36.04365338911715D
+    36.04365338911715D // Issue #29488
 }.slice();
 
 internal static slice<float64> vfmodfSC = new float64[]{
@@ -1754,12 +1679,10 @@ internal static slice<float64> vfmodfSC = new float64[]{
     NaN()
 }.slice();
 
-// [2]float64{Copysign(0, -1), Inf(-1)},
-// [2]float64{0, Inf(1)},
 internal static slice<array<float64>> modfSC = GoReflect.WithElemDims(new array<float64>[]{
-    new float64[]{Inf(-1), NaN()}.array(),
+    new float64[]{Inf(-1), NaN()}.array(), // [2]float64{Copysign(0, -1), Inf(-1)},
     new float64[]{Copysign(0D, -1D), Copysign(0D, -1D)}.array(),
-    new float64[]{Inf(1), NaN()}.array(),
+    new float64[]{Inf(1), NaN()}.array(), // [2]float64{0, Inf(1)},
     new float64[]{NaN(), NaN()}.array()
 }.slice(), 2);
 
@@ -1776,18 +1699,15 @@ internal static slice<array<float32>> vfnextafter32SC = GoReflect.WithElemDims(n
     new float32[]{(float32)NaN(), (float32)NaN()}.array()
 }.slice(), 2);
 
-// Float32frombits(0x80000001)
-// Float32frombits(0x00000001)
-// Float32frombits(0x80000001)
 internal static slice<float32> nextafter32SC = new float32[]{
     0F,
     0F,
-    -1.401298464e-45F,
+    -1.401298464e-45F, // Float32frombits(0x80000001)
     (float32)NaN(),
-    1.401298464e-45F,
+    1.401298464e-45F, // Float32frombits(0x00000001)
     (float32)Copysign(0D, -1D),
     (float32)Copysign(0D, -1D),
-    -1.401298464e-45F,
+    -1.401298464e-45F, // Float32frombits(0x80000001)
     (float32)NaN(),
     (float32)NaN()
 }.slice();
@@ -1805,24 +1725,19 @@ internal static slice<array<float64>> vfnextafter64SC = GoReflect.WithElemDims(n
     new float64[]{NaN(), NaN()}.array()
 }.slice(), 2);
 
-// Float64frombits(0x8000000000000001)
-// Float64frombits(0x0000000000000001)
-// Float64frombits(0x8000000000000001)
 internal static slice<float64> nextafter64SC = new float64[]{
     0D,
     0D,
-    -4.9406564584124654418e-324D,
+    -4.9406564584124654418e-324D, // Float64frombits(0x8000000000000001)
     NaN(),
-    4.9406564584124654418e-324D,
+    4.9406564584124654418e-324D, // Float64frombits(0x0000000000000001)
     Copysign(0D, -1D),
     Copysign(0D, -1D),
-    -4.9406564584124654418e-324D,
+    -4.9406564584124654418e-324D, // Float64frombits(0x8000000000000001)
     NaN(),
     NaN()
 }.slice();
 
-// Issue #7394 overflow checks
-// Issue #57465
 internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{Inf(-1), -Pi}.array(),
     new float64[]{Inf(-1), -3D}.array(),
@@ -1886,6 +1801,8 @@ internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array
     new float64[]{NaN(), 1D}.array(),
     new float64[]{NaN(), Pi}.array(),
     new float64[]{NaN(), NaN()}.array(),
+
+    // Issue #7394 overflow checks
     new float64[]{2D, (float64)(4294967296D)}.array(),
     new float64[]{2D, -(float64)(4294967296D)}.array(),
     new float64[]{-2D, (float64)(4294967297D)}.array(),
@@ -1895,165 +1812,94 @@ internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array
     new float64[]{Nextafter(1D, -2D), (float64)(9223372036854775808D)}.array(),
     new float64[]{Nextafter(-1D, 2D), (float64)(9223372036854775808D)}.array(),
     new float64[]{Nextafter(-1D, -2D), (float64)(9223372036854775808D)}.array(),
+
+    // Issue #57465
     new float64[]{Copysign(0D, -1D), 1e19D}.array(),
     new float64[]{Copysign(0D, -1D), -1e19D}.array(),
     new float64[]{Copysign(0D, -1D), 9007199254740991D}.array(),
     new float64[]{Copysign(0D, -1D), -(9007199254740991L)}.array()
 }.slice(), 2);
 
-// pow(-Inf, -Pi)
-// pow(-Inf, -3)
-// pow(-Inf, -0)
-// pow(-Inf, +0)
-// pow(-Inf, 1)
-// pow(-Inf, 3)
-// pow(-Inf, Pi)
-// pow(-Inf, 0.5)
-// pow(-Inf, NaN)
-// pow(-Pi, -Inf)
-// pow(-Pi, -Pi)
-// pow(-Pi, -0)
-// pow(-Pi, +0)
-// pow(-Pi, 1)
-// pow(-Pi, Pi)
-// pow(-Pi, +Inf)
-// pow(-Pi, NaN)
-// pow(-1, -Inf) IEEE 754-2008
-// pow(-1, +Inf) IEEE 754-2008
-// pow(-1, NaN)
-// pow(-1/2, -Inf)
-// pow(-1/2, +Inf)
-// pow(-0, -Inf)
-// pow(-0, -Pi)
-// pow(-0, -0.5)
-// pow(-0, -3) IEEE 754-2008
-// pow(-0, 3) IEEE 754-2008
-// pow(-0, +Pi)
-// pow(-0, 0.5)
-// pow(-0, +Inf)
-// pow(+0, -Inf)
-// pow(+0, -Pi)
-// pow(+0, -3)
-// pow(+0, -0)
-// pow(+0, +0)
-// pow(+0, 3)
-// pow(+0, +Pi)
-// pow(+0, +Inf)
-// pow(+0, NaN)
-// pow(1/2, -Inf)
-// pow(1/2, +Inf)
-// pow(1, -Inf) IEEE 754-2008
-// pow(1, +Inf) IEEE 754-2008
-// pow(1, NaN) IEEE 754-2008
-// pow(+Pi, -Inf)
-// pow(+Pi, -0)
-// pow(+Pi, +0)
-// pow(+Pi, 1)
-// pow(+Pi, +Inf)
-// pow(+Pi, NaN)
-// pow(+Inf, -Pi)
-// pow(+Inf, -0)
-// pow(+Inf, +0)
-// pow(+Inf, 1)
-// pow(+Inf, Pi)
-// pow(+Inf, NaN)
-// pow(NaN, -Pi)
-// pow(NaN, -0)
-// pow(NaN, +0)
-// pow(NaN, 1)
-// pow(NaN, +Pi)
-// pow(NaN, NaN)
-// Issue #7394 overflow checks
-// pow(2, float64(1 << 32))
-// pow(2, -float64(1 << 32))
-// pow(-2, float64(1<<32 + 1))
-// pow(1/2, float64(1 << 45))
-// pow(1/2, -float64(1 << 45))
-// pow(Nextafter(1, 2), float64(1 << 63))
-// pow(Nextafter(1, -2), float64(1 << 63))
-// pow(Nextafter(-1, 2), float64(1 << 63))
-// pow(Nextafter(-1, -2), float64(1 << 63))
-// Issue #57465
-// pow(-0, 1e19)
-// pow(-0, -1e19)
-// pow(-0, 1<<53 -1)
-// pow(-0, -(1<<53 -1))
 internal static slice<float64> powSC = new float64[]{
-    0D,
-    Copysign(0D, -1D),
-    1D,
-    1D,
-    Inf(-1),
-    Inf(-1),
-    Inf(1),
-    Inf(1),
-    NaN(),
-    0D,
-    NaN(),
-    1D,
-    1D,
-    -Pi,
-    NaN(),
-    Inf(1),
-    NaN(),
-    1D,
-    1D,
-    NaN(),
-    Inf(1),
-    0D,
-    Inf(1),
-    Inf(1),
-    Inf(1),
-    Inf(-1),
-    Copysign(0D, -1D),
-    0D,
-    0D,
-    0D,
-    Inf(1),
-    Inf(1),
-    Inf(1),
-    1D,
-    1D,
-    0D,
-    0D,
-    0D,
-    NaN(),
-    Inf(1),
-    0D,
-    1D,
-    1D,
-    1D,
-    0D,
-    1D,
-    1D,
-    Pi,
-    Inf(1),
-    NaN(),
-    0D,
-    1D,
-    1D,
-    Inf(1),
-    Inf(1),
-    NaN(),
-    NaN(),
-    1D,
-    1D,
-    NaN(),
-    NaN(),
-    NaN(),
-    Inf(1),
-    0D,
-    Inf(-1),
-    0D,
-    Inf(1),
-    Inf(1),
-    0D,
-    0D,
-    Inf(1),
-    0D,
-    Inf(1),
-    Copysign(0D, -1D),
-    Inf(-1)
+    0D, // pow(-Inf, -Pi)
+    Copysign(0D, -1D), // pow(-Inf, -3)
+    1D, // pow(-Inf, -0)
+    1D, // pow(-Inf, +0)
+    Inf(-1), // pow(-Inf, 1)
+    Inf(-1), // pow(-Inf, 3)
+    Inf(1), // pow(-Inf, Pi)
+    Inf(1), // pow(-Inf, 0.5)
+    NaN(), // pow(-Inf, NaN)
+    0D, // pow(-Pi, -Inf)
+    NaN(), // pow(-Pi, -Pi)
+    1D, // pow(-Pi, -0)
+    1D, // pow(-Pi, +0)
+    -Pi, // pow(-Pi, 1)
+    NaN(), // pow(-Pi, Pi)
+    Inf(1), // pow(-Pi, +Inf)
+    NaN(), // pow(-Pi, NaN)
+    1D, // pow(-1, -Inf) IEEE 754-2008
+    1D, // pow(-1, +Inf) IEEE 754-2008
+    NaN(), // pow(-1, NaN)
+    Inf(1), // pow(-1/2, -Inf)
+    0D, // pow(-1/2, +Inf)
+    Inf(1), // pow(-0, -Inf)
+    Inf(1), // pow(-0, -Pi)
+    Inf(1), // pow(-0, -0.5)
+    Inf(-1), // pow(-0, -3) IEEE 754-2008
+    Copysign(0D, -1D), // pow(-0, 3) IEEE 754-2008
+    0D, // pow(-0, +Pi)
+    0D, // pow(-0, 0.5)
+    0D, // pow(-0, +Inf)
+    Inf(1), // pow(+0, -Inf)
+    Inf(1), // pow(+0, -Pi)
+    Inf(1), // pow(+0, -3)
+    1D, // pow(+0, -0)
+    1D, // pow(+0, +0)
+    0D, // pow(+0, 3)
+    0D, // pow(+0, +Pi)
+    0D, // pow(+0, +Inf)
+    NaN(), // pow(+0, NaN)
+    Inf(1), // pow(1/2, -Inf)
+    0D, // pow(1/2, +Inf)
+    1D, // pow(1, -Inf) IEEE 754-2008
+    1D, // pow(1, +Inf) IEEE 754-2008
+    1D, // pow(1, NaN) IEEE 754-2008
+    0D, // pow(+Pi, -Inf)
+    1D, // pow(+Pi, -0)
+    1D, // pow(+Pi, +0)
+    Pi, // pow(+Pi, 1)
+    Inf(1), // pow(+Pi, +Inf)
+    NaN(), // pow(+Pi, NaN)
+    0D, // pow(+Inf, -Pi)
+    1D, // pow(+Inf, -0)
+    1D, // pow(+Inf, +0)
+    Inf(1), // pow(+Inf, 1)
+    Inf(1), // pow(+Inf, Pi)
+    NaN(), // pow(+Inf, NaN)
+    NaN(), // pow(NaN, -Pi)
+    1D, // pow(NaN, -0)
+    1D, // pow(NaN, +0)
+    NaN(), // pow(NaN, 1)
+    NaN(), // pow(NaN, +Pi)
+    NaN(), // pow(NaN, NaN)
+
+    // Issue #7394 overflow checks
+    Inf(1), // pow(2, float64(1 << 32))
+    0D, // pow(2, -float64(1 << 32))
+    Inf(-1), // pow(-2, float64(1<<32 + 1))
+    0D, // pow(1/2, float64(1 << 45))
+    Inf(1), // pow(1/2, -float64(1 << 45))
+    Inf(1), // pow(Nextafter(1, 2), float64(1 << 63))
+    0D, // pow(Nextafter(1, -2), float64(1 << 63))
+    0D, // pow(Nextafter(-1, 2), float64(1 << 63))
+    Inf(1), // pow(Nextafter(-1, -2), float64(1 << 63))
+
+    // Issue #57465
+    0D, // pow(-0, 1e19)
+    Inf(1), // pow(-0, -1e19)
+    Copysign(0D, -1D), // pow(-0, 1<<53 -1)
+    Inf(-1) // pow(-0, -(1<<53 -1))
 }.slice();
 
 internal static slice<nint> vfpow10SC = new nint[]{
@@ -2074,81 +1920,54 @@ internal static slice<nint> vfpow10SC = new nint[]{
     MaxInt32
 }.slice();
 
-// pow10(MinInt32)
-// pow10(-324)
-// pow10(-323)
-// pow10(-50)
-// pow10(-22)
-// pow10(-1)
-// pow10(0)
-// pow10(1)
-// pow10(22)
-// pow10(50)
-// pow10(100)
-// pow10(200)
-// pow10(308)
-// pow10(309)
-// pow10(MaxInt32)
 internal static slice<float64> pow10SC = new float64[]{
-    0D,
-    0D,
-    1.0e-323D,
-    1.0e-50D,
-    1.0e-22D,
-    1.0e-1D,
-    1.0e0D,
-    1.0e1D,
-    1.0e22D,
-    1.0e50D,
-    1.0e100D,
-    1.0e200D,
-    1.0e308D,
-    Inf(1),
-    Inf(1)
+    0D, // pow10(MinInt32)
+    0D, // pow10(-324)
+    1.0e-323D, // pow10(-323)
+    1.0e-50D, // pow10(-50)
+    1.0e-22D, // pow10(-22)
+    1.0e-1D, // pow10(-1)
+    1.0e0D, // pow10(0)
+    1.0e1D, // pow10(1)
+    1.0e22D, // pow10(22)
+    1.0e50D, // pow10(50)
+    1.0e100D, // pow10(100)
+    1.0e200D, // pow10(200)
+    1.0e308D, // pow10(308)
+    Inf(1), // pow10(309)
+    Inf(1) // pow10(MaxInt32)
 }.slice();
 
-// denormal
-// 0.5-epsilon
-// 0.5+epsilon
-// 1 bit fraction
-// 1 bit fraction, rounding to 0 bit fraction
-// large integer
 internal static slice<array<float64>> vfroundSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{0D, 0D}.array(),
-    new float64[]{1.390671161567e-309D, 0D}.array(),
-    new float64[]{0.49999999999999994D, 0D}.array(),
+    new float64[]{1.390671161567e-309D, 0D}.array(), // denormal
+    new float64[]{0.49999999999999994D, 0D}.array(), // 0.5-epsilon
     new float64[]{0.5D, 1D}.array(),
-    new float64[]{0.5000000000000001D, 1D}.array(),
+    new float64[]{0.5000000000000001D, 1D}.array(), // 0.5+epsilon
     new float64[]{-1.5D, -2D}.array(),
     new float64[]{-2.5D, -3D}.array(),
     new float64[]{NaN(), NaN()}.array(),
     new float64[]{Inf(1), Inf(1)}.array(),
-    new float64[]{2251799813685249.5D, 2251799813685250D}.array(),
+    new float64[]{2251799813685249.5D, 2251799813685250D}.array(), // 1 bit fraction
     new float64[]{2251799813685250.5D, 2251799813685251D}.array(),
-    new float64[]{4503599627370495.5D, 4503599627370496D}.array(),
-    new float64[]{4503599627370497D, 4503599627370497D}.array()
+    new float64[]{4503599627370495.5D, 4503599627370496D}.array(), // 1 bit fraction, rounding to 0 bit fraction
+    new float64[]{4503599627370497D, 4503599627370497D}.array() // large integer
 }.slice(), 2);
 
-// denormal
-// 0.5-epsilon
-// 0.5+epsilon
-// 1 bit fraction
-// 1 bit fraction, rounding to 0 bit fraction
-// large integer
 internal static slice<array<float64>> vfroundEvenSC = GoReflect.WithElemDims(new array<float64>[]{
     new float64[]{0D, 0D}.array(),
-    new float64[]{1.390671161567e-309D, 0D}.array(),
-    new float64[]{0.49999999999999994D, 0D}.array(),
+    new float64[]{1.390671161567e-309D, 0D}.array(), // denormal
+    new float64[]{0.49999999999999994D, 0D}.array(), // 0.5-epsilon
     new float64[]{0.5D, 0D}.array(),
-    new float64[]{0.5000000000000001D, 1D}.array(),
+    new float64[]{0.5000000000000001D, 1D}.array(), // 0.5+epsilon
     new float64[]{-1.5D, -2D}.array(),
     new float64[]{-2.5D, -2D}.array(),
     new float64[]{NaN(), NaN()}.array(),
     new float64[]{Inf(1), Inf(1)}.array(),
-    new float64[]{2251799813685249.5D, 2251799813685250D}.array(),
+    new float64[]{2251799813685249.5D, 2251799813685250D}.array(), // 1 bit fraction
     new float64[]{2251799813685250.5D, 2251799813685250D}.array(),
-    new float64[]{4503599627370495.5D, 4503599627370496D}.array(),
-    new float64[]{4503599627370497D, 4503599627370497D}.array()
+    new float64[]{4503599627370495.5D, 4503599627370496D}.array(), // 1 bit fraction, rounding to 0 bit fraction
+    new float64[]{4503599627370497D, 4503599627370497D}.array() // large integer
 }.slice(), 2);
 
 internal static slice<float64> vfsignbitSC = new float64[]{
@@ -2199,7 +2018,6 @@ internal static slice<float64> sinhSC = new float64[]{
     NaN()
 }.slice();
 
-// subnormal; see https://golang.org/issue/13013
 internal static slice<float64> vfsqrtSC = new float64[]{
     Inf(-1),
     -Pi,
@@ -2207,7 +2025,7 @@ internal static slice<float64> vfsqrtSC = new float64[]{
     0D,
     Inf(1),
     NaN(),
-    Float64frombits(2)
+    Float64frombits(2) // subnormal; see https://golang.org/issue/13013
 }.slice();
 
 internal static slice<float64> sqrtSC = new float64[]{
@@ -2278,7 +2096,6 @@ internal static slice<float64> yM3SC = new float64[]{
 
 // arguments and expected results for boundary cases
 public static UntypedFloat SmallestNormalFloat64 => 2.2250738585072014e-308; // 2**-1022
-
 public static UntypedFloat LargestSubnormalFloat64 => /* SmallestNormalFloat64 - SmallestNonzeroFloat64 */ 2.225073858507201e-308;
 
 internal static slice<float64> vffrexpBC = new float64[]{
@@ -2316,13 +2133,11 @@ internal static slice<fi> vfldexpBC = new fi[]{
     new(1D, -1075)
 }.slice();
 
-// 2**-1073
-// 2**-1073
 internal static slice<float64> ldexpBC = new float64[]{
     SmallestNonzeroFloat64,
-    1e-323D,
+    1e-323D, // 2**-1073
     1D,
-    1e-323D,
+    1e-323D, // 2**-1073
     0D,
     Copysign(0D, -1D),
     Inf(1),
@@ -2342,25 +2157,19 @@ internal static slice<float64> logbBC = new float64[]{
     1023D
 }.slice();
 
-// Large exponent spread
-// Effective addition
-// Effective subtraction
-// Overflow
-// Finite x and y, but non-finite z.
-// Special
-// Random
-// Issue #61130
 // Test cases were generated with Berkeley TestFloat-3e/testfloat_gen.
 // http://www.jhauser.us/arithmetic/TestFloat.html.
 // The default rounding mode is selected (nearest/even), and exception flags are ignored.
-
 partial struct fmaCᴛ1 /*dyn*/ {
     internal float64 x, y, z, want;
 }
 internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
+    // Large exponent spread
     new(-3.999999999999087D, -1.1123914289620494e-16D, -7.999877929687506D, -7.999877929687505D),
     new(-262112.0000004768D, -0.06251525855623184D, 1.1102230248837136e-16D, 16385.99945072085D),
     new(-6.462348523533467e-27D, -2.3763644720331857e-211D, 4.000000000931324D, 4.000000000931324D),
+
+    // Effective addition
     new(-2.0000000037252907D, 6.7904383376e-313D, -3.3951933161e-313D, -1.697607001654e-312D),
     new(-0.12499999999999999D, 512.007568359375D, -1.4193627164960366e-16D, -64.00094604492188D),
     new(-2.7550648847397148e-39D, -3.4028301595800694e+38D, 0.9960937495343386D, 1.9335955376735676D),
@@ -2368,6 +2177,8 @@ internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
     new(-0.4843749999990904D, -3.6893487872543293e+19D, 9.223653786709391e+18D, 2.7093936974938993e+19D),
     new(-3.8146972665201165e-06D, 4.2949672959999385e+09D, -2.2204460489938386e-16D, -16384.000003844263D),
     new(6.98156394130982e-309D, -1.1072962560000002e+09D, -4.4414561548793455e-308D, -7.73065965765153e-300D),
+
+    // Effective subtraction
     new(5e-324D, 4.5D, -2e-323D, 0D),
     new(5e-324D, 7D, -3.5e-323D, 0D),
     new(5e-324D, 0.5000000000000001D, -5e-324D, Copysign(0D, -1D)),
@@ -2375,11 +2186,17 @@ internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
     new(8.579992955364441e-308D, 0.6037391876780558D, -4.4501307410480706e-308D, 7.29947236107098e-309D),
     new(-4.450143471986689e-308D, -0.9960937499927239D, -4.450419332475649e-308D, -1.7659233458788e-310D),
     new(1.4932076393918112D, -2.2248022430460833e-308D, 4.449875571054211e-308D, 1.127783865601762e-308D),
+
+    // Overflow
     new(-2.288020632214759e+38D, -8.98846570988901e+307D, 1.7696041796300924e+308D, Inf(0)),
     new(1.4888652783208255e+308D, -9.007199254742012e+15D, -6.807282911929205e+38D, Inf(-1)),
     new(9.142703268902826e+192D, -1.3504889569802838e+296D, -1.9082200803806996e-89D, Inf(-1)),
+
+    // Finite x and y, but non-finite z.
     new(31.99218749627471D, -1.7976930544991702e+308D, Inf(0), Inf(0)),
     new(-1.7976931281784667e+308D, -2.0009765625002265D, Inf(-1), Inf(-1)),
+
+    // Special
     new(0D, 0D, 0D, 0D),
     new(Copysign(0D, -1D), 0D, 0D, 0D),
     new(0D, 0D, Copysign(0D, -1D), 0D),
@@ -2390,6 +2207,8 @@ internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
     new(-0.00012207403779029757D, 3.221225471996093e+09D, NaN(), NaN()),
     new(Inf(-1), 0.1252441407414153D, -1.387184532981584e-76D, Inf(-1)),
     new(Inf(0), 1.525878907671432e-05D, -9.214364835452549e+18D, Inf(0)),
+
+    // Random
     new(0.1777916152213626D, -32.000015266239636D, -2.2204459148334633e-16D, -5.689334401293007D),
     new(-2.0816681711722314e-16D, -0.4997558592585846D, -0.9465627129124969D, -0.9465627129124968D),
     new(-1.9999997615814211D, 1.8518819259933516e+19D, 16.874999999999996D, -3.703763410463646e+19D),
@@ -2400,6 +2219,8 @@ internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
     new(4.612811918325842e+18D, 1.4901161193847641e-08D, 2.6077032311277997e-08D, 6.873625395187494e+10D),
     new(-9.094947033611148e-13D, 4.450691014249257e-308D, 2.086006742350485e-308D, 2.086006742346437e-308D),
     new(-7.751454006381804e-05D, 5.588653777189071e-308D, -2.2207280111272877e-308D, -2.2211612130544025e-308D),
+
+    // Issue #61130
     new(-1D, 1D, 1D, 0D),
     new(1D, 1D, -1D, 0D)
 }.slice();
@@ -2430,6 +2251,7 @@ internal static bool tolerance(float64 a, float64 b, float64 e) {
     if (d < 0D) {
         d = -d;
     }
+
     // note: b is correct (expected) value, a is actual value.
     // make error tolerance a fraction of b, not a.
     if (b != 0D) {
@@ -2461,7 +2283,6 @@ internal static bool alike(float64 a, float64 b) {
     case {} when a == b: {
         return Signbit(a) == Signbit(b);
     }}
-
     return false;
 }
 
@@ -3841,6 +3662,7 @@ public static void TestTrigReduce(ж<testing.T> Ꮡt) {
         // reduce the value to compare
         var (j, z) = math_internal_test_package.TrigReduce(x);
         var xred = (float64)j * /* (Pi / 4) */ 0.7853981633974483D + z;
+
         {
             var (fΔ1, fredΔ1) = (Sin(x), Sin(xred)); if (!close(fΔ1, fredΔ1)) {
                 Ꮡt.Errorf("Sin(trigReduce(%g)) != Sin(%g), got %g, want %g"u8, x, x, fredΔ1, fΔ1);
@@ -3928,9 +3750,7 @@ public static void TestFloat32Sqrt(ж<testing.T> Ꮡt) {
 // Storing the results in these variables prevents the compiler
 // from completely optimizing the benchmarked functions away.
 public static nint GlobalI;
-
 public static bool GlobalB;
-
 public static float64 GlobalF;
 
 public static void BenchmarkAcos(ж<testing.B> Ꮡb) {

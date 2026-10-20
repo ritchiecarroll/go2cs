@@ -29,6 +29,7 @@ internal static void Main() {
     var done = new channel<@string>(0);
     launch(done);
     fmt.Println(ᐸꟷ(done));
+
     var c = new counter(v: 7);
     fmt.Println(Closure((nint)c.v));
     fmt.Println(Unsafe);

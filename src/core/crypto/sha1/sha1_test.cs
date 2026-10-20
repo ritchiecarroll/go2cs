@@ -93,7 +93,6 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
                 sum = c._<ж<global::go.crypto.sha1_package.digest>>().ConstantTimeSum(default!);
                 break;
             }}
-
             @string sΔ1 = fmt.Sprintf("%x"u8, sum);
             if (sΔ1 != g.@out) {
                 Ꮡt.Fatalf("sha1[%d](%s) = %s want %s"u8, j, g.@in, sΔ1, g.@out);
@@ -109,34 +108,42 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
     foreach (var (_, g) in golden) {
         h.Reset();
         h2.Reset();
+
         io.WriteString(h, g.@in.slice(0, len(g.@in) / 2));
+
         var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
         if (err != default!) {
             Ꮡt.Errorf("could not marshal: %v"u8, err);
             continue;
         }
+
         (var stateAppend, err) = h._<encoding.BinaryAppender>().AppendBinary(new slice<byte>(4, 32));
         if (err != default!) {
             Ꮡt.Errorf("could not marshal: %v"u8, err);
             continue;
         }
         stateAppend = stateAppend[4..];
+
         if (((sstring)state) != g.halfState) {
             Ꮡt.Errorf("sha1(%q) state = %+q, want %+q"u8, g.@in, state, g.halfState);
             continue;
         }
+
         if (((sstring)stateAppend) != g.halfState) {
             Ꮡt.Errorf("sha1(%q) stateAppend = %+q, want %+q"u8, g.@in, stateAppend, g.halfState);
             continue;
         }
+
         {
             var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != default!) {
                 Ꮡt.Errorf("could not unmarshal: %v"u8, errΔ1);
                 continue;
             }
         }
+
         io.WriteString(h, g.@in.slice(len(g.@in) / 2));
         io.WriteString(h2, g.@in.slice(len(g.@in) / 2));
+
         {
             var (actual, actual2) = (h.Sum(default!), h2.Sum(default!)); if (!bytes.Equal(actual, actual2)) {
                 Ꮡt.Errorf("sha1(%q) = 0x%x != marshaled 0x%x"u8, g.@in, actual, actual2);
@@ -171,8 +178,7 @@ public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
     if (boring.Enabled) {
         Ꮡt.Skip(boringCryptoDoesnTExposeˢ);
     }
-    for (nint i = 1; i < 30; i++) {
-        // arbitrary factor
+    for (nint i = 1; i < 30; i++) { // arbitrary factor
         var (gen, asm) = (New()._<ж<global::go.crypto.sha1_package.digest>>(), New()._<ж<global::go.crypto.sha1_package.digest>>());
         var buf = new slice<byte>((nint)ΔBlockSize * i);
         rand.Read(buf);
@@ -197,13 +203,13 @@ internal partial struct unmarshalTest {
     internal @string sum;
 }
 
-// Data length: 7_102_415_735
-// Data length: 6_565_544_823
 internal static slice<unmarshalTest> largeUnmarshalTests = new unmarshalTest[]{
+    // Data length: 7_102_415_735
     new(
         state: ((@string)(new byte[]{0x73, 0x68, 0x61, 0x01, 0x13, 0xbc, 0xfe, 0x83, 0x8c, 0xbd, 0xdf, 0x50, 0x1f, 0xd8, 0xda, 0xbf, 0x3c, 0x9e, 0x6a, 0x69, 0x38, 0x74, 0xe1, 0xa5, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xa7, 0x56, 0x43, 0x77})),
         sum: "bc6245c9959cc33e1c2592e5c9ea9b5d0431246c"u8
     ),
+    // Data length: 6_565_544_823
     new(
         state: ((@string)(new byte[]{0x73, 0x68, 0x61, 0x01, 0x6d, 0x3b, 0x16, 0xa6, 0x52, 0xbe, 0x40, 0xa9, 0x6e, 0xc4, 0x88, 0xf9, 0x53, 0x03, 0x00, 0x42, 0xc2, 0xdc, 0x76, 0xcf, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x87, 0x56, 0x43, 0x77})),
         sum: "8f2d1c0e4271768f35feb918bfe21ea1387a2072"u8
@@ -222,6 +228,7 @@ internal static (slice<byte> sum, error err) safeSum(hash.Hash h) {
                 }
             }
         }, ref ᒐ);
+
         (sum, err) = (h.Sum(default!), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -238,11 +245,13 @@ public static void TestLargeHashes(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
+
         var (sum, err) = safeSum(h);
         if (err != default!) {
             Ꮡt.Errorf("test %d could not sum: %v"u8, i, err);
             continue;
         }
+
         if (fmt.Sprintf("%x"u8, sum) != test.sum) {
             Ꮡt.Errorf("test %d sum mismatch: expect %s got %x"u8, i, test.sum, sum);
         }

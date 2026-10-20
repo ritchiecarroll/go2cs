@@ -45,6 +45,7 @@ partial struct ΔProperties {
     internal uint16 index;
 }
 
+// functions dispatchable per form
 // type lookupFunc is a methodless func type — rendered inline as its base delegate
 
 // formInfo holds Form-specific functions and tables.
@@ -104,6 +105,15 @@ public static bool BoundaryAfter(this ΔProperties p) {
     return p.isInert();
 }
 
+// We pack quick check data in 4 bits:
+//
+//	5:    Combines forward  (0 == false, 1 == true)
+//	4..3: NFC_QC Yes(00), No (10), or Maybe (11)
+//	2:    NFD_QC Yes (0) or No (1). No also means there is a decomposition.
+//	1..0: Number of trailing non-starters.
+//
+// When all 4 bits are zero, the character is inert, meaning it is never
+// influenced by normalization.
 partial struct qcInfo /*num:uint8*/;
 
 internal static bool isYesC(this ΔProperties p) {
@@ -203,7 +213,7 @@ internal static void buildRecompMap() {
 // The caller is responsible for calling
 // recompMapOnce.Do(buildRecompMap) sometime before this is called.
 internal static rune combine(rune a, rune b) {
-    var key = ((uint32)(uint16)a << (int)(16)) + (uint32)(uint16)b;
+    var key = ((uint32)(uint16)a << 16) + (uint32)(uint16)b;
     if (recompMap == default!) {
         throw panic("caller error"); // see func comment
     }
@@ -252,7 +262,7 @@ internal static ΔProperties compInfo(uint16 v, nint sz) {
             size: (uint8)sz,
             ccc: (uint8)v,
             tccc: (uint8)v,
-            flags: ((qcInfo)(uint8)((v >> (int)(8))))
+            flags: ((qcInfo)(uint8)((v >> 8)))
         );
         if (pΔ1.ccc > 0 || pΔ1.combinesBackward()) {
             pΔ1.nLead = (uint8)((qcInfo)(pΔ1.flags & 0x3));
@@ -261,12 +271,12 @@ internal static ΔProperties compInfo(uint16 v, nint sz) {
     }
     // has decomposition
     var h = decomps[v];
-    var f = (qcInfo)(((((qcInfo)((byte)(h & (byte)headerFlagsMask))) >> (int)(2))) | 0x4);
+    var f = (qcInfo)((((qcInfo)((byte)(h & (byte)headerFlagsMask))) >> 2) | 0x4);
     var p = new ΔProperties(size: (uint8)sz, flags: f, index: v);
     if (v >= firstCCC) {
         v += (uint16)((uint16)((byte)(h & (byte)headerLenMask)) + 1);
         var c = decomps[v];
-        p.tccc = (uint8)((c >> (int)(2)));
+        p.tccc = (uint8)((c >> 2));
         p.flags |= (qcInfo)(((qcInfo)((byte)(c & 0x3))));
         if (v >= firstLeadingCCC) {
             p.nLead = (uint8)((byte)(c & 0x3));

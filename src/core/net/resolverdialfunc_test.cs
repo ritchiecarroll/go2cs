@@ -30,8 +30,6 @@ internal static readonly @string someServiceˢ = "some-service"u8;
 internal static readonly @string fakeDomainᶜ = "something-that-is-a-not-a-real-domain.fake-tld."u8;
 
 public static void TestResolverDialFunc(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var r = Ꮡ(new Resolver(
         PreferGo: true,
         Dial: newResolverDialFunc(Ꮡ(new resolverDialHandler(
@@ -43,9 +41,9 @@ public static void TestResolverDialFunc(ж<testing.T> Ꮡt) {
                 q = q.ΔClone();
                 Ꮡt.Logf("Header: %+v for %q (type=%v, class=%v)"u8, h,
                     q.Name.String(), q.Type, q.Class);
-            }, // TODO: add test without HandleA* hooks specified at all, that Go
- // doesn't issue retries; map to something terminal.
-
+            },
+            // TODO: add test without HandleA* hooks specified at all, that Go
+            // doesn't issue retries; map to something terminal.
             HandleA: (AWriter w, @string name) => {
                 w.AddIP(new byte[]{1, 2, 3, 4}.array());
                 w.AddIP(new byte[]{5, 6, 7, 8}.array());
@@ -65,6 +63,7 @@ public static void TestResolverDialFunc(ж<testing.T> Ꮡt) {
     ));
     var ctx = context.Background();
     @string fakeDomain = fakeDomainᶜ;
+
     var ctxʗ1 = ctx;
     var rʗ1 = r;
     Ꮡt.Run(lookupIPˢ, (ж<testing.T> tΔ1) => {
@@ -78,6 +77,7 @@ public static void TestResolverDialFunc(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     var ctxʗ2 = ctx;
     var rʗ2 = r;
     Ꮡt.Run(lookupSRVˢ, (ж<testing.T> tΔ2) => {
@@ -121,9 +121,8 @@ internal static Func<context.Context, @string, @string, (global::go.net_package.
             h: Ꮡh,
             network: network,
             address: address,
-            ttl: 10
+            ttl: 10 // 10 second default if unset
         ));
-        // 10 second default if unset
         if (Ꮡh.Value.StartDial != default!) {
             {
                 var err = Ꮡh.Value.StartDial(network, address); if (err != default!) {
@@ -179,7 +178,7 @@ public static void SetTTL(this ResponseWriter w, uint32 seconds) {
 }
 
 public partial struct AWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 public static void AddIP(this AWriter w, /*[4]*/ array<byte> v4) {
@@ -193,7 +192,7 @@ public static void AddIP(this AWriter w, /*[4]*/ array<byte> v4) {
 }
 
 public partial struct AAAAWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 public static void AddIP(this AAAAWriter w, /*[16]*/ array<byte> v6) {
@@ -207,7 +206,7 @@ public static void AddIP(this AAAAWriter w, /*[16]*/ array<byte> v6) {
 }
 
 public partial struct SRVWriter {
-    public partial ref ResponseWriter ResponseWriter { get; }
+    /*embed*/ public ResponseWriter ResponseWriter;
 }
 
 // AddSRV adds a SRV record. The target name must end in a period and
@@ -275,16 +274,17 @@ internal static (nint n, error err) Read(this ref resolverFuncConn a, slice<byte
 internal static (nint n, error err) Write(this ж<resolverFuncConn> Ꮡa, slice<byte> packet) {
     nint n = default!;
     error err = default!;
-
     ref var a = ref Ꮡa.DerefOrNull();
+
     if (len(packet) < 2) {
         return (0, fmt.Errorf("short write of %d bytes; want 2+"u8, len(packet)));
     }
-    nint reqLen = (nint)(((nint)packet[0] << (int)(8)) | (nint)packet[1]);
+    nint reqLen = (nint)packet[0] << 8 | (nint)packet[1];
     var req = packet[2..];
     if (len(req) != reqLen) {
         return (0, fmt.Errorf("packet declared length %d doesn't match body length %d"u8, reqLen, len(req)));
     }
+
     dnsmessage.Parser parser = default!;
     (var h, err) = parser.Start(req);
     if (err != default!) {
@@ -299,6 +299,7 @@ internal static (nint n, error err) Write(this ж<resolverFuncConn> Ꮡa, slice<
     if (err != default! && !AreEqual(err, dnsmessage.ErrSectionDone)) {
         return (0, err);
     }
+
     var resh = h;
     resh.Response = true;
     resh.Authoritative = true;
@@ -337,16 +338,17 @@ internal static (nint n, error err) Write(this ж<resolverFuncConn> Ꮡa, slice<
                 resh.RCode = mapRCode((~a.h).HandleSRV(new SRVWriter(new ResponseWriter(Ꮡa)), q.Name.String()));
             }
         }
-
     }
     (var tcpRes, err) = builder.Finish();
     if (err != default!) {
         return (0, fmt.Errorf("Finish: %w"u8, err));
     }
+
     n = len(tcpRes) - 2;
-    tcpRes[0] = (byte)((n >> (int)(8)));
+    tcpRes[0] = (byte)(n >> 8);
     tcpRes[1] = (byte)n;
     a.rbuf.Write(tcpRes[2..]);
+
     return (len(packet), default!);
 }
 
@@ -381,7 +383,6 @@ internal static dnsmessage.RCode mapRCode(error err) {
     { /* default: */
         return dnsmessage.RCodeServerFailure;
     }
-
 }
 
 } // end net_internal_test_package

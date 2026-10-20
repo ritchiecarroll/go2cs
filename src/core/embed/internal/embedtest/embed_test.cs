@@ -88,13 +88,15 @@ public static void TestGlobal(ж<testing.T> Ꮡt) {
     testFiles(Ꮡt, global, concurrencyTxtˢ, concurrencyIsNotˢ);
     testFiles(Ꮡt, global, testdataHelloTxtˢ, helloWorldˢ);
     testFiles(Ꮡt, global, testdataGlassTxtˢ, iCanEatGlassAndItDoesnTˢ);
+
     {
         var err = fstest.TestFS(new embedtest_test_package.embed_FSᴠFS(global), concurrencyTxtˢ, testdataHelloTxtˢ); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     testString(Ꮡt, concurrency, concurrencyˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass), glassˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass, glassˢ, iCanEatGlassAndItDoesnTˢ);
 }
 
 //go:embed testdata
@@ -120,13 +122,17 @@ public static void TestDir(ж<testing.T> Ꮡt) {
     testFiles(Ꮡt, all, testdataII18nTxtˢ, internationalizationˢ);
     testFiles(Ꮡt, all, testdataIJKK8sTxtˢ, kubernetesˢ);
     testFiles(Ꮡt, all, testdataKenTxtˢ, ifAProgramIsTooSlowItˢ);
+
     testDir(Ꮡt, all, "."u8, testdataˢ);
     testDir(Ꮡt, all, testdataIˢ, i18nTxtˢ, "j/");
     testDir(Ꮡt, all, testdataIJˢ, "k/"u8);
     testDir(Ꮡt, all, testdataIJKˢ, k8sTxtˢ);
 }
 
+//go:embed testdata
 internal static embed.FS testHiddenDir = go.embed_package.ΔEmbedFS(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", ["testdata/", "testdata/-not-hidden/", "testdata/ascii.txt", "testdata/glass.txt", "testdata/hello.txt", "testdata/i/", "testdata/ken.txt", "testdata/-not-hidden/fortune.txt", "testdata/i/i18n.txt", "testdata/i/j/", "testdata/i/j/k/", "testdata/i/j/k/k8s.txt"]);
+
+//go:embed testdata/*
 internal static embed.FS testHiddenStar = go.embed_package.ΔEmbedFS(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", ["testdata/", "testdata/-not-hidden/", "testdata/.hidden/", "testdata/_hidden/", "testdata/ascii.txt", "testdata/glass.txt", "testdata/hello.txt", "testdata/i/", "testdata/ken.txt", "testdata/-not-hidden/fortune.txt", "testdata/.hidden/fortune.txt", "testdata/.hidden/more/", "testdata/.hidden/more/tip.txt", "testdata/_hidden/fortune.txt", "testdata/i/i18n.txt", "testdata/i/j/", "testdata/i/j/k/", "testdata/i/j/k/k8s.txt"]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -145,12 +151,17 @@ internal static readonly @string moreˢ = "more/"u8;
 public static void TestHidden(ж<testing.T> Ꮡt) {
     var dir = testHiddenDir;
     var star = testHiddenStar;
+
     Ꮡt.Logf("//go:embed testdata"u8);
+
     testDir(Ꮡt, dir, testdataˢ2,
         notHiddenˢ, asciiTxtˢ, glassTxtˢ, helloTxtˢ, "i/", kenTxtˢ);
+
     Ꮡt.Logf("//go:embed testdata/*"u8);
+
     testDir(Ꮡt, star, testdataˢ2,
         notHiddenˢ, hiddenˢ, hiddenˢ2, asciiTxtˢ, glassTxtˢ, helloTxtˢ, "i/", kenTxtˢ);
+
     testDir(Ꮡt, star, testdataHiddenˢ,
         fortuneTxtˢ, moreˢ); // but not .more or _more
 }
@@ -178,10 +189,15 @@ public static void TestUninitialized(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+//go:embed "testdata/hello.txt"
 internal static slice<T> helloT = go.embed_package.ΔEmbedBytes<T>(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/hello.txt");
+//go:embed "testdata/hello.txt"
 internal static slice<uint8> helloUint8 = go.embed_package.ΔEmbedBytes<uint8>(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/hello.txt");
+//go:embed "testdata/hello.txt"
 internal static slice<EmbedUint8> helloEUint8 = go.embed_package.ΔEmbedBytes<EmbedUint8>(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/hello.txt");
+//go:embed "testdata/hello.txt"
 internal static EmbedBytes helloBytes = (EmbedBytes)(go.embed_package.ΔEmbedBytes<byte>(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/hello.txt"));
+//go:embed "testdata/hello.txt"
 internal static EmbedString helloString = (EmbedString)(go.embed_package.ΔEmbedString(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/hello.txt"));
 
 public partial struct T /*num:byte*/;
@@ -229,7 +245,9 @@ public static void TestOffset(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(openˢ, err);
     }
+
     @string want = helloWorldˢ;
+
     // Read the entire file.
     var got = new slice<byte>(len(want));
     (var n, err) = @file.Read(got);
@@ -242,6 +260,7 @@ public static void TestOffset(ж<testing.T> Ꮡt) {
     if (((sstring)got) != want) {
         Ꮡt.Fatalf("Read: %q"u8, got);
     }
+
     // Try to read one byte; confirm we're at the EOF.
     array<byte> buf = new(1);
     (n, err) = @file.Read(buf[..]);
@@ -251,6 +270,7 @@ public static void TestOffset(ж<testing.T> Ꮡt) {
     if (n != 0) {
         Ꮡt.Fatal(readˢ, n);
     }
+
     // Use seek to get the offset at the EOF.
     var seeker = @file._<io.Seeker>();
     (var off, err) = seeker.Seek(0, io.SeekCurrent);
@@ -260,6 +280,7 @@ public static void TestOffset(ж<testing.T> Ꮡt) {
     if (off != (int64)len(want)) {
         Ꮡt.Fatal(seekˢ, off);
     }
+
     // Use ReadAt to read the entire file, ignoring the offset.
     var at = @file._<io.ReaderAt>();
     got = new slice<byte>(len(want));
@@ -273,6 +294,7 @@ public static void TestOffset(ж<testing.T> Ꮡt) {
     if (((sstring)got) != want) {
         Ꮡt.Fatalf("ReadAt: got %q, want %q"u8, got, want);
     }
+
     // Use ReadAt with non-zero offset.
     off = (int64)7;
     want = want.slice((nint)(off));

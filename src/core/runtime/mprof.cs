@@ -18,25 +18,44 @@ using System.Runtime.CompilerServices;
 partial class runtime_package {
 
 // NOTE(rsc): Everything here could use cas if contention became an issue.
+// profInsertLock protects changes to the start of all *bucket linked lists
 internal static ж<mutex> ᏑprofInsertLock = new StandardBox<mutex>(new mutex(nil));
 internal static ref mutex profInsertLock => ref ᏑprofInsertLock.Value;
-
+// profBlockLock protects the contents of every blockRecord struct
 internal static ж<mutex> ᏑprofBlockLock = new StandardBox<mutex>(new mutex(nil));
 internal static ref mutex profBlockLock => ref ᏑprofBlockLock.Value;
-
+// profMemActiveLock protects the active field of every memRecord struct
 internal static ж<mutex> ᏑprofMemActiveLock = new StandardBox<mutex>(new mutex(nil));
 internal static ref mutex profMemActiveLock => ref ᏑprofMemActiveLock.Value;
-
+// profMemFutureLock is a set of locks that protect the respective elements
+// of the future array of every memRecord struct
 internal static ж<array<mutex>> ᏑprofMemFutureLock = new StandardBox<array<mutex>>(new array<mutex>(3, () => new(nil)));
 internal static ref array<mutex> profMemFutureLock => ref ᏑprofMemFutureLock.Value;
 
 // All memory allocations are local and do not escape outside of the profiler.
 // The profiler is forbidden from referring to garbage-collected memory.
+
+// profile types
 internal static bucketType memProfile => /* 1 + iota */ 1;
 internal static bucketType blockProfile => 2;
 internal static bucketType mutexProfile => 3;
+
+// size of bucket hash table
 internal static UntypedInt buckHashSize => 179999;
+
+// maxSkip is to account for deferred inline expansion
+// when using frame pointer unwinding. We record the stack
+// with "physical" frame pointers but handle skipping "logical"
+// frames at some point after collecting the stack. So
+// we need extra space in order to avoid getting fewer than the
+// desired maximum number of frames after expansion.
+// This should be at least as large as the largest skip value
+// used for profiling; otherwise stacks may be truncated inconsistently
 internal static UntypedInt maxSkip => 6;
+
+// maxProfStackDepth is the highest valid value for debug.profstackdepth.
+// It's used for the bucket.stk func.
+// TODO(fg): can we get rid of this?
 internal static UntypedInt maxProfStackDepth => 1024;
 
 partial struct bucketType /*num:nint*/;
@@ -156,6 +175,7 @@ internal static ж<atomic.UnsafePointer> Ꮡxbuckets = new StandardBox<atomic.Un
 internal static ref atomic.UnsafePointer xbuckets => ref Ꮡxbuckets.Value;                    // *bucket, mutex profile buckets
 internal static ж<atomic.UnsafePointer> Ꮡbuckhash = new StandardBox<atomic.UnsafePointer>(default(atomic.UnsafePointer));
 internal static ref atomic.UnsafePointer buckhash => ref Ꮡbuckhash.Value;                    // *buckhashArray
+
 internal static ж<mProfCycleHolder> ᏑmProfCycle = new StandardBox<mProfCycleHolder>(default(mProfCycleHolder));
 internal static ref mProfCycleHolder mProfCycle => ref ᏑmProfCycle.Value;
 
@@ -177,7 +197,7 @@ internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) {
     uint32 cycle = default!;
 
     var v = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
-    cycle = (v >> (int)(1));
+    cycle = v >> 1;
     return cycle;
 }
 
@@ -189,9 +209,9 @@ internal static (uint32 cycle, bool alreadyFlushed) setFlushed(this ж<mProfCycl
 
     while (ᐧ) {
         var prev = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
-        cycle = (prev >> (int)(1));
-        alreadyFlushed = ((uint32)(prev & 0x1)) != 0;
-        var next = (uint32)(prev | 0x1);
+        cycle = prev >> 1;
+        alreadyFlushed = (prev & 0x1) != 0;
+        var next = prev | 0x1;
         if (Ꮡc.of(mProfCycleHolder.Ꮡvalue).CompareAndSwap(prev, next)) {
             return (cycle, alreadyFlushed);
         }
@@ -206,9 +226,9 @@ internal static void increment(this ж<mProfCycleHolder> Ꮡc) {
     // itself wrap at a power of two.
     while (ᐧ) {
         var prev = Ꮡc.of(mProfCycleHolder.Ꮡvalue).Load();
-        var cycle = (prev >> (int)(1));
+        var cycle = prev >> 1;
         cycle = (cycle + 1) % mProfCycleWrap;
-        var next = (cycle << (int)(1));
+        var next = cycle << 1;
         if (Ꮡc.of(mProfCycleHolder.Ꮡvalue).CompareAndSwap(prev, next)) {
             break;
         }
@@ -261,6 +281,7 @@ internal static void mProf_Flush() {
     if (alreadyFlushed) {
         return;
     }
+
     var index = cycle % (uint32)len(new memRecord(nil).future);
     @lock(ᏑprofMemActiveLock);
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
@@ -279,6 +300,7 @@ internal static void mProf_FlushLocked(uint32 index) {
     var head = (ж<bucket>)(uintptr)(Ꮡmbuckets.Load());
     for (var b = head; b != nil; b = b.Value.allnext) {
         var mp = b.mp();
+
         // Flush cycle C into the published profile and clear
         // it for reuse.
         var mpc = mp.at(memRecord.Ꮡfuture, (ulong)(index));
@@ -298,6 +320,7 @@ internal static void mProf_PostSweep() {
     // C+2, which have to become C+1 in the next mark termination
     // and so on.
     var cycle = ᏑmProfCycle.read() + 1;
+
     var index = cycle % (uint32)len(new memRecord(nil).future);
     @lock(ᏑprofMemActiveLock);
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
@@ -317,15 +340,18 @@ internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer Δp, uintptr
     }
     // Only use the part of mp.profStack we need and ignore the extra space
     // reserved for delayed inline expansion with frame pointer unwinding.
-    nint nstk = callers(5, mp.profStack.slice(0, debug.profstackdepth));
+    nint nstk = callers(3, mp.profStack.slice(0, debug.profstackdepth + 2));
     var index = (ᏑmProfCycle.read() + 2) % (uint32)len(new memRecord(nil).future);
+
     var b = stkbucket(memProfile, size, mp.profStack.slice(0, nstk), true);
     var mr = b.mp();
     var mpc = mr.at(memRecord.Ꮡfuture, (ulong)(index));
+
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mpc.Value.allocs++;
     mpc.Value.alloc_bytes += size;
     unlock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
+
     // Setprofilebucket locks a bunch of other mutexes, so we call it outside of
     // the profiler locks. This reduces potential contention and chances of
     // deadlocks. Since the object must be alive during the call to
@@ -339,8 +365,10 @@ internal static partial void mProf_Malloc(ref m mp, @unsafe.Pointer Δp, uintptr
 // Called when freeing a profiled block.
 internal static void mProf_Free(ж<bucket> Ꮡb, uintptr size) {
     var index = (ᏑmProfCycle.read() + 1) % (uint32)len(new memRecord(nil).future);
+
     var mp = Ꮡb.mp();
     var mpc = mp.at(memRecord.Ꮡfuture, (ulong)(index));
+
     @lock(ᏑprofMemFutureLock.at<mutex>((ulong)(index)));
     mpc.Value.frees++;
     mpc.Value.free_bytes += size;
@@ -370,6 +398,7 @@ public static void SetBlockProfileRate(nint rate) {
             r = 1;
         }
     }
+
     atomic.Store64(Ꮡblockprofilerate, (uint64)r);
 }
 
@@ -377,6 +406,7 @@ public static partial void blockevent(int64 cycles, nint skip) {
     if (cycles <= 0) {
         cycles = 1;
     }
+
     var rate = (int64)atomic.Load64(Ꮡblockprofilerate);
     if (blocksampled(cycles, rate)) {
         saveblockevent(cycles, rate, skip + 1, blockProfile);
@@ -415,6 +445,7 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
     while (n < len(pcBuf) && fp != nil) {
         // return addr sits one word above the frame pointer
         var pc = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)((uintptr)fp + (uintptr)goarch.PtrSize));
+
         if (skip > 0){
             var callPC = pc - 1;
             var fi = findfunc(callPC);
@@ -422,10 +453,10 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
             for (; uf.valid(); uf = u.next(uf)) {
                 var sf = u.srcFunc(uf);
                 if (sf.funcID == abi.FuncIDWrapper && elideWrapperCalling(lastFuncID)){
+                    // ignore wrappers
                 } else 
                 {
                     var more = skipOrAdd(uf.pc + 1); if (!more) {
-                        // ignore wrappers
                         return n;
                     }
                 }
@@ -437,117 +468,79 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
             pcBuf[n] = pc;
             n++;
         }
+
         // follow the frame pointer to the next one
         fp = (@unsafe.Pointer)(~(ж<uintptr>)(uintptr)(fp));
     }
     return n;
 }
 
-// lockTimer assists with profiling contention on runtime-internal locks.
+// mLockProfile holds information about the runtime-internal lock contention
+// experienced and caused by this M, to report in metrics and profiles.
 //
-// There are several steps between the time that an M experiences contention and
-// when that contention may be added to the profile. This comes from our
-// constraints: We need to keep the critical section of each lock small,
-// especially when those locks are contended. The reporting code cannot acquire
-// new locks until the M has released all other locks, which means no memory
-// allocations and encourages use of (temporary) M-local storage.
+// These measurements are subject to some notable constraints: First, the fast
+// path for lock and unlock must remain very fast, with a minimal critical
+// section. Second, the critical section during contention has to remain small
+// too, so low levels of contention are less likely to snowball into large ones.
+// The reporting code cannot acquire new locks until the M has released all
+// other locks, which means no memory allocations and encourages use of
+// (temporary) M-local storage.
 //
-// The M will have space for storing one call stack that caused contention, and
-// for the magnitude of that contention. It will also have space to store the
-// magnitude of additional contention the M caused, since it only has space to
-// remember one call stack and might encounter several contention events before
-// it releases all of its locks and is thus able to transfer the local buffer
-// into the profile.
+// The M has space for storing one call stack that caused contention, and the
+// magnitude of that contention. It also has space to store the magnitude of
+// additional contention the M caused, since it might encounter several
+// contention events before it releases all of its locks and is thus able to
+// transfer the locally buffered call stack and magnitude into the profile.
 //
-// The M will collect the call stack when it unlocks the contended lock. That
-// minimizes the impact on the critical section of the contended lock, and
-// matches the mutex profile's behavior for contention in sync.Mutex: measured
-// at the Unlock method.
+// The M collects the call stack when it unlocks the contended lock. The
+// traceback takes place outside of the lock's critical section.
 //
 // The profile for contention on sync.Mutex blames the caller of Unlock for the
 // amount of contention experienced by the callers of Lock which had to wait.
 // When there are several critical sections, this allows identifying which of
-// them is responsible.
+// them is responsible. We must match that reporting behavior for contention on
+// runtime-internal locks.
 //
-// Matching that behavior for runtime-internal locks will require identifying
-// which Ms are blocked on the mutex. The semaphore-based implementation is
-// ready to allow that, but the futex-based implementation will require a bit
-// more work. Until then, we report contention on runtime-internal locks with a
-// call stack taken from the unlock call (like the rest of the user-space
-// "mutex" profile), but assign it a duration value based on how long the
-// previous lock call took (like the user-space "block" profile).
-//
-// Thus, reporting the call stacks of runtime-internal lock contention is
-// guarded by GODEBUG for now. Set GODEBUG=runtimecontentionstacks=1 to enable.
-//
-// TODO(rhysh): plumb through the delay duration, remove GODEBUG, update comment
-//
-// The M will track this by storing a pointer to the lock; lock/unlock pairs for
-// runtime-internal locks are always on the same M.
-//
-// Together, that demands several steps for recording contention. First, when
-// finally acquiring a contended lock, the M decides whether it should plan to
-// profile that event by storing a pointer to the lock in its "to be profiled
-// upon unlock" field. If that field is already set, it uses the relative
-// magnitudes to weight a random choice between itself and the other lock, with
-// the loser's time being added to the "additional contention" field. Otherwise
-// if the M's call stack buffer is occupied, it does the comparison against that
-// sample's magnitude.
-//
-// Second, having unlocked a mutex the M checks to see if it should capture the
-// call stack into its local buffer. Finally, when the M unlocks its last mutex,
-// it transfers the local buffer into the profile. As part of that step, it also
-// transfers any "additional contention" time to the profile. Any lock
-// contention that it experiences while adding samples to the profile will be
-// recorded later as "additional contention" and not include a call stack, to
-// avoid an echo.
-partial struct lockTimer {
-    internal ж<mutex> @lock;
-    internal int64 timeRate;
-    internal int64 timeStart;
-    internal int64 tickStart;
-}
-
-internal static void begin(this ref lockTimer lt) {
-    var rate = (int64)atomic.Load64(Ꮡmutexprofilerate);
-    lt.timeRate = gTrackingPeriod;
-    if (rate != 0 && rate < lt.timeRate) {
-        lt.timeRate = rate;
-    }
-    if (rem((int64)cheaprand(), lt.timeRate) == 0) {
-        lt.timeStart = nanotime();
-    }
-    if (rate > 0 && rem((int64)cheaprand(), rate) == 0) {
-        lt.tickStart = cputicks();
-    }
-}
-
-internal static void end(this ref lockTimer lt) {
-    var gp = getg();
-    if (lt.timeStart != 0) {
-        var nowTime = nanotime();
-        (~gp).m.of(m.ᏑmLockProfile).of(mLockProfile.ᏑwaitTime).Add((nowTime - lt.timeStart) * lt.timeRate);
-    }
-    if (lt.tickStart != 0) {
-        var nowTick = cputicks();
-        (~gp).m.of(m.ᏑmLockProfile).recordLock(nowTick - lt.tickStart, lt.@lock);
-    }
-}
-
+// When the M unlocks its last mutex, it transfers the locally buffered call
+// stack and magnitude into the profile. As part of that step, it also transfers
+// any "additional contention" time to the profile. Any lock contention that it
+// experiences while adding samples to the profile will be recorded later as
+// "additional contention" and not include a call stack, to avoid an echo.
 partial struct mLockProfile {
-    internal atomic.Int64 waitTime; // total nanoseconds spent waiting in runtime.lockWithRank
-    internal slice<uintptr> stack; // stack that experienced contention in runtime.lockWithRank
-    internal uintptr pending;      // *mutex that experienced contention (to be traceback-ed)
-    internal int64 cycles;        // cycles attributable to "pending" (if set), otherwise to "stack"
-    internal int64 cyclesLost;        // contention for which we weren't able to record a call stack
-    internal bool haveStack;         // stack and cycles are to be added to the mutex profile
+    internal atomic.Int64 waitTime; // (nanotime) total time this M has spent waiting in runtime.lockWithRank. Read by runtime/metrics.
+    internal slice<uintptr> stack; // call stack at the point of this M's unlock call, when other Ms had to wait
+    internal int64 cycles;        // (cputicks) cycles attributable to "stack"
+    internal int64 cyclesLost;        // (cputicks) contention for which we weren't able to record a call stack
+    internal bool haveStack;         // stack and cycles are to be added to the mutex profile (even if cycles is 0)
     internal bool disabled;         // attribute all time to "lost"
 }
 
-internal static void recordLock(this ref mLockProfile prof, int64 cycles, ж<mutex> Ꮡl) {
+internal static int64 start(this ref mLockProfile prof) {
+    if (cheaprandn(gTrackingPeriod) == 0) {
+        return nanotime();
+    }
+    return 0;
+}
+
+internal static void end(this ж<mLockProfile> Ꮡprof, int64 start) {
+    if (start != 0) {
+        Ꮡprof.of(mLockProfile.ᏑwaitTime).Add((nanotime() - start) * (int64)gTrackingPeriod);
+    }
+}
+
+// recordUnlock prepares data for later addition to the mutex contention
+// profile. The M may hold arbitrary locks during this call.
+//
+// From unlock2, we might not be holding a p in this code.
+//
+//go:nowritebarrierrec
+internal static void recordUnlock(this ж<mLockProfile> Ꮡprof, int64 cycles) {
+    ref var prof = ref Ꮡprof.DerefOrNull();
+
     if (cycles < 0) {
         cycles = 0;
     }
+
     if (prof.disabled) {
         // We're experiencing contention while attempting to report contention.
         // Make a note of its magnitude, but don't allow it to be the sole cause
@@ -555,12 +548,7 @@ internal static void recordLock(this ref mLockProfile prof, int64 cycles, ж<mut
         prof.cyclesLost += cycles;
         return;
     }
-    if ((uintptr)Ꮡl == prof.pending) {
-        // Optimization: we'd already planned to profile this same lock (though
-        // possibly from a different unlock site).
-        prof.cycles += cycles;
-        return;
-    }
+
     {
         var prev = prof.cycles; if (prev > 0) {
             // We can only store one call stack for runtime-internal lock contention
@@ -579,28 +567,8 @@ internal static void recordLock(this ref mLockProfile prof, int64 cycles, ж<mut
             }
         }
     }
-    // Saving the *mutex as a uintptr is safe because:
-    //  - lockrank_on.go does this too, which gives it regular exercise
-    //  - the lock would only move if it's stack allocated, which means it
-    //      cannot experience multi-M contention
-    prof.pending = (uintptr)Ꮡl;
+    Ꮡprof.captureStack();
     prof.cycles = cycles;
-}
-
-// From unlock2, we might not be holding a p in this code.
-//
-//go:nowritebarrierrec
-internal static void recordUnlock(this ж<mLockProfile> Ꮡprof, ж<mutex> Ꮡl) {
-    ref var prof = ref Ꮡprof.DerefOrNull();
-
-    if ((uintptr)Ꮡl == prof.pending) {
-        Ꮡprof.captureStack();
-    }
-    {
-        var gp = getg(); if ((~(~gp).m).locks == 1 && (~(~gp).m).mLockProfile.haveStack) {
-            prof.store();
-        }
-    }
 }
 
 internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
@@ -611,7 +579,8 @@ internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
         // can't record a stack trace.
         return;
     }
-    nint skip = 3; // runtime.(*mLockProfile).recordUnlock runtime.unlock2 runtime.unlockWithRank
+
+    nint skip = 4; // runtime.(*mLockProfile).recordUnlock runtime.unlock2Wake runtime.unlock2 runtime.unlockWithRank
     if (staticLockRanking) {
         // When static lock ranking is enabled, we'll always be on the system
         // stack at this point. There will be a runtime.unlockWithRank.func1
@@ -624,14 +593,10 @@ internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
         // "runtime.unlock".
         skip += 1; // runtime.unlockWithRank.func1
     }
-    prof.pending = 0;
     prof.haveStack = true;
+
     prof.stack[0] = logicalStackSentinel;
-    if (Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks).Load() == 0) {
-        prof.stack[1] = abi.FuncPCABIInternal(_LostContendedRuntimeLock) + (uintptr)sys.PCQuantum;
-        prof.stack[2] = 0;
-        return;
-    }
+
     nint nstk = default!;
     var gp = getg();
     var sp = sys.GetCallerSP();
@@ -647,13 +612,27 @@ internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
     }
 }
 
+// store adds the M's local record to the mutex contention profile.
+//
+// From unlock2, we might not be holding a p in this code.
+//
+//go:nowritebarrierrec
 internal static void store(this ref mLockProfile prof) {
+    {
+        var gp = getg(); if ((~(~gp).m).locks == 1 && (~(~gp).m).mLockProfile.haveStack) {
+            prof.storeSlow();
+        }
+    }
+}
+
+internal static void storeSlow(this ref mLockProfile prof) {
     // Report any contention we experience within this function as "lost"; it's
     // important that the act of reporting a contention event not lead to a
     // reportable contention event. This also means we can use prof.stack
     // without copying, since it won't change during this function.
     var mp = acquirem();
     prof.disabled = true;
+
     nint nstk = (nint)debug.profstackdepth;
     for (nint i = 0; i < nstk; i++) {
         {
@@ -663,9 +642,11 @@ internal static void store(this ref mLockProfile prof) {
             }
         }
     }
+
     var (cycles, lost) = (prof.cycles, prof.cyclesLost);
     (prof.cycles, prof.cyclesLost) = (0, 0);
     prof.haveStack = false;
+
     var rate = (int64)atomic.Load64(Ꮡmutexprofilerate);
     saveBlockEventStack(cycles, rate, prof.stack.slice(0, nstk), mutexProfile);
     if (lost > 0) {
@@ -675,6 +656,7 @@ internal static void store(this ref mLockProfile prof) {
         }.array();
         saveBlockEventStack(lost, rate, lostStk[..], mutexProfile);
     }
+
     prof.disabled = false;
     releasem(ref (mp).DerefOrNull());
 }
@@ -682,6 +664,7 @@ internal static void store(this ref mLockProfile prof) {
 internal static void saveBlockEventStack(int64 cycles, int64 rate, slice<uintptr> stk, bucketType which) {
     var b = stkbucket(which, 0, stk, true);
     var bp = b.bp();
+
     @lock(ᏑprofBlockLock);
     // We want to up-scale the count and cycles according to the
     // probability that the event was sampled. For block profile events,
@@ -946,7 +929,7 @@ internal static void iterate_memprof(Action<ж<bucket>, uintptr, ж<uintptr>, ui
 partial struct BlockProfileRecord {
     public int64 Count;
     public int64 Cycles;
-    public partial ref StackRecord StackRecord { get; }
+    /*embed*/ public StackRecord StackRecord;
 }
 
 // BlockProfile returns n, the number of records in the current blocking profile.
@@ -1166,6 +1149,19 @@ public static (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilere
 
 // go2cs generated this placeholder — func goroutineProfileWithLabels is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+//go:linkname pprof_goroutineLeakProfileWithLabels
+internal static (nint n, bool ok) pprof_goroutineLeakProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
+    return goroutineLeakProfileWithLabels(Δp, labels);
+}
+
+// labels may be nil. If labels is non-nil, it must have the same length as p.
+internal static (nint n, bool ok) goroutineLeakProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
+    if (labels != default! && len(labels) != len(Δp)) {
+        labels = default!;
+    }
+
+    return goroutineLeakProfileWithLabelsConcurrent(Δp, labels);
+}
 
 partial struct goroutineProfileᴛ1 /*dyn*/ {
     internal uint32 sema;
@@ -1179,6 +1175,17 @@ internal static ж<goroutineProfileᴛ1> ᏑgoroutineProfile = new StandardBox<g
 ));
 internal static ref goroutineProfileᴛ1 goroutineProfile => ref ᏑgoroutineProfile.Value;
 
+// goroutineProfileState indicates the status of a goroutine's stack for the
+// current in-progress goroutine profile. Goroutines' stacks are initially
+// "Absent" from the profile, and end up "Satisfied" by the time the profile is
+// complete. While a goroutine's stack is being captured, its
+// goroutineProfileState will be "InProgress" and it will not be able to run
+// until the capture completes and the state moves to "Satisfied".
+//
+// Some goroutines (the finalizer goroutine, which at various times can be
+// either a "system" or a "user" goroutine, and the goroutine that is
+// coordinating the profile, any goroutines created during the profile) move
+// directly to the "Satisfied" state.
 partial struct goroutineProfileState /*num:uint32*/;
 
 internal static goroutineProfileState goroutineProfileAbsent => /* iota */ 0;
@@ -1188,7 +1195,7 @@ internal static goroutineProfileState goroutineProfileSatisfied => 2;
 partial struct goroutineProfileStateHolder /*global::go.@internal.runtime.atomic_package.Uint32*/;
 
 internal static goroutineProfileState Load(this ж<goroutineProfileStateHolder> Ꮡp) {
-    return ((goroutineProfileState)(Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Load());
+    return (goroutineProfileState)(Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Load();
 }
 
 internal static void Store(this ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState value) {
@@ -1199,6 +1206,52 @@ internal static bool CompareAndSwap(this ж<goroutineProfileStateHolder> Ꮡp, g
     return (Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).CompareAndSwap((uint32)old, (uint32)@new);
 }
 
+internal static (nint n, bool ok) goroutineLeakProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
+    nint n = default!;
+
+    if (len(Δp) == 0) {
+        // An empty slice is obviously too small. Return a rough
+        // allocation estimate.
+        return (work.goroutineLeak.count, false);
+    }
+
+    var pcbuf = makeProfStack(); // see saveg() for explanation
+
+    // Prepare a profile large enough to store all leaked goroutines.
+    n = work.goroutineLeak.count;
+
+    if (n > len(Δp)) {
+        // There's not enough space in p to store the whole profile, so
+        // we're not allowed to write to p at all and must return n, false.
+        return (n, false);
+    }
+
+    // Visit each leaked goroutine and try to record its stack.
+    nint offset = default!;
+    var labelsʗ1 = labels;
+    var pʗ1 = Δp;
+    var pcbufʗ1 = pcbuf;
+    forEachGRace((ж<g> gp1) => {
+        if ((readgstatus(gp1) & ~(uint32)_Gscan) == _Gleaked) {
+            var pʗ2 = pʗ1;
+            var pcbufʗ2 = pcbufʗ1;
+            systemstack(() => {
+                saveg(~(uintptr)0, ~(uintptr)0, gp1, ref (Ꮡ(pʗ2, offset)).DerefOrNull(), pcbufʗ2);
+            });
+            if (labelsʗ1 != default!) {
+                labelsʗ1[offset] = gp1.Value.labels;
+            }
+            offset++;
+        }
+    });
+
+    if (raceenabled) {
+        raceacquire(@unsafe.Pointer.FromBox(ᏑlabelSync));
+    }
+
+    return (n, true);
+}
+
 internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
     nint n = default!;
 
@@ -1207,10 +1260,13 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
         // allocation estimate without bothering to STW. As long as
         // this is close, then we'll only need to STW once (on the next
         // call).
-        return ((nint)gcount(), false);
+        return ((nint)gcount(false), false);
     }
+
     semacquire(ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡsema));
+
     var ourg = getg();
+
     var pcbuf = makeProfStack(); // see saveg() for explanation
     var stw = stopTheWorld(stwGoroutineProfile);
     // Using gcount while the world is stopped should give us a consistent view
@@ -1219,11 +1275,13 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     // with what we'd get from isSystemGoroutine, we need special handling for
     // goroutines that can vary between user and system to ensure that the count
     // doesn't change during the collection. So, check the finalizer goroutine
-    // in particular.
-    n = (nint)gcount();
-    if ((uint32)(ᏑfingStatus.Load() & fingRunningFinalizer) != 0) {
+    // and cleanup goroutines in particular.
+    n = (nint)gcount(false);
+    if ((ᏑfingStatus.Load() & fingRunningFinalizer) != 0) {
         n++;
     }
+    n += (nint)ᏑgcCleanups.of(cleanupQueue.Ꮡrunning).Load();
+
     if (n > len(Δp)) {
         // There's not enough space in p to store the whole profile, so (per the
         // contract of runtime.GoroutineProfile) we're not allowed to write to p
@@ -1232,6 +1290,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
         semrelease(ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡsema));
         return (n, false);
     }
+
     // Save current goroutine.
     var sp = sys.GetCallerSP();
     var pc = sys.GetCallerPC();
@@ -1246,6 +1305,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     }
     ourg.of(g.ᏑgoroutineProfiled).Store(goroutineProfileSatisfied);
     ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡoffset).Store(1);
+
     // Prepare for all other goroutines to enter the profile. Aside from ourg,
     // every goroutine struct in the allgs list has its goroutineProfiled field
     // cleared. Any goroutine created from this point on (while
@@ -1254,16 +1314,8 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     goroutineProfile.active = true;
     goroutineProfile.records = Δp;
     goroutineProfile.labels = labels;
-    // The finalizer goroutine needs special handling because it can vary over
-    // time between being a user goroutine (eligible for this profile) and a
-    // system goroutine (to be excluded). Pick one before restarting the world.
-    if (fing != nil) {
-        fing.of(g.ᏑgoroutineProfiled).Store(goroutineProfileSatisfied);
-        if (readgstatus(fing) != _Gdead && !isSystemGoroutine(ref (fing).DerefOrNull(), false)) {
-            doRecordGoroutineProfile(fing, pcbuf);
-        }
-    }
     startTheWorld(stw);
+
     // Visit each goroutine that existed as of the startTheWorld call above.
     //
     // New goroutines may not be in this list, but we didn't want to know about
@@ -1279,31 +1331,36 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsConcurrent(slice<pro
     forEachGRace((ж<g> gp1) => {
         tryRecordGoroutineProfile(gp1, pcbufʗ2, Gosched);
     });
+
     stw = stopTheWorld(stwGoroutineProfileCleanup);
     var endOffset = ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡoffset).Swap(0);
     goroutineProfile.active = false;
     goroutineProfile.records = default!;
     goroutineProfile.labels = default!;
     startTheWorld(stw);
+
     // Restore the invariant that every goroutine struct in allgs has its
     // goroutineProfiled field cleared.
     forEachGRace((ж<g> gp1) => {
         gp1.of(g.ᏑgoroutineProfiled).Store(goroutineProfileAbsent);
     });
+
     if (raceenabled) {
         raceacquire(@unsafe.Pointer.FromBox(ᏑlabelSync));
     }
+
     if (n != (nint)endOffset) {
+        // It's a big surprise that the number of goroutines changed while we
+        // were collecting the profile. But probably better to return a
+        // truncated profile than to crash the whole process.
+        //
+        // For instance, needm moves a goroutine out of the _Gdeadextra state and so
+        // might be able to change the goroutine count without interacting with
+        // the scheduler. For code like that, the race windows are small and the
+        // combination of features is uncommon, so it's hard to be (and remain)
+        // sure we've caught them all.
     }
-    // It's a big surprise that the number of goroutines changed while we
-    // were collecting the profile. But probably better to return a
-    // truncated profile than to crash the whole process.
-    //
-    // For instance, needm moves a goroutine out of the _Gdead state and so
-    // might be able to change the goroutine count without interacting with
-    // the scheduler. For code like that, the race windows are small and the
-    // combination of features is uncommon, so it's hard to be (and remain)
-    // sure we've caught them all.
+
     semrelease(ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡsema));
     return (n, true);
 }
@@ -1326,15 +1383,16 @@ internal static void tryRecordGoroutineProfileWB(ж<g> Ꮡgp1) {
 // in the current goroutine profile: either that it should not be profiled, or
 // that a snapshot of its call stack and labels are now in the profile.
 internal static void tryRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf, Action yield) {
-    ref var gp1 = ref Ꮡgp1.DerefOrNull();
-
-    if (readgstatus(Ꮡgp1) == _Gdead) {
-        // Dead goroutines should not appear in the profile. Goroutines that
-        // start while profile collection is active will get goroutineProfiled
-        // set to goroutineProfileSatisfied before transitioning out of _Gdead,
-        // so here we check _Gdead first.
-        return;
+    {
+        var status = readgstatus(Ꮡgp1); if (status == _Gdead || status == _Gdeadextra) {
+            // Dead goroutines should not appear in the profile. Goroutines that
+            // start while profile collection is active will get goroutineProfiled
+            // set to goroutineProfileSatisfied before transitioning out of _Gdead,
+            // so here we check _Gdead first.
+            return;
+        }
     }
+
     while (ᐧ) {
         var prev = Ꮡgp1.of(g.ᏑgoroutineProfiled).Load();
         if (prev == goroutineProfileSatisfied) {
@@ -1348,6 +1406,7 @@ internal static void tryRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbu
             yield();
             continue;
         }
+
         // While we have gp1.goroutineProfiled set to
         // goroutineProfileInProgress, gp1 may appear _Grunnable but will not
         // actually be able to run. Disable preemption for ourselves, to make
@@ -1375,7 +1434,7 @@ internal static readonly @string cannotReadStackOfRunningˢ = "cannot read stack
 internal static void doRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf) {
     ref var gp1 = ref Ꮡgp1.DerefOrNull();
 
-    if (isSystemGoroutine(ref (Ꮡgp1).DerefOrNull(), false)) {
+    if (isSystemGoroutine(Ꮡgp1, false)) {
         // System goroutines should not appear in the profile.
         // Check this here and not in tryRecordGoroutineProfile because isSystemGoroutine
         // may change on a goroutine while it is executing, so while the scheduler might
@@ -1386,17 +1445,31 @@ internal static void doRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf
         // everything else, we just don't record the stack in the profile.
         return;
     }
-    if (readgstatus(Ꮡgp1) == _Grunning) {
+    // Double-check that we didn't make a grave mistake. If the G is running then in
+    // general, we cannot safely read its stack.
+    //
+    // However, there is one case where it's OK. There's a small window of time in
+    // exitsyscall where a goroutine could be in _Grunning as it's exiting a syscall.
+    // This is OK because goroutine will not exit the syscall until it passes through
+    // a call to tryRecordGoroutineProfile. (An explicit one on the fast path, an
+    // implicit one via the scheduler on the slow path.)
+    //
+    // This is also why it's safe to check syscallsp here. The syscall path mutates
+    // syscallsp only after passing through tryRecordGoroutineProfile.
+    if (readgstatus(Ꮡgp1) == _Grunning && gp1.syscallsp == 0) {
         print((@string)"doRecordGoroutineProfile gp1="u8, gp1.goid, (@string)"\n"u8);
         @throw(cannotReadStackOfRunningˢ);
     }
+
     nint offset = (nint)ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡoffset).Add(1) - 1;
+
     if (offset >= len(goroutineProfile.records)) {
         // Should be impossible, but better to return a truncated profile than
         // to crash the entire process at this point. Instead, deal with it in
         // goroutineProfileWithLabelsConcurrent where we have more context.
         return;
     }
+
     // saveg calls gentraceback, which may call cgo traceback functions. When
     // called from the scheduler, this is on the system stack already so
     // traceback.go:cgoContextPCs will avoid calling back into the scheduler.
@@ -1409,6 +1482,7 @@ internal static void doRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf
     systemstack(() => {
         saveg(~(uintptr)0, ~(uintptr)0, Ꮡgp1, ref (Ꮡ(goroutineProfile.records, offset)).DerefOrNull(), pcbufʗ1);
     });
+
     if (goroutineProfile.labels != default!) {
         goroutineProfile.labels[offset] = gp1.labels;
     }
@@ -1419,14 +1493,28 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
     bool ok = default!;
 
     var gp = getg();
+
     var gpʗ1 = gp;
     bool isOK(ж<g> gp1) {
         // Checking isSystemGoroutine here makes GoroutineProfile
         // consistent with both NumGoroutine and Stack.
-        return gp1 != gpʗ1 && readgstatus(gp1) != _Gdead && !isSystemGoroutine(ref (gp1).DerefOrNull(), false);
+        if (gp1 == gpʗ1) {
+            return false;
+        }
+        {
+            var status = readgstatus(gp1); if (status == _Gdead || status == _Gdeadextra) {
+                return false;
+            }
+        }
+        if (isSystemGoroutine(gp1, false)) {
+            return false;
+        }
+        return true;
     }
+
     var pcbuf = makeProfStack(); // see saveg() for explanation
     var stw = stopTheWorld(stwGoroutineProfile);
+
     // World is stopped, no locking required.
     n = 1;
     var isOKʗ1 = isOK;
@@ -1435,12 +1523,14 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
             n++;
         }
     });
+
     if (n <= len(Δp)) {
         ok = true;
         ref var r = ref heap<slice<profilerecord.StackRecord>>(out var Ꮡr);
         r = Δp;
         ref var lbl = ref heap<slice<@unsafe.Pointer>>(out var Ꮡlbl);
         lbl = labels;
+
         // Save current goroutine.
         var sp = sys.GetCallerSP();
         var pc = sys.GetCallerPC();
@@ -1450,11 +1540,13 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
             saveg(pc, sp, gpʗ2, ref (Ꮡ(Ꮡr.ValueSlot, 0)).DerefOrNull(), pcbufʗ1);
         });
         r = r[1..];
+
         // If we have a place to put our goroutine labelmap, insert it there.
         if (labels != default!) {
             lbl[0] = gp.Value.labels;
             lbl = lbl[1..];
         }
+
         // Save other goroutines.
         var isOKʗ2 = isOK;
         var labelsʗ1 = labels;
@@ -1463,6 +1555,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
             if (!isOKʗ2(gp1)) {
                 return;
             }
+
             if (len(Ꮡr.ValueSlot) == 0) {
                 // Should be impossible, but better to return a
                 // truncated profile than to crash the entire process.
@@ -1483,9 +1576,11 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
             Ꮡr.ValueSlot = Ꮡr.ValueSlot[1..];
         });
     }
+
     if (raceenabled) {
         raceacquire(@unsafe.Pointer.FromBox(ᏑlabelSync));
     }
+
     startTheWorld(stw);
     return (n, ok);
 }
@@ -1517,8 +1612,6 @@ internal static (nint n, bool ok) goroutineProfileInternal(slice<profilerecord.S
 }
 
 internal static void saveg(uintptr pc, uintptr sp, ж<g> Ꮡgp, ref profilerecord.StackRecord r, slice<uintptr> pcbuf) {
-    ref var gp = ref Ꮡgp.DerefOrNull();
-
     // To reduce memory usage, we want to allocate a r.Stack that is just big
     // enough to hold gp's stack trace. Naively we might achieve this by
     // recording our stack trace into mp.profStack, and then allocating a
@@ -1532,6 +1625,7 @@ internal static void saveg(uintptr pc, uintptr sp, ж<g> Ꮡgp, ref profilerecor
     if (pcbuf == default!) {
         pcbuf = makeProfStack();
     }
+
     ref var u = ref heap(new unwinder(), out var Ꮡu);
     Ꮡu.initAt(pc, sp, 0, Ꮡgp, unwindSilentErrors);
     nint n = tracebackPCs(Ꮡu, 0, pcbuf);

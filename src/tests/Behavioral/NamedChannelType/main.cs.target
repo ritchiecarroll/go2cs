@@ -21,26 +21,28 @@ internal static void Wait(this closeWaiter cw) {
 
 partial struct intQueue /*chan nint*/;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object waitedˢ = (@string)"waited"u8;
-
 internal static partial void Main() {
     closeWaiter cw = default!;
     cw.Init();
     cw.Close();
     cw.Wait();
-    fmt.Println(waitedˢ);
+    fmt.Println("waited");
+
     var q = new intQueue(3);
     q.ᐸꟷ(10);
     q.ᐸꟷ(20);
     fmt.Println(len(q), cap(q));
+
     nint v = ᐸꟷ<nint>(q);
     fmt.Println(v);
+
     (v, var ok) = ᐸꟷ<nint>(q, ꟷ);
     fmt.Println(v, ok);
+
     close<nint>(q);
     (v, ok) = ᐸꟷ<nint>(q, ꟷ);
     fmt.Println(v, ok);
+
     var drain = new intQueue(2);
     drain.ᐸꟷ(7);
     drain.ᐸꟷ(8);
@@ -50,6 +52,7 @@ internal static partial void Main() {
         sum += x;
     }
     fmt.Println(sum);
+
     var sel = new intQueue(1);
     sel.ᐸꟷ(42);
     var selᴛ1 = sel;
@@ -58,6 +61,7 @@ internal static partial void Main() {
         fmt.Println(y);
         break;
     }}
+
     var pipe = new intQueue(0);
     fmt.Println(len(pipe), cap(pipe));
     var pipeʗ1 = pipe;

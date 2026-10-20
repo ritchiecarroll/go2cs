@@ -134,6 +134,7 @@ public static void TestReverseProxy(ж<testing.T> Ꮡt) {
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
+
         var (getReq, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         getReq.Value.Host = someNameˢ;
         (~getReq).Header.Set(connectionˢ, closeTeˢ);
@@ -211,6 +212,7 @@ public static void TestReverseProxy(ж<testing.T> Ꮡt) {
             }
         }
         (~res).Body.Close();
+
         // Test that a backend failing to be reached or one which doesn't return
         // a response results in a StatusBadGateway.
         (getReq, _) = http.NewRequest(getˢ, (~frontend).URL + "/?mode=hangup"u8, default!);
@@ -244,9 +246,11 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
     try {
         @string fakeConnectionToken = fakeConnectionTokenᶜ;
         @string backendResponse = backendResponseᶜ1;
+
         // someConnHeader is some arbitrary header to be declared as a hop-by-hop header
         // in the Request's Connection header.
         @string someConnHeader = someConnHeaderᶜ;
+
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             {
                 @string c = (~r).Header.Get(connectionˢ); if (c != ""u8) {
@@ -311,6 +315,7 @@ public static void TestReverseProxyStripHeadersPresentInConnection(ж<testing.T>
         })));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (getReq, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         (~getReq).Header.Add(connectionˢ, "Upgrade, " + fakeConnectionToken);
         (~getReq).Header.Add(connectionˢ, someConnHeader);
@@ -363,9 +368,11 @@ public static void TestReverseProxyStripEmptyConnection(ж<testing.T> Ꮡt) {
     try {
         // See Issue 46313.
         @string backendResponse = backendResponseᶜ2;
+
         // someConnHeader is some arbitrary header to be declared as a hop-by-hop header
         // in the Request's Connection header.
         @string someConnHeader = someConnHeaderᶜ1;
+
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             {
                 var c = (~r).Header.Values(connectionˢ); if (len(c) != 0) {
@@ -400,6 +407,7 @@ public static void TestReverseProxyStripEmptyConnection(ж<testing.T> Ꮡt) {
         })));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (getReq, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         (~getReq).Header.Add(connectionˢ, ""u8);
         (~getReq).Header.Add(connectionˢ, someConnHeader);
@@ -472,6 +480,7 @@ public static void TestXForwardedFor(ж<testing.T> Ꮡt) {
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (getReq, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         (~getReq).Header.Set(connectionˢ, closeˢ);
         (~getReq).Header.Set(xForwardedForˢ, prevForwardedFor);
@@ -522,12 +531,14 @@ public static void TestXForwardedFor_Omit(ж<testing.T> Ꮡt) {
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var oldDirector = proxyHandler.Value.Director;
         var oldDirectorʗ1 = oldDirector;
         proxyHandler.Value.Director = (ж<http.Request> r) => {
             r.Value.Header[xForwardedForˢ] = default!;
             oldDirectorʗ1(r);
         };
+
         var (getReq, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         getReq.Value.Host = someNameˢ;
         getReq.Value.Close = true;
@@ -575,6 +586,7 @@ public static void TestReverseProxyRewriteStripsForwarded(ж<testing.T> Ꮡt) {
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (getReq, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         getReq.Value.Host = someNameˢ;
         getReq.Value.Close = true;
@@ -590,7 +602,6 @@ public static void TestReverseProxyRewriteStripsForwarded(ж<testing.T> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
 
 partial struct proxyQueryTestsᴛ1 /*dyn*/ {
     internal @string baseSuffix; // suffix to add to backend URL
@@ -616,6 +627,7 @@ public static void TestReverseProxyQuery(ж<testing.T> Ꮡt) {
         })));
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
+
         foreach (var (i, tt) in proxyQueryTests) {
             var (backendURL, err) = url.Parse((~backend).URL + tt.baseSuffix);
             if (err != default!) {
@@ -654,15 +666,19 @@ public static void TestReverseProxyFlushInterval(ж<testing.T> Ꮡt) {
         })));
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
+
         var (backendURL, err) = url.Parse((~backend).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.Value.FlushInterval = time.Microsecond;
+
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (req, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         req.Value.Close = true;
         (var res, err) = frontend.Client().Do(req);
@@ -710,10 +726,12 @@ public static void TestReverseProxyResponseControllerFlushInterval(ж<testing.T>
         })));
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
+
         var (backendURL, err) = url.Parse((~backend).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var mf = Ꮡ(new mockFlusher(nil));
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.Value.FlushInterval = -1; // flush immediately
@@ -724,9 +742,11 @@ public static void TestReverseProxyResponseControllerFlushInterval(ж<testing.T>
             w = new httputil_internal_test_package.wrappedRWжResponseWriter(Ꮡ(new wrappedRW(new httputil_internal_test_package.mockFlusherжResponseWriter(mfʗ1))));
             proxyHandlerʗ1.ServeHTTP(w, r);
         });
+
         var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(proxyWithMiddleware));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (req, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         req.Value.Close = true;
         (var res, err) = frontend.Client().Do(req);
@@ -769,27 +789,34 @@ public static void TestReverseProxyFlushIntervalHeaders(ж<testing.T> Ꮡt) {
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
         defer(ᴛ1 => close(ᴛ1), stopCh, ref ᒐ);
+
         var (backendURL, err) = url.Parse((~backend).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.Value.FlushInterval = time.Microsecond;
+
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (req, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         req.Value.Close = true;
+
         var (ctx, cancel) = context.WithTimeout(req.Context(), (time.Duration)(10000000000L));
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
         req = req.WithContext(ctx);
+
         (var res, err) = frontend.Client().Do(req);
         if (err != default!) {
             Ꮡt.Fatalf("Get: %v"u8, err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         if ((~res).Header.Get(myHeaderˢ) != expected) {
             Ꮡt.Errorf("got header %q; expected %q"u8, (~res).Header.Get(myHeaderˢ), expected);
         }
@@ -809,40 +836,50 @@ public static partial void TestReverseProxyCancellation(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         @string backendResponse = backendResponseᶜ4;
+
         var reqInFlight = new channel<EmptyStruct>(0);
         var reqInFlightʗ1 = reqInFlight;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             close(reqInFlightʗ1); // cause the client to cancel its request
+
             var selᴛ3 = time.After((time.Duration)(10000000000L));
             var selᴛ4 = w._<http.CloseNotifier>().CloseNotify();
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
             case 0 when selᴛ3.ꟷᐳ(out _): {
+                // Note: this should only happen in broken implementations, and the
+                // closenotify case should be instantaneous.
                 Ꮡt.Error(handlerNeverSawˢ);
                 return;
             }
             case 1 when selᴛ4.ꟷᐳ(out _): {
                 break;
             }}
-            // Note: this should only happen in broken implementations, and the
-            // closenotify case should be instantaneous.
+
             w.WriteHeader(http.StatusOK);
             w.Write(slice<byte>(backendResponse));
         })));
+
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
+
         backend.Value.Config.Value.ErrorLog = log.New(io.Discard, ""u8, 0);
+
         var (backendURL, err) = url.Parse((~backend).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
+
         // Discards errors of the form:
         // http: proxy error: read tcp 127.0.0.1:44643: use of closed network connection
         proxyHandler.Value.ErrorLog = log.New(io.Discard, ""u8, 0);
+
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
+
         var (getReq, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         var frontendClientʗ1 = frontendClient;
         var getReqʗ1 = getReq;
@@ -886,6 +923,7 @@ public static void TestNilBody(ж<testing.T> Ꮡt) {
         })));
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
+
         var backendʗ2 = backend;
         var frontend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> _Δp1) => {
             var (backURL, _) = url.Parse((~backendʗ2).URL);
@@ -896,6 +934,7 @@ public static void TestNilBody(ж<testing.T> Ꮡt) {
         })));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (res, err) = http.Get((~frontend).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -928,6 +967,7 @@ public static void TestUserAgentHeader(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var proxyHandler = @new<global::go.net.http.httputil_package.ReverseProxy>();
         proxyHandler.Value.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
         var backendURLʗ1 = backendURL;
@@ -938,6 +978,7 @@ public static void TestUserAgentHeader(ж<testing.T> Ꮡt) {
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
+
         foreach (var (_, sentUA) in new @string[]{"explicit UA"u8, ""u8}.slice()) {
             var (getReq, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
             (~getReq).Header.Set(userAgentˢ, sentUA);
@@ -987,10 +1028,12 @@ public static void TestReverseProxyGetPutBuffer(ж<testing.T> Ꮡt) {
         })));
         var backendʗ1 = backend;
         defer(backendʗ1.Close, ref ᒐ);
+
         var (backendURL, err) = url.Parse((~backend).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
         ref var log = ref heap<slice<@string>>(out var Ꮡlog);
         void addLog(@string @event) {
@@ -1020,6 +1063,7 @@ public static void TestReverseProxyGetPutBuffer(ж<testing.T> Ꮡt) {
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(rp));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (req, _) = http.NewRequest(getˢ, (~frontend).URL, default!);
         req.Value.Close = true;
         (var res, err) = frontend.Client().Do(req);
@@ -1082,6 +1126,7 @@ public static void TestReverseProxy_Post(ж<testing.T> Ꮡt) {
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (postReq, _) = http.NewRequest(postˢ, (~frontend).URL, new httputil_test_package.bytes_ReaderжReader(bytes.NewReader(requestBody)));
         (var res, err) = frontend.Client().Do(postReq);
         if (err != default!) {
@@ -1134,6 +1179,7 @@ public static void TestReverseProxy_NilBody(ж<testing.T> Ꮡt) {
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (res, err) = frontend.Client().Get((~frontend).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1163,6 +1209,7 @@ public static void TestReverseProxy_AllocatedHeader(ж<testing.T> Ꮡt) {
         }
         return (default!, errors.New(doneTestingTheˢ));
     }));
+
     proxyHandler.ServeHTTP(new httputil_test_package.httptest_ResponseRecorderжResponseWriter(httptest.NewRecorder()), Ꮡ(new http.Request(
         Method: "GET"u8,
         URL: Ꮡ(new url.URL(Scheme: "http"u8, Host: "fake.tld"u8, Path: "/"u8)),
@@ -1189,6 +1236,7 @@ public static void TestReverseProxyModifyResponse(ж<testing.T> Ꮡt) {
         })));
         var backendServerʗ1 = backendServer;
         defer(backendServerʗ1.Close, ref ᒐ);
+
         var (rpURL, _) = url.Parse((~backendServer).URL);
         var rproxy = NewSingleHostReverseProxy(rpURL);
         rproxy.Value.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
@@ -1198,13 +1246,16 @@ public static void TestReverseProxyModifyResponse(ж<testing.T> Ꮡt) {
             }
             return default!;
         };
+
         var frontendProxy = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(rproxy));
         var frontendProxyʗ1 = frontendProxy;
         defer(frontendProxyʗ1.Close, ref ᒐ);
+
         var tests = new TestReverseProxyModifyResponse_tests[]{
             new((~frontendProxy).URL + "/mod"u8, http.StatusOK),
             new((~frontendProxy).URL + "/schedule"u8, http.StatusBadGateway)
         }.slice();
+
         foreach (var (i, tt) in tests) {
             var (resp, err) = http.Get(tt.url);
             if (err != default!) {
@@ -1294,6 +1345,7 @@ public static void TestReverseProxyErrorHandler(ж<testing.T> Ꮡt) {
             wantCode: http.StatusTeapot
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestReverseProxyErrorHandler_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1320,6 +1372,7 @@ public static void TestReverseProxyErrorHandler(ж<testing.T> Ꮡt) {
                 var frontendProxy = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(rproxy));
                 var frontendProxyʗ1 = frontendProxy;
                 defer(frontendProxyʗ1.Close, ref ᒐ);
+
                 var (resp, err) = http.Get((~frontendProxy).URL + "/test"u8);
                 if (err != default!) {
                     tΔ1.Fatalf("failed to reach proxy: %v"u8, err);
@@ -1354,10 +1407,12 @@ public static void TestReverseProxy_CopyBuffer(ж<testing.T> Ꮡt) {
         })));
         var backendServerʗ1 = backendServer;
         defer(backendServerʗ1.Close, ref ᒐ);
+
         var (rpURL, err) = url.Parse((~backendServer).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         ref var proxyLog = ref heap(new bytes.Buffer(), out var ᏑproxyLog);
         var rproxy = NewSingleHostReverseProxy(rpURL);
         rproxy.Value.ErrorLog = log.New(new httputil_test_package.bytes_BufferжWriter(ᏑproxyLog), ""u8, log.Lshortfile);
@@ -1378,6 +1433,7 @@ public static void TestReverseProxy_CopyBuffer(ж<testing.T> Ꮡt) {
         })));
         var frontendProxyʗ1 = frontendProxy;
         defer(frontendProxyʗ1.Close, ref ᒐ);
+
         {
             (_, err) = frontendProxy.Client().Get((~frontendProxy).URL); if (err == default!) {
                 Ꮡt.Fatalf("want non-nil error"u8);
@@ -1388,6 +1444,7 @@ public static void TestReverseProxy_CopyBuffer(ж<testing.T> Ꮡt) {
         // channel to ensure that the ReverseProxy's ServeHTTP is done before we
         // continue after Get.
         ᐸꟷ(donec);
+
         var expected = new @string[]{
             "EOF"u8,
             "read"u8
@@ -1422,8 +1479,10 @@ public static void BenchmarkServeHTTP(ж<testing.B> Ꮡb) {
         },
         Transport: new httputil_internal_test_package.staticTransportжRoundTripper(Ꮡ(new staticTransport(res)))
     ));
+
     var w = httptest.NewRecorder();
     var r = httptest.NewRequest(getˢ, "/"u8, default!);
+
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
         proxy.ServeHTTP(new httputil_test_package.httptest_ResponseRecorderжResponseWriter(w), r);
@@ -1446,6 +1505,7 @@ public static void TestServeHTTPDeepCopy(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var resultChan = new channel<TestServeHTTPDeepCopy_result>(1);
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         var proxyHandlerʗ1 = proxyHandler;
@@ -1458,12 +1518,15 @@ public static void TestServeHTTPDeepCopy(ж<testing.T> Ꮡt) {
         })));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var want = new TestServeHTTPDeepCopy_result(before: "/"u8, after: "/"u8);
+
         (var res, err) = frontend.Client().Get((~frontend).URL);
         if (err != default!) {
             Ꮡt.Fatalf("Do: %v"u8, err);
         }
         (~res).Body.Close();
+
         var got = ᐸꟷ(resultChan);
         if (got != want) {
             Ꮡt.Errorf("got = %+v; want = %+v"u8, got, want);
@@ -1500,6 +1563,7 @@ public static void TestClonesRequestHeaders(ж<testing.T> Ꮡt) {
             }))
         ));
         rp.ServeHTTP(new httputil_test_package.httptest_ResponseRecorderжResponseWriter(httptest.NewRecorder()), req);
+
         foreach (var (_, h) in new @string[]{
             "From-Director"u8,
             "X-Forwarded-For"u8
@@ -1591,11 +1655,14 @@ public static void TestReverseProxy_PanicBodyError(ж<testing.T> Ꮡt) {
         })));
         var backendServerʗ1 = backendServer;
         defer(backendServerʗ1.Close, ref ᒐ);
+
         var (rpURL, err) = url.Parse((~backendServer).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var rproxy = NewSingleHostReverseProxy(rpURL);
+
         // Ensure that the handler panics when the body read encounters an
         // io.ErrUnexpectedEOF
         defer(() => {
@@ -1636,6 +1703,7 @@ public static partial void TestReverseProxy_PanicClosesIncomingBody(ж<testing.T
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
+
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         for (nint i = 0; i < 2; i++) {
             Ꮡwg.Add(1);
@@ -1795,6 +1863,7 @@ public static void TestReverseProxyWebSocket(ж<testing.T> Ꮡt) {
         })));
         var backendServerʗ1 = backendServer;
         defer(backendServerʗ1.Close, ref ᒐ);
+
         var (backURL, _) = url.Parse((~backendServer).URL);
         var rproxy = NewSingleHostReverseProxy(backURL);
         rproxy.Value.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
@@ -1802,6 +1871,7 @@ public static void TestReverseProxyWebSocket(ж<testing.T> Ꮡt) {
             (~resΔ1).Header.Add(xModifiedˢ, trueˢ);
             return default!;
         };
+
         var rproxyʗ1 = rproxy;
         var handler = new http.HandlerFunc((http.ResponseWriter rw, ж<http.Request> reqΔ1) => {
             rw.Header().Set(xHeaderˢ, xValueˢ);
@@ -1813,12 +1883,15 @@ public static void TestReverseProxyWebSocket(ж<testing.T> Ꮡt) {
                 }
             }
         });
+
         var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(handler));
         var frontendProxyʗ1 = frontendProxy;
         defer(frontendProxyʗ1.Close, ref ᒐ);
+
         var (req, _) = http.NewRequest(getˢ, (~frontendProxy).URL, default!);
         (~req).Header.Set(connectionˢ, upgradeˢ);
         (~req).Header.Set(upgradeˢ, websocketˢ);
+
         var c = frontendProxy.Client();
         var (res, err) = c.Do(req);
         if (err != default!) {
@@ -1827,11 +1900,13 @@ public static void TestReverseProxyWebSocket(ж<testing.T> Ꮡt) {
         if ((~res).StatusCode != 101) {
             Ꮡt.Fatalf("status = %v; want 101"u8, (~res).Status);
         }
+
         @string got = (~res).Header.Get(xHeaderˢ);
         @string want = xValueˢ;
         if (got != want) {
             Ꮡt.Errorf("Header(XHeader) = %q; want %q"u8, got, want);
         }
+
         if (!ascii.EqualFold(upgradeType((~res).Header), websocketˢ)) {
             Ꮡt.Fatalf("not websocket upgrade; got %#v"u8, (~res).Header);
         }
@@ -1841,12 +1916,14 @@ public static void TestReverseProxyWebSocket(ж<testing.T> Ꮡt) {
         }
         var rwcʗ1 = rwc;
         defer(() => rwcʗ1.Close(), ref ᒐ);
+
         {
             @string gotΔ2 = (~res).Header.Get(xModifiedˢ);
             @string wantΔ2 = trueˢ; if (gotΔ2 != wantΔ2) {
                 Ꮡt.Errorf("response X-Modified header = %q; want %q"u8, gotΔ2, wantΔ2);
             }
         }
+
         io.WriteString(rwc, helloˢ);
         var bs = bufio.NewScanner(rwc);
         if (!bs.Scan()) {
@@ -1873,6 +1950,7 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
         var triggerCancelCh = new channel<bool>(n);
         @string nthResponse(nint i) => fmt.Sprintf("backend response #%d\n"u8, i);
         @string terminalMsg = finalMessageˢ;
+
         var nthResponseʗ1 = nthResponse;
         var triggerCancelChʗ1 = triggerCancelCh;
         var cst = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
@@ -1893,6 +1971,7 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
                 }
                 var connʗ1 = conn;
                 defer(() => connʗ1.Close(), ref ᒐ);
+
                 @string upgradeMsg = http11101Switchingˢ;
                 {
                     var (_, errΔ2) = io.WriteString(new httputil_test_package.net_ConnᴠWriter(conn), upgradeMsg); if (errΔ2 != default!) {
@@ -1906,6 +1985,7 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
                         return;
                     }
                 }
+
                 for (nint i = 0; i < n; i++) {
                     {
                         var (_, errΔ4) = bufrw.Value.Writer.Value.WriteString(nthResponseʗ1(i)); if (errΔ4 != default!) {
@@ -1944,6 +2024,7 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
         })));
         var cstʗ1 = cst;
         defer(cstʗ1.Close, ref ᒐ);
+
         var (backendURL, _) = url.Parse((~cst).URL);
         var rproxy = NewSingleHostReverseProxy(backendURL);
         rproxy.Value.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
@@ -1951,6 +2032,7 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
             (~resΔ1).Header.Add(xModifiedˢ, trueˢ);
             return default!;
         };
+
         var rproxyʗ1 = rproxy;
         var triggerCancelChʗ2 = triggerCancelCh;
         var handler = new http.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (http.ResponseWriter rw, ж<http.Request> reqΔ1) => {
@@ -1964,12 +2046,15 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
             });
             rproxyʗ1.ServeHTTP(rw, reqΔ1.WithContext(ctx));
         });
+
         var frontendProxy = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(handler));
         var frontendProxyʗ1 = frontendProxy;
         defer(frontendProxyʗ1.Close, ref ᒐ);
+
         var (req, _) = http.NewRequest(getˢ, (~frontendProxy).URL, default!);
         (~req).Header.Set(connectionˢ, upgradeˢ);
         (~req).Header.Set(upgradeˢ, websocketˢ);
+
         var (res, err) = frontendProxy.Client().Do(req);
         if (err != default!) {
             Ꮡt.Fatalf("Dialing to frontend proxy: %v"u8, err);
@@ -1982,39 +2067,46 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("Switching protocols failed, got: %d, want: %d"u8, g, w);
             }
         }
+
         {
             @string g = (~res).Header.Get(xHeaderˢ);
             @string w = xValueˢ; if (g != w) {
                 Ꮡt.Errorf("X-Header mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
             }
         }
+
         {
             @string g = upgradeType((~res).Header);
             @string w = websocketˢ; if (!ascii.EqualFold(g, w)) {
                 Ꮡt.Fatalf("Upgrade header mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
             }
         }
+
         var (rwc, ok) = (~res).Body._<io.ReadWriteCloser>(ᐧ);
         if (!ok) {
             Ꮡt.Fatalf("Response body type mismatch, got %T, want io.ReadWriteCloser"u8, (~res).Body);
         }
+
         {
             @string got = (~res).Header.Get(xModifiedˢ);
             @string want = trueˢ; if (got != want) {
                 Ꮡt.Errorf("response X-Modified header = %q; want %q"u8, got, want);
             }
         }
+
         {
             var (_, errΔ6) = io.WriteString(rwc, helloˢ); if (errΔ6 != default!) {
                 Ꮡt.Fatalf("Failed to write first message: %v"u8, errΔ6);
             }
         }
+
         // Read loop.
+
         var br = bufio.NewReader(rwc);
         while (ᐧ) {
             var (line, errΔ7) = br.ReadString((rune)'\n');
             switch (ᐧ) {
-            case {} when line == terminalMsg: {
+            case {} when line == terminalMsg: { // this case before "err == io.EOF"
                 Ꮡt.Fatalf("The websocket request was not canceled, unfortunately!"u8);
                 break;
             }
@@ -2022,23 +2114,20 @@ public static void TestReverseProxyWebSocketCancellation(ж<testing.T> Ꮡt) {
                 return;
             }
             case {} when errΔ7 != default!: {
-                Ꮡt.Fatalf("Unexpected error: %v"u8, // this case before "err == io.EOF"
- errΔ7);
+                Ꮡt.Fatalf("Unexpected error: %v"u8, errΔ7);
                 break;
             }
-            case {} when line == nthResponse(0): {
+            case {} when line == nthResponse(0): { // We've gotten the first response back
+                // Let's trigger a cancel.
                 close(triggerCancelCh);
                 break;
             }}
-
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// We've gotten the first response back
-// Let's trigger a cancel.
 public static void TestUnannouncedTrailer(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -2059,10 +2148,12 @@ public static void TestUnannouncedTrailer(ж<testing.T> Ꮡt) {
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
+
         (var res, err) = frontendClient.Get((~frontend).URL);
         if (err != default!) {
             Ꮡt.Fatalf("Get: %v"u8, err);
         }
+
         io.ReadAll((~res).Body);
         (~res).Body.Close();
         {
@@ -2098,16 +2189,19 @@ public static void TestSetURL(ж<testing.T> Ꮡt) {
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
+
         (var res, err) = frontendClient.Get((~frontend).URL);
         if (err != default!) {
             Ꮡt.Fatalf("Get: %v"u8, err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         (var body, err) = io.ReadAll((~res).Body);
         if (err != default!) {
             Ꮡt.Fatalf("Reading body: %v"u8, err);
         }
+
         {
             @string got = ((@string)body);
             @string want = backendURL.Value.Host; if (got != want) {
@@ -2162,6 +2256,7 @@ public static void TestJoinURLPath(ж<testing.T> Ꮡt) {
         new(Ꮡ(new url.URL(Path: "/a/b/"u8, RawPath: "/a%2Fb%2F"u8)), Ꮡ(new url.URL(Path: "c"u8)), "/a/b//c"u8, "/a%2Fb%2F/c"u8),
         new(Ꮡ(new url.URL(Path: "/a/b/"u8, RawPath: "/a%2Fb/"u8)), Ꮡ(new url.URL(Path: "/c/d"u8, RawPath: "/c%2Fd"u8)), "/a/b/c/d"u8, "/a%2Fb/c%2Fd"u8)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         var (p, rp) = joinURLPath(tt.a, tt.b);
         if (p != tt.wantPath || rp != tt.wantRaw) {
@@ -2195,6 +2290,7 @@ public static void TestReverseProxyRewriteReplacesOut(ж<testing.T> Ꮡt) {
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         var (res, err) = frontend.Client().Get((~frontend).URL);
         if (err != default!) {
             Ꮡt.Fatalf("Get: %v"u8, err);
@@ -2219,8 +2315,6 @@ internal static readonly @string httpGoDevˢ = "http://go.dev/"u8;
 public static void Test1xxHeadersNotModifiedAfterRoundTrip(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // https://go.dev/issue/65123: We use httptrace.Got1xxResponse to capture 1xx responses
         // and proxy them. httptrace handlers can execute after RoundTrip returns, in particular
         // after experiencing connection errors. When this happens, we shouldn't modify the
@@ -2238,6 +2332,7 @@ public static void Test1xxHeadersNotModifiedAfterRoundTrip(ж<testing.T> Ꮡt) {
         }
         var proxyHandler = NewSingleHostReverseProxy(backendURL);
         proxyHandler.Value.ErrorLog = log.New(io.Discard, ""u8, 0); // quiet for tests
+
         var rw = Ꮡ(new testResponseWriter(nil));
         var proxyHandlerʗ1 = proxyHandler;
         var rwʗ1 = rw;
@@ -2256,6 +2351,7 @@ public static void Test1xxHeadersNotModifiedAfterRoundTrip(ж<testing.T> Ꮡt) {
                         return default!;
                     }
                 )));
+
                 var (req, _) = http.NewRequestWithContext(ctx, getˢ, httpGoDevˢ, default!);
                 proxyHandlerʗ1.ServeHTTP(new httputil_internal_test_package.testResponseWriterжResponseWriter(rwʗ1), req);
             }
@@ -2287,8 +2383,10 @@ public static void Test1xxResponses(ж<testing.T> Ꮡt) {
             h.Add(linkˢ, styleCssRelPreloadAsˢ);
             h.Add(linkˢ, scriptJsRelPreloadAsˢ);
             w.WriteHeader(http.StatusEarlyHints);
+
             h.Add(linkˢ, fooJsRelPreloadAsScriptˢ);
             w.WriteHeader(http.StatusProcessing);
+
             w.Write(slice<byte>("Hello"u8));
         })));
         var backendʗ1 = backend;
@@ -2303,21 +2401,27 @@ public static void Test1xxResponses(ж<testing.T> Ꮡt) {
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
         var frontendClient = frontend.Client();
+
         void checkLinkHeaders(ж<testing.T> tΔ1, slice<@string> expected, slice<@string> got) {
             tΔ1.Helper();
+
             if (len(expected) != len(got)) {
                 tΔ1.Errorf("Expected %d link headers; got %d"u8, len(expected), len(got));
             }
+
             foreach (var (i, _) in expected) {
                 if (i >= len(got)) {
                     tΔ1.Errorf("Expected %q link header; got nothing"u8, expected[i]);
+
                     continue;
                 }
+
                 if (expected[i] != got[i]) {
                     tΔ1.Errorf("Expected %q link header; got %q"u8, expected[i], got[i]);
                 }
             }
         }
+
         uint8 respCounter = default!;
             var checkLinkHeadersʗ1 = checkLinkHeaders;
         var trace = Ꮡ(new httptrace.ClientTrace(
@@ -2334,20 +2438,25 @@ public static void Test1xxResponses(ж<testing.T> Ꮡt) {
                 }
 
                 respCounter++;
+
                 return default!;
             }
         ));
         var (req, _) = http.NewRequestWithContext(httptrace.WithClientTrace(context.Background(), trace), getˢ, (~frontend).URL, default!);
+
         (var res, err) = frontendClient.Do(req);
         if (err != default!) {
             Ꮡt.Fatalf("Get: %v"u8, err);
         }
+
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         if (respCounter != 2) {
             Ꮡt.Errorf("Expected 2 1xx responses; got %d"u8, respCounter);
         }
         checkLinkHeaders(Ꮡt, new @string[]{"</style.css>; rel=preload; as=style"u8, "</script.js>; rel=preload; as=script"u8, "</foo.js>; rel=preload; as=script"u8}.slice(), (~res).Header[linkˢ]);
+
         var (body, _) = io.ReadAll((~res).Body);
         if (((sstring)body) != "Hello"u8) {
             Ꮡt.Errorf("Read body %q; want Hello"u8, body);
@@ -2415,8 +2524,6 @@ internal partial struct testReverseProxyQueryParameterSmuggling_type /*dyn*/ {
 internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> Ꮡt, bool wantCleanQuery, Func<ж<url.URL>, ж<global::go.net.http.httputil_package.ReverseProxy>> newProxy) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         @string content = contentᶜ1;
         var backend = httptest.NewServer(new httputil_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>((~(~r).URL).RawQuery));
@@ -2431,9 +2538,11 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> Ꮡt,
         var frontend = httptest.NewServer(new httputil_test_package.httputil_ReverseProxyжΔHandler(proxyHandler));
         var frontendʗ1 = frontend;
         defer(frontendʗ1.Close, ref ᒐ);
+
         // Don't spam output with logs of queries containing semicolons.
         backend.Value.Config.Value.ErrorLog = log.New(io.Discard, ""u8, 0);
         frontend.Value.Config.Value.ErrorLog = log.New(io.Discard, ""u8, 0);
+
         foreach (var (_, test) in new testReverseProxyQueryParameterSmuggling_type[]{new(
             rawQuery: "a=1&a=2;b=3"u8,
             cleanQuery: "a=1"u8

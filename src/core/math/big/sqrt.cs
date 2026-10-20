@@ -8,9 +8,8 @@ using sync = sync_package;
 
 partial class big_package {
 
-
 partial struct threeOnceᴛ1 /*dyn*/ {
-    public partial ref sync_package.Once Once { get; }
+    /*embed*/ public sync_package.Once Once;
     internal ж<Float> v;
 }
 internal static ж<threeOnceᴛ1> ᏑthreeOnce = new StandardBox<threeOnceᴛ1>(new threeOnceᴛ1(nil));
@@ -39,13 +38,16 @@ public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
     if (debugFloat) {
         Ꮡx.validate();
     }
+
     if (z.prec == 0) {
         z.prec = x.prec;
     }
+
     if (Ꮡx.Sign() == -1) {
         // following IEEE754-2008 (section 7.2)
         throw panic(new ErrNaN("square root of negative operand"u8));
     }
+
     // handle ±0 and +∞
     if (x.form != finite) {
         z.acc = Exact;
@@ -53,18 +55,21 @@ public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
         z.neg = x.neg; // IEEE754-2008 requires √±0 = ±0
         return Ꮡz;
     }
+
     // MantExp sets the argument's precision to the receiver's, and
     // when z.prec > x.prec this will lower z.prec. Restore it after
     // the MantExp call.
     var prec = z.prec;
     nint b = Ꮡx.MantExp(Ꮡz);
     z.prec = prec;
+
     // Compute √(z·2**b) as
     //   √( z)·2**(½b)     if b is even
     //   √(2z)·2**(⌊½b⌋)   if b > 0 is odd
     //   √(½z)·2**(⌈½b⌉)   if b < 0 is odd
     var exprᴛ1 = b % 2;
     if (exprᴛ1 is 0) {
+        // nothing to do
     }
     else if (exprᴛ1 is 1) {
         z.exp++;
@@ -72,12 +77,12 @@ public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
     else if (exprᴛ1 == -1) {
         z.exp--;
     }
-
-    // nothing to do
     // 0.25 <= z < 2.0
+
     // Solving 1/x² - z = 0 avoids Quo calls and is faster, especially
     // for high precisions.
     Ꮡz.sqrtInverse(Ꮡz);
+
     // re-attach halved exponent
     return Ꮡz.SetMantExp(Ꮡz, b / 2);
 }
@@ -89,7 +94,6 @@ public static ж<Float> Sqrt(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
 // for t (using Newton's method), and then inverting.
 internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
-    ref var x = ref Ꮡx.DerefOrNull();
 
     // let
     //   f(t) = 1/t² - x
@@ -113,6 +117,7 @@ internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
         uʗ1.Value.exp--; //   = ½t(3 - xt²)
         return t.Set(uʗ1);
     }
+
     var (xf, _) = Ꮡx.Float64();
     var sqi = newFloat(z.prec);
     sqi.SetFloat64(1D / math.Sqrt(xf));
@@ -121,6 +126,7 @@ internal static void sqrtInverse(this ж<Float> Ꮡz, ж<Float> Ꮡx) {
         sqi = ng(sqi);
     }
     // sqi = 1/√x
+
     // x/√x = √x
     Ꮡz.Mul(Ꮡx, sqi);
 }

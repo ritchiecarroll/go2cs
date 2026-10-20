@@ -18,8 +18,6 @@ global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 global using ecdsaꓸPublicKey = go.crypto.@internal.fips140.ecdsa_package.ΔPublicKey;
-using ecdsa = go.crypto.@internal.fips140.ecdsa_package;
-using nistec = go.crypto.@internal.fips140.nistec_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -48,13 +46,16 @@ using static go.crypto.ecdsa_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<PublicKey, go.crypto.elliptic_package.Curve>(Promoted = true)]
 [assembly: GoImplement<go.math.rand.rand_package.ChaCha8, io_package.Reader>(Pointer = true)]
-[assembly: GoImplement<hash_package.Hash, go.crypto.@internal.fips140_package.Hash>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<PrivateKey, ж<PrivateKey>>(Indirect = true)]
-[assembly: GoImplicitConv<PublicKey, ж<PublicKey>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,8 +65,8 @@ using static go.crypto.ecdsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "ADlm4oKClIKUAAIQ0oKClAAQIrKCgpSCgpSmgpSkpKTKkqyygoKUqtIAAiIADgKClAACENKEgoKClJSElKSkpKT4ooKUgoKUygABFAAKAoSCgoKUlISUpKSkpMiigsqCgsqCgpT2goKUgoKUlKSkpKT4ooKClJKClIKClKaCgqKClNrCgpSCgpSSgpQAAxLygoKClJSElKSkpKTIooKClIKClICCpNaygoKKlKaigoKUpqKCgpSmooKClKaigoKU6MKUgpSCpoKCgoKC2MKUlIKCgg==", "298-301:1;315-320:1", "285=crypto.Hash.New", "448=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABksooKWgoKWgoKCgqyygoKCloKCgpSmzgAJAoKCloKCgoqUpqKCloaSgIKkgpSClJaCgpSygoKCgpaEgoKCqIKCgoKCgqgAAhIACQKClIKClKaCgpaCgpSEgoSClIKogoSCgoKEgoKEgpSCppjSgoKCgIKkgIKkgoI=", "", "", "82=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
+[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "AEF+AAgCgoKUgoKUAAIQ0oKClAALLAAOAoKUlKSkpKS4ooKClAAFHAANApSkpKSkuKKCgpQAECrSgoKUgoKUpoKUpKSkupKssoKClKrSAAUiAA4ClKSkpKS4ooKClIKClAAFHgAOApSkpKSkuKKCgpQAAiQADwKClIIAAhDSgoKClJSUlJSkpKSk6KKClIKClAACGAALAoKCgpSUlJSUpKSkpLiigpSCgsqCgpT2ooKUgoKUlKSkpKToooKClJKClIKClKaCgqKClNrCgpSCgpSSgpQAAxLygoKClJSUlKSkpKS4ooKClIKClICCpNaygoKKlKaigoKUpqKCgpSmooKClAAKCsKCgriClIKmgoKClJQACxLClIKUgqaCgoKCgtjClJSCgoI=", "466-469:1;483-488:1;595-597:1;597-600:2", "453=crypto.Hash.New", "655=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
+[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABksooKmgoKmgoKCgqyygoKCpoKCgpSmAAQYAA4CgoKmgoKCipSmooKmlpKAgqSClIKUpoKClLKCgoKCppSCgoK4goKCgoKCuAACEgAJAoKUgoKUpoKCpoKClJSClIKUgriClIKCgpSCgpSClIKmmNKCgoKAgqSAgqSCgg==", "", "", "91=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
 [assembly: go.GoPositionMap("crypto/ecdsa/notboring.go", "notboring.cs", "AAsWgqSC")]
 // </GoSourcePositionMaps>
 
@@ -97,10 +98,12 @@ public static partial class ecdsa_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸelliptic() => builtin.initPackage(typeof(go.crypto.elliptic_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸboring() => builtin.initPackage(typeof(go.crypto.@internal.boring_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸboringꓸbbig() => builtin.initPackage(typeof(go.crypto.@internal.boring.bbig_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140cache() => builtin.initPackage(typeof(go.crypto.@internal.fips140cache_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140hash() => builtin.initPackage(typeof(go.crypto.@internal.fips140hash_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140only() => builtin.initPackage(typeof(go.crypto.@internal.fips140only_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸecdsa() => builtin.initPackage(typeof(go.crypto.@internal.fips140.ecdsa_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrandutil() => builtin.initPackage(typeof(go.crypto.@internal.randutil_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸnistec() => builtin.initPackage(typeof(go.crypto.@internal.fips140.nistec_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrand() => builtin.initPackage(typeof(go.crypto.@internal.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsha512() => builtin.initPackage(typeof(go.crypto.sha512_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsubtle() => builtin.initPackage(typeof(go.crypto.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));

@@ -12,13 +12,17 @@ internal static partial any /*r*/ tryMake(nint length, nint capacity) {
         defer(() => {
             r = recover();
         }, ref ᒐ);
+
         slice<byte> b = default!;
+
         if (capacity < 0){
             b = new slice<byte>(length);
         } else {
             b = new slice<byte>(length, capacity);
         }
+
         _ = b;
+
         r = default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

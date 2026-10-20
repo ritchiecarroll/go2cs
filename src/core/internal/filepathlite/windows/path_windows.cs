@@ -5,8 +5,10 @@ namespace go.@internal;
 
 using bytealg = go.@internal.bytealg_package;
 using stringslite = go.@internal.stringslite_package;
+using windows = go.@internal.syscall.windows_package;
 using Δsyscall = syscall_package;
 using go.@internal;
+using go.@internal.syscall;
 
 partial class filepathlite_package {
 
@@ -56,7 +58,6 @@ internal static (@string, error) localize(@string path) {
         case (rune)':' or (rune)'\\' or 0: {
             return ("", errInvalidPath);
         }}
-
     }
     var containsSlash = false;
     for (@string p = path; p != ""u8; ) {
@@ -83,7 +84,7 @@ internal static (@string, error) localize(@string path) {
                 buf[i] = (rune)'\\';
             }
         }
-        path = ((@string)buf);
+        path = (@string)buf;
     }
     return (path, default!);
 }
@@ -102,7 +103,6 @@ internal static bool isReservedName(@string name) {
             @base = @base.slice(0, i);
             break;
         }}
-
     }
     // Trailing spaces in the last path element are ignored.
     while (len(@base) > 0 && @base[len(@base) - 1] == (rune)' ') {
@@ -115,15 +115,14 @@ internal static bool isReservedName(@string name) {
         return true;
     }
     // The path element is a reserved name with an extension.
-    // Some Windows versions consider this a reserved name,
-    // while others do not. Use FullPath to see if the name is
-    // reserved.
-    {
-        var (p, _) = Δsyscall.FullPath(name); if (len(p) >= 4 && p[..4] == @"\\.\") {
-            return true;
-        }
+    // Since Windows 11, reserved names with extensions are no
+    // longer reserved. For example, "CON.txt" is a valid file
+    // name. Use RtlIsDosDeviceName_U to see if the name is reserved.
+    var (p, err) = Δsyscall.UTF16PtrFromString(name);
+    if (err != default!) {
+        return false;
     }
-    return false;
+    return windows.RtlIsDosDeviceName_U(p) > 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -136,7 +135,6 @@ internal static bool isReservedBaseName(@string name) {
         if (exprᴛ1 == "CON"u8 || exprᴛ1 == "PRN"u8 || exprᴛ1 == "AUX"u8 || exprᴛ1 == "NUL"u8) {
             return true;
         }
-
     }
     if (len(name) >= 4) {
         var exprᴛ2 = ((sstring)new byte[]{toUpper(name[0]), toUpper(name[1]), toUpper(name[2])}.slice());
@@ -144,16 +142,15 @@ internal static bool isReservedBaseName(@string name) {
             if (len(name) == 4 && (rune)'1' <= name[3] && name[3] <= (rune)'9') {
                 return true;
             }
+            // Superscript ¹, ², and ³ are considered numbers as well.
             var exprᴛ3 = name[3..];
             if (exprᴛ3 == "\u00b2"u8 || exprᴛ3 == "\u00b3"u8 || exprᴛ3 == "\u00b9"u8) {
                 return true;
             }
-
             return false;
         }
-
     }
-    // Superscript ¹, ², and ³ are considered numbers as well.
+
     // Passing CONIN$ or CONOUT$ to CreateFile opens a console handle.
     // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#consoles
     //
@@ -216,35 +213,35 @@ private static readonly @string uncˢ = @"\\.\UNC"u8;
 internal static nint volumeNameLen(@string path) {
     switch (ᐧ) {
     case {} when len(path) >= 2 && path[1] == (rune)':': {
+        // Path starts with a drive letter.
+        //
+        // Not all Windows functions necessarily enforce the requirement that
+        // drive letters be in the set A-Z, and we don't try to here.
+        //
+        // We don't handle the case of a path starting with a non-ASCII character,
+        // in which case the "drive letter" might be multiple bytes long.
         return 2;
     }
     case {} when len(path) == 0 || !IsPathSeparator(path[0]): {
+        // Path does not have a volume component.
         return 0;
     }
-    case {} when pathHasPrefixFold(path, // Path starts with a drive letter.
- //
- // Not all Windows functions necessarily enforce the requirement that
- // drive letters be in the set A-Z, and we don't try to here.
- //
- // We don't handle the case of a path starting with a non-ASCII character,
- // in which case the "drive letter" might be multiple bytes long.
- // Path does not have a volume component.
- uncˢ): {
-        return uncLen(path, // We're going to treat the UNC host and share as part of the volume
- // prefix for historical reasons, but this isn't really principled;
- // Windows's own GetFullPathName will happily remove the first
- // component of the path in this space, converting
- // \\.\unc\a\b\..\c into \\.\unc\a\c.
- len(@"\\.\UNC\"));
+    case {} when pathHasPrefixFold(path, uncˢ): {
+        // We're going to treat the UNC host and share as part of the volume
+        // prefix for historical reasons, but this isn't really principled;
+        // Windows's own GetFullPathName will happily remove the first
+        // component of the path in this space, converting
+        // \\.\unc\a\b\..\c into \\.\unc\a\c.
+        return uncLen(path, len(@"\\.\UNC\"));
     }
     case {} when pathHasPrefixFold(path, @"\\."u8) || pathHasPrefixFold(path, @"\\?"u8) || pathHasPrefixFold(path, @"\??"u8): {
+        // Path starts with \\.\, and is a Local Device path; or
+        // path starts with \\?\ or \??\ and is a Root Local Device path.
+        //
+        // We treat the next component after the \\.\ prefix as
+        // part of the volume name, which means Clean(`\\?\c:\`)
+        // won't remove the trailing \. (See #64028.)
         if (len(path) == 3) {
-            // Path starts with \\.\, and is a Local Device path; or
-            // path starts with \\?\ or \??\ and is a Root Local Device path.
-            //
-            // We treat the next component after the \\.\ prefix as
-            // part of the volume name, which means Clean(`\\?\c:\`)
-            // won't remove the trailing \. (See #64028.)
             return 3; // exactly \\.
         }
         var (_, rest, ok) = cutPath(path[4..]);
@@ -254,10 +251,9 @@ internal static nint volumeNameLen(@string path) {
         return len(path) - len(rest) - 1;
     }
     case {} when len(path) >= 2 && IsPathSeparator(path[1]): {
-        return uncLen(path, // Path starts with \\, and is a UNC path.
- 2);
+        // Path starts with \\, and is a UNC path.
+        return uncLen(path, 2);
     }}
-
     return 0;
 }
 
@@ -308,11 +304,6 @@ internal static (@string before, @string after, bool found) cutPath(@string path
         }
     }
     return (path, "", false);
-}
-
-// isUNC reports whether path is a UNC path.
-internal static bool isUNC(@string path) {
-    return len(path) > 1 && IsPathSeparator(path[0]) && IsPathSeparator(path[1]);
 }
 
 // postClean adjusts the results of Clean to avoid turning a relative path

@@ -53,6 +53,7 @@ internal static (nint, error) Read(this ref testFile f, slice<byte> b) {
     if (!ok) {
         return (0, errors.New(unexpectedReadOperationˢ));
     }
+
     nint n = copy(b, s);
     if (len(s) > n){
         f.ops[0] = s.slice(n);
@@ -77,7 +78,8 @@ internal static (nint, error) Write(this ref testFile f, slice<byte> b) {
     if (!ok) {
         return (0, errors.New(unexpectedWriteOperationˢ));
     }
-    if (!strings.HasPrefix(s, ((@string)b))) {
+
+    if (!strings.HasPrefix(s, (@string)b)) {
         return (0, new testError(fmt.Errorf("got Write(%q), want Write(%q)"u8, b, s)));
     }
     if (len(s) > len(b)){
@@ -103,6 +105,7 @@ internal static (int64, error) Seek(this ref testFile f, int64 pos, nint whence)
     if (!ok) {
         return (0, errors.New(unexpectedSeekOperationˢ));
     }
+
     if (s != pos || whence != io.SeekCurrent) {
         return (0, new testError(fmt.Errorf("got Seek(%d, %d), want Seek(%d, %d)"u8, pos, whence, s, (nint)(io.SeekCurrent))));
     }
@@ -199,6 +202,7 @@ public static void TestSparseEntries(ж<testing.T> Ꮡt) {
         wantValid: false
     )
     }.slice();
+
     foreach (var (i, v) in vectors) {
         var gotValid = validateSparseEntries(v.@in, v.size);
         if (gotValid != v.wantValid) {
@@ -281,7 +285,7 @@ public static void TestFileInfoHeaderDir(ж<testing.T> Ꮡt) {
     }
     // Ignoring c_ISGID for golang.org/issue/4867
     {
-        var (g, e) = ((int64)((~h).Mode & ~(int64)c_ISGID), (int64)(uint32)fi.Mode().Perm()); if (g != e) {
+        var (g, e) = ((~h).Mode & ~(int64)c_ISGID, (int64)(uint32)fi.Mode().Perm()); if (g != e) {
             Ꮡt.Errorf("Mode = %#o; want %#o"u8, g, e);
         }
     }
@@ -302,7 +306,9 @@ internal static readonly @string linkˢ = "link"u8;
 
 public static void TestFileInfoHeaderSymlink(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new tar_test_package.testing_TжTB(Ꮡt));
+
     @string tmpdir = Ꮡt.TempDir();
+
     @string link = filepath.Join(tmpdir, linkˢ);
     @string target = tmpdir;
     {
@@ -314,6 +320,7 @@ public static void TestFileInfoHeaderSymlink(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var h, err) = FileInfoHeader(fi, target);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -339,12 +346,12 @@ public static void TestFileInfoHeaderSymlink(ж<testing.T> Ꮡt) {
 
 public static void TestRoundTrip(ж<testing.T> Ꮡt) {
     var data = slice<byte>("some file contents"u8);
+
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡb));
     var hdr = Ꮡ(new Header(
         Name: "file.txt"u8,
-        Uid: (1 << (int)(21)), // Too big for 8 octal digits
-
+        Uid: (1 << 21), // Too big for 8 octal digits
         Size: (int64)len(data),
         ModTime: time.Now().Round(time.ΔSecond),
         PAXRecords: new map<@string, @string>{["uid"u8] = "2097152"u8},
@@ -366,6 +373,7 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("tw.Close: %v"u8, errΔ3);
         }
     }
+
     // Read it back.
     var tr = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡb));
     var (rHdr, err) = tr.Next();
@@ -393,8 +401,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var vectors = new headerRoundTripTest[]{new(
-        h: Ꮡ(new Header( // regular file.
-
+        // regular file.
+        h: Ꮡ(new Header(
             Name: "test.txt"u8,
             Mode: 420,
             Size: 12,
@@ -403,8 +411,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: 420
     ), new(
-        h: Ꮡ(new Header( // symbolic link.
-
+        // symbolic link.
+        h: Ꮡ(new Header(
             Name: "link.txt"u8,
             Mode: 511,
             Size: 0,
@@ -413,8 +421,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: (fs.FileMode)(511 | fs.ModeSymlink)
     ), new(
-        h: Ꮡ(new Header( // character device node.
-
+        // character device node.
+        h: Ꮡ(new Header(
             Name: "dev/null"u8,
             Mode: 438,
             Size: 0,
@@ -423,8 +431,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: (fs.FileMode)((fs.FileMode)(438 | fs.ModeDevice) | fs.ModeCharDevice)
     ), new(
-        h: Ꮡ(new Header( // block device node.
-
+        // block device node.
+        h: Ꮡ(new Header(
             Name: "dev/sda"u8,
             Mode: 432,
             Size: 0,
@@ -433,8 +441,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: (fs.FileMode)(432 | fs.ModeDevice)
     ), new(
-        h: Ꮡ(new Header( // directory.
-
+        // directory.
+        h: Ꮡ(new Header(
             Name: "dir/"u8,
             Mode: 493,
             Size: 0,
@@ -443,8 +451,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: (fs.FileMode)(493 | fs.ModeDir)
     ), new(
-        h: Ꮡ(new Header( // fifo node.
-
+        // fifo node.
+        h: Ꮡ(new Header(
             Name: "dev/initctl"u8,
             Mode: 384,
             Size: 0,
@@ -453,8 +461,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: (fs.FileMode)(384 | fs.ModeNamedPipe)
     ), new(
-        h: Ꮡ(new Header( // setuid.
-
+        // setuid.
+        h: Ꮡ(new Header(
             Name: "bin/su"u8,
             Mode: (int64)(493 | (int64)c_ISUID),
             Size: 23232,
@@ -463,8 +471,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: (fs.FileMode)(493 | fs.ModeSetuid)
     ), new(
-        h: Ꮡ(new Header( // setguid.
-
+        // setguid.
+        h: Ꮡ(new Header(
             Name: "group.txt"u8,
             Mode: (int64)(488 | (int64)c_ISGID),
             Size: 0,
@@ -473,8 +481,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: (fs.FileMode)(488 | fs.ModeSetgid)
     ), new(
-        h: Ꮡ(new Header( // sticky.
-
+        // sticky.
+        h: Ꮡ(new Header(
             Name: "sticky.txt"u8,
             Mode: (int64)(384 | (int64)c_ISVTX),
             Size: 7,
@@ -483,8 +491,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: (fs.FileMode)(384 | fs.ModeSticky)
     ), new(
-        h: Ꮡ(new Header( // hard link.
-
+        // hard link.
+        h: Ꮡ(new Header(
             Name: "hard.txt"u8,
             Mode: 420,
             Size: 0,
@@ -494,8 +502,8 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         )),
         fm: 420
     ), new(
-        h: Ꮡ(new Header( // More information.
-
+        // More information.
+        h: Ꮡ(new Header(
             Name: "info.txt"u8,
             Mode: 384,
             Size: 0,
@@ -509,6 +517,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
         fm: 384
     )
     }.slice();
+
     foreach (var (i, v) in vectors) {
         var fi = v.h.FileInfo();
         var (h2, err) = FileInfoHeader(fi, ""u8);
@@ -830,6 +839,7 @@ public static void TestHeaderAllowedFormats(ж<testing.T> Ꮡt) {
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     )
     }.slice();
+
     foreach (var (i, v) in vectors) {
         var (formats, paxHdrs, err) = (~v.header).allowedFormats();
         if (formats != v.formats) {
@@ -894,6 +904,7 @@ public static void Benchmark(ж<testing.B> Ꮡb) {
         }.slice()
     )
     }.slice();
+
     var vectorsʗ1 = vectors;
     Ꮡb.Run(writerˢ, (ж<testing.B> bΔ1) => {
         foreach (var (_, vᴛ1) in vectorsʗ1) {
@@ -928,11 +939,13 @@ public static void Benchmark(ж<testing.B> Ꮡb) {
             });
         }
     });
+
     var vectorsʗ2 = vectors;
     Ꮡb.Run(readerˢ, (ж<testing.B> bΔ3) => {
         foreach (var (_, v) in vectorsʗ2) {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             ref var r = ref heap(new bytes.Reader(), out var Ꮡr);
+
             // Write the archive to a byte buffer.
             var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
             foreach (var (_, @file) in v.files) {

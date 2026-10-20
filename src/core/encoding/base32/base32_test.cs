@@ -21,9 +21,8 @@ internal partial struct testpair {
     internal @string decoded, encoded;
 }
 
-// RFC 4648 examples
-// Wikipedia examples, converted to base32
 internal static slice<testpair> pairs = new testpair[]{
+    // RFC 4648 examples
     new(""u8, ""u8),
     new("f"u8, "MY======"u8),
     new("fo"u8, "MZXQ===="u8),
@@ -31,6 +30,8 @@ internal static slice<testpair> pairs = new testpair[]{
     new("foob"u8, "MZXW6YQ="u8),
     new("fooba"u8, "MZXW6YTB"u8),
     new("foobar"u8, "MZXW6YTBOI======"u8),
+
+    // Wikipedia examples, converted to base32
     new("sure."u8, "ON2XEZJO"u8),
     new("sure"u8, "ON2XEZI="u8),
     new("sur"u8, "ON2XE==="u8),
@@ -66,7 +67,7 @@ public static void TestEncode(ж<testing.T> Ꮡt) {
         @string got = StdEncoding.EncodeToString(slice<byte>(p.decoded));
         testEqual(Ꮡt, encodeQQWantQˢ, p.decoded, got, p.encoded);
         var dst = StdEncoding.AppendEncode(slice<byte>("lead"u8), slice<byte>(p.decoded));
-        testEqual(Ꮡt, appendEncodeLeadQQWantQˢ, p.decoded, ((@string)dst), "lead" + p.encoded);
+        testEqual(Ꮡt, appendEncodeLeadQQWantQˢ, p.decoded, (@string)dst, "lead" + p.encoded);
     }
 }
 
@@ -97,11 +98,11 @@ public static void TestEncoderBuffering(ж<testing.T> Ꮡt) {
                 end = len(input);
             }
             var (n, errΔ1) = encoder.Write(input.slice(pos, end));
-            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, ((error)default!));
+            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, (error)default!);
             testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input.slice(pos, end), n, end - pos);
         }
         var err = encoder.Close();
-        testEqual(Ꮡt, closeGaveErrorVWantVˢ, err, ((error)default!));
+        testEqual(Ꮡt, closeGaveErrorVWantVˢ, err, (error)default!);
         testEqual(Ꮡt, encodingDOfQQWantQˢ, bs, bigtest.decoded, bb.String(), bigtest.encoded);
     }
 }
@@ -114,13 +115,15 @@ public static void TestDecoderBufferingWithPadding(ж<testing.T> Ꮡt) {
         foreach (var (_, s) in pairs) {
             var decoder = NewDecoder(StdEncoding, new base32_test_package.strings_ReaderжReader(strings.NewReader(s.encoded)));
             var buf = new slice<byte>(len(s.decoded) + bs);
+
             nint n = default!;
             error err = default!;
             (n, err) = decoder.Read(buf);
+
             if (err != default! && !AreEqual(err, io.EOF)) {
                 Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, s.encoded, len(s.decoded), n, err);
             }
-            testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, s.encoded, ((@string)(buf.slice(0, n))), s.decoded);
+            testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, s.encoded, (@string)(buf.slice(0, n)), s.decoded);
         }
     }
 }
@@ -131,13 +134,15 @@ public static void TestDecoderBufferingWithoutPadding(ж<testing.T> Ꮡt) {
             @string encoded = strings.TrimRight(s.encoded, "="u8);
             var decoder = NewDecoder((~StdEncoding).WithPadding(NoPadding), new base32_test_package.strings_ReaderжReader(strings.NewReader(encoded)));
             var buf = new slice<byte>(len(s.decoded) + bs);
+
             nint n = default!;
             error err = default!;
             (n, err) = decoder.Read(buf);
+
             if (err != default! && !AreEqual(err, io.EOF)) {
                 Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, encoded, len(s.decoded), n, err);
             }
-            testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, encoded, ((@string)(buf.slice(0, n))), s.decoded);
+            testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, encoded, (@string)(buf.slice(0, n)), s.decoded);
         }
     }
 }
@@ -157,21 +162,24 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
     foreach (var (_, p) in pairs) {
         var dbuf = new slice<byte>(StdEncoding.DecodedLen(len(p.encoded)));
         var (count, end, err) = StdEncoding.decode(dbuf, slice<byte>(p.encoded));
-        testEqual(Ꮡt, decodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
+        testEqual(Ꮡt, decodeQErrorVWantVˢ, p.encoded, err, (error)default!);
         testEqual(Ꮡt, decodeQLengthVWantVˢ, p.encoded, count, len(p.decoded));
         if (len(p.encoded) > 0) {
             testEqual(Ꮡt, decodeQEndVWantVˢ, p.encoded, end, (p.encoded[len(p.encoded) - 1] == (rune)'='));
         }
-        testEqual(Ꮡt, decodeQQWantQˢ, p.encoded, ((@string)(dbuf.slice(0, count))), p.decoded);
+        testEqual(Ꮡt, decodeQQWantQˢ, p.encoded, (@string)(dbuf.slice(0, count)), p.decoded);
+
         (dbuf, err) = StdEncoding.DecodeString(p.encoded);
-        testEqual(Ꮡt, decodeStringQErrorVWantVˢ, p.encoded, err, ((error)default!));
-        testEqual(Ꮡt, decodeStringQQWantQˢ, p.encoded, ((@string)dbuf), p.decoded);
+        testEqual(Ꮡt, decodeStringQErrorVWantVˢ, p.encoded, err, (error)default!);
+        testEqual(Ꮡt, decodeStringQQWantQˢ, p.encoded, (@string)dbuf, p.decoded);
+
         (var dst, err) = StdEncoding.AppendDecode(slice<byte>("lead"u8), slice<byte>(p.encoded));
-        testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
-        testEqual(Ꮡt, appendDecodeLeadQQWantQˢ, p.encoded, ((@string)dst), "lead" + p.decoded);
+        testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, (error)default!);
+        testEqual(Ꮡt, appendDecodeLeadQQWantQˢ, p.encoded, (@string)dst, "lead" + p.decoded);
+
         (var dst2, err) = StdEncoding.AppendDecode(dst.slice(0, 0, len(p.decoded)), slice<byte>(p.encoded));
-        testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
-        testEqual(Ꮡt, appendDecodeQQWantQˢ, p.encoded, ((@string)dst2), p.decoded);
+        testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, (error)default!);
+        testEqual(Ꮡt, appendDecodeQQWantQˢ, p.encoded, (@string)dst2, p.decoded);
         if (len(dst) > 0 && len(dst2) > 0 && Ꮡ(dst, 0) != Ꮡ(dst2, 0)) {
             Ꮡt.Errorf("unexpected capacity growth: got %d, want %d"u8, cap(dst2), cap(dst));
         }
@@ -193,7 +201,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(readFailedˢ, err);
         }
         testEqual(Ꮡt, readFromQLengthVWantVˢ, p.encoded, count, len(p.decoded));
-        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, ((@string)(dbuf.slice(0, count))), p.decoded);
+        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, (@string)(dbuf.slice(0, count)), p.decoded);
         if (!AreEqual(err, io.EOF)) {
             (_, err) = decoder.Read(dbuf);
         }
@@ -250,56 +258,57 @@ internal partial struct TestIssue20044_testCases /*dyn*/ {
 // supplied reader returns an error.
 public static void TestIssue20044(ж<testing.T> Ꮡt) {
     var badErr = errors.New(badReaderErrorˢ);
-    var testCases = new TestIssue20044_testCases[]{ // Check valid input data accompanied by an error is processed and the error is propagated.
-
+    var testCases = new TestIssue20044_testCases[]{
+        // Check valid input data accompanied by an error is processed and the error is propagated.
         new(r: new badReader(data: slice<byte>("MY======"u8), errs: new error[]{badErr}.slice()),
-            res: "f"u8, err: badErr), // Check a read error accompanied by input data consisting of newlines only is propagated.
-
+            res: "f"u8, err: badErr),
+        // Check a read error accompanied by input data consisting of newlines only is propagated.
         new(r: new badReader(data: slice<byte>("\n\n\n\n\n\n\n\n"u8), errs: new error[]{badErr, default!}.slice()),
-            res: ""u8, err: badErr), // Reader will be called twice.  The first time it will return 8 newline characters.  The
- // second time valid base32 encoded data and an error.  The data should be decoded
- // correctly and the error should be propagated.
-
+            res: ""u8, err: badErr),
+        // Reader will be called twice.  The first time it will return 8 newline characters.  The
+        // second time valid base32 encoded data and an error.  The data should be decoded
+        // correctly and the error should be propagated.
         new(r: new badReader(data: slice<byte>("\n\n\n\n\n\n\n\nMY======"u8), errs: new error[]{default!, badErr}.slice()),
-            res: "f"u8, err: badErr, dbuflen: 8), // Reader returns invalid input data (too short) and an error.  Verify the reader
- // error is returned.
-
+            res: "f"u8, err: badErr, dbuflen: 8),
+        // Reader returns invalid input data (too short) and an error.  Verify the reader
+        // error is returned.
         new(r: new badReader(data: slice<byte>("MY====="u8), errs: new error[]{badErr}.slice()),
-            res: ""u8, err: badErr), // Reader returns invalid input data (too short) but no error.  Verify io.ErrUnexpectedEOF
- // is returned.
-
+            res: ""u8, err: badErr),
+        // Reader returns invalid input data (too short) but no error.  Verify io.ErrUnexpectedEOF
+        // is returned.
         new(r: new badReader(data: slice<byte>("MY====="u8), errs: new error[]{default!}.slice()),
-            res: ""u8, err: io.ErrUnexpectedEOF), // Reader returns invalid input data and an error.  Verify the reader and not the
- // decoder error is returned.
-
+            res: ""u8, err: io.ErrUnexpectedEOF),
+        // Reader returns invalid input data and an error.  Verify the reader and not the
+        // decoder error is returned.
         new(r: new badReader(data: slice<byte>("Ma======"u8), errs: new error[]{badErr}.slice()),
-            res: ""u8, err: badErr), // Reader returns valid data and io.EOF.  Check data is decoded and io.EOF is propagated.
-
+            res: ""u8, err: badErr),
+        // Reader returns valid data and io.EOF.  Check data is decoded and io.EOF is propagated.
         new(r: new badReader(data: slice<byte>("MZXW6YTB"u8), errs: new error[]{io.EOF}.slice()),
-            res: "fooba"u8, err: io.EOF), // Check errors are properly reported when decoder.Read is called multiple times.
- // decoder.Read will be called 8 times, badReader.Read will be called twice, returning
- // valid data both times but an error on the second call.
-
+            res: "fooba"u8, err: io.EOF),
+        // Check errors are properly reported when decoder.Read is called multiple times.
+        // decoder.Read will be called 8 times, badReader.Read will be called twice, returning
+        // valid data both times but an error on the second call.
         new(r: new badReader(data: slice<byte>("NRSWC43VOJSS4==="u8), errs: new error[]{default!, badErr}.slice()),
-            res: "leasure."u8, err: badErr, dbuflen: 1), // Check io.EOF is properly reported when decoder.Read is called multiple times.
- // decoder.Read will be called 8 times, badReader.Read will be called twice, returning
- // valid data both times but io.EOF on the second call.
-
+            res: "leasure."u8, err: badErr, dbuflen: 1),
+        // Check io.EOF is properly reported when decoder.Read is called multiple times.
+        // decoder.Read will be called 8 times, badReader.Read will be called twice, returning
+        // valid data both times but io.EOF on the second call.
         new(r: new badReader(data: slice<byte>("NRSWC43VOJSS4==="u8), errs: new error[]{default!, io.EOF}.slice()),
-            res: "leasure."u8, err: io.EOF, dbuflen: 1), // The following two test cases check that errors are propagated correctly when more than
- // 8 bytes are read at a time.
-
+            res: "leasure."u8, err: io.EOF, dbuflen: 1),
+        // The following two test cases check that errors are propagated correctly when more than
+        // 8 bytes are read at a time.
         new(r: new badReader(data: slice<byte>("NRSWC43VOJSS4==="u8), errs: new error[]{io.EOF}.slice()),
             res: "leasure."u8, err: io.EOF, dbuflen: 11),
         new(r: new badReader(data: slice<byte>("NRSWC43VOJSS4==="u8), errs: new error[]{badErr}.slice()),
-            res: "leasure."u8, err: badErr, dbuflen: 11), // Check that errors are correctly propagated when the reader returns valid bytes in
- // groups that are not divisible by 8.  The first read will return 11 bytes and no
- // error.  The second will return 7 and an error.  The data should be decoded correctly
- // and the error should be propagated.
-
+            res: "leasure."u8, err: badErr, dbuflen: 11),
+        // Check that errors are correctly propagated when the reader returns valid bytes in
+        // groups that are not divisible by 8.  The first read will return 11 bytes and no
+        // error.  The second will return 7 and an error.  The data should be decoded correctly
+        // and the error should be propagated.
         new(r: new badReader(data: slice<byte>("NRSWC43VOJSS4==="u8), errs: new error[]{default!, badErr}.slice(), limit: 11),
             res: "leasure."u8, err: badErr)
     }.slice();
+
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestIssue20044_testCases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -322,8 +331,9 @@ public static void TestIssue20044(ж<testing.T> Ꮡt) {
                 res = appendꓸꓸꓸ(res, dbuf.slice(0, n));
             }
         }
-        testEqual(Ꮡt, decodingOfQQWantQˢ, ((@string)input), ((@string)res), tc.res);
-        testEqual(Ꮡt, decodingOfQErrVExpectedVˢ, ((@string)input), err, tc.err);
+
+        testEqual(Ꮡt, decodingOfQQWantQˢ, (@string)input, (@string)res, tc.res);
+        testEqual(Ꮡt, decodingOfQErrVExpectedVˢ, (@string)input, err, tc.err);
     }
 }
 
@@ -341,7 +351,7 @@ public static void TestDecoderError(ж<testing.T> Ꮡt) {
         br = new badReader(data: slice<byte>(input), errs: new error[]{readErr}.slice());
         var decoder = NewDecoder(StdEncoding, new base32_internal_test_package.badReaderжReader(Ꮡbr));
         var (n, err) = decoder.Read(dbuf);
-        testEqual(Ꮡt, readAfterEofNDExpectedDˢ, n, (nint)(0));
+        testEqual(Ꮡt, readAfterEofNDExpectedDˢ, n, (nint)0);
         {
             var (_, ok) = err._<CorruptInputError>(ᐧ); if (!ok) {
                 Ꮡt.Errorf("Corrupt input error expected.  Found %T"u8, err);
@@ -364,12 +374,12 @@ public static void TestReaderEOF(ж<testing.T> Ꮡt) {
         var decoder = NewDecoder(StdEncoding, new base32_internal_test_package.badReaderжReader(Ꮡbr));
         var dbuf = new slice<byte>(StdEncoding.DecodedLen(len(input)));
         var (n, err) = decoder.Read(dbuf);
-        testEqual(Ꮡt, decodingOfQErrVExpectedVˢ, input, err, ((error)default!));
+        testEqual(Ꮡt, decodingOfQErrVExpectedVˢ, input, err, (error)default!);
         (n, err) = decoder.Read(dbuf);
-        testEqual(Ꮡt, readAfterEofNDExpectedDˢ, n, (nint)(0));
+        testEqual(Ꮡt, readAfterEofNDExpectedDˢ, n, (nint)0);
         testEqual(Ꮡt, readAfterEofErrVExpectedˢ, err, io.EOF);
         (n, err) = decoder.Read(dbuf);
-        testEqual(Ꮡt, readAfterEofNDExpectedDˢ, n, (nint)(0));
+        testEqual(Ꮡt, readAfterEofNDExpectedDˢ, n, (nint)0);
         testEqual(Ꮡt, readAfterEofErrVExpectedˢ, err, io.EOF);
     }
 }
@@ -391,7 +401,7 @@ public static void TestDecoderBuffering(ж<testing.T> Ꮡt) {
         if (err != default! && !AreEqual(err, io.EOF)) {
             Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, bigtest.encoded, total, n, err);
         }
-        testEqual(Ꮡt, decodingDOfQQWantQˢ2, bs, bigtest.encoded, ((@string)(buf.slice(0, total))), bigtest.decoded);
+        testEqual(Ꮡt, decodingDOfQQWantQˢ2, bs, bigtest.encoded, (@string)(buf.slice(0, total)), bigtest.decoded);
     }
 }
 
@@ -477,6 +487,7 @@ public static void TestBig(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("io.ReadAll(NewDecoder(...)): %v"u8, err);
     }
+
     if (!bytes.Equal(raw, decoded)) {
         nint i = default!;
         for (i = 0; i < len(decoded) && i < len(raw); i++) {
@@ -496,7 +507,7 @@ internal static void testStringEncoding(ж<testing.T> Ꮡt, @string expected, sl
             continue;
         }
         {
-            @string s = ((@string)buf); if (s != expected) {
+            @string s = (@string)buf; if (s != expected) {
                 Ꮡt.Errorf("Decode(%q) = %q, want %q"u8, e, s, expected);
             }
         }
@@ -521,6 +532,7 @@ public static void TestNewLineCharacters(ж<testing.T> Ꮡt) {
         "ON2XEZI\n="u8
     }.slice();
     testStringEncoding(Ꮡt, sureˢ, examples);
+
     // Each of these should decode to the string "foobar", without errors.
     examples = new @string[]{
         "MZXW6YTBOI======"u8,
@@ -545,19 +557,22 @@ IZJAOZSWY2LUEBSXG43FEBRWS3DMOVWSAZDPNRXXEZJAMV2SAZTVM5UWC5BANZ2WY3DBBJYGC4TJMF
 NZ2CYIDTOVXHIIDJNYFGG5LMOBQSA4LVNEQG6ZTGNFRWSYJAMRSXGZLSOVXHIIDNN5WGY2LUEBQW42
 LNEBUWIIDFON2CA3DBMJXXE5LNFY==
 ====
-"""u8;
+"""u8.Raw();
     @string encodedShort = strings.ReplaceAll(encoded, "\n"u8, ""u8);
+
     var dec = NewDecoder(StdEncoding, new base32_test_package.strings_ReaderжReader(strings.NewReader(encoded)));
     var (res1, err) = io.ReadAll(dec);
     if (err != default!) {
         Ꮡt.Errorf("ReadAll failed: %v"u8, err);
     }
+
     dec = NewDecoder(StdEncoding, new base32_test_package.strings_ReaderжReader(strings.NewReader(encodedShort)));
     slice<byte> res2 = default!;
     (res2, err) = io.ReadAll(dec);
     if (err != default!) {
         Ꮡt.Errorf("ReadAll failed: %v"u8, err);
     }
+
     if (!bytes.Equal(res1, res2)) {
         Ꮡt.Error(decodedResultsNotEqualˢ);
     }
@@ -611,6 +626,7 @@ public static void TestWithCustomPadding(ж<testing.T> Ꮡt) {
         @string defaultPadding = StdEncoding.EncodeToString(slice<byte>(testcase.decoded));
         @string customPadding = (~StdEncoding).WithPadding((rune)'@').EncodeToString(slice<byte>(testcase.decoded));
         @string expected = strings.ReplaceAll(defaultPadding, "="u8, "@"u8);
+
         if (expected != customPadding) {
             Ꮡt.Errorf("Expected custom %s, got %s"u8, expected, customPadding);
         }
@@ -625,6 +641,7 @@ public static void TestWithoutPadding(ж<testing.T> Ꮡt) {
         @string defaultPadding = StdEncoding.EncodeToString(slice<byte>(testcase.decoded));
         @string customPadding = (~StdEncoding).WithPadding(NoPadding).EncodeToString(slice<byte>(testcase.decoded));
         @string expected = strings.TrimRight(defaultPadding, "="u8);
+
         if (expected != customPadding) {
             Ꮡt.Errorf("Expected custom %s, got %s"u8, expected, customPadding);
         }
@@ -640,14 +657,17 @@ public static void TestDecodeWithPadding(ж<testing.T> Ꮡt) {
         (~StdEncoding).WithPadding((rune)'-'),
         (~StdEncoding).WithPadding(NoPadding)
     }.slice();
+
     foreach (var (i, enc) in encodings) {
         foreach (var (_, pair) in pairs) {
             @string input = pair.decoded;
             @string encoded = enc.EncodeToString(slice<byte>(input));
+
             var (decoded, err) = enc.DecodeString(encoded);
             if (err != default!) {
                 Ꮡt.Errorf("DecodeString Error for encoding %d (%q): %v"u8, i, input, err);
             }
+
             if (input != ((sstring)decoded)) {
                 Ꮡt.Errorf("Unexpected result for encoding %d: got %q; want %q"u8, i, decoded, input);
             }
@@ -660,10 +680,12 @@ internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 
 public static void TestDecodeWithWrongPadding(ж<testing.T> Ꮡt) {
     @string encoded = StdEncoding.EncodeToString(slice<byte>("foobar"u8));
+
     var (_, err) = (~StdEncoding).WithPadding((rune)'-').DecodeString(encoded);
     if (err == default!) {
         Ꮡt.Error(expectedErrorˢ);
     }
+
     (_, err) = (~StdEncoding).WithPadding(NoPadding).DecodeString(encoded);
     if (err == default!) {
         Ꮡt.Error(expectedErrorˢ);
@@ -677,32 +699,35 @@ internal partial struct TestBufferedDecodingSameError_testcases /*dyn*/ {
 }
 
 public static partial void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
-    var testcases = new TestBufferedDecodingSameError_testcases[]{ // NBSWY3DPO5XXE3DE == helloworld
- // Test with "ZZ" as extra input
-
+    var testcases = new TestBufferedDecodingSameError_testcases[]{
+        // NBSWY3DPO5XXE3DE == helloworld
+        // Test with "ZZ" as extra input
         new("helloworld"u8, new slice<@string>[]{
             new @string[]{"NBSW"u8, "Y3DP"u8, "O5XX"u8, "E3DE"u8, "ZZ"u8}.slice(),
             new @string[]{"NBSWY3DPO5XXE3DE"u8, "ZZ"u8}.slice(),
             new @string[]{"NBSWY3DPO5XXE3DEZZ"u8}.slice(),
             new @string[]{"NBS"u8, "WY3"u8, "DPO"u8, "5XX"u8, "E3D"u8, "EZZ"u8}.slice(),
             new @string[]{"NBSWY3DPO5XXE3"u8, "DEZZ"u8}.slice()
-        }.slice(), io.ErrUnexpectedEOF), // Test with "ZZY" as extra input
+        }.slice(), io.ErrUnexpectedEOF),
 
+        // Test with "ZZY" as extra input
         new("helloworld"u8, new slice<@string>[]{
             new @string[]{"NBSW"u8, "Y3DP"u8, "O5XX"u8, "E3DE"u8, "ZZY"u8}.slice(),
             new @string[]{"NBSWY3DPO5XXE3DE"u8, "ZZY"u8}.slice(),
             new @string[]{"NBSWY3DPO5XXE3DEZZY"u8}.slice(),
             new @string[]{"NBS"u8, "WY3"u8, "DPO"u8, "5XX"u8, "E3D"u8, "EZZY"u8}.slice(),
             new @string[]{"NBSWY3DPO5XXE3"u8, "DEZZY"u8}.slice()
-        }.slice(), io.ErrUnexpectedEOF), // Normal case, this is valid input
+        }.slice(), io.ErrUnexpectedEOF),
 
+        // Normal case, this is valid input
         new("helloworld"u8, new slice<@string>[]{
             new @string[]{"NBSW"u8, "Y3DP"u8, "O5XX"u8, "E3DE"u8}.slice(),
             new @string[]{"NBSWY3DPO5XXE3DE"u8}.slice(),
             new @string[]{"NBS"u8, "WY3"u8, "DPO"u8, "5XX"u8, "E3D"u8, "E"u8}.slice(),
             new @string[]{"NBSWY3DPO5XXE3"u8, "DE"u8}.slice()
-        }.slice(), default!), // MZXW6YTB = fooba
+        }.slice(), default!),
 
+        // MZXW6YTB = fooba
         new("fooba"u8, new slice<@string>[]{
             new @string[]{"MZXW6YTBZZ"u8}.slice(),
             new @string[]{"MZXW6YTBZ"u8, "Z"u8}.slice(),
@@ -713,8 +738,9 @@ public static partial void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
             new @string[]{"MZXW6"u8, "YTBZZ"u8}.slice(),
             new @string[]{"MZXW6"u8, "YTB"u8, "ZZ"u8}.slice(),
             new @string[]{"MZXW6"u8, "YT"u8, "BZZ"u8}.slice()
-        }.slice(), io.ErrUnexpectedEOF), // Normal case, this is valid input
+        }.slice(), io.ErrUnexpectedEOF),
 
+        // Normal case, this is valid input
         new("fooba"u8, new slice<@string>[]{
             new @string[]{"MZXW6YTB"u8}.slice(),
             new @string[]{"MZXW6YT"u8, "B"u8}.slice(),
@@ -725,9 +751,11 @@ public static partial void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
             new @string[]{"MZXW"u8, "6Y"u8, "TB"u8}.slice()
         }.slice(), default!)
     }.slice();
+
     foreach (var (_, testcase) in testcases) {
         foreach (var (_, chunks) in testcase.chunkCombinations) {
             var (pr, pw) = io.Pipe();
+
             // Write the encoded chunks into the pipe
             var chunksʗ1 = chunks;
             var pwʗ1 = pw;
@@ -737,8 +765,10 @@ public static partial void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
                 }
                 pwʗ1.Close();
             });
+
             var decoder = NewDecoder(StdEncoding, new io.PipeReaderжReader(pr));
             var (_, err) = io.ReadAll(decoder);
+
             if (!AreEqual(err, testcase.expected)) {
                 Ꮡt.Errorf("Expected %v, got %v; case %s %+v"u8, testcase.expected, err, testcase.prefix, chunks);
             }
@@ -774,6 +804,7 @@ public static partial void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
             "I4======"u8
         }.slice(), "illegal base32 data at input byte 0"u8)
     }.slice();
+
     foreach (var (_, testcase) in testcases) {
         ref var testcaseΔ1 = ref heap<TestBufferedDecodingPadding_testcases>(out var ᏑtestcaseΔ1);
         testcaseΔ1 = testcase;
@@ -786,8 +817,10 @@ public static partial void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
             }
             _ = pwʗ1.Close();
         });
+
         var decoder = NewDecoder(StdEncoding, new io.PipeReaderжReader(pr));
         var (_, err) = io.ReadAll(decoder);
+
         if (err == default! && len(testcaseΔ1.expectedError) != 0){
             Ꮡt.Errorf("case %q: got nil error, want %v"u8, testcaseΔ1.chunks, testcaseΔ1.expectedError);
         } else 
@@ -836,7 +869,6 @@ public static void TestEncodedLen(ж<testing.T> Ꮡt) {
         tests = append(tests, new TestEncodedLen_test(rawStdEncoding, unchecked((nint)(1152921504606846976L)), 1844674407370955162L));
         tests = append(tests, new TestEncodedLen_test(rawStdEncoding, unchecked((nint)(5764607523034234879L)), math.MaxInt));
     }
-
     foreach (var (_, tt) in tests) {
         {
             nint got = tt.enc.EncodedLen(tt.n); if ((int64)got != tt.want) {
@@ -880,7 +912,6 @@ public static void TestDecodedLen(ж<testing.T> Ꮡt) {
         tests = append(tests, new TestDecodedLen_test(rawStdEncoding, unchecked((nint)(1844674407370955162L)), 1152921504606846976L));
         tests = append(tests, new TestDecodedLen_test(rawStdEncoding, math.MaxInt, 5764607523034234879L));
     }
-
     foreach (var (_, tt) in tests) {
         {
             nint got = tt.enc.DecodedLen(tt.n); if ((int64)got != tt.want) {
@@ -895,17 +926,21 @@ public static void TestWithoutPaddingClose(ж<testing.T> Ꮡt) {
         StdEncoding,
         (~StdEncoding).WithPadding(NoPadding)
     }.slice();
+
     foreach (var (_, encoding) in encodings) {
         foreach (var (_, testpair) in pairs) {
             ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
             var encoder = NewEncoder(encoding, new base32_test_package.strings_BuilderжWriter(Ꮡbuf));
             encoder.Write(slice<byte>(testpair.decoded));
             encoder.Close();
+
             @string expected = testpair.encoded;
             if ((~encoding).padChar == NoPadding) {
                 expected = strings.ReplaceAll(expected, "="u8, ""u8);
             }
+
             @string res = buf.String();
+
             if (res != expected) {
                 Ꮡt.Errorf("Expected %s got %s; padChar=%d"u8, expected, res, (~encoding).padChar);
             }
@@ -918,16 +953,19 @@ public static void TestDecodeReadAll(ж<testing.T> Ꮡt) {
         StdEncoding,
         (~StdEncoding).WithPadding(NoPadding)
     }.slice();
+
     foreach (var (_, pair) in pairs) {
         foreach (var (encIndex, encoding) in encodings) {
             @string encoded = pair.encoded;
             if ((~encoding).padChar == NoPadding) {
                 encoded = strings.ReplaceAll(encoded, "="u8, ""u8);
             }
+
             var (decReader, err) = io.ReadAll(NewDecoder(encoding, new base32_test_package.strings_ReaderжReader(strings.NewReader(encoded))));
             if (err != default!) {
                 Ꮡt.Errorf("NewDecoder error: %v"u8, err);
             }
+
             if (pair.decoded != ((sstring)decReader)) {
                 Ꮡt.Errorf("Expected %s got %s; Encoding %d"u8, pair.decoded, decReader, encIndex);
             }
@@ -940,6 +978,7 @@ public static void TestDecodeSmallBuffer(ж<testing.T> Ꮡt) {
         StdEncoding,
         (~StdEncoding).WithPadding(NoPadding)
     }.slice();
+
     for (nint bufferSize = 1; bufferSize < 200; bufferSize++) {
         foreach (var (_, pair) in pairs) {
             foreach (var (encIndex, encoding) in encodings) {
@@ -947,8 +986,11 @@ public static void TestDecodeSmallBuffer(ж<testing.T> Ꮡt) {
                 if ((~encoding).padChar == NoPadding) {
                     encoded = strings.ReplaceAll(encoded, "="u8, ""u8);
                 }
+
                 var decoder = NewDecoder(encoding, new base32_test_package.strings_ReaderжReader(strings.NewReader(encoded)));
+
                 slice<byte> allRead = default!;
+
                 while (ᐧ) {
                     var buf = new slice<byte>(bufferSize);
                     var (n, err) = decoder.Read(buf);
@@ -960,6 +1002,7 @@ public static void TestDecodeSmallBuffer(ж<testing.T> Ꮡt) {
                         Ꮡt.Error(err);
                     }
                 }
+
                 if (pair.decoded != ((sstring)allRead)) {
                     Ꮡt.Errorf("Expected %s got %s; Encoding %d; bufferSize %d"u8, pair.decoded, allRead, encIndex, bufferSize);
                 }

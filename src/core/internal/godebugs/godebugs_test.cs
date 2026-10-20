@@ -25,6 +25,7 @@ private static readonly @string docGodebugMdˢ = "../../../doc/godebug.md"u8;
 
 public static void TestAll(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     var (data, err) = os.ReadFile(docGodebugMdˢ);
     if (err != default!) {
         if (os.IsNotExist(err) && (testenv.Builder() == ""u8 || Δruntime.GOOS != "linux"u8)) {
@@ -32,14 +33,17 @@ public static void TestAll(ж<testing.T> Ꮡt) {
         }
         Ꮡt.Fatal(err);
     }
-    @string doc = ((@string)data);
+    @string doc = (@string)data;
+
     var incs = incNonDefaults(Ꮡt);
+
     @string last = ""u8;
     foreach (var (_, info) in godebugs.All) {
         if (info.Name <= last) {
             Ꮡt.Errorf("All not sorted: %s then %s"u8, last, info.Name);
         }
         last = info.Name;
+
         if (info.Package == ""u8) {
             Ꮡt.Errorf("Name=%s missing Package"u8, info.Name);
         }
@@ -76,8 +80,9 @@ internal static map<@string, bool> incNonDefaults(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("go list: %v\n%s"u8, err, @out);
     }
+
     var seen = new map<@string, bool>{};
-    foreach (var (_, dir) in strings.Split(((@string)@out), "\n"u8)) {
+    foreach (var (_, dir) in strings.Split((@string)@out, "\n"u8)) {
         if (dir == ""u8) {
             continue;
         }

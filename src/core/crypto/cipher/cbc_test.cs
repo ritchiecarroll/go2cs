@@ -27,24 +27,31 @@ public static void TestCBCBlockMode(ж<testing.T> Ꮡt) {
         foreach (var (_, keylen) in new nint[]{128, 192, 256}.slice()) {
             tΔ1.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ2) => {
                 var rng = newRandReader(tΔ2);
+
                 var key = new slice<byte>(keylen / 8);
                 rng.Read(key);
+
                 var (block, err) = aes.NewCipher(key);
                 if (err != default!) {
                     throw panic(err);
                 }
+
                 cryptotest.TestBlockMode(tΔ2, block, new Func<cipher.Block, slice<byte>, cipher.BlockMode>(cipher.NewCBCEncrypter), new Func<cipher.Block, slice<byte>, cipher.BlockMode>(cipher.NewCBCDecrypter));
             });
         }
     });
+
     Ꮡt.Run(desˢ, (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
+
         var key = new slice<byte>(8);
         rng.Read(key);
+
         var (block, err) = des.NewCipher(key);
         if (err != default!) {
             throw panic(err);
         }
+
         cryptotest.TestBlockMode(tΔ3, block, new Func<cipher.Block, slice<byte>, cipher.BlockMode>(cipher.NewCBCEncrypter), new Func<cipher.Block, slice<byte>, cipher.BlockMode>(cipher.NewCBCDecrypter));
     });
 }

@@ -17,6 +17,7 @@ internal static void sais_8_64(slice<byte> text, nint textMax, slice<int64> sa, 
     if (builtin.len(sa) != builtin.len(text) || builtin.len(tmp) < textMax) {
         throw panic("suffixarray: misuse of sais_8_64");
     }
+
     // Trivial base cases. Sorting 0 or 1 things is easy.
     if (builtin.len(text) == 0) {
         return;
@@ -25,6 +26,7 @@ internal static void sais_8_64(slice<byte> text, nint textMax, slice<int64> sa, 
         sa[0] = 0;
         return;
     }
+
     // Establish slices indexed by text character
     // holding character frequency and bucket-sort offsets.
     // If there's only enough tmp for one slice,
@@ -38,14 +40,15 @@ internal static void sais_8_64(slice<byte> text, nint textMax, slice<int64> sa, 
     } else {
         (freq, bucket) = (default!, tmp.slice(0, textMax));
     }
+
     // The SAIS algorithm.
     // Each of these calls makes one scan through sa.
     // See the individual functions for documentation
     // about each's role in the algorithm.
     nint numLMS = placeLMS_8_64(text, sa, freq, bucket);
     if (numLMS <= 1){
-    } else {
         // 0 or 1 items are already sorted. Do nothing.
+    } else {
         induceSubL_8_64(text, sa, freq, bucket);
         induceSubS_8_64(text, sa, freq, bucket);
         length_8_64(text, sa, numLMS);
@@ -68,6 +71,7 @@ internal static void sais_8_64(slice<byte> text, nint textMax, slice<int64> sa, 
     }
     induceL_8_64(text, sa, freq, bucket);
     induceS_8_64(text, sa, freq, bucket);
+
     // Mark for caller that we overwrote tmp.
     tmp[0] = -1;
 }
@@ -76,6 +80,7 @@ internal static void sais_32(slice<int32> text, nint textMax, slice<int32> sa, s
     if (builtin.len(sa) != builtin.len(text) || builtin.len(tmp) < textMax) {
         throw panic("suffixarray: misuse of sais_32");
     }
+
     // Trivial base cases. Sorting 0 or 1 things is easy.
     if (builtin.len(text) == 0) {
         return;
@@ -84,6 +89,7 @@ internal static void sais_32(slice<int32> text, nint textMax, slice<int32> sa, s
         sa[0] = 0;
         return;
     }
+
     // Establish slices indexed by text character
     // holding character frequency and bucket-sort offsets.
     // If there's only enough tmp for one slice,
@@ -97,14 +103,15 @@ internal static void sais_32(slice<int32> text, nint textMax, slice<int32> sa, s
     } else {
         (freq, bucket) = (default!, tmp.slice(0, textMax));
     }
+
     // The SAIS algorithm.
     // Each of these calls makes one scan through sa.
     // See the individual functions for documentation
     // about each's role in the algorithm.
     nint numLMS = placeLMS_32(text, sa, freq, bucket);
     if (numLMS <= 1){
-    } else {
         // 0 or 1 items are already sorted. Do nothing.
+    } else {
         induceSubL_32(text, sa, freq, bucket);
         induceSubS_32(text, sa, freq, bucket);
         length_32(text, sa, numLMS);
@@ -127,6 +134,7 @@ internal static void sais_32(slice<int32> text, nint textMax, slice<int32> sa, s
     }
     induceL_32(text, sa, freq, bucket);
     induceS_32(text, sa, freq, bucket);
+
     // Mark for caller that we overwrote tmp.
     tmp[0] = -1;
 }
@@ -135,6 +143,7 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
     if (builtin.len(sa) != builtin.len(text) || builtin.len(tmp) < textMax) {
         throw panic("suffixarray: misuse of sais_64");
     }
+
     // Trivial base cases. Sorting 0 or 1 things is easy.
     if (builtin.len(text) == 0) {
         return;
@@ -143,6 +152,7 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
         sa[0] = 0;
         return;
     }
+
     // Establish slices indexed by text character
     // holding character frequency and bucket-sort offsets.
     // If there's only enough tmp for one slice,
@@ -156,14 +166,15 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
     } else {
         (freq, bucket) = (default!, tmp.slice(0, textMax));
     }
+
     // The SAIS algorithm.
     // Each of these calls makes one scan through sa.
     // See the individual functions for documentation
     // about each's role in the algorithm.
     nint numLMS = placeLMS_64(text, sa, freq, bucket);
     if (numLMS <= 1){
-    } else {
         // 0 or 1 items are already sorted. Do nothing.
+    } else {
         induceSubL_64(text, sa, freq, bucket);
         induceSubS_64(text, sa, freq, bucket);
         length_64(text, sa, numLMS);
@@ -186,6 +197,7 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
     }
     induceL_64(text, sa, freq, bucket);
     induceS_64(text, sa, freq, bucket);
+
     // Mark for caller that we overwrote tmp.
     tmp[0] = -1;
 }
@@ -197,6 +209,7 @@ internal static slice<int64> freq_8_64(slice<byte> text, slice<int64> freq, slic
     if (freq == default!) {
         freq = bucket;
     }
+
     freq = freq[..256]; // eliminate bounds check for freq[c] below
     clear(freq);
     foreach (var (_, c) in text) {
@@ -212,6 +225,7 @@ internal static slice<int32> freq_32(slice<int32> text, slice<int32> freq, slice
     if (freq == default!) {
         freq = bucket;
     }
+
     clear(freq);
     foreach (var (_, c) in text) {
         freq[c]++;
@@ -226,6 +240,7 @@ internal static slice<int64> freq_64(slice<int64> text, slice<int64> freq, slice
     if (freq == default!) {
         freq = bucket;
     }
+
     clear(freq);
     foreach (var (_, c) in text) {
         freq[(nint)(c)]++;
@@ -293,9 +308,11 @@ internal static void bucketMax_64(slice<int64> text, slice<int64> freq, slice<in
 
 internal static nint placeLMS_8_64(slice<byte> text, slice<int64> sa, slice<int64> freq, slice<int64> bucket) {
     bucketMax_8_64(text, freq, bucket);
+
     nint numLMS = 0;
     var lastB = (int64)(-1);
     bucket = bucket[..256]; // eliminate bounds check for bucket[c1] below
+
     // The next stanza of code (until the blank line) loop backward
     // over text, stopping to execute a code body at each position i
     // such that text[i] is an L-character and text[i+1] is an S-character.
@@ -329,6 +346,7 @@ internal static nint placeLMS_8_64(slice<byte> text, slice<int64> sa, slice<int6
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Bucket the index i+1 for the start of an LMS-substring.
             var b = bucket[c1] - 1;
             bucket[c1] = b;
@@ -337,6 +355,7 @@ internal static nint placeLMS_8_64(slice<byte> text, slice<int64> sa, slice<int6
             numLMS++;
         }
     }
+
     // We recorded the LMS-substring starts but really want the ends.
     // Luckily, with two differences, the start indexes and the end indexes are the same.
     // The first difference is that the rightmost LMS-substring's end index is len(text),
@@ -356,8 +375,10 @@ internal static nint placeLMS_8_64(slice<byte> text, slice<int64> sa, slice<int6
 
 internal static nint placeLMS_32(slice<int32> text, slice<int32> sa, slice<int32> freq, slice<int32> bucket) {
     bucketMax_32(text, freq, bucket);
+
     nint numLMS = 0;
     var lastB = (int32)(-1);
+
     // The next stanza of code (until the blank line) loop backward
     // over text, stopping to execute a code body at each position i
     // such that text[i] is an L-character and text[i+1] is an S-character.
@@ -391,6 +412,7 @@ internal static nint placeLMS_32(slice<int32> text, slice<int32> sa, slice<int32
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Bucket the index i+1 for the start of an LMS-substring.
             var b = bucket[c1] - 1;
             bucket[c1] = b;
@@ -399,6 +421,7 @@ internal static nint placeLMS_32(slice<int32> text, slice<int32> sa, slice<int32
             numLMS++;
         }
     }
+
     // We recorded the LMS-substring starts but really want the ends.
     // Luckily, with two differences, the start indexes and the end indexes are the same.
     // The first difference is that the rightmost LMS-substring's end index is len(text),
@@ -418,8 +441,10 @@ internal static nint placeLMS_32(slice<int32> text, slice<int32> sa, slice<int32
 
 internal static nint placeLMS_64(slice<int64> text, slice<int64> sa, slice<int64> freq, slice<int64> bucket) {
     bucketMax_64(text, freq, bucket);
+
     nint numLMS = 0;
     var lastB = (int64)(-1);
+
     // The next stanza of code (until the blank line) loop backward
     // over text, stopping to execute a code body at each position i
     // such that text[i] is an L-character and text[i+1] is an S-character.
@@ -453,6 +478,7 @@ internal static nint placeLMS_64(slice<int64> text, slice<int64> sa, slice<int64
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Bucket the index i+1 for the start of an LMS-substring.
             var b = bucket[(nint)(c1)] - 1;
             bucket[(nint)(c1)] = b;
@@ -461,6 +487,7 @@ internal static nint placeLMS_64(slice<int64> text, slice<int64> sa, slice<int64
             numLMS++;
         }
     }
+
     // We recorded the LMS-substring starts but really want the ends.
     // Luckily, with two differences, the start indexes and the end indexes are the same.
     // The first difference is that the rightmost LMS-substring's end index is len(text),
@@ -482,6 +509,7 @@ internal static void induceSubL_8_64(slice<byte> text, slice<int64> sa, slice<in
     // Initialize positions for left side of character buckets.
     bucketMin_8_64(text, freq, bucket);
     bucket = bucket[..256]; // eliminate bounds check for bucket[cB] below
+
     // As we scan the array left-to-right, each sa[i] = j > 0 is a correctly
     // sorted suffix array entry (for text[j:]) for which we know that j-1 is type L.
     // Because j-1 is type L, inserting it into sa now will sort it correctly.
@@ -500,6 +528,7 @@ internal static void induceSubL_8_64(slice<byte> text, slice<int64> sa, slice<in
     //
     // The suffix array sa therefore serves simultaneously as input, output,
     // and a miraculously well-tailored work queue.
+
     // placeLMS_8_64 left out the implicit entry sa[-1] == len(text),
     // corresponding to the identified type-L index len(text)-1.
     // Process it before the left-to-right scan of sa proper.
@@ -509,6 +538,7 @@ internal static void induceSubL_8_64(slice<byte> text, slice<int64> sa, slice<in
     if (c0 < c1) {
         k = -k;
     }
+
     // Cache recently used bucket index:
     // we're processing suffixes in sorted order
     // and accessing buckets indexed by the
@@ -519,6 +549,7 @@ internal static void induceSubL_8_64(slice<byte> text, slice<int64> sa, slice<in
     var b = bucket[cB];
     sa[(nint)(b)] = (int64)k;
     b++;
+
     for (nint i = 0; i < builtin.len(sa); i++) {
         nint j = (nint)sa[i];
         if (j == 0) {
@@ -531,6 +562,7 @@ internal static void induceSubL_8_64(slice<byte> text, slice<int64> sa, slice<in
             continue;
         }
         sa[i] = 0;
+
         // Index j was on work queue, meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
         // If k-1 is L-type, queue k for processing later in this loop.
@@ -540,6 +572,7 @@ internal static void induceSubL_8_64(slice<byte> text, slice<int64> sa, slice<in
         if (c0Δ1 < c1Δ1) {
             kΔ1 = -kΔ1;
         }
+
         if (cB != c1Δ1) {
             bucket[cB] = b;
             cB = c1Δ1;
@@ -553,6 +586,7 @@ internal static void induceSubL_8_64(slice<byte> text, slice<int64> sa, slice<in
 internal static void induceSubL_32(slice<int32> text, slice<int32> sa, slice<int32> freq, slice<int32> bucket) {
     // Initialize positions for left side of character buckets.
     bucketMin_32(text, freq, bucket);
+
     // As we scan the array left-to-right, each sa[i] = j > 0 is a correctly
     // sorted suffix array entry (for text[j:]) for which we know that j-1 is type L.
     // Because j-1 is type L, inserting it into sa now will sort it correctly.
@@ -571,6 +605,7 @@ internal static void induceSubL_32(slice<int32> text, slice<int32> sa, slice<int
     //
     // The suffix array sa therefore serves simultaneously as input, output,
     // and a miraculously well-tailored work queue.
+
     // placeLMS_32 left out the implicit entry sa[-1] == len(text),
     // corresponding to the identified type-L index len(text)-1.
     // Process it before the left-to-right scan of sa proper.
@@ -580,6 +615,7 @@ internal static void induceSubL_32(slice<int32> text, slice<int32> sa, slice<int
     if (c0 < c1) {
         k = -k;
     }
+
     // Cache recently used bucket index:
     // we're processing suffixes in sorted order
     // and accessing buckets indexed by the
@@ -590,6 +626,7 @@ internal static void induceSubL_32(slice<int32> text, slice<int32> sa, slice<int
     var b = bucket[cB];
     sa[b] = (int32)k;
     b++;
+
     for (nint i = 0; i < builtin.len(sa); i++) {
         nint j = (nint)sa[i];
         if (j == 0) {
@@ -602,6 +639,7 @@ internal static void induceSubL_32(slice<int32> text, slice<int32> sa, slice<int
             continue;
         }
         sa[i] = 0;
+
         // Index j was on work queue, meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
         // If k-1 is L-type, queue k for processing later in this loop.
@@ -611,6 +649,7 @@ internal static void induceSubL_32(slice<int32> text, slice<int32> sa, slice<int
         if (c0Δ1 < c1Δ1) {
             kΔ1 = -kΔ1;
         }
+
         if (cB != c1Δ1) {
             bucket[cB] = b;
             cB = c1Δ1;
@@ -624,6 +663,7 @@ internal static void induceSubL_32(slice<int32> text, slice<int32> sa, slice<int
 internal static void induceSubL_64(slice<int64> text, slice<int64> sa, slice<int64> freq, slice<int64> bucket) {
     // Initialize positions for left side of character buckets.
     bucketMin_64(text, freq, bucket);
+
     // As we scan the array left-to-right, each sa[i] = j > 0 is a correctly
     // sorted suffix array entry (for text[j:]) for which we know that j-1 is type L.
     // Because j-1 is type L, inserting it into sa now will sort it correctly.
@@ -642,6 +682,7 @@ internal static void induceSubL_64(slice<int64> text, slice<int64> sa, slice<int
     //
     // The suffix array sa therefore serves simultaneously as input, output,
     // and a miraculously well-tailored work queue.
+
     // placeLMS_64 left out the implicit entry sa[-1] == len(text),
     // corresponding to the identified type-L index len(text)-1.
     // Process it before the left-to-right scan of sa proper.
@@ -651,6 +692,7 @@ internal static void induceSubL_64(slice<int64> text, slice<int64> sa, slice<int
     if (c0 < c1) {
         k = -k;
     }
+
     // Cache recently used bucket index:
     // we're processing suffixes in sorted order
     // and accessing buckets indexed by the
@@ -661,6 +703,7 @@ internal static void induceSubL_64(slice<int64> text, slice<int64> sa, slice<int
     var b = bucket[(nint)(cB)];
     sa[(nint)(b)] = (int64)k;
     b++;
+
     for (nint i = 0; i < builtin.len(sa); i++) {
         nint j = (nint)sa[i];
         if (j == 0) {
@@ -673,6 +716,7 @@ internal static void induceSubL_64(slice<int64> text, slice<int64> sa, slice<int
             continue;
         }
         sa[i] = 0;
+
         // Index j was on work queue, meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
         // If k-1 is L-type, queue k for processing later in this loop.
@@ -682,6 +726,7 @@ internal static void induceSubL_64(slice<int64> text, slice<int64> sa, slice<int
         if (c0Δ1 < c1Δ1) {
             kΔ1 = -kΔ1;
         }
+
         if (cB != c1Δ1) {
             bucket[(nint)(cB)] = b;
             cB = c1Δ1;
@@ -696,6 +741,7 @@ internal static void induceSubS_8_64(slice<byte> text, slice<int64> sa, slice<in
     // Initialize positions for right side of character buckets.
     bucketMax_8_64(text, freq, bucket);
     bucket = bucket[..256]; // eliminate bounds check for bucket[cB] below
+
     // Analogous to induceSubL_8_64 above,
     // as we scan the array right-to-left, each sa[i] = j > 0 is a correctly
     // sorted suffix array entry (for text[j:]) for which we know that j-1 is type S.
@@ -714,9 +760,11 @@ internal static void induceSubS_8_64(slice<byte> text, slice<int64> sa, slice<in
     // and we flip sa[i] < 0 to -sa[i] and compact into the top of sa,
     // so that the loop finishes with the top of sa containing exactly
     // the LMS-substring start indexes, sorted by LMS-substring.
+
     // Cache recently used bucket index:
     var cB = (byte)0;
     var b = bucket[cB];
+
     nint top = builtin.len(sa);
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         nint j = (nint)sa[i];
@@ -731,6 +779,7 @@ internal static void induceSubS_8_64(slice<byte> text, slice<int64> sa, slice<in
             sa[top] = (int64)(-j);
             continue;
         }
+
         // Index j was on work queue, meaning k := j-1 is S-type,
         // so we can now place k correctly into sa.
         // If k-1 is S-type, queue k for processing later in this loop.
@@ -741,6 +790,7 @@ internal static void induceSubS_8_64(slice<byte> text, slice<int64> sa, slice<in
         if (c0 > c1) {
             k = -k;
         }
+
         if (cB != c1) {
             bucket[cB] = b;
             cB = c1;
@@ -754,6 +804,7 @@ internal static void induceSubS_8_64(slice<byte> text, slice<int64> sa, slice<in
 internal static void induceSubS_32(slice<int32> text, slice<int32> sa, slice<int32> freq, slice<int32> bucket) {
     // Initialize positions for right side of character buckets.
     bucketMax_32(text, freq, bucket);
+
     // Analogous to induceSubL_32 above,
     // as we scan the array right-to-left, each sa[i] = j > 0 is a correctly
     // sorted suffix array entry (for text[j:]) for which we know that j-1 is type S.
@@ -772,9 +823,11 @@ internal static void induceSubS_32(slice<int32> text, slice<int32> sa, slice<int
     // and we flip sa[i] < 0 to -sa[i] and compact into the top of sa,
     // so that the loop finishes with the top of sa containing exactly
     // the LMS-substring start indexes, sorted by LMS-substring.
+
     // Cache recently used bucket index:
     var cB = (int32)0;
     var b = bucket[cB];
+
     nint top = builtin.len(sa);
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         nint j = (nint)sa[i];
@@ -789,6 +842,7 @@ internal static void induceSubS_32(slice<int32> text, slice<int32> sa, slice<int
             sa[top] = (int32)(-j);
             continue;
         }
+
         // Index j was on work queue, meaning k := j-1 is S-type,
         // so we can now place k correctly into sa.
         // If k-1 is S-type, queue k for processing later in this loop.
@@ -799,6 +853,7 @@ internal static void induceSubS_32(slice<int32> text, slice<int32> sa, slice<int
         if (c0 > c1) {
             k = -k;
         }
+
         if (cB != c1) {
             bucket[cB] = b;
             cB = c1;
@@ -812,6 +867,7 @@ internal static void induceSubS_32(slice<int32> text, slice<int32> sa, slice<int
 internal static void induceSubS_64(slice<int64> text, slice<int64> sa, slice<int64> freq, slice<int64> bucket) {
     // Initialize positions for right side of character buckets.
     bucketMax_64(text, freq, bucket);
+
     // Analogous to induceSubL_64 above,
     // as we scan the array right-to-left, each sa[i] = j > 0 is a correctly
     // sorted suffix array entry (for text[j:]) for which we know that j-1 is type S.
@@ -830,9 +886,11 @@ internal static void induceSubS_64(slice<int64> text, slice<int64> sa, slice<int
     // and we flip sa[i] < 0 to -sa[i] and compact into the top of sa,
     // so that the loop finishes with the top of sa containing exactly
     // the LMS-substring start indexes, sorted by LMS-substring.
+
     // Cache recently used bucket index:
     var cB = (int64)0;
     var b = bucket[(nint)(cB)];
+
     nint top = builtin.len(sa);
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         nint j = (nint)sa[i];
@@ -847,6 +905,7 @@ internal static void induceSubS_64(slice<int64> text, slice<int64> sa, slice<int
             sa[top] = (int64)(-j);
             continue;
         }
+
         // Index j was on work queue, meaning k := j-1 is S-type,
         // so we can now place k correctly into sa.
         // If k-1 is S-type, queue k for processing later in this loop.
@@ -857,6 +916,7 @@ internal static void induceSubS_64(slice<int64> text, slice<int64> sa, slice<int
         if (c0 > c1) {
             k = -k;
         }
+
         if (cB != c1) {
             bucket[(nint)(cB)] = b;
             cB = c1;
@@ -869,6 +929,7 @@ internal static void induceSubS_64(slice<int64> text, slice<int64> sa, slice<int
 
 internal static void length_8_64(slice<byte> text, slice<int64> sa, nint numLMS) {
     nint end = 0; // index of current LMS-substring end (0 indicates final LMS-substring)
+
     // The encoding of N text bytes into a “length” word
     // adds 1 to each byte, packs them into the bottom
     // N*8 bits of a word, and then bitwise inverts the result.
@@ -887,17 +948,19 @@ internal static void length_8_64(slice<byte> text, slice<int64> sa, nint numLMS)
     //
     // cx holds the pre-inverted encoding (the packed incremented bytes).
     var cx = (uint64)0; // byte-only
+
     // This stanza (until the blank line) is the "LMS-substring iterator",
     // described in placeLMS_8_64 above, with one line added to maintain cx.
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        cx = (uint64)((cx << (int)(8)) | (uint64)((byte)(c1 + 1))); // byte-only
+        cx = cx << 8 | (uint64)((byte)(c1 + 1)); // byte-only
         if (c0 < c1){
             isTypeS = true;
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Index j = i+1 is the start of an LMS-substring.
             // Compute length or encoded text to store in sa[j/2].
             nint j = i + 1;
@@ -906,12 +969,11 @@ internal static void length_8_64(slice<byte> text, slice<int64> sa, nint numLMS)
                 code = 0;
             } else {
                 code = (int64)(end - j);
-                if (code <= 64 / 8 && ~cx >= (uint64)builtin.len(text)) {
-                    // byte-only
+                if (code <= 64 / 8 && ~cx >= (uint64)builtin.len(text)) { // byte-only
                     code = (int64)(~cx); // byte-only
                 } // byte-only
             }
-            sa[(j >> (int)(1))] = code;
+            sa[(j >> 1)] = code;
             end = j + 1;
             cx = (uint64)((byte)(c1 + 1)); // byte-only
         }
@@ -920,6 +982,7 @@ internal static void length_8_64(slice<byte> text, slice<int64> sa, nint numLMS)
 
 internal static void length_32(slice<int32> text, slice<int32> sa, nint numLMS) {
     nint end = 0; // index of current LMS-substring end (0 indicates final LMS-substring)
+
     // The encoding of N text int32s into a “length” word
     // adds 1 to each int32, packs them into the bottom
     // N*8 bits of a word, and then bitwise inverts the result.
@@ -937,6 +1000,7 @@ internal static void length_32(slice<int32> text, slice<int32> sa, nint numLMS) 
     // making it clearly not a valid length (it would be a negative one).
     //
     // cx holds the pre-inverted encoding (the packed incremented int32s).
+
     // This stanza (until the blank line) is the "LMS-substring iterator",
     // described in placeLMS_32 above, with one line added to maintain cx.
     var (c0, c1, isTypeS) = ((int32)0, (int32)0, false);
@@ -947,6 +1011,7 @@ internal static void length_32(slice<int32> text, slice<int32> sa, nint numLMS) 
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Index j = i+1 is the start of an LMS-substring.
             // Compute length or encoded text to store in sa[j/2].
             nint j = i + 1;
@@ -956,7 +1021,7 @@ internal static void length_32(slice<int32> text, slice<int32> sa, nint numLMS) 
             } else {
                 code = (int32)(end - j);
             }
-            sa[(j >> (int)(1))] = code;
+            sa[(j >> 1)] = code;
             end = j + 1;
         }
     }
@@ -964,6 +1029,7 @@ internal static void length_32(slice<int32> text, slice<int32> sa, nint numLMS) 
 
 internal static void length_64(slice<int64> text, slice<int64> sa, nint numLMS) {
     nint end = 0; // index of current LMS-substring end (0 indicates final LMS-substring)
+
     // The encoding of N text int64s into a “length” word
     // adds 1 to each int64, packs them into the bottom
     // N*8 bits of a word, and then bitwise inverts the result.
@@ -981,6 +1047,7 @@ internal static void length_64(slice<int64> text, slice<int64> sa, nint numLMS) 
     // making it clearly not a valid length (it would be a negative one).
     //
     // cx holds the pre-inverted encoding (the packed incremented int64s).
+
     // This stanza (until the blank line) is the "LMS-substring iterator",
     // described in placeLMS_64 above, with one line added to maintain cx.
     var (c0, c1, isTypeS) = ((int64)0, (int64)0, false);
@@ -991,6 +1058,7 @@ internal static void length_64(slice<int64> text, slice<int64> sa, nint numLMS) 
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Index j = i+1 is the start of an LMS-substring.
             // Compute length or encoded text to store in sa[j/2].
             nint j = i + 1;
@@ -1000,7 +1068,7 @@ internal static void length_64(slice<int64> text, slice<int64> sa, nint numLMS) 
             } else {
                 code = (int64)(end - j);
             }
-            sa[(j >> (int)(1))] = code;
+            sa[(j >> 1)] = code;
             end = j + 1;
         }
     }
@@ -1127,6 +1195,7 @@ internal static void map_64(slice<int64> sa, nint numLMS) {
 
 internal static void recurse_64(slice<int64> sa, slice<int64> oldTmp, nint numLMS, nint maxID) {
     var (dst, saTmp, text) = (sa.slice(0, numLMS), sa.slice(numLMS, builtin.len(sa) - numLMS), sa.slice(builtin.len(sa) - numLMS));
+
     // Set up temporary space for recursive call.
     // We must pass sais_64 a tmp buffer with at least maxID entries.
     //
@@ -1178,6 +1247,7 @@ internal static void recurse_64(slice<int64> sa, slice<int64> oldTmp, nint numLM
         }
         tmp = new slice<int64>(n);
     }
+
     // sais_64 requires that the caller arrange to clear dst,
     // because in general the caller may know dst is
     // freshly-allocated and already cleared. But this one is not.
@@ -1188,6 +1258,7 @@ internal static void recurse_64(slice<int64> sa, slice<int64> oldTmp, nint numLM
 internal static void unmap_8_64(slice<byte> text, slice<int64> sa, nint numLMS) {
     var unmap = sa.slice(builtin.len(sa) - numLMS);
     nint j = builtin.len(unmap);
+
     // "LMS-substring iterator" (see placeLMS_8_64 above).
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
@@ -1197,11 +1268,13 @@ internal static void unmap_8_64(slice<byte> text, slice<int64> sa, nint numLMS) 
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Populate inverse map.
             j--;
             unmap[j] = (int64)(i + 1);
         }
     }
+
     // Apply inverse map to subproblem suffix array.
     sa = sa.slice(0, numLMS);
     for (nint i = 0; i < builtin.len(sa); i++) {
@@ -1212,6 +1285,7 @@ internal static void unmap_8_64(slice<byte> text, slice<int64> sa, nint numLMS) 
 internal static void unmap_32(slice<int32> text, slice<int32> sa, nint numLMS) {
     var unmap = sa.slice(builtin.len(sa) - numLMS);
     nint j = builtin.len(unmap);
+
     // "LMS-substring iterator" (see placeLMS_32 above).
     var (c0, c1, isTypeS) = ((int32)0, (int32)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
@@ -1221,11 +1295,13 @@ internal static void unmap_32(slice<int32> text, slice<int32> sa, nint numLMS) {
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Populate inverse map.
             j--;
             unmap[j] = (int32)(i + 1);
         }
     }
+
     // Apply inverse map to subproblem suffix array.
     sa = sa.slice(0, numLMS);
     for (nint i = 0; i < builtin.len(sa); i++) {
@@ -1236,6 +1312,7 @@ internal static void unmap_32(slice<int32> text, slice<int32> sa, nint numLMS) {
 internal static void unmap_64(slice<int64> text, slice<int64> sa, nint numLMS) {
     var unmap = sa.slice(builtin.len(sa) - numLMS);
     nint j = builtin.len(unmap);
+
     // "LMS-substring iterator" (see placeLMS_64 above).
     var (c0, c1, isTypeS) = ((int64)0, (int64)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
@@ -1245,11 +1322,13 @@ internal static void unmap_64(slice<int64> text, slice<int64> sa, nint numLMS) {
         } else 
         if (c0 > c1 && isTypeS) {
             isTypeS = false;
+
             // Populate inverse map.
             j--;
             unmap[j] = (int64)(i + 1);
         }
     }
+
     // Apply inverse map to subproblem suffix array.
     sa = sa.slice(0, numLMS);
     for (nint i = 0; i < builtin.len(sa); i++) {
@@ -1260,6 +1339,7 @@ internal static void unmap_64(slice<int64> text, slice<int64> sa, nint numLMS) {
 internal static void expand_8_64(slice<byte> text, slice<int64> freq, slice<int64> bucket, slice<int64> sa, nint numLMS) {
     bucketMax_8_64(text, freq, bucket);
     bucket = bucket[..256]; // eliminate bound check for bucket[c] below
+
     // Loop backward through sa, always tracking
     // the next index to populate from sa[:numLMS].
     // When we get to one, populate it.
@@ -1269,12 +1349,14 @@ internal static void expand_8_64(slice<byte> text, slice<int64> freq, slice<int6
     var c = text[(nint)(saX)];
     var b = bucket[c] - 1;
     bucket[c] = b;
+
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         if (i != (nint)b) {
             sa[i] = 0;
             continue;
         }
         sa[i] = saX;
+
         // Load next entry to put down (if any).
         if (x > 0) {
             x--;
@@ -1288,6 +1370,7 @@ internal static void expand_8_64(slice<byte> text, slice<int64> freq, slice<int6
 
 internal static void expand_32(slice<int32> text, slice<int32> freq, slice<int32> bucket, slice<int32> sa, nint numLMS) {
     bucketMax_32(text, freq, bucket);
+
     // Loop backward through sa, always tracking
     // the next index to populate from sa[:numLMS].
     // When we get to one, populate it.
@@ -1297,12 +1380,14 @@ internal static void expand_32(slice<int32> text, slice<int32> freq, slice<int32
     var c = text[saX];
     var b = bucket[c] - 1;
     bucket[c] = b;
+
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         if (i != (nint)b) {
             sa[i] = 0;
             continue;
         }
         sa[i] = saX;
+
         // Load next entry to put down (if any).
         if (x > 0) {
             x--;
@@ -1316,6 +1401,7 @@ internal static void expand_32(slice<int32> text, slice<int32> freq, slice<int32
 
 internal static void expand_64(slice<int64> text, slice<int64> freq, slice<int64> bucket, slice<int64> sa, nint numLMS) {
     bucketMax_64(text, freq, bucket);
+
     // Loop backward through sa, always tracking
     // the next index to populate from sa[:numLMS].
     // When we get to one, populate it.
@@ -1325,12 +1411,14 @@ internal static void expand_64(slice<int64> text, slice<int64> freq, slice<int64
     var c = text[(nint)(saX)];
     var b = bucket[(nint)(c)] - 1;
     bucket[(nint)(c)] = b;
+
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         if (i != (nint)b) {
             sa[i] = 0;
             continue;
         }
         sa[i] = saX;
+
         // Load next entry to put down (if any).
         if (x > 0) {
             x--;
@@ -1346,11 +1434,13 @@ internal static void induceL_8_64(slice<byte> text, slice<int64> sa, slice<int64
     // Initialize positions for left side of character buckets.
     bucketMin_8_64(text, freq, bucket);
     bucket = bucket[..256]; // eliminate bounds check for bucket[cB] below
+
     // This scan is similar to the one in induceSubL_8_64 above.
     // That one arranges to clear all but the leftmost L-type indexes.
     // This scan leaves all the L-type indexes and the original S-type
     // indexes, but it negates the positive leftmost L-type indexes
     // (the ones that induceS_8_64 needs to process).
+
     // expand_8_64 left out the implicit entry sa[-1] == len(text),
     // corresponding to the identified type-L index len(text)-1.
     // Process it before the left-to-right scan of sa proper.
@@ -1360,17 +1450,20 @@ internal static void induceL_8_64(slice<byte> text, slice<int64> sa, slice<int64
     if (c0 < c1) {
         k = -k;
     }
+
     // Cache recently used bucket index.
     var cB = c1;
     var b = bucket[cB];
     sa[(nint)(b)] = (int64)k;
     b++;
+
     for (nint i = 0; i < builtin.len(sa); i++) {
         nint j = (nint)sa[i];
         if (j <= 0) {
             // Skip empty or negated entry (including negated zero).
             continue;
         }
+
         // Index j was on work queue, meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
         // If k-1 is L-type, queue k for processing later in this loop.
@@ -1389,6 +1482,7 @@ internal static void induceL_8_64(slice<byte> text, slice<int64> sa, slice<int64
                 }
             }
         }
+
         if (cB != c1Δ1) {
             bucket[cB] = b;
             cB = c1Δ1;
@@ -1402,11 +1496,13 @@ internal static void induceL_8_64(slice<byte> text, slice<int64> sa, slice<int64
 internal static void induceL_32(slice<int32> text, slice<int32> sa, slice<int32> freq, slice<int32> bucket) {
     // Initialize positions for left side of character buckets.
     bucketMin_32(text, freq, bucket);
+
     // This scan is similar to the one in induceSubL_32 above.
     // That one arranges to clear all but the leftmost L-type indexes.
     // This scan leaves all the L-type indexes and the original S-type
     // indexes, but it negates the positive leftmost L-type indexes
     // (the ones that induceS_32 needs to process).
+
     // expand_32 left out the implicit entry sa[-1] == len(text),
     // corresponding to the identified type-L index len(text)-1.
     // Process it before the left-to-right scan of sa proper.
@@ -1416,17 +1512,20 @@ internal static void induceL_32(slice<int32> text, slice<int32> sa, slice<int32>
     if (c0 < c1) {
         k = -k;
     }
+
     // Cache recently used bucket index.
     var cB = c1;
     var b = bucket[cB];
     sa[b] = (int32)k;
     b++;
+
     for (nint i = 0; i < builtin.len(sa); i++) {
         nint j = (nint)sa[i];
         if (j <= 0) {
             // Skip empty or negated entry (including negated zero).
             continue;
         }
+
         // Index j was on work queue, meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
         // If k-1 is L-type, queue k for processing later in this loop.
@@ -1445,6 +1544,7 @@ internal static void induceL_32(slice<int32> text, slice<int32> sa, slice<int32>
                 }
             }
         }
+
         if (cB != c1Δ1) {
             bucket[cB] = b;
             cB = c1Δ1;
@@ -1458,11 +1558,13 @@ internal static void induceL_32(slice<int32> text, slice<int32> sa, slice<int32>
 internal static void induceL_64(slice<int64> text, slice<int64> sa, slice<int64> freq, slice<int64> bucket) {
     // Initialize positions for left side of character buckets.
     bucketMin_64(text, freq, bucket);
+
     // This scan is similar to the one in induceSubL_64 above.
     // That one arranges to clear all but the leftmost L-type indexes.
     // This scan leaves all the L-type indexes and the original S-type
     // indexes, but it negates the positive leftmost L-type indexes
     // (the ones that induceS_64 needs to process).
+
     // expand_64 left out the implicit entry sa[-1] == len(text),
     // corresponding to the identified type-L index len(text)-1.
     // Process it before the left-to-right scan of sa proper.
@@ -1472,17 +1574,20 @@ internal static void induceL_64(slice<int64> text, slice<int64> sa, slice<int64>
     if (c0 < c1) {
         k = -k;
     }
+
     // Cache recently used bucket index.
     var cB = c1;
     var b = bucket[(nint)(cB)];
     sa[(nint)(b)] = (int64)k;
     b++;
+
     for (nint i = 0; i < builtin.len(sa); i++) {
         nint j = (nint)sa[i];
         if (j <= 0) {
             // Skip empty or negated entry (including negated zero).
             continue;
         }
+
         // Index j was on work queue, meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
         // If k-1 is L-type, queue k for processing later in this loop.
@@ -1501,6 +1606,7 @@ internal static void induceL_64(slice<int64> text, slice<int64> sa, slice<int64>
                 }
             }
         }
+
         if (cB != c1Δ1) {
             bucket[(nint)(cB)] = b;
             cB = c1Δ1;
@@ -1515,8 +1621,10 @@ internal static void induceS_8_64(slice<byte> text, slice<int64> sa, slice<int64
     // Initialize positions for right side of character buckets.
     bucketMax_8_64(text, freq, bucket);
     bucket = bucket[..256]; // eliminate bounds check for bucket[cB] below
+
     var cB = (byte)0;
     var b = bucket[cB];
+
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         nint j = (nint)sa[i];
         if (j >= 0) {
@@ -1524,9 +1632,11 @@ internal static void induceS_8_64(slice<byte> text, slice<int64> sa, slice<int64
             // (This loop can't see an empty entry; 0 means the real zero index.)
             continue;
         }
+
         // Negative j is a work queue entry; rewrite to positive j for final suffix array.
         j = -j;
         sa[i] = (int64)j;
+
         // Index j was on work queue (encoded as -j but now decoded),
         // meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
@@ -1543,6 +1653,7 @@ internal static void induceS_8_64(slice<byte> text, slice<int64> sa, slice<int64
                 }
             }
         }
+
         if (cB != c1) {
             bucket[cB] = b;
             cB = c1;
@@ -1556,8 +1667,10 @@ internal static void induceS_8_64(slice<byte> text, slice<int64> sa, slice<int64
 internal static void induceS_32(slice<int32> text, slice<int32> sa, slice<int32> freq, slice<int32> bucket) {
     // Initialize positions for right side of character buckets.
     bucketMax_32(text, freq, bucket);
+
     var cB = (int32)0;
     var b = bucket[cB];
+
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         nint j = (nint)sa[i];
         if (j >= 0) {
@@ -1565,9 +1678,11 @@ internal static void induceS_32(slice<int32> text, slice<int32> sa, slice<int32>
             // (This loop can't see an empty entry; 0 means the real zero index.)
             continue;
         }
+
         // Negative j is a work queue entry; rewrite to positive j for final suffix array.
         j = -j;
         sa[i] = (int32)j;
+
         // Index j was on work queue (encoded as -j but now decoded),
         // meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
@@ -1584,6 +1699,7 @@ internal static void induceS_32(slice<int32> text, slice<int32> sa, slice<int32>
                 }
             }
         }
+
         if (cB != c1) {
             bucket[cB] = b;
             cB = c1;
@@ -1597,8 +1713,10 @@ internal static void induceS_32(slice<int32> text, slice<int32> sa, slice<int32>
 internal static void induceS_64(slice<int64> text, slice<int64> sa, slice<int64> freq, slice<int64> bucket) {
     // Initialize positions for right side of character buckets.
     bucketMax_64(text, freq, bucket);
+
     var cB = (int64)0;
     var b = bucket[(nint)(cB)];
+
     for (nint i = builtin.len(sa) - 1; i >= 0; i--) {
         nint j = (nint)sa[i];
         if (j >= 0) {
@@ -1606,9 +1724,11 @@ internal static void induceS_64(slice<int64> text, slice<int64> sa, slice<int64>
             // (This loop can't see an empty entry; 0 means the real zero index.)
             continue;
         }
+
         // Negative j is a work queue entry; rewrite to positive j for final suffix array.
         j = -j;
         sa[i] = (int64)j;
+
         // Index j was on work queue (encoded as -j but now decoded),
         // meaning k := j-1 is L-type,
         // so we can now place k correctly into sa.
@@ -1625,6 +1745,7 @@ internal static void induceS_64(slice<int64> text, slice<int64> sa, slice<int64>
                 }
             }
         }
+
         if (cB != c1) {
             bucket[(nint)(cB)] = b;
             cB = c1;

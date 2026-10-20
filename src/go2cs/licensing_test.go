@@ -21,6 +21,7 @@ import (
 )
 
 func TestLicensingEmissionCompatibility(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	sourceDir := filepath.Join(root, "app")
 	out := filepath.Join(root, "out")
@@ -492,6 +493,7 @@ func TestLicensingPackageBoundaries(t *testing.T) {
 }
 
 func TestLicensingLibraryConversion(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	source := filepath.Join(root, "input")
 	output := filepath.Join(root, "output")

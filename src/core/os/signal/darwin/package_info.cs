@@ -46,11 +46,18 @@ using static go.os.signal_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
 [assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
+[assembly: GoImplement<signalError, error>]
 [assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,7 +67,7 @@ using static go.os.signal_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/signal/signal.go", "signal.cs", "AChKgqaCpoKs0oKEgoSCgoKCgrqWgoKmgsas4qiSggAGOAAUAoKWgoSCgoKUgpaSgpSCgoKogoK4qIKCpoLGqtKssoSCgoKUhIKCgoIADSCEhISEgoKCqKrUooKCloKEgpQAChCCggALDAACIgASAoLKgoKCkrT6AAkWgoLugqaCgoKCgoKCgqaUgg==", "56-70:1;139-158:1;150-154:1.1;288-294:1")]
+[assembly: go.GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAkWgoLuoqaCgoKCgoKCgqaUgsqCpoKClA==", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
 [assembly: go.GoPositionMap("os/signal/signal_unix.go", "signal_unix.cs", "AAsewrKysrSCgriCzoKUgoKUtLiCpoKmgqaC")]
 // </GoSourcePositionMaps>
 
@@ -80,6 +87,7 @@ public static partial class signal_package
     [GoValueClone("mask")] internal partial struct handler {}
     [GoValueClone("@ref")] internal partial struct handlersᴛ1 {}
     internal partial struct signalCtx {}
+    internal partial struct signalError {}
     internal partial struct stopping {}
     // </TypeAccessibility>
 

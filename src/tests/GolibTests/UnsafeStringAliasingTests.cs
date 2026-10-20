@@ -19,7 +19,7 @@ public unsafe class UnsafeStringAliasingTests
     // pins &b[0] and then requires the string's data pointer to name that same pinned object).
     //
     // golib's unsafe.String COPIED, and it was the ONLY member of the family that did:
-    // unsafe.Slice aliases through TryGetElementWindow, unsafe.SliceData and unsafe.StringData both
+    // unsafe.Slice aliases through ElementWindow.TryGet, unsafe.SliceData and unsafe.StringData both
     // hand back an ElemRefBox over the original backing. SliceData's own comment already claimed
     // "the round trip through unsafe.String/unsafe.Slice now ALIASES instead of snapshotting",
     // which was true of Slice and false of String.

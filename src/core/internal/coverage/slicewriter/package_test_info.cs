@@ -7,7 +7,6 @@
 global using static global::go.@internal.coverage.slicewriter_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -20,8 +19,13 @@ using static global::go.@internal.coverage.slicewriter_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.@internal.coverage.slicewriter_package.WriteSeeker, ж<global::go.@internal.coverage.slicewriter_package.WriteSeeker>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -31,7 +35,7 @@ using static global::go.@internal.coverage.slicewriter_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/slicewriter/slw_test.go", "slw_test.cs", "AAsYhIKCgpSCgrqCgoKClIKokoKCgoKUgpSWgoKCgpSWgpaUlJaClIKCloKCgoKCgoKWgoKCloKCgpaCgpSCgpaCgoKUgoKWgoKUgoKCqIKC", "14-24:1;26-35:2;37-48:3;50-57:4")]
+[assembly: go.GoPositionMap("internal/coverage/slicewriter/slw_test.go", "slw_test.cs", "AAsYhIKCgpSCgsqCgoKClIK4koKCgoKUgpSmgoKCgpSmgqaUlKaClIKCpoKCgoKCgoKmgoKCpoKCgqaCgpSCgqaCgoKUgoKmgoKUgoKCuIKC", "14-24:1;26-35:2;37-48:3;50-57:4")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

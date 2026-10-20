@@ -34,6 +34,7 @@ internal static void testStatAndLstat(ж<Δtesting.T> Ꮡt, @string path, testSt
             return;
         }
         @params.statCheck(Ꮡt, path, sfi);
+
         // test os.Lstat
         (var lsfi, err) = Δos.Lstat(path);
         if (err != default!) {
@@ -41,6 +42,7 @@ internal static void testStatAndLstat(ж<Δtesting.T> Ꮡt, @string path, testSt
             return;
         }
         @params.lstatCheck(Ꮡt, path, lsfi);
+
         if (@params.isLink){
             if (Δos.SameFile(sfi, lsfi)) {
                 Ꮡt.Errorf("stat and lstat of %q should not be the same"u8, path);
@@ -50,6 +52,7 @@ internal static void testStatAndLstat(ж<Δtesting.T> Ꮡt, @string path, testSt
                 Ꮡt.Errorf("stat and lstat of %q should be the same"u8, path);
             }
         }
+
         // test os.File.Stat
         (var f, err) = Δos.Open(path);
         if (err != default!) {
@@ -58,15 +61,18 @@ internal static void testStatAndLstat(ж<Δtesting.T> Ꮡt, @string path, testSt
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var sfi2, err) = f.Stat();
         if (err != default!) {
             Ꮡt.Error(err);
             return;
         }
         @params.statCheck(Ꮡt, path, sfi2);
+
         if (!Δos.SameFile(sfi, sfi2)) {
             Ꮡt.Errorf("stat of open %q file and stat of %q should be the same"u8, path, path);
         }
+
         if (@params.isLink){
             if (Δos.SameFile(sfi2, lsfi)) {
                 Ꮡt.Errorf("stat of opened %q file and lstat of %q should not be the same"u8, path, path);
@@ -76,12 +82,14 @@ internal static void testStatAndLstat(ж<Δtesting.T> Ꮡt, @string path, testSt
                 Ꮡt.Errorf("stat of opened %q file and lstat of %q should be the same"u8, path, path);
             }
         }
+
         var (parentdir, @base) = filepath.Split(path);
         if (parentdir == ""u8 || @base == ""u8) {
             // skip os.Readdir test of files without directory or file name component,
             // such as directories with slash at the end or Windows device names.
             return;
         }
+
         (var parent, err) = Δos.Open(parentdir);
         if (err != default!) {
             Ꮡt.Error(err);
@@ -89,6 +97,7 @@ internal static void testStatAndLstat(ж<Δtesting.T> Ꮡt, @string path, testSt
         }
         var parentʗ1 = parent;
         defer(() => parentʗ1.Close(), ref ᒐ);
+
         (var fis, err) = parent.Readdir(-1);
         if (err != default!) {
             Ꮡt.Error(err);
@@ -106,6 +115,7 @@ internal static void testStatAndLstat(ж<Δtesting.T> Ꮡt, @string path, testSt
             return;
         }
         @params.lstatCheck(Ꮡt, path, lsfi2);
+
         if (!Δos.SameFile(lsfi, lsfi2)) {
             Ꮡt.Errorf("lstat of %q file in %q directory and %q should be the same"u8, lsfi2.Name(), parentdir, path);
         }
@@ -184,6 +194,7 @@ internal static void testSymlinkSameFile(ж<Δtesting.T> Ꮡt, @string path, @st
         Ꮡt.Error(err);
         return;
     }
+
     (var linkfi, err) = Δos.Stat(link);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -192,6 +203,7 @@ internal static void testSymlinkSameFile(ж<Δtesting.T> Ꮡt, @string path, @st
     if (!Δos.SameFile(pathfi, linkfi)) {
         Ꮡt.Errorf("os.Stat(%q) and os.Stat(%q) are not the same file"u8, path, link);
     }
+
     (linkfi, err) = Δos.Lstat(link);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -212,16 +224,19 @@ internal static void testSymlinkSameFileOpen(ж<Δtesting.T> Ꮡt, @string link)
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var fi, err) = f.Stat();
         if (err != default!) {
             Ꮡt.Error(err);
             return;
         }
+
         (var fi2, err) = Δos.Stat(link);
         if (err != default!) {
             Ꮡt.Error(err);
             return;
         }
+
         if (!Δos.SameFile(fi, fi2)) {
             Ꮡt.Errorf("os.Open(%q).Stat() and os.Stat(%q) are not the same file"u8, link, link);
         }
@@ -236,6 +251,7 @@ internal static readonly @string linklinkˢ = "linklink"u8;
 public static void TestDirAndSymlinkStats(ж<Δtesting.T> Ꮡt) {
     testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Parallel();
+
     @string tmpdir = Ꮡt.TempDir();
     @string dir = filepath.Join(tmpdir, dirˢ);
     {
@@ -244,6 +260,7 @@ public static void TestDirAndSymlinkStats(ж<Δtesting.T> Ꮡt) {
         }
     }
     testDirStats(Ꮡt, dir);
+
     @string dirlink = filepath.Join(tmpdir, linkˢ);
     {
         var err = Δos.Symlink(dir, dirlink); if (err != default!) {
@@ -253,6 +270,7 @@ public static void TestDirAndSymlinkStats(ж<Δtesting.T> Ꮡt) {
     testSymlinkStats(Ꮡt, dirlink, true);
     testSymlinkSameFile(Ꮡt, dir, dirlink);
     testSymlinkSameFileOpen(Ꮡt, dirlink);
+
     @string linklink = filepath.Join(tmpdir, linklinkˢ);
     {
         var err = Δos.Symlink(dirlink, linklink); if (err != default!) {
@@ -267,6 +285,7 @@ public static void TestDirAndSymlinkStats(ж<Δtesting.T> Ꮡt) {
 public static void TestFileAndSymlinkStats(ж<Δtesting.T> Ꮡt) {
     testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Parallel();
+
     @string tmpdir = Ꮡt.TempDir();
     @string @file = filepath.Join(tmpdir, fileˢ2);
     {
@@ -275,6 +294,7 @@ public static void TestFileAndSymlinkStats(ж<Δtesting.T> Ꮡt) {
         }
     }
     testFileStats(Ꮡt, @file);
+
     @string filelink = filepath.Join(tmpdir, linkˢ);
     {
         var err = Δos.Symlink(@file, filelink); if (err != default!) {
@@ -284,6 +304,7 @@ public static void TestFileAndSymlinkStats(ж<Δtesting.T> Ꮡt) {
     testSymlinkStats(Ꮡt, filelink, false);
     testSymlinkSameFile(Ꮡt, @file, filelink);
     testSymlinkSameFileOpen(Ꮡt, filelink);
+
     @string linklink = filepath.Join(tmpdir, linklinkˢ);
     {
         var err = Δos.Symlink(filelink, linklink); if (err != default!) {
@@ -299,6 +320,7 @@ public static void TestFileAndSymlinkStats(ж<Δtesting.T> Ꮡt) {
 public static void TestSymlinkWithTrailingSlash(ж<Δtesting.T> Ꮡt) {
     testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Parallel();
+
     @string tmpdir = Ꮡt.TempDir();
     @string dir = filepath.Join(tmpdir, dirˢ);
     {
@@ -313,7 +335,9 @@ public static void TestSymlinkWithTrailingSlash(ж<Δtesting.T> Ꮡt) {
         }
     }
     @string dirlinkWithSlash = dirlink + ((@string)(rune)Δos.PathSeparator);
+
     testDirStats(Ꮡt, dirlinkWithSlash);
+
     var (fi1, err) = Δos.Stat(dir);
     if (err != default!) {
         Ꮡt.Error(err);

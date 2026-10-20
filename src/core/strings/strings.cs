@@ -100,7 +100,6 @@ public static nint LastIndex(@string s, @string substr) {
     case {} when n > len(s): {
         return -1;
     }}
-
     // Rabin-Karp search from the end of the string
     var (hashss, pow) = bytealg.HashStrRev(substr);
     nint last = len(s) - n;
@@ -149,14 +148,14 @@ public static nint IndexRune(@string s, rune r) {
         return -1;
     }
     default: {
-        @string rs = ((@string)r);
+        // Search for rune r using the last byte of its UTF-8 encoded form.
+        // The distribution of the last byte is more uniform compared to the
+        // first byte which has a 78% chance of being [240, 243, 244].
+        @string rs = (@string)r;
         nint last = len(rs) - 1;
         nint i = last;
         nint fails = 0;
         while (i < len(s)) {
-            // Search for rune r using the last byte of its UTF-8 encoded form.
-            // The distribution of the last byte is more uniform compared to the
-            // first byte which has a 78% chance of being [240, 243, 244].
             if (s[i] != rs[last]) {
                 nint o = IndexByte(s.slice(i + 1), rs[last]);
                 if (o < 0) {
@@ -174,16 +173,17 @@ public static nint IndexRune(@string s, rune r) {
 next:
             fails++;
             i++;
-            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> (int)(4)) && i < len(s))) {
+            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> 4) && i < len(s))) {
                 goto fallback;
             }
         }
         return -1;
+
 fallback:
         if (haveFastIndex){
             // see comment in ../bytes/bytes.go
             {
-                nint j = bytealg.IndexString(s.slice(i - last), ((@string)r)); if (j >= 0) {
+                nint j = bytealg.IndexString(s.slice(i - last), (@string)r); if (j >= 0) {
                     return i + j - last;
                 }
             }
@@ -206,7 +206,6 @@ break_loop:;
         }
         return -1;
     }}
-
 }
 
 // IndexAny returns the index of the first instance of any Unicode code point
@@ -315,6 +314,7 @@ internal static slice<@string> genSplit(@string s, @string sep, nint sepSave, ni
     if (n < 0) {
         n = Count(s, sep) + 1;
     }
+
     if (n > len(s) + 1) {
         n = len(s) + 1;
     }
@@ -398,7 +398,9 @@ internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1
 
 // Fields splits the string s around each instance of one or more consecutive white space
 // characters, as defined by [unicode.IsSpace], returning a slice of substrings of s or an
-// empty slice if s contains only white space.
+// empty slice if s contains only white space. Every element of the returned slice is
+// non-empty. Unlike [Split], leading and trailing runs of white space characters
+// are discarded.
 public static slice<@string> Fields(@string s) {
     // First count the fields.
     // This is an exact count if s is ASCII, otherwise it is an approximation.
@@ -410,9 +412,10 @@ public static slice<@string> Fields(@string s) {
         var r = s[iΔ1];
         setBits |= (byte)(r);
         nint isSpace = (nint)asciiSpace[r];
-        n += (nint)(wasSpace & ~isSpace);
+        n += (wasSpace & ~isSpace);
         wasSpace = isSpace;
     }
+
     if (setBits >= utf8.RuneSelf) {
         // Some runes in the input string are not ASCII.
         return FieldsFunc(s, Δunicode.IsSpace);
@@ -441,8 +444,7 @@ public static slice<@string> Fields(@string s) {
         }
         fieldStart = i;
     }
-    if (fieldStart < len(s)) {
-        // Last field might end at EOF.
+    if (fieldStart < len(s)) { // Last field might end at EOF.
         a[na] = s.slice(fieldStart);
     }
     return a;
@@ -457,12 +459,17 @@ internal partial struct FieldsFunc_span /*dyn*/ {
 
 // FieldsFunc splits the string s at each run of Unicode code points c satisfying f(c)
 // and returns an array of slices of s. If all code points in s satisfy f(c) or the
-// string is empty, an empty slice is returned.
+// string is empty, an empty slice is returned. Every element of the returned slice is
+// non-empty. Unlike [Split], leading and trailing runs of code points satisfying f(c)
+// are discarded.
 //
 // FieldsFunc makes no guarantees about the order in which it calls f(c)
 // and assumes that f always returns the same value for a given c.
 public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
+    var spansᴷ = new stackAppend<FieldsFunc_span>();
+
     var spans = new slice<FieldsFunc_span>(0, 32);
+
     // Find the field start and end indices.
     // Doing this in a separate pass (rather than slicing the string s
     // and collecting the result substrings right away) is significantly
@@ -471,7 +478,7 @@ public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
     foreach (var (end, rune) in s) {
         if (f(rune)){
             if (start >= 0) {
-                spans = append(spans, new FieldsFunc_span(start, end));
+                spans = append(spansᴷ, spans, new FieldsFunc_span(start, end));
                 // Set start to a negative value.
                 // Note: using -1 here consistently and reproducibly
                 // slows down this code by a several percent on amd64.
@@ -483,15 +490,18 @@ public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
             }
         }
     }
+
     // Last field might end at EOF.
     if (start >= 0) {
         spans = append(spans, new FieldsFunc_span(start, len(s)));
     }
+
     // Create strings from recorded field indices.
     var a = new slice<@string>(len(spans));
     foreach (var (i, span) in spans) {
         a[i] = s.slice(span.start, span.end);
     }
+
     return a;
 }
 
@@ -519,6 +529,7 @@ public static @string Join(slice<@string> elems, @string sep) {
         }
         n += len(elem);
     }
+
     ref var b = ref heap(new Builder(), out var Ꮡb);
     Ꮡb.Grow(n);
     Ꮡb.WriteString(elems[0]);
@@ -549,6 +560,7 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
     // The output buffer b is initialized on demand, the first
     // time a character differs.
     ref var b = ref heap(new Builder(), out var Ꮡb);
+
     foreach (var (i, rᴛ1) in s) {
         var c = rᴛ1;
 
@@ -556,6 +568,7 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
         if (r == c && c != utf8.RuneError) {
             continue;
         }
+
         nint width = default!;
         if (c == utf8.RuneError){
             (c, width) = utf8.DecodeRuneInString(s.slice(i));
@@ -565,21 +578,25 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
         } else {
             width = utf8.RuneLen(c);
         }
+
         Ꮡb.Grow(len(s) + (nint)utf8.UTFMax);
         Ꮡb.WriteString(s.slice(0, i));
         if (r >= 0) {
             Ꮡb.WriteRune(r);
         }
+
         s = s.slice(i + width);
         break;
     }
+
     // Fast path for unchanged input
-    if (b.Cap() == 0) {
-        // didn't call b.Grow above
+    if (b.Cap() == 0) { // didn't call b.Grow above
         return s;
     }
+
     foreach (var (_, c) in s) {
         var r = mapping(c);
+
         if (r >= 0) {
             // common case
             // Due to inlining, it is more performant to determine if WriteByte should be
@@ -592,6 +609,7 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
             }
         }
     }
+
     return b.String();
 }
 
@@ -600,13 +618,9 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
 // often used for display on fixed-width terminal windows.
 // Pre-declare constants for these for O(1) repetition in the common-case.
 internal static readonly @string repeatedSpaces = "                                                                                                                                ";
-
 internal static readonly @string repeatedDashes = "--------------------------------------------------------------------------------------------------------------------------------";
-
 internal static readonly @string repeatedZeroes = "0000000000000000000000000000000000000000000000000000000000000000";
-
 internal static readonly @string repeatedEquals = "================================================================================================================================";
-
 internal static readonly @string repeatedTabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 
 // Repeat returns a new string consisting of count copies of the string s.
@@ -633,9 +647,11 @@ public static @string Repeat(@string s, nint count) {
         throw panic("strings: Repeat output length overflow");
     }
     nint n = (nint)lo; // lo = len(s) * count
+
     if (len(s) == 0) {
         return ""u8;
     }
+
     // Optimize for commonly repeated strings of relatively short length.
     switch (s[0]) {
     case (rune)' ' or (rune)'-' or (rune)'0' or (rune)'=' or (rune)'\t': {
@@ -655,7 +671,6 @@ public static @string Repeat(@string s, nint count) {
         case {} when n <= len(repeatedTabs) && HasPrefix(repeatedTabs, s): {
             return repeatedTabs.slice(0, n);
         }}
-
         break;
     }}
 
@@ -677,6 +692,7 @@ public static @string Repeat(@string s, nint count) {
             chunkMax = len(s);
         }
     }
+
     ref var b = ref heap(new Builder(), out var Ꮡb);
     Ꮡb.Grow(n);
     Ꮡb.WriteString(s);
@@ -698,8 +714,8 @@ public static @string ToUpper(@string s) {
         }
         hasLower = hasLower || ((rune)'a' <= c && c <= (rune)'z');
     }
-    if (isASCII) {
-        // optimize for ASCII-only strings.
+
+    if (isASCII) { // optimize for ASCII-only strings.
         if (!hasLower) {
             return s;
         }
@@ -736,8 +752,8 @@ public static @string ToLower(@string s) {
         }
         hasUpper = hasUpper || ((rune)'A' <= c && c <= (rune)'Z');
     }
-    if (isASCII) {
-        // optimize for ASCII-only strings.
+
+    if (isASCII) { // optimize for ASCII-only strings.
         if (!hasUpper) {
             return s;
         }
@@ -794,10 +810,12 @@ public static @string ToTitleSpecial(Δunicode.SpecialCase c, @string s) {
 // replaced by the replacement string, which may be empty.
 public static @string ToValidUTF8(@string s, @string replacement) {
     ref var b = ref heap(new Builder(), out var Ꮡb);
+
     foreach (var (i, c) in s) {
         if (c != utf8.RuneError) {
             continue;
         }
+
         var (_, wid) = utf8.DecodeRuneInString(s.slice(i));
         if (wid == 1) {
             Ꮡb.Grow(len(s) + len(replacement));
@@ -806,11 +824,12 @@ public static @string ToValidUTF8(@string s, @string replacement) {
             break;
         }
     }
+
     // Fast path for unchanged input
-    if (b.Cap() == 0) {
-        // didn't call b.Grow above
+    if (b.Cap() == 0) { // didn't call b.Grow above
         return s;
     }
+
     var invalid = false; // previous byte was from an invalid UTF-8 sequence
     for (nint i = 0; i < len(s); ) {
         var c = s[i];
@@ -833,6 +852,7 @@ public static @string ToValidUTF8(@string s, @string replacement) {
         Ꮡb.WriteString(s.slice(i, i + wid));
         i += wid;
     }
+
     return b.String();
 }
 
@@ -854,7 +874,6 @@ internal static bool isSeparator(rune r) {
         case {} when r is (rune)'_': {
             return false;
         }}
-
         return true;
     }
     // Letters and digits are not separators
@@ -901,7 +920,7 @@ public static @string TrimLeftFunc(@string s, Func<rune, bool> f) {
 // Unicode code points c satisfying f(c) removed.
 public static @string TrimRightFunc(@string s, Func<rune, bool> f) {
     nint i = lastIndexFunc(s, f, false);
-    if (i >= 0 && s[i] >= utf8.RuneSelf){
+    if (i >= 0){
         var (_, wid) = utf8.DecodeRuneInString(s.slice(i));
         i += wid;
     } else {
@@ -954,6 +973,14 @@ internal static nint lastIndexFunc(@string s, Func<rune, bool> f, bool truth) {
     return -1;
 }
 
+// asciiSet is a 32-byte value, where each bit represents the presence of a
+// given ASCII character in the set. The 128-bits of the lower 16 bytes,
+// starting with the least-significant bit of the lowest word to the
+// most-significant bit of the highest word, map to the full range of all
+// 128 ASCII characters. The 128-bits of the upper 16 bytes will be zeroed,
+// ensuring that any non-ASCII character will be reported as not in the set.
+// This allocates a total of 32 bytes even though the upper half
+// is unused to avoid bounds checks in asciiSet.contains.
 partial struct asciiSet /*[8]uint32*/;
 
 // makeASCIISet creates a set of ASCII characters and reports whether all
@@ -966,14 +993,14 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
         if (c >= utf8.RuneSelf) {
             return (@as.Clone(), false);
         }
-        @as[c / 32] |= (uint32)(((uint32)1 << (int)((c % 32))));
+        @as[c / 32] |= (uint32)(((uint32)1 << (int)(c % 32)));
     }
     return (@as.Clone(), true);
 }
 
 // contains reports whether c is inside the set.
 internal static bool contains(this ref asciiSet @as, byte c) {
-    return ((uint32)(@as.Value[c / 32] & (((uint32)1 << (int)((c % 32)))))) != 0;
+    return (@as.Value[c / 32] & ((uint32)1 << (int)(c % 32))) != 0;
 }
 
 // Trim returns a slice of the string s with all leading and
@@ -1035,11 +1062,7 @@ internal static @string trimLeftASCII(@string s, ж<asciiSet> Ꮡas) {
 
 internal static @string trimLeftUnicode(@string s, @string cutset) {
     while (len(s) > 0) {
-        var r = (rune)s[0];
-        nint n = 1;
-        if (r >= utf8.RuneSelf) {
-            (r, n) = utf8.DecodeRuneInString(s);
-        }
+        var (r, n) = utf8.DecodeRuneInString(s);
         if (!ContainsRune(cutset, r)) {
             break;
         }
@@ -1102,38 +1125,36 @@ internal static @string trimRightUnicode(@string s, @string cutset) {
     return s;
 }
 
-// TrimSpace returns a slice of the string s, with all leading
-// and trailing white space removed, as defined by Unicode.
+// TrimSpace returns a slice (substring) of the string s,
+// with all leading and trailing white space removed,
+// as defined by Unicode.
 public static @string TrimSpace(@string s) {
-    // Fast path for ASCII: look for the first ASCII non-space byte
-    nint start = 0;
-    for (; start < len(s); start++) {
-        var c = s[start];
+    // Fast path for ASCII: look for the first ASCII non-space byte.
+    foreach (var (lo, c) in slice<byte>(s)) {
         if (c >= utf8.RuneSelf) {
             // If we run into a non-ASCII byte, fall back to the
-            // slower unicode-aware method on the remaining bytes
-            return TrimFunc(s.slice(start), Δunicode.IsSpace);
+            // slower unicode-aware method on the remaining bytes.
+            return TrimFunc(s.slice(lo), Δunicode.IsSpace);
         }
-        if (asciiSpace[c] == 0) {
-            break;
+        if (asciiSpace[c] != 0) {
+            continue;
+        }
+        s = s.slice(lo);
+        // Now look for the first ASCII non-space byte from the end.
+        for (nint hi = len(s) - 1; hi >= 0; hi--) {
+            var cΔ1 = s[hi];
+            if (cΔ1 >= utf8.RuneSelf) {
+                return TrimRightFunc(s.slice(0, hi + 1), Δunicode.IsSpace);
+            }
+            if (asciiSpace[cΔ1] == 0) {
+                // At this point, s[:hi+1] starts and ends with ASCII
+                // non-space bytes, so we're done. Non-ASCII cases have
+                // already been handled above.
+                return s.slice(0, hi + 1);
+            }
         }
     }
-    // Now look for the first ASCII non-space byte from the end
-    nint stop = len(s);
-    for (; stop > start; stop--) {
-        var c = s[stop - 1];
-        if (c >= utf8.RuneSelf) {
-            // start has been already trimmed above, should trim end only
-            return TrimRightFunc(s.slice(start, stop), Δunicode.IsSpace);
-        }
-        if (asciiSpace[c] == 0) {
-            break;
-        }
-    }
-    // At this point s[start:stop] starts and ends with an ASCII
-    // non-space bytes, so we're done. Non-ASCII cases have already
-    // been handled above.
-    return s.slice(start, stop);
+    return ""u8;
 }
 
 // TrimPrefix returns s without the provided leading prefix string.
@@ -1158,6 +1179,7 @@ public static @string Replace(@string s, @string old, @string @new, nint n) {
     if (old == @new || n == 0) {
         return s; // avoid allocation
     }
+
     // Compute number of replacements.
     {
         nint m = Count(s, old); if (m == 0){
@@ -1167,23 +1189,27 @@ public static @string Replace(@string s, @string old, @string @new, nint n) {
             n = m;
         }
     }
+
     // Apply replacements to buffer.
     ref var b = ref heap(new Builder(), out var Ꮡb);
     Ꮡb.Grow(len(s) + n * (len(@new) - len(old)));
     nint start = 0;
-    for (nint i = 0; i < n; i++) {
-        nint j = start;
-        if (len(old) == 0){
-            if (i > 0) {
-                var (_, wid) = utf8.DecodeRuneInString(s.slice(start));
-                j += wid;
-            }
-        } else {
-            j += Index(s.slice(start), old);
+    if (len(old) > 0){
+        foreach (var _ᴛ1 in range(n)) {
+            nint j = start + Index(s.slice(start), old);
+            Ꮡb.WriteString(s.slice(start, j));
+            Ꮡb.WriteString(@new);
+            start = j + len(old);
         }
-        Ꮡb.WriteString(s.slice(start, j));
+    } else { // len(old) == 0
         Ꮡb.WriteString(@new);
-        start = j + len(old);
+        foreach (var _ᴛ2 in range(n - 1)) {
+            var (_, wid) = utf8.DecodeRuneInString(s.slice(start));
+            nint j = start + wid;
+            Ꮡb.WriteString(s.slice(start, j));
+            Ꮡb.WriteString(@new);
+            start = j;
+        }
     }
     Ꮡb.WriteString(s.slice(start));
     return b.String();
@@ -1204,16 +1230,18 @@ public static @string ReplaceAll(@string s, @string old, @string @new) {
 public static bool EqualFold(@string s, @string t) {
     // ASCII fast path
     nint i = 0;
-    for (; i < len(s) && i < len(t); i++) {
+    for (nint n = min(len(s), len(t)); i < n; i++) {
         var sr = s[i];
         var tr = t[i];
         if ((byte)(sr | tr) >= utf8.RuneSelf) {
             goto hasUnicode;
         }
+
         // Easy case.
         if (tr == sr) {
             continue;
         }
+
         // Make sr < tr to simplify what follows.
         if (tr < sr) {
             (tr, sr) = (sr, tr);
@@ -1226,6 +1254,7 @@ public static bool EqualFold(@string s, @string t) {
     }
     // Check if we've exhausted both strings.
     return len(s) == len(t);
+
 hasUnicode:
     s = s.slice(i);
     t = t.slice(i);
@@ -1236,19 +1265,18 @@ hasUnicode:
         if (len(t) == 0) {
             return false;
         }
+
         // Extract first rune from second string.
-        rune tr = default!;
-        if (t[0] < utf8.RuneSelf){
-            (tr, t) = ((rune)t[0], t[1..]);
-        } else {
-            var (rΔ1, size) = utf8.DecodeRuneInString(t);
-            (tr, t) = (rΔ1, t.slice(size));
-        }
+        var (tr, size) = utf8.DecodeRuneInString(t);
+        t = t.slice(size);
+
         // If they match, keep going; if not, return false.
+
         // Easy case.
         if (tr == sr) {
             continue;
         }
+
         // Make sr < tr to simplify what follows.
         if (tr < sr) {
             (tr, sr) = (sr, tr);
@@ -1261,6 +1289,7 @@ hasUnicode:
             }
             return false;
         }
+
         // General case. SimpleFold(x) returns the next equivalent rune > x
         // or wraps around to smaller values.
         var r = Δunicode.SimpleFold(sr);
@@ -1272,6 +1301,7 @@ hasUnicode:
         }
         return false;
     }
+
     // First string is empty, so check if the second one is also empty.
     return len(t) == 0;
 }

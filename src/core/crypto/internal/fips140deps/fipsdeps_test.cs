@@ -43,7 +43,7 @@ internal static readonly @string pathImportPathRangeˢ = """
 {{range .XTestImports -}}
 {{$path}} {{.}}
 {{end -}}
-"""u8;
+"""u8.Raw();
 internal static readonly @string cryptoInternalFips140ˢ = "crypto/internal/fips140/..."u8;
 internal static readonly @string cryptoInternalFips140ˢ2 = "crypto/internal/fips140/"u8;
 internal static readonly @string cryptoInternalFips140ˢ3 = "crypto/internal/fips140"u8;

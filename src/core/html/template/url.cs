@@ -112,37 +112,37 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> �
     for ((nint i, nint n) = (0, len(s)); i < n; i++) {
         var c = s[i];
         switch (c) {
+        // Single quote and parens are sub-delims in RFC 3986, but we
+        // escape them so the output can be embedded in single
+        // quoted attributes and unquoted CSS url(...) constructs.
+        // Single quotes are reserved in URLs, but are only used in
+        // the obsolete "mark" rule in an appendix in RFC 3986
+        // so can be safely encoded.
         case (rune)'!' or (rune)'#' or (rune)'$' or (rune)'&' or (rune)'*' or (rune)'+' or (rune)',' or (rune)'/' or (rune)':' or (rune)';' or (rune)'=' or (rune)'?' or (rune)'@' or (rune)'[' or (rune)']': {
             if (norm) {
-                // Single quote and parens are sub-delims in RFC 3986, but we
-                // escape them so the output can be embedded in single
-                // quoted attributes and unquoted CSS url(...) constructs.
-                // Single quotes are reserved in URLs, but are only used in
-                // the obsolete "mark" rule in an appendix in RFC 3986
-                // so can be safely encoded.
                 continue;
             }
             break;
         }
+        // Unreserved according to RFC 3986 sec 2.3
+        // "For consistency, percent-encoded octets in the ranges of
+        // ALPHA (%41-%5A and %61-%7A), DIGIT (%30-%39), hyphen (%2D),
+        // period (%2E), underscore (%5F), or tilde (%7E) should not be
+        // created by URI producers
         case (rune)'-' or (rune)'.' or (rune)'_' or (rune)'~': {
             continue;
             break;
         }
         case (rune)'%': {
+            // When normalizing do not re-encode valid escapes.
             if (norm && i + 2 < len(s) && isHex(s[i + 1]) && isHex(s[i + 2])) {
-                // Unreserved according to RFC 3986 sec 2.3
-                // "For consistency, percent-encoded octets in the ranges of
-                // ALPHA (%41-%5A and %61-%7A), DIGIT (%30-%39), hyphen (%2D),
-                // period (%2E), underscore (%5F), or tilde (%7E) should not be
-                // created by URI producers
-                // When normalizing do not re-encode valid escapes.
                 continue;
             }
             break;
         }
         default: {
+            // Unreserved according to RFC 3986 sec 2.3
             if ((rune)'a' <= c && c <= (rune)'z') {
-                // Unreserved according to RFC 3986 sec 2.3
                 continue;
             }
             if ((rune)'A' <= c && c <= (rune)'Z') {
@@ -153,7 +153,6 @@ internal static bool processURLOnto(@string s, bool norm, ж<strings.Builder> �
             }
             break;
         }}
-
         Ꮡb.WriteString(s.slice(written, i));
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "%%%02x"u8, c);
         written = i + 1;
@@ -179,8 +178,8 @@ internal static @string srcsetFilterAndEscaper(params ꓸꓸꓸany argsʗp) {
         if (processURLOnto(s, true, ᏑbΔ2)) {
             s = bΔ2.String();
         }
-        return strings.ReplaceAll(s, // Additionally, commas separate one source from another.
- ","u8, "%2c"u8);
+        // Additionally, commas separate one source from another.
+        return strings.ReplaceAll(s, ","u8, "%2c"u8);
     }
 
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
@@ -202,11 +201,11 @@ internal static readonly @string htmlSpaceAndASCIIAlnumBytes = ((@string)(new by
 // isHTMLSpace is true iff c is a whitespace character per
 // https://infra.spec.whatwg.org/#ascii-whitespace
 internal static bool isHTMLSpace(byte c) {
-    return (c <= 0x20) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> (int)(3))] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
+    return (c <= 0x20) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> 3)] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
 }
 
 internal static bool isHTMLSpaceOrASCIIAlnum(byte c) {
-    return (c < 0x80) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> (int)(3))] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
+    return (c < 0x80) && 0 != ((byte)(htmlSpaceAndASCIIAlnumBytes[(c >> 3)] & (((byte)1).Lsh((nuint)((byte)(c & 0x7))))));
 }
 
 internal static void filterSrcsetElement(@string s, nint left, nint right, ж<strings.Builder> Ꮡb) {

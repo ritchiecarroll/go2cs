@@ -22,9 +22,11 @@ internal static void Main() {
     float32 re = real(2.5F + -3.5F.i());
     float32 im = imag(complex(2.5F, -3.5F));
     main_meters dist = -1.5F;
+
     var cprod = /* 1i * gPi */ 3.141592653589793D.i();
     var cprod2 = /* gPi * 2i */ 6.283185307179586D.i();
     var csum = /* 1i + gPi */ 3.141592653589793D + 1D.i();
+
     fmt.Println(real(c64), imag(c64));
     fmt.Println(real(c64b), imag(c64b));
     fmt.Println(a, b);

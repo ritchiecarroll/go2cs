@@ -16,7 +16,7 @@ internal static nint bump(this ref setting s) {
 
 partial struct Setting {
     internal @string tag;
-    internal partial ref ж<setting> setting { get; }
+    /*embed*/ internal ж<setting> setting;
 }
 
 internal static ж<setting> lookup(@string name) {
@@ -27,34 +27,33 @@ public static ж<Setting> New(@string tag) {
     return Ꮡ(new Setting(tag: tag));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string debugˢ = "debug"u8;
-private static readonly object recoveredˢ = (@string)"recovered:"u8;
-private static readonly @string gcpacertraceˢ = "gcpacertrace"u8;
-private static readonly @string otherˢ = "other"u8;
-
 internal static void Main() {
-    var s = New(debugˢ);
+    var s = New("debug");
+
     fmt.Println((~s).setting == nil);
+
     var sʗ1 = s;
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println(recoveredˢ, recover());
+                fmt.Println("recovered:", recover());
             }, ref ᒐ);
             fmt.Println((~sʗ1).name);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     ж<setting> p = default!;
     s.Value.setting = p;
     fmt.Println((~s).setting == nil);
-    s.Value.setting = lookup(gcpacertraceˢ);
+
+    s.Value.setting = lookup("gcpacertrace");
     fmt.Println((~s).setting == nil);
     fmt.Println((~s).name, s.bump(), s.bump());
-    var direct = lookup(otherˢ);
+
+    var direct = lookup("other");
     s.Value.setting = direct;
     s.Value.count = 10;
     nint before = direct.Value.count;

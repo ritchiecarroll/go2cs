@@ -30,15 +30,13 @@ public static void TestSpace(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// UTF-8 error
-// correctly encoded RuneError
 internal static slice<@string> scanTests = new @string[]{
     ""u8,
     "a"u8,
     "¼"u8,
     "☹"u8,
-    ((@string)(new byte[]{0x81})),
-    "\uFFFD"u8,
+    ((@string)(new byte[]{0x81})), // UTF-8 error
+    "\uFFFD"u8, // correctly encoded RuneError
     "abcdefgh"u8,
     "abc def\n\t\tgh    "u8,
     ((@string)(new byte[]{0x61, 0x62, 0x63, 0xc2, 0xbc, 0xe2, 0x98, 0xb9, 0x81, 0xef, 0xbf, 0xbd, 0xe6, 0x97, 0xa5, 0xe6, 0x9c, 0xac, 0xe8, 0xaa, 0x9e, 0x82, 0x61, 0x62, 0x63}))
@@ -170,11 +168,9 @@ internal static void genLine(ж<bytes.Buffer> Ꮡbuf, nint lineNum, nint n, bool
     if (doCR) {
         n--;
     }
-    for (nint i = 0; i < n - 1; i++) {
-        // Stop early for \n.
+    for (nint i = 0; i < n - 1; i++) { // Stop early for \n.
         var c = (byte)((rune)'a' + (byte)(lineNum + i));
-        if (c == (rune)'\n' || c == (rune)'\r') {
-            // Don't confuse us.
+        if (c == (rune)'\n' || c == (rune)'\r') { // Don't confuse us.
             c = (rune)'N';
         }
         buf.WriteByte(c);
@@ -575,7 +571,7 @@ internal static (nint advance, slice<byte> token, error err) split(this ref coun
 // Check that the looping-at-EOF check doesn't trigger for merely empty tokens.
 public static void TestEmptyLinesOK(ж<Δtesting.T> Ꮡt) {
     ref var c = ref heap<countdown>(out var Ꮡc);
-    c = ((countdown)10000);
+    c = (countdown)10000;
     var s = NewScanner(new bufio_test_package.strings_ReaderжReader(strings.NewReader(strings.Repeat("\n"u8, 10000))));
     s.Split(new Func<slice<byte>, bool, (nint, slice<byte>, error)>(Ꮡc.split));
     while (s.Scan()) {
@@ -604,6 +600,8 @@ public static void TestHugeBuffer(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// negativeEOFReader returns an invalid -1 at the end, as though it
+// were wrapping the read system call.
 partial struct negativeEOFReader /*num:nint*/;
 
 internal static (nint, error) Read(this ref negativeEOFReader r, slice<byte> p) {
@@ -629,7 +627,7 @@ internal static readonly object readTooManyLinesˢ = (@string)"read too many lin
 // on a reader that returns a negative count of bytes read (issue 38053).
 public static void TestNegativeEOFReader(ж<Δtesting.T> Ꮡt) {
     ref var r = ref heap<negativeEOFReader>(out var Ꮡr);
-    r = ((negativeEOFReader)10);
+    r = (negativeEOFReader)10;
     var scanner = NewScanner(new bufio_test_package.negativeEOFReaderжReader(Ꮡr));
     nint c = 0;
     while (scanner.Scan()) {

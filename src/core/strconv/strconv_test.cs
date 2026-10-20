@@ -14,8 +14,6 @@ partial class strconv_test_package {
 
 internal static array<byte> globalBuf = new(64);
 internal static @string nextToOne = "1.00000000000000011102230246251565404236316680908203125"u8 + strings.Repeat("0"u8, 10000) + "1"u8;
-// In practice we see 7 for the next one, but allow some slop.
-// Before pre-allocation in appendQuotedWith, we saw 39.
 
 partial struct mallocTestᴛ1 /*dyn*/ {
     internal nint count;
@@ -38,8 +36,10 @@ internal static void initᴛmallocTest() { mallocTest = new mallocTestᴛ1[]{
     new(0, @"AppendFloat(globalBuf[:0], 1.23, 'g', 5, 64)"u8, () => {
         AppendFloat(globalBuf[..0], 1.23D, (rune)'g', 5, 64);
     }),
+    // In practice we see 7 for the next one, but allow some slop.
+    // Before pre-allocation in appendQuotedWith, we saw 39.
     new(10, @"AppendQuoteToASCII(nil, oneMB)"u8, () => {
-        AppendQuoteToASCII(default!, ((@string)oneMB));
+        AppendQuoteToASCII(default!, (@string)oneMB);
     }),
     new(0, @"ParseFloat(""123.45"", 64)"u8, () => {
         ParseFloat("123.45"u8, 64);
@@ -84,7 +84,6 @@ public static void TestCountMallocs(ж<testing.T> Ꮡt) {
 }
 
 // Sink makes sure the compiler cannot optimize away the benchmarks.
-
 partial struct Sinkᴛ1 /*dyn*/ {
     public bool Bool;
     public nint Int;
@@ -120,6 +119,7 @@ public static void TestAllocationsFromBytes(ж<testing.T> Ꮡt) {
         String: slice<byte>("hello, world!"u8),
         Buffer: new slice<byte>(1024)
     );
+
     Action<ж<testing.T>> checkNoAllocs(Action f) => (ж<testing.T> tΔ1) => {
             tΔ1.Helper();
             {
@@ -128,45 +128,46 @@ public static void TestAllocationsFromBytes(ж<testing.T> Ꮡt) {
                 }
             }
         };
+
     var bytesʗ1 = bytes;
     Ꮡt.Run(atoiˢ, checkNoAllocs(() => {
-        (Sink.Int, Sink.Error) = Atoi(((@string)bytesʗ1.Number));
+        (Sink.Int, Sink.Error) = Atoi((@string)bytesʗ1.Number);
     }));
     var bytesʗ2 = bytes;
     Ꮡt.Run(parseBoolˢ, checkNoAllocs(() => {
-        (Sink.Bool, Sink.Error) = ParseBool(((@string)bytesʗ2.Bool));
+        (Sink.Bool, Sink.Error) = ParseBool((@string)bytesʗ2.Bool);
     }));
     var bytesʗ3 = bytes;
     Ꮡt.Run(parseIntˢ, checkNoAllocs(() => {
-        (Sink.Int64, Sink.Error) = ParseInt(((@string)bytesʗ3.Number), 10, 64);
+        (Sink.Int64, Sink.Error) = ParseInt((@string)bytesʗ3.Number, 10, 64);
     }));
     var bytesʗ4 = bytes;
     Ꮡt.Run(parseUintˢ, checkNoAllocs(() => {
-        (Sink.Uint64, Sink.Error) = ParseUint(((@string)bytesʗ4.Number), 10, 64);
+        (Sink.Uint64, Sink.Error) = ParseUint((@string)bytesʗ4.Number, 10, 64);
     }));
     var bytesʗ5 = bytes;
     Ꮡt.Run(parseFloatˢ, checkNoAllocs(() => {
-        (Sink.Float64, Sink.Error) = ParseFloat(((@string)bytesʗ5.Number), 64);
+        (Sink.Float64, Sink.Error) = ParseFloat((@string)bytesʗ5.Number, 64);
     }));
     var bytesʗ6 = bytes;
     Ꮡt.Run(parseComplexˢ, checkNoAllocs(() => {
-        (Sink.Complex128, Sink.Error) = ParseComplex(((@string)bytesʗ6.Number), 128);
+        (Sink.Complex128, Sink.Error) = ParseComplex((@string)bytesʗ6.Number, 128);
     }));
     var bytesʗ7 = bytes;
     Ꮡt.Run(canBackquoteˢ, checkNoAllocs(() => {
-        Sink.Bool = CanBackquote(((@string)bytesʗ7.String));
+        Sink.Bool = CanBackquote((@string)bytesʗ7.String);
     }));
     var bytesʗ8 = bytes;
     Ꮡt.Run(appendQuoteˢ, checkNoAllocs(() => {
-        Sink.Bytes = AppendQuote(bytesʗ8.Buffer[..0], ((@string)bytesʗ8.String));
+        Sink.Bytes = AppendQuote(bytesʗ8.Buffer[..0], (@string)bytesʗ8.String);
     }));
     var bytesʗ9 = bytes;
     Ꮡt.Run(appendQuoteToASCIIˢ, checkNoAllocs(() => {
-        Sink.Bytes = AppendQuoteToASCII(bytesʗ9.Buffer[..0], ((@string)bytesʗ9.String));
+        Sink.Bytes = AppendQuoteToASCII(bytesʗ9.Buffer[..0], (@string)bytesʗ9.String);
     }));
     var bytesʗ10 = bytes;
     Ꮡt.Run(appendQuoteToGraphicˢ, checkNoAllocs(() => {
-        Sink.Bytes = AppendQuoteToGraphic(bytesʗ10.Buffer[..0], ((@string)bytesʗ10.String));
+        Sink.Bytes = AppendQuoteToGraphic(bytesʗ10.Buffer[..0], (@string)bytesʗ10.String);
     }));
 }
 
@@ -184,6 +185,7 @@ public static void TestErrorPrefixes(ж<testing.T> Ꮡt) {
     var (_, errFloat) = ParseFloat(invalidˢ, 64);
     var (_, errInt64) = ParseInt(invalidˢ, 10, 64);
     var (_, errUint64) = ParseUint(invalidˢ, 10, 64);
+
     var vectors = new TestErrorPrefixes_vectors[]{
         new(errInt, "Atoi"u8),
         new(errBool, "ParseBool"u8),
@@ -191,6 +193,7 @@ public static void TestErrorPrefixes(ж<testing.T> Ꮡt) {
         new(errInt64, "ParseInt"u8),
         new(errUint64, "ParseUint"u8)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         var (nerr, ok) = v.err._<ж<strconv.NumError>>(ᐧ);
         if (!ok) {

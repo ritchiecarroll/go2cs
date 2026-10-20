@@ -85,6 +85,12 @@
     <!-- Go 1.24: TB.Context() returns context.Context. Go's own testing.go imports context
          (testing.go:402), so this edge exists in Go's package graph too and adds no cycle. -->
     <ProjectReference Include="../context/context.csproj" />
+    <!-- -test.testlogfile (TestLogBridge): Go's testdeps opens the log with os.Create and installs an
+         internal/testlog logger. Both are already in every host's closure through fmt -> os -> internal/testlog
+         (measured in testing/synctest's host deps.json, a package that imports neither), so these edges add no
+         assembly to a host and no cycle. -->
+    <ProjectReference Include="../os/os.csproj" />
+    <ProjectReference Include="../internal/testlog/internal.testlog.csproj" />
     <ProjectReference Include="../../gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 

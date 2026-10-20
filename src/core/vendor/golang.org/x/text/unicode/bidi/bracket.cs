@@ -10,8 +10,6 @@ using container;
 
 partial class bidi_package {
 
-partial struct bracketType /*num:byte*/;
-
 // This file contains a port of the reference implementation of the
 // Bidi Parentheses Algorithm:
 // https://www.unicode.org/Public/PROGRAMS/BidiReferenceJava/BidiPBAReference.java
@@ -33,6 +31,15 @@ partial struct bracketType /*num:byte*/;
 // algorithm defined in UAX#9. In particular, the stack referenced there
 // supports operations that go beyond a "basic" stack. An equivalent
 // implementation based on a linked list is used here.
+
+// Bidi_Paired_Bracket_Type
+// BD14. An opening paired bracket is a character whose
+// Bidi_Paired_Bracket_Type property value is Open.
+//
+// BD15. A closing paired bracket is a character whose
+// Bidi_Paired_Bracket_Type property value is Close.
+partial struct bracketType /*num:byte*/;
+
 internal static bracketType bpNone => /* iota */ 0;
 internal static bracketType bpOpen => 1;
 internal static bracketType bpClose => 2;
@@ -48,6 +55,7 @@ internal static @string String(this ref bracketPair b) {
     return fmt.Sprintf("(%v, %v)"u8, b.opener, b.closer);
 }
 
+// bracketPairs is a slice of bracketPairs with a sort.Interface implementation.
 partial struct bracketPairs /*[]bracketPair*/;
 
 internal static nint Len(this bracketPairs b) {
@@ -135,18 +143,18 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
         }
         var exprᴛ1 = pairTypes[index];
         if (exprᴛ1 == bpOpen) {
+            // check if maximum pairing depth reached
             if (p.openers.Len() == maxPairingDepth) {
-                // check if maximum pairing depth reached
                 p.openers.Init();
                 return;
             }
+            // remember opener location, most recent first
             p.openers.PushFront(i);
         }
         else if (exprᴛ1 == bpClose) {
+            // see if there is a match
             nint count = 0;
             for (var elem = p.openers.Front(); elem != nil; elem = elem.Next()) {
-                // remember opener location, most recent first
-                // see if there is a match
                 count++;
                 nint opener = (~elem).Value._<nint>();
                 if (p.matchOpener(pairValues, opener, i)) {
@@ -160,13 +168,12 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
                 }
             }
             sort.Sort(p.pairPositions);
+            // if we get here, the closing bracket matched no openers
+            // and gets ignored
         }
-
     }
 }
 
-// if we get here, the closing bracket matched no openers
-// and gets ignored
 // Bracket pairs within an isolating run sequence are processed as units so
 // that both the opening and the closing paired bracket in a pair resolve to
 // the same direction.
@@ -224,6 +231,7 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
 // TODO: have separate type for "strong" directionality.
 internal static ΔClass getStrongTypeN0(this ref bracketPairer p, nint index) {
     var exprᴛ1 = p.codesIsolatedRun[index];
+    // in the scope of N0, number types are treated as R
     if (exprᴛ1 == EN || exprᴛ1 == AN || exprᴛ1 == AL || exprᴛ1 == R) {
         return R;
     }
@@ -233,10 +241,7 @@ internal static ΔClass getStrongTypeN0(this ref bracketPairer p, nint index) {
     { /* default: */
         return ON;
     }
-
 }
-
-// in the scope of N0, number types are treated as R
 
 // classifyPairContent reports the strong types contained inside a Bracket Pair,
 // assuming the given embedding direction.
@@ -279,12 +284,15 @@ internal static ΔClass classBeforePair(this ref bracketPairer p, bracketPair lo
 internal static void assignBracketType(this ref bracketPairer p, bracketPair loc, ΔClass dirEmbed, slice<ΔClass> initialTypes) {
     // rule "N0, a", inspect contents of pair
     ΔClass dirPair = p.classifyPairContent(loc, dirEmbed);
+
     // dirPair is now L, R, or N (no strong type found)
+
     // the following logical tests are performed out of order compared to
     // the statement of the rules but yield the same results
     if (dirPair == ON) {
         return; // case "d" - nothing to do
     }
+
     if (dirPair != dirEmbed) {
         // case "c": strong type found, opposite - check before (c.1)
         dirPair = p.classBeforePair(loc);
@@ -296,6 +304,7 @@ internal static void assignBracketType(this ref bracketPairer p, bracketPair loc
     // else: case "b", strong type found matching embedding,
     // no explicit action needed, as dirPair is already set to embedding
     // direction
+
     // set the bracket types to the type found
     p.setBracketsToType(loc, dirPair, initialTypes);
 }
@@ -303,6 +312,7 @@ internal static void assignBracketType(this ref bracketPairer p, bracketPair loc
 internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc, ΔClass dirPair, slice<ΔClass> initialTypes) {
     p.codesIsolatedRun[loc.opener] = dirPair;
     p.codesIsolatedRun[loc.closer] = dirPair;
+
     for (nint i = loc.opener + 1; i < loc.closer; i++) {
         nint index = p.indexes[i];
         if (initialTypes[index] != NSM) {
@@ -310,6 +320,7 @@ internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc
         }
         p.codesIsolatedRun[i] = dirPair;
     }
+
     for (nint i = loc.closer + 1; i < len(p.indexes); i++) {
         nint index = p.indexes[i];
         if (initialTypes[index] != NSM) {

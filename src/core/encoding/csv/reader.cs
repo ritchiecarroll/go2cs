@@ -88,11 +88,10 @@ public static error Unwrap(this ref ParseError e) {
 
 // These are the errors that can be returned in [ParseError.Err].
 public static error ErrBareQuote = errors.New("bare \" in non-quoted-field"u8);
-
 public static error ErrQuote = errors.New("extraneous or missing \" in quoted-field"u8);
-
 public static error ErrFieldCount = errors.New("wrong number of fields"u8);
 
+// Deprecated: ErrTrailingComma is no longer used.
 public static error ErrTrailingComma = errors.New("extra delimiter at end of line"u8);
 
 internal static error errInvalidDelim = errors.New("csv: invalid field or comment delimiter"u8);
@@ -293,6 +292,7 @@ internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@str
     if (r.Comma == r.Comment || !validDelim(r.Comma) || (r.Comment != 0 && !validDelim(r.Comment))) {
         return (default!, errInvalidDelim);
     }
+
     // Read line (automatically skipping past empty lines and any comments).
     slice<byte> line = default!;
     error errRead = default!;
@@ -311,6 +311,7 @@ internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@str
     if (AreEqual(errRead, io.EOF)) {
         return (default!, errRead);
     }
+
     // Parse each field in the record.
     error err = default!;
     const nint quoteLen = /* len(`"`) */ 1;
@@ -377,41 +378,40 @@ parseField:
                         var rn = nextRune(line);
                         switch (ᐧ) {
                         case {} when rn is (rune)'"': {
-                            r.recordBuffer = append(r.recordBuffer, // `""` sequence (append quote).
- (byte)((rune)'"'));
+                            // `""` sequence (append quote).
+                            r.recordBuffer = append(r.recordBuffer, (byte)((rune)'"'));
                             line = line[(int)(quoteLen)..];
                             pos.col += quoteLen;
                             break;
                         }
                         case {} when rn == r.Comma: {
+                            // `",` sequence (end of field).
                             line = line.slice(commaLen);
                             pos.col += commaLen;
-                            r.fieldIndexes = append(r.fieldIndexes, // `",` sequence (end of field).
- len(r.recordBuffer));
+                            r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
                             r.fieldPositions = append(r.fieldPositions, fieldPos);
                             goto continue_parseField;
                             break;
                         }
                         case {} when lengthNL(line) == len(line): {
-                            r.fieldIndexes = append(r.fieldIndexes, // `"\n` sequence (end of line).
- len(r.recordBuffer));
+                            // `"\n` sequence (end of line).
+                            r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
                             r.fieldPositions = append(r.fieldPositions, fieldPos);
                             goto break_parseField;
                             break;
                         }
                         case {} when r.LazyQuotes: {
-                            r.recordBuffer = append(r.recordBuffer, // `"` sequence (bare quote).
- (byte)((rune)'"'));
+                            // `"` sequence (bare quote).
+                            r.recordBuffer = append(r.recordBuffer, (byte)((rune)'"'));
                             break;
                         }
                         default: {
-                            err = new ParseErrorжerror(Ꮡ(new ParseError( // `"*` sequence (invalid non-escaped quote).
-StartLine: recLine, Line: r.numLine, Column: pos.col - quoteLen, Err: ErrQuote)));
+                            // `"*` sequence (invalid non-escaped quote).
+                            err = new ParseErrorжerror(Ꮡ(new ParseError(StartLine: recLine, Line: r.numLine, Column: pos.col - quoteLen, Err: ErrQuote)));
                             goto break_parseField;
                             break;
                         }}
                     }
-
                 } else 
                 if (len(line) > 0){
                     // Hit end of line (copy all data so far).
@@ -446,9 +446,10 @@ break_parseField:;
     if (err == default!) {
         err = errRead;
     }
+
     // Create a single string and create slices out of it.
     // This pins the memory of the fields together, but allocates once.
-    @string str = ((@string)r.recordBuffer); // Convert to string once to batch allocations
+    @string str = (@string)r.recordBuffer; // Convert to string once to batch allocations
     dst = dst[..0];
     if (cap(dst) < len(r.fieldIndexes)) {
         dst = new slice<@string>(len(r.fieldIndexes));
@@ -459,6 +460,7 @@ break_parseField:;
         dst[i] = str.slice(preIdx, idx);
         preIdx = idx;
     }
+
     // Check or update the expected fields per record.
     if (r.FieldsPerRecord > 0){
         if (len(dst) != r.FieldsPerRecord && err == default!) {

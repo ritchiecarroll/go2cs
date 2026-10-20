@@ -26,6 +26,7 @@ public static @string String(this ref MethodSet s) {
     if (s.Len() == 0) {
         return methodSetˢ;
     }
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), methodSetˢ2);
     foreach (var (_, f) in s.list) {
@@ -52,6 +53,7 @@ public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> Ꮡpkg, 
     if (s.Len() == 0) {
         return default!;
     }
+
     @string key = Id(Ꮡpkg, name);
     nint i = sort.Search(len(s.list), (nint iΔ1) => {
         var m = Ꮡs.Value.list[iΔ1];
@@ -91,29 +93,38 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
             return ᏑemptyMethodSet;
         }
     }
+
     // method set up to the current depth, allocated lazily
     methodSet @base = default!;
+
     var (typ, isPtr) = deref(T);
+
     // *typ where typ is an interface has no methods.
     if (isPtr && IsInterface(typ)) {
         return ᏑemptyMethodSet;
     }
+
     // Start with typ as single entry at shallowest depth.
     var current = new embeddedType[]{new(typ, default!, isPtr, false)}.slice();
+
     // seen tracks named types that we have seen already, allocated lazily.
     // Used to avoid endless searches in case of recursive types.
     //
     // We must use a lookup on identity rather than a simple map[*Named]bool as
     // instantiated types may be identical but not equal.
     instanceLookup seen = new();
+
     // collect methods at current depth
     while (len(current) > 0) {
         slice<embeddedType> next = default!;                          // embedded types found at current depth
+
         // field and method sets at current depth, indexed by names (Id's), and allocated lazily
         map<@string, bool> fset = default!;                            // we only care about the field names
         methodSet mset = default!;
+
         foreach (var (_, e) in current) {
             var typΔ1 = e.typ;
+
             // If we have a named type, we may have associated methods.
             // Look for those first.
             {
@@ -129,18 +140,21 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                         }
                     }
                     seen.add(named);
+
                     for (nint i = 0; i < named.NumMethods(); i++) {
                         mset = mset.addOne(named.Method(i), concat(e.index, i), e.indirect, e.multiples);
                     }
                 }
             }
-            switch (under(typΔ1).type()) {
+
+            switch (typΔ1.Underlying().type()) {
             case ж<Struct> t: {
                 foreach (var (i, f) in (~t).fields) {
                     if (fset == default!) {
                         fset = new map<@string, bool>();
                     }
                     fset[f.of(Var.Ꮡobject).Id()] = true;
+
                     // Embedded fields are always of the form T or *T where
                     // T is a type name. If typ appeared multiple times at
                     // this depth, f.Type appears multiple times at the next
@@ -160,6 +174,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                 break;
             }}
         }
+
         // Add methods and collisions at this depth to base if no entries with matching
         // names exist already.
         foreach (var (k, vᴛ1) in mset) {
@@ -178,6 +193,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                 }
             }
         }
+
         // Add all (remaining) fields at this depth as collisions (since they will
         // hide any method further down) if no entries with matching names exist already.
         foreach (var (k, _) in fset) {
@@ -190,11 +206,14 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
                 }
             }
         }
+
         current = consolidateMultiples(next);
     }
+
     if (len(@base) == 0) {
         return ᏑemptyMethodSet;
     }
+
     // collect methods
     slice<ж<Selection>> list = default!;
     foreach (var (_, m) in @base) {
@@ -209,6 +228,9 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     return Ꮡ(new MethodSet(list));
 }
 
+// A methodSet is a set of methods and name collisions.
+// A collision indicates that multiple methods with the
+// same unique id, or a field with that id appeared.
 partial struct methodSet /*map[@string, ж<Selection>]*/;
 
 // Add adds all functions in list to the method set s.

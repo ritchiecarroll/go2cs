@@ -175,6 +175,22 @@ internal static slice<testCase> cases = new testCase[]{
         }.slice()
     ),
     new(
+        name: "nested-empty-group-record"u8,
+        explanation: withSource("a Handler should not output nested groups if there are no attributes"u8),
+        f: (ж<slog.Logger> l) => {
+            l.With((@string)"a"u8, (@string)"b"u8).WithGroup("G"u8).With((@string)"c"u8, (@string)"d"u8).WithGroup("H"u8).WithGroup("I"u8).Info("msg"u8);
+        },
+        checks: new Func<map<@string, any>, @string>[]{
+            hasKey(slog.TimeKey),
+            hasKey(slog.LevelKey),
+            hasAttr(slog.MessageKey, (@string)"msg"u8),
+            hasAttr("a"u8, (@string)"b"u8),
+            inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
+            inGroup("G"u8, missingKey("H"u8)),
+            inGroup("G"u8, missingKey("I"u8))
+        }.slice()
+    ),
+    new(
         name: "resolve"u8,
         explanation: withSource("a Handler should call Resolve on attribute values"u8),
         f: (ж<slog.Logger> l) => {
@@ -254,6 +270,8 @@ internal static slice<testCase> cases = new testCase[]{
 // If a Handler intentionally drops an attribute that is checked by a test,
 // then the results function should check for its absence and add it to the map it returns.
 public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>> results) {
+    var errsᴷ = new stackAppend<error>();
+
     // Run the handler on the test cases.
     foreach (var (_, c) in cases) {
         var ht = h;
@@ -263,6 +281,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
         var l = slog.New(ht);
         c.f(l);
     }
+
     // Collect and check the results.
     slice<error> errs = default!;
     var res = results();
@@ -277,7 +296,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
         foreach (var (_, check) in c.checks) {
             {
                 @string problem = check(got); if (problem != ""u8) {
-                    errs = append(errs, fmt.Errorf("%s: %s"u8, problem, c.explanation));
+                    errs = append(errsᴷ, errs, fmt.Errorf("%s: %s"u8, problem, c.explanation));
                 }
             }
         }

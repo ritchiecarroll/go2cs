@@ -5,15 +5,15 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object beforeGoroutinePanicˢ = (@string)"before goroutine panic"u8;
-
 internal static partial void Main() {
-    fmt.Println(beforeGoroutinePanicˢ);
+    fmt.Println("before goroutine panic");
+
     var done = new channel<EmptyStruct>(0);
+
     goǃ(() => {
         throw panic("goroutine boom");
     });
+
     ᐸꟷ(done);
 }
 

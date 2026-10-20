@@ -21,6 +21,7 @@ import (
 // the underlying, as the numeric twin already does. Emitted as a plain cast it is CS0030 (go-cmp's
 // example_test `myString(in)`, with `type myString otherString` and `type otherString string`).
 func TestNamedStringAndBoolConversionsHopThroughTheUnderlying(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 
@@ -76,10 +77,10 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "namedbasic", "main.cs"))
 
 	for _, want := range []string{
-		"((B)(@string)a)",           // sibling named strings
-		"((pkgString)(@string)o)",   // a same-package type defined over a named string
-		"((otherString)(@string)p)", // and back
-		"((U)(bool)t)",              // sibling named bools
+		"(B)(@string)a",           // sibling named strings
+		"(pkgString)(@string)o",   // a same-package type defined over a named string
+		"(otherString)(@string)p", // and back
+		"(U)(bool)t",              // sibling named bools
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("missing %q in:\n%s", want, mainCs)

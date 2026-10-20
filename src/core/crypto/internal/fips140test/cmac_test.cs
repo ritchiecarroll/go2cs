@@ -36,6 +36,7 @@ public static void TestCMAC(ж<testing.T> Ꮡt) {
             "7D85449E A6EA19C8 23A7BF78 837DFADE"u8
         )
     }.slice();
+
     var (b, err) = aes.New(decodeHex(Ꮡt, key));
     if (err != default!) {
         Ꮡt.Fatal(err);

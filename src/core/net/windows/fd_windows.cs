@@ -34,7 +34,6 @@ internal static bool canUseConnectEx(@string net) {
     if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
         return true;
     }
-
     // ConnectEx windows API does not support connectionless sockets.
     return false;
 }
@@ -53,14 +52,41 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
     return (ret, default!);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string wsaioctlˢ = "wsaioctl"u8;
+
 internal static error init(this ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
-    var (errcall, err) = Ꮡfd.of(netFD.Ꮡpfd).Init(fd.net, true);
-    if (errcall != ""u8) {
-        err = wrapSyscallError(errcall, err);
+    {
+        var err = Ꮡfd.of(netFD.Ꮡpfd).Init(fd.net, true); if (err != default!) {
+            return err;
+        }
     }
-    return err;
+    var exprᴛ1 = fd.net;
+    if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
+        // Disable reporting of PORT_UNREACHABLE errors.
+        // See https://go.dev/issue/5834.
+        ref var ret = ref heap<uint32>(out var Ꮡret);
+        ret = (uint32)0;
+        ref var flag = ref heap<uint32>(out var Ꮡflag);
+        flag = (uint32)0;
+        var size = (uint32)/* unsafe.Sizeof(flag) */ (uintptr)4;
+        var err = syscall.WSAIoctl(fd.pfd.Sysfd, syscall.SIO_UDP_CONNRESET, Ꮡflag.Reinterpret<uint32, byte>(), size, nil, 0, Ꮡret, nil, 0);
+        if (err != default!) {
+            return wrapSyscallError(wsaioctlˢ, err);
+        }
+        // Disable reporting of NET_UNREACHABLE errors.
+        // See https://go.dev/issue/68614.
+        ret = 0;
+        flag = 0;
+        size = (uint32)/* unsafe.Sizeof(flag) */ (uintptr)4;
+        err = syscall.WSAIoctl(fd.pfd.Sysfd, windows.SIO_UDP_NETRESET, Ꮡflag.Reinterpret<uint32, byte>(), size, nil, 0, Ꮡret, nil, 0);
+        if (err != default!) {
+            return wrapSyscallError(wsaioctlˢ, err);
+        }
+    }
+    return default!;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -83,12 +109,14 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
                 return (default!, err);
             }
         }
+
         if (ctx.Done() != default!) {
             // Propagate the Context's deadline and cancellation.
             // If the context is already done, or if it has a nonzero deadline,
             // ensure that that is applied before the call to ConnectEx begins
             // so that we don't return spurious connections.
             defer(Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline, noDeadline, ref ᒐ);
+
             if (ctx.Err() != default!){
                 Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(aLongTimeAgo);
             } else {
@@ -97,6 +125,7 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
                         Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(deadline);
                     }
                 }
+
                 var done = new channel<EmptyStruct>(0);
                 var doneʗ1 = done;
                 var stop = context.AfterFunc(ctx, () => {
@@ -116,6 +145,7 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
                 }, ref ᒐ);
             }
         }
+
         if (!canUseConnectEx(fd.net)) {
             var err = connectFunc(fd.pfd.Sysfd, ra);
             return (default!, os.NewSyscallError(connectˢ, err));
@@ -135,13 +165,13 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
                 throw panic("unexpected type in connect");
                 break;
             }}
-
             {
                 var err = syscall.Bind(fd.pfd.Sysfd, la); if (err != default!) {
                     return (default!, os.NewSyscallError(bindˢ, err));
                 }
             }
         }
+
         bool isloopback = default!;
         switch (ra.type()) {
         case ж<syscall.SockaddrInet4> raΔ1: {
@@ -163,10 +193,8 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
             ref var @params = ref heap<windows.TCP_INITIAL_RTO_PARAMETERS>(out var Ꮡparams);
             @params = new windows.TCP_INITIAL_RTO_PARAMETERS(
                 Rtt: windows.TCP_INITIAL_RTO_UNSPECIFIED_RTT, // use the default or overridden by the Administrator
-
-                MaxSynRetransmissions: 1
+                MaxSynRetransmissions: 1 // minimum possible value before Windows 10.0.16299
             );
-            // minimum possible value before Windows 10.0.16299
             if (windows.SupportTCPInitialRTONoSYNRetransmissions()) {
                 // In Windows 10.0.16299 TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS makes ConnectEx() fails instantly.
                 @params.MaxSynRetransmissions = windows.TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS;
@@ -176,6 +204,7 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
             // If it fails reliably, we expect TestDialClosedPortFailFast to detect it.
             _ = Ꮡfd.of(netFD.Ꮡpfd).WSAIoctl(windows.SIO_TCP_INITIAL_RTO, Ꮡparams.Reinterpret<windows.TCP_INITIAL_RTO_PARAMETERS, byte>(), (uint32)/* unsafe.Sizeof(params) */ (uintptr)4, nil, 0, Ꮡout, nil, 0);
         }
+
         // Call ConnectEx API.
         {
             var err = Ꮡfd.of(netFD.Ꮡpfd).ConnectEx(ra); if (err != default!) {
@@ -227,12 +256,14 @@ internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     var (s, rawsa, rsan, errcall, err) = Ꮡfd.of(netFD.Ꮡpfd).Accept(() => sysSocket(Ꮡfd.Value.family, Ꮡfd.Value.sotype, 0));
+
     if (err != default!) {
         if (errcall != ""u8) {
             err = wrapSyscallError(errcall, err);
         }
         return (default!, err);
     }
+
     // Associate our new socket with IOCP.
     (var netfd, err) = newFD(s, fd.family, fd.sotype, fd.net);
     if (err != default!) {
@@ -245,6 +276,7 @@ internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
             return (default!, errΔ1);
         }
     }
+
     // Get local and peer addr out of AcceptEx buffer.
     ref var lrsa = ref heap<ж<syscall.RawSockaddrAny>>(out var Ꮡlrsa);
     ref var rrsa = ref heap<ж<syscall.RawSockaddrAny>>(out var Ꮡrrsa);
@@ -254,14 +286,42 @@ internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
         0, rsan, rsan, Ꮡlrsa, Ꮡllen, Ꮡrrsa, Ꮡrlen);
     var (lsa, _) = lrsa.Sockaddr();
     var (rsa, _) = rrsa.Sockaddr();
+
     netfd.setAddr(netfd.addrFunc()(lsa), netfd.addrFunc()(rsa));
     return (netfd, default!);
 }
 
-// Unimplemented functions.
-internal static (ж<os.File>, error) dup(this ref netFD fd) {
-    // TODO: Implement this, perhaps using internal/poll.DupCloseOnExec.
-    return (default!, syscall.EWINDOWS);
+// Defined in os package.
+/*linkname*/ internal static partial ж<os.File> newWindowsFile(syscallꓸHandle h, @string name) {
+    return os.net_newWindowsFile((uintptr)h, name);
+}
+
+internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.DerefOrNull();
+
+    // Disassociate the IOCP from the socket,
+    // it is not safe to share a duplicated handle
+    // that is associated with IOCP.
+    {
+        var errΔ1 = Ꮡfd.of(netFD.Ꮡpfd).DisassociateIOCP(); if (errΔ1 != default!) {
+            return (default!, errΔ1);
+        }
+    }
+    syscallꓸHandle h = default!;
+    ref var syserr = ref heap<error>(out var Ꮡsyserr);
+    var err = Ꮡfd.of(netFD.Ꮡpfd).RawControl((uintptr fdΔ1) => {
+        (h, Ꮡsyserr.ValueSlot) = dupSocket((syscallꓸHandle)fdΔ1);
+    });
+    if (err == default!) {
+        err = syserr;
+    }
+    if (err != default!) {
+        return (default!, err);
+    }
+    // All WSASocket calls must be match with a syscall.Closesocket call,
+    // but os.NewFile calls syscall.CloseHandle instead. We need to use
+    // a hidden function so that the returned file is aware of this fact.
+    return (newWindowsFile(h, fd.name()), default!);
 }
 
 } // end net_package

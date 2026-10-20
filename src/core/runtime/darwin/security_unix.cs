@@ -11,14 +11,17 @@ partial class runtime_package {
 
 internal static void secure() {
     initSecureMode();
+
     if (!isSecureMode()) {
         return;
     }
+
     // When secure mode is enabled, we do one thing: enforce specific
     // environment variable values (currently we only force GOTRACEBACK=none)
     //
     // Other packages may also disable specific functionality when secure mode
     // is enabled (determined by using linkname to call isSecureMode).
+
     secureEnv();
 }
 

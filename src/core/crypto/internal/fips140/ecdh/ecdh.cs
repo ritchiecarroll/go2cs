@@ -150,6 +150,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
     fips140.RecordApproved();
     // This procedure is equivalent to Key Pair Generation by Testing
     // Candidates, specified in NIST SP 800-56A Rev. 3, Section 5.6.1.2.2.
+
     while (ᐧ) {
         var key = new slice<byte>(len(c.N));
         {
@@ -161,15 +162,18 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
         // the zero key as it generates the identity as a public key. This also
         // makes this function consistent with crypto/elliptic.GenerateKey.
         key[1] ^= (byte)(0x42);
+
         // Mask off any excess bits if the size of the underlying field is not a
         // whole number of bytes, which is only the case for P-521.
         if (c.curve == p521 && (byte)(c.N[0] & 0b1111_1110) == 0) {
             key[0] &= (byte)(0b0000_0001);
         }
+
         var (privateKey, err) = NewPrivateKey(Ꮡc, key);
         if (err != default!) {
             continue;
         }
+
         // A "Pairwise Consistency Test" makes no sense if we just generated the
         // public key from an ephemeral private key. Moreover, there is no way to
         // check it aside from redoing the exact same computation again. SP 800-56A
@@ -190,6 +194,7 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
             }
             return default!;
         });
+
         return (privateKey, default!);
     }
 }
@@ -208,12 +213,14 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
     if (len(key) != len(c.N) || isZero(key) || !isLess(key, c.N)) {
         return (default!, errors.New(cryptoEcdhInvalidPrivateˢ));
     }
+
     var (p, err) = c.newPoint().ScalarBaseMult(key);
     if (err != default!) {
         // This is unreachable because the only error condition of
         // ScalarBaseMult is if the input is not the right size.
         throw panic("crypto/ecdh: internal error: nistec ScalarBaseMult failed for a fixed-size input");
     }
+
     var publicKey = p.Bytes();
     if (len(publicKey) == 1) {
         // The encoding of the identity is a single 0x00 byte. This is
@@ -221,6 +228,7 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
         // zero, which is rejected above.
         throw panic("crypto/ecdh: internal error: public key is the identity element");
     }
+
     var k = Ꮡ(new PrivateKey(d: bytes.Clone(key), pub: new ΔPublicKey(curve: c.curve, q: publicKey)));
     return (k, default!);
 }
@@ -237,6 +245,7 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
     if (len(key) == 0 || key[0] != 4) {
         return (default!, errors.New(cryptoEcdhInvalidPublicˢ));
     }
+
     // SetBytes checks that x and y are in the interval [0, p - 1], and that
     // the point is on the curve. Along with the rejection of the point at
     // infinity (the identity element) above, this fulfills the requirements
@@ -246,6 +255,7 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
             return (default!, err);
         }
     }
+
     return (Ꮡ(new ΔPublicKey(curve: c.curve, q: bytes.Clone(key))), default!);
 }
 
@@ -270,24 +280,29 @@ internal static (slice<byte>, error) ecdh<P>(ref Curve<P> c, ref PrivateKey k, r
     if (k.pub.curve != peer.curve) {
         return (default!, errors.New(cryptoEcdhMismatchedˢ));
     }
+
     // This applies the Shared Secret Computation of the Ephemeral Unified Model
     // scheme specified in NIST SP 800-56A Rev. 3, Section 6.1.2.2.
+
     // Per Section 5.6.2.3.4, Step 1, reject the identity element (0x00).
     if (len(k.pub.q) == 1) {
         return (default!, errors.New(cryptoEcdhPublicKeyIsTheˢ));
     }
+
     // SetBytes checks that (x, y) are reduced modulo p, and that they are on
     // the curve, performing Steps 2-3 of Section 5.6.2.3.4.
     var (p, err) = c.newPoint().SetBytes(peer.q);
     if (err != default!) {
         return (default!, err);
     }
+
     // Compute P according to Section 5.7.1.2.
     {
         var (_, errΔ1) = p.ScalarMult(p, k.d); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
+
     // BytesX checks that the result is not the identity element, and returns the
     // x-coordinate of the result, performing Steps 2-5 of Section 5.7.1.2.
     return p.BytesX();
@@ -308,6 +323,7 @@ internal static bool isLess(slice<byte> a, slice<byte> b) {
     if (len(a) != len(b)) {
         throw panic("crypto/ecdh: internal error: mismatched isLess inputs");
     }
+
     // Copy the values into a fixed-size preallocated little-endian buffer.
     // 72 bytes is enough for every scalar in this package, and having a fixed
     // size lets us avoid heap allocations.
@@ -318,12 +334,14 @@ internal static bool isLess(slice<byte> a, slice<byte> b) {
     foreach (var (i, _) in a) {
         (bufA[i], bufB[i]) = (a[len(a) - i - 1], b[len(b) - i - 1]);
     }
+
     // Perform a subtraction with borrow.
     uint64 borrow = default!;
     for (nint i = 0; i < len(bufA); i += 8) {
         var (limbA, limbB) = (byteorder.LEUint64(bufA.slice(i)), byteorder.LEUint64(bufB.slice(i)));
         (_, borrow) = bits.Sub64(limbA, limbB, borrow);
     }
+
     // If there is a borrow at the end of the operation, then a < b.
     return borrow == 1;
 }

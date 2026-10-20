@@ -116,35 +116,32 @@ internal static float64 log1p(float64 x) {
     const float64 Lp5 = 1.818357216161805012e-01; // 3FC7466496CB03DE
     const float64 Lp6 = 1.531383769920937332e-01; // 3FC39A09D078C69F
     const float64 Lp7 = 1.479819860511658591e-01; // 3FC2F112DF3E5244
+
     // special cases
     switch (ᐧ) {
-    case {} when x < -1D || IsNaN(x): {
+    case {} when x < -1D || IsNaN(x): { // includes -Inf
         return NaN();
     }
     case {} when x == -1D: {
         return Inf(-1);
     }
-    case {} when IsInf(x, // includes -Inf
- 1): {
+    case {} when IsInf(x, 1): {
         return Inf(1);
     }}
 
     var absx = Abs(x);
+
     float64 f = default!;
     uint64 iu = default!;
     nint k = 1;
-    if (absx < Sqrt2M1) {
-        //  |x| < Sqrt(2)-1
-        if (absx < Small) {
-            // |x| < 2**-29
-            if (absx < Tiny) {
-                // |x| < 2**-54
+    if (absx < Sqrt2M1) { //  |x| < Sqrt(2)-1
+        if (absx < Small) { // |x| < 2**-29
+            if (absx < Tiny) { // |x| < 2**-54
                 return x;
             }
             return x - x * x * 0.5D;
         }
-        if (x > Sqrt2HalfM1) {
-            // Sqrt(2)/2-1 < x
+        if (x > Sqrt2HalfM1) { // Sqrt(2)/2-1 < x
             // (Sqrt(2)/2-1) < x < (Sqrt(2)-1)
             k = 0;
             f = x;
@@ -154,11 +151,10 @@ internal static float64 log1p(float64 x) {
     float64 c = default!;
     if (k != 0) {
         float64 u = default!;
-        if (absx < Two53){
-            // 1<<53
+        if (absx < Two53){ // 1<<53
             u = 1.0D + x;
             iu = Float64bits(u);
-            k = (nint)(((iu >> (int)(52))) - 1023);
+            k = (nint)((iu >> 52) - 1023);
             // correction term
             if (k > 0){
                 c = 1.0D - (u - x);
@@ -169,17 +165,16 @@ internal static float64 log1p(float64 x) {
         } else {
             u = x;
             iu = Float64bits(u);
-            k = (nint)(((iu >> (int)(52))) - 1023);
+            k = (nint)((iu >> 52) - 1023);
             c = 0D;
         }
         iu &= (uint64)(0x000fffffffffffffUL);
-        if (iu < 0x0006a09e667f3bcdUL){
-            // mantissa of Sqrt(2)
-            u = Float64frombits((uint64)(iu | 0x3ff0000000000000UL)); // normalize u
+        if (iu < 0x0006a09e667f3bcdUL){ // mantissa of Sqrt(2)
+            u = Float64frombits(iu | 0x3ff0000000000000UL); // normalize u
         } else {
             k++;
-            u = Float64frombits((uint64)(iu | 0x3fe0000000000000UL)); // normalize u/2
-            iu = ((0x0010000000000000UL - iu) >> (int)(2));
+            u = Float64frombits(iu | 0x3fe0000000000000UL); // normalize u/2
+            iu = (0x0010000000000000UL - iu) >> 2;
         }
         f = u - 1.0D; // Sqrt(2)/2 < u < Sqrt(2)
     }
@@ -187,8 +182,7 @@ internal static float64 log1p(float64 x) {
     float64 s = default!;
     float64 R = default!;
     float64 z = default!;
-    if (iu == 0) {
-        // |f| < 2**-20
+    if (iu == 0) { // |f| < 2**-20
         if (f == 0D) {
             if (k == 0) {
                 return 0D;

@@ -15,7 +15,7 @@ partial class comment_package {
 
 // A textPrinter holds the state needed for printing a Doc as plain text.
 partial struct textPrinter {
-    public partial ref ж<Printer> Printer { get; }
+    /*embed*/ public ж<Printer> Printer;
     internal strings.Builder @long;
     internal @string prefix;
     internal @string codePrefix;
@@ -40,6 +40,7 @@ public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     if ((~tp).width == 0) {
         tp.Value.width = 80 - utf8.RuneCountInString((~tp).prefix);
     }
+
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     foreach (var (i, x) in d.Content) {
         if (i > 0 && blankBefore(x)) {
@@ -158,6 +159,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
     p.oneLongLine(Ꮡp.of(textPrinter.Ꮡlong), x);
     var words = strings.Fields(p.@long.String());
     p.@long.Reset();
+
     slice<nint> seq = default!;
     if (p.width < 0 || len(words) == 0){
         seq = new nint[]{0, len(words)}.slice(); // one long line
@@ -186,11 +188,11 @@ internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡ
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {
-            Ꮡout.WriteString(((@string)tΔ1));
+            Ꮡout.WriteString((@string)tΔ1);
             break;
         }
         case Italic tΔ1: {
-            Ꮡout.WriteString(((@string)tΔ1));
+            Ꮡout.WriteString((@string)tΔ1);
             break;
         }
         case ж<Link> tΔ1: {
@@ -228,6 +230,9 @@ internal partial struct wrap_score /*dyn*/ {
 // [The least weight subsequence problem]: https://doi.org/10.1109/SFCS.1985.60
 internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     slice<nint> seq = default!;
+    var fᴷ = new stackAppend<wrap_score>();
+    var bestleftᴷ = new stackAppend<nint>();
+    var dᴷ = new stackAppend<nint>();
 
     // The algorithm requires that our scoring function be concave,
     // meaning that for all i₀ ≤ i₁ < j₀ ≤ j₁,
@@ -271,9 +276,9 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         case {} when s.lo > t.lo: {
             return +1;
         }}
-
         return 0;
     }
+
     // total[j] is the total number of runes
     // (including separating spaces) in words[:j].
     var total = new slice<nint>(len(words) + 1);
@@ -281,6 +286,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     foreach (var (i, s) in words) {
         total[1 + i] = total[i] + utf8.RuneCountInString(s) + 1;
     }
+
     // weight returns weight(i, j).
     var totalʗ1 = total;
     var wordsʗ1 = words;
@@ -290,6 +296,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         if (j == len(wordsʗ1) && nΔ1 <= max) {
             return new wrap_score(0, 0);
         }
+
         // Otherwise the weight is the penalty plus the square of the number of
         // characters remaining on the line or by which the line goes over.
         // In the latter case, that value goes in the hi part of the score.
@@ -301,6 +308,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         }
         return new wrap_score(0, v + p);
     }
+
     // The rest of this function is “The Basic Algorithm” from
     // Hirschberg and Larmore's conference paper,
     // using the same names as in the paper.
@@ -309,6 +317,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     var addʗ1 = add;
     var weightʗ1 = weight;
     wrap_score g(nint i, nint j) => addʗ1(Ꮡf.ValueSlot[i], weightʗ1(i, j));
+
     var cmpʗ1 = cmp;
     var gʗ1 = g;
     var wordsʗ2 = words;
@@ -324,14 +333,15 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         }
         return cmpʗ1(gʗ1(c, k), gʗ1(b, k)) <= 0;
     }
+
     // d is a one-ended deque implemented as a slice.
     var d = new slice<nint>(1, len(words));
     d[0] = 0;
     var bestleft = new slice<nint>(1, len(words));
     bestleft[0] = -1;
     for (nint m = 1; m < len(words); m++) {
-        f = append(f, g(d[0], m));
-        bestleft = append(bestleft, d[0]);
+        f = append(fᴷ, f, g(d[0], m));
+        bestleft = append(bestleftᴷ, bestleft, d[0]);
         while (len(d) > 1 && cmp(g(d[1], m + 1), g(d[0], m + 1)) <= 0) {
             d = d[1..]; // “Retire”
         }
@@ -339,7 +349,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
             d = d.slice(0, len(d) - 1); // “Fire”
         }
         if (cmp(g(m, len(words)), g(d[len(d) - 1], len(words))) < 0) {
-            d = append(d, m); // “Hire”
+            d = append(dᴷ, d, m); // “Hire”
             // The next few lines are not in the paper but are necessary
             // to handle two-word inputs correctly. It appears to be
             // just a bug in the paper's pseudocode.
@@ -349,6 +359,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         }
     }
     bestleft = append(bestleft, d[0]);
+
     // Recover least weight sequence from bestleft.
     nint n = 1;
     for (nint m = len(words); m > 0; m = bestleft[m]) {
@@ -368,7 +379,6 @@ internal static int64 wrapPenalty(@string s) {
     case (rune)'.' or (rune)',' or (rune)':' or (rune)';': {
         return 0;
     }}
-
     return 64;
 }
 

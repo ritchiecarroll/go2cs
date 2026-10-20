@@ -80,17 +80,10 @@ internal static bool tryWhileHeld(this ж<counter> Ꮡc) {
     return got;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object totalˢ = (@string)"total:"u8;
-private static readonly object wantˢ = (@string)"want:"u8;
-private static readonly object trylockWhileHeldˢ = (@string)"trylock while held:"u8;
-private static readonly object crossGoroutineUnlockOkˢ = (@string)"cross-goroutine unlock: ok"u8;
-private static readonly object viaLocalPointerˢ = (@string)"via local pointer:"u8;
-private static readonly object nilReceiverEarlyReturnˢ = (@string)"nil receiver, early return:"u8;
-
 internal static partial void Main() {
     UntypedInt workers = 8;
     UntypedInt each = 2000;
+
     var c = Ꮡ(new counter(nil));
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < workers; i++) {
@@ -111,8 +104,10 @@ internal static partial void Main() {
         c.bumpAsync(each, Ꮡwg);
     }
     Ꮡwg.Wait();
-    fmt.Println(totalˢ, c.get(), wantˢ, (nint)(2 * workers * each));
-    fmt.Println(trylockWhileHeldˢ, c.tryWhileHeld());
+    fmt.Println("total:", c.get(), "want:", (nint)(2 * workers * each));
+
+    fmt.Println("trylock while held:", c.tryWhileHeld());
+
     c.of(counter.Ꮡmu).Lock();
     var released = new channel<bool>(0);
     var cʗ2 = c;
@@ -124,15 +119,17 @@ internal static partial void Main() {
     ᐸꟷ(released);
     c.of(counter.Ꮡmu).Lock();
     c.of(counter.Ꮡmu).Unlock();
-    fmt.Println(crossGoroutineUnlockOkˢ);
+    fmt.Println("cross-goroutine unlock: ok");
+
     var p = Ꮡ(new counter(nil));
     var q = p;
     q.of(counter.Ꮡmu).Lock();
     q.Value.n = 42;
     q.of(counter.Ꮡmu).Unlock();
-    fmt.Println(viaLocalPointerˢ, (~p).n);
+    fmt.Println("via local pointer:", (~p).n);
+
     ж<counter> nilc = default!;
-    fmt.Println(nilReceiverEarlyReturnˢ, nilc.nBeforeTouch());
+    fmt.Println("nil receiver, early return:", nilc.nBeforeTouch());
 }
 
 } // end main_package

@@ -113,7 +113,7 @@ internal static error Exported(this ref hidden t, Args args, ж<Reply> Ꮡreply)
 }
 
 public partial struct Embed {
-    internal partial ref hidden hidden { get; }
+    /*embed*/ internal hidden hidden;
 }
 
 public partial struct BuiltinTypes {
@@ -161,10 +161,12 @@ internal static partial void startServer() {
     Register(@new<Embed>());
     RegisterName(netRpcArithˢ, @new<Arith>());
     Register(new BuiltinTypes(nil));
+
     net.Listener l = default!;
     (l, serverAddr) = listenTCP();
     log.Println(testRpcServerListeningOnˢ, serverAddr);
     goǃ(Accept, l);
+
     HandleHTTP();
     ᏑhttpOnce.Do(startHttpServer);
 }
@@ -180,10 +182,12 @@ internal static partial void startNewServer() {
     newServer.Register(@new<Embed>());
     newServer.RegisterName(netRpcArithˢ, @new<Arith>());
     newServer.RegisterName(newServerArithˢ, @new<Arith>());
+
     net.Listener l = default!;
     (l, newServerAddr) = listenTCP();
     log.Println(newServerTestRpcServerˢ, newServerAddr);
     goǃ(newServer.Accept, l);
+
     newServer.HandleHTTP(newHttpPath, barˢ);
     ᏑhttpOnce.Do(startHttpServer);
 }
@@ -238,6 +242,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         // Synchronous calls
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
@@ -248,6 +253,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if ((~reply).C != (~args).A + (~args).B) {
             Ꮡt.Errorf("Add: expected %d got %d"u8, (~reply).C, (~args).A + (~args).B);
         }
+
         // Methods exported from unexported embedded structs
         args = Ꮡ(new Args(7, 0));
         reply = @new<Reply>();
@@ -258,6 +264,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if ((~reply).C != (~args).A + (~args).B) {
             Ꮡt.Errorf("Add: expected %d got %d"u8, (~reply).C, (~args).A + (~args).B);
         }
+
         // Nonexistent method
         args = Ꮡ(new Args(7, 0));
         reply = @new<Reply>();
@@ -269,6 +276,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if (!strings.HasPrefix(err.Error(), rpcCanTFindMethodˢ)) {
             Ꮡt.Errorf("BadOperation: expected can't find method error; got %q"u8, err);
         }
+
         // Unknown service
         args = Ꮡ(new Args(7, 8));
         reply = @new<Reply>();
@@ -279,12 +287,14 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if (!strings.Contains(err.Error(), methodˢ)) {
             Ꮡt.Error(expectedErrorAboutMethodˢ, err);
         }
+
         // Out of order.
         args = Ꮡ(new Args(7, 8));
         var mulReply = @new<Reply>();
         var mulCall = client.Go(arithMulˢ, args.OrTypedNil(), mulReply.OrTypedNil(), default!);
         var addReply = @new<Reply>();
         var addCall = client.Go(arithAddˢ, args.OrTypedNil(), addReply.OrTypedNil(), default!);
+
         addCall = ᐸꟷ((~addCall).Done);
         if ((~addCall).Error != default!) {
             Ꮡt.Errorf("Add: expected no error but got string %q"u8, (~addCall).Error.Error());
@@ -292,6 +302,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if ((~addReply).C != (~args).A + (~args).B) {
             Ꮡt.Errorf("Add: expected %d got %d"u8, (~addReply).C, (~args).A + (~args).B);
         }
+
         mulCall = ᐸꟷ((~mulCall).Done);
         if ((~mulCall).Error != default!) {
             Ꮡt.Errorf("Mul: expected no error but got string %q"u8, (~mulCall).Error.Error());
@@ -299,6 +310,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if ((~mulReply).C != (~args).A * (~args).B) {
             Ꮡt.Errorf("Mul: expected %d got %d"u8, (~mulReply).C, (~args).A * (~args).B);
         }
+
         // Error test
         args = Ꮡ(new Args(7, 0));
         reply = @new<Reply>();
@@ -310,6 +322,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if (err.Error() != "divide by zero"u8) {
             Ꮡt.Error(divExpectedDivideByZeroˢ, err);
         }
+
         // Bad type.
         reply = @new<Reply>();
         err = client.Call(arithAddˢ, reply.OrTypedNil(), reply.OrTypedNil()); // args, reply would be the correct thing to use
@@ -319,6 +332,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if (!strings.Contains(err.Error(), typeˢ)) {
             Ꮡt.Error(expectedErrorAboutTypeˢ, err);
         }
+
         // Non-struct argument
         const nint Val = 12345;
         ref var str = ref heap<@string>(out var Ꮡstr);
@@ -331,6 +345,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if ((~reply).C != Val) {
             Ꮡt.Errorf("Scan: expected %d got %d"u8, (nint)(Val), (~reply).C);
         }
+
         // Non-struct reply
         args = Ꮡ(new Args(27, 35));
         str = ""u8;
@@ -342,6 +357,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if (str != expect) {
             Ꮡt.Errorf("String: expected %s got %s"u8, expect, str);
         }
+
         args = Ꮡ(new Args(7, 8));
         reply = @new<Reply>();
         err = client.Call(arithMulˢ, args.OrTypedNil(), reply.OrTypedNil());
@@ -351,6 +367,7 @@ internal static void testRPC(ж<testing.T> Ꮡt, @string addr) {
         if ((~reply).C != (~args).A * (~args).B) {
             Ꮡt.Errorf("Mul: expected %d got %d"u8, (~reply).C, (~args).A * (~args).B);
         }
+
         // ServiceName contain "." character
         args = Ꮡ(new Args(7, 8));
         reply = @new<Reply>();
@@ -378,6 +395,7 @@ internal static void testNewServerRPC(ж<testing.T> Ꮡt, @string addr) {
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         // Synchronous calls
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
@@ -415,6 +433,7 @@ internal static void testHTTPRPC(ж<testing.T> Ꮡt, @string path) {
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         // Synchronous calls
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
@@ -439,12 +458,14 @@ public static void TestBuiltinTypes(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡonce.Do(startServer);
+
         var (client, err) = DialHTTP(tcpˢ, httpServerAddr);
         if (err != default!) {
             Ꮡt.Fatal(dialingˢ, err);
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         // Map
         var args = Ꮡ(new Args(7, 8));
         ref var replyMap = ref heap<map<nint, nint>>(out var ᏑreplyMap);
@@ -456,6 +477,7 @@ public static void TestBuiltinTypes(ж<testing.T> Ꮡt) {
         if (replyMap[(~args).A] != (~args).B) {
             Ꮡt.Errorf("Map: expected %d got %d"u8, (~args).B, replyMap[(~args).A]);
         }
+
         // Slice
         args = Ꮡ(new Args(7, 8));
         ref var replySlice = ref heap<slice<nint>>(out var ᏑreplySlice);
@@ -469,6 +491,7 @@ public static void TestBuiltinTypes(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Slice: expected %v got %v"u8, e, replySlice);
             }
         }
+
         // Array
         args = Ꮡ(new Args(7, 8));
         ref var replyArray = ref heap<array<nint>>(out var ᏑreplyArray);
@@ -562,6 +585,7 @@ internal static void testServeRequest(ж<testing.T> Ꮡt, ж<global::go.net.rpc_
         ref var client = ref heap<CodecEmulator>(out var Ꮡclient);
         client = new CodecEmulator(server: Ꮡserver);
         defer(() => Ꮡclient.Value.Close(), ref ᒐ);
+
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
         var err = Ꮡclient.Call(arithAddˢ, args, reply);
@@ -571,6 +595,7 @@ internal static void testServeRequest(ж<testing.T> Ꮡt, ж<global::go.net.rpc_
         if ((~reply).C != (~args).A + (~args).B) {
             Ꮡt.Errorf("Add: expected %d got %d"u8, (~reply).C, (~args).A + (~args).B);
         }
+
         err = Ꮡclient.Call(arithAddˢ, nil, reply);
         if (err == default!) {
             Ꮡt.Errorf("expected error calling Arith.Add with nil arg"u8);
@@ -629,7 +654,7 @@ public static void TestRegistrationError(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Error(expectedErrorRegisteringˢ3);
     }
-    err = Register(((ΔNeedsPtrType)0));
+    err = Register((ΔNeedsPtrType)0);
     if (err == default!){
         Ꮡt.Error(expectedErrorRegisteringˢ4);
     } else 
@@ -668,9 +693,10 @@ internal static readonly object deadlockˢ = (@string)"deadlock"u8;
 public static partial void TestSendDeadlock(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var client = NewClientWithCodec(((WriteFailCodec)0));
+        var client = NewClientWithCodec((WriteFailCodec)0);
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         var done = new channel<bool>(0);
         var clientʗ2 = client;
         var doneʗ1 = done;
@@ -729,6 +755,7 @@ internal static float64 countMallocs(Func<(ж<global::go.net.rpc_package.Client>
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
         var argsʗ1 = args;
@@ -804,9 +831,10 @@ public static void TestClientWriteError(ж<testing.T> Ꮡt) {
         var c = NewClient(new rpc_internal_test_package.writeCrasherжReadWriteCloser(w));
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         ref var res = ref heap<bool>(out var Ꮡres);
         res = false;
-        var err = c.Call(fooˢ, (nint)(1), Ꮡres);
+        var err = c.Call(fooˢ, (nint)1, Ꮡres);
         if (err == default!) {
             Ꮡt.Fatal(expectedErrorˢ);
         }
@@ -826,12 +854,14 @@ public static void TestTCPClose(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡonce.Do(startServer);
+
         var (client, err) = dialHTTP();
         if (err != default!) {
             Ꮡt.Fatalf("dialing: %v"u8, err);
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         var args = new Args(17, 8);
         ref var reply = ref heap(new Reply(), out var Ꮡreply);
         err = client.Call(arithMulˢ, args, Ꮡreply);
@@ -852,6 +882,7 @@ internal static readonly object closeErrorˢ = (@string)"close error:"u8;
 
 public static void TestErrorAfterClientClose(ж<testing.T> Ꮡt) {
     Ꮡonce.Do(startServer);
+
     var (client, err) = dialHTTP();
     if (err != default!) {
         Ꮡt.Fatalf("dialing: %v"u8, err);
@@ -872,6 +903,7 @@ public static void TestAcceptExitAfterListenerClose(ж<testing.T> Ꮡt) {
     newServer.Register(@new<Arith>());
     newServer.RegisterName(netRpcArithˢ, @new<Arith>());
     newServer.RegisterName(newServerArithˢ, @new<Arith>());
+
     net.Listener l = default!;
     (l, _) = listenTCP();
     l.Close();
@@ -909,10 +941,12 @@ public static partial void TestShutdown(ж<testing.T> Ꮡt) {
     if (c1 == default!) {
         Ꮡt.Fatal(err);
     }
+
     var newServer = NewServer();
     newServer.Register(@new<Arith>());
     var newServerʗ1 = newServer;
     goǃ(newServerʗ1.ServeConn, new rpc_internal_test_package.net_ConnᴠReadWriteCloser(c1));
+
     var args = Ꮡ(new Args(7, 8));
     var reply = @new<Reply>();
     var client = NewClient(new rpc_internal_test_package.net_ConnᴠReadWriteCloser(c));
@@ -920,6 +954,7 @@ public static partial void TestShutdown(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // On an unloaded system 10ms is usually enough to fail 100% of the time
     // with a broken server. On a loaded system, a broken server might incorrectly
     // be reported as passing, but we're OK with that kind of flakiness.
@@ -949,9 +984,11 @@ internal static void benchmarkEndToEnd(Func<(ж<global::go.net.rpc_package.Clien
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         // Synchronous calls
         var args = Ꮡ(new Args(7, 8));
         b.ResetTimer();
+
         var argsʗ1 = args;
         var clientʗ2 = client;
         Ꮡb.RunParallel((ж<testing.PB> pb) => {
@@ -987,6 +1024,7 @@ internal static partial void benchmarkEndToEndAsync(Func<(ж<global::go.net.rpc_
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         // Asynchronous calls
         var args = Ꮡ(new Args(7, 8));
         nint procs = 4 * runtime.GOMAXPROCS(-1);
@@ -999,6 +1037,7 @@ internal static partial void benchmarkEndToEndAsync(Func<(ж<global::go.net.rpc_
         var gate = new channel<bool>(MaxConcurrentCalls);
         var res = new channel<ж<global::go.net.rpc_package.ΔCall>>(MaxConcurrentCalls);
         b.ResetTimer();
+
         for (nint p = 0; p < procs; p++) {
             var argsʗ1 = args;
             var clientʗ2 = client;

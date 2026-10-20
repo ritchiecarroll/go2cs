@@ -8,9 +8,15 @@
 namespace go.@internal;
 
 using byteorder = go.@internal.byteorder_package;
+using cpu = go.@internal.cpu_package;
+using @unsafe = unsafe_package;
 using go.@internal;
 
 partial class chacha8rand_package {
+
+// Offsets into internal/cpu records for use in assembly.
+internal static uintptr offsetLOONG64HasLSX => /* unsafe.Offsetof(cpu.Loong64.HasLSX) */ 64;
+internal static uintptr offsetRISCV64HasV => /* unsafe.Offsetof(cpu.RISCV64.HasV) */ 65;
 
 internal static UntypedInt ctrInc => 4; // increment counter by 4 between block calls
 internal static UntypedInt ctrMax => 16; // reseed when counter reaches 16
@@ -48,7 +54,7 @@ public static (uint64, bool) Next(this ref State s) {
         return (0, false);
     }
     s.i = i + 1;
-    return (s.buf[(uint32)(i & 31)], true); // i&31 eliminates bounds check
+    return (s.buf[(i & 31)], true); // i&31 eliminates bounds check
 }
 
 // Init seeds the State with the given seed value.
@@ -66,8 +72,8 @@ public static void Init(this ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
 // Init64 seeds the state with the given seed value.
 public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
     seed = seed.Clone();
-
     ref var s = ref Ꮡs.DerefOrNull();
+
     s.seed = seed.Clone();
     block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), 0);
     s.c = 0;

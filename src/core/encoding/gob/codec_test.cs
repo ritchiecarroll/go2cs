@@ -42,7 +42,7 @@ internal static slice<EncodeT> encodeT = new EncodeT[]{
     new(0x1111, new byte[]{0xFE, 0x11, 0x11}.slice()),
     new(0x1111111111111111UL, new byte[]{0xF8, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11}.slice()),
     new(0x8888888888888888UL, new byte[]{0xF8, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88}.slice()),
-    new(((uint64)1 << (int)(63)), new byte[]{0xF8, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}.slice())
+    new((uint64)1 << 63, new byte[]{0xF8, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}.slice())
 }.slice();
 
 // testError is meant to be used as a deferred function to turn a panic(gobError) into a
@@ -88,7 +88,7 @@ public static void TestUintCodec(ж<testing.T> Ꮡt) {
             if (u != v) {
                 Ꮡt.Errorf("Encode/Decode: sent %#x received %#x"u8, u, v);
             }
-            if ((uint64)(u & (((uint64)1 << (int)(63)))) != 0) {
+            if ((uint64)(u & ((uint64)1 << 63)) != 0) {
                 break;
             }
         }
@@ -122,7 +122,7 @@ public static void TestIntCodec(ж<testing.T> Ꮡt) {
         verifyInt(i, Ꮡt);
         verifyInt(-i, Ꮡt);
         verifyInt(~i, Ꮡt);
-        if ((uint64)(u & (((uint64)1 << (int)(63)))) != 0) {
+        if ((uint64)(u & ((uint64)1 << 63)) != 0) {
             break;
         }
     }
@@ -167,6 +167,7 @@ internal static readonly @string helloˢ = "hello"u8;
 // Do not run the machine yet; instead do individual instructions crafted by hand.
 public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
     ж<global::go.encoding.gob_package.encBuffer> b = @new<global::go.encoding.gob_package.encBuffer>();
+
     // bool
     {
         bool data = true;
@@ -177,6 +178,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("bool enc instructions: expected % x got % x"u8, boolResult, b.Bytes());
         }
     }
+
     // int
     {
         b.Reset();
@@ -188,6 +190,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int enc instructions: expected % x got % x"u8, signedResult, b.Bytes());
         }
     }
+
     // uint
     {
         b.Reset();
@@ -199,6 +202,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint enc instructions: expected % x got % x"u8, unsignedResult, b.Bytes());
         }
     }
+
     // int8
     {
         b.Reset();
@@ -210,6 +214,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int8 enc instructions: expected % x got % x"u8, signedResult, b.Bytes());
         }
     }
+
     // uint8
     {
         b.Reset();
@@ -221,6 +226,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint8 enc instructions: expected % x got % x"u8, unsignedResult, b.Bytes());
         }
     }
+
     // int16
     {
         b.Reset();
@@ -232,6 +238,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int16 enc instructions: expected % x got % x"u8, signedResult, b.Bytes());
         }
     }
+
     // uint16
     {
         b.Reset();
@@ -243,6 +250,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint16 enc instructions: expected % x got % x"u8, unsignedResult, b.Bytes());
         }
     }
+
     // int32
     {
         b.Reset();
@@ -254,6 +262,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int32 enc instructions: expected % x got % x"u8, signedResult, b.Bytes());
         }
     }
+
     // uint32
     {
         b.Reset();
@@ -265,6 +274,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint32 enc instructions: expected % x got % x"u8, unsignedResult, b.Bytes());
         }
     }
+
     // int64
     {
         b.Reset();
@@ -276,6 +286,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int64 enc instructions: expected % x got % x"u8, signedResult, b.Bytes());
         }
     }
+
     // uint64
     {
         b.Reset();
@@ -287,6 +298,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint64 enc instructions: expected % x got % x"u8, unsignedResult, b.Bytes());
         }
     }
+
     // float32
     {
         b.Reset();
@@ -298,6 +310,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("float32 enc instructions: expected % x got % x"u8, floatResult, b.Bytes());
         }
     }
+
     // float64
     {
         b.Reset();
@@ -309,6 +322,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("float64 enc instructions: expected % x got % x"u8, floatResult, b.Bytes());
         }
     }
+
     // bytes == []uint8
     {
         b.Reset();
@@ -320,6 +334,7 @@ public static void TestScalarEncInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("bytes enc instructions: expected % x got % x"u8, bytesResult, b.Bytes());
         }
     }
+
     // string
     {
         b.Reset();
@@ -342,7 +357,7 @@ internal static void execDec(ж<global::go.encoding.gob_package.decInstr> Ꮡins
         defer(testError, Ꮡt, ref ᒐ);
         nint v = (nint)state.decodeUint();
         if (v + state.fieldnum != 6) {
-            Ꮡt.Fatalf("decoding field number %d, got %d"u8, (nint)(6), v + state.fieldnum);
+            Ꮡt.Fatalf("decoding field number %d, got %d"u8, (nint)6, v + state.fieldnum);
         }
         instr.op(Ꮡinstr, Ꮡstate, value.Elem());
         state.fieldnum = 6;
@@ -365,6 +380,7 @@ internal static readonly @string overflowˢ = "overflow"u8;
 // Do not run the machine yet; instead do individual instructions crafted by hand.
 public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
     var ovfl = errors.New(overflowˢ);
+
     // bool
     {
         ref var data = ref heap(new bool(), out var Ꮡdata);
@@ -385,6 +401,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int a = %v not 17"u8, data);
         }
     }
+
     // uint
     {
         ref var data = ref heap(new nuint(), out var Ꮡdata);
@@ -395,6 +412,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint a = %v not 17"u8, data);
         }
     }
+
     // int8
     {
         ref var data = ref heap(new int8(), out var Ꮡdata);
@@ -405,6 +423,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int8 a = %v not 17"u8, data);
         }
     }
+
     // uint8
     {
         ref var data = ref heap(new uint8(), out var Ꮡdata);
@@ -415,6 +434,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint8 a = %v not 17"u8, data);
         }
     }
+
     // int16
     {
         ref var data = ref heap(new int16(), out var Ꮡdata);
@@ -425,6 +445,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int16 a = %v not 17"u8, data);
         }
     }
+
     // uint16
     {
         ref var data = ref heap(new uint16(), out var Ꮡdata);
@@ -435,6 +456,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint16 a = %v not 17"u8, data);
         }
     }
+
     // int32
     {
         ref var data = ref heap(new int32(), out var Ꮡdata);
@@ -445,6 +467,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int32 a = %v not 17"u8, data);
         }
     }
+
     // uint32
     {
         ref var data = ref heap(new uint32(), out var Ꮡdata);
@@ -455,6 +478,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint32 a = %v not 17"u8, data);
         }
     }
+
     // uintptr
     {
         ref var data = ref heap(new uintptr(), out var Ꮡdata);
@@ -465,6 +489,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uintptr a = %v not 17"u8, data);
         }
     }
+
     // int64
     {
         ref var data = ref heap(new int64(), out var Ꮡdata);
@@ -475,6 +500,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("int64 a = %v not 17"u8, data);
         }
     }
+
     // uint64
     {
         ref var data = ref heap(new uint64(), out var Ꮡdata);
@@ -485,6 +511,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("uint64 a = %v not 17"u8, data);
         }
     }
+
     // float32
     {
         ref var data = ref heap(new float32(), out var Ꮡdata);
@@ -495,6 +522,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("float32 a = %v not 17"u8, data);
         }
     }
+
     // float64
     {
         ref var data = ref heap(new float64(), out var Ꮡdata);
@@ -505,6 +533,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("float64 a = %v not 17"u8, data);
         }
     }
+
     // complex64
     {
         ref var data = ref heap(new complex64(), out var Ꮡdata);
@@ -515,6 +544,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("complex a = %v not 17+19i"u8, data);
         }
     }
+
     // complex128
     {
         ref var data = ref heap(new complex128(), out var Ꮡdata);
@@ -525,6 +555,7 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("complex a = %v not 17+19i"u8, data);
         }
     }
+
     // bytes == []uint8
     {
         ref var data = ref heap<slice<byte>>(out var Ꮡdata);
@@ -532,9 +563,10 @@ public static void TestScalarDecInstructions(ж<testing.T> Ꮡt) {
         var state = newDecodeStateFromData(bytesResult);
         execDec(instr, state, Ꮡt, reflect.ValueOf(Ꮡdata));
         if (((sstring)data) != "hello"u8) {
-            Ꮡt.Errorf(@"bytes a = %q not ""hello"""u8, ((@string)data));
+            Ꮡt.Errorf(@"bytes a = %q not ""hello"""u8, (@string)data);
         }
     }
+
     // string
     {
         ref var data = ref heap(new @string(), out var Ꮡdata);
@@ -716,6 +748,7 @@ public static void TestOverflow(ж<testing.T> Ꮡt) {
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
+
     // int8
     b.Reset();
     it = new TestOverflow_inputT(
@@ -736,6 +769,7 @@ public static void TestOverflow(ж<testing.T> Ꮡt) {
     if (err == default! || err.Error() != @"value for ""Mini"" out of range"u8) {
         Ꮡt.Error(wrongUnderflowErrorForˢ, err);
     }
+
     // int16
     b.Reset();
     it = new TestOverflow_inputT(
@@ -756,6 +790,7 @@ public static void TestOverflow(ж<testing.T> Ꮡt) {
     if (err == default! || err.Error() != @"value for ""Mini"" out of range"u8) {
         Ꮡt.Error(wrongUnderflowErrorForˢ2, err);
     }
+
     // int32
     b.Reset();
     it = new TestOverflow_inputT(
@@ -776,6 +811,7 @@ public static void TestOverflow(ж<testing.T> Ꮡt) {
     if (err == default! || err.Error() != @"value for ""Mini"" out of range"u8) {
         Ꮡt.Error(wrongUnderflowErrorForˢ3, err);
     }
+
     // uint8
     b.Reset();
     it = new TestOverflow_inputT(
@@ -787,6 +823,7 @@ public static void TestOverflow(ж<testing.T> Ꮡt) {
     if (err == default! || err.Error() != @"value for ""Maxu"" out of range"u8) {
         Ꮡt.Error(wrongOverflowErrorForˢ4, err);
     }
+
     // uint16
     b.Reset();
     it = new TestOverflow_inputT(
@@ -798,6 +835,7 @@ public static void TestOverflow(ж<testing.T> Ꮡt) {
     if (err == default! || err.Error() != @"value for ""Maxu"" out of range"u8) {
         Ꮡt.Error(wrongOverflowErrorForˢ5, err);
     }
+
     // uint32
     b.Reset();
     it = new TestOverflow_inputT(
@@ -809,6 +847,7 @@ public static void TestOverflow(ж<testing.T> Ꮡt) {
     if (err == default! || err.Error() != @"value for ""Maxu"" out of range"u8) {
         Ꮡt.Error(wrongOverflowErrorForˢ6, err);
     }
+
     // float32
     b.Reset();
     it = new TestOverflow_inputT(
@@ -820,6 +859,7 @@ public static void TestOverflow(ж<testing.T> Ꮡt) {
     if (err == default! || err.Error() != @"value for ""Maxf"" out of range"u8) {
         Ꮡt.Error(wrongOverflowErrorForˢ7, err);
     }
+
     // complex64
     b.Reset();
     it = new TestOverflow_inputT(
@@ -911,6 +951,7 @@ public static void TestAutoIndirection(ж<testing.T> Ꮡt) {
     if (t0.A != 17 || t0.B != 177 || t0.C != 1777 || t0.D != 17777) {
         Ꮡt.Errorf("t1->t0: expected {17 177 1777 17777}; got %v"u8, t0);
     }
+
     // Now transfer t2 into t0
     ref var t2 = ref heap(new T2(), out var Ꮡt2);
     t2.D = 17777;
@@ -930,6 +971,7 @@ public static void TestAutoIndirection(ж<testing.T> Ꮡt) {
     if (t0.A != 17 || t0.B != 177 || t0.C != 1777 || t0.D != 17777) {
         Ꮡt.Errorf("t2->t0 expected {17 177 1777 17777}; got %v"u8, t0);
     }
+
     // Now transfer t0 into t1
     t0 = new T0(17, 177, 1777, 17777);
     b.Reset();
@@ -939,6 +981,7 @@ public static void TestAutoIndirection(ж<testing.T> Ꮡt) {
     if (t1.A != 17 || t1.B.Value != 177 || (t1.C.ValueSlot).Value != 1777 || ((t1.D.ValueSlot).ValueSlot).Value != 17777) {
         Ꮡt.Errorf("t0->t1 expected {17 177 1777 17777}; got {%d %d %d %d}"u8, t1.A, t1.B.Value, (t1.C.ValueSlot).Value, ((t1.D.ValueSlot).ValueSlot).Value);
     }
+
     // Now transfer t0 into t2
     b.Reset();
     enc.Encode(t0);
@@ -947,6 +990,7 @@ public static void TestAutoIndirection(ж<testing.T> Ꮡt) {
     if (((t2.A.ValueSlot).ValueSlot).Value != 17 || (t2.B.ValueSlot).Value != 177 || t2.C.Value != 1777 || t2.D != 17777) {
         Ꮡt.Errorf("t0->t2 expected {17 177 1777 17777}; got {%d %d %d %d}"u8, ((t2.A.ValueSlot).ValueSlot).Value, (t2.B.ValueSlot).Value, t2.C.Value, t2.D);
     }
+
     // Now do t2 again but without pre-allocated pointers.
     b.Reset();
     enc.Encode(t0);
@@ -1027,6 +1071,7 @@ public static void TestIgnoredFields(ж<testing.T> Ꮡt) {
     it0.Ignore_h = slice<byte>("to the curtain"u8);
     it0.Ignore_i = Ꮡ(new RT1(3.1D, "hi"u8, 7, "hello"u8));
     it0.Ignore_m = new map<@string, nint>{["one"u8] = 1, ["two"u8] = 2};
+
     var b = @new<bytes.Buffer>();
     NewEncoder(new gob_test_package.bytes_BufferжWriter(b)).Encode(it0);
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
@@ -1058,9 +1103,9 @@ public static void TestBadRecursiveType(ж<testing.T> Ꮡt) {
     if (!strings.Contains(err.Error(), recursiveˢ)) {
         Ꮡt.Error(expectedRecursiveTypeˢ, err);
     }
+    // Can't test decode easily because we can't encode one, so we can't pass one to a Decoder.
 }
 
-// Can't test decode easily because we can't encode one, so we can't pass one to a Decoder.
 public partial struct Indirect {
     public /*[3]*/ ж<ж<ж<array<nint>>>> A;
     public ж<ж<ж<slice<nint>>>> S;
@@ -1197,22 +1242,23 @@ internal static readonly object normalFloatDidNotDecodeˢ = (@string)"normal flo
 
 public static void TestInterface(ж<testing.T> Ꮡt) {
     ref var iVal = ref heap<Int>(out var ᏑiVal);
-    iVal = ((Int)3);
+    iVal = (Int)3;
     ref var fVal = ref heap<Float>(out var ᏑfVal);
-    fVal = ((Float)5D);
+    fVal = (Float)5D;
     // Sending a Vector will require that the receiver define a type in the middle of
     // receiving the value for item2.
     var vVal = new Vector(new nint[]{1, 2, 3}.slice());
     var b = @new<bytes.Buffer>();
     var item1 = Ꮡ(new InterfaceItem(1, iVal, fVal, vVal, 11.5D, new Squarer[]{iVal, fVal, default!, vVal}.slice()));
     // Register the types.
-    Register(((Int)0));
-    Register(((Float)0D));
+    Register((Int)0);
+    Register((Float)0D);
     Register(new Vector(new nint[]{}.slice()));
     var err = NewEncoder(new gob_test_package.bytes_BufferжWriter(b)).Encode(item1.OrTypedNil());
     if (err != default!) {
         Ꮡt.Error(expectedNoEncodeErrorGotˢ, err);
     }
+
     ref var item2 = ref heap<InterfaceItem>(out var Ꮡitem2);
     item2 = new InterfaceItem(nil);
     err = NewDecoder(new gob_test_package.bytes_BufferжReader(b)).Decode(Ꮡitem2);
@@ -1280,6 +1326,7 @@ public static void TestInterfaceBasic(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Error(expectedNoEncodeErrorGotˢ, err);
     }
+
     ref var item2 = ref heap<ж<BasicInterfaceItem>>(out var Ꮡitem2);
     item2 = Ꮡ(new BasicInterfaceItem(nil));
     err = NewDecoder(new gob_test_package.bytes_BufferжReader(b)).Decode(Ꮡitem2);
@@ -1320,7 +1367,7 @@ public static void TestInterfacePointer(ж<testing.T> Ꮡt) {
     ref var str1 = ref heap<@string>(out var Ꮡstr1);
     str1 = howdyˢ;
     ref var str2 = ref heap<ΔString>(out var Ꮡstr2);
-    str2 = ((ΔString)(@string)kiddoˢ);
+    str2 = (ΔString)(@string)kiddoˢ;
     var item1 = Ꮡ(new PtrInterfaceItem(
         Ꮡstr1,
         Ꮡstr2
@@ -1331,6 +1378,7 @@ public static void TestInterfacePointer(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Error(expectedNoEncodeErrorGotˢ, err);
     }
+
     ref var item2 = ref heap<ж<PtrInterfaceItem>>(out var Ꮡitem2);
     item2 = Ꮡ(new PtrInterfaceItem(nil));
     err = NewDecoder(new gob_test_package.bytes_BufferжReader(b)).Decode(Ꮡitem2);
@@ -1352,9 +1400,9 @@ public static void TestInterfacePointer(ж<testing.T> Ꮡt) {
 
 public static void TestIgnoreInterface(ж<testing.T> Ꮡt) {
     ref var iVal = ref heap<Int>(out var ᏑiVal);
-    iVal = ((Int)3);
+    iVal = (Int)3;
     ref var fVal = ref heap<Float>(out var ᏑfVal);
-    fVal = ((Float)5D);
+    fVal = (Float)5D;
     // Sending a Point will require that the receiver define a type in the middle of
     // receiving the value for item2.
     ref var pVal = ref heap<Point>(out var ᏑpVal);
@@ -1362,13 +1410,14 @@ public static void TestIgnoreInterface(ж<testing.T> Ꮡt) {
     var b = @new<bytes.Buffer>();
     var item1 = Ꮡ(new InterfaceItem(1, iVal, fVal, pVal, 11.5D, default!));
     // Register the types.
-    Register(((Int)0));
-    Register(((Float)0D));
+    Register((Int)0);
+    Register((Float)0D);
     Register(new Point(nil));
     var err = NewEncoder(new gob_test_package.bytes_BufferжWriter(b)).Encode(item1.OrTypedNil());
     if (err != default!) {
         Ꮡt.Error(expectedNoEncodeErrorGotˢ, err);
     }
+
     ref var item2 = ref heap<NoInterfaceItem>(out var Ꮡitem2);
     item2 = new NoInterfaceItem(nil);
     err = NewDecoder(new gob_test_package.bytes_BufferжReader(b)).Decode(Ꮡitem2);
@@ -1418,7 +1467,7 @@ public static void TestUnexportedFields(ж<testing.T> Ꮡt) {
 
 internal static slice<any> singletons = new any[]{
     true,
-    (nint)(7),
+    (nint)7,
     (nuint)10,
     3.2D,
     (@string)"hello"u8,
@@ -1465,7 +1514,7 @@ internal static DT newDT() {
     dt.A = 17;
     dt.B = helloˢ;
     dt.C = 3.14159D;
-    dt.I = (nint)(271828);
+    dt.I = (nint)271828;
     dt.J = new OnTheFly(3);
     dt.I_nil = default!;
     dt.M = new map<@string, nint>{["one"u8] = 1, ["two"u8] = 2};
@@ -1497,8 +1546,8 @@ public static void TestDebugStruct(ж<testing.T> Ꮡt) {
 
 internal static error encFuzzDec(ж<rand.Rand> Ꮡrng, any @inʗp) {
     ref var rng = ref Ꮡrng.DerefOrNull();
-
     ref var @in = ref heap(@inʗp, out var Ꮡin);
+
     var buf = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(buf));
     {
@@ -1506,12 +1555,14 @@ internal static error encFuzzDec(ж<rand.Rand> Ꮡrng, any @inʗp) {
             return err;
         }
     }
+
     var b = buf.Bytes();
     foreach (var (i, bi) in b) {
         if (rng.Intn(10) < 3) {
             b[i] = (byte)(bi + (uint8)rng.Intn(256));
         }
     }
+
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(buf));
     ref var e = ref heap<any>(out var Ꮡe);
     {
@@ -1527,6 +1578,7 @@ public static void TestFuzz(ж<testing.T> Ꮡt) {
     if (!doFuzzTests.Value) {
         Ꮡt.Skipf("disabled; run with -gob.fuzz to enable"u8);
     }
+
     // all possible inputs
     var input = new any[]{
         @new<nint>(),
@@ -1545,6 +1597,7 @@ public static void TestFuzzRegressions(ж<testing.T> Ꮡt) {
     if (!doFuzzTests.Value) {
         Ꮡt.Skipf("disabled; run with -gob.fuzz to enable"u8);
     }
+
     // An instance triggering a type name of length ~102 GB.
     testFuzz(Ꮡt, 1328492090837718000L, 100, @new<float32>());
     // An instance triggering a type name of 1.6 GB.
@@ -1570,6 +1623,7 @@ public static void TestFuzzOneByte(ж<testing.T> Ꮡt) {
     if (!doFuzzTests.Value) {
         Ꮡt.Skipf("disabled; run with -gob.fuzz to enable"u8);
     }
+
     var buf = @new<strings.Builder>();
     Register(new OnTheFly(nil));
     var dt = newDT();
@@ -1579,21 +1633,20 @@ public static void TestFuzzOneByte(ж<testing.T> Ꮡt) {
         }
     }
     @string s = buf.String();
+
     var indices = new slice<nint>(0, len(s));
     for (nint i = 0; i < len(s); i++) {
         switch (i) {
-        case 14 or 167 or 231 or 265: {
+        case 14 or 167 or 231 or 265: { // a slice length, corruptions are not handled yet.
             continue;
             break;
         }
         case 248: {
+            // Large map size, which currently causes an out of memory panic.
+            // See golang.org/issue/24308 and golang.org/issue/20221.
             continue;
             break;
         }}
-
-        // a slice length, corruptions are not handled yet.
-        // Large map size, which currently causes an out of memory panic.
-        // See golang.org/issue/24308 and golang.org/issue/20221.
         indices = append(indices, i);
     }
     if (testing.Short()) {
@@ -1630,8 +1683,6 @@ public static void TestFuzzOneByte(ж<testing.T> Ꮡt) {
 // Don't crash, just give error with invalid type id.
 // Issue 9649.
 public static void TestErrorInvalidTypeId(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var data = new byte[]{0x01, 0x00, 0x01, 0x00}.slice();
     var d = NewDecoder(new gob_test_package.bytes_ReaderжReader(bytes.NewReader(data)));
     // When running d.Decode(&foo) the first time the decoder stops
@@ -1695,7 +1746,7 @@ public static void TestLargeSlice(ж<testing.T> Ꮡt) {
         if (/* unsafe.Sizeof(uintptr(0)) */ (uintptr)8 > 4) {
             tΔ1.Parallel(); // Only run in parallel in a large address space
         }
-        var s = new slice<byte>((10 << (int)(21)));
+        var s = new slice<byte>((10 << 21));
         foreach (var (i, _) in s) {
             s[i] = (byte)i;
         }
@@ -1707,7 +1758,7 @@ public static void TestLargeSlice(ж<testing.T> Ꮡt) {
         if (/* unsafe.Sizeof(uintptr(0)) */ (uintptr)8 > 4) {
             tΔ2.Parallel();
         }
-        var s = new slice<int8>((10 << (int)(21)));
+        var s = new slice<int8>((10 << 21));
         foreach (var (i, _) in s) {
             s[i] = (int8)i;
         }
@@ -1719,9 +1770,9 @@ public static void TestLargeSlice(ж<testing.T> Ꮡt) {
         if (/* unsafe.Sizeof(uintptr(0)) */ (uintptr)8 > 4) {
             tΔ3.Parallel();
         }
-        var s = new slice<StringPair>((1 << (int)(21)));
+        var s = new slice<StringPair>((1 << 21));
         foreach (var (i, _) in s) {
-            s[i].A = ((@string)(rune)i);
+            s[i].A = (@string)(rune)i;
             s[i].B = s[i].A;
         }
         var st = Ꮡ(new LargeSliceStruct(S: s));
@@ -1732,9 +1783,9 @@ public static void TestLargeSlice(ж<testing.T> Ꮡt) {
         if (/* unsafe.Sizeof(uintptr(0)) */ (uintptr)8 > 4) {
             tΔ4.Parallel();
         }
-        var s = new slice<@string>((1 << (int)(21)));
+        var s = new slice<@string>((1 << 21));
         foreach (var (i, _) in s) {
-            s[i] = ((@string)(rune)i);
+            s[i] = (@string)(rune)i;
         }
         var st = Ꮡ(new LargeSliceString(S: s));
         var rt = Ꮡ(new LargeSliceString(nil));
@@ -1748,6 +1799,7 @@ internal static readonly object encodeDecodeExpectedˢ = (@string)"Encode/Decode
 public static void TestLocalRemoteTypesMismatch(ж<testing.T> Ꮡt) {
     // Test data is from https://go.dev/issue/62117.
     var testData = new byte[]{9, 127, 3, 1, 2, 255, 128, 0, 0, 0, 3, 255, 128, 0}.slice();
+
     ref var v = ref heap<slice<ж<EmptyStruct>>>(out var Ꮡv);
     var buf = bytes.NewBuffer(testData);
     var err = NewDecoder(new gob_test_package.bytes_BufferжReader(buf)).Decode(Ꮡv);

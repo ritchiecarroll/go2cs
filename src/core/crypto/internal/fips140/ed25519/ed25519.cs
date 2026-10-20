@@ -98,12 +98,14 @@ internal static void precomputePrivateKey(ж<PrivateKey> Ꮡpriv) {
     var hs = sha512.New();
     hs.Write(priv.seed[..]);
     var h = hs.Sum(new slice<byte>(0, sha512Size));
+
     var (s, err) = Ꮡpriv.of(PrivateKey.Ꮡs).SetBytesWithClamping(h[..32]);
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
     var A = (Ꮡ(new Δedwards25519.Point(nil))).ScalarBaseMult(s);
     copy(priv.pub[..], A.Bytes());
+
     copy(priv.prefix[..], h[32..]);
 }
 
@@ -121,10 +123,13 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, sl
             return (default!, errors.New("ed25519: bad private key length: "u8 + strconv.Itoa(l)));
         }
     }
+
     copy(priv.seed[..], privBytes[..32]);
+
     var hs = sha512.New();
     hs.Write(priv.seed[..]);
     var h = hs.Sum(new slice<byte>(0, sha512Size));
+
     {
         var (_, err) = Ꮡpriv.of(PrivateKey.Ꮡs).SetBytesWithClamping(h[..32]); if (err != default!) {
             throw panic("ed25519: internal error: setting scalar failed");
@@ -134,7 +139,9 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, sl
     // because it takes > 20% of the time of a signature generation.
     // Signing doesn't use it as a point anyway.
     copy(priv.pub[..], privBytes[32..]);
+
     copy(priv.prefix[..], h[32..]);
+
     return (Ꮡpriv, default!);
 }
 
@@ -166,10 +173,13 @@ internal static (ж<ΔPublicKey>, error) newPublicKey(ж<ΔPublicKey> Ꮡpub, sl
 
 // Domain separation prefixes used to disambiguate Ed25519/Ed25519ph/Ed25519ctx.
 // See RFC 8032, Section 2 and Section 5.1.
+// domPrefixPure is empty for pure Ed25519.
 internal static readonly @string domPrefixPure = ""u8;
-
+// domPrefixPh is dom2(phflag=1) for Ed25519ph. It must be followed by the
+// uint8-length prefixed context.
 internal static readonly @string domPrefixPh = "SigEd25519 no Ed25519 collisions\x01"u8;
-
+// domPrefixCtx is dom2(phflag=0) for Ed25519ctx. It must be followed by the
+// uint8-length prefixed context.
 internal static readonly @string domPrefixCtx = "SigEd25519 no Ed25519 collisions\x00"u8;
 
 public static slice<byte> Sign(ж<PrivateKey> Ꮡpriv, slice<byte> message) {
@@ -245,7 +255,9 @@ internal static slice<byte> signWithDom(slice<byte> signature, ж<PrivateKey> �
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
+
     var R = (Ꮡ(new Δedwards25519.Point(nil))).ScalarBaseMult(r);
+
     var kh = sha512.New();
     if (domPrefix != domPrefixPure) {
         kh.Write(slice<byte>(domPrefix));
@@ -261,9 +273,12 @@ internal static slice<byte> signWithDom(slice<byte> signature, ж<PrivateKey> �
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
+
     var S = Δedwards25519.NewScalar().MultiplyAdd(k, Ꮡpriv.of(PrivateKey.Ꮡs), r);
+
     copy(signature[..32], R.Bytes());
     copy(signature[32..], S.Bytes());
+
     return signature;
 }
 
@@ -316,9 +331,11 @@ internal static error verifyWithDom(ж<ΔPublicKey> Ꮡpub, slice<byte> message,
             return errors.New("ed25519: bad signature length: "u8 + strconv.Itoa(l));
         }
     }
+
     if ((byte)(sig[63] & 224) != 0) {
         return errors.New(ed25519InvalidSignatureˢ);
     }
+
     var kh = sha512.New();
     if (domPrefix != domPrefixPure) {
         kh.Write(slice<byte>(domPrefix));
@@ -334,13 +351,16 @@ internal static error verifyWithDom(ж<ΔPublicKey> Ꮡpub, slice<byte> message,
     if (err != default!) {
         throw panic("ed25519: internal error: setting scalar failed");
     }
+
     (var S, err) = Δedwards25519.NewScalar().SetCanonicalBytes(sig[32..]);
     if (err != default!) {
         return errors.New(ed25519InvalidSignatureˢ);
     }
+
     // [S]B = R + [k]A --> [k](-A) + [S]B = R
     var minusA = (Ꮡ(new Δedwards25519.Point(nil))).Negate(Ꮡpub.of(ed25519_package.ΔPublicKey.Ꮡa));
     var R = (Ꮡ(new Δedwards25519.Point(nil))).VarTimeDoubleScalarBaseMult(k, minusA, S);
+
     if (!bytes.Equal(sig[..32], R.Bytes())) {
         return errors.New(ed25519InvalidSignatureˢ);
     }

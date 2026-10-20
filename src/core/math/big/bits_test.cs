@@ -13,6 +13,15 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
+// A Bits value b represents a finite floating-point number x of the form
+//
+//	x = 2**b[0] + 2**b[1] + ... 2**b[len(b)-1]
+//
+// The order of slice elements is not significant. Negative elements may be
+// used to form fractions. A Bits value is normalized if each b[i] occurs at
+// most once. For instance Bits{0, 0, 1} is not normalized but represents the
+// same floating-point number as Bits{2}, which is normalized. The zero (nil)
+// value of Bits is a ready to use Bits value and represents the value 0.
 public partial struct ΔBits /*[]nint*/;
 
 internal static ΔBits add(this ΔBits x, ΔBits y) {
@@ -71,7 +80,7 @@ internal static ΔBits norm(this ΔBits x) {
             z = append(z, b);
         }
     }
-    slices.Sort<slice<nint>, nint>(((slice<nint>)z));
+    slices.Sort<slice<nint>, nint>((slice<nint>)z);
     return z;
 }
 
@@ -100,6 +109,7 @@ public static void TestNormBits(ж<testing.T> Ꮡt) {
 // to prec bits according to mode.
 internal static ж<global::go.math.big_package.Float> round(this ΔBits x, nuint prec, global::go.math.big_package.RoundingMode mode) {
     x = x.norm();
+
     // determine range
     nint min = default!;
     nint max = default!;
@@ -116,6 +126,7 @@ internal static ж<global::go.math.big_package.Float> round(this ΔBits x, nuint
         return x.ΔFloat();
     }
     // prec < prec0
+
     // determine bit 0, rounding, and sticky bit, and result bits z
     nuint bit0 = default!;
     nuint rbit = default!;
@@ -133,15 +144,15 @@ internal static ж<global::go.math.big_package.Float> round(this ΔBits x, nuint
             break;
         }
         default: {
+            // b > r
             if (b == r + 1) {
-                // b > r
                 bit0 = 1;
             }
             z = append(z, b);
             break;
         }}
-
     }
+
     // round
     var f = z.ΔFloat(); // rounded to zero
     if (mode == ToNearestAway) {
@@ -164,6 +175,7 @@ public static ж<global::go.math.big_package.Float> ΔFloat(this ΔBits bits) {
         return @new<global::go.math.big_package.Float>();
     }
     // len(bits) > 0
+
     // determine lsb exponent
     nint min = default!;
     foreach (var (i, b) in bits) {
@@ -171,6 +183,7 @@ public static ж<global::go.math.big_package.Float> ΔFloat(this ΔBits bits) {
             min = b;
         }
     }
+
     // create bit pattern
     var x = NewInt(0);
     foreach (var (_, b) in bits) {
@@ -182,6 +195,7 @@ public static ж<global::go.math.big_package.Float> ΔFloat(this ΔBits bits) {
         }
         x.SetBit(x, badj, 1);
     }
+
     // create corresponding float
     var z = @new<global::go.math.big_package.Float>().SetInt(x); // normalized
     {
@@ -201,22 +215,21 @@ internal partial struct TestFromBits_type /*dyn*/ {
 }
 
 public static void TestFromBits(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFromBits_type[]{ // all different bit numbers
-
+    foreach (var (_, test) in new TestFromBits_type[]{
+        // all different bit numbers
         new(default!, "0"u8),
         new(new ΔBits(new nint[]{0}.slice()), "0x.8p+1"u8),
         new(new ΔBits(new nint[]{1}.slice()), "0x.8p+2"u8),
         new(new ΔBits(new nint[]{-1}.slice()), "0x.8p+0"u8),
         new(new ΔBits(new nint[]{63}.slice()), "0x.8p+64"u8),
         new(new ΔBits(new nint[]{33, -30}.slice()), "0x.8000000000000001p+34"u8),
-        new(new ΔBits(new nint[]{255, 0}.slice()), "0x.8000000000000000000000000000000000000000000000000000000000000001p+256"u8), // multiple equal bit numbers
+        new(new ΔBits(new nint[]{255, 0}.slice()), "0x.8000000000000000000000000000000000000000000000000000000000000001p+256"u8),
 
+        // multiple equal bit numbers
         new(new ΔBits(new nint[]{0, 0}.slice()), "0x.8p+2"u8),
         new(new ΔBits(new nint[]{0, 0, 0, 0}.slice()), "0x.8p+3"u8),
         new(new ΔBits(new nint[]{0, 1, 0}.slice()), "0x.8p+3"u8),
-        new(appendꓸꓸꓸ(new ΔBits(new nint[]{2, 1, 0}.slice()), /* 7 */
- new ΔBits(new nint[]{3, 1}.slice())), /* 10 */
- "0x.88p+5"u8 /* 17 */
+        new(appendꓸꓸꓸ(new ΔBits(new nint[]{2, 1, 0}.slice()), /* 7 */ new ΔBits(new nint[]{3, 1}.slice()) /* 10 */), "0x.88p+5"u8 /* 17 */
 )
     }.slice()) {
         var f = test.bits.ΔFloat();

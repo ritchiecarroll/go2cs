@@ -15,13 +15,16 @@ partial struct Context {
 internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
-    @string joined = ""u8;
+    @string joined = "";
+
     foreach (var (i, e) in elem) {
         if (i > 0) {
             joined += "/"u8;
         }
+
         joined += e;
     }
+
     return joined;
 }
 
@@ -31,32 +34,35 @@ internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp)
     if (c.JoinPath != default!) {
         return c.JoinPath(elem.ꓸꓸꓸ);
     }
+
     return slashJoin(elem.ꓸꓸꓸ);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string doneˢ = "done"u8;
-
 internal static void Main() {
     var ctxt = new Context(
-        Name: "demo"u8,
+        Name: "demo",
         JoinPath: slashJoin,
         Log: (@string format, params ꓸꓸꓸany argsʗp) => {
             var args = argsʗp.sslice();
             fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
         }
     );
-    fmt.Println(ctxt.JoinPath("a"u8, "b", "c"));
+
+    fmt.Println(ctxt.JoinPath("a", "b", "c"));
+
     fmt.Println(ctxt.JoinPath() == ""u8);
-    var parts = new @string[]{"x"u8, "y"u8}.slice();
+
+    var parts = new @string[]{"x", "y"}.slice();
     fmt.Println(ctxt.join(parts.ꓸꓸꓸ));
+
     ctxt.JoinPath = @string (params ꓸꓸꓸstring elemʗp) => {
         var elem = elemʗp.sslice();
         return fmt.Sprint(len(elem));
     };
-    fmt.Println(ctxt.JoinPath("p"u8, "q"));
-    ctxt.Log("%s:%d"u8, ctxt.Name, (nint)(3));
-    ctxt.Log(doneˢ);
+    fmt.Println(ctxt.JoinPath("p", "q"));
+
+    ctxt.Log("%s:%d", ctxt.Name, (nint)3);
+    ctxt.Log("done");
 }
 
 } // end main_package

@@ -36,7 +36,9 @@ public static void TestCalibrate(ж<testing.T> Ꮡt) {
     if (!calibrate.Value) {
         return;
     }
+
     computeKaratsubaThresholds();
+
     // compute basicSqrThreshold where overhead becomes negligible
     nint minSqr = computeSqrThreshold(10, 30, 1, 3, sqrModeMul, sqrModeBasic);
     // compute karatsubaSqrThreshold where karatsuba is faster
@@ -73,36 +75,46 @@ internal static readonly object diminishingReturnˢ = (@string)"  diminishing re
 internal static void computeKaratsubaThresholds() {
     fmt.Printf("Multiplication times for varying Karatsuba thresholds\n"u8);
     fmt.Printf("(run repeatedly for good results)\n"u8);
+
     // determine Tk, the work load execution time using basic multiplication
     var Tb = measureKaratsuba(1000000000); // th == 1e9 => Karatsuba multiplication disabled
     fmt.Printf("Tb = %10s\n"u8, Tb);
+
     // thresholds
     nint th = 4;
     nint th1 = -1;
     nint th2 = -1;
+
     time.Duration deltaOld = default!;
     for (nint count = -1; count != 0 && th < 128; count--) {
         // determine Tk, the work load execution time using Karatsuba multiplication
         var Tk = measureKaratsuba(th);
+
         // improvement over Tb
         var delta = (Tb - Tk) * 100 / Tb;
+
         fmt.Printf("th = %3d  Tk = %10s  %4d%%"u8, th, Tk, delta);
+
         // determine break-even point
         if (Tk < Tb && th1 < 0) {
             th1 = th;
             fmt.Print(breakEvenPointˢ);
         }
+
         // determine diminishing return
         if (0 < delta && delta < deltaOld && th2 < 0) {
             th2 = th;
             fmt.Print(diminishingReturnˢ);
         }
         deltaOld = delta;
+
         fmt.Println();
+
         // trigger counter
         if (th1 >= 0 && th2 >= 0 && count < 0) {
             count = 10; // this many extra measurements after we got both thresholds
         }
+
         th++;
     }
 }
@@ -111,6 +123,7 @@ internal static time.Duration measureSqr(nint words, nint nruns, @string mode) {
     // more runs for better statistics
     nint initBasicSqr = basicSqrThreshold;
     nint initKaratsubaSqr = karatsubaSqrThreshold;
+
     var exprᴛ1 = mode;
     if (exprᴛ1 == sqrModeMul) {
         basicSqrThreshold = words + 1;
@@ -130,7 +143,9 @@ internal static time.Duration measureSqr(nint words, nint nruns, @string mode) {
         testval += res.NsPerOp();
     }
     testval = quo(testval, (int64)nruns);
+
     (basicSqrThreshold, karatsubaSqrThreshold) = (initBasicSqr, initKaratsubaSqr);
+
     return ((time.Duration)testval);
 }
 

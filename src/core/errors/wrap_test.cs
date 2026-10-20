@@ -23,11 +23,14 @@ public static void TestIs(ж<testing.T> Ꮡt) {
     var err1 = errors.New("1"u8);
     var erra = new wrapped("wrap 2"u8, err1);
     var errb = new wrapped("wrap 3"u8, erra);
+
     var err3 = errors.New("3"u8);
+
     var err1ʗ1 = err1;
     var err3ʗ1 = err3;
     var poser = Ꮡ(new poser("either 1 or 3"u8, (error err) => AreEqual(err, err1ʗ1) || AreEqual(err, err3ʗ1)
     ));
+
     var testCases = new TestIs_testCases[]{
         new(default!, default!, true),
         new(default!, err1, false),
@@ -132,6 +135,7 @@ public static void TestAs(ж<testing.T> Ꮡt) {
     ref var p = ref heap<ж<poser>>(out var Ꮡp);
     var (_, errF) = os.Open(nonExistingˢ);
     var poserErr = Ꮡ(new poser("oh no"u8, default!));
+
     var testCases = new TestAs_testCases[]{new(
         default!,
         ᏑerrP,
@@ -293,6 +297,7 @@ public static void BenchmarkIs(ж<testing.B> Ꮡb) {
 
     var err1 = errors.New("1"u8);
     var err2 = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{err1, new errorT("a"u8)}.slice()), new errorT("b"u8)}.slice())}.slice());
+
     for (nint i = 0; i < b.N; i++) {
         if (!errors.Is(err2, err1)) {
             Ꮡb.Fatal(isFailedˢ);
@@ -323,6 +328,7 @@ internal partial struct TestUnwrap_testCases /*dyn*/ {
 public static void TestUnwrap(ж<testing.T> Ꮡt) {
     var err1 = errors.New("1"u8);
     var erra = new wrapped("wrap 2"u8, err1);
+
     var testCases = new TestUnwrap_testCases[]{
         new(default!, default!),
         new(new wrapped("wrapped"u8, default!), default!),

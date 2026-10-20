@@ -195,6 +195,11 @@ public class SyncMutexProfileTests
         return names;
     }
 
+    // A record's stack, read through a by-value copy: Stack is a pointer-receiver method of the embedded
+    // StackRecord, and a foreach iteration variable's embed FIELD cannot be passed by ref (CS1655) -- Go's
+    // `r.Stack()` on a range variable works on the copy too.
+    private static slice<uintptr> StackOf(BlockProfileRecord record) => record.StackRecord.Stack();
+
     private static slice<BlockProfileRecord> Records(bool mutex)
     {
         var (n, _) = mutex ? MutexProfile(default) : BlockProfile(default);
@@ -212,7 +217,7 @@ public class SyncMutexProfileTests
         int64 count = 0;
         foreach (var (_, record) in Records(mutex))
         {
-            var names = FrameNames(record.StackRecord.Stack());
+            var names = FrameNames(StackOf(record));
             if (names.Count > 0 && names[0] == function)
                 count += record.Count;
         }
@@ -225,7 +230,7 @@ public class SyncMutexProfileTests
         var all = new System.Collections.Generic.List<string>();
         foreach (var (_, record) in Records(mutex))
         {
-            var names = FrameNames(record.StackRecord.Stack());
+            var names = FrameNames(StackOf(record));
             all.Add($"[{(names.Count > 0 ? names[0] : "")} < {(names.Count > 1 ? names[1] : "-")} x{record.Count}]");
         }
         return string.Join(" ", all);
@@ -253,7 +258,7 @@ public class SyncMutexProfileTests
         int64 count = 0;
         foreach (var (_, record) in Records(mutex))
         {
-            var names = FrameNames(record.StackRecord.Stack());
+            var names = FrameNames(StackOf(record));
             if (names.Count > 1 && names[0] == top && names[1] == caller)
                 count += record.Count;
         }

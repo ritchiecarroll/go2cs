@@ -63,6 +63,7 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 	}
 
 	performEscapeAnalysis(markedFiles, fset, packageTypes, info)
+	collectStackAppendHints(markedFiles, fset, packageTypes, info, filepath.Dir(markedFiles[0].filePath), options)
 	collectAddressedGlobals(markedFiles, packageTypes, info)
 	computeImportAliasRenames(markedFiles, packageTypes, packageNamespace, options.go2csPath, goosOfTarget(options.targetPlatform), false)
 	preloadImportedTypeAliases(markedFiles, options)
@@ -122,6 +123,7 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 	// Resolve any deferred dynamic (anonymous struct) type markers in the sibling output using
 	// the package registry, which now also contains the siblings' own lifted names.
 	resolveDynamicTypeMarkers(autoFileNames)
+	resolveDynamicInterfaceBases(autoFileNames)
 
 	// Give an unchanged sibling its previous time back, and clear what writeAutoConversionSibling remembered: the record
 	// is process-wide and first-wins, so an entry left here would shadow the next conversion's.

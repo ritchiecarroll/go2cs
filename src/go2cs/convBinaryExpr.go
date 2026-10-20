@@ -153,6 +153,12 @@ func (v *Visitor) foldedNamedFloatConstLiteral(operand ast.Expr, targetCSType st
 // typed the way overflowingConstLiteral types its folds.
 // Pure-integer and pure-float expressions, and a float operand beside only integer LITERALS, keep
 // their emission: C# already evaluates those correctly.
+//
+// The SECOND trigger is pure-integer arithmetic around a named untyped-int constant whose UntypedInt
+// (int64) evaluation reaches a different value than Go's exact constant: an intermediate that leaves
+// int64 (`maxUint64 / 5`) or a shift count of 64 or more (`(div1e8m*5^8) % (1<<64) - 1`, internal/strconv's
+// compile-time assert). See untypedIntEvaluationDiffers. Arithmetic whose int64 evaluation agrees with
+// Go keeps its operators.
 func (v *Visitor) foldedMixedIntegerConstLiteral(expr ast.Expr) string {
 	tv, ok := v.info.Types[expr]
 
@@ -166,7 +172,7 @@ func (v *Visitor) foldedMixedIntegerConstLiteral(expr ast.Expr) string {
 		return ""
 	}
 
-	if !v.containsUntypedNamedIntegerConstRef(expr) || !v.containsFloatConstOperand(expr) {
+	if !v.containsUntypedNamedIntegerConstRef(expr) || !v.containsFloatConstOperand(expr) && !v.untypedIntEvaluationDiffers(expr) {
 		return ""
 	}
 
@@ -558,6 +564,74 @@ func shiftGuardWidthOfType(t types.Type) (*types.Basic, int, bool) {
 	return nil, 0, false
 }
 
+// foldedMixedConstShiftOperand renders a NON-constant shift's left operand as its constant VALUE, typed
+// to the shift, when that operand is a computed constant whose untyped arithmetic mixes in a TYPED
+// constant or a builtin min/max call: `(((1 << min(bits, ptrBits)) - 1) << j)` with `const bits
+// uintptr`, runtime's 1.26 malloc_generated.go (17 sites) and malloc_stubs.go (1).
+//
+// Go types the whole constant operand from context (uintptr), but its C# rendering cannot follow: a
+// typed local const emits as a local VARIABLE of its type (`uintptr bits = 5;`, C# has no const of a
+// struct type), and min/max emit as calls, so `(1 << (int)min(bits, …)) - 1` is ordinary `int`
+// arithmetic over non-constants. Because the operand also names an untyped constant (ptrBits),
+// shiftLeftRendersAsUntypedWrapper read it as golib UntypedInt arithmetic, so neither the untyped
+// retype nor the shift guard applied, and `dst & ~<int>` was CS0019. go/types holds the operand's exact
+// value, so it is emitted as that value with the Go text beside it, the converter's `/* expr */ value`
+// idiom for a constant C# cannot spell: `((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 31))`.
+//
+// Scoped to the mix that breaks: an operand of untyped literals and untyped named constants alone keeps
+// its existing UntypedInt rendering (UntypedIntWideShift), and a literal or bare constant is not computed.
+func (v *Visitor) foldedMixedConstShiftOperand(binaryExpr *ast.BinaryExpr) (string, bool) {
+	tv, ok := v.info.Types[binaryExpr.X]
+
+	if !ok || tv.Value == nil || tv.Value.Kind() != constant.Int || !v.isComputedConstOperand(binaryExpr.X) {
+		return "", false
+	}
+
+	shiftType, ok := v.info.Types[binaryExpr]
+
+	if !ok || shiftType.Value != nil {
+		return "", false
+	}
+
+	basic, _, inScope := shiftGuardWidthOfType(shiftType.Type)
+
+	if !inScope {
+		return "", false
+	}
+
+	mixed := false
+
+	ast.Inspect(binaryExpr.X, func(n ast.Node) bool {
+		if mixed {
+			return false
+		}
+
+		switch node := n.(type) {
+		case *ast.Ident:
+			if c, ok := v.info.Uses[node].(*types.Const); ok {
+				if b, ok := c.Type().Underlying().(*types.Basic); ok && b.Info()&types.IsUntyped == 0 {
+					mixed = true
+				}
+			}
+		case *ast.CallExpr:
+			if fun, ok := ast.Unparen(node.Fun).(*ast.Ident); ok && (fun.Name == "min" || fun.Name == "max") && v.identIsUniverseBuiltin(fun) {
+				mixed = true
+			}
+		}
+
+		return !mixed
+	})
+
+	if !mixed {
+		return "", false
+	}
+
+	goText := strings.Join(strings.Fields(v.getPrintedNode(binaryExpr.X)), " ")
+	goText = strings.ReplaceAll(goText, "*/", "* /")
+
+	return fmt.Sprintf("((%s)(/* %s */ %s))", v.getCSharpTypeName(basic), goText, tv.Value.ExactString()), true
+}
+
 // shiftLeftRendersAsUntypedWrapper reports whether the shift's left operand renders as a golib Untyped*
 // wrapper — a COMPUTED constant that references a named untyped constant (`bias - 1`, emitted as
 // UntypedInt arithmetic). Such an operand shifts through UntypedInt.operator<< / >> on its own 64-bit
@@ -719,7 +793,7 @@ func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) strin
 		return fmt.Sprintf("ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(tp), converted)
 	}
 
-	return fmt.Sprintf("(%s)(%s)", width, converted)
+	return castOf(width, converted)
 }
 
 // shiftCountIsSigned reports whether a shift count is a non-constant signed integer, the one kind of
@@ -1811,16 +1885,30 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			// rather than the native operator. In scope only for a basic-integer left operand (a
 			// NAMED [GoType] wrapper keeps its existing generated-operator emission); a constant,
 			// masked, or modulo'd count that is provably bounded stays native (unchanged, ~zero churn).
-			if basic, width, inScope := v.shiftGuardWidth(binaryExpr); inScope && v.shiftCountGuarded(binaryExpr.Y, width) && !v.shiftLeftRendersAsUntypedWrapper(binaryExpr.X) {
+			// A computed-constant left operand that MIXES a typed constant or a min/max into its untyped
+			// arithmetic is folded to its value, typed to the shift (foldedMixedConstShiftOperand). It no
+			// longer renders as a golib Untyped* wrapper, so it takes the guard like any typed operand.
+			folded, isFolded := v.foldedMixedConstShiftOperand(binaryExpr)
+
+			if isFolded {
+				leftOperand = folded
+			}
+
+			if basic, width, inScope := v.shiftGuardWidth(binaryExpr); inScope && v.shiftCountGuarded(binaryExpr.Y, width) && (isFolded || !v.shiftLeftRendersAsUntypedWrapper(binaryExpr.X)) {
 				return v.emitGuardedShift(binaryExpr, leftOperand, rightOperand, binaryOp, basic)
 			}
 
-			rightOperand = v.intCastOperand(binaryExpr.Y, rightOperand)
+			// A literal count C# already reads as `int` is written as Go writes it, `x << 8`. The guard above has
+			// taken every constant count that reaches the operand's width, so this one is below it.
+			if !shiftCountIsIntLiteral(binaryExpr.Y) {
+				rightOperand = v.intCastOperand(binaryExpr.Y, rightOperand)
+			}
 
 			// Go's shift operators bind at the multiplicative level (tighter than `+`/`-`),
 			// but C#'s `<<`/`>>` bind looser than the additive operators. So Go's
 			// `x>>4 + x` (meaning `(x>>4) + x`) would re-associate in C# as `x >> (4 + x)`.
-			// Parenthesize the shift so the original grouping is preserved in every context.
+			// The shift is built parenthesized, which every cast below relies on; an enclosing operator
+			// drops parentheses it does not need when it composes its operands (unparenthesizedOperand).
 			shiftExpr := fmt.Sprintf("(%s %s %s)", leftOperand, binaryOp, rightOperand)
 
 			// When the shifted (left) operand is an untyped constant — `1 << k` — Go gives the
@@ -2028,11 +2116,11 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			if operandCast := v.concreteNumericCSType(binaryType); operandCast != "" &&
 				binaryTypeName != "nuint" && binaryTypeName != "nint" && binaryTypeName != "uintptr" {
 				if arithConstOperand(binaryExpr.X) {
-					leftOperand = fmt.Sprintf("(%s)(%s)", operandCast, leftOperand)
+					leftOperand = castOf(operandCast, leftOperand)
 				}
 
 				if arithConstOperand(binaryExpr.Y) {
-					rightOperand = fmt.Sprintf("(%s)(%s)", operandCast, rightOperand)
+					rightOperand = castOf(operandCast, rightOperand)
 				}
 			}
 
@@ -2066,7 +2154,24 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				}
 			}
 
-			return fmt.Sprintf("(%s)(%s%s%s)", binaryTypeName, leftOperand, binaryOp, rightOperand)
+			// The result cast exists for the types C# promotes (a sub-int operand computes in `int`) and for operands
+			// C# types differently from Go; where C# already types the result as Go's, it is dropped
+			// (bitwiseResultCastRedundant), and the operands shed parentheses C# does not need.
+			composedLeft := unparenthesizedOperand(leftOperand, binaryExpr.X, binaryExpr.Op, false)
+			composedRight := rightOperand
+
+			// The right operand of `&^` renders after `~`, which binds to its first token only.
+			if binaryExpr.Op != token.AND_NOT {
+				composedRight = unparenthesizedOperand(rightOperand, binaryExpr.Y, binaryExpr.Op, true)
+			}
+
+			composed := v.joinWithOperandComments(binaryExpr, composedLeft, binaryOp, composedRight)
+
+			if v.bitwiseResultCastRedundant(binaryExpr, binaryTypeName, leftOperand, rightOperand) {
+				return "(" + composed + ")"
+			}
+
+			return fmt.Sprintf("(%s)(%s)", binaryTypeName, composed)
 		}
 
 		// ARITHMETIC only. When one operand references a *named* untyped numeric constant and the
@@ -2140,7 +2245,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				if folded := v.foldedNamedFloatConstLiteral(binaryExpr.X, tn); folded != "" {
 					leftOperand = folded
 				} else if v.needsParentheses(binaryExpr.X) {
-					leftOperand = fmt.Sprintf("(%s)(%s)", tn, leftOperand)
+					leftOperand = castOf(tn, leftOperand)
 				} else {
 					leftOperand = fmt.Sprintf("(%s)%s", tn, leftOperand)
 				}
@@ -2150,7 +2255,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				if folded := v.foldedNamedFloatConstLiteral(binaryExpr.Y, tn); folded != "" {
 					rightOperand = folded
 				} else if v.needsParentheses(binaryExpr.Y) {
-					rightOperand = fmt.Sprintf("(%s)(%s)", tn, rightOperand)
+					rightOperand = castOf(tn, rightOperand)
 				} else {
 					rightOperand = fmt.Sprintf("(%s)%s", tn, rightOperand)
 				}
@@ -2194,7 +2299,9 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			}
 		}
 
-		return fmt.Sprintf("%s%s%s", leftOperand, binaryOp, rightOperand)
+		return v.joinWithOperandComments(binaryExpr,
+			unparenthesizedOperand(leftOperand, binaryExpr.X, binaryExpr.Op, false), binaryOp,
+			unparenthesizedOperand(rightOperand, binaryExpr.Y, binaryExpr.Op, true))
 	}
 
 	// Handle start of pattern match expression with "is" keyword. Go's `!=` has no C# pattern
@@ -2322,4 +2429,120 @@ func (v *Visitor) isUntypedConstShift(expr ast.Expr) bool {
 
 	basic, ok := tv.Type.(*types.Basic)
 	return ok && basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsInteger != 0
+}
+
+// joinWithOperandComments joins a binary expression's operands around its operator, with the comments Go has on
+// the operands (class G, the owner's decision 3) when `-comments` is on: one between the left operand and the
+// operator trails that operand; one between the operator and the right operand leads it on its line; and where Go
+// breaks the line after the operator (always after a line comment) the C# breaks there too, the comment trailing
+// the operator and the right operand on the next line, one level in. A comment is taken only when written here, so
+// an arm that does not join this way leaves it pending, where it was written before.
+func (v *Visitor) joinWithOperandComments(binaryExpr *ast.BinaryExpr, left, op, right string) string {
+	if !v.options.includeComments {
+		return left + op + right
+	}
+
+	if v.file == nil {
+		v.file = v.fset.File(binaryExpr.Pos())
+	}
+
+	pending := func(from, to token.Pos) []token.Pos {
+		var found []token.Pos
+
+		for _, pos := range v.sortedCommentPos {
+			if pos >= to {
+				break
+			}
+
+			if _, ok := v.standAloneComments[pos]; ok && pos > from {
+				found = append(found, pos)
+			}
+		}
+
+		return found
+	}
+
+	take := func(positions []token.Pos) {
+		for _, pos := range positions {
+			delete(v.standAloneComments, pos)
+			v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
+		}
+	}
+
+	builder := &strings.Builder{}
+	builder.WriteString(left)
+
+	// Between the left operand and the operator only a block comment on the operand's line can stay inline.
+	if trailing := pending(binaryExpr.X.End(), binaryExpr.OpPos); len(trailing) > 0 {
+		inline := true
+
+		for _, pos := range trailing {
+			comment := v.standAloneComments[pos]
+
+			if !strings.HasPrefix(comment, "/*") || strings.Contains(comment, "\n") || v.file.Line(pos) != v.file.Line(binaryExpr.X.End()) {
+				inline = false
+			}
+		}
+
+		if inline {
+			for _, pos := range trailing {
+				builder.WriteString(" ")
+				builder.WriteString(v.standAloneComments[pos])
+			}
+
+			take(trailing)
+		}
+	}
+
+	leading := pending(binaryExpr.OpPos, binaryExpr.Y.Pos())
+
+	if len(leading) == 0 {
+		builder.WriteString(op)
+		builder.WriteString(right)
+
+		return builder.String()
+	}
+
+	for _, pos := range leading {
+		if strings.Contains(v.standAloneComments[pos], "\n") {
+			// a multi-line comment here keeps today's placement
+			builder.WriteString(op)
+			builder.WriteString(right)
+
+			return builder.String()
+		}
+	}
+
+	last := leading[len(leading)-1]
+	breaks := strings.HasPrefix(v.standAloneComments[last], "//") || v.file.Line(binaryExpr.Y.Pos()) > v.file.Line(last)
+
+	builder.WriteString(strings.TrimRight(op, " "))
+
+	// A comment on the line where the operator (or the comment before it) ends trails it; one on a later
+	// line takes a line of its own, as in Go.
+	prevLine := v.file.Line(binaryExpr.OpPos)
+
+	for _, pos := range leading {
+		if v.file.Line(pos) == prevLine {
+			builder.WriteString(" ")
+		} else {
+			builder.WriteString(v.newline)
+			builder.WriteString(v.indent(v.indentLevel + 1))
+		}
+
+		builder.WriteString(v.standAloneComments[pos])
+		prevLine = v.file.Line(pos)
+	}
+
+	if breaks {
+		builder.WriteString(v.newline)
+		builder.WriteString(v.indent(v.indentLevel + 1))
+	} else {
+		builder.WriteString(" ")
+	}
+
+	builder.WriteString(right)
+	take(leading)
+
+	return builder.String()
 }

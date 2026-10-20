@@ -67,6 +67,7 @@ func use() string { return pkgConst + greeting + fromInit }
 //
 // RED at master 4c53b02a0a: every local string const emitted `@string fnAtoi = "Atoi"u8;` in the body.
 func TestLocalStringConstHoistsUnderItsOwnName(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 
@@ -88,6 +89,7 @@ func TestLocalStringConstHoistsUnderItsOwnName(t *testing.T) {
 		indentSpaces:        4,
 		preferVarDecl:       true,
 		useChannelOperators: true,
+		hoistLiterals:       true, // arm C is the HOISTED mode's: a user package opts in (the standard library always does)
 	}
 
 	build.Default.GOROOT = options.goRoot

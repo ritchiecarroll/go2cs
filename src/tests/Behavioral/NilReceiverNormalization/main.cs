@@ -9,7 +9,7 @@ partial struct loc {
     internal nint offset;
 }
 
-internal static ж<loc> ᏑutcLoc = new StandardBox<loc>(new loc(name: "UTC"u8, offset: 0));
+internal static ж<loc> ᏑutcLoc = new StandardBox<loc>(new loc(name: "UTC", offset: 0));
 internal static ref loc utcLoc => ref ᏑutcLoc.Value;
 
 internal static ж<loc> get(this ж<loc> Ꮡl) {
@@ -22,8 +22,8 @@ internal static ж<loc> get(this ж<loc> Ꮡl) {
 internal static (@string name, nint offset) lookup(this ж<loc> Ꮡl, nint sec) {
     @string name = default!;
     nint offset = default!;
-
     ref var l = ref Ꮡl.DerefOrNull();
+
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
     name = l.name;
     offset = l.offset + sec;
@@ -53,23 +53,25 @@ internal static @string firstUseReads(this ж<loc> Ꮡl) {
     return n + "/"u8 + l.name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered"u8;
-
 internal static void Main() {
     ж<loc> nilLoc = default!;
-    var real = Ꮡ(new loc(name: "MST"u8, offset: -7));
+    var real = Ꮡ(new loc(name: "MST", offset: -7));
+
     var (ᴛ1, ᴛ2) = nilLoc.lookup(3);
     fmt.Println(ᴛ1, ᴛ2);
     var (ᴛ3, ᴛ4) = real.lookup(3);
     fmt.Println(ᴛ3, ᴛ4);
+
     fmt.Println(span(nilLoc, 10));
     fmt.Println(span(real, 10));
-    fmt.Println(nilLoc.rename("!"u8));
+
+    fmt.Println(nilLoc.rename("!"));
     fmt.Println(utcLoc.name);
-    fmt.Println(real.rename("?"u8));
+    fmt.Println(real.rename("?"));
     fmt.Println((~real).name);
+
     fmt.Println(real.firstUseReads());
+
     var nilLocʗ1 = nilLoc;
     ((Action)(() => {
         GoFrame ᒐ = default;
@@ -77,7 +79,7 @@ internal static void Main() {
             defer(() => {
                 {
                     var r = recover(); if (r != default!) {
-                        fmt.Println(recoveredˢ);
+                        fmt.Println("recovered");
                     }
                 }
             }, ref ᒐ);

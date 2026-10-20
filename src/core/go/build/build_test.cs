@@ -55,9 +55,11 @@ public static void TestMatch(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s tags = %v, want %v"u8, tag, m, want);
         }
     }
+
     match(runtime.GOOS + ","u8 + runtime.GOARCH, new map<@string, bool>{[runtime.GOOS] = true, [runtime.GOARCH] = true});
     match(runtime.GOOS + ","u8 + runtime.GOARCH + ",!foo"u8, new map<@string, bool>{[runtime.GOOS] = true, [runtime.GOARCH] = true, ["foo"u8] = true});
     nomatch(runtime.GOOS + ","u8 + runtime.GOARCH + ",foo"u8, new map<@string, bool>{[runtime.GOOS] = true, [runtime.GOARCH] = true, ["foo"u8] = true});
+
     what = modifiedˢ;
     ctxt.BuildTags = new @string[]{"foo"u8}.slice();
     match(runtime.GOOS + ","u8 + runtime.GOARCH, new map<@string, bool>{[runtime.GOOS] = true, [runtime.GOARCH] = true});
@@ -81,6 +83,7 @@ public static void TestDotSlashImport(ж<testing.T> Ꮡt) {
     if (len((~p).Imports) != 1 || (~p).Imports[0] != "./file") {
         Ꮡt.Fatalf("testdata/other: Imports=%v, want [./file]"u8, (~p).Imports);
     }
+
     (var p1, err) = Import(fileˢ, testdataOtherˢ, 0);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -131,6 +134,7 @@ internal static readonly @string mainˢ = "main"u8;
 
 public static void TestMultiplePackageImport(ж<testing.T> Ꮡt) {
     var (pkg, err) = Import("."u8, testdataMultiˢ, 0);
+
     var (mpe, ok) = err._<ж<global::go.go.build_package.MultiplePackageError>>(ᐧ);
     if (!ok) {
         Ꮡt.Fatal(importTestdataMultiDidˢ);
@@ -143,17 +147,20 @@ public static void TestMultiplePackageImport(ж<testing.T> Ꮡt) {
     if (!reflect.DeepEqual(mpe.OrTypedNil(), want.OrTypedNil())) {
         Ꮡt.Errorf("err = %#v; want %#v"u8, mpe.OrTypedNil(), want.OrTypedNil());
     }
+
     // TODO(#45999): Since the name is ambiguous, pkg.Name should be left empty.
     {
         @string wantName = mainˢ; if ((~pkg).Name != wantName) {
             Ꮡt.Errorf("pkg.Name = %q; want %q"u8, (~pkg).Name, wantName);
         }
     }
+
     {
         var wantGoFiles = new @string[]{"file.go"u8, "file_appengine.go"u8}.slice(); if (!slices.Equal<slice<@string>, @string>((~pkg).GoFiles, wantGoFiles)) {
             Ꮡt.Errorf("pkg.GoFiles = %q; want %q"u8, (~pkg).GoFiles, wantGoFiles);
         }
     }
+
     {
         var wantInvalidFiles = new @string[]{"file_appengine.go"u8}.slice(); if (!slices.Equal<slice<@string>, @string>((~pkg).InvalidGoFiles, wantInvalidFiles)) {
             Ꮡt.Errorf("pkg.InvalidGoFiles = %q; want %q"u8, (~pkg).InvalidGoFiles, wantInvalidFiles);
@@ -168,10 +175,12 @@ public static void TestLocalDirectory(ж<testing.T> Ꮡt) {
     if (runtime.GOOS == "ios"u8) {
         Ꮡt.Skipf("skipping on %s/%s, no valid GOROOT"u8, runtime.GOOS, runtime.GOARCH);
     }
+
     var (cwd, err) = os.Getwd();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var p, err) = ImportDir(cwd, 0);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -180,7 +189,6 @@ public static void TestLocalDirectory(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ImportPath=%q, want %q"u8, (~p).ImportPath, goBuildˢ);
     }
 }
-
 
 partial struct shouldBuildTestsᴛ1 /*dyn*/ {
     internal @string name;
@@ -372,7 +380,6 @@ internal static error Close(this readNopCloser r) {
 internal static global::go.go.build_package.Context ctxtP9 = new Context(GOARCH: "arm"u8, GOOS: "plan9"u8);
 internal static global::go.go.build_package.Context ctxtAndroid = new Context(GOARCH: "arm"u8, GOOS: "android"u8);
 
-
 partial struct matchFileTestsᴛ1 /*dyn*/ {
     internal global::go.go.build_package.Context ctxt;
     internal @string name;
@@ -430,6 +437,7 @@ public static void TestImportCmd(ж<testing.T> Ꮡt) {
     if (runtime.GOOS == "ios"u8) {
         Ꮡt.Skipf("skipping on %s/%s, no valid GOROOT"u8, runtime.GOOS, runtime.GOARCH);
     }
+
     var (p, err) = Import(cmdInternalObjfileˢ, ""u8, 0);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -440,7 +448,6 @@ public static void TestImportCmd(ж<testing.T> Ꮡt) {
 }
 
 internal static @string expandSrcDirPath = filepath.Join(((@string)(rune)filepath.Separator) + "projects"u8, "src", "add");
-
 
 partial struct expandSrcDirTestsᴛ1 /*dyn*/ {
     internal @string input, expected;
@@ -519,22 +526,29 @@ public static void TestImportDirNotExist(ж<testing.T> Ꮡt) {
         testenv.MustHaveGoBuild(new build_internal_test_package.testing_TжTB(Ꮡt)); // Need 'go list' internally.
         ref var ctxt = ref heap<global::go.go.build_package.Context>(out var Ꮡctxt);
         ctxt = Default;
+
         @string emptyDir = Ꮡt.TempDir();
+
         ctxt.GOPATH = emptyDir;
         ctxt.Dir = emptyDir;
+
         var tests = new TestImportDirNotExist_tests[]{
             new("Import(full, 0)"u8, "go/build/doesnotexist"u8, ""u8, 0),
             new("Import(local, 0)"u8, "./doesnotexist"u8, filepath.Join(ctxt.GOROOT, srcGoBuildˢ), 0),
             new("Import(full, FindOnly)"u8, "go/build/doesnotexist"u8, ""u8, FindOnly),
             new("Import(local, FindOnly)"u8, "./doesnotexist"u8, filepath.Join(ctxt.GOROOT, srcGoBuildˢ), FindOnly)
         }.slice();
+
         defer(os.Setenv, go111moduleˢ, os.Getenv(go111moduleˢ), ref ᒐ);
+
         foreach (var (_, GO111MODULE) in new @string[]{"off"u8, "on"u8}.slice()) {
             var testsʗ1 = tests;
             Ꮡt.Run("GO111MODULE="u8 + GO111MODULE, (ж<testing.T> tΔ1) => {
                 os.Setenv(go111moduleˢ, GO111MODULE);
+
                 foreach (var (_, test) in testsʗ1) {
                     var (p, err) = Ꮡctxt.Import(test.path, test.srcDir, test.mode);
+
                     var errOk = (err != default! && strings.HasPrefix(err.Error(), cannotFindPackageˢ));
                     @string wantErr = cannotFindPackageErrorˢ;
                     if (test.srcDir == ""u8) {
@@ -571,7 +585,9 @@ internal static readonly @string aVendorCDˢ = "a/vendor/c/d"u8;
 
 public static void TestImportVendor(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(Ꮡt));
+
     Ꮡt.Setenv(go111moduleˢ, offˢ);
+
     ref var ctxt = ref heap<global::go.go.build_package.Context>(out var Ꮡctxt);
     ctxt = Default;
     var (wd, err) = os.Getwd();
@@ -593,7 +609,9 @@ public static void BenchmarkImportVendor(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     testenv.MustHaveSource(new build_internal_test_package.testing_BжTB(Ꮡb));
+
     Ꮡb.Setenv(go111moduleˢ, offˢ);
+
     ref var ctxt = ref heap<global::go.go.build_package.Context>(out var Ꮡctxt);
     ctxt = Default;
     var (wd, err) = os.Getwd();
@@ -617,7 +635,9 @@ internal static readonly @string vendorTreeˢ = " (vendor tree)"u8;
 
 public static void TestImportVendorFailure(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(Ꮡt));
+
     Ꮡt.Setenv(go111moduleˢ, offˢ);
+
     ref var ctxt = ref heap<global::go.go.build_package.Context>(out var Ꮡctxt);
     ctxt = Default;
     var (wd, err) = os.Getwd();
@@ -629,6 +649,7 @@ public static void TestImportVendorFailure(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("found made-up package x.com/y/z in %s"u8, (~p).Dir);
     }
+
     @string e = err.Error();
     if (!strings.Contains(e, vendorTreeˢ)) {
         Ꮡt.Fatalf("error on failed import does not mention GOROOT/src/vendor directory:\n%s"u8, e);
@@ -637,7 +658,9 @@ public static void TestImportVendorFailure(ж<testing.T> Ꮡt) {
 
 public static void TestImportVendorParentFailure(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(Ꮡt));
+
     Ꮡt.Setenv(go111moduleˢ, offˢ);
+
     ref var ctxt = ref heap<global::go.go.build_package.Context>(out var Ꮡctxt);
     ctxt = Default;
     var (wd, err) = os.Getwd();
@@ -671,12 +694,12 @@ internal static readonly object importingPackageWhenNoGoˢ = (@string)"importing
 // no go.mod file is present. It should fail to resolve packages outside std.
 // Verifies golang.org/issue/34669.
 public static void TestImportPackageOutsideModule(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveGoBuild(new build_internal_test_package.testing_TжTB(Ꮡt));
+
     // Disable module fetching for this test so that 'go list' fails quickly
     // without trying to find the latest version of a module.
     Ꮡt.Setenv(goproxyˢ, offˢ);
+
     // Create a GOPATH in a temporary directory. We don't use testdata
     // because it's in GOROOT, which interferes with the module heuristic.
     @string gopath = Ꮡt.TempDir();
@@ -690,12 +713,14 @@ public static void TestImportPackageOutsideModule(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     Ꮡt.Setenv(go111moduleˢ, "on"u8);
     Ꮡt.Setenv(gopathˢ, gopath);
     ref var ctxt = ref heap<global::go.go.build_package.Context>(out var Ꮡctxt);
     ctxt = Default;
     ctxt.GOPATH = gopath;
     ctxt.Dir = filepath.Join(gopath, srcExampleComPˢ);
+
     @string want = goModFileNotFoundInˢ;
     {
         var (_, err) = Ꮡctxt.Import(exampleComPˢ, gopath, FindOnly); if (err == default!){
@@ -724,6 +749,7 @@ public static void TestIssue23594(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("could not import testdata: %v"u8, err);
     }
+
     if ((~p).Doc != "Correct"u8) {
         Ꮡt.Fatalf("incorrectly set .Doc to %q"u8, (~p).Doc);
     }
@@ -742,6 +768,7 @@ public static void TestIssue56509(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("could not import testdata/bads: %v"u8, err);
     }
+
     if (len((~p).InvalidGoFiles) != 0) {
         Ꮡt.Fatalf("incorrectly added non-go file to InvalidGoFiles"u8);
     }
@@ -758,8 +785,6 @@ internal static readonly @string goGet1ˢ = "://...?go-get=1"u8;
 // imported, the package path is only shown once in the error.
 // Verifies golang.org/issue/34752.
 public static void TestMissingImportErrorRepetition(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveGoBuild(new build_internal_test_package.testing_TжTB(Ꮡt)); // need 'go list' internally
     @string tmp = Ꮡt.TempDir();
     {
@@ -770,21 +795,26 @@ public static void TestMissingImportErrorRepetition(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(go111moduleˢ, "on"u8);
     Ꮡt.Setenv(goproxyˢ, offˢ);
     Ꮡt.Setenv(gonoproxyˢ, noneˢ);
+
     ref var ctxt = ref heap<global::go.go.build_package.Context>(out var Ꮡctxt);
     ctxt = Default;
     ctxt.Dir = tmp;
+
     @string pkgPath = exampleComHelloˢ;
     var (_, err) = Ꮡctxt.Import(pkgPath, tmp, FindOnly);
     if (err == default!) {
         Ꮡt.Fatal(unexpectedSuccessˢ);
     }
+
     // Don't count the package path with a URL like https://...?go-get=1.
     // See golang.org/issue/35986.
     @string errStr = strings.ReplaceAll(err.Error(), "://"u8 + pkgPath + "?go-get=1"u8, goGet1ˢ);
+
     // Also don't count instances in suggested "go get" or similar commands
     // (see https://golang.org/issue/41576). The suggested command typically
     // follows a semicolon.
     (errStr, _, _) = strings.Cut(errStr, ";"u8);
+
     {
         nint n = strings.Count(errStr, pkgPath); if (n != 1) {
             Ꮡt.Fatalf("package path %q appears in error %d times; should appear once\nerror: %v"u8, pkgPath, n, err);
@@ -841,6 +871,7 @@ public static void TestAllTags(ж<testing.T> Ꮡt) {
     if (!slices.Equal<slice<@string>, @string>((~p).GoFiles, wantFiles)) {
         Ꮡt.Errorf("GoFiles = %v, want %v"u8, (~p).GoFiles, wantFiles);
     }
+
     ctxt.GOARCH = amd64ˢ;
     ctxt.GOOS = linuxˢ;
     (p, err) = Ꮡctxt.ImportDir(testdataAlltagsˢ, 0);
@@ -885,6 +916,7 @@ public static void TestDirectives(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("could not import testdata: %v"u8, err);
     }
+
     void check(@string name, slice<global::go.go.build_package.Directive> list, @string want) {
         if (runtime.GOOS == "windows"u8) {
             want = strings.ReplaceAll(want, testdataDirectivesˢ2, testdataDirectivesˢ3);

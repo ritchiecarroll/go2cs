@@ -34,7 +34,7 @@ Y/dEpa0D0EHhDxxVg6UzKOXB355n0IetGE/aWvyTV9SiDs6QsaC57Q9qq1/mitx5
 6/YBacNZ7ff1/57Etg4i5mNA6ubCpuc4Gi9oYqCNNohftr2lkJr7REdDR6OW0lsL
 rF7r4gUnKeC7mYIH1zypY7laskopiLFAfe96Kg==
 -----END CERTIFICATE-----
-"""u8);
+"""u8.Raw());
 
 // LocalhostKey is the private key for LocalhostCert.
 public static slice<byte> LocalhostKey;
@@ -67,7 +67,7 @@ nIhgtzGERF/6sZdQGW2LxTbUDWG74AfFkkEbeBfwEkCZXY/xmnYqYABhvlSex8jU
 supU6Eea21esIxIub2zv/Np0ojUb6rlqTPS4Ox1E27D787EJ3VOXpriSD10vyNnZ
 jel6uj2FOP9g54s+GzlSVg/T
 -----END RSA TESTING KEY-----
-"""u8)); }
+"""u8.Raw())); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string testingKeyˢ = "TESTING KEY"u8;

@@ -39,12 +39,16 @@ using static go.crypto.rand_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<go.crypto.@internal.boring_package.randReader, io_package.Reader>]
-[assembly: GoImplement<reader, go.crypto.@internal.fips140.drbg_package.DefaultReader>(Promoted = true)]
-[assembly: GoImplement<reader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -54,9 +58,9 @@ using static go.crypto.rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rand/rand.go", "rand.cs", "ACJCgoKClO6CgoKUlKwABBAADAqAgpSCgqSCgpQ=")]
+[assembly: go.GoPositionMap("crypto/rand/rand.go", "rand.cs", "ACBEmgAEEAAMCoKClKaCgpSCgpQ=")]
 [assembly: go.GoPositionMap("crypto/rand/text.go", "text.cs", "AAkc5IKCgpQ=")]
-[assembly: go.GoPositionMap("crypto/rand/util.go", "util.cs", "ABMiooKUgpaEgoKWgoSCgIK4yoKmgoK4hIKCzuKClIKUgpSmlIKCloSCgoK6hIKC")]
+[assembly: go.GoPositionMap("crypto/rand/util.go", "util.cs", "ABMq4oKUgqaUgoKmgpSCgILIyoKmgoK4lIKCzuKClIKUgpSmlIKCppSCgoLKlIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -71,7 +75,6 @@ public static partial class rand_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct reader {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -82,11 +85,9 @@ public static partial class rand_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸboring() => builtin.initPackage(typeof(go.crypto.@internal.boring_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140only() => builtin.initPackage(typeof(go.crypto.@internal.fips140only_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸdrbg() => builtin.initPackage(typeof(go.crypto.@internal.fips140.drbg_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrandutil() => builtin.initPackage(typeof(go.crypto.@internal.randutil_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸsysrand() => builtin.initPackage(typeof(go.crypto.@internal.sysrand_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrand() => builtin.initPackage(typeof(go.crypto.@internal.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbig() => builtin.initPackage(typeof(math.big_package));

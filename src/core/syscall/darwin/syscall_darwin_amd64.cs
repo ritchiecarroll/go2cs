@@ -52,10 +52,13 @@ internal static (nint written, error err) sendfile(nint outfd, nint infd, ref in
     ref var length = ref heap(new uint64(), out var Ꮡlength);
 
     length = (uint64)count;
+
     var ᴋ0 = Ꮡlength;
         var (_, _, e1) = syscall6(abi.FuncPCABI0(libc_sendfile_trampoline), (uintptr)infd, (uintptr)outfd, (uintptr)(offset), (uintptr)ᴋ0, 0, 0);
     System.GC.KeepAlive(ᴋ0);
+
     written = (nint)length;
+
     if (e1 != 0) {
         err = e1;
     }
@@ -65,10 +68,6 @@ internal static (nint written, error err) sendfile(nint outfd, nint infd, ref in
 internal static partial void libc_sendfile_trampoline();
 
 //go:cgo_import_dynamic libc_sendfile sendfile "/usr/lib/libSystem.B.dylib"
-
-// Implemented in the runtime package (runtime/sys_darwin_64.go)
-internal static partial (uintptr r1, uintptr r2, Errno err) syscallX(uintptr fn, uintptr a1, uintptr a2, uintptr a3);
-
 public static partial (uintptr r1, uintptr r2, Errno err) Syscall9(uintptr trap, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9);
 
 } // end syscall_package

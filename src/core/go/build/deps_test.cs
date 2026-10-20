@@ -774,25 +774,29 @@ internal static @string depsRules = """
 
 
 
-"""u8;
+"""u8.Raw();
 
 // listStdPkgs returns the same list of packages as "go list std".
 internal static (slice<@string>, error) listStdPkgs(@string goroot) {
     // Based on cmd/go's matchPackages function.
     ref var pkgs = ref heap<slice<@string>>(out var Ꮡpkgs);
+
     @string src = filepath.Join(goroot, srcˢ) + ((@string)(rune)filepath.Separator);
     var walkFn = error (@string path, fs.DirEntry d, error err) => {
         if (err != default! || !d.IsDir() || path == src) {
             return default!;
         }
+
         @string @base = filepath.Base(path);
         if (strings.HasPrefix(@base, "."u8) || strings.HasPrefix(@base, "_"u8) || @base == "testdata"u8) {
             return filepath.SkipDir;
         }
+
         @string name = filepath.ToSlash(path.slice(len(src)));
         if (name == "builtin"u8 || name == "cmd"u8) {
             return filepath.SkipDir;
         }
+
         Ꮡpkgs.ValueSlot = append(Ꮡpkgs.ValueSlot, strings.TrimPrefix(name, vendorˢ2));
         return default!;
     };
@@ -806,14 +810,17 @@ internal static (slice<@string>, error) listStdPkgs(@string goroot) {
 
 public static void TestDependencies(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(Ꮡt));
+
     var ctxt = Default;
     var (all, err) = listStdPkgs(ctxt.GOROOT);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     slices.Sort<slice<@string>, @string>(all);
+
     var sawImport = new map<@string, map<@string, bool>>{}; // from package => to package => true
     var policy = depsPolicy(Ꮡt);
+
     foreach (var (_, pkg) in all) {
         var (imports, errΔ1) = findImports(pkg);
         if (errΔ1 != default!) {
@@ -911,11 +918,13 @@ internal static ж<dag.Graph> depsPolicy(ж<testing.T> Ꮡt) {
 // lowercase. See Issue 40065.
 public static void TestStdlibLowercase(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(Ꮡt));
+
     var ctxt = Default;
     var (all, err) = listStdPkgs(ctxt.GOROOT);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, pkgname) in all) {
         if (strings.ToLower(pkgname) != pkgname) {
             Ꮡt.Errorf("package %q should not use upper-case path"u8, pkgname);

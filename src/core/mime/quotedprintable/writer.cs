@@ -33,6 +33,7 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
 
     foreach (var (i, b) in p) {
         switch (ᐧ) {
+        // Simple writes are done in batch.
         case {} when b >= (rune)'!' && b <= (rune)'~' && b != (rune)'=': {
             continue;
             break;
@@ -42,7 +43,6 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
             break;
         }}
 
-        // Simple writes are done in batch.
         if (i > n) {
             {
                 var errΔ1 = w.write(p.slice(n, i)); if (errΔ1 != default!) {
@@ -51,6 +51,7 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
             }
             n = i;
         }
+
         {
             var errΔ2 = w.encode(b); if (errΔ2 != default!) {
                 return (n, errΔ2);
@@ -58,14 +59,17 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
         }
         n++;
     }
+
     if (n == len(p)) {
         return (n, default!);
     }
+
     {
         var errΔ3 = w.write(p.slice(n)); if (errΔ3 != default!) {
             return (n, errΔ3);
         }
     }
+
     return (len(p), default!);
 }
 
@@ -77,6 +81,7 @@ public static error Close(this ref Writer w) {
             return err;
         }
     }
+
     return w.flush();
 }
 
@@ -89,9 +94,11 @@ internal static error write(this ref Writer w, slice<byte> p) {
                 w.cr = false;
                 continue;
             }
+
             if (b == (rune)'\r') {
                 w.cr = true;
             }
+
             {
                 var err = w.checkLastByte(); if (err != default!) {
                     return err;
@@ -104,6 +111,7 @@ internal static error write(this ref Writer w, slice<byte> p) {
             }
             continue;
         }
+
         if (w.i == (nint)(lineMaxLen - 1)) {
             {
                 var err = w.insertSoftLineBreak(); if (err != default!) {
@@ -111,10 +119,12 @@ internal static error write(this ref Writer w, slice<byte> p) {
                 }
             }
         }
+
         w.line[w.i] = b;
         w.i++;
         w.cr = false;
     }
+
     return default!;
 }
 
@@ -126,10 +136,12 @@ internal static error encode(this ref Writer w, byte b) {
             }
         }
     }
+
     w.line[w.i] = (rune)'=';
-    w.line[w.i + 1] = upperhex[(b >> (int)(4))];
+    w.line[w.i + 1] = upperhex[(b >> 4)];
     w.line[w.i + 2] = upperhex[(byte)(b & 0x0f)];
     w.i += 3;
+
     return default!;
 }
 
@@ -140,6 +152,7 @@ internal static error checkLastByte(this ref Writer w) {
     if (w.i == 0) {
         return default!;
     }
+
     var b = w.line[w.i - 1];
     if (isWhitespace(b)) {
         w.i--;
@@ -149,12 +162,14 @@ internal static error checkLastByte(this ref Writer w) {
             }
         }
     }
+
     return default!;
 }
 
 internal static error insertSoftLineBreak(this ref Writer w) {
     w.line[w.i] = (rune)'=';
     w.i++;
+
     return w.insertCRLF();
 }
 
@@ -162,6 +177,7 @@ internal static error insertCRLF(this ref Writer w) {
     w.line[w.i] = (rune)'\r';
     w.line[w.i + 1] = (rune)'\n';
     w.i += 2;
+
     return w.flush();
 }
 
@@ -171,6 +187,7 @@ internal static error flush(this ref Writer w) {
             return err;
         }
     }
+
     w.i = 0;
     return default!;
 }

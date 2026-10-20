@@ -6,10 +6,12 @@ namespace go;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
-using syscall = @internal.runtime.syscall_package;
+using linux = @internal.runtime.syscall.linux_package;
+using strconv = @internal.strconv_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using @internal.runtime.syscall;
 
 partial class runtime_package {
 
@@ -36,9 +38,6 @@ partial struct mOS {
     internal uintptr vgetrandomState;
     internal uint32 waitsema; // semaphore for parking on locks
 }
-
-//go:noescape
-internal static partial int32 futex(@unsafe.Pointer addr, int32 op, uint32 val, @unsafe.Pointer ts, @unsafe.Pointer addr2, uint32 val3);
 
 // Linux futex.
 //
@@ -70,9 +69,10 @@ internal static void futexsleep(ж<uint32> Ꮡaddr, uint32 val, int64 ns) {
         futex(@unsafe.Pointer.FromPinnedBox(Ꮡaddr), _FUTEX_WAIT_PRIVATE, val, nil, nil, 0);
         return;
     }
+
     ref var ts = ref heap(new timespec(), out var Ꮡts);
     ts.setNsec(ns);
-    futex(@unsafe.Pointer.FromPinnedBox(Ꮡaddr), _FUTEX_WAIT_PRIVATE, val, @unsafe.Pointer.FromPinnedBox(Ꮡts), nil, 0);
+    futex(@unsafe.Pointer.FromPinnedBox(Ꮡaddr), _FUTEX_WAIT_PRIVATE, val, Ꮡts, nil, 0);
 }
 
 // If any procs are sleeping on addr, wake up at most cnt.
@@ -85,16 +85,18 @@ internal static void futexwakeup(ж<uint32> Ꮡaddr, uint32 cnt) {
     if (ret >= 0) {
         return;
     }
+
     // I don't know that futex wakeup can return
     // EAGAIN or EINTR, but if it does, it would be
     // safe to loop and call futex again.
     systemstack(() => {
         print((@string)"futexwakeup addr="u8, Ꮡaddr.OrTypedNil(), (@string)" returned "u8, ret, (@string)"\n"u8);
     });
+
     ((ж<int32>)(uintptr)((@unsafe.Pointer)(uintptr)0x1006)).Value = 0x1006;
 }
 
-internal static int32 getproccount() {
+internal static int32 getCPUCount() {
     // This buffer is huge (8 kB) but we are on the system stack
     // and there should be plenty of space (64 kB).
     // Also this is a leaf, so we're not holding up the memory for long.
@@ -125,40 +127,24 @@ internal static int32 getproccount() {
 
 // Clone, the Linux rfork.
 internal static UntypedInt _CLONE_VM => 0x100;
-
 internal static UntypedInt _CLONE_FS => 0x200;
-
 internal static UntypedInt _CLONE_FILES => 0x400;
-
 internal static UntypedInt _CLONE_SIGHAND => 0x800;
-
 internal static UntypedInt _CLONE_PTRACE => 0x2000;
-
 internal static UntypedInt _CLONE_VFORK => 0x4000;
-
 internal static UntypedInt _CLONE_PARENT => 0x8000;
-
 internal static UntypedInt _CLONE_THREAD => 0x10000;
-
 internal static UntypedInt _CLONE_NEWNS => 0x20000;
-
 internal static UntypedInt _CLONE_SYSVSEM => 0x40000;
-
 internal static UntypedInt _CLONE_SETTLS => 0x80000;
-
 internal static UntypedInt _CLONE_PARENT_SETTID => 0x100000;
-
 internal static UntypedInt _CLONE_CHILD_CLEARTID => 0x200000;
-
 internal static UntypedInt _CLONE_UNTRACED => 0x800000;
-
 internal static UntypedInt _CLONE_CHILD_SETTID => 0x1000000;
-
 internal static UntypedInt _CLONE_STOPPED => 0x2000000;
-
 internal static UntypedInt _CLONE_NEWUTS => 0x4000000;
-
 internal static UntypedInt _CLONE_NEWIPC => 0x8000000;
+
 // As of QEMU 2.8.0 (5ea2fc84d), user emulation requires all six of these
 // flags to be set when creating a thread; attempts to share the other
 // five but leave SYSVSEM unshared will fail with -EINVAL.
@@ -170,7 +156,6 @@ internal static UntypedInt _CLONE_NEWIPC => 0x8000000;
 /* share fd table */
 /* share sig handler table */
 /* share SysV semaphore undo lists (see issue #20763) */
-
 internal static UntypedInt cloneFlags => /* _CLONE_VM |
 	_CLONE_FS |
 	_CLONE_FILES |
@@ -197,6 +182,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
     if (false) {
         print((@string)"newosproc stk="u8, @unsafe.Pointer.OrTypedNil(stk), (@string)" m="u8, Ꮡmp.OrTypedNil(), (@string)" g="u8, mp.g0.OrTypedNil(), (@string)" clone="u8, abi.FuncPCABI0(clone), (@string)" id="u8, mp.id, (@string)" ostk="u8, Ꮡ(mp), (@string)"\n"u8);
     }
+
     // Disable signals during clone, so that the new thread starts
     // with signals disabled. It will enable them in minit.
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
@@ -211,6 +197,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
         return -r;
     });
     sigprocmask(_SIG_SETMASK, Ꮡoset, ж<sigset>.NilBoxOfDims(2L));
+
     if (ret != 0) {
         print((@string)"runtime: failed to create new OS thread (have "u8, mcount(), (@string)" already; errno="u8, ret, (@string)")\n"u8);
         if (ret == _EAGAIN) {
@@ -220,11 +207,14 @@ internal static void newosproc(ж<m> Ꮡmp) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string osThreadStackˢ = "OS thread stack"u8;
+
 // Version of newosproc that doesn't require a valid G.
 //
 //go:nosplit
 internal static void newosproc0(uintptr stacksize, @unsafe.Pointer fn) {
-    @unsafe.Pointer Δstack = (uintptr)sysAlloc(stacksize, Ꮡmemstats.of(mstats.Ꮡstacks_sys));
+    @unsafe.Pointer Δstack = (uintptr)sysAlloc(stacksize, Ꮡmemstats.of(mstats.Ꮡstacks_sys), osThreadStackˢ);
     if (Δstack == nil) {
         writeErrStr(failallocatestack);
         exit(1);
@@ -256,28 +246,29 @@ internal static ж<array<uintptr>> Ꮡauxvreadbuf = new StandardBox<array<uintpt
 internal static ref array<uintptr> auxvreadbuf => ref Ꮡauxvreadbuf.Value;
 
 internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
-    ref var argv = ref Ꮡargv.DerefOrNull();
-
     var n = argc + 1;
+
     // skip over argv, envp to get to auxv
     while (argv_index(Ꮡargv, n) != nil) {
         n++;
     }
+
     // skip NULL separator
     n++;
+
     // now argv+n is auxv
     var auxvp = (ж<array<uintptr>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡargv), (uintptr)n * (uintptr)goarch.PtrSize));
+
     {
-        nint pairsΔ1 = sysauxv((~auxvp)[..]); if (pairsΔ1 != 0) {
-            auxv = (~auxvp).slice(0, pairsΔ1 * 2, pairsΔ1 * 2);
+        nint pairsΔ1 = sysauxv(auxvp.slice()); if (pairsΔ1 != 0) {
+            auxv = auxvp.slice(0, pairsΔ1 * 2, pairsΔ1 * 2);
             return;
         }
     }
     // In some situations we don't get a loader-provided
     // auxv, such as when loaded as a library on Android.
     // Fall back to /proc/self/auxv.
-    var fd = open(Ꮡ(procAuxv, 0), 0, /* O_RDONLY */
- 0);
+    var fd = open(Ꮡ(procAuxv, 0), 0, /* O_RDONLY */ 0);
     if (fd < 0) {
         // On Android, /proc/self/auxv might be unreadable (issue 9229), so we fallback to
         // try using mincore to detect the physical page size.
@@ -288,7 +279,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
             return;
         }
         uintptr nΔ1 = default!;
-        for (nΔ1 = ((uintptr)4 << (int)(10)); nΔ1 < size; nΔ1 <<= (int)(1)) {
+        for (nΔ1 = (uintptr)4 << 10; nΔ1 < size; nΔ1 <<= (int)(1)) {
             var errΔ1 = mincore((@unsafe.Pointer)((uintptr)Δp + nΔ1), 1, Ꮡaddrspace_vec.at<byte>(0));
             if (errΔ1 == 0) {
                 physPageSize = nΔ1;
@@ -301,6 +292,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
         munmap(Δp, size);
         return;
     }
+
     n = read(fd, (uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡauxvreadbuf.at<uintptr>(0))), (int32)/* unsafe.Sizeof(auxvreadbuf) */ (uintptr)1024);
     closefd(fd);
     if (n < 0) {
@@ -324,7 +316,13 @@ internal static nint /*pairs*/ sysauxv(slice<uintptr> auxv) {
         var (tag, val) = (auxv[i], auxv[i + 1]);
         var exprᴛ1 = tag;
         if (exprᴛ1 == _AT_RANDOM) {
-            startupRand = (~(ж<array<byte>>)(uintptr)((@unsafe.Pointer)val))[..];
+            // The kernel provides a pointer to 16 bytes of cryptographically
+            // random data. Note that in cgo programs this value may have
+            // already been used by libc at this point, and in particular glibc
+            // and musl use the value as-is for stack and pointer protector
+            // cookies from libc_start_main and/or dl_start. Also, cgo programs
+            // may use the value after we do.
+            startupRand = ((ж<array<byte>>)(uintptr)((@unsafe.Pointer)val)).slice();
         }
         else if (exprᴛ1 == _AT_PAGESZ) {
             physPageSize = val;
@@ -333,12 +331,6 @@ internal static nint /*pairs*/ sysauxv(slice<uintptr> auxv) {
             secureMode = val == 1;
         }
 
-        // The kernel provides a pointer to 16 bytes of cryptographically
-        // random data. Note that in cgo programs this value may have
-        // already been used by libc at this point, and in particular glibc
-        // and musl use the value as-is for stack and pointer protector
-        // cookies from libc_start_main and/or dl_start. Also, cgo programs
-        // may use the value after we do.
         archauxv(tag, val);
         vdsoauxv(tag, val);
     }
@@ -350,8 +342,7 @@ internal static ref slice<byte> sysTHPSizePath => ref ᏑsysTHPSizePath.ValueSlo
 
 internal static uintptr getHugePageSize() {
     ref var numbuf = ref heap(new array<byte>(20), out var Ꮡnumbuf);
-    var fd = open(Ꮡ(sysTHPSizePath, 0), 0, /* O_RDONLY */
- 0);
+    var fd = open(Ꮡ(sysTHPSizePath, 0), 0, /* O_RDONLY */ 0);
     if (fd < 0) {
         return 0;
     }
@@ -362,11 +353,11 @@ internal static uintptr getHugePageSize() {
         return 0;
     }
     n--; // remove trailing newline
-    var (v, ok) = atoi(slicebytetostringtmp((ж<byte>)(uintptr)(ptr), (nint)n));
-    if (!ok || v < 0) {
+    var (v, err) = strconv.Atoi(slicebytetostringtmp((ж<byte>)(uintptr)(ptr), (nint)n));
+    if (err != default! || v < 0) {
         v = 0;
     }
-    if ((nint)(v & (v - 1)) != 0) {
+    if ((v & (v - 1)) != 0) {
         // v is not a power of 2
         return 0;
     }
@@ -374,10 +365,10 @@ internal static uintptr getHugePageSize() {
 }
 
 internal static void osinit() {
-    ncpu = getproccount();
+    numCPUStartup = getCPUCount();
     physHugePageSize = getHugePageSize();
-    osArchInit();
     vgetrandomInit();
+    configure64bitsTimeOn32BitsArchitectures();
 }
 
 internal static ж<slice<byte>> Ꮡurandom_dev = new StandardBox<slice<byte>>(slice<byte>("/dev/urandom\x00"u8));
@@ -386,8 +377,7 @@ internal static ref slice<byte> urandom_dev => ref Ꮡurandom_dev.ValueSlot;
 internal static nint readRandom(slice<byte> r) {
     // Note that all supported Linux kernels should provide AT_RANDOM which
     // populates startupRand, so this fallback should be unreachable.
-    var fd = open(Ꮡ(urandom_dev, 0), 0, /* O_RDONLY */
- 0);
+    var fd = open(Ꮡ(urandom_dev, 0), 0, /* O_RDONLY */ 0);
     var n = read(fd, @unsafe.Pointer.FromPinnedBox(Ꮡ(r, 0)), (int32)len(r));
     closefd(fd);
     return (nint)n;
@@ -422,6 +412,7 @@ internal static partial uint32 gettid();
 // Called on the new thread, cannot allocate memory.
 internal static void minit() {
     minitSignals();
+
     // Cgo-created threads and the bootstrap m are missing a
     // procid. We need this for asynchronous preemption and it's
     // useful in debuggers.
@@ -440,6 +431,7 @@ internal static void unminit() {
 // resources in minit, semacreate, or elsewhere. Do not take locks after calling this.
 //
 // This always runs without a P, so //go:nowritebarrierrec is required.
+//
 //go:nowritebarrierrec
 internal static void mdestroy(ref m mp) {
 }
@@ -462,9 +454,6 @@ internal static partial void setitimer(int32 mode, ж<itimerval> @new, ж<itimer
 
 //go:noescape
 internal static partial int32 timer_create(int32 clockid, ж<sigevent> sevp, ж<int32> timerid);
-
-//go:noescape
-internal static partial int32 timer_settime(int32 timerid, int32 flags, ж<itimerspec> @new, ж<itimerspec> old);
 
 //go:noescape
 internal static partial int32 timer_delete(int32 timerid);
@@ -496,7 +485,7 @@ internal static partial (int32 r, int32 w, int32 errno) pipe2(int32 flags);
 
 //go:nosplit
 public static (int32 ret, int32 errno) fcntl(int32 fd, int32 cmd, int32 arg) {
-    var (r, _, err) = syscall.Syscall6(syscall.SYS_FCNTL, (uintptr)fd, (uintptr)cmd, (uintptr)arg, 0, 0, 0);
+    var (r, _, err) = linux.Syscall6(linux.SYS_FCNTL, (uintptr)fd, (uintptr)cmd, (uintptr)arg, 0, 0, 0);
     return ((int32)r, (int32)err);
 }
 
@@ -511,12 +500,12 @@ internal static void setsig(uint32 i, uintptr fn) {
     sigfillset(ref sa.sa_mask);
     // Although Linux manpage says "sa_restorer element is obsolete and
     // should not be used". x86_64 kernel requires it. Only use it on
-    // x86.
+    // x86. Note that on 386 this is cleared when using the C sigaction
+    // function via cgo; see fixSigactionForCgo.
     if (GOARCH == "386"u8 || GOARCH == "amd64"u8) {
         sa.sa_restorer = abi.FuncPCABI0(sigreturn__sigaction);
     }
-    if (fn == abi.FuncPCABIInternal(sighandler)) {
-        // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
+    if (fn == abi.FuncPCABIInternal(sighandler)) { // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
         if (iscgo){
             fn = abi.FuncPCABI0(cgoSigtramp);
         } else {
@@ -532,7 +521,7 @@ internal static void setsig(uint32 i, uintptr fn) {
 internal static void setsigstack(uint32 i) {
     ref var sa = ref heap(new sigactiont(), out var Ꮡsa);
     sigaction(i, nil, Ꮡsa);
-    if ((uint64)(sa.sa_flags & (uint64)_SA_ONSTACK) != 0) {
+    if ((sa.sa_flags & (uint64)_SA_ONSTACK) != 0) {
         return;
     }
     sa.sa_flags |= (uint64)(_SA_ONSTACK);
@@ -591,6 +580,23 @@ internal static void sysSigaction(uint32 sig, ж<sigactiont> Ꮡnew, ж<sigactio
 //go:noescape
 internal static partial int32 rt_sigaction(uintptr sig, ж<sigactiont> @new, ж<sigactiont> old, uintptr size);
 
+// fixSigactionForCgo is called when we are using cgo to call the
+// C sigaction function. On 386 the C function does not expect the
+// SA_RESTORER flag to be set, and in some cases will fail if it is set:
+// it will pass the SA_RESTORER flag to the kernel without passing
+// the sa_restorer field. Since the C function will handle SA_RESTORER
+// for us, we need not pass it. See issue #75253.
+//
+//go:nosplit
+internal static void fixSigactionForCgo(ж<sigactiont> Ꮡnew) {
+    ref var @new = ref Ꮡnew.DerefOrNull();
+
+    if (GOARCH == "386"u8 && Ꮡnew != nil) {
+        @new.sa_flags &= unchecked((uint64)~(uint64)(_SA_RESTORER));
+        @new.sa_restorer = 0;
+    }
+}
+
 internal static partial nint getpid();
 
 internal static partial void tgkill(nint tgid, nint tid, nint sig);
@@ -613,12 +619,14 @@ internal static bool validSIGPROF(ж<m> Ꮡmp, ж<sigctxt> Ꮡc) {
     var code = (int32)c.sigcode();
     var setitimer = code == _SI_KERNEL;
     var timer_create = code == _SI_TIMER;
+
     if (!(setitimer || timer_create)) {
         // The signal doesn't correspond to a profiling mechanism that the
         // runtime enables itself. There's no reason to process it, but there's
         // no reason to ignore it either.
         return true;
     }
+
     if (Ꮡmp == nil) {
         // Since we don't have an M, we can't check if there's an active
         // per-thread timer for this thread. We don't know how long this thread
@@ -634,6 +642,7 @@ internal static bool validSIGPROF(ж<m> Ꮡmp, ж<sigctxt> Ꮡc) {
         // the assembly implementations of runtime.cgoSigtramp.
         return setitimer;
     }
+
     // Having an M means the thread interacts with the Go scheduler, and we can
     // check whether there's an active per-thread timer for this thread.
     if (Ꮡmp.of(m.ᏑprofileTimerValid).Load()) {
@@ -644,6 +653,7 @@ internal static bool validSIGPROF(ж<m> Ꮡmp, ж<sigctxt> Ꮡc) {
         // CPU consumption).
         return timer_create;
     }
+
     // No active per-thread timer means the only valid profiler is setitimer.
     return setitimer;
 }
@@ -689,8 +699,9 @@ internal static void runPerThreadSyscall() {
     if ((~gp).m.of(m.ᏑneedPerThreadSyscall).Load() == 0) {
         return;
     }
+
     var args = perThreadSyscall;
-    var (r1, r2, errno) = syscall.Syscall6(args.trap, args.a1, args.a2, args.a3, args.a4, args.a5, args.a6);
+    var (r1, r2, errno) = linux.Syscall6(args.trap, args.a1, args.a2, args.a3, args.a4, args.a5, args.a6);
     if (GOARCH == "ppc64"u8 || GOARCH == "ppc64le"u8) {
         // TODO(https://go.dev/issue/51192 ): ppc64 doesn't use r2.
         r2 = 0;
@@ -700,6 +711,7 @@ internal static void runPerThreadSyscall() {
         print((@string)"results: got {r1="u8, r1, (@string)",r2="u8, r2, (@string)",errno="u8, errno, (@string)"}, want {r1="u8, args.r1, (@string)",r2="u8, args.r2, (@string)",errno=0}\n"u8);
         fatal(allThreadsSyscall6ˢ);
     }
+
     (~gp).m.of(m.ᏑneedPerThreadSyscall).Store(0);
 }
 
@@ -727,9 +739,97 @@ internal static bool sigFromSeccomp(this ref sigctxt c) {
 //go:nosplit
 internal static (int32 ret, int32 errno) mprotect(@unsafe.Pointer addr, uintptr n, int32 prot) {
     var ᴋ0 = addr;
-        var (r, _, err) = syscall.Syscall6(syscall.SYS_MPROTECT, (uintptr)ᴋ0, n, (uintptr)prot, 0, 0, 0);
+        var (r, _, err) = linux.Syscall6(linux.SYS_MPROTECT, (uintptr)ᴋ0, n, (uintptr)prot, 0, 0, 0);
     System.GC.KeepAlive(ᴋ0);
     return ((int32)r, (int32)err);
+}
+
+partial struct kernelVersion {
+    internal nint major;
+    internal nint minor;
+}
+
+// getKernelVersion returns major and minor kernel version numbers
+// parsed from the uname release field. ok reports whether parsing
+// succeeded; on failure callers must pick a default rather than
+// failing, because this is called during osinit before the runtime
+// is fully initialized and a throw here is unrecoverable.
+internal static (kernelVersion kv, bool ok) getKernelVersion() {
+    bool ok = default!;
+
+    ref var buf = ref heap(new linux.Utsname(), out var Ꮡbuf);
+    {
+        var e = linux.Uname(Ꮡbuf); if (e != 0) {
+            return (new kernelVersion(nil), false);
+        }
+    }
+    @string rel = gostringnocopy(Ꮡbuf.at(linux.Utsname.ᏑRelease, 0));
+    (var major, var minor, _, ok) = parseRelease(rel);
+    if (!ok) {
+        return (new kernelVersion(nil), false);
+    }
+    return (new kernelVersion(major: major, minor: minor), true);
+}
+
+// parseRelease parses a dot-separated version number from the prefix
+// of rel. It returns ok=true only if at least the major and minor
+// components were successfully parsed; the patch component is
+// best-effort. Trailing vendor or build suffixes such as
+// "-generic", "+", "_hi3535", or "-rc1" are ignored.
+internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@string rel) {
+    nint major = default!;
+    nint minor = default!;
+    nint patch = default!;
+    bool ok = default!;
+
+    // next consumes a run of decimal digits from the front of rel,
+    // returning the parsed value. If the digits are followed by a
+    // '.', it is consumed and more is set so the caller knows to
+    // parse another component; otherwise scanning terminates and
+    // the rest of rel is discarded.
+    (nint n, bool more, bool ok) next() {
+        nint n = default!;
+        nint i = 0;
+        while (i < len(rel) && rel[i] >= (rune)'0' && rel[i] <= (rune)'9') {
+            i++;
+        }
+        if (i == 0) {
+            return (0, false, false);
+        }
+        (n, var err) = strconv.Atoi(rel.slice(0, i));
+        if (err != default!) {
+            return (0, false, false);
+        }
+        if (i < len(rel) && rel[i] == (rune)'.') {
+            rel = rel.slice(i + 1);
+            return (n, true, true);
+        }
+        rel = ""u8;
+        return (n, false, true);
+    }
+
+    bool more = default!;
+    {
+        (major, more, ok) = next(); if (!ok || !more) {
+            return (0, 0, 0, false);
+        }
+    }
+    {
+        (minor, more, ok) = next(); if (!ok) {
+            return (0, 0, 0, false);
+        }
+    }
+    if (!more) {
+        return (major, minor, 0, true);
+    }
+    (patch, _, _) = next();
+    return (major, minor, patch, true);
+}
+
+// GE checks if the running kernel version
+// is greater than or equal to the provided version.
+internal static bool GE(this kernelVersion kv, nint x, nint y) {
+    return kv.major > x || (kv.major == x && kv.minor >= y);
 }
 
 } // end runtime_package

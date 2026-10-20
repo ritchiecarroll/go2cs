@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-1_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.6/os.signal.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/os/signal@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/os/signal) [![Source](https://img.shields.io/badge/Source-@1.24.13.6-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.6/src/core/os/signal)
+[![Tests](https://img.shields.io/badge/Tests-1_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/os.signal.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/os/signal@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/os/signal) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/os/signal)
 
 From C#, call this package through the static class go.os.signal_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -15,7 +15,7 @@ Signals are primarily used on Unix-like systems. For the use of this package on 
 
 The signals SIGKILL and SIGSTOP may not be caught by a program, and therefore cannot be affected by this package.
 
-Synchronous signals are signals triggered by errors in program execution: SIGBUS, SIGFPE, and SIGSEGV. These are only considered synchronous when caused by program execution, not when sent using [os.Process.Kill](https://pkg.go.dev/os@go1.24.13#Process.Kill) or the kill program or some similar mechanism. In general, except as discussed below, Go programs will convert a synchronous signal into a run-time panic.
+Synchronous signals are signals triggered by errors in program execution: SIGBUS, SIGFPE, and SIGSEGV. These are only considered synchronous when caused by program execution, not when sent using [os.Process.Kill](https://pkg.go.dev/os@go1.26.10#Process.Kill) or the kill program or some similar mechanism. In general, except as discussed below, Go programs will convert a synchronous signal into a run-time panic.
 
 The remaining signals are asynchronous signals. They are not triggered by program errors, but are instead sent from the kernel or from some other program.
 
@@ -27,7 +27,7 @@ By default, a synchronous signal is converted into a run-time panic. A SIGHUP, S
 
 If the Go program is started with either SIGHUP or SIGINT ignored (signal handler set to SIG\_IGN), they will remain ignored.
 
-If the Go program is started with a non-empty signal mask, that will generally be honored. However, some signals are explicitly unblocked: the synchronous signals, SIGILL, SIGTRAP, SIGSTKFLT, SIGCHLD, SIGPROF, and, on Linux, signals 32 (SIGCANCEL) and 33 (SIGSETXID) (SIGCANCEL and SIGSETXID are used internally by glibc). Subprocesses started by [os.Exec](https://pkg.go.dev/os@go1.24.13#Exec), or by [os/exec](https://pkg.go.dev/os/exec@go1.24.13), will inherit the modified signal mask.
+If the Go program is started with a non-empty signal mask, that will generally be honored. However, some signals are explicitly unblocked: the synchronous signals, SIGILL, SIGTRAP, SIGSTKFLT, SIGCHLD, SIGPROF, and, on Linux, signals 32 (SIGCANCEL) and 33 (SIGSETXID) (SIGCANCEL and SIGSETXID are used internally by glibc). Subprocesses started by [os.Exec](https://pkg.go.dev/os@go1.26.10#Exec), or by [os/exec](https://pkg.go.dev/os/exec@go1.26.10), will inherit the modified signal mask.
 
 ### Changing the behavior of signals in Go programs
 
@@ -43,9 +43,9 @@ If the program is started with a non-empty signal mask, some signals will be exp
 
 When a Go program writes to a broken pipe, the kernel will raise a SIGPIPE signal.
 
-If the program has not called Notify to receive SIGPIPE signals, then the behavior depends on the file descriptor number. A write to a broken pipe on file descriptors 1 or 2 (standard output or standard error) will cause the program to exit with a SIGPIPE signal. A write to a broken pipe on some other file descriptor will take no action on the SIGPIPE signal, and the write will fail with an EPIPE error.
+If the program has not called Notify to receive SIGPIPE signals, then the behavior depends on the file descriptor number. A write to a broken pipe on file descriptors 1 or 2 (standard output or standard error) will cause the program to exit with a SIGPIPE signal. A write to a broken pipe on some other file descriptor will take no action on the SIGPIPE signal, and the write will fail with a [syscall.EPIPE](https://pkg.go.dev/syscall@go1.26.10#EPIPE) error.
 
-If the program has called Notify to receive SIGPIPE signals, the file descriptor number does not matter. The SIGPIPE signal will be delivered to the Notify channel, and the write will fail with an EPIPE error.
+If the program has called Notify to receive SIGPIPE signals, the file descriptor number does not matter. The SIGPIPE signal will be delivered to the Notify channel, and the write will fail with a [syscall.EPIPE](https://pkg.go.dev/syscall@go1.26.10#EPIPE) error.
 
 This means that, by default, command line programs will behave like typical Unix command line programs, while other programs will not crash with SIGPIPE when writing to a closed network connection.
 
@@ -83,7 +83,7 @@ Go code built without -buildmode=c-archive or -buildmode=c-shared will install a
 
 ### Windows
 
-On Windows a ^C (Control-C) or ^BREAK (Control-Break) normally cause the program to exit. If Notify is called for [os.Interrupt](https://pkg.go.dev/os@go1.24.13#Interrupt), ^C or ^BREAK will cause [os.Interrupt](https://pkg.go.dev/os@go1.24.13#Interrupt) to be sent on the channel, and the program will not exit. If Reset is called, or Stop is called on all channels passed to Notify, then the default behavior will be restored.
+On Windows a ^C (Control-C) or ^BREAK (Control-Break) normally cause the program to exit. If Notify is called for [os.Interrupt](https://pkg.go.dev/os@go1.26.10#Interrupt), ^C or ^BREAK will cause [os.Interrupt](https://pkg.go.dev/os@go1.26.10#Interrupt) to be sent on the channel, and the program will not exit. If Reset is called, or Stop is called on all channels passed to Notify, then the default behavior will be restored.
 
 Additionally, if Notify is called, and Windows sends CTRL\_CLOSE\_EVENT, CTRL\_LOGOFF\_EVENT or CTRL\_SHUTDOWN\_EVENT to the process, Notify will return syscall.SIGTERM. Unlike Control-C and Control-Break, Notify does not change process behavior when either CTRL\_CLOSE\_EVENT, CTRL\_LOGOFF\_EVENT or CTRL\_SHUTDOWN\_EVENT is received - the process will still get terminated unless it exits. But receiving syscall.SIGTERM will give the process an opportunity to clean up before termination.
 

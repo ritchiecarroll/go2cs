@@ -16,7 +16,7 @@ using Δruntime = runtime_package;
 partial class runtime_test_package {
 
 partial struct MyNode {
-    public partial ref global::go.runtime_internal_test_package.LFNode LFNode { get; }
+    /*embed*/ public global::go.runtime_internal_test_package.LFNode LFNode;
     internal nint data;
 }
 
@@ -25,7 +25,7 @@ partial struct MyNode {
 // We require lfstack objects to live outside the heap so that
 // checkptr passes on the unsafe shenanigans used.
 internal static ж<MyNode> allocMyNode(nint data) {
-    var n = (ж<MyNode>)(uintptr)(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(MyNode{}) */ (uintptr)24));
+    var n = (ж<MyNode>)(uintptr)(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(MyNode{}) */ (uintptr)24, runtime_internal_test_package.TagAlign));
     runtime_internal_test_package.LFNodeValidate(n.of(MyNode.ᏑLFNode));
     n.Value.data = data;
     return n;
@@ -44,16 +44,20 @@ internal static any global;
 public static void TestLFStack(ж<testing.T> Ꮡt) {
     var stack = @new<uint64>();
     global = stack.OrTypedNil(); // force heap allocation
+
     // Check the stack is initially empty.
     if (runtime_internal_test_package.LFStackPop(stack) != nil) {
         Ꮡt.Fatalf("stack is not empty"u8);
     }
+
     // Push one element.
     var node = allocMyNode(42);
     runtime_internal_test_package.LFStackPush(stack, fromMyNode(node));
+
     // Push another.
     node = allocMyNode(43);
     runtime_internal_test_package.LFStackPush(stack, fromMyNode(node));
+
     // Pop one element.
     node = toMyNode(runtime_internal_test_package.LFStackPop(stack));
     if (node == nil) {
@@ -62,6 +66,7 @@ public static void TestLFStack(ж<testing.T> Ꮡt) {
     if ((~node).data != 43) {
         Ꮡt.Fatalf("no lifo"u8);
     }
+
     // Pop another.
     node = toMyNode(runtime_internal_test_package.LFStackPop(stack));
     if (node == nil) {
@@ -70,6 +75,7 @@ public static void TestLFStack(ж<testing.T> Ꮡt) {
     if ((~node).data != 42) {
         Ꮡt.Fatalf("no lifo"u8);
     }
+
     // Check the stack is empty again.
     if (runtime_internal_test_package.LFStackPop(stack) != nil) {
         Ꮡt.Fatalf("stack is not empty"u8);

@@ -24,6 +24,7 @@ import (
 )
 
 func TestAParenthesizedFuncLitGoOrDeferCalleeEmitsAsTheBareLiteral(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -93,7 +94,7 @@ func main() {
 	}
 
 	// The deferred literal reads `done` by reference, as Go's closure does, with no snapshot at all.
-	if want := "defer(() => {\n            fmt.Println(deferˢ, done == default!);\n        }, ref ᒐ);"; !strings.Contains(mainCs, want) {
+	if want := "defer(() => {\n            fmt.Println(\"defer\", done == default!);\n        }, ref ᒐ);"; !strings.Contains(mainCs, want) {
 		t.Errorf("want %q: the parenthesized deferred literal must emit as the bare one:\n%s", want, mainCs)
 	}
 

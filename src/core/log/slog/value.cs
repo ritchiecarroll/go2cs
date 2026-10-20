@@ -41,6 +41,7 @@ partial class stringptr /*ж<byte>*/;
 
 partial class groupptr /*ж<Attr>*/;
 
+// Kind is the kind of a [Value].
 partial struct ΔKind /*num:nint*/;
 
 // The following list is sorted alphabetically, but it's also important that
@@ -79,6 +80,8 @@ public static @string String(this ΔKind k) {
     return unknownSlogKindˢ;
 }
 
+// Unexported version of Kind, just so we can store Kinds in Values.
+// (No user-provided value has this type.)
 partial struct kind /*num:nint*/;
 
 // Kind returns v's Kind.
@@ -101,7 +104,7 @@ public static ΔKind Kind(this Value v) {
     case {} Δx when Δx._<ΔLogValuer>(out var x): {
         return KindLogValuer;
     }
-    case kind x: {
+    case kind x: { // a kind is just a wrapper for a Kind
         return KindAny;
     }
     default: {
@@ -110,7 +113,6 @@ public static ΔKind Kind(this Value v) {
     }}
 }
 
-// a kind is just a wrapper for a Kind
 //////////////// Constructors
 
 // StringValue returns a new [Value] for a string.
@@ -147,8 +149,11 @@ public static Value BoolValue(bool v) {
     return new Value(num: u, any: KindBool);
 }
 
+// Unexported version of *time.Location, just so we can store *time.Locations in
+// Values. (No user-provided value has this type.)
 partial class timeLocation /*ж<timeꓸLocation>*/;
 
+// timeTime is for times where UnixNano is undefined.
 partial struct timeTime /*global::go.time_package.Time*/;
 
 // TimeValue returns a [Value] for a [time.Time].
@@ -301,7 +306,7 @@ public static any Any(this Value v) {
     if (exprᴛ1 == KindAny) {
         {
             var (k, ok) = v.any._<kind>(ᐧ); if (ok) {
-                return ((ΔKind)(nint)k);
+                return (ΔKind)(nint)k;
             }
         }
         return v.any;
@@ -336,7 +341,6 @@ public static any Any(this Value v) {
     { /* default: */
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
     }
-
 }
 
 // String returns Value's value as a string, formatted like [fmt.Sprint]. Unlike
@@ -349,7 +353,7 @@ public static @string String(this Value v) {
         }
     }
     slice<byte> buf = default!;
-    return ((@string)v.append(buf));
+    return (@string)v.append(buf);
 }
 
 internal static @string str(this Value v) {
@@ -405,11 +409,12 @@ public static time.Duration Duration(this Value v) {
             throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
         }
     }
+
     return v.duration();
 }
 
 internal static time.Duration duration(this Value v) {
-    return ((time.Duration)(int64)v.num);
+    return (time.Duration)(int64)v.num;
 }
 
 // Float64 returns v's value as a float64. It panics
@@ -421,6 +426,7 @@ public static float64 Float64(this Value v) {
             throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
         }
     }
+
     return v.@float();
 }
 
@@ -450,7 +456,7 @@ internal static time.Time time(this Value v) {
         return time_package.Unix(0, (int64)v.num).In(a);
     }
     case timeTime a: {
-        return ((time.Time)a);
+        return (time.Time)a;
     }
     default: {
         var a = v.any;
@@ -511,7 +517,6 @@ public static bool Equal(this Value v, Value w) {
     { /* default: */
         throw panic(fmt.Sprintf("bad kind: %s"u8, k1));
     }
-
 }
 
 // isEmptyGroup reports whether v is a group that has no attributes.
@@ -559,7 +564,6 @@ internal static slice<byte> append(this Value v, slice<byte> dst) {
     { /* default: */
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
     }
-
 }
 
 // A LogValuer is any Go value that can convert itself into a Value for logging.
@@ -591,6 +595,7 @@ public static Value /*rv*/ Resolve(this Value v) {
                 }
             }
         }, ref ᒐ);
+
         for (nint i = 0; i < maxLogValues; i++) {
             if (v.Kind() != KindLogValuer) {
                 rv = v; goto ᒐdone;

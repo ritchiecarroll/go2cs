@@ -43,16 +43,19 @@ partial class aes_package {
 internal static void encryptBlockGeneric(ref blockExpanded c, slice<byte> dst, slice<byte> src) {
     checkGenericIsExpected();
     var xk = c.enc[..];
+
     _ = src[15]; // early bounds check
     var s0 = byteorder.BEUint32(src[0..4]);
     var s1 = byteorder.BEUint32(src[4..8]);
     var s2 = byteorder.BEUint32(src[8..12]);
     var s3 = byteorder.BEUint32(src[12..16]);
+
     // First round just XORs input with key.
     s0 ^= (uint32)(xk[0]);
     s1 ^= (uint32)(xk[1]);
     s2 ^= (uint32)(xk[2]);
     s3 ^= (uint32)(xk[3]);
+
     // Middle rounds shuffle using tables.
     nint k = 4;
     uint32 t0 = default!;
@@ -60,22 +63,25 @@ internal static void encryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
     uint32 t2 = default!;
     uint32 t3 = default!;
     for (nint r = 0; r < c.rounds - 1; r++) {
-        t0 = (uint32)((uint32)((uint32)((uint32)(xk[k + 0] ^ te0[(uint8)((s0 >> (int)(24)))]) ^ te1[(uint8)((s1 >> (int)(16)))]) ^ te2[(uint8)((s2 >> (int)(8)))]) ^ te3[(uint8)s3]);
-        t1 = (uint32)((uint32)((uint32)((uint32)(xk[k + 1] ^ te0[(uint8)((s1 >> (int)(24)))]) ^ te1[(uint8)((s2 >> (int)(16)))]) ^ te2[(uint8)((s3 >> (int)(8)))]) ^ te3[(uint8)s0]);
-        t2 = (uint32)((uint32)((uint32)((uint32)(xk[k + 2] ^ te0[(uint8)((s2 >> (int)(24)))]) ^ te1[(uint8)((s3 >> (int)(16)))]) ^ te2[(uint8)((s0 >> (int)(8)))]) ^ te3[(uint8)s1]);
-        t3 = (uint32)((uint32)((uint32)((uint32)(xk[k + 3] ^ te0[(uint8)((s3 >> (int)(24)))]) ^ te1[(uint8)((s0 >> (int)(16)))]) ^ te2[(uint8)((s1 >> (int)(8)))]) ^ te3[(uint8)s2]);
+        t0 = xk[k + 0] ^ te0[(uint8)(s0 >> 24)] ^ te1[(uint8)(s1 >> 16)] ^ te2[(uint8)(s2 >> 8)] ^ te3[(uint8)s3];
+        t1 = xk[k + 1] ^ te0[(uint8)(s1 >> 24)] ^ te1[(uint8)(s2 >> 16)] ^ te2[(uint8)(s3 >> 8)] ^ te3[(uint8)s0];
+        t2 = xk[k + 2] ^ te0[(uint8)(s2 >> 24)] ^ te1[(uint8)(s3 >> 16)] ^ te2[(uint8)(s0 >> 8)] ^ te3[(uint8)s1];
+        t3 = xk[k + 3] ^ te0[(uint8)(s3 >> 24)] ^ te1[(uint8)(s0 >> 16)] ^ te2[(uint8)(s1 >> 8)] ^ te3[(uint8)s2];
         k += 4;
         (s0, s1, s2, s3) = (t0, t1, t2, t3);
     }
+
     // Last round uses s-box directly and XORs to produce output.
-    s0 = (uint32)((uint32)((uint32)(((uint32)sbox0[(t0 >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((t1 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((t2 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(t3 & 0xff)]);
-    s1 = (uint32)((uint32)((uint32)(((uint32)sbox0[(t1 >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((t2 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((t3 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(t0 & 0xff)]);
-    s2 = (uint32)((uint32)((uint32)(((uint32)sbox0[(t2 >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((t3 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((t0 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(t1 & 0xff)]);
-    s3 = (uint32)((uint32)((uint32)(((uint32)sbox0[(t3 >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((t0 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((t1 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(t2 & 0xff)]);
+    s0 = (uint32)sbox0[(t0 >> 24)] << 24 | (uint32)sbox0[(t1 >> 16 & 0xff)] << 16 | (uint32)sbox0[(t2 >> 8 & 0xff)] << 8 | (uint32)sbox0[(t3 & 0xff)];
+    s1 = (uint32)sbox0[(t1 >> 24)] << 24 | (uint32)sbox0[(t2 >> 16 & 0xff)] << 16 | (uint32)sbox0[(t3 >> 8 & 0xff)] << 8 | (uint32)sbox0[(t0 & 0xff)];
+    s2 = (uint32)sbox0[(t2 >> 24)] << 24 | (uint32)sbox0[(t3 >> 16 & 0xff)] << 16 | (uint32)sbox0[(t0 >> 8 & 0xff)] << 8 | (uint32)sbox0[(t1 & 0xff)];
+    s3 = (uint32)sbox0[(t3 >> 24)] << 24 | (uint32)sbox0[(t0 >> 16 & 0xff)] << 16 | (uint32)sbox0[(t1 >> 8 & 0xff)] << 8 | (uint32)sbox0[(t2 & 0xff)];
+
     s0 ^= (uint32)(xk[k + 0]);
     s1 ^= (uint32)(xk[k + 1]);
     s2 ^= (uint32)(xk[k + 2]);
     s3 ^= (uint32)(xk[k + 3]);
+
     _ = dst[15]; // early bounds check
     byteorder.BEPutUint32(dst[0..4], s0);
     byteorder.BEPutUint32(dst[4..8], s1);
@@ -87,16 +93,19 @@ internal static void encryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
 internal static void decryptBlockGeneric(ref blockExpanded c, slice<byte> dst, slice<byte> src) {
     checkGenericIsExpected();
     var xk = c.dec[..];
+
     _ = src[15]; // early bounds check
     var s0 = byteorder.BEUint32(src[0..4]);
     var s1 = byteorder.BEUint32(src[4..8]);
     var s2 = byteorder.BEUint32(src[8..12]);
     var s3 = byteorder.BEUint32(src[12..16]);
+
     // First round just XORs input with key.
     s0 ^= (uint32)(xk[0]);
     s1 ^= (uint32)(xk[1]);
     s2 ^= (uint32)(xk[2]);
     s3 ^= (uint32)(xk[3]);
+
     // Middle rounds shuffle using tables.
     nint k = 4;
     uint32 t0 = default!;
@@ -104,22 +113,25 @@ internal static void decryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
     uint32 t2 = default!;
     uint32 t3 = default!;
     for (nint r = 0; r < c.rounds - 1; r++) {
-        t0 = (uint32)((uint32)((uint32)((uint32)(xk[k + 0] ^ td0[(uint8)((s0 >> (int)(24)))]) ^ td1[(uint8)((s3 >> (int)(16)))]) ^ td2[(uint8)((s2 >> (int)(8)))]) ^ td3[(uint8)s1]);
-        t1 = (uint32)((uint32)((uint32)((uint32)(xk[k + 1] ^ td0[(uint8)((s1 >> (int)(24)))]) ^ td1[(uint8)((s0 >> (int)(16)))]) ^ td2[(uint8)((s3 >> (int)(8)))]) ^ td3[(uint8)s2]);
-        t2 = (uint32)((uint32)((uint32)((uint32)(xk[k + 2] ^ td0[(uint8)((s2 >> (int)(24)))]) ^ td1[(uint8)((s1 >> (int)(16)))]) ^ td2[(uint8)((s0 >> (int)(8)))]) ^ td3[(uint8)s3]);
-        t3 = (uint32)((uint32)((uint32)((uint32)(xk[k + 3] ^ td0[(uint8)((s3 >> (int)(24)))]) ^ td1[(uint8)((s2 >> (int)(16)))]) ^ td2[(uint8)((s1 >> (int)(8)))]) ^ td3[(uint8)s0]);
+        t0 = xk[k + 0] ^ td0[(uint8)(s0 >> 24)] ^ td1[(uint8)(s3 >> 16)] ^ td2[(uint8)(s2 >> 8)] ^ td3[(uint8)s1];
+        t1 = xk[k + 1] ^ td0[(uint8)(s1 >> 24)] ^ td1[(uint8)(s0 >> 16)] ^ td2[(uint8)(s3 >> 8)] ^ td3[(uint8)s2];
+        t2 = xk[k + 2] ^ td0[(uint8)(s2 >> 24)] ^ td1[(uint8)(s1 >> 16)] ^ td2[(uint8)(s0 >> 8)] ^ td3[(uint8)s3];
+        t3 = xk[k + 3] ^ td0[(uint8)(s3 >> 24)] ^ td1[(uint8)(s2 >> 16)] ^ td2[(uint8)(s1 >> 8)] ^ td3[(uint8)s0];
         k += 4;
         (s0, s1, s2, s3) = (t0, t1, t2, t3);
     }
+
     // Last round uses s-box directly and XORs to produce output.
-    s0 = (uint32)((uint32)((uint32)(((uint32)sbox1[(t0 >> (int)(24))] << (int)(24)) | ((uint32)sbox1[(uint32)((t3 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox1[(uint32)((t2 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox1[(uint32)(t1 & 0xff)]);
-    s1 = (uint32)((uint32)((uint32)(((uint32)sbox1[(t1 >> (int)(24))] << (int)(24)) | ((uint32)sbox1[(uint32)((t0 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox1[(uint32)((t3 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox1[(uint32)(t2 & 0xff)]);
-    s2 = (uint32)((uint32)((uint32)(((uint32)sbox1[(t2 >> (int)(24))] << (int)(24)) | ((uint32)sbox1[(uint32)((t1 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox1[(uint32)((t0 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox1[(uint32)(t3 & 0xff)]);
-    s3 = (uint32)((uint32)((uint32)(((uint32)sbox1[(t3 >> (int)(24))] << (int)(24)) | ((uint32)sbox1[(uint32)((t2 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox1[(uint32)((t1 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox1[(uint32)(t0 & 0xff)]);
+    s0 = (uint32)sbox1[(t0 >> 24)] << 24 | (uint32)sbox1[(t3 >> 16 & 0xff)] << 16 | (uint32)sbox1[(t2 >> 8 & 0xff)] << 8 | (uint32)sbox1[(t1 & 0xff)];
+    s1 = (uint32)sbox1[(t1 >> 24)] << 24 | (uint32)sbox1[(t0 >> 16 & 0xff)] << 16 | (uint32)sbox1[(t3 >> 8 & 0xff)] << 8 | (uint32)sbox1[(t2 & 0xff)];
+    s2 = (uint32)sbox1[(t2 >> 24)] << 24 | (uint32)sbox1[(t1 >> 16 & 0xff)] << 16 | (uint32)sbox1[(t0 >> 8 & 0xff)] << 8 | (uint32)sbox1[(t3 & 0xff)];
+    s3 = (uint32)sbox1[(t3 >> 24)] << 24 | (uint32)sbox1[(t2 >> 16 & 0xff)] << 16 | (uint32)sbox1[(t1 >> 8 & 0xff)] << 8 | (uint32)sbox1[(t0 & 0xff)];
+
     s0 ^= (uint32)(xk[k + 0]);
     s1 ^= (uint32)(xk[k + 1]);
     s2 ^= (uint32)(xk[k + 2]);
     s3 ^= (uint32)(xk[k + 3]);
+
     _ = dst[15]; // early bounds check
     byteorder.BEPutUint32(dst[0..4], s0);
     byteorder.BEPutUint32(dst[4..8], s1);
@@ -129,12 +141,12 @@ internal static void decryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
 
 // Apply sbox0 to each byte in w.
 internal static uint32 subw(uint32 w) {
-    return (uint32)((uint32)((uint32)(((uint32)sbox0[(w >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((w >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((w >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(w & 0xff)]);
+    return (uint32)sbox0[(w >> 24)] << 24 | (uint32)sbox0[(w >> 16 & 0xff)] << 16 | (uint32)sbox0[(w >> 8 & 0xff)] << 8 | (uint32)sbox0[(w & 0xff)];
 }
 
 // Rotate
 internal static uint32 rotw(uint32 w) {
-    return (uint32)((w << (int)(8)) | (w >> (int)(24)));
+    return w << 8 | w >> 24;
 }
 
 // Key expansion algorithm. See FIPS-197, Figure 11.
@@ -143,6 +155,7 @@ internal static void expandKeyGeneric(ж<blockExpanded> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     checkGenericIsExpected();
+
     // Encryption key setup.
     nint i = default!;
     nint nk = len(key) / 4;
@@ -152,13 +165,14 @@ internal static void expandKeyGeneric(ж<blockExpanded> Ꮡc, slice<byte> key) {
     for (; i < c.roundKeysSize(); i++) {
         var t = c.enc[i - 1];
         if (rem(i, nk) == 0){
-            t = (uint32)(subw(rotw(t)) ^ (((uint32)powx[quo(i, nk) - 1] << (int)(24))));
+            t = subw(rotw(t)) ^ ((uint32)powx[quo(i, nk) - 1] << 24);
         } else 
         if (nk > 6 && rem(i, nk) == 4) {
             t = subw(t);
         }
-        c.enc[i] = (uint32)(c.enc[i - nk] ^ t);
+        c.enc[i] = c.enc[i - nk] ^ t;
     }
+
     // Derive decryption key from encryption key.
     // Reverse the 4-word round key sets from enc to produce dec.
     // All sets but the first and last get the MixColumn transform applied.
@@ -168,7 +182,7 @@ internal static void expandKeyGeneric(ж<blockExpanded> Ꮡc, slice<byte> key) {
         for (nint j = 0; j < 4; j++) {
             var x = c.enc[ei + j];
             if (iΔ1 > 0 && iΔ1 + 4 < n) {
-                x = (uint32)((uint32)((uint32)(td0[sbox0[(x >> (int)(24))]] ^ td1[sbox0[(uint32)((x >> (int)(16)) & 0xff)]]) ^ td2[sbox0[(uint32)((x >> (int)(8)) & 0xff)]]) ^ td3[sbox0[(uint32)(x & 0xff)]]);
+                x = td0[sbox0[(x >> 24)]] ^ td1[sbox0[(x >> 16 & 0xff)]] ^ td2[sbox0[(x >> 8 & 0xff)]] ^ td3[sbox0[(x & 0xff)]];
             }
             c.dec[iΔ1 + j] = x;
         }

@@ -41,36 +41,8 @@ internal static ж<global::go.net.http_package.Request> dummyReq11(@string metho
     return Ꮡ(new Request(Method: method, Proto: "HTTP/1.1"u8, ProtoMajor: 1, ProtoMinor: 1));
 }
 
-// Unchunked response without Content-Length.
-// TODO(rsc): Delete?
-// Unchunked HTTP/1.1 response without Content-Length or
-// Connection headers.
-// Unchunked HTTP/1.1 204 response without Content-Length.
-// Unchunked response with Content-Length.
-// Chunked response without Content-Length.
-// Trailer header but no TransferEncoding
-// Chunked response with Content-Length.
-// Chunked response in response to a HEAD request
-// Content-Length in response to a HEAD request
-// Content-Length in response to a HEAD request with HTTP/1.1
-// No Content-Length or Chunked in response to a HEAD request
-// explicit Content-Length of 0.
-// Status line without a Reason-Phrase, but trailing space.
-// (permitted by RFC 7230, section 3.1.2)
-// Status line without a Reason-Phrase, and no trailing space.
-// (not permitted by RFC 7230, but we'll accept it anyway)
-// golang.org/issue/4767: don't special-case multipart/byteranges responses
-// Unchunked response without Content-Length, Request is nil
-// TODO(rsc): Delete?
-// 206 Partial Content. golang.org/issue/8923
-// Both keep-alive and close, on the same Connection line. (Issue 8840)
-// Both keep-alive and close, on different Connection lines. (Issue 8840)
-// Issue 12785: HTTP/1.0 response with bogus (to be ignored) Transfer-Encoding.
-// Without a Content-Length.
-// Issue 12785: HTTP/1.0 response with bogus (to be ignored) Transfer-Encoding.
-// With a Content-Length.
-// Issue 19989: two spaces between HTTP version and status.
 internal static slice<respTest> respTests = new respTest[]{
+    // Unchunked response without Content-Length.
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
@@ -82,13 +54,16 @@ internal static slice<respTest> respTests = new respTest[]{
             ProtoMinor: 0,
             Request: dummyReq("GET"u8),
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Connection"u8] = new @string[]{"close"u8}.slice()
+                ["Connection"u8] = new @string[]{"close"u8}.slice() // TODO(rsc): Delete?
             }),
             Close: true,
             ContentLength: -1
         ),
         "Body here\n"u8
     ),
+
+    // Unchunked HTTP/1.1 response without Content-Length or
+    // Connection headers.
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
         "HTTP/1.1 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
@@ -105,6 +80,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         "Body here\n"u8
     ),
+
+    // Unchunked HTTP/1.1 204 response without Content-Length.
     new(
         "HTTP/1.1 204 No Content\r\n"u8 + "\r\n"u8 + "Body should not be read!\n"u8,
         "HTTP/1.1 204 No Content\r\n"u8 + "\r\n"u8,
@@ -121,6 +98,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         ""u8
     ),
+
+    // Unchunked response with Content-Length.
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Content-Length: 10\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
         "HTTP/1.0 200 OK\r\n"u8 + "Content-Length: 10\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
@@ -140,6 +119,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         "Body here\n"u8
     ),
+
+    // Chunked response without Content-Length.
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8 + "0a\r\n"u8 + "Body here\n\r\n"u8 + "09\r\n"u8 + "continued\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8 + "13\r\n"u8 + "Body here\ncontinued\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
@@ -157,6 +138,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         "Body here\ncontinued"u8
     ),
+
+    // Trailer header but no TransferEncoding
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Trailer: Content-MD5, Content-Sources\r\n"u8 + "Content-Length: 10\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
         "HTTP/1.0 200 OK\r\n"u8 + "Content-Length: 10\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
@@ -177,6 +160,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         "Body here\n"u8
     ),
+
+    // Chunked response with Content-Length.
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "Content-Length: 10\r\n"u8 + "\r\n"u8 + "0a\r\n"u8 + "Body here\n\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8 + "a\r\n"u8 + "Body here\n\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
@@ -194,6 +179,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         "Body here\n"u8
     ),
+
+    // Chunked response in response to a HEAD request
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8,
         "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n"u8,
@@ -211,6 +198,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         ""u8
     ),
+
+    // Content-Length in response to a HEAD request
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
@@ -228,6 +217,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         ""u8
     ),
+
+    // Content-Length in response to a HEAD request with HTTP/1.1
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
@@ -245,6 +236,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         ""u8
     ),
+
+    // No Content-Length or Chunked in response to a HEAD request
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "\r\n"u8,
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8,
@@ -262,6 +255,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         ""u8
     ),
+
+    // explicit Content-Length of 0.
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 0\r\n"u8 + "\r\n"u8,
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 0\r\n"u8 + "\r\n"u8,
@@ -280,6 +275,9 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         ""u8
     ),
+
+    // Status line without a Reason-Phrase, but trailing space.
+    // (permitted by RFC 7230, section 3.1.2)
     new(
         "HTTP/1.0 303 \r\n\r\n"u8,
         "HTTP/1.0 303 \r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8,
@@ -296,6 +294,9 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         ""u8
     ),
+
+    // Status line without a Reason-Phrase, and no trailing space.
+    // (not permitted by RFC 7230, but we'll accept it anyway)
     new(
         "HTTP/1.0 303\r\n\r\n"u8,
         "HTTP/1.0 303 303\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8,
@@ -312,6 +313,8 @@ internal static slice<respTest> respTests = new respTest[]{
         ),
         ""u8
     ),
+
+    // golang.org/issue/4767: don't special-case multipart/byteranges responses
     new(
         """
 HTTP/1.1 206 Partial Content
@@ -319,7 +322,7 @@ Connection: close
 Content-Type: multipart/byteranges; boundary=18a75608c8f47cef
 
 some body
-"""u8,
+"""u8.Raw(),
         "HTTP/1.1 206 Partial Content\r\n"u8 + "Connection: close\r\n"u8 + "Content-Type: multipart/byteranges; boundary=18a75608c8f47cef\r\n"u8 + "\r\n"u8 + "some body"u8,
         new Response(
             Status: "206 Partial Content"u8,
@@ -336,6 +339,8 @@ some body
         ),
         "some body"u8
     ),
+
+    // Unchunked response without Content-Length, Request is nil
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
@@ -346,13 +351,15 @@ some body
             ProtoMajor: 1,
             ProtoMinor: 0,
             Header: new ΔHeader(new map<@string, slice<@string>>{
-                ["Connection"u8] = new @string[]{"close"u8}.slice()
+                ["Connection"u8] = new @string[]{"close"u8}.slice() // TODO(rsc): Delete?
             }),
             Close: true,
             ContentLength: -1
         ),
         "Body here\n"u8
     ),
+
+    // 206 Partial Content. golang.org/issue/8923
     new(
         "HTTP/1.1 206 Partial Content\r\n"u8 + "Content-Type: text/plain; charset=utf-8\r\n"u8 + "Accept-Ranges: bytes\r\n"u8 + "Content-Range: bytes 0-5/1862\r\n"u8 + "Content-Length: 6\r\n\r\n"u8 + "foobar"u8,
         "HTTP/1.1 206 Partial Content\r\n"u8 + "Content-Length: 6\r\n"u8 + "Accept-Ranges: bytes\r\n"u8 + "Content-Range: bytes 0-5/1862\r\n"u8 + "Content-Type: text/plain; charset=utf-8\r\n"u8 + "\r\n"u8 + "foobar"u8,
@@ -373,6 +380,8 @@ some body
         ),
         "foobar"u8
     ),
+
+    // Both keep-alive and close, on the same Connection line. (Issue 8840)
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "Connection: keep-alive, close\r\n"u8 + "\r\n"u8,
         "HTTP/1.1 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
@@ -392,6 +401,8 @@ some body
         ),
         ""u8
     ),
+
+    // Both keep-alive and close, on different Connection lines. (Issue 8840)
     new(
         "HTTP/1.1 200 OK\r\n"u8 + "Content-Length: 256\r\n"u8 + "Connection: keep-alive\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8,
         "HTTP/1.1 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 256\r\n"u8 + "\r\n"u8,
@@ -411,6 +422,9 @@ some body
         ),
         ""u8
     ),
+
+    // Issue 12785: HTTP/1.0 response with bogus (to be ignored) Transfer-Encoding.
+    // Without a Content-Length.
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Transfer-Encoding: bogus\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
@@ -427,6 +441,9 @@ some body
         ),
         "Body here\n"u8
     ),
+
+    // Issue 12785: HTTP/1.0 response with bogus (to be ignored) Transfer-Encoding.
+    // With a Content-Length.
     new(
         "HTTP/1.0 200 OK\r\n"u8 + "Transfer-Encoding: bogus\r\n"u8 + "Content-Length: 10\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
         "HTTP/1.0 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 10\r\n"u8 + "\r\n"u8 + "Body here\n"u8,
@@ -466,6 +483,8 @@ some body
         ),
         ((@string)(new byte[]{0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x73, 0xf3, 0xf7, 0x07, 0x00, 0xab, 0x27, 0xd4, 0x1a, 0x03, 0x00, 0x00, 0x00}))
     ),
+
+    // Issue 19989: two spaces between HTTP version and status.
     new(
         "HTTP/1.0  401 Unauthorized\r\n"u8 + "Content-type: text/html\r\n"u8 + "WWW-Authenticate: Basic realm=\"\"\r\n\r\n"u8 + "Your Authentication failed.\r\n"u8,
         "HTTP/1.0 401 Unauthorized\r\n"u8 + "Connection: close\r\n"u8 + "Content-Type: text/html\r\n"u8 + "Www-Authenticate: Basic realm=\"\"\r\n"u8 + "\r\n"u8 + "Your Authentication failed.\r\n"u8,
@@ -543,7 +562,6 @@ public static void TestWriteResponse(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct readResponseCloseInMiddleTestsᴛ1 /*dyn*/ {
     internal bool chunked, compressed;
 }
@@ -610,6 +628,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> Ꮡt) {
             wr = new http_test_package.gzip_WriterжWriter(gzip.NewWriter(wr));
         }
         buf.WriteString("\r\n"u8);
+
         var chunk = bytes.Repeat(new byte[]{(rune)'x'}.slice(), 1000);
         for (nint i = 0; i < 1000; i++) {
             if (test.compressed) {
@@ -627,6 +646,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> Ꮡt) {
             buf.WriteString("0\r\n\r\n"u8);
         }
         buf.WriteString(nextRequestHereˢ);
+
         var bufr = bufio.NewReader(new http_test_package.bytes_BufferжReader(Ꮡbuf));
         var (resp, err) = ReadResponse(bufr, dummyReq(getˢ));
         checkErr(err, readResponseˢ);
@@ -645,6 +665,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> Ꮡt) {
             checkErr(errΔ1, gzipNewReaderˢ);
             resp.Value.Body = new http_internal_test_package.readerAndCloserжReadCloser(Ꮡ(new readerAndCloser(new http_test_package.gzip_ReaderжReader(gzReader), (~resp).Body)));
         }
+
         var rbuf = new slice<byte>(2500);
         (var n, err) = io.ReadFull((~resp).Body, rbuf);
         checkErr(err, byteReadFullˢ);
@@ -652,14 +673,15 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> Ꮡt) {
             fatalf("ReadFull only read %d bytes"u8, n);
         }
         if (test.compressed == false && !bytes.Equal(bytes.Repeat(new byte[]{(rune)'x'}.slice(), 2500), rbuf)) {
-            fatalf("ReadFull didn't read 2500 'x'; got %q"u8, ((@string)rbuf));
+            fatalf("ReadFull didn't read 2500 'x'; got %q"u8, (@string)rbuf);
         }
         (~resp).Body.Close();
+
         (var rest, err) = io.ReadAll(new http_test_package.bufio_ReaderжReader(bufr));
         checkErr(err, readAllOnRemainderˢ);
         {
             @string e = nextRequestHereˢ;
-            @string g = ((@string)rest); if (e != g) {
+            @string g = (@string)rest; if (e != g) {
                 g = regexp.MustCompile(@"(xx+)"u8).ReplaceAllStringFunc(g, (@string match) => fmt.Sprintf("x(repeated x%d)"u8, builtin.len(match)));
                 fatalf("remainder = %q, expected %q"u8, g, e);
             }
@@ -715,6 +737,7 @@ public static void TestLocationResponse(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("bad test URL %q: %v"u8, tt.requrl, errΔ1);
             }
         }
+
         var (got, err) = res.Location();
         if (tt.wantErr != default!) {
             if (err == default!) {
@@ -836,6 +859,7 @@ public static void TestReadResponseErrors(ж<testing.T> Ꮡt) {
             wantErr: wantErr
         );
     }
+
     TestReadResponseErrors_testCase version(@string s, any wantErr) {
         if (AreEqual(wantErr, true)) {
             wantErr = malformedHttpVersionˢ;
@@ -846,13 +870,16 @@ public static void TestReadResponseErrors(ж<testing.T> Ꮡt) {
             wantErr: wantErr
         );
     }
+
     TestReadResponseErrors_testCase contentLength(@string statusΔ1, @string body, any wantErr) => new TestReadResponseErrors_testCase(
             name: fmt.Sprintf("status %q %q"u8, statusΔ1, body),
             @in: fmt.Sprintf("HTTP/1.1 %s\r\n%s"u8, statusΔ1, body),
             wantErr: wantErr
         );
+
     @string errMultiCL = messageCannotContainˢ;
     @string errEmptyCL = invalidEmptyContentˢ;
+
     var tests = new TestReadResponseErrors_testCase[]{
         new(""u8, ""u8, io.ErrUnexpectedEOF),
         new(""u8, "HTTP/1.1 301 Moved Permanently\r\nFoo: bar"u8, io.ErrUnexpectedEOF),
@@ -887,16 +914,19 @@ public static void TestReadResponseErrors(ж<testing.T> Ꮡt) {
         contentLength("201 OK"u8, contentLength0Contentˢ, errMultiCL),
         contentLength("300 OK"u8, contentLength0Contentˢ2, default!),
         contentLength("200 OK"u8, contentLengthContentˢ, errEmptyCL),
-        contentLength("206 OK"u8, contentLengthContentˢ2, errMultiCL), // multiple content-length headers for 204 and 304 should still be checked
+        contentLength("206 OK"u8, contentLengthContentˢ2, errMultiCL),
 
+        // multiple content-length headers for 204 and 304 should still be checked
         contentLength("204 OK"u8, contentLength7Contentˢ2, errMultiCL),
         contentLength("204 OK"u8, contentLength3Contentˢ, default!),
         contentLength("304 OK"u8, contentLength880Contentˢ, errMultiCL),
-        contentLength("304 OK"u8, contentLength961Contentˢ, default!), // golang.org/issue/22464
+        contentLength("304 OK"u8, contentLength961Contentˢ, default!),
 
+        // golang.org/issue/22464
         new("leading space in header"u8, "HTTP/1.1 200 OK\r\n Content-type: text/html\r\nFoo: bar\r\n\r\n"u8, (@string)"malformed MIME"u8),
         new("leading tab in header"u8, "HTTP/1.1 200 OK\r\n\tContent-type: text/html\r\nFoo: bar\r\n\r\n"u8, (@string)"malformed MIME"u8)
     }.slice();
+
     foreach (var (i, tt) in tests) {
         var br = bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)));
         var (_, rerr) = ReadResponse(br, nil);
@@ -952,10 +982,12 @@ internal static readonly @string connectionCloseHeaderᶜ = "Connection: close"u
 // A response should only write out single Connection: close header. Tests #19499.
 public static void TestResponseWritesOnlySingleConnectionClose(ж<testing.T> Ꮡt) {
     @string connectionCloseHeader = connectionCloseHeaderᶜ;
+
     var (res, err) = ReadResponse(bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(http10200OkAaaaˢ))), nil);
     if (err != default!) {
         Ꮡt.Fatalf("ReadResponse failed %v"u8, err);
     }
+
     ref var buf1 = ref heap(new bytes.Buffer(), out var Ꮡbuf1);
     {
         err = res.Write(new http_test_package.bytes_BufferжWriter(Ꮡbuf1)); if (err != default!) {
@@ -967,6 +999,7 @@ public static void TestResponseWritesOnlySingleConnectionClose(ж<testing.T> Ꮡ
             Ꮡt.Fatalf("ReadResponse failed %v"u8, err);
         }
     }
+
     ref var buf2 = ref heap(new strings.Builder(), out var Ꮡbuf2);
     {
         err = res.Write(new http_test_package.strings_BuilderжWriter(Ꮡbuf2)); if (err != default!) {

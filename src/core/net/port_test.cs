@@ -8,9 +8,6 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-// Decimal number literals
-// Others
-
 partial struct parsePortTestsᴛ1 /*dyn*/ {
     internal @string service;
     internal nint port;
@@ -18,9 +15,11 @@ partial struct parsePortTestsᴛ1 /*dyn*/ {
 }
 internal static slice<parsePortTestsᴛ1> parsePortTests = new parsePortTestsᴛ1[]{
     new(""u8, 0, false),
-    new("-1073741825"u8, (-1 << (int)(30)), false),
-    new("-1073741824"u8, (-1 << (int)(30)), false),
-    new("-1073741823"u8, -((1 << (int)(30)) - 1), false),
+
+    // Decimal number literals
+    new("-1073741825"u8, -1 << 30, false),
+    new("-1073741824"u8, -1 << 30, false),
+    new("-1073741823"u8, -((1 << 30) - 1), false),
     new("-123456789"u8, -123456789, false),
     new("-1"u8, -1, false),
     new("-0"u8, 0, false),
@@ -30,10 +29,12 @@ internal static slice<parsePortTestsᴛ1> parsePortTests = new parsePortTestsᴛ
     new("65535"u8, 65535, false),
     new("65536"u8, 65536, false),
     new("123456789"u8, 123456789, false),
-    new("1073741822"u8, (1 << (int)(30)) - 2, false),
-    new("1073741823"u8, (1 << (int)(30)) - 1, false),
-    new("1073741824"u8, (1 << (int)(30)) - 1, false),
-    new("1073741825"u8, (1 << (int)(30)) - 1, false),
+    new("1073741822"u8, (1 << 30) - 2, false),
+    new("1073741823"u8, (1 << 30) - 1, false),
+    new("1073741824"u8, (1 << 30) - 1, false),
+    new("1073741825"u8, (1 << 30) - 1, false),
+
+    // Others
     new("abc"u8, 0, true),
     new("9pfs"u8, 0, true),
     new("123badport"u8, 0, true),

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestPointerEquality",
+      "class": "codegen-liveness",
+      "signature": "expected weak pointer to be nil",
+      "reason": "codegen-liveness: the test fills bt := make([]*T, 10), makes a weak pointer to each element, sets bt = nil and calls runtime.GC(), then asserts every weak pointer reads nil. Go's liveness drops the slice, and every range copy of it, once it is dead, so the elements are collected. The converted host keeps a frame slot rooted that still references the slice's backing array: at Release+TC0 it is the hidden enumerator the emitted `foreach (var (i, _) in bt)` holds for each `for i := range bt`, and under tiering or in Debug it is any frame temporary. The elements survive the collection and the first weak pointer reads non-nil. Newly visible at Go 1.26: through Go 1.25 the final loop ranged over bt after `bt = nil`, so it ran zero times and the assertion never executed; Go 1.26 ranges over wt. MEASURED with a six-arm probe on the test's shape, every arm also run under Go as its own oracle (Go clears every weak pointer in every arm); C# readings as Release+TC0 / Release tiered / Debug: (A) the test's body verbatim in one frame: 10 of 10 alive / 10 / 10; (B) the allocation and weak.Make moved into a noinline helper: 0 / 0 / 0; (C) one weak pointer whose referent is made in a helper: cleared / cleared / cleared; (D) one weak pointer to a FIELD, made in a helper: cleared / cleared / cleared; (E) A with every `for i := range bt` written as an index loop: 0 / 10 / 10; (F) B plus the field weak pointers made beside them and kept by the caller: 0 / 0 / 0. B, C, D and F clear, so weak.Pointer and runtime.GC() do what Go's do whenever the frame does not root the referent, and a field weak pointer does not keep its object alive; A against E at TC0 isolates the range copy. Retires if a key-only range stops holding a copy of its slice past the loop at TC0."
+    }
+  ]
+}

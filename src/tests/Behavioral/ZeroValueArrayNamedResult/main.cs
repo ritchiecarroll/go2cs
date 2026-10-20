@@ -26,14 +26,14 @@ internal static partial array<byte> /*a16*/ as16(uint64 hi, uint64 lo) {
 
 internal static void putUint64(slice<byte> b, uint64 v) {
     for (nint i = 0; i < 8; i++) {
-        b[i] = (byte)(v.Rsh((int64)((56 - 8 * i))));
+        b[i] = (byte)(v.Rsh((int64)(56 - 8 * i)));
     }
 }
 
 internal static partial ticket /*key*/ ticketFromBytes(/*[32]*/ array<byte> b) {
     ticket key = new();
-
     b = b.Clone();
+
     copy(key.aesKey[..], b[..16]);
     copy(key.hmacKey[..], b[16..]);
     key.seq = 7;
@@ -82,18 +82,23 @@ internal static partial (nint n, @string s) scalars() {
 internal static void Main() {
     var a = as16(0x0102030405060708UL, 0x090a0b0c0d0e0f10UL);
     fmt.Println(len(a), a[0], a[7], a[8], a[15]);
+
     array<byte> raw = new(32);
     foreach (var (i, _) in raw) {
         raw[i] = (byte)(i + 1);
     }
     var k = ticketFromBytes(raw);
     fmt.Println(len(k.aesKey), len(k.hmacKey), k.aesKey[0], k.aesKey[15], k.hmacKey[0], k.hmacKey[15], k.seq);
+
     var bx = makeBox();
     fmt.Println(bx.id, len(bx.t.aesKey), bx.t.aesKey[0], bx.t.hmacKey[15]);
+
     var (d, err) = withDefer();
     fmt.Println(len(d), d[0], d[1], err == default!);
+
     var l = literalAs3();
     fmt.Println(len(l), l[2]);
+
     var (n, s) = scalars();
     fmt.Println(n, len(s));
 }

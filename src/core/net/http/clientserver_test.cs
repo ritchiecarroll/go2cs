@@ -103,7 +103,7 @@ internal static void run<T>(T t, Action<T, testMode> f, params ꓸꓸꓸany opts
         }
     }
     foreach (var (_, mode) in modes) {
-        t.Run(((@string)mode), (T tΔ2) => {
+        t.Run((@string)mode, (T tΔ2) => {
             tΔ2.Helper();
             {
                 var (tΔ3, ok) = ((any)tΔ2)._<ж<testing.T>>(ᐧ); if (ok && parallel) {
@@ -188,7 +188,7 @@ internal static @string getURL(this ж<clientServerTest> Ꮡt, @string u) {
         if (err != default!) {
             t.t.Fatal(err);
         }
-        return ((@string)slurp);
+        return (@string)slurp;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -239,9 +239,11 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
         h2: mode == http2Mode,
         h: h
     ));
+
     slice<Action<ж<Δhttp.Transport>>> transportFuncs = default!;
+
     {
-        nint idx = slices.Index(opts, ((any)optFakeNet.OrTypedNil())); if (idx >= 0){
+        nint idx = slices.Index(opts, (any)optFakeNet.OrTypedNil()); if (idx >= 0){
             opts = slices.Delete<slice<any>, any>(opts, idx, idx + 1);
             cst.Value.li = fakeNetListen();
             cst.Value.ts = Ꮡ(new httptest.Server(
@@ -257,11 +259,13 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
             cst.Value.ts = httptest.NewUnstartedServer(h);
         }
     }
+
     if (mode == http2UnencryptedMode) {
         var p = Ꮡ(new Protocols(nil));
         p.SetUnencryptedHTTP2(true);
         cst.Value.ts.Value.Config.Value.Protocols = p;
     }
+
     foreach (var (_, opt) in opts) {
         switch (opt.type()) {
         case Action<ж<Δhttp.Transport>> optΔ1: {
@@ -278,9 +282,11 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
             break;
         }}
     }
+
     if ((~(~(~cst).ts).Config).ErrorLog == nil) {
         cst.Value.ts.Value.Config.Value.ErrorLog = log.New(new testLogWriter(t), ""u8, 0);
     }
+
     var exprᴛ1 = mode;
     if (exprᴛ1 == http1Mode) {
         (~cst).ts.Start();
@@ -300,7 +306,6 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
     else { /* default: */
         t.Fatalf("unknown test mode %v"u8, mode);
     }
-
     cst.Value.c = (~cst).ts.Client();
     cst.Value.tr = (~(~cst).c).Transport._<ж<Δhttp.Transport>>();
     if (mode == http2Mode || mode == http2UnencryptedMode) {
@@ -313,11 +318,13 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
     foreach (var (_, f) in transportFuncs) {
         f((~cst).tr);
     }
+
     if (mode == http2UnencryptedMode) {
         var p = Ꮡ(new Protocols(nil));
         p.SetUnencryptedHTTP2(true);
         cst.Value.tr.Value.Protocols = p;
     }
+
     var cstʗ3 = cst;
     t.Cleanup(() => {
         cstʗ3.close();
@@ -330,7 +337,7 @@ partial struct testLogWriter {
 }
 
 internal static (nint, error) Write(this testLogWriter w, slice<byte> b) {
-    w.t.Logf("server log: %v"u8, strings.TrimSpace(((@string)b)));
+    w.t.Logf("server log: %v"u8, strings.TrimSpace((@string)b));
     return (len(b), default!);
 }
 
@@ -402,7 +409,6 @@ internal static void testNewClientServerTest(testing.TB t, testMode mode, params
         wantProto = http20ˢ;
         wantTLS = true;
     }
-
     if (got.proto != wantProto) {
         t.Errorf("req.Proto = %q, want %q"u8, got.proto, wantProto);
     }
@@ -428,6 +434,7 @@ internal static void testChunkedResponseHeaders(ж<testing.T> Ꮡt, testMode mod
             w._<Flusher>().Flush();
             fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "I am a chunked response."u8);
         })));
+
         var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
         if (err != default!) {
             Ꮡt.Fatalf("Get error: %v"u8, err);
@@ -487,6 +494,7 @@ internal static void run(this h12Compare tt, ж<testing.T> Ꮡt) {
         var cst2 = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), http2Mode, new http_test_package.http_HandlerFuncᴠΔHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(tt.Handler)), tt.Opts.ꓸꓸꓸ);
         var cst2ʗ1 = cst2;
         defer(cst2ʗ1.close, ref ᒐ);
+
         var (res1, err) = tt.reqFunc()((~cst1).c, (~(~cst1).ts).URL);
         if (err != default!) {
             Ꮡt.Errorf("HTTP/1 request: %v"u8, err);
@@ -497,15 +505,18 @@ internal static void run(this h12Compare tt, ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("HTTP/2 request: %v"u8, err);
             return;
         }
+
         {
             var fn = tt.EarlyCheckResponse; if (fn != default!) {
                 fn(http11ˢ, res1);
                 fn(http20ˢ, res2);
             }
         }
+
         tt.normalizeRes(Ꮡt, res1, http11ˢ);
         tt.normalizeRes(Ꮡt, res2, http20ˢ);
         var (res1body, res2body) = (res1.Value.Body, res2.Value.Body);
+
         var eres1 = mostlyCopy(res1);
         var eres2 = mostlyCopy(res2);
         if (!reflect.DeepEqual(eres1.OrTypedNil(), eres2.OrTypedNil())) {
@@ -561,6 +572,7 @@ internal static void normalizeRes(this h12Compare tt, ж<testing.T> Ꮡt, ж<Δh
         Ꮡt.Errorf("got %q response; want %q"u8, res.Proto, wantProto);
     }
     var (slurp, err) = io.ReadAll(res.Body);
+
     res.Body.Close();
     res.Body = new slurpResult(
         ReadCloser: io.NopCloser(new http_test_package.bytes_ReaderжReader(bytes.NewReader(slurp))),
@@ -603,7 +615,7 @@ public static void TestH12_HeadContentLengthLargeBody(ж<testing.T> Ꮡt) {
     new h12Compare(
         ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(Δhttp.Head))),
         Handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-            @string chunk = strings.Repeat("x"u8, (512 << (int)(10)));
+            @string chunk = strings.Repeat("x"u8, 512 << 10);
             for (nint i = 0; i < 10; i++) {
                 io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), chunk);
             }
@@ -746,12 +758,14 @@ internal static void testHandlerWritesTooMuch(ж<testing.T> Ꮡt, testMode mode)
                 Ꮡt.Errorf("for proto %q, final write = %v, %v; want _, some error"u8, (~r).Proto, n, errΔ1);
             }
         })));
+
         var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         var (gotBody, _) = io.ReadAll((~res).Body);
         if (!bytes.Equal(gotBody, wantBody)) {
             Ꮡt.Fatalf("got response body: %q; want %q"u8, gotBody, wantBody);
@@ -834,7 +848,7 @@ internal static void test304Responses(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Error(err);
         }
         if (len(body) > 0) {
-            Ꮡt.Errorf("got unexpected body %q"u8, ((@string)body));
+            Ꮡt.Errorf("got unexpected body %q"u8, (@string)body);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -921,9 +935,11 @@ internal static void testCancelRequestMidBody(ж<testing.T> Ꮡt, testMode mode)
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), worldˢ);
         })));
         defer(ᴛ1 => builtin.close(ᴛ1), unblock, ref ᒐ);
+
         var (req, _) = NewRequest(getˢ2, (~(~cst).ts).URL, default!);
         var cancel = new channel<EmptyStruct>(0);
         req.Value.Cancel = cancel.WithDirection(GoChanDir.Recv);
+
         var (res, err) = (~cst).c.Do(req);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -931,6 +947,7 @@ internal static void testCancelRequestMidBody(ж<testing.T> Ꮡt, testMode mode)
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
         ᐸꟷ(didFlush);
+
         // Read a bit before we cancel. (Issue 13626)
         // We should have "Hello" at least sitting there.
         var firstRead = new slice<byte>(10);
@@ -939,7 +956,9 @@ internal static void testCancelRequestMidBody(ж<testing.T> Ꮡt, testMode mode)
             Ꮡt.Fatal(err);
         }
         firstRead = firstRead.slice(0, n);
+
         builtin.close(cancel);
+
         (var rest, err) = io.ReadAll((~res).Body);
         @string all = ((sstring)firstRead) + ((sstring)rest);
         if (all != "Hello"u8) {
@@ -983,6 +1002,7 @@ internal static void testTrailersClientToServer(ж<testing.T> Ꮡt, testMode mod
                 (~r).Trailer.Get(clientTrailerBˢ));
         }
     })));
+
     ref var req = ref heap<ж<Δhttp.Request>>(out var Ꮡreq);
     (req, _) = NewRequest(postˢ, (~(~cst).ts).URL, io.MultiReader(
         new http_test_package.eofReaderFuncᴠReader(new eofReaderFunc(() => {
@@ -994,10 +1014,8 @@ internal static void testTrailersClientToServer(ж<testing.T> Ꮡt, testMode mod
         }))));
     req.Value.Trailer = new httpꓸHeader(new map<@string, slice<@string>>{
         ["Client-Trailer-A"u8] = default!, //  to be set later
-
-        ["Client-Trailer-B"u8] = default!
+        ["Client-Trailer-B"u8] = default! //  to be set later
     });
-    //  to be set later
     req.Value.ContentLength = -1;
     var (res, err) = (~cst).c.Do(req);
     if (err != default!) {
@@ -1043,10 +1061,12 @@ internal static void testTrailersServerToClient(ж<testing.T> Ꮡt, testMode mod
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         w.Header().Set(trailerˢ, serverTrailerAServerˢ);
         w.Header().Add(trailerˢ, serverTrailerCˢ);
+
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), body);
         if (flush) {
             w._<Flusher>().Flush();
         }
+
         // How handlers set Trailers: declare it ahead of time
         // with the Trailer header, and then mutate the
         // Header() of those values later, after the response
@@ -1055,10 +1075,12 @@ internal static void testTrailersServerToClient(ж<testing.T> Ꮡt, testMode mod
         w.Header().Set(serverTrailerCˢ, valuecˢ); // skipping B
         w.Header().Set(serverTrailerNotDeclaredˢ, shouldBeOmittedˢ);
     })));
+
     var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var wantHeader = new httpꓸHeader(new map<@string, slice<@string>>{
         ["Content-Type"u8] = new @string[]{"text/plain; charset=utf-8"u8}.slice()
     });
@@ -1075,10 +1097,12 @@ internal static void testTrailersServerToClient(ж<testing.T> Ꮡt, testMode mod
     if ((~res).ContentLength != (int64)wantLen) {
         Ꮡt.Errorf("ContentLength = %v; want %v"u8, (~res).ContentLength, wantLen);
     }
+
     delete((~res).Header, "Date"u8); // irrelevant for test
     if (!reflect.DeepEqual((~res).Header, wantHeader)) {
         Ꮡt.Errorf("Header = %v; want %v"u8, (~res).Header, wantHeader);
     }
+
     {
         var (got, want) = (res.Value.Trailer, (new httpꓸHeader(new map<@string, slice<@string>>{
             ["Server-Trailer-A"u8] = default!,
@@ -1088,11 +1112,13 @@ internal static void testTrailersServerToClient(ж<testing.T> Ꮡt, testMode mod
             Ꮡt.Errorf("Trailer before body read = %v; want %v"u8, got, want);
         }
     }
+
     {
         var errΔ1 = wantBody(res, default!, body); if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     {
         var (got, want) = (res.Value.Trailer, (new httpꓸHeader(new map<@string, slice<@string>>{
             ["Server-Trailer-A"u8] = new @string[]{"valuea"u8}.slice(),
@@ -1145,8 +1171,6 @@ internal static readonly @string resBodyᶜ = "some response body"u8;
 internal static void testConcurrentReadWriteReqBody(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         @string reqBody = reqBodyᶜ;
         @string resBody = resBodyᶜ;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc([MethodImpl(MethodImplOptions.NoInlining)] (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -1226,10 +1250,12 @@ internal static void testConnectRequest(ж<testing.T> Ꮡt, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         gotcʗ1.ᐸꟷ(r);
     })));
+
     var (u, err) = url.Parse((~(~cst).ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var tests = new testConnectRequest_tests[]{
         new(
             req: Ꮡ(new Request(
@@ -1249,6 +1275,7 @@ internal static void testConnectRequest(ж<testing.T> Ꮡt, testMode mode) {
             want: "example.com:123"u8
         )
     }.slice();
+
     foreach (var (i, tt) in tests) {
         var (res, errΔ1) = (~cst).c.Do(tt.req);
         if (errΔ1 != default!) {
@@ -1287,12 +1314,14 @@ internal static void testTransportUserAgent(ж<testing.T> Ꮡt, testMode mode) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "%q"u8, (~r).Header[userAgentˢ2]);
     })));
+
     @string either(@string a, @string b) {
         if (mode == http2Mode) {
             return b;
         }
         return a;
     }
+
     var tests = new testTransportUserAgent_tests[]{
         new(
             (ж<Δhttp.Request> r) => {
@@ -1363,21 +1392,25 @@ internal static void testStarRequest(ж<testing.T> Ꮡt, @string method, testMod
         gotcʗ1.ᐸꟷ(r);
         w._<Flusher>().Flush();
     })));
+
     var (u, err) = url.Parse((~(~cst).ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     u.Value.Path = "*"u8;
+
     var req = Ꮡ(new Request(
         Method: method,
         Header: new httpꓸHeader(new map<@string, slice<@string>>{}),
         URL: u
     ));
+
     (var res, err) = (~cst).c.Do(req);
     if (err != default!) {
         Ꮡt.Fatalf("RoundTrip = %v"u8, err);
     }
     (~res).Body.Close();
+
     @string wantFoo = barˢ;
     var wantLen = (int64)(-1);
     if (method == "OPTIONS"u8) {
@@ -1385,7 +1418,7 @@ internal static void testStarRequest(ж<testing.T> Ꮡt, @string method, testMod
         wantLen = 0;
     }
     if ((~res).StatusCode != 200) {
-        Ꮡt.Errorf("status code = %v; want %d"u8, (~res).Status, (nint)(200));
+        Ꮡt.Errorf("status code = %v; want %d"u8, (~res).Status, (nint)200);
     }
     if ((~res).ContentLength != wantLen) {
         Ꮡt.Errorf("content length = %v; want %d"u8, (~res).ContentLength, wantLen);
@@ -1434,8 +1467,10 @@ internal static partial void testTransportDiscardsUnneededConns(ж<testing.T> �
         })));
         var cstʗ1 = cst;
         defer(cstʗ1.close, ref ᒐ);
+
         ref var numOpen = ref heap(new int32(), out var ᏑnumOpen);               // atomic
         ref var numClose = ref heap(new int32(), out var ᏑnumClose);
+
         var tlsConfig = Ꮡ(new tls.Config(InsecureSkipVerify: true));
             var tlsConfigʗ1 = tlsConfig;
         var tr = Ꮡ(new Transport(
@@ -1460,7 +1495,9 @@ internal static partial void testTransportDiscardsUnneededConns(ж<testing.T> �
         }
         var trʗ1 = tr;
         defer(trʗ1.CloseIdleConnections, ref ᒐ);
+
         var c = Ꮡ(new Client(Transport: new Δhttp.TransportжRoundTripper(tr)));
+
         const nint N = 10;
         var gotBody = new channel<@string>(N);
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -1498,6 +1535,7 @@ internal static partial void testTransportDiscardsUnneededConns(ж<testing.T> �
         }
         Ꮡwg.Wait();
         builtin.close(gotBody);
+
         @string last = default!;
         foreach (var got in gotBody) {
             if (last == ""u8) {
@@ -1508,6 +1546,7 @@ internal static partial void testTransportDiscardsUnneededConns(ж<testing.T> �
                 Ꮡt.Errorf("Response body changed: %q -> %q"u8, last, got);
             }
         }
+
         int32 open = default!;
         int32 closeΔ1 = default!;
         for (nint i = 0; i < 150; i++) {
@@ -1554,6 +1593,7 @@ internal static void testTransportGCRequest(ж<testing.T> Ꮡt, testMode mode, b
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloˢ2);
         }
     })));
+
     var didGC = new channel<EmptyStruct>(0);
     var cstʗ1 = cst;
     var didGCʗ1 = didGC;
@@ -1607,26 +1647,18 @@ internal static void testTransportRejectsInvalidHeaders(ж<testing.T> Ꮡt, test
         fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "Handler saw headers: %q"u8, (~r).Header);
     })), (optQuietLog).OrTypedNilFunc());
     cst.Value.tr.Value.DisableKeepAlives = true;
+
     var tests = new testTransportRejectsInvalidHeaders_tests[]{
         new("Foo"u8, "capital-key"u8, true), // verify h2 allows capital keys
-
         new("Foo"u8, ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x00, 0x62, 0x61, 0x72})), false), // \x00 byte in value not allowed
-
         new("Foo"u8, "two\nlines"u8, false), // \n byte in value not allowed
-
         new("bogus\nkey"u8, "v"u8, false), // \n byte also not allowed in key
-
         new("A space"u8, "v"u8, false), // spaces in keys not allowed
-
         new("имя"u8, "v"u8, false), // key must be ascii
-
         new("name"u8, "валю"u8, true), // value may be non-ascii
-
         new(""u8, "v"u8, false), // key must be non-empty
-
-        new("k"u8, ""u8, true)
+        new("k"u8, ""u8, true) // value may be empty
     }.slice();
-    // value may be empty
     foreach (var (_, tt) in tests) {
         var dialedc = new channel<bool>(1);
         var dialedcʗ1 = dialedc;
@@ -1652,6 +1684,7 @@ internal static void testTransportRejectsInvalidHeaders(ж<testing.T> Ꮡt, test
         default: {
             break;
         }}
+
         if (!tt.ok && dialed){
             Ꮡt.Errorf("For key %q, value %q, transport dialed. Expected local failure. Response was: (%v, %v)\nServer replied with: %s"u8, tt.key, tt.val, res.OrTypedNil(), err, body);
         } else 
@@ -1696,8 +1729,10 @@ internal static void testInterruptWithPanic(ж<testing.T> Ꮡt, testMode mode, a
         ref var t = ref Ꮡt.DerefOrNull();
 
         @string msg = msgᶜ;
+
         var testDone = new channel<EmptyStruct>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), testDone, ref ᒐ);
+
         ref var errorLog = ref heap(new lockedBytesBuffer(), out var ᏑerrorLog);
         var gotHeaders = new channel<bool>(1);
         var gotHeadersʗ1 = gotHeaders;
@@ -1706,6 +1741,7 @@ internal static void testInterruptWithPanic(ж<testing.T> Ꮡt, testMode mode, a
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), msg);
             w._<Flusher>().Flush();
+
             var selᴛ12 = gotHeadersʗ1;
             var selᴛ13 = testDoneʗ1;
             switch (select(ᐸꟷ(selᴛ12, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
@@ -1744,6 +1780,7 @@ internal static void testInterruptWithPanic(ж<testing.T> Ꮡt, testMode mode, a
             finally { ᒐ.Run(); }
         }
         var wantStackLogged = panicValue != default! && !AreEqual(panicValue, ErrAbortHandler);
+
         var logOutputʗ1 = logOutput;
         waitCondition(new http_test_package.testing_TжTB(Ꮡt), 10 * time.Millisecond, (time.Duration d) => {
             @string gotLog = logOutputʗ1();
@@ -1813,10 +1850,10 @@ public static void TestH12_AutoGzipWithDumpResponse(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("%s: DumpResponse: %v"u8, proto, err);
                 return;
             }
-            if (strings.Contains(((@string)dump), connectionCloseˢ)) {
+            if (strings.Contains((@string)dump, connectionCloseˢ)) {
                 Ꮡt.Errorf("%s: should not see \"Connection: close\" in dump; got:\n%s"u8, proto, dump);
             }
-            if (!strings.Contains(((@string)dump), fooˢ4)) {
+            if (!strings.Contains((@string)dump, fooˢ4)) {
                 Ꮡt.Errorf("%s: should see \"FOO\" in response; got:\n%s"u8, proto, dump);
             }
         }
@@ -1888,13 +1925,13 @@ public static void TestNoSniffExpectRequestBody(ж<testing.T> Ꮡt) {
 internal static void testNoSniffExpectRequestBody(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             w.WriteHeader(StatusUnauthorized);
         })));
+
         // Set ExpectContinueTimeout non-zero so RoundTrip won't try to write it.
         cst.Value.tr.Value.ExpectContinueTimeout = (time.Duration)(10000000000L);
+
         var (req, err) = NewRequest(postˢ, (~(~cst).ts).URL, new testErrorReader(Ꮡt));
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1946,6 +1983,7 @@ internal static void testServerUndeclaredTrailers(ж<testing.T> Ꮡt, testMode m
     (~res).Body.Close();
     delete((~res).Header, "Date"u8);
     delete((~res).Header, "Content-Type"u8);
+
     {
         var want = (new httpꓸHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"Bar"u8}.slice()})); if (!reflect.DeepEqual((~res).Header, want)) {
             Ꮡt.Errorf("Header = %#v; want %#v"u8, (~res).Header, want);
@@ -1986,6 +2024,7 @@ internal static void testBadResponseAfterReadingBody(ж<testing.T> Ꮡt, testMod
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     })));
+
     ref var closes = ref heap<nint>(out var Ꮡcloses);
     closes = 0;
     var (res, err) = (~cst).c.Post((~(~cst).ts).URL, textPlainˢ, new countCloseReader(Ꮡcloses, new http_test_package.strings_ReaderжReader(strings.NewReader(helloˢ3))));
@@ -2007,8 +2046,6 @@ internal static readonly @string stringInvalidWriteHeaderˢ = "string, invalid W
 internal static readonly object expectedPanicInHandlerˢ = (@string)"expected panic in handler"u8;
 
 internal static void testWriteHeader0(ж<testing.T> Ꮡt, testMode mode) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var gotpanic = new channel<bool>(1);
     var gotpanicʗ1 = gotpanic;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -2025,6 +2062,7 @@ internal static void testWriteHeader0(ж<testing.T> Ꮡt, testMode mode) {
                             Ꮡt.Errorf("unexpected panic value:\n got: %v\nwant: %v\n"u8, got, want);
                         }
                         gotpanicʗ2.ᐸꟷ(true);
+
                         // Set an explicit 503. This also tests that the WriteHeader call panics
                         // before it recorded that an explicit value was set and that bogus
                         // value wasn't stuck.
@@ -2070,8 +2108,6 @@ internal static readonly @string httpResponseWriteHeaderˢ = "http: response.Wri
 internal static void testWriteHeaderAfterWrite(ж<testing.T> Ꮡt, testMode mode, bool hijack) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         ref var errorLog = ref heap(new lockedBytesBuffer(), out var ᏑerrorLog);
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             GoFrame ᒐ = default;
@@ -2106,11 +2142,12 @@ internal static void testWriteHeaderAfterWrite(ж<testing.T> Ꮡt, testMode mode
             Ꮡt.Fatal(err);
         }
         {
-            @string got = ((@string)body);
+            @string got = (@string)body;
             @string want = foobarˢ; if (got != want) {
                 Ꮡt.Errorf("got = %q; want %q"u8, got, want);
             }
         }
+
         // Also check the stderr output:
         if (mode == http2Mode) {
             // TODO: also emit this log message for HTTP/2?
@@ -2150,6 +2187,7 @@ internal static partial void testBidiStreamReverseProxy(ж<testing.T> Ꮡt, test
                 }
             }
         })));
+
         var (backURL, err) = url.Parse((~(~backend).ts).URL);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -2160,6 +2198,7 @@ internal static partial void testBidiStreamReverseProxy(ж<testing.T> Ꮡt, test
         var proxy = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             rpʗ1.ServeHTTP(w, r);
         })));
+
         var bodyRes = new channel<any>(1); // error or hash.Hash
         var (pr, pw) = io.Pipe();
         var (req, _) = NewRequest(putˢ, (~(~proxy).ts).URL, new io.PipeReaderжReader(pr));
@@ -2265,7 +2304,7 @@ internal static void testIdentityTransferEncoding(ж<testing.T> Ꮡt, testMode m
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var (gotBodyΔ1, _) = io.ReadAll((~r).Body);
             {
-                @string got = ((@string)gotBodyΔ1);
+                @string got = (@string)gotBodyΔ1;
                 @string want = body; if (got != want) {
                     Ꮡt.Errorf("got request body = %q; want %q"u8, got, want);
                 }
@@ -2287,7 +2326,7 @@ internal static void testIdentityTransferEncoding(ж<testing.T> Ꮡt, testMode m
             Ꮡt.Fatal(err);
         }
         {
-            @string got = ((@string)gotBody);
+            @string got = (@string)gotBody;
             @string want = body; if (got != want) {
                 Ꮡt.Errorf("got response body = %q; want %q"u8, got, want);
             }
@@ -2315,28 +2354,37 @@ internal static void testEarlyHintsRequest(ж<testing.T> Ꮡt, testMode mode) {
         Ꮡwg.Add(1);
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var h = w.Header();
+
             h.Add(contentLengthˢ, "123"u8); // must be ignored
             h.Add(linkˢ, styleCssRelPreloadAsˢ);
             h.Add(linkˢ, scriptJsRelPreloadAsˢ);
             w.WriteHeader(StatusEarlyHints);
+
             Ꮡwg.Wait();
+
             h.Add(linkˢ, fooJsRelPreloadAsScriptˢ);
             w.WriteHeader(StatusEarlyHints);
+
             w.Write(slice<byte>("Hello"u8));
         })));
+
         void checkLinkHeaders(ж<testing.T> tΔ1, slice<@string> expected, slice<@string> got) {
             tΔ1.Helper();
+
             if (len(expected) != len(got)) {
                 tΔ1.Errorf("got %d expected %d"u8, len(got), len(expected));
             }
+
             foreach (var (i, _) in expected) {
                 if (expected[i] != got[i]) {
                     tΔ1.Errorf("got %q expected %q"u8, got[i], expected[i]);
                 }
             }
         }
+
         void checkExcludedHeaders(ж<testing.T> tΔ2, textproto.MIMEHeader header) {
             tΔ2.Helper();
+
             foreach (var (_, h) in new @string[]{"Content-Length"u8, "Transfer-Encoding"u8}.slice()) {
                 {
                     var (v, ok) = header[h, ꟷ]; if (ok) {
@@ -2345,6 +2393,7 @@ internal static void testEarlyHintsRequest(ж<testing.T> Ꮡt, testMode mode) {
                 }
             }
         }
+
         uint8 respCounter = default!;
             var checkExcludedHeadersʗ1 = checkExcludedHeaders;
             var checkLinkHeadersʗ1 = checkLinkHeaders;
@@ -2354,6 +2403,7 @@ internal static void testEarlyHintsRequest(ж<testing.T> Ꮡt, testMode mode) {
                 case 0: {
                     checkLinkHeadersʗ1(Ꮡt, new @string[]{"</style.css>; rel=preload; as=style"u8, "</script.js>; rel=preload; as=script"u8}.slice(), header[linkˢ]);
                     checkExcludedHeadersʗ1(Ꮡt, header);
+
                     Ꮡwg.Done();
                     break;
                 }
@@ -2368,22 +2418,26 @@ internal static void testEarlyHintsRequest(ж<testing.T> Ꮡt, testMode mode) {
                 }}
 
                 respCounter++;
+
                 return default!;
             }
         ));
         var (req, _) = NewRequestWithContext(httptrace.WithClientTrace(context_package.Background(), trace), getˢ2, (~(~cst).ts).URL, default!);
+
         var (res, err) = (~cst).c.Do(req);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         checkLinkHeaders(Ꮡt, new @string[]{"</style.css>; rel=preload; as=style"u8, "</script.js>; rel=preload; as=script"u8, "</foo.js>; rel=preload; as=script"u8}.slice(), (~res).Header[linkˢ]);
         {
             @string cl = (~res).Header.Get(contentLengthˢ); if (cl != "123"u8) {
                 Ꮡt.Errorf("Content-Length is %q; want 123"u8, cl);
             }
         }
+
         var (body, _) = io.ReadAll((~res).Body);
         if (((sstring)body) != "Hello"u8) {
             Ꮡt.Errorf("Read body %q; want Hello"u8, body);

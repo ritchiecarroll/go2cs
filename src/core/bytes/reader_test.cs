@@ -38,6 +38,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         new(seek: Δio.SeekCurrent, n: 5, want: "56789"u8),
         new(seek: Δio.SeekEnd, off: -1, n: 1, wantpos: 9, want: "9"u8)
     }.slice();
+
     foreach (var (i, tt) in tests) {
         var (pos, err) = r.Seek(tt.off, tt.seek);
         if (err == default! && tt.seekerr != ""u8) {
@@ -57,7 +58,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%d. read = %v; want %v"u8, i, err, tt.readerr);
             continue;
         }
-        @string got = ((@string)(buf.slice(0, n)));
+        @string got = (@string)(buf.slice(0, n));
         if (got != tt.want) {
             Ꮡt.Errorf("%d. got %q; want %q"u8, i, got, tt.want);
         }
@@ -98,7 +99,7 @@ public static void TestReaderAt(ж<testing.T> Ꮡt) {
     foreach (var (i, tt) in tests) {
         var b = new slice<byte>(tt.n);
         var (rn, err) = r.ReadAt(b, tt.off);
-        @string got = ((@string)(b.slice(0, rn)));
+        @string got = (@string)(b.slice(0, rn));
         if (got != tt.want) {
             Ꮡt.Errorf("%d. got %q; want %q"u8, i, got, tt.want);
         }
@@ -109,8 +110,6 @@ public static void TestReaderAt(ж<testing.T> Ꮡt) {
 }
 
 public static partial void TestReaderAtConcurrent(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test for the race detector, to verify ReadAt doesn't mutate
     // any state.
     var r = NewReader(slice<byte>("0123456789"u8));
@@ -133,8 +132,6 @@ public static partial void TestReaderAtConcurrent(ж<testing.T> Ꮡt) {
 }
 
 public static partial void TestEmptyReaderConcurrent(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test for the race detector, to verify a Read that doesn't yield any bytes
     // is okay to use from multiple goroutines. This was our historic behavior.
     // See golang.org/issue/7856
@@ -230,7 +227,6 @@ public static void TestReaderLen(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct UnreadRuneErrorTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action<ж<bytes.Reader>> f;
@@ -311,6 +307,7 @@ internal partial struct TestReaderCopyNothing_justWriter /*dyn*/ {
 // regardless of the presence of a WriteTo method.
 public static void TestReaderCopyNothing(ж<testing.T> Ꮡt) {
     var discard = new TestReaderCopyNothing_justWriter(Δio.Discard); // hide ReadFrom
+
     TestReaderCopyNothing_nErr with = default!;
     TestReaderCopyNothing_nErr withOut = default!;
     (with.n, with.err) = Δio.Copy(discard, new bytes_test_package.bytes_ReaderжReader(NewReader(default!)));
@@ -342,6 +339,7 @@ public static void TestReaderReset(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ReadRune: unexpected error: %v"u8, errΔ1);
         }
     }
+
     @string want = wantᶜ;
     r.Reset(slice<byte>(want));
     {
@@ -354,7 +352,7 @@ public static void TestReaderReset(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("ReadAll: unexpected error: %v"u8, err);
     }
     {
-        @string got = ((@string)buf); if (got != want) {
+        @string got = (@string)buf; if (got != want) {
             Ꮡt.Errorf("ReadAll: got %q, want %q"u8, got, want);
         }
     }
@@ -366,42 +364,51 @@ public static void TestReaderZero(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Len: got %d, want 0"u8, l);
         }
     }
+
     {
         var (n, err) = (Ꮡ(new Reader(nil))).Read(default!); if (n != 0 || !AreEqual(err, Δio.EOF)) {
             Ꮡt.Errorf("Read: got %d, %v; want 0, io.EOF"u8, n, err);
         }
     }
+
     {
         var (n, err) = (Ꮡ(new Reader(nil))).ReadAt(default!, 11); if (n != 0 || !AreEqual(err, Δio.EOF)) {
             Ꮡt.Errorf("ReadAt: got %d, %v; want 0, io.EOF"u8, n, err);
         }
     }
+
     {
         var (b, err) = (Ꮡ(new Reader(nil))).ReadByte(); if (b != 0 || !AreEqual(err, Δio.EOF)) {
             Ꮡt.Errorf("ReadByte: got %d, %v; want 0, io.EOF"u8, b, err);
         }
     }
+
     {
         var (ch, size, err) = (Ꮡ(new Reader(nil))).ReadRune(); if (ch != 0 || size != 0 || !AreEqual(err, Δio.EOF)) {
             Ꮡt.Errorf("ReadRune: got %d, %d, %v; want 0, 0, io.EOF"u8, ch, size, err);
         }
     }
+
     {
         var (offset, err) = (Ꮡ(new Reader(nil))).Seek(11, Δio.SeekStart); if (offset != 11 || err != default!) {
             Ꮡt.Errorf("Seek: got %d, %v; want 11, nil"u8, offset, err);
         }
     }
+
     {
         var s = (Ꮡ(new Reader(nil))).Size(); if (s != 0) {
             Ꮡt.Errorf("Size: got %d, want 0"u8, s);
         }
     }
+
     if ((Ꮡ(new Reader(nil))).UnreadByte() == default!) {
         Ꮡt.Errorf("UnreadByte: got nil, want error"u8);
     }
+
     if ((Ꮡ(new Reader(nil))).UnreadRune() == default!) {
         Ꮡt.Errorf("UnreadRune: got nil, want error"u8);
     }
+
     {
         var (n, err) = (Ꮡ(new Reader(nil))).WriteTo(Δio.Discard); if (n != 0 || err != default!) {
             Ꮡt.Errorf("WriteTo: got %d, %v; want 0, nil"u8, n, err);

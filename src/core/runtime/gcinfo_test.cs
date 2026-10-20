@@ -58,6 +58,7 @@ public static void TestGCInfo(ж<testing.T> Ꮡt) {
     verifyGCInfo(Ꮡt, bssSliceˢ, ᏑbssSlice, infoSlice);
     verifyGCInfo(Ꮡt, bssEfaceˢ, ᏑbssEface, infoEface);
     verifyGCInfo(Ꮡt, bssIfaceˢ, ᏑbssIface, infoIface);
+
     verifyGCInfo(Ꮡt, dataPtrˢ, ᏑdataPtr, infoPtr);
     verifyGCInfo(Ꮡt, dataScalarPtrˢ, ᏑdataScalarPtr, infoScalarPtr);
     verifyGCInfo(Ꮡt, dataPtrScalarˢ, ᏑdataPtrScalar, infoPtrScalar);
@@ -66,6 +67,7 @@ public static void TestGCInfo(ж<testing.T> Ꮡt) {
     verifyGCInfo(Ꮡt, dataSliceˢ, ᏑdataSlice, infoSlice);
     verifyGCInfo(Ꮡt, dataEfaceˢ, ᏑdataEface, infoEface);
     verifyGCInfo(Ꮡt, dataIfaceˢ, ᏑdataIface, infoIface);
+
     {
         ref var x = ref heap(new Ptr(), out var Ꮡx);
         verifyGCInfo(Ꮡt, stackPtrˢ, Ꮡx, infoPtr);
@@ -106,6 +108,7 @@ public static void TestGCInfo(ж<testing.T> Ꮡt) {
         verifyGCInfo(Ꮡt, stackIfaceˢ, Ꮡx, infoIface);
         Δruntime.KeepAlive(x);
     }
+
     for (nint i = 0; i < 10; i++) {
         verifyGCInfo(Ꮡt, heapPtrˢ, runtime_internal_test_package.Escape(@new<Ptr>()).OrTypedNil(), trimDead(infoPtr));
         verifyGCInfo(Ꮡt, heapPtrSliceˢ, runtime_internal_test_package.Escape(Ꮡ(new slice<ж<byte>>(10), 0)).OrTypedNil(), trimDead(infoPtr10));
@@ -189,37 +192,26 @@ internal static slice<byte> infoBigStruct() {
     if (exprᴛ1 == "386"u8 || exprᴛ1 == "arm"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8) {
         return new byte[]{
             typePointer, // q *int
-
             typeScalar, typeScalar, typeScalar, typeScalar, typeScalar, // w byte; e [17]byte
-
             typePointer, typeScalar, typeScalar, // r []byte
-
             typeScalar, typeScalar, typeScalar, typeScalar, // t int; y uint16; u uint64
-
-            typePointer, typeScalar
+            typePointer, typeScalar // i string
         }.slice();
     }
     if (exprᴛ1 == "arm64"u8 || exprᴛ1 == "amd64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "wasm"u8) {
-        return new byte[]{ // i string
-
+        return new byte[]{
             typePointer, // q *int
-
             typeScalar, typeScalar, typeScalar, // w byte; e [17]byte
-
             typePointer, typeScalar, typeScalar, // r []byte
-
             typeScalar, typeScalar, typeScalar, // t int; y uint16; u uint64
-
-            typePointer, typeScalar
+            typePointer, typeScalar // i string
         }.slice();
     }
     { /* default: */
         throw panic("unknown arch");
     }
-
 }
 
-// i string
 partial interface Iface {
     void f();
 }
@@ -229,6 +221,7 @@ partial struct IfaceImpl /*num:nint*/;
 internal static void f(this IfaceImpl _) {
 }
 
+// BSS
 internal static ж<Ptr> ᏑbssPtr = new StandardBox<Ptr>(default(Ptr));
 internal static ref Ptr bssPtr => ref ᏑbssPtr.Value;
 internal static ж<ScalarPtr> ᏑbssScalarPtr = new StandardBox<ScalarPtr>(default(ScalarPtr));
@@ -245,6 +238,8 @@ internal static ж<any> ᏑbssEface = new StandardBox<any>(default(any));
 internal static ref any bssEface => ref ᏑbssEface.ValueSlot;
 internal static ж<Iface> ᏑbssIface = new StandardBox<Iface>(default(Iface));
 internal static ref Iface bssIface => ref ᏑbssIface.ValueSlot;
+
+// DATA
 internal static ж<Ptr> ᏑdataPtr = new StandardBox<Ptr>(new Ptr(@new<byte>()));
 internal static ref Ptr dataPtr => ref ᏑdataPtr.Value;
 internal static ж<ScalarPtr> ᏑdataScalarPtr = new StandardBox<ScalarPtr>(new ScalarPtr(q: 1));
@@ -257,10 +252,11 @@ internal static ж<@string> ᏑdataString = new StandardBox<@string>("foo"u8);
 internal static ref @string dataString => ref ᏑdataString.Value;
 internal static ж<slice<@string>> ᏑdataSlice = new StandardBox<slice<@string>>(new @string[]{"foo"u8}.slice());
 internal static ref slice<@string> dataSlice => ref ᏑdataSlice.ValueSlot;
-internal static ж<any> ᏑdataEface = new StandardBox<any>((nint)(42));
+internal static ж<any> ᏑdataEface = new StandardBox<any>((nint)42);
 internal static ref any dataEface => ref ᏑdataEface.ValueSlot;
 internal static ж<Iface> ᏑdataIface = new StandardBox<Iface>(((IfaceImpl)42));
 internal static ref Iface dataIface => ref ᏑdataIface.ValueSlot;
+
 internal static slice<byte> infoString = new byte[]{typePointer, typeScalar}.slice();
 internal static slice<byte> infoSlice = new byte[]{typePointer, typeScalar, typeScalar}.slice();
 internal static slice<byte> infoEface = new byte[]{typeScalar, typePointer}.slice();

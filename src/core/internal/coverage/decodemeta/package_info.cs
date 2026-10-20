@@ -49,6 +49,12 @@ using static go.@internal.coverage.decodemeta_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -57,8 +63,8 @@ using static go.@internal.coverage.decodemeta_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/decodemeta/decode.go", "decode.cs", "AB4+goK4gIKkgIKkpqKAgqSClKaUgoCCuIKCpoKmgqaCpoKqwoKogoCCpJaCqIKAgriCgoSCloKClIIACBKCgg==", "", "", "133=ReadULEB128/1/5/2,ReadULEB128/2/5/3,ReadULEB128/3/5/4,ReadULEB128/4/5/5,ReadULEB128/5/5/6")]
-[assembly: go.GoPositionMap("internal/coverage/decodemeta/decodefile.go", "decodefile.cs", "ACla4syAgqSmooSWgIK4goKCuoKogoKAgqSCuIKCgIKkgsyCgoKUgpSSgoSClqaCgoKCgpSClIKqoqyyrLKssgACFPKCgoKCpoKUgoKUAAIUAAgGgpSChIKWgpaCgpSCgIKkgIKk", "", "", "181=Sum/1/1/1,Sprintf/1/1/1")]
+[assembly: go.GoPositionMap("internal/coverage/decodemeta/decode.go", "decode.cs", "AB4+goK4gIKkgIKkpqKAgqSClKaUgoCCyIKCpoKmgqaCpoKqwoK4goCCpKaCuIKAgsiCgpSCpoKClIIACBKCgg==", "", "", "140=ReadULEB128/1/5/2,ReadULEB128/2/5/3,ReadULEB128/3/5/4,ReadULEB128/4/5/5,ReadULEB128/5/5/6")]
+[assembly: go.GoPositionMap("internal/coverage/decodemeta/decodefile.go", "decodefile.cs", "ACla4tyAgqSmopSmgILIgoKCyoK4goKAgqSCuIKCgIKkgtyCgoKUgpSCgpSCpqaCgoKCgpSClIKqoqyyrLKssgACFPKCgoKCpoKUgoKUAAIUAAgGgpSClIKmgqaCgpSCgIKkgIKk", "", "", "189=Sum/1/1/1,Sprintf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

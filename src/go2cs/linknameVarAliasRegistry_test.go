@@ -140,6 +140,7 @@ func TestLinknameVarAliasStorageIsDerived(t *testing.T) {
 // RED PROOF: delete the linknameVarAliasStorage arm from packageVarAccess, or key it on goIDName
 // alone — the first arm goes red, the last arm goes red respectively.
 func TestLinknameVarAliasPublicizesTheStorageSide(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	savedPath := currentPackagePath
 	savedHandles := linknameHandles
 

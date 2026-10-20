@@ -35,6 +35,7 @@ internal static readonly @string runtimeˢ = "runtime"u8;
 // are aligned to 8 bytes. This can be a problem on 32-bit systems.
 public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt)); // go command needed to resolve std .a files for importer.Default().
+
     // Read the code making the tables above, to see which fields and
     // variables we are currently checking.
     var @checked = new map<@string, bool>{};
@@ -44,18 +45,19 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     }
     var fieldDesc = new map<nint, @string>{};
     var r = Δregexp.MustCompile(unsafeOffsetofWWˢ);
-    var matches = r.FindAllStringSubmatch(((@string)x), -1);
+    var matches = r.FindAllStringSubmatch((@string)x, -1);
     foreach (var (i, vΔ1) in matches) {
         @checked["field runtime." + vΔ1[1] + "." + vΔ1[2]] = true;
         fieldDesc[i] = vΔ1[1] + "." + vΔ1[2];
     }
     var varDesc = new map<nint, @string>{};
     r = Δregexp.MustCompile(unsafePointerWˢ);
-    matches = r.FindAllStringSubmatch(((@string)x), -1);
+    matches = r.FindAllStringSubmatch((@string)x, -1);
     foreach (var (i, vΔ2) in matches) {
         @checked["var " + vΔ2[1]] = true;
         varDesc[i] = vΔ2[1];
     }
+
     // Check all of our alignments. This is the actual core of the test.
     foreach (var (i, d) in runtime_internal_test_package.AtomicFields) {
         if (d % 8 != 0) {
@@ -67,8 +69,10 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("variable alignment of %s failed: address is %x"u8, varDesc[i], @unsafe.Pointer.OrTypedNil(p));
         }
     }
+
     // The code above is the actual test. The code below attempts to check
     // that the tables used by the code above are exhaustive.
+
     // Parse the whole runtime package, checking that arguments of
     // appropriate atomic operations are in the list above.
     var fset = token.NewFileSet();
@@ -77,6 +81,7 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("parsing runtime failed: %v"u8, err);
     }
     var pkg = m[runtimeˢ]; // Note: ignore runtime_test and main packages
+
     // Filter files by those for the current architecture/os being tested.
     var fileMap = new map<@string, bool>{};
     foreach (var (_, f) in buildableFiles(Ꮡt, "."u8)) {
@@ -88,6 +93,7 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
             files = append(files, f);
         }
     }
+
     // Call go/types to analyze the runtime package.
     ref var info = ref heap(new typesꓸInfo(), out var Ꮡinfo);
     info.Types = new map<ast.Expr, types.TypeAndValue>{};
@@ -97,6 +103,7 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("typechecking runtime failed: %v"u8, err);
     }
+
     // Analyze all atomic.*64 callsites.
     ref var v = ref heap<Visitor>(out var Ꮡv);
     v = new Visitor(t: Ꮡt, fset: fset, types: info.Types, @checked: @checked);
@@ -131,18 +138,23 @@ public static ast.Visitor Visit(this ж<Visitor> Ꮡv, ast.Node n) {
     if (!strings.HasSuffix((~(~f).Sel).Name, "64"u8)) {
         return new runtime_test_package.VisitorжVisitor(Ꮡv);
     }
+
     var a = (~c).Args[0];
+
     // This is a call to atomic.XXX64(a, ...). Make sure a is aligned to 8 bytes.
     // XXX = one of Load, Store, Cas, etc.
     // The arg we care about the alignment of is always the first one.
+
     {
         var (u, okΔ1) = a._<ж<ast.UnaryExpr>>(ᐧ); if (okΔ1 && (~u).Op == token.AND) {
             v.checkAddr((~u).X);
             return new runtime_test_package.VisitorжVisitor(Ꮡv);
         }
     }
+
     // Other cases there's nothing we can check. Assume we're ok.
     v.t.Logf("unchecked atomic operation %s %v"u8, v.fset.Position(n.Pos()), v.print(n));
+
     return new runtime_test_package.VisitorжVisitor(Ꮡv);
 }
 
@@ -150,13 +162,13 @@ public static ast.Visitor Visit(this ж<Visitor> Ꮡv, ast.Node n) {
 internal static void checkAddr(this ref Visitor v, ast.Node n) {
     switch (n.type()) {
     case ж<ast.IndexExpr> nΔ1: {
+        // Alignment of an array element is the same as the whole array.
         v.checkAddr((~nΔ1).X);
         return;
     }
     case ж<ast.Ident> nΔ1: {
         @string key = "var "u8 + v.print(new ast.IdentжNode(nΔ1));
         if (!v.@checked[key]) {
-            // Alignment of an array element is the same as the whole array.
             v.t.Errorf("unchecked variable %s %s"u8, v.fset.Position(nΔ1.Pos()), key);
         }
         return;

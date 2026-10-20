@@ -28,8 +28,8 @@ internal static slice<mulUintptrTest> mulUintptrTests = new mulUintptrTest[]{
     new(MaxUintptr / 100, 100, false),
     new(MaxUintptr / 1000, 1001, true),
     new((uintptr)(4294967296L - 1), (uintptr)(4294967296L - 1), false),
-    new(((uintptr)1 << (int)((UintptrSize / 2))), ((uintptr)1 << (int)((UintptrSize / 2))), true),
-    new((MaxUintptr >> (int)(32)), (MaxUintptr >> (int)(32)), false),
+    new((uintptr)1 << (int)(UintptrSize / 2), (uintptr)1 << (int)(UintptrSize / 2), true),
+    new(MaxUintptr >> 32, MaxUintptr >> 32, false),
     new(MaxUintptr, MaxUintptr, true)
 }.slice();
 

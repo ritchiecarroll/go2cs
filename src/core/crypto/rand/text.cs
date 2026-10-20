@@ -19,7 +19,7 @@ public static @string Text() {
     foreach (var (i, _) in src) {
         src[i] = base32alphabet[src[i] % 32];
     }
-    return ((@string)src);
+    return (@string)src;
 }
 
 } // end rand_package

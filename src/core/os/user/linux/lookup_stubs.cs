@@ -11,6 +11,8 @@ using strconv = strconv_package;
 
 partial class user_package {
 
+// unused variables (in this implementation)
+// modified during test to exercise code paths in the cgo implementation.
 internal static nint userBuffer = 0;
 internal static nint groupBuffer = 0;
 
@@ -28,6 +30,7 @@ internal static (ж<User>, error) current() {
     if (err == default!) {
         return (u, default!);
     }
+
     ref var homeDir = ref heap<@string>(out var ᏑhomeDir);
     (homeDir, _) = os.UserHomeDir();
     u = Ꮡ(new User(
@@ -35,7 +38,6 @@ internal static (ж<User>, error) current() {
         Gid: currentGID(),
         Username: os.Getenv(userˢ),
         Name: ""u8, // ignored
-
         HomeDir: homeDir
     ));
     // On Android, return a dummy user instead of failing.
@@ -48,7 +50,6 @@ internal static (ж<User>, error) current() {
             u.Value.Username = androidˢ;
         }
     }
-
     // cgo isn't available, but if we found the minimum information
     // without it, use it:
     if ((~u).Uid != ""u8 && (~u).Username != ""u8 && (~u).HomeDir != ""u8) {

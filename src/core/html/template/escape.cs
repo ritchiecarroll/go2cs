@@ -194,6 +194,8 @@ internal static context escape(this ref escaper e, context c, parse.Node n) {
 
 internal static ж<godebug.Setting> debugAllowActionJSTmpl = godebug.New("jstmpllitinterp"u8);
 
+internal static ж<godebug.Setting> htmlmetacontenturlescape = godebug.New("htmlmetacontenturlescape"u8);
+
 // escapeAction escapes an action template node.
 internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -248,7 +250,6 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
             else { /* default: */
                 s = append(s, "_html_template_urlnormalizer"u8);
             }
-
         }
         else if (exprᴛ2 == urlPartQueryOrFrag) { matchᴛ1 = true;
             s = append(s, "_html_template_urlescaper"u8);
@@ -262,15 +263,28 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
         else if (!matchᴛ1) { /* default: */
             throw panic(c.urlPart.String());
         }
-
+    }
+    else if (exprᴛ1 == stateMetaContent) {
+        // Handled below in delim check.
+    }
+    else if (exprᴛ1 == stateMetaContentURL) {
+        if (htmlmetacontenturlescape.Value() != "0"u8){
+            s = append(s, "_html_template_urlfilter"u8);
+        } else {
+            // We don't have a great place to increment this, since it's hard to
+            // know if we actually escape any urls in _html_template_urlfilter,
+            // since it has no information about what context it is being
+            // executed in etc. This is probably the best we can do.
+            htmlmetacontenturlescape.IncNonDefault();
+        }
     }
     else if (exprᴛ1 == stateJS) {
         s = append(s, "_html_template_jsvalescaper"u8);
+        // A slash after a value starts a div operator.
         c.jsCtx = jsCtxDivOp;
     }
     else if (exprᴛ1 == stateJSDqStr || exprᴛ1 == stateJSSqStr) {
-        s = append(s, // A slash after a value starts a div operator.
- "_html_template_jsstrescaper"u8);
+        s = append(s, "_html_template_jsstrescaper"u8);
     }
     else if (exprᴛ1 == stateJSTmplLit) {
         s = append(s, "_html_template_jstmpllitescaper"u8);
@@ -288,11 +302,11 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
         s = append(s, "_html_template_rcdataescaper"u8);
     }
     else if (exprᴛ1 == stateAttr) {
+        // Handled below in delim check.
     }
     else if (exprᴛ1 == stateAttrName || exprᴛ1 == stateTag) {
         c.state = stateAttrName;
-        s = append(s, // Handled below in delim check.
- "_html_template_htmlnamefilter"u8);
+        s = append(s, "_html_template_htmlnamefilter"u8);
     }
     else if (exprᴛ1 == stateSrcset) {
         s = append(s, "_html_template_srcsetescaper"u8);
@@ -304,18 +318,16 @@ internal static context escapeAction(this ref escaper e, context c, ж<parse.Act
             throw panic("unexpected state " + c.state.String());
         }
     }
-
     var exprᴛ4 = c.delim;
     if (exprᴛ4 == delimNone) {
+        // No extra-escaping needed for raw text content.
     }
     else if (exprᴛ4 == delimSpaceOrTagEnd) {
-        s = append(s, // No extra-escaping needed for raw text content.
- "_html_template_nospaceescaper"u8);
+        s = append(s, "_html_template_nospaceescaper"u8);
     }
     else { /* default: */
         s = append(s, "_html_template_attrescaper"u8);
     }
-
     e.editActionNode(Ꮡn, s);
     return c;
 }
@@ -404,24 +416,24 @@ internal static map<@string, bool> predefinedEscapers = new map<@string, bool>{
     ["urlquery"u8] = true
 };
 
-// The following pairs of HTML escapers provide equivalent security
-// guarantees, since they all escape '\000', '\'', '"', '&', '<', and '>'.
-// These two URL escapers produce URLs safe for embedding in a URL query by
-// percent-encoding all the reserved characters specified in RFC 3986 Section
-// 2.2
-// These two functions are not actually equivalent; urlquery is stricter as it
-// escapes reserved characters (e.g. '#'), while _html_template_urlnormalizer
-// does not. It is therefore only safe to replace _html_template_urlnormalizer
-// with urlquery (this happens in ensurePipelineContains), but not the otherI've
-// way around. We keep this entry around to preserve the behavior of templates
-// written before Go 1.9, which might depend on this substitution taking place.
 // equivEscapers matches contextual escapers to equivalent predefined
 // template escapers.
 internal static map<@string, @string> equivEscapers = new map<@string, @string>{
+    // The following pairs of HTML escapers provide equivalent security
+    // guarantees, since they all escape '\000', '\'', '"', '&', '<', and '>'.
     ["_html_template_attrescaper"u8] = "html"u8,
     ["_html_template_htmlescaper"u8] = "html"u8,
     ["_html_template_rcdataescaper"u8] = "html"u8,
+    // These two URL escapers produce URLs safe for embedding in a URL query by
+    // percent-encoding all the reserved characters specified in RFC 3986 Section
+    // 2.2
     ["_html_template_urlescaper"u8] = "urlquery"u8,
+    // These two functions are not actually equivalent; urlquery is stricter as it
+    // escapes reserved characters (e.g. '#'), while _html_template_urlnormalizer
+    // does not. It is therefore only safe to replace _html_template_urlnormalizer
+    // with urlquery (this happens in ensurePipelineContains), but not the otherI've
+    // way around. We keep this entry around to preserve the behavior of templates
+    // written before Go 1.9, which might depend on this substitution taking place.
     ["_html_template_urlnormalizer"u8] = "urlquery"u8
 };
 
@@ -480,11 +492,9 @@ internal static slice<ж<parse.CommandNode>> appendCmd(slice<ж<parse.CommandNod
 internal static ж<parse.CommandNode> newIdentCmd(@string identifier, parse.Pos pos) {
     return Ꮡ(new parse.CommandNode(
         NodeType: parse.NodeCommand,
-        Args: new parse.Node[]{new parse.IdentifierNodeжNode(parse.NewIdentifier(identifier).SetTree(nil).SetPos(pos))}.slice()
+        Args: new parse.Node[]{new parse.IdentifierNodeжNode(parse.NewIdentifier(identifier).SetTree(nil).SetPos(pos))}.slice() // TODO: SetTree.
     ));
 }
-
-// TODO: SetTree.
 
 // nudge returns the context that would result from following empty string
 // transitions from the input context.
@@ -507,18 +517,17 @@ internal static ж<parse.CommandNode> newIdentCmd(@string identifier, parse.Pos 
 internal static context nudge(context c) {
     var exprᴛ1 = c.state;
     if (exprᴛ1 == stateTag) {
+        // In `<foo {{.}}`, the action should emit an attribute.
         c.state = stateAttrName;
     }
     else if (exprᴛ1 == stateBeforeValue) {
+        // In `<foo bar={{.}}`, the action is an undelimited value.
         (c.state, c.delim, c.attr) = (attrStartStates[c.attr], delimSpaceOrTagEnd, attrNone);
     }
     else if (exprᴛ1 == stateAfterName) {
+        // In `<foo bar {{.}}`, the action is an attribute name.
         (c.state, c.attr) = (stateAttrName, attrNone);
     }
-
-    // In `<foo {{.}}`, the action should emit an attribute.
-    // In `<foo bar={{.}}`, the action is an undelimited value.
-    // In `<foo bar {{.}}`, the action is an attribute name.
     return c;
 }
 
@@ -541,6 +550,7 @@ internal static context join(context a, context b, parse.Node node, @string node
     if (a.eq(b)) {
         return a;
     }
+
     var c = a;
     c.urlPart = b.urlPart;
     if (c.eq(b)) {
@@ -548,6 +558,7 @@ internal static context join(context a, context b, parse.Node node, @string node
         c.urlPart = urlPartUnknown;
         return c;
     }
+
     c = a;
     c.jsCtx = b.jsCtx;
     if (c.eq(b)) {
@@ -555,6 +566,7 @@ internal static context join(context a, context b, parse.Node node, @string node
         c.jsCtx = jsCtxUnknown;
         return c;
     }
+
     // Allow a nudged context to join with an unnudged one.
     // This means that
     //   <p title={{if .C}}{{.}}{{end}}
@@ -569,6 +581,7 @@ internal static context join(context a, context b, parse.Node node, @string node
             }
         }
     }
+
     return new context(
         state: stateError,
         err: errorf(ErrBranchEnd, node, 0, "{{%s}} branches end in different contexts: %v, %v"u8, nodeName, a, b)
@@ -582,7 +595,7 @@ internal static context escapeBranch(this ref escaper e, context c, ж<parse.Bra
     if (nodeName == "range"u8) {
         e.rangeContext = Ꮡ(new rangeContext(outer: e.rangeContext));
     }
-    var c0 = e.escapeList(c, n.List);
+    var c0 = e.escapeList(c.clone(), n.List);
     if (nodeName == "range"u8) {
         if (c0.state != stateError) {
             c0 = joinRange(c0, ref (e.rangeContext).DerefOrNull());
@@ -591,6 +604,7 @@ internal static context escapeBranch(this ref escaper e, context c, ж<parse.Bra
         if (c0.state == stateError) {
             return c0;
         }
+
         // The "true" branch of a "range" node can execute multiple times.
         // We check that executing n.List once results in the same context
         // as executing n.List twice.
@@ -612,7 +626,7 @@ internal static context escapeBranch(this ref escaper e, context c, ж<parse.Bra
             return c0;
         }
     }
-    var c1 = e.escapeList(c, n.ElseList);
+    var c1 = e.escapeList(c.clone(), n.ElseList);
     return join(c0, c1, new parse.BranchNodeжNode(Ꮡn), nodeName);
 }
 
@@ -753,8 +767,8 @@ internal static context computeOutCtx(this ref escaper e, context c, ж<template
                 (c1, ok) = (c2, true);
             }
         }
+        // Use c1 as the error context if neither assumption worked.
     }
-    // Use c1 as the error context if neither assumption worked.
     if (!ok && c1.state != stateError) {
         return new context(
             state: stateError,
@@ -792,20 +806,27 @@ internal static (context, bool) escapeTemplateBody(this ref escaper e, context c
     return e.escapeListConditionally(c, (~t.Tree).Root, filter);
 }
 
-// Determined empirically by running the below in various browsers.
-// var div = document.createElement("DIV");
-// for (var i = 0; i < 0x10000; ++i) {
-//   div.innerHTML = "<span title=x" + String.fromCharCode(i) + "-bar>";
-//   if (div.getElementsByTagName("SPAN")[0].title.indexOf("bar") < 0)
-//     document.write("<p>U+" + i.toString(16));
-// }
 // delimEnds maps each delim to a string of characters that terminate it.
 internal static array<@string> delimEnds = new golib.SparseArray<@string>{
     [delimDoubleQuote] = @""""u8,
     [delimSingleQuote] = "'"u8,
+    // Determined empirically by running the below in various browsers.
+    // var div = document.createElement("DIV");
+    // for (var i = 0; i < 0x10000; ++i) {
+    //   div.innerHTML = "<span title=x" + String.fromCharCode(i) + "-bar>";
+    //   if (div.getElementsByTagName("SPAN")[0].title.indexOf("bar") < 0)
+    //     document.write("<p>U+" + i.toString(16));
+    // }
     [delimSpaceOrTagEnd] = " \t\n\f\r>"u8
 }.array(4);
 
+// Per WHATWG HTML specification, section 4.12.1.3, there are extremely
+// complicated rules for how to handle the set of opening tags <!--,
+// <script, and </script when they appear in JS literals (i.e. strings,
+// regexs, and comments). The specification suggests a simple solution,
+// rather than implementing the arcane ABNF, which involves simply escaping
+// the opening bracket with \x3C. We use the below regex for this, since it
+// makes doing the case-insensitive find-replace much simpler.
 internal static ж<regexp.Regexp> specialScriptTagRE = regexp.MustCompile("(?i)<(script|/script|!--)"u8);
 internal static slice<byte> specialScriptTagReplacement = slice<byte>("\\x3C$1"u8);
 
@@ -851,14 +872,14 @@ internal static context escapeText(this ref escaper e, context c, ж<parse.TextN
         if (isComment(c.state) && c.delim == delimNone) {
             var exprᴛ1 = c.state;
             if (exprᴛ1 == stateJSBlockCmt) {
-                if (bytes.ContainsAny(s.slice(written, i1), // https://es5.github.io/#x7.4:
- // "Comments behave like white space and are
- // discarded except that, if a MultiLineComment
- // contains a line terminator character, then
- // the entire comment is considered to be a
- // LineTerminator for purposes of parsing by
- // the syntactic grammar."
- "\n\r\u2028\u2029"u8)){
+                // https://es5.github.io/#x7.4:
+                // "Comments behave like white space and are
+                // discarded except that, if a MultiLineComment
+                // contains a line terminator character, then
+                // the entire comment is considered to be a
+                // LineTerminator for purposes of parsing by
+                // the syntactic grammar."
+                if (bytes.ContainsAny(s.slice(written, i1), "\n\r\u2028\u2029"u8)){
                     b.WriteByte((rune)'\n');
                 } else {
                     b.WriteByte((rune)' ');
@@ -867,7 +888,6 @@ internal static context escapeText(this ref escaper e, context c, ж<parse.TextN
             else if (exprᴛ1 == stateCSSBlockCmt) {
                 b.WriteByte((rune)' ');
             }
-
             written = i1;
         }
         if (c.state != c1.state && isComment(c1.state) && c1.delim == delimNone) {
@@ -894,6 +914,7 @@ internal static context escapeText(this ref escaper e, context c, ж<parse.TextN
         }
         (c, i) = (c1, i1);
     }
+
     if (written != 0 && c.state != stateError) {
         if (!isComment(c.state) || c.delim != delimNone) {
             b.Write(n.Text.slice(written));
@@ -916,7 +937,9 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
         // Consider all content up to any end tag.
         return transitionFunc[c.state](c, s.slice(0, iΔ1));
     }
+
     // We are at the beginning of an attribute value.
+
     nint i = bytes.IndexAny(s, delimEnds[c.delim]);
     if (i == -1) {
         i = len(s);
@@ -943,17 +966,20 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
         // Decode the value so non-HTML rules can easily handle
         //     <button onclick="alert(&quot;Hi!&quot;)">
         // without having to entity decode token boundaries.
-        for (var u = slice<byte>(html.UnescapeString(((@string)s))); len(u) != 0; ) {
+        for (var u = slice<byte>(html.UnescapeString((@string)s)); len(u) != 0; ) {
             var (c1, i1) = transitionFunc[c.state](c, u);
             (c, u) = (c1, u.slice(i1));
         }
         return (c, len(s));
     }
+
     var element = c.element;
+
     // If this is a non-JS "type" attribute inside "script" tag, do not treat the contents as JS.
-    if (c.state == stateAttr && c.element == elementScript && c.attr == attrScriptType && !isJSType(((@string)(s.slice(0, i))))) {
+    if (c.state == stateAttr && c.element == elementScript && c.attr == attrScriptType && !isJSType((@string)(s.slice(0, i)))) {
         element = elementNone;
     }
+
     if (c.delim != delimSpaceOrTagEnd) {
         // Consume any quote.
         i++;

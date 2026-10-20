@@ -50,7 +50,6 @@ partial struct quoteTest {
     internal @string graphic;
 }
 
-// Some non-printable but graphic runes. Final column is double-quoted.
 internal static slice<quoteTest> quotetests = new quoteTest[]{
     new("\a\b\f\r\n\t\v"u8, @"""\a\b\f\r\n\t\v"""u8, @"""\a\b\f\r\n\t\v"""u8, @"""\a\b\f\r\n\t\v"""u8),
     new("\\"u8, @"""\\"""u8, @"""\\"""u8, @"""\\"""u8),
@@ -58,6 +57,7 @@ internal static slice<quoteTest> quotetests = new quoteTest[]{
     new("\u263a"u8, @"""☺"""u8, @"""\u263a"""u8, @"""☺"""u8),
     new("\U0010ffff"u8, @"""\U0010ffff"""u8, @"""\U0010ffff"""u8, @"""\U0010ffff"""u8),
     new("\x04"u8, @"""\x04"""u8, @"""\x04"""u8, @"""\x04"""u8),
+    // Some non-printable but graphic runes. Final column is double-quoted.
     new("!\u00a0!\u2000!\u3000!"u8, @"""!\u00a0!\u2000!\u3000!"""u8, @"""!\u00a0!\u2000!\u3000!"""u8, "\"!\u00a0!\u2000!\u3000!\""u8),
     new("\x7f"u8, @"""\x7f"""u8, @"""\x7f"""u8, @"""\x7f"""u8)
 }.slice();
@@ -150,7 +150,6 @@ partial struct quoteRuneTest {
     internal @string graphic;
 }
 
-// Some differences between graphic and printable. Note the last column is double-quoted.
 internal static slice<quoteRuneTest> quoterunetests = new quoteRuneTest[]{
     new((rune)'a', @"'a'"u8, @"'a'"u8, @"'a'"u8),
     new((rune)'\a', @"'\a'"u8, @"'\a'"u8, @"'\a'"u8),
@@ -162,6 +161,7 @@ internal static slice<quoteRuneTest> quoterunetests = new quoteRuneTest[]{
     new(0x0010ffff, @"'\U0010ffff'"u8, @"'\U0010ffff'"u8, @"'\U0010ffff'"u8),
     new(0x0010ffff + 1, @"'�'"u8, @"'\ufffd'"u8, @"'�'"u8),
     new(0x04, @"'\x04'"u8, @"'\x04'"u8, @"'\x04'"u8),
+    // Some differences between graphic and printable. Note the last column is double-quoted.
     new((rune)'\u00a0', @"'\u00a0'"u8, @"'\u00a0'"u8, "'\u00a0'"u8),
     new((rune)'\u2000', @"'\u2000'"u8, @"'\u2000'"u8, "'\u2000'"u8),
     new((rune)'\u3000', @"'\u3000'"u8, @"'\u3000'"u8, "'\u3000'"u8)
@@ -217,42 +217,41 @@ partial struct canBackquoteTest {
     internal bool @out;
 }
 
-// \t
 internal static slice<canBackquoteTest> canbackquotetests = new canBackquoteTest[]{
     new("`"u8, false),
-    new(((@string)(rune)0), false),
-    new(((@string)(rune)1), false),
-    new(((@string)(rune)2), false),
-    new(((@string)(rune)3), false),
-    new(((@string)(rune)4), false),
-    new(((@string)(rune)5), false),
-    new(((@string)(rune)6), false),
-    new(((@string)(rune)7), false),
-    new(((@string)(rune)8), false),
-    new(((@string)(rune)9), true),
-    new(((@string)(rune)10), false),
-    new(((@string)(rune)11), false),
-    new(((@string)(rune)12), false),
-    new(((@string)(rune)13), false),
-    new(((@string)(rune)14), false),
-    new(((@string)(rune)15), false),
-    new(((@string)(rune)16), false),
-    new(((@string)(rune)17), false),
-    new(((@string)(rune)18), false),
-    new(((@string)(rune)19), false),
-    new(((@string)(rune)20), false),
-    new(((@string)(rune)21), false),
-    new(((@string)(rune)22), false),
-    new(((@string)(rune)23), false),
-    new(((@string)(rune)24), false),
-    new(((@string)(rune)25), false),
-    new(((@string)(rune)26), false),
-    new(((@string)(rune)27), false),
-    new(((@string)(rune)28), false),
-    new(((@string)(rune)29), false),
-    new(((@string)(rune)30), false),
-    new(((@string)(rune)31), false),
-    new(((@string)(rune)0x7F), false),
+    new((@string)(rune)0, false),
+    new((@string)(rune)1, false),
+    new((@string)(rune)2, false),
+    new((@string)(rune)3, false),
+    new((@string)(rune)4, false),
+    new((@string)(rune)5, false),
+    new((@string)(rune)6, false),
+    new((@string)(rune)7, false),
+    new((@string)(rune)8, false),
+    new((@string)(rune)9, true), // \t
+    new((@string)(rune)10, false),
+    new((@string)(rune)11, false),
+    new((@string)(rune)12, false),
+    new((@string)(rune)13, false),
+    new((@string)(rune)14, false),
+    new((@string)(rune)15, false),
+    new((@string)(rune)16, false),
+    new((@string)(rune)17, false),
+    new((@string)(rune)18, false),
+    new((@string)(rune)19, false),
+    new((@string)(rune)20, false),
+    new((@string)(rune)21, false),
+    new((@string)(rune)22, false),
+    new((@string)(rune)23, false),
+    new((@string)(rune)24, false),
+    new((@string)(rune)25, false),
+    new((@string)(rune)26, false),
+    new((@string)(rune)27, false),
+    new((@string)(rune)28, false),
+    new((@string)(rune)29, false),
+    new((@string)(rune)30, false),
+    new((@string)(rune)31, false),
+    new((@string)(rune)0x7F, false),
     new(@"' !""#$%&'()*+,-./:;<=>?@[\]^_{|}~"u8, true),
     new(@"0123456789"u8, true),
     new(@"ABCDEFGHIJKLMNOPQRSTUVWXYZ"u8, true),
@@ -384,13 +383,12 @@ public static void TestUnquoteInvalidUTF8(ж<testing.T> Ꮡt) {
 }
 
 internal static void testUnquote(ж<testing.T> Ꮡt, @string @in, @string want, error wantErr) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test Unquote.
     var (got, gotErr) = Unquote(@in);
     if (got != want || !AreEqual(gotErr, wantErr)) {
         Ꮡt.Errorf("Unquote(%q) = (%q, %v), want (%q, %v)"u8, @in, got, gotErr, want, wantErr);
     }
+
     // Test QuotedPrefix.
     // Adding an arbitrary suffix should not change the result of QuotedPrefix
     // assume that the suffix doesn't accidentally terminate a truncated input.

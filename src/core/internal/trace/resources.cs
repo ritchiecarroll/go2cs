@@ -7,24 +7,34 @@ using fmt = fmt_package;
 
 partial class trace_package {
 
+// ThreadID is the runtime-internal M structure's ID. This is unique
+// for each OS thread.
 partial struct ThreadID /*num:int64*/;
 
 // NoThread indicates that the relevant events don't correspond to any
 // thread in particular.
 public static ThreadID NoThread => /* ThreadID(-1) */ -1;
 
+// ProcID is the runtime-internal G structure's id field. This is unique
+// for each P.
 partial struct ProcID /*num:int64*/;
 
 // NoProc indicates that the relevant events don't correspond to any
 // P in particular.
 public static ProcID NoProc => /* ProcID(-1) */ -1;
 
+// GoID is the runtime-internal G structure's goid field. This is unique
+// for each goroutine.
 partial struct GoID /*num:int64*/;
 
 // NoGoroutine indicates that the relevant events don't correspond to any
 // goroutine in particular.
 public static GoID NoGoroutine => /* GoID(-1) */ -1;
 
+// GoState represents the state of a goroutine.
+//
+// New GoStates may be added in the future. Users of this type must be robust
+// to that possibility.
 partial struct GoState /*num:uint8*/;
 
 public static GoState GoUndetermined => /* iota */ 0;  // No information is known about the goroutine.
@@ -69,10 +79,13 @@ public static @string String(this GoState s) {
     if (exprᴛ1 == GoSyscall) {
         return syscallˢ;
     }
-
     return badˢ;
 }
 
+// ProcState represents the state of a proc.
+//
+// New ProcStates may be added in the future. Users of this type must be robust
+// to that possibility.
 partial struct ProcState /*num:uint8*/;
 
 public static ProcState ProcUndetermined => /* iota */ 0;  // No information is known about the proc.
@@ -106,10 +119,13 @@ public static @string String(this ProcState s) {
     if (exprᴛ1 == ProcIdle) {
         return idleˢ;
     }
-
     return badˢ;
 }
 
+// ResourceKind indicates a kind of resource that has a state machine.
+//
+// New ResourceKinds may be added in the future. Users of this type must be robust
+// to that possibility.
 partial struct ResourceKind /*num:uint8*/;
 
 public static ResourceKind ResourceNone => /* iota */ 0;       // No resource.
@@ -140,7 +156,6 @@ public static @string String(this ResourceKind r) {
     if (exprᴛ1 == ResourceThread) {
         return threadˢ;
     }
-
     return badˢ;
 }
 
@@ -170,7 +185,6 @@ public static ResourceID MakeResourceID<T>(T id)
         rd.Kind = ResourceThread;
         break;
     }}
-
     rd.id = (int64)ConvertToUInt64<T>(id);
     return rd;
 }
@@ -182,7 +196,7 @@ public static GoID Goroutine(this ResourceID r) {
     if (r.Kind != ResourceGoroutine) {
         throw panic(fmt.Sprintf("attempted to get GoID from %s resource ID"u8, r.Kind));
     }
-    return ((GoID)r.id);
+    return (GoID)r.id;
 }
 
 // Proc obtains a ProcID from the resource ID.
@@ -192,7 +206,7 @@ public static ProcID Proc(this ResourceID r) {
     if (r.Kind != ResourceProc) {
         throw panic(fmt.Sprintf("attempted to get ProcID from %s resource ID"u8, r.Kind));
     }
-    return ((ProcID)r.id);
+    return (ProcID)r.id;
 }
 
 // Thread obtains a ThreadID from the resource ID.
@@ -202,7 +216,7 @@ public static ThreadID Thread(this ResourceID r) {
     if (r.Kind != ResourceThread) {
         throw panic(fmt.Sprintf("attempted to get ThreadID from %s resource ID"u8, r.Kind));
     }
-    return ((ThreadID)r.id);
+    return (ThreadID)r.id;
 }
 
 // String returns a human-readable string representation of the ResourceID.
@@ -235,12 +249,12 @@ partial struct ΔStateTransition {
     public ΔStack Stack;
     // The actual transition data. Stored in a neutral form so that
     // we don't need fields for every kind of resource.
-    internal int64 id;
     internal uint8 oldState;
     internal uint8 newState;
 }
 
-internal static ΔStateTransition goStateTransition(GoID id, GoState from, GoState to) {
+// MakeGoStateTransition creates a goroutine state transition.
+public static ΔStateTransition MakeGoStateTransition(GoID id, GoState from, GoState to) {
     return new ΔStateTransition(
         Resource: new ResourceID(Kind: ResourceGoroutine, id: (int64)id),
         oldState: (uint8)from,
@@ -248,7 +262,8 @@ internal static ΔStateTransition goStateTransition(GoID id, GoState from, GoSta
     );
 }
 
-internal static ΔStateTransition procStateTransition(ProcID id, ProcState from, ProcState to) {
+// MakeProcStateTransition creates a proc state transition.
+public static ΔStateTransition MakeProcStateTransition(ProcID id, ProcState from, ProcState to) {
     return new ΔStateTransition(
         Resource: new ResourceID(Kind: ResourceProc, id: (int64)id),
         oldState: (uint8)from,
@@ -267,7 +282,7 @@ public static (GoState from, GoState to) Goroutine(this ΔStateTransition d) {
     if (d.Resource.Kind != ResourceGoroutine) {
         throw panic("Goroutine called on non-Goroutine state transition");
     }
-    return (((GoState)d.oldState), ((GoState)d.newState));
+    return ((GoState)d.oldState, (GoState)d.newState);
 }
 
 // Proc returns the state transition for a proc.
@@ -281,7 +296,7 @@ public static (ProcState from, ProcState to) Proc(this ΔStateTransition d) {
     if (d.Resource.Kind != ResourceProc) {
         throw panic("Proc called on non-Proc state transition");
     }
-    return (((ProcState)d.oldState), ((ProcState)d.newState));
+    return ((ProcState)d.oldState, (ProcState)d.newState);
 }
 
 } // end trace_package

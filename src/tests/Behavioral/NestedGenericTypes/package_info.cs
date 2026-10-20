@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("NestedGenericTypes.go", "NestedGenericTypes.cs", "AA8igoKChoKCgoSCgg==")]
+[assembly: go.GoPositionMap("NestedGenericTypes.go", "NestedGenericTypes.cs", "AA8igoKCloKCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -22,19 +22,23 @@ public static void MustHaveDebugOptionsSupport(ж<testing.T> Ꮡt) {
 }
 
 public static void MustSupportFeatureDetection(ж<testing.T> Ꮡt) {
+    // TODO: add platforms that do not have CPU feature detection support.
 }
 
-// TODO: add platforms that do not have CPU feature detection support.
 internal static void runDebugOptionsTest(ж<testing.T> Ꮡt, @string test, @string options) {
     MustHaveDebugOptionsSupport(Ꮡt);
+
     testenv.MustHaveExec(new cpu_test_package.testing_TжTB(Ꮡt));
+
     @string env = "GODEBUG="u8 + options;
+
     var cmd = exec.Command(os.Args[0], "-test.run=^"u8 + test + "$"u8);
     cmd.Value.Env = append((~cmd).Env, env);
+
     var (output, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("%s with %s: run failed: %v output:\n%s\n"u8,
-            test, env, err, ((@string)output));
+            test, env, err, (@string)output);
     }
 }
 
@@ -51,9 +55,11 @@ internal static readonly @string cpuAllˢ = "#cpu.all"u8;
 
 public static void TestAllCapabilitiesDisabled(ж<testing.T> Ꮡt) {
     MustHaveDebugOptionsSupport(Ꮡt);
+
     if (godebug.New(cpuAllˢ).Value() != "off"u8) {
         Ꮡt.Skipf("skipping test: GODEBUG=cpu.all=off not set"u8);
     }
+
     foreach (var (_, o) in cpu_internal_test_package.Options) {
         var want = false;
         {

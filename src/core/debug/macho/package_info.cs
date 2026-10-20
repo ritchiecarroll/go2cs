@@ -70,6 +70,12 @@ using static go.debug.macho_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -78,9 +84,9 @@ using static go.debug.macho_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/macho/fat.go", "fat.cs", "AClSmrKCqIKCkoaigoKClKaWkoKClISCuoS4goKUgoKCgoKUhIKCgqiCgIKkloKUgqiWqqKCgpSCgoKUgqaCgoKClA==")]
-[assembly: go.GoPositionMap("debug/macho/file.go", "file.cs", "ADRqgAAfQpKokAApVpKokAA0aIKCgpSCqJKCgpSCgoKUgqyygoKClKqigoiigIKkgoKUgqSCpLiAgriSgpSCgpSCgpSCgpSClIKClIKCgoKagoKAgqSCgpSCgqaCgoCCpIKClIKCgoKCpoKCgIKkgoKUgoKUlIKClIKClIKmgoKAgqSCkoK2griCgpSCgIKkgoKCgoKmgoKAgqSCgoKCgoKCgoKCgoKCgoKCgIKkgoKCgoKCgoKCgoCC2oKCgIKkgoKCgoKCgoKCgoKCgoKCgoCCpIKCgoKCgoKCgoKAggAFzwIAAtgCgoKUgpSCpqaigoKClIKCgoKCgIK2goCCpIKCgoKUgqaCgpQABxCCgoIABxCigoKEgoKClISEgoKEgoCCppKCgoKCgpSUgoKCgoKkgoKCgoKk3KaCgoKUqJKCgIK2qqKCgqYACwiSgoKClLS0yAAIEoKCppSCgoKWgoKCgoKUgIKkgIKklJyygoKClICCpIKClJaCgqiCgoKUgJSmgoKWgpSUgqissoKWgoKCgpSssoKCgIK2", "612-640:1;641-663:2")]
-[assembly: go.GoPositionMap("debug/macho/macho.go", "macho.cs", "ACli7oCigAANIAAIEoCigAAOIgAIEoCigADSAboDgoKCgpSm")]
+[assembly: go.GoPositionMap("debug/macho/fat.go", "fat.cs", "AClSmrKCuIKCkoaigoKClKamkoKClJSCyoTIgoKUgoKCgoKUlIKCgriCgIKkpoKUgrimqqKCgpSCgoKUgqaCgoKClA==")]
+[assembly: go.GoPositionMap("debug/macho/file.go", "file.cs", "ADVqgAAfQpKokAApVpKokAA0aIKCgpSCqJKCgpSCgoKUgqyygoKClKqigpiigIKkgoKUgqSCpLiAgsiSgpSCgpSCgpSCgpSClIKClIKCgoKagoKAgqSCgpSCgqaCgoCCpIKClIKCgoKCpoKCgIKkgoKUgoKUlIKClIKClIKmgoKAgqSCkoK2griCgpSCgIKkgoKCgoKmgoKAgqSCgoKCgoKCgoKCgoKCgoKCgIKkgoKCgoKCgoKCgoCC2oKCgIKkgoKCgoKCgoKCgoKCgoKCgoCCpIKCgoKCgoKCgoKAggAFzwIAAdgCgoKUgpSCpqaigoKClIKCgoKCgIK2goCCpIKCgoKUgqaCgpQABxCCgoIABxCigoKUgoKClJSUgoKUgoCCtoKCgoKCgpSUgoKCgoKkgoKCgoKk3KaCgoKUqJKCgIK2qqKCgqYACwiSgoKClLS0uAAIEoKCppSCgoKmgoKCgoKUgIKkgIKklKyygoKClICCpIKClKaCgriCgoKUgJS2goKmgpSUgrissoKmgoKCgoKouoKCuKyygoKAgrY=", "612-640:1;641-663:2")]
+[assembly: go.GoPositionMap("debug/macho/macho.go", "macho.cs", "ACpi7oCigAAOIAAIEoCigAAPIgAIEoCigADZAboDgoKCgpSm")]
 [assembly: go.GoPositionMap("debug/macho/reloctype.go", "reloctype.cs", "ABEogAAPIoAADyKAABAkgA==")]
 [assembly: go.GoPositionMap("debug/macho/reloctype_string.go", "reloctype_string.cs", "/oaigoKCgoLKlIKClKSGooKCgoKCgoKCgsqUgoKUpIaigoKCgoKCgoKCypSCgpSkhqKCgoKCgoKCgoKCypSCgpQ=")]
 // </GoSourcePositionMaps>

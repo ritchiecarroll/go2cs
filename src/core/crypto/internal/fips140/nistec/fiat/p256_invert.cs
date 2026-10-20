@@ -32,6 +32,7 @@ public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> 
     ж<P256Element> z = @new<P256Element>().Set(Ꮡe);
     ж<P256Element> t0 = @new<P256Element>();
     ж<P256Element> t1 = @new<P256Element>();
+
     z.Square(Ꮡx);
     z.Mul(Ꮡx, z);
     z.Square(z);
@@ -77,6 +78,7 @@ public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> 
         z.Square(z);
     }
     z.Mul(Ꮡx, z);
+
     return Ꮡe.Set(z);
 }
 

@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -32,7 +31,7 @@ using static go.text.scanner_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/scanner/scanner_test.go", "scanner_test.cs", "ABYssoKCgpSUpoKCgoKCgoKUlIK4AAoWgoIACxYAjwG2AoKCgpSmooKUgpSCgqaCgsqigoKCuIKCgoKmpqKCgoKCgoKClJSmgoIACAaCgoKCgoKmgoKCgoKCgoK4ooKCgoKCgoKUgpSClIKCpoK4ooKCgoKCgoKClJSClIK4goKCgoKCgpSUgriigriCgoIACQaCgriGgoKCgoKCgoKCgqaCgoKCgoKCgoKCgoKCgoKCgoKCgriCgpSCgpSChIKCgoKCuIKCgoKUgIKkgpSmgoKUgpSCABEIgoKChIKChIKChIKChIKEgoKCgoKCgoKEgoKCgoLsgqaCgoKCgoCCpKaCgpSCuIKCyqKAgqSCpqKCgoCCgoK25rSCgoKWgoKUgpSCqIKClIKUgqiCgoKCgoKCgoKCgoKCgoKUgpSCqIKCgoKCgoKCgoKCgpSClILcgoLmgpaEgoKWgoKWgriCloSCgpaCgpaC6KKCgoKCgqYACAiCAG6KAoKCgoKogoKCgoKClIKmgrqAggAKCoIABxaCgsqigoKCgoCkgpSkAAwKgoKChIKCgoKWgoKC", "296-301:1;395-397:1;458-469:1;530-537:1;704-710:1;851-855:1;920-920:1")]
+[assembly: go.GoPositionMap("text/scanner/scanner_test.go", "scanner_test.cs", "ABYssoKCgpSUpoKCgoKCgoKUlIK4AAoWgoIAChYAkAG2AoKCgpSmooKUgpSCgqaCgsqigoKCuIKCgoKmpqKCgoKCgoKClJSmgoIACAaCgoKCgoKmgoKCgoKCgoK4ooKCgoKCgoKUgpSClIKCpoK4goKCgoKCgoKClJSClIK4goKCgoKCgpSUgriCgriCgoIACQaCgriGgoKCgoKCgoKCgqaCgoKCgoKCgoKCgoKCgoKCgoKCgriCgpSCgpSClIKCgoKCuIKCgoKUgIKkgpSmgoKUgpSCABEIgoKClIKClIKClIKClIKUgoKCgoKCgoKUgoKCgoLsgqaCgoKCgoCCpKaCgpSCuIKCyqKAgqSCpqKCgoCCgoK25pSCgoKmgoKUgpSCuIKClIKUgriCgoKCgoKCgoKCgoKCgoKUgpSCuIKCgoKCgoKCgoKCgpSClILcgoLmgqaUgoKmgoKmgriCppSCgqaCgqaC6IKCgoKCgqYACAiCAHOKAoKCgoK4goKCgoKClIKmgsqAggAKCoIABxaCgsqigoKCgoCkgpSkAAsKgoKClIKCgoKmgoKC", "296-301:1;395-397:1;458-469:1;530-537:1;704-710:1;851-855:1;920-920:1")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

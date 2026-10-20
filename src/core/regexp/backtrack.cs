@@ -81,11 +81,13 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
     ref var prog = ref Ꮡprog.DerefOrNull();
 
     b.end = end;
+
     if (cap(b.jobs) == 0){
         b.jobs = new slice<job>(0, 256);
     } else {
         b.jobs = b.jobs[..0];
     }
+
     nint visitedSize = (len(prog.Inst) * (end + 1) + (nint)visitedBits - 1) / (nint)visitedBits;
     if (cap(b.visited) < visitedSize){
         b.visited = new slice<uint32>(visitedSize, maxBacktrackVector / visitedBits);
@@ -93,6 +95,7 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
         b.visited = b.visited.slice(0, visitedSize);
         builtin.clear(b.visited); // set to 0
     }
+
     if (cap(b.cap) < ncap){
         b.cap = new slice<nint>(ncap);
     } else {
@@ -101,6 +104,7 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
     foreach (var (i, _) in b.cap) {
         b.cap[i] = -1;
     }
+
     if (cap(b.matchcap) < ncap){
         b.matchcap = new slice<nint>(ncap);
     } else {
@@ -115,10 +119,10 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
 // been visited yet.
 internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) {
     nuint n = (nuint)((nint)pc * (b.end + 1) + pos);
-    if ((uint32)(b.visited[n / (nuint)visitedBits] & (((uint32)1 << (int)(((nuint)(n & (nuint)(visitedBits - 1))))))) != 0) {
+    if ((b.visited[n / (nuint)visitedBits] & ((uint32)1 << (int)(n & (nuint)(visitedBits - 1)))) != 0) {
         return false;
     }
-    b.visited[n / (nuint)visitedBits] |= (uint32)(((uint32)1 << (int)(((nuint)(n & (nuint)(visitedBits - 1))))));
+    b.visited[n / (nuint)visitedBits] |= (uint32)(((uint32)1 << (int)(n & (nuint)(visitedBits - 1))));
     return true;
 }
 
@@ -140,6 +144,7 @@ internal static bool tryBacktrack(this ж<Regexp> Ꮡre, ж<bitState> Ꮡb, inpu
     ref var b = ref Ꮡb.DerefOrNull();
 
     var longest = re.longest;
+
     b.push(Ꮡre, pc, pos, false);
     while (len(b.jobs) > 0) {
         nint l = len(b.jobs) - 1;
@@ -148,6 +153,7 @@ internal static bool tryBacktrack(this ж<Regexp> Ꮡre, ж<bitState> Ꮡb, inpu
         nint posΔ1 = b.jobs[l].pos;
         var arg = b.jobs[l].arg;
         b.jobs = b.jobs.slice(0, l);
+
         // Optimization: rather than push and pop,
         // code that is going to Push and continue
         // the loop simply updates ip, p, and arg
@@ -162,20 +168,21 @@ CheckAndLoop:
         }
 Skip:
         var inst = Ꮡ((~re.prog).Inst, pcΔ1);
+
         var exprᴛ1 = (~inst).Op;
         if (exprᴛ1 == syntax.InstFail) {
             throw panic("unexpected InstFail");
         }
         else if (exprᴛ1 == syntax.InstAlt) {
+            // Cannot just
+            //   b.push(inst.Out, pos, false)
+            //   b.push(inst.Arg, pos, false)
+            // If during the processing of inst.Out, we encounter
+            // inst.Arg via another path, we want to process it then.
+            // Pushing it here will inhibit that. Instead, re-push
+            // inst with arg==true as a reminder to push inst.Arg out
+            // later.
             if (arg){
-                // Cannot just
-                //   b.push(inst.Out, pos, false)
-                //   b.push(inst.Arg, pos, false)
-                // If during the processing of inst.Out, we encounter
-                // inst.Arg via another path, we want to process it then.
-                // Pushing it here will inhibit that. Instead, re-push
-                // inst with arg==true as a reminder to push inst.Arg out
-                // later.
                 // Finished inst.Out; try inst.Arg.
                 arg = false;
                 pcΔ1 = inst.Value.Arg;
@@ -187,18 +194,17 @@ Skip:
             }
         }
         else if (exprᴛ1 == syntax.InstAltMatch) {
+            // One opcode consumes runes; the other leads to match.
             var exprᴛ2 = (~re.prog).Inst[(~inst).Out].Op;
             if (exprᴛ2 == syntax.InstRune || exprᴛ2 == syntax.InstRune1 || exprᴛ2 == syntax.InstRuneAny || exprᴛ2 == syntax.InstRuneAnyNotNL) {
-                b.push(Ꮡre, // One opcode consumes runes; the other leads to match.
- // inst.Arg is the match.
- (~inst).Arg, posΔ1, false);
+                // inst.Arg is the match.
+                b.push(Ꮡre, (~inst).Arg, posΔ1, false);
                 pcΔ1 = inst.Value.Arg;
                 posΔ1 = b.end;
                 goto CheckAndLoop;
             }
-
-            b.push(Ꮡre, // inst.Out is the match - non-greedy
- (~inst).Out, b.end, false);
+            // inst.Out is the match - non-greedy
+            b.push(Ꮡre, (~inst).Out, b.end, false);
             pcΔ1 = inst.Value.Out;
             goto CheckAndLoop;
         }
@@ -255,7 +261,7 @@ Skip:
         }
         else if (exprᴛ1 == syntax.InstEmptyWidth) {
             var flag = i.context(posΔ1);
-            if (!flag.match(((syntax.EmptyOp)(uint8)(~inst).Arg))) {
+            if (!flag.match((syntax.EmptyOp)(uint8)(~inst).Arg)) {
                 continue;
             }
             pcΔ1 = inst.Value.Out;
@@ -266,15 +272,16 @@ Skip:
             goto CheckAndLoop;
         }
         else if (exprᴛ1 == syntax.InstMatch) {
+            // We found a match. If the caller doesn't care
+            // where the match is, no point going further.
             if (len(b.cap) == 0) {
-                // We found a match. If the caller doesn't care
-                // where the match is, no point going further.
                 return true;
             }
+
+            // Record best match so far.
+            // Only need to check end point, because this entire
+            // call is only considering one start position.
             if (len(b.cap) > 1) {
-                // Record best match so far.
-                // Only need to check end point, because this entire
-                // call is only considering one start position.
                 b.cap[1] = posΔ1;
             }
             {
@@ -282,22 +289,25 @@ Skip:
                     copy(b.matchcap, b.cap);
                 }
             }
+
+            // If going for first match, we're done.
             if (!longest) {
-                // If going for first match, we're done.
                 return true;
             }
+
+            // If we used the entire text, no longer match is possible.
             if (posΔ1 == b.end) {
-                // If we used the entire text, no longer match is possible.
                 return true;
             }
+
+            // Otherwise, continue on in hope of a longer match.
             continue;
         }
         else { /* default: */
             throw panic("bad inst");
         }
-
     }
-    // Otherwise, continue on in hope of a longer match.
+
     return longest && len(b.matchcap) > 1 && b.matchcap[1] >= 0;
 }
 
@@ -306,17 +316,18 @@ internal static slice<nint> backtrack(this ж<Regexp> Ꮡre, slice<byte> ib, @st
     ref var re = ref Ꮡre.DerefOrNull();
 
     var startCond = re.cond;
-    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) {
-        // impossible
+    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) { // impossible
         return default!;
     }
     if ((syntax.EmptyOp)(startCond & syntax.EmptyBeginText) != 0 && pos != 0) {
         // Anchored match, past beginning of text.
         return default!;
     }
+
     var b = newBitState();
     var (i, end) = b.of(bitState.Ꮡinputs).init(default!, ib, @is);
     b.reset(re.prog, end, ncap);
+
     // Anchored search must start at the beginning of the input
     if ((syntax.EmptyOp)(startCond & syntax.EmptyBeginText) != 0){
         if (len((~b).cap) > 0) {
@@ -344,6 +355,7 @@ internal static slice<nint> backtrack(this ж<Regexp> Ꮡre, slice<byte> ib, @st
                 }
                 pos += advance;
             }
+
             if (len((~b).cap) > 0) {
                 b.Value.cap[0] = pos;
             }
@@ -356,6 +368,7 @@ internal static slice<nint> backtrack(this ж<Regexp> Ꮡre, slice<byte> ib, @st
         freeBitState(b);
         return default!;
     }
+
 Match:
     dstCap = appendꓸꓸꓸ(dstCap, (~b).matchcap);
     freeBitState(b);

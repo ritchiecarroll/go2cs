@@ -72,20 +72,23 @@ internal static readonly @string bbigˢ = "bbig"u8;
 public static void TestXGlobal(ж<testing.T> Ꮡt) {
     testFiles(Ꮡt, global, testdataHelloTxtˢ, helloWorldˢ);
     testString(Ꮡt, concurrency, concurrencyˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass), glassˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass, glassˢ, iCanEatGlassAndItDoesnTˢ);
     testString(Ꮡt, concurrency2, concurrency2ˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass2), glass2ˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass2, glass2ˢ, iCanEatGlassAndItDoesnTˢ);
+
     var (big, err) = os.ReadFile(testdataAsciiTxtˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    testString(Ꮡt, sbig, sbigˢ, ((@string)big));
-    testString(Ꮡt, sbig2, sbig2ˢ, ((@string)big));
-    testString(Ꮡt, ((@string)bbig), bbigˢ, ((@string)big));
-    testString(Ꮡt, ((@string)bbig2), bbigˢ, ((@string)big));
+    testString(Ꮡt, sbig, sbigˢ, (@string)big);
+    testString(Ꮡt, sbig2, sbig2ˢ, (@string)big);
+    testString(Ꮡt, (@string)bbig, bbigˢ, (@string)big);
+    testString(Ꮡt, (@string)bbig2, bbigˢ, (@string)big);
+
     if (Ꮡt.Failed()) {
         return;
     }
+
     // Could check &glass[0] == &glass2[0] but also want to make sure write does not fault
     // (data must not be in read-only memory).
     var old = glass[0];
@@ -94,6 +97,7 @@ public static void TestXGlobal(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("glass and glass2 do not share storage"u8);
     }
     glass[0] = old;
+
     // Could check &bbig[0] == &bbig2[0] but also want to make sure write does not fault
     // (data must not be in read-only memory).
     old = bbig[0];

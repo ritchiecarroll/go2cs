@@ -18,17 +18,11 @@ partial class cookiejar_package {
 // All computation is done with int32s, so that overflow behavior is identical
 // regardless of whether int is 32-bit or 64-bit.
 internal const int32 @base = 36;
-
 internal const int32 damp = 700;
-
 internal const int32 initialBias = 72;
-
 internal const int32 initialN = 128;
-
 internal const int32 skew = 38;
-
 internal const int32 tmax = 26;
-
 internal const int32 tmin = 1;
 
 // encode encodes a string as specified in section 6.3 and prepends prefix to
@@ -37,6 +31,8 @@ internal const int32 tmin = 1;
 // The "while h < length(input)" line in the specification becomes "for
 // remaining != 0" in the Go code, because len(s) in Go is in bytes, not runes.
 internal static (@string, error) encode(@string prefix, @string s) {
+    var outputᴷ = new stackAppend<byte>();
+
     var output = new slice<byte>(len(prefix), len(prefix) + 1 + 2 * len(s));
     copy(output, prefix);
     var (delta, n, bias) = ((int32)0, initialN, initialBias);
@@ -44,7 +40,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
     foreach (var (_, r) in s) {
         if (r < utf8.RuneSelf){
             b++;
-            output = append(output, (byte)r);
+            output = append(outputᴷ, output, (byte)r);
         } else {
             remaining++;
         }
@@ -100,7 +96,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
         delta++;
         n++;
     }
-    return (((@string)output), default!);
+    return ((@string)output, default!);
 }
 
 internal static byte encodeDigit(int32 digit) {
@@ -111,7 +107,6 @@ internal static byte encodeDigit(int32 digit) {
     case {} when 26 <= digit && digit < 36: {
         return (byte)(digit + ((rune)'0' - 26));
     }}
-
     throw panic("cookiejar: internal error in punycode encoding");
 }
 

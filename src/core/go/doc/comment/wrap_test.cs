@@ -27,6 +27,7 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
     }
     Ꮡt.Logf("-wrapseed=%#x\n"u8, wrapSeed.Value);
     var r = rand.New(rand.NewSource(wrapSeed.Value));
+
     // Generate words of random length.
     @string s = cdefghijklmnopqrstuvwxyzˢ;
     nint sN = utf8.RuneCountInString(s);
@@ -41,6 +42,7 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
         }
         words = append(words, s.slice(0, n));
     }
+
     for (nint nᴛ1 = 1; nᴛ1 <= len(words) && !Ꮡt.Failed(); nᴛ1++) {
         var n = nᴛ1;
         var wordsʗ1 = words;
@@ -52,6 +54,7 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
                 var wordsʗ2 = wordsΔ1;
                 tΔ1.Run(fmt.Sprint(maxˢ, max), (ж<testing.T> tΔ2) => {
                     var seq = wrap(wordsʗ2, max);
+
                     // Compute score for seq.
                     nint start = 0;
                     var score = (int64)0;
@@ -73,9 +76,9 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
                             size += 1 + utf8.RuneCountInString(sΔ1);
                         }
                         if (nΔ1 - start == 1 && size >= max){
+                            // no score
                         } else 
                         if (size > max){
-                            // no score
                             tΔ2.Fatalf("wrap used overlong line %d:%d: %v"u8, start, nΔ1, wordsʗ2.slice(start, nΔ1));
                         } else 
                         if (nΔ1 != len(wordsʗ2)) {
@@ -86,6 +89,7 @@ public static void TestWrap(ж<testing.T> Ꮡt) {
                     if (start != len(wordsʗ2)) {
                         tΔ2.Fatalf("wrap seq does not use all words (%d < %d): %v"u8, start, len(wordsʗ2), seq);
                     }
+
                     // Check that score matches slow reference implementation.
                     var (slowSeq, slowScore) = wrapSlow(wordsʗ2, max);
                     if (score != slowScore) {
@@ -136,6 +140,7 @@ internal static (slice<nint> seq, int64 score) wrapSlow(slice<@string> words, ni
             }
         }
     }
+
     // Recover least weight sequence from bestleft.
     nint n = 1;
     for (nint m = len(words); m > 0; m = bestleft[m]) {

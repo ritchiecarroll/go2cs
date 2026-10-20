@@ -10,6 +10,7 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(stackmap))]
 partial class runtime_package {
 
 // A stkframe holds information about a single physical stack frame.
@@ -104,12 +105,13 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this 
     // Extract argument bitmaps for reflect stubs from the calls they made to reflect.
     var exprᴛ1 = funcname(f);
     if (exprᴛ1 == "reflect.makeFuncStub"u8 || exprᴛ1 == "reflect.methodValueCall"u8) {
+        // These take a *reflect.methodValue as their
+        // context register and immediately save it to 0(SP).
+        // Get the methodValue from 0(SP).
         var arg0 = frame.sp + (uintptr)sys.MinFrameSize;
+
         var minSP = frame.fp;
         if (!usesLR) {
-            // These take a *reflect.methodValue as their
-            // context register and immediately save it to 0(SP).
-            // Get the methodValue from 0(SP).
             // The CALL itself pushes a word.
             // Undo that adjustment.
             minSP -= goarch.PtrSize;
@@ -127,18 +129,18 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this 
             // also know its argument map is
             // empty.
             if (frame.pc != f.entry()) {
-                print((@string)"runtime: confused by "u8, funcname(f), (@string)": no frame (sp="u8, ((Δhex)(uint64)frame.sp), (@string)" fp="u8, ((Δhex)(uint64)frame.fp), (@string)") at entry+"u8, ((Δhex)(uint64)(frame.pc - f.entry())), (@string)"\n"u8);
+                print((@string)"runtime: confused by "u8, funcname(f), (@string)": no frame (sp="u8, (Δhex)(uint64)frame.sp, (@string)" fp="u8, (Δhex)(uint64)frame.fp, (@string)") at entry+"u8, (Δhex)(uint64)(frame.pc - f.entry()), (@string)"\n"u8);
                 @throw(reflectMismatchˢ);
             }
             return (new bitvector(nil), false); // No locals, so also no stack objects
         }
         hasReflectStackObj = true;
         var mv = ~(ж<ж<reflectMethodValue>>)(uintptr)((@unsafe.Pointer)arg0);
+        // Figure out whether the return values are valid.
+        // Reflect will update this value after it copies
+        // in the return values.
         var retValid = ~(ж<bool>)(uintptr)((@unsafe.Pointer)(arg0 + (uintptr)(4 * goarch.PtrSize)));
         if ((~mv).fn != f.entry()) {
-            // Figure out whether the return values are valid.
-            // Reflect will update this value after it copies
-            // in the return values.
             print((@string)"runtime: confused by "u8, funcname(f), (@string)"\n"u8);
             @throw(reflectMismatchˢ);
         }
@@ -152,7 +154,6 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this 
             }
         }
     }
-
     return (argMap, hasReflectStackObj);
 }
 
@@ -172,6 +173,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // Frame is dead. Return empty bitvectors.
         return (locals, args, objs);
     }
+
     var f = frame.fn;
     var pcdata = (int32)(-1);
     if (targetpc != f.entry()) {
@@ -188,6 +190,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // at the function prologue, assume so and hope for the best.
         pcdata = 0;
     }
+
     // Local variables.
     var size = frame.varp - frame.sp;
     uintptr minsize = default!;
@@ -198,30 +201,30 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
     else { /* default: */
         minsize = sys.MinFrameSize;
     }
-
     if (size > minsize) {
         var stackid = pcdata;
         var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
-        if (stkmap == nil || (~stkmap).n <= 0) {
-            print((@string)"runtime: frame "u8, funcname(f), (@string)" untyped locals "u8, ((Δhex)(uint64)(frame.varp - size)), (@string)"+"u8, ((Δhex)(uint64)size), (@string)"\n"u8);
+        if (stkmap == nil || stkmap.n <= 0) {
+            print((@string)"runtime: frame "u8, funcname(f), (@string)" untyped locals "u8, (Δhex)(uint64)(frame.varp - size), (@string)"+"u8, (Δhex)(uint64)size, (@string)"\n"u8);
             @throw(missingStackmapˢ);
         }
         // If nbit == 0, there's no work to do.
-        if ((~stkmap).nbit > 0){
-            if (stackid < 0 || stackid >= (~stkmap).n) {
+        if (stkmap.nbit > 0){
+            if (stackid < 0 || stackid >= stkmap.n) {
                 // don't know where we are
-                print((@string)"runtime: pcdata is "u8, stackid, (@string)" and "u8, (~stkmap).n, (@string)" locals stack map entries for "u8, funcname(f), (@string)" (targetpc="u8, ((Δhex)(uint64)targetpc), (@string)")\n"u8);
+                print((@string)"runtime: pcdata is "u8, stackid, (@string)" and "u8, stkmap.n, (@string)" locals stack map entries for "u8, funcname(f), (@string)" (targetpc="u8, (Δhex)(uint64)targetpc, (@string)")\n"u8);
                 @throw(badSymbolTableˢ);
             }
             locals = stackmapdata(stkmap, stackid);
             if (stackDebug >= 3 && debug) {
-                print((@string)"      locals "u8, stackid, (@string)"/"u8, (~stkmap).n, (@string)" "u8, locals.n, (@string)" words "u8, locals.bytedata.OrTypedNil(), (@string)"\n"u8);
+                print((@string)"      locals "u8, stackid, (@string)"/"u8, stkmap.n, (@string)" "u8, locals.n, (@string)" words "u8, locals.bytedata.OrTypedNil(), (@string)"\n"u8);
             }
         } else 
         if (stackDebug >= 3 && debug) {
             print((@string)"      no locals to adjust\n"u8);
         }
     }
+
     // Arguments. First fetch frame size and special-case argument maps.
     bool isReflect = default!;
     (args, isReflect) = frame.argMapInternal();
@@ -229,23 +232,24 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // Non-empty argument frame, but not a special map.
         // Fetch the argument map at pcdata.
         var stackmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
-        if (stackmap == nil || (~stackmap).n <= 0) {
-            print((@string)"runtime: frame "u8, funcname(f), (@string)" untyped args "u8, ((Δhex)(uint64)frame.argp), (@string)"+"u8, ((Δhex)(uint64)(args.n * (int32)goarch.PtrSize)), (@string)"\n"u8);
+        if (stackmap == nil || stackmap.n <= 0) {
+            print((@string)"runtime: frame "u8, funcname(f), (@string)" untyped args "u8, (Δhex)(uint64)frame.argp, (@string)"+"u8, (Δhex)(uint64)(args.n * (int32)goarch.PtrSize), (@string)"\n"u8);
             @throw(missingStackmapˢ);
         }
-        if (pcdata < 0 || pcdata >= (~stackmap).n) {
+        if (pcdata < 0 || pcdata >= stackmap.n) {
             // don't know where we are
-            print((@string)"runtime: pcdata is "u8, pcdata, (@string)" and "u8, (~stackmap).n, (@string)" args stack map entries for "u8, funcname(f), (@string)" (targetpc="u8, ((Δhex)(uint64)targetpc), (@string)")\n"u8);
+            print((@string)"runtime: pcdata is "u8, pcdata, (@string)" and "u8, stackmap.n, (@string)" args stack map entries for "u8, funcname(f), (@string)" (targetpc="u8, (Δhex)(uint64)targetpc, (@string)")\n"u8);
             @throw(badSymbolTableˢ);
         }
-        if ((~stackmap).nbit == 0){
+        if (stackmap.nbit == 0){
             args.n = 0;
         } else {
             args = stackmapdata(stackmap, pcdata);
         }
     }
+
     // stack objects.
-    if ((GOARCH == "amd64"u8 || GOARCH == "arm64"u8 || GOARCH == "loong64"u8 || GOARCH == "ppc64"u8 || GOARCH == "ppc64le"u8 || GOARCH == "riscv64"u8) && /* unsafe.Sizeof(abi.RegArgs{}) */ (uintptr)272 > 0 && isReflect){
+    if ((GOARCH == "amd64"u8 || GOARCH == "arm64"u8 || GOARCH == "loong64"u8 || GOARCH == "ppc64"u8 || GOARCH == "ppc64le"u8 || GOARCH == "riscv64"u8 || GOARCH == "s390x"u8) && /* unsafe.Sizeof(abi.RegArgs{}) */ (uintptr)272 > 0 && isReflect){
         // For reflect.makeFuncStub and reflect.methodValueCall,
         // we need to fake the stack object record.
         // These frames contain an internal/abi.RegArgs at a hard-coded offset.
@@ -258,18 +262,19 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
             Δp = (uintptr)add(Δp, goarch.PtrSize);
             var r0 = (ж<stackObjectRecord>)(uintptr)(noescape(Δp));
             objs = @unsafe.Slice(r0, (nint)n);
+            // Note: the noescape above is needed to keep
+            // getStackMap from "leaking param content:
+            // frame".  That leak propagates up to getgcmask, then
+            // GCMask, then verifyGCInfo, which converts the stack
+            // gcinfo tests into heap gcinfo tests :(
         }
     }
-    // Note: the noescape above is needed to keep
-    // getStackMap from "leaking param content:
-    // frame".  That leak propagates up to getgcmask, then
-    // GCMask, then verifyGCInfo, which converts the stack
-    // gcinfo tests into heap gcinfo tests :(
+
     return (locals, args, objs);
 }
 
 internal static ж<array<stackObjectRecord>> ᏑmethodValueCallFrameObjs = new StandardBox<array<stackObjectRecord>>(new array<stackObjectRecord>(1));
-internal static ref array<stackObjectRecord> methodValueCallFrameObjs => ref ᏑmethodValueCallFrameObjs.Value;    // initialized in stackobjectinit
+internal static ref array<stackObjectRecord> methodValueCallFrameObjs => ref ᏑmethodValueCallFrameObjs.Value;    // initialized in stkobjinit
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string methodValueCallFrameObjsˢ = "methodValueCallFrameObjs is not in a module"u8;
@@ -284,7 +289,7 @@ internal static void stkobjinit() {
     var ptr = (uintptr)ᏑmethodValueCallFrameObjs.at<stackObjectRecord>(0);
     ж<moduledata> mod = default!;
     for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
-        if ((~datap).gofunc <= ptr && ptr < (~datap).end) {
+        if ((~datap).noptrbss <= ptr && ptr < (~datap).enoptrbss) {
             mod = datap;
             break;
         }
@@ -294,7 +299,6 @@ internal static void stkobjinit() {
     }
     methodValueCallFrameObjs[0] = new stackObjectRecord(
         off: -(int32)alignUp((~abiRegArgsType).Size_, 8), // It's always the highest address local.
-
         size: (int32)(~abiRegArgsType).Size_,
         ptrBytes: (int32)(~abiRegArgsType).PtrBytes,
         gcdataoff: (uint32)((uintptr)getGCMask(abiRegArgsType) - (~mod).rodata)

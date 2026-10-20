@@ -15,6 +15,7 @@ internal static void setReadMsgCloseOnExec(slice<byte> oob) {
     if (err != default!) {
         return;
     }
+
     foreach (var (_, vᴛ1) in scms) {
         ref var scm = ref heap(new syscall.SocketControlMessage(), out var Ꮡscm);
         scm = vᴛ1;

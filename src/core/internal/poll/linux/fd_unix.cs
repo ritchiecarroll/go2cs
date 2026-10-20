@@ -4,7 +4,7 @@
 //go:build unix || (js && wasm) || wasip1
 namespace go.@internal;
 
-using itoa = go.@internal.itoa_package;
+using strconv = go.@internal.strconv_package;
 using unix = go.@internal.syscall.unix_package;
 using io = io_package;
 using atomic = go.sync.atomic_package;
@@ -23,7 +23,7 @@ partial struct FD {
     // System file descriptor. Immutable until Close.
     public nint Sysfd;
     // Platform dependent state of the file descriptor.
-    public partial ref SysFile SysFile { get; }
+    /*embed*/ public SysFile SysFile;
     // I/O poller.
     internal pollDesc pd;
     // Semaphore signaled when file is closed.
@@ -49,6 +49,7 @@ public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.SysFile.init();
+
     // We don't actually care about the various network types.
     if (net == "file"u8) {
         fd.isFile = true;
@@ -74,7 +75,9 @@ internal static error destroy(this ж<FD> Ꮡfd) {
     // Poller may want to unregister fd in readiness notification mechanism,
     // so this must be executed before CloseFunc.
     fd.pd.close();
+
     var err = fd.SysFile.destroy(fd.Sysfd);
+
     fd.Sysfd = -1;
     runtime_Semrelease(Ꮡfd.of(FD.Ꮡcsema));
     return err;
@@ -88,15 +91,18 @@ public static error Close(this ж<FD> Ꮡfd) {
     if (!fd.fdmu.increfAndClose()) {
         return errClosing(fd.isFile);
     }
+
     // Unblock any I/O.  Once it all unblocks and returns,
     // so that it cannot be referring to fd.sysfd anymore,
     // the final decref will close fd.sysfd. This should happen
     // fairly quickly, since all the I/O is non-blocking, and any
     // attempts to block in the pollDesc will return errClosing(fd.isFile).
     fd.pd.evict();
+
     // The call to decref will call destroy if there are no other
     // references.
     var err = Ꮡfd.decref();
+
     // Wait until the descriptor is closed. If this was the only
     // reference, it is already closed. Only wait if the file has
     // not been set to blocking mode, as otherwise any current I/O
@@ -106,6 +112,7 @@ public static error Close(this ж<FD> Ꮡfd) {
     if (fd.isBlocking == 0) {
         runtime_Semacquire(Ꮡfd.of(FD.Ꮡcsema));
     }
+
     return err;
 }
 
@@ -203,14 +210,8 @@ public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> p, int64 off) {
     if (fd.IsStream && len(p) > maxRW) {
         p = p[..(int)(maxRW)];
     }
-    nint n = default!;
-    error err = default!;
-    while (ᐧ) {
-        (n, err) = Δsyscall.Pread(fd.Sysfd, p, off);
-        if (!AreEqual(err, Δsyscall.EINTR)) {
-            break;
-        }
-    }
+    var pʗ1 = p;
+    var (n, err) = ignoringEINTR2((nint, error) () => Δsyscall.Pread(Ꮡfd.Value.Sysfd, pʗ1, off));
     if (err != default!) {
         n = 0;
     }
@@ -497,7 +498,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) {
                     // If we don't check this we will panic
                     // with slice bounds out of range.
                     // Use a more informative panic.
-                    throw panic("invalid return from write: got " + itoa.Itoa(n) + " from a write of " + itoa.Itoa(max - nn));
+                    throw panic("invalid return from write: got " + strconv.Itoa(n) + " from a write of " + strconv.Itoa(max - nn));
                 }
                 nn += n;
             }
@@ -820,6 +821,7 @@ public static (nint, Δsyscall.Sockaddr, @string, error) Accept(this ж<FD> Ꮡf
             }
         }
         ᒐd1 = true;
+
         {
             var err = fd.pd.prepareRead(fd.isFile); if (err != default!) {
                 return (-1, default!, "", err);
@@ -844,12 +846,11 @@ public static (nint, Δsyscall.Sockaddr, @string, error) Accept(this ж<FD> Ꮡf
                 }
             }
             else if (AreEqual(exprᴛ1, Δsyscall.ECONNABORTED)) {
+                // This means that a socket on the listen
+                // queue was closed before we Accept()ed it;
+                // it's a silly error, so try again.
                 continue;
             }
-
-            // This means that a socket on the listen
-            // queue was closed before we Accept()ed it;
-            // it's a silly error, so try again.
             return (-1, default!, errcall, err);
         }
     }
@@ -907,16 +908,15 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
         }
         var exprᴛ1 = err;
         if (AreEqual(exprᴛ1, Δsyscall.EINVAL) || AreEqual(exprᴛ1, Δsyscall.ENOSYS)) {
+            // Old kernel, or js/wasm (which returns
+            // ENOSYS). Fall back to the portable way from
+            // now on.
             ᏑdupCloexecUnsupported.Store(true);
         }
         else { /* default: */
             return (-1, fcntlˢ, err);
         }
-
     }
-    // Old kernel, or js/wasm (which returns
-    // ENOSYS). Fall back to the portable way from
-    // now on.
     return dupCloseOnExecOld(fd);
 }
 

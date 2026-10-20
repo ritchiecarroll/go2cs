@@ -25,15 +25,10 @@ partial struct PEMCipher /*num:nint*/;
 
 // Possible values for the EncryptPEMBlock encryption algorithm.
 internal static PEMCipher _ᴛ1ʗ => /* iota */ 0;
-
 public static PEMCipher PEMCipherDES => 1;
-
 public static PEMCipher PEMCipher3DES => 2;
-
 public static PEMCipher PEMCipherAES128 => 3;
-
 public static PEMCipher PEMCipherAES192 => 4;
-
 public static PEMCipher PEMCipherAES256 => 5;
 
 // rfc1423Algo holds a method for enciphering a PEM block.
@@ -88,6 +83,7 @@ internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, 
     var hash = md5.New();
     var @out = new slice<byte>(c.keySize);
     slice<byte> digest = default!;
+
     for (nint i = 0; i < builtin.len(@out); i += builtin.len(digest)) {
         hash.Reset();
         hash.Write(digest);
@@ -145,10 +141,12 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     if (!ok) {
         return (default!, errors.New(x509NoDekInfoHeaderInˢ));
     }
+
     (var mode, var hexIV, ok) = strings.Cut(dek, ","u8);
     if (!ok) {
         return (default!, errors.New(x509MalformedDekInfoˢ));
     }
+
     var ciph = cipherByName(mode);
     if (ciph == nil) {
         return (default!, errors.New(x509UnknownEncryptionˢ));
@@ -160,6 +158,7 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     if (builtin.len(iv) != (~ciph).blockSize) {
         return (default!, errors.New(x509IncorrectIvSizeˢ));
     }
+
     // Based on the OpenSSL implementation. The salt is the first 8 bytes
     // of the initialization vector.
     var key = (~ciph).deriveKey(password, iv[..8]);
@@ -167,12 +166,15 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     if (err != default!) {
         return (default!, err);
     }
+
     if (builtin.len(b.Bytes) % block.BlockSize() != 0) {
         return (default!, errors.New(x509EncryptedPemDataIsˢ));
     }
+
     var data = new slice<byte>(builtin.len(b.Bytes));
     var dec = cipher.NewCBCDecrypter(block, iv);
     dec.CryptBlocks(data, b.Bytes);
+
     // Blocks are padded using a scheme where the last n bytes of padding are all
     // equal to n. It can pad from 1 to blocksize bytes inclusive. See RFC 1423.
     // For example:
@@ -235,6 +237,7 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
         encrypted = append(encrypted, (byte)pad);
     }
     enc.CryptBlocks(encrypted, encrypted);
+
     return (Ꮡ(new pem.Block(
         Type: blockType,
         Headers: new map<@string, @string>{

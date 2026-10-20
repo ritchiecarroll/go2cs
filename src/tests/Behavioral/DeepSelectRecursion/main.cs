@@ -24,16 +24,15 @@ internal static nint rec(nint n) {
     return n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sumˢ = (@string)"sum:"u8;
-
 internal static void Main() {
     f(100);
+
     nint sum = 0;
     foreach (var (_, v) in sink.ΔRangeSnapshot()) {
         sum += v;
     }
-    fmt.Println(sumˢ, sum);
+
+    fmt.Println("sum:", sum);
 }
 
 } // end main_package

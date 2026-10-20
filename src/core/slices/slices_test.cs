@@ -20,7 +20,6 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class slices_test_package {
 
-
 partial struct equalIntTestsᴛ1 /*dyn*/ {
     internal slice<nint> s1, s2;
     internal bool want;
@@ -47,7 +46,6 @@ internal static slice<equalIntTestsᴛ1> equalIntTests = new equalIntTestsᴛ1[]
         false
     )
 }.slice();
-
 
 partial struct equalFloatTestsᴛ1 /*dyn*/ {
     internal slice<float64> s1, s2;
@@ -126,6 +124,7 @@ public static void TestEqualFunc(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var s1 = new nint[]{1, 2, 3}.slice();
     var s2 = new nint[]{2, 3, 4}.slice();
     if (EqualFunc<slice<nint>, slice<nint>, nint, nint>(s1, s1, offByOne)) {
@@ -134,11 +133,13 @@ public static void TestEqualFunc(ж<testing.T> Ꮡt) {
     if (!EqualFunc<slice<nint>, slice<nint>, nint, nint>(s1, s2, offByOne)) {
         Ꮡt.Errorf("EqualFunc(%v, %v, offByOne) = false, want true"u8, s1, s2);
     }
+
     var s3 = new @string[]{"a"u8, "b"u8, "c"u8}.slice();
     var s4 = new @string[]{"A"u8, "B"u8, "C"u8}.slice();
     if (!EqualFunc<slice<@string>, slice<@string>, @string, @string>(s3, s4, strings.EqualFold)) {
         Ꮡt.Errorf("EqualFunc(%v, %v, strings.EqualFold) = false, want true"u8, s3, s4);
     }
+
     var cmpIntString = (nint v1, @string v2) => ((@string)((rune)v1 - 1 + (rune)'a')) == v2;
     if (!EqualFunc(s1, s3, cmpIntString)) {
         Ꮡt.Errorf("EqualFunc(%v, %v, cmpIntString) = false, want true"u8, s1, s3);
@@ -161,7 +162,6 @@ public static void BenchmarkEqualFunc_Large(ж<testing.B> Ꮡb) {
         });
     }
 }
-
 
 partial struct compareIntTestsᴛ1 /*dyn*/ {
     internal slice<nint> s1, s2;
@@ -219,7 +219,6 @@ internal static slice<compareIntTestsᴛ1> compareIntTests = new compareIntTests
         +1
     )
 }.slice();
-
 
 partial struct compareFloatTestsᴛ1 /*dyn*/ {
     internal slice<float64> s1, s2;
@@ -299,6 +298,7 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     foreach (var (_, test) in compareIntTests) {
         {
             nint got = Compare<slice<nint>, nint>(test.s1, test.s2); if (got != test.want) {
@@ -345,6 +345,7 @@ public static void TestCompareFunc(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     foreach (var (_, test) in compareIntTests) {
         {
             nint got = CompareFunc<slice<nint>, slice<nint>, nint, nint>(test.s1, test.s2, cmp.Compare<nint>); if (got != test.want) {
@@ -359,6 +360,7 @@ public static void TestCompareFunc(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var s1 = new nint[]{1, 2, 3}.slice();
     var s2 = new nint[]{2, 3, 4}.slice();
     {
@@ -366,6 +368,7 @@ public static void TestCompareFunc(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("CompareFunc(%v, %v, offByOne) = %d, want 0"u8, s1, s2, got);
         }
     }
+
     var s3 = new @string[]{"a"u8, "b"u8, "c"u8}.slice();
     var s4 = new @string[]{"A"u8, "B"u8, "C"u8}.slice();
     {
@@ -373,20 +376,21 @@ public static void TestCompareFunc(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("CompareFunc(%v, %v, strings.Compare) = %d, want 1"u8, s3, s4, got);
         }
     }
+
     var compareLower = (@string v1, @string v2) => strings.Compare(strings.ToLower(v1), strings.ToLower(v2));
     {
         nint got = CompareFunc(s3, s4, compareLower); if (got != 0) {
             Ꮡt.Errorf("CompareFunc(%v, %v, compareLower) = %d, want 0"u8, s3, s4, got);
         }
     }
-    var cmpIntString = (nint v1, @string v2) => strings.Compare(((@string)((rune)v1 - 1 + (rune)'a')), v2);
+
+    var cmpIntString = (nint v1, @string v2) => strings.Compare((@string)((rune)v1 - 1 + (rune)'a'), v2);
     {
         nint got = CompareFunc(s1, s3, cmpIntString); if (got != 0) {
             Ꮡt.Errorf("CompareFunc(%v, %v, cmpIntString) = %d, want 0"u8, s1, s3, got);
         }
     }
 }
-
 
 partial struct indexTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
@@ -455,15 +459,16 @@ public static void TestIndexFunc(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var s1 = new @string[]{"hi"u8, "HI"u8}.slice();
     {
         nint got = IndexFunc(s1, equalToIndex<@string>(equal<@string>, (@string)"HI")); if (got != 1) {
-            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(equal[string], %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)(1));
+            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(equal[string], %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)1);
         }
     }
     {
         nint got = IndexFunc(s1, equalToIndex<@string>(strings.EqualFold, (@string)"HI")); if (got != 0) {
-            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(strings.EqualFold, %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)(0));
+            Ꮡt.Errorf("IndexFunc(%v, equalToIndex(strings.EqualFold, %q)) = %d, want %d"u8, s1, (@string)"HI"u8, got, (nint)0);
         }
     }
 }
@@ -505,6 +510,7 @@ public static void TestContainsFunc(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var s1 = new @string[]{"hi"u8, "HI"u8}.slice();
     {
         var got = ContainsFunc(s1, equalToIndex<@string>(equal<@string>, (@string)"HI")); if (got != true) {
@@ -522,7 +528,6 @@ public static void TestContainsFunc(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct insertTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
@@ -572,13 +577,14 @@ public static void TestInsert(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if (!testenv.OptimizationOff() && !race.Enabled && !asan.Enabled && !msan.Enabled) {
         // Allocations should be amortized.
         UntypedInt count = 50;
         var n = testing.AllocsPerRun(10, () => {
             var sΔ1 = new nint[]{1, 2, 3}.slice();
             for (nint i = 0; i < count; i++) {
-                sΔ1 = Insert(sΔ1, 0, (nint)(1));
+                sΔ1 = Insert(sΔ1, 0, (nint)1);
             }
         });
         if (n > /* count / 2 */ 25D) {
@@ -591,14 +597,10 @@ public static void TestInsertOverlap(ж<testing.T> Ꮡt) {
     UntypedInt N = 10;
     var a = new slice<nint>(N);
     var want = new slice<nint>(2 * N);
-    for (nint n = 0; n <= N; n++) {
-        // length
-        for (nint i = 0; i <= n; i++) {
-            // insertion point
-            for (nint x = 0; x <= N; x++) {
-                // start of inserted data
-                for (nint y = x; y <= N; y++) {
-                    // end of inserted data
+    for (nint n = 0; n <= N; n++) { // length
+        for (nint i = 0; i <= n; i++) { // insertion point
+            for (nint x = 0; x <= N; x++) { // start of inserted data
+                for (nint y = x; y <= N; y++) { // end of inserted data
                     for (nint k = 0; k < N; k++) {
                         a[k] = k;
                     }
@@ -626,13 +628,14 @@ internal partial struct TestInsertPanics_type /*dyn*/ {
 public static void TestInsertPanics(ж<testing.T> Ꮡt) {
     var a = new nint[]{}.array(3);
     var b = new nint[]{}.array(1);
-    foreach (var (_, vᴛ1) in new TestInsertPanics_type[]{ // There are no values.
-
+    foreach (var (_, vᴛ1) in new TestInsertPanics_type[]{
+        // There are no values.
         new("with negative index"u8, a.slice(0, 1, 1), -1, default!),
         new("with out-of-bounds index and > cap"u8, a.slice(0, 1, 1), 2, default!),
         new("with out-of-bounds index and = cap"u8, a.slice(0, 1, 2), 2, default!),
-        new("with out-of-bounds index and < cap"u8, a.slice(0, 1, 3), 2, default!), // There are values.
+        new("with out-of-bounds index and < cap"u8, a.slice(0, 1, 3), 2, default!),
 
+        // There are values.
         new("with negative index"u8, a.slice(0, 1, 1), -1, b[..]),
         new("with out-of-bounds index and > cap"u8, a.slice(0, 1, 1), 2, b[..]),
         new("with out-of-bounds index and = cap"u8, a.slice(0, 1, 2), 2, b[..]),
@@ -649,7 +652,6 @@ public static void TestInsertPanics(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct deleteTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
@@ -699,7 +701,6 @@ public static void TestDelete(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct deleteFuncTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
@@ -779,6 +780,7 @@ public static void TestDeletePanics(ж<testing.T> Ꮡt) {
     var s = new nint[]{0, 1, 2, 3, 4}.slice();
     s = s[0..2];
     _ = s[0..4]; // this is a valid slice of s
+
     foreach (var (_, vᴛ1) in new TestDeletePanics_type[]{
         new("with negative first index"u8, new nint[]{42}.slice(), -2, 1),
         new("with negative second index"u8, new nint[]{42}.slice(), 1, -1),
@@ -804,7 +806,9 @@ public static void TestDeletePanics(ж<testing.T> Ꮡt) {
 public static void TestDeleteClearTail(ж<testing.T> Ꮡt) {
     var mem = new ж<nint>[]{@new<nint>(), @new<nint>(), @new<nint>(), @new<nint>(), @new<nint>(), @new<nint>()}.slice();
     var s = mem[0..5]; // there is 1 element beyond len(s), within cap(s)
+
     s = Delete<slice<ж<nint>>, ж<nint>>(s, 2, 4);
+
     if (mem[3] != nil || mem[4] != nil) {
         // Check that potential memory leak is avoided
         Ꮡt.Errorf("Delete: want nil discarded elements, got %v, %v"u8, mem[3].OrTypedNil(), mem[4].OrTypedNil());
@@ -818,7 +822,9 @@ public static void TestDeleteFuncClearTail(ж<testing.T> Ꮡt) {
     var mem = new ж<nint>[]{@new<nint>(), @new<nint>(), @new<nint>(), @new<nint>(), @new<nint>(), @new<nint>()}.slice();
     (mem[2].Value, mem[3].Value) = (42, 42);
     var s = mem[0..5]; // there is 1 element beyond len(s), within cap(s)
+
     s = DeleteFunc(s, (ж<nint> i) => i != nil && i.Value == 42);
+
     if (mem[3] != nil || mem[4] != nil) {
         // Check that potential memory leak is avoided
         Ꮡt.Errorf("DeleteFunc: want nil discarded elements, got %v, %v"u8, mem[3].OrTypedNil(), mem[4].OrTypedNil());
@@ -850,7 +856,6 @@ public static void TestClone(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct compactTestsᴛ1 /*dyn*/ {
     internal @string name;
@@ -926,6 +931,7 @@ internal partial struct BenchmarkCompact_Large_Large /*[16]nint*/;
 
 public static void BenchmarkCompact_Large(ж<testing.B> Ꮡb) {
     const nint N = 1024;
+
     Ꮡb.Run(allDupˢ, (ж<testing.B> bΔ1) => {
         var ss = GoReflect.WithElemDims(new slice<BenchmarkCompact_Large_Large>(N), 16);
         bΔ1.ResetTimer();
@@ -954,6 +960,7 @@ public static void TestCompactFunc(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var s1 = new @string[]{"a"u8, "a"u8, "A"u8, "B"u8, "b"u8}.slice();
     var copy = Clone<slice<@string>, @string>(s1);
     var want = new @string[]{"a"u8, "B"u8}.slice();
@@ -976,12 +983,15 @@ public static void TestCompactClearTail(ж<testing.T> Ꮡt) {
     var mem = new ж<nint>[]{Ꮡone, Ꮡone, Ꮡtwo, Ꮡtwo, Ꮡthree, Ꮡfour}.slice();
     var s = mem[0..5]; // there is 1 element beyond len(s), within cap(s)
     var copy = Clone<slice<ж<nint>>, ж<nint>>(s);
+
     s = Compact<slice<ж<nint>>, ж<nint>>(s);
+
     {
         var want = new ж<nint>[]{Ꮡone, Ꮡtwo, Ꮡthree}.slice(); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
             Ꮡt.Errorf("Compact(%v) = %v, want %v"u8, copy, s, want);
         }
     }
+
     if (mem[3] != nil || mem[4] != nil) {
         // Check that potential memory leak is avoided
         Ꮡt.Errorf("Compact: want nil discarded elements, got %v, %v"u8, mem[3].OrTypedNil(), mem[4].OrTypedNil());
@@ -1007,17 +1017,20 @@ public static void TestCompactFuncClearTail(ж<testing.T> Ꮡt) {
     var mem = new ж<nint>[]{Ꮡa, Ꮡb, Ꮡc, Ꮡd, Ꮡe, Ꮡf}.slice();
     var s = mem[0..5]; // there is 1 element beyond len(s), within cap(s)
     var copy = Clone<slice<ж<nint>>, ж<nint>>(s);
+
     s = CompactFunc(s, (ж<nint> x, ж<nint> y) => {
         if (x == nil || y == nil) {
             return x == y;
         }
         return x.Value == y.Value;
     });
+
     {
         var want = new ж<nint>[]{Ꮡa, Ꮡc, Ꮡe}.slice(); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
             Ꮡt.Errorf("CompactFunc(%v) = %v, want %v"u8, copy, s, want);
         }
     }
+
     if (mem[3] != nil || mem[4] != nil) {
         // Check that potential memory leak is avoided
         Ꮡt.Errorf("CompactFunc: want nil discarded elements, got %v, %v"u8, mem[3].OrTypedNil(), mem[4].OrTypedNil());
@@ -1046,6 +1059,7 @@ public static void BenchmarkCompactFunc(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkCompactFunc_Large(ж<testing.B> Ꮡb) {
     const nint N = /* 1024 * 1024 */ 1048576;
+
     Ꮡb.Run(allDupˢ, (ж<testing.B> bΔ1) => {
         var ss = new slice<BenchmarkCompactFunc_Large_Element>(N);
         bΔ1.ResetTimer();
@@ -1067,6 +1081,7 @@ public static void BenchmarkCompactFunc_Large(ж<testing.B> Ꮡb) {
 
 public static void TestGrow(ж<testing.T> Ꮡt) {
     var s1 = new nint[]{1, 2, 3}.slice();
+
     var copy = Clone<slice<nint>, nint>(s1);
     var s2 = Grow<slice<nint>, nint>(copy, 1000);
     if (!Equal<slice<nint>, nint>(s1, s2)) {
@@ -1075,6 +1090,7 @@ public static void TestGrow(ж<testing.T> Ꮡt) {
     if (cap(s2) < 1000 + len(s1)) {
         Ꮡt.Errorf("after Grow(%v) cap = %d, want >= %d"u8, s1, cap(s2), 1000 + len(s1));
     }
+
     // Test mutation of elements between length and capacity.
     copy = Clone<slice<nint>, nint>(s1);
     var s3 = Grow<slice<nint>, nint>(copy[..1], 2)[..3];
@@ -1085,6 +1101,7 @@ public static void TestGrow(ж<testing.T> Ꮡt) {
     if (!Equal<slice<nint>, nint>(s1, s3)) {
         Ꮡt.Errorf("Grow should not mutate elements between length and capacity"u8);
     }
+
     // Test number of allocations.
     {
         var s2ʗ1 = s2;
@@ -1107,6 +1124,7 @@ public static void TestGrow(ж<testing.T> Ꮡt) {
             errorf("Grow should allocate once when given insufficient capacity; allocated %v times"u8, n);
         }
     }
+
     // Test for negative growth sizes.
     bool gotPanic = default!;
     var s1ʗ1 = s1;
@@ -1156,6 +1174,7 @@ public static void TestReverse(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Reverse(even) = %v, want %v"u8, even, want);
         }
     }
+
     var odd = new nint[]{3, 1, 4, 1, 5, 9, 2}.slice(); // len = 7
     Reverse<slice<nint>, nint>(odd);
     {
@@ -1163,6 +1182,7 @@ public static void TestReverse(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Reverse(odd) = %v, want %v"u8, odd, want);
         }
     }
+
     var words = strings.Fields(oneTwoThreeˢ);
     Reverse<slice<@string>, @string>(words);
     {
@@ -1170,6 +1190,7 @@ public static void TestReverse(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Reverse(words) = %v, want %v"u8, words, want);
         }
     }
+
     var singleton = new @string[]{"one"u8}.slice();
     Reverse<slice<@string>, @string>(singleton);
     {
@@ -1177,6 +1198,7 @@ public static void TestReverse(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Reverse(singleton) = %v, want %v"u8, singleton, want);
         }
     }
+
     Reverse<slice<@string>, @string>(default!);
 }
 
@@ -1199,7 +1221,6 @@ internal partial struct TestReplace_type /*dyn*/ {
 public static void TestReplace(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestReplace_type[]{
         new(), // all zero value
-
         new(
             s: new nint[]{1, 2, 3, 4}.slice(),
             v: new nint[]{5}.slice(),
@@ -1244,6 +1265,7 @@ public static void TestReplacePanics(ж<testing.T> Ꮡt) {
     var s = new nint[]{0, 1, 2, 3, 4}.slice();
     s = s[0..2];
     _ = s[0..4]; // this is a valid slice of s
+
     foreach (var (_, vᴛ1) in new TestReplacePanics_type[]{
         new("indexes out of order"u8, new nint[]{1, 2}.slice(), new nint[]{3}.slice(), 2, 1),
         new("large index"u8, new nint[]{1, 2}.slice(), new nint[]{3}.slice(), 1, 10),
@@ -1266,8 +1288,6 @@ public static void TestReplacePanics(ж<testing.T> Ꮡt) {
 }
 
 public static void TestReplaceGrow(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // When Replace needs to allocate a new slice, we want the original slice
     // to not be changed.
     ref var a = ref heap<nint>(out var Ꮡa);
@@ -1287,18 +1307,22 @@ public static void TestReplaceGrow(ж<testing.T> Ꮡt) {
     var s = mem[0..5]; // there is 1 element beyond len(s), within cap(s)
     var copy = Clone<slice<ж<nint>>, ж<nint>>(s);
     var original = s;
+
     // The new elements don't fit within cap(s), so Replace will allocate.
     ref var z = ref heap<nint>(out var Ꮡz);
     z = 99;
     s = Replace(s, 1, 3, Ꮡz, Ꮡz, Ꮡz, Ꮡz);
+
     {
         var want = new ж<nint>[]{Ꮡa, Ꮡz, Ꮡz, Ꮡz, Ꮡz, Ꮡd, Ꮡe}.slice(); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
             Ꮡt.Errorf("Replace(%v, 1, 3, %v, %v, %v, %v) = %v, want %v"u8, copy, Ꮡz, Ꮡz, Ꮡz, Ꮡz, s, want);
         }
     }
+
     if (!Equal<slice<ж<nint>>, ж<nint>>(original, copy)) {
         Ꮡt.Errorf("original slice has changed, got %v, want %v"u8, original, copy);
     }
+
     if (!Equal<slice<ж<nint>>, ж<nint>>(mem, memcopy)) {
         // Changing the original tail s[len(s):cap(s)] is unwanted
         Ꮡt.Errorf("original backing memory has changed, got %v, want %v"u8, mem, memcopy);
@@ -1321,16 +1345,19 @@ public static void TestReplaceClearTail(ж<testing.T> Ꮡt) {
     var mem = new ж<nint>[]{Ꮡa, Ꮡb, Ꮡc, Ꮡd, Ꮡe, Ꮡf}.slice();
     var s = mem[0..5]; // there is 1 element beyond len(s), within cap(s)
     var copy = Clone<slice<ж<nint>>, ж<nint>>(s);
+
     ref var y = ref heap<nint>(out var Ꮡy);
     y = 8;
     ref var z = ref heap<nint>(out var Ꮡz);
     z = 9;
     s = Replace(s, 1, 4, Ꮡy, Ꮡz);
+
     {
         var want = new ж<nint>[]{Ꮡa, Ꮡy, Ꮡz, Ꮡe}.slice(); if (!Equal<slice<ж<nint>>, ж<nint>>(s, want)) {
             Ꮡt.Errorf("Replace(%v) = %v, want %v"u8, copy, s, want);
         }
     }
+
     if (mem[4] != nil) {
         // Check that potential memory leak is avoided
         Ꮡt.Errorf("Replace: want nil discarded element, got %v"u8, mem[4].OrTypedNil());
@@ -1344,16 +1371,11 @@ public static void TestReplaceOverlap(ж<testing.T> Ꮡt) {
     UntypedInt N = 10;
     var a = new slice<nint>(N);
     var want = new slice<nint>(2 * N);
-    for (nint n = 0; n <= N; n++) {
-        // length
-        for (nint i = 0; i <= n; i++) {
-            // insertion point 1
-            for (nint j = i; j <= n; j++) {
-                // insertion point 2
-                for (nint x = 0; x <= N; x++) {
-                    // start of inserted data
-                    for (nint y = x; y <= N; y++) {
-                        // end of inserted data
+    for (nint n = 0; n <= N; n++) { // length
+        for (nint i = 0; i <= n; i++) { // insertion point 1
+            for (nint j = i; j <= n; j++) { // insertion point 2
+                for (nint x = 0; x <= N; x++) { // start of inserted data
+                    for (nint y = x; y <= N; y++) { // end of inserted data
                         for (nint k = 0; k < N; k++) {
                             a[k] = k;
                         }
@@ -1379,6 +1401,7 @@ public static void TestReplaceEndClearTail(ж<testing.T> Ꮡt) {
     nint i = 1;
     nint j = 3;
     s = Replace(s, i, j, v.ꓸꓸꓸ);
+
     nint x = s[..3][2];
     {
         nint want = 0; if (x != want) {
@@ -1410,6 +1433,7 @@ public static void BenchmarkReplace(ж<testing.B> Ꮡb) {
             j: 2
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in cases) {
         ref var c = ref heap(new BenchmarkReplace_cases(), out var Ꮡc);
         c = vᴛ1;
@@ -1439,7 +1463,7 @@ public static void TestInsertGrowthRate(ж<testing.T> Ꮡt) {
     nint nGrow = 0;
     UntypedFloat N = 1e6;
     for (nint i = 0; i < (nint)N; i++) {
-        b = Insert(b, len(b) - 1, (byte)(0));
+        b = Insert(b, len(b) - 1, (byte)0);
         if (cap(b) > maxCap) {
             maxCap = cap(b);
             nGrow++;
@@ -1457,7 +1481,7 @@ public static void TestReplaceGrowthRate(ж<testing.T> Ꮡt) {
     nint nGrow = 0;
     UntypedFloat N = 1e6;
     for (nint i = 0; i < (nint)N; i++) {
-        b = Replace(b, len(b) - 2, len(b) - 1, (byte)(0), (byte)(0));
+        b = Replace(b, len(b) - 2, len(b) - 1, (byte)0, (byte)0);
         if (cap(b) > maxCap) {
             maxCap = cap(b);
             nGrow++;
@@ -1654,6 +1678,7 @@ public static void TestRepeat(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // big slices
     foreach (var (_, tc) in new TestRepeat_typeᴛ1[]{
         new(x: new slice<EmptyStruct>(unchecked((nint)(9223372036854775807L))), count: 1, want: new slice<EmptyStruct>(unchecked((nint)(9223372036854775807L)))),
@@ -1709,7 +1734,6 @@ public static void TestIssue68488(ж<testing.T> Ꮡt) {
     if (exprᴛ1 == Ꮡ(s, 0) || exprᴛ1 == Ꮡ(s, 1) || exprᴛ1 == Ꮡ(s, 2)) {
         Ꮡt.Error(cloneKeepsAliveSDueToˢ);
     }
-
 }
 
 } // end slices_test_package

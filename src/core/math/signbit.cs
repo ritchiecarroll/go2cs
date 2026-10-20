@@ -7,7 +7,7 @@ partial class math_package {
 
 // Signbit reports whether x is negative or negative zero.
 public static bool Signbit(float64 x) {
-    return (uint64)(Float64bits(x) & (((uint64)1 << (int)(63)))) != 0;
+    return (int64)Float64bits(x) < 0;
 }
 
 } // end math_package

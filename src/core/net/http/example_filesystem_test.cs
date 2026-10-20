@@ -41,8 +41,7 @@ internal static (slice<fs.FileInfo> fis, error err) Readdir(this dotFileHidingFi
     error err = default!;
 
     (var files, err) = f.File.Readdir(n);
-    foreach (var (_, @file) in files) {
-        // Filters out the dot files
+    foreach (var (_, @file) in files) { // Filters out the dot files
         if (!strings.HasPrefix(@file.Name(), "."u8)) {
             fis = append(fis, @file);
         }
@@ -63,10 +62,10 @@ partial struct dotFileHidingFileSystem {
 // that serves a 403 permission error when name has a file or directory
 // with whose name starts with a period in its path.
 internal static (Δhttp.File, error) Open(this dotFileHidingFileSystem fsys, @string name) {
-    if (containsDotFile(name)) {
-        // If dot file, return 403 response
+    if (containsDotFile(name)) { // If dot file, return 403 response
         return (default!, fs.ErrPermission);
     }
+
     var (@file, err) = fsys.FileSystem.Open(name);
     if (err != default!) {
         return (default!, err);
@@ -75,7 +74,7 @@ internal static (Δhttp.File, error) Open(this dotFileHidingFileSystem fsys, @st
 }
 
 public static void ExampleFileServer_dotFileHiding() {
-    var fsys = new dotFileHidingFileSystem(((Δhttp.Dir)(@string)"."u8));
+    var fsys = new dotFileHidingFileSystem((Δhttp.Dir)(@string)"."u8);
     Δhttp.Handle("/"u8, Δhttp.FileServer(fsys));
     log.Fatal(Δhttp.ListenAndServe(":8080"u8, default!));
 }

@@ -86,7 +86,7 @@ partial struct SectionHeader {
 
 // Section provides access to PE COFF section.
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
@@ -116,19 +116,12 @@ public static io.ReadSeeker Open(this ref ΔSection s) {
 
 // Section characteristics flags.
 public static UntypedInt IMAGE_SCN_CNT_CODE => 0x00000020;
-
 public static UntypedInt IMAGE_SCN_CNT_INITIALIZED_DATA => 0x00000040;
-
 public static UntypedInt IMAGE_SCN_CNT_UNINITIALIZED_DATA => 0x00000080;
-
 public static UntypedInt IMAGE_SCN_LNK_COMDAT => 0x00001000;
-
 public static UntypedInt IMAGE_SCN_MEM_DISCARDABLE => 0x02000000;
-
 public static UntypedInt IMAGE_SCN_MEM_EXECUTE => 0x20000000;
-
 public static UntypedInt IMAGE_SCN_MEM_READ => 0x40000000;
-
 public static UntypedInt IMAGE_SCN_MEM_WRITE => 0x80000000;
 
 } // end pe_package

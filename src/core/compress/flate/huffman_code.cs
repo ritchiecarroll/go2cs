@@ -68,30 +68,29 @@ internal static ж<huffmanEncoder> generateFixedLiteralEncoding() {
         uint16 size = default!;
         switch (ᐧ) {
         case {} when ch is < 144: {
+            // size 8, 000110000  .. 10111111
             bits = (uint16)(ch + 48);
             size = 8;
             break;
         }
         case {} when ch is < 256: {
+            // size 9, 110010000 .. 111111111
             bits = (uint16)(ch + 400 - 144);
             size = 9;
             break;
         }
         case {} when ch is < 280: {
+            // size 7, 0000000 .. 0010111
             bits = (uint16)(ch - 256);
             size = 7;
             break;
         }
         default: {
+            // size 8, 11000000 .. 11000111
             bits = (uint16)(ch + 192 - 280);
             size = 8;
             break;
         }}
-
-        // size 8, 000110000  .. 10111111
-        // size 9, 110010000 .. 111111111
-        // size 7, 0000000 .. 0010111
-        // size 8, 11000000 .. 11000111
         codes[ch] = new hcode(code: reverseBits(bits, (byte)size), len: size);
     }
     return h;
@@ -143,11 +142,13 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
     var n = (int32)len(list);
     list = list.slice(0, n + 1);
     list[n] = maxNode();
+
     // The tree can't have greater depth than n - 1, no matter what. This
     // saves a little bit of work in some small cases
     if (maxBits > n - 1) {
         maxBits = n - 1;
     }
+
     // Create information about each of the levels.
     // A bogus "Level 0" whose sole purpose is so that
     // level1.prev.needed==0.  This makes level1.nextPairFreq
@@ -158,6 +159,7 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
     // leafCounts[i][j] is the number of literals at the left
     // of the level j ancestor.
     ref var leafCounts = ref heap(new array<array<int32>>(16, () => new(16)), out var ᏑleafCounts);
+
     for (var levelΔ1 = (int32)1; levelΔ1 <= maxBits; levelΔ1++) {
         // For every level, the first two items are the first two characters.
         // We initialize the levels as if we had already figured this out.
@@ -172,8 +174,10 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
             levels[levelΔ1].nextPairFreq = math.MaxInt32;
         }
     }
+
     // We need a total of 2*n - 2 items at top level and have already generated 2.
     levels[maxBits].needed = 2 * n - 4;
+
     var level = maxBits;
     while (ᐧ) {
         var l = Ꮡlevels.at<levelInfo>((nint)(level));
@@ -187,6 +191,7 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
             level++;
             continue;
         }
+
         var prevFreq = l.Value.lastFreq;
         if ((~l).nextCharFreq < (~l).nextPairFreq){
             // The next item on this row is a leaf node.
@@ -204,6 +209,7 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
             copy(leafCounts[level].slice(0, level), leafCounts[level - 1].slice(0, level));
             levels[(~l).level - 1].needed = 2;
         }
+
         {
             l.Value.needed--; if ((~l).needed == 0){
                 // We've done everything we need to do for this level.
@@ -224,11 +230,13 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
             }
         }
     }
+
     // Somethings is wrong if at the end, the top level is null or hasn't used
     // all of the leaves.
     if (leafCounts[maxBits][maxBits] != n) {
         throw panic("leafCounts[maxBits][maxBits] != n");
     }
+
     var bitCount = h.bitCount.slice(0, maxBits + 1);
     nint bits = 1;
     var counts = ᏑleafCounts.at<array<int32>>((nint)(maxBits));
@@ -257,6 +265,7 @@ internal static void assignEncodingAndSize(this ж<huffmanEncoder> Ꮡh, slice<i
         // code, code + 1, ....  The code values are
         // assigned in literal order (not frequency order).
         var chunk = list.slice(len(list) - (nint)bits);
+
         Ꮡh.of(huffmanEncoder.Ꮡlns).sort(chunk);
         foreach (var (_, node) in chunk) {
             h.codes[node.literal] = new hcode(code: reverseBits(code, (uint8)n), len: (uint16)n);
@@ -291,6 +300,7 @@ internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, i
             h.codes[i].len = 0;
         }
     }
+
     list = list.slice(0, count);
     if (count <= 2) {
         // Handle the small cases here, because they are awkward for the general case code. With
@@ -302,6 +312,7 @@ internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, i
         return;
     }
     Ꮡh.of(huffmanEncoder.Ꮡlfs).sort(list);
+
     // Get the number of literals for each bit count
     var bitCount = h.bitCounts(list, maxBits);
     // And do the assignment
@@ -313,7 +324,7 @@ partial struct byLiteral /*[]literalNode*/;
 internal static void sort(this ж<byLiteral> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s = ((byLiteral)a);
+    s = (byLiteral)a;
     sort_package.Sort(new byLiteralжInterface(Ꮡs));
 }
 
@@ -334,7 +345,7 @@ partial struct byFreq /*[]literalNode*/;
 internal static void sort(this ж<byFreq> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s = ((byFreq)a);
+    s = (byFreq)a;
     sort_package.Sort(new byFreqжInterface(Ꮡs));
 }
 

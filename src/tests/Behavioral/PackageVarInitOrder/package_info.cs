@@ -50,7 +50,7 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("entries.go", "entries.cs", "AAUQqqiogAACEAADHg==")]
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAcQvoKmgoKCgoKCgoKGgoKC")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAcQvoKmgoKCgoKCgoKWgoKC")]
 [assembly: go.GoPositionMap("registry.go", "registry.cs", "AAkQgqaCgoKmlAAPJoI=")]
 // </GoSourcePositionMaps>
 

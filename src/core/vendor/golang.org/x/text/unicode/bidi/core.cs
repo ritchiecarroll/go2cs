@@ -9,8 +9,6 @@ using ꓸꓸꓸClass = Span<bidi_package.ΔClass>;
 
 partial class bidi_package {
 
-partial struct level /*num:int8*/;
-
 // This implementation is a port based on the reference implementation found at:
 // https://www.unicode.org/Public/PROGRAMS/BidiReferenceJava/
 //
@@ -51,6 +49,12 @@ partial struct level /*num:int8*/;
 // engine expects combining marks in visual order (e.g. to the left of their
 // base character in RTL runs) and that it adjusts the glyphs used to render
 // mirrored characters that are in RTL runs so that they render appropriately.
+
+// level is the embedding level of a character. Even embedding levels indicate
+// left-to-right order and odd levels indicate right-to-left order. The special
+// level of -1 is reserved for undefined order.
+partial struct level /*num:int8*/;
+
 internal static level implicitLevel => -1;
 
 // in returns if x is equal to any of the values in set.
@@ -115,6 +119,7 @@ internal static (ж<paragraph>, error) newParagraph(slice<ΔClass> types, slice<
             return (default!, err);
         }
     }
+
     var p = Ꮡ(new paragraph(
         initialTypes: appendꓸꓸꓸ(slice<ΔClass>(default!), types),
         embeddingLevel: levels,
@@ -136,6 +141,7 @@ internal static void run(this ж<paragraph> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.determineMatchingIsolates();
+
     // 1) determining the paragraph level
     // Rule P1 is the requirement for entering this algorithm.
     // Rules P2, P3.
@@ -143,35 +149,44 @@ internal static void run(this ж<paragraph> Ꮡp) {
     if (p.embeddingLevel == implicitLevel) {
         p.embeddingLevel = p.determineParagraphEmbeddingLevel(0, p.Len());
     }
+
     // Initialize result levels to paragraph embedding level.
     p.resultLevels = new slice<level>(p.Len());
     setLevels(p.resultLevels, p.embeddingLevel);
+
     // 2) Explicit levels and directions
     // Rules X1-X8.
     p.determineExplicitEmbeddingLevels();
+
     // Rule X9.
     // We do not remove the embeddings, the overrides, the PDFs, and the BNs
     // from the string explicitly. But they are not copied into isolating run
     // sequences when they are created, so they are removed for all
     // practical purposes.
+
     // Rule X10.
     // Run remainder of algorithm one isolating run sequence at a time
     foreach (var (_, seq) in Ꮡp.determineIsolatingRunSequences()) {
         // 3) resolving weak types
         // Rules W1-W7.
         seq.resolveWeakTypes();
+
         // 4a) resolving paired brackets
         // Rule N0
         resolvePairedBrackets(ref (seq).DerefOrNull());
+
         // 4b) resolving neutral types
         // Rules N1-N3.
         seq.resolveNeutralTypes();
+
         // 5) resolving implicit embedding levels
         // Rules I1, I2.
         seq.resolveImplicitLevels();
+
         // Apply the computed levels and types
         seq.applyLevelsAndTypes();
     }
+
     // Assign appropriate levels to 'hide' LREs, RLEs, LROs, RLOs, PDFs, and
     // BNs. This is for convenience, so the resulting level array will have
     // a value for every character.
@@ -196,11 +211,14 @@ internal static void run(this ж<paragraph> Ꮡp) {
 internal static void determineMatchingIsolates(this ref paragraph p) {
     p.matchingPDI = new slice<nint>(p.Len());
     p.matchingIsolateInitiator = new slice<nint>(p.Len());
+
     foreach (var (i, _) in p.matchingIsolateInitiator) {
         p.matchingIsolateInitiator[i] = -1;
     }
+
     foreach (var (i, _) in p.matchingPDI) {
         p.matchingPDI[i] = -1;
+
         {
             ΔClass t = p.resultTypes[i]; if (t.@in(LRI, RLI, FSI)) {
                 nint depthCounter = 1;
@@ -238,6 +256,7 @@ private static readonly object assertIEndˢ = (@string)"assert (i <= end)"u8;
 // in rule X5c to find if an FSI should resolve to LRI or RLI.
 internal static level determineParagraphEmbeddingLevel(this ref paragraph p, nint start, nint end) {
     ΔClass strongType = unknownClass;
+
     // Rule P2.
     for (nint i = start; i < end; i++) {
         {
@@ -255,21 +274,18 @@ internal static level determineParagraphEmbeddingLevel(this ref paragraph p, nin
     }
     // Rule P3.
     var exprᴛ1 = strongType;
-    if (exprᴛ1 == unknownClass) {
+    if (exprᴛ1 == unknownClass) { // none found
+        // default embedding level when no strong types found is 0.
         return 0;
     }
     if (exprᴛ1 == L) {
         return 0;
     }
-    { /* default: */
+    { /* default: */ // AL, R
         return 1;
     }
-
 }
 
-// none found
-// default embedding level when no strong types found is 0.
-// AL, R
 internal static UntypedInt maxDepth => 125;
 
 // This stack will store the embedding levels and override and isolated
@@ -318,16 +334,19 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
     nint overflowIsolateCount = default!;
     nint overflowEmbeddingCount = default!;
     nint validIsolateCount = default!;
+
     // Rule X1.
     stack.push(p.embeddingLevel, ON, false);
+
     foreach (var (i, t) in p.resultTypes) {
         // Rules X2, X3, X4, X5, X5a, X5b, X5c
         var exprᴛ1 = t;
         if (exprᴛ1 == RLE || exprᴛ1 == LRE || exprᴛ1 == RLO || exprᴛ1 == LRO || exprᴛ1 == RLI || exprᴛ1 == LRI || exprᴛ1 == FSI) {
             var isIsolate = t.@in(RLI, LRI, FSI);
             var isRTL = t.@in(RLE, RLO, RLI);
+
+            // override if this is an FSI that resolves to RLI
             if (t == FSI) {
-                // override if this is an FSI that resolves to RLI
                 isRTL = (p.determineParagraphEmbeddingLevel(i + 1, p.matchingPDI[i]) == 1);
             }
             if (isIsolate) {
@@ -336,6 +355,7 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                     p.resultTypes[i] = stack.lastDirectionalOverrideStatus();
                 }
             }
+
             level newLevel = default!;
             if (isRTL){
                 // least greater odd
@@ -344,6 +364,7 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                 // least greater even
                 newLevel = (level)((stack.lastEmbeddingLevel() + 2) & ~1);
             }
+
             if (newLevel <= maxDepth && overflowIsolateCount == 0 && overflowEmbeddingCount == 0){
                 if (isIsolate) {
                     validIsolateCount++;
@@ -362,7 +383,6 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                 else { /* default: */
                     stack.push(newLevel, ON, isIsolate);
                 }
-
                 // Not really part of the spec
                 if (!isIsolate) {
                     p.resultLevels[i] = newLevel;
@@ -372,22 +392,21 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
                 // so apply the "Otherwise" part of rules X2-X5b.
                 if (isIsolate){
                     overflowIsolateCount++;
-                } else {
-                    // !isIsolate
+                } else { // !isIsolate
                     if (overflowIsolateCount == 0) {
                         overflowEmbeddingCount++;
                     }
                 }
             }
         }
+        // Rule X6a
         else if (exprᴛ1 == PDI) {
             if (overflowIsolateCount > 0){
-                // Rule X6a
                 overflowIsolateCount--;
             } else 
             if (validIsolateCount == 0){
-            } else {
                 // do nothing
+            } else {
                 overflowEmbeddingCount = 0;
                 while (!stack.lastDirectionalIsolateStatus()) {
                     stack.pop();
@@ -397,21 +416,25 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
             }
             p.resultLevels[i] = stack.lastEmbeddingLevel();
         }
+        // Rule X7
         else if (exprᴛ1 == PDF) {
+            // Not really part of the spec
             p.resultLevels[i] = stack.lastEmbeddingLevel();
+
             if (overflowIsolateCount > 0){
+                // do nothing
             } else 
             if (overflowEmbeddingCount > 0){
-                // Rule X7
-                // Not really part of the spec
-                // do nothing
                 overflowEmbeddingCount--;
             } else 
             if (!stack.lastDirectionalIsolateStatus() && stack.depth() >= 2) {
                 stack.pop();
             }
         }
-        else if (exprᴛ1 == B) {
+        else if (exprᴛ1 == B) { // paragraph separator.
+            // Rule X8.
+            // These values are reset for clarity, in this implementation B
+            // can only occur as the last code in the array.
             stack.empty();
             overflowIsolateCount = 0;
             overflowEmbeddingCount = 0;
@@ -421,14 +444,9 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
         else { /* default: */
             p.resultLevels[i] = stack.lastEmbeddingLevel();
             if (stack.lastDirectionalOverrideStatus() != ON) {
-                // paragraph separator.
-                // Rule X8.
-                // These values are reset for clarity, in this implementation B
-                // can only occur as the last code in the array.
                 p.resultTypes[i] = stack.lastDirectionalOverrideStatus();
             }
         }
-
     }
 }
 
@@ -445,13 +463,6 @@ internal static nint Len(this ref ΔisolatingRunSequence i) {
     return len(i.indexes);
 }
 
-internal static level maxLevel(level a, level b) {
-    if (a > b) {
-        return a;
-    }
-    return b;
-}
-
 // Rule X10, second bullet: Determine the start-of-sequence (sos) and end-of-sequence (eos) types,
 // either L or R, for each isolating run sequence.
 internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragraph> Ꮡp, slice<nint> indexes) {
@@ -462,6 +473,7 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
     foreach (var (i, x) in indexes) {
         types[i] = p.resultTypes[x];
     }
+
     // assign level, sos and eos
     nint prevChar = indexes[0] - 1;
     while (prevChar >= 0 && isRemovedByX9(p.initialTypes[prevChar])) {
@@ -471,6 +483,7 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
     if (prevChar >= 0) {
         prevLevel = p.resultLevels[prevChar];
     }
+
     level succLevel = default!;
     ΔClass lastType = types[length - 1];
     if (lastType.@in(LRI, RLI, FSI)){
@@ -492,8 +505,8 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
         indexes: indexes,
         types: types,
         level: level,
-        sos: typeForLevel(maxLevel(prevLevel, level)),
-        eos: typeForLevel(maxLevel(succLevel, level))
+        sos: typeForLevel(max(prevLevel, level)),
+        eos: typeForLevel(max(succLevel, level))
     ));
 }
 
@@ -504,6 +517,7 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
 internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
     // on entry, only these types remain
     s.assertOnly(L, R, AL, EN, ES, ET, AN, CS, B, S, WS, ON, NSM, LRI, RLI, FSI, PDI);
+
     // Rule W1.
     // Changes all NSMs.
     ΔClass precedingCharacterType = s.sos;
@@ -517,6 +531,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
             precedingCharacterType = t;
         }
     }
+
     // Rule W2.
     // EN does not change at the start of the run, because sos != AL.
     foreach (var (i, t) in s.types) {
@@ -533,12 +548,14 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
             }
         }
     }
+
     // Rule W3.
     foreach (var (i, t) in s.types) {
         if (t == AL) {
             s.types[i] = R;
         }
     }
+
     // Rule W4.
     // Since there must be values on both sides for this rule to have an
     // effect, the scan skips the first and last value.
@@ -551,6 +568,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
     // only change if the value to its right is not ES or CS. Thus
     // either the current value will not change, or its change will have
     // no effect on the remainder of the analysis.
+
     for (nint i = 1; i < s.Len() - 1; i++) {
         ΔClass t = s.types[i];
         if (t == ES || t == CS) {
@@ -564,6 +582,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
             }
         }
     }
+
     // Rule W5.
     foreach (var (iᴛ1, t) in s.types) {
         var i = iᴛ1;
@@ -572,6 +591,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
             // locate end of sequence
             nint runStart = i;
             nint runEnd = s.findRunLimit(runStart, ET);
+
             // check values at ends of sequence
             ΔClass tΔ1 = s.sos;
             if (runStart > 0) {
@@ -590,12 +610,14 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
             i = runEnd;
         }
     }
+
     // Rule W6.
     foreach (var (i, t) in s.types) {
         if (t.@in(ES, ET, CS)) {
             s.types[i] = ON;
         }
     }
+
     // Rule W7.
     foreach (var (i, vᴛ1) in s.types) {
         var t = vᴛ1;
@@ -605,8 +627,7 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
             ΔClass prevStrongType = s.sos;
             for (nint j = i - 1; j >= 0; j--) {
                 t = s.types[j];
-                if (t == L || t == R) {
-                    // AL's have been changed to R
+                if (t == L || t == R) { // AL's have been changed to R
                     prevStrongType = t;
                     break;
                 }
@@ -622,20 +643,23 @@ internal static void resolveWeakTypes(this ref ΔisolatingRunSequence s) {
 internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
     // on entry, only these types can be in resultTypes
     s.assertOnly(L, R, EN, AN, B, S, WS, ON, RLI, LRI, FSI, PDI);
+
     foreach (var (iᴛ1, t) in s.types) {
         var i = iᴛ1;
 
         var exprᴛ1 = t;
         if (exprᴛ1 == WS || exprᴛ1 == ON || exprᴛ1 == B || exprᴛ1 == S || exprᴛ1 == RLI || exprᴛ1 == LRI || exprᴛ1 == FSI || exprᴛ1 == PDI) {
+            // find bounds of run of neutrals
             nint runStart = i;
-            nint runEnd = s.findRunLimit(runStart, // find bounds of run of neutrals
- B, S, WS, ON, RLI, LRI, FSI, PDI);
+            nint runEnd = s.findRunLimit(runStart, B, S, WS, ON, RLI, LRI, FSI, PDI);
+
             // determine effective types at ends of run
             ΔClass leadType = default!;
             ΔClass trailType = default!;
+
+            // Note that the character found can only be L, R, AN, or
+            // EN.
             if (runStart == 0){
-                // Note that the character found can only be L, R, AN, or
-                // EN.
                 leadType = s.sos;
             } else {
                 leadType = s.types[runStart - 1];
@@ -651,6 +675,7 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
                     trailType = R;
                 }
             }
+
             ΔClass resolvedType = default!;
             if (leadType == trailType){
                 // Rule N1.
@@ -661,14 +686,15 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
                 // the paragraph embedding level.
                 resolvedType = typeForLevel(s.level);
             }
+
             setTypes(s.types.slice(runStart, runEnd), resolvedType);
+
+            // skip over run of (former) neutrals
             i = runEnd;
         }
-
     }
 }
 
-// skip over run of (former) neutrals
 internal static void setLevels(slice<level> levels, level newLevel) {
     foreach (var (i, _) in levels) {
         levels[i] = newLevel;
@@ -685,30 +711,28 @@ internal static void setTypes(slice<ΔClass> types, ΔClass newType) {
 internal static void resolveImplicitLevels(this ref ΔisolatingRunSequence s) {
     // on entry, only these types can be in resultTypes
     s.assertOnly(L, R, EN, AN);
+
     s.resolvedLevels = new slice<level>(len(s.types));
     setLevels(s.resolvedLevels, s.level);
-    if (((level)(s.level & 1)) == 0){
-        // even level
+
+    if (((level)(s.level & 1)) == 0){ // even level
         foreach (var (i, t) in s.types) {
             // Rule I1.
             if (t == L){
+                // no change
             } else 
             if (t == R){
-                // no change
                 s.resolvedLevels[i] += 1;
-            } else {
-                // t == AN || t == EN
+            } else { // t == AN || t == EN
                 s.resolvedLevels[i] += 2;
             }
         }
-    } else {
-        // odd level
+    } else { // odd level
         foreach (var (i, t) in s.types) {
             // Rule I2.
             if (t == R){
-            } else {
                 // no change
-                // t == L || t == AN || t == EN
+            } else { // t == L || t == AN || t == EN
                 s.resolvedLevels[i] += 1;
             }
         }
@@ -773,12 +797,12 @@ internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
     var run = new nint[]{}.slice();
     var allRuns = new slice<nint>[]{}.slice();
     var currentLevel = implicitLevel;
+
     foreach (var (i, _) in p.initialTypes) {
         if (!isRemovedByX9(p.initialTypes[i])) {
             if (p.resultLevels[i] != currentLevel) {
                 // we just encountered a new run; wrap up last run
-                if (currentLevel >= 0) {
-                    // only wrap it up if there was a run
+                if (currentLevel >= 0) { // only wrap it up if there was a run
                     allRuns = append(allRuns, run);
                     run = default!;
                 }
@@ -800,6 +824,7 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
     ref var p = ref Ꮡp.DerefOrNull();
 
     var levelRuns = p.determineLevelRuns();
+
     // Compute the run that each character belongs to
     var runForCharacter = new slice<nint>(p.Len());
     foreach (var (i, run) in levelRuns) {
@@ -807,8 +832,11 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
             runForCharacter[index] = i;
         }
     }
+
     var sequences = new ж<ΔisolatingRunSequence>[]{}.slice();
+
     slice<nint> currentRunSequence = default!;
+
     foreach (var (_, vᴛ1) in levelRuns) {
         var run = vᴛ1;
 
@@ -819,6 +847,7 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
             while (ᐧ) {
                 // Copy this level run into currentRunSequence
                 currentRunSequence = appendꓸꓸꓸ(currentRunSequence, run);
+
                 nint last = currentRunSequence[len(currentRunSequence) - 1];
                 ΔClass lastT = p.initialTypes[last];
                 if (lastT.@in(LRI, RLI, FSI) && p.matchingPDI[last] != p.Len()){
@@ -847,6 +876,7 @@ internal static void assignLevelsToCharactersRemovedByX9(this ref paragraph p) {
     // now propagate forward the levels information (could have
     // propagated backward, the main thing is not to introduce a level
     // break where one doesn't already exist).
+
     if (p.resultLevels[0] == -1) {
         p.resultLevels[0] = p.embeddingLevel;
     }
@@ -855,10 +885,10 @@ internal static void assignLevelsToCharactersRemovedByX9(this ref paragraph p) {
             p.resultLevels[i] = p.resultLevels[i - 1];
         }
     }
+    // Embedding information is for informational purposes only so need not be
+    // adjusted.
 }
 
-// Embedding information is for informational purposes only so need not be
-// adjusted.
 //
 // Output
 //
@@ -881,7 +911,9 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
     // These codes are treated like WS in this implementation,
     // so they don't interrupt sequences of WS.
     validateLineBreaks(linebreaks, p.Len());
+
     var result = appendꓸꓸꓸ(slice<level>(default!), p.resultLevels);
+
     // don't worry about linebreaks since if there is a break within
     // a series of WS values preceding S, the linebreak itself
     // causes the reset.
@@ -889,10 +921,10 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
         if (t.@in(B, S)) {
             // Rule L1, clauses one and two.
             result[i] = p.embeddingLevel;
+
             // Rule L1, clause three.
             for (nint j = i - 1; j >= 0; j--) {
-                if (isWhitespace(p.initialTypes[j])){
-                    // including format codes
+                if (isWhitespace(p.initialTypes[j])){ // including format codes
                     result[j] = p.embeddingLevel;
                 } else {
                     break;
@@ -900,12 +932,12 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
             }
         }
     }
+
     // Rule L1, clause four.
     nint start = 0;
     foreach (var (_, limit) in linebreaks) {
         for (nint j = limit - 1; j >= start; j--) {
-            if (isWhitespace(p.initialTypes[j])){
-                // including format codes
+            if (isWhitespace(p.initialTypes[j])){ // including format codes
                 result[j] = p.embeddingLevel;
             } else {
                 break;
@@ -913,6 +945,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
         }
         start = limit;
     }
+
     return result;
 }
 
@@ -933,6 +966,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
 // the text, inclusive. The last value must be the length of the text.
 internal static slice<nint> getReordering(this ref paragraph p, slice<nint> linebreaks) {
     validateLineBreaks(linebreaks, p.Len());
+
     return computeMultilineReordering(p.getLevels(linebreaks), linebreaks);
 }
 
@@ -940,10 +974,12 @@ internal static slice<nint> getReordering(this ref paragraph p, slice<nint> line
 // does not occur across a line break.
 internal static slice<nint> computeMultilineReordering(slice<level> levels, slice<nint> linebreaks) {
     var result = new slice<nint>(len(levels));
+
     nint start = 0;
     foreach (var (_, limit) in linebreaks) {
         var tempLevels = new slice<level>(limit - start);
         copy(tempLevels, levels.slice(start));
+
         foreach (var (j, order) in computeReordering(tempLevels)) {
             result[start + j] = order + start;
         }
@@ -961,11 +997,12 @@ internal static slice<nint> computeReordering(slice<level> levels) {
     foreach (var (i, _) in result) {
         result[i] = i;
     }
+
     // locate highest level found on line.
     // Note the rules say text, but no reordering across line bounds is
     // performed, so this is sufficient.
-    var highestLevel = ((level)0);
-    var lowestOddLevel = ((level)(maxDepth + 2));
+    var highestLevel = (level)0;
+    var lowestOddLevel = (level)(maxDepth + 2);
     foreach (var (_, level) in levels) {
         if (level > highestLevel) {
             highestLevel = level;
@@ -974,6 +1011,7 @@ internal static slice<nint> computeReordering(slice<level> levels) {
             lowestOddLevel = level;
         }
     }
+
     for (var level = highestLevel; level >= lowestOddLevel; level--) {
         for (nint i = 0; i < len(levels); i++) {
             if (levels[i] >= level) {
@@ -983,6 +1021,7 @@ internal static slice<nint> computeReordering(slice<level> levels) {
                 while (limit < len(levels) && levels[limit] >= level) {
                     limit++;
                 }
+
                 for ((nint j, nint k) = (start, limit - 1); j < k; (j, k) = (j + 1, k - 1)) {
                     (result[j], result[k]) = (result[k], result[j]);
                 }
@@ -991,6 +1030,7 @@ internal static slice<nint> computeReordering(slice<level> levels) {
             }
         }
     }
+
     return result;
 }
 
@@ -1001,7 +1041,6 @@ internal static bool isWhitespace(ΔClass c) {
     if (exprᴛ1 == LRE || exprᴛ1 == RLE || exprᴛ1 == LRO || exprᴛ1 == RLO || exprᴛ1 == PDF || exprᴛ1 == LRI || exprᴛ1 == RLI || exprᴛ1 == FSI || exprᴛ1 == PDI || exprᴛ1 == BN || exprᴛ1 == WS) {
         return true;
     }
-
     return false;
 }
 
@@ -1011,7 +1050,6 @@ internal static bool isRemovedByX9(ΔClass c) {
     if (exprᴛ1 == LRE || exprᴛ1 == RLE || exprᴛ1 == LRO || exprᴛ1 == RLO || exprᴛ1 == PDF || exprᴛ1 == BN) {
         return true;
     }
-
     return false;
 }
 
@@ -1067,7 +1105,6 @@ internal static error validatePbTypes(slice<bracketType> pairTypes) {
         else { /* default: */
             return fmt.Errorf("illegal pairType value at %d: %v"u8, i, pairTypes[i]);
         }
-
     }
     return default!;
 }

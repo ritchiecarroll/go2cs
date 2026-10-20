@@ -6,6 +6,7 @@ namespace go;
 using bytealg = @internal.bytealg_package;
 using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
+using strconv = @internal.strconv_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
@@ -19,9 +20,7 @@ partial class runtime_package {
 // are the "crash" and "all" settings and the remaining
 // bits are the traceback value (0 off, 1 on, 2 include system).
 internal static UntypedInt tracebackCrash => /* 1 << iota */ 1;
-
 internal static UntypedInt tracebackAll => 2;
-
 internal static UntypedInt tracebackShift => /* iota */ 2;
 
 internal static ж<uint32> Ꮡtraceback_cache = new StandardBox<uint32>(((uint32)2 << (int)(tracebackShift)));
@@ -45,8 +44,8 @@ internal static (int32 level, bool all, bool crash) gotraceback() {
 
     var gp = getg();
     var t = atomic.Load(Ꮡtraceback_cache);
-    crash = (uint32)(t & (uint32)tracebackCrash) != 0;
-    all = (~(~gp).m).throwing >= throwTypeUser || (uint32)(t & (uint32)tracebackAll) != 0;
+    crash = (t & (uint32)tracebackCrash) != 0;
+    all = (~(~gp).m).throwing > throwTypeUser || (t & (uint32)tracebackAll) != 0;
     if ((~(~gp).m).traceback != 0){
         level = (int32)(~(~gp).m).traceback;
     } else 
@@ -55,7 +54,7 @@ internal static (int32 level, bool all, bool crash) gotraceback() {
         // otherwise overridden by m.traceback.
         level = 2;
     } else {
-        level = (int32)((t >> (int)(tracebackShift)));
+        level = (int32)(t >> (int)(tracebackShift));
     }
     return (level, all, crash);
 }
@@ -94,6 +93,7 @@ internal static void goenvs_unix() {
     while (argv_index(argv, argc + 1 + n) != nil) {
         n++;
     }
+
     envs = new slice<@string>(n);
     for (var i = (int32)0; i < n; i++) {
         envs[i] = gostring(argv_index(argv, argc + 1 + i));
@@ -170,7 +170,6 @@ internal static readonly @string badLˢ = "bad l"u8;
 internal static readonly @string badUnsafeSizeofX1ˢ = "bad unsafe.Sizeof x1"u8;
 internal static readonly @string badOffsetofY1Yˢ = "bad offsetof y1.y"u8;
 internal static readonly @string badUnsafeSizeofY1ˢ = "bad unsafe.Sizeof y1"u8;
-internal static readonly @string badTimedivˢ = "bad timediv"u8;
 internal static readonly @string cas1ˢ = "cas1"u8;
 internal static readonly @string cas2ˢ = "cas2"u8;
 internal static readonly @string cas3ˢ = "cas3"u8;
@@ -204,7 +203,7 @@ internal static void check() {
     uint8 b = default!;
     int16 c = default!;
     uint16 d = default!;
-    ref var e = ref heap(new int32(), out var Ꮡe);
+    int32 e = default!;
     uint32 f = default!;
     int64 g = default!;
     uint64 h = default!;
@@ -217,6 +216,7 @@ internal static void check() {
     ref var m = ref heap(new array<byte>(4), out var Ꮡm);
     check_x1t x1 = default!;
     check_y1t y1 = default!;
+
     if (/* unsafe.Sizeof(a) */ (uintptr)1 != 1) {
         @throw(badAˢ);
     }
@@ -262,9 +262,7 @@ internal static void check() {
     if (/* unsafe.Sizeof(y1) */ (uintptr)2 != 2) {
         @throw(badUnsafeSizeofY1ˢ);
     }
-    if (timediv(12345000054321L, 1000000000, Ꮡe) != 12345 || e != 54321) {
-        @throw(badTimedivˢ);
-    }
+
     ref var z = ref heap(new uint32(), out var Ꮡz);
     z = 1;
     if (!atomic.Cas(Ꮡz, 1, 2)) {
@@ -273,6 +271,7 @@ internal static void check() {
     if (z != 2) {
         @throw(cas2ˢ);
     }
+
     z = 4;
     if (atomic.Cas(Ꮡz, 5, 6)) {
         @throw(cas3ˢ);
@@ -280,6 +279,7 @@ internal static void check() {
     if (z != 4) {
         @throw(cas4ˢ);
     }
+
     z = 0xffffffffU;
     if (!atomic.Cas(Ꮡz, 0xffffffffU, 0xfffffffeU)) {
         @throw(cas5ˢ);
@@ -287,16 +287,19 @@ internal static void check() {
     if (z != 0xfffffffeU) {
         @throw(cas6ˢ);
     }
+
     m = new byte[]{1, 1, 1, 1}.array();
     atomic.Or8(Ꮡm.at<byte>(1), 0xf0);
     if (m[0] != 1 || m[1] != 0xf1 || m[2] != 1 || m[3] != 1) {
         @throw(atomicor8ˢ);
     }
+
     m = new byte[]{0xff, 0xff, 0xff, 0xff}.array();
     atomic.And8(Ꮡm.at<byte>(1), 0x1);
     if (m[0] != 0xff || m[1] != 0x1 || m[2] != 0xff || m[3] != 0xff) {
         @throw(atomicand8ˢ);
     }
+
     (Ꮡj.Reinterpret<float64, uint64>()).Value = ~(uint64)0;
     if (j == j) {
         @throw(float64nanˢ);
@@ -304,6 +307,7 @@ internal static void check() {
     if (!(j != j)) {
         @throw(float64nan1ˢ);
     }
+
     (Ꮡj1.Reinterpret<float64, uint64>()).Value = ~(uint64)1;
     if (j == j1) {
         @throw(float64nan2ˢ);
@@ -311,6 +315,7 @@ internal static void check() {
     if (!(j != j1)) {
         @throw(float64nan3ˢ);
     }
+
     (Ꮡi.Reinterpret<float32, uint32>()).Value = ~(uint32)0;
     if (i == i) {
         @throw(float32nanˢ);
@@ -318,6 +323,7 @@ internal static void check() {
     if (i == i) {
         @throw(float32nan1ˢ);
     }
+
     (Ꮡi1.Reinterpret<float32, uint32>()).Value = ~(uint32)1;
     if (i == i1) {
         @throw(float32nan2ˢ);
@@ -325,10 +331,13 @@ internal static void check() {
     if (i == i1) {
         @throw(float32nan3ˢ);
     }
+
     testAtomic64();
+
     if (fixedStack != round2(fixedStack)) {
         @throw(fixedStackIsNotPowerOf2ˢ);
     }
+
     if (!checkASM()) {
         @throw(assemblyChecksFailedˢ);
     }
@@ -345,10 +354,11 @@ partial struct dbgVar {
 // except for "memprofilerate" since there is an
 // existing int var for that value, which may
 // already have an initial value.
-
 partial struct debugᴛ1 /*dyn*/ {
     internal int32 cgocheck;
     internal int32 clobberfree;
+    internal int32 containermaxprocs;
+    internal int32 decoratemappings;
     internal int32 disablethp;
     internal int32 dontfreezetheworld;
     internal int32 efence;
@@ -359,11 +369,11 @@ partial struct debugᴛ1 /*dyn*/ {
     internal int32 gctrace;
     internal int32 invalidptr;
     internal int32 madvdontneed; // for Linux; issue 28466
-    internal atomic.Int32 runtimeContentionStacks;
     internal int32 scavtrace;
     internal int32 scheddetail;
     internal int32 schedtrace;
     internal int32 tracebackancestors;
+    internal int32 updatemaxprocs;
     internal int32 asyncpreemptoff;
     internal int32 harddecommit;
     internal int32 adaptivestackstart;
@@ -378,6 +388,7 @@ partial struct debugᴛ1 /*dyn*/ {
     internal bool malloc;
     internal int32 inittrace;
     internal int32 sbrk;
+    internal int32 checkfinalizers;
     // traceallocfree controls whether execution traces contain
     // detailed trace data about memory allocation. This value
     // affects debug.malloc only if it is != 0 and the execution
@@ -397,6 +408,9 @@ partial struct debugᴛ1 /*dyn*/ {
     // but allowing it is convenient for testing and for programs
     // that do an os.Setenv in main.init or main.main.
     internal atomic.Int32 asynctimerchan;
+    // tracebacklabels controls the inclusion of goroutine labels in the
+    // goroutine status header line.
+    internal atomic.Int32 tracebacklabels;
 }
 internal static ж<debugᴛ1> Ꮡdebug = new StandardBox<debugᴛ1>(default(debugᴛ1));
 internal static ref debugᴛ1 debug => ref Ꮡdebug.Value;
@@ -407,9 +421,12 @@ internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
     Ꮡ(new dbgVar(name: "asynctimerchan"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan))),
     Ꮡ(new dbgVar(name: "cgocheck"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡcgocheck))),
     Ꮡ(new dbgVar(name: "clobberfree"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡclobberfree))),
+    Ꮡ(new dbgVar(name: "containermaxprocs"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡcontainermaxprocs), def: 1)),
     Ꮡ(new dbgVar(name: "dataindependenttiming"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡdataindependenttiming))),
+    Ꮡ(new dbgVar(name: "decoratemappings"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡdecoratemappings), def: 1)),
     Ꮡ(new dbgVar(name: "disablethp"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡdisablethp))),
     Ꮡ(new dbgVar(name: "dontfreezetheworld"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡdontfreezetheworld))),
+    Ꮡ(new dbgVar(name: "checkfinalizers"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡcheckfinalizers))),
     Ꮡ(new dbgVar(name: "efence"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡefence))),
     Ꮡ(new dbgVar(name: "gccheckmark"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡgccheckmark))),
     Ꮡ(new dbgVar(name: "gcpacertrace"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡgcpacertrace))),
@@ -422,7 +439,6 @@ internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
     Ꮡ(new dbgVar(name: "madvdontneed"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡmadvdontneed))),
     Ꮡ(new dbgVar(name: "panicnil"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡpanicnil))),
     Ꮡ(new dbgVar(name: "profstackdepth"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡprofstackdepth), def: 128)),
-    Ꮡ(new dbgVar(name: "runtimecontentionstacks"u8, atomic: Ꮡdebug.of(debugᴛ1.ᏑruntimeContentionStacks))),
     Ꮡ(new dbgVar(name: "sbrk"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡsbrk))),
     Ꮡ(new dbgVar(name: "scavtrace"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡscavtrace))),
     Ꮡ(new dbgVar(name: "scheddetail"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡscheddetail))),
@@ -431,14 +447,12 @@ internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
     Ꮡ(new dbgVar(name: "traceallocfree"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡtraceallocfree))),
     Ꮡ(new dbgVar(name: "tracecheckstackownership"u8, value: Ꮡdebug.of(debugᴛ1.ᏑtraceCheckStackOwnership))),
     Ꮡ(new dbgVar(name: "tracebackancestors"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡtracebackancestors))),
-    Ꮡ(new dbgVar(name: "tracefpunwindoff"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡtracefpunwindoff)))
+    Ꮡ(new dbgVar(name: "tracebacklabels"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels), def: 0)),
+    Ꮡ(new dbgVar(name: "tracefpunwindoff"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡtracefpunwindoff))),
+    Ꮡ(new dbgVar(name: "updatemaxprocs"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡupdatemaxprocs), def: 1))
 }.slice();
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string godebugˢ = "GODEBUG"u8;
-internal static readonly @string gotracebackˢ = "GOTRACEBACK"u8;
-
-internal static void parsedebugvars() {
+internal static void parseRuntimeDebugVars(@string godebug) {
     // defaults
     debug.cgocheck = 1;
     debug.invalidptr = 1;
@@ -455,10 +469,7 @@ internal static void parsedebugvars() {
         debug.madvdontneed = 1;
     }
     debug.traceadvanceperiod = defaultTraceAdvancePeriod;
-    @string godebug = gogetenv(godebugˢ);
-    var Δp = @new<@string>();
-    Δp.Value = godebug;
-    ᏑgodebugEnv.Store(Δp);
+
     // apply runtime defaults, if any
     foreach (var (_, v) in dbgvars) {
         if ((~v).def != 0) {
@@ -473,10 +484,39 @@ internal static void parsedebugvars() {
     }
     // apply compile-time GODEBUG settings
     parsegodebug(godebugDefault, default!);
+
     // apply environment settings
     parsegodebug(godebug, default!);
-    debug.malloc = ((int32)(debug.inittrace | debug.sbrk)) != 0;
+
+    debug.malloc = (debug.inittrace | debug.sbrk | debug.checkfinalizers) != 0;
     debug.profstackdepth = min(debug.profstackdepth, (int32)(maxProfStackDepth));
+
+    // Disable async preemption in checkmark mode. The following situation is
+    // problematic with checkmark mode:
+    //
+    // - The GC doesn't mark object A because it is truly dead.
+    // - The GC stops the world, asynchronously preempting G1 which has a reference
+    //   to A in its top stack frame
+    // - During the stop the world, we run the second checkmark GC. It marks the roots
+    //   and discovers A through G1.
+    // - Checkmark mode reports a failure since there's a discrepancy in mark metadata.
+    //
+    // We could disable just conservative scanning during the checkmark scan, which is
+    // safe but makes checkmark slightly less powerful, but that's a lot more invasive
+    // than just disabling async preemption altogether.
+    if (debug.gccheckmark > 0) {
+        debug.asyncpreemptoff = 1;
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string gotracebackˢ = "GOTRACEBACK"u8;
+
+internal static void finishDebugVarsSetup() {
+    var Δp = @new<@string>();
+    Δp.Value = gogetenv(godebugˢ);
+    ᏑgodebugEnv.Store(Δp);
+
     setTraceback(gogetenv(gotracebackˢ));
     traceback_env = traceback_cache;
 }
@@ -545,12 +585,13 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
         if (seen != default!) {
             seen[key] = true;
         }
+
         // Update MemProfileRate directly here since it
         // is int, not int32, and should only be updated
         // if specified in GODEBUG.
         if (seen == default! && key == "memprofilerate"u8){
             {
-                var (n, ok) = atoi(value); if (ok) {
+                var (n, err) = strconv.Atoi(value); if (err == default!) {
                     MemProfileRate = n;
                 }
             }
@@ -558,12 +599,12 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
             foreach (var (_, v) in dbgvars) {
                 if ((~v).name == key) {
                     {
-                        var (n, ok) = atoi32(value); if (ok) {
+                        var (n, err) = strconv.ParseInt(value, 10, 32); if (err == default!) {
                             if (seen == default! && (~v).value != nil){
-                                (~v).value.Value = n;
+                                (~v).value.Value = (int32)n;
                             } else 
                             if ((~v).atomic != nil) {
-                                (~v).atomic.Store(n);
+                                (~v).atomic.Store((int32)n);
                             }
                         }
                     }
@@ -571,6 +612,7 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
             }
         }
     }
+
     if (debug.cgocheck > 1) {
         @throw(cgocheck1ModeIsNoLongerˢ);
     }
@@ -585,7 +627,7 @@ internal static void setTraceback(@string level) {
         t = 0;
     }
     else if (exprᴛ1 == "single"u8 || exprᴛ1 == ""u8) { matchᴛ1 = true;
-        t = ((uint32)1 << (int)(tracebackShift));
+        t = (uint32)1 << (int)(tracebackShift);
     }
     else if (exprᴛ1 == "all"u8) { matchᴛ1 = true;
         t = (uint32)((uint32)(1 << (int)(tracebackShift)) | (uint32)tracebackAll);
@@ -594,12 +636,12 @@ internal static void setTraceback(@string level) {
         t = (uint32)((uint32)(2 << (int)(tracebackShift)) | (uint32)tracebackAll);
     }
     else if (exprᴛ1 == "crash"u8) { matchᴛ1 = true;
-        t = (uint32)((UntypedInt)((2 << (int)(tracebackShift)) | tracebackAll) | (uint32)tracebackCrash);
+        t = (uint32)((UntypedInt)(2 << (int)(tracebackShift) | tracebackAll) | (uint32)tracebackCrash);
     }
     else if (exprᴛ1 == "wer"u8) { matchᴛ1 = true;
         do {
             if (GOOS == "windows"u8) {
-                t = (uint32)((UntypedInt)((2 << (int)(tracebackShift)) | tracebackAll) | (uint32)tracebackCrash);
+                t = (uint32)((UntypedInt)(2 << (int)(tracebackShift) | tracebackAll) | (uint32)tracebackCrash);
                 enableWER();
                 break;
             }
@@ -609,50 +651,20 @@ internal static void setTraceback(@string level) {
     if (fallthrough || !matchᴛ1) { /* default: */
         t = tracebackAll;
         {
-            var (n, ok) = atoi(level); if (ok && n == (nint)(uint32)n) {
+            var (n, err) = strconv.Atoi(level); if (err == default! && n == (nint)(uint32)n) {
                 t |= (uint32)(((uint32)n << (int)(tracebackShift)));
             }
         }
     }
-
     // when C owns the process, simply exit'ing the process on fatal errors
     // and panics is surprising. Be louder and abort instead.
     if (islibrary || isarchive) {
         t |= (uint32)(tracebackCrash);
     }
+
     t |= (uint32)(traceback_env);
+
     atomic.Store(Ꮡtraceback_cache, t);
-}
-
-// Poor mans 64-bit division.
-// This is a very special function, do not use it if you are not sure what you are doing.
-// int64 division is lowered into _divv() call on 386, which does not fit into nosplit functions.
-// Handles overflow in a time-specific manner.
-// This keeps us within no-split stack limits on 32-bit processors.
-//
-//go:nosplit
-internal static int32 timediv(int64 v, int32 div, ж<int32> Ꮡrem) {
-    ref var rem = ref Ꮡrem.DerefOrNull();
-
-    var res = (int32)0;
-    for (nint bit = 30; bit >= 0; bit--) {
-        if (v >= ((int64)div).Lsh((nuint)bit)) {
-            v = v - (((int64)div).Lsh((nuint)bit));
-            // Before this for loop, res was 0, thus all these
-            // power of 2 increments are now just bitsets.
-            res |= (int32)(((int32)1).Lsh((nuint)bit));
-        }
-    }
-    if (v >= (int64)div) {
-        if (Ꮡrem != nil) {
-            rem = 0;
-        }
-        return 0x7fffffff;
-    }
-    if (Ꮡrem != nil) {
-        rem = (int32)v;
-    }
-    return res;
 }
 
 // Helpers for Go. Must be NOSPLIT, must only call NOSPLIT functions, and must not block.
@@ -712,7 +724,7 @@ internal static (slice<@unsafe.Pointer>, slice<slice<int32>>) reflect_typelinks(
 //
 //go:linkname reflect_resolveNameOff reflect.resolveNameOff
 public static @unsafe.Pointer reflect_resolveNameOff(@unsafe.Pointer ptrInModule, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(resolveNameOff(ptrInModule, ((nameOff)off)).Bytes);
+    return @unsafe.Pointer.FromPinnedBox(resolveNameOff(ptrInModule, (nameOff)off).Bytes);
 }
 
 // reflect_resolveTypeOff resolves an *rtype offset from a base type.
@@ -730,7 +742,7 @@ public static @unsafe.Pointer reflect_resolveNameOff(@unsafe.Pointer ptrInModule
 //
 //go:linkname reflect_resolveTypeOff reflect.resolveTypeOff
 public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff(((typeOff)off)));
+    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff((typeOff)off));
 }
 
 // reflect_resolveTextOff resolves a function pointer offset from a base type.
@@ -745,21 +757,21 @@ public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, in
 //
 //go:linkname reflect_resolveTextOff reflect.resolveTextOff
 public static @unsafe.Pointer reflect_resolveTextOff(@unsafe.Pointer Δrtype, int32 off) {
-    return (uintptr)toRType((ж<_type>)(uintptr)(Δrtype)).textOff(((textOff)off));
+    return (uintptr)toRType((ж<_type>)(uintptr)(Δrtype)).textOff((textOff)off);
 }
 
 // reflectlite_resolveNameOff resolves a name offset from a base pointer.
 //
 //go:linkname reflectlite_resolveNameOff internal/reflectlite.resolveNameOff
 internal static @unsafe.Pointer reflectlite_resolveNameOff(@unsafe.Pointer ptrInModule, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(resolveNameOff(ptrInModule, ((nameOff)off)).Bytes);
+    return @unsafe.Pointer.FromPinnedBox(resolveNameOff(ptrInModule, (nameOff)off).Bytes);
 }
 
 // reflectlite_resolveTypeOff resolves an *rtype offset from a base type.
 //
 //go:linkname reflectlite_resolveTypeOff internal/reflectlite.resolveTypeOff
 internal static @unsafe.Pointer reflectlite_resolveTypeOff(@unsafe.Pointer Δrtype, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff(((typeOff)off)));
+    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff((typeOff)off));
 }
 
 // reflect_addReflectOff adds a pointer to the reflection offset lookup map.

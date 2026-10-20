@@ -68,26 +68,17 @@ partial struct @file {
     internal bool nonblock;                    // whether we set nonblocking mode
     internal bool stdoutOrErr;                    // whether this is stdout or stderr
     internal bool appendMode;                    // whether file is opened for appending
+    internal bool inRoot;                    // whether file is opened in a Root
 }
 
-// Fd returns the integer Unix file descriptor referencing the open file.
-// If f is closed, the file descriptor becomes invalid.
-// If f is garbage collected, a finalizer may close the file descriptor,
-// making it invalid; see [runtime.SetFinalizer] for more information on when
-// a finalizer might be run. On Unix systems this will cause the [File.SetDeadline]
-// methods to stop working.
-// Because file descriptors can be reused, the returned file descriptor may
-// only be closed through the [File.Close] method of f, or by its finalizer during
-// garbage collection. Otherwise, during garbage collection the finalizer
-// may close an unrelated file descriptor with the same (reused) number.
-//
-// As an alternative, see the f.SyscallConn method.
-public static uintptr Fd(this ж<File> Ꮡf) {
+// fd is the Unix implementation of Fd.
+internal static uintptr fd(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
         return ~((uintptr)0);
     }
+
     // If we put the file descriptor into nonblocking mode,
     // then set it to blocking mode before we return it,
     // because historically we have always returned a descriptor
@@ -96,29 +87,23 @@ public static uintptr Fd(this ж<File> Ꮡf) {
     if (f.nonblock) {
         Ꮡf.of(File.Ꮡpfd).SetBlocking();
     }
+
     return (uintptr)f.pfd.Sysfd;
 }
 
-// NewFile returns a new File with the given file descriptor and
-// name. The returned value will be nil if fd is not a valid file
-// descriptor. On Unix systems, if the file descriptor is in
-// non-blocking mode, NewFile will attempt to return a pollable File
-// (one for which the SetDeadline methods work).
-//
-// After passing it to NewFile, fd may become invalid under the same
-// conditions described in the comments of the Fd method, and the same
-// constraints apply.
-public static ж<File> NewFile(uintptr fd, @string name) {
+// newFileFromNewFile is called by [NewFile].
+internal static ж<File> newFileFromNewFile(uintptr fd, @string name) {
     nint fdi = (nint)fd;
     if (fdi < 0) {
         return default!;
     }
+
     var (flags, err) = unix.Fcntl(fdi, syscall.F_GETFL, 0);
     if (err != default!) {
         flags = 0;
     }
     var f = newFile(fdi, name, kindNewFile, unix.HasNonblockFlag(flags));
-    f.Value.appendMode = (nint)(flags & (nint)syscall.O_APPEND) != 0;
+    f.Value.appendMode = (flags & (nint)syscall.O_APPEND) != 0;
     return f;
 }
 
@@ -136,15 +121,26 @@ public static ж<File> net_newUnixFile(nint fd, @string name) {
     if (fd < 0) {
         throw panic("invalid FD");
     }
+
     return newFile(fd, name, kindSock, true);
 }
 
+// newFileKind describes the kind of file to newFile.
 partial struct newFileKind /*num:nint*/;
 
+// kindNewFile means that the descriptor was passed to us via NewFile.
 internal static newFileKind kindNewFile => /* iota */ 0;
+// kindOpenFile means that the descriptor was opened using
+// Open, Create, or OpenFile.
 internal static newFileKind kindOpenFile => 1;
+// kindPipe means that the descriptor was opened using Pipe.
 internal static newFileKind kindPipe => 2;
+// kindSock means that the descriptor is a network file descriptor
+// that was created from net package and was opened using net_newUnixFile.
 internal static newFileKind kindSock => 3;
+// kindNoPoll means that we should not put the descriptor into
+// non-blocking mode, because we know it is not a pipe or FIFO.
+// Used by openDirAt and openDirNolog for directories.
 internal static newFileKind kindNoPoll => 4;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -164,7 +160,9 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
         stdoutOrErr: fd == 1 || fd == 2
     ))
     ));
+
     var pollable = kind == kindOpenFile || kind == kindPipe || kind == kindSock || nonBlocking;
+
     // Things like regular files and FIFOs in kqueue on *BSD/Darwin
     // may not work properly (or accurately according to its manual).
     // As a result, we should avoid adding those to the kqueue-based
@@ -178,27 +176,28 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
         if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8) {
             ref var st = ref heap(new syscall.Stat_t(), out var Ꮡst);
             var err = ignoringEINTR(() => syscall.Fstat(fd, Ꮡst));
-            var typ = (uint32)(st.Mode & (uint32)syscall.S_IFMT);
+            var typ = st.Mode & (uint32)syscall.S_IFMT;
+            // Don't try to use kqueue with regular files on *BSDs.
+            // On FreeBSD a regular file is always
+            // reported as ready for writing.
+            // On Dragonfly, NetBSD and OpenBSD the fd is signaled
+            // only once as ready (both read and write).
+            // Issue 19093.
+            // Also don't add directories to the netpoller.
             if (err == default! && (typ == syscall.S_IFREG || typ == syscall.S_IFDIR)) {
-                // Don't try to use kqueue with regular files on *BSDs.
-                // On FreeBSD a regular file is always
-                // reported as ready for writing.
-                // On Dragonfly, NetBSD and OpenBSD the fd is signaled
-                // only once as ready (both read and write).
-                // Issue 19093.
-                // Also don't add directories to the netpoller.
                 pollable = false;
             }
+
+            // In addition to the behavior described above for regular files,
+            // on Darwin, kqueue does not work properly with fifos:
+            // closing the last writer does not cause a kqueue event
+            // for any readers. See issue #24164.
             if ((runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) && typ == syscall.S_IFIFO) {
-                // In addition to the behavior described above for regular files,
-                // on Darwin, kqueue does not work properly with fifos:
-                // closing the last writer does not cause a kqueue event
-                // for any readers. See issue #24164.
                 pollable = false;
             }
         }
-
     }
+
     var clearNonBlock = false;
     if (pollable) {
         // The descriptor is already in non-blocking mode.
@@ -219,6 +218,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
             }
         }
     }
+
     // An error here indicates a failure to register
     // with the netpoll system. That can happen for
     // a file descriptor that is not supported by
@@ -235,6 +235,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
             }
         }
     }
+
     runtime.SetFinalizer((~f).@file.OrTypedNil(), ((Func<ж<@file>, error>)(close)));
     return f;
 }
@@ -262,33 +263,37 @@ public static readonly @string DevNull = "/dev/null"u8;
 // Changes here should be reflected in openDirAt and openDirNolog, if relevant.
 internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMode perm) {
     var setSticky = false;
-    if (!supportsCreateWithStickyBit && (nint)(flag & O_CREATE) != 0 && (FileMode)(perm & ModeSticky) != 0) {
+    if (!supportsCreateWithStickyBit && (flag & O_CREATE) != 0 && (FileMode)(perm & ModeSticky) != 0) {
         {
             var (_, err) = Stat(name); if (IsNotExist(err)) {
                 setSticky = true;
             }
         }
     }
+
     nint r = default!;
     ref var s = ref heap(new poll.SysFile(), out var Ꮡs);
     ref var e = ref heap<error>(out var Ꮡe);
     // We have to check EINTR here, per issues 11180 and 39237.
     ignoringEINTR(() => {
-        (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, (nint)(flag | (nint)syscall.O_CLOEXEC), syscallMode(perm));
+        (r, Ꮡs.Value, Ꮡe.ValueSlot) = open(name, flag | (nint)syscall.O_CLOEXEC, syscallMode(perm));
         return Ꮡe.ValueSlot;
     });
     if (e != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: e))));
     }
+
     // open(2) itself won't handle the sticky bit on *BSD and Solaris
     if (setSticky) {
         setStickyBit(name);
     }
+
     // There's a race here with fork/exec, which we are
     // content to live with. See ../syscall/exec_unix.go.
     if (!supportsCloseOnExec) {
         syscall.CloseOnExec(r);
     }
+
     var f = newFile(r, name, kindOpenFile, unix.HasNonblockFlag(flag));
     f.Value.pfd.SysFile = s;
     return (f, default!);
@@ -305,9 +310,11 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     if (e != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: e))));
     }
+
     if (!supportsCloseOnExec) {
         syscall.CloseOnExec(r);
     }
+
     var f = newFile(r, name, kindNoPoll, false);
     f.Value.pfd.SysFile = s;
     return (f, default!);
@@ -333,6 +340,7 @@ internal static error close(this ж<@file> Ꮡfile) {
             err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "close"u8, Path: @file.name, Err: e)));
         }
     }
+
     // no need for a finalizer anymore
     runtime.SetFinalizer(Ꮡfile.OrTypedNil(), default!);
     return err;
@@ -360,7 +368,7 @@ internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, ni
 
 // Truncate changes the size of the named file.
 // If the file is a symbolic link, it changes the size of the link's target.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static error Truncate(@string name, int64 size) {
     var e = ignoringEINTR(() => syscall.Truncate(name, size));
     if (e != default!) {
@@ -370,7 +378,7 @@ public static error Truncate(@string name, int64 size) {
 }
 
 // Remove removes the named file or (empty) directory.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static error Remove(@string name) {
     // System call interface forces us to know
     // whether name is a file or directory.
@@ -384,6 +392,7 @@ public static error Remove(@string name) {
     if (e1 == default!) {
         return default!;
     }
+
     // Both failed: figure out which error to return.
     // OS X and Linux differ on whether unlink(dir)
     // returns EISDIR, so can't use that. However,
@@ -454,7 +463,7 @@ internal static (@string, error) readlink(@string name) {
             return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: err))));
         }
         if (n < len) {
-            return (((@string)(b.slice(0, n))), default!);
+            return ((@string)(b.slice(0, n)), default!);
         }
     }
 }
@@ -482,26 +491,33 @@ internal static (FileInfo, error) Info(this ref unixDirent d) {
     if (d.info != default!) {
         return (d.info, default!);
     }
-    return lstat(d.parent + "/"u8 + d.name);
+    return Lstat(d.parent + "/"u8 + d.name);
 }
 
 internal static @string String(this ж<unixDirent> Ꮡd) {
     return fs.FormatDirEntry(new unixDirentжDirEntry(Ꮡd));
 }
 
-internal static (DirEntry, error) newUnixDirent(@string parent, @string name, FileMode typ) {
+internal static (DirEntry, error) newUnixDirent(ж<File> Ꮡparent, @string name, FileMode typ) {
+    ref var parent = ref Ꮡparent.DerefOrNull();
+
     var ude = Ꮡ(new unixDirent(
-        parent: parent,
+        parent: parent.name,
         name: name,
         typ: typ
     ));
-    if (typ != ~((fs.FileMode)((fs.FileMode)0)) && !testingForceReadDirLstat) {
+    // When the parent file was opened in a Root,
+    // we cannot use a lazy lstat to load the FileInfo.
+    // Use lstatat here.
+    if (typ != ~((fs.FileMode)((fs.FileMode)0)) && !parent.inRoot) {
         return (new unixDirentжDirEntry(ude), default!);
     }
-    var (info, err) = lstat(parent + "/"u8 + name);
+
+    var (info, err) = Ꮡparent.lstatat(name);
     if (err != default!) {
         return (default!, err);
     }
+
     ude.Value.typ = info.Mode().Type();
     ude.Value.info = info;
     return (new unixDirentжDirEntry(ude), default!);

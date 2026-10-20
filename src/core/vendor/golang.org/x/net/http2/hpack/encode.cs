@@ -48,6 +48,7 @@ public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.buf = e.buf[..0];
+
     if (e.tableSizeUpdate) {
         e.tableSizeUpdate = false;
         if (e.minSize < e.dynTab.maxSize) {
@@ -56,6 +57,7 @@ public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) {
         e.minSize = uint32Max;
         e.buf = appendTableSize(e.buf, e.dynTab.maxSize);
     }
+
     var (idx, nameValueMatch) = Ꮡe.searchTable(f);
     if (nameValueMatch){
         e.buf = appendIndexed(e.buf, idx);
@@ -64,6 +66,7 @@ public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) {
         if (indexing) {
             e.dynTab.add(f);
         }
+
         if (idx == 0){
             e.buf = appendNewName(e.buf, f, indexing);
         } else {
@@ -92,10 +95,12 @@ internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡ
     if (nameValueMatch) {
         return (i, true);
     }
+
     (var j, nameValueMatch) = Ꮡe.of(Encoder.ᏑdynTab).of(dynamicTable.Ꮡtable).search(f);
     if (nameValueMatch || (i == 0 && j != 0)) {
         return (j + (uint64)staticTable.len(), nameValueMatch);
     }
+
     return (i, false);
 }
 
@@ -202,7 +207,7 @@ internal static slice<byte> appendVarInt(slice<byte> dst, byte n, uint64 i) {
     dst = append(dst, (byte)k);
     i -= k;
     for (; i >= 128; i >>= (int)(7)) {
-        dst = append(dst, (byte)((uint64)(0x80 | ((uint64)(i & 0x7f)))));
+        dst = append(dst, (byte)(0x80 | (i & 0x7f)));
     }
     return append(dst, (byte)i);
 }

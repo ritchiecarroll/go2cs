@@ -74,13 +74,16 @@ internal static ж<matrix> newInverseHilbert(nint n) {
             var x2 = @new<global::go.math.big_package.ΔRat>().SetInt(@new<global::go.math.big_package.ΔInt>().Binomial((int64)(n + i), (int64)(n - j - 1)));
             var x3 = @new<global::go.math.big_package.ΔRat>().SetInt(@new<global::go.math.big_package.ΔInt>().Binomial((int64)(n + j), (int64)(n - i - 1)));
             var x4 = @new<global::go.math.big_package.ΔRat>().SetInt(@new<global::go.math.big_package.ΔInt>().Binomial((int64)(i + j), (int64)i));
+
             x1.Mul(x1, x2);
             x1.Mul(x1, x3);
             x1.Mul(x1, x4);
             x1.Mul(x1, x4);
-            if ((nint)((i + j) & 1) != 0) {
+
+            if (((i + j) & 1) != 0) {
                 x1.Neg(x1);
             }
+
             a.set(i, j, x1);
         }
     }

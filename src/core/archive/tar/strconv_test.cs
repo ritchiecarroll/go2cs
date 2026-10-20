@@ -35,6 +35,7 @@ public static void TestFitsInBase256(ж<testing.T> Ꮡt) {
         new(0, 12, true),
         new(math.MinInt64, 12, true)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         var ok = fitsInBase256(v.width, v.@in);
         if (ok != v.ok) {
@@ -50,21 +51,21 @@ internal partial struct TestParseNumeric_vectors /*dyn*/ {
 }
 
 public static void TestParseNumeric(ж<testing.T> Ꮡt) {
-    var vectors = new TestParseNumeric_vectors[]{ // Test base-256 (binary) encoded values.
-
+    var vectors = new TestParseNumeric_vectors[]{
+        // Test base-256 (binary) encoded values.
         new(""u8, 0, true),
         new(((@string)(new byte[]{0x80})), 0, true),
         new(((@string)(new byte[]{0x80, 0x00})), 0, true),
         new(((@string)(new byte[]{0x80, 0x00, 0x00})), 0, true),
-        new(((@string)(new byte[]{0xbf})), ((1 << (int)(6))) - 1, true),
-        new(((@string)(new byte[]{0xbf, 0xff})), ((1 << (int)(14))) - 1, true),
-        new(((@string)(new byte[]{0xbf, 0xff, 0xff})), ((1 << (int)(22))) - 1, true),
+        new(((@string)(new byte[]{0xbf})), (1 << 6) - 1, true),
+        new(((@string)(new byte[]{0xbf, 0xff})), (1 << 14) - 1, true),
+        new(((@string)(new byte[]{0xbf, 0xff, 0xff})), (1 << 22) - 1, true),
         new(((@string)(new byte[]{0xff})), -1, true),
         new(((@string)(new byte[]{0xff, 0xff})), -1, true),
         new(((@string)(new byte[]{0xff, 0xff, 0xff})), -1, true),
-        new(((@string)(new byte[]{0xc0})), -1 * ((1 << (int)(6))), true),
-        new(((@string)(new byte[]{0xc0, 0x00})), -1 * ((1 << (int)(14))), true),
-        new(((@string)(new byte[]{0xc0, 0x00, 0x00})), -1 * ((1 << (int)(22))), true),
+        new(((@string)(new byte[]{0xc0})), -1 * (1 << 6), true),
+        new(((@string)(new byte[]{0xc0, 0x00})), -1 * (1 << 14), true),
+        new(((@string)(new byte[]{0xc0, 0x00, 0x00})), -1 * (1 << 22), true),
         new(((@string)(new byte[]{0x87, 0x76, 0xa2, 0x22, 0xeb, 0x8a, 0x72, 0x61})), 537795476381659745L, true),
         new(((@string)(new byte[]{0x80, 0x00, 0x00, 0x00, 0x07, 0x76, 0xa2, 0x22, 0xeb, 0x8a, 0x72, 0x61})), 537795476381659745L, true),
         new(((@string)(new byte[]{0xf7, 0x76, 0xa2, 0x22, 0xeb, 0x8a, 0x72, 0x61})), -615126028225187231L, true),
@@ -73,8 +74,9 @@ public static void TestParseNumeric(ж<testing.T> Ꮡt) {
         new(((@string)(new byte[]{0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})), 0, false),
         new(((@string)(new byte[]{0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})), math.MinInt64, true),
         new(((@string)(new byte[]{0xff, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})), 0, false),
-        new(((@string)(new byte[]{0xf5, 0xec, 0xd1, 0xc7, 0x7e, 0x5f, 0x26, 0x48, 0x81, 0x9f, 0x8f, 0x9b})), 0, false), // Test base-8 (octal) encoded values.
+        new(((@string)(new byte[]{0xf5, 0xec, 0xd1, 0xc7, 0x7e, 0x5f, 0x26, 0x48, 0x81, 0x9f, 0x8f, 0x9b})), 0, false),
 
+        // Test base-8 (octal) encoded values.
         new("0000000\x00"u8, 0, true),
         new(((@string)(new byte[]{0x20, 0x00, 0x30, 0x30, 0x30, 0x30, 0x30, 0x00})), 0, true),
         new(((@string)(new byte[]{0x20, 0x00, 0x30, 0x30, 0x30, 0x30, 0x33, 0x00})), 3, true),
@@ -88,6 +90,7 @@ public static void TestParseNumeric(ж<testing.T> Ꮡt) {
         new(((@string)(new byte[]{0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x00, 0x38, 0x39, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66})), 342391, true),
         new(((@string)(new byte[]{0x30, 0x31, 0x32, 0x33, 0x7e, 0x5f, 0x26, 0x34, 0x31, 0x32, 0x33})), 0, false)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         global::go.archive.tar_package.parser p = default!;
         var got = p.parseNumeric(slice<byte>(v.@in));
@@ -112,8 +115,8 @@ internal partial struct TestFormatNumeric_vectors /*dyn*/ {
 }
 
 public static void TestFormatNumeric(ж<testing.T> Ꮡt) {
-    var vectors = new TestFormatNumeric_vectors[]{ // Test base-8 (octal) encoded values.
-
+    var vectors = new TestFormatNumeric_vectors[]{
+        // Test base-8 (octal) encoded values.
         new(0, "0\x00"u8, true),
         new(7, "7\x00"u8, true),
         new(8, ((@string)(new byte[]{0x80, 0x08})), true),
@@ -130,22 +133,23 @@ public static void TestFormatNumeric(ж<testing.T> Ꮡt) {
         new(1402433619, "12345670123\x00"u8, true),
         new(8589934591L, "77777777777\x00"u8, true),
         new(8589934592L, ((@string)(new byte[]{0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00})), true),
-        new(math.MaxInt64, "777777777777777777777\x00"u8, true), // Test base-256 (binary) encoded values.
+        new(math.MaxInt64, "777777777777777777777\x00"u8, true),
 
+        // Test base-256 (binary) encoded values.
         new(-1, ((@string)(new byte[]{0xff})), true),
         new(-1, ((@string)(new byte[]{0xff, 0xff})), true),
         new(-1, ((@string)(new byte[]{0xff, 0xff, 0xff})), true),
-        new((((int64)1 << (int)(0))), "0"u8, false),
-        new(((1 << (int)(8))) - 1, ((@string)(new byte[]{0x80, 0xff})), true),
-        new((((int64)1 << (int)(8))), "0\x00"u8, false),
-        new(((1 << (int)(16))) - 1, ((@string)(new byte[]{0x80, 0xff, 0xff})), true),
-        new((((int64)1 << (int)(16))), "00\x00"u8, false),
-        new(-1 * ((1 << (int)(0))), ((@string)(new byte[]{0xff})), true),
-        new(-1 * ((1 << (int)(0))) - 1, "0"u8, false),
-        new(-1 * ((1 << (int)(8))), ((@string)(new byte[]{0xff, 0x00})), true),
-        new(-1 * ((1 << (int)(8))) - 1, "0\x00"u8, false),
-        new(-1 * ((1 << (int)(16))), ((@string)(new byte[]{0xff, 0x00, 0x00})), true),
-        new(-1 * ((1 << (int)(16))) - 1, "00\x00"u8, false),
+        new(((int64)1 << 0), "0"u8, false),
+        new((1 << 8) - 1, ((@string)(new byte[]{0x80, 0xff})), true),
+        new(((int64)1 << 8), "0\x00"u8, false),
+        new((1 << 16) - 1, ((@string)(new byte[]{0x80, 0xff, 0xff})), true),
+        new(((int64)1 << 16), "00\x00"u8, false),
+        new(-1 * (1 << 0), ((@string)(new byte[]{0xff})), true),
+        new(-1 * (1 << 0) - 1, "0"u8, false),
+        new(-1 * (1 << 8), ((@string)(new byte[]{0xff, 0x00})), true),
+        new(-1 * (1 << 8) - 1, "0\x00"u8, false),
+        new(-1 * (1 << 16), ((@string)(new byte[]{0xff, 0x00, 0x00})), true),
+        new(-1 * (1 << 16) - 1, "00\x00"u8, false),
         new(537795476381659745L, "0000000\x00"u8, false),
         new(537795476381659745L, ((@string)(new byte[]{0x80, 0x00, 0x00, 0x00, 0x07, 0x76, 0xa2, 0x22, 0xeb, 0x8a, 0x72, 0x61})), true),
         new(-615126028225187231L, "0000000\x00"u8, false),
@@ -157,6 +161,7 @@ public static void TestFormatNumeric(ж<testing.T> Ꮡt) {
         new(math.MaxInt64, ((@string)(new byte[]{0x80, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})), true),
         new(math.MinInt64, ((@string)(new byte[]{0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})), true)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         global::go.archive.tar_package.formatter f = default!;
         var got = new slice<byte>(len(v.want));
@@ -207,6 +212,7 @@ public static void TestFitsInOctal(ж<testing.T> Ꮡt) {
         new(-452724, 12, false),
         new(-1564164, 30, false)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         var ok = fitsInOctal(v.width, v.input);
         if (ok != v.ok) {
@@ -278,10 +284,9 @@ public static void TestParsePAXTime(ж<testing.T> Ꮡt) {
         new("foo"u8, new time.Time(nil), false),
         new("\x00"u8, new time.Time(nil), false),
         new("𝟵𝟴𝟳𝟲𝟱.𝟰𝟯𝟮𝟭𝟬"u8, new time.Time(nil), false), // Unicode numbers (U+1D7EC to U+1D7F5)
-
-        new("98765﹒43210"u8, new time.Time(nil), false)
+        new("98765﹒43210"u8, new time.Time(nil), false) // Unicode period (U+FE52)
     }.slice();
-    // Unicode period (U+FE52)
+
     foreach (var (_, v) in vectors) {
         var (ts, err) = parsePAXTime(v.@in);
         var ok = (err == default!);
@@ -336,6 +341,7 @@ public static void TestFormatPAXTime(ж<testing.T> Ꮡt) {
         new(-1350244992, -23960100, "-1350244992.0239601"u8),
         new(-1350244992, -23960108, "-1350244992.023960108"u8)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         @string got = formatPAXTime(time.Unix(v.sec, v.nsec));
         if (got != v.want) {
@@ -356,6 +362,7 @@ internal partial struct TestParsePAXRecord_vectors /*dyn*/ {
 public static void TestParsePAXRecord(ж<testing.T> Ꮡt) {
     @string medName = strings.Repeat("CD"u8, 50);
     @string longName = strings.Repeat("AB"u8, 100);
+
     var vectors = new TestParsePAXRecord_vectors[]{
         new("6 k=v\n\n"u8, "\n"u8, "k"u8, "v"u8, true),
         new("19 path=/etc/hosts\n"u8, ""u8, "path"u8, "/etc/hosts"u8, true),
@@ -383,6 +390,7 @@ public static void TestParsePAXRecord(ж<testing.T> Ꮡt) {
         new("0 k=v\n"u8, "0 k=v\n"u8, ""u8, ""u8, false),
         new("+0000005 x=\n"u8, "+0000005 x=\n"u8, ""u8, ""u8, false)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         var (key, val, res, err) = parsePAXRecord(v.@in);
         var ok = (err == default!);
@@ -414,6 +422,7 @@ internal partial struct TestFormatPAXRecord_vectors /*dyn*/ {
 public static void TestFormatPAXRecord(ж<testing.T> Ꮡt) {
     @string medName = strings.Repeat("CD"u8, 50);
     @string longName = strings.Repeat("AB"u8, 100);
+
     var vectors = new TestFormatPAXRecord_vectors[]{
         new("k"u8, "v"u8, "6 k=v\n"u8, true),
         new("path"u8, "/etc/hosts"u8, "19 path=/etc/hosts\n"u8, true),
@@ -429,6 +438,7 @@ public static void TestFormatPAXRecord(ж<testing.T> Ꮡt) {
         new("null\x00"u8, "value"u8, ""u8, false),
         new(paxSchilyXattr + "key", "null\x00"u8, "26 SCHILY.xattr.key=null\x00\n"u8, true)
     }.slice();
+
     foreach (var (_, v) in vectors) {
         var (got, err) = formatPAXRecord(v.inKey, v.inVal);
         var ok = (err == default!);

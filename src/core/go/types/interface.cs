@@ -5,8 +5,8 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -60,20 +60,24 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<ΔTy
     if (len(methods) == 0 && len(embeddeds) == 0) {
         return ᏑemptyInterface;
     }
+
     // set method receivers if necessary
     var typ = (((ж<Checker>)nil)).newInterface();
     foreach (var (_, m) in methods) {
         {
             var sig = (~m).typ._<ж<ΔSignature>>(); if ((~sig).recv == nil) {
-                sig.Value.recv = NewVar((~m).pos, (~m).pkg, ""u8, new InterfaceжΔType(typ));
+                sig.Value.recv = newVar(RecvVar, (~m).pos, (~m).pkg, ""u8, new InterfaceжΔType(typ));
             }
         }
     }
+
     // sort for API stability
     sortMethods(methods);
+
     typ.Value.methods = methods;
     typ.Value.embeddeds = embeddeds;
     typ.Value.complete = true;
+
     return typ;
 }
 
@@ -209,18 +213,21 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
         }
         Ꮡityp.Value.embedPos.ValueSlot = append(Ꮡityp.Value.embedPos.ValueSlot, pos);
     }
+
     foreach (var (_, f) in (~iface.Methods).List) {
         if (len((~f).Names) == 0) {
             addEmbedded((~f).Type.Pos(), parseUnion(Ꮡcheck, (~f).Type));
             continue;
         }
         // f.Name != nil
+
         // We have a method with name f.Names[0].
         var name = (~f).Names[0];
         if ((~name).Name == "_"u8) {
             Ꮡcheck.error(new ast_Identжpositioner(name), BlankIfaceMethod, methodsMustHaveAUniqueˢ);
             continue; // ignore
         }
+
         var typ = Ꮡcheck.typ((~f).Type);
         var (sig, _) = typ._<ж<ΔSignature>>(ᐧ);
         if (sig == nil) {
@@ -229,6 +236,7 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
             }
             continue; // ignore
         }
+
         // The go/parser doesn't accept method type parameters but an ast.FuncType may have them.
         if ((~sig).tparams != nil) {
             positioner at = new ast_Exprᴠpositioner((~f).Type);
@@ -239,6 +247,7 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
             }
             Ꮡcheck.error(at, InvalidSyntaxTree, methodsCannotHaveTypeˢ);
         }
+
         // use named receiver type if available (for better error messages)
         ΔType recvTyp = new InterfaceжΔType(Ꮡityp);
         if (Ꮡdef != nil) {
@@ -248,22 +257,27 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
                 }
             }
         }
-        sig.Value.recv = NewVar(name.Pos(), check.pkg, ""u8, recvTyp);
+        sig.Value.recv = newVar(RecvVar, name.Pos(), check.pkg, ""u8, recvTyp);
+
         var m = NewFunc(name.Pos(), check.pkg, (~name).Name, sig);
         check.recordDef(name, new FuncжObject(m));
         ityp.methods = append(ityp.methods, m);
     }
+
     // All methods and embedded elements for this interface are collected;
     // i.e., this interface may be used in a type set computation.
     ityp.complete = true;
+
     if (len(ityp.methods) == 0 && len(ityp.embeddeds) == 0) {
         // empty interface
         ityp.tset = ᏑtopTypeSet;
         return;
     }
+
     // sort for API stability
     sortMethods(ityp.methods);
     // (don't sort embeddeds: they must correspond to *embedPos entries)
+
     // Compute type set as soon as possible to report any errors.
     // Subsequent uses of type sets will use this computed type
     // set and won't need to pass in a *Checker.

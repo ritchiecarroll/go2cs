@@ -42,6 +42,7 @@ partial struct visitor {
 internal static visitor newVisitor() {
     var v = new visitor(nil);
     v.m = new map<@string, map<@string, bool>>();
+
     return v;
 }
 
@@ -78,12 +79,15 @@ internal static ast.Visitor Visit(this visitor v, ast.Node n) {
 
 internal static void loadTypes(@string path, @string pkgName, visitor v) {
     var fset = token.NewFileSet();
+
     var filter = (fs.FileInfo fi) => strings.HasSuffix(fi.Name(), ".go"u8);
     var (pkgs, err) = parser.ParseDir(fset, path, filter, 0);
     if (err != default!) {
         throw panic(err);
     }
+
     var pkg = pkgs[pkgName];
+
     foreach (var (_, f) in (~pkg).Files) {
         ast.Walk(v, new ast.FileжNode(f));
     }
@@ -109,8 +113,10 @@ public static partial void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
             Ꮡt.Skipf("GOROOT source not present"u8);
         }
     }
+
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     var (rl, r) = (newVisitor(), newVisitor());
+
     foreach (var (_, tc) in new TestMirrorWithReflect_type[]{
         new("."u8, "reflectlite"u8, rl),
         new(reflectDir, "reflect"u8, r)
@@ -130,9 +136,11 @@ public static partial void TestMirrorWithReflect(ж<testing.T> Ꮡt) {
         });
     }
     Ꮡwg.Wait();
+
     if (len(rl.m) != len(r.m)) {
         Ꮡt.Fatalf("number of types mismatch, reflect: %d, reflectlite: %d (%+v, %+v)"u8, len(r.m), len(rl.m), r.m, rl.m);
     }
+
     foreach (var (typName, _) in r.m) {
         if (len(r.m[typName]) != len(rl.m[typName])) {
             Ꮡt.Errorf("type %s number of fields mismatch, reflect: %d, reflectlite: %d"u8, typName, len(r.m[typName]), len(rl.m[typName]));

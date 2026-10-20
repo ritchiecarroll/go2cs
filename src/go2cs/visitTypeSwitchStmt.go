@@ -28,6 +28,9 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, target
 }
 
 func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
+	v.noteClauseSpans(typeSwitchStmt.Body)
+	defer v.trimTrailingLineBreak()
+
 	var caseClauses []*ast.CaseClause
 
 	for _, stmt := range typeSwitchStmt.Body.List {
@@ -149,6 +152,8 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 			v.outputBuilder.WriteString(v.newline)
 		}
 
+		v.writeAboveLabelComments(caseClause.Colon)
+
 		if caseClause.List == nil {
 			// Emit `default: {` WITHOUT a trailing newline (mirroring the `case …: {` path below):
 			// each visited body statement supplies its own LEADING newline, so a trailing newline here
@@ -174,9 +179,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				v.outputBuilder.WriteString(fmt.Sprintf(" %s = %s;", targetIdent, boundExpr))
 			}
 
-			for _, stmt := range caseClause.Body {
-				v.visitListStmt(stmt)
-			}
+			v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 			v.outputBuilder.WriteString(v.newline)
 
@@ -373,9 +376,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 					// inherit a STALE lastStatementWasReturn from the prior case (CS0163).
 					v.lastStatementWasReturn = false
 
-					for _, stmt := range caseClause.Body {
-						v.visitListStmt(stmt)
-					}
+					v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 					v.outputBuilder.WriteString(v.newline)
 
@@ -437,9 +438,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 					// below — the empty C# case then falls through (CS0163).
 					v.lastStatementWasReturn = false
 
-					for _, stmt := range caseClause.Body {
-						v.visitListStmt(stmt)
-					}
+					v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 					v.outputBuilder.WriteString(v.newline)
 

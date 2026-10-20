@@ -13,6 +13,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -35,6 +36,65 @@ func isSimpleIdentifierName(s string) bool {
 	}
 
 	return true
+}
+
+// writeListComments writes the free comments ahead of one item of a list that spans lines — a composite
+// literal's elements or a call's arguments — where Go has them. A comment on the line where the previous
+// item (or the opening brace) ends trails that line; any other takes a line of its own, at indentLevel,
+// after the blank line Go has above it. open is the list's opening bracket, prevEnd where the previous
+// item ends and limit where the next one starts. Only comments after open are the list's: a list can be
+// rendered before the code ahead of it is written (a lowered switch renders its next case's condition
+// before the body above it), and a comment there belongs to that code. It reports whether what it wrote
+// ends in a line comment, after which the next item must start a new line.
+func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, limit token.Pos, indentLevel int) bool {
+	if !v.options.includeComments || !prevEnd.IsValid() || !limit.IsValid() {
+		return false
+	}
+
+	prevLine := v.fset.Position(prevEnd).Line
+	lastLine := prevLine
+	handledPos := []token.Pos{}
+	endsInLineComment := false
+
+	first := sort.Search(len(v.sortedCommentPos), func(i int) bool { return v.sortedCommentPos[i] > open })
+
+	for _, pos := range v.sortedCommentPos[first:] {
+		if pos >= limit {
+			break
+		}
+
+		comment, found := v.standAloneComments[pos]
+
+		if !found {
+			continue
+		}
+
+		line := v.fset.Position(pos).Line
+
+		if pos > prevEnd && line == prevLine {
+			builder.WriteString(" ")
+		} else {
+			if pos > prevEnd && line > lastLine+1 {
+				builder.WriteString(v.newline)
+			}
+
+			builder.WriteString(v.newline)
+			builder.WriteString(v.indent(indentLevel))
+		}
+
+		builder.WriteString(strings.ReplaceAll(comment, "\n", v.newline))
+		lastLine = line + strings.Count(comment, "\n")
+		endsInLineComment = strings.HasPrefix(comment, "//")
+
+		delete(v.standAloneComments, pos)
+		handledPos = append(handledPos, pos)
+	}
+
+	for _, pos := range handledPos {
+		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
+	}
+
+	return endsInLineComment
 }
 
 func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callContext *CallExprContext) string {
@@ -73,10 +133,17 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		} else {
 			if i == 0 && prevEndPos.IsValid() {
 				exprOnNewLine = v.isLineFeedBetween(prevEndPos, expr.Pos())
+
+				if v.writeListComments(result, prevEndPos, prevEndPos, expr.Pos(), v.indentLevel+1) {
+					exprOnNewLine = true
+				}
 			} else {
 				result.WriteRune(',')
 				exprOnNewLine = v.isLineFeedBetween(exprs[i-1].End(), expr.Pos())
-				v.writeStandAloneCommentString(result, expr.Pos(), nil, " ")
+
+				if v.writeListComments(result, prevEndPos, exprs[i-1].End(), expr.Pos(), v.indentLevel+1) {
+					exprOnNewLine = true
+				}
 			}
 
 			if forceMultiLine || exprOnNewLine {
@@ -118,7 +185,16 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// takes the explicit (@string) cast instead — otherwise the parameter infers as C#
 			// string and the method-group-to-Action conversion fails (fmt's
 			// `defer p.catchPanic(p.arg, verb, "Format")`, CS0123 x4).
-			basicLitContext.castToGoString = callContext.useGoStringArg[i] || (callArgs != nil && callContext.u8StringArgOK[i])
+			//
+			// EVERY literal in the capture list, not only one in a slot that accepts u8: a variadic
+			// tail element (past the parameter array, so u8StringArgOK reads false) and an `any`
+			// slot such as panic's took no cast, so `defer note("a", "b")` and
+			// `defer panic("from defer")` inferred T = System.String. Each happened to be correct
+			// (the thunk converts at the call; panic normalizes), and GO2CS0004 reports exactly that
+			// inference (A2) once plain literals made the analyzer read converted code: measured on
+			// DeferVariadicCallee, DeferPanicArg and DeferLambdaParam. The cast makes T = @string, Go's
+			// own type for the literal.
+			basicLitContext.castToGoString = callContext.useGoStringArg[i] || callArgs != nil
 
 			// Check if the argument is a pointer type
 			identContext.isPointer = callContext.argTypeIsPtr[i]
@@ -266,7 +342,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// extension (sameNameMethodCapture); an adapter (`new …`) is already a different type and binds
 			// the function.
 			if cast, ok := callContext.sameNameCaptureCasts[i]; ok && !strings.HasPrefix(resultExpr, "new ") {
-				resultExpr = fmt.Sprintf("(%s)(%s)", cast, resultExpr)
+				resultExpr = castOf(cast, resultExpr)
 			}
 		} else {
 			resultExpr = clonedElement(v.convExpr(expr, contexts))
@@ -304,6 +380,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			resultExpr = v.applyTypedNilUnsafePointerBox(v.getType(expr, false), v.unsafePointerExprNeverRendersNull(expr), resultExpr)
 		}
 
+		// The TYPE-PARAMETER sibling: `fmt.Sprintf("%T", e)` and `[]any{e}` inside a generic body, where E may be a nil
+		// pointer or func at run time (errors_test's testAsType named its subtests by `%T` of a nil *fs.PathError).
+		if callContext != nil && callContext.anyBoxedTypeParamArgs[i] && !spreadArg && !totalReplacement {
+			if typeParam, isTypeParam := v.getType(expr, false).(*types.TypeParam); isTypeParam {
+				resultExpr = applyTypedNilTypeParamBox(typeParam, resultExpr)
+			}
+		}
+
 		if !totalReplacement && replacementArgs != nil && i < len(replacementArgs) && len(replacementArgs[i]) > 0 {
 			resultExpr = strings.ReplaceAll(replacementArgs[i], DynamicCastArgMarker, resultExpr)
 		}
@@ -333,7 +417,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 					if keyed {
 						resultExpr = fmt.Sprintf("%s: (%s)(%s)", label, castType, value)
 					} else {
-						resultExpr = fmt.Sprintf("(%s)(%s)", castType, value)
+						resultExpr = castOf(castType, value)
 					}
 				}
 			}
@@ -386,6 +470,12 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		}
 
 		arg := &strings.Builder{}
+
+		// A whole argument needs no parentheses of its own (parityOperatorEmission.go); a spread argument takes a
+		// member access below, which binds to its first token.
+		if !hasSpreadOperator || i != len(exprs)-1 {
+			resultExpr = v.unparenthesizedWholeExpression(expr, resultExpr)
+		}
 
 		arg.WriteString(resultExpr)
 
@@ -516,6 +606,22 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 		if forceMultiLine && i != len(exprs)-1 {
 			result.WriteRune(';')
+		}
+	}
+
+	// A call's comments after its last argument, before its `)`: on that argument's line they trail it
+	// (`cipher(k, false /* not for reading */)`); a line comment puts the `)` on a line of its own. Only
+	// for the whole argument list of the innermost call being converted, the one that opens at its `(`
+	// with its first argument: a composite literal's elements come through here too, inside some
+	// enclosing call, and make's size arguments (Args[1:]) are rendered here and then rebuilt. A deferred
+	// call's capture render (callArgs) is not the one written either.
+	if callContext != nil && callContext.callArgs == nil && !forceMultiLine && len(v.callParens) > 0 &&
+		v.callParens[len(v.callParens)-1][0] == prevEndPos && v.callParens[len(v.callParens)-1][2] == exprs[0].Pos() {
+		if rparen := v.callParens[len(v.callParens)-1][1]; rparen > exprs[len(exprs)-1].End() {
+			if v.writeListComments(result, prevEndPos, exprs[len(exprs)-1].End(), rparen, v.indentLevel+1) {
+				result.WriteString(v.newline)
+				result.WriteString(v.indent(v.indentLevel))
+			}
 		}
 	}
 

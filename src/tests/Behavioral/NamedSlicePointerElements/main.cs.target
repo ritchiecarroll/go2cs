@@ -15,13 +15,17 @@ partial struct Array {
 partial struct queue /*[]ж<item>*/;
 
 internal static void Main() {
+    var qᴷ = new stackAppend<ж<item>>();
+
     var q = new queue(new ж<item>[]{Ꮡ(new item(v: 1)), Ꮡ(new item(v: 2))}.slice());
-    q = append(q, Ꮡ(new item(v: 3)));
+    q = append(qᴷ, q, Ꮡ(new item(v: 3)));
     q[1].Value.v = 5;
+
     nint sum = 0;
     foreach (var (_, it) in q) {
         sum += it.Value.v;
     }
+
     fmt.Println(len(q), (~q[0]).v, (~q[1]).v, (~q[2]).v, sum);
 }
 

@@ -4,7 +4,9 @@
 // CPU profile -> trace
 namespace go;
 
+using tracev2 = @internal.trace.tracev2_package;
 using @internal.runtime;
+using @internal.trace;
 using @unsafe = unsafe_package;
 using System.Runtime.CompilerServices;
 using atomic = @internal.runtime.atomic_package;
@@ -64,6 +66,7 @@ internal static partial void traceStartReadCPU() {
             // we would still want to do a goroutine-level sleep in between
             // reads to avoid frequent wakeups.
             Δtrace.cpuSleep.sleep(100_000_000);
+
             ref var tl = ref heap<traceLocker>(out var Ꮡtl);
             tl = traceAcquire();
             if (!tl.ok()) {
@@ -91,6 +94,7 @@ internal static void traceStopReadCPU() {
     if (traceEnabled()) {
         @throw(traceStopReadCPUCalledˢ);
     }
+
     // Once we close the profbuf, we'll be in one of two situations:
     // - The logger goroutine has already exited because it observed
     //   that the trace is disabled.
@@ -103,8 +107,10 @@ internal static void traceStopReadCPU() {
     Δtrace.cpuLogRead[0].close();
     Δtrace.cpuLogRead[1].close();
     Δtrace.cpuSleep.wake();
+
     // Wait until the logger goroutine exits.
     ᐸꟷ(Δtrace.cpuLogDone);
+
     // Clear state for the next trace.
     Δtrace.cpuLogDone = default!;
     Δtrace.cpuLogRead[0] = default!;
@@ -126,7 +132,8 @@ internal static void traceStopReadCPU() {
 // Must not run on the system stack because profBuf.read performs race
 // operations.
 internal static bool traceReadCPU(uintptr gen) {
-    array<uintptr> pcBuf = new(128); /* traceStackSize */
+    array<uintptr> pcBuf = new(128); /* tracev2.MaxFramesPerStack */
+
     var (data, tags, eof) = Δtrace.cpuLogRead[gen % 2].read(profBufNonBlocking);
     while (len(data) > 0) {
         if (len(data) < 4 || data[0] > (uint64)len(data)) {
@@ -138,21 +145,24 @@ internal static bool traceReadCPU(uintptr gen) {
         if (len(tags) < 1) {
             break; // mismatched profile records and tags
         }
+
         // Deserialize the data in the profile buffer.
         var recordLen = data[0];
         var timestamp = data[1];
-        var ppid = (data[2] >> (int)(1));
+        var ppid = data[2] >> 1;
         {
-            var hasP = ((uint64)(data[2] & 0b1)) != 0; if (!hasP) {
+            var hasP = (data[2] & 0b1) != 0; if (!hasP) {
                 ppid = ~(uint64)0;
             }
         }
         var goid = data[3];
         var mpid = data[4];
         var stk = data.slice(5, (nint)(recordLen));
+
         // Overflow records always have their headers contain
         // all zeroes.
         var isOverflowRecord = len(stk) == 1 && data[2] == 0 && data[3] == 0 && data[4] == 0;
+
         // Move the data iterator forward.
         data = data.slice((nint)(recordLen));
         // No support here for reporting goroutine tags at the moment; if
@@ -160,36 +170,42 @@ internal static bool traceReadCPU(uintptr gen) {
         // probably want to see when the tags are applied and when they
         // change, instead of only seeing them when we get a CPU sample.
         tags = tags[1..];
+
         if (isOverflowRecord) {
             // Looks like an overflow record from the profBuf. Not much to
             // do here, we only want to report full records.
             continue;
         }
+
         // Construct the stack for insertion to the stack table.
         nint nstk = 1;
         pcBuf[0] = logicalStackSentinel;
         for (; nstk < len(pcBuf) && nstk - 1 < len(stk); nstk++) {
             pcBuf[nstk] = (uintptr)stk[nstk - 1];
         }
+
         // Write out a trace event.
         var w = unsafeTraceWriter(gen, Δtrace.cpuBuf[gen % 2]);
+
         // Ensure we have a place to write to.
         bool flushed = default!;
-        (w, flushed) = w.ensure(2 + 5 * traceBytesPerNumber);
-        /* traceEvCPUSamples + traceEvCPUSample + timestamp + g + m + p + stack ID */
+        (w, flushed) = w.ensure(2 + 5 * traceBytesPerNumber /* tracev2.EvCPUSamples + tracev2.EvCPUSample + timestamp + g + m + p + stack ID */);
         if (flushed) {
             // Annotate the batch as containing strings.
-            w.@byte((byte)traceEvCPUSamples);
+            w.@byte((byte)tracev2.EvCPUSamples);
         }
+
         // Add the stack to the table.
         var stackID = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).put(pcBuf.slice(0, nstk));
+
         // Write out the CPU sample.
-        w.@byte((byte)traceEvCPUSample);
+        w.@byte((byte)tracev2.EvCPUSample);
         w.varint(timestamp);
         w.varint(mpid);
         w.varint(ppid);
         w.varint(goid);
         w.varint(stackID);
+
         Δtrace.cpuBuf[gen % 2] = w.traceBuf;
     }
     return !eof;
@@ -230,25 +246,27 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
         // this in any useful way anyway.
         return;
     }
+
     // We're going to conditionally write to one of two buffers based on the
     // generation. To make sure we write to the correct one, we need to make
-    // sure this thread's trace seqlock is held. If it already is, then we're
+    // sure this thread's trace write flag is set. If it already is, then we're
     // in the tracer and we can just take advantage of that. If it isn't, then
     // we need to acquire it and read the generation.
     var locked = false;
-    if (Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Load() % 2 == 0) {
-        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
+    if (!Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Load()) {
+        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(true);
         locked = true;
     }
     var gen = ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Load();
     if (gen == 0) {
-        // Tracing is disabled, as it turns out. Release the seqlock if necessary
+        // Tracing is disabled, as it turns out. Clear the write flag if necessary
         // and exit.
         if (locked) {
-            Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
+            Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
         }
         return;
     }
+
     var now = traceClockNow();
     // The "header" here is the ID of the M that was running the profiled code,
     // followed by the IDs of the P and goroutine. (For normal CPU profiling, it's
@@ -258,19 +276,21 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
     if (Ꮡpp != nil){
         // Overflow records in profBuf have all header values set to zero. Make
         // sure that real headers have at least one bit set.
-        hdr[0] = (uint64)(((uint64)pp.id << (int)(1)) | 0b1);
+        hdr[0] = (uint64)pp.id << 1 | 0b1;
     } else {
         hdr[0] = 0b10;
     }
     if (Ꮡgp != nil) {
         hdr[1] = gp.goid;
     }
-    hdr[2] = (uint64)mp.procid;
+    hdr[2] = mp.procid;
+
     // Allow only one writer at a time
     while (!ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
         osyield();
     }
+
     {
         var log = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, (ulong)(gen % 2)).Load(); if (log != nil) {
             // Note: we don't pass a tag pointer here (how should profiling tags
@@ -279,10 +299,12 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
             log.write(nil, (int64)(uint64)now, hdr[..], stk);
         }
     }
+
     ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑsignalLock).Store(0);
-    // Release the seqlock if we acquired it earlier.
+
+    // Clear the write flag if we set it earlier.
     if (locked) {
-        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡseqlock).Add(1);
+        Ꮡmp.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Store(false);
     }
 }
 

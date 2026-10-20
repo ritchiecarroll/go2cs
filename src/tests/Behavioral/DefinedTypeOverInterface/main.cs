@@ -33,16 +33,19 @@ internal static @string describe(Token t) {
     case point v: {
         return "pt:"u8 + v.String();
     }}
-    return "?"u8;
+    return "?";
 }
 
 internal static void Main() {
-    any t = (nint)(42);
+    any t = (nint)42;
     fmt.Println(describe(t));
-    @string msg = "hi"u8;
+
+    @string msg = "hi";
     Token ts = msg;
     fmt.Println(describe(ts));
+
     fmt.Println(describe(new point(1, 2)));
+
     Named n = new point(3, 4);
     fmt.Println(n.String());
 }

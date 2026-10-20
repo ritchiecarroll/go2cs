@@ -25,7 +25,6 @@ internal static float64 pow2(nint i) {
     case {} when i is 1: {
         return 2D;
     }}
-
     return pow2(i / 2) * pow2(i - i / 2);
 }
 
@@ -120,7 +119,9 @@ public static void TestFp(ж<testing.T> Ꮡt) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         var s = bufio.NewScanner(new strconv_test_package.os_FileжReader(f));
+
         for (nint lineno = 1; s.Scan(); lineno++) {
             @string line = s.Text();
             if (len(line) == 0 || line[0] == (rune)'#') {
@@ -152,7 +153,6 @@ public static void TestFp(ж<testing.T> Ꮡt) {
                 sΔ1 = fmt.Sprintf(a[1], v1);
                 v = (float64)v1;
             }
-
             if (sΔ1 != a[3]) {
                 Ꮡt.Error(testdataTestfpTxtˢ2, lineno, (@string)": "u8, a[0], (@string)" "u8, a[1], (@string)" "u8, a[2], (@string)" ("u8, v, (@string)") "u8,
                     wantˢ, a[3], gotˢ, sΔ1);

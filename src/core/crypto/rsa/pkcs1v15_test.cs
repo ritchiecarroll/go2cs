@@ -61,6 +61,7 @@ internal static slice<DecryptPKCS1v15Test> decryptPKCS1v15Tests = new DecryptPKC
 
 public static void TestDecryptPKCS1v15(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
+
     var decryptionFuncs = new Func<slice<byte>, (slice<byte>, error)>[]{
         (slice<byte> ciphertext) => {
             return DecryptPKCS1v15(default!, test512Key, ciphertext);
@@ -69,6 +70,7 @@ public static void TestDecryptPKCS1v15(ж<testing.T> Ꮡt) {
             return test512Key.Decrypt(default!, ciphertext, default!);
         }
     }.slice();
+
     foreach (var (_, decryptFunc) in decryptionFuncs) {
         foreach (var (i, test) in decryptPKCS1v15Tests) {
             var (@out, err) = decryptFunc(decodeBase64(test.@in));
@@ -86,16 +88,19 @@ public static void TestDecryptPKCS1v15(ж<testing.T> Ꮡt) {
 public static void TestEncryptPKCS1v15(ж<testing.T> Ꮡt) {
     var random = rand.Reader;
     nint k = ((~rsaPrivateKey).N.BitLen() + 7) / 8;
+
     var randomʗ1 = random;
     var tryEncryptDecrypt = (slice<byte> @in, bool blind) => {
         if (len(@in) > k - 11) {
             @in = @in.slice(0, k - 11);
         }
+
         var (ciphertext, err) = EncryptPKCS1v15(randomʗ1, rsaPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), @in);
         if (err != default!) {
             Ꮡt.Errorf("error encrypting: %s"u8, err);
             return false;
         }
+
         io.Reader randΔ1 = default!;
         if (!blind){
             randΔ1 = default!;
@@ -107,12 +112,14 @@ public static void TestEncryptPKCS1v15(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("error decrypting: %s"u8, err);
             return false;
         }
+
         if (!bytes.Equal(plaintext, @in)) {
             Ꮡt.Errorf("output mismatch: %#v %#v"u8, plaintext, @in);
             return false;
         }
         return true;
     };
+
     var config = @new<quick.Config>();
     if (testing.Short()) {
         config.Value.MaxCount = 10;
@@ -165,6 +172,7 @@ public static void TestEncryptPKCS1v15DecrypterSessionKey(ж<testing.T> Ꮡt) {
         if (len(plaintext) != 4) {
             Ꮡt.Fatalf("#%d: incorrect length plaintext: got %d, want 4"u8, i, len(plaintext));
         }
+
         if (test.@out != "FAIL"u8 && !bytes.Equal(plaintext, slice<byte>(test.@out))) {
             Ꮡt.Errorf("#%d: incorrect plaintext: got %x, want %x"u8, i, plaintext, test.@out);
         }
@@ -173,6 +181,7 @@ public static void TestEncryptPKCS1v15DecrypterSessionKey(ж<testing.T> Ꮡt) {
 
 public static void TestNonZeroRandomBytes(ж<testing.T> Ꮡt) {
     var random = rand.Reader;
+
     var b = new slice<byte>(512);
     var err = rsa_internal_test_package.NonZeroRandomBytes(b, random);
     if (err != default!) {
@@ -203,10 +212,12 @@ public static void TestSignPKCS1v15(ж<testing.T> Ꮡt) {
         var h = sha1.New();
         h.Write(slice<byte>(test.@in));
         var digest = h.Sum(default!);
+
         var (s, err) = SignPKCS1v15(default!, test512Key, crypto.SHA1, digest);
         if (err != default!) {
             Ꮡt.Errorf("#%d %s"u8, i, err);
         }
+
         var (expected, _) = hex.DecodeString(test.@out);
         if (!bytes.Equal(s, expected)) {
             Ꮡt.Errorf("#%d got: %x want: %x"u8, i, s, expected);
@@ -220,7 +231,9 @@ public static void TestVerifyPKCS1v15(ж<testing.T> Ꮡt) {
         var h = sha1.New();
         h.Write(slice<byte>(test.@in));
         var digest = h.Sum(default!);
+
         var (sig, _) = hex.DecodeString(test.@out);
+
         var err = VerifyPKCS1v15(test512Key.of(rsa.PrivateKey.ᏑPublicKey), crypto.SHA1, digest, sig);
         if (err != default!) {
             Ꮡt.Errorf("#%d %s"u8, i, err);
@@ -242,6 +255,7 @@ public static void TestOverlongMessagePKCS1v15(ж<testing.T> Ꮡt) {
 
 public static void TestUnpaddedSignature(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
+
     var msg = slice<byte>("Thu Dec 19 18:06:16 EST 2013\n"u8);
     // This base64 value was generated with:
     // % echo Thu Dec 19 18:06:16 EST 2013 > /tmp/msg
@@ -250,7 +264,8 @@ public static void TestUnpaddedSignature(ж<testing.T> Ꮡt) {
     // Where "key" contains the RSA private key given at the bottom of this
     // file.
     var expectedSig = decodeBase64("pX4DR8azytjdQ1rtUiC040FjkepuQut5q2ZFX1pTjBrOVKNjgsCDyiJDGZTCNoh9qpXYbhl7iEym30BWWwuiZg=="u8);
-    var (sig, err) = SignPKCS1v15(default!, test512Key, ((crypto.Hash)0), msg);
+
+    var (sig, err) = SignPKCS1v15(default!, test512Key, (crypto.Hash)0, msg);
     if (err != default!) {
         Ꮡt.Fatalf("SignPKCS1v15 failed: %s"u8, err);
     }
@@ -258,7 +273,7 @@ public static void TestUnpaddedSignature(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("signature is not expected value: got %x, want %x"u8, sig, expectedSig);
     }
     {
-        var errΔ1 = VerifyPKCS1v15(test512Key.of(rsa.PrivateKey.ᏑPublicKey), ((crypto.Hash)0), msg, sig); if (errΔ1 != default!) {
+        var errΔ1 = VerifyPKCS1v15(test512Key.of(rsa.PrivateKey.ᏑPublicKey), (crypto.Hash)0, msg, sig); if (errΔ1 != default!) {
             Ꮡt.Fatalf("signature failed to verify: %s"u8, errΔ1);
         }
     }
@@ -268,20 +283,20 @@ public static void TestUnpaddedSignature(ж<testing.T> Ꮡt) {
 internal static readonly object keyWasModifiedWhenˢ = (@string)"key was modified when ciphertext was invalid"u8;
 
 public static void TestShortSessionKey(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // This tests that attempting to decrypt a session key where the
     // ciphertext is too small doesn't run outside the array bounds.
     var (ciphertext, err) = EncryptPKCS1v15(rand.Reader, rsaPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), new byte[]{1}.slice());
     if (err != default!) {
         Ꮡt.Fatalf("Failed to encrypt short message: %s"u8, err);
     }
+
     array<byte> key = new(32);
     {
         var errΔ1 = DecryptPKCS1v15SessionKey(default!, rsaPrivateKey, ciphertext, key[..]); if (errΔ1 != default!) {
             Ꮡt.Fatalf("Failed to decrypt short message: %s"u8, errΔ1);
         }
     }
+
     foreach (var (_, v) in key.ΔRangeSnapshot()) {
         if (v != 0) {
             Ꮡt.Fatal(keyWasModifiedWhenˢ);
@@ -304,7 +319,7 @@ internal static readonly @string beginRsaPublicKeyˢ = """
 MEgCQQCd9BVzo775lkohasxjnefF1nCMcNoibqIWEVDe/K7M2GSoO4zlSQB+gkix
 O3AnTcdHB51iaZpWfxPSnew8yfulAgMBAAE=
 -----END RSA PUBLIC KEY-----
-"""u8;
+"""u8.Raw();
 internal static readonly object verifyPKCS1v15AcceptedAˢ = (@string)"VerifyPKCS1v15 accepted a truncated signature"u8;
 
 public static void TestShortPKCS1v15Signature(ж<testing.T> Ꮡt) {
@@ -313,6 +328,7 @@ public static void TestShortPKCS1v15Signature(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to decode signature: %s"u8, err);
     }
+
     var h = sha256.Sum256(slice<byte>("hello"u8));
     err = VerifyPKCS1v15(pub, crypto.SHA256, h[..], sig);
     if (err == default!) {

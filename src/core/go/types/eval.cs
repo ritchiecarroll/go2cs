@@ -32,6 +32,7 @@ public static (TypeAndValue, error err) Eval(ж<token.FileSet> Ꮡfset, ж<Packa
     if (err != default!) {
         return (new TypeAndValue(nil), err);
     }
+
     var info = Ꮡ(new ΔInfo(
         Types: new map<ast.Expr, TypeAndValue>()
     ));
@@ -61,10 +62,9 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡ
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
-        ref var fset = ref Ꮡfset.DerefOrNull();
         ref var pkg = ref Ꮡpkg.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         // determine scope
         ж<ΔScope> scope = default!;
         if (Ꮡpkg == nil){
@@ -96,17 +96,20 @@ public static error /*err*/ CheckExpr(ж<token.FileSet> Ꮡfset, ж<Package> Ꮡ
                 }
             }
         }
+
         // initialize checker
         var check = NewChecker(nil, Ꮡfset, Ꮡpkg, Ꮡinfo);
         check.Value.scope = scope;
         check.Value.exprPos = pos;
         var checkʗ1 = check;
         defer(checkʗ1.handleBailout, Ꮡerr, ref ᒐ);
+
         // evaluate node
         ref var x = ref heap(new operand(), out var Ꮡx);
         check.rawExpr(nil, Ꮡx, expr, default!, true); // allow generic expressions
         check.processDelayed(0); // incl. all functions
         check.recordUntyped();
+
         err = default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

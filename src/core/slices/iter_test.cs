@@ -160,13 +160,15 @@ public static void TestSortedStableFunc(ж<testing.T> Ꮡt) {
         data[i].a = rand.IntN(m);
     }
     data.initB();
-    var s = ((intPairs)SortedStableFunc<intPair>(Values<intPairs, intPair>(data), intPairCmp));
+
+    var s = (intPairs)SortedStableFunc<intPair>(Values<intPairs, intPair>(data), intPairCmp);
     if (!IsSortedFunc<intPairs, intPair>(s, intPairCmp)) {
         Ꮡt.Errorf("SortedStableFunc didn't sort %d ints"u8, n);
     }
     if (!s.inOrder(false)) {
         Ꮡt.Errorf("SortedStableFunc wasn't stable on %d ints"u8, n);
     }
+
     // iterVal converts a Seq2 to a Seq.
     iter.Seq<intPair> iterVal(iter.Seq2<nint, intPair> seq) => (iter.Seq<intPair>)((Func<intPair, bool> yield) => {
             foreach (var (_, v) in range<nint, intPair>(seq.Invoke)) {
@@ -175,7 +177,8 @@ public static void TestSortedStableFunc(ж<testing.T> Ꮡt) {
                 }
             }
         });
-    s = ((intPairs)SortedStableFunc<intPair>(iterVal(Backward<intPairs, intPair>(data)), intPairCmp));
+
+    s = (intPairs)SortedStableFunc<intPair>(iterVal(Backward<intPairs, intPair>(data)), intPairCmp);
     if (!IsSortedFunc<intPairs, intPair>(s, intPairCmp)) {
         Ꮡt.Errorf("SortedStableFunc didn't sort %d reverse ints"u8, n);
     }
@@ -230,6 +233,7 @@ public static void TestChunk(ж<testing.T> Ꮡt) {
             chunks: new slice<nint>[]{new nint[]{1, 2}.slice(), new nint[]{3, 4}.slice(), new nint[]{5}.slice()}.slice()
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in cases) {
         ref var tc = ref heap(new TestChunk_cases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -240,12 +244,15 @@ public static void TestChunk(ж<testing.T> Ꮡt) {
             foreach (var c in range<slice<nint>>(Chunk<slice<nint>, nint>(tcʗ1.s, tcʗ1.n).Invoke)) {
                 chunks = append(chunks, c);
             }
+
             if (!chunkEqual<slice<nint>, nint>(chunks, tcʗ1.chunks)) {
                 tΔ1.Errorf("Chunk(%v, %d) = %v, want %v"u8, tcʗ1.s, tcʗ1.n, chunks, tcʗ1.chunks);
             }
+
             if (len(chunks) == 0) {
                 return;
             }
+
             // Verify that appending to the end of the first chunk does not
             // clobber the beginning of the next chunk.
             var s = Clone<slice<nint>, nint>(tcʗ1.s);
@@ -291,8 +298,10 @@ public static void TestChunkRange(ж<testing.T> Ꮡt) {
             // Found enough values, break early.
             break;
         }
+
         got = append(got, c);
     }
+
     {
         var want = new slice<nint>[]{new nint[]{1, 2}.slice(), new nint[]{3, 4}.slice()}.slice(); if (!chunkEqual<slice<nint>, nint>(got, want)) {
             Ꮡt.Errorf("Chunk iteration did not stop, got %v, want %v"u8, got, want);

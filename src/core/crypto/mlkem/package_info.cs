@@ -10,6 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -36,10 +39,20 @@ using static go.crypto.mlkem_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<DecapsulationKey1024, crypto_package.Decapsulator>(Pointer = true)]
+[assembly: GoImplement<DecapsulationKey768, crypto_package.Decapsulator>(Pointer = true)]
+[assembly: GoImplement<EncapsulationKey1024, crypto_package.Encapsulator>(Pointer = true)]
+[assembly: GoImplement<EncapsulationKey768, crypto_package.Encapsulator>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -49,7 +62,7 @@ using static go.crypto.mlkem_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/mlkem/mlkem.go", "mlkem.cs", "AB9YooKClqqigoKWrLKuwqqiAAgWooKClqiSrsIACBaigoKWqqKCgpassq7CqqIACBaigoKWqJKuwg==")]
+[assembly: go.GoPositionMap("crypto/mlkem/mlkem.go", "mlkem.cs", "ACteooKCpqqigoKmrLKuwqqirsKmAAcUooKCpqiSAAIU8gAIFqKCgqaqooKCpqyyrsKqoq7CpgAHFKKCgqaokgACFPI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -77,6 +90,7 @@ public static partial class mlkem_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸcrypto() => builtin.initPackage(typeof(crypto_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸmlkem() => builtin.initPackage(typeof(go.crypto.@internal.fips140.mlkem_package));
     // </ImportInitializers>
 }

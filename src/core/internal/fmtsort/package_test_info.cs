@@ -29,6 +29,12 @@ using static global::go.@internal.fmtsort_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -37,7 +43,7 @@ using static global::go.@internal.fmtsort_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/fmtsort/sort_test.go", "sort_test.cs", "ABcoABs4ooKCgpKUlJSmgoKCgoKClLS0tIIADBgAMV6CgoKUgoKClIKClP7CgKSCgoKmpIKCgqakgoKCpqQACAy4gpSClIamgoKClKaCgoKUpoKCgpQABxCCgoKCAAgKuAARJIIADRCCgg==", "200-202:1", "", "24=TypeOf/1/23/1,ct/1/23/1,TypeOf/2/23/2,ct/2/23/2,TypeOf/3/23/3,ct/3/23/3,TypeOf/4/23/4,ct/4/23/4,TypeOf/5/23/5,ct/5/23/5,TypeOf/6/23/6,ct/6/23/6,TypeOf/7/23/7,ct/7/23/7,TypeOf/8/23/8,ct/8/23/8,TypeOf/9/23/9,ct/9/23/9,TypeOf/10/23/10,ct/10/23/10,TypeOf/11/23/11,ct/11/23/11,TypeOf/12/23/12,ct/12/23/12,TypeOf/13/23/13,NaN/1/2/13,Inf/1/4/13,Inf/2/4/13,ct/13/23/13,TypeOf/14/23/14,NaN/2/2/14,Inf/3/4/14,Inf/4/4/14,ct/14/23/14,TypeOf/15/23/15,ct/15/23/15,TypeOf/16/23/16,ct/16/23/16,TypeOf/17/23/17,ct/17/23/17,TypeOf/18/23/18,ct/18/23/18,TypeOf/19/23/19,ct/19/23/19,TypeOf/20/23/20,ct/20/23/20,TypeOf/21/23/21,ct/21/23/21,TypeOf/22/23/22,ct/22/23/22,TypeOf/23/23/23,ct/23/23/23;103=NaN/1/2/14,Inf/1/2/14,NaN/2/2/18,Inf/2/2/18,chanMap/1/1/26,pointerMap/1/1/30,unsafePointerMap/1/1/34;280=NaN/1/1/8")]
+[assembly: go.GoPositionMap("internal/fmtsort/sort_test.go", "sort_test.cs", "ABcoABs4ooKCgoKUlJSmgoKCgoKClLS0pIIADBgAMV6CgoKUgoKClIKClP7CgKSCgoKmpIKCgqakgoKCpqT8uIKUgpSGpoKCgpSmgoKClKaCgoKUAAcQgoKCggAICrgAESSCAAcQgoI=", "200-202:1", "", "24=TypeOf/1/23/1,ct/1/23/1,TypeOf/2/23/2,ct/2/23/2,TypeOf/3/23/3,ct/3/23/3,TypeOf/4/23/4,ct/4/23/4,TypeOf/5/23/5,ct/5/23/5,TypeOf/6/23/6,ct/6/23/6,TypeOf/7/23/7,ct/7/23/7,TypeOf/8/23/8,ct/8/23/8,TypeOf/9/23/9,ct/9/23/9,TypeOf/10/23/10,ct/10/23/10,TypeOf/11/23/11,ct/11/23/11,TypeOf/12/23/12,ct/12/23/12,TypeOf/13/23/13,NaN/1/2/13,Inf/1/4/13,Inf/2/4/13,ct/13/23/13,TypeOf/14/23/14,NaN/2/2/14,Inf/3/4/14,Inf/4/4/14,ct/14/23/14,TypeOf/15/23/15,ct/15/23/15,TypeOf/16/23/16,ct/16/23/16,TypeOf/17/23/17,ct/17/23/17,TypeOf/18/23/18,ct/18/23/18,TypeOf/19/23/19,ct/19/23/19,TypeOf/20/23/20,ct/20/23/20,TypeOf/21/23/21,ct/21/23/21,TypeOf/22/23/22,ct/22/23/22,TypeOf/23/23/23,ct/23/23/23;101=NaN/1/2/14,Inf/1/2/14,NaN/2/2/18,Inf/2/2/18,chanMap/1/1/26,pointerMap/1/1/30,unsafePointerMap/1/1/34;277=NaN/1/1/8")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

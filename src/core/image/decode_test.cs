@@ -24,22 +24,22 @@ partial struct imageTest {
     internal nint tolerance;
 }
 
-// GIF images are restricted to a 256-color palette and the conversion
-// to GIF loses significant image quality.
-// JPEG is a lossy format and hence needs a non-zero tolerance.
-// Grayscale images.
 internal static slice<imageTest> imageTests = new imageTest[]{
     new("testdata/video-001.png"u8, "testdata/video-001.png"u8, 0),
-    new("testdata/video-001.png"u8, "testdata/video-001.gif"u8, (64 << (int)(8))),
-    new("testdata/video-001.png"u8, "testdata/video-001.interlaced.gif"u8, (64 << (int)(8))),
-    new("testdata/video-001.png"u8, "testdata/video-001.5bpp.gif"u8, (128 << (int)(8))),
-    new("testdata/video-001.png"u8, "testdata/video-001.jpeg"u8, (8 << (int)(8))),
-    new("testdata/video-001.png"u8, "testdata/video-001.progressive.jpeg"u8, (8 << (int)(8))),
-    new("testdata/video-001.221212.png"u8, "testdata/video-001.221212.jpeg"u8, (8 << (int)(8))),
-    new("testdata/video-001.cmyk.png"u8, "testdata/video-001.cmyk.jpeg"u8, (8 << (int)(8))),
-    new("testdata/video-001.rgb.png"u8, "testdata/video-001.rgb.jpeg"u8, (8 << (int)(8))),
-    new("testdata/video-001.progressive.truncated.png"u8, "testdata/video-001.progressive.truncated.jpeg"u8, (8 << (int)(8))),
-    new("testdata/video-005.gray.png"u8, "testdata/video-005.gray.jpeg"u8, (8 << (int)(8))),
+    // GIF images are restricted to a 256-color palette and the conversion
+    // to GIF loses significant image quality.
+    new("testdata/video-001.png"u8, "testdata/video-001.gif"u8, 64 << 8),
+    new("testdata/video-001.png"u8, "testdata/video-001.interlaced.gif"u8, 64 << 8),
+    new("testdata/video-001.png"u8, "testdata/video-001.5bpp.gif"u8, 128 << 8),
+    // JPEG is a lossy format and hence needs a non-zero tolerance.
+    new("testdata/video-001.png"u8, "testdata/video-001.jpeg"u8, 8 << 8),
+    new("testdata/video-001.png"u8, "testdata/video-001.progressive.jpeg"u8, 8 << 8),
+    new("testdata/video-001.221212.png"u8, "testdata/video-001.221212.jpeg"u8, 8 << 8),
+    new("testdata/video-001.cmyk.png"u8, "testdata/video-001.cmyk.jpeg"u8, 8 << 8),
+    new("testdata/video-001.rgb.png"u8, "testdata/video-001.rgb.jpeg"u8, 8 << 8),
+    new("testdata/video-001.progressive.truncated.png"u8, "testdata/video-001.progressive.truncated.jpeg"u8, 8 << 8),
+    // Grayscale images.
+    new("testdata/video-005.gray.png"u8, "testdata/video-005.gray.jpeg"u8, 8 << 8),
     new("testdata/video-005.gray.png"u8, "testdata/video-005.gray.png"u8, 0)
 }.slice();
 
@@ -96,6 +96,7 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
         var (r, g, b, a) = c.RGBA();
         return fmt.Sprintf("rgba = 0x%04x, 0x%04x, 0x%04x, 0x%04x for %T%v"u8, r, g, b, a, c, c);
     }
+
     var golden = new map<@string, Δimage.Image>();
 loop:
     foreach (var (_, it) in imageTests) {

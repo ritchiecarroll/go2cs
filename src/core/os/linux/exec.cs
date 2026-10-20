@@ -17,211 +17,187 @@ partial class os_package {
 
 // ErrProcessDone indicates a [Process] has finished.
 public static error ErrProcessDone = errors.New("os: process already finished"u8);
+// errProcessReleased indicates a [Process] has been released.
+internal static error errProcessReleased = errors.New("os: process already released"u8);
+// ErrNoHandle indicates a [Process] does not have a handle.
+public static error ErrNoHandle = errors.New("os: process handle unavailable"u8);
 
-partial struct processMode /*num:uint8*/;
+// processStatus describes the status of a [Process].
+public partial struct processStatus /*num:uint32*/;
 
-internal static processMode modePID => /* iota */ 0;
-internal static processMode modeHandle => 1;
+// statusOK means that the Process is ready to use.
+internal static processStatus statusOK => /* iota */ 0;
 
-public partial struct processStatus /*num:uint64*/;
+// statusDone indicates that the PID/handle should not be used because
+// the process is done (has been successfully Wait'd on).
+internal static processStatus statusDone => 1;
 
-internal static processStatus statusOK => 0;
-internal static processStatus statusDone => /* 1 << 62 */ unchecked((processStatus)4611686018427387904);
-internal static processStatus statusReleased => /* 1 << 63 */ unchecked((processStatus)9223372036854775808);
-internal static UntypedInt processStatusMask => /* 0x3 << 62 */ 13835058055282163712;
+// statusReleased indicates that the PID/handle should not be used
+// because the process is released.
+internal static processStatus statusReleased => 2;
 
 // Process stores the information about a process created by [StartProcess].
 partial struct Process {
     public nint Pid;
-    internal processMode mode;
-    // State contains the atomic process state.
+    // state contains the atomic process state.
     //
-    // In modePID, this consists only of the processStatus fields, which
-    // indicate if the process is done/released.
-    //
-    // In modeHandle, the lower bits also contain a reference count for the
-    // handle field.
-    //
-    // The Process itself initially holds 1 persistent reference. Any
-    // operation that uses the handle with a system call temporarily holds
-    // an additional transient reference. This prevents the handle from
-    // being closed prematurely, which could result in the OS allocating a
-    // different handle with the same value, leading to Process' methods
-    // operating on the wrong process.
-    //
-    // Release and Wait both drop the Process' persistent reference, but
-    // other concurrent references may delay actually closing the handle
-    // because they hold a transient reference.
-    //
-    // Regardless, we want new method calls to immediately treat the handle
-    // as unavailable after Release or Wait to avoid extending this delay.
-    // This is achieved by setting either processStatus flag when the
-    // Process' persistent reference is dropped. The only difference in the
-    // flags is the reason the handle is unavailable, which affects the
-    // errors returned by concurrent calls.
-    internal atomic.Uint64 state;
-    // Used only in modePID.
+    // This consists of the processStatus fields,
+    // which indicate if the process is done/released.
+    internal atomic.Uint32 state;
+    // Used only when handle is nil
     internal Δsync.RWMutex sigMu; // avoid race between wait and signal
-    // handle is the OS handle for process actions, used only in
-    // modeHandle.
-    //
-    // handle must be accessed only via the handleTransientAcquire method
-    // (or during closeHandle), not directly! handle is immutable.
-    //
-    // On Windows, it is a handle from OpenProcess.
-    // On Linux, it is a pidfd.
-    // It is unused on other GOOSes.
-    internal uintptr handle;
+    // handle, if not nil, is a pointer to a struct
+    // that holds the OS-specific process handle.
+    // This pointer is set when Process is created,
+    // and never changed afterward.
+    // This is a pointer to a separate memory allocation
+    // so that we can use runtime.AddCleanup.
+    internal ж<processHandle> handle;
+    // cleanup is used to clean up the process handle.
+    internal runtime.Cleanup cleanup;
 }
 
+// processHandle holds an operating system handle to a process.
+// This is only used on systems that support that concept,
+// currently Linux and Windows.
+// This maintains a reference count to the handle,
+// and closes the handle when the reference drops to zero.
+partial struct processHandle {
+    // The actual handle. This field should not be used directly.
+    // Instead, use the acquire and release methods.
+    //
+    // On Windows this is a handle returned by OpenProcess.
+    // On Linux this is a pidfd.
+    internal uintptr handle;
+    // Number of active references. When this drops to zero
+    // the handle is closed.
+    internal atomic.Int32 refs;
+}
+
+// acquire adds a reference and returns the handle.
+// The bool result reports whether acquire succeeded;
+// it fails if the handle is already closed.
+// Every successful call to acquire should be paired with a call to release.
+internal static (uintptr, bool) acquire(this ж<processHandle> Ꮡph) {
+    ref var ph = ref Ꮡph.DerefOrNull();
+
+    while (ᐧ) {
+        var refs = Ꮡph.of(processHandle.Ꮡrefs).Load();
+        if (refs < 0) {
+            throw panic("internal error: negative process handle reference count");
+        }
+        if (refs == 0) {
+            return (0, false);
+        }
+        if (Ꮡph.of(processHandle.Ꮡrefs).CompareAndSwap(refs, refs + 1)) {
+            return (ph.handle, true);
+        }
+    }
+}
+
+// release releases a reference to the handle.
+internal static void release(this ж<processHandle> Ꮡph) {
+    ref var ph = ref Ꮡph.DerefOrNull();
+
+    while (ᐧ) {
+        var refs = Ꮡph.of(processHandle.Ꮡrefs).Load();
+        if (refs <= 0) {
+            throw panic("internal error: too many releases of process handle");
+        }
+        if (Ꮡph.of(processHandle.Ꮡrefs).CompareAndSwap(refs, refs - 1)) {
+            if (refs == 1) {
+                ph.closeHandle();
+            }
+            return;
+        }
+    }
+}
+
+// newPIDProcess returns a [Process] for the given PID.
 internal static ж<Process> newPIDProcess(nint pid) {
     var p = Ꮡ(new Process(
-        Pid: pid,
-        mode: modePID
+        Pid: pid
     ));
-    runtime.SetFinalizer(p.OrTypedNil(), ((Func<ж<Process>, error>)(Release)));
     return p;
 }
 
+// newHandleProcess returns a [Process] with the given PID and handle.
 internal static ж<Process> newHandleProcess(nint pid, uintptr handle) {
-    var p = Ꮡ(new Process(
-        Pid: pid,
-        mode: modeHandle,
+    var ph = Ꮡ(new processHandle(
         handle: handle
     ));
-    p.of(Process.Ꮡstate).Store(1); // 1 persistent reference
-    runtime.SetFinalizer(p.OrTypedNil(), ((Func<ж<Process>, error>)(Release)));
-    return p;
-}
 
-internal static ж<Process> newDoneProcess(nint pid) {
+    // Start the reference count as 1,
+    // meaning the reference from the returned Process.
+    ph.of(processHandle.Ꮡrefs).Store(1);
+
     var p = Ꮡ(new Process(
         Pid: pid,
-        mode: modeHandle
+        handle: ph
     ));
-    // N.B Since we set statusDone, handle will never actually be
-    // used, so its value doesn't matter.
-    p.of(Process.Ꮡstate).Store((uint64)statusDone); // No persistent reference, as there is no handle.
-    runtime.SetFinalizer(p.OrTypedNil(), ((Func<ж<Process>, error>)(Release)));
+
+    p.Value.cleanup = runtime.AddCleanup<Process, ж<processHandle>>(p, ((Action<ж<processHandle>>)(release)), ph);
+
     return p;
 }
 
+// newDoneProcess returns a [Process] for the given PID
+// that is already marked as done. This is used on Unix systems
+// if the process is known to not exist.
+internal static ж<Process> newDoneProcess(nint pid) {
+    var p = Ꮡ(new Process(
+        Pid: pid
+    ));
+    p.of(Process.Ꮡstate).Store((uint32)statusDone); // No persistent reference, as there is no handle.
+    return p;
+}
+
+// handleTransientAcquire returns the process handle or,
+// if the process is not ready, the current status.
 internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    if (p.mode != modeHandle) {
+    if (p.handle == nil) {
         throw panic("handleTransientAcquire called in invalid mode");
     }
-    while (ᐧ) {
-        var refs = Ꮡp.of(Process.Ꮡstate).Load();
-        if ((uint64)(refs & (uint64)processStatusMask) != 0) {
-            return (0, ((processStatus)((uint64)(refs & (uint64)processStatusMask))));
-        }
-        var @new = refs + 1;
-        if (!Ꮡp.of(Process.Ꮡstate).CompareAndSwap(refs, @new)) {
-            continue;
-        }
-        return (p.handle, statusOK);
+
+    var status = (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
+    if (status != statusOK) {
+        return (0, status);
     }
+    var (h, ok) = p.handle.acquire();
+    if (ok) {
+        return (h, statusOK);
+    }
+
+    // This case means that the handle has been closed.
+    // We always set the status to non-zero before closing the handle.
+    // If we get here the status must have been set non-zero after
+    // we just checked it above.
+    status = (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
+    if (status == statusOK) {
+        throw panic("inconsistent process status");
+    }
+    return (0, status);
 }
 
-internal static void handleTransientRelease(this ж<Process> Ꮡp) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
-    if (p.mode != modeHandle) {
+// handleTransientRelease releases a handle returned by handleTransientAcquire.
+internal static void handleTransientRelease(this ref Process p) {
+    if (p.handle == nil) {
         throw panic("handleTransientRelease called in invalid mode");
     }
-    while (ᐧ) {
-        var state = Ꮡp.of(Process.Ꮡstate).Load();
-        var refs = (uint64)(state & ~(uint64)processStatusMask);
-        var status = ((processStatus)((uint64)(state & (uint64)processStatusMask)));
-        if (refs == 0) {
-            // This should never happen because
-            // handleTransientRelease is always paired with
-            // handleTransientAcquire.
-            throw panic("release of handle with refcount 0");
-        }
-        if (refs == 1 && status == statusOK) {
-            // Process holds a persistent reference and always sets
-            // a status when releasing that reference
-            // (handlePersistentRelease). Thus something has gone
-            // wrong if this is the last release but a status has
-            // not always been set.
-            throw panic("final release of handle without processStatus");
-        }
-        var @new = state - 1;
-        if (!Ꮡp.of(Process.Ꮡstate).CompareAndSwap(state, @new)) {
-            continue;
-        }
-        if ((uint64)(@new & ~(uint64)processStatusMask) == 0) {
-            p.closeHandle();
-        }
-        return;
-    }
+    p.handle.release();
 }
 
-// Drop the Process' persistent reference on the handle, deactivating future
-// Wait/Signal calls with the passed reason.
-//
-// Returns the status prior to this call. If this is not statusOK, then the
-// reference was not dropped or status changed.
-internal static processStatus handlePersistentRelease(this ж<Process> Ꮡp, processStatus reason) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
-    if (p.mode != modeHandle) {
-        throw panic("handlePersistentRelease called in invalid mode");
-    }
-    while (ᐧ) {
-        var refs = Ꮡp.of(Process.Ꮡstate).Load();
-        var status = ((processStatus)((uint64)(refs & (uint64)processStatusMask)));
-        if (status != statusOK) {
-            // Both Release and successful Wait will drop the
-            // Process' persistent reference on the handle. We
-            // can't allow concurrent calls to drop the reference
-            // twice, so we use the status as a guard to ensure the
-            // reference is dropped exactly once.
-            return status;
-        }
-        if (refs == 0) {
-            // This should never happen because dropping the
-            // persistent reference always sets a status.
-            throw panic("release of handle with refcount 0");
-        }
-        var @new = (uint64)((refs - 1) | (uint64)reason);
-        if (!Ꮡp.of(Process.Ꮡstate).CompareAndSwap(refs, @new)) {
-            continue;
-        }
-        if ((uint64)(@new & ~(uint64)processStatusMask) == 0) {
-            p.closeHandle();
-        }
-        return status;
-    }
-}
-
+// pidStatus returns the current process status.
 internal static processStatus pidStatus(this ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    if (p.mode != modePID) {
+    if (p.handle != nil) {
         throw panic("pidStatus called in invalid mode");
     }
-    return ((processStatus)Ꮡp.of(Process.Ꮡstate).Load());
-}
 
-internal static void pidDeactivate(this ж<Process> Ꮡp, processStatus reason) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
-    if (p.mode != modePID) {
-        throw panic("pidDeactivate called in invalid mode");
-    }
-    // Both Release and successful Wait will deactivate the PID. Only one
-    // of those should win, so nothing left to do here if the compare
-    // fails.
-    //
-    // N.B. This means that results can be inconsistent. e.g., with a
-    // racing Release and Wait, Wait may successfully wait on the process,
-    // returning the wait status, while future calls error with "process
-    // released" rather than "process done".
-    Ꮡp.of(Process.Ꮡstate).CompareAndSwap(0, (uint64)reason);
+    return (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
 }
 
 // ProcAttr holds the attributes that will be applied to a new process
@@ -305,23 +281,60 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 public static error Release(this ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    // Note to future authors: the Release API is cursed.
-    //
-    // On Unix and Plan 9, Release sets p.Pid = -1. This is the only part of the
-    // Process API that is not thread-safe, but it can't be changed now.
-    //
-    // On Windows, Release does _not_ modify p.Pid.
-    //
-    // On Windows, Wait calls Release after successfully waiting to
-    // proactively clean up resources.
-    //
-    // On Unix and Plan 9, Wait also proactively cleans up resources, but
-    // can not call Release, as Wait does not set p.Pid = -1.
-    //
-    // On Unix and Plan 9, calling Release a second time has no effect.
-    //
-    // On Windows, calling Release a second time returns EINVAL.
-    return Ꮡp.release();
+    // Unfortunately, for historical reasons, on systems other
+    // than Windows, Release sets the Pid field to -1.
+    // This causes the race detector to report a problem
+    // on concurrent calls to Release, but we can't change it now.
+    if (runtime.GOOS != "windows"u8) {
+        p.Pid = -1;
+    }
+
+    var oldStatus = Ꮡp.doRelease(statusReleased);
+
+    // For backward compatibility, on Windows only,
+    // we return EINVAL on a second call to Release.
+    if (runtime.GOOS == "windows"u8) {
+        if (oldStatus == statusReleased) {
+            return syscall.EINVAL;
+        }
+    }
+
+    return default!;
+}
+
+// doRelease releases a [Process], setting the status to newStatus.
+// If the previous status is not statusOK, this does nothing.
+// It returns the previous status.
+internal static processStatus doRelease(this ж<Process> Ꮡp, processStatus newStatus) {
+    ref var p = ref Ꮡp.DerefOrNull();
+
+    while (ᐧ) {
+        var state = Ꮡp.of(Process.Ꮡstate).Load();
+        var oldStatus = (processStatus)state;
+        if (oldStatus != statusOK) {
+            return oldStatus;
+        }
+
+        if (!Ꮡp.of(Process.Ꮡstate).CompareAndSwap(state, (uint32)newStatus)) {
+            continue;
+        }
+
+        // We have successfully released the Process.
+        // If it has a handle, release the reference we
+        // created in newHandleProcess.
+        if (p.handle != nil) {
+            // No need for more cleanup.
+            // We must stop the cleanup before calling release;
+            // otherwise the cleanup might run concurrently
+            // with the release, which would cause the reference
+            // counts to be invalid, causing a panic.
+            p.cleanup.Stop();
+
+            p.handle.release();
+        }
+
+        return statusOK;
+    }
 }
 
 // Kill causes the [Process] to exit immediately. Kill does not wait until
@@ -344,6 +357,18 @@ public static (ж<ProcessState>, error) Wait(this ж<Process> Ꮡp) {
 // Sending [Interrupt] on Windows is not implemented.
 public static error Signal(this ж<Process> Ꮡp, ΔSignal sig) {
     return Ꮡp.signal(sig);
+}
+
+// WithHandle calls a supplied function f with a valid process handle
+// as an argument. The handle is guaranteed to refer to process p
+// until f returns, even if p terminates. This function cannot be used
+// after [Process.Release] or [Process.Wait].
+//
+// If process handles are not supported or a handle is not available,
+// it returns [ErrNoHandle]. Currently, process handles are supported
+// on Linux 5.4 or later (pidfd) and Windows.
+public static error WithHandle(this ж<Process> Ꮡp, Action<uintptr> f) {
+    return Ꮡp.withHandle(f);
 }
 
 // UserTime returns the user CPU time of the exited process and its children.

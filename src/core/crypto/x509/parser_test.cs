@@ -98,6 +98,7 @@ public static void TestParseASN1String(ж<testing.T> Ꮡt) {
             expectedErr: "invalid NumericString"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestParseASN1String_tests(), out var Ꮡtc);
         tc = vᴛ1;
@@ -157,7 +158,7 @@ gc5PYnVF0ot7qAmNFENIpbKg3BdusBkF9rGxLaDSUBvSc7+s9iQz9d/iRuAebrYu
 +eqUlJ2lsjS1U8qyPmlH+spfPNbAEQEsuP32Aw==
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedˢ = (@string)"expected RequireExplicitPolicyZero to be set"u8;
@@ -171,10 +172,10 @@ public static void TestPolicyParse(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (builtin.len((~c).Policies) != 9) {
-        Ꮡt.Errorf("unexpected number of policies: got %d, want %d"u8, builtin.len((~c).Policies), (nint)(9));
+        Ꮡt.Errorf("unexpected number of policies: got %d, want %d"u8, builtin.len((~c).Policies), (nint)9);
     }
     if (builtin.len((~c).PolicyMappings) != 9) {
-        Ꮡt.Errorf("unexpected number of policy mappings: got %d, want %d"u8, builtin.len((~c).PolicyMappings), (nint)(9));
+        Ꮡt.Errorf("unexpected number of policy mappings: got %d, want %d"u8, builtin.len((~c).PolicyMappings), (nint)9);
     }
     if (!(~c).RequireExplicitPolicyZero) {
         Ꮡt.Error(expectedˢ);
@@ -219,21 +220,22 @@ internal partial struct TestDomainNameValid_type /*dyn*/ {
 public static void TestDomainNameValid(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, vᴛ1) in new TestDomainNameValid_type[]{ // TODO(#75835): these tests are for stricter name validation, which we
- // had to disable. Once we reenable these strict checks, behind a
- // GODEBUG, we should add them back in.
- // {"empty name, name", "", false, false},
- // {"254 char label, name", strings.Repeat("a.a", 84) + "aaa", false, false},
- // {"254 char label, constraint", strings.Repeat("a.a", 84) + "aaa", true, false},
- // {"253 char label, name", strings.Repeat("a.a", 84) + "aa", false, false},
- // {"253 char label, constraint", strings.Repeat("a.a", 84) + "aa", true, false},
- // {"64 char single label, name", strings.Repeat("a", 64), false, false},
- // {"64 char single label, constraint", strings.Repeat("a", 64), true, false},
- // {"64 char label, name", "a." + strings.Repeat("a", 64), false, false},
- // {"64 char label, constraint", "a." + strings.Repeat("a", 64), true, false},
- // TODO(#75835): these are the inverse of the tests above, they should be removed
- // once the strict checking is enabled.
+    foreach (var (_, vᴛ1) in new TestDomainNameValid_type[]{
+        // TODO(#75835): these tests are for stricter name validation, which we
+        // had to disable. Once we reenable these strict checks, behind a
+        // GODEBUG, we should add them back in.
+        // {"empty name, name", "", false, false},
+        // {"254 char label, name", strings.Repeat("a.a", 84) + "aaa", false, false},
+        // {"254 char label, constraint", strings.Repeat("a.a", 84) + "aaa", true, false},
+        // {"253 char label, name", strings.Repeat("a.a", 84) + "aa", false, false},
+        // {"253 char label, constraint", strings.Repeat("a.a", 84) + "aa", true, false},
+        // {"64 char single label, name", strings.Repeat("a", 64), false, false},
+        // {"64 char single label, constraint", strings.Repeat("a", 64), true, false},
+        // {"64 char label, name", "a." + strings.Repeat("a", 64), false, false},
+        // {"64 char label, constraint", "a." + strings.Repeat("a", 64), true, false},
 
+        // TODO(#75835): these are the inverse of the tests above, they should be removed
+        // once the strict checking is enabled.
         new("254 char label, name"u8, strings.Repeat("a.a"u8, 84) + "aaa"u8, false, true),
         new("254 char label, constraint"u8, strings.Repeat("a.a"u8, 84) + "aaa"u8, true, true),
         new("253 char label, name"u8, strings.Repeat("a.a"u8, 84) + "aa"u8, false, true),
@@ -241,14 +243,14 @@ public static void TestDomainNameValid(ж<testing.T> Ꮡt) {
         new("64 char single label, name"u8, strings.Repeat("a"u8, 64), false, true),
         new("64 char single label, constraint"u8, strings.Repeat("a"u8, 64), true, true),
         new("64 char label, name"u8, "a."u8 + strings.Repeat("a"u8, 64), false, true),
-        new("64 char label, constraint"u8, "a."u8 + strings.Repeat("a"u8, 64), true, true), // Check we properly enforce properties of domain names.
+        new("64 char label, constraint"u8, "a."u8 + strings.Repeat("a"u8, 64), true, true),
 
+        // Check we properly enforce properties of domain names.
         new("empty name, constraint"u8, ""u8, true, true),
         new("empty label, name"u8, "a..a"u8, false, false),
         new("empty label, constraint"u8, "a..a"u8, true, false),
         new("period, name"u8, "."u8, false, false),
         new("period, constraint"u8, "."u8, true, false), // TODO(roland): not entirely clear if this is a valid constraint (require at least one label?)
-
         new("valid, name"u8, "a.b.c"u8, false, true),
         new("valid, constraint"u8, "a.b.c"u8, true, true),
         new("leading period, name"u8, ".a.b.c"u8, false, false),

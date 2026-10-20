@@ -24,6 +24,12 @@ using static global::go.hash_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -32,7 +38,7 @@ using static global::go.hash_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/marshal_test.go", "marshal_test.cs", "ABs2goKClAAIBgATMIKykoKCloKChIKCgoKUgoKUgoKUgpSCgpSAgqSCgoKCgpSC", "61-105:1", "", "42=fromHex/1/17/5,fromHex/2/17/6,fromHex/3/17/7,fromHex/4/17/8,fromHex/5/17/9,fromHex/6/17/10,fromHex/7/17/11,fromHex/8/17/12,fromHex/9/17/13,fromHex/10/17/14,fromHex/11/17/15,fromHex/12/17/16,fromHex/13/17/17,fromHex/14/17/18,fromHex/15/17/19,fromHex/16/17/20,fromHex/17/17/21")]
+[assembly: go.GoPositionMap("hash/marshal_test.go", "marshal_test.cs", "ABs2goKClPYAEzCCspKCgqaCgpSCgoKClIKClIKClIKUgoKUgIKkgoKCgoKUgg==", "61-105:1", "", "41=fromHex/1/17/5,fromHex/2/17/6,fromHex/3/17/7,fromHex/4/17/8,fromHex/5/17/9,fromHex/6/17/10,fromHex/7/17/11,fromHex/8/17/12,fromHex/9/17/13,fromHex/10/17/14,fromHex/11/17/15,fromHex/12/17/16,fromHex/13/17/17,fromHex/14/17/18,fromHex/15/17/19,fromHex/16/17/20,fromHex/17/17/21")]
 // </GoSourcePositionMaps>
 
 namespace go;

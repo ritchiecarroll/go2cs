@@ -74,7 +74,7 @@ namespace go;
 /// each process was seen 109 times of 109. Only code outside the standard library reaches this path.
 /// </para>
 /// </remarks>
-public static unsafe class NativeStructMarshal
+public static unsafe partial class NativeStructMarshal
 {
     /// <summary>The raw call the keystone runs once the arguments are final.</summary>
     public delegate (uintptr r1, uintptr r2, uintptr errno) Syscall6Invoker(uintptr num, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
@@ -138,6 +138,21 @@ public static unsafe class NativeStructMarshal
         nuint r = GoLibcCall.CallUnmarshalled(state.fn, a, state.rule, state.errnoReader, out nuint errno);
         return (r, errno);
     }
+
+    /// <summary>
+    /// <see cref="CallLibc"/>'s form for <see cref="GoLibcCall.CallFiveAndDouble"/>: the same marshal and
+    /// nil-pointer policy over the five integer arguments, with the double carried beside them untouched.
+    /// </summary>
+    internal static nuint CallLibcWithDouble(nint fn, ReadOnlySpan<nuint> args, double f1)
+    {
+        Span<nuint> copy = stackalloc nuint[args.Length];
+        args.CopyTo(copy);
+
+        return marshalCall(copy, nilPointersAsZero: true, (fn, f1), &invokeWithDouble);
+    }
+
+    private static nuint invokeWithDouble((nint fn, double f1) state, ReadOnlySpan<nuint> a) =>
+        GoLibcCall.CallFiveAndDoubleUnmarshalled(state.fn, a, state.f1);
 
     /// <summary>Whether any of <paramref name="args"/> carries the managed-pointer-token tag.</summary>
     internal static bool AnyToken(ReadOnlySpan<nuint> args)

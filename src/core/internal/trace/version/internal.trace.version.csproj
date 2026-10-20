@@ -161,8 +161,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/event/go122/internal.trace.event.go122.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/event/internal.trace.event.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/tracev2/internal.trace.tracev2.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
   </ItemGroup>
 

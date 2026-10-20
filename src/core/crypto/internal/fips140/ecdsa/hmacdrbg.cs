@@ -6,6 +6,7 @@ namespace go.crypto.@internal.fips140;
 using bytes = bytes_package;
 using fips140 = go.crypto.@internal.fips140_package;
 using hmac = go.crypto.@internal.fips140.hmac_package;
+using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 
@@ -29,11 +30,15 @@ public partial struct hmacDRBG {
 internal static UntypedInt reseedInterval => /* 1 << 48 */ 281474976710656;
 internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 
+// plainPersonalizationString is used by HMAC_DRBG as-is.
 partial struct plainPersonalizationString /*[]byte*/;
 
 internal static void isPersonalizationString(this plainPersonalizationString _) {
 }
 
+// Each entry in blockAlignedPersonalizationString is written to the HMAC at a
+// block boundary, as specified in draft-irtf-cfrg-det-sigs-with-noise-04,
+// Section 4.
 partial struct blockAlignedPersonalizationString /*[]slice<byte>*/;
 
 internal static void isPersonalizationString(this blockAlignedPersonalizationString _) {
@@ -43,22 +48,26 @@ partial interface personalizationString {
     void isPersonalizationString();
 }
 
-internal static ж<hmacDRBG> newDRBG<H>(Func<H> hash, slice<byte> entropy, slice<byte> nonce, personalizationString s)
-    where H : fips140.Hash
+internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, slice<byte> nonce, personalizationString s)
+    where H : hash.Hash
 {
     // HMAC_DRBG_Instantiate_algorithm, per Section 10.1.2.3.
     fips140.RecordApproved();
+
     var d = Ꮡ(new hmacDRBG(
-        newHMAC: (slice<byte> key) => hmac.New(hash, key)
+        newHMAC: (slice<byte> key) => hmac.New(hashΔ1, key)
     ));
-    nint size = hash().Size();
+    nint size = hashΔ1().Size();
+
     // K = 0x00 0x00 0x00 ... 0x00
     var K = new slice<byte>(size);
+
     // V = 0x01 0x01 0x01 ... 0x01
     d.Value.V = bytes.Repeat(new byte[]{0x01}.slice(), size);
+
     // HMAC_DRBG_Update, per Section 10.1.2.2.
     // K = HMAC (K, V || 0x00 || provided_data)
-    var h = hmac.New(hash, K);
+    var h = hmac.New(hashΔ1, K);
     h.Write((~d).V);
     h.Write(new byte[]{0x00}.slice());
     h.Write(entropy);
@@ -79,7 +88,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hash, slice<byte> entropy, slice
     }}
     K = h.Sum(K[..0]);
     // V = HMAC (K, V)
-    h = hmac.New(hash, K);
+    h = hmac.New(hashΔ1, K);
     h.Write((~d).V);
     d.Value.V = h.Sum((~d).V[..0]);
     // K = HMAC (K, V || 0x01 || provided_data).
@@ -104,9 +113,10 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hash, slice<byte> entropy, slice
     }}
     K = h.Sum(K[..0]);
     // V = HMAC (K, V)
-    h = hmac.New(hash, K);
+    h = hmac.New(hashΔ1, K);
     h.Write((~d).V);
     d.Value.V = h.Sum((~d).V[..0]);
+
     d.Value.hK = h;
     d.Value.reseedCounter = 1;
     return d;
@@ -117,10 +127,10 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hash, slice<byte> entropy, slice
 //
 // This should only be used for ACVP testing. hmacDRBG is not intended to be
 // used directly.
-public static ж<hmacDRBG> TestingOnlyNewDRBG<H>(Func<H> hash, slice<byte> entropy, slice<byte> nonce, slice<byte> s)
-    where H : fips140.Hash
+public static ж<hmacDRBG> TestingOnlyNewDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, slice<byte> nonce, slice<byte> s)
+    where H : hash.Hash
 {
-    return newDRBG(hash, entropy, nonce, ((plainPersonalizationString)s));
+    return newDRBG(hashΔ1, entropy, nonce, (plainPersonalizationString)s);
 }
 
 internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
@@ -138,12 +148,15 @@ internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
 public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     // HMAC_DRBG_Generate_algorithm, per Section 10.1.2.5.
     fips140.RecordApproved();
+
     if (len(@out) > maxRequestSize) {
         throw panic("ecdsa: internal error: request size exceeds maximum");
     }
+
     if (d.reseedCounter > reseedInterval) {
         throw panic("ecdsa: reseed interval exceeded");
     }
+
     nint tlen = 0;
     while (tlen < len(@out)) {
         // V = HMAC_K(V)
@@ -153,9 +166,11 @@ public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
         d.V = d.hK.Sum(d.V[..0]);
         tlen += copy(@out.slice(tlen), d.V);
     }
+
     // Note that if this function shows up on ECDSA-level profiles, this can be
     // optimized in the common case by deferring the rest to the next Generate
     // call, which will never come in nearly all cases.
+
     // HMAC_DRBG_Update, per Section 10.1.2.2, without provided_data.
     // K = HMAC (K, V || 0x00)
     d.hK.Reset();
@@ -166,6 +181,7 @@ public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     d.hK = d.newHMAC(K);
     d.hK.Write(d.V);
     d.V = d.hK.Sum(d.V[..0]);
+
     d.reseedCounter++;
 }
 

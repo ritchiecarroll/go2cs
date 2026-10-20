@@ -24,26 +24,21 @@ internal static testEntry dup(@string s) {
     return new testEntry(s, s);
 }
 
-// basic types
-// arrays
-// slices
-// structs
-// pointers
-// functions
-// interfaces
-// TODO(gri) adjust test for EvalCompositeTest
-// {"comparable", "interface{comparable}"},
-// {"error", "interface{Error() string}"},
-// maps
-// channels
 // types that don't depend on any other type declarations
 internal static slice<testEntry> independentTestTypes = new testEntry[]{
+    // basic types
     dup("int"u8),
     dup("float32"u8),
     dup("string"u8),
+
+    // arrays
     dup("[10]int"u8),
+
+    // slices
     dup("[]int"u8),
     dup("[][]int"u8),
+
+    // structs
     dup("struct{}"u8),
     dup("struct{x int}"u8),
     new("""
@@ -51,16 +46,20 @@ struct {
 		x, y int
 		z float32 "foo"
 	}
-"""u8, @"struct{x int; y int; z float32 ""foo""}"u8),
+"""u8.Raw(), @"struct{x int; y int; z float32 ""foo""}"u8),
     new("""
 struct {
 		string
 		elems []complex128
 	}
-"""u8, @"struct{string; elems []complex128}"u8),
+"""u8.Raw(), @"struct{string; elems []complex128}"u8),
+
+    // pointers
     dup("*int"u8),
     dup("***struct{}"u8),
     dup("*struct{a int; b float32}"u8),
+
+    // functions
     dup("func()"u8),
     dup("func(x int)"u8),
     new("func(x, y int)"u8, "func(x int, y int)"u8),
@@ -79,6 +78,8 @@ struct {
     dup("func(x ...int) string"u8),
     dup("func(x ...int) (u string)"u8),
     new("func(x int, y ...int) (u string)"u8, "func(x int, y ...int) (u string)"u8),
+
+    // interfaces
     dup("interface{}"u8),
     dup("interface{m()}"u8),
     dup(@"interface{String() string; m(int) float32}"u8),
@@ -86,8 +87,15 @@ struct {
     dup("interface{int | ~float32 | ~complex128}"u8),
     dup("any"u8),
     dup("interface{comparable}"u8),
+    // TODO(gri) adjust test for EvalCompositeTest
+    // {"comparable", "interface{comparable}"},
+    // {"error", "interface{Error() string}"},
+
+    // maps
     dup("map[string]int"u8),
     new("map[struct{x, y int}][]byte"u8, "map[struct{x int; y int}][]byte"u8),
+
+    // channels
     dup("chan<- chan int"u8),
     dup("chan<- <-chan int"u8),
     dup("<-chan <-chan int"u8),
@@ -96,9 +104,9 @@ struct {
     dup("<-chan []func() int"u8)
 }.slice();
 
-// interfaces
 // types that depend on other type declarations (src in TestTypes)
 internal static slice<testEntry> dependentTestTypes = new testEntry[]{
+    // interfaces
     dup(@"interface{io.Reader; io.Writer}"u8),
     dup(@"interface{m() int; io.Writer}"u8),
     new(@"interface{m() interface{T}}"u8, @"interface{m() interface{p.T}}"u8)
@@ -107,9 +115,11 @@ internal static slice<testEntry> dependentTestTypes = new testEntry[]{
 public static void TestTypeString(ж<testing.T> Ꮡt) {
     // The Go command is needed for the importer to determine the locations of stdlib .a files.
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     slice<testEntry> tests = default!;
     tests = appendꓸꓸꓸ(tests, independentTestTypes);
     tests = appendꓸꓸꓸ(tests, dependentTestTypes);
+
     foreach (var (_, test) in tests) {
         @string src = @"package p; import ""io""; type _ io.Writer; type T "u8 + test.src;
         var (pkg, err) = typecheck(src, nil, nil);
@@ -144,6 +154,7 @@ internal partial struct TestQualifiedTypeString_type /*dyn*/ {
 public static void TestQualifiedTypeString(ж<testing.T> Ꮡt) {
     var p = mustTypecheck(packagePTypeTIntˢ, nil, nil);
     var q = mustTypecheck(packageQˢ, nil, nil);
+
     var pT = p.Scope().Lookup("T"u8).Type();
     foreach (var (_, vᴛ1) in new TestQualifiedTypeString_type[]{
         new(default!, nil, "<nil>"u8),

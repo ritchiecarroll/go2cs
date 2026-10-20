@@ -59,10 +59,8 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                 continue;
             }
             var exprᴛ1 = f[0];
-            if (exprᴛ1 == "nameserver"u8) {
-                if (len(f) > 1 && len((~conf).servers) < 3) {
-                    // add one name server
-                    // small, but the standard limit
+            if (exprᴛ1 == "nameserver"u8) { // add one name server
+                if (len(f) > 1 && len((~conf).servers) < 3) { // small, but the standard limit
                     // One more check: make sure server name is
                     // just an IP address. Otherwise we need DNS
                     // to look it up.
@@ -73,13 +71,12 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                     }
                 }
             }
-            else if (exprᴛ1 == "domain"u8) {
+            else if (exprᴛ1 == "domain"u8) { // set search path to just this domain
                 if (len(f) > 1) {
-                    // set search path to just this domain
                     conf.Value.search = new @string[]{ensureRooted(f[1])}.slice();
                 }
             }
-            else if (exprᴛ1 == "search"u8) {
+            else if (exprᴛ1 == "search"u8) { // set search path to given servers
                 conf.Value.search = new slice<@string>(0, len(f) - 1);
                 for (nint i = 1; i < len(f); i++) {
                     @string name = ensureRooted(f[i]);
@@ -89,9 +86,8 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                     conf.Value.search = append((~conf).search, name);
                 }
             }
-            else if (exprᴛ1 == "options"u8) {
+            else if (exprᴛ1 == "options"u8) { // magic options
                 foreach (var (_, s) in f[1..]) {
-                    // magic options
                     switch (ᐧ) {
                     case {} when stringslite.HasPrefix(s, ndotsˢ): {
                         var (n, _, _) = dtoi(s[6..]);
@@ -125,10 +121,21 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         break;
                     }
                     case {} when s == "single-request"u8 || s == "single-request-reopen"u8: {
+                        // Linux option:
+                        // http://man7.org/linux/man-pages/man5/resolv.conf.5.html
+                        // "By default, glibc performs IPv4 and IPv6 lookups in parallel [...]
+                        //  This option disables the behavior and makes glibc
+                        //  perform the IPv6 and IPv4 requests sequentially."
                         conf.Value.singleRequest = true;
                         break;
                     }
                     case {} when s == "use-vc"u8 || s == "usevc"u8 || s == "tcp"u8: {
+                        // Linux (use-vc), FreeBSD (usevc) and OpenBSD (tcp) option:
+                        // http://man7.org/linux/man-pages/man5/resolv.conf.5.html
+                        // "Sets RES_USEVC in _res.options.
+                        //  This option forces the use of TCP for DNS resolutions."
+                        // https://www.freebsd.org/cgi/man.cgi?query=resolv.conf&sektion=5&manpath=freebsd-release-ports
+                        // https://man.openbsd.org/resolv.conf.5
                         conf.Value.useTCP = true;
                         break;
                     }
@@ -137,6 +144,8 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         break;
                     }
                     case {} when s == "edns0"u8: {
+                        // We use EDNS by default.
+                        // Ignore this option.
                         break;
                     }
                     case {} when s == "no-reload"u8: {
@@ -147,33 +156,18 @@ internal static ж<dnsConfig> dnsReadConfig(@string filename) {
                         conf.Value.unknownOpt = true;
                         break;
                     }}
-
                 }
             }
             else if (exprᴛ1 == "lookup"u8) {
+                // OpenBSD option:
+                // https://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/resolv.conf.5
+                // "the legal space-separated values are: bind, file, yp"
                 conf.Value.lookup = f[1..];
             }
             else { /* default: */
                 conf.Value.unknownOpt = true;
             }
-
         }
-        // Linux option:
-        // http://man7.org/linux/man-pages/man5/resolv.conf.5.html
-        // "By default, glibc performs IPv4 and IPv6 lookups in parallel [...]
-        //  This option disables the behavior and makes glibc
-        //  perform the IPv6 and IPv4 requests sequentially."
-        // Linux (use-vc), FreeBSD (usevc) and OpenBSD (tcp) option:
-        // http://man7.org/linux/man-pages/man5/resolv.conf.5.html
-        // "Sets RES_USEVC in _res.options.
-        //  This option forces the use of TCP for DNS resolutions."
-        // https://www.freebsd.org/cgi/man.cgi?query=resolv.conf&sektion=5&manpath=freebsd-release-ports
-        // https://man.openbsd.org/resolv.conf.5
-        // We use EDNS by default.
-        // Ignore this option.
-        // OpenBSD option:
-        // https://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/resolv.conf.5
-        // "the legal space-separated values are: bind, file, yp"
         if (len((~conf).servers) == 0) {
             conf.Value.servers = defaultNS;
         }

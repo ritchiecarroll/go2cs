@@ -17,6 +17,7 @@ partial class slogtest_test_package {
 
 public static void TestRun(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     var newHandler = (ж<testing.T> _) => {
         Ꮡbuf.Value.Reset();
         return new slog.JSONHandlerжΔHandler(slog.NewJSONHandler(new bytes_BufferжWriter(Ꮡbuf), nil));
@@ -31,6 +32,7 @@ public static void TestRun(ж<testing.T> Ꮡt) {
         }
         return m;
     };
+
     slogtest.Run(Ꮡt, newHandler, result);
 }
 

@@ -9,6 +9,7 @@ namespace go.crypto.@internal.fips140;
 using fips140 = go.crypto.@internal.fips140_package;
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;
+using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140deps;
 
@@ -22,6 +23,12 @@ internal static UntypedInt size224 => 28;
 
 // The block size of SHA-256 and SHA-224 in bytes.
 internal static UntypedInt blockSize => 64;
+
+// The maximum number of bytes that can be passed to block(). The limit exists
+// because implementations that rely on assembly routines are not preemptible.
+internal static UntypedInt maxAsmIters => 1024;
+
+internal static UntypedInt maxAsmSize => /* blockSize * maxAsmIters */ 65536; // 64KiB
 
 internal static UntypedInt chunk => 64;
 internal static UntypedInt init0 => 0x6A09E667;
@@ -112,6 +119,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b));
 }
 
+public static (hash.Cloner, error) Clone(this ref Digest d) {
+    ref var r = ref heap<Digest>(out var Ꮡr);
+    r = d.ΔClone();
+    return (new DigestжCloner(Ꮡr), default!);
+}
+
 public static void Reset(this ref Digest d) {
     if (!d.is224){
         d.h[0] = init0;
@@ -165,8 +178,8 @@ public static nint BlockSize(this ref Digest d) {
 public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     nint nn = default!;
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
+
     nn = len(p);
     d.len += (uint64)nn;
     if (d.nx > 0) {
@@ -179,7 +192,12 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
         p = p.slice(n);
     }
     if (len(p) >= chunk) {
-        nint n = (nint)(len(p) & ~(nint)(chunk - 1));
+        nint n = len(p) & ~(nint)(chunk - 1);
+        while (n > maxAsmSize) {
+            block(ref (Ꮡd).DerefOrNull(), p[..(int)(maxAsmSize)]);
+            p = p[(int)(maxAsmSize)..];
+            n -= maxAsmSize;
+        }
         block(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
         p = p.slice(n);
     }
@@ -214,15 +232,19 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     } else {
         t = 64 + 56 - len % 64;
     }
+
     // Length in bits.
     len <<= (int)(3);
     var padlen = tmp.slice(0, (nint)(t + 8));
     byteorder.BEPutUint64(padlen.slice((nint)(t + 0)), len);
     Ꮡd.Write(padlen);
+
     if (d.nx != 0) {
         throw panic("d.nx != 0");
     }
+
     array<byte> digest = new(32); /* size */
+
     byteorder.BEPutUint32(digest[0..], d.h[0]);
     byteorder.BEPutUint32(digest[4..], d.h[1]);
     byteorder.BEPutUint32(digest[8..], d.h[2]);
@@ -233,6 +255,7 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     if (!d.is224) {
         byteorder.BEPutUint32(digest[28..], d.h[7]);
     }
+
     return digest.Clone();
 }
 

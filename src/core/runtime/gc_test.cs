@@ -5,6 +5,8 @@ namespace go;
 
 using fmt = fmt_package;
 using asan = @internal.asan_package;
+using msan = @internal.msan_package;
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using bits = global::go.math.bits_package;
 using rand = global::go.math.rand_package;
@@ -52,9 +54,11 @@ public static void TestGcSys(ж<testing.T> Ꮡt) {
 
 public static void TestGcDeepNesting(ж<testing.T> Ꮡt) {
     var a = @new<TestGcDeepNesting_T>();
+
     // Prevent the compiler from applying escape analysis.
     // This makes sure new(T) is allocated on heap, not on the stack.
     Ꮡt.Logf("%p"u8, a.OrTypedNil());
+
     a.Value[0][0][0][0][0][0][0][0][0][0] = @new<nint>();
     a.Value[0][0][0][0][0][0][0][0][0][0].Value = 13;
     Δruntime.GC();
@@ -117,7 +121,7 @@ internal partial struct TestGcRescan_X /*dyn*/ {
 }
 
 internal partial struct TestGcRescan_Y /*dyn*/ {
-    public partial ref TestGcRescan_X X { get; }
+    /*embed*/ public TestGcRescan_X X;
     internal ж<TestGcRescan_Y> nexty;
     internal ж<nint> p;
 }
@@ -198,14 +202,18 @@ public static void TestPeriodicGC(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noSysmonOnWasmYetˢ);
     }
+
     // Make sure we're not in the middle of a GC.
     Δruntime.GC();
+
     ref var ms1 = ref heap(new Δruntime.MemStats(), out var Ꮡms1);
     ref var ms2 = ref heap(new Δruntime.MemStats(), out var Ꮡms2);
     Δruntime.ReadMemStats(Ꮡms1);
+
     // Make periodic GC run continuously.
     var orig = runtime_internal_test_package.ForceGCPeriod.Value;
     runtime_internal_test_package.ForceGCPeriod.Value = 0;
+
     // Let some periodic GCs happen. In a heavily loaded system,
     // it's possible these will be delayed, so this is designed to
     // succeed quickly if things are working, but to give it some
@@ -214,22 +222,28 @@ public static void TestPeriodicGC(ж<testing.T> Ꮡt) {
     const uint32 want = 2;
     for (nint i = 0; i < 200 && numGCs < want; i++) {
         time.Sleep(5 * time.Millisecond);
+
         // Test that periodic GC actually happened.
         Δruntime.ReadMemStats(Ꮡms2);
         numGCs = ms2.NumGC - ms1.NumGC;
     }
     runtime_internal_test_package.ForceGCPeriod.Value = orig;
+
     if (numGCs < want) {
         Ꮡt.Fatalf("no periodic GC: got %v GCs, want >= 2"u8, numGCs);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippedTestCheckptrModeˢ2 = (@string)"skipped test: checkptr mode catches the issue before getting to zombie reporting"u8;
 internal static readonly @string gcZombieˢ = "GCZombie"u8;
 internal static readonly @string godebugInvalidptr0ˢ = "GODEBUG=invalidptr=0"u8;
 internal static readonly @string foundPointerToFreeObjectˢ = "found pointer to free object"u8;
 
 public static void TestGcZombieReporting(ж<testing.T> Ꮡt) {
+    if (asan.Enabled || msan.Enabled || race.Enabled) {
+        Ꮡt.Skip(skippedTestCheckptrModeˢ2);
+    }
     // This test is somewhat sensitive to how the allocator works.
     // Pointers in zombies slice may cross-span, thus we
     // add invalidptr=0 for avoiding the badPointer check.
@@ -246,8 +260,6 @@ internal static readonly object extraAllocationsWithAsanˢ = (@string)"extra all
 internal static readonly object stackDidNotMoveˢ = (@string)"stack did not move"u8;
 
 public static void TestGCTestMoveStackOnNextCall(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (asan.Enabled) {
         Ꮡt.Skip(extraAllocationsWithAsanˢ);
     }
@@ -271,13 +283,12 @@ public static void TestGCTestMoveStackOnNextCall(ж<testing.T> Ꮡt) {
 //
 //go:noinline
 internal static partial bool moveStackCheck(ж<testing.T> Ꮡt, ж<nint> Ꮡnew, uintptr old) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // new should have been updated by the stack move;
     // old should not have.
     // Capture new's value before doing anything that could
     // further move the stack.
     var new2 = (uintptr)Ꮡnew;
+
     Ꮡt.Logf("old stack pointer %x, new stack pointer %x"u8, old, new2);
     if (new2 == old) {
         // Check that we didn't screw up the test's escape analysis.
@@ -310,8 +321,6 @@ internal static partial void moveStack1(bool x) {
 }
 
 public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     slice<@unsafe.Pointer> all = default!;
     slice<@unsafe.Pointer> half = default!;
     uint64 want = default!;
@@ -325,13 +334,14 @@ public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
             want |= (uint64)(((uint64)1).Lsh((int64)(i)));
         }
     }
+
     var got = runtime_internal_test_package.GCTestIsReachable(all.ꓸꓸꓸ);
-    if ((uint64)(got & want) != want) {
+    if ((got & want) != want) {
         // This is a serious bug - an object is live (due to the KeepAlive
         // call below), but isn't reported as such.
         Ꮡt.Fatalf("live object not in reachable set; want %b, got %b"u8, want, got);
     }
-    if (global::go.math.bits_package.OnesCount64((uint64)(got & ~want)) > 1) {
+    if (global::go.math.bits_package.OnesCount64(got & ~want) > 1) {
         // Note: we can occasionally have a value that is retained even though
         // it isn't live, due to conservative scanning of stack frames.
         // See issue 67204. For now, we allow a "slop" of 1 unintentionally
@@ -349,7 +359,7 @@ internal static ref nint pointerClassData => ref ᏑpointerClassData.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object extraAllocationsCauseˢ = (@string)"extra allocations cause this test to fail; see #70079"u8;
-internal static readonly @string stackˢ = "stack"u8;
+internal static readonly @string stackˢ2 = "stack"u8;
 internal static readonly @string heapˢ = "heap"u8;
 internal static readonly @string bssˢ = "bss"u8;
 internal static readonly @string dataˢ = "data"u8;
@@ -371,7 +381,7 @@ public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
     }
     ref var onStack = ref heap(new nint(), out var ᏑonStack);
     ref var notOnStack = ref heap(new nint(), out var ᏑnotOnStack);
-    check(@unsafe.Pointer.FromPinnedBox(ᏑonStack), stackˢ);
+    check(@unsafe.Pointer.FromPinnedBox(ᏑonStack), stackˢ2);
     check(@unsafe.Pointer.FromPinnedBox(runtime_internal_test_package.Escape(ᏑnotOnStack)), heapˢ);
     check(@unsafe.Pointer.FromBox(ᏑpointerClassBSS), bssˢ);
     check(@unsafe.Pointer.FromPinnedBox(ᏑpointerClassData), dataˢ);
@@ -456,12 +466,12 @@ public static partial void TestPrintGC(ж<testing.T> Ꮡt) {
 internal static error testTypeSwitch(any x) {
     switch (x.type()) {
     case null: {
+        // ok
         break;
     }
     case {} Δy when Δy._<error>(out var y): {
         return y;
     }}
-    // ok
     return default!;
 }
 
@@ -497,10 +507,11 @@ public static void TestPageAccounting(ж<testing.T> Ꮡt) {
     // pages-in-use count below zero because of a rounding
     // mismatch (golang.org/issue/15022).
     UntypedInt blockSize = /* 64 << 10 */ 65536;
-    var blocks = new slice<ж<array<byte>>>(((64 << (int)(20))) / blockSize);
+    var blocks = new slice<ж<array<byte>>>((64 << 20) / blockSize);
     foreach (var (i, _) in blocks) {
         blocks[i] = Ꮡ(new array<byte>(65536));
     }
+
     // Check that the running page count matches reality.
     var (pagesInUse, counted) = runtime_internal_test_package.CountPagesInUse();
     if (pagesInUse != counted) {
@@ -554,7 +565,6 @@ internal static void logDiff(ж<testing.T> Ꮡt, @string prefix, reflectꓸValue
             Ꮡt.Logf("%s: got %v, want %v"u8, prefix, got, want);
         }
     }
-
 }
 
 public static void BenchmarkReadMemStats(ж<testing.B> Ꮡb) {
@@ -566,10 +576,12 @@ public static void BenchmarkReadMemStats(ж<testing.B> Ꮡb) {
     foreach (var (i, _) in x) {
         x[i] = Ꮡ(new array<byte>(1024));
     }
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         Δruntime.ReadMemStats(Ꮡms);
     }
+
     Δruntime.KeepAlive(x);
 }
 
@@ -600,6 +612,7 @@ internal static partial Action applyGCLoad(ж<testing.B> Ꮡb) {
         }
         return tree;
     };
+
     // Keep the GC busy by continuously generating large trees.
     var done = new channel<EmptyStruct>(0);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -651,8 +664,10 @@ public static void BenchmarkReadMemStatsLatency(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var stop = applyGCLoad(Ꮡb);
+
     // Spend this much time measuring latencies.
     var latencies = new slice<time.Duration>(0, 1024);
+
     // Run for timeToBench hitting ReadMemStats continuously
     // and measuring the latency.
     b.ResetTimer();
@@ -670,12 +685,14 @@ public static void BenchmarkReadMemStatsLatency(ж<testing.B> Ꮡb) {
     // confusing the benchmarking framework for small b.N.
     b.StopTimer();
     stop();
+
     // Disable the default */op metrics.
     // ns/op doesn't mean anything because it's an average, but we
     // have a sleep in our b.N loop above which skews this significantly.
     b.ReportMetric(0D, nsOpˢ);
     b.ReportMetric(0D, bOpˢ);
     b.ReportMetric(0D, allocsOpˢ);
+
     // Sort latencies then report percentiles.
     slices.Sort<slice<time.Duration>, time.Duration>(latencies);
     b.ReportMetric((float64)(int64)latencies[len(latencies) * 50 / 100], p50Nsˢ);
@@ -688,6 +705,7 @@ public static void TestUserForcedGC(ж<testing.T> Ꮡt) {
     try {
         // Test that runtime.GC() triggers a GC even if GOGC=off.
         defer(Δdebug.SetGCPercent, Δdebug.SetGCPercent(-1), ref ᒐ);
+
         ref var ms1 = ref heap(new Δruntime.MemStats(), out var Ꮡms1);
         ref var ms2 = ref heap(new Δruntime.MemStats(), out var Ꮡms2);
         Δruntime.ReadMemStats(Ꮡms1);
@@ -713,6 +731,7 @@ internal static partial void writeBarrierBenchmark(ж<testing.B> Ꮡb, Action f)
         ref var ms = ref heap(new Δruntime.MemStats(), out var Ꮡms);
         Δruntime.ReadMemStats(Ꮡms);
         //b.Logf("heap size: %d MB", ms.HeapAlloc>>20)
+
         // Keep GC running continuously during the benchmark, which in
         // turn keeps the write barrier on continuously.
         ref var stop = ref heap(new uint32(), out var Ꮡstop);
@@ -729,6 +748,7 @@ internal static partial void writeBarrierBenchmark(ж<testing.B> Ꮡb, Action f)
             atomic.StoreUint32(Ꮡstop, 1);
             ᐸꟷ(doneʗ2);
         }, ref ᒐ);
+
         b.ResetTimer();
         f();
         b.StopTimer();
@@ -768,16 +788,19 @@ public static void BenchmarkWriteBarrier(ж<testing.B> Ꮡb) {
     };
     UntypedInt depth = 22; // 64 MB
     var root = mkTree(22);
+
     var rootʗ1 = root;
     writeBarrierBenchmark(Ꮡb, () => {
         array<ж<BenchmarkWriteBarrier_node>> stack = new(22); /* depth */
         nint tos = -1;
+
         // There are two write barriers per iteration, so i+=2.
         for (nint i = 0; i < Ꮡb.Value.N; i += 2) {
             if (tos == -1) {
                 stack[0] = rootʗ1;
                 tos = 0;
             }
+
             // Perform one step of reversing the tree.
             var n = stack[tos];
             if ((~n).l == nil){
@@ -788,12 +811,14 @@ public static void BenchmarkWriteBarrier(ж<testing.B> Ꮡb) {
                 stack[tos + 1] = n.Value.r;
                 tos++;
             }
-            if (i % ((1 << (int)(12))) == 0) {
+
+            if (i % (1 << 12) == 0) {
                 // Avoid non-preemptible loops (see issue #10958).
                 Δruntime.Gosched();
             }
         }
     });
+
     Δruntime.KeepAlive(wbRoots);
 }
 
@@ -804,12 +829,14 @@ public static void BenchmarkBulkWriteBarrier(ж<testing.B> Ꮡb) {
         // We don't want GC to take our time.
         Ꮡb.Skip(needGomaxprocs2ˢ);
     }
+
     // Construct a large set of objects we can copy around.
     UntypedInt heapSize = /* 64 << 20 */ 67108864;
     var ptrs = new slice<ж<BenchmarkBulkWriteBarrier_obj>>((nint)((uintptr)heapSize / /* unsafe.Sizeof(obj{}) */ (uintptr)128));
     foreach (var (i, _) in ptrs) {
         ptrs[i] = @new<BenchmarkBulkWriteBarrier_obj>();
     }
+
     var ptrsʗ1 = ptrs;
     writeBarrierBenchmark(Ꮡb, () => {
         UntypedInt blockSize = 1024;
@@ -820,13 +847,16 @@ public static void BenchmarkBulkWriteBarrier(ж<testing.B> Ꮡb) {
             var first = block[0];
             copy(block, block[1..]);
             block[blockSize - 1] = first;
+
             pos += blockSize;
             if (pos + (nint)blockSize > len(ptrsʗ1)) {
                 pos = 0;
             }
+
             Δruntime.Gosched();
         }
     });
+
     Δruntime.KeepAlive(ptrs);
 }
 
@@ -861,6 +891,7 @@ public static void BenchmarkMSpanCountAlloc(ж<testing.B> Ꮡb) {
         // Allocate one dummy mspan for the whole benchmark.
         var s = runtime_internal_test_package.AllocMSpan();
         defer(runtime_internal_test_package.FreeMSpan, s, ref ᒐ);
+
         // n is the number of bytes to benchmark against.
         // n must always be a multiple of 8, since gcBits is
         // always rounded up 8 bytes.
@@ -870,6 +901,7 @@ public static void BenchmarkMSpanCountAlloc(ж<testing.B> Ꮡb) {
                 // Initialize a new byte slice with pseudo-random data.
                 var bits = new slice<byte>(n);
                 rand.Read(bits);
+
                 bΔ1.ResetTimer();
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     runtime_internal_test_package.MSpanCountAlloc(sʗ1, bits);
@@ -941,24 +973,27 @@ internal partial struct TestWeakToStrongMarkTermination_T /*dyn*/ {
 public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         testenv.MustHaveParallelism(new runtime_test_package.testing_TжTB(Ꮡt));
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(2), ref ᒐ);
         defer(Δdebug.SetGCPercent, Δdebug.SetGCPercent(-1), ref ᒐ);
         var w = new slice<weak.Pointer<TestWeakToStrongMarkTermination_T>>(2048);
+
         // Make sure there's no out-standing GC from a previous test.
         Δruntime.GC();
+
         // Create many objects with a weak pointers to them.
         foreach (var (i, _) in w) {
             var x = @new<TestWeakToStrongMarkTermination_T>();
             x.Value.a = @new<nint>();
             w[i] = weak.Make<TestWeakToStrongMarkTermination_T>(x);
         }
+
         // Reset the restart flag.
         runtime_internal_test_package.GCMarkDoneResetRestartFlag();
+
         // Prevent mark termination from completing.
         runtime_internal_test_package.SetSpinInGCMarkDone(true);
+
         // Start a GC, and wait a little bit to get something spinning in mark termination.
         // Simultaneously, fire off another goroutine to disable spinning. If everything's
         // working correctly, then weak.Value will block, so we need to make sure something
@@ -975,10 +1010,12 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
             // can end up stuck in gcMarkDone with nothing to
             // wake it.
             runtime_internal_test_package.Usleep(100000); // 100ms
+
             // Let mark termination continue.
             runtime_internal_test_package.SetSpinInGCMarkDone(false);
         });
         time.Sleep(10 * time.Millisecond);
+
         // Perform many weak->strong conversions in the critical window.
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         foreach (var (_, vᴛ1) in w) {
@@ -997,10 +1034,13 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
                 finally { ᒐ.Run(); }
             });
         }
+
         // Make sure the GC completes.
         ᐸꟷ(done);
+
         // Make sure all the weak->strong conversions finish.
         Ꮡwg.Wait();
+
         // The bug is triggered if there's still mark work after gcMarkDone stops the world.
         //
         // This can manifest in one of two ways today:
@@ -1017,6 +1057,35 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string godebugCheckfinalizers1ˢ = "GODEBUG=checkfinalizers=1"u8;
+internal static readonly @string detectedPossibleIssuesˢ = "detected possible issues with cleanups and/or finalizers"u8;
+internal static readonly @string isReachableFromˢ = "is reachable from"u8;
+internal static readonly @string isInATinyBlockˢ = "is in a tiny block"u8;
+internal static readonly @string mainˢ = "main.DetectFinalizerAndCleanupLeaks()"u8;
+
+public static void TestDetectFinalizerAndCleanupLeaks(ж<testing.T> Ꮡt) {
+    @string got = runTestProg(Ꮡt, testprogˢ, "DetectFinalizerAndCleanupLeaks"u8, godebugCheckfinalizers1ˢ);
+    var sp = strings.SplitN(got, detectedPossibleIssuesˢ, 2);
+    if (len(sp) != 2) {
+        Ꮡt.Fatalf("expected the runtime to throw, got:\n%s"u8, got);
+    }
+    if (strings.Count(sp[0], isReachableFromˢ) != 2) {
+        Ꮡt.Fatalf("expected exactly two leaked cleanups and/or finalizers, got:\n%s"u8, got);
+    }
+    // N.B. Disable in race mode and in asan mode. Both disable the tiny allocator.
+    nint wantSymbolizedLocations = 2;
+    if (!race.Enabled && !asan.Enabled) {
+        if (strings.Count(sp[0], isInATinyBlockˢ) != 1) {
+            Ꮡt.Fatalf("expected exactly one report for allocation in a tiny block, got:\n%s"u8, got);
+        }
+        wantSymbolizedLocations++;
+    }
+    if (strings.Count(sp[0], mainˢ) != wantSymbolizedLocations) {
+        Ꮡt.Fatalf("expected %d symbolized locations, got:\n%s"u8, wantSymbolizedLocations, got);
+    }
 }
 
 } // end runtime_test_package

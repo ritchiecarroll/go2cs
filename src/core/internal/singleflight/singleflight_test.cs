@@ -66,9 +66,12 @@ public static partial void TestDoDupSuppress(ж<testing.T> Ꮡt) {
         }
         @string v = ᐸꟷ(cʗ1);
         cʗ1.ᐸꟷ(v); // pump; make available for any future calls
+
         time.Sleep(10 * time.Millisecond); // let more goroutines enter Do
+
         return (v, default!);
     };
+
     UntypedInt n = 10;
     Ꮡwg1.Add(1);
     for (nint i = 0; i < n; i++) {
@@ -109,10 +112,13 @@ public static partial void TestDoDupSuppress(ж<testing.T> Ꮡt) {
 
 public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
+
     ref var firstStarted = ref heap(new sync.WaitGroup(), out var ᏑfirstStarted);
     ref var firstFinished = ref heap(new sync.WaitGroup(), out var ᏑfirstFinished);
+
     ᏑfirstStarted.Add(1);
     ᏑfirstFinished.Add(1);
+
     @string key = keyˢ;
     var firstCh = new channel<EmptyStruct>(0);
     var firstChʗ1 = firstCh;
@@ -127,8 +133,10 @@ public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
         });
         ᏑfirstFinished.Done();
     });
+
     ᏑfirstStarted.Wait();
     Ꮡg.ForgetUnshared(key); // from this point no two function using same key should be executed concurrently
+
     var secondCh = new channel<EmptyStruct>(0);
     var secondChʗ1 = secondCh;
     goǃ(() => {
@@ -137,33 +145,39 @@ public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
             // Notify that we started
             secondChʗ2.ᐸꟷ(new EmptyStruct());
             ᐸꟷ(secondChʗ2);
-            return ((nint)(2), default!);
+            return ((nint)2, default!);
         });
     });
+
     ᐸꟷ(secondCh);
+
     var resultCh = Ꮡg.DoChan(key, () => {
         throw panic("third must not be started");
     });
+
     if (Ꮡg.ForgetUnshared(key)) {
         Ꮡt.Errorf("Before first goroutine finished, key %q is shared, should return false"u8, key);
     }
+
     close(firstCh);
     ᏑfirstFinished.Wait();
+
     if (Ꮡg.ForgetUnshared(key)) {
         Ꮡt.Errorf("After first goroutine finished, key %q is still shared, should return false"u8, key);
     }
+
     secondCh.ᐸꟷ(new EmptyStruct());
+
     {
-        var result = ᐸꟷ(resultCh); if (!AreEqual(result.Val, (nint)(2))) {
+        var result = ᐸꟷ(resultCh); if (!AreEqual(result.Val, (nint)2)) {
             Ꮡt.Errorf("We should receive result produced by second call, expected: 2, got %d"u8, result.Val);
         }
     }
 }
 
 public static partial void TestDoAndForgetUnsharedRace(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
+
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
     @string key = keyˢ;
     var d = time.Millisecond;
@@ -186,6 +200,7 @@ public static partial void TestDoAndForgetUnsharedRace(ж<testing.T> Ꮡt) {
             });
         }
         Ꮡwg.Wait();
+
         if (Ꮡcalls.Load() != 1) {
             // The goroutines didn't park in g.Do in time,
             // so the key was re-added and may have been shared after the call.
@@ -193,6 +208,7 @@ public static partial void TestDoAndForgetUnsharedRace(ж<testing.T> Ꮡt) {
             d *= 2;
             continue;
         }
+
         // All of the Do calls ended up sharing the first
         // invocation, so the key should have been unused
         // (and therefore unshared) when they returned.

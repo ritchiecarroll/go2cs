@@ -24,8 +24,8 @@ internal static (@string, error) executable() {
     else { /* default: */
         return ("", errors.New("Executable not implemented for "u8 + runtime.GOOS));
     }
-
     var (path, err) = Readlink(procfn);
+
     // When the executable has been deleted then Readlink returns a
     // path appended with " (deleted)".
     return (stringslite.TrimSuffix(path, deletedˢ), err);

@@ -33,12 +33,14 @@ public static void Example() {
                 }
             }
         }, ref ᒐ);
+
         {
             var errΔ2 = trace.Start(new os.FileжWriter(f)); if (errΔ2 != default!) {
                 log.Fatalf("failed to start trace: %v"u8, errΔ2);
             }
         }
         defer(trace.Stop, ref ᒐ);
+
         // your program here
         RunMyProgram();
     }

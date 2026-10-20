@@ -8,10 +8,10 @@ namespace go.go;
 
 using fmt = fmt_package;
 using ast = global::go.go.ast_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using strings = strings_package;
 using constant = global::go.go.constant_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using token = global::go.go.token_package;
 
@@ -27,21 +27,22 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     ref var x = ref Ꮡx.DerefOrNull();
 
     Ꮡcheck.singleValue(Ꮡx);
+
     var exprᴛ1 = x.mode;
     if (exprᴛ1 == invalid) {
         return; // error reported before
     }
     if (exprᴛ1 == nilvalue) {
         assert(isTypes2);
+        // ok
     }
     else if (exprᴛ1 == constant_ || exprᴛ1 == variable || exprᴛ1 == mapindex || exprᴛ1 == value || exprᴛ1 == commaok || exprᴛ1 == commaerr) {
+        // ok
     }
     else { /* default: */
-        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), // ok
- // ok
- // we may get here because of other problems (go.dev/issue/39634, crash 12)
- // TODO(gri) do we need a new "generic" error code here?
- IncompatibleAssign, "cannot assign %s to %s in %s"u8, Ꮡx.OrTypedNil(), T, context);
+        // we may get here because of other problems (go.dev/issue/39634, crash 12)
+        // TODO(gri) do we need a new "generic" error code here?
+        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), IncompatibleAssign, "cannot assign %s to %s in %s"u8, Ꮡx.OrTypedNil(), T, context);
         x.mode = invalid;
         return;
     }
@@ -64,8 +65,7 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
             if (T == default! || isNonTypeParamInterface(T)) {
                 target = Default(x.typ);
             }
-        } else {
-            // go/types
+        } else { // go/types
             if (T == default! || isNonTypeParamInterface(T)) {
                 if (T == default! && AreEqual(x.typ, Typ[UntypedNil])) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UntypedNilUse, "use of untyped nil in %s"u8, context);
@@ -88,7 +88,6 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
             else { /* default: */
                 code = IncompatibleAssign;
             }
-
             Ꮡcheck.error(new operandжpositioner(Ꮡx), code, msg);
             x.mode = invalid;
             return;
@@ -103,20 +102,23 @@ internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         }
     }
     // x.typ is typed
+
     // A generic (non-instantiated) function value cannot be assigned to a variable.
     {
-        var (sig, _) = under(x.typ)._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
+        var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), WrongTypeArgCount, "cannot use generic function %s without instantiation in %s"u8, Ꮡx.OrTypedNil(), context);
             x.mode = invalid;
             return;
         }
     }
+
     // spec: "If a left-hand side is the blank identifier, any typed or
     // non-constant value except for the predeclared identifier nil may
     // be assigned to it."
     if (T == default!) {
         return;
     }
+
     ref var cause = ref heap<@string>(out var Ꮡcause);
     cause = ""u8;
     {
@@ -144,6 +146,7 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
         }
         return;
     }
+
     // rhs must be a constant
     if (x.mode != constant_) {
         Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConstInit, "%s is not constant"u8, Ꮡx.OrTypedNil());
@@ -153,14 +156,17 @@ internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<o
         return;
     }
     assert(isConstType(x.typ));
+
     // If the lhs doesn't have a type yet, use the type of x.
     if (lhs.typ == default!) {
         lhs.typ = x.typ;
     }
+
     Ꮡcheck.assignment(Ꮡx, lhs.typ, constantDeclarationˢ);
     if (x.mode == invalid) {
         return;
     }
+
     lhs.val = x.val;
 }
 
@@ -179,6 +185,7 @@ internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<opera
         x.mode = invalid;
         return;
     }
+
     // If lhs doesn't have a type yet, use the type of x.
     if (lhs.typ == default!) {
         var typ = x.typ;
@@ -194,6 +201,7 @@ internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<opera
         }
         lhs.typ = typ;
     }
+
     Ꮡcheck.assignment(Ꮡx, lhs.typ, context);
 }
 
@@ -206,11 +214,13 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
 
     // Determine if the lhs is a (possibly parenthesized) identifier.
     var (ident, _) = ast.Unparen(lhs)._<ж<ast.Ident>>(ᐧ);
+
     // Don't evaluate lhs if it is the blank identifier.
     if (ident != nil && (~ident).Name == "_"u8) {
         check.recordDef(ident, default!);
         return default!;
     }
+
     // If the lhs is an identifier denoting a variable v, this reference
     // is not a 'use' of v. Remember current value of v.used and restore
     // after evaluating the lhs via check.expr.
@@ -231,14 +241,18 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
             }
         }
     }
+
     ref var x = ref heap(new operand(), out var Ꮡx);
     Ꮡcheck.expr(nil, Ꮡx, lhs);
+
     if (v != nil) {
         check.usedVars[v] = v_used; // restore v.used
     }
+
     if (x.mode == invalid || !isValid(x.typ)) {
         return new BasicжΔType(Typ[Invalid]);
     }
+
     // spec: "Each left-hand side operand must be addressable, a map index
     // expression, or the blank identifier. Operands may be parenthesized."
     var exprᴛ1 = x.mode;
@@ -246,11 +260,11 @@ internal static ΔType lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) {
         return new BasicжΔType(Typ[Invalid]);
     }
     if (exprᴛ1 == variable || exprᴛ1 == mapindex) {
+        // ok
     }
     else { /* default: */
         {
             var (sel, ok) = x.expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
-                // ok
                 ref var op = ref heap(new operand(), out var Ꮡop);
                 Ꮡcheck.expr(nil, Ꮡop, (~sel).X);
                 if (op.mode == mapindex) {
@@ -284,12 +298,13 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
         }
         return;
     }
+
     if (Ꮡx == nil) {
         ж<target> target = default!;
         // avoid calling ExprString if not needed
         if (T != default!) {
             {
-                var (_, ok) = under(T)._<ж<ΔSignature>>(ᐧ); if (ok) {
+                var (_, ok) = T.Underlying()._<ж<ΔSignature>>(ᐧ); if (ok) {
                     target = newTarget(T, ExprString(lhs));
                 }
             }
@@ -297,6 +312,7 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
         Ꮡx = @new<operand>(); x = ref Ꮡx.DerefOrNull();
         Ꮡcheck.expr(target, Ꮡx, rhs);
     }
+
     if (T == default! && context == "assignment"u8) {
         context = assignmentToIdentifierˢ;
     }
@@ -336,6 +352,8 @@ internal static readonly @string untypedˢ = "untyped "u8;
 // where T is the last type.
 // Only one of variadic and hasDots may be set.
 internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> list, bool variadic, bool hasDots) {
+    var resᴷ = new stackAppend<@string>();
+
     assert(!(variadic && hasDots));
     slice<@string> res = default!;
     foreach (var (i, t) in list) {
@@ -347,9 +365,8 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
         if (fallthrough || !matchᴛ1 && (!isValid(t))) { matchᴛ1 = true;
             s = unknownTypeˢ;
         }
-        else if (isUntyped(t)) {
+        else if (isUntyped(t)) { // => *Basic
             if (isNumeric(t)){
-                // => *Basic
                 // Do not imply a specific type requirement:
                 // "have number, want float64" is better than
                 // "have untyped int, want float64" or
@@ -358,20 +375,19 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
             } else {
                 // If we don't have a number, omit the "untyped" qualifier
                 // for compactness.
-                s = strings.Replace((~t._<ж<Basic>>()).name, untypedˢ, ""u8, -1);
+                s = strings.ReplaceAll((~t._<ж<Basic>>()).name, untypedˢ, ""u8);
             }
         }
         else if (!matchᴛ1) { /* default: */
             s = Ꮡcheck.sprintf("%s"u8, t);
         }
-
         // handle ... parameters/arguments
         if (i == len(list) - 1) {
             switch (ᐧ) {
             case {} when variadic: {
+                // In correct code, the parameter type is a slice, but be careful.
                 {
                     var (tΔ2, _) = t._<ж<Slice>>(ᐧ); if (tΔ2 != nil) {
-                        // In correct code, the parameter type is a slice, but be careful.
                         s = Ꮡcheck.sprintf("%s"u8, (~tΔ2).elem);
                     }
                 }
@@ -382,9 +398,8 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
                 s += "..."u8;
                 break;
             }}
-
         }
-        res = append(res, s);
+        res = append(resᴷ, res, s);
     }
     return "("u8 + strings.Join(res, ", "u8) + ")"u8;
 }
@@ -404,6 +419,7 @@ internal static void assignError(this ж<Checker> Ꮡcheck, slice<ast.Expr> rhs,
     @string vars = measure(l, variableˢ);
     @string vals = measure(r, valueˢ);
     var rhs0 = rhs[0];
+
     if (len(rhs) == 1) {
         {
             var (call, _) = ast.Unparen(rhs0)._<ж<ast.CallExpr>>(ᐧ); if (call != nil) {
@@ -453,14 +469,17 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
     if (returnStmt != default!) {
         context = returnStatementˢ;
     }
+
     nint l = len(lhs);
     nint r = len(orig_rhs);
+
     // If l == 1 and the rhs is a single call, for a better
     // error message don't handle it as n:n mapping below.
     var isCall = false;
     if (r == 1) {
         (_, isCall) = ast.Unparen(orig_rhs[0])._<ж<ast.CallExpr>>(ᐧ);
     }
+
     // If we have a n:n mapping from lhs variable to rhs expression,
     // each value can be assigned to its corresponding variable.
     if (l == r && !isCall) {
@@ -475,6 +494,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         }
         return;
     }
+
     // If we don't have an n:n mapping, the rhs must be a single expression
     // resulting in 2 or more values; otherwise we have an assignment mismatch.
     if (r != 1) {
@@ -495,6 +515,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         }
         return;
     }
+
     var (rhs, commaOk) = Ꮡcheck.multiExpr(orig_rhs[0], l == 2 && returnStmt == default!);
     r = len(rhs);
     if (l == r) {
@@ -508,6 +529,7 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
         }
         return;
     }
+
     // In all other cases we have an assignment mismatch.
     // Only report a mismatch error if there are no other errors on the rhs.
     if ((~rhs[0]).mode != invalid) {
@@ -523,9 +545,8 @@ internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, sli
             v.Value.typ = new BasicжΔType(Typ[Invalid]);
         }
     }
+    // orig_rhs[0] was already evaluated
 }
-
-// orig_rhs[0] was already evaluated
 
 // assignVars type-checks assignments of expressions orig_rhs to variables lhs.
 internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, slice<ast.Expr> orig_rhs) {
@@ -533,12 +554,14 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
 
     nint l = len(lhs);
     nint r = len(orig_rhs);
+
     // If l == 1 and the rhs is a single call, for a better
     // error message don't handle it as n:n mapping below.
     var isCall = false;
     if (r == 1) {
         (_, isCall) = ast.Unparen(orig_rhs[0])._<ж<ast.CallExpr>>(ᐧ);
     }
+
     // If we have a n:n mapping from lhs variable to rhs expression,
     // each value can be assigned to its corresponding variable.
     if (l == r && !isCall) {
@@ -547,6 +570,7 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
         }
         return;
     }
+
     // If we don't have an n:n mapping, the rhs must be a single expression
     // resulting in 2 or more values; otherwise we have an assignment mismatch.
     if (r != 1) {
@@ -558,6 +582,7 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
         }
         return;
     }
+
     var (rhs, commaOk) = Ꮡcheck.multiExpr(orig_rhs[0], l == 2);
     r = len(rhs);
     if (l == r) {
@@ -571,20 +596,23 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
         }
         return;
     }
+
     // In all other cases we have an assignment mismatch.
     // Only report a mismatch error if there are no other errors on the rhs.
     if ((~rhs[0]).mode != invalid) {
         Ꮡcheck.assignError(orig_rhs, l, r);
     }
     Ꮡcheck.useLHS(lhs.ꓸꓸꓸ);
+    // orig_rhs[0] was already evaluated
 }
 
-// orig_rhs[0] was already evaluated
 internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
+    var newVarsᴷ = new stackAppend<ж<Var>>();
 
     nint top = len(check.delayed);
     var scope = check.scope;
+
     // collect lhs variables
     var seen = new map<@string, bool>(len(lhs));
     var lhsVars = new slice<ж<Var>>(len(lhs));
@@ -599,6 +627,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
             hasErr = true;
             continue;
         }
+
         @string name = ident.Value.Name;
         if (name != "_"u8) {
             if (seen[name]) {
@@ -608,6 +637,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
             }
             seen[name] = true;
         }
+
         // Use the correct obj if the ident is redeclared. The
         // variable's scope starts after the declaration; so we
         // must use Scope.Lookup here and call Scope.Insert
@@ -627,27 +657,33 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
                 continue;
             }
         }
+
         // declare new variable
-        var obj = NewVar(ident.Pos(), check.pkg, name, default!);
+        var obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default!);
         lhsVars[i] = obj;
         if (name != "_"u8) {
-            newVars = append(newVars, obj);
+            newVars = append(newVarsᴷ, newVars, obj);
         }
         check.recordDef(ident, new VarжObject(obj));
     }
+
     // create dummy variables where the lhs is invalid
     foreach (var (i, obj) in lhsVars) {
         if (obj == nil) {
-            lhsVars[i] = NewVar(lhs[i].Pos(), check.pkg, "_"u8, default!);
+            lhsVars[i] = newVar(LocalVar, lhs[i].Pos(), check.pkg, "_"u8, default!);
         }
     }
+
     Ꮡcheck.initVars(lhsVars, rhs, default!);
+
     // process function literals in rhs expressions before scope changes
     Ꮡcheck.processDelayed(top);
+
     if (len(newVars) == 0 && !hasErr) {
         Ꮡcheck.softErrorf(pos, NoNewVar, "no new variables on left side of :="u8);
         return;
     }
+
     // declare new variables
     // spec: "The scope of a constant or variable identifier declared inside
     // a function begins at the end of the ConstSpec or VarSpec (ShortVarDecl

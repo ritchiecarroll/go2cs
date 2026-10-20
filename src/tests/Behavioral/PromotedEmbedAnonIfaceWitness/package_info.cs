@@ -54,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("PromotedEmbedAnonIfaceWitness.go", "PromotedEmbedAnonIfaceWitness.cs", "AAs+gKSAAA0ggAAmKISCgoSChIiCgpaIgoKCgIKkhpTErIKChoKChIKChIaCiIKCgoKGgog=")]
+[assembly: go.GoPositionMap("PromotedEmbedAnonIfaceWitness.go", "PromotedEmbedAnonIfaceWitness.cs", "AAs+gKSAAA0ggAATKISCgpSClIiCgqaYgoKCgIKklpTEvIKCloKClIKClIaCmIKCgoKWgpg=")]
 // </GoSourcePositionMaps>
 
 namespace go;

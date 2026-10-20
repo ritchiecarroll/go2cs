@@ -92,8 +92,6 @@ public static void TestTermEqual(ж<testing.T> Ꮡt) {
 }
 
 public static void TestTermUnion(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, test) in new @string[]{
         "∅ ∅ ∅ ∅"u8,
         "∅ 𝓤 𝓤 ∅"u8,
@@ -110,8 +108,9 @@ public static void TestTermUnion(ж<testing.T> Ꮡt) {
         "int ~string int ~string"u8,
         "int myInt int myInt"u8,
         "~int ~string ~int ~string"u8,
-        "~int myInt ~int ∅"u8, // union is symmetric, but the result order isn't - repeat symmetric cases explicitly
+        "~int myInt ~int ∅"u8,
 
+        // union is symmetric, but the result order isn't - repeat symmetric cases explicitly
         "𝓤 ∅ 𝓤 ∅"u8,
         "int ∅ int ∅"u8,
         "~int ∅ ~int ∅"u8,

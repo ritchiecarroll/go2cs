@@ -41,6 +41,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
         cgiMain();
         os.Exit(0);
     }
+
     os.Exit(Ꮡm.Run());
 }
 
@@ -69,8 +70,8 @@ internal static readonly @string bodyˢ = "_body"u8;
 
 internal static void runResponseChecks(ж<testing.T> Ꮡt, ж<httptest.ResponseRecorder> Ꮡrw, map<@string, @string> expectedMap, params Span<Action<map<@string, @string>>> checksʗp) {
     var checks = checksʗp.sslice();
-
     ref var rw = ref Ꮡrw.DerefOrNull();
+
     // Make a map to hold the test map that the CGI returns.
     var m = new map<@string, @string>();
     m[bodyˢ] = rw.Body.String();
@@ -87,7 +88,6 @@ readlines:
             Ꮡt.Fatalf("unexpected error reading from CGI: %v"u8, err);
             break;
         }}
-
         linesRead++;
         @string trimmedLine = strings.TrimRight(line, "\r\n"u8);
         var (k, v, ok) = strings.Cut(trimmedLine, "="u8);
@@ -99,6 +99,7 @@ readlines:
 continue_readlines:;
     }
 break_readlines:;
+
     foreach (var (key, expected) in expectedMap) {
         @string got = m[key];
         if (key == "cwd"u8) {
@@ -148,6 +149,7 @@ public static void TestCGIBasicGet(ж<testing.T> Ꮡt) {
         ["env-SERVER_SOFTWARE"u8] = "go"u8
     };
     var replay = runCgiTest(Ꮡt, h, getTestCgiFooBarABHttp10ˢ, expectedMap);
+
     {
         @string expected = textHtmlˢ;
         @string got = replay.Header().Get(contentTypeˢ2); if (got != expected) {
@@ -190,6 +192,7 @@ public static void TestCGIEnvIPv6(ж<testing.T> Ꮡt) {
         ["env-SERVER_PORT"u8] = "80"u8,
         ["env-SERVER_SOFTWARE"u8] = "go"u8
     };
+
     var rw = httptest.NewRecorder();
     var req = newRequest(getTestCgiFooBarABHttp10ˢ2);
     req.Value.RemoteAddr = "[2000::3000]:12345"u8;
@@ -324,7 +327,7 @@ Content-Type: application/x-www-form-urlencoded
 Content-Length: 15
 
 postfoo=postbar
-"""u8;
+"""u8.Raw();
 
 public static void TestCGIBasicPost(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
@@ -361,7 +364,8 @@ Content-Type: application/x-www-form-urlencoded
 Transfer-Encoding: chunked
 
 
-"""u8 + chunk(postfooˢ) + chunk("="u8) + chunk(postbarˢ) + chunk(""u8);
+"""u8.Raw() + chunk(postfooˢ) + chunk("="u8) + chunk(postbarˢ) + chunk(""u8);
+
     var h = Ꮡ(new Handler(
         Path: os.Args[0],
         Root: "/test.cgi"u8
@@ -436,6 +440,7 @@ public static void TestCopyError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
+
         var h = Ꮡ(new Handler(
             Path: os.Args[0],
             Root: "/test.cgi"u8
@@ -443,6 +448,7 @@ public static void TestCopyError(ж<testing.T> Ꮡt) {
         var ts = httptest.NewServer(new cgi_internal_test_package.cgi_HandlerжΔHandler(h));
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
+
         var (conn, err) = net.Dial(tcpˢ, (~ts).Listener.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -463,11 +469,13 @@ public static void TestCopyError(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("ReadFull: %d bytes, %v"u8, n, err);
         }
+
         if (!handlerRunning()) {
             Ꮡt.Fatalf("pre-conn.Close, expected handler to still be running"u8);
         }
         conn.Close();
         var closed = time.Now();
+
         var nextSleep = 1 * time.Millisecond;
         while (ᐧ) {
             time.Sleep(nextSleep);
@@ -489,7 +497,7 @@ internal static readonly @string netHttpCgiHandlerˢ = @"net/http/cgi\.\(\*Handl
 // [Handler.ServeHTTP].
 internal static partial bool handlerRunning() {
     var r = regexp.MustCompile(netHttpCgiHandlerˢ);
-    var buf = new slice<byte>((64 << (int)(10)));
+    var buf = new slice<byte>((64 << 10));
     while (ᐧ) {
         nint n = runtime.Stack(buf, true);
         if (n < len(buf)) {
@@ -517,6 +525,7 @@ public static void TestDir(ж<testing.T> Ꮡt) {
         ["cwd"u8] = cwd
     };
     runCgiTest(Ꮡt, h, getTestCgiHttp10Hostˢ, expectedMap);
+
     (cwd, _) = os.Getwd();
     (cwd, _) = filepath.Split(os.Args[0]);
     h = Ꮡ(new Handler(
@@ -535,6 +544,7 @@ internal static readonly @string testdataTestCgiˢ = "testdata/test.cgi"u8;
 public static void TestEnvOverride(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
     var (cgifile, _) = filepath.Abs(testdataTestCgiˢ);
+
     ref var cwd = ref heap<@string>(out var Ꮡcwd);
     (cwd, _) = os.Getwd();
     var h = Ꮡ(new Handler(
@@ -567,6 +577,7 @@ public static void TestHandlerStderr(ж<testing.T> Ꮡt) {
         Root: "/test.cgi"u8,
         Stderr: new cgi_internal_test_package.strings_BuilderжWriter(Ꮡstderr)
     ));
+
     var rw = httptest.NewRecorder();
     var req = newRequest(getTestCgiWritestderr1ˢ);
     h.ServeHTTP(new cgi_internal_test_package.httptest_ResponseRecorderжResponseWriter(rw), req);

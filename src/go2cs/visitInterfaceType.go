@@ -122,8 +122,16 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	var preLiftIndentLevel int
 
+	// The type parameters a LIFTED interface closes over (liftCapturedTypeParams): crypto/x509's
+	// `type constraints[T, V any] struct { permitted interface{ query(V) (T, bool) } }` lifts its field
+	// type out of the generic struct, so the lift must carry `<T, V>` or both names are unbound (CS0246,
+	// Go 1.26 H7 class E).
+	var capturedTypeParams []*types.TypeParam
+
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
+		capturedTypeParams = liftCapturedTypeParams(identType)
+
 		// Structurally IDENTICAL anonymous interfaces are ONE Go type — the interface twin of
 		// visitStructType's dedup (that function's own anonLiftKey/lookupDynamicTypeName block),
 		// which this type never had. Without it, two occurrences of the same anonymous interface
@@ -161,7 +169,9 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		// removing it costs no currently-safe dedup anywhere in the corpus (i9's cross-tier census,
 		// 2026-09-01: 0 hits `-stdlib`-wide, 2 in reflect's own `-tests`, both false, 0 in the five
 		// reflect-importer canaries' `-tests`).
-		if signatureType := v.getType(interfaceType, false); signatureType != nil {
+		// A lift that closes over type parameters is never reused or registered by signature: its
+		// signature text names `T`/`V`, which mean something different in every generic declaration.
+		if signatureType := v.getType(interfaceType, false); signatureType != nil && len(capturedTypeParams) == 0 {
 			signature := signatureType.String()
 			existing := lookupDynamicTypeName(signature)
 			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name))
@@ -209,9 +219,43 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 			v.indentLevel = 0
 		}
 
+		// Within the declaration that owns the captured parameters, one signature is one Go type
+		// (crypto/x509's `permitted` and `excluded`): reuse the first lift, never across declarations.
+		capturedKey := ""
+
+		if len(capturedTypeParams) > 0 {
+			capturedKey = capturedLiftKey(capturedTypeParams, v.getType(interfaceType, false))
+
+			if existing, ok := v.capturedLiftNames[capturedKey]; ok {
+				reference := existing + liftedTypeParamList(capturedTypeParamNames(capturedTypeParams))
+				v.liftedTypeMap[identType] = reference
+				v.liftedTypeMap[v.getType(interfaceType, false)] = reference
+
+				if v.inFunction {
+					v.indentLevel = preLiftIndentLevel
+				}
+
+				return existing
+			}
+		}
+
 		interfaceTypeName = v.getUniqueLiftedTypeName(name)
-		v.liftedTypeMap[identType] = interfaceTypeName
-		v.liftedTypeMap[v.getType(interfaceType, false)] = interfaceTypeName
+		liftedReference := interfaceTypeName
+
+		if capturedKey != "" {
+			if v.capturedLiftNames == nil {
+				v.capturedLiftNames = map[string]string{}
+			}
+
+			v.capturedLiftNames[capturedKey] = interfaceTypeName
+		}
+
+		if len(capturedTypeParams) > 0 {
+			liftedReference += liftedTypeParamList(capturedTypeParamNames(capturedTypeParams))
+		}
+
+		v.liftedTypeMap[identType] = liftedReference
+		v.liftedTypeMap[v.getType(interfaceType, false)] = liftedReference
 
 		// Lifted interfaces are shared across the package so other files can resolve
 		// cross-file references to the anonymous type — INCLUDING function-scoped lifts,
@@ -221,11 +265,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		// name need the lifted name — the raw Go literal's `}` breaks the assembly
 		// attribute parse, CS1730 cascade). Mirrors the lifted anonymous-struct
 		// registration (visitStructType); see convertToInterfaceType for the resolution.
-		if identType != nil {
+		if identType != nil && len(capturedTypeParams) == 0 {
 			registerDynamicTypeName(identType.String(), interfaceTypeName)
 		}
 
-		if t := v.getType(interfaceType, false); t != nil {
+		if t := v.getType(interfaceType, false); t != nil && len(capturedTypeParams) == 0 {
 			registerDynamicTypeName(t.String(), interfaceTypeName)
 		}
 	} else {
@@ -292,6 +336,8 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	if !lifted && identType != nil {
 		genericTypeParams, genericConstraints = v.getGenericDefinition(identType)
+	} else if len(capturedTypeParams) > 0 {
+		genericTypeParams = liftedTypeParamList(capturedTypeParamNames(capturedTypeParams))
 	}
 
 	result.WriteString(outerIndent)
@@ -329,7 +375,15 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 			typeLenDeviation += token.Pos(len(parameterSignature) - v.getSourceParameterSignatureLen(signature))
 			typeLenDeviation += token.Pos(len(resultSignature) - v.getSourceResultSignatureLen(signature))
 
-			result.WriteString(fmt.Sprintf("%s%s %s(%s);", innerIndent, resultSignature, csMethodName, parameterSignature))
+			// A dyn lift's member may redeclare a member it later inherits (dynamicInterfaceBase.go):
+			// the marker resolves to `new ` exactly then, and to nothing everywhere else.
+			memberModifier := ""
+
+			if lifted && len(capturedTypeParams) == 0 {
+				memberModifier = dynamicNewMarker(interfaceTypeName)
+			}
+
+			result.WriteString(fmt.Sprintf("%s%s%s %s(%s);", innerIndent, memberModifier, resultSignature, csMethodName, parameterSignature))
 			v.writeCommentString(result, method.Comment, method.Type.End()+typeLenDeviation)
 			result.WriteString(v.newline)
 		} else if method.Type != nil {

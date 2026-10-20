@@ -21,14 +21,16 @@ internal static void show(message m) {
 }
 
 internal static void Main() {
-    message m = new ValueType(unit: "cpu in nanoseconds"u8);
+    message m = new ValueType(unit: "cpu in nanoseconds");
     show(m);
+
     ref var v = ref heap<ValueType>(out var Ꮡv);
-    v = new ValueType(unit: "heap in bytes"u8);
+    v = new ValueType(unit: "heap in bytes");
     message mp = new ValueTypeжmessage(Ꮡv);
     show(mp);
     fmt.Println(mp.describe());
-    show(new ValueType(unit: "v1.4"u8));
+
+    show(new ValueType(unit: "v1.4"));
 }
 
 } // end main_package

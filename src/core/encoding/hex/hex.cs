@@ -29,7 +29,7 @@ public static nint EncodedLen(nint n) {
 public static nint Encode(slice<byte> dst, slice<byte> src) {
     nint j = 0;
     foreach (var (_, v) in src) {
-        dst[j] = hextable[(v >> (int)(4))];
+        dst[j] = hextable[(v >> 4)];
         dst[j + 1] = hextable[(byte)(v & 0x0f)];
         j += 2;
     }
@@ -50,6 +50,7 @@ public static slice<byte> AppendEncode(slice<byte> dst, slice<byte> src) {
 // The stream-based Decoder returns [io.ErrUnexpectedEOF] instead of ErrLength.
 public static error ErrLength = errors.New("encoding/hex: odd length hex string"u8);
 
+// InvalidByteError values describe errors resulting from an invalid byte in a hex string.
 partial struct InvalidByteError /*num:byte*/;
 
 public static @string Error(this InvalidByteError e) {
@@ -75,6 +76,7 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
     for (; j < len(src); j += 2) {
         var p = src[j - 1];
         var q = src[j];
+
         var a = reverseHexTable[p];
         var b = reverseHexTable[q];
         if (a > 0x0f) {
@@ -83,7 +85,7 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
         if (b > 0x0f) {
             return (i, ((InvalidByteError)q));
         }
-        dst[i] = (byte)(((byte)(a << (int)(4))) | b);
+        dst[i] = (byte)(((byte)(a << 4)) | b);
         i++;
     }
     if (len(src) % 2 == 1) {
@@ -111,7 +113,7 @@ public static (slice<byte>, error) AppendDecode(slice<byte> dst, slice<byte> src
 public static @string EncodeToString(slice<byte> src) {
     var dst = new slice<byte>(EncodedLen(len(src)));
     Encode(dst, src);
-    return ((@string)dst);
+    return (@string)dst;
 }
 
 // DecodeString returns the bytes represented by the hexadecimal string s.
@@ -132,11 +134,13 @@ public static @string Dump(slice<byte> data) {
     if (len(data) == 0) {
         return ""u8;
     }
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     // Dumper will write 79 bytes per complete 16 byte chunk, and at least
     // 64 bytes for whatever remains. Round the allocation up, since only a
     // maximum of 15 bytes will be wasted.
     Ꮡbuf.Grow((1 + ((len(data) - 1) / 16)) * 79);
+
     var dumper = Dumper(new strings_BuilderжWriter(Ꮡbuf));
     dumper.Write(data);
     dumper.Close();
@@ -165,6 +169,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         if (len(p) < chunkSize) {
             chunkSize = len(p);
         }
+
         nint written = default!;
         nint encoded = Encode(e.@out[..], p.slice(0, chunkSize));
         (written, e.err) = e.w.Write(e.@out.slice(0, encoded));
@@ -207,6 +212,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
             }
         }
     }
+
     // Decode internal buffer into output buffer
     {
         nint numAvail = len(d.@in) / 2; if (len(p) > numAvail) {
@@ -218,6 +224,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     if (err != default!) {
         (d.@in, d.err) = (default!, err); // Decode error; discard input remainder
     }
+
     if (len(d.@in) < 2) {
         return (numDec, d.err); // Only expose errors when buffer fully consumed
     }
@@ -257,6 +264,7 @@ internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
     if (h.closed) {
         return (0, errors.New(encodingHexDumperClosedˢ));
     }
+
     // Output lines look like:
     // 00000010  2e 2f 30 31 32 33 34 35  36 37 38 39 3a 3b 3c 3d  |./0123456789:;<=|
     // ^ offset                          ^ extra space              ^ ASCII of line.
@@ -264,9 +272,9 @@ internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) {
         if (h.used == 0) {
             // At the beginning of a line we print the current
             // offset in hex.
-            h.buf[0] = (byte)((h.n >> (int)(24)));
-            h.buf[1] = (byte)((h.n >> (int)(16)));
-            h.buf[2] = (byte)((h.n >> (int)(8)));
+            h.buf[0] = (byte)(h.n >> 24);
+            h.buf[1] = (byte)(h.n >> 16);
+            h.buf[2] = (byte)(h.n >> 8);
             h.buf[3] = (byte)h.n;
             Encode(h.buf[4..], h.buf[..4]);
             h.buf[12] = (rune)' ';

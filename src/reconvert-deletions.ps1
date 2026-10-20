@@ -1333,6 +1333,11 @@ if ($unexpectedDeletable.Count -gt 0) {
 # is reported by name and the directory stays. Never `Remove-Item -Recurse` here.
 $absentPackageDirs = @{}
 
+# A key here that is a layout-L3 per-GOOS FOLDER (core\<pkg>\<goos>\) rather than a package directory: its
+# rows resolved, through Resolve-Principal's L3 arm, to the PARENT's import path. A per-GOOS folder never
+# holds a project, so it is never a "package with no project file" in the solution post-condition below.
+$absentL3Folders = @{}
+
 foreach ($row in @($deleteRows | Where-Object { $_.Class -eq 'DELETE-ABSENT' -and $_.Reason -eq 'package not in std at target' })) {
     $segments = $row.Path -split '/'
 
@@ -1340,6 +1345,104 @@ foreach ($row in @($deleteRows | Where-Object { $_.Class -eq 'DELETE-ABSENT' -an
 
     $dir = ($segments[0..($segments.Count - 2)] -join '/')
     $absentPackageDirs[$dir] = $true
+
+    $importPath = $row.Principal.Substring(0, [Math]::Max(0, $row.Principal.LastIndexOf('/')))
+    if ($importPath -ne $dir -and ($KnownGoos -contains $segments[-2])) { $absentL3Folders[$dir] = $true }
+}
+
+# ---------------------------------------------------------------------------------------------
+# A PACKAGE WHOSE OWN SOURCE IS GONE WHILE A GOOS-NAMED CHILD PACKAGE REMAINS (coordinator ruling
+# 2026-10-12, on the i9's Go 1.26 recon, RECON-go1.26-hop.md F1).
+#
+# At go1.24.13 internal/runtime/syscall is a linux-only package in the per-OS layout: its project file at
+# core\internal\runtime\syscall\ and its .cs in the linux\ folder. At go1.26.9 that package is GONE and Go
+# has two packages on its paths instead, internal/runtime/syscall/linux and internal/runtime/syscall/windows.
+# The rows above key the removal on each FILE's directory, so the only absent "package directory" was the
+# linux\ FOLDER: the parent's project, README and icons were never enumerated, the stale project survived
+# H5c and stayed in the solution, and its $(GoTargetOS)/*.cs glob compiled the NEW windows package's files
+# into the wrong assembly (CS0234 x12 at the 1.26.9 rung 1).
+#
+# ⚠ WHY THIS IS DECIDED FROM THE GOROOTS' FILES AND NOT FROM THE ROWS. A row-derived answer depends on the
+# flavour: under -Goos linux the old linux\ files resolve to the NEW package internal/runtime/syscall/linux
+# and are never DELETE rows at all, so the windows run would remove the parent and the linux run would not,
+# and the three flavours' delete sets would disagree. Whether a directory's OWN Go source exists is the same
+# question in every flavour. A directory qualifies when it holds a staged project, it held non-test Go source
+# at the SOURCE release (so it was a converted package), it holds none at the TARGET, and a child named for a
+# GOOS holds non-test Go source at the target. Its own files then become residue below, and its solution entry
+# is removed like any DELETE-ABSENT package's; its child directories are never touched.
+function Test-OwnGoSource {
+    param([Parameter(Mandatory = $true)][string] $Root, [Parameter(Mandatory = $true)][string] $ImportPath)
+
+    $dir = Join-Path (Join-Path $Root 'src') ($ImportPath -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+    if (-not (Test-Path -LiteralPath $dir -PathType Container)) { return $false }
+    return (@(Get-ChildItem -LiteralPath $dir -File -Filter '*.go' -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike '*_test.go' }).Count -gt 0)
+}
+
+$stagedProjectDirs = @(Get-ChildItem -LiteralPath $CoreDir -Recurse -File -Filter '*.csproj' -ErrorAction SilentlyContinue |
+    ForEach-Object { Get-RelativeDisplayPath -Path $_.DirectoryName -Root $CoreDir } |
+    Where-Object { $_ -and @($_ -split '/' | Where-Object { $_ -in @('bin', 'obj') }).Count -eq 0 } |
+    Sort-Object -Unique)
+
+$goosChildParents = @{}
+
+foreach ($dir in $stagedProjectDirs) {
+    if (-not (Test-OwnGoSource -Root $SourceGoRoot -ImportPath $dir)) { continue }
+    if (Test-OwnGoSource -Root $GoRoot -ImportPath $dir) { continue }
+
+    $children = @($KnownGoos | Where-Object { Test-OwnGoSource -Root $GoRoot -ImportPath "$dir/$_" })
+
+    if ($children.Count -eq 0) {
+        # ⚠ THE SAME HOLE WITHOUT A CHILD (coordinator ruling 2026-10-15, the Go 1.26 hop's H5). A package
+        # removed WHOLE whose staged .cs all sit in per-GOOS folders: vendor/golang.org/x/net/route is
+        # darwin-only, so every .cs it has is under darwin\. Its rows key the removal on darwin\, which goes,
+        # and the parent's project, README, icons and .editorconfig were never enumerated -- the stale
+        # project stayed in the solution compiling an empty $(GoTargetOS)/*.cs. i9 measured it on the real
+        # post-H5c root (stage h5-go126-r2): exit 0 x3 with route's parent and its <Project> entry left.
+        # Decided from the GOROOTs and the staged LAYOUT, never from the rows, for the flavour reason above;
+        # a package with a flat .cs of its own is left to its rows, which already key it.
+        $onDisk  = Join-Path $CoreDir ($dir -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+        $flatCs  = @(Get-ChildItem -LiteralPath $onDisk -File -Filter '*.cs' -ErrorAction SilentlyContinue | Where-Object {
+            $_.Name -notlike '*_test.cs' -and $_.Name -ne 'package_test_info.cs' -and $_.Name -ne 'go2cs_test_host.cs' })
+        $goosCs  = @($KnownGoos | Where-Object {
+            @(Get-ChildItem -LiteralPath (Join-Path $onDisk $_) -File -Filter '*.cs' -ErrorAction SilentlyContinue).Count -gt 0 })
+
+        if ($flatCs.Count -eq 0 -and $goosCs.Count -gt 0) { $absentPackageDirs[$dir] = $true }
+
+        continue
+    }
+
+    $absentPackageDirs[$dir] = $true
+    $goosChildParents[$dir] = $children
+}
+
+# ---------------------------------------------------------------------------------------------
+# THE HAZARD ITSELF, REFUSED: a project directory that SURVIVES this pass beside a child directory named for
+# a GOOS that is a package of its own (it carries its own project). The per-OS layout compiles
+# $(GoTargetOS)/*.cs, so that parent's project would compile the CHILD package's files. No Go release from
+# 1.24 to 1.27 has that shape (internal/syscall and internal/runtime/syscall, the only parents with
+# GOOS-named children, have no Go source of their own), so a hit is a new upstream shape the converter's
+# layout cannot hold, and it is refused by name rather than built wrong.
+$goosChildCollisions = @()
+
+foreach ($dir in $stagedProjectDirs) {
+    if ($absentPackageDirs.ContainsKey($dir)) { continue }
+
+    foreach ($g in $KnownGoos) {
+        $child = Join-Path $CoreDir (("$dir/$g") -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+
+        if ((Test-Path -LiteralPath $child -PathType Container) -and
+            @(Get-ChildItem -LiteralPath $child -File -Filter '*.csproj' -ErrorAction SilentlyContinue).Count -gt 0) {
+            $goosChildCollisions += "$dir/$g"
+        }
+    }
+}
+
+if ($goosChildCollisions.Count -gt 0) {
+    Write-Host ''
+    Write-Host ("REFUSED: {0} per-OS-layout package director(y/ies) hold a child package named for a GOOS: {1}." -f $goosChildCollisions.Count, ($goosChildCollisions -join ', ')) -ForegroundColor Red
+    Write-Host 'The parent''s $(GoTargetOS)/*.cs glob would compile the child package''s files into the wrong assembly.' -ForegroundColor Red
+    Write-Host 'This is a layout the converter cannot hold. NOTHING WAS DELETED.' -ForegroundColor Red
+    exit 3
 }
 
 $residueRows = @()
@@ -1435,6 +1538,16 @@ foreach ($row in @($rows | Where-Object { $_.Class -eq 'PROTECTED' })) {
 # still PARSED so a stale invocation is answered with the pointer rather than a syntax complaint, and is
 # then refused by name (ruling `f0837eea1`). A human's ruling carried by the instrument, never inferred --
 # the UNRESOLVED shape (ruling `485d7387d` §2).
+#
+# ⚠ PASSING SEVERAL. -Orphan is [string[]]: give it ONCE, as an array. Under `powershell -File` a repeated
+# `-Orphan a -Orphan b` is refused before this script runs (ParameterAlreadyBound, exit 1, nothing read),
+# and `-Orphan a,b` arrives as ONE string, which the parse below refuses as a disposition of 'delete,b...'.
+# So a caller with more than one goes through -Command:
+#   powershell -Command "& '<script>' ... -Orphan @('<p1>=delete','<p2>=delete') -Apply; exit `$LASTEXITCODE"
+# The trailing `exit $LASTEXITCODE` is what carries this script's exit code out of -Command. i9 measured all
+# three shapes at the Go 1.26 hop's H5 (2026-10-15), and a stale path through -Command returned 2.
+# Only the paths still present are passed on a later flavour: the first -Apply deletes them, and a
+# disposition naming a path that is no longer an orphan is refused below (the stale arm).
 $orphanDisposition = @{}
 
 foreach ($entry in @($Orphan)) {
@@ -1722,6 +1835,7 @@ else {
     $dirsRemoved    = 0
     $dirsKept       = @()
     $slnxRemoved    = 0
+    $foldersRemoved = 0
 
     foreach ($r in ($residueRows | Sort-Object Path)) {
         $why = Test-ProtectedPath -RelativePath $r.Path
@@ -1779,12 +1893,21 @@ else {
         Write-Host ("  orphaned hand-owns: {0} deleted, of {1}  (relocate is REFUSED; a move lives in git)" -f $orphansDeleted, $orphanRows.Count)
     }
 
-    foreach ($dir in @($absentPackageDirs.Keys | Sort-Object)) {
+    # Deepest first, so a per-GOOS folder emptied by its rows is gone before its parent is tested.
+    foreach ($dir in @($absentPackageDirs.Keys | Sort-Object -Descending)) {
         $onDisk = Join-Path $CoreDir ($dir -replace '/', [System.IO.Path]::DirectorySeparatorChar)
 
         if (-not (Test-Path -LiteralPath $onDisk -PathType Container)) { continue }
 
         $left = @(Get-ChildItem -LiteralPath $onDisk -Force -ErrorAction SilentlyContinue)
+
+        if ($goosChildParents.ContainsKey($dir) -and $left.Count -gt 0 -and
+            @($left | Where-Object { -not ($_.PSIsContainer -and ($goosChildParents[$dir] -contains $_.Name)) }).Count -eq 0) {
+            # Expected, not a leftover: the directory now holds only its GOOS-named child packages.
+            $dirsKept += $dir
+            Write-Host ("    KEPT     {0}/  -- holds only its GOOS-named child package(s): {1}" -f $dir, ($goosChildParents[$dir] -join ', '))
+            continue
+        }
 
         if ($left.Count -eq 0) {
             Remove-Item -LiteralPath $onDisk -Force
@@ -1837,6 +1960,10 @@ else {
     $slnxDirs = @()
 
     foreach ($dir in @($absentPackageDirs.Keys | Sort-Object)) {
+        # A per-GOOS folder is never a project, so it is never a package that lost its project file
+        # (see $absentL3Folders). Counting it is what refused the internal/runtime/syscall case at go1.26.9.
+        if ($absentL3Folders.ContainsKey($dir)) { continue }
+
         $onDisk = Join-Path $CoreDir ($dir -replace '/', [System.IO.Path]::DirectorySeparatorChar)
 
         # No directory at all, or a directory with no surviving .csproj: either way nothing can build it
@@ -1875,7 +2002,10 @@ else {
                 # (solutionGenerator.go's own reason -- a pre-F5 binary or a deployed tree can emit
                 # backslashes), one spelling of the path, and no escaped backslash in the pattern.
                 $normalized = $line.Replace([char]92, [char]47)
-                $pattern    = 'Path="core/' + (($dir -split '/' | ForEach-Object { [regex]::Escape($_) }) -join '/') + '/'
+                # The project file DIRECTLY in the package directory, never one below it: a parent whose
+                # own source is gone keeps its GOOS-named child packages, and a prefix match would drop
+                # their entries too (core/internal/runtime/syscall/ is a prefix of .../syscall/windows/).
+                $pattern    = 'Path="core/' + (($dir -split '/' | ForEach-Object { [regex]::Escape($_) }) -join '/') + '/[^/"]+\.csproj"'
 
                 if ($normalized -match $pattern) { $drop = $true; break }
             }
@@ -1886,6 +2016,57 @@ else {
             }
             else { $keptLines += $line }
         }
+
+        # ⚠ A <Folder> THIS PASS EMPTIED GOES WITH ITS LAST <Project> (coordinator ruling 2026-10-15, the Go 1.26
+        # hop's H5). The loop above drops the <Project> line and nothing else, so every removed package left
+        # `<Folder Name="/<pkg>/" ...>` over its own `</Folder>`: i9 measured 8 on the real post-H5c root, where
+        # the committed solution, written by the generator, has none. A Folder is dropped ONLY when a
+        # <Project> was removed from it AND no line is left inside it -- one that was empty before this pass, or
+        # that still holds anything, is never touched. Read off the edited lines, never a fresh text filter.
+        $removedFrom = @{}
+
+        foreach ($line in $slnxLines) {
+            if ($keptLines -notcontains $line -and $line -match '<Project ') { $removedFrom[$line] = $true }
+        }
+
+        $folded     = @()
+        $open       = -1
+        $openHadRow = $false
+        $original   = @($slnxLines)
+        $cursor     = 0
+
+        foreach ($line in $keptLines) {
+            # Walk the ORIGINAL lines in step, so "a <Project> was removed inside this Folder" is a fact about
+            # the file as read, not a guess from what is left.
+            while ($cursor -lt $original.Count -and $original[$cursor] -ne $line) {
+                if ($open -ge 0 -and $removedFrom.ContainsKey($original[$cursor])) { $openHadRow = $true }
+                $cursor++
+            }
+            $cursor++
+
+            if ($line -match '^\s*<Folder\b[^>]*[^/]>\s*$') {
+                $folded    += $line
+                $open       = $folded.Count - 1
+                $openHadRow = $false
+                continue
+            }
+
+            if ($line -match '^\s*</Folder>\s*$' -and $open -ge 0) {
+                if ($openHadRow -and $open -eq $folded.Count - 1) {
+                    Write-Host ("    slnx     removed empty folder {0}" -f $folded[$open].Trim())
+                    $folded = @(if ($open -gt 0) { $folded[0..($open - 1)] })
+                    $foldersRemoved++
+                }
+                else { $folded += $line }
+
+                $open = -1
+                continue
+            }
+
+            $folded += $line
+        }
+
+        $keptLines = $folded
 
         $joiner = if ($slnxCrLf) { "`r`n" } else { "`n" }
         [System.IO.File]::WriteAllText($slnxPath, ($keptLines -join $joiner))
@@ -1904,7 +2085,7 @@ else {
     # The after-block below subtracts this same variable, so the two can never disagree.
     Write-Host ("  residue .cs {0}   (the term the post-condition subtracts; the rest are .csproj, icons and test hosts)" -f $residueCs)
     Write-Host ("  package directories removed {0} of {1}; {2} kept with entries remaining" -f $dirsRemoved, $absentPackageDirs.Count, $dirsKept.Count)
-    Write-Host ("  slnx <Project> entries removed {0}  (packages with no project file {1}; directories removed {2})" -f $slnxRemoved, $slnxDirs.Count, $dirsRemoved)
+    Write-Host ("  slnx <Project> entries removed {0}  (packages with no project file {1}; directories removed {2}); emptied <Folder> elements removed {3}" -f $slnxRemoved, $slnxDirs.Count, $dirsRemoved, $foldersRemoved)
 
     # ⚠ THIS ROW IS A GUARD ON THE GENERATED SOLUTION, NOT A REPAIR OF IT -- ruling `d2ad84bdb` §3, which
     # supplies the mechanism my own report at `1f8da6540` did not have:
@@ -1993,14 +2174,23 @@ else {
     # residue .cs against the 37 the arithmetic implies, because the KEPT-directory block below prints
     # the names of entries that were NOT residue and a listing-parse cannot tell the two blocks apart.
     # A number the instrument derived beats a number a reader parsed out of its prose.
-    $expectedRemaining = $totalCs - $deleted - $residueCs
+    #
+    # ⚠ AND IT OWES AN ORPHAN TERM, for the same reason it owed the residue one. An orphaned hand-own
+    # ruled `-Orphan <path>=delete` is a production .cs that the walk above no longer finds, and it is in
+    # neither $deleted (classified rows) nor $residueCs. i9 measured it at the Go 1.26 hop's H5 (stage
+    # h5-go126-r2, 2026-10-15): the first real -Orphan delete removed 88 of 88 classified rows, 9 residue
+    # .cs and the 3 ruled orphans, and this check refused "expected 4405" against 4402 on disk -- exit 3,
+    # CORRECTLY, on bookkeeping. The disposition loop landed without this arithmetic, so the check was
+    # unsatisfiable on any run that deleted an orphan. $orphansDeleted counts only files it removed (a
+    # floor refusal exits above), so the term is exactly the deleted set.
+    $expectedRemaining = $totalCs - $deleted - $residueCs - $orphansDeleted
 
     Write-Host ''
     Write-Host '  after (re-walked from disk)' -ForegroundColor Cyan
-    Write-Host ("    production .cs under core        {0}   (was {1}, minus {2} classified, minus {3} residue .cs)" -f $remaining.Count, $totalCs, $deleted, $residueCs)
+    Write-Host ("    production .cs under core        {0}   (was {1}, minus {2} classified, minus {3} residue .cs, minus {4} orphaned hand-owns)" -f $remaining.Count, $totalCs, $deleted, $residueCs, $orphansDeleted)
 
     if ($remaining.Count -ne $expectedRemaining) {
-        Write-Host ("    ARITHMETIC MISMATCH -- expected {0} = {1} - {2} classified - {3} residue .cs" -f $expectedRemaining, $totalCs, $deleted, $residueCs) -ForegroundColor Red
+        Write-Host ("    ARITHMETIC MISMATCH -- expected {0} = {1} - {2} classified - {3} residue .cs - {4} orphaned hand-owns" -f $expectedRemaining, $totalCs, $deleted, $residueCs, $orphansDeleted) -ForegroundColor Red
         exit 3
     }
 }

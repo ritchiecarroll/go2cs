@@ -18,7 +18,7 @@ partial struct GCM {
     internal aes.Block cipher;
     internal nint nonceSize;
     internal nint tagSize;
-    internal partial ref gcmPlatformData gcmPlatformData { get; }
+    /*embed*/ internal gcmPlatformData gcmPlatformData;
 }
 
 public static (ж<GCM>, error) New(ж<aes.Block> Ꮡcipher, nint nonceSize, nint tagSize) {
@@ -85,6 +85,7 @@ internal static slice<byte> sealAfterIndicator(this ж<GCM> Ꮡg, slice<byte> ds
     if ((uint64)len(plaintext) > (uint64)((uint64)((4294967296L) - 2) * (uint64)gcmBlockSize)) {
         throw panic("crypto/cipher: message too large for GCM");
     }
+
     var (ret, @out) = sliceForAppend(dst, len(plaintext) + g.tagSize);
     if (alias.InexactOverlap(@out, plaintext)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and input");
@@ -92,6 +93,7 @@ internal static slice<byte> sealAfterIndicator(this ж<GCM> Ꮡg, slice<byte> ds
     if (alias.AnyOverlap(@out, data)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and additional data");
     }
+
     seal(@out, Ꮡg, nonce, plaintext, data);
     return ret;
 }
@@ -109,12 +111,14 @@ public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slic
     if (g.tagSize < gcmMinimumTagSize) {
         throw panic("crypto/cipher: incorrect GCM tag size");
     }
+
     if (len(ciphertext) < g.tagSize) {
         return (default!, errOpen);
     }
     if ((uint64)len(ciphertext) > (uint64)((uint64)((4294967296L) - 2) * (uint64)gcmBlockSize) + (uint64)g.tagSize) {
         return (default!, errOpen);
     }
+
     var (ret, @out) = sliceForAppend(dst, len(ciphertext) - g.tagSize);
     if (alias.InexactOverlap(@out, ciphertext)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and input");
@@ -122,6 +126,7 @@ public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slic
     if (alias.AnyOverlap(@out, data)) {
         throw panic("crypto/cipher: invalid buffer overlap of output and additional data");
     }
+
     fips140.RecordApproved();
     {
         var err = open(@out, Ꮡg, nonce, ciphertext, data); if (err != default!) {
