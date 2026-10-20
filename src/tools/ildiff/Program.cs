@@ -273,10 +273,10 @@ internal sealed class Names(MetadataReader md) : ISignatureTypeProvider<string, 
     public string TypeDef(TypeDefinitionHandle handle)
     {
         TypeDefinition type = m_md.GetTypeDefinition(handle);
-        string name = $"{m_md.GetString(type.Namespace)}.{m_md.GetString(type.Name)}";
+        string name = $"{m_md.GetString(type.Namespace)}.{FileLocal(m_md.GetString(type.Name))}";
         TypeDefinitionHandle declaring = type.GetDeclaringType();
 
-        return declaring.IsNil ? name : $"{TypeDef(declaring)}/{m_md.GetString(type.Name)}";
+        return declaring.IsNil ? name : $"{TypeDef(declaring)}/{FileLocal(m_md.GetString(type.Name))}";
     }
 
     public string TypeRef(TypeReferenceHandle handle)
@@ -310,6 +310,13 @@ internal sealed class Names(MetadataReader md) : ISignatureTypeProvider<string, 
 
         return $"sig({string.Join(",", decoded.ParameterTypes)}):{decoded.ReturnType}";
     }
+
+    // A file-local type's metadata name carries a hash of its source file's path (`<main_5b343830_Interceptors_g>F<64 hex>__T`),
+    // and a generator's hint name may carry its own (`_5b343830_`), so two builds of the same code from different trees name
+    // it differently. Both hashes are dropped; the file stem stays, so two files' types stay apart.
+    private static readonly System.Text.RegularExpressions.Regex s_fileLocalHash = new(@"_[0-9a-f]{8}(?=_\w*>F[0-9A-F]{64}__)|(?<=>F)[0-9A-F]{64}(?=__)");
+
+    public static string FileLocal(string name) => s_fileLocalHash.Replace(name, "");
 
     // The source roots --roots names; see Program.Main.
     public static string[] Roots = [];
