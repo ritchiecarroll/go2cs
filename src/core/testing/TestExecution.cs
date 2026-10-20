@@ -1564,14 +1564,27 @@ public sealed class TestExecution
                 if (m_tempDirParent is null || !Directory.Exists(m_tempDirParent))
                 {
                     string gotmpdir = os_package.Getenv("GOTMPDIR").ToString();
-                    string root = gotmpdir.Length > 0 ? gotmpdir : Path.Combine(m_runner.RunRoot, ".tmp");
-                    string made = Path.Combine(root, TempDirName(Name));
+                    string made;
 
-                    // MkdirTemp makes only the last element: a GOTMPDIR that does not exist is an error, as in Go.
-                    if (gotmpdir.Length > 0 && !Directory.Exists(gotmpdir))
-                        throw new DirectoryNotFoundException($"Could not find a part of the path '{made}'.");
+                    if (gotmpdir.Length > 0)
+                    {
+                        // Go's os.MkdirTemp(os.Getenv("GOTMPDIR"), pattern), through the converted os: a parent
+                        // unique to this test even when another process runs the same test name under the same
+                        // GOTMPDIR, and Go's own error when the directory is missing (MkdirTemp returns Stat's).
+                        (@string dir, error err) = os_package.MkdirTemp(gotmpdir, GoTempDirPattern(GoTempDirNamePrefix(Name)));
 
-                    Directory.CreateDirectory(made);
+                        if (err is not null)
+                            return (null, err.Error().ToString());
+
+                        made = dir.ToString();
+                    }
+                    else
+                    {
+                        // The run root is this run's own sandbox, so the stable name cannot meet another process.
+                        made = Path.Combine(m_runner.RunRoot, ".tmp", TempDirName(Name));
+                        Directory.CreateDirectory(made);
+                    }
+
                     m_tempDirParent = made;
                     Cleanup(() => RemoveAllWithWindowsRetry(made));
                 }
