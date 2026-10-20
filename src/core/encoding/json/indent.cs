@@ -27,7 +27,7 @@ internal static slice<byte> appendHTMLEscape(slice<byte> dst, slice<byte> src) {
     foreach (var (i, c) in src) {
         if (c == (rune)'<' || c == (rune)'>' || c == (rune)'&') {
             dst = appendꓸꓸꓸ(dst, src.slice(start, i));
-            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> (int)(4))], hex[(byte)(c & 0xF)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> 4)], hex[(byte)(c & 0xF)]);
             start = i + 1;
         }
         // Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).
@@ -64,7 +64,7 @@ internal static (slice<byte>, error) appendCompact(slice<byte> dst, slice<byte> 
                 if (start < i) {
                     dst = appendꓸꓸꓸ(dst, src.slice(start, i));
                 }
-                dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> (int)(4))], hex[(byte)(c & 0xF)]);
+                dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(c >> 4)], hex[(byte)(c & 0xF)]);
                 start = i + 1;
             }
             // Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).

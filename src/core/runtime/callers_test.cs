@@ -150,12 +150,12 @@ public static partial void TestCallersDoublePanic(ж<testing.T> Ꮡt) {
                 if (recover() == default!) {
                     Ꮡt.Fatal(didNotPanicˢ);
                 }
-                throw panic((nint)(2));
+                throw panic((nint)2);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }, ref ᒐ);
-        throw panic((nint)(1));
+        throw panic((nint)1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -182,7 +182,7 @@ public static partial void TestCallersAfterRecovery(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(didNotRecoverFromPanicˢ);
             }
         }, ref ᒐ);
-        throw panic((nint)(1));
+        throw panic((nint)1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -647,7 +647,7 @@ public static void TestFPUnwindAfterRecovery(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(didNotRecoverFromPanicˢ);
             }
         }, ref ᒐ);
-        throw panic((nint)(1));
+        throw panic((nint)1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

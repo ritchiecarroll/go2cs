@@ -186,7 +186,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                 if (!checkValidʗ2(tΔ5, err, testʗ1.valid)) {
                     return;
                 }
-                checkTimeʗ2(tΔ5, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ2(tΔ5, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
                 checkStackʗ2(tΔ5, ev.Stack(), testʗ1.stack, schedStack);
                 var got = ev.Metric();
                 if (got.Name != testʗ1.metric) {
@@ -205,7 +205,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
         var (ev, err) = MakeEvent(new EventConfig<ΔLabel>(
             Kind: EventLabel,
             Time: 42,
-            Details: new ΔLabel(ΔΔLabel: "test"u8, Resource: MakeResourceID(((global::go.@internal.trace_package.GoID)23)))
+            Details: new ΔLabel(ΔΔLabel: "test"u8, Resource: MakeResourceID((global::go.@internal.trace_package.GoID)23))
         ));
         if (!checkValidʗ3(tΔ6, err, true)) {
             return;
@@ -232,21 +232,21 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
             new(kind: EventRangeEnd, name: "GC concurrent mark phase"u8, scope: new ResourceID(nil), valid: true),
             new(kind: EventMetric, name: "GC concurrent mark phase"u8, scope: new ResourceID(nil), valid: false),
             new(kind: EventRangeBegin, name: "GC concurrent mark phase - INVALID"u8, scope: new ResourceID(nil), valid: false),
-            new(kind: EventRangeBegin, name: "GC incremental sweep"u8, scope: MakeResourceID(((global::go.@internal.trace_package.ProcID)1)), valid: true),
-            new(kind: EventRangeActive, name: "GC incremental sweep"u8, scope: MakeResourceID(((global::go.@internal.trace_package.ProcID)2)), valid: true),
-            new(kind: EventRangeEnd, name: "GC incremental sweep"u8, scope: MakeResourceID(((global::go.@internal.trace_package.ProcID)3)), valid: true),
-            new(kind: EventMetric, name: "GC incremental sweep"u8, scope: MakeResourceID(((global::go.@internal.trace_package.ProcID)4)), valid: false),
-            new(kind: EventRangeBegin, name: "GC incremental sweep - INVALID"u8, scope: MakeResourceID(((global::go.@internal.trace_package.ProcID)5)), valid: false),
-            new(kind: EventRangeBegin, name: "GC mark assist"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)1)), valid: true),
-            new(kind: EventRangeActive, name: "GC mark assist"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)2)), valid: true),
-            new(kind: EventRangeEnd, name: "GC mark assist"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)3)), valid: true),
-            new(kind: EventMetric, name: "GC mark assist"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)4)), valid: false),
-            new(kind: EventRangeBegin, name: "GC mark assist - INVALID"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)5)), valid: false),
-            new(kind: EventRangeBegin, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)1)), valid: true),
-            new(kind: EventRangeActive, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)2)), valid: false),
-            new(kind: EventRangeEnd, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)3)), valid: true),
-            new(kind: EventMetric, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)4)), valid: false),
-            new(kind: EventRangeBegin, name: "stop-the-world (for a good reason) - INVALID"u8, scope: MakeResourceID(((global::go.@internal.trace_package.GoID)5)), valid: false)
+            new(kind: EventRangeBegin, name: "GC incremental sweep"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)1), valid: true),
+            new(kind: EventRangeActive, name: "GC incremental sweep"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)2), valid: true),
+            new(kind: EventRangeEnd, name: "GC incremental sweep"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)3), valid: true),
+            new(kind: EventMetric, name: "GC incremental sweep"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)4), valid: false),
+            new(kind: EventRangeBegin, name: "GC incremental sweep - INVALID"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)5), valid: false),
+            new(kind: EventRangeBegin, name: "GC mark assist"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)1), valid: true),
+            new(kind: EventRangeActive, name: "GC mark assist"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)2), valid: true),
+            new(kind: EventRangeEnd, name: "GC mark assist"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)3), valid: true),
+            new(kind: EventMetric, name: "GC mark assist"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)4), valid: false),
+            new(kind: EventRangeBegin, name: "GC mark assist - INVALID"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)5), valid: false),
+            new(kind: EventRangeBegin, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)1), valid: true),
+            new(kind: EventRangeActive, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)2), valid: false),
+            new(kind: EventRangeEnd, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)3), valid: true),
+            new(kind: EventMetric, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)4), valid: false),
+            new(kind: EventRangeBegin, name: "stop-the-world (for a good reason) - INVALID"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)5), valid: false)
         }.slice();
 
         foreach (var (i, vᴛ2) in tests) {
@@ -276,7 +276,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                 if (got.Scope.String() != testʗ2.scope.String()) {
                     tΔ8.Errorf("expected scope to be %s, got %s"u8, testʗ2.scope.String(), got.Scope.String());
                 }
-                checkTimeʗ5(tΔ8, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ5(tΔ8, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
             });
         }
     });
@@ -556,7 +556,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                     tΔ10.Errorf("expected reason to be %s, got %s"u8, testʗ3.reason, got.Reason);
                 }
                 checkStackʗ4(tΔ10, got.Stack, testʗ3.stStack, stStack);
-                checkTimeʗ7(tΔ10, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ7(tΔ10, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
             });
         }
     });
@@ -589,7 +589,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                 if (!checkValidʗ9(tΔ12, err, testʗ4.valid)) {
                     return;
                 }
-                checkTimeʗ9(tΔ12, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ9(tΔ12, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
                 var gotSt = ev.StateTransition();
                 var (from, to) = gotSt.Proc();
                 if (from != testʗ4.from) {
@@ -672,7 +672,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                     return;
                 }
                 var got = ev.Sync();
-                checkTimeʗ11(tΔ14, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ11(tΔ14, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
                 if (got.N != testʗ5.n) {
                     tΔ14.Errorf("expected N to be %d, got %d"u8, testʗ5.n, got.N);
                 }
@@ -727,7 +727,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                 if (!checkValidʗ13(tΔ16, err, testʗ6.valid)) {
                     return;
                 }
-                checkTimeʗ13(tΔ16, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ13(tΔ16, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
                 var got = ev.Task();
                 if (got.ID != testʗ6.id) {
                     tΔ16.Errorf("expected ID to be %d, got %d"u8, testʗ6.id, got.ID);
@@ -767,7 +767,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                 if (!checkValidʗ15(tΔ18, err, testʗ7.valid)) {
                     return;
                 }
-                checkTimeʗ15(tΔ18, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ15(tΔ18, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
                 var got = ev.Region();
                 if (got.Task != testʗ7.task) {
                     tΔ18.Errorf("expected Task to be %d, got %d"u8, testʗ7.task, got.Task);
@@ -803,7 +803,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                 if (!checkValidʗ17(tΔ20, err, testʗ8.valid)) {
                     return;
                 }
-                checkTimeʗ17(tΔ20, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ17(tΔ20, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
                 var got = ev.Log();
                 if (got.Task != testʗ8.task) {
                     tΔ20.Errorf("expected Task to be %d, got %d"u8, testʗ8.task, got.Task);
@@ -847,7 +847,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
                 if (!checkValidʗ19(tΔ22, err, testʗ9.valid)) {
                     return;
                 }
-                checkTimeʗ19(tΔ22, ev, ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)));
+                checkTimeʗ19(tΔ22, ev, (global::go.@internal.trace_package.ΔTime)(int64)(42 + i));
                 var got = ev.Stack();
                 checkStackʗ6(tΔ22, got, testʗ9.stack, schedStack);
             });

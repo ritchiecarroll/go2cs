@@ -100,7 +100,7 @@ internal static void Main() {
     fmt.Println("fields:", ht.NumField());
     foreach (var (_, name) in new @string[]{"Plain", "inner", "tagged", "Named"}.slice()) {
         var (f, ok) = ht.FieldByName(name);
-        fmt.Printf("field %s found=%v anonymous=%v tag=%q exported=%v type=%s\n"u8, name, ok, f.Anonymous, ((@string)f.Tag), f.IsExported(), f.Type);
+        fmt.Printf("field %s found=%v anonymous=%v tag=%q exported=%v type=%s\n"u8, name, ok, f.Anonymous, (@string)f.Tag, f.IsExported(), f.Type);
     }
 
     handler named = (nint _Δp0) => default!;
@@ -113,16 +113,16 @@ internal static void Main() {
     var custom = new definedBytes(new definedByte[]{(rune)'h', (rune)'i', (rune)'!'}.slice());
     var cv = reflect.ValueOf(custom);
     var got = cv.Bytes();
-    fmt.Printf("bytes(definedBytes)=%q len=%d cap=%d\n"u8, ((@string)got), len(got), cap(got));
+    fmt.Printf("bytes(definedBytes)=%q len=%d cap=%d\n"u8, (@string)got, len(got), cap(got));
     got[2] = (rune)'?';
     fmt.Printf("alias write visible in source: %q\n"u8, ((@string)new byte[]{(byte)custom[0], (byte)custom[1], (byte)custom[2]}.slice()));
 
-    var plain = ((namedPlainBytes)slice<byte>((@string)"ok"u8));
-    fmt.Printf("bytes(namedPlainBytes)=%q\n"u8, ((@string)reflect.ValueOf(plain).Bytes()));
+    var plain = (namedPlainBytes)slice<byte>((@string)"ok"u8);
+    fmt.Printf("bytes(namedPlainBytes)=%q\n"u8, (@string)reflect.ValueOf(plain).Bytes());
 
     ref var arr = ref heap<array<byte>>(out var Ꮡarr);
     arr = new byte[]{(rune)'a', (rune)'b', (rune)'c'}.array();
-    fmt.Printf("bytes([3]byte)=%q\n"u8, ((@string)reflect.ValueOf(Ꮡarr).Elem().Bytes()));
+    fmt.Printf("bytes([3]byte)=%q\n"u8, (@string)reflect.ValueOf(Ꮡarr).Elem().Bytes());
 
     ref var dstPlain = ref heap<slice<byte>>(out var ᏑdstPlain);
     reflect.ValueOf(ᏑdstPlain).Elem().SetBytes(slice<byte>("plain"u8));
@@ -130,7 +130,7 @@ internal static void Main() {
     reflect.ValueOf(ᏑdstNamed).Elem().SetBytes(slice<byte>("named"u8));
     ref var dstCustom = ref heap<definedBytes>(out var ᏑdstCustom);
     reflect.ValueOf(ᏑdstCustom).Elem().SetBytes(slice<byte>("custom"u8));
-    fmt.Printf("setbytes %q %q %d\n"u8, ((@string)dstPlain), ((@string)(slice<byte>)dstNamed), len(dstCustom));
+    fmt.Printf("setbytes %q %q %d\n"u8, (@string)dstPlain, (@string)(slice<byte>)dstNamed, len(dstCustom));
 
     ref var h = ref heap(new host(), out var Ꮡh);
     var hv = reflect.ValueOf(Ꮡh).Elem();
@@ -167,9 +167,9 @@ internal static void Main() {
     fmt.Println("map nil element separations:", reflect.DeepEqual(nilElem, otherKey),
         reflect.DeepEqual(nilElem, nonNil), reflect.DeepEqual(nilElem, new map<@string, ж<inner>>{["b"] = default!}));
 
-    var anyNil = new map<@string, any>{["a"] = default!, ["b"] = (nint)(1)};
-    fmt.Println("map nil interface element:", reflect.DeepEqual(anyNil, new map<@string, any>{["a"] = default!, ["b"] = (nint)(1)}),
-        reflect.DeepEqual(anyNil, new map<@string, any>{["a"] = (nint)(0), ["b"] = (nint)(1)}));
+    var anyNil = new map<@string, any>{["a"] = default!, ["b"] = (nint)1};
+    fmt.Println("map nil interface element:", reflect.DeepEqual(anyNil, new map<@string, any>{["a"] = default!, ["b"] = (nint)1}),
+        reflect.DeepEqual(anyNil, new map<@string, any>{["a"] = (nint)0, ["b"] = (nint)1}));
 
     var (sliceEq, sliceElemEq) = zeroAgrees<slice<any>, ᴀnone>();
     var (mapEq, mapElemEq) = zeroAgrees<map<@string, nint>, ᴀnone>();

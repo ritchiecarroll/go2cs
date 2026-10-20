@@ -274,7 +274,7 @@ internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) {
             return details.hash;
         }
     }
-    return ((crypto.Hash)0);
+    return (crypto.Hash)0;
 }
 
 public static @string String(this SignatureAlgorithm algo) {
@@ -407,7 +407,7 @@ internal static void initᴛsignatureAlgorithmDetails() { signatureAlgorithmDeta
     new(ECDSAWithSHA256, "ECDSA-SHA256"u8, oidSignatureECDSAWithSHA256, emptyRawValue, ECDSA, crypto.SHA256, false),
     new(ECDSAWithSHA384, "ECDSA-SHA384"u8, oidSignatureECDSAWithSHA384, emptyRawValue, ECDSA, crypto.SHA384, false),
     new(ECDSAWithSHA512, "ECDSA-SHA512"u8, oidSignatureECDSAWithSHA512, emptyRawValue, ECDSA, crypto.SHA512, false),
-    new(PureEd25519, "Ed25519"u8, oidSignatureEd25519, emptyRawValue, Ed25519, ((crypto.Hash)0), /* no pre-hashing */ false)
+    new(PureEd25519, "Ed25519"u8, oidSignatureEd25519, emptyRawValue, Ed25519, (crypto.Hash)0, /* no pre-hashing */ false)
 }.slice(); }
 
 internal static asn1.RawValue emptyRawValue = new asn1.RawValue(nil);
@@ -910,7 +910,7 @@ public static error ErrUnsupportedAlgorithm = errors.New("x509: cannot verify si
 partial struct InsecureAlgorithmError /*num:nint*/;
 
 public static @string Error(this InsecureAlgorithmError e) {
-    return fmt.Sprintf("x509: cannot verify signature: insecure algorithm %v"u8, ((SignatureAlgorithm)(nint)e));
+    return fmt.Sprintf("x509: cannot verify signature: insecure algorithm %v"u8, (SignatureAlgorithm)(nint)e);
 }
 
 // ConstraintViolationError results when a requested usage is not permitted by
@@ -1129,9 +1129,9 @@ public partial struct distributionPointName {
 }
 
 internal static byte reverseBitsInAByte(byte @in) {
-    var b1 = (byte)((@in >> (int)(4)) | (byte)(@in << (int)(4)));
-    var b2 = (byte)((byte)((b1 >> (int)(2)) & 0x33) | (byte)((byte)(b1 << (int)(2)) & 0xcc));
-    var b3 = (byte)((byte)((b2 >> (int)(1)) & 0x55) | (byte)((byte)(b2 << (int)(1)) & 0xaa));
+    var b1 = (byte)(@in >> 4 | (byte)(@in << 4));
+    var b2 = (byte)((byte)(b1 >> 2 & 0x33) | (byte)((byte)(b1 << 2) & 0xcc));
+    var b3 = (byte)((byte)(b2 >> 1 & 0x55) | (byte)((byte)(b2 << 1) & 0xaa));
     return b3;
 }
 
@@ -1473,7 +1473,7 @@ internal static (pkix.Extension, error) marshalKeyUsage(KeyUsage ku) {
 
     array<byte> a = new(2);
     a[0] = reverseBitsInAByte((byte)(nint)ku);
-    a[1] = reverseBitsInAByte((byte)(nint)((ku >> (int)(8))));
+    a[1] = reverseBitsInAByte((byte)(nint)((ku >> 8)));
 
     nint l = 1;
     if (a[1] != 0) {
@@ -2604,7 +2604,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
             // Only add a reasonCode extension if the reason is non-zero, as per
             // RFC 5280 Section 5.3.1.
             if (rce.ReasonCode != 0) {
-                var (reasonBytes, errΔ1) = asn1.Marshal(((asn1.Enumerated)rce.ReasonCode));
+                var (reasonBytes, errΔ1) = asn1.Marshal((asn1.Enumerated)rce.ReasonCode);
                 if (errΔ1 != default!) {
                     return (default!, errΔ1);
                 }

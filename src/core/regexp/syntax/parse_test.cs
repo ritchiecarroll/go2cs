@@ -461,7 +461,7 @@ public static void TestAppendRangeCollapse(ж<testing.T> Ꮡt) {
         r = appendRange(r, i + (rune)'a' - (rune)'A', i + (rune)'a' - (rune)'A');
     }
     if (((@string)r) != "AZaz"u8) {
-        Ꮡt.Errorf("appendRange interlaced A-Z a-z = %s, want AZaz"u8, ((@string)r));
+        Ꮡt.Errorf("appendRange interlaced A-Z a-z = %s, want AZaz"u8, (@string)r);
     }
 }
 

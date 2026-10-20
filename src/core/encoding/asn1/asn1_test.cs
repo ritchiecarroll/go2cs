@@ -669,9 +669,9 @@ public static void TestRawStructs(ж<testing.T> Ꮡt) {
         return;
     }
     if (s.A != 0x50) {
-        Ꮡt.Errorf("bad value for A: got %d want %d"u8, s.A, (nint)(0x50));
+        Ꮡt.Errorf("bad value for A: got %d want %d"u8, s.A, (nint)0x50);
     }
-    if (!bytes.Equal(((slice<byte>)s.Raw), input)) {
+    if (!bytes.Equal((slice<byte>)s.Raw, input)) {
         Ꮡt.Errorf("bad value for Raw: got %x want %x"u8, s.Raw, input);
     }
 }
@@ -1188,10 +1188,10 @@ public static void TestTaggedRawValue(ж<testing.T> Ꮡt) {
 
     var tests = new TestTaggedRawValue_tests[]{
         new(false, new byte[]{0x30, 3, TagInteger, 1, 1}.slice()),
-        new(true, new byte[]{0x30, 3, (byte)((byte)((ClassContextSpecific << (int)(6))) | (byte)tag), 1, 1}.slice()),
-        new(true, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassContextSpecific << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice()),
-        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassApplication << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice()),
-        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassPrivate << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice())
+        new(true, new byte[]{0x30, 3, (byte)((byte)(ClassContextSpecific << 6) | (byte)tag), 1, 1}.slice()),
+        new(true, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassContextSpecific << 6) | tag) | (byte)isCompound), 1, 1}.slice()),
+        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassApplication << 6) | tag) | (byte)isCompound), 1, 1}.slice()),
+        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassPrivate << 6) | tag) | (byte)isCompound), 1, 1}.slice())
     }.slice();
 
     foreach (var (i, test) in tests) {
@@ -1299,7 +1299,7 @@ public static void TestParsingMemoryConsumption(ж<testing.T> Ꮡt) {
 
     // Ensure that the memory allocated does not exceed 10<<21 (~20 MB) when
     // the parsing fails.
-    if (memDiff > ((uint64)10 << (int)(21))) {
+    if (memDiff > (uint64)10 << 21) {
         Ꮡt.Errorf("Too much memory allocated while parsing DER: %v MiB"u8, memDiff / 1024 / 1024);
     }
 }

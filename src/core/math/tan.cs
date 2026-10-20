@@ -117,7 +117,7 @@ internal static float64 tan(float64 x) {
         y = (float64)j; // integer part of x/(Pi/4), as float
 
         /* map zeros and singularities to origin */
-        if ((uint64)(j & 1) == 1) {
+        if ((j & 1) == 1) {
             j++;
             y++;
         }
@@ -131,7 +131,7 @@ internal static float64 tan(float64 x) {
     } else {
         y = z;
     }
-    if ((uint64)(j & 2) == 2) {
+    if ((j & 2) == 2) {
         y = -1D / y;
     }
     if (sign) {

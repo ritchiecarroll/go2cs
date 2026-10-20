@@ -80,7 +80,7 @@ internal static ΔBits norm(this ΔBits x) {
             z = append(z, b);
         }
     }
-    slices.Sort<slice<nint>, nint>(((slice<nint>)z));
+    slices.Sort<slice<nint>, nint>((slice<nint>)z);
     return z;
 }
 

@@ -292,7 +292,7 @@ public static partial void TestRenegotiationExtension(ж<testing.T> Ꮡt) {
     // buf contains a TLS record, with a 5 byte record header and a 4 byte
     // handshake header. The length of the ServerHello is taken from the
     // handshake header.
-    nint serverHelloLen = (nint)((nint)(((nint)buf[6] << (int)(16)) | ((nint)buf[7] << (int)(8))) | (nint)buf[8]);
+    nint serverHelloLen = (nint)buf[6] << 16 | (nint)buf[7] << 8 | (nint)buf[8];
 
     ref var serverHello = ref heap(new global::go.crypto.tls_package.serverHelloMsg(), out var ᏑserverHello);
     // unmarshal expects to be given the handshake header, but
@@ -478,7 +478,7 @@ public static partial void TestAlertForwarding(ж<testing.T> Ꮡt) {
     s.Close();
     {
         var (opErr, ok) = errors.AsType<ж<net.OpError>>(err); if (!ok || !AreEqual((~opErr).Err, ((error)alertUnknownCA))) {
-            Ꮡt.Errorf("Got error: %s; expected: %s"u8, err, ((error)alertUnknownCA));
+            Ꮡt.Errorf("Got error: %s; expected: %s"u8, err, (error)alertUnknownCA);
         }
     }
 }
@@ -1507,7 +1507,7 @@ public static void TestHandshakeServerExportKeyingMaterial(ж<testing.T> Ꮡt) {
                     return fmt.Errorf("ExportKeyingMaterial failed: %v"u8, err);
                 } else 
                 if (len(km) != 42) {
-                    return fmt.Errorf("Got %d bytes from ExportKeyingMaterial, wanted %d"u8, len(km), (nint)(42));
+                    return fmt.Errorf("Got %d bytes from ExportKeyingMaterial, wanted %d"u8, len(km), (nint)42);
                 }
             }
             return default!;

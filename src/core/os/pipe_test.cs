@@ -57,7 +57,7 @@ public static void TestEPIPE(ж<Δtesting.T> Ꮡt) {
     var expect = syscall.EPIPE;
     if (Δruntime.GOOS == "windows"u8) {
         // 232 is Windows error code ERROR_NO_DATA, "The pipe is being closed".
-        expect = ((syscall.Errno)232);
+        expect = (syscall.Errno)232;
     }
     // Every time we write to the pipe we should get an EPIPE.
     for (nint i = 0; i < 20; i++) {
@@ -229,7 +229,7 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read)
             {
                 var (bΔ1, errΔ1) = Δos.ReadFile(procSysFsPipeMaxSizeˢ); if (errΔ1 == default!) {
                     {
-                        var (i, errΔ2) = strconv.Atoi(strings.TrimSpace(((@string)bΔ1))); if (errΔ2 == default!) {
+                        var (i, errΔ2) = strconv.Atoi(strings.TrimSpace((@string)bΔ1)); if (errΔ2 == default!) {
                             limit = i + 1;
                         }
                     }
@@ -315,7 +315,7 @@ public static void TestReadNonblockingFd(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Skip(windowsDoesnTSupportˢ2);
         }
         if (Δos.Getenv(goWantReadNonblockingFdˢ) == "1"u8) {
-            var fd = ((syscallꓸHandle)Δos.Stdin.Fd());
+            var fd = (syscallꓸHandle)Δos.Stdin.Fd();
             syscall.SetNonblock(fd, true);
             defer(syscall.SetNonblock, fd, (bool)false, ref ᒐ);
             var (_, errΔ1) = Δos.Stdin.Read(new slice<byte>(1));

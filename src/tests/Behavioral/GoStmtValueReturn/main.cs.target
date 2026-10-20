@@ -70,7 +70,7 @@ internal static partial void Main() {
             return fmt.Errorf("negative %d"u8, n);
         }
         return default!;
-    }, @out, (nint)(6));
+    }, @out, (nint)6);
     fmt.Println("litmulti:", ᐸꟷ(@out));
 }
 

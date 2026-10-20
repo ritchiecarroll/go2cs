@@ -20,7 +20,7 @@ internal static void Main() {
 
     var (@out, err) = cmd.CombinedOutput();
 
-    fmt.Print(((@string)@out));
+    fmt.Print((@string)@out);
     if (err == default!) {
         fmt.Println("parent: unexpected nil error, want exit status 3");
         return;
@@ -33,7 +33,7 @@ internal static void Main() {
     }
 
     fmt.Println("parent: child exit code =", exitErr.Value.ProcessState.ExitCode());
-    fmt.Println("parent: captured", len(strings.Split(strings.TrimSpace(((@string)@out)), "\n")), "lines");
+    fmt.Println("parent: captured", len(strings.Split(strings.TrimSpace((@string)@out), "\n")), "lines");
 }
 
 } // end main_package

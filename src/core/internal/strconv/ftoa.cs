@@ -56,7 +56,7 @@ internal static ref floatInfo float64info => ref Ꮡfloat64info.Value;
 // The exponent is written as a decimal integer;
 // for all formats other than 'b', it will be at least two digits.
 public static @string FormatFloat(float64 f, byte fmt, nint prec, nint bitSize) {
-    return ((@string)genericFtoa(new slice<byte>(0, max(prec + 4, 24)), f, fmt, prec, bitSize));
+    return (@string)genericFtoa(new slice<byte>(0, max(prec + 4, 24)), f, fmt, prec, bitSize);
 }
 
 // AppendFloat appends the string form of the floating-point number f,
@@ -90,8 +90,8 @@ internal static slice<byte> genericFtoa(slice<byte> dst, float64 val, byte fmt, 
     }}
 
     var neg = bits.Rsh(((~flt).expbits + (~flt).mantbits)) != 0;
-    nint exp = (nint)((nint)(bits.Rsh((~flt).mantbits)) & (((nint)1).Lsh((~flt).expbits) - 1));
-    var mant = (uint64)(bits & (((uint64)1).Lsh((~flt).mantbits) - 1));
+    nint exp = (nint)(bits.Rsh((~flt).mantbits)) & (((nint)1).Lsh((~flt).expbits) - 1);
+    var mant = bits & (((uint64)1).Lsh((~flt).mantbits) - 1);
     var denorm = false;
 
     var exprᴛ1 = exp;
@@ -571,7 +571,7 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
 
     // Shift digits so leading 1 (if any) is at bit 1<<60.
     mant.LshAssign(60 - flt.mantbits);
-    while (mant != 0 && (uint64)(mant & (((uint64)1 << (int)(60)))) == 0) {
+    while (mant != 0 && (uint64)(mant & ((uint64)1 << 60)) == 0) {
         mant <<= (int)(1);
         exp--;
     }
@@ -581,11 +581,11 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
         nuint shift = (nuint)(prec * 4);
         var extra = (uint64)((mant.Lsh(shift)) & ((uint64)(1152921504606846976L - 1)));
         mant.RshAssign(60 - shift);
-        if ((uint64)(extra | ((uint64)(mant & 1))) > ((uint64)1 << (int)(59))) {
+        if ((extra | (mant & 1)) > (uint64)1 << 59) {
             mant++;
         }
         mant.LshAssign(60 - shift);
-        if ((uint64)(mant & (((uint64)1 << (int)(61)))) != 0) {
+        if ((uint64)(mant & ((uint64)1 << 61)) != 0) {
             // Wrapped around.
             mant >>= (int)(1);
             exp++;
@@ -601,21 +601,21 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
     if (neg) {
         dst = append(dst, (byte)((rune)'-'));
     }
-    dst = append(dst, (byte)((rune)'0'), fmt, (byte)((rune)'0' + (byte)((uint64)(((mant >> (int)(60))) & 1))));
+    dst = append(dst, (byte)((rune)'0'), fmt, (byte)((rune)'0' + (byte)((mant >> 60) & 1)));
 
     // .fraction
     mant <<= (int)(4); // remove leading 0 or 1
     if (prec < 0 && mant != 0){
         dst = append(dst, (byte)((rune)'.'));
         while (mant != 0) {
-            dst = append(dst, hex[(uint64)(((mant >> (int)(60))) & 15)]);
+            dst = append(dst, hex[((mant >> 60) & 15)]);
             mant <<= (int)(4);
         }
     } else 
     if (prec > 0) {
         dst = append(dst, (byte)((rune)'.'));
         for (nint i = 0; i < prec; i++) {
-            dst = append(dst, hex[(uint64)(((mant >> (int)(60))) & 15)]);
+            dst = append(dst, hex[((mant >> 60) & 15)]);
             mant <<= (int)(4);
         }
     }

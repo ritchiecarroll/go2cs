@@ -353,7 +353,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
             slice<rune> pattern = default!;
             foreach (var (j, r) in e) {
                 if (r == (rune)'*' || r == (rune)'?' || r == (rune)'\\' || r == (rune)'[' || r == (rune)'-') {
-                    pattern = append(pattern, (rune)((rune)'\\'), r);
+                    pattern = append(pattern, (rune)'\\', r);
                     continue;
                 }
                 switch ((i + j) % 5) {
@@ -362,23 +362,23 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
                     break;
                 }
                 case 1: {
-                    pattern = append(pattern, (rune)((rune)'['), r, (rune)((rune)']'));
+                    pattern = append(pattern, (rune)'[', r, (rune)']');
                     break;
                 }
                 case 2: {
-                    pattern = append(pattern, (rune)((rune)'['), r, (rune)((rune)'-'), r, (rune)((rune)']'));
+                    pattern = append(pattern, (rune)'[', r, (rune)'-', r, (rune)']');
                     break;
                 }
                 case 3: {
-                    pattern = append(pattern, (rune)((rune)'['), (rune)((rune)'\\'), r, (rune)((rune)']'));
+                    pattern = append(pattern, (rune)'[', (rune)'\\', r, (rune)']');
                     break;
                 }
                 case 4: {
-                    pattern = append(pattern, (rune)((rune)'['), (rune)((rune)'\\'), r, (rune)((rune)'-'), (rune)((rune)'\\'), r, (rune)((rune)']'));
+                    pattern = append(pattern, (rune)'[', (rune)'\\', r, (rune)'-', (rune)'\\', r, (rune)']');
                     break;
                 }}
             }
-            elem[i] = ((@string)pattern);
+            elem[i] = (@string)pattern;
         }
         glob = strings.Join(elem, "/"u8) + "/"u8;
     }

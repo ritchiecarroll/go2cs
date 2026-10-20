@@ -34,7 +34,7 @@ internal partial struct localKind_tag /*@string*/;
 
 internal static @string localKind() {
     localKind_tag t = "local-tag"u8;
-    return ((@string)t);
+    return (@string)t;
 }
 
 internal static @string multi() {

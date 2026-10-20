@@ -449,7 +449,7 @@ break_parseField:;
 
     // Create a single string and create slices out of it.
     // This pins the memory of the fields together, but allocates once.
-    @string str = ((@string)r.recordBuffer); // Convert to string once to batch allocations
+    @string str = (@string)r.recordBuffer; // Convert to string once to batch allocations
     dst = dst[..0];
     if (cap(dst) < len(r.fieldIndexes)) {
         dst = new slice<@string>(len(r.fieldIndexes));

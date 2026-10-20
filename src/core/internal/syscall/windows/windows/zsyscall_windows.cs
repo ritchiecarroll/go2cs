@@ -229,7 +229,7 @@ public static (syscallꓸHandle handle, error err) OpenSCManager(ж<uint16> Ꮡm
         var (r0, _, e1) = syscall.SyscallN(procOpenSCManagerW.Addr(), (uintptr)ᴋ13, (uintptr)ᴋ14, (uintptr)access);
     System.GC.KeepAlive(ᴋ13);
     System.GC.KeepAlive(ᴋ14);
-    handle = ((syscallꓸHandle)r0);
+    handle = (syscallꓸHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -243,7 +243,7 @@ public static (syscallꓸHandle handle, error err) OpenService(syscallꓸHandle 
     var ᴋ15 = ᏑserviceName;
         var (r0, _, e1) = syscall.SyscallN(procOpenServiceW.Addr(), (uintptr)mgr, (uintptr)ᴋ15, (uintptr)access);
     System.GC.KeepAlive(ᴋ15);
-    handle = ((syscallꓸHandle)r0);
+    handle = (syscallꓸHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -388,7 +388,7 @@ public static (syscallꓸHandle handle, error err) CreateEvent(ж<SecurityAttrib
         var (r0, _, e1) = syscall.SyscallN(procCreateEventW.Addr(), (uintptr)ᴋ31, (uintptr)manualReset, (uintptr)initialState, (uintptr)ᴋ32);
     System.GC.KeepAlive(ᴋ31);
     System.GC.KeepAlive(ᴋ32);
-    handle = ((syscallꓸHandle)r0);
+    handle = (syscallꓸHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -400,7 +400,7 @@ public static (syscallꓸHandle handle, error err) CreateIoCompletionPort(syscal
     error err = default!;
 
     var (r0, _, e1) = syscall.SyscallN(procCreateIoCompletionPort.Addr(), (uintptr)filehandle, (uintptr)cphandle, (uintptr)key, (uintptr)threadcnt);
-    handle = ((syscallꓸHandle)r0);
+    handle = (syscallꓸHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -416,7 +416,7 @@ public static (syscallꓸHandle handle, error err) CreateNamedPipe(ж<uint16> �
         var (r0, _, e1) = syscall.SyscallN(procCreateNamedPipeW.Addr(), (uintptr)ᴋ33, (uintptr)flags, (uintptr)pipeMode, (uintptr)maxInstances, (uintptr)outSize, (uintptr)inSize, (uintptr)defaultTimeout, (uintptr)ᴋ34);
     System.GC.KeepAlive(ᴋ33);
     System.GC.KeepAlive(ᴋ34);
-    handle = ((syscallꓸHandle)r0);
+    handle = (syscallꓸHandle)r0;
     if (handle == syscall.InvalidHandle) {
         err = errnoErr(e1);
     }
@@ -458,7 +458,7 @@ public static (syscallꓸHandle pseudoHandle, error err) GetCurrentThread() {
     error err = default!;
 
     var (r0, _, e1) = syscall.SyscallN(procGetCurrentThread.Addr());
-    pseudoHandle = ((syscallꓸHandle)r0);
+    pseudoHandle = (syscallꓸHandle)r0;
     if (pseudoHandle == 0) {
         err = errnoErr(e1);
     }
@@ -524,7 +524,7 @@ public static (syscallꓸHandle handle, error err) GetModuleHandle(ж<uint16> �
     var ᴋ41 = Ꮡmodulename;
         var (r0, _, e1) = syscall.SyscallN(procGetModuleHandleW.Addr(), (uintptr)ᴋ41);
     System.GC.KeepAlive(ᴋ41);
-    handle = ((syscallꓸHandle)r0);
+    handle = (syscallꓸHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -632,7 +632,7 @@ public static (syscallꓸHandle handle, error err) ReOpenFile(syscallꓸHandle f
     error err = default!;
 
     var (r0, _, e1) = syscall.SyscallN(procReOpenFile.Addr(), (uintptr)filehandle, (uintptr)desiredAccess, (uintptr)shareMode, (uintptr)flagAndAttributes);
-    handle = ((syscallꓸHandle)r0);
+    handle = (syscallꓸHandle)r0;
     if (handle == syscall.InvalidHandle) {
         err = errnoErr(e1);
     }
@@ -801,7 +801,7 @@ internal static syscall.Errno /*ret*/ rtlNtStatusToDosErrorNoTeb(NTStatus ntstat
     syscall.Errno ret = default!;
 
     var (r0, _, _) = syscall.SyscallN(procRtlNtStatusToDosErrorNoTeb.Addr(), (uintptr)(uint32)ntstatus);
-    ret = ((syscall.Errno)r0);
+    ret = (syscall.Errno)r0;
     return ret;
 }
 
@@ -880,7 +880,7 @@ public static (syscallꓸHandle handle, error err) WSASocket(int32 af, int32 typ
     var ᴋ83 = Ꮡprotinfo;
         var (r0, _, e1) = syscall.SyscallN(procWSASocketW.Addr(), (uintptr)af, (uintptr)typ, (uintptr)protocol, (uintptr)ᴋ83, (uintptr)group, (uintptr)flags);
     System.GC.KeepAlive(ᴋ83);
-    handle = ((syscallꓸHandle)r0);
+    handle = (syscallꓸHandle)r0;
     if (handle == syscall.InvalidHandle) {
         err = errnoErr(e1);
     }

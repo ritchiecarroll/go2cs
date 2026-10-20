@@ -42,10 +42,10 @@ internal static void Main() {
     var s = new slice<nint>(3, 10);
     ref var a = ref heap(new array<nint>(3), out var Ꮡa);
     var p = Ꮡa;
-    var n = ((named)s);
+    var n = (named)s;
     ref var na = ref heap(new namedArr(), out var Ꮡna);
     @string str = "abc";
-    namedStr ns = ((namedStr)(@string)abcˢ);
+    namedStr ns = (namedStr)(@string)abcˢ;
     nint neg = -1;
     nint big = unchecked((nint)(4294967301L));
     nint lo4 = 4;

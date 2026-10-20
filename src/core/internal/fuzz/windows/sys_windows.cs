@@ -33,7 +33,7 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf
 
         // Create a file mapping object. The object itself is not shared.
         (var mapObj, err) = Δsyscall.CreateFileMapping(
-            ((syscallꓸHandle)Ꮡf.Fd()), // fhandle
+            (syscallꓸHandle)Ꮡf.Fd(), // fhandle
             nil, // sa
             Δsyscall.PAGE_READWRITE, // prot
             0, // maxSizeHigh
@@ -99,11 +99,11 @@ internal static void setWorkerComm(ref exec.Cmd cmd, workerComm comm) {
     var mem = ᐸꟷ(comm.memMu);
     var memFD = (~mem).f.Fd();
     comm.memMu.ᐸꟷ(mem);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzIn.Fd()), Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzOut.Fd()), Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)memFD), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)comm.fuzzIn.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)comm.fuzzOut.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)memFD, Δsyscall.HANDLE_FLAG_INHERIT, 1);
     cmd.Env = append(cmd.Env, fmt.Sprintf("GO_TEST_FUZZ_WORKER_HANDLES=%x,%x,%x"u8, comm.fuzzIn.Fd(), comm.fuzzOut.Fd(), memFD));
-    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{((syscallꓸHandle)comm.fuzzIn.Fd()), ((syscallꓸHandle)comm.fuzzOut.Fd()), ((syscallꓸHandle)memFD)}.slice()));
+    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{(syscallꓸHandle)comm.fuzzIn.Fd(), (syscallꓸHandle)comm.fuzzOut.Fd(), (syscallꓸHandle)memFD}.slice()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

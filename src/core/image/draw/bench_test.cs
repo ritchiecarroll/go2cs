@@ -70,7 +70,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
             var dst1 = image.NewPaletted(image.Rect(0, 0, dstw, dsth), palette);
             for (nint y = 0; y < dsth; y++) {
                 for (nint x = 0; x < dstw; x++) {
-                    dst1.SetColorIndex(x, y, (uint8)((uint8)((nint)(x ^ y)) & 1));
+                    dst1.SetColorIndex(x, y, (uint8)((uint8)(x ^ y) & 1));
                 }
             }
             dst = new draw_test_package.image_PalettedжImage(dst1);

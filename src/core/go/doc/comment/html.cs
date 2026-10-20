@@ -117,7 +117,7 @@ internal static @string inc(@string s) {
     for (nint i = len(b) - 1; i >= 0; i--) {
         if (b[i] < (rune)'9') {
             b[i]++;
-            return ((@string)b);
+            return (@string)b;
         }
         b[i] = (rune)'0';
     }
@@ -134,12 +134,12 @@ internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {
-            p.escape(Ꮡout, ((@string)tΔ1));
+            p.escape(Ꮡout, (@string)tΔ1);
             break;
         }
         case Italic tΔ1: {
             @out.WriteString("<i>"u8);
-            p.escape(Ꮡout, ((@string)tΔ1));
+            p.escape(Ꮡout, (@string)tΔ1);
             @out.WriteString("</i>"u8);
             break;
         }

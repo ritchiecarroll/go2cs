@@ -196,7 +196,7 @@ public static GoID Goroutine(this ResourceID r) {
     if (r.Kind != ResourceGoroutine) {
         throw panic(fmt.Sprintf("attempted to get GoID from %s resource ID"u8, r.Kind));
     }
-    return ((GoID)r.id);
+    return (GoID)r.id;
 }
 
 // Proc obtains a ProcID from the resource ID.
@@ -206,7 +206,7 @@ public static ProcID Proc(this ResourceID r) {
     if (r.Kind != ResourceProc) {
         throw panic(fmt.Sprintf("attempted to get ProcID from %s resource ID"u8, r.Kind));
     }
-    return ((ProcID)r.id);
+    return (ProcID)r.id;
 }
 
 // Thread obtains a ThreadID from the resource ID.
@@ -216,7 +216,7 @@ public static ThreadID Thread(this ResourceID r) {
     if (r.Kind != ResourceThread) {
         throw panic(fmt.Sprintf("attempted to get ThreadID from %s resource ID"u8, r.Kind));
     }
-    return ((ThreadID)r.id);
+    return (ThreadID)r.id;
 }
 
 // String returns a human-readable string representation of the ResourceID.
@@ -282,7 +282,7 @@ public static (GoState from, GoState to) Goroutine(this ΔStateTransition d) {
     if (d.Resource.Kind != ResourceGoroutine) {
         throw panic("Goroutine called on non-Goroutine state transition");
     }
-    return (((GoState)d.oldState), ((GoState)d.newState));
+    return ((GoState)d.oldState, (GoState)d.newState);
 }
 
 // Proc returns the state transition for a proc.
@@ -296,7 +296,7 @@ public static (ProcState from, ProcState to) Proc(this ΔStateTransition d) {
     if (d.Resource.Kind != ResourceProc) {
         throw panic("Proc called on non-Proc state transition");
     }
-    return (((ProcState)d.oldState), ((ProcState)d.newState));
+    return ((ProcState)d.oldState, (ProcState)d.newState);
 }
 
 } // end trace_package

@@ -425,8 +425,8 @@ public static void TestQUICPostHandshakeMessageTooLarge(ж<testing.T> Ꮡt) {
     {
         var err = (~cli).conn.HandleData(QUICEncryptionLevelApplication, new byte[]{
             (byte)typeNewSessionTicket,
-            (byte)((size >> (int)(16))),
-            (byte)((size >> (int)(8))),
+            (byte)(size >> 16),
+            (byte)(size >> 8),
             (byte)size
         }.slice()); if (err == default!) {
             Ꮡt.Fatalf("%v-byte post-handshake message: got no error, want one"u8, size);
@@ -646,13 +646,13 @@ public static void TestQUICDelayedTransportParameters(ж<testing.T> Ꮡt) {
     }
 
     {
-        @string got = ((@string)(~cli).gotParams);
+        @string got = (@string)(~cli).gotParams;
         @string want = srvParams; if (got != want) {
             Ꮡt.Errorf("client got transport params: %q, want %q"u8, got, want);
         }
     }
     {
-        @string got = ((@string)(~srv).gotParams);
+        @string got = (@string)(~srv).gotParams;
         @string want = cliParams; if (got != want) {
             Ꮡt.Errorf("server got transport params: %q, want %q"u8, got, want);
         }

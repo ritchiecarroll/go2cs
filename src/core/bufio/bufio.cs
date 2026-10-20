@@ -783,7 +783,7 @@ public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
         n = b.Available();
         if (n < utf8.UTFMax) {
             // Can only happen if buffer is silly small.
-            return b.WriteString(((@string)r));
+            return b.WriteString((@string)r);
         }
     }
     size = utf8.EncodeRune(b.buf.slice(b.n), r);

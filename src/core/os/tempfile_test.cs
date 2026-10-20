@@ -182,7 +182,7 @@ public static void TestMkdirTemp(ж<Δtesting.T> Ꮡt) {
     //     "^<DIR>/[0-9]+xyz"
     var runTestMkdirTempʗ2 = runTestMkdirTemp;
     Ꮡt.Run(xyzˢ, (ж<Δtesting.T> tΔ3) => {
-        @string wantRePat = "^"u8 + Δregexp.QuoteMeta(filepath.Join(dir)) + Δregexp.QuoteMeta(((@string)(rune)filepath.Separator)) + "[0-9]+xyz$"u8;
+        @string wantRePat = "^"u8 + Δregexp.QuoteMeta(filepath.Join(dir)) + Δregexp.QuoteMeta((@string)(rune)filepath.Separator) + "[0-9]+xyz$"u8;
         runTestMkdirTempʗ2(tΔ3, xyzˢ, wantRePat);
     });
 }

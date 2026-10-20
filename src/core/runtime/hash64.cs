@@ -24,8 +24,8 @@ internal static uintptr memhashFallback(@unsafe.Pointer Δp, uintptr seed, uintp
     }
     case {} when s < 4: {
         a = (uintptr)(~(ж<byte>)(uintptr)(Δp));
-        a |= (uintptr)(((uintptr)(~(ж<byte>)(uintptr)(add(Δp, (s >> (int)(1))))) << (int)(8)));
-        a |= (uintptr)(((uintptr)(~(ж<byte>)(uintptr)(add(Δp, s - 1))) << (int)(16)));
+        a |= (uintptr)(((uintptr)(~(ж<byte>)(uintptr)(add(Δp, s >> 1))) << 8));
+        a |= (uintptr)(((uintptr)(~(ж<byte>)(uintptr)(add(Δp, s - 1))) << 16));
         break;
     }
     case {} when s == 4: {
@@ -85,7 +85,7 @@ internal static uintptr memhash64Fallback(@unsafe.Pointer Δp, uintptr seed) {
 
 internal static uintptr mix(uintptr a, uintptr b) {
     var (hi, lo) = Δmath.Mul64((uint64)a, (uint64)b);
-    return (uintptr)((uint64)(hi ^ lo));
+    return (uintptr)(hi ^ lo);
 }
 
 internal static uintptr r4(@unsafe.Pointer Δp) {

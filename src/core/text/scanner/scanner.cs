@@ -108,7 +108,7 @@ public static @string TokenString(rune tok) {
             return s;
         }
     }
-    return fmt.Sprintf("%q"u8, ((@string)tok));
+    return fmt.Sprintf("%q"u8, (@string)tok);
 }
 
 // GoWhitespace is the default value for the [Scanner]'s Whitespace field.
@@ -471,7 +471,7 @@ internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool see
         }
         (ch, ds) = Ꮡs.digits(ch, @base, Ꮡinvalid);
         digsep |= (nint)(ds);
-        if (ch == (rune)'.' && (nuint)(s.Mode & (nuint)ScanFloats) != 0) {
+        if (ch == (rune)'.' && (s.Mode & (nuint)ScanFloats) != 0) {
             ch = Ꮡs.next();
             seenDot = true;
         }
@@ -487,13 +487,13 @@ internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool see
         digsep |= (nint)(ds);
     }
 
-    if ((nint)(digsep & 1) == 0) {
+    if ((digsep & 1) == 0) {
         Ꮡs.error(litname(prefix) + " has no digits"u8);
     }
 
     // exponent
     {
-        var e = lower(ch); if ((e == (rune)'e' || e == (rune)'p') && (nuint)(s.Mode & (nuint)ScanFloats) != 0){
+        var e = lower(ch); if ((e == (rune)'e' || e == (rune)'p') && (s.Mode & (nuint)ScanFloats) != 0){
             switch (ᐧ) {
             case {} when e == (rune)'e' && prefix != 0 && prefix != (rune)'0': {
                 Ꮡs.errorf("%q exponent requires decimal mantissa"u8, ch);
@@ -510,7 +510,7 @@ internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool see
             }
             (ch, ds) = Ꮡs.digits(ch, 10, nil);
             digsep |= (nint)(ds);
-            if ((nint)(ds & 1) == 0) {
+            if ((ds & 1) == 0) {
                 Ꮡs.error(exponentHasNoDigitsˢ);
             }
         } else 
@@ -523,7 +523,7 @@ internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool see
         Ꮡs.errorf("invalid digit %q in %s"u8, invalid, litname(prefix));
     }
 
-    if ((nint)(digsep & 2) != 0) {
+    if ((digsep & 2) != 0) {
         s.tokEnd = s.srcPos - s.lastCharLen; // make sure token text is terminated
         {
             nint i = invalidSep(Ꮡs.TokenText()); if (i >= 0) {
@@ -740,7 +740,7 @@ public static rune Scan(this ж<Scanner> Ꮡs) {
     s.Line = 0;
 
 redo:
-    while ((uint64)(s.Whitespace & (((uint64)1).Lsh((nuint)ch))) != 0) {
+    while ((s.Whitespace & (((uint64)1).Lsh((nuint)ch))) != 0) {
         // skip white space
         ch = Ꮡs.next();
 continue_redo:;
@@ -770,7 +770,7 @@ break_redo:;
     var tok = ch;
     switch (ᐧ) {
     case {} when s.isIdentRune(ch, 0): {
-        if ((nuint)(s.Mode & (nuint)ScanIdents) != 0){
+        if ((s.Mode & (nuint)ScanIdents) != 0){
             tok = Ident;
             ch = Ꮡs.scanIdentifier();
         } else {
@@ -779,7 +779,7 @@ break_redo:;
         break;
     }
     case {} when isDecimal(ch): {
-        if ((nuint)(s.Mode & (nuint)((nuint)((nuint)ScanInts | (nuint)ScanFloats))) != 0){
+        if ((s.Mode & (nuint)((nuint)((nuint)ScanInts | (nuint)ScanFloats))) != 0){
             (tok, ch) = Ꮡs.scanNumber(ch, false);
         } else {
             ch = Ꮡs.next();
@@ -794,14 +794,14 @@ break_redo:;
             } while (false);
         }
         else if (exprᴛ1 is (rune)'"') {
-            if ((nuint)(s.Mode & (nuint)ScanStrings) != 0) {
+            if ((s.Mode & (nuint)ScanStrings) != 0) {
                 Ꮡs.scanString((rune)'"');
                 tok = ΔString;
             }
             ch = Ꮡs.next();
         }
         else if (exprᴛ1 is (rune)'\'') {
-            if ((nuint)(s.Mode & (nuint)ScanChars) != 0) {
+            if ((s.Mode & (nuint)ScanChars) != 0) {
                 Ꮡs.scanChar();
                 tok = Char;
             }
@@ -809,14 +809,14 @@ break_redo:;
         }
         else if (exprᴛ1 is (rune)'.') {
             ch = Ꮡs.next();
-            if (isDecimal(ch) && (nuint)(s.Mode & (nuint)ScanFloats) != 0) {
+            if (isDecimal(ch) && (s.Mode & (nuint)ScanFloats) != 0) {
                 (tok, ch) = Ꮡs.scanNumber(ch, true);
             }
         }
         else if (exprᴛ1 is (rune)'/') {
             ch = Ꮡs.next();
-            if ((ch == (rune)'/' || ch == (rune)'*') && (nuint)(s.Mode & (nuint)ScanComments) != 0) {
-                if ((nuint)(s.Mode & (nuint)SkipComments) != 0) {
+            if ((ch == (rune)'/' || ch == (rune)'*') && (s.Mode & (nuint)ScanComments) != 0) {
+                if ((s.Mode & (nuint)SkipComments) != 0) {
                     s.tokPos = -1; // don't collect token text
                     ch = Ꮡs.scanComment(ch);
                     goto redo;
@@ -826,7 +826,7 @@ break_redo:;
             }
         }
         else if (exprᴛ1 is (rune)'`') {
-            if ((nuint)(s.Mode & (nuint)ScanRawStrings) != 0) {
+            if ((s.Mode & (nuint)ScanRawStrings) != 0) {
                 Ꮡs.scanRawString();
                 tok = RawString;
             }
@@ -894,7 +894,7 @@ public static @string TokenText(this ж<Scanner> Ꮡs) {
 
     if (s.tokBuf.Len() == 0) {
         // common case: the entire token text is still in srcBuf
-        return ((@string)(s.srcBuf.slice(s.tokPos, s.tokEnd)));
+        return (@string)(s.srcBuf.slice(s.tokPos, s.tokEnd));
     }
 
     // part of the token text was saved in tokBuf: save the rest in

@@ -196,7 +196,7 @@ internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abiꓸMa
 
     @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
 
-    g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
+    g.ctrls().set(i, (ctrl)(uint8)h2(hash));
     m.used++;
 
     return slotElem;
@@ -321,7 +321,7 @@ outer:
 
                 slotElem = (uintptr)g.elem(Ꮡtyp, i);
 
-                g.ctrls().set(i, ((ctrl)(uint8)h2Hash));
+                g.ctrls().set(i, (ctrl)(uint8)h2Hash);
                 t.Value.growthLeft--;
                 t.Value.used++;
                 m.used++;
@@ -462,7 +462,7 @@ outer:
 
                 slotElem = (uintptr)g.elem(Ꮡtyp, i);
 
-                g.ctrls().set(i, ((ctrl)(uint8)h2Hash));
+                g.ctrls().set(i, (ctrl)(uint8)h2Hash);
                 t.Value.growthLeft--;
                 t.Value.used++;
                 m.used++;

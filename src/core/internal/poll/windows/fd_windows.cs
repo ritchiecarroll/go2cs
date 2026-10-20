@@ -52,7 +52,7 @@ internal static void checkSetFileCompletionNotificationModes() {
         return;
     }
     for (var i = (int32)0; i < n; i++) {
-        if ((uint32)(buf[i].ServiceFlags1 & (uint32)Δsyscall.XP1_IFS_HANDLES) == 0) {
+        if ((buf[i].ServiceFlags1 & (uint32)Δsyscall.XP1_IFS_HANDLES) == 0) {
             return;
         }
     }
@@ -299,7 +299,7 @@ internal static (nint, error) execIO(this ж<FD> Ꮡfd, nint mode, Func<ж<opera
         defer(ᏑoperationPool.Put, o.OrTypedNil(), ref ᒐ);
         o.Value = new operation(
             o: new Δsyscall.Overlapped(
-                OffsetHigh: (uint32)((fd.offset >> (int)(32))),
+                OffsetHigh: (uint32)(fd.offset >> 32),
                 Offset: (uint32)fd.offset
             ),
             runtimeCtx: fd.pd.runtimeCtx,
@@ -505,7 +505,7 @@ public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) {
                 return default!;
             }
         }
-        fd.skipSyncNotif = (uint32)(info.Flags & (uint32)Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS) != 0;
+        fd.skipSyncNotif = (info.Flags & (uint32)Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS) != 0;
     }
 
     // It is safe to add overlapped handles that also perform I/O
@@ -1455,7 +1455,7 @@ public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) {
             }
         }
         var attrs = d.FileAttributes;
-        if ((uint32)(mode & (uint32)Δsyscall.S_IWRITE) != 0){
+        if ((mode & (uint32)Δsyscall.S_IWRITE) != 0){
             attrs &= unchecked((uint32)~(uint32)(Δsyscall.FILE_ATTRIBUTE_READONLY));
         } else {
             attrs |= (uint32)(Δsyscall.FILE_ATTRIBUTE_READONLY);
@@ -1863,7 +1863,7 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
     ref var nfd = ref heap(new syscallꓸHandle(), out var Ꮡnfd);
     const bool inherit = false; // analogous to CLOEXEC
     {
-        var errΔ1 = Δsyscall.DuplicateHandle(proc, ((syscallꓸHandle)(uintptr)fd), proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != default!) {
+        var errΔ1 = Δsyscall.DuplicateHandle(proc, (syscallꓸHandle)(uintptr)fd, proc, Ꮡnfd, 0, inherit, Δsyscall.DUPLICATE_SAME_ACCESS); if (errΔ1 != default!) {
             return (0, duplicateHandleˢ, errΔ1);
         }
     }

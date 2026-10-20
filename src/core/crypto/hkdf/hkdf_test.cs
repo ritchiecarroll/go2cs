@@ -308,7 +308,7 @@ public static void TestHKDF(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("test %d: incorrect PRK: have %v, need %v."u8, i, prk, tt.prk);
         }
 
-        (var key, err) = Key(tt.hash, tt.master, tt.salt, ((@string)tt.info), len(tt.@out));
+        (var key, err) = Key(tt.hash, tt.master, tt.salt, (@string)tt.info, len(tt.@out));
         if (err != default!) {
             Ꮡt.Errorf("test %d: key derivation failed: %v"u8, i, err);
         }
@@ -317,7 +317,7 @@ public static void TestHKDF(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("test %d: incorrect output: have %v, need %v."u8, i, key, tt.@out);
         }
 
-        (var expanded, err) = Expand(tt.hash, prk, ((@string)tt.info), len(tt.@out));
+        (var expanded, err) = Expand(tt.hash, prk, (@string)tt.info, len(tt.@out));
         if (err != default!) {
             Ꮡt.Errorf("test %d: key expansion failed: %v"u8, i, err);
         }

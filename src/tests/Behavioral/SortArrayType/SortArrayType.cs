@@ -154,7 +154,7 @@ internal static void Main() {
     agesDemo.sort();
     fmt.Println(agesDemo[0].Name);
 
-    var lt = ((levelToken)markerConst);
+    var lt = (levelToken)markerConst;
     fmt.Println((uint32)lt + 1);
 
     fmt.Println(MultiLine);
@@ -196,20 +196,20 @@ internal static void Main() {
 
     fmt.Println(people);
 
-    sort_package.Sort(((PeopleByShoeSize)people));
+    sort_package.Sort((PeopleByShoeSize)people);
     fmt.Println(people);
 
-    sort_package.Sort(((PeopleByAge)people));
+    sort_package.Sort((PeopleByAge)people);
     fmt.Println(people);
 
-    var byAge = ((PeopleByAge)people);
+    var byAge = (PeopleByAge)people;
     fmt.Println(byAge[0..3].Len(), byAge[2..].Len());
 
     var pb = @new<PeopleByAge>();
     pb.ValueSlot = byAge[1..4];
     fmt.Println((~pb).Len());
 
-    var ros = ((Roster)(slice<Person>)(byAge[0..2]));
+    var ros = (Roster)(slice<Person>)(byAge[0..2]);
     fmt.Println(ros.headcount(), len(ros));
 
     ref var crew = ref heap<Roster>(out var Ꮡcrew);

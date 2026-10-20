@@ -70,7 +70,7 @@ internal static readonly @string sigsendInconsistentStateˢ = "sigsend: inconsis
 // It reports whether the signal was sent. If not, the caller typically crashes the program.
 // It runs from the signal handler, so it's limited in what it can do.
 internal static bool sigsend(uint32 s) {
-    var bit = ((uint32)1).Lsh((nuint)((uint32)(s & 31)));
+    var bit = ((uint32)1).Lsh((nuint)(s & 31));
     if (s >= (uint32)(32 * len(sig.wanted))) {
         return false;
     }
@@ -79,7 +79,7 @@ internal static bool sigsend(uint32 s) {
     // We are running in the signal handler; defer is not available.
 
     {
-        var w = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32))); if ((uint32)(w & bit) == 0) {
+        var w = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32))); if ((w & bit) == 0) {
             Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
             return false;
         }
@@ -88,11 +88,11 @@ internal static bool sigsend(uint32 s) {
     // Add signal to outgoing queue.
     while (ᐧ) {
         var mask = sig.mask[s / 32];
-        if ((uint32)(mask & bit) != 0) {
+        if ((mask & bit) != 0) {
             Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
             return true; // signal already in queue
         }
-        if (atomic.Cas(Ꮡsig.at(sigᴛ1.Ꮡmask, (ulong)(s / 32)), mask, (uint32)(mask | bit))) {
+        if (atomic.Cas(Ꮡsig.at(sigᴛ1.Ꮡmask, (ulong)(s / 32)), mask, mask | bit)) {
             break;
         }
     }
@@ -142,8 +142,8 @@ public static uint32 signal_recv() {
     while (ᐧ) {
         // Serve any signals from local copy.
         for (var i = (uint32)0; i < _NSIG; i++) {
-            if ((uint32)(sig.recv[i / 32] & (((uint32)1 << (int)(((uint32)(i & 31)))))) != 0) {
-                sig.recv[i / 32] &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(i & 31))))));
+            if ((sig.recv[i / 32] & ((uint32)1 << (int)((i & 31)))) != 0) {
+                sig.recv[i / 32] &= unchecked((uint32)~(uint32)(((uint32)1 << (int)((i & 31)))));
                 return i;
             }
         }
@@ -228,11 +228,11 @@ public static void signal_enable(uint32 s) {
     }
 
     var w = sig.wanted[s / 32];
-    w |= (uint32)(((uint32)1 << (int)(((uint32)(s & 31)))));
+    w |= (uint32)(((uint32)1 << (int)((s & 31))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
 
     var i = sig.ignored[s / 32];
-    i &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
+    i &= unchecked((uint32)~(uint32)(((uint32)1 << (int)((s & 31)))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)), i);
 
     sigenable(s);
@@ -248,7 +248,7 @@ public static void signal_disable(uint32 s) {
     sigdisable(s);
 
     var w = sig.wanted[s / 32];
-    w &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
+    w &= unchecked((uint32)~(uint32)(((uint32)1 << (int)((s & 31)))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
 }
 
@@ -262,11 +262,11 @@ public static void signal_ignore(uint32 s) {
     sigignore(s);
 
     var w = sig.wanted[s / 32];
-    w &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
+    w &= unchecked((uint32)~(uint32)(((uint32)1 << (int)((s & 31)))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
 
     var i = sig.ignored[s / 32];
-    i |= (uint32)(((uint32)1 << (int)(((uint32)(s & 31)))));
+    i |= (uint32)(((uint32)1 << (int)((s & 31))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)), i);
 }
 
@@ -277,7 +277,7 @@ public static void signal_ignore(uint32 s) {
 //go:nosplit
 internal static void sigInitIgnored(uint32 s) {
     var i = sig.ignored[s / 32];
-    i |= (uint32)(((uint32)1 << (int)(((uint32)(s & 31)))));
+    i |= (uint32)(((uint32)1 << (int)((s & 31))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)), i);
 }
 
@@ -286,7 +286,7 @@ internal static void sigInitIgnored(uint32 s) {
 //go:linkname signal_ignored os/signal.signal_ignored
 public static bool signal_ignored(uint32 s) {
     var i = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)));
-    return (uint32)(i & (((uint32)1 << (int)(((uint32)(s & 31)))))) != 0;
+    return (i & ((uint32)1 << (int)((s & 31)))) != 0;
 }
 
 } // end runtime_package

@@ -202,7 +202,7 @@ internal static any describe(bool b) {
     if (b) {
         return textValueˢ;
     }
-    return (nint)(99);
+    return (nint)99;
 }
 
 partial interface labeler {

@@ -114,7 +114,7 @@ internal static void Main() {
         report("map["u8 + it.Key().String() + "]"u8, it.Value());
     }
 
-    var rn = reflect.New(reflect.TypeOf(((ж<Blob>)nil))).Elem();
+    var rn = reflect.New(reflect.TypeOf((ж<Blob>)nil)).Elem();
     report("new(*Blob).Elem()", rn);
 
     var iface = rs.Index(0).Interface();

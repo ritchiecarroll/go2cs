@@ -55,7 +55,7 @@ internal static @string makePATH(@string root, slice<@string> dirs) {
             break;
         }}
     }
-    return strings.Join(paths, ((@string)(rune)os.PathListSeparator));
+    return strings.Join(paths, (@string)(rune)os.PathListSeparator);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -347,7 +347,7 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
                         paths = append(paths, dir);
                     }
                 }
-                pathVar = strings.Join(paths, ((@string)(rune)os.PathListSeparator));
+                pathVar = strings.Join(paths, (@string)(rune)os.PathListSeparator);
             } else {
                 pathVar = makePATH(root, ttʗ1.PATH);
             }
@@ -362,7 +362,7 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
                 var cmd = testenv.Command(new exec_test_package.testing_TжTB(tΔ1), cmdExe, "/c"u8, ttʗ1.searchFor, printpathˢ);
                 var (@out, errΔ1) = cmd.Output();
                 if (errΔ1 == default!){
-                    @string gotAbs = strings.TrimSpace(((@string)@out));
+                    @string gotAbs = strings.TrimSpace((@string)@out);
                     @string wantAbs = ""u8;
                     if (ttʗ1.want != ""u8) {
                         wantAbs = filepath.Join(root, ttʗ1.want);
@@ -622,7 +622,7 @@ public static void TestCommand(ж<testing.T> Ꮡt) {
                 return;
             }
 
-            @string got = strings.TrimSpace(((@string)@out));
+            @string got = strings.TrimSpace((@string)@out);
             if (filepath.IsAbs(got)) {
                 (got, err) = filepath.Rel(root, got);
                 if (err != default!) {

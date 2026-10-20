@@ -80,7 +80,7 @@ internal static void walkChain(slice<byte> der) {
             fmt.Println("open store error:", err);
             return;
         }
-        defer(syscall.CertCloseStore, store, (uint32)(0), ref ᒐ);
+        defer(syscall.CertCloseStore, store, (uint32)0, ref ᒐ);
 
         ref var storeCtx = ref heap<ж<syscall.CertContext>>(out var ᏑstoreCtx);
         {
@@ -106,7 +106,7 @@ internal static void walkChain(slice<byte> der) {
 
         ref var chainCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑchainCtx);
         {
-            var errΔ2 = syscall.CertGetCertificateChain(((syscallꓸHandle)0), storeCtx, nil, (~storeCtx).Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != default!) {
+            var errΔ2 = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, nil, (~storeCtx).Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != default!) {
                 fmt.Println("get chain error:", errΔ2);
                 return;
             }
@@ -114,7 +114,7 @@ internal static void walkChain(slice<byte> der) {
         defer(syscall.CertFreeCertificateChain, chainCtx, ref ᒐ);
 
         fmt.Println("chain count:", (~chainCtx).ChainCount);
-        fmt.Println("chain reports untrusted root:", (uint32)((~chainCtx).TrustStatus.ErrorStatus & (uint32)syscall.CERT_TRUST_IS_UNTRUSTED_ROOT) != 0);
+        fmt.Println("chain reports untrusted root:", ((~chainCtx).TrustStatus.ErrorStatus & (uint32)syscall.CERT_TRUST_IS_UNTRUSTED_ROOT) != 0);
 
         var simpleChains = @unsafe.Slice((~chainCtx).Chains, (~chainCtx).ChainCount);
         var last = simpleChains[(~chainCtx).ChainCount - 1];

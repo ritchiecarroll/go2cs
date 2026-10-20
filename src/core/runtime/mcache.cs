@@ -78,7 +78,7 @@ partial struct gclinkptr /*num:uintptr*/;
 // The result should be used for accessing fields, not stored
 // in other data structures.
 internal static ж<gclink> ptr(this gclinkptr Δp) {
-    return (ж<gclink>)(uintptr)(((@unsafe.Pointer)(uintptr)Δp));
+    return (ж<gclink>)(uintptr)((@unsafe.Pointer)(uintptr)Δp);
 }
 
 partial struct stackfreelist {
@@ -245,7 +245,7 @@ internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool nosca
     if (size + (uintptr)pageSize < size) {
         @throw(outOfMemoryˢ);
     }
-    var npages = (size >> (int)(gc.PageShift));
+    var npages = size >> (int)(gc.PageShift);
     if ((uintptr)(size & (uintptr)pageMask) != 0) {
         npages++;
     }
@@ -384,7 +384,7 @@ internal static void addReusableNoscan(this ref mcache c, spanClass spc, uintptr
     }
 
     // Add to the reusable pointers free list.
-    var v = ((gclinkptr)ptr);
+    var v = (gclinkptr)ptr;
     v.ptr().Value.next = c.reusableNoscan[spc];
     c.reusableNoscan[spc] = v;
 }

@@ -199,7 +199,7 @@ public static void TestTempDir(ж<testing.T> Ꮡt) {
     //     "^<DIR>/[0-9]+xyz"
     var runTestTempDirʗ2 = runTestTempDir;
     Ꮡt.Run(xyzˢ, (ж<testing.T> tΔ3) => {
-        @string wantRePat = "^"u8 + regexp.QuoteMeta(filepath.Join(dir)) + regexp.QuoteMeta(((@string)(rune)filepath.Separator)) + "[0-9]+xyz$"u8;
+        @string wantRePat = "^"u8 + regexp.QuoteMeta(filepath.Join(dir)) + regexp.QuoteMeta((@string)(rune)filepath.Separator) + "[0-9]+xyz$"u8;
         runTestTempDirʗ2(tΔ3, xyzˢ, wantRePat);
     });
 }

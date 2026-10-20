@@ -134,7 +134,7 @@ internal static (@string name, slice<byte> after) isMarker(slice<byte> data) {
     if (!(bytes.HasSuffix(data, markerEnd) && len(data) >= len(marker) + len(markerEnd))) {
         return ("", default!);
     }
-    return (strings.TrimSpace(((@string)(data.slice(len(marker), len(data) - len(markerEnd))))), after);
+    return (strings.TrimSpace((@string)(data.slice(len(marker), len(data) - len(markerEnd)))), after);
 }
 
 // If data is empty or ends in \n, fixNL returns data.

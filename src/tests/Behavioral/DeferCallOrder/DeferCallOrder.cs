@@ -93,9 +93,9 @@ internal static partial void watchAndSend(ж<sema> Ꮡs) {
 
         s.@out = new channel<nint>(2);
         s.held = true;
-        goǃ(Ꮡs.send, (nint)(7));
+        goǃ(Ꮡs.send, (nint)7);
         fmt.Println("sent-first:", ᐸꟷ(s.@out));
-        defer(Ꮡs.send, (nint)(9), ref ᒐ);
+        defer(Ꮡs.send, (nint)9, ref ᒐ);
         defer(Ꮡs.release, ref ᒐ);
         fmt.Println("watching, held:", s.held);
     }

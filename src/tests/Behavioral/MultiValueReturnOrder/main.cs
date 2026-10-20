@@ -117,7 +117,7 @@ internal static @string describe(any v) {
 
 internal static void Main() {
     var (o, err) = parseOID("abc");
-    fmt.Println("parseOID:", ((@string)o.der), err);
+    fmt.Println("parseOID:", (@string)o.der, err);
 
     var (a, b) = readThenBump();
     fmt.Println("readThenBump:", a, b);

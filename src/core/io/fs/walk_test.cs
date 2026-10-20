@@ -136,7 +136,7 @@ public static void TestIssue51617(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
-        defer(os.Chmod, bad, (fs.FileMode)(448), ref ᒐ); // avoid errors on cleanup
+        defer(os.Chmod, bad, (fs.FileMode)448, ref ᒐ); // avoid errors on cleanup
         ref var saw = ref heap<slice<@string>>(out var Ꮡsaw);
         var err = WalkDir(os.DirFS(dir), "."u8, error (@string path, fs.DirEntry d, error errΔ3) => {
             if (errΔ3 != default!) {

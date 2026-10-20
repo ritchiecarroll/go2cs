@@ -69,8 +69,8 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("part 1: ReadAll: %v"u8, err);
     }
     {
-        @string e = ((@string)fileContents);
-        @string g = ((@string)slurp); if (e != g) {
+        @string e = (@string)fileContents;
+        @string g = (@string)slurp; if (e != g) {
             Ꮡt.Errorf("part 1: want contents %q, got %q"u8, e, g);
         }
     }
@@ -91,7 +91,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
     }
     {
         @string e = valˢ;
-        @string g = ((@string)slurp); if (e != g) {
+        @string g = (@string)slurp; if (e != g) {
             Ꮡt.Errorf("part 2: want contents %q, got %q"u8, e, g);
         }
     }

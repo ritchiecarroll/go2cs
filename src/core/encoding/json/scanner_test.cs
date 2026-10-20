@@ -346,7 +346,7 @@ internal static @string genString(float64 stddev) {
         }
         c[i] = (rune)f;
     }
-    return ((@string)c);
+    return (@string)c;
 }
 
 internal static slice<any> genArray(nint n) {

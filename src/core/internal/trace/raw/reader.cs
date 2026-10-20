@@ -50,7 +50,7 @@ public static (Event, error) ReadEvent(this ref Reader r) {
     if ((nint)evb >= len(r.specs) || evb == 0) {
         return (new Event(nil), fmt.Errorf("invalid event type: %d"u8, evb));
     }
-    var ev = ((tracev2.EventType)evb);
+    var ev = (tracev2.EventType)evb;
     var spec = r.specs[ev];
     (var args, err) = r.readArgs(len(spec.Args));
     if (err != default!) {

@@ -54,7 +54,7 @@ internal static void Main() {
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
-            defer(report, namedˢ, baseʗ2, (nint)(5), ref ᒐ);
+            defer(report, namedˢ, baseʗ2, (nint)5, ref ᒐ);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }

@@ -331,7 +331,7 @@ internal static UntypedInt sep => /* filepath.Separator */ 92;
 
 internal static slice<PathTest> slashtests = new PathTest[]{
     new(""u8, ""u8),
-    new("/"u8, ((@string)(rune)sep)),
+    new("/"u8, (@string)(rune)sep),
     new("/a/b"u8, ((@string)new byte[]{sep, (rune)'a', sep, (rune)'b'}.slice())),
     new("a//b"u8, ((@string)new byte[]{(rune)'a', sep, sep, (rune)'b'}.slice()))
 }.slice();
@@ -1878,7 +1878,7 @@ public static void TestIssue29372(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
 
-    @string pathSeparator = ((@string)(rune)filepath.Separator);
+    @string pathSeparator = (@string)(rune)filepath.Separator;
     var tests = new @string[]{
         path + strings.Repeat(pathSeparator, 1),
         path + strings.Repeat(pathSeparator, 2),
@@ -1927,17 +1927,17 @@ public static void TestEvalSymlinksAboveRoot(ж<testing.T> Ꮡt) {
 
     // Count the number of ".." elements to get to the root directory.
     @string vol = filepath.VolumeName(evalTmpDir);
-    nint c = strings.Count(evalTmpDir.slice(len(vol)), ((@string)(rune)os.PathSeparator));
+    nint c = strings.Count(evalTmpDir.slice(len(vol)), (@string)(rune)os.PathSeparator);
     slice<@string> dd = default!;
     for (nint i = 0; i < c + 2; i++) {
         dd = append(dd, ".."u8);
     }
 
-    @string wantSuffix = strings.Join(new @string[]{"a"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
+    @string wantSuffix = strings.Join(new @string[]{"a"u8, "file"u8}.slice(), (@string)(rune)os.PathSeparator);
 
     // Try different numbers of "..".
     foreach (var (_, i) in new nint[]{c, c + 1, c + 2}.slice()) {
-        @string check = strings.Join(new @string[]{evalTmpDir, strings.Join(dd.slice(0, i), ((@string)(rune)os.PathSeparator)), evalTmpDir.slice(len(vol) + 1), "b"u8, "file"u8}.slice(), ((@string)(rune)os.PathSeparator));
+        @string check = strings.Join(new @string[]{evalTmpDir, strings.Join(dd.slice(0, i), (@string)(rune)os.PathSeparator), evalTmpDir.slice(len(vol) + 1), "b"u8, "file"u8}.slice(), (@string)(rune)os.PathSeparator);
         var (resolved, errΔ4) = filepath.EvalSymlinks(check);
         switch (ᐧ) {
         case {} when runtime.GOOS == "darwin"u8 && errors.Is(errΔ4, fs.ErrNotExist): {
@@ -2029,7 +2029,7 @@ public static void TestIssue51617(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
-        defer(os.Chmod, bad, (fs.FileMode)(448), ref ᒐ); // avoid errors on cleanup
+        defer(os.Chmod, bad, (fs.FileMode)448, ref ᒐ); // avoid errors on cleanup
         ref var saw = ref heap<slice<@string>>(out var Ꮡsaw);
         var err = filepath.WalkDir(dir, error (@string path, fs.DirEntry d, error errΔ3) => {
             if (errΔ3 != default!) {

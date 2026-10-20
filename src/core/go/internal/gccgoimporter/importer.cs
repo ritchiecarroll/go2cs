@@ -294,7 +294,7 @@ internal static (@string, error) readMagic(io.ReadSeeker reader) {
             return ("", err);
         }
     }
-    return (((@string)(magic[..])), default!);
+    return ((@string)(magic[..]), default!);
 }
 
 } // end gccgoimporter_package

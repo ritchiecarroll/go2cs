@@ -76,12 +76,12 @@ public static void InCgroupV2(ж<testing.T> Ꮡt, Action<ж<CgroupV2>> fn) {
         if (err != default!) {
             Ꮡt.Skipf("unable to read cgroup.subtree_control: %v"u8, err);
         }
-        if (!slices.Contains(strings.Fields(((@string)b)), cpuˢ)) {
+        if (!slices.Contains(strings.Fields((@string)b), cpuˢ)) {
             // N.B. We should have permission to add cpu to
             // subtree_control, but it seems like a bad idea to change this
             // on a high-level cgroup that probably has lots of existing
             // children.
-            Ꮡt.Skipf("Parent cgroup %s does not allow children to control cpu, only %q"u8, parent, ((@string)b));
+            Ꮡt.Skipf("Parent cgroup %s does not allow children to control cpu, only %q"u8, parent, (@string)b);
         }
 
         ref var path = ref heap<@string>(out var Ꮡpath);
@@ -131,7 +131,7 @@ internal static @string findCurrent(ж<testing.T> Ꮡt) {
     if (ver != cgroup.V2) {
         Ꮡt.Skipf("cgroup: running on cgroup v%d want v2"u8, ver);
     }
-    return ((@string)(buf.slice(0, n)));
+    return (@string)(buf.slice(0, n));
 }
 
 // Returns a parent directory in which we can create our own cgroup subdirectory.

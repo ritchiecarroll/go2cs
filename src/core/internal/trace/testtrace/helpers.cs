@@ -32,7 +32,7 @@ public static void Dump(ж<testing.T> Ꮡt, @string testName, slice<byte> traceB
         // data is critical for debugging and this is the only way
         // we can currently make sure it's retained.
         @string s = dumpTraceToText(Ꮡt, traceBytes);
-        if (onOldBuilder && len(s) > (1 << (int)(20)) + (512 << (int)(10))){
+        if (onOldBuilder && len(s) > (1 << 20) + (512 << 10)){
             // The old build infrastructure truncates logs at ~2 MiB.
             // Let's assume we're the only failure and give ourselves
             // up to 1.5 MiB to dump the trace.

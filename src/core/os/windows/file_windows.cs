@@ -145,7 +145,7 @@ internal static ж<File> newConsoleFile(syscallꓸHandle h, @string name) {
 
 // newFileFromNewFile is called by [NewFile].
 internal static ж<File> newFileFromNewFile(uintptr fd, @string name) {
-    var h = ((syscallꓸHandle)fd);
+    var h = (syscallꓸHandle)fd;
     if (h == syscall.InvalidHandle) {
         return default!;
     }
@@ -177,11 +177,11 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: syscall.ENOENT))));
     }
     @string path = fixLongPath(name);
-    var (r, err) = syscall.Open(path, (nint)(flag | (nint)syscall.O_CLOEXEC), syscallMode(perm));
+    var (r, err) = syscall.Open(path, flag | (nint)syscall.O_CLOEXEC, syscallMode(perm));
     if (err != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: err))));
     }
-    var nonblocking = (nint)(flag & (nint)windows.O_FILE_FLAG_OVERLAPPED) != 0;
+    var nonblocking = (flag & (nint)windows.O_FILE_FLAG_OVERLAPPED) != 0;
     return (newFile(r, name, kindOpenFile, nonblocking), default!);
 }
 
@@ -281,12 +281,12 @@ public static error Remove(@string name) {
         if (e2 != default!){
             e = e2;
         } else {
-            if ((uint32)(a & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0){
+            if ((a & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0){
                 e = e1;
             } else 
-            if ((uint32)(a & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
+            if ((a & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
                 {
-                    e1 = syscall.SetFileAttributes(p, (uint32)(a & ~(uint32)syscall.FILE_ATTRIBUTE_READONLY)); if (e1 == default!) {
+                    e1 = syscall.SetFileAttributes(p, a & ~(uint32)syscall.FILE_ATTRIBUTE_READONLY); if (e1 == default!) {
                         {
                             e = syscall.DeleteFile(p); if (e == default!) {
                                 return default!;

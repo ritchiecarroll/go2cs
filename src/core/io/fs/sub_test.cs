@@ -36,7 +36,7 @@ public static void TestSub(ж<testing.T> Ꮡt) {
         }
         (var data, errΔ1) = ReadFile(subΔ1, goodbyeTxtˢ);
         if (((sstring)data) != "goodbye, world"u8 || errΔ1 != default!) {
-            Ꮡt.Errorf(@"ReadFile(%s, ""goodbye.txt"" = %q, %v, want %q, nil"u8, desc, ((@string)data), errΔ1, goodbyeWorldˢ);
+            Ꮡt.Errorf(@"ReadFile(%s, ""goodbye.txt"" = %q, %v, want %q, nil"u8, desc, (@string)data, errΔ1, goodbyeWorldˢ);
         }
 
         (var dirs, errΔ1) = ReadDir(subΔ1, "."u8);

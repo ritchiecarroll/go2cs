@@ -168,7 +168,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
 
             while (i < len(data) - chunkFieldsLength) {
                 var length = binary.BigEndian.Uint32(data.slice(i, i + 4));
-                @string name = ((@string)(data.slice(i + 4, i + 8)));
+                @string name = (@string)(data.slice(i + 4, i + 8));
 
                 var exprᴛ1 = name;
                 if (exprᴛ1 == "IHDR"u8) {

@@ -19,7 +19,7 @@ internal static nint three = 3;
 internal static nint wide = 70;
 internal static nint y = -3;
 internal static count c = -1;
-internal static nuint huge = ((nuint)1 << (int)(63));
+internal static nuint huge = ((nuint)1 << 63);
 
 internal static void arm(@string @class, Func<@string> f) {
     GoFrame ᒐ = default;
@@ -62,7 +62,7 @@ internal static void Main() {
     arm("modulo count", () => fmt.Sprint(big.Lsh((int64)((y % 8)))));
     arm("non-negative signed", () => fmt.Sprint(one.Lsh((int64)(three)), " ", big.Rsh((int64)(three)), " ", u32.Lsh((int64)(wide)), " ", i8.Rsh((int64)(wide))));
     arm("unsigned huge", () => fmt.Sprint(big.Lsh(huge), " ", i8.Rsh(huge)));
-    arm("masked signed", () => fmt.Sprint((big << (int)(((nint)(y & 7))))));
+    arm("masked signed", () => fmt.Sprint(big << (int)((y & 7))));
 }
 
 } // end main_package

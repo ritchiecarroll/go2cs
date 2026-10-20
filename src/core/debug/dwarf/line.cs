@@ -150,7 +150,7 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
 
     // Create the LineReader.
     var u = Ꮡ(d.unit, Ꮡd.offsetToUnit(cu.Offset));
-    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, ((Offset)(uint32)off), d.line.slice((nint)(off)));
+    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, (Offset)(uint32)off, d.line.slice((nint)(off)));
     // The compilation directory is implicitly directories[0].
     ref var r = ref heap<ΔLineReader>(out var Ꮡr);
     r = new ΔLineReader(
@@ -205,9 +205,9 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     }
     Offset headerLength = default!;
     if (dwarf64){
-        headerLength = ((Offset)(uint32)buf.uint64());
+        headerLength = (Offset)(uint32)buf.uint64();
     } else {
-        headerLength = ((Offset)buf.uint32());
+        headerLength = (Offset)buf.uint32();
     }
     var programOffset = (~buf).off + headerLength;
     if (programOffset > r.endOffset) {
@@ -331,7 +331,7 @@ internal static slice<lnctForm> readLNCTFormat(this ref ΔLineReader r) {
     var ret = new slice<lnctForm>(c);
     foreach (var (i, _) in ret) {
         ret[i].lnct = (nint)r.buf.@uint();
-        ret[i].form = ((format)(uint32)r.buf.@uint());
+        ret[i].form = (format)(uint32)r.buf.@uint();
     }
     return ret;
 }
@@ -563,7 +563,7 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
     var exprᴛ1 = opcode;
     if (exprᴛ1 is 0) {
         // Extended opcode [DWARF2 6.2.5.3]
-        var length = ((Offset)(uint32)r.buf.@uint());
+        var length = (Offset)(uint32)r.buf.@uint();
         var startOff = r.buf.off;
         var opcodeΔ2 = r.buf.uint8();
 

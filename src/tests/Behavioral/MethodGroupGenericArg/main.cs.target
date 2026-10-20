@@ -97,7 +97,7 @@ internal static void Main() {
     fmt.Println(pairEqual<slice<nint>, slice<nint>, nint, nint>(nums, new nint[]{1, 2, 9, 4}.slice(), equalPair<nint>));
 
     fmt.Println(insertAt<slice<nint>, nint>(nums, 1));
-    fmt.Println(insertAt(nums, 1, (nint)(7), (nint)(8)));
+    fmt.Println(insertAt(nums, 1, (nint)7, (nint)8));
 
     var plain = new nint[]{1, 2, 3}.slice();
     applyTo<slice<nint>>(plain, reverse<slice<nint>, nint>);

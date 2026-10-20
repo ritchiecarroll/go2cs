@@ -28,13 +28,13 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         // direct
         var m = new map<nint, nint>();
         var mv = ValueOf(m);
-        mv.SetMapIndex(ValueOf((nint)(1)), ValueOf((nint)(2)));
+        mv.SetMapIndex(ValueOf((nint)1), ValueOf((nint)2));
         var (x, ok) = m[1, ꟷ];
         if (x != 2) {
             Ꮡt.Errorf("#1 after SetMapIndex(1,2): %d, %t (map=%v)"u8, x, ok, m);
         }
         {
-            nint n = mv.MapIndex(ValueOf((nint)(1))).Interface()._<nint>(); if (n != 2) {
+            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
                 Ꮡt.Errorf("#1 MapIndex(1) = %d"u8, n);
             }
         }
@@ -43,13 +43,13 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         // convert interface key
         var m = new map<any, nint>();
         var mv = ValueOf(m);
-        mv.SetMapIndex(ValueOf((nint)(1)), ValueOf((nint)(2)));
-        var (x, ok) = m[(nint)(1), ꟷ];
+        mv.SetMapIndex(ValueOf((nint)1), ValueOf((nint)2));
+        var (x, ok) = m[(nint)1, ꟷ];
         if (x != 2) {
             Ꮡt.Errorf("#2 after SetMapIndex(1,2): %d, %t (map=%v)"u8, x, ok, m);
         }
         {
-            nint n = mv.MapIndex(ValueOf((nint)(1))).Interface()._<nint>(); if (n != 2) {
+            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
                 Ꮡt.Errorf("#2 MapIndex(1) = %d"u8, n);
             }
         }
@@ -58,13 +58,13 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         // convert interface value
         var m = new map<nint, any>();
         var mv = ValueOf(m);
-        mv.SetMapIndex(ValueOf((nint)(1)), ValueOf((nint)(2)));
+        mv.SetMapIndex(ValueOf((nint)1), ValueOf((nint)2));
         var (x, ok) = m[1, ꟷ];
-        if (!AreEqual(x, (nint)(2))) {
+        if (!AreEqual(x, (nint)2)) {
             Ꮡt.Errorf("#3 after SetMapIndex(1,2): %d, %t (map=%v)"u8, x, ok, m);
         }
         {
-            nint n = mv.MapIndex(ValueOf((nint)(1))).Interface()._<nint>(); if (n != 2) {
+            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
                 Ꮡt.Errorf("#3 MapIndex(1) = %d"u8, n);
             }
         }
@@ -73,13 +73,13 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         // convert both interface key and interface value
         var m = new map<any, any>();
         var mv = ValueOf(m);
-        mv.SetMapIndex(ValueOf((nint)(1)), ValueOf((nint)(2)));
-        var (x, ok) = m[(nint)(1), ꟷ];
-        if (!AreEqual(x, (nint)(2))) {
+        mv.SetMapIndex(ValueOf((nint)1), ValueOf((nint)2));
+        var (x, ok) = m[(nint)1, ꟷ];
+        if (!AreEqual(x, (nint)2)) {
             Ꮡt.Errorf("#4 after SetMapIndex(1,2): %d, %t (map=%v)"u8, x, ok, m);
         }
         {
-            nint n = mv.MapIndex(ValueOf((nint)(1))).Interface()._<nint>(); if (n != 2) {
+            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
                 Ꮡt.Errorf("#4 MapIndex(1) = %d"u8, n);
             }
         }

@@ -905,7 +905,7 @@ internal static errorString cgoFormatErr(cgoErrorMsg error, abiꓸKind kind) {
         msg += "argument of cgo function has Go pointer to unpinned Go "u8 + kindname;
     }
 
-    return ((errorString)msg);
+    return (errorString)msg;
 }
 
 } // end runtime_package

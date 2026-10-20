@@ -229,7 +229,7 @@ public static @string UnescapeString(@string s) {
         }
         (dst, src) = unescapeEntity(b, dst + i, src + i, entity, entity2);
     }
-    return ((@string)(b.slice(0, dst)));
+    return (@string)(b.slice(0, dst));
 }
 
 } // end html_package

@@ -382,8 +382,8 @@ internal static int64 @sizeof(this ref Config conf, ΔType T) {
 // a must be within 1 and 8 and it must be a power of 2.
 // The result may be negative due to overflow.
 internal static int64 align(int64 x, int64 a) {
-    assert(x >= 0 && 1 <= a && a <= 8 && (int64)(a & (a - 1)) == 0);
-    return (int64)((x + a - 1) & ~(a - 1));
+    assert(x >= 0 && 1 <= a && a <= 8 && (a & (a - 1)) == 0);
+    return (x + a - 1) & ~(a - 1);
 }
 
 } // end types_package

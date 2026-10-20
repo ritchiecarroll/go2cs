@@ -30,10 +30,10 @@ internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @
     // Compute hash of (stk, tag).
     var h = (uintptr)0;
     foreach (var (_, x) in stk) {
-        h = (uintptr)((h << (int)(8)) | ((h >> (int)((8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1))))));
+        h = (uintptr)(h << 8 | (h >> (int)((8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1)))));
         h += (uintptr)x * 41;
     }
-    h = (uintptr)((h << (int)(8)) | ((h >> (int)((8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1))))));
+    h = (uintptr)(h << 8 | (h >> (int)((8 * (/* unsafe.Sizeof(h) */ (uintptr)8 - 1)))));
     h += (uintptr)tag * 41;
 
     // Find entry if present.

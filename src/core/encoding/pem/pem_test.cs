@@ -73,7 +73,7 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
     }
 
     if (len(remainder) != 0) {
-        Ꮡt.Errorf("expected nothing remaining of pemData, but found %s"u8, ((@string)remainder));
+        Ꮡt.Errorf("expected nothing remaining of pemData, but found %s"u8, (@string)remainder);
     }
 
     (result, _) = Decode(slice<byte>(pemPrivateKey2));

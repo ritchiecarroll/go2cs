@@ -26,7 +26,7 @@ internal static void Main() {
     }
 
     fmt.Println(pick(abcˢ));
-    fmt.Println(pick((nint)(42)));
+    fmt.Println(pick((nint)42));
     fmt.Println(pick(true));
 
     @string wrap(@string s, bool quote) {

@@ -47,7 +47,7 @@ public static Uint8x64 /*y*/ Shuffle(this Uint8x64 x, Uint8x64 shuf) {
         foreach (var (i, inp) in (~shuf.op).c._<array<uint8>>()) {
             // 0xff is a special "don't care" value
             if (!(inp == 0xff || inp < 64)) {
-                fatalf("shuffle[%d] = %d out of range [0, %d) or 0xff"u8, i, inp, (nint)(64));
+                fatalf("shuffle[%d] = %d out of range [0, %d) or 0xff"u8, i, inp, (nint)64);
             }
         }
     }

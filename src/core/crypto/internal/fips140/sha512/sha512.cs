@@ -270,7 +270,7 @@ public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
         p = p.slice(n);
     }
     if (len(p) >= chunk) {
-        nint n = (nint)(len(p) & ~(nint)(chunk - 1));
+        nint n = len(p) & ~(nint)(chunk - 1);
         block(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
         p = p.slice(n);
     }

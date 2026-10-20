@@ -44,7 +44,7 @@ public static void TestBoundaryLine(ж<testing.T> Ꮡt) {
 
 internal static @string escapeString(@string v) {
     var (bytes, _) = json.Marshal(v);
-    return ((@string)bytes);
+    return (@string)bytes;
 }
 
 internal static void expectEq(ж<testing.T> Ꮡt, @string expected, @string actual, @string what) {
@@ -86,7 +86,7 @@ public static void TestNameAccessors(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static @string longLine = strings.Repeat("\n\n\r\r\r\n\r\u0000"u8, ((1 << (int)(20))) / 8);
+internal static @string longLine = strings.Repeat("\n\n\r\r\r\n\r\u0000"u8, (1 << 20) / 8);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string thisIsAMultiPartMessageˢ = """
@@ -461,7 +461,7 @@ public static void TestMultipartStreamReadahead(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Part %d: part.Header = %v, want %v"u8, i, (~part).Header, hdr);
         }
         (var data, err) = io.ReadAll(new global::go.mime.multipart_package.PartжReader(part));
-        expectEq(Ꮡt, body, ((@string)data), fmt.Sprintf("Part %d body"u8, i));
+        expectEq(Ꮡt, body, (@string)data, fmt.Sprintf("Part %d body"u8, i));
         if (err != default!) {
             Ꮡt.Fatalf("Part %d: ReadAll failed: %v"u8, i, err);
         }
@@ -1045,7 +1045,7 @@ Cases:
                 Ꮡt.Errorf("in test %q, error reading part: %v"u8, tt.name, err);
                 goto continue_Cases;
             }
-            got = append(got, new headerBody((~p).Header, ((@string)pbody)));
+            got = append(got, new headerBody((~p).Header, (@string)pbody));
         }
         if (!reflect.DeepEqual(tt.want, got)) {
             Ꮡt.Errorf("test %q:\n got: %v\nwant: %v"u8, tt.name, got, tt.want);
@@ -1079,7 +1079,7 @@ internal static (slice<headerBody>, error) partsFromReader(ж<global::go.mime.mu
         if (err != default!) {
             return (default!, fmt.Errorf("error reading part: %v"u8, err));
         }
-        got = append(got, new headerBody((~p).Header, ((@string)pbody)));
+        got = append(got, new headerBody((~p).Header, (@string)pbody));
     }
 }
 
@@ -1088,7 +1088,7 @@ internal static readonly @string keyˢ = "key"u8;
 
 public static void TestParseAllSizes(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
-    nint maxSize = (5 << (int)(10));
+    nint maxSize = 5 << 10;
     if (testing.Short()) {
         maxSize = 512;
     }

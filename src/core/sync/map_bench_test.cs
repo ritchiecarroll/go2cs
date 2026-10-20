@@ -152,11 +152,11 @@ public static void BenchmarkMapLoadOrStoreUnique(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkMapLoadOrStoreCollision(ж<Δtesting.B> Ꮡb) {
     benchMap(Ꮡb, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
-            m.LoadOrStore((nint)(0), (nint)(0));
+            m.LoadOrStore((nint)0, (nint)0);
         },
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                m.LoadOrStore((nint)(0), (nint)(0));
+                m.LoadOrStore((nint)0, (nint)0);
             }
         }
     ));
@@ -214,13 +214,13 @@ public static void BenchmarkMapLoadAndDeleteUnique(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkMapLoadAndDeleteCollision(ж<Δtesting.B> Ꮡb) {
     benchMap(Ꮡb, new bench(
         setup: (ж<Δtesting.B> _Δp0, mapInterface m) => {
-            m.LoadOrStore((nint)(0), (nint)(0));
+            m.LoadOrStore((nint)0, (nint)0);
         },
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
                 {
-                    var (_, loaded) = m.LoadAndDelete((nint)(0)); if (loaded) {
-                        m.Store((nint)(0), (nint)(0));
+                    var (_, loaded) = m.LoadAndDelete((nint)0); if (loaded) {
+                        m.Store((nint)0, (nint)0);
                     }
                 }
             }
@@ -302,11 +302,11 @@ public static void BenchmarkMapAdversarialDelete(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkMapDeleteCollision(ж<Δtesting.B> Ꮡb) {
     benchMap(Ꮡb, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
-            m.LoadOrStore((nint)(0), (nint)(0));
+            m.LoadOrStore((nint)0, (nint)0);
         },
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                m.Delete((nint)(0));
+                m.Delete((nint)0);
             }
         }
     ));
@@ -315,11 +315,11 @@ public static void BenchmarkMapDeleteCollision(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkMapSwapCollision(ж<Δtesting.B> Ꮡb) {
     benchMap(Ꮡb, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
-            m.LoadOrStore((nint)(0), (nint)(0));
+            m.LoadOrStore((nint)0, (nint)0);
         },
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                m.Swap((nint)(0), (nint)(0));
+                m.Swap((nint)0, (nint)0);
             }
         }
     ));
@@ -384,12 +384,12 @@ public static void BenchmarkMapSwapMostlyMisses(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkMapCompareAndSwapCollision(ж<Δtesting.B> Ꮡb) {
     benchMap(Ꮡb, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
-            m.LoadOrStore((nint)(0), (nint)(0));
+            m.LoadOrStore((nint)0, (nint)0);
         },
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             while (pb.Next()) {
-                if (m.CompareAndSwap((nint)(0), (nint)(0), (nint)(42))) {
-                    m.CompareAndSwap((nint)(0), (nint)(42), (nint)(0));
+                if (m.CompareAndSwap((nint)0, (nint)0, (nint)42)) {
+                    m.CompareAndSwap((nint)0, (nint)42, (nint)0);
                 }
             }
         }
@@ -400,7 +400,7 @@ public static void BenchmarkMapCompareAndSwapNoExistingKey(ж<Δtesting.B> Ꮡb)
     benchMap(Ꮡb, new bench(
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                if (m.CompareAndSwap(i, (nint)(0), (nint)(0))) {
+                if (m.CompareAndSwap(i, (nint)0, (nint)0)) {
                     m.Delete(i);
                 }
             }
@@ -411,11 +411,11 @@ public static void BenchmarkMapCompareAndSwapNoExistingKey(ж<Δtesting.B> Ꮡb)
 public static void BenchmarkMapCompareAndSwapValueNotEqual(ж<Δtesting.B> Ꮡb) {
     benchMap(Ꮡb, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
-            m.Store((nint)(0), (nint)(0));
+            m.Store((nint)0, (nint)0);
         },
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                m.CompareAndSwap((nint)(0), (nint)(1), (nint)(2));
+                m.CompareAndSwap((nint)0, (nint)1, (nint)2);
             }
         }
     ));
@@ -482,12 +482,12 @@ public static void BenchmarkMapCompareAndSwapMostlyMisses(ж<Δtesting.B> Ꮡb) 
 public static void BenchmarkMapCompareAndDeleteCollision(ж<Δtesting.B> Ꮡb) {
     benchMap(Ꮡb, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
-            m.LoadOrStore((nint)(0), (nint)(0));
+            m.LoadOrStore((nint)0, (nint)0);
         },
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                if (m.CompareAndDelete((nint)(0), (nint)(0))) {
-                    m.Store((nint)(0), (nint)(0));
+                if (m.CompareAndDelete((nint)0, (nint)0)) {
+                    m.Store((nint)0, (nint)0);
                 }
             }
         }

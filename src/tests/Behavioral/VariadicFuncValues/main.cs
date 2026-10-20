@@ -27,7 +27,7 @@ internal static void apply(Funcꓸꓸꓸ<@string, nint, @string> f) {
 }
 
 internal static void report(Actionꓸꓸꓸ<@string, any> emit) {
-    emit("%s=%d", (@string)"x"u8, (nint)(7));
+    emit("%s=%d", (@string)"x"u8, (nint)7);
     emit("bare");
 }
 
@@ -54,11 +54,11 @@ internal static void swapEmitter(ж<logger> Ꮡl, bool swap) {
         emit = (@string p1, params ꓸꓸꓸany p2) => Ꮡl.logf(p1, p2);
     }
 
-    emit("one %d", (nint)(1));
-    emit("two %d %d", (nint)(2), (nint)(3));
+    emit("one %d", (nint)1);
+    emit("two %d %d", (nint)2, (nint)3);
     emit("none");
 
-    var rest = new any[]{(nint)(4), (nint)(5)}.slice();
+    var rest = new any[]{(nint)4, (nint)5}.slice();
     emit("spread %d %d"u8, rest.ꓸꓸꓸ);
 }
 

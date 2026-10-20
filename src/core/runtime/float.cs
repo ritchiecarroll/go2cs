@@ -44,7 +44,7 @@ internal static float64 abs(float64 x) {
 // of x and the sign of y.
 internal static float64 copysign(float64 x, float64 y) {
     const uint64 sign = /* 1 << 63 */ 9223372036854775808;
-    return float64frombits((uint64)((uint64)(float64bits(x) & ~sign) | (uint64)(float64bits(y) & sign)));
+    return float64frombits((uint64)(float64bits(x) & ~sign) | (uint64)(float64bits(y) & sign));
 }
 
 // float64bits returns the IEEE 754 binary representation of f.
@@ -124,7 +124,7 @@ internal static (float64 @int, float64 frac) modf(float64 f) {
     }
 
     var x = float64bits(f);
-    nuint e = (nuint)((nuint)((x >> (int)(float64Shift))) & (nuint)float64Mask) - (nuint)float64Bias;
+    nuint e = ((nuint)(x >> (int)(float64Shift)) & (nuint)float64Mask) - (nuint)float64Bias;
 
     // Keep the top 12+e bits, the integer part; clear the rest.
     if (e < 64 - 12) {

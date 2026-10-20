@@ -123,14 +123,14 @@ internal static void itoa(ref slice<byte> buf, nint i, nint wid) {
 //   - file and line number (if corresponding flags are provided),
 //   - l.prefix (if it's not blank and Lmsgprefix is set).
 internal static void formatHeader(ref slice<byte> buf, time.Time t, @string prefix, nint flag, @string @file, nint line) {
-    if ((nint)(flag & (nint)Lmsgprefix) == 0) {
+    if ((flag & (nint)Lmsgprefix) == 0) {
         buf = append(buf, prefix.ꓸꓸꓸ);
     }
-    if ((nint)(flag & (nint)((nint)((nint)(UntypedInt)(Ldate | Ltime) | (nint)Lmicroseconds))) != 0) {
-        if ((nint)(flag & (nint)LUTC) != 0) {
+    if ((flag & (nint)((nint)((nint)(UntypedInt)(Ldate | Ltime) | (nint)Lmicroseconds))) != 0) {
+        if ((flag & (nint)LUTC) != 0) {
             t = t.UTC();
         }
-        if ((nint)(flag & (nint)Ldate) != 0) {
+        if ((flag & (nint)Ldate) != 0) {
             var (year, month, day) = t.Date();
             itoa(ref buf, year, 4);
             buf = append(buf, (byte)((rune)'/'));
@@ -139,22 +139,22 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
             itoa(ref buf, day, 2);
             buf = append(buf, (byte)((rune)' '));
         }
-        if ((nint)(flag & (nint)((nint)((nint)Ltime | (nint)Lmicroseconds))) != 0) {
+        if ((flag & (nint)((nint)((nint)Ltime | (nint)Lmicroseconds))) != 0) {
             var (hour, min, sec) = t.Clock();
             itoa(ref buf, hour, 2);
             buf = append(buf, (byte)((rune)':'));
             itoa(ref buf, min, 2);
             buf = append(buf, (byte)((rune)':'));
             itoa(ref buf, sec, 2);
-            if ((nint)(flag & (nint)Lmicroseconds) != 0) {
+            if ((flag & (nint)Lmicroseconds) != 0) {
                 buf = append(buf, (byte)((rune)'.'));
                 itoa(ref buf, t.Nanosecond() / 1000, 6);
             }
             buf = append(buf, (byte)((rune)' '));
         }
     }
-    if ((nint)(flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
-        if ((nint)(flag & (nint)Lshortfile) != 0) {
+    if ((flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
+        if ((flag & (nint)Lshortfile) != 0) {
             @string @short = @file;
             for (nint i = len(@file) - 1; i > 0; i--) {
                 if (@file[i] == (rune)'/') {
@@ -169,7 +169,7 @@ internal static void formatHeader(ref slice<byte> buf, time.Time t, @string pref
         itoa(ref buf, line, -1);
         buf = append(buf, ((@string)": "u8).ꓸꓸꓸ);
     }
-    if ((nint)(flag & (nint)Lmsgprefix) != 0) {
+    if ((flag & (nint)Lmsgprefix) != 0) {
         buf = append(buf, prefix.ꓸꓸꓸ);
     }
 }
@@ -192,7 +192,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
     // to place back in the pool.
     //
     // See https://go.dev/issue/23199
-    if (cap(p) > (64 << (int)(10))) {
+    if (cap(p) > 64 << 10) {
         p = default!;
     }
     ᏑbufferPool.Put(Ꮡp.OrTypedNil());
@@ -230,7 +230,7 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
 
         @string @file = default!;
         nint line = default!;
-        if ((nint)(flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
+        if ((flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
             if (pc == 0){
                 bool ok = default!;
                 (_, @file, line, ok) = runtime.Caller(calldepth);

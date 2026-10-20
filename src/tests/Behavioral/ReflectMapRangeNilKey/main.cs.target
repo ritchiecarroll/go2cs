@@ -8,7 +8,7 @@ partial class main_package {
 partial struct namedAny /*map[any, nint]*/;
 
 internal static void Main() {
-    var anyKeys = new map<any, nint>{[default!] = 1, [(@string)"b"u8] = 2, [(nint)(7)] = 3};
+    var anyKeys = new map<any, nint>{[default!] = 1, [(@string)"b"u8] = 2, [(nint)7] = 3};
     nint iface = 0;
     nint nils = 0;
     nint invalid = 0;

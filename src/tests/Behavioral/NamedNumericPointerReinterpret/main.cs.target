@@ -65,7 +65,7 @@ internal static partial void bump(ж<coord> Ꮡc) {
 partial struct namedString /*@string*/;
 
 internal static partial void setStr(ref namedString s, @string v) {
-    s = ((namedString)v);
+    s = (namedString)v;
 }
 
 internal static void Main() {
@@ -80,7 +80,7 @@ internal static void Main() {
     c = 42;
     fmt.Println(Ꮡc.peek());
 
-    var h = ((hexval)(uint64)a);
+    var h = (hexval)(uint64)a;
     fmt.Println(describe(h), (uint64)((hexval)(uint64)c));
 
     ref var g = ref heap(new gobber(), out var Ꮡg);

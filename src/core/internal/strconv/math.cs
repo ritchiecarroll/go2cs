@@ -54,7 +54,7 @@ internal static (uint128 mant, nint exp, bool ok) pow10(nint e) {
 // slower floating point arithmetic. Correctness is verified by unit tests.
 internal static nint mulLog10_2(nint x) {
     // log(2)/log(10) ≈ 0.30102999566 ≈ 78913 / 2^18
-    return ((x * 78913) >> (int)(18));
+    return (x * 78913) >> 18;
 }
 
 // mulLog2_10 returns math.Floor(x * log(10)/log(2)) for an integer x in
@@ -64,7 +64,7 @@ internal static nint mulLog10_2(nint x) {
 // slower floating point arithmetic. Correctness is verified by unit tests.
 internal static nint mulLog2_10(nint x) {
     // log(10)/log(2) ≈ 3.32192809489 ≈ 108853 / 2^15
-    return ((x * 108853) >> (int)(15));
+    return (x * 108853) >> 15;
 }
 
 internal static nuint bool2uint(bool b) {

@@ -189,11 +189,11 @@ internal static map<@string, array<slice<@string>>> goSets = new map<@string, ar
 };
 
 internal static void Main() {
-    probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"p="u8}.slice(), ["Set"] = new any[]{(nint)(9)}.slice()});
-    probe("Box[int]", new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{(nint)(9)}.slice()});
+    probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"p="u8}.slice(), ["Set"] = new any[]{(nint)9}.slice()});
+    probe("Box[int]", new Box<nint>(v: 7), Ꮡ(new Box<nint>(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{(nint)9}.slice()});
     probe("Box[string]", new Box<@string>(v: "s"), Ꮡ(new Box<@string>(v: "t")), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{(@string)"u"u8}.slice()});
     probe("Box[[]int]", new Box<slice<nint>>(v: new nint[]{1}.slice()), Ꮡ(new Box<slice<nint>>(v: new nint[]{2}.slice())), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"b="u8}.slice(), ["Set"] = new any[]{new nint[]{3, 4}.slice()}.slice()});
-    probe("Pair[string,int]", new Pair<@string, nint>(k: "a", v: 1), Ꮡ(new Pair<@string, nint>(k: "b", v: 2)), new map<@string, slice<any>>{["Swap"] = new any[]{(nint)(5)}.slice()});
+    probe("Pair[string,int]", new Pair<@string, nint>(k: "a", v: 1), Ꮡ(new Pair<@string, nint>(k: "b", v: 2)), new map<@string, slice<any>>{["Swap"] = new any[]{(nint)5}.slice()});
     probe("Ord2[age]", new Ord2<age>(a: 1, b: 2), Ꮡ(new Ord2<age>(a: 3, b: 2)), default!);
 
     @try("fmt generic Stringer", () => fmt.Sprint(new Pair<@string, nint>(k: "z", v: 26)));

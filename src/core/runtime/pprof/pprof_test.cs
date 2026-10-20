@@ -335,7 +335,7 @@ internal static (uint64 pc, bool found) findInlinedCall(any f, nint maxBytes) {
 internal static readonly object canTDetermineWhetherˢ = (@string)"Can't determine whether inlinedCallee was inlined into inlinedCaller."u8;
 
 public static void TestCPUProfileInlining(ж<testing.T> Ꮡt) {
-    if (!containsInlinedCall(inlinedCaller, (4 << (int)(10)))) {
+    if (!containsInlinedCall(inlinedCaller, 4 << 10)) {
         Ꮡt.Skip(canTDetermineWhetherˢ);
     }
 
@@ -490,7 +490,7 @@ internal static ж<profile.Profile> testCPUProfile(ж<testing.T> Ꮡt, Func<ж<t
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        @string vers = ((@string)@out);
+        @string vers = (@string)@out;
         Ꮡt.Logf("uname -a: %v"u8, vers);
     }
     else if (exprᴛ1 == "plan9"u8) {
@@ -715,17 +715,17 @@ public static partial void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
 
-        nint heap = (1 << (int)(30));
+        nint heap = 1 << 30;
         if (runtime.GOOS == "android"u8) {
             // Use smaller size for Android to avoid crash.
-            heap = (100 << (int)(20));
+            heap = 100 << 20;
         }
         if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm"u8) {
             // Use smaller heap for Windows/ARM to avoid crash.
             heap = (100 << (int)(20));
         }
         if (testing.Short()) {
-            heap = (100 << (int)(20));
+            heap = 100 << 20;
         }
         // This makes fork slower.
         var garbage = new slice<byte>(heap);
@@ -900,7 +900,7 @@ internal static partial void growstack1() {
 
 //go:noinline
 internal static partial void growstack(nint n) {
-    array<byte> buf = new(2097152); /* (8 << (int)(18)) */
+    array<byte> buf = new(2097152); /* (8 << 18) */
     use(buf);
     if (n > 0) {
         growstack(n - 1);
@@ -1047,7 +1047,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 
         // Generate block profile
         runtime.SetBlockProfileRate(1);
-        defer(runtime.SetBlockProfileRate, (nint)(0), ref ᒐ);
+        defer(runtime.SetBlockProfileRate, (nint)0, ref ᒐ);
         foreach (var (_, test) in tests.ΔRangeSnapshot()) {
             test.f(Ꮡt);
         }
@@ -1183,7 +1183,7 @@ internal static partial void awaitBlockedGoroutine(ж<testing.T> Ꮡt, @string s
             }
         }
 
-        var buf = new slice<byte>((64 << (int)(10)));
+        var buf = new slice<byte>((64 << 10));
         while (ᐧ) {
             runtime.Gosched();
             nint n = runtime.Stack(buf, true);
@@ -1369,7 +1369,7 @@ public static void TestBlockProfileBias(ж<testing.T> Ꮡt) {
     try {
         nint rate = (nint)1000; // arbitrary value
         runtime.SetBlockProfileRate(rate);
-        defer(runtime.SetBlockProfileRate, (nint)(0), ref ᒐ);
+        defer(runtime.SetBlockProfileRate, (nint)0, ref ᒐ);
 
         // simulate blocking events
         blockFrequentShort(rate);
@@ -1540,12 +1540,12 @@ public static void TestMutexProfile(ж<testing.T> Ꮡt) {
             // time keeps ticking during these delays. By making the upper
             // bound proportional to the wall time in blockMutexN, in theory
             // we're accounting for all these possible delays.
-            var d = ((time.Duration)total);
+            var d = (time.Duration)total;
             var lo = (time.Duration)(9000000000L);
             var hi = ((time.Duration)N) * blockMutexNTime * 11 / 10;
             if (d < lo || d > hi) {
                 foreach (var (_, s) in (~p).Sample) {
-                    tΔ2.Logf("sample: %s"u8, ((time.Duration)(~s).Value[i]));
+                    tΔ2.Logf("sample: %s"u8, (time.Duration)(~s).Value[i]);
                 }
                 tΔ2.Fatalf("profile samples total %v, want within range [%v, %v] (target: %v)"u8, d, lo, hi, (time.Duration)(10000000000L));
             }
@@ -2728,7 +2728,7 @@ internal partial struct TestTryAdd_testCases /*dyn*/ {
 // utilizing translateCPUProfile defined in proto_test.go
 public static void TestTryAdd(ж<testing.T> Ꮡt) {
     {
-        var (_, found) = findInlinedCall(inlinedCallerDump, (4 << (int)(10))); if (!found) {
+        var (_, found) = findInlinedCall(inlinedCallerDump, 4 << 10); if (!found) {
             Ꮡt.Skip(canTDetermineWhetherˢ2);
         }
     }
@@ -2745,7 +2745,7 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
     inlinedWrapperCallerDump(wrapperPCs);
 
     {
-        var (_, found) = findInlinedCall(recursionChainBottom, (4 << (int)(10))); if (!found) {
+        var (_, found) = findInlinedCall(recursionChainBottom, 4 << 10); if (!found) {
             Ꮡt.Skip(canTDetermineWhetherˢ3);
         }
     }
@@ -3109,7 +3109,7 @@ internal static void allocDeep(nint n) {
         allocDeep(n - 1);
         return;
     }
-    memSink = new slice<byte>((1 << (int)(20)));
+    memSink = new slice<byte>((1 << 20));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -3236,7 +3236,7 @@ public static partial void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
 
         runtime.SetMutexProfileFraction(fraction);
         runtime.SetBlockProfileRate(1);
-        defer(runtime.SetBlockProfileRate, (nint)(0), ref ᒐ);
+        defer(runtime.SetBlockProfileRate, (nint)0, ref ᒐ);
 
         ref var wg = ref heap<sync.WaitGroup>(out var Ꮡwg);
         wg = new sync.WaitGroup(nil);
@@ -3334,7 +3334,7 @@ public static partial void TestBlockMutexProfileInlineExpansion(ж<testing.T> �
     GoFrame ᒐ = default;
     try {
         runtime.SetBlockProfileRate(1);
-        defer(runtime.SetBlockProfileRate, (nint)(0), ref ᒐ);
+        defer(runtime.SetBlockProfileRate, (nint)0, ref ᒐ);
         nint prev = runtime.SetMutexProfileFraction(1);
         defer(runtime.SetMutexProfileFraction, prev, ref ᒐ);
 

@@ -219,7 +219,7 @@ internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, tokenꓸPos pos,
 
     @string msg = Ꮡcheck.sprintf("%s type arguments for type %s: have %d, want %d"u8, qual, name, got, want);
     if (Ꮡcheck != nil) {
-        Ꮡcheck.error(((atPos)pos), WrongTypeArgCount, msg);
+        Ꮡcheck.error((atPos)pos, WrongTypeArgCount, msg);
         return false;
     }
 

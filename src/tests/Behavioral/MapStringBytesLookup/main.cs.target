@@ -36,7 +36,7 @@ internal static void Main() {
     var (_, hit) = w[tmpstring(k), ꟷ];
     fmt.Println(hit);
 
-    delete(w, ((@string)slice<byte>("alpha"u8)));
+    delete(w, (@string)slice<byte>("alpha"u8));
     fmt.Println(len(w));
 }
 

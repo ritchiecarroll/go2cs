@@ -508,7 +508,7 @@ func (v *Visitor) numericCastOperand(expr ast.Expr, converted, csType string) st
 		return fmt.Sprintf("(%s)(ConvertToUInt64<%s>(%s))", csType, v.getCSharpTypeName(tp), converted)
 	}
 
-	return fmt.Sprintf("(%s)(%s)", csType, converted)
+	return castOf(csType, converted)
 }
 
 func isIntegerLiteral(expr ast.Expr) bool {

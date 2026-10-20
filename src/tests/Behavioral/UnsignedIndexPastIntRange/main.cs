@@ -31,8 +31,8 @@ internal static void Main() {
     var b = slice<byte>("abcdefghij"u8);
     ref var a = ref heap(new array<byte>(10), out var Ꮡa);
     copy(a[..], b);
-    var nb = ((bytes)b);
-    path np = ((path)s);
+    var nb = (bytes)b;
+    path np = (path)s;
     ref var nk = ref heap<block>(out var Ꮡnk);
     nk = new block(new byte[]{1, 2, 3, 4}.array());
     var pa = Ꮡa;

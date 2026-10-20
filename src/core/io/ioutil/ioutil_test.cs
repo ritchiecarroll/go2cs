@@ -68,7 +68,7 @@ public static void TestWriteFile(ж<testing.T> Ꮡt) {
     }
 
     if (((sstring)contents) != data) {
-        Ꮡt.Fatalf("contents = %q\nexpected = %q"u8, ((@string)contents), data);
+        Ꮡt.Fatalf("contents = %q\nexpected = %q"u8, (@string)contents, data);
     }
 
     // cleanup

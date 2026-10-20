@@ -55,7 +55,7 @@ public static void TestPipePassing(ж<testing.T> Ꮡt) {
     }
     @string marker = markerᶜ;
     var childProc = helperCommand(Ꮡt, pipehandleˢ, strconv.FormatUint((uint64)w.Fd(), 16), marker);
-    childProc.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{((syscallꓸHandle)w.Fd())}.slice()));
+    childProc.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{(syscallꓸHandle)w.Fd()}.slice()));
     err = childProc.Start();
     if (err != default!) {
         Ꮡt.Error(err);
@@ -67,7 +67,7 @@ public static void TestPipePassing(ж<testing.T> Ꮡt) {
     }
     r.Close();
     if (((sstring)response) != marker) {
-        Ꮡt.Errorf("got %q; want %q"u8, ((@string)response), marker);
+        Ꮡt.Errorf("got %q; want %q"u8, (@string)response, marker);
     }
     err = childProc.Wait();
     if (err != default!) {
@@ -119,7 +119,7 @@ public static void TestChildCriticalEnv(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    if (strings.TrimSpace(((@string)@out)) == ""u8) {
+    if (strings.TrimSpace((@string)@out) == ""u8) {
         Ꮡt.Error(noSystemrootFoundˢ);
     }
 }

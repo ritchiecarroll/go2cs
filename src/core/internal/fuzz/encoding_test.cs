@@ -301,7 +301,7 @@ uint(0xffffffffffffffff)
                 want = testʗ1.@in;
             }
             want += "\n"u8;
-            @string got = ((@string)newB);
+            @string got = (@string)newB;
             if (got != want) {
                 tΔ1.Errorf("unexpected marshaled value\ngot:\n%s\nwant:\n%s"u8, got, want);
             }
@@ -452,7 +452,7 @@ public static void FuzzStringRoundTrip(ж<testing.F> Ꮡf) {
 
     f.Add((@string)""u8);
     f.Add((@string)"\x00"u8);
-    f.Add(((@string)new rune[]{unicode.ReplacementChar}.slice()));
+    f.Add((@string)new rune[]{unicode.ReplacementChar}.slice());
 
     Ꮡf.Fuzz((ж<testing.T> t, @string s1) => {
         var b = marshalCorpusFile(s1);

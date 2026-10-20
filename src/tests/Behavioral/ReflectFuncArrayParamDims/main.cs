@@ -85,7 +85,7 @@ internal static void reportMethod() {
     fmt.Println("method ptr param: kind =", ptr.Kind(), "elem =", elem, "len =", elem.Len());
 
     var reply = reflect.New(elem);
-    m.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler(nil)), reflect.ValueOf((nint)(7)), reply}.slice());
+    m.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler(nil)), reflect.ValueOf((nint)7), reply}.slice());
     fmt.Println("filled through the pointer:", reply.Elem().Interface());
 
     (var s, ok) = t.MethodByName("SumArray");

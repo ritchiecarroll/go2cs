@@ -20,7 +20,7 @@ internal static void Main() {
     fmt.Println("int64(2^53+1) > twoTo53:", big > (int64)twoTo53);
     fmt.Println("int64(2^53+1) != twoTo53:", big != (int64)twoTo53);
 
-    var ubig = ((uint64)1 << (int)(53)) + 1;
+    var ubig = ((uint64)1 << 53) + 1;
     fmt.Println("uint64(2^53+1) > twoTo53:", ubig > (uint64)twoTo53);
 
     nint n = unchecked((nint)(9007199254740993L));

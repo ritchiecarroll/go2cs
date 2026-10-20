@@ -481,7 +481,7 @@ public static void TestInt64(ж<testing.T> Ꮡt) {
     };
     var cfg = Ꮡ(new Config(MaxCount: 10000));
     Check((f).OrTypedNilFunc(), cfg);
-    if (((uint64)lo >> (int)(62)) == 0 || ((uint64)hi >> (int)(62)) == 0) {
+    if ((uint64)lo >> 62 == 0 || (uint64)hi >> 62 == 0) {
         Ꮡt.Errorf("int64 returned range %#016x,%#016x; does not look like full range"u8, lo, hi);
     }
 }

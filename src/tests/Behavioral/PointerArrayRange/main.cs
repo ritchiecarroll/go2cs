@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static void swap(ref array<uint64> buf) {
     foreach (var (i, x) in buf) {
-        buf[i] = (uint64)((x >> (int)(32)) | (x << (int)(32)));
+        buf[i] = x >> 32 | x << 32;
     }
 }
 

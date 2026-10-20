@@ -616,9 +616,9 @@ public static void TestReadTimeoutUnblocksRead(ж<testing.T> Ꮡt) {
                 return err;
             }
             case 1 when selᴛ10.ꟷᐳ(out _): {
-                var buf = new slice<byte>((2 << (int)(20)));
+                var buf = new slice<byte>((2 << 20));
                 buf = buf.slice(0, Δruntime.Stack(buf, true));
-                println((@string)"Stacks at timeout:\n"u8, ((@string)buf));
+                println((@string)"Stacks at timeout:\n"u8, (@string)buf);
                 return errors.New(timeoutWaitingForReadToˢ);
             }}
             return default!;

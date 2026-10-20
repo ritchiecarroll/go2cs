@@ -30,14 +30,14 @@ internal static void Main() {
     fmt.Println(show((rune)'a'));
     fmt.Println(show(1D + 2D.i()));
     fmt.Println(show<nint>(named));
-    fmt.Println(show<nint>((1 << (int)(10))));
+    fmt.Println(show<nint>(1 << 10));
     fmt.Println(show((@string)"s"));
     fmt.Println(show(true));
     fmt.Println(many<nint>(1, 2, 3));
     fmt.Println(keyed<@string, nint>((@string)"k", 4));
 
     int8 x = 1;
-    fmt.Println(pair(x, (int8)(3)));
+    fmt.Println(pair(x, (int8)3));
     fmt.Println(show(x));
     fmt.Println(show((int16)5));
 }

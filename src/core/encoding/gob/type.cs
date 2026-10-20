@@ -215,7 +215,7 @@ internal static void setTypeId(ΔgobType typ) {
     if (typ.id() != 0) {
         return;
     }
-    var nextId = ((typeId)(int32)len(idToTypeSlice));
+    var nextId = (typeId)(int32)len(idToTypeSlice);
     typ.setId(nextId);
     idToTypeSlice = append(idToTypeSlice, typ);
 }
@@ -281,43 +281,43 @@ internal static @string name(this ref CommonType t) {
 // Primordial types, needed during initialization.
 // Always passed as pointers so the interface{} type
 // goes through without losing its interfaceness.
-internal static typeId tBool = bootstrapType("bool"u8, ((ж<bool>)nil));
-internal static typeId tInt = bootstrapType("int"u8, ((ж<nint>)nil));
-internal static typeId tUint = bootstrapType("uint"u8, ((ж<nuint>)nil));
-internal static typeId tFloat = bootstrapType("float"u8, ((ж<float64>)nil));
-internal static typeId tBytes = bootstrapType("bytes"u8, ((ж<slice<byte>>)nil));
-internal static typeId tString = bootstrapType("string"u8, ((ж<@string>)nil));
-internal static typeId tComplex = bootstrapType("complex"u8, ((ж<complex128>)nil));
-internal static typeId tInterface = bootstrapType("interface"u8, ((ж<any>)nil));
+internal static typeId tBool = bootstrapType("bool"u8, (ж<bool>)nil);
+internal static typeId tInt = bootstrapType("int"u8, (ж<nint>)nil);
+internal static typeId tUint = bootstrapType("uint"u8, (ж<nuint>)nil);
+internal static typeId tFloat = bootstrapType("float"u8, (ж<float64>)nil);
+internal static typeId tBytes = bootstrapType("bytes"u8, (ж<slice<byte>>)nil);
+internal static typeId tString = bootstrapType("string"u8, (ж<@string>)nil);
+internal static typeId tComplex = bootstrapType("complex"u8, (ж<complex128>)nil);
+internal static typeId tInterface = bootstrapType("interface"u8, (ж<any>)nil);
 // Reserve some Ids for compatible expansion
     partial struct eᴛ1 /*dyn*/ {
         internal nint r7;
     }
-internal static typeId tReserved7 = bootstrapType("_reserved1"u8, ((ж<eᴛ1>)nil));
+internal static typeId tReserved7 = bootstrapType("_reserved1"u8, (ж<eᴛ1>)nil);
     partial struct eᴛ2 /*dyn*/ {
         internal nint r6;
     }
-internal static typeId tReserved6 = bootstrapType("_reserved1"u8, ((ж<eᴛ2>)nil));
+internal static typeId tReserved6 = bootstrapType("_reserved1"u8, (ж<eᴛ2>)nil);
     partial struct eᴛ3 /*dyn*/ {
         internal nint r5;
     }
-internal static typeId tReserved5 = bootstrapType("_reserved1"u8, ((ж<eᴛ3>)nil));
+internal static typeId tReserved5 = bootstrapType("_reserved1"u8, (ж<eᴛ3>)nil);
     partial struct eᴛ4 /*dyn*/ {
         internal nint r4;
     }
-internal static typeId tReserved4 = bootstrapType("_reserved1"u8, ((ж<eᴛ4>)nil));
+internal static typeId tReserved4 = bootstrapType("_reserved1"u8, (ж<eᴛ4>)nil);
     partial struct eᴛ5 /*dyn*/ {
         internal nint r3;
     }
-internal static typeId tReserved3 = bootstrapType("_reserved1"u8, ((ж<eᴛ5>)nil));
+internal static typeId tReserved3 = bootstrapType("_reserved1"u8, (ж<eᴛ5>)nil);
     partial struct eᴛ6 /*dyn*/ {
         internal nint r2;
     }
-internal static typeId tReserved2 = bootstrapType("_reserved1"u8, ((ж<eᴛ6>)nil));
+internal static typeId tReserved2 = bootstrapType("_reserved1"u8, (ж<eᴛ6>)nil);
     partial struct eᴛ7 /*dyn*/ {
         internal nint r1;
     }
-internal static typeId tReserved1 = bootstrapType("_reserved1"u8, ((ж<eᴛ7>)nil));
+internal static typeId tReserved1 = bootstrapType("_reserved1"u8, (ж<eᴛ7>)nil);
 
 // Predefined because it's needed by the Decoder
 internal static typeId tWireType;

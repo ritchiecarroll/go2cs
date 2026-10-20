@@ -155,7 +155,7 @@ public static ΔReg RegHint(this ж<Asm> Ꮡa, Hint hint) {
             if (i < 0) {
                 return new ΔReg(name);
             }
-            if ((uint64)(a.regavail & (((uint64)1).Lsh((int64)(i)))) == 0) {
+            if ((a.regavail & (((uint64)1).Lsh((int64)(i)))) == 0) {
                 Ꮡa.Fatalf("hint for already allocated register %s"u8, name);
             }
             a.regavail &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((int64)(i))));
@@ -174,7 +174,7 @@ public static void Free(this ж<Asm> Ꮡa, ΔReg r) {
     if (i < 0) {
         return;
     }
-    if ((uint64)(a.regavail & (((uint64)1).Lsh((int64)(i)))) != 0) {
+    if ((a.regavail & (((uint64)1).Lsh((int64)(i)))) != 0) {
         Ꮡa.Fatalf("register %s already freed"u8, r.name);
     }
     a.regavail |= (uint64)(((uint64)1).Lsh((int64)(i)));
@@ -192,7 +192,7 @@ public static void Unfree(this ж<Asm> Ꮡa, ΔReg r) {
     if (i < 0) {
         return;
     }
-    if ((uint64)(a.regavail & (((uint64)1).Lsh((int64)(i)))) == 0) {
+    if ((a.regavail & (((uint64)1).Lsh((int64)(i)))) == 0) {
         Ꮡa.Fatalf("register %s not free"u8, r.name);
     }
     a.regavail &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((int64)(i))));
@@ -322,7 +322,7 @@ public static void AddWords(this ж<Asm> Ꮡa, ΔReg src1, RegPtr src2, RegPtr d
         // Architectures where this is not true (x86) need to provide Arch.addWords.
         var t = Ꮡa.Reg();
         Ꮡa.Lsh(a.Imm(bits.TrailingZeros((nuint)(~a.Arch).WordBytes)), src1, t);
-        Ꮡa.Add(t, ((ΔReg)src2), ((ΔReg)dst), KeepCarry);
+        Ꮡa.Add(t, (ΔReg)src2, (ΔReg)dst, KeepCarry);
         Ꮡa.Free(t);
         return;
     }

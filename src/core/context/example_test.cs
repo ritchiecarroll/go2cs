@@ -157,11 +157,11 @@ public static void ExampleWithValue() {
         fmt.Println(keyNotFoundˢ, kΔ1);
     }
 
-    ExampleWithValue_favContextKey k = ((ExampleWithValue_favContextKey)(@string)languageˢ);
+    ExampleWithValue_favContextKey k = (ExampleWithValue_favContextKey)(@string)languageˢ;
     var ctx = context.WithValue(context.Background(), k, (@string)"Go"u8);
 
     f(ctx, k);
-    f(ctx, ((ExampleWithValue_favContextKey)(@string)colorˢ));
+    f(ctx, (ExampleWithValue_favContextKey)(@string)colorˢ);
 
     // Output:
     // found value: Go

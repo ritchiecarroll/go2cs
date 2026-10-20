@@ -5,11 +5,11 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    var i32 = new int32[]{0, 1, (int32)(1 << (int)(20)), (1 << (int)(20)) + 1, (int32)(2147483648L - 2), (int32)(2147483648L - 1)}.slice();
+    var i32 = new int32[]{0, 1, (int32)(1 << 20), (1 << 20) + 1, (int32)(2147483648L - 2), (int32)(2147483648L - 1)}.slice();
 
     var i64 = new int64[]{1152921504606846976L, 4611686018427387905L, 9223372036854775807L}.slice();
 
-    var i16 = new int16[]{(int16)((1 << (int)(15)) - 1)}.slice();
+    var i16 = new int16[]{(int16)((1 << 15) - 1)}.slice();
     var u32 = new uint32[]{unchecked((uint32)(4294967295UL))}.slice();
     var u64 = new uint64[]{(uint64)(1099511627776L + 1), 18446744073709551615UL}.slice();
     var ptr = new uintptr[]{(uintptr)(1099511627776L + 1)}.slice();
@@ -76,10 +76,10 @@ internal static void Main() {
     var negs = new int32[]{(int32)(-(2147483648L - 1)), (int32)(-(2147483648L - 2)), (int32)(~(2147483648L - 1))}.slice();
     var negInts = new nint[]{(nint)(-(2147483648L - 1))}.slice();
 
-    var neg16 = new int16[]{(int16)(-((1 << (int)(15)) - 1))}.slice();
+    var neg16 = new int16[]{(int16)(-((1 << 15) - 1))}.slice();
 
     var deep = new int32[]{(int32)((2147483648L - 1) - 1)}.slice();
-    var deeper = new int32[]{(int32)((1099511627776L >> (int)(20)) - 1)}.slice();
+    var deeper = new int32[]{(int32)((1099511627776L >> 20) - 1)}.slice();
 
     int32 negAssign = (int32)(-(2147483648L - 1));
     var negConv = (int32)(-(2147483648L - 1));

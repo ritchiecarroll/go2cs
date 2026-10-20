@@ -286,7 +286,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         if (len(dat) < 8) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "command block too small"u8, default!))));
         }
-        var (cmd, siz) = (((LoadCmd)bo.Uint32(dat[0..4])), bo.Uint32(dat[4..8]));
+        var (cmd, siz) = ((LoadCmd)bo.Uint32(dat[0..4]), bo.Uint32(dat[4..8]));
         if (siz < 8 || siz > (uint32)len(dat)) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid command block size"u8, default!))));
         }
@@ -308,7 +308,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid path in rpath command"u8, hdr.Path))));
             }
             l.Value.Path = cstring(cmddat.slice((nint)(hdr.Path)));
-            l.Value.LoadBytes = ((LoadBytes)cmddat);
+            l.Value.LoadBytes = (LoadBytes)cmddat;
             f.Value.Loads = append((~f).Loads, (Load)(new RpathжLoad(l)));
         }
         else if (exprᴛ2 == LoadCmdDylib) {
@@ -327,7 +327,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             l.Value.Time = hdr.Time;
             l.Value.CurrentVersion = hdr.CurrentVersion;
             l.Value.CompatVersion = hdr.CompatVersion;
-            l.Value.LoadBytes = ((LoadBytes)cmddat);
+            l.Value.LoadBytes = (LoadBytes)cmddat;
             f.Value.Loads = append((~f).Loads, (Load)(new DylibжLoad(l)));
         }
         else if (exprᴛ2 == LoadCmdSymtab) {
@@ -391,7 +391,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 }
             }
             var st = @new<Dysymtab>();
-            st.Value.LoadBytes = ((LoadBytes)cmddat);
+            st.Value.LoadBytes = (LoadBytes)cmddat;
             st.Value.DysymtabCmd = hdr;
             st.Value.IndirectSyms = x;
             f.Value.Loads = append((~f).Loads, (Load)(new DysymtabжLoad(st)));
@@ -554,7 +554,7 @@ internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> sym
         ));
     }
     var st = @new<Symtab>();
-    st.Value.LoadBytes = ((LoadBytes)cmddat);
+    st.Value.LoadBytes = (LoadBytes)cmddat;
     st.Value.Syms = symtab;
     return (st, default!);
 }
@@ -591,30 +591,30 @@ internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.Reade
                 }
             }
 
-            if ((uint32)(ri.Addr & (((uint32)1 << (int)(31)))) != 0){ // scattered
-                rel.Value.Addr = (uint32)(ri.Addr & ((1 << (int)(24)) - 1));
-                rel.Value.Type = (uint8)((uint32)(((ri.Addr >> (int)(24))) & ((1 << (int)(4)) - 1)));
-                rel.Value.Len = (uint8)((uint32)(((ri.Addr >> (int)(28))) & ((1 << (int)(2)) - 1)));
-                rel.Value.Pcrel = (uint32)(ri.Addr & (((uint32)1 << (int)(30)))) != 0;
+            if ((uint32)(ri.Addr & ((uint32)1 << 31)) != 0){ // scattered
+                rel.Value.Addr = (uint32)(ri.Addr & ((1 << 24) - 1));
+                rel.Value.Type = (uint8)((uint32)((ri.Addr >> 24) & ((1 << 4) - 1)));
+                rel.Value.Len = (uint8)((uint32)((ri.Addr >> 28) & ((1 << 2) - 1)));
+                rel.Value.Pcrel = (uint32)(ri.Addr & ((uint32)1 << 30)) != 0;
                 rel.Value.Value = ri.Symnum;
                 rel.Value.Scattered = true;
             } else {
                 var exprᴛ1 = bo;
                 if (AreEqual(exprᴛ1, binary.LittleEndian)) {
                     rel.Value.Addr = ri.Addr;
-                    rel.Value.Value = (uint32)(ri.Symnum & ((1 << (int)(24)) - 1));
-                    rel.Value.Pcrel = (uint32)(ri.Symnum & (((uint32)1 << (int)(24)))) != 0;
-                    rel.Value.Len = (uint8)((uint32)(((ri.Symnum >> (int)(25))) & ((1 << (int)(2)) - 1)));
-                    rel.Value.Extern = (uint32)(ri.Symnum & (((uint32)1 << (int)(27)))) != 0;
-                    rel.Value.Type = (uint8)((uint32)(((ri.Symnum >> (int)(28))) & ((1 << (int)(4)) - 1)));
+                    rel.Value.Value = (uint32)(ri.Symnum & ((1 << 24) - 1));
+                    rel.Value.Pcrel = (uint32)(ri.Symnum & ((uint32)1 << 24)) != 0;
+                    rel.Value.Len = (uint8)((uint32)((ri.Symnum >> 25) & ((1 << 2) - 1)));
+                    rel.Value.Extern = (uint32)(ri.Symnum & ((uint32)1 << 27)) != 0;
+                    rel.Value.Type = (uint8)((uint32)((ri.Symnum >> 28) & ((1 << 4) - 1)));
                 }
                 else if (AreEqual(exprᴛ1, binary.BigEndian)) {
                     rel.Value.Addr = ri.Addr;
-                    rel.Value.Value = (ri.Symnum >> (int)(8));
-                    rel.Value.Pcrel = (uint32)(ri.Symnum & (((uint32)1 << (int)(7)))) != 0;
-                    rel.Value.Len = (uint8)((uint32)(((ri.Symnum >> (int)(5))) & ((1 << (int)(2)) - 1)));
-                    rel.Value.Extern = (uint32)(ri.Symnum & (((uint32)1 << (int)(4)))) != 0;
-                    rel.Value.Type = (uint8)((uint32)(ri.Symnum & ((1 << (int)(4)) - 1)));
+                    rel.Value.Value = ri.Symnum >> 8;
+                    rel.Value.Pcrel = (uint32)(ri.Symnum & ((uint32)1 << 7)) != 0;
+                    rel.Value.Len = (uint8)((uint32)((ri.Symnum >> 5) & ((1 << 2) - 1)));
+                    rel.Value.Extern = (uint32)(ri.Symnum & ((uint32)1 << 4)) != 0;
+                    rel.Value.Type = (uint8)((uint32)(ri.Symnum & ((1 << 4) - 1)));
                 }
                 else { /* default: */
                     throw panic("unreachable");
@@ -631,7 +631,7 @@ internal static @string cstring(slice<byte> b) {
     if (i == -1) {
         i = len(b);
     }
-    return ((@string)(b.slice(0, i)));
+    return (@string)(b.slice(0, i));
 }
 
 // Segment returns the first Segment with the given name, or nil if no such segment exists.

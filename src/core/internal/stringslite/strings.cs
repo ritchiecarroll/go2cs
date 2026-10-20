@@ -98,7 +98,7 @@ public static nint Index(@string s, @string substr) {
         }
         i++;
         fails++;
-        if (fails >= 4 + (i >> (int)(4)) && i < t) {
+        if (fails >= 4 + (i >> 4) && i < t) {
             // See comment in ../bytes/bytes.go.
             nint j = bytealg.IndexRabinKarp(s.slice(i), substr);
             if (j < 0) {

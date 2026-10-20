@@ -176,7 +176,7 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
     }
 }
 
-internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)nil)).Elem();
+internal static reflectliteꓸType errorType = reflectlite.TypeOf((ж<error>)nil).Elem();
 
 // AsType finds the first error in err's tree that matches the type E, and
 // if one is found, returns that error value and true. Otherwise, it

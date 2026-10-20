@@ -48,7 +48,7 @@ internal static error errorf(@string format, params ꓸꓸꓸany aʗp) {
     p.Value.wrapErrs = true;
     p.doPrintf(format, a);
     ref var s = ref heap<@string>(out var Ꮡs);
-    s = ((@string)(slice<byte>)(~p).buf);
+    s = (@string)(slice<byte>)(~p).buf;
     error err = default!;
     switch (len((~p).wrappedErrs)) {
     case 0: {

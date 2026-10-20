@@ -64,7 +64,7 @@ partial struct PrivateKey /*[]byte*/;
 public static cryptoꓸPublicKey Public(this PrivateKey priv) {
     var publicKey = new slice<byte>(PublicKeySize);
     copy(publicKey, priv[32..]);
-    return ((PublicKey)publicKey);
+    return (PublicKey)publicKey;
 }
 
 // Equal reports whether priv and x have the same value.

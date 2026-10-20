@@ -52,7 +52,7 @@ public static void TestMetaDataEmptyPackage(ж<testing.T> Ꮡt) {
     }
     var nf = dec.NumFuncs();
     if (nf != 0) {
-        Ꮡt.Errorf("dec.NumFuncs(): got %d want %d"u8, nf, (nint)(0));
+        Ꮡt.Errorf("dec.NumFuncs(): got %d want %d"u8, nf, (nint)0);
     }
     @string pp = dec.PackagePath();
     if (pp != p) {
@@ -92,7 +92,7 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> Ꮡt) {
     );
     nuint idx = b.AddFunc(f1);
     if (idx != 0) {
-        Ꮡt.Errorf("b.AddFunc(f1) got %d want %d"u8, idx, (nint)(0));
+        Ꮡt.Errorf("b.AddFunc(f1) got %d want %d"u8, idx, (nint)0);
     }
 
     var f2 = new coverage.FuncDesc(
@@ -106,7 +106,7 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> Ꮡt) {
     );
     idx = b.AddFunc(f2);
     if (idx != 1) {
-        Ꮡt.Errorf("b.AddFunc(f2) got %d want %d"u8, idx, (nint)(0));
+        Ꮡt.Errorf("b.AddFunc(f2) got %d want %d"u8, idx, (nint)0);
     }
 
     // Emit into a writer.
@@ -121,7 +121,7 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> Ꮡt) {
     }
     var nf = dec.NumFuncs();
     if (nf != 2) {
-        Ꮡt.Errorf("dec.NumFuncs(): got %d want %d"u8, nf, (nint)(2));
+        Ꮡt.Errorf("dec.NumFuncs(): got %d want %d"u8, nf, (nint)2);
     }
 
     @string gotpp = dec.PackagePath();

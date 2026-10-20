@@ -389,7 +389,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
                 b[w] = b[i];
                 w++;
             }
-            ts.Value.Name = ((@string)(s.name.slice(0, w)));
+            ts.Value.Name = (@string)(s.name.slice(0, w));
             break;
         }
         case (rune)'z' or (rune)'Z': {
