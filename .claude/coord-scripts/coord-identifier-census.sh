@@ -3067,6 +3067,14 @@ idc_mode_selftest() {
     idc_st_exc "  and BOTH were admitted AS DOC CONSTANTS"        "ipv4|doc-constant" "$IDC_TMP/st.status"
     # ⚠ THE BOUND, in the gate's own mode: a quad ONE COMPONENT off a declared constant is not one.
     printf 'the address %d.%d.%d.%d answered\n' 127 0 0 2                 > "$d/p18c"; idc_st_case "STRICT still refuses a quad one component off" "ipv4" "$d/p18c" 1
+    # 2026-10-19: CONTIGUOUS NETMASKS joined the declared set (Go's net test tables carry them, and a
+    # corpus-wide seat re-emits those lines). Both directions in the gate's own mode: a /26 and an
+    # octet-boundary /16 pass AS DOC CONSTANTS; a NON-contiguous last octet (a host, not a mask) and a
+    # mask-shaped head with a host tail still refuse.
+    printf 'the mask %d.%d.%d.%d and %d.%d.%d.%d appear\n' 255 255 255 192 255 255 0 0 > "$d/p18d"; idc_st_case "STRICT admits a contiguous netmask" "" "$d/p18d" 1
+    idc_st_exc "  and the netmasks were admitted AS DOC CONSTANTS" "ipv4|doc-constant" "$IDC_TMP/st.status"
+    printf 'the address %d.%d.%d.%d answered\n' 255 255 255 193           > "$d/p18e"; idc_st_case "STRICT still refuses a non-contiguous mask-like quad" "ipv4" "$d/p18e" 1
+    printf 'the address %d.%d.%d.%d answered\n' 255 255 192 7             > "$d/p18f"; idc_st_case "STRICT still refuses a mask head with a host tail"   "ipv4" "$d/p18f" 1
 
     echo
     echo "  A2. THE RELEASE-LITERAL ADMIT -- BOTH DIRECTIONS, IN THE GATE'S OWN MODE (STRICT)"
