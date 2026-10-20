@@ -27581,4 +27581,63 @@ known comparable right-hand type), not the pre-pay's: the pre-pay only builds th
 
 — P2 (measured 2026-10-20)
 
+## 2026-10-20 — P2 finding: a process's first read deadline returned 9-11 ms late under the JIT and 6-8 ms under ReadyToRun, because the deadline path compiled on its way out — FIXED (claude/p2-deadline-prepay)
+
+Go's first deadline is as prompt as its later ones (0.3-0.5 ms late on linux). Here the first one paid for compiling
+the arm, park, fire and return paths, and under ReadyToRun for the golib generics instantiated over another
+assembly's types that ReadyToRun does not pregenerate (the `fd.fdmu` field view) and for io's package-init boxes.
+Bisected with the first-deadline probe (claude/p2-first-deadline-probe) and a JIT-summary list of every method
+compiled between arming and return. As ruled (COORD 2026-10-20 05:00Z and 08:28Z), the poller's start
+(`runtime_pollServerInit`, all three seams) now pays it once: `PrepareMethod` over the named methods, three calls on
+a spare never-opened FD, io's package init, one no-op runtime timer, and an os hook for os's part
+(`deadline_prepay_impl.cs` in internal/poll and in os). It runs synchronously: run on a background thread it took
+the cost off FD.Init but left the first deadline 3.9-5.4 ms late when armed right after the poller started.
+Linux, three interleaved processes per arm, A1 late in ms (Go 0.4-0.5): no pre-pay JIT 8.9-10.8, R2R 6.1-7.6; sync
+JIT 0.9-1.6, R2R 0.3-0.6; async JIT 4.9-5.4, R2R 3.9-5.3. Cost: the first pollable FD.Init takes about 10 ms longer
+under both the JIT and ReadyToRun (first Read medians 44.3 to 53.8 ms JIT, 31.1 to 40.6 ms R2R), once per process
+and only in a process that opens a pollable descriptor. Native AOT is unaffected (nothing runs).
+
+— P2 (found and fixed 2026-10-20)
+
+**Amended 2026-10-20 (G's review of dd65b04763).** Windows read the first cut short of the bar (JIT, A1 late in ms):
+cold Go 0.0-0.6, no pre-pay 7.8-8.7, pre-pay 3.6-5.1; after a first completion Go 0.2-0.8, no pre-pay 4.6-5.4, pre-pay
+2.3-2.6. On windows the wake is followed by a cancel and an aborted completion that the first cut did not cover, so
+the windows seam now pre-pays them too (`windows/deadline_prepay_windows_impl.cs`). And because nothing guarded the
+pre-pay, a throwing hook made the first pollable FD.Init fail and skipped every later hook; this package's part, the
+windows part and each hook now run in their own try (red at dd65b04763 with a planted throwing hook, green after).
+The windows reading of the amended cut is owed by a windows host. Until it lands this row stays FIXED on linux only.
+
+**Amended 2026-10-20 (the i9's windows reading of 895445983a).** A1 moved but still missed: cold Go 0.6-0.7, C#
+6.2-7.8 (was 7.0-10.7); after a first completion Go 0.4-0.8, C# 1.3-3.4 (was 5.3-7.2). Its JIT list named 24 methods
+still compiled between the fire and the return: the timer callback, the completion callback and readiness sink, the
+overlapped field view's equality, the operation table's lookups, the inline-array helpers SyscallN's callers build,
+errnoErr, the poll error codes, the errno getters, the pinner's unpin, and a reflection invoke stub for
+`Errno.op_Equality` (its per-call cost has its own row, branch claude/p2-errno-equality). The pre-pay now reaches them: the parts
+private to syscall and internal/syscall/windows register with golib's `GoAsyncIO.AddDeadlinePathPrepay` (which also
+replaces internal/poll's public hook event), the timer callback and readiness sink are named so they can be
+prepared, and the windows part touches the rest on spare values. Windows reading owed again.
+
+**Amended 2026-10-20 (the i9's windows reading of 4f9377add3).** After a first completion A1 now meets the bar (0.4-0.7,
+Go 0.6-1.2); cold it still misses (4.2-4.8, Go 0.2-0.8), with only 4 small compiles left in the window. Since one real
+completion first removes the lag, the windows pre-pay now also makes one (a one-byte write and read on a private
+named pipe pair, closed before it returns), to be kept only if the windows reading brings cold A1 within about 1 ms;
+otherwise the residue is recorded here as the runtime's first-completion cost.
+
+**Amended 2026-10-20 (the i9's windows reading of 8967b1b1da).** The real completion closed the gap, so it stays
+(COORD's ruling, 17:14Z). Windows, JIT, Go and the two cuts interleaved, three rounds per mode, every run exit 0, no
+hang. Cold A1 late in ms: Go 0.7-0.9, 4f9377add3 1.8-2.9, 8967b1b1da 0.4-1.2; after a first completion it stays at Go's
+level. Cost: about 8.5 ms added to the first pollable FD.Init on windows (the probe's cold setup, which opens the
+first pipe pair, 29.1-29.9 ms against 20.3-21.5), once per process. A process whose first I/O is a real completion pays
+about the same either way (the probe's first write and read, 31.7-32.1 ms against 30.7-31.3), so for it the cost moves
+to FD.Init rather than adding to it. The JIT list shows the step running end to end inside the pre-pay, through waitIO
+and the completion callback. The cost is documented beside the pre-pay. This row is now FIXED on linux and windows.
+
+**Amended 2026-10-20 (G's review of the completion step).** G found the step safe as written and asked for one fix:
+nothing bounded its write and read, so a completion that never arrived (an I/O-intercepting filter, say) would hang
+the first FD.Init of every process that does I/O. Both now carry a deadline one second out, which never fires on the
+normal path; where the I/O is held, the deadline cancels it as any deadline does and the step gives up. A port that
+never posts even the cancelled operation's completion still hangs it, as it hangs every deadline in the program. The
+pipe also takes an owner-only security descriptor (`D:P(A;;GA;;;OW)`) in place of the default, which lets Everyone
+read it (COORD's ruling, defense in depth). Neither is measured here: the i9's smoke run of the probe is owed.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
