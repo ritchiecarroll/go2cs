@@ -396,12 +396,12 @@ internal static (bool fipsApproved, error err) checkPublicKey(ref ΔPublicKey pu
     }
     // e needs to be coprime with p-1 and q-1, since it must be invertible
     // modulo λ(pq). Since p and q are prime, this means e needs to be odd.
-    if ((nint)(pub.E & 1) == 0) {
+    if ((pub.E & 1) == 0) {
         return (false, errors.New(cryptoRsaPublicExponentˢ2));
     }
     // FIPS 186-5, Section 5.5(e): "The exponent e shall be an odd, positive
     // integer such that 2¹⁶ < e < 2²⁵⁶."
-    if (pub.E <= (1 << (int)(16))) {
+    if (pub.E <= 1 << 16) {
         fipsApproved = false;
     }
     // We require pub.E to fit into a 32-bit integer so that we

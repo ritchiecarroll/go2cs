@@ -379,7 +379,7 @@ internal static float64 sinPi(float64 x) {
             if (x < Two52) {
                 z = x + Two52; // exact
             }
-            n = (nint)((uint64)(1 & Float64bits(z)));
+            n = (nint)(1 & Float64bits(z));
             x = (float64)n;
             n <<= (int)(2);
         }

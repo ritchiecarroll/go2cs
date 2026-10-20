@@ -25,16 +25,16 @@ internal static void Main() {
     try {
         fmt.Println(fmt.Sprintf("xxx"u8));
         @string dynamic = "dyn %d";
-        fmt.Println(fmt.Sprintf(dynamic, (nint)(1)));
+        fmt.Println(fmt.Sprintf(dynamic, (nint)1));
         var b = slice<byte>("from bytes %d"u8);
-        fmt.Println(fmt.Sprintf(((@string)b), (nint)(2)));
+        fmt.Println(fmt.Sprintf((@string)b, (nint)2));
         fmt.Println(fmt.Sprintf("con"u8 + "cat %s"u8, "ok"));
-        fmt.Printf("printf %v %q\n"u8, (nint)(3), "q");
+        fmt.Printf("printf %v %q\n"u8, (nint)3, "q");
 
         Funcꓸꓸꓸ<@string, any, @string> f = fmt.Sprintfᶠ;
         fmt.Println(f("via local %s"u8, (@string)"ok"u8));
         var table = new map<@string, any>{["printf"] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ))};
-        fmt.Println(table["printf"]._<Funcꓸꓸꓸ<@string, any, @string>>()("via table %d", (nint)(4)));
+        fmt.Println(table["printf"]._<Funcꓸꓸꓸ<@string, any, @string>>()("via table %d", (nint)4));
         fmt.Println(apply(fmt.Sprintfᶠ, "via argument %s"));
 
         var p1 = reflect.ValueOf(fmt.Sprintfᶠ).Pointer();
@@ -46,11 +46,11 @@ internal static void Main() {
         var (count, err) = fmt.Sscanf("42"u8, "%d"u8, Ꮡn);
         fmt.Println(count, err, n);
         fmt.Println(fmt.Errorf("wrapped: %w"u8, errors.New("inner")));
-        fmt.Println(((@string)fmt.Appendf(default!, "appended %d"u8, (nint)(6))));
+        fmt.Println((@string)fmt.Appendf(default!, "appended %d"u8, (nint)6));
         fmt.Println(utf8.RuneCountInString(hLloˢ));
         var (r, size) = utf8.DecodeRuneInString("é!"u8);
         fmt.Println(r, size);
-        fmt.Printf("%x %X %08b %5.2f|%-6s|%6s|\n"u8, (nint)(255), "hi", (nint)(5), 3.14159D, "left", "right");
+        fmt.Printf("%x %X %08b %5.2f|%-6s|%6s|\n"u8, (nint)255, "hi", (nint)5, 3.14159D, "left", "right");
 
         defer((ᴛ1, ᴛ2) => fmt.Printf(ᴛ1, ᴛ2), (@string)"deferred %s\n", printfˢ, ref ᒐ);
         fmt.Println("done");

@@ -198,7 +198,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
             tΔ4.Fatal(goBuildinfNotFoundˢ);
         }
         var verLen = data.slice(i + 32);
-        binary.PutUvarint(verLen, ((uint64)16 << (int)(40))); // 16TB ought to be enough for anyone.
+        binary.PutUvarint(verLen, (uint64)16 << 40); // 16TB ought to be enough for anyone.
         {
             var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != default!) {
                 tΔ4.Fatal(errΔ1);

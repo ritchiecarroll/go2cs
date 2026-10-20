@@ -395,7 +395,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
                 check.files = append(check.files, @file);
             }
             else if (!matchᴛ1) { /* default: */
-                Ꮡcheck.errorf(((atPos)(~@file).Package), MismatchedPkgName, "package %s; expected package %s"u8, name, (~pkg).name);
+                Ꮡcheck.errorf((atPos)(~@file).Package, MismatchedPkgName, "package %s; expected package %s"u8, name, (~pkg).name);
                 // ignore this file
             }
         }
@@ -434,7 +434,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
                 // downgrade to a version before go1.22, where the for loop semantics
                 // change was made, while being backwards compatible with versions of
                 // go before the new //go:build semantics were introduced.
-                v = ((@string)versionMax(fileVersion, go1_21));
+                v = (@string)versionMax(fileVersion, go1_21);
 
                 // Report a specific error for each tagged file that's too new.
                 // (Normally the build system will have filtered files by version,
@@ -577,7 +577,7 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
             if (atomic.AddInt32(Ꮡ_aliasAny, -1) >= 0) {
                 throw panic("!EnableAlias set while EnableAlias type checking is ongoing");
             }
-            defer(atomic.AddInt32, Ꮡ_aliasAny, (int32)(1), ref ᒐ);
+            defer(atomic.AddInt32, Ꮡ_aliasAny, (int32)1, ref ᒐ);
         }
 
         void print(@string msg) {

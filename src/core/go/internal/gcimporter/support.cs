@@ -59,7 +59,7 @@ internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line
     }
 
     // Return a fake position assuming that f.file consists only of newlines.
-    return ((tokenꓸPos)((~f).@file.Base() + line - 1));
+    return (tokenꓸPos)((~f).@file.Base() + line - 1);
 }
 
 internal static void setLines(this ref fakeFileSet s) {

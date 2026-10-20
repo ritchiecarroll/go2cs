@@ -54,9 +54,9 @@ internal static void Main() {
     fmt.Println(nbs, nrs);
 
     @string plainVar = "abc";
-    fmt.Println(((namedByteSlice)widen<byte, namedByte>(slice<byte>(plainVar), elemᴛ0 => (namedByte)elemᴛ0)), ((plainByteSlice)slice<byte>(plainVar)));
+    fmt.Println(((namedByteSlice)widen<byte, namedByte>(slice<byte>(plainVar), elemᴛ0 => (namedByte)elemᴛ0)), (plainByteSlice)slice<byte>(plainVar));
 
-    fmt.Println(((namedByteSlice)widen<byte, namedByte>(slice<byte>((@string)ns), elemᴛ0 => (namedByte)elemᴛ0)), ((plainByteSlice)slice<byte>((@string)ns)));
+    fmt.Println(((namedByteSlice)widen<byte, namedByte>(slice<byte>((@string)ns), elemᴛ0 => (namedByte)elemᴛ0)), (plainByteSlice)slice<byte>((@string)ns));
 
     fmt.Println(takesNamedBytes(widen<byte, namedByte>(slice<byte>((@string)"wxyz"u8), elemᴛ0 => (namedByte)elemᴛ0)));
 
@@ -75,8 +75,8 @@ internal static void Main() {
     fmt.Println(slice<byte>("lit"u8));
     fmt.Println(slice<byte>(plain));
     fmt.Println(slice<rune>(plain));
-    var pbs = ((plainByteSlice)slice<byte>((@string)"abc"u8));
-    fmt.Println(pbs, ((@string)(slice<byte>)pbs));
+    var pbs = (plainByteSlice)slice<byte>((@string)"abc"u8);
+    fmt.Println(pbs, (@string)(slice<byte>)pbs);
 }
 
 } // end main_package

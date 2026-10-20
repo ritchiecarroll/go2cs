@@ -793,7 +793,7 @@ func (v *Visitor) shiftCountUint64Operand(expr ast.Expr, converted string) strin
 		return fmt.Sprintf("ConvertToUInt64<%s>(%s)", v.getCSharpTypeName(tp), converted)
 	}
 
-	return fmt.Sprintf("(%s)(%s)", width, converted)
+	return castOf(width, converted)
 }
 
 // shiftCountIsSigned reports whether a shift count is a non-constant signed integer, the one kind of
@@ -1898,12 +1898,17 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				return v.emitGuardedShift(binaryExpr, leftOperand, rightOperand, binaryOp, basic)
 			}
 
-			rightOperand = v.intCastOperand(binaryExpr.Y, rightOperand)
+			// A literal count C# already reads as `int` is written as Go writes it, `x << 8`. The guard above has
+			// taken every constant count that reaches the operand's width, so this one is below it.
+			if !shiftCountIsIntLiteral(binaryExpr.Y) {
+				rightOperand = v.intCastOperand(binaryExpr.Y, rightOperand)
+			}
 
 			// Go's shift operators bind at the multiplicative level (tighter than `+`/`-`),
 			// but C#'s `<<`/`>>` bind looser than the additive operators. So Go's
 			// `x>>4 + x` (meaning `(x>>4) + x`) would re-associate in C# as `x >> (4 + x)`.
-			// Parenthesize the shift so the original grouping is preserved in every context.
+			// The shift is built parenthesized, which every cast below relies on; an enclosing operator
+			// drops parentheses it does not need when it composes its operands (unparenthesizedOperand).
 			shiftExpr := fmt.Sprintf("(%s %s %s)", leftOperand, binaryOp, rightOperand)
 
 			// When the shifted (left) operand is an untyped constant — `1 << k` — Go gives the
@@ -2111,11 +2116,11 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			if operandCast := v.concreteNumericCSType(binaryType); operandCast != "" &&
 				binaryTypeName != "nuint" && binaryTypeName != "nint" && binaryTypeName != "uintptr" {
 				if arithConstOperand(binaryExpr.X) {
-					leftOperand = fmt.Sprintf("(%s)(%s)", operandCast, leftOperand)
+					leftOperand = castOf(operandCast, leftOperand)
 				}
 
 				if arithConstOperand(binaryExpr.Y) {
-					rightOperand = fmt.Sprintf("(%s)(%s)", operandCast, rightOperand)
+					rightOperand = castOf(operandCast, rightOperand)
 				}
 			}
 
@@ -2149,7 +2154,24 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				}
 			}
 
-			return fmt.Sprintf("(%s)(%s)", binaryTypeName, v.joinWithOperandComments(binaryExpr, leftOperand, binaryOp, rightOperand))
+			// The result cast exists for the types C# promotes (a sub-int operand computes in `int`) and for operands
+			// C# types differently from Go; where C# already types the result as Go's, it is dropped
+			// (bitwiseResultCastRedundant), and the operands shed parentheses C# does not need.
+			composedLeft := unparenthesizedOperand(leftOperand, binaryExpr.X, binaryExpr.Op, false)
+			composedRight := rightOperand
+
+			// The right operand of `&^` renders after `~`, which binds to its first token only.
+			if binaryExpr.Op != token.AND_NOT {
+				composedRight = unparenthesizedOperand(rightOperand, binaryExpr.Y, binaryExpr.Op, true)
+			}
+
+			composed := v.joinWithOperandComments(binaryExpr, composedLeft, binaryOp, composedRight)
+
+			if v.bitwiseResultCastRedundant(binaryExpr, binaryTypeName, leftOperand, rightOperand) {
+				return "(" + composed + ")"
+			}
+
+			return fmt.Sprintf("(%s)(%s)", binaryTypeName, composed)
 		}
 
 		// ARITHMETIC only. When one operand references a *named* untyped numeric constant and the
@@ -2223,7 +2245,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				if folded := v.foldedNamedFloatConstLiteral(binaryExpr.X, tn); folded != "" {
 					leftOperand = folded
 				} else if v.needsParentheses(binaryExpr.X) {
-					leftOperand = fmt.Sprintf("(%s)(%s)", tn, leftOperand)
+					leftOperand = castOf(tn, leftOperand)
 				} else {
 					leftOperand = fmt.Sprintf("(%s)%s", tn, leftOperand)
 				}
@@ -2233,7 +2255,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				if folded := v.foldedNamedFloatConstLiteral(binaryExpr.Y, tn); folded != "" {
 					rightOperand = folded
 				} else if v.needsParentheses(binaryExpr.Y) {
-					rightOperand = fmt.Sprintf("(%s)(%s)", tn, rightOperand)
+					rightOperand = castOf(tn, rightOperand)
 				} else {
 					rightOperand = fmt.Sprintf("(%s)%s", tn, rightOperand)
 				}
@@ -2277,7 +2299,9 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			}
 		}
 
-		return v.joinWithOperandComments(binaryExpr, leftOperand, binaryOp, rightOperand)
+		return v.joinWithOperandComments(binaryExpr,
+			unparenthesizedOperand(leftOperand, binaryExpr.X, binaryExpr.Op, false), binaryOp,
+			unparenthesizedOperand(rightOperand, binaryExpr.Y, binaryExpr.Op, true))
 	}
 
 	// Handle start of pattern match expression with "is" keyword. Go's `!=` has no C# pattern

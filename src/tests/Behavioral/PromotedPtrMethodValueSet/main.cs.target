@@ -141,7 +141,7 @@ internal static void Main() {
     if (ok) {
         var buf = new slice<byte>(6);
         var (n, _) = r.Read(buf);
-        fmt.Printf("Read via io.Reader = %q\n"u8, ((@string)(buf.slice(0, n))));
+        fmt.Printf("Read via io.Reader = %q\n"u8, (@string)(buf.slice(0, n)));
     }
 }
 

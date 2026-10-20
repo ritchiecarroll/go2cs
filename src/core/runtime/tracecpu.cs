@@ -149,9 +149,9 @@ internal static bool traceReadCPU(uintptr gen) {
         // Deserialize the data in the profile buffer.
         var recordLen = data[0];
         var timestamp = data[1];
-        var ppid = (data[2] >> (int)(1));
+        var ppid = data[2] >> 1;
         {
-            var hasP = ((uint64)(data[2] & 0b1)) != 0; if (!hasP) {
+            var hasP = (data[2] & 0b1) != 0; if (!hasP) {
                 ppid = ~(uint64)0;
             }
         }
@@ -276,7 +276,7 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
     if (Ꮡpp != nil){
         // Overflow records in profBuf have all header values set to zero. Make
         // sure that real headers have at least one bit set.
-        hdr[0] = (uint64)(((uint64)pp.id << (int)(1)) | 0b1);
+        hdr[0] = (uint64)pp.id << 1 | 0b1;
     } else {
         hdr[0] = 0b10;
     }

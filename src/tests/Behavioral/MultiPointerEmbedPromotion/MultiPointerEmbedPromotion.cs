@@ -43,7 +43,7 @@ internal static error Close(this ref writer w) {
 }
 
 internal static @string String(this ref writer w) {
-    return ((@string)w.@out);
+    return (@string)w.@out;
 }
 
 partial struct duplex {
@@ -90,7 +90,7 @@ internal static void Main() {
 
     var buf = new slice<byte>(5);
     var (n, err) = rwc.Read(buf);
-    fmt.Println("read:", n, ((@string)(buf.slice(0, n))), err == default!);
+    fmt.Println("read:", n, (@string)(buf.slice(0, n)), err == default!);
 
     (n, err) = rwc.Write(buf.slice(0, n));
     fmt.Println("write:", n, err == default!);

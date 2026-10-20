@@ -84,7 +84,7 @@ internal static (@string, error) localize(@string path) {
                 buf[i] = (rune)'\\';
             }
         }
-        path = ((@string)buf);
+        path = (@string)buf;
     }
     return (path, default!);
 }

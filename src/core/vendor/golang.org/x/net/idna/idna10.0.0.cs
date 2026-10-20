@@ -591,7 +591,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
             b = norm.NFC.Bytes(b);
         }
         // TODO: the punycode converters require strings as input.
-        s = ((@string)b);
+        s = (@string)b;
     }
     return (s, bidi, err);
 }
@@ -786,7 +786,7 @@ internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
     var trie = p.trie; // p.checkJoiners is only set if trie is set.
     // TODO: merge the use of this in the trie.
     var (v, sz) = trie.lookupString(s);
-    var x = ((info)v);
+    var x = (info)v;
     if (x.isModifier()) {
         return new labelErrorжerror(Ꮡ(new labelError(s, "V5"u8)));
     }
@@ -813,7 +813,7 @@ internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
             }
         }
         (v, sz) = trie.lookupString(s.slice(i));
-        x = ((info)v);
+        x = (info)v;
     }
     if (st == stateFAIL || st == stateAfter) {
         return new labelErrorжerror(Ꮡ(new labelError(s, "C"u8)));

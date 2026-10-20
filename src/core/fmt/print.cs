@@ -98,7 +98,7 @@ public static @string FormatString(State state, rune verb) {
         }
     }
     b = utf8.AppendRune(b, verb);
-    return ((@string)b);
+    return (@string)b;
 }
 
 // Use simple []byte instead of bytes.Buffer to avoid large dependency.
@@ -256,7 +256,7 @@ public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintf(format, a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
@@ -306,7 +306,7 @@ public static @string Sprint(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrint(a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
@@ -359,7 +359,7 @@ public static @string Sprintln(params ꓸꓸꓸany aʗp) {
 
     var p = newPrinter();
     p.doPrintln(a);
-    @string s = ((@string)(slice<byte>)(~p).buf);
+    @string s = (@string)(slice<byte>)(~p).buf;
     p.free();
     return s;
 }
@@ -658,7 +658,7 @@ internal static void fmtBytes(this ж<pp> Ꮡp, slice<byte> v, rune verb, sstrin
         break;
     }
     case (rune)'q': {
-        p.fmt.fmtQ(((@string)v));
+        p.fmt.fmtQ((@string)v);
         break;
     }
     default: {

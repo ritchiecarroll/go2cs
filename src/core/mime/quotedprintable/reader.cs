@@ -60,7 +60,7 @@ internal static (byte b, error err) readHexByte(slice<byte> v) {
             return (0, err);
         }
     }
-    return ((byte)((byte)(hb << (int)(4)) | lb), default!);
+    return ((byte)((byte)(hb << 4) | lb), default!);
 }
 
 internal static bool isQPDiscardWhitespace(rune r) {

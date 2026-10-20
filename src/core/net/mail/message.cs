@@ -758,7 +758,7 @@ continue_Loop:;
     }
 break_Loop:;
     p.s = p.s.slice(i + 1);
-    return (((@string)qsb), default!);
+    return ((@string)qsb, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1017,7 +1017,7 @@ internal static ref mime.WordDecoder rfc2047Decoder => ref Ꮡrfc2047Decoder.Val
 partial struct charsetError /*@string*/;
 
 internal static @string Error(this charsetError e) {
-    return fmt.Sprintf("charset not supported: %q"u8, ((@string)e));
+    return fmt.Sprintf("charset not supported: %q"u8, (@string)e);
 }
 
 // isAtext reports whether r is an RFC 5322 atext character.

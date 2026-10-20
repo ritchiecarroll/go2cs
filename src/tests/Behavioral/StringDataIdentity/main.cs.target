@@ -12,7 +12,7 @@ internal static void Main() {
     fmt.Println(@unsafe.StringData(s) == @unsafe.StringData(t));
     fmt.Println(@unsafe.StringData(s) == @unsafe.StringData(s));
 
-    @string u = ((@string)append(slice<byte>(default!), s.ꓸꓸꓸ));
+    @string u = (@string)append(slice<byte>(default!), s.ꓸꓸꓸ);
     fmt.Println(@unsafe.StringData(s) == @unsafe.StringData(u));
     fmt.Println(s == u);
 

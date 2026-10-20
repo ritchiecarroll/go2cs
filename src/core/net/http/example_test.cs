@@ -81,7 +81,7 @@ internal static readonly @string usrShareDocˢ = "/usr/share/doc"u8;
 
 public static void ExampleFileServer() {
     // Simple static webserver:
-    log.Fatal(Δhttp.ListenAndServe(":8080"u8, Δhttp.FileServer(((Δhttp.Dir)(@string)usrShareDocˢ))));
+    log.Fatal(Δhttp.ListenAndServe(":8080"u8, Δhttp.FileServer((Δhttp.Dir)(@string)usrShareDocˢ)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -92,14 +92,14 @@ public static void ExampleFileServer_stripPrefix() {
     // To serve a directory on disk (/tmp) under an alternate URL
     // path (/tmpfiles/), use StripPrefix to modify the request
     // URL's path before the FileServer sees it:
-    Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer(((Δhttp.Dir)(@string)tmpˢ))));
+    Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer((Δhttp.Dir)(@string)tmpˢ)));
 }
 
 public static void ExampleStripPrefix() {
     // To serve a directory on disk (/tmp) under an alternate URL
     // path (/tmpfiles/), use StripPrefix to modify the request
     // URL's path before the FileServer sees it:
-    Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer(((Δhttp.Dir)(@string)tmpˢ))));
+    Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer((Δhttp.Dir)(@string)tmpˢ)));
 }
 
 partial struct apiHandler {

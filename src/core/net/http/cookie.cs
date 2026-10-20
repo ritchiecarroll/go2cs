@@ -628,7 +628,7 @@ internal static @string sanitizeOrWarn(@string fieldName, Func<byte, bool> valid
             }
         }
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // parseCookieValue parses a cookie value according to RFC 6265.

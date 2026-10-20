@@ -279,7 +279,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
             return;
         }
         uintptr nΔ1 = default!;
-        for (nΔ1 = ((uintptr)4 << (int)(10)); nΔ1 < size; nΔ1 <<= (int)(1)) {
+        for (nΔ1 = (uintptr)4 << 10; nΔ1 < size; nΔ1 <<= (int)(1)) {
             var errΔ1 = mincore((@unsafe.Pointer)((uintptr)Δp + nΔ1), 1, Ꮡaddrspace_vec.at<byte>(0));
             if (errΔ1 == 0) {
                 physPageSize = nΔ1;
@@ -357,7 +357,7 @@ internal static uintptr getHugePageSize() {
     if (err != default! || v < 0) {
         v = 0;
     }
-    if ((nint)(v & (v - 1)) != 0) {
+    if ((v & (v - 1)) != 0) {
         // v is not a power of 2
         return 0;
     }
@@ -521,7 +521,7 @@ internal static void setsig(uint32 i, uintptr fn) {
 internal static void setsigstack(uint32 i) {
     ref var sa = ref heap(new sigactiont(), out var Ꮡsa);
     sigaction(i, nil, Ꮡsa);
-    if ((uint64)(sa.sa_flags & (uint64)_SA_ONSTACK) != 0) {
+    if ((sa.sa_flags & (uint64)_SA_ONSTACK) != 0) {
         return;
     }
     sa.sa_flags |= (uint64)(_SA_ONSTACK);

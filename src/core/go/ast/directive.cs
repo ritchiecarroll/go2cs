@@ -99,7 +99,7 @@ public static tokenꓸPos Pos(this ref Directive d) {
 }
 
 public static tokenꓸPos End(this ref Directive d) {
-    return ((tokenꓸPos)((nint)d.ArgsPos + len(d.Args)));
+    return (tokenꓸPos)((nint)d.ArgsPos + len(d.Args));
 }
 
 // A DirectiveArg is an argument to a directive comment.

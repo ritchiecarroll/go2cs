@@ -87,18 +87,18 @@ internal static void blockGeneric(ref Digest dig, slice<byte> p) {
         foreach (var i in range(64)) {
             if (i < 16){
                 nint j = i * 4;
-                w[i] = (uint32)((uint32)((uint32)(((uint32)p[j] << (int)(24)) | ((uint32)p[j + 1] << (int)(16))) | ((uint32)p[j + 2] << (int)(8))) | (uint32)p[j + 3]);
+                w[i] = (uint32)p[j] << 24 | (uint32)p[j + 1] << 16 | (uint32)p[j + 2] << 8 | (uint32)p[j + 3];
             } else {
                 var v1 = w[i - 2];
-                var t1Δ1 = (uint32)((uint32)((bits.RotateLeft32(v1, -17)) ^ (bits.RotateLeft32(v1, -19))) ^ ((v1 >> (int)(10))));
+                var t1Δ1 = (bits.RotateLeft32(v1, -17)) ^ (bits.RotateLeft32(v1, -19)) ^ (v1 >> 10);
                 var v2 = w[i - 15];
-                var t2Δ1 = (uint32)((uint32)((bits.RotateLeft32(v2, -7)) ^ (bits.RotateLeft32(v2, -18))) ^ ((v2 >> (int)(3))));
+                var t2Δ1 = (bits.RotateLeft32(v2, -7)) ^ (bits.RotateLeft32(v2, -18)) ^ (v2 >> 3);
                 w[i] = t1Δ1 + w[i - 7] + t2Δ1 + w[i - 16];
             }
 
-            var t1 = h + ((uint32)((uint32)((bits.RotateLeft32(e, -6)) ^ (bits.RotateLeft32(e, -11))) ^ (bits.RotateLeft32(e, -25)))) + ((uint32)(((uint32)(e & f)) ^ ((uint32)(~e & g)))) + _K[i] + w[i];
+            var t1 = h + ((bits.RotateLeft32(e, -6)) ^ (bits.RotateLeft32(e, -11)) ^ (bits.RotateLeft32(e, -25))) + ((e & f) ^ (~e & g)) + _K[i] + w[i];
 
-            var t2 = ((uint32)((uint32)((bits.RotateLeft32(a, -2)) ^ (bits.RotateLeft32(a, -13))) ^ (bits.RotateLeft32(a, -22)))) + ((uint32)((uint32)(((uint32)(a & b)) ^ ((uint32)(a & c))) ^ ((uint32)(b & c))));
+            var t2 = ((bits.RotateLeft32(a, -2)) ^ (bits.RotateLeft32(a, -13)) ^ (bits.RotateLeft32(a, -22))) + ((a & b) ^ (a & c) ^ (b & c));
 
             h = g;
             g = f;

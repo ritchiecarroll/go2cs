@@ -68,7 +68,7 @@ internal static void Main() {
 
         var ifs = true;
         for (var i = (int32)0; i < n; i++) {
-            if ((uint32)(buf[i].ServiceFlags1 & (uint32)syscall.XP1_IFS_HANDLES) == 0) {
+            if ((buf[i].ServiceFlags1 & (uint32)syscall.XP1_IFS_HANDLES) == 0) {
                 ifs = false;
             }
         }

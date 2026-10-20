@@ -403,7 +403,7 @@ internal static readonly @string nameFlagFieldˢ = "name flag field"u8;
 internal static readonly @string nameOffsetFieldˢ = "name offset field"u8;
 
 internal static @string pkgPath(abiꓸName n) {
-    if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << (int)(2)))) == 0) {
+    if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << 2))) == 0) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
@@ -535,20 +535,20 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 // resolveReflectName adds a name to the reflection lookup map in the runtime.
 // It returns a new nameOff that can be used to refer to the pointer.
 internal static aNameOff resolveReflectName(abiꓸName n) {
-    return ((aNameOff)addReflectOff(@unsafe.Pointer.FromPinnedBox(n.Bytes)));
+    return (aNameOff)addReflectOff(@unsafe.Pointer.FromPinnedBox(n.Bytes));
 }
 
 // resolveReflectType adds a *rtype to the reflection lookup map in the runtime.
 // It returns a new typeOff that can be used to refer to the pointer.
 internal static aTypeOff resolveReflectType(ж<abi.Type> Ꮡt) {
-    return ((aTypeOff)addReflectOff(@unsafe.Pointer.FromPinnedBox(Ꮡt)));
+    return (aTypeOff)addReflectOff(@unsafe.Pointer.FromPinnedBox(Ꮡt));
 }
 
 // resolveReflectText adds a function pointer to the reflection lookup map in
 // the runtime. It returns a new textOff that can be used to refer to the
 // pointer.
 internal static aTextOff resolveReflectText(@unsafe.Pointer ptr) {
-    return ((aTextOff)addReflectOff(ptr));
+    return (aTextOff)addReflectOff(ptr);
 }
 
 internal static abiꓸName nameOff(this ж<rtype> Ꮡt, aNameOff off) {
@@ -601,7 +601,7 @@ internal static nint FieldAlign(this ref rtype t) {
 }
 
 internal static ΔKind Kind(this ref rtype t) {
-    return ((ΔKind)(nuint)(uint8)t.t.Kind());
+    return (ΔKind)(nuint)(uint8)t.t.Kind();
 }
 
 internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) {
@@ -1011,7 +1011,7 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
         if (i == 0 || i + 1 >= len(tag) || tag[i] != (rune)':' || tag[i + 1] != (rune)'"') {
             break;
         }
-        @string name = ((@string)(tag.slice(0, i)));
+        @string name = (@string)(tag.slice(0, i));
         tag = tag.slice(i + 1);
 
         // Scan quoted string to find value.
@@ -1025,7 +1025,7 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
         if (i >= len(tag)) {
             break;
         }
-        @string qvalue = ((@string)(tag.slice(0, i + 1)));
+        @string qvalue = (@string)(tag.slice(0, i + 1));
         tag = tag.slice(i + 1);
 
         if (key == name) {
@@ -1055,7 +1055,7 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
     }
     {
         @string tag = (~p).Name.Tag(); if (tag != ""u8) {
-            f.Tag = ((StructTag)tag);
+            f.Tag = (StructTag)tag;
         }
     }
     f.Offset = p.Value.Offset;
@@ -1342,7 +1342,7 @@ internal static uint32 fnv1(uint32 x, params ꓸꓸꓸbyte listʗp) {
     var list = listʗp.sslice();
 
     foreach (var (_, b) in list) {
-        x = (uint32)(x * 16777619 ^ (uint32)b);
+        x = x * 16777619 ^ (uint32)b;
     }
     return x;
 }
@@ -1472,7 +1472,7 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
         nint i = 0;
         nint j = len(offs);
         while (i < j) {
-            nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+            nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
             // i ≤ h < j
             if (!(stringFor(rtypeOff(section, offs[h])) >= s)){
                 i = h + 1; // preserves f(i-1) == false
@@ -1599,7 +1599,7 @@ internal static @string funcStr(ж<funcType> Ꮡft) {
     if (len(@out) > 1) {
         repr = builtin.append(repr, (byte)((rune)')'));
     }
-    return ((@string)repr);
+    return (@string)repr;
 }
 
 // isReflexive reports whether the == operation on the type is reflexive.
@@ -1701,7 +1701,7 @@ internal static void emitGCMask(slice<byte> @out, uintptr @base, ж<abi.Type> �
     var words = typ.Size_ / (uintptr)goarch.PtrSize;
     var mask = typ.GcSlice(0, (ptrs + 7) / 8);
     for (var j = (uintptr)0; j < ptrs; j++) {
-        if ((byte)(((mask[j / 8] >> (int)((j % 8)))) & 1) != 0) {
+        if ((byte)((mask[j / 8] >> (int)((j % 8))) & 1) != 0) {
             for (var i = (uintptr)0; i < n; i++) {
                 var k = @base + i * words + j;
                 @out[k / 8] |= (byte)((byte)(1 << (int)((k % 8))));
@@ -1822,7 +1822,7 @@ internal static (structField, @string) runtimeStructField(StructField field) {
 
     resolveReflectType(field.Type.common()); // install in runtime
     var f = new structField(
-        Name: newName(field.Name, ((@string)field.Tag), field.IsExported(), field.Anonymous),
+        Name: newName(field.Name, (@string)field.Tag, field.IsExported(), field.Anonymous),
         Typ: field.Type.common(),
         Offset: 0
     );
@@ -1961,7 +1961,7 @@ internal static void append(this ref bitVector bv, uint8 bit) {
         // Since reflect passes bv.data directly to the runtime as a pointer mask,
         // we append a full uintptr of zeros at a time.
         for (nint i = 0; i < goarch.PtrSize; i++) {
-            bv.data = builtin.append(bv.data, (byte)(0));
+            bv.data = builtin.append(bv.data, (byte)0);
         }
     }
     bv.data[bv.n / 8] |= (uint8)((uint8)(bit << (int)((bv.n % 8))));

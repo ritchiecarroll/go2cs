@@ -45,7 +45,7 @@ public static ж<FlightRecorder> NewFlightRecorder(FlightRecorderConfig cfg) {
     if (cfg.MaxBytes != 0){
         fr.Value.targetSize = cfg.MaxBytes;
     } else {
-        fr.Value.targetSize = ((uint64)10 << (int)(20)); // 10 MiB.
+        fr.Value.targetSize = (uint64)10 << 20; // 10 MiB.
     }
 
     if (cfg.MinAge != 0){
@@ -69,7 +69,7 @@ public static error Start(this ж<FlightRecorder> Ꮡfr) {
     fr.wantSize = fr.targetSize;
     fr.wantDur = fr.targetPeriod;
     fr.err = default!;
-    fr.freq = ((frequency)(1.0D / ((float64)runtime_traceClockUnitsPerSecond() / 1e9D)));
+    fr.freq = (frequency)(1.0D / ((float64)runtime_traceClockUnitsPerSecond() / 1e9D));
 
     // Start tracing, data is sent to a recorder which forwards it to our own
     // storage.

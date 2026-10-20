@@ -60,12 +60,12 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
         return (new batch(nil), 0, err);
     }
     {
-        var typ = ((tracev2.EventType)b); if (typ == tracev2.EvEndOfGeneration) {
+        var typ = (tracev2.EventType)b; if (typ == tracev2.EvEndOfGeneration) {
             return (new batch(m: NoThread, exp: tracev2.NoExperiment, data: new byte[]{b}.slice()), 0, default!);
         }
     }
     {
-        var typ = ((tracev2.EventType)b); if (typ != tracev2.EvEventBatch && typ != tracev2.EvExperimentalBatch) {
+        var typ = (tracev2.EventType)b; if (typ != tracev2.EvEventBatch && typ != tracev2.EvExperimentalBatch) {
             return (new batch(nil), 0, fmt.Errorf("expected batch event, got event %d"u8, typ));
         }
     }
@@ -77,7 +77,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
         if (errΔ1 != default!) {
             return (new batch(nil), 0, errΔ1);
         }
-        exp = ((tracev2.Experiment)(nuint)e);
+        exp = (tracev2.Experiment)(nuint)e;
     }
 
     // Read the batch header: gen (generation), thread (M) ID, base timestamp

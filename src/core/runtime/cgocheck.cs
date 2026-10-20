@@ -62,7 +62,7 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
     }
 
     systemstack(() => {
-        println((@string)"write of unpinned Go pointer"u8, ((Δhex)(uint64)(uintptr)src), (@string)"to non-Go memory"u8, ((Δhex)(uint64)(uintptr)Ꮡdst));
+        println((@string)"write of unpinned Go pointer"u8, (Δhex)(uint64)(uintptr)src, (@string)"to non-Go memory"u8, (Δhex)(uint64)(uintptr)Ꮡdst);
         @throw(cgoWriteBarrierFail);
     });
 }
@@ -177,7 +177,7 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintp
         if (off > 0){
             off -= goarch.PtrSize;
         } else {
-            if ((uint32)(bits & 1) != 0) {
+            if ((bits & 1) != 0) {
                 @unsafe.Pointer v = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(src, i));
                 if (cgoIsGoPointer(v) && !isPinned(v)) {
                     @throw(cgoWriteBarrierFail);

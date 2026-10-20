@@ -217,7 +217,7 @@ internal static ж<Float> pow5(this ж<Float> Ꮡz, uint64 n) {
     var f = @new<Float>().SetPrec(z.Prec() + 64).SetUint64(5);
 
     while (n > 0) {
-        if ((uint64)(n & 1) != 0) {
+        if ((n & 1) != 0) {
             Ꮡz.Mul(Ꮡz, f);
         }
         f.Mul(f, f);

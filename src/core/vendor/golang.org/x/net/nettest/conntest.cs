@@ -117,7 +117,7 @@ private static readonly object transmittedDataDiffersˢ = (@string)"transmitted 
 
 // testBasicIO tests that the data sent on c1 is properly received on c2.
 internal static partial void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
-    var want = new slice<byte>((1 << (int)(20)));
+    var want = new slice<byte>((1 << 20));
     rand.New(rand.NewSource(0)).Read(want);
 
     var dataCh = new channel<slice<byte>>(0);

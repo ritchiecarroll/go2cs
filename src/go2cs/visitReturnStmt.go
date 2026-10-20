@@ -642,7 +642,8 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 							elem.WriteString("ref ")
 						}
 
-						elem.WriteString(resultExpr)
+						// A returned value is a whole expression (parityOperatorEmission.go).
+						elem.WriteString(v.unparenthesizedWholeExpression(expr, resultExpr))
 					}
 				}
 

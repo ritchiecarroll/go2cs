@@ -211,7 +211,7 @@ internal static bool isFIPSCurve(global::go.crypto.tls_package.CurveID id) {
 internal static bool isECDSA(uint16 id) {
     foreach (var (_, suite) in ΔcipherSuites) {
         if ((~suite).id == id) {
-            return (nint)((~suite).flags & (nint)suiteECSign) == suiteECSign;
+            return ((~suite).flags & (nint)suiteECSign) == suiteECSign;
         }
     }
     return false; // TLS 1.3 cipher suites are not tied to the signature algorithm.
@@ -652,12 +652,12 @@ public static void TestFIPSCertAlgs(ж<testing.T> Ꮡt) {
                     }
                 }
             }
-            addList((nint)(i & 1), I_R1);
-            addList((nint)(i & 2), I_R2);
-            addList((nint)(i & 4), I_M1);
-            addList((nint)(i & 8), I_M2);
-            addList((nint)(i & 16), M1_R1);
-            addList((nint)(i & 32), M2_R1);
+            addList(i & 1, I_R1);
+            addList(i & 2, I_R2);
+            addList(i & 4, I_M1);
+            addList(i & 8, I_M2);
+            addList(i & 16, M1_R1);
+            addList(i & 32, M2_R1);
 
             for (nint r = 1; r <= 3; r++) {
                 var pool = Δx509.NewCertPool();
@@ -679,8 +679,8 @@ public static void TestFIPSCertAlgs(ж<testing.T> Ꮡt) {
                         }
                     }
                 }
-                addRoot((nint)(r & 1), R1);
-                addRoot((nint)(r & 2), R2);
+                addRoot(r & 1, R1);
+                addRoot(r & 2, R2);
                 rootName = rootName[1..]; // strip leading comma
 
                 var poolʗ2 = pool;
@@ -803,7 +803,7 @@ internal static ж<fipsCertificate> fipsCert(ж<testing.T> Ꮡt, @string name, a
     }
 
     ref var fipsOK = ref heap<bool>(out var ᏑfipsOK);
-    fipsOK = (nint)(mode & (nint)fipsCertFIPSOK) != 0;
+    fipsOK = (mode & (nint)fipsCertFIPSOK) != 0;
     var certʗ1 = cert;
     var fipsOKʗ1 = fipsOK;
     runWithFIPSEnabled(Ꮡt, (ж<testing.T> tΔ1) => {

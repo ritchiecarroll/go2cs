@@ -73,7 +73,7 @@ internal static void Main() {
 
     fmt.Println(take(small), (nint)(small * 2), (float64)((float64)small / 4D));
 
-    foreach (var (_, u) in new uint64[]{0, 999, 1000, 1001, ((uint64)1 << (int)(62)), ((uint64)1 << (int)(63)), 18446744073709551615UL}.slice()) {
+    foreach (var (_, u) in new uint64[]{0, 999, 1000, 1001, (uint64)1 << 62, (uint64)1 << 63, 18446744073709551615UL}.slice()) {
         fmt.Println(u, u < small, u <= small, u > small, u >= small, u == small, u != small);
     }
 
@@ -81,7 +81,7 @@ internal static void Main() {
         fmt.Println(i, i < small, i > small, i == small);
     }
 
-    fmt.Println(fastPath(0), fastPath(999), fastPath(1000), fastPath(((uint64)1 << (int)(63))), fastPath(18446744073709551615UL));
+    fmt.Println(fastPath(0), fastPath(999), fastPath(1000), fastPath((uint64)1 << 63), fastPath(18446744073709551615UL));
 }
 
 internal static @string fastPath(uint64 u) {

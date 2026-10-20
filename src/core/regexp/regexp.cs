@@ -583,14 +583,14 @@ public static @string ReplaceAllString(this ж<Regexp> Ꮡre, @string src, @stri
         n = 2 * (re.numSubexp + 1);
     }
     var b = Ꮡre.replaceAll(default!, src, n, (slice<byte> dst, slice<nint> match) => Ꮡre.Value.expand(dst, repl, default!, src, match));
-    return ((@string)b);
+    return (@string)b;
 }
 
 // ReplaceAllLiteralString returns a copy of src, replacing matches of the [Regexp]
 // with the replacement string repl. The replacement repl is substituted directly,
 // without using [Regexp.Expand].
 public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src, @string repl) {
-    return ((@string)Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ)));
+    return (@string)Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ));
 }
 
 // ReplaceAllStringFunc returns a copy of src in which all matches of the
@@ -599,7 +599,7 @@ public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src
 // directly, without using [Regexp.Expand].
 public static @string ReplaceAllStringFunc(this ж<Regexp> Ꮡre, @string src, Func<@string, @string> repl) {
     var b = Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(src.slice(match[0], match[1])).ꓸꓸꓸ));
-    return ((@string)b);
+    return (@string)b;
 }
 
 internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, @string src, nint nmatch, Func<slice<byte>, slice<nint>, slice<byte>> repl) {
@@ -685,7 +685,7 @@ public static slice<byte> ReplaceAll(this ж<Regexp> Ꮡre, slice<byte> src, sli
     var srcʗ1 = src;
     var b = Ꮡre.replaceAll(src, ""u8, n, (slice<byte> dst, slice<nint> match) => {
         if (len(srepl) != len(replʗ1)) {
-            srepl = ((@string)replʗ1);
+            srepl = (@string)replʗ1;
         }
         return Ꮡre.Value.expand(dst, srepl, srcʗ1, ""u8, match);
     });
@@ -750,7 +750,7 @@ public static @string QuoteMeta(@string s) {
         b[j] = s[i];
         j++;
     }
-    return ((@string)(b.slice(0, j)));
+    return (@string)(b.slice(0, j));
 }
 
 // The number of capture values in the program may correspond
@@ -924,7 +924,7 @@ public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte>
 //
 // To insert a literal $ in the output, use $$ in the template.
 public static slice<byte> Expand(this ref Regexp re, slice<byte> dst, slice<byte> template, slice<byte> src, slice<nint> match) {
-    return re.expand(dst, ((@string)template), src, ""u8, match);
+    return re.expand(dst, (@string)template, src, ""u8, match);
 }
 
 // ExpandString is like [Regexp.Expand] but the template and source are strings.
@@ -1325,7 +1325,7 @@ public static (slice<byte>, error) MarshalText(this ref Regexp re) {
 // UnmarshalText implements [encoding.TextUnmarshaler] by calling
 // [Compile] on the encoded value.
 public static error UnmarshalText(this ref Regexp re, slice<byte> text) {
-    var (newRE, err) = Compile(((@string)text));
+    var (newRE, err) = Compile((@string)text);
     if (err != default!) {
         return err;
     }

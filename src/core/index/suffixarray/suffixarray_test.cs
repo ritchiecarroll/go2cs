@@ -616,7 +616,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
                 bΔ1.Fatal(err);
             }
             if (testing.Short() && builtin.len(data) > 5000000) {
-                data = data[..(int)(5000000)];
+                data = data[..(int)5000000];
             }
             foreach (var (_, size) in new nint[]{100000, 500000, 1000000, 5000000, 10000000, 50000000}.slice()) {
                 if (builtin.len(data) < size) {
@@ -659,7 +659,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkSaveRestore(ж<testing.B> Ꮡb) {
     var r = rand.New(rand.NewSource(0x5a77a1)); // guarantee always same sequence
-    var data = new slice<byte>((1 << (int)(20))); // 1MB of data to index
+    var data = new slice<byte>((1 << 20)); // 1MB of data to index
     foreach (var (i, _) in data) {
         data[i] = (byte)r.Intn(256);
     }

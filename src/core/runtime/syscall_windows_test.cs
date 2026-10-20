@@ -346,7 +346,7 @@ public static void TestCallbackInAnotherThread(ж<testing.T> Ꮡt) {
         if (r == 0) {
             Ꮡt.Fatalf("CreateThread failed: %v"u8, err);
         }
-        var h = ((syscallꓸHandle)r);
+        var h = (syscallꓸHandle)r;
         defer(syscall.CloseHandle, h, ref ᒐ);
 
         {
@@ -625,7 +625,7 @@ internal static @string build(this ref cbDLL d, ж<testing.T> Ꮡt, @string dir)
     cmd.Value.Dir = dir;
     var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
-        Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+        Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
     }
     return filepath.Join(dir, outname);
 }
@@ -823,7 +823,7 @@ public static void TestWindowsStackMemory(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Failed to read stack usage: %v"u8, err);
     }
     {
-        nint expected = (128 << (int)(10));
+        nint expected = 128 << 10;
         nint got = stackUsage; if (got > expected) {
             Ꮡt.Fatalf("expected < %d bytes of memory per thread, got %d"u8, expected, got);
         }
@@ -905,7 +905,7 @@ public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt
         cmd.Value.Dir = tmpdir;
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
         }
         @string dllpath = filepath.Join(tmpdir, outname);
 
@@ -922,7 +922,7 @@ public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt
         ref var want = ref heap<TestReturnAfterStackGrowInCallback_result>(out var Ꮡwant);
         want = new TestReturnAfterStackGrowInCallback_result(
             // Make it large enough to test issue #29331.
-            r: ((~(uintptr)0) >> (int)(24)),
+            r: ((~(uintptr)0) >> 24),
             err: 333
         );
         var c = new channel<TestReturnAfterStackGrowInCallback_result>(0);
@@ -1050,7 +1050,7 @@ public static void TestFloatArgs(ж<testing.T> Ꮡt) {
         cmd.Value.Dir = tmpdir;
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
         }
         @string dllpath = filepath.Join(tmpdir, outname);
 
@@ -1124,7 +1124,7 @@ public static void TestFloatReturn(ж<testing.T> Ꮡt) {
         cmd.Value.Dir = tmpdir;
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
         }
         @string dllpath = filepath.Join(tmpdir, outname);
 
@@ -1231,7 +1231,7 @@ internal static error resumeChildThread(ж<syscall.DLL> Ꮡkernel32, nint childp
         if (h == 0) {
             return err;
         }
-        defer(syscall.Close, ((syscallꓸHandle)h), ref ᒐ);
+        defer(syscall.Close, (syscallꓸHandle)h, ref ᒐ);
 
         (ret, _, err) = _ResumeThread.Call(h);
         if (ret == 0xffffffffU) {
@@ -1388,7 +1388,7 @@ public static void TestDLLPreloadMitigation(ж<testing.T> Ꮡt) {
     cmd.Value.Dir = tmpdir;
     (var @out, err) = cmd.CombinedOutput();
     if (err != default!) {
-        Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+        Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
     }
     @string dllpath = filepath.Join(tmpdir, name);
 
@@ -1452,7 +1452,7 @@ public static void TestBigStackCallbackSyscall(ж<testing.T> Ꮡt) {
         cmd.Value.Dir = tmpdir;
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, (@string)@out);
         }
         @string dllpath = filepath.Join(tmpdir, outname);
 
@@ -1495,7 +1495,7 @@ internal static (syscallꓸHandle, error) createEvent() {
     if (r0 == 0) {
         return (0, e0);
     }
-    return (((syscallꓸHandle)r0), default!);
+    return ((syscallꓸHandle)r0, default!);
 }
 
 internal static error setEvent(syscallꓸHandle h) {

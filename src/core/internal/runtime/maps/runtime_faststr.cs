@@ -33,7 +33,7 @@ internal static @unsafe.Pointer getWithoutKeySmallFastStr(this ref ΔMap m, ж<a
         // String hashing and equality might be expensive. Do a quick check first.
         nint j = abi.MapGroupSlots;
         foreach (var i in range(abi.MapGroupSlots)) {
-            if ((ctrlGroup)(ctrls & ((ctrlGroup)((uint64)1 << (int)(7)))) == 0 && longStringQuickEqualityTest(key, ~(ж<@string>)(uintptr)(slotKey))) {
+            if ((ctrlGroup)(ctrls & ((ctrlGroup)((uint64)1 << 7))) == 0 && longStringQuickEqualityTest(key, ~(ж<@string>)(uintptr)(slotKey))) {
                 if (j < abi.MapGroupSlots) {
                     // 2 strings both passed the quick equality test.
                     // Break out of this loop and do it the slow way.
@@ -273,7 +273,7 @@ internal static @unsafe.Pointer putSlotSmallFastStr(this ref ΔMap m, ж<abiꓸM
 
     @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
 
-    g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
+    g.ctrls().set(i, (ctrl)(uint8)h2(hash));
     m.used++;
 
     return slotElem;
@@ -401,7 +401,7 @@ outer:
 
                 slotElem = (uintptr)g.elem(Ꮡtyp, i);
 
-                g.ctrls().set(i, ((ctrl)(uint8)h2Hash));
+                g.ctrls().set(i, (ctrl)(uint8)h2Hash);
                 t.Value.growthLeft--;
                 t.Value.used++;
                 m.used++;

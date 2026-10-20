@@ -38,15 +38,15 @@ partial struct handler {
 }
 
 internal static bool want(this ref handler h, nint sig) {
-    return (uint32)((h.mask[sig / 32].Rsh((nuint)((nint)(sig & 31)))) & 1) != 0;
+    return ((h.mask[sig / 32].Rsh((nuint)(sig & 31))) & 1) != 0;
 }
 
 internal static void set(this ref handler h, nint sig) {
-    h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)((nint)(sig & 31))));
+    h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)(sig & 31)));
 }
 
 internal static void clear(this ref handler h, nint sig) {
-    h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)((nint)(sig & 31)))));
+    h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)(sig & 31))));
 }
 
 // Stop relaying the signals, sigs, to any channels previously registered to
@@ -331,7 +331,7 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
             var selᴛ4 = (~cʗ1).Context.Done();
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
             case 0 when selᴛ3.ꟷᐳ(out var s): {
-                (~cʗ1).cancel(((signalError)(s.String() + " signal received"u8)));
+                (~cʗ1).cancel((signalError)(s.String() + " signal received"u8));
                 break;
             }
             case 1 when selᴛ4.ꟷᐳ(out _): {
@@ -376,13 +376,13 @@ internal static @string String(this ref signalCtx c) {
         buf = append(buf, (byte)((rune)']'));
     }
     buf = append(buf, (byte)((rune)')'));
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 partial struct signalError /*@string*/;
 
 internal static @string Error(this signalError s) {
-    return ((@string)s);
+    return (@string)s;
 }
 
 internal static bool Is(this signalError s, error target) {

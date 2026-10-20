@@ -92,7 +92,7 @@ func main() {
 	libCs := readGenerated(t, filepath.Join(outDir, "lib", "lib.cs"))
 
 	// The control: inside lib, both conversions cast directly.
-	for _, want := range []string{"return ((L)n);", "return ((S)n);"} {
+	for _, want := range []string{"return (L)n;", "return (S)n;"} {
 		if !strings.Contains(libCs, want) {
 			t.Errorf("control: missing %q in lib:\n%s", want, libCs)
 		}

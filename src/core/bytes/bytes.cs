@@ -188,7 +188,7 @@ public static nint IndexRune(slice<byte> s, rune r) {
 next:
             fails++;
             i++;
-            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> (int)(4)) && i < len(s))) {
+            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> 4) && i < len(s))) {
                 goto fallback;
             }
         }
@@ -293,7 +293,7 @@ public static nint IndexAny(slice<byte> s, @string chars) {
             }
             // Use bytealg.IndexString for performance if available.
             if (bytealg.MaxLen >= width) {
-                if (bytealg.IndexString(chars, ((@string)r)) >= 0) {
+                if (bytealg.IndexString(chars, (@string)r) >= 0) {
                     return i;
                 }
                 continue;
@@ -381,7 +381,7 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
             }
             // Use bytealg.IndexString for performance if available.
             if (bytealg.MaxLen >= size) {
-                if (bytealg.IndexString(chars, ((@string)r)) >= 0) {
+                if (bytealg.IndexString(chars, (@string)r) >= 0) {
                     return i;
                 }
                 continue;
@@ -489,7 +489,7 @@ public static slice<slice<byte>> Fields(slice<byte> s) {
         var r = s[iΔ1];
         setBits |= (byte)(r);
         nint isSpace = (nint)asciiSpace[r];
-        n += (nint)(wasSpace & ~isSpace);
+        n += (wasSpace & ~isSpace);
         wasSpace = isSpace;
     }
 
@@ -996,7 +996,7 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
 
 // contains reports whether c is inside the set.
 internal static bool contains(this ref asciiSet @as, byte c) {
-    return ((uint32)(@as.Value[c / 32] & (((uint32)1 << (int)((c % 32)))))) != 0;
+    return (@as.Value[c / 32] & ((uint32)1 << (int)((c % 32)))) != 0;
 }
 
 // containsRune is a simplified version of strings.ContainsRune
@@ -1400,7 +1400,7 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
         }
         i++;
         fails++;
-        if (fails >= 4 + (i >> (int)(4)) && i < t) {
+        if (fails >= 4 + (i >> 4) && i < t) {
             // Give up on IndexByte, it isn't skipping ahead
             // far enough to be better than Rabin-Karp.
             // Experiments (using IndexPeriodic) suggest

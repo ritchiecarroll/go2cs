@@ -42,7 +42,7 @@ public static void TestBasicEncoderDecoder(ж<testing.T> Ꮡt) {
         (complex64)(1.2345F + 2.3456F.i()),
         (complex128)(1.2345678D + 2.3456789D.i()),
         slice<byte>("hello"u8),
-        ((@string)"hello"u8)
+        (@string)"hello"u8
     }.slice();
     foreach (var (_, value) in values) {
         var b = @new<bytes.Buffer>();
@@ -511,7 +511,7 @@ public partial struct SingleTest {
 }
 
 internal static slice<SingleTest> singleTests = new SingleTest[]{
-    new((nint)(17), ᏑtestInt, ""u8),
+    new((nint)17, ᏑtestInt, ""u8),
     new((float32)17.5F, ᏑtestFloat32, ""u8),
     new((@string)"bike shed"u8, ᏑtestString, ""u8),
     new(new @string[]{"bike"u8, "shed"u8, "paint"u8, "color"u8}.slice(), ᏑtestSlice, ""u8),
@@ -520,7 +520,7 @@ internal static slice<SingleTest> singleTests = new SingleTest[]{
     new(new nint[]{4, 55, 1, 44, 22, 66, 1234}.array(), ᏑtestArray, ""u8),
 
     // Decode errors
-    new((nint)(172), ᏑtestFloat32, "type"u8)
+    new((nint)172, ᏑtestFloat32, "type"u8)
 }.slice();
 
 public static void TestSingletons(ж<testing.T> Ꮡt) {
@@ -676,7 +676,7 @@ internal static slice<ignoreTest> ignoreTests = new ignoreTest[]{
     // Decode struct containing an interface into a nil.
     new(Ꮡ(new Struct0(Ꮡ(new NewType0("value0"u8)))), default!),
     // Decode singleton slice of interfaces into a nil.
-    new(new any[]{(@string)"hi"u8, Ꮡ(new NewType0("value1"u8)), (nint)(23)}.slice(), default!)
+    new(new any[]{(@string)"hi"u8, Ꮡ(new NewType0("value1"u8)), (nint)23}.slice(), default!)
 }.slice();
 
 public static void TestDecodeIntoNothing(ж<testing.T> Ꮡt) {
@@ -782,7 +782,7 @@ public static void TestNestedInterfaces(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("v.Bug0Field.Bug0Field not Bug0Inner: %T"u8, (~outer2).Bug0Field);
     }
     if ((~inner).A != 7) {
-        Ꮡt.Fatalf("final value %d; expected %d"u8, (~inner).A, (nint)(7));
+        Ꮡt.Fatalf("final value %d; expected %d"u8, (~inner).A, (nint)7);
     }
 }
 
@@ -1377,7 +1377,7 @@ internal partial struct TestMarshalFloatMap_mapEntry /*dyn*/ {
 // Issue 24075
 public static void TestMarshalFloatMap(ж<testing.T> Ꮡt) {
     var nan1 = math.NaN();
-    var nan2 = math.Float64frombits((uint64)(math.Float64bits(nan1) ^ 1)); // A different NaN in the same class.
+    var nan2 = math.Float64frombits(math.Float64bits(nan1) ^ 1); // A different NaN in the same class.
 
     var @in = new map<float64, @string>{
         [nan1] = "a"u8,

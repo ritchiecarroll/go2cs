@@ -53,7 +53,7 @@ public static void TestYCbCrToRGBConsistency(ж<testing.T> Ꮡt) {
             for (nint cr = 0; cr < 256; cr += 3) {
                 var x = new YCbCr((uint8)y, (uint8)cb, (uint8)cr);
                 var (r0, g0, b0, _) = x.RGBA();
-                var (r1, g1, b1) = ((uint8)((r0 >> (int)(8))), (uint8)((g0 >> (int)(8))), (uint8)((b0 >> (int)(8))));
+                var (r1, g1, b1) = ((uint8)(r0 >> 8), (uint8)(g0 >> 8), (uint8)(b0 >> 8));
                 var (r2, g2, b2) = YCbCrToRGB(x.Y, x.Cb, x.Cr);
                 if (r1 != r2 || g1 != g2 || b1 != b2) {
                     Ꮡt.Fatalf("y, cb, cr = %d, %d, %d\nr1, g1, b1 = %d, %d, %d\nr2, g2, b2 = %d, %d, %d"u8,
@@ -131,7 +131,7 @@ public static void TestCMYKToRGBConsistency(ж<testing.T> Ꮡt) {
                 for (nint k = 0; k < 256; k += 11) {
                     var x = new CMYK((uint8)c, (uint8)m, (uint8)y, (uint8)k);
                     var (r0, g0, b0, _) = x.RGBA();
-                    var (r1, g1, b1) = ((uint8)((r0 >> (int)(8))), (uint8)((g0 >> (int)(8))), (uint8)((b0 >> (int)(8))));
+                    var (r1, g1, b1) = ((uint8)(r0 >> 8), (uint8)(g0 >> 8), (uint8)(b0 >> 8));
                     var (r2, g2, b2) = CMYKToRGB(x.C, x.M, x.Y, x.K);
                     if (r1 != r2 || g1 != g2 || b1 != b2) {
                         Ꮡt.Fatalf("c, m, y, k = %d, %d, %d, %d\nr1, g1, b1 = %d, %d, %d\nr2, g2, b2 = %d, %d, %d"u8,

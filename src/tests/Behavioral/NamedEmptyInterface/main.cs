@@ -25,7 +25,7 @@ internal static I back(int8 n) {
 internal static I pick(nint which) {
     switch (which) {
     case 0: {
-        return (nint)(42);
+        return (nint)42;
     }
     case 1: {
         return (@string)"go"u8;
@@ -39,19 +39,19 @@ internal static I pick(nint which) {
 
 internal static void Main() {
     any a = (int8)(-5);
-    any b = (nint)(42);
+    any b = (nint)42;
     any c = (@string)"go"u8;
     I d = new point(3, 4);
     I e = default!;
     fmt.Printf("%T %v | %T %v | %T %v | %T %v | %T %v\n"u8, a, a, b, b, c, c, d, d, e, e);
 
     show((int8)7);
-    show((nint)(9));
+    show((nint)9);
     show("s");
     show(new point(5, 6));
     show(default!);
     anon((int8)7);
-    anon((nint)(9));
+    anon((nint)9);
     anon("s");
     anon(new point(5, 6));
     anon(default!);
@@ -79,9 +79,9 @@ internal static void Main() {
         break;
     }}
 
-    var list = new I[]{(int8)1, (nint)(2), (@string)"three"u8, new point(4, 4), default!}.slice();
+    var list = new I[]{(int8)1, (nint)2, (@string)"three"u8, new point(4, 4), default!}.slice();
     fmt.Println(len(list), list);
-    var m = new map<@string, I>{["n"] = (nint)(1), ["s"] = (@string)"one"u8};
+    var m = new map<@string, I>{["n"] = (nint)1, ["s"] = (@string)"one"u8};
     fmt.Println(m["n"], m["s"]);
 }
 

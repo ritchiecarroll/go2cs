@@ -83,8 +83,8 @@ internal static void Main() {
 
     var add = pv.Method(0);
     fmt.Println("Add kind:", add.Kind(), "in0:", add.Type().In(0).Kind());
-    fmt.Println("Add(5) =", add.Call(new reflectꓸValue[]{reflect.ValueOf((nint)(5))}.slice())[0].Interface());
-    fmt.Println("Add(7) =", add.Call(new reflectꓸValue[]{reflect.ValueOf((nint)(7))}.slice())[0].Interface());
+    fmt.Println("Add(5) =", add.Call(new reflectꓸValue[]{reflect.ValueOf((nint)5)}.slice())[0].Interface());
+    fmt.Println("Add(7) =", add.Call(new reflectꓸValue[]{reflect.ValueOf((nint)7)}.slice())[0].Interface());
     fmt.Println("receiver observed the writes:", (~c).n);
 
     var label = pv.MethodByName("Label");
@@ -102,7 +102,7 @@ internal static void Main() {
     var c2 = Ꮡ(new counter(n: 3));
     var (addM, _) = pt.MethodByName("Add");
     fmt.Println("unbound Func numIn:", addM.Type.NumIn(),
-        "call:", addM.Func.Call(new reflectꓸValue[]{reflect.ValueOf(c2.OrTypedNil()), reflect.ValueOf((nint)(4))}.slice())[0].Interface());
+        "call:", addM.Func.Call(new reflectꓸValue[]{reflect.ValueOf(c2.OrTypedNil()), reflect.ValueOf((nint)4)}.slice())[0].Interface());
 
     fmt.Println("outer methods:", strings.Join(names(reflect.TypeOf(new outer(nil))), ","));
     fmt.Println("outer Zeta:", reflect.ValueOf(new outer(nil)).MethodByName("Zeta").Call(default!)[0].Interface());

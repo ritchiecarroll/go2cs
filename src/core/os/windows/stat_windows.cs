@@ -44,7 +44,7 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
         if (errors.Is(err, ErrNotExist)) {
             return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileAttributesEx"u8, Path: name, Err: err))));
         }
-        if (err == default! && (uint32)(fa.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
+        if (err == default! && (fa.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
             // Not a surrogate for another named entity, because it isn't any kind of reparse point.
             // The information we got from GetFileAttributesEx is good enough for now.
             var fs = newFileStatFromWin32FileAttributeData(ref fa);
@@ -65,7 +65,7 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
                 return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "FindFirstFile"u8, Path: name, Err: errΔ2))));
             }
             syscall.FindClose(sh);
-            if ((uint32)(fd.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
+            if ((fd.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
                 // Not a surrogate for another named entity. FindFirstFile is good enough.
                 var fs = newFileStatFromWin32finddata(ref fd);
                 {

@@ -34,7 +34,7 @@ internal static void write(this ж<builder> Ꮡb, @string s) {
 }
 
 internal static @string String(this ref builder b) {
-    return ((@string)b.buf);
+    return (@string)b.buf;
 }
 
 internal static void Main() {

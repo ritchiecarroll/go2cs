@@ -24,7 +24,7 @@ internal static (uint64, nint, error) readUvarint(slice<byte> b) {
             if (i == (nint)(maxVarintLen64 - 1) && byt > 1) {
                 return (x, i, errOverflow);
             }
-            return ((uint64)(x | ((uint64)byt).Lsh(s)), i + 1, default!);
+            return (x | ((uint64)byt).Lsh(s), i + 1, default!);
         }
         x |= (uint64)(((uint64)((byte)(byt & 0x7f))).Lsh(s));
         s += 7;

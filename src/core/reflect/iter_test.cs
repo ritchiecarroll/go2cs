@@ -39,7 +39,7 @@ public static void TestValueSeq(ж<Δtesting.T> Ꮡt) {
 
 
     var tests = new TestValueSeq_tests[]{
-        new("int"u8, ValueOf((nint)(4)), (ж<Δtesting.T> tΔ1, iter.Seq<reflectꓸValue> s) => {
+        new("int"u8, ValueOf((nint)4), (ж<Δtesting.T> tΔ1, iter.Seq<reflectꓸValue> s) => {
             var i = (int64)0;
             foreach (var v in range<reflectꓸValue>(s.Invoke)) {
                 if (v.Int() != i) {
@@ -200,8 +200,8 @@ public static void TestValueSeq(ж<Δtesting.T> Ꮡt) {
                 tΔ12.Fatalf("should loop four times"u8);
             }
         }),
-        new("type N int8"u8, ValueOf(((N)4)), (ж<Δtesting.T> tΔ13, iter.Seq<reflectꓸValue> s) => {
-            var i = ((N)0);
+        new("type N int8"u8, ValueOf((N)4), (ж<Δtesting.T> tΔ13, iter.Seq<reflectꓸValue> s) => {
+            var i = (N)0;
             foreach (var v in range<reflectꓸValue>(s.Invoke)) {
                 if (v.Int() != (int64)(int8)i) {
                     tΔ13.Fatalf("got %d, want %d"u8, v.Int(), i);
@@ -365,7 +365,7 @@ public static void TestValueSeq2(ж<Δtesting.T> Ꮡt) {
             }
         }),
         new("[4]N"u8, ValueOf(new N[]{0, 1, 2, 3}.array()), (ж<Δtesting.T> tΔ8, iter.Seq2<reflectꓸValue, reflectꓸValue> s) => {
-            var i = ((N)0);
+            var i = (N)0;
             foreach (var (v1, v2) in range<reflectꓸValue, reflectꓸValue>(s.Invoke)) {
                 if (v1.Int() != (int64)(int8)i) {
                     tΔ8.Fatalf("got %d, want %d"u8, v1.Int(), i);
@@ -383,7 +383,7 @@ public static void TestValueSeq2(ж<Δtesting.T> Ꮡt) {
             }
         }),
         new("[]N"u8, ValueOf(new N[]{1, 2, 3, 4}.slice()), (ж<Δtesting.T> tΔ9, iter.Seq2<reflectꓸValue, reflectꓸValue> s) => {
-            var i = ((N)0);
+            var i = (N)0;
             foreach (var (v1, v2) in range<reflectꓸValue, reflectꓸValue>(s.Invoke)) {
                 if (v1.Int() != (int64)(int8)i) {
                     tΔ9.Fatalf("got %d, want %d"u8, v1.Int(), i);

@@ -273,7 +273,7 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
             if (errΔ1 != default!) {
                 return (default!, fmt.Errorf("pkg-config --cflags: %w"u8, errΔ1));
             }
-            args = appendꓸꓸꓸ(args, strings.Fields(((@string)@out)));
+            args = appendꓸꓸꓸ(args, strings.Fields((@string)@out));
         }
         args = append(args, "-I"u8, tmpdir);
         args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCflagsˢ)));

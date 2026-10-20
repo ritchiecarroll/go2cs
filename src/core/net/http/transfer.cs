@@ -1070,11 +1070,11 @@ internal static error readTrailer(this ref body b) {
     }
     switch (b.hdr.type()) {
     case ж<Request> rr: {
-        mergeSetHeader(ref (rr.of(Request.ᏑTrailer)).DerefOrNull(), ((ΔHeader)(map<@string, slice<@string>>)hdr));
+        mergeSetHeader(ref (rr.of(Request.ᏑTrailer)).DerefOrNull(), (ΔHeader)(map<@string, slice<@string>>)hdr);
         break;
     }
     case ж<Response> rr: {
-        mergeSetHeader(ref (rr.of(Response.ᏑTrailer)).DerefOrNull(), ((ΔHeader)(map<@string, slice<@string>>)hdr));
+        mergeSetHeader(ref (rr.of(Response.ᏑTrailer)).DerefOrNull(), (ΔHeader)(map<@string, slice<@string>>)hdr);
         break;
     }}
     return default!;

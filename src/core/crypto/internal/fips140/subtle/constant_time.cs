@@ -58,7 +58,7 @@ public static nint ConstantTimeLessOrEqBytes(slice<byte> x, slice<byte> y) {
         var y0 = byteorder.BEUint64(yb);
         (_, b) = bits.Sub64(y0, x0, b);
     }
-    return (nint)((uint64)(b ^ 1));
+    return (nint)(b ^ 1);
 }
 
 // ConstantTimeCopy copies the contents of y into x (a slice of equal length)

@@ -19,7 +19,7 @@ internal static ж<T> sinkT;
 internal static ж<T> sinkLit;
 
 internal static partial void allocMake() {
-    sinkBytes = new slice<byte>((1 << (int)(16)));
+    sinkBytes = new slice<byte>((1 << 16));
 }
 
 internal static partial void allocGrow() {

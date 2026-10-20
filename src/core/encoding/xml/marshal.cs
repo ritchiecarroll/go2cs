@@ -692,7 +692,7 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
                 if (errΔ3 != default!) {
                     return errΔ3;
                 }
-                start.Attr = append(start.Attr, new Attr(name, ((@string)text)));
+                start.Attr = append(start.Attr, new Attr(name, (@string)text));
                 return default!;
             }
         }
@@ -707,7 +707,7 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
                     if (errΔ4 != default!) {
                         return errΔ4;
                     }
-                    start.Attr = append(start.Attr, new Attr(name, ((@string)text)));
+                    start.Attr = append(start.Attr, new Attr(name, (@string)text));
                     return default!;
                 }
             }
@@ -747,7 +747,7 @@ internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart,
         return err;
     }
     if (b != default!) {
-        s = ((@string)b);
+        s = (@string)b;
     }
     start.Attr = append(start.Attr, new Attr(name, s));
     return default!;

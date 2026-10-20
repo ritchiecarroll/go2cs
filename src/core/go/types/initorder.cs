@@ -33,7 +33,7 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
     // Compute the object dependency graph and initialize
     // a priority queue with the list of graph nodes.
     ref var pq = ref heap<nodeQueue>(out var Ꮡpq);
-    pq = ((nodeQueue)dependencyGraph(check.objMap));
+    pq = (nodeQueue)dependencyGraph(check.objMap);
     heap.Init(new nodeQueueжInterface(Ꮡpq));
 
     const bool debug = false;

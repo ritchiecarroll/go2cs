@@ -96,7 +96,7 @@ internal static void readRest(this ref importReader r) {
     while (ᐧ) {
         if (len(r.buf) == cap(r.buf)) {
             // Grow the buffer
-            r.buf = append(r.buf, (byte)(0)).slice(0, len(r.buf));
+            r.buf = append(r.buf, (byte)0).slice(0, len(r.buf));
         }
         var (n, err) = r.b.Read(r.buf.slice(len(r.buf), cap(r.buf)));
         r.buf = r.buf.slice(0, len(r.buf) + n);

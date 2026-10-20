@@ -19,7 +19,7 @@ public static Size Small => 1;
 public static Size Large => 2;
 
 public static error UnmarshalText(this ref Size s, slice<byte> text) {
-    var exprᴛ1 = strings.ToLower(((@string)text));
+    var exprᴛ1 = strings.ToLower((@string)text);
     if (exprᴛ1 == "small"u8) {
         s = Small;
     }

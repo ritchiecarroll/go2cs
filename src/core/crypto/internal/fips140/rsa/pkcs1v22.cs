@@ -502,12 +502,12 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, hash.Hash mgfH
     for (nint i = 0; i < len(rest); i++) {
         nint equals0 = constanttime.ByteEq(rest[i], 0);
         nint equals1 = constanttime.ByteEq(rest[i], 1);
-        index = constanttime.Select((nint)(lookingForIndex & equals1), i, index);
+        index = constanttime.Select(lookingForIndex & equals1, i, index);
         lookingForIndex = constanttime.Select(equals1, 0, lookingForIndex);
-        invalid = constanttime.Select((nint)(lookingForIndex & ~equals0), 1, invalid);
+        invalid = constanttime.Select(lookingForIndex & ~equals0, 1, invalid);
     }
 
-    if ((nint)((nint)((nint)(firstByteIsZero & lHash2Good) & ~invalid) & ~lookingForIndex) != 1) {
+    if ((firstByteIsZero & lHash2Good & ~invalid & ~lookingForIndex) != 1) {
         return (default!, ErrDecryption);
     }
 

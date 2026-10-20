@@ -87,7 +87,7 @@ internal static void test(ж<testing.T> Ꮡt, @string name, slice<byte> cipherTe
             }
             @string plain = plainᶜ;
             if (plainTextʗ1[shorterLen] == plain[shorterLen]) {
-                Ꮡt.Errorf("%v XORKeyStream did out of bounds write, want %v, got %v"u8, name, want, ((@string)plainTextʗ1));
+                Ꮡt.Errorf("%v XORKeyStream did out of bounds write, want %v, got %v"u8, name, want, (@string)plainTextʗ1);
             }
         }, ref ᒐ);
         xor(plainText.slice(0, shorterLen), cipherText);

@@ -211,7 +211,7 @@ internal static slice<token> tokenList = new token[]{
     new(Comment, "// individual characters"u8),
     // NUL character is not allowed
     new((rune)'\x01', "\x01"u8),
-    new((rune)' ' - 1, ((@string)((rune)(rune)' ' - 1))),
+    new((rune)' ' - 1, (@string)((rune)(rune)' ' - 1)),
     new((rune)'+', "+"u8),
     new((rune)'/', "/"u8),
     new((rune)'.', "."u8),
@@ -276,7 +276,7 @@ internal static void testScan(ж<testing.T> Ꮡt, nuint mode) {
     var tok = s.Scan();
     nint line = 1;
     foreach (var (_, k) in tokenList) {
-        if ((nuint)(mode & (nuint)SkipComments) == 0 || k.tok != Comment) {
+        if ((mode & (nuint)SkipComments) == 0 || k.tok != Comment) {
             checkTok(Ꮡt, s, line, tok, k.tok, k.text);
             tok = s.Scan();
         }
@@ -423,7 +423,7 @@ public static void TestScanCustomIdent(ж<testing.T> Ꮡt) {
 
 public static void TestScanNext(ж<testing.T> Ꮡt) {
     UntypedInt BOM = /* '\uFEFF' */ 65279;
-    @string BOMs = ((@string)(rune)BOM);
+    @string BOMs = (@string)(rune)BOM;
     var s = @new<global::go.text.scanner_package.Scanner>().Init(new scanner_test_package.strings_ReaderжReader(strings.NewReader(BOMs + "if a == bcd /* com"u8 + BOMs + "ment */ {\n\ta += c\n}"u8 + BOMs + "// line comment ending in eof"u8)));
     checkTok(Ꮡt, s, 1, s.Scan(), Ident, "if"u8); // the first BOM is ignored
     checkTok(Ꮡt, s, 1, s.Scan(), Ident, "a"u8);
@@ -604,7 +604,7 @@ internal static void checkScanPos(ж<testing.T> Ꮡt, ж<global::go.text.scanner
         var ch = Ꮡs.Scan(); if (ch != @char) {
             Ꮡt.Errorf("ch = %s, want %s"u8, TokenString(ch), TokenString(@char));
             if (((@string)ch) != Ꮡs.TokenText()) {
-                Ꮡt.Errorf("tok = %q, want %q"u8, Ꮡs.TokenText(), ((@string)ch));
+                Ꮡt.Errorf("tok = %q, want %q"u8, Ꮡs.TokenText(), (@string)ch);
             }
         }
     }

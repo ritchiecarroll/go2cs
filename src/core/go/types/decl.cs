@@ -61,7 +61,7 @@ internal static void objDecl(this ж<Checker> Ꮡcheck, Object obj) {
         ref var check = ref Ꮡcheck.DerefOrNull();
 
         if (tracePos) {
-            check.pushPos(((atPos)obj.Pos()));
+            check.pushPos((atPos)obj.Pos());
             defer(() => {
                 // If we're panicking, keep stack of source positions.
                 {
@@ -688,7 +688,7 @@ internal static void typeDecl(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж
             if (!versionErr && tparam0 != nil && !Ꮡcheck.verifyVersionf(new ast_Fieldжpositioner(tparam0), go1_23, "generic type alias"u8)) {
                 versionErr = true;
             }
-            if (!versionErr && !Ꮡcheck.verifyVersionf(((atPos)tdecl.Assign), go1_9, "type alias"u8)) {
+            if (!versionErr && !Ꮡcheck.verifyVersionf((atPos)tdecl.Assign, go1_9, "type alias"u8)) {
                 versionErr = true;
             }
 

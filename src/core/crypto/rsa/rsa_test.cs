@@ -409,7 +409,7 @@ internal static void testEverything(ж<testing.T> Ꮡt, ж<rsa.PrivateKey> Ꮡpr
     if (err == default!) {
         Ꮡt.Errorf("DecryptPKCS1v15 accepted a large ciphertext"u8);
     }
-    c = append(c, (byte)(0xff));
+    c = append(c, (byte)0xff);
     err = VerifyPSS(Ꮡpriv.of(rsa.PrivateKey.ᏑPublicKey), crypto.SHA256, hash[..], c, opts);
     if (err == default!) {
         Ꮡt.Errorf("VerifyPSS accepted a long signature"u8);
@@ -705,7 +705,7 @@ public static void BenchmarkDecryptPKCS1v15(ж<testing.B> Ꮡb) {
 internal static void benchmarkDecryptPKCS1v15(ж<testing.B> Ꮡb, ж<rsa.PrivateKey> Ꮡk) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+    var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
 
     var m = slice<byte>("Hello Gophers"u8);
     var (c, err) = EncryptPKCS1v15(new rsa_test_package.bufio_ReaderжReader(r), Ꮡk.of(rsa.PrivateKey.ᏑPublicKey), m);
@@ -729,7 +729,7 @@ internal static void benchmarkDecryptPKCS1v15(ж<testing.B> Ꮡb, ж<rsa.Private
 
 public static void BenchmarkEncryptPKCS1v15(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var m = slice<byte>("Hello Gophers"u8);
 
         byte sink = default!;
@@ -745,7 +745,7 @@ public static void BenchmarkEncryptPKCS1v15(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkDecryptOAEP(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
 
         var m = slice<byte>("Hello Gophers"u8);
         var (c, err) = EncryptOAEP(sha256.New(), new rsa_test_package.bufio_ReaderжReader(r), test2048Key.of(rsa.PrivateKey.ᏑPublicKey), m, default!);
@@ -770,7 +770,7 @@ public static void BenchmarkDecryptOAEP(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkEncryptOAEP(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var m = slice<byte>("Hello Gophers"u8);
 
         byte sink = default!;

@@ -62,7 +62,7 @@ public static Key CURRENT_CONFIG => /* Key(syscall.HKEY_CURRENT_CONFIG) */ unche
 
 // Close closes open key k.
 public static error Close(this Key k) {
-    return syscall.RegCloseKey(((syscallꓸHandle)k));
+    return syscall.RegCloseKey((syscallꓸHandle)k);
 }
 
 // OpenKey opens a new key with path name relative to key k.
@@ -76,11 +76,11 @@ public static (Key, error) OpenKey(Key k, @string path, uint32 access) {
         return ((Key)(syscallꓸHandle)(0), err);
     }
     ref var subkey = ref heap(new syscallꓸHandle(), out var Ꮡsubkey);
-    err = syscall.RegOpenKeyEx(((syscallꓸHandle)k), p, 0, access, Ꮡsubkey);
+    err = syscall.RegOpenKeyEx((syscallꓸHandle)k, p, 0, access, Ꮡsubkey);
     if (err != default!) {
         return ((Key)(syscallꓸHandle)(0), err);
     }
-    return (((Key)subkey), default!);
+    return ((Key)subkey, default!);
 }
 
 // ReadSubKeyNames returns the names of subkeys of key k.
@@ -102,7 +102,7 @@ loopItems:
             ref var l = ref heap<uint32>(out var Ꮡl);
             l = (uint32)len(buf);
             while (ᐧ) {
-                var err = syscall.RegEnumKeyEx(((syscallꓸHandle)k), i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
+                var err = syscall.RegEnumKeyEx((syscallꓸHandle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
                 if (err == default!) {
                     break;
                 }
@@ -141,12 +141,12 @@ public static (Key newk, bool openedExisting, error err) CreateKey(Key k, @strin
     if (err != default!) {
         return ((Key)(syscallꓸHandle)(0), false, err);
     }
-    err = regCreateKeyEx(((syscallꓸHandle)k), pathp,
+    err = regCreateKeyEx((syscallꓸHandle)k, pathp,
         0, nil, _REG_OPTION_NON_VOLATILE, access, nil, Ꮡh, Ꮡd);
     if (err != default!) {
         return ((Key)(syscallꓸHandle)(0), false, err);
     }
-    return (((Key)h), d == _REG_OPENED_EXISTING_KEY, default!);
+    return ((Key)h, d == _REG_OPENED_EXISTING_KEY, default!);
 }
 
 // DeleteKey deletes the subkey path of key k and its values.
@@ -155,7 +155,7 @@ public static error DeleteKey(Key k, @string path) {
     if (err != default!) {
         return err;
     }
-    return regDeleteKey(((syscallꓸHandle)k), pathp);
+    return regDeleteKey((syscallꓸHandle)k, pathp);
 }
 
 // A KeyInfo describes the statistics of a key. It is returned by Stat.
@@ -171,7 +171,7 @@ partial struct KeyInfo {
 // Stat retrieves information about the open key k.
 public static (ж<KeyInfo>, error) Stat(this Key k) {
     ref var ki = ref heap(new KeyInfo(), out var Ꮡki);
-    var err = syscall.RegQueryInfoKey(((syscallꓸHandle)k), nil, nil, nil,
+    var err = syscall.RegQueryInfoKey((syscallꓸHandle)k, nil, nil, nil,
         Ꮡki.of(KeyInfo.ᏑSubKeyCount), Ꮡki.of(KeyInfo.ᏑMaxSubKeyLen), nil, Ꮡki.of(KeyInfo.ᏑValueCount),
         Ꮡki.of(KeyInfo.ᏑMaxValueNameLen), Ꮡki.of(KeyInfo.ᏑMaxValueLen), nil, Ꮡki.of(KeyInfo.ᏑlastWriteTime));
     if (err != default!) {

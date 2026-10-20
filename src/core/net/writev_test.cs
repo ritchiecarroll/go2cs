@@ -256,9 +256,9 @@ public static partial void TestWritevError(ж<testing.T> Ꮡt) {
         // 1 GB of data should be enough to notice the connection is gone.
         // Just a few bytes is not enough.
         // Arrange to reuse the same 1 MB buffer so that we don't allocate much.
-        var buf = new slice<byte>((1 << (int)(20)));
+        var buf = new slice<byte>((1 << 20));
         ref var buffers = ref heap<global::go.net_package.Buffers>(out var Ꮡbuffers);
-        buffers = new global::go.net_package.Buffers((1 << (int)(10)));
+        buffers = new global::go.net_package.Buffers((1 << 10));
         foreach (var (i, _) in buffers) {
             buffers[i] = buf;
         }

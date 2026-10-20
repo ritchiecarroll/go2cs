@@ -2069,12 +2069,12 @@ public static void TestRedundantFuncs(ж<testing.T> Ꮡt) {
 
     var inputs = new any[]{
         (@string)("\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f" + "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f" + @" !""#$%&'()*+,-./" + @"0123456789:;<=>?" + @"@ABCDEFGHIJKLMNO" + @"PQRSTUVWXYZ[\]^_" + "`abcdefghijklmno" + "pqrstuvwxyz{|}~\x7f" + "\u00A0\u0100\u2028\u2029\ufeff\ufdec\ufffd\uffff\U0001D11E" + "&amp;%22\\"),
-        ((global::go.html.template_package.CSS)(@string)aHrefExampleComFooˢ),
-        ((global::go.html.template_package.HTML)(@string)helloBWorldBAmpTcˢ),
-        ((global::go.html.template_package.HTMLAttr)(@string)dirLtrˢ),
-        ((global::go.html.template_package.JS)(@string)cAlertHelloWorldˢ),
-        ((global::go.html.template_package.JSStr)(@string)helloWorldOReillyX21ˢ),
-        ((global::go.html.template_package.URL)(@string)greetingH69Addresseeˢ3)
+        (global::go.html.template_package.CSS)(@string)aHrefExampleComFooˢ,
+        (global::go.html.template_package.HTML)(@string)helloBWorldBAmpTcˢ,
+        (global::go.html.template_package.HTMLAttr)(@string)dirLtrˢ,
+        (global::go.html.template_package.JS)(@string)cAlertHelloWorldˢ,
+        (global::go.html.template_package.JSStr)(@string)helloWorldOReillyX21ˢ,
+        (global::go.html.template_package.URL)(@string)greetingH69Addresseeˢ3
     }.slice();
 
     foreach (var (n0, m) in redundantFuncs) {
@@ -2173,7 +2173,7 @@ public static void TestPipeToMethodIsEscaped(ж<testing.T> Ꮡt) {
                 }
             }, ref ᒐ);
             ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-            tmplʗ1.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), ((Issue7379)0));
+            tmplʗ1.Execute(new template_test_package.strings_BuilderжWriter(Ꮡb), (Issue7379)0);
             return b.String();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }

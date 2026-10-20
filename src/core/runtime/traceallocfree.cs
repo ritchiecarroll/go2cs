@@ -90,23 +90,23 @@ internal static traceArg traceSpanTypeAndClass(ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs.of(mspan.Ꮡstate).get() == mSpanInUse) {
-        return (((traceArg)(uint64)(uint8)s.spanclass) << (int)(1));
+        return ((traceArg)(uint64)(uint8)s.spanclass) << 1;
     }
-    return ((traceArg)1);
+    return (traceArg)1;
 }
 
 // SpanExists records an event indicating that the span exists.
 internal static void SpanExists(this traceLocker tl, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpan, traceSpanID(Ꮡs), ((traceArg)(uint64)s.npages), traceSpanTypeAndClass(Ꮡs));
+    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpan, traceSpanID(Ꮡs), (traceArg)(uint64)s.npages, traceSpanTypeAndClass(Ꮡs));
 }
 
 // SpanAlloc records an event indicating that the span has just been allocated.
 internal static void SpanAlloc(this traceLocker tl, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpanAlloc, traceSpanID(Ꮡs), ((traceArg)(uint64)s.npages), traceSpanTypeAndClass(Ꮡs));
+    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpanAlloc, traceSpanID(Ꮡs), (traceArg)(uint64)s.npages, traceSpanTypeAndClass(Ꮡs));
 }
 
 // SpanFree records an event indicating that the span is about to be freed.
@@ -175,7 +175,7 @@ internal static traceArg traceCompressStackSize(uintptr size) {
     if ((uintptr)(size & (size - 1)) != 0) {
         @throw(goroutineStackSizeIsNotAˢ);
     }
-    return ((traceArg)(uint64)sys.Len64((uint64)size));
+    return (traceArg)(uint64)sys.Len64((uint64)size);
 }
 
 } // end runtime_package

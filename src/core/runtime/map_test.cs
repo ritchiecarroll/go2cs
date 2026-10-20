@@ -83,7 +83,7 @@ internal static void testMapNan(ж<testing.T> Ꮡt, map<float64, nint> m) {
         if (k == k) {
             Ꮡt.Error(nanDisappearedˢ);
         }
-        if (((nint)(v & (v - 1))) != 0) {
+        if ((v & (v - 1)) != 0) {
             Ꮡt.Error(valueWrongˢ);
         }
         s |= (nint)(v);
@@ -144,9 +144,9 @@ public static void TestMapAppendAssignment(ж<testing.T> Ꮡt) {
     var m = new map<nint, slice<nint>>(0);
 
     m[0] = default!;
-    m[0] = append(m[0], (nint)(12345));
-    m[0] = append(m[0], (nint)(67890));
-    (sinkAppend, m[0]) = (!sinkAppend, append(m[0], (nint)(123), (nint)(456)));
+    m[0] = append(m[0], (nint)12345);
+    m[0] = append(m[0], (nint)67890);
+    (sinkAppend, m[0]) = (!sinkAppend, append(m[0], (nint)123, (nint)456));
     var a = new nint[]{7, 8, 9, 0}.slice();
     m[0] = appendꓸꓸꓸ(m[0], a);
 
@@ -247,13 +247,13 @@ public static void TestGrowWithNegativeZero(ж<testing.T> Ꮡt) {
         } // ignore entries added to grow table
         cnt++;
         if (Δmath.Copysign(1.0D, k.x) < 0D){
-            if ((nint)(v & 16) == 0) {
+            if ((v & 16) == 0) {
                 Ꮡt.Error(keyValueNotUpdatedˢ);
             }
             negcnt++;
-            s |= (nint)((nint)(v & 15));
+            s |= (nint)((v & 15));
         } else {
-            if ((nint)(v & 16) == 16) {
+            if ((v & 16) == 16) {
                 Ꮡt.Error(keyValueNotUpdatedˢ2, k, v);
             }
             s |= (nint)(v);
@@ -304,7 +304,7 @@ public static void TestIterGrowAndDelete(ж<testing.T> Ꮡt) {
             }
             growflag = false;
         } else {
-            if ((nint)(k & 1) == 1) {
+            if ((k & 1) == 1) {
                 Ꮡt.Error(oddValueReturnedˢ);
             }
         }
@@ -340,7 +340,7 @@ public static void TestIterGrowWithGC(ж<testing.T> Ꮡt) {
             growflag = false;
         }
     }
-    if (bitmask != (1 << (int)(16)) - 1) {
+    if (bitmask != (1 << 16) - 1) {
         Ꮡt.Error(missingKeyˢ, bitmask);
     }
 }
@@ -1221,7 +1221,7 @@ internal static uintptr subprocessHash(ж<testing.T> Ꮡt, @string env) {
         Ꮡt.Fatalf("cmd.Output got err %v want nil"u8, err);
     }
 
-    @string s = strings.TrimSpace(((@string)@out));
+    @string s = strings.TrimSpace((@string)@out);
     (var h, err) = strconv.ParseUint(s, 10, 64);
     if (err != default!) {
         Ꮡt.Fatalf("Parse output %q got err %v want nil"u8, s, err);

@@ -13,7 +13,7 @@ internal static @string describe(this ref alias a) {
 }
 
 internal static void Main() {
-    var a = ((alias)ptlike.New("first", 1, 2, 3));
+    var a = (alias)ptlike.New("first", 1, 2, 3);
 
     fmt.Println(a.Name, a.In.Len());
     fmt.Println(a.describe());
@@ -29,7 +29,7 @@ internal static void Main() {
     a.In.Vals[0] = 99;
     fmt.Println(a.In.Vals);
 
-    var o = ((ptlike.Outer)a);
+    var o = (ptlike.Outer)a;
     fmt.Println(o.Name, o.In.Vals);
 
     alias z = default!;

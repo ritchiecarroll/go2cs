@@ -94,7 +94,7 @@ public static partial void TestCtrlBreak(ж<testing.T> Ꮡt) {
         defer(os.Remove, exe, ref ᒐ);
         (var o, err) = testenv.Command(new signal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new signal_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", exe, src).CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("Failed to compile: %v\n%v"u8, err, ((@string)o));
+            Ꮡt.Fatalf("Failed to compile: %v\n%v"u8, err, (@string)o);
         }
 
         // run it

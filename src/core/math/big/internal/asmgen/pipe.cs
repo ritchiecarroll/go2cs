@@ -139,10 +139,10 @@ public static void LoadPtrs(this ref ΔPipe p, ΔReg n) {
     // Load the actual pointers.
     p.loaded = true;
     foreach (var (_, name) in (~p.f).inputs) {
-        p.inPtr = append(p.inPtr, ((RegPtr)p.f.Arg(name + "_base"u8)));
+        p.inPtr = append(p.inPtr, (RegPtr)p.f.Arg(name + "_base"u8));
     }
     foreach (var (_, name) in (~p.f).outputs) {
-        p.outPtr = append(p.outPtr, ((RegPtr)p.f.Arg(name + "_base"u8)));
+        p.outPtr = append(p.outPtr, (RegPtr)p.f.Arg(name + "_base"u8));
     }
 
     // Decide the memory access strategy for LoadN and StoreN.
@@ -328,10 +328,10 @@ internal static void advancePtrs(this ref ΔPipe p, nint step) {
                 step = -step;
             }
             foreach (var (_, ptr) in p.inPtr) {
-                a.Add(a.Imm(step * (~(~a).Arch).WordBytes), ((ΔReg)ptr), ((ΔReg)ptr), KeepCarry);
+                a.Add(a.Imm(step * (~(~a).Arch).WordBytes), (ΔReg)ptr, (ΔReg)ptr, KeepCarry);
             }
             foreach (var (_, ptr) in p.outPtr) {
-                a.Add(a.Imm(step * (~(~a).Arch).WordBytes), ((ΔReg)ptr), ((ΔReg)ptr), KeepCarry);
+                a.Add(a.Imm(step * (~(~a).Arch).WordBytes), (ΔReg)ptr, (ΔReg)ptr, KeepCarry);
             }
         }
         break;
@@ -347,7 +347,7 @@ public static void DropInput(this ref ΔPipe p, @string name) {
         (~p.f).Asm.Fatalf("unknown input %s"u8, name);
     }
     var ptr = p.inPtr[i];
-    (~p.f).Asm.Free(((ΔReg)ptr));
+    (~p.f).Asm.Free((ΔReg)ptr);
     p.inPtr = slices.Delete<slice<RegPtr>, RegPtr>(p.inPtr, i, i + 1);
     p.f.Value.inputs = slices.Delete<slice<@string>, @string>((~p.f).inputs, i, i + 1);
     if (len(p.hints) > i) {
@@ -455,7 +455,7 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
             if (f <= factors[i]) {
                 a.Fatalf("non-increasing factors %v"u8, factors);
             }
-            if ((nint)(f & (f - 1)) != 0) {
+            if ((f & (f - 1)) != 0) {
                 a.Fatalf("non-power-of-two factors %v"u8, factors);
             }
             var t = (~p.f).Asm.Reg();
@@ -474,7 +474,7 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
             if (f <= factors[i + 1]) {
                 a.Fatalf("non-decreasing factors %v"u8, factors);
             }
-            if ((nint)(f & (f - 1)) != 0) {
+            if ((f & (f - 1)) != 0) {
                 a.Fatalf("non-power-of-two factors %v"u8, factors);
             }
             var t = (~p.f).Asm.Reg();
@@ -490,11 +490,11 @@ public static void Restart(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint fact
 // Done frees all the registers allocated by the pipe.
 public static void Done(this ref ΔPipe p) {
     foreach (var (_, ptr) in p.inPtr) {
-        (~p.f).Asm.Free(((ΔReg)ptr));
+        (~p.f).Asm.Free((ΔReg)ptr);
     }
     p.inPtr = default!;
     foreach (var (_, ptr) in p.outPtr) {
-        (~p.f).Asm.Free(((ΔReg)ptr));
+        (~p.f).Asm.Free((ΔReg)ptr);
     }
     p.outPtr = default!;
     p.index = new ΔReg(nil);

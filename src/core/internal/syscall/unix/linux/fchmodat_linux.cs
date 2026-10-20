@@ -46,7 +46,7 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
                 return errΔ2;
             }
         }
-        if ((uint32)(st.Mode & (uint32)syscall.S_IFMT) == syscall.S_IFLNK) {
+        if ((st.Mode & (uint32)syscall.S_IFMT) == syscall.S_IFLNK) {
             // fchmodat on the proc FD for a symlink apparently gives inconsistent
             // results, so just refuse to try.
             return syscall.EOPNOTSUPP;

@@ -24,7 +24,7 @@ internal static void Main() {
     @string t = "abc";
     var b = slice<byte>(t);
     b[0] = (rune)'X';
-    fmt.Println(t, ((@string)b));
+    fmt.Println(t, (@string)b);
 }
 
 } // end main_package

@@ -9,7 +9,7 @@ internal static any store(any v) {
 }
 
 internal static any ret() {
-    return (nint)(42);
+    return (nint)42;
 }
 
 partial struct holder {
@@ -31,33 +31,33 @@ internal static @string classify(any v) {
 }
 
 internal static void Main() {
-    fmt.Println(store((nint)(42))._<nint>());
+    fmt.Println(store((nint)42)._<nint>());
 
-    any a = (nint)(7);
+    any a = (nint)7;
     fmt.Println(a._<nint>());
 
     any b = default!;
-    b = (nint)(8);
+    b = (nint)8;
     fmt.Println(b._<nint>());
 
     fmt.Println(ret()._<nint>());
 
-    var s = new any[]{(nint)(5)}.slice();
+    var s = new any[]{(nint)5}.slice();
     fmt.Println(s[0]._<nint>());
 
-    var m = new map<@string, any>{["k"] = (nint)(9)};
+    var m = new map<@string, any>{["k"] = (nint)9};
     fmt.Println(m["k"]._<nint>());
 
-    var h = new holder(v: (nint)(3));
+    var h = new holder(v: (nint)3);
     fmt.Println(h.v._<nint>());
 
     fmt.Println(store((nint)(-5))._<nint>());
     fmt.Println(store((nint)(1 + 2))._<nint>());
 
-    fmt.Println(classify((nint)(1)), classify((int32)1));
+    fmt.Println(classify((nint)1), classify((int32)1));
 
     {
-        var (n, ok) = store((nint)(11))._<nint>(ᐧ); if (ok) {
+        var (n, ok) = store((nint)11)._<nint>(ᐧ); if (ok) {
             fmt.Println("ok", n);
         }
     }

@@ -104,7 +104,7 @@ public static (nint consumed, nint count, slice<@string> newnames) ParseDirent(s
         }
         max--;
         count++;
-        names = append(names, ((@string)name));
+        names = append(names, (@string)name);
     }
     return (origlen - len(buf), count, names);
 }

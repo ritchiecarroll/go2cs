@@ -29,7 +29,7 @@ internal static slice<@string> lookupTestIPs = new @string[]{"8.8.8.8"u8, "1.1.1
 
 internal static @string toJson(any v) {
     var (data, _) = json.Marshal(v);
-    return ((@string)data);
+    return (@string)data;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -355,9 +355,9 @@ internal static (@string, error) ping(@string name) {
     var cmd = exec.Command(pingˢ, "-n"u8, "1", "-a", name);
     var (stdoutStderr, err) = cmd.CombinedOutput();
     if (err != default!) {
-        return ("", fmt.Errorf("%v: %v"u8, err, ((@string)stdoutStderr)));
+        return ("", fmt.Errorf("%v: %v"u8, err, (@string)stdoutStderr));
     }
-    @string r = strings.ReplaceAll(((@string)stdoutStderr), "\r\n"u8, "\n"u8);
+    @string r = strings.ReplaceAll((@string)stdoutStderr, "\r\n"u8, "\n"u8);
     return (r, default!);
 }
 

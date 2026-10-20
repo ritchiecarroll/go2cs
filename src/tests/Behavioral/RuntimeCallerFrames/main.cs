@@ -175,7 +175,7 @@ internal static partial bool callerFileRooted() {
 internal static partial bool stackHasBackslash() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
-    return hasByte(((@string)(buf.slice(0, n))), (rune)'\\');
+    return hasByte((@string)(buf.slice(0, n)), (rune)'\\');
 }
 
 internal static bool hasSub(@string s, @string sub) {
@@ -197,7 +197,7 @@ internal static bool hasSub(@string s, @string sub) {
 internal static partial @string stackText() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
-    return ((@string)(buf.slice(0, n)));
+    return (@string)(buf.slice(0, n));
 }
 
 partial struct recvT /*num:nint*/;

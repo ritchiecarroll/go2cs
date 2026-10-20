@@ -224,7 +224,7 @@ internal static void testPseudoprimes(ж<testing.T> Ꮡt, @string name, Func<glo
                 i = want[0] - 2;
             }
         }
-        n[0] = ((global::go.math.big_package.Word)(nuint)i);
+        n[0] = (global::go.math.big_package.Word)(nuint)i;
         var pseudo = cond(n);
         if (pseudo && (len(want) == 0 || i != want[0])){
             Ꮡt.Errorf("%s(%v, base=2) = true, want false"u8, name, i);

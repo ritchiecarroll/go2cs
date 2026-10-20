@@ -101,15 +101,15 @@ internal static @string callString(any fn, params ꓸꓸꓸany argsʗp) {
 }
 
 internal static void Main() {
-    fmt.Println("join3    :", callString(join, "go", (nint)(1), (nint)(2), (nint)(3)));
+    fmt.Println("join3    :", callString(join, "go", (nint)1, (nint)2, (nint)3));
     fmt.Println("join0    :", callString(join, "go"));
 
-    fmt.Println("sum      :", callString(sum, (nint)(4), (nint)(5), (nint)(6)));
+    fmt.Println("sum      :", callString(sum, (nint)4, (nint)5, (nint)6));
     fmt.Println("sum0     :", callString(sum));
 
-    fmt.Println("describe :", callString(describe, "tag=", (nint)(1), "two", true));
+    fmt.Println("describe :", callString(describe, "tag=", (nint)1, "two", true));
 
-    fmt.Println("firstA   :", callString(firstNonZero, (nint)(0), (nint)(0), (nint)(9)));
+    fmt.Println("firstA   :", callString(firstNonZero, (nint)0, (nint)0, (nint)9));
     fmt.Println("firstB   :", callString(firstNonZero));
 
     fmt.Println("recordN  :", len(reflect.ValueOf(record).Call(new reflectꓸValue[]{
@@ -117,10 +117,10 @@ internal static void Main() {
     }.slice())));
     fmt.Println("recorded :", recorded);
 
-    fmt.Println("between  :", callString(between, (nint)(2), (nint)(4), (nint)(1), (nint)(2), (nint)(3), (nint)(4), (nint)(5)));
+    fmt.Println("between  :", callString(between, (nint)2, (nint)4, (nint)1, (nint)2, (nint)3, (nint)4, (nint)5));
 
     var m = reflect.ValueOf(new counter(@base: 100)).MethodByName("Total");
-    fmt.Println("method   :", callString(m.Interface(), (nint)(1), (nint)(2)));
+    fmt.Println("method   :", callString(m.Interface(), (nint)1, (nint)2));
 
     var funcs = new map<@string, any>{
         ["cat"] = ((Funcꓸꓸꓸ<@string, @string, @string>)(@string (@string sep, params ꓸꓸꓸstring partsʗp) => {
@@ -158,8 +158,8 @@ internal static void Main() {
             name, fn.Type().IsVariadic(), fn.Type().NumIn(), fn.Type().In(fn.Type().NumIn() - 1));
     }
     fmt.Println("cat      :", callString(funcs["cat"], "-", "a", "b", "c"));
-    fmt.Println("count    :", callString(funcs["count"], (nint)(1), (nint)(2), (nint)(3), (nint)(4)));
-    fmt.Println("pair     :", callString(funcs["pair"], (nint)(7), (nint)(1), (nint)(2)));
+    fmt.Println("count    :", callString(funcs["count"], (nint)1, (nint)2, (nint)3, (nint)4));
+    fmt.Println("pair     :", callString(funcs["pair"], (nint)7, (nint)1, (nint)2));
 
     fmt.Println("toofew   :", recoverText(() => {
         reflect.ValueOf(join).Call(default!);

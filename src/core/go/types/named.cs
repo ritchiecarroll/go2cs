@@ -300,7 +300,7 @@ internal static void setState(this ж<Named> Ꮡn, stateMask m) {
     atomic.OrUint32(Ꮡn.of(Named.Ꮡstate_), (uint32)m);
     // verify state transitions
     if (debug) {
-        var mΔ1 = ((stateMask)atomic.LoadUint32(Ꮡn.of(Named.Ꮡstate_)));
+        var mΔ1 = (stateMask)atomic.LoadUint32(Ꮡn.of(Named.Ꮡstate_));
         var u = (stateMask)(mΔ1 & unpacked) != 0;
         // unpacked => lazyLoaded
         if (u) {

@@ -45,5 +45,11 @@ func (v *Visitor) convParenExpr(parenExpr *ast.ParenExpr, context LambdaContext,
 		return expr
 	}
 
+	// A shift or bitwise expression renders parenthesized already (parityOperatorEmission.go), so Go's
+	// parentheses are those: `(v >> 8)`, not `((v >> 8))`.
+	if binary, ok := parenExpr.X.(*ast.BinaryExpr); ok && isShiftOrBitwise(binary.Op) && wrappedWhole(expr) {
+		return expr
+	}
+
 	return fmt.Sprintf("(%s)", expr)
 }

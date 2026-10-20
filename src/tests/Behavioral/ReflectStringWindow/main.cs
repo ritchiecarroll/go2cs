@@ -69,7 +69,7 @@ internal static void Main() {
         plainʗ1.Slice(4, 2);
     }),
         probe(() => {
-            reflect.ValueOf((nint)(42)).Index(0);
+            reflect.ValueOf((nint)42).Index(0);
         }), probe(() => {
         plainʗ2.Slice3(0, 1, 2);
     }),

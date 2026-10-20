@@ -12,7 +12,7 @@ partial class math_package {
 //	Abs(±Inf) = +Inf
 //	Abs(NaN) = NaN
 public static float64 Abs(float64 x) {
-    return Float64frombits((uint64)(Float64bits(x) & ~(((uint64)1 << (int)(63)))));
+    return Float64frombits((uint64)(Float64bits(x) & ~((uint64)1 << 63)));
 }
 
 } // end math_package

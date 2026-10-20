@@ -91,16 +91,16 @@ internal static bool isMapped(this info c) {
 internal static Δcategory category(this info c) {
     var small = (info)(c & (uint16)catSmallMask);
     if (small != 0) {
-        return ((Δcategory)(uint16)small);
+        return (Δcategory)(uint16)small;
     }
-    return ((Δcategory)(uint16)((info)(c & (uint16)catBigMask)));
+    return (Δcategory)(uint16)((info)(c & (uint16)catBigMask));
 }
 
 internal static info joinType(this info c) {
     if (c.isMapped()) {
         return 0;
     }
-    return (info)(((c >> (int)(joinShift))) & (uint16)joinMask);
+    return (info)((c >> (int)(joinShift)) & (uint16)joinMask);
 }
 
 internal static bool isModifier(this info c) {

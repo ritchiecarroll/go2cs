@@ -36,7 +36,7 @@ internal static bool isTSpecial(byte c) {
 	1<<'?' |
 	1<<'=' */
             maskᶜ;
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (18158675342946992128UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (939524097UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (18158675342946992128UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (939524097UL))) != 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -74,7 +74,7 @@ internal static bool isTokenChar(byte c) {
 	1<<'}' |
 	1<<'~' */
             maskᶜ1;
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (288068722172624896UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (9223372035915251710UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (288068722172624896UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (9223372035915251710UL))) != 0;
 }
 
 // isToken reports whether s is a 'token' as defined by RFC 1521

@@ -155,7 +155,7 @@ public static ж<P224Element> Select(this ж<P224Element> Ꮡv, ж<P224Element> 
     var ᴛ4 = nonnil(ref b).x.Value;
 
     var ᴛ5 = nonnil(ref a).x.Value;
-    p224Selectznz(ref ᴛ3, ((p224Uint1)(uint64)cond),
+    p224Selectznz(ref ᴛ3, (p224Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;
 }

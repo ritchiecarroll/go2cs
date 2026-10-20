@@ -39,7 +39,7 @@ internal static void initᴛmallocTest() { mallocTest = new mallocTestᴛ1[]{
     // In practice we see 7 for the next one, but allow some slop.
     // Before pre-allocation in appendQuotedWith, we saw 39.
     new(10, @"AppendQuoteToASCII(nil, oneMB)"u8, () => {
-        AppendQuoteToASCII(default!, ((@string)oneMB));
+        AppendQuoteToASCII(default!, (@string)oneMB);
     }),
     new(0, @"ParseFloat(""123.45"", 64)"u8, () => {
         ParseFloat("123.45"u8, 64);
@@ -131,43 +131,43 @@ public static void TestAllocationsFromBytes(ж<testing.T> Ꮡt) {
 
     var bytesʗ1 = bytes;
     Ꮡt.Run(atoiˢ, checkNoAllocs(() => {
-        (Sink.Int, Sink.Error) = Atoi(((@string)bytesʗ1.Number));
+        (Sink.Int, Sink.Error) = Atoi((@string)bytesʗ1.Number);
     }));
     var bytesʗ2 = bytes;
     Ꮡt.Run(parseBoolˢ, checkNoAllocs(() => {
-        (Sink.Bool, Sink.Error) = ParseBool(((@string)bytesʗ2.Bool));
+        (Sink.Bool, Sink.Error) = ParseBool((@string)bytesʗ2.Bool);
     }));
     var bytesʗ3 = bytes;
     Ꮡt.Run(parseIntˢ, checkNoAllocs(() => {
-        (Sink.Int64, Sink.Error) = ParseInt(((@string)bytesʗ3.Number), 10, 64);
+        (Sink.Int64, Sink.Error) = ParseInt((@string)bytesʗ3.Number, 10, 64);
     }));
     var bytesʗ4 = bytes;
     Ꮡt.Run(parseUintˢ, checkNoAllocs(() => {
-        (Sink.Uint64, Sink.Error) = ParseUint(((@string)bytesʗ4.Number), 10, 64);
+        (Sink.Uint64, Sink.Error) = ParseUint((@string)bytesʗ4.Number, 10, 64);
     }));
     var bytesʗ5 = bytes;
     Ꮡt.Run(parseFloatˢ, checkNoAllocs(() => {
-        (Sink.Float64, Sink.Error) = ParseFloat(((@string)bytesʗ5.Number), 64);
+        (Sink.Float64, Sink.Error) = ParseFloat((@string)bytesʗ5.Number, 64);
     }));
     var bytesʗ6 = bytes;
     Ꮡt.Run(parseComplexˢ, checkNoAllocs(() => {
-        (Sink.Complex128, Sink.Error) = ParseComplex(((@string)bytesʗ6.Number), 128);
+        (Sink.Complex128, Sink.Error) = ParseComplex((@string)bytesʗ6.Number, 128);
     }));
     var bytesʗ7 = bytes;
     Ꮡt.Run(canBackquoteˢ, checkNoAllocs(() => {
-        Sink.Bool = CanBackquote(((@string)bytesʗ7.String));
+        Sink.Bool = CanBackquote((@string)bytesʗ7.String);
     }));
     var bytesʗ8 = bytes;
     Ꮡt.Run(appendQuoteˢ, checkNoAllocs(() => {
-        Sink.Bytes = AppendQuote(bytesʗ8.Buffer[..0], ((@string)bytesʗ8.String));
+        Sink.Bytes = AppendQuote(bytesʗ8.Buffer[..0], (@string)bytesʗ8.String);
     }));
     var bytesʗ9 = bytes;
     Ꮡt.Run(appendQuoteToASCIIˢ, checkNoAllocs(() => {
-        Sink.Bytes = AppendQuoteToASCII(bytesʗ9.Buffer[..0], ((@string)bytesʗ9.String));
+        Sink.Bytes = AppendQuoteToASCII(bytesʗ9.Buffer[..0], (@string)bytesʗ9.String);
     }));
     var bytesʗ10 = bytes;
     Ꮡt.Run(appendQuoteToGraphicˢ, checkNoAllocs(() => {
-        Sink.Bytes = AppendQuoteToGraphic(bytesʗ10.Buffer[..0], ((@string)bytesʗ10.String));
+        Sink.Bytes = AppendQuoteToGraphic(bytesʗ10.Buffer[..0], (@string)bytesʗ10.String);
     }));
 }
 

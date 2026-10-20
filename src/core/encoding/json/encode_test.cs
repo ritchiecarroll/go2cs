@@ -71,7 +71,7 @@ public static void TestOmitEmpty(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("MarshalIndent error: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got); if (gotΔ1 != want) {
+        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
             Ꮡt.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n"u8, indentNewlines(gotΔ1), indentNewlines(want));
         }
     }
@@ -169,7 +169,7 @@ public static void TestOmitZero(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("MarshalIndent error: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got); if (gotΔ1 != want) {
+        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
             Ꮡt.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n"u8, indentNewlines(gotΔ1), indentNewlines(want));
         }
     }
@@ -201,7 +201,7 @@ public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("MarshalIndent error: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got); if (gotΔ1 != want) {
+        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
             fmt.Println(gotΔ1);
             Ꮡt.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n"u8, indentNewlines(gotΔ1), indentNewlines(want));
         }
@@ -257,7 +257,7 @@ public static void TestOmitEmptyZero(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("MarshalIndent error: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got); if (gotΔ1 != want) {
+        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
             Ꮡt.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n"u8, indentNewlines(gotΔ1), indentNewlines(want));
         }
     }
@@ -330,7 +330,7 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("%s: MarshalIndent error: %v"u8, Ꮡtt.Value.Where, err);
             }
             {
-                @string gotΔ1 = ((@string)got); if (gotΔ1 != Ꮡtt.Value.want) {
+                @string gotΔ1 = (@string)got; if (gotΔ1 != Ꮡtt.Value.want) {
                     tΔ1.Fatalf("%s: MarshalIndent:\n\tgot:  %s\n\twant: %s"u8, Ꮡtt.Value.Where, stripWhitespace(gotΔ1), stripWhitespace(Ꮡtt.Value.want));
                 }
             }
@@ -343,7 +343,7 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
                 }
             }
             if (!reflect.DeepEqual(s2, Ꮡtt.Value.@in)) {
-                tΔ1.Fatalf("%s: Decode:\n\tinput: %s\n\tgot:  %#v\n\twant: %#v"u8, Ꮡtt.Value.Where, indentNewlines(((@string)got)), s2, Ꮡtt.Value.@in);
+                tΔ1.Fatalf("%s: Decode:\n\tinput: %s\n\tgot:  %#v\n\twant: %#v"u8, Ꮡtt.Value.Where, indentNewlines((@string)got), s2, Ꮡtt.Value.@in);
             }
         });
     }
@@ -360,7 +360,7 @@ internal partial struct renamedRenamedByteSlice /*[]renamedByte*/;
 internal static readonly @string ywJjˢ = @"""YWJj"""u8;
 
 public static void TestEncodeRenamedByteSlice(ж<testing.T> Ꮡt) {
-    var s = ((renamedByteSlice)slice<byte>((@string)"abc"u8));
+    var s = (renamedByteSlice)slice<byte>((@string)"abc"u8);
     var (got, err) = Marshal(s);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -563,7 +563,7 @@ public static void TestRefValMarshal(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
     {
-        @string got = ((@string)b); if (got != want) {
+        @string got = (@string)b; if (got != want) {
             Ꮡt.Errorf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
         }
     }
@@ -595,7 +595,7 @@ public static void TestMarshalerEscaping(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
     {
-        @string got = ((@string)b); if (got != want) {
+        @string got = (@string)b; if (got != want) {
             Ꮡt.Errorf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
         }
     }
@@ -607,7 +607,7 @@ public static void TestMarshalerEscaping(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
     {
-        @string got = ((@string)b); if (got != want) {
+        @string got = (@string)b; if (got != want) {
             Ꮡt.Errorf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
         }
     }
@@ -928,15 +928,15 @@ public static void TestNilMarshal(ж<testing.T> Ꮡt) {
         new(Name(""u8), @new<float64>(), @"0"u8),
         new(Name(""u8), slice<any>(default!), @"null"u8),
         new(Name(""u8), slice<@string>(default!), @"null"u8),
-        new(Name(""u8), ((map<@string, @string>)default!), @"null"u8),
+        new(Name(""u8), (map<@string, @string>)default!, @"null"u8),
         new(Name(""u8), slice<byte>(default!), @"null"u8),
         new(Name(""u8), new TestNilMarshal_type("gopher"u8), @"{""M"":""gopher""}"u8),
         new(Name(""u8), new TestNilMarshal_typeᴛ1(), @"{""M"":null}"u8),
         new(Name(""u8), new TestNilMarshal_typeᴛ1(new json_internal_test_package.nilJSONMarshalerжMarshaler(((ж<nilJSONMarshaler>)nil))), @"{""M"":""0zenil0""}"u8),
-        new(Name(""u8), new TestNilMarshal_typeᴛ2(((ж<nilJSONMarshaler>)nil)), @"{""M"":null}"u8),
+        new(Name(""u8), new TestNilMarshal_typeᴛ2((ж<nilJSONMarshaler>)nil), @"{""M"":null}"u8),
         new(Name(""u8), new TestNilMarshal_typeᴛ3(), @"{""M"":null}"u8),
         new(Name(""u8), new TestNilMarshal_typeᴛ3(new json_internal_test_package.nilTextMarshalerжTextMarshaler(((ж<nilTextMarshaler>)nil))), @"{""M"":""0zenil0""}"u8),
-        new(Name(""u8), new TestNilMarshal_typeᴛ2(((ж<nilTextMarshaler>)nil)), @"{""M"":null}"u8)
+        new(Name(""u8), new TestNilMarshal_typeᴛ2((ж<nilTextMarshaler>)nil), @"{""M"":null}"u8)
     }.slice();
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestNilMarshal_tests(), out var Ꮡtt);
@@ -975,7 +975,7 @@ public static void TestEmbeddedBug(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     @string want = @"{""S"":""B""}"u8;
-    @string got = ((@string)b);
+    @string got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -988,7 +988,7 @@ public static void TestEmbeddedBug(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     want = a23ˢ;
-    got = ((@string)b);
+    got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -1019,7 +1019,7 @@ public static void TestTaggedFieldDominates(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     @string want = sBugDˢ;
-    @string got = ((@string)b);
+    @string got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -1046,7 +1046,7 @@ public static void TestDuplicatedFieldDisappears(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     @string want = @"{}"u8;
-    @string got = ((@string)b);
+    @string got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -1061,7 +1061,7 @@ internal partial struct TestIssue10281_Foo /*dyn*/ {
 
 public static void TestIssue10281(ж<testing.T> Ꮡt) {
     ref var x = ref heap<TestIssue10281_Foo>(out var Ꮡx);
-    x = new TestIssue10281_Foo(((global::go.encoding.json_package.Number)(@string)invalidˢ));
+    x = new TestIssue10281_Foo((global::go.encoding.json_package.Number)(@string)invalidˢ);
 
     {
         var (_, err) = Marshal(Ꮡx); if (err == default!) {
@@ -1142,7 +1142,7 @@ public static void TestEncodePointerString(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
     {
-        @string got = ((@string)b);
+        @string got = (@string)b;
         @string want = n42ˢ; if (got != want) {
             Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
         }
@@ -1212,7 +1212,7 @@ public static void TestEncodeString(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Marshal(%q) error: %v"u8, tt.@in, err);
             continue;
         }
-        @string @out = ((@string)b);
+        @string @out = (@string)b;
         if (@out != tt.@out) {
             Ꮡt.Errorf("Marshal(%q) = %#q, want %#q"u8, tt.@in, @out, tt.@out);
         }
@@ -1282,10 +1282,10 @@ internal partial struct TestEncodeBytekind_tests /*dyn*/ {
 public static void TestEncodeBytekind(ж<testing.T> Ꮡt) {
     var tests = new TestEncodeBytekind_tests[]{
         new(Name(""u8), (byte)7, "7"u8),
-        new(Name(""u8), ((jsonbyte)7), @"{""JB"":7}"u8),
-        new(Name(""u8), ((textbyte)4), @"""TB:4"""u8),
-        new(Name(""u8), ((jsonint)5), @"{""JI"":5}"u8),
-        new(Name(""u8), ((textint)1), @"""TI:1"""u8),
+        new(Name(""u8), (jsonbyte)7, @"{""JB"":7}"u8),
+        new(Name(""u8), (textbyte)4, @"""TB:4"""u8),
+        new(Name(""u8), (jsonint)5, @"{""JI"":5}"u8),
+        new(Name(""u8), (textint)1, @"""TI:1"""u8),
         new(Name(""u8), new byte[]{0, 1}.slice(), @"""AAE="""u8),
         new(Name(""u8), new jsonbyte[]{0, 1}.slice(), @"[{""JB"":0},{""JB"":1}]"u8),
         new(Name(""u8), new slice<jsonbyte>[]{new jsonbyte[]{0, 1}.slice(), new jsonbyte[]{3}.slice()}.slice(), @"[[{""JB"":0},{""JB"":1}],[{""JB"":3}]]"u8),
@@ -1305,7 +1305,7 @@ public static void TestEncodeBytekind(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 tΔ1.Errorf("%s: Marshal error: %v"u8, ttʗ1.Where, err);
             }
-            @string got = ((@string)b);
+            @string got = (@string)b;
             @string want = ttʗ1.want;
             if (got != want) {
                 tΔ1.Errorf("%s: Marshal:\n\tgot:  %s\n\twant: %s"u8, ttʗ1.Where, got, want);
@@ -1379,7 +1379,7 @@ public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     nint nfail = 0;
     void test(float64 f, nint bits) {
-        var vf = ((any)f);
+        var vf = (any)f;
         if (bits == 32) {
             f = (float64)(float32)f; // round
             vf = (float32)f;
@@ -1390,7 +1390,7 @@ public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
             nfail++;
             return;
         }
-        @string @out = ((@string)bout);
+        @string @out = (@string)bout;
 
         // result must convert back to the same float
         (var g, err) = strconv.ParseFloat(@out, bits);
@@ -1579,7 +1579,7 @@ public static void TestMarshalRawMessageValue(ж<testing.T> Ꮡt) {
                 }
             }
             {
-                @string got = ((@string)b); if (got != ttʗ1.want) {
+                @string got = (@string)b; if (got != ttʗ1.want) {
                     tΔ1.Errorf("%s: Marshal:\n\tinput: %#v\n\tgot:  %s\n\twant: %s"u8, ttʗ1.Where, ttʗ1.@in, got, ttʗ1.want);
                 }
             }
@@ -1591,7 +1591,7 @@ internal partial struct marshalPanic {
 }
 
 internal static (slice<byte>, error) MarshalJSON(this marshalPanic _) {
-    throw panic((nint)(0xdead));
+    throw panic((nint)0xdead);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1602,7 +1602,7 @@ public static void TestMarshalPanic(ж<testing.T> Ꮡt) {
     try {
         defer(() => {
             {
-                var got = recover(); if (!reflect.DeepEqual(got, (nint)(0xdead))) {
+                var got = recover(); if (!reflect.DeepEqual(got, (nint)0xdead)) {
                     Ꮡt.Errorf("panic() = (%T)(%v), want 0xdead"u8, got, got);
                 }
             }
@@ -1628,7 +1628,7 @@ public static void TestMarshalUncommonFieldNames(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     @string want = a000A0ˢ;
-    @string got = ((@string)b);
+    @string got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -1695,7 +1695,7 @@ public static void TestIssue63379(ж<testing.T> Ꮡt) {
         "{}\u2028"u8,
         "{}\u2029"u8
     }.slice()) {
-        var (_, err) = Marshal(((marshaledValue)v));
+        var (_, err) = Marshal((marshaledValue)v);
         if (err == default!) {
             Ꮡt.Errorf("expected error for %q"u8, v);
         }

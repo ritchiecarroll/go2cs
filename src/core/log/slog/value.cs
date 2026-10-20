@@ -306,7 +306,7 @@ public static any Any(this Value v) {
     if (exprᴛ1 == KindAny) {
         {
             var (k, ok) = v.any._<kind>(ᐧ); if (ok) {
-                return ((ΔKind)(nint)k);
+                return (ΔKind)(nint)k;
             }
         }
         return v.any;
@@ -353,7 +353,7 @@ public static @string String(this Value v) {
         }
     }
     slice<byte> buf = default!;
-    return ((@string)v.append(buf));
+    return (@string)v.append(buf);
 }
 
 internal static @string str(this Value v) {
@@ -414,7 +414,7 @@ public static time.Duration Duration(this Value v) {
 }
 
 internal static time.Duration duration(this Value v) {
-    return ((time.Duration)(int64)v.num);
+    return (time.Duration)(int64)v.num;
 }
 
 // Float64 returns v's value as a float64. It panics
@@ -456,7 +456,7 @@ internal static time.Time time(this Value v) {
         return time_package.Unix(0, (int64)v.num).In(a);
     }
     case timeTime a: {
-        return ((time.Time)a);
+        return (time.Time)a;
     }
     default: {
         var a = v.any;

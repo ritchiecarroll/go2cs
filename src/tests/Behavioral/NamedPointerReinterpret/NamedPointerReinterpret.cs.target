@@ -52,7 +52,7 @@ internal static @string classify(any v) {
 internal static void Main() {
     var pb = makeBase();
     var pv = pb.Reinterpret<@base, view>();
-    var bb = ((@base)(pv.Value));
+    var bb = (@base)(pv.Value);
     fmt.Println(bb.a, bb.b);
 
     any boxed = ((intRef)nil);

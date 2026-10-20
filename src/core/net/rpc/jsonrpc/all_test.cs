@@ -168,7 +168,7 @@ public static partial void TestServer(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("resp.Error: %s"u8, resp.Error);
             }
             if (resp.Id._<@string>() != ((@string)(rune)i)) {
-                Ꮡt.Fatalf("resp: bad id %q want %q"u8, resp.Id._<@string>(), ((@string)(rune)i));
+                Ꮡt.Fatalf("resp: bad id %q want %q"u8, resp.Id._<@string>(), (@string)(rune)i);
             }
             if (resp.Result.C != 2 * i + 1) {
                 Ꮡt.Fatalf("resp: bad result: %d+%d=%d"u8, i, i + 1, resp.Result.C);

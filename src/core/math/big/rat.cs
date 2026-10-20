@@ -40,7 +40,7 @@ public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
     UntypedInt expMask = /* 1<<11 - 1 */ 2047;
     var bits = math.Float64bits(f);
     var mantissa = (uint64)(bits & ((uint64)(4503599627370496L - 1)));
-    nint exp = (nint)((uint64)(((bits >> (int)(52))) & (uint64)expMask));
+    nint exp = (nint)((bits >> 52) & (uint64)expMask);
     var exprᴛ1 = exp;
     if (exprᴛ1 == expMask) { // non-finite
         return default!;
@@ -49,14 +49,14 @@ public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
         exp -= 1022;
     }
     else { /* default: */ // normal
-        mantissa |= (uint64)(((uint64)1 << (int)(52)));
+        mantissa |= (uint64)(((uint64)1 << 52));
         exp -= 1023;
     }
 
     nint shift = 52 - exp;
 
     // Optimization (?): partially pre-normalise.
-    while ((uint64)(mantissa & 1) == 0 && shift > 0) {
+    while ((mantissa & 1) == 0 && shift > 0) {
         mantissa >>= (int)(1);
         shift--;
     }
@@ -134,14 +134,14 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a,
 
     // 3. If quotient didn't fit in Msize2 bits, redo division by b2<<1
     // (in effect---we accomplish this incrementally).
-    if ((mantissa >> (int)(Msize2)) == 1) {
-        if ((uint32)(mantissa & 1) == 1) {
+    if (mantissa >> (int)(Msize2) == 1) {
+        if ((mantissa & 1) == 1) {
             haveRem = true;
         }
         mantissa >>= (int)(1);
         exp++;
     }
-    if ((mantissa >> (int)(Msize1)) != 1) {
+    if (mantissa >> (int)(Msize1) != 1) {
         throw panic(fmt.Sprintf("expected exactly %d bits of result"u8, (nint)(Msize2)));
     }
 
@@ -149,16 +149,16 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> Ꮡstk, Δnat a,
     if ((nint)(Emin - Msize) <= exp && exp <= Emin) {
         // Denormal case; lose 'shift' bits of precision.
         nuint shift = (nuint)((nint)Emin - (exp - 1)); // [1..Esize1)
-        var lostbits = (uint32)(mantissa & (((uint32)1).Lsh(shift) - 1));
+        var lostbits = mantissa & (((uint32)1).Lsh(shift) - 1);
         haveRem = haveRem || lostbits != 0;
         mantissa.RshAssign(shift);
         exp = 2 - Ebias; // == exp + shift
     }
     // Round q using round-half-to-even.
     exact = !haveRem;
-    if ((uint32)(mantissa & 1) != 0) {
+    if ((mantissa & 1) != 0) {
         exact = false;
-        if (haveRem || (uint32)(mantissa & 2) != 0) {
+        if (haveRem || (mantissa & 2) != 0) {
             {
                 mantissa++; if (mantissa >= (uint32)(((uint32)1 << (int)(Msize2)))) {
                     // Complete rollover 11...1 => 100...0, so shift is safe
@@ -239,14 +239,14 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a,
 
     // 3. If quotient didn't fit in Msize2 bits, redo division by b2<<1
     // (in effect---we accomplish this incrementally).
-    if ((mantissa >> (int)(Msize2)) == 1) {
-        if ((uint64)(mantissa & 1) == 1) {
+    if (mantissa >> (int)(Msize2) == 1) {
+        if ((mantissa & 1) == 1) {
             haveRem = true;
         }
         mantissa >>= (int)(1);
         exp++;
     }
-    if ((mantissa >> (int)(Msize1)) != 1) {
+    if (mantissa >> (int)(Msize1) != 1) {
         throw panic(fmt.Sprintf("expected exactly %d bits of result"u8, (nint)(Msize2)));
     }
 
@@ -254,16 +254,16 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> Ꮡstk, Δnat a,
     if ((nint)(Emin - Msize) <= exp && exp <= Emin) {
         // Denormal case; lose 'shift' bits of precision.
         nuint shift = (nuint)((nint)Emin - (exp - 1)); // [1..Esize1)
-        var lostbits = (uint64)(mantissa & (((uint64)1).Lsh(shift) - 1));
+        var lostbits = mantissa & (((uint64)1).Lsh(shift) - 1);
         haveRem = haveRem || lostbits != 0;
         mantissa.RshAssign(shift);
         exp = 2 - Ebias; // == exp + shift
     }
     // Round q using round-half-to-even.
     exact = !haveRem;
-    if ((uint64)(mantissa & 1) != 0) {
+    if ((mantissa & 1) != 0) {
         exact = false;
-        if (haveRem || (uint64)(mantissa & 2) != 0) {
+        if (haveRem || (mantissa & 2) != 0) {
             {
                 mantissa++; if (mantissa >= (uint64)(((uint64)1 << (int)(Msize2)))) {
                     // Complete rollover 11...1 => 100...0, so shift is safe

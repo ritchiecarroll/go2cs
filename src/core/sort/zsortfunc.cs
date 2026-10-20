@@ -239,11 +239,11 @@ internal static bool partialInsertionSort_func(lessSwap data, nint a, nint b) {
 internal static void breakPatterns_func(lessSwap data, nint a, nint b) {
     nint length = b - a;
     if (length >= 8) {
-        var random = ((xorshift)(uint64)length);
+        var random = (xorshift)(uint64)length;
         nuint modulus = nextPowerOfTwo(length);
 
         for (nint idx = a + (length / 4) * 2 - 1; idx <= a + (length / 4) * 2 + 1; idx++) {
-            nint other = (nint)((nuint)((nuint)random.Next() & (modulus - 1)));
+            nint other = (nint)((nuint)random.Next() & (modulus - 1));
             if (other >= length) {
                 other -= length;
             }
@@ -386,7 +386,7 @@ internal static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
         nint i = m;
         nint j = b;
         while (i < j) {
-            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
+            nint h = (nint)((nuint)(i + j) >> 1);
             if (data.Less(h, a)){
                 i = h + 1;
             } else {
@@ -410,7 +410,7 @@ internal static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
         nint i = a;
         nint j = m;
         while (i < j) {
-            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
+            nint h = (nint)((nuint)(i + j) >> 1);
             if (!data.Less(m, h)){
                 i = h + 1;
             } else {
@@ -424,7 +424,7 @@ internal static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
         return;
     }
 
-    nint mid = (nint)(((nuint)(a + b) >> (int)(1)));
+    nint mid = (nint)((nuint)(a + b) >> 1);
     nint n = mid + m;
     nint start = default!;
     nint r = default!;
@@ -438,7 +438,7 @@ internal static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
     nint p = n - 1;
 
     while (start < r) {
-        nint c = (nint)(((nuint)(start + r) >> (int)(1)));
+        nint c = (nint)((nuint)(start + r) >> 1);
         if (!data.Less(p - c, c)){
             start = c + 1;
         } else {

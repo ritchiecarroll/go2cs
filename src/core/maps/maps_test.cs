@@ -21,10 +21,10 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, m1)) {
         Ꮡt.Errorf("Equal(%v, %v) = false, want true"u8, m1, m1);
     }
-    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, ((map<nint, nint>)default!))) {
+    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, (map<nint, nint>)default!)) {
         Ꮡt.Errorf("Equal(%v, nil) = true, want false"u8, m1);
     }
-    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(((map<nint, nint>)default!), m1)) {
+    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>((map<nint, nint>)default!, m1)) {
         Ꮡt.Errorf("Equal(nil, %v) = true, want false"u8, m1);
     }
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(default!, default!)) {
@@ -66,10 +66,10 @@ public static void TestEqualFunc(ж<testing.T> Ꮡt) {
     if (!EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, m1, equal<nint>)) {
         Ꮡt.Errorf("EqualFunc(%v, %v, equal) = false, want true"u8, m1, m1);
     }
-    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, ((map<nint, nint>)default!), equal<nint>)) {
+    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, (map<nint, nint>)default!, equal<nint>)) {
         Ꮡt.Errorf("EqualFunc(%v, nil, equal) = true, want false"u8, m1);
     }
-    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(((map<nint, nint>)default!), m1, equal<nint>)) {
+    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>((map<nint, nint>)default!, m1, equal<nint>)) {
         Ꮡt.Errorf("EqualFunc(nil, %v, equal) = true, want false"u8, m1);
     }
     if (!EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(default!, default!, equal<nint>)) {
@@ -171,7 +171,7 @@ public static void TestCloneWithDelete(ж<testing.T> Ꮡt) {
     }
     var m2 = Clone<map<nint, nint>, nint, nint>(m);
     if (len(m2) != 8) {
-        Ꮡt.Errorf("len2(m2) = %d, want %d"u8, len(m2), (nint)(8));
+        Ꮡt.Errorf("len2(m2) = %d, want %d"u8, len(m2), (nint)8);
     }
     for (nint i = 0; i < 8; i++) {
         if (m2[i] != m[i]) {

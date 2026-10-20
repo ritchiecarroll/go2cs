@@ -58,7 +58,7 @@ tail
 
     var h = (uint32)2166136261U;
     for (nint i = 0; i < len(pemBlock); i++) {
-        h = ((uint32)(h ^ (uint32)pemBlock[i])) * 16777619;
+        h = (h ^ (uint32)pemBlock[i]) * 16777619;
     }
     fmt.Printf("%08x\n"u8, h);
 }

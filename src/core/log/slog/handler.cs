@@ -578,7 +578,7 @@ internal static void appendError(this ref handleState s, error err) {
 internal static void appendKey(this ref handleState s, @string key) {
     s.buf.WriteString(s.sep);
     if (s.prefix != nil && len(s.prefix.ValueSlot) > 0){
-        s.appendTwoStrings(((@string)(slice<byte>)s.prefix.ValueSlot), key);
+        s.appendTwoStrings((@string)(slice<byte>)s.prefix.ValueSlot, key);
     } else {
         s.appendString(key);
     }

@@ -71,7 +71,7 @@ internal static array<array<byte>> unscaledQuantInNaturalOrder = new array<byte>
 
 public static void TestUnscaledQuant(ж<testing.T> Ꮡt) {
     var bad = false;
-    for (global::go.image.jpeg_package.quantIndex i = ((global::go.image.jpeg_package.quantIndex)0); i < nQuantIndex; i++) {
+    for (global::go.image.jpeg_package.quantIndex i = (global::go.image.jpeg_package.quantIndex)0; i < nQuantIndex; i++) {
         for (nint zig = 0; zig < blockSize; zig++) {
             var got = unscaledQuant[i][zig];
             var want = unscaledQuantInNaturalOrder[i][unzig[zig]];
@@ -104,12 +104,12 @@ partial struct testCaseᴛ1 /*dyn*/ {
     internal int64 tolerance;
 }
 internal static slice<testCaseᴛ1> testCase = new testCaseᴛ1[]{
-    new("../testdata/video-001.png"u8, 1, ((int64)24 << (int)(8))),
-    new("../testdata/video-001.png"u8, 20, ((int64)12 << (int)(8))),
-    new("../testdata/video-001.png"u8, 60, ((int64)8 << (int)(8))),
-    new("../testdata/video-001.png"u8, 80, ((int64)6 << (int)(8))),
-    new("../testdata/video-001.png"u8, 90, ((int64)4 << (int)(8))),
-    new("../testdata/video-001.png"u8, 100, ((int64)2 << (int)(8)))
+    new("../testdata/video-001.png"u8, 1, (int64)24 << 8),
+    new("../testdata/video-001.png"u8, 20, (int64)12 << 8),
+    new("../testdata/video-001.png"u8, 60, (int64)8 << 8),
+    new("../testdata/video-001.png"u8, 80, (int64)6 << 8),
+    new("../testdata/video-001.png"u8, 90, (int64)4 << 8),
+    new("../testdata/video-001.png"u8, 100, (int64)2 << 8)
 }.slice();
 
 internal static int64 delta(uint32 u0, uint32 u1) {
@@ -194,7 +194,7 @@ public static void TestWriteGrayscale(ж<testing.T> Ꮡt) {
         }
     }
     // Compare the average delta to the tolerance level.
-    var want = (int64)(((int64)2 << (int)(8)));
+    var want = (int64)((int64)2 << 8);
     {
         var got = averageDelta(new image.GrayжImage(m0), m1); if (got > want) {
             Ꮡt.Errorf("average delta too high; got %d, want <= %d"u8, got, want);

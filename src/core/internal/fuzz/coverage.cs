@@ -109,10 +109,10 @@ internal static array<byte> pow2Table = new(256);
 [GoInit] internal static void init() {
     foreach (var (i, _) in pow2Table) {
         var b = (byte)i;
-        b |= (byte)((b >> (int)(1)));
-        b |= (byte)((b >> (int)(2)));
-        b |= (byte)((b >> (int)(4)));
-        b -= (byte)((b >> (int)(1)));
+        b |= (byte)((b >> 1));
+        b |= (byte)((b >> 2));
+        b |= (byte)((b >> 4));
+        b -= (byte)((b >> 1));
         pow2Table[i] = b;
     }
 }

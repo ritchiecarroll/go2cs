@@ -34,7 +34,7 @@ public static float64 NormFloat64(this ref Rand r) {
     while (ᐧ) {
         var u = r.Uint64();
         var j = (int32)u; // Possibly negative
-        var i = (uint64)((u >> (int)(32)) & 0x7F);
+        var i = u >> 32 & 0x7F;
         var x = (float64)j * (float64)wn[i];
         if (absInt32(j) < kn[i]) {
             // This case should be hit better than 99% of the time.

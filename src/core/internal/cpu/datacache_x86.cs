@@ -34,7 +34,7 @@ internal static uint32 extractBits(uint32 arg, nint l, nint r) {
     if (l > r) {
         throw panic("bad bit range");
     }
-    return (uint32)((arg.Rsh((int64)(l))) & ((((uint32)1).Lsh((int64)((r - l + 1)))) - 1));
+    return (arg.Rsh((int64)(l))) & ((((uint32)1).Lsh((int64)((r - l + 1)))) - 1);
 }
 
 internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
@@ -52,7 +52,7 @@ internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
     for (var i = (uint32)0; i < 0xFFFF; i++) {
         var (eax, ebx, ecx, _) = cpuid(4, i);
 
-        var cacheType = (uint32)(eax & 0xF); // EAX bits 4-0: Cache Type
+        var cacheType = eax & 0xF; // EAX bits 4-0: Cache Type
         if (cacheType == 0) {
             break;
         }
@@ -63,7 +63,7 @@ internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
         }
 
         // Guaranteed to always start counting from 1.
-        var level = (uint32)(((eax >> (int)(5))) & 0x7);
+        var level = (eax >> 5) & 0x7;
 
         var lineSize = extractBits(ebx, 0, 11) + 1; // Bits 11-0: Line size in bytes - 1
         var partitions = extractBits(ebx, 12, 21) + 1; // Bits 21-12: Physical line partitions - 1
@@ -97,7 +97,7 @@ internal static slice<uintptr> getDataCacheSizesAMD() {
     var (_, _, ecx6, edx6) = cpuid(0x80000006U, 0);
 
     // The size is return in kb, turning into bytes.
-    var l1dSize = (uintptr)((extractBits(ecx5, 24, 31) << (int)(10)));
+    var l1dSize = (uintptr)(extractBits(ecx5, 24, 31) << 10);
     caches = append(caches, l1dSize);
 
     // Check that L2 cache is present.
@@ -106,7 +106,7 @@ internal static slice<uintptr> getDataCacheSizesAMD() {
             return caches;
         }
     }
-    var l2Size = (uintptr)((extractBits(ecx6, 16, 31) << (int)(10)));
+    var l2Size = (uintptr)(extractBits(ecx6, 16, 31) << 10);
     caches = append(caches, l2Size);
 
     // Check that L3 cache is present.
@@ -117,7 +117,7 @@ internal static slice<uintptr> getDataCacheSizesAMD() {
     }
     // Specifies the L3 cache size is within the following range:
     // (L3Size[31:18] * 512KB) <= L3 cache size < ((L3Size[31:18]+1) * 512KB).
-    var l3Size = (uintptr)(extractBits(edx6, 18, 31) * (((uint32)512 << (int)(10))));
+    var l3Size = (uintptr)(extractBits(edx6, 18, 31) * ((uint32)512 << 10));
     caches = append(caches, l3Size);
 
     return caches;

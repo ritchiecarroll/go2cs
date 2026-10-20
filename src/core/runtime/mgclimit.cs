@@ -397,7 +397,7 @@ partial struct limiterEventStamp /*num:uint64*/;
 
 // makeLimiterEventStamp creates a new stamp from the event type and the current timestamp.
 internal static limiterEventStamp makeLimiterEventStamp(limiterEventType typ, int64 now) {
-    return ((limiterEventStamp)((uint64)(((uint64)(uint8)typ << (int)((64 - limiterEventBits))) | ((uint64)((uint64)now & ~limiterEventTypeMask)))));
+    return (limiterEventStamp)((uint64)(uint8)typ << (int)((64 - limiterEventBits)) | ((uint64)now & ~limiterEventTypeMask));
 }
 
 // duration computes the difference between now and the start time stored in the stamp.
@@ -407,7 +407,7 @@ internal static limiterEventStamp makeLimiterEventStamp(limiterEventType typ, in
 internal static int64 duration(this limiterEventStamp s, int64 now) {
     // The top limiterEventBits bits of the timestamp are derived from the current time
     // when computing a duration.
-    var start = (int64)((uint64)(((uint64)((uint64)now & limiterEventTypeMask)) | ((uint64)((uint64)s & ~limiterEventTypeMask))));
+    var start = (int64)(((uint64)now & limiterEventTypeMask) | ((uint64)s & ~limiterEventTypeMask));
     if (now < start) {
         return 0;
     }
@@ -416,7 +416,7 @@ internal static int64 duration(this limiterEventStamp s, int64 now) {
 
 // type extracts the event type from the stamp.
 internal static limiterEventType typ(this limiterEventStamp s) {
-    return ((limiterEventType)(uint8)((uint64)((s >> (int)((64 - limiterEventBits))))));
+    return (limiterEventType)(uint8)((uint64)((s >> (int)((64 - limiterEventBits)))));
 }
 
 // limiterEvent represents tracking state for an event tracked by the GC CPU limiter.
@@ -453,7 +453,7 @@ internal static (limiterEventType typ, int64 duration) consume(this ж<limiterEv
 
     // Read the limiter event timestamp and update it to now.
     while (ᐧ) {
-        var old = ((limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load());
+        var old = (limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load();
         typ = old.typ();
         if (typ == limiterEventNone) {
             // There's no in-flight event, so just push that up.
@@ -484,7 +484,7 @@ internal static readonly @string limiterEventStopInvalidˢ = "limiterEvent.stop:
 internal static void stop(this ж<limiterEvent> Ꮡe, limiterEventType typ, int64 now) {
     limiterEventStamp stamp = default!;
     while (ᐧ) {
-        stamp = ((limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load());
+        stamp = (limiterEventStamp)Ꮡe.of(limiterEvent.Ꮡstamp).Load();
         if (stamp.typ() != typ) {
             print((@string)"runtime: want="u8, typ, (@string)" got="u8, stamp.typ(), (@string)"\n"u8);
             @throw(limiterEventStopFoundˢ);

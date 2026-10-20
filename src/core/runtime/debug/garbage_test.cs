@@ -144,7 +144,7 @@ public static void TestFreeOSMemory(ж<testing.T> Ꮡt) {
     // 2x pages.
     var slack = (uint64)(bigBytes / 2);
     var pageSize = (uint64)os.Getpagesize();
-    if (pageSize > ((uint64)8 << (int)(10))) {
+    if (pageSize > (uint64)8 << 10) {
         slack += pageSize * 2;
     }
     if (slack > bigBytes) {
@@ -185,19 +185,19 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
         setGCPercentBallast = new slice<byte>((nint)((uint64)baseline - ms.Alloc));
         runtime.GC();
         runtime.ReadMemStats(Ꮡms);
-        if (abs64((int64)baseline - (int64)ms.Alloc) > ((int64)10 << (int)(20))) {
-            Ꮡt.Fatalf("failed to set up baseline live heap; got %d MB, want %d MB"u8, (ms.Alloc >> (int)(20)), (nint)((baseline >> (int)(20))));
+        if (abs64((int64)baseline - (int64)ms.Alloc) > (int64)10 << 20) {
+            Ꮡt.Fatalf("failed to set up baseline live heap; got %d MB, want %d MB"u8, ms.Alloc >> 20, (nint)((baseline >> 20)));
         }
         // NextGC should be ~200 MB.
         UntypedInt thresh = /* 20 << 20 */ 20971520; // TODO: Figure out why this is so noisy on some builders
         {
             var want = (int64)(2 * baseline); if (abs64(want - (int64)ms.NextGC) > thresh) {
-                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, (ms.NextGC >> (int)(20)), (want >> (int)(20)), (nint)((thresh >> (int)(20))));
+                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, ms.NextGC >> 20, want >> 20, (nint)((thresh >> 20)));
             }
         }
         // Create some garbage, but not enough to trigger another GC.
-        for (nint i = 0; i < (nint)((nint)(/* 1.2 * baseline */ 125829120L)); i += (1 << (int)(10))) {
-            setGCPercentSink = new slice<byte>((1 << (int)(10)));
+        for (nint i = 0; i < (nint)((nint)(/* 1.2 * baseline */ 125829120L)); i += (1 << 10)) {
+            setGCPercentSink = new slice<byte>((1 << 10));
         }
         setGCPercentSink = default!;
         // Adjust GOGC to 50. NextGC should be ~150 MB.
@@ -205,7 +205,7 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
         runtime.ReadMemStats(Ꮡms);
         {
             var want = (int64)(/* 1.5 * baseline */ 157286400L); if (abs64(want - (int64)ms.NextGC) > thresh) {
-                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, (ms.NextGC >> (int)(20)), (want >> (int)(20)), (nint)((thresh >> (int)(20))));
+                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, ms.NextGC >> 20, want >> 20, (nint)((thresh >> 20)));
             }
         }
 
@@ -219,7 +219,7 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
         var ngc1 = ms.NumGC;
         SetGCPercent(10);
         // It may require an allocation to actually force the GC.
-        setGCPercentSink = new slice<byte>((1 << (int)(20)));
+        setGCPercentSink = new slice<byte>((1 << 20));
         runtime.ReadMemStats(Ꮡms);
         var ngc2 = ms.NumGC;
         if (ngc1 == ngc2) {

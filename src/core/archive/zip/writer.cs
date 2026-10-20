@@ -100,7 +100,7 @@ public static error Close(this ref Writer w) {
     var start = w.cw.Value.count;
     foreach (var (_, h) in w.dir) {
         array<byte> bufΔ1 = new(46); /* directoryHeaderLen */
-        var bΔ1 = ((writeBuf)(bufΔ1[..]));
+        var bΔ1 = (writeBuf)(bufΔ1[..]);
         bΔ1.uint32((uint32)directoryHeaderSignature);
         bΔ1.uint16((~h).CreatorVersion);
         bΔ1.uint16((~h).ReaderVersion);
@@ -118,7 +118,7 @@ public static error Close(this ref Writer w) {
 
             // append a zip64 extra block to Extra
             array<byte> bufΔ2 = new(28);            // 2x uint16 + 3x uint64
-            var eb = ((writeBuf)(bufΔ2[..]));
+            var eb = (writeBuf)(bufΔ2[..]);
             eb.uint16(zip64ExtraID);
             eb.uint16(24); // size = 3x uint64
             eb.uint64((~h).UncompressedSize64);
@@ -175,7 +175,7 @@ public static error Close(this ref Writer w) {
 
     if (records >= uint16max || size >= uint32max || offset >= uint32max) {
         array<byte> bufΔ3 = new(76); /* directory64EndLen + directory64LocLen */
-        var bΔ2 = ((writeBuf)(bufΔ3[..]));
+        var bΔ2 = (writeBuf)(bufΔ3[..]);
 
         // zip64 end of central directory record
         bΔ2.uint32(directory64EndSignature);
@@ -210,7 +210,7 @@ public static error Close(this ref Writer w) {
 
     // write end record
     array<byte> buf = new(22); /* directoryEndLen */
-    var b = ((writeBuf)(buf[..]));
+    var b = (writeBuf)(buf[..]);
     b.uint32((uint32)directoryEndSignature);
     b = b[4..]; // skip over disk number and first disk number (2x uint16)
     b.uint16((uint16)records); // number of entries this disk
@@ -362,7 +362,7 @@ public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> 
         // if modification time is the only timestamp being encoded.
         array<byte> mbuf = new(9);            // 2*SizeOf(uint16) + SizeOf(uint8) + SizeOf(uint32)
         var mt = (uint32)fh.Modified.Unix();
-        var eb = ((writeBuf)(mbuf[..]));
+        var eb = (writeBuf)(mbuf[..]);
         eb.uint16(extTimeExtraID);
         eb.uint16(5); // Size: SizeOf(uint8) + SizeOf(uint32)
         eb.uint8(1); // Flags: ModTime
@@ -436,7 +436,7 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     }
 
     array<byte> buf = new(30); /* fileHeaderLen */
-    var b = ((writeBuf)(buf[..]));
+    var b = (writeBuf)(buf[..]);
     b.uint32((uint32)fileHeaderSignature);
     b.uint16(h.ReaderVersion);
     b.uint16(h.Flags);
@@ -699,7 +699,7 @@ internal static error writeDataDescriptor(this ref fileWriter w) {
     } else {
         buf = new slice<byte>(dataDescriptorLen);
     }
-    var b = ((writeBuf)buf);
+    var b = (writeBuf)buf;
     b.uint32(dataDescriptorSignature); // de-facto standard, required by OS X
     b.uint32(w.CRC32);
     if (w.isZip64()){
