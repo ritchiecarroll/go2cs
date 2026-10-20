@@ -9,44 +9,27 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string readErrorˢ = "read error"u8;
-private static readonly @string gidˢ = "Gid:"u8;
-private static readonly @string noGidLineˢ = "no Gid line"u8;
-
 internal static @string gidLine(nint tid) {
     var (b, err) = os.ReadFile(fmt.Sprintf("/proc/self/task/%d/status"u8, tid));
     if (err != default!) {
-        return readErrorˢ;
+        return "read error";
     }
-    foreach (var (_, line) in strings.Split(((@string)b), "\n"u8)) {
-        if (strings.HasPrefix(line, gidˢ)) {
-            return strings.Join(strings.Fields(line[4..]), " "u8);
+    foreach (var (_, line) in strings.Split(((@string)b), "\n")) {
+        if (strings.HasPrefix(line, "Gid:")) {
+            return strings.Join(strings.Fields(line[4..]), " ");
         }
     }
-    return noGidLineˢ;
+    return "no Gid line";
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object notLinuxNothingToObserveˢ = (@string)"not linux; nothing to observe"u8;
-private static readonly object skipNeedsRootThisSeamˢ = (@string)"SKIP: needs root -- this seam changes the process's effective gid and reads /proc"u8;
-private static readonly object beforeMainˢ = (@string)"before main  :"u8;
-private static readonly object beforeParkedˢ = (@string)"before parked:"u8;
-private static readonly object setegid1Failedˢ = (@string)"setegid(1) failed:"u8;
-private static readonly object afterMainˢ = (@string)"after  main  :"u8;
-private static readonly object afterParkedˢ = (@string)"after  parked:"u8;
-private static readonly object theParkedThreadFollowedˢ = (@string)"the parked thread followed the change:"u8;
-private static readonly object restoreFailedˢ = (@string)"restore failed:"u8;
-private static readonly object restoredMainˢ = (@string)"restored main:"u8;
 
 internal static partial void Main() {
     if (runtime.GOOS != "linux"u8) {
-        fmt.Println(notLinuxNothingToObserveˢ);
+        fmt.Println("not linux; nothing to observe");
         return;
     }
 
     if (os.Geteuid() != 0) {
-        fmt.Println(skipNeedsRootThisSeamˢ);
+        fmt.Println("SKIP: needs root -- this seam changes the process's effective gid and reads /proc");
         return;
     }
 
@@ -74,31 +57,31 @@ internal static partial void Main() {
     nint parked = ᐸꟷ(tidCh);
     nint self = syscall.Gettid();
 
-    fmt.Println(beforeMainˢ, gidLine(self));
-    fmt.Println(beforeParkedˢ, gidLine(parked));
+    fmt.Println("before main  :", gidLine(self));
+    fmt.Println("before parked:", gidLine(parked));
 
     {
         var err = syscall.Setegid(1); if (err != default!) {
-            fmt.Println(setegid1Failedˢ, err);
+            fmt.Println("setegid(1) failed:", err);
             return;
         }
     }
 
     @string mainAfter = gidLine(self);
-    fmt.Println(afterMainˢ, mainAfter);
+    fmt.Println("after  main  :", mainAfter);
 
     close(release);
     @string parkedAfter = ᐸꟷ(done);
-    fmt.Println(afterParkedˢ, parkedAfter);
-    fmt.Println(theParkedThreadFollowedˢ, parkedAfter == mainAfter);
+    fmt.Println("after  parked:", parkedAfter);
+    fmt.Println("the parked thread followed the change:", parkedAfter == mainAfter);
 
     {
         var err = syscall.Setegid(0); if (err != default!) {
-            fmt.Println(restoreFailedˢ, err);
+            fmt.Println("restore failed:", err);
             return;
         }
     }
-    fmt.Println(restoredMainˢ, gidLine(self));
+    fmt.Println("restored main:", gidLine(self));
 }
 
 } // end main_package
