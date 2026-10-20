@@ -5,9 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using bytes = go.bytes_package;
-using io = go.io_package;
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -22,7 +19,6 @@ using static go.encoding.base32_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<badReader, ж<badReader>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

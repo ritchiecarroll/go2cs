@@ -8,9 +8,6 @@ global using static global::go.encoding.base32_package;
 global using static global::go.encoding.base32_internal_test_package;
 
 // <ImportedTypeAliases>
-using bytes = go.bytes_package;
-using io = go.io_package;
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -27,10 +24,6 @@ using static global::go.encoding.base32_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bytes.Buffer, ж<bytes.Buffer>>(Indirect = true)]
-[assembly: GoImplicitConv<io.PipeReader, ж<io.PipeReader>>(Indirect = true)]
-[assembly: GoImplicitConv<strings.Builder, ж<strings.Builder>>(Indirect = true)]
-[assembly: GoImplicitConv<strings.Reader, ж<strings.Reader>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

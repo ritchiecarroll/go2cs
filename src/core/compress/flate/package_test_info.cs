@@ -20,7 +20,6 @@ global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,7 +43,6 @@ using static global::go.compress.flate_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.compress.flate_package.huffmanBitWriter, ж<global::go.compress.flate_package.huffmanBitWriter>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

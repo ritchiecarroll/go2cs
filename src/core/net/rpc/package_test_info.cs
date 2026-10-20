@@ -26,7 +26,6 @@ global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +48,6 @@ using static global::go.net.rpc_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.net.rpc_package.Server, ж<global::go.net.rpc_package.Server>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

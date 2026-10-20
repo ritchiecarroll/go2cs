@@ -29,8 +29,6 @@ global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using Δtesting = go.testing_package;
-using Δtime = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -83,9 +81,6 @@ using static global::go.time_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<ParseTest, ж<ParseTest>>]
-[assembly: GoImplicitConv<parsedTime, ж<parsedTime>>]
-[assembly: GoImplicitConv<tickerTimer, ж<tickerTimer>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

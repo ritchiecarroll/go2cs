@@ -32,7 +32,6 @@ global using sqlꓸStmt = go.database.sql_package.ΔStmt;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,8 +53,6 @@ using static global::go.database.sql_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.database.sql_package.DB, ж<global::go.database.sql_package.DB>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.database.sql_package.Rows, ж<global::go.database.sql_package.Rows>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

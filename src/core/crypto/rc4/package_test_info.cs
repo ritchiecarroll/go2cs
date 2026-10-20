@@ -7,7 +7,6 @@
 global using static global::go.crypto.rc4_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -21,7 +20,6 @@ using static global::go.crypto.rc4_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.rc4_package.Cipher, ж<global::go.crypto.rc4_package.Cipher>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -8,7 +8,6 @@ global using static global::go.go.token_package;
 global using static global::go.go.token_internal_test_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -27,8 +26,6 @@ using static global::go.go.token_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.go.token_package.FileSet, ж<global::go.go.token_package.FileSet>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.go.token_package.ΔFile, ж<global::go.go.token_package.ΔFile>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

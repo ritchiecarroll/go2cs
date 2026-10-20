@@ -17,8 +17,6 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using strings = go.strings_package;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -41,10 +39,6 @@ using static global::go.archive.zip_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.archive.zip_package.File, ж<global::go.archive.zip_package.File>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.archive.zip_package.Writer, ж<global::go.archive.zip_package.Writer>>(Indirect = true)]
-[assembly: GoImplicitConv<strings.Reader, ж<strings.Reader>>(Indirect = true)]
-[assembly: GoImplicitConv<testing.T, ж<testing.T>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

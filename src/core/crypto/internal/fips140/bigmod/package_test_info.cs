@@ -33,7 +33,6 @@ using static global::go.crypto.@internal.fips140.bigmod_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.bigmod_package.Modulus, ж<global::go.crypto.@internal.fips140.bigmod_package.Modulus>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

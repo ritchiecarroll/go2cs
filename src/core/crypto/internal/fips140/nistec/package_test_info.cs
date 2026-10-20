@@ -8,7 +8,6 @@ global using static global::go.crypto.@internal.fips140.nistec_package;
 global using static global::go.crypto.@internal.fips140.nistec_internal_test_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -25,7 +24,6 @@ using static global::go.crypto.@internal.fips140.nistec_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.nistec_package.P256Point, ж<global::go.crypto.@internal.fips140.nistec_package.P256Point>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
