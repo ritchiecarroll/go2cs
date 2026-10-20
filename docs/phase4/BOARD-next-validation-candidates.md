@@ -27567,4 +27567,13 @@ completion first removes the lag, the windows pre-pay now also makes one (a one-
 named pipe pair, closed before it returns), to be kept only if the windows reading brings cold A1 within about 1 ms;
 otherwise the residue is recorded here as the runtime's first-completion cost.
 
+**Amended 2026-10-20 (the i9's windows reading of 8967b1b1da).** The real completion closed the gap, so it stays
+(COORD's ruling, 17:14Z). Windows, JIT, Go and the two cuts interleaved, three rounds per mode, every run exit 0, no
+hang. Cold A1 late in ms: Go 0.7-0.9, 4f9377add3 1.8-2.9, 8967b1b1da 0.4-1.2; after a first completion it stays at Go's
+level. Cost: about 8.5 ms added to the first pollable FD.Init on windows (the probe's cold setup, which opens the
+first pipe pair, 29.1-29.9 ms against 20.3-21.5), once per process. A process whose first I/O is a real completion pays
+about the same either way (the probe's first write and read, 31.7-32.1 ms against 30.7-31.3), so for it the cost moves
+to FD.Init rather than adding to it. The JIT list shows the step running end to end inside the pre-pay, through waitIO
+and the completion callback. The cost is documented beside the pre-pay. This row is now FIXED on linux and windows.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

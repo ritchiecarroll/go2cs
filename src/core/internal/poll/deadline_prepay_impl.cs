@@ -24,12 +24,13 @@
 //   - io's package initialization, which Go has always completed before internal/poll's;
 //   - one no-op GoTimer two milliseconds out, so the timer service's wait, sleep and run path has run
 //     once before a deadline needs it;
-//   - on windows, the cancel and the aborted completion that follow a deadline's wake there
-//     (windows/deadline_prepay_windows_impl.cs);
+//   - on windows, the cancel and the aborted completion that follow a deadline's wake there, and one
+//     real completion on a private pipe pair (windows/deadline_prepay_windows_impl.cs);
 //   - every part another package registered with golib's GoAsyncIO.AddDeadlinePathPrepay: what this
 //     package cannot name, because it lives above it (os's return path) or is private to a package below
 //     it (syscall's completion callback on windows).
-// Nothing here arms a deadline or waits on a descriptor. Under Native AOT nothing is compiled at run
+// Nothing here arms a deadline, and apart from that windows pipe pair nothing waits on a descriptor.
+// Under Native AOT nothing is compiled at run
 // time, so none of it runs.
 //
 // Go has no such step, so nothing in it may fail the FD.Init that started the poller. This package's
@@ -40,7 +41,8 @@
 // ReadyToRun alike, once per process, and only in a process that opens a pollable descriptor. Run on
 // a background thread instead, it took that time off FD.Init but left the first deadline 4-5 ms late
 // when the deadline was armed right after the poller started (the probe's cold arm), against Go's
-// 0.3-0.5 ms; run here, that deadline reads 0.3-1.6 ms late.
+// 0.3-0.5 ms; run here, that deadline reads 0.3-1.6 ms late. On windows the pipe pair's completion adds
+// about 8.5 ms more to that first FD.Init (the windows file has the reading).
 
 using System;
 using System.Runtime.CompilerServices;

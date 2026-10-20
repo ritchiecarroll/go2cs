@@ -36,8 +36,13 @@
 //     step): a one-byte write and read on a private named pipe pair this step creates, uses and closes.
 //     A cold first deadline stayed 4.2-4.8 ms late with every listed method compiled, while one real
 //     completion through the poller first (the probe's io mode) brought it to Go's, so the remaining cost
-//     looks like the process's first completion on a CLR IO thread, which no method list shows; the
-//     step stays only if the windows reading confirms that. The pair's FDs
+//     looks like the process's first completion on a CLR IO thread, which no method list shows. The
+//     i9's reading of this step (8967b1b1da, JIT) confirmed it: a cold first deadline 0.4-1.2 ms late,
+//     against Go's 0.7-0.9. Its cost is about 8.5 ms added to the first pollable FD.Init, once per
+//     process (the probe's cold setup, which opens the first pipe pair: 29.1-29.9 ms against 20.3-21.5
+//     without the step). A process whose first I/O is a real completion pays about the same either way
+//     (the probe's first write and read: 31.7-32.1 ms against 30.7-31.3), so for it the step moves that
+//     cost to FD.Init rather than adding to it. The pair's FDs
 //     are set up as FD.Init would set them, except that their poll descriptors come straight from
 //     runtime_pollOpen: FD.Init would re-enter the serverInit.Do this runs inside. Their completion modes
 //     are left as created, so the read's completion is delivered through the port even though the byte
