@@ -19,7 +19,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 )
@@ -421,9 +420,21 @@ func selectStackAppendSites(sites []*appendSite, perTarget []map[*appendSite]sta
 	return selected
 }
 
-// stackAppendHarvest runs one target's harvest: the compiler's -m output for the package in dir, from `go build`, or
-// for its test packages from `go test -c`. A build that fails reports nothing for that target.
-var stackAppendHarvest = func(dir string, tests bool, target string, options Options) string {
+// stackAppendHarvestCommand is one target's harvest invocation: the go tool, its arguments and the environment
+// entries the harvest sets over the inherited environment. The harvest runs exactly this, and its cache key is built
+// from it, so the two cannot disagree.
+type stackAppendHarvestCommand struct {
+	goTool string
+	args   []string
+	env    []string
+}
+
+// stackAppendHarvestInherited names the variables the harvest inherits that change what the compiler inlines or proves
+// does not escape: the architecture levels (GOAMD64 and its peers), GOEXPERIMENT, and GOFIPS140, which selects the
+// crypto sources compiled.
+var stackAppendHarvestInherited = []string{"GOAMD64", "GO386", "GOARM", "GOARM64", "GOMIPS", "GOMIPS64", "GOPPC64", "GORISCV64", "GOWASM", "GOEXPERIMENT", "GOFIPS140"}
+
+func newStackAppendHarvestCommand(tests bool, target string, options Options) stackAppendHarvestCommand {
 	goos, goarch, _ := strings.Cut(target, "/")
 	goTool := "go"
 
@@ -443,10 +454,22 @@ var stackAppendHarvest = func(dir string, tests bool, target string, options Opt
 	args = append(args, options.loaderBuildFlags()...)
 	args = append(args, ".")
 
+	return stackAppendHarvestCommand{
+		goTool: goTool,
+		args:   args,
+		env:    []string{"GOOS=" + goos, "GOARCH=" + goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS="},
+	}
+}
+
+// stackAppendHarvest runs one target's harvest: the compiler's -m output for the package in dir, from `go build`, or
+// for its test packages from `go test -c`. A build that fails reports nothing for that target.
+var stackAppendHarvest = func(dir string, tests bool, target string, options Options) string {
+	command := newStackAppendHarvestCommand(tests, target, options)
+
 	// The package's own directory, always: see the file comment.
-	cmd := exec.Command(goTool, args...)
+	cmd := exec.Command(command.goTool, command.args...)
 	cmd.Dir = dir
-	cmd.Env = append(os.Environ(), "GOOS="+goos, "GOARCH="+goarch, "GOTOOLCHAIN=local", "CGO_ENABLED=0", "GOFLAGS=")
+	cmd.Env = append(os.Environ(), command.env...)
 
 	var output bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &output, &output
@@ -458,9 +481,8 @@ var stackAppendHarvest = func(dir string, tests bool, target string, options Opt
 	return output.String()
 }
 
-// stackAppendHarvests holds every harvest this process has run, by package directory, file set, target, toolchain
-// and build flags. A multi-target -stdlib run converts each package once per target, and each pass reads the same
-// three harvests, so each runs once.
+// stackAppendHarvests holds every harvest this process has run, by stackAppendHarvestKey. A multi-target -stdlib run
+// converts each package once per target, and each pass reads the same three harvests, so each runs once.
 var (
 	stackAppendHarvestsLock sync.Mutex
 	stackAppendHarvests     = map[string]*stackAppendHarvestResult{}
@@ -471,9 +493,25 @@ type stackAppendHarvestResult struct {
 	output string
 }
 
+// stackAppendHarvestKey holds every input that changes the compiler's -m answer for a package: its directory, the
+// toolchain (GOROOT and the go tool), the arguments (build or test -c, the -gcflags, the -tags), the environment the
+// harvest sets (GOOS, GOARCH, CGO_ENABLED, GOTOOLCHAIN, GOFLAGS) and the inherited variables in
+// stackAppendHarvestInherited. A key that missed one would serve one configuration's -m output to another.
+func stackAppendHarvestKey(dir string, tests bool, target string, options Options) string {
+	command := newStackAppendHarvestCommand(tests, target, options)
+	fields := append([]string{dir, options.goRoot, command.goTool}, command.args...)
+	fields = append(fields, command.env...)
+
+	for _, name := range stackAppendHarvestInherited {
+		fields = append(fields, name+"="+os.Getenv(name))
+	}
+
+	return strings.Join(fields, "\x00")
+}
+
 // cachedStackAppendHarvest is stackAppendHarvest, run at most once per key.
 func cachedStackAppendHarvest(dir string, tests bool, target string, options Options) string {
-	key := strings.Join(append([]string{dir, strconv.FormatBool(tests), target, options.goRoot}, options.loaderBuildFlags()...), "\x00")
+	key := stackAppendHarvestKey(dir, tests, target, options)
 
 	stackAppendHarvestsLock.Lock()
 	result := stackAppendHarvests[key]

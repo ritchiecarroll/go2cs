@@ -848,6 +848,14 @@ Taking the buffer charges no allocation to golib's allocation counter, because G
 GolibTests' `StackAppendTests` hold the runtime rule, and the `StackAppendBackingStore` behavioral test
 compares eleven arms with Go.
 
+**Conversion time.** The harvest compiles the package, so it adds to conversion time. On a box's first
+conversion, with an empty Go build cache, it compiles the package and everything it imports for all three
+targets, which can take tens of seconds for a large package. The build cache keeps those compiles, so a
+later conversion pays a fraction of a second, and an edited package recompiles only itself. A `main`
+package costs more on every conversion, because each of its three harvests also links a binary. Within one
+converter run each harvest runs once per package, target, toolchain and build configuration, whatever
+the number of targets being emitted.
+
 **What is not hinted.** A copy of an append inlined into another package is invisible to that package's
 own harvest, so the site follows its own package's copies alone. A conversion whose toolchain predates
 Go 1.25 gets no harvest output and so no hints, which is Go's own behavior before 1.25.

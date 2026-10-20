@@ -337,6 +337,59 @@ func TestStackAppendHarvestRunsOncePerKey(t *testing.T) {
 	}
 }
 
+// TestStackAppendHarvestKeyHoldsEveryCompilerInput: two harvests that differ only in one input that changes the
+// compiler's inlining or escape answers never share a cache entry. RED with the inherited variables left out of the
+// key: the GOAMD64, GOEXPERIMENT and GOFIPS140 arms each shared the base key.
+func TestStackAppendHarvestKeyHoldsEveryCompilerInput(t *testing.T) {
+	options := Options{goRoot: "/toolchain"}
+	base := stackAppendHarvestKey("/work/sa", false, "linux/amd64", options)
+
+	if again := stackAppendHarvestKey("/work/sa", false, "linux/amd64", options); again != base {
+		t.Fatalf("the same harvest keyed differently: %q, %q", base, again)
+	}
+
+	differs := map[string]func(t *testing.T) string{
+		"the directory": func(t *testing.T) string { return stackAppendHarvestKey("/work/other", false, "linux/amd64", options) },
+		"tests":         func(t *testing.T) string { return stackAppendHarvestKey("/work/sa", true, "linux/amd64", options) },
+		"GOOS":          func(t *testing.T) string { return stackAppendHarvestKey("/work/sa", false, "darwin/amd64", options) },
+		"GOARCH":        func(t *testing.T) string { return stackAppendHarvestKey("/work/sa", false, "linux/arm64", options) },
+		"the toolchain": func(t *testing.T) string {
+			return stackAppendHarvestKey("/work/sa", false, "linux/amd64", Options{goRoot: "/other"})
+		},
+		"the build tags": func(t *testing.T) string {
+			return stackAppendHarvestKey("/work/sa", false, "linux/amd64", Options{goRoot: "/toolchain", buildTags: []string{"purego"}})
+		},
+		"GOAMD64": func(t *testing.T) string {
+			t.Setenv("GOAMD64", "v3")
+			return stackAppendHarvestKey("/work/sa", false, "linux/amd64", options)
+		},
+		"GOEXPERIMENT": func(t *testing.T) string {
+			t.Setenv("GOEXPERIMENT", "nogreenteagc")
+			return stackAppendHarvestKey("/work/sa", false, "linux/amd64", options)
+		},
+		"GOFIPS140": func(t *testing.T) string {
+			t.Setenv("GOFIPS140", "latest")
+			return stackAppendHarvestKey("/work/sa", false, "linux/amd64", options)
+		},
+	}
+
+	for name, key := range differs {
+		t.Run(name, func(t *testing.T) {
+			if key(t) == base {
+				t.Errorf("a harvest differing only in %s shares the key", name)
+			}
+		})
+	}
+
+	command := strings.Join(newStackAppendHarvestCommand(false, "linux/amd64", options).env, " ")
+
+	for _, want := range []string{"GOOS=linux", "GOARCH=amd64", "CGO_ENABLED=0"} {
+		if !strings.Contains(command, want) {
+			t.Errorf("the harvest's environment %q lacks %s, which its key reads from it", command, want)
+		}
+	}
+}
+
 const stackAppendEmissionFixture = `package sappend
 
 //go:noinline
