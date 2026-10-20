@@ -17,7 +17,6 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -32,7 +31,6 @@ using static global::go.os.user_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.os.user_package.User, ж<global::go.os.user_package.User>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

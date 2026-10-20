@@ -41,6 +41,7 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<Person, processAnonymousStruct_data>]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -136,10 +136,12 @@ partial struct HideC {
 }
 
 internal static @string methods(reflectꓸType t) {
+    var namesᴷ = new stackAppend<@string>();
+
     slice<@string> names = default!;
 
     for (nint i = 0; i < t.NumMethod(); i++) {
-        names = append(names, t.Method(i).Name);
+        names = append(namesᴷ, names, t.Method(i).Name);
     }
 
     sort.Strings(names);

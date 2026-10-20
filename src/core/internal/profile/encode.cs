@@ -17,6 +17,9 @@ internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Profile
 // (with suffix X) from the corresponding exported fields. The
 // exported fields are cleared up to facilitate testing.
 internal static void preEncode(this ref Profile p) {
+    var keysᴷ = new stackAppend<@string>();
+    var numKeysᴷ = new stackAppend<@string>();
+
     var strings = new map<@string, nint>();
     addString(strings, ""u8);
 
@@ -29,7 +32,7 @@ internal static void preEncode(this ref Profile p) {
         s.Value.labelX = default!;
         slice<@string> keys = default!;
         foreach (var (k, _) in (~s).Label) {
-            keys = append(keys, k);
+            keys = append(keysᴷ, keys, k);
         }
         sort.Strings(keys);
         foreach (var (_, k) in keys) {
@@ -44,7 +47,7 @@ internal static void preEncode(this ref Profile p) {
         }
         slice<@string> numKeys = default!;
         foreach (var (k, _) in (~s).NumLabel) {
-            numKeys = append(numKeys, k);
+            numKeys = append(numKeysᴷ, numKeys, k);
         }
         sort.Strings(numKeys);
         foreach (var (_, k) in numKeys) {

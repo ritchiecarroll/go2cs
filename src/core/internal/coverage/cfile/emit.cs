@@ -489,6 +489,7 @@ internal static readonly @string ioWriterˢ = "<io.Writer>"u8;
 
 internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metalist, coverage.CounterMode cmode, coverage.CounterGranularity gran, /*[16]*/ array<byte> finalHash) {
     finalHash = finalHash.Clone();
+    var blobsᴷ = new stackAppend<slice<byte>>();
 
     var mfw = encodemeta.NewCoverageMetaFileWriter(ioWriterˢ, w);
 
@@ -497,7 +498,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
         var e = vᴛ1.ΔClone();
 
         var sd = @unsafe.Slice(e.P, (nint)e.Len);
-        blobs = append(blobs, sd);
+        blobs = append(blobsᴷ, blobs, sd);
     }
     return mfw.Write(finalHash, blobs, cmode, gran);
 }

@@ -458,6 +458,7 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
     GoFrame ᒐ = default;
     try {
         ref var fixups = ref Ꮡfixups.DerefOrNull();
+        var dimsᴷ = new stackAppend<int64>();
 
         {
             var (t, ok) = typeCache[off, ꟷ]; if (ok) {
@@ -602,7 +603,7 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
                             count = -1; // As in x[].
                         }
                     }
-                    dims = append(dims, count);
+                    dims = append(dimsᴷ, dims, count);
                 }
                 else if (exprᴛ2 == TagEnumerationType) {
                     err = new DecodeError(name, (~kid).Offset, "cannot handle enumeration type as array bound"u8);

@@ -69,8 +69,13 @@ using static go.os_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<processHandle, ж<processHandle>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -83,7 +88,7 @@ using static go.os_package;
 [assembly: go.GoPositionMap("os/dir.go", "dir.cs", "ABpQABECgpSCuJQAAiQAEgKClIK4lAACIgAKAoKUgpSUAAIQ8oKClKSChgAFKAARAqKCpoKClKSUpIKClKSCgpSSgoKUgoKmgIKCpKQ=", "122-124:1;146-189:1")]
 [assembly: go.GoPositionMap("os/dir_darwin.go", "dir_darwin.cs", "ABImgoKUggAExAGClKSkpKSkpJSs5g==")]
 [assembly: go.GoPositionMap("os/eloop_other.go", "eloop_other.cs", "AAsekpSUlIKm")]
-[assembly: go.GoPositionMap("os/env.go", "env.cs", "AAwgopSCgoKClIKCtqaUlIKmgpSssqqilJSokqyylIKmgoKClKaklpKUrLKCggACENKC2qKCgpSokqiSqqI=")]
+[assembly: go.GoPositionMap("os/env.go", "env.cs", "AAwgwpSCgoKClIKCtqaUlIKmgpSssqqilJSokqyylIKmgoKClKaklpKUrLKCggACENKC2qKCgpSokqiSqqI=")]
 [assembly: go.GoPositionMap("os/error.go", "error.cs", "ABYmlIKCgpSCloAAAhLwAAwegKSAppKCrLKClAACEuIAAhLiAAIS4gACFgAIAoKmuIKCpoKokpSkpJQ=")]
 [assembly: go.GoPositionMap("os/exec.go", "exec.cs", "ABImlJQANYQB4oKCgpSClILMsoKCgpSCgpTMkqaoktyUypSssqaCqsKCpoKClIKC7oKClKiSgpSosoKmACROkKaQAAIWAAkCAAIgAA0CgqwACQqCpriCgris0oKCgoKmgtzclKa+sgACENKqogACFgAIAqiSqJKssqqirLIAAhDS")]
 [assembly: go.GoPositionMap("os/exec_nohandle.go", "exec_nohandle.cs", "AAgSgg==")]

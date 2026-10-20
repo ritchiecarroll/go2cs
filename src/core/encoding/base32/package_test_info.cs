@@ -8,9 +8,6 @@ global using static global::go.encoding.base32_package;
 global using static global::go.encoding.base32_internal_test_package;
 
 // <ImportedTypeAliases>
-using bytes = go.bytes_package;
-using io = go.io_package;
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -27,11 +24,13 @@ using static global::go.encoding.base32_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bytes.Buffer, ж<bytes.Buffer>>(Indirect = true)]
-[assembly: GoImplicitConv<io.PipeReader, ж<io.PipeReader>>(Indirect = true)]
-[assembly: GoImplicitConv<strings.Builder, ж<strings.Builder>>(Indirect = true)]
-[assembly: GoImplicitConv<strings.Reader, ж<strings.Reader>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

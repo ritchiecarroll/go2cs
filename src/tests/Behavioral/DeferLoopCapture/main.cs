@@ -61,6 +61,8 @@ internal static void deferIndexedReceiverInLoop() {
 }
 
 internal static partial void goIndexedReceiverInLoop() {
+    var gotᴷ = new stackAppend<@string>();
+
     fmt.Println("-- red 2: go c[i].Close() --");
     var @out = new channel<@string>(3);
     ref var c = ref heap(new array<closer>(3), out var Ꮡc);
@@ -76,7 +78,7 @@ internal static partial void goIndexedReceiverInLoop() {
         var selᴛ2 = time.After((time.Duration)(5000000000L));
         switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out var s): {
-            got = append(got, s);
+            got = append(gotᴷ, got, s);
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {

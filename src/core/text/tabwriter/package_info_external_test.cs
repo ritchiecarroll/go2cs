@@ -6,7 +6,6 @@
 // the test package class. Production-anchored records stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -23,7 +22,6 @@ using static go.text.tabwriter_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<buffer, ж<buffer>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

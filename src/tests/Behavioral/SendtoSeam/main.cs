@@ -40,7 +40,7 @@ internal static void Main() {
         var buf = new slice<byte>(64);
         (var n, var from, err) = syscall.Recvfrom(receiver, buf, 0);
         fatal("recvfrom(addressed)", err);
-        fmt.Println("addressed payload:", ((@string)(buf.slice(0, n))));
+        fmt.Println("addressed payload:", (@string)(buf.slice(0, n)));
 
         var first = from._<ж<syscall.SockaddrInet4>>();
         fmt.Println("addressed sender is in 127/8:", (~first).Addr[0] == 127);
@@ -51,7 +51,7 @@ internal static void Main() {
 
         (n, from, err) = syscall.Recvfrom(receiver, buf, 0);
         fatal("recvfrom(nil-to)", err);
-        fmt.Println("nil-to payload:", ((@string)(buf.slice(0, n))));
+        fmt.Println("nil-to payload:", (@string)(buf.slice(0, n)));
 
         var second = from._<ж<syscall.SockaddrInet4>>();
         fmt.Println("nil-to sender equals addressed sender:",

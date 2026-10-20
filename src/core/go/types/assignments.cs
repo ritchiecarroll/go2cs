@@ -352,6 +352,8 @@ internal static readonly @string untypedˢ = "untyped "u8;
 // where T is the last type.
 // Only one of variadic and hasDots may be set.
 internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> list, bool variadic, bool hasDots) {
+    var resᴷ = new stackAppend<@string>();
+
     assert(!(variadic && hasDots));
     slice<@string> res = default!;
     foreach (var (i, t) in list) {
@@ -397,7 +399,7 @@ internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<ΔType> li
                 break;
             }}
         }
-        res = append(res, s);
+        res = append(resᴷ, res, s);
     }
     return "("u8 + strings.Join(res, ", "u8) + ")"u8;
 }
@@ -606,6 +608,7 @@ internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, 
 
 internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
+    var newVarsᴷ = new stackAppend<ж<Var>>();
 
     nint top = len(check.delayed);
     var scope = check.scope;
@@ -659,7 +662,7 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
         var obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default!);
         lhsVars[i] = obj;
         if (name != "_"u8) {
-            newVars = append(newVars, obj);
+            newVars = append(newVarsᴷ, newVars, obj);
         }
         check.recordDef(ident, new VarжObject(obj));
     }

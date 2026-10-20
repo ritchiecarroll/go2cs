@@ -881,6 +881,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
 
     [TestMethod]
+    public void CheckImplicitConvArgumentParameter() => CheckTarget("ImplicitConvArgumentParameter");
+
+    [TestMethod]
     public void CheckImportSegmentTypeShadow() => CheckTarget("ImportSegmentTypeShadow");
 
     [TestMethod]
@@ -2088,6 +2091,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
+
+    [TestMethod]
+    public void CheckStackAppendBackingStore() => CheckTarget("StackAppendBackingStore");
 
     [TestMethod]
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");

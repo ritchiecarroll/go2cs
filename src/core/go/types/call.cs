@@ -534,6 +534,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var call = ref Ꮡcall.DerefOrNull();
     ref var sig = ref Ꮡsig.DerefOrNull();
+    var genericArgsᴷ = new stackAppend<nint>();
 
     rsig = Ꮡsig;
 
@@ -675,7 +676,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
                     while (len(targs) < len(tparams)) {
                         targs = append(targs, (ΔType)(default!));
                     }
-                    genericArgs = append(genericArgs, i);
+                    genericArgs = append(genericArgsᴷ, genericArgs, i);
                 }
             }
         }

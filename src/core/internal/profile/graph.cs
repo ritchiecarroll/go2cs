@@ -465,6 +465,8 @@ internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) {
 
 // String returns a text representation of a graph, for debugging purposes.
 public static @string String(this ref Graph g) {
+    var sᴷ = new stackAppend<@string>();
+
     slice<@string> s = default!;
 
     var nodeIndex = new map<ж<Node>, nint>(len(g.Nodes));
@@ -484,7 +486,7 @@ public static @string String(this ref Graph g) {
         foreach (var (_, to) in (~n).Out) {
             @out = append(@out, nodeIndex[(~to).Dest]);
         }
-        s = append(s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, (~n).Flat, (~n).Cum, @in, @out));
+        s = append(sᴷ, s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, (~n).Flat, (~n).Cum, @in, @out));
     }
     return strings.Join(s, "\n"u8);
 }

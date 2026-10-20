@@ -21,7 +21,6 @@ global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using mapsꓸMap = go.@internal.runtime.maps_package.ΔMap;
 global using strconvꓸError = go.@internal.strconv_package.ΔError;
 using abi = go.@internal.abi_package;
-using linux = go.@internal.runtime.syscall.linux_package;
 using tracev2 = go.@internal.trace.tracev2_package;
 // </ImportedTypeAliases>
 
@@ -96,41 +95,22 @@ using static go.runtime_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<_type, ж<_type>>(Indirect = true)]
-[assembly: GoImplicitConv<abi.RegArgs, ж<abi.RegArgs>>(Indirect = true)]
-[assembly: GoImplicitConv<abi.Type, ж<abi.Type>>(Indirect = true)]
-[assembly: GoImplicitConv<adjustinfo, ж<adjustinfo>>(Indirect = true)]
-[assembly: GoImplicitConv<childInfo, ж<childInfo>>(Indirect = true)]
-[assembly: GoImplicitConv<elfEhdr, ж<elfEhdr>>(Indirect = true)]
-[assembly: GoImplicitConv<funcval, ж<funcval>>(Indirect = true)]
-[assembly: GoImplicitConv<g, ж<g>>(Indirect = true)]
-[assembly: GoImplicitConv<g, ж<g>>]
-[assembly: GoImplicitConv<gQueue, ж<gQueue>>(Indirect = true)]
-[assembly: GoImplicitConv<gcWork, ж<gcWork>>(Indirect = true)]
 [assembly: GoImplicitConv<gclinkptr, Δhex>(Inverted = true, ValueType = "uintptr")]
-[assembly: GoImplicitConv<gsignalStack, ж<gsignalStack>>(Indirect = true)]
-[assembly: GoImplicitConv<itab, ж<itab>>(Indirect = true)]
 [assembly: GoImplicitConv<lfstack, Δhex>(Inverted = true, ValueType = "uint64")]
 [assembly: GoImplicitConv<limiterEventStamp, limiterEventType>(Inverted = true, ValueType = "uint64")]
-[assembly: GoImplicitConv<linknameIter, ж<linknameIter>>(Indirect = true)]
-[assembly: GoImplicitConv<m, ж<m>>(Indirect = true)]
-[assembly: GoImplicitConv<mspan, ж<mspan>>(Indirect = true)]
-[assembly: GoImplicitConv<pollDesc, ж<pollDesc>>(Indirect = true)]
-[assembly: GoImplicitConv<ptrtype, ж<ptrtype>>(Indirect = true)]
-[assembly: GoImplicitConv<sigctxt, ж<sigctxt>>(Indirect = true)]
 [assembly: GoImplicitConv<spanClass, traceArg>(Inverted = true, ValueType = "uint8")]
-[assembly: GoImplicitConv<stackScanState, ж<stackScanState>>(Indirect = true)]
-[assembly: GoImplicitConv<stkframe, ж<stkframe>>]
-[assembly: GoImplicitConv<sudog, ж<sudog>>(Indirect = true)]
 [assembly: GoImplicitConv<sweepClass, spanClass>(Inverted = true, ValueType = "uint32")]
-[assembly: GoImplicitConv<synctestBubble, ж<synctestBubble>>(Indirect = true)]
 [assembly: GoImplicitConv<taggedPointer, Δhex>(Inverted = true, ValueType = "uint64")]
 [assembly: GoImplicitConv<traceArg, tracev2.GoStatus>(Inverted = false, ValueType = "uint8")]
 [assembly: GoImplicitConv<traceArg, tracev2.ProcStatus>(Inverted = false, ValueType = "uint8")]
-[assembly: GoImplicitConv<vdsoVersionKey, ж<vdsoVersionKey>>(Indirect = true)]
 [assembly: GoImplicitConv<Δhex, abi.PCLnTabMagic>(Inverted = false, ValueType = "uint32")]
-[assembly: GoImplicitConv<Δp, ж<Δp>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -168,7 +148,7 @@ using static go.runtime_package;
 [assembly: go.GoPositionMap("runtime/defs_linux_amd64.go", "defs_linux_amd64.cs", "AGXQAZKCAAcQgg==")]
 [assembly: go.GoPositionMap("runtime/dit.go", "dit.cs", "AAsakoKCgqiSgoKC")]
 [assembly: go.GoPositionMap("runtime/env_posix.go", "env_posix.cs", "AAwSgoKClIKCpqqigoKCgpSUlKaCgpQAGDSSgpSSqJKClJKmgoKC")]
-[assembly: go.GoPositionMap("runtime/error.go", "error.cs", "ACtUpIKCgpSCgpSCgoKUgpSmlAACEtKCgoKClILcpIIABxCkggACENIABxCkggARJAAMGgAKFqSCgoKUgoKmgoKCuIKCgoKCgpSClLS2AAYeAAgClLS0tLS0tLS0tLS0tLS0tLS0xMqygpSUgoKkpKSkpKSkpKSkpKSkpKSkpLqSgoKClIKCgpSuwoK4goKUgoKUgoKClIKUgoI=")]
+[assembly: go.GoPositionMap("runtime/error.go", "error.cs", "ACtUpIKCgpSCgpSCgoKUgpSmlAACEtKCgoKClILcpIIABxCkggACENIABxCkggARJAAMGgAKFqSCgoKUgoKmooKCuIKCgoKCgpSClLS2AAYeAAgClLS0tLS0tLS0tLS0tLS0tLS0xMqygpSUgoKkpKSkpKSkpKSkpKSkpKSkpLqSgoKClIKCgpSuwoK4goKUgoKUgoKClIKUgoI=")]
 [assembly: go.GoPositionMap("runtime/extern.go", "extern.cs", "AK8C6gQADAKCgoKUggAJSAAIAoKClAAMILI=")]
 [assembly: go.GoPositionMap("runtime/fastlog2.go", "fastlog2.cs", "AAcc8oKUpoKClII=")]
 [assembly: go.GoPositionMap("runtime/fastlog2table.go", "fastlog2table.cs", "AAkS")]

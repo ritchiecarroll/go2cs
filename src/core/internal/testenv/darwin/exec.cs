@@ -16,7 +16,6 @@ using testing = testing_package;
 using time = time_package;
 using go;
 using go.os;
-using Δsyscall = syscall_package;
 using ꓸꓸꓸstring = Span<@string>;
 
 partial class testenv_package {

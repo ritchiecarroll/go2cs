@@ -34,6 +34,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var rangeStmt = ref ᏑrangeStmt.DerefOrNull();
+        var varsᴷ = new stackAppend<ж<Var>>();
 
         // check expression to iterate over
         ref var x = ref heap(new operand(), out var Ꮡx);
@@ -136,7 +137,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
                         check.recordDef(ident, new VarжObject(obj));
                         // _ variables don't count as new variables
                         if (name != "_"u8) {
-                            vars = append(vars, obj);
+                            vars = append(varsᴷ, vars, obj);
                         }
                     } else {
                         Ꮡcheck.errorf(new ast_Exprᴠpositioner(lhsΔ1), InvalidSyntaxTree, "cannot declare %s"u8, lhsΔ1);

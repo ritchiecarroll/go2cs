@@ -39,6 +39,9 @@ internal static partial void allocLiteral() {
 }
 
 internal static partial void Main() {
+    var namesᴷ = new stackAppend<@string>();
+    var linesᴷ = new stackAppend<@string>();
+
     runtime.MemProfileRate = 1;
     allocMake();
     allocGrow();
@@ -59,7 +62,7 @@ internal static partial void Main() {
         foreach (var (_, pc) in r.Stack()) {
             var f = runtime.FuncForPC(pc - 1);
             if (f == nil) {
-                names = append(names, "?"u8);
+                names = append(namesᴷ, names, "?"u8);
                 continue;
             }
             @string name = f.Name();
@@ -68,7 +71,7 @@ internal static partial void Main() {
                 @string line = strings.Join(names, " < ");
                 if (!seen[line]) {
                     seen[line] = true;
-                    lines = append(lines, line);
+                    lines = append(linesᴷ, lines, line);
                 }
                 break;
             }

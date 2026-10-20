@@ -881,6 +881,8 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(
 }
 
 internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
+    var bᴷ = new stackAppend<byte>();
+
     if (v.IsNil()) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
@@ -888,7 +890,7 @@ internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, en
 
     var s = v.Bytes();
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
-    b = append(b, (byte)((rune)'"'));
+    b = append(bᴷ, b, (byte)((rune)'"'));
     b = base64.StdEncoding.AppendEncode(b, s);
     b = append(b, (byte)((rune)'"'));
     Ꮡe.of(encodeState.ᏑBuffer).Write(b);

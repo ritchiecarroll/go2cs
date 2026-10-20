@@ -505,6 +505,8 @@ internal static void fmtQc(this ref fmt f, uint64 c) {
 // fmtFloat formats a float64. It assumes that verb is a valid format specifier
 // for strconv.AppendFloat and therefore fits into a byte.
 internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, nint prec) {
+    var numᴷ = new stackAppend<byte>();
+
     // Explicit precision in format specifier overrules default precision.
     if (f.precPresent) {
         prec = f.prec;
@@ -591,7 +593,7 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
             if (len(num) == 2 && num[1] == (rune)'0') {
                 digits--;
             }
-            num = append(num, (byte)((rune)'.'));
+            num = append(numᴷ, num, (byte)((rune)'.'));
         }
         while (digits > 0) {
             num = append(num, (byte)((rune)'0'));

@@ -14,7 +14,6 @@ global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;

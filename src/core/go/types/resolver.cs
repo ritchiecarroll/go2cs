@@ -724,6 +724,8 @@ internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Che
 // packageObjects typechecks all package objects, but not function bodies.
 internal static void packageObjects(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
+    var aliasListᴷ = new stackAppend<ж<TypeName>>();
+    var othersListᴷ = new stackAppend<Object>();
 
     // add new methods to already type-checked types (from a prior Checker.Files call)
     foreach (var (_, obj) in check.objList) {
@@ -767,12 +769,12 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
             {
                 var (tname, _) = obj._<ж<TypeName>>(ᐧ); if (tname != nil){
                     if ((~(~check.objMap[new TypeNameжObject(tname)]).tdecl).Assign.IsValid()){
-                        aliasList = append(aliasList, tname);
+                        aliasList = append(aliasListᴷ, aliasList, tname);
                     } else {
                         Ꮡcheck.objDecl(obj);
                     }
                 } else {
-                    othersList = append(othersList, obj);
+                    othersList = append(othersListᴷ, othersList, obj);
                 }
             }
         }

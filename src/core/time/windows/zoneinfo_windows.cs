@@ -103,10 +103,12 @@ internal static (@string, error) toEnglishName(@string stdname, @string dstname)
 
 // extractCAPS extracts capital letters from description desc.
 internal static @string extractCAPS(@string desc) {
+    var shortᴷ = new stackAppend<rune>();
+
     slice<rune> @short = default!;
     foreach (var (_, c) in desc) {
         if ((rune)'A' <= c && c <= (rune)'Z') {
-            @short = append(@short, c);
+            @short = append(shortᴷ, @short, c);
         }
     }
     return (@string)@short;

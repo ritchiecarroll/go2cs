@@ -1051,6 +1051,7 @@ public static error Ping(this ж<DB> Ꮡdb) {
 // long-lived and shared between many goroutines.
 public static error Close(this ж<DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
+    var fnsᴷ = new stackAppend<Func<error>>();
 
     db.mu.Lock();
     if (db.closed) { // Make DB.Close idempotent
@@ -1063,7 +1064,7 @@ public static error Close(this ж<DB> Ꮡdb) {
     error err = default!;
     var fns = new slice<Func<error>>(0, len(db.freeConn));
     foreach (var (_, dc) in db.freeConn) {
-        fns = append(fns, dc.closeDBLocked());
+        fns = append(fnsᴷ, fns, dc.closeDBLocked());
     }
     db.freeConn = default!;
     db.closed = true;

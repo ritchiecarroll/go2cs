@@ -466,6 +466,8 @@ internal partial struct FieldsFunc_span /*dyn*/ {
 // FieldsFunc makes no guarantees about the order in which it calls f(c)
 // and assumes that f always returns the same value for a given c.
 public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
+    var spansᴷ = new stackAppend<FieldsFunc_span>();
+
     var spans = new slice<FieldsFunc_span>(0, 32);
 
     // Find the field start and end indices.
@@ -476,7 +478,7 @@ public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
     foreach (var (end, rune) in s) {
         if (f(rune)){
             if (start >= 0) {
-                spans = append(spans, new FieldsFunc_span(start, end));
+                spans = append(spansᴷ, spans, new FieldsFunc_span(start, end));
                 // Set start to a negative value.
                 // Note: using -1 here consistently and reproducibly
                 // slows down this code by a several percent on amd64.

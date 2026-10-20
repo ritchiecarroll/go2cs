@@ -14,7 +14,6 @@ global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -27,9 +26,6 @@ using static global::go.crypto.@internal.fips140.edwards25519_internal_test_pack
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.edwards25519_package.Point, ж<global::go.crypto.@internal.fips140.edwards25519_package.Point>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.edwards25519_package.affineCached, ж<global::go.crypto.@internal.fips140.edwards25519_package.affineCached>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.edwards25519_package.projCached, ж<global::go.crypto.@internal.fips140.edwards25519_package.projCached>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

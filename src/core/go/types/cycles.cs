@@ -51,6 +51,8 @@ internal static readonly @string checkDirectCycleForSˢ = "-- check direct cycle
 internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname, map<ж<TypeName>, nint> pathIdx) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var tname = ref Ꮡtname.DerefOrNull();
+    var cycleᴷ = new stackAppend<Object>();
+    var pathᴷ = new stackAppend<ж<TypeName>>();
 
     if (debug && (~check.conf)._Trace) {
         Ꮡcheck.trace(Ꮡtname.of(TypeName.Ꮡobject).Pos(), checkDirectCycleForSˢ, Ꮡtname.OrTypedNil());
@@ -73,7 +75,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
             // collect type names on cycle
             slice<Object> cycle = default!;
             foreach (var (_, tnameΔ1) in path.slice(start)) {
-                cycle = append(cycle, (Object)(new TypeNameжObject(tnameΔ1)));
+                cycle = append(cycleᴷ, cycle, (Object)(new TypeNameжObject(tnameΔ1)));
             }
 
             Ꮡcheck.cycleError(cycle, firstInSrc(cycle));
@@ -82,7 +84,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
 
         // tname is marked white - mark it grey and add it to the path.
         pathIdx[Ꮡtname] = len(path);
-        path = append(path, Ꮡtname);
+        path = append(pathᴷ, path, Ꮡtname);
 
         // For direct cycle detection, we don't care about whether we have an alias or not.
         // If the associated type is not a name, we're at the end of the path and we're done.

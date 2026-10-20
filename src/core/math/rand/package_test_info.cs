@@ -20,7 +20,6 @@ global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -35,7 +34,6 @@ using static global::go.math.rand_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<statsResults, ж<statsResults>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
