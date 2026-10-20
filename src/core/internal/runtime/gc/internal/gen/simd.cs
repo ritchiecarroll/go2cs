@@ -43,6 +43,7 @@ public static Uint8x64 /*y*/ Shuffle(this Uint8x64 x, Uint8x64 shuf) {
         // TODO: There are often patterns we can take advantage of here. Sometimes
         // we can do a broadcast. Sometimes we can at least do a quadword
         // permutation instead of a full byte permutation.
+
         // Range check the shuffle
         foreach (var (i, inp) in (~shuf.op).c._<array<uint8>>()) {
             // 0xff is a special "don't care" value

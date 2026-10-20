@@ -163,6 +163,7 @@ internal static ж<windows.WSAMsg> newWSAMsg(slice<byte> p, slice<byte> oob, nin
     // by Windows in between several system calls. If the stack frame is moved while that happens,
     // then Windows may access invalid memory.
     // TODO(qmuntal): investigate using runtime.Pinner keeping this path allocation-free.
+
     // Use a pool to reuse allocations.
     var msg = ᏑwsaMsgPool.Get()._<ж<windows.WSAMsg>>();
     msg.Value.Buffers.Value.Len = (uint32)len(p);

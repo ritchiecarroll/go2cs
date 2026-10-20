@@ -50,6 +50,7 @@ internal static (@string, error) lookPath(@string @file) {
     // NOTE(rsc): I wish we could use the Plan 9 behavior here
     // (only bypass the path if file begins with / or ./ or ../)
     // but that would not match all the Unix shells.
+
     {
         var err = validateLookPath(@file); if (err != default!) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));

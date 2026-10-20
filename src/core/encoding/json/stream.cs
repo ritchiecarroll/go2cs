@@ -115,6 +115,7 @@ Input:
     while (scanp >= 0) {
         // help the compiler see that scanp is never negative, so it can remove
         // some bounds checks below.
+
         // Look in the buffer for a new value.
         for (; scanp < len(dec.buf); scanp++) {
             var c = dec.buf[scanp];

@@ -110,6 +110,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             // if check.valids.lookup(t) != nil {
             // 	break
             // }
+
             // If the current type t is also found in nest, (the memory of) t is
             // embedded in itself, indicating an invalid recursive type.
             foreach (var (_, e) in nest) {

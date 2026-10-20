@@ -79,7 +79,7 @@ using static go.os.exec_package;
 [assembly: go.GoPositionMap("os/exec/exec.go", "exec.cs", "AH3uAYKmgNoABxCCpoIA2gHcA5IABTAAGALKgIKmgoKCgoKUpoCCpKaCgoKClIKCgpTagoK4lIKkAAgSgIKUtgACGAALAoKUgoKWrsKUpoKCgoKUqsKClNaCgpSmooKCgpSCpoCCtoKCpoKCkoKClICCpJSmgqaCgpSuwoKCgpSCpoCCtoKCpoKCkoKClKaCggADIgANAoCCpAAMEgANCIKmgoKClIKCgriClIKClJSCgrgAASAADgKCgriClIKk6oKCgpSCgoKUgoKClIKUgoKm3IKUpoKChIqCgqKUkoKUgoKUuAAIEoKCgqYABRTytNiCgoC4ksrsgoKmgtjYgoDKkoLsgsiCAA0YpoKC7KYAEiiCAAYoABMCgpSCpoKClJSCgoK4griAuKSClAACFAAMAoKClKaCpoKCprb8prSmgqYAChLygpSClIKCpoKCgIK22sKClIKUgoKCggAGEuKClIKUgoKUgoKCAAUWAAgCgpSClIKClIKCggAFFgAIAoKUgpSCgpSCgoIADSjygqaAgoKkpoKCgoKCgqaqwoCCgoKk5oKClIKUgoKCgoKCgoKsspSCgoKCuIIADRqAgpKC7IKClKq0ggACENLctqKCgoK4goKmgriUgriUlIKClIKmgriCgqbcsoKUgoKClJSmAAkUmKKUlA==", "430-443:1;490-492:1;518-520:1;552-561:1;601-605:1;650-659:1;756-769:2;968-973:1")]
 [assembly: go.GoPositionMap("os/exec/exec_unix.go", "exec_unix.cs", "AAwg2II=")]
 [assembly: go.GoPositionMap("os/exec/lookpath.go", "lookpath.cs", "AAc4ABUC")]
-[assembly: go.GoPositionMap("os/exec/lp_unix.go", "lp_unix.cs", "ABUolIKCgpSCgpS4gpSClNa6gIK2goKClJSCopSUgoCCgoKUlLaqog==")]
+[assembly: go.GoPositionMap("os/exec/lp_unix.go", "lp_unix.cs", "ABUolIKCgpSCgpS4gpSClNbKgIK2goKClJSCopSUgoCCgoKUlLaqog==")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

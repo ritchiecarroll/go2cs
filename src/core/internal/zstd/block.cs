@@ -275,6 +275,7 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Set up the initial states for the sequence code readers.
+
     ref var rbr = ref heap<reverseBitReader>(out var Ꮡrbr);
     (rbr, var err) = Ꮡr.makeReverseBitReader(data, builtin.len(data) - 1, off);
     if (err != default!) {

@@ -144,6 +144,7 @@ internal static slice<token> encode(this ref deflateFast e, slice<token> dst, sl
         while (ᐧ) {
             // Invariant: we have a 4-byte match at s, and no need to emit any
             // literal bytes prior to s.
+
             // Extend the 4-byte match as long as possible.
             //
             s += 4;

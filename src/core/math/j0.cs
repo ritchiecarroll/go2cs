@@ -198,6 +198,7 @@ public static float64 Y0(float64 x) {
         // To avoid cancellation, use
         //     sin(x) +- cos(x) = -cos(2x)/(sin(x) -+ cos(x))
         // to compute the worse one.
+
         var (s, c) = Sincos(x);
         var ss = s - c;
         var cc = s + c;

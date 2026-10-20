@@ -12,6 +12,7 @@ public static (uint8, uint8, uint8) RGBToYCbCr(uint8 r, uint8 g, uint8 b) {
     //	Cb = -0.1687*R - 0.3313*G + 0.5000*B + 128
     //	Cr =  0.5000*R - 0.4187*G - 0.0813*B + 128
     // https://www.w3.org/Graphics/JPEG/jfif3.pdf says Y but means Y'.
+
     var r1 = (int32)r;
     var g1 = (int32)g;
     var b1 = (int32)b;
@@ -185,6 +186,7 @@ public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
     // prints:
     //	0x7e18 0x808d 0x7db9
     //	0x7e7e 0x8080 0x7d7d
+
     var yy1 = (int32)c.Y * 0x10101;
     var cb1 = (int32)c.Cb - 128;
     var cr1 = (int32)c.Cr - 128;
@@ -354,6 +356,7 @@ partial struct CMYK {
 public static (uint32, uint32, uint32, uint32) RGBA(this CMYK c) {
     // This code is a copy of the CMYKToRGB function above, except that it
     // returns values in the range [0, 0xffff] instead of [0, 0xff].
+
     var w = 0xffff - (uint32)c.K * 0x101;
     var r = (0xffff - (uint32)c.C * 0x101) * w / 0xffff;
     var g = (0xffff - (uint32)c.M * 0x101) * w / 0xffff;

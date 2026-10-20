@@ -163,6 +163,7 @@ public static (ж<Point>, error) SetBytes(this ж<Point> Ꮡv, slice<byte> x) {
     //
     // Read more at https://hdevalence.ca/blog/2020-10-04-its-25519am,
     // specifically the "Canonical A, R" section.
+
     var (y, err) = @new<field.Element>().SetBytes(x);
     if (err != default!) {
         return (default!, errors.New(edwards25519InvalidPointˢ));

@@ -81,7 +81,7 @@ using static go.math.big.@internal.asmgen_package;
 [assembly: go.GoPositionMap("math/big/internal/asmgen/ppc64.go", "ppc64.cs", "/g==")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/riscv64.go", "riscv64.cs", "/g==")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/s390x.go", "s390x.cs", "AAgOACpcooLKgoKClKaCgpTmgpSklKaCgpSClIKUgoKU")]
-[assembly: go.GoPositionMap("math/big/internal/asmgen/shift.go", "shift.cs", "AA0SAA4YpoKmkoKClIKCgpSCgsiCgoKCgoKCgpTKgoKCgoKC+IKCgoKUgpSC7pKCgoKCgoKCgoLy3IKCgoKClKaCgoKCgoKClJSUgoKCpoKC", "65-77:1;96-123:2")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/shift.go", "shift.cs", "AA0SAA8YpoKmkoKClIKCgpSCgsiCgoKCgoKCgpTKgoKCgoKC+IKCgoKUgpSC7pKCgoKCgoKCgoLy3IKCgoKClKaCgoKCgoKClJSUgoKCpoKC", "65-77:1;96-123:2")]
 // </GoSourcePositionMaps>
 
 namespace go.math.big.@internal;

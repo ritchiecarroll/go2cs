@@ -146,6 +146,7 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
         else { /* default: */
             // The old GNU sparse format is handled here since it is technically
             // just a regular file with additional attributes.
+
             {
                 var errΔ7 = mergePAX(ref (hdr).DerefOrNull(), paxHdrs); if (errΔ7 != default!) {
                     return (default!, errΔ7);

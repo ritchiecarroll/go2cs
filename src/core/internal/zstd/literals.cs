@@ -155,6 +155,7 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
     if (((byte)(hdr & 3)) == 2){
         // Compressed_Literals_Block.
         // Read new huffman tree.
+
         if (builtin.len(r.huffmanTable) < (nint)(1 << (int)(maxHuffmanBits))) {
             r.huffmanTable = new slice<uint16>((1 << (int)(maxHuffmanBits)));
         }

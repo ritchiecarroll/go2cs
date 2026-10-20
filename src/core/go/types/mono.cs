@@ -86,6 +86,7 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
     // iterations, we run until we either reach a fixed point or we've
     // found a path of length |V|. This allows us to terminate earlier
     // when there are no cycles, which should be the common case.
+
     var again = true;
     while (again) {
         again = false;

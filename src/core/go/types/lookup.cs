@@ -166,6 +166,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
     bool indirect = default!;
 
     // WARNING: The code in this function is extremely subtle - do not modify casually!
+
     if (name == "_"u8) {
         return (obj, index, indirect); // blank fields/methods are never found
     }

@@ -165,6 +165,7 @@ internal static ж<array<uintptr>> get2(this ref wbBuf b) {
 internal static void wbBufFlush() {
     // Note: Every possible return from this function must reset
     // the buffer's next pointer to prevent buffer overflow.
+
     if ((~(~getg()).m).dying > 0) {
         // We're going down. Not much point in write barriers
         // and this way we can allow write barriers in the

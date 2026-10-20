@@ -1062,6 +1062,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
     // TODO(nigeltao): handle the case where the dst and src overlap.
     // Does it even make sense to try and do Floyd-Steinberg whilst
     // walking the image backward (right-to-left bottom-to-top)?
+
     // If dst is an *image.Paletted, we have a fast path for dst.Set and
     // dst.At. The dst.Set equivalent is a batch version of the algorithm
     // used by color.Palette's Index method in image/color/color.go, plus

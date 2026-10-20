@@ -29,6 +29,7 @@ public static ж<P256Element> Invert(this ж<P256Element> Ꮡe, ж<P256Element> 
     //	i263    = ((i53 << 17 + 1) << 143 + x47) << 47
     //	return    (x47 + i263) << 2 + 1
     //
+
     ж<P256Element> z = @new<P256Element>().Set(Ꮡe);
     ж<P256Element> t0 = @new<P256Element>();
     ж<P256Element> t1 = @new<P256Element>();

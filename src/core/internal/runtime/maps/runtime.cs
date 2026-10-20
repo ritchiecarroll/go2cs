@@ -315,6 +315,7 @@ outer:
             if (match != 0) {
                 // Finding an empty slot means we've reached the end of
                 // the probe sequence.
+
                 uintptr i = default!;
 
                 // If we found a deleted slot along the way, we

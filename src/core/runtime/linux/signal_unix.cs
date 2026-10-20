@@ -670,6 +670,7 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
         // Arrange the stack so that it looks like the point
         // where the signal occurred made a call to the
         // function sigpanic. Then set the PC to sigpanic.
+
         // Have to pass arguments out of band since
         // augmenting the stack frame would break
         // the unwinding code.

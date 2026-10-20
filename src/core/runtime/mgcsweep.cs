@@ -425,6 +425,7 @@ internal static uintptr sweepone() {
         // The sweep list is empty. There may still be
         // concurrent sweeps running, but we're at least very
         // close to done sweeping.
+
         // Move the scavenge gen forward (signaling
         // that there's new work to do) and wake the scavenger.
         //
@@ -830,6 +831,7 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
         // Handle spans for large objects.
         if (nfreed != 0) {
             // Free large object span to heap.
+
             // Count the free in the consistent, external stats.
             //
             // Do this before freeSpan, which might update heapStats' inHeap

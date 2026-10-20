@@ -326,6 +326,7 @@ public static Color Convert(this Palette p, Color c) {
 // R,G,B,A space.
 public static nint Index(this Palette p, Color c) {
     // A batch version of this computation is in image/draw/draw.go.
+
     var (cr, cg, cb, ca) = c.RGBA();
     nint ret = 0;
     var bestSum = unchecked((uint32)(4294967295UL));

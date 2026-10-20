@@ -901,6 +901,7 @@ internal static error os_checkClonePidfd() {
         if (pidfd == -1) {
             // Bad: CLONE_PIDFD failed to provide a pidfd. Reap the process
             // before returning.
+
             error err = default!;
             while (ᐧ) {
                 ref var status = ref heap(new WaitStatus(), out var Ꮡstatus);

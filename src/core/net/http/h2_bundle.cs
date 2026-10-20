@@ -6288,6 +6288,7 @@ internal static error processData(this ж<http2serverConn> Ꮡsc, ж<http2DataFr
         // the http.Handler returned, so it's done reading &
         // done writing). Try to stop the client from sending
         // more DATA.
+
         // But still enforce their connection-level flow control,
         // and return any flow control bytes since we're not going
         // to consume them.

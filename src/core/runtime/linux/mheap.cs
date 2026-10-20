@@ -774,6 +774,7 @@ internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) {
     // locking/unlocking the heap (even with low contention). We
     // could make the slow path here several times faster by
     // batching heap frees.
+
     // Bail early if there's no more reclaim work.
     if (Ꮡh.of(mheap.ᏑreclaimIndex).Load() >= (uint64)1 << 63) {
         return;

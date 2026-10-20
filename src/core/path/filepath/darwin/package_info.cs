@@ -65,7 +65,7 @@ using static go.path.filepath_package;
 [assembly: go.GoPositionMap("path/filepath/match.go", "match.cs", "ABQkAAE4ABoCgoKCgoKUpriCgpSClKaCgpSClIKUgri0qsKCgpSCgqaCxrS0gsisAAgIgoKCppKCgoKUlIKCgqaCgoKCgpSSgIKkgoKAgraClKaCgoKUpoKCgqamgoKUpoKUqNKCgpSCgoKCpoKClIKClAACFgAIAqa0koK4gIKkgoCCpKaCgoKUpoK4gqaCgoKUgoKCpqiSlLakupKClLakpIKUAAMQAAgCgoKClIKUgoKUpIKUgoKClIKm2qKCgpQ=")]
 [assembly: go.GoPositionMap("path/filepath/path.go", "path.cs", "ABxuABsCAAIiAA4CAAIWAAgCrLIAAhLirsIAAhDSAAIUAAkCrsIAAhDSqJIAAhDSpoKClIKClAACGAAJAoKCgoKClIKCgpKkuIKCgqaCgrKCgpSClIKUgpSClIKUgpSUgoKClIKCgoKClIKClJTcygApVKaSgIKUlLaClIKCgpS4goKAgoKUtqiSgqaCuMqmgoKCgoCCtoKCgsoAAiQADwKCgpSUgpQAAiIADgKCgpSUgpSqooKClIKCgpSCrsIAAhLirsI=")]
 [assembly: go.GoPositionMap("path/filepath/path_unix.go", "path_unix.cs", "AAoiwqaCgpSmgqaUgoKmpoI=")]
-[assembly: go.GoPositionMap("path/filepath/symlink.go", "symlink.cs", "ABMggoKUgpSCgoKCgpSCgtymlJKUkqyigoKmyoKUppTKgqa4goKmgoKUyoKCpoKCpqamlIKUgpSCgpKUgoKCmKKCgqaClJSm")]
+[assembly: go.GoPositionMap("path/filepath/symlink.go", "symlink.cs", "ABMggoKUgpSCgoKCgpSCgtymlJKUkryigoKmyoKUppTKgqa4goKmgoKUyoKCpoKCpqamlIKUgpSCgpKUgoKCmKKCgqaClJSm")]
 [assembly: go.GoPositionMap("path/filepath/symlink_unix.go", "symlink_unix.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 

@@ -503,6 +503,7 @@ internal static void gcScanFinalizer(ж<specialfinalizer> Ꮡspf, ж<mspan> Ꮡs
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Don't mark finalized object, but scan it so we retain everything it points to.
+
     // A finalizer can be set for an inner byte of an object, find object beginning.
     var Δp = s.@base() + spf.special.offset / s.elemsize * s.elemsize;
 
@@ -765,6 +766,7 @@ internal static void gcAssistAlloc1(ж<g> Ꮡgp, int64 scanWork) {
         // would be a performance hit.
         // Instead we recheck it here on the non-preemptible system
         // stack to determine if we should perform an assist.
+
         // GC is done, so ignore any remaining debt.
         gp.gcAssistBytes = 0;
         return;

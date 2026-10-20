@@ -29,6 +29,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
     // TODO(rsc): The paper is not focused on, nor terribly clear about,
     // this fact in this context, and the proof seems too complicated.
     // Post a shorter, more direct proof and link to it here.
+
     if (digits > 18) {
         throw panic("fixedFtoa called with digits > 18");
     }

@@ -26,6 +26,7 @@ internal static (float64 f, bool ok) eiselLemire64(uint64 man, nint exp10, bool 
 
     // The terse comments in this function body refer to sections of the
     // https://nigeltao.github.io/blog/2020/eisel-lemire.html blog post.
+
     // Exp10 Range.
     if (man == 0) {
         if (neg) {
@@ -103,6 +104,7 @@ internal static (float32 f, bool ok) eiselLemire32(uint64 man, nint exp10, bool 
     // applies to the float32 flavor (8 exponent bits with a -127 bias, 23
     // mantissa bits). The computation here happens with 64-bit values (e.g.
     // man, xHi, retMantissa) before finally converting to a 32-bit float.
+
     // Exp10 Range.
     if (man == 0) {
         if (neg) {

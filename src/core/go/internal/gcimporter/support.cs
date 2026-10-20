@@ -41,6 +41,7 @@ internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
 
 internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line, nint column) {
     // TODO(mdempsky): Make use of column.
+
     // Since we don't know the set of needed file positions, we reserve
     // maxlines positions per file. We delay calling token.File.SetLines until
     // all positions have been calculated (by way of fakeFileSet.setLines), so
