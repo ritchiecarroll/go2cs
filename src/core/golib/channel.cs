@@ -1129,6 +1129,7 @@ internal static class SelectRuntime
         foreach (int i in pollOrder)
         {
             SelectOp op = ops[i];
+            ChanCore core = op.Core!;
 
             // Waiter plus its park semaphore, once per live case — Go parks one sudog per case too.
             AllocationCounter.Count(2);
@@ -1137,11 +1138,11 @@ internal static class SelectRuntime
             if (op.IsSend)
             {
                 waiter.Elem = op.SendValue;
-                op.Core.Sendq.Enqueue(waiter);
+                core.Sendq.Enqueue(waiter);
             }
             else
             {
-                op.Core.Recvq.Enqueue(waiter);
+                core.Recvq.Enqueue(waiter);
             }
 
             waiters[i] = waiter;

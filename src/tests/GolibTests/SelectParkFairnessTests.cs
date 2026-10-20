@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -32,19 +33,23 @@ public class SelectParkFairnessTests
     private const int Selects = 10_000;
     private const double MaxAbsZ = 4.5;
 
+    // Walls run 0.5-15 s under load. The counterpart spins without sleeping, so it also stops when the
+    // test exits (an assert failure included) or when this bound passes, whichever comes first.
+    private const int TimeoutMs = 120_000;
+
     private static readonly FieldInfo s_core = typeof(channel<nint>).GetField("m_core", BindingFlags.Instance | BindingFlags.NonPublic)!;
     private static readonly Type s_chanCore = typeof(channel<nint>).Assembly.GetType("go.ChanCore", throwOnError: true)!;
     private static readonly FieldInfo s_sendq = s_chanCore.GetField("Sendq", BindingFlags.Instance | BindingFlags.NonPublic)!;
     private static readonly FieldInfo s_recvq = s_chanCore.GetField("Recvq", BindingFlags.Instance | BindingFlags.NonPublic)!;
     private static readonly PropertyInfo s_isEmpty = s_sendq.FieldType.GetProperty("IsEmpty", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
-    [TestMethod]
+    [TestMethod, Timeout(TimeoutMs)]
     public void ParkedSendCasesOnOneChannelWinEqually()
     {
         RunParked(send: true, c => select(c.Sending(1), c.Sending(0)));
     }
 
-    [TestMethod]
+    [TestMethod, Timeout(TimeoutMs)]
     public void ParkedReceiveCasesOnOneChannelWinEqually()
     {
         RunParked(send: false, c =>
@@ -58,7 +63,7 @@ public class SelectParkFairnessTests
     }
 
     // reflect.Select reaches the same engine (GoReflect.RunSelect calls SelectRuntime.Run).
-    [TestMethod]
+    [TestMethod, Timeout(TimeoutMs)]
     public void ParkedReflectSelectCasesOnOneChannelWinEqually()
     {
         RunParked(send: true, c =>
@@ -78,52 +83,74 @@ public class SelectParkFairnessTests
         int case0 = 0;
         int case1 = 0;
         int wrongValues = 0;
+        int exited = 0;
+        Stopwatch elapsed = Stopwatch.StartNew();
+
+        bool stopped() => Volatile.Read(ref exited) != 0 || elapsed.ElapsedMilliseconds > TimeoutMs;
 
         Goroutine.Start(() =>
         {
-            for (int i = 0; i < Selects; i++)
+            try
             {
-                int iteration = i + 1;
-                SpinUntil(() => Volatile.Read(ref started) == iteration && HasWaiter(c, send ? s_sendq : s_recvq));
+                for (int i = 0; i < Selects; i++)
+                {
+                    int iteration = i + 1;
 
-                if (send)
-                {
-                    // Case 0 sends 1 and case 1 sends 0, so the value names the case that fired.
-                    if (c.Receive() == 1)
-                        case0++;
+                    if (!SpinUntil(() => Volatile.Read(ref started) == iteration && HasWaiter(c, send ? s_sendq : s_recvq), stopped))
+                    {
+                        // The test exited or ran out of time: release a select still parked on c, then stop.
+                        c.Close();
+                        return;
+                    }
+
+                    if (send)
+                    {
+                        // Case 0 sends 1 and case 1 sends 0, so the value names the case that fired.
+                        if (c.Receive() == 1)
+                            case0++;
+                        else
+                            case1++;
+                    }
                     else
-                        case1++;
-                }
-                else
-                {
-                    c.Send(i);
+                    {
+                        c.Send(i);
+                    }
                 }
             }
-
-            done.Close();
+            finally
+            {
+                done.Close();
+            }
         });
 
-        for (int i = 0; i < Selects; i++)
+        try
         {
-            Volatile.Write(ref started, i + 1);
-            int winner = selectOnce(c);
-
-            if (!send)
+            for (int i = 0; i < Selects; i++)
             {
-                if (winner == 0)
-                    case0++;
-                else if (winner == 1)
-                    case1++;
-                else
+                Volatile.Write(ref started, i + 1);
+                int winner = selectOnce(c);
+
+                if (!send)
+                {
+                    if (winner == 0)
+                        case0++;
+                    else if (winner == 1)
+                        case1++;
+                    else
+                        wrongValues++;
+                }
+                else if (winner is not (0 or 1))
+                {
                     wrongValues++;
+                }
             }
-            else if (winner is not (0 or 1))
-            {
-                wrongValues++;
-            }
-        }
 
-        done.Receive();
+            done.Receive();
+        }
+        finally
+        {
+            Volatile.Write(ref exited, 1);
+        }
 
         Assert.AreEqual(0, wrongValues, "a select returned something other than one of its two cases");
         Assert.AreEqual(Selects, case0 + case1, "every select must fire exactly one case");
@@ -140,11 +167,19 @@ public class SelectParkFairnessTests
         return !(bool)s_isEmpty.GetValue(queue.GetValue(core))!;
     }
 
-    private static void SpinUntil(Func<bool> condition)
+    // False when stopped() answered first.
+    private static bool SpinUntil(Func<bool> condition, Func<bool> stopped)
     {
         SpinWait spin = new();
 
         while (!condition())
+        {
+            if (stopped())
+                return false;
+
             spin.SpinOnce(sleep1Threshold: -1);
+        }
+
+        return true;
     }
 }
