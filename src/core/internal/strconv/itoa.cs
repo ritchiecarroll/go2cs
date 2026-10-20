@@ -18,7 +18,7 @@ public static @string FormatUint(uint64 i, nint @base) {
         }
         array<byte> a = new(24);
         nint j = formatBase10(a[..], i);
-        return ((@string)(a.slice(j)));
+        return (@string)(a.slice(j));
     }
     var (_, s) = formatBits(default!, i, @base, false, false);
     return s;
@@ -42,7 +42,7 @@ public static @string FormatInt(int64 i, nint @base) {
             j--;
             a[j] = (rune)'-';
         }
-        return ((@string)(a.slice(j)));
+        return (@string)(a.slice(j));
     }
     var (_, s) = formatBits(default!, (uint64)i, @base, i < 0, false);
     return s;
@@ -112,7 +112,7 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
         nuint m = (nuint)@base - 1; // == 1<<shift - 1
         while (u >= b) {
             i--;
-            a[i] = digits[(nuint)((nuint)u & m)];
+            a[i] = digits[((nuint)u & m)];
             u.RshAssign(shift);
         }
         // u < base
@@ -145,12 +145,12 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
         d = appendꓸꓸꓸ(dst, a.slice(i));
         return (d, s);
     }
-    s = ((@string)(a.slice(i)));
+    s = (@string)(a.slice(i));
     return (d, s);
 }
 
 internal static bool isPowerOfTwo(nint x) {
-    return (nint)(x & (x - 1)) == 0;
+    return (x & (x - 1)) == 0;
 }
 
 internal static UntypedInt nSmalls => 100;
@@ -191,7 +191,7 @@ internal static nint formatBase10(slice<byte> a, uint64 u) {
     // so the setup for the comparison u >= 1e9 is usually pure overhead.
     // Instead, we approximate it by u>>29 != 0, which is usually faster and good enough.
     nint i = len(a);
-    while ((host64bit && (u >> (int)(29)) != 0) || (!host64bit && (uint32)(((uint32)u >> (int)(29)) | (uint32)((u >> (int)(32)))) != 0)) {
+    while ((host64bit && u >> 29 != 0) || (!host64bit && ((uint32)u >> 29 | (uint32)(u >> 32)) != 0)) {
         uint32 loΔ1 = default!;
         (u, loΔ1) = (u / 1000000000, (uint32)(u % 1000000000));
 

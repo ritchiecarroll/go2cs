@@ -314,7 +314,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 break;
             }
             headerLines++;
-            var (header, val, ok) = strings.Cut(((@string)line), ":"u8);
+            var (header, val, ok) = strings.Cut((@string)line, ":"u8);
             if (!ok) {
                 h.printf("cgi: bogus header line: %s"u8, line);
                 continue;

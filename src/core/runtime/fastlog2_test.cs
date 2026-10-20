@@ -19,7 +19,7 @@ public static void TestFastLog2(ж<testing.T> Ꮡt) {
     nint inc = 1;
     if (testing.Short()) {
         // Check 1K total values, down from 64M.
-        inc = (1 << (int)(16));
+        inc = 1 << 16;
     }
     for (nint i = 1; i < (nint)((1 << (int)(randomBitCount))); i += inc) {
         var (l, fl) = (Δmath.Log2((float64)i), runtime_internal_test_package.Fastlog2((float64)i));

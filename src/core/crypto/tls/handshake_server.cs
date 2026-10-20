@@ -505,11 +505,11 @@ internal static error pickCipherSuite(this ж<serverHandshakeState> Ꮡhs) {
 internal static bool cipherSuiteOk(this ref serverHandshakeState hs, ж<cipherSuite> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if ((nint)(c.flags & (nint)suiteECDHE) != 0){
+    if ((c.flags & (nint)suiteECDHE) != 0){
         if (!hs.ecdheOk) {
             return false;
         }
-        if ((nint)(c.flags & (nint)suiteECSign) != 0){
+        if ((c.flags & (nint)suiteECSign) != 0){
             if (!hs.ecSignOk) {
                 return false;
             }
@@ -521,7 +521,7 @@ internal static bool cipherSuiteOk(this ref serverHandshakeState hs, ж<cipherSu
     if (!hs.rsaDecryptOk) {
         return false;
     }
-    if ((~hs.c).vers < VersionTLS12 && (nint)(c.flags & (nint)suiteTLS12) != 0) {
+    if ((~hs.c).vers < VersionTLS12 && (c.flags & (nint)suiteTLS12) != 0) {
         return false;
     }
     return true;

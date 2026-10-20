@@ -513,7 +513,7 @@ public static (ΔHandle handle, error err) CertOpenStore(uintptr storeProvider, 
     error err = default!;
 
     var (r0, _, e1) = SyscallN(procCertOpenStore.Addr(), (uintptr)storeProvider, (uintptr)msgAndCertEncodingType, (uintptr)cryptProv, (uintptr)flags, (uintptr)para);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -527,7 +527,7 @@ public static (ΔHandle store, error err) CertOpenSystemStore(ΔHandle hprov, ж
     var ᴋ58 = Ꮡname;
         var (r0, _, e1) = SyscallN(procCertOpenSystemStoreW.Addr(), (uintptr)hprov, (uintptr)ᴋ58);
     System.GC.KeepAlive(ᴋ58);
-    store = ((ΔHandle)r0);
+    store = (ΔHandle)r0;
     if (store == 0) {
         err = errnoErr(e1);
     }
@@ -634,7 +634,7 @@ public static (ΔHandle handle, error err) CreateFileMapping(ΔHandle fhandle, �
         var (r0, _, e1) = SyscallN(procCreateFileMappingW.Addr(), (uintptr)fhandle, (uintptr)ᴋ66, (uintptr)prot, (uintptr)maxSizeHigh, (uintptr)maxSizeLow, (uintptr)ᴋ67);
     System.GC.KeepAlive(ᴋ66);
     System.GC.KeepAlive(ᴋ67);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -650,7 +650,7 @@ internal static (ΔHandle handle, error err) createFile(ж<uint16> Ꮡname, uint
         var (r0, _, e1) = SyscallN(procCreateFileW.Addr(), (uintptr)ᴋ68, (uintptr)access, (uintptr)mode, (uintptr)ᴋ69, (uintptr)createmode, (uintptr)attrs, (uintptr)templatefile);
     System.GC.KeepAlive(ᴋ68);
     System.GC.KeepAlive(ᴋ69);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == InvalidHandle || e1 == ERROR_ALREADY_EXISTS) {
         err = errnoErr(e1);
     }
@@ -676,7 +676,7 @@ internal static (ΔHandle handle, error err) createIoCompletionPort(ΔHandle fil
     error err = default!;
 
     var (r0, _, e1) = SyscallN(procCreateIoCompletionPort.Addr(), (uintptr)filehandle, (uintptr)cphandle, (uintptr)key, (uintptr)threadcnt);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -748,7 +748,7 @@ public static (ΔHandle handle, error err) CreateToolhelp32Snapshot(uint32 flags
     error err = default!;
 
     var (r0, _, e1) = SyscallN(procCreateToolhelp32Snapshot.Addr(), (uintptr)flags, (uintptr)processId);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == InvalidHandle) {
         err = errnoErr(e1);
     }
@@ -942,7 +942,7 @@ public static (ΔHandle pseudoHandle, error err) GetCurrentProcess() {
     error err = default!;
 
     var (r0, _, e1) = SyscallN(procGetCurrentProcess.Addr());
-    pseudoHandle = ((ΔHandle)r0);
+    pseudoHandle = (ΔHandle)r0;
     if (pseudoHandle == 0) {
         err = errnoErr(e1);
     }
@@ -1190,7 +1190,7 @@ public static (ΔHandle handle, error err) GetStdHandle(nint stdhandle) {
     error err = default!;
 
     var (r0, _, e1) = SyscallN(procGetStdHandle.Addr(), (uintptr)stdhandle);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == InvalidHandle) {
         err = errnoErr(e1);
     }
@@ -1265,7 +1265,7 @@ internal static (ΔHandle handle, error err) _LoadLibrary(ж<uint16> Ꮡlibname)
     var ᴋ126 = Ꮡlibname;
         var (r0, _, e1) = SyscallN(procLoadLibraryW.Addr(), (uintptr)ᴋ126);
     System.GC.KeepAlive(ᴋ126);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -1289,7 +1289,7 @@ public static (ΔHandle handle, error err) LocalFree(ΔHandle hmem) {
     error err = default!;
 
     var (r0, _, e1) = SyscallN(procLocalFree.Addr(), (uintptr)hmem);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle != 0) {
         err = errnoErr(e1);
     }
@@ -1331,7 +1331,7 @@ public static (ΔHandle handle, error err) OpenProcess(uint32 da, bool inheritHa
         _p0 = 1;
     }
     var (r0, _, e1) = SyscallN(procOpenProcess.Addr(), (uintptr)da, (uintptr)_p0, (uintptr)pid);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == 0) {
         err = errnoErr(e1);
     }
@@ -1914,7 +1914,7 @@ internal static (ΔHandle handle, error err) socket(int32 af, int32 typ, int32 p
     error err = default!;
 
     var (r0, _, e1) = SyscallN(procsocket.Addr(), (uintptr)af, (uintptr)typ, (uintptr)protocol);
-    handle = ((ΔHandle)r0);
+    handle = (ΔHandle)r0;
     if (handle == InvalidHandle) {
         err = errnoErr(e1);
     }

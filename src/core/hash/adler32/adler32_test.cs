@@ -71,7 +71,7 @@ internal static uint32 checksum(slice<byte> p) {
         s1 = (s1 + (uint32)x) % (uint32)mod;
         s2 = (s2 + s1) % (uint32)mod;
     }
-    return (uint32)((s2 << (int)(16)) | s1);
+    return s2 << 16 | s1;
 }
 
 public static void TestGolden(ж<testing.T> Ꮡt) {

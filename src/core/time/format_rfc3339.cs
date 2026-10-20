@@ -115,7 +115,7 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> Ꮡloca
     }
     nint year = parseUint(s[0..4], 0, 9999); // e.g., 2006
     nint month = parseUint(s[5..7], 1, 12); // e.g., 01
-    nint day = parseUint(s[8..10], 1, daysIn(((ΔMonth)month), year)); // e.g., 02
+    nint day = parseUint(s[8..10], 1, daysIn((ΔMonth)month, year)); // e.g., 02
     nint hour = parseUint(s[11..13], 0, 23); // e.g., 15
     nint min = parseUint(s[14..16], 0, 59); // e.g., 04
     nint sec = parseUint(s[17..19], 0, 59); // e.g., 05
@@ -135,7 +135,7 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> Ꮡloca
     }
 
     // Parse the time zone.
-    var t = Date(year, ((ΔMonth)month), day, hour, min, sec, nsec, ΔUTC);
+    var t = Date(year, (ΔMonth)month, day, hour, min, sec, nsec, ΔUTC);
     if (len(s) != 1 || s[0] != (rune)'Z') {
         if (len(s) != len("-07:00")) {
             return (new Time(nil), false);
@@ -166,7 +166,7 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> Ꮡloca
 internal static (Time, error) parseStrictRFC3339(slice<byte> b) {
     var (t, ok) = parseRFC3339(b, ΔLocal);
     if (!ok) {
-        var (tΔ1, err) = Parse(RFC3339, ((@string)b));
+        var (tΔ1, err) = Parse(RFC3339, (@string)b);
         if (err != default!) {
             return (new Time(nil), err);
         }
@@ -182,23 +182,23 @@ internal static (Time, error) parseStrictRFC3339(slice<byte> b) {
             return (tΔ1, default!);
         }
         case {} when b[len("2006-01-02T") + 1] == (rune)':': { // hour must be two digits
-            return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, ((@string)b), "15"u8, ((@string)(b[(int)(len("2006-01-02T"))..][..1])), ""u8))));
+            return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, (@string)b, "15"u8, (@string)(b[(int)(len("2006-01-02T"))..][..1]), ""u8))));
         }
         case {} when b[len("2006-01-02T15:04:05")] == (rune)',': { // sub-second separator must be a period
-            return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, ((@string)b), "."u8, ","u8, ""u8))));
+            return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, (@string)b, "."u8, ","u8, ""u8))));
         }
         case {} when b[len(b) - 1] is not (rune)'Z': {
             switch (ᐧ) {
             case {} when num2(b.slice(len(b) - len("07:00"))) >= 24: { // timezone hour must be in range
-                return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, ((@string)b), "Z07:00"u8, ((@string)(b.slice(len(b) - len("Z07:00")))), ": timezone hour out of range"u8))));
+                return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, (@string)b, "Z07:00"u8, (@string)(b.slice(len(b) - len("Z07:00"))), ": timezone hour out of range"u8))));
             }
             case {} when num2(b.slice(len(b) - len("00"))) >= 60: { // timezone minute must be in range
-                return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, ((@string)b), "Z07:00"u8, ((@string)(b.slice(len(b) - len("Z07:00")))), ": timezone minute out of range"u8))));
+                return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, (@string)b, "Z07:00"u8, (@string)(b.slice(len(b) - len("Z07:00"))), ": timezone minute out of range"u8))));
             }}
             break;
         }
         default: { // unknown error; should not occur
-            return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, ((@string)b), RFC3339, ((@string)b), ""u8))));
+            return (new Time(nil), new ParseErrorжerror(Ꮡ(new ParseError(RFC3339, (@string)b, RFC3339, (@string)b, ""u8))));
         }}
     }
     return (t, default!);

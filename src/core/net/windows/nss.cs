@@ -275,7 +275,7 @@ internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
         if (hasUpperCase(f)) {
             var lower = slice<byte>(f);
             lowerASCIIBytes(lower);
-            f = ((@string)lower);
+            f = (@string)lower;
         }
         c = append(c, new nssCriterion(
             negate: not,

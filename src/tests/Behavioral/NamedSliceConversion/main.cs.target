@@ -27,10 +27,10 @@ internal static nint /*total*/ sum(slice<nint> s) {
 
 internal static void Main() {
     var special = new SpecialCase(new CaseRange[]{new(1, 2), new(3, 4), new(5, 6)}.slice());
-    fmt.Println(count(((slice<CaseRange>)special)));
+    fmt.Println(count((slice<CaseRange>)special));
 
     var n = new ints(new nint[]{10, 20, 30}.slice());
-    fmt.Println(sum(((slice<nint>)n)));
+    fmt.Println(sum((slice<nint>)n));
 
     slice<CaseRange> rs = ((slice<CaseRange>)special);
     fmt.Println(len(rs), rs[2].Lo);

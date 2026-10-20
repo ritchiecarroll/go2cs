@@ -5,21 +5,12 @@ using Δnet = net_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object fatalInterfacesˢ = (@string)"FATAL interfaces:"u8;
-private static readonly object noMulticastCapableˢ = (@string)"no multicast-capable interface: join NOT exercised on this host"u8;
-private static readonly @string udp4ˢ = "udp4"u8;
-private static readonly object joinErrIsNilˢ = (@string)"join err is nil  ="u8;
-private static readonly object joinErrorˢ = (@string)"  join error      ="u8;
-private static readonly object localIpIsUnsetˢ = (@string)"local ip is unset ="u8;
-private static readonly object localPortBoundˢ = (@string)"local port bound  ="u8;
-
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
         var (ifis, err) = Δnet.Interfaces();
         if (err != default!) {
-            fmt.Println(fatalInterfacesˢ, err);
+            fmt.Println("FATAL interfaces:", err);
             return;
         }
 
@@ -31,24 +22,24 @@ internal static void Main() {
             }
         }
         if (chosen == nil) {
-            fmt.Println(noMulticastCapableˢ);
+            fmt.Println("no multicast-capable interface: join NOT exercised on this host");
             return;
         }
 
         var gaddr = Ꮡ(new Δnet.UDPAddr(IP: Δnet.IPv4(224, 0, 0, 254), Port: 0));
 
-        (var c, err) = Δnet.ListenMulticastUDP(udp4ˢ, chosen, gaddr);
-        fmt.Println(joinErrIsNilˢ, err == default!);
+        (var c, err) = Δnet.ListenMulticastUDP("udp4", chosen, gaddr);
+        fmt.Println("join err is nil  =", err == default!);
         if (err != default!) {
-            fmt.Println(joinErrorˢ, err);
+            fmt.Println("  join error      =", err);
             return;
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
 
         var local = c.LocalAddr()._<ж<Δnet.UDPAddr>>();
-        fmt.Println(localIpIsUnsetˢ, (~local).IP.IsUnspecified());
-        fmt.Println(localPortBoundˢ, (~local).Port != 0);
+        fmt.Println("local ip is unset =", (~local).IP.IsUnspecified());
+        fmt.Println("local port bound  =", (~local).Port != 0);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

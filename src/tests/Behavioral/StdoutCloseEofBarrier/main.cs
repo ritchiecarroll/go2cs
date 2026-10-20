@@ -46,7 +46,7 @@ internal static void parent() {
     stdin.Write(new byte[]{(rune)'\n'}.slice());
     stdin.Close();
     cmd.Wait();
-    fmt.Printf("child wrote %q\n"u8, ((@string)data));
+    fmt.Printf("child wrote %q\n"u8, (@string)data);
     fmt.Println("EOF preceded child exit");
 }
 

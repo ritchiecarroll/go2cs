@@ -625,7 +625,7 @@ internal static void benchmarkAllCurves(ж<testing.B> Ꮡb, Action<ж<testing.B>
 
 public static void BenchmarkSign(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var (priv, err) = GenerateKey(curve, new ecdsa_test_package.bufio_ReaderжReader(r));
         if (err != default!) {
             bΔ1.Fatal(err);
@@ -650,7 +650,7 @@ internal static readonly object verifyFailedˢ = (@string)"verify failed"u8;
 
 public static void BenchmarkVerify(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         var (priv, err) = GenerateKey(curve, new ecdsa_test_package.bufio_ReaderжReader(r));
         if (err != default!) {
             bΔ1.Fatal(err);
@@ -673,7 +673,7 @@ public static void BenchmarkVerify(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkGenerateKey(ж<testing.B> Ꮡb) {
     benchmarkAllCurves(Ꮡb, (ж<testing.B> bΔ1, elliptic.Curve curve) => {
-        var r = bufio.NewReaderSize(rand.Reader, (1 << (int)(15)));
+        var r = bufio.NewReaderSize(rand.Reader, 1 << 15);
         bΔ1.ReportAllocs();
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {

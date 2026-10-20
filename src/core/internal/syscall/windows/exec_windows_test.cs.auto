@@ -58,7 +58,7 @@ public static void TestRunAtLowIntegrity(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         if (((sstring)@out) != sidWilLow) {
-            Ꮡt.Fatalf("Child process did not run as low integrity level: %s"u8, ((@string)@out));
+            Ꮡt.Fatalf("Child process did not run as low integrity level: %s"u8, (@string)@out);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

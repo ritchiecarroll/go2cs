@@ -101,7 +101,7 @@ internal static void Main() {
 
     var embedType = reflect.TypeOf(new main_i());
     var embedded = reflect.StructOf(new reflect.StructField[]{
-        new(Name: "Celsius", Type: reflect.TypeOf(((Celsius)0D)), Anonymous: true),
+        new(Name: "Celsius", Type: reflect.TypeOf((Celsius)0D), Anonymous: true),
         field("Tail", intT)
     }.slice());
     fmt.Println("embedded type:", embedded);
@@ -117,9 +117,9 @@ internal static void Main() {
         unexported.Field(0).PkgPath, unexported.Field(1).PkgPath,
         unexported.Field(0).IsExported(), unexported.Field(1).IsExported());
 
-    var stringerT = reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem();
+    var stringerT = reflect.TypeOf((ж<fmt.Stringer>)nil).Elem();
     fmt.Println("implements Stringer:", first.Implements(stringerT),
-        "| implements any:", first.Implements(reflect.TypeOf(((ж<any>)nil)).Elem()),
+        "| implements any:", first.Implements(reflect.TypeOf((ж<any>)nil).Elem()),
         "| comparable:", first.Comparable(),
         "| declared stringer does:", reflect.TypeOf(new stringer(nil)).Implements(stringerT));
 
@@ -150,7 +150,7 @@ internal static void Main() {
         reflect.StructOf(new reflect.StructField[]{new(Name: "lower", Type: intTʗ4)}.slice());
     }));
     fmt.Println("anonymous with pkgpath:", recovered(() => {
-        reflect.StructOf(new reflect.StructField[]{new(Name: "Celsius", Type: reflect.TypeOf(((Celsius)0D)), Anonymous: true, PkgPath: "main")}.slice());
+        reflect.StructOf(new reflect.StructField[]{new(Name: "Celsius", Type: reflect.TypeOf((Celsius)0D), Anonymous: true, PkgPath: "main")}.slice());
     }));
 }
 

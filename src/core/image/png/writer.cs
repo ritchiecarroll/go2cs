@@ -436,9 +436,9 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                 } else {
                     for (nint x = b.Min.X; x < b.Max.X; x++) {
                         var (r, g, bΔ3, _) = m.At(x, y).RGBA();
-                        cr0[i + 0] = (uint8)((r >> (int)(8)));
-                        cr0[i + 1] = (uint8)((g >> (int)(8)));
-                        cr0[i + 2] = (uint8)((bΔ3 >> (int)(8)));
+                        cr0[i + 0] = (uint8)(r >> 8);
+                        cr0[i + 1] = (uint8)(g >> 8);
+                        cr0[i + 2] = (uint8)(bΔ3 >> 8);
                         i += 3;
                     }
                 }
@@ -509,9 +509,9 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                             // alpha-premultiplied to non-alpha-premultiplied).
                             const uint32 mΔ2 = /* 0x101 * 0xffff */ 16842495;
                             var a = (uint32)s.Value[3] * 0x101;
-                            d.Value[0] = (uint8)((((uint32)s.Value[0] * mΔ2 / a) >> (int)(8)));
-                            d.Value[1] = (uint8)((((uint32)s.Value[1] * mΔ2 / a) >> (int)(8)));
-                            d.Value[2] = (uint8)((((uint32)s.Value[2] * mΔ2 / a) >> (int)(8)));
+                            d.Value[0] = (uint8)(((uint32)s.Value[0] * mΔ2 / a) >> 8);
+                            d.Value[1] = (uint8)(((uint32)s.Value[1] * mΔ2 / a) >> 8);
+                            d.Value[2] = (uint8)(((uint32)s.Value[2] * mΔ2 / a) >> 8);
                             d.Value[3] = s.Value[3];
                         }
                     }
@@ -530,7 +530,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             else if (exprᴛ2 == cbG16) {
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     var c = color.Gray16Model.Convert(m.At(x, y))._<color.Gray16>();
-                    cr[0][i + 0] = (uint8)((c.Y >> (int)(8)));
+                    cr[0][i + 0] = (uint8)(c.Y >> 8);
                     cr[0][i + 1] = (uint8)c.Y;
                     i += 2;
                 }
@@ -539,11 +539,11 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                 // We have previously verified that the alpha value is fully opaque.
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     var (r, g, bΔ4, _) = m.At(x, y).RGBA();
-                    cr[0][i + 0] = (uint8)((r >> (int)(8)));
+                    cr[0][i + 0] = (uint8)(r >> 8);
                     cr[0][i + 1] = (uint8)r;
-                    cr[0][i + 2] = (uint8)((g >> (int)(8)));
+                    cr[0][i + 2] = (uint8)(g >> 8);
                     cr[0][i + 3] = (uint8)g;
-                    cr[0][i + 4] = (uint8)((bΔ4 >> (int)(8)));
+                    cr[0][i + 4] = (uint8)(bΔ4 >> 8);
                     cr[0][i + 5] = (uint8)bΔ4;
                     i += 6;
                 }
@@ -552,13 +552,13 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
                 // Convert from image.Image (which is alpha-premultiplied) to PNG's non-alpha-premultiplied.
                 for (nint x = b.Min.X; x < b.Max.X; x++) {
                     var c = color.NRGBA64Model.Convert(m.At(x, y))._<color.NRGBA64>();
-                    cr[0][i + 0] = (uint8)((c.R >> (int)(8)));
+                    cr[0][i + 0] = (uint8)(c.R >> 8);
                     cr[0][i + 1] = (uint8)c.R;
-                    cr[0][i + 2] = (uint8)((c.G >> (int)(8)));
+                    cr[0][i + 2] = (uint8)(c.G >> 8);
                     cr[0][i + 3] = (uint8)c.G;
-                    cr[0][i + 4] = (uint8)((c.B >> (int)(8)));
+                    cr[0][i + 4] = (uint8)(c.B >> 8);
                     cr[0][i + 5] = (uint8)c.B;
-                    cr[0][i + 6] = (uint8)((c.A >> (int)(8)));
+                    cr[0][i + 6] = (uint8)(c.A >> 8);
                     cr[0][i + 7] = (uint8)c.A;
                     i += 8;
                 }
@@ -600,7 +600,7 @@ internal static void writeIDATs(this ж<encoder> Ꮡe) {
         return;
     }
     if (e.bw == nil){
-        e.bw = bufio.NewWriterSize(new encoderжWriter(Ꮡe), (1 << (int)(15)));
+        e.bw = bufio.NewWriterSize(new encoderжWriter(Ꮡe), 1 << 15);
     } else {
         e.bw.Reset(new encoderжWriter(Ꮡe));
     }

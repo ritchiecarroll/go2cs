@@ -118,7 +118,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         if (maxFileMemoryBytes == math.MaxInt64) {
             maxFileMemoryBytes--;
         }
-        var maxMemoryBytes = maxMemory + (int64)(((int64)10 << (int)(20)));
+        var maxMemoryBytes = maxMemory + (int64)((int64)10 << 20);
         if (maxMemoryBytes <= 0) {
             maxMemoryBytes = math.MaxInt64;
         }

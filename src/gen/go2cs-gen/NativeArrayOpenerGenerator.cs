@@ -98,7 +98,7 @@ public class NativeArrayOpenerGenerator : ISourceGenerator
                     }
                     case StructDeclarationSyntax declaration:
                     {
-                        if (semanticModel.GetDeclaredSymbol(declaration) is not INamedTypeSymbol type || IsOpen(type))
+                        if (semanticModel.GetDeclaredSymbol(declaration) is not INamedTypeSymbol type)
                             break;
 
                         INamedTypeSymbol package = Outermost(type);
@@ -196,18 +196,6 @@ public class NativeArrayOpenerGenerator : ISourceGenerator
             type = type.ContainingType;
 
         return type;
-    }
-
-    // A type declared inside generic code, or itself generic, has fields over open elements.
-    private static bool IsOpen(INamedTypeSymbol type)
-    {
-        for (INamedTypeSymbol? current = type; current is not null; current = current.ContainingType)
-        {
-            if (current.IsGenericType)
-                return true;
-        }
-
-        return false;
     }
 
     // A registration line must compile and register a closed element: no type parameter, and nameable from the package.

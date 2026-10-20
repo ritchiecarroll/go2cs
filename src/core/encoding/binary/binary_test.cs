@@ -537,26 +537,26 @@ public static void TestSizeInvalid(ж<testing.T> Ꮡt) {
     var testcases = new any[]{
         (nint)0,
         @new<nint>(),
-        ((ж<nint>)nil),
+        (ж<nint>)nil,
         new nuint[]{}.array(1),
         Ꮡ(new array<nuint>(1)),
         ж<array<nuint>>.NilBoxOfDims(1L),
         new nint[]{}.slice(),
         slice<nint>(default!),
         @new<slice<nint>>(),
-        ((ж<slice<nint>>)nil),
-        ((ж<int8>)nil),
-        ((ж<uint8>)nil),
-        ((ж<int16>)nil),
-        ((ж<uint16>)nil),
-        ((ж<int32>)nil),
-        ((ж<uint32>)nil),
-        ((ж<int64>)nil),
-        ((ж<uint64>)nil),
-        ((ж<float32>)nil),
-        ((ж<float64>)nil),
-        ((ж<complex64>)nil),
-        ((ж<complex128>)nil)
+        (ж<slice<nint>>)nil,
+        (ж<int8>)nil,
+        (ж<uint8>)nil,
+        (ж<int16>)nil,
+        (ж<uint16>)nil,
+        (ж<int32>)nil,
+        (ж<uint32>)nil,
+        (ж<int64>)nil,
+        (ж<uint64>)nil,
+        (ж<float32>)nil,
+        (ж<float64>)nil,
+        (ж<complex64>)nil,
+        (ж<complex128>)nil
     }.slice();
     foreach (var (_, tc) in testcases) {
         {
@@ -630,7 +630,7 @@ public static void TestReadErrorMsg(ж<testing.T> Ꮡt) {
                     }
                 }
             }
-            read((nint)(0));
+            read((nint)0);
             ref var s = ref heap<ж<EmptyStruct>>(out var Ꮡs);
             s = @new<EmptyStruct>();
             read(Ꮡs);

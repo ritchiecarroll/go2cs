@@ -47,22 +47,22 @@ public static UntypedInt MapIndirectElem => 8;
 
 public static bool NeedKeyUpdate(this ref ΔMapType mt) {
     // true if we need to update key on an overwrite
-    return (uint32)(mt.Flags & (uint32)MapNeedKeyUpdate) != 0;
+    return (mt.Flags & (uint32)MapNeedKeyUpdate) != 0;
 }
 
 public static bool HashMightPanic(this ref ΔMapType mt) {
     // true if hash function might panic
-    return (uint32)(mt.Flags & (uint32)MapHashMightPanic) != 0;
+    return (mt.Flags & (uint32)MapHashMightPanic) != 0;
 }
 
 public static bool IndirectKey(this ref ΔMapType mt) {
     // store ptr to key instead of key itself
-    return (uint32)(mt.Flags & (uint32)MapIndirectKey) != 0;
+    return (mt.Flags & (uint32)MapIndirectKey) != 0;
 }
 
 public static bool IndirectElem(this ref ΔMapType mt) {
     // store ptr to elem instead of elem itself
-    return (uint32)(mt.Flags & (uint32)MapIndirectElem) != 0;
+    return (mt.Flags & (uint32)MapIndirectElem) != 0;
 }
 
 } // end abi_package

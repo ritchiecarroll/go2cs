@@ -117,14 +117,14 @@ internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
                     return err;
                 }
                 // TODO: avoid the conversion to string.
-                s.appendString(((@string)data));
+                s.appendString((@string)data);
                 return default!;
             }
         }
         {
             var (bs, ok) = byteSlice(v.any); if (ok) {
                 // As of Go 1.19, this only allocates for strings longer than 32 bytes.
-                s.buf.WriteString(strconv.Quote(((@string)bs)));
+                s.buf.WriteString(strconv.Quote((@string)bs));
                 return default!;
             }
         }

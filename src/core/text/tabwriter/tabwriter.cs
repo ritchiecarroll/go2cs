@@ -240,7 +240,7 @@ internal static void dump(this ref Writer b) {
     foreach (var (i, line) in b.lines) {
         print((@string)"("u8, i, (@string)") "u8);
         foreach (var (_, c) in line) {
-            print((@string)"["u8, ((@string)(b.buf.slice(pos, pos + c.size))), (@string)"]"u8);
+            print((@string)"["u8, (@string)(b.buf.slice(pos, pos + c.size)), (@string)"]"u8);
             pos += c.size;
         }
         print((@string)"\n"u8);
@@ -305,10 +305,10 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
         var line = b.lines[i];
 
         // if TabIndent is set, use tabs to pad leading empty cells
-        var useTabs = (nuint)(b.flags & TabIndent) != 0;
+        var useTabs = (b.flags & TabIndent) != 0;
 
         foreach (var (j, c) in line) {
-            if (j > 0 && (nuint)(b.flags & Debug) != 0) {
+            if (j > 0 && (b.flags & Debug) != 0) {
                 // indicate column break
                 b.write0(vbar);
             }
@@ -321,7 +321,7 @@ internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0
             } else {
                 // non-empty cell
                 useTabs = false;
-                if ((nuint)(b.flags & AlignRight) == 0){ // align left
+                if ((b.flags & AlignRight) == 0){ // align left
                     b.write0(b.buf.slice(pos, pos + c.size));
                     pos += c.size;
                     if (j < len(b.widths)) {
@@ -400,7 +400,7 @@ internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, ni
         // column block end
 
         // discard empty columns if necessary
-        if (discardable && (nuint)(b.flags & DiscardEmptyColumns) != 0) {
+        if (discardable && (b.flags & DiscardEmptyColumns) != 0) {
             width = 0;
         }
 
@@ -458,7 +458,7 @@ internal static void endEscape(this ref Writer b) {
     var exprᴛ1 = b.endChar;
     if (exprᴛ1 == Escape) {
         b.updateWidth();
-        if ((nuint)(b.flags & StripEscape) == 0) {
+        if ((b.flags & StripEscape) == 0) {
             b.cell.width -= 2; // don't count the Escape chars
         }
     }
@@ -594,7 +594,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                             // line is ignored by format()), thus we can flush the
                             // Writer contents.
                             b.flushNoDefers();
-                            if (ch == (rune)'\f' && (nuint)(b.flags & Debug) != 0) {
+                            if (ch == (rune)'\f' && (b.flags & Debug) != 0) {
                                 // indicate section break
                                 b.write0(hbar);
                             }
@@ -606,14 +606,14 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                     b.append(buf.slice(n, i));
                     b.updateWidth();
                     n = i;
-                    if ((nuint)(b.flags & StripEscape) != 0) {
+                    if ((b.flags & StripEscape) != 0) {
                         n++; // strip Escape
                     }
                     b.startEscape(Escape);
                 }
                 else if (exprᴛ1 is (rune)'<' or (rune)'&') {
                     // possibly an html tag/entity
-                    if ((nuint)(b.flags & FilterHTML) != 0) {
+                    if ((b.flags & FilterHTML) != 0) {
                         // begin of tag/entity
                         b.append(buf.slice(n, i));
                         b.updateWidth();
@@ -626,7 +626,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
                 if (ch == b.endChar) {
                     // end of tag/entity
                     nint j = i + 1;
-                    if (ch == Escape && (nuint)(b.flags & StripEscape) != 0) {
+                    if (ch == Escape && (b.flags & StripEscape) != 0) {
                         j = i; // strip Escape
                     }
                     b.append(buf.slice(n, j));

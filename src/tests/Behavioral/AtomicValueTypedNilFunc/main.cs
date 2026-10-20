@@ -58,7 +58,7 @@ internal static void Main() {
     });
 
     ref var v5 = ref heap(new atomic.Value(), out var Ꮡv5);
-    Ꮡv5.Store((nint)(1));
+    Ꮡv5.Store((nint)1);
     recovered("int then string, different type", () => {
         Ꮡv5.Store("x");
     });

@@ -343,8 +343,8 @@ internal static error processSOF(this ref decoder d, nint n) {
     if (d.tmp[0] != 8) {
         return ((UnsupportedError)(@string)precisionˢ);
     }
-    d.height = ((nint)d.tmp[1] << (int)(8)) + (nint)d.tmp[2];
-    d.width = ((nint)d.tmp[3] << (int)(8)) + (nint)d.tmp[4];
+    d.height = ((nint)d.tmp[1] << 8) + (nint)d.tmp[2];
+    d.width = ((nint)d.tmp[3] << 8) + (nint)d.tmp[4];
     if ((nint)d.tmp[5] != d.nComp) {
         return ((FormatError)(@string)sofHasWrongLengthˢ);
     }
@@ -365,7 +365,7 @@ internal static error processSOF(this ref decoder d, nint n) {
         }
 
         var hv = d.tmp[7 + 3 * i];
-        nint h = (nint)((hv >> (int)(4)));
+        nint h = (nint)(hv >> 4);
         nint v = (nint)((byte)(hv & 0x0f));
         if (h < 1 || 4 < h || v < 1 || 4 < v) {
             return ((FormatError)(@string)lumaChromaSubsamplingˢ);
@@ -476,7 +476,7 @@ loop:
         if (tq > maxTq) {
             return ((FormatError)(@string)badTqValueˢ);
         }
-        switch ((x >> (int)(4))) {
+        switch ((x >> 4)) {
         default: {
             return ((FormatError)(@string)badPqValueˢ);
         }
@@ -506,7 +506,7 @@ loop:
                 }
             }
             foreach (var (i, _) in d.quant[tq]) {
-                d.quant[tq][i] = (int32)(((int32)d.tmp[2 * i] << (int)(8)) | (int32)d.tmp[2 * i + 1]);
+                d.quant[tq][i] = (int32)d.tmp[2 * i] << 8 | (int32)d.tmp[2 * i + 1];
             }
             break;
         }}
@@ -532,7 +532,7 @@ internal static error processDRI(this ref decoder d, nint n) {
             return err;
         }
     }
-    d.ri = ((nint)d.tmp[0] << (int)(8)) + (nint)d.tmp[1];
+    d.ri = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1];
     return default!;
 }
 
@@ -663,7 +663,7 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
                 return (default!, err);
             }
         }
-        nint n = ((nint)d.tmp[0] << (int)(8)) + (nint)d.tmp[1] - 2;
+        nint n = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1] - 2;
         if (n < 0) {
             return (default!, ((FormatError)(@string)shortSegmentLengthˢ));
         }

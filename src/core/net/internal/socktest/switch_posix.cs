@@ -38,7 +38,7 @@ private static readonly @string seqpacketˢ = "seqpacket"u8;
 
 internal static @string typeString(nint sotype) {
     @string s = default!;
-    var exprᴛ1 = (nint)(sotype & 0xff);
+    var exprᴛ1 = (sotype & 0xff);
     if (exprᴛ1 == syscall.SOCK_STREAM) {
         s = streamˢ;
     }
@@ -52,7 +52,7 @@ internal static @string typeString(nint sotype) {
         s = seqpacketˢ;
     }
     else { /* default: */
-        s = fmt.Sprintf("%d"u8, (nint)(sotype & 0xff));
+        s = fmt.Sprintf("%d"u8, sotype & 0xff);
     }
     {
         nuint flags = (nuint)((nuint)sotype & (nuint)~(nuint)0xff); if (flags != 0) {

@@ -35,7 +35,7 @@ internal static void Main() {
 
     fmt.Println(mine == person.Value);
 
-    fmt.Println(slice<rune>(((@string)"白鵬翔"u8)));
+    fmt.Println(slice<rune>((@string)"白鵬翔"u8));
 }
 
 } // end main_package

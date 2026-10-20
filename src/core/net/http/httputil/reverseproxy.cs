@@ -617,7 +617,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
                         return default!;
                     }
                     var h = rw.Header();
-                    copyHeader(h, ((httpꓸHeader)(map<@string, slice<@string>>)header));
+                    copyHeader(h, (httpꓸHeader)(map<@string, slice<@string>>)header);
                     rw.WriteHeader(code);
 
                     // Clear headers, it's not automatically done by ResponseWriter.WriteHeader() for 1xx responses

@@ -1618,6 +1618,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckParenthesizedTypeAssertion() => CheckTarget("ParenthesizedTypeAssertion");
 
     [TestMethod]
+    public void CheckParityOperatorPrecedence() => CheckTarget("ParityOperatorPrecedence");
+
+    [TestMethod]
     public void CheckPartialInstantiationAnonymousTypeArg() => CheckTarget("PartialInstantiationAnonymousTypeArg");
 
     [TestMethod]

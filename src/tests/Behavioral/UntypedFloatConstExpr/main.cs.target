@@ -40,7 +40,7 @@ internal static void bits32(@string label, uint32 got, uint32 want) {
 
 internal static void Main() {
     fmt.Println("-- named float conversion --");
-    var f = ((MyFloat)(/* -math.Sqrt2 */ -1.4142135623730951D));
+    var f = (MyFloat)(/* -math.Sqrt2 */ -1.4142135623730951D);
     fmt.Println(f.Abs());
 
     fmt.Println("-- float64 constant expressions (IEEE 754 bits, want-match) --");

@@ -42,7 +42,7 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
                     }
                 }
                 if (val != nil) {
-                    val.ValueSlot = constant.MakeString(((@string)codepoint));
+                    val.ValueSlot = constant.MakeString((@string)codepoint);
                 }
                 return true;
             }}

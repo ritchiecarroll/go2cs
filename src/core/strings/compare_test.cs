@@ -67,10 +67,10 @@ public static void TestCompareStrings(ж<testing.T> Ꮡt) {
     for (nint i = 0; i <= 128; i++) {
         lengths = append(lengths, i);
     }
-    lengths = append(lengths, (nint)(256), (nint)(512), (nint)(1024), (nint)(1333), (nint)(4095), (nint)(4096), (nint)(4097));
+    lengths = append(lengths, (nint)256, (nint)512, (nint)1024, (nint)1333, (nint)4095, (nint)4096, (nint)4097);
 
     if (!testing.Short() || testenv.Builder() != ""u8) {
-        lengths = append(lengths, (nint)(65535), (nint)(65536), (nint)(65537), (nint)(99999));
+        lengths = append(lengths, (nint)65535, (nint)65536, (nint)65537, (nint)99999);
     }
 
     nint n = lengths[len(lengths) - 1];

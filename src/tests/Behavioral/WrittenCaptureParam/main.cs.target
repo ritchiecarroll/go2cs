@@ -87,7 +87,7 @@ internal static (nint, nint) declSliceRedeclare(slice<nint> vʗp) {
 }
 
 internal static (slice<nint>, nint) grow(slice<nint> v) {
-    return (append(v.slice(0, len(v), len(v)), (nint)(99)), 1);
+    return (append(v.slice(0, len(v), len(v)), (nint)99), 1);
 }
 
 internal static void Main() {

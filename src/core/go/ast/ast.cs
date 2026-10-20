@@ -80,7 +80,7 @@ public static tokenꓸPos Pos(this ref Comment c) {
 }
 
 public static tokenꓸPos End(this ref Comment c) {
-    return ((tokenꓸPos)((nint)c.Slash + len(c.Text)));
+    return (tokenꓸPos)((nint)c.Slash + len(c.Text));
 }
 
 // A CommentGroup represents a sequence of comments
@@ -621,7 +621,7 @@ public static tokenꓸPos End(this ref BadExpr x) {
 }
 
 public static tokenꓸPos End(this ref Ident x) {
-    return ((tokenꓸPos)((nint)x.NamePos + len(x.Name)));
+    return (tokenꓸPos)((nint)x.NamePos + len(x.Name));
 }
 
 public static tokenꓸPos End(this ref Ellipsis x) {
@@ -636,7 +636,7 @@ public static tokenꓸPos End(this ref BasicLit x) {
         // Not from parser; use a heuristic.
         // (Incorrect for `...` containing \r\n;
         // see https://go.dev/issue/76031.)
-        return ((tokenꓸPos)((nint)x.ValuePos + len(x.Value)));
+        return (tokenꓸPos)((nint)x.ValuePos + len(x.Value));
     }
     return x.ValueEnd;
 }
@@ -1129,7 +1129,7 @@ public static tokenꓸPos End(this ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
-    return ((tokenꓸPos)((nint)s.TokPos + len(s.Tok.String())));
+    return (tokenꓸPos)((nint)s.TokPos + len(s.Tok.String()));
 }
 
 public static tokenꓸPos End(this ref BlockStmt s) {

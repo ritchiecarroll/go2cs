@@ -104,7 +104,7 @@ public static ж<Info> Lookup(@string name) {
     nint lo = 0;
     nint hi = len(All);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         @string mid = All[m].Name;
         if (name == mid) {
             return Ꮡ(All, m);

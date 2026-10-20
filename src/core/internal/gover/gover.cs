@@ -229,7 +229,7 @@ public static @string DecInt(@string @decimal) {
     } else {
         digits[i]--;
     }
-    return ((@string)digits);
+    return (@string)digits;
 }
 
 } // end gover_package

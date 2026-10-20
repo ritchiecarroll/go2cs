@@ -297,7 +297,7 @@ public static void TestRemoveReadOnlyDir(ж<Δtesting.T> Ꮡt) {
 
         // If an error occurs make it more likely that removing the
         // temporary directory will succeed.
-        defer(Chmod, subdir, (fs.FileMode)(511), ref ᒐ);
+        defer(Chmod, subdir, (fs.FileMode)511, ref ᒐ);
 
         {
             var err = RemoveAll(subdir); if (err != default!) {
@@ -379,7 +379,7 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
 
             // Defer changing the mode back so that the deferred
             // RemoveAll(tempDir) can succeed.
-            defer(Chmod, d, (fs.FileMode)(511), ref ᒐ);
+            defer(Chmod, d, (fs.FileMode)511, ref ᒐ);
         }
 
         var err = RemoveAll(tempDir);
@@ -485,7 +485,7 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ3);
             }
         }
-        defer(Chmod, path, (fs.FileMode)(493), ref ᒐ);
+        defer(Chmod, path, (fs.FileMode)493, ref ᒐ);
 
         // This call should not hang, even on a platform that disallows file deletion
         // from read-only directories.

@@ -82,7 +82,7 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ReadAll: %v"u8, err);
     }
     if (((sstring)b) != "payload"u8) {
-        Ꮡt.Fatalf("payload is %q, want %q"u8, ((@string)b), payloadˢ);
+        Ꮡt.Fatalf("payload is %q, want %q"u8, (@string)b, payloadˢ);
     }
     if ((~r).Comment != "comment"u8) {
         Ꮡt.Fatalf("comment is %q, want %q"u8, (~r).Comment, commentˢ);
@@ -128,7 +128,7 @@ public static void TestLatin1(ж<testing.T> Ꮡt) {
     }
     s = buf.String();
     if (s != ((sstring)latin1)) {
-        Ꮡt.Fatalf("write utf-8: got %q, want %q"u8, s, ((@string)latin1));
+        Ꮡt.Fatalf("write utf-8: got %q, want %q"u8, s, (@string)latin1);
     }
 }
 

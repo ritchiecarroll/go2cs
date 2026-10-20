@@ -204,7 +204,7 @@ public static @string TypeByExtension(@string ext) {
             lower = append(lower, c);
         }
     }
-    var (si, _) = ᏑmimeTypesLower.Load(((@string)lower));
+    var (si, _) = ᏑmimeTypesLower.Load((@string)lower);
     var (s, _) = si._<@string>(ᐧ);
     return s;
 }

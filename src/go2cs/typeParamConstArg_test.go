@@ -143,7 +143,7 @@ func TestUntypedConstArgInTypeParamPositionTakesTheInstantiatedCast(t *testing.T
 	visitor, calls := loadTypeParamConstFixture(t)
 	got := emitTypeParamConstCall(t, visitor, calls, "unsigned")
 
-	for _, want := range []string{"(uint32)(1)", "(uint32)(2)", "(uint32)(3)"} {
+	for _, want := range []string{"(uint32)1", "(uint32)2", "(uint32)3"} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("an untyped constant bound to a type parameter inferred as uint32 must be emitted at that recorded type:\n got %q\nwant it to contain %q\n(a bare C# int literal has NO implicit conversion to System.UInt32, so type inference itself fails -- CS0411, net/http h2_bundle ×3)",
 				got, want)
@@ -177,7 +177,7 @@ func TestExplicitInstantiationTakesNoConstCast(t *testing.T) {
 
 	requireRenderedCall(t, got, "setDefault")
 
-	if strings.Contains(got, "(uint32)(1)") {
+	if strings.Contains(got, "(uint32)1") {
 		t.Fatalf("an EXPLICIT instantiation needs no inference and must not acquire a cast:\n got %q", got)
 	}
 }
@@ -190,7 +190,7 @@ func TestNonGenericCallTakesNoConstCast(t *testing.T) {
 
 	requireRenderedCall(t, got, "takesU")
 
-	if strings.Contains(got, "(uint32)(1)") {
+	if strings.Contains(got, "(uint32)1") {
 		t.Fatalf("a non-generic parameter is not a type-parameter position and must not acquire a cast:\n got %q", got)
 	}
 }
@@ -205,7 +205,7 @@ func TestConstArgMatchingItsDefaultTypeTakesNoCast(t *testing.T) {
 
 	requireRenderedCall(t, got, "setDefault")
 
-	if strings.Contains(got, "(nint)(1)") {
+	if strings.Contains(got, "(nint)1") || strings.Contains(got, "(nint)(1)") {
 		t.Fatalf("a type parameter inferred as the constant's OWN default type needs no cast -- applying one is pure churn:\n got %q", got)
 	}
 }

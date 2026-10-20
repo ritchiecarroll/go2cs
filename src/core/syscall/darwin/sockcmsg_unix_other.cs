@@ -38,7 +38,7 @@ internal static nint cmsgAlignOf(nint salen) {
         }
     }
 
-    return (nint)((salen + salign - 1) & ~(salign - 1));
+    return (salen + salign - 1) & ~(salign - 1);
 }
 
 } // end syscall_package

@@ -718,12 +718,12 @@ public static void TestMutexWaitTimeMetric(ж<testing.T> Ꮡt) {
         var sampleʗ1 = sample;
         Ꮡt.Run(reflect.TypeOf(@lock).Elem().Name(), (ж<testing.T> tΔ1) => {
             metrics.Read(sampleʗ1[..]);
-            var before = ((time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D));
+            var before = (time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D);
 
             var minMutexWaitTime = generateMutexWaitTime(lockʗ1);
 
             metrics.Read(sampleʗ1[..]);
-            var after = ((time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D));
+            var after = (time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D);
 
             {
                 var wt = after - before; if (wt < minMutexWaitTime) {
@@ -1846,7 +1846,7 @@ public static partial void TestMetricHeapUnusedLargeObjectOverflow(ж<testing.T>
             defer(Ꮡwg.Done, ref ᒐ);
             while (ᐧ) {
                 foreach (var _ᴛ1 in range(10)) {
-                    abi.Escape(new slice<byte>((1 << (int)(20))));
+                    abi.Escape(new slice<byte>((1 << 20)));
                 }
                 Δruntime.GC();
                 var selᴛ74 = doneʗ1;
@@ -1867,7 +1867,7 @@ public static partial void TestMetricHeapUnusedLargeObjectOverflow(ж<testing.T>
     }.slice();
     foreach (var _ᴛ2 in range(1000)) {
         metrics.Read(s);
-        if (s[0].Value.Uint64() > ((uint64)1 << (int)(40))) {
+        if (s[0].Value.Uint64() > (uint64)1 << 40) {
             Ꮡt.Errorf("overflow"u8);
             break;
         }

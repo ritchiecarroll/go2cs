@@ -47,15 +47,15 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
-            v |= (uint32)(((uint32)src[2] << (int)(8)));
+            v |= (uint32)(((uint32)src[2] << 8));
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
-            v |= (uint32)(((uint32)src[1] << (int)(16)));
+            v |= (uint32)(((uint32)src[1] << 16));
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
-            v |= (uint32)(((uint32)src[0] << (int)(24)));
+            v |= (uint32)(((uint32)src[0] << 24));
         }
 
         // Special case: zero (!!!!!) shortens to z.
@@ -229,9 +229,9 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
         }}
         if (nb == 5) {
             nsrc = i + 1;
-            dst[ndst] = (byte)((v >> (int)(24)));
-            dst[ndst + 1] = (byte)((v >> (int)(16)));
-            dst[ndst + 2] = (byte)((v >> (int)(8)));
+            dst[ndst] = (byte)(v >> 24);
+            dst[ndst + 1] = (byte)(v >> 16);
+            dst[ndst + 2] = (byte)(v >> 8);
             dst[ndst + 3] = (byte)v;
             ndst += 4;
             nb = 0;
@@ -255,7 +255,7 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
                 v = v * 85 + 84;
             }
             for (nint i = 0; i < nb - 1; i++) {
-                dst[ndst] = (byte)((v >> (int)(24)));
+                dst[ndst] = (byte)(v >> 24);
                 v <<= (int)(8);
                 ndst++;
             }

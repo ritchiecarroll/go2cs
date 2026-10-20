@@ -306,7 +306,7 @@ internal static void testSniffWriteSize(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Errorf("write of %d bytes wrote %d bytes"u8, size, written);
         }
     })));
-    foreach (var (_, size) in new nint[]{0, 1, 200, 600, 999, 1000, 1023, 1024, (512 << (int)(10)), (1 << (int)(20))}.slice()) {
+    foreach (var (_, size) in new nint[]{0, 1, 200, 600, 999, 1000, 1023, 1024, 512 << 10, 1 << 20}.slice()) {
         var (res, err) = (~cst).c.Get(fmt.Sprintf("%s/?size=%d"u8, (~(~cst).ts).URL, size));
         if (err != default!) {
             Ꮡt.Fatalf("size %d: %v"u8, size, err);

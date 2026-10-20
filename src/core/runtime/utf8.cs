@@ -68,7 +68,7 @@ internal static (rune r, nint pos) decoderune(@string s, nint k) {
     case {} when t2 <= s[0] && s[0] < t3: {
         // 0080-07FF two byte sequence
         if (len(s) > 1 && (locb <= s[1] && s[1] <= hicb)) {
-            r = (rune)(((rune)((byte)(s[0] & (byte)mask2)) << (int)(6)) | (rune)((byte)(s[1] & (byte)maskx)));
+            r = (rune)((byte)(s[0] & (byte)mask2)) << 6 | (rune)((byte)(s[1] & (byte)maskx));
             pos += 2;
             if (rune1Max < r) {
                 return (r, pos);
@@ -79,7 +79,7 @@ internal static (rune r, nint pos) decoderune(@string s, nint k) {
     case {} when t3 <= s[0] && s[0] < t4: {
         // 0800-FFFF three byte sequence
         if (len(s) > 2 && (locb <= s[1] && s[1] <= hicb) && (locb <= s[2] && s[2] <= hicb)) {
-            r = (rune)((rune)(((rune)((byte)(s[0] & (byte)mask3)) << (int)(12)) | ((rune)((byte)(s[1] & (byte)maskx)) << (int)(6))) | (rune)((byte)(s[2] & (byte)maskx)));
+            r = (rune)((byte)(s[0] & (byte)mask3)) << 12 | (rune)((byte)(s[1] & (byte)maskx)) << 6 | (rune)((byte)(s[2] & (byte)maskx));
             pos += 3;
             if (rune2Max < r && !(surrogateMin <= r && r <= surrogateMax)) {
                 return (r, pos);
@@ -90,7 +90,7 @@ internal static (rune r, nint pos) decoderune(@string s, nint k) {
     case {} when t4 <= s[0] && s[0] < t5: {
         // 10000-1FFFFF four byte sequence
         if (len(s) > 3 && (locb <= s[1] && s[1] <= hicb) && (locb <= s[2] && s[2] <= hicb) && (locb <= s[3] && s[3] <= hicb)) {
-            r = (rune)((rune)((rune)(((rune)((byte)(s[0] & (byte)mask4)) << (int)(18)) | ((rune)((byte)(s[1] & (byte)maskx)) << (int)(12))) | ((rune)((byte)(s[2] & (byte)maskx)) << (int)(6))) | (rune)((byte)(s[3] & (byte)maskx)));
+            r = (rune)((byte)(s[0] & (byte)mask4)) << 18 | (rune)((byte)(s[1] & (byte)maskx)) << 12 | (rune)((byte)(s[2] & (byte)maskx)) << 6 | (rune)((byte)(s[3] & (byte)maskx));
             pos += 4;
             if (rune3Max < r && r <= maxRune) {
                 return (r, pos);
@@ -115,7 +115,7 @@ internal static nint encoderune(slice<byte> Δp, rune r) {
         }
         if (i <= rune2Max) { matchᴛ1 = true;
             _ = Δp[1]; // eliminate bounds checks
-            Δp[0] = (byte)((byte)t2 | (byte)((r >> (int)(6))));
+            Δp[0] = (byte)((byte)t2 | (byte)(r >> 6));
             Δp[1] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 2;
         }
@@ -125,16 +125,16 @@ internal static nint encoderune(slice<byte> Δp, rune r) {
         }
         if (fallthrough || !matchᴛ1 && (i <= rune3Max)) {
             _ = Δp[2]; // eliminate bounds checks
-            Δp[0] = (byte)((byte)t3 | (byte)((r >> (int)(12))));
-            Δp[1] = (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx));
+            Δp[0] = (byte)((byte)t3 | (byte)(r >> 12));
+            Δp[1] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
             Δp[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 3;
         }
         if (!matchᴛ1) { /* default: */
             _ = Δp[3]; // eliminate bounds checks
-            Δp[0] = (byte)((byte)t4 | (byte)((r >> (int)(18))));
-            Δp[1] = (byte)((byte)tx | (byte)((byte)((r >> (int)(12))) & (byte)maskx));
-            Δp[2] = (byte)((byte)tx | (byte)((byte)((r >> (int)(6))) & (byte)maskx));
+            Δp[0] = (byte)((byte)t4 | (byte)(r >> 18));
+            Δp[1] = (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx));
+            Δp[2] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
             Δp[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 4;
         }

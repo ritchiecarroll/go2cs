@@ -249,13 +249,13 @@ internal static ж<timeꓸLocation> timeZone(time.Duration offset) {
 internal static time.Time msDosTimeToTime(uint16 dosDate, uint16 dosTime) {
     return time.Date(
         // date bits 0-4: day of month; 5-8: month; 9-15: years since 1980
-        (nint)((uint16)((dosDate >> (int)(9)) + 1980)),
-        ((timeꓸMonth)(nint)((uint16)((dosDate >> (int)(5)) & 0xf))),
+        (nint)((uint16)((dosDate >> 9) + 1980)),
+        (timeꓸMonth)(nint)((uint16)(dosDate >> 5 & 0xf)),
         (nint)((uint16)(dosDate & 0x1f)),
 
         // time bits 0-4: second/2; 5-10: minute; 11-15: hour
-        (nint)((dosTime >> (int)(11))),
-        (nint)((uint16)((dosTime >> (int)(5)) & 0x3f)),
+        (nint)(dosTime >> 11),
+        (nint)((uint16)(dosTime >> 5 & 0x3f)),
         (nint)((uint16)((uint16)(dosTime & 0x1f) * 2)),
         0, // nanoseconds
         time.ΔUTC);
@@ -268,8 +268,8 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
     uint16 fDate = default!;
     uint16 fTime = default!;
 
-    fDate = (uint16)(t.Day() + ((nint)t.Month() << (int)(5)) + ((t.Year() - 1980) << (int)(9)));
-    fTime = (uint16)(t.Second() / 2 + (t.Minute() << (int)(5)) + (t.Hour() << (int)(11)));
+    fDate = (uint16)(t.Day() + ((nint)t.Month() << 5) + ((t.Year() - 1980) << 9));
+    fTime = (uint16)(t.Second() / 2 + (t.Minute() << 5) + (t.Hour() << 11));
     return (fDate, fTime);
 }
 
@@ -312,9 +312,9 @@ internal static UntypedInt msdosReadOnly => 0x01;
 public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
     fs.FileMode mode = default!;
 
-    var exprᴛ1 = (h.CreatorVersion >> (int)(8));
+    var exprᴛ1 = (h.CreatorVersion >> 8);
     if (exprᴛ1 == creatorUnix || exprᴛ1 == creatorMacOSX) {
-        mode = unixModeToFileMode((h.ExternalAttrs >> (int)(16)));
+        mode = unixModeToFileMode(h.ExternalAttrs >> 16);
     }
     else if (exprᴛ1 == creatorNTFS || exprᴛ1 == creatorVFAT || exprᴛ1 == creatorFAT) {
         mode = msdosModeToFileMode(h.ExternalAttrs);
@@ -327,8 +327,8 @@ public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
 
 // SetMode changes the permission and mode bits for the [FileHeader].
 public static void SetMode(this ref FileHeader h, fs.FileMode mode) {
-    h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 0xff) | (uint16)(creatorUnix << (int)(8)));
-    h.ExternalAttrs = (fileModeToUnixMode(mode) << (int)(16));
+    h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 0xff) | (uint16)(creatorUnix << 8));
+    h.ExternalAttrs = fileModeToUnixMode(mode) << 16;
 
     // set MSDOS attributes too, as the original zip does.
     if ((fs.FileMode)(mode & fs.ModeDir) != 0) {
@@ -351,12 +351,12 @@ internal static bool hasDataDescriptor(this ref FileHeader h) {
 internal static fs.FileMode /*mode*/ msdosModeToFileMode(uint32 m) {
     fs.FileMode mode = default!;
 
-    if ((uint32)(m & (uint32)msdosDir) != 0){
+    if ((m & (uint32)msdosDir) != 0){
         mode = (fs.FileMode)(fs.ModeDir | 511);
     } else {
         mode = 438;
     }
-    if ((uint32)(m & (uint32)msdosReadOnly) != 0) {
+    if ((m & (uint32)msdosReadOnly) != 0) {
         mode &= unchecked((fs.FileMode)~(fs.FileMode)(146));
     }
     return mode;
@@ -395,12 +395,12 @@ internal static uint32 fileModeToUnixMode(fs.FileMode mode) {
     if ((fs.FileMode)(mode & fs.ModeSticky) != 0) {
         m |= (uint32)(s_ISVTX);
     }
-    return (uint32)(m | (uint32)((fs.FileMode)(mode & 511)));
+    return m | (uint32)((fs.FileMode)(mode & 511));
 }
 
 internal static fs.FileMode unixModeToFileMode(uint32 m) {
-    var mode = ((fs.FileMode)((uint32)(m & 511)));
-    var exprᴛ1 = (uint32)(m & (uint32)s_IFMT);
+    var mode = (fs.FileMode)(m & 511);
+    var exprᴛ1 = (m & (uint32)s_IFMT);
     if (exprᴛ1 == s_IFBLK) {
         mode |= (fs.FileMode)(fs.ModeDevice);
     }
@@ -422,13 +422,13 @@ internal static fs.FileMode unixModeToFileMode(uint32 m) {
     else if (exprᴛ1 == s_IFSOCK) {
         mode |= (fs.FileMode)(fs.ModeSocket);
     }
-    if ((uint32)(m & (uint32)s_ISGID) != 0) {
+    if ((m & (uint32)s_ISGID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetgid);
     }
-    if ((uint32)(m & (uint32)s_ISUID) != 0) {
+    if ((m & (uint32)s_ISUID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetuid);
     }
-    if ((uint32)(m & (uint32)s_ISVTX) != 0) {
+    if ((m & (uint32)s_ISVTX) != 0) {
         mode |= (fs.FileMode)(fs.ModeSticky);
     }
     return mode;

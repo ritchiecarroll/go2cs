@@ -105,7 +105,7 @@ internal static Func<slice<byte>, (any, error)> matchGroupIndexValue(@string val
             return (v, err);
         }
         // wheel:*:0:root
-        var parts = strings.SplitN(((@string)line), ":"u8, 4);
+        var parts = strings.SplitN((@string)line, ":"u8, 4);
         if (len(parts) < 4 || parts[0] == "" || parts[idx] != value ||
             // If the file contains +foo and you search for "foo", glibc
             // returns an "invalid argument" error. Similarly, if you search
@@ -163,7 +163,7 @@ internal static Func<slice<byte>, (any, error)> matchUserIndexValue(@string valu
             return (v, err);
         }
         // kevin:x:1005:1006::/home/kevin:/usr/bin/zsh
-        var parts = strings.SplitN(((@string)line), ":"u8, 7);
+        var parts = strings.SplitN((@string)line, ":"u8, 7);
         if (len(parts) < 6 || parts[idx] != value || parts[0] == "" || parts[0][0] == (rune)'+' || parts[0][0] == (rune)'-') {
             return (v, err);
         }

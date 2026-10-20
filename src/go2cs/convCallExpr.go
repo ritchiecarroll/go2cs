@@ -445,7 +445,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
-			return fmt.Sprintf("(%s)(%s)", v.getCSharpTypeName(ifaceType), converted)
+			return castOf(v.getCSharpTypeName(ifaceType), converted)
 		}
 	}
 
@@ -1520,7 +1520,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					if argNamed, ok := types.Unalias(argType).(*types.Named); ok {
 						if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Info()&types.IsNumeric != 0 && !types.Identical(argBasic, basic) {
 							if v.needsParentheses(arg) {
-								inner = fmt.Sprintf("(%s)(%s)", v.getCSharpTypeName(argBasic), expr)
+								inner = castOf(v.getCSharpTypeName(argBasic), expr)
 							} else {
 								inner = fmt.Sprintf("(%s)%s", v.getCSharpTypeName(argBasic), expr)
 							}
@@ -1753,16 +1753,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
-			if targetIsBasic {
-				return fmt.Sprintf("(%s)(%s)", targetTypeName, expr)
+			// A shift or bitwise operand renders parenthesized already (parityOperatorEmission.go).
+			operand := fmt.Sprintf("(%s)", expr)
+
+			if binary, ok := arg.(*ast.BinaryExpr); ok && isShiftOrBitwise(binary.Op) && wrappedWhole(expr) {
+				operand = expr
 			}
 
-			return fmt.Sprintf("((%s)(%s))", targetTypeName, expr)
+			if targetIsBasic {
+				return fmt.Sprintf("(%s)%s", targetTypeName, operand)
+			}
+
+			return fmt.Sprintf("((%s)%s)", targetTypeName, operand)
 		}
 
 		if targetIsBasic {
 			if castOperandNeedsParens(targetTypeName, expr) {
-				return fmt.Sprintf("(%s)(%s)", targetTypeName, expr)
+				return castOf(targetTypeName, expr)
 			}
 
 			return fmt.Sprintf("(%s)%s", targetTypeName, expr)
@@ -2798,7 +2805,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// enough to decide the overload — float64 has no implicit conversion to
 					// float32, and a float32-width call cannot have a float64 operand).
 					if argBasic, ok := v.info.TypeOf(arg).(*types.Basic); ok && argBasic.Info()&types.IsUntyped != 0 {
-						args[i] = fmt.Sprintf("(%s)(%s)", elementCS, args[i])
+						args[i] = castOf(elementCS, args[i])
 					}
 				}
 
@@ -3741,7 +3748,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							args[i] = v.convExpr(arg, nil)
 
 							if _, isLit := arg.(*ast.BasicLit); isLit || argIsNamedUntypedConst(arg) || literalTrigger && isUntypedConstArg(v.info, arg) {
-								args[i] = fmt.Sprintf("(%s)(%s)", csCallType, args[i])
+								args[i] = castOf(csCallType, args[i])
 							}
 						}
 
@@ -4846,7 +4853,7 @@ func (v *Visitor) applyUntypedConstBoxCast(value ast.Expr, rendered string) stri
 		return rendered
 	}
 
-	return fmt.Sprintf("(%s)(%s)", castType, rendered)
+	return castOf(castType, rendered)
 }
 
 // exprRendersUntypedConstWrapper reports whether expr syntactically references — directly or through

@@ -103,7 +103,7 @@ internal static void testServer(ж<testing.T> Ꮡt, Func<httpꓸHandler, ж<glob
             Ꮡt.Fatal(err);
         }
         if (((sstring)got) != "hello"u8) {
-            Ꮡt.Errorf("got %q, want hello"u8, ((@string)got));
+            Ꮡt.Errorf("got %q, want hello"u8, (@string)got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -126,7 +126,7 @@ internal static void testGetAfterClose(ж<testing.T> Ꮡt, Func<httpꓸHandler, 
         Ꮡt.Fatal(err);
     }
     if (((sstring)got) != "hello"u8) {
-        Ꮡt.Fatalf("got %q, want hello"u8, ((@string)got));
+        Ꮡt.Fatalf("got %q, want hello"u8, (@string)got);
     }
 
     ts.Close();
@@ -214,7 +214,7 @@ internal static void testServerClient(ж<testing.T> Ꮡt, Func<httpꓸHandler, �
             Ꮡt.Fatal(err);
         }
         if (((sstring)got) != "hello"u8) {
-            Ꮡt.Errorf("got %q, want hello"u8, ((@string)got));
+            Ꮡt.Errorf("got %q, want hello"u8, (@string)got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

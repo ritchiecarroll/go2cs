@@ -101,9 +101,9 @@ public static void TestFloatSetFloat64String(ж<testing.T> Ꮡt) {
         // decimal mantissa, binary exponent
         new("0p0"u8, 0D),
         new("-0p0"u8, -zero_),
-        new("1p10"u8, (1 << (int)(10))),
-        new("1p+10"u8, (1 << (int)(10))),
-        new("+1p-10"u8, 1.0D / ((1 << (int)(10)))),
+        new("1p10"u8, 1 << 10),
+        new("1p+10"u8, 1 << 10),
+        new("+1p-10"u8, 1.0D / (1 << 10)),
         new("1024p-12"u8, 0.25D),
         new("-1p10"u8, -1024D),
         new("1.5p1"u8, 3D),
@@ -367,7 +367,7 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
 // actualPrec returns the number of actually used mantissa bits.
 internal static nuint actualPrec(float64 x) {
     {
-        var mant = math.Float64bits(x); if (x != 0D && (uint64)(mant & (((uint64)0x7ff << (int)(52)))) == 0) {
+        var mant = math.Float64bits(x); if (x != 0D && (uint64)(mant & ((uint64)0x7ff << 52)) == 0) {
             // x is denormalized
             return 64 - (nuint)bits.LeadingZeros64((uint64)(mant & ((uint64)(4503599627370496L - 1))));
         }

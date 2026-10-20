@@ -151,7 +151,7 @@ public static nint IndexRune(@string s, rune r) {
         // Search for rune r using the last byte of its UTF-8 encoded form.
         // The distribution of the last byte is more uniform compared to the
         // first byte which has a 78% chance of being [240, 243, 244].
-        @string rs = ((@string)r);
+        @string rs = (@string)r;
         nint last = len(rs) - 1;
         nint i = last;
         nint fails = 0;
@@ -173,7 +173,7 @@ public static nint IndexRune(@string s, rune r) {
 next:
             fails++;
             i++;
-            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> (int)(4)) && i < len(s))) {
+            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> 4) && i < len(s))) {
                 goto fallback;
             }
         }
@@ -183,7 +183,7 @@ fallback:
         if (haveFastIndex){
             // see comment in ../bytes/bytes.go
             {
-                nint j = bytealg.IndexString(s.slice(i - last), ((@string)r)); if (j >= 0) {
+                nint j = bytealg.IndexString(s.slice(i - last), (@string)r); if (j >= 0) {
                     return i + j - last;
                 }
             }
@@ -412,7 +412,7 @@ public static slice<@string> Fields(@string s) {
         var r = s[iΔ1];
         setBits |= (byte)(r);
         nint isSpace = (nint)asciiSpace[r];
-        n += (nint)(wasSpace & ~isSpace);
+        n += (wasSpace & ~isSpace);
         wasSpace = isSpace;
     }
 
@@ -998,7 +998,7 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
 
 // contains reports whether c is inside the set.
 internal static bool contains(this ref asciiSet @as, byte c) {
-    return ((uint32)(@as.Value[c / 32] & (((uint32)1 << (int)((c % 32)))))) != 0;
+    return (@as.Value[c / 32] & ((uint32)1 << (int)((c % 32)))) != 0;
 }
 
 // Trim returns a slice of the string s with all leading and

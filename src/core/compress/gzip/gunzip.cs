@@ -165,9 +165,9 @@ internal static (@string, error) readString(this ref Reader z) {
                 foreach (var (_, v) in z.buf.slice(0, i)) {
                     s = append(s, (rune)v);
                 }
-                return (((@string)s), default!);
+                return ((@string)s, default!);
             }
-            return (((@string)(z.buf.slice(0, i))), default!);
+            return ((@string)(z.buf.slice(0, i)), default!);
         }
     }
 }

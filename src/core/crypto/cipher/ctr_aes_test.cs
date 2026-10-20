@@ -325,7 +325,7 @@ public static void TestCTR_AES_multiblock_XORKeyStreamAt(ж<testing.T> Ꮡt) {
             for (nint i = 0; i < N; i++) {
                 boundaries = append(boundaries, rʗ1.Intn(Size));
             }
-            boundaries = append(boundaries, (nint)(0));
+            boundaries = append(boundaries, (nint)0);
             boundaries = append(boundaries, Size);
             sort.Ints(boundaries);
 

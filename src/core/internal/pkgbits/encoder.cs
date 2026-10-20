@@ -125,7 +125,7 @@ public static RelElemIdx StringIdx(this ref PkgEncoder pw, @string s) {
         }
     }
 
-    var idx = ((RelElemIdx)(int32)len(pw.elems[SectionString]));
+    var idx = (RelElemIdx)(int32)len(pw.elems[SectionString]);
     pw.elems[SectionString] = append(pw.elems[SectionString], s);
     pw.stringsIdx[s] = idx;
     return idx;
@@ -148,7 +148,7 @@ public static ж<Encoder> NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, SectionKind k
     ref var pw = ref Ꮡpw.DerefOrNull();
 
     ref var idx = ref heap<RelElemIdx>(out var Ꮡidx);
-    idx = ((RelElemIdx)(int32)len(pw.elems[k]));
+    idx = (RelElemIdx)(int32)len(pw.elems[k]);
     pw.elems[k] = append(pw.elems[k], ""u8); // placeholder
 
     return Ꮡ(new Encoder(
@@ -217,7 +217,7 @@ internal static void rawUvarint(this ref Encoder w, uint64 x) {
 
 internal static void rawVarint(this ref Encoder w, int64 x) {
     // Zig-zag encode.
-    var ux = ((uint64)x << (int)(1));
+    var ux = (uint64)x << 1;
     if (x < 0) {
         ux = ~ux;
     }
@@ -420,13 +420,13 @@ internal static void bigInt(this ref Encoder w, ж<bigꓸInt> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     var b = v.Bytes();
-    w.String(((@string)b)); // TODO: More efficient encoding.
+    w.String((@string)b); // TODO: More efficient encoding.
     w.Bool(v.Sign() < 0);
 }
 
 internal static void bigFloat(this ref Encoder w, ж<big.Float> Ꮡv) {
     var b = Ꮡv.Append(default!, (rune)'p', -1);
-    w.String(((@string)b)); // TODO: More efficient encoding.
+    w.String((@string)b); // TODO: More efficient encoding.
 }
 
 // Version reports the version of the bitstream.

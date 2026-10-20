@@ -398,7 +398,7 @@ internal static floatVal rtof(ratVal x) {
 }
 
 internal static complexVal vtoc(Value x) {
-    return new complexVal(x, ((int64Val)0));
+    return new complexVal(x, (int64Val)0);
 }
 
 internal static Value makeInt(ж<bigꓸInt> Ꮡx) {
@@ -536,7 +536,7 @@ public static Value MakeInt64(int64 x) {
 
 // MakeUint64 returns the [Int] value for x.
 public static Value MakeUint64(uint64 x) {
-    if (x < ((uint64)1 << (int)(63))) {
+    if (x < (uint64)1 << 63) {
         return ((int64Val)(int64)x);
     }
     return new intVal(newInt().SetUint64(x));
@@ -590,7 +590,7 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
             nint n = len(lit); if (n > 0 && lit[n - 1] == (rune)'i') {
                 {
                     var im = makeFloatFromLiteral(lit.slice(0, n - 1)); if (im != default!) {
-                        return makeComplex(((int64Val)0), im);
+                        return makeComplex((int64Val)0, im);
                     }
                 }
             }
@@ -888,7 +888,7 @@ public static nint Sign(Value x) {
         return xΔ1.val.Sign();
     }
     case complexVal xΔ1: {
-        return (nint)(Sign(xΔ1.re) | Sign(xΔ1.im));
+        return Sign(xΔ1.re) | Sign(xΔ1.im);
     }
     case unknownVal xΔ1: {
         return 1; // avoid spurious division by zero errors
@@ -1057,7 +1057,7 @@ public static Value MakeImag(Value x) {
     case intVal _:
     case ratVal _:
     case floatVal _: {
-        return makeComplex(((int64Val)0), x);
+        return makeComplex((int64Val)0, x);
     }
     default: {
         throw panic(fmt.Sprintf("%v not Int or Float"u8, x));
@@ -1237,7 +1237,7 @@ internal static bool is32bit(int64 x) {
 // is63bit reports whether x can be represented using 63 bits.
 internal static bool is63bit(int64 x) {
     UntypedInt s = 63;
-    return (int64)(-4611686018427387904L) <= x && x <= (int64)(4611686018427387903L);
+    return (int64)(-4611686018427387904L) <= x && x <= (int64)4611686018427387903L;
 }
 
 // UnaryOp returns the result of the unary expression op y.
@@ -1491,16 +1491,16 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
             c = rem(a, b);
         }
         else if (exprᴛ2 == token.AND) {
-            c = (int64)(a & b);
+            c = a & b;
         }
         else if (exprᴛ2 == token.OR) {
-            c = (int64)(a | b);
+            c = a | b;
         }
         else if (exprᴛ2 == token.XOR) {
-            c = (int64)(a ^ b);
+            c = a ^ b;
         }
         else if (exprᴛ2 == token.AND_NOT) {
-            c = (int64)(a & ~b);
+            c = a & ~b;
         }
         else { /* default: */
             goto Error;

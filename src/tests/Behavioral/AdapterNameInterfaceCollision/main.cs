@@ -35,7 +35,7 @@ internal static @string viaForeign(Δio.Reader r) {
     if (err != default!) {
         return "err";
     }
-    return ((@string)(buf.slice(0, n)));
+    return (@string)(buf.slice(0, n));
 }
 
 internal static @string viaLocal(Reader r) {
@@ -45,7 +45,7 @@ internal static @string viaLocal(Reader r) {
     if (err != default!) {
         return "err";
     }
-    return fmt.Sprintf("%d|%s|%d"u8, before, ((@string)(buf.slice(0, n))), r.Remaining());
+    return fmt.Sprintf("%d|%s|%d"u8, before, (@string)(buf.slice(0, n)), r.Remaining());
 }
 
 internal static void Main() {

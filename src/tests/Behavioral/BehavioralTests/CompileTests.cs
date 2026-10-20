@@ -1618,6 +1618,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckParenthesizedTypeAssertion() => CheckTarget("ParenthesizedTypeAssertion");
 
     [TestMethod]
+    public void CheckParityOperatorPrecedence() => CheckTarget("ParityOperatorPrecedence");
+
+    [TestMethod]
     public void CheckPartialInstantiationAnonymousTypeArg() => CheckTarget("PartialInstantiationAnonymousTypeArg");
 
     [TestMethod]

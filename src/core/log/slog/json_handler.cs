@@ -262,7 +262,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
                 default: {
                     // This encodes bytes < 0x20 except for \t, \n and \r.
                     str(u00ˢ);
-                    @char(hex[(b >> (int)(4))]);
+                    @char(hex[(b >> 4)]);
                     @char(hex[(byte)(b & 0xF)]);
                     break;
                 }}
@@ -293,7 +293,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
                 str(s.slice(start, i));
             }
             str(u202ˢ);
-            @char(hex[(rune)(c & 0xF)]);
+            @char(hex[(c & 0xF)]);
             i += size;
             start = i;
             continue;

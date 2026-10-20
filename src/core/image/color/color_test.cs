@@ -19,7 +19,7 @@ public static void TestSqDiff(ж<testing.T> Ꮡt) {
         } else {
             d = (uint32)(y - x);
         }
-        return ((d * d) >> (int)(2));
+        return (d * d) >> 2;
     };
     var testCases = new uint32[]{
         0,

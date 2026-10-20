@@ -61,7 +61,7 @@ internal static (slice<byte>, error) processClientKeyExchange(this rsaKeyAgreeme
     if (len(ckx.ciphertext) < 2) {
         return (default!, errClientKeyExchange);
     }
-    nint ciphertextLen = (nint)(((nint)ckx.ciphertext[0] << (int)(8)) | (nint)ckx.ciphertext[1]);
+    nint ciphertextLen = (nint)ckx.ciphertext[0] << 8 | (nint)ckx.ciphertext[1];
     if (ciphertextLen != len(ckx.ciphertext) - 2) {
         return (default!, errClientKeyExchange);
     }
@@ -101,7 +101,7 @@ internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKey
     ref var cert = ref Ꮡcert.DerefOrNull();
 
     var preMasterSecret = new slice<byte>(48);
-    preMasterSecret[0] = (byte)((clientHello.vers >> (int)(8)));
+    preMasterSecret[0] = (byte)(clientHello.vers >> 8);
     preMasterSecret[1] = (byte)clientHello.vers;
     var (_, err) = io.ReadFull(config.rand(), preMasterSecret[2..]);
     if (err != default!) {
@@ -118,7 +118,7 @@ internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKey
     }
     var ckx = @new<clientKeyExchangeMsg>();
     ckx.Value.ciphertext = new slice<byte>(len(encrypted) + 2);
-    ckx.Value.ciphertext[0] = (byte)((len(encrypted) >> (int)(8)));
+    ckx.Value.ciphertext[0] = (byte)(len(encrypted) >> 8);
     ckx.Value.ciphertext[1] = (byte)len(encrypted);
     copy((~ckx).ciphertext[2..], encrypted);
     return (preMasterSecret, ckx, default!);
@@ -211,7 +211,7 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
     var ecdhePublic = key.PublicKey().Bytes();
     var serverECDHEParams = new slice<byte>(1 + 2 + 1 + len(ecdhePublic));
     serverECDHEParams[0] = 3; // named curve
-    serverECDHEParams[1] = (byte)(uint16)((ka.curveID >> (int)(8)));
+    serverECDHEParams[1] = (byte)(uint16)((ka.curveID >> 8));
     serverECDHEParams[2] = (byte)(uint16)ka.curveID;
     serverECDHEParams[3] = (byte)len(ecdhePublic);
     copy(serverECDHEParams[4..], ecdhePublic);
@@ -272,11 +272,11 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
     copy((~skx).key, serverECDHEParams);
     var k = (~skx).key.slice(len(serverECDHEParams));
     if (ka.version >= VersionTLS12) {
-        k[0] = (byte)(uint16)((ka.signatureAlgorithm >> (int)(8)));
+        k[0] = (byte)(uint16)((ka.signatureAlgorithm >> 8));
         k[1] = (byte)(uint16)ka.signatureAlgorithm;
         k = k[2..];
     }
-    k[0] = (byte)((len(sig) >> (int)(8)));
+    k[0] = (byte)(len(sig) >> 8);
     k[1] = (byte)len(sig);
     copy(k[2..], sig);
 
@@ -319,7 +319,7 @@ internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж
     if (skx.key[0] != 3) { // named curve
         return errors.New(tlsServerSelectedˢ4);
     }
-    ka.curveID = (CurveID)((CurveID)(uint16)(((CurveID)(uint16)skx.key[1]) << (int)(8)) | ((CurveID)(uint16)skx.key[2]));
+    ka.curveID = (CurveID)((CurveID)(uint16)(((CurveID)(uint16)skx.key[1]) << 8) | ((CurveID)(uint16)skx.key[2]));
 
     nint publicLen = (nint)skx.key[3];
     if (publicLen + 4 > len(skx.key)) {
@@ -333,13 +333,13 @@ internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж
         return errServerKeyExchange;
     }
     if (ka.version >= VersionTLS12) {
-        ka.signatureAlgorithm = (SignatureScheme)((SignatureScheme)(uint16)(((SignatureScheme)(uint16)sig[0]) << (int)(8)) | ((SignatureScheme)(uint16)sig[1]));
+        ka.signatureAlgorithm = (SignatureScheme)((SignatureScheme)(uint16)(((SignatureScheme)(uint16)sig[0]) << 8) | ((SignatureScheme)(uint16)sig[1]));
         sig = sig[2..];
         if (len(sig) < 2) {
             return errServerKeyExchange;
         }
     }
-    nint sigLen = (nint)(((nint)sig[0] << (int)(8)) | (nint)sig[1]);
+    nint sigLen = (nint)sig[0] << 8 | (nint)sig[1];
     if (sigLen + 2 != len(sig)) {
         return errServerKeyExchange;
     }

@@ -34,7 +34,7 @@ internal static void Main() {
     cmd.Value.Args = new @string[]{token, "-marker", "x"}.slice();
     cmd.Value.Env = append(Δos.Environ(), "ARGV0_DEPTH="u8 + strconv.Itoa(depth + 1));
     (var @out, err) = cmd.CombinedOutput();
-    fmt.Print(((@string)@out));
+    fmt.Print((@string)@out);
     if (depth == 0) {
         fmt.Printf("parent: child exit error = %v\n"u8, err);
     }

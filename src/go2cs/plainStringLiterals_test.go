@@ -209,7 +209,7 @@ func TestPlainLiteralsAtInterceptableAnySlots(t *testing.T) {
 	for _, want := range []string{
 		`show("passed to an any slot");`,
 		`show("mixed any and value use");`,
-		`mp.Store("cross package method", (nint)(1));`,
+		`mp.Store("cross package method", (nint)1);`,
 		`sink.Put("interface method any");`,
 		`show("");`,
 	} {
@@ -238,8 +238,8 @@ func TestAnySlotsGoInterceptorsCannotReachKeepTheHoist(t *testing.T) {
 		`f(funcValueAnyˢ);`,
 		`Tag<nint>(1, genericFunctionAnySlotˢ);`,
 		`b.Note(genericTypeAnySlotˢ);`,
-		`l.Log(methodVariadicAnyˢ, (nint)(1));`,
-		`.Store(fieldReceiverMethodˢ, (nint)(2));`,
+		`l.Log(methodVariadicAnyˢ, (nint)1);`,
+		`.Store(fieldReceiverMethodˢ, (nint)2);`,
 		`(@string)"composite any element"u8`,
 	} {
 		if !strings.Contains(emitted, want) {

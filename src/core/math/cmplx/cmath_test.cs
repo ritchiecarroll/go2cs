@@ -504,7 +504,7 @@ internal static void initᴛatanhSC() { atanhSC = new acosSCᴛ1[]{
     new(complex(1.0D, zero),
         complex(inf, zero)),
     new(complex(1.0D, inf),
-        complex((float64)(0D), (float64)(math.Pi / 2D))),
+        complex((float64)0D, (float64)(math.Pi / 2D))),
     new(complex(1.0D, nan),
         NaN()),
     new(complex(inf, 1.0D),

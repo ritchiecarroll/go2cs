@@ -154,7 +154,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             // TODO(agl): need to cope with values that spread across lines.
             key = bytes.TrimSpace(key);
             val = bytes.TrimSpace(val);
-            p.Value.Headers[((@string)key)] = ((@string)val);
+            p.Value.Headers[((@string)key)] = (@string)val;
             rest = next;
             endIndex -= consumedΔ1;
             endTrailerIndex -= consumedΔ1;

@@ -44,8 +44,8 @@ internal static (int32 level, bool all, bool crash) gotraceback() {
 
     var gp = getg();
     var t = atomic.Load(Ꮡtraceback_cache);
-    crash = (uint32)(t & (uint32)tracebackCrash) != 0;
-    all = (~(~gp).m).throwing > throwTypeUser || (uint32)(t & (uint32)tracebackAll) != 0;
+    crash = (t & (uint32)tracebackCrash) != 0;
+    all = (~(~gp).m).throwing > throwTypeUser || (t & (uint32)tracebackAll) != 0;
     if ((~(~gp).m).traceback != 0){
         level = (int32)(~(~gp).m).traceback;
     } else 
@@ -54,7 +54,7 @@ internal static (int32 level, bool all, bool crash) gotraceback() {
         // otherwise overridden by m.traceback.
         level = 2;
     } else {
-        level = (int32)((t >> (int)(tracebackShift)));
+        level = (int32)(t >> (int)(tracebackShift));
     }
     return (level, all, crash);
 }
@@ -488,7 +488,7 @@ internal static void parseRuntimeDebugVars(@string godebug) {
     // apply environment settings
     parsegodebug(godebug, default!);
 
-    debug.malloc = ((int32)((int32)(debug.inittrace | debug.sbrk) | debug.checkfinalizers)) != 0;
+    debug.malloc = (debug.inittrace | debug.sbrk | debug.checkfinalizers) != 0;
     debug.profstackdepth = min(debug.profstackdepth, (int32)(maxProfStackDepth));
 
     // Disable async preemption in checkmark mode. The following situation is
@@ -627,7 +627,7 @@ internal static void setTraceback(@string level) {
         t = 0;
     }
     else if (exprᴛ1 == "single"u8 || exprᴛ1 == ""u8) { matchᴛ1 = true;
-        t = ((uint32)1 << (int)(tracebackShift));
+        t = (uint32)1 << (int)(tracebackShift);
     }
     else if (exprᴛ1 == "all"u8) { matchᴛ1 = true;
         t = (uint32)((uint32)(1 << (int)(tracebackShift)) | (uint32)tracebackAll);
@@ -636,12 +636,12 @@ internal static void setTraceback(@string level) {
         t = (uint32)((uint32)(2 << (int)(tracebackShift)) | (uint32)tracebackAll);
     }
     else if (exprᴛ1 == "crash"u8) { matchᴛ1 = true;
-        t = (uint32)((UntypedInt)((2 << (int)(tracebackShift)) | tracebackAll) | (uint32)tracebackCrash);
+        t = (uint32)((UntypedInt)(2 << (int)(tracebackShift) | tracebackAll) | (uint32)tracebackCrash);
     }
     else if (exprᴛ1 == "wer"u8) { matchᴛ1 = true;
         do {
             if (GOOS == "windows"u8) {
-                t = (uint32)((UntypedInt)((2 << (int)(tracebackShift)) | tracebackAll) | (uint32)tracebackCrash);
+                t = (uint32)((UntypedInt)(2 << (int)(tracebackShift) | tracebackAll) | (uint32)tracebackCrash);
                 enableWER();
                 break;
             }
@@ -724,7 +724,7 @@ internal static (slice<@unsafe.Pointer>, slice<slice<int32>>) reflect_typelinks(
 //
 //go:linkname reflect_resolveNameOff reflect.resolveNameOff
 public static @unsafe.Pointer reflect_resolveNameOff(@unsafe.Pointer ptrInModule, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(resolveNameOff(ptrInModule, ((nameOff)off)).Bytes);
+    return @unsafe.Pointer.FromPinnedBox(resolveNameOff(ptrInModule, (nameOff)off).Bytes);
 }
 
 // reflect_resolveTypeOff resolves an *rtype offset from a base type.
@@ -742,7 +742,7 @@ public static @unsafe.Pointer reflect_resolveNameOff(@unsafe.Pointer ptrInModule
 //
 //go:linkname reflect_resolveTypeOff reflect.resolveTypeOff
 public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff(((typeOff)off)));
+    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff((typeOff)off));
 }
 
 // reflect_resolveTextOff resolves a function pointer offset from a base type.
@@ -757,21 +757,21 @@ public static @unsafe.Pointer reflect_resolveTypeOff(@unsafe.Pointer Δrtype, in
 //
 //go:linkname reflect_resolveTextOff reflect.resolveTextOff
 public static @unsafe.Pointer reflect_resolveTextOff(@unsafe.Pointer Δrtype, int32 off) {
-    return (uintptr)toRType((ж<_type>)(uintptr)(Δrtype)).textOff(((textOff)off));
+    return (uintptr)toRType((ж<_type>)(uintptr)(Δrtype)).textOff((textOff)off);
 }
 
 // reflectlite_resolveNameOff resolves a name offset from a base pointer.
 //
 //go:linkname reflectlite_resolveNameOff internal/reflectlite.resolveNameOff
 internal static @unsafe.Pointer reflectlite_resolveNameOff(@unsafe.Pointer ptrInModule, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(resolveNameOff(ptrInModule, ((nameOff)off)).Bytes);
+    return @unsafe.Pointer.FromPinnedBox(resolveNameOff(ptrInModule, (nameOff)off).Bytes);
 }
 
 // reflectlite_resolveTypeOff resolves an *rtype offset from a base type.
 //
 //go:linkname reflectlite_resolveTypeOff internal/reflectlite.resolveTypeOff
 internal static @unsafe.Pointer reflectlite_resolveTypeOff(@unsafe.Pointer Δrtype, int32 off) {
-    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff(((typeOff)off)));
+    return @unsafe.Pointer.FromPinnedBox(toRType((ж<_type>)(uintptr)(Δrtype)).typeOff((typeOff)off));
 }
 
 // reflect_addReflectOff adds a pointer to the reflection offset lookup map.

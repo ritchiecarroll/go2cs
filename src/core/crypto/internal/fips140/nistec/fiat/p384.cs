@@ -155,7 +155,7 @@ public static ж<P384Element> Select(this ж<P384Element> Ꮡv, ж<P384Element> 
     var ᴛ4 = nonnil(ref b).x.Value;
 
     var ᴛ5 = nonnil(ref a).x.Value;
-    p384Selectznz(ref ᴛ3, ((p384Uint1)(uint64)cond),
+    p384Selectznz(ref ᴛ3, (p384Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;
 }

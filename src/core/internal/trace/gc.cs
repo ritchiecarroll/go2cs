@@ -337,7 +337,7 @@ internal static slice<MutatorUtil> addUtil(slice<MutatorUtil> util, MutatorUtil 
 partial struct totalUtil /*num:float64*/;
 
 internal static totalUtil totalUtilOf(float64 meanUtil, int64 dur) {
-    return ((totalUtil)(meanUtil * (float64)dur));
+    return (totalUtil)(meanUtil * (float64)dur);
 }
 
 // mean returns the mean utilization over dur.
@@ -643,7 +643,7 @@ public static slice<UtilWindow> /*worst*/ Examples(this ref MMUCurve c, time.Dur
     acc = new accumulator(mmu: 1.0D, bound: 1.0D, nWorst: n);
     c.mmu(window, Ꮡacc);
     sort.Sort(sort.Reverse(acc.wHeap));
-    return ((slice<UtilWindow>)acc.wHeap);
+    return (slice<UtilWindow>)acc.wHeap;
 }
 
 // MUD returns mutator utilization distribution quantiles for the
@@ -741,12 +741,12 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
 
         windows[i] = window;
         {
-            var max = ((time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time)); if (window > max) {
+            var max = (time.Duration)(s.util[len(s.util) - 1].Time - s.util[0].Time); if (window > max) {
                 windows[i] = max;
             }
         }
 
-        var bandU1 = ((bandUtilHeap)s.mkBandUtil(i, windows[i]));
+        var bandU1 = (bandUtilHeap)s.mkBandUtil(i, windows[i]);
         if (bandU == default!){
             bandU = bandU1;
         } else {
@@ -934,7 +934,7 @@ internal static totalUtil advance(this ref integrator @in, int64 time) {
         nint l = pos;
         nint r = len(util);
         while (l < r) {
-            nint h = (nint)(((nuint)(l + r) >> (int)(1)));
+            nint h = (nint)((nuint)(l + r) >> 1);
             if (util[h].Time <= time){
                 l = h + 1;
             } else {

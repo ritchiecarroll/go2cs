@@ -79,7 +79,7 @@ internal static (nint, Addr, error) parseKernelLinkAddr(nint _, slice<byte> b) {
     ref var name = ref heap(new @string(), out var Ꮡname);
     slice<byte> addr = default!;
     if (nlen > 0) {
-        name = ((@string)(data.slice(0, nlen)));
+        name = (@string)(data.slice(0, nlen));
         data = data.slice(nlen);
     }
     if (alen > 0) {
@@ -246,7 +246,7 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, slice<byte> b) {
     array<Addr> @as = new(8); /* syscall.RTAX_MAX */
     nint af = (nint)syscall.AF_UNSPEC;
     for (nuint i = (nuint)0; i < syscall.RTAX_MAX && len(b) >= roundup(0); i++) {
-        if ((nuint)(attrs & (((nuint)1).Lsh(i))) == 0) {
+        if ((attrs & (((nuint)1).Lsh(i))) == 0) {
             continue;
         }
         if (i <= syscall.RTAX_BRD){

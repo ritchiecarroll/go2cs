@@ -1271,7 +1271,7 @@ public static void TestIPVersion(ж<testing.T> Ꮡt) {
         {
             var version = ipVersion(tt.network); if (version != tt.version) {
                 Ꮡt.Errorf("Family for: %s. Expected: %s, Got: %s"u8, tt.network,
-                    ((@string)tt.version), ((@string)version));
+                    (@string)tt.version, (@string)version);
             }
         }
     }
@@ -1296,9 +1296,9 @@ public static void TestLookupIPAddrPreservesContextValues(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
 
         var keyValues = new TestLookupIPAddrPreservesContextValues_keyValues[]{
-            new((@string)"key-1"u8, (nint)(12)),
-            new((nint)(384), (@string)"value2"u8),
-            new(@new<float64>(), (nint)(137))
+            new((@string)"key-1"u8, (nint)12),
+            new((nint)384, (@string)"value2"u8),
+            new(@new<float64>(), (nint)137)
         }.slice();
         var ctx = context.Background();
         foreach (var (_, kv) in keyValues) {
@@ -1620,7 +1620,7 @@ public static partial void TestDNSTimeout(ж<testing.T> Ꮡt) {
             } else 
             {
                 var (dnserr, ok) = errΔ1._<ж<global::go.net_package.DNSError>>(ᐧ); if (!ok){
-                    Ꮡt.Errorf("got error type %T, want %T"u8, errΔ1, ((ж<global::go.net_package.DNSError>)nil));
+                    Ꮡt.Errorf("got error type %T, want %T"u8, errΔ1, (ж<global::go.net_package.DNSError>)nil);
                 } else 
                 if (!(~dnserr).IsTimeout){
                     Ꮡt.Errorf("got error %#v, want IsTimeout == true"u8, dnserr.OrTypedNil());

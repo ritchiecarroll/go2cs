@@ -155,7 +155,7 @@ public static ж<P256Element> Select(this ж<P256Element> Ꮡv, ж<P256Element> 
     var ᴛ4 = nonnil(ref b).x.Value;
 
     var ᴛ5 = nonnil(ref a).x.Value;
-    p256Selectznz(ref ᴛ3, ((p256Uint1)(uint64)cond),
+    p256Selectznz(ref ᴛ3, (p256Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;
 }

@@ -158,7 +158,7 @@ internal static void archInit() {
 }
 
 internal static bool isSet(nuint bitpos, uint32 value) {
-    return (uint32)(value & (((uint32)1).Lsh(bitpos))) != 0;
+    return (value & (((uint32)1).Lsh(bitpos))) != 0;
 }
 
 } // end cpu_package

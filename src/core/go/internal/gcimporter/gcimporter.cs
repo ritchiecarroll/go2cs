@@ -88,7 +88,7 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfse
             err = fmt.Errorf("import %q: %v"u8, path, err);
             goto ᒐdone;
         }
-        @string s = ((@string)data);
+        @string s = (@string)data;
 
         var input = pkgbits.NewPkgDecoder(id, s);
         pkg = readUnifiedPackage(Ꮡfset, nil, packages, input);

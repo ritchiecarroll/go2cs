@@ -140,7 +140,7 @@ internal static bool expiredWriteDeadline(this pollInfo i) {
 
 // info returns the pollInfo corresponding to pd.
 internal static pollInfo info(this ж<pollDesc> Ꮡpd) {
-    return ((pollInfo)Ꮡpd.of(pollDesc.ᏑatomicInfo).Load());
+    return (pollInfo)Ꮡpd.of(pollDesc.ᏑatomicInfo).Load();
 }
 
 // publishInfo updates pd.atomicInfo (returned by pd.info)
@@ -167,7 +167,7 @@ internal static void publishInfo(this ж<pollDesc> Ꮡpd) {
 
     // Set all of x except the pollEventErr bit.
     var x = Ꮡpd.of(pollDesc.ᏑatomicInfo).Load();
-    while (!Ꮡpd.of(pollDesc.ᏑatomicInfo).CompareAndSwap(x, (uint32)(((uint32)(x & (uint32)pollEventErr)) | info))) {
+    while (!Ꮡpd.of(pollDesc.ᏑatomicInfo).CompareAndSwap(x, (x & (uint32)pollEventErr) | info)) {
         x = Ꮡpd.of(pollDesc.ᏑatomicInfo).Load();
     }
 }
@@ -178,13 +178,13 @@ internal static void publishInfo(this ж<pollDesc> Ꮡpd) {
 internal static void setEventErr(this ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
     var mSeq = (uint32)((uintptr)(seq & (uintptr)pollFDSeqMask));
     var x = Ꮡpd.of(pollDesc.ᏑatomicInfo).Load();
-    var xSeq = (uint32)(((x >> (int)(pollFDSeq))) & (uint32)pollFDSeqMask);
+    var xSeq = (x >> (int)(pollFDSeq)) & (uint32)pollFDSeqMask;
     if (seq != 0 && xSeq != mSeq) {
         return;
     }
-    while (((uint32)(x & (uint32)pollEventErr) != 0) != b && !Ꮡpd.of(pollDesc.ᏑatomicInfo).CompareAndSwap(x, (uint32)(x ^ (uint32)pollEventErr))) {
+    while (((x & (uint32)pollEventErr) != 0) != b && !Ꮡpd.of(pollDesc.ᏑatomicInfo).CompareAndSwap(x, x ^ (uint32)pollEventErr)) {
         x = Ꮡpd.of(pollDesc.ᏑatomicInfo).Load();
-        var xSeqΔ1 = (uint32)(((x >> (int)(pollFDSeq))) & (uint32)pollFDSeqMask);
+        var xSeqΔ1 = (x >> (int)(pollFDSeq)) & (uint32)pollFDSeqMask;
         if (seq != 0 && xSeqΔ1 != mSeq) {
             return;
         }

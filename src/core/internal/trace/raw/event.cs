@@ -59,7 +59,7 @@ public static @string String(this ref Event e) {
     }
     if (e.Data != default!) {
         Ꮡs.WriteString(dataˢ);
-        Ꮡs.WriteString(strconv.Quote(((@string)e.Data)));
+        Ꮡs.WriteString(strconv.Quote((@string)e.Data));
     }
     return s.String();
 }

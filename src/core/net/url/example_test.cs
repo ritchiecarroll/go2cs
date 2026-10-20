@@ -481,7 +481,7 @@ internal static @string toJSON(any m) {
     if (err != default!) {
         log.Fatal(err);
     }
-    return strings.ReplaceAll(((@string)js), ","u8, ", "u8);
+    return strings.ReplaceAll((@string)js, ","u8, ", "u8);
 }
 
 } // end url_test_package

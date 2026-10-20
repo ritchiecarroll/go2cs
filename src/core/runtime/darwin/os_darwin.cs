@@ -456,13 +456,13 @@ internal static void setsigstack(uint32 i) {
     ref var osa = ref heap(new usigactiont(), out var Ꮡosa);
     sigaction(i, nil, Ꮡosa);
     var handler = ~Ꮡosa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>();
-    if ((int32)(osa.sa_flags & (int32)_SA_ONSTACK) != 0) {
+    if ((osa.sa_flags & (int32)_SA_ONSTACK) != 0) {
         return;
     }
     ref var sa = ref heap(new usigactiont(), out var Ꮡsa);
     (Ꮡsa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>()).Value = handler;
     sa.sa_mask = osa.sa_mask;
-    sa.sa_flags = (int32)(osa.sa_flags | (int32)_SA_ONSTACK);
+    sa.sa_flags = osa.sa_flags | (int32)_SA_ONSTACK;
     sigaction(i, Ꮡsa, nil);
 }
 
@@ -519,7 +519,7 @@ internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
 }
 
 internal static void signalM(ref m mp, nint sig) {
-    pthread_kill(((pthread)(uintptr)mp.procid), (uint32)sig);
+    pthread_kill((pthread)(uintptr)mp.procid, (uint32)sig);
 }
 
 // sigPerThreadSyscall is only used on linux, so we assign a bogus signal

@@ -81,7 +81,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 
     ref var ver = ref heap(new uint32(), out var Ꮡver);
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, Ꮡver) == default!);
-    pr.version = ((ΔVersion)ver);
+    pr.version = (ΔVersion)ver;
 
     if (pr.version >= numVersions) {
         throw panic(fmt.Errorf("cannot decode %q, export data version %d is greater than maximum supported version %d"u8, pkgPath, pr.version, (nint)(numVersions - 1)));
@@ -90,7 +90,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
     if (pr.version.Has(Flags)) {
         ref var flags = ref heap(new uint32(), out var Ꮡflags);
         assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, Ꮡflags) == default!);
-        pr.sync = (uint32)(flags & (uint32)flagSyncMarkers) != 0;
+        pr.sync = (flags & (uint32)flagSyncMarkers) != 0;
     }
 
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, pr.elemEndsEnds[..]) == default!);
@@ -207,7 +207,7 @@ public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, Re
     r.Relocs = new slice<RefTableEntry>(Ꮡr.Len());
     foreach (var (i, _) in r.Relocs) {
         Ꮡr.Sync(SyncReloc);
-        r.Relocs[i] = new RefTableEntry(((SectionKind)(int32)Ꮡr.Len()), ((RelElemIdx)(int32)Ꮡr.Len()));
+        r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
     }
 
     return r;
@@ -234,7 +234,7 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, R
     }
     foreach (var (i, _) in r.Relocs) {
         Ꮡr.Sync(SyncReloc);
-        r.Relocs[i] = new RefTableEntry(((SectionKind)(int32)Ꮡr.Len()), ((RelElemIdx)(int32)Ꮡr.Len()));
+        r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
     }
 
     return r;
@@ -284,7 +284,7 @@ internal static (uint64, error) readUvarint(ж<strings.Reader> Ꮡr) {
             if (i == (nint)(binary.MaxVarintLen64 - 1) && b > 1) {
                 return (x, overflow);
             }
-            return ((uint64)(x | ((uint64)b).Lsh(s)), default!);
+            return (x | ((uint64)b).Lsh(s), default!);
         }
         x |= (uint64)(((uint64)((byte)(b & 0x7f))).Lsh(s));
         s += 7;
@@ -298,8 +298,8 @@ internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
     var ux = Ꮡr.rawUvarint();
 
     // Zig-zag decode.
-    var x = (int64)((ux >> (int)(1)));
-    if ((uint64)(ux & 1) != 0) {
+    var x = (int64)(ux >> 1);
+    if ((ux & 1) != 0) {
         x = ~x;
     }
     return x;
@@ -323,7 +323,7 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     }
 
     var (pos, _) = r.Data.Seek(0, io.SeekCurrent);
-    SyncMarker mHave = ((SyncMarker)(nint)Ꮡr.rawUvarint());
+    SyncMarker mHave = (SyncMarker)(nint)Ꮡr.rawUvarint();
     var writerPCs = new slice<nint>((nint)(Ꮡr.rawUvarint()));
     foreach (var (i, _) in writerPCs) {
         writerPCs[i] = (nint)Ꮡr.rawUvarint();
@@ -473,7 +473,7 @@ public static constant.Value Value(this ж<Decoder> Ꮡr) {
 
 internal static constant.Value scalar(this ж<Decoder> Ꮡr) {
     {
-        CodeVal tag = ((CodeVal)Ꮡr.Code(SyncVal));
+        CodeVal tag = (CodeVal)Ꮡr.Code(SyncVal);
         var exprᴛ1 = tag;
         if (exprᴛ1 == ValBool) {
             return constant.MakeBool(Ꮡr.Bool());
@@ -559,7 +559,7 @@ public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, Rel
     @string path = Ꮡpr.PeekPkgPath(ridx);
     assert(name != ""u8);
 
-    CodeObj tag = ((CodeObj)rcode);
+    CodeObj tag = (CodeObj)rcode;
 
     return (path, name, tag);
 }

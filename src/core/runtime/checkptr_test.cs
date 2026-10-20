@@ -70,7 +70,7 @@ public static void TestCheckPtr(ж<testing.T> Ꮡt) {
                 }
                 return;
             }
-            if (!strings.HasPrefix(((@string)got), tcʗ1.want)) {
+            if (!strings.HasPrefix((@string)got, tcʗ1.want)) {
                 tΔ1.Errorf("output:\n%s\n\nwant output starting with: %s"u8, got, tcʗ1.want);
             }
         });
@@ -121,7 +121,7 @@ public static void TestCheckPtr2(ж<testing.T> Ꮡt) {
                 }
                 return;
             }
-            if (!strings.HasPrefix(((@string)got), tcʗ1.want)) {
+            if (!strings.HasPrefix((@string)got, tcʗ1.want)) {
                 tΔ1.Errorf("output:\n%s\n\nwant output starting with: %s"u8, got, tcʗ1.want);
             }
         });

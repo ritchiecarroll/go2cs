@@ -47,19 +47,19 @@ internal static void Main() {
     var (p1, net1) = lookup(true);
 
     fmt.Println("zero tuple:", p0 == nil, ((@string)net0) == ""u8, len(net0));
-    fmt.Println("set tuple:", p1.Value, ((@string)net1), len(net1));
+    fmt.Println("set tuple:", p1.Value, (@string)net1, len(net1));
 
     fmt.Println("single zero:", ((@string)single(false)) == ""u8, len(single(false)));
-    fmt.Println("single set:", ((@string)single(true)));
+    fmt.Println("single set:", (@string)single(true));
 
     fmt.Println("alias zero:", ((@string)viaAlias(false)) == ""u8);
-    fmt.Println("alias set:", ((@string)viaAlias(true)));
+    fmt.Println("alias set:", (@string)viaAlias(true));
 
     Network acc = default!;
     acc = acc + "a"u8;
     acc += "b"u8;
 
-    fmt.Println("accumulated:", ((@string)acc), acc == "ab"u8, len(acc));
+    fmt.Println("accumulated:", (@string)acc, acc == "ab"u8, len(acc));
 }
 
 } // end main_package

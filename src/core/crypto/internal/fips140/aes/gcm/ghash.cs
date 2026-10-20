@@ -74,27 +74,27 @@ internal static void ghash(/*[16]*/ ж<array<byte>> Ꮡout, /*[16]*/ ж<array<by
 
 // reverseBits reverses the order of the bits of 4-bit number in i.
 internal static nint reverseBits(nint i) {
-    i = (nint)(((nint)(((i << (int)(2))) & 0xc)) | ((nint)(((i >> (int)(2))) & 0x3)));
-    i = (nint)(((nint)(((i << (int)(1))) & 0xa)) | ((nint)(((i >> (int)(1))) & 0x5)));
+    i = ((i << 2) & 0xc) | ((i >> 2) & 0x3);
+    i = ((i << 1) & 0xa) | ((i >> 1) & 0x5);
     return i;
 }
 
 // ghashAdd adds two elements of GF(2¹²⁸) and returns the sum.
 internal static gcmFieldElement ghashAdd(ref gcmFieldElement x, ref gcmFieldElement y) {
     // Addition in a characteristic 2 field is just XOR.
-    return new gcmFieldElement((uint64)(x.low ^ y.low), (uint64)(x.high ^ y.high));
+    return new gcmFieldElement(x.low ^ y.low, x.high ^ y.high);
 }
 
 // ghashDouble returns the result of doubling an element of GF(2¹²⁸).
 internal static gcmFieldElement /*double*/ ghashDouble(ref gcmFieldElement x) {
     gcmFieldElement @double = default!;
 
-    var msbSet = (uint64)(x.high & 1) == 1;
+    var msbSet = (x.high & 1) == 1;
 
     // Because of the bit-ordering, doubling is actually a right shift.
-    @double.high = (x.high >> (int)(1));
-    @double.high |= (uint64)((x.low << (int)(63)));
-    @double.low = (x.low >> (int)(1));
+    @double.high = x.high >> 1;
+    @double.high |= (uint64)((x.low << 63));
+    @double.low = x.low >> 1;
 
     // If the most-significant bit was set before shifting then it,
     // conceptually, becomes a term of x^128. This is greater than the
@@ -128,15 +128,15 @@ internal static void ghashMul(ref array<gcmFieldElement> productTable, ref gcmFi
         // Multiplication works by multiplying z by 16 and adding in
         // one of the precomputed multiples of H.
         for (nint j = 0; j < 64; j += 4) {
-            var msw = (uint64)(z.high & 0xf);
+            var msw = z.high & 0xf;
             z.high >>= (int)(4);
-            z.high |= (uint64)((z.low << (int)(60)));
+            z.high |= (uint64)((z.low << 60));
             z.low >>= (int)(4);
-            z.low ^= (uint64)(((uint64)ghashReductionTable[msw] << (int)(48)));
+            z.low ^= (uint64)(((uint64)ghashReductionTable[msw] << 48));
 
             // the values in |table| are ordered for little-endian bit
             // positions. See the comment in New.
-            var t = productTable[(uint64)(word & 0xf)];
+            var t = productTable[(word & 0xf)];
 
             z.low ^= (uint64)(t.low);
             z.high ^= (uint64)(t.high);
@@ -161,7 +161,7 @@ internal static void updateBlocks(ref array<gcmFieldElement> productTable, ref g
 // ghashUpdate extends y with more polynomial terms from data. If data is not a
 // multiple of gcmBlockSize bytes long then the remainder is zero padded.
 internal static void ghashUpdate(ref array<gcmFieldElement> productTable, ref gcmFieldElement y, slice<byte> data) {
-    nint fullBlocks = (((len(data) >> (int)(4))) << (int)(4));
+    nint fullBlocks = (len(data) >> 4) << 4;
     updateBlocks(ref productTable, ref y, data.slice(0, fullBlocks));
 
     if (len(data) != fullBlocks) {

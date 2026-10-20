@@ -200,7 +200,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 
     for (nint end = start; end < len(section); end++) {
         if (section[end] == 0) {
-            return (((@string)(section.slice(start, end))), true);
+            return ((@string)(section.slice(start, end)), true);
         }
     }
     return ("", false);
@@ -457,7 +457,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
                 if (va == 0) {
                     break;
                 }
-                if ((uint64)(va & 0x8000000000000000UL) > 0){ // is Ordinal
+                if ((va & 0x8000000000000000UL) > 0){ // is Ordinal
                     // TODO add dynimport ordinal support.
                 } else {
                     var (fn, _) = getString(names, (nint)((uint32)va - (~ds).VirtualAddress + 2));
@@ -472,7 +472,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
                 if (va == 0) {
                     break;
                 }
-                if ((uint32)(va & 0x80000000U) > 0){ // is Ordinal
+                if ((va & 0x80000000U) > 0){ // is Ordinal
                     // TODO add dynimport ordinal support.
                     //ord := va&0x0000FFFF
                 } else {

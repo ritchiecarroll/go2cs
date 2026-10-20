@@ -511,7 +511,7 @@ public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
                 break;
             }
             case 1 when selᴛ17.ꟷᐳ(out _): {
-                var buf = new slice<byte>((10 << (int)(10)));
+                var buf = new slice<byte>((10 << 10));
                 nint n = Δruntime.Stack(buf, true);
                 Ꮡt.Fatalf("timed out after %v waiting for <-ctx.Done(); stacks:\n%s"u8, d, buf.slice(0, n));
                 break;
@@ -531,7 +531,7 @@ public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
             break;
         }
         case 1 when selᴛ19.ꟷᐳ(out _): {
-            var buf = new slice<byte>((10 << (int)(10)));
+            var buf = new slice<byte>((10 << 10));
             nint n = Δruntime.Stack(buf, true);
             Ꮡt.Fatalf("timed out after %v waiting for cancel functions; stacks:\n%s"u8, d, buf.slice(0, n));
             break;
@@ -564,7 +564,7 @@ public static partial void TestInterlockedCancels(ж<testing.T> Ꮡt) {
             break;
         }
         case 1 when selᴛ21.ꟷᐳ(out _): {
-            var buf = new slice<byte>((10 << (int)(10)));
+            var buf = new slice<byte>((10 << 10));
             nint n = Δruntime.Stack(buf, true);
             Ꮡt.Fatalf("timed out after %v waiting for child.Done(); stacks:\n%s"u8, d, buf.slice(0, n));
             break;

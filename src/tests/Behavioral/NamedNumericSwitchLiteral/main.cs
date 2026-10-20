@@ -39,7 +39,7 @@ internal static @string kind(reply code) {
 
 internal static void Main() {
     for (nint i = 0; i <= 4; i++) {
-        fmt.Println(describe(((reply)i)), kind(((reply)i)));
+        fmt.Println(describe((reply)i), kind((reply)i));
     }
 }
 

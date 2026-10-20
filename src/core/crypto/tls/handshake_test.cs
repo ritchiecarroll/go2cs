@@ -94,7 +94,7 @@ internal static error checkOpenSSLVersion() {
         return err;
     }
 
-    @string version = ((@string)output);
+    @string version = (@string)output;
     if (strings.HasPrefix(version, openSSL111ˢ)) {
         return default!;
     }
@@ -667,7 +667,7 @@ internal static partial (global::go.crypto.tls_package.ΔConnectionState serverS
                 Ꮡt.Errorf("failed to call cli.Read: %v"u8, errΔ1);
             }
             {
-                @string got = ((@string)buf); if (got != sentinel) {
+                @string got = (@string)buf; if (got != sentinel) {
                     Ꮡt.Errorf("read %q from TLS connection, but expected %q"u8, got, sentinel);
                 }
             }
@@ -991,9 +991,9 @@ internal static (slice<byte>, error) concatHandshakeMessages(params Span<global:
     var outBuf = new slice<byte>(recordHeaderLen);
     outBuf[0] = (byte)recordTypeHandshake;
     nint vers = VersionTLS12;
-    outBuf[1] = (byte)((vers >> (int)(8)));
+    outBuf[1] = (byte)(vers >> 8);
     outBuf[2] = (byte)vers;
-    outBuf[3] = (byte)((m >> (int)(8)));
+    outBuf[3] = (byte)(m >> 8);
     outBuf[4] = (byte)m;
     outBuf = appendꓸꓸꓸ(outBuf, marshalled);
     return (outBuf, default!);

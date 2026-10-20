@@ -587,7 +587,7 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
         }}
         text = text.slice(size);
     }
-    return (positions, errPositions, ((@string)buf));
+    return (positions, errPositions, (@string)buf);
 }
 
 // nTimes is an io.Reader which yields the string s n times.

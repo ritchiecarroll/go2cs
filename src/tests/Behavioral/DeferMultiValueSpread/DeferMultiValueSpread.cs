@@ -140,7 +140,7 @@ internal static void deferControlPlain() {
     GoFrame ᒐ = default;
     try {
         fmt.Println("deferControlPlain: enter");
-        defer(show, (nint)(11), elevenˢ, ref ᒐ);
+        defer(show, (nint)11, elevenˢ, ref ᒐ);
         fmt.Println("deferControlPlain: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

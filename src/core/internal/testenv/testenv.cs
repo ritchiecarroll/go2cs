@@ -97,7 +97,7 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
         return fmt.Errorf("%v: no tool reported"u8, cmd.OrTypedNil());
     }
     {
-        var (_, errΔ1) = exec.LookPath(((@string)@out)); if (errΔ1 != default!) {
+        var (_, errΔ1) = exec.LookPath((@string)@out); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
@@ -122,7 +122,7 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
             if (len(outΔ1) == 0) {
                 return fmt.Errorf("%v: no CC reported"u8, cmdΔ1.OrTypedNil());
             }
-            (_, errΔ2) = exec.LookPath(((@string)outΔ1));
+            (_, errΔ2) = exec.LookPath((@string)outΔ1);
             return errΔ2;
         }
     }
@@ -250,7 +250,7 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
             }
             return ("", fmt.Errorf("finding GOROOT: %w"u8, errΔ1));
         }
-        @string goMod = ((@string)b);
+        @string goMod = (@string)b;
 
         while (goMod != ""u8) {
             @string line = default!;
@@ -342,7 +342,7 @@ internal static Func<bool> hasCgo = sync.OnceValue(bool () => {
     if (err != default!) {
         throw panic(fmt.Sprintf("%v: %v"u8, cmd.OrTypedNil(), @out));
     }
-    (var ok, err) = strconv.ParseBool(((@string)bytes.TrimSpace(@out)));
+    (var ok, err) = strconv.ParseBool((@string)bytes.TrimSpace(@out));
     if (err != default!) {
         throw panic(fmt.Sprintf("%v: non-boolean output %q"u8, cmd.OrTypedNil(), @out));
     }
@@ -530,7 +530,7 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
             t.Fatalf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, (~cmd).Stderr);
         }
 
-        foreach (var line in range<@string>(strings.SplitSeq(((@string)@out), "\n"u8).Invoke)) {
+        foreach (var line in range<@string>(strings.SplitSeq((@string)@out, "\n"u8).Invoke)) {
             if (line == ""u8) {
                 continue;
             }

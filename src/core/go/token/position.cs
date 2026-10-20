@@ -132,7 +132,7 @@ public static nint Size(this ref ΔFile f) {
 
 // End returns the end position of file f as registered with AddFile.
 public static ΔPos End(this ref ΔFile f) {
-    return ((ΔPos)(f.@base + f.size));
+    return (ΔPos)(f.@base + f.size);
 }
 
 // LineCount returns the number of lines in file f.
@@ -267,7 +267,7 @@ public static ΔPos LineStart(this ж<ΔFile> Ꮡf, nint line) {
         if (line > len(f.lines)) {
             throw panic(fmt.Sprintf("invalid line number %d (should be < %d)"u8, line, len(f.lines)));
         }
-        return ((ΔPos)(f.@base + f.lines[line - 1]));
+        return (ΔPos)(f.@base + f.lines[line - 1]);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { if (ᒐd1) Ꮡf.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
@@ -331,7 +331,7 @@ internal static nint fixOffset(this ref ΔFile f, nint offset) {
     // only generate this code if needed
     if (debug) {
         throw panic(fmt.Sprintf("offset %d out of bounds [%d, %d] (position %d out of bounds [%d, %d])"u8,
-            (nint)(0), /* for symmetry */ offset, f.size,
+            (nint)0, /* for symmetry */ offset, f.size,
             f.@base + offset, f.@base, f.@base + f.size));
     }
     return 0;
@@ -347,7 +347,7 @@ internal static nint fixOffset(this ref ΔFile f, nint offset) {
 // in general, holds for the result p:
 // f.Pos(f.Offset(p)) == p.
 public static ΔPos Pos(this ref ΔFile f, nint offset) {
-    return ((ΔPos)(f.@base + f.fixOffset(offset)));
+    return (ΔPos)(f.@base + f.fixOffset(offset));
 }
 
 // Offset returns the offset for the given file position p.
@@ -733,7 +733,7 @@ internal static nint searchInts(slice<nint> a, nint x) {
     nint i = 0;
     nint j = len(a);
     while (i < j) {
-        nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+        nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
         if (a[h] <= x){
             i = h + 1;

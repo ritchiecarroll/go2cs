@@ -314,7 +314,7 @@ public static error HandleData(this ж<QUICConn> Ꮡq, QUICEncryptionLevel level
         c.Value.quic.Value.readbuf = default!;
         while (q.conn.of(Conn.Ꮡhand).Len() >= 4 && (~q.conn).handshakeErr == default!) {
             var b = q.conn.of(Conn.Ꮡhand).Bytes();
-            nint n = (nint)((nint)(((nint)b[1] << (int)(16)) | ((nint)b[2] << (int)(8))) | (nint)b[3]);
+            nint n = (nint)b[1] << 16 | (nint)b[2] << 8 | (nint)b[3];
             if (n > maxHandshake) {
                 q.conn.Value.handshakeErr = fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes"u8, n, (nint)(maxHandshake));
                 break;
@@ -427,7 +427,7 @@ internal static error quicError(error err) {
     }
     // Return an error wrapping the original error and an AlertError.
     // Truncate the text of the alert to 0 characters.
-    return fmt.Errorf("%w%.0w"u8, err, ((AlertError)(uint8)a));
+    return fmt.Errorf("%w%.0w"u8, err, (AlertError)(uint8)a);
 }
 
 internal static error quicReadHandshakeBytes(this ж<Conn> Ꮡc, nint n) {

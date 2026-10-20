@@ -170,7 +170,7 @@ internal static ж<T> tVal = Ꮡ(new T(
         new map<@string, nint>{["one"u8] = 1, ["two"u8] = 2},
         new map<@string, nint>{["eleven"u8] = 11, ["twelve"u8] = 12}
     }.slice(),
-    Empty1: (nint)(3),
+    Empty1: (nint)3,
     Empty2: (@string)"empty2"u8,
     Empty3: new nint[]{7, 8}.slice(),
     Empty4: Ꮡ(new U("UinEmpty"u8)),
@@ -316,13 +316,13 @@ internal static slice<execTest> execTests = new execTest[]{
     new("nil action"u8, "{{nil}}"u8, ""u8, default!, false),
 
     // Ideal constants.
-    new("ideal int"u8, "{{typeOf 3}}"u8, "int"u8, (nint)(0), true),
-    new("ideal float"u8, "{{typeOf 1.0}}"u8, "float64"u8, (nint)(0), true),
-    new("ideal exp float"u8, "{{typeOf 1e1}}"u8, "float64"u8, (nint)(0), true),
-    new("ideal complex"u8, "{{typeOf 1i}}"u8, "complex128"u8, (nint)(0), true),
-    new("ideal int"u8, "{{typeOf "u8 + bigInt + "}}"u8, "int"u8, (nint)(0), true),
-    new("ideal too big"u8, "{{typeOf "u8 + bigUint + "}}"u8, ""u8, (nint)(0), false),
-    new("ideal nil without type"u8, "{{nil}}"u8, ""u8, (nint)(0), false),
+    new("ideal int"u8, "{{typeOf 3}}"u8, "int"u8, (nint)0, true),
+    new("ideal float"u8, "{{typeOf 1.0}}"u8, "float64"u8, (nint)0, true),
+    new("ideal exp float"u8, "{{typeOf 1e1}}"u8, "float64"u8, (nint)0, true),
+    new("ideal complex"u8, "{{typeOf 1i}}"u8, "complex128"u8, (nint)0, true),
+    new("ideal int"u8, "{{typeOf "u8 + bigInt + "}}"u8, "int"u8, (nint)0, true),
+    new("ideal too big"u8, "{{typeOf "u8 + bigUint + "}}"u8, ""u8, (nint)0, false),
+    new("ideal nil without type"u8, "{{nil}}"u8, ""u8, (nint)0, false),
 
     // Fields of structs.
     new(".X"u8, "-{{.X}}-"u8, "-x-"u8, tVal.OrTypedNil(), true),
@@ -338,7 +338,7 @@ internal static slice<execTest> execTests = new execTest[]{
     new("map .WRONG type"u8, "{{.MII.one}}"u8, ""u8, tVal.OrTypedNil(), false),
 
     // Dots of all kinds to test basic evaluation.
-    new("dot int"u8, "<{{.}}>"u8, "&lt;13>"u8, (nint)(13), true),
+    new("dot int"u8, "<{{.}}>"u8, "&lt;13>"u8, (nint)13, true),
     new("dot uint"u8, "<{{.}}>"u8, "&lt;14>"u8, (nuint)14, true),
     new("dot float"u8, "<{{.}}>"u8, "&lt;15.1>"u8, 15.1D, true),
     new("dot bool"u8, "<{{.}}>"u8, "&lt;true>"u8, true, true),
@@ -349,7 +349,7 @@ internal static slice<execTest> execTests = new execTest[]{
     new("dot struct"u8, "<{{.}}>"u8, "&lt;{7 seven}>"u8, new Δtype(7, "seven"u8), true),
 
     // Variables.
-    new("$ int"u8, "{{$}}"u8, "123"u8, (nint)(123), true),
+    new("$ int"u8, "{{$}}"u8, "123"u8, (nint)123, true),
     new("$.I"u8, "{{$.I}}"u8, "17"u8, tVal.OrTypedNil(), true),
     new("$.U.V"u8, "{{$.U.V}}"u8, "v"u8, tVal.OrTypedNil(), true),
     new("declare in action"u8, "{{$x := $.U.V}}{{$x}}"u8, "v"u8, tVal.OrTypedNil(), true),
@@ -681,7 +681,7 @@ internal static slice<execTest> execTests = new execTest[]{
     // A bug was introduced that broke map lookups for lower-case names.
     new("bug9"u8, "{{.cause}}"u8, "neglect"u8, new map<@string, @string>{["cause"u8] = "neglect"u8}, true),
     // Field chain starting with function did not work.
-    new("bug10"u8, "{{mapOfThree.three}}-{{(mapOfThree).three}}"u8, "3-3"u8, (nint)(0), true),
+    new("bug10"u8, "{{mapOfThree.three}}-{{(mapOfThree).three}}"u8, "3-3"u8, (nint)0, true),
     // Dereferencing nil pointer while evaluating function arguments should not panic. Issue 7333.
     new("bug11"u8, "{{valueString .PS}}"u8, ""u8, new T(nil), false),
     // 0xef gave constant type float64. Issue 8622.
@@ -985,7 +985,7 @@ public static void TestExecError(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(parseErrorˢ, err);
     }
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-    err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)(5)); // 5 is out of range indexing "hi"
+    err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)5); // 5 is out of range indexing "hi"
     if (err == default!) {
         Ꮡt.Fatal(expectedErrorˢ);
     }
@@ -1141,7 +1141,7 @@ public static void TestMessageForExecuteEmpty(ж<testing.T> Ꮡt) {
     // Test a truly empty template.
     var tmpl = New(emptyˢ);
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-    var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)(0));
+    var err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)0);
     if (err == default!) {
         Ꮡt.Fatal(expectedInitialErrorˢ);
     }
@@ -1158,7 +1158,7 @@ public static void TestMessageForExecuteEmpty(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     tmpl.AddParseTree(secondaryˢ, (~tests).Tree);
-    err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)(0));
+    err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)0);
     if (err == default!) {
         Ꮡt.Fatal(expectedSecondErrorˢ);
     }
@@ -1167,7 +1167,7 @@ public static void TestMessageForExecuteEmpty(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("expected error %s got %s"u8, want, got);
     }
     // Make sure we can execute the secondary.
-    err = tmpl.ExecuteTemplate(new template_test_package.bytes_BufferжWriter(Ꮡb), secondaryˢ, (nint)(0));
+    err = tmpl.ExecuteTemplate(new template_test_package.bytes_BufferжWriter(Ꮡb), secondaryˢ, (nint)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -1182,7 +1182,7 @@ public static void TestFinalForPrintf(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-    err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)(0));
+    err = tmpl.Execute(new template_test_package.bytes_BufferжWriter(Ꮡb), (nint)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -1459,7 +1459,7 @@ public static void TestExecuteGivesExecError(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    err = tmpl.Execute(((ErrorWriter)0), (nint)(0));
+    err = tmpl.Execute((ErrorWriter)0, (nint)0);
     if (err == default!) {
         Ꮡt.Fatal(expectedErrorGotNoneˢ);
     }
@@ -1471,7 +1471,7 @@ public static void TestExecuteGivesExecError(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    err = tmpl.Execute(io.Discard, (nint)(0));
+    err = tmpl.Execute(io.Discard, (nint)0);
     if (err == default!) {
         Ꮡt.Fatal(expectedErrorGotNoneˢ);
     }
@@ -1613,7 +1613,7 @@ public static void TestEvalFieldErrors(ж<testing.T> Ꮡt) {
             // pointer error. https://golang.org/issue/15125
             "MissingFieldOnNil"u8,
             "{{.MissingField}}"u8,
-            ((ж<T>)nil),
+            (ж<T>)nil,
             "can't evaluate field MissingField in type *template.T"u8
         ),
         new(
@@ -1625,19 +1625,19 @@ public static void TestEvalFieldErrors(ж<testing.T> Ꮡt) {
         new(
             "ExistingFieldOnNil"u8,
             "{{.X}}"u8,
-            ((ж<T>)nil),
+            (ж<T>)nil,
             "nil pointer evaluating *template.T.X"u8
         ),
         new(
             "MissingKeyOnNilMap"u8,
             "{{.MissingKey}}"u8,
-            ((ж<map<@string, @string>>)nil),
+            (ж<map<@string, @string>>)nil,
             "nil pointer evaluating *map[string]string.MissingKey"u8
         ),
         new(
             "MissingKeyOnNilMapPtr"u8,
             "{{.MissingKey}}"u8,
-            ((ж<map<@string, @string>>)nil),
+            (ж<map<@string, @string>>)nil,
             "nil pointer evaluating *map[string]string.MissingKey"u8
         ),
         new(
@@ -1773,10 +1773,10 @@ public static void TestInterfaceValues(ж<testing.T> Ꮡt) {
         var err = tmpl.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), new map<@string, any>{
             ["PlusOne"u8] = nint (nint n) => n + 1,
             ["Slice"u8] = new nint[]{0, 1, 2, 3}.slice(),
-            ["One"u8] = (nint)(1),
-            ["Two"u8] = (nint)(2),
+            ["One"u8] = (nint)1,
+            ["Two"u8] = (nint)2,
             ["Nil"u8] = default!,
-            ["Zero"u8] = (nint)(0)
+            ["Zero"u8] = (nint)0
         });
         if (strings.HasPrefix(tt.@out, errorˢ2)) {
             @string e = strings.TrimSpace(strings.TrimPrefix(tt.@out, errorˢ2));
@@ -1814,22 +1814,22 @@ public static void TestExecutePanicDuringCall(ж<testing.T> Ꮡt) {
     var tests = new TestExecutePanicDuringCall_tests[]{
         new(
             "direct func call panics"u8,
-            "{{doPanic}}"u8, ((ж<T>)nil),
+            "{{doPanic}}"u8, (ж<T>)nil,
             @"template: t:1:2: executing ""t"" at <doPanic>: error calling doPanic: custom panic string"u8
         ),
         new(
             "indirect func call panics"u8,
-            "{{call doPanic}}"u8, ((ж<T>)nil),
+            "{{call doPanic}}"u8, (ж<T>)nil,
             @"template: t:1:7: executing ""t"" at <doPanic>: error calling doPanic: custom panic string"u8
         ),
         new(
             "direct method call panics"u8,
-            "{{.GetU}}"u8, ((ж<T>)nil),
+            "{{.GetU}}"u8, (ж<T>)nil,
             @"template: t:1:2: executing ""t"" at <.GetU>: error calling GetU: runtime error: invalid memory address or nil pointer dereference"u8
         ),
         new(
             "indirect method call panics"u8,
-            "{{call .GetU}}"u8, ((ж<T>)nil),
+            "{{call .GetU}}"u8, (ж<T>)nil,
             @"template: t:1:7: executing ""t"" at <.GetU>: error calling GetU: runtime error: invalid memory address or nil pointer dereference"u8
         ),
         new(
@@ -1984,7 +1984,7 @@ public static void TestRecursiveExecute(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
-        return (((global::go.html.template_package.HTML)sb.String()), default!);
+        return ((global::go.html.template_package.HTML)sb.String(), default!);
     };
 
     var m = new FuncMap(new map<@string, any>{

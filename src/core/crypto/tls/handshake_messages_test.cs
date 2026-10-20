@@ -138,7 +138,7 @@ internal static slice<byte> randomBytes(nint n, ж<rand.Rand> Ꮡrand) {
 
 internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     var b = randomBytes(n, Ꮡrand);
-    return ((@string)b);
+    return (@string)b;
 }
 
 internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.clientHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
@@ -167,7 +167,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     m.Value.supportedPoints = randomBytes(randΔ1.Intn(5) + 1, Ꮡrand);
     m.Value.supportedCurves = new slice<global::go.crypto.tls_package.CurveID>(randΔ1.Intn(5) + 1);
     foreach (var (i, _) in (~m).supportedCurves) {
-        m.Value.supportedCurves[i] = ((global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1));
+        m.Value.supportedCurves[i] = (global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1);
     }
     if (randΔ1.Intn(10) > 5) {
         m.Value.ticketSupported = true;
@@ -204,7 +204,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     }
     for (nint i = 0; i < randΔ1.Intn(5); i++) {
         global::go.crypto.tls_package.keyShare ks = default!;
-        ks.group = ((global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1));
+        ks.group = (global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1);
         ks.data = randomBytes(randΔ1.Intn(200) + 1, Ꮡrand);
         m.Value.keyShares = append((~m).keyShares, ks);
     }
@@ -283,12 +283,12 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     }
     if (randΔ1.Intn(10) > 5){
         for (nint i = 0; i < randΔ1.Intn(5); i++) {
-            m.Value.serverShare.group = ((global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1));
+            m.Value.serverShare.group = (global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1);
             m.Value.serverShare.data = randomBytes(randΔ1.Intn(200) + 1, Ꮡrand);
         }
     } else 
     if (randΔ1.Intn(10) > 5) {
-        m.Value.selectedGroup = ((global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1));
+        m.Value.selectedGroup = (global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1);
     }
     if (randΔ1.Intn(10) > 5) {
         m.Value.selectedIdentityPresent = true;
@@ -347,7 +347,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
 
     var m = Ꮡ(new certificateVerifyMsg(nil));
     m.Value.hasSignatureAlgorithm = true;
-    m.Value.signatureAlgorithm = ((global::go.crypto.tls_package.SignatureScheme)(uint16)randΔ1.Intn(30000));
+    m.Value.signatureAlgorithm = (global::go.crypto.tls_package.SignatureScheme)(uint16)randΔ1.Intn(30000);
     m.Value.signature = randomBytes(randΔ1.Intn(15) + 1, Ꮡrand);
     return reflect.ValueOf(m.OrTypedNil());
 }
@@ -445,15 +445,15 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
         }
     }
     if (randΔ1.Intn(10) > 5 && (~s).EarlyData) {
-        s.Value.alpnProtocol = ((@string)randomBytes(randΔ1.Intn(10), Ꮡrand));
+        s.Value.alpnProtocol = (@string)randomBytes(randΔ1.Intn(10), Ꮡrand);
     }
     if (isTLS13){
         if ((~s).isClient) {
             s.Value.useBy = (uint64)randΔ1.Int63();
-            s.Value.ageAdd = (uint32)((int64)(randΔ1.Int63() & (int64)math.MaxUint32));
+            s.Value.ageAdd = (uint32)(randΔ1.Int63() & (int64)math.MaxUint32);
         }
     } else {
-        s.Value.curveID = ((global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1));
+        s.Value.curveID = (global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1);
     }
     return reflect.ValueOf(s.OrTypedNil());
 }
@@ -579,12 +579,12 @@ public static void TestRejectEmptySCTList(ж<testing.T> Ꮡt) {
     serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, serverHelloBytes.slice(i + 4));
 
     // Update the handshake message length.
-    serverHelloEmptySCT[1] = (byte)(((len(serverHelloEmptySCT) - 4) >> (int)(16)));
-    serverHelloEmptySCT[2] = (byte)(((len(serverHelloEmptySCT) - 4) >> (int)(8)));
+    serverHelloEmptySCT[1] = (byte)((len(serverHelloEmptySCT) - 4) >> 16);
+    serverHelloEmptySCT[2] = (byte)((len(serverHelloEmptySCT) - 4) >> 8);
     serverHelloEmptySCT[3] = (byte)(len(serverHelloEmptySCT) - 4);
 
     // Update the extensions length
-    serverHelloEmptySCT[42] = (byte)(((len(serverHelloEmptySCT) - 44) >> (int)(8)));
+    serverHelloEmptySCT[42] = (byte)((len(serverHelloEmptySCT) - 44) >> 8);
     serverHelloEmptySCT[43] = (byte)(len(serverHelloEmptySCT) - 44);
 
     if (ᏑserverHelloCopy.unmarshal(serverHelloEmptySCT)) {

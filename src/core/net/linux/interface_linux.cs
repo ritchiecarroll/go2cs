@@ -96,7 +96,7 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
             }
         }
         else if (exprᴛ1 == syscall.IFLA_IFNAME) {
-            ifi.Value.Name = ((@string)(a.Value.slice(0, len(a.Value) - 1)));
+            ifi.Value.Name = (@string)(a.Value.slice(0, len(a.Value) - 1));
         }
         else if (exprᴛ1 == syscall.IFLA_MTU) {
             ifi.Value.MTU = (nint)(~Ꮡ(a.Value[..4], 0).Reinterpret<byte, uint32>());
@@ -107,22 +107,22 @@ internal static ж<Interface> newLink(ref syscall.IfInfomsg ifim, slice<syscall.
 
 internal static Flags linkFlags(uint32 rawFlags) {
     Flags f = default!;
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_UP) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_UP) != 0) {
         f |= (Flags)(FlagUp);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_RUNNING) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_RUNNING) != 0) {
         f |= (Flags)(FlagRunning);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_BROADCAST) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_BROADCAST) != 0) {
         f |= (Flags)(FlagBroadcast);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_LOOPBACK) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_LOOPBACK) != 0) {
         f |= (Flags)(FlagLoopback);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_POINTOPOINT) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_POINTOPOINT) != 0) {
         f |= (Flags)(FlagPointToPoint);
     }
-    if ((uint32)(rawFlags & (uint32)syscall.IFF_MULTICAST) != 0) {
+    if ((rawFlags & (uint32)syscall.IFF_MULTICAST) != 0) {
         f |= (Flags)(FlagMulticast);
     }
     return f;
@@ -253,7 +253,7 @@ internal static slice<ΔAddr> parseProcNetIGMP(@string path, ж<Interface> Ꮡif
                         (b[iΔ1 / 2], _) = xtoi2(f[0].slice(iΔ1, iΔ1 + 2), 0);
                     }
                     var i = ~Ꮡ(b[..4], 0).Reinterpret<byte, uint32>();
-                    var ifma = Ꮡ(new IPAddr(IP: IPv4((byte)((i >> (int)(24))), (byte)((i >> (int)(16))), (byte)((i >> (int)(8))), (byte)i)));
+                    var ifma = Ꮡ(new IPAddr(IP: IPv4((byte)(i >> 24), (byte)(i >> 16), (byte)(i >> 8), (byte)i)));
                     ifmat = append(ifmat, (ΔAddr)(new IPAddrжΔAddr(ifma)));
                 }
                 break;

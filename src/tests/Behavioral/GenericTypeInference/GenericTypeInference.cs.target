@@ -37,7 +37,7 @@ public static S Scale<S, E>(S s, E c)
 }
 
 public static void ScaleAndPrint(Point p) {
-    var r = Scale(p, (int32)(2));
+    var r = Scale(p, (int32)2);
     fmt.Println(r.String());
 }
 
@@ -155,17 +155,17 @@ internal static void Main() {
     Point p = default!;
     p = new int32[]{1, 2, 3}.slice();
     ScaleAndPrint(p);
-    fmt.Println(Twice(new Point(new int32[]{3, 4}.slice()), (int32)(2)).String());
+    fmt.Println(Twice(new Point(new int32[]{3, 4}.slice()), (int32)2).String());
     var (dst2, src2) = (new Point(new int32[]{0, 0, 0}.slice()), new Point(new int32[]{7, 8, 9}.slice()));
     var (lo, hi) = CopyClearMinMax<Point, int32>(dst2, src2);
     fmt.Println(dst2.String(), src2.String(), lo, hi);
     var q = new Point(new int32[]{1, 2, 3, 4}.slice());
     var total = SumHalves<Point, int32>(q);
     fmt.Println(q.String(), total);
-    var grown = AppendKeep(new Point(new int32[]{5, 6}.slice()), (int32)(7));
+    var grown = AppendKeep(new Point(new int32[]{5, 6}.slice()), (int32)7);
     fmt.Println(grown.String());
     var pt = new Point(new int32[]{1, 2}.slice());
-    PassSlice(pt, (int32)(42));
+    PassSlice(pt, (int32)42);
     fmt.Println(pt.String());
     var g1 = new Grades(new map<@string, nint>{["a"] = 1, ["b"] = 2});
     var g2 = new Grades(new map<@string, nint>{["a"] = 1, ["b"] = 2});
@@ -206,7 +206,7 @@ internal static U growShrink<U>(U v, U lim)
     while (v < lim) {
         v = v * ConvertToType<U>(2) + ConvertToType<U>(1);
     }
-    return ((v % lim) >> (int)(1));
+    return (v % lim) >> 1;
 }
 
 internal static Seq<T> seqOf<T, N>(N n)
@@ -230,7 +230,7 @@ internal static (nint, bool) bsearchLike<S, E>(S s, E v)
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = i + ((j - i) >> (int)(1));
+        nint h = i + ((j - i) >> 1);
         if (s[h] < v){
             i = h + 1;
         } else {
@@ -252,7 +252,7 @@ internal static Int halveN<Int>(Int n)
 internal static E halve<E>(E v)
     where E : /* ~uint16 | ~uint32 */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IIncrementOperators<E>, IDecrementOperators<E>, IUnaryNegationOperators<E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, int, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
-    return (v >> (int)(1));
+    return v >> 1;
 }
 
 } // end main_package

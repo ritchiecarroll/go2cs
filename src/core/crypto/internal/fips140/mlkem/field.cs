@@ -22,15 +22,15 @@ internal static (fieldElement, error) fieldCheckReduced(uint16 a) {
     if (a >= q) {
         return (0, errors.New(unreducedFieldElementˢ));
     }
-    return (((fieldElement)a), default!);
+    return ((fieldElement)a, default!);
 }
 
 // fieldReduceOnce reduces a value a < 2q.
 internal static fieldElement fieldReduceOnce(uint16 a) {
     var x = (uint16)(a - (uint16)q);
     // If x underflowed, then x >= 2¹⁶ - q > 2¹⁵, so the top bit is set.
-    x += (uint16)(((x >> (int)(15))) * (uint16)q);
-    return ((fieldElement)x);
+    x += (uint16)((x >> 15) * (uint16)q);
+    return (fieldElement)x;
 }
 
 internal static fieldElement fieldAdd(fieldElement a, fieldElement b) {
@@ -49,7 +49,7 @@ internal static UntypedInt barrettShift => 24; // log₂(2¹² * 2¹²)
 // fieldReduce reduces a value a < 2q² using Barrett reduction, to avoid
 // potentially variable-time division.
 internal static fieldElement fieldReduce(uint32 a) {
-    var quotient = (uint32)((((uint64)a * (uint64)barrettMultiplier) >> (int)(barrettShift)));
+    var quotient = (uint32)(((uint64)a * (uint64)barrettMultiplier) >> (int)(barrettShift));
     return fieldReduceOnce((uint16)(a - quotient * (uint32)q));
 }
 
@@ -81,7 +81,7 @@ internal static uint16 compress(fieldElement x, uint8 d) {
     // Barrett reduction produces a quotient and a remainder in the range [0, 2q),
     // such that dividend = quotient * q + remainder.
     var dividend = ((uint32)(uint16)x).Lsh((uint64)(d)); // x * 2ᵈ
-    var quotient = (uint32)(((uint64)dividend * (uint64)barrettMultiplier >> (int)(barrettShift)));
+    var quotient = (uint32)((uint64)dividend * (uint64)barrettMultiplier >> (int)(barrettShift));
     var remainder = dividend - quotient * (uint32)q;
 
     // Since the remainder is in the range [0, 2q), not [0, q), we need to
@@ -96,12 +96,12 @@ internal static uint16 compress(fieldElement x, uint8 d) {
     //
     // Note that if remainder > x, then ⌊x⌋ - remainder underflows, and the top
     // bit of the difference will be set.
-    quotient += (uint32)((((uint32)(q / 2) - remainder) >> (int)(31)) & 1);
-    quotient += (uint32)((((uint32)(q + q / 2) - remainder) >> (int)(31)) & 1);
+    quotient += (((uint32)(q / 2) - remainder) >> 31 & 1);
+    quotient += (((uint32)(q + q / 2) - remainder) >> 31 & 1);
 
     // quotient might have overflowed at this point, so reduce it by masking.
     uint32 mask = (((uint32)1).Lsh((uint64)(d))) - 1;
-    return (uint16)((uint32)(quotient & mask));
+    return (uint16)(quotient & mask);
 }
 
 // decompress maps a number x between 0 and 2ᵈ-1 uniformly to the full range of
@@ -115,10 +115,10 @@ internal static fieldElement decompress(uint16 y, uint8 d) {
     // The d'th least-significant bit of the dividend (the most significant bit
     // of the remainder) is 1 for the top half of the values that divide to the
     // same quotient, which are the ones that round up.
-    quotient += (uint32)(dividend.Rsh((uint64)((uint8)(d - 1))) & 1);
+    quotient += (dividend.Rsh((uint64)((uint8)(d - 1))) & 1);
 
     // quotient is at most (2¹¹-1) * q / 2¹¹ + 1 = 3328, so it didn't overflow.
-    return ((fieldElement)(uint16)quotient);
+    return (fieldElement)(uint16)quotient;
 }
 
 // ringElement is a polynomial, an element of R_q, represented as an array
@@ -158,10 +158,10 @@ internal static slice<byte> polyByteEncode<T>(slice<byte> b, T f)
 {
     var (@out, B) = sliceForAppend(b, encodingSize12);
     for (nint i = 0; i < n; i += 2) {
-        var x = (uint32)((uint32)(uint16)f[i] | ((uint32)(uint16)f[i + 1] << (int)(12)));
+        var x = (uint32)(uint16)f[i] | (uint32)(uint16)f[i + 1] << 12;
         B[0] = (uint8)x;
-        B[1] = (uint8)((x >> (int)(8)));
-        B[2] = (uint8)((x >> (int)(16)));
+        B[1] = (uint8)(x >> 8);
+        B[2] = (uint8)(x >> 16);
         B = B[3..];
     }
     return @out;
@@ -184,7 +184,7 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
     }
     T f = GoZero<T>();
     for (nint i = 0; i < n; i += 2) {
-        var d = (uint32)((uint32)((uint32)b[0] | ((uint32)b[1] << (int)(8))) | ((uint32)b[2] << (int)(16)));
+        var d = (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16;
         const uint32 mask12 = 0b1111_1111_1111;
         error err = default!;
         {
@@ -193,7 +193,7 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
             }
         }
         {
-            (f[i + 1], err) = fieldCheckReduced((uint16)((d >> (int)(12)))); if (err != default!) {
+            (f[i + 1], err) = fieldCheckReduced((uint16)(d >> 12)); if (err != default!) {
                 return (new T{}, errors.New(mlkemInvalidPolynomialˢ));
             }
         }
@@ -263,7 +263,7 @@ internal static slice<byte> ringCompressAndEncode4(slice<byte> s, ringElement f)
 
     (s, var b) = sliceForAppend(s, encodingSize4);
     for (nint i = 0; i < n; i += 2) {
-        b[i / 2] = (uint8)((uint16)(compress(f[i], 4) | (uint16)(compress(f[i + 1], 4) << (int)(4))));
+        b[i / 2] = (uint8)((uint16)(compress(f[i], 4) | (uint16)(compress(f[i + 1], 4) << 4)));
     }
     return s;
 }
@@ -277,7 +277,7 @@ internal static ringElement ringDecodeAndDecompress4(ref array<byte> b) {
     ringElement f = default!;
     for (nint i = 0; i < n; i += 2) {
         f[i] = decompress((uint16)((byte)(b[i / 2] & 0b1111)), 4);
-        f[i + 1] = decompress((uint16)((b[i / 2] >> (int)(4))), 4);
+        f[i + 1] = decompress((uint16)(b[i / 2] >> 4), 4);
     }
     return f.Clone();
 }
@@ -294,14 +294,14 @@ internal static slice<byte> ringCompressAndEncode10(slice<byte> s, ringElement f
     for (nint i = 0; i < n; i += 4) {
         uint64 x = default!;
         x |= (uint64)((uint64)compress(f[i], 10));
-        x |= (uint64)(((uint64)compress(f[i + 1], 10) << (int)(10)));
-        x |= (uint64)(((uint64)compress(f[i + 2], 10) << (int)(20)));
-        x |= (uint64)(((uint64)compress(f[i + 3], 10) << (int)(30)));
+        x |= (uint64)(((uint64)compress(f[i + 1], 10) << 10));
+        x |= (uint64)(((uint64)compress(f[i + 2], 10) << 20));
+        x |= (uint64)(((uint64)compress(f[i + 3], 10) << 30));
         b[0] = (uint8)x;
-        b[1] = (uint8)((x >> (int)(8)));
-        b[2] = (uint8)((x >> (int)(16)));
-        b[3] = (uint8)((x >> (int)(24)));
-        b[4] = (uint8)((x >> (int)(32)));
+        b[1] = (uint8)(x >> 8);
+        b[2] = (uint8)(x >> 16);
+        b[3] = (uint8)(x >> 24);
+        b[4] = (uint8)(x >> 32);
         b = b[5..];
     }
     return s;
@@ -318,12 +318,12 @@ internal static ringElement ringDecodeAndDecompress10(/*[320]*/ ж<array<byte>> 
     var b = bb[..];
     ringElement f = default!;
     for (nint i = 0; i < n; i += 4) {
-        var x = (uint64)((uint64)((uint64)((uint64)((uint64)b[0] | ((uint64)b[1] << (int)(8))) | ((uint64)b[2] << (int)(16))) | ((uint64)b[3] << (int)(24))) | ((uint64)b[4] << (int)(32)));
+        var x = (uint64)b[0] | (uint64)b[1] << 8 | (uint64)b[2] << 16 | (uint64)b[3] << 24 | (uint64)b[4] << 32;
         b = b[5..];
-        f[i] = decompress((uint16)((uint64)((x >> (int)(0)) & 0b11_1111_1111)), 10);
-        f[i + 1] = decompress((uint16)((uint64)((x >> (int)(10)) & 0b11_1111_1111)), 10);
-        f[i + 2] = decompress((uint16)((uint64)((x >> (int)(20)) & 0b11_1111_1111)), 10);
-        f[i + 3] = decompress((uint16)((uint64)((x >> (int)(30)) & 0b11_1111_1111)), 10);
+        f[i] = decompress((uint16)(x >> 0 & 0b11_1111_1111), 10);
+        f[i + 1] = decompress((uint16)(x >> 10 & 0b11_1111_1111), 10);
+        f[i + 2] = decompress((uint16)(x >> 20 & 0b11_1111_1111), 10);
+        f[i + 3] = decompress((uint16)(x >> 30 & 0b11_1111_1111), 10);
     }
     return f.Clone();
 }
@@ -449,10 +449,10 @@ internal static ringElement samplePolyCBD(slice<byte> s, byte b) {
     ringElement f = default!;
     for (nint i = 0; i < n; i += 2) {
         var bΔ1 = B[i / 2];
-        var (b_7, b_6, b_5, b_4) = ((byte)((bΔ1 >> (int)(7))), (byte)((bΔ1 >> (int)(6)) & 1), (byte)((bΔ1 >> (int)(5)) & 1), (byte)((bΔ1 >> (int)(4)) & 1));
-        var (b_3, b_2, b_1, b_0) = ((byte)((bΔ1 >> (int)(3)) & 1), (byte)((bΔ1 >> (int)(2)) & 1), (byte)((bΔ1 >> (int)(1)) & 1), (byte)(bΔ1 & 1));
-        f[i] = fieldSub(((fieldElement)(uint16)((byte)(b_0 + b_1))), ((fieldElement)(uint16)((byte)(b_2 + b_3))));
-        f[i + 1] = fieldSub(((fieldElement)(uint16)((byte)(b_4 + b_5))), ((fieldElement)(uint16)((byte)(b_6 + b_7))));
+        var (b_7, b_6, b_5, b_4) = ((byte)((bΔ1 >> 7)), (byte)(bΔ1 >> 6 & 1), (byte)(bΔ1 >> 5 & 1), (byte)(bΔ1 >> 4 & 1));
+        var (b_3, b_2, b_1, b_0) = ((byte)(bΔ1 >> 3 & 1), (byte)(bΔ1 >> 2 & 1), (byte)(bΔ1 >> 1 & 1), (byte)(bΔ1 & 1));
+        f[i] = fieldSub((fieldElement)(uint16)((byte)(b_0 + b_1)), (fieldElement)(uint16)((byte)(b_2 + b_3)));
+        f[i + 1] = fieldSub((fieldElement)(uint16)((byte)(b_4 + b_5)), (fieldElement)(uint16)((byte)(b_6 + b_7)));
     }
     return f.Clone();
 }
@@ -508,7 +508,7 @@ internal static nttElement ntt(ringElement f) {
             }
         }
     }
-    return ((nttElement)(array<fieldElement>)f);
+    return (nttElement)(array<fieldElement>)f;
 }
 
 // inverseNTT maps a nttElement back to the ringElement it represents.
@@ -534,7 +534,7 @@ internal static ringElement inverseNTT(nttElement f) {
     foreach (var (i, _) in f) {
         f[i] = fieldMul(f[i], 3303); // 3303 = 128⁻¹ mod q
     }
-    return ((ringElement)(array<fieldElement>)f);
+    return (ringElement)(array<fieldElement>)f;
 }
 
 // sampleNTT draws a uniformly random nttElement from a stream of uniformly
@@ -579,17 +579,17 @@ internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
             off = 0;
         }
         var d1 = (uint16)(byteorder.LEUint16(buf.slice(off)) & 0b1111_1111_1111);
-        var d2 = (uint16)((byteorder.LEUint16(buf.slice(off + 1)) >> (int)(4)));
+        var d2 = (uint16)((byteorder.LEUint16(buf.slice(off + 1)) >> 4));
         off += 3;
         if (d1 < q) {
-            a[j] = ((fieldElement)d1);
+            a[j] = (fieldElement)d1;
             j++;
         }
         if (j >= len(a)) {
             break;
         }
         if (d2 < q) {
-            a[j] = ((fieldElement)d2);
+            a[j] = (fieldElement)d2;
             j++;
         }
         if (j >= len(a)) {

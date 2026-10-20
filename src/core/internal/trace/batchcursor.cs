@@ -70,7 +70,7 @@ internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
 // be the case for every event in a plain EventBatch.
 internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref baseEvent e) {
     // Get the event type.
-    var typ = ((tracev2.EventType)b[0]);
+    var typ = (tracev2.EventType)b[0];
     var specs = tracev2.Specs();
     if ((nint)(uint8)typ >= len(specs)) {
         return (0, 0, fmt.Errorf("found invalid event type: %v"u8, typ));
@@ -100,7 +100,7 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
         e.args[i] = arg;
         n += nbΔ1;
     }
-    return (n, ((timestamp)ts), default!);
+    return (n, (timestamp)ts, default!);
 }
 
 internal static slice<ж<batchCursor>> heapInsert(slice<ж<batchCursor>> heap, ж<batchCursor> Ꮡbc) {

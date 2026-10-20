@@ -881,7 +881,7 @@ public static void TestIssue51093(ж<testing.T> Ꮡt) {
         }
 
         if (n != 1) {
-            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)(1));
+            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)1);
         }
     }
 }

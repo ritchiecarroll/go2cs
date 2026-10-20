@@ -221,12 +221,12 @@ public static void TestAuxMetaDataFiles(ж<testing.T> Ꮡt) {
 
     // Look for the expected things in the coverage profile.
     (var contents, err) = os.ReadFile(textfile);
-    @string strc = ((@string)contents);
+    @string strc = (@string)contents;
     if (err != default!) {
         Ꮡt.Fatalf("problems reading text file %s: %v"u8, textfile, err);
     }
     if (!strings.Contains(strc, token)) {
-        Ꮡt.Logf("content: %s\n"u8, ((@string)contents));
+        Ꮡt.Logf("content: %s\n"u8, (@string)contents);
         Ꮡt.Fatalf("cov profile does not contain aux meta content %q"u8, token);
     }
 }

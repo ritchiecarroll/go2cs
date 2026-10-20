@@ -24,9 +24,9 @@ internal static uint8 goXchg8(ж<uint8> Ꮡaddr, uint8 v) {
     while (ᐧ) {
         var old = addr32.Value; // Read the old 32-bit value
         // Clear the old 8 bits then insert the new value
-        if (Cas(addr32, old, (uint32)(((uint32)(old & ~mask)) | word))) {
+        if (Cas(addr32, old, (old & ~mask) | word)) {
             // Return the old 8-bit value
-            return (uint8)(((uint32)(old & mask)).Rsh((uint64)(shift)));
+            return (uint8)((old & mask).Rsh((uint64)(shift)));
         }
     }
 }

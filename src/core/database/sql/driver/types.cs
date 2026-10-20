@@ -82,7 +82,7 @@ public static (Value, error) ConvertValue(this boolType _, any src) {
         return (b, default!);
     }
     case slice<byte> s: {
-        var (b, err) = strconv.ParseBool(((@string)s));
+        var (b, err) = strconv.ParseBool((@string)s);
         if (err != default!) {
             return (default!, fmt.Errorf("sql/driver: couldn't convert %q into type bool"u8, s));
         }
@@ -297,7 +297,7 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     }
     if (exprᴛ1 == reflect.Uint64) {
         var u64 = rv.Uint();
-        if (u64 >= ((uint64)1 << (int)(63))) {
+        if (u64 >= (uint64)1 << 63) {
             return (default!, fmt.Errorf("uint64 values with high bit set are not supported"u8));
         }
         return ((int64)u64, default!);

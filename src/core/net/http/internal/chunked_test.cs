@@ -50,7 +50,7 @@ public static void TestChunk(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ReadAll from reader: %v"u8, err);
     }
     {
-        @string g = ((@string)data);
+        @string g = (@string)data;
         @string e = chunk1 + chunk2; if (g != e) {
             Ꮡt.Errorf("chunk reader read %q; want %q"u8, g, e);
         }
@@ -219,7 +219,7 @@ public static void TestChunkReadingIgnoresExtensions(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ReadAll = %q, %v"u8, data, err);
     }
     {
-        @string g = ((@string)data);
+        @string g = (@string)data;
         @string e = helloWorldˢ; if (g != e) {
             Ꮡt.Errorf("read %q; want %q"u8, g, e);
         }

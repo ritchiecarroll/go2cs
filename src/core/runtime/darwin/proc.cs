@@ -588,7 +588,7 @@ internal static void badmorestackg0() {
     var g = getg();
     var gʗ1 = g;
     switchToCrashStack(() => {
-        print((@string)"runtime: morestack on g0, stack ["u8, ((Δhex)(uint64)(~gʗ1).stack.lo), (@string)" "u8, ((Δhex)(uint64)(~gʗ1).stack.hi), (@string)"], sp="u8, ((Δhex)(uint64)(~gʗ1).sched.sp), (@string)", called from\n"u8);
+        print((@string)"runtime: morestack on g0, stack ["u8, (Δhex)(uint64)(~gʗ1).stack.lo, (@string)" "u8, (Δhex)(uint64)(~gʗ1).stack.hi, (@string)"], sp="u8, (Δhex)(uint64)(~gʗ1).sched.sp, (@string)", called from\n"u8);
         gʗ1.Value.m.Value.traceback = 2; // include pc and sp in stack trace
         traceback1((~gʗ1).sched.pc, (~gʗ1).sched.sp, (~gʗ1).sched.lr, gʗ1, 0);
         print((@string)"\n"u8);
@@ -1236,17 +1236,17 @@ internal static void casfrom_Gscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newv
     // Check that transition is valid.
     var exprᴛ1 = oldval;
     if (exprᴛ1 == _Gscanrunnable || exprᴛ1 == _Gscanwaiting || exprᴛ1 == _Gscanrunning || exprᴛ1 == _Gscansyscall || exprᴛ1 == _Gscanleaked || exprᴛ1 == _Gscanpreempted || exprᴛ1 == _Gscandeadextra) {
-        if (newval == (uint32)(oldval & ~(uint32)_Gscan)) {
+        if (newval == (oldval & ~(uint32)_Gscan)) {
             success = Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(oldval, newval);
         }
     }
     else { /* default: */
-        print((@string)"runtime: casfrom_Gscanstatus bad oldval gp="u8, Ꮡgp.OrTypedNil(), (@string)", oldval="u8, ((Δhex)(uint64)oldval), (@string)", newval="u8, ((Δhex)(uint64)newval), (@string)"\n"u8);
+        print((@string)"runtime: casfrom_Gscanstatus bad oldval gp="u8, Ꮡgp.OrTypedNil(), (@string)", oldval="u8, (Δhex)(uint64)oldval, (@string)", newval="u8, (Δhex)(uint64)newval, (@string)"\n"u8);
         dumpgstatus(Ꮡgp);
         @throw(casfromGscanstatusTopGpˢ);
     }
     if (!success) {
-        print((@string)"runtime: casfrom_Gscanstatus failed gp="u8, Ꮡgp.OrTypedNil(), (@string)", oldval="u8, ((Δhex)(uint64)oldval), (@string)", newval="u8, ((Δhex)(uint64)newval), (@string)"\n"u8);
+        print((@string)"runtime: casfrom_Gscanstatus failed gp="u8, Ꮡgp.OrTypedNil(), (@string)", oldval="u8, (Δhex)(uint64)oldval, (@string)", newval="u8, (Δhex)(uint64)newval, (@string)"\n"u8);
         dumpgstatus(Ꮡgp);
         @throw(casfromGscanstatusGpˢ);
     }
@@ -1261,7 +1261,7 @@ internal static readonly @string badOldvalPassedToˢ = "bad oldval passed to cas
 internal static bool castogscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     var exprᴛ1 = oldval;
     if (exprᴛ1 == _Grunnable || exprᴛ1 == _Grunning || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gleaked || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gdeadextra) {
-        if (newval == (uint32)(oldval | (uint32)_Gscan)) {
+        if (newval == (oldval | (uint32)_Gscan)) {
             var r = Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(oldval, newval);
             if (r) {
                 acquireLockRankAndM(lockRankGscan);
@@ -1269,7 +1269,7 @@ internal static bool castogscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval)
             return r;
         }
     }
-    print((@string)"runtime: castogscanstatus oldval="u8, ((Δhex)(uint64)oldval), (@string)" newval="u8, ((Δhex)(uint64)newval), (@string)"\n"u8);
+    print((@string)"runtime: castogscanstatus oldval="u8, (Δhex)(uint64)oldval, (@string)" newval="u8, (Δhex)(uint64)newval, (@string)"\n"u8);
     @throw(badOldvalPassedToˢ);
     return false;
 }
@@ -1292,11 +1292,11 @@ internal static readonly @string casgstatusWaitingForˢ = "casgstatus: waiting f
 internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
-    if (((uint32)(oldval & (uint32)_Gscan) != 0) || ((uint32)(newval & (uint32)_Gscan) != 0) || oldval == newval) {
+    if (((oldval & (uint32)_Gscan) != 0) || ((newval & (uint32)_Gscan) != 0) || oldval == newval) {
         systemstack(() => {
             // Call on the systemstack to prevent print and throw from counting
             // against the nosplit stack reservation.
-            print((@string)"runtime: casgstatus: oldval="u8, ((Δhex)(uint64)oldval), (@string)" newval="u8, ((Δhex)(uint64)newval), (@string)"\n"u8);
+            print((@string)"runtime: casgstatus: oldval="u8, (Δhex)(uint64)oldval, (@string)" newval="u8, (Δhex)(uint64)newval, (@string)"\n"u8);
             @throw(casgstatusBadIncomingˢ);
         });
     }
@@ -3319,7 +3319,7 @@ internal static void stoplockedm() {
     // Wait until another thread schedules lockedg again.
     mPark();
     var status = readgstatus((~(~gp).m).lockedg.ptr());
-    if ((uint32)(status & ~(uint32)_Gscan) != _Grunnable) {
+    if ((status & ~(uint32)_Gscan) != _Grunnable) {
         print((@string)"runtime:stoplockedm: lockedg (atomicstatus="u8, status, (@string)") is not Grunnable or Gscanrunnable\n"u8);
         dumpgstatus((~(~gp).m).lockedg.ptr());
         @throw(stoplockedmNotRunnableˢ);
@@ -4334,7 +4334,7 @@ internal static void goschedImpl(ж<g> Ꮡgp, bool preempted) {
     var pp = (~gp.m).p.ptr();
     var Δtrace = traceAcquire();
     var status = readgstatus(Ꮡgp);
-    if ((uint32)(status & ~(uint32)_Gscan) != _Grunning) {
+    if ((status & ~(uint32)_Gscan) != _Grunning) {
         dumpgstatus(Ꮡgp);
         @throw(badGStatusˢ);
     }
@@ -4401,7 +4401,7 @@ internal static void preemptPark(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var status = readgstatus(Ꮡgp);
-    if ((uint32)(status & ~(uint32)_Gscan) != _Grunning) {
+    if ((status & ~(uint32)_Gscan) != _Grunning) {
         dumpgstatus(Ꮡgp);
         @throw(badGStatusˢ);
     }
@@ -6024,7 +6024,7 @@ internal static ж<Δp> releasepNoTrace() {
     }
     var pp = (~(~gp).m).p.ptr();
     if ((~pp).m.ptr() != (~gp).m || (~pp).status != _Prunning) {
-        print((@string)"releasep: m="u8, (~gp).m.OrTypedNil(), (@string)" m->p="u8, (~(~gp).m).p.ptr().OrTypedNil(), (@string)" p->m="u8, ((Δhex)(uint64)(uintptr)(~pp).m), (@string)" p->status="u8, (~pp).status, (@string)"\n"u8);
+        print((@string)"releasep: m="u8, (~gp).m.OrTypedNil(), (@string)" m->p="u8, (~(~gp).m).p.ptr().OrTypedNil(), (@string)" p->m="u8, (Δhex)(uint64)(uintptr)(~pp).m, (@string)" p->status="u8, (~pp).status, (@string)"\n"u8);
         @throw(releasepInvalidPStateˢ);
     }
 
@@ -6102,7 +6102,7 @@ internal static void checkdead() {
             return;
         }
         var s = readgstatus(gp);
-        var exprᴛ1 = (uint32)(s & ~(uint32)_Gscan);
+        var exprᴛ1 = (s & ~(uint32)_Gscan);
         if (exprᴛ1 == _Gwaiting || exprᴛ1 == _Gpreempted) {
             grunning++;
         }
@@ -6475,7 +6475,7 @@ internal static (syscallingThread, bool) setBlockOnExitSyscall(ж<Δp> Ꮡpp) {
         // Nothing to do.
         return (new syscallingThread(nil), false);
     }
-    var status = (uint32)(readgstatus(gp) & ~(uint32)_Gscan);
+    var status = readgstatus(gp) & ~(uint32)_Gscan;
 
     // A goroutine is considered in a syscall, and may have a corresponding
     // P, if it's in _Gsyscall *or* _Gdeadextra. In the latter case, it's an
@@ -6484,13 +6484,13 @@ internal static (syscallingThread, bool) setBlockOnExitSyscall(ж<Δp> Ꮡpp) {
         // Not in a syscall, nothing to do.
         return (new syscallingThread(nil), false);
     }
-    if (!castogscanstatus(gp, status, (uint32)(status | (uint32)_Gscan))) {
+    if (!castogscanstatus(gp, status, status | (uint32)_Gscan)) {
         // Not in _Gsyscall or _Gdeadextra anymore. Nothing to do.
         return (new syscallingThread(nil), false);
     }
     if ((~gp).m != mp || (~(~gp).m).p.ptr() != Ꮡpp) {
         // This is not what we originally observed. Nothing to do.
-        casfrom_Gscanstatus(gp, (uint32)(status | (uint32)_Gscan), status);
+        casfrom_Gscanstatus(gp, status | (uint32)_Gscan, status);
         return (new syscallingThread(nil), false);
     }
     return (new syscallingThread(gp, mp, Ꮡpp, status), true);
@@ -6538,7 +6538,7 @@ internal static void releaseP(this syscallingThread s, uint32 state) {
 
 // resume allows a syscalling thread to advance beyond exitsyscall.
 internal static void resume(this syscallingThread s) {
-    casfrom_Gscanstatus(s.gp, (uint32)(s.status | (uint32)_Gscan), s.status);
+    casfrom_Gscanstatus(s.gp, s.status | (uint32)_Gscan, s.status);
 }
 
 // Tell all goroutines that they have been preempted and they should stop.
@@ -6578,7 +6578,7 @@ internal static bool preemptone(ref Δp pp) {
     if (gp == nil || gp == (~mp).g0) {
         return false;
     }
-    if ((uint32)(readgstatus(gp) & ~(uint32)_Gscan) == _Gsyscall) {
+    if ((readgstatus(gp) & ~(uint32)_Gscan) == _Gsyscall) {
         // Don't bother trying to preempt a goroutine in a syscall.
         return false;
     }
@@ -7032,8 +7032,8 @@ partial struct pMask /*[]uint32*/;
 // read returns true if P id's bit is set.
 internal static bool read(this pMask Δp, uint32 id) {
     var word = id / 32;
-    var mask = ((uint32)1 << (int)((id % 32)));
-    return ((uint32)(atomic.Load(Ꮡ(Δp, word)) & mask)) != 0;
+    var mask = (uint32)1 << (int)((id % 32));
+    return (atomic.Load(Ꮡ(Δp, word)) & mask) != 0;
 }
 
 // set sets P id's bit.
@@ -7399,7 +7399,7 @@ internal static uint32 runqgrab(ж<Δp> Ꮡpp, /*[256]*/ ж<array<Δguintptr>> �
                             {
                                 var mp = pp.m.ptr(); if (mp != nil) {
                                     {
-                                        var gp = mp.Value.curg; if (gp == nil || (uint32)(readgstatus(gp) & ~(uint32)_Gscan) != _Gsyscall) {
+                                        var gp = mp.Value.curg; if (gp == nil || (readgstatus(gp) & ~(uint32)_Gscan) != _Gsyscall) {
                                             // Sleep to ensure that pp isn't about to run the g
                                             // we are about to steal.
                                             // The important use case here is when the g running
@@ -7870,10 +7870,10 @@ internal static void doInit1(ж<initTask> Ꮡt) {
 
             array<byte> sbuf = new(24);
             print((@string)"init "u8, pkg, (@string)" @"u8);
-            print(((@string)fmtNSAsMS(sbuf[..], (uint64)(start - runtimeInitTime))), (@string)" ms, "u8);
-            print(((@string)fmtNSAsMS(sbuf[..], (uint64)(end - start))), (@string)" ms clock, "u8);
-            print(((@string)itoa(sbuf[..], after.bytes - before.bytes)), (@string)" bytes, "u8);
-            print(((@string)itoa(sbuf[..], after.allocs - before.allocs)), (@string)" allocs"u8);
+            print((@string)fmtNSAsMS(sbuf[..], (uint64)(start - runtimeInitTime)), (@string)" ms, "u8);
+            print((@string)fmtNSAsMS(sbuf[..], (uint64)(end - start)), (@string)" ms clock, "u8);
+            print((@string)itoa(sbuf[..], after.bytes - before.bytes), (@string)" bytes, "u8);
+            print((@string)itoa(sbuf[..], after.allocs - before.allocs), (@string)" allocs"u8);
             print((@string)"\n"u8);
         }
 

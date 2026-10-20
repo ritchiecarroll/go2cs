@@ -144,7 +144,7 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Error while reading from Reader: %v"u8, err);
     }
-    @string got = ((@string)gotBytes);
+    @string got = (@string)gotBytes;
     if (got != ((sstring)testMsg)) {
         Ꮡt.Errorf("Encoding and decoding changed the message, got:\n%s"u8, got);
     }

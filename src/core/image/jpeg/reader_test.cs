@@ -511,7 +511,7 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
             nerr++;
             continue;
         }
-        if (averageDelta(got, new image.ΔRGBAжImage(src)) > ((int64)2 << (int)(8))) {
+        if (averageDelta(got, new image.ΔRGBAжImage(src)) > (int64)2 << 8) {
             Ꮡt.Errorf("image #%d changed too much after a round trip"u8, i);
             nerr++;
             continue;

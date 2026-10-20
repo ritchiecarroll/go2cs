@@ -342,7 +342,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// extension (sameNameMethodCapture); an adapter (`new …`) is already a different type and binds
 			// the function.
 			if cast, ok := callContext.sameNameCaptureCasts[i]; ok && !strings.HasPrefix(resultExpr, "new ") {
-				resultExpr = fmt.Sprintf("(%s)(%s)", cast, resultExpr)
+				resultExpr = castOf(cast, resultExpr)
 			}
 		} else {
 			resultExpr = clonedElement(v.convExpr(expr, contexts))
@@ -417,7 +417,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 					if keyed {
 						resultExpr = fmt.Sprintf("%s: (%s)(%s)", label, castType, value)
 					} else {
-						resultExpr = fmt.Sprintf("(%s)(%s)", castType, value)
+						resultExpr = castOf(castType, value)
 					}
 				}
 			}
@@ -470,6 +470,12 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		}
 
 		arg := &strings.Builder{}
+
+		// A whole argument needs no parentheses of its own (parityOperatorEmission.go); a spread argument takes a
+		// member access below, which binds to its first token.
+		if !hasSpreadOperator || i != len(exprs)-1 {
+			resultExpr = v.unparenthesizedWholeExpression(expr, resultExpr)
+		}
 
 		arg.WriteString(resultExpr)
 

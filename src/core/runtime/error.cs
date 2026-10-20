@@ -125,7 +125,7 @@ internal static void RuntimeError(this plainError e) {
 }
 
 internal static @string Error(this plainError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 // A boundsError represents an indexing or slicing operation gone wrong.
@@ -206,7 +206,7 @@ internal static @string Error(this boundsError e) {
             break;
         }}
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 partial interface stringer {

@@ -361,7 +361,7 @@ internal static error UnmarshalBinary(this ref sum32 s, slice<byte> b) {
     if (len(b) != marshaledSize32) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
-    s = ((sum32)byteorder.BEUint32(b[4..]));
+    s = (sum32)byteorder.BEUint32(b[4..]);
     return default!;
 }
 
@@ -372,7 +372,7 @@ internal static error UnmarshalBinary(this ref sum32a s, slice<byte> b) {
     if (len(b) != marshaledSize32) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
-    s = ((sum32a)byteorder.BEUint32(b[4..]));
+    s = (sum32a)byteorder.BEUint32(b[4..]);
     return default!;
 }
 
@@ -383,7 +383,7 @@ internal static error UnmarshalBinary(this ref sum64 s, slice<byte> b) {
     if (len(b) != marshaledSize64) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
-    s = ((sum64)byteorder.BEUint64(b[4..]));
+    s = (sum64)byteorder.BEUint64(b[4..]);
     return default!;
 }
 
@@ -394,7 +394,7 @@ internal static error UnmarshalBinary(this ref sum64a s, slice<byte> b) {
     if (len(b) != marshaledSize64) {
         return errors.New(hashFnvInvalidHashStateˢ2);
     }
-    s = ((sum64a)byteorder.BEUint64(b[4..]));
+    s = (sum64a)byteorder.BEUint64(b[4..]);
     return default!;
 }
 
