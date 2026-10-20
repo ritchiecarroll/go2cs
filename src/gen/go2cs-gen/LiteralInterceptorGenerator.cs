@@ -56,7 +56,10 @@ namespace go2cs;
 /// <para>
 /// Only a converted file that holds a call with a bare string-literal argument reaches the transform: the syntax
 /// provider's predicate reads that from the syntax alone, and a predicate re-runs only for a changed tree, so a file
-/// with no candidate pays no semantic query on any edit. A file that has one re-binds its calls on every compilation
+/// with no candidate pays no semantic query on any edit. An assembly stamped <c>[GoHoistedLiterals]</c> (golib), which the
+/// converter writes for the standard library and under <c>-hoist-literals</c>, holds no bare literal in an <c>any</c>
+/// slot, so its candidates are dropped before the semantic step and it runs no transform at all; GO2CS0004 stays the net
+/// if a stamp were ever wrong. A file that has one re-binds its calls on every compilation
 /// change, as any semantic transform does (a probe with ForAttributeWithMetadataName measured the same re-run), and
 /// that is what lets GO2CS0006 see an overload added in another file. Each file still gets its own generated file,
 /// and only a file whose output changed is re-emitted. The cache class and the interceptor class are
@@ -72,12 +75,33 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
 {
     private const string GoTakesCSharpStringAttributeName = "go.GoTakesCSharpStringAttribute";
 
+    private const string GoHoistedLiteralsAttributeName = "go.GoHoistedLiteralsAttribute";
+
+    /// <summary>The tracking name of the semantic transform, which GenTests counts.</summary>
+    public const string TransformStepName = "LiteralInterceptorTransform";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // An assembly stamped [GoHoistedLiterals] (the standard library, or a package converted with -hoist-literals)
+        // passes no bare literal to an any slot, so none of its files reaches the semantic transform. The stamp is found
+        // through its attribute's syntax index, which re-runs only for a changed tree: reading it from the compilation's
+        // assembly attributes instead bound all of them on every edit (about 20 ms per edit on go/types, unstamped).
+        IncrementalValueProvider<bool> hoisted = context.SyntaxProvider.ForAttributeWithMetadataName(
+                GoHoistedLiteralsAttributeName,
+                static (node, _) => node is CompilationUnitSyntax,
+                static (_, _) => true)
+            .Collect()
+            .Select(static (stamps, _) => stamps.Length > 0);
+
         IncrementalValuesProvider<FileOutput> files = context.SyntaxProvider.CreateSyntaxProvider(
                 static (node, _) => IsTransformInput(node),
-                static (syntaxContext, cancellationToken) => Transform(syntaxContext.SemanticModel, (CompilationUnitSyntax)syntaxContext.Node, cancellationToken))
+                static (syntaxContext, _) => (CompilationUnitSyntax)syntaxContext.Node)
+            .Combine(hoisted)
+            .Where(static candidate => !candidate.Right)
+            .Select(static (candidate, _) => candidate.Left)
+            .Combine(context.CompilationProvider)
+            .Select(static (input, cancellationToken) => Transform(input.Right.GetSemanticModel(input.Left.SyntaxTree), input.Left, cancellationToken))
+            .WithTrackingName(TransformStepName)
             .Where(static output => output is not null)!;
 
         context.RegisterSourceOutput(files, static (productionContext, output) =>
