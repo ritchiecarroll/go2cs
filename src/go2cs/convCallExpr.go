@@ -3897,14 +3897,58 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// entirely type-driven, so dropping the traversal is free: it also removes the need to suppress
 	// capture-decl hoisting around the loop (the second conversion of a func-literal argument was
 	// what wrote its decls into the hoist buffer a second time).
-	for _, arg := range callExpr.Args {
-		argType := v.getType(arg, false)
-		argTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(argType, false))
+	//
+	// Each argument is compared with ITS OWN parameter, and the target is that parameter's type. The loop
+	// used to pass the callee's whole signature, which applyImplicitConversion read as Params().At(0), and
+	// the argument's own type name as the target: a pointer argument recorded a conversion to its own box
+	// (GoImplicitConv<U, ж<U>>, 255 in the corpus, every one skipped by go2cs-gen), and an unnamed struct
+	// passed where a named one is declared recorded nothing, so C# had no operator (CS1503;
+	// TestImplicitConversionsComparesEachArgumentWithItsOwnParameter, ImplicitConvArgumentParameter).
+	signature, _ := types.Unalias(funcType).(*types.Signature)
 
-		v.applyImplicitConversion(funcType, arg, argTypeName, "")
+	for i, arg := range callExpr.Args {
+		paramType := argumentParameterType(signature, i, callExpr.Ellipsis.IsValid())
+
+		if paramType == nil {
+			continue
+		}
+
+		v.applyImplicitConversion(paramType, arg, convertToCSTypeName(v.getAliasQualifiedTypeName(paramType, false)), "")
 	}
 
 	return result
+}
+
+// argumentParameterType is the type the i-th argument of a call to signature is passed as: its own
+// parameter's, or for a variadic tail the slice parameter itself when the call spreads a slice with `...`
+// and the slice's element type otherwise. Nil when there is no signature or no such parameter.
+func argumentParameterType(signature *types.Signature, i int, spread bool) types.Type {
+	if signature == nil {
+		return nil
+	}
+
+	params := signature.Params()
+	n := params.Len()
+
+	if signature.Variadic() && n > 0 && i >= n-1 {
+		last := params.At(n - 1).Type()
+
+		if spread {
+			return last
+		}
+
+		if slice, ok := last.Underlying().(*types.Slice); ok {
+			return slice.Elem()
+		}
+
+		return last
+	}
+
+	if i >= n {
+		return nil
+	}
+
+	return params.At(i).Type()
 }
 
 // identDeclaredFromMethodGroup reports whether ident resolves to a local whose `:=` declaration
@@ -3988,11 +4032,6 @@ func (v *Visitor) applyImplicitConversion(funcType types.Type, arg ast.Expr, tar
 	}
 
 	var targetTypeIsPointer bool
-
-	// Check if function type is a signature, i.e., an anonymous struct
-	if sigType, ok := funcType.(*types.Signature); ok && sigType.Params().Len() > 0 {
-		funcType = sigType.Params().At(0).Type()
-	}
 
 	// Check if function type is a struct or a pointer to a struct
 	if ptrType, ok := funcType.(*types.Pointer); ok {
