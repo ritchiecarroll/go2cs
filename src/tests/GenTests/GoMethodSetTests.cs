@@ -85,6 +85,40 @@ public class GoMethodSetTests
 
             public static object OuterBox() => Ꮡ(new Outer { Inner = new Inner { i = 4 } });
 
+            // Executed by the nil pins: each *T arm of a value method through a nil pointer, bound and unbound, and a
+            // promoted method value written after its bind. Go binds without a panic and panics at the call: panicwrap
+            // for the type's own method, the nil-pointer fault for a promoted one; the write is seen at the call.
+            public static string NilProbe()
+            {
+                IGoMethodSet plain = default(Plain);
+                IGoMethodSet outer = default(Outer);
+                ж<Plain>? nilPlain = null;
+                ж<Outer>? nilOuter = null;
+
+                static string at(Func<Delegate?> bind, Func<Delegate, nint> call)
+                {
+                    Delegate? arm;
+
+                    try { arm = bind(); }
+                    catch (PanicException ex) { return "bind: " + ex.Message; }
+
+                    try { return "no panic: " + call(arm!); }
+                    catch (PanicException ex) { return "call: " + ex.Message; }
+                }
+
+                ж<Outer> outerBox = Ꮡ(new Outer { Inner = new Inner { i = 4 } });
+                Func<nint> twice = (Func<nint>)outer.ᴛMethod("Twice", true, true, outerBox)!;
+                outerBox.Value.Inner.i = 5;
+
+                return string.Join(" | ",
+                    at(() => plain.ᴛMethod("Get", true, true, nilPlain), static arm => ((Func<nint>)arm)()),
+                    at(() => plain.ᴛMethod("Get", true, false, null), arm => ((Func<ж<Plain>, nint>)arm)(nilPlain!)),
+                    at(() => plain.ᴛMethod("Get", true, true, ж<Plain>.NilBox), static arm => ((Func<nint>)arm)()),
+                    at(() => outer.ᴛMethod("Twice", true, true, nilOuter), static arm => ((Func<nint>)arm)()),
+                    at(() => outer.ᴛMethod("Twice", true, false, null), arm => ((Func<ж<Outer>, nint>)arm)(nilOuter!)),
+                    twice().ToString());
+            }
+
             // Executed by the test: each arm, as reflect asks for it.
             public static string Probe()
             {
@@ -94,7 +128,7 @@ public class GoMethodSetTests
                 nint unboundT = ((Func<Plain, nint>)plain.ᴛMethod("Get", false, false, null)!)(new Plain { n = 1 });
                 nint unboundP = ((Func<ж<Plain>, nint>)plain.ᴛMethod("Get", true, false, null)!)(box);
 
-                // A method value through *T copies the pointee at the bind (Go's rule): a later Set does not reach it.
+                // A method value through *T reads the pointee at each call, as Go's reflect does: a later Set reaches it.
                 Func<nint> boundP = (Func<nint>)plain.ᴛMethod("Get", true, true, box)!;
                 ((Action<ж<Plain>, nint>)plain.ᴛMethod("Set", true, false, null)!)(box, 4);
                 Action<nint> set = (Action<nint>)plain.ᴛMethod("Set", true, true, box)!;
@@ -206,11 +240,11 @@ public class GoMethodSetTests
 
         System.Reflection.MethodInfo probe = Assembly.Load(image.ToArray()).GetType("go.mtest_package", throwOnError: true)!.GetMethod("Probe")!;
 
-        // unbound over T and *T; the *T method value read 3 at its bind; Set through the unbound func then the bound one;
+        // unbound over T and *T; the *T method value reads 5 at its call, after both Sets; Set through the unbound func then the bound one;
         // the generic pair; no arm for a pointer method through T, an unexported method, or Swap through T; the variadic
         // tail unbound (1+2) and bound to the box (5+0); 16 parameters unbound (200+1+16) and bound (300+1+16); Outer's
         // promoted Twice through T (10), Bump through *T then Twice through *T (5*2), Inner.i now 5, and no Bump through T.
-        Assert.AreEqual("1 3 3 5 z=26 26 7 True True True 3 5 217 317 10 10 5 True", probe.Invoke(null, null));
+        Assert.AreEqual("1 3 5 5 z=26 26 7 True True True 3 5 217 317 10 10 5 True", probe.Invoke(null, null));
     }
 
     // golib takes a bound arm only when its delegate is of the type golib's binder builds (GoReflect.GoMethodValueType), so
@@ -273,4 +307,25 @@ public class GoMethodSetTests
     }
 
     private static Type Box(Type element) => typeof(golib::go.ж<>).MakeGenericType(element);
+
+    // Go's reflect holds the pointer in a method value through *T and reads the pointee when it is called (checked
+    // against Go 1.26.10): a nil *T binds, then panics at the call with panicwrap's text for the type's own method and
+    // the nil-pointer fault for a promoted one, bound or unbound; a write after the bind is seen at the call.
+    [TestMethod]
+    public void ANilPointerPanicsAtTheCallWithGosText()
+    {
+        (_, Diagnostic[] errors, Compilation output) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package compiles: " + string.Join("; ", errors.Take(3)));
+
+        using MemoryStream image = new();
+        Assert.IsTrue(output.Emit(image).Success, "the package emits an assembly");
+
+        System.Reflection.MethodInfo probe = Assembly.Load(image.ToArray()).GetType("go.mtest_package", throwOnError: true)!.GetMethod("NilProbe")!;
+
+        const string panicwrap = "call: value method mtest.Plain.Get called using nil *Plain pointer";
+        const string fault = "call: runtime error: invalid memory address or nil pointer dereference";
+
+        Assert.AreEqual($"{panicwrap} | {panicwrap} | {panicwrap} | {fault} | {fault} | 10", probe.Invoke(null, null));
+    }
 }

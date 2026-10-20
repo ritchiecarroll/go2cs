@@ -3,6 +3,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using static go.builtin;
 
 namespace GolibTests;
 
@@ -50,4 +51,78 @@ public static class armguard_package
     }
 
     public static nint Get(this Skewed s) => s.n;
+}
+
+// golib's binder, the route for a method no generated arm answers, reads a value method's pointee through *T at each
+// call, as Go's reflect does (checked against Go 1.26.10): a write after the bind is seen, and a nil *T binds and then
+// panics at the call, with panicwrap's text for the type's own method and the nil-pointer fault for a promoted one.
+[TestClass]
+public class MethodValuePointeeTests
+{
+    private const string Panicwrap = "value method nilrecv.Cell.Get called using nil *Cell pointer";
+    private const string Fault = "runtime error: invalid memory address or nil pointer dereference";
+
+    private static int Index(Type t, string name) => GoReflect.GoMethodIndex(t, name);
+
+    [TestMethod]
+    public void AWriteAfterTheBindIsSeenAtTheCall()
+    {
+        ж<nilrecv_package.Cell> box = Ꮡ(new nilrecv_package.Cell { n = 3 });
+        Func<nint> get = (Func<nint>)GoReflect.GoMethodValue(typeof(ж<nilrecv_package.Cell>), Index(typeof(ж<nilrecv_package.Cell>), "Get"), box);
+
+        ж<nilrecv_package.Outer> outer = Ꮡ(new nilrecv_package.Outer { Inner = new nilrecv_package.Inner { i = 4 } });
+        Func<nint> twice = (Func<nint>)GoReflect.GoMethodValue(typeof(ж<nilrecv_package.Outer>), Index(typeof(ж<nilrecv_package.Outer>), "Twice"), outer);
+
+        box.Value.n = 5;
+        outer.Value.Inner.i = 5;
+
+        Assert.AreEqual((nint)5, get());
+        Assert.AreEqual((nint)10, twice());
+    }
+
+    [TestMethod]
+    public void ANilPointerBindsAndPanicsAtTheCallWithGosText()
+    {
+        Type cell = typeof(ж<nilrecv_package.Cell>);
+        Type outer = typeof(ж<nilrecv_package.Outer>);
+
+        Assert.AreEqual(Panicwrap, CallMessage(() => GoReflect.GoMethodValue(cell, Index(cell, "Get"), null), static d => ((Func<nint>)d)()), "bound, null");
+        Assert.AreEqual(Panicwrap, CallMessage(() => GoReflect.GoMethodValue(cell, Index(cell, "Get"), global::go.ж<nilrecv_package.Cell>.NilBox), static d => ((Func<nint>)d)()), "bound, nil box");
+        Assert.AreEqual(Panicwrap, CallMessage(() => GoReflect.GoMethodFunc(cell, Index(cell, "Get"))!, static d => ((Func<ж<nilrecv_package.Cell>, nint>)d)(null!)), "unbound");
+        Assert.AreEqual(Fault, CallMessage(() => GoReflect.GoMethodValue(outer, Index(outer, "Twice"), null), static d => ((Func<nint>)d)()), "promoted, bound");
+        Assert.AreEqual(Fault, CallMessage(() => GoReflect.GoMethodFunc(outer, Index(outer, "Twice"))!, static d => ((Func<ж<nilrecv_package.Outer>, nint>)d)(null!)), "promoted, unbound");
+    }
+
+    // The panic's message when the bind succeeds and the call panics; anything else is named.
+    private static string CallMessage(Func<Delegate> bind, Func<Delegate, nint> call)
+    {
+        Delegate bound;
+
+        try { bound = bind(); }
+        catch (Exception ex) { return "bind threw " + ex.GetType().Name + ": " + ex.Message; }
+
+        try { return "no panic: " + call(bound); }
+        catch (PanicException ex) { return ex.Message; }
+        catch (Exception ex) { return "call threw " + ex.GetType().Name + ": " + ex.Message; }
+    }
+}
+
+public static class nilrecv_package
+{
+    public struct Cell { public nint n; }
+
+    public struct Inner { public nint i; }
+
+    // Outer promotes Inner's Twice through the forwarder go2cs-gen writes.
+    public struct Outer
+    {
+        [GoEmbedded] public Inner Inner;
+        public nint o;
+    }
+
+    public static nint Get(this Cell c) => c.n;
+
+    public static nint Twice(this Inner x) => x.i * 2;
+
+    public static nint Twice(this Outer target) => target.Inner.Twice();
 }
