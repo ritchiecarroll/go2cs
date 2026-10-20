@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `internal/godebug` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-02 · converter `2acbc7144`*
+*Validated 2026-10-20 · converter `56e3e1164`*
 
-**5 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**6 matched · 0 disclosed** — Go 1.26.10, `linux/amd64`, converted package
 [`src/core/internal/godebug`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/godebug).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 linux/amd64`, with no controlling terminal.
 
 Both runtimes skip 1 of the matched tests identically.
 
@@ -22,5 +22,6 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestBisectTestCase` | pass | pass |
 | `TestCmdBisect` | pass | pass |
 | `TestGet` | pass | pass |
+| `TestImmutable` | pass | pass |
 | `TestMetrics` | pass | pass |
 | `TestPanicNilRace` | skip | skip |
