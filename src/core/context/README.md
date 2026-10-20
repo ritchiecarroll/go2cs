@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-57_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/context.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/context@go1.26.9)\
-[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/context) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/context)
+[![Tests](https://img.shields.io/badge/Tests-57_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/context.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/context@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/context) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/context)
 
 From C#, call this package through the static class go.context_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -25,7 +25,7 @@ Do not store Contexts inside a struct type; instead, pass a Context explicitly t
 		// ... use ctx ...
 	}
 
-Do not pass a nil \[Context], even if a function permits it. Pass [context.TODO](https://pkg.go.dev/context@go1.26.9#TODO) if you are unsure about which Context to use.
+Do not pass a nil \[Context], even if a function permits it. Pass [context.TODO](https://pkg.go.dev/context@go1.26.10#TODO) if you are unsure about which Context to use.
 
 Use context Values only for request-scoped data that transits processes and APIs, not for passing optional parameters to functions.
 
