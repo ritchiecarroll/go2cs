@@ -223,25 +223,37 @@ func resolveEmissionStageDir(stageDir string, rootPath string) (string, func(), 
 	return resolved, func() { os.RemoveAll(resolved) }, reclaimed, nil
 }
 
-// lockEmissionStage creates the stage's lock file holding this process's ID. A lock left by a process
-// that is no longer running is stale and is replaced; a lock held by a live process refuses the run.
+// lockEmissionStage takes the stage's lock: a file holding this process's ID. The ID is written into a
+// file of this run's own first and that file is then linked into place, so the lock appears whole or
+// not at all, and a link refuses to replace a lock another run already holds. A lock naming a process
+// that is no longer running is stale and is replaced. A lock naming a live process refuses the run,
+// and so does one that names no process at all: no run ever presents an empty lock, so that is not
+// evidence of a stale one. A known limit: two runs that start together over a dead run's lock can both
+// judge it stale, and the later one's remove can take the lock the earlier one has just linked.
 func lockEmissionStage(stageDir string) error {
 	lockPath := filepath.Join(stageDir, emissionStageLockName)
+	pending, err := os.CreateTemp(stageDir, emissionStageLockName+".*")
+
+	if err != nil {
+		return fmt.Errorf("failed to create staging lock in %q: %w", stageDir, err)
+	}
+
+	defer os.Remove(pending.Name())
+
+	_, err = fmt.Fprintf(pending, "%d\n", os.Getpid())
+
+	if closeErr := pending.Close(); err == nil {
+		err = closeErr
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to write staging lock %q: %w", pending.Name(), err)
+	}
 
 	for attempt := 0; ; attempt++ {
-		lock, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
+		err := os.Link(pending.Name(), lockPath)
 
 		if err == nil {
-			_, err = fmt.Fprintf(lock, "%d\n", os.Getpid())
-
-			if closeErr := lock.Close(); err == nil {
-				err = closeErr
-			}
-
-			if err != nil {
-				return fmt.Errorf("failed to write staging lock %q: %w", lockPath, err)
-			}
-
 			return nil
 		}
 
@@ -249,7 +261,19 @@ func lockEmissionStage(stageDir string) error {
 			return fmt.Errorf("failed to create staging lock %q: %w", lockPath, err)
 		}
 
-		if holder := readStageLockHolder(lockPath); holder > 0 && processIsRunning(holder) {
+		holder := readStageLockHolder(lockPath)
+
+		if holder == 0 {
+			if _, err := os.Lstat(lockPath); errors.Is(err, fs.ErrNotExist) {
+				continue // its holder released it between the link and the read
+			}
+
+			return fmt.Errorf("staging directory %q has a lock (%s) that names no process, so it may belong to a live run: "+
+				"two emissions into one output root are never run at once; if no go2cs run is using it, remove the directory",
+				stageDir, emissionStageLockName)
+		}
+
+		if processIsRunning(holder) {
 			return fmt.Errorf("staging directory %q is held by running process %d (%s): two emissions into one output root "+
 				"are never run at once; wait for that run to finish, or, if that process is not a go2cs run, remove the directory",
 				stageDir, holder, emissionStageLockName)
@@ -261,7 +285,8 @@ func lockEmissionStage(stageDir string) error {
 	}
 }
 
-// readStageLockHolder reads the process ID a staging lock holds, or 0 when it holds none.
+// readStageLockHolder reads the process ID a staging lock holds, or 0 when it holds none: the lock is
+// missing, empty, or not a process ID.
 func readStageLockHolder(lockPath string) int {
 	content, err := os.ReadFile(lockPath)
 
@@ -271,7 +296,7 @@ func readStageLockHolder(lockPath string) int {
 
 	pid, err := strconv.Atoi(strings.TrimSpace(string(content)))
 
-	if err != nil {
+	if err != nil || pid <= 0 {
 		return 0
 	}
 
@@ -280,7 +305,9 @@ func readStageLockHolder(lockPath string) int {
 
 // processIsRunning reports whether a process with the given ID is running. On Windows FindProcess
 // opens the process and fails when there is none; elsewhere it always succeeds, and signal 0 asks
-// without signalling (EPERM means the process exists under another user).
+// without signalling (EPERM means the process exists under another user). A known limit, which fails
+// closed: Windows reuses process IDs, so a stale lock whose ID now belongs to an unrelated process
+// reads as live and the run refuses rather than proceeding; removing the directory clears it.
 func processIsRunning(pid int) bool {
 	process, err := os.FindProcess(pid)
 

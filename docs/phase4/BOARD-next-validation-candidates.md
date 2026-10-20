@@ -27523,4 +27523,6 @@ at 5530cc85f4.
 
 — P2 (found and fixed 2026-10-20)
 
+**Amended 2026-10-20 (G's review):** the first cut created `owner.pid` with `O_EXCL` and wrote the PID after, so a second run arriving in that window read an empty lock as stale, replaced it, and ran beside the first (fail-open against safety floor 1). The PID is now written into a file of the run's own and linked into place with `os.Link`, which fails with `ErrExist` while any lock is present, so a lock appears whole or not at all. A lock that names no process now refuses the run. Pin: `TestEmissionStageRefusesWhenItsLockHoldsNoProcessID` (empty and unparseable), red 2 of 2 at cef77053d3. Named limits, both stated in the code: on Windows a recycled PID reads as live, so the run refuses (fail-closed); and two runs that start together over a dead run's lock can each judge it stale, so the second can remove the first's fresh lock. That window is the time between one run's read and its remove.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

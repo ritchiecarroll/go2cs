@@ -107,6 +107,11 @@ func TestEmissionStageReclaimsALeftoverAtStart(t *testing.T) {
 	if holder := readStageLockHolder(filepath.Join(stageDir, "owner.pid")); holder != os.Getpid() {
 		t.Fatalf("staging lock holds %d, want this run's %d", holder, os.Getpid())
 	}
+
+	// The file the lock was written into before it was linked into place is gone again.
+	if entries, err := os.ReadDir(stageDir); err != nil || len(entries) != 1 {
+		t.Fatalf("staging directory holds %v (%v), want only owner.pid", entries, err)
+	}
 }
 
 // A stage whose lock names a live process is never emptied: the run refuses, naming the holder.
@@ -131,6 +136,39 @@ func TestEmissionStageRefusesWhenALiveRunHoldsIt(t *testing.T) {
 
 	if content, err := os.ReadFile(inFlight); err != nil || string(content) != "a live run's output" {
 		t.Fatalf("the refusal touched the live run's staged file (%q, %v)", content, err)
+	}
+}
+
+// A lock that holds no process ID refuses the run as a live one does. go2cs writes the ID into a file
+// of its own and links that file into place, so no run ever shows another an empty lock; an empty or
+// unreadable one is therefore not evidence of a stale run, and taking it would risk two runs in one
+// output root (CLAUDE.md safety floor 1). Removing the directory by hand clears it.
+func TestEmissionStageRefusesWhenItsLockHoldsNoProcessID(t *testing.T) {
+	for name, content := range map[string]string{"empty": "", "unparseable": "not a process id\n"} {
+		t.Run(name, func(t *testing.T) {
+			root := t.TempDir()
+			stageDir := filepath.Join(root, ".go2cs-platform-stage")
+			lockPath := filepath.Join(stageDir, "owner.pid")
+			inFlight := filepath.Join(stageDir, "windows-amd64", "src", "core", "fmt", "print.cs")
+
+			plantStageFile(t, lockPath, content)
+			plantStageFile(t, inFlight, "a live run's output")
+
+			_, release, _, err := resolveEmissionStageDir("", root)
+
+			if err == nil {
+				release()
+				t.Fatalf("resolveEmissionStageDir took a staging directory whose lock holds %q", content)
+			}
+
+			if lock, err := os.ReadFile(lockPath); err != nil || string(lock) != content {
+				t.Fatalf("the refusal replaced the lock (%q, %v), want %q left in place", lock, err, content)
+			}
+
+			if staged, err := os.ReadFile(inFlight); err != nil || string(staged) != "a live run's output" {
+				t.Fatalf("the refusal touched the staged file (%q, %v)", staged, err)
+			}
+		})
 	}
 }
 
