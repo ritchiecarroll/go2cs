@@ -3,7 +3,7 @@
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@v0.32.0-00ADD8?logo=go)](https://pkg.go.dev/golang.org/x/text@v0.32.0/unicode/norm)\
-[![Source](https://img.shields.io/badge/Source-@v0.32.0-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/vendor/golang.org/x/text/unicode/norm) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/vendor/golang.org/x/text/unicode/norm)
+[![Source](https://img.shields.io/badge/Source-@v0.32.0-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/vendor/golang.org/x/text/unicode/norm) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/vendor/golang.org/x/text/unicode/norm)
 
 From C#, call this package through the static class go.vendor.golang.org.x.text.unicode.norm_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
