@@ -484,11 +484,11 @@ internal static void setSignalstackSP(ж<stackt> Ꮡs, uintptr sp) {
 //go:nosplit
 //go:nowritebarrierrec
 internal static void sigaddset(ref sigset mask, nint i) {
-    mask |= (sigset)((sigset)((uint32)1 << (int)(((uint32)i - 1))));
+    mask |= (sigset)((sigset)((uint32)1 << (int)((uint32)i - 1)));
 }
 
 internal static void sigdelset(ref sigset mask, nint i) {
-    mask &= unchecked((sigset)~(sigset)((sigset)((uint32)1 << (int)(((uint32)i - 1)))));
+    mask &= unchecked((sigset)~(sigset)((sigset)((uint32)1 << (int)((uint32)i - 1))));
 }
 
 // go2cs generated this placeholder — func setProcessCPUProfiler is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

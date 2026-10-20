@@ -694,7 +694,7 @@ internal static (ж<heapArena> arena, uintptr pageIdx, uint8 pageMask) pageIndex
     arenaIdx ai = arenaIndex(Δp);
     arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
     pageIdx = ((Δp / (uintptr)pageSize) / 8) % (uintptr)len((~arena).pageInUse);
-    pageMask = (byte)((byte)(1 << (int)(((Δp / (uintptr)pageSize) % 8))));
+    pageMask = (byte)((byte)(1 << (int)((Δp / (uintptr)pageSize) % 8)));
     return (arena, pageIdx, pageMask);
 }
 
@@ -1737,11 +1737,11 @@ internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAll
 
         // Clear in-use bit in arena page bitmap.
         var (arena, pageIdx, pageMask) = pageIndexOf(s.@base());
-        atomic.And8(arena.at(heapArena.ᏑpageInUse, (ulong)(pageIdx)), (uint8)(((uint8)(~pageMask))));
+        atomic.And8(arena.at(heapArena.ᏑpageInUse, (ulong)(pageIdx)), (uint8)((uint8)(~pageMask)));
 
         // Clear small heap span bit if necessary.
         if (gcUsesSpanInlineMarkBits(s.elemsize)) {
-            atomic.And8(arena.at(heapArena.ᏑpageUseSpanInlineMarkBits, (ulong)(pageIdx)), (uint8)(((uint8)(~pageMask))));
+            atomic.And8(arena.at(heapArena.ᏑpageUseSpanInlineMarkBits, (ulong)(pageIdx)), (uint8)((uint8)(~pageMask)));
         }
     }
     else { /* default: */
@@ -2001,7 +2001,7 @@ internal static void spanHasSpecials(ж<mspan> Ꮡs) {
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
     var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
-    atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)1 << (int)((arenaPage % 8))));
+    atomic.Or8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)1 << (int)(arenaPage % 8)));
 }
 
 // spanHasNoSpecials marks a span as having no specials in the arena bitmap.
@@ -2011,7 +2011,7 @@ internal static void spanHasNoSpecials(ж<mspan> Ꮡs) {
     var arenaPage = (s.@base() / (uintptr)pageSize) % (uintptr)pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
     var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
-    atomic.And8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)(((uint8)(~((uint8)((uint8)1 << (int)((arenaPage % 8))))))));
+    atomic.And8(ha.at(heapArena.ᏑpageSpecials, (ulong)(arenaPage / 8)), (uint8)((uint8)(~((uint8)((uint8)1 << (int)(arenaPage % 8))))));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2743,7 +2743,7 @@ internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡta
         if (n.ptr == Δp) {
             return n.handle();
         }
-        m = n.at(immortalWeakHandle.Ꮡchildren, (ulong)((hashIter >> (int)((8 * goarch.PtrSize - 1)))));
+        m = n.at(immortalWeakHandle.Ꮡchildren, (ulong)((hashIter >> (int)(8 * goarch.PtrSize - 1))));
         hashIter <<= (int)(1);
     }
 }
@@ -2936,7 +2936,7 @@ internal static ж<uint8> bytep(this ж<gcBits> Ꮡb, uintptr n) {
 // bitp returns a pointer to the byte containing bit n and a mask for
 // selecting that bit from *bytep.
 internal static (ж<uint8> bytep, uint8 mask) bitp(this ж<gcBits> Ꮡb, uintptr n) {
-    return (Ꮡb.bytep(n / 8), (uint8)(1 << (int)((n % 8))));
+    return (Ꮡb.bytep(n / 8), (uint8)(1 << (int)(n % 8)));
 }
 
 internal static uintptr gcBitsChunkBytes => /* uintptr(64 << 10) */ 65536;

@@ -141,9 +141,11 @@ func (v *Visitor) bitwiseOperandIsT(operand ast.Expr, basic *types.Basic, csType
 var unsignedLiteral = regexp.MustCompile(`^(?:(?:0[xX][0-9A-Fa-f_]+|0[bB][01_]+|\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?)[uUlLfFdDmM]{0,2}|'(?:[^'\\]|\\.[^']*)')$`)
 
 // castOf renders the cast of a rendered expression to csType: `(T)500` for an unsigned literal, as Go writes
-// `T(500)`, and `(T)(expr)` for anything else.
+// `T(500)`; `(T)(expr)` for an expression already rendered as ONE parenthesized expression, which keeps its own
+// pair rather than taking a second (`(int)(c[3] & 63)` for Go's `u >> (c[3] & 63)`, where the pair is Go's own); and
+// `(T)(expr)` around anything else. C# reads `(T)` before a parenthesized expression as a cast for every type T.
 func castOf(csType, rendered string) string {
-	if unsignedLiteral.MatchString(rendered) {
+	if unsignedLiteral.MatchString(rendered) || wrappedWhole(rendered) {
 		return "(" + csType + ")" + rendered
 	}
 

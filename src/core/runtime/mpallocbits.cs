@@ -14,7 +14,7 @@ partial struct pageBits /*[8]uint64*/;
 
 // get returns the value of the i'th bit in the bitmap.
 internal static nuint get(this ref pageBits b, nuint i) {
-    return (nuint)((b.Value[i / 64] >> (int)((i % 64))) & 1);
+    return (nuint)((b.Value[i / 64] >> (int)(i % 64)) & 1);
 }
 
 // block64 returns the 64-bit aligned block of bits containing the i'th bit.
@@ -24,7 +24,7 @@ internal static uint64 block64(this ref pageBits b, nuint i) {
 
 // set sets bit i of pageBits.
 internal static void set(this ref pageBits b, nuint i) {
-    b.Value[i / 64] |= (uint64)(((uint64)1 << (int)((i % 64))));
+    b.Value[i / 64] |= (uint64)(((uint64)1 << (int)(i % 64)));
 }
 
 // setRange sets bits in the range [i, i+n).
@@ -38,12 +38,12 @@ internal static void setRange(this ref pageBits b, nuint i, nuint n) {
     // Set bits [i, j].
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        b.Value[i / 64] |= (uint64)((((((uint64)1).Lsh(n)) - 1) << (int)((i % 64))));
+        b.Value[i / 64] |= (uint64)((((((uint64)1).Lsh(n)) - 1) << (int)(i % 64)));
         return;
     }
     _ = b.Value[j / 64];
     // Set leading bits.
-    b.Value[i / 64] |= (uint64)((~(uint64)0 << (int)((i % 64))));
+    b.Value[i / 64] |= (uint64)((~(uint64)0 << (int)(i % 64)));
     for (nuint k = i / 64 + 1; k < j / 64; k++) {
         b.Value[k] = ~(uint64)0;
     }
@@ -66,7 +66,7 @@ internal static void setBlock64(this ref pageBits b, nuint i, uint64 v) {
 
 // clear clears bit i of pageBits.
 internal static void clear(this ref pageBits b, nuint i) {
-    b.Value[i / 64] &= unchecked((uint64)~(uint64)(((uint64)1 << (int)((i % 64)))));
+    b.Value[i / 64] &= unchecked((uint64)~(uint64)(((uint64)1 << (int)(i % 64))));
 }
 
 // clearRange clears bits in the range [i, i+n).
@@ -80,12 +80,12 @@ internal static void clearRange(this ref pageBits b, nuint i, nuint n) {
     // Clear bits [i, j].
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        b.Value[i / 64] &= unchecked((uint64)~(uint64)((((((uint64)1).Lsh(n)) - 1) << (int)((i % 64)))));
+        b.Value[i / 64] &= unchecked((uint64)~(uint64)((((((uint64)1).Lsh(n)) - 1) << (int)(i % 64))));
         return;
     }
     _ = b.Value[j / 64];
     // Clear leading bits.
-    b.Value[i / 64] &= unchecked((uint64)~(uint64)((~(uint64)0 << (int)((i % 64)))));
+    b.Value[i / 64] &= unchecked((uint64)~(uint64)((~(uint64)0 << (int)(i % 64))));
     builtin.clear(b.Value.slice((nint)(i / 64 + 1), (nint)(j / 64)));
     // Clear trailing bits.
     b.Value[j / 64] &= unchecked((uint64)~(uint64)((((uint64)1).Lsh((j % 64 + 1))) - 1));
@@ -108,15 +108,15 @@ internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) {
     nuint s = default!;
 
     if (n == 1) {
-        return (nuint)((b.Value[i / 64] >> (int)((i % 64))) & 1);
+        return (nuint)((b.Value[i / 64] >> (int)(i % 64)) & 1);
     }
     _ = b.Value[i / 64];
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        return (nuint)sys.OnesCount64((b.Value[i / 64] >> (int)((i % 64))) & ((((uint64)1).Lsh(n)) - 1));
+        return (nuint)sys.OnesCount64((b.Value[i / 64] >> (int)(i % 64)) & ((((uint64)1).Lsh(n)) - 1));
     }
     _ = b.Value[j / 64];
-    s += (nuint)sys.OnesCount64(b.Value[i / 64] >> (int)((i % 64)));
+    s += (nuint)sys.OnesCount64(b.Value[i / 64] >> (int)(i % 64));
     for (nuint k = i / 64 + 1; k < j / 64; k++) {
         s += (nuint)sys.OnesCount64(b.Value[k]);
     }
@@ -195,14 +195,14 @@ outer:
             while (Δp > 0) {
                 if (Δp <= k) {
                     // Shift p ones down into the top of each run of zeros.
-                    x |= (uint64)((x >> (int)((Δp & 63))));
+                    x |= (uint64)((x >> (int)(Δp & 63)));
                     if ((x & (x + 1)) == 0) { // no more zeros (except at the top).
                         goto continue_outer;
                     }
                     break;
                 }
                 // Shift k ones down into the top of each run of zeros.
-                x |= (uint64)((x >> (int)((k & 63))));
+                x |= (uint64)((x >> (int)(k & 63)));
                 if ((x & (x + 1)) == 0) { // no more zeros (except at the top).
                     goto continue_outer;
                 }
@@ -409,11 +409,11 @@ internal static nuint findBitRange64(uint64 c, nuint n) {
     while (Δp > 0) {
         if (Δp <= k) {
             // Shift p 0s down into the top of each run of 1s.
-            c &= (uint64)((c >> (int)((Δp & 63))));
+            c &= (uint64)((c >> (int)(Δp & 63)));
             break;
         }
         // Shift k 0s down into the top of each run of 1s.
-        c &= (uint64)((c >> (int)((k & 63))));
+        c &= (uint64)((c >> (int)(k & 63)));
         if (c == 0) {
             return 64;
         }

@@ -393,7 +393,7 @@ internal static uintptr nextHeapRandBits(nint bits) {
     if (bits > heapRandSeedBitsRemaining) {
         @throw(notEnoughHeapRandSeedˢ);
     }
-    var r = heapRandSeed.Rsh((int64)((64 - bits)));
+    var r = heapRandSeed.Rsh((int64)(64 - bits));
     heapRandSeed.LshAssign((int64)(bits));
     heapRandSeedBitsRemaining -= bits;
     return r;
@@ -590,9 +590,9 @@ internal static void mallocinit() {
             (heapRandSeed, heapRandSeedBitsRemaining) = ((uintptr)bootstrapRand(), 64);
 
             nint topBits = (randHeapAddrBits - (nint)logHeapArenaBytes);
-            randHeapBase = nextHeapRandBits(topBits).Lsh((int64)((randHeapAddrBits - topBits)));
+            randHeapBase = nextHeapRandBits(topBits).Lsh((int64)(randHeapAddrBits - topBits));
             randHeapBase = alignUp(randHeapBase, heapArenaBytes);
-            randHeapBasePrefix = (byte)(randHeapBase.Rsh((int64)((randHeapAddrBits - 8))));
+            randHeapBasePrefix = (byte)(randHeapBase.Rsh((int64)(randHeapAddrBits - 8)));
         }
 
         nint vmaSize = default!;
@@ -630,7 +630,7 @@ internal static void mallocinit() {
                 break;
             }
             case {} when ᐧᐧ: {
-                var prefix = ((uintptr)((byte)(randHeapBasePrefix + (byte)i))).Lsh((int64)((randHeapAddrBits - 8)));
+                var prefix = ((uintptr)((byte)(randHeapBasePrefix + (byte)i))).Lsh((int64)(randHeapAddrBits - 8));
                 Δp = (uintptr)(prefix | ((uintptr)(randHeapBase & randHeapBasePrefixMask)));
                 break;
             }

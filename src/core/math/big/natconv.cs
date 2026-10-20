@@ -374,7 +374,7 @@ internal static slice<byte> itoa(this Δnat x, bool neg, nint @base) {
                         s[i] = digits[(Word)(w & mask)];
 
                         // advance
-                        w = x[k] >> (int)((shift - nbits));
+                        w = x[k] >> (int)(shift - nbits);
                         nbits = (nuint)_W - (shift - nbits);
                     }
                 }

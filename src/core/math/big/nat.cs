@@ -475,7 +475,7 @@ internal static Δnat rsh(this Δnat z, Δnat x, nuint s) {
 
 internal static Δnat setBit(this Δnat z, Δnat x, nuint i, nuint b) {
     nint j = (nint)(i / (nuint)_W);
-    Word m = ((Word)1) << (int)((i % (nuint)_W));
+    Word m = ((Word)1) << (int)(i % (nuint)_W);
     nint n = len(x);
     switch (b) {
     case 0: {
@@ -510,7 +510,7 @@ internal static nuint bit(this Δnat x, nuint i) {
         return 0;
     }
     // 0 <= j < len(x)
-    return (nuint)((Word)(x[j] >> (int)((i % (nuint)_W)) & 1));
+    return (nuint)((Word)(x[j] >> (int)(i % (nuint)_W) & 1));
 }
 
 // sticky returns 1 if there's a 1 bit within the
@@ -529,7 +529,7 @@ internal static nuint sticky(this Δnat x, nuint i) {
             return 1;
         }
     }
-    if (x[j] << (int)(((nuint)_W - i % (nuint)_W)) != 0) {
+    if (x[j] << (int)((nuint)_W - i % (nuint)_W) != 0) {
         return 1;
     }
     return 0;
@@ -560,7 +560,7 @@ internal static Δnat trunc(this Δnat z, Δnat x, nuint n) {
     z = z.make((nint)w);
     copy(z, x);
     if (n % (nuint)_W != 0) {
-        z[len(z) - 1] &= (Word)((Word)((nuint)1 << (int)((n % (nuint)_W))) - 1);
+        z[len(z) - 1] &= (Word)((Word)((nuint)1 << (int)(n % (nuint)_W)) - 1);
     }
     return z.norm();
 }
@@ -876,7 +876,7 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
         }
         powers[0] = powers[0].set(natOne);
         powers[1] = powers[1].trunc(x, logM);
-        for (nint iΔ2 = 2; iΔ2 < (nint)((1 << (int)(n))); iΔ2 += 2) {
+        for (nint iΔ2 = 2; iΔ2 < (nint)(1 << (int)(n)); iΔ2 += 2) {
             var (p2, p, p1) = (Ꮡpowers.at<Δnat>(iΔ2 / 2), Ꮡpowers.at<Δnat>(iΔ2), Ꮡpowers.at<Δnat>(iΔ2 + 1));
             p.ValueSlot = (~p).sqr(Ꮡstk, p2.ValueSlot);
             p.ValueSlot = (~p).trunc(p.ValueSlot, logM);
@@ -930,7 +930,7 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
                     z = z.trunc(z, logM);
                 }
 
-                zz = zz.mul(Ꮡstk, z, powers[(yi >> (int)((_W - n)))]);
+                zz = zz.mul(Ꮡstk, z, powers[(yi >> (int)(_W - n))]);
                 (zz, z) = (z, zz);
                 z = z.trunc(z, logM);
 
@@ -991,7 +991,7 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> Ꮡstk, Δnat x, �
     array<Δnat> powers = new(16); /* (1 << (int)(n)) */
     powers[0] = powers[0].montgomery(one, RR, m, k0, numWords);
     powers[1] = powers[1].montgomery(x, RR, m, k0, numWords);
-    for (nint i = 2; i < (nint)((1 << (int)(n))); i++) {
+    for (nint i = 2; i < (nint)(1 << (int)(n)); i++) {
         powers[i] = powers[i].montgomery(powers[i - 1], powers[1], m, k0, numWords);
     }
 
@@ -1011,7 +1011,7 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> Ꮡstk, Δnat x, �
                 zz = zz.montgomery(z, z, m, k0, numWords);
                 z = z.montgomery(zz, zz, m, k0, numWords);
             }
-            zz = zz.montgomery(z, powers[(yi >> (int)((_W - n)))], m, k0, numWords);
+            zz = zz.montgomery(z, powers[(yi >> (int)(_W - n))], m, k0, numWords);
             (z, zz) = (zz, z);
             yi <<= (int)(n);
         }

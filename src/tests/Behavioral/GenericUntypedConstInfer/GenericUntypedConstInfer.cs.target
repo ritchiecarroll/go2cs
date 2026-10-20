@@ -98,7 +98,7 @@ internal static void Main() {
     pairValue((@string)"k", (nint)0)(i, false);
 
     wantValue((nint)(3 + 4))(i, true);
-    wantValue((nint)((1 << 10)))(1 << 10, true);
+    wantValue((nint)(1 << 10))(1 << 10, true);
 
     fmt.Println("slice", sliceOf((nint)9));
     fmt.Println("map", mapTo(oneˢ, (nint)1)["one"]);

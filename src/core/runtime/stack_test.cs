@@ -80,7 +80,7 @@ public static partial void TestStackMem(ж<testing.T> Ꮡt) {
         var inuse = (int64)(~s1).StackInuse - (int64)(~s0).StackInuse;
         Ꮡt.Logf("Inuse %vMB for stack mem"u8, inuse >> 20);
         if (inuse > (int64)4 << 20) {
-            Ꮡt.Fatalf("Stack inuse: want %v, got %v"u8, (nint)((4 << 20)), inuse);
+            Ꮡt.Fatalf("Stack inuse: want %v, got %v"u8, (nint)(4 << 20), inuse);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

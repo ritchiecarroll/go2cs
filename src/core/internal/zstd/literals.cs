@@ -155,7 +155,7 @@ internal static (nint, slice<byte>, error) readHuffLiterals(this ж<Reader> Ꮡr
     if (((byte)(hdr & 3)) == 2){
         // Compressed_Literals_Block.
         // Read new huffman tree.
-        if (builtin.len(r.huffmanTable) < (nint)((1 << (int)(maxHuffmanBits)))) {
+        if (builtin.len(r.huffmanTable) < (nint)(1 << (int)(maxHuffmanBits))) {
             r.huffmanTable = new slice<uint16>((1 << (int)(maxHuffmanBits)));
         }
 
@@ -219,7 +219,7 @@ internal static (slice<byte>, error) readLiteralsOneStream(this ж<Reader> Ꮡr,
         }
 
         uint16 t = default!;
-        var idx = (rbr.bits.Rsh((uint64)((rbr.cnt - huffBits)))) & huffMask;
+        var idx = (rbr.bits.Rsh((uint64)(rbr.cnt - huffBits))) & huffMask;
         t = huffTable[idx];
         outbuf = append(outbuf, (byte)(t >> 8));
         rbr.cnt -= (uint32)((uint16)(t & 0xff));
@@ -326,7 +326,7 @@ internal static (slice<byte>, error) readLiteralsFourStreams(this ж<Reader> Ꮡ
             if (!rbr.fetch((uint8)huffBits)) {
                 return (0, rbr.makeError(literalsHuffmanStreamOutˢ));
             }
-            var idx = ((~rbr).bits.Rsh((uint64)(((~rbr).cnt - huffBits)))) & huffMask;
+            var idx = ((~rbr).bits.Rsh((uint64)((~rbr).cnt - huffBits))) & huffMask;
             return (huffTableʗ1[idx], default!);
         }
 

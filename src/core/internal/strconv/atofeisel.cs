@@ -84,7 +84,7 @@ internal static (float64 f, bool ok) eiselLemire64(uint64 man, nint exp10, bool 
     if (retExp2 - 1 >= 0x7FF - 1) {
         return (0D, false);
     }
-    var retBits = retExp2 << (int)(float64MantBits) | retMantissa & (uint64)(((uint64)(4503599627370496L - 1)));
+    var retBits = retExp2 << (int)(float64MantBits) | retMantissa & (uint64)((uint64)(4503599627370496L - 1));
     if (neg) {
         retBits |= (uint64)(0x8000000000000000UL);
     }
@@ -161,7 +161,7 @@ internal static (float32 f, bool ok) eiselLemire32(uint64 man, nint exp10, bool 
     if (retExp2 - 1 >= 0xFF - 1) {
         return (0F, false);
     }
-    var retBits = retExp2 << (int)(float32MantBits) | retMantissa & (uint64)(((1 << (int)(float32MantBits)) - 1));
+    var retBits = retExp2 << (int)(float32MantBits) | retMantissa & (uint64)((1 << (int)(float32MantBits)) - 1);
     if (neg) {
         retBits |= (uint64)(0x80000000U);
     }
