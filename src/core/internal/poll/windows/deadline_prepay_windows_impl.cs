@@ -55,6 +55,8 @@
 //     The pipe takes an owner-only security descriptor (COORD's ruling, as defense in depth): only its
 //     owner may open it, where the default would also let Everyone read it. If the descriptor cannot
 //     be built its field stays 0, which asks for the default, and G found the default safe for this pipe.
+//     Building it adds about 2 ms to the first FD.Init (the i9's smoke run of bac5dfbd2e), and our own
+//     CreateFile passes it there.
 // Apart from that pair, nothing here cancels, waits on or completes a real operation.
 
 using System;
