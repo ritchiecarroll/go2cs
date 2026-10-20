@@ -96,5 +96,17 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    // GO2CS0007, StackAppendBufferAnalyzer: golib's stack-append overload, append(in stackAppend<T>, ...), sets the
+    // buffer's used flag through the reference `in` passes. That is the caller's own flag only when the argument IS a
+    // plain local of the calling method or lambda that no lambda captures; any other argument (a field, a new object,
+    // a captured or foreach local) would set a copy's flag and let a second empty append take the buffer again.
+    public static readonly DiagnosticDescriptor StackAppendBufferNotALocal = new(
+        id: "GO2CS0007",
+        title: "A stack-append buffer must be a plain local of the calling method or lambda",
+        messageFormat: "The stack-append buffer argument '{0}' is {1}; it must be a plain local declared in the calling method or lambda and captured by no lambda, so that the used flag the call sets is that frame's",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }
