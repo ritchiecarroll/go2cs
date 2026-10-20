@@ -57,7 +57,7 @@ Oct 29, 2026**.
 
 **Seven venues in all (eight with the optional r/golang), down from eleven.** Dropped: the C# Discord,
 r/csharp, Lobsters and the extra newsletters (section 5 says why). Watcher agents read the live threads
-and draft replies into Slack; **the owner posts every public word himself**
+and draft replies into Slack; **the owner posts every public word**
 ([`AGENTS-venue-watch.md`](AGENTS-venue-watch.md)). An issues agent drafts GitHub answers the same way,
 starting now ([`AGENTS-issues-discussions.md`](AGENTS-issues-discussions.md)).
 
@@ -131,7 +131,7 @@ Nothing is announced until every **soft** row is done. "Who" uses the fleet's ro
 | 5 | **Cold first-hour test on 1.26** | the owner runs it; COORD fixes | from the README to a converted program running, on Windows and on Linux, in under an hour, using a release binary; every stumble fixed or written into Known issues | soft |
 | 6 | **The issues agent at tier 0 for a week** | COORD sets up; the owner approves drafts | [`AGENTS-issues-discussions.md`](AGENTS-issues-discussions.md) running, with at least a week of drafts read and the kinks written down | soft |
 | 7 | **Watchers dry-run** | COORD | each watcher run once against an old public thread, posting into its Slack channel; the kill switch tested | wide |
-| 8 | **The reply bank reviewed** | the owner | [`drafts/replies.md`](drafts/replies.md) read and edited in his voice, including D6 | soft |
+| 8 | **The reply bank reviewed** | the owner | [`drafts/replies.md`](drafts/replies.md) read and edited in their voice, including D6 | soft |
 | 9 | **Old pre-release** | the owner | the 2022 `v0.1.2` pre-release is deleted or marked clearly as historical, so the Releases list shows only current releases | soft |
 | 10 | **A code of conduct** | R | `CODE_OF_CONDUCT.md` (the Contributor Covenant) exists; GitHub's community profile stops flagging it | wide |
 | 11 | **A demo** | R | a recording of under a minute, convert, build, run, on the README | nice to have; not a gate |
@@ -216,7 +216,7 @@ an estimate of the comments to read and the replies worth writing, not a forecas
 | **C# Discord showcase** | chat expects replies in minutes, not hours; its audience overlaps r/dotnet; Discord's terms forbid automated reading, so no watcher could help |
 | **r/csharp** | a second .NET subreddit in the same week doubles the watching for an overlapping audience, and two self-promotional posts close together read as spam; r/dotnet carries the use case. The draft is kept in [`drafts/retired/`](drafts/retired/) |
 | **Lobsters** | needs an invitation in hand (never settled); a small audience that overlaps HN; a third aggregator thread with a demanding readership. If someone else posts it there, the mentions watcher sees it and the owner can choose to answer |
-| **Social accounts** (Bluesky, Mastodon, X, LinkedIn) | never in the plan; each is another stream to watch. Anything the owner posts there is his own choice, outside the watched set |
+| **Social accounts** (Bluesky, Mastodon, X, LinkedIn) | never in the plan; each is another stream to watch. Anything the owner posts there is their own choice, outside the watched set |
 | **More than two newsletters** (the old plan named C# Digest, .NET Weekly and The Morning Brew) | each extra one is low yield; two is enough to learn whether the channel works |
 
 ## 6. The owner's hours
@@ -247,8 +247,8 @@ allow, each tier being the owner's explicit grant.
 
 **On a venue day:**
 
-- The owner posts and writes the first comment himself on HN: who he is, why he built it, and the three
-  things it does not do. Then he stays three to four hours.
+- The owner posts and writes the first comment on HN: who they are, why they built it, and the three
+  things it does not do. Then they stay three to four hours.
 - The watcher posts each new comment into the venue's Slack channel with a suggested reply, a confidence
   and a needs-the-owner flag. The owner edits and posts, or skips.
 - Every reply is short, grants what is true in the objection, and links the page with the detail.

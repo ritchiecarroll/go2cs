@@ -4,7 +4,7 @@
 > Figures in [square brackets] are read from the roster on the day. Hacker News rewards a plain title and
 > an author who stays to answer; it punishes superlatives. The `#launch-hn` watcher
 > ([`../AGENTS-venue-watch.md`](../AGENTS-venue-watch.md)) drafts replies into Slack; the owner posts every
-> word himself.
+> word.
 
 ## Title (80 characters at most)
 
