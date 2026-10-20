@@ -8,7 +8,6 @@
 namespace go;
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 // Aliased rather than imported wholesale: this file needs exactly these golib types, and a blanket
@@ -16,6 +15,7 @@ using System.Threading;
 // beside converted code.
 using Goroutine = go.golib.Goroutine;
 using GoTimer = go.golib.GoTimer;
+using MonotonicClock = go.golib.MonotonicClock;
 using WaitReason = go.golib.WaitReason;
 using SyncTestBubble = go.golib.SyncTestBubble;
 using @unsafe = unsafe_package;
@@ -38,11 +38,11 @@ partial class time_package
     // bodies remain. The same applies to Go's runtime TIMERS (Sleep / newTimer / stopTimer /
     // resetTimer), realized in the region at the bottom of this file.
 
-    // runtimeNano returns the current value of a monotonic clock in nanoseconds. Go's
-    // runtime.nanotime reads a monotonic source (QueryPerformanceCounter on Windows); Stopwatch is
-    // exactly that source on .NET. The tick count is scaled to nanoseconds with the seconds/remainder
-    // split so the result stays EXACT and monotonic without overflowing: `ticks * 1e9` would overflow
-    // int64 for any real uptime, whereas `seconds * 1e9` (seconds = ticks/Frequency) and
+    // runtimeNano returns the current value of a monotonic clock in nanoseconds. Go's runtime.nanotime reads
+    // a monotonic source (QueryPerformanceCounter on Windows); Stopwatch is exactly that source on .NET, read
+    // through golib's MonotonicClock (realNano below), which scales the tick count to nanoseconds with the
+    // seconds/remainder split so the result stays EXACT and monotonic without overflowing: `ticks * 1e9`
+    // would overflow int64 for any real uptime, whereas `seconds * 1e9` (seconds = ticks/Frequency) and
     // `rem * 1e9 / Frequency` (rem < Frequency) each stay well inside int64 and together preserve full
     // sub-tick nanosecond resolution. The absolute epoch is arbitrary — only differences are observed
     // (startNano rebases it), and Now().mono / Sub / Since all read this same source, so the monotonic
@@ -66,15 +66,10 @@ partial class time_package
 
     // The REAL monotonic clock -- Go's nanotime(), which no bubble ever fakes. now() (Go's time_now),
     // the timer service thread and real-clock waits read this, never runtimeNano(): those are real in
-    // Go even for a bubble member, and a member's runtimeNano() is its bubble's fake clock.
-    private static int64 realNano()
-    {
-        int64 ticks = Stopwatch.GetTimestamp();
-        int64 freq = Stopwatch.Frequency;
-        int64 seconds = ticks / freq;
-        int64 rem = ticks % freq;
-        return seconds * 1_000_000_000L + rem * 1_000_000_000L / freq;
-    }
+    // Go even for a bubble member, and a member's runtimeNano() is its bubble's fake clock. It is golib's
+    // MonotonicClock, the clock GoTimer waits on, so a Sleep's deadline and the timer that ends it share one
+    // epoch by construction.
+    private static int64 realNano() => MonotonicClock.Nanoseconds();
 
     // now returns the current wall-clock time as (Unix seconds, sub-second nanoseconds) plus a
     // monotonic reading. Go's runtime.now returns seconds since the Unix epoch (Now() then rebases
