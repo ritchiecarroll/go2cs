@@ -61,8 +61,14 @@ public class AttrOutputArtifactDirTests
         TestEvent terminal = Terminal(reporter, "TestAttrRefused");
 
         Assert.AreEqual("fail", terminal.Action, "Attr's refusals are Errorf, so the test fails");
-        CollectionAssert.Contains(terminal.Records!.ToList(), "disallowed whitespace in attribute key \"bad key\"");
-        CollectionAssert.Contains(terminal.Records!.ToList(), "disallowed newline in attribute value \"two\\nlines\"");
+
+        // Go's call site for a refusal is Attr's own frame (callSite's fixed skip passes callSite, log and Errorf),
+        // so Go prints "testing.go:1609: ..."; the host's Attr frame is in testing.cs.
+        string[] records = terminal.Records!.ToArray();
+        Assert.IsTrue(records.Any(r => r.StartsWith("testing.cs:", StringComparison.Ordinal) && r.EndsWith(": disallowed whitespace in attribute key \"bad key\"", StringComparison.Ordinal)),
+            $"records: {string.Join(" | ", records)}");
+        Assert.IsTrue(records.Any(r => r.StartsWith("testing.cs:", StringComparison.Ordinal) && r.EndsWith(": disallowed newline in attribute value \"two\\nlines\"", StringComparison.Ordinal)),
+            $"records: {string.Join(" | ", records)}");
     }
 
     [TestMethod]
@@ -101,8 +107,14 @@ public class AttrOutputArtifactDirTests
 
         (TestReporter reporter, _) = Run(registry);
 
-        CollectionAssert.AreEqual(new[] { "a", "b", "c", "d" }, Terminal(reporter, "TestOutputLines").Records!.ToArray(),
-            "a complete line is a record; the partial 'b' is flushed by Log, and the partial 'd' at the end of the test");
+        // Output lines are not decorated (Go's outputWriter writes them as they are); a Log record carries Go's
+        // call-site prefix, which for this C# lambda body is Go's fallback, so only its text is pinned.
+        string[] records = Terminal(reporter, "TestOutputLines").Records!.ToArray();
+        Assert.AreEqual(4, records.Length, $"records: {string.Join(" | ", records)}");
+        Assert.AreEqual("a", records[0], "a complete line is a record");
+        Assert.AreEqual("b", records[1], "the partial 'b' is flushed by Log");
+        StringAssert.EndsWith(records[2], ": c", "Log's record, decorated");
+        Assert.AreEqual("d", records[3], "the partial 'd' is flushed at the end of the test");
     }
 
     [TestMethod]

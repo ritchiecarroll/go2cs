@@ -93,7 +93,10 @@ public class SynctestTestHookTests
 
         Assert.IsFalse(s_ok, "a failing child reports !ok");
         Assert.AreEqual("fail", terminal.Action, "the child's Fail walks to its caller");
-        CollectionAssert.Contains(terminal.Records!.ToList(), "inside the bubble", "the child's record is the caller's");
+        // The record carries Go's call-site prefix ("file:line: "); this body is a C# lambda, invisible to
+        // runtime.Callers, so the prefix is Go's fallback, and only the routing is asserted here.
+        Assert.IsTrue(terminal.Records!.Any(r => r.EndsWith(": inside the bubble", StringComparison.Ordinal)),
+            $"the child's record is the caller's; records: {string.Join(" | ", terminal.Records!)}");
     }
 
     private static string? s_parallel;
