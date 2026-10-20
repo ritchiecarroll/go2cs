@@ -63,8 +63,10 @@ Two facts the readings turned up:
 
 | `v.(error)` on a raw box | Go | before | after |
 |---|---|---|---|
-| `*fs.PathError`, registered adapter | 1.3 ns | 41.1-41.7 ns | 31.2-32.7 ns |
-| `*localErr`, no adapter (control) | 1.2 ns | 36.0-37.4 ns | 35.4-37.4 ns |
+| `*fs.PathError`, registered adapter | 1.3 ns | 40.0-42.0 ns | 31.0-32.8 ns |
+| `*localErr`, no adapter (control) | 1.2 ns | 35.3-37.9 ns | 35.8-36.5 ns |
 
-With `DOTNET_TieredCompilation=0`: `*fs.PathError` 60.6-61.4 ns before, 43.6-44.0 ns after; `*localErr` 58.9-61.7 ns
-before, 58.4-59.0 ns after.
+Each arm's programs were converted by a converter built from that arm's own tree (before: 874374df34; after: the
+seat merged onto 5530cc85f4) and built against that tree's golib; the AOT readings above are the same arms. A first
+reading converted both arms with an older scratch converter and read the same within noise (`*fs.PathError`
+41.1-41.7 before, 31.2-32.7 after; with `DOTNET_TieredCompilation=0` 60.6-61.4 before, 43.6-44.0 after).
