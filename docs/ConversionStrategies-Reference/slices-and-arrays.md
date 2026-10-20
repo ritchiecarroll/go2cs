@@ -777,10 +777,80 @@ GolibTests' `GoGrowSliceTests` replays twenty-six growth sequences recorded from
 (`testdata/growslice`, under `-gcflags='-N -l'`), and `TestGoGrowSliceExpectationsMatchTheToolchain`
 re-runs that probe.
 
-**What is not modeled.** Since Go 1.25 the compiler can give a non-escaping append a 32-byte stack
-backing store, so `var s []int64; s = append(s, 1)` reports cap 4. Since Go 1.26 a slice that escapes
-only when it is returned can walk the size-class ladder inside that buffer and move to the heap at the
-end. Both are the compiler's decisions after inlining, and golib reproduces only the heap path.
+**What is not modeled.** Since Go 1.26 a slice that escapes only when it is returned can walk the
+size-class ladder inside a stack buffer and move to the heap at the end. That is the compiler's decision
+after inlining, and golib reproduces only the heap path. The Go 1.25 stack buffer of a non-escaping append
+is modeled: see the next section.
+
+## A non-escaping append can take Go's 32-byte stack buffer
+
+Since Go 1.25 the compiler gives an append whose result does not escape a 32-byte backing store in the
+frame of the function that appends. At a variable's first qualifying append, when the slice must grow, is
+empty and the new length is at most K = 32 / the element's size, the slice becomes that buffer, with
+capacity K:
+
+<!-- source: src/tests/Behavioral/StackAppendBackingStore/main.go:13-20 -->
+```go
+func loopCaps() {
+	var x []int64
+	for i := 0; i < 5; i++ {
+		x = append(x, int64(i))
+		fmt.Print(cap(x), " ")
+	}
+	fmt.Println()
+}
+```
+
+Go prints `4 4 4 4 8`, where growslice alone gives `1 2 4 4 8`. A flag in the frame records that the
+buffer is taken, so a function takes it at most once per call: a slice reset to nil and refilled grows as
+growslice does. An element of zero size or over 32 bytes, a spread `append(x, s...)`, a slice that is not
+empty, and a variable whose address is taken never take it.
+
+Which appends qualify is the compiler's decision, made after inlining and escape analysis, so the converter
+reads it from the compiler instead of re-deriving it (`src/go2cs/stackAppendHints.go`). For each package
+it runs `go build`, or `go test -c` for test files, with `-gcflags='-m -d=variablemakehash=vy'` for
+windows/amd64, linux/amd64 and darwin/amd64, whatever the conversion's own target. It hints a site when:
+
+- the site's own copy does not escape;
+- the backing-store check logged the variable's declaration, which it does not for a variable whose
+  address is taken;
+- every copy inlined elsewhere in the package that can be attributed to the site agrees, and none that
+  cannot be attributed exists (a callee with more than one append, inlined, leaves all of them unhinted);
+- every target that compiles the site picks it as the variable's first qualifying append, and none refuses
+  it.
+
+The function that appends declares one `stackAppend<T>` per hinted variable at its entry, and the site
+passes it to golib's `append`:
+
+<!-- source: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:8-17 -->
+```csharp
+internal static partial void loopCaps() {
+    var xᴷ = new stackAppend<int64>();
+
+    slice<int64> x = default!;
+    for (nint i = 0; i < 5; i++) {
+        x = append(xᴷ, x, (int64)i);
+        fmt.Print(cap(x), " ");
+    }
+    fmt.Println();
+}
+```
+
+`ᴷ` (U+1D37, a modifier-letter capital K) names the buffer after its variable. The overload takes the
+buffer as an `in` parameter, which C# passes by reference to the caller's local with no keyword at the
+call, and sets the flag through that reference. That is sound only when the argument is a plain local of
+the calling method or lambda that no lambda captures, so the go2cs-gen analyzer GO2CS0007 makes any other
+argument a build error. A variable declared inside a function literal gets its buffer at the top of the
+lambda's body, one per call as in Go. An outer variable appended inside a function literal gets none:
+the literal captures it by reference, so Go lowers that append in place.
+
+Taking the buffer charges no allocation to golib's allocation counter, because Go's buffer is on the stack.
+GolibTests' `StackAppendTests` hold the runtime rule, and the `StackAppendBackingStore` behavioral test
+compares eleven arms with Go.
+
+**What is not hinted.** A copy of an append inlined into another package is invisible to that package's
+own harvest, so the site follows its own package's copies alone. A conversion whose toolchain predates
+Go 1.25 gets no harvest output and so no hints, which is Go's own behavior before 1.25.
 
 ## A slice of a ZERO-SIZE element type carries no storage — `make([]struct{}, math.MaxInt)` allocates nothing
 
