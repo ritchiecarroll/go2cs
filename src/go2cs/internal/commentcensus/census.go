@@ -665,6 +665,7 @@ func analyze(p pair, r *results, verbose bool) {
 			}
 			r.body.add("functions", 1)
 			matchedStarts := map[int]bool{}
+			separator := preludeSeparator(cs, g, cOpen, cEnd, lb, rb)
 			cur := cOpen + 1
 			for L := lb + 1; L < rb; L++ {
 				if !g.blank[L-1] || g.blank[L] {
@@ -704,14 +705,21 @@ func analyze(p pair, r *results, verbose bool) {
 					st--
 				}
 				matchedStarts[st] = true
-				if isBlankCS(cs, st-1) {
+				// A walk back over comment lines must not land on the prelude's separator: that blank is the
+				// converter's, never Go's. When a function opens with a comment and Go puts a blank line between
+				// it and the first statement, the C# that drops that blank keeps the comment directly under the
+				// prelude's separator, which the walk would otherwise credit as Go's blank. It applies only when
+				// Go's own line above its blank is a comment, so the comment the walk crossed is that one; where
+				// it is code, the identifier search can anchor on an earlier line that names the same identifiers.
+				goAbove := strings.TrimSpace(g.src[L-3])
+				goCommentAbove := strings.HasPrefix(goAbove, "//") || strings.HasSuffix(goAbove, "*/")
+				if isBlankCS(cs, st-1) && !(goCommentAbove && st < csLine && st-1 == separator) {
 					r.body.add("go-blank:cs-blank", 1)
 				} else {
 					r.body.add("go-blank:cs-NONE", 1)
 					r.ex("body:go-blank-cs-none", fmt.Sprintf("%s.go:%d -> .cs:%d", where, L, st), strings.TrimSpace(g.src[L-1]))
 				}
 			}
-			separator := preludeSeparator(cs, g, cOpen, cEnd, lb, rb)
 			for c := cOpen + 1; c < cEnd; c++ {
 				if !isBlankCS(cs, c) || isBlankCS(cs, c-1) {
 					continue

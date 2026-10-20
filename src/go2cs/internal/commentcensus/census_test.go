@@ -171,9 +171,9 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 		t.Fatalf("%s: %v", rendering, err)
 	}
 
-	// Vacuity: the five functions are read, or no class could move.
-	if n := r.r.body["functions"]; n != 5 {
-		t.Fatalf("%s: %d function bodies read, want 5", rendering, n)
+	// Vacuity: the six functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 6 {
+		t.Fatalf("%s: %d function bodies read, want 6", rendering, n)
 	}
 
 	got := map[string]int{}
@@ -193,13 +193,15 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 // before, and two blank lines after the prelude in a fifth. `first` opens with a Go statement that reads like
 // a prelude line (`var z int`), followed by Go's own blank line: only the blank line above it is the separator.
 // `grow` opens with `buf := make([]int, len(xs))`, which the translation spells `var buf = new slice<nint>(...)`:
-// Go's builtin `make` never appears on the C# line, so the identifier test must not require it.
+// Go's builtin `make` never appears on the C# line, so the identifier test must not require it. `opens` opens
+// with a comment and then Go's blank line; `bad` drops that blank, as the converter does, and the census must
+// report it rather than credit the prelude's separator above the comment as Go's blank.
 func TestPreludeSeparatorIsNotADefect(t *testing.T) {
-	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 5 {
-		t.Errorf("good: %v and %d separators, want no body class and 5 separators", got, separators)
+	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 6 {
+		t.Errorf("good: %v and %d separators, want no body class and 6 separators", got, separators)
 	}
 
-	want := map[string]int{"body:extra:after-named-result-locals": 4, "body:extra:after-param-prelude": 1}
+	want := map[string]int{"body:extra:after-named-result-locals": 4, "body:extra:after-param-prelude": 1, "body:go-blank-cs-none": 1}
 
 	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 0 {
 		t.Errorf("bad: %v and %d separators, want %v and 0 separators", got, separators, want)

@@ -39,3 +39,10 @@ func grow(xs ...int) (n int) {
 	n = copy(buf, xs)
 	return
 }
+
+func opens(xs ...int) (n int) {
+	// opens with a comment, then Go's blank line
+
+	n = len(xs)
+	return
+}
