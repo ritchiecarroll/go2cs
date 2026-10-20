@@ -92,13 +92,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -255,13 +255,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -418,13 +418,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -581,13 +581,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -744,13 +744,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -907,13 +907,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -1070,13 +1070,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -1233,13 +1233,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -1396,13 +1396,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -1559,13 +1559,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -1722,13 +1722,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -1885,13 +1885,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -2048,13 +2048,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -2211,13 +2211,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -2374,13 +2374,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -2537,13 +2537,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -2700,13 +2700,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -2863,13 +2863,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -3026,13 +3026,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -3189,13 +3189,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -3352,13 +3352,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -3515,13 +3515,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -3678,13 +3678,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -3841,13 +3841,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -4004,13 +4004,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }
@@ -4167,13 +4167,13 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
         var scanSize = typ.PtrBytes;
         var src = src0;
         if (typ.Size_ == goarch.PtrSize){
-            src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+            src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
         } else {
             if (doubleCheckHeapSetType && !asanenabled && dataSize % typ.Size_ != 0) {
                 @throw(runtimeMspanˢ);
             }
             for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-                src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+                src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
                 scanSize += typ.Size_;
             }
         }

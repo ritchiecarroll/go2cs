@@ -1647,7 +1647,7 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> Ꮡptrmask
             if (Ꮡptrmask != nil) {
                 var word = (Δp - b) / (uintptr)goarch.PtrSize;
                 var bits = addb(Ꮡptrmask, word / 8).Value;
-                if ((byte)((bits >> (int)((word % 8))) & 1) == 0) {
+                if ((byte)((bits >> (int)(word % 8)) & 1) == 0) {
                     return;
                 }
             }
@@ -1690,7 +1690,7 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> Ꮡptrmask
                 i += goarch.PtrSize * 8 - goarch.PtrSize;
                 continue;
             }
-            if ((byte)((bits >> (int)((word % 8))) & 1) == 0) {
+            if ((byte)((bits >> (int)(word % 8)) & 1) == 0) {
                 continue;
             }
         }

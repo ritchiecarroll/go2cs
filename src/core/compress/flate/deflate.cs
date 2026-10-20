@@ -289,7 +289,7 @@ internal static UntypedInt hashmul => 0x1e35a7bd;
 // of the supplied slice.
 // The caller must ensure that len(b) >= 4.
 internal static uint32 hash4(slice<byte> b) {
-    return (((uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24) * (uint32)hashmul) >> (int)((32 - hashBits));
+    return (((uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24) * (uint32)hashmul) >> (int)(32 - hashBits);
 }
 
 // bulkHash4 will compute hashes using the same
@@ -299,11 +299,11 @@ internal static void bulkHash4(slice<byte> b, slice<uint32> dst) {
         return;
     }
     var hb = (uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24;
-    dst[0] = (hb * (uint32)hashmul) >> (int)((32 - hashBits));
+    dst[0] = (hb * (uint32)hashmul) >> (int)(32 - hashBits);
     nint end = len(b) - (nint)minMatchLength + 1;
     for (nint i = 1; i < end; i++) {
         hb = (hb << 8) | (uint32)b[i + 3];
-        dst[i] = (hb * (uint32)hashmul) >> (int)((32 - hashBits));
+        dst[i] = (hb * (uint32)hashmul) >> (int)(32 - hashBits);
     }
 }
 

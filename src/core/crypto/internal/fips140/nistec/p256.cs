@@ -466,7 +466,7 @@ internal static uint64 Rsh(this ж<p256OrdElement> Ꮡs, nint n) {
     // Shift in the more significant limb, if present.
     {
         nint iΔ1 = i + 1; if (iΔ1 < 4) {
-            res |= (uint64)(s.Value[iΔ1].Lsh((int64)((64 - n))));
+            res |= (uint64)(s.Value[iΔ1].Lsh((int64)(64 - n)));
         }
     }
     return res;

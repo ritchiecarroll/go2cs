@@ -31,7 +31,7 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
     bool inf = default!;
     bool nan = default!;
 
-    sign = (uint64)(f & ((uint64)1 << (int)((mantbits64 + expbits64))));
+    sign = (uint64)(f & ((uint64)1 << (int)(mantbits64 + expbits64)));
     mant = (uint64)(f & ((uint64)(4503599627370496L - 1)));
     exp = (nint)(f >> (int)(mantbits64)) & (nint)((1 << (int)(expbits64)) - 1);
 
@@ -69,7 +69,7 @@ internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack
     bool inf = default!;
     bool nan = default!;
 
-    sign = (uint32)(f & ((uint32)1 << (int)((mantbits32 + expbits32))));
+    sign = (uint32)(f & ((uint32)1 << (int)(mantbits32 + expbits32)));
     mant = (uint32)(f & ((1 << (int)(mantbits32)) - 1));
     exp = (nint)(f >> (int)(mantbits32)) & (nint)((1 << (int)(expbits32)) - 1);
 
@@ -265,7 +265,7 @@ internal static uint64 fsub64(uint64 f, uint64 g) {
 }
 
 internal static uint64 fneg64(uint64 f) {
-    return (uint64)(f ^ ((uint64)1 << (int)((mantbits64 + expbits64))));
+    return (uint64)(f ^ ((uint64)1 << (int)(mantbits64 + expbits64)));
 }
 
 internal static uint64 fmul64(uint64 f, uint64 g) {

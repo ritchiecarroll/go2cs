@@ -169,7 +169,7 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
     ref var x = ref heap<uint8>(out var Ꮡx);
     x = (uint8)0xff;
     for (var i = (uint8)0; i < 8; i++) {
-        atomic.And8(Ꮡx, (uint8)(((uint8)(~(((uint8)1).Lsh((uint64)(i)))))));
+        atomic.And8(Ꮡx, (uint8)((uint8)(~(((uint8)1).Lsh((uint64)(i))))));
         {
             var r = (uint8)(((uint8)0xff).Lsh((uint64)((uint8)(i + 1)))); if (x != r) {
                 Ꮡt.Fatalf("clearing bit %#x: want %#x, got %#x"u8, (uint8)(((uint8)1).Lsh((uint64)(i))), r, x);
@@ -215,7 +215,7 @@ public static partial void TestAnd(ж<testing.T> Ꮡt) {
     for (var i = (uint32)0; i < 32; i++) {
         atomic.And(Ꮡx, ~(((uint32)1).Lsh((uint64)(i))));
         {
-            var r = ((uint32)0xffffffffU).Lsh((uint64)((i + 1))); if (x != r) {
+            var r = ((uint32)0xffffffffU).Lsh((uint64)(i + 1)); if (x != r) {
                 Ꮡt.Fatalf("clearing bit %#x: want %#x, got %#x"u8, (uint32)(((uint32)1).Lsh((uint64)(i))), r, x);
             }
         }
@@ -300,7 +300,7 @@ public static partial void TestOr(ж<testing.T> Ꮡt) {
     for (var i = (uint32)0; i < 32; i++) {
         atomic.Or(Ꮡx, ((uint32)1).Lsh((uint64)(i)));
         {
-            var r = (((uint32)1).Lsh((uint64)((i + 1)))) - 1; if (x != r) {
+            var r = (((uint32)1).Lsh((uint64)(i + 1))) - 1; if (x != r) {
                 Ꮡt.Fatalf("setting bit %#x: want %#x, got %#x"u8, ((uint32)1).Lsh((uint64)(i)), r, x);
             }
         }
@@ -357,7 +357,7 @@ public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
                     if ((uint8)(atomic.Load8(Ꮡ(aʗ1, iΔ1)) & m) != m) {
                         Ꮡt.Errorf("a[%v] bit %#x not set"u8, iΔ1, m);
                     }
-                    atomic.And8(Ꮡ(aʗ1, iΔ1), (uint8)(((uint8)(~m))));
+                    atomic.And8(Ꮡ(aʗ1, iΔ1), (uint8)((uint8)(~m)));
                     if ((uint8)(atomic.Load8(Ꮡ(aʗ1, iΔ1)) & m) != 0) {
                         Ꮡt.Errorf("a[%v] bit %#x not clear"u8, iΔ1, m);
                     }

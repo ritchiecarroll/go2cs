@@ -510,7 +510,7 @@ internal static ΔwriteUserArenaHeapBits write(this ΔwriteUserArenaHeapBits h, 
     // out and move on to the next word.
 
     var data = (uintptr)(h.mask | bits.Lsh((uint64)(h.valid))); // mask for this word
-    h.mask = bits.Rsh((uint64)(((uintptr)ptrBits - h.valid))); // leftover for next word
+    h.mask = bits.Rsh((uint64)((uintptr)ptrBits - h.valid)); // leftover for next word
     h.valid += valid - (uintptr)ptrBits; // have h.valid+valid bits, writing ptrBits of them
 
     // Flush mask to the memory bitmap.

@@ -823,7 +823,7 @@ internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
         if (b < 128) {
             return (r + ((uint32)b).Lsh((int64)(shift)), fd);
         }
-        r += ((uint32)((uint8)(b & 0x7F)) << (int)((shift & 31)));
+        r += ((uint32)((uint8)(b & 0x7F)) << (int)(shift & 31));
         shift += 7;
         if (shift > 28) {
             throw panic("Bad varint");

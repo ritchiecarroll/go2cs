@@ -59,10 +59,10 @@ internal static void Main() {
         x.RshAssign((int64)(neg8));
         return fmt.Sprint(x);
     });
-    arm("modulo count", () => fmt.Sprint(big.Lsh((int64)((y % 8)))));
+    arm("modulo count", () => fmt.Sprint(big.Lsh((int64)(y % 8))));
     arm("non-negative signed", () => fmt.Sprint(one.Lsh((int64)(three)), " ", big.Rsh((int64)(three)), " ", u32.Lsh((int64)(wide)), " ", i8.Rsh((int64)(wide))));
     arm("unsigned huge", () => fmt.Sprint(big.Lsh(huge), " ", i8.Rsh(huge)));
-    arm("masked signed", () => fmt.Sprint(big << (int)((y & 7))));
+    arm("masked signed", () => fmt.Sprint(big << (int)(y & 7)));
 }
 
 } // end main_package

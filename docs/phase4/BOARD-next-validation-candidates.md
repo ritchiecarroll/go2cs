@@ -27524,5 +27524,120 @@ at 5530cc85f4.
 — P2 (found and fixed 2026-10-20)
 
 **Amended 2026-10-20 (G's review):** the first cut created `owner.pid` with `O_EXCL` and wrote the PID after, so a second run arriving in that window read an empty lock as stale, replaced it, and ran beside the first (fail-open against safety floor 1). The PID is now written into a file of the run's own and linked into place with `os.Link`, which fails with `ErrExist` while any lock is present, so a lock appears whole or not at all. A lock that names no process now refuses the run. Pin: `TestEmissionStageRefusesWhenItsLockHoldsNoProcessID` (empty and unparseable), red 2 of 2 at cef77053d3. Named limits, both stated in the code: on Windows a recycled PID reads as live, so the run refuses (fail-closed); and two runs that start together over a dead run's lock can each judge it stale, so the second can remove the first's fresh lock. That window is the time between one run's read and its remove.
+## 2026-10-20 — P2 finding: crypto/x509's TestBetterTLS is a slow path on linux, not a hang (nameconstraints 390 s against Go's 2.3 s), and on a host that can make namespaces the row reads red because C# skips TestSetFallbackRoots — OPEN (found by P2, sized, unowned)
+
+Asked by COORD: is the long crypto/x509 run on linux a hang, a slow path, or a deadline? Reading: linux, uid 0,
+Microsoft .NET 10.0.12 / SDK 10.0.112, go1.26.10, tree 913d33224b (the go1.26.10 hop tip), the `-tests` row on a
+byte copy of the tree, Release, `-test-timeout 120m`, two runs (the second with the container's `SSL_CERT_FILE`
+unset).
+
+**A slow path.** Every case passes on both sides; nothing waits on a deadline or a lock.
+
+| part | Go | C# run 1 | C# run 2 | C# per case | Go per case |
+|---|---|---|---|---|---|
+| `TestBetterTLS/nameconstraints` (9,491 cases) | 2.31 s | 387.8 s | 389.8 s | about 41 ms | about 0.24 ms |
+| `TestBetterTLS/pathbuilding` (81 cases) | 0.08 s | 4.78 s | 4.67 s | about 58 ms | about 1 ms |
+| `TestBetterTLS` (with the suite fetch) | 17.04 s | 403.5 s | 405.4 s | | |
+| whole package | | 470 s | 478 s | | |
+
+The C# side is about 170 times Go on nameconstraints, and that one test is 85% of the package's wall. The runner
+read `tiered: false`. Nothing was profiled: the rows say where the time is, not why. A host about 1.5 times slower
+than this one passes Go's default 10-minute test timeout on `TestBetterTLS` alone.
+
+**The row reads red here for another reason.** `TestSetFallbackRoots` runs its nine subtests in a child process
+started with `CLONE_NEWNS | CLONE_NEWUSER`. Go runs them on this host; C# skips all nine ("posix_spawn seam:
+SysProcAttr.Cloneflags is not supported"), so the comparison fails 9 of 532. Go's own verdict depends on the
+environment: with the container's `SSL_CERT_FILE` set, Go fails the parent and the four `no_system_CAs` and
+`system_CA_read_error` subtests (the variable hands it a real bundle); with it unset, Go passes all nine. The
+roster's linux 500 was banked on a host where Go skips them too (inferred from the count, not re-read). Making
+them run needs `Cloneflags` in the posix_spawn seam, which posix_spawn cannot express: the child needs `clone` or
+`unshare` before exec.
+## 2026-10-20 — P2 finding: `err == syscall.ERRNO` reaches the errno's `==` by reflection on every call, 85-156 ns and 144 bytes where a typed compare costs 0.4 ns — OPEN (found by P2 from the i9's windows JIT list, measured on linux, unowned; for G and the perf review)
+
+Found while extending the first-deadline pre-pay on windows: the i9's JIT list of a cold run showed
+`(dynamicClass):InvokeStub_Errno.op_Equality`, a reflection invoke stub, compiled between the deadline and `Read`'s
+return. Where: golib `builtin.AreEqual(object?, object?)` (`src/core/golib/builtin.cs`, the
+`equalityOperator.Invoke(...)` at the end of the method). Go's `==` between an interface value and a value of a
+comparable type converts to `AreEqual(x, y)`, and when the two static types differ (`error` against
+`syscall.Errno`) C# cannot infer the generic `AreEqual<T>`, so the call binds the `object` overload. That overload
+unwraps adapters, checks nil, checks that the dynamic types match, then looks up the type's `op_Equality`
+(`TypeExtensions.GetEqualityOperator`, cached per type) and calls it with `MethodInfo.Invoke`. The lookup is
+cached; the invoke is not avoidable on that path, so every comparison whose two sides are non-nil and of one
+dynamic type pays it. A nil side returns before the invoke but still boxes the value argument.
+
+**Cost (linux, uid 0, Microsoft .NET 10.0.12 / SDK 10.0.112, golib at claude/p2-deadline-prepay, Release, one
+process, load 6 from a concurrent build).** A uint struct declaring `operator ==` (the shape of `syscall.Errno`),
+boxed as `object`, compared 2,000,000 times each against a matching and a non-matching value: 156.3, 110.9 and
+85.3 ns per compare over three rounds, 144-155 bytes allocated per compare (the boxed argument, the argument
+array and the boxed result). The same compare written as a type test plus the struct's `==`: 0.37-0.41 ns, no
+allocation. The second use of a type's operator also builds its invoke stub (a JIT of a dynamic method), which is how
+it showed up in the deadline window.
+
+Where it is reached: every `switch err { case syscall.X: }` and `err == syscall.X` in the converted standard
+library, a common shape of errno classification on windows (`internal/poll`'s `FD.Read` tests every file and pipe read's
+result against `ERROR_HANDLE_EOF` and `ERROR_BROKEN_PIPE`; `execIO` tests against `ERROR_OPERATION_ABORTED` and
+`ERROR_IO_INCOMPLETE`). Not sized across the corpus. A fix is the converter's or golib's (a typed equality for a
+known comparable right-hand type), not the pre-pay's: the pre-pay only builds the stub ahead of the first deadline.
+
+— P2 (measured 2026-10-20)
+
+## 2026-10-20 — P2 finding: a process's first read deadline returned 9-11 ms late under the JIT and 6-8 ms under ReadyToRun, because the deadline path compiled on its way out — FIXED (claude/p2-deadline-prepay)
+
+Go's first deadline is as prompt as its later ones (0.3-0.5 ms late on linux). Here the first one paid for compiling
+the arm, park, fire and return paths, and under ReadyToRun for the golib generics instantiated over another
+assembly's types that ReadyToRun does not pregenerate (the `fd.fdmu` field view) and for io's package-init boxes.
+Bisected with the first-deadline probe (claude/p2-first-deadline-probe) and a JIT-summary list of every method
+compiled between arming and return. As ruled (COORD 2026-10-20 05:00Z and 08:28Z), the poller's start
+(`runtime_pollServerInit`, all three seams) now pays it once: `PrepareMethod` over the named methods, three calls on
+a spare never-opened FD, io's package init, one no-op runtime timer, and an os hook for os's part
+(`deadline_prepay_impl.cs` in internal/poll and in os). It runs synchronously: run on a background thread it took
+the cost off FD.Init but left the first deadline 3.9-5.4 ms late when armed right after the poller started.
+Linux, three interleaved processes per arm, A1 late in ms (Go 0.4-0.5): no pre-pay JIT 8.9-10.8, R2R 6.1-7.6; sync
+JIT 0.9-1.6, R2R 0.3-0.6; async JIT 4.9-5.4, R2R 3.9-5.3. Cost: the first pollable FD.Init takes about 10 ms longer
+under both the JIT and ReadyToRun (first Read medians 44.3 to 53.8 ms JIT, 31.1 to 40.6 ms R2R), once per process
+and only in a process that opens a pollable descriptor. Native AOT is unaffected (nothing runs).
+
+— P2 (found and fixed 2026-10-20)
+
+**Amended 2026-10-20 (G's review of dd65b04763).** Windows read the first cut short of the bar (JIT, A1 late in ms):
+cold Go 0.0-0.6, no pre-pay 7.8-8.7, pre-pay 3.6-5.1; after a first completion Go 0.2-0.8, no pre-pay 4.6-5.4, pre-pay
+2.3-2.6. On windows the wake is followed by a cancel and an aborted completion that the first cut did not cover, so
+the windows seam now pre-pays them too (`windows/deadline_prepay_windows_impl.cs`). And because nothing guarded the
+pre-pay, a throwing hook made the first pollable FD.Init fail and skipped every later hook; this package's part, the
+windows part and each hook now run in their own try (red at dd65b04763 with a planted throwing hook, green after).
+The windows reading of the amended cut is owed by a windows host. Until it lands this row stays FIXED on linux only.
+
+**Amended 2026-10-20 (the i9's windows reading of 895445983a).** A1 moved but still missed: cold Go 0.6-0.7, C#
+6.2-7.8 (was 7.0-10.7); after a first completion Go 0.4-0.8, C# 1.3-3.4 (was 5.3-7.2). Its JIT list named 24 methods
+still compiled between the fire and the return: the timer callback, the completion callback and readiness sink, the
+overlapped field view's equality, the operation table's lookups, the inline-array helpers SyscallN's callers build,
+errnoErr, the poll error codes, the errno getters, the pinner's unpin, and a reflection invoke stub for
+`Errno.op_Equality` (its per-call cost has its own row, branch claude/p2-errno-equality). The pre-pay now reaches them: the parts
+private to syscall and internal/syscall/windows register with golib's `GoAsyncIO.AddDeadlinePathPrepay` (which also
+replaces internal/poll's public hook event), the timer callback and readiness sink are named so they can be
+prepared, and the windows part touches the rest on spare values. Windows reading owed again.
+
+**Amended 2026-10-20 (the i9's windows reading of 4f9377add3).** After a first completion A1 now meets the bar (0.4-0.7,
+Go 0.6-1.2); cold it still misses (4.2-4.8, Go 0.2-0.8), with only 4 small compiles left in the window. Since one real
+completion first removes the lag, the windows pre-pay now also makes one (a one-byte write and read on a private
+named pipe pair, closed before it returns), to be kept only if the windows reading brings cold A1 within about 1 ms;
+otherwise the residue is recorded here as the runtime's first-completion cost.
+
+**Amended 2026-10-20 (the i9's windows reading of 8967b1b1da).** The real completion closed the gap, so it stays
+(COORD's ruling, 17:14Z). Windows, JIT, Go and the two cuts interleaved, three rounds per mode, every run exit 0, no
+hang. Cold A1 late in ms: Go 0.7-0.9, 4f9377add3 1.8-2.9, 8967b1b1da 0.4-1.2; after a first completion it stays at Go's
+level. Cost: about 8.5 ms added to the first pollable FD.Init on windows (the probe's cold setup, which opens the
+first pipe pair, 29.1-29.9 ms against 20.3-21.5), once per process. A process whose first I/O is a real completion pays
+about the same either way (the probe's first write and read, 31.7-32.1 ms against 30.7-31.3), so for it the cost moves
+to FD.Init rather than adding to it. The JIT list shows the step running end to end inside the pre-pay, through waitIO
+and the completion callback. The cost is documented beside the pre-pay. This row is now FIXED on linux and windows.
+
+**Amended 2026-10-20 (G's review of the completion step).** G found the step safe as written and asked for one fix:
+nothing bounded its write and read, so a completion that never arrived (an I/O-intercepting filter, say) would hang
+the first FD.Init of every process that does I/O. Both now carry a deadline one second out, which never fires on the
+normal path; where the I/O is held, the deadline cancels it as any deadline does and the step gives up. A port that
+never posts even the cancelled operation's completion still hangs it, as it hangs every deadline in the program. The
+pipe also takes an owner-only security descriptor (`D:P(A;;GA;;;OW)`) in place of the default, which lets Everyone
+read it (COORD's ruling, defense in depth). Neither is measured here: the i9's smoke run of the probe is owed.
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

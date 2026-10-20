@@ -336,7 +336,7 @@ internal static uintptr directoryIndex(this ref ΔMap m, uintptr hash) {
     if (m.dirLen == 1) {
         return 0;
     }
-    return hash >> (int)(((uint8)(m.globalShift & 63)));
+    return hash >> (int)((uint8)(m.globalShift & 63));
 }
 
 internal static ж<table> directoryAt(this ref ΔMap m, uintptr i) {
