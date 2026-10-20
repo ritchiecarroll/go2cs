@@ -93,3 +93,43 @@ with more than 8 fixed parameters; no method with 16 or more parameters.
 - The standard library's assemblies (`go2cs-stdlib.slnx`, Release, every core package), arms ON minus OFF, summed
   over the DLLs: between +2.5 MB and +6 MB. Increment 1's JIT measure was about 430 B of IL per arm, and the std has
   about 8,000 (type, method, T or *T) cases.
+
+### Measurement (2026-10-20, linux-x64, Microsoft .NET 10.0.12, the seat merged with hop 5530cc85f4)
+
+From hop 1e7e92da23 on, ILC's identical-body folding runs past an hour on this probe. It stalls on the generic
+virtual method `IReinterpretRoot.AliasAs<TDst>()` that `PointerExtensions.Reinterpret` calls (59c05f749a). The bisect
+placed it there, and removing that one call confirmed it. On the seat merged with hop 9470d24654, arms OFF and
+increment 1 were each still in ILC at about 37 minutes, and increment 2 was still folding after 2 h 34 min. With the
+call removed, the same increment-2 publish finishes in 35 minutes. Every AOT number below was therefore taken with that one call removed from
+`ж.PointerExtensions.cs`, in all five publishes alike. The removal is not in any commit. The standard-library sum was
+taken before the hop merge, at the seat merged with hop 9470d24654.
+
+| Program | Arms OFF | Arms at increment 1 | Arms at increment 2 | Output equals Go |
+|---|---|---|---|---|
+| `nocall` | 87,454,592 B | 90,090,560 B | 90,668,672 B | yes, all three |
+| `promoted` | 88,507,928 B | | 91,710,008 B | no: OFF and ON both stop at line 4 |
+
+| Standard library, `go2cs-stdlib.slnx` Release, 363 DLLs | Arms OFF | Arms ON | ON minus OFF |
+|---|---|---|---|
+| summed DLL bytes | 145,255,424 B | 148,787,200 B | +3,531,776 B |
+
+Scored against the prediction above, which stays as written:
+
+- `nocall`, increment 2 minus increment 1: +578,112 B, against +250 KB to +900 KB (central +500 KB). MET. Increment 1's
+  own cost on this tree is +2,635,968 B (it was +2,586,816 B at e90f602d1c).
+- Standard library ON minus OFF: +3,531,776 B (+2.43%), against +2.5 MB to +6 MB. MET. The largest growth is in
+  `net.http` (+282,112), `net` (+191,488), `go.types` (+130,048), `reflect` (+119,808) and `internal.abi` (+115,712).
+  No DLL shrank.
+- `promoted`, arms ON, all 6 lines equal Go: MISSED. Lines 1 to 3 are equal. Line 4, the bound variadic `Join`, binds
+  through its arm and then fails in golib's variadic invoke: `GoReflect.InvokeVariadic` closes its trampoline
+  `callVariadicFunc1<string, string, string>` with `MakeGenericMethod`, and Native AOT has no code for that value-type
+  instantiation (`NotSupportedException ... is missing native code`). The arm builds the delegate. The call through
+  it is a golib gap that no arm reaches.
+- `promoted`, arms OFF, fails at line 2: MISSED, and the falsifier FIRED. OFF prints lines 1 to 3 equal to Go, so
+  increment 1's run-time binder already covers a promoted value method through `T` and through `*T`, unbound
+  included, and the promoted arms are not what fixes those lines. OFF stops at line 4 one step earlier than ON:
+  binding `Join` needs `Expression<Funcꓸꓸꓸ<string, string, string>>`, which has no native code.
+
+So for this probe the arms move the variadic failure from the bind to the call, and they change no line's output.
+Lines 5 and 6 are unmeasured in both arms. Line 6, the pointer embed `Wrap`, is the one where a promoted arm could
+matter. The variadic invoke needs its own AOT-safe shape before this program can measure the promoted arms.
