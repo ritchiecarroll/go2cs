@@ -106,7 +106,8 @@ public sealed class TestExecution
     private readonly TestRunner m_runner;
     private readonly TestExecution? m_parent;
     private readonly object m_syncRoot = new();
-    private readonly Stack<Action> m_cleanups = new();
+    // Each cleanup with the stack that registered it (Go's cleanupPc, testing.go:1393).
+    private readonly Stack<(Action Cleanup, slice<uintptr> Pc)> m_cleanups = new();
     private readonly List<string> m_logs = [];
     private readonly Dictionary<string, int> m_subtestNames = new(StringComparer.Ordinal);
     private readonly ManualResetEventSlim m_parallelGate = new(false);
@@ -1118,6 +1119,11 @@ public sealed class TestExecution
         go.runtime_package.Frame first = default, previous = default;
         bool haveFirst = false;
 
+        // Go meets a running cleanup's wrapper frame (c.cleanupName) on the way out and walks on in the stack that
+        // registered it; here the next Go frame above a cleanup is tRunner itself, so reaching it while a cleanup
+        // runs is that same point, taken once.
+        bool cleanupWalked = false;
+
         while (frames.MoveNext())
         {
             go.runtime_package.Frame frame = frames.Current;
@@ -1137,6 +1143,14 @@ public sealed class TestExecution
 
             if (function == RunnerFunction)
             {
+                if (!cleanupWalked && c.RunningCleanupPc is { } cleanupPc)
+                {
+                    cleanupWalked = true;
+                    frames = FramesPastHost(cleanupPc).GetEnumerator();
+                    previous = frame;
+                    continue;
+                }
+
                 if (c.m_parent is { } parent && c.m_creator is { } creator)
                 {
                     frames = FramesPastHost(creator).GetEnumerator();
@@ -1239,6 +1253,11 @@ public sealed class TestExecution
     public void Cleanup(Action cleanup)
     {
         ArgumentNullException.ThrowIfNull(cleanup);
+
+        // Go's Cleanup keeps `runtime.Callers(2, pc[:])`, the stack that called t.Cleanup, for frameSkip to walk
+        // when a record logged from inside the cleanup passes its helpers (testing.go:1386-1404).
+        slice<uintptr> pc = Callers();
+
         lock (m_syncRoot)
         {
             // A cleanup registered after the test completed can never run (the cleanup phase is
@@ -1252,7 +1271,19 @@ public sealed class TestExecution
                 throw new InvalidOperationException($"Cleanup called after {Name} completed");
             }
 
-            m_cleanups.Push(cleanup);
+            m_cleanups.Push((cleanup, pc));
+        }
+    }
+
+    // Go's c.cleanupPc while a cleanup runs (set by its wrapper, testing.go:1395-1400), null otherwise. Under m_syncRoot.
+    private slice<uintptr>? m_cleanupPc;
+
+    private slice<uintptr>? RunningCleanupPc
+    {
+        get
+        {
+            lock (m_syncRoot)
+                return m_cleanupPc;
         }
     }
 
@@ -2160,7 +2191,7 @@ public sealed class TestExecution
             {
                 if (m_cleanups.Count == 0)
                     return;
-                cleanup = m_cleanups.Pop();
+                (cleanup, m_cleanupPc) = m_cleanups.Pop();
             }
 
             try
@@ -2182,6 +2213,12 @@ public sealed class TestExecution
                 lock (m_syncRoot)
                     AppendLog($"cleanup failed: {ex}");
                 FailFromInfrastructure();
+            }
+            finally
+            {
+                // Go's wrapper clears cleanupName and cleanupPc as the cleanup returns (testing.go:1395).
+                lock (m_syncRoot)
+                    m_cleanupPc = null;
             }
         }
     }
