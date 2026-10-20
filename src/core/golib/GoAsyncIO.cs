@@ -521,6 +521,70 @@ public static class GoAsyncIO
         onComplete(bytesTransferred);
         return true;
     }
+
+    // The parts other packages add to the first read deadline's pre-pay, in registration order.
+    private static readonly List<Action> s_deadlinePathPrepay = [];
+
+    /// <summary>
+    /// Registers a package's part of the first read deadline's one-time costs, for the poller to pay
+    /// when it starts.
+    /// </summary>
+    /// <param name="part">Work that compiles or first-touches that package's part of the path.</param>
+    /// <remarks>
+    /// <para>
+    /// A process's first read deadline would otherwise compile its path between the deadline instant
+    /// and the read's return (<c>internal/poll/deadline_prepay_impl.cs</c>). The path runs through
+    /// several packages, and the poller cannot name what is private to them or what lives above it
+    /// (<c>os</c> imports <c>internal/poll</c>), so each package registers its own part here, from its
+    /// module initializer, and the poller runs them all once. It lives in golib for the reason this
+    /// type does: it is the one assembly all of them see.
+    /// </para>
+    /// <para>
+    /// A part must not open, wait on or arm anything: it only compiles, or calls what Go would allow
+    /// on values nobody else holds.
+    /// </para>
+    /// </remarks>
+    public static void AddDeadlinePathPrepay(Action part)
+    {
+        ArgumentNullException.ThrowIfNull(part);
+
+        lock (s_deadlinePathPrepay)
+            s_deadlinePathPrepay.Add(part);
+    }
+
+    /// <summary>
+    /// Runs every part registered with <see cref="AddDeadlinePathPrepay"/>, each in its own try.
+    /// </summary>
+    /// <remarks>
+    /// The poller calls this once, from inside the FD.Init that started it. Go has no such step, so
+    /// nothing here may fail that FD.Init: a part that throws ends only itself, and its costs fall on
+    /// the first deadline instead.
+    /// </remarks>
+    public static void RunDeadlinePathPrepay()
+    {
+        Action[] parts;
+
+        lock (s_deadlinePathPrepay)
+            parts = [.. s_deadlinePathPrepay];
+
+        RunEach(parts);
+    }
+
+    // Runs each part in its own try, so one that throws cannot skip another.
+    internal static void RunEach(IEnumerable<Action> parts)
+    {
+        foreach (Action part in parts)
+        {
+            try
+            {
+                part();
+            }
+            catch (Exception)
+            {
+                // Leaves this part's costs to the first deadline.
+            }
+        }
+    }
 }
 
 /// <summary>

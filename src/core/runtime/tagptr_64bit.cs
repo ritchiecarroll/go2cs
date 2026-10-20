@@ -61,7 +61,7 @@ internal static readonly @string taggedPointerPackˢ = "taggedPointerPack"u8;
 // taggedPointerPack created a taggedPointer from a pointer and a tag.
 // Tag bits that don't fit in the result are discarded.
 internal static taggedPointer taggedPointerPack(@unsafe.Pointer ptr, uintptr tag) {
-    var t = (taggedPointer)((uint64)(uintptr)ptr << (int)((tagBits - tagAlignBits)) | (uint64)((uintptr)(tag & (uintptr)((1 << (int)(tagBits)) - 1))));
+    var t = (taggedPointer)((uint64)(uintptr)ptr << (int)(tagBits - tagAlignBits) | (uint64)((uintptr)(tag & (uintptr)((1 << (int)(tagBits)) - 1))));
     if ((uintptr)t.pointer() != ptr || t.tag() != tag) {
         print((@string)"runtime: taggedPointerPack invalid packing: ptr="u8, @unsafe.Pointer.OrTypedNil(ptr), (@string)" tag="u8, (Δhex)(uint64)tag, (@string)" packed="u8, (Δhex)(uint64)t, (@string)" -> ptr="u8, @unsafe.Pointer.OrTypedNil((uintptr)t.pointer()), (@string)" tag="u8, (Δhex)(uint64)t.tag(), (@string)"\n"u8);
         @throw(taggedPointerPackˢ);
@@ -84,7 +84,7 @@ internal static @unsafe.Pointer pointer(this taggedPointer tp) {
 
 // Tag returns the tag from a taggedPointer.
 internal static uintptr tag(this taggedPointer tp) {
-    return (uintptr)(uint64)((taggedPointer)(tp & (uint64)(((1 << (int)(tagBits)) - 1))));
+    return (uintptr)(uint64)((taggedPointer)(tp & (uint64)((1 << (int)(tagBits)) - 1)));
 }
 
 } // end runtime_package

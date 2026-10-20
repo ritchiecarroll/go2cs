@@ -173,7 +173,7 @@ internal static UntypedInt maxSparseFileEntries => /* 1 << 20 */ 1048576;
 // blockPadding computes the number of bytes needed to pad offset up to the
 // nearest block edge where 0 <= n < blockSize.
 internal static int64 /*n*/ blockPadding(int64 offset) {
-    return -offset & (int64)((blockSize - 1));
+    return -offset & (int64)(blockSize - 1);
 }
 
 internal static block zeroBlock;

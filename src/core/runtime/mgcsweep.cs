@@ -82,7 +82,7 @@ internal static void clear(this ж<sweepClass> Ꮡs) {
 // unswept lists for that class, indicated as a boolean
 // (true means "full").
 internal static (spanClass spc, bool full) split(this sweepClass s) {
-    return ((spanClass)(uint8)((uint32)((s >> 1))), (sweepClass)(s & 1) == 0);
+    return ((spanClass)(uint8)((uint32)(s >> 1)), (sweepClass)(s & 1) == 0);
 }
 
 // nextSpanForSweep finds and pops the next span for sweeping from the
@@ -691,7 +691,7 @@ internal static bool sweep(this ref sweepLocked sl, bool preserve) {
         // Check the first bitmap byte, where we have to be
         // careful with freeindex.
         var obj = (uintptr)(~s).freeindex;
-        if ((uint8)((((uint8)((~s).gcmarkBits.bytep(obj / 8).Value & ~(~s).allocBits.bytep(obj / 8).Value)) >> (int)((obj % 8)))) != 0) {
+        if ((uint8)((((uint8)((~s).gcmarkBits.bytep(obj / 8).Value & ~(~s).allocBits.bytep(obj / 8).Value)) >> (int)(obj % 8))) != 0) {
             s.reportZombies();
         }
         // Check remaining bytes.

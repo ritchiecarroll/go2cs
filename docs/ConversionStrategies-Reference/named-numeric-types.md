@@ -281,7 +281,7 @@ _ = u < 1<<8   // 1<<8 takes type uintptr
 ```
 ```csharp
 uintptr u = 7;
-_ = u < (uintptr)(1 << (int)(8));
+_ = u < (uintptr)1 << 8;
 ```
 
 The **narrow-width** flavor of the same shift-retype is a *behavioral* requirement, not just a compile fix: a sub-`int`-width left operand (`int8`/`uint8`/`int16`/`uint16`) promotes to `int` in a C# shift, so the shift computes at 32-bit width with no wraparound at the type's own width — where Go computes a shift in the operand's type. `byte(200) << 1` is 144 in Go (wraps at byte width) but 400 in the promoted C# `int` shift. The shift result is cast back to the **shift expression's resolved Go type**, so a var, *typed*-const, and *untyped*-const left operand all wrap alike (the untyped-const flavor was historically correct only via the wrapper retype above; typed left operands got no cast at all and produced the unwrapped value):

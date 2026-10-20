@@ -711,7 +711,7 @@ internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔInt || exprᴛ1 == Int8 || exprᴛ1 == Int16 || exprᴛ1 == Int32 || exprᴛ1 == Int64) {
         var bitSize = t.Size() * 8;
-        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
     }
     throw panic("reflect: OverflowInt of non-int type " + Ꮡt.String());
@@ -724,7 +724,7 @@ internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔUint || exprᴛ1 == Uintptr || exprᴛ1 == Uint8 || exprᴛ1 == Uint16 || exprᴛ1 == Uint32 || exprᴛ1 == Uint64) {
         var bitSize = t.Size() * 8;
-        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
     }
     throw panic("reflect: OverflowUint of non-uint type " + Ꮡt.String());
@@ -1703,10 +1703,10 @@ internal static void emitGCMask(slice<byte> @out, uintptr @base, ж<abi.Type> �
     var words = typ.Size_ / (uintptr)goarch.PtrSize;
     var mask = typ.GcSlice(0, (ptrs + 7) / 8);
     for (var j = (uintptr)0; j < ptrs; j++) {
-        if ((byte)((mask[j / 8] >> (int)((j % 8))) & 1) != 0) {
+        if ((byte)((mask[j / 8] >> (int)(j % 8)) & 1) != 0) {
             for (var i = (uintptr)0; i < n; i++) {
                 var k = @base + i * words + j;
-                @out[k / 8] |= (byte)((byte)(1 << (int)((k % 8))));
+                @out[k / 8] |= (byte)((byte)(1 << (int)(k % 8)));
             }
         }
     }
@@ -1966,7 +1966,7 @@ internal static void append(this ref bitVector bv, uint8 bit) {
             bv.data = builtin.append(bv.data, (byte)0);
         }
     }
-    bv.data[bv.n / 8] |= (uint8)((uint8)(bit << (int)((bv.n % 8))));
+    bv.data[bv.n / 8] |= (uint8)((uint8)(bit << (int)(bv.n % 8)));
     bv.n++;
 }
 

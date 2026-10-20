@@ -740,7 +740,7 @@ internal static uint32 msb32(Δnat x) {
     if (i < 0) {
         return 0;
     }
-    if (debugFloat && (Word)(x[i] & ((Word)((nuint)1 << (int)((_W - 1))))) == 0) {
+    if (debugFloat && (Word)(x[i] & ((Word)((nuint)1 << (int)(_W - 1)))) == 0) {
         throw panic("x not normalized");
     }
     var exprᴛ1 = _W;
@@ -759,7 +759,7 @@ internal static uint64 msb64(Δnat x) {
     if (i < 0) {
         return 0;
     }
-    if (debugFloat && (Word)(x[i] & ((Word)((nuint)1 << (int)((_W - 1))))) == 0) {
+    if (debugFloat && (Word)(x[i] & ((Word)((nuint)1 << (int)(_W - 1)))) == 0) {
         throw panic("x not normalized");
     }
     var exprᴛ1 = _W;
@@ -801,7 +801,7 @@ public static (uint64, Accuracy) Uint64(this ж<Float> Ꮡx) {
         // 1 <= x < Inf
         if (x.exp <= 64) {
             // u = trunc(x) fits into a uint64
-            var u = msb64(x.mant).Rsh((uint64)((64 - (uint32)x.exp)));
+            var u = msb64(x.mant).Rsh((uint64)(64 - (uint32)x.exp));
             if (x.MinPrec() <= 64) {
                 return (u, Exact);
             }
@@ -848,7 +848,7 @@ public static (int64, Accuracy) Int64(this ж<Float> Ꮡx) {
         // 1 <= |x| < +Inf
         if (x.exp <= 63) {
             // i = trunc(x) fits into an int64 (excluding math.MinInt64)
-            var i = (int64)(msb64(x.mant).Rsh((uint64)((64 - (uint32)x.exp))));
+            var i = (int64)(msb64(x.mant).Rsh((uint64)(64 - (uint32)x.exp)));
             if (x.neg) {
                 i = -i;
             }
@@ -965,7 +965,7 @@ public static (float32, Accuracy) Float32(this ж<Float> Ꮡx) {
         uint32 bexp = default!;
         uint32 mant = default!;
         if (x.neg) {
-            sign = (uint32)1 << (int)((fbits - 1));
+            sign = (uint32)1 << (int)(fbits - 1);
         }
 
         // Rounding may have caused a denormal number to
@@ -980,7 +980,7 @@ public static (float32, Accuracy) Float32(this ж<Float> Ꮡx) {
         } else {
             // normal number: emin <= e <= emax
             bexp = (uint32)(e + (int32)bias) << (int)(mbits);
-            mant = msb32(r.mant) >> (int)(ebits) & (uint32)(((1 << (int)(mbits)) - 1)); // cut off msb (implicit 1 bit)
+            mant = msb32(r.mant) >> (int)(ebits) & (uint32)((1 << (int)(mbits)) - 1); // cut off msb (implicit 1 bit)
         }
 
         return (math.Float32frombits(sign | bexp | mant), r.acc);
@@ -1087,7 +1087,7 @@ public static (float64, Accuracy) Float64(this ж<Float> Ꮡx) {
         uint64 bexp = default!;
         uint64 mant = default!;
         if (x.neg) {
-            sign = (uint64)1 << (int)((fbits - 1));
+            sign = (uint64)1 << (int)(fbits - 1);
         }
 
         // Rounding may have caused a denormal number to
@@ -1102,7 +1102,7 @@ public static (float64, Accuracy) Float64(this ж<Float> Ꮡx) {
         } else {
             // normal number: emin <= e <= emax
             bexp = (uint64)(e + (int32)bias) << (int)(mbits);
-            mant = msb64(r.mant) >> (int)(ebits) & (uint64)(((uint64)(4503599627370496L - 1))); // cut off msb (implicit 1 bit)
+            mant = msb64(r.mant) >> (int)(ebits) & (uint64)((uint64)(4503599627370496L - 1)); // cut off msb (implicit 1 bit)
         }
 
         return (math.Float64frombits(sign | bexp | mant), r.acc);

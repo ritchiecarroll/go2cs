@@ -597,7 +597,7 @@ public static bool IsMulticast(this ΔAddr ip) {
     // IP Version 6 Addressing Architecture (2.4 Address Type Identification)
     // https://datatracker.ietf.org/doc/html/rfc4291#section-2.4
     if (ip.Is6()) {
-        return ip.addr.hi >> (int)((64 - 8)) == 0xff; // ip.v6(0) == 0xff
+        return ip.addr.hi >> (int)(64 - 8) == 0xff; // ip.v6(0) == 0xff
     }
     return false; // zero value
 }
@@ -1551,7 +1551,7 @@ public static bool Contains(this ΔPrefix p, ΔAddr ip) {
         // the compiler doesn't know that, so mask with 63 to help it.
         // Now truncate to 32 bits, because this is IPv4.
         // If all the bits we care about are equal, the result will be zero.
-        return (uint32)((ip.addr.lo ^ p.ip.addr.lo) >> (int)(((32 - p.Bits()) & 63))) == 0;
+        return (uint32)((ip.addr.lo ^ p.ip.addr.lo) >> (int)((32 - p.Bits()) & 63)) == 0;
     } else {
         // xor the IP addresses together.
         // Mask away the bits we don't care about.

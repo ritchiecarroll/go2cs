@@ -560,14 +560,14 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
                 var mΔ1 = (~gΔ1.ctrls()).matchEmptyOrDeleted();
                 if (mΔ1 != 0) { // must be deleted, not empty, as we haven't found our key yet
                     // Mark this group's tombstone as required.
-                    needed[seq.offset / 32] |= (uint32)(((uint32)1 << (int)((seq.offset % 32))));
+                    needed[seq.offset / 32] |= (uint32)(((uint32)1 << (int)(seq.offset % 32)));
                 }
             }
         }
         if ((~g.ctrls()).matchEmpty() != 0) {
             // Also mark non-tombstone-containing groups, so we don't try
             // to remove tombstones from them below.
-            needed[i / 32] |= (uint32)(((uint32)1 << (int)((i % 32))));
+            needed[i / 32] |= (uint32)(((uint32)1 << (int)(i % 32)));
         }
     }
 
@@ -576,7 +576,7 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
     // enough of them to justify the O(n) cost.
     nint cnt = 0;
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
-        if ((needed[i / 32] >> (int)((i % 32)) & 1) != 0) {
+        if ((needed[i / 32] >> (int)(i % 32) & 1) != 0) {
             continue;
         }
         var g = t.groups.group(Ꮡtyp, i);
@@ -589,7 +589,7 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
 
     // Prune unneeded tombstones.
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
-        if ((needed[i / 32] >> (int)((i % 32)) & 1) != 0) {
+        if ((needed[i / 32] >> (int)(i % 32) & 1) != 0) {
             continue;
         }
         var g = t.groups.group(Ꮡtyp, i);
@@ -977,7 +977,7 @@ public static void Next(this ref Iter it) {
         // match.
 
         var entryIdx = (it.entryIdx + it.entryOffset) & entryMask;
-        var slotIdx = (uintptr)(entryIdx & (uint64)((abi.MapGroupSlots - 1)));
+        var slotIdx = (uintptr)(entryIdx & (uint64)(abi.MapGroupSlots - 1));
         if (slotIdx == 0 || it.group.data == nil) {
             // Only compute the group (a) when we switch
             // groups (slotIdx rolls over) and (b) on the
@@ -1043,7 +1043,7 @@ next:
         bitset groupMatch = default!;
         while (it.entryIdx <= entryMask) {
             var entryIdxΔ1 = (it.entryIdx + it.entryOffset) & entryMask;
-            var slotIdxΔ1 = (uintptr)(entryIdxΔ1 & (uint64)((abi.MapGroupSlots - 1)));
+            var slotIdxΔ1 = (uintptr)(entryIdxΔ1 & (uint64)(abi.MapGroupSlots - 1));
 
             if (slotIdxΔ1 == 0 || it.group.data == nil) {
                 // Only compute the group (a) when we switch

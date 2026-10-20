@@ -1231,7 +1231,7 @@ public static Value ToComplex(Value x) {
 // is32bit reports whether x can be represented using 32 bits.
 internal static bool is32bit(int64 x) {
     UntypedInt s = 32;
-    return (int64)(((int64)(-1) << (int)((s - 1)))) <= x && x <= (int64)(2147483648L - 1);
+    return (int64)((int64)(-1) << (int)(s - 1)) <= x && x <= (int64)(2147483648L - 1);
 }
 
 // is63bit reports whether x can be represented using 63 bits.

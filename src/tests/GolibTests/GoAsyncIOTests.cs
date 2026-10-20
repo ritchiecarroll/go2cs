@@ -710,4 +710,24 @@ public class GoAsyncIOTests
 
         GoAsyncIO.RemoveDescriptor(reused);
     }
+
+    // The deadline pre-pay's parts run inside the FD.Init that starts the poller, so a part that throws
+    // must neither fail that FD.Init nor skip a part registered after it (G's review of the pre-pay:
+    // red at dd65b04763 with a planted throwing hook, where the first os.Pipe failed in FD.Init).
+    [TestMethod]
+    public void DeadlinePathPrepayPartThatThrowsStillRunsTheNextPart()
+    {
+        List<string> ran = [];
+
+        GoAsyncIO.RunEach([
+            () =>
+            {
+                ran.Add("throws");
+                throw new InvalidOperationException("planted pre-pay failure");
+            },
+            () => ran.Add("next")
+        ]);
+
+        CollectionAssert.AreEqual(new[] { "throws", "next" }, ran);
+    }
 }

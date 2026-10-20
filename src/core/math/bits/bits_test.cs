@@ -101,7 +101,7 @@ public static void BenchmarkLeadingZeros(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros((nuint)Input >> (int)(((nuint)i % (nuint)UintSize)));
+        s += LeadingZeros((nuint)Input >> (int)((nuint)i % (nuint)UintSize));
     }
     Output = s;
 }
@@ -111,7 +111,7 @@ public static void BenchmarkLeadingZeros8(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros8((uint8)(((uint8)Input >> (int)(((nuint)i % 8)))));
+        s += LeadingZeros8((uint8)(((uint8)Input >> (int)((nuint)i % 8))));
     }
     Output = s;
 }
@@ -121,7 +121,7 @@ public static void BenchmarkLeadingZeros16(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros16((uint16)(((uint16)Input >> (int)(((nuint)i % 16)))));
+        s += LeadingZeros16((uint16)(((uint16)Input >> (int)((nuint)i % 16))));
     }
     Output = s;
 }
@@ -131,7 +131,7 @@ public static void BenchmarkLeadingZeros32(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros32((uint32)Input >> (int)(((nuint)i % 32)));
+        s += LeadingZeros32((uint32)Input >> (int)((nuint)i % 32));
     }
     Output = s;
 }
@@ -141,7 +141,7 @@ public static void BenchmarkLeadingZeros64(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros64((uint64)Input >> (int)(((nuint)i % 64)));
+        s += LeadingZeros64((uint64)Input >> (int)((nuint)i % 64));
     }
     Output = s;
 }
@@ -212,7 +212,7 @@ public static void BenchmarkTrailingZeros(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros((nuint)Input << (int)(((nuint)i % (nuint)UintSize)));
+        s += TrailingZeros((nuint)Input << (int)((nuint)i % (nuint)UintSize));
     }
     Output = s;
 }
@@ -222,7 +222,7 @@ public static void BenchmarkTrailingZeros8(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros8((uint8)((uint8)Input << (int)(((nuint)i % 8))));
+        s += TrailingZeros8((uint8)((uint8)Input << (int)((nuint)i % 8)));
     }
     Output = s;
 }
@@ -232,7 +232,7 @@ public static void BenchmarkTrailingZeros16(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros16((uint16)((uint16)Input << (int)(((nuint)i % 16))));
+        s += TrailingZeros16((uint16)((uint16)Input << (int)((nuint)i % 16)));
     }
     Output = s;
 }
@@ -242,7 +242,7 @@ public static void BenchmarkTrailingZeros32(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros32((uint32)Input << (int)(((nuint)i % 32)));
+        s += TrailingZeros32((uint32)Input << (int)((nuint)i % 32));
     }
     Output = s;
 }
@@ -252,7 +252,7 @@ public static void BenchmarkTrailingZeros64(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros64((uint64)Input << (int)(((nuint)i % 64)));
+        s += TrailingZeros64((uint64)Input << (int)((nuint)i % 64));
     }
     Output = s;
 }
@@ -374,7 +374,7 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
     for (nuint k = (nuint)0; k < 128; k++) {
         var x8 = (uint8)m;
         var got8 = RotateLeft8(x8, (nint)k);
-        var want8 = (uint8)((uint8)(x8 << (int)((k & 0x7))) | x8.Rsh((8 - (k & 0x7))));
+        var want8 = (uint8)((uint8)(x8 << (int)(k & 0x7)) | x8.Rsh((8 - (k & 0x7))));
         if (got8 != want8) {
             Ꮡt.Fatalf("RotateLeft8(%#02x, %d) == %#02x; want %#02x"u8, x8, k, got8, want8);
         }
@@ -385,7 +385,7 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
 
         var x16 = (uint16)m;
         var got16 = RotateLeft16(x16, (nint)k);
-        var want16 = (uint16)((uint16)(x16 << (int)((k & 0xf))) | x16.Rsh((16 - (k & 0xf))));
+        var want16 = (uint16)((uint16)(x16 << (int)(k & 0xf)) | x16.Rsh((16 - (k & 0xf))));
         if (got16 != want16) {
             Ꮡt.Fatalf("RotateLeft16(%#04x, %d) == %#04x; want %#04x"u8, x16, k, got16, want16);
         }
@@ -396,7 +396,7 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
 
         var x32 = (uint32)m;
         var got32 = RotateLeft32(x32, (nint)k);
-        var want32 = x32 << (int)((k & 0x1f)) | x32.Rsh((32 - (k & 0x1f)));
+        var want32 = x32 << (int)(k & 0x1f) | x32.Rsh((32 - (k & 0x1f)));
         if (got32 != want32) {
             Ꮡt.Fatalf("RotateLeft32(%#08x, %d) == %#08x; want %#08x"u8, x32, k, got32, want32);
         }
@@ -407,7 +407,7 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
         if (UintSize == 32) {
             nuint x = (nuint)m;
             nuint got = RotateLeft(x, (nint)k);
-            nuint want = x << (int)((k & 0x1f)) | x.Rsh((32 - (k & 0x1f)));
+            nuint want = x << (int)(k & 0x1f) | x.Rsh((32 - (k & 0x1f)));
             if (got != want) {
                 Ꮡt.Fatalf("RotateLeft(%#08x, %d) == %#08x; want %#08x"u8, x, k, got, want);
             }
@@ -419,7 +419,7 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
 
         var x64 = (uint64)m;
         var got64 = RotateLeft64(x64, (nint)k);
-        var want64 = x64 << (int)((k & 0x3f)) | x64.Rsh((64 - (k & 0x3f)));
+        var want64 = x64 << (int)(k & 0x3f) | x64.Rsh((64 - (k & 0x3f)));
         if (got64 != want64) {
             Ꮡt.Fatalf("RotateLeft64(%#016x, %d) == %#016x; want %#016x"u8, x64, k, got64, want64);
         }
@@ -430,7 +430,7 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
         if (UintSize == 64) {
             nuint x = (nuint)m;
             nuint got = RotateLeft(x, (nint)k);
-            nuint want = x << (int)((k & 0x3f)) | x.Rsh((64 - (k & 0x3f)));
+            nuint want = x << (int)(k & 0x3f) | x.Rsh((64 - (k & 0x3f)));
             if (got != want) {
                 Ꮡt.Fatalf("RotateLeft(%#016x, %d) == %#016x; want %#016x"u8, x, k, got, want);
             }
@@ -531,21 +531,21 @@ public static void TestReverse(ж<testing.T> Ꮡt) {
 internal static void testReverse(ж<testing.T> Ꮡt, uint64 x64, uint64 want64) {
     var x8 = (uint8)x64;
     var got8 = Reverse8(x8);
-    var want8 = (uint8)(want64 >> (int)((64 - 8)));
+    var want8 = (uint8)(want64 >> (int)(64 - 8));
     if (got8 != want8) {
         Ꮡt.Fatalf("Reverse8(%#02x) == %#02x; want %#02x"u8, x8, got8, want8);
     }
 
     var x16 = (uint16)x64;
     var got16 = Reverse16(x16);
-    var want16 = (uint16)(want64 >> (int)((64 - 16)));
+    var want16 = (uint16)(want64 >> (int)(64 - 16));
     if (got16 != want16) {
         Ꮡt.Fatalf("Reverse16(%#04x) == %#04x; want %#04x"u8, x16, got16, want16);
     }
 
     var x32 = (uint32)x64;
     var got32 = Reverse32(x32);
-    var want32 = (uint32)(want64 >> (int)((64 - 32)));
+    var want32 = (uint32)(want64 >> (int)(64 - 32));
     if (got32 != want32) {
         Ꮡt.Fatalf("Reverse32(%#08x) == %#08x; want %#08x"u8, x32, got32, want32);
     }
@@ -646,14 +646,14 @@ public static void TestReverseBytes(ж<testing.T> Ꮡt) {
 internal static void testReverseBytes(ж<testing.T> Ꮡt, uint64 x64, uint64 want64) {
     var x16 = (uint16)x64;
     var got16 = ReverseBytes16(x16);
-    var want16 = (uint16)(want64 >> (int)((64 - 16)));
+    var want16 = (uint16)(want64 >> (int)(64 - 16));
     if (got16 != want16) {
         Ꮡt.Fatalf("ReverseBytes16(%#04x) == %#04x; want %#04x"u8, x16, got16, want16);
     }
 
     var x32 = (uint32)x64;
     var got32 = ReverseBytes32(x32);
-    var want32 = (uint32)(want64 >> (int)((64 - 32)));
+    var want32 = (uint32)(want64 >> (int)(64 - 32));
     if (got32 != want32) {
         Ꮡt.Fatalf("ReverseBytes32(%#08x) == %#08x; want %#08x"u8, x32, got32, want32);
     }
@@ -1092,7 +1092,7 @@ public static void TestMulDiv(ж<testing.T> Ꮡt) {
         }
     }
     foreach (var (_, a) in new TestMulDiv_type[]{
-        new((nuint)1 << (int)((UintSize - 1)), 2, 1, 0, 1),
+        new((nuint)1 << (int)(UintSize - 1), 2, 1, 0, 1),
         new(_M, _M, _M - 1, 1, 42)
     }.slice()) {
         testMul(mulˢ, Mul, a.x, a.y, a.hi, a.lo);
