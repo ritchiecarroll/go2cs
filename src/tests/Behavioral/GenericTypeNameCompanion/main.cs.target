@@ -32,7 +32,7 @@ internal static void Main() {
     nameOf<inlineIface, inlineIface>("inlineIface");
     nameOf<ordinary, ordinary>("ordinary");
 
-    sizeOf("neg-ordinary", ((ordinary)(@string)"x"u8));
+    sizeOf("neg-ordinary", (ordinary)(@string)"x"u8);
     sizeOf<eface>("neg-eface", default!);
 }
 

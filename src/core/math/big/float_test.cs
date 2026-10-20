@@ -586,7 +586,7 @@ public static void TestFloatSetUint64(ж<testing.T> Ꮡt) {
         10,
         100,
         (uint64)(4294967296L - 1),
-        ((uint64)1 << (int)(32)),
+        (uint64)1 << 32,
         18446744073709551615UL
     }.slice()) {
         ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
@@ -603,7 +603,7 @@ public static void TestFloatSetUint64(ж<testing.T> Ꮡt) {
     for (nuint prec = (nuint)1; prec <= 64; prec++) {
         var f = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(ToZero).SetUint64(x);
         var got = f.uint64();
-        var want = (uint64)(x & ~(((uint64)1).Lsh((64 - prec)) - 1)); // cut off (round to zero) low 64-prec bits
+        var want = x & ~(((uint64)1).Lsh((64 - prec)) - 1); // cut off (round to zero) low 64-prec bits
         if (got != want) {
             Ꮡt.Errorf("got %#x (%s); want %#x"u8, got, f.Text((rune)'p', 0), want);
         }
@@ -624,7 +624,7 @@ public static void TestFloatSetInt64(ж<testing.T> Ꮡt) {
         var want = vᴛ1;
 
         foreach (var (i, _) in new nint[]{}.array(2)) {
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 want = -want;
             }
             ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
@@ -642,7 +642,7 @@ public static void TestFloatSetInt64(ж<testing.T> Ꮡt) {
     for (nuint prec = (nuint)1; prec <= 63; prec++) {
         var f = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(ToZero).SetInt64(x);
         var got = f.int64();
-        var want = (int64)(x & ~(((int64)1).Lsh((63 - prec)) - 1)); // cut off (round to zero) low 63-prec bits
+        var want = x & ~(((int64)1).Lsh((63 - prec)) - 1); // cut off (round to zero) low 63-prec bits
         if (got != want) {
             Ꮡt.Errorf("got %#x (%s); want %#x"u8, got, f.Text((rune)'p', 0), want);
         }
@@ -673,7 +673,7 @@ public static void TestFloatSetFloat64(ж<testing.T> Ꮡt) {
             var want = vᴛ1;
 
             foreach (var (i, _) in new nint[]{}.array(2)) {
-                if ((nint)(i & 1) != 0) {
+                if ((i & 1) != 0) {
                     want = -want;
                 }
                 ref var fΔ1 = ref heap(new global::go.math.big_package.Float(), out var ᏑfΔ1);
@@ -691,7 +691,7 @@ public static void TestFloatSetFloat64(ж<testing.T> Ꮡt) {
         for (nuint prec = (nuint)1; prec <= 52; prec++) {
             var fΔ2 = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(ToZero).SetFloat64((float64)x);
             var (got, _) = fΔ2.Float64();
-            var want = (float64)((uint64)(x & ~(((uint64)1).Lsh((52 - prec)) - 1))); // cut off (round to zero) low 53-prec bits
+            var want = (float64)(x & ~(((uint64)1).Lsh((52 - prec)) - 1)); // cut off (round to zero) low 53-prec bits
             if (got != want) {
                 Ꮡt.Errorf("got %g (%s); want %g"u8, got, fΔ2.Text((rune)'p', 0), want);
             }
@@ -1382,7 +1382,7 @@ public static void TestFloatAdd32(ж<testing.T> Ꮡt) {
     for (nint d = 0; d <= 0x10; d++) {
         foreach (var (i, _) in new nint[]{}.array(2)) {
             var (x0, y0) = ((float64)@base, (float64)d);
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 (x0, y0) = (y0, x0);
             }
 
@@ -1415,7 +1415,7 @@ public static void TestFloatAdd64(ж<testing.T> Ꮡt) {
     for (nint d = 0; d <= 0x10; d++) {
         foreach (var (i, _) in new nint[]{}.array(2)) {
             var (x0, y0) = ((float64)@base, (float64)d);
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 (x0, y0) = (y0, x0);
             }
 
@@ -1528,13 +1528,13 @@ public static void TestFloatMul64(ж<testing.T> Ꮡt) {
     }.slice()) {
         foreach (var (i, _) in new nint[]{}.array(8)) {
             var (x0, y0) = (test.x, test.y);
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 x0 = -x0;
             }
-            if ((nint)(i & 2) != 0) {
+            if ((i & 2) != 0) {
                 y0 = -y0;
             }
-            if ((nint)(i & 4) != 0) {
+            if ((i & 4) != 0) {
                 (x0, y0) = (y0, x0);
             }
 
@@ -1606,13 +1606,13 @@ public static void TestFloatQuo(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 8; i++) {
         // compute accurate (not rounded) result z
         var bits = new ΔBits(new nint[]{preci - 1}.slice());
-        if ((nint)(i & 3) != 0) {
-            bits = append(bits, (nint)(0));
+        if ((i & 3) != 0) {
+            bits = append(bits, (nint)0);
         }
-        if ((nint)(i & 2) != 0) {
+        if ((i & 2) != 0) {
             bits = append(bits, (nint)(-1));
         }
-        if ((nint)(i & 1) != 0) {
+        if ((i & 1) != 0) {
             bits = append(bits, -precf);
         }
         var z = bits.ΔFloat();

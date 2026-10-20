@@ -77,7 +77,7 @@ internal static void Main() {
     (s, ok) = pmslib.TrySpeak(new WrongSig(nil));
     report("WrongSig       ", s, ok);
 
-    (s, ok) = pmslib.TrySpeak((nint)(42));
+    (s, ok) = pmslib.TrySpeak((nint)42);
     report("int            ", s, ok);
 
     (s, ok) = pmslib.TryGet(new gbox<nint>(v: 7));

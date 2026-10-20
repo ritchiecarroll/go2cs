@@ -250,9 +250,9 @@ public static void TestFormatShortYear(ж<Δtesting.T> Ꮡt) {
         if (y < 0){
             // The 4 in %04d counts the - sign, so print -y instead
             // and introduce our own - sign.
-            want = fmt.Sprintf("-%04d.%02d.%02d"u8, -y, (nint)(1), (nint)(1));
+            want = fmt.Sprintf("-%04d.%02d.%02d"u8, -y, (nint)1, (nint)1);
         } else {
-            want = fmt.Sprintf("%04d.%02d.%02d"u8, y, (nint)(1), (nint)(1));
+            want = fmt.Sprintf("%04d.%02d.%02d"u8, y, (nint)1, (nint)1);
         }
         if (result != want) {
             Ꮡt.Errorf("(jan 1 %d).Format(\"2006.01.02\") = %q, want %q"u8, y, result, want);
@@ -555,22 +555,22 @@ internal static void checkTime(Δtime.Time time, ж<ParseTest> Ꮡtest, ж<Δtes
 
     // The time should be Thu Feb  4 21:00:57 PST 2010
     if (test.yearSign >= 0 && test.yearSign * time.Year() != 2010) {
-        Ꮡt.Errorf("%s: bad year: %d not %d"u8, test.name, time.Year(), (nint)(2010));
+        Ꮡt.Errorf("%s: bad year: %d not %d"u8, test.name, time.Year(), (nint)2010);
     }
     if (time.Month() != February) {
         Ꮡt.Errorf("%s: bad month: %s not %s"u8, test.name, time.Month(), February);
     }
     if (time.Day() != 4) {
-        Ꮡt.Errorf("%s: bad day: %d not %d"u8, test.name, time.Day(), (nint)(4));
+        Ꮡt.Errorf("%s: bad day: %d not %d"u8, test.name, time.Day(), (nint)4);
     }
     if (time.Hour() != 21) {
-        Ꮡt.Errorf("%s: bad hour: %d not %d"u8, test.name, time.Hour(), (nint)(21));
+        Ꮡt.Errorf("%s: bad hour: %d not %d"u8, test.name, time.Hour(), (nint)21);
     }
     if (time.Minute() != 0) {
-        Ꮡt.Errorf("%s: bad minute: %d not %d"u8, test.name, time.Minute(), (nint)(0));
+        Ꮡt.Errorf("%s: bad minute: %d not %d"u8, test.name, time.Minute(), (nint)0);
     }
     if (time.Second() != 57) {
-        Ꮡt.Errorf("%s: bad second: %d not %d"u8, test.name, time.Second(), (nint)(57));
+        Ꮡt.Errorf("%s: bad second: %d not %d"u8, test.name, time.Second(), (nint)57);
     }
     // Nanoseconds must be checked against the precision of the input.
     var (nanosec, err) = strconv.ParseUint(((@string)"012345678"u8.slice(0, test.fracDigits)) + "000000000"u8.slice(0, 9 - test.fracDigits), 10, 0);
@@ -997,7 +997,7 @@ public static void TestParseYday(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("unexpected error for %s: %v"u8, d, err);
         } else 
         if (tm.Year() != 2020 || tm.YearDay() != i) {
-            Ꮡt.Errorf("got year %d yearday %d, want %d %d"u8, tm.Year(), tm.YearDay(), (nint)(2020), i);
+            Ꮡt.Errorf("got year %d yearday %d, want %d %d"u8, tm.Year(), tm.YearDay(), (nint)2020, i);
         }
     }
 }
@@ -1108,8 +1108,8 @@ public static void FuzzFormatRFC3339(ж<Δtesting.F> Ꮡf) {
     }.slice(), 2)) {
         var ts = vᴛ1.Clone();
 
-        f.Add(ts[0], ts[1], true, false, (nint)(0));
-        f.Add(ts[0], ts[1], false, true, (nint)(0));
+        f.Add(ts[0], ts[1], true, false, (nint)0);
+        f.Add(ts[0], ts[1], false, true, (nint)0);
         foreach (var (_, offset) in new nint[]{0, 60, 60 * 60, 99 * 60 * 60 + 99 * 60, 123456789}.slice()) {
             f.Add(ts[0], ts[1], false, false, -offset);
             f.Add(ts[0], ts[1], false, false, +offset);

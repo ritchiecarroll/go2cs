@@ -368,7 +368,7 @@ internal static nint nextslicecap(nint newLen, nint oldCap) {
         // Transition from growing 2x for small slices
         // to growing 1.25x for large slices. This formula
         // gives a smooth-ish transition between the two.
-        newcap += ((newcap + (nint)(3 * threshold)) >> (int)(2));
+        newcap += ((newcap + (nint)(3 * threshold)) >> 2);
 
         // We need to check `newcap >= newLen` and whether `newcap` overflowed.
         // newLen is guaranteed to be larger than zero, hence

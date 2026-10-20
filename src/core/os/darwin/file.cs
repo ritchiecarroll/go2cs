@@ -468,7 +468,7 @@ public static (ж<File>, error) OpenFile(@string name, nint flag, FileMode perm)
     if (err != default!) {
         return (default!, err);
     }
-    f.Value.appendMode = (nint)(flag & O_APPEND) != 0;
+    f.Value.appendMode = (flag & O_APPEND) != 0;
 
     return (f, default!);
 }

@@ -327,7 +327,7 @@ public static void TestParseAddrPort(ж<testing.T> Ꮡt) {
                 tΔ3.Fatal(err);
             }
             if (((sstring)gotb) != jsin) {
-                tΔ3.Errorf("Marshal = %q; want %q"u8, ((@string)gotb), jsin);
+                tΔ3.Errorf("Marshal = %q; want %q"u8, (@string)gotb, jsin);
             }
         });
     }
@@ -363,7 +363,7 @@ public static void TestAddrPortMarshalUnmarshal(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("failed to marshal: %v"u8, err);
             }
 
-            @string back = ((@string)ippb);
+            @string back = (@string)ippb;
             if (orig != back) {
                 tΔ1.Errorf("Marshal = %q; want %q"u8, back, orig);
             }

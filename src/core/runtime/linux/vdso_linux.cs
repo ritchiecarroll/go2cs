@@ -57,7 +57,7 @@ internal static uintptr vdsoBloomSizeScale => /* unsafe.Sizeof(uintptr(0)) / 4 *
 
 /* How to extract and insert information held in the st_info field.  */
 internal static byte _ELF_ST_BIND(byte val) {
-    return (byte)((val >> (int)(4)));
+    return (byte)((val >> 4));
 }
 
 internal static byte _ELF_ST_TYPE(byte val) {
@@ -263,13 +263,13 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
         }
         for (; ᐧ ; symIndex++) {
             var hash = info.chain[symIndex - info.symOff];
-            if ((uint32)(hash | 1) == (uint32)(k.gnuHash | 1)) {
+            if ((hash | 1) == (k.gnuHash | 1)) {
                 // Found a hash match.
                 if (apply(symIndex, k)) {
                     break;
                 }
             }
-            if ((uint32)(hash & 1) != 0) {
+            if ((hash & 1) != 0) {
                 // End of chain.
                 break;
             }

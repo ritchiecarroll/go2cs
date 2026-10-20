@@ -37,7 +37,7 @@ internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) {
     for (nint i = 0; i < N; i++) {
         testBytes[i] = (byte)((rune)'a' + (byte)(i % 26));
     }
-    testString = ((@string)testBytes);
+    testString = (@string)testBytes;
 }
 
 // Verify that contents of buf match the string s.
@@ -59,7 +59,7 @@ internal static void check(ж<testing.T> Ꮡt, @string testname, ж<bytes.Buffer
     }
 
     if (((sstring)bytes) != s) {
-        Ꮡt.Errorf("%s: string(buf.Bytes()) == %q, s == %q"u8, testname, ((@string)bytes), s);
+        Ꮡt.Errorf("%s: string(buf.Bytes()) == %q, s == %q"u8, testname, (@string)bytes, s);
     }
 }
 
@@ -375,7 +375,7 @@ public static void TestReadFromPanicReader(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         if (i != 0) {
-            Ꮡt.Fatalf("unexpected return from bytes.ReadFrom (1): got: %d, want %d"u8, i, (nint)(0));
+            Ꮡt.Fatalf("unexpected return from bytes.ReadFrom (1): got: %d, want %d"u8, i, (nint)0);
         }
         check(Ꮡt, testReadFromPanicReader1ˢ, Ꮡbuf, ""u8);
 
@@ -791,7 +791,7 @@ public static void TestBufferGrowth(ж<testing.T> Ꮡt) {
     var buf = new slice<byte>(1024);
     b.Write(buf[0..1]);
     nint cap0 = default!;
-    for (nint i = 0; i < (5 << (int)(10)); i++) {
+    for (nint i = 0; i < 5 << 10; i++) {
         b.Write(buf);
         b.Read(buf);
         if (i == 0) {
@@ -843,7 +843,7 @@ public static void BenchmarkBufferNotEmptyWriteRead(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         bytes.Buffer bΔ1 = default!;
         bΔ1.Write(buf[0..1]);
-        for (nint iΔ1 = 0; iΔ1 < (5 << (int)(10)); iΔ1++) {
+        for (nint iΔ1 = 0; iΔ1 < 5 << 10; iΔ1++) {
             bΔ1.Write(buf);
             bΔ1.Read(buf);
         }
@@ -861,7 +861,7 @@ public static void BenchmarkBufferFullSmallReads(ж<testing.B> Ꮡb) {
         while (bΔ1.Len() + 20 < bΔ1.Cap()) {
             bΔ1.Write(buf[..10]);
         }
-        for (nint iΔ1 = 0; iΔ1 < (5 << (int)(10)); iΔ1++) {
+        for (nint iΔ1 = 0; iΔ1 < 5 << 10; iΔ1++) {
             bΔ1.Read(buf[..1]);
             bΔ1.Write(buf[..1]);
         }
@@ -870,7 +870,7 @@ public static void BenchmarkBufferFullSmallReads(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkBufferWriteBlock(ж<testing.B> Ꮡb) {
     var block = new slice<byte>(1024);
-    foreach (var (_, n) in new nint[]{(1 << (int)(12)), (1 << (int)(16)), (1 << (int)(20))}.slice()) {
+    foreach (var (_, n) in new nint[]{1 << 12, 1 << 16, 1 << 20}.slice()) {
         var blockʗ1 = block;
         Ꮡb.Run(fmt.Sprintf("N%d"u8, n), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
@@ -888,7 +888,7 @@ public static void BenchmarkBufferAppendNoCopy(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     bytes.Buffer bb = default!;
-    bb.Grow((16 << (int)(20)));
+    bb.Grow(16 << 20);
     b.SetBytes((int64)bb.Available());
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {

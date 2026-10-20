@@ -273,7 +273,7 @@ internal static @string cssValueFilter(params ꓸꓸꓸany argsʗp) {
     if (bytes.Contains(id, expressionBytes) || bytes.Contains(id, mozBindingBytes)) {
         return filterFailsafe;
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 } // end template_package

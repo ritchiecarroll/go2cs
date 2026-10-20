@@ -1399,7 +1399,7 @@ internal static Errno /*res*/ readdir_r(uintptr dir, ж<Dirent> Ꮡentry, ж<ж<
         var (r0, _, _) = syscall(abi.FuncPCABI0(libc_readdir_r_trampoline), (uintptr)dir, (uintptr)ᴋ60, (uintptr)ᴋ61);
     System.GC.KeepAlive(ᴋ60);
     System.GC.KeepAlive(ᴋ61);
-    res = ((Errno)r0);
+    res = (Errno)r0;
     return res;
 }
 

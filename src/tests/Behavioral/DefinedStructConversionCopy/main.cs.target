@@ -21,20 +21,20 @@ partial struct Grid /*grid*/;
 internal static void Main() {
     Counts c = new();
     c.vals[1] = 5;
-    var b = ((counts)c);
+    var b = (counts)c;
     b.vals[1] = 99;
     fmt.Println("to base:", c.vals[1], b.vals[1]);
 
     counts x = new();
     x.vals[2] = 7;
-    var w = ((Counts)x);
+    var w = (Counts)x;
     w.vals[2] = 88;
     fmt.Println("to wrapper:", x.vals[2], w.vals[2]);
 
     Grid g = new();
     g.cells[1][2] = 3;
     g.tags[1].vals[0] = 4;
-    var h = ((grid)g);
+    var h = (grid)g;
     h.cells[1][2] = 30;
     h.tags[1].vals[0] = 40;
     fmt.Println("nested:", g.cells[1][2], g.tags[1].vals[0], h.cells[1][2], h.tags[1].vals[0]);

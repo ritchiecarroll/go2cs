@@ -177,7 +177,7 @@ retry:
                 pd = (~ev).udata.Reinterpret<byte, pollDesc>();
                 tag = 0;
             } else {
-                var tpΔ1 = ((taggedPointer)(uint64)(uintptr)(~ev).udata);
+                var tpΔ1 = (taggedPointer)(uint64)(uintptr)(~ev).udata;
                 pd = (ж<pollDesc>)(uintptr)(tpΔ1.pointer());
                 tag = tpΔ1.tag();
                 if (pd.of(pollDesc.Ꮡfdseq).Load() != tag) {

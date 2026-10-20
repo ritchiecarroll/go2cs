@@ -118,8 +118,8 @@ internal static void readMessage(this ref Decoder dec, nint nbytes) {
 
 // toInt turns an encoded uint64 into an int, according to the marshaling rules.
 internal static int64 toInt(uint64 x) {
-    var i = (int64)((x >> (int)(1)));
-    if ((uint64)(x & 1) != 0) {
+    var i = (int64)(x >> 1);
+    if ((x & 1) != 0) {
         i = ~i;
     }
     return i;
@@ -175,7 +175,7 @@ internal static typeId decodeTypeSequence(this ж<Decoder> Ꮡdec, bool isInterf
             }
         }
         // Receive a type id.
-        var id = ((typeId)(int32)Ꮡdec.nextInt());
+        var id = (typeId)(int32)Ꮡdec.nextInt();
         if (id >= 0) {
             // Value follows.
             return id;

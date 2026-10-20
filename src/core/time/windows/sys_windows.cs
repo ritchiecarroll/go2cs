@@ -25,11 +25,11 @@ internal static (uintptr, error) open(@string name) {
 }
 
 internal static (nint, error) read(uintptr fd, slice<byte> buf) {
-    return syscall.Read(((syscallꓸHandle)fd), buf);
+    return syscall.Read((syscallꓸHandle)fd, buf);
 }
 
 internal static void closefd(uintptr fd) {
-    syscall.Close(((syscallꓸHandle)fd));
+    syscall.Close((syscallꓸHandle)fd);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -41,12 +41,12 @@ internal static error preadn(uintptr fd, slice<byte> buf, nint off) {
         whence = seekEnd;
     }
     {
-        var (_, err) = syscall.Seek(((syscallꓸHandle)fd), (int64)off, whence); if (err != default!) {
+        var (_, err) = syscall.Seek((syscallꓸHandle)fd, (int64)off, whence); if (err != default!) {
             return err;
         }
     }
     while (len(buf) > 0) {
-        var (m, err) = syscall.Read(((syscallꓸHandle)fd), buf);
+        var (m, err) = syscall.Read((syscallꓸHandle)fd, buf);
         if (m <= 0) {
             if (err == default!) {
                 return errors.New(shortReadˢ);

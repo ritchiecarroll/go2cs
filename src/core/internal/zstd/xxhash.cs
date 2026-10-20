@@ -116,11 +116,11 @@ internal static uint64 digest(this ref xxhash64 xh) {
         len--;
     }
 
-    h64 ^= (uint64)((h64 >> (int)(33)));
+    h64 ^= (uint64)((h64 >> 33));
     h64 *= xxhPrime64c2;
-    h64 ^= (uint64)((h64 >> (int)(29)));
+    h64 ^= (uint64)((h64 >> 29));
     h64 *= xxhPrime64c3;
-    h64 ^= (uint64)((h64 >> (int)(32)));
+    h64 ^= (uint64)((h64 >> 32));
 
     return h64;
 }

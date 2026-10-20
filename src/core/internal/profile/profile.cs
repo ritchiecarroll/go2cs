@@ -315,7 +315,7 @@ public static @string String(this ref Profile p) {
         ss = append(ss, fmt.Sprintf("Time: %v"u8, time.Unix(0, p.TimeNanos)));
     }
     if (p.DurationNanos != 0) {
-        ss = append(ss, fmt.Sprintf("Duration: %v"u8, ((time.Duration)p.DurationNanos)));
+        ss = append(ss, fmt.Sprintf("Duration: %v"u8, (time.Duration)p.DurationNanos));
     }
 
     ss = append(ss, "Samples:"u8);

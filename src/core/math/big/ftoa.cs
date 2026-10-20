@@ -48,7 +48,7 @@ public static @string Text(this ж<Float> Ꮡx, byte format, nint prec) {
     if (prec > 0) {
         cap += prec;
     }
-    return ((@string)Ꮡx.Append(new slice<byte>(0, cap), format, prec));
+    return (@string)Ꮡx.Append(new slice<byte>(0, cap), format, prec);
 }
 
 // String formats x like x.Text('g', 10).

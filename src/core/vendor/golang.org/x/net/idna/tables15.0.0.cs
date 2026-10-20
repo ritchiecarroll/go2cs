@@ -293,7 +293,7 @@ internal static (uint16 v, nint sz) lookup(this ref idnaTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = idnaIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -310,13 +310,13 @@ internal static (uint16 v, nint sz) lookup(this ref idnaTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = idnaIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = idnaIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -339,11 +339,11 @@ internal static uint16 lookupUnsafe(this ref idnaTrie t, slice<byte> s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = idnaIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = idnaIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = idnaIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = idnaIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -382,7 +382,7 @@ internal static (uint16 v, nint sz) lookupString(this ref idnaTrie t, @string s)
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = idnaIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -399,13 +399,13 @@ internal static (uint16 v, nint sz) lookupString(this ref idnaTrie t, @string s)
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = idnaIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = idnaIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -428,11 +428,11 @@ internal static uint16 lookupStringUnsafe(this ref idnaTrie t, @string s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = idnaIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = idnaIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = idnaIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = idnaIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -451,7 +451,7 @@ internal static ж<idnaTrie> newIdnaTrie(nint i) {
 internal static uint16 lookupValue(this ref idnaTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 133: {
-        return (uint16)idnaValues[(n << (int)(6)) + (uint32)b];
+        return (uint16)idnaValues[(n << 6) + (uint32)b];
     }
     default: {
         n -= 133;

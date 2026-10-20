@@ -155,7 +155,7 @@ public static ж<P521Element> Select(this ж<P521Element> Ꮡv, ж<P521Element> 
     var ᴛ4 = nonnil(ref b).x.Value;
 
     var ᴛ5 = nonnil(ref a).x.Value;
-    p521Selectznz(ref ᴛ3, ((p521Uint1)(uint64)cond),
+    p521Selectznz(ref ᴛ3, (p521Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;
 }

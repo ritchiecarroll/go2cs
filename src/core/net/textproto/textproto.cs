@@ -50,7 +50,7 @@ public static @string Error(this ref ΔError e) {
 partial struct ProtocolError /*@string*/;
 
 public static @string Error(this ProtocolError p) {
-    return ((@string)p);
+    return (@string)p;
 }
 
 // A Conn represents a textual network protocol connection.

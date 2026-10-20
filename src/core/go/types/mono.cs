@@ -154,11 +154,11 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
             break;
         }
         case ж<Named>: {
-            err.addf(((atPos)edge.pos), "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
+            err.addf((atPos)edge.pos, "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
             break;
         }
         case ж<TypeParam>: {
-            err.addf(((atPos)edge.pos), "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
+            err.addf((atPos)edge.pos, "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
             break;
         }}
     }

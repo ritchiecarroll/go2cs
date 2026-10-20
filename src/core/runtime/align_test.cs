@@ -45,14 +45,14 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     }
     var fieldDesc = new map<nint, @string>{};
     var r = Δregexp.MustCompile(unsafeOffsetofWWˢ);
-    var matches = r.FindAllStringSubmatch(((@string)x), -1);
+    var matches = r.FindAllStringSubmatch((@string)x, -1);
     foreach (var (i, vΔ1) in matches) {
         @checked["field runtime." + vΔ1[1] + "." + vΔ1[2]] = true;
         fieldDesc[i] = vΔ1[1] + "." + vΔ1[2];
     }
     var varDesc = new map<nint, @string>{};
     r = Δregexp.MustCompile(unsafePointerWˢ);
-    matches = r.FindAllStringSubmatch(((@string)x), -1);
+    matches = r.FindAllStringSubmatch((@string)x, -1);
     foreach (var (i, vΔ2) in matches) {
         @checked["var " + vΔ2[1]] = true;
         varDesc[i] = vΔ2[1];

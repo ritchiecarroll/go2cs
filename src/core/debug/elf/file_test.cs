@@ -1085,7 +1085,7 @@ public static void TestCompressedDWARF(ж<testing.T> Ꮡt) {
         n++;
     }
     if (n != 18) {
-        Ꮡt.Fatalf("want %d DWARF entries, got %d"u8, (nint)(18), n);
+        Ꮡt.Fatalf("want %d DWARF entries, got %d"u8, (nint)18, n);
     }
 }
 
@@ -1351,7 +1351,7 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
             // last 48 bytes.
             buf.Write(bytes.Repeat(new byte[]{0}.slice(), 0x03FC28 - 12 * 4));
             for (nint i = 0; i < 12; i++) {
-                binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (uint32)((nint)(0xFF00 | i)));
+                binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (uint32)(0xFF00 | i));
             }
 
             // Write section [65296].
@@ -1628,7 +1628,7 @@ public static void BenchmarkSymbols64(ж<testing.B> Ꮡb) {
                 Ꮡb.Fatalf("Symbols(): got unexpected error %v"u8, errΔ1);
             }
             if (len(symbols) != 73) {
-                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)(73));
+                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)73);
             }
         }
     }
@@ -1658,7 +1658,7 @@ public static void BenchmarkSymbols32(ж<testing.B> Ꮡb) {
                 Ꮡb.Fatalf("Symbols(): got unexpected error %v"u8, errΔ1);
             }
             if (len(symbols) != 74) {
-                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)(74));
+                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)74);
             }
         }
     }

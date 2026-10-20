@@ -198,7 +198,7 @@ internal static bool useProxy(this ref config cfg, @string addr) {
     (var nip, err) = netip.ParseAddr(host);
     net.IP ip = default!;
     if (err == default!) {
-        ip = ((net.IP)nip.AsSlice());
+        ip = (net.IP)nip.AsSlice();
         if (ip.IsLoopback()) {
             return false;
         }

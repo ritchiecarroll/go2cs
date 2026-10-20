@@ -169,7 +169,7 @@ internal static @string jsonValueString(global::go.log.slog_package.Value v) {
             s.appendError(err);
         }
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

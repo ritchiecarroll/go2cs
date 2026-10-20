@@ -59,7 +59,7 @@ internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16
         secrets = appendꓸꓸꓸ(secrets, sharedSecret);
 
         var ksContextΔ1 = new slice<byte>(0, 1 + 2 + 2 + len(info));
-        ksContextΔ1 = append(ksContextΔ1, (byte)(0)); // mode 0
+        ksContextΔ1 = append(ksContextΔ1, (byte)0); // mode 0
         ksContextΔ1 = byteorder.BEAppendUint16(ksContextΔ1, 0); // empty psk_id
         ksContextΔ1 = byteorder.BEAppendUint16(ksContextΔ1, (uint16)len(info));
         ksContextΔ1 = appendꓸꓸꓸ(ksContextΔ1, info);

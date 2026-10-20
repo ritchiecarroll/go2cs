@@ -81,7 +81,7 @@ public static @string String(this ж<Buffer> Ꮡb) {
         // Special case, useful in debugging.
         return nilˢ;
     }
-    return ((@string)(b.buf.slice(b.off)));
+    return (@string)(b.buf.slice(b.off));
 }
 
 // Peek returns the next n bytes without advancing the buffer.
@@ -437,7 +437,7 @@ public static (rune r, nint size, error err) ReadRune(this ref Buffer b) {
     }
     (r, var n) = utf8.DecodeRune(b.buf.slice(b.off));
     b.off += n;
-    b.lastRead = ((readOp)(int8)n);
+    b.lastRead = (readOp)(int8)n;
     return (r, n, default!);
 }
 
@@ -521,7 +521,7 @@ public static (@string line, error err) ReadString(this ref Buffer b, byte delim
     error err = default!;
 
     (var Δslice, err) = b.readSlice(delim);
-    return (((@string)Δslice), err);
+    return ((@string)Δslice, err);
 }
 
 // NewBuffer creates and initializes a new [Buffer] using buf as its

@@ -59,10 +59,10 @@ internal static void Main() {
     uint8 z = (uint8)(a + b);
     fmt.Println(z);
 
-    var p1 = new pix((uint8)(((a >> (int)(1))) * 3), (uint8)(a + b));
+    var p1 = new pix((uint8)((a >> 1) * 3), (uint8)(a + b));
     fmt.Println(p1.Y, p1.A);
 
-    var p2 = new pix(Y: (uint8)(((a >> (int)(1))) * 3), A: (uint8)(((uint8)(~a))));
+    var p2 = new pix(Y: (uint8)((a >> 1) * 3), A: (uint8)(((uint8)(~a))));
     fmt.Println(p2.Y, p2.A);
 
     fmt.Println((uint8)(a + b) == 44);

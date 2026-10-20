@@ -123,7 +123,7 @@ internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name
     // Fast path: if a symlink is in the map, resolve it.
     {
         var @file = fsys[name]; if (@file != nil && (~@file).Mode.Type() == fs.ModeSymlink) {
-            @string target = ((@string)(~@file).Data);
+            @string target = (@string)(~@file).Data;
             if (path.IsAbs(target)) {
                 return ("", false);
             }
@@ -144,7 +144,7 @@ internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name
         }
         {
             var @file = fsys[dir]; if (@file != nil && (~@file).Mode.Type() == fs.ModeSymlink) {
-                @string target = ((@string)(~@file).Data);
+                @string target = (@string)(~@file).Data;
                 if (path.IsAbs(target)) {
                     return ("", false);
                 }
@@ -165,7 +165,7 @@ public static (@string, error) ReadLink(this MapFS fsys, @string name) {
     if ((~(~info).f).Mode.Type() != fs.ModeSymlink) {
         return ("", new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "readlink"u8, Path: name, Err: fs.ErrInvalid))));
     }
-    return (((@string)(~(~info).f).Data), default!);
+    return ((@string)(~(~info).f).Data, default!);
 }
 
 // Lstat returns a FileInfo describing the named file.

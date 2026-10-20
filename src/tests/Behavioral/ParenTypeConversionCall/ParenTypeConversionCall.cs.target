@@ -38,12 +38,12 @@ internal static void Main() {
     @unsafe.Pointer s = @unsafe.Pointer.FromPinnedBox(n);
     fmt.Println("B2 bare, existing pointer, round-trips:", ~(ж<nint>)(uintptr)(s));
 
-    var c1 = ((Celsius)36.6D);
-    var c2 = ((Celsius)36.6D);
+    var c1 = (Celsius)36.6D;
+    var c2 = (Celsius)36.6D;
     fmt.Println("C1 named float both spellings:", c1 == c2, c1);
 
-    Counter k1 = ((Counter)7);
-    Counter k2 = ((Counter)7);
+    Counter k1 = (Counter)7;
+    Counter k2 = (Counter)7;
     fmt.Println("C2 named int both spellings:", k1 == k2, k1);
 
     var i1 = (int64)5;

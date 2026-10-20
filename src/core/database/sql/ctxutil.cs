@@ -126,7 +126,7 @@ internal static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ж<TxOpti
         var (ciCtx, @is) = ci._<driver.ConnBeginTx>(ᐧ); if (@is) {
             var dopts = new driver.TxOptions(nil);
             if (Ꮡopts != nil) {
-                dopts.Isolation = ((driver.IsolationLevel)(nint)opts.Isolation);
+                dopts.Isolation = (driver.IsolationLevel)(nint)opts.Isolation;
                 dopts.ReadOnly = opts.ReadOnly;
             }
             return ciCtx.BeginTx(ctx, dopts);

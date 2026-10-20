@@ -20,7 +20,7 @@ internal static void makeImg(this ref decoder d, nint mxx, nint myy) {
     nint hRatio = quo(h0, d.comp[1].h);
     nint vRatio = quo(v0, d.comp[1].v);
     image.YCbCrSubsampleRatio subsampleRatio = default!;
-    switch ((nint)((hRatio << (int)(4)) | vRatio)) {
+    switch ((hRatio << 4 | vRatio)) {
     case 0x11: {
         subsampleRatio = image.YCbCrSubsampleRatio444;
         break;
@@ -123,7 +123,7 @@ internal static error processSOS(this ref decoder d, nint n) {
         totalHV += d.comp[compIndex].h * d.comp[compIndex].v;
 
         // The baseline t <= 1 restriction is specified in table B.3.
-        scan[i].td = (uint8)((d.tmp[2 + 2 * i] >> (int)(4)));
+        scan[i].td = (uint8)((d.tmp[2 + 2 * i] >> 4));
         {
             var t = scan[i].td; if (t > maxTh || (d.baseline && t > 1)) {
                 return ((FormatError)(@string)badTdValueˢ);
@@ -163,7 +163,7 @@ internal static error processSOS(this ref decoder d, nint n) {
     if (d.progressive) {
         zigStart = (int32)d.tmp[1 + 2 * nComp];
         zigEnd = (int32)d.tmp[2 + 2 * nComp];
-        ah = (uint32)((d.tmp[3 + 2 * nComp] >> (int)(4)));
+        ah = (uint32)(d.tmp[3 + 2 * nComp] >> 4);
         al = (uint32)((byte)(d.tmp[3 + 2 * nComp] & 0x0f));
         if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || blockSize <= zigEnd) {
             return ((FormatError)(@string)badSpectralSelectionˢ);
@@ -292,7 +292,7 @@ internal static error processSOS(this ref decoder d, nint n) {
                                 if (err != default!) {
                                     return err;
                                 }
-                                var val0 = (uint8)((value >> (int)(4)));
+                                var val0 = (uint8)((value >> 4));
                                 var val1 = (uint8)(value & 0x0f);
                                 if (val1 != 0){
                                     zig += (int32)val0;
@@ -410,7 +410,7 @@ loop:
             if (err != default!) {
                 return err;
             }
-            var val0 = (uint8)((value >> (int)(4)));
+            var val0 = (uint8)((value >> 4));
             var val1 = (uint8)(value & 0x0f);
 
             switch (val1) {

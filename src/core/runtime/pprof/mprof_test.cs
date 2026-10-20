@@ -35,11 +35,11 @@ internal static void allocateTransient1M() {
 
 //go:noinline
 internal static partial void allocateTransient2M() {
-    memSink = new slice<byte>((2 << (int)(20)));
+    memSink = new slice<byte>((2 << 20));
 }
 
 internal static partial void allocateTransient2MInline() {
-    memSink = new slice<byte>((2 << (int)(20)));
+    memSink = new slice<byte>((2 << 20));
 }
 
 public partial struct Obj32 {
@@ -59,7 +59,7 @@ internal static void allocatePersistent1K() {
 
 // Allocate transient memory using reflect.Call.
 internal static partial void allocateReflectTransient() {
-    memSink = new slice<byte>((2 << (int)(20)));
+    memSink = new slice<byte>((2 << 20));
 }
 
 internal static void allocateReflect() {
@@ -128,7 +128,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient1M\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:25
 #	0x[0-9,a-f]+	runtime/pprof\.TestMemoryProfiler\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:84
 
-"""u8.Raw(), ((1 << (int)(10))) * memoryProfilerRun, ((1 << (int)(20))) * memoryProfilerRun)
+"""u8.Raw(), (1 << 10) * memoryProfilerRun, (1 << 20) * memoryProfilerRun)
         ), new(
             stk: new @string[]{"runtime/pprof.allocateTransient2M"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
             legacy: fmt.Sprintf("""
@@ -136,7 +136,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient2M\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:31
 #	0x[0-9,a-f]+	runtime/pprof\.TestMemoryProfiler\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:85
 
-"""u8.Raw(), memoryProfilerRun, ((2 << (int)(20))) * memoryProfilerRun)
+"""u8.Raw(), memoryProfilerRun, (2 << 20) * memoryProfilerRun)
         ), new(
             stk: new @string[]{"runtime/pprof.allocateTransient2MInline"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
             legacy: fmt.Sprintf("""
@@ -144,14 +144,14 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient2MInline\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:35
 #	0x[0-9,a-f]+	runtime/pprof\.TestMemoryProfiler\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:86
 
-"""u8.Raw(), memoryProfilerRun, ((2 << (int)(20))) * memoryProfilerRun)
+"""u8.Raw(), memoryProfilerRun, (2 << 20) * memoryProfilerRun)
         ), new(
             stk: new @string[]{"runtime/pprof.allocateReflectTransient"u8}.slice(),
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @( 0x[0-9,a-f]+)+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateReflectTransient\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:56
 
-"""u8.Raw(), memoryProfilerRun, ((2 << (int)(20))) * memoryProfilerRun)
+"""u8.Raw(), memoryProfilerRun, (2 << 20) * memoryProfilerRun)
         )
         }.slice();
 
@@ -192,7 +192,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
                 }
             }
 
-            if (!containsInlinedCall(TestMemoryProfiler, (4 << (int)(10)))) {
+            if (!containsInlinedCall(TestMemoryProfiler, 4 << 10)) {
                 tΔ2.Logf("Can't determine whether allocateTransient2MInline was inlined into TestMemoryProfiler."u8);
                 return;
             }

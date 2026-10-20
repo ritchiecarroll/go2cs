@@ -11,7 +11,7 @@ using @internal;
 partial class pprof_package {
 
 internal static bool isExecutable(int32 protection) {
-    return ((int32)(protection & (int32)_VM_PROT_EXECUTE)) != 0 && ((int32)(protection & (int32)_VM_PROT_READ)) != 0;
+    return (protection & (int32)_VM_PROT_EXECUTE) != 0 && (protection & (int32)_VM_PROT_READ) != 0;
 }
 
 // machVMInfo uses the mach_vm_region region system call to add mapping entries
@@ -60,7 +60,7 @@ internal static @string regionFilename(uint64 address) {
     if (r == 0) {
         return ""u8;
     }
-    return ((@string)(buf.slice(0, r)));
+    return (@string)(buf.slice(0, r));
 }
 
 // mach_vm_region and proc_regionfilename are implemented by

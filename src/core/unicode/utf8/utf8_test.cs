@@ -99,7 +99,7 @@ public static void TestFullRune(ж<testing.T> Ꮡt) {
         if (FullRune(b1)) {
             Ꮡt.Errorf("FullRune(%q) = true, want false"u8, b1);
         }
-        @string s1 = ((@string)b1);
+        @string s1 = (@string)b1;
         if (FullRuneInString(s1)) {
             Ꮡt.Errorf("FullRune(%q) = true, want false"u8, s1);
         }
@@ -189,12 +189,12 @@ public static void TestDecodeRune(ж<testing.T> Ꮡt) {
         }
         (r, size) = DecodeRune(b);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b, r, size, (int32)(RuneError), (nint)(1));
+            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
         }
-        s = ((@string)b);
+        s = (@string)b;
         (r, size) = DecodeRuneInString(s);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, (int32)(RuneError), (nint)(1));
+            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, (int32)(RuneError), (nint)1);
         }
     }
 }
@@ -204,12 +204,12 @@ public static void TestDecodeSurrogateRune(ж<testing.T> Ꮡt) {
         var b = slice<byte>(m.str);
         var (r, size) = DecodeRune(b);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRune(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)(1));
+            Ꮡt.Errorf("DecodeRune(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
         }
         @string s = m.str;
         (r, size) = DecodeRuneInString(s);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)(1));
+            Ꮡt.Errorf("DecodeRuneInString(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
         }
     }
 }
@@ -509,13 +509,13 @@ internal static slice<ValidTest> validTests = new ValidTest[]{
     new(((@string)new byte[]{66, 250}.slice()), false),
     new(((@string)new byte[]{66, 250, 67}.slice()), false),
     new("a\uFFFDb"u8, true),
-    new(((@string)((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf}))), true), // U+10FFFF
-    new(((@string)((@string)(new byte[]{0xf4, 0x90, 0x80, 0x80}))), false), // U+10FFFF+1; out of range
-    new(((@string)((@string)(new byte[]{0xf7, 0xbf, 0xbf, 0xbf}))), false), // 0x1FFFFF; out of range
-    new(((@string)((@string)(new byte[]{0xfb, 0xbf, 0xbf, 0xbf, 0xbf}))), false), // 0x3FFFFFF; out of range
-    new(((@string)((@string)(new byte[]{0xc0, 0x80}))), false), // U+0000 encoded in two bytes: incorrect
-    new(((@string)((@string)(new byte[]{0xed, 0xa0, 0x80}))), false), // U+D800 high surrogate (sic)
-    new(((@string)((@string)(new byte[]{0xed, 0xbf, 0xbf}))), false) // U+DFFF low surrogate (sic)
+    new((@string)((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf})), true), // U+10FFFF
+    new((@string)((@string)(new byte[]{0xf4, 0x90, 0x80, 0x80})), false), // U+10FFFF+1; out of range
+    new((@string)((@string)(new byte[]{0xf7, 0xbf, 0xbf, 0xbf})), false), // 0x1FFFFF; out of range
+    new((@string)((@string)(new byte[]{0xfb, 0xbf, 0xbf, 0xbf, 0xbf})), false), // 0x3FFFFFF; out of range
+    new((@string)((@string)(new byte[]{0xc0, 0x80})), false), // U+0000 encoded in two bytes: incorrect
+    new((@string)((@string)(new byte[]{0xed, 0xa0, 0x80})), false), // U+D800 high surrogate (sic)
+    new((@string)((@string)(new byte[]{0xed, 0xbf, 0xbf})), false) // U+DFFF low surrogate (sic)
 }.slice();
 
 public static void TestValid(ж<testing.T> Ꮡt) {

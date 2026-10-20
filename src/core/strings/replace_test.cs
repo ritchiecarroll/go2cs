@@ -91,7 +91,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
     slice<TestReplacer_testCase> testCases = default!;
 
     // str converts 0xff to "\xff". This isn't just string(b) since that converts to UTF-8.
-    @string str(byte b) => ((@string)new byte[]{b}.slice());
+    @string str(byte b) => (@string)new byte[]{b}.slice();
     slice<@string> s = default!;
 
     // inc maps "\x00"->"\x01", ..., "a"->"b", "b"->"c", ..., "\xff"->"\x00".
@@ -104,7 +104,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
     // Test cases with 1-byte old strings, 1-byte new strings.
     testCases = append(testCases,
         new TestReplacer_testCase(capitalLetters, "brad"u8, "BrAd"u8),
-        new TestReplacer_testCase(capitalLetters, Repeat("a"u8, ((32 << (int)(10))) + 123), Repeat("A"u8, ((32 << (int)(10))) + 123)),
+        new TestReplacer_testCase(capitalLetters, Repeat("a"u8, (32 << 10) + 123), Repeat("A"u8, (32 << 10) + 123)),
         new TestReplacer_testCase(capitalLetters, ""u8, ""u8),
         new TestReplacer_testCase(inc, "brad"u8, "csbe"u8),
         new TestReplacer_testCase(inc, ((@string)(new byte[]{0x00, 0xff})), "\x01\x00"u8),
@@ -220,7 +220,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in allBytes) {
         allBytes[i] = (byte)i;
     }
-    @string allString = ((@string)allBytes);
+    @string allString = (@string)allBytes;
     var genAll = NewReplacer(
         allString, allˢ,
         ((@string)(new byte[]{0xff})), "[ff]",
@@ -434,7 +434,7 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
                 wantbuf = append(wantbuf, tc.@out[i]);
             }
         }
-        @string want = ((@string)wantbuf);
+        @string want = (@string)wantbuf;
 
         if (got != want) {
             Ꮡt.Errorf("PrintTrie(%q)\ngot\n%swant\n%s"u8, tc.@in, got, want);

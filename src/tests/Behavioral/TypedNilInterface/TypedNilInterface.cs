@@ -119,7 +119,7 @@ internal static void Main() {
     var rows = new main_rows[]{
         new(dp.OrTypedNil(), true),
         new(st.P.OrTypedNil(), true),
-        new((nint)(7), false)
+        new((nint)7, false)
     }.slice();
     foreach (var (_, r) in rows) {
         fmt.Printf("row %T %v %v\n"u8, r.value, r.value == default!, r.want);

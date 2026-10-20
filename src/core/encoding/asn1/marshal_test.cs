@@ -113,9 +113,9 @@ internal static time.Time farFuture() {
 }
 
 internal static slice<marshalTest> marshalTests = new marshalTest[]{
-    new((nint)(10), "02010a"u8),
-    new((nint)(127), "02017f"u8),
-    new((nint)(128), "02020080"u8),
+    new((nint)10, "02010a"u8),
+    new((nint)127, "02017f"u8),
+    new((nint)128, "02020080"u8),
     new((nint)(-128), "020180"u8),
     new((nint)(-129), "0202ff7f"u8),
     new(new intStruct(64), "3003020140"u8),
@@ -156,7 +156,7 @@ internal static slice<marshalTest> marshalTests = new marshalTest[]{
     new(new rawContentsStruct(default!, 64), "3003020140"u8),
     new(new rawContentsStruct(new byte[]{0x30, 3, 1, 2, 3}.slice(), 64), "3003010203"u8),
     new(new RawValue(Tag: 1, Class: 2, IsCompound: false, Bytes: new byte[]{1, 2, 3}.slice()), "8103010203"u8),
-    new(((testSET)new nint[]{10}.slice()), "310302010a"u8),
+    new((testSET)new nint[]{10}.slice(), "310302010a"u8),
     new(new omitEmptyTest(new @string[]{}.slice()), "3000"u8),
     new(new omitEmptyTest(new @string[]{"1"u8}.slice()), "30053003130131"u8),
     new((@string)"Σ"u8, "0c02cea3"u8),

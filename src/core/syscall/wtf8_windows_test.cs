@@ -141,7 +141,7 @@ public static void TestWTF16Rountrip(ж<testing.T> Ꮡt) {
         var ttʗ1 = tt;
         Ꮡt.Run(fmt.Sprintf("%X"u8, tt.str), (ж<testing.T> tΔ1) => {
             var got = syscall_internal_test_package.EncodeWTF16(ttʗ1.str, default!);
-            @string got2 = ((@string)syscall_internal_test_package.DecodeWTF16(got, default!));
+            @string got2 = (@string)syscall_internal_test_package.DecodeWTF16(got, default!);
             if (got2 != ttʗ1.str) {
                 tΔ1.Errorf("got:\n%s\nwant:\n%s"u8, got2, ttʗ1.str);
             }
@@ -202,11 +202,11 @@ public static void FuzzDecodeWTF16(ж<testing.F> Ꮡf) {
             // utf16.Decode
             var want = utf16.Decode(u16);
             if (((@string)got) != ((@string)want)) {
-                t.Errorf("got:\n%s\nwant:\n%s"u8, ((@string)got), ((@string)want));
+                t.Errorf("got:\n%s\nwant:\n%s"u8, (@string)got, (@string)want);
             }
         }
         // WTF-8 should always roundtrip
-        var got2 = syscall_internal_test_package.EncodeWTF16(((@string)got), default!);
+        var got2 = syscall_internal_test_package.EncodeWTF16((@string)got, default!);
         if (!slices.Equal<slice<uint16>, uint16>(got2, u16)) {
             t.Errorf("got:\n%v\nwant:\n%v"u8, got2, u16);
         }

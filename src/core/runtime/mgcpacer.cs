@@ -433,9 +433,9 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
         var heapGoal = Ꮡc.heapGoal();
         var assistRatio = Ꮡc.of(gcControllerState.ᏑassistWorkPerByte).Load();
         print((@string)"pacer: assist ratio="u8, assistRatio,
-            (@string)" (scan "u8, (ᏑgcController.of(gcControllerState.ᏑheapScan).Load() >> (int)(20)), (@string)" MB in "u8,
-            (work.initialHeapLive >> (int)(20)), (@string)"->"u8,
-            (heapGoal >> (int)(20)), (@string)" MB)"u8,
+            (@string)" (scan "u8, ᏑgcController.of(gcControllerState.ᏑheapScan).Load() >> 20, (@string)" MB in "u8,
+            work.initialHeapLive >> 20, (@string)"->"u8,
+            heapGoal >> 20, (@string)" MB)"u8,
             (@string)" workers="u8, dedicatedMarkWorkersNeeded,
             (@string)"+"u8, c.fractionalUtilizationGoal, (@string)"\n"u8);
     }
@@ -1473,7 +1473,7 @@ internal static readonly @string negativeIdleMarkWorkersˢ = "negative idle mark
 internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var (n, max) = ((int32)((uint64)(old & (uint64)(~(uint32)0))), (int32)((old >> (int)(32))));
+        var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
         if (n >= max) {
             // See the comment on idleMarkWorkers for why
             // n > max is tolerated.
@@ -1483,7 +1483,7 @@ internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)(n + 1) | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)(n + 1) | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return true;
         }
@@ -1500,7 +1500,7 @@ internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 //go:nosplit
 internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     var Δp = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-    var (n, max) = ((int32)((uint64)(Δp & (uint64)(~(uint32)0))), (int32)((Δp >> (int)(32))));
+    var (n, max) = ((int32)(Δp & (uint64)(~(uint32)0)), (int32)(Δp >> 32));
     return n < max;
 }
 
@@ -1508,12 +1508,12 @@ internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var (n, max) = ((int32)((uint64)(old & (uint64)(~(uint32)0))), (int32)((old >> (int)(32))));
+        var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
         if (n - 1 < 0) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)(n - 1) | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)(n - 1) | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return;
         }
@@ -1528,12 +1528,12 @@ internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 internal static void setMaxIdleMarkWorkers(this ж<gcControllerState> Ꮡc, int32 max) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var n = (int32)((uint64)(old & (uint64)(~(uint32)0)));
+        var n = (int32)(old & (uint64)(~(uint32)0));
         if (n < 0) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)n | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)n | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return;
         }

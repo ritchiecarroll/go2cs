@@ -371,7 +371,7 @@ partial struct Filetime {
 // since Epoch (00:00:00 UTC, January 1, 1970).
 public static int64 Nanoseconds(this ref Filetime ft) {
     // 100-nanosecond intervals since January 1, 1601
-    var nsec = ((int64)ft.HighDateTime << (int)(32)) + (int64)ft.LowDateTime;
+    var nsec = ((int64)ft.HighDateTime << 32) + (int64)ft.LowDateTime;
     // change starting time to the Epoch (00:00:00 UTC, January 1, 1970)
     nsec -= 116444736000000000L;
     // convert into nanoseconds
@@ -387,8 +387,8 @@ public static Filetime /*ft*/ NsecToFiletime(int64 nsec) {
     // change starting time to January 1, 1601
     nsec += 116444736000000000L;
     // split into high / low
-    ft.LowDateTime = (uint32)((int64)(nsec & 0xffffffffL));
-    ft.HighDateTime = (uint32)((int64)((nsec >> (int)(32)) & 0xffffffffL));
+    ft.LowDateTime = (uint32)(nsec & 0xffffffffL);
+    ft.HighDateTime = (uint32)(nsec >> 32 & 0xffffffffL);
     return ft;
 }
 

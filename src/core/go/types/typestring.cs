@@ -598,7 +598,7 @@ internal static @string subscript(uint64 x) {
             break;
         }
     }
-    return ((@string)(buf.slice(i)));
+    return (@string)(buf.slice(i));
 }
 
 } // end types_package

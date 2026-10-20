@@ -113,7 +113,7 @@ partial struct rawGeneration {
 }
 
 internal static eventTime traceTimeNow(frequency freq) {
-    return freq.mul(((timestamp)runtime_traceClockNow()));
+    return freq.mul((timestamp)runtime_traceClockNow());
 }
 
 //go:linkname runtime_traceClockNow runtime.traceClockNow
@@ -124,7 +124,7 @@ partial struct frequency /*num:float64*/;
 
 // mul multiplies an unprocessed timestamp to produce a time in nanoseconds.
 internal static eventTime mul(this frequency f, timestamp t) {
-    return ((eventTime)(int64)((float64)(uint64)t * (float64)f));
+    return (eventTime)(int64)((float64)(uint64)t * (float64)f);
 }
 
 // eventTime is a timestamp in nanoseconds.
@@ -150,7 +150,7 @@ partial struct eventTime /*num:int64*/;
 
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
 internal static time.Duration Sub(this eventTime t, eventTime t0) {
-    return ((time.Duration)((int64)t - (int64)t0));
+    return (time.Duration)((int64)t - (int64)t0);
 }
 
 } // end trace_package

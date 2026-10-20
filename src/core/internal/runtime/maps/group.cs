@@ -53,7 +53,7 @@ internal static uintptr first(this bitset b) {
 // On AMD64, this is replaced with an intrisic that simply does
 // TrailingZeros64. There is no need to shift as the bitset is packed.
 internal static uintptr bitsetFirst(bitset b) {
-    return ((uintptr)sys.TrailingZeros64((uint64)b) >> (int)(3));
+    return (uintptr)sys.TrailingZeros64((uint64)b) >> 3;
 }
 
 // removeFirst clears the first set bit (that is, resets the least significant
@@ -88,7 +88,7 @@ internal static bool lowestSet(this bitset b) {
 //
 // On AMD64, this is replaced with an intrisic that checks the lowest bit.
 internal static bool bitsetLowestSet(bitset b) {
-    return (bitset)(b & ((bitset)((uint64)1 << (int)(7)))) != 0;
+    return (bitset)(b & ((bitset)((uint64)1 << 7))) != 0;
 }
 
 // shiftOutLowest shifts the lowest entry out of the bitset. Afterwards, the
@@ -101,7 +101,7 @@ internal static bitset shiftOutLowest(this bitset b) {
 //
 // On AMD64, this is replaced with an intrisic that shifts a single bit.
 internal static bitset bitsetShiftOutLowest(bitset b) {
-    return (b >> (int)(8));
+    return b >> 8;
 }
 
 // count returns the number of bits set in b.
@@ -147,7 +147,7 @@ internal static void set(this ж<ctrlGroup> Ꮡg, uintptr i, ctrl c) {
 
 // setEmpty sets all the control bytes to empty.
 internal static void setEmpty(this ref ctrlGroup g) {
-    g = ((ctrlGroup)bitsetEmpty);
+    g = (ctrlGroup)bitsetEmpty;
 }
 
 // matchH2 returns the set of slots which are full and for which the 7-bit hash
@@ -169,8 +169,8 @@ internal static bitset ctrlGroupMatchH2(ctrlGroup g, uintptr h) {
     // just a rare inefficiency. Note that they only occur if there is a real
     // match and never occur on ctrlEmpty, or ctrlDeleted. The subsequent key
     // comparisons ensure that there is no correctness issue.
-    var v = (uint64)((uint64)g ^ ((uint64)bitsetLSB * (uint64)h));
-    return ((bitset)((uint64)(((uint64)((v - (uint64)bitsetLSB) & ~v)) & (uint64)bitsetMSB)));
+    var v = (uint64)g ^ ((uint64)bitsetLSB * (uint64)h);
+    return (bitset)(((v - (uint64)bitsetLSB) & ~v) & (uint64)bitsetMSB);
 }
 
 // matchEmpty returns the set of slots in the group that are empty.
@@ -190,7 +190,7 @@ internal static bitset ctrlGroupMatchEmpty(ctrlGroup g) {
     // A slot is empty iff bit 7 is set and bit 1 is not. We could select any
     // of the other bits here (e.g. v << 1 would also work).
     var v = (uint64)g;
-    return ((bitset)((uint64)(((uint64)(v & ~((v << (int)(6))))) & (uint64)bitsetMSB)));
+    return (bitset)((v & ~(v << 6)) & (uint64)bitsetMSB);
 }
 
 // matchEmptyOrDeleted returns the set of slots in the group that are empty or
@@ -210,7 +210,7 @@ internal static bitset ctrlGroupMatchEmptyOrDeleted(ctrlGroup g) {
     //
     // A slot is empty or deleted iff bit 7 is set.
     var v = (uint64)g;
-    return ((bitset)((uint64)(v & (uint64)bitsetMSB)));
+    return (bitset)(v & (uint64)bitsetMSB);
 }
 
 // matchFull returns the set of slots in the group that are full.
@@ -235,7 +235,7 @@ internal static bitset ctrlGroupMatchFull(ctrlGroup g) {
     //
     // A slot is full iff bit 7 is unset.
     var v = (uint64)g;
-    return ((bitset)((uint64)(~v & (uint64)bitsetMSB)));
+    return (bitset)(~v & (uint64)bitsetMSB);
 }
 
 // groupReference is a wrapper type representing a single slot group stored at

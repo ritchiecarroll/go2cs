@@ -84,7 +84,7 @@ public static void BenchmarkSortIsSorted(ж<testing.B> Ꮡb) {
         b.StopTimer();
         var ints = makeSortedInts(N);
         b.StartTimer();
-        IsSorted(((sort.IntSlice)ints));
+        IsSorted((sort.IntSlice)ints);
     }
 }
 

@@ -59,7 +59,7 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) {
         var data = new slice<byte>(0, size + 1);
         while (ᐧ) {
             if (len(data) >= cap(data)) {
-                var d = append(data.slice(0, cap(data)), (byte)(0));
+                var d = append(data.slice(0, cap(data)), (byte)0);
                 data = d.slice(0, len(data));
             }
             var (n, errΔ2) = @file.Read(data.slice(len(data), cap(data)));

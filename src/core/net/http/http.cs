@@ -176,7 +176,7 @@ internal static @string hexEscapeNonASCII(@string s) {
     if (pos < builtin.len(s)) {
         b = append(b, s.slice(pos).ꓸꓸꓸ);
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // NoBody is an [io.ReadCloser] with no bytes. Read always returns EOF

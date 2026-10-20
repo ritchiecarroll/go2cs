@@ -21,7 +21,7 @@ partial struct @short /*num:int16*/;
 partial struct dword /*num:uint32*/;
 
 internal static @short toShort(dword d) {
-    return ((@short)(int16)(uint32)d);
+    return (@short)(int16)(uint32)d;
 }
 
 internal static nint size(this @fixed f, @string of) {

@@ -230,7 +230,7 @@ internal static bool decIntSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, n
         }
         var x = state.decodeInt();
         // MinInt and MaxInt
-        if (x < ~(int64)((~(nuint)0 >> (int)(1))) || (int64)((~(nuint)0 >> (int)(1))) < x) {
+        if (x < ~(int64)(~(nuint)0 >> 1) || (int64)(~(nuint)0 >> 1) < x) {
             error_(ovfl);
         }
         Δslice[i] = (nint)x;
@@ -408,7 +408,7 @@ internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v
         if (len(data) < n) {
             errorf("invalid string length %d: exceeds input size %d"u8, n, len(data));
         }
-        Δslice[i] = ((@string)(data.slice(0, n)));
+        Δslice[i] = (@string)(data.slice(0, n));
         state.b.Drop(n);
     }
     return true;

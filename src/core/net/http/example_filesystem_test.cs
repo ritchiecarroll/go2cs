@@ -74,7 +74,7 @@ internal static (Δhttp.File, error) Open(this dotFileHidingFileSystem fsys, @st
 }
 
 public static void ExampleFileServer_dotFileHiding() {
-    var fsys = new dotFileHidingFileSystem(((Δhttp.Dir)(@string)"."u8));
+    var fsys = new dotFileHidingFileSystem((Δhttp.Dir)(@string)"."u8);
     Δhttp.Handle("/"u8, Δhttp.FileServer(fsys));
     log.Fatal(Δhttp.ListenAndServe(":8080"u8, default!));
 }

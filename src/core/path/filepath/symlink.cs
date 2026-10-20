@@ -19,7 +19,7 @@ internal static readonly @string evalSymlinksTooManyLinksˢ = "EvalSymlinks: too
 
 internal static (@string, error) walkSymlinks(@string path) {
     nint volLen = filepathlite.VolumeNameLen(path);
-    @string pathSeparator = ((@string)(rune)os.PathSeparator);
+    @string pathSeparator = (@string)(rune)os.PathSeparator;
 
     if (volLen < len(path) && os.IsPathSeparator(path[volLen])) {
         volLen++;

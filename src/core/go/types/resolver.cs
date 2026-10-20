@@ -294,7 +294,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
         tokenꓸPos end = @file.End();
         {
             var f = check.fset.File(@file.Pos()); if (f != nil) {
-                (pos, end) = (((tokenꓸPos)f.Base()), f.End());
+                (pos, end) = ((tokenꓸPos)f.Base(), f.End());
             }
         }
         var fileScope = NewScope((~pkg).scope, pos, end, check.filename(fileNo));

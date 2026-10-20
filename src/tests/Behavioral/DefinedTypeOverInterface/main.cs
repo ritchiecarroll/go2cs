@@ -37,7 +37,7 @@ internal static @string describe(Token t) {
 }
 
 internal static void Main() {
-    any t = (nint)(42);
+    any t = (nint)42;
     fmt.Println(describe(t));
 
     @string msg = "hi";

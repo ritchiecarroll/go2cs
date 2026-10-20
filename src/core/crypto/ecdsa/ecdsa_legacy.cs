@@ -87,7 +87,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
 
     (r, s) = (@new<bigꓸInt>(), @new<bigꓸInt>());
     ref var inner = ref heap<cryptobyte.String>(out var Ꮡinner);
-    var input = ((cryptobyte.String)sig);
+    var input = (cryptobyte.String)sig;
     if (!input.ReadASN1(Ꮡinner, asn1.SEQUENCE) || !input.Empty() || !inner.ReadASN1Integer(r.OrTypedNil()) || !inner.ReadASN1Integer(s.OrTypedNil()) || !inner.Empty()) {
         return (default!, default!, errors.New(invalidAsn1FromSignASN1ˢ));
     }

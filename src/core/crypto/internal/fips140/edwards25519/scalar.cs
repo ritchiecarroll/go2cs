@@ -298,13 +298,13 @@ public static nint Equal(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
     uint64 nonzero = default!;
     var ᴛ6 = diff.Value;
     fiatScalarNonzero(ref nonzero, ref ᴛ6);
-    nonzero |= (uint64)((nonzero >> (int)(32)));
-    nonzero |= (uint64)((nonzero >> (int)(16)));
-    nonzero |= (uint64)((nonzero >> (int)(8)));
-    nonzero |= (uint64)((nonzero >> (int)(4)));
-    nonzero |= (uint64)((nonzero >> (int)(2)));
-    nonzero |= (uint64)((nonzero >> (int)(1)));
-    return (nint)((nint)(~nonzero) & 1);
+    nonzero |= (uint64)((nonzero >> 32));
+    nonzero |= (uint64)((nonzero >> 16));
+    nonzero |= (uint64)((nonzero >> 8));
+    nonzero |= (uint64)((nonzero >> 4));
+    nonzero |= (uint64)((nonzero >> 2));
+    nonzero |= (uint64)((nonzero >> 1));
+    return (nint)(~nonzero) & 1;
 }
 
 // nonAdjacentForm computes a width-w non-adjacent form for this scalar.
@@ -346,13 +346,13 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
             bitBuf = digits[indexU64].Rsh(indexBit);
         } else {
             // Combine the current 64 bits with bits from the next 64
-            bitBuf = (uint64)((digits[indexU64].Rsh(indexBit)) | (digits[1 + indexU64].Lsh((64 - indexBit))));
+            bitBuf = (digits[indexU64].Rsh(indexBit)) | (digits[1 + indexU64].Lsh((64 - indexBit)));
         }
 
         // Add carry into the current window
-        var window = carry + ((uint64)(bitBuf & windowMask));
+        var window = carry + (bitBuf & windowMask);
 
-        if ((uint64)(window & 1) == 0) {
+        if ((window & 1) == 0) {
             // If the window value is even, preserve the carry and continue.
             // Why is the carry preserved?
             // If carry == 0 and window & 1 == 0,
@@ -387,13 +387,13 @@ internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
     // Compute unsigned radix-16 digits:
     for (nint i = 0; i < 32; i++) {
         digits[2 * i] = (int8)((byte)(b[i] & 15));
-        digits[2 * i + 1] = (int8)((byte)(((b[i] >> (int)(4))) & 15));
+        digits[2 * i + 1] = (int8)((byte)((b[i] >> 4) & 15));
     }
 
     // Recenter coefficients:
     for (nint i = 0; i < 63; i++) {
-        var carry = (int8)(((int8)(digits[i] + 8) >> (int)(4)));
-        digits[i] -= (int8)(carry << (int)(4));
+        var carry = (int8)(((int8)(digits[i] + 8) >> 4));
+        digits[i] -= (int8)(carry << 4);
         digits[i + 1] += carry;
     }
 

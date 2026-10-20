@@ -77,7 +77,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
         var b = new slice<byte>(0, 6 + builtin.len(host)); // the size here is just an estimate
         b = append(b, (byte)(socksVersion5));
         if (builtin.len(d.AuthMethods) == 0 || d.Authenticate == default!){
-            b = append(b, (byte)(1), (byte)(nint)socksAuthMethodNotRequired);
+            b = append(b, (byte)1, (byte)(nint)socksAuthMethodNotRequired);
         } else {
             var ams = d.AuthMethods;
             if (builtin.len(ams) > 255) {
@@ -102,7 +102,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
         if (b[0] != socksVersion5) {
             (_ᴛ1, ctxErr) = (default!, errors.New("unexpected protocol version "u8 + strconv.Itoa((nint)b[0]))); goto ᒐdone;
         }
-        socksAuthMethod am = ((socksAuthMethod)(nint)b[1]);
+        socksAuthMethod am = (socksAuthMethod)(nint)b[1];
         if (am == socksAuthMethodNoAcceptableMethods) {
             (_ᴛ1, ctxErr) = (default!, errors.New(noAcceptableˢ)); goto ᒐdone;
         }
@@ -115,7 +115,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
         }
 
         b = b[..0];
-        b = append(b, (byte)(socksVersion5), (byte)(nint)d.cmd, (byte)(0));
+        b = append(b, (byte)(socksVersion5), (byte)(nint)d.cmd, (byte)0);
         {
             var ip = net.ParseIP(host); if (ip != default!){
                 {
@@ -141,7 +141,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 b = append(b, host.ꓸꓸꓸ);
             }
         }
-        b = append(b, (byte)((port >> (int)(8))), (byte)port);
+        b = append(b, (byte)(port >> 8), (byte)port);
         {
             (_, ctxErr) = c.Write(b); if (ctxErr != default!) {
                 goto ᒐdone;
@@ -157,7 +157,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
             (_ᴛ1, ctxErr) = (default!, errors.New("unexpected protocol version "u8 + strconv.Itoa((nint)b[0]))); goto ᒐdone;
         }
         {
-            socksReply cmdErr = ((socksReply)(nint)b[1]); if (cmdErr != socksStatusSucceeded) {
+            socksReply cmdErr = (socksReply)(nint)b[1]; if (cmdErr != socksStatusSucceeded) {
                 (_ᴛ1, ctxErr) = (default!, errors.New("unknown error "u8 + cmdErr.String())); goto ᒐdone;
             }
         }
@@ -199,9 +199,9 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
         if (a.IP != default!){
             copy(a.IP, b);
         } else {
-            a.Name = ((@string)(b.slice(0, builtin.len(b) - 2)));
+            a.Name = (@string)(b.slice(0, builtin.len(b) - 2));
         }
-        a.Port = (nint)(((nint)b[builtin.len(b) - 2] << (int)(8)) | (nint)b[builtin.len(b) - 1]);
+        a.Port = (nint)b[builtin.len(b) - 2] << 8 | (nint)b[builtin.len(b) - 1];
         (_ᴛ1, ctxErr) = (new socksAddrжΔAddr(Ꮡa), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

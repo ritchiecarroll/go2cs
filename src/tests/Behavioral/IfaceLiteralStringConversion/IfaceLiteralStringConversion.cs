@@ -16,7 +16,7 @@ internal static void Main() {
         (any)((@string)("paren"u8)),
         (any)((@string)(named)),
         (any)(typed),
-        ((any)(@string)("control"u8))
+        (any)(@string)("control"u8)
     }.slice();
     foreach (var (_, v) in values) {
         fmt.Printf("%v %T\n"u8, v, v);

@@ -221,7 +221,7 @@ public static void Trace(http.ResponseWriter w, ж<http.Request> Ꮡr) {
             return;
         }
     }
-    sleep(Ꮡr, ((time.Duration)(int64)(sec * (float64)(int64)time.ΔSecond)));
+    sleep(Ꮡr, (time.Duration)(int64)(sec * (float64)(int64)time.ΔSecond));
     trace.Stop();
 }
 
@@ -255,7 +255,7 @@ public static void Symbol(http.ResponseWriter w, ж<http.Request> Ꮡr) {
         if (err == default!) {
             word = word.slice(0, len(word) - 1); // trim +
         }
-        var (pc, _) = strconv.ParseUint(((@string)word), 0, 64);
+        var (pc, _) = strconv.ParseUint((@string)word, 0, 64);
         if (pc != 0) {
             var f = runtime.FuncForPC((uintptr)pc);
             if (f != nil) {
@@ -290,7 +290,7 @@ internal static readonly @string debugˢ = "debug"u8;
 
 internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
-    var p = pprof.Lookup(((@string)name));
+    var p = pprof.Lookup((@string)name);
     if (p == nil) {
         serveError(w, http.StatusNotFound, unknownProfileˢ);
         return;

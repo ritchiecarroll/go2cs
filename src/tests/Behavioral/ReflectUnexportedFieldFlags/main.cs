@@ -23,7 +23,7 @@ internal static void Main() {
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
-        fmt.Printf("%d %-10s exported=%-5v pkgpath=%q tag=%q\n"u8, i, fΔ1.Name, fΔ1.IsExported(), fΔ1.PkgPath, ((@string)fΔ1.Tag));
+        fmt.Printf("%d %-10s exported=%-5v pkgpath=%q tag=%q\n"u8, i, fΔ1.Name, fΔ1.IsExported(), fΔ1.PkgPath, (@string)fΔ1.Tag);
     }
 
     var (f, ok) = t.FieldByName("secret");

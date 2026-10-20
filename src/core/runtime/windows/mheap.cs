@@ -386,7 +386,7 @@ internal static void set(this ж<mSpanStateBox> Ꮡb, mSpanState s) {
 
 //go:nosplit
 internal static mSpanState get(this ж<mSpanStateBox> Ꮡb) {
-    return ((mSpanState)Ꮡb.of(mSpanStateBox.Ꮡs).Load());
+    return (mSpanState)Ꮡb.of(mSpanStateBox.Ꮡs).Load();
 }
 
 partial struct mspan {
@@ -487,7 +487,7 @@ internal static (uintptr size, uintptr n, uintptr total) layout(this ref mspan s
     uintptr n = default!;
     uintptr total = default!;
 
-    total = (s.npages << (int)(gc.PageShift));
+    total = s.npages << (int)(gc.PageShift);
     size = s.elemsize;
     if (size > 0) {
         n = total / size;
@@ -556,12 +556,12 @@ internal static UntypedInt numSpanClasses => /* gc.NumSizeClasses << 1 */ 136;
 internal static spanClass tinySpanClass => /* spanClass(tinySizeClass<<1 | 1) */ 5;
 
 internal static spanClass makeSpanClass(uint8 sizeclass, bool noscan) {
-    return (spanClass)(((spanClass)((uint8)(sizeclass << (int)(1)))) | ((spanClass)(uint8)bool2int(noscan)));
+    return (spanClass)(((spanClass)((uint8)(sizeclass << 1))) | ((spanClass)(uint8)bool2int(noscan)));
 }
 
 //go:nosplit
 internal static int8 sizeclass(this spanClass sc) {
-    return (int8)(uint8)((sc >> (int)(1)));
+    return (int8)(uint8)((sc >> 1));
 }
 
 //go:nosplit
@@ -582,7 +582,7 @@ internal static bool noscan(this spanClass sc) {
 //
 //go:nosplit
 internal static arenaIdx arenaIndex(uintptr Δp) {
-    return ((arenaIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)heapArenaBytes));
+    return (arenaIdx)(nuint)((Δp - (uintptr)arenaBaseOffset) / (uintptr)heapArenaBytes);
 }
 
 // arenaBase returns the low address of the region covered by heap
@@ -605,7 +605,7 @@ internal static nuint l1(this arenaIdx i) {
         // L1 map.
         return 0;
     } else {
-        return ((nuint)i >> (int)(arenaL1Shift));
+        return (nuint)i >> (int)(arenaL1Shift);
     }
 }
 
@@ -619,7 +619,7 @@ internal static nuint l2(this arenaIdx i) {
     if (arenaL1Bits == 0){
         return (nuint)i;
     } else {
-        return (nuint)((nuint)i & (nuint)((1 << (int)(arenaL2Bits)) - 1));
+        return (nuint)i & (nuint)((1 << (int)(arenaL2Bits)) - 1);
     }
 }
 
@@ -753,7 +753,7 @@ internal static void init(this ж<mheap> Ꮡh) {
     // h->mapcache needs no init
 
     foreach (var (i, _) in h.central) {
-        h.central[i].mcentral.init(((spanClass)(uint8)i));
+        h.central[i].mcentral.init((spanClass)(uint8)i);
     }
 
     Ꮡh.of(mheap.Ꮡpages).init(Ꮡh.of(mheap.Ꮡlock), Ꮡmemstats.of(mstats.ᏑgcMiscSys), false);
@@ -775,7 +775,7 @@ internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) {
     // could make the slow path here several times faster by
     // batching heap frees.
     // Bail early if there's no more reclaim work.
-    if (Ꮡh.of(mheap.ᏑreclaimIndex).Load() >= ((uint64)1 << (int)(63))) {
+    if (Ꮡh.of(mheap.ᏑreclaimIndex).Load() >= (uint64)1 << 63) {
         return;
     }
 
@@ -812,7 +812,7 @@ internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) {
         var idx = (uintptr)(Ꮡh.of(mheap.ᏑreclaimIndex).Add(pagesPerReclaimerChunk) - (uint64)pagesPerReclaimerChunk);
         if (idx / (uintptr)pagesPerArena >= (uintptr)len(arenas)) {
             // Page reclaiming is done.
-            Ꮡh.of(mheap.ᏑreclaimIndex).Store(((uint64)1 << (int)(63)));
+            Ꮡh.of(mheap.ᏑreclaimIndex).Store((uint64)1 << 63);
             break;
         }
 
@@ -1589,7 +1589,7 @@ internal static (uintptr, bool) grow(this ж<mheap> Ꮡh, uintptr npage) {
                 // h.curArena.base is aligned to pallocChunkBytes.
                 nint bits = logHeapArenaBytes - logPallocChunkBytes;
                 var offset = nextHeapRandBits(bits);
-                h.curArena.@base = alignDown((uintptr)(h.curArena.@base | ((offset << (int)(logPallocChunkBytes)))), pallocChunkBytes);
+                h.curArena.@base = alignDown((uintptr)(h.curArena.@base | (offset << (int)(logPallocChunkBytes))), pallocChunkBytes);
             }
         }
 
@@ -1656,13 +1656,13 @@ internal static void freeSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs) {
         if (msanenabled) {
             // Tell msan that this entire span is no longer in use.
             @unsafe.Pointer @base = (@unsafe.Pointer)Ꮡs.Value.@base();
-            var bytes = (Ꮡs.Value.npages << (int)(gc.PageShift));
+            var bytes = Ꮡs.Value.npages << (int)(gc.PageShift);
             msanfree(@base, bytes);
         }
         if (asanenabled) {
             // Tell asan that this entire span is no longer in use.
             @unsafe.Pointer @base = (@unsafe.Pointer)Ꮡs.Value.@base();
-            var bytes = (Ꮡs.Value.npages << (int)(gc.PageShift));
+            var bytes = Ꮡs.Value.npages << (int)(gc.PageShift);
             asanpoison(@base, bytes);
         }
         if (valgrindenabled) {
@@ -1730,7 +1730,7 @@ internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAll
             @throw(mheapFreeSpanLockedˢ2);
         }
         if (s.allocCount != 0 || s.sweepgen != h.sweepgen) {
-            print((@string)"mheap.freeSpanLocked - span "u8, Ꮡs.OrTypedNil(), (@string)" ptr "u8, ((Δhex)(uint64)s.@base()), (@string)" allocCount "u8, s.allocCount, (@string)" sweepgen "u8, s.sweepgen, (@string)"/"u8, h.sweepgen, (@string)"\n"u8);
+            print((@string)"mheap.freeSpanLocked - span "u8, Ꮡs.OrTypedNil(), (@string)" ptr "u8, (Δhex)(uint64)s.@base(), (@string)" allocCount "u8, s.allocCount, (@string)" sweepgen "u8, s.sweepgen, (@string)"/"u8, h.sweepgen, (@string)"\n"u8);
             @throw(mheapFreeSpanLockedˢ3);
         }
         Ꮡh.of(mheap.ᏑpagesInUse).Add(((uintptr)0 - s.npages));

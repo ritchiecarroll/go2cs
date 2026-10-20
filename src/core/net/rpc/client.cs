@@ -22,7 +22,7 @@ partial class rpc_package {
 partial struct ServerError /*@string*/;
 
 public static @string Error(this ServerError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 public static error ErrShutdown = errors.New("connection is shut down"u8);

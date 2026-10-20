@@ -131,15 +131,15 @@ internal static partial void Main() {
 
     var buffered = new channel<nint>(2);
     var bv = reflect.ValueOf(buffered);
-    bv.Send(reflect.ValueOf((nint)(41)));
-    bv.Send(reflect.ValueOf((nint)(42)));
+    bv.Send(reflect.ValueOf((nint)41));
+    bv.Send(reflect.ValueOf((nint)42));
     var (first, ok1) = bv.Recv();
     fmt.Println("send/recv:", first.Int(), ok1, "len:", bv.Len(), "cap:", bv.Cap());
 
     var (drained, ok2) = bv.TryRecv();
     var (empty, ok3) = bv.TryRecv();
     fmt.Println("tryrecv:", drained.Int(), ok2, "| empty valid:", empty.IsValid(), ok3);
-    fmt.Println("trysend:", bv.TrySend(reflect.ValueOf((nint)(7))));
+    fmt.Println("trysend:", bv.TrySend(reflect.ValueOf((nint)7)));
 
     var closing = new channel<@string>(1);
     closing.ᐸꟷ("last");
@@ -155,7 +155,7 @@ internal static partial void Main() {
     }));
     var recvʗ1 = recv;
     fmt.Println("send on recv-only:", recovered(() => {
-        reflect.ValueOf(recvʗ1).Send(reflect.ValueOf((nint)(1)));
+        reflect.ValueOf(recvʗ1).Send(reflect.ValueOf((nint)1));
     }));
 }
 

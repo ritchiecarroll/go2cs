@@ -161,7 +161,7 @@ internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process>
         throw panic("handleTransientAcquire called in invalid mode");
     }
 
-    var status = ((processStatus)Ꮡp.of(Process.Ꮡstate).Load());
+    var status = (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
     if (status != statusOK) {
         return (0, status);
     }
@@ -174,7 +174,7 @@ internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process>
     // We always set the status to non-zero before closing the handle.
     // If we get here the status must have been set non-zero after
     // we just checked it above.
-    status = ((processStatus)Ꮡp.of(Process.Ꮡstate).Load());
+    status = (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
     if (status == statusOK) {
         throw panic("inconsistent process status");
     }
@@ -197,7 +197,7 @@ internal static processStatus pidStatus(this ж<Process> Ꮡp) {
         throw panic("pidStatus called in invalid mode");
     }
 
-    return ((processStatus)Ꮡp.of(Process.Ꮡstate).Load());
+    return (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
 }
 
 // ProcAttr holds the attributes that will be applied to a new process
@@ -310,7 +310,7 @@ internal static processStatus doRelease(this ж<Process> Ꮡp, processStatus new
 
     while (ᐧ) {
         var state = Ꮡp.of(Process.Ꮡstate).Load();
-        var oldStatus = ((processStatus)state);
+        var oldStatus = (processStatus)state;
         if (oldStatus != statusOK) {
             return oldStatus;
         }

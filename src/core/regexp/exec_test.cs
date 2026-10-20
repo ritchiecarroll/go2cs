@@ -759,7 +759,7 @@ public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
             ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
             size = vᴛ1;
 
-            if ((isRaceBuilder || testing.Short()) && size.n > (1 << (int)(10))) {
+            if ((isRaceBuilder || testing.Short()) && size.n > 1 << 10) {
                 continue;
             }
             var t = makeText(size.n);
@@ -792,7 +792,7 @@ public static void BenchmarkMatch_onepass_regex(ж<testing.B> Ꮡb) {
         ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
         size = vᴛ1;
 
-        if ((isRaceBuilder || testing.Short()) && size.n > (1 << (int)(10))) {
+        if ((isRaceBuilder || testing.Short()) && size.n > 1 << 10) {
             continue;
         }
         var t = makeText(size.n);
@@ -827,10 +827,10 @@ partial struct benchSizesᴛ1 /*dyn*/ {
 internal static slice<benchSizesᴛ1> benchSizes = new benchSizesᴛ1[]{
     new("16"u8, 16),
     new("32"u8, 32),
-    new("1K"u8, (1 << (int)(10))),
-    new("32K"u8, (32 << (int)(10))),
-    new("1M"u8, (1 << (int)(20))),
-    new("32M"u8, (32 << (int)(20)))
+    new("1K"u8, 1 << 10),
+    new("32K"u8, 32 << 10),
+    new("1M"u8, 1 << 20),
+    new("32M"u8, 32 << 20)
 }.slice();
 
 public static void TestLongest(ж<testing.T> Ꮡt) {

@@ -157,10 +157,10 @@ internal static @string ascii(@string s) {
         }
         @out = append(@out, (byte)((rune)'\\'), (byte)((rune)'u'));
         for (nint shift = 20; shift >= 0; shift -= 4) {
-            @out = append(@out, hexDigits[(rune)((r.Rsh((nuint)shift)) & 0xf)]);
+            @out = append(@out, hexDigits[((r.Rsh((nuint)shift)) & 0xf)]);
         }
     }
-    return ((@string)@out);
+    return (@string)@out;
 }
 
 } // end main_package

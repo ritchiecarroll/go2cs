@@ -59,9 +59,9 @@ internal static void Main() {
     fmt.Println("map key TypeFor->TypeOf", ok1, ok2);
 
     ref var sm = ref heap(new Δsync.Map(), out var Ꮡsm);
-    Ꮡsm.Store(reflect.TypeOf(s), (nint)(1));
+    Ꮡsm.Store(reflect.TypeOf(s), (nint)1);
     var (_, ok3) = Ꮡsm.Load(reflect.TypeFor<T>());
-    Ꮡsm.Store(reflect.TypeFor<Arr>(), (nint)(2));
+    Ꮡsm.Store(reflect.TypeFor<Arr>(), (nint)2);
     var (_, ok4) = Ꮡsm.Load(reflect.TypeOf(a));
     fmt.Println("sync.Map TypeOf->TypeFor", ok3, "TypeFor->TypeOf", ok4);
 }

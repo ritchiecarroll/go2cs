@@ -79,7 +79,7 @@ internal static (nint, error) Write(this ref testFile f, slice<byte> b) {
         return (0, errors.New(unexpectedWriteOperationˢ));
     }
 
-    if (!strings.HasPrefix(s, ((@string)b))) {
+    if (!strings.HasPrefix(s, (@string)b)) {
         return (0, new testError(fmt.Errorf("got Write(%q), want Write(%q)"u8, b, s)));
     }
     if (len(s) > len(b)){
@@ -285,7 +285,7 @@ public static void TestFileInfoHeaderDir(ж<testing.T> Ꮡt) {
     }
     // Ignoring c_ISGID for golang.org/issue/4867
     {
-        var (g, e) = ((int64)((~h).Mode & ~(int64)c_ISGID), (int64)(uint32)fi.Mode().Perm()); if (g != e) {
+        var (g, e) = ((~h).Mode & ~(int64)c_ISGID, (int64)(uint32)fi.Mode().Perm()); if (g != e) {
             Ꮡt.Errorf("Mode = %#o; want %#o"u8, g, e);
         }
     }
@@ -351,7 +351,7 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡb));
     var hdr = Ꮡ(new Header(
         Name: "file.txt"u8,
-        Uid: (1 << (int)(21)), // Too big for 8 octal digits
+        Uid: (1 << 21), // Too big for 8 octal digits
         Size: (int64)len(data),
         ModTime: time.Now().Round(time.ΔSecond),
         PAXRecords: new map<@string, @string>{["uid"u8] = "2097152"u8},

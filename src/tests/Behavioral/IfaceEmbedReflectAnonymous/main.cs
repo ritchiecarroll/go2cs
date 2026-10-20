@@ -93,8 +93,8 @@ internal static void Main() {
     fmt.Printf("%#v\n"u8, new Pub(new S(3)));
     fmt.Printf("%#v\n"u8, new Named(new S(3)));
 
-    var twin = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem(), Anonymous: true)}.slice());
-    var plain = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem())}.slice());
+    var twin = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf((ж<fmt.Stringer>)nil).Elem(), Anonymous: true)}.slice());
+    var plain = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer", Type: reflect.TypeOf((ж<fmt.Stringer>)nil).Elem())}.slice());
     fmt.Println("Pub -> anonymous twin:", reflect.TypeOf(new Pub(nil)).ConvertibleTo(twin));
     fmt.Println("Pub -> named twin:", reflect.TypeOf(new Pub(nil)).ConvertibleTo(plain));
     fmt.Println("Named -> anonymous twin:", reflect.TypeOf(new Named(nil)).ConvertibleTo(twin));

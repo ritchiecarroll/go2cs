@@ -23,11 +23,11 @@ internal static ref sigset sigset_all => ref Ꮡsigset_all.Value;
 //go:nosplit
 //go:nowritebarrierrec
 internal static void sigaddset(ref sigset mask, nint i) {
-    (mask)[(i - 1) / 32] |= (uint32)(((uint32)1 << (int)(((uint32)(((uint32)i - 1) & 31)))));
+    (mask)[(i - 1) / 32] |= (uint32)(((uint32)1 << (int)((((uint32)i - 1) & 31))));
 }
 
 internal static void sigdelset(ref sigset mask, nint i) {
-    (mask)[(i - 1) / 32] &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(((uint32)i - 1) & 31))))));
+    (mask)[(i - 1) / 32] &= unchecked((uint32)~(uint32)(((uint32)1 << (int)((((uint32)i - 1) & 31)))));
 }
 
 //go:nosplit

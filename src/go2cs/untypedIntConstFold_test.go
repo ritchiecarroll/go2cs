@@ -114,7 +114,7 @@ func TestUntypedIntArithmeticThatLeavesInt64FoldsToGoValue(t *testing.T) {
 		t.Errorf("the compile-time assert's index is not folded to Go's constant 0:\n%s", asserted)
 	}
 
-	if strings.Contains(asserted, "<< (int)(64)") {
+	if strings.Contains(asserted, "<< 64") || strings.Contains(asserted, "<< (int)(64)") {
 		t.Errorf("the assert still evaluates 1 << 64 at run time (1 in int64, index -1):\n%s", asserted)
 	}
 

@@ -20,7 +20,7 @@ partial struct goVersion /*@string*/;
 // asGoVersion returns v as a goVersion (e.g., "go1.20.1" becomes "go1.20").
 // If v is not a valid Go version, the result is the empty string.
 internal static goVersion asGoVersion(@string v) {
-    return ((goVersion)version.Lang(v));
+    return (goVersion)version.Lang(v);
 }
 
 // isValid reports whether v is a valid Go version.
@@ -31,7 +31,7 @@ internal static bool isValid(this goVersion v) {
 // cmp returns -1, 0, or +1 depending on whether x < y, x == y, or x > y,
 // interpreted as Go versions.
 internal static nint cmp(this goVersion x, goVersion y) {
-    return version.Compare(((@string)x), ((@string)y));
+    return version.Compare((@string)x, (@string)y);
 }
 
 // Go versions that introduced language changes

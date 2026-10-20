@@ -333,7 +333,7 @@ internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff o
         if (@base >= (~md).types && @base < (~md).etypes) {
             var resΔ1 = (~md).types + (uintptr)(int32)off;
             if (resΔ1 > (~md).etypes) {
-                println((@string)"runtime: nameOff"u8, ((Δhex)(uint64)(int32)off), (@string)"out of range"u8, ((Δhex)(uint64)(~md).types), (@string)"-"u8, ((Δhex)(uint64)(~md).etypes));
+                println((@string)"runtime: nameOff"u8, (Δhex)(uint64)(int32)off, (@string)"out of range"u8, (Δhex)(uint64)(~md).types, (@string)"-"u8, (Δhex)(uint64)(~md).etypes);
                 @throw(runtimeNameOffsetOutOfˢ);
             }
             return new abiꓸName(Bytes: (ж<byte>)(uintptr)((@unsafe.Pointer)resΔ1));
@@ -345,9 +345,9 @@ internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff o
     var (res, found) = reflectOffs.m[(int32)off, ꟷ];
     reflectOffsUnlock();
     if (!found) {
-        println((@string)"runtime: nameOff"u8, ((Δhex)(uint64)(int32)off), (@string)"base"u8, ((Δhex)(uint64)@base), (@string)"not in ranges:"u8);
+        println((@string)"runtime: nameOff"u8, (Δhex)(uint64)(int32)off, (@string)"base"u8, (Δhex)(uint64)@base, (@string)"not in ranges:"u8);
         for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
-            println((@string)"\ttypes"u8, ((Δhex)(uint64)(~next).types), (@string)"etypes"u8, ((Δhex)(uint64)(~next).etypes));
+            println((@string)"\ttypes"u8, (Δhex)(uint64)(~next).types, (@string)"etypes"u8, (Δhex)(uint64)(~next).etypes);
         }
         @throw(runtimeNameOffsetBaseˢ);
     }
@@ -381,9 +381,9 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
         @unsafe.Pointer resΔ1 = reflectOffs.m[(int32)off];
         reflectOffsUnlock();
         if (resΔ1 == nil) {
-            println((@string)"runtime: typeOff"u8, ((Δhex)(uint64)(int32)off), (@string)"base"u8, ((Δhex)(uint64)@base), (@string)"not in ranges:"u8);
+            println((@string)"runtime: typeOff"u8, (Δhex)(uint64)(int32)off, (@string)"base"u8, (Δhex)(uint64)@base, (@string)"not in ranges:"u8);
             for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
-                println((@string)"\ttypes"u8, ((Δhex)(uint64)(~next).types), (@string)"etypes"u8, ((Δhex)(uint64)(~next).etypes));
+                println((@string)"\ttypes"u8, (Δhex)(uint64)(~next).types, (@string)"etypes"u8, (Δhex)(uint64)(~next).etypes);
             }
             @throw(runtimeTypeOffsetBaseˢ);
         }
@@ -396,7 +396,7 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
     }
     var res = (~md).types + (uintptr)(int32)off;
     if (res > (~md).etypes) {
-        println((@string)"runtime: typeOff"u8, ((Δhex)(uint64)(int32)off), (@string)"out of range"u8, ((Δhex)(uint64)(~md).types), (@string)"-"u8, ((Δhex)(uint64)(~md).etypes));
+        println((@string)"runtime: typeOff"u8, (Δhex)(uint64)(int32)off, (@string)"out of range"u8, (Δhex)(uint64)(~md).types, (@string)"-"u8, (Δhex)(uint64)(~md).etypes);
         @throw(runtimeTypeOffsetOutOfˢ);
     }
     return (ж<_type>)(uintptr)((@unsafe.Pointer)res);
@@ -428,9 +428,9 @@ internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
         @unsafe.Pointer resΔ1 = reflectOffs.m[(int32)off];
         reflectOffsUnlock();
         if (resΔ1 == nil) {
-            println((@string)"runtime: textOff"u8, ((Δhex)(uint64)(int32)off), (@string)"base"u8, ((Δhex)(uint64)@base), (@string)"not in ranges:"u8);
+            println((@string)"runtime: textOff"u8, (Δhex)(uint64)(int32)off, (@string)"base"u8, (Δhex)(uint64)@base, (@string)"not in ranges:"u8);
             for (var next = Ꮡfirstmoduledata; next != nil; next = next.Value.next) {
-                println((@string)"\ttypes"u8, ((Δhex)(uint64)(~next).types), (@string)"etypes"u8, ((Δhex)(uint64)(~next).etypes));
+                println((@string)"\ttypes"u8, (Δhex)(uint64)(~next).types, (@string)"etypes"u8, (Δhex)(uint64)(~next).etypes);
             }
             @throw(runtimeTextOffsetBaseˢ);
         }
@@ -441,12 +441,12 @@ internal static @unsafe.Pointer textOff(this Δrtype t, textOff off) {
 }
 
 internal static @string pkgPath(abiꓸName n) {
-    if (n.Bytes == nil || (byte)(n.Data(0).Value & ((byte)(1 << (int)(2)))) == 0) {
+    if (n.Bytes == nil || (byte)(n.Data(0).Value & ((byte)(1 << 2))) == 0) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
     nint off = 1 + i + l;
-    if ((byte)(n.Data(0).Value & ((byte)(1 << (int)(1)))) != 0) {
+    if ((byte)(n.Data(0).Value & ((byte)(1 << 1))) != 0) {
         var (i2, l2) = n.ReadVarint(off);
         off += i2 + l2;
     }

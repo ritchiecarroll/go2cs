@@ -58,7 +58,7 @@ public static @string String(this ref @decimal a) {
         w += digitZero(buf.slice(w, w + a.dp - a.nd));
         break;
     }}
-    return ((@string)(buf.slice(0, w)));
+    return (@string)(buf.slice(0, w));
 }
 
 internal static nint digitZero(slice<byte> dst) {

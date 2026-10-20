@@ -36,8 +36,8 @@ internal static nint maxListenerBacklog() {
     // FreeBSD stores the backlog in a uint16, as does Linux.
     // Assume the other BSDs do too. Truncate number to avoid wrapping.
     // See issue 5030.
-    if (n > (1 << (int)(16)) - 1) {
-        n = (1 << (int)(16)) - 1;
+    if (n > (1 << 16) - 1) {
+        n = (1 << 16) - 1;
     }
     return (nint)n;
 }

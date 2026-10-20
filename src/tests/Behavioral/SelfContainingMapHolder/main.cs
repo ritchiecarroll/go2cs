@@ -133,9 +133,9 @@ internal static void reflection() {
     fmt.Printf("reflect %%T: %T\n"u8, d);
 
     var v = reflect.ValueOf(d);
-    fmt.Println("reflect len:", v.Len(), v.MapIndex(reflect.ValueOf((nint)(1))).Len());
+    fmt.Println("reflect len:", v.Len(), v.MapIndex(reflect.ValueOf((nint)1)).Len());
 
-    v.SetMapIndex(reflect.ValueOf((nint)(3)), reflect.ValueOf(new Direct(new map<nint, Direct>{})));
+    v.SetMapIndex(reflect.ValueOf((nint)3), reflect.ValueOf(new Direct(new map<nint, Direct>{})));
     fmt.Println("reflect set:", len(d), d[3] != default!);
 
     nint n = 0;

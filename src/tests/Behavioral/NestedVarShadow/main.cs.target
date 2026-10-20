@@ -67,7 +67,7 @@ internal static (nint, @string) pkgParamShadow(ж<strings.Reader> Ꮡstrings) {
 
     var buf = new slice<byte>(2);
     var (n, _) = stringsΔ1.Read(buf);
-    return (n, ((@string)buf));
+    return (n, (@string)buf);
 }
 
 partial struct @file {

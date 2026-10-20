@@ -75,7 +75,7 @@ public static void BenchmarkMutatorString(ж<testing.B> Ꮡb) {
                     // resize buffer to the correct shape and reset the PCG
                     buf = buf.slice(0, size);
                     mʗ1.Value.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
-                    mʗ1.mutate(new any[]{((@string)buf)}.slice(), workerSharedMemSize);
+                    mʗ1.mutate(new any[]{(@string)buf}.slice(), workerSharedMemSize);
                 }
             });
         }
@@ -96,7 +96,7 @@ public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> Ꮡb) {
 
         var types = new any[]{
             slice<byte>(""u8),
-            ((@string)""u8),
+            (@string)""u8,
             false,
             (float32)0F,
             (float64)0D,

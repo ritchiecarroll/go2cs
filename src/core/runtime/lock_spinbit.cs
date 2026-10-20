@@ -92,8 +92,8 @@ internal static readonly @string runtimeMMemoryAlignmentˢ = "runtime.m memory a
 internal static void lockVerifyMSize() {
     var size = roundupsize(/* unsafe.Sizeof(mPadded{}) */ (uintptr)2040, false) + (uintptr)gc.MallocHeaderSize;
     if ((uintptr)(size & (uintptr)mutexMMask) != 0) {
-        print((@string)"M structure uses sizeclass "u8, size, (@string)"/"u8, ((Δhex)(uint64)size), (@string)" bytes; "u8,
-            (@string)"incompatible with mutex flag mask "u8, ((Δhex)mutexMMask), (@string)"\n"u8);
+        print((@string)"M structure uses sizeclass "u8, size, (@string)"/"u8, (Δhex)(uint64)size, (@string)" bytes; "u8,
+            (@string)"incompatible with mutex flag mask "u8, (Δhex)mutexMMask, (@string)"\n"u8);
         @throw(runtimeMMemoryAlignmentˢ);
     }
 }
@@ -115,7 +115,7 @@ internal static muintptr mutexWaitListHead(uintptr v) {
             var m0bits = new muintptr(Ꮡm0); if (highBits == (uintptr)((uintptr)m0bits & ~(uintptr)(uintptr)mutexMMask)){
                 return m0bits;
             } else {
-                return ((muintptr)(highBits + (uintptr)mutexMOffset));
+                return (muintptr)(highBits + (uintptr)mutexMOffset);
             }
         }
     }

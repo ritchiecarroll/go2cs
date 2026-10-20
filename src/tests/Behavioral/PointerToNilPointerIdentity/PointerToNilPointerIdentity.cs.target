@@ -11,9 +11,9 @@ partial struct holder {
 
 internal static void Main() {
     ref var p1 = ref heap<ж<nint>>(out var Ꮡp1);
-    p1 = ((ж<nint>)nil);
+    p1 = (ж<nint>)nil;
     ref var p2 = ref heap<ж<nint>>(out var Ꮡp2);
-    p2 = ((ж<nint>)nil);
+    p2 = (ж<nint>)nil;
 
     var pp1 = Ꮡp1;
     var pp2 = Ꮡp2;

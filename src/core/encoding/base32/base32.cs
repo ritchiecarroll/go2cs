@@ -121,17 +121,17 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
     while (si < n) {
         // Combining two 32 bit loads allows the same code to be used
         // for 32 and 64 bit platforms.
-        var hi = (uint32)((uint32)((uint32)(((uint32)src[si + 0] << (int)(24)) | ((uint32)src[si + 1] << (int)(16))) | ((uint32)src[si + 2] << (int)(8))) | (uint32)src[si + 3]);
-        var lo = (uint32)((hi << (int)(8)) | (uint32)src[si + 4]);
+        var hi = (uint32)src[si + 0] << 24 | (uint32)src[si + 1] << 16 | (uint32)src[si + 2] << 8 | (uint32)src[si + 3];
+        var lo = hi << 8 | (uint32)src[si + 4];
 
-        dst[di + 0] = enc.encode[(uint32)(((hi >> (int)(27))) & 0x1F)];
-        dst[di + 1] = enc.encode[(uint32)(((hi >> (int)(22))) & 0x1F)];
-        dst[di + 2] = enc.encode[(uint32)(((hi >> (int)(17))) & 0x1F)];
-        dst[di + 3] = enc.encode[(uint32)(((hi >> (int)(12))) & 0x1F)];
-        dst[di + 4] = enc.encode[(uint32)(((hi >> (int)(7))) & 0x1F)];
-        dst[di + 5] = enc.encode[(uint32)(((hi >> (int)(2))) & 0x1F)];
-        dst[di + 6] = enc.encode[(uint32)(((lo >> (int)(5))) & 0x1F)];
-        dst[di + 7] = enc.encode[(uint32)((lo) & 0x1F)];
+        dst[di + 0] = enc.encode[((hi >> 27) & 0x1F)];
+        dst[di + 1] = enc.encode[((hi >> 22) & 0x1F)];
+        dst[di + 2] = enc.encode[((hi >> 17) & 0x1F)];
+        dst[di + 3] = enc.encode[((hi >> 12) & 0x1F)];
+        dst[di + 4] = enc.encode[((hi >> 7) & 0x1F)];
+        dst[di + 5] = enc.encode[((hi >> 2) & 0x1F)];
+        dst[di + 6] = enc.encode[((lo >> 5) & 0x1F)];
+        dst[di + 7] = enc.encode[((lo) & 0x1F)];
 
         si += 5;
         di += 8;
@@ -149,25 +149,25 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
     var matchᴛ1 = false;
     if (exprᴛ1 is 4) { matchᴛ1 = true;
         val |= (uint32)((uint32)src[si + 3]);
-        dst[di + 6] = enc.encode[(uint32)((val << (int)(3)) & 0x1F)];
-        dst[di + 5] = enc.encode[(uint32)((val >> (int)(2)) & 0x1F)];
+        dst[di + 6] = enc.encode[(val << 3 & 0x1F)];
+        dst[di + 5] = enc.encode[(val >> 2 & 0x1F)];
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
-        val |= (uint32)(((uint32)src[si + 2] << (int)(8)));
-        dst[di + 4] = enc.encode[(uint32)((val >> (int)(7)) & 0x1F)];
+        val |= (uint32)(((uint32)src[si + 2] << 8));
+        dst[di + 4] = enc.encode[(val >> 7 & 0x1F)];
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
-        val |= (uint32)(((uint32)src[si + 1] << (int)(16)));
-        dst[di + 3] = enc.encode[(uint32)((val >> (int)(12)) & 0x1F)];
-        dst[di + 2] = enc.encode[(uint32)((val >> (int)(17)) & 0x1F)];
+        val |= (uint32)(((uint32)src[si + 1] << 16));
+        dst[di + 3] = enc.encode[(val >> 12 & 0x1F)];
+        dst[di + 2] = enc.encode[(val >> 17 & 0x1F)];
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
-        val |= (uint32)(((uint32)src[si + 0] << (int)(24)));
-        dst[di + 1] = enc.encode[(uint32)((val >> (int)(22)) & 0x1F)];
-        dst[di + 0] = enc.encode[(uint32)((val >> (int)(27)) & 0x1F)];
+        val |= (uint32)(((uint32)src[si + 0] << 24));
+        dst[di + 1] = enc.encode[(val >> 22 & 0x1F)];
+        dst[di + 0] = enc.encode[(val >> 27 & 0x1F)];
     }
 
     // Pad the final quantum
@@ -192,7 +192,7 @@ public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, s
 public static @string EncodeToString(this ref Encoding enc, slice<byte> src) {
     var buf = new slice<byte>(enc.EncodedLen(len(src)));
     enc.Encode(buf, src);
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 partial struct encoder {
@@ -363,27 +363,27 @@ internal static (nint n, bool end, error err) decode(this ref Encoding enc, slic
         var exprᴛ1 = dlen;
         var matchᴛ1 = false;
         if (exprᴛ1 is 8) { matchᴛ1 = true;
-            dst[dsti + 4] = (byte)((byte)(dbuf[6] << (int)(5)) | dbuf[7]);
+            dst[dsti + 4] = (byte)((byte)(dbuf[6] << 5) | dbuf[7]);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 7) { matchᴛ1 = true;
-            dst[dsti + 3] = (byte)((byte)((byte)(dbuf[4] << (int)(7)) | (byte)(dbuf[5] << (int)(2))) | (dbuf[6] >> (int)(3)));
+            dst[dsti + 3] = (byte)((byte)((byte)(dbuf[4] << 7) | (byte)(dbuf[5] << 2)) | dbuf[6] >> 3);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
-            dst[dsti + 2] = (byte)((byte)(dbuf[3] << (int)(4)) | (dbuf[4] >> (int)(1)));
+            dst[dsti + 2] = (byte)((byte)(dbuf[3] << 4) | dbuf[4] >> 1);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
-            dst[dsti + 1] = (byte)((byte)((byte)(dbuf[1] << (int)(6)) | (byte)(dbuf[2] << (int)(1))) | (dbuf[3] >> (int)(4)));
+            dst[dsti + 1] = (byte)((byte)((byte)(dbuf[1] << 6) | (byte)(dbuf[2] << 1)) | dbuf[3] >> 4);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
-            dst[dsti + 0] = (byte)((byte)(dbuf[0] << (int)(3)) | (dbuf[1] >> (int)(2)));
+            dst[dsti + 0] = (byte)((byte)(dbuf[0] << 3) | dbuf[1] >> 2);
             n++;
         }
         dsti += 5;

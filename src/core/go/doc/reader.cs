@@ -575,7 +575,7 @@ internal static @string clean(@string s) {
             b = b.slice(0, n - 1);
         }
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // readNote collects a single note from a sequence of comments.

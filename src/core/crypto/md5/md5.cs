@@ -160,7 +160,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
         p = p.slice(n);
     }
     if (len(p) >= ΔBlockSize) {
-        nint n = (nint)(len(p) & ~(nint)(ΔBlockSize - 1));
+        nint n = len(p) & ~(nint)(ΔBlockSize - 1);
         if (haveAsm){
             while (n > maxAsmSize) {
                 block(ref (Ꮡd).DerefOrNull(), p[..(int)(maxAsmSize)]);
@@ -201,7 +201,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     // 1 byte end marker :: 0-63 padding bytes :: 8 byte length
     var tmp = new byte[]{0x80}.array(72);
     var pad = (55 - d.len) % 64; // calculate number of padding bytes
-    byteorder.LEPutUint64(tmp.slice((nint)(1 + pad)), (d.len << (int)(3))); // append length in bits
+    byteorder.LEPutUint64(tmp.slice((nint)(1 + pad)), d.len << 3); // append length in bits
     Ꮡd.Write(tmp.slice(0, (nint)(1 + pad + 8)));
 
     // The previous write ensures that a whole number of

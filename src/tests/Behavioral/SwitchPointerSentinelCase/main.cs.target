@@ -95,7 +95,7 @@ internal static (uintptr declared, uintptr assigned, uintptr highByte) nativeWid
 
     uintptr word = (nuint)0x0102030405060708UL;
     declared = word;
-    highByte = (word >> (int)(56));
+    highByte = word >> 56;
 
     word = (nuint)0x7fedcba987654321UL;
     assigned = word;

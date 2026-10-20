@@ -71,8 +71,8 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
             var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ, testVˢ));
             cmd.Value.Env = append((~cmd).Env, "TEST_FINALIZER_REGABI=1"u8);
             var (@out, err) = cmd.CombinedOutput();
-            if (!strings.Contains(((@string)@out), passˢ) || err != default!) {
-                Ꮡt.Fatalf("%s\n(exit status %v)"u8, ((@string)@out), err);
+            if (!strings.Contains((@string)@out, passˢ) || err != default!) {
+                Ꮡt.Fatalf("%s\n(exit status %v)"u8, (@string)@out, err);
             }
             return;
         }
@@ -117,7 +117,7 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
             var testʗ1 = test;
             Ꮡt.Run((~test).name, (ж<testing.T> tΔ1) => {
                 var x = Ꮡ(new TintPointer(p: @new<Tint>()));
-                (~x).p.Value = ((Tint)(~testʗ1).confirmValue);
+                (~x).p.Value = (Tint)(~testʗ1).confirmValue;
                 Δruntime.SetFinalizer(x.OrTypedNil(), (~testʗ1).fin);
 
                 Δruntime.KeepAlive(x.OrTypedNil());

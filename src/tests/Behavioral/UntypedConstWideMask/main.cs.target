@@ -21,7 +21,7 @@ internal static bool isHost(byte c) {
 	1<<':' */
             maskᶜ;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL))) != 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -34,7 +34,7 @@ internal static bool validHeaderValueByte(byte c) {
 	1<<0x09 */
             maskᶜ1;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & ~(9223372036854775807UL)))) == 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & ~(9223372036854775807UL))) == 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -44,7 +44,7 @@ internal static uint64 smallHigh(byte c) {
     GoBigConst mask = /* 1<<70 | 1<<3 */
             maskᶜ2;
 
-    return (uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (8UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (64UL)));
+    return (uint64)((((uint64)1).Lsh((uint64)(c))) & (8UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (64UL));
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)

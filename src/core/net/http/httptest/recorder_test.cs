@@ -79,7 +79,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 return err;
             }
-            @string contents = ((@string)contentBytes);
+            @string contents = (@string)contentBytes;
             if (contents != want) {
                 return fmt.Errorf("Result().Body = %s; want %s"u8, contents, want);
             }

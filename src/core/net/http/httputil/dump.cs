@@ -112,7 +112,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         if (!body){
             var contentLength = outgoingLength(ref (Ꮡreq).DerefOrNull());
             if (contentLength != 0) {
-                req.Body = io.NopCloser(io.LimitReader(((neverEnding)(rune)'x'), contentLength));
+                req.Body = io.NopCloser(io.LimitReader((neverEnding)(rune)'x', contentLength));
                 dummyBody = true;
             }
         } else {

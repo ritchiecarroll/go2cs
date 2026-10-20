@@ -140,13 +140,13 @@ internal static void doinit() {
     if (X86.HasOSXSAVE) {
         var (eax, _) = xgetbv();
         // Check if XMM and YMM registers have OS support.
-        osSupportsAVX = isSet(eax, ((uint32)1 << (int)(1))) && isSet(eax, ((uint32)1 << (int)(2)));
+        osSupportsAVX = isSet(eax, (uint32)1 << 1) && isSet(eax, (uint32)1 << 2);
 
         // AVX512 detection does not work on Darwin,
         // see https://github.com/golang/go/issues/49233
         //
         // Check if opmask, ZMMhi256 and Hi16_ZMM have OS support.
-        osSupportsAVX512 = osSupportsAVX && isSet(eax, ((uint32)1 << (int)(5))) && isSet(eax, ((uint32)1 << (int)(6))) && isSet(eax, ((uint32)1 << (int)(7)));
+        osSupportsAVX512 = osSupportsAVX && isSet(eax, (uint32)1 << 5) && isSet(eax, (uint32)1 << 6) && isSet(eax, (uint32)1 << 7);
     }
 
     X86.HasAVX = isSet(ecx1, cpuid_AVX) && osSupportsAVX;
@@ -228,7 +228,7 @@ internal static void doinit() {
 }
 
 internal static bool isSet(uint32 hwc, uint32 value) {
-    return (uint32)(hwc & value) != 0;
+    return (hwc & value) != 0;
 }
 
 // Name returns the CPU name given by the vendor.
@@ -265,7 +265,7 @@ public static @string Name() {
         }
     }
 
-    return ((@string)data);
+    return (@string)data;
 }
 
 internal static slice<byte> appendBytes(slice<byte> b, params ꓸꓸꓸuint32 argsʗp) {
@@ -273,10 +273,10 @@ internal static slice<byte> appendBytes(slice<byte> b, params ꓸꓸꓸuint32 ar
 
     foreach (var (_, arg) in args) {
         b = append(b,
-            (byte)((arg >> (int)(0))),
-            (byte)((arg >> (int)(8))),
-            (byte)((arg >> (int)(16))),
-            (byte)((arg >> (int)(24))));
+            (byte)(arg >> 0),
+            (byte)(arg >> 8),
+            (byte)(arg >> 16),
+            (byte)(arg >> 24));
     }
     return b;
 }

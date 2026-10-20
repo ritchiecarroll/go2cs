@@ -22,7 +22,7 @@ public static (slice<byte>, error) GobEncode(this ж<ΔInt> Ꮡx) {
     }
     var buf = new slice<byte>(1 + len(x.abs) * (nint)_S); // extra byte for version and sign bit
     nint i = x.abs.bytes(buf) - 1; // i >= 0
-    var b = (byte)((intGobVersion << (int)(1))); // make space for sign bit
+    var b = (byte)(intGobVersion << 1); // make space for sign bit
     if (x.neg) {
         b |= (byte)(1);
     }
@@ -38,8 +38,8 @@ public static error GobDecode(this ref ΔInt z, slice<byte> buf) {
         return default!;
     }
     var b = buf[0];
-    if ((byte)((b >> (int)(1))) != intGobVersion) {
-        return fmt.Errorf("Int.GobDecode: encoding version %d not supported"u8, (byte)((b >> (int)(1))));
+    if ((byte)((b >> 1)) != intGobVersion) {
+        return fmt.Errorf("Int.GobDecode: encoding version %d not supported"u8, (byte)((b >> 1)));
     }
     z.neg = (byte)(b & 1) != 0;
     z.abs = z.abs.setBytes(buf[1..]);

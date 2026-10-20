@@ -61,7 +61,7 @@ public static void TestXadduintptr(ж<testing.T> Ꮡt) {
         atomic.Xadduintptr(Ꮡtotal, (uintptr)(-(int64)inc));
     });
     if (total != 0) {
-        Ꮡt.Fatalf("xadduintpr total error, want %d, got %d"u8, (nint)(0), total);
+        Ꮡt.Fatalf("xadduintpr total error, want %d, got %d"u8, (nint)0, total);
     }
 }
 
@@ -178,7 +178,7 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
     }
 
     // Set every bit in array to 1.
-    var a = new slice<uint8>((1 << (int)(12)));
+    var a = new slice<uint8>((1 << 12));
     foreach (var (i, _) in a) {
         a[i] = 0xff;
     }
@@ -222,7 +222,7 @@ public static partial void TestAnd(ж<testing.T> Ꮡt) {
     }
 
     // Set every bit in array to 1.
-    var a = new slice<uint32>((1 << (int)(12)));
+    var a = new slice<uint32>((1 << 12));
     foreach (var (i, _) in a) {
         a[i] = 0xffffffffU;
     }
@@ -266,7 +266,7 @@ public static partial void TestOr8(ж<testing.T> Ꮡt) {
     }
 
     // Start with every bit in array set to 0.
-    var a = new slice<uint8>((1 << (int)(12)));
+    var a = new slice<uint8>((1 << 12));
 
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
@@ -307,7 +307,7 @@ public static partial void TestOr(ж<testing.T> Ꮡt) {
     }
 
     // Start with every bit in array set to 0.
-    var a = new slice<uint32>((1 << (int)(12)));
+    var a = new slice<uint32>((1 << 12));
 
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
@@ -339,9 +339,9 @@ public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
     var a = new slice<uint8>(16);
 
     // Iterations to try.
-    nint N = (1 << (int)(16));
+    nint N = 1 << 16;
     if (testing.Short()) {
-        N = (1 << (int)(10));
+        N = 1 << 10;
     }
 
     // Set and then clear every bit in the array bit-by-bit in different goroutines.
@@ -383,9 +383,9 @@ public static partial void TestBitwiseContended(ж<testing.T> Ꮡt) {
     var a = new slice<uint32>(16);
 
     // Iterations to try.
-    nint N = (1 << (int)(16));
+    nint N = 1 << 16;
     if (testing.Short()) {
-        N = (1 << (int)(10));
+        N = 1 << 10;
     }
 
     // Set and then clear every bit in the array bit-by-bit in different goroutines.
@@ -398,11 +398,11 @@ public static partial void TestBitwiseContended(ж<testing.T> Ꮡt) {
             for (nint n = 0; n < N; n++) {
                 foreach (var (iΔ1, _) in aʗ1) {
                     atomic.Or(Ꮡ(aʗ1, iΔ1), m);
-                    if ((uint32)(atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != m) {
+                    if ((atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != m) {
                         Ꮡt.Errorf("a[%v] bit %#x not set"u8, iΔ1, m);
                     }
                     atomic.And(Ꮡ(aʗ1, iΔ1), ~m);
-                    if ((uint32)(atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != 0) {
+                    if ((atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != 0) {
                         Ꮡt.Errorf("a[%v] bit %#x not clear"u8, iΔ1, m);
                     }
                 }
