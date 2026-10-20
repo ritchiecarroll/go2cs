@@ -7,8 +7,8 @@
 
 // Hand-written: os's part of the first read deadline's one-time costs, paid when the poller starts
 // (internal/poll/deadline_prepay_impl.cs says why and what poll pays). internal/poll cannot name these,
-// because os imports it, so os registers them on poll's DeadlinePathPrepay hook when its module loads,
-// and poll runs them inside the poller's start, after its own part:
+// because os imports it, so os registers them with golib's GoAsyncIO.AddDeadlinePathPrepay when its
+// module loads, and poll runs them inside the poller's start, after its own part:
 //   - RuntimeHelpers.PrepareMethod over File.Read and File.read, the return path above poll's FD.Read;
 //   - SetReadDeadline of the zero Time on a spare File whose file holds a never-opened FD (it returns
 //     poll's ErrNoDeadline and touches no descriptor);
@@ -23,14 +23,14 @@ using System.Runtime.CompilerServices;
 
 namespace go;
 
-using poll = @internal.poll_package;
+using GoAsyncIO = golib.GoAsyncIO;
 
 partial class os_package
 {
     [ModuleInitializer]
     internal static void registerDeadlinePathPrepay()
     {
-        poll.DeadlinePathPrepay += prepayDeadlinePath;
+        GoAsyncIO.AddDeadlinePathPrepay(prepayDeadlinePath);
     }
 
     private static void prepayDeadlinePath()

@@ -634,10 +634,14 @@ partial class poll_package
     // Arms the mode's runtime timer for DueNanos on golib's one timer heap (Go's pd.rt.modify).
     private static void armDeadlineLocked(ManagedPollMode mode)
     {
-        mode.Deadline ??= new GoTimer(static state => deadlineFired((ManagedPollMode)state!), mode);
+        mode.Deadline ??= new GoTimer(fireDeadline, mode);
         mode.ArmedGeneration = mode.Generation;
         mode.Deadline.Reset(mode.DueNanos);
     }
+
+    // The deadline timer's callback, named so the poller's start can compile it ahead of the first
+    // deadline (deadline_prepay_impl.cs).
+    private static readonly Action<object?> fireDeadline = static state => deadlineFired((ManagedPollMode)state!);
 
     // The timer callback, run inline on the timer service thread (Go's netpolldeadlineimpl). Re-validates
     // its generation under the gate (a stale callback must be inert), re-arms if it fired before

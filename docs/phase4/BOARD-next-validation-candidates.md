@@ -27535,4 +27535,14 @@ pre-pay, a throwing hook made the first pollable FD.Init fail and skipped every 
 windows part and each hook now run in their own try (red at dd65b04763 with a planted throwing hook, green after).
 The windows reading of the amended cut is owed by a windows host. Until it lands this row stays FIXED on linux only.
 
+**Amended 2026-10-20 (the i9's windows reading of 895445983a).** A1 moved but still missed: cold Go 0.6-0.7, C#
+6.2-7.8 (was 7.0-10.7); after a first completion Go 0.4-0.8, C# 1.3-3.4 (was 5.3-7.2). Its JIT list named 24 methods
+still compiled between the fire and the return: the timer callback, the completion callback and readiness sink, the
+overlapped field view's equality, the operation table's lookups, the inline-array helpers SyscallN's callers build,
+errnoErr, the poll error codes, the errno getters, the pinner's unpin, and a reflection invoke stub for
+`Errno.op_Equality` (its per-call cost has its own row, branch claude/p2-errno-equality). The pre-pay now reaches them: the parts
+private to syscall and internal/syscall/windows register with golib's `GoAsyncIO.AddDeadlinePathPrepay` (which also
+replaces internal/poll's public hook event), the timer callback and readiness sink are named so they can be
+prepared, and the windows part touches the rest on spare values. Windows reading owed again.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

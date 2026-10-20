@@ -26,13 +26,15 @@
 //     once before a deadline needs it;
 //   - on windows, the cancel and the aborted completion that follow a deadline's wake there
 //     (windows/deadline_prepay_windows_impl.cs);
-//   - any hook a package above this one registered for its own part of the path (os's return path).
+//   - every part another package registered with golib's GoAsyncIO.AddDeadlinePathPrepay: what this
+//     package cannot name, because it lives above it (os's return path) or is private to a package below
+//     it (syscall's completion callback on windows).
 // Nothing here arms a deadline or waits on a descriptor. Under Native AOT nothing is compiled at run
 // time, so none of it runs.
 //
 // Go has no such step, so nothing in it may fail the FD.Init that started the poller. This package's
-// part, the platform part and each hook run in their own try, and an exception ends only that one; its
-// costs then fall on the first deadline, as they did before this file.
+// part, the platform part and each registered part run in their own try, and an exception ends only
+// that one; its costs then fall on the first deadline, as they did before this file.
 //
 // It runs on the starting thread, so the first FD.Init pays it: about 10 ms under the JIT and under
 // ReadyToRun alike, once per process, and only in a process that opens a pollable descriptor. Run on
@@ -41,8 +43,8 @@
 // 0.3-0.5 ms; run here, that deadline reads 0.3-1.6 ms late.
 
 using System;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using GoAsyncIO = go.golib.GoAsyncIO;
 using GoTimer = go.golib.GoTimer;
 using MonotonicClock = go.golib.MonotonicClock;
 
@@ -52,13 +54,6 @@ namespace go.@internal;
 
 partial class poll_package
 {
-    // A package above internal/poll (os) adds its own part of the deadline path here, from its module
-    // initializer. Each hook runs once, inside the poller's start, after this package's part. Go's
-    // internal/poll has no such member. It is public only because os is another assembly and the corpus
-    // grants no internals between converted packages, so it is hidden from editor completion instead.
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static event Action? DeadlinePathPrepay;
-
     // Called once from each flavor's runtime_pollServerInit, after the poller is running.
     private static void prepayDeadlinePath()
     {
@@ -68,11 +63,7 @@ partial class poll_package
         attempt(prepayOwnDeadlinePath);
         attempt(() => prepayPlatformDeadlinePath());
 
-        if (DeadlinePathPrepay is not { } hooks)
-            return;
-
-        foreach (Action hook in hooks.GetInvocationList())
-            attempt(hook);
+        GoAsyncIO.RunDeadlinePathPrepay();
     }
 
     private static void prepayOwnDeadlinePath()
@@ -81,8 +72,8 @@ partial class poll_package
         warmTimer.Reset(MonotonicClock.Nanoseconds() + 2_000_000);
 
         prepare(
-            runtime_pollSetDeadline, applyDeadlineLocked, armDeadlineLocked, stopDeadlineLocked, deadlineFired,
-            runtime_pollReset, runtime_pollWait, pollBlock, modeState, runtimeNano, convertErr, Read,
+            runtime_pollSetDeadline, applyDeadlineLocked, armDeadlineLocked, stopDeadlineLocked, fireDeadline,
+            deadlineFired, runtime_pollReset, runtime_pollWait, pollBlock, modeState, runtimeNano, convertErr, Read,
             (pollDescFileFunc)prepareRead, (pollDescFileFunc)waitRead, (pollDescWaitFunc)wait,
             (pollDescPollableFunc)pollable);
 
