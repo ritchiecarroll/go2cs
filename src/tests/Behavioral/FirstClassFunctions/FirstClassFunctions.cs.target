@@ -94,10 +94,6 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     return s;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object convertedFuncTypeCallˢ = (@string)"converted func type call:"u8;
-private static readonly object collapseHoistˢ = (@string)"collapse hoist:"u8;
-
 internal static void Main() {
     var strategies = new slice<strategy>(win);
     foreach (var (kΔ1, _) in strategies) {
@@ -115,7 +111,7 @@ internal static void Main() {
 
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
-    fmt.Println(convertedFuncTypeCallˢ, result.player, result.opponent, result.thisTurn, turnIsOver);
+    fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
 
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
     var (n, @out, serr) = m.split("hi");
@@ -154,7 +150,7 @@ internal static void Main() {
         return (ᴛ1, ᴛ2);
     }
     var (got, gerr) = fetch();
-    fmt.Println(collapseHoistˢ, got, gerr == default!);
+    fmt.Println("collapse hoist:", got, gerr == default!);
 
     fmt.Println(passThrough());
 }

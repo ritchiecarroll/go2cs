@@ -106,44 +106,35 @@ internal static ж<ValueSpec> newSpec() {
     ));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object fixSpecˢ = (@string)"fixSpec:"u8;
-private static readonly object renumberOuterˢ = (@string)"renumber outer:"u8;
-private static readonly object renumberˢ = (@string)"renumber:"u8;
-private static readonly object bumpˢ = (@string)"bump:"u8;
-private static readonly object tagSpecˢ = (@string)"tag spec:"u8;
-private static readonly object tagDefaultˢ = (@string)"tag default:"u8;
-private static readonly object readˢ = (@string)"read:"u8;
-
 internal static void Main() {
     var spec = newSpec();
     fixSpec(new ValueSpecжNode(spec));
-    fmt.Println(fixSpecˢ, (~(~spec).Values[0]._<ж<Lit>>()).Len);
+    fmt.Println("fixSpec:", (~(~spec).Values[0]._<ж<Lit>>()).Len);
 
     var multi = Ꮡ(new ValueSpec(
         Names: new @string[]{"Typ", "Other"}.slice(),
         Values: new Node[]{new LitжNode(Ꮡ(new Lit(Len: 1, Name: "a"))), new LitжNode(Ꮡ(new Lit(Len: 2, Name: "b"))), new LitжNode(Ꮡ(new Lit(Len: 3, Name: "c")))}.slice()
     ));
     nint outer = renumber(new ValueSpecжNode(multi), 7);
-    fmt.Println(renumberOuterˢ, outer);
+    fmt.Println("renumber outer:", outer);
 
     foreach (var (k, _) in (~multi).Values) {
-        fmt.Println(renumberˢ, k, (~(~multi).Values[k]._<ж<Lit>>()).Len);
+        fmt.Println("renumber:", k, (~(~multi).Values[k]._<ж<Lit>>()).Len);
     }
 
     var bumped = newSpec();
     bump(new ValueSpecжNode(bumped));
-    fmt.Println(bumpˢ, (~(~bumped).Values[0]._<ж<Lit>>()).Len);
+    fmt.Println("bump:", (~(~bumped).Values[0]._<ж<Lit>>()).Len);
 
     var tagged = newSpec();
     tag(new ValueSpecжNode(tagged));
-    fmt.Println(tagSpecˢ, (~(~tagged).Values[0]._<ж<Lit>>()).Name);
+    fmt.Println("tag spec:", (~(~tagged).Values[0]._<ж<Lit>>()).Name);
 
     var lone = Ꮡ(new Lit(Len: 9, Name: "z"));
     tag(new LitжNode(lone));
-    fmt.Println(tagDefaultˢ, (~lone).Name);
+    fmt.Println("tag default:", (~lone).Name);
 
-    fmt.Println(readˢ, read(new ValueSpecжNode(tagged)));
+    fmt.Println("read:", read(new ValueSpecжNode(tagged)));
 }
 
 } // end main_package

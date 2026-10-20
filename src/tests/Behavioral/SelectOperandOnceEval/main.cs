@@ -33,29 +33,18 @@ internal static nint swap(ref channel<nint> ch, channel<nint> repl) {
     return 0;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object s1Gotˢ = (@string)"S1 got:"u8;
-private static readonly object madeˢ = (@string)"made ="u8;
-private static readonly object s2Gotˢ = (@string)"S2 got:"u8;
-private static readonly object afterCallsˢ = (@string)"afterCalls ="u8;
-private static readonly object s3Sink0ˢ = (@string)"S3 sink[0] ="u8;
-private static readonly object lenChˢ = (@string)"len(ch) ="u8;
-private static readonly object lenReplˢ = (@string)"len(repl) ="u8;
-private static readonly object s4Gotˢ = (@string)"S4 got:"u8;
-private static readonly object s4DefaultWrongˢ = (@string)"S4 default (wrong)"u8;
-
 internal static void Main() {
     var selᴛ1 = fresh();
     switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out var v): {
-        fmt.Println(s1Gotˢ, v, madeˢ, made);
+        fmt.Println("S1 got:", v, "made =", made);
         break;
     }}
 
     var selᴛ2 = after();
     switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out var v): {
-        fmt.Println(s2Gotˢ, v, afterCallsˢ, afterCalls);
+        fmt.Println("S2 got:", v, "afterCalls =", afterCalls);
         break;
     }}
 
@@ -67,18 +56,18 @@ internal static void Main() {
     var selᴛ3 = ch;
     switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
     case 0 when selᴛ3.ꟷᐳ(out sink[swap(ref ch, repl)]): {
-        fmt.Println(s3Sink0ˢ, sink[0], lenChˢ, len(ch), lenReplˢ, len(repl));
+        fmt.Println("S3 sink[0] =", sink[0], "len(ch) =", len(ch), "len(repl) =", len(repl));
         break;
     }}
 
     var selᴛ4 = fresh();
     switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out var v): {
-        fmt.Println(s4Gotˢ, v, madeˢ, made);
+        fmt.Println("S4 got:", v, "made =", made);
         break;
     }
     default: {
-        fmt.Println(s4DefaultWrongˢ);
+        fmt.Println("S4 default (wrong)");
         break;
     }}
 }

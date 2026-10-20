@@ -30,19 +30,12 @@ internal static void initᴛforward() { forward = lineNumber() + declaredLater *
 
 internal static nint declaredLater = 3;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object singleˢ = (@string)"single:"u8;
-private static readonly object groupedAˢ = (@string)"groupedA:"u8;
-private static readonly object groupedBˢ = (@string)"groupedB:"u8;
-private static readonly object multiAˢ = (@string)"multiA:"u8;
-private static readonly object forwardˢ = (@string)"forward:"u8;
-
 internal static void Main() {
-    fmt.Println(singleˢ, single);
-    fmt.Println(groupedAˢ, groupedA);
-    fmt.Println(groupedBˢ, groupedB);
-    fmt.Println(multiAˢ, multiA, multiB);
-    fmt.Println(forwardˢ, forward);
+    fmt.Println("single:", single);
+    fmt.Println("groupedA:", groupedA);
+    fmt.Println("groupedB:", groupedB);
+    fmt.Println("multiA:", multiA, multiB);
+    fmt.Println("forward:", forward);
 }
 
 } // end main_package

@@ -12,14 +12,11 @@ internal static @string Error(this ref myErr e) {
     return e.msg;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object valueCaptureRecoveredˢ = (@string)"valueCapture recovered:"u8;
-
 internal static void valueCapture() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(valueCaptureRecoveredˢ, recover());
+            fmt.Println("valueCapture recovered:", recover());
         }, ref ᒐ);
         defer(ᴛ1 => throw panic(ᴛ1), (nint)(42), ref ᒐ);
     }
@@ -27,14 +24,11 @@ internal static void valueCapture() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object reassignedAfterDeferˢ = (@string)"reassignedAfterDefer recovered:"u8;
-
 internal static void reassignedAfterDefer() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(reassignedAfterDeferˢ, recover());
+            fmt.Println("reassignedAfterDefer recovered:", recover());
         }, ref ᒐ);
         var err = fmt.Errorf("first"u8);
         defer(ᴛ1 => throw panic(ᴛ1), err, ref ᒐ);
@@ -45,14 +39,11 @@ internal static void reassignedAfterDefer() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object computedExprRecoveredˢ = (@string)"computedExpr recovered:"u8;
-
 internal static void computedExpr() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(computedExprRecoveredˢ, recover());
+            fmt.Println("computedExpr recovered:", recover());
         }, ref ᒐ);
         nint n = 3;
         defer(ᴛ1 => throw panic(ᴛ1), n * 7 + 1, ref ᒐ);
@@ -63,10 +54,6 @@ internal static void computedExpr() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object pointerValueRecoveredˢ = (@string)"pointerValue recovered typed:"u8;
-private static readonly object pointerValueRecoveredˢ2 = (@string)"pointerValue recovered UNTYPED:"u8;
-
 internal static void pointerValue() {
     GoFrame ᒐ = default;
     try {
@@ -74,9 +61,9 @@ internal static void pointerValue() {
             var r = recover();
             {
                 var (e, ok) = r._<ж<myErr>>(ᐧ); if (ok){
-                    fmt.Println(pointerValueRecoveredˢ, (~e).msg);
+                    fmt.Println("pointerValue recovered typed:", (~e).msg);
                 } else {
-                    fmt.Println(pointerValueRecoveredˢ2, r);
+                    fmt.Println("pointerValue recovered UNTYPED:", r);
                 }
             }
         }, ref ᒐ);
@@ -89,14 +76,11 @@ internal static void pointerValue() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object replacesInFlightˢ = (@string)"replacesInFlight recovered:"u8;
-
 internal static void replacesInFlight() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(replacesInFlightˢ, recover());
+            fmt.Println("replacesInFlight recovered:", recover());
         }, ref ᒐ);
         ((Action)(() => {
             GoFrame ᒐ = default;
@@ -112,14 +96,11 @@ internal static void replacesInFlight() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object multipleRecoveredˢ = (@string)"multiple recovered:"u8;
-
 internal static void multiple() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(multipleRecoveredˢ, recover());
+            fmt.Println("multiple recovered:", recover());
         }, ref ᒐ);
         @string a = "A";
         @string b = "B";

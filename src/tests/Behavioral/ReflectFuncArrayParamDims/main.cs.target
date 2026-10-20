@@ -35,13 +35,6 @@ internal static nint declared(/*[16]*/ array<byte> @in) {
     return len(@in);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object distinctIn0Typesˢ = (@string)"distinct in0 types:"u8;
-private static readonly object sameAsItselfˢ = (@string)"same as itself:    "u8;
-private static readonly object nestedElemˢ = (@string)"nested elem:"u8;
-private static readonly object structFieldˢ = (@string)"struct field:"u8;
-private static readonly object generatedCallˢ = (@string)"generated call:"u8;
-
 internal static void Main() {
     var f32 = ([GoArrayDims(32)] array<byte> @in) => {
         @in = @in.Clone();
@@ -64,28 +57,20 @@ internal static void Main() {
     report("plain", reflect.TypeOf((plain).OrTypedNilFunc()));
     report("declared", reflect.TypeOf(declared));
 
-    fmt.Println(distinctIn0Typesˢ, !AreEqual(reflect.TypeOf((f32).OrTypedNilFunc()).In(0), reflect.TypeOf((f64).OrTypedNilFunc()).In(0)));
-    fmt.Println(sameAsItselfˢ, AreEqual(reflect.TypeOf((f32).OrTypedNilFunc()).In(0), reflect.TypeOf((f32).OrTypedNilFunc()).In(0)));
+    fmt.Println("distinct in0 types:", !AreEqual(reflect.TypeOf((f32).OrTypedNilFunc()).In(0), reflect.TypeOf((f64).OrTypedNilFunc()).In(0)));
+    fmt.Println("same as itself:    ", AreEqual(reflect.TypeOf((f32).OrTypedNilFunc()).In(0), reflect.TypeOf((f32).OrTypedNilFunc()).In(0)));
 
     var inner = reflect.TypeOf((nested).OrTypedNilFunc()).In(0).Elem();
-    fmt.Println(nestedElemˢ, inner, inner.Len());
+    fmt.Println("nested elem:", inner, inner.Len());
 
     var field = reflect.TypeOf((f64).OrTypedNilFunc()).In(1).Field(0);
-    fmt.Println(structFieldˢ, field.Name, field.Type, field.Type.Len());
+    fmt.Println("struct field:", field.Name, field.Type, field.Type.Len());
 
-    fmt.Println(generatedCallˢ, generateAndCall(reflect.ValueOf((f32).OrTypedNilFunc())));
-    fmt.Println(generatedCallˢ, generateAndCall(reflect.ValueOf(declared)));
+    fmt.Println("generated call:", generateAndCall(reflect.ValueOf((f32).OrTypedNilFunc())));
+    fmt.Println("generated call:", generateAndCall(reflect.ValueOf(declared)));
 
     reportMethod();
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object methodPtrParamKindˢ = (@string)"method ptr param: kind ="u8;
-private static readonly object elemˢ = (@string)"elem ="u8;
-private static readonly object lenˢ = (@string)"len ="u8;
-private static readonly object filledThroughThePointerˢ = (@string)"filled through the pointer:"u8;
-private static readonly object methodValueParamˢ = (@string)"method value param:"u8;
-private static readonly object methodSumˢ = (@string)"method sum:"u8;
 
 internal static void reportMethod() {
     var t = reflect.TypeOf(new filler(nil));
@@ -97,11 +82,11 @@ internal static void reportMethod() {
 
     var ptr = m.Type.In(2);
     var elem = ptr.Elem();
-    fmt.Println(methodPtrParamKindˢ, ptr.Kind(), elemˢ, elem, lenˢ, elem.Len());
+    fmt.Println("method ptr param: kind =", ptr.Kind(), "elem =", elem, "len =", elem.Len());
 
     var reply = reflect.New(elem);
     m.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler(nil)), reflect.ValueOf((nint)(7)), reply}.slice());
-    fmt.Println(filledThroughThePointerˢ, reply.Elem().Interface());
+    fmt.Println("filled through the pointer:", reply.Elem().Interface());
 
     (var s, ok) = t.MethodByName("SumArray");
     if (!ok) {
@@ -109,7 +94,7 @@ internal static void reportMethod() {
     }
 
     var @in = s.Type.In(1);
-    fmt.Println(methodValueParamˢ, @in, @in.Len());
+    fmt.Println("method value param:", @in, @in.Len());
 
     var arg = reflect.New(@in).Elem();
 
@@ -118,7 +103,7 @@ internal static void reportMethod() {
     }
 
     var @out = s.Func.Call(new reflectꓸValue[]{reflect.ValueOf(new filler(nil)), arg}.slice());
-    fmt.Println(methodSumˢ, @out[0].Int());
+    fmt.Println("method sum:", @out[0].Int());
 }
 
 internal static void report(@string name, reflectꓸType t) {

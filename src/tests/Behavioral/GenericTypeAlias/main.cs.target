@@ -27,25 +27,18 @@ internal static lib.Box<T> wrap<T>(T v) {
     return b;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object localˢ = (@string)"local:"u8;
-private static readonly object identityˢ = (@string)"identity:"u8;
-private static readonly object crossˢ = (@string)"cross:"u8;
-private static readonly object genericˢ = (@string)"generic:"u8;
-private static readonly object plainˢ = (@string)"plain:"u8;
-
 internal static void Main() {
     Pair<@string, nint> p = new Pair<@string, nint>(Key: "a", Val: 1);
     var sp = new Pair<@string, bool>(Key: "b", Val: true);
     Pair<@string, bool> sp2 = sp;
     var m = new map<nint, @string>{[1] = "one"};
-    fmt.Println(localˢ, p, sp, sp2, m[1], swap<nint>(new Pair<nint, nint>(Key: 1, Val: 2)));
+    fmt.Println("local:", p, sp, sp2, m[1], swap<nint>(new Pair<nint, nint>(Key: 1, Val: 2)));
 
     Pair<@string, nint> pair = p;
     p = pair;
     any pi = p;
     var (_, isPair) = pi._<Pair<@string, nint>>(ᐧ);
-    fmt.Println(identityˢ, pair, isPair);
+    fmt.Println("identity:", pair, isPair);
 
     lib.Box<nint> a = new lib.Box<nint>(V: 5);
     a.Set(6);
@@ -58,12 +51,12 @@ internal static void Main() {
     ж<lib.Box<nint>> ptr = Ꮡb;
     ptr.Set(7);
     var n = new lib.Box<float64>(V: 1.5D);
-    fmt.Println(crossˢ, a.Get(), b.Get(), len(s), l, f(4), lib.Twice(f, 3), n.Get());
-    fmt.Println(genericˢ, lib.Sum<nint>(l), lib.Sum<float64>(new float64[]{0.5D, 0.25D}.slice()), wrap((@string)"w").Get());
+    fmt.Println("cross:", a.Get(), b.Get(), len(s), l, f(4), lib.Twice(f, 3), n.Get());
+    fmt.Println("generic:", lib.Sum<nint>(l), lib.Sum<float64>(new float64[]{0.5D, 0.25D}.slice()), wrap((@string)"w").Get());
 
     Pairs ps = new Pair<@string, nint>[]{new(Key: "k", Val: 9)}.slice();
     GenericTypeAliasLibꓸIntBox ib = lib.NewBox<nint>(8);
-    fmt.Println(plainˢ, ps, lib.Label("w"), lib.Unbox(ib));
+    fmt.Println("plain:", ps, lib.Label("w"), lib.Unbox(ib));
 
     aliasedImport();
 }

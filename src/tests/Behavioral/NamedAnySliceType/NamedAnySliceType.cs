@@ -14,7 +14,7 @@ partial struct row {
 }
 
 internal static @string describe(this SE s) {
-    return fmt.Sprint(len(s), (@string)":"u8, s);
+    return fmt.Sprint(len(s), ":", s);
 }
 
 internal static void Main() {
@@ -34,7 +34,7 @@ internal static void Main() {
     fmt.Println(s[1..], s.describe());
 
     foreach (var (i, v) in s) {
-        fmt.Print(i, (@string)"="u8, v, (@string)";"u8);
+        fmt.Print(i, "=", v, ";");
     }
     fmt.Println();
 

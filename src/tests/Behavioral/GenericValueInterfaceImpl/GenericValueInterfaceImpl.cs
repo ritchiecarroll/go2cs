@@ -35,7 +35,7 @@ internal static void Main() {
     fmt.Println(AreEqual(a, new G<nint>(7)), AreEqual(a, new G<nint>(8)), AreEqual(b, new G<@string>("x")), AreEqual(d, ((T)3)));
 
     foreach (var (_, item) in new I[]{a, b, c, d}.slice()) {
-        fmt.Print(item.M(), (@string)";"u8);
+        fmt.Print(item.M(), ";");
     }
     fmt.Println();
 }

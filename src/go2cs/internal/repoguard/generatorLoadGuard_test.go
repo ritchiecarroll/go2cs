@@ -19,7 +19,9 @@ import (
 
 // A source generator that fails to LOAD or INITIALIZE is only a warning to the compiler: CS8034 (the analyzer
 // assembly cannot be loaded), CS8032 (it cannot be instantiated), CS8784 (the generator failed to initialize),
-// CS8785 (it threw while generating). The build goes on without the generator's output and fails later, if at
+// CS8785 (it threw while generating), and CS9057 (it references a newer compiler than the one running it, as
+// go2cs-gen built against Roslyn 4.14 would under an older compiler). The build goes on without the generator's
+// output and fails later, if at
 // all, as a CS0246 on the first generated type the code names -- far from the cause, and a transient that
 // passes on rerun (the i9's D5 reflect row, 2026-09-30: CS0246 on go/ast's FileжNode and inspector Visitor).
 // Measured: a project given an unloadable analyzer prints `warning CS8034` and EXITS 0.
@@ -31,7 +33,7 @@ import (
 // silently shadow it); and no tracked project, props or targets file REPLACES WarningsAsErrors. The census
 // before the change read 0 of the four codes across 150 compilations of reflect's test closure, so raising
 // them fails no build today.
-var generatorLoadCodes = []string{"CS8032", "CS8034", "CS8784", "CS8785"}
+var generatorLoadCodes = []string{"CS8032", "CS8034", "CS8784", "CS8785", "CS9057"}
 
 var warningsAsErrorsElement = regexp.MustCompile(`<WarningsAsErrors(?:\s[^>]*)?>([^<]*)</WarningsAsErrors>`)
 

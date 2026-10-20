@@ -276,8 +276,8 @@ func main() {
 `
 
 // lineContaining returns the index of the single emitted line containing text, failing if it is
-// missing or repeated. A string literal is hoisted to a static field, so a call is found by the
-// field's name (`afterTheCaseGapˢ);`), not by the literal's text, which sits on the hoist line.
+// missing or repeated. An fmt.Println literal is a bare C# literal at its call (go2cs-gen intercepts the call to
+// box it), so a call is found by its literal's text and closing parenthesis (`"after the case gap");`).
 func lineContaining(t *testing.T, lines []string, text string) int {
 	t.Helper()
 
@@ -333,17 +333,17 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 		{"nint w = v * 2;", true, "a blank line after a lowered switch"},
 		{"nint u = v * 3;", false, "no blank line after a lowered switch Go writes adjacently"},
 		{"nint t = u * 5;", false, "no blank line after a lowered switch Go writes adjacently"},
-		{"afterTheCaseGapˢ);", true, "a blank line inside a case body"},
+		{`"after the case gap");`, true, "a blank line inside a case body"},
 		{"// opens the case body", false, "a comment leading a case body stays above its first statement"},
-		{"afterTheTypeSwitchGapˢ);", true, "a blank line inside a type-switch case body"},
-		{"afterTheSelectGapˢ);", true, "a blank line inside a select case body"},
+		{`"after the type-switch gap");`, true, "a blank line inside a type-switch case body"},
+		{`"after the select gap");`, true, "a blank line inside a select case body"},
 	} {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("%s: blank line above %q = %v, want %v", c.why, c.line, got, c.blank)
 		}
 	}
 
-	if next := lineContaining(t, lines, "// opens the case body") + 1; !strings.Contains(lines[next], "caseOneˢ);") {
+	if next := lineContaining(t, lines, "// opens the case body") + 1; !strings.Contains(lines[next], `"case one");`) {
 		t.Errorf("the comment leading a case body is not directly above its first statement: next line %q", strings.TrimSpace(lines[next]))
 	}
 
@@ -497,9 +497,9 @@ func TestBodyBlankLinesKeptWithoutComments(t *testing.T) {
 		// -comments only), so the statement after it has a blank line above whether Go has one or not; the
 		// gap adds no second one.
 		{"nint w = v * 2;", true, "a blank line after a lowered switch"},
-		{"afterTheCaseGapˢ);", true, "a blank line inside a case body"},
-		{"afterTheTypeSwitchGapˢ);", true, "a blank line inside a type-switch case body"},
-		{"afterTheSelectGapˢ);", true, "a blank line inside a select case body"},
+		{`"after the case gap");`, true, "a blank line inside a case body"},
+		{`"after the type-switch gap");`, true, "a blank line inside a type-switch case body"},
+		{`"after the select gap");`, true, "a blank line inside a select case body"},
 	} {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("without -comments, blank line above %q = %v, want %v (%s)", c.line, got, c.blank, c.why)

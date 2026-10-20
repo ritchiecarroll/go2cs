@@ -85,43 +85,38 @@ internal static partial slice<nint> ret() {
         line());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object pkgSliceˢ = (@string)"pkgSlice"u8;
-private static readonly object pkgSumˢ = (@string)"pkgSum"u8;
-private static readonly object pkgStructsˢ = (@string)"pkgStructs"u8;
-
 internal static void Main() {
-    show(false, pkgSliceˢ, pkgSlice);
-    show(false, pkgSumˢ, pkgSum);
-    show(false, pkgStructsˢ, pkgStructs);
+    show(false, "pkgSlice", pkgSlice);
+    show(false, "pkgSum", pkgSum);
+    show(false, "pkgStructs", pkgStructs);
 
     (Ꮡ(new chain(nil))).Add(1).Add(2).Add(3).Done("S1");
 
-    show(false, (@string)"S2"u8, three(line(),
+    show(false, "S2", three(line(),
         line(),
         line()));
 
     nint sum = line() + line() + line();
-    show(false, (@string)"S3"u8, sum);
+    show(false, "S3", sum);
 
     var f = line;
-    show(false, (@string)"S4"u8, f(),
+    show(false, "S4", f(),
         f());
 
     impl im = default!;
-    show(false, (@string)"S5"u8, im.Line(),
+    show(false, "S5", im.Line(),
         im.Line());
 
     if (rec(line()) && rec(line())) {
-        show(true, (@string)"S6"u8, recorded);
+        show(true, "S6", recorded);
     }
 
     var local = new nint[]{line(),
         line()
     }.slice();
-    show(false, (@string)"S7"u8, local);
+    show(false, "S7", local);
 
-    show(false, (@string)"S8"u8, ret());
+    show(false, "S8", ret());
 }
 
 } // end main_package

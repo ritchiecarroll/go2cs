@@ -10,19 +10,13 @@ internal static nint counter;
 
 internal static channel<bool> done = new channel<bool>(0);
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object twoEvaluatedˢ = (@string)"  two() evaluated"u8;
-
 internal static (nint, @string) two() {
-    fmt.Println(twoEvaluatedˢ);
+    fmt.Println("  two() evaluated");
     return (7, "seven");
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object threeEvaluatedˢ = (@string)"  three() evaluated"u8;
-
 internal static (nint, @string, bool) three() {
-    fmt.Println(threeEvaluatedˢ);
+    fmt.Println("  three() evaluated");
     return (3, "three", true);
 }
 
@@ -31,48 +25,29 @@ internal static (nint, nint) next() {
     return (counter, counter * 10);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object oneEvaluatedˢ = (@string)"  one() evaluated"u8;
-
 internal static nint one() {
-    fmt.Println(oneEvaluatedˢ);
+    fmt.Println("  one() evaluated");
     return 1;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object showˢ = (@string)"  show:"u8;
-
 internal static void show(nint n, @string s) {
-    fmt.Println(showˢ, n, s);
+    fmt.Println("  show:", n, s);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object show3ˢ = (@string)"  show3:"u8;
 
 internal static void show3(nint n, @string s, bool b) {
-    fmt.Println(show3ˢ, n, s, b);
+    fmt.Println("  show3:", n, s, b);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object showOneˢ = (@string)"  showOne:"u8;
 
 internal static void showOne(nint n) {
-    fmt.Println(showOneˢ, n);
+    fmt.Println("  showOne:", n);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object reportˢ = (@string)"  report:"u8;
-private static readonly object counterNowˢ = (@string)"counter now"u8;
 
 internal static void report(nint a, nint b) {
-    fmt.Println(reportˢ, a, b, counterNowˢ, counter);
+    fmt.Println("  report:", a, b, "counter now", counter);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object goShowˢ = (@string)"  goShow:"u8;
-
 internal static void goShow(nint n, @string s) {
-    fmt.Println(goShowˢ, n, s);
+    fmt.Println("  goShow:", n, s);
     done.ᐸꟷ(true);
 }
 
@@ -80,123 +55,93 @@ partial struct sink {
     internal @string tag;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sinkˢ = (@string)"  sink"u8;
-private static readonly object tookˢ = (@string)"took"u8;
-
 internal static void take(this ref sink s, nint n, @string msg) {
-    fmt.Println(sinkˢ, s.tag, tookˢ, n, msg);
+    fmt.Println("  sink", s.tag, "took", n, msg);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferSpreadEnterˢ = (@string)"deferSpread: enter"u8;
-private static readonly object deferSpreadBodyˢ = (@string)"deferSpread: body"u8;
 
 internal static void deferSpread() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferSpreadEnterˢ);
+        fmt.Println("deferSpread: enter");
         defer(ᴛ1 => show(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
-        fmt.Println(deferSpreadBodyˢ);
+        fmt.Println("deferSpread: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferThreeEnterˢ = (@string)"deferThree: enter"u8;
-private static readonly object deferThreeBodyˢ = (@string)"deferThree: body"u8;
 
 internal static void deferThree() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferThreeEnterˢ);
+        fmt.Println("deferThree: enter");
         defer(ᴛ1 => show3(ᴛ1.Item1, ᴛ1.Item2, ᴛ1.Item3), three(), ref ᒐ);
-        fmt.Println(deferThreeBodyˢ);
+        fmt.Println("deferThree: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferCaptureEnterˢ = (@string)"deferCapture: enter"u8;
-private static readonly object deferCaptureCounterIsNowˢ = (@string)"deferCapture: counter is now"u8;
 
 internal static void deferCapture() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferCaptureEnterˢ);
+        fmt.Println("deferCapture: enter");
         defer(ᴛ1 => report(ᴛ1.Item1, ᴛ1.Item2), next(), ref ᒐ);
         next();
         next();
-        fmt.Println(deferCaptureCounterIsNowˢ, counter);
+        fmt.Println("deferCapture: counter is now", counter);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferOrderEnterˢ = (@string)"deferOrder: enter"u8;
-private static readonly object deferOrderBodyˢ = (@string)"deferOrder: body"u8;
 
 internal static void deferOrder() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferOrderEnterˢ);
+        fmt.Println("deferOrder: enter");
         defer(ᴛ1 => show(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
         defer(ᴛ1 => show3(ᴛ1.Item1, ᴛ1.Item2, ᴛ1.Item3), three(), ref ᒐ);
-        fmt.Println(deferOrderBodyˢ);
+        fmt.Println("deferOrder: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferMethodSpreadEnterˢ = (@string)"deferMethodSpread: enter"u8;
-private static readonly object deferMethodSpreadBodyˢ = (@string)"deferMethodSpread: body"u8;
 
 internal static void deferMethodSpread() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferMethodSpreadEnterˢ);
+        fmt.Println("deferMethodSpread: enter");
         var s = Ꮡ(new sink(tag: "A"));
         var sʗ1 = s;
         defer(ᴛ1 => sʗ1.take(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
         s.Value.tag = "B";
-        fmt.Println(deferMethodSpreadBodyˢ);
+        fmt.Println("deferMethodSpread: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferLoopSpreadEnterˢ = (@string)"deferLoopSpread: enter"u8;
-private static readonly object deferLoopSpreadBodyˢ = (@string)"deferLoopSpread: body, counter"u8;
 
 internal static void deferLoopSpread() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferLoopSpreadEnterˢ);
+        fmt.Println("deferLoopSpread: enter");
         for (nint i = 0; i < 3; i++) {
             defer(ᴛ1 => report(ᴛ1.Item1, ᴛ1.Item2), next(), ref ᒐ);
         }
-        fmt.Println(deferLoopSpreadBodyˢ, counter);
+        fmt.Println("deferLoopSpread: body, counter", counter);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferControlPlainEnterˢ = (@string)"deferControlPlain: enter"u8;
 private static readonly @string elevenˢ = "eleven"u8;
-private static readonly object deferControlPlainBodyˢ = (@string)"deferControlPlain: body"u8;
 
 internal static void deferControlPlain() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferControlPlainEnterˢ);
+        fmt.Println("deferControlPlain: enter");
         defer(show, (nint)(11), elevenˢ, ref ᒐ);
-        fmt.Println(deferControlPlainBodyˢ);
+        fmt.Println("deferControlPlain: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -205,44 +150,32 @@ internal static void deferControlPlain() {
 internal static void deferControlSingleValueCall() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println((@string)"deferControlSingleValueCall: enter"u8);
+        fmt.Println("deferControlSingleValueCall: enter");
         defer(showOne, one(), ref ᒐ);
-        fmt.Println((@string)"deferControlSingleValueCall: body"u8);
+        fmt.Println("deferControlSingleValueCall: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object goSpreadEnterˢ = (@string)"goSpread: enter"u8;
-private static readonly object goSpreadDoneˢ = (@string)"goSpread: done"u8;
-
 internal static partial void goSpread() {
-    fmt.Println(goSpreadEnterˢ);
+    fmt.Println("goSpread: enter");
     goǃ(ᴛ1 => goShow(ᴛ1.Item1, ᴛ1.Item2), two());
     ᐸꟷ(done);
-    fmt.Println(goSpreadDoneˢ);
+    fmt.Println("goSpread: done");
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object goCaptureSpreadEnterˢ = (@string)"goCaptureSpread: enter"u8;
-private static readonly object goCaptureSpreadDoneˢ = (@string)"goCaptureSpread: done"u8;
-
 internal static partial void goCaptureSpread() {
-    fmt.Println(goCaptureSpreadEnterˢ);
+    fmt.Println("goCaptureSpread: enter");
     goǃ(ᴛ1 => goShow(ᴛ1.Item1, ᴛ1.Item2), pair());
     ᐸꟷ(done);
-    fmt.Println(goCaptureSpreadDoneˢ);
+    fmt.Println("goCaptureSpread: done");
 }
 
 internal static (nint, @string) pair() {
     counter++;
     return (counter, "captured");
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object finalCounterˢ = (@string)"final counter"u8;
-private static readonly object regsˢ = (@string)"regs"u8;
 
 internal static void Main() {
     deferSpread();
@@ -258,70 +191,54 @@ internal static void Main() {
     deferFuncLitSpread();
     deferVariadicSpread();
     deferResultReturningSpread();
-    fmt.Println(finalCounterˢ, counter, regsˢ, regs);
+    fmt.Println("final counter", counter, "regs", regs);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object showAllˢ = (@string)"  showAll:"u8;
 
 internal static void showAll(params ꓸꓸꓸany partsʗp) {
     var parts = partsʗp.slice();
 
-    fmt.Println(showAllˢ, parts);
+    fmt.Println("  showAll:", parts);
 }
 
 internal static array<nint> regs = new nint[]{1, 2, 3}.array();
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object setRegsNowˢ = (@string)"  setRegs: now"u8;
-private static readonly object wasˢ = (@string)"was"u8;
-
 internal static (nint, nint, nint) setRegs(nint a, nint b, nint c) {
     var old = regs.Clone();
     regs = new nint[]{a, b, c}.array();
-    fmt.Println(setRegsNowˢ, regs, wasˢ, old);
+    fmt.Println("  setRegs: now", regs, "was", old);
     return (old[0], old[1], old[2]);
 }
 
 internal static void deferResultReturningSpread() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println((@string)"deferResultReturningSpread: enter"u8);
+        fmt.Println("deferResultReturningSpread: enter");
         defer(ᴛ1 => setRegs(ᴛ1.Item1, ᴛ1.Item2, ᴛ1.Item3), setRegs(7, 8, 9), ref ᒐ);
-        fmt.Println((@string)"deferResultReturningSpread: body, regs"u8, regs);
+        fmt.Println("deferResultReturningSpread: body, regs", regs);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferFuncLitSpreadEnterˢ = (@string)"deferFuncLitSpread: enter"u8;
-private static readonly object litˢ = (@string)"  lit:"u8;
-private static readonly object deferFuncLitSpreadBodyˢ = (@string)"deferFuncLitSpread: body"u8;
 
 internal static void deferFuncLitSpread() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferFuncLitSpreadEnterˢ);
+        fmt.Println("deferFuncLitSpread: enter");
         defer(ᴛ1 => ((Action<nint, @string>)((nint n, @string s) => {
-            fmt.Println(litˢ, n, s);
+            fmt.Println("  lit:", n, s);
         }))(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
-        fmt.Println(deferFuncLitSpreadBodyˢ);
+        fmt.Println("deferFuncLitSpread: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferVariadicSpreadEnterˢ = (@string)"deferVariadicSpread: enter"u8;
-private static readonly object deferVariadicSpreadBodyˢ = (@string)"deferVariadicSpread: body"u8;
-
 internal static void deferVariadicSpread() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(deferVariadicSpreadEnterˢ);
+        fmt.Println("deferVariadicSpread: enter");
         defer(ᴛ1 => showAll(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
-        fmt.Println(deferVariadicSpreadBodyˢ);
+        fmt.Println("deferVariadicSpread: body");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

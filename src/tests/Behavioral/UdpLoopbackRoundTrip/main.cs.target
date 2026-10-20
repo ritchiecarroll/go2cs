@@ -6,31 +6,20 @@ using time = time_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void Main() {
     unconnectedRoundTrip();
     zeroLengthDatagram();
     connectedRoundTrip();
     ipv6RoundTrip();
-    fmt.Println(doneˢ);
+    fmt.Println("done");
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object ipv4ListenFailedˢ = (@string)"ipv4: listen failed"u8;
-private static readonly object ipv4ClientListenFailedˢ = (@string)"ipv4: client listen failed"u8;
-private static readonly object ipv4WriteToFailedˢ = (@string)"ipv4: WriteTo failed"u8;
-private static readonly object ipv4ReadFromFailedˢ = (@string)"ipv4: ReadFrom failed"u8;
-private static readonly object ipv4ReplyWriteToFailedˢ = (@string)"ipv4: reply WriteTo failed"u8;
-private static readonly object ipv4ReplyReadFromFailedˢ = (@string)"ipv4: reply ReadFrom failed"u8;
 
 internal static void unconnectedRoundTrip() {
     GoFrame ᒐ = default;
     try {
         var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(ipv4ListenFailedˢ);
+            fmt.Println("ipv4: listen failed");
             return;
         }
         var serverʗ1 = server;
@@ -38,7 +27,7 @@ internal static void unconnectedRoundTrip() {
 
         (var client, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(ipv4ClientListenFailedˢ);
+            fmt.Println("ipv4: client listen failed");
             return;
         }
         var clientʗ1 = client;
@@ -47,7 +36,7 @@ internal static void unconnectedRoundTrip() {
         var payload = slice<byte>("datagram-payload"u8);
         {
             (_, err) = client.WriteTo(payload, server.LocalAddr()); if (err != default!) {
-                fmt.Println(ipv4WriteToFailedˢ);
+                fmt.Println("ipv4: WriteTo failed");
                 return;
             }
         }
@@ -56,7 +45,7 @@ internal static void unconnectedRoundTrip() {
         var buf = new slice<byte>(64);
         (var n, var from, err) = server.ReadFrom(buf);
         if (err != default!) {
-            fmt.Println(ipv4ReadFromFailedˢ);
+            fmt.Println("ipv4: ReadFrom failed");
             return;
         }
 
@@ -65,14 +54,14 @@ internal static void unconnectedRoundTrip() {
 
         {
             (_, err) = server.WriteTo(slice<byte>("reply"u8), from); if (err != default!) {
-                fmt.Println(ipv4ReplyWriteToFailedˢ);
+                fmt.Println("ipv4: reply WriteTo failed");
                 return;
             }
         }
         client.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var (rn, rfrom, rerr) = client.ReadFrom(buf);
         if (rerr != default!) {
-            fmt.Println(ipv4ReplyReadFromFailedˢ);
+            fmt.Println("ipv4: reply ReadFrom failed");
             return;
         }
         fmt.Printf("ipv4: replyMatches=%v replyFromServer=%v\n"u8,
@@ -82,17 +71,12 @@ internal static void unconnectedRoundTrip() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object zerolenListenFailedˢ = (@string)"zerolen: listen failed"u8;
-private static readonly object zerolenClientListenˢ = (@string)"zerolen: client listen failed"u8;
-private static readonly object zerolenWriteToFailedˢ = (@string)"zerolen: WriteTo failed"u8;
-
 internal static void zeroLengthDatagram() {
     GoFrame ᒐ = default;
     try {
         var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(zerolenListenFailedˢ);
+            fmt.Println("zerolen: listen failed");
             return;
         }
         var serverʗ1 = server;
@@ -100,7 +84,7 @@ internal static void zeroLengthDatagram() {
 
         (var client, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(zerolenClientListenˢ);
+            fmt.Println("zerolen: client listen failed");
             return;
         }
         var clientʗ1 = client;
@@ -108,7 +92,7 @@ internal static void zeroLengthDatagram() {
 
         {
             (_, err) = client.WriteTo(new byte[]{}.slice(), server.LocalAddr()); if (err != default!) {
-                fmt.Println(zerolenWriteToFailedˢ);
+                fmt.Println("zerolen: WriteTo failed");
                 return;
             }
         }
@@ -122,19 +106,12 @@ internal static void zeroLengthDatagram() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object connectedListenFailedˢ = (@string)"connected: listen failed"u8;
-private static readonly object connectedDialFailedˢ = (@string)"connected: dial failed"u8;
-private static readonly object connectedWriteFailedˢ = (@string)"connected: write failed"u8;
-private static readonly object connectedReadFromFailedˢ = (@string)"connected: ReadFrom failed"u8;
-private static readonly object connectedReplyFailedˢ = (@string)"connected: reply failed"u8;
-
 internal static void connectedRoundTrip() {
     GoFrame ᒐ = default;
     try {
         var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(connectedListenFailedˢ);
+            fmt.Println("connected: listen failed");
             return;
         }
         var serverʗ1 = server;
@@ -142,7 +119,7 @@ internal static void connectedRoundTrip() {
 
         (var conn, err) = Δnet.Dial("udp4", server.LocalAddr().String());
         if (err != default!) {
-            fmt.Println(connectedDialFailedˢ);
+            fmt.Println("connected: dial failed");
             return;
         }
         var connʗ1 = conn;
@@ -150,7 +127,7 @@ internal static void connectedRoundTrip() {
 
         {
             (_, err) = conn.Write(slice<byte>("connected-payload"u8)); if (err != default!) {
-                fmt.Println(connectedWriteFailedˢ);
+                fmt.Println("connected: write failed");
                 return;
             }
         }
@@ -158,7 +135,7 @@ internal static void connectedRoundTrip() {
         var buf = new slice<byte>(64);
         (var n, var from, err) = server.ReadFrom(buf);
         if (err != default!) {
-            fmt.Println(connectedReadFromFailedˢ);
+            fmt.Println("connected: ReadFrom failed");
             return;
         }
         fmt.Printf("connected: bytesMatch=%v senderMatchesLocal=%v\n"u8,
@@ -166,7 +143,7 @@ internal static void connectedRoundTrip() {
 
         {
             (_, err) = server.WriteTo(slice<byte>("connected-reply"u8), from); if (err != default!) {
-                fmt.Println(connectedReplyFailedˢ);
+                fmt.Println("connected: reply failed");
                 return;
             }
         }
@@ -178,18 +155,12 @@ internal static void connectedRoundTrip() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object ipv6AvailableFalseˢ = (@string)"ipv6: available=false"u8;
-private static readonly object ipv6AvailableTrueˢ = (@string)"ipv6: available=true"u8;
-private static readonly object ipv6WriteToFailedˢ = (@string)"ipv6: WriteTo failed"u8;
-private static readonly object ipv6ReadFromFailedˢ = (@string)"ipv6: ReadFrom failed"u8;
-
 internal static void ipv6RoundTrip() {
     GoFrame ᒐ = default;
     try {
         var (server, err) = Δnet.ListenPacket("udp6", "[::1]:0");
         if (err != default!) {
-            fmt.Println(ipv6AvailableFalseˢ);
+            fmt.Println("ipv6: available=false");
             return;
         }
         var serverʗ1 = server;
@@ -197,17 +168,17 @@ internal static void ipv6RoundTrip() {
 
         (var client, err) = Δnet.ListenPacket("udp6", "[::1]:0");
         if (err != default!) {
-            fmt.Println(ipv6AvailableFalseˢ);
+            fmt.Println("ipv6: available=false");
             return;
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
 
-        fmt.Println(ipv6AvailableTrueˢ);
+        fmt.Println("ipv6: available=true");
 
         {
             (_, err) = client.WriteTo(slice<byte>("v6-payload"u8), server.LocalAddr()); if (err != default!) {
-                fmt.Println(ipv6WriteToFailedˢ);
+                fmt.Println("ipv6: WriteTo failed");
                 return;
             }
         }
@@ -215,7 +186,7 @@ internal static void ipv6RoundTrip() {
         var buf = new slice<byte>(64);
         (var n, var from, err) = server.ReadFrom(buf);
         if (err != default!) {
-            fmt.Println(ipv6ReadFromFailedˢ);
+            fmt.Println("ipv6: ReadFrom failed");
             return;
         }
         fmt.Printf("ipv6: bytesMatch=%v senderAddrMatchesClient=%v\n"u8,

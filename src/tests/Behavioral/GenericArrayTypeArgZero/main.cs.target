@@ -30,33 +30,24 @@ internal static nint zeroLen<T, Tᴀ>()
 
 private sealed class ᴀ3 : IGoArrayDims { public static nint[] Dims { get; } = [3]; }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object byteˢ = (@string)"[16]byte:"u8;
-private static readonly object int32ˢ = (@string)"[2][3]int32:"u8;
-private static readonly object structHolding4Byteˢ = (@string)"struct holding [4]byte:"u8;
-private static readonly object int64ˢ = (@string)"int64:"u8;
-private static readonly object funcValue64Byteˢ = (@string)"func value [64]byte:"u8;
-private static readonly object zero3IntPrintsAsˢ = (@string)"zero [3]int prints as"u8;
-private static readonly object charsˢ = (@string)"chars"u8;
-
 internal static void Main() {
     var (a, b) = z<array<byte>, ᴀ16>();
-    fmt.Println(byteˢ, a, b);
+    fmt.Println("[16]byte:", a, b);
 
     (a, b) = z<array<array<int32>>, ᴀ2_3>();
-    fmt.Println(int32ˢ, a, b);
+    fmt.Println("[2][3]int32:", a, b);
 
     (a, b) = z<holder, ᴀnone>();
-    fmt.Println(structHolding4Byteˢ, a, b);
+    fmt.Println("struct holding [4]byte:", a, b);
 
     (a, b) = z<int64, ᴀnone>();
-    fmt.Println(int64ˢ, a, b);
+    fmt.Println("int64:", a, b);
 
     var f = z<array<byte>, ᴀ64>;
     (a, b) = f();
-    fmt.Println(funcValue64Byteˢ, a, b);
+    fmt.Println("func value [64]byte:", a, b);
 
-    fmt.Println(zero3IntPrintsAsˢ, zeroLen<array<nint>, ᴀ3>(), charsˢ);
+    fmt.Println("zero [3]int prints as", zeroLen<array<nint>, ᴀ3>(), "chars");
 }
 
 } // end main_package

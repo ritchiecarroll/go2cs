@@ -57,12 +57,6 @@ internal static uintptr nativeWidth(byte c) {
     return (uintptr)((uintptr)((((uintptr)1).Lsh((uint64)(c))) & (uintptr)((nuint)(128UL))) | (uintptr)((((uintptr)1).Lsh((uint64)((byte)(c - 64)))) & (uintptr)(unchecked((nuint)(4611686018427387906UL)))));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object isHostCountˢ = (@string)"isHost count:"u8;
-private static readonly object validHeaderValueByteˢ = (@string)"validHeaderValueByte count:"u8;
-private static readonly object isHostSamplesˢ = (@string)"isHost samples:"u8;
-private static readonly object valueSamplesˢ = (@string)"value samples:"u8;
-
 internal static void Main() {
     nint hosts = 0;
     nint values = 0;
@@ -75,11 +69,11 @@ internal static void Main() {
             values++;
         }
     }
-    fmt.Println(isHostCountˢ, hosts);
-    fmt.Println(validHeaderValueByteˢ, values);
+    fmt.Println("isHost count:", hosts);
+    fmt.Println("validHeaderValueByte count:", values);
 
-    fmt.Println(isHostSamplesˢ, isHost((rune)'a'), isHost((rune)'Z'), isHost((rune)'9'), isHost((rune)':'), isHost((rune)' '), isHost(200));
-    fmt.Println(valueSamplesˢ, validHeaderValueByte((rune)'a'), validHeaderValueByte(0x09), validHeaderValueByte(0x00), validHeaderValueByte(0x80));
+    fmt.Println("isHost samples:", isHost((rune)'a'), isHost((rune)'Z'), isHost((rune)'9'), isHost((rune)':'), isHost((rune)' '), isHost(200));
+    fmt.Println("value samples:", validHeaderValueByte((rune)'a'), validHeaderValueByte(0x09), validHeaderValueByte(0x00), validHeaderValueByte(0x80));
 
     foreach (var (_, c) in new byte[]{3, 6, 70, 8, 64}.slice()) {
         fmt.Printf("smallHigh(%d) = %d\n"u8, c, smallHigh(c));

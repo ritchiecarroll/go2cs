@@ -75,9 +75,6 @@ internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
     return (zero, false);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object assertˢ = (@string)"assert:"u8;
-
 internal static void Main() {
     var d = new constraints<@string, @string>("dns", newDNS("a"), newDNS("x"));
     var (ᴛ1, ᴛ2) = check(d, (@string)"a");
@@ -95,7 +92,7 @@ internal static void Main() {
 
     any x = d.permitted;
     var (_, isShape) = x._<newDNS_R0>(ᐧ);
-    fmt.Println(assertˢ, isShape);
+    fmt.Println("assert:", isShape);
 
     var c = newCounter();
     var k = new constraints<ж<counter>, nint>("count", c, default!);

@@ -11,11 +11,8 @@ internal static void Main() {
     unsafeStrings();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object utf16ToStringˢ = (@string)"-- UTF16ToString --"u8;
-
 internal static void utf16() {
-    fmt.Println(utf16ToStringˢ);
+    fmt.Println("-- UTF16ToString --");
 
     array<uint16> alt = new(14);
     array<uint16> name = new(260);
@@ -35,12 +32,8 @@ internal static void utf16() {
     show("nil slice", syscall.UTF16ToString(default!));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object unsafeStringˢ = (@string)"-- unsafe.String --"u8;
-private static readonly object zeroLengthSliceLenˢ = (@string)"zero-length Slice len ="u8;
-
 internal static void unsafeStrings() {
-    fmt.Println(unsafeStringˢ);
+    fmt.Println("-- unsafe.String --");
 
     var empty = new slice<byte>(0);
     show("make len 0", @unsafe.String(@unsafe.SliceData(empty), 0));
@@ -58,7 +51,7 @@ internal static void unsafeStrings() {
     show("full", @unsafe.String(@unsafe.SliceData(body), len(body)));
     show("prefix", @unsafe.String(@unsafe.SliceData(body), 3));
 
-    fmt.Println(zeroLengthSliceLenˢ, len(@unsafe.Slice(@unsafe.SliceData(empty), 0)));
+    fmt.Println("zero-length Slice len =", len(@unsafe.Slice(@unsafe.SliceData(empty), 0)));
 }
 
 internal static slice<uint16> encode(@string s) {

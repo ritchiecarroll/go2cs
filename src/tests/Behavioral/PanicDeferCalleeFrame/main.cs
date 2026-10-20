@@ -10,11 +10,8 @@ internal static void note(@string s) {
     trace = append(trace, s);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object openˢ = (@string)"open ="u8;
-
 internal static void show(@string label, bool open) {
-    fmt.Println(label, openˢ, open, trace);
+    fmt.Println(label, "open =", open, trace);
     trace = default!;
 }
 
@@ -139,9 +136,6 @@ internal static void calleeDeferPanicsDuringPanic() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered:"u8;
-
 internal static void Main() {
     open = true;
     raw(() => {
@@ -154,7 +148,7 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println(recoveredˢ, recover());
+                fmt.Println("recovered:", recover());
             }, ref ᒐ);
             raw(() => {
                 throw panic("callback boom");
@@ -170,7 +164,7 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println(recoveredˢ, recover());
+                fmt.Println("recovered:", recover());
             }, ref ᒐ);
             deepCleanup();
         }
@@ -183,7 +177,7 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println(recoveredˢ, recover());
+                fmt.Println("recovered:", recover());
             }, ref ᒐ);
             calleeDeferPanics();
             note("unreachable");
@@ -197,7 +191,7 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println(recoveredˢ, recover());
+                fmt.Println("recovered:", recover());
             }, ref ᒐ);
             calleeDeferPanicsDuringPanic();
         }

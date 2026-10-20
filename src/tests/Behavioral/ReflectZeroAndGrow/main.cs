@@ -41,19 +41,10 @@ internal static void z(@string label, any v) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string valˢ = "val"u8;
-private static readonly object anyNsIsZeroˢ = (@string)"any(NS(\"\")) IsZero:"u8;
-private static readonly object anyNsVIsZeroˢ = (@string)"any(NS(\"v\")) IsZero:"u8;
-private static readonly object fieldEKindˢ = (@string)"field E kind:"u8;
-private static readonly object isZeroˢ = (@string)"IsZero:"u8;
-private static readonly object fieldESetKindˢ = (@string)"field E set kind:"u8;
-private static readonly object grow1LenCapˢ = (@string)"Grow(1) len/cap:"u8;
-private static readonly object grow3FromNilˢ = (@string)"Grow(3) from nil:"u8;
-private static readonly object growSetLenˢ = (@string)"Grow+SetLen:"u8;
-private static readonly object grow0ˢ = (@string)"Grow(0):"u8;
 
 internal static void Main() {
-    z("string non-empty", valˢ);
-    z("string empty", (@string)""u8);
+    z("string non-empty", "val");
+    z("string empty", "");
     z("NS non-empty", ((NS)(@string)valˢ));
     z("NS empty", ((NS)(@string)""u8));
     z("NI non-zero", ((NI)3));
@@ -86,26 +77,26 @@ internal static void Main() {
     z("outer{P:&n}", new outer(P: Ꮡn));
     z("outer{Sl:[]}", new outer(Sl: new nint[]{}.slice()));
 
-    fmt.Println(anyNsIsZeroˢ, reflect.ValueOf(((any)((NS)(@string)""u8))).IsZero());
-    fmt.Println(anyNsVIsZeroˢ, reflect.ValueOf(((any)((NS)(@string)"v"u8))).IsZero());
+    fmt.Println("any(NS(\"\")) IsZero:", reflect.ValueOf(((any)((NS)(@string)""u8))).IsZero());
+    fmt.Println("any(NS(\"v\")) IsZero:", reflect.ValueOf(((any)((NS)(@string)"v"u8))).IsZero());
 
     z("outer{E:nil}", new outer(nil));
     z("outer{E:err}", new outer(E: errors.New("x")));
     var ev = reflect.ValueOf(Ꮡ(new outer(nil))).Elem().FieldByName("E");
-    fmt.Println(fieldEKindˢ, ev.Kind(), isZeroˢ, ev.IsZero());
+    fmt.Println("field E kind:", ev.Kind(), "IsZero:", ev.IsZero());
     var ev2 = reflect.ValueOf(Ꮡ(new outer(E: errors.New("x")))).Elem().FieldByName("E");
-    fmt.Println(fieldESetKindˢ, ev2.Kind(), isZeroˢ, ev2.IsZero());
+    fmt.Println("field E set kind:", ev2.Kind(), "IsZero:", ev2.IsZero());
 
     ref var s = ref heap<slice<byte>>(out var Ꮡs);
     s = new byte[]{1, 2, 3, 4}.slice();
     var rv = reflect.ValueOf(Ꮡs).Elem();
     rv.Grow(1);
-    fmt.Println(grow1LenCapˢ, rv.Len(), rv.Cap() >= 5, len(s), cap(s) >= 5);
+    fmt.Println("Grow(1) len/cap:", rv.Len(), rv.Cap() >= 5, len(s), cap(s) >= 5);
 
     ref var empty = ref heap<slice<byte>>(out var Ꮡempty);
     var re = reflect.ValueOf(Ꮡempty).Elem();
     re.Grow(3);
-    fmt.Println(grow3FromNilˢ, re.Len(), re.Cap() >= 3, empty == default!);
+    fmt.Println("Grow(3) from nil:", re.Len(), re.Cap() >= 3, empty == default!);
 
     ref var big = ref heap<slice<nint>>(out var Ꮡbig);
     big = new slice<nint>(2, 2);
@@ -113,13 +104,13 @@ internal static void Main() {
     rb.Grow(8);
     rb.SetLen(3);
     rb.Index(2).SetInt(99);
-    fmt.Println(growSetLenˢ, len(big), big[2], cap(big) >= 10);
+    fmt.Println("Grow+SetLen:", len(big), big[2], cap(big) >= 10);
 
     ref var keep = ref heap<slice<nint>>(out var Ꮡkeep);
     keep = new nint[]{7, 8}.slice();
     var rk = reflect.ValueOf(Ꮡkeep).Elem();
     rk.Grow(0);
-    fmt.Println(grow0ˢ, len(keep), keep[0], keep[1]);
+    fmt.Println("Grow(0):", len(keep), keep[0], keep[1]);
 }
 
 } // end main_package

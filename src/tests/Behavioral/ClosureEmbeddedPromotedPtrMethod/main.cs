@@ -16,10 +16,6 @@ internal static nint apply(Func<nint> f) {
     return f();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object innerˢ = (@string)"inner:"u8;
-private static readonly object appliedˢ = (@string)"applied:"u8;
-
 internal partial struct run_rep /*dyn*/ {
     /*embed*/ internal counter counter;
     internal @string label;
@@ -35,7 +31,7 @@ internal static (@string, nint) run() {
         return rep.n;
     }
 
-    fmt.Println(innerˢ, build(), rep.label);
+    fmt.Println("inner:", build(), rep.label);
 
     nint got = apply(() => {
         void touch() {
@@ -45,17 +41,14 @@ internal static (@string, nint) run() {
         touch();
         return rep.n;
     });
-    fmt.Println(appliedˢ, got);
+    fmt.Println("applied:", got);
 
     return (rep.label, rep.n);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object outerˢ = (@string)"outer:"u8;
-
 internal static void Main() {
     var (label, n) = run();
-    fmt.Println(outerˢ, label, n);
+    fmt.Println("outer:", label, n);
 }
 
 } // end main_package

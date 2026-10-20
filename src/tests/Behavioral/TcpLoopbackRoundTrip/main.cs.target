@@ -114,18 +114,12 @@ internal static partial void roundTrip(@string label, @string network, @string a
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closeReadListenFailedˢ = (@string)"closeRead: listen failed"u8;
-private static readonly object closeReadDialFailedˢ = (@string)"closeRead: dial failed"u8;
-private static readonly object closeReadAcceptFailedˢ = (@string)"closeRead: accept failed"u8;
-private static readonly object closeReadˢ = (@string)"closeRead: brokeBlockedRead=false (timed out)"u8;
-
 internal static partial void closeBreaksBlockedRead() {
     GoFrame ᒐ = default;
     try {
         var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(closeReadListenFailedˢ);
+            fmt.Println("closeRead: listen failed");
             return;
         }
         var listenerʗ1 = listener;
@@ -145,12 +139,12 @@ internal static partial void closeBreaksBlockedRead() {
 
         (var client, err) = Δnet.Dial("tcp", listener.Addr().String());
         if (err != default!) {
-            fmt.Println(closeReadDialFailedˢ);
+            fmt.Println("closeRead: dial failed");
             return;
         }
         var server = ᐸꟷ(accepts);
         if (server == default!) {
-            fmt.Println(closeReadAcceptFailedˢ);
+            fmt.Println("closeRead: accept failed");
             return;
         }
         var serverʗ1 = server;
@@ -176,7 +170,7 @@ internal static partial void closeBreaksBlockedRead() {
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
-            fmt.Println(closeReadˢ);
+            fmt.Println("closeRead: brokeBlockedRead=false (timed out)");
             break;
         }}
     }
@@ -184,18 +178,12 @@ internal static partial void closeBreaksBlockedRead() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closeWriteListenFailedˢ = (@string)"closeWrite: listen failed"u8;
-private static readonly object closeWriteDialFailedˢ = (@string)"closeWrite: dial failed"u8;
-private static readonly object closeWriteAcceptFailedˢ = (@string)"closeWrite: accept failed"u8;
-private static readonly object closeWriteˢ = (@string)"closeWrite: brokeBlockedWrite=false (timed out)"u8;
-
 internal static partial void closeBreaksBlockedWrite() {
     GoFrame ᒐ = default;
     try {
         var (listener, err) = Δnet.Listen("tcp", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(closeWriteListenFailedˢ);
+            fmt.Println("closeWrite: listen failed");
             return;
         }
         var listenerʗ1 = listener;
@@ -215,12 +203,12 @@ internal static partial void closeBreaksBlockedWrite() {
 
         (var client, err) = Δnet.Dial("tcp", listener.Addr().String());
         if (err != default!) {
-            fmt.Println(closeWriteDialFailedˢ);
+            fmt.Println("closeWrite: dial failed");
             return;
         }
         var server = ᐸꟷ(accepts);
         if (server == default!) {
-            fmt.Println(closeWriteAcceptFailedˢ);
+            fmt.Println("closeWrite: accept failed");
             return;
         }
         var serverʗ1 = server;
@@ -252,7 +240,7 @@ internal static partial void closeBreaksBlockedWrite() {
             break;
         }
         case 1 when selᴛ4.ꟷᐳ(out _): {
-            fmt.Println(closeWriteˢ);
+            fmt.Println("closeWrite: brokeBlockedWrite=false (timed out)");
             break;
         }}
     }
@@ -260,28 +248,23 @@ internal static partial void closeBreaksBlockedWrite() {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object ipv6AvailableTrueˢ = (@string)"ipv6: available=true"u8;
-private static readonly object ipv6AvailableFalseˢ = (@string)"ipv6: available=false"u8;
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void Main() {
     roundTrip("ipv4", "tcp", "127.0.0.1:0");
 
     {
         var (probe, err) = Δnet.Listen("tcp", "[::1]:0"); if (err == default!){
             probe.Close();
-            fmt.Println(ipv6AvailableTrueˢ);
+            fmt.Println("ipv6: available=true");
             roundTrip("ipv6", "tcp", "[::1]:0");
         } else {
-            fmt.Println(ipv6AvailableFalseˢ);
+            fmt.Println("ipv6: available=false");
         }
     }
 
     closeBreaksBlockedRead();
     closeBreaksBlockedWrite();
 
-    fmt.Println(doneˢ);
+    fmt.Println("done");
 }
 
 } // end main_package

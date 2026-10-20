@@ -67,9 +67,6 @@ internal static (nint, nint) unshadowed() {
     return (len(s), cap(s));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object shadowedˢ = (@string)"shadowed"u8;
-
 internal static void shadowedCalls() {
     ref var a = ref heap<arr>(out var Ꮡa);
     a = new arr(new nint[]{1, 2, 3}.array());
@@ -82,13 +79,9 @@ internal static void shadowedCalls() {
     nint len(ж<arr> p) => p.Value[0] + 100;
     nint cap(ж<arr> p) => p.Value[1] + 200;
 
-    fmt.Println(shadowedˢ, make(21), @new(7), panic(5));
-    fmt.Println(shadowedˢ, print(4), println(3), len(Ꮡa), cap(Ꮡa));
+    fmt.Println("shadowed", make(21), @new(7), panic(5));
+    fmt.Println("shadowed", print(4), println(3), len(Ꮡa), cap(Ꮡa));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object heapˢ = (@string)"heap"u8;
-private static readonly object builtinˢ = (@string)"builtin"u8;
 
 internal static void Main() {
     fmt.Println(sumWithLenLocal(new nint[]{10, 20, 30}.slice()));
@@ -99,10 +92,10 @@ internal static void Main() {
 
     shadowedCalls();
 
-    fmt.Println(heapˢ, sumHeap(new nint[]{4, 5, 6}.slice()), scaleHeap(7, 6));
+    fmt.Println("heap", sumHeap(new nint[]{4, 5, 6}.slice()), scaleHeap(7, 6));
 
     var (l, c) = unshadowed();
-    fmt.Println(builtinˢ, l, c);
+    fmt.Println("builtin", l, c);
 }
 
 } // end main_package

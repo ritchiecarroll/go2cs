@@ -5,59 +5,17 @@ using Δnet = net_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object netInterfacesˢ = (@string)"-- net.Interfaces --"u8;
-private static readonly object errorˢ = (@string)"error:"u8;
-private static readonly object interfacesReportedˢ = (@string)"interfaces reported:"u8;
-private static readonly object indexesPositiveˢ = (@string)"indexes positive:"u8;
-private static readonly object indexesUniqueˢ = (@string)"indexes unique:"u8;
-private static readonly object namesNonEmptyˢ = (@string)"names non-empty:"u8;
-private static readonly object namesPrintableˢ = (@string)"names printable:"u8;
-private static readonly object namesUniqueˢ = (@string)"names unique:"u8;
-private static readonly object mtUsPlausibleˢ = (@string)"MTUs plausible:"u8;
-private static readonly object hardwareAddressesWithinˢ = (@string)"hardware addresses within MAX_ADAPTER_ADDRESS_LENGTH:"u8;
-private static readonly object someAdapterReportsASixˢ = (@string)"some adapter reports a six-byte hardware address:"u8;
-private static readonly object theLoopbackPseudoˢ = (@string)"-- the loopback pseudo-interface --"u8;
-private static readonly object presentˢ = (@string)"present:"u8;
-private static readonly object indexPositiveˢ = (@string)"index positive:"u8;
-private static readonly object nameNonEmptyˢ = (@string)"name non-empty:"u8;
-private static readonly object mtuIs1ˢ = (@string)"MTU is -1:"u8;
-private static readonly object noHardwareAddressˢ = (@string)"no hardware address:"u8;
-private static readonly object runningˢ = (@string)"running:"u8;
-private static readonly object multicastˢ = (@string)"multicast:"u8;
-private static readonly object notBroadcastˢ = (@string)"not broadcast:"u8;
-private static readonly object notPointToPointˢ = (@string)"not point-to-point:"u8;
-private static readonly object lookupRoundTripsˢ = (@string)"-- lookup round trips --"u8;
-private static readonly object interfaceByIndexAgreesˢ = (@string)"InterfaceByIndex agrees:"u8;
-private static readonly object interfaceByNameAgreesˢ = (@string)"InterfaceByName agrees:"u8;
-private static readonly object unknownNameIsAnErrorˢ = (@string)"unknown name is an error:"u8;
-private static readonly object netInterfaceAddrsˢ = (@string)"-- net.InterfaceAddrs --"u8;
-private static readonly object addressesReportedˢ = (@string)"addresses reported:"u8;
-private static readonly object unicastIPsAre4Or16Bytesˢ = (@string)"unicast IPs are 4 or 16 bytes:"u8;
-private static readonly object unicastMasksAgreeWithTheˢ = (@string)"unicast masks agree with the address family:"u8;
-private static readonly object anycastIPsAre4Or16Bytesˢ = (@string)"anycast IPs are 4 or 16 bytes:"u8;
-private static readonly object presentˢ2 = (@string)"127.0.0.1/8 present:"u8;
-private static readonly object presentˢ3 = (@string)"::1/128 present:"u8;
-private static readonly object someNonLoopbackAddressˢ = (@string)"some non-loopback address present:"u8;
-private static readonly object perInterfaceAddressesˢ = (@string)"-- per-interface addresses --"u8;
-private static readonly object addrsErrorsˢ = (@string)"Addrs errors:"u8;
-private static readonly object multicastAddrsErrorsˢ = (@string)"MulticastAddrs errors:"u8;
-private static readonly object perInterfaceAddressesSumˢ = (@string)"per-interface addresses sum to InterfaceAddrs:"u8;
-private static readonly object multicastAddressesˢ = (@string)"multicast addresses reported:"u8;
-private static readonly object multicastIPsAre4Or16ˢ = (@string)"multicast IPs are 4 or 16 bytes:"u8;
-private static readonly object multicastIPsAreMulticastˢ = (@string)"multicast IPs are multicast:"u8;
-
 internal static void Main() {
-    fmt.Println(netInterfacesˢ);
+    fmt.Println("-- net.Interfaces --");
 
     var (ifs, err) = Δnet.Interfaces();
-    fmt.Println(errorˢ, err);
+    fmt.Println("error:", err);
 
     if (err != default!) {
         return;
     }
 
-    fmt.Println(interfacesReportedˢ, len(ifs) > 0);
+    fmt.Println("interfaces reported:", len(ifs) > 0);
 
     var indexesPositive = true;
     var indexesUnique = true;
@@ -113,28 +71,28 @@ internal static void Main() {
         }
     }
 
-    fmt.Println(indexesPositiveˢ, indexesPositive);
-    fmt.Println(indexesUniqueˢ, indexesUnique);
-    fmt.Println(namesNonEmptyˢ, namesNonEmpty);
-    fmt.Println(namesPrintableˢ, namesPrintable);
-    fmt.Println(namesUniqueˢ, namesUnique);
-    fmt.Println(mtUsPlausibleˢ, mtusPlausible);
-    fmt.Println(hardwareAddressesWithinˢ, hardwareAddrsWithinMax);
-    fmt.Println(someAdapterReportsASixˢ, sixByteHardwareAddr);
+    fmt.Println("indexes positive:", indexesPositive);
+    fmt.Println("indexes unique:", indexesUnique);
+    fmt.Println("names non-empty:", namesNonEmpty);
+    fmt.Println("names printable:", namesPrintable);
+    fmt.Println("names unique:", namesUnique);
+    fmt.Println("MTUs plausible:", mtusPlausible);
+    fmt.Println("hardware addresses within MAX_ADAPTER_ADDRESS_LENGTH:", hardwareAddrsWithinMax);
+    fmt.Println("some adapter reports a six-byte hardware address:", sixByteHardwareAddr);
 
-    fmt.Println(theLoopbackPseudoˢ);
-    fmt.Println(presentˢ, loopbacks > 0);
-    fmt.Println(indexPositiveˢ, loopback.Index > 0);
-    fmt.Println(nameNonEmptyˢ, loopback.Name != ""u8);
-    fmt.Println(mtuIs1ˢ, loopback.MTU == -1);
-    fmt.Println(noHardwareAddressˢ, len(loopback.HardwareAddr) == 0);
-    fmt.Println((@string)"up:"u8, (Δnet.Flags)(loopback.Flags & Δnet.FlagUp) != 0);
-    fmt.Println(runningˢ, (Δnet.Flags)(loopback.Flags & Δnet.FlagRunning) != 0);
-    fmt.Println(multicastˢ, (Δnet.Flags)(loopback.Flags & Δnet.FlagMulticast) != 0);
-    fmt.Println(notBroadcastˢ, (Δnet.Flags)(loopback.Flags & Δnet.FlagBroadcast) == 0);
-    fmt.Println(notPointToPointˢ, (Δnet.Flags)(loopback.Flags & Δnet.FlagPointToPoint) == 0);
+    fmt.Println("-- the loopback pseudo-interface --");
+    fmt.Println("present:", loopbacks > 0);
+    fmt.Println("index positive:", loopback.Index > 0);
+    fmt.Println("name non-empty:", loopback.Name != ""u8);
+    fmt.Println("MTU is -1:", loopback.MTU == -1);
+    fmt.Println("no hardware address:", len(loopback.HardwareAddr) == 0);
+    fmt.Println("up:", (Δnet.Flags)(loopback.Flags & Δnet.FlagUp) != 0);
+    fmt.Println("running:", (Δnet.Flags)(loopback.Flags & Δnet.FlagRunning) != 0);
+    fmt.Println("multicast:", (Δnet.Flags)(loopback.Flags & Δnet.FlagMulticast) != 0);
+    fmt.Println("not broadcast:", (Δnet.Flags)(loopback.Flags & Δnet.FlagBroadcast) == 0);
+    fmt.Println("not point-to-point:", (Δnet.Flags)(loopback.Flags & Δnet.FlagPointToPoint) == 0);
 
-    fmt.Println(lookupRoundTripsˢ);
+    fmt.Println("-- lookup round trips --");
     var byIndexAgrees = true;
     var byNameAgrees = true;
 
@@ -150,22 +108,22 @@ internal static void Main() {
         }
     }
 
-    fmt.Println(interfaceByIndexAgreesˢ, byIndexAgrees);
-    fmt.Println(interfaceByNameAgreesˢ, byNameAgrees);
+    fmt.Println("InterfaceByIndex agrees:", byIndexAgrees);
+    fmt.Println("InterfaceByName agrees:", byNameAgrees);
 
     (_, err) = Δnet.InterfaceByName("go2cs-no-such-adapter");
-    fmt.Println(unknownNameIsAnErrorˢ, err != default!);
+    fmt.Println("unknown name is an error:", err != default!);
 
-    fmt.Println(netInterfaceAddrsˢ);
+    fmt.Println("-- net.InterfaceAddrs --");
 
     (var addrs, err) = Δnet.InterfaceAddrs();
-    fmt.Println(errorˢ, err);
+    fmt.Println("error:", err);
 
     if (err != default!) {
         return;
     }
 
-    fmt.Println(addressesReportedˢ, len(addrs) > 0);
+    fmt.Println("addresses reported:", len(addrs) > 0);
 
     var ipsValid = true;
     var masksValid = true;
@@ -217,14 +175,14 @@ internal static void Main() {
         }}
     }
 
-    fmt.Println(unicastIPsAre4Or16Bytesˢ, ipsValid);
-    fmt.Println(unicastMasksAgreeWithTheˢ, masksValid);
-    fmt.Println(anycastIPsAre4Or16Bytesˢ, anycastIPsValid);
-    fmt.Println(presentˢ2, loopback4);
-    fmt.Println(presentˢ3, loopback6);
-    fmt.Println(someNonLoopbackAddressˢ, nonLoopback);
+    fmt.Println("unicast IPs are 4 or 16 bytes:", ipsValid);
+    fmt.Println("unicast masks agree with the address family:", masksValid);
+    fmt.Println("anycast IPs are 4 or 16 bytes:", anycastIPsValid);
+    fmt.Println("127.0.0.1/8 present:", loopback4);
+    fmt.Println("::1/128 present:", loopback6);
+    fmt.Println("some non-loopback address present:", nonLoopback);
 
-    fmt.Println(perInterfaceAddressesˢ);
+    fmt.Println("-- per-interface addresses --");
 
     nint perInterface = 0;
     var perInterfaceErr = false;
@@ -265,12 +223,12 @@ internal static void Main() {
         }
     }
 
-    fmt.Println(addrsErrorsˢ, perInterfaceErr);
-    fmt.Println(multicastAddrsErrorsˢ, multicastErr);
-    fmt.Println(perInterfaceAddressesSumˢ, perInterface == len(addrs));
-    fmt.Println(multicastAddressesˢ, multicast > 0);
-    fmt.Println(multicastIPsAre4Or16ˢ, multicastIPsValid);
-    fmt.Println(multicastIPsAreMulticastˢ, multicastIsMulticast);
+    fmt.Println("Addrs errors:", perInterfaceErr);
+    fmt.Println("MulticastAddrs errors:", multicastErr);
+    fmt.Println("per-interface addresses sum to InterfaceAddrs:", perInterface == len(addrs));
+    fmt.Println("multicast addresses reported:", multicast > 0);
+    fmt.Println("multicast IPs are 4 or 16 bytes:", multicastIPsValid);
+    fmt.Println("multicast IPs are multicast:", multicastIsMulticast);
 }
 
 internal static bool printable(@string s) {

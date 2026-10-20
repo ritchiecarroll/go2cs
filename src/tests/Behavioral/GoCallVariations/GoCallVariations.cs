@@ -13,10 +13,6 @@ private static readonly object thirdˢ = (@string)"Third"u8;
 private static readonly object fourthˢ = (@string)"Fourth"u8;
 private static readonly @string fifthˢ = "Fifth"u8;
 private static readonly object functionResultˢ = (@string)"Function result:"u8;
-private static readonly object goCountClosureˢ = (@string)"Go count (closure):"u8;
-private static readonly object countBeforeGoˢ = (@string)"Count before Go:"u8;
-private static readonly object accumTotalˢ = (@string)"accum total:"u8;
-private static readonly object mainFunctionˢ = (@string)"Main function"u8;
 
 internal static partial void Main() {
     goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);
@@ -35,10 +31,10 @@ internal static partial void Main() {
 
     nint count = 1;
     goǃ(() => {
-        fmt.Println(goCountClosureˢ, count);
+        fmt.Println("Go count (closure):", count);
     });
     count = 10;
-    fmt.Println(countBeforeGoˢ, count);
+    fmt.Println("Count before Go:", count);
 
     time.Sleep(200);
 
@@ -48,9 +44,9 @@ internal static partial void Main() {
 
     var acc = Ꮡ(new accum(nil));
     bindAdd(acc);
-    fmt.Println(accumTotalˢ, (~acc).total);
+    fmt.Println("accum total:", (~acc).total);
 
-    fmt.Println(mainFunctionˢ);
+    fmt.Println("Main function");
 }
 
 partial struct accum {
@@ -62,12 +58,9 @@ internal static nint add(this ref accum a, nint n) {
     return a.total;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object boundAddˢ = (@string)"bound add:"u8;
-
 internal static void bindAdd(ж<accum> Ꮡa) {
     var add = (nint p1) => Ꮡa.add(p1);
-    fmt.Println(boundAddˢ, add(5), add(7));
+    fmt.Println("bound add:", add(5), add(7));
 }
 
 public static Action<@string> GetPrintLn() {
@@ -76,40 +69,32 @@ public static Action<@string> GetPrintLn() {
     };
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object calculateˢ = (@string)"Calculate:"u8;
-
 internal static nint add(nint x, nint y) {
     nint result = x + y;
-    fmt.Println(calculateˢ, result);
+    fmt.Println("Calculate:", result);
     return result;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object handledˢ = (@string)"handled:"u8;
-private static readonly object innerFnRanˢ = (@string)"inner fn ran"u8;
 
 internal static partial void runPair(channel<EmptyStruct> done) {
     @string tag = "pair";
     void handler(channel<EmptyStruct> ch, Action fn) {
         fn();
-        fmt.Println(handledˢ, tag);
+        fmt.Println("handled:", tag);
         ch.ᐸꟷ(new EmptyStruct());
     }
     var handlerʗ1 = handler;
     goǃ(handlerʗ1, done, () => {
-        fmt.Println(innerFnRanˢ);
+        fmt.Println("inner fn ran");
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object goThreadSquareˢ = (@string)"Go thread square:"u8;
-private static readonly object immediateNˢ = (@string)"Immediate n:"u8;
 
 internal static partial void printSquare(nint n) {
     goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), goThreadSquareˢ, n * n);
     n++;
-    fmt.Println(immediateNˢ, n);
+    fmt.Println("Immediate n:", n);
 }
 
 } // end main_package
