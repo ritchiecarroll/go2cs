@@ -377,7 +377,7 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
 
 - **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring`:
 
-  <!-- source: src/core/fmt/print.cs:254-262 -->
+  <!-- source: src/core/fmt/print.cs:256-264 -->
   ```csharp
   public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
       …

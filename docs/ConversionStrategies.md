@@ -4714,7 +4714,7 @@ fmt.Println(fmt.Sprintf("xxx"u8));
 
 Go's `func Sprintf(format string, a ...any) string` is declared this way in the converted `fmt` package:
 
-<!-- source: src/core/fmt/print.cs:254-255 and :262 -->
+<!-- source: src/core/fmt/print.cs:256-257 and :264 -->
 ```csharp
 public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
