@@ -188,11 +188,11 @@ internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡ
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {
-            Ꮡout.WriteString(((@string)tΔ1));
+            Ꮡout.WriteString((@string)tΔ1);
             break;
         }
         case Italic tΔ1: {
-            Ꮡout.WriteString(((@string)tΔ1));
+            Ꮡout.WriteString((@string)tΔ1);
             break;
         }
         case ж<Link> tΔ1: {

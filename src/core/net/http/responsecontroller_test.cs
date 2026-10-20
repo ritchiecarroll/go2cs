@@ -58,12 +58,12 @@ internal static void testResponseControllerFlush(ж<testing.T> Ꮡt, testMode mo
         (var n, err) = (~res).Body.Read(buf);
         builtin.close(continuec);
         if (err != default! || ((sstring)(buf.slice(0, n))) != "one"u8) {
-            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, ((@string)(buf.slice(0, n))), err, oneˢ);
+            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, (@string)(buf.slice(0, n)), err, oneˢ);
         }
 
         (var got, err) = io.ReadAll((~res).Body);
         if (err != default! || ((sstring)got) != "two"u8) {
-            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, ((@string)got), err, twoˢ);
+            Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, (@string)got, err, twoˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -163,7 +163,7 @@ internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> �
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
         var (b, _) = io.ReadAll((~res).Body);
         if (((sstring)b) != "one"u8) {
-            Ꮡt.Errorf("unexpected body: %q"u8, ((@string)b));
+            Ꮡt.Errorf("unexpected body: %q"u8, (@string)b);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -195,7 +195,7 @@ internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> 
                     Ꮡt.Errorf("ctl.SetWriteDeadline() = %v, want nil"u8, errΔ2);
                 }
             }
-            var (_, errΔ3) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), ((neverEnding)(rune)'a'));
+            var (_, errΔ3) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), (neverEnding)(rune)'a');
             errcʗ1.ᐸꟷ(errΔ3);
         })));
 
@@ -242,7 +242,7 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 var (n, errΔ1) = io.ReadFull((~r).Body, b);
                 b = b.slice(0, n);
                 if (errΔ1 != default! || ((sstring)b) != "one"u8) {
-                    Ꮡt.Errorf("before setting read deadline: Read = %v, %q, want nil, %q"u8, errΔ1, ((@string)b), oneˢ);
+                    Ꮡt.Errorf("before setting read deadline: Read = %v, %q, want nil, %q"u8, errΔ1, (@string)b, oneˢ);
                     return;
                 }
                 {
@@ -253,7 +253,7 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 }
                 (b, errΔ1) = io.ReadAll((~r).Body);
                 if (errΔ1 == default! || ((sstring)b) != ""u8) {
-                    Ꮡt.Errorf("after setting read deadline: Read = %q, nil, want error"u8, ((@string)b));
+                    Ꮡt.Errorf("after setting read deadline: Read = %q, nil, want error"u8, (@string)b);
                 }
                 builtin.close(readcʗ1);
                 // Connection errors are sticky, so resetting the deadline does not permit
@@ -267,7 +267,7 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
                 }
                 (b, errΔ1) = io.ReadAll((~r).Body);
                 if (errΔ1 == default!) {
-                    Ꮡt.Errorf("after resetting read deadline: Read = %q, nil, want error"u8, ((@string)b));
+                    Ꮡt.Errorf("after resetting read deadline: Read = %q, nil, want error"u8, (@string)b);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -355,7 +355,7 @@ internal static void testResponseControllerSetFutureReadDeadline(ж<testing.T> �
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
         (var got, err) = io.ReadAll((~res).Body);
         if (((sstring)got) != respBody || err != default!) {
-            Ꮡt.Errorf("client read response body: %q, %v; want %q, nil"u8, ((@string)got), err, respBody);
+            Ꮡt.Errorf("client read response body: %q, %v; want %q, nil"u8, (@string)got, err, respBody);
         }
         pw.Close();
     }

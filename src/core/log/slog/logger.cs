@@ -83,7 +83,7 @@ public static void SetDefault(ж<Logger> Ꮡl) {
     {
         var (_, ok) = l.Handler()._<ж<defaultHandler>>(ᐧ); if (!ok) {
             ref var capturePC = ref heap<bool>(out var ᏑcapturePC);
-            capturePC = (nint)(log_package.Flags() & (nint)((nint)((nint)log_package.Lshortfile | (nint)log_package.Llongfile))) != 0;
+            capturePC = (log_package.Flags() & (nint)((nint)((nint)log_package.Lshortfile | (nint)log_package.Llongfile))) != 0;
             log_package.SetOutput(new handlerWriterжWriter(Ꮡ(new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capturePC))));
             log_package.SetFlags(0); // we want just the log message, no time or location
         }
@@ -114,7 +114,7 @@ internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte
     // Remove final newline.
     nint origLen = len(buf); // Report that the entire buf was written.
     buf = bytes.TrimSuffix(buf, new byte[]{(rune)'\n'}.slice());
-    var r = NewRecord(time_package.Now(), level, ((@string)buf), pc);
+    var r = NewRecord(time_package.Now(), level, (@string)buf, pc);
     return (origLen, w.h.Handle(context.Background(), r));
 }
 

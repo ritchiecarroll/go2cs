@@ -38,7 +38,7 @@ internal static @string Name(this thing t) {
 
 internal static void Main() {
     var (b, err) = json.Marshal(new reading("lab", 21.5D));
-    fmt.Println(((@string)b), err);
+    fmt.Println((@string)b, err);
 
     (var der, err) = asn1.Marshal(new record(7, "seven"));
     fmt.Printf("%x %v\n"u8, der, err);
@@ -47,7 +47,7 @@ internal static void Main() {
     (_, err) = asn1.Unmarshal(der, Ꮡback);
     fmt.Println(back.N, back.Name, err);
 
-    var (i, ok) = reflect.TypeAssert<nint>(reflect.ValueOf((nint)(42)));
+    var (i, ok) = reflect.TypeAssert<nint>(reflect.ValueOf((nint)42));
     fmt.Println("concrete:", i, ok);
 
     (var n, ok) = reflect.TypeAssert<namer>(reflect.ValueOf(new thing("t")));
@@ -66,7 +66,7 @@ internal static void Main() {
     (var a, ok) = reflect.TypeAssert<array<nint>>(reflect.ValueOf(new nint[]{3, 4}.array()));
     fmt.Println("array:", a, ok);
 
-    (var s, ok) = reflect.TypeAssert<@string>(reflect.ValueOf((nint)(42)));
+    (var s, ok) = reflect.TypeAssert<@string>(reflect.ValueOf((nint)42));
     fmt.Printf("mismatch: %q %v\n"u8, s, ok);
 }
 

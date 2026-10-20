@@ -103,7 +103,7 @@ internal static void run<T>(T t, Action<T, testMode> f, params ꓸꓸꓸany opts
         }
     }
     foreach (var (_, mode) in modes) {
-        t.Run(((@string)mode), (T tΔ2) => {
+        t.Run((@string)mode, (T tΔ2) => {
             tΔ2.Helper();
             {
                 var (tΔ3, ok) = ((any)tΔ2)._<ж<testing.T>>(ᐧ); if (ok && parallel) {
@@ -188,7 +188,7 @@ internal static @string getURL(this ж<clientServerTest> Ꮡt, @string u) {
         if (err != default!) {
             t.t.Fatal(err);
         }
-        return ((@string)slurp);
+        return (@string)slurp;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -243,7 +243,7 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
     slice<Action<ж<Δhttp.Transport>>> transportFuncs = default!;
 
     {
-        nint idx = slices.Index(opts, ((any)optFakeNet.OrTypedNil())); if (idx >= 0){
+        nint idx = slices.Index(opts, (any)optFakeNet.OrTypedNil()); if (idx >= 0){
             opts = slices.Delete<slice<any>, any>(opts, idx, idx + 1);
             cst.Value.li = fakeNetListen();
             cst.Value.ts = Ꮡ(new httptest.Server(
@@ -337,7 +337,7 @@ partial struct testLogWriter {
 }
 
 internal static (nint, error) Write(this testLogWriter w, slice<byte> b) {
-    w.t.Logf("server log: %v"u8, strings.TrimSpace(((@string)b)));
+    w.t.Logf("server log: %v"u8, strings.TrimSpace((@string)b));
     return (len(b), default!);
 }
 
@@ -615,7 +615,7 @@ public static void TestH12_HeadContentLengthLargeBody(ж<testing.T> Ꮡt) {
     new h12Compare(
         ReqFunc: new Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>(((Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)>)(Δhttp.Head))),
         Handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-            @string chunk = strings.Repeat("x"u8, (512 << (int)(10)));
+            @string chunk = strings.Repeat("x"u8, 512 << 10);
             for (nint i = 0; i < 10; i++) {
                 io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), chunk);
             }
@@ -848,7 +848,7 @@ internal static void test304Responses(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Error(err);
         }
         if (len(body) > 0) {
-            Ꮡt.Errorf("got unexpected body %q"u8, ((@string)body));
+            Ꮡt.Errorf("got unexpected body %q"u8, (@string)body);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1418,7 +1418,7 @@ internal static void testStarRequest(ж<testing.T> Ꮡt, @string method, testMod
         wantLen = 0;
     }
     if ((~res).StatusCode != 200) {
-        Ꮡt.Errorf("status code = %v; want %d"u8, (~res).Status, (nint)(200));
+        Ꮡt.Errorf("status code = %v; want %d"u8, (~res).Status, (nint)200);
     }
     if ((~res).ContentLength != wantLen) {
         Ꮡt.Errorf("content length = %v; want %d"u8, (~res).ContentLength, wantLen);
@@ -1850,10 +1850,10 @@ public static void TestH12_AutoGzipWithDumpResponse(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("%s: DumpResponse: %v"u8, proto, err);
                 return;
             }
-            if (strings.Contains(((@string)dump), connectionCloseˢ)) {
+            if (strings.Contains((@string)dump, connectionCloseˢ)) {
                 Ꮡt.Errorf("%s: should not see \"Connection: close\" in dump; got:\n%s"u8, proto, dump);
             }
-            if (!strings.Contains(((@string)dump), fooˢ4)) {
+            if (!strings.Contains((@string)dump, fooˢ4)) {
                 Ꮡt.Errorf("%s: should see \"FOO\" in response; got:\n%s"u8, proto, dump);
             }
         }
@@ -2142,7 +2142,7 @@ internal static void testWriteHeaderAfterWrite(ж<testing.T> Ꮡt, testMode mode
             Ꮡt.Fatal(err);
         }
         {
-            @string got = ((@string)body);
+            @string got = (@string)body;
             @string want = foobarˢ; if (got != want) {
                 Ꮡt.Errorf("got = %q; want %q"u8, got, want);
             }
@@ -2304,7 +2304,7 @@ internal static void testIdentityTransferEncoding(ж<testing.T> Ꮡt, testMode m
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
             var (gotBodyΔ1, _) = io.ReadAll((~r).Body);
             {
-                @string got = ((@string)gotBodyΔ1);
+                @string got = (@string)gotBodyΔ1;
                 @string want = body; if (got != want) {
                     Ꮡt.Errorf("got request body = %q; want %q"u8, got, want);
                 }
@@ -2326,7 +2326,7 @@ internal static void testIdentityTransferEncoding(ж<testing.T> Ꮡt, testMode m
             Ꮡt.Fatal(err);
         }
         {
-            @string got = ((@string)gotBody);
+            @string got = (@string)gotBody;
             @string want = body; if (got != want) {
                 Ꮡt.Errorf("got response body = %q; want %q"u8, got, want);
             }

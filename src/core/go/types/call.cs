@@ -118,7 +118,7 @@ internal static slice<ΔType> funcInst(this ж<Checker> Ꮡcheck, ж<target> Ꮡ
         var (tparams, params2) = Ꮡcheck.renameTParams(pos, sig.TypeParams().list(), new TupleжΔType(NewTuple(@params.ꓸꓸꓸ)));
 
         var err = Ꮡcheck.newError(CannotInferTypeArgs);
-        targs = Ꮡcheck.infer(((atPos)pos), tparams, targs, params2._<ж<Tuple>>(), args, reverse, err);
+        targs = Ꮡcheck.infer((atPos)pos, tparams, targs, params2._<ж<Tuple>>(), args, reverse, err);
         if (targs == default!) {
             if (!err.empty()) {
                 err.report();
@@ -181,12 +181,12 @@ internal static ж<ΔSignature> /*res*/ instantiateSignature(this ж<Checker> �
                     if (i < len(xlistʗ1)) {
                         posΔ1 = xlistʗ1[i].Pos();
                     }
-                    Ꮡcheck.softErrorf(((atPos)posΔ1), InvalidTypeArg, "%s"u8, err);
+                    Ꮡcheck.softErrorf((atPos)posΔ1, InvalidTypeArg, "%s"u8, err);
                 } else {
                     Ꮡcheck.of(Checker.Ꮡmono).recordInstance(Ꮡcheck.Value.pkg, pos, tparams, targsʗ1, xlistʗ1);
                 }
             }
-        }).describef(((atPos)pos), "verify instantiation"u8);
+        }).describef((atPos)pos, "verify instantiation"u8);
 
         res = inst;
     }
@@ -336,7 +336,7 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         // is an error checking its arguments (for example, if an incorrect number
         // of arguments is supplied).
         if (got == want && want > 0) {
-            Ꮡcheck.verifyVersionf(((atPos)(~ix).lbrack), go1_18, "function instantiation"u8);
+            Ꮡcheck.verifyVersionf((atPos)(~ix).lbrack, go1_18, "function instantiation"u8);
             sig = Ꮡcheck.instantiateSignature(ix.Pos(), (~ix).orig, sig, targs, xlist);
             // targs have been consumed; proceed with checking arguments of the
             // non-generic signature.
@@ -468,7 +468,7 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
                 } else {
                     // x is not a function instantiation (it may still be a generic function).
                     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, true);
-                    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
+                    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
                     {
                         var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid){
                             // x is a function call returning multiple values; it cannot be generic.
@@ -806,7 +806,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                         }
                         if (exp == default!) {
                             if (isValidName(sel)) {
-                                Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s"u8, ((ast.Expr)new ast.SelectorExprжExpr(Ꮡe))); // cast to ast.Expr to silence vet
+                                Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s"u8, (ast.Expr)new ast.SelectorExprжExpr(Ꮡe)); // cast to ast.Expr to silence vet
                             }
                             goto ΔError;
                         }
@@ -819,9 +819,9 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                                 var exps = (~pkg).scope.lookupIgnoringCase(sel, true);
                                 if (len(exps) >= 1){
                                     // report just the first one
-                                    Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s (but have %s)"u8, ((ast.Expr)new ast.SelectorExprжExpr(Ꮡe)), exps[0].Name());
+                                    Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s (but have %s)"u8, (ast.Expr)new ast.SelectorExprжExpr(Ꮡe), exps[0].Name());
                                 } else {
-                                    Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s"u8, ((ast.Expr)new ast.SelectorExprжExpr(Ꮡe)));
+                                    Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s"u8, (ast.Expr)new ast.SelectorExprжExpr(Ꮡe));
                                 }
                             }
                             goto ΔError;
@@ -910,7 +910,7 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
     // TODO(rfindley): We should do better by refusing to check selectors in all cases where
     // x.typ is incomplete.
     if (wantType) {
-        Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), NotAType, "%s is not a type"u8, ((ast.Expr)new ast.SelectorExprжExpr(Ꮡe)));
+        Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), NotAType, "%s is not a type"u8, (ast.Expr)new ast.SelectorExprжExpr(Ꮡe));
         goto ΔError;
     }
 

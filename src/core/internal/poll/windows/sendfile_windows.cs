@@ -25,7 +25,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
             // TransmitFile does not work with pipes
             (written, err, handled) = (0, Δsyscall.ESPIPE, false); goto ᒐdone;
         }
-        var hsrc = ((syscallꓸHandle)src);
+        var hsrc = (syscallꓸHandle)src;
         {
             var (ft, _) = Δsyscall.GetFileType(hsrc); if (ft == Δsyscall.FILE_TYPE_PIPE) {
                 (written, err, handled) = (0, Δsyscall.ESPIPE, false); goto ᒐdone;
@@ -46,7 +46,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
                 (written, err, handled) = (0, errΔ2, false); goto ᒐdone;
             }
         }
-        var fileSize = ((int64)fi.FileSizeHigh << (int)(32)) + (int64)fi.FileSizeLow;
+        var fileSize = ((int64)fi.FileSizeHigh << 32) + (int64)fi.FileSizeLow;
         (var startpos, err) = Δsyscall.Seek(hsrc, 0, io.SeekCurrent);
         if (err != default!) {
             (written, err, handled) = (0, err, false); goto ᒐdone;
@@ -83,7 +83,7 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
 
             var (n, errΔ3) = Ꮡfd.execIO((rune)'w', (ж<operation> o) => {
                 var off = startpos + written;
-                o.Value.o.OffsetHigh = (uint32)((off >> (int)(32)));
+                o.Value.o.OffsetHigh = (uint32)(off >> 32);
                 o.Value.o.Offset = (uint32)off;
                 var errΔ4 = Δsyscall.TransmitFile(Ꮡfd.Value.Sysfd, hsrc, (uint32)chunkSize, 0, o.of(operation.Ꮡo), nil, Δsyscall.TF_WRITE_BEHIND);
                 if (errΔ4 != default!) {

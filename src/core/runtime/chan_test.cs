@@ -114,12 +114,12 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 }
                 {
                     nint v = ᐸꟷ(c); if (v != 0) {
-                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, (nint)(0));
+                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, (nint)0);
                     }
                 }
                 {
                     var (v, ok) = ᐸꟷ(c, ꟷ); if (v != 0 || ok) {
-                        Ꮡt.Fatalf("chan[%d]: received %v/%v, expected %v/%v"u8, chanCap, v, ok, (nint)(0), false);
+                        Ꮡt.Fatalf("chan[%d]: received %v/%v, expected %v/%v"u8, chanCap, v, ok, (nint)0, false);
                     }
                 }
             }
@@ -220,7 +220,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 // Test len/cap.
                 var c = new channel<nint>(chanCap);
                 if (len(c) != 0 || cap(c) != chanCap) {
-                    Ꮡt.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v"u8, chanCap, (nint)(0), chanCap, len(c), cap(c));
+                    Ꮡt.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v"u8, chanCap, (nint)0, chanCap, len(c), cap(c));
                 }
                 for (nint i = 0; i < chanCap; i++) {
                     c.ᐸꟷ(i);
@@ -938,7 +938,7 @@ public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
     var dʗ1 = d;
     void f(channel<bool> ready, bool dup) {
         // Temporarily grow the stack to 10K.
-        stackGrowthRecursive(((10 << (int)(10))) / (128 * 8));
+        stackGrowthRecursive((10 << 10) / (128 * 8));
 
         // We're ready to trigger GC and stack shrink.
         ready.ᐸꟷ(true);

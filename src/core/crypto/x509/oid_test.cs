@@ -228,7 +228,7 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
 
         (var marshalled, err) = o.MarshalText();
         if (((sstring)marshalled) != tt.@in || err != default!) {
-            Ꮡt.Errorf("(%#v).MarshalText() = (%v, %v); want = (%v, nil)"u8, o, ((@string)marshalled), err, tt.@in);
+            Ꮡt.Errorf("(%#v).MarshalText() = (%v, %v); want = (%v, nil)"u8, o, (@string)marshalled, err, tt.@in);
             continue;
         }
 
@@ -236,7 +236,7 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
         (textAppend, err) = o.AppendText(textAppend);
         textAppend = textAppend[4..];
         if (((sstring)textAppend) != tt.@in || err != default!) {
-            Ꮡt.Errorf("(%#v).AppendText() = (%v, %v); want = (%v, nil)"u8, o, ((@string)textAppend), err, tt.@in);
+            Ꮡt.Errorf("(%#v).AppendText() = (%v, %v); want = (%v, nil)"u8, o, (@string)textAppend, err, tt.@in);
             continue;
         }
 

@@ -189,7 +189,7 @@ public static void TestMutexOverflowPanic(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
 
         ref var mu1 = ref heap(new global::go.@internal.poll_internal_test_package.XFDMutex(), out var Ꮡmu1);
-        for (nint i = 0; i < (1 << (int)(21)); i++) {
+        for (nint i = 0; i < 1 << 21; i++) {
             Ꮡmu1.Incref();
         }
     }

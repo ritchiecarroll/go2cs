@@ -96,7 +96,7 @@ partial struct testCaseᴛ1 /*dyn*/ {
     internal int64 tolerance;
 }
 internal static slice<testCaseᴛ1> testCase = new testCaseᴛ1[]{
-    new("../testdata/video-001.png"u8, ((int64)1 << (int)(12))),
+    new("../testdata/video-001.png"u8, (int64)1 << 12),
     new("../testdata/video-001.gif"u8, 0),
     new("../testdata/video-001.interlaced.gif"u8, 0)
 }.slice();
@@ -455,7 +455,7 @@ public static void TestEncodeNonZeroMinPoint(ж<testing.T> Ꮡt) {
         uint32 rednessAt(nint x, nint y) {
             var (r, _, _, _) = mʗ1.At(x, y).RGBA();
             // Shift by 8 to convert from 16 bit color to 8 bit color.
-            return (r >> (int)(8));
+            return r >> 8;
         }
 
         // Round-tripping a still (non-animated) image.Image through
@@ -603,7 +603,7 @@ internal static readonly object colorTablesMatchFalseˢ = (@string)"colorTablesM
 
 public static void TestColorTablesMatch(ж<testing.T> Ꮡt) {
     const nint trIdx = 100;
-    var global = ((Δcolor.Palette)palette.Plan9);
+    var global = (Δcolor.Palette)palette.Plan9;
     {
         var rgb = global[trIdx]._<colorꓸRGBA>(); if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) {
             Ꮡt.Fatalf("trIdx (%d) is already black"u8, (nint)(trIdx));
@@ -612,7 +612,7 @@ public static void TestColorTablesMatch(ж<testing.T> Ꮡt) {
 
     // Make a copy of the palette, substituting trIdx's slot with transparent,
     // just like decoder.decode.
-    var local = appendꓸꓸꓸ(((Δcolor.Palette)default!), global);
+    var local = appendꓸꓸꓸ((Δcolor.Palette)default!, global);
     local[trIdx] = new colorꓸRGBA(nil);
 
     const nint testLen = /* 3 * 256 */ 768;

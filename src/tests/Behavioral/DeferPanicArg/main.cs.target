@@ -18,7 +18,7 @@ internal static void valueCapture() {
         defer(() => {
             fmt.Println("valueCapture recovered:", recover());
         }, ref ᒐ);
-        defer(ᴛ1 => throw panic(ᴛ1), (nint)(42), ref ᒐ);
+        defer(ᴛ1 => throw panic(ᴛ1), (nint)42, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

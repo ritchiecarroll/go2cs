@@ -119,10 +119,10 @@ internal static void reset(this ref bitState b, ж<syntax.Prog> Ꮡprog, nint en
 // been visited yet.
 internal static bool shouldVisit(this ref bitState b, uint32 pc, nint pos) {
     nuint n = (nuint)((nint)pc * (b.end + 1) + pos);
-    if ((uint32)(b.visited[n / (nuint)visitedBits] & (((uint32)1 << (int)(((nuint)(n & (nuint)(visitedBits - 1))))))) != 0) {
+    if ((b.visited[n / (nuint)visitedBits] & ((uint32)1 << (int)((n & (nuint)(visitedBits - 1))))) != 0) {
         return false;
     }
-    b.visited[n / (nuint)visitedBits] |= (uint32)(((uint32)1 << (int)(((nuint)(n & (nuint)(visitedBits - 1))))));
+    b.visited[n / (nuint)visitedBits] |= (uint32)(((uint32)1 << (int)((n & (nuint)(visitedBits - 1)))));
     return true;
 }
 
@@ -261,7 +261,7 @@ Skip:
         }
         else if (exprᴛ1 == syntax.InstEmptyWidth) {
             var flag = i.context(posΔ1);
-            if (!flag.match(((syntax.EmptyOp)(uint8)(~inst).Arg))) {
+            if (!flag.match((syntax.EmptyOp)(uint8)(~inst).Arg)) {
                 continue;
             }
             pcΔ1 = inst.Value.Out;

@@ -162,7 +162,7 @@ internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, 
                 (rsa, ret) = (default!, os.NewSyscallError(getsockoptˢ, err)); goto ᒐdone;
             }
             {
-                var errΔ1 = ((syscall.Errno)(uintptr)nerr);
+                var errΔ1 = (syscall.Errno)(uintptr)nerr;
                 var exprᴛ2 = errΔ1;
                 if (exprᴛ2 == syscall.EINPROGRESS || exprᴛ2 == syscall.EALREADY || exprᴛ2 == syscall.EINTR) {
                 }

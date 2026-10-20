@@ -104,22 +104,22 @@ internal static error /*err*/ writeHeader(this ref Writer z) {
     // The final five FCHECK bits form a mod-31 checksum.
     var exprᴛ1 = z.level;
     if (exprᴛ1 == -2 || exprᴛ1 == 0 || exprᴛ1 == 1) {
-        z.scratch[1] = (byte)(0 << (int)(6));
+        z.scratch[1] = (byte)(0 << 6);
     }
     else if (exprᴛ1 is 2 or 3 or 4 or 5) {
-        z.scratch[1] = (byte)(1 << (int)(6));
+        z.scratch[1] = (byte)(1 << 6);
     }
     else if (exprᴛ1 == 6 || exprᴛ1 == -1) {
-        z.scratch[1] = (byte)(2 << (int)(6));
+        z.scratch[1] = (byte)(2 << 6);
     }
     else if (exprᴛ1 is 7 or 8 or 9) {
-        z.scratch[1] = (byte)(3 << (int)(6));
+        z.scratch[1] = (byte)(3 << 6);
     }
     else { /* default: */
         throw panic("unreachable");
     }
     if (z.dict != default!) {
-        z.scratch[1] |= (byte)((byte)(1 << (int)(5)));
+        z.scratch[1] |= (byte)((byte)(1 << 5));
     }
     z.scratch[1] += (uint8)(31 - binary.BigEndian.Uint16(z.scratch[..2]) % 31);
     {

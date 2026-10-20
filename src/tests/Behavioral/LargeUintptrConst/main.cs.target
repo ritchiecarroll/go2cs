@@ -23,11 +23,11 @@ internal static void Main() {
     fmt.Println(big);
     fmt.Println(big > 1);
 
-    uintptr wide = ((uintptr)1 << (int)(40));
+    uintptr wide = ((uintptr)1 << 40);
     fmt.Println(wide);
 
     var rows = new main_rows[]{
-        new(((uintptr)1 << (int)((4 * ptrSize))), ((uintptr)1 << (int)((4 * ptrSize)))),
+        new((uintptr)1 << (int)((4 * ptrSize)), (uintptr)1 << (int)((4 * ptrSize))),
         new((uintptr)(4294967296L - 1), (uintptr)(4294967296L - 1))
     }.slice();
     fmt.Println(rows[0].a, rows[0].b);

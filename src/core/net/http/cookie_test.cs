@@ -203,7 +203,7 @@ public static void TestWriteSetCookies(ж<testing.T> Ꮡt) {
 internal partial struct headerOnlyResponseWriter /*global::go.net.http_package.ΔHeader*/;
 
 internal static global::go.net.http_package.ΔHeader Header(this headerOnlyResponseWriter ho) {
-    return ((global::go.net.http_package.ΔHeader)ho);
+    return (global::go.net.http_package.ΔHeader)ho;
 }
 
 internal static (nint, error) Write(this headerOnlyResponseWriter ho, slice<byte> _) {
@@ -220,11 +220,11 @@ internal static readonly @string cookie2TwoMaxAge3600ˢ = "cookie-2=two; Max-Age
 
 public static void TestSetCookie(ж<testing.T> Ꮡt) {
     var m = new global::go.net.http_package.ΔHeader(0);
-    SetCookie(((headerOnlyResponseWriter)m), Ꮡ(new ΔCookie(Name: "cookie-1"u8, Value: "one"u8, Path: "/restricted/"u8)));
-    SetCookie(((headerOnlyResponseWriter)m), Ꮡ(new ΔCookie(Name: "cookie-2"u8, Value: "two"u8, MaxAge: 3600)));
+    SetCookie((headerOnlyResponseWriter)m, Ꮡ(new ΔCookie(Name: "cookie-1"u8, Value: "one"u8, Path: "/restricted/"u8)));
+    SetCookie((headerOnlyResponseWriter)m, Ꮡ(new ΔCookie(Name: "cookie-2"u8, Value: "two"u8, MaxAge: 3600)));
     {
         nint l = builtin.len(m[setCookieˢ]); if (l != 2) {
-            Ꮡt.Fatalf("expected %d cookies, got %d"u8, (nint)(2), l);
+            Ꮡt.Fatalf("expected %d cookies, got %d"u8, (nint)2, l);
         }
     }
     {
@@ -457,7 +457,7 @@ internal static @string toJSON(any v) {
     if (err != default!) {
         return fmt.Sprintf("%#v"u8, v);
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

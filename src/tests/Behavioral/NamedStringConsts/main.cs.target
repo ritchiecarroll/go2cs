@@ -37,7 +37,7 @@ private static readonly @string opLocalˢ = "opLocal"u8;
 internal static void Main() {
     fmt.Println(describe(equivalent));
     fmt.Println(describe(moreGeneral));
-    fmt.Println(describe(((relationship)(@string)"x"u8)));
+    fmt.Println(describe((relationship)(@string)"x"u8));
 
     relationship localRel = "moreSpecific"u8;
     fmt.Println(describe(localRel));

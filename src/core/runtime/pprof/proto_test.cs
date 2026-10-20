@@ -50,7 +50,7 @@ internal static (ж<profile.Profile>, error) translateCPUProfile(slice<uint64> d
 // data structures like profile.Profile.
 internal static @string fmtJSON(any x) {
     var (js, _) = json.MarshalIndent(x, ""u8, "\t"u8);
-    return ((@string)js);
+    return (@string)js;
 }
 
 public static void TestConvertCPUProfileNoSamples(ж<testing.T> Ꮡt) {

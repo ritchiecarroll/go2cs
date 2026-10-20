@@ -18,7 +18,7 @@ internal static UntypedInt fsize => 5;
 
 internal static void Main() {
     rune codepoint = replacementChar;
-    @string s = ((@string)codepoint);
+    @string s = (@string)codepoint;
     fmt.Println(len(s), codepoint);
 
     float64 factor = scale;
@@ -56,7 +56,7 @@ internal static void tightenGuards() {
 
         UntypedInt sh = 3;
         uint64 v2 = 1;
-        fmt.Println((v2 << (int)(sh)));
+        fmt.Println(v2 << (int)(sh));
 
         const nint shifted = 3;
         nuint k = 2;

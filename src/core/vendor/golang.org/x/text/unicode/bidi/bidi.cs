@@ -117,7 +117,7 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
             p.pairValues = append(p.pairValues, r);
         } else {
             p.pairTypes = append(p.pairTypes, bpNone);
-            p.pairValues = append(p.pairValues, (rune)(0));
+            p.pairValues = append(p.pairValues, (rune)0);
         }
     }
     return (bytecount, default!);
@@ -222,7 +222,7 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
     foreach (var (_, fn) in p.opts) {
         fn(Ꮡp.of(Paragraph.Ꮡoptions));
     }
-    var lvl = ((level)(-1));
+    var lvl = (level)(-1);
     if (p.options.defaultDirection == RightToLeft) {
         lvl = 1;
     }
@@ -297,7 +297,7 @@ partial struct ΔRun {
 
 // String returns the text of the run in its original order.
 public static @string String(this ref ΔRun r) {
-    return ((@string)r.runes);
+    return (@string)r.runes;
 }
 
 // Bytes returns the text of the run in its original order.
@@ -339,7 +339,7 @@ public static slice<byte> AppendReverse(slice<byte> @out, slice<byte> @in) {
     for ((nint i, nint j) = (0, len(inRunes) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         (inRunes[i], inRunes[j]) = (inRunes[j], inRunes[i]);
     }
-    copy(ret.slice(len(@out)), ((@string)inRunes));
+    copy(ret.slice(len(@out)), (@string)inRunes);
 
     return ret;
 }
@@ -359,7 +359,7 @@ public static @string ReverseString(@string s) {
             ret[li - i - 1] = r;
         }
     }
-    return ((@string)ret);
+    return (@string)ret;
 }
 
 } // end bidi_package

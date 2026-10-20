@@ -116,7 +116,7 @@ public static @string ReadString(this ref Reader r, int64 len) {
     if (r.@readonly) {
         return toString(b); // backed by RO memory, ok to make unsafe string
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 internal static @string toString(slice<byte> b) {

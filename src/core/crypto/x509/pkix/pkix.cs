@@ -84,7 +84,7 @@ public static @string String(this RDNSequence r) {
                 }}
 
                 if (escape){
-                    escaped = append(escaped, (rune)((rune)'\\'), c);
+                    escaped = append(escaped, (rune)'\\', c);
                 } else {
                     escaped = append(escaped, c);
                 }

@@ -136,7 +136,7 @@ internal static (nint n, error err) Write(this ref opensslOutputSink o, slice<by
 }
 
 internal static @string String(this ref opensslOutputSink o) {
-    return ((@string)o.all);
+    return (@string)o.all;
 }
 
 // clientTest represents a test of the TLS client handshake against a reference
@@ -198,7 +198,7 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
         if (len(test.cert) > 0) {
             cert = test.cert;
         }
-        @string certPath = tempFile(((@string)cert));
+        @string certPath = tempFile((@string)cert);
         defer(os.Remove, certPath, ref ᒐ);
 
         any key = testRSAPrivateKey.OrTypedNil();
@@ -256,7 +256,7 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
         }
 
         var cmd = exec.Command(command[0], command[1..].ꓸꓸꓸ);
-        stdin = ((opensslInput)new channel<opensslInputEvent>(0));
+        stdin = (opensslInput)new channel<opensslInputEvent>(0);
         cmd.Value.Stdin = stdin;
         var @out = newOpensslOutputSink();
         cmd.Value.Stdout = new tls_internal_test_package.opensslOutputSinkжWriter(@out);
@@ -423,7 +423,7 @@ internal static partial void run(this ж<clientTest> Ꮡtest, ж<testing.T> Ꮡt
 
                     buf = buf.slice(0, n);
                     if (!bytes.Equal(slice<byte>(opensslSentinel), buf)) {
-                        Ꮡt.Errorf("Client.Read returned %q, but wanted %q"u8, ((@string)buf), opensslSentinel);
+                        Ꮡt.Errorf("Client.Read returned %q, but wanted %q"u8, (@string)buf, opensslSentinel);
                     }
 
                     {
@@ -468,7 +468,7 @@ internal static partial void run(this ж<clientTest> Ꮡtest, ж<testing.T> Ꮡt
 
                     buf = buf.slice(0, n);
                     if (!bytes.Equal(slice<byte>(opensslSentinel), buf)) {
-                        Ꮡt.Errorf("Client.Read returned %q, but wanted %q"u8, ((@string)buf), opensslSentinel);
+                        Ꮡt.Errorf("Client.Read returned %q, but wanted %q"u8, (@string)buf, opensslSentinel);
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1496,7 +1496,7 @@ public static partial void TestServerSelectingUnconfiguredApplicationProtocol(ж
             Ꮡt.Fatal(err);
         }
     }
-    nint recordLen = (nint)(((nint)header[3] << (int)(8)) | (nint)header[4]);
+    nint recordLen = (nint)header[3] << 8 | (nint)header[4];
 
     var record = new slice<byte>(recordLen);
     {
@@ -1515,9 +1515,9 @@ public static partial void TestServerSelectingUnconfiguredApplicationProtocol(ж
 
     s.Write(new byte[]{
         (byte)recordTypeHandshake,
-        (byte)(((byte)VersionTLS12).Rsh((uint64)(8))),
+        (byte)(((byte)VersionTLS12).Rsh((uint64)8)),
         (byte)((byte)((byte)VersionTLS12 & 0xff)),
-        (byte)((len(serverHelloBytes) >> (int)(8))),
+        (byte)(len(serverHelloBytes) >> 8),
         (byte)len(serverHelloBytes)
     }.slice());
     s.Write(serverHelloBytes);
@@ -1669,7 +1669,7 @@ public static void TestHandshakeClientExportKeyingMaterial(ж<testing.T> Ꮡt) {
                     return fmt.Errorf("ExportKeyingMaterial failed: %v"u8, err);
                 } else 
                 if (len(km) != 42) {
-                    return fmt.Errorf("Got %d bytes from ExportKeyingMaterial, wanted %d"u8, len(km), (nint)(42));
+                    return fmt.Errorf("Got %d bytes from ExportKeyingMaterial, wanted %d"u8, len(km), (nint)42);
                 }
             }
             return default!;
@@ -1721,7 +1721,7 @@ public static partial void TestHostnameInSNI(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
         }
-        nint recordLen = (nint)(((nint)header[3] << (int)(8)) | (nint)header[4]);
+        nint recordLen = (nint)header[3] << 8 | (nint)header[4];
 
         var record = new slice<byte>(recordLen);
         {
@@ -1772,7 +1772,7 @@ public static partial void TestServerSelectingUnconfiguredCipherSuite(ж<testing
             Ꮡt.Fatal(err);
         }
     }
-    nint recordLen = (nint)(((nint)header[3] << (int)(8)) | (nint)header[4]);
+    nint recordLen = (nint)header[3] << 8 | (nint)header[4];
 
     var record = new slice<byte>(recordLen);
     {
@@ -1792,9 +1792,9 @@ public static partial void TestServerSelectingUnconfiguredCipherSuite(ж<testing
 
     s.Write(new byte[]{
         (byte)recordTypeHandshake,
-        (byte)(((byte)VersionTLS12).Rsh((uint64)(8))),
+        (byte)(((byte)VersionTLS12).Rsh((uint64)8)),
         (byte)((byte)((byte)VersionTLS12 & 0xff)),
-        (byte)((len(serverHelloBytes) >> (int)(8))),
+        (byte)(len(serverHelloBytes) >> 8),
         (byte)len(serverHelloBytes)
     }.slice());
     s.Write(serverHelloBytes);
@@ -2719,7 +2719,7 @@ public static partial void TestHandshakeRace(ж<testing.T> Ꮡt) {
             readDoneʗ1.ᐸꟷ(new EmptyStruct());
         });
 
-        if ((nint)(i & 1) == 1){
+        if ((i & 1) == 1){
             startWrite.ᐸꟷ(new EmptyStruct());
             startRead.ᐸꟷ(new EmptyStruct());
         } else {

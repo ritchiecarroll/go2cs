@@ -30,7 +30,7 @@ public static void ExpandReference(nint sizeClass, ж<gc.ObjMask> Ꮡpacked, ж<
     var f = size / (uintptr)goarch.PtrSize;
     foreach (var i in range<uintptr>(nObj)) {
         // Check if the object is marked.
-        if ((uintptr)(packed[i / (uintptr)goarch.PtrBits] & (((uintptr)1 << (int)((i % (uintptr)goarch.PtrBits))))) == 0) {
+        if ((uintptr)(packed[i / (uintptr)goarch.PtrBits] & ((uintptr)1 << (int)((i % (uintptr)goarch.PtrBits)))) == 0) {
             continue;
         }
         // Propagate that mark into the destination into one bit per the

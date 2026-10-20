@@ -57,9 +57,9 @@ partial struct traceTime /*num:uint64*/;
 //go:nosplit
 internal static traceTime traceClockNow() {
     if (osHasLowResClock) {
-        return ((traceTime)(uint64)(cputicks() / (int64)traceTimeDiv));
+        return (traceTime)(uint64)(cputicks() / (int64)traceTimeDiv);
     }
-    return ((traceTime)(uint64)(nanotime() / (int64)traceTimeDiv));
+    return (traceTime)(uint64)(nanotime() / (int64)traceTimeDiv);
 }
 
 // traceClockUnitsPerSecond estimates the number of trace clock units per

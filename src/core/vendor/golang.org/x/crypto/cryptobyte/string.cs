@@ -61,7 +61,7 @@ public static bool ReadUint16(this ref String s, ж<uint16> Ꮡout) {
     if (v == default!) {
         return false;
     }
-    @out = (uint16)((uint16)((uint16)v[0] << (int)(8)) | (uint16)v[1]);
+    @out = (uint16)((uint16)((uint16)v[0] << 8) | (uint16)v[1]);
     return true;
 }
 
@@ -74,7 +74,7 @@ public static bool ReadUint24(this ref String s, ж<uint32> Ꮡout) {
     if (v == default!) {
         return false;
     }
-    @out = (uint32)((uint32)(((uint32)v[0] << (int)(16)) | ((uint32)v[1] << (int)(8))) | (uint32)v[2]);
+    @out = (uint32)v[0] << 16 | (uint32)v[1] << 8 | (uint32)v[2];
     return true;
 }
 
@@ -87,7 +87,7 @@ public static bool ReadUint32(this ref String s, ж<uint32> Ꮡout) {
     if (v == default!) {
         return false;
     }
-    @out = (uint32)((uint32)((uint32)(((uint32)v[0] << (int)(24)) | ((uint32)v[1] << (int)(16))) | ((uint32)v[2] << (int)(8))) | (uint32)v[3]);
+    @out = (uint32)v[0] << 24 | (uint32)v[1] << 16 | (uint32)v[2] << 8 | (uint32)v[3];
     return true;
 }
 
@@ -100,7 +100,7 @@ public static bool ReadUint48(this ref String s, ж<uint64> Ꮡout) {
     if (v == default!) {
         return false;
     }
-    @out = (uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)v[0] << (int)(40)) | ((uint64)v[1] << (int)(32))) | ((uint64)v[2] << (int)(24))) | ((uint64)v[3] << (int)(16))) | ((uint64)v[4] << (int)(8))) | (uint64)v[5]);
+    @out = (uint64)v[0] << 40 | (uint64)v[1] << 32 | (uint64)v[2] << 24 | (uint64)v[3] << 16 | (uint64)v[4] << 8 | (uint64)v[5];
     return true;
 }
 
@@ -113,7 +113,7 @@ public static bool ReadUint64(this ref String s, ж<uint64> Ꮡout) {
     if (v == default!) {
         return false;
     }
-    @out = (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)v[0] << (int)(56)) | ((uint64)v[1] << (int)(48))) | ((uint64)v[2] << (int)(40))) | ((uint64)v[3] << (int)(32))) | ((uint64)v[4] << (int)(24))) | ((uint64)v[5] << (int)(16))) | ((uint64)v[6] << (int)(8))) | (uint64)v[7]);
+    @out = (uint64)v[0] << 56 | (uint64)v[1] << 48 | (uint64)v[2] << 40 | (uint64)v[3] << 32 | (uint64)v[4] << 24 | (uint64)v[5] << 16 | (uint64)v[6] << 8 | (uint64)v[7];
     return true;
 }
 
@@ -142,8 +142,8 @@ internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<Strin
     }
     uint32 length = default!;
     foreach (var (_, b) in lenBytes) {
-        length = (length << (int)(8));
-        length = (uint32)(length | (uint32)b);
+        length = length << 8;
+        length = length | (uint32)b;
     }
     var v = s.read((nint)length);
     if (v == default!) {

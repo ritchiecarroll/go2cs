@@ -74,7 +74,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this Ð¶<Reader> á
             // repeat flag. If the 2-bit flag is 0b11,
             // it adds 3 and then there is another repeat flag.
             nint zsym = sym;
-            while (((uint32)(br.bits & 0xfff)) == 0xfff) {
+            while ((br.bits & 0xfff) == 0xfff) {
                 zsym += 3 * 6;
                 br.bits >>= (int)(12);
                 br.cnt -= 12;
@@ -84,7 +84,7 @@ internal static (nint tableBits, nint roff, error err) readFSE(this Ð¶<Reader> á
                     }
                 }
             }
-            while (((uint32)(br.bits & 3)) == 3) {
+            while ((br.bits & 3) == 3) {
                 zsym += 3;
                 br.bits >>= (int)(2);
                 br.cnt -= 2;
@@ -114,14 +114,14 @@ internal static (nint tableBits, nint roff, error err) readFSE(this Ð¶<Reader> á
 
         nint max = (2 * threshold - 1) - remaining;
         nint count = default!;
-        if ((nint)((uint32)(br.bits & (uint32)(threshold - 1))) < max){
+        if ((nint)(br.bits & (uint32)(threshold - 1)) < max){
             // A small value.
-            count = (nint)((uint32)(br.bits & (uint32)(threshold - 1)));
+            count = (nint)(br.bits & (uint32)(threshold - 1));
             br.bits.RshAssign((int64)(bitsNeeded - 1));
             br.cnt -= (uint32)(bitsNeeded - 1);
         } else {
             // A large value.
-            count = (nint)((uint32)(br.bits & (uint32)(2 * threshold - 1)));
+            count = (nint)(br.bits & (uint32)(2 * threshold - 1));
             if (count >= threshold) {
                 count -= max;
             }
@@ -192,14 +192,14 @@ internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, s
     }
 
     nint pos = 0;
-    nint step = ((tableSize >> (int)(1))) + ((tableSize >> (int)(3))) + 3;
+    nint step = (tableSize >> 1) + (tableSize >> 3) + 3;
     nint mask = tableSize - 1;
     foreach (var (i, n) in norm) {
         for (nint j = 0; j < (nint)n; j++) {
             table[pos].sym = (uint8)i;
-            pos = (nint)((pos + step) & mask);
+            pos = (pos + step) & mask;
             while (pos > highThreshold) {
-                pos = (nint)((pos + step) & mask);
+                pos = (pos + step) & mask;
             }
         }
     }
@@ -245,26 +245,26 @@ partial struct fseBaselineEntry {
 internal static UntypedInt literalLengthOffset => 16;
 
 internal static slice<uint32> literalLengthBase = new uint32[]{
-    (uint32)(16 | ((1 << (int)(24)))),
-    (uint32)(18 | ((1 << (int)(24)))),
-    (uint32)(20 | ((1 << (int)(24)))),
-    (uint32)(22 | ((1 << (int)(24)))),
-    (uint32)(24 | ((2 << (int)(24)))),
-    (uint32)(28 | ((2 << (int)(24)))),
-    (uint32)(32 | ((3 << (int)(24)))),
-    (uint32)(40 | ((3 << (int)(24)))),
-    (uint32)(48 | ((4 << (int)(24)))),
-    (uint32)(64 | ((6 << (int)(24)))),
-    (uint32)(128 | ((7 << (int)(24)))),
-    (uint32)(256 | ((8 << (int)(24)))),
-    (uint32)(512 | ((9 << (int)(24)))),
-    (uint32)(1024 | ((10 << (int)(24)))),
-    (uint32)(2048 | ((11 << (int)(24)))),
-    (uint32)(4096 | ((12 << (int)(24)))),
-    (uint32)(8192 | ((13 << (int)(24)))),
-    (uint32)(16384 | ((14 << (int)(24)))),
-    (uint32)(32768 | ((15 << (int)(24)))),
-    (uint32)(65536 | ((16 << (int)(24))))
+    (uint32)(16 | (1 << 24)),
+    (uint32)(18 | (1 << 24)),
+    (uint32)(20 | (1 << 24)),
+    (uint32)(22 | (1 << 24)),
+    (uint32)(24 | (2 << 24)),
+    (uint32)(28 | (2 << 24)),
+    (uint32)(32 | (3 << 24)),
+    (uint32)(40 | (3 << 24)),
+    (uint32)(48 | (4 << 24)),
+    (uint32)(64 | (6 << 24)),
+    (uint32)(128 | (7 << 24)),
+    (uint32)(256 | (8 << 24)),
+    (uint32)(512 | (9 << 24)),
+    (uint32)(1024 | (10 << 24)),
+    (uint32)(2048 | (11 << 24)),
+    (uint32)(4096 | (12 << 24)),
+    (uint32)(8192 | (13 << 24)),
+    (uint32)(16384 | (14 << 24)),
+    (uint32)(32768 | (15 << 24)),
+    (uint32)(65536 | (16 << 24))
 }.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -286,8 +286,8 @@ internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<
             }
             var idx = (uint8)(e.sym - (uint8)literalLengthOffset);
             var basebits = literalLengthBase[idx];
-            be.baseline = (uint32)(basebits & 0xffffff);
-            be.basebits = (uint8)((basebits >> (int)(24)));
+            be.baseline = basebits & 0xffffff;
+            be.basebits = (uint8)(basebits >> 24);
         }
         baselineTable[i] = be;
     }
@@ -342,27 +342,27 @@ internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<f
 internal static UntypedInt matchLengthOffset => 32;
 
 internal static slice<uint32> matchLengthBase = new uint32[]{
-    (uint32)(35 | ((1 << (int)(24)))),
-    (uint32)(37 | ((1 << (int)(24)))),
-    (uint32)(39 | ((1 << (int)(24)))),
-    (uint32)(41 | ((1 << (int)(24)))),
-    (uint32)(43 | ((2 << (int)(24)))),
-    (uint32)(47 | ((2 << (int)(24)))),
-    (uint32)(51 | ((3 << (int)(24)))),
-    (uint32)(59 | ((3 << (int)(24)))),
-    (uint32)(67 | ((4 << (int)(24)))),
-    (uint32)(83 | ((4 << (int)(24)))),
-    (uint32)(99 | ((5 << (int)(24)))),
-    (uint32)(131 | ((7 << (int)(24)))),
-    (uint32)(259 | ((8 << (int)(24)))),
-    (uint32)(515 | ((9 << (int)(24)))),
-    (uint32)(1027 | ((10 << (int)(24)))),
-    (uint32)(2051 | ((11 << (int)(24)))),
-    (uint32)(4099 | ((12 << (int)(24)))),
-    (uint32)(8195 | ((13 << (int)(24)))),
-    (uint32)(16387 | ((14 << (int)(24)))),
-    (uint32)(32771 | ((15 << (int)(24)))),
-    (uint32)(65539 | ((16 << (int)(24))))
+    (uint32)(35 | (1 << 24)),
+    (uint32)(37 | (1 << 24)),
+    (uint32)(39 | (1 << 24)),
+    (uint32)(41 | (1 << 24)),
+    (uint32)(43 | (2 << 24)),
+    (uint32)(47 | (2 << 24)),
+    (uint32)(51 | (3 << 24)),
+    (uint32)(59 | (3 << 24)),
+    (uint32)(67 | (4 << 24)),
+    (uint32)(83 | (4 << 24)),
+    (uint32)(99 | (5 << 24)),
+    (uint32)(131 | (7 << 24)),
+    (uint32)(259 | (8 << 24)),
+    (uint32)(515 | (9 << 24)),
+    (uint32)(1027 | (10 << 24)),
+    (uint32)(2051 | (11 << 24)),
+    (uint32)(4099 | (12 << 24)),
+    (uint32)(8195 | (13 << 24)),
+    (uint32)(16387 | (14 << 24)),
+    (uint32)(32771 | (15 << 24)),
+    (uint32)(65539 | (16 << 24))
 }.slice();
 
 // makeMatchBaselineFSE converts the match length fseTable to baselineTable.
@@ -381,8 +381,8 @@ internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fs
             }
             var idx = (uint8)(e.sym - (uint8)matchLengthOffset);
             var basebits = matchLengthBase[idx];
-            be.baseline = (uint32)(basebits & 0xffffff);
-            be.basebits = (uint8)((basebits >> (int)(24)));
+            be.baseline = basebits & 0xffffff;
+            be.basebits = (uint8)(basebits >> 24);
         }
         baselineTable[i] = be;
     }

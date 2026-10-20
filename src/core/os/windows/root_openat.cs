@@ -430,11 +430,11 @@ Loop:
 
             if (i == len(parts) - 1){
                 err = default!;
-                if (endsInSlash && (nuint)(flags & (nuint)doInRootNoHandleTerminalSlash) == 0) {
+                if (endsInSlash && (flags & (nuint)doInRootNoHandleTerminalSlash) == 0) {
                     FileInfo fi = default!;
                     (fi, err) = lstatat(dirfd, parts[i]);
                     switch (ᐧ) {
-                    case {} when IsNotExist(err) && (nuint)(flags & (nuint)doInRootCreatingDirectory) != 0: {
+                    case {} when IsNotExist(err) && (flags & (nuint)doInRootCreatingDirectory) != 0: {
                         // The path ends in a slash, the last path component
                         // does not exist, and we creating a directory.
                         // This is fine.
@@ -448,7 +448,7 @@ Loop:
                         break;
                     }
                     case {} when isLink(fi): {
-                        if (runtime.GOOS != "windows"u8 || (nuint)(flags & (nuint)doInRootAlwaysResolveTerminalSlash) != 0){
+                        if (runtime.GOOS != "windows"u8 || (flags & (nuint)doInRootAlwaysResolveTerminalSlash) != 0){
                             err = checkSymlink(dirfd, parts[i], syscall.ENOTDIR);
                         } else {
                             if (!isDirectoryLink(fi)) {
@@ -495,7 +495,7 @@ Loop:
                     (ret, err) = (ret, syscall.ELOOP); goto ᒐdone;
                 }
                 var lastPart = i == len(parts) - 1;
-                var (newparts, newEndsInSlash, errΔ2) = splitPathInRoot(((@string)e), parts.slice(0, i), parts.slice(i + 1));
+                var (newparts, newEndsInSlash, errΔ2) = splitPathInRoot((@string)e, parts.slice(0, i), parts.slice(i + 1));
                 if (errΔ2 != default!) {
                     (ret, err) = (ret, errΔ2); goto ᒐdone;
                 }

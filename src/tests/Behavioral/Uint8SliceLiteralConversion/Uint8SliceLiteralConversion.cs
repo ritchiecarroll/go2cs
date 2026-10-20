@@ -20,8 +20,8 @@ internal static void Main() {
     buf c = ((buf)slice<uint8>((@string)"baz"u8));
     var r = slice<int32>((@string)"héllo");
     var s = slice<uint8>((@string)("a"u8 + "b"u8));
-    fmt.Println(len(a), len(b), len(c), take(slice<uint8>("qux"u8)), len(g), len(r), len(s), len(((B)"ali"u8)));
-    fmt.Println(((@string)a), ((@string)g), ((@string)s), ((@string)r), r[1]);
+    fmt.Println(len(a), len(b), len(c), take(slice<uint8>("qux"u8)), len(g), len(r), len(s), len((B)"ali"u8));
+    fmt.Println((@string)a, (@string)g, (@string)s, (@string)r, r[1]);
 }
 
 } // end main_package

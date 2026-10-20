@@ -275,7 +275,7 @@ internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1
 
     for (nint i = 2; i < len(em); i++) {
         nint equals0 = subtle.ConstantTimeByteEq(em[i], 0);
-        index = subtle.ConstantTimeSelect((nint)(lookingForIndex & equals0), i, index);
+        index = subtle.ConstantTimeSelect(lookingForIndex & equals0, i, index);
         lookingForIndex = subtle.ConstantTimeSelect(equals0, 0, lookingForIndex);
     }
 
@@ -283,7 +283,7 @@ internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1
     // bytes into em.
     nint validPS = subtle.ConstantTimeLessOrEq(2 + 8, index);
 
-    valid = (nint)((nint)((nint)(firstByteIsZero & secondByteIsTwo) & ((nint)(~lookingForIndex & 1))) & validPS);
+    valid = firstByteIsZero & secondByteIsTwo & (~lookingForIndex & 1) & validPS;
     index = subtle.ConstantTimeSelect(valid, index + 1, 0);
     return (valid, em, index, default!);
 }

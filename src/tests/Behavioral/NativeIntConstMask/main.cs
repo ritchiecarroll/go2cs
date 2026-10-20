@@ -9,7 +9,7 @@ internal static uintptr shift => 3;
 internal static uintptr blockSize => 16;
 
 internal static uintptr low(uintptr i) {
-    return (uintptr)(i & (uintptr)(((1 << (int)(shift))) - 1));
+    return (uintptr)(i & (uintptr)((1 << (int)(shift)) - 1));
 }
 
 internal static uintptr align(uintptr i) {

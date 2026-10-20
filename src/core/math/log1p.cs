@@ -154,7 +154,7 @@ internal static float64 log1p(float64 x) {
         if (absx < Two53){ // 1<<53
             u = 1.0D + x;
             iu = Float64bits(u);
-            k = (nint)(((iu >> (int)(52))) - 1023);
+            k = (nint)((iu >> 52) - 1023);
             // correction term
             if (k > 0){
                 c = 1.0D - (u - x);
@@ -165,16 +165,16 @@ internal static float64 log1p(float64 x) {
         } else {
             u = x;
             iu = Float64bits(u);
-            k = (nint)(((iu >> (int)(52))) - 1023);
+            k = (nint)((iu >> 52) - 1023);
             c = 0D;
         }
         iu &= (uint64)(0x000fffffffffffffUL);
         if (iu < 0x0006a09e667f3bcdUL){ // mantissa of Sqrt(2)
-            u = Float64frombits((uint64)(iu | 0x3ff0000000000000UL)); // normalize u
+            u = Float64frombits(iu | 0x3ff0000000000000UL); // normalize u
         } else {
             k++;
-            u = Float64frombits((uint64)(iu | 0x3fe0000000000000UL)); // normalize u/2
-            iu = ((0x0010000000000000UL - iu) >> (int)(2));
+            u = Float64frombits(iu | 0x3fe0000000000000UL); // normalize u/2
+            iu = (0x0010000000000000UL - iu) >> 2;
         }
         f = u - 1.0D; // Sqrt(2)/2 < u < Sqrt(2)
     }

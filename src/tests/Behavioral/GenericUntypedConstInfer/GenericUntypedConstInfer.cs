@@ -68,8 +68,8 @@ private static readonly @string oneˢ = "one"u8;
 internal static void Main() {
     nint i = 7;
 
-    wantValue((nint)(0))(i, false);
-    wantValue((nint)(7))(i, true);
+    wantValue((nint)0)(i, false);
+    wantValue((nint)7)(i, true);
 
     wantPresent<nint>(15)(true);
     takeOnly<nint>(15);
@@ -95,17 +95,17 @@ internal static void Main() {
     bool b = true;
     wantValue(true)(b, true);
 
-    pairValue((@string)"k", (nint)(0))(i, false);
+    pairValue((@string)"k", (nint)0)(i, false);
 
     wantValue((nint)(3 + 4))(i, true);
-    wantValue((nint)((1 << (int)(10))))((1 << (int)(10)), true);
+    wantValue((nint)((1 << 10)))(1 << 10, true);
 
-    fmt.Println("slice", sliceOf((nint)(9)));
-    fmt.Println("map", mapTo(oneˢ, (nint)(1))["one"]);
-    fmt.Println("chan", ᐸꟷ(chanOf((nint)(11))));
+    fmt.Println("slice", sliceOf((nint)9));
+    fmt.Println("map", mapTo(oneˢ, (nint)1)["one"]);
+    fmt.Println("chan", ᐸꟷ(chanOf((nint)11)));
 
-    wantLike((byte)0, (byte)(3))(3, true);
-    wantInt64((int64)(1234567890123L))(1234567890123L, true);
+    wantLike((byte)0, (byte)3)(3, true);
+    wantInt64((int64)1234567890123L)(1234567890123L, true);
 }
 
 } // end main_package

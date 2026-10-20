@@ -40,7 +40,7 @@ public static slice<byte> ExpandLabel<H>(Func<H> hashΔ1, slice<byte> secret, @s
     hkdfLabel = append(hkdfLabel, label.ꓸꓸꓸ);
     hkdfLabel = append(hkdfLabel, (byte)len(context));
     hkdfLabel = appendꓸꓸꓸ(hkdfLabel, context);
-    return hkdf.Expand(hashΔ1, secret, ((@string)hkdfLabel), length);
+    return hkdf.Expand(hashΔ1, secret, (@string)hkdfLabel, length);
 }
 
 internal static slice<byte> extract<H>(Func<H> hashΔ1, slice<byte> newSecret, slice<byte> currentSecret)

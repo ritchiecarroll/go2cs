@@ -105,7 +105,7 @@ public static void TestDefaultHandle(ж<testing.T> Ꮡt) {
             @string got = default!;
 
             global::go.log.slog_package.ΔHandler h = new global::go.log.slog_package.defaultHandlerжΔHandler(newDefaultHandler((uintptr _, slice<byte> b) => {
-                got = ((@string)b);
+                got = (@string)b;
                 return default!;
             }));
             if (testʗ1.with != default!) {
@@ -473,7 +473,7 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
         new(
             name: "json.RawMessage"u8,
             replace: removeKeys(TimeKey, LevelKey),
-            attrs: new global::go.log.slog_package.Attr[]{go.log.slog_package.Any("bs"u8, ((json.RawMessage)slice<byte>("1234"u8)))}.slice(),
+            attrs: new global::go.log.slog_package.Attr[]{go.log.slog_package.Any("bs"u8, (json.RawMessage)slice<byte>("1234"u8))}.slice(),
             wantText: @"msg=message bs=""1234"""u8,
             wantJSON: @"{""msg"":""message"",""bs"":1234}"u8
         ),
@@ -506,7 +506,7 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
             name: "replace built-in with group"u8,
             replace: (slice<@string> _, global::go.log.slog_package.Attr a) => {
                 if (a.Key == TimeKey) {
-                    return Group(TimeKey, minsˢ, (nint)(3), secsˢ, (nint)(2));
+                    return Group(TimeKey, minsˢ, (nint)3, secsˢ, (nint)2);
                 }
                 if (a.Key == LevelKey) {
                     return new Attr(nil);
@@ -842,7 +842,7 @@ public static void TestWriteTimeRFC3339(ж<testing.T> Ꮡt) {
         time_package.Date(2000, 1, 2, 3, 4, 5, 400, time_package.ΔLocal),
         time_package.Date(2000, 11, 12, 3, 4, 500, 50000000, time_package.ΔUTC)
     }.slice()) {
-        @string got = ((@string)appendRFC3339Millis(default!, tm));
+        @string got = (@string)appendRFC3339Millis(default!, tm);
         @string want = tm.Format(rfc3339Millis);
         if (got != want) {
             Ꮡt.Errorf("got %s, want %s"u8, got, want);
@@ -880,10 +880,10 @@ public static void TestDiscardHandler(ж<testing.T> Ꮡt) {
 
     // Just ensure nothing panics during normal usage
     var l = New(DiscardHandler);
-    l.Info(msgˢ, (@string)"a"u8, (nint)(1), (@string)"b"u8, (nint)(2));
-    l.Debug("bg"u8, Int("a"u8, 1), (@string)"b"u8, (nint)(2));
+    l.Info(msgˢ, (@string)"a"u8, (nint)1, (@string)"b"u8, (nint)2);
+    l.Debug("bg"u8, Int("a"u8, 1), (@string)"b"u8, (nint)2);
     l.Warn("w"u8, go.log.slog_package.Duration(durˢ, (time.Duration)(3000000000L)));
-    l.Error(badˢ, (@string)"a"u8, (nint)(1));
+    l.Error(badˢ, (@string)"a"u8, (nint)1);
     l.Log(ctx, LevelWarn + 1, "w"u8, Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ));
     l.LogAttrs(ctx, LevelInfo + 1, aBCˢ, Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ));
     l.Info(infoˢ2, (@string)"a"u8, new global::go.log.slog_package.Attr[]{Int("i"u8, 1)}.slice());

@@ -95,7 +95,7 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
             return (default!, fmt.Errorf("archive header format header (%q)"u8, hdrBuf[..]));
         }
 
-        var (size, err) = strconv.ParseInt(strings.TrimSpace(((@string)(hdrBuf[(int)(arSizeOff)..(int)(arSizeOff + arSizeSize)]))), 10, 64);
+        var (size, err) = strconv.ParseInt(strings.TrimSpace((@string)(hdrBuf[(int)(arSizeOff)..(int)(arSizeOff + arSizeSize)])), 10, 64);
         if (err != default!) {
             return (default!, fmt.Errorf("error parsing size in archive header (%q): %v"u8, hdrBuf[..], err));
         }
@@ -112,7 +112,7 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
             }
         }
 
-        if ((int64)(size & 1) != 0) {
+        if ((size & 1) != 0) {
             size++;
         }
         off += size;

@@ -68,7 +68,7 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
                     offsetΔ1 = index + 1;
 
                     Ꮡb.WriteByte((rune)'%');
-                    Ꮡb.WriteByte(upperhex[(ch >> (int)(4))]);
+                    Ꮡb.WriteByte(upperhex[(ch >> 4)]);
                     Ꮡb.WriteByte(upperhex[(byte)(ch & 0x0F)]);
                 }
             }
@@ -397,7 +397,7 @@ internal static (@string, bool) percentHexUnescape(@string s) {
     for (nint i = 0; i < len(s); ) {
         switch (s[i]) {
         case (rune)'%': {
-            t[j] = (byte)((byte)(unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
+            t[j] = (byte)((byte)(unhex(s[i + 1]) << 4) | unhex(s[i + 2]));
             j++;
             i += 3;
             break;
@@ -409,7 +409,7 @@ internal static (@string, bool) percentHexUnescape(@string s) {
             break;
         }}
     }
-    return (((@string)t), true);
+    return ((@string)t, true);
 }
 
 internal static bool ishex(byte c) {

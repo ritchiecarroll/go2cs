@@ -81,7 +81,7 @@ internal static error writeMSB(this ref Writer w, uint32 c) {
     w.nBits += w.width;
     while (w.nBits >= 8) {
         {
-            var err = w.w.WriteByte((uint8)((w.bits >> (int)(24)))); if (err != default!) {
+            var err = w.w.WriteByte((uint8)(w.bits >> 24)); if (err != default!) {
                 return err;
             }
         }
@@ -115,7 +115,7 @@ internal static error incHi(this ж<Writer> Ꮡw) {
         }
         w.width = w.litWidth + 1;
         w.hi = clear + 1;
-        w.overflow = (clear << (int)(1));
+        w.overflow = clear << 1;
         foreach (var (i, _) in w.table) {
             w.table[i] = invalidEntry;
         }
@@ -171,16 +171,16 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
 loop:
     foreach (var (_, x) in p) {
         var literal = (uint32)x;
-        var key = (uint32)((code << (int)(8)) | literal);
+        var key = code << 8 | literal;
         // If there is a hash table hit for this key then we continue the loop
         // and do not emit a code yet.
-        var hash = (uint32)(((uint32)((key >> (int)(12)) ^ key)) & (uint32)tableMask);
+        var hash = (key >> 12 ^ key) & (uint32)tableMask;
         for (var (h, t) = (hash, w.table[hash]); t != invalidEntry; ) {
-            if (key == (t >> (int)(12))) {
-                code = (uint32)(t & (uint32)maxCode);
+            if (key == t >> 12) {
+                code = t & (uint32)maxCode;
                 goto continue_loop;
             }
-            h = (uint32)((h + 1) & (uint32)tableMask);
+            h = (h + 1) & (uint32)tableMask;
             t = w.table[h];
         }
         // Otherwise, write the current code, and literal becomes the start of
@@ -205,10 +205,10 @@ loop:
         // Otherwise, insert key -> e.hi into the map that e.table represents.
         while (ᐧ) {
             if (w.table[hash] == invalidEntry) {
-                w.table[hash] = (uint32)(((key << (int)(12))) | w.hi);
+                w.table[hash] = (key << 12) | w.hi;
                 break;
             }
-            hash = (uint32)((hash + 1) & (uint32)tableMask);
+            hash = (hash + 1) & (uint32)tableMask;
         }
 continue_loop:;
     }

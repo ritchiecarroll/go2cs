@@ -97,7 +97,7 @@ internal static @unsafe.Pointer poolRaceAddr(any xʗp) {
     ref var x = ref heap(xʗp, out var Ꮡx);
 
     var ptr = (uintptr)((ж<array<@unsafe.Pointer>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡx))).Value[1];
-    var h = (uint32)((((uint64)(uint32)ptr * 0x85ebca6bU) >> (int)(16)));
+    var h = (uint32)(((uint64)(uint32)ptr * 0x85ebca6bU) >> 16);
     return @unsafe.Pointer.FromPinnedBox(ᏑpoolRaceHash.at<uint64>((ulong)(h % (uint32)len(poolRaceHash))));
 }
 

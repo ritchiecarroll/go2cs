@@ -138,7 +138,7 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
     if (len(lines) < 2) {
         return (default!, fmt.Errorf("must include version and at least one value"u8));
     }
-    @string version = strings.TrimSuffix(((@string)lines[0]), "\r"u8);
+    @string version = strings.TrimSuffix((@string)lines[0], "\r"u8);
     if (version != encVersion1) {
         return (default!, fmt.Errorf("unknown encoding version: %s"u8, version));
     }

@@ -459,7 +459,7 @@ public static nint NumIn(this ref ΔFuncType t) {
 }
 
 public static nint NumOut(this ref ΔFuncType t) {
-    return (nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1)));
+    return (nint)((uint16)(t.OutCount & ((1 << 15) - 1)));
 }
 
 public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
@@ -471,7 +471,7 @@ public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
 // go2cs generated this placeholder — func OutSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static bool IsVariadic(this ref ΔFuncType t) {
-    return (uint16)(t.OutCount & ((uint16)(1 << (int)(15)))) != 0;
+    return (uint16)(t.OutCount & ((uint16)(1 << 15))) != 0;
 }
 
 partial struct PtrType {
@@ -541,17 +541,17 @@ public static ж<byte> Data(this ΔName n, nint off) {
 
 // IsExported returns "is n exported?"
 public static bool IsExported(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(0)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
 // HasTag returns true iff there is tag data following this name
 public static bool HasTag(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(1)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
 // IsEmbedded returns true iff n is embedded (an anonymous field).
 public static bool IsEmbedded(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(3)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -584,7 +584,7 @@ public static bool IsBlank(this ΔName n) {
 // Writes at most 10 bytes.
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
-        var b = (byte)((nint)(n & 0x7f));
+        var b = (byte)(n & 0x7f);
         n >>= (int)(7);
         if (n == 0) {
             buf[i] = b;
@@ -617,10 +617,10 @@ public static @string Tag(this ΔName n) {
 }
 
 public static ΔName NewName(@string n, @string tag, bool exported, bool embedded) {
-    if (len(n) >= (1 << (int)(29))) {
+    if (len(n) >= 1 << 29) {
         throw panic("abi.NewName: name too long: " + n[..1024] + "...");
     }
-    if (len(tag) >= (1 << (int)(29))) {
+    if (len(tag) >= 1 << 29) {
         throw panic("abi.NewName: tag too long: " + tag[..1024] + "...");
     }
     array<byte> nameLen = new(10);
@@ -631,14 +631,14 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
-        bits |= (byte)((byte)(1 << (int)(0)));
+        bits |= (byte)((byte)(1 << 0));
     }
     if (len(tag) > 0) {
         l += tagLenLen + len(tag);
-        bits |= (byte)((byte)(1 << (int)(1)));
+        bits |= (byte)((byte)(1 << 1));
     }
     if (embedded) {
-        bits |= (byte)((byte)(1 << (int)(3)));
+        bits |= (byte)((byte)(1 << 3));
     }
 
     var b = new slice<byte>(l);

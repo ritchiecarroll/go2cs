@@ -458,8 +458,8 @@ public static void TestDecodeMemoryConsumption(ж<testing.T> Ꮡt) {
         }
         runtime.ReadMemStats(s1);
         {
-            var heapDiff = (int64)((~s1).HeapAlloc - (~s0).HeapAlloc); if (heapDiff > ((int64)30 << (int)(20))) {
-                Ꮡt.Fatalf("Decode of %d frames increased heap by %dMB"u8, (nint)(frames), (heapDiff >> (int)(20)));
+            var heapDiff = (int64)((~s1).HeapAlloc - (~s0).HeapAlloc); if (heapDiff > (int64)30 << 20) {
+                Ꮡt.Fatalf("Decode of %d frames increased heap by %dMB"u8, (nint)(frames), heapDiff >> 20);
             }
         }
     }

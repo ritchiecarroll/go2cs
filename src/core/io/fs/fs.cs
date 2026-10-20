@@ -248,7 +248,7 @@ public static @string String(this FileMode m) {
         }
         w++;
     }
-    return ((@string)(buf.slice(0, w)));
+    return (@string)(buf.slice(0, w));
 }
 
 // IsDir reports whether m describes a directory.

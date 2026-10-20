@@ -70,7 +70,7 @@ public static void TestIsCSSNmchar(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in tests) {
         var got = isCSSNmchar(test.rune);
         if (got != test.want) {
-            Ꮡt.Errorf("%q: want %t but got %t"u8, ((@string)test.rune), test.want, got);
+            Ꮡt.Errorf("%q: want %t but got %t"u8, (@string)test.rune, test.want, got);
         }
     }
 }
@@ -112,13 +112,13 @@ public static void TestDecodeCSS(ж<testing.T> Ꮡt) {
         )
     }.slice();
     foreach (var (_, test) in tests) {
-        @string got1 = ((@string)decodeCSS(slice<byte>(test.css)));
+        @string got1 = (@string)decodeCSS(slice<byte>(test.css));
         if (got1 != test.want) {
             Ꮡt.Errorf("%q: want\n\t%q\nbut got\n\t%q"u8, test.css, test.want, got1);
         }
         @string recoded = cssEscaper(got1);
         {
-            @string got2 = ((@string)decodeCSS(slice<byte>(recoded))); if (got2 != test.want) {
+            @string got2 = (@string)decodeCSS(slice<byte>(recoded)); if (got2 != test.want) {
                 Ꮡt.Errorf("%q: escape & decode not dual for %q"u8, test.css, recoded);
             }
         }
@@ -164,7 +164,7 @@ public static void TestSkipCSSSpace(ж<testing.T> Ꮡt) {
         new(@"\20"u8, @"\20"u8)
     }.slice();
     foreach (var (_, test) in tests) {
-        @string got = ((@string)skipCSSSpace(slice<byte>(test.css)));
+        @string got = (@string)skipCSSSpace(slice<byte>(test.css));
         if (got != test.want) {
             Ꮡt.Errorf("%q: want %q but got %q"u8, test.css, test.want, got);
         }
@@ -183,7 +183,7 @@ public static void TestCSSEscaper(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("encode: want\n\t%q\nbut got\n\t%q"u8, want, got);
     }
 
-    got = ((@string)decodeCSS(slice<byte>(got)));
+    got = (@string)decodeCSS(slice<byte>(got));
     if (input != got) {
         Ꮡt.Errorf("decode: want\n\t%q\nbut got\n\t%q"u8, input, got);
     }

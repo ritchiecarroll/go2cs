@@ -1059,7 +1059,7 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
     if (err != default!) {
         return ("", "", false);
     }
-    @string cs = ((@string)c);
+    @string cs = (@string)c;
     (username, password, ok) = strings.Cut(cs, ":"u8);
     if (!ok) {
         return ("", "", false);
@@ -1219,7 +1219,7 @@ internal static (ж<Request> req, error err) readRequest(ж<bufio.Reader> Ꮡb) 
         if (err != default!) {
             (req, err) = (default!, err); goto ᒐdone;
         }
-        req.Value.Header = ((ΔHeader)(map<@string, slice<@string>>)mimeHeader);
+        req.Value.Header = (ΔHeader)(map<@string, slice<@string>>)mimeHeader;
         if (builtin.len((~req).Header[hostˢ]) > 1) {
             (req, err) = (default!, fmt.Errorf("too many Host headers"u8)); goto ᒐdone;
         }
@@ -1382,7 +1382,7 @@ internal static (urlpkg.Values vs, error err) parsePostForm(ref Request r) {
         var maxFormSize = (int64)(9223372036854775807L);
         {
             var (_, ok) = r.Body._<ж<maxBytesReader>>(ᐧ); if (!ok) {
-                maxFormSize = (int64)(((int64)10 << (int)(20))); // 10 MB is a lot of text.
+                maxFormSize = (int64)((int64)10 << 20); // 10 MB is a lot of text.
                 reader = io.LimitReader(r.Body, maxFormSize + 1);
             }
         }
@@ -1397,7 +1397,7 @@ internal static (urlpkg.Values vs, error err) parsePostForm(ref Request r) {
             err = errors.New(httpPostTooLargeˢ);
             return (vs, err);
         }
-        (vs, e) = url.ParseQuery(((@string)b));
+        (vs, e) = url.ParseQuery((@string)b);
         if (err == default!) {
             err = e;
         }

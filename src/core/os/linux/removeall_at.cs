@@ -56,7 +56,7 @@ internal static error removeAll(@string path) {
         defer(() => parentʗ1.Close(), ref ᒐ);
 
         {
-            var errΔ1 = removeAllFrom(((sysfdType)parent.Fd()), @base); if (errΔ1 != default!) {
+            var errΔ1 = removeAllFrom((sysfdType)parent.Fd(), @base); if (errΔ1 != default!) {
                 {
                     var (pathErr, ok) = errΔ1._<ж<PathError>>(ᐧ); if (ok) {
                         pathErr.Value.Path = parentDir + ((@string)(rune)PathSeparator) + (~pathErr).Path;
@@ -131,7 +131,7 @@ internal static error removeAllFrom(sysfdType parentFd, @string @base) {
 
             respSize = len(names);
             foreach (var (_, name) in names) {
-                var errΔ2 = removeAllFrom(((sysfdType)@file.Fd()), name);
+                var errΔ2 = removeAllFrom((sysfdType)@file.Fd(), name);
                 if (errΔ2 != default!) {
                     {
                         var (pathErr, ok) = errΔ2._<ж<PathError>>(ᐧ); if (ok) {

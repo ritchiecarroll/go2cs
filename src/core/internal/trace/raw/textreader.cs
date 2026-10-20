@@ -47,7 +47,7 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
     if (err != default!) {
         return (default!, fmt.Errorf("failed to parse header Go version: %v"u8, err));
     }
-    var v = ((version.Version)(uint32)rawv);
+    var v = (version.Version)(uint32)rawv;
     if (!v.Valid()) {
         return (default!, fmt.Errorf("unknown or unsupported Go version 1.%d"u8, v));
     }

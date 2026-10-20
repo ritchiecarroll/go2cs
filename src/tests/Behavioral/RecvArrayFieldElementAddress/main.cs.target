@@ -13,9 +13,9 @@ partial struct hasher {
 }
 
 internal static uint32 storeHead(this ref hasher h, uint32 hash, uint32 index) {
-    var hh = Ꮡ(h.head, (uint32)(hash & (uint32)mask));
+    var hh = Ꮡ(h.head, (hash & (uint32)mask));
     var previous = hh.Value;
-    h.prev[(uint32)(index & 15)] = previous;
+    h.prev[(index & 15)] = previous;
     hh.Value = index + 1;
     return previous;
 }

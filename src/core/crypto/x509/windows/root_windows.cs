@@ -40,7 +40,7 @@ internal static (ж<syscall.CertContext>, error) createStoreContext(ж<Certifica
         if (err != default!) {
             return (default!, err);
         }
-        defer(syscall.CertCloseStore, handle, (uint32)(0), ref ᒐ);
+        defer(syscall.CertCloseStore, handle, (uint32)0, ref ᒐ);
 
         err = syscall.CertAddCertificateContextToStore(handle, leafCtx, syscall.CERT_STORE_ADD_ALWAYS, ᏑstoreCtx);
         if (err != default!) {
@@ -285,7 +285,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         // CertGetCertificateChain will traverse Windows's root stores in an attempt to build a verified certificate chain
         ref var topCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑtopCtx);
-        err = syscall.CertGetCertificateChain(((syscallꓸHandle)0), storeCtx, verifyTime, (~storeCtx).Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);
+        err = syscall.CertGetCertificateChain((syscallꓸHandle)0, storeCtx, verifyTime, (~storeCtx).Store, para, CERT_CHAIN_RETURN_LOWER_QUALITY_CONTEXTS, 0, ᏑtopCtx);
         if (err != default!) {
             (chains, err) = (default!, err); goto ᒐdone;
         }

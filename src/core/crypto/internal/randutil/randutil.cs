@@ -19,7 +19,7 @@ partial class randutil_package {
 // This does not affect tests that pass a stream of fixed bytes as the random
 // source (e.g. a zeroReader).
 public static void MaybeReadByte(io.Reader r) {
-    if ((uint64)(rand.Uint64() & 1) == 1) {
+    if ((rand.Uint64() & 1) == 1) {
         return;
     }
     array<byte> buf = new(1);

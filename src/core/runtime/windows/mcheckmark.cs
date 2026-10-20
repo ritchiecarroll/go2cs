@@ -92,8 +92,8 @@ internal static readonly @string checkmarkFoundUnmarkedˢ = "checkmark found unm
 internal static bool setCheckmark(uintptr obj, uintptr @base, uintptr off, markBits mbits) {
     if (!mbits.isMarked()) {
         printlock();
-        print((@string)"runtime: checkmarks found unexpected unmarked object obj="u8, ((Δhex)(uint64)obj), (@string)"\n"u8);
-        print((@string)"runtime: found obj at *("u8, ((Δhex)(uint64)@base), (@string)"+"u8, ((Δhex)(uint64)off), (@string)")\n"u8);
+        print((@string)"runtime: checkmarks found unexpected unmarked object obj="u8, (Δhex)(uint64)obj, (@string)"\n"u8);
+        print((@string)"runtime: found obj at *("u8, (Δhex)(uint64)@base, (@string)"+"u8, (Δhex)(uint64)off, (@string)")\n"u8);
 
         // Dump the source (base) object
         gcDumpObject(baseˢ, @base, off);
@@ -196,7 +196,7 @@ internal static void checkFinalizersAndCleanups() {
 
         // Run a checkmark GC using this cleanup and/or finalizer as a root.
         if (debug.checkfinalizers > 1) {
-            print((@string)"Scan trace for cleanup/finalizer on "u8, ((Δhex)(uint64)Δp), (@string)":\n"u8);
+            print((@string)"Scan trace for cleanup/finalizer on "u8, (Δhex)(uint64)Δp, (@string)":\n"u8);
         }
         runCheckmark((ж<gcWork> gcw) => {
             var exprᴛ1 = (~sp).kind;
@@ -258,7 +258,7 @@ internal static void checkFinalizersAndCleanups() {
                 if (lastPtr != 0) {
                     println();
                 }
-                print((@string)"Value of type "u8, toRType((~ctx).ptrType).@string(), (@string)" at "u8, ((Δhex)(uint64)r.ptr), (@string)"\n"u8);
+                print((@string)"Value of type "u8, toRType((~ctx).ptrType).@string(), (@string)" at "u8, (Δhex)(uint64)r.ptr, (@string)"\n"u8);
                 if ((nint)(r.issues & reportCycle) != 0) {
                     if ((~r.sp).kind == _KindSpecialFinalizer){
                         println((@string)"  is reachable from finalizer"u8);
@@ -279,14 +279,14 @@ internal static void checkFinalizersAndCleanups() {
             }
             println();
 
-            println((@string)"Has"u8, kind, (@string)"at"u8, ((Δhex)(uint64)(uintptr)r.sp));
+            println((@string)"Has"u8, kind, (@string)"at"u8, (Δhex)(uint64)(uintptr)r.sp);
             var ΔfuncInfo = findfunc((~ctx).funcPC);
             if (ΔfuncInfo.valid()){
                 var (@file, line) = funcline(ΔfuncInfo, (~ctx).funcPC);
                 print((@string)"  "u8, funcname(ΔfuncInfo), (@string)"()\n"u8);
-                print((@string)"      "u8, @file, (@string)":"u8, line, (@string)" +"u8, ((Δhex)(uint64)((~ctx).funcPC - ΔfuncInfo.entry())), (@string)"\n"u8);
+                print((@string)"      "u8, @file, (@string)":"u8, line, (@string)" +"u8, (Δhex)(uint64)((~ctx).funcPC - ΔfuncInfo.entry()), (@string)"\n"u8);
             } else {
-                print((@string)"  <bad pc "u8, ((Δhex)(uint64)(~ctx).funcPC), (@string)">\n"u8);
+                print((@string)"  <bad pc "u8, (Δhex)(uint64)(~ctx).funcPC, (@string)">\n"u8);
             }
 
             println((@string)"created at: "u8);
@@ -294,9 +294,9 @@ internal static void checkFinalizersAndCleanups() {
             if (createInfo.valid()){
                 var (@file, line) = funcline(createInfo, (~ctx).createPC);
                 print((@string)"  "u8, funcname(createInfo), (@string)"()\n"u8);
-                print((@string)"      "u8, @file, (@string)":"u8, line, (@string)" +"u8, ((Δhex)(uint64)((~ctx).createPC - createInfo.entry())), (@string)"\n"u8);
+                print((@string)"      "u8, @file, (@string)":"u8, line, (@string)" +"u8, (Δhex)(uint64)((~ctx).createPC - createInfo.entry()), (@string)"\n"u8);
             } else {
-                print((@string)"  <bad pc "u8, ((Δhex)(uint64)(~ctx).createPC), (@string)">\n"u8);
+                print((@string)"  <bad pc "u8, (Δhex)(uint64)(~ctx).createPC, (@string)">\n"u8);
             }
 
             lastPtr = r.ptr;

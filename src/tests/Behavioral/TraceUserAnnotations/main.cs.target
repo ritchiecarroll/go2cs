@@ -21,7 +21,7 @@ internal static void annotate(@string label) {
 
         var region = trace.StartRegion(ctx, "work");
         trace.Log(ctx, "step", "logged");
-        trace.Logf(ctx, "step", "count=%d"u8, (nint)(3));
+        trace.Logf(ctx, "step", "count=%d"u8, (nint)3);
         region.End();
 
         var (subctx, subtask) = trace.NewTask(ctx, "inner");

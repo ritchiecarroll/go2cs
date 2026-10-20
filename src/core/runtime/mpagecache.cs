@@ -40,7 +40,7 @@ internal static (uintptr, uintptr) alloc(this ref pageCache c, uintptr npages) {
     }
     if (npages == 1) {
         var i = (uintptr)sys.TrailingZeros64(c.cache);
-        var scav = (uint64)((c.scav.Rsh((uint64)(i))) & 1);
+        var scav = (c.scav.Rsh((uint64)(i))) & 1;
         c.cache &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((uint64)(i)))); // set bit to mark in-use
         c.scav &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((uint64)(i)))); // clear bit to mark unscavenged
         return (c.@base + i * (uintptr)pageSize, (uintptr)scav * (uintptr)pageSize);
@@ -60,7 +60,7 @@ internal static (uintptr, uintptr) allocN(this ref pageCache c, uintptr npages) 
         return (0, 0);
     }
     var mask = ((((uint64)1).Lsh((uint64)(npages))) - 1).Lsh(i);
-    nint scav = sys.OnesCount64((uint64)(c.scav & mask));
+    nint scav = sys.OnesCount64(c.scav & mask);
     c.cache &= unchecked((uint64)~(uint64)(mask)); // mark in-use bits
     c.scav &= unchecked((uint64)~(uint64)(mask)); // clear scavenged bits
     return (c.@base + (uintptr)(i * (nuint)pageSize), (uintptr)scav * (uintptr)pageSize);
@@ -89,13 +89,13 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
     // This method is called very infrequently, so just do the
     // slower, safer thing by iterating over each bit individually.
     for (nuint i = (nuint)0; i < 64; i++) {
-        if ((uint64)(c.cache & (((uint64)1).Lsh(i))) != 0) {
+        if ((c.cache & (((uint64)1).Lsh(i))) != 0) {
             Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).free1(pi + i);
 
             // Update density statistics.
             Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(ci, pi + i, 1);
         }
-        if ((uint64)(c.scav & (((uint64)1).Lsh(i))) != 0) {
+        if ((c.scav & (((uint64)1).Lsh(i))) != 0) {
             Δp.chunkOf(ci).of(pallocData.Ꮡscavenged).setRange(pi + i, 1);
         }
     }
@@ -166,7 +166,7 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
     // be careful to only set and clear the relevant bits.
     nuint cpi = chunkPageIndex(c.@base);
     chunk.of(pallocData.ᏑpallocBits).allocPages64(cpi, c.cache);
-    chunk.of(pallocData.Ꮡscavenged).clearBlock64(cpi, (uint64)(c.cache & c.scav) /* free and scavenged */);
+    chunk.of(pallocData.Ꮡscavenged).clearBlock64(cpi, c.cache & c.scav /* free and scavenged */);
 
     // Update as an allocation, but note that it's not contiguous.
     Δp.update(c.@base, pageCachePages, false, true);

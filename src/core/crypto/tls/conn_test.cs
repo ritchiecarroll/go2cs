@@ -196,7 +196,7 @@ internal static partial void runDynamicRecordSizingTest(ж<testing.T> Ꮡt, ж<g
                         return;
                     }
 
-                    nint length = (nint)(((nint)recordHeader[3] << (int)(8)) | (nint)recordHeader[4]);
+                    nint length = (nint)recordHeader[3] << 8 | (nint)recordHeader[4];
                     if (len(record) < length) {
                         record = new slice<byte>(length);
                     }

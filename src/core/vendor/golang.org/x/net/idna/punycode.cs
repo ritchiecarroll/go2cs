@@ -88,12 +88,12 @@ internal static (@string, error) decode(@string encoded) {
         if (n < 0 || n > utf8.MaxRune) {
             return ("", punyError(encoded));
         }
-        output = append(output, (rune)(0));
+        output = append(output, (rune)0);
         copy(output.slice(i + 1), output.slice(i));
         output[i] = n;
         i++;
     }
-    return (((@string)output), default!);
+    return ((@string)output, default!);
 }
 
 // encode encodes a string as specified in section 6.3 and prepends prefix to
@@ -166,7 +166,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
         delta++;
         n++;
     }
-    return (((@string)output), default!);
+    return ((@string)output, default!);
 }
 
 // madd computes a + (b * c), detecting overflow.

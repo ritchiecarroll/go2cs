@@ -120,14 +120,14 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
         child.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(ParentProcess: ph));
         (var childOutput, err) = child.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Errorf("child failed: %v: %v"u8, err, ((@string)childOutput));
+            Ꮡt.Errorf("child failed: %v: %v"u8, err, (@string)childOutput);
         }
         (childOutput, err) = Δos.ReadFile(childDumpPath);
         if (err != default!) {
             Ꮡt.Fatalf("reading child output failed: %v"u8, err);
         }
         {
-            @string got = ((@string)childOutput);
+            @string got = (@string)childOutput;
             @string want = fmt.Sprintf("%d"u8, (~(~parent).Process).Pid); if (got != want) {
                 Ꮡt.Fatalf("child output: want %q, got %q"u8, want, got);
             }

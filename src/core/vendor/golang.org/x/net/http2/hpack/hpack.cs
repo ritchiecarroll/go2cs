@@ -378,7 +378,7 @@ internal static error parseFieldIndexed(this ref Decoder d) {
     }
     var (hf, ok) = d.at(idx);
     if (!ok) {
-        return new DecodingError(((InvalidIndexError)(nint)idx));
+        return new DecodingError((InvalidIndexError)(nint)idx);
     }
     d.buf = buf;
     return d.callEmit(new HeaderField(Name: hf.Name, Value: hf.Value));
@@ -398,7 +398,7 @@ internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType i
     if (nameIdx > 0){
         var (ihf, ok) = d.at(nameIdx);
         if (!ok) {
-            return new DecodingError(((InvalidIndexError)(nint)nameIdx));
+            return new DecodingError((InvalidIndexError)(nint)nameIdx);
         }
         hf.Name = ihf.Name;
     } else {
@@ -552,7 +552,7 @@ partial struct undecodedString {
 
 internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) {
     if (!u.isHuff) {
-        return (((@string)u.b), default!);
+        return ((@string)u.b, default!);
     }
     var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
     buf.Reset(); // don't trust others

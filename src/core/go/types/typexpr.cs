@@ -547,7 +547,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
                         if (i < len(Ꮡix.Value.indices)) {
                             pos = Ꮡix.Value.indices[i].Pos();
                         }
-                        Ꮡcheck.softErrorf(((atPos)pos), InvalidTypeArg, "%v"u8, err);
+                        Ꮡcheck.softErrorf((atPos)pos, InvalidTypeArg, "%v"u8, err);
                     } else {
                         Ꮡcheck.of(Checker.Ꮡmono).recordInstance(Ꮡcheck.Value.pkg, Ꮡix.Value.Pos(), tparams, targsʗ1, Ꮡix.Value.indices);
                     }

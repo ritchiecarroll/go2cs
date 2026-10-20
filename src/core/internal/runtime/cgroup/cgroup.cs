@@ -55,7 +55,7 @@ internal static (int64, error) parseV1Number(slice<byte> buf) {
     }
     buf = buf.slice(0, i);
 
-    var (val, err) = strconv.ParseInt(((@string)buf), 10, 64);
+    var (val, err) = strconv.ParseInt((@string)buf, 10, 64);
     if (err != default!) {
         return (0, errMalformedFile);
     }
@@ -83,12 +83,12 @@ internal static (float64, bool, error) parseV2Limit(slice<byte> buf) {
     }
     periodStr = periodStr.slice(0, i);
 
-    var (quota, err) = strconv.ParseInt(((@string)quotaStr), 10, 64);
+    var (quota, err) = strconv.ParseInt((@string)quotaStr, 10, 64);
     if (err != default!) {
         return (0D, false, errMalformedFile);
     }
 
-    (var period, err) = strconv.ParseInt(((@string)periodStr), 10, 64);
+    (var period, err) = strconv.ParseInt((@string)periodStr, 10, 64);
     if (err != default!) {
         return (0D, false, errMalformedFile);
     }

@@ -319,9 +319,9 @@ internal static void setbits(ж<HashSet> Ꮡh, slice<byte> b, nint i, nint k) {
         return;
     }
     for (nint j = i; j < len(b) * 8; j++) {
-        b[j / 8] |= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(j & 7)))));
+        b[j / 8] |= (byte)((byte)(((byte)1).Lsh((nuint)(j & 7))));
         setbits(Ꮡh, b, j + 1, k - 1);
-        b[j / 8] &= (byte)((byte)(((byte)(~(((byte)1).Lsh((nuint)((nint)(j & 7))))))));
+        b[j / 8] &= (byte)((byte)(((byte)(~(((byte)1).Lsh((nuint)(j & 7)))))));
     }
 }
 
@@ -340,10 +340,10 @@ public static void TestSmhasherPermutation(ж<testing.T> Ꮡt) {
     testenv.ParallelOn64Bit(Ꮡt);
     var h = newHashSet();
     permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7}.slice(), 8);
-    permutation(Ꮡt, h, new uint32[]{0, ((uint32)1 << (int)(29)), ((uint32)2 << (int)(29)), ((uint32)3 << (int)(29)), ((uint32)4 << (int)(29)), ((uint32)5 << (int)(29)), ((uint32)6 << (int)(29)), ((uint32)7 << (int)(29))}.slice(), 8);
+    permutation(Ꮡt, h, new uint32[]{0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29}.slice(), 8);
     permutation(Ꮡt, h, new uint32[]{0, 1}.slice(), 20);
-    permutation(Ꮡt, h, new uint32[]{0, ((uint32)1 << (int)(31))}.slice(), 20);
-    permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7, ((uint32)1 << (int)(29)), ((uint32)2 << (int)(29)), ((uint32)3 << (int)(29)), ((uint32)4 << (int)(29)), ((uint32)5 << (int)(29)), ((uint32)6 << (int)(29)), ((uint32)7 << (int)(29))}.slice(), 6);
+    permutation(Ꮡt, h, new uint32[]{0, (uint32)1 << 31}.slice(), 20);
+    permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29}.slice(), 6);
 }
 
 internal static void permutation(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, slice<uint32> s, nint n) {
@@ -393,7 +393,7 @@ internal static nint bits(this ref BytesKey k) {
 }
 
 internal static void flipBit(this ref BytesKey k, nint i) {
-    k.b[(i >> (int)(3))] ^= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(i & 7)))));
+    k.b[(i >> 3)] ^= (byte)((byte)(((byte)1).Lsh((nuint)(i & 7))));
 }
 
 internal static partial uintptr hash(this ref BytesKey k) {
@@ -448,7 +448,7 @@ internal static void clear(this ref Int64Key k) {
 internal static void random(this ref Int64Key k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    k.i = (uint64)r.Uint32() + ((uint64)r.Uint32() << (int)(32));
+    k.i = (uint64)r.Uint32() + ((uint64)r.Uint32() << 32);
 }
 
 internal static nint bits(this ref Int64Key k) {
@@ -492,7 +492,7 @@ internal static nint bits(this ref EfaceKey k) {
 }
 
 internal static void flipBit(this ref EfaceKey k, nint i) {
-    k.i = (uint64)(k.i._<uint64>() ^ ((uint64)1).Lsh((nuint)i));
+    k.i = k.i._<uint64>() ^ ((uint64)1).Lsh((nuint)i);
 }
 
 internal static partial uintptr hash(this ref EfaceKey k) {
@@ -534,7 +534,7 @@ internal static nint bits(this ref IfaceKey k) {
 }
 
 internal static void flipBit(this ref IfaceKey k, nint i) {
-    k.i = (fInter)(k.i._<fInter>() ^ (((fInter)1) << (int)((nuint)i)));
+    k.i = (fInter)(k.i._<fInter>() ^ ((fInter)1) << (int)((nuint)i));
 }
 
 internal static partial uintptr hash(this ref IfaceKey k) {
@@ -666,7 +666,7 @@ internal static void windowed(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, Key k) {
         for (nint i = 0; i < (nint)((1 << (int)(BITS))); i++) {
             k.clear();
             for (nint j = 0; j < BITS; j++) {
-                if ((nint)(i.Rsh((nuint)j) & 1) != 0) {
+                if ((i.Rsh((nuint)j) & 1) != 0) {
                     k.flipBit(rem((j + r), k.bits()));
                 }
             }
@@ -748,7 +748,7 @@ public static void TestIssue66841(ж<testing.T> Ꮡt) {
         cmd.Value.Env = append((~cmd).Env, "GODEBUG=cpu.aes=off"u8, "TEST_ISSUE_66841=1");
         var (@out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Errorf("%s"u8, ((@string)@out));
+            Ꮡt.Errorf("%s"u8, (@string)@out);
         }
         // Fall through. Might as well run this test when aeshash is on also.
     }
@@ -830,7 +830,7 @@ public static void TestArrayHash(ж<testing.T> Ꮡt) {
             TestArrayHash_key k = default!;
             nint cnt = 0;
             for (nuint j = (nuint)0; j < 8; j++) {
-                if ((nint)(i.Rsh(j) & 1) != 0) {
+                if ((i.Rsh(j) & 1) != 0) {
                     k[j] = fooˢ2;
                     cnt++;
                 }
@@ -863,35 +863,35 @@ public static void TestStructHash(ж<testing.T> Ꮡt) {
         for (nint i = 0; i < 256; i++) {
             TestStructHash_key k = default!;
             nint cnt = 0;
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 k.a = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 2) != 0) {
+            if ((i & 2) != 0) {
                 k.b = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 4) != 0) {
+            if ((i & 4) != 0) {
                 k.c = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 8) != 0) {
+            if ((i & 8) != 0) {
                 k.d = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 16) != 0) {
+            if ((i & 16) != 0) {
                 k.e = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 32) != 0) {
+            if ((i & 32) != 0) {
                 k.f = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 64) != 0) {
+            if ((i & 64) != 0) {
                 k.g = fooˢ2;
                 cnt++;
             }
-            if ((nint)(i & 128) != 0) {
+            if ((i & 128) != 0) {
                 k.h = fooˢ2;
                 cnt++;
             }
@@ -947,10 +947,10 @@ public static void TestCollisions(ж<testing.T> Ꮡt) {
                 continue;
             }
             array<byte> a = new(16);
-            var m = new map<uint16, EmptyStruct>((1 << (int)(16)));
-            for (nint n = 0; n < (1 << (int)(16)); n++) {
+            var m = new map<uint16, EmptyStruct>((1 << 16));
+            for (nint n = 0; n < 1 << 16; n++) {
                 a[i] = (byte)n;
-                a[j] = (byte)((n >> (int)(8)));
+                a[j] = (byte)(n >> 8);
                 m[(uint16)runtime_internal_test_package.BytesHash(a[..], 0)] = new EmptyStruct();
             }
             // N balls in N bins, for N=65536

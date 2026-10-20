@@ -95,11 +95,11 @@ internal static netꓸAddr Addr(this ref oneConnListener l) {
 }
 
 internal static @string Network(this dummyAddr a) {
-    return ((@string)a);
+    return (@string)a;
 }
 
 internal static @string String(this dummyAddr a) {
-    return ((@string)a);
+    return (@string)a;
 }
 
 partial struct noopConn {
@@ -294,7 +294,7 @@ public static partial void TestConsumingBodyOnNextConn(ж<testing.T> Ꮡt) {
 partial struct stringHandler /*@string*/;
 
 internal static void ServeHTTP(this stringHandler s, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡr) {
-    w.Header().Set(resultˢ, ((@string)s));
+    w.Header().Set(resultˢ, (@string)s);
 }
 
 partial struct handlersᴛ1 /*dyn*/ {
@@ -334,7 +334,7 @@ internal static void testHostHandlers(ж<testing.T> Ꮡt, testMode mode) {
     try {
         var mux = NewServeMux();
         foreach (var (_, h) in handlers) {
-            mux.Handle(h.pattern, ((stringHandler)h.msg));
+            mux.Handle(h.pattern, (stringHandler)h.msg);
         }
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new Δhttp.ServeMuxжΔHandler(mux)).Value.ts;
 
@@ -666,7 +666,7 @@ internal static void testServeWithSlashRedirectKeepsQueryString(ж<testing.T> �
             }
         }
         {
-            @string got = ((@string)slurp);
+            @string got = (@string)slurp;
             @string want = tt.want; if (got != want) {
                 Ꮡt.Errorf("#%d: Body = %q; want = %q"u8, i, got, want);
             }
@@ -694,12 +694,12 @@ public static void TestServeWithSlashRedirectForHostPatterns(ж<testing.T> Ꮡt)
     setParallel(Ꮡt);
 
     var mux = NewServeMux();
-    mux.Handle(exampleComPkgFooˢ, ((stringHandler)(@string)exampleComPkgFooˢ));
-    mux.Handle(exampleComPkgBarˢ, ((stringHandler)(@string)exampleComPkgBarˢ));
-    mux.Handle(exampleComPkgBarˢ2, ((stringHandler)(@string)exampleComPkgBarˢ2));
-    mux.Handle(exampleCom3000PkgConnectˢ, ((stringHandler)(@string)exampleCom3000PkgConnectˢ));
-    mux.Handle(exampleCom9000ˢ, ((stringHandler)(@string)exampleCom9000ˢ));
-    mux.Handle(pkgBazˢ, ((stringHandler)(@string)pkgBazˢ));
+    mux.Handle(exampleComPkgFooˢ, (stringHandler)(@string)exampleComPkgFooˢ);
+    mux.Handle(exampleComPkgBarˢ, (stringHandler)(@string)exampleComPkgBarˢ);
+    mux.Handle(exampleComPkgBarˢ2, (stringHandler)(@string)exampleComPkgBarˢ2);
+    mux.Handle(exampleCom3000PkgConnectˢ, (stringHandler)(@string)exampleCom3000PkgConnectˢ);
+    mux.Handle(exampleCom9000ˢ, (stringHandler)(@string)exampleCom9000ˢ);
+    mux.Handle(pkgBazˢ, (stringHandler)(@string)pkgBazˢ);
 
     var tests = new TestServeWithSlashRedirectForHostPatterns_tests[]{
         new("GET"u8, "http://example.com/"u8, 404, ""u8, ""u8),
@@ -894,7 +894,7 @@ internal static partial error testServerTimeoutsWithTimeout(ж<testing.T> Ꮡt, 
         @string expected = req1ˢ;
         if (((sstring)got) != expected || err != default!) {
             return fmt.Errorf("Unexpected response for request #1; got %q ,%v; expected %q, nil"u8,
-                ((@string)got), err, expected);
+                (@string)got, err, expected);
         }
 
         // Slow client that should timeout.
@@ -908,7 +908,7 @@ internal static partial error testServerTimeoutsWithTimeout(ж<testing.T> Ꮡt, 
         conn.Close();
         var latency = time.Since(t1);
         if (n != 0 || !AreEqual(err, io.EOF)) {
-            return fmt.Errorf("Read = %v, %v, wanted %v, %v"u8, n, err, (nint)(0), io.EOF);
+            return fmt.Errorf("Read = %v, %v, wanted %v, %v"u8, n, err, (nint)0, io.EOF);
         }
         var minLatency = timeout / 5 * 4;
         if (latency < minLatency) {
@@ -926,7 +926,7 @@ internal static partial error testServerTimeoutsWithTimeout(ж<testing.T> Ꮡt, 
         (~r).Body.Close();
         expected = req2ˢ;
         if (((sstring)got) != expected || err != default!) {
-            return fmt.Errorf("Get #2 got %q, %v, want %q, nil"u8, ((@string)got), err, expected);
+            return fmt.Errorf("Get #2 got %q, %v, want %q, nil"u8, (@string)got, err, expected);
         }
 
         if (!testing.Short()) {
@@ -995,7 +995,7 @@ internal static void testServerReadTimeout(ж<testing.T> Ꮡt, testMode mode) {
             defer(() => (~resʗ1).Body.Close(), ref ᒐ);
             (var got, err) = io.ReadAll((~res).Body);
             if (((sstring)got) != respBody || err != default!) {
-                Ꮡt.Errorf("client read response body: %q, %v; want %q, nil"u8, ((@string)got), err, respBody);
+                Ꮡt.Errorf("client read response body: %q, %v; want %q, nil"u8, (@string)got, err, respBody);
             }
             pw.Close();
             break;
@@ -1080,7 +1080,7 @@ internal static void testServerWriteTimeout(ж<testing.T> Ꮡt, testMode mode) {
 
             var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter resΔ1, ж<Δhttp.Request> req) => {
                 errcʗ1.ᐸꟷ(default!);
-                var (_, errΔ1) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(resΔ1), ((neverEnding)(rune)'a'));
+                var (_, errΔ1) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(resΔ1), (neverEnding)(rune)'a');
                 errcʗ1.ᐸꟷ(errΔ1);
             })), (ж<httptest.Server> ts) => {
                 ts.Value.Config.Value.WriteTimeout = timeout;
@@ -1155,7 +1155,7 @@ internal static void testServerNoWriteTimeout(ж<testing.T> Ꮡt, testMode mode)
     try {
         foreach (var (_, timeout) in new time.Duration[]{0, -1}.slice()) {
             var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter resΔ1, ж<Δhttp.Request> req) => {
-                var (_, errΔ1) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(resΔ1), ((neverEnding)(rune)'a'));
+                var (_, errΔ1) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(resΔ1), (neverEnding)(rune)'a');
                 Ꮡt.Logf("server write response: %v"u8, errΔ1);
             })), (ж<httptest.Server> ts) => {
                 ts.Value.Config.Value.WriteTimeout = timeout;
@@ -1168,8 +1168,8 @@ internal static void testServerNoWriteTimeout(ж<testing.T> Ꮡt, testMode mode)
             }
             var resʗ1 = res;
             defer(() => (~resʗ1).Body.Close(), ref ᒐ);
-            (var n, err) = io.CopyN(io.Discard, (~res).Body, ((int64)1 << (int)(20))); // 1MB should be sufficient to prove the point
-            if (n != ((int64)1 << (int)(20)) || err != default!) {
+            (var n, err) = io.CopyN(io.Discard, (~res).Body, (int64)1 << 20); // 1MB should be sufficient to prove the point
+            if (n != (int64)1 << 20 || err != default!) {
                 Ꮡt.Errorf("client read response body: %d, %v"u8, n, err);
             }
             // This shutdown really should be automatic, but it isn't right now.
@@ -1389,7 +1389,7 @@ internal static void testOnlyWriteTimeout(ж<testing.T> Ꮡt, testMode mode) {
     var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
         GoFrame ᒐ = default;
         try {
-            var buf = new slice<byte>((512 << (int)(10)));
+            var buf = new slice<byte>((512 << 10));
             var (_, errΔ1) = w.Write(buf);
             if (errΔ1 != default!) {
                 Ꮡt.Errorf("handler Write error: %v"u8, errΔ1);
@@ -1553,9 +1553,9 @@ internal static void testIdentityResponse(ж<testing.T> Ꮡt, testMode mode) {
     // The ReadAll will hang for a failing test.
     var (got, _) = io.ReadAll(new http_test_package.net_ConnᴠReader(conn));
     @string expectedSuffix = tooShortˢ;
-    if (!strings.HasSuffix(((@string)got), expectedSuffix)) {
+    if (!strings.HasSuffix((@string)got, expectedSuffix)) {
         Ꮡt.Errorf("Expected output to end with %q; got response body %q"u8,
-            expectedSuffix, ((@string)got));
+            expectedSuffix, (@string)got);
     }
 }
 
@@ -1771,7 +1771,7 @@ internal static void testSetsRemoteAddr(ж<testing.T> Ꮡt, testMode mode) {
     if (err != default!) {
         Ꮡt.Fatalf("ReadAll error: %v"u8, err);
     }
-    @string ip = ((@string)body);
+    @string ip = (@string)body;
     if (!strings.HasPrefix(ip, "127.0.0.1:"u8) && !strings.HasPrefix(ip, "[::1]:"u8)) {
         Ꮡt.Fatalf("Expected local addr; got %q"u8, ip);
     }
@@ -1893,7 +1893,7 @@ internal static partial void testServerAllowsBlockingRemoteAddr(ж<testing.T> �
     // Start a request. The server will block on getting conn.RemoteAddr.
     var response1c = new channel<@string>(1);
     var fetchʗ1 = fetch;
-    goǃ(fetchʗ1, (nint)(1), response1c.WithDirection(GoChanDir.Send));
+    goǃ(fetchʗ1, (nint)1, response1c.WithDirection(GoChanDir.Send));
 
     // Wait for the server to accept it; grab the connection.
     var conn1 = ᐸꟷ(conns);
@@ -1901,7 +1901,7 @@ internal static partial void testServerAllowsBlockingRemoteAddr(ж<testing.T> �
     // Start another request and grab its connection
     var response2c = new channel<@string>(1);
     var fetchʗ2 = fetch;
-    goǃ(fetchʗ2, (nint)(2), response2c.WithDirection(GoChanDir.Send));
+    goǃ(fetchʗ2, (nint)2, response2c.WithDirection(GoChanDir.Send));
     var conn2 = ᐸꟷ(conns);
 
     // Send a response on connection 2.
@@ -1976,7 +1976,7 @@ internal static void testHeadResponses(ж<testing.T> Ꮡt, testMode mode) {
         Ꮡt.Error(err);
     }
     if (len(body) > 0) {
-        Ꮡt.Errorf("got unexpected body %q"u8, ((@string)body));
+        Ꮡt.Errorf("got unexpected body %q"u8, (@string)body);
     }
 }
 
@@ -2219,7 +2219,7 @@ internal static void testTLSServerRejectHTTPRequests(ж<testing.T> Ꮡt, testMod
             Ꮡt.Fatal(err);
         }
         @string wantPrefix = wantPrefixᶜ;
-        if (!strings.HasPrefix(((@string)slurp), wantPrefix)) {
+        if (!strings.HasPrefix((@string)slurp, wantPrefix)) {
             Ꮡt.Errorf("response = %q; wanted prefix %q"u8, slurp, wantPrefix);
         }
     }
@@ -2586,7 +2586,7 @@ public static partial void TestServerUnreadRequestBodyLittle(ж<testing.T> Ꮡt)
         setParallel(Ꮡt);
         defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
         var conn = @new<testConn>();
-        @string body = strings.Repeat("x"u8, (100 << (int)(10)));
+        @string body = strings.Repeat("x"u8, 100 << 10);
         conn.of(testConn.ᏑreadBuf).Write(slice<byte>(fmt.Sprintf(
             "POST / HTTP/1.1\r\n"u8 + "Host: test\r\n"u8 + "Content-Length: %d\r\n"u8 + "\r\n"u8, len(body))));
         conn.of(testConn.ᏑreadBuf).Write(slice<byte>(body));
@@ -2650,7 +2650,7 @@ public static partial void TestServerUnreadRequestBodyLarge(ж<testing.T> Ꮡt) 
         Ꮡt.Log(skippingInShortModeˢ);
     }
     var conn = @new<testConn>();
-    @string body = strings.Repeat("x"u8, (1 << (int)(20)));
+    @string body = strings.Repeat("x"u8, 1 << 20);
     conn.of(testConn.ᏑreadBuf).Write(slice<byte>(fmt.Sprintf(
         "POST / HTTP/1.1\r\n"u8 + "Host: test\r\n"u8 + "Content-Length: %d\r\n"u8 + "\r\n"u8, len(body))));
     conn.of(testConn.ᏑreadBuf).Write(slice<byte>(body));
@@ -2699,7 +2699,7 @@ internal static array<handlerBodyCloseTest> handlerBodyCloseTests = new array<ha
     // Small enough to slurp past to the next request +
     // has Content-Length.
     [0] = new(
-        bodySize: (20 << (int)(10)),
+        bodySize: (20 << 10),
         bodyChunked: false,
         reqConnClose: false,
         wantEOFSearch: true,
@@ -2709,7 +2709,7 @@ internal static array<handlerBodyCloseTest> handlerBodyCloseTests = new array<ha
     // Small enough to slurp past to the next request +
     // is chunked.
     [1] = new(
-        bodySize: (20 << (int)(10)),
+        bodySize: (20 << 10),
         bodyChunked: true,
         reqConnClose: false,
         wantEOFSearch: true,
@@ -2720,7 +2720,7 @@ internal static array<handlerBodyCloseTest> handlerBodyCloseTests = new array<ha
     // has Content-Length +
     // declares Connection: close (so pointless to read more).
     [2] = new(
-        bodySize: (20 << (int)(10)),
+        bodySize: (20 << 10),
         bodyChunked: false,
         reqConnClose: true,
         wantEOFSearch: false,
@@ -2733,7 +2733,7 @@ internal static array<handlerBodyCloseTest> handlerBodyCloseTests = new array<ha
     // TODO: maybe skip this search if no trailers were declared
     // in the headers.
     [3] = new(
-        bodySize: (20 << (int)(10)),
+        bodySize: (20 << 10),
         bodyChunked: true,
         reqConnClose: true,
         wantEOFSearch: true,
@@ -2742,7 +2742,7 @@ internal static array<handlerBodyCloseTest> handlerBodyCloseTests = new array<ha
 
     // Big with Content-Length, so give up immediately if we know it's too big.
     [4] = new(
-        bodySize: (1 << (int)(20)),
+        bodySize: (1 << 20),
         bodyChunked: false, // has a Content-Length
         reqConnClose: false,
         wantEOFSearch: false,
@@ -2751,7 +2751,7 @@ internal static array<handlerBodyCloseTest> handlerBodyCloseTests = new array<ha
 
     // Big chunked, so read a bit before giving up.
     [5] = new(
-        bodySize: (1 << (int)(20)),
+        bodySize: (1 << 20),
         bodyChunked: true,
         reqConnClose: false,
         wantEOFSearch: true,
@@ -2762,7 +2762,7 @@ internal static array<handlerBodyCloseTest> handlerBodyCloseTests = new array<ha
     // TODO: maybe skip this search if no trailers were declared
     // in the headers.
     [6] = new(
-        bodySize: (1 << (int)(20)),
+        bodySize: (1 << 20),
         bodyChunked: true,
         reqConnClose: true,
         wantEOFSearch: true,
@@ -2772,7 +2772,7 @@ internal static array<handlerBodyCloseTest> handlerBodyCloseTests = new array<ha
     // Big with Connection: close, so don't do any reads on Close.
     // With Content-Length.
     [7] = new(
-        bodySize: (1 << (int)(20)),
+        bodySize: (1 << 20),
         bodyChunked: false,
         reqConnClose: true,
         wantEOFSearch: false,
@@ -3161,7 +3161,7 @@ internal static void testTimeoutHandler(ж<testing.T> Ꮡt, testMode mode) {
     }
     var (body, _) = io.ReadAll((~res).Body);
     {
-        @string g = ((@string)body);
+        @string g = (@string)body;
         @string e = "hi"u8; if (g != e) {
             Ꮡt.Errorf("got body %q; expected %q"u8, g, e);
         }
@@ -3186,8 +3186,8 @@ internal static void testTimeoutHandler(ж<testing.T> Ꮡt, testMode mode) {
         }
     }
     (body, _) = io.ReadAll((~res).Body);
-    if (!strings.Contains(((@string)body), titleTimeoutTitleˢ)) {
-        Ꮡt.Errorf("expected timeout body; got %q"u8, ((@string)body));
+    if (!strings.Contains((@string)body, titleTimeoutTitleˢ)) {
+        Ꮡt.Errorf("expected timeout body; got %q"u8, (@string)body);
     }
     {
         @string g = (~res).Header.Get(contentTypeˢ);
@@ -3348,7 +3348,7 @@ internal static void testTimeoutHandlerRaceHeaderTimeout(ж<testing.T> Ꮡt, tes
     }
     var (body, _) = io.ReadAll((~res).Body);
     {
-        @string g = ((@string)body);
+        @string g = (@string)body;
         @string e = "hi"u8; if (g != e) {
             Ꮡt.Errorf("got body %q; expected %q"u8, g, e);
         }
@@ -3373,8 +3373,8 @@ internal static void testTimeoutHandlerRaceHeaderTimeout(ж<testing.T> Ꮡt, tes
         }
     }
     (body, _) = io.ReadAll((~res).Body);
-    if (!strings.Contains(((@string)body), titleTimeoutTitleˢ)) {
-        Ꮡt.Errorf("expected timeout body; got %q"u8, ((@string)body));
+    if (!strings.Contains((@string)body, titleTimeoutTitleˢ)) {
+        Ꮡt.Errorf("expected timeout body; got %q"u8, (@string)body);
     }
 
     // Now make the previously-timed out handler speak again,
@@ -3472,7 +3472,7 @@ internal static void testTimeoutHandlerContextCanceled(ж<testing.T> Ꮡt, testM
         }
         var (body, _) = io.ReadAll((~res).Body);
         {
-            @string g = ((@string)body);
+            @string g = (@string)body;
             @string e = ""u8; if (g != e) {
                 Ꮡt.Errorf("got body %q; expected %q"u8, g, e);
             }
@@ -3651,7 +3651,7 @@ public static void TestRedirectContentTypeAndBody(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         {
-            @string got = ((@string)body);
+            @string got = (@string)body;
             @string want = tt.wantBody; if (got != want) {
                 Ꮡt.Errorf("Redirect(%q, %#v) generated Body %q; want %q"u8, tt.method, tt.ct.OrTypedNil(), got, want);
             }
@@ -3773,7 +3773,7 @@ internal static partial void testHandlerPanic(ж<testing.T> Ꮡt, bool withHijac
         var doneʗ1 = done;
         var prʗ1 = pr;
         goǃ(() => {
-            var buf = new slice<byte>((4 << (int)(10)));
+            var buf = new slice<byte>((4 << 10));
             var (_, errΔ2) = prʗ1.Read(buf);
             prʗ1.Close();
             if (errΔ2 != default! && !AreEqual(errΔ2, io.EOF)) {
@@ -4155,7 +4155,7 @@ internal static void testClientWriteShutdown(ж<testing.T> Ꮡt, testMode mode) 
     if (err != default!) {
         Ꮡt.Errorf("ReadAll: %v"u8, err);
     }
-    @string got = ((@string)bs);
+    @string got = (@string)bs;
     if (got != ""u8) {
         Ꮡt.Errorf("read %q from server; want nothing"u8, got);
     }
@@ -4580,7 +4580,7 @@ internal static readonly object backendReadWrongRequestˢ = (@string)"Backend re
 internal static void testHijackBeforeRequestBodyRead(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        slice<byte> requestBody = bytes.Repeat(slice<byte>("a"u8), (1 << (int)(20)));
+        slice<byte> requestBody = bytes.Repeat(slice<byte>("a"u8), 1 << 20);
         var bodyOkay = new channel<bool>(1);
         var gotCloseNotify = new channel<bool>(1);
         var bodyOkayʗ1 = bodyOkay;
@@ -5159,7 +5159,7 @@ internal static void testServerReaderFromOrder(ж<testing.T> Ꮡt, testMode mode
         ᐸꟷ(done);
     })));
 
-    var (req, err) = NewRequest(postˢ, (~(~cst).ts).URL, io.LimitReader(((neverEnding)(rune)'a'), size));
+    var (req, err) = NewRequest(postˢ, (~(~cst).ts).URL, io.LimitReader((neverEnding)(rune)'a', size));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -5339,7 +5339,7 @@ internal static void testTransportAndServerSharedBodyRace(ж<testing.T> Ꮡt, te
             })));
             defer(Ꮡproxy.ValueSlot.close, ref ᒐ);
 
-            var (req, _) = NewRequest(postˢ, (~(~Ꮡproxy.ValueSlot).ts).URL, io.LimitReader(((neverEnding)(rune)'a'), bodySize));
+            var (req, _) = NewRequest(postˢ, (~(~Ꮡproxy.ValueSlot).ts).URL, io.LimitReader((neverEnding)(rune)'a', bodySize));
             var (res, err) = (~Ꮡproxy.ValueSlot).c.Do(req);
             if (err != default!) {
                 return fmt.Errorf("original request: %v"u8, err);
@@ -6098,7 +6098,7 @@ public static partial void TestHandlerFinishSkipBigContentLengthRead(ж<testing.
     setParallel(Ꮡt);
     var conn = newTestConn();
     conn.of(testConn.ᏑreadBuf).WriteString(
-        "POST / HTTP/1.1\r\n"u8 + "Host: test\r\n"u8 + "Content-Length: 9999999999\r\n"u8 + "\r\n"u8 + strings.Repeat("a"u8, (1 << (int)(20))));
+        "POST / HTTP/1.1\r\n"u8 + "Host: test\r\n"u8 + "Content-Length: 9999999999\r\n"u8 + "\r\n"u8 + strings.Repeat("a"u8, 1 << 20));
 
     var ls = Ꮡ(new oneConnListener(new http_test_package.testConnжConn(conn)));
     nint inHandlerLen = default!;
@@ -6138,7 +6138,7 @@ internal static void testHandlerSetsBodyNil(ж<testing.T> Ꮡt, testMode mode) {
             if (err != default!) {
                 Ꮡt.Fatal(err);
             }
-            return ((@string)slurp);
+            return (@string)slurp;
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
         finally { ᒐ.Run(); }
@@ -6309,7 +6309,7 @@ public static partial void TestServerValidatesHeaders(ж<testing.T> Ꮡt) {
         new("A space: foo\r\n"u8, 400), // space in header
         new(((@string)(new byte[]{0x66, 0x6f, 0x6f, 0xff, 0x62, 0x61, 0x72, 0x3a, 0x20, 0x66, 0x6f, 0x6f, 0x0d, 0x0a})), 400), // binary in header
         new(((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x00, 0x62, 0x61, 0x72, 0x3a, 0x20, 0x66, 0x6f, 0x6f, 0x0d, 0x0a})), 400), // binary in header
-        new("Foo: "u8 + strings.Repeat("x"u8, (1 << (int)(21))) + "\r\n"u8, 431), // header too large
+        new("Foo: "u8 + strings.Repeat("x"u8, 1 << 21) + "\r\n"u8, 431), // header too large
         // Spaces between the header key and colon are not allowed.
         // See RFC 7230, Section 3.2.4.
         new("Foo : bar\r\n"u8, 400),
@@ -6562,7 +6562,7 @@ internal static void benchmarkClientServer(ж<testing.B> Ꮡb, testMode mode) {
         if (err != default!) {
             Ꮡb.Fatal(readAllˢ, err);
         }
-        @string body = ((@string)all);
+        @string body = (@string)all;
         if (body != "Hello world.\n"u8) {
             Ꮡb.Fatal(gotBodyˢ, body);
         }
@@ -6606,7 +6606,7 @@ internal static void benchmarkClientServerParallel(ж<testing.B> Ꮡb, nint para
                 Ꮡb.Logf("ReadAll: %v"u8, err);
                 continue;
             }
-            sstring body = ((sstring)all);
+            sstring body = (sstring)all;
             if (body != "Hello world.\n"u8) {
                 throw panic("Got body: " + body);
             }
@@ -6651,7 +6651,7 @@ public static void BenchmarkServer(ж<testing.B> Ꮡb) {
                     if (errΔ2 != default!) {
                         log.Panicf("ReadAll: %v"u8, errΔ2);
                     }
-                    @string body = ((@string)all);
+                    @string body = (@string)all;
                     if (body != "Hello world.\n"u8) {
                         log.Panicf("Got body: %q"u8, body);
                     }
@@ -6951,7 +6951,7 @@ public static partial void BenchmarkServerFakeConnWithKeepAliveLite(ж<testing.B
 internal static readonly @string someResponse = "<html>some response</html>"u8;
 
 // A Response that's just no bigger than 2KB, the buffer-before-chunking threshold.
-internal static slice<byte> response = bytes.Repeat(slice<byte>(someResponse), (2 << (int)(10)) / len(someResponse));
+internal static slice<byte> response = bytes.Repeat(slice<byte>(someResponse), (2 << 10) / len(someResponse));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string textHtmlˢ = "text/html"u8;
@@ -7134,7 +7134,7 @@ internal static void testServerIdleTimeout(ж<testing.T> Ꮡt, testMode mode) {
                         // this should never fail.
                         tΔ1.Fatal(errΔ1);
                     }
-                    return (((@string)slurp), default!);
+                    return ((@string)slurp, default!);
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
                 finally { ᒐ.Run(); }
@@ -7195,7 +7195,7 @@ internal static @string get(ж<testing.T> Ꮡt, ж<Δhttp.Client> Ꮡc, @string 
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        return ((@string)slurp);
+        return (@string)slurp;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -8346,7 +8346,7 @@ internal static partial void testTimeoutHandlerSuperfluousLogs(ж<testing.T> Ꮡ
                 // Match the response.
                 var (blob, _) = httputil.DumpResponse(res, true);
                 {
-                    @string g = ((@string)blob);
+                    @string g = (@string)blob;
                     @string w = ttʗ1.wantResp; if (g != w) {
                         tΔ1.Errorf("Response mismatch\nGot\n%q\n\nWant\n%q"u8, g, w);
                     }
@@ -8500,7 +8500,7 @@ partial struct tlogWriter {
 }
 
 internal static (nint, error) Write(this tlogWriter w, slice<byte> p) {
-    w.t.Log(((@string)p));
+    w.t.Log((@string)p);
     return (len(p), default!);
 }
 
@@ -8587,7 +8587,7 @@ internal static void testWriteHeaderSwitchingProtocols(ж<testing.T> Ꮡt, testM
             Ꮡt.Error(err);
         }
         if (((sstring)body) != wantBody) {
-            Ꮡt.Errorf("Response body = %q, want %q"u8, ((@string)body), wantBody);
+            Ꮡt.Errorf("Response body = %q, want %q"u8, (@string)body, wantBody);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -8713,7 +8713,7 @@ internal static void testQuerySemicolon(ж<testing.T> Ꮡt, testMode mode, @stri
         }
     }
     {
-        @string got = ((@string)slurp);
+        @string got = (@string)slurp;
         @string want = wantX; if (got != want) {
             Ꮡt.Errorf("Body = %q; want = %q"u8, got, want);
         }
@@ -8953,8 +8953,8 @@ internal static void testParseFormCleanup(ж<testing.T> Ꮡt, testMode mode) {
         }
         cst.close();
         {
-            var (_, errΔ4) = os.Stat(((@string)fname)); if (!errors.Is(errΔ4, os.ErrNotExist)) {
-                Ꮡt.Errorf("file %q exists after HTTP handler returned"u8, ((@string)fname));
+            var (_, errΔ4) = os.Stat((@string)fname); if (!errors.Is(errΔ4, os.ErrNotExist)) {
+                Ꮡt.Errorf("file %q exists after HTTP handler returned"u8, (@string)fname);
             }
         }
     }
@@ -9002,7 +9002,7 @@ internal static void testHeadBody(ж<testing.T> Ꮡt, testMode mode, bool chunke
                 Ꮡt.Errorf("server reading body: %v"u8, err);
                 return;
             }
-            w.Header().Set(xRequestBodyˢ, ((@string)b));
+            w.Header().Set(xRequestBodyˢ, (@string)b);
             w.Header().Set(contentLengthˢ, "0"u8);
         })));
         var cstʗ1 = cst;
@@ -9127,7 +9127,7 @@ internal static void testErrorContentLength(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Fatalf("io.ReadAll(res.Body) = %v"u8, err);
         }
         if (((@string)body) != errorBody + "\n") {
-            Ꮡt.Fatalf("read body: %q, want %q"u8, ((@string)body), errorBody);
+            Ꮡt.Fatalf("read body: %q, want %q"u8, (@string)body, errorBody);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

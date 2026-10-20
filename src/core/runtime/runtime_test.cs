@@ -136,7 +136,7 @@ internal static void defer1() {
             if (recover() != default! || x != 1 || y != 2 || z != 3) {
                 throw panic("bad recover");
             }
-        }, (nint)(1), (nint)(2), (nint)(3), ref ᒐ);
+        }, (nint)1, (nint)2, (nint)3, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -158,7 +158,7 @@ internal static void defer2() {
                 if (recover() != default! || x != 1 || y != 2 || z != 3) {
                     throw panic("bad recover");
                 }
-            }, (nint)(1), (nint)(2), (nint)(3), ref ᒐ);
+            }, (nint)1, (nint)2, (nint)3, ref ᒐ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -175,7 +175,7 @@ public static void BenchmarkDeferMany(ж<testing.B> Ꮡb) {
                 if (recover() != default! || x != 1 || y != 2 || z != 3) {
                     throw panic("bad recover");
                 }
-            }, (nint)(1), (nint)(2), (nint)(3), ref ᒐ);
+            }, (nint)1, (nint)2, (nint)3, ref ᒐ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -197,7 +197,7 @@ internal static void defer3() {
             if (recover() == default!) {
                 throw panic("failed recover");
             }
-        }, (nint)(1), (nint)(2), (nint)(3), ref ᒐ);
+        }, (nint)1, (nint)2, (nint)3, ref ᒐ);
         throw panic("hi");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -392,9 +392,9 @@ public static void TestAppendGrowthHeap(ж<testing.T> Ꮡt) {
     check(0);
     nint want = 1;
     for (nint i = 1; i <= 100; i++) {
-        x = append(x, (int64)(1));
+        x = append(x, (int64)1);
         check(want);
-        if ((nint)(i & (i - 1)) == 0) {
+        if ((i & (i - 1)) == 0) {
             want = 2 * i;
         }
     }
@@ -421,9 +421,9 @@ public static void TestAppendGrowthStack(ж<testing.T> Ꮡt) {
         want = 1;
     }
     for (nint i = 1; i <= 100; i++) {
-        x = append(x, (int64)(1));
+        x = append(x, (int64)1);
         check(want);
-        if ((nint)(i & (i - 1)) == 0) {
+        if ((i & (i - 1)) == 0) {
             want = builtin.max(want, 2 * i);
         }
     }
@@ -444,7 +444,7 @@ public static void TestAppendSliceGrowth(ж<testing.T> Ꮡt) {
     for (nint i = 1; i <= 100; i++) {
         x = appendꓸꓸꓸ(x, One);
         check(want);
-        if ((nint)(i & (i - 1)) == 0) {
+        if ((i & (i - 1)) == 0) {
             want = 2 * i;
         }
     }
@@ -746,7 +746,7 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
         h = h.Clone();
         nint sum = 0;
         foreach (var (i, v) in h.ΔRangeSnapshot()) {
-            var bound = ((uint64)(((uint64)1 << (int)(63)))).Rsh((int64)(i));
+            var bound = ((uint64)((uint64)1 << 63)).Rsh((int64)(i));
             sum += (nint)bound * v;
         }
 
@@ -756,7 +756,7 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
         // percentile target.
         nint part = 0;
         foreach (var (i, v) in h.ΔRangeSnapshot()) {
-            var bound = ((uint64)(((uint64)1 << (int)(63)))).Rsh((int64)(i));
+            var bound = ((uint64)((uint64)1 << 63)).Rsh((int64)(i));
             part += (nint)bound * v;
             // have we trimmed off enough at the head to dip below the percentile goal
             if ((float64)(sum - part) < (float64)sum * p) {
@@ -836,7 +836,7 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
                         delay(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
                         t -= runtime_internal_test_package.Nanotime(); // start the timer
                         runtime_internal_test_package.ΔUnlock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
-                        while ((int64)(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Load() & 0x2) != 0) {
+                        while ((Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Load() & 0x2) != 0) {
                         }
                     }
                     Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Add(1);
@@ -857,7 +857,7 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
                     defer(Ꮡwg.Done, ref ᒐ);
                     int64 t = default!;
                     while (ᐧ) {
-                        switch ((int64)(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Load() & 0x3)) {
+                        switch ((Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Load() & 0x3)) {
                         case 0: {
                             break;
                         }

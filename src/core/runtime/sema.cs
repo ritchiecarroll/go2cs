@@ -58,7 +58,7 @@ partial struct semTableᴛ1 /*dyn*/ {
 partial struct semTable /*[251]semTableᴛ1*/;
 
 internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> Ꮡaddr) {
-    return Ꮡ(t.Value, (((uintptr)Ꮡaddr >> (int)(3))) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
+    return Ꮡ(t.Value, ((uintptr)Ꮡaddr >> 3) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
 }
 
 // sync_runtime_Semacquire should be an internal detail,
@@ -246,7 +246,7 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
     //
     // s.ticket compared with zero in couple of places, therefore set lowest bit.
     // It will not affect treap's quality noticeably.
-    s.ticket = (uint32)(cheaprand() | 1);
+    s.ticket = cheaprand() | 1;
     s.parent = last;
     pt.ValueSlot = Ꮡs;
 
@@ -590,7 +590,7 @@ internal static void notifyListNotifyOne(ж<notifyList> Ꮡl) {
     // be too long. This applies even when the g is missing:
     // it hasn't yet gotten to sleep and has lost the race to
     // the (few) other g's that we find on the list.
-    for (var (Δp, s) = (((ж<sudog>)nil), l.head); s != nil; (Δp, s) = (s, s.Value.next)) {
+    for (var (Δp, s) = ((ж<sudog>)nil, l.head); s != nil; (Δp, s) = (s, s.Value.next)) {
         if ((~s).ticket == t) {
             var n = s.Value.next;
             if (Δp != nil){

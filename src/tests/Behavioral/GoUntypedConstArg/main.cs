@@ -10,7 +10,7 @@ internal static UntypedInt poly => 0x82f63b78;
 internal static channel<uint32> done = new channel<uint32>(1);
 
 internal static uint32 compute(uint32 p) {
-    var r = (uint32)(p ^ 0xffffffffU);
+    var r = p ^ 0xffffffffU;
     done.ᐸꟷ(r);
     return r;
 }

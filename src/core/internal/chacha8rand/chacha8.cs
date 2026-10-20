@@ -54,7 +54,7 @@ public static (uint64, bool) Next(this ref State s) {
         return (0, false);
     }
     s.i = i + 1;
-    return (s.buf[(uint32)(i & 31)], true); // i&31 eliminates bounds check
+    return (s.buf[(i & 31)], true); // i&31 eliminates bounds check
 }
 
 // Init seeds the State with the given seed value.

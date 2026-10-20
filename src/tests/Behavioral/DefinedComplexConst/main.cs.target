@@ -115,7 +115,7 @@ internal static void Main() {
     var mv = new map<@string, C64>{["k"] = 9F};
     fmt.Println("composite:", s, arr, p, mv["k"]);
 
-    var c = ((C128)2D);
+    var c = (C128)2D;
     c = c * 2D;
     c = 1D + c;
     c += 2D;
@@ -130,7 +130,7 @@ internal static void Main() {
     C64 expr = 7F + 0F.i();
     fmt.Println("named:", ni, nf, nc, ci, neg, expr, takeC128(intConst), takeC64(floatConst));
 
-    fmt.Println("conversion:", ((C64)2F), ((C128)(-3D)), ((C128b)1.25D), ((C128)complex(0D, 0D)));
+    fmt.Println("conversion:", (C64)2F, (C128)(-3D), (C128b)1.25D, (C128)complex(0D, 0D));
 
     C64 localC64 = /* 1.5 */ 1.5F + 0F.i();
     C128b localC128b = /* -2 */ -2D + 0D.i();

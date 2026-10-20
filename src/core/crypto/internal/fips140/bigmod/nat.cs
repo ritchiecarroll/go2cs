@@ -50,7 +50,7 @@ internal static choice ctEq(nuint x, nuint y) {
     // If x != y, then either x - y or y - x will generate a carry.
     var (_, c1) = bits.Sub(x, y, 0);
     var (_, c2) = bits.Sub(y, x, 0);
-    return not(((choice)((nuint)(c1 | c2))));
+    return not((choice)(c1 | c2));
 }
 
 // Nat represents an arbitrary natural number
@@ -351,7 +351,7 @@ public static choice IsOdd(this ref ΔNat x) {
     if (len(x.limbs) == 0) {
         return no;
     }
-    return ((choice)((nuint)(x.limbs[0] & 1)));
+    return (choice)(x.limbs[0] & 1);
 }
 
 // TrailingZeroBitsVarTime returns the number of trailing zero bits in x.
@@ -388,7 +388,7 @@ internal static choice cmpGeq(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     }
     // If there was a carry, then subtracting y underflowed, so
     // x is not greater than or equal to y.
-    return not(((choice)c));
+    return not((choice)c);
 }
 
 // assign sets x <- y if on == 1, and does nothing otherwise.
@@ -407,7 +407,7 @@ internal static ж<ΔNat> assign(this ж<ΔNat> Ꮡx, choice on, ж<ΔNat> Ꮡy)
 
     nuint mask = ctMask(on);
     for (nint i = 0; i < size; i++) {
-        xLimbs[i] ^= (nuint)((nuint)(mask & ((nuint)(xLimbs[i] ^ yLimbs[i]))));
+        xLimbs[i] ^= (nuint)((mask & (xLimbs[i] ^ yLimbs[i])));
     }
     return Ꮡx;
 }
@@ -545,7 +545,7 @@ internal static ж<ΔNat> rr(ж<Modulus> Ꮡm) {
 
     // We start by computing R = 2^(_W * n) mod m. We can get pretty close, to
     // 2^⌊log₂m⌋, by setting the highest bit we can without having to reduce.
-    rr.Value.limbs[n - 1] = ((nuint)1 << (int)(((mLen - 1) % (nuint)_W)));
+    rr.Value.limbs[n - 1] = (nuint)1 << (int)(((mLen - 1) % (nuint)_W));
     // Then we double until we reach 2^(_W * n).
     for (nuint iΔ1 = mLen - 1; iΔ1 < logR; iΔ1++) {
         rr.Add(rr, Ꮡm);
@@ -576,7 +576,7 @@ internal static ж<ΔNat> rr(ж<Modulus> Ꮡm) {
     while (i > 0) {
         rr.montgomeryMul(rr, rr, Ꮡm);
         i--;
-        if ((nuint)(logR.Rsh((int64)(i)) & 1) != 0) {
+        if ((logR.Rsh((int64)(i)) & 1) != 0) {
             rr.Add(rr, Ꮡm);
         }
     }
@@ -687,18 +687,18 @@ internal static ж<ΔNat> shiftIn(this ж<ΔNat> Ꮡx, nuint y, ж<Modulus> Ꮡm
     // based on whether 2x + b overflows m.
     choice needSubtraction = no;
     for (nint i = _W - 1; i >= 0; i--) {
-        nuint carry = (nuint)((y.Rsh((int64)(i))) & 1);
+        nuint carry = (y.Rsh((int64)(i))) & 1;
         nuint borrow = default!;
         nuint mask = ctMask(needSubtraction);
         for (nint iΔ1 = 0; iΔ1 < size; iΔ1++) {
-            nuint l = (nuint)(xLimbs[iΔ1] ^ ((nuint)(mask & ((nuint)(xLimbs[iΔ1] ^ dLimbs[iΔ1])))));
+            nuint l = xLimbs[iΔ1] ^ (mask & (xLimbs[iΔ1] ^ dLimbs[iΔ1]));
             (xLimbs[iΔ1], carry) = bits.Add(l, l, carry);
             (dLimbs[iΔ1], borrow) = bits.Sub(xLimbs[iΔ1], mLimbs[iΔ1], borrow);
         }
         // Like in maybeSubtractModulus, we need the subtraction if either it
         // didn't underflow (meaning 2x + b > m) or if computing 2x + b
         // overflowed (meaning 2x + b > 2^_W*n > m).
-        needSubtraction = (choice)(not(((choice)borrow)) | ((choice)carry));
+        needSubtraction = (choice)(not((choice)borrow) | ((choice)carry));
     }
     return Ꮡx.assign(needSubtraction, d);
 }
@@ -776,7 +776,7 @@ internal static void maybeSubtractModulus(this ж<ΔNat> Ꮡx, choice always, ж
     nuint underflow = t.sub(m.nat);
     // We keep the result if x - m didn't underflow (meaning x >= m)
     // or if always was set.
-    choice keep = (choice)(not(((choice)underflow)) | always);
+    choice keep = (choice)(not((choice)underflow) | always);
     Ꮡx.assign(keep, t);
 }
 
@@ -794,7 +794,7 @@ public static ж<ΔNat> Sub(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
     // If the subtraction underflowed, add m.
     var t = NewNat().set(Ꮡx);
     t.add(m.nat);
-    Ꮡx.assign(((choice)underflow), t);
+    Ꮡx.assign((choice)underflow, t);
     return Ꮡx;
 }
 
@@ -819,7 +819,7 @@ public static ж<ΔNat> Add(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
     ref var x = ref Ꮡx.DerefOrNull();
 
     nuint overflow = x.add(Ꮡy);
-    Ꮡx.maybeSubtractModulus(((choice)overflow), Ꮡm);
+    Ꮡx.maybeSubtractModulus((choice)overflow, Ꮡm);
     return Ꮡx;
 }
 
@@ -885,7 +885,7 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
             (T[(nint)nΔ4 + i], c) = bits.Add(c1, c2, c);
         }
         copy((~Ꮡx.reset(nΔ4)).limbs, T[(int)(nΔ4)..]);
-        Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
+        Ꮡx.maybeSubtractModulus((choice)c, Ꮡm);
     }
     else if (exprᴛ1 == 1536 / _W) {
         UntypedInt nΔ5 = /* 1536 / _W */ 24; // compiler hint
@@ -899,7 +899,7 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
             (T[(nint)nΔ5 + i], c) = bits.Add(c1, c2, c);
         }
         copy((~Ꮡx.reset(nΔ5)).limbs, T[(int)(nΔ5)..]);
-        Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
+        Ꮡx.maybeSubtractModulus((choice)c, Ꮡm);
     }
     else if (exprᴛ1 == 2048 / _W) {
         UntypedInt nΔ6 = /* 2048 / _W */ 32; // compiler hint
@@ -913,7 +913,7 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
             (T[(nint)nΔ6 + i], c) = bits.Add(c1, c2, c);
         }
         copy((~Ꮡx.reset(nΔ6)).limbs, T[(int)(nΔ6)..]);
-        Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
+        Ꮡx.maybeSubtractModulus((choice)c, Ꮡm);
     }
     else { /* default: */
         // Attempt to use a stack-allocated backing array.
@@ -974,7 +974,7 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
         // x >= m as a side effect, and taking care of the broken invariant is
         // highly undesirable (see https://go.dev/issue/13907).
         copy((~Ꮡx.reset(n)).limbs, T.slice(n));
-        Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
+        Ꮡx.maybeSubtractModulus((choice)c, Ꮡm);
     }
 
     return Ꮡx;
@@ -1150,7 +1150,7 @@ public static ж<ΔNat> ExpShortVarTime(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, n
     for (nint i = (nint)bits.UintSize - bits.Len(e) + 1; i < bits.UintSize; i++) {
         Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
         {
-            nuint k = (nuint)((e.Rsh((int64)(((nint)bits.UintSize - i - 1)))) & 1); if (k != 0) {
+            nuint k = (e.Rsh((int64)(((nint)bits.UintSize - i - 1)))) & 1; if (k != 0) {
                 Ꮡout.montgomeryMul(Ꮡout, xR, Ꮡm);
             }
         }

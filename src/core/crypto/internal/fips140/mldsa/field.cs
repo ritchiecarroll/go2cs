@@ -33,14 +33,14 @@ internal static (fieldElement, error) fieldToMontgomery(uint32 a) {
         return (0, errUnreducedFieldElement);
     }
     // a * R² * R⁻¹ ≡ a * R (mod q)
-    return (fieldMontgomeryMul(((fieldElement)a), RR), default!);
+    return (fieldMontgomeryMul((fieldElement)a, RR), default!);
 }
 
 // fieldSubToMontgomery converts a difference a - b to Montgomery form.
 // a and b must be < q. (This bound can probably be relaxed.)
 internal static fieldElement fieldSubToMontgomery(uint32 a, uint32 b) {
     var x = a - b + (uint32)q;
-    return fieldMontgomeryMul(((fieldElement)x), RR);
+    return fieldMontgomeryMul((fieldElement)x, RR);
 }
 
 // fieldFromMontgomery converts a value a in Montgomery form back to
@@ -70,7 +70,7 @@ internal static uint32 fieldInfinityNorm(fieldElement r) {
 // fieldReduceOnce reduces a value a < 2q.
 internal static fieldElement fieldReduceOnce(uint32 a) {
     var (x, b) = bits.Sub64((uint64)a, (uint64)q, 0);
-    return ((fieldElement)(uint32)(x + b * (uint64)q));
+    return (fieldElement)(uint32)(x + b * (uint64)q);
 }
 
 // fieldAdd returns a + b mod q.
@@ -94,7 +94,7 @@ internal static fieldElement fieldMontgomeryMul(fieldElement a, fieldElement b) 
 // fieldMontgomeryReduce returns x * R⁻¹ mod q for x < q * R.
 internal static fieldElement fieldMontgomeryReduce(uint64 x) {
     var t = (uint32)x * (uint32)qNegInv;
-    var u = ((x + (uint64)t * (uint64)q) >> (int)(32));
+    var u = (x + (uint64)t * (uint64)q) >> 32;
     return fieldReduceOnce((uint32)u);
 }
 
@@ -221,7 +221,7 @@ internal static nttElement ntt(ringElement f) {
         f[start] = fieldAdd(f[start], t);
     }
 
-    return ((nttElement)(array<fieldElement>)f);
+    return (nttElement)(array<fieldElement>)f;
 }
 
 // inverseNTT maps a nttElement back to the ringElement it represents.
@@ -298,7 +298,7 @@ internal static ringElement inverseNTT(nttElement f) {
     foreach (var (i, _) in f) {
         f[i] = fieldMontgomeryMul(f[i], 16382); // 16382 = 256⁻¹ * R mod q
     }
-    return ((ringElement)(array<fieldElement>)f);
+    return (ringElement)(array<fieldElement>)f;
 }
 
 // nttMul multiplies two nttElements.
@@ -330,9 +330,9 @@ internal static nttElement sampleNTT(slice<byte> rho, byte s, byte r) {
             G.Read(buf[..]);
             off = 0;
         }
-        var v = (uint32)((uint32)((uint32)buf[off] | ((uint32)buf[off + 1] << (int)(8))) | ((uint32)buf[off + 2] << (int)(16)));
+        var v = (uint32)buf[off] | (uint32)buf[off + 1] << 8 | (uint32)buf[off + 2] << 16;
         off += 3;
-        var (f, err) = fieldToMontgomery((uint32)(v & 0b01111111_11111111_11111111)); // 23 bits
+        var (f, err) = fieldToMontgomery(v & 0b01111111_11111111_11111111); // 23 bits
         if (err != default!) {
             continue;
         }
@@ -360,7 +360,7 @@ internal static ringElement sampleBoundedPoly(slice<byte> rho, byte r, parameter
             off = 0;
         }
         var z0 = (byte)(buf[off] & 0x0F);
-        var z1 = (byte)((buf[off] >> (int)(4)));
+        var z1 = (byte)((buf[off] >> 4));
         off++;
         var (coeff, ok) = coeffFromHalfByte(z0, p);
         if (ok) {
@@ -440,7 +440,7 @@ internal static (fieldElement, bool) coeffFromHalfByte(byte b, parameters p) {
         // variable-time division.
         const uint32 barrettMultiplier = 0x3334; // ⌈2¹⁶ / 5⌉
         UntypedInt barrettShift = 16; // log₂(2¹⁶)
-        var quotient = (((uint32)b * barrettMultiplier) >> (int)(barrettShift));
+        var quotient = ((uint32)b * barrettMultiplier) >> (int)(barrettShift);
         var remainder = (uint32)b - quotient * 5;
         return (fieldSubToMontgomery(2, remainder), true);
     }
@@ -472,11 +472,11 @@ internal static (uint16 hi, fieldElement lo) power2Round(fieldElement r) {
     var rr = fieldFromMontgomery(r);
     // Add 2¹² - 1 to round up r1 by one if r0 > 2¹².
     // r is at most 2²³ - 2¹³ + 1, so rr + (2¹² - 1) won't overflow 23 bits.
-    var r1 = rr + ((uint32)1 << (int)(12)) - 1;
+    var r1 = rr + ((uint32)1 << 12) - 1;
     r1 >>= (int)(13);
     // r1 <= 2¹⁰ - 1
     // r1 * 2¹³ <= (2¹⁰ - 1) * 2¹³ = 2²³ - 2¹³ < q
-    var r0 = fieldSubToMontgomery(rr, (r1 << (int)(13)));
+    var r0 = fieldSubToMontgomery(rr, r1 << 13);
     return ((uint16)r1, r0);
 }
 
@@ -569,8 +569,8 @@ internal static byte highBits32(uint32 x) {
     // BoringSSL. There are exhaustive tests in TestDecompose that compare it to
     // a straightforward implementation of Decompose from the spec, so for our
     // purposes it only has to work and be constant-time.
-    var r1 = ((x + 127) >> (int)(7));
-    r1 = ((r1 * 1025 + (((uint32)1 << (int)(21)))) >> (int)(22));
+    var r1 = (x + 127) >> 7;
+    r1 = (r1 * 1025 + ((uint32)1 << 21)) >> 22;
     r1 &= (uint32)(0b1111);
     return (byte)r1;
 }
@@ -616,14 +616,14 @@ internal static byte makeHint32(fieldElement ct0, fieldElement w, fieldElement c
     // r1 = HighBits(r) = HighBits(w - cs2 + ct0)
     var r1 = highBits32(fieldFromMontgomery(fieldAdd(rPlusZ, ct0)));
 
-    return (byte)((nint)(constanttime.ByteEq(v1, r1) ^ 1));
+    return (byte)(constanttime.ByteEq(v1, r1) ^ 1);
 }
 
 // highBits88 implements HighBits from FIPS 204 for γ2 = (q - 1) / 88.
 internal static byte highBits88(uint32 x) {
     // Like highBits32, this is exhaustively tested in TestDecompose.
-    var r1 = ((x + 127) >> (int)(7));
-    r1 = ((r1 * 11275 + (((uint32)1 << (int)(23)))) >> (int)(24));
+    var r1 = (x + 127) >> 7;
+    r1 = (r1 * 11275 + ((uint32)1 << 23)) >> 24;
     r1 = constantTimeSelectEqual(r1, 44, 0, r1);
     return (byte)r1;
 }
@@ -675,7 +675,7 @@ internal static byte makeHint88(fieldElement ct0, fieldElement w, fieldElement c
     var rPlusZ = fieldSub(w, cs2);
     var v1 = highBits88(fieldFromMontgomery(rPlusZ));
     var r1 = highBits88(fieldFromMontgomery(fieldAdd(rPlusZ, ct0)));
-    return (byte)((nint)(constanttime.ByteEq(v1, r1) ^ 1));
+    return (byte)(constanttime.ByteEq(v1, r1) ^ 1);
 }
 
 // bitPack implements BitPack(r mod± q, γ₁-1, γ₁), which packs the centered
@@ -712,21 +712,21 @@ internal static slice<byte> bitPack18(slice<byte> buf, ringElement r) {
     for (nint i = 0; i < n; i += 4) {
         // b - [−2¹⁷+1, 2¹⁷] = [0, 2²⁸-1]
         var w0 = b - fieldCenteredMod(r[i]);
-        v[0] = (byte)((w0 << (int)(0)));
-        v[1] = (byte)((w0 >> (int)(8)));
-        v[2] = (byte)((w0 >> (int)(16)));
+        v[0] = (byte)(w0 << 0);
+        v[1] = (byte)(w0 >> 8);
+        v[2] = (byte)(w0 >> 16);
         var w1 = b - fieldCenteredMod(r[i + 1]);
-        v[2] |= (byte)((byte)((w1 << (int)(2))));
-        v[3] = (byte)((w1 >> (int)(6)));
-        v[4] = (byte)((w1 >> (int)(14)));
+        v[2] |= (byte)((byte)(w1 << 2));
+        v[3] = (byte)(w1 >> 6);
+        v[4] = (byte)(w1 >> 14);
         var w2 = b - fieldCenteredMod(r[i + 2]);
-        v[4] |= (byte)((byte)((w2 << (int)(4))));
-        v[5] = (byte)((w2 >> (int)(4)));
-        v[6] = (byte)((w2 >> (int)(12)));
+        v[4] |= (byte)((byte)(w2 << 4));
+        v[5] = (byte)(w2 >> 4);
+        v[6] = (byte)(w2 >> 12);
         var w3 = b - fieldCenteredMod(r[i + 3]);
-        v[6] |= (byte)((byte)((w3 << (int)(6))));
-        v[7] = (byte)((w3 >> (int)(2)));
-        v[8] = (byte)((w3 >> (int)(10)));
+        v[6] |= (byte)((byte)(w3 << 6));
+        v[7] = (byte)(w3 >> 2);
+        v[8] = (byte)(w3 >> 10);
         v = v[(int)(4 * 18 / 8)..];
     }
     return @out;
@@ -745,13 +745,13 @@ internal static slice<byte> bitPack20(slice<byte> buf, ringElement r) {
     for (nint i = 0; i < n; i += 2) {
         // b - [−2¹⁹+1, 2¹⁹] = [0, 2²⁰-1]
         var w0 = b - fieldCenteredMod(r[i]);
-        v[0] = (byte)((w0 << (int)(0)));
-        v[1] = (byte)((w0 >> (int)(8)));
-        v[2] = (byte)((w0 >> (int)(16)));
+        v[0] = (byte)(w0 << 0);
+        v[1] = (byte)(w0 >> 8);
+        v[2] = (byte)(w0 >> 16);
         var w1 = b - fieldCenteredMod(r[i + 1]);
-        v[2] |= (byte)((byte)((w1 << (int)(4))));
-        v[3] = (byte)((w1 >> (int)(4)));
-        v[4] = (byte)((w1 >> (int)(12)));
+        v[2] |= (byte)((byte)(w1 << 4));
+        v[3] = (byte)(w1 >> 4);
+        v[4] = (byte)(w1 >> 12);
         v = v[(int)(2 * 20 / 8)..];
     }
     return @out;
@@ -783,13 +783,13 @@ internal static ringElement bitUnpack18(slice<byte> v) {
     const uint32 mask18 = /* 1<<18 - 1 */ 262143;
     ringElement r = default!;
     for (nint i = 0; i < n; i += 4) {
-        var w0 = (uint32)((uint32)((uint32)v[0] | ((uint32)v[1] << (int)(8))) | ((uint32)v[2] << (int)(16)));
+        var w0 = (uint32)v[0] | (uint32)v[1] << 8 | (uint32)v[2] << 16;
         r[i + 0] = fieldSubToMontgomery(b, (uint32)(w0 & mask18));
-        var w1 = (uint32)((uint32)(((uint32)v[2] >> (int)(2)) | ((uint32)v[3] << (int)(6))) | ((uint32)v[4] << (int)(14)));
+        var w1 = (uint32)v[2] >> 2 | (uint32)v[3] << 6 | (uint32)v[4] << 14;
         r[i + 1] = fieldSubToMontgomery(b, (uint32)(w1 & mask18));
-        var w2 = (uint32)((uint32)(((uint32)v[4] >> (int)(4)) | ((uint32)v[5] << (int)(4))) | ((uint32)v[6] << (int)(12)));
+        var w2 = (uint32)v[4] >> 4 | (uint32)v[5] << 4 | (uint32)v[6] << 12;
         r[i + 2] = fieldSubToMontgomery(b, (uint32)(w2 & mask18));
-        var w3 = (uint32)((uint32)(((uint32)v[6] >> (int)(6)) | ((uint32)v[7] << (int)(2))) | ((uint32)v[8] << (int)(10)));
+        var w3 = (uint32)v[6] >> 6 | (uint32)v[7] << 2 | (uint32)v[8] << 10;
         r[i + 3] = fieldSubToMontgomery(b, (uint32)(w3 & mask18));
         v = v[(int)(4 * 18 / 8)..];
     }
@@ -806,9 +806,9 @@ internal static ringElement bitUnpack20(slice<byte> v) {
     const uint32 mask20 = /* 1<<20 - 1 */ 1048575;
     ringElement r = default!;
     for (nint i = 0; i < n; i += 2) {
-        var w0 = (uint32)((uint32)((uint32)v[0] | ((uint32)v[1] << (int)(8))) | ((uint32)v[2] << (int)(16)));
+        var w0 = (uint32)v[0] | (uint32)v[1] << 8 | (uint32)v[2] << 16;
         r[i + 0] = fieldSubToMontgomery(b, (uint32)(w0 & mask20));
-        var w1 = (uint32)((uint32)(((uint32)v[2] >> (int)(4)) | ((uint32)v[3] << (int)(4))) | ((uint32)v[4] << (int)(12)));
+        var w1 = (uint32)v[2] >> 4 | (uint32)v[3] << 4 | (uint32)v[4] << 12;
         r[i + 1] = fieldSubToMontgomery(b, (uint32)(w1 & mask20));
         v = v[(int)(2 * 20 / 8)..];
     }

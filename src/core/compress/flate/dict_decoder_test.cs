@@ -56,7 +56,7 @@ public static void TestDictDecoder(ж<testing.T> Ꮡt) {
     ref var got = ref heap(new bytes.Buffer(), out var Ꮡgot);
     ref var want = ref heap(new bytes.Buffer(), out var Ꮡwant);
     ref var dd = ref heap(new global::go.compress.flate_package.dictDecoder(), out var Ꮡdd);
-    dd.init((1 << (int)(11)), default!);
+    dd.init(1 << 11, default!);
 
     Action<nint, nint> writeCopy = (nint dist, nint length) => {
         while (length > 0) {

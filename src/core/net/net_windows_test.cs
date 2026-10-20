@@ -70,7 +70,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
                 var b = new slice<byte>(100);
                 (var n, errΔ1) = c.Read(b);
                 if (errΔ1 == default! || AreEqual(errΔ1, Δio.EOF)) {
-                    return (((@string)(b.slice(0, n))), default!);
+                    return ((@string)(b.slice(0, n)), default!);
                 }
                 var (errno, ok) = toErrno(errΔ1);
                 if (ok && ignoreSomeReadErrors && (errno == syscall.ERROR_NETNAME_DELETED || errno == syscall.WSAECONNRESET)) {
@@ -232,7 +232,7 @@ internal static (slice<byte>, error) runCmd(params ꓸꓸꓸstring argsʗp) {
         (var @out, err) = exec.Command(powershellˢ, commandˢ, cmd).CombinedOutput();
         if (err != default!) {
             if (len(@out) != 0) {
-                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, ((@string)removeUTF8BOM(@out))));
+                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
             }
             error err2 = default!;
             (@out, err2) = Δos.ReadFile(f.Name());
@@ -240,7 +240,7 @@ internal static (slice<byte>, error) runCmd(params ꓸꓸꓸstring argsʗp) {
                 return (default!, err2);
             }
             if (len(@out) != 0) {
-                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, ((@string)removeUTF8BOM(@out))));
+                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
             }
             return (default!, fmt.Errorf("%s failed: %v"u8, args[0], err));
         }
@@ -303,7 +303,7 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
         if (bytes.HasPrefix(line, slice<byte>("Interface "u8)) && bytes.HasSuffix(line, slice<byte>(" Parameters"u8))) {
             var f = line[(int)(len("Interface "))..];
             f = f.slice(0, len(f) - len(" Parameters"));
-            name = ((@string)f);
+            name = (@string)f;
             continue;
         }
         bool isup = default!;
@@ -419,7 +419,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
                 if (len(f) == 2) {
                     f = bytes.Split(f[0], new byte[]{(rune)'/'}.slice());
                     if (len(f) == 2) {
-                        subnetprefix = ((@string)bytes.TrimSpace(f[1]));
+                        subnetprefix = (@string)bytes.TrimSpace(f[1]);
                         if (addr != ""u8 && subnetprefix != ""u8) {
                             addrs = append(addrs, addr + "/"u8 + subnetprefix);
                         }
@@ -431,7 +431,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
         if (bytes.Contains(line, slice<byte>("IP Address:"u8))) {
             var f = bytes.Split(line, new byte[]{(rune)':'}.slice());
             if (len(f) == 2) {
-                addr = ((@string)bytes.TrimSpace(f[1]));
+                addr = (@string)bytes.TrimSpace(f[1]);
             }
         }
     }
@@ -498,10 +498,10 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
         // Convert these to all hexadecimal fe80::5efe:c0a8:8c01 for later string comparisons.
         var ipv4Tail = Δregexp.MustCompile(dDDDˢ);
         if (ipv4Tail.Match(f[0])) {
-            f[0] = slice<byte>(ParseIP(((@string)f[0])).String());
+            f[0] = slice<byte>(ParseIP((@string)f[0]).String());
         }
 
-        addr = ((@string)bytes.ToLower(bytes.TrimSpace(f[0])));
+        addr = (@string)bytes.ToLower(bytes.TrimSpace(f[0]));
     }
     return addrs;
 }
@@ -685,7 +685,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
         if (i == -1) {
             Ꮡt.Fatalf("line %q has no : in it"u8, line);
         }
-        group[((@string)(line.slice(0, i)))] = ((@string)bytes.TrimSpace(line.slice(i + 1)));
+        group[((@string)(line.slice(0, i)))] = (@string)bytes.TrimSpace(line.slice(i + 1));
     }
     processGroup();
 

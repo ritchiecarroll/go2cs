@@ -76,7 +76,7 @@ public static void TestSamples(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
-            @string gotstr = ((@string)got);
+            @string gotstr = (@string)got;
             if (gotstr != testʗ1.uncompressed) {
                 tΔ1.Errorf("got %q want %q"u8, gotstr, testʗ1.uncompressed);
             }
@@ -100,7 +100,7 @@ public static void TestReset(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
-            @string gotstr = ((@string)got);
+            @string gotstr = (@string)got;
             if (gotstr != testʗ1.uncompressed) {
                 tΔ1.Errorf("got %q want %q"u8, gotstr, testʗ1.uncompressed);
             }

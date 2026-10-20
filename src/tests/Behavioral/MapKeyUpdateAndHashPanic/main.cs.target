@@ -201,7 +201,7 @@ internal static void @try(@string label, Action f) {
 internal static void hashPanic() {
     slice<nint> Δslice = default!;
     var empty = new map<any, bool>{};
-    var full = new map<any, bool>{[(nint)(1)] = true, [(@string)"a"u8] = true};
+    var full = new map<any, bool>{[(nint)1] = true, [(@string)"a"u8] = true};
     map<any, bool> nilMap = default!;
 
     var emptyʗ1 = empty;

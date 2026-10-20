@@ -121,7 +121,7 @@ internal static (context, nint) tTag(context c, slice<byte> s) {
         ), len(s));
     }
 
-    @string attrName = strings.ToLower(((@string)(s.slice(i, j))));
+    @string attrName = strings.ToLower((@string)(s.slice(i, j)));
     if (c.element == elementScript && attrName == "type"u8){
         attr = attrScriptType;
     } else 
@@ -432,7 +432,7 @@ internal static (context, nint) tJSTmpl(context c, slice<byte> s) {
         }
         case (rune)'$': {
             if (len(s) >= i + 2 && s[i + 1] == (rune)'{') {
-                c.jsBraceDepth = append(c.jsBraceDepth, (nint)(0));
+                c.jsBraceDepth = append(c.jsBraceDepth, (nint)0);
                 (c.state, c.jsCtx) = (stateJS, jsCtxRegexp);
                 return (c, i + 2);
             }
@@ -797,7 +797,7 @@ internal static (nint, element) eatTagName(slice<byte> s, nint i) {
         }
         break;
     }
-    return (j, elementNameMap[strings.ToLower(((@string)(s.slice(i, j))))]);
+    return (j, elementNameMap[strings.ToLower((@string)(s.slice(i, j)))]);
 }
 
 // eatWhiteSpace returns the largest j such that s[i:j] is white space.

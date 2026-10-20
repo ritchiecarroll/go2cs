@@ -72,7 +72,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
     var cbits = (uint8)0;
     var sbits = (uint8)0;
     foreach (var (_, b) in v) {
-        cur = (nuint)((cur << (int)(8)) | (nuint)b);
+        cur = cur << 8 | (nuint)b;
         cbits += 8;
         sbits += 8;
         while (cbits >= 8) {
@@ -116,7 +116,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         return ErrInvalidHuffman;
     }
     {
-        nuint mask = (nuint)(((nuint)1).Lsh((uint64)(cbits)) - 1); if ((nuint)(cur & mask) != mask) {
+        nuint mask = (nuint)(((nuint)1).Lsh((uint64)(cbits)) - 1); if ((cur & mask) != mask) {
             // Trailing bits must be a prefix of EOS per RFC 7541 section 5.2.
             return ErrInvalidHuffman;
         }
@@ -199,7 +199,7 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
         if (n >= 32) {
             n %= 32; // Normally would be -= 32 but %= 32 informs compiler 0 <= n <= 31 for upcoming shift
             var yΔ1 = (uint32)(x.Rsh(n)); // Compiler doesn't combine memory writes if y isn't uint32
-            dst = append(dst, (byte)((yΔ1 >> (int)(24))), (byte)((yΔ1 >> (int)(16))), (byte)((yΔ1 >> (int)(8))), (byte)yΔ1);
+            dst = append(dst, (byte)(yΔ1 >> 24), (byte)(yΔ1 >> 16), (byte)(yΔ1 >> 8), (byte)yΔ1);
         }
     }
     // Add padding bits if necessary
@@ -209,7 +209,7 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
             UntypedInt eosNBits = 30;
             const uint64 eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
             nuint pad = 8 - over;
-            x = (uint64)((x.Lsh(pad)) | (eosPadByte.Rsh(over)));
+            x = (x.Lsh(pad)) | (eosPadByte.Rsh(over));
             n += pad; // 8 now divides into n exactly
         }
     }
@@ -223,15 +223,15 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
     }
     case 2: {
         var yΔ3 = (uint16)x;
-        return append(dst, (byte)((yΔ3 >> (int)(8))), (byte)yΔ3);
+        return append(dst, (byte)(yΔ3 >> 8), (byte)yΔ3);
     }
     case 3: {
-        var yΔ4 = (uint16)((x >> (int)(8)));
-        return append(dst, (byte)((yΔ4 >> (int)(8))), (byte)yΔ4, (byte)x);
+        var yΔ4 = (uint16)(x >> 8);
+        return append(dst, (byte)(yΔ4 >> 8), (byte)yΔ4, (byte)x);
     }}
     //	case 4:
     var y = (uint32)x;
-    return append(dst, (byte)((y >> (int)(24))), (byte)((y >> (int)(16))), (byte)((y >> (int)(8))), (byte)y);
+    return append(dst, (byte)(y >> 24), (byte)(y >> 16), (byte)(y >> 8), (byte)y);
 }
 
 // HuffmanEncodeLength returns the number of bytes required to encode

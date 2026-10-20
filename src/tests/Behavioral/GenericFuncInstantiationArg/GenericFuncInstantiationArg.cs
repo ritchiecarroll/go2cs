@@ -44,7 +44,7 @@ internal static void Main() {
 
     fmt.Println(reflect.TypeOf(returned()).String());
 
-    fmt.Println(apply(describe<any>, (nint)(42)));
+    fmt.Println(apply(describe<any>, (nint)42));
     fmt.Println(apply(describe<any>, "go"));
 }
 

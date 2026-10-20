@@ -318,7 +318,7 @@ func (v *Visitor) narrowComparisonOperand(operand ast.Expr, converted string) st
 		return converted
 	}
 
-	return fmt.Sprintf("(%s)(%s)", castType, converted)
+	return castOf(castType, converted)
 }
 
 // wholeExprIsCastOfType reports whether expr is exactly `(castType)(…)` spanning its whole length — the
@@ -337,6 +337,11 @@ func wholeExprIsCastOfType(expr, castType string) bool {
 	if strings.HasPrefix(expr, uncheckedPrefix) &&
 		balancedCloseIndex(expr, len(uncheckedPrefix)-1) == len(expr)-1 {
 		expr = expr[len(uncheckedPrefix) : len(expr)-1]
+	}
+
+	// castOf's form for a literal operand, `(T)500`.
+	if literal, ok := strings.CutPrefix(expr, "("+castType+")"); ok && unsignedLiteral.MatchString(literal) {
+		return true
 	}
 
 	prefix := fmt.Sprintf("(%s)(", castType)
@@ -1711,7 +1716,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			if lhsTypeIsInterface[i] {
 				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
-				result.WriteString(rhsExpr)
+				result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 			}
 
 			if len(narrowCastType) > 0 {
@@ -1854,7 +1859,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			if i < lhsLen && lhsTypeIsInterface[i] {
 				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
-				result.WriteString(rhsExpr)
+				result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 			}
 		}
 
@@ -2028,7 +2033,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				if lhsTypeIsInterface[i] {
 					result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 				} else {
-					result.WriteString(rhsExpr)
+					result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 				}
 
 				if len(narrowCastType) > 0 {
@@ -2081,7 +2086,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
-						result.WriteString(rhsExpr)
+						result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 					}
 
 					if andNotUncheckedClose {
@@ -2224,7 +2229,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// parentheses are load-bearing for the lambda form: `(Func<…>)(nint p1) => …`
 					// does not parse as a cast.
 					if discardCastType != "" {
-						rhsExpr = fmt.Sprintf("(%s)(%s)", discardCastType, rhsExpr)
+						rhsExpr = castOf(discardCastType, rhsExpr)
 					}
 
 					_, rhsIsTypeAssert := rhs.(*ast.TypeAssertExpr)
@@ -2232,7 +2237,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					if lhsTypeIsInterface[i] && !rhsIsTypeAssert {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
-						result.WriteString(rhsExpr)
+						result.WriteString(v.unparenthesizedAssignedValue(assignStmt, rhs, rhsExpr))
 					}
 
 					if format.includeSemiColon || i < lhsLen-1 {

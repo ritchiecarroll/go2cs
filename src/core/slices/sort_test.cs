@@ -465,7 +465,7 @@ public static void TestBinarySearchFunc(ж<testing.T> Ꮡt) {
     var cmp = (nint a, @string b) => strings.Compare(strconv.Itoa(a), b);
     var (pos, found) = BinarySearchFunc(data, (@string)"2", cmp);
     if (pos != 3 || !found) {
-        Ꮡt.Errorf("BinarySearchFunc(%v, %q, cmp) = %v, %v, want %v, %v"u8, data, (@string)"2"u8, pos, found, (nint)(3), true);
+        Ꮡt.Errorf("BinarySearchFunc(%v, %q, cmp) = %v, %v, want %v, %v"u8, data, (@string)"2"u8, pos, found, (nint)3, true);
     }
 }
 

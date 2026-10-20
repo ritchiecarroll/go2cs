@@ -288,7 +288,7 @@ public static void BenchmarkAppendGrowByte(ж<testing.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         slice<byte> x = default!;
-        for (nint j = 0; j < (1 << (int)(20)); j++) {
+        for (nint j = 0; j < 1 << 20; j++) {
             x = append(x, (byte)j);
         }
     }
@@ -300,7 +300,7 @@ public static void BenchmarkAppendGrowString(ж<testing.B> Ꮡb) {
     @string s = default!;
     for (nint i = 0; i < b.N; i++) {
         slice<@string> x = default!;
-        for (nint j = 0; j < (1 << (int)(20)); j++) {
+        for (nint j = 0; j < 1 << 20; j++) {
             x = append(x, s);
         }
     }
@@ -325,7 +325,7 @@ public static void BenchmarkAppendSlice(ж<testing.B> Ꮡb) {
 internal static slice<byte> blackhole;
 
 public static void BenchmarkAppendSliceLarge(ж<testing.B> Ꮡb) {
-    foreach (var (_, length) in new nint[]{(1 << (int)(10)), (4 << (int)(10)), (16 << (int)(10)), (64 << (int)(10)), (256 << (int)(10)), (1024 << (int)(10))}.slice()) {
+    foreach (var (_, length) in new nint[]{1 << 10, 4 << 10, 16 << 10, 64 << 10, 256 << 10, 1024 << 10}.slice()) {
         var y = new slice<byte>(length);
         var yʗ1 = y;
         Ꮡb.Run(fmt.Sprint(length, bytesˢ), (ж<testing.B> bΔ1) => {
@@ -386,7 +386,7 @@ internal static readonly object appendFailedˢ = (@string)"append failed: "u8;
 
 public static void TestSideEffectOrder(ж<testing.T> Ꮡt) {
     x = new slice<nint>(0, 10);
-    x = append(x, (nint)(1), f());
+    x = append(x, (nint)1, f());
     if (x[0] != 1 || x[1] != 2) {
         Ꮡt.Error(appendFailedˢ, x[0], x[1]);
     }
@@ -395,7 +395,7 @@ public static void TestSideEffectOrder(ж<testing.T> Ꮡt) {
 public static void TestAppendOverlap(ж<testing.T> Ꮡt) {
     var x = slice<byte>("1234"u8);
     x = appendꓸꓸꓸ(x[1..], x); // p > q in runtime·appendslice.
-    @string got = ((@string)x);
+    @string got = (@string)x;
     @string want = "2341234"u8;
     if (got != want) {
         Ꮡt.Errorf("overlap failed: got %q want %q"u8, got, want);
@@ -419,7 +419,7 @@ public static void BenchmarkCopy(ж<testing.B> Ꮡb) {
         });
         var bufʗ2 = buf;
         Ꮡb.Run(fmt.Sprint(l, stringˢ), (ж<testing.B> bΔ2) => {
-            @string s = ((@string)new slice<byte>(l));
+            @string s = (@string)new slice<byte>(l);
             nint n = default!;
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 n = copy(bufʗ2, s);
@@ -460,7 +460,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 sByte = new slice<byte>(C);
                 for (nint j = 0; j < C; j++) {
-                    sByte = append(sByte, (byte)(0x77));
+                    sByte = append(sByte, (byte)0x77);
                 }
             }
         });
@@ -469,7 +469,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             for (nint i = 0; i < (~bΔ3).N; i++) {
                 s1Ptr = new slice<uintptr>(C);
                 for (nint j = 0; j < C; j++) {
-                    s1Ptr = append(s1Ptr, (uintptr)(0x77));
+                    s1Ptr = append(s1Ptr, (uintptr)0x77);
                 }
             }
         });
@@ -509,7 +509,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             for (nint i = 0; i < (~bΔ8).N; i++) {
                 sByte = new slice<byte>(0);
                 for (nint j = 0; j < C; j++) {
-                    sByte = append(sByte, (byte)(0x77));
+                    sByte = append(sByte, (byte)0x77);
                     sByte = sByte.slice(0, cap(sByte));
                 }
             }
@@ -519,7 +519,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             for (nint i = 0; i < (~bΔ9).N; i++) {
                 s1Ptr = new slice<uintptr>(0);
                 for (nint j = 0; j < C; j++) {
-                    s1Ptr = append(s1Ptr, (uintptr)(0x77));
+                    s1Ptr = append(s1Ptr, (uintptr)0x77);
                     s1Ptr = s1Ptr.slice(0, cap(s1Ptr));
                 }
             }
@@ -820,7 +820,7 @@ public static void TestMoveToHeapEarly(ж<testing.T> Ꮡt) {
     slice<nint> x = default!;
     var y = x; // causes a move2heap in the entry block
     foreach (var _ᴛ1 in range(5)) {
-        x = append(x, (nint)(5));
+        x = append(x, (nint)5);
     }
     _ = y;
 }

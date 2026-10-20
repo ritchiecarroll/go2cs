@@ -86,16 +86,16 @@ internal static void Main() {
 
     var (ᴛ1, ᴛ2) = countArgs((any)(default!));
     fmt.Println(ᴛ1, ᴛ2);
-    var (ᴛ3, ᴛ4) = countArgs((any)(default!), (nint)(1));
+    var (ᴛ3, ᴛ4) = countArgs((any)(default!), (nint)1);
     fmt.Println(ᴛ3, ᴛ4);
-    var (ᴛ5, ᴛ6) = countArgs((nint)(1), (any)(default!));
+    var (ᴛ5, ᴛ6) = countArgs((nint)1, (any)(default!));
     fmt.Println(ᴛ5, ᴛ6);
     var (ᴛ7, ᴛ8) = countArgs((any)(default!), (any)(default!), (any)(default!));
     fmt.Println(ᴛ7, ᴛ8);
 
     var (ᴛ9, ᴛ10) = countArgs();
     fmt.Println(ᴛ9, ᴛ10);
-    var (ᴛ11, ᴛ12) = countArgs((nint)(1), (nint)(2));
+    var (ᴛ11, ᴛ12) = countArgs((nint)1, (nint)2);
     fmt.Println(ᴛ11, ᴛ12);
 
     fmt.Println(describe((Shape)(default!)));
@@ -103,7 +103,7 @@ internal static void Main() {
     slice<Shape> none = default!;
     fmt.Println(describe(none.ꓸꓸꓸ));
 
-    var anys = new any[]{(nint)(1), (@string)"two"u8, default!}.slice();
+    var anys = new any[]{(nint)1, (@string)"two"u8, default!}.slice();
     var (ᴛ13, ᴛ14) = countArgs((any)(anys));
     fmt.Println(ᴛ13, ᴛ14);
     fmt.Println(nest((any)(anys)));
@@ -118,16 +118,16 @@ internal static void Main() {
     var (ᴛ19, ᴛ20) = countArgs(noAnys.ꓸꓸꓸ);
     fmt.Println(ᴛ19, ᴛ20);
 
-    var (ᴛ21, ᴛ22) = countArgs((nint)(1), anys);
+    var (ᴛ21, ᴛ22) = countArgs((nint)1, anys);
     fmt.Println(ᴛ21, ᴛ22);
-    fmt.Println(nest((nint)(1), anys));
+    fmt.Println(nest((nint)1, anys));
 
-    var arr = new any[]{(nint)(7), (nint)(8)}.array();
+    var arr = new any[]{(nint)7, (nint)8}.array();
     var (ᴛ23, ᴛ24) = countArgs((any)(arr));
     fmt.Println(ᴛ23, ᴛ24);
     fmt.Println(nest((any)(arr)));
 
-    var named = new anyList(new any[]{(nint)(1), (@string)"two"u8}.slice());
+    var named = new anyList(new any[]{(nint)1, (@string)"two"u8}.slice());
     var (ᴛ25, ᴛ26) = countArgs(named);
     fmt.Println(ᴛ25, ᴛ26);
     fmt.Println(nest(named));

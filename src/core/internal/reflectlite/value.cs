@@ -77,7 +77,7 @@ internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
 internal static abiꓸKind kind(this flag f) {
-    return ((abiꓸKind)(uint8)((uintptr)((flag)(f & flagKindMask))));
+    return (abiꓸKind)(uint8)((uintptr)((flag)(f & flagKindMask)));
 }
 
 internal static flag ro(this flag f) {
@@ -289,7 +289,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
             // A nil ReadWriter passed to nil Reader is OK,
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
-            return new Value(Ꮡdst, nil, ((flag)(uintptr)(uint8)abi.Interface));
+            return new Value(Ꮡdst, nil, (flag)(uintptr)(uint8)abi.Interface);
         }
         var x = valueInterface(v);
         if (Ꮡdst.NumMethod() == 0){

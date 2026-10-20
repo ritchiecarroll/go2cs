@@ -35,7 +35,7 @@ internal static void Main() {
 
         defer(triple, multiValueEagerˢ, n, ref ᒐ);
         defer(single, singleResultˢ, ref ᒐ);
-        defer(quad, sysConst, @base + off, (uintptr)(65536), (uintptr)(0), ref ᒐ);
+        defer(quad, sysConst, @base + off, (uintptr)65536, (uintptr)0, ref ᒐ);
 
         n = 99;
         fmt.Println("body done, n =", n);

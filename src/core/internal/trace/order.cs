@@ -177,9 +177,9 @@ internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, �
     ref var ev = ref Ꮡev.DerefOrNull();
 
     ref var pid = ref heap<ProcID>(out var Ꮡpid);
-    pid = ((ProcID)(int64)ev.args[0]);
+    pid = (ProcID)(int64)ev.args[0];
     ref var status = ref heap<tracev2.ProcStatus>(out var Ꮡstatus);
-    status = ((tracev2.ProcStatus)(uint8)ev.args[1]);
+    status = (tracev2.ProcStatus)(uint8)ev.args[1];
     if ((nint)(uint8)status >= len(tracev2ProcStatus2ProcState)) {
         return (curCtx, false, fmt.Errorf("invalid status for proc %d: %d"u8, pid, status));
     }
@@ -248,7 +248,7 @@ internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, �
 internal static (schedCtx, bool, error) advanceProcStart(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var pid = ((ProcID)(int64)ev.args[0]);
+    var pid = (ProcID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]);
 
     // Try to advance. We might fail here due to sequencing, because the P hasn't
@@ -315,7 +315,7 @@ internal static (schedCtx, bool, error) advanceProcStop(this ref ordering o, ж<
 internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var pid = ((ProcID)(int64)ev.args[0]);
+    var pid = (ProcID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]);
     var (state, ok) = o.pStates[pid, ꟷ];
     if (!ok || ((~state).status != tracev2.ProcSyscall && (~state).status != tracev2.ProcSyscallAbandoned) || !seq.succeeds((~state).seq)) {
@@ -352,7 +352,7 @@ internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж
     }
 
     // Validate that the M we're stealing from is what we expect.
-    var mid = ((ThreadID)(int64)ev.args[2]); // The M we're stealing from.
+    var mid = (ThreadID)(int64)ev.args[2]; // The M we're stealing from.
 
     var newCtx = curCtx;
     if (mid == curCtx.M) {
@@ -391,10 +391,10 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
     ref var ev = ref Ꮡev.DerefOrNull();
 
     ref var gid = ref heap<GoID>(out var Ꮡgid);
-    gid = ((GoID)(int64)ev.args[0]);
-    var mid = ((ThreadID)(int64)ev.args[1]);
+    gid = (GoID)(int64)ev.args[0];
+    var mid = (ThreadID)(int64)ev.args[1];
     ref var status = ref heap<tracev2.GoStatus>(out var Ꮡstatus);
-    status = ((tracev2.GoStatus)(uint8)ev.args[2]);
+    status = (tracev2.GoStatus)(uint8)ev.args[2];
 
     if ((nint)(uint8)status >= len(tracev2GoStatus2GoState)) {
         return (curCtx, false, fmt.Errorf("invalid status for goroutine %d: %d"u8, gid, status));
@@ -415,7 +415,7 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
             return (curCtx, false, fmt.Errorf("found goroutine status for new goroutine after the first generation: id=%v status=%v"u8, gid, status));
         }
     }
-    ev.args[2] = (uint64)(((uint64)(uint8)oldState << (int)(32)) | (uint64)(uint8)status); // Smuggle in the old state for StateTransition.
+    ev.args[2] = (uint64)(uint8)oldState << 32 | (uint64)(uint8)status; // Smuggle in the old state for StateTransition.
 
     var newCtx = curCtx;
     var exprᴛ1 = status;
@@ -494,7 +494,7 @@ internal static (schedCtx, bool, error) advanceGoCreate(this ref ordering o, ж<
     }
     // This goroutine created another. Add a state for it.
     ref var newgid = ref heap<GoID>(out var Ꮡnewgid);
-    newgid = ((GoID)(int64)ev.args[0]);
+    newgid = (GoID)(int64)ev.args[0];
     {
         var (_, ok) = o.gStates[newgid, ꟷ]; if (ok) {
             return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) that already exists"u8, newgid));
@@ -554,7 +554,7 @@ internal static (schedCtx, bool, error) advanceGoStopExec(this ref ordering o, �
 internal static (schedCtx, bool, error) advanceGoStart(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var gid = ((GoID)(int64)ev.args[0]);
+    var gid = (GoID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]);
     var (state, ok) = o.gStates[gid, ꟷ];
     if (!ok || (~state).status != tracev2.GoRunnable || !seq.succeeds((~state).seq)) {
@@ -582,7 +582,7 @@ internal static (schedCtx, bool, error) advanceGoUnblock(this ref ordering o, ж
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // N.B. These both reference the goroutine to unblock, not the current goroutine.
-    var gid = ((GoID)(int64)ev.args[0]);
+    var gid = (GoID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]);
     var (state, ok) = o.gStates[gid, ꟷ];
     if (!ok || (~state).status != tracev2.GoWaiting || !seq.succeeds((~state).seq)) {
@@ -623,7 +623,7 @@ internal static (schedCtx, bool, error) advanceGoSwitch(this ref ordering o, ж<
     if ((~curGState).status != tracev2.GoRunning) {
         return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, o.evName(ev.typ), GoRunning));
     }
-    var nextg = ((GoID)(int64)ev.args[0]);
+    var nextg = (GoID)(int64)ev.args[0];
     var seq = makeSeq(gen, ev.args[1]); // seq is for nextg, not curCtx.G.
     (var nextGState, ok) = o.gStates[nextg, ꟷ];
     if (!ok || (~nextGState).status != tracev2.GoWaiting || !seq.succeeds((~nextGState).seq)) {
@@ -799,7 +799,7 @@ internal static (schedCtx, bool, error) advanceGoCreateSyscall(this ref ordering
     }
     // This goroutine is effectively being created. Add a state for it.
     ref var newgid = ref heap<GoID>(out var Ꮡnewgid);
-    newgid = ((GoID)(int64)ev.args[0]);
+    newgid = (GoID)(int64)ev.args[0];
     {
         var (_, ok) = o.gStates[newgid, ꟷ]; if (ok) {
             return (curCtx, false, fmt.Errorf("tried to create goroutine (%v) in syscall that already exists"u8, newgid));
@@ -883,7 +883,7 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
     // thing we have to be sure of is that a task didn't begin
     // after it had already begun. Task IDs are allowed to be
     // reused, so we don't care about a Begin after an End.
-    var id = ((TaskID)ev.args[0]);
+    var id = (TaskID)ev.args[0];
     {
         var (_, okΔ1) = o.activeTasks[id, ꟷ]; if (okΔ1) {
             return (curCtx, false, fmt.Errorf("task ID conflict: %d"u8, id));
@@ -891,7 +891,7 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
     }
     // Get the parent ID, but don't validate it. There's no guarantee
     // we actually have information on whether it's active.
-    var parentID = ((TaskID)ev.args[1]);
+    var parentID = (TaskID)ev.args[1];
     if (parentID == BackgroundTask) {
         // Note: a value of 0 here actually means no parent, *not* the
         // background task. Automatic background task attachment only
@@ -902,7 +902,7 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
 
     // Validate the name and record it. We'll need to pass it through to
     // EvUserTaskEnd.
-    var nameID = ((stringID)ev.args[2]);
+    var nameID = (stringID)ev.args[2];
     var (name, ok) = evt.strings.get(nameID);
     if (!ok) {
         return (curCtx, false, fmt.Errorf("invalid string ID %v for %v event"u8, nameID, ev.typ));
@@ -921,7 +921,7 @@ internal static (schedCtx, bool, error) advanceUserTaskEnd(this ref ordering o, 
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
-    var id = ((TaskID)ev.args[0]);
+    var id = (TaskID)ev.args[0];
     {
         var (ts, ok) = o.activeTasks[id, ꟷ]; if (ok){
             // Smuggle the task info. This may happen in a different generation,
@@ -954,8 +954,8 @@ internal static (schedCtx, bool, error) advanceUserRegionBegin(this ref ordering
             return (curCtx, false, err);
         }
     }
-    var tid = ((TaskID)ev.args[0]);
-    var nameID = ((stringID)ev.args[1]);
+    var tid = (TaskID)ev.args[0];
+    var nameID = (stringID)ev.args[1];
     var (name, ok) = evt.strings.get(nameID);
     if (!ok) {
         return (curCtx, false, fmt.Errorf("invalid string ID %v for %v event"u8, nameID, ev.typ));
@@ -982,8 +982,8 @@ internal static (schedCtx, bool, error) advanceUserRegionEnd(this ref ordering o
             return (curCtx, false, err);
         }
     }
-    var tid = ((TaskID)ev.args[0]);
-    var nameID = ((stringID)ev.args[1]);
+    var tid = (TaskID)ev.args[0];
+    var nameID = (stringID)ev.args[1];
     var (name, ok) = evt.strings.get(nameID);
     if (!ok) {
         return (curCtx, false, fmt.Errorf("invalid string ID %v for %v event"u8, nameID, ev.typ));
@@ -1138,7 +1138,7 @@ internal static (schedCtx, bool, error) advanceGCSweepBegin(this ref ordering o,
 internal static (schedCtx, bool, error) advanceGCSweepActive(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var pid = ((ProcID)(int64)ev.args[0]);
+    var pid = (ProcID)(int64)ev.args[0];
     // N.B. In practice Ps can't block while they're sweeping, so this can only
     // ever reference curCtx.P. However, be lenient about this like we are with
     // GCMarkAssistActive; there's no reason the runtime couldn't change to block
@@ -1181,9 +1181,9 @@ internal static (schedCtx, bool, error) advanceGoRangeBegin(this ref ordering o,
             return (curCtx, false, err);
         }
     }
-    var desc = ((stringID)0);
+    var desc = (stringID)0;
     if (ev.typ == tracev2.EvSTWBegin) {
-        desc = ((stringID)ev.args[0]);
+        desc = (stringID)ev.args[0];
     }
     var (gState, ok) = o.gStates[curCtx.G, ꟷ];
     if (!ok) {
@@ -1201,7 +1201,7 @@ internal static (schedCtx, bool, error) advanceGoRangeBegin(this ref ordering o,
 internal static (schedCtx, bool, error) advanceGoRangeActive(this ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
-    var gid = ((GoID)(int64)ev.args[0]);
+    var gid = (GoID)(int64)ev.args[0];
     // N.B. Like GoStatus, this can happen at any time, because it can
     // reference a non-running goroutine. Don't check anything about the
     // current scheduler context.

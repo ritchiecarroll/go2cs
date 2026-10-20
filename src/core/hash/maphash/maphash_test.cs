@@ -53,7 +53,7 @@ public static void TestHashGrouping(ж<testing.T> Ꮡt) {
         h.SetSeed(hh[0].Seed());
     }
     hh[0].Write(b);
-    hh[1].WriteString(((@string)b));
+    hh[1].WriteString((@string)b);
 
     void writeByte(ж<global::go.hash.maphash_package.Hash> h, byte bΔ1) {
         var err = h.WriteByte(bΔ1);
@@ -68,7 +68,7 @@ public static void TestHashGrouping(ж<testing.T> Ꮡt) {
         }
     }
     void writeStringSingleByte(ж<global::go.hash.maphash_package.Hash> h, byte bΔ3) {
-        var (_, err) = h.WriteString(((@string)new byte[]{bΔ3}.slice()));
+        var (_, err) = h.WriteString((@string)new byte[]{bΔ3}.slice());
         if (err != default!) {
             Ꮡt.Fatalf("WriteString single byte: %v"u8, err);
         }
@@ -104,7 +104,7 @@ public static void TestHashGrouping(ж<testing.T> Ꮡt) {
     }
 
     {
-        var sum1 = String(hh[0].Seed(), ((@string)b)); if (sum1 != hh[0].Sum64()) {
+        var sum1 = String(hh[0].Seed(), (@string)b); if (sum1 != hh[0].Sum64()) {
             Ꮡt.Errorf("hash using String not identical to a single Write"u8);
         }
     }
@@ -139,7 +139,7 @@ public static void TestHashHighBytes(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < N; i++) {
         var h = @new<global::go.hash.maphash_package.Hash>();
         h.WriteString(fooˢ);
-        m[(h.Sum64() >> (int)(32))] = new EmptyStruct();
+        m[(h.Sum64() >> 32)] = new EmptyStruct();
     }
     if (len(m) < (nint)(N / 2)) {
         Ꮡt.Errorf("from %d seeds, wanted at least %d different hashes; got %d"u8, (nint)(N), (nint)(N / 2), len(m));
@@ -269,14 +269,14 @@ public static void TestComparable(ж<testing.T> Ꮡt) {
     testComparable<int64, int64>(Ꮡt, (int64)2);
     testComparable<uint64, uint64>(Ꮡt, (uint64)8);
     testComparable<uintptr, uintptr>(Ꮡt, (uintptr)12);
-    testComparable<any, any>(Ꮡt, ((any)(@string)("s"u8)));
+    testComparable<any, any>(Ꮡt, (any)(@string)("s"u8));
     testComparable<@string, @string>(Ꮡt, (@string)"s");
     testComparable<bool, bool>(Ꮡt, true);
     testComparable<ж<float64>, ж<float64>>(Ꮡt, @new<float64>());
     testComparable<float64, float64>(Ꮡt, (float64)9D);
     testComparable<complex128, complex128>(Ꮡt, (complex128)(1D + 9D.i()));
     testComparable<EmptyStruct, EmptyStruct>(Ꮡt, new EmptyStruct());
-    testComparable<TestComparable_v, TestComparable_v>(Ꮡt, new TestComparable_v(i: 9, u: 1, b: true, f: 9.9D, p: @new<nint>(), a: (nint)(1)));
+    testComparable<TestComparable_v, TestComparable_v>(Ꮡt, new TestComparable_v(i: 9, u: 1, b: true, f: 9.9D, p: @new<nint>(), a: (nint)1));
     var s1 = new TestComparable_S(s: heapStr(Ꮡt));
     var s2 = new TestComparable_S(s: heapStr(Ꮡt));
     if (@unsafe.StringData(s1.s) == @unsafe.StringData(s2.s)) {
@@ -290,7 +290,7 @@ public static void TestComparable(ж<testing.T> Ꮡt) {
     var c1 = new channel<EmptyStruct>(0);
     var c2 = new channel<EmptyStruct>(0);
     testComparable<channel<EmptyStruct>, channel<EmptyStruct>>(Ꮡt, c1, c1);
-    testComparable<channel<EmptyStruct>, channel<EmptyStruct>>(Ꮡt, ((channel<EmptyStruct>)default!));
+    testComparable<channel<EmptyStruct>, channel<EmptyStruct>>(Ꮡt, (channel<EmptyStruct>)default!);
     testComparable<float32, float32>(Ꮡt, (float32)0F, negativeZero<float32>());
     testComparable<float64, float64>(Ꮡt, (float64)0D, negativeZero<float64>());
     testComparableNoEqual(Ꮡt, math.NaN(), math.NaN());
@@ -310,7 +310,7 @@ internal static void testComparableNoEqual<T>(ж<testing.T> Ꮡt, T v1, T v2) {
 internal static slice<byte> heapStrValue = slice<byte>("aTestString"u8);
 
 internal static @string heapStr(ж<testing.T> Ꮡt) {
-    return ((@string)heapStrValue);
+    return (@string)heapStrValue;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -364,14 +364,14 @@ public static void TestWriteComparable(ж<testing.T> Ꮡt) {
     testWriteComparable<int64, int64>(Ꮡt, (int64)2);
     testWriteComparable<uint64, uint64>(Ꮡt, (uint64)8);
     testWriteComparable<uintptr, uintptr>(Ꮡt, (uintptr)12);
-    testWriteComparable<any, any>(Ꮡt, ((any)(@string)("s"u8)));
+    testWriteComparable<any, any>(Ꮡt, (any)(@string)("s"u8));
     testWriteComparable<@string, @string>(Ꮡt, (@string)"s");
     testComparable<bool, bool>(Ꮡt, true);
     testWriteComparable<ж<float64>, ж<float64>>(Ꮡt, @new<float64>());
     testWriteComparable<float64, float64>(Ꮡt, (float64)9D);
     testWriteComparable<complex128, complex128>(Ꮡt, (complex128)(1D + 9D.i()));
     testWriteComparable<EmptyStruct, EmptyStruct>(Ꮡt, new EmptyStruct());
-    testWriteComparable<TestComparable_v, TestComparable_v>(Ꮡt, new TestComparable_v(i: 9, u: 1, b: true, f: 9.9D, p: @new<nint>(), a: (nint)(1)));
+    testWriteComparable<TestComparable_v, TestComparable_v>(Ꮡt, new TestComparable_v(i: 9, u: 1, b: true, f: 9.9D, p: @new<nint>(), a: (nint)1));
     var s1 = new TestWriteComparable_S(s: heapStr(Ꮡt));
     var s2 = new TestWriteComparable_S(s: heapStr(Ꮡt));
     if (@unsafe.StringData(s1.s) == @unsafe.StringData(s2.s)) {
@@ -449,7 +449,7 @@ public static void TestComparableShouldPanic(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var s = slice<byte>("s"u8);
-        var a = ((any)s);
+        var a = (any)s;
         defer(() => {
             var e = recover();
             var (err, ok) = e._<error>(ᐧ);
@@ -539,7 +539,7 @@ internal static readonly @string stringˢ = "String"u8;
 internal static void benchmarkSize(ж<testing.B> Ꮡb, nint size) {
     var h = Ꮡ(new Hash(nil));
     var buf = new slice<byte>(size);
-    @string s = ((@string)buf);
+    @string s = (@string)buf;
 
     var bufʗ1 = buf;
     var hʗ1 = h;
@@ -603,14 +603,14 @@ public static void BenchmarkComparable(ж<testing.B> Ꮡb) {
     benchmarkComparable<int64, int64>(Ꮡb, (int64)2);
     benchmarkComparable<uint64, uint64>(Ꮡb, (uint64)8);
     benchmarkComparable<uintptr, uintptr>(Ꮡb, (uintptr)12);
-    benchmarkComparable<any, any>(Ꮡb, ((any)(@string)("s"u8)));
+    benchmarkComparable<any, any>(Ꮡb, (any)(@string)("s"u8));
     benchmarkComparable<@string, @string>(Ꮡb, (@string)"s");
     benchmarkComparable<bool, bool>(Ꮡb, true);
     benchmarkComparable<ж<float64>, ж<float64>>(Ꮡb, @new<float64>());
     benchmarkComparable<float64, float64>(Ꮡb, (float64)9D);
     benchmarkComparable<complex128, complex128>(Ꮡb, (complex128)(1D + 9D.i()));
     benchmarkComparable<EmptyStruct, EmptyStruct>(Ꮡb, new EmptyStruct());
-    benchmarkComparable<BenchmarkComparable_testStruct, BenchmarkComparable_testStruct>(Ꮡb, new BenchmarkComparable_testStruct(i: 9, u: 1, b: true, f: 9.9D, p: @new<nint>(), a: (nint)(1)));
+    benchmarkComparable<BenchmarkComparable_testStruct, BenchmarkComparable_testStruct>(Ꮡb, new BenchmarkComparable_testStruct(i: 9, u: 1, b: true, f: 9.9D, p: @new<nint>(), a: (nint)1));
 }
 
 } // end maphash_internal_test_package
