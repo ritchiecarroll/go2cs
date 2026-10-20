@@ -541,9 +541,11 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 	}
 }
 
-// stackAppendBufferName is a buffer's C# name: its variable's, as the operand renders, plus StackBufferMarker.
+// stackAppendBufferName is a buffer's C# name: its variable's, as the operand renders, plus StackBufferMarker. The
+// marker makes a keyword-named variable's buffer an ordinary name, so its @ is dropped (@out's buffer is outᴷ), as
+// AddressPrefix drops it.
 func (v *Visitor) stackAppendBufferName(buffer *stackAppendBuffer) string {
-	return getSanitizedIdentifier(v.getIdentName(buffer.operand)) + StackBufferMarker
+	return strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(buffer.operand)), "@") + StackBufferMarker
 }
 
 // stackAppendBufferPrologue is the declarations a function's entry holds for its buffers, one line each at indent.

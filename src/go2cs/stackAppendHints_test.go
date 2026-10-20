@@ -360,6 +360,13 @@ func addressTaken() int {
 }
 
 //go:noinline
+func keyword() int {
+	var out []int64
+	out = append(out, 1)
+	return cap(out)
+}
+
+//go:noinline
 func run(f func() int) int { return f() }
 
 //go:noinline
@@ -376,8 +383,9 @@ func closures() int {
 
 // TestStackAppendEmission converts a module with the real harvest: the buffer at the entry of the function that
 // appends, the first qualifying site only, a function literal's own variable in the literal's body, and no buffer
-// for an address-taken variable or an outer variable appended inside a literal. RED before the converter read the
-// harvest: no buffer anywhere, so x's first append grew 1 2 4 4 8 where Go's reads 4 4 4 4 8.
+// for an address-taken variable or an outer variable appended inside a literal; a C# keyword's buffer drops its @.
+// RED before the converter read the harvest: no buffer anywhere, so x's first append grew 1 2 4 4 8 where Go's reads
+// 4 4 4 4 8; and with the @ kept, out's buffer read @outᴷ.
 func TestStackAppendEmission(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
@@ -426,13 +434,15 @@ func TestStackAppendEmission(t *testing.T) {
 		"x = append(x, (int64)(5));",
 		"        var innerᴷ = new stackAppend<int64>();\n",
 		"inner = append(innerᴷ, inner, (int64)(1));",
+		"    var outᴷ = new stackAppend<int64>();\n",
+		"@out = append(outᴷ, @out, (int64)(1));",
 	} {
 		if strings.Count(emitted, want) != 1 {
 			t.Errorf("want exactly one %q in:\n%s", want, emitted)
 		}
 	}
 
-	for _, unwanted := range []string{"aᴷ", "outerᴷ"} {
+	for _, unwanted := range []string{"aᴷ", "outerᴷ", "@outᴷ"} {
 		if strings.Contains(emitted, unwanted) {
 			t.Errorf("unwanted %q in:\n%s", unwanted, emitted)
 		}
