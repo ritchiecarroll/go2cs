@@ -22,7 +22,7 @@ public static partial void TestAnd32(ж<testing.T> Ꮡt) {
         var old = x;
         var v = atomic.And32(Ꮡx, ~(((uint32)1).Lsh((uint64)(i))));
         {
-            var r = ((uint32)0xffffffffU).Lsh((uint64)((i + 1))); if (x != r || v != old) {
+            var r = ((uint32)0xffffffffU).Lsh((uint64)(i + 1)); if (x != r || v != old) {
                 Ꮡt.Fatalf("clearing bit %#x: want %#x, got new %#x and old %#v"u8, (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
             }
         }
@@ -113,7 +113,7 @@ public static partial void TestOr32(ж<testing.T> Ꮡt) {
         var old = x;
         var v = atomic.Or32(Ꮡx, ((uint32)1).Lsh((uint64)(i)));
         {
-            var r = (((uint32)1).Lsh((uint64)((i + 1)))) - 1; if (x != r || v != old) {
+            var r = (((uint32)1).Lsh((uint64)(i + 1))) - 1; if (x != r || v != old) {
                 Ꮡt.Fatalf("setting bit %#x: want %#x, got new %#x and old %#v"u8, (uint32)(((uint32)1).Lsh((uint64)(i))), r, x, v);
             }
         }

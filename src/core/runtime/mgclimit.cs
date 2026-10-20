@@ -397,7 +397,7 @@ partial struct limiterEventStamp /*num:uint64*/;
 
 // makeLimiterEventStamp creates a new stamp from the event type and the current timestamp.
 internal static limiterEventStamp makeLimiterEventStamp(limiterEventType typ, int64 now) {
-    return (limiterEventStamp)((uint64)(uint8)typ << (int)((64 - limiterEventBits)) | ((uint64)now & ~limiterEventTypeMask));
+    return (limiterEventStamp)((uint64)(uint8)typ << (int)(64 - limiterEventBits) | ((uint64)now & ~limiterEventTypeMask));
 }
 
 // duration computes the difference between now and the start time stored in the stamp.
@@ -416,7 +416,7 @@ internal static int64 duration(this limiterEventStamp s, int64 now) {
 
 // type extracts the event type from the stamp.
 internal static limiterEventType typ(this limiterEventStamp s) {
-    return (limiterEventType)(uint8)((uint64)((s >> (int)((64 - limiterEventBits)))));
+    return (limiterEventType)(uint8)((uint64)(s >> (int)(64 - limiterEventBits)));
 }
 
 // limiterEvent represents tracking state for an event tracked by the GC CPU limiter.

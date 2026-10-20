@@ -106,15 +106,15 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 }
                 if (exprᴛ1 == Int8) {
                     UntypedInt s = 8;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)((1 << (int)((s - 1))) - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
                 }
                 if (exprᴛ1 == Int16) {
                     UntypedInt s = 16;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)((1 << (int)((s - 1))) - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
                 }
                 if (exprᴛ1 == Int32) {
                     UntypedInt s = 32;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
                 }
                 if (exprᴛ1 == Int64 || exprᴛ1 == ΔUntypedInt) {
                     return true;

@@ -53,12 +53,12 @@ internal static float64 cbrt(float64 x) {
     }
 
     // rough cbrt to 5 bits
-    var t = Float64frombits(Float64bits(x) / 3 + (uint64)(((uint64)B1 << 32)));
+    var t = Float64frombits(Float64bits(x) / 3 + (uint64)((uint64)B1 << 32));
     if (x < SmallestNormal) {
         // subnormal number
         t = (float64)(18014398509481984D); // set t= 2**54
         t *= x;
-        t = Float64frombits(Float64bits(t) / 3 + (uint64)(((uint64)B2 << 32)));
+        t = Float64frombits(Float64bits(t) / 3 + (uint64)((uint64)B2 << 32));
     }
 
     // new cbrt to 23 bits

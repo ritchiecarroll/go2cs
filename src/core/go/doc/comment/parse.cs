@@ -959,7 +959,7 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
     void flush(nint i) {
         writeUntilʗ1(i);
         if (Ꮡw.Value.Len() > 0) {
-            @out = append(@out, (ΔText)(((Plain)Ꮡw.Value.String())));
+            @out = append(@out, (ΔText)((Plain)Ꮡw.Value.String()));
             Ꮡw.Value.Reset();
         }
     }
@@ -991,7 +991,7 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
                     }
                     flush(i);
                     if (url == ""u8){
-                        @out = append(@out, (ΔText)(((Italic)id)));
+                        @out = append(@out, (ΔText)((Italic)id));
                     } else {
                         @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: new ΔText[]{((Italic)id)}.slice(), URL: url)))));
                     }

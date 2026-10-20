@@ -152,7 +152,7 @@ internal static void dumptype(ж<_type> Ꮡt) {
 
     // If we've definitely serialized the type before,
     // no need to do it again.
-    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((t.Hash & (uint32)((typeCacheBuckets - 1)))));
+    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((t.Hash & (uint32)(typeCacheBuckets - 1))));
     if (Ꮡt == (~b).t[0]) {
         return;
     }
@@ -776,7 +776,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
             }
         }
         var i = (addr - Δp) / (uintptr)goarch.PtrSize;
-        tmpbuf[i / 8] |= (byte)((byte)(1 << (int)((i % 8))));
+        tmpbuf[i / 8] |= (byte)((byte)(1 << (int)(i % 8)));
     }
     return new bitvector((int32)nptr, Ꮡ(tmpbuf, 0));
 }

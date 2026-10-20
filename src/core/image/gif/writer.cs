@@ -228,7 +228,7 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
         dst[3 * i + 1] = g;
         dst[3 * i + 2] = b;
     }
-    nint n = ((nint)1).Lsh((int64)((size + 1)));
+    nint n = ((nint)1).Lsh((int64)(size + 1));
     if (n > len(p)) {
         // Pad with black.
         clear(dst.slice(3 * len(p), 3 * n));
