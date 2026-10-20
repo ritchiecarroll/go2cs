@@ -283,61 +283,136 @@ public sealed class TestExecution
     /// </summary>
     internal TestRunner.NestedRoot? NestedRoot { get; }
 
-    private int Depth => m_parent is null ? 0 : m_parent.Depth + 1;
+    // Go's c.output (testing.go:661): this test's buffered text, every line already indented four spaces
+    // (Go's outputWriter and indenter), its records when it is not chatty and its subtests' reports.
+    // Printed after its own `--- FAIL` line by its report, or dropped with a quiet pass. Under m_syncRoot.
+    private readonly StringBuilder m_goOutput = new();
 
-    // The report blocks of a redirected RunTests root's failed subtests, held for the parent's own block
-    // (Go appends a subtest's report to its parent's output, printed after the parent's `--- FAIL` line).
-    private readonly System.Text.StringBuilder m_redirectedChildReports = new();
+    // Go's text output is this test's to print when the run is not --json, and always under a RunTests root
+    // whose program redirected os.Stdout (Go's root writes there, and the run hears nothing; see ReportEvent).
+    private bool GoText => NestedRoot?.Redirected is not null || !m_runner.Json;
 
-    // Every event goes to the run, except under a RunTests root whose program redirected os.Stdout: then it
-    // is Go's text output on that file (TestRunner.NestedRoot.Redirected) and the run hears nothing. Verbose
-    // (-test.v, or --json) is Go's chatty printer, which writes each line as it happens; otherwise only a
-    // failure prints, its subtests' reports inside its own. An infrastructure failure is the host's, and
-    // always goes to the run.
+    // Go's chatty printer for the output this test's text goes to: the redirected file's, or stdout's.
+    private TestRunner.ChattyPrinter Printer => NestedRoot?.Chatty ?? m_runner.Chatty;
+
+    // Go's `c.chatty != nil`: -test.v (Go's text output prints as it happens).
+    private bool Chatty => m_runner.Verbose;
+
+    // Every event goes to the run (results, --json), except under a RunTests root whose program redirected
+    // os.Stdout: there the run hears nothing (TestRunner.NestedRoot). Wherever Go's text output is this
+    // test's to print (GoText), the event's Go text is printed here as Go's testing package prints it.
+    // An infrastructure failure is the host's, and always goes to the run.
     private void ReportEvent(TestEvent testEvent)
     {
-        if (NestedRoot?.Redirected is not Action<string> write || testEvent.Action is not ("run" or "pass" or "fail" or "skip"))
-        {
+        bool redirected = NestedRoot?.Redirected is not null;
+
+        if (!redirected || testEvent.Action is not ("run" or "pass" or "fail" or "skip" or "attr" or "artifacts"))
             m_runner.Report(testEvent);
-            return;
-        }
 
-        bool verbose = m_runner.Verbose;
-        string indent = new(' ', 4 * Depth);
-
-        if (testEvent.Action == "run")
-        {
-            if (verbose)
-                write($"=== RUN   {Name}\n");
-
-            return;
-        }
-
-        if (testEvent.Action != "fail" && !verbose)
-            return;
-
-        System.Text.StringBuilder block = new();
-        block.Append($"{indent}--- {testEvent.Action.ToUpperInvariant()}: {Name} ({testEvent.Elapsed:0.00}s)\n");
-
-        if (testEvent.Output is string output)
-        {
-            foreach (string line in output.Split('\n'))
-                block.Append(indent).Append("    ").Append(line.TrimEnd('\r')).Append('\n');
-        }
-
-        lock (m_syncRoot)
-            block.Append(m_redirectedChildReports);
-
-        if (verbose || m_parent is null)
-            write(block.ToString());
-        else
-            m_parent.AppendRedirectedChildReport(block.ToString());
+        if (GoText)
+            PrintGoText(testEvent);
     }
 
-    private void AppendRedirectedChildReport(string report)
+    // Go's text for one event: === RUN (t.Run, testing.go:2092), === ATTR (:1616), === ARTIFACTS (:1398) under
+    // chatty output, and a terminal event's report (T.report, :2489).
+    private void PrintGoText(TestEvent testEvent)
     {
+        switch (testEvent.Action)
+        {
+            case "run":
+                if (Chatty)
+                    Printer.Updatef(Name, $"=== RUN   {Name}\n");
+                break;
+
+            case "attr":
+                if (Chatty)
+                    Printer.Updatef(Name, $"=== ATTR  {Name} {testEvent.Key} {testEvent.Value}\n");
+                break;
+
+            case "artifacts":
+                if (Chatty)
+                    Printer.Updatef(Name, $"=== ARTIFACTS {Name} {testEvent.Path}\n");
+                break;
+
+            case "pass" or "skip" or "fail" or "infrastructure-error":
+                Report(testEvent.Action is "fail" or "infrastructure-error" ? "FAIL" : testEvent.Action.ToUpperInvariant(), testEvent.Elapsed);
+                break;
+        }
+    }
+
+    // Go's T.report: a failure always reports, a pass or skip only under chatty output, as
+    // "--- %s: %s (%s)\n" followed by the test's buffered output (flushToParent, :815). A top-level test's
+    // report goes to the output itself (its parent is the root, whose writer is the output: chatty.Updatef when
+    // chatty, a plain write when not); a subtest's goes into its parent's output, four spaces further in (the
+    // parent's indenter), to print after the parent's own report line.
+    private void Report(string verdict, double elapsed)
+    {
+        if (verdict != "FAIL" && !Chatty)
+        {
+            lock (m_syncRoot)
+                m_goOutput.Clear();
+
+            return;
+        }
+
+        string header = $"--- {verdict}: {Name} ({elapsed.ToString("0.00", CultureInfo.InvariantCulture)}s)\n";
+        string block;
+
         lock (m_syncRoot)
-            m_redirectedChildReports.Append(report);
+        {
+            if (m_logsDropped > 0)
+                m_goOutput.Append($"    testing: {m_logsDropped} further log record(s) dropped after {MaxLogCharacters} characters\n");
+
+            block = header + m_goOutput;
+            m_goOutput.Clear();
+        }
+
+        if (m_parent is null)
+        {
+            if (Chatty)
+                Printer.Updatef(Name, block);
+            else
+                Printer.Write(block);
+
+            return;
+        }
+
+        lock (m_parent.m_syncRoot)
+            AppendIndentedLocked(m_parent.m_goOutput, block);
+    }
+
+    // Go's outputWriter.writeLine (testing.go:1167): each line of a record prints at once, indented four spaces,
+    // while the test runs under chatty output (naming the test first when another printed last), and is buffered
+    // into its output otherwise. Callers hold m_syncRoot, as Go's writeLine runs under c.mu.
+    private void EmitRecordLocked(string record)
+    {
+        if (!GoText)
+            return;
+
+        StringBuilder lines = new();
+        AppendIndentedLocked(lines, record);
+
+        if (Chatty && !m_finished)
+            Printer.Printf(Name, lines.ToString());
+        else
+            m_goOutput.Append(lines);
+    }
+
+    // Go's indenter (testing.go:860): every line of `text` four spaces further in, each ending in a newline.
+    private static void AppendIndentedLocked(StringBuilder target, string text)
+    {
+        int start = 0;
+
+        while (start < text.Length)
+        {
+            int end = text.IndexOf('\n', start);
+
+            if (end < 0)
+                end = text.Length;
+
+            target.Append("    ").Append(text.AsSpan(start, end - start).TrimEnd('\r')).Append('\n');
+            start = end + 1;
+        }
     }
 
     public string Name { get; }
@@ -941,10 +1016,201 @@ public sealed class TestExecution
         return (m_artifactDir, m_artifactDirError);
     }
 
-    public void Helper()
+    // Go's c.helperNames (testing.go:651-652): the Go names of the functions that called t.Helper. Go keeps their
+    // PCs and names them lazily (pcToName); a name is what frameSkip compares, so the name is kept. Under m_syncRoot.
+    private readonly HashSet<string> m_helperNames = new(StringComparer.Ordinal);
+
+    // Go's c.creator (testing.go:654, set in T.Run :2065): the stack that called t.Run for this subtest, which
+    // frameSkip walks on into when a helper chain reaches tRunner. Null for a top-level test.
+    private slice<uintptr>? m_creator;
+
+    // The Go name the host's test body frame reports (Execute's GoStackRoot) -- Go's c.runner.
+    private const string RunnerFunction = "testing.tRunner";
+
+    // Go's maxStackLen (testing.go:592).
+    private const int MaxStackLen = 50;
+
+    /// <summary>
+    /// Go's <c>(*common).Helper</c> (testing.go:1272): marks <paramref name="function"/>, the Go name of the function
+    /// that called <c>t.Helper</c>, as a helper of this test, so a record logged from it is attributed to its caller.
+    /// A synctest child's helpers are its parent's.
+    /// </summary>
+    internal void Helper(string function)
     {
-        // Helper-frame elision is staged; declaration source identity is still reported.
+        if (m_isSynctest && m_parent is not null)
+        {
+            m_parent.Helper(function);
+            return;
+        }
+
+        lock (m_syncRoot)
+            m_helperNames.Add(function);
     }
+
+    private bool IsHelper(string function)
+    {
+        lock (m_syncRoot)
+            return m_helperNames.Contains(function);
+    }
+
+    /// <summary>
+    /// Go's <c>(*common).log</c> (testing.go:1028) for a record a test function logs through <c>T</c>'s API: the
+    /// record is decorated with its call site and logged. When the test and every ancestor are done, Go panics
+    /// before it decorates, so that panic carries the record as Go composes it (<see cref="Log"/>).
+    /// </summary>
+    internal void LogFromCaller(string text)
+    {
+        // Go's destination skips a synctest child (`!c.done && !c.isSynctest`): its records, and its helpers, are
+        // the test that called synctest.Test.
+        if (m_isSynctest && m_parent is not null)
+        {
+            m_parent.LogFromCaller(text);
+            return;
+        }
+
+        if (Destination() is not { } destination)
+        {
+            Log(text);
+            return;
+        }
+
+        string s = text.EndsWith('\n') ? text[..^1] : text;
+        Log(destination.CallSite() + s.Replace("\n", "\n    "));
+    }
+
+    /// <summary>
+    /// Go's <c>(*common).callSite</c> (testing.go:1076) over <c>frameSkip</c> (:742): the file and line of the frame
+    /// that logged, past this host's own frames and every helper, as <c>"file.go:12: "</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The walk is Go's, over the converted runtime's <c>runtime.Callers</c>, which reports only frames the Go
+    /// source declares (each with its Go position). The host's own frames there are <c>runtime.Callers</c> and the
+    /// <c>testing.(*T)</c> API it entered through, possibly twice (the <c>ж&lt;T&gt;</c> forwarder reports the
+    /// same Go name), and they are passed first, as Go's fixed skip of 3 passes callSite, log and the public
+    /// function. Then Go's loop: <c>runtime.gopanic</c> is passed; reaching <c>testing.tRunner</c> (this host's
+    /// <see cref="Execute"/>) ends a top-level test's walk at the frame before it, and continues a subtest's into
+    /// the stack that called its <c>t.Run</c> with the parent's helpers; the first frame that is not a helper is
+    /// the call site.
+    /// </para>
+    /// <para>
+    /// The name is the base name unless <c>-test.fullpath</c>; an unknown file is <c>???</c> and line 0 is 1.
+    /// </para>
+    /// </remarks>
+    internal string CallSite()
+    {
+        go.runtime_package.Frame frame = FrameSkip();
+        string file = frame.File.ToString();
+
+        if (file.Length == 0)
+            file = "???";
+        else if (!m_runner.FullPath)
+            file = file[(file.LastIndexOfAny(['/', '\\']) + 1)..];
+
+        long line = frame.Line == 0 ? 1 : frame.Line;
+        return $"{file}:{line.ToString(CultureInfo.InvariantCulture)}: ";
+    }
+
+    private go.runtime_package.Frame FrameSkip()
+    {
+        TestExecution c = this;
+        IEnumerator<go.runtime_package.Frame> frames = FramesPastHost(Callers()).GetEnumerator();
+        go.runtime_package.Frame first = default, previous = default;
+        bool haveFirst = false;
+
+        while (frames.MoveNext())
+        {
+            go.runtime_package.Frame frame = frames.Current;
+            string function = frame.Function.ToString();
+
+            if (function == "runtime.gopanic")
+            {
+                previous = frame;
+                continue;
+            }
+
+            if (!haveFirst)
+            {
+                first = frame;
+                haveFirst = true;
+            }
+
+            if (function == RunnerFunction)
+            {
+                if (c.m_parent is { } parent && c.m_creator is { } creator)
+                {
+                    frames = FramesPastHost(creator).GetEnumerator();
+                    c = parent;
+                    previous = frame;
+                    continue;
+                }
+
+                return previous;
+            }
+
+            if (!c.IsHelper(function))
+                return frame;
+
+            previous = frame;
+        }
+
+        return first;
+    }
+
+    // Go's `runtime.Callers(n, pc[:maxStackLen])`, from here: the host's frames are passed by FramesPastHost.
+    internal static slice<uintptr> Callers()
+    {
+        slice<uintptr> pcs = new(new uintptr[MaxStackLen]);
+        nint n = go.runtime_package.Callers(0, pcs);
+        return pcs[..(int)n];
+    }
+
+    // The Go frames of `pcs` after this host's own: runtime.Callers itself, then the ONE testing API function the
+    // caller entered through (Go names a method of a testing type `testing.(*T).Name`), every frame of it: its
+    // ж<T> forwarder reports the same Go name. That is Go's fixed skip (callSite + log + the public function, or
+    // Callers + Helper, or Callers + Run), so a record a testing method logs through another, as Go's Attr logs
+    // through Errorf, is attributed to that method's frame, as Go attributes it.
+    internal static IEnumerable<go.runtime_package.Frame> FramesPastHost(slice<uintptr> pcs)
+    {
+        ж<go.runtime_package.Frames> frames = go.runtime_package.CallersFrames(pcs);
+        bool passedCallers = false;
+        string? api = null;
+        bool pastHost = false;
+
+        while (true)
+        {
+            (go.runtime_package.Frame frame, bool more) = frames.Value.Next();
+            string function = frame.Function.ToString();
+
+            if (!pastHost)
+            {
+                if (!passedCallers && function == "runtime.Callers")
+                {
+                    passedCallers = true;
+                }
+                else if (api is null && IsTestingApiFunction(function))
+                {
+                    api = function;
+                }
+                else if (api is null || function != api)
+                {
+                    pastHost = true;
+                }
+            }
+
+            if (pastHost && frame.PC != 0)
+                yield return frame;
+
+            if (!more)
+                yield break;
+        }
+    }
+
+    private static bool IsTestingApiFunction(string function) =>
+        function.StartsWith("testing.(*T).", StringComparison.Ordinal) ||
+        function.StartsWith("testing.(*B).", StringComparison.Ordinal) ||
+        function.StartsWith("testing.(*F).", StringComparison.Ordinal) ||
+        function.StartsWith("testing.(*common).", StringComparison.Ordinal);
 
     /// <summary>
     /// Records — at most once per test — that a number this test is about was measured in a
@@ -1028,8 +1294,12 @@ public sealed class TestExecution
         if (m_isSynctest)
             throw builtin.panic(RunInsideBubbleText);
 
-        return m_runner.RunChild(this, name, action);
+        // Go's t.creator (testing.go:2065): the stack that called t.Run, for the child's frameSkip.
+        return m_runner.RunChild(this, name, action, Callers());
     }
+
+    // Set by TestRunner.Start before the execution's thread starts.
+    internal void SetCreator(slice<uintptr>? creator) => m_creator = creator;
 
     /// <summary>
     /// Go's <c>common.isParallel</c> for this execution, read under the lock
@@ -1119,6 +1389,10 @@ public sealed class TestExecution
             m_parallel = true;
         }
 
+        // Go's chatty line as the test parks (testing.go:1797).
+        if (GoText && Chatty)
+            Printer.Updatef(Name, $"=== PAUSE {Name}\n");
+
         // Parked at the serial-phase gate the test is not running, so its per-test deadline stops until it
         // resumes below. Without this the parked time, which is every later serial test's, would count.
         Interlocked.Exchange(ref m_runningSince, 0);
@@ -1150,6 +1424,10 @@ public sealed class TestExecution
             GoexitException.MarkGoroutineExiting();
             throw new TestAbortException();
         }
+
+        // Go's chatty line as the test resumes, holding its slot (testing.go:1807).
+        if (GoText && Chatty)
+            Printer.Updatef(Name, $"=== CONT  {Name}\n");
     }
 
     /// <summary>
@@ -1702,6 +1980,7 @@ public sealed class TestExecution
 
         m_logs.Add(text);
         m_logCharacters += text.Length + Environment.NewLine.Length;
+        EmitRecordLocked(text);
     }
 
     /// <summary>

@@ -60,6 +60,9 @@ internal sealed class TestOptions
     /// <summary>Go 1.26's <c>-test.artifacts</c>: keep each test's ArtifactDir under the output directory.</summary>
     public bool Artifacts { get; private set; }
 
+    /// <summary>Go's <c>-test.fullpath</c>: a log record's call site names the whole file, not its base name.</summary>
+    public bool FullPath { get; private set; }
+
     /// <summary>Go's <c>-test.outputdir</c>: where profiles and, with <see cref="Artifacts"/>, artifacts go.</summary>
     public string? OutputDir { get; private set; }
 
@@ -261,6 +264,10 @@ internal sealed class TestOptions
                     }
 
                     options.Verbose = value is null || bool.Parse(value);
+                    break;
+                case "test.fullpath":
+                    // Go's callSite keeps a frame's whole file name instead of its base name (testing.go:1085).
+                    options.FullPath = value is null || bool.Parse(value);
                     break;
                 case "short":
                 case "test.short":

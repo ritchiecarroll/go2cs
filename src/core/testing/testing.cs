@@ -337,7 +337,7 @@ public static partial class testing_package
             return;
         }
 
-        execution.Log(Sprint(args));
+        execution.LogFromCaller(Sprint(args));
         execution.Fail();
     }
 
@@ -349,7 +349,7 @@ public static partial class testing_package
             return;
         }
 
-        execution.Log(Sprintf(format, args));
+        execution.LogFromCaller(Sprintf(format, args));
         execution.Fail();
     }
 
@@ -427,7 +427,7 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.Log(Sprint(args));
+        execution.LogFromCaller(Sprint(args));
         execution.FailNow();
     }
 
@@ -439,17 +439,28 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.Log(Sprintf(format, args));
+        execution.LogFromCaller(Sprintf(format, args));
         execution.FailNow();
     }
 
     [GoRecv] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
-        t.Execution?.Log(Sprint(args));
+        t.Execution?.LogFromCaller(Sprint(args));
 
     [GoRecv] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
-        t.Execution?.Log(Sprintf(format, args));
+        t.Execution?.LogFromCaller(Sprintf(format, args));
 
-    [GoRecv] public static void Helper(this ref T t) => t.Execution?.Helper();
+    // Go's Helper (testing.go:1272) records the CALLER of t.Helper: the first Go frame past this API.
+    [GoRecv] public static void Helper(this ref T t)
+    {
+        if (t.Execution is not { } execution)
+            return;
+
+        foreach (go.runtime_package.Frame frame in TestExecution.FramesPastHost(TestExecution.Callers()))
+        {
+            execution.Helper(frame.Function.ToString());
+            return;
+        }
+    }
 
     [GoRecv] public static @string Name(this ref T t) =>
         t.Execution is { } execution ? execution.Name : (@string)"";
@@ -468,7 +479,7 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.Log(Sprint(args));
+        execution.LogFromCaller(Sprint(args));
         execution.SkipNow();
     }
 
@@ -480,7 +491,7 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.Log(Sprintf(format, args));
+        execution.LogFromCaller(Sprintf(format, args));
         execution.SkipNow();
     }
 

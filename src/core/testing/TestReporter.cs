@@ -127,6 +127,9 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
     private TestEvent StampAfterAbandoned(TestEvent testEvent) =>
         m_abandoned is null || testEvent.Abandoned ? testEvent : testEvent with { AfterAbandoned = m_abandoned };
 
+    /// <summary>Whether this run emits <c>go test -json</c> events (otherwise Go's text output).</summary>
+    internal bool Json => json;
+
     public IReadOnlyList<TestEvent> Events
     {
         get
@@ -149,21 +152,15 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
                 return;
             }
 
-            if (testEvent.Action == "run" && !verbose)
+            // A test's own lines are Go's text, which its TestExecution prints as Go's binary does (=== RUN,
+            // records, --- PASS/FAIL/SKIP, === ATTR, ...). This text mode prints the package's summary and the
+            // host's own diagnostics only.
+            if (!string.IsNullOrEmpty(testEvent.Test) && testEvent.Action is "run" or "pass" or "fail" or "skip" or "attr" or "artifacts")
                 return;
 
-            // Go's chatty lines for these two, as testing.go prints them (:1621 and :1395).
-            if (testEvent.Action == "attr")
-            {
-                WriteEventLine($"=== ATTR  {testEvent.Test} {testEvent.Key} {testEvent.Value}");
+            // Go's binary prints nothing as a run starts but its "-test.shuffle N" line, which TestRunner prints.
+            if (testEvent.Action == "run")
                 return;
-            }
-
-            if (testEvent.Action == "artifacts")
-            {
-                WriteEventLine($"=== ARTIFACTS {testEvent.Test} {testEvent.Path}");
-                return;
-            }
 
             string output = string.IsNullOrWhiteSpace(testEvent.Output) ? "" : $" — {testEvent.Output}";
 
@@ -251,17 +248,23 @@ internal sealed class TestReporter(string package, bool json, bool verbose)
     /// "PASS\r\n" failed it (D5). The comparer splits on "\n" and reads either ending.
     /// </para>
     /// </remarks>
-    internal static void WriteEventLine(string line)
+    internal static void WriteEventLine(string line) => WriteText(line + "\n");
+
+    /// <summary>
+    /// Writes <paramref name="text"/> exactly as given (Go's text output: one or more whole lines) as ONE write,
+    /// the way <see cref="WriteEventLine"/> writes a line.
+    /// </summary>
+    internal static void WriteText(string text)
     {
         lock (s_eventLineLock)
         {
             if (!(ProcessConsoleForGuard ?? ConsoleOutIsTheProcessConsole()))
             {
-                Console.Out.Write(line + "\n");
+                Console.Out.Write(text);
                 return;
             }
 
-            byte[] bytes = Console.OutputEncoding.GetBytes(line + "\n");
+            byte[] bytes = Console.OutputEncoding.GetBytes(text);
             Stream stdout = StdoutForGuard ?? s_stdout.Value;
 
             // Anything already written through Console.Out stays ahead of this line.
