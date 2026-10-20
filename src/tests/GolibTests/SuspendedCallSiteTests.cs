@@ -44,11 +44,12 @@ namespace GolibTests
     /// The optimized JIT reports a frame suspended inside a method chain at the chain's FIRST offset, for every
     /// call in it (measured on CallerLineMultiLine's S1: Main reported IL 0xB1 for the call of Done at 0xD7), so
     /// "the first call after the reported offset" named the wrong call and the line fell back to the statement's.
-    /// runtime's suspendedCallSite settles it from the callee, the raw frame inside: the one call of the callee
-    /// in the statement at or after the reported offset. It never guesses: a callee called more than once there,
-    /// or not at all, leaves the CLR's reading. The end-to-end guard is the behavioral CallerLineMultiLine in
-    /// Release (S1-terminal 89 where Go has 92 before the fix, on two boxes); this pins the rule itself from the
-    /// IL, which no JIT setting changes.
+    /// The capture keeps the callee, the raw frame inside, when a call of it follows the reported offset (IL only:
+    /// a capture opens no symbol file), and Resolve settles the call by it (runtime's calleeSettledCallSite): the
+    /// one call of the callee in the statement at or after the reported offset. It never guesses: a callee called
+    /// more than once there, or not at all, leaves the CLR's reading. The end-to-end guard is the behavioral
+    /// CallerLineMultiLine in Release (S1-terminal 89 where Go has 92 before the fix, on two boxes); this pins the
+    /// rule itself from the IL, which no JIT setting changes.
     /// </summary>
     [TestClass]
     public class SuspendedCallSiteTests
@@ -81,17 +82,22 @@ namespace GolibTests
             // The offset the optimized JIT reports for every call in the chain: the chain statement's start.
             int chainStart = statements.Where(point => point <= adds[0]).Max();
 
-            Assert.AreEqual(doneCall, Invoke<int>("suspendedCallSite", shape, chainStart, done),
+            // CAPTURE keeps the callee for Resolve wherever a call of it follows the reported offset (IL only).
+            Assert.IsTrue(Invoke<bool>("callsCalleeAfter", shape, chainStart, done), "a call of `done` follows the chain's start");
+            Assert.IsFalse(Invoke<bool>("callsCalleeAfter", shape, chainStart, Method("unrelated")), "no call of `unrelated` follows it");
+
+            // RESOLVE settles the call.
+            Assert.AreEqual(doneCall, Invoke<int>("calleeSettledCallSite", shape, chainStart, done),
                 "a frame suspended calling `done` (called once in the statement) must resolve to that call");
 
-            Assert.AreEqual(-1, Invoke<int>("suspendedCallSite", shape, chainStart, add),
+            Assert.AreEqual(-1, Invoke<int>("calleeSettledCallSite", shape, chainStart, add),
                 "`add` is called twice after the chain's start: the offset cannot tell them apart, so nothing is settled");
 
-            Assert.AreEqual(-1, Invoke<int>("suspendedCallSite", shape, chainStart, Method("unrelated")),
+            Assert.AreEqual(-1, Invoke<int>("calleeSettledCallSite", shape, chainStart, Method("unrelated")),
                 "a callee no call in the statement targets (one the JIT inlined away) settles nothing");
 
-            // The reported offset IS a call of the callee: that call, as suspendedAtReportedCall answered before.
-            Assert.AreEqual(doneCall, Invoke<int>("suspendedCallSite", shape, doneCall, done));
+            // The reported offset IS a call of the callee: settled at capture, as before.
+            Assert.IsTrue(Invoke<bool>("suspendedAtReportedCall", shape, doneCall, done));
         }
     }
 }
