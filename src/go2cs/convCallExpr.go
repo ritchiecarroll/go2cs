@@ -1191,8 +1191,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// the referent-carrying box expression. A pointer LOCAL holds its box directly; a pointer
 		// PARAMETER renders as its deref'd value alias, so it takes the box `Ꮡp` exactly as the
 		// unsafe.Pointer branch above does — runqput's `guintptr(unsafe.Pointer(gp))` stores the
-		// CALLER's g, and the alias compiled only through a self-to-box operator boxing a COPY.
-		// Non-pointer args (e.g. a zero literal) fall through to the named-numeric route against
+		// CALLER's g, and the alias compiled only through a self-to-box operator boxing a COPY. A
+		// pointer RECEIVER has no box to pass and never reaches here: the package is refused before
+		// conversion (manualTypeReceiverRefusal.go, GO2CS2003). Non-pointer args (e.g. a zero literal) fall through to the named-numeric route against
 		// the manual type's operators.
 		if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
 			if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg && v.isManualType(obj.Name()) {
