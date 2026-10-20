@@ -52,10 +52,6 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 		}
 
 		v.writeLineTrailingComments(blockStmt.Lbrace, limit)
-
-		if len(blockStmt.List) > 0 {
-			v.writeStandAloneCommentString(v.outputBuilder, blockStmt.List[0].Pos(), nil, prefix)
-		}
 	}
 
 	for _, stmt := range blockStmt.List {
@@ -63,6 +59,8 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 
 		if lastStmt != nil {
 			gap = v.writeStatementGap(lastStmt, stmt)
+		} else if v.options.includeComments {
+			gap = v.writeLeadingComments(blockStmt.Lbrace, stmt, prefix)
 		}
 
 		// Inject any hoisted stack-string temp declarations whose anchor is this statement, so a
@@ -123,7 +121,7 @@ func (v *Visitor) visitStatementList(stmts []ast.Stmt, colon token.Pos) {
 		gap := -1
 
 		if i == 0 {
-			v.writeLeadingBodyComments(colon, stmt)
+			gap = v.writeLeadingBodyComments(colon, stmt)
 		} else {
 			gap = v.writeStatementGap(stmts[i-1], stmt)
 		}
@@ -279,10 +277,13 @@ func (v *Visitor) releaseClauseComments(colon token.Pos) {
 // the next flush, after the first statement or inside an argument list. A clause whose comments were
 // held (holdClauseComments) gets them back first.
 //
-// Each comment is written on its own, with the prefix this body's statements take.
-func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
+// Each comment is written on its own, with the prefix this body's statements take, and with Go's blank
+// line between two groups below the `:` line and between the last of them and first, as visitBlockStmt
+// writes them for a block (writeLeadingComments). It returns the output length before the blank line
+// it wrote ahead of first, or -1 when it wrote none, for dropEmptyGap.
+func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) int {
 	if !v.options.includeComments || !colon.IsValid() {
-		return
+		return -1
 	}
 
 	v.releaseClauseComments(colon)
@@ -290,7 +291,7 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 	span, spanned := v.clauseSpans[colon]
 
 	if first == nil && !spanned {
-		return
+		return -1
 	}
 
 	if v.file == nil {
@@ -342,13 +343,86 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
 	}
 
+	// lastLine is the last line written below the `:` line; comments above the label do not move it, as no
+	// blank line is kept among them.
+	lastLine := colonLine
+
 	for _, pos := range ownLine {
+		line := v.file.Line(pos)
+
+		if line > colonLine && lastLine > colonLine && line-lastLine > 1 {
+			v.writeGapLine()
+		}
+
 		v.outputBuilder.WriteString(prefix)
 		v.outputBuilder.WriteString(strings.ReplaceAll(v.standAloneComments[pos], "\n", v.newline))
+
+		if line > colonLine {
+			lastLine = max(lastLine, line+strings.Count(v.standAloneComments[pos], "\n"))
+		}
 
 		delete(v.standAloneComments, pos)
 		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
 	}
+
+	if first != nil && lastLine > colonLine && v.goBlankLineBetween(v.file.LineStart(lastLine), first.Pos()) {
+		mark := v.outputBuilder.Len()
+
+		if v.writeGapLine() {
+			return mark
+		}
+	}
+
+	return -1
+}
+
+// writeLeadingComments writes the comments still pending ahead of a block's first statement, each group on
+// its own lines, with Go's blank line between two groups and between the last group and first, as
+// writeStatementGap writes them between two statements. No blank line is written directly after the `{`
+// (writeGapLine refuses it, and gofmt keeps none there). It returns the output length before the blank
+// line it wrote ahead of first, or -1 when it wrote none, for dropEmptyGap.
+func (v *Visitor) writeLeadingComments(lbrace token.Pos, first ast.Stmt, prefix string) int {
+	if v.file == nil {
+		v.file = v.fset.File(first.Pos())
+	}
+
+	var pending []token.Pos
+
+	for _, pos := range v.sortedCommentPos {
+		if pos >= first.Pos() {
+			break
+		}
+
+		if _, found := v.standAloneComments[pos]; found {
+			pending = append(pending, pos)
+		}
+	}
+
+	lastLine := v.file.Line(lbrace)
+	wrote := false
+
+	for _, pos := range pending {
+		line := v.file.Line(pos)
+
+		if wrote && line-lastLine > 1 {
+			v.writeGapLine()
+		}
+
+		lines := strings.Count(v.standAloneComments[pos], "\n")
+		v.writeStandAloneCommentString(v.outputBuilder, pos, nil, prefix)
+		lastLine = max(lastLine, line+lines)
+		wrote = true
+	}
+
+	if wrote && v.goBlankLineBetween(v.file.LineStart(lastLine), first.Pos()) {
+		mark := v.outputBuilder.Len()
+
+		if v.writeGapLine() {
+			return mark
+		}
+	}
+
+	return -1
 }
 
 // writeLineTrailingComments writes a one-line comment Go has after a block's `{`, on the same line and
