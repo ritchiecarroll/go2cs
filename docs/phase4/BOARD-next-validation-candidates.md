@@ -27640,4 +27640,29 @@ never posts even the cancelled operation's completion still hangs it, as it hang
 pipe also takes an owner-only security descriptor (`D:P(A;;GA;;;OW)`) in place of the default, which lets Everyone
 read it (COORD's ruling, defense in depth). Neither is measured here: the i9's smoke run of the probe is owed.
 
+## 2026-10-20 — C2 finding: the comment census places a Go blank line by the FIRST C# line that names the next Go line's identifiers, which can be an earlier statement — OPEN (found by C2 on claude/c2-census-prelude-make and claude/c2-comment-blank-parity, census precision, unowned)
+
+The comment census (`src/go2cs/internal/commentcensus`) finds the C# translation of the Go line after a blank
+line by searching forward from the last line it placed for the first line holding all of that Go line's
+identifiers. When an earlier statement names the same identifiers, it anchors there. The blank is then read as
+missing where the C# has it, or credited where it has none. Measured instances, go1.26.10 against src/core:
+
+- read as missing where the C# keeps the blank: bytes/bytes.go:556 (`return a` anchored on `var a = new
+  slice...`), compress/bzip2/bzip2.go:393 (`if repeat > 0` on `if (repeat > 2*1024*1024)`),
+  internal/goroot/gc.go:118, go/printer/printer.go:1099 (on the `comments` local's declaration),
+  go/internal/gccgoimporter/parser.go:332. Until claude/c2-census-prelude-make, the walk back over comment lines
+  hid these, because that walk landed on an unrelated blank above the earlier line's comment.
+- exposed when the companion commit stopped requiring `make` (c3964f6fa): crypto/internal/cryptotest/aead.go:87,
+  debug/pe/file.go:639, encoding/asn1/asn1.go:194, go/parser/interface.go:159, internal/dag/alg.go:11,
+  internal/runtime/gc/internal/gen/gen.go:443, time/zoneinfo_read.go:427. All 7 read go-blank-cs-none
+  falsely at f3261431a.
+- the reverse direction exists too: crypto/tls/common.go:1846 and net/http/httputil/reverseproxy.go:872 read
+  missing while the make lines were unmapped, and correct once mapping them advanced the search.
+
+The census is the instrument, not the contract, and none of this moves a converter gate. It sizes the
+go-blank-cs-none class to within the miss count, so a converter seat scored on that class names the
+instances it relies on. A stricter anchor bounds the search by the C# line of the Go line before the blank
+(the previous statement's own translation), rather than by the last blank placed. It is a census seat with
+its own two-reading measurement.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
