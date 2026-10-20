@@ -205,7 +205,7 @@ func TestConstArgMatchingItsDefaultTypeTakesNoCast(t *testing.T) {
 
 	requireRenderedCall(t, got, "setDefault")
 
-	if strings.Contains(got, "(nint)(1)") {
+	if strings.Contains(got, "(nint)1") || strings.Contains(got, "(nint)(1)") {
 		t.Fatalf("a type parameter inferred as the constant's OWN default type needs no cast -- applying one is pure churn:\n got %q", got)
 	}
 }

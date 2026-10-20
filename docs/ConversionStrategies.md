@@ -1750,7 +1750,7 @@ internal static UntypedFloat scale => 2.5;
 …
 internal static void Main() {
     rune codepoint = replacementChar;
-    @string s = ((@string)codepoint);
+    @string s = (@string)codepoint;
     fmt.Println(len(s), codepoint);
     float64 factor = scale;
     fmt.Println(factor * 2D);
@@ -2124,12 +2124,14 @@ a type no wider.
 **Wider types need no narrowing cast.** `int32` and wider types are not promoted, and C# arithmetic is
 unchecked by default. So `+`, `-` and `*` on them wrap on overflow exactly as in Go, with no cast.
 
-**Bitwise results are cast at every width.** The converter wraps each bitwise operator, such as `&`, `|` and
-Go's "and not" `&^`, in a cast to its result type. The cast changes nothing at 32 or 64 bits; it only keeps the
-type explicit. You see it in the `(uint32)(…)` and `(uint64)(…)` around the examples that follow.
-<!-- src/go2cs/convBinaryExpr.go (~1675): a bitwise-shaped operand "is recursively emitted with its own
-     concrete `(type)(…)` wrap". Goldens: ShiftPrecedenceUnsigned/main.cs.target:8#9ab817, :19#34ffad, :42#7a44bf. Plain wide `+`
-     stays uncast. -->
+**A bitwise result is cast only where C# would change its type.** C# computes `&`, `|` and `^` on the
+narrow types in `int`, so a narrow result is cast back, as narrow arithmetic is. At 32 and 64 bits C# keeps
+the operands' type. So when both operands already have the result's type, a bitwise expression has no cast, as
+in the examples that follow. The cast stays on a named type, on `uintptr`, and where an operand is a constant C#
+might type differently, such as a constant on the right of Go's "and not" `&^`.
+<!-- src/go2cs/parityOperatorEmission.go:41 `func (v *Visitor) bitwiseResultCastRedundant(`, :54-58#3b37e5 (the six
+     widths), :60-63 (`&^`'s right operand: no constant). Goldens: ShiftPrecedenceUnsigned/main.cs.target:8
+     `return x & ((uint32)0 - x);` (no cast), :42 `fmt.Println((uint64)(hi & ~((uint64)1 << 63)));` (kept). -->
 
 **Unsigned negation subtracts from zero.** C#'s unary minus never keeps an unsigned type: it rejects `uint64`
 and `nuint`, and widens smaller unsigned values to a signed type. Go's `-x` on an unsigned value of type `T`
@@ -2144,14 +2146,14 @@ func lowestSetBit(x uint32) uint32 {
 <!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:7-9 -->
 ```csharp
 internal static uint32 lowestSetBit(uint32 x) {
-    return (uint32)(x & ((uint32)0 - x));
+    return x & ((uint32)0 - x);
 }
 ```
 
-Here `((uint32)0 - x)` is the negation. The outer `(uint32)(…)` is the bitwise cast around `&`.
+Here `((uint32)0 - x)` is the negation. Both operands of `&` are `uint32`, so the `&` has no cast.
 <!-- unsigned negation: src/go2cs/convUnaryExpr.go:1275-1281#05e413; golden
      src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:19
-     `fmt.Println((uint64)(z & ((uint64)0 - z)));` for Go `fmt.Println(z & -z)` (main.go:29#bb0128).
+     `fmt.Println(z & ((uint64)0 - z));` for Go `fmt.Println(z & -z)` (main.go:29#bb0128).
      C# spec: unary minus on uint converts to long, on byte/ushort promotes to int, on ulong/nuint
      is a compile error. -->
 
@@ -2166,17 +2168,23 @@ fmt.Println(hi &^ (1 << 63)) // clear the high bit -> 0x7FFFFFFFFFFFFFFF
 <!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:41-42 -->
 ```csharp
 uint64 hi = 0xFFFFFFFFFFFFFFFFUL;
-fmt.Println((uint64)(hi & ~(((uint64)1 << (int)(63)))));
+fmt.Println((uint64)(hi & ~((uint64)1 << 63)));
 ```
 
 The constant `1` becomes `(uint64)1`, so the shift happens at 64 bits, as Go's typed constant does
 ([Constant Values](#constant-values)). A large unsigned literal gets C#'s `UL` suffix so it compiles. The
-shift's own parentheses and `(int)` count are explained in the next paragraph.
+shift keeps its parentheses because C#'s `~` binds tighter than a shift, as Go's `^` does. The `&` keeps its
+cast because its right operand is a constant.
 <!-- golden: src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:33 `(uint8)(~a)` for Go `^a`. -->
 
-**Shifts get parentheses and an `int` count.** Go's `<<` and `>>` bind tighter than `+` and `-`, but C#'s bind
-looser. The converter wraps each shift in parentheses so the grouping stays Go's. C#'s shift also takes an
-`int` count, while Go accepts any integer type, so the count is cast to `int`:
+**Shifts and bitwise operators get parentheses where C# would regroup them.** Go puts `<<`, `>>` and `&` at
+the level of `*`, and `|` and `^` at the level of `+`. C# ranks shifts below `+` and `-`, and `&`, `^` and `|`
+below `==`. The converter keeps an operand's parentheses only where C#'s precedence would group the bare text
+differently from Go's tree, so `x>>4 + x` keeps them and `a | b<<8` does not. C#'s shift takes an `int` count,
+while Go accepts any integer type, so a count that is not an integer literal is cast to `int`:
+<!-- src/go2cs/parityOperatorEmission.go `func operandParensNeeded(` and `func shiftCountIsIntLiteral(`; the
+     behavioral fixture ParityOperatorPrecedence prints every `a op1 b op2 c` over the ten operators at three
+     widths against Go. -->
 
 <!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.go:32-33 -->
 ```go
@@ -2186,7 +2194,7 @@ fmt.Println(x>>4 + x) // (0x100>>4)+0x100 = 16 + 256 = 272
 <!-- source: src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:21-22 -->
 ```csharp
 uint64 x = 0x100;
-fmt.Println((x >> (int)(4)) + x);
+fmt.Println((x >> 4) + x);
 ```
 
 **A shift count that can reach the width calls a golib helper.** In Go, shifting by the operand's full width or
@@ -2252,12 +2260,12 @@ fmt.Println(u >> (c[4] % 64)) // 65 % 64 = 1 -> u >> 1
 ```
 <!-- source: src/tests/Behavioral/GoShiftSemantics/main.cs.target:30-31 -->
 ```csharp
-fmt.Println((u >> (int)(((nuint)(c[3] & 63)))));
-fmt.Println((u >> (int)((c[4] % 64))));
+fmt.Println(u >> (int)((c[3] & 63)));
+fmt.Println(u >> (int)((c[4] % 64)));
 ```
 
-The `(nuint)` on the first line is the bitwise cast around `&`; `%` is not bitwise, so the second line has
-none. The extra parentheses are harmless.
+Each count is a variable expression, so it is cast to `int`. The inner parentheses are Go's own around the
+count, kept inside the cast; they change nothing.
 
 A named integer type, such as `type Word uint`, becomes a C# struct whose operators are generated at compile
 time ([Named Numeric Types](#named-numeric-types-and-constant-contexts),
@@ -2435,7 +2443,7 @@ partial struct traceArg /*num:uint64*/;
 partial struct nameOff /*num:int32*/;
 …
     int32 procs = 5;
-    var a = ((traceArg)(uint64)procs);
+    var a = (traceArg)(uint64)procs;
 …
     nameOff s = 7;
     var e = (uint64)(int32)s;
@@ -3107,7 +3115,7 @@ fmt.Println(a.(int))
 ```
 <!-- source: src/tests/Behavioral/UntypedIntInterfaceBox/main.cs.target:36-37 -->
 ```csharp
-any a = (nint)(7);
+any a = (nint)7;
 fmt.Println(a._<nint>());
 ```
 
@@ -3197,9 +3205,9 @@ fmt.Println(x != 42) // false
 ```
 <!-- source: src/tests/Behavioral/InterfaceUntypedIntCompare/InterfaceUntypedIntCompare.cs.target:33-35 -->
 ```csharp
-any x = (nint)(42);
-fmt.Println(AreEqual(x, (nint)(42)));
-fmt.Println(!AreEqual(x, (nint)(42)));
+any x = (nint)42;
+fmt.Println(AreEqual(x, (nint)42));
+fmt.Println(!AreEqual(x, (nint)42));
 ```
 
 The right-hand `42` is also an untyped constant compared with an `any`. Go gives it its default type
@@ -3414,7 +3422,7 @@ A Go function with several results returns a C# tuple, so its call deconstructs 
 <!-- source: src/tests/Behavioral/ParallelAssignmentHazard/main.cs.target:8-26 -->
 ```csharp
     var x = (uint64)0b1011010;
-    (x, var frac) = ((x >> (int)(3)), (uint64)(x & 7));
+    (x, var frac) = (x >> 3, x & 7);
     fmt.Println(x, frac);
 …
     nint m = 5;
@@ -3633,7 +3641,7 @@ func forwardOk() int {
 	return total
 }
 ```
-<!-- source: src/tests/Behavioral/NestedVarShadow/main.cs.target:106-127 -->
+<!-- source: src/tests/Behavioral/NestedVarShadow/main.cs.target:101-122 -->
 ```csharp
 internal static nint forwardOk() {
     var m = new map<@string, nint>{["a"] = 1, ["b"] = 2, ["c"] = 3};
@@ -4189,10 +4197,10 @@ fmt.Println(base[2], y[0], len(y), cap(y))
 <!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:40-47 -->
 ```csharp
 var w = @base[2..4];
-var x = append(w, (uint32)(500));
+var x = append(w, (uint32)500);
 x[0] = 501;
 fmt.Println(@base, len(x), cap(x));
-var y = append(x, (uint32)(1), (uint32)(2), (uint32)(3));
+var y = append(x, (uint32)1, (uint32)2, (uint32)3);
 y[0] = 999;
 fmt.Println(@base[2], y[0], len(y), cap(y));
 ```
@@ -4480,8 +4488,8 @@ fmt.Println(len(rs), string(rs))
 var bs = slice<byte>("hello"u8);
 var rs = slice<rune>((@string)"héllo");
 
-fmt.Println(len(bs), ((@string)bs));
-fmt.Println(len(rs), ((@string)rs));
+fmt.Println(len(bs), (@string)bs);
+fmt.Println(len(rs), (@string)rs);
 ```
 
 A `[]byte` conversion takes the `u8` bytes directly. A `[]rune` conversion first makes the literal an
@@ -4682,7 +4690,7 @@ func returnedString() string {
 ```csharp
 internal static @string returnedString() {
     var b = slice<byte>("returned"u8);
-    @string r = ((@string)b);
+    @string r = (@string)b;
     return r;
 }
 ```
@@ -7279,7 +7287,7 @@ void whatAmI(any i) {
     }}
 }
 whatAmI(true);
-whatAmI((nint)(1));
+whatAmI((nint)1);
 whatAmI((int64)2);
 whatAmI((uint64)2);
 whatAmI(heyˢ);
@@ -9551,7 +9559,7 @@ internal static void Main() {
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
-        fmt.Printf("%s raw=%q json=%q asn1=%q\n"u8, fΔ1.Name, ((@string)fΔ1.Tag), fΔ1.Tag.Get("json"), fΔ1.Tag.Get("asn1"));
+        fmt.Printf("%s raw=%q json=%q asn1=%q\n"u8, fΔ1.Name, (@string)fΔ1.Tag, fΔ1.Tag.Get("json"), fΔ1.Tag.Get("asn1"));
     }
 
     var f = t.Field(1);
@@ -10031,7 +10039,7 @@ go2cs-gen boxes as a Go string because `fmt.Println` takes `any` arguments.
 
 A `defer` or `go` call to such a function works too. The statement stores the address as a box when it
 runs, and turns it into a `ref` only when the call itself runs, so the call sees the variable's latest value
-([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:167#a48ecd, :179#8a1144 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2858#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#26adb4; reference: docs/ConversionStrategies-Reference/pointers.md:194#25611d, :198#3edc27 -->
+([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:12#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:167#a48ecd, :179#8a1144 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:31-35#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:17 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:2858#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:124#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:63 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:87#008246; reference: docs/ConversionStrategies-Reference/pointers.md:194#25611d, :198#3edc27 -->
 
 **A pointer receiver is `this ref T`, or the box `this ж<T>` when the method needs the pointer itself.**
 Methods are C# extension methods, so the receiver is the first parameter
@@ -11881,8 +11889,8 @@ A statement's trailing comment follows the statement's last C# line, after one s
 ```
 <!-- source: src/core/unicode/utf8/utf8.cs:181-182 -->
 ```csharp
-        var mask = (((rune)x << (int)(31)) >> (int)(31)); // Create 0x0000 or 0xFFFF.
-        return ((rune)((rune)((rune)p[0] & ~mask) | (rune)((rune)RuneError & mask)), 1);
+        var mask = ((rune)x << 31) >> 31; // Create 0x0000 or 0xFFFF.
+        return ((rune)p[0] & ~mask | (rune)RuneError & mask, 1);
 ```
 
 **Blank lines follow Go, in every conversion.** Where Go leaves a blank line between two statements of a body, the C# has one; where Go has none, the C# adds none. After the converter's own lines at the top of a function, such as the locals for named results, there is exactly one blank line before the Go body. Without `-comments`, a converted `switch` is still followed by a blank line whether Go has one or not.

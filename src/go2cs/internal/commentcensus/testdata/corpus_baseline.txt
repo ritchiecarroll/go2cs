@@ -8,8 +8,8 @@ body:extra:after-param-prelude	211
 body:extra:unexplained	2917
 body:go-blank-cs-none	2139
 body:go-blank-unmapped	2379
-eol:cs-ragged-run	956
-eol:misaligned	940
+eol:cs-ragged-run	957
+eol:misaligned	941
 eol:missing	7
 eol:moved-to-own-line	3
 eol:split	17
