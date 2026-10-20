@@ -148,7 +148,7 @@ internal static UntypedInt sqrt2inv_cos6 => 311978311033955632; // fix (1/sqrt 2
 internal static UntypedInt sqrt2inv_sin6 => 753182269664427492; // fix (1/sqrt 2)*sin 6*pi/16
 
 internal static int32 c(uint64 x, nint bits) {
-    return (int32)((x + (((uint64)1).Lsh((int64)((59 - bits))))).Rsh((int64)((60 - bits))));
+    return (int32)((x + (((uint64)1).Lsh((int64)(59 - bits)))).Rsh((int64)(60 - bits)));
 }
 
 // fdct implements the forward DCT.

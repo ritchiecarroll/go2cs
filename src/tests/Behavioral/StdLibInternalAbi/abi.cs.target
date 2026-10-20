@@ -48,11 +48,11 @@ public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintpt
 partial struct IntArgRegBitmap /*[2]uint8*/;
 
 public static void Set(this ref IntArgRegBitmap b, nint i) {
-    b.Value[i / 8] |= (uint8)(((uint8)1).Lsh((int64)((i % 8))));
+    b.Value[i / 8] |= (uint8)(((uint8)1).Lsh((int64)(i % 8)));
 }
 
 public static bool Get(this ref IntArgRegBitmap b, nint i) {
-    return (uint8)(b.Value[i / 8] & (((uint8)1).Lsh((int64)((i % 8))))) != 0;
+    return (uint8)(b.Value[i / 8] & (((uint8)1).Lsh((int64)(i % 8)))) != 0;
 }
 
 } // end main_package

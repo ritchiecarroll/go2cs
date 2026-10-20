@@ -1076,7 +1076,7 @@ internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
     if (max == maxPackedValue) {
         return (pallocSum)(uint64)((uint64)1 << 63);
     }
-    return (pallocSum)(((uint64)start & (uint64)((maxPackedValue - 1))) | (((uint64)max & (uint64)((maxPackedValue - 1))) << (int)(logMaxPackedValue)) | (((uint64)end & (uint64)((maxPackedValue - 1))) << (int)((2 * logMaxPackedValue))));
+    return (pallocSum)(((uint64)start & (uint64)(maxPackedValue - 1)) | (((uint64)max & (uint64)(maxPackedValue - 1)) << (int)(logMaxPackedValue)) | (((uint64)end & (uint64)(maxPackedValue - 1)) << (int)(2 * logMaxPackedValue)));
 }
 
 // start extracts the start value from a packed sum.
@@ -1084,7 +1084,7 @@ internal static nuint start(this pallocSum Δp) {
     if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)((uint64)Δp & (uint64)((maxPackedValue - 1)));
+    return (nuint)((uint64)Δp & (uint64)(maxPackedValue - 1));
 }
 
 // max extracts the max value from a packed sum.
@@ -1092,7 +1092,7 @@ internal static nuint max(this pallocSum Δp) {
     if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)(((uint64)Δp >> (int)(logMaxPackedValue)) & (uint64)((maxPackedValue - 1)));
+    return (nuint)(((uint64)Δp >> (int)(logMaxPackedValue)) & (uint64)(maxPackedValue - 1));
 }
 
 // end extracts the end value from a packed sum.
@@ -1100,7 +1100,7 @@ internal static nuint end(this pallocSum Δp) {
     if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
-    return (nuint)(((uint64)Δp >> (int)((2 * logMaxPackedValue))) & (uint64)((maxPackedValue - 1)));
+    return (nuint)(((uint64)Δp >> (int)(2 * logMaxPackedValue)) & (uint64)(maxPackedValue - 1));
 }
 
 // unpack unpacks all three values from the summary.
@@ -1108,7 +1108,7 @@ internal static (nuint, nuint, nuint) unpack(this pallocSum Δp) {
     if (((uint64)Δp & (uint64)((uint64)1 << 63)) != 0) {
         return (maxPackedValue, maxPackedValue, maxPackedValue);
     }
-    return ((nuint)((uint64)Δp & (uint64)((maxPackedValue - 1))), (nuint)(((uint64)Δp >> (int)(logMaxPackedValue)) & (uint64)((maxPackedValue - 1))), (nuint)(((uint64)Δp >> (int)((2 * logMaxPackedValue))) & (uint64)((maxPackedValue - 1))));
+    return ((nuint)((uint64)Δp & (uint64)(maxPackedValue - 1)), (nuint)(((uint64)Δp >> (int)(logMaxPackedValue)) & (uint64)(maxPackedValue - 1)), (nuint)(((uint64)Δp >> (int)(2 * logMaxPackedValue)) & (uint64)(maxPackedValue - 1)));
 }
 
 // mergeSummaries merges consecutive summaries which may each represent at

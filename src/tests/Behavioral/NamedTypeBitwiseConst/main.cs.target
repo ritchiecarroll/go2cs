@@ -23,7 +23,7 @@ partial struct word /*num:uint64*/;
 internal static UntypedInt tagBits => 19;
 
 internal static word low(this word w) {
-    return (word)(w & (uint64)(((1 << (int)(tagBits)) - 1)));
+    return (word)(w & (uint64)((1 << (int)(tagBits)) - 1));
 }
 
 internal static void Main() {

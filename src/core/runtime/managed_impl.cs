@@ -3596,6 +3596,10 @@ partial class runtime_package
         // suspendedAtReportedCall), so the line is that call's rather than returnSiteILOffset's answer.
         public bool SuspendedAtReportedCall;
 
+        // The method the frame is suspended calling, kept when the capture found a call of it after the
+        // reported offset, so Resolve can settle the call by it (calleeSettledCallSite). Null otherwise.
+        public System.Reflection.MethodBase? Callee;
+
         // A method value's `-fm` wrapper (goMethodValueName): Go's traceback never shows one, so
         // Frames.Next skips it. Known at RESOLVE time only -- it needs the PDB, which capture never reads
         // -- so runtime.Callers still COUNTS the wrapper's pc where Go's does not.
@@ -3626,7 +3630,10 @@ partial class runtime_package
                     // The LINE is the call's (Go's pc-1): see returnSiteILOffset. The NAME below is read
                     // at the REPORTED offset, as it always was -- a literal is named by the frame's own
                     // line, never by the method's first sequence point.
-                    int callSite = !ReturnAddress ? -1 : SuspendedAtReportedCall ? ILOffset : returnSiteILOffset(Method, ILOffset);
+                    int callSite = !ReturnAddress ? -1 :
+                        SuspendedAtReportedCall ? ILOffset :
+                        Callee is { } callee && calleeSettledCallSite(Method, ILOffset, callee) is >= 0 and var settled ? settled :
+                        returnSiteILOffset(Method, ILOffset);
                     (string file, int line) = goILPosition(Method, callSite >= 0 ? callSite : ILOffset);
                     File = file;
                     Line = line;
@@ -3669,11 +3676,16 @@ partial class runtime_package
     // TieredCompilation=0 default a site has one pc for the life of the process (pinned by GolibTests'
     // LazyCallersTests.ACallSiteHasOnePcAcrossCalls); only a tiering promotion, which recompiles the
     // method, can give the same site a second one.
-    private readonly record struct CallSiteKey(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, bool SuspendedAtReportedCall);
+    private readonly record struct CallSiteKey(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, bool SuspendedAtReportedCall, System.Reflection.MethodBase? Callee);
+
+    // A frame as a capture sees it: the site, and the raw callee directly inside it. Maps to the canonical
+    // site's token (internCallerFrame), so the capture's callee tests run once per observed pair.
+    private readonly record struct ObservedSite(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, System.Reflection.MethodBase? Callee);
 
     private static readonly object s_callerTableLock = new();
     private static readonly Dictionary<string, nuint> s_callerTokens = new();
     private static readonly Dictionary<CallSiteKey, nuint> s_callSiteTokens = new();
+    private static readonly Dictionary<ObservedSite, nuint> s_observedSiteTokens = new();
     private static readonly List<CallerFrameRecord> s_callerRecords = new();
 
     // EVERY CALL SITE OWNS A SPAN, AND ITS TOKEN SITS IN THE MIDDLE. Go's consumers do arithmetic on a
@@ -4221,22 +4233,47 @@ partial class runtime_package
     // IL offset seen both ways is two sites. `callee` is the raw frame directly inside this one (the method
     // this frame is suspended calling, or its generated forwarder), null where none is known; see
     // suspendedAtReportedCall. It joins the key too: one reported offset can be either kind of mapping.
+    // When the reported offset is not itself the call, the callee is kept for Resolve to settle the call
+    // by (calleeSettledCallSite) wherever a call of it follows that offset: the test here reads the IL
+    // only, because the statement bounds the settling needs come from the symbol file, which a capture
+    // never opens (LazyCallersTests).
+    //
+    // THE HOT PATH IS ONE LOOKUP. What the callee says about a site (suspendedAtReportedCall, callsCalleeAfter)
+    // is a function of the method, the offset and the callee, so it is computed the FIRST time that triple is
+    // seen and never again: the observed triple maps straight to its token. Computed on every capture, the
+    // callee tests made runtime.Callers 30% slower (measured 2026-10-20, windows, Release, a depth-8 stack:
+    // 4.4-4.6 -> 5.8-6.0 us). The token itself is the CANONICAL site's, which carries the callee only where
+    // it settles a call, so callees that settle nothing (a virtual call's implementations, an inlined
+    // callee's caller) still share one token, as Go's one PC.
     private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame, bool returnAddress = true, System.Reflection.MethodBase? callee = null)
     {
         int ilOffset = frame.GetILOffset();
-        bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
         bool nativeOffset = ilOffset < 0 && !System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported;
-        CallSiteKey key = new(method.MethodHandle, nativeOffset ? frame.GetNativeOffset() : ilOffset, nativeOffset, returnAddress, atReportedCall);
+        int offset = nativeOffset ? frame.GetNativeOffset() : ilOffset;
+        ObservedSite observed = new(method.MethodHandle, offset, nativeOffset, returnAddress, returnAddress ? callee : null);
 
         lock (s_callerTableLock)
         {
-            if (s_callSiteTokens.TryGetValue(key, out nuint token))
-                return token;
+            if (s_observedSiteTokens.TryGetValue(observed, out nuint seen))
+                return seen;
+        }
 
-            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress, SuspendedAtReportedCall = atReportedCall });
-            // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
-            token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
-            s_callSiteTokens[key] = token;
+        // First sight of this site with this callee: read what the callee settles (the IL only), outside the lock.
+        bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
+        System.Reflection.MethodBase? settlingCallee = returnAddress && callee is not null && !atReportedCall && callsCalleeAfter(method, ilOffset, callee) ? callee : null;
+        CallSiteKey key = new(method.MethodHandle, offset, nativeOffset, returnAddress, atReportedCall, settlingCallee);
+
+        lock (s_callerTableLock)
+        {
+            if (!s_callSiteTokens.TryGetValue(key, out nuint token))
+            {
+                s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress, SuspendedAtReportedCall = atReportedCall, Callee = settlingCallee });
+                // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
+                token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
+                s_callSiteTokens[key] = token;
+            }
+
+            s_observedSiteTokens[observed] = token;
             return token;
         }
     }
@@ -4319,15 +4356,84 @@ partial class runtime_package
         if (ilOffset < 0 || callSiteOffsets(method) is not { } calls || Array.BinarySearch(calls, ilOffset) < 0)
             return false;
 
-        if (callTarget(method, ilOffset) is not { } target)
-            return false;
+        return callTarget(method, ilOffset) is { } target && targetsCallee(target, callee);
+    }
 
+    // Whether a call naming `target` is a call of `callee`, the method of the raw frame it is suspended in.
+    private static bool targetsCallee(System.Reflection.MethodBase target, System.Reflection.MethodBase callee)
+    {
         if (target.Module == callee.Module && target.MetadataToken == callee.MetadataToken)
             return true;
 
         // A virtual or interface call names the slot; the frame is the override or the implementation.
         return (target.IsVirtual || target.IsAbstract) &&
             (callee.Name == target.Name || callee.Name.EndsWith("." + target.Name, StringComparison.Ordinal));
+    }
+
+    // Whether a call of `callee` follows `ilOffset` in the method's IL: the capture's test for keeping the callee
+    // for Resolve (calleeSettledCallSite). The IL only, so it opens no symbol file.
+    private static bool callsCalleeAfter(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase callee)
+    {
+        if (ilOffset < 0 || callSiteOffsets(method) is not { } calls)
+            return false;
+
+        int index = Array.BinarySearch(calls, ilOffset);
+
+        for (int i = index < 0 ? ~index : index; i < calls.Length; i++)
+        {
+            if (callTarget(method, calls[i]) is { } target && targetsCallee(target, callee))
+                return true;
+        }
+
+        return false;
+    }
+
+    // THE CALL THE FRAME IS SUSPENDED IN, settled at Resolve by the callee, or -1 when the callee settles
+    // nothing and returnSiteILOffset's reading stands. The reported offset being a call of the callee is
+    // settled at capture (suspendedAtReportedCall); this settles the other case: returnSiteILOffset names a
+    // call that does NOT target the callee, so it cannot be the suspended one, and the reported offset's
+    // statement holds exactly ONE call of the callee at or after that offset. That call it is.
+    //
+    // This is the optimized JIT inside an expression that keeps a value on the evaluation stack from one call
+    // to the next (a method chain `a.F().G().H()`), which has no mapping between its calls: every frame
+    // suspended in the chain reports the chain's first offset, and "the first call after" named the box the
+    // chain starts from, not the call. Measured 2026-10-20 on CallerLineMultiLine's S1 (Release, TC0 and
+    // tiered alike): Main reported IL 0xB1 for the call of Done at 0xD7, the line read the statement's first
+    // (89) where Go's is the call's (92); Debug reported 0xDB, the call itself.
+    //
+    // NEVER A GUESS: two or more calls of the callee after the reported offset (the chain's Add, Add, Add)
+    // cannot be told apart from that offset, and keep returnSiteILOffset's answer, as before. A callee the
+    // JIT inlined away left no frame, so its caller's frame names a callee no call here targets: unsettled.
+    private static int calleeSettledCallSite(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase callee)
+    {
+        int candidate = returnSiteILOffset(method, ilOffset);
+
+        if (candidate < 0 || callTarget(method, candidate) is not { } named || targetsCallee(named, callee))
+            return -1;
+
+        if (callSiteOffsets(method) is not { } calls || sequencePointOffsets(method) is not { Length: > 0 } statements)
+            return -1;
+
+        int index = Array.BinarySearch(statements, ilOffset);
+
+        if (index < 0)
+            index = ~index - 1;
+
+        int end = index >= 0 && index + 1 < statements.Length ? statements[index + 1] : int.MaxValue;
+        int found = -1;
+
+        foreach (int call in calls)
+        {
+            if (call < ilOffset || call >= end || callTarget(method, call) is not { } target || !targetsCallee(target, callee))
+                continue;
+
+            if (found >= 0)
+                return -1;
+
+            found = call;
+        }
+
+        return found;
     }
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Reflection.MethodBase, int), System.Reflection.MethodBase?> s_callTargets = new();

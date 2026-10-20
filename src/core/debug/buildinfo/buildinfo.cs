@@ -383,7 +383,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
     }
 
     // Round up start; magic can't occur in the initial unaligned portion.
-    start = (start + (uint64)buildInfoAlign - 1) & ~(uint64)((buildInfoAlign - 1));
+    start = (start + (uint64)buildInfoAlign - 1) & ~(uint64)(buildInfoAlign - 1);
     if (start >= end) {
         return (0, errNotGoExe);
     }

@@ -465,7 +465,7 @@ internal static void windowed(ж<testing.T> Ꮡt, key k) {
 
     var h = newHashSet();
     for (nint r = 0; r < k.bits(); r++) {
-        for (nint i = 0; i < (nint)((1 << (int)(BITS))); i++) {
+        for (nint i = 0; i < (nint)(1 << (int)(BITS)); i++) {
             k.clear();
             for (nint j = 0; j < BITS; j++) {
                 if ((i.Rsh((nuint)j) & 1) != 0) {

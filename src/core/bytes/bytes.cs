@@ -991,14 +991,14 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
         if (c >= utf8.RuneSelf) {
             return (@as.Clone(), false);
         }
-        @as[c / 32] |= (uint32)(((uint32)1 << (int)((c % 32))));
+        @as[c / 32] |= (uint32)(((uint32)1 << (int)(c % 32)));
     }
     return (@as.Clone(), true);
 }
 
 // contains reports whether c is inside the set.
 internal static bool contains(this ref asciiSet @as, byte c) {
-    return (@as.Value[c / 32] & ((uint32)1 << (int)((c % 32)))) != 0;
+    return (@as.Value[c / 32] & ((uint32)1 << (int)(c % 32))) != 0;
 }
 
 // containsRune is a simplified version of strings.ContainsRune

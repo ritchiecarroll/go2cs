@@ -32,7 +32,7 @@ internal static void dboxFtoa(ref decimalSlice d, uint64 mant, nint exp, bool de
 }
 
 internal static void dboxFtoa64(ref decimalSlice d, uint64 mant, nint exp, bool denorm) {
-    if (mant == (uint64)(((uint64)1 << (int)(float64MantBits))) && !denorm) {
+    if (mant == (uint64)((uint64)1 << (int)(float64MantBits)) && !denorm) {
         // Algorithm 5.6 (page 24).
         nint k0Δ1 = -mulLog10_2MinusLog10_4Over3(exp);
         var (φΔ1, βΔ1) = dboxPow64(k0Δ1, exp);
@@ -103,7 +103,7 @@ internal static void dboxFtoa64(ref decimalSlice d, uint64 mant, nint exp, bool 
 // Almost identical to dragonboxFtoa64.
 // This is kept as a separate copy to minimize runtime overhead.
 internal static void dboxFtoa32(ref decimalSlice d, uint32 mant, nint exp, bool denorm) {
-    if (mant == (uint32)(((uint32)1 << (int)(float32MantBits))) && !denorm) {
+    if (mant == (uint32)((uint32)1 << (int)(float32MantBits)) && !denorm) {
         // Algorithm 5.6 (page 24).
         nint k0Δ1 = -mulLog10_2MinusLog10_4Over3(exp);
         var (φΔ1, βΔ1) = dboxPow32(k0Δ1, exp);
@@ -277,8 +277,8 @@ internal static (bool parity, bool isInt) dboxParity64(uint64 mant2, uint128 phi
     bool isInt = default!;
 
     var r = umul192Lower128(mant2, phi);
-    parity = ((r.Hi.Rsh((int64)((64 - beta)))) & 1) != 0;
-    isInt = (((uint64)(r.Hi.Lsh((int64)(beta)))) | (r.Lo.Rsh((int64)((64 - beta))))) == 0;
+    parity = ((r.Hi.Rsh((int64)(64 - beta))) & 1) != 0;
+    isInt = (((uint64)(r.Hi.Lsh((int64)(beta)))) | (r.Lo.Rsh((int64)(64 - beta)))) == 0;
     return (parity, isInt);
 }
 
@@ -290,19 +290,19 @@ internal static (bool parity, bool isInt) dboxParity32(uint32 mant2, uint64 phi,
     bool isInt = default!;
 
     var r = umul96Lower64(mant2, phi);
-    parity = ((r.Rsh((int64)((64 - beta)))) & 1) != 0;
-    isInt = (uint32)(r.Rsh((int64)((32 - beta)))) == 0;
+    parity = ((r.Rsh((int64)(64 - beta))) & 1) != 0;
+    isInt = (uint32)(r.Rsh((int64)(32 - beta))) == 0;
     return (parity, isInt);
 }
 
 // dboxDelta64 returns δ^(i) from the precomputed value of φ̃k for float64.
 internal static uint32 dboxDelta64(uint128 φ, nint β) {
-    return (uint32)(φ.Hi.Rsh((int64)((64 - 1 - β))));
+    return (uint32)(φ.Hi.Rsh((int64)(64 - 1 - β)));
 }
 
 // dboxDelta32 returns δ^(i) from the precomputed value of φ̃k for float32.
 internal static uint32 dboxDelta32(uint64 φ, nint β) {
-    return (uint32)(φ.Rsh((int64)((64 - 1 - β))));
+    return (uint32)(φ.Rsh((int64)(64 - 1 - β)));
 }
 
 // mulLog10_2MinusLog10_4Over3 computes
@@ -320,8 +320,8 @@ internal static (uint64 left, uint64 right) dboxRange64(uint128 φ, nint β) {
     uint64 left = default!;
     uint64 right = default!;
 
-    left = (φ.Hi - (φ.Hi >> (int)((float64MantBits + 2)))).Rsh((int64)(((nint)(64 - float64MantBits - 1) - β)));
-    right = (φ.Hi + (φ.Hi >> (int)((float64MantBits + 1)))).Rsh((int64)(((nint)(64 - float64MantBits - 1) - β)));
+    left = (φ.Hi - (φ.Hi >> (int)(float64MantBits + 2))).Rsh((int64)((nint)(64 - float64MantBits - 1) - β));
+    right = (φ.Hi + (φ.Hi >> (int)(float64MantBits + 1))).Rsh((int64)((nint)(64 - float64MantBits - 1) - β));
     return (left, right);
 }
 
@@ -330,19 +330,19 @@ internal static (uint32 left, uint32 right) dboxRange32(uint64 φ, nint β) {
     uint32 left = default!;
     uint32 right = default!;
 
-    left = (uint32)((φ - (φ >> (int)((floatMantBits32 + 2)))).Rsh((int64)(((nint)(64 - floatMantBits32 - 1) - β))));
-    right = (uint32)((φ + (φ >> (int)((floatMantBits32 + 1)))).Rsh((int64)(((nint)(64 - floatMantBits32 - 1) - β))));
+    left = (uint32)((φ - (φ >> (int)(floatMantBits32 + 2))).Rsh((int64)((nint)(64 - floatMantBits32 - 1) - β)));
+    right = (uint32)((φ + (φ >> (int)(floatMantBits32 + 1))).Rsh((int64)((nint)(64 - floatMantBits32 - 1) - β)));
     return (left, right);
 }
 
 // dboxRoundUp64 computes the round up of y (i.e., y^(ru)).
 internal static uint64 dboxRoundUp64(uint128 phi, nint beta) {
-    return (phi.Hi.Rsh((int64)(((nint)(128 / 2 - floatMantBits64 - 2) - beta))) + 1) / 2;
+    return (phi.Hi.Rsh((int64)((nint)(128 / 2 - floatMantBits64 - 2) - beta)) + 1) / 2;
 }
 
 // dboxRoundUp32 computes the round up of y (i.e., y^(ru)).
 internal static uint32 dboxRoundUp32(uint64 phi, nint beta) {
-    return (uint32)(phi.Rsh((int64)(((nint)(64 - floatMantBits32 - 2) - beta))) + 1) / 2;
+    return (uint32)(phi.Rsh((int64)((nint)(64 - floatMantBits32 - 2) - beta)) + 1) / 2;
 }
 
 // dboxPow64 gets the precomputed value of φ̃̃k for float64.

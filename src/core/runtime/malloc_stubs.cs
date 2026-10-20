@@ -604,7 +604,7 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
     var scanSize = typ.PtrBytes;
     var src = src0;
     if (typ.Size_ == goarch.PtrSize){
-        src = (((uintptr)1).Lsh((uint64)((dataSize / (uintptr)goarch.PtrSize)))) - 1;
+        src = (((uintptr)1).Lsh((uint64)(dataSize / (uintptr)goarch.PtrSize))) - 1;
     } else {
         // N.B. We rely on dataSize being an exact multiple of the type size.
         // The alternative is to be defensive and mask out src to the length
@@ -613,7 +613,7 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
             @throw(runtimeMspanˢ);
         }
         for (var iΔ1 = typ.Size_; iΔ1 < dataSize; iΔ1 += typ.Size_) {
-            src |= (uintptr)(src0.Lsh((uint64)((iΔ1 / (uintptr)goarch.PtrSize))));
+            src |= (uintptr)(src0.Lsh((uint64)(iΔ1 / (uintptr)goarch.PtrSize)));
             scanSize += typ.Size_;
         }
     }
