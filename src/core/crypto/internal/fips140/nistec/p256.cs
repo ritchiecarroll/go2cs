@@ -176,14 +176,14 @@ internal static slice<byte> bytes(this ж<P256Point> Ꮡp, /*[65]*/ ж<array<byt
     // The SEC 1 representation of the point at infinity is a single zero byte,
     // and only infinity has z = 0.
     if (Ꮡp.of(P256Point.Ꮡz).IsZero() == 1) {
-        return append(@out[..0], (byte)(0));
+        return append(@out[..0], (byte)0);
     }
 
     var zinv = @new<fiat.P256Element>().Invert(Ꮡp.of(P256Point.Ꮡz));
     var x = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡx), zinv);
     var y = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡy), zinv);
 
-    var buf = append(@out[..0], (byte)(4));
+    var buf = append(@out[..0], (byte)4);
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     buf = appendꓸꓸꓸ(buf, y.Bytes());
     return buf;
@@ -228,7 +228,7 @@ internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, /*[33]*/ ж
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (Ꮡp.of(P256Point.Ꮡz).IsZero() == 1) {
-        return append(@out[..0], (byte)(0));
+        return append(@out[..0], (byte)0);
     }
 
     var zinv = @new<fiat.P256Element>().Invert(Ꮡp.of(P256Point.Ꮡz));
@@ -237,7 +237,7 @@ internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, /*[33]*/ ж
 
     // Encode the sign of the y coordinate (indicated by the least significant
     // bit) as the encoding type (2 or 3).
-    var buf = append(@out[..0], (byte)(2));
+    var buf = append(@out[..0], (byte)2);
     buf[0] |= (byte)((byte)(y.Bytes()[p256ElementLength - 1] & 1));
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     return buf;
@@ -438,10 +438,10 @@ internal static (ж<p256OrdElement>, error) SetBytes(this ж<p256OrdElement> Ꮡ
     (var t2, b) = bits.Sub64(s.Value[2], 0xffffffffffffffffUL, b);
     (var t3, b) = bits.Sub64(s.Value[3], 0xffffffff00000000UL, b);
     var tMask = b - 1; // zero if subtraction underflowed
-    s.Value[0] ^= (uint64)((uint64)(((uint64)(t0 ^ s.Value[0])) & tMask));
-    s.Value[1] ^= (uint64)((uint64)(((uint64)(t1 ^ s.Value[1])) & tMask));
-    s.Value[2] ^= (uint64)((uint64)(((uint64)(t2 ^ s.Value[2])) & tMask));
-    s.Value[3] ^= (uint64)((uint64)(((uint64)(t3 ^ s.Value[3])) & tMask));
+    s.Value[0] ^= (uint64)(((t0 ^ s.Value[0]) & tMask));
+    s.Value[1] ^= (uint64)(((t1 ^ s.Value[1]) & tMask));
+    s.Value[2] ^= (uint64)(((t2 ^ s.Value[2]) & tMask));
+    s.Value[3] ^= (uint64)(((t3 ^ s.Value[3]) & tMask));
 
     return (Ꮡs, default!);
 }
@@ -505,11 +505,11 @@ internal static ж<p256Table> Compute(this ж<p256Table> Ꮡtable, ж<P256Point>
 }
 
 internal static (uint8, nint) boothW5(uint64 @in) {
-    var s = ~(((@in >> (int)(5))) - 1);
-    var d = (((uint64)1 << (int)(6))) - @in - 1;
-    d = (uint64)(((uint64)(d & s)) | ((uint64)(@in & (~s))));
-    d = ((d >> (int)(1))) + ((uint64)(d & 1));
-    return ((uint8)d, (nint)((uint64)(s & 1)));
+    var s = ~((@in >> 5) - 1);
+    var d = ((uint64)1 << 6) - @in - 1;
+    d = (d & s) | (@in & (~s));
+    d = (d >> 1) + (d & 1);
+    return ((uint8)d, (nint)(s & 1));
 }
 
 // ScalarMult sets r = scalar * q, where scalar is a 32-byte big endian value,
@@ -546,11 +546,11 @@ public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡp, ж<P256
         Ꮡp.Double(Ꮡp);
 
         if (index >= 0){
-            (sel, sign) = boothW5((uint64)(s.Rsh(index) & 0b111111));
+            (sel, sign) = boothW5(s.Rsh(index) & 0b111111);
         } else {
             // Booth encoding considers a virtual zero bit at index -1,
             // so we shift left the least significant limb.
-            var wvalue = (uint64)(((s.Value[0] << (int)(1))) & 0b111111);
+            var wvalue = (s.Value[0] << 1) & 0b111111;
             (sel, sign) = boothW5(wvalue);
         }
 
@@ -601,11 +601,11 @@ internal static ref ж<array<p256AffineTable>> p256GeneratorTables => ref Ꮡp25
 // go2cs generated this placeholder — func init is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (uint8, nint) boothW6(uint64 @in) {
-    var s = ~(((@in >> (int)(6))) - 1);
-    var d = (((uint64)1 << (int)(7))) - @in - 1;
-    d = (uint64)(((uint64)(d & s)) | ((uint64)(@in & (~s))));
-    d = ((d >> (int)(1))) + ((uint64)(d & 1));
-    return ((uint8)d, (nint)((uint64)(s & 1)));
+    var s = ~((@in >> 6) - 1);
+    var d = ((uint64)1 << 7) - @in - 1;
+    d = (d & s) | (@in & (~s));
+    d = (d >> 1) + (d & 1);
+    return ((uint8)d, (nint)(s & 1));
 }
 
 // ScalarBaseMult sets p = scalar * generator, where scalar is a 32-byte big
@@ -644,11 +644,11 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
         index -= 6;
 
         if (index >= 0){
-            (sel, sign) = boothW6((uint64)(s.Rsh(index) & 0b1111111));
+            (sel, sign) = boothW6(s.Rsh(index) & 0b1111111);
         } else {
             // Booth encoding considers a virtual zero bit at index -1,
             // so we shift left the least significant limb.
-            var wvalue = (uint64)(((s.Value[0] << (int)(1))) & 0b1111111);
+            var wvalue = (s.Value[0] << 1) & 0b1111111;
             (sel, sign) = boothW6(wvalue);
         }
 

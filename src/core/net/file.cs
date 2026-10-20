@@ -19,7 +19,7 @@ internal static @string Network(this fileAddr _) {
 }
 
 internal static @string String(this fileAddr f) {
-    return ((@string)f);
+    return (@string)f;
 }
 
 // FileConn returns a copy of the network connection corresponding to

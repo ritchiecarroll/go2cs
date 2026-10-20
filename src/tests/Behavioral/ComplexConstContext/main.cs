@@ -26,7 +26,7 @@ internal static void Main() {
         fmt.Println(real(h));
     }
 
-    var c = complex((float64)(0D), (float64)(gHalfPi));
+    var c = complex((float64)0D, (float64)(gHalfPi));
     fmt.Println(real(c), imag(c));
 
     float64 q = 7 / 2;

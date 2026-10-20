@@ -41,7 +41,7 @@ public static ж<Reader> NewReader(ж<bufio.Reader> Ꮡr) {
 // eliding the final \n or \r\n from the returned string.
 public static (@string, error) ReadLine(this ref Reader r) {
     var (line, err) = r.readLineSlice(-1);
-    return (((@string)line), err);
+    return ((@string)line, err);
 }
 
 // ReadLineBytes is like [Reader.ReadLine] but returns a []byte instead of a string.
@@ -99,7 +99,7 @@ internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim)
 // Empty lines are never continued.
 public static (@string, error) ReadContinuedLine(this ref Reader r) {
     var (line, err) = r.readContinuedLineSlice(-1, noValidation);
-    return (((@string)line), err);
+    return ((@string)line, err);
 }
 
 // trim returns s with leading and trailing spaces and tabs removed.
@@ -595,7 +595,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
         }
 
         // Skip initial spaces in value.
-        @string value = ((@string)bytes.TrimLeft(v, " \t"u8));
+        @string value = (@string)bytes.TrimLeft(v, " \t"u8);
 
         var vv = m[key];
         if (vv == default!) {
@@ -741,7 +741,7 @@ internal static bool validHeaderFieldByte(byte c) {
 	1<<'|' |
 	1<<'~' */
             maskᶜ;
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (288068722172624896UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (6341068274398134270UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (288068722172624896UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (6341068274398134270UL))) != 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -772,7 +772,7 @@ internal static bool validHeaderValueByte(byte c) {
 	1<<0x20 |
 	1<<0x09 */ // HTAB: %x09
             maskᶜ1;
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & ~(9223372036854775807UL)))) == 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & ~(9223372036854775807UL))) == 0;
 }
 
 // canonicalMIMEHeaderKey is like CanonicalMIMEHeaderKey but is
@@ -804,10 +804,10 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
             noCanon = true;
             continue;
         }
-        return (((@string)a), false);
+        return ((@string)a, false);
     }
     if (noCanon) {
-        return (((@string)a), true);
+        return ((@string)a, true);
     }
 
     var upper = true;
@@ -836,7 +836,7 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
             return (v, true);
         }
     }
-    return (((@string)a), true);
+    return ((@string)a, true);
 }
 
 // commonHeader interns common header strings.

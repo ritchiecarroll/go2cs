@@ -29,7 +29,7 @@ public static partial void TestAnd32(ж<testing.T> Ꮡt) {
     }
 
     // Set every bit in array to 1.
-    var a = new slice<uint32>((1 << (int)(12)));
+    var a = new slice<uint32>((1 << 12));
     foreach (var (i, _) in a) {
         a[i] = 0xffffffffU;
     }
@@ -75,7 +75,7 @@ public static partial void TestAnd64(ж<testing.T> Ꮡt) {
     }
 
     // Set every bit in array to 1.
-    var a = new slice<uint64>((1 << (int)(12)));
+    var a = new slice<uint64>((1 << 12));
     foreach (var (i, _) in a) {
         a[i] = 0xffffffffffffffffUL;
     }
@@ -120,7 +120,7 @@ public static partial void TestOr32(ж<testing.T> Ꮡt) {
     }
 
     // Start with every bit in array set to 0.
-    var a = new slice<uint32>((1 << (int)(12)));
+    var a = new slice<uint32>((1 << 12));
 
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
@@ -163,7 +163,7 @@ public static partial void TestOr64(ж<testing.T> Ꮡt) {
     }
 
     // Start with every bit in array set to 0.
-    var a = new slice<uint64>((1 << (int)(12)));
+    var a = new slice<uint64>((1 << 12));
 
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);

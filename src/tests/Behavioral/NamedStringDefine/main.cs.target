@@ -15,7 +15,7 @@ internal static @string tag(this version v) {
 }
 
 internal static version asVersion(@string s) {
-    return ((version)s);
+    return (version)s;
 }
 
 internal static void mutate(ref @string s) {

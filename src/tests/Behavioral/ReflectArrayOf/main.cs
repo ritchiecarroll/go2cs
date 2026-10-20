@@ -60,7 +60,7 @@ internal static void Main() {
     fmt.Println("nested:", outer, "| identical:", AreEqual(outer, reflect.TypeOf(nestedDecl)),
         "| len:", outer.Len(), "| elem:", outer.Elem(), "| elem len:", outer.Elem().Len(), "| size:", outer.Size());
 
-    var celsius = reflect.ArrayOf(2, reflect.TypeOf(((Celsius)0D)));
+    var celsius = reflect.ArrayOf(2, reflect.TypeOf((Celsius)0D));
     describe("ArrayOf(2, Celsius)", celsius);
     fmt.Println("celsius identical:", AreEqual(celsius, reflect.TypeOf(new Celsius[]{}.array(2))));
 

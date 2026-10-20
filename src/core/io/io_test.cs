@@ -501,7 +501,7 @@ public static void TestSectionReader_Max(ж<testing.T> Ꮡt) {
     }
     {
         var (_r, off, nΔ1) = sr.Outer(); if (!AreEqual(_r, r) || off != 3 || nΔ1 != maxint64) {
-            Ꮡt.Fatalf("Outer = %v, %d, %d; expected %v, %d, %d"u8, _r, off, nΔ1, r.OrTypedNil(), (nint)(3), (int64)maxint64);
+            Ꮡt.Fatalf("Outer = %v, %d, %d; expected %v, %d, %d"u8, _r, off, nΔ1, r.OrTypedNil(), (nint)3, (int64)maxint64);
         }
     }
 }
@@ -555,7 +555,7 @@ public static void TestNopCloserWriterToForwarding(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     foreach (var (_, tc) in new TestNopCloserWriterToForwarding_type[]{
-        new("not a WriterTo"u8, ((Δio.Reader)default!)),
+        new("not a WriterTo"u8, (Δio.Reader)default!),
         new("a WriterTo"u8, new TestNopCloserWriterToForwarding_typeᴛ1())
     }.array()) {
         var nc = NopCloser(tc.r);
@@ -600,7 +600,7 @@ public static void TestOffsetWriter_Seek(ж<testing.T> Ꮡt) {
                 var (gotOff, gotErr) = wʗ1.Seek(offset, whence);
                 if (gotOff != 0 || !AreEqual(gotErr, io_internal_test_package.ErrWhence)) {
                     tΔ1.Errorf("For whence %d, offset %d, OffsetWriter.Seek got: (%d, %v), want: (%d, %v)"u8,
-                        whence, offset, gotOff, gotErr, (nint)(0), io_internal_test_package.ErrWhence);
+                        whence, offset, gotOff, gotErr, (nint)0, io_internal_test_package.ErrWhence);
                 }
             }
         });
@@ -613,7 +613,7 @@ public static void TestOffsetWriter_Seek(ж<testing.T> Ꮡt) {
                     var (gotOff, gotErr) = wʗ2.Seek(offset, whence);
                     if (gotOff != 0 || !AreEqual(gotErr, io_internal_test_package.ErrOffset)) {
                         tΔ2.Errorf("For whence %d, offset %d, OffsetWriter.Seek got: (%d, %v), want: (%d, %v)"u8,
-                            whence, offset, gotOff, gotErr, (nint)(0), io_internal_test_package.ErrOffset);
+                            whence, offset, gotOff, gotErr, (nint)0, io_internal_test_package.ErrOffset);
                     }
                 }
             }
@@ -692,7 +692,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> Ꮡt) {
             if (!AreEqual(err, EOF)) {
                 Ꮡt.Fatalf("ReadAt failed: %v"u8, err);
             }
-            @string readContent = ((@string)(buf.slice(0, (nint)(contentSize))));
+            @string readContent = (@string)(buf.slice(0, (nint)(contentSize)));
             if (ᏑwriteN.Value != (int64)readN || ᏑwriteN.Value != contentSize || readContent != content) {
                 Ꮡt.Fatalf("%s:: WriteAt(%s, %d) error. \ngot n: %v, content: %s \nexpected n: %v, content: %v"u8,
                     position, content, at, readN, readContent, contentSize, content);
@@ -765,7 +765,7 @@ public static void TestOffsetWriter_Write(ж<testing.T> Ꮡt) {
         if (!AreEqual(err, EOF)) {
             Ꮡt.Fatalf("ReadAt failed, err: %v"u8, err);
         }
-        @string readContent = ((@string)(buf.slice(0, contentSize)));
+        @string readContent = (@string)(buf.slice(0, contentSize));
         if (readN != contentSize || readContent != content) {
             Ꮡt.Fatalf("%s error. \ngot n: %v, content: %s \nexpected n: %v, content: %v"u8,
                 nameΔ2, readN, readContent, contentSize, content);

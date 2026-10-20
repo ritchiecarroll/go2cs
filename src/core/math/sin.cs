@@ -146,7 +146,7 @@ internal static float64 cos(float64 x) {
         y = (float64)j; // integer part of x/(Pi/4), as float
 
         // map zeros to origin
-        if ((uint64)(j & 1) == 1) {
+        if ((j & 1) == 1) {
             j++;
             y++;
         }
@@ -218,7 +218,7 @@ internal static float64 sin(float64 x) {
         y = (float64)j; // integer part of x/(Pi/4), as float
 
         // map zeros to origin
-        if ((uint64)(j & 1) == 1) {
+        if ((j & 1) == 1) {
             j++;
             y++;
         }

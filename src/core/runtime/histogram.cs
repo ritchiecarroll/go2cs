@@ -175,7 +175,7 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
     for (nint j = 0; j < timeHistNumSubBuckets; j++) {
         // No bucket bit for the first few buckets. Just sub-bucket bits after the
         // min bucket bit.
-        var bucketNanos = ((uint64)j << (int)((timeHistMinBucketBits - 1 - timeHistSubBucketBits)));
+        var bucketNanos = (uint64)j << (int)((timeHistMinBucketBits - 1 - timeHistSubBucketBits));
         // Convert nanoseconds to seconds via a division.
         // These values will all be exactly representable by a float64.
         b[j + 1] = (float64)bucketNanos / 1e9D;
@@ -199,7 +199,7 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
         }
     }
     // Overflow bucket.
-    b[len(b) - 2] = (float64)(((uint64)1 << (int)((timeHistMaxBucketBits - 1)))) / 1e9D;
+    b[len(b) - 2] = (float64)((uint64)1 << (int)((timeHistMaxBucketBits - 1))) / 1e9D;
     b[len(b) - 1] = float64Inf();
     return b;
 }

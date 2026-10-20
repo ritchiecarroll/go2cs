@@ -47,7 +47,7 @@ public static @string FormatFileInfo(FileInfo info) {
         b = append(b, (byte)((rune)'/'));
     }
 
-    return ((@string)b);
+    return (@string)b;
 }
 
 // FormatDirEntry returns a formatted version of dir for human readability.
@@ -71,7 +71,7 @@ public static @string FormatDirEntry(DirEntry dir) {
     if (dir.IsDir()) {
         b = append(b, (byte)((rune)'/'));
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 } // end fs_package

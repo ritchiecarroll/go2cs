@@ -17,7 +17,7 @@ internal static UntypedInt backslashRune => /* '\\' */ 92;
 internal static UntypedInt octalRune => /* '\101' */ 65;
 
 internal static nint get4(@string s, nint i) {
-    return (nint)((nint)((nint)((nint)s[i] | ((nint)s[i + 1] << (int)(8))) | ((nint)s[i + 2] << (int)(16))) | ((nint)s[i + 3] << (int)(24)));
+    return (nint)s[i] | (nint)s[i + 1] << 8 | (nint)s[i + 2] << 16 | (nint)s[i + 3] << 24;
 }
 
 internal static void dump(@string label, @string s) {
@@ -48,7 +48,7 @@ internal static void Main() {
     @string localEscaped = ((@string)(new byte[]{0x5c, 0x33, 0x37, 0x37, 0x7c, 0xff}));
     dump("localEscaped", localEscaped);
 
-    fmt.Println(((@string)(rune)backslashRune), ((@string)(rune)octalRune), (nint)backslashRune, (nint)octalRune);
+    fmt.Println((@string)(rune)backslashRune, (@string)(rune)octalRune, (nint)backslashRune, (nint)octalRune);
 }
 
 } // end main_package

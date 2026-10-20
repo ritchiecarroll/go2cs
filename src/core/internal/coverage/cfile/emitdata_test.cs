@@ -204,7 +204,7 @@ internal static (@string, error) runHarness(ж<testing.T> Ꮡt, @string harnessP
     cmd.Value.Env = updateGoCoverDir(os.Environ(), rdir, setGoCoverDir);
     var (b, err) = cmd.CombinedOutput();
     //t.Logf("harness run output: %s\n", string(b))
-    return (((@string)b), err);
+    return ((@string)b, err);
 }
 
 internal static @string testForSpecificFunctions(ж<testing.T> Ꮡt, @string dir, slice<@string> want, slice<@string> avoid) {
@@ -216,7 +216,7 @@ internal static @string testForSpecificFunctions(ж<testing.T> Ꮡt, @string dir
     if (err != default!) {
         Ꮡt.Fatalf("'go tool covdata failed (%v): %s"u8, err, b);
     }
-    @string output = ((@string)b);
+    @string output = (@string)b;
     @string rval = ""u8;
     foreach (var (_, f) in want) {
         @string wf = "Func: "u8 + f + "\n"u8;
@@ -355,7 +355,7 @@ internal static void testEmitToUnwritableDir(ж<testing.T> Ꮡt, @string harness
                     Ꮡt.Fatalf("chmod failed: %v"u8, errΔ1);
                 }
             }
-            defer(os.Chmod, edir, (fs.FileMode)(511), ref ᒐ);
+            defer(os.Chmod, edir, (fs.FileMode)511, ref ᒐ);
 
             var (output, err) = runHarness(Ꮡt, harnessPath, tp, setGoCoverDir, rdir, edir);
             if (err != default!) {
@@ -438,7 +438,7 @@ internal static void testEmitToDirNonAtomic(ж<testing.T> Ꮡt, @string harnessP
         Ꮡt.Fatalf("running 'harness -tp %s': did not get expected error"u8, tp);
     }
 
-    @string got = strings.TrimSpace(((@string)output));
+    @string got = strings.TrimSpace((@string)output);
     @string want = writeCountersDirInvokedˢ;
     if (!strings.Contains(got, want)) {
         Ꮡt.Errorf("running 'harness -tp %s': got:\n%s\nwant: %s"u8,
@@ -465,7 +465,7 @@ internal static void testEmitToWriterNonAtomic(ж<testing.T> Ꮡt, @string harne
         Ꮡt.Fatalf("running 'harness -tp %s': did not get expected error"u8, tp);
     }
 
-    @string got = strings.TrimSpace(((@string)output));
+    @string got = strings.TrimSpace((@string)output);
     @string want = writeCountersInvokedForˢ;
     if (!strings.Contains(got, want)) {
         Ꮡt.Errorf("running 'harness -tp %s': got:\n%s\nwant: %s"u8,
@@ -493,7 +493,7 @@ internal static void testEmitWithCounterClearNonAtomic(ж<testing.T> Ꮡt, @stri
         Ꮡt.Fatalf("running 'harness -tp %s' nonatomic: did not get expected error"u8, tp);
     }
 
-    @string got = strings.TrimSpace(((@string)output));
+    @string got = strings.TrimSpace((@string)output);
     @string want = clearCountersInvokedForˢ;
     if (!strings.Contains(got, want)) {
         Ꮡt.Errorf("running 'harness -tp %s': got:\n%s\nwant: %s"u8,
@@ -567,8 +567,8 @@ public static void TestIssue56006EmitDataRaceCoverRunningGoroutine(ж<testing.T>
     // Don't want to see any data races in output.
     var avoid = new @string[]{"DATA RACE"u8}.slice();
     foreach (var (_, no) in avoid) {
-        if (strings.Contains(((@string)b), no)) {
-            Ꮡt.Logf("%s\n"u8, ((@string)b));
+        if (strings.Contains((@string)b, no)) {
+            Ꮡt.Logf("%s\n"u8, (@string)b);
             Ꮡt.Fatalf("found %s in test output, not permitted"u8, no);
         }
     }
@@ -605,7 +605,7 @@ public static void TestIssue59563TruncatedCoverPkgAll(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("go tool cover -func failed: %v"u8, err);
     }
 
-    var lines = strings.Split(((@string)b), "\n"u8);
+    var lines = strings.Split((@string)b, "\n"u8);
     nint nfound = 0;
     var bad = false;
     foreach (var (_, line) in lines) {
@@ -631,7 +631,7 @@ public static void TestIssue59563TruncatedCoverPkgAll(ж<testing.T> Ꮡt) {
         bad = true;
     }
     if (bad) {
-        Ꮡt.Logf("func output:\n%s\n"u8, ((@string)b));
+        Ꮡt.Logf("func output:\n%s\n"u8, (@string)b);
     }
 }
 

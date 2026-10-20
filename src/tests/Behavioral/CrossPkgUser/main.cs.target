@@ -220,8 +220,8 @@ internal static void Main() {
         fmt.Println(c.Meter.Value.Bump());
         fmt.Println(g.Meter());
 
-        var rd = ((reading)CrossPkgLib.Boiling());
-        var cback = ((CrossPkgLib.Celsius)rd);
+        var rd = (reading)CrossPkgLib.Boiling();
+        var cback = (CrossPkgLib.Celsius)rd;
         fmt.Println((float64)cback, cback == CrossPkgLib.Boiling());
         var (st1, err1) = stampOrErr(false);
         var (st2, err2) = stampOrErr(true);
@@ -259,12 +259,12 @@ internal static void Main() {
         var led = new ledger(cur: statusPtr(sptr));
         fmt.Println((~led.cur).Code);
 
-        CrossPkgLibꓸGrade gv = ((CrossPkgLibꓸGrade)7);
+        CrossPkgLibꓸGrade gv = (CrossPkgLibꓸGrade)7;
         CrossPkgLibꓸStatus stv = default!;
         stv.Code = (nint)gv;
         fmt.Println(stv.Code);
 
-        var ccel = ((CrossPkgLib.Celsius)(float64)((localCelsius)2.5D));
+        var ccel = (CrossPkgLib.Celsius)(float64)((localCelsius)2.5D);
         fmt.Println((float64)ccel);
         CrossPkgLib.Labeled l1 = new badge(name: "a");
         Tagged l2 = new badge(name: "b");
@@ -275,7 +275,7 @@ internal static void Main() {
         fmt.Println(rep.Report());
         error boom = new CrossPkgLib.Alarmжerror(Ꮡ(new CrossPkgLib.Alarm(Msg: "boom")));
         fmt.Println(boom.Error());
-        var tk = ((tick)(uintptr)((nint)(3 | (nint)gv)));
+        var tk = (tick)(uintptr)((3 | (nint)gv));
         fmt.Println((uint64)(uintptr)tk);
 
         namedLabel nl = new emblem(name: "gold", rank: 1);
@@ -343,13 +343,13 @@ internal static void Main() {
 
         var scan = makeScanner("p:");
         var (scanName, scanData, scanErr) = scan("hello");
-        fmt.Println(scanName, ((@string)scanData), scanErr == default!);
+        fmt.Println(scanName, (@string)scanData, scanErr == default!);
 
         var bbuf = slice<byte>("key"u8);
         bbuf = append(bbufᴷ, bbuf, (byte)(CrossPkgLib.Sep));
         var rbuf = new rune[]{(rune)'a'}.slice();
         rbuf = append(rbufᴷ, rbuf, (rune)(CrossPkgLib.Precision));
-        fmt.Println(((@string)bbuf), len(rbuf), rbuf[1]);
+        fmt.Println((@string)bbuf, len(rbuf), rbuf[1]);
 
         var sc = ((CrossPkgLib.Scored)((CrossPkgLib.Verdict)4));
         fmt.Println("verdict score:", sc.Score());

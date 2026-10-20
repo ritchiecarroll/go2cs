@@ -172,10 +172,10 @@ public static void TestPolicyParse(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (builtin.len((~c).Policies) != 9) {
-        Ꮡt.Errorf("unexpected number of policies: got %d, want %d"u8, builtin.len((~c).Policies), (nint)(9));
+        Ꮡt.Errorf("unexpected number of policies: got %d, want %d"u8, builtin.len((~c).Policies), (nint)9);
     }
     if (builtin.len((~c).PolicyMappings) != 9) {
-        Ꮡt.Errorf("unexpected number of policy mappings: got %d, want %d"u8, builtin.len((~c).PolicyMappings), (nint)(9));
+        Ꮡt.Errorf("unexpected number of policy mappings: got %d, want %d"u8, builtin.len((~c).PolicyMappings), (nint)9);
     }
     if (!(~c).RequireExplicitPolicyZero) {
         Ꮡt.Error(expectedˢ);

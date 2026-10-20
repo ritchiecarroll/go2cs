@@ -88,7 +88,7 @@ public static array<@string> EventArgTypes = new @string[]{
 public static map<@string, EventType> EventNames(slice<EventSpec> specs) {
     var nameToType = new map<@string, EventType>();
     foreach (var (i, spec) in specs) {
-        nameToType[spec.Name] = ((EventType)(byte)i);
+        nameToType[spec.Name] = (EventType)(byte)i;
     }
     return nameToType;
 }

@@ -67,9 +67,9 @@ public static void Run(nint code) {
             }
             Gosched();
         }
-        defer(Ꮡlocked.Store, (int32)(0), ref ᒐ);
+        defer(Ꮡlocked.Store, (int32)0, ref ᒐ);
         ᏑrunGoid.Store(Goid());
-        defer(ᏑrunGoid.Store, (uint64)(0), ref ᒐ);
+        defer(ᏑrunGoid.Store, (uint64)0, ref ᒐ);
 
         defer(() => {
             {
@@ -95,7 +95,7 @@ public static void Run(nint code) {
 partial struct exitError /*@string*/;
 
 internal static @string Error(this exitError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 } // end exithook_package

@@ -131,7 +131,7 @@ internal static void Main() {
     fmt.Println(describe(raw));
 
     fmt.Println(describe(new dot(tag: 3)));
-    fmt.Println(describe((nint)(42)));
+    fmt.Println(describe((nint)42));
 
     error e = new errMarkжerror(Ꮡ(new errMark(code: 5)));
     any anyErr = e;

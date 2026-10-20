@@ -110,8 +110,8 @@ internal static (@string, error) elfBuildID(@string @file) {
                 nint nameSize = (nint)byteOrder.Uint32(buf[0..]);
                 nint descSize = (nint)byteOrder.Uint32(buf[4..]);
                 nint noteType = (nint)byteOrder.Uint32(buf[8..]);
-                var descOff = off + (int64)(12 + (nint)((nameSize + 3) & ~(nint)3));
-                off = descOff + (int64)((nint)((descSize + 3) & ~(nint)3));
+                var descOff = off + (int64)(12 + ((nameSize + 3) & ~(nint)3));
+                off = descOff + (int64)((descSize + 3) & ~(nint)3);
                 if (nameSize != 4 || noteType != 3 || buf[12] != (rune)'G' || buf[13] != (rune)'N' || buf[14] != (rune)'U' || buf[15] != (rune)'\x00') { // want name GNU\x00 type 3 (NT_GNU_BUILD_ID)
                     continue;
                 }

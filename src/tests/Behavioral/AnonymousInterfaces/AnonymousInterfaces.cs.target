@@ -43,14 +43,14 @@ internal partial interface takesReader_r /*dyn*/ {
 internal static void takesReader(takesReader_r r) {
     var buf = new slice<byte>(4);
     var (n, _) = r.Read(buf);
-    fmt.Println("FuncParam: Read =", ((@string)(buf.slice(0, n))));
+    fmt.Println("FuncParam: Read =", (@string)(buf.slice(0, n)));
 }
 
 internal static void testCompositeLiteral() {
     var readers = new takesReader_r[]{new fakeReader(nil)}.slice();
     var buf = new slice<byte>(4);
     var (n, _) = readers[0].Read(buf);
-    fmt.Println("CompositeLiteral: Read =", ((@string)(buf.slice(0, n))));
+    fmt.Println("CompositeLiteral: Read =", (@string)(buf.slice(0, n)));
 }
 
 partial interface WithInlineField_R /*dyn*/ {
@@ -65,7 +65,7 @@ internal static void testInlineField() {
     var s = new WithInlineField(R: new fakeReader(nil));
     var buf = new slice<byte>(4);
     var (n, _) = s.R.Read(buf);
-    fmt.Println("InlineField: Read =", ((@string)(buf.slice(0, n))));
+    fmt.Println("InlineField: Read =", (@string)(buf.slice(0, n)));
 }
 
 partial interface Δtype /*dyn*/ {

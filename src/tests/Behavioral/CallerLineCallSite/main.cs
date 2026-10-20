@@ -92,7 +92,7 @@ internal static void Main() {
     nint r = e.Value((@string)"y"u8);
     report("S4 method, result used:", r, line() - 1);
 
-    e.Info((@string)"a"u8, (nint)(1), 2.5D);
+    e.Info((@string)"a"u8, (nint)1, 2.5D);
     l = line();
     report("S5 method, variadic, three args:", got, l - 1);
 

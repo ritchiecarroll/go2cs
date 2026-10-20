@@ -20,7 +20,7 @@ internal static void Main() {
     var c = lookup(i);
     fmt.Println(c(21));
 
-    any j = (nint)(7);
+    any j = (nint)7;
     fmt.Println(lookup(j) == default!);
 }
 

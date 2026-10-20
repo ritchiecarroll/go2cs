@@ -15,11 +15,11 @@ internal static void Main() {
     fmt.Println("3 PointerTo(ArrayOf(6,uint8)) == TypeOf(&[6]uint8):", AreEqual(reflect.PointerTo(reflect.ArrayOf(6, reflect.TypeOf((uint8)0))), reflect.TypeOf(Ꮡ(new uint8[]{}.array(6)))));
 
     var m = new map<array<nint>, nint>{[new nint[]{}.array(2)] = 0};
-    fmt.Println("4 MapOf(ArrayOf(2,int),int) == TypeOf(map[[2]int]int):", AreEqual(reflect.MapOf(reflect.ArrayOf(2, reflect.TypeOf((nint)(0))), reflect.TypeOf((nint)(0))), reflect.TypeOf(m)));
+    fmt.Println("4 MapOf(ArrayOf(2,int),int) == TypeOf(map[[2]int]int):", AreEqual(reflect.MapOf(reflect.ArrayOf(2, reflect.TypeOf((nint)0)), reflect.TypeOf((nint)0)), reflect.TypeOf(m)));
     fmt.Println("5 TypeOf(map[[2]int]int).Key().Len() == 2:        ", reflect.TypeOf(m).Key().Len() == 2);
 
     var me = new map<@string, array<nint>>{[""] = new nint[]{}.array(3)};
-    fmt.Println("6 MapOf(string,ArrayOf(3,int)) == TypeOf(map[string][3]int):", AreEqual(reflect.MapOf(reflect.TypeOf(""), reflect.ArrayOf(3, reflect.TypeOf((nint)(0)))), reflect.TypeOf(me)));
+    fmt.Println("6 MapOf(string,ArrayOf(3,int)) == TypeOf(map[string][3]int):", AreEqual(reflect.MapOf(reflect.TypeOf(""), reflect.ArrayOf(3, reflect.TypeOf((nint)0))), reflect.TypeOf(me)));
 
     var nested = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()}.slice(), 2, 3);
     fmt.Println("7 TypeOf([][2][3]int).Elem().Elem().Len() == 3:   ", reflect.TypeOf(nested).Elem().Elem().Len() == 3);

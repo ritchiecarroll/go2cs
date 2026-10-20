@@ -624,7 +624,7 @@ public static void TestPageAllocAlloc(ж<testing.T> Ꮡt) {
         // Figure out how many chunks are in a physical page, then align BaseChunkIdx
         // to a physical page in the chunk summary array. Here we only assume that
         // each summary array is aligned to some physical page.
-        global::go.runtime_internal_test_package.ChunkIdx sumsPerPhysPage = ((global::go.runtime_internal_test_package.ChunkIdx)(nuint)(runtime_internal_test_package.PhysPageSize / runtime_internal_test_package.PallocSumBytes));
+        global::go.runtime_internal_test_package.ChunkIdx sumsPerPhysPage = (global::go.runtime_internal_test_package.ChunkIdx)(nuint)(runtime_internal_test_package.PhysPageSize / runtime_internal_test_package.PallocSumBytes);
         global::go.runtime_internal_test_package.ChunkIdx baseChunkIdx = (global::go.runtime_internal_test_package.ChunkIdx)(runtime_internal_test_package.BaseChunkIdx & ~(sumsPerPhysPage - 1));
         tests["DiscontiguousMappedSumBoundary"u8] = new TestPageAllocAlloc_test(
             before: new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
@@ -745,7 +745,7 @@ public static void TestPageAllocExhaust(ж<testing.T> Ꮡt) {
             try {
                 // Construct b.
                 var bDesc = new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>();
-                for (global::go.runtime_internal_test_package.ChunkIdx i = ((global::go.runtime_internal_test_package.ChunkIdx)0); i < 4; i++) {
+                for (global::go.runtime_internal_test_package.ChunkIdx i = (global::go.runtime_internal_test_package.ChunkIdx)0; i < 4; i++) {
                     bDesc[runtime_internal_test_package.BaseChunkIdx + i] = new global::go.runtime_internal_test_package.BitRange[]{}.slice();
                 }
                 var b = runtime_internal_test_package.NewPageAlloc(bDesc, default!);
@@ -772,7 +772,7 @@ public static void TestPageAllocExhaust(ж<testing.T> Ꮡt) {
                 // Construct what we want the heap to look like now.
                 nint allocPages = nAlloc * (nint)npages;
                 var wantDesc = new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>();
-                for (global::go.runtime_internal_test_package.ChunkIdx i = ((global::go.runtime_internal_test_package.ChunkIdx)0); i < 4; i++) {
+                for (global::go.runtime_internal_test_package.ChunkIdx i = (global::go.runtime_internal_test_package.ChunkIdx)0; i < 4; i++) {
                     if (allocPages >= runtime_internal_test_package.PallocChunkPages){
                         wantDesc[runtime_internal_test_package.BaseChunkIdx + i] = new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice();
                         allocPages -= runtime_internal_test_package.PallocChunkPages;

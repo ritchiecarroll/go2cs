@@ -48,7 +48,7 @@ internal static void Main() {
         (var dirInfo, err) = os.Stat(deep);
         fmt.Println("dir stat:", err == default!, dirInfo != default! && dirInfo.IsDir(), dirInfo != default! && dirInfo.Name() == strings.Repeat("d", 24));
 
-        @string sep = ((@string)(rune)filepath.Separator);
+        @string sep = (@string)(rune)filepath.Separator;
         @string name = "probe.txt";
         @string @file = deep + sep + name;
         @string payload = "the quick brown fox jumps over the lazy dog";
@@ -77,7 +77,7 @@ internal static void Main() {
         }
 
         (var grown, err) = os.ReadFile(@file);
-        fmt.Println("after append:", err == default!, len(grown) == len(payload) + 1, strings.HasSuffix(((@string)grown), "g!"));
+        fmt.Println("after append:", err == default!, len(grown) == len(payload) + 1, strings.HasSuffix((@string)grown, "g!"));
 
         @string second = deep + sep + "another.dat"u8;
 

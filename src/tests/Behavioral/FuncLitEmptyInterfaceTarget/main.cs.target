@@ -98,7 +98,7 @@ internal static void Main() {
         }
         return (x * 9, default!);
     });
-    var namedConverted = ((Hook)(int64 () => 3));
+    var namedConverted = (Hook)(int64 () => 3);
     var ch = new channel<any>(1);
     ch.ᐸꟷ((any, error) (nint x) => {
         if (x < 0) {

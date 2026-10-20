@@ -460,7 +460,7 @@ public static syscall.Errno Errno(this NTStatus s) {
 }
 
 internal static uint32 langID(uint16 pri, uint16 sub) {
-    return (uint32)(((uint32)sub << (int)(10)) | (uint32)pri);
+    return (uint32)sub << 10 | (uint32)pri;
 }
 
 public static @string Error(this NTStatus s) {

@@ -23,11 +23,11 @@ internal static nint readArchiveHeader(ж<bufio.Reader> Ꮡb, @string name) {
             return -1;
         }
     }
-    @string aname = strings.Trim(((@string)(buf[0..16])), " "u8);
+    @string aname = strings.Trim((@string)(buf[0..16]), " "u8);
     if (!strings.HasPrefix(aname, name)) {
         return -1;
     }
-    @string asize = strings.Trim(((@string)(buf[48..58])), " "u8);
+    @string asize = strings.Trim((@string)(buf[48..58]), " "u8);
     var (i, _) = strconv.Atoi(asize);
     return i;
 }

@@ -11,12 +11,12 @@ internal static void Main() {
     for (var ch = (rune)(rune)'A'; ch <= (rune)'E'; ch++) {
         b = append(b, ((@string)ch).ꓸꓸꓸ);
     }
-    fmt.Println(((@string)b));
+    fmt.Println((@string)b);
 
     var bs = new byte[]{(rune)'H', (rune)'i'}.slice();
     fmt.Println((((@string)bs))[0]);
 
-    fmt.Println(len(((@string)bs)));
+    fmt.Println(len((@string)bs));
 
     slice<byte> m = default!;
     m = append(m, ((@string)(rune)(rune)'世').ꓸꓸꓸ);
@@ -25,7 +25,7 @@ internal static void Main() {
     slice<byte> eb = default!;
     eb = append(eb, ((@string)"runtime error: "u8).ꓸꓸꓸ);
     eb = append(eb, ((@string)"oops"u8).ꓸꓸꓸ);
-    fmt.Println(((@string)eb), len(eb));
+    fmt.Println((@string)eb, len(eb));
 
     nint tag = 7;
     fmt.Println((@string)("g=" + "\tm="), tag);
@@ -33,13 +33,13 @@ internal static void Main() {
 
     sink w = default!;
     w = append(wᴷ, w, (byte)((rune)'h'), (byte)((rune)'i'));
-    fmt.Println(((@string)(slice<byte>)w), len(w));
+    fmt.Println((@string)(slice<byte>)w, len(w));
 
     var glyphs = new map<@string, rune>{
         ["frak"] = (rune)0x1D504,
         ["ae"] = (rune)'\U000000C6'
     };
-    fmt.Println(glyphs["frak"], glyphs["ae"], ((@string)glyphs["frak"]));
+    fmt.Println(glyphs["frak"], glyphs["ae"], (@string)glyphs["frak"]);
 }
 
 partial struct sink /*[]byte*/;

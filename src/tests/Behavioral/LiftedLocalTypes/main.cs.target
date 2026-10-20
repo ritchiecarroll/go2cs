@@ -68,7 +68,7 @@ internal static void embeddedLocalTypes() {
     fmt.Println(k.myInt);
 
     ref var i = ref heap<embeddedLocalTypes_myInt>(out var Ꮡi);
-    i = ((embeddedLocalTypes_myInt)8);
+    i = (embeddedLocalTypes_myInt)8;
     ref var e = ref heap<embeddedLocalTypes_embed>(out var Ꮡe);
     e = new embeddedLocalTypes_embed(Q: 9);
     var pp = new embeddedLocalTypes_ptrHolder(myInt: Ꮡi, embed: Ꮡe);

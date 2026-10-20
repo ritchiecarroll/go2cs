@@ -115,7 +115,7 @@ internal static (slice<byte>, error) labeledExpand(this ref hkdfKDF kdf, slice<b
     labeledInfo = appendꓸꓸꓸ(labeledInfo, suiteID);
     labeledInfo = append(labeledInfo, label.ꓸꓸꓸ);
     labeledInfo = appendꓸꓸꓸ(labeledInfo, info);
-    return hkdf.Expand(kdf.hash, randomKey, ((@string)labeledInfo), (nint)length);
+    return hkdf.Expand(kdf.hash, randomKey, (@string)labeledInfo, (nint)length);
 }
 
 // SHAKE128 returns a SHAKE128 KDF implementation.
@@ -155,9 +155,9 @@ internal static (slice<byte>, error) labeledDerive(this ref shakeKDF kdf, slice<
     H.Write(inputKey);
     H.Write(slice<byte>("HPKE-v1"u8));
     H.Write(suiteID);
-    H.Write(new byte[]{(byte)((len(label) >> (int)(8))), (byte)len(label)}.slice());
+    H.Write(new byte[]{(byte)(len(label) >> 8), (byte)len(label)}.slice());
     H.Write(slice<byte>(label));
-    H.Write(new byte[]{(byte)((length >> (int)(8))), (byte)length}.slice());
+    H.Write(new byte[]{(byte)(length >> 8), (byte)length}.slice());
     H.Write(context);
     var @out = new slice<byte>(length);
     H.Read(@out);

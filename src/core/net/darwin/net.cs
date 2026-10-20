@@ -652,7 +652,7 @@ public static bool Temporary(this UnknownNetworkError e) {
 partial struct InvalidAddrError /*@string*/;
 
 public static @string Error(this InvalidAddrError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 public static bool Timeout(this InvalidAddrError e) {

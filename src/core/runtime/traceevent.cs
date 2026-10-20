@@ -71,7 +71,7 @@ internal static void @event(this traceEventWriter e, tracev2.EventType ev, param
 // It then returns a traceArg representing that stack which may be
 // passed to write.
 internal static traceArg stack(this traceLocker tl, nint skip) {
-    return ((traceArg)traceStack(skip, nil, ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(tl.gen % 2))));
+    return (traceArg)traceStack(skip, nil, ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(tl.gen % 2)));
 }
 
 // startPC takes a start PC for a goroutine and produces a unique
@@ -81,29 +81,29 @@ internal static traceArg stack(this traceLocker tl, nint skip) {
 // passed to write.
 internal static traceArg startPC(this traceLocker tl, uintptr pc) {
     // +PCQuantum because makeTraceFrame expects return PCs and subtracts PCQuantum.
-    return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(tl.gen % 2)).put(new uintptr[]{
+    return (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(tl.gen % 2)).put(new uintptr[]{
         logicalStackSentinel,
         startPCForTrace(pc) + (uintptr)sys.PCQuantum
-    }.slice()));
+    }.slice());
 }
 
 // string returns a traceArg representing s which may be passed to write.
 // The string is assumed to be relatively short and popular, so it may be
 // stored for a while in the string dictionary.
 internal static traceArg @string(this traceLocker tl, @string s) {
-    return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(tl.gen % 2)).put(tl.gen, s));
+    return (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(tl.gen % 2)).put(tl.gen, s);
 }
 
 // uniqueString returns a traceArg representing s which may be passed to write.
 // The string is assumed to be unique or long, so it will be written out to
 // the trace eagerly.
 internal static traceArg uniqueString(this traceLocker tl, @string s) {
-    return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(tl.gen % 2)).emit(tl.gen, s));
+    return (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(tl.gen % 2)).emit(tl.gen, s);
 }
 
 // rtype returns a traceArg representing typ which may be passed to write.
 internal static traceArg rtype(this traceLocker tl, ж<abi.Type> Ꮡtyp) {
-    return ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (ulong)(tl.gen % 2)).put(Ꮡtyp));
+    return (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (ulong)(tl.gen % 2)).put(Ꮡtyp);
 }
 
 } // end runtime_package

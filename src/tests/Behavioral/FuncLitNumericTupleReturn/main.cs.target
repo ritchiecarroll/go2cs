@@ -84,9 +84,9 @@ internal static @string intControl(bool ok) {
 internal static @string takeSplit(Func<slice<byte>, bool, (nint, slice<byte>, error)> f, slice<byte> data, bool atEOF) {
     var (a, t, err) = f(data, atEOF);
     if (err != default!) {
-        return fmt.Sprintf("adv:%d tok:[%s] err:%s"u8, a, ((@string)t), err.Error());
+        return fmt.Sprintf("adv:%d tok:[%s] err:%s"u8, a, (@string)t, err.Error());
     }
-    return fmt.Sprintf("adv:%d tok:[%s]"u8, a, ((@string)t));
+    return fmt.Sprintf("adv:%d tok:[%s]"u8, a, (@string)t);
 }
 
 internal static @string mixedIntArms(slice<byte> data, bool atEOF) {

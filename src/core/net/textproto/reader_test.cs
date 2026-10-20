@@ -227,7 +227,7 @@ public static void TestLargeReadMIMEHeader(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < len(data); i++) {
         data[i] = (rune)'x';
     }
-    @string sdata = ((@string)data);
+    @string sdata = (@string)data;
     var r = reader("Cookie: "u8 + sdata + "\r\n\n"u8);
     var (m, err) = r.ReadMIMEHeader();
     if (err != default!) {
@@ -457,7 +457,7 @@ public static void TestReadMultiLineError(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("ReadResponse: no error, want error"u8);
     }
     if (code != 550) {
-        Ꮡt.Errorf("ReadResponse: code=%d, want %d"u8, code, (nint)(550));
+        Ꮡt.Errorf("ReadResponse: code=%d, want %d"u8, code, (nint)550);
     }
     if (msg != wantMsg) {
         Ꮡt.Errorf("ReadResponse: msg=%q, want %q"u8, msg, wantMsg);

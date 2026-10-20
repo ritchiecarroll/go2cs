@@ -108,7 +108,7 @@ internal static void Main() {
         fmt.Println("parked bare receive:", len(v.vals), v.vals[3]);
     });
     arm("failed assertion:", () => {
-        any x = (nint)(7);
+        any x = (nint)7;
         var (v, ok) = x._<counts>(ᐧ);
         fmt.Println("failed assertion:", len(v.vals), v.vals[3], ok);
     });

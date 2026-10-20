@@ -69,7 +69,7 @@ internal static void Main() {
 
     fmt.Println("type match:", AreEqual(made.Type(), sumField.Type()));
 
-    var @out = made.Call(new reflectꓸValue[]{reflect.ValueOf((nint)(10)), reflect.ValueOf((nint)(20))}.slice());
+    var @out = made.Call(new reflectꓸValue[]{reflect.ValueOf((nint)10), reflect.ValueOf((nint)20)}.slice());
     fmt.Println("call:", @out[0].Int(), @out[1].String());
 
     ref var describe = ref heap<Func<any, @string>>(out var Ꮡdescribe);
@@ -78,7 +78,7 @@ internal static void Main() {
         var arg = args[0];
         return new reflectꓸValue[]{reflect.ValueOf(fmt.Sprintf("%v/%v"u8, arg.Kind(), arg.Elem().Kind()))}.slice();
     }));
-    fmt.Println("describe:", describe((nint)(42)));
+    fmt.Println("describe:", describe((nint)42));
 
     ref var isNil = ref heap<Func<ж<nint>, bool>>(out var ᏑisNil);
     var nv = reflect.ValueOf(ᏑisNil).Elem();

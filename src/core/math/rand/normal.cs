@@ -33,7 +33,7 @@ internal static uint32 absInt32(int32 i) {
 public static float64 NormFloat64(this ref Rand r) {
     while (ᐧ) {
         var j = (int32)r.Uint32(); // Possibly negative
-        var i = (int32)(j & 0x7F);
+        var i = j & 0x7F;
         var x = (float64)j * (float64)wn[i];
         if (absInt32(j) < kn[i]) {
             // This case should be hit better than 99% of the time.

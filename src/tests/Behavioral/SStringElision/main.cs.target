@@ -6,23 +6,23 @@ partial class main_package {
 
 internal static void Main() {
     var name = slice<byte>("go2cs"u8);
-    sstring s = ((sstring)name);
+    sstring s = (sstring)name;
     if (s == "go2cs"u8) {
         fmt.Println("match");
     }
 
     var digits = slice<byte>("2468"u8);
-    sstring d = ((sstring)digits);
+    sstring d = (sstring)digits;
     fmt.Println((nint)d[0] + (nint)d[3] + len(d));
 
     var scratch = slice<byte>("AB"u8);
-    @string t = ((@string)scratch);
+    @string t = (@string)scratch;
     scratch[0] = (rune)'X';
     if (t == "AB"u8) {
         fmt.Println("copy-safe");
     }
 
-    @string u = ((@string)slice<byte>("printed"u8));
+    @string u = (@string)slice<byte>("printed"u8);
     fmt.Println(u);
 
     fmt.Println(returnedString());
@@ -78,7 +78,7 @@ internal static @string concatObj(slice<byte> b) {
 }
 
 internal static @string concatLocal(slice<byte> b, @string suffix) {
-    sstring s = ((sstring)b);
+    sstring s = (sstring)b;
     return s + suffix;
 }
 
@@ -111,7 +111,7 @@ internal static nint switchTag(slice<byte> b) {
 }
 
 internal static nint switchLocal(slice<byte> b) {
-    sstring s = ((sstring)b);
+    sstring s = (sstring)b;
     var exprᴛ1 = s;
     if (exprᴛ1 == "on"u8) {
         return 1;
@@ -157,12 +157,12 @@ partial struct config {
 }
 
 internal static bool matchVar(slice<byte> b, @string want) {
-    sstring s = ((sstring)b);
+    sstring s = (sstring)b;
     return s == want;
 }
 
 internal static bool matchField(slice<byte> b, config cfg) {
-    sstring s = ((sstring)b);
+    sstring s = (sstring)b;
     return s == cfg.name;
 }
 
@@ -176,7 +176,7 @@ internal static bool staysHeapCallOperand(slice<byte> a, Func<@string> next) {
 
 internal static @string returnedString() {
     var b = slice<byte>("returned"u8);
-    @string r = ((@string)b);
+    @string r = (@string)b;
     return r;
 }
 

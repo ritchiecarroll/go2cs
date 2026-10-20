@@ -88,7 +88,7 @@ public static void TestSliceReader(ж<testing.T> Ꮡt) {
 
 internal static slice<byte> appendUleb128(slice<byte> b, nuint v) {
     while (ᐧ) {
-        var c = (uint8)((nuint)(v & 0x7f));
+        var c = (uint8)(v & 0x7f);
         v >>= (int)(7);
         if (v != 0) {
             c |= (uint8)(0x80);

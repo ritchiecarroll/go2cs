@@ -166,7 +166,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
 // If the file does not end in a newline, one is supplied
 // along with a warning about the missing newline.
 internal static slice<@string> lines(slice<byte> x) {
-    var l = strings.SplitAfter(((@string)x), "\n"u8);
+    var l = strings.SplitAfter((@string)x, "\n"u8);
     if (l[len(l) - 1] == ""){
         l = l.slice(0, len(l) - 1);
     } else {

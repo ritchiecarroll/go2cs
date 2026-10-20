@@ -232,7 +232,7 @@ partial struct frequency /*num:float64*/;
 
 // mul multiplies an unprocessed to produce a time in nanoseconds.
 internal static ΔTime mul(this frequency f, timestamp t) {
-    return ((ΔTime)(int64)((float64)(uint64)t * (float64)f));
+    return (ΔTime)(int64)((float64)(uint64)t * (float64)f);
 }
 
 // stringID is an index into the string table for a generation.

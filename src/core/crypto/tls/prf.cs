@@ -94,10 +94,10 @@ internal static readonly @string serverFinishedLabel = "server finished"u8;
 internal static (Func<slice<byte>, @string, slice<byte>, nint, slice<byte>>, crypto.Hash) prfAndHashForVersion(uint16 version, ref cipherSuite suite) {
     var exprᴛ1 = version;
     if (exprᴛ1 == VersionTLS10 || exprᴛ1 == VersionTLS11) {
-        return (prf10, ((crypto.Hash)0));
+        return (prf10, (crypto.Hash)0);
     }
     if (exprᴛ1 == VersionTLS12) {
-        if ((nint)(suite.flags & (nint)suiteSHA384) != 0) {
+        if ((suite.flags & (nint)suiteSHA384) != 0) {
             return (prf12(sha512.New384), crypto.SHA384);
         }
         return (prf12(sha256.New), crypto.SHA256);
@@ -290,10 +290,10 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMa
         seed = appendꓸꓸꓸ(seed, serverRandomʗ1);
 
         if (context != default!) {
-            if (len(context) >= (1 << (int)(16))) {
+            if (len(context) >= 1 << 16) {
                 return (default!, fmt.Errorf("crypto/tls: ExportKeyingMaterial context too long"u8));
             }
-            seed = append(seed, (byte)((len(context) >> (int)(8))), (byte)len(context));
+            seed = append(seed, (byte)(len(context) >> 8), (byte)len(context));
             seed = appendꓸꓸꓸ(seed, context);
         }
 

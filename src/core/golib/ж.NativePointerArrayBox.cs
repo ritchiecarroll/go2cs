@@ -98,6 +98,17 @@ internal sealed class NativePointerArrayBox<E> : ж<array<ж<E>>>, INativeWordAr
     // re-implementation maps the rest to the base's members.
     object? IGoReflectBox.ReadBoxSlot() => m_words.Clone();
 
+    // reflect's store of the pointee, `*p = arr` (Value.Elem().Set): Go's array assignment, N element stores. Each goes
+    // through p[i]'s element door, so the whole store behaves exactly as `p[i] = arr[i]` for every i, refusals included:
+    // a value that differs from the word is refused by name at the next access, and never reaches the word.
+    void IGoReflectBox.WriteBoxSlot(object? value)
+    {
+        array<ж<E>> source = (array<ж<E>>)value!;
+
+        for (nint i = 0; i < source.Length; i++)
+            m_words[i] = source[i];
+    }
+
     private PanicException noMaterializableArray() =>
         new($"go2cs: native pointer array at 0x{m_nativeAddr:x}: a *[{m_words.Length}]*{typeof(E).Name} over memory the Go runtime " +
             "did not allocate has no array<T> to dereference (serving one would read every word); read its elements " +

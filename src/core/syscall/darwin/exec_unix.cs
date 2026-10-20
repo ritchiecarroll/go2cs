@@ -110,7 +110,7 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
     if (err != default!) {
         return err;
     }
-    if (((nint)(flag & (nint)O_NONBLOCK) != 0) == nonblocking) {
+    if (((flag & (nint)O_NONBLOCK) != 0) == nonblocking) {
         return default!;
     }
     if (nonblocking){

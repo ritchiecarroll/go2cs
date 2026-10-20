@@ -16,8 +16,8 @@ internal static void Main() {
             @out = append(outᴷ, @out, (uint16)r);
         } else {
             r -= 0x10000;
-            @out = append(@out, (uint16)(0xD800 + ((r >> (int)(10)))));
-            @out = append(@out, (uint16)(0xDC00 + ((rune)(r & 0x3FF))));
+            @out = append(@out, (uint16)(0xD800 + (r >> 10)));
+            @out = append(@out, (uint16)(0xDC00 + (r & 0x3FF)));
         }
     }
     foreach (var (_, u) in @out) {

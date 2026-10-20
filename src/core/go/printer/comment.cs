@@ -66,7 +66,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
     var d = Ꮡp.Parse(text);
 
     ref var pr = ref heap(new comment.Printer(), out var Ꮡpr);
-    text = ((@string)Ꮡpr.Comment(d));
+    text = (@string)Ꮡpr.Comment(d);
 
     // For /* */ comment, return one big comment with text inside.
     ref var slash = ref heap<tokenꓸPos>(out var Ꮡslash);

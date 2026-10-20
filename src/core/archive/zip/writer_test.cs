@@ -85,7 +85,7 @@ internal static readonly object randReadFailedˢ = (@string)"rand.Read failed:"u
 public static void TestWriter(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var largeData = new slice<byte>((1 << (int)(17)));
+        var largeData = new slice<byte>((1 << 17));
         {
             var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != default!) {
                 Ꮡt.Fatal(randReadFailedˢ, errΔ1);
@@ -309,7 +309,7 @@ public static void TestWriterTime(ж<testing.T> Ꮡt) {
 public static void TestWriterOffset(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var largeData = new slice<byte>((1 << (int)(17)));
+        var largeData = new slice<byte>((1 << 17));
         {
             var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != default!) {
                 Ꮡt.Fatal(randReadFailedˢ, errΔ1);
@@ -686,7 +686,7 @@ internal static void testReadFile(ж<testing.T> Ꮡt, ж<global::go.archive.zip_
 public static void BenchmarkCompressedZipGarbage(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bigBuf = bytes.Repeat(slice<byte>("a"u8), (1 << (int)(20)));
+    var bigBuf = bytes.Repeat(slice<byte>("a"u8), 1 << 20);
 
     var bigBufʗ1 = bigBuf;
     void runOnce(ж<bytes.Buffer> buf) {

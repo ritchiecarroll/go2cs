@@ -201,7 +201,7 @@ public static (@string, error) Rel(@string basePath, @string targPath) {
     if (@base == ""u8 && filepathlite.VolumeNameLen(baseVol) > 2) {
         /* isUNC */
         // Treat any targetpath matching `\\host\share` basePath as absolute path.
-        @base = ((@string)(rune)Separator);
+        @base = (@string)(rune)Separator;
     }
 
     // Can't use IsAbs - `\a` and `a` are both relative in Windows.
@@ -257,7 +257,7 @@ public static (@string, error) Rel(@string basePath, @string targPath) {
             buf[n] = Separator;
             copy(buf.slice(n + 1), targ.slice(t0));
         }
-        return (Clean(((@string)buf)), default!);
+        return (Clean((@string)buf), default!);
     }
     return (targ.slice(t0), default!);
 }

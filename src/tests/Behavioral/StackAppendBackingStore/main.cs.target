@@ -21,12 +21,12 @@ internal static partial void resetCaps() {
 
     slice<int64> x = default!;
     for (nint i = 0; i < 3; i++) {
-        x = append(xᴷ, x, (int64)(1));
+        x = append(xᴷ, x, (int64)1);
         fmt.Print(cap(x), " ");
     }
     x = default!;
     for (nint i = 0; i < 3; i++) {
-        x = append(x, (int64)(2));
+        x = append(x, (int64)2);
         fmt.Print(cap(x), " ");
     }
     fmt.Println();
@@ -38,7 +38,7 @@ internal static partial nint keep(ref slice<int64> p) {
 
 internal static partial void addressTakenCap() {
     ref var x = ref heap<slice<int64>>(out var Ꮡx);
-    x = append(x, (int64)(1));
+    x = append(x, (int64)1);
     fmt.Println(cap(x), keep(ref x));
 }
 
@@ -82,9 +82,9 @@ internal static partial void boundaryCaps() {
     var overᴷ = new stackAppend<int64>();
 
     slice<int64> exact = default!;
-    exact = append(exactᴷ, exact, (int64)(1), (int64)(2), (int64)(3), (int64)(4));
+    exact = append(exactᴷ, exact, (int64)1, (int64)2, (int64)3, (int64)4);
     slice<int64> over = default!;
-    over = append(overᴷ, over, (int64)(1), (int64)(2), (int64)(3), (int64)(4), (int64)(5));
+    over = append(overᴷ, over, (int64)1, (int64)2, (int64)3, (int64)4, (int64)5);
     fmt.Println(cap(exact), cap(over));
 }
 
@@ -92,7 +92,7 @@ internal static partial void closureLocalCaps() {
     var f = () => {
         var wᴷ = new stackAppend<int64>();
         slice<int64> w = default!;
-        w = append(wᴷ, w, (int64)(1));
+        w = append(wᴷ, w, (int64)1);
         return cap(w);
     };
     fmt.Println(run(f), run(f));
@@ -105,7 +105,7 @@ internal static partial nint run(Func<nint> f) {
 internal static partial void closureOuterCap() {
     ref var w = ref heap<slice<int64>>(out var Ꮡw);
     var f = () => {
-        Ꮡw.ValueSlot = append(Ꮡw.ValueSlot, (int64)(1));
+        Ꮡw.ValueSlot = append(Ꮡw.ValueSlot, (int64)1);
         return len(Ꮡw.ValueSlot);
     };
     run(f);
@@ -119,7 +119,7 @@ internal static partial void siblingScopeCaps(nint n) {
     switch (n) {
     case 0: {
         slice<int64> buf = default!;
-        buf = append(bufᴷ, buf, (int64)(1));
+        buf = append(bufᴷ, buf, (int64)1);
         fmt.Print(cap(buf), " ");
         break;
     }}
@@ -127,7 +127,7 @@ internal static partial void siblingScopeCaps(nint n) {
     switch (n) {
     case 0: {
         slice<int64> buf = default!;
-        buf = append(bufᴷΔ1, buf, (int64)(2));
+        buf = append(bufᴷΔ1, buf, (int64)2);
         fmt.Println(cap(buf));
         break;
     }}
@@ -139,13 +139,13 @@ internal static partial void literalNameCaps() {
 
     {
         slice<int64> buf = default!;
-        buf = append(bufᴷ, buf, (int64)(1));
+        buf = append(bufᴷ, buf, (int64)1);
         fmt.Print(cap(buf), " ");
     }
     var f = () => {
         var bufᴷ = new stackAppend<int64>();
         slice<int64> buf = default!;
-        buf = append(bufᴷ, buf, (int64)(1));
+        buf = append(bufᴷ, buf, (int64)1);
         return cap(buf);
     };
     fmt.Println(run(f));
@@ -155,7 +155,7 @@ internal static partial void nonEmptyCap() {
     var xᴷ = new stackAppend<int64>();
 
     var x = new slice<int64>(1);
-    x = append(xᴷ, x, (int64)(2));
+    x = append(xᴷ, x, (int64)2);
     fmt.Println(cap(x));
 }
 

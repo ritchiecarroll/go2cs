@@ -237,7 +237,7 @@ internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset,
     {
         var alt = oset.insert(obj); if (alt != default!) {
             var err = Ꮡcheck.newError(DuplicateDecl);
-            err.addf(((atPos)pos), "%s redeclared"u8, obj.Name());
+            err.addf((atPos)pos, "%s redeclared"u8, obj.Name());
             err.addAltDecl(alt);
             err.report();
             return false;

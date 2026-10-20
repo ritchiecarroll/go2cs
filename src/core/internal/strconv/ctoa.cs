@@ -14,7 +14,7 @@ partial class strconv_package {
 // value of bitSize bits, which must be 64 for complex64 and 128 for complex128.
 public static @string FormatComplex(complex128 c, byte fmt, nint prec, nint bitSize) {
     array<byte> buf = new(64);
-    return ((@string)AppendComplex(buf[..0], c, fmt, prec, bitSize));
+    return (@string)AppendComplex(buf[..0], c, fmt, prec, bitSize);
 }
 
 // AppendComplex appends the result of FormatComplex to dst.
@@ -32,7 +32,7 @@ public static slice<byte> AppendComplex(slice<byte> dst, complex128 c, byte fmt,
     dst = AppendFloat(dst, imag(c), fmt, prec, bitSize);
     // Check if imaginary part has a sign. If not, add one.
     if (dst[i] != (rune)'+' && dst[i] != (rune)'-') {
-        dst = append(dst, (byte)(0));
+        dst = append(dst, (byte)0);
         copy(dst.slice(i + 1), dst.slice(i));
         dst[i] = (rune)'+';
     }

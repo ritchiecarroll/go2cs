@@ -294,7 +294,7 @@ internal static (nint toRemove, byte good) extractPadding(slice<byte> payload) {
     var paddingLen = payload[len(payload) - 1];
     nuint t = (nuint)(len(payload) - 1) - (nuint)paddingLen;
     // if len(payload) >= (paddingLen - 1) then the MSB of t is zero
-    good = (byte)(((int32)(~t) >> (int)(31)));
+    good = (byte)((int32)(~t) >> 31);
 
     // The maximum possible padding length plus the actual length field
     nint toCheck = 256;
@@ -306,17 +306,17 @@ internal static (nint toRemove, byte good) extractPadding(slice<byte> payload) {
     for (nint i = 0; i < toCheck; i++) {
         nuint tΔ1 = (nuint)paddingLen - (nuint)i;
         // if i <= paddingLen then the MSB of t is zero
-        var mask = (byte)(((int32)(~tΔ1) >> (int)(31)));
+        var mask = (byte)((int32)(~tΔ1) >> 31);
         var b = payload[len(payload) - 1 - i];
         good &= unchecked((byte)~(byte)((byte)((byte)(mask & paddingLen) ^ (byte)(mask & b))));
     }
 
     // We AND together the bits of good and replicate the result across
     // all the bits.
-    good &= (byte)((byte)(good << (int)(4)));
-    good &= (byte)((byte)(good << (int)(2)));
-    good &= (byte)((byte)(good << (int)(1)));
-    good = (uint8)(((int8)good >> (int)(7)));
+    good &= (byte)((byte)(good << 4));
+    good &= (byte)((byte)(good << 2));
+    good &= (byte)((byte)(good << 1));
+    good = (uint8)((int8)good >> 7);
 
     // Zero the padding length on error. This ensures any unchecked bytes
     // are included in the MAC. Otherwise, an attacker that could
@@ -348,7 +348,7 @@ partial interface cbcMode :
 // this stage. The returned plaintext might overlap with the input.
 internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, slice<byte> record) {
     slice<byte> plaintext = default!;
-    var typ = ((recordType)record[0]);
+    var typ = (recordType)record[0];
     var payload = record[(int)(recordHeaderLen)..];
 
     // In TLS 1.3, change_cipher_spec messages are to be ignored without being
@@ -385,7 +385,7 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
                 additionalData = appendꓸꓸꓸ(hc.scratchBuf[..0], hc.seq[..]);
                 additionalData = appendꓸꓸꓸ(additionalData, record[..3]);
                 nint n = len(payload) - c.Overhead();
-                additionalData = append(additionalData, (byte)((n >> (int)(8))), (byte)n);
+                additionalData = append(additionalData, (byte)(n >> 8), (byte)n);
             }
 
             error err = default!;
@@ -433,7 +433,7 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
             // Remove padding and find the ContentType scanning from the end.
             for (nint i = len(plaintext) - 1; i >= 0; i--) {
                 if (plaintext[i] != 0) {
-                    typ = ((recordType)plaintext[i]);
+                    typ = (recordType)plaintext[i];
                     plaintext = plaintext.slice(0, i);
                     break;
                 }
@@ -453,8 +453,8 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
         }
 
         nint n = len(payload) - macSize - paddingLen;
-        n = subtle.ConstantTimeSelect((nint)(((uint32)n >> (int)(31))), 0, n); // if n < 0 { n = 0 }
-        record[3] = (byte)((n >> (int)(8)));
+        n = subtle.ConstantTimeSelect((nint)((uint32)n >> 31), 0, n); // if n < 0 { n = 0 }
+        record[3] = (byte)(n >> 8);
         record[4] = (byte)n;
         var remoteMAC = payload.slice(n, n + macSize);
         var localMAC = tls10MAC(hc.mac, hc.scratchBuf[..0], hc.seq[..], record[..(int)(recordHeaderLen)], payload.slice(0, n), payload.slice(n + macSize));
@@ -466,7 +466,7 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
         // bad MAC from bad padding can lead to an attack.
         //
         // See also the logic at the end of extractPadding.
-        nint macAndPaddingGood = (nint)(subtle.ConstantTimeCompare(localMAC, remoteMAC) & (nint)paddingGood);
+        nint macAndPaddingGood = subtle.ConstantTimeCompare(localMAC, remoteMAC) & (nint)paddingGood;
         if (macAndPaddingGood != 1) {
             return (default!, 0, alertBadRecordMAC);
         }
@@ -554,7 +554,7 @@ internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> r
             record[0] = (byte)recordTypeApplicationData;
 
             nint nΔ1 = len(payload) + 1 + c.Overhead();
-            record[3] = (byte)((nΔ1 >> (int)(8)));
+            record[3] = (byte)(nΔ1 >> 8);
             record[4] = (byte)nΔ1;
 
             record = c.Seal(record[..(int)(recordHeaderLen)],
@@ -591,7 +591,7 @@ internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> r
 
     // Update length to include nonce, MAC and any block padding needed.
     nint n = len(record) - (nint)recordHeaderLen;
-    record[3] = (byte)((n >> (int)(8)));
+    record[3] = (byte)(n >> 8);
     record[4] = (byte)n;
     hc.incSeq();
 
@@ -691,7 +691,7 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         }
     }
     var hdr = c.rawInput.Bytes()[..(int)(recordHeaderLen)];
-    var typ = ((recordType)hdr[0]);
+    var typ = (recordType)hdr[0];
 
     // No valid TLS record has a type of 0x80, however SSLv2 handshakes
     // start with a uint16 length where the MSB is set and the first record
@@ -702,14 +702,14 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         return c.@in.setErrorLocked(c.newRecordHeaderError(default!, unsupportedSSLv2ˢ));
     }
 
-    var vers = (uint16)((uint16)((uint16)hdr[1] << (int)(8)) | (uint16)hdr[2]);
+    var vers = (uint16)((uint16)((uint16)hdr[1] << 8) | (uint16)hdr[2]);
     var expectedVers = c.vers;
     if (expectedVers == VersionTLS13) {
         // All TLS 1.3 records are expected to have 0x0303 (1.2) after
         // the initial hello (RFC 8446 Section 5.1).
         expectedVers = VersionTLS12;
     }
-    nint n = (nint)(((nint)hdr[3] << (int)(8)) | (nint)hdr[4]);
+    nint n = (nint)hdr[3] << 8 | (nint)hdr[4];
     if (c.haveVers && vers != expectedVers) {
         Ꮡc.sendAlert(alertProtocolVersion);
         @string msg = fmt.Sprintf("received record with version %x when expecting version %x"u8, vers, expectedVers);
@@ -998,7 +998,7 @@ internal static nint maxPayloadSizeForWrite(this ref Conn c, recordType typ) {
             nint blockSize = ciph.BlockSize();
             // The payload must fit in a multiple of blockSize, with
             // room for at least one padding byte.
-            payloadBytes = ((nint)(payloadBytes & ~(blockSize - 1))) - 1;
+            payloadBytes = (payloadBytes & ~(blockSize - 1)) - 1;
             // The MAC is appended before padding so affects the
             // payload size directly.
             payloadBytes -= c.@out.mac.Size();
@@ -1118,9 +1118,9 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
                 // See RFC 8446, Section 5.1.
                 vers = VersionTLS12;
             }
-            outBuf[1] = (byte)((vers >> (int)(8)));
+            outBuf[1] = (byte)(vers >> 8);
             outBuf[2] = (byte)vers;
-            outBuf[3] = (byte)((m >> (int)(8)));
+            outBuf[3] = (byte)(m >> 8);
             outBuf[4] = (byte)m;
 
             error err = default!;
@@ -1231,7 +1231,7 @@ internal static (any, error) readHandshake(this ж<Conn> Ꮡc, transcriptHash tr
         maxHandshakeSize = maxHandshakeCertificateMsg;
     }
 
-    nint n = (nint)((nint)(((nint)data[1] << (int)(16)) | ((nint)data[2] << (int)(8))) | (nint)data[3]);
+    nint n = (nint)data[1] << 16 | (nint)data[2] << 8 | (nint)data[3];
     if (n > maxHandshakeSize) {
         Ꮡc.sendAlertLocked(alertInternalError);
         return (default!, c.@in.setErrorLocked(fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes"u8, n, maxHandshakeSize)));
@@ -1362,7 +1362,7 @@ public static (nint, error) Write(this ж<Conn> Ꮡc, slice<byte> b) {
         // interlock with Close below
         while (ᐧ) {
             var x = Ꮡc.of(Conn.ᏑactiveCall).Load();
-            if ((int32)(x & 1) != 0) {
+            if ((x & 1) != 0) {
                 return (0, net.ErrClosed);
             }
             if (Ꮡc.of(Conn.ᏑactiveCall).CompareAndSwap(x, x + 2)) {
@@ -1647,10 +1647,10 @@ public static error Close(this ж<Conn> Ꮡc) {
     int32 x = default!;
     while (ᐧ) {
         x = Ꮡc.of(Conn.ᏑactiveCall).Load();
-        if ((int32)(x & 1) != 0) {
+        if ((x & 1) != 0) {
             return net.ErrClosed;
         }
-        if (Ꮡc.of(Conn.ᏑactiveCall).CompareAndSwap(x, (int32)(x | 1))) {
+        if (Ꮡc.of(Conn.ᏑactiveCall).CompareAndSwap(x, x | 1)) {
             break;
         }
     }
@@ -1844,7 +1844,7 @@ internal static error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Conte
                 // any alert error we may have sent, or alertInternalError
                 // if we didn't send an alert.
                 // Truncate the text of the alert to 0 characters.
-                c.handshakeErr = fmt.Errorf("%w%.0w"u8, c.handshakeErr, ((AlertError)(uint8)a));
+                c.handshakeErr = fmt.Errorf("%w%.0w"u8, c.handshakeErr, (AlertError)(uint8)a);
             }
             close((~c.quic).blockedc);
             close((~c.quic).signalc);

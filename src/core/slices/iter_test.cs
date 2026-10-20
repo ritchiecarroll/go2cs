@@ -161,7 +161,7 @@ public static void TestSortedStableFunc(ж<testing.T> Ꮡt) {
     }
     data.initB();
 
-    var s = ((intPairs)SortedStableFunc<intPair>(Values<intPairs, intPair>(data), intPairCmp));
+    var s = (intPairs)SortedStableFunc<intPair>(Values<intPairs, intPair>(data), intPairCmp);
     if (!IsSortedFunc<intPairs, intPair>(s, intPairCmp)) {
         Ꮡt.Errorf("SortedStableFunc didn't sort %d ints"u8, n);
     }
@@ -178,7 +178,7 @@ public static void TestSortedStableFunc(ж<testing.T> Ꮡt) {
             }
         });
 
-    s = ((intPairs)SortedStableFunc<intPair>(iterVal(Backward<intPairs, intPair>(data)), intPairCmp));
+    s = (intPairs)SortedStableFunc<intPair>(iterVal(Backward<intPairs, intPair>(data)), intPairCmp);
     if (!IsSortedFunc<intPairs, intPair>(s, intPairCmp)) {
         Ꮡt.Errorf("SortedStableFunc didn't sort %d reverse ints"u8, n);
     }

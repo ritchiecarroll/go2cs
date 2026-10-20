@@ -60,7 +60,7 @@ public static (CFRef, error) SecCertificateCreateWithData(slice<byte> b) {
         if (ret == 0) {
             return (0, errors.New("SecCertificateCreateWithData: invalid certificate"u8));
         }
-        return (((CFRef)ret), default!);
+        return ((CFRef)ret, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -75,14 +75,14 @@ public static (CFRef, error) SecPolicyCreateSSL(@string name) {
         CFString hostname = default!;
         if (name != ""u8) {
             hostname = StringToCFString(name);
-            defer(CFRelease, ((CFRef)(uintptr)hostname), ref ᒐ);
+            defer(CFRelease, (CFRef)(uintptr)hostname, ref ᒐ);
         }
         var ret = syscall(abi.FuncPCABI0(x509_SecPolicyCreateSSL_trampoline), 1, (uintptr)hostname, 0, 0, 0, 0D);
         /* true */
         if (ret == 0) {
             return (0, new OSStatus("SecPolicyCreateSSL"u8, (int32)ret));
         }
-        return (((CFRef)ret), default!);
+        return ((CFRef)ret, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -143,8 +143,8 @@ public static (slice<byte>, error) SecCertificateCopyData(CFRef cert) {
     if (ret == 0) {
         return (default!, errors.New(x509InvalidCertificateˢ));
     }
-    var b = CFDataToSlice(((CFRef)ret));
-    CFRelease(((CFRef)ret));
+    var b = CFDataToSlice((CFRef)ret);
+    CFRelease((CFRef)ret);
     return (b, default!);
 }
 
@@ -156,7 +156,7 @@ public static (CFRef, error) SecTrustCopyCertificateChain(CFRef trustObj) {
     if (ret == 0) {
         return (0, new OSStatus("SecTrustCopyCertificateChain"u8, (int32)ret));
     }
-    return (((CFRef)ret), default!);
+    return ((CFRef)ret, default!);
 }
 
 internal static partial void x509_SecTrustCopyCertificateChain_trampoline();

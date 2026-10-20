@@ -18,9 +18,9 @@ internal static void Store(this ref inner g, /*[4]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     @out[0] = (byte)g.total;
-    @out[1] = (byte)((g.total >> (int)(8)));
-    @out[2] = (byte)((g.total >> (int)(16)));
-    @out[3] = (byte)((g.total >> (int)(24)));
+    @out[1] = (byte)(g.total >> 8);
+    @out[2] = (byte)(g.total >> 16);
+    @out[3] = (byte)(g.total >> 24);
 }
 
 partial struct acc {

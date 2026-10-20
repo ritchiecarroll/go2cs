@@ -62,7 +62,7 @@ internal static void Main() {
     fmt.Println(d);
 
     var m = new sortedMap(0, 4);
-    m = append(m, (nint)(3), (nint)(1), (nint)(4), (nint)(1));
+    m = append(m, (nint)3, (nint)1, (nint)4, (nint)1);
     sortSeq(m, (nint x, nint y) => x < y);
     fmt.Println(m);
 }

@@ -29,7 +29,7 @@ internal static (batch, uint64, error) readBatch(slice<byte> b) {
 
     // Read batch header byte.
     {
-        var typ = ((tracev2.EventType)b[0]); if (typ == tracev2.EvEndOfGeneration) {
+        var typ = (tracev2.EventType)b[0]; if (typ == tracev2.EvEndOfGeneration) {
             if (len(b) != 1) {
                 return (new batch(nil), 1, fmt.Errorf("unexpected end of generation in batch of size >1"u8));
             }
@@ -37,7 +37,7 @@ internal static (batch, uint64, error) readBatch(slice<byte> b) {
         }
     }
     {
-        var typ = ((tracev2.EventType)b[0]); if (typ != tracev2.EvEventBatch && typ != tracev2.EvExperimentalBatch) {
+        var typ = (tracev2.EventType)b[0]; if (typ != tracev2.EvEventBatch && typ != tracev2.EvExperimentalBatch) {
             return (new batch(nil), 1, fmt.Errorf("expected batch event, got event %d"u8, typ));
         }
     }

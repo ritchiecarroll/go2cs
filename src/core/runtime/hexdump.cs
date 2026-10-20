@@ -100,7 +100,7 @@ internal static void init(this ref hexdumper h) {
         h.wordBytes = goarch.PtrSize;
     }
     nint wb = (nint)h.wordBytes;
-    if (wb < 0 || wb >= bytesPerLine || (nint)(wb & (wb - 1)) != 0) {
+    if (wb < 0 || wb >= bytesPerLine || (wb & (wb - 1)) != 0) {
         @throw(invalidWordBytesˢ);
     }
 
@@ -111,7 +111,7 @@ internal static void init(this ref hexdumper h) {
         if (goarch.BigEndian){
             field = i;
         } else {
-            field = (nint)(i ^ (nint)(wb - 1));
+            field = i ^ (nint)(wb - 1);
         }
         // Translate this field into a visual offset.
         // "00112233 44556677  8899AABB CCDDEEFF"

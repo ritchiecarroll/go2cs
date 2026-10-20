@@ -176,9 +176,9 @@ internal static void sha384Block(ref array<uint64> dh, /*[128]*/ ж<array<byte>>
             w[i] = beUint64(p.slice(i * 8));
         } else {
             var v1 = w[i - 2];
-            var t1 = (uint64)((uint64)(bits.RotateLeft64(v1, -19) ^ bits.RotateLeft64(v1, -61)) ^ ((v1 >> (int)(6))));
+            var t1 = bits.RotateLeft64(v1, -19) ^ bits.RotateLeft64(v1, -61) ^ (v1 >> 6);
             var v2 = w[i - 15];
-            var t2 = (uint64)((uint64)(bits.RotateLeft64(v2, -1) ^ bits.RotateLeft64(v2, -8)) ^ ((v2 >> (int)(7))));
+            var t2 = bits.RotateLeft64(v2, -1) ^ bits.RotateLeft64(v2, -8) ^ (v2 >> 7);
 
             w[i] = t1 + w[i - 7] + t2 + w[i - 16];
         }
@@ -187,8 +187,8 @@ internal static void sha384Block(ref array<uint64> dh, /*[128]*/ ж<array<byte>>
     var (a, b, c, d, e, f, g, h) = (dh[0], dh[1], dh[2], dh[3], dh[4], dh[5], dh[6], dh[7]);
 
     foreach (var i in range(80)) {
-        var t1 = h + ((uint64)((uint64)(bits.RotateLeft64(e, -14) ^ bits.RotateLeft64(e, -18)) ^ bits.RotateLeft64(e, -41))) + ((uint64)(((uint64)(e & f)) ^ ((uint64)(~e & g)))) + _K[i] + w[i];
-        var t2 = ((uint64)((uint64)(bits.RotateLeft64(a, -28) ^ bits.RotateLeft64(a, -34)) ^ bits.RotateLeft64(a, -39))) + ((uint64)((uint64)(((uint64)(a & b)) ^ ((uint64)(a & c))) ^ ((uint64)(b & c))));
+        var t1 = h + (bits.RotateLeft64(e, -14) ^ bits.RotateLeft64(e, -18) ^ bits.RotateLeft64(e, -41)) + ((e & f) ^ (~e & g)) + _K[i] + w[i];
+        var t2 = (bits.RotateLeft64(a, -28) ^ bits.RotateLeft64(a, -34) ^ bits.RotateLeft64(a, -39)) + ((a & b) ^ (a & c) ^ (b & c));
 
         h = g;
         g = f;
@@ -212,18 +212,18 @@ internal static void sha384Block(ref array<uint64> dh, /*[128]*/ ж<array<byte>>
 
 internal static uint64 beUint64(slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[7] | ((uint64)b[6] << (int)(8))) | ((uint64)b[5] << (int)(16))) | ((uint64)b[4] << (int)(24))) | ((uint64)b[3] << (int)(32))) | ((uint64)b[2] << (int)(40))) | ((uint64)b[1] << (int)(48))) | ((uint64)b[0] << (int)(56)));
+    return (uint64)b[7] | (uint64)b[6] << 8 | (uint64)b[5] << 16 | (uint64)b[4] << 24 | (uint64)b[3] << 32 | (uint64)b[2] << 40 | (uint64)b[1] << 48 | (uint64)b[0] << 56;
 }
 
 internal static void bePutUint64(slice<byte> b, uint64 v) {
     _ = b[7]; // early bounds check to guarantee safety of writes below
-    b[0] = (byte)((v >> (int)(56)));
-    b[1] = (byte)((v >> (int)(48)));
-    b[2] = (byte)((v >> (int)(40)));
-    b[3] = (byte)((v >> (int)(32)));
-    b[4] = (byte)((v >> (int)(24)));
-    b[5] = (byte)((v >> (int)(16)));
-    b[6] = (byte)((v >> (int)(8)));
+    b[0] = (byte)(v >> 56);
+    b[1] = (byte)(v >> 48);
+    b[2] = (byte)(v >> 40);
+    b[3] = (byte)(v >> 32);
+    b[4] = (byte)(v >> 24);
+    b[5] = (byte)(v >> 16);
+    b[6] = (byte)(v >> 8);
     b[7] = (byte)v;
 }
 

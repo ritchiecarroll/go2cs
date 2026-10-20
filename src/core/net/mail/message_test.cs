@@ -108,7 +108,7 @@ public static void TestParsing(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("test #%d: Failed reading body: %v"u8, i, err);
             continue;
         }
-        @string bodyStr = ((@string)body);
+        @string bodyStr = (@string)body;
         if (bodyStr != test.body) {
             Ꮡt.Errorf("test #%d: Incorrectly parsed message body.\nGot:\n%+v\nWant:\n%+v"u8,
                 i, bodyStr, test.body);

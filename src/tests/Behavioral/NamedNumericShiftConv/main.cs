@@ -14,8 +14,8 @@ internal static UntypedInt bits => 6;
 
 internal static void Main() {
     arenaIdx a = (arenaIdx)((nuint)1 << (int)(bits));
-    tag t = (tag)(uint8)(1 << (int)(3));
-    big b = (big)((uint64)1 << (int)(40));
+    tag t = (tag)(uint8)(1 << 3);
+    big b = (big)((uint64)1 << 40);
     fmt.Println((nuint)a, (uint8)t, (uint64)b);
 }
 

@@ -139,7 +139,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
             tΔ1.Run(structˢ, (ж<testing.T> tΔ2) => {
                 var arena = runtime_internal_test_package.NewUserArena();
                 ref var x = ref heap<any>(out var Ꮡx);
-                x = ((ж<EmptyStruct>)nil);
+                x = (ж<EmptyStruct>)nil;
                 arena.New(Ꮡx);
                 {
                     @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(x._<ж<EmptyStruct>>()); if (v != runtime_internal_test_package.ZeroBase) {
@@ -204,7 +204,7 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
         var arenaValues = new slice<ж<S>>(0, n);
         for (nint j = 0; j < n; j++) {
             ref var x = ref heap<any>(out var Ꮡx);
-            x = ((ж<S>)nil);
+            x = (ж<S>)nil;
             arena.New(Ꮡx);
             var s = x._<ж<S>>();
             s.ValueSlot = Ꮡvalue.ValueSlot;
@@ -309,7 +309,7 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
         }
 
         ref var x = ref heap<any>(out var Ꮡx);
-        x = ((ж<smallPointerMix>)nil);
+        x = (ж<smallPointerMix>)nil;
         arena.New(Ꮡx);
         var v = x._<ж<smallPointerMix>>();
 
@@ -402,7 +402,7 @@ public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
     var a = runtime_internal_test_package.NewUserArena();
     for (nint i = 0; i < (nint)((uintptr)(runtime_internal_test_package.UserArenaChunkBytes / (uintptr)goarch.PtrSize) * 3); i++) {
         ref var xΔ1 = ref heap<any>(out var ᏑxΔ1);
-        xΔ1 = ((ж<smallPointer>)nil);
+        xΔ1 = (ж<smallPointer>)nil;
         a.New(ᏑxΔ1);
     }
     a.Free();
@@ -414,7 +414,7 @@ public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
     a = runtime_internal_test_package.NewUserArena();
     for (nint i = 0; i < (nint)((uintptr)(runtime_internal_test_package.UserArenaChunkBytes / (uintptr)goarch.PtrSize) * 2); i++) {
         ref var xΔ2 = ref heap<any>(out var ᏑxΔ2);
-        xΔ2 = ((ж<smallScalar>)nil);
+        xΔ2 = (ж<smallScalar>)nil;
         a.New(ᏑxΔ2);
         var v = xΔ2._<ж<smallScalar>>();
         // Write a pointer that should not keep x alive.
@@ -511,7 +511,7 @@ public static void TestUserArenaClonePointer(ж<testing.T> Ꮡt) {
 
     // Clone should make a copy of an arena-allocated smallScalar.
     ref var i = ref heap<any>(out var Ꮡi);
-    i = ((ж<smallScalar>)nil);
+    i = (ж<smallScalar>)nil;
     a.New(Ꮡi);
     var xArena = i._<ж<smallScalar>>();
     var xArenaCopy = runtime_internal_test_package.UserArenaClone(xArena);

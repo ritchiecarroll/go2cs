@@ -7,7 +7,7 @@ partial struct Handle /*num:uintptr*/;
 partial struct Token /*num:uintptr*/;
 
 public static Token NewToken(uintptr v) {
-    return ((Token)v);
+    return (Token)v;
 }
 
 public static @string String(this Handle h) {

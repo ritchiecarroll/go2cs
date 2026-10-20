@@ -52,7 +52,7 @@ public static bool ProbablyPrime(this ж<ΔInt> Ꮡx, nint n) {
 
         Word w = x.abs[0];
         if (len(x.abs) == 1 && w < 64) {
-            return (uint64)(primeBitMask & (((uint64)1).Lsh(w))) != 0;
+            return (primeBitMask & (((uint64)1).Lsh(w))) != 0;
         }
 
         if ((Word)(w & 1) == 0) {
@@ -182,9 +182,9 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
     // The search is expected to succeed for non-square n after just a few trials.
     // After more than expected failures, check whether n is square
     // (which would cause Jacobi(D, n) = 1 for all D not dividing n).
-    Word p = ((Word)3);
+    Word p = (Word)3;
     var d = new Δnat(new Word[]{1}.slice());
-    var t1 = ((Δnat)default!); // temp
+    var t1 = (Δnat)default!; // temp
     var intD = Ꮡ(new ΔInt(abs: d));
     var intN = Ꮡ(new ΔInt(abs: n));
     for (; ᐧ ; p++) {
@@ -266,7 +266,7 @@ internal static bool probablyPrimeLucas(this Δnat n, ж<stack> Ꮡstk) {
     var natP = ((Δnat)default!).setWord(p);
     var vk = ((Δnat)default!).setWord(2);
     var vk1 = ((Δnat)default!).setWord(p);
-    var t2 = ((Δnat)default!); // temp
+    var t2 = (Δnat)default!; // temp
     for (nint i = (nint)s.bitLen(); i >= 0; i--) {
         if (s.bit((nuint)i) != 0){
             // k' = 2k+1

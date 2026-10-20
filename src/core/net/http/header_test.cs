@@ -193,7 +193,7 @@ public static void TestHasToken(ж<testing.T> Ꮡt) {
 }
 
 public static void TestNilHeaderClone(ж<testing.T> Ꮡt) {
-    var t1 = ((global::go.net.http_package.ΔHeader)default!);
+    var t1 = (global::go.net.http_package.ΔHeader)default!;
     var t2 = t1.Clone();
     if (t2 != default!) {
         Ꮡt.Errorf("cloned header does not match original: got: %+v; want: %+v"u8, t2, (any)(default!));

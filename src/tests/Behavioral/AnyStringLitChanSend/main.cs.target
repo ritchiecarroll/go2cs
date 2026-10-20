@@ -53,7 +53,7 @@ private static readonly object assertˢ = (@string)"assert"u8;
 internal static void Main() {
     var ch = new channel<any>(2);
     ch.ᐸꟷ(textˢ);
-    ch.ᐸꟷ((nint)(42));
+    ch.ᐸꟷ((nint)42);
     describe("send", ᐸꟷ(ch));
     describe("send", ᐸꟷ(ch));
 

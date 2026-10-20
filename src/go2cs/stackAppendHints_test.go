@@ -516,15 +516,15 @@ func TestStackAppendEmission(t *testing.T) {
 	for _, want := range []string{
 		"    var xᴷ = new stackAppend<int64>();\n",
 		"x = append(xᴷ, x, (int64)i);",
-		"x = append(x, (int64)(5));",
+		"x = append(x, (int64)5);",
 		"        var innerᴷ = new stackAppend<int64>();\n",
-		"inner = append(innerᴷ, inner, (int64)(1));",
+		"inner = append(innerᴷ, inner, (int64)1);",
 		"    var outᴷ = new stackAppend<int64>();\n",
-		"@out = append(outᴷ, @out, (int64)(1));",
+		"@out = append(outᴷ, @out, (int64)1);",
 		"    var bufᴷ = new stackAppend<int64>();\n",
 		"    var bufᴷΔ1 = new stackAppend<int64>();\n",
-		"buf = append(bufᴷ, buf, (int64)(1));",
-		"buf = append(bufᴷΔ1, buf, (int64)(2));",
+		"buf = append(bufᴷ, buf, (int64)1);",
+		"buf = append(bufᴷΔ1, buf, (int64)2);",
 		"        var tmpᴷ = new stackAppend<int64>();\n",
 	} {
 		if strings.Count(emitted, want) != 1 {
@@ -532,7 +532,7 @@ func TestStackAppendEmission(t *testing.T) {
 		}
 	}
 
-	if strings.Count(emitted, "var tmpᴷ = new stackAppend<int64>();") != 2 || strings.Count(emitted, "tmp = append(tmpᴷ, tmp, (int64)(1));") != 2 {
+	if strings.Count(emitted, "var tmpᴷ = new stackAppend<int64>();") != 2 || strings.Count(emitted, "tmp = append(tmpᴷ, tmp, (int64)1);") != 2 {
 		t.Errorf("want literalName's entry and its lambda each to declare and pass their own tmpᴷ:\n%s", emitted)
 	}
 

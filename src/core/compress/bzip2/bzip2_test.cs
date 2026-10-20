@@ -69,7 +69,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
     ), new(
         desc: "1MiB zeros"u8,
         input: mustDecodeHex(""u8 + "425a683931415926535938571ce50008084000c0040008200030cc0529a60806"u8 + "c4201e2ee48a70a12070ae39ca"u8),
-        output: new slice<byte>((1 << (int)(20)))
+        output: new slice<byte>((1 << 20))
     ), new(
         desc: "random data"u8,
         input: mustLoadFile(testdataPassRandom1Bz2ˢ),
@@ -86,7 +86,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         desc: "1MiB sawtooth"u8,
         input: mustLoadFile(testdataPassSawtoothBz2ˢ),
         output: ((Func<slice<byte>>)(() => {
-            var b = new slice<byte>((1 << (int)(20)));
+            var b = new slice<byte>((1 << 20));
             foreach (var (i, _) in b) {
                 b[i] = (byte)i;
             }

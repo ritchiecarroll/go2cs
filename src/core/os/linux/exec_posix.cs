@@ -153,7 +153,7 @@ public static @string String(this ж<ProcessState> Ꮡp) {
     switch (ᐧ) {
     case {} when status.Exited(): {
         nint code = status.ExitStatus();
-        if (runtime.GOOS == "windows"u8 && (nuint)code >= ((nuint)1 << (int)(16))){ // windows uses large hex numbers
+        if (runtime.GOOS == "windows"u8 && (nuint)code >= (nuint)1 << 16){ // windows uses large hex numbers
             res = "exit status 0x"u8 + strconv.FormatUint((uint64)code, 16);
         } else { // unix systems use small decimal integers
             res = "exit status "u8 + strconv.Itoa(code); // unix

@@ -16,7 +16,7 @@ partial struct tagOptions /*@string*/;
 // comma-separated options.
 internal static (@string, tagOptions) parseTag(@string tag) {
     (tag, var opt, _) = strings.Cut(tag, ","u8);
-    return (tag, ((tagOptions)opt));
+    return (tag, (tagOptions)opt);
 }
 
 // Contains reports whether a comma-separated list of options
@@ -26,7 +26,7 @@ internal static bool Contains(this tagOptions o, @string optionName) {
     if (len(o) == 0) {
         return false;
     }
-    @string s = ((@string)o);
+    @string s = (@string)o;
     while (s != ""u8) {
         @string name = default!;
         (name, s, _) = strings.Cut(s, ","u8);

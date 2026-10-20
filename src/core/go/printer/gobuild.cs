@@ -169,7 +169,7 @@ internal static @string commentTextAt(this ref printer p, nint start) {
     while (pos < len(p.output) && p.output[pos] != tabwriter.Escape && !isNL(p.output[pos])) {
         pos++;
     }
-    return ((@string)(p.output.slice(start, pos)));
+    return (@string)(p.output.slice(start, pos));
 }
 
 internal static bool isNL(byte b) {

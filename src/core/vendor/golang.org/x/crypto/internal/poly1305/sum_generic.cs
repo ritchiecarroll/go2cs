@@ -107,8 +107,8 @@ internal static UntypedInt rMask1 => 0x0FFFFFFC0FFFFFFC;
 internal static void initialize(/*[32]*/ ж<array<byte>> Ꮡkey, ref macState m) {
     ref var key = ref Ꮡkey.DerefOrNull();
 
-    m.r[0] = (uint64)(binary.LittleEndian.Uint64(key[0..8]) & (uint64)rMask0);
-    m.r[1] = (uint64)(binary.LittleEndian.Uint64(key[8..16]) & (uint64)rMask1);
+    m.r[0] = binary.LittleEndian.Uint64(key[0..8]) & (uint64)rMask0;
+    m.r[1] = binary.LittleEndian.Uint64(key[8..16]) & (uint64)rMask1;
     m.s[0] = binary.LittleEndian.Uint64(key[16..24]);
     m.s[1] = binary.LittleEndian.Uint64(key[24..32]);
 }
@@ -134,8 +134,8 @@ internal static uint128 add128(uint128 a, uint128 b) {
 }
 
 internal static uint128 shiftRightBy2(uint128 a) {
-    a.lo = (uint64)((a.lo >> (int)(2)) | (((uint64)(a.hi & 3)) << (int)(62)));
-    a.hi = (a.hi >> (int)(2));
+    a.lo = a.lo >> 2 | (a.hi & 3) << 62;
+    a.hi = a.hi >> 2;
     return a;
 }
 
@@ -244,8 +244,8 @@ internal static void updateGeneric(ref macState state, slice<byte> msg) {
         // We split the final result at the 2¹³⁰ mark into h and cc, the carry.
         // Note that the carry bits are effectively shifted left by 2, in other
         // words, cc = c * 4 for the c in the reduction identity.
-        (h0, h1, h2) = (t0, t1, (uint64)(t2 & maskLow2Bits));
-        var cc = new uint128((uint64)(t2 & maskNotLow2Bits), t3);
+        (h0, h1, h2) = (t0, t1, t2 & maskLow2Bits);
+        var cc = new uint128(t2 & maskNotLow2Bits, t3);
 
         // To add c * 5 to h, we first add cc = c * 4, and then add (cc >> 2) = c.
 
@@ -272,7 +272,7 @@ internal const uint64 maskNotLow2Bits = /* ^maskLow2Bits */ 18446744073709551612
 
 // select64 returns x if v == 1 and y if v == 0, in constant time.
 internal static uint64 select64(uint64 v, uint64 x, uint64 y) {
-    return (uint64)((uint64)(~(v - 1) & x) | (uint64)((v - 1) & y));
+    return ~(v - 1) & x | (v - 1) & y;
 }
 
 // [p0, p1, p2] is 2¹³⁰ - 5 in little endian order.

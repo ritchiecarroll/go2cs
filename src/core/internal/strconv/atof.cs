@@ -434,7 +434,7 @@ internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<f
     }
 
     // Denormalized?
-    if ((uint64)(mant & (((uint64)1).Lsh(flt.mantbits))) == 0) {
+    if ((mant & (((uint64)1).Lsh(flt.mantbits))) == 0) {
         exp = flt.bias;
     }
     goto @out;
@@ -446,9 +446,9 @@ overflow:
     overflow = true;
 
 @out:
-    var bits = (uint64)(mant & (((uint64)1).Lsh(flt.mantbits) - 1));
+    var bits = mant & (((uint64)1).Lsh(flt.mantbits) - 1);
     // Assemble bits.
-    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & (((nint)1).Lsh(flt.expbits) - 1)))).Lsh(flt.mantbits));
+    bits |= (uint64)(((uint64)((exp - flt.bias) & (((nint)1).Lsh(flt.expbits) - 1))).Lsh(flt.mantbits));
     if (d.neg) {
         bits |= (uint64)((((uint64)1).Lsh(flt.mantbits)).Lsh(flt.expbits));
     }
@@ -516,7 +516,7 @@ internal static (float32 f, bool ok) atof32exact(uint64 mantissa, nint exp, bool
     float32 f = default!;
     bool ok = default!;
 
-    if ((mantissa >> (int)(float32MantBits)) != 0) {
+    if (mantissa >> (int)(float32MantBits) != 0) {
         return (f, ok);
     }
     f = (float32)mantissa;
@@ -574,7 +574,7 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
         mantissa |= (uint64)(1);
     }
     while (mantissa.Rsh((1 + flt.mantbits + 2)) != 0) {
-        mantissa = (uint64)((mantissa >> (int)(1)) | (uint64)(mantissa & 1));
+        mantissa = mantissa >> 1 | mantissa & 1;
         exp++;
     }
 
@@ -582,14 +582,14 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
     // denormalize in hopes of making it representable.
     // (The -2 is for the rounding bits.)
     while (mantissa > 1 && exp < minExp - 2) {
-        mantissa = (uint64)((mantissa >> (int)(1)) | (uint64)(mantissa & 1));
+        mantissa = mantissa >> 1 | mantissa & 1;
         exp++;
     }
 
     // Round using two bottom bits.
-    var round = (uint64)(mantissa & 3);
+    var round = mantissa & 3;
     mantissa >>= (int)(2);
-    round |= (uint64)((uint64)(mantissa & 1)); // round to even (round up if mantissa is odd)
+    round |= (uint64)((mantissa & 1)); // round to even (round up if mantissa is odd)
     exp += 2;
     if (round == 3) {
         mantissa++;
@@ -609,8 +609,8 @@ internal static (float64, error) atofHex(@string s, ж<floatInfo> Ꮡflt, uint64
         err = ErrRange;
     }
 
-    var bits = (uint64)(mantissa & (((uint64)1).Lsh(flt.mantbits) - 1));
-    bits |= (uint64)(((uint64)((nint)((exp - flt.bias) & (((nint)1).Lsh(flt.expbits) - 1)))).Lsh(flt.mantbits));
+    var bits = mantissa & (((uint64)1).Lsh(flt.mantbits) - 1);
+    bits |= (uint64)(((uint64)((exp - flt.bias) & (((nint)1).Lsh(flt.expbits) - 1))).Lsh(flt.mantbits));
     if (neg) {
         bits |= (uint64)((((uint64)1).Lsh(flt.mantbits)).Lsh(flt.expbits));
     }

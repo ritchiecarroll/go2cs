@@ -47,9 +47,9 @@ internal static void Main() {
     fmt.Println("last([]byte):", lastByte(bs));
     fmt.Println("sum:", digitSum((@string)"12:34"), digitSum(slice<byte>("56:78"u8)));
     fmt.Println("head:", headSum(x9876ˢ), headSum(slice<byte>("y10:23"u8)));
-    fmt.Println("appendRun(string):", ((@string)appendRun(default!, abcdeˢ)));
-    fmt.Println("appendRun([]byte):", ((@string)appendRun(slice<byte>("<"u8), slice<byte>("abcde"u8))));
-    fmt.Println("whole(string):", ((@string)wholeSpan(str)), "whole([]byte):", ((@string)wholeSpan(bs)));
+    fmt.Println("appendRun(string):", (@string)appendRun(default!, abcdeˢ));
+    fmt.Println("appendRun([]byte):", (@string)appendRun(slice<byte>("<"u8), slice<byte>("abcde"u8)));
+    fmt.Println("whole(string):", (@string)wholeSpan(str), "whole([]byte):", (@string)wholeSpan(bs));
 }
 
 internal static nint digitSum<T>(T s)

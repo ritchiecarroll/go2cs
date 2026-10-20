@@ -14,27 +14,27 @@ partial class runtime_package {
 internal static void dumpregs(ж<sigctxt> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    print((@string)"rax    "u8, ((Δhex)c.rax()), (@string)"\n"u8);
-    print((@string)"rbx    "u8, ((Δhex)c.rbx()), (@string)"\n"u8);
-    print((@string)"rcx    "u8, ((Δhex)c.rcx()), (@string)"\n"u8);
-    print((@string)"rdx    "u8, ((Δhex)c.rdx()), (@string)"\n"u8);
-    print((@string)"rdi    "u8, ((Δhex)c.rdi()), (@string)"\n"u8);
-    print((@string)"rsi    "u8, ((Δhex)c.rsi()), (@string)"\n"u8);
-    print((@string)"rbp    "u8, ((Δhex)c.rbp()), (@string)"\n"u8);
-    print((@string)"rsp    "u8, ((Δhex)c.rsp()), (@string)"\n"u8);
-    print((@string)"r8     "u8, ((Δhex)c.r8()), (@string)"\n"u8);
-    print((@string)"r9     "u8, ((Δhex)c.r9()), (@string)"\n"u8);
-    print((@string)"r10    "u8, ((Δhex)c.r10()), (@string)"\n"u8);
-    print((@string)"r11    "u8, ((Δhex)c.r11()), (@string)"\n"u8);
-    print((@string)"r12    "u8, ((Δhex)c.r12()), (@string)"\n"u8);
-    print((@string)"r13    "u8, ((Δhex)c.r13()), (@string)"\n"u8);
-    print((@string)"r14    "u8, ((Δhex)c.r14()), (@string)"\n"u8);
-    print((@string)"r15    "u8, ((Δhex)c.r15()), (@string)"\n"u8);
-    print((@string)"rip    "u8, ((Δhex)c.rip()), (@string)"\n"u8);
-    print((@string)"rflags "u8, ((Δhex)c.rflags()), (@string)"\n"u8);
-    print((@string)"cs     "u8, ((Δhex)c.cs()), (@string)"\n"u8);
-    print((@string)"fs     "u8, ((Δhex)c.fs()), (@string)"\n"u8);
-    print((@string)"gs     "u8, ((Δhex)c.gs()), (@string)"\n"u8);
+    print((@string)"rax    "u8, (Δhex)c.rax(), (@string)"\n"u8);
+    print((@string)"rbx    "u8, (Δhex)c.rbx(), (@string)"\n"u8);
+    print((@string)"rcx    "u8, (Δhex)c.rcx(), (@string)"\n"u8);
+    print((@string)"rdx    "u8, (Δhex)c.rdx(), (@string)"\n"u8);
+    print((@string)"rdi    "u8, (Δhex)c.rdi(), (@string)"\n"u8);
+    print((@string)"rsi    "u8, (Δhex)c.rsi(), (@string)"\n"u8);
+    print((@string)"rbp    "u8, (Δhex)c.rbp(), (@string)"\n"u8);
+    print((@string)"rsp    "u8, (Δhex)c.rsp(), (@string)"\n"u8);
+    print((@string)"r8     "u8, (Δhex)c.r8(), (@string)"\n"u8);
+    print((@string)"r9     "u8, (Δhex)c.r9(), (@string)"\n"u8);
+    print((@string)"r10    "u8, (Δhex)c.r10(), (@string)"\n"u8);
+    print((@string)"r11    "u8, (Δhex)c.r11(), (@string)"\n"u8);
+    print((@string)"r12    "u8, (Δhex)c.r12(), (@string)"\n"u8);
+    print((@string)"r13    "u8, (Δhex)c.r13(), (@string)"\n"u8);
+    print((@string)"r14    "u8, (Δhex)c.r14(), (@string)"\n"u8);
+    print((@string)"r15    "u8, (Δhex)c.r15(), (@string)"\n"u8);
+    print((@string)"rip    "u8, (Δhex)c.rip(), (@string)"\n"u8);
+    print((@string)"rflags "u8, (Δhex)c.rflags(), (@string)"\n"u8);
+    print((@string)"cs     "u8, (Δhex)c.cs(), (@string)"\n"u8);
+    print((@string)"fs     "u8, (Δhex)c.fs(), (@string)"\n"u8);
+    print((@string)"gs     "u8, (Δhex)c.gs(), (@string)"\n"u8);
 }
 
 //go:nosplit

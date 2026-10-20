@@ -57,12 +57,12 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
         return originalErr;
     }
 
-    var parts = strings.Split(name, ((@string)sep));
+    var parts = strings.Split(name, (@string)sep);
     foreach (var (i, _) in parts) {
         if (parts[i] == "") {
             continue;
         }
-        var (fi, err) = stat(strings.Join(parts.slice(0, i + 1), ((@string)sep)));
+        var (fi, err) = stat(strings.Join(parts.slice(0, i + 1), (@string)sep));
         if (err != default!) {
             return originalErr;
         }
@@ -89,7 +89,7 @@ public static (File, error) Open(this Dir d, @string name) {
     if (err != default!) {
         return (default!, errInvalidUnsafePath);
     }
-    @string dir = ((@string)d);
+    @string dir = (@string)d;
     if (dir == ""u8) {
         dir = "."u8;
     }
@@ -948,7 +948,7 @@ public static void ServeFile(ResponseWriter w, ж<Request> Ꮡr, @string name) {
         return;
     }
     var (dir, @file) = filepath.Split(name);
-    serveFile(w, Ꮡr, ((Dir)dir), @file, false);
+    serveFile(w, Ꮡr, (Dir)dir, @file, false);
 }
 
 // ServeFileFS replies to the request with the contents

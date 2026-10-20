@@ -651,7 +651,7 @@ internal static (slice<byte> r, slice<byte> s, error err) parseSignature(slice<b
     ref var s = ref heap<slice<byte>>(out var Ꮡs);
 
     ref var inner = ref heap<cryptobyte.String>(out var Ꮡinner);
-    var input = ((cryptobyte.String)sig);
+    var input = (cryptobyte.String)sig;
     if (!input.ReadASN1(Ꮡinner, asn1.SEQUENCE) || !input.Empty() || !inner.ReadASN1Integer(Ꮡr) || !inner.ReadASN1Integer(Ꮡs) || !inner.Empty()) {
         return (default!, default!, errors.New(invalidAsn1ˢ));
     }

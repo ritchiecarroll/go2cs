@@ -17,7 +17,7 @@ internal static void Main() {
 
     m[default!] = "nil-key";
     m[(@string)"a"u8] = "alpha";
-    m[(nint)(7)] = "seven";
+    m[(nint)7] = "seven";
 
     fmt.Println("len:", len(m));
     fmt.Println("index:", m[default!]);
@@ -39,7 +39,7 @@ internal static void Main() {
     m[default!] = "again";
     fmt.Println("overwrite:", len(m), m[default!]);
 
-    fmt.Println("neighbors:", m[(@string)"a"u8], m[(nint)(7)]);
+    fmt.Println("neighbors:", m[(@string)"a"u8], m[(nint)7]);
 
     delete(m, default!);
     (v, ok) = m[default!, ꟷ];

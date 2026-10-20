@@ -36,28 +36,28 @@ public static void TestMemmove(ж<testing.T> Ꮡt) {
     var src = new slice<byte>(size);
     var dst = new slice<byte>(size);
     for (nint i = 0; i < size; i++) {
-        src[i] = (byte)(128 + ((nint)(i & 127)));
+        src[i] = (byte)(128 + (i & 127));
     }
     for (nint i = 0; i < size; i++) {
-        dst[i] = (byte)((nint)(i & 127));
+        dst[i] = (byte)(i & 127);
     }
     for (nint n = 0; n <= size; n++) {
         for (nint x = 0; x <= size - n; x++) { // offset in src
             for (nint y = 0; y <= size - n; y++) { // offset in dst
                 copy(dst.slice(y, y + n), src.slice(x, x + n));
                 for (nint i = 0; i < y; i++) {
-                    if (dst[i] != (byte)((nint)(i & 127))) {
+                    if (dst[i] != (byte)(i & 127)) {
                         Ꮡt.Fatalf("prefix dst[%d] = %d"u8, i, dst[i]);
                     }
                 }
                 for (nint i = y; i < y + n; i++) {
-                    if (dst[i] != (byte)(128 + ((nint)((i - y + x) & 127)))) {
+                    if (dst[i] != (byte)(128 + ((i - y + x) & 127))) {
                         Ꮡt.Fatalf("copied dst[%d] = %d"u8, i, dst[i]);
                     }
-                    dst[i] = (byte)((nint)(i & 127)); // reset dst
+                    dst[i] = (byte)(i & 127); // reset dst
                 }
                 for (nint i = y + n; i < size; i++) {
-                    if (dst[i] != (byte)((nint)(i & 127))) {
+                    if (dst[i] != (byte)(i & 127)) {
                         Ꮡt.Fatalf("suffix dst[%d] = %d"u8, i, dst[i]);
                     }
                 }
@@ -437,10 +437,10 @@ public static void BenchmarkMemclr(ж<testing.B> Ꮡb) {
         });
     }
     foreach (var (_, m) in new nint[]{1, 4, 8, 16, 64}.slice()) {
-        var x = new slice<byte>((m << (int)(20)));
+        var x = new slice<byte>((m << 20));
         var xʗ2 = x;
         Ꮡb.Run(fmt.Sprint(m, (@string)"M"u8), (ж<testing.B> bΔ2) => {
-            bΔ2.SetBytes((int64)((m << (int)(20))));
+            bΔ2.SetBytes((int64)(m << 20));
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 runtime_internal_test_package.MemclrBytes(xʗ2);
             }
@@ -464,10 +464,10 @@ public static void BenchmarkMemclrUnaligned(ж<testing.B> Ꮡb) {
 
     foreach (var (_, off) in new nint[]{0, 1, 4, 7}.slice()) {
         foreach (var (_, m) in new nint[]{1, 4, 8, 16, 64}.slice()) {
-            var x = new slice<byte>(((m << (int)(20))) + off);
+            var x = new slice<byte>((m << 20) + off);
             var xʗ2 = x;
             Ꮡb.Run(fmt.Sprint(off, m, (@string)"M"u8), (ж<testing.B> bΔ2) => {
-                bΔ2.SetBytes((int64)((m << (int)(20))));
+                bΔ2.SetBytes((int64)(m << 20));
                 for (nint i = 0; i < (~bΔ2).N; i++) {
                     runtime_internal_test_package.MemclrBytes(xʗ2.slice(off));
                 }
@@ -526,11 +526,11 @@ public static void BenchmarkMemclrRange(ж<testing.B> Ꮡb) {
         var buffer = new slice<byte>(maxLen);
 
         @string text = ""u8;
-        if (minLen >= ((1 << (int)(20)))){
-            text = fmt.Sprint((minLen >> (int)(20)), (@string)"M "u8, ((maxLen + ((1 << (int)(20)) - 1)) >> (int)(20)), (@string)"M"u8);
+        if (minLen >= (1 << 20)){
+            text = fmt.Sprint(minLen >> 20, (@string)"M "u8, (maxLen + ((1 << 20) - 1)) >> 20, (@string)"M"u8);
         } else 
-        if (minLen >= ((1 << (int)(10)))){
-            text = fmt.Sprint((minLen >> (int)(10)), (@string)"K "u8, ((maxLen + ((1 << (int)(10)) - 1)) >> (int)(10)), (@string)"K"u8);
+        if (minLen >= (1 << 10)){
+            text = fmt.Sprint(minLen >> 10, (@string)"K "u8, (maxLen + ((1 << 10) - 1)) >> 10, (@string)"K"u8);
         } else {
             text = fmt.Sprint(minLen, (@string)" "u8, maxLen);
         }
