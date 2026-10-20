@@ -44,7 +44,7 @@ type Options struct {
 	targetPlatforms     []string // -platforms: the full requested list (len 1 for every ordinary run); targetPlatform is its first entry
 	platformCensusDir   string   // -platform-census: staging + manifest directory for a multi-target emission census (no corpus output)
 	alwaysWriteSources  bool     // set ONLY by runCensusTarget: write every converted .cs even when unchanged (writeSourceIfChanged)
-	platformStageDir    string   // -platform-stage: where a multi-target EMISSION stages its per-target conversions; a temporary directory this run owns and removes when empty
+	platformStageDir    string   // -platform-stage: where a multi-target EMISSION stages its per-target conversions; when empty, .go2cs-platform-stage under the output root, which this run locks, reclaims and removes
 	refCensusPath       string   // -ref-census: JSON output path for the ж-box A1 ref-lowering census (analysis only, no corpus output)
 	dualRecv            bool     // -dual-recv: B′ S0 — eligible pointer-receiver methods emit the `[GoRecv] this ref T` PRIMARY (R3 arms; the ж twin is minted by RecvGenerator). Flag-gated and corpus-inert: default off, scratch-root regens only until S2's own rebank ride
 	dualRecvParams      bool     // -dual-recv-params: B′ S1 (requires -dual-recv) — the PARAMETER half: primaries lower their pointer params (twin ref-forwards), the §4.2 call-site table lands corpus-wide, and the §4.3 X3 method-call arm relaxes for directly-selectable methods (feMul/feSquare unstrip). Kept a SEPARATE flag so `-dual-recv` alone still emits the S0 floor after S1 lands — the measurability condition (coordinator, 2026-09-03)

@@ -50,11 +50,13 @@ internal static readonly @string andˢ = "; and "u8;
 internal static readonly @string prefixᶜ = "archive/tar: cannot encode header"u8;
 
 internal static @string Error(this headerError he) {
+    var ssᴷ = new stackAppend<@string>();
+
     @string prefix = prefixᶜ;
     slice<@string> ss = default!;
     foreach (var (_, s) in he) {
         if (s != ""u8) {
-            ss = append(ss, s);
+            ss = append(ssᴷ, ss, s);
         }
     }
     if (len(ss) == 0) {

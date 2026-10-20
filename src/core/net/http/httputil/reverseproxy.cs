@@ -434,6 +434,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
     try {
         ref var p = ref Ꮡp.DerefOrNull();
         ref var req = ref Ꮡreq.DerefOrNull();
+        var trailerKeysᴷ = new stackAppend<@string>();
 
         var transport = p.Transport;
         if (transport == default!) {
@@ -662,7 +663,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
         if (announcedTrailers > 0) {
             var trailerKeys = new slice<@string>(0, len((~res).Trailer));
             foreach (var (k, _) in (~res).Trailer) {
-                trailerKeys = append(trailerKeys, k);
+                trailerKeys = append(trailerKeysᴷ, trailerKeys, k);
             }
             rw.Header().Add(trailerˢ, strings.Join(trailerKeys, ", "u8));
         }

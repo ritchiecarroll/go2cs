@@ -713,6 +713,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     slice<IPAddr> addrs = default!;
     dnsmessage.Name cname = new();
     ref var conf = ref Ꮡconf.DerefOrNull();
+    var qtypesᴷ = new stackAppend<dnsmessage.Type>();
 
     if (order == hostLookupFilesDNS || order == hostLookupFiles) {
         @string canonical = default!;
@@ -744,7 +745,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
     var lane = new channel<goLookupIPCNAMEOrder_result>(1);
     var qtypes = new dnsmessage.Type[]{dnsmessage.TypeA, dnsmessage.TypeAAAA}.slice();
     if (network == "CNAME"u8) {
-        qtypes = append(qtypes, dnsmessage.TypeCNAME);
+        qtypes = append(qtypesᴷ, qtypes, dnsmessage.TypeCNAME);
     }
     switch (ipVersion(network)) {
     case (rune)'4': {

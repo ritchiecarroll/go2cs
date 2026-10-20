@@ -289,6 +289,7 @@ internal static @string String(this rfc2821Mailbox s) {
 // format of an rfc822Name is a "Mailbox" as defined in RFC 2821, Section 4.1.2”.
 internal static (rfc2821Mailbox mailbox, bool ok) parseRFC2821Mailbox(@string @in) {
     rfc2821Mailbox mailbox = default!;
+    var localPartBytesᴷ = new stackAppend<byte>();
 
     if (builtin.len(@in) == 0) {
         return (mailbox, false);
@@ -327,7 +328,7 @@ QuotedString:
                     return (mailbox, false);
                 }
                 if (@in[0] == 11 || @in[0] == 12 || (1 <= @in[0] && @in[0] <= 9) || (14 <= @in[0] && @in[0] <= 127)){
-                    localPartBytes = append(localPartBytes, @in[0]);
+                    localPartBytes = append(localPartBytesᴷ, localPartBytes, @in[0]);
                     @in = @in[1..];
                 } else {
                     return (mailbox, false);
@@ -571,6 +572,7 @@ internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж
 public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate> Ꮡc, VerifyOptions optsʗp) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var opts = ref heap(optsʗp, out var Ꮡopts);
+    var detailsᴷ = new stackAppend<@string>();
 
     // Platform-specific verification needs the ASN.1 contents so
     // this makes the behavior consistent across platforms.
@@ -685,7 +687,7 @@ public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate>
             if (invalidPoliciesChains == 0) {
                 return (default!, new CertificateInvalidError(Ꮡc, IncompatibleUsage, ""u8));
             }
-            details = append(details, fmt.Sprintf("%d candidate chains with incompatible key usage"u8, incompatibleKeyUsageChains));
+            details = append(detailsᴷ, details, fmt.Sprintf("%d candidate chains with incompatible key usage"u8, incompatibleKeyUsageChains));
         }
         if (invalidPoliciesChains > 0) {
             details = append(details, fmt.Sprintf("%d candidate chains with invalid policies"u8, invalidPoliciesChains));
@@ -1250,6 +1252,8 @@ internal static void incrDepth(this ref policyGraph pg) {
 }
 
 internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions opts) {
+    var validPolicyNodeSetᴷ = new stackAppend<ж<policyGraphNode>>();
+
     // The following code implements the policy verification algorithm as
     // specified in RFC 5280 and updated by RFC 9618. In particular the
     // following sections are replaced by RFC 9618:
@@ -1445,7 +1449,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
         // 6.1.5 (g) (3) -- as updated by RFC 9618
         {
             var currentAny = pg.leafWithPolicy(anyPolicyOID); if (currentAny != nil) {
-                validPolicyNodeSet = append(validPolicyNodeSet, currentAny);
+                validPolicyNodeSet = append(validPolicyNodeSetᴷ, validPolicyNodeSet, currentAny);
             }
         }
     }

@@ -51,6 +51,8 @@ func resetPackageState(pkg *packages.Package) {
 	currentPackageGorootVendored = false
 	packageHoistsLiterals = false
 	packagePlainLits = nil
+	packageStackAppendSites = nil
+	packageStackAppendBuffers = nil
 	exportedTypeAliases = make(map[string]string)
 	importedTypeAliases = make(map[string]string)
 	importedTypeAliasSourceDirs = make(map[string]string)

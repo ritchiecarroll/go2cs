@@ -41,9 +41,6 @@ global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
 global using urlꓸError = go.net.url_package.ΔError;
-using bufio = go.bufio_package;
-using testing = go.testing_package;
-using Δhttp = go.net.http_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -242,10 +239,6 @@ using static global::go.net.http_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<closeWriteTestConn, ж<closeWriteTestConn>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.net.http_package.Request, ж<global::go.net.http_package.Request>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.net.http_package.Response, ж<global::go.net.http_package.Response>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.net.http_package.routingIndex, ж<global::go.net.http_package.routingIndex>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -14,6 +14,8 @@ partial class printer_package {
 // formatDocComment reformats the doc comment list,
 // returning the canonical formatting.
 internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> list) {
+    var directivesᴷ = new stackAppend<ж<ast.Comment>>();
+
     // Extract comment text (removing comment markers).
     @string kind = default!;
     @string text = default!;
@@ -45,7 +47,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
             }
             // Accumulate //go:build etc lines separately.
             if (isDirective(after)) {
-                directives = append(directives, c);
+                directives = append(directivesᴷ, directives, c);
                 continue;
             }
             Ꮡb.WriteString(strings.TrimPrefix(after, " "u8));

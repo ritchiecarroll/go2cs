@@ -5,8 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
-using Δrand = go.math.rand_package;
 // </ImportedTypeAliases>
 
 using go;

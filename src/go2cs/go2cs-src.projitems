@@ -216,6 +216,7 @@
     <None Include="$(MSBuildThisFileDirectory)hostFatalClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostLaunchLoadTime_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hoistedLiteralOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)hoistedLiteralsStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)identifierNaming.go" />
     <None Include="$(MSBuildThisFileDirectory)iifeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)implementRecordAliasCanonicalization_test.go" />
@@ -223,6 +224,7 @@
     <None Include="$(MSBuildThisFileDirectory)importAliasOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)importInit_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)implicitConvArgumentLoop_test.go" />
     <None Include="$(MSBuildThisFileDirectory)implicitConvValueType_test.go" />
     <None Include="$(MSBuildThisFileDirectory)implicitRuntimeReference_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importInitSection.go" />
@@ -337,6 +339,9 @@
     <None Include="$(MSBuildThisFileDirectory)manualConversionMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)manualTypeReceiverRefusal.go" />
+    <None Include="$(MSBuildThisFileDirectory)manualTypeReceiverRefusal_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)manualTypeUnwrapBox_test.go" />
     <None Include="$(MSBuildThisFileDirectory)managedSliceViewRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)markerComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)memberMarkGuard_test.go" />
@@ -414,6 +419,7 @@
     <None Include="$(MSBuildThisFileDirectory)perUnitAliasRenames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)plainStringLiterals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformEmit.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformEmitStage_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformFilterSkip_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn.go" />
     <None Include="$(MSBuildThisFileDirectory)platformHandOwn_test.go" />
@@ -505,6 +511,8 @@
     <None Include="$(MSBuildThisFileDirectory)sstringTwinOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)sstringTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)Stack.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendHints.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendHints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stderrTail_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stdLibConverter.go" />
     <None Include="$(MSBuildThisFileDirectory)stdNamespaceGuard_test.go" />

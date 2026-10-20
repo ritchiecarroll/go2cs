@@ -1461,7 +1461,7 @@ The cast site in another file, `generation.cs`:
 
 And the record in `package_info.cs`:
 
-<!-- source: src/core/internal/trace/package_info.cs:59 -->
+<!-- source: src/core/internal/trace/package_info.cs:58 -->
 ```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
@@ -1877,6 +1877,15 @@ and `ast.FuncType` → `ж<ast.FuncType>`, and those must not start recording. (
 `TestWhiteboxProductionPointerBoxConvStillRecorded`, whose both-foreign arm is the boundary, and
 `TestPointerBoxConversionRecordShape` for the shared predicate; the numeric phantom keeps its own guard,
 `TestWhiteboxProductionNumericConvNotRecorded`.)
+
+**Superseded 2026-10-20.** Those pointer-boxing records came from a call-argument loop that compared
+every argument with the FIRST parameter. Checked against its own parameter, an argument in a `*T` slot
+never owes `T` → `ж<T>`, because Go has no implicit conversion from a value to a pointer, so the records
+no longer arise and a `-tests` regen drops them. They were not inert either: in a production build the
+generator strips the box, finds `T`, and generated an operator that boxed a COPY (runtime's `runqput`
+stored a copy of the caller's `g`). It now refuses such a record by name, `GO2CS0008`. The guard above is
+now `TestWhiteboxArgumentOfItsParameterTypeRecordsNoBox`: `check(t, New())` records nothing, and the
+both-foreign arm stays.
 
 ---
 

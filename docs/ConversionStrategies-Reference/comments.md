@@ -401,7 +401,7 @@ statement's last emitted C# line.
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1177-1179 -->
+<!-- source: src/core/strings/strings.cs:1179-1181 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -635,7 +635,7 @@ var unitMap = map[string]uint64{
 	"μs": uint64(Microsecond), // U+03BC = Greek letter mu
 ```
 
-<!-- source: src/core/time/format.cs:1765-1769 -->
+<!-- source: src/core/time/format.cs:1771-1775 -->
 ```csharp
 internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"u8] = (uint64)(int64)ΔNanosecond,
@@ -655,7 +655,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3189-3193 -->
+<!-- source: src/core/database/sql/sql.cs:3190-3194 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,
@@ -690,7 +690,7 @@ func appendLines(x, y []byte) []byte {
 }
 ```
 
-<!-- source: src/core/go/printer/gobuild.cs:145-151 -->
+<!-- source: src/core/go/printer/gobuild.cs:147-153 -->
 ```csharp
 internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     if (len(y) > 0 && isNL(y[0]) && // y starts in blank line

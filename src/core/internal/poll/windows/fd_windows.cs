@@ -998,6 +998,8 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
 // writeConsole writes len(b) bytes to the console File.
 // It returns the number of bytes written and an error, if any.
 internal static (nint, error) writeConsole(this ref FD fd, slice<byte> b) {
+    var runesᴷ = new stackAppend<rune>();
+
     nint n = len(b);
     var runes = new slice<rune>(0, 256);
     if (len(fd.lastbits) > 0) {
@@ -1006,7 +1008,7 @@ internal static (nint, error) writeConsole(this ref FD fd, slice<byte> b) {
     }
     while (len(b) >= utf8.UTFMax || utf8.FullRune(b)) {
         var (r, l) = utf8.DecodeRune(b);
-        runes = append(runes, r);
+        runes = append(runesᴷ, runes, r);
         b = b.slice(l);
     }
     if (len(b) > 0) {

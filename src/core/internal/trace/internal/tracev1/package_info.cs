@@ -43,9 +43,13 @@ using static go.@internal.trace.@internal.tracev1_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Event, ж<Event>>(Indirect = true)]
-[assembly: GoImplicitConv<Event, ж<Event>>]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,7 +60,7 @@ using static go.@internal.trace.@internal.tracev1_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/trace/internal/tracev1/order.go", "order.cs", "AB9G9pSCgoKkgoKCpIKCggAIEIKCgqiCgoKkgoKCpIKCgqSCgoKkgoKCtoK4gtaCgpSCppSUtKSCyoKmsoKmooKCgoKCpqKCgoKUgriigoKCgpSCgIKkgpSClA==")]
-[assembly: go.GoPositionMap("internal/trace/internal/tracev1/parser.go", "parser.cs", "AG7oAYKClICClKSmgoKApoKClIKClIKCpoKCgqaCgoK2AAIUAAkGgoKU2NKCABImgoKCgoKUgIK2goKmgqaUlIKCgpSClILKgIK2AAcQACVOooKClIKCqLKCgqaCgqa4poKmgqaCpoKClIKCgqaUpoKClIKmgoKCgoKCAAUeAA4MoqaCgpSUtgAAEAAIBIKClIKCgpSUgoKUgoKmgpKClLiCAAsYgpSCgoK4xoKCgqaU3KaUpKSUlICCpNyCAAsYgoKClKSCgpSCgpSClKaUqJSSgoKCgpSClIKmgoKCpoKCppSClIKCgpSCgpS4goKCAA4euAAFEIKCgoKUuILKlIKC6sjWgoKUAAwagoKmlJSAgqSCgpSCuIKClIKUgpSCgoKUgpSClIKClKaCpICCyJSCgpSCpoKClKaCgqbcgqSCgoKCgoKUpoKAgv6CgqaApraCgoKUgoKCgpS4gqaUlIKClKaCgpSC3IK6koKClIKCgpSUgqaCgoKCgoKUgpSClIKClLiCgpSCuKaigoKUgpSClIKClKrSgoKUgoKUlIKClIKUlIKkgri2pIKUgoKUgoKUgoKCgoKCgoKUgIK2/IKCgoKCgoKUppSCqqQAChKAgpSCgoLIpoLKAA8M4rwAABqCgoKCgqSCgoKUgpSClKaClJSCgpSUpIKClIKUlKSClJSkgpSkgoKUpIKClKSCgpSUpIKClJTIgoKmpIKClJSkgoKUgpSkgoKUgpSkgoKAgqSAgqSmgoKClIKUgoKCgoKmgqaCpIKCgIKkgoKUgqaCpIKCgIKkgoKClIKkgoKClIKUgoKUgpSCgqaCgoCCpJSkgoKAgqSCgpSCpIKClIKUpoKCgIKkgoKClIKkgoCCpKaCpoKCgpKCgoKCgqaClLi4usymlpKCgpSCpqKCgpSmgoKCgoKUqqKCgpSCgpSUlIIAQXoANXiSgu6CgpSCpoKCgpSkgoKUpg==", "180-182:1;354-362:1;380-382:1;1041-1053:1")]
+[assembly: go.GoPositionMap("internal/trace/internal/tracev1/parser.go", "parser.cs", "AG7oAYKClICClKSmgoKApoKClIKClIKCpoKCgqaCgoK2AAIUAAkGgoKU2NKCABImgoKCgoKUgIK2goKmgqaUlIKCgpSClILKgIK2AAcQACVOooKClIKCqLKCgqaCgqa4poKmgqaCpoKClIKCgqaUpoKClIKmgoKCgoKCAAUeABAMoqaCgpSUtgAAEAAIBIKClIKCgpSUgoKUgoKmgpKClLiCAAsYgpSCgoK4xoKCgqaU3KaUpKSUlICCpNyCAAsYgoKClKSCgpSCgpSClKaUqJSSgoKCgpSClIKmgoKCpoKCppSClIKCgpSCgpS4goKCAA4euAAFEIKCgoKUuILKlIKC6sjWgoKUAAwagoKmlJSAgqSCgpSCuIKClIKUgpSCgoKUgpSClIKClKaCpICCyJSCgpSCpoKClKaCgqbcgqSCgoKCgoKUpoKAgv6CgqaApraCgoKUgoKCgpS4gqaUlIKClKaCgpSC3IK6koKClIKCgpSUgqaCgoKCgoKUgpSClIKClLiCgpSCuKaigoKUgpSClIKClKrSgoKUgoKUlIKClIKUlIKkgri2pIKUgoKUgoKUgoKCgoKCgoKUgIK2/IKCgoKCgoKUppSCqqQAChKAgpSCgoLIpoLKAA8M4rwAABqCgoKCgqSCgoKUgpSClKaClJSCgpSUpIKClIKUlKSClJSkgpSkgoKUpIKClKSCgpSUpIKClJTIgoKmpIKClJSkgoKUgpSkgoKUgpSkgoKAgqSAgqSmgoKClIKUgoKCgoKmgqaCpIKCgIKkgoKUgqaCpIKCgIKkgoKClIKkgoKClIKUgoKUgpSCgqaCgoCCpJSkgoKAgqSCgpSCpIKClIKUpoKCgIKkgoKClIKkgoCCpKaCpoKCgpKCgoKCgqaClLi4usymlpKCgpSCpqKCgpSmgoKCgoKUqqKCgpSCgpSUlIIAQXoANXiSgu6CgpSCpoKCgpSkgoKUpg==", "180-182:1;354-362:1;380-382:1;1041-1053:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace.@internal;

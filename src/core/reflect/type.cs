@@ -1121,6 +1121,7 @@ partial struct fieldScan {
 internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType> Ꮡt, Func<@string, bool> match) {
     StructField result = default!;
     bool ok = default!;
+    var nextᴷ = new stackAppend<fieldScan>();
 
     // This uses the same condition that the Go language does: there must be a unique instance
     // of the match at a given depth level. If there are multiple instances of a match at the
@@ -1214,7 +1215,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
                 slice<nint> index = default!;
                 index = builtin.appendꓸꓸꓸ(index, scan.index);
                 index = builtin.append(index, i);
-                next = builtin.append(next, new fieldScan(styp, index));
+                next = builtin.append(nextᴷ, next, new fieldScan(styp, index));
             }
         }
         if (ok) {
@@ -1568,6 +1569,7 @@ internal static @string stringFor(ж<abi.Type> Ꮡt) {
 // funcStr builds a string representation of a funcType.
 internal static @string funcStr(ж<funcType> Ꮡft) {
     ref var ft = ref Ꮡft.DerefOrNull();
+    var reprᴷ = new stackAppend<byte>();
 
     var repr = new slice<byte>(0, 64);
     repr = builtin.append(repr, ((@string)"func("u8).ꓸꓸꓸ);
@@ -1582,7 +1584,7 @@ internal static @string funcStr(ж<funcType> Ꮡft) {
             repr = builtin.append(repr, stringFor(t).ꓸꓸꓸ);
         }
     }
-    repr = builtin.append(repr, (byte)((rune)')'));
+    repr = builtin.append(reprᴷ, repr, (byte)((rune)')'));
     var @out = Ꮡft.OutSlice();
     if (len(@out) == 1){
         repr = builtin.append(repr, (byte)((rune)' '));

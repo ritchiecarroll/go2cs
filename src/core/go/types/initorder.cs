@@ -240,6 +240,8 @@ internal static void add(this ref nodeSet s, ж<graphNode> Ꮡp) {
 // with any function nodes removed. The resulting graph contains only constants
 // and variables.
 internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> objMap) {
+    var funcGᴷ = new stackAppend<ж<graphNode>>();
+
     // M is the dependency (Object) -> graphNode mapping
     var M = new map<dependency, ж<graphNode>>();
     foreach (var (obj, _) in objMap) {
@@ -273,7 +275,7 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     foreach (var (_, n) in M) {
         {
             var (_, ok) = (~n).obj._<ж<Func>>(ᐧ); if (ok){
-                funcG = append(funcG, n);
+                funcG = append(funcGᴷ, funcG, n);
             } else {
                 G = append(G, n);
             }

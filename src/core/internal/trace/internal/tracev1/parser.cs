@@ -385,6 +385,8 @@ public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) {
 // repeat. This approach ensures that we form a consistent stream even if
 // timestamps are incorrect (condition observed on some machines).
 internal static (Events, error) parseEventBatches(this ref parser p) {
+    var availableProcsᴷ = new stackAppend<ж<proc>>();
+
     // The ordering of CPU profile sample events in the data stream is based on
     // when each run of the signal handler was able to acquire the spinlock,
     // with original timestamps corresponding to when ReadTrace pulled the data
@@ -508,7 +510,7 @@ break_pidLoop:;
                 return (new Events(nil), err);
             }
         }
-        availableProcs = builtin.append(availableProcs, f.proc);
+        availableProcs = builtin.append(availableProcsᴷ, availableProcs, f.proc);
     }
 
     // At this point we have a consistent stream of events. Make sure time

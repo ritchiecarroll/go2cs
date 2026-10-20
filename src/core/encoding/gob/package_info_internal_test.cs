@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -26,10 +25,6 @@ using static go.encoding.gob_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<LargeSliceByte, ж<LargeSliceByte>>(Indirect = true)]
-[assembly: GoImplicitConv<LargeSliceInt8, ж<LargeSliceInt8>>(Indirect = true)]
-[assembly: GoImplicitConv<LargeSliceString, ж<LargeSliceString>>(Indirect = true)]
-[assembly: GoImplicitConv<LargeSliceStruct, ж<LargeSliceStruct>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

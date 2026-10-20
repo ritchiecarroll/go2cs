@@ -79,11 +79,13 @@ partial interface GoStringer {
 // omitted. This function allows a [Formatter] to reconstruct the original
 // directive triggering the call to Format.
 public static @string FormatString(State state, rune verb) {
+    var bᴷ = new stackAppend<byte>();
+
     array<byte> tmp = new(16);               // Use a local buffer.
     var b = append(tmp[..0], (byte)((rune)'%'));
     foreach (var (_, c) in (@string)" +-#0"u8) { // All known flags
         if (state.Flag((nint)c)) { // The argument is an int for historical reasons.
-            b = append(b, (byte)c);
+            b = append(bᴷ, b, (byte)c);
         }
     }
     {

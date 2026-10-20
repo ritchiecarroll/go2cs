@@ -636,6 +636,8 @@ internal partial struct Import_tried /*dyn*/ {
 // *[Package] containing partial information.
 public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
+    var pathsᴷ = new stackAppend<@string>();
+    var Sfilesᴷ = new stackAppend<@string>();
 
     var p = Ꮡ(new Package(
         ImportPath: path
@@ -864,7 +866,7 @@ public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path
         slice<@string> paths = default!;
         @string format = sVendorTreeˢ;
         foreach (var (_, dir) in tried.vendor) {
-            paths = append(paths, fmt.Sprintf(format, dir));
+            paths = append(pathsᴷ, paths, fmt.Sprintf(format, dir));
             format = "\t%s"u8;
         }
         if (tried.goroot != ""u8){
@@ -999,7 +1001,7 @@ Found:
         }
         else if (exprᴛ3 == ".S"u8 || exprᴛ3 == ".sx"u8) {
             // special case for cgo, handled at end
-            Sfiles = append(Sfiles, name);
+            Sfiles = append(Sfilesᴷ, Sfiles, name);
             continue;
         }
         else { /* default: */

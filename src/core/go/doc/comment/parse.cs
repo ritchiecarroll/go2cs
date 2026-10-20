@@ -655,14 +655,18 @@ internal static Block heading(this ref parseDoc d, @string line) {
 
 // code returns a code block built from the lines.
 internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
+    var bodyᴷ = new stackAppend<@string>();
+
     var body = unindent(lines);
-    body = append(body, ""u8); // to get final \n from Join
+    body = append(bodyᴷ, body, ""u8); // to get final \n from Join
     return Ꮡ(new Code(Text: strings.Join(body, "\n"u8)));
 }
 
 // paragraph returns a paragraph block built from the lines.
 // If the lines are link definitions, paragraph adds them to d and returns nil.
 internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
+    var defsᴷ = new stackAppend<ж<LinkDef>>();
+
     // Is this a block of known links? Handle.
     slice<ж<LinkDef>> defs = default!;
     foreach (var (_, line) in lines) {
@@ -670,7 +674,7 @@ internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
         if (!ok) {
             goto NoDefs;
         }
-        defs = append(defs, def);
+        defs = append(defsᴷ, defs, def);
     }
     foreach (var (_, def) in defs) {
         d.Links = append(d.Links, def);
@@ -716,6 +720,8 @@ internal static (ж<LinkDef>, bool) parseLink(@string line) {
 // list returns a list built from the indented lines,
 // using forceBlankBefore as the value of the List's ForceBlankBefore field.
 internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
+    var textᴷ = new stackAppend<@string>();
+
     var (num, _, _) = listMarker(lines[0]);
     ж<List> list = Ꮡ(new List(ForceBlankBefore: forceBlankBefore));
     ref var item = ref heap<ж<ListItem>>(out var Ꮡitem);
@@ -751,7 +757,7 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
             flush();
             continue;
         }
-        text = append(text, strings.TrimSpace(line));
+        text = append(textᴷ, text, strings.TrimSpace(line));
     }
     flush();
     return list;
@@ -816,6 +822,7 @@ internal static bool isList(@string line) {
 // map[ast.Expr]TypeAndValue as containing a link.
 internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string text) {
     ref var d = ref Ꮡd.DerefOrNull();
+    var bufᴷ = new stackAppend<byte>();
 
     ref var @out = ref heap<slice<ΔText>>(out var Ꮡout);
     nint wrote = 0;
@@ -865,7 +872,7 @@ internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string te
             break;
         }}
         if (start >= 0 && i != start) {
-            buf = append(buf, c);
+            buf = append(bufᴷ, buf, c);
         }
     }
 
@@ -1039,6 +1046,8 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
 // The caller should skip over the first len(url) bytes of s
 // before further processing.
 internal static (@string url, bool ok) autoURL(@string s) {
+    var stkᴷ = new stackAppend<byte>();
+
     // Find the ://. Fast path to pick off non-URL,
     // since we call this at every position in the string.
     // The shortest possible URL is ftp://x, 7 bytes.
@@ -1110,7 +1119,7 @@ Path:
         }
         switch (s[i]) {
         case (rune)'(': {
-            stk = append(stk, (byte)((rune)')'));
+            stk = append(stkᴷ, stk, (byte)((rune)')'));
             break;
         }
         case (rune)'{': {

@@ -608,6 +608,8 @@ internal static bool validCookiePathByte(byte b) {
 }
 
 internal static @string sanitizeOrWarn(@string fieldName, Func<byte, bool> valid, @string v) {
+    var bufᴷ = new stackAppend<byte>();
+
     var ok = true;
     for (nint i = 0; i < builtin.len(v); i++) {
         if (valid(v[i])) {
@@ -624,7 +626,7 @@ internal static @string sanitizeOrWarn(@string fieldName, Func<byte, bool> valid
     for (nint i = 0; i < builtin.len(v); i++) {
         {
             var b = v[i]; if (valid(b)) {
-                buf = append(buf, b);
+                buf = append(bufᴷ, buf, b);
             }
         }
     }

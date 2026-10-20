@@ -642,6 +642,7 @@ internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist,
 internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var recv = ref Ꮡrecv.DerefOrNull();
+    var resolveExprsᴷ = new stackAppend<ast.Expr>();
 
     // If our receiver has receiver type parameters, we must declare them before
     // trying to resolve the rest of the receiver, and avoid re-resolving the
@@ -661,7 +662,7 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
     switch (typ.type()) {
     case ж<ast.IndexExpr> typΔ1: {
         declareExprs = new ast.Expr[]{(~typΔ1).Index}.slice();
-        resolveExprs = append(resolveExprs, (~typΔ1).X);
+        resolveExprs = append(resolveExprsᴷ, resolveExprs, (~typΔ1).X);
         break;
     }
     case ж<ast.IndexListExpr> typΔ1: {

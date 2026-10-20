@@ -128,10 +128,12 @@ internal static map<Format, @string> formatNames = new map<Format, @string>{
 internal static readonly @string unknownˢ = "<unknown>"u8;
 
 public static @string String(this Format f) {
+    var ssᴷ = new stackAppend<@string>();
+
     slice<@string> ss = default!;
     for (Format f2 = (Format)1; f2 < formatMax; f2 <<= (int)(1)) {
         if (f.has(f2)) {
-            ss = append(ss, formatNames[f2]);
+            ss = append(ssᴷ, ss, formatNames[f2]);
         }
     }
     switch (len(ss)) {

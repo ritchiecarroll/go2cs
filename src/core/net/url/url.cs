@@ -1132,6 +1132,8 @@ public static @string Encode(this Values v) {
 // resolvePath applies special path segments from refs and applies
 // them to base, per RFC 3986.
 internal static @string resolvePath(@string @base, @string @ref) {
+    var dstᴷ = new stackAppend<byte>();
+
     @string full = default!;
     if (@ref == ""u8){
         full = @base;
@@ -1147,7 +1149,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
     }
 
     var dst = new slice<byte>(0, len(full) + 1);
-    dst = append(dst, (byte)((rune)'/'));
+    dst = append(dstᴷ, dst, (byte)((rune)'/'));
     @string elem = ""u8;
     @string remaining = full;
     var found = true;

@@ -637,6 +637,7 @@ internal static (@string spec, error err) consumeAddrSpec(this ж<addrParser> �
 internal static (@string phrase, error err) consumePhrase(this ref addrParser p) {
     @string phrase = default!;
     error err = default!;
+    var wordsᴷ = new stackAppend<@string>();
 
     debug.Printf("consumePhrase: [%s]"u8, p.s);
     // phrase = 1*word
@@ -679,7 +680,7 @@ internal static (@string phrase, error err) consumePhrase(this ref addrParser p)
             break;
         }
         case {} when !isEncoded && sb.Len() > 0: {
-            words = append(words, sb.String());
+            words = append(wordsᴷ, words, sb.String());
             sb.Reset();
             words = append(words, word);
             break;
@@ -708,6 +709,8 @@ internal static readonly @string mailUnclosedQuotedStringˢ = "mail: unclosed qu
 
 // consumeQuotedString parses the quoted string at the start of p.
 internal static (@string qs, error err) consumeQuotedString(this ref addrParser p) {
+    var qsbᴷ = new stackAppend<rune>();
+
     // Assume first byte is '"'.
     nint i = 1;
     var qsb = new slice<rune>(0, 10);
@@ -731,7 +734,7 @@ Loop:
                 return ("", fmt.Errorf("mail: bad character in quoted-string: %q"u8, r));
             }
 
-            qsb = append(qsb, r);
+            qsb = append(qsbᴷ, qsb, r);
             escaped = false;
             break;
         }

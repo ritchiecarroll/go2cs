@@ -49,34 +49,9 @@ internal class ImplicitConvTemplate : TemplateBase
 
     private string ConvExprValue => ConvExprOverride ?? ConvExpr;
 
-    private string ConvExpr
-    {
-        get
-        {
-            if (!PointerExpr.IsMatch(LHTypeName))
-                return $"new {LHTypeName}({ParamList})";
-            
-            int ltIndex = LHTypeName.IndexOf('<');
-            int gtIndex = LHTypeName.LastIndexOf('>');
-
-            if (gtIndex > ltIndex)
-            {
-                string innerType = LHTypeName[(ltIndex + 1)..gtIndex];
-
-                // Self-boxing (`T -> ж<T>`): the source value IS the boxed element type, so box it
-                // directly. Reconstructing it field-by-field would wrongly deref pointer fields
-                // (`src.f?.Value`) whose target ctor parameter is itself a `ж<…>` pointer field — the
-                // value cannot bind the pointer parameter (CS1503). `Ꮡ(src)` boxes a copy of the
-                // whole struct, identical in effect but without the per-field deref.
-                if (innerType == RHTypeName)
-                    return $"{AddressPrefix}(src)";
-
-                return $"{AddressPrefix}(new {innerType}({ParamList}))";
-            }
-
-            throw new FormatException($"Unexpected target type name \"{LHTypeName}\"");
-        }
-    }
+    // The operator never returns a box: ImplicitConvGenerator refuses a record whose operator would return
+    // one from a value (GO2CS0008), since it could only box a copy, and a box parameter has no struct source.
+    private string ConvExpr => $"new {LHTypeName}({ParamList})";
 
     private string ParamList => string.IsNullOrWhiteSpace(ValueType) ? 
         string.Join(", ", StructMembers.Select(GetParamExpr)) : 

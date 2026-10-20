@@ -541,6 +541,8 @@ internal static readonly @string invalidBMPStringˢ = "invalid BMPString"u8;
 // parseBMPString parses an ASN.1 BMPString (Basic Multilingual Plane of
 // ISO/IEC/ITU 10646-1) from the given byte slice and returns it.
 internal static (@string, error) parseBMPString(slice<byte> bmpString) {
+    var sᴷ = new stackAppend<uint16>();
+
     // BMPString uses the defunct UCS-2 16-bit character encoding, which
     // covers the Basic Multilingual Plane (BMP). UTF-16 was an extension of
     // UCS-2, containing all of the same code points, but also including
@@ -568,7 +570,7 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
         if (point == 0xfffe || point == 0xffff || (point >= 0xfdd0 && point <= 0xfdef) || (point >= 0xd800 && point <= 0xdfff)) {
             return ("", errors.New(invalidBMPStringˢ));
         }
-        s = append(s, point);
+        s = append(sᴷ, s, point);
         bmpString = bmpString[2..];
     }
 

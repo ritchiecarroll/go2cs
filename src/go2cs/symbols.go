@@ -68,6 +68,7 @@ const CapturedVarMarker = "\u0297"               // Variants: ʗ ɔ ᴄ
 const TempVarMarker = "\u1D1B"                   // Variants: ᴛ Ŧ ᵀ
 const HoistedLiteralMarker = "\u02E2"            // Suffix of a hoisted string-literal field name (trueˢ). Variants: ˢ ˢˢ
 const HoistedConstMarker = "\u1D9C"              // Suffix of a hoisted function-local constant field name: a big constant (maskᶜ) or a string constant (fnAtoiᶜ). Variants: ᶜ ᶜᶜ
+const StackBufferMarker = "\u1D37"               // Suffix of a stack-append buffer local: var xᴷ = new stackAppend<T>(); at a function's entry, passed at x's first qualifying append, x = append(xᴷ, x, v).
 const FuncValueMarker = "\u1DA0"                 // Suffix of an sstring twin's canonical value delegate (Sprintfᶠ). Variants: ᶠ ᶠᶠ
 const TrueMarker = "\u1427"                      // Variants: ᐧ true
 const OpaqueTrueMarker = TrueMarker + TrueMarker // golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)
