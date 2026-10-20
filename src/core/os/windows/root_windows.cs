@@ -48,6 +48,8 @@ internal static readonly @string fixedPrefixᶜ = @"\\?\?"u8;
 // by rejecting any input paths which contain a ?, which is not a valid character
 // in a Windows filename.
 internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix, slice<@string> suffix) {
+    var bufᴷ = new stackAppend<byte>();
+
     // Reject paths which include a ? component (see above).
     if (stringslite.IndexByte(s, (rune)'?') >= 0) {
         return ("", windows.ERROR_INVALID_NAME);
@@ -56,7 +58,7 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
     @string fixedPrefix = fixedPrefixᶜ;
     var buf = slice<byte>(fixedPrefix);
     foreach (var (_, p) in prefix) {
-        buf = append(buf, (byte)((rune)'\\'));
+        buf = append(bufᴷ, buf, (byte)((rune)'\\'));
         buf = appendꓸꓸꓸ(buf, slice<byte>(p));
     }
     buf = append(buf, (byte)((rune)'\\'));

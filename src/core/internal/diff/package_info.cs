@@ -50,7 +50,7 @@ using static go.@internal.diff_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/diff/diff.go", "diff.cs", "ABNcABwCgpSClpKCggABEAAJDIKU7oKCgpSCgoLKgoKUgoKqooSCgoKUgriCgoKUgoKClMqClIKUgoKUgoK4griCgoKClKassoKCuJQAAhYADAqCgoCCtoKAggAEFAAIAoKCgqaCgIKCAAgQgoKCgoKUkqaClIKCgqaCgoKCgoKmgg==", "238-240:1")]
+[assembly: go.GoPositionMap("internal/diff/diff.go", "diff.cs", "ABNcAB4CgpSClpKCggABEAAJDIKU7oKCgpSCgoLKgoKUgoKqooSCgoKUgriCgoKUgoKClMqClIKUgoKUgoK4griCgoKClKassoKCuJQAAhYAEAqCgoCCtoKAggAEFAAIAoKCgqaCgIKCAAgQgoKCgoKUkqaClIKCgqaCgoKCgoKmgg==", "238-240:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

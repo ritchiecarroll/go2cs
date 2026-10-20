@@ -79,7 +79,7 @@ using static go.html.template_package;
 [assembly: go.GoPositionMap("html/template/attr_string.go", "attr_string.cs", "/oaigoKCgoKCypSCgpQ=")]
 [assembly: go.GoPositionMap("html/template/content.go", "content.cs", "AGzmAaKClICUpIKClKiCnLKClIKClKrCgpSkpKSkpKSkpoK4gqaClA==")]
 [assembly: go.GoPositionMap("html/template/context.go", "context.cs", "ACNIgoKClKiSAAIYtIKUgoKUgpSClIKUgpSClKiSgoIAV7gBopSUqJKUlKzolJQ=", "", "", "46=Equal/1/1/4")]
-[assembly: go.GoPositionMap("html/template/css.go", "css.cs", "AA8iooKUlIKClAAHEKjIAAQewoKCyoKCgoKUgoK4poKClIKClLimgqaokqiSgoKClLS0tLaokoKmlNqClJSokpSUqLKCgqKUgoKUtKSClIKCgoKmgpSCpgAXMJKe8oKClAAMGoKUyILGgsiCgpQ=")]
+[assembly: go.GoPositionMap("html/template/css.go", "css.cs", "AA8iooKUlIKClAAHEKjIAAQewoKCyoKCgoKUgoK4poKClIKClLimgqaokqiSgoKClLS0tLaokoKmlNqClJSokpSUqLKCgqKUgoKUtKSClIKCgoKmgpSCpgAXMJKeAAgCgoKUAAwagpTIgsaCyIKClA==")]
 [assembly: go.GoPositionMap("html/template/delim_string.go", "delim_string.cs", "/oaigoKCypSCgpQ=")]
 [assembly: go.GoPositionMap("html/template/element_string.go", "element_string.cs", "/oaigoKCgoLKlIKClA==")]
 [assembly: go.GoPositionMap("html/template/error.go", "error.cs", "AOgB1AOClIKkpJSqwg==")]

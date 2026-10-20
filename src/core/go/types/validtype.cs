@@ -35,6 +35,8 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
+        var nestᴷ = new stackAppend<ж<Named>>();
+        var pathᴷ = new stackAppend<ж<Named>>();
 
         typ = Unalias(typ);
 
@@ -159,7 +161,7 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             // must also be in path (invariant). But not every type in path is in nest, since
             // nest may be pruned (see below, *TypeParam case).
             t.Origin().unpack();
-            if (!Ꮡcheck.validType0(pos, t.Origin().rhs(), append(nest, t), append(path, t))) {
+            if (!Ꮡcheck.validType0(pos, t.Origin().rhs(), append(nestᴷ, nest, t), append(pathᴷ, path, t))) {
                 return false;
             }
 

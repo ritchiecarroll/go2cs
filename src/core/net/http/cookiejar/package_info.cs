@@ -61,7 +61,7 @@ using static go.net.http.cookiejar_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AEmgAcKmgpQAGjqSrLKssoKUqJKClIKCkoKmrLKUppSmgpSCgpTWgoKAgqSokqyyqPKClIKClJSClIKCpoKCgqaCgqKCgoKUgpSCgoKUgoKU3IKAgqSAgqSUgpbcsqjygpSClIKClIKUgpSUgoKCgpSCgoKAgoK2lIKmgIKClIKCpIKCpoKClMaoooKCgoK4goKCpoKqooKClIKUqJKCpoKCgoKmgoKUgqbcgqiSypSqooKmgoKUAAcYAA0ClIKUpoKCuIKSgoKUgoKUgpSCuIKCgpSUpKSmqILMlpKmpgAPIoIACxjclKamgpSm7riCgIKmlOyCpg==", "247-255:1")]
-[assembly: go.GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ABtG0oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgpKClIKUgpSCgoKClIKUpoKUpJSokoKUlIKCgoKUAAgYsoKUgoKCgoKUpg==")]
+[assembly: go.GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ABtG8oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgpKClIKUgpSCgoKClIKUpoKUpJSokoKUlIKCgoKUAAgYsoKUgoKCgoKUpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

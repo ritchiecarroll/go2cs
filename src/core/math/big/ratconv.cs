@@ -262,6 +262,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     int64 exp = default!;
     nint @base = default!;
     error err = default!;
+    var digitsᴷ = new stackAppend<byte>();
 
     // one char look-ahead
     (var ch, err) = r.ReadByte();
@@ -297,7 +298,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     (ch, err) = r.ReadByte();
     if (err == default! && (ch == (rune)'+' || ch == (rune)'-')) {
         if (ch == (rune)'-') {
-            digits = append(digits, (byte)((rune)'-'));
+            digits = append(digitsᴷ, digits, (byte)((rune)'-'));
         }
         (ch, err) = r.ReadByte();
     }
@@ -384,13 +385,14 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
+        var bufᴷ = new stackAppend<byte>();
 
         slice<byte> buf = default!;
 
         if (x.IsInt()) {
             buf = Ꮡx.of(big_package.ΔRat.Ꮡa).Append(buf, 10);
             if (prec > 0) {
-                buf = append(buf, (byte)((rune)'.'));
+                buf = append(bufᴷ, buf, (byte)((rune)'.'));
                 for (nint i = prec; i > 0; i--) {
                     buf = append(buf, (byte)((rune)'0'));
                 }
@@ -464,6 +466,8 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     bool exact = default!;
     GoFrame ᒐ = default;
     try {
+        var tabᴷ = new stackAppend<Δnat>();
+
         var stk = getStack();
         var stkʗ1 = stk;
         defer(stkʗ1.free, ref ᒐ);
@@ -501,7 +505,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
                     break; // f doesn't divide q evenly
                 }
             }
-            tab = append(tab, f);
+            tab = append(tabᴷ, tab, f);
             f = ((Δnat)default!).sqr(stk, f); // nat(nil) to ensure a new f for each table entry
         }
 

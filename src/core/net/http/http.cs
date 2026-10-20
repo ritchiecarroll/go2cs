@@ -73,9 +73,11 @@ internal static void setBit(this ref Protocols p, uint8 bit, bool ok) {
 }
 
 public static @string String(this Protocols p) {
+    var sᴷ = new stackAppend<@string>();
+
     slice<@string> s = default!;
     if (p.HTTP1()) {
-        s = append(s, "HTTP1"u8);
+        s = append(sᴷ, s, "HTTP1"u8);
     }
     if (p.HTTP2()) {
         s = append(s, "HTTP2"u8);
@@ -150,6 +152,8 @@ internal static bool stringContainsCTLByte(@string s) {
 }
 
 internal static @string hexEscapeNonASCII(@string s) {
+    var bᴷ = new stackAppend<byte>();
+
     nint newLen = 0;
     for (nint i = 0; i < builtin.len(s); i++) {
         if (s[i] >= utf8.RuneSelf){
@@ -168,7 +172,7 @@ internal static @string hexEscapeNonASCII(@string s) {
             if (pos < i) {
                 b = append(b, s.slice(pos, i).ꓸꓸꓸ);
             }
-            b = append(b, (byte)((rune)'%'));
+            b = append(bᴷ, b, (byte)((rune)'%'));
             b = strconv.AppendInt(b, (int64)s[i], 16);
             pos = i + 1;
         }

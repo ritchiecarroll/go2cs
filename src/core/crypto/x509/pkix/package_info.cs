@@ -54,7 +54,7 @@ using static go.crypto.x509.pkix_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/x509/pkix/pkix.go", "pkix.cs", "ABs0AAscooKCgoKUgoKmgoKCgoKCpqaClIKUlLa2toKUuLgALmjSgoKmgoKCgqaCgpS0tLS0tLS0tAAHEIKCgoKCgoKCnsKCpoKCgqYAAh4ADgKCgoKCgoKCgpSClIKmqqKmgoKCgqbapoKqooKCpgANHpI=")]
+[assembly: go.GoPositionMap("crypto/x509/pkix/pkix.go", "pkix.cs", "ABs0AAscwoKCgoKUgoKmgoKCgoKCpqaClIKUlLa2toKUuLgALmjSgoKmgoKCgqaCgpS0tLS0tLS0tAAHEIKCgoKCgoKCnsKCpoKCgqYAAh4ADgKCgoKCgoKCgpSClIKmqsKmgoKCgqbapoKqooKCpgANHpI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.x509;

@@ -65,6 +65,8 @@ internal static readonly @string invalidNumericStringˢ = "invalid NumericString
 // from the respective encoding/asn1.parse... methods, rather than just
 // increasing the API surface of that package.
 internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<byte> value) {
+    var sᴷ = new stackAppend<uint16>();
+
     var exprᴛ1 = tag;
     if (exprᴛ1 == cryptobyte_asn1.T61String) {
         // T.61 is a defunct ITU 8-bit character encoding which preceded Unicode.
@@ -125,7 +127,7 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
             if (point == 0xfffe || point == 0xffff || (point >= 0xfdd0 && point <= 0xfdef) || (point >= 0xd800 && point <= 0xdfff)) {
                 return ("", errors.New(invalidBMPStringˢ));
             }
-            s = append(s, point);
+            s = append(sᴷ, s, point);
             value = value[2..];
         }
 

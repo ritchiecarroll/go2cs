@@ -54,7 +54,7 @@ using static go.go.build.constraint_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ACxapIKmgqaA/qSCpoKCpKSmgP6klIKCpoKmgoKAgqSmggAHEKSUgoKmgqaCgoCCpKaCAAgSgqaYooCCpICCpKqigtq0gpSCpoKmgtyCgqYADCDSgoCCgIKCpMiCgoKU7NKCgpSs0oKClKzSgoKUgoKCgpSU3AAIBIKSgoCCgIKktoKClIKmgoKUlIKCAAUS4oKClIKCgpSUgoKCpoKUgoKCpoKCgoKmgoKmgoKCqqKC2rSClIKmgpSUlIKU3IKCptiYspSCgoKSgoKClIKClIKUlIKmgpSAgqSmgpSAgqSmgpSssoKUgoKmpsjYlpKCgoKCgqS0ppTcgoKCpoKCgpSokoKCgoKCgoKUpqassrakgIKkpIKUpIKCgpSClKSCgoKUgpS8ooCCgoKkqqKAgoKCpA==", "214-222:1;280-287:1")]
+[assembly: global::go.GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ACxapIKmgqaA/qSCpoKCpKSmgP6klIKCpoKmgoKAgqSmggAHEKSUgoKmgqaCgoCCpKaCAAgSgqaYooCCpICCpKqigtq0gpSCpoKmgtyCgqYADCDSgoCCgIKCpMiCgoKU7NKCgpSs0oKClKzSgoKUgoKCgpSU3AAIBIKSgoCCgIKktoKClIKmgoKUlIKCAAUS4oKClIKCgpSUgoKCpoKUgoKCpoKCgoKmgoKmgoKCqqKC2rSClIKmgpSUlIKU3IKCptiYspSCgoKSgoKClIKClIKUlIKmgpSAgqSmgpSAgqSmgpSssoKUgoKmpsj4lpKCgoKCgqS0ppTcgoKCpoKCgpSokoKCgoKCgoKUpqassrakgIKkpIKUpIKCgpSClKSCgoKUgpS8ooCCgoKkqqKAgoKCpA==", "214-222:1;280-287:1")]
 [assembly: global::go.GoPositionMap("go/build/constraint/vers.go", "vers.cs", "AA08ABICgoKUgpTaoqSkgoKUpIKClKSklJSClIKClJS+soKUrLKClA==")]
 // </GoSourcePositionMaps>
 

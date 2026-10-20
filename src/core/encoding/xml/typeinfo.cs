@@ -281,6 +281,7 @@ internal static ж<fieldInfo> /*xmlname*/ lookupXMLName(reflectꓸType typ) {
 // It is okay for field paths to share a common, shorter prefix.
 internal static error addFieldInfo(reflectꓸType typ, ж<typeInfo> Ꮡtinfo, ref fieldInfo newf) {
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
+    var conflictsᴷ = new stackAppend<nint>();
 
     slice<nint> conflicts = default!;
 Loop:
@@ -301,7 +302,7 @@ Loop:
         }
         if (len((~oldf).parents) > len(newf.parents)){
             if ((~oldf).parents[len(newf.parents)] == newf.name) {
-                conflicts = append(conflicts, i);
+                conflicts = append(conflictsᴷ, conflicts, i);
             }
         } else 
         if (len((~oldf).parents) < len(newf.parents)){
