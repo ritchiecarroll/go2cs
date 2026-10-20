@@ -289,6 +289,10 @@ partial class poll_package
         drain.Start();
 
         Volatile.Write(ref pollServerInitialized, true);
+
+        // Pays the first deadline's one-time costs now, before any deadline is armed
+        // (deadline_prepay_impl.cs).
+        prepayDeadlinePath();
     }
 
     private static bool pollServerInitialized;

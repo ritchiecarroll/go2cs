@@ -27509,4 +27509,22 @@ stands: size and build time never gate parity, so this row is sized for after th
 
 — P2 (measured 2026-10-19)
 
+## 2026-10-20 — P2 finding: a process's first read deadline returned 9-11 ms late under the JIT and 6-8 ms under ReadyToRun, because the deadline path compiled on its way out — FIXED (claude/p2-deadline-prepay)
+
+Go's first deadline is as prompt as its later ones (0.3-0.5 ms late on linux). Here the first one paid for compiling
+the arm, park, fire and return paths, and under ReadyToRun for the golib generics instantiated over another
+assembly's types that ReadyToRun does not pregenerate (the `fd.fdmu` field view) and for io's package-init boxes.
+Bisected with the first-deadline probe (claude/p2-first-deadline-probe) and a JIT-summary list of every method
+compiled between arming and return. As ruled (COORD 2026-10-20 05:00Z and 08:28Z), the poller's start
+(`runtime_pollServerInit`, all three seams) now pays it once: `PrepareMethod` over the named methods, three calls on
+a spare never-opened FD, io's package init, one no-op runtime timer, and an os hook for os's part
+(`deadline_prepay_impl.cs` in internal/poll and in os). It runs synchronously: run on a background thread it took
+the cost off FD.Init but left the first deadline 3.9-5.4 ms late when armed right after the poller started.
+Linux, three interleaved processes per arm, A1 late in ms (Go 0.4-0.5): no pre-pay JIT 8.9-10.8, R2R 6.1-7.6; sync
+JIT 0.9-1.6, R2R 0.3-0.6; async JIT 4.9-5.4, R2R 3.9-5.3. Cost: the first pollable FD.Init takes about 10 ms longer
+under both the JIT and ReadyToRun (first Read medians 44.3 to 53.8 ms JIT, 31.1 to 40.6 ms R2R), once per process
+and only in a process that opens a pollable descriptor. Native AOT is unaffected (nothing runs).
+
+— P2 (found and fixed 2026-10-20)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

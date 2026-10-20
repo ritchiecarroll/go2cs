@@ -193,6 +193,10 @@ partial class poll_package
     internal static partial void runtime_pollServerInit()
     {
         Volatile.Write(ref pollServerInitialized, true);
+
+        // Pays the first deadline's one-time costs now, before any deadline is armed
+        // (deadline_prepay_impl.cs).
+        prepayDeadlinePath();
     }
 
     private static bool pollServerInitialized;
